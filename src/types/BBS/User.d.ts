@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/User.d.ts
  * @description 用户类型定义文件
- * @since Beta v0.7.2
+ * @since Beta v0.7.9
  */
 
 declare namespace TGApp.BBS.User {
@@ -58,7 +58,7 @@ declare namespace TGApp.BBS.User {
 
   /**
    * @description 主页用户信息-二级
-   * @since Beta v0.7.2
+   * @since Beta v0.7.9
    * @interface Info
    * @property {string} uid 用户 ID
    * @property {string} nickname 用户昵称
@@ -67,7 +67,7 @@ declare namespace TGApp.BBS.User {
    * @property {number} gender 用户性别
    * @property {Certification} certification 用户认证信息
    * @property {LevelExp[]} level_exps 用户等级经验
-   * @property {Archive} archive 用户档案
+   * @property {Achieve} archive 用户档案
    * @property {Community} community_info 用户社区信息
    * @property {string} avatar_url 用户头像链接
    * @property {Certification[]} certifications 用户认证信息
@@ -75,7 +75,8 @@ declare namespace TGApp.BBS.User {
    * @property {string} pendant 用户挂件 URL，可能为 ""
    * @property {boolean} is_logoff 是否注销
    * @property {string} ip_region 用户 IP 地区
-   * @return Info
+   * @property {string | null} showText 显示文本，可能为 null
+   * @property {AvatarExt} avatar_ext 用户头像扩展信息
    */
   type Info = {
     uid: string;
@@ -85,7 +86,7 @@ declare namespace TGApp.BBS.User {
     gender: number;
     certification: Certification;
     level_exps: Array<LevelExp>;
-    archive: Archive;
+    archive: Achieve;
     community_info: Community;
     avatar_url: string;
     certifications: Array<Certification>;
@@ -93,6 +94,8 @@ declare namespace TGApp.BBS.User {
     pendant: string;
     is_logoff: boolean;
     ip_region: string;
+    showText: string | null; // 显示文本，可能为 null
+    avatar_ext: AvatarExt;
   };
 
   /**
@@ -128,26 +131,80 @@ declare namespace TGApp.BBS.User {
   type SelfOperation = { attitude: number; is_collected: boolean; upvote_type: number };
 
   /**
-   * @description 用户头像扩展信息
-   * @since Beta v0.7.2
-   * @interface AvatarExt
-   * @property {number} avatar_type 头像类型
-   * @property {string} avatar_assets_id 头像资源 ID
-   * @property {Array<unknown>} resources 资源
-   * @property {Array<unknown>} hd_resources 高清资源
-   * @return AvatarExt
+   * @description 用户头像类型
+   * @since Beta v0.7.9
+   * @const AvatarExtType
+   * @enum {number}
+   * @property {number} CUSTOM - 自定义头像(0)
+   * @property {number} GIF - 可选动态头像(3)
    */
-  type AvatarExt = {
-    avatar_type: number;
-    avatar_assets_id: string;
-    resources: Array<unknown>;
-    hd_resources: Array<unknown>;
+  const AvatarExtType = <const>{
+    CUSTOM: 0,
+    GIF: 3,
   };
 
   /**
+   * @description 用户头像类型枚举
+   * @since Beta v0.7.9
+   * @enum {number}
+   * @type AvatarExtTypeEnum
+   */
+  type AvatarExtTypeEnum = (typeof AvatarExtType)[keyof typeof AvatarExtType];
+
+  /**
+   * @description 用户头像扩展信息
+   * @since Beta v0.7.9
+   * @interface AvatarExt
+   * @property {AvatarExtTypeEnum} avatar_type 头像类型
+   * @property {string} avatar_assets_id 头像资源 ID
+   * @property {Array<AvatarExtRes>} resources 资源
+   * @property {Array<AvatarExtRes>} hd_resources 高清资源
+   * @return AvatarExt
+   */
+  type AvatarExt = {
+    avatar_type: AvatarExtTypeEnum;
+    avatar_assets_id: string;
+    resources: Array<AvatarExtRes>;
+    hd_resources: Array<AvatarExtRes>;
+  };
+
+  /**
+   * @description 用户头像拓展资源类型
+   * @since Beta v0.7.9
+   * @const AvatarExtResType
+   * @property {number} WEBP - WEBP 格式
+   * @property {number} APNG - APNG 格式
+   * @property {number} GIF - GIF 格式
+   * @property {number} PNG - PNG 格式
+   */
+  const AvatarExtResType = <const>{
+    WEBP: 1,
+    APNG: 2,
+    GIF: 3,
+    PNG: 4,
+  };
+
+  /**
+   * @description 用户头像拓展资源类型枚举
+   * @since Beta v0.7.9
+   * @enum {number}
+   * @type AvatarExtResTypeEnum
+   */
+  type AvatarExtResTypeEnum = (typeof AvatarExtResType)[keyof typeof AvatarExtResType];
+
+  /**
+   * @description 用户头像拓展资源
+   * @since Beta v0.7.9
+   * @interface AvatarExtRes
+   * @property {AvatarExtResTypeEnum} format 资源格式
+   * @property {string} url 资源链接
+   */
+  type AvatarExtRes = { format: AvatarExtResTypeEnum; url: string };
+
+  /**
    * @description 用户档案
-   * @since Alpha v0.2.1
-   * @interface Archive
+   * @since Beta v0.7.9
+   * @interface Achieve
    * @property {string} like_num 获赞数
    * @property {string} post_num 发帖数
    * @property {string} replypost_num 回帖数
@@ -157,9 +214,9 @@ declare namespace TGApp.BBS.User {
    * @property {string} new_follower_num 新粉丝数
    * @property {string} good_post_num 精华帖数
    * @property {string} follow_collection_cnt 收藏数
-   * @return Archive
+   * @return Achieve
    */
-  type Archive = {
+  type Achieve = {
     like_num: string;
     post_num: string;
     replypost_num: string;

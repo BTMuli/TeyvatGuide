@@ -5,7 +5,7 @@
         <div class="vp-ouu-info">
           <div class="left">
             <div class="avatar">
-              <TMiImg :src="userInfo.avatar_url" alt="avatar" :ori="true" />
+              <TMiImg :src="getUserAvatar(userInfo)" alt="avatar" :ori="true" />
             </div>
             <div class="pendant" v-if="userInfo.pendant !== ''">
               <TMiImg :src="userInfo.pendant" alt="pendant" :ori="true" />
@@ -46,6 +46,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
+import { getUserAvatar } from "@utils/toolFunc.js";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostUserProps = { gid: number; uid: string; postId?: string };

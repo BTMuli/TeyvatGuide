@@ -2,7 +2,7 @@
   <div class="tp-avatar-box">
     <div class="tpa-img">
       <div class="tpa-icon">
-        <TMiImg :ori="true" :src="props.data.avatar_url" alt="avatar" />
+        <TMiImg :ori="true" :src="getUserAvatar(props.data)" alt="avatar" />
       </div>
       <div v-if="props.data.pendant !== ''" class="tpa-pendant">
         <TMiImg :ori="true" :src="props.data.pendant" alt="pendant" />
@@ -25,6 +25,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { getUserAvatar } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
 type TpAvatarProps = { data: TGApp.BBS.Post.User; position: "left" | "right" };

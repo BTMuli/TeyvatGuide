@@ -10,7 +10,7 @@
     <div class="tpr-user" @click="handleUser()">
       <div class="tpru-left">
         <div class="avatar">
-          <TMiImg :ori="true" :src="props.modelValue.user.avatar_url" alt="avatar" />
+          <TMiImg :ori="true" :src="getUserAvatar(props.modelValue.user)" alt="avatar" />
         </div>
         <div class="pendant" v-if="props.modelValue.user.pendant !== ''">
           <TMiImg :ori="true" :src="props.modelValue.user.pendant" alt="pendant" />
@@ -109,7 +109,7 @@ import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { generateShareImg } from "@utils/TGShare.js";
-import { getNearTime, timestampToDate } from "@utils/toolFunc.js";
+import { getNearTime, getUserAvatar, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
 
 import TpParser from "./tp-parser.vue";

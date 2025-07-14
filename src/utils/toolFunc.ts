@@ -1,9 +1,10 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.7.2
+ * @since Beta v0.7.9
  */
 
+import { AvatarExtResTypeEnum, AvatarExtTypeEnum } from "@enum/bbs.js";
 import { path } from "@tauri-apps/api";
 import { type } from "@tauri-apps/plugin-os";
 import colorConvert from "color-convert";
@@ -314,4 +315,34 @@ export function getWikiBrief(
     return AppWeaponData.find((item) => item.id.toString() === id.toString()) ?? false;
   }
   return AppCharacterData.find((item) => item.id.toString() === id.toString()) ?? false;
+}
+
+/**
+ * @description 根据传入角色信息获取头像
+ * @since Beta v0.7.9
+ * @param {TGApp.BBS.Reply.User|TGApp.BBS.Post.User} user - 用户信息
+ * @returns {string} 头像链接
+ */
+export function getUserAvatar(
+  user: TGApp.BBS.Reply.User | TGApp.BBS.Post.User | TGApp.BBS.User.Info,
+): string {
+  if (!user.avatar_ext) return user.avatar_url;
+  if (user.avatar_ext.avatar_type === AvatarExtTypeEnum.CUSTOM) return user.avatar_url;
+  if (user.avatar_ext.avatar_type === AvatarExtTypeEnum.GIF) {
+    const findGH = user.avatar_ext.hd_resources.find((i) => i.format === AvatarExtResTypeEnum.GIF);
+    if (findGH) return findGH.url;
+    const findG = user.avatar_ext.resources.find((i) => i.format === AvatarExtResTypeEnum.GIF);
+    if (findG) return findG.url;
+    const findWH = user.avatar_ext.hd_resources.find((i) => i.format === AvatarExtResTypeEnum.WEBP);
+    if (findWH) return findWH.url;
+    const findW = user.avatar_ext.resources.find((i) => i.format === AvatarExtResTypeEnum.WEBP);
+    if (findW) return findW.url;
+    const findPH = user.avatar_ext.hd_resources.find((i) => i.format === AvatarExtResTypeEnum.PNG);
+    if (findPH) return findPH.url;
+    const findP = user.avatar_ext.resources.find((i) => i.format === AvatarExtResTypeEnum.PNG);
+    if (findP) return findP.url;
+    return user.avatar_url;
+  }
+  // TODO: 处理其他类型头像
+  return user.avatar_url;
 }
