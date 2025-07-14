@@ -67,7 +67,7 @@ declare namespace TGApp.BBS.User {
    * @property {number} gender 用户性别
    * @property {Certification} certification 用户认证信息
    * @property {LevelExp[]} level_exps 用户等级经验
-   * @property {Achieve} archive 用户档案
+   * @property {Achieve} achieve 用户档案
    * @property {Community} community_info 用户社区信息
    * @property {string} avatar_url 用户头像链接
    * @property {Certification[]} certifications 用户认证信息
@@ -86,7 +86,7 @@ declare namespace TGApp.BBS.User {
     gender: number;
     certification: Certification;
     level_exps: Array<LevelExp>;
-    archive: Achieve;
+    achieve: Achieve;
     community_info: Community;
     avatar_url: string;
     certifications: Array<Certification>;
