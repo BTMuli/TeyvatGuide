@@ -1,7 +1,7 @@
 /**
  * @file request/painterReq.ts
  * @description painter 下的请求
- * @since Beta v0.7.2
+ * @since Beta v0.7.9
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
@@ -35,7 +35,7 @@ async function getNewsList(
 
 /**
  * @description 获取最近版块热门帖子列表
- * @since Beta v0.7.1
+ * @since Beta v0.7.9
  * @param {number} forumId 版块 ID
  * @param {number} gid 社区 ID
  * @param {number} pageSize 每页数量
@@ -66,13 +66,14 @@ async function getHotForumPostList(
     await TGHttp<TGApp.BBS.Forum.PostForumResp>(`${bapBu}getHotForumPostList`, {
       method: "GET",
       query: params,
+      headers: { cookie: "" },
     })
   ).data;
 }
 
 /**
  * @description 获取最近版块帖子列表
- * @since Beta v0.7.1
+ * @since Beta v0.7.9
  * @param {number} forumId 版块 ID
  * @param {number} gid 社区 ID
  * @param {number} type 排序方式: 1-最新回复，2-最新发布
@@ -107,6 +108,7 @@ async function getRecentForumPostList(
     await TGHttp<TGApp.BBS.Forum.PostForumResp>(`${bapBu}getRecentForumPostList`, {
       method: "GET",
       query: params,
+      headers: { cookie: "" },
     })
   ).data;
 }

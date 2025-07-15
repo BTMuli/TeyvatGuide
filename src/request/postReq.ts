@@ -12,7 +12,7 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取单个帖子信息
- * @since Beta v0.7.7
+ * @since Beta v0.7.9
  * @param {number|string} postId 帖子 ID
  * @param {Record<string, string>} cookie Cookie
  * @return {Promise<TGApp.BBS.Post.FullData | TGApp.BBS.Response.Base>}
@@ -28,7 +28,7 @@ async function getPostFull(
       ...getRequestHeader(cookie, "GET", param, "K2", true),
       "x-rpc-client_type": "2",
     };
-  } else header = { referer: Referer };
+  } else header = { referer: Referer, cookie: "" };
   const resp = await TGHttp<TGApp.BBS.Post.FullResp>(`${bapBu}getPostFull`, {
     method: "GET",
     headers: header,
@@ -40,7 +40,7 @@ async function getPostFull(
 
 /**
  * @description 获取合集帖子
- * @since Beta v0.7.1
+ * @since Beta v0.7.9
  * @param {string} collectionId 合集 ID
  * @returns {Promise<Array<TGApp.BBS.Post.FullData>>}
  */
@@ -50,7 +50,7 @@ async function getPostFullInCollection(
   return (
     await TGHttp<TGApp.BBS.Collection.PostsResp>(`${bapBu}getPostFullInCollection`, {
       method: "GET",
-      headers: { "Content-Type": "application/json", referer: Referer },
+      headers: { "Content-Type": "application/json", referer: Referer, cookie: "" },
       query: { collection_id: collectionId },
     })
   ).data.posts;

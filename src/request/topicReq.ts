@@ -1,7 +1,7 @@
 /**
  * @file web/request/topicReq.ts
  * @description 话题相关的请求
- * @since Beta v0.7.1
+ * @since Beta v0.7.9
  */
 import TGHttp from "@utils/TGHttp.js";
 
@@ -11,7 +11,7 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * @description 获取特定话题信息
- * @since Beta v0.7.1
+ * @since Beta v0.7.9
  * @param {string} gid 游戏分区 ID
  * @param {string} topicId 话题 ID
  * @return {Promise<TGApp.BBS.Topic.InfoRes|TGApp.BBS.Response.Base>}
@@ -22,7 +22,7 @@ async function getTopicFullInfo(
 ): Promise<TGApp.BBS.Topic.InfoRes | TGApp.BBS.Response.Base> {
   const resp = await TGHttp<TGApp.BBS.Topic.InfoResp>(`${batBu}getTopicFullInfo`, {
     method: "GET",
-    headers: { referer: Referer },
+    headers: { referer: Referer, cookie: "" },
     query: { gids: gid, id: topicId },
   });
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
