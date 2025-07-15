@@ -9,7 +9,6 @@
     <TBackTop />
   </v-app>
 </template>
-
 <script lang="ts" setup>
 import TBackTop from "@comp/app/t-backTop.vue";
 import TSidebar from "@comp/app/t-sidebar.vue";
@@ -44,6 +43,7 @@ let resizeListener: UnlistenFn | null = null;
 
 onMounted(async () => {
   const win = getCurrentWindow();
+  const webview = webviewWindow.getCurrentWebviewWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
@@ -59,18 +59,20 @@ onMounted(async () => {
     document.documentElement.className = theme.value;
   });
   resizeListener = await event.listen<string>("needResize", async (e: Event<string>) => {
-    console.log(needResize.value);
-    const windowCur = webviewWindow.getCurrentWebviewWindow();
     if (e.payload !== "false") {
       await resizeWindow();
     } else {
-      const size = getWindowSize(windowCur.label);
-      await windowCur.setSize(new LogicalSize(size.width, size.height));
-      await windowCur.setZoom(1);
+      const size = getWindowSize(webview.label);
+      await win.setSize(new LogicalSize(size.width, size.height));
+      await webview.setZoom(1);
     }
-    await windowCur.center();
+    await win.center();
   });
-  await getCurrentWindow().show();
+  const isShow = await win.isVisible();
+  if (!isShow) {
+    await win.center();
+    await win.show();
+  }
 });
 
 // 启动后只执行一次的监听
