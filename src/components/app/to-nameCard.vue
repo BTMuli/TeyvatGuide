@@ -14,7 +14,7 @@
           <span>{{ parseNameCard(props.data.desc) }}</span>
           <span>获取途径：{{ props.data.source }}</span>
         </div>
-        <div class="ton-type">{{ props.data.type }}</div>
+        <div class="ton-type" :title="`ID:${props.data.id}`">{{ props.data.type }}</div>
         <v-btn
           class="ton-share"
           @click="shareNameCard"
@@ -84,6 +84,12 @@ function parseDesc(desc: string, inQuote: boolean = false): string[] {
   }
   if (!desc.includes("！」")) res = res.replace(/！/g, "！\n");
   res = res.replace(/…/g, "…\n");
+  res = res.replace(/…\n…/g, "……\n");
+  if (props?.data?.id === 210236) res = res.replace(/…\n/g, "…");
+  if (props?.data?.id === 210237) {
+    res = res.replace(/…\n/g, "…\n");
+    res = res.replace(/」/g, "」\n");
+  }
   const match = res.split("\n");
   let array: string[] = [];
   for (const item of match) {
