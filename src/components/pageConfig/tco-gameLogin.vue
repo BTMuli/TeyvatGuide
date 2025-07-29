@@ -23,8 +23,8 @@
           class="tog-qr"
           :value="codeUrl"
           render-as="svg"
-          :background="'var(--box-bg-1)'"
-          foreground="var(--box-text-1)"
+          :background="'var(--tgc-white-1)'"
+          :foreground="'var(--tgc-dark-7)'"
         />
       </div>
       <div class="tog-bottom" @click="share()">
@@ -289,7 +289,7 @@ onUnmounted(() => {
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   aspect-ratio: 1;
-  background: var(--box-bg-2);
+  background: var(--tgc-white-1);
 }
 
 .tog-qr {
