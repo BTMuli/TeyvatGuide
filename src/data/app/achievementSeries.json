@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "5.7",
+    "version": "5.8",
     "card": "",
     "icon": "UI_AchievementIcon_O001"
   },
@@ -494,5 +494,13 @@
     "version": "5.5",
     "card": "纳塔·眬瞳",
     "icon": "UI_AchievementIcon_A021"
+  },
+  {
+    "id": 62,
+    "order": 63,
+    "name": "岩灰与刺梨的夏日",
+    "version": "5.8",
+    "card": "纳塔·巡风",
+    "icon": "UI_AchievementIcon_A022"
   }
 ]

@@ -736,6 +736,22 @@
     "source": { "index": 6, "area": "纳塔", "name": "旋复" }
   },
   {
+    "id": 10000116,
+    "contentId": 505631,
+    "dropDays": [3, 6, 7],
+    "name": "伊涅芙",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "长柄武器",
+    "element": "雷",
+    "materials": [
+      { "id": 104353, "name": "「纷争」的教导", "star": 2 },
+      { "id": 104354, "name": "「纷争」的指引", "star": 3 },
+      { "id": 104355, "name": "「纷争」的哲学", "star": 4 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "旋复" }
+  },
+  {
     "id": 10000003,
     "contentId": 59,
     "dropDays": [2, 5, 7],
@@ -2528,6 +2544,22 @@
     "source": { "index": 5, "area": "枫丹", "name": "匠理" }
   },
   {
+    "id": 13515,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "支离轮光",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114061, "name": "贡祭炽心的惶恐", "star": 2 },
+      { "id": 114062, "name": "贡祭炽心的踌躇", "star": 3 },
+      { "id": 114063, "name": "贡祭炽心的决绝", "star": 4 },
+      { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "冥见" }
+  },
+  {
     "id": 11401,
     "contentId": 208,
     "dropDays": [1, 4, 7],
@@ -3310,6 +3342,22 @@
       { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "冥见" }
+  },
+  {
+    "id": 12432,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "拾慧铸熔",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "双手剑",
+    "materials": [
+      { "id": 114065, "name": "谵妄圣主的朽败", "star": 2 },
+      { "id": 114066, "name": "谵妄圣主的余哀", "star": 3 },
+      { "id": 114067, "name": "谵妄圣主的容光", "star": 4 },
+      { "id": 114068, "name": "谵妄圣主的神面", "star": 5 }
+    ],
+    "source": { "index": 6, "area": "纳塔", "name": "究观" }
   },
   {
     "id": 15401,

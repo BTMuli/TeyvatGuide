@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000116,
+    "contentId": 505631,
+    "name": "伊涅芙",
+    "title": "轰隆雷鸣波",
+    "area": "未知",
+    "birthday": [4, 2],
+    "star": 5,
+    "element": "雷",
+    "weapon": "长柄武器",
+    "nameCard": "伊涅芙·指令"
+  },
+  {
     "id": 10000114,
     "contentId": 505417,
     "name": "丝柯克",

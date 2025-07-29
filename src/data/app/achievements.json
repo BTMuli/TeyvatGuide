@@ -3901,6 +3901,126 @@
     }
   },
   {
+    "id": 80430,
+    "series": 62,
+    "order": 393,
+    "name": "双屋的呼唤",
+    "description": "点亮纳塔区域中，悠悠度假村的地图。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80431,
+    "series": 62,
+    "order": 394,
+    "name": "暖浪引路人",
+    "description": "解锁纳塔区域中，悠悠度假村所有传送锚点。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80432,
+    "series": 62,
+    "order": 395,
+    "name": "圣龛巡礼·水软风柔之岛",
+    "description": "解除纳塔区域中，悠悠度假村所有地灵龛的封印。",
+    "reward": 10,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80433,
+    "series": 62,
+    "order": 396,
+    "name": "幻写引路人·其三",
+    "description": "在悠悠度假村追随6个幻写灵，并完成涂鸦。",
+    "reward": 10,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80434,
+    "series": 62,
+    "order": 397,
+    "name": "沧屿的寻宝者",
+    "description": "在悠悠度假村开启30个宝箱。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80435,
+    "series": 62,
+    "order": 398,
+    "name": "沧屿的寻宝者",
+    "description": "在悠悠度假村开启60个宝箱。",
+    "reward": 10,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80436,
+    "series": 62,
+    "order": 399,
+    "name": "沧屿的寻宝者",
+    "description": "在悠悠度假村开启120个宝箱。",
+    "reward": 20,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80437,
+    "series": 62,
+    "order": 400,
+    "name": "沧屿的冒险家",
+    "description": "在悠悠度假村完成6个大世界限时挑战。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80438,
+    "series": 62,
+    "order": 401,
+    "name": "沧屿的冒险家",
+    "description": "在悠悠度假村完成12个大世界限时挑战。",
+    "reward": 10,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80439,
+    "series": 62,
+    "order": 402,
+    "name": "沧屿的冒险家",
+    "description": "在悠悠度假村完成24个大世界限时挑战。",
+    "reward": 20,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80440,
+    "series": 62,
+    "order": 403,
+    "name": "阿夏引力之虹",
+    "description": "解锁阿夏的所有颜色。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80441,
+    "series": 62,
+    "order": 404,
+    "name": "彩色相簿",
+    "description": "完成悠悠纪念册中所有的留影。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -9596,6 +9716,166 @@
     "trigger": { "type": "QUEST_GLOBAL_VAR_EQUAL" }
   },
   {
+    "id": 81580,
+    "series": 0,
+    "order": 1575,
+    "name": "终竟的悠悠花海",
+    "description": "装饰了悠悠度假村的全部花海。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81581,
+    "series": 0,
+    "order": 1576,
+    "name": "并非空军",
+    "description": "钓上并战胜「豚兽·大王」。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81582,
+    "series": 0,
+    "order": 1577,
+    "name": "悠悠村的金色闪光",
+    "description": "在悠悠极速大赛中战胜「来无影」和「去无踪」。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81583,
+    "series": 0,
+    "order": 1578,
+    "name": "流彩的踪迹",
+    "description": "参加了「流彩设计工作室」的开业典礼。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81584,
+    "series": 0,
+    "order": 1579,
+    "name": "梦中的帕伊提提",
+    "description": "在梦里发现埋藏在提提岛的宝藏。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81585,
+    "series": 0,
+    "order": 1580,
+    "name": "「他们给了我名字」",
+    "description": "帮助伊凯卡完成枪手训练。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81587,
+    "series": 0,
+    "order": 1582,
+    "name": "她说「我愿意」",
+    "description": "帮助斯奇完成告白。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81589,
+    "series": 0,
+    "order": 1584,
+    "name": "闪耀吧！皮皮潘偶像！",
+    "description": "观看了皮皮潘偶像大赛的决赛。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81590,
+    "series": 0,
+    "order": 1585,
+    "name": "「一个伟大的计划」",
+    "description": "两次挫败了乔克力爪牙的伟大计划。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81591,
+    "series": 0,
+    "order": 1586,
+    "name": "我于七色之中",
+    "description": "用颜色填满悠悠集市的七色悠悠像。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81592,
+    "series": 0,
+    "order": 1587,
+    "name": "飞起来也是十分！",
+    "description": "在呼呼丘的跳水台完成一次跳水。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81593,
+    "series": 0,
+    "order": 1588,
+    "name": "阿亚尔的后继者",
+    "description": "摘得阿亚尔英雄杯桂冠。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81594,
+    "series": 0,
+    "order": 1589,
+    "name": "这里曾有一条归家之路",
+    "description": "在提提岛体验一次热舞乐台。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81597,
+    "series": 0,
+    "order": 1592,
+    "name": "「若我未被化作烟灰」",
+    "description": "目送渊上开启他的未知旅程。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81598,
+    "series": 0,
+    "order": 1593,
+    "name": "「最后的特诺奇兹托克人」",
+    "description": "战胜地方传奇·最后的特诺奇兹托克人。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81599,
+    "series": 0,
+    "order": 1594,
+    "name": "灯火不歇",
+    "description": "与伙伴们共同参与开业仪式。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -14897,6 +15177,36 @@
       "type": "FINISH_QUEST_AND",
       "task": [{ "questId": 8018, "name": "你所不在的时空", "type": "魔神任务" }]
     }
+  },
+  {
+    "id": 84348,
+    "series": 0,
+    "order": 5127,
+    "name": "你所无法想象的爱",
+    "description": "这个机器人来自挪德卡莱。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84349,
+    "series": 0,
+    "order": 5128,
+    "name": "你难以置信的愤怒",
+    "description": "阻绝「明晨之镜」的复燃与归还。",
+    "reward": 5,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84350,
+    "series": 0,
+    "order": 5129,
+    "name": "归途",
+    "description": "完成「归途」。",
+    "reward": 10,
+    "version": "5.8",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84501,
