@@ -44,7 +44,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 ## 功能 / Features
 
 - 免登陆功能：
-
   - [x] 当前卡池、近期活动、素材日历
   - [x] 游戏内公告&活动获取
   - [x] 米游社官方帖获取（支持通过 ID 获取）
@@ -59,7 +58,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - 登陆功能：
 
   > 支持 扫码/验证码/Cookie 登陆，支持多账号管理
-
   - [x] 原神战绩
   - [x] 角色详情
   - [x] 螺旋深渊
@@ -72,7 +70,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 一键完成游戏签到
 
 - Wiki 功能：
-
   - [x] 深渊数据库（Hutao API）
   - [x] 角色图鉴
   - [x] 武器图鉴
@@ -80,7 +77,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 材料图鉴
 
 - 应用功能：
-
   - [x] 浅色/深色主题切换
   - [x] 米游社 JSBridge
 
