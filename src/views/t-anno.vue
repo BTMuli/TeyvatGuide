@@ -6,8 +6,8 @@
     <div class="anno-info" @click="createAnnoJson">
       AnnoID: {{ annoId }} | Render by TeyvatGuide v{{ appVersion }}
     </div>
-    <div class="anno-title">{{ annoData.title }}</div>
-    <div class="anno-subtitle">{{ parseText(annoData.subtitle) }}</div>
+    <div class="anno-title">{{ parseText(annoData.subtitle) }}</div>
+    <div class="anno-subtitle">{{ annoData.title }}</div>
     <div class="anno-content">
       <TaParser :data="annoData" />
     </div>
@@ -74,7 +74,7 @@ async function createAnnoJson(): Promise<void> {
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .anno-info {
   position: relative;
   display: flex;
@@ -93,19 +93,15 @@ async function createAnnoJson(): Promise<void> {
   font-family: var(--font-text);
 }
 
-.anno-title,
-.anno-subtitle {
+.anno-title {
   color: var(--common-text-title);
   font-family: var(--font-title);
-}
-
-.anno-title {
   font-size: 20px;
 }
 
 .anno-subtitle {
   font-size: 16px;
-  opacity: 0.6;
+  font-style: italic;
 }
 
 .anno-content {
