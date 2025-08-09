@@ -1,7 +1,7 @@
 /**
  * @file sqlite/modules/userChallenge.ts
  * @description 幽境危战模块
- * @since Beta v0.8.0
+ * @since Beta v0.7.10
  */
 
 import { path } from "@tauri-apps/api";
@@ -72,7 +72,7 @@ async function getAllUid(): Promise<Array<string>> {
 
 /**
  * @description 获取挑战数据
- * @since Beta v0.8.0
+ * @since Beta v0.7.10
  * @param {string} [uid] - 游戏UID
  * @return {Promise<Array<TGApp.Sqlite.Challenge.SingleTable>>} - 挑战数据
  */
@@ -87,7 +87,8 @@ async function getChallenge(uid?: string): Promise<Array<TGApp.Sqlite.Challenge.
     resR = await db.select<Array<TGApp.Sqlite.Challenge.RawTable>>(
       `SELECT *
        FROM HardChallenge
-       WHERE uid = ?;`,
+       WHERE uid = ?
+       ORDER BY id DESC;`,
       [uid],
     );
   }
