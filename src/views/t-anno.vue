@@ -24,6 +24,7 @@ import useAppStore from "@store/app.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import TGLogger from "@utils/TGLogger.js";
 import { createTGWindow } from "@utils/TGWindow.js";
+import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
@@ -31,6 +32,9 @@ const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <TGApp.Game.Base.ServerTypeEnum>route.params.region;
 const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
+
+const { devMode } = storeToRefs(useAppStore());
+
 const appVersion = ref<string>();
 const annoData = shallowRef<TGApp.BBS.Announcement.AnnoDetail>();
 
@@ -55,8 +59,7 @@ onMounted(async () => {
   annoData.value = find;
   await showLoading.update(`公告ID: ${annoId} - ${annoData.value.title}`);
   await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} ${annoData.value.title}`);
-  const isDev = useAppStore().devMode ?? false;
-  if (isDev) await createAnnoJson();
+  if (devMode.value === true) await createAnnoJson();
   await showLoading.end();
 });
 
@@ -71,6 +74,7 @@ async function createAnnoJson(): Promise<void> {
   if (import.meta.env.MODE === "production") return;
   const jsonPath = `/anno_detail_json/${region}/${annoId}/${lang}`;
   const jsonTitle = `Anno_${region}_${annoId}_${lang}_JSON`;
+  await TGLogger.Debug(`[t-anno.vue][${annoId}] 打开JSON窗口`);
   await createTGWindow(jsonPath, "Dev_JSON", jsonTitle, 960, 720, false, false);
 }
 </script>
