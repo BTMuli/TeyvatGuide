@@ -83,7 +83,7 @@ watch(
 
 async function getDefaultSavePath(): Promise<string> {
   const tsNow = new Date().getTime();
-  return `${await path.downloadDir()}${path.sep()}UIGF4_${tsNow}.json`;
+  return `${await path.downloadDir()}${path.sep()}UIGFv4.1_${tsNow}.json`;
 }
 
 async function refreshData(): Promise<void> {

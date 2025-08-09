@@ -1,7 +1,7 @@
 /**
  * @file utils/UIGF.ts
  * @description UIGF工具类
- * @since Beta v0.7.5
+ * @since Beta v0.7.10
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -64,9 +64,9 @@ async function getUigfHeader(uid: string, timezone: number): Promise<TGApp.Plugi
 }
 
 /**
- * @description 获取 UIGF v4.0 头部信息
- * @since Beta v0.5.1
- * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.0 头部信息
+ * @description 获取 UIGF v4.1 头部信息
+ * @since Beta v0.7.10
+ * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.1 头部信息
  */
 export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
   const stamp = Date.now();
@@ -74,7 +74,7 @@ export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
     export_timestamp: Math.floor(stamp / 1000).toString(),
     export_app: "TeyvatGuide",
     export_app_version: await app.getVersion(),
-    version: "v4.0",
+    version: "v4.1",
     lang: "zh-cn",
   };
 }
