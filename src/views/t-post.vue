@@ -10,10 +10,16 @@
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
       <div class="tp-post-meta">
-        <div class="mpm-forum" v-if="postData.forum" @click="toForum(postData.forum)">
-          <TMiImg :src="getGameIcon(postData.forum.game_id)" alt="gameIcon" />
-          <TMiImg :src="postData.forum.icon" alt="forumIcon" :ori="true" />
-          <span>{{ postData.forum.name }}</span>
+        <div class="mpm-forum">
+          <TMiImg
+            :src="getGameIcon(postData?.forum?.game_id || postData.post.game_id)"
+            alt="gameIcon"
+            @click="toGame(postData?.forum?.game_id || postData.post.game_id)"
+          />
+          <div v-if="postData.forum" @click="toForum(postData.forum)">
+            <TMiImg :src="postData.forum.icon" alt="forumIcon" :ori="true" />
+            <span>{{ postData.forum.name }}</span>
+          </div>
         </div>
         <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
           <v-icon>mdi-eye</v-icon>
@@ -189,6 +195,7 @@ onMounted(async () => {
     return;
   }
   postData.value = resp;
+  console.log(resp);
   isLike.value = postData.value.self_operation.upvote_type !== 0;
   await showLoading.update("正在渲染数据");
   renderPost.value = await getRenderPost(postData.value);
@@ -343,6 +350,10 @@ async function toPost(): Promise<void> {
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
   const gid = postData.value?.post.game_id ?? topic.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
+}
+
+async function toGame(gameId: number): Promise<void> {
+  await emit("active_deep_link", `router?path=/posts/forum/${gameId}`);
 }
 
 async function toForum(forum: TGApp.BBS.Post.Forum): Promise<void> {
