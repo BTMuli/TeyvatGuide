@@ -1,6 +1,7 @@
 <template>
   <div class="twc-li-box">
     <div class="twc-li-left">
+      <!-- TODO: 角色添加元素&武器类型，武器添加类型 -->
       <img class="twc-li-bg" :src="`/icon/bg/${props.data.star}-Star.webp`" alt="bg" />
       <img class="twc-li-icon" :src="`/WIKI/${props.mode}/${props.data.id}.webp`" alt="icon" />
     </div>
@@ -22,7 +23,7 @@ type TwcListItemProps =
 
 const props = defineProps<TwcListItemProps>();
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .twc-li-box {
   position: relative;
   display: flex;

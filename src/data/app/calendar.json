@@ -2545,7 +2545,7 @@
   },
   {
     "id": 13515,
-    "contentId": 0,
+    "contentId": 505676,
     "dropDays": [1, 4, 7],
     "name": "支离轮光",
     "itemType": "weapon",
@@ -3345,7 +3345,7 @@
   },
   {
     "id": 12432,
-    "contentId": 0,
+    "contentId": 505675,
     "dropDays": [2, 5, 7],
     "name": "拾慧铸熔",
     "itemType": "weapon",
