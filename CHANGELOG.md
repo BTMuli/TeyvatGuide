@@ -2,14 +2,23 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2024-10-09
-Update: 2025-07-30
+Update: 2025-08-17
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-07-30 10:29:44`
+> 更新于 `2025-08-17 23:14:55`
 
-## [v0.7.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.9) (2025-07-30)
+## [0.7.10](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.10) (2025-08-17)
+
+- 🍱 更新下半卡池数据
+- 🍱 角色WIKI侧栏添加不同元素旅行者数据
+- 👽️ UIGFv4.1适配
+- 🚸 幽境危战逆序
+- 🚸 处理未选择版块帖子
+- 💄 微调公告详情页面样式
+
+## [0.7.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.9) (2025-07-30)
 
 - 🍱 更新5.8版本资源
 - ✨ 支持动态头像
@@ -19,7 +28,7 @@ Update: 2025-07-30
 - 🚸 帖子列表不携带ck
 - 💄 调整部分名片换行处理
 
-## [v0.7.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.8) (2025-07-07)
+## [0.7.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.8) (2025-07-07)
 
 - 🐛 修正游戏账号判断逻辑
 - ✏️ 修正帖子活动卡片状态类型
