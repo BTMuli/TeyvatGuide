@@ -3,6 +3,7 @@
     v-if="mode == 'link'"
     class="tp-text-link"
     @click="toLink()"
+    @contextmenu="copyLink()"
     :title="props.data.attributes?.link"
     :style="getTextStyle()"
   >
@@ -108,6 +109,19 @@ async function toLink(): Promise<void> {
     return;
   }
   await openUrl(res);
+}
+
+// 复制链接
+async function copyLink(): Promise<void> {
+  if (!props.data.attributes) return;
+  if (!props.data.attributes.link) return;
+  const link = props.data.attributes.link;
+  try {
+    await navigator.clipboard.writeText(link);
+    showSnackbar.success("链接已复制到剪贴板");
+  } catch (e) {
+    showSnackbar.error(`复制链接失败: ${e}`, 3000);
+  }
 }
 
 // 解析表情链接
