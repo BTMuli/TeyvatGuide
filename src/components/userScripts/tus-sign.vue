@@ -110,6 +110,9 @@ function getGameInfo(biz: string): SignGameInfo {
     // 绝区零
     case "nap_cn":
       return { title: "绝区零", icon: "/platforms/mhy/zzz.webp", gid: 8 };
+    // 崩坏：因缘精灵
+    case "hna_cn":
+      return { title: "崩坏：因缘精灵", icon: "/platform/s/mhy/hna.webp", gid: 9 };
     default:
       return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
   }

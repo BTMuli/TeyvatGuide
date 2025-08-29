@@ -61,9 +61,9 @@ const selects: Array<ToGameLoginSelect> = [
     icon: "/platforms/mhy/bh2.webp",
   },
   // {
-  //   title: "星布谷地",
-  //   value: 13,
-  //   icon: "/platforms/mhy/xbgd.webp",
+  //   title: "崩坏：因缘精灵",
+  //   value: 9,
+  //   icon: "/platforms/mhy/hna.webp",
   // },
 ];
 
