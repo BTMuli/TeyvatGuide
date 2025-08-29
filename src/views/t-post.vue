@@ -10,13 +10,13 @@
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
       </div>
       <div class="tp-post-meta">
-        <div class="mpm-forum">
+        <div class="mpm-icons">
           <TMiImg
             :src="getGameIcon(postData?.forum?.game_id || postData.post.game_id)"
             alt="gameIcon"
             @click="toGame(postData?.forum?.game_id || postData.post.game_id)"
           />
-          <div v-if="postData.forum" @click="toForum(postData.forum)">
+          <div class="mpm-forum" v-if="postData.forum" @click="toForum(postData.forum)">
             <TMiImg :src="postData.forum.icon" alt="forumIcon" :ori="true" />
             <span>{{ postData.forum.name }}</span>
           </div>
@@ -456,10 +456,11 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   font-size: 14px;
 }
 
-.mpm-forum {
+.mpm-icons {
   display: flex;
   align-items: center;
   justify-content: center;
+  column-gap: 4px;
   cursor: pointer;
 
   img {
@@ -472,10 +473,17 @@ function handleUser(user: TGApp.BBS.Post.User): void {
     }
   }
 
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .mpm-forum {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 2px;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }
 
