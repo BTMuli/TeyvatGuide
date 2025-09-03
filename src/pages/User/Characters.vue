@@ -388,11 +388,14 @@ function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
 function handleSelect(val: SelectedCValue) {
   showSelect.value = false;
   const filterC = AppCharacterData.filter((avatar) => {
-    if (!roleList.value.find((role) => role.avatar.id === avatar.id)) return false;
     if (!val.star.includes(avatar.star)) return false;
     if (!val.weapon.includes(avatar.weapon)) return false;
     if (!val.elements.includes(avatar.element)) return false;
-    return val.area.includes(avatar.area);
+    if (!val.area.includes(avatar.area)) return false;
+    return roleList.value.find(
+      (role) =>
+        role.avatar.id === avatar.id && getZhElement(role.avatar.element) === avatar.element,
+    );
   });
   if (filterC.length === 0) {
     showSnackbar.warn("未找到符合条件的角色");
@@ -535,7 +538,7 @@ function handleSwitch(next: boolean): void {
 
 .uc-grid {
   display: grid;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(210px, 0.2fr));
 }
 
