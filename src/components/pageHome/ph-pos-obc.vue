@@ -1,5 +1,5 @@
 <template>
-  <div class="ph-position-card">
+  <div class="ph-pos-obc-card">
     <div class="top">
       <div class="main">
         <div class="left" @click="openPosition()">
@@ -40,11 +40,11 @@ import { toObcPage, createPost } from "@utils/TGWindow.js";
 import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
-type PhPositionCardProps = { pos: TGApp.BBS.Obc.PositionItem };
+type PhPosObcProps = { pos: TGApp.BBS.Obc.PositionItem };
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
-const props = defineProps<PhPositionCardProps>();
+const props = defineProps<PhPosObcProps>();
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
@@ -93,7 +93,7 @@ onUnmounted(() => {
 });
 </script>
 <style lang="scss" scoped>
-.ph-position-card {
+.ph-pos-obc-card {
   position: relative;
   display: flex;
   flex-direction: column;
