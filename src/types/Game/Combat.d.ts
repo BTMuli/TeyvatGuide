@@ -1,15 +1,9 @@
 /**
  * @file types/Game/Combat.d.ts
  * @description 幻想真境剧诗类型定义
- * @since Beta v0.6.3
+ * @since Beta v0.7.11
  */
 
-/**
- * @description 幻想真境剧诗相关类型
- * @since Beta v0.6.3
- * @namespace TGApp.Game.Combat
- * @memberOf TGApp.Game
- */
 declare namespace TGApp.Game.Combat {
   /**
    * @description 幻想真境剧诗数据返回类型
@@ -17,11 +11,8 @@ declare namespace TGApp.Game.Combat {
    * @since Beta v0.6.3
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullData} data
-   * @return Response
    */
-  interface Response extends TGApp.BBS.Response.BaseWithData {
-    data: FullData;
-  }
+  type Response = TGApp.BBS.Response.BaseWithData<FullData>;
 
   /**
    * @description 返回完整数据类型
@@ -30,13 +21,8 @@ declare namespace TGApp.Game.Combat {
    * @property {boolean} is_unlock 是否解锁
    * @property {Record<string,string>} links 相关链接
    * @property {Array<Combat>} data 挑战数据
-   * @return FullData
    */
-  interface FullData {
-    is_unlock: boolean;
-    links: Record<string, string>;
-    data: Array<Combat>;
-  }
+  type FullData = { is_unlock: boolean; links: Record<string, string>; data: Array<Combat> };
 
   /**
    * @description 角色数据
@@ -49,9 +35,8 @@ declare namespace TGApp.Game.Combat {
    * @property {string} image 角色图像
    * @property {number} level 角色等级
    * @property {number} rarity 角色稀有度
-   * @return Avatar
    */
-  interface Avatar {
+  type Avatar = {
     avatar_id: number;
     avatar_type: number;
     name: string;
@@ -59,7 +44,7 @@ declare namespace TGApp.Game.Combat {
     image: string;
     level: number;
     rarity: number;
-  }
+  };
 
   /**
    * @description 简要角色
@@ -69,14 +54,8 @@ declare namespace TGApp.Game.Combat {
    * @property {number} avatar_icon 角色图标
    * @property {string} value 值
    * @property {number} rarity 角色稀有度
-   * @return AvatarMini
    */
-  interface AvatarMini {
-    avatar_id: number;
-    avatar_icon: string;
-    value: string;
-    rarity?: number;
-  }
+  type AvatarMini = { avatar_id: number; avatar_icon: string; value: string; rarity?: number };
 
   /**
    * @description Buff
@@ -86,14 +65,8 @@ declare namespace TGApp.Game.Combat {
    * @property {string} icon 图标
    * @property {number} level 等级
    * @property {Array<BuffEffect>} level_effect 不同等级下的助益
-   * @return Buff
    */
-  interface Buff {
-    name: string;
-    icon: string;
-    level: number;
-    level_effect: Array<BuffEffect>;
-  }
+  type Buff = { name: string; icon: string; level: number; level_effect: Array<BuffEffect> };
 
   /**
    * @description Buff助益
@@ -104,11 +77,7 @@ declare namespace TGApp.Game.Combat {
    * @property {string} desc 描述
    * @return BuffEffect
    */
-  interface BuffEffect {
-    icon: string;
-    name: string;
-    desc: string;
-  }
+  type BuffEffect = { icon: string; name: string; desc: string };
 
   /**
    * @description 卡片
@@ -119,36 +88,8 @@ declare namespace TGApp.Game.Combat {
    * @property {string} desc 描述
    * @property {boolean} is_enhanced 是否加强
    * @property {number} id ID
-   * @return Card
    */
-  interface Card {
-    icon: string;
-    name: string;
-    desc: string;
-    is_enhanced: boolean;
-    id: number;
-  }
-
-  /**
-   * @description 时间
-   * @interface DateTime
-   * @since Beta v0.6.3
-   * @property {number} year 年份
-   * @property {number} month 月份
-   * @property {number} day 日期
-   * @property {number} hour 小时
-   * @property {number} minute 分钟
-   * @property {number} second 秒
-   * @return DateTime
-   */
-  interface DateTime {
-    year: number;
-    month: number;
-    day: number;
-    hour: number;
-    minute: number;
-    second: number;
-  }
+  type Card = { icon: string; name: string; desc: string; is_enhanced: boolean; id: number };
 
   /**
    * @description 状态
@@ -162,9 +103,8 @@ declare namespace TGApp.Game.Combat {
    * @property {number} coin_num 硬币数
    * @property {number} avatar_bonus_num 角色声援数
    * @property {number} rent_cnt 出借次数
-   * @return Stat
    */
-  interface Stat {
+  type Stat = {
     difficulty_id: number;
     max_round_id: number;
     heraldry: number;
@@ -173,7 +113,7 @@ declare namespace TGApp.Game.Combat {
     coin_num: number;
     avatar_bonus_num: number;
     rent_cnt: number;
-  }
+  };
 
   /**
    * @description 敌人
@@ -182,13 +122,8 @@ declare namespace TGApp.Game.Combat {
    * @property {string} name 名称
    * @property {string} icon 图标
    * @property {number} level 等级
-   * @return Enemy
    */
-  interface Enemy {
-    name: string;
-    icon: string;
-    level: number;
-  }
+  type Enemy = { name: string; icon: string; level: number };
 
   /**
    * @description 单期挑战数据
@@ -199,15 +134,14 @@ declare namespace TGApp.Game.Combat {
    * @property {Schedule} schedule 挑战期数
    * @property {boolean} has_data 是否有数据
    * @property {boolean} has_detail_data 是否有详细数据
-   * @return Combat
    */
-  interface Combat {
+  type Combat = {
     detail: Detail;
     stat: Stat;
     schedule: Schedule;
     has_data: boolean;
     has_detail_data: boolean;
-  }
+  };
 
   /**
    * @description 挑战详情
@@ -218,19 +152,18 @@ declare namespace TGApp.Game.Combat {
    * @property {string} lineup_link 未知链接
    * @property {Array<Avatar>} backup_avatars 后备角色
    * @property {FightStatisic} fight_statisic buff加成
-   * @return Detail
    */
-  interface Detail {
+  type Detail = {
     rounds_data: Array<RoundData>;
     detail_stat: Stat;
     lineup_link: string;
     backup_avatars: Array<Avatar>;
     fight_statisic: FightStatisic;
-  }
+  };
 
   /**
    * @description 轮次数据
-   * @since Beta v0.6.3
+   * @since Beta v0.7.11
    * @interface RoundData
    * @property {Array<Avatar>} avatars 角色
    * @property {Array<Card>} choice_cards 选中卡片
@@ -238,40 +171,39 @@ declare namespace TGApp.Game.Combat {
    * @property {boolean} is_get_medal 是否获得星章
    * @property {number} round_id 轮次ID
    * @property {string} finish_time 完成时间（秒级时间戳）
-   * @property {DateTime} finish_date_time 完成时间
+   * @property {TGApp.Game.Base.DateTime} finish_date_time 完成时间
    * @property {Array<Enemy>} enemies 敌人
    * @property {SplendourBuff} splendour_buff 总体Buff
-   * @return RoundData
    */
-  interface RoundData {
+  type RoundData = {
     avatars: Array<Avatar>;
     choice_cards: Array<Card>;
     buffs: Array<Buff>;
     is_get_medal: boolean;
     round_id: number;
     finish_time: string;
-    finish_date_time: DateTime;
+    finish_date_time: TGApp.Game.Base.DateTime;
     enemies: Array<Enemy>;
     splendour_buff: SplendourBuff;
-  }
+  };
 
   /**
    * @description 总体buff
    * @interface SplendourBuff
-   * @since Beta v0.6.3
-   * @property {object} summary 概况
-   * @property {number} summary.total_level 总等级
-   * @property {string} summary.desc 描述
+   * @since Beta v0.7.11
+   * @property {SplendourBuffSummary} summary 概况
    * @property {Array<Buff>} buffs 助益
-   * @return SplendourBuff
    */
-  interface SplendourBuff {
-    summary: {
-      total_level: number;
-      desc: string;
-    };
-    buffs: Array<Buff>;
-  }
+  type SplendourBuff = { summary: SplendourBuffSummary; buffs: Array<Buff> };
+
+  /**
+   * @description 总体buff概况
+   * @interface SplendourBuffSummary
+   * @since Beta v0.7.11
+   * @property {number} total_level 总等级
+   * @property {string} desc 描述
+   */
+  type SplendourBuffSummary = { total_level: number; desc: string };
 
   /**
    * @description 战斗数据
@@ -284,9 +216,8 @@ declare namespace TGApp.Game.Combat {
    * @property {Array<AvatarMini>} shortest_avatar_list 最快完成演出队伍
    * @property {number} total_use_time 总时间
    * @property {boolean} is_show_battle_stats 是否展示
-   * @return FightStatisic
    */
-  interface FightStatisic {
+  type FightStatisic = {
     max_defeat_avatar: AvatarMini | null;
     max_damage_avatar: AvatarMini | null;
     max_take_damage_avatar: AvatarMini | null;
@@ -294,26 +225,25 @@ declare namespace TGApp.Game.Combat {
     shortest_avatar_list: Array<AvatarMini>;
     total_use_time: number;
     is_show_battle_stats: boolean;
-  }
+  };
 
   /**
    * @description 期数
    * @interface Schedule
-   * @since Beta v0.6.3
+   * @since Beta v0.7.11
    * @property {string} start_time 开始时间（秒级时间戳）
    * @property {string} end_time 结束时间（秒级时间戳）
    * @property {number} schedule_type 类型 // 1-本期。2-上期
    * @property {number} schedule_id ID
-   * @property {DateTime} start_date_time 开始时间
-   * @property {DateTime} end_date_time 结束时间
-   * @return Schedule
+   * @property {TGApp.Game.Base.DateTime} start_date_time 开始时间
+   * @property {TGApp.Game.Base.DateTime} end_date_time 结束时间
    */
-  interface Schedule {
+  type Schedule = {
     start_time: string;
     end_time: string;
     schedule_type: number;
     schedule_id: number;
-    start_date_time: DateTime;
-    end_date_time: DateTime;
-  }
+    start_date_time: TGApp.Game.Base.DateTime;
+    end_date_time: TGApp.Game.Base.DateTime;
+  };
 }

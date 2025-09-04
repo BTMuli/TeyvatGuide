@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Base.d.ts
  * @description 游戏相关基础类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.7.11
  */
 
 declare namespace TGApp.Game.Base {
@@ -31,4 +31,24 @@ declare namespace TGApp.Game.Base {
    * @enum ServerTypeEnum
    */
   type ServerTypeEnum = (typeof ServerType)[keyof typeof ServerType];
+
+  /**
+   * @description 时间类型
+   * @since Beta v0.7.11
+   * @interface DateTime
+   * @property {number} year - 年份
+   * @property {number} month - 月份（1-12）
+   * @property {number} day - 日（1-31）
+   * @property {number} hour - 小时（0-23）
+   * @property {number} minute - 分钟（0-59）
+   * @property {number} second - 秒（0-59）
+   */
+  type DateTime = {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+  };
 }

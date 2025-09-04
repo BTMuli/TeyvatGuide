@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Challenge.d.ts
  * @description 幽境危战相关类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.7.11
  */
 
 declare namespace TGApp.Game.Challenge {
@@ -83,34 +83,14 @@ declare namespace TGApp.Game.Challenge {
   };
 
   /**
-   * @description 时间对象
-   * @since Beta v0.8.0
-   * @interface DateTime
-   * @property {number} year - 年份
-   * @property {number} month - 月份（1-12）
-   * @property {number} day - 日（1-31）
-   * @property {number} hour - 小时（0-23）
-   * @property {number} minute - 分钟（0-59）
-   * @property {number} second - 秒（0-59）
-   */
-  type DateTime = {
-    year: number;
-    month: number;
-    day: number;
-    hour: number;
-    minute: number;
-    second: number;
-  };
-
-  /**
    * @description 挑战周期信息
-   * @since Beta v0.8.0
+   * @since Beta v0.7.11
    * @interface ChallengeSchedule
    * @property {string} schedule_id - 挑战周期 ID
    * @property {string} start_time - 挑战开始时间(秒级时间戳)
    * @property {string} end_time - 挑战结束时间(秒级时间戳)
-   * @property {DateTime} start_date_time - 挑战开始时间（DateTime 对象）
-   * @property {DateTime} end_date_time - 挑战结束时间（DateTime 对象）
+   * @property {TGApp.Game.Base.DateTime} start_date_time - 挑战开始时间（DateTime 对象）
+   * @property {TGApp.Game.Base.DateTime} end_date_time - 挑战结束时间（DateTime 对象）
    * @property {boolean} is_valid - 是否有效
    * @property {string} name - 挑战名称
    */
@@ -118,8 +98,8 @@ declare namespace TGApp.Game.Challenge {
     schedule_id: string;
     start_time: string;
     end_time: string;
-    start_date_time: DateTime;
-    end_date_time: DateTime;
+    start_date_time: TGApp.Game.Base.DateTime;
+    end_date_time: TGApp.Game.Base.DateTime;
     is_valid: boolean;
     name: string;
   };
