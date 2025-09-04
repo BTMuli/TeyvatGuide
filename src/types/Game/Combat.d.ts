@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Combat.d.ts
  * @description 幻想真境剧诗类型定义
- * @since Beta v0.7.11
+ * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Game.Combat {
@@ -163,7 +163,7 @@ declare namespace TGApp.Game.Combat {
 
   /**
    * @description 轮次数据
-   * @since Beta v0.7.11
+   * @since Beta v0.8.0
    * @interface RoundData
    * @property {Array<Avatar>} avatars 角色
    * @property {Array<Card>} choice_cards 选中卡片
@@ -190,7 +190,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 总体buff
    * @interface SplendourBuff
-   * @since Beta v0.7.11
+   * @since Beta v0.8.0
    * @property {SplendourBuffSummary} summary 概况
    * @property {Array<Buff>} buffs 助益
    */
@@ -199,7 +199,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 总体buff概况
    * @interface SplendourBuffSummary
-   * @since Beta v0.7.11
+   * @since Beta v0.8.0
    * @property {number} total_level 总等级
    * @property {string} desc 描述
    */
@@ -230,7 +230,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 期数
    * @interface Schedule
-   * @since Beta v0.7.11
+   * @since Beta v0.8.0
    * @property {string} start_time 开始时间（秒级时间戳）
    * @property {string} end_time 结束时间（秒级时间戳）
    * @property {number} schedule_type 类型 // 1-本期。2-上期

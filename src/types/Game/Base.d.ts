@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Base.d.ts
  * @description 游戏相关基础类型定义文件
- * @since Beta v0.7.11
+ * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Game.Base {
@@ -34,7 +34,7 @@ declare namespace TGApp.Game.Base {
 
   /**
    * @description 时间类型
-   * @since Beta v0.7.11
+   * @since Beta v0.8.0
    * @interface DateTime
    * @property {number} year - 年份
    * @property {number} month - 月份（1-12）

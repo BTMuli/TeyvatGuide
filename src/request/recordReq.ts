@@ -187,8 +187,30 @@ async function hardChallengeDetail(
   return resp.data;
 }
 
+/**
+ * @description 获取活动日历数据
+ * @since Beta v0.8.0
+ * @param {TGApp.App.Account.Cookie} cookie Cookie
+ * @param {TGApp.Sqlite.Account.Game} user 用户
+ * @returns {Promise<TGApp.Game.ActCalendar.ActRes | TGApp.BBS.Response.Base>}
+ */
+async function actCalendar(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.Game.ActCalendar.ActRes | TGApp.BBS.Response.Base> {
+  const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+  const body = { role_id: user.gameUid, server: user.region };
+  const resp = await TGHttp<TGApp.Game.ActCalendar.Response | TGApp.BBS.Response.Base>(
+    `${trgAbu}act_calendar`,
+    { method: "POST", headers: getRequestHeader(ck, "POST", body), body: JSON.stringify(body) },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
+}
+
 const recordReq = {
   index: index,
+  actCalendar: actCalendar,
   character: { list: characterList, detail: characterDetail },
   roleCombat: roleCombat,
   spiralAbyss: spiralAbyss,

@@ -20,23 +20,20 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import painterReq from "@req/painterReq.js";
+import recordReq from "@req/recordReq.js";
 import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
 
-const { cookie } = storeToRefs(useUserStore());
-const offset = ref<number>();
+const { cookie, account } = storeToRefs(useUserStore());
 
 async function test(): Promise<void> {
   if (!cookie.value) return;
-  const resp = await painterReq.follow(cookie.value, offset.value);
+  const resp = await recordReq.actCalendar(cookie.value, account.value);
   console.log(resp);
   if ("retcode" in resp) {
     showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
     return;
   }
-  offset.value = resp.next_offset;
 }
 </script>
 <style lang="css" scoped>

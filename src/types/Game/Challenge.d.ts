@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Challenge.d.ts
  * @description 幽境危战相关类型定义文件
- * @since Beta v0.7.11
+ * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Game.Challenge {
@@ -84,7 +84,7 @@ declare namespace TGApp.Game.Challenge {
 
   /**
    * @description 挑战周期信息
-   * @since Beta v0.7.11
+   * @since Beta v0.8.0
    * @interface ChallengeSchedule
    * @property {string} schedule_id - 挑战周期 ID
    * @property {string} start_time - 挑战开始时间(秒级时间戳)
