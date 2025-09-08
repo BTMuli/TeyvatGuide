@@ -13,10 +13,10 @@
         </div>
         <div class="twom-bottom">
           <div class="twom-desc" v-html="parseHtmlText(props.data.description)" />
-          <div class="twom-source" v-if="props.data.source.length > 1">
+          <div class="twom-source" v-if="props.data.source.length > 0">
             <TwoSource :data="item" v-for="(item, index) in props.data.source" :key="index" />
           </div>
-          <div class="twom-convert" v-if="props.data.convert.length > 1">
+          <div class="twom-convert" v-if="props.data.convert.length > 0">
             <TwoConvert :data="item" v-for="(item, index) in props.data.convert" :key="index" />
           </div>
         </div>
