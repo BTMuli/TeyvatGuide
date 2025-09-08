@@ -45,7 +45,7 @@
         </v-item-group>
       </div>
       <div class="two-sc-item">
-        <div class="two-sc-title">地区</div>
+        <div class="two-sc-title">阵营</div>
         <v-item-group multiple mandatory v-model="selectedArea" class="two-sc-select">
           <div v-for="(item, index) in selectAreaList" :key="index">
             <v-item v-slot="{ isSelected, toggle }" :value="item">
@@ -81,7 +81,21 @@ const emits = defineEmits<TwoSelectCEmits>();
 const selectStarList = [4, 5];
 const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
 const selectElementList = ["冰", "岩", "水", "火", "草", "雷", "风"];
-const selectAreaList = ["蒙德", "璃月", "稻妻", "须弥", "枫丹", "纳塔", "愚人众", "至冬", "其他"];
+const selectAreaList = [
+  "未知",
+  "蒙德",
+  "璃月",
+  "主角",
+  "愚人众",
+  "稻妻",
+  "游侠",
+  "须弥",
+  "枫丹",
+  "纳塔",
+  "至冬",
+  "寰宇劫灭",
+  "挪德卡莱",
+];
 
 // 选中的元素
 const selectedStar = ref<Array<number>>(selectStarList);

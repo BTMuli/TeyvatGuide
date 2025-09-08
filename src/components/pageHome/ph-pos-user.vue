@@ -184,7 +184,7 @@ onUnmounted(() => {
     box-sizing: border-box;
     -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px);
-    background: rgb(0 0 0 / 50%);
+    background: #00000080;
     color: var(--tgc-white-1);
     font-family: var(--font-title);
     font-size: 10px;
