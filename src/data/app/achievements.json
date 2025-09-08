@@ -4027,6 +4027,146 @@
     "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
+    "id": 80442,
+    "series": 63,
+    "order": 405,
+    "name": "月尘的寻宝者·其一",
+    "description": "在伦波岛、希汐岛、帕哈岛开启60个宝箱。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80443,
+    "series": 63,
+    "order": 406,
+    "name": "月尘的寻宝者·其一",
+    "description": "在伦波岛、希汐岛、帕哈岛开启120个宝箱。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80444,
+    "series": 63,
+    "order": 407,
+    "name": "月尘的寻宝者·其一",
+    "description": "在伦波岛、希汐岛、帕哈岛开启240个宝箱。",
+    "reward": 20,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80445,
+    "series": 63,
+    "order": 408,
+    "name": "月尘的冒险家·其一",
+    "description": "在伦波岛、希汐岛、帕哈岛完成3个大世界限时挑战。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80446,
+    "series": 63,
+    "order": 409,
+    "name": "月尘的冒险家·其一",
+    "description": "在伦波岛、希汐岛、帕哈岛完成6个大世界限时挑战。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80447,
+    "series": 63,
+    "order": 410,
+    "name": "月尘的冒险家·其一",
+    "description": "在伦波岛、希汐岛、帕哈岛完成10个大世界限时挑战。",
+    "reward": 20,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80448,
+    "series": 63,
+    "order": 415,
+    "name": "大地勘探·月华濯沐之岛·其一",
+    "description": "点亮挪德卡莱区域中，伦波岛、希汐岛、帕哈岛的地图。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80449,
+    "series": 63,
+    "order": 416,
+    "name": "远渡苍夜的霜林·其一",
+    "description": "解锁挪德卡莱区域中，伦波岛、希汐岛、帕哈岛所有传送锚点。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80450,
+    "series": 63,
+    "order": 417,
+    "name": "圣龛巡礼·月华濯沐之岛·其一",
+    "description": "解除挪德卡莱区域中，伦波岛、希汐岛、帕哈岛所有地灵龛的封印。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80451,
+    "series": 63,
+    "order": 418,
+    "name": "夜馈寻迹·月华濯沐之岛·其一",
+    "description": "解除挪德卡莱区域中，伦波岛、希汐岛、帕哈岛所有月灵盈藏之地的封印。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80452,
+    "series": 63,
+    "order": 411,
+    "name": "如月朗明",
+    "description": "将挪德卡莱的新月神像供奉至满级。",
+    "reward": 20,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80453,
+    "series": 63,
+    "order": 412,
+    "name": "聚所共建·终夜长茔",
+    "description": "将「终夜长茔」共建至满级。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80454,
+    "series": 63,
+    "order": 413,
+    "name": "聚所共建·叮铃哐啷蛋卷工坊",
+    "description": "将「叮铃哐啷蛋卷工坊」共建至满级。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80455,
+    "series": 63,
+    "order": 414,
+    "name": "聚所共建·霜月之坊",
+    "description": "将「霜月之坊」共建至满级。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -9897,6 +10037,246 @@
     }
   },
   {
+    "id": 81600,
+    "series": 63,
+    "order": 415,
+    "name": "藏骸所的织密者",
+    "description": "探索了最初的咏月使封锁的圣所。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81601,
+    "series": 63,
+    "order": 416,
+    "name": "谁之罪",
+    "description": "完成了在月矩力试验设计局的冒险。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81602,
+    "series": 0,
+    "order": 1597,
+    "name": "至冬域外的色彩",
+    "description": "将空寂走廊染上色彩。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81603,
+    "series": 0,
+    "order": 1598,
+    "name": "当极光闪耀",
+    "description": "让漂亮的彩缎出现在蓝珀湖上空。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81604,
+    "series": 0,
+    "order": 1599,
+    "name": "电光幻梦",
+    "description": "协助方格尔完成了实验。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81605,
+    "series": 0,
+    "order": 1600,
+    "name": "寂静的春天",
+    "description": "当生命的颤动从世界的画布上褪去…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81606,
+    "series": 0,
+    "order": 1601,
+    "name": "废土工程学",
+    "description": "和博比克成为了朋友。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81607,
+    "series": 0,
+    "order": 1602,
+    "name": "「地隐会」的黑暗秘密",
+    "description": "知晓了秘密组织的真身。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81608,
+    "series": 0,
+    "order": 1603,
+    "name": "人类灭绝之后…",
+    "description": "将会是怎样的世界？",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81609,
+    "series": 0,
+    "order": 1604,
+    "name": "时光飞逝，金钱亦逝",
+    "description": "盗宝鼬毕竟本性难移…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81610,
+    "series": 0,
+    "order": 1605,
+    "name": "正午审判",
+    "description": "为守护那夏镇的和平做出了贡献。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81611,
+    "series": 0,
+    "order": 1606,
+    "name": "「为了家园与炉火」",
+    "description": "即使生命之光已然消逝，他不屈的意志仍未消散。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81612,
+    "series": 0,
+    "order": 1607,
+    "name": "提琴手的绿地",
+    "description": "一切归于平静…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81613,
+    "series": 0,
+    "order": 1608,
+    "name": "银钥解封",
+    "description": "获得了新月的祝福。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81614,
+    "series": 0,
+    "order": 1609,
+    "name": "原力与你同在",
+    "description": "祝福的力量得到了增强。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81615,
+    "series": 0,
+    "order": 1610,
+    "name": "向上，向上，飞走了！",
+    "description": "进行了特殊的跳跃。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81616,
+    "series": 0,
+    "order": 1611,
+    "name": "潮流逆转",
+    "description": "正是退潮的时刻…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81617,
+    "series": 0,
+    "order": 1612,
+    "name": "今夜月色正好",
+    "description": "完成「伴月纪闻·其一」。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81618,
+    "series": 0,
+    "order": 1613,
+    "name": "沿着银色之路",
+    "description": "乘上月光飞驰吧。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81619,
+    "series": 0,
+    "order": 1613,
+    "name": "月影行者",
+    "description": "像月灵一样游走。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81620,
+    "series": 0,
+    "order": 1614,
+    "name": "伟业的遂成",
+    "description": "获得月谕圣牌。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81621,
+    "series": 0,
+    "order": 1615,
+    "name": "伟业的遂成",
+    "description": "同时持有12种不同的月谕圣牌。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81622,
+    "series": 0,
+    "order": 1616,
+    "name": "伟业的遂成",
+    "description": "同时持有22种不同的月谕圣牌。",
+    "reward": 20,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81623,
+    "series": 0,
+    "order": 1617,
+    "name": "纯真年代的终结",
+    "description": "世界并不似想象中那样甜美…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -10850,7 +11230,7 @@
     "id": 82099,
     "series": 0,
     "order": 2100,
-    "name": "只要我跑的够快",
+    "name": "只要我跑得够快",
     "description": "不被幻影击中的情况下，击败魔偶剑鬼。",
     "reward": 10,
     "version": "2.0",
@@ -12715,6 +13095,46 @@
     "reward": 5,
     "version": "5.6",
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82298,
+    "series": 0,
+    "order": 2298,
+    "name": "武库巨鸭的坠落",
+    "description": "通过击坠所有冲鸭机关，破除重拳出击鸭的护罩。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 82299,
+    "series": 0,
+    "order": 2299,
+    "name": "蕴光之茧",
+    "description": "为角色恢复生命值，清除「蕴光之茧」。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 82300,
+    "series": 0,
+    "order": 2300,
+    "name": "无声指令",
+    "description": "中断了敌方的进程。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 82301,
+    "series": 0,
+    "order": 2301,
+    "name": "「现在是我的了！」",
+    "description": "…果然还是自己的武器趁手。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84000,
@@ -14585,6 +15005,16 @@
     }
   },
   {
+    "id": 84155,
+    "series": 0,
+    "order": 7900,
+    "name": "途中的见闻",
+    "description": "见证一次逸闻。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 84300,
     "series": 0,
     "order": 5079,
@@ -15237,6 +15667,86 @@
       "type": "FINISH_QUEST_AND",
       "task": [{ "questId": 6006, "name": "逆焰", "type": "魔神任务" }]
     }
+  },
+  {
+    "id": 84351,
+    "series": 0,
+    "order": 5130,
+    "name": "异国相逢，优惠放送？",
+    "description": "遇见熟人的感觉真好。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84352,
+    "series": 0,
+    "order": 5131,
+    "name": "诗与歌的女儿们",
+    "description": "花丛中诞生的生灵是来自月的祝福。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84353,
+    "series": 0,
+    "order": 5132,
+    "name": "月光下的少女",
+    "description": "在银月之庭与「少女」邂逅…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84354,
+    "series": 0,
+    "order": 5133,
+    "name": "雪浪与苍林之舞",
+    "description": "完成「雪浪与苍林之舞」。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84355,
+    "series": 0,
+    "order": 5134,
+    "name": "「渠道」为王",
+    "description": "不同的地方，有不同的办事方法。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84356,
+    "series": 0,
+    "order": 5135,
+    "name": "灯也会有影子",
+    "description": "光芒照不出善恶，只能照出真相。",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84357,
+    "series": 0,
+    "order": 5136,
+    "name": "罪人降临",
+    "description": "「他」最终还是取回了完整的形体…",
+    "reward": 5,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84358,
+    "series": 0,
+    "order": 5137,
+    "name": "尘与灯的挽歌",
+    "description": "完成「尘与灯的挽歌」。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84501,
@@ -16840,5 +17350,95 @@
     "reward": 10,
     "version": "5.0",
     "trigger": { "type": "MP_KILL_MONSTER_NUM" }
+  },
+  {
+    "id": 86048,
+    "series": 64,
+    "order": 9047,
+    "name": "快速建造：关闭",
+    "description": "与其他玩家一同战胜秘源机兵·构型械。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86051,
+    "series": 64,
+    "order": 9050,
+    "name": "「此处曾有龙」",
+    "description": "与其他玩家一同战胜蚀灭的源焰之主。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86052,
+    "series": 64,
+    "order": 9051,
+    "name": "创造日前的黎明",
+    "description": "与其他玩家一同战胜熔岩辉龙像。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86053,
+    "series": 64,
+    "order": 9052,
+    "name": "非统一秘源世界论",
+    "description": "与其他玩家一同战胜秘源机兵·统御械。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86054,
+    "series": 64,
+    "order": 9053,
+    "name": "皇家捉双",
+    "description": "与其他玩家一同战胜门扉前的弈局。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86055,
+    "series": 64,
+    "order": 9054,
+    "name": "拳力以赴！",
+    "description": "与其他玩家一同战胜重拳出击鸭。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86056,
+    "series": 64,
+    "order": 9055,
+    "name": "最后的黄金之秋",
+    "description": "与其他玩家一同战胜蕴光月幻蝶。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86057,
+    "series": 64,
+    "order": 9048,
+    "name": "又斩了无趣的…",
+    "description": "与其他玩家一同战胜深邃摹结株。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86058,
+    "series": 64,
+    "order": 9049,
+    "name": "巫士的最终试炼",
+    "description": "与其他玩家一同战胜灵觉隐修的迷者。",
+    "reward": 10,
+    "version": "6.0",
+    "trigger": { "type": "Unknown" }
   }
 ]

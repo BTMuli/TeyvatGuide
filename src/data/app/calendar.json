@@ -640,6 +640,22 @@
     "source": { "index": 6, "area": "纳塔", "name": "空华" }
   },
   {
+    "id": 10000119,
+    "contentId": 505973,
+    "dropDays": [1, 4, 7],
+    "name": "菈乌玛",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "草",
+    "materials": [
+      { "id": 104356, "name": "「月光」的教导", "star": 2 },
+      { "id": 104357, "name": "「月光」的指引", "star": 3 },
+      { "id": 104358, "name": "「月光」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "墟都" }
+  },
+  {
     "id": 10000042,
     "contentId": 1058,
     "dropDays": [1, 4, 7],
@@ -750,6 +766,22 @@
       { "id": 104355, "name": "「纷争」的哲学", "star": 4 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "旋复" }
+  },
+  {
+    "id": 10000120,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "菲林斯",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "长柄武器",
+    "element": "雷",
+    "materials": [
+      { "id": 104362, "name": "「浪迹」的教导", "star": 2 },
+      { "id": 104363, "name": "「浪迹」的指引", "star": 3 },
+      { "id": 104364, "name": "「浪迹」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "覆巢" }
   },
   {
     "id": 10000003,
@@ -1150,6 +1182,22 @@
       { "id": 104331, "name": "「诤言」的哲学", "star": 4 }
     ],
     "source": { "index": 4, "area": "须弥", "name": "圆镜" }
+  },
+  {
+    "id": 10000121,
+    "contentId": 505972,
+    "dropDays": [2, 5, 7],
+    "name": "爱诺",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "双手剑",
+    "element": "水",
+    "materials": [
+      { "id": 104359, "name": "「乐园」的教导", "star": 2 },
+      { "id": 104360, "name": "「乐园」的指引", "star": 3 },
+      { "id": 104361, "name": "「乐园」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "遗荫" }
   },
   {
     "id": 10000021,
@@ -2384,6 +2432,22 @@
     "source": { "index": 6, "area": "纳塔", "name": "究观" }
   },
   {
+    "id": 14520,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "纺夜天镜",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114073, "name": "奇巧秘器的残件", "star": 2 },
+      { "id": 114074, "name": "奇巧秘器的模本", "star": 3 },
+      { "id": 114075, "name": "奇巧秘器的继业", "star": 4 },
+      { "id": 114076, "name": "奇巧秘器的真愿", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
+  },
+  {
     "id": 13502,
     "contentId": 1077,
     "dropDays": [3, 6, 7],
@@ -2558,6 +2622,22 @@
       { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "冥见" }
+  },
+  {
+    "id": 13516,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "血染荒城",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114077, "name": "长夜燧火的余烬", "star": 2 },
+      { "id": 114078, "name": "长夜燧火的残照", "star": 3 },
+      { "id": 114079, "name": "长夜燧火的明焰", "star": 4 },
+      { "id": 114080, "name": "长夜燧火的烈辉", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祷颂" }
   },
   {
     "id": 11401,
@@ -2976,6 +3056,38 @@
     "source": { "index": 6, "area": "纳塔", "name": "究观" }
   },
   {
+    "id": 11433,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "谧音吹哨",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "单手剑",
+    "materials": [
+      { "id": 114073, "name": "奇巧秘器的残件", "star": 2 },
+      { "id": 114074, "name": "奇巧秘器的模本", "star": 3 },
+      { "id": 114075, "name": "奇巧秘器的继业", "star": 4 },
+      { "id": 114076, "name": "奇巧秘器的真愿", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
+  },
+  {
+    "id": 11434,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "织月者的曙色",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "单手剑",
+    "materials": [
+      { "id": 114081, "name": "终北遗嗣的哀荣", "star": 2 },
+      { "id": 114082, "name": "终北遗嗣的迷顽", "star": 3 },
+      { "id": 114083, "name": "终北遗嗣的祷献", "star": 4 },
+      { "id": 114084, "name": "终北遗嗣的煌熠", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祭月" }
+  },
+  {
     "id": 12401,
     "contentId": 174,
     "dropDays": [3, 6, 7],
@@ -3358,6 +3470,22 @@
       { "id": 114068, "name": "谵妄圣主的神面", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "究观" }
+  },
+  {
+    "id": 12433,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "万能钥匙",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "双手剑",
+    "materials": [
+      { "id": 114081, "name": "终北遗嗣的哀荣", "star": 2 },
+      { "id": 114082, "name": "终北遗嗣的迷顽", "star": 3 },
+      { "id": 114083, "name": "终北遗嗣的祷献", "star": 4 },
+      { "id": 114084, "name": "终北遗嗣的煌熠", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祭月" }
   },
   {
     "id": 15401,
@@ -3776,6 +3904,22 @@
     "source": { "index": 6, "area": "纳塔", "name": "测度" }
   },
   {
+    "id": 15433,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "罗网勾针",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "弓",
+    "materials": [
+      { "id": 114077, "name": "长夜燧火的余烬", "star": 2 },
+      { "id": 114078, "name": "长夜燧火的残照", "star": 3 },
+      { "id": 114079, "name": "长夜燧火的明焰", "star": 4 },
+      { "id": 114080, "name": "长夜燧火的烈辉", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祷颂" }
+  },
+  {
     "id": 14401,
     "contentId": 185,
     "dropDays": [1, 4, 7],
@@ -4128,6 +4272,38 @@
     "source": { "index": 6, "area": "纳塔", "name": "究观" }
   },
   {
+    "id": 14432,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "天光的纺琴",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114081, "name": "终北遗嗣的哀荣", "star": 2 },
+      { "id": 114082, "name": "终北遗嗣的迷顽", "star": 3 },
+      { "id": 114083, "name": "终北遗嗣的祷献", "star": 4 },
+      { "id": 114084, "name": "终北遗嗣的煌熠", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祭月" }
+  },
+  {
+    "id": 14433,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "乌髓孑灯",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114073, "name": "奇巧秘器的残件", "star": 2 },
+      { "id": 114074, "name": "奇巧秘器的模本", "star": 3 },
+      { "id": 114075, "name": "奇巧秘器的继业", "star": 4 },
+      { "id": 114076, "name": "奇巧秘器的真愿", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
+  },
+  {
     "id": 13405,
     "contentId": 972,
     "dropDays": [2, 5, 7],
@@ -4462,6 +4638,22 @@
       { "id": 114068, "name": "谵妄圣主的神面", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "究观" }
+  },
+  {
+    "id": 13433,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "掘金之锹",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114077, "name": "长夜燧火的余烬", "star": 2 },
+      { "id": 114078, "name": "长夜燧火的残照", "star": 3 },
+      { "id": 114079, "name": "长夜燧火的明焰", "star": 4 },
+      { "id": 114080, "name": "长夜燧火的烈辉", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祷颂" }
   },
   {
     "id": 11301,
