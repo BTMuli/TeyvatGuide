@@ -109,11 +109,11 @@ async function loadAccount(ac: string): Promise<void> {
   cookie.value = accountGet.cookie;
   const gameAccount = await TSUserAccount.game.getCurAccount(ac);
   if (!gameAccount) {
-    showSnackbar.warn(`未找到${uid}的游戏账号信息，请尝试刷新`);
+    showSnackbar.warn(`未找到${uid.value}的游戏账号信息，请尝试刷新`);
     return;
   }
   account.value = gameAccount;
-  showSnackbar.success(`成功切换到用户${uid}`);
+  showSnackbar.success(`成功切换到用户${uid.value}`);
 }
 
 async function tryCkVerify(): Promise<void> {

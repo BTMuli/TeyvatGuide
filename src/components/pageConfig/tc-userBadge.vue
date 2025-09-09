@@ -92,27 +92,27 @@
           <v-btn variant="outlined" icon="mdi-account-plus" title="添加账户" v-bind="props" />
         </template>
         <v-list>
-          <v-list-item @click="addByCookie()" append-icon="mdi-account-plus">
-            <v-list-item-title>手动添加</v-list-item-title>
-            <v-list-item-subtitle>手动输入Cookie</v-list-item-subtitle>
-          </v-list-item>
           <v-list-item @click="tryCaptchaLogin()" append-icon="mdi-cellphone">
-            <v-list-item-title>验证码登录</v-list-item-title>
+            <v-list-item-title>验证码登录✨推荐</v-list-item-title>
             <v-list-item-subtitle>使用手机号登录</v-list-item-subtitle>
           </v-list-item>
-          <v-list-item @click="tryCodeLogin(true)">
+          <v-list-item @click="tryCodeLogin(false)">
+            <v-list-item-title>扫码登录✨推荐</v-list-item-title>
+            <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
+            <template #append>
+              <img src="/platforms/mhy/mys.webp" alt="launcher" class="menu-icon" />
+            </template>
+          </v-list-item>
+          <v-list-item @click="tryCodeLogin(true)" v-show="false">
             <v-list-item-title>扫码登录(启动器)</v-list-item-title>
             <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
             <template #append>
               <img src="/platforms/mhy/launcher.webp" alt="launcher" class="menu-icon" />
             </template>
           </v-list-item>
-          <v-list-item @click="tryCodeLogin(false)">
-            <v-list-item-title>扫码登录(游戏)</v-list-item-title>
-            <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
-            <template #append>
-              <img src="/platforms/mhy/mys.webp" alt="launcher" class="menu-icon" />
-            </template>
+          <v-list-item @click="addByCookie()" append-icon="mdi-account-plus">
+            <v-list-item-title>手动添加</v-list-item-title>
+            <v-list-item-subtitle>手动输入Cookie</v-list-item-subtitle>
           </v-list-item>
         </v-list>
       </v-menu>

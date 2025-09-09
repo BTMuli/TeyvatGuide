@@ -1,3 +1,4 @@
+<!-- TODO：组件拆分 -->
 <template>
   <div class="gro-chart">
     <div class="gro-chart-options">
@@ -25,6 +26,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+// TODO: 类型声明
 // about import err,see:https://github.com/apache/echarts/issues/19992
 import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
