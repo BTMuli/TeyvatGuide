@@ -10,17 +10,23 @@
         <PhPosObc v-for="(card, index) in obsPos" :key="index" :pos="card" />
       </div>
       <div class="tp-grid" v-show="isUserPos">
-        <PhPosUser v-for="(card, index) in userPos" :key="index" :pos="card" />
+        <PhPosUser
+          @click-m="handleMaterial"
+          v-for="(card, index) in userPos"
+          :key="index"
+          :pos="card"
+        />
       </div>
     </template>
   </THomeCard>
-  <!-- TODO: 活动奖励材料浮窗 -->
+  <TwoMaterial v-model="showMaterial" :data="curMaterial" />
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhPosObc from "@comp/pageHome/ph-pos-obc.vue";
 import PhPosUser from "@comp/pageHome/ph-pos-user.vue";
+import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import recordReq from "@req/recordReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
@@ -31,6 +37,8 @@ import { onMounted, shallowRef, ref, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
+import { WikiMaterialData } from "@/data/index.js";
+
 type TPositionEmits = (e: "success") => void;
 
 const { isLogin } = storeToRefs(useAppStore());
@@ -40,6 +48,8 @@ const emits = defineEmits<TPositionEmits>();
 
 const isInit = ref<boolean>(false);
 const isUserPos = ref<boolean>(isLogin.value);
+const showMaterial = ref<boolean>(false);
+const curMaterial = shallowRef<TGApp.App.Material.WikiItem>(WikiMaterialData[0]);
 const obsPos = shallowRef<Array<TGApp.BBS.Obc.PositionItem>>([]);
 const userPos = shallowRef<Array<TGApp.Game.ActCalendar.ActItem>>([]);
 
@@ -88,6 +98,18 @@ async function loadWikiPosition(): Promise<void> {
     showSnackbar.error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
     await TGLogger.Error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
   }
+}
+
+function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): void {
+  console.log("handleMaterial", cur);
+  const find = WikiMaterialData.find((i) => i.id === cur.item_id);
+  if (!find) {
+    showSnackbar.warn(`未找到${cur.name}的百科信息`);
+    return;
+  }
+  curMaterial.value = find;
+  showMaterial.value = true;
+  console.log(showMaterial.value);
 }
 </script>
 <style lang="scss" scoped>

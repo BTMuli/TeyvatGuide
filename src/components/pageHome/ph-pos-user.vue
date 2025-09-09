@@ -80,6 +80,7 @@
         v-for="reward in props.pos.reward_list"
         :key="reward.item_id"
         class="ph-puc-reward"
+        @click="showMaterial(reward)"
       >
         <img :src="`/icon/bg/${reward.rarity}-Star.webp`" class="bg" alt="bg" />
         <TMiImg :ori="true" :alt="reward.name" :src="reward.icon" class="icon" />
@@ -97,12 +98,14 @@ import { onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCompPositionUserProps = { pos: TGApp.Game.ActCalendar.ActItem };
+type PhCompPositionUserEmits = (e: "clickM", cur: TGApp.Game.ActCalendar.ActReward) => void;
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
 const router = useRouter();
 
 const props = defineProps<PhCompPositionUserProps>();
+const emits = defineEmits<PhCompPositionUserEmits>();
 
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
@@ -138,6 +141,11 @@ async function toCombat(): Promise<void> {
 
 async function toAbyss(): Promise<void> {
   await router.push({ name: "深境螺旋" });
+}
+
+function showMaterial(reward: TGApp.Game.ActCalendar.ActReward): void {
+  emits("clickM", reward);
+  console.log("showMaterial", reward);
 }
 
 onUnmounted(() => {
