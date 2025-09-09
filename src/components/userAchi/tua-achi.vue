@@ -160,7 +160,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
 
   &__title {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     column-gap: 4px;
     font-family: var(--font-title);
     font-size: 14px;
@@ -175,12 +175,18 @@ async function setAchiStat(stat: boolean): Promise<void> {
     @include github-styles.github-tag-dark-gen(#00aeec);
 
     display: flex;
-    height: 21px;
+    height: 18px;
+    box-sizing: border-box;
     align-items: center;
     justify-content: center;
     padding: 0 4px;
-    border-radius: 4px;
-    font-size: 12px;
+    border-radius: 9px;
+    font-family: var(--font-text);
+    font-size: 10px;
+
+    &:hover {
+      @include github-styles.github-tag-dark-gen(#7ab61f);
+    }
   }
 }
 
