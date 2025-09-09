@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-08-17
+Update: 2025-09-09
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-08-17 23:14:50`
+> 更新于 `2025-09-09 14:37:02`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases)
 
@@ -58,6 +58,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - 登陆功能：
 
   > 支持 扫码/验证码/Cookie 登陆，支持多账号管理
+  - [x] 近期活动（首页组件）
   - [x] 原神战绩
   - [x] 角色详情
   - [x] 螺旋深渊
