@@ -31,6 +31,7 @@ import recordReq from "@req/recordReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef, ref, watch } from "vue";
@@ -100,16 +101,14 @@ async function loadWikiPosition(): Promise<void> {
   }
 }
 
-function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): void {
-  console.log("handleMaterial", cur);
+async function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): Promise<void> {
   const find = WikiMaterialData.find((i) => i.id === cur.item_id);
   if (!find) {
-    showSnackbar.warn(`未找到${cur.name}的百科信息`);
+    await openUrl(cur.wiki_url);
     return;
   }
   curMaterial.value = find;
   showMaterial.value = true;
-  console.log(showMaterial.value);
 }
 </script>
 <style lang="scss" scoped>

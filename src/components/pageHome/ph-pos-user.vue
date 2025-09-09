@@ -145,7 +145,6 @@ async function toAbyss(): Promise<void> {
 
 function showMaterial(reward: TGApp.Game.ActCalendar.ActReward): void {
   emits("clickM", reward);
-  console.log("showMaterial", reward);
 }
 
 onUnmounted(() => {
