@@ -9,6 +9,10 @@ Update: 2024-10-09
 >
 > 更新于 `2024-10-09 15:50:42`
 
+# CHANGELOG v0.5.x
+
+> 本文仅记录 v0.5.x 版本的更新内容
+
 ## [0.5.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.5.5) (2024-09-17)
 
 - ✨ 帖子回复&子回复查看&分享

@@ -1,13 +1,17 @@
 ---
 Author: 目棃
-Description: CHANGELOG
+Description: CHANGELOG v0.7.x
 Date: 2024-10-09
-Update: 2025-08-17
+Update: 2025-09-09
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2024-10-09 15:51:43`
 >
-> 更新于 `2025-08-17 23:14:55`
+> 更新于 `2025-09-09 14:29:54`
+
+# CHANGELOG v0.7.x
+
+> 本文仅记录 v0.7.x 版本的更新内容
 
 ## [0.7.10](https://github.com/BTMuli/TeyvatGuide/releases/v0.7.10) (2025-08-17)
 

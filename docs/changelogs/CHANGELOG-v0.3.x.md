@@ -9,6 +9,10 @@ Update: 2024-01-15
 >
 > 更新于 `2024-01-15 17:28:47`
 
+# CHANGELOG v0.3.x
+
+> 本文仅记录 v0.3.x 版本的更新内容
+
 ## [0.3.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.3.9) (2024-01-02)
 
 ### Feat
