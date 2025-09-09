@@ -2,10 +2,16 @@
   <div
     class="top-nc-box"
     @click="emit('selected', props.data)"
-    :class="{ grey: !props.finish }"
+    :class="props.finish ? '' : 'grey'"
     :title.attr="props.data.name"
   >
-    <v-list-item :title="props.data.name">
+    <v-list-item>
+      <template #title>
+        <div class="title">
+          <TwnTypeTag :type="props.data.type" />
+          <span>{{ props.data.name }}</span>
+        </div>
+      </template>
       <template #subtitle>
         <span class="desc" :title="props.data.desc">{{ props.data.desc }}</span>
       </template>
@@ -16,14 +22,13 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TwnTypeTag from "@comp/pageWiki/twn-type-tag.vue";
 import { computed } from "vue";
 
 type TopNameCardProps = { data: TGApp.App.NameCard.Item; finish?: boolean };
 type TopNameCardEmits = (e: "selected", v: TGApp.App.NameCard.Item) => void;
 
-const props = withDefaults(defineProps<TopNameCardProps>(), {
-  finish: true,
-});
+const props = withDefaults(defineProps<TopNameCardProps>(), { finish: true });
 const emit = defineEmits<TopNameCardEmits>();
 
 const bgImage = computed<string>(() => {
@@ -70,6 +75,12 @@ const bgImage = computed<string>(() => {
   height: 60px;
   margin-right: 12px;
   aspect-ratio: 23 / 15;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
 }
 
 .desc {

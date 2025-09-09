@@ -14,7 +14,8 @@
           <span>{{ parseNameCard(props.data.desc) }}</span>
           <span>获取途径：{{ props.data.source }}</span>
         </div>
-        <div class="ton-type" :title="`ID:${props.data.id}`">{{ props.data.type }}</div>
+        <TwnTypeTag :type="props.data.type" class="ton-type" />
+        <div class="ton-sign">ID:{{ props.data.id }} | TeyvatGuide v{{ version }}</div>
         <v-btn
           class="ton-share"
           @click="shareNameCard"
@@ -32,8 +33,10 @@
 </template>
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
+import TwnTypeTag from "@comp/pageWiki/twn-type-tag.vue";
+import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/TGShare.js";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 import TOverlay from "./t-overlay.vue";
 
@@ -42,6 +45,11 @@ type ToNameCardProps = { data?: TGApp.App.NameCard.Item };
 const props = defineProps<ToNameCardProps>();
 const visible = defineModel<boolean>();
 const loading = ref<boolean>(false);
+const version = ref<string>("");
+
+onMounted(async () => {
+  version.value = await getVersion();
+});
 
 function parseNameCard(desc: string): string {
   let array = [];
@@ -141,16 +149,6 @@ async function shareNameCard(): Promise<void> {
   border-radius: 4px;
 }
 
-.ton-type {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 0 4px;
-  border: 1px solid var(--tgc-white-1);
-  border-radius: 4px;
-  color: var(--tgc-white-1);
-}
-
 .ton-content {
   position: absolute;
   right: 0;
@@ -167,27 +165,42 @@ async function shareNameCard(): Promise<void> {
   backdrop-filter: blur(5px);
   background: #00000040;
   color: var(--tgc-white-1);
+
+  :first-child {
+    font-family: var(--font-title);
+    font-size: 20px;
+    text-shadow: 0 0 5px #000000cc;
+  }
+
+  :nth-child(2) {
+    border-bottom: 1px dotted var(--tgc-white-1);
+    text-shadow: 0 0 2px #000000cc;
+    white-space: pre-wrap;
+  }
+
+  :last-child {
+    opacity: 0.8;
+    text-shadow: 0 0 2px black;
+  }
 }
 
 .dark .ton-content {
   background: #00000080;
 }
 
-.ton-content :first-child {
-  font-family: var(--font-title);
-  font-size: 20px;
-  text-shadow: 0 0 5px #000000cc;
+.ton-type {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 14px;
 }
 
-.ton-content :nth-child(2) {
-  border-bottom: 1px dotted var(--tgc-white-1);
-  text-shadow: 0 0 2px #000000cc;
-  white-space: pre-wrap;
-}
-
-.ton-content :last-child {
-  opacity: 0.8;
-  text-shadow: 0 0 2px black;
+.ton-sign {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--tgc-white-1);
+  font-size: 12px;
 }
 
 .ton-share {
