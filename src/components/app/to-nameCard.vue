@@ -90,6 +90,7 @@ function parseDesc(desc: string, inQuote: boolean = false): string[] {
     res = res.replace(/…\n/g, "…\n");
     res = res.replace(/」/g, "」\n");
   }
+  if (props?.data?.id === 210254) res = res.replace(/\n」/g, "」\n");
   const match = res.split("\n");
   let array: string[] = [];
   for (const item of match) {
