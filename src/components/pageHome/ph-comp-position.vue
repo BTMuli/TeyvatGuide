@@ -14,6 +14,7 @@
       </div>
     </template>
   </THomeCard>
+  <!-- TODO: 活动奖励材料浮窗 -->
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";

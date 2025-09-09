@@ -40,3 +40,17 @@ export function getGameServerDesc(server: TGApp.Game.Base.ServerTypeEnum): strin
       return "国际服-港澳台服";
   }
 }
+
+/**
+ * @description 近期活动活动类型枚举
+ * @since Beta v0.8.0
+ * @enum ActCalendarTypeEnum
+ */
+export const ActCalendarTypeEnum: typeof TGApp.Game.ActCalendar.ActType = {
+  HardChallenge: "ActTypeHardChallenge",
+  RoleCombat: "ActTypeRoleCombat",
+  Tower: "ActTypeTower",
+  Double: "ActTypeDouble",
+  Explore: "ActTypeExplore",
+  Other: "ActTypeOther",
+};

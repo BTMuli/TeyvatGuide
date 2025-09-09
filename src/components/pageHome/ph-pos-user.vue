@@ -8,12 +8,59 @@
         <v-icon v-else title="未完成" color="var(--tgc-od-white)">mdi-circle</v-icon>
         <span>{{ props.pos.name }}</span>
       </div>
-      <!-- TODO: 枚举 -->
       <div class="subtitle">
-        <template v-if="props.pos.type === 'ActTypeExplore'">
+        <!-- 处理幽境危战 -->
+        <template v-if="props.pos.type === ActCalendarTypeEnum.HardChallenge">
+          <div class="challenge-append" @click="toChallenge()" title="点击前往幽境页面">
+            <template v-if="!props.pos.hard_challenge_detail.is_unlock">
+              <span>未解锁</span>
+            </template>
+            <template v-else>
+              <span>最佳记录</span>
+              <span>{{ props.pos.hard_challenge_detail.second }}s</span>
+              <img
+                :title="getHardChallengeDesc(props.pos.hard_challenge_detail.difficulty)"
+                :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.pos.hard_challenge_detail.difficulty}.webp`"
+                alt="medal"
+              />
+            </template>
+          </div>
+        </template>
+        <!-- 处理真境剧诗 -->
+        <template v-else-if="props.pos.type === ActCalendarTypeEnum.RoleCombat">
+          <div class="combat-append" @click="toCombat()" title="点击前往剧诗页面">
+            <template v-if="!props.pos.role_combat_detail.is_unlock">
+              <span>未解锁</span>
+            </template>
+            <template v-else-if="!props.pos.role_combat_detail.has_data">
+              <span>尚未挑战</span>
+            </template>
+            <span v-else>第{{ props.pos.role_combat_detail.max_round_id }}幕</span>
+          </div>
+        </template>
+        <!-- 处理深境螺旋 -->
+        <template v-else-if="props.pos.type === ActCalendarTypeEnum.Tower">
+          <div class="abyss-append" @click="toAbyss()" title="点击前往深渊页面">
+            <template v-if="!props.pos.tower_detail.is_unlock">
+              <span>未解锁</span>
+            </template>
+            <template v-else-if="!props.pos.tower_detail.has_data">
+              <span>尚未挑战</span>
+            </template>
+            <template v-else>
+              <span>
+                {{ props.pos.tower_detail.max_star }}/{{ props.pos.tower_detail.total_star }}
+              </span>
+              <img src="/icon/star/Abyss.webp" alt="abyss" />
+            </template>
+          </div>
+        </template>
+        <!-- 处理区域探索 -->
+        <template v-else-if="props.pos.type === ActCalendarTypeEnum.Explore">
           <span>当前区域探索度: {{ props.pos.explore_detail.explore_percent }}%</span>
         </template>
-        <template v-else-if="props.pos.type === 'ActTypeDouble'">
+        <!-- 处理双倍经验 -->
+        <template v-else-if="props.pos.type === ActCalendarTypeEnum.Double">
           <span>
             剩余双倍次数: {{ props.pos.double_detail.left }}/{{ props.pos.double_detail.total }}
           </span>
@@ -21,8 +68,8 @@
       </div>
     </div>
     <div class="ph-puc-duration">
-      <span>{{ stamp2LastTime(restTs * 1000) }}</span>
-      <span>
+      <span title="剩余时间">{{ stamp2LastTime(restTs * 1000) }}</span>
+      <span title="活动时间">
         {{ timestampToDate(Number(props.pos.start_timestamp) * 1000) }} ~
         {{ timestampToDate(Number(props.pos.end_timestamp) * 1000) }}
       </span>
@@ -34,7 +81,7 @@
         :key="reward.item_id"
         class="ph-puc-reward"
       >
-        <TMiImg :src="`/icon/bg/${reward.rarity}-Star.webp`" class="bg" alt="bg" />
+        <img :src="`/icon/bg/${reward.rarity}-Star.webp`" class="bg" alt="bg" />
         <TMiImg :ori="true" :alt="reward.name" :src="reward.icon" class="icon" />
         <span v-if="reward.num > 0" class="count">{{ reward.num }}</span>
       </div>
@@ -43,14 +90,20 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { ActCalendarTypeEnum } from "@enum/game.js";
+import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
 import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, onUnmounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 type PhCompPositionUserProps = { pos: TGApp.Game.ActCalendar.ActItem };
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
+const router = useRouter();
+
 const props = defineProps<PhCompPositionUserProps>();
+
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
@@ -73,6 +126,18 @@ function handlePosition(): void {
     return;
   }
   restTs.value = endTs.value - Math.floor(Date.now() / 1000);
+}
+
+async function toChallenge(): Promise<void> {
+  await router.push({ name: "幽境危战" });
+}
+
+async function toCombat(): Promise<void> {
+  await router.push({ name: "真境剧诗" });
+}
+
+async function toAbyss(): Promise<void> {
+  await router.push({ name: "深境螺旋" });
 }
 
 onUnmounted(() => {
@@ -119,6 +184,23 @@ onUnmounted(() => {
     justify-content: flex-start;
     column-gap: 4px;
     font-size: 12px;
+
+    .challenge-append,
+    .combat-append,
+    .abyss-append {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      column-gap: 4px;
+      cursor: pointer;
+      user-select: none;
+
+      img {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+      }
+    }
   }
 }
 
@@ -129,6 +211,7 @@ onUnmounted(() => {
   color: var(--box-text-2);
   column-gap: 4px;
   font-size: 12px;
+  user-select: none;
 
   span:last-child {
     font-size: 10px;
