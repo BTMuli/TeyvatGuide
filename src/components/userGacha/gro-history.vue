@@ -2,7 +2,7 @@
   <div class="gro-container">
     <v-tabs class="gro-tabs" v-model="historyTab" align-tabs="start" direction="vertical">
       <v-tab v-for="(item, index) in tabList" :key="index" :value="item.tab">
-        v{{ item.tab }}
+        {{ item.tab }}
       </v-tab>
     </v-tabs>
     <v-window v-model="historyTab" class="gro-window">
