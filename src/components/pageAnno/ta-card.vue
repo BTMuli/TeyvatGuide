@@ -76,21 +76,23 @@ async function refreshAnnoTime(): Promise<void> {
 
 function getAnnoTime(content: string): string | false {
   const regexes = [
-    /〓活动时间〓.*?\d\.\d版本期间持续开放/,
-    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
-    /(?:〓活动时间〓|祈愿时间|【上架时间】|〓折扣时间〓|〓获取奖励时限〓).*?(\d\.\d)版本更新后.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
+    /〓活动时间〓.*?(\d\.\d|「月之[一二三四五六七八九]」)版本期间持续开放/,
+    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d|「月之[一二三四五六七八九]」)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
+    /(?:〓活动时间〓|祈愿时间|【上架时间】|〓折扣时间〓|〓获取奖励时限〓).*?(\d\.\d|「月之[一二三四五六七八九]」)版本更新后.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
     /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
     // /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/
-    /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}).*?(\d\.\d版本结束)/s,
+    /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}).*?((\d\.\d|「月之[一二三四五六七八九]」)版本结束)/s,
   ];
   if (content.match(regexes[0])) {
     const res = content.match(regexes[0]);
-    return res?.[0].replace(/.*?(\d\.\d版本期间持续开放)/, "$1") ?? false;
+    return (
+      res?.[0].replace(/.*?((\d\.\d|「月之[一二三四五六七八九]」)版本期间持续开放)/, "$1") ?? false
+    );
   }
   if (content.match(regexes[1])) {
     const res = content.match(regexes[1]);
     if (res === null) return false;
-    const regex2 = /\d\.\d版本更新(?:完成|)后永久开放/;
+    const regex2 = /(\d\.\d|「月之[一二三四五六七八九]」)版本更新(?:完成|)后永久开放/;
     const regex3 = /\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}/;
     const res2 = res[0].match(regex2);
     if (res2 !== null) return res2[0];
@@ -99,7 +101,7 @@ function getAnnoTime(content: string): string | false {
   }
   if (content.match(regexes[2])) {
     const res = content.match(regexes[2]);
-    if (res?.[1]?.match(/\d\.\d/)) {
+    if (res?.[1]?.match(/(\d\.\d|「月之[一二三四五六七八九]」)/)) {
       const parser = new DOMParser().parseFromString(decodeRegExp(res[2]), "text/html");
       return `${res?.[1]}版本更新后 ~ ${parser.body.innerText}`;
     }
