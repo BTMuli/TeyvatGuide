@@ -1,7 +1,7 @@
 /**
  * @file eslint/vueEslint.js
  * @description Vue相关的ESLint配置
- * @since Beta v0.7.7
+ * @since Beta v0.8.0
  */
 import pluginImport from "eslint-plugin-import";
 import pluginPrettier from "eslint-plugin-prettier";
@@ -9,6 +9,7 @@ import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
 import eslintTs from "typescript-eslint";
 import parserVue from "vue-eslint-parser";
+import appRootPath from "app-root-path";
 
 const tsConfigRules = {
   "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: "angle-bracket" }],
@@ -32,7 +33,7 @@ const tsConfig = {
   plugins: { typescript: eslintTs, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
     parser: eslintTs.parser,
-    parserOptions: { project: "tsconfig.json", tsconfigRootDir: "." },
+    parserOptions: { project: "tsconfig.json", tsconfigRootDir: appRootPath.path },
   },
   rules: tsConfigRules,
 };
@@ -48,7 +49,7 @@ const vueConfig = {
     parserOptions: {
       parser: eslintTs.parser,
       extraFileExtensions: [".vue"],
-      tsconfigRootDir: ".",
+      tsconfigRootDir: appRootPath.path,
     },
   },
   rules: { ...tsConfigRules, "vue/multi-word-component-names": "off" },
