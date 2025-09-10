@@ -48,11 +48,8 @@
         title="解锁传送点"
       />
       <TurOverviewSub :text="modelValue.domainNumber" title="解锁秘境" />
-      <TurOverviewSub
-        :text="modelValue.pyroCulus"
-        icon="/icon/material/107028.webp"
-        title="火神瞳"
-      />
+      <!-- TODO: 添加月神瞳图标 -->
+      <TurOverviewSub :text="modelValue.moonCulus" title="月神瞳" />
       <TurOverviewSub
         :text="modelValue.anemoCulus"
         icon="/icon/material/107001.webp"
@@ -78,6 +75,11 @@
         icon="/icon/material/107023.webp"
         title="水神瞳"
       />
+      <TurOverviewSub
+        :text="modelValue.pyroCulus"
+        icon="/icon/material/107028.webp"
+        title="火神瞳"
+      />
       <TurOverviewSub :text="modelValue.luxuriousChest" title="华丽宝箱数" />
       <TurOverviewSub :text="modelValue.preciousChest" title="珍贵宝箱数" />
       <TurOverviewSub :text="modelValue.exquisiteChest" title="精致宝箱数" />
@@ -95,15 +97,15 @@ defineProps<{ modelValue: TGApp.Sqlite.Record.Stats }>();
 .tur-og-box {
   display: grid;
   width: 100%;
-  grid-gap: 8px;
-  grid-template-columns: repeat(4, 0.25fr);
+  gap: 8px;
+  grid-template-columns: repeat(3, 0.33fr);
 }
 
 .tur-og-box-3 {
   display: grid;
   width: 100%;
   margin-bottom: 8px;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>

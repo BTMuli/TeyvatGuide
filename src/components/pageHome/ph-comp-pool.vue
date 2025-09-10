@@ -2,6 +2,7 @@
   <THomeCard :append="false">
     <template #title>限时祈愿</template>
     <template #default>
+      <!-- TODO: 当数量超过2时，改为走轮播，显示2个 -->
       <div class="pool-grid">
         <PhPoolCard v-for="(pool, idx) in pools" :key="idx" :pool="pool" />
       </div>

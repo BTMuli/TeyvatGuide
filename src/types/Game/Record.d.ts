@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Record.d.ts
  * @description 原神战绩相关类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.8.1
  */
 
 declare namespace TGApp.Game.Record {
@@ -11,7 +11,6 @@ declare namespace TGApp.Game.Record {
    * @since Alpha v0.2.0
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullData} data - 原神战绩数据
-   * @return Response
    */
   type Response = TGApp.BBS.Response.BaseWithData<FullData>;
 
@@ -27,7 +26,6 @@ declare namespace TGApp.Game.Record {
    * @property {Array<Home>} homes - 尘歌壶信息
    * @property {string} query_tool_link - 查询工具链接
    * @property {string} query_tool_image - 查询工具图片
-   * @return FullData
    */
   type FullData = {
     role: Role;
@@ -49,7 +47,6 @@ declare namespace TGApp.Game.Record {
    * @property {string} region - 区域
    * @property {number} level - 等级
    * @property {string} game_head_icon - 游戏头像
-   * @return Role
    */
   type Role = {
     AvatarUrl: string;
@@ -75,7 +72,6 @@ declare namespace TGApp.Game.Record {
    * @property {boolean} is_chosen - 角色是否展示
    * @property {unknown} weapon - 角色武器 // null
    * @property {Array<unknown>} relics - 角色圣遗物 // []
-   * @return Avatar
    */
   type Avatar = {
     id: number;
@@ -95,51 +91,53 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.8.0
-   * @property {number} active_day_number - 活跃天数
+   * @since Beta v0.8.1
    * @property {number} achievement_number - 成就数量
+   * @property {number} active_day_number - 活跃天数
    * @property {number} anemoculus_number - 风神瞳数量
-   * @property {number} geoculus_number - 岩神瞳数量
    * @property {number} avatar_number - 角色数量
-   * @property {number} way_point_number - 解锁传送点数量
-   * @property {number} domain_number - 解锁秘境数量
-   * @property {string} spiral_abyss - 深境螺旋最深达到几层
-   * @property {number} precious_chest_number - 珍贵宝箱数量
-   * @property {number} luxurious_chest_number - 豪华宝箱数量
-   * @property {number} exquisite_chest_number - 精致宝箱数量
    * @property {number} common_chest_number - 普通宝箱数量
-   * @property {number} electroculus_number - 雷神瞳数量
-   * @property {number} magic_chest_number - 奇馈宝箱数量
    * @property {number} dendroculus_number - 草神瞳数量
-   * @property {number} hydroculus_number - 水神瞳数量
-   * @property {number} pyroculus_number - 火神瞳数量
+   * @property {number} domain_number - 解锁秘境数量
+   * @property {number} electroculus_number - 雷神瞳数量
+   * @property {number} exquisite_chest_number - 精致宝箱数量
    * @property {unknown} field_ext_map - 数据对应链接的map，用不到设为 unknown
-   * @property {CombatStats} role_combat - 幻想真境剧诗数据
    * @property {number} full_fetter_avatar_num - 满好感角色数
+   * @property {number} geoculus_number - 岩神瞳数量
    * @property {ChallengeStats} hard_challenge - 幽境危战挑战数据
+   * @property {number} hydroculus_number - 水神瞳数量
+   * @property {number} luxurious_chest_number - 豪华宝箱数量
+   * @property {number} magic_chest_number - 奇馈宝箱数量
+   * @property {number} moonoculus_number - 月神瞳数量
+   * @property {number} precious_chest_number - 珍贵宝箱数量
+   * @property {number} pyroculus_number - 火神瞳数量
+   * @property {CombatStats} role_combat - 幻想真境剧诗数据
+   * @property {string} spiral_abyss - 深境螺旋最深达到几层
+   * @property {number} way_point_number - 解锁传送点数量
    */
   type Stats = {
-    active_day_number: number;
     achievement_number: number;
+    active_day_number: number;
     anemoculus_number: number;
-    geoculus_number: number;
     avatar_number: number;
-    way_point_number: number;
-    domain_number: number;
-    spiral_abyss: string;
-    precious_chest_number: number;
-    luxurious_chest_number: number;
-    exquisite_chest_number: number;
     common_chest_number: number;
-    electroculus_number: number;
-    magic_chest_number: number;
     dendroculus_number: number;
-    hydroculus_number: number;
-    pyroculus_number: number;
+    domain_number: number;
+    electroculus_number: number;
+    exquisite_chest_number: number;
     field_ext_map: unknown;
-    role_combat: CombatStats;
     full_fetter_avatar_num: number;
+    geoculus_number: number;
     hard_challenge: ChallengeStats;
+    hydroculus_number: number;
+    luxurious_chest_number: number;
+    magic_chest_number: number;
+    moonoculus_number: number;
+    precious_chest_number: number;
+    pyroculus_number: number;
+    role_combat: CombatStats;
+    spiral_abyss: string;
+    way_point_number: number;
   };
 
   /**
@@ -150,7 +148,6 @@ declare namespace TGApp.Game.Record {
    * @property {number} max_round_id - 最大报幕数
    * @property {boolean} has_data - 是否有数据
    * @property {boolean} has_detail_data - 是否有详细数据
-   * @return CombatStats
    */
   type CombatStats = {
     is_unlock: boolean;
@@ -200,7 +197,6 @@ declare namespace TGApp.Game.Record {
    * @property {number} seven_status_level - 七天神像等级
    * @property {NataReputation[] | null} nata_reputation - 纳塔声望
    * @property {number} world_type - 世界类型
-   * @return WorldExplore
    */
   type WorldExplore = {
     level: number;
@@ -233,7 +229,6 @@ declare namespace TGApp.Game.Record {
    * @property {string} name - 名称
    * @property {number} level - 等级
    * @property {string} icon - 图标
-   * @return WorldOffering
    */
   type WorldOffering = { name: string; level: number; icon: string };
 
@@ -242,7 +237,6 @@ declare namespace TGApp.Game.Record {
    * @interface NataReputation
    * @since Beta v0.7.2
    * @property {Array<NataOffering>} tribal_list - 部落列表
-   * @returns NataReputation
    */
   type NataReputation = { tribal_list: Array<NataOffering> };
 
@@ -252,7 +246,6 @@ declare namespace TGApp.Game.Record {
    * @extends WorldOffering
    * @property {number} id - ID
    * @property {string} image - 图片
-   * @returns NataOffering
    */
   type NataOffering = WorldOffering & { id: number; image: string };
 
@@ -268,7 +261,6 @@ declare namespace TGApp.Game.Record {
    * @property {string} icon - 图标
    * @property {string} comfort_level_name - 洞天仙力等级名称
    * @property {string} comfort_level_icon - 洞天仙力等级图标
-   * @return Home
    */
   type Home = {
     level: number;

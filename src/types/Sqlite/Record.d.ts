@@ -1,7 +1,7 @@
 /**
  * @file types/Sqlite/Record.d.ts
  * @description Sqlite 原神战绩相关类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.8.1
  */
 
 declare namespace TGApp.Sqlite.Record {
@@ -16,7 +16,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} worldExplore - 世界探索信息
    * @property {string} homes - 尘歌壶信息
    * @property {string} updated - 更新时间
-   * @return SingleTable
    */
   type SingleTable = {
     uid: number;
@@ -39,7 +38,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {WorldExplore[]} worldExplore - 世界探索信息
    * @property {Home[]} homes - 尘歌壶信息
    * @property {string} updated - 更新时间
-   * @returns RenderData
    */
   type RenderData = {
     uid: number;
@@ -59,7 +57,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} region - 区域
    * @property {number} level - 等级
    * @property {string} avatar - 头像
-   * @return Role
    */
   type Role = { nickname: string; region: string; level: number; avatar: string };
 
@@ -75,7 +72,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} star - 角色星级
    * @property {number} constellation - 角色命座
    * @property {boolean} isShow - 角色是否展示
-   * @return Avatar
    */
   type Avatar = {
     id: number;
@@ -91,7 +87,7 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 统计信息类型
    * @interface Stats
-   * @since Beta v0.8.0
+   * @since Beta v0.8.1
    * @property {number} activeDays - 活跃天数
    * @property {number} achievementNumber - 成就达成数
    * @property {number} avatarNumber - 获得角色数
@@ -104,6 +100,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} dendroCulus - 草神瞳数
    * @property {number} hydroCulus - 水神瞳数
    * @property {number} pyroCulus - 火神瞳数
+   * @property {number} moonCulus - 月神瞳数
    * @property {string} sprialAbyss - 深境螺旋信息
    * @property {string} combatRole - 幻想真境剧诗
    * @property {string} hardChallenge - 幽境危战挑战
@@ -112,7 +109,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} exquisiteChest - 精致宝箱数
    * @property {number} commonChest - 普通宝箱数
    * @property {number} magicChest - 奇馈宝箱数
-   * @return Stats
    */
   type Stats = {
     activeDays: number;
@@ -127,6 +123,7 @@ declare namespace TGApp.Sqlite.Record {
     dendroCulus: number;
     hydroCulus: number;
     pyroCulus: number;
+    moonCulus: number;
     sprialAbyss: string;
     combatRole: string;
     hardChallenge: string;
@@ -149,8 +146,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} reputation - 地区声望等级
    * @property {WorldOffering} offering - 地区供奉信息
    * @property {number} exploration - 地区探索进度
-   * @property {WorldChild[]} children - 子地区
-   * @return WorldExplore
+   * @property {Array<WorldChild>} children - 子地区
    */
   type WorldExplore = {
     id: number;
@@ -162,7 +158,7 @@ declare namespace TGApp.Sqlite.Record {
     reputation?: number;
     offering?: WorldOffering;
     exploration: number;
-    children: WorldChild[];
+    children: Array<WorldChild>;
   };
 
   /**
@@ -172,7 +168,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} name - 名称
    * @property {number} level - 等级
    * @property {string} icon - 图标
-   * @return WorldOffering
    */
   type WorldOffering = { name: string; level: number; icon: string };
 
@@ -183,7 +178,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} id - 子地区 ID
    * @property {string} name - 子地区名称
    * @property {number} exploration - 子地区探索进度
-   * @return WorldChild
    */
   type WorldChild = { id: number; name: string; exploration: number };
 
@@ -199,7 +193,6 @@ declare namespace TGApp.Sqlite.Record {
    * @property {number} furniture - 获得摆设数
    * @property {number} visit - ；历史访客数
    * @property {string} bg - 背景
-   * @return Home
    */
   type Home = {
     comfortIcon: string;

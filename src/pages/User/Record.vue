@@ -39,9 +39,7 @@
   <div class="ur-box" v-if="recordData">
     <div class="ur-box-title">
       <TurRoleInfo :role="recordData.role" :uid="uidCur ?? 0" />
-      <span class="sign">
-        原神战绩|Render by TeyvatGuide v{{ version }}|更新于 {{ recordData.updated }}
-      </span>
+      <span class="sign">TeyvatGuide v{{ version }} | {{ recordData.updated }}</span>
     </div>
     <PhCompCard>
       <template #title>数据总览</template>
@@ -144,21 +142,21 @@ async function refreshRecord(): Promise<void> {
   }
   await showLoading.start(`正在刷新${account.value.gameUid}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 刷新战绩数据`);
-  const res = await recordReq.index(cookie.value, account.value);
-  if ("retcode" in res) {
+  const resp = await recordReq.index(cookie.value, account.value);
+  console.log(resp);
+  if ("retcode" in resp) {
     await showLoading.end();
-    showSnackbar.error(`[${res.retcode}] ${res.message}`);
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据失败`);
     await TGLogger.Error(
-      `[UserRecord][refresh][${account.value.gameUid}] ${res.retcode} ${res.message}`,
+      `[UserRecord][refresh][${account.value.gameUid}] ${resp.retcode} ${resp.message}`,
     );
     return;
   }
   await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据成功`);
   await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}]`, false);
-  console.log(res);
   await showLoading.update("正在保存战绩数据");
-  await TSUserRecord.saveRecord(Number(account.value.gameUid), res);
+  await TSUserRecord.saveRecord(Number(account.value.gameUid), resp);
   await showLoading.update("正在加载战绩数据");
   await loadUid();
   await loadRecord();

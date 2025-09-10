@@ -1,7 +1,7 @@
 /**
  * @file plugins/Sqlite/utils/transUserRecord.ts
  * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.7.2
+ * @since Beta v0.8.1
  */
 
 import { getZhElement } from "@utils/toolFunc.js";
@@ -89,9 +89,9 @@ export function getHardChallengeDesc(difficulty: number): string {
 
 /**
  * @description 将统计信息转换为数据库中的数据
- * @since Beta v0.8.0
+ * @since Beta v0.8.1
  * @param {TGApp.Game.Record.Stats} data 统计信息
- * @return {TGApp.Sqlite.Record.Stats } 转换后的统计信息
+ * @return {TGApp.Sqlite.Record.Stats} 转换后的统计信息
  */
 function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
   return {
@@ -107,6 +107,7 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
     dendroCulus: data.dendroculus_number,
     hydroCulus: data.hydroculus_number,
     pyroCulus: data.pyroculus_number,
+    moonCulus: data.moonoculus_number,
     sprialAbyss: data.spiral_abyss,
     combatRole: data.role_combat.is_unlock ? `第 ${data.role_combat.max_round_id} 幕` : "未解锁",
     hardChallenge: data.hard_challenge.is_unlock
@@ -122,7 +123,7 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
 
 /**
  * @description 将探索信息转换为数据库中的数据
- * @since Beta v0.7.2
+ * @since Beta v0.8.1
  * @param {TGApp.Game.Record.WorldExplore[]} data 城市探索信息
  * @returns {TGApp.Sqlite.Record.WorldExplore[]} 转换后的城市探索信息
  */
@@ -164,6 +165,13 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
       world.iconLight = world.icon;
       world.bg =
         "https://fastcdn.mihoyo.com/static-resource-v2/2025/03/17/8ee1648101a8b292ffb37eb49559032e_6583057448168798147.png";
+      // 对挪德卡莱的特殊处理
+    } else if (area.name === "挪德卡莱") {
+      world.icon =
+        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-17.dadac5bf.png";
+      world.iconLight = world.icon;
+      world.bg =
+        "https://fastcdn.mihoyo.com/static-resource-v2/2025/08/22/ace66cea9c5074b70310ecbbb712cd94_2619077306700596372.png";
     }
     const children = areaChild.filter((i) => i.parent_id === area.id);
     for (const child of children) {
