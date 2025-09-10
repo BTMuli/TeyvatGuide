@@ -48,8 +48,11 @@
         title="解锁传送点"
       />
       <TurOverviewSub :text="modelValue.domainNumber" title="解锁秘境" />
-      <!-- TODO: 添加月神瞳图标 -->
-      <TurOverviewSub :text="modelValue.moonCulus" title="月神瞳" />
+      <TurOverviewSub
+        :text="modelValue.moonCulus"
+        icon="/icon/material/107030.webp"
+        title="月神瞳"
+      />
       <TurOverviewSub
         :text="modelValue.anemoCulus"
         icon="/icon/material/107001.webp"
