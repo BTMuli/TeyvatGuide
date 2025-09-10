@@ -68,11 +68,16 @@
       </div>
     </div>
     <div class="ph-puc-duration">
-      <span title="剩余时间">{{ stamp2LastTime(restTs * 1000) }}</span>
-      <span title="活动时间">
-        {{ timestampToDate(Number(props.pos.start_timestamp) * 1000) }} ~
-        {{ timestampToDate(Number(props.pos.end_timestamp) * 1000) }}
-      </span>
+      <template v-if="isStart">
+        <span title="剩余时间">{{ stamp2LastTime(restTs * 1000) }}</span>
+        <span title="活动时间">
+          {{ timestampToDate(Number(props.pos.start_timestamp) * 1000) }} ~
+          {{ timestampToDate(Number(props.pos.end_timestamp) * 1000) }}
+        </span>
+      </template>
+      <template v-else>
+        <span>未开始</span>
+      </template>
     </div>
     <div class="ph-puc-rewards">
       <div
@@ -94,7 +99,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import { ActCalendarTypeEnum } from "@enum/game.js";
 import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
 import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCompPositionUserProps = { pos: TGApp.Game.ActCalendar.ActItem };
@@ -110,6 +115,9 @@ const emits = defineEmits<PhCompPositionUserEmits>();
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
+const isStart = computed<boolean>(() => {
+  return props.pos.start_timestamp !== "0";
+});
 
 onMounted(() => {
   endTs.value = Number(props.pos.end_timestamp);

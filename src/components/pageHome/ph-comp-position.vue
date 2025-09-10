@@ -84,7 +84,9 @@ async function loadUserPosition(): Promise<void> {
     await TGLogger.Error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
     return;
   }
-  userPos.value = [...resp.act_list, ...resp.fixed_act_list];
+  userPos.value = [...resp.act_list, ...resp.fixed_act_list].filter(
+    (i) => i.start_timestamp !== "0",
+  );
 }
 
 async function loadWikiPosition(): Promise<void> {
