@@ -3,7 +3,7 @@
     <template #prepend>
       <div class="wnc-top-prepend">
         <div class="title">
-          <v-icon>mdi-credit-card-outline</v-icon>
+          <v-icon size="32">mdi-credit-card-outline</v-icon>
           <span>名片图鉴</span>
         </div>
         <v-select

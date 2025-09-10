@@ -1,8 +1,8 @@
 <template>
-  <v-app-bar density="compact">
+  <v-app-bar>
     <template #prepend>
-      <div class="twm-title">
-        <div class="twm-title-left">
+      <div class="twm-top-prepend">
+        <div class="title">
           <img src="/source/UI/wikiGCG.webp" alt="icon" />
           <span>材料图鉴</span>
         </div>
@@ -14,6 +14,8 @@
           :clearable="true"
           width="250px"
           label="材料类别"
+          density="compact"
+          variant="outlined"
         >
           <template #item="{ props, item }">
             <v-list-item v-bind="props">
@@ -26,16 +28,19 @@
       </div>
     </template>
     <template #append>
-      <v-text-field
-        v-model="search"
-        width="200px"
-        append-icon="mdi-magnify"
-        label="搜索"
-        :single-line="true"
-        :hide-details="true"
-        @keydown.enter="searchMaterial()"
-        @click:append="searchMaterial()"
-      />
+      <div class="twm-top-append">
+        <v-text-field
+          v-model="search"
+          variant="outlined"
+          density="compact"
+          prepend-inner-icon="mdi-magnify"
+          label="搜索"
+          :single-line="true"
+          :hide-details="true"
+          @keydown.enter="searchMaterial()"
+          @click:prepend-inner="searchMaterial()"
+        />
+      </div>
     </template>
   </v-app-bar>
   <div class="twm-box">
@@ -158,33 +163,36 @@ function searchMaterial(): void {
 }
 </script>
 <style lang="css" scoped>
-.twm-title {
+.twm-top-prepend {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 5px;
-  margin: 5px;
-  column-gap: 10px;
+  justify-content: flex-start;
+  margin-left: 16px;
+  column-gap: 16px;
+
+  .title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--common-text-title);
+    column-gap: 4px;
+    font-family: var(--font-title);
+    font-size: 20px;
+
+    img {
+      width: 32px;
+      height: 32px;
+      object-fit: cover;
+    }
+  }
 }
 
-.twm-title-left {
+.twm-top-append {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 5px;
-
-  img {
-    width: 30px;
-    height: 30px;
-    object-fit: cover;
-  }
-
-  span {
-    font-family: var(--font-title);
-    font-size: 18px;
-  }
+  width: 600px;
+  margin-right: 16px;
 }
 
 .twm-box {
