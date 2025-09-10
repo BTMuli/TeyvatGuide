@@ -396,7 +396,6 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
   img {
     width: 100%;
     height: 100%;
-    border-radius: 4px;
   }
 
   .delete {
@@ -430,16 +429,16 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
   height: 48px;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 50%;
   background: var(--box-bg-4);
 
   img {
-    width: 100%;
-    height: 100%;
+    width: 36px;
+    height: 36px;
     box-sizing: border-box;
-    padding: 10px;
-    border: 1px solid var(--common-shadow-1);
     border-radius: 50%;
+    transition: all 0.3s;
   }
 
   span {
@@ -453,6 +452,12 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
     background: var(--app-page-bg);
     font-size: 8px;
     text-align: center;
+  }
+
+  &:hover img {
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s;
   }
 }
 </style>
