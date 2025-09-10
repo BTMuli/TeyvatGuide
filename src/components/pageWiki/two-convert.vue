@@ -57,6 +57,7 @@ const props = defineProps<TwoConvertProps>();
   }
 
   .icon {
+    position: relative;
     z-index: 2;
     width: 40px;
     height: 40px;
