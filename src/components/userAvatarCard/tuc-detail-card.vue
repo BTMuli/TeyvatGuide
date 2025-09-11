@@ -35,8 +35,7 @@
     </div>
     <!-- 底部水印信息 -->
     <div class="duc-doc-bt">
-      UID: {{ props.modelValue.uid }} Updated: {{ props.modelValue.updated }} | Rendered by
-      TeyvatGuide v{{ version }}
+      UID: {{ props.modelValue.uid }} {{ props.modelValue.updated }} | TeyvatGuide v{{ version }}
     </div>
   </div>
 </template>
@@ -149,9 +148,8 @@ async function share(): Promise<void> {
 
 .duc-doc-rt {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 5px;
+  top: 8px;
+  right: 8px;
 }
 
 .duc-doc-lb {
