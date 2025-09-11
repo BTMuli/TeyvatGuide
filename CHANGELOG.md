@@ -2,12 +2,27 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2025-09-09
+Update: 2025-09-11
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-09-09 15:18:01`
+> 更新于 `2025-09-11 13:38:00`
+
+## [0.8.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.1) (2025-09-11)
+
+- 🍱 添加月神瞳数据&资源
+- ♻️ 战绩世界探索数据结构调整，增加数据显示
+- 🐛 修复战绩显示异常
+- 🐛 首页活动组件隐藏未开始活动，修复未开始活动时间显示异常
+- 🐛 修复材料浮窗分享图生成异常
+- 🐛 角色简略视图修复天赋显示异常，增加是否解锁显示
+- 🐛 修复角色天赋/技能描述显示异常
+- 🚸 调整名片Wiki页面，支持按类型筛选
+- 🚸 微调签到奖励交互效果
+- 💄 优化名片UI
+- 💄 优化成就项UI
+- 💄 调整材料图鉴顶部样式，保持UI一致性
 
 ## [0.8.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.0) (2025-09-09)
 
