@@ -220,18 +220,30 @@ export function isColorSimilar(colorBg: string, colorText: string): boolean {
 
 /**
  * @description 解析带样式的文本
- * @since Beta v0.3.8
+ * @since Beta v0.8.0
  * @param {string} desc - 带样式的文本
  * @returns {string} 解析后的文本
  */
 export function parseHtmlText(desc: string): string {
-  const reg = /<color=(.*?)>(.*?)<\/color>/g;
-  let match = reg.exec(desc);
-  while (match !== null) {
-    const color = match[1];
-    const text = match[2];
-    desc = desc.replace(match[0], `<span title="${text}" style="color: ${color}">${text}</span>`);
-    match = reg.exec(desc);
+  const linkReg = /\{LINK#(.*?)}(.*?)\{\/LINK}/g;
+  let linkMatch = linkReg.exec(desc);
+  while (linkMatch !== null) {
+    const link = linkMatch[1];
+    const text = linkMatch[2];
+    // TODO: 后续处理 t-link
+    desc = desc.replace(linkMatch[0], `<t-link data-link="${link}">${text}</t-link>`);
+    linkMatch = linkReg.exec(desc);
+  }
+  const colorReg = /<color=(.*?)>(.*?)<\/color>/g;
+  let colorMatch = colorReg.exec(desc);
+  while (colorMatch !== null) {
+    const color = colorMatch[1];
+    const text = new DOMParser().parseFromString(colorMatch[2], "text/html").body.textContent;
+    desc = desc.replace(
+      colorMatch[0],
+      `<span title="${text}" style="color: ${color}">${text}</span>`,
+    );
+    colorMatch = colorReg.exec(desc);
   }
   desc = desc.replace(/\\n/g, "<br />");
   return desc;
