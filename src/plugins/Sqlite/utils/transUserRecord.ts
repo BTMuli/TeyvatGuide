@@ -124,10 +124,12 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
 /**
  * @description 将探索信息转换为数据库中的数据
  * @since Beta v0.8.1
- * @param {TGApp.Game.Record.WorldExplore[]} data 城市探索信息
- * @returns {TGApp.Sqlite.Record.WorldExplore[]} 转换后的城市探索信息
+ * @param {Array<TGApp.Game.Record.WorldExplore>} data 城市探索信息
+ * @returns {Array<TGApp.Sqlite.Record.WorldExplore>} 转换后的城市探索信息
  */
-function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record.WorldExplore[] {
+function transWorld(
+  data: Array<TGApp.Game.Record.WorldExplore>,
+): Array<TGApp.Sqlite.Record.WorldExplore> {
   const areaParent = data.filter((i) => i.parent_id === 0);
   const areaChild = data.filter((i) => i.parent_id !== 0);
   const worlds: TGApp.Sqlite.Record.WorldExplore[] = [];
@@ -141,16 +143,11 @@ function transWorld(data: TGApp.Game.Record.WorldExplore[]): TGApp.Sqlite.Record
       bg: area.background_image,
       cover: area.cover,
       exploration: area.exploration_percentage,
+      area_exploration_list: area.area_exploration_list,
       children: [],
     };
     if (area.type === "Reputation") world.reputation = area.level;
-    if (area.offerings !== undefined && area.offerings.length > 0) {
-      world.offering = {
-        name: area.offerings[0].name,
-        level: area.offerings[0].level,
-        icon: area.offerings[0].icon,
-      };
-    }
+    if (area.offerings !== undefined && area.offerings.length > 0) world.offerings = area.offerings;
     // 对纳塔的特殊处理
     if (area.name === "纳塔") {
       world.icon =

@@ -9,10 +9,22 @@
     <div class="tur-ws-content">
       <div class="tur-ws-title">
         <span>{{ data.name }}</span>
-        <span v-if="data.offering" class="tur-ws-sub">
-          <img :src="data.offering.icon" alt="offer" />
-          <span>{{ data.offering.name }}-</span>
-          <span>{{ data.offering.level }}</span>
+        <span v-if="data.offerings?.length === 1" class="tur-ws-sub">
+          <img :src="data.offerings[0].icon" alt="offer" />
+          <span>{{ data.offerings[0].name }}-</span>
+          <span>{{ data.offerings[0].level }}</span>
+          <span>级</span>
+        </span>
+      </div>
+      <div class="tur-ws-offerings" v-if="data.offerings && data.offerings.length > 1">
+        <span
+          v-for="(offer, idx) in data.offerings"
+          :key="idx"
+          class="tur-ws-sub"
+          :title="offer.name + '-' + offer.level + '级'"
+        >
+          <img :src="offer.icon" alt="offer" />
+          <span>{{ offer.level }}</span>
           <span>级</span>
         </span>
       </div>
@@ -32,6 +44,24 @@
           <span>{{ item.exploration / 10 }}</span>
           <span>%</span>
         </div>
+      </div>
+      <div
+        v-if="
+          data.area_exploration_list &&
+          data.area_exploration_list.length > 0 &&
+          data.exploration < 1000
+        "
+        class="tur-ws-areas"
+      >
+        <span
+          v-for="area in data.area_exploration_list.filter((i) => i.exploration_percentage < 1000)"
+          :key="area.name"
+          class="tur-ws-sub"
+        >
+          <span>{{ area.name }}：</span>
+          <span>{{ Math.min(area.exploration_percentage / 10, 100) }}</span>
+          <span>%</span>
+        </span>
       </div>
       <div v-if="data.reputation" class="tur-ws-sub">
         <span>声望等级：</span>
@@ -84,6 +114,7 @@ const icon = computed<string>(() => {
 }
 
 .tur-ws-icon {
+  position: relative;
   z-index: 1;
   width: 64px;
   height: 64px;
@@ -96,6 +127,7 @@ const icon = computed<string>(() => {
 }
 
 .tur-ws-content {
+  position: relative;
   z-index: 1;
   width: calc(100% - 68px);
   height: 100%;
@@ -109,6 +141,21 @@ const icon = computed<string>(() => {
   border-bottom: 1px inset var(--common-shadow-8);
   font-family: var(--font-title);
   font-size: 18px;
+}
+
+.tur-ws-offerings {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  column-gap: 8px;
+}
+
+.tur-ws-areas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: start;
+  gap: 4px 8px;
 }
 
 .tur-ws-sub {

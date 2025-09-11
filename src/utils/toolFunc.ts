@@ -1,7 +1,7 @@
 /**
  * @file utils/toolFunc.ts
  * @description 一些工具函数
- * @since Beta v0.8.0
+ * @since Beta v0.8.1
  */
 
 import { AvatarExtResTypeEnum, AvatarExtTypeEnum } from "@enum/bbs.js";
@@ -220,7 +220,7 @@ export function isColorSimilar(colorBg: string, colorText: string): boolean {
 
 /**
  * @description 解析带样式的文本
- * @since Beta v0.8.0
+ * @since Beta v0.8.1
  * @param {string} desc - 带样式的文本
  * @returns {string} 解析后的文本
  */

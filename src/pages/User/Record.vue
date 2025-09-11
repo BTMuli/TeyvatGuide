@@ -113,6 +113,7 @@ async function loadRecord(): Promise<void> {
   const record = await TSUserRecord.getRecord(uidCur.value);
   if (!record) return;
   recordData.value = record;
+  console.log(recordData.value);
 }
 
 async function refreshRecord(): Promise<void> {

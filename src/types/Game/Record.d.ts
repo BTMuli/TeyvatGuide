@@ -175,7 +175,7 @@ declare namespace TGApp.Game.Record {
   /**
    * @description 世界探索信息类型
    * @interface WorldExplore
-   * @since Beta 0.7.2
+   * @since Beta 0.8.1
    * @property {number} level - 声望等级
    * @property {number} exploration_percentage - 探索千分比
    * @property {string} icon - 图标
@@ -195,7 +195,7 @@ declare namespace TGApp.Game.Record {
    * @property {boolean} index_active - 索引激活
    * @property {boolean} detail_active - 详细激活
    * @property {number} seven_status_level - 七天神像等级
-   * @property {NataReputation[] | null} nata_reputation - 纳塔声望
+   * @property {NataReputation | null} nata_reputation - 纳塔声望
    * @property {number} world_type - 世界类型
    */
   type WorldExplore = {
@@ -212,7 +212,7 @@ declare namespace TGApp.Game.Record {
     background_image: string;
     inner_icon: string;
     cover: string;
-    area_exploration_list: Array<unknown>;
+    area_exploration_list: Array<AreaExploration>;
     boss_list: Array<unknown>;
     is_hot: boolean;
     index_active: boolean;
@@ -231,6 +231,15 @@ declare namespace TGApp.Game.Record {
    * @property {string} icon - 图标
    */
   type WorldOffering = { name: string; level: number; icon: string };
+
+  /**
+   * @description 区域探索类型
+   * @interface AreaExploration
+   * @since Beta v0.8.1
+   * @property {string} name - 名称
+   * @property {number} exploration_percentage - 探索千分比
+   */
+  type AreaExploration = { name: string; exploration_percentage: number };
 
   /**
    * @description 纳塔声望类型

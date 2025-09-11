@@ -137,7 +137,7 @@ declare namespace TGApp.Sqlite.Record {
   /**
    * @description 世界探索信息类型
    * @interface WorldExplore
-   * @since Beta v0.7.2
+   * @since Beta v0.8.1
    * @property {number} id - 地区 ID
    * @property {string} name - 地区名称
    * @property {string} iconLight - 地区图标（亮）
@@ -145,6 +145,7 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} cover - 封面
    * @property {number} reputation - 地区声望等级
    * @property {WorldOffering} offering - 地区供奉信息
+   * @property {Array<WorldOffering>} offerings - 地区供奉列表
    * @property {number} exploration - 地区探索进度
    * @property {Array<WorldChild>} children - 子地区
    */
@@ -156,8 +157,13 @@ declare namespace TGApp.Sqlite.Record {
     bg: string;
     cover: string;
     reputation?: number;
+    /**
+     * @deprecated 已弃用，建议使用 offerings
+     */
     offering?: WorldOffering;
+    offerings?: Array<WorldOffering>;
     exploration: number;
+    area_exploration_list?: Array<AreaExploration>;
     children: Array<WorldChild>;
   };
 
@@ -170,6 +176,15 @@ declare namespace TGApp.Sqlite.Record {
    * @property {string} icon - 图标
    */
   type WorldOffering = { name: string; level: number; icon: string };
+
+  /**
+   * @description 区域探索类型
+   * @interface AreaExploration
+   * @since Beta v0.8.1
+   * @property {string} name - 名称
+   * @property {number} exploration_percentage - 探索千分比
+   */
+  type AreaExploration = { name: string; exploration_percentage: number };
 
   /**
    * @description 子地区类型
