@@ -1,6 +1,6 @@
 <template>
   <div class="tua-al-container">
-    <div v-if="ncData !== undefined">
+    <div v-if="ncData !== undefined" class="tua-al-nc">
       <TopNameCard :data="ncData" @selected="showNc = true" :finish="isFinish" />
     </div>
     <v-virtual-scroll :items="renderAchi" :item-height="60" class="tua-al-list">
@@ -158,6 +158,10 @@ function switchAchiInfo(next: boolean): void {
   max-height: 100%;
   flex-direction: column;
   overflow-y: auto;
+}
+
+.tua-al-nc {
+  margin-bottom: 8px;
 }
 
 .tua-al-list {

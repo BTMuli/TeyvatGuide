@@ -45,7 +45,7 @@
   <div class="tw-nc-list">
     <v-virtual-scroll class="v-scroll" :items="sortNameCardsData" :item-height="80" item-key="id">
       <template #default="{ item }">
-        <TopNameCard :data="item" @selected="showNameCard(item)" />
+        <TopNameCard class="item" :data="item" @selected="showNameCard(item)" />
       </template>
     </v-virtual-scroll>
   </div>
@@ -193,6 +193,10 @@ function searchNameCard(): void {
 
   .v-scroll {
     padding-right: 8px;
+
+    .item {
+      margin-bottom: 8px;
+    }
   }
 }
 

@@ -49,7 +49,6 @@ const bgImage = computed<string>(() => {
   justify-content: flex-start;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px 50px 50px 4px;
-  margin-bottom: 8px;
   background-color: var(--box-bg-1);
   background-image: v-bind(bgImage); /* stylelint-disable-line value-keyword-case */
   background-position: right;
