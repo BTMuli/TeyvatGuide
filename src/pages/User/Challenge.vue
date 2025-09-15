@@ -292,7 +292,7 @@ async function refreshChallenge(): Promise<void> {
     await TSUserChallenge.saveChallenge(account.value.gameUid, challenge);
   }
   isReq.value = false;
-  await showLoading.end();
+  // await showLoading.end();
   uidCur.value = account.value.gameUid;
   await reloadChallenge();
 }
