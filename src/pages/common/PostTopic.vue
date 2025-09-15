@@ -4,8 +4,10 @@
       <div class="post-topic-top" v-if="topicInfo">
         <TMiImg :src="topicInfo.topic.cover" alt="cover" :ori="true" />
         <div class="post-topic-info">
-          <span>{{ topicInfo.topic.name }}({{ curTopic }})</span>
-          <span :title="topicInfo.topic.desc">{{ topicInfo.topic.desc }}</span>
+          <span>{{ curTopic }}-{{ topicInfo.topic.name }}</span>
+          <span :class="sidebar.collapse ? 'wide' : 'thin'" :title="topicInfo.topic.desc">
+            {{ topicInfo.topic.desc }}
+          </span>
         </div>
       </div>
     </template>
@@ -98,6 +100,7 @@ import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
+import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -112,6 +115,8 @@ const route = useRoute();
 const router = useRouter();
 
 const { isReachBottom } = usePageReachBottom();
+const { sidebar } = storeToRefs(useAppStore());
+const { gameList } = storeToRefs(useBBSStore());
 
 const curGid = ref<number>(0);
 const curSortType = ref<0 | 1 | 2>(0);
@@ -124,7 +129,6 @@ const showUser = ref<boolean>(false);
 
 const isReq = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
-const { gameList } = storeToRefs(useBBSStore());
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
@@ -288,37 +292,50 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   position: relative;
   display: flex;
   overflow: hidden;
+  max-width: 100%;
   align-items: center;
   justify-content: center;
-  padding-right: 4px;
   border-radius: 4px;
+  margin-right: 12px;
   margin-left: 12px;
   background: var(--box-bg-2);
   gap: 4px;
 
   img {
-    width: 64px;
-    height: 64px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+.post-topic-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  :first-child {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 18px;
   }
 
-  .post-topic-info {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  :last-child {
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-right: 8px;
+    max-lines: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
 
-    :first-child {
-      color: var(--common-text-title);
-      font-family: var(--font-title);
-      font-size: 20px;
+    &.wide {
+      max-width: 580px;
+      transition: max-width 0.5s ease-in-out;
     }
 
-    :last-child {
-      overflow: hidden;
-      height: 24px;
-      max-lines: 1;
-      text-overflow: ellipsis;
-      word-break: break-all;
+    &.thin {
+      max-width: 380px;
     }
   }
 }
@@ -350,8 +367,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 .post-topic-grid {
   display: grid;
   font-family: var(--font-title);
+  gap: 8px;
   grid-auto-rows: auto;
-  grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 
