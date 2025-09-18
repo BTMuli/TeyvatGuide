@@ -25,8 +25,7 @@ import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@utils/TGShare.js";
 import { getVideoDuration } from "@utils/toolFunc.js";
-import Artplayer from "artplayer";
-import type { Option } from "artplayer/types/option.js";
+import Artplayer, { type Option } from "artplayer";
 import { onMounted, onUnmounted, ref, shallowRef, toRaw } from "vue";
 
 type TpVod = {
@@ -126,26 +125,22 @@ onMounted(async () => {
 
 onUnmounted(() => {
   container.value?.destroy();
-  if (coverBuffer.value) {
-    coverBuffer.value = null;
-  }
-  if (coverUrl.value) {
-    URL.revokeObjectURL(coverUrl.value);
-  }
+  if (coverBuffer.value) coverBuffer.value = null;
+  if (coverUrl.value) URL.revokeObjectURL(coverUrl.value);
 });
 </script>
 <style lang="css" scoped>
 .tp-vod-box {
   position: relative;
   max-width: 100%;
-  margin: 10px auto;
+  margin: 8px auto;
   aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
 .tp-vod-container {
   overflow: hidden;
   max-width: 100%;
-  border-radius: 10px;
+  border-radius: 8px;
   aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
@@ -159,7 +154,7 @@ onUnmounted(() => {
   width: 100%;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 8px;
   aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
 }
 
@@ -181,31 +176,31 @@ onUnmounted(() => {
 
 .tp-vod-time {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
+  bottom: 8px;
+  left: 8px;
   display: flex;
   align-items: center;
-  padding: 2px 5px;
-  border-radius: 5px;
+  padding: 2px 4px;
+  border-radius: 4px;
   background: #00000080;
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;
-  gap: 5px;
+  gap: 4px;
 }
 
 .tp-vod-view {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   display: flex;
   align-items: center;
-  padding: 2px 5px;
-  border-radius: 5px;
+  padding: 2px 4px;
+  border-radius: 4px;
   background: #00000080;
   color: var(--tgc-white-4);
   font-family: var(--font-title);
   font-size: 12px;
-  gap: 5px;
+  gap: 4px;
 }
 </style>

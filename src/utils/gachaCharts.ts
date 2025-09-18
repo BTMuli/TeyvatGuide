@@ -1,7 +1,7 @@
 /**
  * @file utils/gachaCharts.ts
  * @description 祈愿图表配置
- * @since Beta v0.6.8
+ * @since Beta v0.8.2
  */
 
 import TSUserGacha from "@Sqlm/userGacha.js";
@@ -236,6 +236,7 @@ async function getStackBarOptions(uid: string, gachaType?: string): Promise<ECha
     xAxis,
     yAxis: { type: "value" },
     series,
+    grid: { left: "3%", right: "3%", bottom: "3%", top: "5%" },
   };
 }
 
