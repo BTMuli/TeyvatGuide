@@ -13,11 +13,17 @@
     <div :title="model.title" class="anno-title" @click="shareAnno">
       {{ parseTitle(model.subtitle) }}
     </div>
-    <div :title="`标签：${model.tagLabel}`" class="anno-label">
+    <div
+      :title="`标签：${model.tagLabel}`"
+      class="anno-label"
+      :style="{ background: str2Color(`${model.tagIcon}${model.tagLabel}`, 40) }"
+    >
       <TMiImg :src="model.tagIcon" alt="tag" :ori="true" />
       <span>{{ model.tagLabel }}</span>
     </div>
-    <div class="anno-id">{{ model.id }}</div>
+    <div class="anno-id" :style="{ background: str2Color(`${model.id}`, 0) }">
+      ID:{{ model.id }}
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -28,7 +34,7 @@ import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createTGWindow } from "@utils/TGWindow.js";
-import { decodeRegExp } from "@utils/toolFunc.js";
+import { decodeRegExp, str2Color } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
@@ -157,13 +163,18 @@ function getAnnoTime(content: string): string | false {
   justify-content: center;
   aspect-ratio: 36 / 13;
   cursor: pointer;
-}
 
-.anno-cover img {
-  width: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: all 0.3s linear;
+  img {
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: all 0.3s linear;
+
+    &:hover {
+      transform: scale(1.1);
+      transition: all 0.3s linear;
+    }
+  }
 }
 
 .anno-title {
@@ -178,6 +189,7 @@ function getAnnoTime(content: string): string | false {
   font-size: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
+  word-break: break-all;
 }
 
 .anno-info {
@@ -211,23 +223,16 @@ function getAnnoTime(content: string): string | false {
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
-  background-color: var(--tgc-od-white);
   border-bottom-left-radius: 6px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
-  opacity: 0.8;
   text-shadow: 0 0 4px var(--tgc-dark-1);
-}
 
-.anno-label img {
-  width: 20px;
-  height: 20px;
-  margin-right: 4px;
-}
-
-.anno-cover img:hover {
-  transform: scale(1.1);
-  transition: all 0.3s linear;
+  img {
+    width: 20px;
+    height: 20px;
+    margin-right: 4px;
+  }
 }
 
 .anno-id {
@@ -239,12 +244,10 @@ function getAnnoTime(content: string): string | false {
   justify-content: center;
   padding: 0 4px;
   background: var(--tgc-od-orange);
-  border-bottom-right-radius: 6px;
-  border-top-left-radius: 6px;
+  border-bottom-right-radius: 4px;
   box-shadow: 0 0 8px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;
-  opacity: 0.8;
   text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 </style>
