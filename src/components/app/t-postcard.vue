@@ -341,14 +341,18 @@ function onUserClick(): void {
   aspect-ratio: 69 / 32;
   background: var(--common-shadow-2);
   cursor: pointer;
-}
 
-.tpc-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: all 0.3s linear;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: all 0.3s linear;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
 }
 
 .tpc-mid {
@@ -422,12 +426,7 @@ function onUserClick(): void {
   img {
     width: 20px;
     height: 20px;
-    margin-right: 5px;
-
-    &:hover {
-      transform: scale(1.1);
-      transition: all 0.3s linear;
-    }
+    margin-right: 4px;
   }
 }
 

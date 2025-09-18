@@ -415,7 +415,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: center;
   color: var(--common-text-title);
-  column-gap: 4px;
+  column-gap: 2px;
   font-family: var(--font-title);
 }
 

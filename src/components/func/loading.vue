@@ -72,7 +72,7 @@ async function displayBox(params: LoadingParams): Promise<void> {
 
 defineExpose({ displayBox });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .func-loading-outer-enter-active,
 .func-loading-outer-leave-active,
 .func-loading-inner-enter-active {
@@ -156,7 +156,6 @@ defineExpose({ displayBox });
   column-gap: 5px;
   font-family: var(--font-title);
   font-size: 2rem;
-  font-weight: 600;
 }
 
 .loading-subtitle {
