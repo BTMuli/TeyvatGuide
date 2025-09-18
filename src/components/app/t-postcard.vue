@@ -39,13 +39,15 @@
     <div class="tpc-bottom">
       <div class="tpc-tags">
         <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
-          <v-icon size="12">mdi-lightbulb-on</v-icon>
+          <v-icon size="10">mdi-lightbulb-on</v-icon>
           <span>{{ reason.text }}</span>
         </div>
-        <div v-for="topic in card.topics" :key="topic.id" class="tpc-tag" @click="toTopic(topic)">
-          <v-icon size="12">mdi-tag</v-icon>
-          <span>{{ topic.name }}</span>
-        </div>
+        <TpcTag
+          v-for="topic in card.topics"
+          :key="topic.id"
+          @click="toTopic(topic)"
+          :tag="topic.name"
+        />
       </div>
       <div class="tpc-data" v-if="card.data !== null">
         <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
@@ -86,6 +88,9 @@
     </div>
     <div
       class="tpc-forum"
+      :style="{
+        background: str2Color(`${card.forum.id}${card.forum.name}`, -60),
+      }"
       v-if="card.forum !== null && card.forum.name !== ''"
       :title="`频道: ${card.forum.name}`"
       @click="toForum(card.forum)"
@@ -100,17 +105,26 @@
       @click.stop="trySelect()"
       data-html2canvas-ignore
     />
-    <div class="tpc-info-id" v-else>{{ props.modelValue.post.post_id }}</div>
+    <div
+      class="tpc-info-id"
+      :style="{
+        background: str2Color(`${props.modelValue.post.post_id}`, 0),
+      }"
+      v-else
+    >
+      {{ props.modelValue.post.post_id }}
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
+import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import { emit } from "@tauri-apps/api/event";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
-import { timestampToDate } from "@utils/toolFunc.js";
+import { str2Color, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -248,6 +262,7 @@ function getPostCard(item: TGApp.BBS.Post.FullData): RenderCard {
     commonCard.subtitle = `${startTime} - ${endTime}`;
     commonCard.status = statusInfo;
   }
+  console.log(commonCard);
   return commonCard;
 }
 
@@ -375,31 +390,17 @@ function onUserClick(): void {
   gap: 4px;
 }
 
-.tpc-tag {
-  @include github-styles.github-tag-dark-gen(#e06c63);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 4px;
-  border-radius: 4px;
-  cursor: pointer;
-  gap: 4px;
-
-  &:hover {
-    @include github-styles.github-tag-dark-gen(#00aeec);
-  }
-}
-
 .tpc-reason {
   @include github-styles.github-tag-dark-gen(#d19a66);
 
   display: flex;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
-  border-radius: 4px;
-  gap: 4px;
+  padding: 0 6px;
+  border-radius: 12px;
+  gap: 2px;
+  user-select: none;
 }
 
 .tpc-forum {
@@ -410,13 +411,12 @@ function onUserClick(): void {
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
-  background: var(--tgc-od-white);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border-bottom-left-radius: 4px;
-  border-top-right-radius: 4px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   cursor: pointer;
-  opacity: 0.8;
   text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 
@@ -491,14 +491,15 @@ function onUserClick(): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
+  padding-right: 4px;
+  padding-left: 8px;
   background: var(--tgc-od-blue);
   border-top-left-radius: 12px;
-  box-shadow: -2px -2px 8px var(--tgc-dark-1);
+  box-shadow: -1px -1px 6px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   column-gap: 2px;
   font-size: 12px;
-  opacity: 0.8;
+  line-height: 18px;
 }
 
 .tpc-status {
@@ -547,15 +548,13 @@ function onUserClick(): void {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   background: var(--tgc-od-orange);
   border-bottom-right-radius: 4px;
-  border-top-left-radius: 4px;
-  box-shadow: 2px 2px 4px var(--tgc-dark-1);
+  box-shadow: 1px 1px 6px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;
-  opacity: 0.8;
   text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 </style>

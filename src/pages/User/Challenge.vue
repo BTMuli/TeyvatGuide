@@ -270,15 +270,15 @@ async function refreshChallenge(): Promise<void> {
   isReq.value = true;
   await TGLogger.Info("[UserChallenge][refreshChallenge] 开始刷新挑战数据");
   await showLoading.start(`正在获取${account.value.gameUid}的幽境危战数据`);
-  const res = await recordReq.challenge.detail(cookie.value, account.value);
-  if ("retcode" in res) {
+  const resp = await recordReq.challenge.detail(cookie.value, account.value);
+  if ("retcode" in resp) {
     await showLoading.end();
     isReq.value = false;
-    showSnackbar.error(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Error(`[UserChallenge][refreshChallenge] ${res.retcode} - ${res.message}`);
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    await TGLogger.Error(`[UserChallenge][refreshChallenge] ${resp.retcode} - ${resp.message}`);
     return;
   }
-  if (!res.is_unlock) {
+  if (!resp.is_unlock) {
     await showLoading.end();
     isReq.value = false;
     showSnackbar.warn("幽境危战未解锁");
@@ -286,7 +286,7 @@ async function refreshChallenge(): Promise<void> {
     return;
   }
   await showLoading.update("", { title: "正在保存幽境危战数据" });
-  for (const challenge of res.data) {
+  for (const challenge of resp.data) {
     if (challenge.schedule.schedule_id === "0") continue;
     await showLoading.update(`ScheduleID：${challenge.schedule.schedule_id}`);
     await TSUserChallenge.saveChallenge(account.value.gameUid, challenge);

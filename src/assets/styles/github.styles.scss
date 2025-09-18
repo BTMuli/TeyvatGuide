@@ -20,13 +20,11 @@
 /* CardShadow，传入theme参数 */
 @mixin github-card-shadow($theme: "default") {
   @if $theme == "default" {
-    box-shadow:
-      #1f23280f 0 1px 1px 0,
-      #1f23280f 0 1px 3px 0;
+    box-shadow: #1f23280f 0 1px 1px 0,
+    #1f23280f 0 1px 3px 0;
   } @else {
-    box-shadow:
-      #01040999 0 1px 1px 0,
-      #01040999 0 1px 3px 0;
+    box-shadow: #01040999 0 1px 1px 0,
+    #01040999 0 1px 3px 0;
   }
 }
 

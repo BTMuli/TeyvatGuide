@@ -287,8 +287,12 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   showUser.value = true;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .post-topic-top {
+  @include github-styles.github-card;
+
   position: relative;
   display: flex;
   overflow: hidden;
@@ -298,13 +302,16 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   border-radius: 4px;
   margin-right: 12px;
   margin-left: 12px;
-  background: var(--box-bg-2);
   gap: 4px;
 
   img {
     width: 50px;
     height: 50px;
   }
+}
+
+.dark .post-topic-top {
+  @include github-styles.github-card("dark");
 }
 
 .post-topic-info {
