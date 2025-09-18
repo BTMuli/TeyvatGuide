@@ -5,7 +5,7 @@
     class="tp-backup-lottery"
     :title="`ID: ${props.data.insert.lottery.id}`"
   >
-    <v-icon size="16">mdi-gift</v-icon>
+    <v-icon size="14">mdi-gift-outline</v-icon>
     <span>{{ props.data.insert.lottery.toast }}</span>
   </span>
   <VpOverlayLottery
@@ -47,12 +47,17 @@ console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
 </script>
 <style lang="css" scoped>
 .tp-backup-lottery {
-  margin-right: 4px;
-  color: #00c3ffff;
+  position: relative;
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  color: #00c3ff;
+  column-gap: 2px;
   cursor: pointer;
 
-  :first-child {
-    margin-right: 2px;
+  span {
+    font-size: 12px;
   }
 }
 

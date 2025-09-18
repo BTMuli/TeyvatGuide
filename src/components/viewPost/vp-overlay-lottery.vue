@@ -3,34 +3,35 @@
     <div class="tpol-box" v-if="card">
       <div class="tpol-title">
         <span>抽奖详情</span>
-        <span class="tpol-time">{{ timeStatus }}</span>
+        <span>{{ timeStatus }}</span>
       </div>
-      <div class="tpol-list">
+      <div class="tpol-info">
         <TpAvatar :data="card.creator" position="left" />
-        <div class="tpolr-title">参与方式：{{ upWay }}</div>
-        <div class="tpolr-title">
-          <span>奖品详情</span>
-          <div v-for="reward in card.rewards" :key="reward.name" class="reward-subtitle">
-            {{ reward.name }} {{ reward.goal }}份
-          </div>
+        <div>参与方式：{{ upWay }}</div>
+        <div>奖品详情：</div>
+        <div v-for="reward in card.rewards" :key="reward.name" class="tpol-info-reward">
+          <v-icon size="12" color="var(--tgc-pink-1)">mdi-gift</v-icon>
+          <span>{{ reward.name }}</span>
+          <span>{{ reward.goal }}份</span>
         </div>
       </div>
       <div class="tpol-title" v-if="timeStatus === '已开奖'">中奖详情</div>
-      <div v-if="timeStatus === '已开奖'">
-        <div v-for="reward in card.rewards" :key="reward.name" class="tpol-list">
-          <div class="tpolr-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
-          <div class="tpol-grid">
+      <template v-if="timeStatus === '已开奖'">
+        <template v-for="reward in card.rewards" :key="reward.name">
+          <div class="vpol-reward-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
+          <div class="vpol-reward-users">
             <TpAvatar
               v-for="user in reward.users"
               :key="user.uid"
               :data="user"
               position="left"
-              class="lottery-sub-list"
+              class="tpolr-user"
+              @click="onUserClick(user)"
             />
           </div>
-        </div>
-      </div>
-      <div class="tpol-id">ID:{{ card.id }}</div>
+        </template>
+      </template>
+      <div class="tpol-id" @click="shareLottery()">ID:{{ card.id }}</div>
     </div>
   </TOverlay>
 </template>
@@ -39,6 +40,9 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import painterReq from "@req/painterReq.js";
+import { emit } from "@tauri-apps/api/event";
+import { generateShareImg } from "@utils/TGShare.js";
+import { stamp2LastTime } from "@utils/toolFunc.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
 
 type TpoLotteryProps = { lottery: string | undefined };
@@ -76,13 +80,13 @@ watch(
 async function load(): Promise<void> {
   if (!props.lottery) return;
   if (card.value) return;
-  const cardGet = await painterReq.lottery(props.lottery);
-  if ("retcode" in cardGet) {
-    showSnackbar.error(`[${cardGet.retcode}] ${cardGet.message}`);
+  const resp = await painterReq.lottery(props.lottery);
+  if ("retcode" in resp) {
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     return;
   }
-  jsonData.value = cardGet;
-  if (cardGet.status === "Settled") timeStatus.value = "已开奖";
+  jsonData.value = resp;
+  if (resp.status === "Settled") timeStatus.value = "已开奖";
   else {
     if (timer !== undefined) {
       clearInterval(timer);
@@ -90,7 +94,7 @@ async function load(): Promise<void> {
     }
     timer = setInterval(flushTimeStatus, 1000);
   }
-  card.value = transLotteryCard(cardGet);
+  card.value = transLotteryCard(resp);
   upWay.value = getUpWay(card.value?.upWay);
 }
 
@@ -109,18 +113,13 @@ function flushTimeStatus(): void {
   if (!jsonData.value) return;
   const timeNow = new Date().getTime();
   const timeDiff = Number(jsonData.value.draw_time) * 1000 - timeNow;
-  if (timeDiff <= 0) {
+  if (timeDiff > 0) timeStatus.value = stamp2LastTime(timeDiff);
+  else {
     timeStatus.value = "已开奖";
     if (timer !== undefined) {
       clearInterval(timer);
       timer = undefined;
     }
-  } else {
-    const day = Math.floor(timeDiff / (24 * 3600 * 1000));
-    const hour = Math.floor((timeDiff % (24 * 3600 * 1000)) / (3600 * 1000));
-    const minute = Math.floor((timeDiff % (3600 * 1000)) / (60 * 1000));
-    const second = Math.floor((timeDiff % (60 * 1000)) / 1000);
-    timeStatus.value = `${day}天${hour}小时${minute}分${second}秒`;
   }
 }
 
@@ -144,6 +143,18 @@ function transLotteryCard(lotteryData: TGApp.BBS.Lottery.FullData): RenderCard {
   };
 }
 
+async function onUserClick(user: TGApp.BBS.Post.User): Promise<void> {
+  const uid = user.uid;
+  await emit("userMention", uid);
+}
+
+async function shareLottery(): Promise<void> {
+  const shareDom = document.querySelector<HTMLDivElement>(".tpol-box");
+  if (!shareDom) return;
+  const fileName = `lottery-${card.value?.id}.png`;
+  await generateShareImg(fileName, shareDom, 2, true);
+}
+
 onUnmounted(() => {
   if (timer !== undefined) {
     clearInterval(timer);
@@ -153,64 +164,102 @@ onUnmounted(() => {
 </script>
 <style lang="css" scoped>
 .tpol-box {
+  position: relative;
   display: flex;
   width: 800px;
   max-width: 800px;
   max-height: 50vh;
   flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   padding: 8px;
-  border-radius: 8px;
+  border-radius: 2px;
   background: var(--box-bg-1);
   overflow-y: auto;
-  row-gap: 8px;
+  row-gap: 4px;
 }
 
 .tpol-title {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: flex-start;
   color: var(--common-text-title);
+  column-gap: 8px;
   font-family: var(--font-title);
   font-size: 20px;
+
+  :last-child {
+    color: var(--tgc-red-1);
+    font-size: 18px;
+  }
 }
 
-.tpol-time {
-  margin-left: 8px;
-  color: var(--tgc-red-1);
-}
-
-.tpol-list {
+.tpol-info {
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
   padding: 4px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-2);
 }
 
-.tpolr-title {
-  margin-bottom: 10px;
-  margin-left: 4px;
-  font-size: 16px;
+.tpol-info-reward {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-left: 16px;
+  color: var(--tgc-od-white);
+  column-gap: 4px;
+  font-size: 12px;
+
+  :last-child {
+    font-style: italic;
+    text-decoration: underline;
+  }
 }
 
-.reward-subtitle {
-  font-size: 16px;
-  opacity: 0.5;
-}
-
-.tpol-grid {
-  display: grid;
-  gap: 4px;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-}
-
-.lottery-sub-list {
+.vpol-reward-title {
   position: relative;
   width: 100%;
+  color: var(--box-text-2);
+  text-align: center;
+}
+
+.vpol-reward-users {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tpolr-user {
+  position: relative;
+  width: fit-content;
   height: 50px;
   box-sizing: border-box;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 30px 4px 4px 30px;
-  background: var(--box-bg-3);
+  padding-right: 20px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 50px;
+  background: var(--box-bg-2);
+  cursor: pointer;
 }
 
 .tpol-id {
-  font-size: 14px;
-  text-align: right;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  cursor: pointer;
+  font-size: 12px;
 }
 </style>

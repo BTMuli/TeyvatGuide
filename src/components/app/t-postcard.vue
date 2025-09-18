@@ -262,7 +262,6 @@ function getPostCard(item: TGApp.BBS.Post.FullData): RenderCard {
     commonCard.subtitle = `${startTime} - ${endTime}`;
     commonCard.status = statusInfo;
   }
-  console.log(commonCard);
   return commonCard;
 }
 
