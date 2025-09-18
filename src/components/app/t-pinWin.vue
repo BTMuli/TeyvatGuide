@@ -1,7 +1,12 @@
 <template>
-  <div class="tpw-box" data-html2canvas-ignore>
-    <div class="tpw-btn" @click="switchPin()" :title="isPined ? '取消置顶' : '窗口置顶'">
-      <v-icon :color="isPined ? 'yellow' : 'inherit'">
+  <div
+    class="tpw-box"
+    :class="isPined ? 'active' : ''"
+    :title="isPined ? '取消置顶' : '窗口置顶'"
+    data-html2canvas-ignore
+  >
+    <div class="tpw-btn" @click="switchPin()">
+      <v-icon size="20">
         {{ isPined ? "mdi-pin-off" : "mdi-pin" }}
       </v-icon>
     </div>
@@ -22,27 +27,56 @@ async function switchPin(): Promise<void> {
   showSnackbar.success(isPined.value ? "已将窗口置顶！" : "已经取消窗口置顶!");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .tpw-box {
+  @include github-styles.github-card;
+
   position: fixed;
-  top: 70px;
-  left: 20px;
-  border: 2px solid var(--common-shadow-8);
+  top: 64px;
+  left: 16px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   cursor: pointer;
 
-  :hover {
-    opacity: 0.8;
+  &.active {
+    background: var(--tgc-btn-1);
+    box-shadow: 1px 3px 6px var(--common-shadow-2);
+    color: var(--btn-text);
+  }
+
+  &:hover:not(.active) {
+    background: var(--common-shadow-1);
+  }
+}
+
+.dark .tpw-box {
+  border: 1px solid var(--common-shadow-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-t-2);
+
+  &:not(.active) {
+    @include github-styles.github-card("dark");
+
+    &:hover {
+      background: var(--common-shadow-6);
+    }
   }
 }
 
 .tpw-btn {
+  position: relative;
+  z-index: 1;
   display: flex;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   align-items: center;
   justify-content: center;
-  margin: 5px;
   rotate: 30deg;
 }
 </style>

@@ -22,15 +22,15 @@
           </div>
         </div>
         <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
-          <v-icon>mdi-eye</v-icon>
+          <v-icon size="16">mdi-eye</v-icon>
           <span>{{ postData?.stat?.view_num }}</span>
         </div>
         <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
-          <v-icon>mdi-star</v-icon>
+          <v-icon size="16">mdi-star</v-icon>
           <span>{{ postData?.stat?.bookmark_num }}</span>
         </div>
         <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
-          <v-icon>mdi-comment</v-icon>
+          <v-icon size="16">mdi-comment</v-icon>
           <span>{{ postData?.stat?.reply_num }}</span>
         </div>
         <div
@@ -39,11 +39,11 @@
           @click="tryLike()"
           :class="{ like: isLike }"
         >
-          <v-icon>mdi-thumb-up</v-icon>
+          <v-icon size="16">mdi-thumb-up</v-icon>
           <span>{{ postData?.stat?.like_num }}</span>
         </div>
         <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
-          <v-icon>mdi-share-variant</v-icon>
+          <v-icon size="16">mdi-share-variant</v-icon>
           <span>{{ postData?.stat?.forward_num }}</span>
         </div>
       </div>
@@ -81,15 +81,13 @@
         <v-icon size="10">mdi-lightbulb-on</v-icon>
         <span>{{ tag.text }}</span>
       </div>
-      <div
+      <TpcTag
         v-for="topic in postData.topics"
         :key="topic.id"
+        :tag="topic.name"
         class="tp-post-topic"
         @click="toTopic(topic)"
-      >
-        <v-icon size="10">mdi-tag</v-icon>
-        <span>{{ topic.name }}</span>
-      </div>
+      />
     </div>
     <div class="tp-post-subtitle">
       <span :title="`更新于:${getDate(postData.post.updated_at)}`">
@@ -120,6 +118,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import TpParser from "@comp/viewPost/tp-parser.vue";
+import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
@@ -405,9 +404,10 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   width: fit-content;
   align-items: center;
   justify-content: flex-start;
+  margin-bottom: 8px;
   column-gap: 8px;
-  font-size: 16px;
-  opacity: 0.6;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .tp-post-copyright {
@@ -424,6 +424,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: end;
   justify-content: space-between;
+  column-gap: 8px;
 }
 
 .tp-post-divider {
@@ -433,7 +434,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   box-sizing: border-box;
   border: 1px dashed var(--common-shadow-2);
   border-radius: 1px;
-  margin: 8px 0;
+  margin-top: 8px;
   background: transparent;
 }
 
@@ -441,7 +442,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   position: absolute;
   top: 0;
   left: 0;
-  color: var(--box-text-4);
+  color: var(--box-text-1);
   font-family: var(--font-title);
   font-size: 14px;
   opacity: 0.6;
@@ -449,7 +450,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 
 .tp-post-meta {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: start;
   color: var(--box-text-4);
   column-gap: 8px;
@@ -510,9 +511,9 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   gap: 8px 4px;
 }
 
-.tp-post-collection,
-.tp-post-topic,
-.tp-post-reason {
+.tp-post-collection {
+  @include github-styles.github-tag-dark-gen(#3572a5);
+
   display: flex;
   height: 20px;
   box-sizing: border-box;
@@ -521,31 +522,30 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   padding: 0 4px;
   border-radius: 4px;
   column-gap: 2px;
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 12px;
-}
-
-.tp-post-collection {
-  @include github-styles.github-tag-dark-gen(#3572a5);
-
-  cursor: pointer;
 
   &:hover {
     @include github-styles.github-tag-dark-gen(#98c379);
   }
 }
 
-.tp-post-topic {
-  @include github-styles.github-tag-dark-gen(#e06c63);
-
-  cursor: pointer;
-
-  &:hover {
-    @include github-styles.github-tag-dark-gen(#00aeec);
-  }
-}
-
 .tp-post-reason {
   @include github-styles.github-tag-dark-gen(#d19a66);
+
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  gap: 2px;
+  user-select: none;
+}
+
+.tp-post-topic {
+  font-size: 12px;
 }
 </style>

@@ -1,8 +1,8 @@
 <template>
-  <div class="switch-box" :title="theme === 'default' ? '切换到深色模式' : '切换到浅色模式'">
+  <div class="switch-box" :title="isDefault ? '切换到深色模式' : '切换到浅色模式'">
     <div class="switch-btn" @click="switchTheme()">
-      <v-icon>
-        {{ theme === "default" ? "mdi-weather-night" : "mdi-weather-sunny" }}
+      <v-icon size="20">
+        {{ isDefault ? "mdi-weather-night" : "mdi-weather-sunny" }}
       </v-icon>
     </div>
   </div>
@@ -12,10 +12,12 @@ import useAppStore from "@store/app.js";
 import { event } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 
-const { theme } = storeToRefs(useAppStore());
 const appStore = useAppStore();
+const { theme } = storeToRefs(appStore);
+const isDefault = computed<boolean>(() => theme.value === "default");
+
 let themeListener: UnlistenFn | null = null;
 
 onMounted(async () => {
@@ -36,26 +38,38 @@ onUnmounted(() => {
   }
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .switch-box {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  border: 2px solid var(--common-shadow-8);
+  top: 16px;
+  left: 16px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
+  background: var(--tgc-btn-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-2);
+  color: var(--btn-text);
   cursor: pointer;
 }
 
-.switch-box:hover {
-  opacity: 0.8;
+.dark .switch-box {
+  border: 1px solid var(--common-shadow-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-t-2);
 }
 
 .switch-btn {
+  position: relative;
+  z-index: 1;
   display: flex;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   align-items: center;
   justify-content: center;
-  margin: 5px;
 }
 </style>

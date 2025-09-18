@@ -418,6 +418,17 @@ function onUserClick(): void {
   color: var(--tgc-white-1);
   cursor: pointer;
   text-shadow: 0 0 4px var(--tgc-dark-1);
+
+  img {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+
+    &:hover {
+      transform: scale(1.1);
+      transition: all 0.3s linear;
+    }
+  }
 }
 
 .tpc-select {
@@ -435,17 +446,6 @@ function onUserClick(): void {
   border-bottom-right-radius: 4px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--box-text-5);
-}
-
-.tpc-forum img {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
-}
-
-.tpc-cover img:hover {
-  transform: scale(1.1);
-  transition: all 0.3s linear;
 }
 
 .tpc-data {

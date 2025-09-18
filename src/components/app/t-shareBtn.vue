@@ -1,7 +1,7 @@
 <template>
   <div class="share-box" title="分享">
     <div class="share-btn" @click="shareContent()">
-      <v-icon>mdi-share-variant</v-icon>
+      <v-icon size="20">mdi-share-variant</v-icon>
     </div>
   </div>
 </template>
@@ -36,27 +36,38 @@ async function shareContent(): Promise<void> {
   await TGLogger.Info("[TShareBtn][shareContent] 生成分享图片完成");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .share-box {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  border: 2px solid var(--common-shadow-8);
+  top: 16px;
+  right: 16px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
+  background: var(--tgc-btn-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-2);
+  color: var(--btn-text);
   cursor: pointer;
 }
 
-.share-box:hover {
-  opacity: 0.8;
+.dark .share-box {
+  border: 1px solid var(--common-shadow-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-t-2);
 }
 
 .share-btn {
+  position: relative;
+  z-index: 1;
   display: flex;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   align-items: center;
   justify-content: center;
-  padding-right: 3px;
-  margin: 5px;
 }
 </style>

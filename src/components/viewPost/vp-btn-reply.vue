@@ -13,12 +13,15 @@
         <v-btn
           :loading="loading"
           class="tpr-btn"
-          size="38px"
           variant="outlined"
           @click="showReply()"
-          icon="mdi-message-text-outline"
           v-bind="props"
-        />
+          size="36"
+        >
+          <template #default>
+            <v-icon size="20">mdi-message-text-outline</v-icon>
+          </template>
+        </v-btn>
       </template>
       <div class="tpr-main-reply">
         <div class="tpr-main-filter">
@@ -169,21 +172,33 @@ async function handleDebug(): Promise<void> {
 <style lang="scss" scoped>
 .tpr-main-box {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tgc-btn-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-2);
+  color: var(--btn-text);
+  cursor: pointer;
+}
+
+.dark .tpr-main-box {
+  border: 1px solid var(--common-shadow-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-t-2);
 }
 
 .tpr-btn {
-  display: flex;
-  width: 24px;
-  height: 24px;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--common-shadow-8);
-
-  &:hover {
-    opacity: 0.8;
-  }
+  position: relative;
+  z-index: 1;
+  width: 36px;
+  height: 36px;
+  border: unset;
+  border-radius: 50%;
 }
 
 .tpr-main-reply {

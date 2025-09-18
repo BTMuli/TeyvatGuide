@@ -1,5 +1,5 @@
 <template>
-  <span class="tag-label" :title="`点击跳转#${props.tag}`">
+  <span class="tag-label" :title="`点击跳转#${props.tag}#`">
     {{ props.tag }}
   </span>
 </template>

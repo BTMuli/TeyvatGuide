@@ -1,12 +1,12 @@
 <template>
-  <div class="tbc-box" data-html2canvas-ignore>
+  <div class="tbc-box" :class="isCollected ? 'active' : ''" data-html2canvas-ignore>
     <div class="tbc-btn" @click="switchCollect()" :title="isCollected ? '取消收藏' : '收藏'">
-      <v-icon :color="isCollected ? 'yellow' : 'inherit'">
+      <v-icon size="20">
         {{ isCollected ? "mdi-star" : "mdi-star-outline" }}
       </v-icon>
     </div>
     <div class="tbc-edit" title="编辑收藏" v-if="isCollected" @click="showEdit = !showEdit">
-      <v-icon size="small">mdi-pencil</v-icon>
+      <v-icon size="8">mdi-pencil</v-icon>
     </div>
   </div>
   <VpOverlayCollect v-model="showEdit" :post="props.data" @submit="refresh()" />
@@ -80,38 +80,77 @@ async function switchCollect(): Promise<void> {
   showSnackbar.success("取消收藏成功");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .tbc-box {
+  @include github-styles.github-card;
+
   position: fixed;
-  top: 70px;
-  right: 20px;
-  border: 2px solid var(--common-shadow-8);
+  top: 64px;
+  right: 16px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
   cursor: pointer;
 
-  :hover {
-    opacity: 0.8;
+  &.active {
+    background: var(--tgc-btn-1);
+    box-shadow: 1px 3px 6px var(--common-shadow-2);
+    color: var(--btn-text);
+  }
+
+  &:hover:not(.active) {
+    background: var(--common-shadow-1);
+  }
+}
+
+.dark .tbc-box {
+  border: 1px solid var(--common-shadow-1);
+  box-shadow: 1px 3px 6px var(--common-shadow-t-2);
+
+  &:not(.active) {
+    @include github-styles.github-card("dark");
+
+    &:hover {
+      background: var(--common-shadow-6);
+    }
   }
 }
 
 .tbc-btn {
-  display: flex;
-  width: 24px;
-  height: 24px;
-  align-items: center;
-  justify-content: center;
-  margin: 5px;
-}
-
-.tbc-edit {
-  position: absolute;
-  right: -10px;
-  bottom: -10px;
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 20px;
   height: 20px;
   align-items: center;
   justify-content: center;
+}
+
+.tbc-edit {
+  @include github-styles.github-card;
+
+  position: absolute;
+  z-index: 2;
+  right: -4px;
+  bottom: -4px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border: unset;
+  border-radius: 50%;
   cursor: pointer;
+}
+
+.dark .tbc-edit {
+  @include github-styles.github-card("dark");
 }
 </style>
