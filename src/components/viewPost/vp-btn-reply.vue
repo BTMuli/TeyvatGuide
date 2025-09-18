@@ -7,7 +7,7 @@
       :persistent="true"
       :no-click-animation="true"
       z-index="60"
-      :offset="[8, 400]"
+      :offset="[4, 400]"
     >
       <template #activator="{ props }">
         <v-btn
@@ -212,7 +212,7 @@ async function handleDebug(): Promise<void> {
   justify-content: flex-start;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--app-page-bg);
   box-shadow: 2px 2px 8px var(--common-shadow-4);
   overflow-y: auto;
