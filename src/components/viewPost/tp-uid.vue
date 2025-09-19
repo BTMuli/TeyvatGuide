@@ -2,10 +2,10 @@
   <div class="tpu-box">
     <div class="tpu-top">
       <span @click="copyUid()" data-html2canvas-ignore>
-        <v-icon>mdi-content-copy</v-icon>
+        <v-icon size="12">mdi-content-copy</v-icon>
         <span>复制</span>
       </span>
-      <span class="tpu-game">{{ getGameName() }}</span>
+      <span class="tpu-game">{{ gameInfo?.name ?? "未知游戏" }}</span>
     </div>
     <div class="tpu-main">UID {{ props.data.insert.game_user_info.game_uid }}</div>
     <div class="tpu-sub">
@@ -19,7 +19,9 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { computed } from "vue";
+import useBBSStore from "@store/bbs.js";
+import { storeToRefs } from "pinia";
+import { onMounted, ref, shallowRef } from "vue";
 
 type TpUid = {
   insert: {
@@ -35,57 +37,68 @@ type TpUid = {
 };
 type TpUidProps = { data: TpUid };
 
+const { gameUidCards, gameList } = storeToRefs(useBBSStore());
+
+const defaultCard: TGApp.BBS.AppConfig.GameUidCardConf = {
+  main_text_color: "#a17a58ff",
+  is_open: true,
+  background_color: "#ffffff",
+  image_url: "/source/post/tp_uid_bg.webp",
+};
+
 const props = defineProps<TpUidProps>();
-const nickname = computed<string>(() =>
-  decodeURIComponent(props.data.insert.game_user_info.nickname),
-);
+const nickname = ref<string>();
+const gameInfo = shallowRef<TGApp.BBS.Game.Item>();
+const cardInfo = shallowRef<TGApp.BBS.AppConfig.GameUidCardConf>(defaultCard);
+
 console.log("tpUid", props.data.insert.game_user_info);
 
-function copyUid(): void {
-  navigator.clipboard.writeText(props.data.insert.game_user_info.game_uid);
+onMounted(async () => {
+  nickname.value = decodeURIComponent(props.data.insert.game_user_info.nickname);
+  gameInfo.value = getGameInfo();
+  if (gameInfo.value) cardInfo.value = gameUidCards.value[gameInfo.value.id] ?? defaultCard;
+});
+
+async function copyUid(): Promise<void> {
+  await navigator.clipboard.writeText(props.data.insert.game_user_info.game_uid);
   showSnackbar.success("已复制UID");
 }
 
-function getGameName(): string {
-  const gameBiz = props.data.insert.game_user_info.game_biz;
-  if (gameBiz.startsWith("hkrpg")) return "崩坏·星穹铁道";
-  if (gameBiz.startsWith("hk4e")) return "原神";
-  if (gameBiz.startsWith("nap")) return "绝区零";
-  if (gameBiz.startsWith("bh2")) return "崩坏学园2";
-  if (gameBiz.startsWith("bh3")) return "崩坏3";
-  if (gameBiz.startsWith("nxx")) return "未定事件簿";
-  return "未知游戏";
+function getGameInfo(): TGApp.BBS.Game.Item | undefined {
+  const enName = props.data.insert.game_user_info.game_biz.split("_")[0];
+  if (!enName) return undefined;
+  return gameList.value.find((g) => g.op_name === enName);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tpu-box {
   position: relative;
   display: flex;
   max-width: 100%;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  padding: 5px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 3px;
-  background-color: #f4efe9ff;
-  background-image: url("/source/post/tp_uid_bg.webp");
+  padding: 4px 4px 8px;
+  border-radius: 2px;
+  background-color: v-bind("cardInfo.background_color");
+  background-image: v-bind("'url(' + cardInfo.image_url + ')'");
   background-position: right bottom;
   background-repeat: no-repeat;
   background-size: contain;
-  color: #a17a58ff;
+  color: v-bind("cardInfo.main_text_color");
 }
 
 .tpu-top {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   margin-left: auto;
-  column-gap: 5px;
+  column-gap: 4px;
+  font-size: 12px;
 
   :first-child {
     cursor: pointer;
-    font-size: 12px;
   }
 }
 
@@ -93,27 +106,28 @@ function getGameName(): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 5px;
   font-family: var(--font-title);
   font-size: 16px;
 }
 
 .tpu-sub {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   column-gap: 2px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .tpu-game {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 5px;
-  border: 1px solid #a17a584d;
-  border-radius: 3px;
-  font-size: 12px;
-  opacity: 0.7;
+  padding: 0 2px;
+  border: 1px solid v-bind("cardInfo.main_text_color");
+  border-radius: 2px;
+  font-size: 10px;
+  opacity: 0.75;
 }
 </style>

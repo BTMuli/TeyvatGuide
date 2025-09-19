@@ -97,6 +97,7 @@ const showItems = computed<Array<string>>({
 
 onMounted(async () => {
   await bbsStore.refreshGameList();
+  await bbsStore.refreshGameUidCards();
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
   if (isProdEnv && devMode.value) devMode.value = false;

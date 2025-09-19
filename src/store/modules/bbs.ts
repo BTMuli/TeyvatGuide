@@ -1,7 +1,7 @@
 /**
  * @file store/modules/bbs.ts
  * @description BBS 模块状态管理
- * @since Beta v0.7.3
+ * @since Beta v0.8.2
  */
 import apiHubReq from "@req/apiHubReq.js";
 import { defineStore } from "pinia";
@@ -12,13 +12,23 @@ const useBBSStore = defineStore(
   () => {
     // 游戏列表
     const gameList = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
+    // 游戏卡片配置项
+    const gameUidCards = shallowRef<Record<string, TGApp.BBS.AppConfig.GameUidCardConf>>({});
 
     // 刷新游戏列表
     async function refreshGameList(): Promise<void> {
       gameList.value = await apiHubReq.game();
     }
 
-    return { gameList, refreshGameList };
+    // 刷新游戏卡片配置项
+    async function refreshGameUidCards(): Promise<void> {
+      const resp = await apiHubReq.appConfig();
+      if ("retcode" in resp) return;
+      const conf = <TGApp.BBS.AppConfig.GameUidCardFullConf>JSON.parse(resp.game_uid_card_config);
+      gameUidCards.value = conf.game_uid_card_conf;
+    }
+
+    return { gameList, refreshGameList, gameUidCards, refreshGameUidCards };
   },
   { persist: true },
 );

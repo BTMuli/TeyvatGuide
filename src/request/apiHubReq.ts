@@ -1,7 +1,7 @@
 /**
  * @file request/apiHubReq.ts
  * @description apiHub下的请求
- * @since Beta v0.7.2
+ * @since Beta v0.8.2
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -23,6 +23,25 @@ async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
       headers: { "Content-Type": "application/json", referer: Referer },
     })
   ).data.list;
+}
+
+/**
+ * @description 获取应用配置
+ * @since Beta v0.8.2
+ * @param {string} gid 分区ID
+ * @return {Promise<TGApp.BBS.AppConfig.FullData|TGApp.BBS.Response.Base>}
+ */
+async function getAppConfig(
+  gid?: string,
+): Promise<TGApp.BBS.AppConfig.FullData | TGApp.BBS.Response.Base> {
+  let url = `${Mahbu}api/getAppConfig`;
+  if (gid) url += `?gid=${gid}`;
+  const resp = await TGHttp<TGApp.BBS.AppConfig.Resp | TGApp.BBS.Response.Base>(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json", referer: Referer },
+  });
+  if (resp.retcode === 0) return resp.data.config;
+  return <TGApp.BBS.Response.Base>resp;
 }
 
 /**
@@ -202,6 +221,7 @@ async function upVotePost(
 
 const apiHubReq = {
   vote: { info: getVotes, result: getVoteResult },
+  appConfig: getAppConfig,
   home: homeNew,
   forum: getAllGamesForums,
   game: getGameList,
