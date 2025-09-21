@@ -89,7 +89,8 @@
       "Id": 1213,
       "Name": "蛋糕与机关维修艺术",
       "Description": "元素爆发<color=#FFD780FF>{LINK#S11215}精密水冷仪{/LINK}</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Aino_01"
+      "Icon": "UI_Talent_U_Aino_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
     },
     {
       "Id": 1214,
@@ -101,7 +102,8 @@
       "Id": 1215,
       "Name": "金属与光的不朽涡轮",
       "Description": "元素战技<color=#FFD780FF>{LINK#S11212}妙思捕手{/LINK}</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Aino_02"
+      "Icon": "UI_Talent_U_Aino_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
     },
     {
       "Id": 1216,

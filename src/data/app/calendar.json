@@ -2433,7 +2433,7 @@
   },
   {
     "id": 14520,
-    "contentId": 0,
+    "contentId": 506390,
     "dropDays": [1, 4, 7],
     "name": "纺夜天镜",
     "itemType": "weapon",
@@ -3057,7 +3057,7 @@
   },
   {
     "id": 11433,
-    "contentId": 0,
+    "contentId": 506379,
     "dropDays": [1, 4, 7],
     "name": "谧音吹哨",
     "itemType": "weapon",
@@ -3073,7 +3073,7 @@
   },
   {
     "id": 11434,
-    "contentId": 0,
+    "contentId": 506381,
     "dropDays": [3, 6, 7],
     "name": "织月者的曙色",
     "itemType": "weapon",
@@ -3473,7 +3473,7 @@
   },
   {
     "id": 12433,
-    "contentId": 0,
+    "contentId": 506376,
     "dropDays": [3, 6, 7],
     "name": "万能钥匙",
     "itemType": "weapon",
@@ -3905,7 +3905,7 @@
   },
   {
     "id": 15433,
-    "contentId": 0,
+    "contentId": 506377,
     "dropDays": [2, 5, 7],
     "name": "罗网勾针",
     "itemType": "weapon",
@@ -4273,7 +4273,7 @@
   },
   {
     "id": 14432,
-    "contentId": 0,
+    "contentId": 506378,
     "dropDays": [3, 6, 7],
     "name": "天光的纺琴",
     "itemType": "weapon",
@@ -4289,7 +4289,7 @@
   },
   {
     "id": 14433,
-    "contentId": 0,
+    "contentId": 506375,
     "dropDays": [1, 4, 7],
     "name": "乌髓孑灯",
     "itemType": "weapon",
@@ -4641,7 +4641,7 @@
   },
   {
     "id": 13433,
-    "contentId": 0,
+    "contentId": 506374,
     "dropDays": [2, 5, 7],
     "name": "掘金之锹",
     "itemType": "weapon",

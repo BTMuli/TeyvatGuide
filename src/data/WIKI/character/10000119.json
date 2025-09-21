@@ -89,7 +89,8 @@
       "Id": 1193,
       "Name": "「汝、切莫贪求狡狐的小径」",
       "Description": "元素爆发<color=#FFD780FF>{LINK#S11195}圣言述咏·众心为月{/LINK}</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Lauma_01"
+      "Icon": "UI_Talent_U_Lauma_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
     },
     {
       "Id": 1194,
@@ -101,7 +102,8 @@
       "Id": 1195,
       "Name": "「若是得以将真实之物见证」",
       "Description": "元素战技<color=#FFD780FF>{LINK#S11192}圣言述咏·终宵永眠{/LINK}</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Lauma_02"
+      "Icon": "UI_Talent_U_Lauma_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
     },
     {
       "Id": 1196,

@@ -89,7 +89,8 @@
       "Id": 1203,
       "Name": "夜访陌客之沼",
       "Description": "元素爆发{LINK#S11205}<color=#FFD780FF>旧仪·夜客致访</color>{/LINK}的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Flins_02"
+      "Icon": "UI_Talent_U_Flins_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
     },
     {
       "Id": 1204,
@@ -101,7 +102,8 @@
       "Id": 1205,
       "Name": "逐远避世之影",
       "Description": "元素战技{LINK#S11202}<color=#FFD780FF>古律·孤灯遗秘</color>{/LINK}的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Flins_01"
+      "Icon": "UI_Talent_U_Flins_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
     },
     {
       "Id": 1206,

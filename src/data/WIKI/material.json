@@ -16,6 +16,10 @@
       { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] },
       { "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] },
       { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] },
+      { "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] },
+      { "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] },
+      { "name": "精通秘境：墟都", "type": "domain", "days": [0, 1, 4] },
+      { "name": "炼武秘境：明辉", "type": "domain", "days": [0, 1, 4] },
       { "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] },
       { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] },
@@ -26,6 +30,10 @@
       { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] },
       { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] },
+      { "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] },
+      { "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] },
+      { "name": "精通秘境：遗荫", "type": "domain", "days": [0, 2, 5] },
+      { "name": "炼武秘境：祷颂", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] },
       { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] },
       { "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] },
@@ -35,7 +43,11 @@
       { "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] },
       { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] },
       { "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] },
-      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
+      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] },
+      { "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] },
+      { "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] },
+      { "name": "精通秘境：覆巢", "type": "domain", "days": [0, 3, 6] },
+      { "name": "炼武秘境：祭月", "type": "domain", "days": [0, 3, 6] }
     ],
     "convert": []
   },
@@ -56,6 +68,10 @@
       { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] },
       { "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] },
       { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] },
+      { "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] },
+      { "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] },
+      { "name": "精通秘境：墟都", "type": "domain", "days": [0, 1, 4] },
+      { "name": "炼武秘境：明辉", "type": "domain", "days": [0, 1, 4] },
       { "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] },
       { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] },
@@ -66,6 +82,10 @@
       { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] },
       { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] },
+      { "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] },
+      { "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] },
+      { "name": "精通秘境：遗荫", "type": "domain", "days": [0, 2, 5] },
+      { "name": "炼武秘境：祷颂", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] },
       { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] },
       { "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] },
@@ -75,7 +95,11 @@
       { "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] },
       { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] },
       { "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] },
-      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
+      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] },
+      { "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] },
+      { "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] },
+      { "name": "精通秘境：覆巢", "type": "domain", "days": [0, 3, 6] },
+      { "name": "炼武秘境：祭月", "type": "domain", "days": [0, 3, 6] }
     ],
     "convert": []
   },
@@ -104,6 +128,8 @@
     "type": "通用货币",
     "star": 3,
     "source": [
+      { "name": "冒险与探索奖励", "type": "single" },
+      { "name": "洞天百宝兑换", "type": "single" },
       { "name": "激活藏金之花奖励", "type": "single" },
       { "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] },
       { "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] },
@@ -115,6 +141,10 @@
       { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] },
       { "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] },
       { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] },
+      { "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] },
+      { "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] },
+      { "name": "精通秘境：墟都", "type": "domain", "days": [0, 1, 4] },
+      { "name": "炼武秘境：明辉", "type": "domain", "days": [0, 1, 4] },
       { "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] },
       { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] },
@@ -125,6 +155,10 @@
       { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] },
       { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] },
+      { "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] },
+      { "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] },
+      { "name": "精通秘境：遗荫", "type": "domain", "days": [0, 2, 5] },
+      { "name": "炼武秘境：祷颂", "type": "domain", "days": [0, 2, 5] },
       { "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] },
       { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] },
       { "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] },
@@ -134,7 +168,11 @@
       { "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] },
       { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] },
       { "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] },
-      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
+      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] },
+      { "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] },
+      { "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] },
+      { "name": "精通秘境：覆巢", "type": "domain", "days": [0, 3, 6] },
+      { "name": "炼武秘境：祭月", "type": "domain", "days": [0, 3, 6] }
     ],
     "convert": []
   },
@@ -195,10 +233,10 @@
   {
     "id": 301,
     "name": "火之印",
-    "description": "蒙德周围的特殊纪念货币，可在城市商店中兑换珍稀物品",
+    "description": "受到纳塔的火焰认可，获授的印记。\\n可以供奉在帕克斯神庙的煅石之轮前，以此得到圣火的庇佑。",
     "type": "七国徽印",
     "star": 3,
-    "source": [{ "name": "探索奖励", "type": "single" }],
+    "source": [{ "name": "纳塔地区探索奖励", "type": "single" }],
     "convert": []
   },
   {
@@ -348,10 +386,7 @@
     "description": "带着勾刺的莓果，会挂在狼的毛皮上来迁徙。看见它时，仿佛能听见狼的凄嚎在林间回荡…",
     "type": "蒙德区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：奔狼领采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：奔狼领采集", "type": "single" }],
     "convert": []
   },
   {
@@ -361,8 +396,8 @@
     "type": "蒙德区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：望风山地采集", "type": "single" }
+      { "name": "推荐：望风山地采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -373,8 +408,8 @@
     "type": "蒙德区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：摘星崖采集", "type": "single" }
+      { "name": "推荐：摘星崖采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -386,8 +421,8 @@
     "star": 1,
     "source": [
       { "name": "风起地七天神像附近采集", "type": "single" },
-      { "name": "野外树下采集", "type": "single" },
-      { "name": "推荐：风龙废墟采集", "type": "single" }
+      { "name": "推荐：风龙废墟采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -416,8 +451,8 @@
     "type": "璃月区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：轻策庄采集", "type": "single" }
+      { "name": "推荐：轻策庄采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -442,7 +477,7 @@
     "source": [
       { "name": "璃月港玉京台附近采集", "type": "single" },
       { "name": "望舒客栈附近采集", "type": "single" },
-      { "name": "推荐：璃月港采集", "type": "single" }
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -453,9 +488,9 @@
     "type": "璃月区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
       { "name": "推荐：璃月港玉京台采集", "type": "single" },
-      { "name": "推荐：轻策庄采集", "type": "single" }
+      { "name": "推荐：轻策庄采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -466,9 +501,9 @@
     "type": "璃月区域特产",
     "star": 1,
     "source": [
-      { "name": "石林顶端采集", "type": "single" },
       { "name": "推荐：绝云间采集", "type": "single" },
-      { "name": "推荐：孤云阁采集", "type": "single" }
+      { "name": "推荐：孤云阁采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -499,7 +534,10 @@
     "description": "拥有旺盛生命力的小花，传说朝下盛开的花姿是为了守住它的香气。",
     "type": "璃月区域特产",
     "star": 1,
-    "source": [{ "name": "璃月山壁采集", "type": "single" }],
+    "source": [
+      { "name": "璃月山壁采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -554,9 +592,9 @@
     "type": "蒙德区域特产",
     "star": 1,
     "source": [
-      { "name": "夜间野外寻找", "type": "single" },
       { "name": "推荐：奔狼领采集", "type": "single" },
-      { "name": "推荐：低语森林采集", "type": "single" }
+      { "name": "推荐：低语森林采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -568,7 +606,8 @@
     "star": 1,
     "source": [
       { "name": "湖泊水边采集", "type": "single" },
-      { "name": "推荐：清泉镇采集", "type": "single" }
+      { "name": "推荐：清泉镇采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -578,10 +617,7 @@
     "description": "随风而行的细小种子。即使拔去了旅行的羽絮，其中也寄宿着远方的希望吧。",
     "type": "蒙德区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：蒙德城门采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：蒙德城门采集", "type": "single" }],
     "convert": []
   },
   {
@@ -755,7 +791,10 @@
     "description": "晶蝶的核心。是吸食着大气中逸散的细小元素的晶蝶长出的奇妙器官。",
     "type": "素材",
     "star": 1,
-    "source": [{ "name": "捕捉晶蝶采集", "type": "single" }],
+    "source": [
+      { "name": "捕捉晶蝶采集", "type": "single" },
+      { "name": "晶蝶诱捕装置采集获得", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -862,7 +901,8 @@
     "star": 1,
     "source": [
       { "name": "须弥餐馆购买", "type": "single" },
-      { "name": "枫丹杂货店购买", "type": "single" }
+      { "name": "枫丹杂货店购买", "type": "single" },
+      { "name": "纳塔杂货店购买", "type": "single" }
     ],
     "convert": []
   },
@@ -1057,6 +1097,13 @@
           { "id": "101111", "name": "央陆单手剑原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
+      },
+      {
+        "id": "70102",
+        "source": [
+          { "id": "101116", "name": "垠土单手剑原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
       }
     ]
   },
@@ -1074,6 +1121,13 @@
         "id": "70201",
         "source": [
           { "id": "101112", "name": "央陆弓原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
+      },
+      {
+        "id": "70202",
+        "source": [
+          { "id": "101117", "name": "垠土弓原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
       }
@@ -1095,6 +1149,13 @@
           { "id": "101113", "name": "央陆双手剑原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
+      },
+      {
+        "id": "70302",
+        "source": [
+          { "id": "101118", "name": "垠土双手剑原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
       }
     ]
   },
@@ -1112,6 +1173,13 @@
         "id": "70401",
         "source": [
           { "id": "101114", "name": "央陆法器原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
+      },
+      {
+        "id": "70402",
+        "source": [
+          { "id": "101119", "name": "垠土法器原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
       }
@@ -1133,6 +1201,13 @@
           { "id": "101115", "name": "央陆长柄武器原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
+      },
+      {
+        "id": "70502",
+        "source": [
+          { "id": "101120", "name": "垠土长柄武器原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
       }
     ]
   },
@@ -1148,6 +1223,13 @@
         "id": "70601",
         "source": [
           { "id": "101101", "name": "北陆单手剑原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
+      },
+      {
+        "id": "70602",
+        "source": [
+          { "id": "101116", "name": "垠土单手剑原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
       }
@@ -1167,6 +1249,13 @@
           { "id": "101102", "name": "北陆弓原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
+      },
+      {
+        "id": "70702",
+        "source": [
+          { "id": "101117", "name": "垠土弓原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
       }
     ]
   },
@@ -1182,6 +1271,13 @@
         "id": "70801",
         "source": [
           { "id": "101103", "name": "北陆双手剑原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
+      },
+      {
+        "id": "70802",
+        "source": [
+          { "id": "101118", "name": "垠土双手剑原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
       }
@@ -1201,6 +1297,13 @@
           { "id": "101104", "name": "北陆法器原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
+      },
+      {
+        "id": "70902",
+        "source": [
+          { "id": "101119", "name": "垠土法器原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
       }
     ]
   },
@@ -1218,6 +1321,13 @@
           { "id": "101105", "name": "北陆长柄武器原胚", "type": "素材", "star": 4, "count": 1 },
           { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
         ]
+      },
+      {
+        "id": "71002",
+        "source": [
+          { "id": "101120", "name": "垠土长柄武器原胚", "type": "素材", "star": 4, "count": 1 },
+          { "id": "113021", "name": "异梦溶媒", "type": "消耗品", "star": 4, "count": 2 }
+        ]
       }
     ]
   },
@@ -1227,7 +1337,7 @@
     "description": "生产武器的原材料。通过锻造，可以生产出4星的单手剑。\\n原胚所能打造而出的诸多武器的「事态」，其结果的「可能」虽然早已包含在了原物之中，但是最终能被制成怎样的形制，仍是现在无人知晓之事…",
     "type": "素材",
     "star": 4,
-    "source": [{ "name": "纳塔地区「征讨领域」挑战奖励", "type": "single" }],
+    "source": [{ "name": "纳塔、挪德卡莱地区「征讨领域」挑战奖励", "type": "single" }],
     "convert": [
       {
         "id": "71101",
@@ -1251,7 +1361,7 @@
     "description": "生产武器的原材料。通过锻造，可以生产出4星的弓。\\n原胚所能打造而出的诸多武器的「事态」，其结果的「可能」虽然早已包含在了原物之中，但是最终能被制成怎样的形制，仍是现在无人知晓之事…",
     "type": "素材",
     "star": 4,
-    "source": [{ "name": "纳塔地区「征讨领域」挑战奖励", "type": "single" }],
+    "source": [{ "name": "纳塔、挪德卡莱地区「征讨领域」挑战奖励", "type": "single" }],
     "convert": [
       {
         "id": "71201",
@@ -1275,7 +1385,7 @@
     "description": "生产武器的原材料。通过锻造，可以生产出4星的双手剑。\\n原胚所能打造而出的诸多武器的「事态」，其结果的「可能」虽然早已包含在了原物之中，但是最终能被制成怎样的形制，仍是现在无人知晓之事…",
     "type": "素材",
     "star": 4,
-    "source": [{ "name": "纳塔地区「征讨领域」挑战奖励", "type": "single" }],
+    "source": [{ "name": "纳塔、挪德卡莱地区「征讨领域」挑战奖励", "type": "single" }],
     "convert": [
       {
         "id": "71301",
@@ -1299,7 +1409,7 @@
     "description": "生产武器的原材料。通过锻造，可以生产出4星的法器。\\n原胚所能打造而出的诸多武器的「事态」，其结果的「可能」虽然早已包含在了原物之中，但是最终能被制成怎样的形制，仍是现在无人知晓之事…",
     "type": "素材",
     "star": 4,
-    "source": [{ "name": "纳塔地区「征讨领域」挑战奖励", "type": "single" }],
+    "source": [{ "name": "纳塔、挪德卡莱地区「征讨领域」挑战奖励", "type": "single" }],
     "convert": [
       {
         "id": "71401",
@@ -1323,7 +1433,7 @@
     "description": "生产武器的原材料。通过锻造，可以生产出4星的长柄武器。\\n原胚所能打造而出的诸多武器的「事态」，其结果的「可能」虽然早已包含在了原物之中，但是最终能被制成怎样的形制，仍是现在无人知晓之事…",
     "type": "素材",
     "star": 4,
-    "source": [{ "name": "纳塔地区「征讨领域」挑战奖励", "type": "single" }],
+    "source": [{ "name": "纳塔、挪德卡莱地区「征讨领域」挑战奖励", "type": "single" }],
     "convert": [
       {
         "id": "71501",
@@ -1348,7 +1458,6 @@
     "type": "稻妻区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
       { "name": "推荐：鸣神岛采集", "type": "single" },
       { "name": "推荐：踏鞴砂采集", "type": "single" }
     ],
@@ -1360,10 +1469,7 @@
     "description": "从鸣神大社的神樱上飘落的花瓣，怀着稻妻大地的眷顾。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：鸣神岛采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：鸣神岛采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1372,10 +1478,7 @@
     "description": "蕴含着「祟神」力量的晶体。冶炼时加入这种物质的话，能极大地提高钢铁制品的强度与韧性。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：八酝岛采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：八酝岛采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1384,10 +1487,7 @@
     "description": "在诗文中也被称为「赤蕊」的鲜艳植物，一度在稻妻列岛绝迹，如今在战场上再度重现。传说在血腥的战场上，它们开得格外妖艳。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：名椎滩采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：名椎滩采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1397,8 +1497,8 @@
     "type": "稻妻区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：踏鞴砂采集", "type": "single" }
+      { "name": "推荐：踏鞴砂采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1408,7 +1508,10 @@
     "description": "在某些特殊的海域中、岛屿上才会生长的特殊物种。虽然外形看起来像菌类，但其实是由软体生物分泌增生而成的。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [{ "name": "稻妻海域采集", "type": "single" }],
+    "source": [
+      { "name": "稻妻海域采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -1417,10 +1520,7 @@
     "description": "与海祇的珊瑚相伴而生的宝珠，散发着月光般的丝丝凉意。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：海祇岛采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：海祇岛采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1429,10 +1529,7 @@
     "description": "生长在清籁岛的天云草结成的果实，贴在耳畔能听见微弱的电流声。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：清籁岛采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：清籁岛采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1441,10 +1538,7 @@
     "description": "如同夜灯般微微发光的蘑菇，其中蕴含着不可思议的力量。",
     "type": "稻妻区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：鹤观采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：鹤观采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1472,7 +1566,6 @@
     "type": "须弥区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
       { "name": "推荐：善见地采集", "type": "single" },
       { "name": "推荐：护世森采集", "type": "single" }
     ],
@@ -1631,10 +1724,7 @@
     "description": "散发着幽光的贝状结构。似乎是纯净的元素能量凝结而成的产物，而非某种生物的甲壳。",
     "type": "枫丹区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：塞洛海原采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：塞洛海原采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1643,10 +1733,7 @@
     "description": "幽淡而高贵的蓝色花卉。柔软的花蕊具备良好的吸水性和弹性，是诸多日用品的原材料。",
     "type": "枫丹区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：塞洛海原采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：塞洛海原采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1665,8 +1752,8 @@
     "type": "枫丹区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "枫丹廷北部采集", "type": "single" }
+      { "name": "枫丹廷北部采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1677,8 +1764,8 @@
     "type": "枫丹区域特产",
     "star": 1,
     "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：苍晶区采集", "type": "single" }
+      { "name": "推荐：苍晶区采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1688,10 +1775,7 @@
     "description": "在水中会发出柔浅微光的软体动物。大多攀附在水边或水下的人造建筑表面。",
     "type": "枫丹区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：黎翡区采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：黎翡区采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1700,10 +1784,7 @@
     "description": "明澈而澄净的苍色花卉。生于水脉汇聚之处，其香清冷淡雅，辛凉柔婉。",
     "type": "枫丹区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：伊黎耶林区采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：伊黎耶林区采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1712,10 +1793,7 @@
     "description": "枫丹科学院利用新型奇械构件生产的微型探测单元，原本用以监测各类环境数据。",
     "type": "枫丹区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：枫丹动能工程科学研究院区采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：枫丹动能工程科学研究院区采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1724,10 +1802,7 @@
     "description": "悬浮于莫尔泰区水体深处的清澈露滴，与常见的纯水造物不同，似乎凝聚着更为原始而纯粹的元素能量。",
     "type": "枫丹区域特产",
     "star": 1,
-    "source": [
-      { "name": "野外采集", "type": "single" },
-      { "name": "推荐：莫尔泰区水下采集", "type": "single" }
-    ],
+    "source": [{ "name": "推荐：莫尔泰区水下采集", "type": "single" }],
     "convert": []
   },
   {
@@ -1789,7 +1864,8 @@
     "star": 1,
     "source": [
       { "name": "推荐：涌流地采集", "type": "single" },
-      { "name": "推荐：「流泉之众」周边采集", "type": "single" }
+      { "name": "推荐：「流泉之众」周边采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1801,7 +1877,8 @@
     "star": 1,
     "source": [
       { "name": "推荐：柴薪之丘采集", "type": "single" },
-      { "name": "推荐：圣火竞技场周边采集", "type": "single" }
+      { "name": "推荐：圣火竞技场周边采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1813,7 +1890,8 @@
     "star": 1,
     "source": [
       { "name": "推荐：踞石山采集", "type": "single" },
-      { "name": "推荐：「悬木人」下方采集", "type": "single" }
+      { "name": "推荐：「悬木人」下方采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1823,7 +1901,10 @@
     "description": "形如巨大动物爪掌的多肉植物。",
     "type": "纳塔区域特产",
     "star": 1,
-    "source": [{ "name": "推荐：硫晶支脉采集", "type": "single" }],
+    "source": [
+      { "name": "推荐：硫晶支脉采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -1843,7 +1924,8 @@
     "star": 1,
     "source": [
       { "name": "推荐：镜璧山采集", "type": "single" },
-      { "name": "推荐：「烟谜主」周边采集", "type": "single" }
+      { "name": "推荐：「烟谜主」周边采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
     ],
     "convert": []
   },
@@ -1862,7 +1944,10 @@
     "description": "花叶的外侧犹如石质的奇特植物，在绽放后，会露出晶石一般的芯。",
     "type": "纳塔区域特产",
     "star": 1,
-    "source": [{ "name": "推荐：安饶之野采集", "type": "single" }],
+    "source": [
+      { "name": "推荐：安饶之野采集", "type": "single" },
+      { "name": "尘歌壶种植", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -1962,6 +2047,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：苍风高地砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -1976,6 +2062,7 @@
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：坠星山谷砍伐", "type": "single" },
       { "name": "推荐：碧水原砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -1989,6 +2076,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：龙脊雪山砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2003,6 +2091,7 @@
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：珉林砍伐", "type": "single" },
       { "name": "推荐：璃沙郊砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2016,6 +2105,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：碧水原砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2029,6 +2119,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：坠星山谷砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2043,6 +2134,7 @@
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：坠星山谷砍伐", "type": "single" },
       { "name": "推荐：风啸山坡砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2056,6 +2148,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：鸣神岛砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2069,6 +2162,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：鸣神岛砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2082,6 +2176,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：鸣神岛砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2095,6 +2190,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：八酝岛砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2108,6 +2204,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：须弥森林砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2121,6 +2218,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：须弥森林砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2134,6 +2232,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：须弥森林砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2147,6 +2246,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：须弥沙漠砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2160,6 +2260,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：须弥沙漠砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2173,6 +2274,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：枫丹野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2186,6 +2288,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：枫丹野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2199,6 +2302,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：枫丹野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2212,6 +2316,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：枫丹野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2225,6 +2330,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：枫丹野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2238,6 +2344,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：纳塔野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2251,6 +2358,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：纳塔野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2264,6 +2372,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：纳塔野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2277,6 +2386,7 @@
     "source": [
       { "name": "野外采集", "type": "single" },
       { "name": "推荐：纳塔野外砍伐", "type": "single" },
+      { "name": "洞天百宝·木材购买获取", "type": "single" },
       { "name": "木材转化", "type": "single" }
     ],
     "convert": []
@@ -2374,6 +2484,14 @@
         "source": [
           { "id": "100022", "name": "落落莓", "type": "蒙德区域特产", "star": 1, "count": 1 }
         ]
+      },
+      {
+        "id": "30009",
+        "source": [{ "id": "101218", "name": "墩墩桃", "type": "食材", "star": 1, "count": 1 }]
+      },
+      {
+        "id": "30010",
+        "source": [{ "id": "101251", "name": "烬芯花", "type": "素材", "star": 1, "count": 1 }]
       }
     ]
   },
@@ -2394,6 +2512,10 @@
         "source": [
           { "id": "100058", "name": "石珀", "type": "璃月区域特产", "star": 1, "count": 1 }
         ]
+      },
+      {
+        "id": "30011",
+        "source": [{ "id": "101231", "name": "茉洁草", "type": "食材", "star": 1, "count": 1 }]
       }
     ]
   },
@@ -2413,6 +2535,22 @@
         "id": "30008",
         "source": [
           { "id": "100021", "name": "钩钩果", "type": "蒙德区域特产", "star": 1, "count": 1 }
+        ]
+      },
+      {
+        "id": "30012",
+        "source": [
+          { "id": "101209", "name": "幽灯蕈", "type": "稻妻区域特产", "star": 1, "count": 1 }
+        ]
+      },
+      {
+        "id": "30013",
+        "source": [{ "id": "101234", "name": "汐藻", "type": "食材", "star": 1, "count": 1 }]
+      },
+      {
+        "id": "30014",
+        "source": [
+          { "id": "101249", "name": "青蜜莓", "type": "纳塔区域特产", "star": 1, "count": 1 }
         ]
       }
     ]
@@ -2534,7 +2672,8 @@
     "star": 2,
     "source": [
       { "name": "纪念品商店兑换", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2588,8 +2727,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2649,8 +2788,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2710,8 +2849,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2772,7 +2911,8 @@
     "star": 2,
     "source": [
       { "name": "纪念品商店兑换", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2826,8 +2966,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2887,8 +3027,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -2948,8 +3088,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3008,7 +3148,10 @@
     "description": "角色突破素材。",
     "type": "角色突破素材",
     "star": 2,
-    "source": [{ "name": "冒险之证讨伐页签查看", "type": "single" }],
+    "source": [
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "50049",
@@ -3061,8 +3204,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3122,8 +3265,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3183,8 +3326,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3245,7 +3388,8 @@
     "star": 2,
     "source": [
       { "name": "纪念品商店兑换", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3299,8 +3443,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3360,8 +3504,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3421,8 +3565,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3483,6 +3627,7 @@
     "star": 2,
     "source": [
       { "name": "纪念品商店兑换", "type": "single" },
+      { "name": "", "type": "single" },
       { "name": "冒险之证讨伐页签查看", "type": "single" }
     ],
     "convert": [
@@ -3537,8 +3682,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3598,8 +3743,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3659,8 +3804,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3721,7 +3866,8 @@
     "star": 2,
     "source": [
       { "name": "纪念品商店兑换", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3775,8 +3921,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3836,8 +3982,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3897,8 +4043,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -3959,6 +4105,7 @@
     "star": 2,
     "source": [
       { "name": "纪念品商店兑换", "type": "single" },
+      { "name": "", "type": "single" },
       { "name": "冒险之证讨伐页签查看", "type": "single" }
     ],
     "convert": [
@@ -4013,8 +4160,8 @@
     "type": "角色突破素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -4074,8 +4221,8 @@
     "type": "角色突破素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -4135,8 +4282,8 @@
     "type": "角色突破素材",
     "star": 5,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "冒险之证讨伐页签查看", "type": "single" }
+      { "name": "冒险之证讨伐页签查看", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
     ],
     "convert": [
       {
@@ -4204,7 +4351,10 @@
     "description": "天赋培养素材。\\n风之国土的精神是自由。\\n自由其一，是生存的自由，即是能健全、健康地生活，而不必担心朝不保夕的自由。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：霜凝祭坛", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：霜凝祭坛", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -4213,10 +4363,7 @@
     "description": "天赋培养素材。\\n风之国土的精神是自由。\\n自由其二，是漫游的自由，即是能在苍翠的土地上自由地通行，而不受阻挠的自由。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：霜凝祭坛", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：霜凝祭坛", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13001",
@@ -4238,10 +4385,7 @@
     "description": "天赋培养素材。\\n风之国土的精神是自由。\\n自由其三，是歌唱的自由，即是能在风之神塑造的美好土地上歌唱，让自己的心与歌一同随风而去的自由。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：霜凝祭坛", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：霜凝祭坛", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13002",
@@ -4263,7 +4407,10 @@
     "description": "天赋培养素材。\\n风之国土的脊梁是抗争。\\n蒙德的历史即是抗争的历史。抗争是为了蒙德过去的一切抗争不被遗忘，如同草木突破土壤，如同恒风洞穿石墙。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -4272,10 +4419,7 @@
     "description": "天赋培养素材。\\n风之国土的脊梁是抗争。\\n蒙德的历史即是抗争的历史。抗争是为了蒙德现在的人们能够拥有自由，正如风之神吹散冰雪，正如温妮莎奋起抗争。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13003",
@@ -4297,10 +4441,7 @@
     "description": "天赋培养素材。\\n风之国土的脊梁是抗争。\\n蒙德的历史即是抗争的历史。抗争是为了蒙德未来的诗文，也能自由地随着眷顾的风，传到远方。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：冰封废渊", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13004",
@@ -4322,7 +4463,10 @@
     "description": "天赋培养素材。\\n风之国土的灵魂是诗文。\\n诗文是美好的心意。在美好的日子里，吹拂原野的风中飘扬着田园诗、情诗，如和风拨动草叶般拨动人们的心。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -4331,10 +4475,7 @@
     "description": "天赋培养素材。\\n风之国土的灵魂是诗文。\\n诗文是激励的心意。在黯淡的日子里，穿过巷道的风中低语着愤怒的诗文，如同战鼓，如同风暴前的低鸣。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13005",
@@ -4356,10 +4497,7 @@
     "description": "天赋培养素材。\\n风之国土的灵魂是诗文。\\n诗文是传颂的心意。即使一切都将逝去，即使一切都将不再，随风而行的诗歌，仍会将此世间一切美好传遍天空、大地与海洋的一切角落。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：沉睡之国", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13006",
@@ -4381,7 +4519,10 @@
     "description": "天赋培养素材。\\n岩之国土的追求是繁荣。\\n繁荣是璃月的恩惠，是璃月的神与人共同建立的伟大城市，是璃月的大地安全和平的源泉。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -4390,10 +4531,7 @@
     "description": "天赋培养素材。\\n岩之国土的追求是繁荣。\\n繁荣是璃月对它的子女的许诺：以繁荣回报勤劳者，以黄金照亮这片土地。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13007",
@@ -4415,10 +4553,7 @@
     "description": "天赋培养素材。\\n岩之国土的追求是繁荣。\\n繁荣是璃月的过去、现在与未来。在此世间一切国度都无法企及的繁荣，均归于璃月，以及璃月的子女。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：炽炎祭场", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13008",
@@ -4440,7 +4575,10 @@
     "description": "天赋培养素材。\\n岩之国土的根基是勤劳。\\n勤劳即为通过人的努力，克服高山与大海，追求繁荣与黄金的勇气与力量。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -4449,10 +4587,7 @@
     "description": "天赋培养素材。\\n岩之国土的根基是勤劳。\\n勤劳是流传在璃月人血脉中的催化剂，能将岩石化为黄金，是伟大商港之所以为伟大商港的原因。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13009",
@@ -4474,10 +4609,7 @@
     "description": "天赋培养素材。\\n岩之国土的根基是勤劳。\\n勤劳即为相信自己，即为相信通过汗水、智慧与力量，在诸神的土地上，人人都可以拥有自己的一席之地。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：深炎之底", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13010",
@@ -4499,7 +4631,10 @@
     "description": "天赋培养素材。\\n岩之国土的象征是黄金。\\n黄金是流淌在璃月土地深处的血液，是鼓动璃月的心脏有力搏动的肌肉，是让璃月傲然挺立的筋骨。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -4508,10 +4643,7 @@
     "description": "天赋培养素材。\\n岩之国土的象征是黄金。\\n黄金意味着转换，这是璃月的岩山、大地、港城与人们的默契。在璃月，勤劳被转换为黄金，而黄金被转换为繁荣。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13011",
@@ -4533,10 +4665,7 @@
     "description": "天赋培养素材。\\n岩之国土的象征是黄金。\\n黄金是璃月的财富。但璃月真正的财富，是璃月的人们那如黄金般闪耀的心灵。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：焚尽之环", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13012",
@@ -4567,7 +4696,10 @@
     "description": "天赋培养素材。\\n雷之国土的梦想是浮世。\\n浮世之荣华乃是人之美的最高体现。人之在世岂不与疾电相类？如美梦或花火般浮华一瞬，在永恒的夜幕中留下绚烂的印记。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：菫染之国", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：菫染之国", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -4576,10 +4708,7 @@
     "description": "天赋培养素材。\\n雷之国土的梦想是浮世。\\n浮世之难求乃是人之美的价值所在。人之在世岂不与雷影相似？意欲追逐掇取则遥踞云端，灯火阑珊的静谧之时却不期而来。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：菫染之国", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：菫染之国", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13013",
@@ -4601,10 +4730,7 @@
     "description": "天赋培养素材。\\n雷之国土的梦想是浮世。\\n浮世之短暂乃是人之美的本性所在。人之在世岂不与稻光相近？神威显现的刹那恍若隽永，而永恒的威鸣又有谁人能够承受？",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：菫染之国", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：菫染之国", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13014",
@@ -4626,7 +4752,10 @@
     "description": "天赋培养素材。\\n雷之国土的姿容是风雅。\\n风雅是不谄媚。风雅之人永远是高贵的。正似只愿高飞与雷暴争鸣的海鹰；迎合鄙俗则恰如将花冠倒插泥淖，仅让尊严染上了污渍。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：初雷幽谷", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：初雷幽谷", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -4635,10 +4764,7 @@
     "description": "天赋培养素材。\\n雷之国土的姿容是风雅。\\n风雅是不倨傲。风雅之人永远是谦虚的。只有消除虚荣与怠慢，才能明亮双眼，从哪怕最不堪入目的表象之下寻求美与雅致的真境。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：初雷幽谷", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：初雷幽谷", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13015",
@@ -4660,10 +4786,7 @@
     "description": "天赋培养素材。\\n雷之国土的姿容是风雅。\\n风雅是不庸俗。风雅之人永远是独行的。不屈于平庸之恶，不感动于平庸之爱，不逃避于平庸的无知，才可能明辨何为雅致与鄙陋。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：初雷幽谷", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：初雷幽谷", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13016",
@@ -4685,7 +4808,10 @@
     "description": "天赋培养素材。\\n雷之国土的愿望是天光。\\n自认通透一切的大君，永远企图将高天之光彩尽收囊中。然而无从分享的愿景，却反令须臾之人更加炽烈地追求，犹如飞蛾扑火。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：真葛废都", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：真葛废都", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -4694,10 +4820,7 @@
     "description": "天赋培养素材。\\n雷之国土的愿望是天光。\\n即使晖光被重重雷云所掩盖，鸣神的国土之上，依旧有志士如云雀般突破雷光与天之怒海，追寻天光之迹，哪怕迎来冷酷的殛灭。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：真葛废都", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：真葛废都", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13017",
@@ -4719,10 +4842,7 @@
     "description": "天赋培养素材。\\n雷之国土的愿望是天光。\\n即使永远生活在地下，人也会不屈地祈求天光。人总是追逐超越，无可止步。静止封闭的永恒亦固然壮丽，但其本质终究是死亡。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：真葛废都", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：真葛废都", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13018",
@@ -4744,7 +4864,10 @@
     "description": "天赋培养素材。\\n「诤言」是智慧之国的枝干。\\n诤言出于纯净的心智。唯有清醒纯善的言语，方能表达深秘的智慧，令睿智之种突破傲慢的壅阻，生根繁茂。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：圆镜", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：圆镜", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -4753,10 +4876,7 @@
     "description": "天赋培养素材。\\n「诤言」是智慧之国的枝干。\\n诤言相伴巧妙的思虑。多思多虑方能出言谦逊明晰，令智者折服，使愚者醒悟，让智慧如川流一般畅通不息。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：圆镜", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：圆镜", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13019",
@@ -4778,10 +4898,7 @@
     "description": "天赋培养素材。\\n「诤言」是智慧之国的枝干。\\n诤言终于至善的操行。行为赋予言语真实含义，言、思、行的协同一致，是令智慧之树结出善果的丰厚养分。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：圆镜", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：圆镜", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13020",
@@ -4803,7 +4920,10 @@
     "description": "天赋培养素材。\\n「巧思」是智慧之国的叶脉。\\n巧思生自良善的意旨。所谓「毒树不结善果」，良善坚定的意念才能孕育巧妙周到的思谋，方不玷污智慧之名。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：妙语", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：妙语", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -4812,10 +4932,7 @@
     "description": "天赋培养素材。\\n「巧思」是智慧之国的叶脉。\\n巧思引导正直的言语。巧妙而周密的向善思索，令出口之言不偏离福祉之正道；怠慢与歹意则令言行卑劣不堪。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：妙语", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：妙语", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13021",
@@ -4837,10 +4954,7 @@
     "description": "天赋培养素材。\\n「巧思」是智慧之国的叶脉。\\n巧思成于谐和的品行。行为赋予思想完美形态，思、言、行的彼此印证，是令智慧之树绽放出花朵的忠实基干。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：妙语", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：妙语", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13022",
@@ -4862,7 +4976,10 @@
     "description": "天赋培养素材。\\n「笃行」是智慧之国的根系。\\n笃行源于明晰的真性。不懈求索的实践，正是一切智慧最终显现的必经之途。不拘善行，明思与雅言亦无土壤。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -4871,10 +4988,7 @@
     "description": "天赋培养素材。\\n「笃行」是智慧之国的根系。\\n笃行印证直率的言说。所思所行皆是为善，仍不可称之为智慧。智慧孕育于行动之中，为正直的言语篆下封印。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13023",
@@ -4896,10 +5010,7 @@
     "description": "天赋培养素材。\\n「笃行」是智慧之国的根系。\\n笃行促生智慧的果实。行为实证行为本身的意义，行、言、思的联结一体，是令贤智之人得见完美的唯一通途。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：律藏", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13024",
@@ -4921,7 +5032,10 @@
     "description": "天赋培养素材。\\n水之国土的堤岸是公平。\\n公平限制了权利的边界。若无公平，律法赋予的权利亦会被滥用，成为损害善良风俗的工具。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -4930,10 +5044,7 @@
     "description": "天赋培养素材。\\n水之国土的堤岸是公平。\\n公平是枫丹立国的基础。公平形成了律法的准绳。假若律法失去公平的本质，必沦为敛利的棋盘。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13025",
@@ -4955,10 +5066,7 @@
     "description": "天赋培养素材。\\n水之国土的堤岸是公平。\\n公平是枫丹立国的基础。公平总是需要稳固的道德与律法加以支撑，道德与律法亦基于不变的公平准则而流变不息。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：旋韵", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13026",
@@ -4980,7 +5088,10 @@
     "description": "天赋培养素材。\\n水之国土的利剑是正义。\\n枫丹的律法秉正义之剑而行。若无正义的准则，一切律法将沦为无力的空文，任人篡改宰割。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -4989,10 +5100,7 @@
     "description": "天赋培养素材。\\n水之国土的利剑是正义。\\n枫丹的律法秉正义之剑而行。正义必定是盲目的，以正义为利剑者，不论利益或私情都无法蛊惑。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13027",
@@ -5014,10 +5122,7 @@
     "description": "天赋培养素材。\\n水之国土的利剑是正义。\\n枫丹的律法秉正义之剑而行。正义意味着裁决与调和，以裁决的剑锋遏止恶行，以调和的手段维护秩序。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：箴铭", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13028",
@@ -5039,7 +5144,10 @@
     "description": "天赋培养素材。\\n水之国土的坚盾是秩序。\\n枫丹的一切律法终究服务于稳固的秩序。若无秩序的存在，混沌的乱流中自然亦无公平可言。",
     "type": "角色天赋素材",
     "star": 2,
-    "source": [{ "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -5048,10 +5156,7 @@
     "description": "天赋培养素材。\\n水之国土的坚盾是秩序。\\n枫丹的一切律法终究服务于稳固的秩序。若无秩序的保证，正义也将沦为无止境的暴力，成为一切人反对一切人的武器。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13029",
@@ -5073,10 +5178,7 @@
     "description": "天赋培养素材。\\n水之国土的坚盾是秩序。\\n枫丹的一切律法终究服务于稳固的秩序。公平与正义源于秩序，亦服务于秩序。正如枫丹恒无风浪的绵延水面那般，秩序构成了枫丹存在的基石。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：琅诵", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13030",
@@ -5110,10 +5212,7 @@
     "description": "天赋培养素材。\\n火之国土的原则是角逐。\\n人无法与有翼的兽比较飞行的速度，无法与史莱姆比较身躯的柔软，但人自有卓然之处。有时，为何要进行角逐，如何进行角逐，正是认清自己的关键。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13031",
@@ -5135,10 +5234,7 @@
     "description": "天赋培养素材。\\n火之国土的原则是角逐。\\n角逐是为了让自身更加强大，在一场角逐的胜负落定之后，胜利者从中获得确立自己方向的自信，失败者获得如何变得强大的启示。在胜负之外，这是角逐真正的意义。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "精通秘境：转竟", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "13032",
@@ -5172,10 +5268,7 @@
     "description": "天赋培养素材。\\n火之国土的成规是焚燔。\\n想要取得多少的东西，就要付出相应量级的代价。有时为了得到而付出太多，有时却付出的不足而无法得到。能够认识如何正确的付出与得到，也是焚燔的意义之一。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13033",
@@ -5197,10 +5290,7 @@
     "description": "天赋培养素材。\\n火之国土的成规是焚燔。\\n所谓的焚燔，是在得到之前，先献出代价，但往往并非一定会有回应与回报。不求回报地付出代价，才是焚燔的真意，因为取得成果的日子终究会到来。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "精通秘境：空华", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "13034",
@@ -5234,10 +5324,7 @@
     "description": "天赋培养素材。\\n火之国土的事理是纷争。\\n纷争永远能够被更高层面的力量介入并解决，而非不可收拾，这让一切都得以进入可控的境地。纷争亦是一种局限，禁止不计成本地推诿下去，而是要求参与方更干净利落地得出结果。",
     "type": "角色天赋素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13035",
@@ -5259,10 +5346,7 @@
     "description": "天赋培养素材。\\n火之国土的事理是纷争。\\n纷争的前提是，参与争端的人都会真诚地面对自己的欲望，面对欲望，然后在争辩或战斗之中，才不会忘记自己想要取得的东西，也不会偏离原本的目的。",
     "type": "角色天赋素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "精通秘境：旋复", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "13036",
@@ -5910,7 +5994,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上史莱姆掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -5936,8 +6019,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上史莱姆掉落", "type": "single" }
+      { "name": "60级以上史莱姆掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -5977,7 +6060,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上丘丘人掉落", "type": "single" },
       { "name": "40级以上丘丘射手少量掉落", "type": "single" },
       { "name": "40级以上丘丘萨满少量掉落", "type": "single" },
@@ -6007,12 +6089,12 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上丘丘人掉落", "type": "single" },
       { "name": "60级以上丘丘射手少量掉落", "type": "single" },
       { "name": "60级以上丘丘萨满少量掉落", "type": "single" },
       { "name": "60级以上丘丘暴徒少量掉落", "type": "single" },
-      { "name": "60级以上丘丘王少量掉落", "type": "single" }
+      { "name": "60级以上丘丘王少量掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6048,7 +6130,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上丘丘萨满掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6074,8 +6155,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上丘丘萨满掉落", "type": "single" }
+      { "name": "60级以上丘丘萨满掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6111,7 +6192,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上丘丘射手掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6137,8 +6217,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上丘丘射手掉落", "type": "single" }
+      { "name": "60级以上丘丘射手掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6175,7 +6255,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上丘丘暴徒掉落", "type": "single" },
       { "name": "40级以上丘丘王掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
@@ -6202,9 +6281,9 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上丘丘暴徒掉落", "type": "single" },
-      { "name": "60级以上丘丘王掉落", "type": "single" }
+      { "name": "60级以上丘丘王掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6240,7 +6319,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上黑蛇众掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6262,12 +6340,12 @@
   {
     "id": 112019,
     "name": "幽邃刻像",
-    "description": "微微散发着不详的能量的独目刻像，是以何种材质制成则完全不可知。\\n凝视着这尊偶像时，似乎能听见令人心情宁静的奇妙低语…\\n「看吧，我的孩子。天之座下的万物终将在动荡中消亡。永远宁静的漆黑深空会包容一切。」",
+    "description": "微微散发着不祥的能量的独目刻像，是以何种材质制成则完全不可知。\\n凝视着这尊偶像时，似乎能听见令人心情宁静的奇妙低语…\\n「看吧，我的孩子。天之座下的万物终将在动荡中消亡。永远宁静的漆黑深空会包容一切。」",
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上黑蛇众掉落", "type": "single" }
+      { "name": "60级以上黑蛇众掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6303,7 +6381,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上深渊法师掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6329,8 +6406,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上深渊法师掉落", "type": "single" }
+      { "name": "60级以上深渊法师掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6367,7 +6444,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上遗迹守卫掉落", "type": "single" },
       { "name": "40级以上遗迹猎者掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
@@ -6394,9 +6470,9 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上遗迹守卫掉落", "type": "single" },
-      { "name": "60级以上遗迹猎者掉落", "type": "single" }
+      { "name": "60级以上遗迹猎者掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6432,7 +6508,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上愚人众·萤术士掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6458,8 +6533,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上愚人众·萤术士掉落", "type": "single" }
+      { "name": "60级以上愚人众·萤术士掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6495,7 +6570,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上愚人众·债务处理人掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6521,8 +6595,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上愚人众·债务处理人掉落", "type": "single" }
+      { "name": "60级以上愚人众·债务处理人掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6560,7 +6634,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上愚人众·先遣队掉落", "type": "single" },
       { "name": "40级以上愚人众·债务处理人少量掉落", "type": "single" },
       { "name": "40级以上愚人众·萤术士少量掉落", "type": "single" },
@@ -6588,10 +6661,10 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上愚人众·先遣队掉落", "type": "single" },
       { "name": "60级以上愚人众·债务处理人少量掉落", "type": "single" },
-      { "name": "60级以上愚人众·萤术士少量掉落", "type": "single" }
+      { "name": "60级以上愚人众·萤术士少量掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6627,7 +6700,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上盗宝团掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6653,8 +6725,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上盗宝团掉落", "type": "single" }
+      { "name": "60级以上盗宝团掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6690,7 +6762,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上骗骗花掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6716,8 +6787,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上骗骗花掉落", "type": "single" }
+      { "name": "60级以上骗骗花掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6755,7 +6826,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上幼岩龙蜥掉落", "type": "single" },
       { "name": "40级以上岩龙蜥掉落", "type": "single" },
       { "name": "40级以上深海龙蜥掉落", "type": "single" },
@@ -6783,10 +6853,10 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上幼岩龙蜥掉落", "type": "single" },
       { "name": "60级以上岩龙蜥掉落", "type": "single" },
-      { "name": "60级以上深海龙蜥掉落", "type": "single" }
+      { "name": "60级以上深海龙蜥掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6822,7 +6892,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上野伏众掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6848,8 +6917,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上野伏众掉落", "type": "single" }
+      { "name": "60级以上野伏众掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6885,7 +6954,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上遗迹机兵掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6911,8 +6979,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上遗迹机兵掉落", "type": "single" }
+      { "name": "60级以上遗迹机兵掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -6948,7 +7016,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上愚人众·冬国仕女掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -6974,8 +7041,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上愚人众·冬国仕女掉落", "type": "single" }
+      { "name": "60级以上愚人众·冬国仕女掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7011,7 +7078,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上飘浮灵掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7037,8 +7103,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上飘浮灵掉落", "type": "single" }
+      { "name": "60级以上飘浮灵掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7074,7 +7140,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上兽境之狼掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7100,8 +7165,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上兽境之狼掉落", "type": "single" }
+      { "name": "60级以上兽境之狼掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7139,7 +7204,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上蕈兽掉落", "type": "single" },
       { "name": "40级以上活化状态下蕈兽少量掉落", "type": "single" },
       { "name": "40级以上枯焦状态下蕈兽少量掉落", "type": "single" },
@@ -7167,10 +7231,10 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上蕈兽掉落", "type": "single" },
       { "name": "60级以上活化状态下蕈兽少量掉落", "type": "single" },
-      { "name": "60级以上枯焦状态下蕈兽少量掉落", "type": "single" }
+      { "name": "60级以上枯焦状态下蕈兽少量掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7207,7 +7271,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上活化状态下蕈兽掉落", "type": "single" },
       { "name": "40级以上枯焦状态下蕈兽掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
@@ -7234,9 +7297,9 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "60级以上活化状态下蕈兽掉落", "type": "single" },
-      { "name": "60级以上枯焦状态下蕈兽掉落", "type": "single" }
+      { "name": "60级以上枯焦状态下蕈兽掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7272,7 +7335,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上镀金旅团掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7298,8 +7360,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上镀金旅团掉落", "type": "single" }
+      { "name": "60级以上镀金旅团掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7335,7 +7397,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上遗迹龙兽掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7361,8 +7422,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上遗迹龙兽掉落", "type": "single" }
+      { "name": "60级以上遗迹龙兽掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7398,7 +7459,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上元能构装体掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7424,8 +7484,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上元能构装体掉落", "type": "single" }
+      { "name": "60级以上元能构装体掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7461,7 +7521,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上圣骸兽掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7487,8 +7546,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上圣骸兽掉落", "type": "single" }
+      { "name": "60级以上圣骸兽掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7524,7 +7583,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上丘丘游侠掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7550,8 +7608,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上丘丘游侠掉落", "type": "single" }
+      { "name": "60级以上丘丘游侠掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7587,7 +7645,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上原海异种掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7613,8 +7670,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上原海异种掉落", "type": "single" }
+      { "name": "60级以上原海异种掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7650,7 +7707,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上发条机关掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7676,8 +7732,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上发条机关掉落", "type": "single" }
+      { "name": "60级以上发条机关掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7713,7 +7769,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上浊水幻灵掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7739,8 +7794,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上浊水幻灵掉落", "type": "single" }
+      { "name": "60级以上浊水幻灵掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7776,7 +7831,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上隙境原体掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7802,8 +7856,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上隙境原体掉落", "type": "single" }
+      { "name": "60级以上隙境原体掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7839,7 +7893,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上愚人众·役人掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7865,8 +7918,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上愚人众·役人掉落", "type": "single" }
+      { "name": "60级以上愚人众·役人掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7902,7 +7955,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上玄文兽掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7928,8 +7980,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上玄文兽掉落", "type": "single" }
+      { "name": "60级以上玄文兽掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -7965,7 +8017,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上魔像禁卫掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -7991,8 +8042,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上魔像禁卫掉落", "type": "single" }
+      { "name": "60级以上魔像禁卫掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -8028,7 +8079,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上纳塔龙众掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -8054,8 +8104,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上纳塔龙众掉落", "type": "single" }
+      { "name": "60级以上纳塔龙众掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -8091,7 +8141,6 @@
     "type": "角色与武器培养素材",
     "star": 2,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上部族龙形武士掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -8117,8 +8166,8 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上部族龙形武士掉落", "type": "single" }
+      { "name": "60级以上部族龙形武士掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -8154,7 +8203,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上大灵显化身掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -8180,8 +8228,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上大灵显化身掉落", "type": "single" }
+      { "name": "60级以上大灵显化身掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -8217,7 +8265,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上熔岩游像掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -8243,8 +8290,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上熔岩游像掉落", "type": "single" }
+      { "name": "60级以上熔岩游像掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -8280,7 +8327,6 @@
     "type": "角色与武器培养素材",
     "star": 3,
     "source": [
-      { "name": "合成获得", "type": "single" },
       { "name": "40级以上秘源机兵·寻捕械掉落", "type": "single" },
       { "name": "星尘兑换", "type": "single" }
     ],
@@ -8300,8 +8346,8 @@
     "type": "角色与武器培养素材",
     "star": 4,
     "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "60级以上秘源机兵·寻捕械掉落", "type": "single" }
+      { "name": "60级以上秘源机兵·寻捕械掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
     ],
     "convert": [
       {
@@ -8361,7 +8407,10 @@
     "description": "名为深邃拟覆叶的魔物在被击败后所残余，由蜷缩在一起的叶片构成的核心。\\n即使已如生机尽失般黯淡下去，但是仍能感受到其中隐约鼓动的不祥之力。\\n时常有人感到困惑，当此种魔物被消灭时，它从大地之中汲取的那些记忆都去往了何处？或许这枚核心提供了这一问题的答案。",
     "type": "角色与武器培养素材",
     "star": 4,
-    "source": [{ "name": "60级以上深邃拟覆叶掉落", "type": "single" }],
+    "source": [
+      { "name": "60级以上深邃拟覆叶掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
+    ],
     "convert": [
       {
         "id": "11072",
@@ -8420,7 +8469,10 @@
     "description": "击败炉壳山鼬后，从其背上取得的完整的背壳碎块。\\n据说在一个种群之中，地位越高的炉壳山鼬，其背后蕴藏的燃素会更多，而地位越低越弱的个体，背后蕴藏的燃素越少。形成这个现象的原因也许很好解释：地位越高的炉壳山鼬，需要运用到背后积蓄的燃素的机会或许永远没有地位低的个体那样多吧。",
     "type": "角色与武器培养素材",
     "star": 4,
-    "source": [{ "name": "60级以上炉壳山鼬掉落", "type": "single" }],
+    "source": [
+      { "name": "60级以上炉壳山鼬掉落", "type": "single" },
+      { "name": "星尘兑换：兑换后合成", "type": "single" }
+    ],
     "convert": [
       {
         "id": "11074",
@@ -8770,7 +8822,10 @@
     "description": "从蒙德的东风之主身上，取下的一枚翎羽。\\n那是经历了千年之风的龙之羽。追求自由的本心使它几乎唤起轻风，好逃离现今的桎梏；但它的旧主对你的赏识，使它留在了你的掌心里。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上风魔龙挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上风魔龙挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60001",
@@ -8794,7 +8849,10 @@
     "description": "从蒙德的东风之主身上，取下的一丝锋锐。\\n因为过去撕裂了伟大魔龙「杜林」的血肉的缘故，过去蕴含着骇人的猛毒。但经过你的净化与治愈，其中躁动的毒性终于平息。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上风魔龙挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上风魔龙挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60003",
@@ -8818,7 +8876,10 @@
     "description": "从蒙德的东风之主唤起的狂风中，采来的些许力量。\\n它的身躯是优美而通透的，信风与龙卷都愿为它效力。只要乘风而行，风就是它的同伴、它的歌声与它的自由。\\n而它的敌人，就是一千种名字各异的风的敌人。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上风魔龙挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上风魔龙挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60005",
@@ -8842,7 +8903,10 @@
     "description": "从北风的伟大王狼身上，取来的些许尾鳞。\\n失去了生命与形体的北风王狼仍有超越凡俗的伟大力量。为了迎接挑战而用冰与风复现的形体也无法容下它的全部，少数灵魂附在了在战斗中脱落的冰鳞上。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上北风狼挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上北风狼挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60101",
@@ -8866,7 +8930,10 @@
     "description": "从北风的伟大王狼身上，取来的些许凝冰。\\n这片大地曾经北风呼啸，呼气凝霜。如砂砾的冰与雪在寒风中嚣叫，飞舞着将肌肤撕裂，让血液凝结。如今的北风王狼力量虽然不如往昔，却仍有能将大地冰封的力量。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上北风狼挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上北风狼挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60103",
@@ -8890,7 +8957,10 @@
     "description": "从北风的伟大王狼之灵处，取来的些许力量。\\n这片大地上曾经北风呼啸，呼气凝霜。但它在最终终于明白，酷烈的北风只能熄灭生命，不能滋养生命。在生命的末尾，它让自己的力量流入这片大地，永远守护大地与大地的住民。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上北风狼挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上北风狼挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60105",
@@ -8950,7 +9020,10 @@
     "description": "战胜解放了邪眼之力的「公子」后，取来的水鲸之角。\\n传说中，命之座的图形反映着人的气质。而巡弋漆黑夜空的星辰之鲸，恐怕映照出的是粉碎一切、吞噬一切的狂傲理念吧…\\n而接受了这一面的他，欣然唤出灭世的水之鲸，投身与你的战斗。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上公子挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上公子挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60201",
@@ -8986,7 +9059,10 @@
     "description": "战胜解放了邪眼之力的「公子」后，得到的武器破片。\\n因为曾经抵达无穷的至暗之地，以少年的双眼目睹了那个国度的漆黑，因此不可逆地染上了不应属于这个世界的深邃色彩。\\n纵使「邪眼」的力量与其无关，但物似主人形…",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上公子挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上公子挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60203",
@@ -9022,7 +9098,10 @@
     "description": "战胜解放了邪眼之力的「公子」后，取来的些许力量。\\n经过无尽历练的气势与战意在全力的厮杀中喷涌而出，物质化的产物。\\n倘若人类拥有命运，那恐怕他的命运也为之歪曲了吧。否则，他又为何总是身处斗争的漩涡中心呢。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上公子挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上公子挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60205",
@@ -9067,7 +9146,10 @@
     "description": "千年刚玉凝成的结晶之角，乃是「龙王」的天生冠冕。\\n注之以精魄，塑之以顽岩。它自山涧而生，在群岩的国土彰示天地的威权，而黄金般的长角则是它在过去与某位君王分庭抗礼的标志。\\n曾一度裂折失色，如今却在你的手中闪烁着冰冷的黄金光泽。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上若陀龙王挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上若陀龙王挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60301",
@@ -9091,7 +9173,10 @@
     "description": "闪烁着特异色泽的骨质枝条，以「龙王」的力量滋养而生。\\n憎恨淌过天成的泉道，交汇冰冷的月光，令晶化的枝桠舒展而生…\\n即使在战斗中已被斩落，龙血滋养的枝叶仍在簌簌作响，永无宁时。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上若陀龙王挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上若陀龙王挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60303",
@@ -9115,7 +9200,10 @@
     "description": "玄岩之中自然而生的鳞甲，坚韧而沉默，蕴含着「龙王」的威能。\\n在无数代蝼蚁归于腐土的岁月中，黄金与黑曜嵌入磐石造就的血肉，蔓延盘生而成甲胄。\\n炽热的痛感，无声的呼号，或许皆会在恩怨终结的一刻消散吧。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上若陀龙王挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上若陀龙王挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60305",
@@ -9184,7 +9272,10 @@
     "description": "战胜解放了原本力量的「女士」后，得到的某种蕴含着强大力量的畸形碎片。\\n「我做了一个很长的梦。\\n「我梦见我与你，在我们缔造的纯白世界中再会。\\n「但我终于醒来了。我早已经被烈火吞没。你早已与毒血一同回归大地。\\n「不过都无所谓了。要不断往前走，就要烧毁身后的一切，就要相信他所说的永远纯白无瑕的国度，在地平线的尽头，『陛下』的梦中，在他让我看见的『妄念』里。」",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上女士挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上女士挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60401",
@@ -9208,7 +9299,10 @@
     "description": "战胜解放了原本力量的「女士」后，得到的某种蕴含着温暖的力量的畸形碎片。\\n应激的冰之封印被打破，过往的意志冲破苍白的囚牢，她再度想起自己原本的名字时，不死蝶会随着血肉焚毁一同逸散飞舞。而她也想起了漫游大地，散布烈焰，烧尽一切罪恶的过去，以及自己未能再见的那个人的面貌。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上女士挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上女士挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60403",
@@ -9232,7 +9326,10 @@
     "description": "战胜解放了原本力量的「女士」后，得到的某种蕴含着强大思念的畸形碎片。\\n即使是泪水也无法使火焰熄灭。铁水般炽热的哀伤与愤怒在她的血管中奔涌，从泪腺中迸发。\\n在她的心脏被永恒之火烧尽前，最初的愚者找到了她。他明白，只有更加深刻的仇恨与妄执，才能熄灭吞噬她的火焰，让她成为自己的同伴…",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上女士挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上女士挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60405",
@@ -9292,7 +9389,10 @@
     "description": "从净土中取回来的人偶关节，这一部分乃是象征着「所见即所为」的手眼造型。\\n已经化做祸神的「她」，同样可以驾驭此等手眼神通。目光所见之瞬间，便已斩出一刀。\\n然而万劫太过久远，凶将之骸亦得春生。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上永恒的守护者挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上永恒的守护者挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60501",
@@ -9316,7 +9416,10 @@
     "description": "从净土中取回的人偶关节，这一部分乃是「恶曜之眼」的造型。\\n仅仅依靠凝视就可以降下灾祸与诅咒，因此把人生之不顺归咎于「祸神」似乎理所当然。但是好好想想吧，倘若意志足够强大，信念足够坚定…\\n万劫太过久远，凶星恶曜亦能以泪涤净自身。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上永恒的守护者挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上永恒的守护者挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60503",
@@ -9340,7 +9443,10 @@
     "description": "在一切尘埃落定之后，从净土带回的小小头饰。\\n一念则万劫尽，总有思念可以超越时间。\\n百千万劫，「真」实之意，不知道是否传达到了。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上永恒的守护者挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上永恒的守护者挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60505",
@@ -9418,7 +9524,10 @@
     "description": "插入机心人偶背部的导管。流淌其中的色彩时而晦暗时而明艳，矛盾到令人恐惧。\\n为机心人偶提供能量，同时也如悬挂木偶的丝线一般控制束缚着人偶。\\n失去导管支撑，人偶将羸弱得堪比新生幼儿，寸步难行。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上「正机之神」挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上「正机之神」挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60601",
@@ -9442,7 +9551,10 @@
     "description": "正机之主胸前用于隔断外界的镜面。特意绘上了三重巴纹以宣告其身份与威严。\\n此纹样并非向雷之主人宣告臣服，\\n而是刺往世间既有之威能的利刃；\\n此镜面并非隔绝世人批判之目光，\\n而是断却俗世一切之污脏的宫墙。\\n于此大殿中施舍惩戒，洗净蒙昧，\\n颠倒梦想、剜去心因，重书定业。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上「正机之神」挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上「正机之神」挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60603",
@@ -9466,7 +9578,10 @@
     "description": "状似铃铛，用来连接机体臂部的球形关节部件。看起来精致小巧，却能负荷远超想象的能量。\\n链接手臂，自己的双臂就会失去知觉；\\n链接腿部，自己的双腿几乎无法使力；\\n而链接这颗机械之颅…\\n憎恨与痛苦，疯狂与自傲，都不会被洗去。\\n万幸。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上「正机之神」挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上「正机之神」挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60605",
@@ -9508,7 +9623,10 @@
     "description": "从阿佩普体内的绿洲中取来的一支蕨草。\\n在时间开始之前，世界曾经由龙管辖。而在阿佩普的宫阙灵囿里、草木生长之天地中，首先抽芽的便是蕨草。\\n在随后的漫长年月当中，蕨草将变为树木、藤蔓、根茎与草叶，遍布大地。但阿佩普还记得最初的一支蕨草由蜷曲的姿态，向无拘无束的天空伸展开时，发出的细不可闻的声响。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上阿佩普的绿洲守望者挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上阿佩普的绿洲守望者挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60701",
@@ -9544,7 +9662,10 @@
     "description": "从阿佩普体内的绿洲中取来的保有古老原始形态的花朵。\\n在随后的漫长年月当中，花取得了无穷多的色彩与芬芳，也获得了如夜空中繁星的数量一般多的名字。\\n但这朵最初绽放的花始终没有名字。对古老的龙而言，即便玫瑰失去了它的名字，也不会失去它的芳香。定义不过是狭隘短寿的物种用于认识世界的工具；生命是不会为字词所限，永远变化着的。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上阿佩普的绿洲守望者挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上阿佩普的绿洲守望者挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60703",
@@ -9580,7 +9701,10 @@
     "description": "从阿佩普体内的绿洲中取来的一枚琥珀。其中禁锢着细小的，如今已经绝迹的飞虫。\\n包裹着细小生命的琥珀对于树木而言是偶然，对其中的存在而言则是命运。\\n随着从天而降的灾厄，树木、藤蔓、根茎与花草纷纷枯干，化作尘埃，许多的生命也消失了。\\n但静止在琥珀当中，又被珍藏于这一不存在于地上的绿洲里的无名飞虫，也因此得以前往同族无缘抵达的未来。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上阿佩普的绿洲守望者挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上阿佩普的绿洲守望者挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60705",
@@ -9631,7 +9755,7 @@
   {
     "id": 113051,
     "name": "帝皇的决断",
-    "description": "铁甲熔火帝皇的战锤。无论是其他的原海异种，还是发条机关或是一时兴起的讨伐者，它用这只巨钳粉碎了无数觐见者。\\n与人不同：在原海异种当中，不存在贵族，也不存在富人之子，谁也无法生来就高于别的同类。能够克服一切逆境、战胜一切天敌的原海异种在漫长的岁月中能够随着捕猎与进食，无限地积累力量成长，最终被充满畏惧地称为霸王。",
+    "description": "铁甲熔火帝皇的战锤。\\n无论是其他的原海异种，还是发条机关或是一时兴起的讨伐者，它用这只巨钳粉碎了无数觐见者。\\n与人不同：在原海异种当中，不存在贵族，也不存在富人之子，谁也无法生来就高于别的同类。能够克服一切逆境、战胜一切天敌的原海异种在漫长的岁月中能够随着捕猎与进食，无限地积累力量成长，最终被充满畏惧地称为霸王。",
     "type": "角色培养素材",
     "star": 4,
     "source": [{ "name": "30级以上铁甲熔火帝皇掉落", "type": "single" }],
@@ -9661,7 +9785,10 @@
     "description": "与吞星之鲸战斗时，不知不觉缠绕在武器上的细丝。\\n在古代的枫丹，曾有人认为主宰万物现象的「法图纳」是由无比细微的「纤维」编制而成，就如同组成竖琴的弦丝。与宏伟的乐声共振的丝线将会带来普世的幸福，正如不谐音会破坏宇宙的肌理。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上吞星之鲸挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上吞星之鲸挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60801",
@@ -9685,7 +9812,10 @@
     "description": "从吞星之鲸的战斗中取得的奇异「物质」，实际质量远比从尺寸看上去的重。\\n一切都聚集在命定沉重的事物旁，正如黄金比之黑铁、大地比之轻风。正如光线无法从黑暗的涡眼当中逃脱，因缘也会汇聚在沉重的命运上，或许这也是不可逆转的规则吧。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上吞星之鲸挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上吞星之鲸挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60803",
@@ -9709,7 +9839,10 @@
     "description": "在与吞星之鲸的激烈战斗中，产生的碎屑。\\n宇宙是黑暗而冰冷的地方。\\n但仔细看吧。其中总有无比细微的亮光，如同半掩沙中的珍珠、撒在沥青上的碎钻、雾夜中视界尽头的灯光，以及点燃枯草原的火星。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上吞星之鲸挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上吞星之鲸挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60805",
@@ -9760,7 +9893,10 @@
     "description": "完成与「仆人」的决斗后，在废墟中拾起的灯烛。\\n相传当烛火摇曳于罪人的手中，光亮即可化作阴影，掩盖脚步声与杀意。\\n不知用何种材料制成，燃烧后没有蜡泪，只有黑色的灰烬散入风中，飘向未知的远方。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上「仆人」挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上「仆人」挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60901",
@@ -9784,7 +9920,10 @@
     "description": "完成与「仆人」的决斗后，在废墟中拾起的晶片。\\n已经冷却的血与火依旧维持着羽毛的形状，周围缭绕着凝固的黑色细线。\\n心智尚未成熟之时，稚童们总是依赖父母的精心照料，如同雏鸟需要羽翼的庇护。\\n为了满足这份愿望，「父亲」将危险的蛛丝织成羽毛，模仿成鸟的翅膀，为家中带去些许温暖。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上「仆人」挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上「仆人」挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60903",
@@ -9808,7 +9947,10 @@
     "description": "完成与「仆人」的决斗后，在废墟中拾起的耳钉。\\n红色的符号如同她眼中的图案，既是申敕也是否决。\\n失怙失恃的孩子们自幼就蒙受诸般苦难，这些她都记在心底。\\n命运审视人间，亦将有人审视命运。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上「仆人」挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上「仆人」挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "60905",
@@ -9832,7 +9974,7 @@
     "description": "「英雄点燃圣火，照亮世界，又终将沉眠，枕星安息。」\\n「他们留下了一块石头，一张织物。我们以此为基石，搭起了永不断绝的文明。」",
     "type": "角色培养素材",
     "star": 5,
-    "source": [],
+    "source": [{ "name": "完成纳塔地区任务获得", "type": "single" }],
     "convert": []
   },
   {
@@ -9856,7 +9998,7 @@
   {
     "id": 113066,
     "name": "秘刻金纹的源核",
-    "description": "在击败秘源机兵·构型械后，从其失去动力而解离的躯体中寻找到的核心构件。\\n据说驱使所有现在被称为秘源机兵的机械核心的其实都是同一种核心，只是不同核心携带的信息并不一样，其上金色纹路图案的差别或许也可以说明这一点。起初只是为了让工具能够自如运转而在回路之中加入了诸多命令，或许正是这种命令的重重叠加，最后造就了人造智慧的雏形吧。",
+    "description": "在击败秘源机兵·构型械后，从其失去动力而解离的躯体中寻找到的核心构件。\\n据说驱使所有现在被称为秘源机兵的造物的核心都是同一种，只是不同核心携带的信息并不一样，其上金色纹路图案的差别或许也可以说明这一点。起初只是为了让工具能够自如运转而在回路之中加入了诸多命令，或许正是这种命令的重重叠加，最后造就了人造智慧的雏形吧。",
     "type": "角色培养素材",
     "star": 4,
     "source": [{ "name": "30级以上秘源机兵·构型械掉落", "type": "single" }],
@@ -9877,7 +10019,10 @@
     "description": "在与蚀灭的源焰之主战斗后，斩下的魔龙的焰角。\\n传说最初的源火是一切光明与智慧诞生之处，而火龙之角犹如光炬一般照亮蛮荒凄凉的世界。\\n在焰角底座已受腐蚀的情况下，一度点亮世界的光辉也并未染上丝毫的污浊。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上蚀灭的源焰之主挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上蚀灭的源焰之主挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "61001",
@@ -9901,7 +10046,10 @@
     "description": "在与蚀灭的源焰之主战斗后，仍在不息燃烧的环状火焰。\\n最初，在最深邃的夜晚里，执掌火焰的主人仿照太阳，以此取代星空的光芒。\\n一半的火焰已受侵蚀的焰芒之辉，似乎还能看出映照旧日世界的光采。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上蚀灭的源焰之主挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上蚀灭的源焰之主挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "61003",
@@ -9925,7 +10073,10 @@
     "description": "在与蚀灭的源焰之主战斗后，落于地面的漆黑鳞片。\\n古老的龙众曾经用自身脱落的鳞片以传递秘密的信息与谕令。\\n完全被漆黑之力腐蚀的鳞片，原本镌刻其上的光芒被噬尽后，唯留有扭曲与黑暗的残余。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上蚀灭的源焰之主挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上蚀灭的源焰之主挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "61005",
@@ -9967,7 +10118,10 @@
     "description": "这是物质经过炼金术的活性化反应后，所留下的珍稀样本。\\n秘典的记述中，青铜骑士并不知道自己的使命是征服还是守护。它只是经历了炼金术的擢升，开始寻找自己的意义罢了。青铜时代是英雄的时代。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上门扉前的弈局挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上门扉前的弈局挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "61101",
@@ -9991,7 +10145,10 @@
     "description": "这是物质经过炼金术的活性化反应后，所留下的珍稀样本。\\n棋子的「车」词源乃是古代须弥语言的「战车」。在占卜牌中，「战车」的画面必须驾驭黑白双色的神驹，这也是炼金术里驾驭性质相反之物的平衡之道。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上门扉前的弈局挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上门扉前的弈局挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "61103",
@@ -10015,7 +10172,10 @@
     "description": "这是物质经过炼金术的活性化反应后，所留下的珍稀样本。\\n「王后」棋子曾经的名字是「宰相」。但是随着游戏规则的发展，它变成了象征外戚势力的最强重子，实至名归的黄金王族。\\n普通士兵的升变和炼金术的物质嬗变或许有些相似之处吧。但是就算成为了黄金，也只能用倒置的城堡来表示。",
     "type": "角色培养素材",
     "star": 5,
-    "source": [{ "name": "70级以上门扉前的弈局挑战奖励", "type": "single" }],
+    "source": [
+      { "name": "70级以上门扉前的弈局挑战奖励", "type": "single" },
+      { "name": "合成台-转化页签：转化获取", "type": "single" }
+    ],
     "convert": [
       {
         "id": "61105",
@@ -10068,6 +10228,7 @@
     "star": 2,
     "source": [
       { "name": "蒙德纪念品商店兑换", "type": "single" },
+      { "name": "礼包商城兑换", "type": "single" },
       { "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }
     ],
     "convert": []
@@ -10078,10 +10239,7 @@
     "description": "赋予武器突破之力的材料。\\n烈风的魔神「迭卡拉庇安」对自己所造的王城十分满意，他在高塔上接受所有追随者的跪拜。但他却不知道，众人对他俯身并非出于敬仰爱戴。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12001",
@@ -10103,10 +10261,7 @@
     "description": "赋予武器突破之力的材料。\\n「安德留斯」曾经对高塔的孤王宣战，却也无法损伤王都分毫。若不是「自由」高歌的瞬间让这座城市土崩瓦解，这一切都会继续永远之梦。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12002",
@@ -10128,10 +10283,7 @@
     "description": "赋予武器突破之力的材料。\\n众人对高塔上的孤王俯身并非出于敬仰爱戴，而是被它的烈风吹得无法起身。这是巴巴托斯崛起之前，风神之一柱的野心与碎梦。\\n它是如此用力地做梦，因此梦的碎片也带着强大的力量。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：水光之城", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12003",
@@ -10155,6 +10307,7 @@
     "star": 2,
     "source": [
       { "name": "蒙德纪念品商店兑换", "type": "single" },
+      { "name": "礼包商城兑换", "type": "single" },
       { "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }
     ],
     "convert": []
@@ -10165,10 +10318,7 @@
     "description": "赋予武器突破之力的材料。\\n狼的生活经常伴有厮杀，断骨裂齿的死斗也不罕见。\\n「安德留斯」认为人类只会带来失望，但是纯真的婴儿是无辜的。狼群选择了孩子，孩子如果也选择了狼，那么他们就结成了「卢皮卡」——命运的家族。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12004",
@@ -10190,10 +10340,7 @@
     "description": "赋予武器突破之力的材料。\\n狼群也充分理解，人如果没有同类会感到孤独。光荣的断牙是狼们离别的赠礼，据说真的有保护平安的魔力。\\n在遥远世界的传说里，有一只母狼领养了伟大的双子。狼与人所同住的「家」则被称为「狼之洞」，也就是「卢佩卡」，与这个世界的「卢皮卡」同义。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12005",
@@ -10215,10 +10362,7 @@
     "description": "赋予武器突破之力的材料。\\n认为自己讨厌人类的奔狼之王，自觉无法去描绘人类的幸福生活，因此没有资格成为尘世的风之王。于是它选择了消失。但是事实不是这样的，它看着被抛弃之人的眼神是如此温柔。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：深没之谷", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12006",
@@ -10242,6 +10386,7 @@
     "star": 2,
     "source": [
       { "name": "蒙德纪念品商店兑换", "type": "single" },
+      { "name": "礼包商城兑换", "type": "single" },
       { "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }
     ],
     "convert": []
@@ -10252,10 +10397,7 @@
     "description": "赋予武器突破之力的材料。\\n曾经施在大英雄温妮莎身上的枷锁——或者这么说吧，那个时代里，所有剑斗士都会背负镣铐。狮牙的斗士也只是其中一员。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12007",
@@ -10277,10 +10419,7 @@
     "description": "赋予武器突破之力的材料。\\n温妮莎并不是被镣铐或者锁链困住的，她想要挣脱枷锁和镣铐的话，随时都能击碎蒙德融造的普通金属。毕竟这里既没有优秀的矿石，也没有故乡的神火。\\n锁住她的，是守护族人的责任。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12008",
@@ -10302,10 +10441,7 @@
     "description": "赋予武器突破之力的材料。\\n温妮莎从奴役之中得到了自由。结果锁住她的东西越来越大了：从族人变成了整个蒙德，甚至变成了「自由」，乃至这个世界。\\n她是发自真心这么希望着的：愿这个世界变得更加坚强一些。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：渴水的废都", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12009",
@@ -10329,6 +10465,7 @@
     "star": 2,
     "source": [
       { "name": "璃月纪念品商店兑换", "type": "single" },
+      { "name": "礼包商城兑换", "type": "single" },
       { "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }
     ],
     "convert": []
@@ -10339,10 +10476,7 @@
     "description": "赋予武器突破之力的材料。\\n所以对于知情人士来说，孤云阁并不是什么愉快的海上奇观，而是曾经璃月众神的墓园。这里的确会周期性地涌起不祥和污秽，不过那都被另一个降妖伏魔的少年平息了。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12010",
@@ -10364,10 +10498,7 @@
     "description": "赋予武器突破之力的材料。\\n岩枪的核心是发着暗淡光辉的核心，那是战败魔神的力量深入岩石形成的。他们的怨恨并不针对摩拉克斯，因为他们早就已经没有自我了，不可能还残留私怨。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12011",
@@ -10389,10 +10520,7 @@
     "description": "赋予武器突破之力的材料。\\n于此躁动、作祟的，正是嗟叹连绵的众神圣骸之体。它们是未能实现的理想，对人类另一种幸福生活的描绘。它们以深海、层岩收纳，却不愿意就此入梦。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：雷云祭坛", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12012",
@@ -10416,6 +10544,7 @@
     "star": 2,
     "source": [
       { "name": "璃月纪念品商店兑换", "type": "single" },
+      { "name": "礼包商城兑换", "type": "single" },
       { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }
     ],
     "convert": []
@@ -10426,10 +10555,7 @@
     "description": "赋予武器突破之力的材料。\\n符箓可以让仙人力量借符号残留，外景可以用心像造出宇宙洞天。丹鼎之术，则一直笼罩在秘密之中。毕竟尝试吞下这些金丹的话，结果必定十死无生。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12013",
@@ -10451,10 +10577,7 @@
     "description": "赋予武器突破之力的材料。\\n其实所谓金丹，真的是字面意思的金属之丹。这些都是仙人们制造的合金，融合了神通之力，可以给与武器超越的力量。武人似乎都觉得武道优于仙道，不怎么访神问仙。所以金丹并没什么机会给出去。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12014",
@@ -10476,10 +10599,7 @@
     "description": "赋予武器突破之力的材料。\\n这是金丹的最高品质，它模拟了混沌初开、清浊不分、天地一体的状态。据说这个是天地创世的缩影。当然，那位是知道的，世界的重现不是这样的。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：鸣雷城墟", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12015",
@@ -10503,6 +10623,7 @@
     "star": 2,
     "source": [
       { "name": "璃月纪念品商店兑换", "type": "single" },
+      { "name": "礼包商城兑换", "type": "single" },
       { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }
     ],
     "convert": []
@@ -10513,10 +10634,7 @@
     "description": "赋予武器突破之力的材料。\\n璃月之地向来都有海怪的传说，毕竟彼方是超越提瓦特的未知区域了。没有了尘世七神的守护，外面不知道是怎样的一团混沌。能把岩王帝君的力量都染黑的，正是提瓦特秩序之外的力量。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12016",
@@ -10538,10 +10656,7 @@
     "description": "赋予武器突破之力的材料。\\n提瓦特沿海的诸国把超越七神庇护的外部称之为「暗之外海」，据说许多战败的魔神不愿意活在新的七神秩序之下，于是逃到了远岛，化作了邪神。不过它们的力量和岩王帝君的力量本就同源，和这个吞噬一切的漆黑并不一样。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12017",
@@ -10563,10 +10678,7 @@
     "description": "赋予武器突破之力的材料。\\n坎瑞亚覆灭的时代，某位大罪人制造了无数的魔兽。它们流淌着与此世不容的黑血，在大陆上践踏众生、破坏一切。它们的生命是变质的，由世界外的力量赐予的。硬要说的话，袭击蒙德的「杜林」也是此类。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：古雷试炼场", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12018",
@@ -10588,7 +10700,10 @@
     "description": "赋予武器突破之力的材料。\\n稻妻列岛中距离鸣神岛最遥远的「海祇」，在海祇岛的古语中的意思是「统管诸海的大神」。传说大蛇在常夜的渊下国土中初次现身时，身上覆满了四色的珊瑚枝，散发着煌煌的荧光。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -10597,10 +10712,7 @@
     "description": "赋予武器突破之力的材料。\\n这种珊瑚在提瓦特的大地上是见不到的，是大蛇闯入「暗之外海」时，获得的礼赠。因此对于深海的大蛇而言，身负珊瑚枝象征着力量；而失去珊瑚枝时，力量会相应地折损。换言之，折断的珊瑚枝中也蕴含着超常的力量。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12019",
@@ -10622,10 +10734,7 @@
     "description": "赋予武器突破之力的材料。\\n失去了一切、逃向暗之外海的魔神在海渊中，见到了什么都没有的弃民。于是它决定留下来，成为他们的「远吕羽氏尊」、「海祇大御神」。\\n传说大蛇神曾经折下身上所有的珊瑚枝，让蜷缩在黑暗中的孩子们拥有照亮周遭的光明。又有一说它用折下的珊瑚枝架起了登高的阶梯，让它的孩子们再次回到了地面上，见到阳光。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12020",
@@ -10647,10 +10756,7 @@
     "description": "赋予武器突破之力的材料。\\n「海祇」之名所背负的含义，归根到底只是曾栖身在深海中的弃民，对引领他们的蛇神一厢情愿的期许罢了。\\n也正是因为有了仰望自己的子民，所以蛇神不得不留在本应逃离的世界里，折下身上的珊瑚枝，向自己不应涉足的土地入侵，与自己无法抗衡的敌手战斗，直到神体与山丘一同被斩断；直到鲜血化为电浆；直到思念与力量沦为永远无法消散的「祟神」。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：沉沙之渊", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12021",
@@ -10672,7 +10778,10 @@
     "description": "赋予武器突破之力的材料。\\n在过去，先民会攀登如今被称为影向山的高峰，将雷电灼烧过的树木雕琢成曲勾形，为照亮高天的闪电、震撼大地的鸣雷赋予造型。这个形象在漫长岁月的积累中，最终演化成了「雷之三重巴」的纹样，象征着雷的眷顾、智慧与威能，以及代行此等眷顾、智慧与威能的人们。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -10681,10 +10790,7 @@
     "description": "赋予武器突破之力的材料。\\n在鸣神的幕府中设有奉行之名，乃是诸类事务的管理与执行者。在妖物悠长久远的故事中，在过去，深受将军殿下亲近信赖者会佩戴这种曲勾造型的护符；而奉行之名也取自欢喜奉行之意，得到她青睐的人，也会回报以爱与忠义。而从某一时点开始，一切都不再是原本的模样了。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12022",
@@ -10706,10 +10812,7 @@
     "description": "赋予武器突破之力的材料。\\n漫游在荒野中，或是与人一同生活的妖物都会被「雷之三重巴」所代表的御建鸣神主尊所吸引。纵使他们的寿命远远久于万物灵长，也有终结的一日。要在有限的寿命中求得永恒与无限，就只能骥望于「永恒」能记住他们了。而她也回应了他们的愿望，将所有的敌手与友人铭记于心。据说，无论是栖息在迷雾当中、撕裂天空的魔性之枭，胆敢擅闯御苑的怪化狸，还是那位武艺高强容貌如月、最终却对自己露出尖牙的鬼族少女；无论是曾经展开黑翼自在空行的天狗，抑或是与她同行，最终又永远消失的「狐斋宫大人」…\\n无数的故事静静地沉睡在她的心中，终有一日会在她所梦想的永恒净土中灼灼发光吧。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12023",
@@ -10731,10 +10834,7 @@
     "description": "赋予武器突破之力的材料。\\n雷电之尊的重宝在于威严，威严由勇武与震怒体现，震怒源于心中的爱执，勇武则是震怒的权现。最终，无论何者，只要敢于挡住望向永恒的目光，只要敢于伤害稻妻的子民，就会成为她的敌人。\\n据说御灵有四魂，仙狐有三匹，名刀有二本；而御建鸣神主尊大御所大人的威严之相，只会呈现为流星光底的无想一线。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：砂之祭场", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12024",
@@ -10756,7 +10856,10 @@
     "description": "赋予武器突破之力的材料。\\n民话传说中，过去有名鬼人「虎千代」。武艺高强，曾有在刀剑一千柄当中狂舞，被割破的十二单如同菫花般零落，身体却未受一丝伤害的说法。后来却对将军大人露出獠牙，拔刀反叛，被斩下一臂一角后遁逃，最终郁愤发狂，自裁而殁。\\n狂言称怀抱执妄之鬼往往内心惊悸而忧患。妄想永恒却恐惧须臾，总会为恐惧与怨怒吞没，是为自业自得。这种面具刻画的就是露出尖牙的虎千代。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -10765,10 +10868,7 @@
     "description": "赋予武器突破之力的材料。\\n《菫染山月虎啮鉴》中描绘的鬼人「虎千代」，曾以利齿咬碎将军的薙刀，取得过一时的上风。因此以他为原型制造的面具上往往有精心雕琢的尖牙。\\n在其结局中，负伤之兽般遁入林野，连清凉的月光也避之唯恐不及。穿过窄巷与峡谷的风声像是受伤的鬼在低声哀嚎，因此也有「虎千代风」这一季语。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12025",
@@ -10790,10 +10890,7 @@
     "description": "赋予武器突破之力的材料。\\n在鬼族失落的子守奉公子守歌中，鬼人「虎千代」是一位翩翩少年，拥有优雅勇健的身姿与华丽的容貌。他原本是将军麾下的爱将，曾忠心追随她深入漆黑的渊薮，击退邪秽之物，为血脉日渐稀薄的鬼族争取功绩。\\n纵使如今这样的歌谣已经无人传唱了，以另一种形象流传下来的有角鬼面形象仍然有着非凡的力量。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12026",
@@ -10815,10 +10912,7 @@
     "description": "赋予武器突破之力的材料。\\n背上「雷之三重巴」的纹样时名为「千代」的鬼族女武者，面对漆黑的军势时，曾被虎躯蛇尾的世外之兽吞下。最后她撕开魔兽的胸腔，得以幸存。\\n这是「虎啮的千代」之名的来由。在此后的岁月中，这一名号渐渐简化为「虎千代」。\\n但在深邃之兽的腹中，她染上了深罪的黯色，也透过猩红的利齿看见同行者被撕碎。沉湎于漆黑景色的她最终向御建鸣神主尊拔剑；后来，她持刀之臂与尖角被斩落，如同负伤的野兽般从城中逃向林野；再后来似乎是被天狗，或是终末番，或是山中修行的岩藏之胤当成不认得的怪物，收拾掉了罢，因为她俊美的容貌已经因为漆黑的仇恨与负伤痛苦变得狰狞扭曲。抑或是遇见了大蛇遗骸附近的鬼面执剑人形，故此结束了命运的旅途。\\n昔日曾与渊薮战斗者难免梦见漆黑的剧画。曾与魔兽厮杀又沦为当中一员者亦不在少数。世界的边缘正在变得稀薄而脆弱，这种侵蚀或许并非是单向的。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：流沙之葬", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12027",
@@ -10840,7 +10934,10 @@
     "description": "赋予武器突破之力的材料。\\n在最初的贤者指导下，雨林的先民曾将枯木雕成神符，以供奉纪念绿草与高木的主人。\\n神符仿照林间清露的形状雕成，象征着智慧的涓滴在凡人的心智中渗流。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -10849,10 +10946,7 @@
     "description": "赋予武器突破之力的材料。\\n后来，草木的主人教会了人们锻造黑铁的奥秘。就这样，天真的凡人学会了使用火与利刃的知识。\\n草木的主人为之欢欣，纵使火与金属会伤害她，但亦会使凡人强大。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12028",
@@ -10874,10 +10968,7 @@
     "description": "赋予武器突破之力的材料。\\n在森林的诸多故事中，身披烈火般条纹斗篷的王是迷宫的大君，是映月之水的主人。\\n当他俯首与草木的主人缔结友谊，信物便是闪烁着似水光泽的宝石与月光似的白银。\\n作为友谊的珍贵交换，草木的主人承诺为迷宫之王保守秘密，保护雨林绮丽的梦想。\\n尽管后来，一切秘密与梦构成的华美宫阙都在遗忘的深黑烈焰之下烟消云散，又融入厚重土壤，化作了新生雨林的养料。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12029",
@@ -10899,10 +10990,7 @@
     "description": "赋予武器突破之力的材料。\\n「为人只有三物值得相顾：怀抱月光的泉水、生命的绿色，与不老的容颜…」\\n「智慧」的本质并不在于掌控一切思维，谋取一切利益，而在于其能够令平凡的生命最终也获得超越桎梏的自由。\\n尽管密林中不再回荡着摄人心魄的虎啸，坚强的卫士也退隐孩童的梦中…在秘密的黄金封印都被揭开，所有的梦想在月光下如琥珀闪闪发亮的那一夜，或许她与她所深爱的凡人们将会赢得真正的自由。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：云垢", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12030",
@@ -10924,7 +11012,10 @@
     "description": "赋予武器突破之力的材料。\\n人们曾说，花的王者是欢乐与幸福之主。清泉从她的袖口涌流而出，沙漠中便有了百花盛开的绿洲；鲜花与香草紧随着她的脚步，银白的月光为她开道。\\n在高天转过脸去的艰苦时代里，花的女主人为凡人遍洒恩惠，人们开始重新认识到快乐与自我，于是再度拾起了闲暇与奢侈。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -10933,10 +11024,7 @@
     "description": "赋予武器突破之力的材料。\\n在被黄沙掩埋的古老文献中，花的王者是梦的女主人。\\n她曾为被放逐之人、癫狂之人与痴愚之人展现梦想，在梦想中为他们奉上甘美的欢乐，即使人们的手中只有黑铁的碗砵，依旧为花之女王的魅力所折服，深醉于她美丽的形象与无微不至的关怀之中。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12031",
@@ -10958,10 +11046,7 @@
     "description": "赋予武器突破之力的材料。\\n花的王者曾与镇灵为善。\\n鲜花与绿洲的女主人曾与沙漠的王共同为镇灵建起了「圆形剧场之城」阿伊·哈努姆，在古老镇灵的语言中乃是「月女城」之意。\\n但后来，据说花的女王死于烈日与黄沙的恶意，绿洲也不复有紫红的帕蒂沙兰盛开。\\n在她陨落之后，沙暴哀鸣、镇灵恸哭，月光般白银的宝石圆盘亦失却了原本的享乐用途，散发出哀伤的光芒。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12032",
@@ -10983,10 +11068,7 @@
     "description": "赋予武器突破之力的材料。\\n「何人会敬奉已死的神祇？」\\n花的王者曾与彼时的两位神王结成同盟，在智慧与威权之外，她为蒙昧的子民带来了慈悲与欢乐。\\n正如大地不能只有烈日和雨水那般，理性与强力之下，欢乐与爱、歌声与乐曲、酒与奢侈同样重要。\\n人们说，鲜花盛开的目的即是灿烂的死亡，而死亡正是花之主人从最开始便尽力追寻的终焉——因为死亡为失去的欢乐增添苦涩的风味，让它愈发浓烈地在无穷回忆之中显现。\\n黄沙的无知之王从未明晓她的道理，仅仅迷醉于她无穷的魅力与柔情——执着的追忆尽管妄入歧途，却也在花之女王的计算之中。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：思惑", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12033",
@@ -11008,7 +11090,10 @@
     "description": "赋予武器突破之力的材料。\\n很久很久以前，黄沙的居民以顽强的甲虫为原型雕成王印，用以纪念朝暮轮回的红日与无始无终的时光。\\n尽管那位王者的名讳如今已不再被人挂在嘴边，但这些小巧的王印却保留下来，隐约透露着旧日的威名。\\n它们随镀金的子孙流散四方，依然沉默地倾诉着旧主的往事。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -11017,10 +11102,7 @@
     "description": "赋予武器突破之力的材料。\\n编织万千思绪，统制万千灵魂，此所谓威权之道。\\n然而威权之道并非冷酷的暴政，其目的恰恰最为深郁——创造不再有人苦恼，不再需要迫害与奴役的真实乐土。\\n正如沉默的王从晶石的秘密中望见的一切，正如已然消逝的伴侣曾经的教诲那般。\\n玄色的虫印与铁色的裁决，就这样成为了王国法度的基石。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12034",
@@ -11042,10 +11124,7 @@
     "description": "赋予武器突破之力的材料。\\n白银的月光与碧蓝的清泉，曾装点了绿洲乐园的美景。但随着花的主人谢落在蔽日的沙暴中，无忧的黄金乐园也被死亡所淹没。\\n在镀金部族的诗歌中，银白的月光照在猩红的袍裾上，令哀恸之王阿赫玛尔发狂。\\n忧伤的沙漠歌谣唱道，出于对旧日回忆的执着，孤独的君王在沙漠中央塑造了无法老去的梦乡。在那里凝聚着不被扰动的纯洁泉水，与永远停留在日暮时分的露光。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12035",
@@ -11067,10 +11146,7 @@
     "description": "赋予武器突破之力的材料。\\n愚痴的黄沙之王统治的年代里，烈日般黄金的权力遍洒大地。\\n古旧的石碑记录，王的威权化作七道烈光或七座柱梁；王的慈悲平均地赐予每一个人手中，没有人受到忽视，亦没有人心怀不满。\\n那是一个被遗忘的黄金时代，彼时花的女王已谢落尘沙，草木的主人也决定离去。但只有黄沙的子嗣选择与他们的神祇同在，即使灾祸的阴影渐行渐近，他们所信赖的威权依旧如琥珀与黄金那般闪耀着不灭的光芒。\\n但灾祸终究还是降临了，黄金的虫印也被葬在了神殿与宫阙深处、曾雕着鹫兽与牛头的破碎柱基之下。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：引业", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12036",
@@ -11092,7 +11168,10 @@
     "description": "赋予武器突破之力的材料。\\n琴键已然腐朽的竖琴，其音腔被阻塞，已经无法奏出声响。\\n据说，遗忘乐章的后人为复活古老王朝的华丽残迹，曾在木制的机械竖琴上涂刷金漆，徒劳地将之与无言的魔像相配…\\n很久很久以后，腐朽走调的竖琴仍旧留在那些沉默的巨像手中，任海浪抚摩，奏出忧伤的余音。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }
+    ],
     "convert": []
   },
   {
@@ -11101,10 +11180,7 @@
     "description": "赋予武器突破之力的材料。\\n传说古老王朝的遗民曾以黑铁铸成竖琴，用于纪念与哀悼。\\n黑铁所铸成的竖琴，是奏不出声音的。为了哀悼那个以金色乐曲为傲的古老王朝，遗民们打造了这些沉重而沉默的乐器。\\n但无论如何，正如那沉默的时代一般，黑铁是奏不出音调的。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12037",
@@ -11126,10 +11202,7 @@
     "description": "赋予武器突破之力的材料。\\n在黄金宫殿与王座同沉的灾难中，乐章破碎，音符沉默…\\n但帝国的遗民从未放弃拯救与超越命运的执望。\\n为了拯救没落的文明与超越的旧梦，「金色剧团」奏响美妙的乐曲，指引孩童向沉睡的魔像献出高贵灵魂。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12038",
@@ -11151,10 +11224,7 @@
     "description": "赋予武器突破之力的材料。\\n神王的宏大乐章由无数曲调连缀而成，但其主调深潜于水国的共同命运之下。\\n无虑之年的协和奏鸣曲曾是文明与秩序的最高代表，但当盛世帝国沦为暴君的乐园，横暴者以华丽的黄金大氅为遮掩撕裂着与源泉的联系，不和谐的噪音终于在帝国各处蜂起扰攘之时——\\n那最初的命运之曲仍不受骚乱的影响，在黄金日渐褪色的乐谱上持续奏响着…直至一切皆被溶解，一切重回混沌。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：机思", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12039",
@@ -11176,7 +11246,10 @@
     "description": "赋予武器突破之力的材料。\\n传说在诸生命诞生之前，曾有一片浓稠的原始之海。它曾是万物纯净的起源，也终将吞没一切生命…而那些本不属于原始之海的物质则将被滤除，成为漂荡的浮渣。\\n「浮渣亦有它们存在的意义——究竟何种物质会被吞噬一切生命的原始根源之海所排斥？」年轻的调律师曾追随伟大的僭主，思索着这个难题。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }
+    ],
     "convert": []
   },
   {
@@ -11185,10 +11258,7 @@
     "description": "赋予武器突破之力的材料。\\n「源自原始之海的活物，必将回归同一的命运。」调律师波爱修斯曾如是说，「但人的超越有着无限可能，即使原始的胎海也无法将之消融净尽…」\\n傲慢的僭主曾试图调配不溶于纯水的灵露，以之容纳灵智与记忆，令臣民得以抛却肉身，获得永恒独立的生命。\\n但灵肉转换的痛苦并非任何凡俗生命能够承受，僭主的律令撕扯着破碎的灵魂…\\n灵露被众多魂灵的哭嚎染成黑色，从此其中失却调谐的神智，只余混乱与疯狂。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12040",
@@ -11210,10 +11280,7 @@
     "description": "赋予武器突破之力的材料。\\n这是「纯水骑士」尚在时的遗物——骑士们说，在无人问津的山野泉流之中仍然有忠诚的精灵，正守护着不被污染的至纯醴泉…\\n然而，人造灵露之主却无法容忍任何不同于伟大乐章的杂音。传说调律师波爱修斯所到之处，自然甘露皆被填埋，树立起帝国的渡槽，纯水的精灵亦销声匿迹…",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12041",
@@ -11235,10 +11302,7 @@
     "description": "赋予武器突破之力的材料。\\n浓稠纯净的精粹溶液，由原始无垠之海的水滴中精炼而出。古代的神王曾相信它能带来永恒生命与无穷智慧，然而侧耳细听——它正隐隐预言着溶合为一的终局。\\n这曾是神王未完成的宏伟乐章——无根无源的黄金灵露将替代原始莽荒之水，永生智者的辉煌秩序将为所有无知的角落带来甘露般的启蒙。\\n但神王的妄想终究沉入深黑的海渊，黄金的灵露也随着无情时光被原始之汤侵蚀…\\n调律师却对噩兆视之不见，支撑着残破的身躯，仍旧企图以最后的灵露赋同胞以生命，让旧日的秩序重临…\\n如今，在枫丹诸多疯诗人与年轻画家的噩梦中，波爱修斯亲历的末日幻景仍旧时而重现，向他们提醒着难以逃避的轮回。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：匠理", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12042",
@@ -11260,7 +11324,10 @@
     "description": "赋予武器突破之力的材料。\\n传说在最初的僭主来到原始之海时，水国的先主曾赠予他一杯水。\\n后来，他成为了不可质疑的神王，以这杯水提炼神奇的露珠，从而建立了辉煌强盛的帝国。\\n那是久远的故事了，其主角如今正沉睡在深海鱼群的磷光之中。",
     "type": "武器突破素材",
     "star": 2,
-    "source": [{ "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }],
+    "source": [
+      { "name": "礼包商城兑换", "type": "single" },
+      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
+    ],
     "convert": []
   },
   {
@@ -11269,10 +11336,7 @@
     "description": "赋予武器突破之力的材料。\\n什么样的帝国能够延续千年？从龙的国度归来后，僭主曾思考过如是问题。\\n不朽的石材与自原始之水提取的灵露结合，雕成如黑铁般坚韧的种族——以魔石为肤，灵露为血，从此之后再也无惧回归莽荒的诅咒…\\n沉默的魔像仍做着帝国美梦——不知不觉间，帝国湮没已千年有余。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12043",
@@ -11294,10 +11358,7 @@
     "description": "赋予武器突破之力的材料。\\n在黄金之衾覆盖国土的岁月里，纯真的泉水不得不藏匿于隐秘山涧，「纯水骑士」便是在这些避难所中诞生的。\\n骑士们以白银的甲胄为誓，守护着来自纯水的精灵，守卫着同样信赖唯一源泉的乡亲，抵抗遮天蔽日的黄金之权。\\n那是很久以前的传说了…在帝国崩毁沉没之后不久，抵抗僭主的骑士们也卸下甲胄，其故事隐入了庞杂的故事歌谣之中。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12044",
@@ -11319,10 +11380,7 @@
     "description": "赋予武器突破之力的材料。\\n沉没之城的僭主弹奏黄金乐章的最后一曲时，深受宠渥的乐师窃走了满盛灵露的金杯。\\n为神王的背叛愚行所震惊，乐师召集了最后的禁卫，用不溶的灵露将魔龙封印于高塔之下，同王城一起沉沦海渊。\\n后来，这高贵窃贼的身影从历史上默默消湮，只有「金色剧团」仍忠诚地记得他的预言。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：奇械", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12045",
@@ -11346,7 +11404,7 @@
     "star": 2,
     "source": [
       { "name": "礼包商城兑换", "type": "single" },
-      { "name": "练武秘境：冥见", "type": "domain", "days": [0, 1, 4] }
+      { "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] }
     ],
     "convert": []
   },
@@ -11356,10 +11414,7 @@
     "description": "赋予武器突破之力的材料。\\n在原有的文明如破碎的玉石般失落，自天上来，引导地上文明的使者被醒来的巨龙吞噬殆尽之后，步入荒蛮的人失去了重新认识世界的能力。\\n于是他们将一切所得都归于最为原始的信仰，认为承载一切的大地自有其神秘，于是，所获的猎物被作为祭品上贡的时代开始了。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：冥见", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12046",
@@ -11381,10 +11436,7 @@
     "description": "赋予武器突破之力的材料。\\n据说盗取火种的贤者，在他将掌握各种形态火焰的秘术交给部族的民众之后，曾希望他们得以踏上文明的阶梯，摆脱古老的陋习。\\n但传承的迂腐总是难以撼动，而掌握力量的稚童仅仅为了更多的献祭之物就能开启同族之间的战端，这或许也是贤者最后心灰意冷，而从历史中隐去身形的原因。\\n值得一说的事是，将生命献祭的仪式遭到全面禁止，却恰恰是禁城的圣主掌权之时。后者为了执掌权威而废弃了种种民俗，却也可视为一类文明的开端。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：冥见", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12047",
@@ -11403,13 +11455,10 @@
   {
     "id": 114064,
     "name": "贡祭炽心的荣膺",
-    "description": "赋予武器突破之力的材料。\\n「如果你想要拥世上的一切，那就先将自己的一切献给世界吧。」\\n在禁城的圣主不再允许众人向夜晚的国度祈求之后，一度建立的精神的纽带业已荒毁。\\n受指引的赤瞳的少年经历种种考验，其最后一项就是要效仿最初的人神那样，用黄金的匕首献上自己的心脏。\\n自我的献祭是一种胜者的荣膺，他没有丝毫的犹豫，用烁光的利刃劈开自己的胸膛。而他再次出现的时候，已是从水如流光的国度归来，即将重造伟业的时刻了。",
+    "description": "赋予武器突破之力的材料。\\n「如果你想要拥有世上的一切，那就先将自己的一切献给世界吧。」\\n在禁城的圣主不再允许众人向夜晚的国度祈求之后，一度建立的精神的纽带业已荒毁。\\n受指引的赤瞳的少年经历种种考验，其最后一项就是要效仿最初的人神那样，用黄金的匕首献上自己的心脏。\\n自我的献祭是一种胜者的荣膺，他没有丝毫的犹豫，用烁光的利刃劈开自己的胸膛。而他再次出现的时候，已是从水如流光的国度归来，即将重造伟业的时刻了。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：冥见", "type": "domain", "days": [0, 1, 4] }
-    ],
+    "source": [{ "name": "炼武秘境：冥见", "type": "domain", "days": [0, 1, 4] }],
     "convert": [
       {
         "id": "12048",
@@ -11433,7 +11482,7 @@
     "star": 2,
     "source": [
       { "name": "礼包商城兑换", "type": "single" },
-      { "name": "练武秘境：究观", "type": "domain", "days": [0, 2, 5] }
+      { "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] }
     ],
     "convert": []
   },
@@ -11443,10 +11492,7 @@
     "description": "赋予武器突破之力的材料。\\n在与巨龙进行战争之时，众部族的谋主，那位以面具掩藏起面目者，为部族的战士们解读非人遗迹上金色纹路的信息，那是在现今早已失落的技巧。\\n这语言与思想由自己的敌人所授予，或许对谋主来说，站在相对的立场驱使它们是相当快意的复仇之事吧。\\n只是他那份毫不掩饰的恨意，偶尔也会换来同行英杰们的深深担忧。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：究观", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12049",
@@ -11468,10 +11514,7 @@
     "description": "赋予武器突破之力的材料。\\n那是端居在王座的，最初的人神走入了圣火，而凡俗的世界等待着王厅继任者的时代。\\n也是谋主代执一切权柄的时代。\\n可惜自称圣主的，这位认为他所爱的、他愿意为之垂下金泪的神应该永远只有那一位的僭越者，将私心凌驾于敬爱之神留下的诫言，建立了地天隔绝的城邑。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：究观", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12050",
@@ -11493,10 +11536,7 @@
     "description": "赋予武器突破之力的材料。\\n禁城的圣主经常在梦中呓语中叙说非人的语言，并在镜中，面具唯一能露出的眼睛中看到逐渐竖立的瞳孔，而这也是他愈加厌恶龙众的原因。\\n传说在赤瞳的少年用火焚烧那被幽影淹没的城上之城时，曾看到王厅前，陷入疯狂的半人如揭下脸皮一般撕下无法脱去的神面，露出犹如巨龙一般的狰狞窍孔。\\n癫狂之人口中喷吐的金焰熔化了自己，失形的魂魄自高处沉入了漆黑的泥沼之中，而据说，这就是这位众叛亲离的谵妄者可悲的结局。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：究观", "type": "domain", "days": [0, 2, 5] }
-    ],
+    "source": [{ "name": "炼武秘境：究观", "type": "domain", "days": [0, 2, 5] }],
     "convert": [
       {
         "id": "12051",
@@ -11520,7 +11560,7 @@
     "star": 2,
     "source": [
       { "name": "礼包商城兑换", "type": "single" },
-      { "name": "练武秘境：测度", "type": "domain", "days": [0, 3, 6] }
+      { "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] }
     ],
     "convert": []
   },
@@ -11530,10 +11570,7 @@
     "description": "赋予武器突破之力的材料。\\n尚古的通灵者认为，没有形象而只有意识的「大灵」是去除了外在，更接近精神本质的存在。\\n将粗糙的石料打磨，直至去除所有纹理，成为反射光亮的镜子的过程，也是一种除去世界原有表征的仪式。或许光滑的镜面亦是通灵者自身精神的投射也说不定。",
     "type": "武器突破素材",
     "star": 3,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：测度", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12052",
@@ -11555,10 +11592,7 @@
     "description": "赋予武器突破之力的材料。\\n没有固型的灵性依附于物件之上，结合转化为种种不同的面目，这一过程被称为神合，此后，神合后的灵性会在人的恍惚中，向其传达如梦般的图景。\\n经常与灵进行这般对话的人需要理解那些图景之中的意义，如解梦般将大地之下的征兆化作部族民众所能理解的语言，或将警示转化为故事。据说这就是部族内被称为「叙事人」的职位的由来，也是大多数杰出的「叙事人」都来自谜烟之内的原因。",
     "type": "武器突破素材",
     "star": 4,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：测度", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12053",
@@ -11580,10 +11614,7 @@
     "description": "赋予武器突破之力的材料。\\n正如物质的表征不管如何打磨，其存在本身仍然是物质的，无法超脱于实体。人类的纯粹精神，依托之物既非意向之树，也不是需要勤加拂拭的曜石之镜。在夜晚的国度与夜魂的力量逐渐强大之后，神合之物的范畴也变得逐渐宽泛。后来，无需打磨石镜的仪式，「大灵」借由种种思绪就能向它的崇敬者传达夜神国度的启示，也使得此种祭具最终失去了作用。",
     "type": "武器突破素材",
     "star": 5,
-    "source": [
-      { "name": "合成获得", "type": "single" },
-      { "name": "练武秘境：测度", "type": "domain", "days": [0, 3, 6] }
-    ],
+    "source": [{ "name": "炼武秘境：测度", "type": "domain", "days": [0, 3, 6] }],
     "convert": [
       {
         "id": "12054",
@@ -11917,10 +11948,10 @@
   {
     "id": 140003,
     "name": "降临之翼",
-    "description": "仅在\"PlayStation Network\"游玩时可用。\\n风之翼款式。可以再次带着它穿梭日月了。",
+    "description": "仅在\"PlayStation™Network\"游玩时可用。\\n风之翼款式。可以再次带着它穿梭日月了。",
     "type": "风之翼",
     "star": 4,
-    "source": [{ "name": "\"PlayStation Network\"的玩家特典奖励", "type": "single" }],
+    "source": [{ "name": "\"PlayStation™Network\"的玩家特典奖励", "type": "single" }],
     "convert": []
   },
   {
@@ -12097,7 +12128,7 @@
   {
     "id": 220003,
     "name": "岩之寻宝罗盘",
-    "description": "在璃月使用时，能寻找附近的宝箱。\\n岩之国土上物产丰富，山间与原野各处都藏着财宝。",
+    "description": "在璃月使用时，能寻找附近的宝箱和宝箱相关的线索。\\n岩之国土上物产丰富，山间与原野各处都藏着财宝。",
     "type": "小道具",
     "star": 4,
     "source": [],
@@ -12174,7 +12205,7 @@
   {
     "id": 220009,
     "name": "风之寻宝罗盘",
-    "description": "在蒙德使用时，能寻找附近的宝箱。\\n寻宝罗盘的指针并不遵循大地的磁场转动，而是沿着地脉，寻找附近的财宝。",
+    "description": "在蒙德使用时，能寻找附近的宝箱和宝箱相关的线索。\\n寻宝罗盘的指针并不遵循大地的磁场转动，而是沿着地脉，寻找附近的财宝。",
     "type": "小道具",
     "star": 4,
     "source": [],
@@ -12318,7 +12349,7 @@
   {
     "id": 220033,
     "name": "化种匣",
-    "description": "从萍姥姥处获得的神奇匣子。据萍姥姥说，这匣子具有「化种」之能…依据原有植物的特性，可以将「化种」所得的种子种植在「尘歌壶」的对应田亩中。\\n可供种植的植物：霓裳花、甜甜花、塞西莉亚花、琉璃百合、风车菊、清心、琉璃袋、落落莓、小灯草、绝云椒椒、胡萝卜、白萝卜、薄荷、蘑菇、鸣草、马尾、金鱼草、莲蓬、嘟嘟莲、海草、海灵芝、香辛果、墩墩桃、须弥蔷薇、久雨莲、茉洁草、柔灯铃、虹彩蔷薇。",
+    "description": "从萍姥姥处获得的神奇匣子。据萍姥姥说，这匣子具有「化种」之能…依据原有植物的特性，可以将「化种」所得的种子种植在「尘歌壶」的对应田亩中。\\n可供种植的植物：霓裳花、甜甜花、塞西莉亚花、琉璃百合、风车菊、清心、琉璃袋、落落莓、小灯草、绝云椒椒、胡萝卜、白萝卜、薄荷、蘑菇、鸣草、马尾、金鱼草、莲蓬、嘟嘟莲、海草、海灵芝、香辛果、墩墩桃、须弥蔷薇、久雨莲、茉洁草、柔灯铃、虹彩蔷薇、颗粒果、苦种、肉龙掌、青蜜莓、灼灼彩菊、浪沫羽鳃、微光角菌、云岩裂叶、霜盏花、夏槲果、白灵果。",
     "type": "小道具",
     "star": 4,
     "source": [],
@@ -12327,7 +12358,7 @@
   {
     "id": 220034,
     "name": "雷之寻宝罗盘",
-    "description": "在稻妻使用时，能寻找附近的宝箱。\\n雷之列岛的土地曾经受过诸多伤害。伴随着创伤与恢复而来的是遍布各岛的诸多宝藏。",
+    "description": "在稻妻使用时，能寻找附近的宝箱和宝箱相关的线索。\\n雷之列岛的土地曾经受过诸多伤害。伴随着创伤与恢复而来的是遍布各岛的诸多宝藏。",
     "type": "小道具",
     "star": 4,
     "source": [],
@@ -12462,7 +12493,7 @@
   {
     "id": 220058,
     "name": "草之寻宝罗盘",
-    "description": "在须弥使用时，能寻找附近的宝箱。\\n对一些人而言，生命的意义在于探索与开拓吧。而在探索与开拓的终点，往往有着丰厚的宝藏等着他们。",
+    "description": "在须弥使用时，能寻找附近的宝箱和宝箱相关的线索。\\n对一些人而言，生命的意义在于探索与开拓吧。而在探索与开拓的终点，往往有着丰厚的宝藏等着他们。",
     "type": "小道具",
     "star": 4,
     "source": [],
@@ -12474,7 +12505,10 @@
     "description": "使用时，能获得附近树木的木材。\\n在须弥的林野中有时能够见到的神秘护符，具有召集草木力量的能力。\\n为了防止沙漠入侵森林，以及在更黑暗的岁月中，为了抵御恶兽的入侵，树木藤蔓会结成严密的藩篱。持有这种护符的人便被森林认作朋友，能不受阻碍地穿行在树篱的迷宫中，得到溪流与月光的指引。不过那是古代传说中的事情了。",
     "type": "小道具",
     "star": 4,
-    "source": [],
+    "source": [
+      { "name": "须弥声望等级到达3级获得", "type": "single" },
+      { "name": "前往蒙德或璃月铁匠铺购买", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -12588,7 +12622,7 @@
   {
     "id": 220087,
     "name": "水之寻宝罗盘",
-    "description": "在枫丹使用时，能寻找附近的宝箱。\\n这些宝藏散落在枫丹诸处，并无人宣告自己对其的所有权。大多数情况下，将其收入囊中不会触犯律法刑责。",
+    "description": "在枫丹使用时，能寻找附近的宝箱和宝箱相关的线索。\\n这些宝藏散落在枫丹诸处，并无人宣告自己对其的所有权。大多数情况下，将其收入囊中不会触犯律法刑责。",
     "type": "小道具",
     "star": 4,
     "source": [],
@@ -12600,7 +12634,10 @@
     "description": "由枫丹动能工程科学研究院高级研究员法维茨基所开发的「晶蝶诱捕装置」。\\n布置完成，并向其内部投入特定材料后，此装置便会开始运转，将晶蝶诱捕入装置内。\\n法维茨基曾领导研究的「低温光照装置」项目需要大量的晶核作为研究材料，本装置也是因此而被研究开发。\\n但因为诸多原因，该项目已暂停研究。\\n「我们在此缅怀勤恳的法维茨基先生，并衷心期望有人能接过他的衣钵，本院将在各个合适的方面予其以大限度的支持。」",
     "type": "小道具",
     "star": 4,
-    "source": [],
+    "source": [
+      { "name": "枫丹声望等级到达3级获得", "type": "single" },
+      { "name": "前往蒙德或璃月铁匠铺购买", "type": "single" }
+    ],
     "convert": []
   },
   {
@@ -12678,7 +12715,7 @@
   {
     "id": 220104,
     "name": "火之寻宝罗盘",
-    "description": "在纳塔使用时，能寻找附近的宝箱。\\n火之国土的大地之上遍布纷争，有许多因此失去了线索与踪迹的宝藏。",
+    "description": "在纳塔使用时，能寻找附近的宝箱和宝箱相关的线索。\\n火之国土的大地之上遍布纷争，有许多因此失去了线索与踪迹的宝藏。",
     "type": "小道具",
     "star": 4,
     "source": [],
