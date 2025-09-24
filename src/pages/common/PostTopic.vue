@@ -297,8 +297,10 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   display: flex;
   overflow: hidden;
   max-width: 100%;
+  box-sizing: border-box;
   align-items: center;
   justify-content: center;
+  padding-right: 8px;
   border-radius: 4px;
   margin-right: 12px;
   margin-left: 12px;
@@ -329,8 +331,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
   :last-child {
     overflow: hidden;
-    box-sizing: border-box;
-    padding-right: 8px;
     max-lines: 1;
     text-overflow: ellipsis;
     white-space: nowrap;
