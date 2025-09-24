@@ -51,8 +51,8 @@ onMounted(async () => {
     if (resp.length < 3) pools.value = resp;
     else pools.value = [...resp, ...resp];
   } else {
-    showSnackbar.error(`获取限时祈愿失败：[${resp.retcode}-${resp.message}`);
-    await TGLogger.Error(`获取限时祈愿失败：[${resp.retcode}-${resp.message}`);
+    showSnackbar.error(`获取限时祈愿失败：[${resp.retcode}]${resp.message}`);
+    await TGLogger.Error(`获取限时祈愿失败：[${resp.retcode}]${resp.message}`);
   }
   emits("success");
 });

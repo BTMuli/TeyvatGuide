@@ -381,7 +381,7 @@ function getUpdateTime(): string {
 
 function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
   dataVal.value = role;
-  selectIndex.value = roleList.value.indexOf(role);
+  selectIndex.value = selectedList.value.indexOf(role);
   if (!showOverlay.value) showOverlay.value = true;
 }
 
