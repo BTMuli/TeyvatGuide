@@ -65,6 +65,11 @@ const selects: Array<ToGameLoginSelect> = [
   //   value: 9,
   //   icon: "/platforms/mhy/hna.webp",
   // },
+  // {
+  //   title: "星布谷地",
+  //   value: 10,
+  //   icon: "/platforms/mhy/hyg.webp",
+  // },
 ];
 
 // eslint-disable-next-line no-undef

@@ -60,6 +60,7 @@ import lunaReq from "@req/lunaReq.js";
 import miscReq from "@req/miscReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
+import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -75,6 +76,8 @@ type SignAccount = {
 };
 
 const { cookie, uid } = storeToRefs(useUserStore());
+const { gameList } = storeToRefs(useBBSStore());
+
 const loadScript = defineModel<boolean>();
 const loadState = ref<boolean>(false);
 const loadSign = ref<boolean>(false);
@@ -91,31 +94,11 @@ watch(
 onMounted(async () => await loadData());
 
 function getGameInfo(biz: string): SignGameInfo {
-  switch (biz) {
-    // 崩坏2
-    case "bh2_cn":
-      return { title: "崩坏2", icon: "/platforms/mhy/bh2.webp", gid: 3 };
-    // 崩坏3
-    case "bh3_cn":
-      return { title: "崩坏3", icon: "/platforms/mhy/bh3.webp", gid: 1 };
-    // 原神
-    case "hk4e_cn":
-      return { title: "原神", icon: "/platforms/mhy/ys.webp", gid: 2 };
-    // 崩坏：星穹铁道
-    case "hkrpg_cn":
-      return { title: "崩坏：星穹铁道", icon: "/platforms/mhy/sr.webp", gid: 6 };
-    // 未定事件簿
-    case "nxx_cn":
-      return { title: "未定事件簿", icon: "/platforms/mhy/wd.webp", gid: 4 };
-    // 绝区零
-    case "nap_cn":
-      return { title: "绝区零", icon: "/platforms/mhy/zzz.webp", gid: 8 };
-    // 崩坏：因缘精灵
-    case "hna_cn":
-      return { title: "崩坏：因缘精灵", icon: "/platform/s/mhy/hna.webp", gid: 9 };
-    default:
-      return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
-  }
+  const enName = biz.split("_")[0];
+  if (!enName) return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
+  const findGame = gameList.value.find((i) => i.op_name === enName);
+  if (findGame) return { title: findGame.name, icon: findGame.app_icon, gid: findGame.id };
+  return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
 }
 
 async function loadData(): Promise<void> {
