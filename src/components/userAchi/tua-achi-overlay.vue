@@ -23,15 +23,14 @@
           <div class="tua-ao-mid-title">
             <span>原石奖励：</span>
             <span>{{ props.data.reward }}</span>
+            <img src="/icon/material/201.webp" alt="原石" />
           </div>
           <div class="tua-ao-mid-title">
             <span>触发方式：</span>
-            <span>{{
-              props.data.trigger.task ? "完成以下所有任务" : props.data.trigger.type
-            }}</span>
+            <span>{{ parseTriggerType() }}</span>
           </div>
           <div class="tua-ao-mid-item" v-for="item in props.data.trigger.task" :key="item.questId">
-            <v-icon>mdi-alert-decagram</v-icon>
+            <v-icon size="16">mdi-alert-decagram</v-icon>
             <span class="tua-ao-click" @click="searchDirect(item.name)">{{ item.name }}</span>
             <span>（{{ item.type }}）</span>
           </div>
@@ -41,11 +40,11 @@
             <span>是否完成：</span>
             <span>{{ props.data.isCompleted ? "是" : "否" }}</span>
           </div>
-          <div class="tua-ao-bottom-title">
+          <div class="tua-ao-bottom-title" v-if="props.data.isCompleted">
             <span>完成时间：</span>
             <span>{{ props.data.completedTime }}</span>
           </div>
-          <div class="tua-ao-bottom-title">
+          <div class="tua-ao-bottom-title" v-if="props.data.progress > 0">
             <span>当前进度：</span>
             <span>{{ props.data.progress }}</span>
           </div>
@@ -93,6 +92,19 @@ async function share(): Promise<void> {
   const fileName = `【成就详情】【${props.data.id}】-${props.data.name}`;
   await generateShareImg(fileName, achiBox);
 }
+
+function parseTriggerType(): string {
+  switch (props.data.trigger.type) {
+    case "FINISH_QUEST_AND":
+    case "FINISH_PARENT_QUEST_AND":
+      return "完成以下所有任务";
+    case "FINISH_QUEST_OR":
+    case "FINISH_PARENT_QUEST_OR":
+      return "完成以下任意任务";
+    default:
+      return props.data.trigger.type;
+  }
+}
 </script>
 <style lang="css" scoped>
 .tua-ao-container {
@@ -112,7 +124,7 @@ async function share(): Promise<void> {
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
-  row-gap: 8px;
+  row-gap: 4px;
 }
 
 .tua-ao-top {
@@ -121,49 +133,72 @@ async function share(): Promise<void> {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+
+  :first-child {
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
+
+  :last-child {
+    font-size: 14px;
+    font-style: italic;
+    opacity: 0.8;
+  }
 }
 
-.tua-ao-top :first-child {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 24px;
-}
-
-.tua-ao-mid-title,
 .tua-ao-bottom-title {
   font-size: 18px;
 }
 
-.tua-ao-mid-title :first-child,
 .tua-ao-bottom-title :first-child {
   font-family: var(--font-title);
 }
 
-.tua-ao-mid-title :last-child {
-  color: var(--box-text-3);
+.tua-ao-mid-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  :first-child {
+    font-family: var(--font-title);
+    font-size: 18px;
+  }
+
+  :not(:first-child) {
+    color: var(--tgc-od-orange);
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .tua-ao-mid-item {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding-left: 15px;
-  margin-top: 5px;
-  column-gap: 5px;
-  font-size: 18px;
-}
+  padding-left: 16px;
+  column-gap: 4px;
+  font-size: 14px;
 
-.tua-ao-mid-item :first-child {
-  color: var(--box-text-5);
+  :first-child {
+    color: var(--box-text-5);
+  }
 }
 
 .tua-ao-extra {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 4px;
+  bottom: 0;
+  color: var(--tgc-od-white);
+  font-size: 12px;
 }
 
 .tua-ao-click {
   cursor: pointer;
+  text-align: center;
 }
 </style>
