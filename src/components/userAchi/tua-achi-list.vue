@@ -84,6 +84,7 @@ async function searchAchi(): Promise<void> {
   nameCard.value = undefined;
   ncData.value = undefined;
   achievements.value = await TSUserAchi.searchAchi(props.uid, props.search);
+  if (showOverlay.value) showOverlay.value = false;
   if (achievements.value.length > 0) {
     showSnackbar.success(`成功获取${achievements.value.length}条成就`);
     emits("update:series", undefined);
