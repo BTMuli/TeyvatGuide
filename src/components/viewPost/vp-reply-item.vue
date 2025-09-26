@@ -472,7 +472,7 @@ async function handleUser(): Promise<void> {
 }
 
 .tpr-share-info.bottom {
-  bottom: 4px;
-  left: 4px;
+  bottom: 8px;
+  left: 8px;
 }
 </style>
