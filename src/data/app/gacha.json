@@ -2866,7 +2866,7 @@
   },
   {
     "name": "苍林月祷",
-    "version": "「月之一」",
+    "version": "6.0",
     "order": 1,
     "banner": "https://sdk.hoyoverse.com/upload/ann/2025/08/28/dfe60f1f91faf724678d5ce11abbc900_3362625339017772610_transformed.png",
     "from": "2025-09-10T06:00:00+08:00",
@@ -2878,7 +2878,7 @@
   },
   {
     "name": "月草的赐慧",
-    "version": "「月之一」",
+    "version": "6.0",
     "order": 1,
     "banner": "https://sdk.hoyoverse.com/upload/ann/2025/08/28/768b0bb0d9375b070e00ff0f64975984_5124007218747130064_transformed.png",
     "from": "2025-09-10T06:00:00+08:00",
@@ -2890,7 +2890,7 @@
   },
   {
     "name": "神铸赋形",
-    "version": "「月之一」",
+    "version": "6.0",
     "order": 1,
     "banner": "https://sdk.hoyoverse.com/upload/ann/2025/08/28/92b3885aac7b10d429c94c7145fd83a2_571272484301319349_transformed.png",
     "from": "2025-09-10T06:00:00+08:00",
@@ -2902,7 +2902,7 @@
   },
   {
     "name": "露草的行盏",
-    "version": "「月之一」",
+    "version": "6.0",
     "order": 1,
     "banner": "https://sdk.hoyoverse.com/upload/ann/2025/08/28/350073ccb799ece1f540021a0433f92a_8893688263054963574_transformed.png",
     "from": "2025-09-10T06:00:00+08:00",
@@ -2918,5 +2918,41 @@
       11402, 11401, 12415, 12405, 12403, 12402, 12401, 13407, 13401, 14416, 14409, 14403, 14402,
       14401, 15405, 15403, 15402, 15401
     ]
+  },
+  {
+    "name": "孤灯夜访",
+    "version": "6.0",
+    "order": 2,
+    "banner": "https://sdk.hoyoverse.com/upload/ann/2025/09/16/137e81395327ceb1abcc1c02864046b6_6645749296662794419_transformed.png",
+    "from": "2025-09-30T18:00:00+08:00",
+    "to": "2025-10-21T14:59:00+08:00",
+    "type": 301,
+    "postId": "68917810",
+    "up5List": [10000120],
+    "up4List": [10000121, 10000043, 10000068]
+  },
+  {
+    "name": "素霓伣天",
+    "version": "6.0",
+    "order": 2,
+    "banner": "https://sdk.hoyoverse.com/upload/ann/2025/09/16/91520278000913c955618741d7be0645_2552430066730850606_transformed.png",
+    "from": "2025-09-30T18:00:00+08:00",
+    "to": "2025-10-21T14:59:00+08:00",
+    "type": 400,
+    "postId": "68917811",
+    "up5List": [10000060],
+    "up4List": [10000121, 10000043, 10000068]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.0",
+    "order": 2,
+    "banner": "https://sdk.hoyoverse.com/upload/ann/2025/09/16/6a72424f1806bc1107bdda324f7b57ec_2627515474587229897_transformed.png",
+    "from": "2025-09-30T18:00:00+08:00",
+    "to": "2025-10-21T14:59:00+08:00",
+    "type": 302,
+    "postId": "68917812",
+    "up5List": [13516, 15508],
+    "up4List": [11405, 12401, 13407, 14401, 15403]
   }
 ]
