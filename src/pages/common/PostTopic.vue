@@ -1,13 +1,11 @@
 <template>
   <v-app-bar>
     <template #prepend>
-      <div class="post-topic-top" v-if="topicInfo">
+      <div class="post-topic-top" v-if="topicInfo" :class="sidebar.collapse ? 'wide' : 'thin'">
         <TMiImg :src="topicInfo.topic.cover" alt="cover" :ori="true" />
         <div class="post-topic-info">
           <span>{{ curTopic }}-{{ topicInfo.topic.name }}</span>
-          <span :class="sidebar.collapse ? 'wide' : 'thin'" :title="topicInfo.topic.desc">
-            {{ topicInfo.topic.desc }}
-          </span>
+          <span :title="topicInfo.topic.desc">{{ topicInfo.topic.desc }}</span>
         </div>
       </div>
     </template>
@@ -299,7 +297,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   max-width: 100%;
   box-sizing: border-box;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding-right: 8px;
   border-radius: 4px;
   margin-right: 12px;
@@ -310,6 +308,15 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
     width: 50px;
     height: 50px;
   }
+
+  &.wide {
+    max-width: 600px;
+    transition: max-width 0.5s ease-in-out;
+  }
+
+  &.thin {
+    max-width: 400px;
+  }
 }
 
 .dark .post-topic-top {
@@ -319,6 +326,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 .post-topic-info {
   position: relative;
   display: flex;
+  overflow: hidden;
+  max-width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -331,19 +340,11 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
   :last-child {
     overflow: hidden;
+    max-width: 100%;
     max-lines: 1;
     text-overflow: ellipsis;
     white-space: nowrap;
     word-break: break-all;
-
-    &.wide {
-      max-width: 580px;
-      transition: max-width 0.5s ease-in-out;
-    }
-
-    &.thin {
-      max-width: 380px;
-    }
   }
 }
 
