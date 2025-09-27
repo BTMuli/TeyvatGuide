@@ -2,12 +2,28 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2025-09-11
+Update: 2025-09-27
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-09-11 13:38:00`
+> 更新于 `2025-09-27 10:18:07`
+
+## [0.8.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.2) (2025-09-27)
+
+- 🍱 更新元数据
+- 🐛 修复特定情况下切换角色浮窗异常
+- ✨ 动态处理游戏卡片组件
+- 👽️ 适配新版块
+- 💄 首页卡池组件改成轮播
+- 💄 调整帖子卡片样式
+- 💄 调整公告卡片样式
+- 💄 调整帖子详情页面样式
+- 💄 优化滚动截屏处理，调整抽奖浮窗UI
+- 💄 调整成就项浮窗样式
+- 🚸 隐藏危战刷新后的loading关闭
+- 🚸 处理话题desc溢出
+- 🚸 搜索成就时隐藏已有浮窗
 
 ## [0.8.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.1) (2025-09-11)
 
