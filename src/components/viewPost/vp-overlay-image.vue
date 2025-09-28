@@ -101,8 +101,7 @@ async function onCopy(): Promise<void> {
     await nextTick();
   }
   await showLoading.start("正在复制图片到剪贴板");
-  const image = props.image.insert.image;
-  if (buffer.value === null) buffer.value = await getImageBuffer(image);
+  if (buffer.value === null) buffer.value = await getImageBuffer(oriLink.value);
   const size = bytesToSize(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
   await showLoading.end();
