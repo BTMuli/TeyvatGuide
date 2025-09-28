@@ -1,11 +1,6 @@
 <template>
   <div class="tp-image-box" v-if="localUrl !== undefined">
-    <img
-      :src="localUrl"
-      @click="showOverlay = true"
-      :alt="props.data.insert.image"
-      :title="getImageTitle()"
-    />
+    <img :src="localUrl" @click="showOverlay = true" :alt="oriUrl" :title="getImageTitle()" />
     <div
       class="act"
       @click.stop="showOri = true"
@@ -16,7 +11,7 @@
       <v-icon size="16" color="white">mdi-magnify</v-icon>
     </div>
   </div>
-  <div v-else class="tp-image-load" :title="props.data.insert.image">
+  <div v-else class="tp-image-load" :title="oriUrl">
     <v-progress-circular :indeterminate="true" color="primary" size="small" />
     <span>加载中...</span>
   </div>
@@ -26,6 +21,7 @@
     v-model:link="localUrl"
     v-model:ori="showOri"
     v-model:bgColor="bgColor"
+    v-model:format="imgExt"
   />
 </template>
 <script lang="ts" setup>
@@ -39,7 +35,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import VpOverlayImage from "./vp-overlay-image.vue";
 
 export type TpImage = {
-  insert: { image: string };
+  insert: { image: string | TGApp.BBS.Post.Image };
   attributes?: {
     width: number;
     height: number;
@@ -54,11 +50,16 @@ const appStore = useAppStore();
 const { imageQualityPercent } = storeToRefs(appStore);
 const props = defineProps<TpImageProps>();
 const showOverlay = ref<boolean>(false);
-const showOri = ref<boolean>(
-  props.data.insert.image.endsWith(".gif") || imageQualityPercent.value === 100,
-);
+
 const localUrl = ref<string>();
 const bgColor = ref<string>("transparent");
+
+const oriUrl = computed<string>(() => {
+  if (typeof props.data.insert.image === "string") return props.data.insert.image;
+  return props.data.insert.image.url;
+});
+const imgExt = computed<string>(() => getImageExt());
+const showOri = ref<boolean>(imgExt.value === "gif" || imageQualityPercent.value === 100);
 
 const imgWidth = computed<string>(() => {
   if (props.data.attributes === undefined) return "auto";
@@ -69,7 +70,7 @@ const imgWidth = computed<string>(() => {
 console.log("tp-image", props.data.insert.image, props.data.attributes);
 
 onMounted(async () => {
-  const link = appStore.getImageUrl(props.data.insert.image);
+  const link = appStore.getImageUrl(oriUrl.value, imgExt.value);
   localUrl.value = await saveImgLocal(link);
 });
 
@@ -77,9 +78,12 @@ watch(
   () => showOri.value,
   async () => {
     if (!showOri.value) return;
-    await showLoading.start("正在加载原图", props.data.insert.image);
+    await showLoading.start("正在加载原图", oriUrl.value);
     if (localUrl.value) URL.revokeObjectURL(localUrl.value);
-    localUrl.value = await saveImgLocal(props.data.insert.image);
+    const ext = getImageExt();
+    if (!["png", "jpg", "jpeg", "gif", "webp"].includes(ext.toLowerCase())) {
+      localUrl.value = await saveImgLocal(`${oriUrl.value}?format=jpg`);
+    } else localUrl.value = await saveImgLocal(oriUrl.value);
     await showLoading.end();
   },
 );
@@ -89,18 +93,39 @@ onUnmounted(() => {
 });
 
 function getImageTitle(): string {
-  if (props.data.attributes == undefined) return "";
   const res: string[] = [];
-  res.push(`宽度：${props.data.attributes.width}px`);
-  res.push(`高度：${props.data.attributes.height}px`);
-  if (props.data.attributes.size) {
-    const size = bytesToSize(props.data.attributes.size);
-    res.push(`大小：${size}`);
+  if (props.data.attributes) {
+    res.push(`宽度：${props.data.attributes.width}px`);
+    res.push(`高度：${props.data.attributes.height}px`);
+    if (props.data.attributes.size) {
+      const size = bytesToSize(props.data.attributes.size);
+      res.push(`大小：${size}`);
+    }
+    res.push(`格式：${getImageExt()}`);
+    return res.join("\n");
   }
-  if (props.data.attributes.ext) {
-    res.push(`格式：${props.data.attributes.ext}`);
+  if (typeof props.data.insert.image !== "string") {
+    res.push(`宽度：${props.data.insert.image.width}px`);
+    res.push(`高度：${props.data.insert.image.height}px`);
+    if (props.data.insert.image.size) {
+      const size = bytesToSize(Number(props.data.insert.image.size));
+      res.push(`大小：${size}`);
+    }
+    res.push(`格式：${getImageExt()}`);
+    return res.join("\n");
   }
-  return res.join("\n");
+  return "";
+}
+
+function getImageExt(): string {
+  if (props.data.attributes) {
+    if (props.data.attributes.ext) return props.data.attributes.ext;
+  }
+  if (typeof props.data.insert.image === "string") {
+    const arr = props.data.insert.image.split(".");
+    return arr[arr.length - 1];
+  }
+  return props.data.insert.image.format;
 }
 </script>
 <style lang="scss" scoped>

@@ -266,7 +266,7 @@ async function getRenderPost(
     jsonParse = data.post.structured_content;
   } else {
     try {
-      jsonParse = await parseContent(data.post.content);
+      jsonParse = await parseContent(data);
     } catch (e) {
       if (e instanceof SyntaxError) {
         await TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
@@ -277,7 +277,8 @@ async function getRenderPost(
   return JSON.parse(jsonParse);
 }
 
-async function parseContent(content: string): Promise<string> {
+async function parseContent(fullData: TGApp.BBS.Post.FullData): Promise<string> {
+  const content = fullData.post.content;
   const data: TGApp.BBS.SctPost.Other = JSON.parse(content);
   const result: TGApp.BBS.SctPost.Base[] = [];
   for (const key of Object.keys(data)) {
@@ -286,7 +287,12 @@ async function parseContent(content: string): Promise<string> {
         result.push({ insert: data.describe });
         break;
       case "imgs":
-        data.imgs.forEach((item) => result.push({ insert: { image: item } }));
+        for (const img of data.imgs) {
+          const imgFind = fullData.image_list.find((i) => i.url === img);
+          if (!imgFind) {
+            result.push({ insert: { image: img } });
+          } else result.push({ insert: { image: imgFind } });
+        }
         break;
       case "link_card_ids":
         if (!data.link_card_ids) break;

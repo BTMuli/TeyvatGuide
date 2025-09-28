@@ -5,28 +5,46 @@
         <img :src="localLink" alt="图片" @click="isOriSize = !isOriSize" />
       </div>
       <div class="tpoi-bottom">
-        <div class="tpoi-info" v-if="props.image.attributes">
-          <p v-if="props.image.attributes.size" class="tpoi-info-item">
-            <span>大小：</span>
-            <span>{{ bytesToSize(props.image.attributes.size ?? 0) }}</span>
-          </p>
-          <p class="tpoi-info-item">
-            <span>尺寸：</span>
-            <span>{{ props.image.attributes.width }}x{{ props.image.attributes.height }}</span>
-          </p>
-          <p class="tpoi-info-item">
-            <span>格式：</span>
-            <span>{{ format }}</span>
-          </p>
-        </div>
+        <template v-if="typeof props.image.insert.image !== 'string'">
+          <div class="tpoi-info">
+            <p class="tpoi-info-item">
+              <span>大小：</span>
+              <span>{{ bytesToSize(Number(props.image.insert.image.size) ?? 0) }}</span>
+            </p>
+            <p class="tpoi-info-item">
+              <span>尺寸：</span>
+              <span>
+                {{ props.image.insert.image.width }}x{{ props.image.insert.image.height }}
+              </span>
+            </p>
+            <p class="tpoi-info-item">
+              <span>格式：</span>
+              <span>{{ format }}</span>
+            </p>
+          </div>
+        </template>
+        <template v-else-if="props.image.attributes">
+          <div class="tpoi-info">
+            <p v-if="props.image.attributes.size" class="tpoi-info-item">
+              <span>大小：</span>
+              <span>{{ bytesToSize(props.image.attributes.size ?? 0) }}</span>
+            </p>
+            <p class="tpoi-info-item">
+              <span>尺寸：</span>
+              <span>{{ props.image.attributes.width }}x{{ props.image.attributes.height }}</span>
+            </p>
+            <p class="tpoi-info-item">
+              <span>格式：</span>
+              <span>{{ format }}</span>
+            </p>
+          </div>
+        </template>
         <div class="tpoi-tools">
           <v-icon @click="setBlackBg" title="切换背景色" v-if="showOri">
             mdi-format-color-fill
           </v-icon>
           <v-icon @click="showOri = true" title="查看原图" v-else>mdi-magnify</v-icon>
-          <v-icon @click="onCopy" title="复制到剪贴板" v-if="format !== 'gif'">
-            mdi-content-copy
-          </v-icon>
+          <v-icon @click="onCopy" title="复制到剪贴板" v-if="showCopy">mdi-content-copy</v-icon>
           <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
           <v-icon @click="visible = false" title="关闭浮窗">mdi-close</v-icon>
         </div>
@@ -51,14 +69,17 @@ const visible = defineModel<boolean>();
 const localLink = defineModel<string>("link");
 const showOri = defineModel<boolean>("ori");
 const bgColor = defineModel<string>("bgColor", { default: "transparent" });
+const format = defineModel<string>("format", { default: "png" });
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
 const buffer = shallowRef<Uint8Array | null>(null);
-const format = computed<string>(() => {
-  if (props.image.attributes?.ext) return props.image.attributes.ext;
-  const imageFormat = props.image.insert.image.split(".").pop();
-  if (imageFormat !== undefined) return imageFormat;
-  return "png";
+const oriLink = computed<string>(() => {
+  const image = props.image.insert.image;
+  return typeof image === "string" ? image : image.url;
+});
+const showCopy = computed<boolean>(() => {
+  // 只能显示 png/jpg/jpeg/webp 格式的复制按钮
+  return ["png", "jpg", "jpeg", "webp"].includes(format.value.toLowerCase());
 });
 
 function setBlackBg(): void {
@@ -93,14 +114,13 @@ async function onDownload(): Promise<void> {
     showOri.value = true;
     await nextTick();
   }
-  const image = props.image.insert.image;
-  await showLoading.start("正在下载图片到本地", image);
-  if (buffer.value === null) buffer.value = await getImageBuffer(image);
+  await showLoading.start("正在下载图片到本地", oriLink.value);
+  if (buffer.value === null) buffer.value = await getImageBuffer(oriLink.value);
   if (buffer.value.byteLength > 80000000) {
     showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
-  let fileName = image.split("/").pop()?.split(".")[0];
+  let fileName = oriLink.value.split("/").pop()?.split(".")[0];
   if (fileName === undefined) fileName = Date.now().toString();
   await saveCanvasImg(buffer.value, fileName, format.value);
   await showLoading.end();

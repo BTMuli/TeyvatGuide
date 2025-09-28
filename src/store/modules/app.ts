@@ -1,7 +1,7 @@
 /**
  * @file store/modules/app.ts
  * @description App store module
- * @since Beta v0.8.0
+ * @since Beta v0.8.3
  */
 
 import { AnnoLangEnum } from "@enum/anno.js";
@@ -84,8 +84,10 @@ const useAppStore = defineStore(
       deviceInfo.value = getInitDeviceInfo();
     }
 
-    function getImageUrl(url: string): string {
-      if (url.endsWith(".gif") || imageQualityPercent.value === 100) return url;
+    function getImageUrl(url: string, fmt?: string): string {
+      let check = false;
+      if (fmt && !["jpg", "png", "webp", "gif", "jpeg"].includes(fmt.toLowerCase())) check = false;
+      if (check && (url.endsWith(".gif") || imageQualityPercent.value === 100)) return url;
       return `${url}?x-oss-process=image/format,jpg/quality,Q_${imageQualityPercent.value}`;
     }
 
