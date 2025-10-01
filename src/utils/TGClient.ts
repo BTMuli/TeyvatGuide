@@ -1,8 +1,7 @@
 /**
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
- * @since Beta v0.7.6
- * @todo Cookie 切换异常
+ * @since Beta v0.8.3
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -535,7 +534,7 @@ class Client {
 
   /**
    * @func getCookieInfo
-   * @since Beta v0.3.9
+   * @since Beta v0.8.3
    * @desc 获取米游社客户端的 cookie
    * @param {TGApp.Plugins.JSBridge.NullArg} arg - 请求参数
    * @returns {void} - 无返回值
@@ -543,13 +542,27 @@ class Client {
   async getCookieInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
     if (!user.cookie) return;
+    const executeJS = `javascript:(function(){
+    let domainCur = window.location.hostname;
+    if (domainCur.endsWith('.miyoushe.com')) domainCur = '.miyoushe.com';
+    else domainCur = '.mihoyo.com';
+    document.cookie = 'account_id=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;
+    document.cookie = 'account_id_v2=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;
+    document.cookie = 'account_mid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;
+    document.cookie = 'cookie_token=${user.cookie!.cookie_token}; domain=' + domainCur + '; path=/;
+    document.cookie = 'ltmid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;
+    document.cookie = 'ltoken=${user.cookie!.ltoken}; domain=' + domainCur + '; path=/;
+    document.cookie = 'ltuid_v2=${user.cookie!.ltuid}; domain=' + domainCur + '; path=/;
+    })();`;
+    console.info(`[getCookieInfo] ${executeJS}`);
+    await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
     const data = { ltoken: user.cookie.ltoken, ltuid: user.cookie.ltuid, login_ticket: "" };
     await this.callback(arg.callback, data);
   }
 
   /**
    * @func getCookieToken
-   * @since Beta v0.6.3
+   * @since Beta v0.8.3
    * @desc 获取米游社客户端的 cookie_token
    * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>} arg - 请求参数
    * @returns {void} - 无返回值
@@ -569,13 +582,13 @@ class Client {
     let domainCur = window.location.hostname;
     if (domainCur.endsWith('.miyoushe.com')) domainCur = '.miyoushe.com';
     else domainCur = '.mihoyo.com';
-    document.cookie = 'account_id=${user.cookie!.account_id}; domain=' + domainCur + '; path=/; max-age=31536000';
-    document.cookie = 'account_id_v2=${user.cookie!.account_id}; domain=' + domainCur + '; path=/; max-age=31536000';
-    document.cookie = 'account_mid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/; max-age=31536000';
-    document.cookie = 'cookie_token=${user.cookie!.cookie_token}; domain=' + domainCur + '; path=/; max-age=31536000';
-    document.cookie = 'ltmid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/; max-age=31536000';
-    document.cookie = 'ltoken=${user.cookie!.ltoken}; domain=' + domainCur + '; path=/; max-age=31536000';
-    document.cookie = 'ltuid_v2=${user.cookie!.ltuid}; domain=' + domainCur + '; path=/; max-age=31536000';
+    document.cookie = 'account_id=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;
+    document.cookie = 'account_id_v2=${user.cookie!.account_id}; domain=' + domainCur + '; path=/;
+    document.cookie = 'account_mid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;
+    document.cookie = 'cookie_token=${user.cookie!.cookie_token}; domain=' + domainCur + '; path=/;
+    document.cookie = 'ltmid_v2=${user.cookie!.mid}; domain=' + domainCur + '; path=/;
+    document.cookie = 'ltoken=${user.cookie!.ltoken}; domain=' + domainCur + '; path=/;
+    document.cookie = 'ltuid_v2=${user.cookie!.ltuid}; domain=' + domainCur + '; path=/;
     })();`;
     console.info(`[getCookieToken] ${executeJS}`);
     await core.invoke("execute_js", { label: "mhy_client", js: executeJS });
