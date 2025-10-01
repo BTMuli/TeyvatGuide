@@ -2,6 +2,7 @@
  * @file utils/TGClient.ts
  * @desc 负责米游社客户端的 callback 处理
  * @since Beta v0.7.6
+ * @todo Cookie 切换异常
  */
 
 import showSnackbar from "@comp/func/snackbar.js";

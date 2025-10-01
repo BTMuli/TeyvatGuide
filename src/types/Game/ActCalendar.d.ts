@@ -1,7 +1,7 @@
 /**
  * @file src/types/Game/ActCalendar.d.ts
  * @description 游戏-活动日历相关类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.8.3
  */
 
 declare namespace TGApp.Game.ActCalendar {
@@ -258,13 +258,21 @@ declare namespace TGApp.Game.ActCalendar {
 
   /**
    * @description 真境剧诗活动详情
-   * @since Beta v0.8.0
+   * @since Beta v0.8.3
    * @interface ActRoleCombat
+   * @property {number} difficulty_id 难度id
+   * @property {boolean} has_data 是否有数据
    * @property {boolean} is_unlock 是否解锁
    * @property {number} max_round_id 最大回合数
-   * @property {boolean} has_data 是否有数据
+   * @property {number} tarot_finished_cnt 塔罗牌完成数
    */
-  type ActRoleCombat = { is_unlock: boolean; max_round_id: number; has_data: boolean };
+  type ActRoleCombat = {
+    difficulty_id: number;
+    has_data: boolean;
+    is_unlock: boolean;
+    max_round_id: number;
+    tarot_finished_cnt: number;
+  };
 
   /**
    * @description 活动信息-深渊螺旋

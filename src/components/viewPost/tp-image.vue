@@ -1,3 +1,4 @@
+<!-- TODO: 链接处理重构 -->
 <template>
   <div class="tp-image-box" v-if="localUrl !== undefined">
     <img :src="localUrl" @click="showOverlay = true" :alt="oriUrl" :title="getImageTitle()" />
@@ -118,9 +119,7 @@ function getImageTitle(): string {
 }
 
 function getImageExt(): string {
-  if (props.data.attributes) {
-    if (props.data.attributes.ext) return props.data.attributes.ext;
-  }
+  if (props.data.attributes && props.data.attributes.ext) return props.data.attributes.ext;
   if (typeof props.data.insert.image === "string") {
     const arr = props.data.insert.image.split(".");
     return arr[arr.length - 1];

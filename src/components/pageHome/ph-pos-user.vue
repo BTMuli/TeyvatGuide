@@ -29,13 +29,7 @@
         <!-- 处理真境剧诗 -->
         <template v-else-if="props.pos.type === ActCalendarTypeEnum.RoleCombat">
           <div class="combat-append" @click="toCombat()" title="点击前往剧诗页面">
-            <template v-if="!props.pos.role_combat_detail.is_unlock">
-              <span>未解锁</span>
-            </template>
-            <template v-else-if="!props.pos.role_combat_detail.has_data">
-              <span>尚未挑战</span>
-            </template>
-            <span v-else>第{{ props.pos.role_combat_detail.max_round_id }}幕</span>
+            <span>{{ getCombatStat(props.pos.role_combat_detail) }}</span>
           </div>
         </template>
         <!-- 处理深境螺旋 -->
@@ -129,6 +123,10 @@ onMounted(() => {
   timer = setInterval(handlePosition, 1000);
 });
 
+onUnmounted(() => {
+  if (timer !== null) clearInterval(timer);
+});
+
 function handlePosition(): void {
   if (restTs.value < 1) {
     if (timer !== null) clearInterval(timer);
@@ -155,9 +153,12 @@ function showMaterial(reward: TGApp.Game.ActCalendar.ActReward): void {
   emits("clickM", reward);
 }
 
-onUnmounted(() => {
-  if (timer !== null) clearInterval(timer);
-});
+function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
+  if (!detail.is_unlock) return "未解锁";
+  if (!detail.has_data) return "尚未挑战";
+  if (detail.difficulty_id < 5) return `第${detail.max_round_id}幕`;
+  return `月谕模式·第${detail.max_round_id}幕·圣牌${detail.tarot_finished_cnt}`;
+}
 </script>
 <style lang="scss" scoped>
 .ph-pos-user-card {

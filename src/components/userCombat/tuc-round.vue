@@ -2,7 +2,10 @@
   <div class="tucr-box">
     <div class="tucr-title">
       <img :src="`/icon/star/combat${modelValue.is_get_medal ? 1 : 0}.webp`" alt="combat" />
-      <span class="main">第{{ modelValue.round_id }}幕</span>
+      <span class="main" v-if="modelValue.is_tarot">
+        圣牌挑战·{{ modelValue.tarot_serial_no }}
+      </span>
+      <span class="main" v-else>第{{ modelValue.round_id }}幕</span>
       <span class="sub">{{ timestampToDate(Number(modelValue.finish_time) * 1000) }}</span>
     </div>
     <div class="tucr-content">

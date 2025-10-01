@@ -1,3 +1,4 @@
+<!-- TODO: 重构UI -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -201,6 +202,7 @@ async function refreshCombat(): Promise<void> {
   await TGLogger.Info("[UserCombat][refreshCombat] 更新剧诗数据");
   await showLoading.start(`正在获取${account.value.gameUid}的剧诗数据`);
   const res = await recordReq.roleCombat(cookie.value, account.value);
+  console.log(res);
   if (res === false) {
     await showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");

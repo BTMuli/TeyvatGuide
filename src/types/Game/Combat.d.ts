@@ -1,7 +1,7 @@
 /**
  * @file types/Game/Combat.d.ts
  * @description 幻想真境剧诗类型定义
- * @since Beta v0.8.0
+ * @since Beta v0.8.3
  */
 
 declare namespace TGApp.Game.Combat {
@@ -94,7 +94,7 @@ declare namespace TGApp.Game.Combat {
   /**
    * @description 状态
    * @interface Stat
-   * @since Beta v0.6.3
+   * @since Beta v0.8.3
    * @property {number} difficulty_id 难度等级
    * @property {number} max_round_id 最多层数
    * @property {number} heraldry 纹章数
@@ -103,6 +103,7 @@ declare namespace TGApp.Game.Combat {
    * @property {number} coin_num 硬币数
    * @property {number} avatar_bonus_num 角色声援数
    * @property {number} rent_cnt 出借次数
+   * @property {number} tarot_finished_cnt 塔罗牌完成数
    */
   type Stat = {
     difficulty_id: number;
@@ -113,6 +114,7 @@ declare namespace TGApp.Game.Combat {
     coin_num: number;
     avatar_bonus_num: number;
     rent_cnt: number;
+    tarot_finished_cnt: number;
   };
 
   /**
@@ -163,7 +165,7 @@ declare namespace TGApp.Game.Combat {
 
   /**
    * @description 轮次数据
-   * @since Beta v0.8.0
+   * @since Beta v0.8.3
    * @interface RoundData
    * @property {Array<Avatar>} avatars 角色
    * @property {Array<Card>} choice_cards 选中卡片
@@ -174,6 +176,8 @@ declare namespace TGApp.Game.Combat {
    * @property {TGApp.Game.Base.DateTime} finish_date_time 完成时间
    * @property {Array<Enemy>} enemies 敌人
    * @property {SplendourBuff} splendour_buff 总体Buff
+   * @property {boolean} is_tarot 是否为塔罗牌
+   * @property {number} tarot_serial_no 塔罗牌序号
    */
   type RoundData = {
     avatars: Array<Avatar>;
@@ -185,6 +189,8 @@ declare namespace TGApp.Game.Combat {
     finish_date_time: TGApp.Game.Base.DateTime;
     enemies: Array<Enemy>;
     splendour_buff: SplendourBuff;
+    is_tarot: boolean;
+    tarot_serial_no: number;
   };
 
   /**

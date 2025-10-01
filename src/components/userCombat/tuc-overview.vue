@@ -1,8 +1,8 @@
 <template>
   <div class="tuco-box">
-    <TucTile title="最佳记录" :val="props.data.max_round_id" />
+    <TucTile title="最佳记录" :val="getBestVal()" />
     <TucTile :title="`获得星章-${props.data.medal_num}`" :val="props.data.get_medal_round_list" />
-    <TucTile :title="getTitle()" :val="`第${props.data.max_round_id}幕`" />
+    <TucTile :title="getRoundTitle()" :val="getRoundVal()" />
     <TucTile title="消耗幻剧之花" :val="props.data.coin_num" />
     <TucFight label="最快完成演出" :data="props.fights.shortest_avatar_list" />
     <TucTile title="总耗时" :val="getTime()" />
@@ -21,7 +21,7 @@ type TucOverviewProps = { data: TGApp.Game.Combat.Stat; fights: TGApp.Game.Comba
 
 const props = defineProps<TucOverviewProps>();
 
-function getTitle(): string {
+function getRoundTitle(): string {
   switch (props.data.difficulty_id) {
     case 0:
       return "未选择";
@@ -33,9 +33,21 @@ function getTitle(): string {
       return "困难模式";
     case 4:
       return "卓越模式";
+    case 5:
+      return "月谕模式";
     default:
       return `未知模式${props.data.difficulty_id}`;
   }
+}
+
+function getBestVal(): string {
+  if (props.data.difficulty_id < 5) return `第${props.data.max_round_id}幕`;
+  return `第${props.data.max_round_id}幕·圣牌${props.data.tarot_finished_cnt}`;
+}
+
+function getRoundVal(): string {
+  if (props.data.difficulty_id < 5) return `第${props.data.max_round_id}幕`;
+  return `${props.data.tarot_finished_cnt + props.data.max_round_id}`;
 }
 
 function getTime(): string {
@@ -48,7 +60,7 @@ function getTime(): string {
 .tuco-box {
   display: grid;
   width: 100%;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>
