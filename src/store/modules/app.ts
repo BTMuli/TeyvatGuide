@@ -85,10 +85,10 @@ const useAppStore = defineStore(
     }
 
     function getImageUrl(url: string, fmt?: string): string {
-      let check = false;
+      let check = true;
       if (fmt && !["jpg", "png", "webp", "gif", "jpeg"].includes(fmt.toLowerCase())) check = false;
-      if (check && (url.endsWith(".gif") || imageQualityPercent.value === 100)) return url;
-      return `${url}?x-oss-process=image/format,jpg/quality,Q_${imageQualityPercent.value}`;
+      if (url.endsWith(".gif") || (check && imageQualityPercent.value === 100)) return url;
+      return `${url}?x-oss-process=image/format,png/quality,Q_${imageQualityPercent.value}`;
     }
 
     return {
