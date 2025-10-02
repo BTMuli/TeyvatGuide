@@ -1,22 +1,22 @@
 <template>
   <div class="tucr-box">
     <div class="tucr-title">
-      <img :src="`/icon/star/combat${modelValue.is_get_medal ? 1 : 0}.webp`" alt="combat" />
-      <span class="main" v-if="modelValue.is_tarot">
-        圣牌挑战·{{ modelValue.tarot_serial_no }}
+      <img :src="`/icon/star/combat${getMedalIndex()}.webp`" alt="combat" />
+      <span class="main" v-if="props.round.is_tarot">
+        圣牌挑战·{{ props.round.tarot_serial_no }}
       </span>
-      <span class="main" v-else>第{{ modelValue.round_id }}幕</span>
-      <span class="sub">{{ timestampToDate(Number(modelValue.finish_time) * 1000) }}</span>
+      <span class="main" v-else>第{{ props.round.round_id }}幕</span>
+      <span class="sub">{{ timestampToDate(Number(props.round.finish_time) * 1000) }}</span>
     </div>
     <div class="tucr-content">
       <TucSub title="出演角色" class="main">
-        <TucAvatars :model-value="modelValue.avatars" :detail="true" />
+        <TucAvatars :model-value="props.round.avatars" :detail="true" />
       </TucSub>
       <TucSub title="辉彩祝福" class="main">
-        <TucBuffs :model-value="modelValue.splendour_buff" />
+        <TucBuffs :model-value="props.round.splendour_buff" />
       </TucSub>
-      <TucSub :title="`神秘收获(${modelValue.choice_cards.length})`" class="sub">
-        <TucCards :model-value="modelValue.choice_cards" />
+      <TucSub :title="`神秘收获(${props.round.choice_cards.length})`" class="sub">
+        <TucCards :model-value="props.round.choice_cards" />
       </TucSub>
     </div>
   </div>
@@ -29,7 +29,13 @@ import TucBuffs from "./tuc-buffs.vue";
 import TucCards from "./tuc-cards.vue";
 import TucSub from "./tuc-sub.vue";
 
-defineProps<{ modelValue: TGApp.Game.Combat.RoundData }>();
+type TucRoundProps = { round: TGApp.Game.Combat.RoundData };
+const props = defineProps<TucRoundProps>();
+
+function getMedalIndex(): number {
+  if (!props.round.is_get_medal) return 0;
+  return props.round.is_tarot ? 2 : 1;
+}
 </script>
 <style lang="css" scoped>
 .tucr-box {

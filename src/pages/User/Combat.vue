@@ -83,11 +83,7 @@
           <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
           <TucAvatars :model-value="item.detail.backup_avatars" :detail="false" />
           <div class="ucw-rounds">
-            <TucRound
-              v-for="(round, idx) in item.detail.rounds_data"
-              :key="idx"
-              :model-value="round"
-            />
+            <TucRound v-for="(round, idx) in item.detail.rounds_data" :key="idx" :round="round" />
           </div>
         </div>
       </v-window-item>
