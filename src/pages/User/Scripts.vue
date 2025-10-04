@@ -76,6 +76,7 @@ import TusOutput from "@comp/userScripts/tus-output.vue";
 import TusSign from "@comp/userScripts/tus-sign.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
+import painterReq from "@req/painterReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
@@ -135,6 +136,7 @@ async function tryCkVerify(): Promise<void> {
   let challenge: string | undefined = undefined;
   while (!flag) {
     await showLoading.start("正在验证CK有效性");
+    await painterReq.forum.recent(26, 2, 1, undefined, 20, ck);
     const resp = await apiHubReq.sign(ck, 2, challenge);
     await showLoading.update(`[${resp.retcode}] ${resp.message}`);
     if (resp.retcode === -100) {

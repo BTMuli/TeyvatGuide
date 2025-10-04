@@ -1,7 +1,7 @@
 /**
  * @file request/painterReq.ts
  * @description painter 下的请求
- * @since Beta v0.7.9
+ * @since Beta v0.8.3
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
@@ -73,12 +73,13 @@ async function getHotForumPostList(
 
 /**
  * @description 获取最近版块帖子列表
- * @since Beta v0.7.9
+ * @since Beta v0.8.3
  * @param {number} forumId 版块 ID
  * @param {number} gid 社区 ID
  * @param {number} type 排序方式: 1-最新回复，2-最新发布
  * @param {string} lastId 最后 ID
  * @param {number} pageSize 每页数量
+ * @param {Record<string, string>} [cookie] 用户 Cookie
  * @return {Promise<TGApp.BBS.Forum.PostForumRes>}
  */
 async function getRecentForumPostList(
@@ -87,6 +88,7 @@ async function getRecentForumPostList(
   type: number = 1,
   lastId?: string,
   pageSize: number = 20,
+  cookie?: Record<string, string>,
 ): Promise<TGApp.BBS.Forum.PostForumRes> {
   type ReqParams = {
     forum_id: number;
@@ -104,11 +106,17 @@ async function getRecentForumPostList(
     page_size: pageSize,
   };
   if (lastId) params.last_id = lastId;
+  let ck: string = "";
+  if (cookie) {
+    for (const key in cookie) {
+      ck += `${key}=${cookie[key]}; `;
+    }
+  }
   return (
     await TGHttp<TGApp.BBS.Forum.PostForumResp>(`${bapBu}getRecentForumPostList`, {
       method: "GET",
       query: params,
-      headers: { cookie: "" },
+      headers: { cookie: ck },
     })
   ).data;
 }

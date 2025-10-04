@@ -278,6 +278,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
   }
   await TGLogger.Script("[米游币任务]正在执行打卡");
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
+  await painterReq.forum.recent(26, 2, 1, undefined, 20, ckSign);
   const resp = await apiHubReq.sign(ckSign, 2, ch);
   if (resp.retcode !== 0) {
     if (resp.retcode !== 1034) {
