@@ -7,7 +7,7 @@
       <slot name="text">{{ val }}</slot>
     </div>
     <div class="tuct-icons" v-else>
-      <img v-for="(v, idx) in val" :key="idx" :src="`/icon/star/combat${v}.webp`" :alt="`${v}`" />
+      <img v-for="(v, idx) in val" :key="idx" :src="`/icon/combat/star_${v}.webp`" :alt="`${v}`" />
     </div>
   </div>
 </template>

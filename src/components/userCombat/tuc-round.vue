@@ -1,7 +1,7 @@
 <template>
   <div class="tucr-box">
     <div class="tucr-title">
-      <img :src="`/icon/star/combat${getMedalIndex()}.webp`" alt="combat" />
+      <img :src="`/icon/combat/${getIcon()}.webp`" alt="combat" />
       <span class="main" v-if="props.round.is_tarot">
         圣牌挑战·{{ props.round.tarot_serial_no }}
       </span>
@@ -32,9 +32,8 @@ import TucSub from "./tuc-sub.vue";
 type TucRoundProps = { round: TGApp.Game.Combat.RoundData };
 const props = defineProps<TucRoundProps>();
 
-function getMedalIndex(): number {
-  if (!props.round.is_get_medal) return 0;
-  return props.round.is_tarot ? 2 : 1;
+function getIcon(): string {
+  return `${props.round.is_tarot ? "tarot" : "star"}_${props.round.is_get_medal ? "1" : "0"}`;
 }
 </script>
 <style lang="css" scoped>
