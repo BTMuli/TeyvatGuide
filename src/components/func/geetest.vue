@@ -48,7 +48,7 @@ declare function initGeetest(
 async function displayBox(
   props: TGApp.BBS.Geetest.CreateRes,
 ): Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false> {
-  return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes>((resolve) => {
+  return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false>((resolve) => {
     initGeetest(
       {
         gt: props.gt,
@@ -64,11 +64,12 @@ async function displayBox(
         geetestEl.value.innerHTML = "";
         captchaObj.appendTo("#geetest");
         captchaObj.onReady(() => (show.value = true));
-        captchaObj.onSuccess(() => {
+        captchaObj.onClose(() => {
           const validate = captchaObj.getValidate();
+          show.value = false;
+          if (!validate) resolve(false);
           resolve(validate);
         });
-        captchaObj.onClose(() => (show.value = false));
       },
     );
   });

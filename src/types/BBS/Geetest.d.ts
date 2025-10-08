@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Geetest.d.ts
  * @description 米游社Geetest 类型定义文件
- * @since Beta v0.7.2
+ * @since Beta v0.8.3
  */
 
 declare namespace TGApp.BBS.Geetest {
@@ -11,7 +11,6 @@ declare namespace TGApp.BBS.Geetest {
    * @interface CreateResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {CreateRes} data - 极验验证数据
-   * @return CreateResp
    */
   type CreateResp = TGApp.BBS.Response.BaseWithData<CreateRes>;
 
@@ -23,7 +22,6 @@ declare namespace TGApp.BBS.Geetest {
    * @property {string} challenge - 极验验证 challenge
    * @property {number} new_captcha - 极验验证 new_captcha
    * @property {number} success - 极验验证 success
-   * @return CreateRes
    */
   type CreateRes = { gt: string; challenge: string; new_captcha: number; success: number };
 
@@ -33,7 +31,6 @@ declare namespace TGApp.BBS.Geetest {
    * @interface VerifyResp
    * @extends TGApp.BBS.Response.Base
    * @property {VerifyRes} data - 极验验证数据
-   * @return VerifyResp
    */
   type VerifyResp = TGApp.BBS.Response.BaseWithData<VerifyRes>;
 
@@ -43,7 +40,6 @@ declare namespace TGApp.BBS.Geetest {
    * @interface VerifyRes
    * @property {string} challenge - 极验验证 challenge
    * @property {string} validate - 极验验证 validate
-   * @return VerifyRes
    */
   type VerifyRes = { challenge: string };
 
@@ -58,7 +54,6 @@ declare namespace TGApp.BBS.Geetest {
    * @property {string} product - 极验验证 product
    * @property {string} width - 极验验证 width
    * @property {string} area - 极验验证 area
-   * @return InitGeetestParams
    */
   type InitGeetestParams = {
     gt: string;
@@ -72,20 +67,17 @@ declare namespace TGApp.BBS.Geetest {
 
   /**
    * @description Geetest 插件 captchaObj
-   * @since Beta v0.7.2
+   * @since Beta v0.8.3
    * @interface GeetestCaptcha
    * @property {Function} appendTo
    * @property {Function} getValidate
-   * @property {Function} onSuccess
    * @property {Function} onClose
    * @property {Function} onReady
-   * @return GeetestCaptcha
    */
   type GeetestCaptcha = {
     appendTo: (selector: string) => void;
-    getValidate: () => GeetestVerifyRes;
-    onSuccess: (callback: () => void) => void;
-    onClose: (callback: () => void) => void;
+    getValidate: () => Promise<GeetestVerifyRes>;
+    onClose: (callback: () => void) => boolean;
     onReady: (callback: () => void) => void;
   };
 
@@ -96,7 +88,6 @@ declare namespace TGApp.BBS.Geetest {
    * @property {string} geetest_challenge
    * @property {string} geetest_validate
    * @property {string} geetest_seccode
-   * @return GeetestVerifyRes
    */
   type GeetestVerifyRes = {
     geetest_challenge: string;
