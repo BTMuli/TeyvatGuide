@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-09-09
+Update: 2025-10-08
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-09-09 14:37:02`
+> 更新于 `2025-10-08 10:08:49`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases)
 
@@ -145,9 +145,5 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - [amos-data](https://github.com/yuehaiteam/amos-data)
 - [MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)
 - [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
-
-感谢 JetBrains 提供的开源许可证。
-
-![JetBrains logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.png)
 
 [![Star History Chart](https://api.star-history.com/svg?repos=BTMuli/TeyvatGuide&type=Timeline)](https://star-history.com/#BTMuli/TeyvatGuide&Timeline)
