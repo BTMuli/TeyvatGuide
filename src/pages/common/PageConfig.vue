@@ -145,6 +145,7 @@
     <TcUserBadge />
     <TcGameBadge v-if="platform() === 'windows'" />
   </div>
+  <TcoImgQuality v-model="showImgQuality" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -155,6 +156,7 @@ import TcDataDir from "@comp/pageConfig/tc-dataDir.vue";
 import TcGameBadge from "@comp/pageConfig/tc-gameBadge.vue";
 import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
+import TcoImgQuality from "@comp/pageConfig/tco-imgQuality.vue";
 import OtherApi from "@req/otherReq.js";
 import TGSqlite from "@Sql/index.js";
 import useAppStore from "@store/app.js";
@@ -190,6 +192,8 @@ const isDevEnv = ref<boolean>(import.meta.env.MODE === "development");
 const showReset = ref<boolean>(false);
 const isNeedResize = ref<boolean>(needResize.value !== "false");
 const cacheSize = ref<number>(0);
+
+const showImgQuality = ref<boolean>(false);
 
 onMounted(async () => {
   await showLoading.start("正在加载设置页面", "正在获取缓存大小");
@@ -320,38 +324,7 @@ async function confirmShare(): Promise<void> {
 
 // 图片质量调整
 async function confirmImgQuality(): Promise<void> {
-  const input = await showDialog.input(
-    "请输入图片质量(1-100)",
-    "质量：",
-    imageQualityPercent.value.toString(),
-  );
-  if (input === undefined) {
-    showSnackbar.cancel("已取消修改图片质量");
-    return;
-  }
-  if (input === "") {
-    showSnackbar.error("质量不能为空!");
-    return;
-  }
-  if (isNaN(Number(input))) {
-    showSnackbar.error("质量必须为数字!");
-    return;
-  }
-  if (Number(input) === imageQualityPercent.value) {
-    showSnackbar.cancel("未修改图片质量");
-    return;
-  }
-  if (Number(input) > 100 || Number(input) < 1) {
-    showSnackbar.error("质量必须在1-100之间!");
-    return;
-  }
-  const check = await showDialog.check("确认修改图片质量吗？", `新质量为${input}`);
-  if (!check) {
-    showSnackbar.cancel("已取消修改图片质量");
-    return;
-  }
-  imageQualityPercent.value = Number(input);
-  showSnackbar.success(`成功修改图片质量!新质量为${input}`);
+  showImgQuality.value = true;
 }
 
 // 更新设备信息
