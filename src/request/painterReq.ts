@@ -106,17 +106,13 @@ async function getRecentForumPostList(
     page_size: pageSize,
   };
   if (lastId) params.last_id = lastId;
-  let ck: string = "";
-  if (cookie) {
-    for (const key in cookie) {
-      ck += `${key}=${cookie[key]}; `;
-    }
-  }
+  let header: Record<string, string> = { cookie: "" };
+  if (cookie) header = getRequestHeader(cookie, "GET", params);
   return (
     await TGHttp<TGApp.BBS.Forum.PostForumResp>(`${bapBu}getRecentForumPostList`, {
       method: "GET",
       query: params,
-      headers: { cookie: ck },
+      headers: header,
     })
   ).data;
 }
