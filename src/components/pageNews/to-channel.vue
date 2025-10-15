@@ -11,7 +11,8 @@
           @click="toChannel(item)"
         >
           <TMiImg :src="item.icon" alt="icon" :ori="true" />
-          <span>{{ item.title }}</span>
+          <span class="toc-list-title">{{ item.title }}</span>
+          <span class="toc-list-id">GID:{{ item.gid }}</span>
         </div>
       </div>
     </div>
@@ -59,32 +60,38 @@ async function toChannel(item: ChannelItem): Promise<void> {
 </script>
 <style lang="css" scoped>
 .toc-box {
-  padding: 10px;
-  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--app-page-bg);
+  row-gap: 12px;
 }
 
 .toc-title {
   color: var(--common-text-title);
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .toc-list {
   display: grid;
-  margin-top: 10px;
-  grid-gap: 10px;
-  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .toc-list-item {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: start;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
+  column-gap: 8px;
   cursor: pointer;
   transition: all 0.5s linear;
 
@@ -95,17 +102,22 @@ async function toChannel(item: ChannelItem): Promise<void> {
   }
 
   img {
-    width: 45px;
-    height: 45px;
-    margin-right: 10px;
-    border-bottom-left-radius: 5px;
-    border-top-left-radius: 5px;
+    width: 48px;
+    height: 48px;
   }
 
-  span {
-    margin-right: 10px;
+  .toc-list-title {
+    margin-right: 8px;
     font-family: var(--font-title);
     font-size: 16px;
+  }
+
+  .toc-list-id {
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+    font-size: 6px;
+    opacity: 0.3;
   }
 }
 </style>
