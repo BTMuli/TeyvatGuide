@@ -1,12 +1,13 @@
+<!-- 近期活动卡片组件（用户）-->
 <template>
-  <div class="ph-pos-user-card">
+  <div class="ph-pos-user-card" ref="posRef">
     <div class="ph-puc-top">
       <div class="title">
         <v-icon title="已完成" color="var(--tgc-od-green)" v-if="props.pos.is_finished">
           mdi-checkbox-marked-circle-outline
         </v-icon>
         <v-icon v-else title="未完成" color="var(--tgc-od-white)">mdi-circle</v-icon>
-        <span>{{ props.pos.name }}</span>
+        <span @click="sharePos()" title="点击分享">{{ props.pos.name }}</span>
       </div>
       <div class="subtitle">
         <!-- 处理幽境危战 -->
@@ -63,7 +64,7 @@
     </div>
     <div class="ph-puc-duration">
       <template v-if="isStart">
-        <span title="剩余时间">{{ stamp2LastTime(restTs * 1000) }}</span>
+        <span title="剩余时间" data-html2canvas-ignore>{{ stamp2LastTime(restTs * 1000) }}</span>
         <span title="活动时间">
           {{ timestampToDate(Number(props.pos.start_timestamp) * 1000) }} ~
           {{ timestampToDate(Number(props.pos.end_timestamp) * 1000) }}
@@ -92,8 +93,9 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import { ActCalendarTypeEnum } from "@enum/game.js";
 import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCompPositionUserProps = { pos: TGApp.Game.ActCalendar.ActItem };
@@ -105,6 +107,7 @@ const router = useRouter();
 
 const props = defineProps<PhCompPositionUserProps>();
 const emits = defineEmits<PhCompPositionUserEmits>();
+const posEl = useTemplateRef<HTMLDivElement>("posRef");
 
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
@@ -159,6 +162,11 @@ function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
   if (detail.difficulty_id < 5) return `第${detail.max_round_id}幕`;
   return `月谕模式·第${detail.max_round_id}幕·圣牌${detail.tarot_finished_cnt}`;
 }
+
+async function sharePos(): Promise<void> {
+  if (!posEl.value) return;
+  await generateShareImg(`活动-${props.pos.name}.png`, posEl.value, 2);
+}
 </script>
 <style lang="scss" scoped>
 .ph-pos-user-card {
@@ -191,6 +199,10 @@ function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
     justify-content: flex-start;
     column-gap: 4px;
     font-family: var(--font-title);
+
+    span {
+      cursor: pointer;
+    }
   }
 
   .subtitle {
@@ -268,6 +280,7 @@ function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
   }
 
   .icon {
+    position: relative;
     z-index: 1;
     width: 40px;
     height: 40px;
