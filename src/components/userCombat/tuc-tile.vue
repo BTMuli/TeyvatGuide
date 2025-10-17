@@ -1,18 +1,29 @@
+<!-- 真境剧诗概况卡片组件 -->
 <template>
   <div class="tuct-box">
     <div class="tuct-title">
-      <slot name="title">{{ title }}</slot>
+      <slot name="title">{{ props.title }}</slot>
     </div>
-    <div class="tuct-text" v-if="!Array.isArray(val)">
-      <slot name="text">{{ val }}</slot>
+    <div class="tuct-text" v-if="!Array.isArray(props.val)">
+      <slot name="text">{{ props.val }}</slot>
     </div>
     <div class="tuct-icons" v-else>
-      <img v-for="(v, idx) in val" :key="idx" :src="`/icon/combat/star_${v}.webp`" :alt="`${v}`" />
+      <template v-for="(v, idx) in props.val" :key="idx">
+        <img
+          v-if="idx < 10"
+          :src="`/icon/combat/star_${v}.webp`"
+          :alt="`${v}`"
+          :title="`第${idx + 1}幕`"
+        />
+        <img v-else :src="`/icon/combat/tarot_${v}.webp`" :alt="`${v}`" :title="`圣牌${idx - 9}`" />
+      </template>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-defineProps<{ title: string; val: string | number | Array<number> }>();
+type TucTileProps = { title: string; val: string | number | Array<number> };
+
+const props = defineProps<TucTileProps>();
 </script>
 <style lang="css" scoped>
 .tuct-box {
@@ -47,7 +58,7 @@ defineProps<{ title: string; val: string | number | Array<number> }>();
 
   img {
     height: 30px;
-    aspect-ratio: 1;
+    object-fit: contain;
   }
 }
 </style>

@@ -84,12 +84,12 @@ async function index(
  * @since Beta v0.6.3
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @param {TGApp.Sqlite.Account.Game} user 用户
- * @returns {Promise<TGApp.Game.Combat.Combat[] | TGApp.BBS.Response.Base|false>}
+ * @returns {Promise<Array<TGApp.Game.Combat.Combat> | TGApp.BBS.Response.Base|false>}
  */
 async function roleCombat(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<TGApp.Game.Combat.Combat[] | TGApp.BBS.Response.Base | false> {
+): Promise<Array<TGApp.Game.Combat.Combat> | TGApp.BBS.Response.Base | false> {
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,

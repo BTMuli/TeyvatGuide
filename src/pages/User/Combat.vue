@@ -1,4 +1,4 @@
-<!-- TODO: 重构UI -->
+<!-- 真境剧诗页面 TODO: 重构UI -->
 <template>
   <v-app-bar>
     <template #prepend>

@@ -21,8 +21,14 @@ declare namespace TGApp.Game.Combat {
    * @property {boolean} is_unlock 是否解锁
    * @property {Record<string,string>} links 相关链接
    * @property {Array<Combat>} data 挑战数据
+   * @property {TarotState} tarot_card_state 塔罗牌状态
    */
-  type FullData = { is_unlock: boolean; links: Record<string, string>; data: Array<Combat> };
+  type FullData = {
+    is_unlock: boolean;
+    links: Record<string, string>;
+    data: Array<Combat>;
+    tarot_card_state: TarotState;
+  };
 
   /**
    * @description 角色数据
@@ -252,4 +258,25 @@ declare namespace TGApp.Game.Combat {
     start_date_time: TGApp.Game.Base.DateTime;
     end_date_time: TGApp.Game.Base.DateTime;
   };
+
+  /**
+   * @description 塔罗牌状态
+   * @since Beta v0.8.3
+   * @interface TarotState
+   * @property {number} total_num 总数
+   * @property {number} curr_num 当前数
+   * @property {Array<TarotCard>} list 卡片列表
+   */
+  type TarotState = { total_num: number; curr_num: number; list: Array<TarotCard> };
+
+  /**
+   * @description 塔罗牌
+   * @interface TarotCard
+   * @since Beta v0.8.3
+   * @property {string} icon 图标
+   * @property {string} name 名称
+   * @property {boolean} is_unlocked 是否解锁
+   * @property {number} unlock_num 解锁数
+   */
+  type TarotCard = { icon: string; name: string; is_unlocked: boolean; unlock_num: number };
 }

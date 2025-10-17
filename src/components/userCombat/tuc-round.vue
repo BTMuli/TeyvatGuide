@@ -1,3 +1,4 @@
+<!-- 真境剧诗，单轮次卡片组件 -->
 <template>
   <div class="tucr-box">
     <div class="tucr-title">
@@ -57,8 +58,8 @@ function getIcon(): string {
   column-gap: 4px;
 
   img {
-    width: 30px;
-    aspect-ratio: 1;
+    height: 30px;
+    object-fit: contain;
   }
 
   .main {
