@@ -682,7 +682,10 @@
     "version": "1.2",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 70102, "name": "腐殖之牙", "type": "世界任务" }]
+      "task": [
+        { "questId": 70102, "name": "腐殖之牙", "type": "世界任务" },
+        { "questId": 75197, "name": "腐殖之牙", "type": "世界任务" }
+      ]
     }
   },
   {
@@ -3759,7 +3762,10 @@
     "description": "点亮纳塔区域中，远古圣山的地图。",
     "reward": 5,
     "version": "5.5",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75149, "name": "冷薪与重燃之地", "type": "世界任务" }]
+    }
   },
   {
     "id": 80384,
@@ -3889,7 +3895,10 @@
     "description": "或许比起曾触手可得的整个世界，对它来说，有其他更为重要的东西。",
     "reward": 10,
     "version": "5.5",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75151, "name": "毁灭预兆与最后的通牒", "type": "世界任务" }]
+    }
   },
   {
     "id": 80430,
@@ -3999,7 +4008,13 @@
     "description": "解锁阿夏的所有颜色。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [
+        { "questId": 75212, "name": "流彩的踪迹", "type": "世界任务" },
+        { "questId": 15040, "name": "目标！彩彩崖！", "type": "角色邀约/传说任务" }
+      ]
+    }
   },
   {
     "id": 80441,
@@ -9672,7 +9687,10 @@
     "description": "启动「天轴」，前往远古圣城的深处。",
     "reward": 5,
     "version": "5.5",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75149, "name": "冷薪与重燃之地", "type": "世界任务" }]
+    }
   },
   {
     "id": 81562,
@@ -9702,7 +9720,10 @@
     "description": "清除「圣山之心」的深渊影响，展露出其真实的样貌。",
     "reward": 5,
     "version": "5.5",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75166, "name": "如烈日彻照阴霾", "type": "世界任务" }]
+    }
   },
   {
     "id": 81565,
@@ -9712,7 +9733,10 @@
     "description": "选择了自己认为的更想前往的一方。",
     "reward": 5,
     "version": "5.5",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 75151, "name": "毁灭预兆与最后的通牒", "type": "世界任务" }]
+    }
   },
   {
     "id": 81566,
@@ -9722,7 +9746,10 @@
     "description": "与龙伙伴告别。",
     "reward": 5,
     "version": "5.5",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75177, "name": "终有独行之日", "type": "世界任务" }]
+    }
   },
   {
     "id": 81567,
@@ -9872,17 +9899,23 @@
     "description": "参加了「流彩设计工作室」的开业典礼。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75212, "name": "流彩的踪迹", "type": "世界任务" }]
+    }
   },
   {
     "id": 81584,
     "series": 0,
     "order": 1579,
-    "name": "梦中的帕伊提提",
+    "name": "梦中的帕依提提",
     "description": "在梦里发现埋藏在提提岛的宝藏。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75232, "name": "美梦帕依提提", "type": "世界任务" }]
+    }
   },
   {
     "id": 81585,
@@ -9912,7 +9945,10 @@
     "description": "观看了皮皮潘偶像大赛的决赛。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75233, "name": "闪耀！皮皮潘偶像大赛！", "type": "世界任务" }]
+    }
   },
   {
     "id": 81590,
@@ -9972,7 +10008,10 @@
     "description": "目送渊上开启他的未知旅程。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 75230, "name": "最后的特诺奇兹托克人", "type": "世界任务" }]
+    }
   },
   {
     "id": 81598,
@@ -9992,7 +10031,10 @@
     "description": "与伙伴们共同参与开业仪式。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 15044, "name": "惊遇！等待众人的将是…？", "type": "角色邀约/传说任务" }]
+    }
   },
   {
     "id": 81600,
@@ -10002,7 +10044,10 @@
     "description": "探索了最初的咏月使封锁的圣所。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76011, "name": "事犹未了", "type": "世界任务" }]
+    }
   },
   {
     "id": 81601,
@@ -10012,7 +10057,10 @@
     "description": "完成了在月矩力试验设计局的冒险。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76003, "name": "鞋匠的孩子总是光脚", "type": "世界任务" }]
+    }
   },
   {
     "id": 81602,
@@ -10022,7 +10070,10 @@
     "description": "将空寂走廊染上色彩。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76028, "name": "空域之外的色彩", "type": "世界任务" }]
+    }
   },
   {
     "id": 81603,
@@ -10032,7 +10083,10 @@
     "description": "让漂亮的彩缎出现在蓝珀湖上空。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76016, "name": "告密的心", "type": "世界任务" }]
+    }
   },
   {
     "id": 81604,
@@ -10042,7 +10096,10 @@
     "description": "协助方格尔完成了实验。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76023, "name": "科研的动力", "type": "世界任务" }]
+    }
   },
   {
     "id": 81605,
@@ -10052,7 +10109,10 @@
     "description": "当生命的颤动从世界的画布上褪去…",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76018, "name": "飞向天空的约定", "type": "世界任务" }]
+    }
   },
   {
     "id": 81606,
@@ -10062,7 +10122,10 @@
     "description": "和博比克成为了朋友。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76004, "name": "是严谨派还是悟性派？", "type": "世界任务" }]
+    }
   },
   {
     "id": 81607,
@@ -10072,7 +10135,10 @@
     "description": "知晓了秘密组织的真身。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76007, "name": "转行总是令人焦虑", "type": "世界任务" }]
+    }
   },
   {
     "id": 81608,
@@ -10082,7 +10148,10 @@
     "description": "将会是怎样的世界？",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76024, "name": "莫雷谷的伙伴们", "type": "世界任务" }]
+    }
   },
   {
     "id": 81609,
@@ -10092,7 +10161,10 @@
     "description": "盗宝鼬毕竟本性难移…",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76000, "name": "要事优先", "type": "世界任务" }]
+    }
   },
   {
     "id": 81610,
@@ -10112,7 +10184,10 @@
     "description": "即使生命之光已然消逝，他不屈的意志仍未消散。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76001, "name": "哀铃的余响", "type": "世界任务" }]
+    }
   },
   {
     "id": 81612,
@@ -10122,7 +10197,10 @@
     "description": "一切归于平静…",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76020, "name": "浪底的低语", "type": "世界任务" }]
+    }
   },
   {
     "id": 81613,
@@ -10172,7 +10250,10 @@
     "description": "完成「伴月纪闻·其一」。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76031, "name": "月光联系你我", "type": "世界任务" }]
+    }
   },
   {
     "id": 81618,
@@ -10233,6 +10314,19 @@
     "reward": 5,
     "version": "6.0",
     "trigger": { "type": "QUEST_GLOBAL_VAR_EQUAL" }
+  },
+  {
+    "id": 81624,
+    "series": 0,
+    "order": 1618,
+    "name": "金之旅人、银之月",
+    "description": "完成「伴月纪闻·其二」。",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76052, "name": "月下小酌", "type": "世界任务" }]
+    }
   },
   {
     "id": 82001,
@@ -13095,6 +13189,16 @@
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
+    "id": 82302,
+    "series": 0,
+    "order": 2302,
+    "name": "搁浅的星座",
+    "description": "在霜夜巡天灵主未进行元素转化的情况下，将其击败。",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -13194,7 +13298,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1018, "name": "返尘", "type": "" }]
+      "task": [{ "questId": 1018, "name": "返尘", "type": "魔神任务" }]
     }
   },
   {
@@ -13207,7 +13311,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1016, "name": "邀约", "type": "" }]
+      "task": [{ "questId": 1016, "name": "邀约", "type": "魔神任务" }]
     }
   },
   {
@@ -13220,7 +13324,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1000, "name": "请仙", "type": "" }]
+      "task": [{ "questId": 1000, "name": "请仙", "type": "魔神任务" }]
     }
   },
   {
@@ -13233,7 +13337,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1003, "name": "望舒", "type": "" }]
+      "task": [{ "questId": 1003, "name": "望舒", "type": "魔神任务" }]
     }
   },
   {
@@ -13246,7 +13350,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1012, "name": "传香", "type": "" }]
+      "task": [{ "questId": 1012, "name": "传香", "type": "魔神任务" }]
     }
   },
   {
@@ -13259,7 +13363,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1014, "name": "壶天", "type": "" }]
+      "task": [{ "questId": 1014, "name": "壶天", "type": "魔神任务" }]
     }
   },
   {
@@ -13272,7 +13376,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1013, "name": "市井", "type": "" }]
+      "task": [{ "questId": 1013, "name": "市井", "type": "魔神任务" }]
     }
   },
   {
@@ -13285,7 +13389,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1015, "name": "归终", "type": "" }]
+      "task": [{ "questId": 1015, "name": "归终", "type": "魔神任务" }]
     }
   },
   {
@@ -13298,7 +13402,7 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1015, "name": "归终", "type": "" }]
+      "task": [{ "questId": 1015, "name": "归终", "type": "魔神任务" }]
     }
   },
   {
@@ -13311,7 +13415,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1021, "name": "玑衡", "type": "" }]
+      "task": [{ "questId": 1021, "name": "玑衡", "type": "魔神任务" }]
     }
   },
   {
@@ -13324,7 +13428,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1021, "name": "玑衡", "type": "" }]
+      "task": [{ "questId": 1021, "name": "玑衡", "type": "魔神任务" }]
     }
   },
   {
@@ -13337,7 +13441,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1022, "name": "孤芳", "type": "" }]
+      "task": [{ "questId": 1022, "name": "孤芳", "type": "魔神任务" }]
     }
   },
   {
@@ -13350,7 +13454,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1023, "name": "离心", "type": "" }]
+      "task": [{ "questId": 1023, "name": "离心", "type": "魔神任务" }]
     }
   },
   {
@@ -13363,7 +13467,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1025, "name": "送仙", "type": "" }]
+      "task": [{ "questId": 1025, "name": "送仙", "type": "魔神任务" }]
     }
   },
   {
@@ -13376,7 +13480,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1025, "name": "送仙", "type": "" }]
+      "task": [{ "questId": 1025, "name": "送仙", "type": "魔神任务" }]
     }
   },
   {
@@ -13389,7 +13493,7 @@
     "version": "1.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1025, "name": "送仙", "type": "" }]
+      "task": [{ "questId": 1025, "name": "送仙", "type": "魔神任务" }]
     }
   },
   {
@@ -13435,7 +13539,7 @@
     "version": "1.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8000, "name": "非自愿的祭献", "type": "" }]
+      "task": [{ "questId": 8000, "name": "非自愿的祭献", "type": "魔神任务" }]
     }
   },
   {
@@ -13448,7 +13552,7 @@
     "version": "1.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8000, "name": "非自愿的祭献", "type": "" }]
+      "task": [{ "questId": 8000, "name": "非自愿的祭献", "type": "魔神任务" }]
     }
   },
   {
@@ -13461,7 +13565,7 @@
     "version": "1.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8001, "name": "无信者的使徒", "type": "" }]
+      "task": [{ "questId": 8001, "name": "无信者的使徒", "type": "魔神任务" }]
     }
   },
   {
@@ -13474,7 +13578,7 @@
     "version": "1.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8003, "name": "有隔阂的魂灵", "type": "" }]
+      "task": [{ "questId": 8003, "name": "有隔阂的魂灵", "type": "魔神任务" }]
     }
   },
   {
@@ -13487,7 +13591,7 @@
     "version": "1.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8003, "name": "有隔阂的魂灵", "type": "" }]
+      "task": [{ "questId": 8003, "name": "有隔阂的魂灵", "type": "魔神任务" }]
     }
   },
   {
@@ -13500,7 +13604,7 @@
     "version": "1.6",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2000, "name": "冲破雷暴之法", "type": "" }]
+      "task": [{ "questId": 2000, "name": "冲破雷暴之法", "type": "魔神任务" }]
     }
   },
   {
@@ -13513,7 +13617,7 @@
     "version": "1.6",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2001, "name": "南十字武斗会", "type": "" }]
+      "task": [{ "questId": 2001, "name": "南十字武斗会", "type": "魔神任务" }]
     }
   },
   {
@@ -13526,7 +13630,7 @@
     "version": "1.6",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2002, "name": "一路随风", "type": "" }]
+      "task": [{ "questId": 2002, "name": "一路随风", "type": "魔神任务" }]
     }
   },
   {
@@ -13539,7 +13643,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2011, "name": "起航之日", "type": "" }]
+      "task": [{ "questId": 2011, "name": "起航之日", "type": "魔神任务" }]
     }
   },
   {
@@ -13552,7 +13656,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2013, "name": "离岛逃离计划", "type": "" }]
+      "task": [{ "questId": 2013, "name": "离岛逃离计划", "type": "魔神任务" }]
     }
   },
   {
@@ -13565,7 +13669,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2003, "name": "三个心愿", "type": "" }]
+      "task": [{ "questId": 2003, "name": "三个心愿", "type": "魔神任务" }]
     }
   },
   {
@@ -13578,7 +13682,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2003, "name": "三个心愿", "type": "" }]
+      "task": [{ "questId": 2003, "name": "三个心愿", "type": "魔神任务" }]
     }
   },
   {
@@ -13591,7 +13695,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2007, "name": "于狱中绽放之花", "type": "" }]
+      "task": [{ "questId": 2007, "name": "于狱中绽放之花", "type": "魔神任务" }]
     }
   },
   {
@@ -13604,7 +13708,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2007, "name": "于狱中绽放之花", "type": "" }]
+      "task": [{ "questId": 2007, "name": "于狱中绽放之花", "type": "魔神任务" }]
     }
   },
   {
@@ -13617,7 +13721,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2008, "name": "在审判的雷鸣声中", "type": "" }]
+      "task": [{ "questId": 2008, "name": "在审判的雷鸣声中", "type": "魔神任务" }]
     }
   },
   {
@@ -13630,7 +13734,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2009, "name": "以反抗之人的名义", "type": "" }]
+      "task": [{ "questId": 2009, "name": "以反抗之人的名义", "type": "魔神任务" }]
     }
   },
   {
@@ -13643,7 +13747,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2007, "name": "于狱中绽放之花", "type": "" }]
+      "task": [{ "questId": 2007, "name": "于狱中绽放之花", "type": "魔神任务" }]
     }
   },
   {
@@ -13656,7 +13760,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2009, "name": "以反抗之人的名义", "type": "" }]
+      "task": [{ "questId": 2009, "name": "以反抗之人的名义", "type": "魔神任务" }]
     }
   },
   {
@@ -13669,7 +13773,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2010, "name": "剑与鱼与反抗者", "type": "" }]
+      "task": [{ "questId": 2010, "name": "剑与鱼与反抗者", "type": "魔神任务" }]
     }
   },
   {
@@ -13682,7 +13786,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2016, "name": "眷属的践行", "type": "" }]
+      "task": [{ "questId": 2016, "name": "眷属的践行", "type": "魔神任务" }]
     }
   },
   {
@@ -13695,7 +13799,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2017, "name": "定罪公文", "type": "" }]
+      "task": [{ "questId": 2017, "name": "定罪公文", "type": "魔神任务" }]
     }
   },
   {
@@ -13708,7 +13812,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2019, "name": "御前决斗", "type": "" }]
+      "task": [{ "questId": 2019, "name": "御前决斗", "type": "魔神任务" }]
     }
   },
   {
@@ -13721,7 +13825,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2020, "name": "千手百眼", "type": "" }]
+      "task": [{ "questId": 2020, "name": "千手百眼", "type": "魔神任务" }]
     }
   },
   {
@@ -13734,7 +13838,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 2021, "name": "愿望", "type": "" }]
+      "task": [{ "questId": 2021, "name": "愿望", "type": "魔神任务" }]
     }
   },
   {
@@ -13781,6 +13885,7 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         { "questId": 21027, "name": "小海盗，要出海！", "type": "每日委托" },
+        { "questId": 21027, "name": "小海盗，要出海！", "type": "每日委托" },
         { "questId": 29300, "name": "哎呀！海盗想长大！", "type": "task" },
         { "questId": 29600, "name": "随水而来的烦恼", "type": "task" },
         { "questId": 29700, "name": "小海盗，要出海！", "type": "task" }
@@ -13797,7 +13902,7 @@
     "version": "2.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 11015, "name": "此心安处", "type": "" }]
+      "task": [{ "questId": 11015, "name": "此心安处", "type": "魔神任务" }]
     }
   },
   {
@@ -13810,7 +13915,7 @@
     "version": "2.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 11015, "name": "此心安处", "type": "" }]
+      "task": [{ "questId": 11015, "name": "此心安处", "type": "魔神任务" }]
     }
   },
   {
@@ -13823,7 +13928,7 @@
     "version": "2.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 11014, "name": "往事如尘", "type": "" }]
+      "task": [{ "questId": 11014, "name": "往事如尘", "type": "魔神任务" }]
     }
   },
   {
@@ -13836,7 +13941,7 @@
     "version": "2.4",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 11015, "name": "此心安处", "type": "" }]
+      "task": [{ "questId": 11015, "name": "此心安处", "type": "魔神任务" }]
     }
   },
   {
@@ -13849,7 +13954,10 @@
     "version": "2.6",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 8004, "name": "渊底不期的再会", "type": "" }]
+      "task": [
+        { "questId": 8004, "name": "渊底不期的再会", "type": "魔神任务" },
+        { "questId": 8004, "name": "渊底不期的再会", "type": "魔神任务" }
+      ]
     }
   },
   {
@@ -13862,7 +13970,10 @@
     "version": "2.6",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 8005, "name": "被守护者的灵柩", "type": "" }]
+      "task": [
+        { "questId": 8005, "name": "被守护者的灵柩", "type": "魔神任务" },
+        { "questId": 8005, "name": "被守护者的灵柩", "type": "魔神任务" }
+      ]
     }
   },
   {
@@ -13875,7 +13986,7 @@
     "version": "2.6",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8006, "name": "因提瓦特的记忆", "type": "" }]
+      "task": [{ "questId": 8006, "name": "因提瓦特的记忆", "type": "魔神任务" }]
     }
   },
   {
@@ -13888,7 +13999,7 @@
     "version": "2.6",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8007, "name": "黑蛇骑士的荣光", "type": "" }]
+      "task": [{ "questId": 8007, "name": "黑蛇骑士的荣光", "type": "魔神任务" }]
     }
   },
   {
@@ -13901,7 +14012,7 @@
     "version": "2.7",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1029, "name": "危机四伏", "type": "" }]
+      "task": [{ "questId": 1029, "name": "危机四伏", "type": "魔神任务" }]
     }
   },
   {
@@ -13914,7 +14025,7 @@
     "version": "2.7",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1031, "name": "绝处逢生", "type": "" }]
+      "task": [{ "questId": 1031, "name": "绝处逢生", "type": "魔神任务" }]
     }
   },
   {
@@ -13927,7 +14038,7 @@
     "version": "2.7",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 1031, "name": "绝处逢生", "type": "" }]
+      "task": [{ "questId": 1031, "name": "绝处逢生", "type": "魔神任务" }]
     }
   },
   {
@@ -13940,7 +14051,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3004, "name": "智慧之神的踪影", "type": "" }]
+      "task": [{ "questId": 3004, "name": "智慧之神的踪影", "type": "魔神任务" }]
     }
   },
   {
@@ -13953,7 +14064,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3005, "name": "失物匿于繁华", "type": "" }]
+      "task": [{ "questId": 3005, "name": "失物匿于繁华", "type": "魔神任务" }]
     }
   },
   {
@@ -13966,7 +14077,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3006, "name": "近在咫尺的目标", "type": "" }]
+      "task": [{ "questId": 3006, "name": "近在咫尺的目标", "type": "魔神任务" }]
     }
   },
   {
@@ -13979,7 +14090,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3006, "name": "近在咫尺的目标", "type": "" }]
+      "task": [{ "questId": 3006, "name": "近在咫尺的目标", "type": "魔神任务" }]
     }
   },
   {
@@ -13992,7 +14103,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3008, "name": "已然来临的花神诞祭", "type": "" }]
+      "task": [{ "questId": 3008, "name": "已然来临的花神诞祭", "type": "魔神任务" }]
     }
   },
   {
@@ -14005,7 +14116,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3008, "name": "已然来临的花神诞祭", "type": "" }]
+      "task": [{ "questId": 3008, "name": "已然来临的花神诞祭", "type": "魔神任务" }]
     }
   },
   {
@@ -14018,7 +14129,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3012, "name": "终将结束的花神诞祭", "type": "" }]
+      "task": [{ "questId": 3012, "name": "终将结束的花神诞祭", "type": "魔神任务" }]
     }
   },
   {
@@ -14031,7 +14142,7 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3012, "name": "终将结束的花神诞祭", "type": "" }]
+      "task": [{ "questId": 3012, "name": "终将结束的花神诞祭", "type": "魔神任务" }]
     }
   },
   {
@@ -14044,7 +14155,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3016, "name": "如凯旋的英雄一般", "type": "" }]
+      "task": [{ "questId": 3016, "name": "如凯旋的英雄一般", "type": "魔神任务" }]
     }
   },
   {
@@ -14057,7 +14168,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3016, "name": "如凯旋的英雄一般", "type": "" }]
+      "task": [{ "questId": 3016, "name": "如凯旋的英雄一般", "type": "魔神任务" }]
     }
   },
   {
@@ -14070,7 +14181,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3017, "name": "来自某位「神明」的凝视", "type": "" }]
+      "task": [{ "questId": 3017, "name": "来自某位「神明」的凝视", "type": "魔神任务" }]
     }
   },
   {
@@ -14083,7 +14194,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3018, "name": "剑拔弩张四人众", "type": "" }]
+      "task": [{ "questId": 3018, "name": "剑拔弩张四人众", "type": "魔神任务" }]
     }
   },
   {
@@ -14096,7 +14207,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3021, "name": "热沙中的秘密", "type": "" }]
+      "task": [{ "questId": 3021, "name": "热沙中的秘密", "type": "魔神任务" }]
     }
   },
   {
@@ -14109,7 +14220,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3021, "name": "热沙中的秘密", "type": "" }]
+      "task": [{ "questId": 3021, "name": "热沙中的秘密", "type": "魔神任务" }]
     }
   },
   {
@@ -14122,7 +14233,7 @@
     "version": "3.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3021, "name": "热沙中的秘密", "type": "" }]
+      "task": [{ "questId": 3021, "name": "热沙中的秘密", "type": "魔神任务" }]
     }
   },
   {
@@ -14135,7 +14246,7 @@
     "version": "3.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3024, "name": "行于黎明前夜幕里", "type": "" }]
+      "task": [{ "questId": 3024, "name": "行于黎明前夜幕里", "type": "魔神任务" }]
     }
   },
   {
@@ -14148,7 +14259,7 @@
     "version": "3.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3025, "name": "如临神之畔", "type": "" }]
+      "task": [{ "questId": 3025, "name": "如临神之畔", "type": "魔神任务" }]
     }
   },
   {
@@ -14161,7 +14272,7 @@
     "version": "3.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3022, "name": "识藏日", "type": "" }]
+      "task": [{ "questId": 3022, "name": "识藏日", "type": "魔神任务" }]
     }
   },
   {
@@ -14174,7 +14285,7 @@
     "version": "3.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3028, "name": "意识之舟所至之处", "type": "" }]
+      "task": [{ "questId": 3028, "name": "意识之舟所至之处", "type": "魔神任务" }]
     }
   },
   {
@@ -14187,7 +14298,7 @@
     "version": "3.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3026, "name": "请饮下祝胜之酒", "type": "" }]
+      "task": [{ "questId": 3026, "name": "请饮下祝胜之酒", "type": "魔神任务" }]
     }
   },
   {
@@ -14200,7 +14311,7 @@
     "version": "3.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3029, "name": "夜中飞鸟坠于三段", "type": "" }]
+      "task": [{ "questId": 3029, "name": "夜中飞鸟坠于三段", "type": "魔神任务" }]
     }
   },
   {
@@ -14213,7 +14324,7 @@
     "version": "3.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3030, "name": "乱世轮舞", "type": "" }]
+      "task": [{ "questId": 3030, "name": "乱世轮舞", "type": "魔神任务" }]
     }
   },
   {
@@ -14226,7 +14337,7 @@
     "version": "3.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3031, "name": "幕切——倾奇之末", "type": "" }]
+      "task": [{ "questId": 3031, "name": "幕切——倾奇之末", "type": "魔神任务" }]
     }
   },
   {
@@ -14239,7 +14350,7 @@
     "version": "3.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3031, "name": "幕切——倾奇之末", "type": "" }]
+      "task": [{ "questId": 3031, "name": "幕切——倾奇之末", "type": "魔神任务" }]
     }
   },
   {
@@ -14252,7 +14363,7 @@
     "version": "3.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 3032, "name": "如朝露一般", "type": "" }]
+      "task": [{ "questId": 3032, "name": "如朝露一般", "type": "魔神任务" }]
     }
   },
   {
@@ -14265,7 +14376,7 @@
     "version": "3.5",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8009, "name": "如命运般的相逢", "type": "" }]
+      "task": [{ "questId": 8009, "name": "如命运般的相逢", "type": "魔神任务" }]
     }
   },
   {
@@ -14278,7 +14389,7 @@
     "version": "3.5",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8010, "name": "嘲弄命运的资格", "type": "" }]
+      "task": [{ "questId": 8010, "name": "嘲弄命运的资格", "type": "魔神任务" }]
     }
   },
   {
@@ -14291,7 +14402,7 @@
     "version": "3.5",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8011, "name": "命运尽头的垂泪者", "type": "" }]
+      "task": [{ "questId": 8011, "name": "命运尽头的垂泪者", "type": "魔神任务" }]
     }
   },
   {
@@ -14304,7 +14415,7 @@
     "version": "3.5",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8012, "name": "既已写下的命运", "type": "" }]
+      "task": [{ "questId": 8012, "name": "既已写下的命运", "type": "魔神任务" }]
     }
   },
   {
@@ -14317,7 +14428,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4004, "name": "独舞者的序幕", "type": "" }]
+      "task": [{ "questId": 4004, "name": "独舞者的序幕", "type": "魔神任务" }]
     }
   },
   {
@@ -14330,7 +14441,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4006, "name": "聚光灯下谎言成影", "type": "" }]
+      "task": [{ "questId": 4006, "name": "聚光灯下谎言成影", "type": "魔神任务" }]
     }
   },
   {
@@ -14343,7 +14454,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4006, "name": "聚光灯下谎言成影", "type": "" }]
+      "task": [{ "questId": 4006, "name": "聚光灯下谎言成影", "type": "魔神任务" }]
     }
   },
   {
@@ -14356,7 +14467,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4006, "name": "聚光灯下谎言成影", "type": "" }]
+      "task": [{ "questId": 4006, "name": "聚光灯下谎言成影", "type": "魔神任务" }]
     }
   },
   {
@@ -14770,7 +14881,11 @@
     "version": "2.8",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 19060, "name": "尘封的疑云", "type": "角色邀约/传说任务" }]
+      "task": [
+        { "questId": 19060, "name": "尘封的疑云", "type": "角色邀约/传说任务" },
+        { "questId": 19060, "name": "尘封的疑云", "type": "角色邀约/传说任务" },
+        { "questId": 19060, "name": "尘封的疑云", "type": "角色邀约/传说任务" }
+      ]
     }
   },
   {
@@ -14806,7 +14921,10 @@
     "version": "3.5",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 19173, "name": "孤影徘徊", "type": "角色邀约/传说任务" }]
+      "task": [
+        { "questId": 19173, "name": "孤影徘徊", "type": "角色邀约/传说任务" },
+        { "questId": 19173, "name": "孤影徘徊", "type": "角色邀约/传说任务" }
+      ]
     }
   },
   {
@@ -14977,7 +15095,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4000, "name": "如同昔日的微茫月明", "type": "" }]
+      "task": [{ "questId": 4000, "name": "如同昔日的微茫月明", "type": "魔神任务" }]
     }
   },
   {
@@ -14990,7 +15108,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4000, "name": "如同昔日的微茫月明", "type": "" }]
+      "task": [{ "questId": 4000, "name": "如同昔日的微茫月明", "type": "魔神任务" }]
     }
   },
   {
@@ -15003,7 +15121,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4002, "name": "当一切回归于水", "type": "" }]
+      "task": [{ "questId": 4002, "name": "当一切回归于水", "type": "魔神任务" }]
     }
   },
   {
@@ -15016,7 +15134,7 @@
     "version": "4.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4002, "name": "当一切回归于水", "type": "" }]
+      "task": [{ "questId": 4002, "name": "当一切回归于水", "type": "魔神任务" }]
     }
   },
   {
@@ -15029,7 +15147,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4012, "name": "梅洛彼得堡", "type": "" }]
+      "task": [{ "questId": 4012, "name": "梅洛彼得堡", "type": "魔神任务" }]
     }
   },
   {
@@ -15042,7 +15160,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4015, "name": "匿于日常之禁忌", "type": "" }]
+      "task": [{ "questId": 4015, "name": "匿于日常之禁忌", "type": "魔神任务" }]
     }
   },
   {
@@ -15055,7 +15173,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4018, "name": "深海的迷路者", "type": "" }]
+      "task": [{ "questId": 4018, "name": "深海的迷路者", "type": "魔神任务" }]
     }
   },
   {
@@ -15068,7 +15186,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4007, "name": "探入水底迷雾", "type": "" }]
+      "task": [{ "questId": 4007, "name": "探入水底迷雾", "type": "魔神任务" }]
     }
   },
   {
@@ -15081,7 +15199,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4008, "name": "真相隐于影中", "type": "" }]
+      "task": [{ "questId": 4008, "name": "真相隐于影中", "type": "魔神任务" }]
     }
   },
   {
@@ -15094,7 +15212,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4009, "name": "守秘者与禁区", "type": "" }]
+      "task": [{ "questId": 4009, "name": "守秘者与禁区", "type": "魔神任务" }]
     }
   },
   {
@@ -15107,7 +15225,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4010, "name": "灾厄的脚步", "type": "" }]
+      "task": [{ "questId": 4010, "name": "灾厄的脚步", "type": "魔神任务" }]
     }
   },
   {
@@ -15120,7 +15238,7 @@
     "version": "4.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4019, "name": "片刻安宁", "type": "" }]
+      "task": [{ "questId": 4019, "name": "片刻安宁", "type": "魔神任务" }]
     }
   },
   {
@@ -15133,7 +15251,7 @@
     "version": "4.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4023, "name": "怒涛之灾", "type": "" }]
+      "task": [{ "questId": 4023, "name": "怒涛之灾", "type": "魔神任务" }]
     }
   },
   {
@@ -15146,7 +15264,7 @@
     "version": "4.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4020, "name": "相见亦是离别", "type": "" }]
+      "task": [{ "questId": 4020, "name": "相见亦是离别", "type": "魔神任务" }]
     }
   },
   {
@@ -15159,7 +15277,7 @@
     "version": "4.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4021, "name": "狩猎者，预见者", "type": "" }]
+      "task": [{ "questId": 4021, "name": "狩猎者，预见者", "type": "魔神任务" }]
     }
   },
   {
@@ -15172,7 +15290,7 @@
     "version": "4.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4025, "name": "终幕礼", "type": "" }]
+      "task": [{ "questId": 4025, "name": "终幕礼", "type": "魔神任务" }]
     }
   },
   {
@@ -15185,7 +15303,7 @@
     "version": "4.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 4025, "name": "终幕礼", "type": "" }]
+      "task": [{ "questId": 4025, "name": "终幕礼", "type": "魔神任务" }]
     }
   },
   {
@@ -15198,7 +15316,7 @@
     "version": "4.7",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 8019, "name": "积存已久的委托", "type": "" }]
+      "task": [{ "questId": 8019, "name": "积存已久的委托", "type": "魔神任务" }]
     }
   },
   {
@@ -15211,7 +15329,7 @@
     "version": "4.7",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 8020, "name": "不应存在的记忆", "type": "" }]
+      "task": [{ "questId": 8020, "name": "不应存在的记忆", "type": "魔神任务" }]
     }
   },
   {
@@ -15224,7 +15342,7 @@
     "version": "4.7",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 8021, "name": "以世界之格的诉说", "type": "" }]
+      "task": [{ "questId": 8021, "name": "以世界之格的诉说", "type": "魔神任务" }]
     }
   },
   {
@@ -15237,7 +15355,7 @@
     "version": "4.7",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 8021, "name": "以世界之格的诉说", "type": "" }]
+      "task": [{ "questId": 8021, "name": "以世界之格的诉说", "type": "魔神任务" }]
     }
   },
   {
@@ -15250,7 +15368,10 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 5000, "name": "纳塔！新的旅程", "type": "" }]
+      "task": [
+        { "questId": 5000, "name": "纳塔！新的旅程", "type": "魔神任务" },
+        { "questId": 5000, "name": "纳塔！新的旅程", "type": "魔神任务" }
+      ]
     }
   },
   {
@@ -15263,7 +15384,7 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5001, "name": "归火圣夜巡礼", "type": "" }]
+      "task": [{ "questId": 5001, "name": "归火圣夜巡礼", "type": "魔神任务" }]
     }
   },
   {
@@ -15276,7 +15397,7 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5003, "name": "抉择", "type": "" }]
+      "task": [{ "questId": 5003, "name": "抉择", "type": "魔神任务" }]
     }
   },
   {
@@ -15289,7 +15410,7 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5006, "name": "坠入永夜", "type": "" }]
+      "task": [{ "questId": 5006, "name": "坠入永夜", "type": "魔神任务" }]
     }
   },
   {
@@ -15302,7 +15423,7 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5006, "name": "坠入永夜", "type": "" }]
+      "task": [{ "questId": 5006, "name": "坠入永夜", "type": "魔神任务" }]
     }
   },
   {
@@ -15315,7 +15436,7 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5007, "name": "过去与未来", "type": "" }]
+      "task": [{ "questId": 5007, "name": "过去与未来", "type": "魔神任务" }]
     }
   },
   {
@@ -15328,7 +15449,7 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5002, "name": "温泉之乡", "type": "" }]
+      "task": [{ "questId": 5002, "name": "温泉之乡", "type": "魔神任务" }]
     }
   },
   {
@@ -15351,7 +15472,7 @@
     "version": "5.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5016, "name": "向着迷烟飘往之处", "type": "" }]
+      "task": [{ "questId": 5016, "name": "向着迷烟飘往之处", "type": "魔神任务" }]
     }
   },
   {
@@ -15364,7 +15485,7 @@
     "version": "5.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5016, "name": "向着迷烟飘往之处", "type": "" }]
+      "task": [{ "questId": 5016, "name": "向着迷烟飘往之处", "type": "魔神任务" }]
     }
   },
   {
@@ -15377,7 +15498,7 @@
     "version": "5.1",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5017, "name": "摇曳灯火一分为二", "type": "" }]
+      "task": [{ "questId": 5017, "name": "摇曳灯火一分为二", "type": "魔神任务" }]
     }
   },
   {
@@ -15390,7 +15511,7 @@
     "version": "5.1",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5009, "name": "秘源之下", "type": "" }]
+      "task": [{ "questId": 5009, "name": "秘源之下", "type": "魔神任务" }]
     }
   },
   {
@@ -15403,7 +15524,7 @@
     "version": "5.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5014, "name": "名为「命运」的燃料", "type": "" }]
+      "task": [{ "questId": 5014, "name": "名为「命运」的燃料", "type": "魔神任务" }]
     }
   },
   {
@@ -15416,7 +15537,7 @@
     "version": "5.1",
     "trigger": {
       "type": "FINISH_PARENT_QUEST_AND",
-      "task": [{ "questId": 5014, "name": "名为「命运」的燃料", "type": "" }]
+      "task": [{ "questId": 5014, "name": "名为「命运」的燃料", "type": "魔神任务" }]
     }
   },
   {
@@ -15429,7 +15550,7 @@
     "version": "5.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5026, "name": "为同一片土地", "type": "" }]
+      "task": [{ "questId": 5026, "name": "为同一片土地", "type": "魔神任务" }]
     }
   },
   {
@@ -15442,7 +15563,7 @@
     "version": "5.2",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5026, "name": "为同一片土地", "type": "" }]
+      "task": [{ "questId": 5026, "name": "为同一片土地", "type": "魔神任务" }]
     }
   },
   {
@@ -15455,7 +15576,7 @@
     "version": "5.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5022, "name": "地中残景", "type": "" }]
+      "task": [{ "questId": 5022, "name": "地中残景", "type": "魔神任务" }]
     }
   },
   {
@@ -15468,7 +15589,7 @@
     "version": "5.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5023, "name": "正如日出日落", "type": "" }]
+      "task": [{ "questId": 5023, "name": "正如日出日落", "type": "魔神任务" }]
     }
   },
   {
@@ -15481,7 +15602,7 @@
     "version": "5.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5024, "name": "星与火的征途", "type": "" }]
+      "task": [{ "questId": 5024, "name": "星与火的征途", "type": "魔神任务" }]
     }
   },
   {
@@ -15494,7 +15615,7 @@
     "version": "5.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "" }]
+      "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "魔神任务" }]
     }
   },
   {
@@ -15507,7 +15628,7 @@
     "version": "5.3",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "" }]
+      "task": [{ "questId": 5029, "name": "当一切镌刻成碑", "type": "魔神任务" }]
     }
   },
   {
@@ -15548,7 +15669,10 @@
     "description": "击退袭击「烟谜主」的「深渊教团」。",
     "reward": 5,
     "version": "5.7",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 8016, "name": "命运始动的钥匙", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84346,
@@ -15558,7 +15682,10 @@
     "description": "「命运的织机」已编织出「新坎瑞亚」的地脉。",
     "reward": 5,
     "version": "5.7",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 8018, "name": "你所不在的时空", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84347,
@@ -15568,7 +15695,10 @@
     "description": "完成「你存在的时空」。",
     "reward": 10,
     "version": "5.7",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 8018, "name": "你所不在的时空", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84348,
@@ -15578,7 +15708,10 @@
     "description": "这个机器人来自挪德卡莱。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6004, "name": "墟火", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84349,
@@ -15588,7 +15721,10 @@
     "description": "阻绝「明晨之镜」的复燃与归还。",
     "reward": 5,
     "version": "5.8",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6006, "name": "逆焰", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84350,
@@ -15598,7 +15734,10 @@
     "description": "完成「归途」。",
     "reward": 10,
     "version": "5.8",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6006, "name": "逆焰", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84351,
@@ -15608,7 +15747,10 @@
     "description": "遇见熟人的感觉真好。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6000, "name": "月亮升起的地方", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84352,
@@ -15618,7 +15760,10 @@
     "description": "花丛中诞生的生灵是来自月的祝福。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6000, "name": "月亮升起的地方", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84353,
@@ -15628,7 +15773,10 @@
     "description": "在银月之庭与「少女」邂逅…",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6001, "name": "于月光下重逢", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84354,
@@ -15638,7 +15786,10 @@
     "description": "完成「雪浪与苍林之舞」。",
     "reward": 10,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6002, "name": "在夜的阴影中", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84355,
@@ -15648,7 +15799,10 @@
     "description": "不同的地方，有不同的办事方法。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6007, "name": "轰鸣与暗涌", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84356,
@@ -15658,7 +15812,10 @@
     "description": "光芒照不出善恶，只能照出真相。",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6009, "name": "曾有人追猎月亮", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84357,
@@ -15668,7 +15825,10 @@
     "description": "「他」最终还是取回了完整的形体…",
     "reward": 5,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6010, "name": "灰白的秩序熊熊燃烧", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84358,
@@ -15678,7 +15838,101 @@
     "description": "完成「尘与灯的挽歌」。",
     "reward": 10,
     "version": "6.0",
-    "trigger": { "type": "FINISH_QUEST_AND" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6011, "name": "遥不可及的安息", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84359,
+    "series": 0,
+    "order": 5138,
+    "name": "火力压制",
+    "description": "对未被邀请之人的接待方式。",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6013, "name": "特别行动", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84360,
+    "series": 0,
+    "order": 5139,
+    "name": "唯遗余烬",
+    "description": "残月留下了最后的光辉。",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6014, "name": "如月长存", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84361,
+    "series": 0,
+    "order": 5140,
+    "name": "不存在的国土",
+    "description": "完成「不存在的国土」。",
+    "reward": 10,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6014, "name": "如月长存", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84362,
+    "series": 0,
+    "order": 5141,
+    "name": "无月之夜",
+    "description": "那是罪人们尚未犯下大罪之时…",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6019, "name": "蛇与蝎的亡命舞", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84363,
+    "series": 0,
+    "order": 5142,
+    "name": "血与沙的游戏",
+    "description": "不过是一捧尘沙罢了。",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6020, "name": "命运的回声", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84364,
+    "series": 0,
+    "order": 5143,
+    "name": "在月坠之前",
+    "description": "战胜五大罪人之一的「猎月人」。",
+    "reward": 5,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6020, "name": "命运的回声", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84365,
+    "series": 0,
+    "order": 5144,
+    "name": "回望湮灭的月光",
+    "description": "完成「回望湮灭的月光」。",
+    "reward": 10,
+    "version": "6.1",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6020, "name": "命运的回声", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84501,
@@ -15722,6 +15976,8 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 20700, "name": "说到做到！", "type": "每日委托" },
+        { "questId": 20700, "name": "说到做到！", "type": "每日委托" },
+        { "questId": 20700, "name": "说到做到！", "type": "每日委托" },
         { "questId": 2070012, "name": "去山底。", "type": "subquest" },
         { "questId": 2070013, "name": "去山腰。", "type": "subquest" },
         { "questId": 2070014, "name": "去山顶。", "type": "subquest" }
@@ -15740,6 +15996,8 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 20600, "name": "来自冬天的故事", "type": "每日委托" },
+        { "questId": 20600, "name": "来自冬天的故事", "type": "每日委托" },
+        { "questId": 20600, "name": "来自冬天的故事", "type": "每日委托" },
         { "questId": 2060006, "name": "关于「愚人众」…", "type": "subquest" },
         { "questId": 2060008, "name": "关于「邪眼」…", "type": "subquest" },
         { "questId": 2060010, "name": "关于「女皇陛下」…", "type": "subquest" }
@@ -15757,6 +16015,7 @@
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
+        { "questId": 22300, "name": "岩游记", "type": "每日委托" },
         { "questId": 22300, "name": "岩游记", "type": "每日委托" },
         { "questId": 2550001, "name": "岩神传说：开拓之神", "type": "subtask" },
         { "questId": 2550002, "name": "岩神传说：历史之神", "type": "subtask" },
@@ -15837,6 +16096,10 @@
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
         { "questId": 22107, "name": "好兆头", "type": "每日委托" },
         { "questId": 2610011, "name": "有只猫和鱼成了朋友…", "type": "subtask" },
         { "questId": 2610012, "name": "关于落叶…", "type": "subtask" },
@@ -16032,6 +16295,9 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 22107, "name": "好兆头", "type": "每日委托" },
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
+        { "questId": 22107, "name": "好兆头", "type": "每日委托" },
         { "questId": 2610001, "name": "捕鱼", "type": "subtask" },
         { "questId": 2610002, "name": "落叶", "type": "subtask" },
         { "questId": 2610003, "name": "赶走鸽子", "type": "subtask" },
@@ -16095,6 +16361,8 @@
       "type": "FINISH_QUEST_OR",
       "task": [
         { "questId": 22025, "name": "绝对独特的美食", "type": "每日委托" },
+        { "questId": 22025, "name": "绝对独特的美食", "type": "每日委托" },
+        { "questId": 22025, "name": "绝对独特的美食", "type": "每日委托" },
         { "questId": 41160, "name": "家乡之味", "type": "task" },
         { "questId": 41170, "name": "绝对独特的美食", "type": "task" }
       ]
@@ -16121,6 +16389,7 @@
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
+        { "questId": 22021, "name": "全能美食队·烹饪对决", "type": "每日委托" },
         { "questId": 22021, "name": "全能美食队·烹饪对决", "type": "每日委托" },
         { "questId": 2202109, "name": "旭东", "type": "subquest" },
         { "questId": 2202110, "name": "龟井宗久", "type": "subquest" }
@@ -16151,6 +16420,7 @@
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [
+        { "questId": 22030, "name": "全能美食队·厨道的极意", "type": "每日委托" },
         { "questId": 22030, "name": "全能美食队·厨道的极意", "type": "每日委托" },
         { "questId": 2203011, "name": "在左侧魔物营地内寻找食材", "type": "subquest" },
         { "questId": 2203012, "name": "在右侧魔物营地内寻找食材", "type": "subquest" }
@@ -16197,7 +16467,10 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 72809, "name": "离岛之路", "type": "世界任务" }]
+      "task": [
+        { "questId": 72809, "name": "离岛之路", "type": "世界任务" },
+        { "questId": 72809, "name": "离岛之路", "type": "世界任务" }
+      ]
     }
   },
   {
@@ -16317,7 +16590,11 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 23012, "name": "喵…喵喵？喵！喵。", "type": "每日委托" }]
+      "task": [
+        { "questId": 23012, "name": "喵…喵喵？喵！喵。", "type": "每日委托" },
+        { "questId": 23012, "name": "喵…喵喵？喵！喵。", "type": "每日委托" },
+        { "questId": 23012, "name": "喵…喵喵？喵！喵。", "type": "每日委托" }
+      ]
     }
   },
   {
@@ -16353,7 +16630,11 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 23018, "name": "谨遵医嘱", "type": "每日委托" }]
+      "task": [
+        { "questId": 23018, "name": "谨遵医嘱", "type": "每日委托" },
+        { "questId": 23018, "name": "谨遵医嘱", "type": "每日委托" },
+        { "questId": 23018, "name": "谨遵医嘱", "type": "每日委托" }
+      ]
     }
   },
   {
@@ -16399,7 +16680,11 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 23025, "name": "衡量世界之人！", "type": "每日委托" }]
+      "task": [
+        { "questId": 23025, "name": "衡量世界之人！", "type": "每日委托" },
+        { "questId": 23025, "name": "衡量世界之人！", "type": "每日委托" },
+        { "questId": 23025, "name": "衡量世界之人！", "type": "每日委托" }
+      ]
     }
   },
   {
@@ -16448,7 +16733,11 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 23004, "name": "宝贝计划", "type": "每日委托" }]
+      "task": [
+        { "questId": 23004, "name": "宝贝计划", "type": "每日委托" },
+        { "questId": 23004, "name": "宝贝计划", "type": "每日委托" },
+        { "questId": 23004, "name": "宝贝计划", "type": "每日委托" }
+      ]
     }
   },
   {
@@ -16474,7 +16763,11 @@
     "version": "3.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [{ "questId": 23010, "name": "食与学", "type": "每日委托" }]
+      "task": [
+        { "questId": 23010, "name": "食与学", "type": "每日委托" },
+        { "questId": 23010, "name": "食与学", "type": "每日委托" },
+        { "questId": 23010, "name": "食与学", "type": "每日委托" }
+      ]
     }
   },
   {
@@ -16716,7 +17009,10 @@
     "version": "5.0",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 25028, "name": "流行音乐，谁先知？", "type": "每日委托" }]
+      "task": [
+        { "questId": 25028, "name": "流行音乐，谁先知？", "type": "每日委托" },
+        { "questId": 25028, "name": "流行音乐，谁先知？", "type": "每日委托" }
+      ]
     }
   },
   {
@@ -16795,7 +17091,10 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 21021, "name": "古云有「螭」", "type": "世界任务" }]
+      "task": [
+        { "questId": 21021, "name": "古云有「螭」", "type": "世界任务" },
+        { "questId": 21021, "name": "古云有「螭」", "type": "世界任务" }
+      ]
     }
   },
   {
@@ -16808,7 +17107,10 @@
     "version": "1.0",
     "trigger": {
       "type": "FINISH_QUEST_OR",
-      "task": [{ "questId": 71005, "name": "靖世九柱", "type": "世界任务" }]
+      "task": [
+        { "questId": 71005, "name": "靖世九柱", "type": "世界任务" },
+        { "questId": 71005, "name": "靖世九柱", "type": "世界任务" }
+      ]
     }
   },
   {

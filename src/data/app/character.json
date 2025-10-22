@@ -1,5 +1,17 @@
 [
   {
+    "id": 10000122,
+    "contentId": 506676,
+    "name": "奈芙尔",
+    "title": "湮沙的秘闻",
+    "area": "挪德卡莱",
+    "birthday": [5, 9],
+    "star": 5,
+    "element": "草",
+    "weapon": "法器",
+    "nameCard": "奈芙尔·秘闻"
+  },
+  {
     "id": 10000120,
     "contentId": 505971,
     "name": "菲林斯",
@@ -22,6 +34,30 @@
     "element": "草",
     "weapon": "法器",
     "nameCard": "菈乌玛·枝角"
+  },
+  {
+    "id": 10000118,
+    "contentId": -1,
+    "name": "奇偶·女性",
+    "title": "",
+    "area": "主角",
+    "birthday": [0, 0],
+    "star": 5,
+    "element": "火",
+    "weapon": "单手剑",
+    "nameCard": ""
+  },
+  {
+    "id": 10000117,
+    "contentId": -1,
+    "name": "奇偶·男性",
+    "title": "",
+    "area": "主角",
+    "birthday": [0, 0],
+    "star": 5,
+    "element": "火",
+    "weapon": "单手剑",
+    "nameCard": ""
   },
   {
     "id": 10000116,

@@ -656,6 +656,22 @@
     "source": { "index": 7, "area": "挪德卡莱", "name": "墟都" }
   },
   {
+    "id": 10000122,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "奈芙尔",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "草",
+    "materials": [
+      { "id": 104359, "name": "「乐园」的教导", "star": 2 },
+      { "id": 104360, "name": "「乐园」的指引", "star": 3 },
+      { "id": 104361, "name": "「乐园」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "遗荫" }
+  },
+  {
     "id": 10000042,
     "contentId": 1058,
     "dropDays": [1, 4, 7],
@@ -2352,6 +2368,22 @@
     "source": { "index": 4, "area": "须弥", "name": "引业" }
   },
   {
+    "id": 14521,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "真语秘匣",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114041, "name": "绿洲花园的追忆", "star": 2 },
+      { "id": 114042, "name": "绿洲花园的恩惠", "star": 3 },
+      { "id": 114043, "name": "绿洲花园的哀思", "star": 4 },
+      { "id": 114044, "name": "绿洲花园的真谛", "star": 5 }
+    ],
+    "source": { "index": 4, "area": "须弥", "name": "思惑" }
+  },
+  {
     "id": 14513,
     "contentId": 7408,
     "dropDays": [3, 6, 7],
@@ -2625,7 +2657,7 @@
   },
   {
     "id": 13516,
-    "contentId": 0,
+    "contentId": 506694,
     "dropDays": [2, 5, 7],
     "name": "血染荒城",
     "itemType": "weapon",
@@ -4304,6 +4336,22 @@
     "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
   },
   {
+    "id": 14434,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "霜辰",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114073, "name": "奇巧秘器的残件", "star": 2 },
+      { "id": 114074, "name": "奇巧秘器的模本", "star": 3 },
+      { "id": 114075, "name": "奇巧秘器的继业", "star": 4 },
+      { "id": 114076, "name": "奇巧秘器的真愿", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
+  },
+  {
     "id": 13405,
     "contentId": 972,
     "dropDays": [2, 5, 7],
@@ -4644,6 +4692,22 @@
     "contentId": 506374,
     "dropDays": [2, 5, 7],
     "name": "掘金之锹",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114077, "name": "长夜燧火的余烬", "star": 2 },
+      { "id": 114078, "name": "长夜燧火的残照", "star": 3 },
+      { "id": 114079, "name": "长夜燧火的明焰", "star": 4 },
+      { "id": 114080, "name": "长夜燧火的烈辉", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祷颂" }
+  },
+  {
+    "id": 13434,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "圣祭者的辉杖",
     "itemType": "weapon",
     "star": 4,
     "weapon": "长柄武器",

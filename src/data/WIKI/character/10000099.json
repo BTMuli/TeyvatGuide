@@ -10,13 +10,13 @@
     {
       "Id": 991,
       "Name": "淡香浸析",
-      "Description": "<color=#FFD780FF>撷萃调香</color>与固有天赋「余薰」的清露香氛造成的伤害提升20%，后者需要解锁固有天赋「余薰」。\n此外，队伍中附近的角色对敌人触发燃烧反应或对处于燃烧状态下的敌人造成<color=#99FF88FF>草元素伤害</color>时，会额外生成一枚<color=#FFD780FF>香韵</color>。此效果每2.9秒至多触发一次。",
+      "Description": "<color=#FFD780FF>撷萃调香</color>与突破天赋「余薰」的清露香氛造成的伤害提升20%，后者需要解锁突破天赋「余薰」。\n此外，队伍中附近的角色对敌人触发燃烧反应或对处于燃烧状态下的敌人造成<color=#99FF88FF>草元素伤害</color>时，会额外生成一枚<color=#FFD780FF>香韵</color>。此效果每2.9秒至多触发一次。",
       "Icon": "UI_Talent_S_Emilie_01"
     },
     {
       "Id": 992,
       "Name": "湖光顶调",
-      "Description": "<color=#FFD780FF>撷萃调香</color>、<color=#FFD780FF>香氛演绎</color>或固有天赋「余薰」的清露香氛（需解锁该固有天赋）命中敌人时，该敌人的<color=#99FF88FF>草元素抗性</color>降低30%，持续10秒。",
+      "Description": "<color=#FFD780FF>撷萃调香</color>、<color=#FFD780FF>香氛演绎</color>或突破天赋「余薰」的清露香氛（需解锁该突破天赋）命中敌人时，该敌人的<color=#99FF88FF>草元素抗性</color>降低30%，持续10秒。",
       "Icon": "UI_Talent_S_Emilie_02"
     },
     {
