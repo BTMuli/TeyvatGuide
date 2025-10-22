@@ -107,9 +107,8 @@ const relicsBox = computed<AvatarRelics>(() => {
   ];
 });
 const isFetterMax = computed<boolean>(() => {
-  if (props.modelValue.avatar.id === 10000005 || props.modelValue.avatar.id === 10000007) {
-    return true;
-  }
+  const skipList = [10000005, 10000007, 10000117, 10000118];
+  if (skipList.includes(props.modelValue.avatar.id)) return true;
   return props.modelValue.avatar.fetter === 10;
 });
 const skills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
