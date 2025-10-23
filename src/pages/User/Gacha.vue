@@ -12,6 +12,12 @@
           variant="outlined"
           label="游戏UID"
         />
+        <img
+          title="查看千星奇域祈愿记录"
+          src="/icon/nation/千星奇域.webp"
+          alt="beyond"
+          @click="toGachaB()"
+        />
       </div>
     </template>
     <template #extension>
@@ -77,10 +83,13 @@ import TGLogger from "@utils/TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
+import { useRouter } from "vue-router";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
 
 const { account, cookie } = storeToRefs(useUserStore());
+const router = useRouter();
+
 const authkey = ref<string>("");
 const uidCur = ref<string>();
 const tab = ref<string>("overview");
@@ -364,6 +373,14 @@ async function deleteGacha(): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
 }
+
+async function toGachaB(): Promise<void> {
+  if (!account.value || !cookie.value) {
+    showSnackbar.error("请先登录账号");
+    return;
+  }
+  await router.push({ name: "千星奇域祈愿记录" });
+}
 </script>
 <style lang="css" scoped>
 .gacha-top-title {
@@ -376,6 +393,10 @@ async function deleteGacha(): Promise<void> {
   img {
     width: 32px;
     height: 32px;
+
+    &:last-child {
+      cursor: pointer;
+    }
   }
 
   span {

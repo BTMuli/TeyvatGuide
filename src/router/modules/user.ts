@@ -1,7 +1,7 @@
 /**
- * @file router modules user.ts
+ * @file router/modules/user.ts
  * @description user 路由模块
- * @since Beta v0.8.0
+ * @since Beta v0.8.4
  */
 import type { RouteRecordRaw } from "vue-router";
 
@@ -30,6 +30,11 @@ const userRoutes = (<const>[
     path: "/user/gacha",
     name: "祈愿记录",
     component: async () => await import("@/pages/User/Gacha.vue"),
+  },
+  {
+    path: "/user/gachaB",
+    name: "千星奇域祈愿记录",
+    component: async () => await import("@/pages/User/GachaB.vue"),
   },
   {
     path: "/user/record",
