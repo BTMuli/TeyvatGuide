@@ -20,20 +20,41 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import recordReq from "@req/recordReq.js";
+import hk4eReq from "@req/hk4eReq.js";
+import takumiReq from "@req/takumiReq.js";
 import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
 const { cookie, account } = storeToRefs(useUserStore());
 
+const authkey = ref<string>("");
+
 async function test(): Promise<void> {
-  if (!cookie.value) return;
-  const resp = await recordReq.actCalendar(cookie.value, account.value);
-  console.log(resp);
-  if ("retcode" in resp) {
-    showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+  if (!cookie.value || !account.value) {
+    showSnackbar.warn("请先登录账号");
     return;
   }
+  const authkeyRes = await takumiReq.bind.authKey(cookie.value, account.value);
+  if (typeof authkeyRes === "string") {
+    authkey.value = authkeyRes;
+  } else {
+    showSnackbar.error("获取authkey失败");
+    return;
+  }
+  const list: Array<TGApp.Game.Gacha.GachaBItem> = [];
+  let endId = "0";
+  while (true) {
+    const res = await hk4eReq.gachaB(authkey.value, "1000", endId);
+    if (Array.isArray(res)) {
+      if (res.length === 0) break;
+      list.push(...res);
+      endId = res[res.length - 1].id;
+    } else {
+      showSnackbar.warn(`[${res.retcode}] 获取祈愿记录失败:${res.message}`);
+    }
+  }
+  console.log(list);
 }
 </script>
 <style lang="css" scoped>

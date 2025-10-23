@@ -78,7 +78,7 @@ async function genAuthKey(
     game_uid: account.gameUid,
     region: account.region,
   };
-  const resp = await TGHttp<TGApp.Game.Gacha.AuthkeyResponse | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<TGApp.Game.Gacha.AuthkeyResp | TGApp.BBS.Response.Base>(
     `${taBu}binding/api/genAuthKey`,
     {
       method: "POST",

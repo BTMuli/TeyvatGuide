@@ -1,7 +1,7 @@
 /**
  * @file request/hk4eReq.ts
  * @description Hk4eApi 请求模块
- * @since Beta v0.8.0
+ * @since Beta v0.8.4
  */
 
 import { AnnoLangEnum } from "@enum/anno.js";
@@ -122,8 +122,44 @@ async function getGachaLog(
     size: "20",
     end_id: endId,
   };
-  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResponse | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResp | TGApp.BBS.Response.Base>(
     "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog",
+    { method: "GET", query: params },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data.list;
+}
+
+/**
+ * @description 获取千星奇域抽卡记录
+ * @since Beta v0.8.4
+ * @param {string} authKey authKey
+ * @param {string} gachaType 抽卡类型
+ * @param {string} endId 结束 id，默认为 0
+ * @returns {Promise<Array<TGApp.Game.Gacha.GachaBItem>|TGApp.BBS.Response.Base>} 抽卡记录
+ */
+async function getBeyondGachaLog(
+  authKey: string,
+  gachaType: string,
+  endId: string = "0",
+): Promise<Array<TGApp.Game.Gacha.GachaBItem> | TGApp.BBS.Response.Base> {
+  const gachaIdMap: Record<string, string> = {
+    "1000": "f3f5090a8ec0b28f15805c9969aa6c4ec357",
+    "2000": "57016dec6b768231ba1342c01935417a799b",
+  };
+  const params = {
+    lang: "zh-cn",
+    auth_appid: "webview_gacha",
+    authkey: authKey,
+    authkey_ver: "1",
+    sign_type: "2",
+    gacha_type: gachaType,
+    gacha_id: gachaIdMap[gachaType],
+    size: "20",
+    end_id: endId,
+  };
+  const resp = await TGHttp<TGApp.Game.Gacha.GachaBLogResp | TGApp.BBS.Response.Base>(
+    "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getBeyondGachaLog",
     { method: "GET", query: params },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
@@ -171,6 +207,7 @@ async function queryPandaQr(
 const hk4eReq = {
   anno: { list: getAnnoList, detail: getAnnoDetail },
   gacha: getGachaLog,
+  gachaB: getBeyondGachaLog,
   loginQr: { create: fetchPandaQr, state: queryPandaQr },
 };
 
