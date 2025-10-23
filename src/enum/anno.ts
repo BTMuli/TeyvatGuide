@@ -1,7 +1,7 @@
 /**
  * @file src/enum/anno.ts
  * @description 游戏内公告相关枚举
- * @since Beta v0.8.0
+ * @since Beta v0.8.4
  */
 
 /**
@@ -37,17 +37,18 @@ export function getAnnoLangDesc(lang: TGApp.BBS.Announcement.AnnoLangEnum): stri
 
 /**
  * @description 公告类型
- * @since Beta v0.7.7
+ * @since Beta v0.8.4
  * @const AnnoTypeEnum
  */
 export const AnnoTypeEnum: typeof TGApp.BBS.Announcement.AnnoType = {
   ACTIVITY: "activity",
   GAME: "game",
+  UGC: "ugc",
 };
 
 /**
  * @description 获取公告类型描述
- * @since Beta v0.7.7
+ * @since Beta v0.8.4
  * @param {TGApp.BBS.Announcement.AnnoTypeEnum} type 公告类型
  * @return {string} 公告类型描述
  */
@@ -57,5 +58,7 @@ export function getAnnoTypeDesc(type: TGApp.BBS.Announcement.AnnoTypeEnum): stri
       return "活动公告";
     case AnnoTypeEnum.GAME:
       return "游戏公告";
+    case AnnoTypeEnum.UGC:
+      return "千星奇域";
   }
 }

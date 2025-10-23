@@ -89,13 +89,14 @@ const langList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoLangEnum>> =
 const tabList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoTypeEnum>> = [
   AnnoTypeEnum.ACTIVITY,
   AnnoTypeEnum.GAME,
+  AnnoTypeEnum.UGC,
 ].map((i) => ({ text: getAnnoTypeDesc(i), value: i }));
 
 const { server, lang } = storeToRefs(useAppStore());
 const router = useRouter();
 
 const tab = ref<TGApp.BBS.Announcement.AnnoTypeEnum>(AnnoTypeEnum.ACTIVITY);
-const annoCards = shallowRef<AnnoList>({ activity: [], game: [] });
+const annoCards = shallowRef<AnnoList>({ activity: [], game: [], ugc: [] });
 const isReq = ref<boolean>(false);
 
 watch(
@@ -134,6 +135,7 @@ async function loadData(): Promise<void> {
   const detailResp = await hk4eReq.anno.detail(server.value, AnnoLangEnum.CHS);
   const actCards: Array<AnnoCard> = [];
   const gameCards: Array<AnnoCard> = [];
+  const ugcCards: Array<AnnoCard> = [];
   for (const list of listResp.list) {
     for (const item of list.list) {
       const detail = detailResp.find((i) => i.ann_id === item.ann_id);
@@ -143,13 +145,15 @@ async function loadData(): Promise<void> {
           actCards.push(card);
         } else if (card.typeLabel === "game") {
           gameCards.push(card);
+        } else if (card.typeLabel === "ugc") {
+          ugcCards.push(card);
         }
       } else {
         await TGLogger.Warn(`[Announcements][loadData] 未找到公告详情：${item.ann_id}`);
       }
     }
   }
-  annoCards.value = { activity: actCards, game: gameCards };
+  annoCards.value = { activity: actCards, game: gameCards, ugc: ugcCards };
   await showLoading.end();
   isReq.value = false;
 }
@@ -177,12 +181,17 @@ function getAnnoCard(
   const timeStart = anno.start_time.split(" ")[0];
   const timeEnd = anno.end_time.split(" ")[0];
   const time = `${timeStart} ~ ${timeEnd}`;
+  const labelMap: Record<string, TGApp.BBS.Announcement.AnnoTypeEnum> = {
+    1: AnnoTypeEnum.ACTIVITY,
+    2: AnnoTypeEnum.GAME,
+    26: AnnoTypeEnum.UGC,
+  };
   return {
     id: anno.ann_id,
     title: anno.title,
     subtitle: anno.subtitle.replace(/<br \/>/g, " "),
     banner: anno.banner,
-    typeLabel: anno.type === 2 ? "game" : "activity",
+    typeLabel: labelMap[anno.type],
     tagIcon: anno.tag_icon,
     tagLabel: getAnnoTag(anno.tag_label),
     timeStr: time,
@@ -233,7 +242,7 @@ async function switchNews(): Promise<void> {
   display: grid;
   font-family: var(--font-title);
   grid-auto-rows: auto;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 </style>

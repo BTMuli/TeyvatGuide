@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Announcement.d.ts
  * @description 从 BBS 获取到的游戏内公告类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.8.4
  */
 
 declare namespace TGApp.BBS.Announcement {
@@ -30,14 +30,16 @@ declare namespace TGApp.BBS.Announcement {
 
   /**
    * @description 公告类型
-   * @since Beta v0.7.7
+   * @since Beta v0.8.4
    * @const AnnoType
    * @property {string} "activity" - 活动公告
    * @property {string} "game" - 游戏公告
+   * @property {string} "ugc" - 千星奇域公告
    */
   const AnnoType = <const>{
     ACTIVITY: "activity",
     GAME: "game",
+    UGC: "ugc",
   };
 
   /**
