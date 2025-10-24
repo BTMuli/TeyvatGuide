@@ -33,6 +33,7 @@
           <v-icon size="16">mdi-comment</v-icon>
           <span>{{ postData?.stat?.reply_num }}</span>
         </div>
+        <!-- TODO: 展示不同种类点赞图标&数量 -->
         <div
           class="mpm-item"
           :title="`点赞数：${postData?.stat?.like_num}`"
@@ -62,6 +63,15 @@
     </div>
     <!-- 一些附加信息，比如 topic、collection 等 -->
     <div class="tp-post-extra">
+      <div
+        class="tp-post-contribution"
+        v-if="postData.contribution_act"
+        :title="`投稿活动：${postData.contribution_act.title}`"
+        @click="toAct()"
+      >
+        <v-icon size="10">mdi-party-popper</v-icon>
+        <span>{{ postData.contribution_act.title }}</span>
+      </div>
       <div
         class="tp-post-collection"
         :title="`合集ID：${postData.collection.collection_id}`"
@@ -130,6 +140,8 @@ import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { emit, type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { parseLink, parsePost } from "@utils/linkParser.js";
 import TGClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createTGWindow } from "@utils/TGWindow.js";
@@ -365,6 +377,23 @@ async function toForum(forum: TGApp.BBS.Post.Forum): Promise<void> {
   await emit("active_deep_link", `router?path=/posts/forum/${forum.game_id}/${forum.id}`);
 }
 
+async function toAct(): Promise<void> {
+  if (!postData.value || !postData.value.external_link) return;
+  const link = postData.value.external_link.external_link;
+  const isPost = await parsePost(link);
+  if (isPost !== false) {
+    location.href = `/post_detail/${isPost}`;
+    return;
+  }
+  const res = await parseLink(link);
+  if (res === true) return;
+  if (res === false) {
+    showSnackbar.error(`未知链接:${link}`, 3000);
+    return;
+  }
+  await openUrl(res);
+}
+
 function handleUser(user: TGApp.BBS.Post.User): void {
   curUid.value = user.uid;
   if (showCollection.value) showCollection.value = false;
@@ -515,6 +544,26 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: start;
   gap: 8px 4px;
+}
+
+.tp-post-contribution {
+  @include github-styles.github-tag-dark-gen(#e06c75);
+
+  display: flex;
+  height: 20px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 4px;
+  column-gap: 2px;
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 12px;
+
+  &:hover {
+    @include github-styles.github-tag-dark-gen(#c678dd);
+  }
 }
 
 .tp-post-collection {

@@ -1,3 +1,4 @@
+<!-- 公告详情页面,TODO:联动消除红点 -->
 <template>
   <TSwitchTheme />
   <TPinWin />

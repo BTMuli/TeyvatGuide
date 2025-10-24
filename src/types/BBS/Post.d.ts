@@ -1,7 +1,7 @@
 /**
  * @file types/BBS/Post.d.ts
  * @description 帖子类型定义文件
- * @since Beta v0.7.2
+ * @since Beta v0.8.4
  */
 
 declare namespace TGApp.BBS.Post {
@@ -11,7 +11,6 @@ declare namespace TGApp.BBS.Post {
    * @interface FullResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {FullRes} data 帖子数据
-   * @return FullResp
    */
   type FullResp = TGApp.BBS.Response.BaseWithData<FullRes>;
 
@@ -20,7 +19,6 @@ declare namespace TGApp.BBS.Post {
    * @since Beta v0.7.2
    * @interface FullRes
    * @property {FullData} post 帖子数据
-   * @return FullRes
    */
   type FullRes = { post: FullData };
 
@@ -30,7 +28,6 @@ declare namespace TGApp.BBS.Post {
    * @interface SearchResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {SearchRes} data 返回数据
-   * @return SearchResp
    */
   type SearchResp = TGApp.BBS.Response.BaseWithData<SearchRes>;
 
@@ -43,7 +40,6 @@ declare namespace TGApp.BBS.Post {
    * @property {boolean} is_last 是否最后一页
    * @property {Array<string>} token_list token 列表
    * @property {Record<string,string>} databox 数据盒
-   * @return SearchRes
    */
   type SearchRes = {
     posts: Array<FullData>;
@@ -59,7 +55,6 @@ declare namespace TGApp.BBS.Post {
    * @interface NewsResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {NewsRes} data 返回数据
-   * @return NewsResp
    */
   type NewsResp = TGApp.BBS.Response.BaseWithData<NewsRes>;
 
@@ -70,7 +65,6 @@ declare namespace TGApp.BBS.Post {
    * @property {Array<FullData>} list 咨讯列表
    * @property {string} last_id 最后 ID
    * @property {boolean} is_last 是否最后一页
-   * @return NewsRes
    */
   type NewsRes = { list: Array<FullData>; last_id: string; is_last: boolean };
 
@@ -80,7 +74,6 @@ declare namespace TGApp.BBS.Post {
    * @interface UserPostResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {UserPostRes} data 返回数据
-   * @return UserPostResp
    */
   type UserPostResp = TGApp.BBS.Response.BaseWithData<UserPostRes>;
 
@@ -91,7 +84,6 @@ declare namespace TGApp.BBS.Post {
    * @property {Array<FullData>} list 帖子列表
    * @property {boolean} is_last 是否最后一页
    * @property {string} next_offset 下一页偏移量
-   * @return UserPostRes
    */
   type UserPostRes = { list: Array<FullData>; is_last: boolean; next_offset: string };
 
@@ -101,7 +93,6 @@ declare namespace TGApp.BBS.Post {
    * @interface FollowPostResp
    * @extends TGApp.BBS.Response.BaseWithData
    * @property {FollowPostRes} data 返回数据
-   * @return FollowPostResp
    */
   type FollowPostResp = TGApp.BBS.Response.BaseWithData<FollowPostRes>;
 
@@ -113,7 +104,6 @@ declare namespace TGApp.BBS.Post {
    * @property {boolean} is_last 是否最后一页
    * @property {Array<FullData>} list 帖子列表
    * @property {number} next_offset 下一页偏移量
-   * @return FollowPostRes
    */
   type FollowPostRes = {
     has_follow_users: boolean;
@@ -155,12 +145,15 @@ declare namespace TGApp.BBS.Post {
    * @property {unknown} challenge 挑战，可能为 null
    * @property {Array<unknown>} hot_reply_list 热门回复列表
    * @property {Array<unknown>} villa_msg_image_list 未知数据列表
-   * @property {unknown} contribution_act 未知数据，可能为 null
+   * @property {ContributionAct|null} contribution_act 投稿活动，可能为 null
    * @property {boolean} is_has_vote 是否有投票
    * @property {boolean} is_has_lottery 是否有抽奖
    * @property {string} release_time_type 发布时间类型
    * @property {number} future_release_time 未来发布时间
-   * @return FullData
+   * @property {ExternalLink} external_link 外部链接信息
+   * @property {unknown} post_full_extra_info 帖子完整额外信息，可能为 null
+   * @property {unknown} post_attachment_info 帖子附件信息，可能为 null
+   * @property {unknown} feed_attachment_info 动态附件信息，可能为 null
    */
   type FullData = {
     post: Post;
@@ -192,11 +185,15 @@ declare namespace TGApp.BBS.Post {
     challenge: unknown | null;
     hot_reply_list: Array<unknown>;
     villa_msg_image_list: Array<unknown>;
-    contribution_act: unknown | null;
+    contribution_act: ContributionAct | null;
     is_has_vote: boolean;
     is_has_lottery: boolean;
     release_time_type: string;
     future_release_time: number;
+    external_link: ExternalLink;
+    post_full_extra_info: unknown | null;
+    post_attachment_info: unknown | null;
+    feed_attachment_info: unknown | null;
   };
 
   /**
@@ -217,7 +214,6 @@ declare namespace TGApp.BBS.Post {
    * @property {Array<TGApp.BBS.User.Certification>} certifications 用户认证信息列表
    * @property {boolean} is_creator 是否是创作者
    * @property {TGApp.BBS.User.AvatarExt} avatar_ext 用户头像扩展信息
-   * @return User
    */
   type User = {
     uid: string;
@@ -277,7 +273,10 @@ declare namespace TGApp.BBS.Post {
    * @property {number} block_latest_reply_time 是否屏蔽最新回复时间
    * @property {number} selected_comment 是否选择评论
    * @property {boolean} is_mentor 是否为导师
-   * @return Post
+   * @property {PostExtra|null} post_extra 帖子额外信息，可能为 null
+   * @property {string} ai_content_type AI 内容类型
+   * @property {string} user_ai_content_choice 用户 AI 内容选择
+   * @property {PostAigcMeta|null} aigc_meta AI 生成内容元数据，可能为 null
    */
   type Post = {
     game_id: number;
@@ -317,6 +316,10 @@ declare namespace TGApp.BBS.Post {
     block_latest_reply_time: number;
     selected_comment: number;
     is_mentor: boolean;
+    post_extra: PostExtra | null;
+    ai_content_type: string;
+    user_ai_content_choice: string;
+    aigc_meta: PostAigcMeta | null;
   };
 
   /**
@@ -327,9 +330,34 @@ declare namespace TGApp.BBS.Post {
    * @property {boolean} is_good 是否加精
    * @property {boolean} is_official 是否官方
    * @property {number} post_status 帖子状态
-   * @return PostStat
    */
   type PostStat = { is_top: boolean; is_good: boolean; is_official: boolean; post_status: number };
+
+  /**
+   * @description 帖子额外信息
+   * @since Beta v0.8.4
+   * @interface PostExtra
+   * @property {PostExtraUgc} ugc_master_post_extra UGCMaster 额外信息
+   */
+  type PostExtra = { ugc_master_post_extra: PostExtraUgc };
+
+  /**
+   * @description UGC所有者额外信息
+   * @since Beta v0.8.4
+   * @interface PostExtraUgc
+   * @property {string} game_uid 游戏 UID
+   * @property {string} game_region 游戏区服
+   */
+  type PostExtraUgc = { game_uid: string; game_region: string };
+
+  /**
+   * @description AI 生成内容元数据
+   * @since Beta v0.8.4
+   * @interface PostAigcMeta
+   * @property {string} ContentPropagator 内容生成器
+   * @property {string} PropagateID 内容生成 ID
+   */
+  type PostAigcMeta = { ContentPropagator: string; PropagateID: string };
 
   /**
    * @description 版块信息
@@ -340,7 +368,6 @@ declare namespace TGApp.BBS.Post {
    * @property {string} icon 版块图标 URL
    * @property {number} game_id 游戏 ID // 2 为原神
    * @property {TGApp.BBS.Forum.ForumCate|null} forum_cate 版块分类，可能为 null
-   * @return Forum
    */
   type Forum = {
     id: number;
@@ -362,7 +389,6 @@ declare namespace TGApp.BBS.Post {
    * @property {boolean} is_interactive 是否互动
    * @property {number} game_id 游戏 ID
    * @property {number} content_type 内容类型
-   * @return Topic
    */
   type Topic = {
     id: number;
@@ -386,7 +412,6 @@ declare namespace TGApp.BBS.Post {
    * @property {number} forward_num 转发数
    * @property {number} original_like_num 原创点赞数
    * @property {Array<StatUpvote>} post_upvote_stat 互动信息
-   * @return Stat
    */
   type Stat = {
     view_num: number;
@@ -404,7 +429,6 @@ declare namespace TGApp.BBS.Post {
    * @interface StatUpvote
    * @property {number} upvote_type 互动类型
    * @property {number} upvote_cnt 互动数量
-   * @return StatUpvote
    */
   type StatUpvote = { upvote_type: number; upvote_cnt: number };
 
@@ -423,7 +447,8 @@ declare namespace TGApp.BBS.Post {
    * @property {string} entity_type 图片类型 // IMG_ENTITY_POST, IMG_ENTITY_UNKOWN
    * @property {string} entity_id 图片 ID
    * @property {boolean} is_deleted 是否已删除
-   * @return Image
+   * @property {string} aigc_label AI 生成标签
+   * @property {string} aigc_meta AI 生成元数据 // 序列化后的 JSON 字符串
    */
   type Image = {
     url: string;
@@ -437,6 +462,8 @@ declare namespace TGApp.BBS.Post {
     entity_type: string;
     entity_id: string;
     is_deleted: boolean;
+    aigc_label: string;
+    aigc_meta: string;
   };
 
   /**
@@ -448,7 +475,6 @@ declare namespace TGApp.BBS.Post {
    * @property {number} w 裁剪宽度
    * @property {number} h 裁剪高度
    * @property {string} url 裁剪图片 URL
-   * @return ImageCrop
    */
   type ImageCrop = { x: number; y: number; w: number; h: number; url: string };
 
@@ -459,7 +485,6 @@ declare namespace TGApp.BBS.Post {
    * @property {unknown} top_up 置顶, 可能为 null
    * @property {Array<unknown>} top_n 置顶, 可能为空
    * @property {number} answer_num 回答数
-   * @return HelpSys
    */
   type HelpSys = { top_up: unknown | null; top_n: Array<unknown>; answer_num: number };
 
@@ -477,7 +502,6 @@ declare namespace TGApp.BBS.Post {
    * @property {number} next_post_game_id 下一篇帖子游戏 ID
    * @property {number} prev_post_view_type 上一篇帖子浏览类型
    * @property {number} next_post_view_type 下一篇帖子浏览类型
-   * @return Collection
    */
   type Collection = {
     prev_post_id: string;
@@ -511,7 +535,6 @@ declare namespace TGApp.BBS.Post {
    * @property {string} origin_user_nickname 原始用户名
    * @property {string} price 价格
    * @property {string} title 标题
-   * @returns LinkCard
    */
   type LinkCard = {
     link_type: number;
@@ -543,7 +566,6 @@ declare namespace TGApp.BBS.Post {
    * @property {number} transcoding_status 转码状态
    * @property {number} review_status 审核状态
    * @property {string} brief_info 视频简介
-   * @return Vod
    */
   type Vod = {
     id: string;
@@ -568,7 +590,6 @@ declare namespace TGApp.BBS.Post {
    * @property {string} size 视频大小
    * @property {string} format 视频格式
    * @property {string} label 视频标签
-   * @return VodResolution
    */
   type VodResolution = {
     url: string;
@@ -588,7 +609,6 @@ declare namespace TGApp.BBS.Post {
    * @property {number} activity_status 活动状态 // ActivityStatus
    * @property {string} start_at_sec 活动开始时间戳，单位秒
    * @property {string} end_at_sec 活动结束时间戳，单位秒
-   * @return NewsMeta
    */
   type NewsMeta = { activity_status: number; start_at_sec: string; end_at_sec: string };
 
@@ -600,7 +620,6 @@ declare namespace TGApp.BBS.Post {
    * @property {unknown|null} lottery 抽奖信息，可能为 null
    * @property {Array<RecommendTags>} tags 标签
    * @property {boolean} is_mentor_rec_block 是否为导师推荐
-   * @return RecommendReason
    */
   type RecommendReason = {
     is_following?: boolean;
@@ -616,7 +635,33 @@ declare namespace TGApp.BBS.Post {
    * @property {string} text 标签文本
    * @property {string} type 标签类型
    * @property {string} deep_link 深度链接
-   * @return RecommendTags
    */
   type RecommendTags = { text: string; type: string; deep_link: string };
+
+  /**
+   * @description 投稿活动
+   * @since Beta v0.8.4
+   * @interface ContributionAct
+   * @property {string} act_id 活动 ID
+   * @property {string} title 活动标题
+   * @property {string} game_uid 投稿游戏 UID
+   * @property {string} game_region 投稿游戏区服
+   * @property {string} game_nickname 投稿游戏昵称
+   */
+  type ContributionAct = {
+    act_id: string;
+    title: string;
+    game_uid: string;
+    game_region: string;
+    game_nickname: string;
+  };
+
+  /**
+   * @description 外部链接信息
+   * @since Beta v0.8.4
+   * @interface ExternalLink
+   * @property {string} external_link 外部链接 URL
+   * @property {string} external_link_title 外部链接标题
+   */
+  type ExternalLink = { external_link: string; external_link_title: string };
 }
