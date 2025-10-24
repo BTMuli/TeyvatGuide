@@ -151,7 +151,7 @@ declare namespace TGApp.BBS.Post {
    * @property {string} release_time_type 发布时间类型
    * @property {number} future_release_time 未来发布时间
    * @property {ExternalLink} external_link 外部链接信息
-   * @property {unknown} post_full_extra_info 帖子完整额外信息，可能为 null
+   * @property {PostExtraFull} post_full_extra_info 帖子完整额外信息，可能为 null
    * @property {unknown} post_attachment_info 帖子附件信息，可能为 null
    * @property {unknown} feed_attachment_info 动态附件信息，可能为 null
    */
@@ -191,7 +191,7 @@ declare namespace TGApp.BBS.Post {
     release_time_type: string;
     future_release_time: number;
     external_link: ExternalLink;
-    post_full_extra_info: unknown | null;
+    post_full_extra_info: PostExtraFull | null;
     post_attachment_info: unknown | null;
     feed_attachment_info: unknown | null;
   };
@@ -243,7 +243,7 @@ declare namespace TGApp.BBS.Post {
    * @property {string} subject 帖子标题
    * @property {string} content 帖子内容，为 html 格式
    * @property {string} cover 封面图 URL，可能为 ""
-   * @property {number} view_type 浏览类型
+   * @property {ViewTypeEnum} view_type 浏览类型
    * @property {number} created_at 发帖时间
    * @property {Array<string>} images 图片列表，可能为空
    * @property {PostStat} post_status 帖子状态
@@ -286,7 +286,7 @@ declare namespace TGApp.BBS.Post {
     subject: string;
     content: string;
     cover: string;
-    view_type: number;
+    view_type: ViewTypeEnum | number;
     created_at: number;
     images: Array<string>;
     post_status: PostStat;
@@ -321,6 +321,31 @@ declare namespace TGApp.BBS.Post {
     user_ai_content_choice: string;
     aigc_meta: PostAigcMeta | null;
   };
+
+  /**
+   * @description 浏览类型枚举
+   * @since Beta v0.8.4
+   * @const PostViewType
+   * @todo 待确定是否有其他类型
+   * @property {number} NORMAL 正常帖子
+   * @property {number} PIC 图片帖子，如同人图，COS
+   * @property {number} VOD 含视频帖子
+   * @property {number} UGC 千星奇域 // TODO: 待确定是否有其他分类
+   */
+  const PostViewType = <const>{
+    NORMAL: 1,
+    PIC: 2,
+    VOD: 5,
+    UGC: 7,
+  };
+
+  /**
+   * @description 浏览类型枚举类型
+   * @since Beta v0.8.4
+   * @enum {number}
+   * @type PostViewTypeEnum
+   */
+  type ViewTypeEnum = (typeof PostViewType)[keyof typeof PostViewType];
 
   /**
    * @description 帖子状态
@@ -664,4 +689,28 @@ declare namespace TGApp.BBS.Post {
    * @property {string} external_link_title 外部链接标题
    */
   type ExternalLink = { external_link: string; external_link_title: string };
+
+  /**
+   * @description 帖子完整额外信息
+   * @since Beta v0.8.4
+   * @interface PostExtraFull
+   * @property {PostExtraUgcFull} ugc_master_post_extra UGCMaster 额外信息
+   */
+  type PostExtraFull = { ugc_master_post_extra: PostExtraUgcFull };
+
+  /**
+   * @description UGC所有者完整额外信息
+   * @since Beta v0.8.4
+   * @interface PostExtraUgcFull
+   * @property {TGApp.BBS.UGC.Character} game_character 游戏角色信息
+   * @property {boolean} user_is_use_game_info 用户是否使用游戏信息
+   * @property {string} ugc_master_post_type UGC 主帖子类型
+   * @property {Array<TGApp.BBS.UGC.Level>} level_list 等级列表
+   */
+  type PostExtraUgcFull = {
+    game_character: TGApp.BBS.UGC.Character;
+    user_is_use_game_info: boolean;
+    ugc_master_post_type: string;
+    level_list: Array<TGApp.BBS.UGC.Level>;
+  };
 }

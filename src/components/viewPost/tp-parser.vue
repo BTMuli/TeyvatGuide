@@ -7,6 +7,8 @@
   />
 </template>
 <script lang="ts" setup>
+import TpUgcLevel from "@comp/viewPost/tp-ugc-level.vue";
+import TpUgcTag from "@comp/viewPost/tp-ugc-tag.vue";
 import type { Component } from "vue";
 
 import TpBackupText from "./tp-backupText.vue";
@@ -72,6 +74,8 @@ function getParsedData(data: SctPostDataArr): SctPostDataArr {
     if (check < parsedText.length && check !== 0) {
       res.push(...child);
       child = [];
+    } else if (check === 0 && child.length > 0) {
+      res.push(...child);
     }
   }
   if (res.length === 0 && child.length > 0) res.push(...child);
@@ -95,8 +99,9 @@ function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   if (tp.children) return TpTexts;
   if (typeof tp.insert === "undefined") return TpUnknown;
   if (typeof tp.insert === "string") return TpText;
-  // game_user_info属于backup_text的一种，必须放在backup_text判断的前面
+  // 判断特殊backup_text
   if ("game_user_info" in tp.insert) return TpUid;
+  if ("ugc_master_tag" in tp.insert) return TpUgcTag;
   if ("backup_text" in tp.insert) {
     if (tp.insert.backup_text === "[游戏卡片]" && "reception_card" in tp.insert) return TpGameCard;
     if (tp.insert.backup_text === "[自定义表情]" && "custom_emoticon" in tp.insert) {
@@ -106,6 +111,7 @@ function getTpName(tp: TGApp.BBS.SctPost.Base): Component {
   }
   if ("divider" in tp.insert) return TpDivider;
   if ("image" in tp.insert) return TpImage;
+  if ("level" in tp.insert) return TpUgcLevel;
   if ("link_card" in tp.insert) return TpLinkCard;
   if ("mention" in tp.insert) return TpMention;
   if ("video" in tp.insert) return TpVideo;

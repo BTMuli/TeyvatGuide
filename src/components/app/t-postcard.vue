@@ -112,7 +112,10 @@
       }"
       v-else
     >
-      {{ props.modelValue.post.post_id }}
+      <span>{{ props.modelValue.post.post_id }}</span>
+      <template v-if="isDevEnv">
+        <span>[{{ props.modelValue.post.view_type }}]</span>
+      </template>
     </div>
   </div>
 </template>
@@ -154,7 +157,8 @@ export type RenderCard = {
   topics: Array<TGApp.BBS.Post.Topic>;
   reasons: Array<TGApp.BBS.Post.RecommendTags>;
 };
-
+// @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
+const isDevEnv = import.meta.env.MODE === "development";
 const stats: Readonly<Array<RenderStatus>> = [
   { stat: 0, label: "未知", color: "var(--tgc-od-red)" },
   { stat: 1, label: "进行中", color: "var(--tgc-od-green)" },

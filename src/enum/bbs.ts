@@ -25,3 +25,15 @@ export const AvatarExtResTypeEnum: typeof TGApp.BBS.User.AvatarExtResType = {
   GIF: 3,
   PNG: 4,
 };
+
+/**
+ * @description 帖子ViewType
+ * @since Beta v0.8.4
+ * @enum PostViewTypeEnum
+ */
+export const PostViewTypeEnum: typeof TGApp.BBS.Post.PostViewType = {
+  NORMAL: 1,
+  PIC: 2,
+  VOD: 5,
+  UGC: 7,
+};

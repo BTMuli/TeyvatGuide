@@ -133,6 +133,7 @@ import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import { PostViewTypeEnum } from "@enum/bbs.js";
 import apiHubReq from "@req/apiHubReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
@@ -272,13 +273,25 @@ function getRepublishAuthorization(type: number): string {
 async function getRenderPost(
   data: TGApp.BBS.Post.FullData,
 ): Promise<Array<TGApp.BBS.SctPost.Base>> {
+  if (
+    data.post.view_type === PostViewTypeEnum.NORMAL ||
+    data.post.view_type === PostViewTypeEnum.VOD
+  ) {
+    return JSON.parse(data.post.structured_content);
+  }
+  if (data.post.view_type === PostViewTypeEnum.PIC) {
+    return await parsePostPic(data);
+  }
+  if (data.post.view_type === PostViewTypeEnum.UGC) {
+    return parsePostUgc(data.post);
+  }
   const postContent = data.post.content;
   let jsonParse: string;
   if (postContent.startsWith("<")) {
     jsonParse = data.post.structured_content;
   } else {
     try {
-      jsonParse = await parseContent(data);
+      jsonParse = JSON.stringify(await parsePostPic(data));
     } catch (e) {
       if (e instanceof SyntaxError) {
         await TGLogger.Warn(`[t-post][${postId}] ${e.name}: ${e.message}`);
@@ -291,9 +304,11 @@ async function getRenderPost(
   return res;
 }
 
-async function parseContent(fullData: TGApp.BBS.Post.FullData): Promise<string> {
+async function parsePostPic(
+  fullData: TGApp.BBS.Post.FullData,
+): Promise<Array<TGApp.BBS.SctPost.Base>> {
   const content = fullData.post.content;
-  const data: TGApp.BBS.SctPost.Other = JSON.parse(content);
+  const data: TGApp.BBS.SctPost.Pic = JSON.parse(content);
   const result: TGApp.BBS.SctPost.Base[] = [];
   for (const key of Object.keys(data)) {
     switch (key) {
@@ -325,7 +340,25 @@ async function parseContent(fullData: TGApp.BBS.Post.FullData): Promise<string> 
         break;
     }
   }
-  return JSON.stringify(result);
+  return result;
+}
+
+function parsePostUgc(post: TGApp.BBS.Post.Post): Array<TGApp.BBS.SctPost.Base> {
+  const data: TGApp.BBS.SctPost.Ugc = JSON.parse(post.structured_content);
+  const result: Array<TGApp.BBS.SctPost.Base> = [];
+  for (const text of data.text) {
+    result.push(text);
+  }
+  for (const image of data.images) {
+    result.push({ insert: { image: image.image } });
+  }
+  for (const vod of data.vods) {
+    result.push({ insert: { vod: vod.vod } });
+  }
+  for (const level of data.levels) {
+    result.push({ insert: { level: level.level } });
+  }
+  return result;
 }
 
 async function createPostJson(postId: number): Promise<void> {
