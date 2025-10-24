@@ -32,9 +32,14 @@
       </div>
     </template>
     <template #append>
-      <v-btn class="anno-switch-btn" @click="switchNews" prepend-icon="mdi-bullhorn">
-        切换米游社咨讯
-      </v-btn>
+      <div class="anno-top-append">
+        <v-btn class="anno-switch-btn" @click="switchNews" prepend-icon="mdi-bullhorn">
+          切换米游社咨讯
+        </v-btn>
+        <v-btn class="anno-switch-btn" v-if="isLogin" @click="showIframe()">
+          <v-icon>mdi-web</v-icon>
+        </v-btn>
+      </div>
     </template>
   </v-app-bar>
   <v-window v-model="tab">
@@ -44,11 +49,13 @@
       </div>
     </v-window-item>
   </v-window>
+  <TaoIframe v-if="isLogin" v-model="iframeVisible" />
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TaCard from "@comp/pageAnno/ta-card.vue";
+import TaoIframe from "@comp/pageAnno/tao-iframe.vue";
 import { AnnoLangEnum, AnnoTypeEnum, getAnnoLangDesc, getAnnoTypeDesc } from "@enum/anno.js";
 import { getGameServerDesc, GameServerEnum } from "@enum/game.js";
 import hk4eReq from "@req/hk4eReq.js";
@@ -92,12 +99,13 @@ const tabList: ReadonlyArray<AnnoSelect<TGApp.BBS.Announcement.AnnoTypeEnum>> = 
   AnnoTypeEnum.UGC,
 ].map((i) => ({ text: getAnnoTypeDesc(i), value: i }));
 
-const { server, lang } = storeToRefs(useAppStore());
+const { server, lang, isLogin } = storeToRefs(useAppStore());
 const router = useRouter();
 
 const tab = ref<TGApp.BBS.Announcement.AnnoTypeEnum>(AnnoTypeEnum.ACTIVITY);
 const annoCards = shallowRef<AnnoList>({ activity: [], game: [], ugc: [] });
 const isReq = ref<boolean>(false);
+const iframeVisible = ref<boolean>(false);
 
 watch(
   () => server.value,
@@ -123,6 +131,10 @@ onMounted(async () => {
   await TGLogger.Info("[Announcements][onMounted] 打开公告页面");
   await loadData();
 });
+
+function showIframe(): void {
+  iframeVisible.value = true;
+}
 
 async function loadData(): Promise<void> {
   if (isReq.value) return;
@@ -226,9 +238,16 @@ async function switchNews(): Promise<void> {
   font-family: var(--font-title);
 }
 
+.anno-top-append {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  column-gap: 8px;
+}
+
 .anno-switch-btn {
   height: 40px;
-  margin-right: 16px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
@@ -241,8 +260,8 @@ async function switchNews(): Promise<void> {
 .anno-grid {
   display: grid;
   font-family: var(--font-title);
-  grid-auto-rows: auto;
   gap: 8px;
+  grid-auto-rows: auto;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 </style>
