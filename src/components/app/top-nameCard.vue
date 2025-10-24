@@ -1,40 +1,35 @@
+<!-- 名片栏组件 -->
 <template>
   <div
     class="top-nc-box"
     @click="emit('selected', props.data)"
     :class="props.finish ? '' : 'grey'"
     :title.attr="props.data.name"
+    :style="{ backgroundImage: `url('/WIKI/nameCard/bg/${props.data.name}.webp')` }"
   >
-    <v-list-item>
-      <template #title>
-        <div class="title">
-          <TwnTypeTag :type="props.data.type" />
-          <span>{{ props.data.name }}</span>
-        </div>
-      </template>
-      <template #subtitle>
+    <div class="top-nc-bgc" />
+    <div class="top-nc-prepend">
+      <img :src="`/WIKI/nameCard/icon/${props.data.name}.webp`" alt="icon" />
+    </div>
+    <div class="top-nc-info">
+      <div class="top-nc-title">
+        <TwnTypeTag :type="props.data.type" />
+        <span>{{ props.data.name }}</span>
+      </div>
+      <div class="top-nc-desc">
         <span class="desc" :title="props.data.desc">{{ props.data.desc }}</span>
-      </template>
-      <template #prepend>
-        <img :src="`/WIKI/nameCard/icon/${props.data.name}.webp`" alt="icon" class="icon" />
-      </template>
-    </v-list-item>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import TwnTypeTag from "@comp/pageWiki/twn-type-tag.vue";
-import { computed } from "vue";
 
 type TopNameCardProps = { data: TGApp.App.NameCard.Item; finish?: boolean };
 type TopNameCardEmits = (e: "selected", v: TGApp.App.NameCard.Item) => void;
 
 const props = withDefaults(defineProps<TopNameCardProps>(), { finish: true });
 const emit = defineEmits<TopNameCardEmits>();
-
-const bgImage = computed<string>(() => {
-  if (props.data.name === "原神·印象") return "none;";
-  return `url("/WIKI/nameCard/bg/${props.data.name}.webp")`;
-});
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
@@ -42,17 +37,19 @@ const bgImage = computed<string>(() => {
 .top-nc-box {
   @include github-styles.github-card-shadow;
 
+  position: relative;
   display: flex;
   width: 100%;
   height: 80px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px 50px 50px 4px;
   background-color: var(--box-bg-1);
-  background-image: v-bind(bgImage); /* stylelint-disable-line value-keyword-case */
   background-position: right;
   background-repeat: no-repeat;
+  column-gap: 8px;
   cursor: pointer;
   font-family: var(--font-title);
   transition: filter 0.5s ease-in-out;
@@ -70,19 +67,60 @@ const bgImage = computed<string>(() => {
   @include github-styles.github-card-shadow("dark");
 }
 
-.icon {
-  height: 60px;
-  margin-right: 12px;
-  aspect-ratio: 23 / 15;
+.top-nc-bgc {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, var(--box-bg-1) 40%, transparent 75%);
 }
 
-.title {
+.top-nc-prepend {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 60px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+
+  img {
+    height: 60px;
+    aspect-ratio: 23/15;
+  }
+}
+
+.top-nc-info {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  overflow: hidden;
+  height: 100%;
+  flex-direction: column;
+  flex-grow: 1;
+  align-items: flex-start;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.top-nc-title {
   display: flex;
   align-items: center;
   column-gap: 4px;
+  font-size: 16px;
 }
 
-.desc {
-  text-shadow: 0 0 2px var(--common-shadow-t-8);
+.top-nc-desc {
+  position: relative;
+  overflow: hidden;
+  max-width: calc(100% - 16px);
+  font-size: 14px;
+  opacity: 0.75;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 2px var(--box-bg-1);
+  white-space: nowrap;
 }
 </style>
