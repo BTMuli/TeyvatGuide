@@ -9,6 +9,9 @@
         </template>
         <template #text>
           <div class="tpj-box">
+            <span class="tpj-box-copy" @click="copyContent(jsonData)" title="复制全部内容到剪贴板">
+              <v-icon small>mdi-content-copy</v-icon>
+            </span>
             <vue-json-pretty
               :data="JSON.parse(JSON.stringify(jsonData))"
               :show-icon="true"
@@ -30,6 +33,9 @@
         </template>
         <template #text>
           <div class="tpj-box">
+            <span class="tpj-box-copy" @click="copyContent(parseData)" title="复制全部内容到剪贴板">
+              <v-icon small>mdi-content-copy</v-icon>
+            </span>
             <vue-json-pretty
               :data="parseData"
               :show-icon="true"
@@ -101,6 +107,16 @@ onMounted(async () => {
   }
   await showLoading.end();
 });
+
+async function copyContent(jsonData: unknown): Promise<void> {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
+    showSnackbar.success("已复制帖子返回内容 JSON 到剪贴板");
+  } catch (err) {
+    showSnackbar.error("复制失败，请稍后重试");
+    await TGLogger.Error(`[${postId}]复制帖子返回内容 JSON 失败：${err}`);
+  }
+}
 </script>
 <style lang="scss" scoped>
 .tpj-page {
@@ -124,5 +140,21 @@ onMounted(async () => {
   padding: 12px;
   border-radius: 4px;
   background: var(--box-bg-1);
+}
+
+.tpj-box-copy {
+  position: absolute;
+  z-index: 1;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: var(--common-text-title);
+  cursor: pointer;
+  transition: background 0.2s;
 }
 </style>
