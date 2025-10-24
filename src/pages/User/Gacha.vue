@@ -12,12 +12,6 @@
           variant="outlined"
           label="游戏UID"
         />
-        <img
-          title="查看千星奇域祈愿记录"
-          src="/icon/nation/千星奇域.webp"
-          alt="beyond"
-          @click="toGachaB()"
-        />
       </div>
     </template>
     <template #extension>
@@ -46,6 +40,10 @@
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
+      <v-tab value="beyond" v-if="isLogin">
+        <img src="/icon/nation/千星奇域.webp" alt="beyond" />
+        千星奇域
+      </v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item value="overview" class="gacha-window-item">
@@ -59,6 +57,9 @@
       </v-window-item>
       <v-window-item value="history" class="gacha-window-item">
         <gro-history />
+      </v-window-item>
+      <v-window-item value="beyond" class="gacha-window-item">
+        <gacha-b />
       </v-window-item>
     </v-window>
   </div>
@@ -76,6 +77,7 @@ import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
@@ -83,12 +85,12 @@ import TGLogger from "@utils/TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
-import { useRouter } from "vue-router";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+import GachaB from "@/pages/User/GachaB.vue";
 
+const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
-const router = useRouter();
 
 const authkey = ref<string>("");
 const uidCur = ref<string>();
@@ -373,14 +375,6 @@ async function deleteGacha(): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
 }
-
-async function toGachaB(): Promise<void> {
-  if (!account.value || !cookie.value) {
-    showSnackbar.error("请先登录账号");
-    return;
-  }
-  await router.push({ name: "千星奇域祈愿记录" });
-}
 </script>
 <style lang="css" scoped>
 .gacha-top-title {
@@ -437,6 +431,12 @@ async function toGachaB(): Promise<void> {
   height: 40px;
   color: var(--box-text-4);
   font-family: var(--font-title);
+
+  img {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
 }
 
 .gacha-window {
