@@ -57,10 +57,8 @@ async function refreshAuthkey(): Promise<void> {
 
 async function getUrl(): Promise<string> {
   const path = "https://sdk.mihoyo.com/hk4e/announcement/index.html";
-  if (authkey.value === "") {
-    await refreshAuthkey();
-  }
-  if (!visible.value) return "";
+  if (authkey.value === "") await refreshAuthkey();
+  if (authkey.value === "") return "";
   const param: Record<string, string> = {
     auth_appid: "announcement",
     authkey_ver: "1",
