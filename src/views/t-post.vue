@@ -286,7 +286,9 @@ async function getRenderPost(
       jsonParse = data.post.structured_content;
     }
   }
-  return JSON.parse(jsonParse);
+  const res = JSON.parse(jsonParse);
+  if (!Array.isArray(res) && !res.insert) return [res];
+  return res;
 }
 
 async function parseContent(fullData: TGApp.BBS.Post.FullData): Promise<string> {
