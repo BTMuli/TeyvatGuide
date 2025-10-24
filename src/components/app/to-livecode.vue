@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" class="tolc-overlay">
     <div class="tolc-box">
       <div class="tolc-title">
-        <span>兑换码</span>
+        <span>{{ gameInfo?.name ?? "" }}兑换码</span>
         <v-icon
           size="18px"
           title="share"
@@ -39,16 +39,28 @@
 </template>
 <script setup lang="ts">
 import showSnackbar from "@comp/func/snackbar.js";
+import useBBSStore from "@store/bbs.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
+import { storeToRefs } from "pinia";
+import { computed } from "vue";
 
 import TMiImg from "./t-mi-img.vue";
 import TOverlay from "./t-overlay.vue";
 
-type ToLiveCodeProps = { data: Array<TGApp.BBS.Navigator.CodeData>; actId: string | undefined };
+type ToLiveCodeProps = {
+  data: Array<TGApp.BBS.Navigator.CodeData>;
+  actId: string | undefined;
+  gid: number;
+};
+
+const { gameList } = storeToRefs(useBBSStore());
 
 const props = defineProps<ToLiveCodeProps>();
 const visible = defineModel<boolean>({ default: false });
+const gameInfo = computed<TGApp.BBS.Game.Item | undefined>(() => {
+  return gameList.value.find((i) => i.id === props.gid);
+});
 
 function copy(code: string): void {
   navigator.clipboard.writeText(code);
