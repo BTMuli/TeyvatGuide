@@ -32,11 +32,6 @@ const userRoutes = (<const>[
     component: async () => await import("@/pages/User/Gacha.vue"),
   },
   {
-    path: "/user/gachaB",
-    name: "千星奇域祈愿记录",
-    component: async () => await import("@/pages/User/GachaB.vue"),
-  },
-  {
     path: "/user/record",
     name: "原神战绩",
     component: async () => await import("@/pages/User/Record.vue"),
