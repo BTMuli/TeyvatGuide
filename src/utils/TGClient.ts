@@ -1,6 +1,5 @@
 /**
- * @file utils/TGClient.ts
- * @desc 负责米游社客户端的 callback 处理
+ * 负责米游社客户端的 callback 处理
  * @since Beta v0.8.3
  */
 
@@ -23,9 +22,6 @@ import TGLogger from "./TGLogger.js";
 import { createPost } from "./TGWindow.js";
 import { getDeviceInfo } from "./toolFunc.js";
 
-// invoke 参数
-type InvokeArg = { func: string };
-
 class Client {
   private listener: UnlistenFn | undefined;
   private route: string[] = [];
@@ -43,10 +39,9 @@ class Client {
   }
 
   /**
-   * @func run
+   * 运行米游社客户端
    * @since Beta v0.3.4
-   * @desc 运行米游社客户端
-   * @returns {void} - 无返回值
+   * @returns Promise<void>
    */
   async run(): Promise<void> {
     if (this.listener === undefined) {
@@ -58,15 +53,12 @@ class Client {
     }
   }
 
-  /* 内置函数 */
-
   /**
-   * @func callback
+   * 回调函数
    * @since Beta v0.5.0
-   * @desc 回调函数
    * @param {string} callback - 回调函数名
    * @param {object} data - 回调数据
-   * @returns {void} - 无返回值
+   * @returns Promise<void>
    */
   async callback(callback: string, data: object): Promise<void> {
     const response = { retcode: 0, message: "success", data: data ?? {} };
@@ -76,12 +68,11 @@ class Client {
   }
 
   /**
-   * @func getSaveImgJS
+   * 获取保存图片的 JS
    * @since Beta v0.5.1
-   * @desc 获取保存图片的 JS
    * @param {string} url - 图片链接
    * @param {string} format - 图片格式
-   * @returns {string} - JS
+   * @returns JS代码字符串
    */
   getSaveImgJS(url: string, format: string): string {
     return `javascript:(async function() {
@@ -104,9 +95,8 @@ class Client {
   }
 
   /**
-   * @func getUrl
+   * 获取 url
    * @since Beta v0.5.0
-   * @desc 获取 url
    * @param {string} func - 方法名
    * @returns {string} - url
    */
@@ -130,9 +120,8 @@ class Client {
   }
 
   /**
-   * @func handleCallback
+   * 处理米游社客户端的 callback
    * @since Beta v0.6.1
-   * @desc 处理米游社客户端的 callback
    * @param {Event<string>} arg - 事件参数
    * @returns {Promise<void>} - 返回值
    */
@@ -162,12 +151,14 @@ class Client {
           <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.EventTrackPayload>>argParse,
         );
         break;
-      case "getStatusBarHeight":
-        await this.getStatusBarHeight(<TGApp.Plugins.JSBridge.NullArg>argParse);
-        break;
       case "genAuthKey":
         await this.genAuthKey(
           <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GenAuthkeyPayload>>argParse,
+        );
+        break;
+      case "getActionTicket":
+        await this.getActionTicket(
+          <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetActionTicketPayload>>argParse,
         );
         break;
       case "getCookieInfo":
@@ -178,14 +169,6 @@ class Client {
           <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>>argParse,
         );
         break;
-      case "getActionTicket":
-        await this.getActionTicket(
-          <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetActionTicketPayload>>argParse,
-        );
-        break;
-      case "getHTTPRequestHeaders":
-        await this.getHTTPRequestHeaders(<TGApp.Plugins.JSBridge.NullArg>argParse);
-        break;
       case "getDS":
         await this.getDS(<TGApp.Plugins.JSBridge.NullArg>argParse);
         break;
@@ -193,6 +176,17 @@ class Client {
         await this.getDS2(
           <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetDS2Payload>>argParse,
         );
+        break;
+      case "getHTTPRequestHeaders":
+        await this.getHTTPRequestHeaders(<TGApp.Plugins.JSBridge.NullArg>argParse);
+        break;
+      case "getRegionRoleInfo":
+        await this.getRegionRoleInfo(
+          <TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetRegionRoleInfoPayload>>argParse,
+        );
+        break;
+      case "getStatusBarHeight":
+        await this.getStatusBarHeight(<TGApp.Plugins.JSBridge.NullArg>argParse);
         break;
       case "getUserInfo":
         await this.getUserInfo(<TGApp.Plugins.JSBridge.NullArg>argParse);
@@ -437,7 +431,7 @@ class Client {
         await TGLogger.Error(`[TGClient][open] ${e}`);
       }
     }
-    await core.invoke<InvokeArg>("create_mhy_client", { func, url });
+    await core.invoke("create_mhy_client", { func, url });
     await this.loadJSBridge();
   }
 
@@ -654,6 +648,26 @@ class Client {
    */
   async getStatusBarHeight(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const data = { statusBarHeight: 0 };
+    await this.callback(arg.callback, data);
+  }
+
+  /**
+   * 获取对应区服的角色信息
+   * @since Beta v0.8.4
+   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetRegionRoleInfoPayload>} arg - 方法参数
+   * @returns {Promise<void>} - 无返回值
+   */
+  async getRegionRoleInfo(
+    arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetRegionRoleInfoPayload>,
+  ): Promise<void> {
+    const user = useUserStore();
+    const data = {
+      region: user.account.region,
+      game_uid: user.account.gameUid,
+      nickname: user.account.nickname,
+      user_label: user.account.nickname,
+      region_name: user.account.regionName,
+    };
     await this.callback(arg.callback, data);
   }
 

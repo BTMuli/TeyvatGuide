@@ -42,7 +42,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import TGClient from "@utils/TGClient.js";
 
 type TpUgcLevel = { insert: { level: TGApp.BBS.UGC.Level } };
 type TpUgcLevelProps = { data: TpUgcLevel };
@@ -52,9 +52,7 @@ const props = defineProps<TpUgcLevelProps>();
 async function toLevel(): Promise<void> {
   let url = `https://act.miyoushe.com/ys/ugc_community/mx/#/pages/level-detail/index?`;
   url = `${url}id=${props.data.insert.level.level_id}&region=${props.data.insert.level.region}`;
-  // TODO: 存在BUG
-  // await TGClient.open("web_act_thin", url.toString());
-  await openUrl(url);
+  await TGClient.open("web_act_thin", url.toString());
 }
 </script>
 <style lang="scss" scoped>

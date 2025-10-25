@@ -1,247 +1,246 @@
 /**
- * @file types/Plugins/JSBridge.d.ts
- * @description JSBridge 插件相关类型定义文件
- * @since Beta v0.6.0
+ * JSBridge 插件相关类型定义文件
+ * @since Beta v0.8.4
  */
 
-/**
- * @description JSBridge 插件相关类型命名
- * @since Beta v0.6.0
- * @namespace TGApp.Plugins.JSBridge
- * @memberof TGApp.Plugins
- */
 declare namespace TGApp.Plugins.JSBridge {
   /**
-   * @description JSBridge 通用 arg 参数
+   * JSBridge 通用 arg 参数
    * @since Beta v0.3.9
-   * @interface Arg
-   * @template T
-   * @property {string} method - 方法名
-   * @property {T} payload - 参数
-   * @property {string} callback - 回调函数名
-   * @return Arg
    */
-  interface Arg<T> {
+  type Arg<T> = {
+    /** 方法名 */
     method: string;
+    /** 参数 */
     payload: T;
+    /** 回调函数名 */
     callback: string;
-  }
+  };
 
   /**
-   * @description 通用 arg 参数-无参数
+   * 通用 arg 参数-无参数
    * @since Beta v0.3.9
-   * @interface NullArg
-   * @return NullArg
    */
   type NullArg = Arg<null>;
 
   /**
-   * @description configShare 方法参数
+   * configShare 方法参数
    * @since Beta v0.3.9
-   * @interface ConfigSharePayload
-   * @property {boolean} enable - 是否启用分享
-   * @return ConfigSharePayload
    */
-  interface ConfigSharePayload {
+  type ConfigSharePayload = {
+    /** 是否启用分享 */
     enable: boolean;
-  }
+  };
 
   /**
-   * @description eventTrack 方法参数
+   * eventTrack 方法参数
    * @since Beta v0.3.9
-   * @interface EventTrackPayload
-   * @property {object} pageInfo - 页面信息
-   * @property {string} pageInfo.page_path - 页面路径
-   * @property {string} pageInfo.page_name - 页面名称
-   * @property {string} pageInfo.sub_page_path - 子页面路径
-   * @property {string} pageInfo.sub_page_name - 子页面名称
-   * @property {string} pageInfo.source_path - 来源页面路径
-   * @property {string} pageInfo.source_name - 来源页面名称
-   * @property {string} pageInfo.page_id - 页面 ID
-   * @property {string} pageInfo.page_type - 页面类型
-   * @property {string} pageInfo.source_id - 来源 ID
-   * @property {unknown} pageInfo.extra_info - 额外信息
-   * @property {object} eventInfo - 事件信息
-   * @property {string} eventInfo.time - 事件时间
-   * @property {number} eventInfo.action_id - 事件 ID
-   * @property {string} eventInfo.btn_name - 按钮名称
-   * @property {string} eventInfo.module_id - 模块 ID
-   * @property {string} eventInfo.module_name - 模块名称
-   * @property {unknown} eventInfo.extra_info - 额外信息
-   * @property {object} commonInfo - 公共信息
-   * @property {object} commonInfo.extra_info - 额外信息
-   * @property {string} commonInfo.extra_info.game_id - 游戏 ID
-   * @property {string} commonInfo.extra_info.view_type - 视图类型
-   * @return EventTrackPayload
    */
-  interface EventTrackPayload {
+  type EventTrackPayload = {
+    /** 页面信息 */
     pageInfo: {
+      /** 页面路径 */
       page_path: string;
+      /** 页面名称 */
       page_name: string;
+      /** 子页面路径 */
       sub_page_path: string;
+      /** 子页面名称 */
       sub_page_name: string;
+      /** 来源页面路径 */
       source_path: string;
+      /** 来源页面名称 */
       source_name: string;
+      /** 页面 ID */
       page_id: string;
+      /** 页面类型 */
       page_type: string;
+      /** 来源 ID */
       source_id: string;
+      /** 额外信息 */
       extra_info: unknown;
     };
+    /** 事件信息 */
     eventInfo: {
+      /** 事件发生时间 */
       time: string;
+      /** 事件 ID */
       action_id: number;
+      /** 按钮名称 */
       btn_name: string;
+      /** 模块 ID */
       module_id: string;
+      /** 模块名称 */
       module_name: string;
+      /** 额外信息 */
       extra_info: unknown;
     };
+    /** 公共信息 */
     commonInfo: {
+      /** 额外信息 */
       extra_info: {
+        /** 游戏 ID */
         game_id: string;
+        /** 视图类型 */
         view_type: string;
       };
     };
-  }
+  };
 
   /**
-   * @description getActionTicket 方法参数
+   * getActionTicket 方法参数
    * @since Beta v0.3.9
-   * @interface GetActionTicketPayload
-   * @property {string} action_type
-   * @return GetActionTicketPayload
    */
-  interface GetActionTicketPayload {
+  type GetActionTicketPayload = {
+    /** 行为类型 */
     action_type: string;
-  }
+  };
 
   /**
-   * @description genAuthkey 方法参数
+   * genAuthkey 方法参数
    * @since Beta v0.3.9
-   * @interface GenAuthkeyPayload
-   * @return GenAuthkeyPayload
    */
   type GenAuthkeyPayload = Record<string, string>;
 
   /**
-   * @description getCookieToken 方法参数
+   * getCookieToken 方法参数
    * @since Beta v0.3.9
-   * @interface GetCookieTokenPayload
-   * @property {boolean} forceRefresh - 是否强制刷新
-   * @return GetCookieTokenPayload
    */
-  interface GetCookieTokenPayload {
+  type GetCookieTokenPayload = {
+    /** 是否强制刷新 */
     forceRefresh: boolean;
-  }
+  };
 
   /**
-   * @description getDS2 方法参数
+   * getDS2 方法参数
    * @since Beta v0.3.9
-   * @interface GetDS2Payload
-   * @property {Record<string,string|number>|string} query - 查询参数
-   * @property {Record<string,string|number>|string} body - 请求体
-   * @return GetDS2Payload
    */
-  interface GetDS2Payload {
+  type GetDS2Payload = {
+    /** 查询参数 */
     query: Record<string, string | number> | string;
+    /** 请求体 */
     body: Record<string, string | number> | string;
-  }
+  };
 
   /**
-   * @description onClickImg 方法参数
+   * onClickImg 方法参数
    * @since Beta v0.3.9
-   * @interface OnClickImgPayload
-   * @property {Array<object>} image_list - 图片列表
-   * @property {string} image_list[].url - 图片链接
-   * @property {string} image_list[].format - 图片格式
-   * @return OnClickImgPayload
    */
-  interface OnClickImgPayload {
+  type OnClickImgPayload = {
+    /** 图片列表 */
     image_list: Array<{
+      /** 图片链接 */
       url: string;
+      /** 图片格式 */
       format: string;
     }>;
-  }
+  };
 
   /**
-   * @description openApplication 方法参数
+   * openApplication 方法参数
    * @since Beta v0.3.9
-   * @interface OpenApplicationPayload
-   * @property {number} gameCenterId - 游戏中心对应 id
-   * @return OpenApplicationPayload
    */
-  interface OpenApplicationPayload {
+  type OpenApplicationPayload = {
+    /** 游戏中心对应 id */
     gameCenterId: number;
-  }
+  };
 
   /**
-   * @description 打开系统浏览器
+   * openSystemBrowser 方法参数
    * @since Beta v0.6.0
-   * @interface OpenSystemBrowserPayload
-   * @property {string} open_url - 打开的链接
-   * @return OpenSystemBrowserPayload
    */
-  interface OpenSystemBrowserPayload {
+  type OpenSystemBrowserPayload = {
+    /** 打开的链接 */
     open_url: string;
-  }
+  };
 
   /**
-   * @description pushPage 方法参数
+   * pushPage 方法参数
    * @since Beta v0.3.9
-   * @interface PushPagePayload
-   * @property {string} page - 页面地址
-   * @return PushPagePayload
    */
-  interface PushPagePayload {
+  type PushPagePayload = {
+    /** 页面地址 */
     page: string;
-  }
+  };
 
   /**
-   * @description setPresentationStyle 方法参数
+   * setPresentationStyle 方法参数
    * @since Beta v0.3.9
-   * @interface SetPresentationStylePayload
-   * @property {string} style - 窗口样式
-   * @property {unknown} navigationBar - 导航栏
-   * @property {string} statusBar.style - 状态栏模式
-   * @return SetPresentationStylePayload
    */
-  interface SetPresentationStylePayload {
+  type SetPresentationStylePayload = {
+    /** 窗口样式 */
     style: string;
+    /** 导航栏 */
     navigationBar: unknown;
+    /** 状态栏模式 */
     statusBar: {
+      /** 状态栏模式 */
       style: string;
     };
-  }
+  };
 
   /**
-   * @description share 方法参数
+   * share 方法参数
    * @since Beta v0.3.9
-   * @interface SharePayload
-   * @property {string} type - 分享类型 // screenshot
-   * @property {object} content - 分享内容
-   * @property {boolean} content?.preview - 是否预览
-   * @return SharePayload
    */
-  type SharePayload =
-    | {
-        type: "default";
-        content: {
-          title: string;
-          description: string;
-          link: string;
-          image_url: string;
-        };
-      }
-    | {
-        type: "screenshot";
-        content: {
-          preview: boolean;
-        };
-      }
-    | {
-        type: "image";
-        content: {
-          image_url?: string;
-          image_base64?: string;
-        };
-      };
+  type SharePayload = SharePayloadDefault | SharePayloadScreenshot | SharePayloadImage;
+
+  /**
+   * share 方法参数-默认分享
+   * @since Beta v0.8.4
+   */
+  type SharePayloadDefault = {
+    /** 分享类型，默认值"default" */
+    type: "default";
+    /** 分享内容 */
+    content: {
+      /** 标题 */
+      title: string;
+      /** 描述 */
+      description: string;
+      /** 链接 */
+      link: string;
+      /** 图片链接 */
+      image_url: string;
+    };
+  };
+
+  /**
+   * share 方法参数-截图分享
+   * @since Beta v0.8.4
+   */
+  type SharePayloadScreenshot = {
+    /** 分享类型，值为"screenshot" */
+    type: "screenshot";
+    /** 分享内容 */
+    content: {
+      /** 是否预览 */
+      preview: boolean;
+    };
+  };
+
+  /**
+   * share 方法参数-图片分享
+   * @since Beta v0.8.4
+   */
+  type SharePayloadImage = {
+    /** 分享类型，值为"image" */
+    type: "image";
+    /** 分享内容 */
+    content: {
+      /** 图片链接（可选） */
+      image_url?: string;
+      /** 图片的 Base64 编码（可选） */
+      image_base64?: string;
+    };
+  };
+
+  /**
+   * getRegionRoleInfo 方法参数
+   * @since Beta v0.8.4
+   */
+  type GetRegionRoleInfoPayload = {
+    /** 游戏 biz 标识 */
+    game_biz: string;
+  };
 }
