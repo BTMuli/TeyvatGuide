@@ -161,7 +161,7 @@ async function handleExportData(): Promise<void> {
   data.value = tmpData;
 }
 
-function parseDataRaw(data: TGApp.Sqlite.GachaRecords.SingleTable[]): UgoUidItem {
+function parseDataRaw(data: TGApp.Sqlite.GachaRecords.TableGacha[]): UgoUidItem {
   const timeList = data.map((item) => new Date(item.time).getTime());
   return {
     uid: data[0].uid,

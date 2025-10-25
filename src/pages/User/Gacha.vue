@@ -40,10 +40,7 @@
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
-      <v-tab value="beyond" v-if="isLogin">
-        <img src="/icon/nation/千星奇域.webp" alt="beyond" />
-        千星奇域
-      </v-tab>
+      <v-tab value="iframe" v-if="isLogin">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item value="overview" class="gacha-window-item">
@@ -58,8 +55,8 @@
       <v-window-item value="history" class="gacha-window-item">
         <gro-history />
       </v-window-item>
-      <v-window-item value="beyond" class="gacha-window-item">
-        <gacha-b />
+      <v-window-item value="iframe" class="gacha-window-item">
+        <gro-iframe />
       </v-window-item>
     </v-window>
   </div>
@@ -71,6 +68,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import GroEcharts from "@comp/userGacha/gro-echarts.vue";
 import GroHistory from "@comp/userGacha/gro-history.vue";
+import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
@@ -87,7 +85,6 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
-import GachaB from "@/pages/User/GachaB.vue";
 
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
@@ -98,7 +95,7 @@ const tab = ref<string>("overview");
 const ovShow = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
 const selectItem = shallowRef<Array<string>>([]);
-const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.SingleTable>>([]);
+const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.TableGacha>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");

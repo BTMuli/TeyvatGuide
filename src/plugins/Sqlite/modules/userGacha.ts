@@ -115,9 +115,9 @@ async function getGachaCheck(uid: string, type: string): Promise<string | undefi
  * @description 获取用户祈愿记录
  * @since Beta v0.4.7
  * @param {string} uid - UID
- * @return {Promise<TGApp.Sqlite.GachaRecords.SingleTable[]>}
+ * @return {Promise<TGApp.Sqlite.GachaRecords.TableGacha[]>}
  */
-async function getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.SingleTable[]> {
+async function getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.TableGacha[]> {
   const db = await TGSqlite.getDB();
   return await db.select("SELECT * FROM GachaRecords WHERE uid = ?;", [uid]);
 }
@@ -132,9 +132,9 @@ async function getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.S
 async function getGachaRecordsGroupByDate(
   uid: string,
   type?: string,
-): Promise<Record<string, TGApp.Sqlite.GachaRecords.SingleTable[]>> {
+): Promise<Record<string, TGApp.Sqlite.GachaRecords.TableGacha[]>> {
   const db = await TGSqlite.getDB();
-  type resType = Array<TGApp.Sqlite.GachaRecords.SingleTable>;
+  type resType = Array<TGApp.Sqlite.GachaRecords.TableGacha>;
   let res: resType;
   if (type) {
     res = await db.select<resType>(
@@ -146,7 +146,7 @@ async function getGachaRecordsGroupByDate(
       uid,
     ]);
   }
-  const map: Record<string, TGApp.Sqlite.GachaRecords.SingleTable[]> = {};
+  const map: Record<string, TGApp.Sqlite.GachaRecords.TableGacha[]> = {};
   for (const item of res) {
     // key 是 yyyy-MM-dd hh:mm:ss，按照日期分组
     const key = item.time.split(" ")[0];

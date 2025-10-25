@@ -10,6 +10,13 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
 const { cookie, account } = storeToRefs(useUserStore());
+
+const gachaIdMap: Record<string, string> = {
+  "1000": "f3f5090a8ec0b28f15805c9969aa6c4ec357", // 常驻
+  "20011": "a8d0a985efb4ed61eb2e73a86a57237bd116", // 角色活动-男
+  "20021": "57016dec6b768231ba1342c01935417a799b", // 角色活动-女
+};
+
 const authkey = ref<string>("");
 const link = ref<string>("");
 
@@ -39,7 +46,7 @@ async function getUrl(): Promise<string> {
     authkey_ver: "1",
     sign_type: "2",
     auth_appid: "webview_gacha",
-    gacha_id: "57016dec6b768231ba1342c01935417a799b",
+    gacha_id: gachaIdMap["20011"],
     timestamp: Math.floor(Date.now() / 1000).toString(),
     lang: "zh-cn",
     device_type: "pc",

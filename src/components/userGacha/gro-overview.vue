@@ -12,22 +12,22 @@ import { computed, ref, watch } from "vue";
 
 import GroDataView from "./gro-data-view.vue";
 
-type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.SingleTable> };
+type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGacha> };
 
 const props = defineProps<GachaOverviewProps>();
-const newData = computed<Array<TGApp.Sqlite.GachaRecords.SingleTable>>(() =>
+const newData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "100"),
 );
-const normalData = computed<Array<TGApp.Sqlite.GachaRecords.SingleTable>>(() =>
+const normalData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "200"),
 );
-const avatarData = computed<Array<TGApp.Sqlite.GachaRecords.SingleTable>>(() =>
+const avatarData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "301"),
 );
-const weaponData = computed<Array<TGApp.Sqlite.GachaRecords.SingleTable>>(() =>
+const weaponData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "302"),
 );
-const mixData = computed<Array<TGApp.Sqlite.GachaRecords.SingleTable>>(() =>
+const mixData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "500"),
 );
 
@@ -56,7 +56,7 @@ watch(
 .gro-o-container {
   display: grid;
   height: 100%;
-  grid-column-gap: 8px;
+  column-gap: 8px;
   grid-template-columns: v-bind(cnCols); /* stylelint-disable-line value-keyword-case */
 }
 </style>

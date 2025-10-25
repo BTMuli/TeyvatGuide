@@ -64,7 +64,7 @@ import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
-  dataVal: Array<TGApp.Sqlite.GachaRecords.SingleTable>;
+  dataVal: Array<TGApp.Sqlite.GachaRecords.TableGacha>;
 };
 
 const props = defineProps<GachaDataViewProps>();

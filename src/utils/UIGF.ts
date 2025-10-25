@@ -82,12 +82,12 @@ export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
 /**
  * @description 数据转换-数据库到 UIGF
  * @since Beta v0.7.5
- * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} data - 数据库数据
+ * @param {TGApp.Sqlite.GachaRecords.TableGacha[]} data - 数据库数据
  * @param {number} timezone - 时区
  * @returns {TGApp.Plugins.UIGF.GachaItem[]} UIGF 数据
  */
 function convertDataToUigf(
-  data: TGApp.Sqlite.GachaRecords.SingleTable[],
+  data: TGApp.Sqlite.GachaRecords.TableGacha[],
   timezone: number,
 ): TGApp.Plugins.UIGF.GachaItem[] {
   return data.map((gacha) => {
@@ -191,13 +191,13 @@ export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIG
  * @description 导出 UIGF 数据
  * @since Beta v0.7.5
  * @param {string} uid - UID
- * @param {TGApp.Sqlite.GachaRecords.SingleTable[]} gachaList - 祈愿列表
+ * @param {TGApp.Sqlite.GachaRecords.TableGacha[]} gachaList - 祈愿列表
  * @param {string} savePath - 保存路径
  * @returns {Promise<void>}
  */
 export async function exportUigfData(
   uid: string,
-  gachaList: TGApp.Sqlite.GachaRecords.SingleTable[],
+  gachaList: TGApp.Sqlite.GachaRecords.TableGacha[],
   savePath?: string,
 ): Promise<void> {
   const timezone = getUigfTimeZone(uid);

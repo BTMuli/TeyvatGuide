@@ -20,7 +20,7 @@ import { computed } from "vue";
 
 import { AppGachaData } from "@/data/index.js";
 
-export type GroDataLineProps = { data: TGApp.Sqlite.GachaRecords.SingleTable; count: number };
+export type GroDataLineProps = { data: TGApp.Sqlite.GachaRecords.TableGacha; count: number };
 
 const props = defineProps<GroDataLineProps>();
 const hint = getEndHint();

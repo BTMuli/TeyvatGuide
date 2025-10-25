@@ -19,7 +19,7 @@
   </v-data-table>
 </template>
 <script lang="ts" setup>
-type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.SingleTable> };
+type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGacha> };
 
 const props = defineProps<GroTableProps>();
 
