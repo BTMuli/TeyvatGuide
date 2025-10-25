@@ -1,7 +1,12 @@
 <!-- UGC关卡组件 TODO:UI调整-->
 <template>
   <div class="tul-card-box" @click="console.log(props.data)">
-    <TMiImg class="tul-cover" :src="props.data.insert.level.cover.url" alt="cover" />
+    <TMiImg
+      @click="toLevel()"
+      class="tul-cover"
+      :src="props.data.insert.level.cover.url"
+      alt="cover"
+    />
     <div class="tul-content">
       <div class="tul-top">
         <div class="tul-title">{{ props.data.insert.level.level_name }}</div>
@@ -37,11 +42,20 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 type TpUgcLevel = { insert: { level: TGApp.BBS.UGC.Level } };
 type TpUgcLevelProps = { data: TpUgcLevel };
 
 const props = defineProps<TpUgcLevelProps>();
+
+async function toLevel(): Promise<void> {
+  let url = `https://act.miyoushe.com/ys/ugc_community/mx/#/pages/level-detail/index?`;
+  url = `${url}id=${props.data.insert.level.level_id}&region=${props.data.insert.level.region}`;
+  // TODO: 存在BUG
+  // await TGClient.open("web_act_thin", url.toString());
+  await openUrl(url);
+}
 </script>
 <style lang="scss" scoped>
 .tul-card-box {

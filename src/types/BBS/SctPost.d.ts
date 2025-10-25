@@ -46,16 +46,17 @@ declare namespace TGApp.BBS.SctPost {
    * @description 帖子结构化数据-viewType为7
    * @since Beta v0.8.4
    * @description 下面详细结构参见相关组件
+   * @todo 为简便起见，所有字段可能为null,但是目前没遇到text&level为null的情况
    * @property {Array<Base>} text - 文字内容
    * @property {Array<UgcImage>} images - 图片内容
    * @property {Array<UgcVod>} vods - 视频内容
    * @property {Array<UgcLevel>} levels - 等级内容
    */
   type Ugc = {
-    text: Array<Base>;
-    images: Array<UgcImage>;
-    vods: Array<UgcVod>;
-    levels: Array<UgcLevel>;
+    text: Array<Base> | null;
+    images: Array<UgcImage> | null;
+    vods: Array<UgcVod> | null;
+    levels: Array<UgcLevel> | null;
   };
 
   /**
