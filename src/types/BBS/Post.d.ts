@@ -1,716 +1,726 @@
 /**
- * @file types/BBS/Post.d.ts
- * @description 帖子类型定义文件
+ * 帖子类型定义文件
  * @since Beta v0.8.4
  */
 
 declare namespace TGApp.BBS.Post {
   /**
-   * @description 获取帖子详情返回数据
+   * 获取帖子详情返回响应
    * @since Beta v0.7.2
-   * @interface FullResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {FullRes} data 帖子数据
    */
   type FullResp = TGApp.BBS.Response.BaseWithData<FullRes>;
 
   /**
-   * @description 帖子数据
+   * 帖子详情返回数据
    * @since Beta v0.7.2
-   * @interface FullRes
-   * @property {FullData} post 帖子数据
    */
-  type FullRes = { post: FullData };
+  type FullRes = {
+    /** 帖子数据 */
+    post: FullData;
+  };
 
   /**
-   * @description 搜索结果返回
+   * 搜索结果返回响应
    * @since Beta v0.7.2
-   * @interface SearchResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {SearchRes} data 返回数据
    */
   type SearchResp = TGApp.BBS.Response.BaseWithData<SearchRes>;
 
   /**
-   * @description 搜索结果数据
+   * 搜索结果返回数据
    * @since Beta v0.7.2
-   * @interface SearchRes
-   * @property {Array<FullData>} posts 帖子列表
-   * @property {string} last_id 索引
-   * @property {boolean} is_last 是否最后一页
-   * @property {Array<string>} token_list token 列表
-   * @property {Record<string,string>} databox 数据盒
+   * @remarks token_list 和 databox 目前用途不明
    */
   type SearchRes = {
+    /** 帖子列表 */
     posts: Array<FullData>;
+    /** 最后一个帖子ID，用于索引 */
     last_id: string;
+    /** 是否最后一页 */
     is_last: boolean;
+    /** token 列表 */
     token_list: Array<string>;
+    /** 数据盒 */
     databox: Record<string, string>;
   };
 
   /**
-   * @description 咨讯返回
+   * 咨讯返回响应
    * @since Beta v0.7.2
-   * @interface NewsResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {NewsRes} data 返回数据
    */
   type NewsResp = TGApp.BBS.Response.BaseWithData<NewsRes>;
 
   /**
-   * @description 咨讯数据
+   * 咨讯数据
    * @since Beta v0.7.2
-   * @interface NewsRes
-   * @property {Array<FullData>} list 咨讯列表
-   * @property {string} last_id 最后 ID
-   * @property {boolean} is_last 是否最后一页
    */
-  type NewsRes = { list: Array<FullData>; last_id: string; is_last: boolean };
+  type NewsRes = {
+    /** 咨讯列表 */
+    list: Array<FullData>;
+    /** 列表内最后一个 ID，用于索引 */
+    last_id: string;
+    /** 是否最后一页 */
+    is_last: boolean;
+  };
 
   /**
-   * @description 用户发布帖子返回
+   * 用户发布帖子返回响应
    * @since Beta v0.7.2
-   * @interface UserPostResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {UserPostRes} data 返回数据
    */
   type UserPostResp = TGApp.BBS.Response.BaseWithData<UserPostRes>;
 
   /**
-   * @description 用户发布帖子数据
+   * 用户发布帖子返回数据
    * @since Beta v0.7.2
-   * @interface UserPostRes
-   * @property {Array<FullData>} list 帖子列表
-   * @property {boolean} is_last 是否最后一页
-   * @property {string} next_offset 下一页偏移量
    */
-  type UserPostRes = { list: Array<FullData>; is_last: boolean; next_offset: string };
+  type UserPostRes = {
+    /** 帖子列表 */
+    list: Array<FullData>;
+    /** 是否最后一页 */
+    is_last: boolean;
+    /** 下一页偏移量 */
+    next_offset: string;
+  };
 
   /**
-   * @description 关注动态返回
+   * 关注动态返回响应
    * @since Beta v0.7.2
-   * @interface FollowPostResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {FollowPostRes} data 返回数据
    */
   type FollowPostResp = TGApp.BBS.Response.BaseWithData<FollowPostRes>;
 
   /**
-   * @description 关注动态返回数据
+   * 关注动态返回数据
    * @since Beta v0.7.2
-   * @interface FollowPostRes
-   * @property {boolean} has_follow_users 是否有关注用户
-   * @property {boolean} is_last 是否最后一页
-   * @property {Array<FullData>} list 帖子列表
-   * @property {number} next_offset 下一页偏移量
    */
   type FollowPostRes = {
+    /** 是否有关注用户 */
     has_follow_users: boolean;
+    /** 是否最后一页 */
     is_last: boolean;
+    /** 帖子列表 */
     list: Array<FullData>;
+    /** 下一页偏移量 */
     next_offset: number;
   };
 
   /**
-   * @description 帖子数据
+   * 帖子数据
    * @since Beta v0.7.2
-   * @interface FullData
-   * @property {Post} post  帖子信息
-   * @property {Forum|null} forum  所属版块，可能为 null
-   * @property {Array<Topic>} topics 所属话题
-   * @property {User|null} user 发帖人，可能为 null
-   * @property {TGApp.BBS.User.SelfOperation} self_operation 当前用户操作
-   * @property {Stat|null} stat 帖子统计，可能为 null
-   * @property {HelpSys} help_sys 帮助系统，可能为 null
-   * @property {Image} cover 封面图，可能为 null
-   * @property {Array<Image>} image_list 图片列表
-   * @property {boolean} is_official_master 是否为官方帖
-   * @property {boolean} is_user_master 是否为用户帖
-   * @property {boolean} hot_reply_exist 是否存在热门回复
-   * @property {number} vote_count 投票数
-   * @property {number} last_modify_time 最后修改时间
-   * @property {string} recommend_type 推荐类型
-   * @property {Collection} collection 合集，可能为 null
-   * @property {Array<Vod>} vod_list 视频列表，可能为空
-   * @property {boolean} is_block_on 是否被屏蔽
-   * @property {unknown} forum_rank_info 版块排行信息，可能为 null
-   * @property {LinkCard[]} link_card_list 链接卡片列表，可能为空
-   * @property {NewsMeta} news_meta 咨讯元数据，可能为 null'
-   * @property {RecommendReason|null} recommend_reason 推荐理由，可能为 null
-   * @property {unknown} villa_card 未知数据，可能为 null
-   * @property {boolean} is_mentor 是否为导师
-   * @property {unknown} villa_room_card 未知数据，可能为 null
-   * @property {unknown} reply_avatar_action_info 未知数据，可能为 null
-   * @property {unknown} challenge 挑战，可能为 null
-   * @property {Array<unknown>} hot_reply_list 热门回复列表
-   * @property {Array<unknown>} villa_msg_image_list 未知数据列表
-   * @property {ContributionAct|null} contribution_act 投稿活动，可能为 null
-   * @property {boolean} is_has_vote 是否有投票
-   * @property {boolean} is_has_lottery 是否有抽奖
-   * @property {string} release_time_type 发布时间类型
-   * @property {number} future_release_time 未来发布时间
-   * @property {ExternalLink} external_link 外部链接信息
-   * @property {PostExtraFull} post_full_extra_info 帖子完整额外信息，可能为 null
-   * @property {unknown} post_attachment_info 帖子附件信息，可能为 null
-   * @property {unknown} feed_attachment_info 动态附件信息，可能为 null
    */
   type FullData = {
+    /** 帖子信息 */
     post: Post;
+    /** 所属版块，可能为 null */
     forum: Forum | null;
+    /** 所属话题 */
     topics: Array<Topic>;
+    /** 发帖人，可能为 null */
     user: User | null;
+    /** 当前用户操作 */
     self_operation: TGApp.BBS.User.SelfOperation;
+    /** 帖子统计，可能为 null */
     stat: Stat | null;
+    /** 帮助系统，可能为 null */
     help_sys: HelpSys | null;
+    /** 封面图，可能为 null */
     cover: Image | null;
+    /** 图片列表 */
     image_list: Array<Image>;
+    /** 是否为官方帖 */
     is_official_master: boolean;
+    /** 是否为用户帖 */
     is_user_master: boolean;
+    /** 是否存在热门回复 */
     hot_reply_exist: boolean;
+    /** 投票数 */
     vote_count: number;
+    /** 最后修改时间 */
     last_modify_time: number;
+    /** 推荐类型 */
     recommend_type: string;
+    /** 合集，可能为 null */
     collection: Collection | null;
+    /** 视频列表，可能为空 */
     vod_list: Array<Vod>;
+    /** 是否被屏蔽 */
     is_block_on: boolean;
+    /** 版块排行信息，可能为 null */
     forum_rank_info: unknown | null;
+    /** 链接卡片列表，可能为空 */
     link_card_list: Array<LinkCard>;
+    /** 咨讯元数据，可能为 null */
     news_meta?: NewsMeta | null;
+    /** 推荐理由，可能为 null */
     recommend_reason: RecommendReason | null;
+    /** 未知数据，可能为 null */
     villa_card: unknown | null;
+    /** 是否为导师 */
     is_mentor: boolean;
+    /** 未知数据，可能为 null */
     villa_room_card: unknown | null;
+    /** 未知数据，可能为 null */
     reply_avatar_action_info: unknown | null;
+    /** 挑战，可能为 null */
     challenge: unknown | null;
+    /** 热门回复列表 */
     hot_reply_list: Array<unknown>;
+    /** 未知数据列表 */
     villa_msg_image_list: Array<unknown>;
+    /** 投稿活动，可能为 null */
     contribution_act: ContributionAct | null;
+    /** 是否有投票 */
     is_has_vote: boolean;
+    /** 是否有抽奖 */
     is_has_lottery: boolean;
+    /** 发布时间类型 */
     release_time_type: string;
+    /** 未来发布时间 */
     future_release_time: number;
+    /** 外部链接信息 */
     external_link: ExternalLink;
+    /** 帖子完整额外信息，可能为 null */
     post_full_extra_info: PostExtraFull | null;
+    /** 帖子附件信息，可能为 null */
     post_attachment_info: unknown | null;
+    /** 动态附件信息，可能为 null */
     feed_attachment_info: unknown | null;
   };
 
   /**
-   * @description 用户信息
+   * 用户信息
    * @since Beta v0.7.2
-   * @interface User
-   * @property {string} uid 用户 ID
-   * @property {string} nickname 用户昵称
-   * @property {string} introduce 用户简介
-   * @property {string} avatar 用户头像
-   * @property {number} gender 用户性别
-   * @property {TGApp.BBS.User.Certification} certification 用户认证信息
-   * @property {TGApp.BBS.User.LevelExp|null} level_exp 用户经验
-   * @property {boolean} is_following 是否关注
-   * @property {boolean} is_followed 是否被关注
-   * @property {string} avatar_url 用户头像链接
-   * @property {string} pendant 用户挂件 URL，可能为 ""
-   * @property {Array<TGApp.BBS.User.Certification>} certifications 用户认证信息列表
-   * @property {boolean} is_creator 是否是创作者
-   * @property {TGApp.BBS.User.AvatarExt} avatar_ext 用户头像扩展信息
    */
   type User = {
+    /** 用户 ID */
     uid: string;
+    /** 用户昵称 */
     nickname: string;
+    /** 用户简介 */
     introduce: string;
+    /** 用户头像 */
     avatar: string;
+    /** 用户性别 */
     gender: number;
+    /** 用户认证信息 */
     certification: TGApp.BBS.User.Certification;
+    /** 用户经验 */
     level_exp: TGApp.BBS.User.LevelExp | null;
+    /** 是否关注 */
     is_following: boolean;
+    /** 是否被关注 */
     is_followed: boolean;
+    /** 用户头像链接 */
     avatar_url: string;
+    /** 用户挂件 URL，可能为 "" */
     pendant: string;
+    /** 用户认证信息列表 */
     certifications: Array<TGApp.BBS.User.Certification>;
+    /** 是否是创作者 */
     is_creator: boolean;
+    /** 用户头像扩展信息 */
     avatar_ext: TGApp.BBS.User.AvatarExt;
   };
 
   /**
-   * @description 帖子信息
+   * 帖子信息
    * @since Beta v0.7.2
-   * @interface Post
-   * @property {number} game_id 游戏 ID // 2 为原神
-   * @property {string} post_id 帖子 ID
-   * @property {number} f_forum_id 所属版块 ID
-   * @property {string} uid 发帖人 UID
-   * @property {string} subject 帖子标题
-   * @property {string} content 帖子内容，为 html 格式
-   * @property {string} cover 封面图 URL，可能为 ""
-   * @property {ViewTypeEnum} view_type 浏览类型
-   * @property {number} created_at 发帖时间
-   * @property {Array<string>} images 图片列表，可能为空
-   * @property {PostStat} post_status 帖子状态
-   * @property {Array<number>} topic_ids 所属话题 ID 列表
-   * @property {number} view_status 浏览状态
-   * @property {number} max_floor 最大楼层
-   * @property {number} is_original 是否原创
-   * @property {number} republish_authorization 是否授权转载
-   * @property {string} reply_time 最后回复时间 // "2023-03-05 20:26:54"
-   * @property {number} is_deleted 是否删除
-   * @property {boolean} is_interactive 是否互动
-   * @property {string} structured_content 结构化内容 // 反序列化后为 TGApp.BBS.SctPost.Common[]
-   * @property {Array<string>} structured_content_rows 结构化内容原始数据
-   * @property {number} review_id 审核ID
-   * @property {boolean} is_profit 是否盈利
-   * @property {boolean} is_in_profit 是否在盈利
-   * @property {number} updated_at 更新时间
-   * @property {number} deleted_at 删除时间
-   * @property {number} pre_pub_status 预发布状态
-   * @property {number} cate_id 分类ID
-   * @property {number} profit_post_status 盈利帖子状态
-   * @property {number} audit_status 审核状态
-   * @property {string} meta_content 元内容，可能为 ""
-   * @property {boolean} is_missing 是否缺失
-   * @property {number} block_reply_img 是否屏蔽回复图片
-   * @property {boolean} is_showing_missing 是否显示缺失
-   * @property {number} block_latest_reply_time 是否屏蔽最新回复时间
-   * @property {number} selected_comment 是否选择评论
-   * @property {boolean} is_mentor 是否为导师
-   * @property {PostExtra|null} post_extra 帖子额外信息，可能为 null
-   * @property {string} ai_content_type AI 内容类型
-   * @property {string} user_ai_content_choice 用户 AI 内容选择
-   * @property {PostAigcMeta|null} aigc_meta AI 生成内容元数据，可能为 null
    */
   type Post = {
+    /** 游戏 ID */
     game_id: number;
+    /** 帖子 ID */
     post_id: string;
+    /** 所属版块 ID */
     f_forum_id: number;
+    /** 发帖人 UID */
     uid: string;
+    /** 帖子标题 */
     subject: string;
+    /** 帖子内容 */
     content: string;
+    /** 封面图 */
     cover: string;
+    /** 浏览类型 */
     view_type: ViewTypeEnum | number;
+    /** 发帖时间 */
     created_at: number;
+    /** 图片列表 */
     images: Array<string>;
+    /** 帖子状态 */
     post_status: PostStat;
+    /** 所属话题 ID 列表 */
     topic_ids: Array<number>;
+    /** 浏览状态 */
     view_status: number;
+    /** 最大楼层 */
     max_floor: number;
+    /** 是否原创 */
     is_original: number;
+    /** 是否授权转载 */
     republish_authorization: number;
+    /** 最后回复时间 */
     reply_time: string;
+    /** 是否删除 */
     is_deleted: number;
+    /** 是否互动 */
     is_interactive: boolean;
+    /** 结构化内容 */
     structured_content: string;
+    /** 结构化内容原始数据 */
     structured_content_rows: Array<string>;
+    /** 审核ID */
     review_id: number;
+    /** 是否盈利 */
     is_profit: boolean;
+    /** 是否在盈利 */
     is_in_profit: boolean;
+    /** 更新时间 */
     updated_at: number;
+    /** 删除时间 */
     deleted_at: number;
+    /** 预发布状态 */
     pre_pub_status: number;
+    /** 分类ID */
     cate_id: number;
+    /** 盈利帖子状态 */
     profit_post_status: number;
+    /** 审核状态 */
     audit_status: number;
+    /** 元内容 */
     meta_content: string;
+    /** 是否缺失 */
     is_missing: boolean;
+    /** 是否屏蔽回复图片 */
     block_reply_img: number;
+    /** 是否显示缺失 */
     is_showing_missing: boolean;
+    /** 是否屏蔽最新回复时间 */
     block_latest_reply_time: number;
+    /** 选择评论 */
     selected_comment: number;
+    /** 是否为导师 */
     is_mentor: boolean;
+    /** 帖子额外信息 */
     post_extra: PostExtra | null;
+    /** AI 内容类型 */
     ai_content_type: string;
+    /** 用户 AI 内容选择 */
     user_ai_content_choice: string;
+    /** AI 生成内容元数据 */
     aigc_meta: PostAigcMeta | null;
   };
 
   /**
-   * @description 浏览类型枚举
+   * 浏览类型枚举
    * @since Beta v0.8.4
-   * @const PostViewType
-   * @todo 待确定是否有其他类型
-   * @property {number} NORMAL 正常帖子
-   * @property {number} PIC 图片帖子，如同人图，COS
-   * @property {number} VOD 含视频帖子
-   * @property {number} UGC 千星奇域 // TODO: 待确定是否有其他分类
+   * @remarks 待确定是否有其他类型
    */
   const PostViewType = <const>{
+    /** 正常帖子 */
     NORMAL: 1,
+    /** 图片帖子，如同人图，COS */
     PIC: 2,
+    /** 含视频帖子 */
     VOD: 5,
+    /** UGC 千星奇域 */
     UGC: 7,
   };
 
   /**
-   * @description 浏览类型枚举类型
+   * 浏览类型枚举类型
    * @since Beta v0.8.4
-   * @enum {number}
-   * @type PostViewTypeEnum
    */
   type ViewTypeEnum = (typeof PostViewType)[keyof typeof PostViewType];
 
   /**
-   * @description 帖子状态
+   * 帖子状态
    * @since Beta v0.7.2
-   * @interface PostStat
-   * @property {boolean} is_top 是否置顶
-   * @property {boolean} is_good 是否加精
-   * @property {boolean} is_official 是否官方
-   * @property {number} post_status 帖子状态
    */
-  type PostStat = { is_top: boolean; is_good: boolean; is_official: boolean; post_status: number };
+  type PostStat = {
+    /** 是否置顶 */
+    is_top: boolean;
+    /** 是否加精 */
+    is_good: boolean;
+    /** 是否官方 */
+    is_official: boolean;
+    /** 帖子状态 */
+    post_status: number;
+  };
 
   /**
-   * @description 帖子额外信息
+   * 帖子额外信息
    * @since Beta v0.8.4
-   * @interface PostExtra
-   * @property {PostExtraUgc} ugc_master_post_extra UGCMaster 额外信息
    */
-  type PostExtra = { ugc_master_post_extra: PostExtraUgc };
+  type PostExtra = {
+    /** UGC 主帖子额外信息 */
+    ugc_master_post_extra: PostExtraUgc;
+  };
 
   /**
-   * @description UGC所有者额外信息
+   *  UGC所有者额外信息
    * @since Beta v0.8.4
-   * @interface PostExtraUgc
-   * @property {string} game_uid 游戏 UID
-   * @property {string} game_region 游戏区服
    */
-  type PostExtraUgc = { game_uid: string; game_region: string };
+  type PostExtraUgc = {
+    /** 游戏 UID */
+    game_uid: string;
+    /** 游戏区服 */
+    game_region: string;
+  };
 
   /**
-   * @description AI 生成内容元数据
+   * AI 生成内容元数据
    * @since Beta v0.8.4
-   * @interface PostAigcMeta
-   * @property {string} ContentPropagator 内容生成器
-   * @property {string} PropagateID 内容生成 ID
    */
-  type PostAigcMeta = { ContentPropagator: string; PropagateID: string };
+  type PostAigcMeta = {
+    /** 内容生成器 */
+    ContentPropagator: string;
+    /** 内容生成 ID */
+    PropagateID: string;
+  };
 
   /**
-   * @description 版块信息
+   * 版块信息
    * @since Beta v0.7.2
-   * @interface Forum
-   * @property {number} id 版块 ID
-   * @property {string} name 版块名称
-   * @property {string} icon 版块图标 URL
-   * @property {number} game_id 游戏 ID // 2 为原神
-   * @property {TGApp.BBS.Forum.ForumCate|null} forum_cate 版块分类，可能为 null
    */
   type Forum = {
+    /** 版块 ID */
     id: number;
+    /** 版块名称 */
     name: string;
+    /** 版块图标 URL */
     icon: string;
+    /** 游戏 ID */
     game_id: number;
+    /** 版块分类，可能为 null */
     forum_cate: TGApp.BBS.Forum.ForumCate | null;
   };
 
   /**
-   * @description 话题信息
+   * 话题信息
    * @since Beta v0.7.2
-   * @interface Topic
-   * @property {number} id 话题 ID
-   * @property {string} name 话题名称
-   * @property {string} cover 话题封面图 URL
-   * @property {boolean} is_top 是否置顶
-   * @property {boolean} is_good 是否加精
-   * @property {boolean} is_interactive 是否互动
-   * @property {number} game_id 游戏 ID
-   * @property {number} content_type 内容类型
    */
   type Topic = {
+    /** 话题 ID */
     id: number;
+    /** 话题名称 */
     name: string;
+    /** 话题封面图 URL */
     cover: string;
+    /** 是否置顶 */
     is_top: boolean;
+    /** 是否加精 */
     is_good: boolean;
+    /** 是否互动 */
     is_interactive: boolean;
+    /** 游戏 ID */
     game_id: number;
+    /** 内容类型 */
     content_type: number;
   };
 
   /**
-   * @description 帖子状态
+   * 帖子状态
    * @since Beta v0.3.7
-   * @interface Stat
-   * @property {number} view_num 浏览数
-   * @property {number} reply_num 回复数
-   * @property {number} like_num 点赞数
-   * @property {number} bookmark_num 收藏数
-   * @property {number} forward_num 转发数
-   * @property {number} original_like_num 原创点赞数
-   * @property {Array<StatUpvote>} post_upvote_stat 互动信息
    */
   type Stat = {
+    /** 浏览数 */
     view_num: number;
+    /** 回复数 */
     reply_num: number;
+    /** 点赞数 */
     like_num: number;
+    /** 收藏数 */
     bookmark_num: number;
+    /** 转发数 */
     forward_num: number;
+    /** 原创点赞数 */
     original_like_num: number;
+    /** 互动信息 */
     post_upvote_stat: Array<StatUpvote>;
   };
 
   /**
-   * @description 互动信息
+   * 互动信息
    * @since Beta v0.7.2
-   * @interface StatUpvote
-   * @property {number} upvote_type 互动类型
-   * @property {number} upvote_cnt 互动数量
    */
-  type StatUpvote = { upvote_type: number; upvote_cnt: number };
+  type StatUpvote = {
+    /** 互动类型 */
+    upvote_type: number;
+    /** 互动数量 */
+    upvote_cnt: number;
+  };
 
   /**
-   * @description 图片数据
+   * 图片数据
    * @since Beta v0.7.2
-   * @interface Image
-   * @property {string} url 图片 URL
-   * @property {number} height 图片高度
-   * @property {string} width 图片宽度
-   * @property {string} format 图片格式 // jpg
-   * @property {string} size 图片大小 // 281428
-   * @property {ImageCrop|null} crop 图片裁剪信息，可能为 null
-   * @property {boolean} is_user_set_cover 是否为封面
-   * @property {string} image_id 图片 ID
-   * @property {string} entity_type 图片类型 // IMG_ENTITY_POST, IMG_ENTITY_UNKOWN
-   * @property {string} entity_id 图片 ID
-   * @property {boolean} is_deleted 是否已删除
-   * @property {string} aigc_label AI 生成标签
-   * @property {string} aigc_meta AI 生成元数据 // 序列化后的 JSON 字符串
    */
   type Image = {
+    /** 图片 URL */
     url: string;
+    /** 图片高度 */
     height: number;
+    /** 图片宽度 */
     width: number;
+    /** 图片格式 */
     format: string;
+    /** 图片大小 */
     size: string;
+    /** 图片裁剪信息，可能为 null */
     crop: ImageCrop | null;
+    /** 是否为封面 */
     is_user_set_cover?: boolean;
+    /** 图片 ID */
     image_id: string;
+    /** 图片类型 */
     entity_type: string;
+    /** 图片 ID */
     entity_id: string;
+    /** 是否已删除 */
     is_deleted: boolean;
+    /** AI 生成标签 */
     aigc_label: string;
+    /**
+     * AI 生成元数据
+     * @remarks 序列化后的 JSON 字符串
+     */
     aigc_meta: string;
   };
 
   /**
-   * @description 图片裁剪信息
+   * 图片裁剪信息
    * @since Beta v0.7.2
-   * @interface ImageCrop
-   * @property {number} x 裁剪 X 轴
-   * @property {number} y 裁剪 Y 轴
-   * @property {number} w 裁剪宽度
-   * @property {number} h 裁剪高度
-   * @property {string} url 裁剪图片 URL
    */
-  type ImageCrop = { x: number; y: number; w: number; h: number; url: string };
-
-  /**
-   * @description help_sys 信息
-   * @since Beta v0.7.2
-   * @interface HelpSys
-   * @property {unknown} top_up 置顶, 可能为 null
-   * @property {Array<unknown>} top_n 置顶, 可能为空
-   * @property {number} answer_num 回答数
-   */
-  type HelpSys = { top_up: unknown | null; top_n: Array<unknown>; answer_num: number };
-
-  /**
-   * @description 合集信息
-   * @since Beta v0.7.2
-   * @interface Collection
-   * @property {string} prev_post_id 上一篇帖子 ID，为 0 说明没有上一篇
-   * @property {string} next_post_id 下一篇帖子 ID，为 0 说明没有下一篇
-   * @property {string} collection_id 合集 ID
-   * @property {number} cur 第几篇
-   * @property {number} total 总篇数
-   * @property {string} collection_title 合集标题
-   * @property {number} prev_post_game_id 上一篇帖子游戏 ID
-   * @property {number} next_post_game_id 下一篇帖子游戏 ID
-   * @property {number} prev_post_view_type 上一篇帖子浏览类型
-   * @property {number} next_post_view_type 下一篇帖子浏览类型
-   */
-  type Collection = {
-    prev_post_id: string;
-    next_post_id: string;
-    collection_id: string;
-    cur: number;
-    total: number;
-    collection_title: string;
-    prev_post_game_id: number;
-    next_post_game_id: number;
-    prev_post_view_type: number;
-    next_post_view_type: number;
+  type ImageCrop = {
+    /** 裁剪 X 轴 */
+    x: number;
+    /** 裁剪 Y 轴 */
+    y: number;
+    /** 裁剪宽度 */
+    w: number;
+    /** 裁剪高度 */
+    h: number;
+    /** 裁剪图片 URL */
+    url: string;
   };
 
   /**
-   * @description 链接卡片信息
+   * help_sys 信息
    * @since Beta v0.7.2
-   * @interface LinkCard
-   * @property {string} button_text 按钮文本
-   * @property {string} card_id 卡片 ID
-   * @property {unknown} card_meta 卡片元数据
-   * @property {number} card_status 卡片状态
-   * @property {string} cover 封面图 URL
-   * @property {string} landing_url 落地页 URL
-   * @property {number} landing_url_type 落地页类型
-   * @property {number} link_type 链接类型
-   * @property {string} market_price 市场价
-   * @property {string} origin_url 原始 URL
-   * @property {string} origin_user_avatar 原始用户头像 URL
-   * @property {string} origin_user_avatar_url 原始用户头像 URL
-   * @property {string} origin_user_nickname 原始用户名
-   * @property {string} price 价格
-   * @property {string} title 标题
+   */
+  type HelpSys = {
+    /** 置顶 */
+    top_up: unknown | null;
+    /** 置顶列表 */
+    top_n: Array<unknown>;
+    /** 回答数 */
+    answer_num: number;
+  };
+
+  /**
+   * 合集信息
+   * @since Beta v0.7.2
+   */
+  type Collection = {
+    /**
+     * 上一篇帖子 ID
+     * @remarks 为 0 说明没有上一篇
+     */
+    prev_post_id: string;
+    /**
+     * 下一篇帖子 ID
+     * @remarks 为 0 说明没有下一篇
+     */
+    next_post_id: string;
+    /** 合集 ID */
+    collection_id: string;
+    /** 第几篇 */
+    cur: number;
+    /** 总篇数 */
+    total: number;
+    /** 合集标题 */
+    collection_title: string;
+    /** 上一篇帖子游戏 ID */
+    prev_post_game_id: number;
+    /** 下一篇帖子游戏 ID */
+    next_post_game_id: number;
+    /** 上一篇帖子浏览类型 */
+    prev_post_view_type: ViewTypeEnum;
+    /** 下一篇帖子浏览类型 */
+    next_post_view_type: ViewTypeEnum;
+  };
+
+  /**
+   * 链接卡片信息
+   * @since Beta v0.7.2
    */
   type LinkCard = {
+    /** 链接类型 */
     link_type: number;
+    /** 原始 URL */
     origin_url: string;
+    /** 落地页 URL */
     landing_url: string;
+    /** 封面图 */
     cover: string;
+    /** 标题 */
     title: string;
+    /** 原始用户头像 */
     origin_user_avatar: string;
+    /** 原始用户名 */
     origin_user_nickname: string;
+    /** 卡片 ID */
     card_id: string;
+    /** 卡片状态 */
     card_status: number;
+    /** 市场价 */
     market_price: string;
+    /** 价格 */
     price: string;
+    /** 按钮文本 */
     button_text: string;
+    /** 落地页类型 */
     landing_url_type: number;
+    /** 卡片元数据 */
     card_meta: unknown;
+    /** 原始用户头像 URL */
     origin_user_avatar_url: string;
   };
 
   /**
-   * @description 视频信息
+   * 视频信息
    * @since Beta v0.7.2
-   * @interface Vod
-   * @property {string} id 视频 ID
-   * @property {number} duration 视频时长
-   * @property {string} cover 视频封面图 URL
-   * @property {Array<VodResolution>} resolutions 视频分辨率信息
-   * @property {number} view_num 观看数
-   * @property {number} transcoding_status 转码状态
-   * @property {number} review_status 审核状态
-   * @property {string} brief_info 视频简介
    */
   type Vod = {
+    /** 视频 ID */
     id: string;
+    /** 视频时长，单位秒 */
     duration: number;
+    /** 视频封面图 URL */
     cover: string;
+    /** 视频分辨率信息 */
     resolutions: Array<VodResolution>;
+    /** 观看数 */
     view_num: number;
+    /** 转码状态 */
     transcoding_status: number;
+    /** 审核状态 */
     review_status: number;
+    /** 视频简介 */
     brief_info: string;
   };
 
   /**
-   * @description 视频分辨率信息
+   * 视频分辨率信息
    * @since Beta v0.7.2
-   * @interface VodResolution
-   * @property {string} url 视频 URL
-   * @property {string} definition 视频清晰度
-   * @property {number} width 视频宽度
-   * @property {number} height 视频高度
-   * @property {number} bitrate 视频码率
-   * @property {string} size 视频大小
-   * @property {string} format 视频格式
-   * @property {string} label 视频标签
    */
   type VodResolution = {
+    /** 视频 URL */
     url: string;
+    /** 视频清晰度 */
     definition: string;
+    /** 视频宽度 */
     width: number;
+    /** 视频高度 */
     height: number;
+    /** 视频码率 */
     bitrate: number;
+    /** 视频大小 */
     size: string;
+    /** 视频格式 */
     format: string;
+    /** 视频标签 */
     label: string;
   };
 
   /**
-   * @description 咨讯元数据，只有活动咨讯才有
+   * 咨讯元数据，只有活动咨讯才有
    * @since Beta v0.7.1
-   * @interface NewsMeta
-   * @property {number} activity_status 活动状态 // ActivityStatus
-   * @property {string} start_at_sec 活动开始时间戳，单位秒
-   * @property {string} end_at_sec 活动结束时间戳，单位秒
    */
-  type NewsMeta = { activity_status: number; start_at_sec: string; end_at_sec: string };
+  type NewsMeta = {
+    /** 活动状态 */
+    activity_status: number;
+    /** 活动开始时间戳，单位秒 */
+    start_at_sec: string;
+    /** 活动结束时间戳，单位秒 */
+    end_at_sec: string;
+  };
 
   /**
-   * @description 推荐理由
+   * 推荐理由
    * @since Beta v0.7.2
-   * @interface RecommendReason
-   * @property {boolean} is_following 是否关注
-   * @property {unknown|null} lottery 抽奖信息，可能为 null
-   * @property {Array<RecommendTags>} tags 标签
-   * @property {boolean} is_mentor_rec_block 是否为导师推荐
    */
   type RecommendReason = {
+    /** 是否关注 */
     is_following?: boolean;
+    /** 抽奖信息，可能为 null */
     lottery?: unknown | null;
+    /** 标签 */
     tags: Array<RecommendTags>;
+    /** 是否为导师推荐 */
     is_mentor_rec_block: boolean;
   };
 
   /**
-   * @description 推荐标签
+   * 推荐标签
    * @since Beta v0.7.2
-   * @interface RecommendTags
-   * @property {string} text 标签文本
-   * @property {string} type 标签类型
-   * @property {string} deep_link 深度链接
    */
-  type RecommendTags = { text: string; type: string; deep_link: string };
+  type RecommendTags = {
+    /** 标签文本 */
+    text: string;
+    /** 标签类型 */
+    type: string;
+    /** 深度链接 */
+    deep_link: string;
+  };
 
   /**
-   * @description 投稿活动
+   * 投稿活动
    * @since Beta v0.8.4
-   * @interface ContributionAct
-   * @property {string} act_id 活动 ID
-   * @property {string} title 活动标题
-   * @property {string} game_uid 投稿游戏 UID
-   * @property {string} game_region 投稿游戏区服
-   * @property {string} game_nickname 投稿游戏昵称
    */
   type ContributionAct = {
+    /** 活动 ID */
     act_id: string;
+    /** 活动标题 */
     title: string;
+    /** 投稿人游戏 UID */
     game_uid: string;
+    /** 投稿人游戏区服 */
     game_region: string;
+    /** 投稿人游戏昵称 */
     game_nickname: string;
   };
 
   /**
-   * @description 外部链接信息
+   * 外部链接信息
    * @since Beta v0.8.4
-   * @interface ExternalLink
-   * @property {string} external_link 外部链接 URL
-   * @property {string} external_link_title 外部链接标题
    */
-  type ExternalLink = { external_link: string; external_link_title: string };
+  type ExternalLink = {
+    /** 外部链接 URL */
+    external_link: string;
+    /** 外部链接标题 */
+    external_link_title: string;
+  };
 
   /**
-   * @description 帖子完整额外信息
+   * 帖子完整额外信息
    * @since Beta v0.8.4
-   * @interface PostExtraFull
-   * @property {PostExtraUgcFull} ugc_master_post_extra UGCMaster 额外信息
    */
-  type PostExtraFull = { ugc_master_post_extra: PostExtraUgcFull };
+  type PostExtraFull = {
+    /** UGC 主帖子完整额外信息 */
+    ugc_master_post_extra: PostExtraUgcFull;
+  };
 
   /**
-   * @description UGC所有者完整额外信息
+   * UGC所有者完整额外信息
    * @since Beta v0.8.4
-   * @interface PostExtraUgcFull
-   * @property {TGApp.BBS.UGC.Character} game_character 游戏角色信息
-   * @property {boolean} user_is_use_game_info 用户是否使用游戏信息
-   * @property {string} ugc_master_post_type UGC 主帖子类型
-   * @property {Array<TGApp.BBS.UGC.Level>} level_list 等级列表
    */
   type PostExtraUgcFull = {
+    /** 游戏角色信息 */
     game_character: TGApp.BBS.UGC.Character;
+    /** 用户是否使用游戏信息 */
     user_is_use_game_info: boolean;
+    /** UGC 主帖子类型 */
     ugc_master_post_type: string;
+    /** 关卡列表 */
     level_list: Array<TGApp.BBS.UGC.Level>;
   };
 }
