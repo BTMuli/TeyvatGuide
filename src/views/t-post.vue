@@ -349,6 +349,8 @@ function parsePostUgc(post: TGApp.BBS.Post.Post): Array<TGApp.BBS.SctPost.Base> 
   for (const text of data.text) {
     result.push(text);
   }
+  // 手动添加换行以对齐解析逻辑
+  if (data.text.length > 0) result.push({ insert: "\n" });
   for (const image of data.images) {
     result.push({ insert: { image: image.image } });
   }
