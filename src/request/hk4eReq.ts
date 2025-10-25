@@ -143,10 +143,6 @@ async function getBeyondGachaLog(
   gachaType: string,
   endId: string = "0",
 ): Promise<Array<TGApp.Game.Gacha.GachaBItem> | TGApp.BBS.Response.Base> {
-  const gachaIdMap: Record<string, string> = {
-    "1000": "f3f5090a8ec0b28f15805c9969aa6c4ec357",
-    "2000": "57016dec6b768231ba1342c01935417a799b",
-  };
   const params = {
     lang: "zh-cn",
     auth_appid: "webview_gacha",
@@ -154,7 +150,6 @@ async function getBeyondGachaLog(
     authkey_ver: "1",
     sign_type: "2",
     gacha_type: gachaType,
-    gacha_id: gachaIdMap[gachaType],
     size: "20",
     end_id: endId,
   };
