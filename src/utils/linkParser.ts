@@ -1,7 +1,6 @@
 /**
- * @file src/utils/linkParser.ts
- * @description 处理链接
- * @since Beta v0.7.3
+ * 处理链接
+ * @since Beta v0.8.4
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -12,9 +11,8 @@ import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
 
 /**
- * @function parsePost
+ * 处理帖子链接
  * @since Beta v0.6.9
- * @description 处理帖子
  * @param {string} link
  * @returns {Promise<false|string>} - 处理情况，或者转换后的链接
  */
@@ -54,9 +52,8 @@ export async function parsePost(link: string): Promise<false | string> {
 }
 
 /**
- * @function parseLink
+ * 处理链接
  * @since Beta v0.7.2
- * @description 处理链接
  * @param {string} link - 链接
  * @param {boolean} useInner - 是否采用内置 JSBridge 打开
  * @returns {Promise<boolean|string>} - 处理情况，或者转换后的链接
@@ -144,6 +141,7 @@ export async function parseLink(
   const prefix = [
     "m.miyoushe.com",
     "act.mihoyo.com",
+    "act.miyoushe.com",
     "ys.mihoyo.com",
     "mhyurl.cn",
     "webstatic.mihoyo.com",
