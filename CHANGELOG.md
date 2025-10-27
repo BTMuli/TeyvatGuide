@@ -2,12 +2,26 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2025-10-22
+Update: 2025-10-27
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-10-22 13:59:03`
+> 更新于 `2025-10-27 19:48:23`
+
+## [0.8.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.4) (2025-10-27)
+
+- 👽️ 公告添加千星奇域分类
+- 🚸 兑换码浮窗显示游戏名称
+- ✨ 嵌入官方公告页面（已登录）
+- ✨ 嵌入官方祈愿详情（已登录）
+- ✨ 完善投稿活动类型声明，渲染投稿活动&交互
+- 🐛 修复部分帖子解析异常
+- ✨ 重构帖子解析逻辑，增加新类型解析
+- 💄 调整名片样式
+- ✨ 添加getRegionRoleInfo事件处理
+- 🐛 公告解析剔除多余换行
+- ✨ 千星奇域祈愿页面草创
 
 ## [0.8.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.3) (2025-10-22)
 
