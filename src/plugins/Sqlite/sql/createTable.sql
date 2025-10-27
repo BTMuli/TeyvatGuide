@@ -1,6 +1,5 @@
--- @file plugins/Sqlite/sql/createTable.sql
 -- @brief sqlite数据库创建表语句
--- @since Beta v0.8.0
+-- @since Beta v0.8.4
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
@@ -146,6 +145,24 @@ create table if not exists GachaRecords
     rank      text,
     count     text,
     updated   text
+);
+
+-- @brief 创建千星奇域祈愿数据表
+create table if not exists GachaBRecords
+(
+    id          text primary key not null,
+    uid         text,
+    region      text,
+    scheduleId  text,
+    gachaType   text,
+    opGachaType text,
+    time        text,
+    itemId      text,
+    name        text,
+    type        text,
+    rank        text,
+    isUp        text,
+    updated     text
 );
 
 -- @brief 创建用户帖子收藏

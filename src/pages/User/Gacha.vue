@@ -1,3 +1,4 @@
+<!-- 祈愿记录页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -12,6 +13,7 @@
           variant="outlined"
           label="游戏UID"
         />
+        <img src="/icon/nation/千星奇域.webp" alt="byd" @click="toBeyond()" title="千星奇域" />
       </div>
     </template>
     <template #extension>
@@ -56,7 +58,7 @@
         <gro-history />
       </v-window-item>
       <v-window-item value="iframe" class="gacha-window-item">
-        <gro-iframe />
+        <gro-iframe mode="normal" />
       </v-window-item>
     </v-window>
   </div>
@@ -83,8 +85,11 @@ import TGLogger from "@utils/TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
+import { useRouter } from "vue-router";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+
+const router = useRouter();
 
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
@@ -129,6 +134,10 @@ watch(
     );
   },
 );
+
+async function toBeyond(): Promise<void> {
+  await router.push({ name: "千星奇域祈愿记录" });
+}
 
 // 刷新按钮点击事件
 async function confirmRefresh(force: boolean): Promise<void> {

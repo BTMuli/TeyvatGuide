@@ -150,7 +150,7 @@ async function getBeyondGachaLog(
     authkey_ver: "1",
     sign_type: "2",
     gacha_type: gachaType,
-    size: "20",
+    size: "5",
     end_id: endId,
   };
   const resp = await TGHttp<TGApp.Game.Gacha.GachaBLogResp | TGApp.BBS.Response.Base>(

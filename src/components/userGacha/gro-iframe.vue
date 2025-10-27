@@ -35,22 +35,28 @@ const GachaIdMap: Record<string, string> = {
   "20021": "57016dec6b768231ba1342c01935417a799b", // 千星奇域角色活动-女
 };
 
+const tabNormal: ReadonlyArray<GroTab> = [
+  { label: "常驻祈愿", value: "200" },
+  { label: "角色活动祈愿", value: "301" },
+  { label: "武器活动祈愿", value: "302" },
+  { label: "角色活动祈愿-2", value: "400" },
+];
+const tabBeyond: ReadonlyArray<GroTab> = [
+  { label: "常驻颂愿", value: "1000", beyond: true },
+  { label: "活动颂愿-男", value: "20011", beyond: true },
+  { label: "活动颂愿-女", value: "20021", beyond: true },
+];
+
 type GroTabKey = keyof typeof GachaIdMap;
 type GroTab = { label: string; value: string; beyond?: boolean };
+type GroIframeProps = { mode: "normal" | "beyond" };
+const props = defineProps<GroIframeProps>();
 
 const { cookie, account } = storeToRefs(useUserStore());
 const authkey = ref<string>("");
 const link = ref<string>("");
 const poolTab = ref<GroTabKey>("200");
-const tabList = shallowRef<ReadonlyArray<GroTab>>([
-  { label: "常驻祈愿", value: "200" },
-  { label: "角色活动祈愿", value: "301" },
-  { label: "武器活动祈愿", value: "302" },
-  { label: "角色活动祈愿-2", value: "400" },
-  { label: "常驻颂愿", value: "1000", beyond: true },
-  { label: "活动颂愿-男", value: "20011", beyond: true },
-  { label: "活动颂愿-女", value: "20021", beyond: true },
-]);
+const tabList = shallowRef<ReadonlyArray<GroTab>>(props.mode === "beyond" ? tabBeyond : tabNormal);
 
 onMounted(async () => {
   link.value = await getUrl();
@@ -107,7 +113,7 @@ async function refreshAuthkey(): Promise<void> {
   display: flex;
   width: 100%;
   height: 100%;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 

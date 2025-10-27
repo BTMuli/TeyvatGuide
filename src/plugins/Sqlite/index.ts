@@ -1,7 +1,6 @@
 /**
- * @file plugins/Sqlite/index.ts
- * @description Sqlite 数据库操作类
- * @since Beta v0.8.0
+ * Sqlite 数据库操作类
+ * @since Beta v0.8.4
  */
 
 import { app } from "@tauri-apps/api";
@@ -17,10 +16,11 @@ class Sqlite {
     "Achievements",
     "AppData",
     "GachaRecords",
+    "GachaBRecords",
     "GameAccount",
-    "SpiralAbyss",
-    "RoleCombat",
     "HardChallenge",
+    "RoleCombat",
+    "SpiralAbyss",
     "UFCollection",
     "UFMap",
     "UFPost",
@@ -39,7 +39,7 @@ class Sqlite {
   private constructor() {}
 
   /**
-   * @description 获取数据库实例
+   * 获取数据库实例
    * @since Beta v0.3.3
    * @returns {Promise<Database>}
    */
@@ -49,7 +49,7 @@ class Sqlite {
   }
 
   /**
-   * @description 检测是否需要创建数据库
+   * 检测是否需要创建数据库
    * @since Beta v0.6.1
    * @returns {Promise<boolean>}
    */
@@ -70,7 +70,7 @@ class Sqlite {
   }
 
   /**
-   * @description 初始化数据库
+   * 初始化数据库
    * @since Beta v0.4.5
    * @returns {Promise<void>}
    */
@@ -81,7 +81,7 @@ class Sqlite {
   }
 
   /**
-   * @description 获取数据库信息
+   * 获取数据库信息
    * @since Beta v0.3.3
    * @returns {Promise<TGApp.Sqlite.AppData.Item[]>}
    */
@@ -92,7 +92,7 @@ class Sqlite {
   }
 
   /**
-   * @description 对比数据判断是否需要更新
+   * 对比数据判断是否需要更新
    * @since Beta v0.3.3
    * @returns {Promise<boolean>}
    */
@@ -105,7 +105,7 @@ class Sqlite {
   }
 
   /**
-   * @description 保存 appData
+   * 保存 appData
    * @since Beta v0.3.3
    * @param {string} key
    * @param {string} value
@@ -118,7 +118,7 @@ class Sqlite {
   }
 
   /**
-   * @description 已有数据表跟触发器不变的情况下，更新数据库数据
+   * 已有数据表跟触发器不变的情况下，更新数据库数据
    * @since Beta v0.3.3
    * @returns {Promise<void>}
    */
@@ -131,7 +131,7 @@ class Sqlite {
   }
 
   /**
-   * @description 更新 SpiralAbyss 表
+   * 更新 SpiralAbyss 表
    * @since Beta v0.6.1
    * @returns {Promise<void>}
    */
@@ -147,7 +147,7 @@ class Sqlite {
   }
 
   /**
-   * @description 重置数据库
+   * 重置数据库
    * @since Beta v0.4.0
    * @returns {Promise<void>}
    */
