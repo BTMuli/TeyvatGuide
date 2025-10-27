@@ -1,7 +1,6 @@
 /**
- * @file src/utils/annoParser.ts
- * @description 解析游戏内公告数据
- * @since Beta v0.7.6
+ * 解析游戏内公告数据
+ * @since Beta v0.8.4
  */
 
 import TpText from "@comp/viewPost/tp-text.vue";
@@ -38,18 +37,22 @@ function handleAnnoContent(data: string): string {
 }
 
 /**
- * @description 解析公告内容，转换为结构化数据
- * @since Beta v0.5.3
+ * 解析公告内容，转换为结构化数据
+ * @since Beta v0.8.4
  * @param {TGApp.BBS.Announcement.AnnoDetail} anno - 公告内容
- * @returns {TGApp.BBS.SctPost.Base[]} 结构化数据
+ * @returns {Array<TGApp.BBS.SctPost.Base>} 结构化数据
  */
 function parseAnnoContent(anno: TGApp.BBS.Announcement.AnnoDetail): Array<TGApp.BBS.SctPost.Base> {
   const parser = new DOMParser();
   const first = handleAnnoContent(anno.content);
   const doc = parser.parseFromString(first, "text/html");
-  const children: Array<TGApp.BBS.SctPost.Base> = [];
+  let children: Array<TGApp.BBS.SctPost.Base> = [];
   if (anno.banner !== "") children.push({ insert: { image: anno.banner } });
   doc.body.childNodes.forEach((child) => children.push(...parseAnnoNode(child)));
+  // 剔除 attributes 为空且内容为 "\n\n" 的节点
+  children = children.filter((child) => {
+    return !(child.attributes === undefined && child.insert === "\n\n");
+  });
   return children;
 }
 

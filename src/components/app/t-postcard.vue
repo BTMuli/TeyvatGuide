@@ -114,7 +114,7 @@
     >
       <span>{{ props.modelValue.post.post_id }}</span>
       <template v-if="isDevEnv">
-        <span>[{{ props.modelValue.post.view_type }}]</span>
+        <span data-html2canvas-ignore>[{{ props.modelValue.post.view_type }}]</span>
       </template>
     </div>
   </div>
