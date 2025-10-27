@@ -1,36 +1,59 @@
 /**
- * @file types/App/Gacha.d.ts
- * @description 本应用的祈愿相关类型定义
- * @since Beta v0.4.4
+ * 本应用的祈愿相关类型定义
+ * @since Beta v0.8.4
  */
 
-/**
- * @description 祈愿记录命名空间
- * @namespace Gacha
- * @since Beta v0.4.4
- * @memberof TGApp.App
- */
 declare namespace TGApp.App.Gacha {
   /**
-   * @description 祈愿类型枚举
+   * 祈愿类型枚举
    * @since Beta v0.4.4
-   * @enum {number}
-   * @property {number} Newbie 新手祈愿 = 100
-   * @property {number} Normal 常驻祈愿 = 200
-   * @property {number} CharacterUp 角色活动祈愿 = 301
-   * @property {number} CharacterUp2 角色活动祈愿2 = 400
-   * @property {number} WeaponUp 武器活动祈愿 = 302
-   * @property {number} MixUp 集录祈愿 = 500
-   * @return WishType
    */
-  const enum WishType {
+  const WishType = <const>{
+    /** 新手祈愿 */
     Newbie = 100,
+    /** 常驻祈愿 */
     Normal = 200,
+    /** 角色活动祈愿 */
     CharacterUp = 301,
+    /** 角色活动祈愿2 */
     CharacterUp2 = 400,
+    /** 武器活动祈愿 */
     WeaponUp = 302,
+    /** 集录祈愿 */
     MixUp = 500,
-  }
+  };
+
+  /**
+   * 祈愿类型枚举
+   * @since Beta v0.8.4
+   */
+  type WishTypeEnum = (typeof WishType)[keyof typeof WishType];
+
+  /**
+   * 千星奇域祈愿类型
+   * @since Beta v0.8.4
+   */
+  const WishTypeB = <const>{
+    /** 常驻祈愿 */
+    Normal: "1000",
+    /** 活动祈愿 */
+    Event: "2000",
+    /** 男性活动祈愿1 */
+    EventBoy1: "20011",
+    /** 男性活动祈愿2 */
+    EventBoy2: "20012",
+    /** 女性活动祈愿1 */
+    EventGirl1: "20021",
+    /** 女性活动祈愿2 */
+    EventGirl2: "20022",
+  };
+
+  /**
+   * 千星奇域祈愿类型
+   * @since Beta v0.8.4
+   */
+  type WishTypeBEnum = (typeof WishTypeB)[keyof typeof WishTypeB];
+
   /**
    * @description 祈愿记录项
    * @interface PoolItem
@@ -47,16 +70,49 @@ declare namespace TGApp.App.Gacha {
    * @property {number[]} up4List up四星
    * @return PoolItem
    */
-  interface PoolItem {
+  type PoolItem = {
+    /** 卡池名称 */
     name: string;
+    /** 卡池版本 */
     version: string;
+    /** 卡池排序 */
     order: number;
+    /** 卡池横幅 */
     banner: string;
+    /** 卡池开始时间 yyyy-MM-ddTHH:mm:ss+08:00 */
     from: string;
+    /** 卡池结束时间 yyyy-MM-ddTHH:mm:ss+08:00 */
     to: string;
-    type: WishType;
+    /** 卡池类型 */
+    type: number;
+    /** 卡池帖子ID */
     postId: string;
-    up5List: number[];
-    up4List: number[];
-  }
+    /** up五星 */
+    up5List: Array<number>;
+    /** up四星 */
+    up4List: Array<number>;
+  };
+
+  /**
+   * 千星奇域套装类型
+   * @since Beta v0.8.4
+   */
+  type GachaBSetType = "装扮部件" | "装扮套装";
+
+  /**
+   * 千星奇域祈愿元数据
+   * @since Beta v0.8.4
+   */
+  type GachaBMeta = {
+    /** ID */
+    id: string;
+    /** 名称 */
+    name: string;
+    /** 图标 */
+    icon: string;
+    /** 稀有度 */
+    rank: number;
+    /** 类型 */
+    type: GachaBSetType;
+  };
 }

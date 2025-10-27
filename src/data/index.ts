@@ -1,7 +1,6 @@
 /**
- * @file src/data/index.ts
- * @description 数据文件入口
- * @since Beta v0.8.0
+ * 数据文件入口
+ * @since Beta v0.8.4
  */
 
 import type { Schema } from "ajv";
@@ -11,6 +10,7 @@ import achievementSeries from "./app/achievementSeries.json" with { type: "json"
 import calendar from "./app/calendar.json" with { type: "json" };
 import character from "./app/character.json" with { type: "json" };
 import gacha from "./app/gacha.json" with { type: "json" };
+import gachaB from "./app/gachaB.json" with { type: "json" };
 import nameCards from "./app/namecard.json" with { type: "json" };
 import weapon from "./app/weapon.json" with { type: "json" };
 import arcBirCalendar from "./archive/birth_calendar.json" with { type: "json" };
@@ -28,6 +28,7 @@ export const AppAchievementSeriesData: Array<TGApp.App.Achievement.Series> = ach
 export const AppCalendarData: Array<TGApp.App.Calendar.Item> = calendar;
 export const AppCharacterData: Array<TGApp.App.Character.WikiBriefInfo> = character;
 export const AppGachaData: Array<TGApp.App.Gacha.PoolItem> = gacha;
+export const AppGachaBData: Array<TGApp.App.Gacha.GachaBMeta> = gachaB;
 export const AppNameCardsData: Array<TGApp.App.NameCard.Item> = nameCards;
 export const AppWeaponData: Array<TGApp.App.Weapon.WikiBriefInfo> = weapon;
 // Schema

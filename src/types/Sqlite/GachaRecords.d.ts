@@ -64,8 +64,19 @@ declare namespace TGApp.Sqlite.GachaRecords {
      * @remarks
      * 1000-常驻池
      * 2000-活动池
+     * 20011-男活动池
+     * 20012-男活动池2
+     * 20021-女活动池
+     * 20022-女活动池2
      */
     gachaType: string;
+    /**
+     * 抽卡类型（接口用）
+     * @remarks
+     * 100-常驻池
+     * 200-活动池
+     */
+    opGachaType: string;
     /** 抽卡时间 */
     time: string;
     /** 抽卡物品 ID */

@@ -1,54 +1,50 @@
 /**
- * @file types/Game/Base.d.ts
- * @description 游戏相关基础类型定义文件
+ * 游戏相关基础类型定义文件
  * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Game.Base {
   /**
-   * @description 服务器类型
+   * 服务器类型
    * @since Beta v0.8.0
-   * @const ServerType
-   * @property {string} "cn_gf01" - 国内-国服
-   * @property {string} "cn_qd01" - 国内-渠道服
-   * @property {string} "os_usa" - 海外-美国
-   * @property {string} "os_euro" - 海外-欧洲
-   * @property {string} "os_asia" - 海外-亚洲
-   * @property {string} "os_cht" - 海外-繁体中文
    */
   const ServerType = <const>{
+    /** 国服-官方服 */
     CN_GF01: "cn_gf01",
+    /** 国服-渠道服 */
     CN_QD01: "cn_qd01",
+    /** 国际服-美服 */
     OS_USA: "os_usa",
+    /** 国际服-欧服 */
     OS_EURO: "os_euro",
+    /** 国际服-亚服 */
     OS_ASIA: "os_asia",
+    /** 国际服-港澳台服 */
     OS_CHT: "os_cht",
   };
 
   /**
-   * @description 公告服务器类型枚举
+   * 公告服务器类型枚举
    * @since Beta v0.8.0
-   * @enum ServerTypeEnum
    */
   type ServerTypeEnum = (typeof ServerType)[keyof typeof ServerType];
 
   /**
-   * @description 时间类型
+   * 时间类型
    * @since Beta v0.8.0
-   * @interface DateTime
-   * @property {number} year - 年份
-   * @property {number} month - 月份（1-12）
-   * @property {number} day - 日（1-31）
-   * @property {number} hour - 小时（0-23）
-   * @property {number} minute - 分钟（0-59）
-   * @property {number} second - 秒（0-59）
    */
   type DateTime = {
+    /** 年份 */
     year: number;
+    /** 月份（1-12） */
     month: number;
+    /** 日（1-31） */
     day: number;
+    /** 小时（0-23） */
     hour: number;
+    /** 分钟（0-59） */
     minute: number;
+    /** 秒（0-59） */
     second: number;
   };
 }
