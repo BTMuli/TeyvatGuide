@@ -23,7 +23,8 @@
       "Id": 1223,
       "Name": "诳言掩虚实之迹",
       "Description": "元素战技<color=#FFD780FF>{LINK#S11222}弈术·千夜一舞{/LINK}</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Nefer_01"
+      "Icon": "UI_Talent_U_Nefer_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
     },
     {
       "Id": 1224,
@@ -35,7 +36,8 @@
       "Id": 1225,
       "Name": "见机在忽微之间",
       "Description": "元素爆发<color=#FFD780FF>{LINK#S11225}圣约·真眸幻戏{/LINK}</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Nefer_02"
+      "Icon": "UI_Talent_U_Nefer_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
     },
     {
       "Id": 1226,

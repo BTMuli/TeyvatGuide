@@ -657,7 +657,7 @@
   },
   {
     "id": 10000122,
-    "contentId": 0,
+    "contentId": 506676,
     "dropDays": [2, 5, 7],
     "name": "奈芙尔",
     "itemType": "character",
@@ -2369,7 +2369,7 @@
   },
   {
     "id": 14521,
-    "contentId": 0,
+    "contentId": 506913,
     "dropDays": [2, 5, 7],
     "name": "真语秘匣",
     "itemType": "weapon",
@@ -4337,7 +4337,7 @@
   },
   {
     "id": 14434,
-    "contentId": 0,
+    "contentId": 506911,
     "dropDays": [1, 4, 7],
     "name": "霜辰",
     "itemType": "weapon",
@@ -4705,7 +4705,7 @@
   },
   {
     "id": 13434,
-    "contentId": 0,
+    "contentId": 506912,
     "dropDays": [2, 5, 7],
     "name": "圣祭者的辉杖",
     "itemType": "weapon",
