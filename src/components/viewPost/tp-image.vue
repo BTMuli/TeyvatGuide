@@ -55,10 +55,7 @@ const showOverlay = ref<boolean>(false);
 const localUrl = ref<string>();
 const bgColor = ref<string>("transparent");
 
-const oriUrl = computed<string>(() => {
-  if (typeof props.data.insert.image === "string") return props.data.insert.image;
-  return props.data.insert.image.url;
-});
+const oriUrl = ref<string>("");
 const imgExt = computed<string>(() => getImageExt());
 const showOri = ref<boolean>(imgExt.value === "gif" || imageQualityPercent.value === 100);
 
@@ -71,6 +68,7 @@ const imgWidth = computed<string>(() => {
 console.log("tp-image", props.data.insert.image, props.data.attributes);
 
 onMounted(async () => {
+  oriUrl.value = miniImgUrl();
   const link = appStore.getImageUrl(oriUrl.value, imgExt.value);
   localUrl.value = await saveImgLocal(link);
 });
@@ -92,6 +90,17 @@ watch(
 onUnmounted(() => {
   if (localUrl.value) URL.revokeObjectURL(localUrl.value);
 });
+
+function miniImgUrl(): string {
+  let url: string;
+  if (typeof props.data.insert.image === "string") {
+    url = props.data.insert.image;
+  } else {
+    url = props.data.insert.image.url;
+  }
+  const link = new URL(url);
+  return `${link.origin}${link.pathname}`;
+}
 
 function getImageTitle(): string {
   const res: string[] = [];
