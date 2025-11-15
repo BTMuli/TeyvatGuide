@@ -73,10 +73,7 @@ const format = defineModel<string>("format", { default: "png" });
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
 const buffer = shallowRef<Uint8Array | null>(null);
-const oriLink = computed<string>(() => {
-  const image = props.image.insert.image;
-  return typeof image === "string" ? image : image.url;
-});
+const oriLink = computed<string>(() => miniImgUrl());
 const showCopy = computed<boolean>(() => {
   // 只能显示 png/jpg/jpeg/webp 格式的复制按钮
   return ["png", "jpg", "jpeg", "webp"].includes(format.value.toLowerCase());
@@ -123,6 +120,17 @@ async function onDownload(): Promise<void> {
   if (fileName === undefined) fileName = Date.now().toString();
   await saveCanvasImg(buffer.value, fileName, format.value);
   await showLoading.end();
+}
+
+function miniImgUrl(): string {
+  let url: string;
+  if (typeof props.image.insert.image === "string") {
+    url = props.image.insert.image;
+  } else {
+    url = props.image.insert.image.url;
+  }
+  const link = new URL(url);
+  return `${link.origin}${link.pathname}`;
 }
 </script>
 <style lang="css" scoped>

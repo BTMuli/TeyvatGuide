@@ -129,11 +129,11 @@ function getImageTitle(): string {
 
 function getImageExt(): string {
   if (props.data.attributes && props.data.attributes.ext) return props.data.attributes.ext;
-  if (typeof props.data.insert.image === "string") {
-    const arr = props.data.insert.image.split(".");
-    return arr[arr.length - 1];
+  if (typeof props.data.insert.image !== "string") {
+    return props.data.insert.image.format;
   }
-  return props.data.insert.image.format;
+  const arr = oriUrl.value.split(".");
+  return arr[arr.length - 1];
 }
 </script>
 <style lang="scss" scoped>
