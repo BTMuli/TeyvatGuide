@@ -1,7 +1,5 @@
 /**
- * @file utils/toolFunc.ts
- * @description 一些工具函数
- * @since Beta v0.8.2
+ * 一些工具函数
  */
 
 import { AvatarExtResTypeEnum, AvatarExtTypeEnum } from "@enum/bbs.js";
@@ -122,14 +120,14 @@ export function bytesToSize(bytes: number): string {
 }
 
 /**
- * @description 获取缓存目录
- * @since Beta v0.5.0
- * @returns {string|string[]} 缓存目录
+ * 获取缓存目录
+ * @returns {Array<string>|false} 缓存目录
  */
-export async function getCacheDir(): Promise<string[] | false> {
+export async function getCacheDir(): Promise<Array<string> | false> {
   const cacheDir = await path.appCacheDir();
   const osType = type().toLowerCase();
   if (osType === "windows") {
+    // TODO: 会报错显示占用
     const cache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Cache`;
     const codeCache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Code Cache`;
     return [cache, codeCache];
