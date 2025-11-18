@@ -1,7 +1,6 @@
 /**
- * @file router routes.ts
- * @description 路由配置
- * @since Beta v0.4.4
+ * 路由配置
+ * @since Beta v0.8.6
  */
 
 import { RouteRecordRaw } from "vue-router";
@@ -18,6 +17,7 @@ const routes = (<const>[
   ...archiveRoutes,
   ...wikiRoutes,
   ...userRoutes,
+  { path: "/:pathMatch(.*)*", redirect: "/" },
 ]) satisfies Array<RouteRecordRaw>;
 
 export default routes;
