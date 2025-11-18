@@ -1,9 +1,9 @@
 /**
- * @file plugins/Sqlite/modules/userGacha.ts
- * @description 用户祈愿模块
- * @since Beta v0.7.5
+ * 用户祈愿模块
+ * @since Beta v0.8.6
  */
 
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
@@ -198,33 +198,53 @@ async function cleanGachaRecords(
 }
 
 /**
- * @description 合并祈愿数据
- * @since Beta v0.4.7
+ * 合并祈愿数据
+ * @since Beta v0.8.6
  * @param {string} uid - UID
  * @param {TGApp.Plugins.UIGF.GachaItem[]} data - UIGF数据
  * @return {Promise<void>}
  */
 async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Promise<void> {
   const db = await TGSqlite.getDB();
+  let cnt = 0;
+  const len = data.length;
+  let progress = 0;
   for (const gacha of data) {
     const trans = transGacha(gacha);
+    if (cnt % 20 === 0) {
+      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      await showLoading.update(
+        `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
+      );
+      cnt++;
+    }
     const sql = getInsertSql(uid, trans);
     await db.execute(sql);
   }
 }
 
 /**
- * @description 合并祈愿数据（v4.0）
- * @since Beta v0.5.0
+ * 合并祈愿数据（v4.0）
+ * @since Beta v0.8.6
  * @param {TGApp.Plugins.UIGF.GachaHk4e} data - UIGF数据
  * @return {Promise<void>}
  */
 async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
   const db = await TGSqlite.getDB();
+  let cnt: number = 0;
+  const len = data.list.length;
+  let progress: number = 0;
   for (const gacha of data.list) {
     const trans = transGacha(gacha, data.timezone);
+    if (cnt % 20 === 0) {
+      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      await showLoading.update(
+        `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
+      );
+    }
     const sql = getInsertSql(data.uid.toString(), trans);
     await db.execute(sql);
+    cnt++;
   }
 }
 

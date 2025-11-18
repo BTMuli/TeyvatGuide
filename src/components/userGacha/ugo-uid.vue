@@ -234,6 +234,7 @@ async function handleExport(): Promise<void> {
   position: relative;
   display: flex;
   width: 100%;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   column-gap: 10px;
@@ -249,6 +250,7 @@ async function handleExport(): Promise<void> {
   color: var(--tgc-od-white);
   cursor: pointer;
   font-size: 12px;
+  word-break: break-all;
 }
 
 .ugo-header {
