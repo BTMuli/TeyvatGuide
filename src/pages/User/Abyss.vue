@@ -43,7 +43,7 @@
           分享
         </v-btn>
         <v-btn class="ua-btn" @click="refreshAbyss()" prepend-icon="mdi-refresh">刷新</v-btn>
-        <v-btn class="ua-btn" @click="uploadAbyss()" prepend-icon="mdi-cloud-upload">上传</v-btn>
+        <v-btn class="ua-btn" @click="tryReadAbyss()" prepend-icon="mdi-download">导入</v-btn>
         <v-btn class="ua-btn" @click="deleteAbyss()" prepend-icon="mdi-delete">删除</v-btn>
       </div>
     </template>
@@ -107,16 +107,16 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOverview from "@comp/userAbyss/tua-overview.vue";
-import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
-import TSUserAvatar from "@Sqlm/userAvatar.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readTextFile } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -126,7 +126,6 @@ const version = ref<string>();
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localAbyss = shallowRef<TGApp.Sqlite.Abyss.TableData[]>([]);
-const abyssIdList = computed<Array<number>>(() => localAbyss.value.map((abyss) => abyss.id));
 
 onMounted(async () => {
   await showLoading.start("正在加载深渊数据");
@@ -148,9 +147,11 @@ watch(() => uidCur.value, loadAbyss);
 async function toCombat(): Promise<void> {
   await router.push({ name: "真境剧诗" });
 }
+
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
 }
+
 async function toWiki(): Promise<void> {
   await router.push({ name: "深渊数据库" });
 }
@@ -262,62 +263,6 @@ async function shareAbyss(): Promise<void> {
   await TGLogger.Info(`[UserAbyss][shareAbyss][${userTab.value}] 生成深渊数据分享图片成功`);
 }
 
-async function uploadAbyss(): Promise<void> {
-  await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
-  const abyssData = localAbyss.value.find((item) => item.id === Math.max(...abyssIdList.value));
-  if (!abyssData) {
-    showSnackbar.warn("未找到深渊数据");
-    await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
-    return;
-  }
-  const maxFloor = Number(abyssData.maxFloor.split("-")[0]);
-  if (isNaN(maxFloor) || maxFloor <= 9) {
-    showSnackbar.warn("尚未完成深渊，请完成深渊后重试！");
-    await TGLogger.Warn(`[UserAbyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
-    return;
-  }
-  const startTime = new Date(abyssData.startTime).getTime();
-  const endTime = new Date(abyssData.endTime).getTime();
-  const nowTime = new Date().getTime();
-  if (nowTime < startTime || nowTime > endTime) {
-    showSnackbar.warn("非最新深渊数据，请刷新深渊数据后重试！");
-    await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
-    return;
-  }
-  try {
-    await showLoading.start(`正在上传${account.value.gameUid}的深渊数据`, `期数：${abyssData.id}`);
-    const transAbyss = Hutao.Abyss.utils.transData(abyssData);
-    if (hutaoEmail.value) transAbyss.ReservedUserName = hutaoEmail.value;
-    await showLoading.update("正在获取角色数据");
-    const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
-    if (!roles) {
-      await showLoading.end();
-      showSnackbar.warn("未找到角色数据");
-      return;
-    }
-    await showLoading.update("正在转换角色数据");
-    transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
-    await showLoading.update("正在上传深渊数据");
-    const res = await Hutao.Abyss.upload(transAbyss);
-    if (res.retcode !== 0) {
-      showSnackbar.error(`[${res.retcode}]${res.message}`);
-      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
-      return;
-    }
-    showSnackbar.success(res.message ?? "上传深渊数据成功");
-    await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
-    await TGLogger.Info(`[${res.retcode}] ${res.message}`);
-  } catch (e) {
-    if (e instanceof Error) {
-      showSnackbar.error(e.message);
-      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${e.message}`);
-    }
-  }
-  await showLoading.end();
-}
-
 async function deleteAbyss(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") {
     showSnackbar.warn("未选择游戏UID");
@@ -336,6 +281,42 @@ async function deleteAbyss(): Promise<void> {
   if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = undefined;
   await loadAbyss();
+}
+
+/**
+ * 尝试读取胡桃工具箱导出的深渊数据
+ * @since Beta v0.8.6
+ * @return {Promise<void>}
+ */
+async function tryReadAbyss(): Promise<void> {
+  const file = await open({
+    multiple: false,
+    title: "选择胡桃工具箱导出的深渊数据文件",
+    filters: [{ name: "JSON 文件", extensions: ["json"] }],
+    directory: false,
+  });
+  if (file === null) {
+    showSnackbar.cancel("已取消文件选择");
+    return;
+  }
+  try {
+    await showLoading.start("正在导入深渊数据文件", file);
+    const fileData = JSON.parse(await readTextFile(file));
+    if (!Array.isArray(fileData)) {
+      await showLoading.end();
+      showSnackbar.warn("文件数据格式错误");
+      return;
+    }
+    // TODO:数据结构
+    for (const item of fileData) {
+      await showLoading.update(`Uid: ${item["Uid"]},ScheduleId: ${item["ScheduleId"]}`);
+      await TSUserAbyss.saveAbyss(item["Uid"], item["SpiralAbyss"]);
+    }
+    await showLoading.end();
+  } catch (e) {
+    console.error(e);
+    await showLoading.end();
+  }
 }
 </script>
 <style lang="css" scoped>
@@ -470,7 +451,7 @@ async function deleteAbyss(): Promise<void> {
 .uaw-o-box {
   display: grid;
   width: 100%;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 

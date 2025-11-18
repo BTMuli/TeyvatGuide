@@ -1,7 +1,6 @@
 /**
- * @file plugins/Sqlite/modules/userAbyss.ts
- * @description Sqlite-用户深渊模块
- * @since Beta v0.6.8
+ * Sqlite-用户深渊模块
+ * @since Beta v0.8.6
  */
 
 import { path } from "@tauri-apps/api";
@@ -50,8 +49,8 @@ function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableData): string {
 }
 
 /**
- * @description 获取深渊数据的插入更新Sql
- * @since Beta v0.6.1
+ * 获取深渊数据的插入更新Sql
+ * @since Beta v0.8.6
  * @param {string} uid - 用户UID
  * @param {TGApp.Game.Abyss.FullData} data -深渊数据
  * @returns {string}
@@ -67,7 +66,7 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
   const normalSkillRank = transCharacterData(data.normal_skill_rank);
   const energySkillRank = transCharacterData(data.energy_skill_rank);
   const floors = transFloorData(data.floors);
-  const skippedFloor = data.skipped_floor;
+  const skippedFloor = data.skipped_floor ?? "";
   const timeNow = timestampToDate(new Date().getTime());
   return `
       INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes, maxFloor,
