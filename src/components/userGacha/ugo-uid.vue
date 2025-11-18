@@ -62,9 +62,11 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 type UgoUidProps = { mode: "import" | "export" };
 type UgoUidItem = { uid: string; length: number; time: string };
 
+const fpEmptyText = "点击选择文件路径";
+
 const props = defineProps<UgoUidProps>();
 const visible = defineModel<boolean>();
-const fp = ref<string>("未选择");
+const fp = ref<string>(fpEmptyText);
 const dataRaw = shallowRef<TGApp.Plugins.UIGF.Schema4>();
 const data = shallowRef<Array<UgoUidItem>>([]);
 const selectedData = shallowRef<Array<UgoUidItem>>([]);
@@ -91,7 +93,7 @@ async function refreshData(): Promise<void> {
   data.value = [];
   dataRaw.value = undefined;
   if (props.mode === "import") {
-    fp.value = "未选择";
+    fp.value = fpEmptyText;
     await handleImportData();
   } else {
     fp.value = await getDefaultSavePath();
@@ -118,7 +120,7 @@ async function selectFile(): Promise<void> {
 }
 
 async function handleImportData(): Promise<void> {
-  if (fp.value === "未选择") return;
+  if (fp.value === fpEmptyText) return;
   try {
     await showLoading.start("正在导入数据...", "正在验证数据...");
     const check = await verifyUigfData(fp.value, true);
@@ -178,7 +180,7 @@ async function handleSelected(): Promise<void> {
 async function handleImport(): Promise<void> {
   if (!dataRaw.value) {
     showSnackbar.error("未获取到数据!");
-    fp.value = "未选择";
+    fp.value = fpEmptyText;
     return;
   }
   if (selectedData.value.length === 0) {
