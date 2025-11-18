@@ -21,10 +21,6 @@
           <img src="/source/UI/userChallenge.webp" alt="challenge" />
           <span>幽境危战</span>
         </v-btn>
-        <v-btn :rounded="true" class="uc-btn" @click="loadWiki()">
-          <img src="/source/UI/wikiAbyss.webp" alt="abyss" />
-          <span>统计数据</span>
-        </v-btn>
       </div>
     </template>
     <template #append>
@@ -41,13 +37,8 @@
         <v-btn class="uc-btn" @click="refreshCombat()" :rounded="true" prepend-icon="mdi-refresh">
           刷新
         </v-btn>
-        <v-btn
-          class="uc-btn"
-          @click="uploadCombat()"
-          :rounded="true"
-          prepend-icon="mdi-cloud-upload"
-        >
-          上传
+        <v-btn class="uc-btn" @click="tryReadCombat()" :rounded="true" prepend-icon="mdi-download">
+          导入
         </v-btn>
         <v-btn class="uc-btn" @click="deleteCombat()" :rounded="true" prepend-icon="mdi-delete">
           删除
@@ -93,7 +84,6 @@
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
-  <TucOverlay v-model="showData" :data="cloudCombat" />
 </template>
 <script lang="ts" setup>
 import TSubLine from "@comp/app/t-subline.vue";
@@ -101,30 +91,27 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucAvatars from "@comp/userCombat/tuc-avatars.vue";
-import TucOverlay from "@comp/userCombat/tuc-overlay.vue";
 import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
-import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readTextFile } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const { account, cookie } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
-const showData = ref<boolean>(false);
 const version = ref<string>();
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.SingleTable>>([]);
-const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
-const combatIdList = computed<Array<number>>(() => localCombat.value.map((combat) => combat.id));
 
 onMounted(async () => {
   await showLoading.start("正在加载剧诗数据");
@@ -158,16 +145,6 @@ async function loadCombat(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") return;
   localCombat.value = await TSUserCombat.getCombat(uidCur.value);
   if (localCombat.value.length > 0) userTab.value = localCombat.value[0].id;
-}
-
-async function loadWiki(): Promise<void> {
-  await showLoading.start("正在加载统计数据");
-  const res = await Hutao.Combat.data();
-  if (res === undefined) showSnackbar.error("未获取到剧诗数据");
-  else cloudCombat.value = <TGApp.Plugins.Hutao.Combat.Data>res;
-  await showLoading.end();
-  showSnackbar.success("成功获取统计数据");
-  showData.value = true;
 }
 
 async function refreshCombat(): Promise<void> {
@@ -238,49 +215,6 @@ async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
 }
 
-async function uploadCombat(): Promise<void> {
-  await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据");
-  const combatData = localCombat.value.find((item) => item.id === Math.max(...combatIdList.value));
-  if (!combatData) {
-    showSnackbar.error("未找到剧诗数据");
-    await TGLogger.Warn("[UserCombat][uploadCombat] 未找到深渊数据");
-    return;
-  }
-  if (!combatData.hasDetailData) {
-    showSnackbar.error("未获取到详情数据");
-    await TGLogger.Warn(`[UserCombat][uploadCombat] 未获取到详细数据`);
-    return;
-  }
-  const startTime = new Date(combatData.startTime).getTime();
-  const endTime = new Date(combatData.endTime).getTime();
-  const nowTime = new Date().getTime();
-  if (nowTime < startTime || nowTime > endTime) {
-    showSnackbar.warn("非最新剧诗数据，请刷新剧诗数据后重试！");
-    await TGLogger.Warn("[UserCombat][uploadCombat] 非最新剧诗数据");
-    return;
-  }
-  try {
-    await showLoading.start("正在上传剧诗数据");
-    const transCombat = Hutao.Combat.trans(combatData);
-    const res = await Hutao.Combat.upload(transCombat);
-    if (res.retcode === 0) {
-      showSnackbar.success(res.message ?? "上传剧诗数据成功");
-      await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
-    } else {
-      showSnackbar.error(`[${res.retcode}]${res.message}`);
-      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
-      await TGLogger.Error(`[UserCombat][uploadCombat] ${res.retcode} ${res.message}`);
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      showSnackbar.error(e.message);
-      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
-      await TGLogger.Error(`[UserCombat][uploadCombat] ${e.message}`);
-    }
-  }
-  await showLoading.end();
-}
-
 async function deleteCombat(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") {
     showSnackbar.error("未找到符合条件的数据!");
@@ -300,6 +234,45 @@ async function deleteCombat(): Promise<void> {
   else uidCur.value = undefined;
   await loadCombat();
   await showLoading.end();
+}
+
+/**
+ * 尝试读取胡桃工具箱导出的剧诗数据
+ * @since Beta v0.8.6
+ * @returns {Promise<void>}
+ */
+async function tryReadCombat(): Promise<void> {
+  const file = await open({
+    multiple: false,
+    title: "选择胡桃工具箱导出的剧诗数据文件",
+    filters: [{ name: "JSON 文件", extensions: ["json"] }],
+    directory: false,
+  });
+  if (file === null) {
+    showSnackbar.cancel("已取消文件选择");
+    return;
+  }
+  try {
+    await showLoading.start("正在导入剧诗数据文件", file);
+    const fileData = JSON.parse(await readTextFile(file));
+    if (!Array.isArray(fileData)) {
+      await showLoading.end();
+      showSnackbar.warn("文件数据格式错误");
+      return;
+    }
+    // TODO:数据结构
+    for (const item of fileData) {
+      await showLoading.update(`Uid: ${item["Uid"]},ScheduleId: ${item["ScheduleId"]}`);
+      await TSUserCombat.saveCombat(item["Uid"], item["RoleCombatData"]);
+    }
+    await showLoading.end();
+    showSnackbar.success(`成功导入 ${fileData.length} 条剧诗数据，即将刷新页面`);
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+    await showLoading.end();
+  }
 }
 </script>
 <style lang="scss" scoped>

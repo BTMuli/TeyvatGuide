@@ -3,7 +3,9 @@
     <div class="tucfi-label">
       <slot name="label">{{ props.label }}</slot>
     </div>
-    <div v-if="props.data === null"><span class="tucfi-data">暂无数据</span></div>
+    <div v-if="!props.data">
+      <span class="tucfi-data">暂无数据</span>
+    </div>
     <div v-else-if="!Array.isArray(props.data)" class="tucfi-data">
       <TItemBox :model-value="getBox(props.data)" />
     </div>
