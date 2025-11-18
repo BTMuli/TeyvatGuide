@@ -404,6 +404,9 @@ async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | fa
   if ("retcode" in captchaResp) {
     if (!captchaResp.data || captchaResp.data === "") {
       showSnackbar.error(`[${captchaResp.retcode}] ${captchaResp.message}`);
+      await TGLogger.Error(
+        `[tc-userBadge][tryGetCaptcha] ${captchaResp.retcode} ${captchaResp.message}`,
+      );
       return false;
     }
     const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
@@ -424,6 +427,9 @@ async function tryLoginByCaptcha(
   if ("retcode" in loginResp) {
     if (!loginResp.data || loginResp.data === "") {
       showSnackbar.error(`[${loginResp.retcode}] ${loginResp.message}`);
+      await TGLogger.Error(
+        `[tc-userBadge][tryLoginByCaptcha] ${loginResp.retcode} ${loginResp.message}`,
+      );
       return false;
     }
     const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
