@@ -1,6 +1,6 @@
 /**
  * 帖子类型定义文件
- * @since Beta v0.8.4
+ * @since Beta v0.8.6
  */
 
 declare namespace TGApp.BBS.Post {
@@ -348,11 +348,13 @@ declare namespace TGApp.BBS.Post {
 
   /**
    * 帖子额外信息
-   * @since Beta v0.8.4
+   * @since Beta v0.8.6
    */
   type PostExtra = {
     /** UGC 主帖子额外信息 */
     ugc_master_post_extra: PostExtraUgc;
+    /** AIGC 额外信息 */
+    minos_aigc_info: PostExtraAigc | null;
   };
 
   /**
@@ -364,6 +366,15 @@ declare namespace TGApp.BBS.Post {
     game_uid: string;
     /** 游戏区服 */
     game_region: string;
+  };
+
+  /**
+   * AIGC 额外信息
+   * @since Beta v0.8.6
+   */
+  type PostExtraAigc = {
+    /** 是否包含 AI 生成内容 */
+    is_aigc: boolean;
   };
 
   /**

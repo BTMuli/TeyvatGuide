@@ -108,6 +108,10 @@
         <v-icon size="16">mdi-copyright</v-icon>
         <span>{{ getRepublishAuthorization(postData.post.republish_authorization) }}</span>
       </span>
+      <span v-if="postData.post.post_extra?.minos_aigc_info?.is_aigc" class="tp-post-aigc">
+        <v-icon size="16">mdi-robot</v-icon>
+        <span>疑似含AI生成内容，请谨慎甄别</span>
+      </span>
     </div>
     <TpParser v-model:data="renderPost" />
   </div>
@@ -490,7 +494,8 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   opacity: 0.8;
 }
 
-.tp-post-copyright {
+.tp-post-copyright,
+.tp-post-aigc {
   display: flex;
   align-items: center;
   justify-content: center;
