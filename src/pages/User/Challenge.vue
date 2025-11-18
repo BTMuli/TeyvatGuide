@@ -50,6 +50,9 @@
             分享
           </v-btn>
           <v-btn class="ucp-btn" @click="refreshChallenge()" prepend-icon="mdi-refresh">刷新</v-btn>
+          <v-btn class="ucp-btn" @click="tryReadChallenge()" prepend-icon="mdi-download">
+            导入
+          </v-btn>
           <v-btn class="ucp-btn" @click="deleteChallenge()" prepend-icon="mdi-delete">删除</v-btn>
         </div>
         <div class="pop-list">
@@ -123,6 +126,8 @@ import recordReq from "@req/recordReq.js";
 import TSUserChallenge from "@Sqlm/userChallenge.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import { open } from "@tauri-apps/plugin-dialog";
+import { readTextFile } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -336,6 +341,45 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
   showSnackbar.success(
     `已刷新 ${getGameServerDesc(server.value)} 的 ${popList.value.length} 位赋光之人`,
   );
+}
+
+/**
+ * 尝试读取胡桃工具箱导出的危战数据
+ * @since Beta v0.8.6
+ * @return {Promise<void>}
+ */
+async function tryReadChallenge(): Promise<void> {
+  const file = await open({
+    multiple: false,
+    title: "选择胡桃工具箱导出的危战数据文件",
+    filters: [{ name: "JSON 文件", extensions: ["json"] }],
+    directory: false,
+  });
+  if (file === null) {
+    showSnackbar.cancel("已取消文件选择");
+    return;
+  }
+  try {
+    await showLoading.start("正在导入危战数据文件", file);
+    const fileData = JSON.parse(await readTextFile(file));
+    if (!Array.isArray(fileData)) {
+      await showLoading.end();
+      showSnackbar.warn("文件数据格式错误");
+      return;
+    }
+    // TODO:数据结构
+    for (const item of fileData) {
+      await showLoading.update(`Uid: ${item["Uid"]},ScheduleId: ${item["ScheduleId"]}`);
+      await TSUserChallenge.saveChallenge(item["Uid"], item["HardChallengeData"]);
+    }
+    await showLoading.end();
+    showSnackbar.success(`成功导入 ${fileData.length} 条危战数据，即将刷新页面`);
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+    window.location.reload();
+  } catch (e) {
+    console.error(e);
+    await showLoading.end();
+  }
 }
 </script>
 <style lang="scss" scoped>

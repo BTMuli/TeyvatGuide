@@ -1,3 +1,4 @@
+<!-- 深境螺旋 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -22,7 +23,7 @@
         </v-btn>
       </div>
     </template>
-    <template #extension>
+    <template #append>
       <div class="uat-acts">
         <v-btn
           class="ua-btn"
@@ -276,6 +277,9 @@ async function tryReadAbyss(): Promise<void> {
       await TSUserAbyss.saveAbyss(item["Uid"], item["SpiralAbyss"]);
     }
     await showLoading.end();
+    showSnackbar.success(`成功导入 ${fileData.length} 条深渊数据，即将刷新页面`);
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+    window.location.reload();
   } catch (e) {
     console.error(e);
     await showLoading.end();
@@ -333,7 +337,7 @@ async function tryReadAbyss(): Promise<void> {
 
 .ua-box {
   display: flex;
-  height: calc(100vh - 144px);
+  height: calc(100vh - 96px);
   align-items: flex-start;
   justify-content: center;
   border: 1px solid var(--common-shadow-2);
