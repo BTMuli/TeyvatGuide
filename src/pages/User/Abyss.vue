@@ -20,16 +20,6 @@
           <img src="/source/UI/userChallenge.webp" alt="challenge" />
           <span>幽境危战</span>
         </v-btn>
-        <v-btn :rounded="true" class="ua-btn" @click="toWiki()">
-          <img src="/source/UI/wikiAbyss.webp" alt="wiki" />
-          <span>深渊数据库</span>
-        </v-btn>
-      </div>
-    </template>
-    <template #append>
-      <div class="uat-hutao">
-        <span>胡桃云账号：</span>
-        <span @click="editHutaoEmail()">{{ hutaoEmail ?? "未设置" }}</span>
       </div>
     </template>
     <template #extension>
@@ -120,7 +110,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { account, cookie, hutaoEmail } = storeToRefs(useUserStore());
+const { account, cookie } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
@@ -150,33 +140,6 @@ async function toCombat(): Promise<void> {
 
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
-}
-
-async function toWiki(): Promise<void> {
-  await router.push({ name: "深渊数据库" });
-}
-
-async function editHutaoEmail(): Promise<void> {
-  if (hutaoEmail.value) {
-    const chgCheck = await showDialog.check("是否更改胡桃云账号", `当前账号：${hutaoEmail.value}`);
-    if (!chgCheck) {
-      showSnackbar.cancel("已取消更改胡桃云账号");
-      return;
-    }
-  }
-  const newEmail = await showDialog.input("请输入胡桃云账号", "胡桃云账号", hutaoEmail.value);
-  if (!newEmail) {
-    showSnackbar.cancel("已取消设置胡桃云账号");
-    return;
-  }
-  // 简单验证邮箱格式
-  const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-  if (!mailReg.test(newEmail)) {
-    showSnackbar.error("邮箱格式错误");
-    return;
-  }
-  hutaoEmail.value = newEmail;
-  showSnackbar.success("已设置胡桃云账号");
 }
 
 async function loadAbyss(): Promise<void> {
@@ -339,21 +302,6 @@ async function tryReadAbyss(): Promise<void> {
 
   span :first-child {
     color: var(--common-text-title);
-  }
-}
-
-.uat-hutao {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 12px;
-  font-family: var(--font-text);
-  font-size: 16px;
-
-  :last-child {
-    color: var(--tgc-pink-1);
-    cursor: pointer;
-    font-weight: bold;
   }
 }
 
