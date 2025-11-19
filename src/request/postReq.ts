@@ -1,7 +1,6 @@
 /**
- * @file request/postReq.ts
- * @description 帖子相关的请求
- * @since Beta v0.7.7
+ * 帖子相关的请求
+ * @since Beta v0.8.7
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
@@ -195,23 +194,25 @@ async function getUserPost(
 }
 
 /**
- * @description 搜索帖子
- * @since Beta v0.7.1
+ * 搜索帖子
+ * @since Beta v0.8.7
  * @param {string} gid 游戏分区 ID
  * @param {string} keyword 关键词
  * @param {string} lastId 最后一条帖子 ID
+ * @param {number} orderType 排序方式,1-最热，2-最新
  * @return {Promise<TGApp.BBS.Post.SearchRes>} 返回帖子列表
  */
 async function searchPosts(
   gid: string = "2",
   keyword: string,
   lastId: string,
+  orderType: number,
 ): Promise<TGApp.BBS.Post.SearchRes> {
   return (
     await TGHttp<TGApp.BBS.Post.SearchResp>(`${bapBu}searchPosts`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
-      query: { gids: gid, keyword, last_id: lastId, size: 20 },
+      query: { gids: gid, keyword, last_id: lastId, size: 20, order_type: orderType },
     })
   ).data;
 }

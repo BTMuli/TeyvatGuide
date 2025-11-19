@@ -1,9 +1,24 @@
+<!-- 搜索悬浮层 -->
 <template>
   <TOverlay v-model="visible">
     <div class="tops-box">
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
-        <span>分区：{{ label }}</span>
+        <div class="tops-game">
+          <span>分区：{{ label }}</span>
+        </div>
+        <div class="tops-sort">
+          <v-select
+            density="compact"
+            v-model="sortType"
+            :items="sortOrderList"
+            item-title="text"
+            item-value="value"
+            variant="outlined"
+            label="排序"
+            :disabled="load"
+          />
+        </div>
       </div>
       <div class="tops-divider" />
       <div class="tops-list" ref="listRef">
@@ -28,6 +43,12 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostSearchProps = { gid: string; keyword?: string };
+type SortSelect = { text: string; value: number };
+
+const sortOrderList: Array<SortSelect> = [
+  { text: "最新", value: 2 },
+  { text: "最热", value: 1 },
+];
 
 const { gameList } = storeToRefs(useBBSStore());
 
@@ -42,6 +63,7 @@ const lastId = ref<string>("");
 const gameId = ref<string>("2");
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
+const sortType = ref<number>(1);
 const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const label = computed<string>(() => {
   const gameFind = gameList.value.find((v) => v.id.toString() === gameId.value);
@@ -59,6 +81,15 @@ watch(
   () => isReachBottom.value,
   async () => {
     if (!isReachBottom.value) return;
+    await searchPosts();
+  },
+);
+watch(
+  () => sortType.value,
+  async () => {
+    results.value = [];
+    lastId.value = "";
+    isLast.value = false;
     await searchPosts();
   },
 );
@@ -119,7 +150,7 @@ async function searchPosts(): Promise<void> {
     load.value = false;
     return;
   }
-  const res = await postReq.search(gameId.value, search.value, lastId.value);
+  const res = await postReq.search(gameId.value, search.value, lastId.value, sortType.value);
   if (lastId.value === "") results.value = res.posts;
   else results.value = results.value.concat(res.posts);
   lastId.value = res.last_id;
@@ -164,6 +195,11 @@ async function searchPosts(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+}
+
+.tops-sort {
+  width: 100px;
+  height: 40px;
 }
 
 .tops-divider {
