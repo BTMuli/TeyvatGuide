@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-10-27
+Update: 2025-11-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-10-27 19:46:04`
+> 更新于 `2025-11-19 13:21:38`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases)
 
@@ -72,7 +72,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 一键完成游戏签到
 
 - Wiki 功能：
-  - [x] 深渊数据库（Hutao API）
   - [x] 角色图鉴
   - [x] 武器图鉴
   - [x] 名片图鉴
@@ -91,7 +90,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 ## UI 参考 / UI Reference
 
-- [Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)
+- ~~[Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)~~
 - [Starward](https://github.com/Scighost/Starward)
 - [米游社](https://www.miyoushe.com/ys/)
 - [原神](https://yuanshen.com/)
@@ -103,6 +102,8 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - UIAF：[UIAF v1.1](docs/standards/UIAF.md)
 - UIGF：[UIGF v3.0](docs/standards/UIGF3.md)，[UIGF v4.0](docs/standards/UIGF.md)
 - [macOS 平台门禁属性导致应用无法打开应用的修复指引](docs/macos-gatekeeper/README.md)
+- [隐私政策](https://app.btmuli.ink/docs/TeyvatGuide/privacy.html)
+- [如何导入胡桃数据库](https://app.btmuli.ink/docs/TeyvatGuide/import-hutao-db.html)
 
 ## 特定项目 / Special Project
 
@@ -137,7 +138,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 本项目在开发过程中参考了诸多相关开源项目，特此鸣谢。
 
 - [UIGF Organization](https://github.com/UIGF-org)
-- [Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)
+- ~~[Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)~~
 - [StarWard](https://github.com/Scighost/Starward)
 - [xunkong](https://github.com/xunkong/xunkong)
 - [gs-helper](https://github.com/vikiboss/gs-helper)
