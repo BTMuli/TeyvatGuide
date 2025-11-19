@@ -23,6 +23,7 @@
 import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@utils/TGShare.js";
 import { getVideoDuration } from "@utils/toolFunc.js";
 import Artplayer, { type Option } from "artplayer";
@@ -106,7 +107,7 @@ onMounted(async () => {
         name: "download-cover",
         index: 0,
         position: "right",
-        html: `<i class="mdi mdi-download"></i>`,
+        html: `<span class="mdi mdi-image-check"></span>`,
         tooltip: "下载封面",
         click: async () => {
           await showLoading.start("正在下载封面", props.data.insert.vod.cover);
@@ -115,6 +116,17 @@ onMounted(async () => {
           }
           await saveCanvasImg(coverBuffer.value, `vod-cover-${props.data.insert.vod.id}`);
           await showLoading.end();
+        },
+      },
+      {
+        name: "download-video",
+        index: 0,
+        position: "right",
+        html: `<span class="mdi mdi-video-check"></span>`,
+        tooltip: "下载视频",
+        click: async () => {
+          if (!container.value) return;
+          await openUrl(container.value.url);
         },
       },
     ],
