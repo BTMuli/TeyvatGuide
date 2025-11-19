@@ -369,8 +369,8 @@ async function tryReadChallenge(): Promise<void> {
     }
     // TODO:数据结构
     for (const item of fileData) {
-      await showLoading.update(`Uid: ${item["Uid"]},ScheduleId: ${item["ScheduleId"]}`);
-      await TSUserChallenge.saveChallenge(item["Uid"], item["HardChallengeData"]);
+      await showLoading.update(`Uid: ${item["uid"]},ScheduleId: ${item["schedule_id"]}`);
+      await TSUserChallenge.saveChallenge(item["uid"], item["data"]);
     }
     await showLoading.end();
     showSnackbar.success(`成功导入 ${fileData.length} 条危战数据，即将刷新页面`);
@@ -378,7 +378,9 @@ async function tryReadChallenge(): Promise<void> {
     window.location.reload();
   } catch (e) {
     console.error(e);
+    await TGLogger.Error(`[UserChallenge][tryReadChallenge] 导入危战数据失败: ${e}`);
     await showLoading.end();
+    showSnackbar.error("导入危战数据失败，请检查文件格式是否正确");
   }
 }
 </script>

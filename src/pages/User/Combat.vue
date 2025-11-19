@@ -262,8 +262,8 @@ async function tryReadCombat(): Promise<void> {
     }
     // TODO:数据结构
     for (const item of fileData) {
-      await showLoading.update(`Uid: ${item["Uid"]},ScheduleId: ${item["ScheduleId"]}`);
-      await TSUserCombat.saveCombat(item["Uid"], item["RoleCombatData"]);
+      await showLoading.update(`Uid: ${item["uid"]},ScheduleId: ${item["schedule_id"]}`);
+      await TSUserCombat.saveCombat(item["uid"], item["data"]);
     }
     await showLoading.end();
     showSnackbar.success(`成功导入 ${fileData.length} 条剧诗数据，即将刷新页面`);
@@ -271,7 +271,9 @@ async function tryReadCombat(): Promise<void> {
     window.location.reload();
   } catch (e) {
     console.error(e);
+    await TGLogger.Error(`[UserCombat][tryReadCombat] 导入剧诗数据失败: ${e}`);
     await showLoading.end();
+    showSnackbar.error("导入剧诗数据失败，请检查文件格式是否正确");
   }
 }
 </script>

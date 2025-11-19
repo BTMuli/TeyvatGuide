@@ -273,8 +273,8 @@ async function tryReadAbyss(): Promise<void> {
     }
     // TODO:数据结构
     for (const item of fileData) {
-      await showLoading.update(`Uid: ${item["Uid"]},ScheduleId: ${item["ScheduleId"]}`);
-      await TSUserAbyss.saveAbyss(item["Uid"], item["SpiralAbyss"]);
+      await showLoading.update(`Uid: ${item["uid"]},ScheduleId: ${item["schedule_id"]}`);
+      await TSUserAbyss.saveAbyss(item["uid"], item["data"]);
     }
     await showLoading.end();
     showSnackbar.success(`成功导入 ${fileData.length} 条深渊数据，即将刷新页面`);
@@ -282,7 +282,9 @@ async function tryReadAbyss(): Promise<void> {
     window.location.reload();
   } catch (e) {
     console.error(e);
+    await TGLogger.Error(`[UserAbyss][tryReadAbyss] 导入深渊数据失败: ${e}`);
     await showLoading.end();
+    showSnackbar.error("导入深渊数据失败，请检查文件格式是否正确");
   }
 }
 </script>
