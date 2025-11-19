@@ -208,7 +208,7 @@ async function exportJson(): Promise<void> {
 
 async function handleImportOuter(app: string): Promise<void> {
   await TGLogger.Info(`[Achievements][handleImportOuter] 导入来源：${app}`);
-  const importCheck = await showDialog.check("是否导入祈愿数据？", `来源APP：${app}`, false);
+  const importCheck = await showDialog.check("是否导入成就数据？", `来源APP：${app}`, false);
   if (!importCheck) {
     showSnackbar.cancel("已取消导入");
     return;
