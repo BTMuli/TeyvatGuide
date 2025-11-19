@@ -410,7 +410,7 @@ async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | fa
       return false;
     }
     const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
-    const resp = await showGeetest(JSON.parse(aigisResp.data));
+    const resp = await showGeetest(JSON.parse(aigisResp.data), aigisResp);
     const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
     return await tryGetCaptcha(phone, aigisStr);
   }

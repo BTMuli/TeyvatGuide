@@ -16,6 +16,7 @@
 </template>
 <script setup lang="ts">
 import "https://static.geetest.com/static/js/gt.0.4.9.js";
+import "https://static.geetest.com/v4/gt4.js";
 import { ref, useTemplateRef, watch } from "vue";
 
 const show = ref<boolean>(false);
@@ -45,19 +46,51 @@ declare function initGeetest(
   callback: (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => void,
 ): void;
 
+declare function initGeetest4(
+  params: TGApp.BBS.Geetest.InitGeetest4Params,
+  callback: (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => void,
+): void;
+
 async function displayBox(
   props: TGApp.BBS.Geetest.CreateRes,
+  raw?: TGApp.BBS.CaptchaLogin.CaptchaAigis,
 ): Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false> {
+  if ("challenge" in props) {
+    return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false>((resolve) => {
+      initGeetest(
+        {
+          gt: props.gt,
+          challenge: props.challenge,
+          offline: false,
+          new_captcha: true,
+          product: "custom",
+          area: "#verify",
+          width: "250px",
+        },
+        (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
+          if (geetestEl.value === null) return;
+          geetestEl.value.innerHTML = "";
+          captchaObj.appendTo("#geetest");
+          captchaObj.onReady(() => (show.value = true));
+          captchaObj.onClose(() => {
+            const validate = captchaObj.getValidate();
+            show.value = false;
+            if (!validate) resolve(false);
+            resolve(validate);
+          });
+        },
+      );
+    });
+  }
   return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false>((resolve) => {
-    initGeetest(
+    initGeetest4(
       {
-        gt: props.gt,
-        challenge: props.challenge,
-        offline: false,
-        new_captcha: true,
-        product: "custom",
-        area: "#verify",
-        width: "250px",
+        captchaId: props.gt,
+        riskType: props.risk_type,
+        product: "popup",
+        nextWidth: "250px",
+        lang: "zho",
+        userInfo: JSON.stringify({ session_id: raw?.session_id }),
       },
       (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
         if (geetestEl.value === null) return;
@@ -65,6 +98,10 @@ async function displayBox(
         captchaObj.appendTo("#geetest");
         captchaObj.onReady(() => (show.value = true));
         captchaObj.onClose(() => {
+          show.value = false;
+          resolve(false);
+        });
+        captchaObj.onSuccess(() => {
           const validate = captchaObj.getValidate();
           show.value = false;
           if (!validate) resolve(false);

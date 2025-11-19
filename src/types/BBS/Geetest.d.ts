@@ -1,7 +1,6 @@
 /**
- * @file types/BBS/Geetest.d.ts
- * @description 米游社Geetest 类型定义文件
- * @since Beta v0.8.3
+ * 极验验证相关类型定义文件
+ * @since Beta v0.8.7
  */
 
 declare namespace TGApp.BBS.Geetest {
@@ -15,15 +14,44 @@ declare namespace TGApp.BBS.Geetest {
   type CreateResp = TGApp.BBS.Response.BaseWithData<CreateRes>;
 
   /**
-   * @description 极验验证的响应数据
-   * @since Beta v0.7.1
-   * @interface CreateRes
-   * @property {string} gt - 极验验证 gt
-   * @property {string} challenge - 极验验证 challenge
-   * @property {number} new_captcha - 极验验证 new_captcha
-   * @property {number} success - 极验验证 success
+   * 极验验证的响应数据
+   * @since Beta v0.8.7
    */
-  type CreateRes = { gt: string; challenge: string; new_captcha: number; success: number };
+  type CreateRes = GtCreateRes | Gt4CreateRes;
+
+  /**
+   * 旧版极验验证的响应数据
+   * @since Beta v0.8.7
+   */
+  type GtCreateRes = {
+    /* gt */
+    gt: string;
+    /* challenge */
+    challenge: string;
+    /* 是否是新验证码 */
+    new_captcha: number;
+    /* 验证成功标志 */
+    success: number;
+    /* 是否使用 Gt4 验证 */
+    use_v4: boolean;
+  };
+
+  /**
+   * 新版 Gt4 验证的响应数据
+   * @since Beta v0.8.7
+   */
+  type Gt4CreateRes = {
+    /* gt */
+    gt: string;
+    /* 是否是新验证码 */
+    new_captcha: number;
+    /* 风险类型 */
+    risk_type: string;
+    /* 验证成功标志 */
+    success: number;
+    /* 是否使用 Gt4 验证 */
+    use_v4: boolean;
+  };
 
   /**
    * @description 验证极验验证的响应
@@ -65,6 +93,21 @@ declare namespace TGApp.BBS.Geetest {
     area: string;
   };
 
+  type InitGeetest4Params = {
+    /* 验证ID */
+    captchaId: string;
+    /* 验证形式 */
+    riskType: string;
+    /* 展现形式 */
+    product: string;
+    /* 宽度 */
+    nextWidth: string;
+    /* 用户信息 */
+    userInfo: unknown;
+    /* 语言 */
+    lang: string;
+  };
+
   /**
    * @description Geetest 插件 captchaObj
    * @since Beta v0.8.3
@@ -79,6 +122,7 @@ declare namespace TGApp.BBS.Geetest {
     getValidate: () => Promise<GeetestVerifyRes>;
     onClose: (callback: () => void) => boolean;
     onReady: (callback: () => void) => void;
+    onSuccess: (callback: () => void) => void;
   };
 
   /**
