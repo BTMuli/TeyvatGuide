@@ -2,12 +2,26 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2025-11-10
+Update: 2025-11-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-11-10 16:32:54`
+> 更新于 `2025-11-19 14:08:20`
+
+## [0.8.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.6) (2025-11-19)
+
+> 关于胡桃数据库导入功能的说明请参考 [导入胡桃数据库](https://app.btmuli.ink/docs/TeyvatGuide/import-hutao-db.html)
+
+- 👽️ 移除剧诗概览，支持导入胡桃剧诗数据
+- 👽️ 移除深渊上传，支持导入胡桃深渊数据
+- 🔥 移除胡桃深渊统计页面
+- 🚸 调整导入祈愿记录浮窗ui，显示导入进度
+- 🐛 修复图片渲染异常
+- 🥅 处理清除缓存异常，清除缓存后重启
+- 🚸 帖子详情添加AIGC相关注释
+- 🚸 添加跳转视频链接
+- 📝 更新相关文档
 
 ## [0.8.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.5) (2025-11-10)
 
