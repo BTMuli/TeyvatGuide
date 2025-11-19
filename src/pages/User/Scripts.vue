@@ -13,6 +13,7 @@
           item-title="uid"
           :hide-details="true"
           label="账号"
+          :disabled="runScript || runAll"
         >
           <template #selection="{ item }">
             <div class="select-main">
