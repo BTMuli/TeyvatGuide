@@ -5,8 +5,11 @@
 
 declare namespace TGApp.BBS.Geetest {
   /**
-   * 创建验证的响应
+   * @description 创建验证的响应
    * @since Beta v0.7.1
+   * @interface CreateResp
+   * @extends TGApp.BBS.Response.BaseWithData
+   * @property {CreateRes} data - 极验验证数据
    */
   type CreateResp = TGApp.BBS.Response.BaseWithData<CreateRes>;
 
@@ -51,45 +54,45 @@ declare namespace TGApp.BBS.Geetest {
   };
 
   /**
-   * 验证极验验证的响应
+   * @description 验证极验验证的响应
    * @since Beta v0.7.1
+   * @interface VerifyResp
+   * @extends TGApp.BBS.Response.Base
+   * @property {VerifyRes} data - 极验验证数据
    */
   type VerifyResp = TGApp.BBS.Response.BaseWithData<VerifyRes>;
 
   /**
-   * 极验验证的请求数据
+   * @description 极验验证的请求数据
    * @since Beta v0.7.1
+   * @interface VerifyRes
+   * @property {string} challenge - 极验验证 challenge
+   * @property {string} validate - 极验验证 validate
    */
-  type VerifyRes = {
-    /* 极验验证 challenge */
-    challenge: string;
-  };
+  type VerifyRes = { challenge: string };
 
   /**
-   * 极验验证的请求方法-请求参数
+   * @description 极验验证的请求方法-请求参数
    * @since Beta v0.7.1
+   * @interface InitGeetestParams
+   * @property {string} gt - 极验验证 gt
+   * @property {string} challenge - 极验验证 challenge
+   * @property {boolean} offline - 极验验证 offline
+   * @property {boolean} new_captcha - 极验验证 new_captcha
+   * @property {string} product - 极验验证 product
+   * @property {string} width - 极验验证 width
+   * @property {string} area - 极验验证 area
    */
   type InitGeetestParams = {
-    /* gt */
     gt: string;
-    /* challenge */
     challenge: string;
-    /* 是否离线 */
     offline: boolean;
-    /* 是否是新验证码 */
     new_captcha: boolean;
-    /* 验证形式 */
     product: string;
-    /* 宽度 */
     width: string;
-    /* 覆盖区域 */
     area: string;
   };
 
-  /**
-   * 初始化 Gt4 验证的请求参数
-   * @since Beta v0.8.7
-   */
   type InitGeetest4Params = {
     /* 验证ID */
     captchaId: string;
@@ -106,26 +109,33 @@ declare namespace TGApp.BBS.Geetest {
   };
 
   /**
-   * GeetestCaptcha 对象
-   * @since Beta v0.8.7
+   * @description Geetest 插件 captchaObj
+   * @since Beta v0.8.3
+   * @interface GeetestCaptcha
+   * @property {Function} appendTo
+   * @property {Function} getValidate
+   * @property {Function} onClose
+   * @property {Function} onReady
    */
   type GeetestCaptcha = {
-    /* 将验证码添加到指定的选择器中 */
     appendTo: (selector: string) => void;
-    /* 获取验证结果 */
     getValidate: () => Promise<GeetestVerifyRes>;
-    /* 关闭回调 */
     onClose: (callback: () => void) => boolean;
-    /* 准备就绪回调 */
     onReady: (callback: () => void) => void;
-    /* 成功回调 */
     onSuccess: (callback: () => void) => void;
   };
 
   /**
-   * 验证成功返回数据
-   * @since Beta v0.8.7
-   * @remarks 由于目前都是直接转 base64 字符串返回，故类型定义为 unknown
+   * @description Geetest 插件 validate
+   * @since Beta v0.7.1
+   * @interface GeetestVerifyRes
+   * @property {string} geetest_challenge
+   * @property {string} geetest_validate
+   * @property {string} geetest_seccode
    */
-  type GeetestVerifyRes = unknown;
+  type GeetestVerifyRes = {
+    geetest_challenge: string;
+    geetest_validate: string;
+    geetest_seccode: string;
+  };
 }
