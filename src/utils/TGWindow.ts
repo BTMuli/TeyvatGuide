@@ -1,7 +1,6 @@
 /**
- * @file utils/TGWindow.ts
- * @description 窗口创建相关工具函数
- * @since Beta v0.7.9
+ * 窗口创建相关工具
+ * @since Beta v0.8.7
  */
 
 import type { RenderCard } from "@comp/app/t-postcard.vue";
@@ -101,8 +100,8 @@ export function getWindowSize(label: string): PhysicalSize {
 }
 
 /**
- * @description 窗口适配
- * @since Beta v0.7.9
+ * 窗口适配
+ * @since Beta v0.8.7
  * @returns Promise<void>
  */
 export async function resizeWindow(): Promise<void> {
@@ -119,7 +118,7 @@ export async function resizeWindow(): Promise<void> {
   const targetWidth = Math.round(designSize.width * widthScale);
   const targetHeight = Math.round(designSize.height * heightScale);
   await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
-  const targetZoom = Math.min(widthScale, heightScale) / screen.scaleFactor;
+  const targetZoom = Math.min(widthScale, heightScale);
   await windowCur.setZoom(targetZoom);
   await windowCur.setFocus();
 }
