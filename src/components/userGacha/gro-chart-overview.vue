@@ -6,6 +6,7 @@
     autoresize
     :theme="echartsTheme"
     :init-options="{ locale: 'ZH' }"
+    :key="`gro-chart-overview-${echartsTheme}`"
   />
 </template>
 <script lang="ts" setup>

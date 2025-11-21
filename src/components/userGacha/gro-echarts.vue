@@ -29,15 +29,16 @@ import { ref } from "vue";
 
 type GachaOverviewEchartsProps = { uid: string; gachaType?: string };
 type ChartsType = "overview" | "calendar" | "stackBar";
-type ChartItem = { label: string; value: ChartsType };
+type SelectType<T> = { label: string; value: T };
 
 defineProps<GachaOverviewEchartsProps>();
 
-const chartTypes: Array<ChartItem> = [
+const chartTypes: Array<SelectType<ChartsType>> = [
   { label: "祈愿分析", value: "overview" },
   { label: "祈愿日历", value: "calendar" },
   { label: "祈愿柱状图", value: "stackBar" },
 ];
+// TODO: 分卡池选择图表
 
 const curChartType = ref<ChartsType>("overview");
 </script>
@@ -70,8 +71,8 @@ const curChartType = ref<ChartsType>("overview");
 }
 
 .gro-chart-container {
+  overflow: hidden auto;
   width: 100%;
   flex: 1;
-  overflow: hidden auto;
 }
 </style>

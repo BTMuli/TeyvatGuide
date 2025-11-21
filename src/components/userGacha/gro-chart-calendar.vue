@@ -7,6 +7,7 @@
     :theme="echartsTheme"
     :init-options="{ locale: 'ZH' }"
     :style="{ height: chartHeight }"
+    :key="`gro-chart-calendar-${echartsTheme}`"
   />
 </template>
 <script lang="ts" setup>
@@ -57,7 +58,7 @@ type EChartsOption = ComposeOption<
 const props = defineProps<GachaChartCalendarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<EChartsOption>({});
+const chartOptions = shallowRef<EChartsOption>();
 const yearCount = shallowRef<number>(1); // 默认至少1年，避免高度为0
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
