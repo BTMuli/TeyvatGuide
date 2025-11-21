@@ -81,7 +81,8 @@ jobs:
           releaseBody: |
             > [!TIP]
             > Windows 平台用户建议通过微软应用商店下载，macOS 平台仅在此发布，Linux 平台暂不支持。
-            > 如有使用问题可加入 [反馈QQ群](https://h5.qun.qq.com/s/3cgX0hJ4GA)
+            > 如有使用问题可加入 [反馈QQ群](https://qm.qq.com/q/hUxIfSWluo)
+            > MacOS 用户参考 [安装指南](https://github.com/BTMuli/TeyvatGuide/blob/master/docs/macos-gatekeeper/README.md)
 
             <a href="https://apps.microsoft.com/store/detail/9NLBNNNBNSJN?launch=true&cid=BTMuli&mode=mini">
               <img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>

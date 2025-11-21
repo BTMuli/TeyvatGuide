@@ -38,7 +38,7 @@ async function toRelease(): Promise<void> {
 }
 
 async function toGroup(): Promise<void> {
-  await openUrl("https://h5.qun.qq.com/s/3cgX0hJ4GA");
+  await openUrl("https://qm.qq.com/q/hUxIfSWluo");
 }
 
 async function toGithub(): Promise<void> {
