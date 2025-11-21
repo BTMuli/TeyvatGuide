@@ -147,12 +147,13 @@ async function tryCkVerify(): Promise<void> {
       await showLoading.end();
       const cGet = await miscReq.challenge(ck);
       if (cGet !== false) challenge = cGet;
+      else break;
     } else {
       flag = true;
       await showLoading.end();
     }
   }
-  if (!flag) showSnackbar.error("CK验证失败，请通过验证码登录重新获取CK");
+  if (!flag) showSnackbar.error("CK验证失败");
   else showSnackbar.success("CK验证成功");
 }
 
