@@ -84,8 +84,8 @@ declare namespace TGApp.BBS.Geetest {
     width: string;
     /* 覆盖区域 */
     area: string;
-    /* API服务器地址 */
-    api_server: string;
+    /** 是否使用 https 协议 */
+    https: boolean;
   };
 
   /**

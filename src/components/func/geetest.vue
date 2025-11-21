@@ -66,7 +66,7 @@ async function displayBox(
           product: "custom",
           area: "#verify",
           width: "250px",
-          api_server: "https://api.geetest.com",
+          https: true,
         },
         (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
           if (geetestEl.value === null) return;
