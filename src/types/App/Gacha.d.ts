@@ -1,26 +1,26 @@
 /**
  * 本应用的祈愿相关类型定义
- * @since Beta v0.8.4
+ * @since Beta v0.8.7
  */
 
 declare namespace TGApp.App.Gacha {
   /**
    * 祈愿类型枚举
-   * @since Beta v0.4.4
+   * @since Beta v0.8.7
    */
   const WishType = <const>{
     /** 新手祈愿 */
-    Newbie = 100,
+    Newbie: 100,
     /** 常驻祈愿 */
-    Normal = 200,
+    Normal: 200,
     /** 角色活动祈愿 */
-    CharacterUp = 301,
+    CharacterUp: 301,
     /** 角色活动祈愿2 */
-    CharacterUp2 = 400,
+    CharacterUp2: 400,
     /** 武器活动祈愿 */
-    WeaponUp = 302,
+    WeaponUp: 302,
     /** 集录祈愿 */
-    MixUp = 500,
+    MixUp: 500,
   };
 
   /**
