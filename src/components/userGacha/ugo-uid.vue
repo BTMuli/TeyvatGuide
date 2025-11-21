@@ -196,7 +196,7 @@ async function handleImport(): Promise<void> {
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       continue;
     }
-    await TSUserGacha.mergeUIGF4(dataFind);
+    await TSUserGacha.mergeUIGF4(dataFind, true);
   }
   await showLoading.end();
   showSnackbar.success("导入成功!");

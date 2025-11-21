@@ -1,6 +1,6 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.8.6
+ * @since Beta v0.8.7
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -199,12 +199,17 @@ async function cleanGachaRecords(
 
 /**
  * 合并祈愿数据
- * @since Beta v0.8.6
+ * @since Beta v0.8.7
  * @param {string} uid - UID
- * @param {TGApp.Plugins.UIGF.GachaItem[]} data - UIGF数据
+ * @param {Array<TGApp.Plugins.UIGF.GachaItem>} data - UIGF数据
+ * @param {boolean} showProgress - 是否显示进度
  * @return {Promise<void>}
  */
-async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Promise<void> {
+async function mergeUIGF(
+  uid: string,
+  data: Array<TGApp.Plugins.UIGF.GachaItem>,
+  showProgress: boolean = false,
+): Promise<void> {
   const db = await TGSqlite.getDB();
   let cnt = 0;
   const len = data.length;
@@ -213,9 +218,11 @@ async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Pro
     const trans = transGacha(gacha);
     if (cnt % 20 === 0) {
       progress = Math.round((cnt / len) * 100 * 100) / 100;
-      await showLoading.update(
-        `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
-      );
+      if (showProgress) {
+        await showLoading.update(
+          `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
+        );
+      }
       cnt++;
     }
     const sql = getInsertSql(uid, trans);
@@ -225,11 +232,15 @@ async function mergeUIGF(uid: string, data: TGApp.Plugins.UIGF.GachaItem[]): Pro
 
 /**
  * 合并祈愿数据（v4.0）
- * @since Beta v0.8.6
+ * @since Beta v0.8.7
  * @param {TGApp.Plugins.UIGF.GachaHk4e} data - UIGF数据
+ * @param {boolean} showProgress - 是否显示进度
  * @return {Promise<void>}
  */
-async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
+async function mergeUIGF4(
+  data: TGApp.Plugins.UIGF.GachaHk4e,
+  showProgress: boolean = false,
+): Promise<void> {
   const db = await TGSqlite.getDB();
   let cnt: number = 0;
   const len = data.list.length;
@@ -238,9 +249,11 @@ async function mergeUIGF4(data: TGApp.Plugins.UIGF.GachaHk4e): Promise<void> {
     const trans = transGacha(gacha, data.timezone);
     if (cnt % 20 === 0) {
       progress = Math.round((cnt / len) * 100 * 100) / 100;
-      await showLoading.update(
-        `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
-      );
+      if (showProgress) {
+        await showLoading.update(
+          `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
+        );
+      }
     }
     const sql = getInsertSql(data.uid.toString(), trans);
     await db.execute(sql);

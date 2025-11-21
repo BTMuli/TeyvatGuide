@@ -298,7 +298,7 @@ async function importUigf(): Promise<void> {
     showSnackbar.error("导入的祈愿数据为空");
     return;
   }
-  await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list);
+  await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list, true);
   await showLoading.end();
   showSnackbar.success(`成功导入 ${remoteData.list.length} 条祈愿数据，即将刷新页面`);
   await TGLogger.Info(
