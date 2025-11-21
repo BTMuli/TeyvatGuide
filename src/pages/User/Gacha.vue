@@ -13,7 +13,13 @@
           variant="outlined"
           label="游戏UID"
         />
-        <img src="/icon/nation/千星奇域.webp" alt="byd" @click="toBeyond()" title="千星奇域" />
+        <img
+          class="gacha-top-byd"
+          src="/icon/nation/千星奇域.webp"
+          alt="byd"
+          @click="toBeyond()"
+          title="千星奇域"
+        />
       </div>
     </template>
     <template #extension>
@@ -404,6 +410,14 @@ async function deleteGacha(): Promise<void> {
     font-family: var(--font-title);
     font-size: 20px;
   }
+}
+
+.gacha-top-byd {
+  filter: invert(0.75);
+}
+
+.dark .gacha-top-byd {
+  filter: none;
 }
 
 .gacha-top-btns {
