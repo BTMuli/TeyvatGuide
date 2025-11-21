@@ -3,7 +3,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="gb-top-title">
-        <img src="/icon/nation/千星奇域.webp" alt="gacha" />
+        <img class="gb-top-byd" src="/icon/nation/千星奇域.webp" alt="byd" />
         <span>祈愿记录</span>
         <v-select
           :hide-details="true"
@@ -13,7 +13,7 @@
           variant="outlined"
           label="游戏UID"
         />
-        <img src="/source/UI/userGacha.webp" alt="byd" @click="toGacha()" title="祈愿" />
+        <img src="/source/UI/userGacha.webp" alt="gacha" @click="toGacha()" title="祈愿" />
       </div>
     </template>
     <template #extension>
@@ -288,6 +288,14 @@ async function deleteGacha(): Promise<void> {
     font-family: var(--font-title);
     font-size: 20px;
   }
+}
+
+.gb-top-byd {
+  filter: invert(0.75);
+}
+
+.dark .gb-top-byd {
+  filter: none;
 }
 
 .gb-top-btns {
