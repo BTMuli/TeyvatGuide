@@ -199,6 +199,7 @@ async function getCalendarOptions(uid: string, gachaType?: string): Promise<ECha
  */
 async function getStackBarOptions(uid: string, gachaType?: string): Promise<EChartsOption> {
   const records = await TSUserGacha.getGachaRecordsGroupByDate(uid, gachaType);
+  const dataCount = Object.keys(records).length;
   const xAxis: XAXisOption = {
     type: "category",
     data: Object.keys(records),
@@ -229,6 +230,28 @@ async function getStackBarOptions(uid: string, gachaType?: string): Promise<ECha
     { data: temp4, type: "bar", stack: "a", name: "四星数量" },
     { data: temp3, type: "bar", stack: "a", name: "三星数量" },
   ];
+
+  // 添加 dataZoom 组件以支持数据量大时的缩放和滚动
+  const dataZoom =
+    dataCount > 100
+      ? [
+          {
+            type: "slider",
+            show: true,
+            xAxisIndex: [0],
+            start: Math.max(0, ((dataCount - 100) / dataCount) * 100),
+            end: 100,
+            bottom: "5%",
+          },
+          {
+            type: "inside",
+            xAxisIndex: [0],
+            start: Math.max(0, ((dataCount - 100) / dataCount) * 100),
+            end: 100,
+          },
+        ]
+      : undefined;
+
   return {
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
     toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
@@ -236,7 +259,8 @@ async function getStackBarOptions(uid: string, gachaType?: string): Promise<ECha
     xAxis,
     yAxis: { type: "value" },
     series,
-    grid: { left: "3%", right: "3%", bottom: "3%", top: "5%" },
+    dataZoom,
+    grid: { left: "3%", right: "3%", bottom: dataZoom ? "15%" : "3%", top: "10%" },
   };
 }
 

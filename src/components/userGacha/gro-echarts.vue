@@ -1,4 +1,3 @@
-<!-- TODO：组件拆分 -->
 <template>
   <div class="gro-chart">
     <div class="gro-chart-options">
@@ -15,66 +14,25 @@
         width="200px"
       />
     </div>
-    <v-chart
-      class="gro-chart-box"
-      :option="chartOptions"
-      autoresize
-      :theme="echartsTheme"
-      :init-options="{ locale: 'ZH' }"
-      v-if="chartOptions"
-    />
+    <div class="gro-chart-container">
+      <gro-chart-overview v-if="curChartType === 'overview'" :uid="uid" />
+      <gro-chart-calendar v-if="curChartType === 'calendar'" :uid="uid" :gacha-type="gachaType" />
+      <gro-chart-stackbar v-if="curChartType === 'stackBar'" :uid="uid" :gacha-type="gachaType" />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
-// TODO: 类型声明
-// about import err,see:https://github.com/apache/echarts/issues/19992
-import showLoading from "@comp/func/loading.js";
-import useAppStore from "@store/app.js";
-import TGachaCharts from "@utils/gachaCharts.js";
-import { BarChart, HeatmapChart, PieChart } from "echarts/charts.js";
-import {
-  CalendarComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  VisualMapComponent,
-} from "echarts/components.js";
-import { use } from "echarts/core.js";
-import { LabelLayout } from "echarts/features.js";
-import { CanvasRenderer } from "echarts/renderers.js";
-import type { EChartsOption } from "echarts/types/dist/shared.js";
-import { storeToRefs } from "pinia";
-import { computed, ref, shallowRef, watch } from "vue";
-import VChart from "vue-echarts";
-
-// echarts
-use([
-  LabelLayout,
-  CanvasRenderer,
-
-  BarChart,
-  HeatmapChart,
-  PieChart,
-
-  CalendarComponent,
-  DataZoomComponent,
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  ToolboxComponent,
-  TooltipComponent,
-  VisualMapComponent,
-]);
+import GroChartCalendar from "@comp/userGacha/gro-chart-calendar.vue";
+import GroChartOverview from "@comp/userGacha/gro-chart-overview.vue";
+import GroChartStackbar from "@comp/userGacha/gro-chart-stackbar.vue";
+import { ref } from "vue";
 
 type GachaOverviewEchartsProps = { uid: string; gachaType?: string };
 type ChartsType = "overview" | "calendar" | "stackBar";
 type ChartItem = { label: string; value: ChartsType };
 
-const props = defineProps<GachaOverviewEchartsProps>();
-const { theme } = storeToRefs(useAppStore());
+defineProps<GachaOverviewEchartsProps>();
+
 const chartTypes: Array<ChartItem> = [
   { label: "祈愿分析", value: "overview" },
   { label: "祈愿日历", value: "calendar" },
@@ -82,32 +40,6 @@ const chartTypes: Array<ChartItem> = [
 ];
 
 const curChartType = ref<ChartsType>("overview");
-const chartOptions = shallowRef<EChartsOption>();
-const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
-
-watch(
-  () => curChartType.value,
-  () => {
-    getOptions();
-  },
-  { immediate: true },
-);
-
-async function getOptions(): Promise<void> {
-  await showLoading.start("加载中...");
-  switch (curChartType.value) {
-    case "overview":
-      chartOptions.value = await TGachaCharts.overview(props.uid);
-      break;
-    case "calendar":
-      chartOptions.value = await TGachaCharts.calendar(props.uid, props.gachaType);
-      break;
-    case "stackBar":
-      chartOptions.value = await TGachaCharts.stackBar(props.uid, props.gachaType);
-      break;
-  }
-  await showLoading.end();
-}
 </script>
 <style lang="css" scoped>
 .gro-chart {
@@ -119,12 +51,12 @@ async function getOptions(): Promise<void> {
   align-items: flex-start;
   justify-content: flex-start;
   gap: 10px;
-  overflow-y: auto;
 }
 
 .gro-chart-options {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   margin-right: auto;
@@ -137,9 +69,9 @@ async function getOptions(): Promise<void> {
   font-family: var(--font-title);
 }
 
-.gro-chart-box {
-  width: calc(100% - 8px);
-  height: calc(100% - 64px);
-  min-height: 300px;
+.gro-chart-container {
+  width: 100%;
+  flex: 1;
+  overflow: hidden auto;
 }
 </style>
