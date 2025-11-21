@@ -11,7 +11,15 @@
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
+import type { BarSeriesOption } from "echarts/charts.js";
 import { BarChart } from "echarts/charts.js";
+import type {
+  DataZoomComponentOption,
+  GridComponentOption,
+  LegendComponentOption,
+  ToolboxComponentOption,
+  TooltipComponentOption,
+} from "echarts/components.js";
 import {
   DataZoomComponent,
   GridComponent,
@@ -19,6 +27,7 @@ import {
   ToolboxComponent,
   TooltipComponent,
 } from "echarts/components.js";
+import type { ComposeOption } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
@@ -39,21 +48,30 @@ use([
 
 type GachaChartStackBarProps = { uid: string; gachaType?: string };
 
+type EChartsOption = ComposeOption<
+  | BarSeriesOption
+  | TooltipComponentOption
+  | ToolboxComponentOption
+  | LegendComponentOption
+  | GridComponentOption
+  | DataZoomComponentOption
+>;
+
 const props = defineProps<GachaChartStackBarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<Record<string, unknown>>({});
+const chartOptions = shallowRef<EChartsOption>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 /**
  * @description 堆叠柱状图
- * @returns {Record<string, unknown>}
+ * @returns {EChartsOption}
  */
-async function getStackBarOptions(): Promise<Record<string, unknown>> {
+async function getStackBarOptions(): Promise<EChartsOption> {
   const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
   const dataCount = Object.keys(records).length;
-  const xAxis: Record<string, unknown> = {
-    type: "category",
+  const xAxis = {
+    type: <const>"category",
     data: Object.keys(records),
     axisTick: { alignWithLabel: true },
     axisLine: { show: true, lineStyle: { color: "#000" } },
@@ -63,7 +81,7 @@ async function getStackBarOptions(): Promise<Record<string, unknown>> {
       fontSize: 12,
       fontFamily: "var(--font-title)",
     },
-    axisPointer: { type: "shadow" },
+    axisPointer: { type: <const>"shadow" },
   };
   const temp5 = [];
   const temp4 = [];
@@ -77,7 +95,7 @@ async function getStackBarOptions(): Promise<Record<string, unknown>> {
     temp4.push(star4);
     temp3.push(star3);
   }
-  const series: unknown[] = [
+  const series: BarSeriesOption[] = [
     { data: temp5, type: "bar", stack: "a", name: "五星数量" },
     { data: temp4, type: "bar", stack: "a", name: "四星数量" },
     { data: temp3, type: "bar", stack: "a", name: "三星数量" },
@@ -88,7 +106,7 @@ async function getStackBarOptions(): Promise<Record<string, unknown>> {
     dataCount > 100
       ? [
           {
-            type: "slider",
+            type: <const>"slider",
             show: true,
             xAxisIndex: [0],
             start: Math.max(0, ((dataCount - 100) / dataCount) * 100),
@@ -96,7 +114,7 @@ async function getStackBarOptions(): Promise<Record<string, unknown>> {
             bottom: "5%",
           },
           {
-            type: "inside",
+            type: <const>"inside",
             xAxisIndex: [0],
             start: Math.max(0, ((dataCount - 100) / dataCount) * 100),
             end: 100,

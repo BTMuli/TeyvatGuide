@@ -11,7 +11,15 @@
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
+import type { PieSeriesOption } from "echarts/charts.js";
 import { BarChart, PieChart } from "echarts/charts.js";
+import type {
+  GridComponentOption,
+  LegendComponentOption,
+  TitleComponentOption,
+  ToolboxComponentOption,
+  TooltipComponentOption,
+} from "echarts/components.js";
 import {
   GridComponent,
   LegendComponent,
@@ -19,6 +27,7 @@ import {
   ToolboxComponent,
   TooltipComponent,
 } from "echarts/components.js";
+import type { ComposeOption } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
@@ -40,19 +49,28 @@ use([
 
 type GachaChartOverviewProps = { uid: string };
 
+type EChartsOption = ComposeOption<
+  | TitleComponentOption
+  | TooltipComponentOption
+  | LegendComponentOption
+  | ToolboxComponentOption
+  | GridComponentOption
+  | PieSeriesOption
+>;
+
 const props = defineProps<GachaChartOverviewProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<Record<string, unknown>>({});
+const chartOptions = shallowRef<EChartsOption>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 /**
  * @description 获取整体祈愿图表配置
- * @returns {Record<string, unknown>}
+ * @returns {EChartsOption}
  */
-async function getOverviewOptions(): Promise<Record<string, unknown>> {
+async function getOverviewOptions(): Promise<EChartsOption> {
   const records = await TSUserGacha.getGachaRecords(props.uid);
-  const data: Record<string, unknown> = {
+  const data: EChartsOption = {
     title: [
       { text: ">> 祈愿系统大数据分析 <<", left: "center", top: "5%" },
       { text: "卡池分布", left: "17%", top: "45%" },

@@ -12,13 +12,21 @@
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
+import type { HeatmapSeriesOption } from "echarts/charts.js";
 import { HeatmapChart } from "echarts/charts.js";
+import type {
+  CalendarComponentOption,
+  ToolboxComponentOption,
+  TooltipComponentOption,
+  VisualMapComponentOption,
+} from "echarts/components.js";
 import {
   CalendarComponent,
   ToolboxComponent,
   TooltipComponent,
   VisualMapComponent,
 } from "echarts/components.js";
+import type { ComposeOption } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
@@ -38,10 +46,18 @@ use([
 
 type GachaChartCalendarProps = { uid: string; gachaType?: string };
 
+type EChartsOption = ComposeOption<
+  | CalendarComponentOption
+  | TooltipComponentOption
+  | VisualMapComponentOption
+  | ToolboxComponentOption
+  | HeatmapSeriesOption
+>;
+
 const props = defineProps<GachaChartCalendarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<Record<string, unknown>>({});
+const chartOptions = shallowRef<EChartsOption>({});
 const yearCount = shallowRef<number>(1); // 默认至少1年，避免高度为0
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
@@ -55,9 +71,9 @@ const chartHeight = computed<string>(() => {
 
 /**
  * @description 获取日历图表配置
- * @returns {Record<string, unknown>}
+ * @returns {EChartsOption}
  */
-async function getCalendarOptions(): Promise<Record<string, unknown>> {
+async function getCalendarOptions(): Promise<EChartsOption> {
   const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
   // 获取最大长度
   const maxLen = Math.max(...Object.values(records).map((v) => v.length));
