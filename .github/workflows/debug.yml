@@ -12,12 +12,15 @@ jobs:
           - platform: macos-latest
             args: "--target x86_64-apple-darwin --debug"
             target: "macos-intel"
+            artifact: "debug-build-macos-intel"
           - platform: macos-15-intel
             args: "--target aarch64-apple-darwin --debug"
             target: "macos-arm"
+            artifact: "debug-build-macos-arm"
           - platform: macos-latest
             args: "--target aarch64-apple-darwin --debug"
             target: "macos-arm"
+            artifact: "debug-build-macos-arm-latest"
     runs-on: ${{ matrix.settings.platform }}
 
     steps:
@@ -72,6 +75,5 @@ jobs:
       - name: Upload Debug Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: debug-build-${{ matrix.settings.target }}
-          path: |
-            src-tauri/target/*/debug/bundle/dmg/*.dmg
+          name: ${{ matrix.settings.artifact }}
+          path: src-tauri/target/*/debug/bundle/dmg/*.dmg
