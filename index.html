@@ -9,6 +9,90 @@
 
   <body>
     <div id="app"></div>
+    <script>
+      (() => {
+        // Replace tauri://api.geetest.com on dynamic <script> src
+        try {
+          const _createElement = Document.prototype.createElement;
+          Document.prototype.createElement = function(tagName, options) {
+            const el = _createElement.call(this, tagName, options);
+
+            try {
+              if (String(tagName).toLowerCase() === 'script') {
+                const desc = Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+                if (desc && desc.configurable) {
+                  Object.defineProperty(el, 'src', {
+                    configurable: true,
+                    enumerable: true,
+                    set(v) {
+                      try {
+                        if (typeof v === 'string' && v.startsWith('tauri://api.geetest.com')) {
+                          const fixed = v.replace(/^tauri:\/\//, 'https://');
+                          return desc.set.call(this, fixed);
+                        }
+                      } catch (e) {}
+                      return desc.set.call(this, v);
+                    },
+                    get() {
+                      return desc.get.call(this);
+                    }
+                  });
+                } else {
+                  const _setAttr = el.setAttribute;
+                  el.setAttribute = function(name, value) {
+                    if (String(name).toLowerCase() === 'src' && typeof value === 'string' && value.startsWith('tauri://api.geetest.com')) {
+                      value = value.replace(/^tauri:\/\//, 'https://');
+                    }
+                    return _setAttr.call(this, name, value);
+                  };
+                }
+              }
+            } catch (err) {
+              console.warn('script src interceptor error', err);
+            }
+            return el;
+          };
+        } catch (e) {
+          console.warn('createElement patch failed', e);
+        }
+
+        // Intercept fetch to rewrite tauri://api.geetest.com -> https://api.geetest.com
+        try {
+          const _fetch = window.fetch;
+          if (_fetch) {
+            window.fetch = function(input, init) {
+              try {
+                if (typeof input === 'string' && input.startsWith('tauri://api.geetest.com')) {
+                  input = input.replace(/^tauri:\/\//, 'https://');
+                } else if (input && input.url && typeof input.url === 'string' && input.url.startsWith('tauri://api.geetest.com')) {
+                  input = new Request(input.url.replace(/^tauri:\/\//, 'https://'), input);
+                }
+              } catch (e) {}
+              return _fetch.call(this, input, init);
+            };
+          }
+        } catch (e) {
+          console.warn('fetch patch failed', e);
+        }
+
+        // Intercept XHR open to rewrite tauri://api.geetest.com -> https://api.geetest.com
+        try {
+          const _open = XMLHttpRequest.prototype.open;
+          XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+            try {
+              if (typeof url === 'string' && url.startsWith('tauri://api.geetest.com')) {
+                url = url.replace(/^tauri:\/\//, 'https://');
+              } else if (url && typeof url === 'object' && url.href && url.href.startsWith('tauri://api.geetest.com')) {
+                url = url.href.replace(/^tauri:\/\//, 'https://');
+              }
+            } catch (e) {}
+            return _open.call(this, method, url, ...rest);
+          };
+        } catch (e) {
+          console.warn('XHR patch failed', e);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
