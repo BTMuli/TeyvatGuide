@@ -1,0 +1,67 @@
+name: Build Debug for Mac
+on:
+  workflow_dispatch:
+jobs:
+  build-debug-mac:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - platform: macos-latest
+            args: "--target x86_64-apple-darwin --debug"
+            target: "macos-intel"
+          - platform: macos-15-intel
+            args: "--target aarch64-apple-darwin --debug"
+            target: "macos-arm"
+    runs-on: ${{ matrix.settings.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Add Github RSA
+        run: |
+          echo "${{ secrets.KNOWN_GITHUB_RSA }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: ssh -T git@github.com || true
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Add Rust targets(macOS Intel)
+        if: matrix.settings.target == 'macos-intel'
+        run: rustup target add x86_64-apple-darwin
+      - name: Add Rust targets(macOS ARM)
+        if: matrix.settings.target == 'macos-arm'
+        run: rustup target add aarch64-apple-darwin
+      - name: Output toolchain
+        run: rustup show
+
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24.8.0
+      - name: setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.16.1
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      - name: Build app
+        uses: tauri-apps/tauri-action@dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.settings.args }}
