@@ -7,12 +7,11 @@
     :theme="echartsTheme"
     :init-options="{ locale: 'ZH' }"
     :style="{ height: chartHeight }"
-    v-if="chartOptions"
   />
 </template>
 <script lang="ts" setup>
+import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
-import TGachaCharts from "@utils/gachaCharts.js";
 import { HeatmapChart } from "echarts/charts.js";
 import {
   CalendarComponent,
@@ -43,7 +42,7 @@ type GachaChartCalendarProps = { uid: string; gachaType?: string };
 const props = defineProps<GachaChartCalendarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<EChartsOption>();
+const chartOptions = shallowRef<EChartsOption>({});
 const yearCount = shallowRef<number>(1); // 默认至少1年，避免高度为0
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
@@ -55,9 +54,53 @@ const chartHeight = computed<string>(() => {
   return `${totalHeight}px`;
 });
 
+/**
+ * @description 获取日历图表配置
+ * @returns {EChartsOption}
+ */
+async function getCalendarOptions(): Promise<EChartsOption> {
+  const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
+  // 获取最大长度
+  const maxLen = Math.max(...Object.values(records).map((v) => v.length));
+  // 获取年份
+  const yearsSet = new Set(Object.keys(records).map((v) => v.split("-")[0]));
+
+  function getYearData(year: string): [string, number][] {
+    const res: [string, number][] = [];
+    for (const key in records) {
+      if (key.startsWith(year)) res.push([key, records[key].length]);
+    }
+    return res;
+  }
+
+  return {
+    tooltip: { position: "top" },
+    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
+    visualMap: {
+      min: 0,
+      max: maxLen,
+      calculable: true,
+      orient: "horizontal",
+      left: "center",
+      top: "top",
+    },
+    calendar: Array.from(yearsSet).map((year, index) => ({
+      range: year,
+      cellSize: ["auto", 15],
+      top: 150 * index + 80,
+    })),
+    series: Array.from(yearsSet).map((year, index) => ({
+      type: "heatmap",
+      coordinateSystem: "calendar",
+      calendarIndex: index,
+      data: getYearData(year),
+    })),
+  };
+}
+
 onMounted(async () => {
   try {
-    const options = await TGachaCharts.calendar(props.uid, props.gachaType);
+    const options = await getCalendarOptions();
     chartOptions.value = options;
 
     // 获取年份数量

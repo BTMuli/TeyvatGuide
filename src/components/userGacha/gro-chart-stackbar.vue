@@ -6,12 +6,12 @@
     autoresize
     :theme="echartsTheme"
     :init-options="{ locale: 'ZH' }"
-    v-if="chartOptions"
   />
 </template>
 <script lang="ts" setup>
+import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
-import TGachaCharts from "@utils/gachaCharts.js";
+import type { BarSeriesOption } from "echarts/charts.js";
 import { BarChart } from "echarts/charts.js";
 import {
   DataZoomComponent,
@@ -23,7 +23,7 @@ import {
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
-import type { EChartsOption } from "echarts/types/dist/shared.js";
+import type { EChartsOption, XAXisOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, shallowRef } from "vue";
 import VChart from "vue-echarts";
@@ -44,11 +44,82 @@ type GachaChartStackBarProps = { uid: string; gachaType?: string };
 const props = defineProps<GachaChartStackBarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<EChartsOption>();
+const chartOptions = shallowRef<EChartsOption>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
+/**
+ * @description 堆叠柱状图
+ * @returns {EChartsOption}
+ */
+async function getStackBarOptions(): Promise<EChartsOption> {
+  const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
+  const dataCount = Object.keys(records).length;
+  const xAxis: XAXisOption = {
+    type: "category",
+    data: Object.keys(records),
+    axisTick: { alignWithLabel: true },
+    axisLine: { show: true, lineStyle: { color: "#000" } },
+    axisLabel: {
+      rotate: 45,
+      interval: 4,
+      fontSize: 12,
+      fontFamily: "var(--font-title)",
+    },
+    axisPointer: { type: "shadow" },
+  };
+  const temp5 = [];
+  const temp4 = [];
+  const temp3 = [];
+  for (const key in records) {
+    const gachaLogs = records[key];
+    const star5 = gachaLogs.filter((r) => r.rank === "5").length;
+    const star4 = gachaLogs.filter((r) => r.rank === "4").length;
+    const star3 = gachaLogs.filter((r) => r.rank === "3").length;
+    temp5.push(star5);
+    temp4.push(star4);
+    temp3.push(star3);
+  }
+  const series: BarSeriesOption = [
+    { data: temp5, type: "bar", stack: "a", name: "五星数量" },
+    { data: temp4, type: "bar", stack: "a", name: "四星数量" },
+    { data: temp3, type: "bar", stack: "a", name: "三星数量" },
+  ];
+
+  // 添加 dataZoom 组件以支持数据量大时的缩放和滚动
+  const dataZoom =
+    dataCount > 100
+      ? [
+          {
+            type: "slider",
+            show: true,
+            xAxisIndex: [0],
+            start: Math.max(0, ((dataCount - 100) / dataCount) * 100),
+            end: 100,
+            bottom: "5%",
+          },
+          {
+            type: "inside",
+            xAxisIndex: [0],
+            start: Math.max(0, ((dataCount - 100) / dataCount) * 100),
+            end: 100,
+          },
+        ]
+      : undefined;
+
+  return {
+    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
+    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
+    legend: { data: ["三星数量", "四星数量", "五星数量"] },
+    xAxis,
+    yAxis: { type: "value" },
+    series,
+    dataZoom,
+    grid: { left: "3%", right: "3%", bottom: dataZoom ? "15%" : "3%", top: "10%" },
+  };
+}
+
 onMounted(async () => {
-  chartOptions.value = await TGachaCharts.stackBar(props.uid, props.gachaType);
+  chartOptions.value = await getStackBarOptions();
 });
 </script>
 <style lang="css" scoped>
