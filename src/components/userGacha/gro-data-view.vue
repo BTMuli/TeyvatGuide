@@ -42,14 +42,14 @@
         <v-window-item value="5" class="gro-b-window-item">
           <v-virtual-scroll :items="star5List" :item-height="48">
             <template #default="{ item }">
-              <GroDataLine :data="item.data" :count="item.count" />
+              <GroDataLine :key="item.data.id" :data="item.data" :count="item.count" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
         <v-window-item value="4" class="gro-b-window-item">
           <v-virtual-scroll :items="star4List" :item-height="48">
             <template #default="{ item }">
-              <GroDataLine :data="item.data" :count="item.count" />
+              <GroDataLine :key="item.data.id" :data="item.data" :count="item.count" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
