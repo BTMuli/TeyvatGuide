@@ -1,20 +1,75 @@
-/**
- * @file utils/gachaCharts.ts
- * @description 祈愿图表配置
- * @since Beta v0.8.2
- */
-
+<!-- 祈愿分析图表组件 -->
+<template>
+  <v-chart
+    class="gro-chart-overview"
+    :option="chartOptions"
+    autoresize
+    :theme="echartsTheme"
+    :init-options="{ locale: 'ZH' }"
+  />
+</template>
+<script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
-import type { BarSeriesOption } from "echarts/charts.js";
-import type { EChartsOption, XAXisOption } from "echarts/types/dist/shared.js";
+import useAppStore from "@store/app.js";
+import type { PieSeriesOption } from "echarts/charts.js";
+import { BarChart, PieChart } from "echarts/charts.js";
+import type {
+  GridComponentOption,
+  LegendComponentOption,
+  TitleComponentOption,
+  ToolboxComponentOption,
+  TooltipComponentOption,
+} from "echarts/components.js";
+import {
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+} from "echarts/components.js";
+import type { ComposeOption } from "echarts/core.js";
+import { use } from "echarts/core.js";
+import { LabelLayout } from "echarts/features.js";
+import { CanvasRenderer } from "echarts/renderers.js";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, shallowRef, watch } from "vue";
+import VChart from "vue-echarts";
+
+use([
+  LabelLayout,
+  CanvasRenderer,
+  BarChart,
+  PieChart,
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  ToolboxComponent,
+  TooltipComponent,
+]);
+
+type GachaChartOverviewProps = { uid: string };
+
+type EChartsOption = ComposeOption<
+  | TitleComponentOption
+  | TooltipComponentOption
+  | LegendComponentOption
+  | ToolboxComponentOption
+  | GridComponentOption
+  | PieSeriesOption
+>;
+
+const props = defineProps<GachaChartOverviewProps>();
+const { theme } = storeToRefs(useAppStore());
+
+const chartOptions = shallowRef<EChartsOption>({});
+const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 /**
  * @description 获取整体祈愿图表配置
- * @param {string} uid - 用户UID
  * @returns {EChartsOption}
  */
-async function getOverviewOptions(uid: string): Promise<EChartsOption> {
-  const records = await TSUserGacha.getGachaRecords(uid);
+async function getOverviewOptions(): Promise<EChartsOption> {
+  const records = await TSUserGacha.getGachaRecords(props.uid);
   const data: EChartsOption = {
     title: [
       { text: ">> 祈愿系统大数据分析 <<", left: "center", top: "5%" },
@@ -25,7 +80,13 @@ async function getOverviewOptions(uid: string): Promise<EChartsOption> {
     ],
     tooltip: { trigger: "item" },
     legend: { type: "scroll", orient: "vertical", left: 10, top: 20, bottom: 20 },
-    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
+    toolbox: {
+      show: true,
+      feature: {
+        restore: {},
+        saveAsImage: { pixelRatio: 2 },
+      },
+    },
     series: [
       {
         name: "卡池分布",
@@ -145,105 +206,26 @@ async function getOverviewOptions(uid: string): Promise<EChartsOption> {
   return data;
 }
 
-/**
- * @description 获取日历图表配置
- * @param {string} uid - 用户UID
- * @param {string} gachaType - 祈愿类型
- * @returns {EChartsOption}
- */
-async function getCalendarOptions(uid: string, gachaType?: string): Promise<EChartsOption> {
-  const records = await TSUserGacha.getGachaRecordsGroupByDate(uid, gachaType);
-  // 获取最大长度
-  const maxLen = Math.max(...Object.values(records).map((v) => v.length));
-  // 获取年份
-  const yearsSet = new Set(Object.keys(records).map((v) => v.split("-")[0]));
-
-  function getYearData(year: string): [string, number][] {
-    const res: [string, number][] = [];
-    for (const key in records) {
-      if (key.startsWith(year)) res.push([key, records[key].length]);
-    }
-    return res;
-  }
-
-  return {
-    tooltip: { position: "top" },
-    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
-    visualMap: {
-      min: 0,
-      max: maxLen,
-      calculable: true,
-      orient: "horizontal",
-      left: "center",
-      top: "top",
-    },
-    calendar: Array.from(yearsSet).map((year, index) => ({
-      range: year,
-      cellSize: ["auto", 15],
-      top: 150 * index + 80,
-    })),
-    series: Array.from(yearsSet).map((year, index) => ({
-      type: "heatmap",
-      coordinateSystem: "calendar",
-      calendarIndex: index,
-      data: getYearData(year),
-    })),
-  };
+async function loadChartData(): Promise<void> {
+  chartOptions.value = await getOverviewOptions();
 }
 
-/**
- * @description 堆叠柱状图
- * @param {string} uid - 用户UID
- * @param {string} gachaType - 祈愿类型
- * @returns {EChartsOption}
- */
-async function getStackBarOptions(uid: string, gachaType?: string): Promise<EChartsOption> {
-  const records = await TSUserGacha.getGachaRecordsGroupByDate(uid, gachaType);
-  const xAxis: XAXisOption = {
-    type: "category",
-    data: Object.keys(records),
-    axisTick: { alignWithLabel: true },
-    axisLine: { show: true, lineStyle: { color: "#000" } },
-    axisLabel: {
-      rotate: 45,
-      interval: 4,
-      fontSize: 12,
-      fontFamily: "var(--font-title)",
-    },
-    axisPointer: { type: "shadow" },
-  };
-  const temp5 = [];
-  const temp4 = [];
-  const temp3 = [];
-  for (const key in records) {
-    const gachaLogs = records[key];
-    const star5 = gachaLogs.filter((r) => r.rank === "5").length;
-    const star4 = gachaLogs.filter((r) => r.rank === "4").length;
-    const star3 = gachaLogs.filter((r) => r.rank === "3").length;
-    temp5.push(star5);
-    temp4.push(star4);
-    temp3.push(star3);
-  }
-  const series: BarSeriesOption = [
-    { data: temp5, type: "bar", stack: "a", name: "五星数量" },
-    { data: temp4, type: "bar", stack: "a", name: "四星数量" },
-    { data: temp3, type: "bar", stack: "a", name: "三星数量" },
-  ];
-  return {
-    tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
-    legend: { data: ["三星数量", "四星数量", "五星数量"] },
-    xAxis,
-    yAxis: { type: "value" },
-    series,
-    grid: { left: "3%", right: "3%", bottom: "3%", top: "5%" },
-  };
+onMounted(async () => {
+  await loadChartData();
+});
+
+// 监听 uid 变化，重新加载数据
+watch(
+  () => props.uid,
+  async () => {
+    await loadChartData();
+  },
+);
+</script>
+<style lang="css" scoped>
+.gro-chart-overview {
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
 }
-
-const TGachaCharts = {
-  overview: getOverviewOptions,
-  calendar: getCalendarOptions,
-  stackBar: getStackBarOptions,
-};
-
-export default TGachaCharts;
+</style>
