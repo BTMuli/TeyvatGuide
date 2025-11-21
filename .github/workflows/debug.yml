@@ -13,14 +13,10 @@ jobs:
             args: "--target x86_64-apple-darwin --debug"
             target: "macos-intel"
             artifact: "debug-build-macos-intel"
-          - platform: macos-15-intel
-            args: "--target aarch64-apple-darwin --debug"
-            target: "macos-arm"
-            artifact: "debug-build-macos-arm"
           - platform: macos-latest
             args: "--target aarch64-apple-darwin --debug"
             target: "macos-arm"
-            artifact: "debug-build-macos-arm-latest"
+            artifact: "debug-build-macos-arm"
     runs-on: ${{ matrix.settings.platform }}
 
     steps:

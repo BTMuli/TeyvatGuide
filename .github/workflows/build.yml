@@ -23,7 +23,7 @@ jobs:
           - platform: macos-latest
             args: "--target x86_64-apple-darwin"
             target: "macos-intel"
-          - platform: macos-15-intel
+          - platform: macos-latest
             args: "--target aarch64-apple-darwin"
             target: "macos-arm"
     runs-on: ${{ matrix.settings.platform }}
