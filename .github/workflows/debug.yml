@@ -15,6 +15,9 @@ jobs:
           - platform: macos-15-intel
             args: "--target aarch64-apple-darwin --debug"
             target: "macos-arm"
+          - platform: macos-latest
+            args: "--target aarch64-apple-darwin --debug"
+            target: "macos-arm"
     runs-on: ${{ matrix.settings.platform }}
 
     steps:
