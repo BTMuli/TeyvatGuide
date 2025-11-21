@@ -22,9 +22,8 @@ import {
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
-import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, shallowRef } from "vue";
+import { computed, onMounted, shallowRef, watch } from "vue";
 import VChart from "vue-echarts";
 
 use([
@@ -42,7 +41,7 @@ type GachaChartCalendarProps = { uid: string; gachaType?: string };
 const props = defineProps<GachaChartCalendarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<EChartsOption>({});
+const chartOptions = shallowRef<Record<string, unknown>>({});
 const yearCount = shallowRef<number>(1); // 默认至少1年，避免高度为0
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
@@ -56,9 +55,9 @@ const chartHeight = computed<string>(() => {
 
 /**
  * @description 获取日历图表配置
- * @returns {EChartsOption}
+ * @returns {Record<string, unknown>}
  */
-async function getCalendarOptions(): Promise<EChartsOption> {
+async function getCalendarOptions(): Promise<Record<string, unknown>> {
   const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
   // 获取最大长度
   const maxLen = Math.max(...Object.values(records).map((v) => v.length));
@@ -75,7 +74,13 @@ async function getCalendarOptions(): Promise<EChartsOption> {
 
   return {
     tooltip: { position: "top" },
-    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
+    toolbox: {
+      show: true,
+      feature: {
+        restore: {},
+        saveAsImage: { pixelRatio: 2 },
+      },
+    },
     visualMap: {
       min: 0,
       max: maxLen,
@@ -88,6 +93,7 @@ async function getCalendarOptions(): Promise<EChartsOption> {
       range: year,
       cellSize: ["auto", 15],
       top: 150 * index + 80,
+      right: 12,
     })),
     series: Array.from(yearsSet).map((year, index) => ({
       type: "heatmap",
@@ -98,7 +104,7 @@ async function getCalendarOptions(): Promise<EChartsOption> {
   };
 }
 
-onMounted(async () => {
+async function loadChartData(): Promise<void> {
   try {
     const options = await getCalendarOptions();
     chartOptions.value = options;
@@ -111,7 +117,19 @@ onMounted(async () => {
     console.error("Failed to load calendar chart:", error);
     // 保持默认值，显示基础高度
   }
+}
+
+onMounted(async () => {
+  await loadChartData();
 });
+
+// 监听 uid 和 gachaType 变化，重新加载数据
+watch(
+  () => [props.uid, props.gachaType],
+  async () => {
+    await loadChartData();
+  },
+);
 </script>
 <style lang="css" scoped>
 .gro-chart-calendar {

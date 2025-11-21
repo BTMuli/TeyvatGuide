@@ -22,9 +22,8 @@ import {
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
-import type { EChartsOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, shallowRef } from "vue";
+import { computed, onMounted, shallowRef, watch } from "vue";
 import VChart from "vue-echarts";
 
 use([
@@ -44,16 +43,16 @@ type GachaChartOverviewProps = { uid: string };
 const props = defineProps<GachaChartOverviewProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<EChartsOption>({});
+const chartOptions = shallowRef<Record<string, unknown>>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 /**
  * @description 获取整体祈愿图表配置
- * @returns {EChartsOption}
+ * @returns {Record<string, unknown>}
  */
-async function getOverviewOptions(): Promise<EChartsOption> {
+async function getOverviewOptions(): Promise<Record<string, unknown>> {
   const records = await TSUserGacha.getGachaRecords(props.uid);
-  const data: EChartsOption = {
+  const data: Record<string, unknown> = {
     title: [
       { text: ">> 祈愿系统大数据分析 <<", left: "center", top: "5%" },
       { text: "卡池分布", left: "17%", top: "45%" },
@@ -63,7 +62,13 @@ async function getOverviewOptions(): Promise<EChartsOption> {
     ],
     tooltip: { trigger: "item" },
     legend: { type: "scroll", orient: "vertical", left: 10, top: 20, bottom: 20 },
-    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
+    toolbox: {
+      show: true,
+      feature: {
+        restore: {},
+        saveAsImage: { pixelRatio: 2 },
+      },
+    },
     series: [
       {
         name: "卡池分布",
@@ -183,9 +188,21 @@ async function getOverviewOptions(): Promise<EChartsOption> {
   return data;
 }
 
-onMounted(async () => {
+async function loadChartData(): Promise<void> {
   chartOptions.value = await getOverviewOptions();
+}
+
+onMounted(async () => {
+  await loadChartData();
 });
+
+// 监听 uid 变化，重新加载数据
+watch(
+  () => props.uid,
+  async () => {
+    await loadChartData();
+  },
+);
 </script>
 <style lang="css" scoped>
 .gro-chart-overview {

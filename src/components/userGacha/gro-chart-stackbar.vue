@@ -11,7 +11,6 @@
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
-import type { BarSeriesOption } from "echarts/charts.js";
 import { BarChart } from "echarts/charts.js";
 import {
   DataZoomComponent,
@@ -23,9 +22,8 @@ import {
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
-import type { EChartsOption, XAXisOption } from "echarts/types/dist/shared.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, shallowRef } from "vue";
+import { computed, onMounted, shallowRef, watch } from "vue";
 import VChart from "vue-echarts";
 
 use([
@@ -44,17 +42,17 @@ type GachaChartStackBarProps = { uid: string; gachaType?: string };
 const props = defineProps<GachaChartStackBarProps>();
 const { theme } = storeToRefs(useAppStore());
 
-const chartOptions = shallowRef<EChartsOption>({});
+const chartOptions = shallowRef<Record<string, unknown>>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 /**
  * @description 堆叠柱状图
- * @returns {EChartsOption}
+ * @returns {Record<string, unknown>}
  */
-async function getStackBarOptions(): Promise<EChartsOption> {
+async function getStackBarOptions(): Promise<Record<string, unknown>> {
   const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
   const dataCount = Object.keys(records).length;
-  const xAxis: XAXisOption = {
+  const xAxis: Record<string, unknown> = {
     type: "category",
     data: Object.keys(records),
     axisTick: { alignWithLabel: true },
@@ -79,7 +77,7 @@ async function getStackBarOptions(): Promise<EChartsOption> {
     temp4.push(star4);
     temp3.push(star3);
   }
-  const series: BarSeriesOption = [
+  const series: unknown[] = [
     { data: temp5, type: "bar", stack: "a", name: "五星数量" },
     { data: temp4, type: "bar", stack: "a", name: "四星数量" },
     { data: temp3, type: "bar", stack: "a", name: "三星数量" },
@@ -108,7 +106,13 @@ async function getStackBarOptions(): Promise<EChartsOption> {
 
   return {
     tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-    toolbox: { show: true, feature: { restore: {}, saveAsImage: {} } },
+    toolbox: {
+      show: true,
+      feature: {
+        restore: {},
+        saveAsImage: { pixelRatio: 2 },
+      },
+    },
     legend: { data: ["三星数量", "四星数量", "五星数量"] },
     xAxis,
     yAxis: { type: "value" },
@@ -118,9 +122,21 @@ async function getStackBarOptions(): Promise<EChartsOption> {
   };
 }
 
-onMounted(async () => {
+async function loadChartData(): Promise<void> {
   chartOptions.value = await getStackBarOptions();
+}
+
+onMounted(async () => {
+  await loadChartData();
 });
+
+// 监听 uid 和 gachaType 变化，重新加载数据
+watch(
+  () => [props.uid, props.gachaType],
+  async () => {
+    await loadChartData();
+  },
+);
 </script>
 <style lang="css" scoped>
 .gro-chart-stackbar {
