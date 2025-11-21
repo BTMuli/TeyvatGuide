@@ -70,7 +70,7 @@ jobs:
           args: ${{ matrix.settings.args }}
 
       - name: Upload Debug Build Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: debug-build-${{ matrix.settings.target }}
           path: |
