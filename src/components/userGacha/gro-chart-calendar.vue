@@ -44,10 +44,10 @@ const props = defineProps<GachaChartCalendarProps>();
 const { theme } = storeToRefs(useAppStore());
 
 const chartOptions = shallowRef<EChartsOption>();
-const yearCount = shallowRef<number>(0);
+const yearCount = shallowRef<number>(1); // 默认至少1年，避免高度为0
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
-// 根据年份数量动态计算高度，每个日历约150px，加上顶部空间
+// 根据年份数量动态计算高度，每个日历约160px，加上顶部空间
 const chartHeight = computed<string>(() => {
   const baseHeight = 120; // 顶部工具栏和 visualMap 的空间
   const perYearHeight = 160; // 每个年份的日历高度
@@ -56,12 +56,17 @@ const chartHeight = computed<string>(() => {
 });
 
 onMounted(async () => {
-  const options = await TGachaCharts.calendar(props.uid, props.gachaType);
-  chartOptions.value = options;
+  try {
+    const options = await TGachaCharts.calendar(props.uid, props.gachaType);
+    chartOptions.value = options;
 
-  // 获取年份数量
-  if (options.calendar && Array.isArray(options.calendar)) {
-    yearCount.value = options.calendar.length;
+    // 获取年份数量
+    if (options.calendar && Array.isArray(options.calendar)) {
+      yearCount.value = options.calendar.length || 1;
+    }
+  } catch (error) {
+    console.error("Failed to load calendar chart:", error);
+    // 保持默认值，显示基础高度
   }
 });
 </script>
