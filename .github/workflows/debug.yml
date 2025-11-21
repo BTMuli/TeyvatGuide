@@ -68,3 +68,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.settings.args }}
+
+      - name: Upload Debug Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-build-${{ matrix.settings.target }}
+          path: |
+            src-tauri/target/*/debug/bundle/dmg/*.dmg
