@@ -67,7 +67,7 @@ declare namespace TGApp.BBS.Geetest {
 
   /**
    * 极验验证的请求方法-请求参数
-   * @since Beta v0.7.1
+   * @since Beta v0.8.7
    */
   type InitGeetestParams = {
     /* gt */
@@ -84,6 +84,8 @@ declare namespace TGApp.BBS.Geetest {
     width: string;
     /* 覆盖区域 */
     area: string;
+    /* API服务器地址 */
+    api_server: string;
   };
 
   /**
@@ -103,6 +105,8 @@ declare namespace TGApp.BBS.Geetest {
     userInfo: unknown;
     /* 语言 */
     lang: string;
+    /* 协议头 */
+    protocol: string;
   };
 
   /**

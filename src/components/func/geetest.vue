@@ -15,8 +15,8 @@
   </transition>
 </template>
 <script setup lang="ts">
-// import "https://static.geetest.com/static/js/gt.0.4.9.js";
-// import "https://static.geetest.com/v4/gt4.js";
+import "https://static.geetest.com/static/js/gt.0.4.9.js";
+import "https://static.geetest.com/v4/gt4.js";
 import { ref, useTemplateRef, watch } from "vue";
 
 const show = ref<boolean>(false);
@@ -66,6 +66,7 @@ async function displayBox(
           product: "custom",
           area: "#verify",
           width: "250px",
+          api_server: "https://api.geetest.com",
         },
         (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
           if (geetestEl.value === null) return;
@@ -91,6 +92,7 @@ async function displayBox(
         nextWidth: "250px",
         lang: "zho",
         userInfo: JSON.stringify({ session_id: raw?.session_id }),
+        protocol: "https",
       },
       (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
         if (geetestEl.value === null) return;
