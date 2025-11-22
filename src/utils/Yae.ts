@@ -1,6 +1,5 @@
 /**
  * Yae 成就数据导入工具
- *
  * @since Beta v0.8.7
  */
 
@@ -12,9 +11,8 @@ import TGLogger from "./TGLogger.js";
 
 /**
  * 启动 Yae 监听器
- *
  * @since Beta v0.8.7
- * @returns 是否启动成功
+ * @returns {Promise<boolean>} 是否启动成功
  */
 export async function startYaeListener(): Promise<boolean> {
   try {
@@ -31,9 +29,8 @@ export async function startYaeListener(): Promise<boolean> {
 
 /**
  * 停止 Yae 监听器
- *
  * @since Beta v0.8.7
- * @returns 是否停止成功
+ * @returns Promise<boolean> 是否停止成功
  */
 export async function stopYaeListener(): Promise<boolean> {
   try {
@@ -50,9 +47,8 @@ export async function stopYaeListener(): Promise<boolean> {
 
 /**
  * 监听 Yae 数据接收事件
- *
  * @since Beta v0.8.7
- * @param callback - 接收到数据时的回调函数
+ * @param {(data: TGApp.Plugins.UIAF.Data) => void} callback - 接收到数据时的回调函数
  * @returns 取消监听的函数
  */
 export async function onYaeDataReceived(
