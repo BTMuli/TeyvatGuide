@@ -400,7 +400,7 @@ async function confirmDelCache(): Promise<void> {
   }
   await showLoading.end();
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
-  showSnackbar.success("缓存已清除!即将退出应用！");
+  showSnackbar.success("缓存已清除!即将重启...");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   await relaunch();
 }
