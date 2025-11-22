@@ -87,6 +87,7 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import {
   getUiafHeader,
@@ -288,8 +289,8 @@ async function deleteUid(): Promise<void> {
 
 async function toYae(): Promise<void> {
   // Check if on Windows
-  const isWindows = navigator.userAgent.includes("Windows");
-  if (!isWindows) {
+  const osPlatform = await platform();
+  if (osPlatform !== "windows") {
     showSnackbar.warn("Yae 仅支持 Windows 平台");
     await openUrl("https://github.com/HolographicHat/Yae");
     return;
