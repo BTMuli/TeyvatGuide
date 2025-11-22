@@ -1,6 +1,7 @@
 <!-- 祈愿日历图表组件 -->
 <template>
   <v-chart
+    ref="chartRef"
     class="gro-chart-calendar"
     :option="chartOptions"
     autoresize
@@ -13,6 +14,7 @@
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
+import { getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
 import type { HeatmapSeriesOption } from "echarts/charts.js";
 import { HeatmapChart } from "echarts/charts.js";
 import type {
@@ -27,12 +29,12 @@ import {
   TooltipComponent,
   VisualMapComponent,
 } from "echarts/components.js";
-import type { ComposeOption } from "echarts/core.js";
+import type { ComposeOption, EChartsType } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, shallowRef, watch } from "vue";
+import { computed, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import VChart from "vue-echarts";
 
 use([
@@ -60,6 +62,8 @@ const { theme } = storeToRefs(useAppStore());
 
 const chartOptions = shallowRef<EChartsOption>();
 const yearCount = shallowRef<number>(1); // 默认至少1年，避免高度为0
+const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
+
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
 // 根据年份数量动态计算高度，每个日历约160px，加上顶部空间
@@ -95,7 +99,24 @@ async function getCalendarOptions(): Promise<EChartsOption> {
       show: true,
       feature: {
         restore: {},
-        saveAsImage: { pixelRatio: 2 },
+        saveAsImage: { show: false },
+        myDownloadChart: {
+          show: true,
+          title: "下载图表",
+          icon: "M12 4v12m-4-4l4 4 4-4",
+          onclick: async () => {
+            if (!chartEl.value) return;
+            const chart: EChartsType = chartEl.value.chart;
+            if (!chart) return;
+            const dataUrl = chart.getDataURL({
+              pixelRatio: 2,
+              backgroundColor: theme.value === "dark" ? "#2c343c" : "#ffffff",
+              excludeComponents: ["toolbox"],
+            });
+            const buffer = await getImageBuffer(dataUrl);
+            await saveCanvasImg(buffer, `gacha-chart-calendar-${props.uid}`);
+          },
+        },
       },
     },
     visualMap: {

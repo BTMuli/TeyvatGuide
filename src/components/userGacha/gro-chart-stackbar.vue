@@ -1,6 +1,7 @@
 <!-- 祈愿柱状图组件 -->
 <template>
   <v-chart
+    ref="chartRef"
     class="gro-chart-stackbar"
     :option="chartOptions"
     autoresize
@@ -12,6 +13,7 @@
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
+import { getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
 import type { BarSeriesOption } from "echarts/charts.js";
 import { BarChart } from "echarts/charts.js";
 import type {
@@ -28,12 +30,12 @@ import {
   ToolboxComponent,
   TooltipComponent,
 } from "echarts/components.js";
-import type { ComposeOption } from "echarts/core.js";
+import type { ComposeOption, EChartsType } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, shallowRef, watch } from "vue";
+import { computed, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 import VChart from "vue-echarts";
 
 use([
@@ -63,6 +65,7 @@ const { theme } = storeToRefs(useAppStore());
 
 const chartOptions = shallowRef<EChartsOption>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
+const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
 
 /**
  * @description 堆叠柱状图
@@ -129,7 +132,24 @@ async function getStackBarOptions(): Promise<EChartsOption> {
       show: true,
       feature: {
         restore: {},
-        saveAsImage: { pixelRatio: 2 },
+        saveAsImage: { show: false },
+        myDownloadChart: {
+          show: true,
+          title: "下载图表",
+          icon: "M12 4v12m-4-4l4 4 4-4",
+          onclick: async () => {
+            if (!chartEl.value) return;
+            const chart: EChartsType = chartEl.value.chart;
+            if (!chart) return;
+            const dataUrl = chart.getDataURL({
+              pixelRatio: 2,
+              backgroundColor: theme.value === "dark" ? "#2c343c" : "#ffffff",
+              excludeComponents: ["toolbox"],
+            });
+            const buffer = await getImageBuffer(dataUrl);
+            await saveCanvasImg(buffer, `gacha-overview-${props.uid}`);
+          },
+        },
       },
     },
     legend: { data: ["三星数量", "四星数量", "五星数量"] },
