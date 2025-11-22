@@ -1,6 +1,6 @@
 /**
- * @file utils/Yae.ts
- * @description Yae 成就数据导入工具
+ * Yae 成就数据导入工具
+ *
  * @since Beta v0.8.7
  */
 
@@ -11,9 +11,10 @@ import { listen } from "@tauri-apps/api/event";
 import TGLogger from "./TGLogger.js";
 
 /**
- * @description 启动 Yae 监听器
+ * 启动 Yae 监听器
+ *
  * @since Beta v0.8.7
- * @returns {Promise<boolean>} 是否启动成功
+ * @returns 是否启动成功
  */
 export async function startYaeListener(): Promise<boolean> {
   try {
@@ -29,9 +30,10 @@ export async function startYaeListener(): Promise<boolean> {
 }
 
 /**
- * @description 停止 Yae 监听器
+ * 停止 Yae 监听器
+ *
  * @since Beta v0.8.7
- * @returns {Promise<boolean>} 是否停止成功
+ * @returns 是否停止成功
  */
 export async function stopYaeListener(): Promise<boolean> {
   try {
@@ -47,15 +49,16 @@ export async function stopYaeListener(): Promise<boolean> {
 }
 
 /**
- * @description 监听 Yae 数据接收事件
+ * 监听 Yae 数据接收事件
+ *
  * @since Beta v0.8.7
- * @param {(data: TGApp.Plugins.UIAF.Data) => void} callback - 接收到数据时的回调函数
- * @returns {Promise<() => void>} 取消监听的函数
+ * @param callback - 接收到数据时的回调函数
+ * @returns 取消监听的函数
  */
 export async function onYaeDataReceived(
   callback: (data: TGApp.Plugins.UIAF.Data) => void,
 ): Promise<() => void> {
-  const unlisten = await listen<string>("yae_data_received", (event) => {
+  return await listen<string>("yae_data_received", (event) => {
     try {
       const data = <TGApp.Plugins.UIAF.Data>JSON.parse(event.payload);
       callback(data);
@@ -64,5 +67,4 @@ export async function onYaeDataReceived(
       showSnackbar.error(`解析 Yae 数据失败: ${error}`);
     }
   });
-  return unlisten;
 }

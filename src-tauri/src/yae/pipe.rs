@@ -123,11 +123,11 @@ async fn handle_client(pipe: HANDLE, app: &AppHandle) -> Result<(), Box<dyn std:
       if bytes_read > 0 {
         info!("Received {} bytes from Yae", bytes_read);
 
-        // Parse protobuf and convert to UIAF
+        // Parse JSON and convert to UIAF
         let data = &buffer[..bytes_read as usize];
-        match crate::yae::proto::convert_yae_to_uiaf(data) {
+        match crate::yae::proto::parse_yae_data(data) {
           Ok(uiaf_data) => {
-            info!("Successfully converted Yae data to UIAF format");
+            info!("Successfully parsed Yae data to UIAF format");
 
             // Emit event to frontend with UIAF data
             let json_str = serde_json::to_string(&uiaf_data)?;
@@ -139,7 +139,7 @@ async fn handle_client(pipe: HANDLE, app: &AppHandle) -> Result<(), Box<dyn std:
             let _ = WriteFile(pipe, Some(response), Some(&mut bytes_written), None);
           }
           Err(e) => {
-            error!("Failed to convert Yae data: {}", e);
+            error!("Failed to parse Yae data: {}", e);
 
             // Send error response back to Yae
             let response = format!("ERROR: {}", e);

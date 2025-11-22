@@ -1,14 +1,8 @@
 //! @file src/yae/proto.rs
-//! @desc Yae protobuf 数据转换模块
+//! @desc Yae JSON 数据转换模块
 //! @since Beta v0.8.7
 
-use prost::Message;
 use serde::{Deserialize, Serialize};
-
-// Include the generated protobuf code
-pub mod yae {
-  include!(concat!(env!("OUT_DIR"), "/yae.rs"));
-}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UiafData {
@@ -32,28 +26,9 @@ pub struct UiafAchievement {
   pub status: u32,
 }
 
-/// Convert Yae protobuf data to UIAF format
-pub fn convert_yae_to_uiaf(data: &[u8]) -> Result<UiafData, Box<dyn std::error::Error>> {
-  let achievement_data = yae::AchievementData::decode(data)?;
-  
-  let achievements: Vec<UiafAchievement> = achievement_data
-    .achievements
-    .iter()
-    .map(|a| UiafAchievement {
-      id: a.id,
-      timestamp: a.timestamp as i64,
-      current: a.current,
-      status: a.status,
-    })
-    .collect();
-
-  Ok(UiafData {
-    info: UiafInfo {
-      export_app: "Yae".to_string(),
-      export_timestamp: chrono::Utc::now().timestamp(),
-      export_app_version: "unknown".to_string(),
-      uiaf_version: "v1.1".to_string(),
-    },
-    list: achievements,
-  })
+/// Parse Yae JSON data to UIAF format
+pub fn parse_yae_data(data: &[u8]) -> Result<UiafData, Box<dyn std::error::Error>> {
+  let json_str = std::str::from_utf8(data)?;
+  let uiaf_data: UiafData = serde_json::from_str(json_str)?;
+  Ok(uiaf_data)
 }
