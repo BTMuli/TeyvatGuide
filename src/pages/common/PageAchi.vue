@@ -43,8 +43,14 @@
           <span>隐藏已完成</span>
         </div>
       </div>
-      <div class="top-link" title="使用Yae导入" @click="toYae()">
-        <v-icon>mdi-comment-question-outline</v-icon>
+      <div
+        class="top-link"
+        :title="yaeListening ? '停止 Yae 监听' : '使用 Yae 导入'"
+        @click="toYae()"
+      >
+        <v-icon :color="yaeListening ? 'var(--tgc-od-green)' : ''">
+          {{ yaeListening ? "mdi-lan-connect" : "mdi-comment-question-outline" }}
+        </v-icon>
       </div>
     </template>
   </v-app-bar>
@@ -88,6 +94,7 @@ import {
   verifyUiafData,
   verifyUiafDataClipboard,
 } from "@utils/UIAF.js";
+import { onYaeDataReceived, startYaeListener, stopYaeListener } from "@utils/Yae.js";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -97,6 +104,8 @@ const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).ma
 const route = useRoute();
 const router = useRouter();
 let achiListener: UnlistenFn | null = null;
+let yaeListener: UnlistenFn | null = null;
+const yaeListening = ref<boolean>(false);
 
 const search = ref<string>("");
 const isSearch = ref<boolean>(false);
@@ -278,13 +287,69 @@ async function deleteUid(): Promise<void> {
 }
 
 async function toYae(): Promise<void> {
-  await openUrl("https://github.com/HolographicHat/Yae");
+  // Check if on Windows
+  const isWindows = navigator.userAgent.includes("Windows");
+  if (!isWindows) {
+    showSnackbar.warn("Yae 仅支持 Windows 平台");
+    await openUrl("https://github.com/HolographicHat/Yae");
+    return;
+  }
+
+  if (yaeListening.value) {
+    // Stop listening
+    await stopYaeListener();
+    if (yaeListener !== null) {
+      yaeListener();
+      yaeListener = null;
+    }
+    yaeListening.value = false;
+    return;
+  }
+
+  // Start Yae listener
+  const started = await startYaeListener();
+  if (!started) {
+    return;
+  }
+
+  yaeListening.value = true;
+
+  // Listen for Yae data
+  yaeListener = await onYaeDataReceived(async (data: TGApp.Plugins.UIAF.Data) => {
+    await TGLogger.Info("[Achievements][toYae] 收到 Yae 数据");
+    
+    // Ask for UID
+    let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
+    if (uidInput === false) {
+      showSnackbar.cancel("已取消导入");
+      return;
+    }
+    if (uidInput === undefined) uidInput = uidCur.value.toString();
+    else if (isNaN(Number(uidInput))) {
+      showSnackbar.warn("请输入合法数字");
+      return;
+    }
+
+    await showLoading.start("正在导入 Yae 数据", `存档UID：${uidInput}`);
+    await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
+    await showLoading.end();
+    showSnackbar.success("导入成功，即将刷新页面");
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    window.location.reload();
+  });
 }
 
 onUnmounted(async () => {
   if (achiListener !== null) {
     achiListener();
     achiListener = null;
+  }
+  if (yaeListener !== null) {
+    yaeListener();
+    yaeListener = null;
+  }
+  if (yaeListening.value) {
+    await stopYaeListener();
   }
 });
 </script>
