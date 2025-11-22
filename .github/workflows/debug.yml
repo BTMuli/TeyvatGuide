@@ -1,6 +1,17 @@
 name: Build Debug for Mac
 on:
   workflow_dispatch:
+    inputs:
+      build-debug:
+        description: "Build debug version"
+        required: true
+        default: true
+        type: boolean
+      build-release:
+        description: "Build release version"
+        required: true
+        default: false
+        type: boolean
 jobs:
   build-debug-mac:
     permissions:
@@ -10,11 +21,11 @@ jobs:
       matrix:
         settings:
           - platform: macos-latest
-            args: "--target x86_64-apple-darwin --debug"
+            args: "--target x86_64-apple-darwin"
             target: "macos-intel"
             artifact: "debug-build-macos-intel"
           - platform: macos-latest
-            args: "--target aarch64-apple-darwin --debug"
+            args: "--target aarch64-apple-darwin"
             target: "macos-arm"
             artifact: "debug-build-macos-arm"
     runs-on: ${{ matrix.settings.platform }}
@@ -61,15 +72,54 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
+      - name: Build debug app
+        uses: tauri-apps/tauri-action@dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: ${{ matrix.settings.args }} --debug
+
       - name: Build app
         uses: tauri-apps/tauri-action@dev
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.settings.args }}
-
-      - name: Upload Debug Build Artifacts
+      # Build Debug
+      - name: Move Debug Intel
+        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-debug == 'true'
+        run: mv src-tauri/target/x86_64-apple-darwin/debug/bundle/dmg/*.dmg intel-debug.dmg
+      - name: Move Debug ARM
+        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-debug == 'true'
+        run: mv src-tauri/target/aarch64-apple-darwin/debug/bundle/dmg/*.dmg arm-debug.dmg
+      - name: Upload Debug Intel
+        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-debug == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.settings.artifact }}
-          path: src-tauri/target/*/debug/bundle/dmg/*.dmg
+          name: debug-macos-intel
+          path: intel-debug.dmg
+      - name: Upload Debug ARM
+        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-debug == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-macos-arm
+          path: arm-debug.dmg
+      # Build Release
+      - name: Move Release Intel
+        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-release == 'true'
+        run: mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg intel-release.dmg
+      - name: Move Release ARM
+        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-release == 'true'
+        run: mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg arm-release.dmg
+      - name: Upload Release Intel
+        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-release
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-macos-intel
+          path: intel-release.dmg
+      - name: Upload Release ARM
+        if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-release == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-macos-arm
+          path: arm-release.dmg
