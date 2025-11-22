@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package yae;
+
+// Yae achievement export data
+message AchievementExport {
+  ExportInfo info = 1;
+  repeated Achievement list = 2;
+}
+
+// Export metadata
+message ExportInfo {
+  string export_app = 1;
+  int64 export_timestamp = 2;
+  string export_app_version = 3;
+  string uiaf_version = 4;
+}
+
+// Individual achievement
+message Achievement {
+  uint32 id = 1;
+  int64 timestamp = 2;
+  uint32 current = 3;
+  uint32 status = 4;
+}

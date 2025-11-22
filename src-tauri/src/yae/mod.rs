@@ -9,4 +9,4 @@ mod proto;
 #[cfg(windows)]
 pub use pipe::{start_yae_listener, stop_yae_listener};
 
-pub use proto::parse_yae_data;
+pub use proto::parse_yae_protobuf;
