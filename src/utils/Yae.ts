@@ -57,7 +57,7 @@ export async function onYaeDataReceived(
 ): Promise<() => void> {
   const unlisten = await listen<string>("yae_data_received", (event) => {
     try {
-      const data = JSON.parse(event.payload) as TGApp.Plugins.UIAF.Data;
+      const data = <TGApp.Plugins.UIAF.Data>JSON.parse(event.payload);
       callback(data);
     } catch (error) {
       TGLogger.Error(`解析 Yae 数据失败: ${error}`);

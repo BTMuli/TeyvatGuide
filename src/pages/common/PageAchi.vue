@@ -317,7 +317,7 @@ async function toYae(): Promise<void> {
   // Listen for Yae data
   yaeListener = await onYaeDataReceived(async (data: TGApp.Plugins.UIAF.Data) => {
     await TGLogger.Info("[Achievements][toYae] 收到 Yae 数据");
-    
+
     // Ask for UID
     let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
     if (uidInput === false) {
