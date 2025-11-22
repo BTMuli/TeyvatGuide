@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package yae;
+
+// Yae achievement data structure
+message AchievementData {
+  repeated Achievement achievements = 1;
+}
+
+// Individual achievement entry
+message Achievement {
+  uint32 id = 1;           // Achievement ID
+  uint32 current = 2;      // Current progress
+  uint64 timestamp = 3;    // Completion timestamp
+  uint32 status = 4;       // Status: 0 = incomplete, 1 = complete
+}

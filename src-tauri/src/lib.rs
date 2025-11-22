@@ -6,10 +6,14 @@ mod client;
 mod commands;
 mod plugins;
 mod utils;
+#[cfg(windows)]
+mod yae;
 
 use crate::client::create_mhy_client;
 use crate::commands::{create_window, execute_js, get_dir_size, init_app};
 use crate::plugins::{build_log_plugin, build_si_plugin};
+#[cfg(windows)]
+use crate::yae::{start_yae_listener, stop_yae_listener};
 use tauri::{generate_context, generate_handler, Builder, Manager, Window, WindowEvent};
 
 // 窗口事件处理
@@ -61,7 +65,11 @@ pub fn run() {
       create_window,
       execute_js,
       get_dir_size,
-      create_mhy_client
+      create_mhy_client,
+      #[cfg(windows)]
+      start_yae_listener,
+      #[cfg(windows)]
+      stop_yae_listener
     ])
     .run(generate_context!())
     .expect("error while running tauri application");
