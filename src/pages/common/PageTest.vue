@@ -15,6 +15,7 @@
     </div>
     <div class="btn-list">
       <v-btn @click="test()" class="test-btn">测试</v-btn>
+      <v-btn @click="test2()" class="test-btn">测试2</v-btn>
     </div>
   </div>
 </template>
@@ -23,6 +24,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import useUserStore from "@store/user.js";
+import { invoke } from "@tauri-apps/api/core";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
 
@@ -55,6 +57,16 @@ async function test(): Promise<void> {
     }
   }
   console.log(list);
+}
+
+async function test2(): Promise<void> {
+  try {
+    await invoke("call_yae_dll", {
+      gamePath: "D:\\Games\\Genshin Impact bilibili\\games\\Genshin Impact Game\\YuanShen.exe",
+    });
+  } catch (e) {
+    console.error(e);
+  }
 }
 </script>
 <style lang="css" scoped>

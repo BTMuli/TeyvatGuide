@@ -30,7 +30,10 @@
     ],
     "targets": ["msi", "app", "dmg"],
     "windows": { "wix": { "language": "zh-CN" } },
-    "macOS": {}
+    "macOS": {},
+    "resources": {
+      "lib/YaeAchievementLib.dll": "resources/YaeAchievementLib.dll"
+    }
   },
   "app": {
     "withGlobalTauri": true,
