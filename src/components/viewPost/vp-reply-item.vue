@@ -52,7 +52,12 @@
             :close-on-content-click="false"
             v-model="showSub"
           >
-            <v-list class="tpr-reply-sub" width="300px" max-height="400px">
+            <v-list
+              class="tpr-reply-sub"
+              width="300px"
+              max-height="400px"
+              @scroll="handleSubScroll"
+            >
               <VpReplyItem
                 v-for="(reply, index) in subReplies"
                 :key="index"
@@ -121,6 +126,7 @@ type TprReplyProps =
 const props = defineProps<TprReplyProps>();
 const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
 let subListener: UnlistenFn | null = null;
+let closeSubListener: UnlistenFn | null = null;
 
 console.log("TprReply", toRaw(props.modelValue));
 
@@ -129,6 +135,7 @@ const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const subReplies = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
+const existingIds = new Set<string>();
 const levelColor = computed<string>(() => {
   const level = props.modelValue.user.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
@@ -138,11 +145,20 @@ const levelColor = computed<string>(() => {
   return "var(--tgc-od-white)";
 });
 
-onMounted(async () => (props.mode === "main" ? (subListener = await listenSub()) : null));
+onMounted(async () => {
+  if (props.mode === "main") {
+    subListener = await listenSub();
+    closeSubListener = await listenCloseSub();
+  }
+});
 onUnmounted(() => {
   if (subListener !== null) {
     subListener();
     subListener = null;
+  }
+  if (closeSubListener !== null) {
+    closeSubListener();
+    closeSubListener = null;
   }
 });
 
@@ -159,6 +175,26 @@ async function listenSub(): Promise<UnlistenFn> {
   });
 }
 
+async function listenCloseSub(): Promise<UnlistenFn> {
+  return await event.listen<void>("closeReplySub", async () => {
+    if (showSub.value) showSub.value = false;
+  });
+}
+
+async function handleSubScroll(e: globalThis.Event): Promise<void> {
+  const target = <HTMLElement>e.target;
+  if (!target) return;
+  // Check if scrolled to bottom for auto-load
+  const scrollTop = target.scrollTop;
+  const clientHeight = target.clientHeight;
+  const scrollHeight = target.scrollHeight;
+  if (scrollTop + clientHeight >= scrollHeight - 1) {
+    if (!loading.value && !isLast.value) {
+      await loadSub();
+    }
+  }
+}
+
 async function share(): Promise<void> {
   const replyDom = document.querySelector<HTMLElement>(`#${replyId}`);
   if (replyDom === null) return;
@@ -166,6 +202,17 @@ async function share(): Promise<void> {
 }
 
 async function showReply(): Promise<void> {
+  if (subReplies.value.length === 0 && props.modelValue.sub_replies?.length > 0) {
+    subReplies.value = [...props.modelValue.sub_replies];
+    // Populate existingIds with embedded sub-replies
+    props.modelValue.sub_replies.forEach((r) => existingIds.add(r.reply.reply_id));
+    const lastReply = props.modelValue.sub_replies[props.modelValue.sub_replies.length - 1];
+    if (lastReply?.reply?.reply_id) lastId.value = lastReply.reply.reply_id;
+    if (props.modelValue.sub_replies.length >= props.modelValue.sub_reply_count) {
+      isLast.value = true;
+    }
+    return;
+  }
   if (subReplies.value.length > 0) return;
   if (isLast.value) return;
   await loadSub();
@@ -186,7 +233,11 @@ async function loadSub(): Promise<void> {
   }
   isLast.value = resp.is_last;
   lastId.value = resp.last_id;
-  subReplies.value = subReplies.value.concat(resp.list);
+  // Filter out duplicates using persistent existingIds Set
+  const newReplies = resp.list.filter((r) => !existingIds.has(r.reply.reply_id));
+  // Add new reply IDs to the Set
+  newReplies.forEach((r) => existingIds.add(r.reply.reply_id));
+  subReplies.value = subReplies.value.concat(newReplies);
   loading.value = false;
   if (isLast.value) showSnackbar.warn("没有更多了");
 }

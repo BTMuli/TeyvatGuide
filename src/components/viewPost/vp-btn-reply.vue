@@ -51,7 +51,7 @@
             </div>
           </div>
         </div>
-        <v-list class="tpr-reply-list">
+        <v-list class="tpr-reply-list" @scroll="handleListScroll">
           <VpReplyItem
             v-for="(item, index) in reply"
             :key="index"
@@ -75,6 +75,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
+import { emit } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 
@@ -116,6 +117,22 @@ watch(
     await reloadReply();
   },
 );
+
+async function handleListScroll(e: Event): Promise<void> {
+  const target = <HTMLElement>e.target;
+  if (!target) return;
+  // Emit event to close sub-reply menus when parent scrolls
+  await emit("closeReplySub");
+  // Check if scrolled to bottom for auto-load
+  const scrollTop = target.scrollTop;
+  const clientHeight = target.clientHeight;
+  const scrollHeight = target.scrollHeight;
+  if (scrollTop + clientHeight >= scrollHeight - 1) {
+    if (!loading.value && !isLast.value) {
+      await loadReply();
+    }
+  }
+}
 
 async function showReply(): Promise<void> {
   if (reply.value.length > 0) return;
