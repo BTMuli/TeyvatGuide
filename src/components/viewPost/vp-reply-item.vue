@@ -135,6 +135,7 @@ const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const subReplies = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
+const existingIds = new Set<string>();
 const levelColor = computed<string>(() => {
   const level = props.modelValue.user.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
@@ -203,6 +204,8 @@ async function share(): Promise<void> {
 async function showReply(): Promise<void> {
   if (subReplies.value.length === 0 && props.modelValue.sub_replies?.length > 0) {
     subReplies.value = [...props.modelValue.sub_replies];
+    // Populate existingIds with embedded sub-replies
+    props.modelValue.sub_replies.forEach((r) => existingIds.add(r.reply.reply_id));
     const lastReply = props.modelValue.sub_replies[props.modelValue.sub_replies.length - 1];
     if (lastReply?.reply?.reply_id) lastId.value = lastReply.reply.reply_id;
     if (props.modelValue.sub_replies.length >= props.modelValue.sub_reply_count) {
@@ -230,9 +233,10 @@ async function loadSub(): Promise<void> {
   }
   isLast.value = resp.is_last;
   lastId.value = resp.last_id;
-  // Filter out duplicates by checking reply_id
-  const existingIds = new Set(subReplies.value.map((r) => r.reply.reply_id));
+  // Filter out duplicates using persistent existingIds Set
   const newReplies = resp.list.filter((r) => !existingIds.has(r.reply.reply_id));
+  // Add new reply IDs to the Set
+  newReplies.forEach((r) => existingIds.add(r.reply.reply_id));
   subReplies.value = subReplies.value.concat(newReplies);
   loading.value = false;
   if (isLast.value) showSnackbar.warn("没有更多了");
