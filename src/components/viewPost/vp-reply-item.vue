@@ -51,9 +51,13 @@
             location="end"
             :close-on-content-click="false"
             v-model="showSub"
-            scroll-strategy="close"
           >
-            <v-list class="tpr-reply-sub" width="300px" max-height="400px" ref="subReplyListRef">
+            <v-list
+              class="tpr-reply-sub"
+              width="300px"
+              max-height="400px"
+              @scroll="handleSubScroll"
+            >
               <VpReplyItem
                 v-for="(reply, index) in subReplies"
                 :key="index"
@@ -104,7 +108,6 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
@@ -112,16 +115,7 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getNearTime, getUserAvatar, timestampToDate } from "@utils/toolFunc.js";
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  ref,
-  shallowRef,
-  toRaw,
-  useTemplateRef,
-  watch,
-} from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
 
 import TpParser from "./tp-parser.vue";
 
@@ -132,6 +126,7 @@ type TprReplyProps =
 const props = defineProps<TprReplyProps>();
 const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
 let subListener: UnlistenFn | null = null;
+let closeSubListener: UnlistenFn | null = null;
 
 console.log("TprReply", toRaw(props.modelValue));
 
@@ -149,22 +144,20 @@ const levelColor = computed<string>(() => {
   return "var(--tgc-od-white)";
 });
 
-const subReplyListRef = useTemplateRef<HTMLElement>("subReplyListRef");
-const { isReachBottom } = useBoxReachBottom(subReplyListRef);
-
-watch(
-  () => isReachBottom.value,
-  async () => {
-    if (!isReachBottom.value || loading.value || isLast.value || props.mode !== "main") return;
-    await loadSub();
-  },
-);
-
-onMounted(async () => (props.mode === "main" ? (subListener = await listenSub()) : null));
+onMounted(async () => {
+  if (props.mode === "main") {
+    subListener = await listenSub();
+    closeSubListener = await listenCloseSub();
+  }
+});
 onUnmounted(() => {
   if (subListener !== null) {
     subListener();
     subListener = null;
+  }
+  if (closeSubListener !== null) {
+    closeSubListener();
+    closeSubListener = null;
   }
 });
 
@@ -179,6 +172,26 @@ async function listenSub(): Promise<UnlistenFn> {
   return await event.listen<string>("openReplySub", async (e: Event<string>) => {
     if (e.payload !== props.modelValue.reply.reply_id) if (showSub.value) showSub.value = false;
   });
+}
+
+async function listenCloseSub(): Promise<UnlistenFn> {
+  return await event.listen<void>("closeReplySub", async () => {
+    if (showSub.value) showSub.value = false;
+  });
+}
+
+function handleSubScroll(e: globalThis.Event): void {
+  const target = <HTMLElement>e.target;
+  if (!target) return;
+  // Check if scrolled to bottom for auto-load
+  const scrollTop = target.scrollTop;
+  const clientHeight = target.clientHeight;
+  const scrollHeight = target.scrollHeight;
+  if (scrollTop + clientHeight >= scrollHeight - 1) {
+    if (!loading.value && !isLast.value) {
+      loadSub();
+    }
+  }
 }
 
 async function share(): Promise<void> {

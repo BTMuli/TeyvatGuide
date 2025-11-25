@@ -51,7 +51,7 @@
             </div>
           </div>
         </div>
-        <v-list class="tpr-reply-list" ref="replyListRef">
+        <v-list class="tpr-reply-list" @scroll="handleListScroll">
           <VpReplyItem
             v-for="(item, index) in reply"
             :key="index"
@@ -73,11 +73,11 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
+import { emit } from "@tauri-apps/api/event";
 import { storeToRefs } from "pinia";
-import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 
 import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
@@ -110,17 +110,6 @@ const replyOrder = computed<1 | 2 | undefined>(() => {
   return undefined;
 });
 
-const replyListRef = useTemplateRef<HTMLElement>("replyListRef");
-const { isReachBottom } = useBoxReachBottom(replyListRef);
-
-watch(
-  () => isReachBottom.value,
-  async () => {
-    if (!isReachBottom.value || loading.value || isLast.value) return;
-    await loadReply();
-  },
-);
-
 watch(
   () => orderType.value,
   async () => {
@@ -128,6 +117,22 @@ watch(
     await reloadReply();
   },
 );
+
+function handleListScroll(e: Event): void {
+  const target = <HTMLElement>e.target;
+  if (!target) return;
+  // Emit event to close sub-reply menus when parent scrolls
+  emit("closeReplySub");
+  // Check if scrolled to bottom for auto-load
+  const scrollTop = target.scrollTop;
+  const clientHeight = target.clientHeight;
+  const scrollHeight = target.scrollHeight;
+  if (scrollTop + clientHeight >= scrollHeight - 1) {
+    if (!loading.value && !isLast.value) {
+      loadReply();
+    }
+  }
+}
 
 async function showReply(): Promise<void> {
   if (reply.value.length > 0) return;
