@@ -180,7 +180,7 @@ async function listenCloseSub(): Promise<UnlistenFn> {
   });
 }
 
-function handleSubScroll(e: globalThis.Event): void {
+async function handleSubScroll(e: globalThis.Event): Promise<void> {
   const target = <HTMLElement>e.target;
   if (!target) return;
   // Check if scrolled to bottom for auto-load
@@ -189,7 +189,7 @@ function handleSubScroll(e: globalThis.Event): void {
   const scrollHeight = target.scrollHeight;
   if (scrollTop + clientHeight >= scrollHeight - 1) {
     if (!loading.value && !isLast.value) {
-      loadSub();
+      await loadSub();
     }
   }
 }
@@ -201,15 +201,10 @@ async function share(): Promise<void> {
 }
 
 async function showReply(): Promise<void> {
-  // Initialize with embedded sub-replies if available and not already loaded
   if (subReplies.value.length === 0 && props.modelValue.sub_replies?.length > 0) {
     subReplies.value = [...props.modelValue.sub_replies];
-    // Set lastId to the last embedded reply's reply_id for pagination
     const lastReply = props.modelValue.sub_replies[props.modelValue.sub_replies.length - 1];
-    if (lastReply?.reply?.reply_id) {
-      lastId.value = lastReply.reply.reply_id;
-    }
-    // If embedded replies count matches total count, we already have all
+    if (lastReply?.reply?.reply_id) lastId.value = lastReply.reply.reply_id;
     if (props.modelValue.sub_replies.length >= props.modelValue.sub_reply_count) {
       isLast.value = true;
     }
