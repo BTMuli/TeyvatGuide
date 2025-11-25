@@ -51,6 +51,7 @@
             location="end"
             :close-on-content-click="false"
             v-model="showSub"
+            scroll-strategy="close"
           >
             <v-list class="tpr-reply-sub" width="300px" max-height="400px">
               <VpReplyItem
