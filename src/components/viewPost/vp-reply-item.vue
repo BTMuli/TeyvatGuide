@@ -201,6 +201,20 @@ async function share(): Promise<void> {
 }
 
 async function showReply(): Promise<void> {
+  // Initialize with embedded sub-replies if available and not already loaded
+  if (subReplies.value.length === 0 && props.modelValue.sub_replies?.length > 0) {
+    subReplies.value = [...props.modelValue.sub_replies];
+    // Set lastId to the last embedded reply's reply_id for pagination
+    const lastReply = props.modelValue.sub_replies[props.modelValue.sub_replies.length - 1];
+    if (lastReply?.reply?.reply_id) {
+      lastId.value = lastReply.reply.reply_id;
+    }
+    // If embedded replies count matches total count, we already have all
+    if (props.modelValue.sub_replies.length >= props.modelValue.sub_reply_count) {
+      isLast.value = true;
+    }
+    return;
+  }
   if (subReplies.value.length > 0) return;
   if (isLast.value) return;
   await loadSub();
