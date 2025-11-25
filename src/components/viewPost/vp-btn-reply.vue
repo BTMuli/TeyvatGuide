@@ -51,7 +51,7 @@
             </div>
           </div>
         </div>
-        <v-list class="tpr-reply-list">
+        <v-list class="tpr-reply-list" ref="replyListRef">
           <VpReplyItem
             v-for="(item, index) in reply"
             :key="index"
@@ -73,10 +73,11 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import { storeToRefs } from "pinia";
-import { computed, ref, shallowRef, watch } from "vue";
+import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
@@ -108,6 +109,17 @@ const replyOrder = computed<1 | 2 | undefined>(() => {
   if (orderType.value === "oldest") return 1;
   return undefined;
 });
+
+const replyListRef = useTemplateRef<HTMLElement>("replyListRef");
+const { isReachBottom } = useBoxReachBottom(replyListRef);
+
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value || loading.value || isLast.value) return;
+    await loadReply();
+  },
+);
 
 watch(
   () => orderType.value,

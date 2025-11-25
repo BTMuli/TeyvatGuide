@@ -53,7 +53,7 @@
             v-model="showSub"
             scroll-strategy="close"
           >
-            <v-list class="tpr-reply-sub" width="300px" max-height="400px">
+            <v-list class="tpr-reply-sub" width="300px" max-height="400px" ref="subReplyListRef">
               <VpReplyItem
                 v-for="(reply, index) in subReplies"
                 :key="index"
@@ -104,6 +104,7 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
@@ -111,7 +112,16 @@ import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getNearTime, getUserAvatar, timestampToDate } from "@utils/toolFunc.js";
-import { computed, onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  toRaw,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import TpParser from "./tp-parser.vue";
 
@@ -138,6 +148,17 @@ const levelColor = computed<string>(() => {
   if (level > 12) return "var(--tgc-od-orange)";
   return "var(--tgc-od-white)";
 });
+
+const subReplyListRef = useTemplateRef<HTMLElement>("subReplyListRef");
+const { isReachBottom } = useBoxReachBottom(subReplyListRef);
+
+watch(
+  () => isReachBottom.value,
+  async () => {
+    if (!isReachBottom.value || loading.value || isLast.value || props.mode !== "main") return;
+    await loadSub();
+  },
+);
 
 onMounted(async () => (props.mode === "main" ? (subListener = await listenSub()) : null));
 onUnmounted(() => {
