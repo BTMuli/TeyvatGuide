@@ -230,7 +230,10 @@ async function loadSub(): Promise<void> {
   }
   isLast.value = resp.is_last;
   lastId.value = resp.last_id;
-  subReplies.value = subReplies.value.concat(resp.list);
+  // Filter out duplicates by checking reply_id
+  const existingIds = new Set(subReplies.value.map((r) => r.reply.reply_id));
+  const newReplies = resp.list.filter((r) => !existingIds.has(r.reply.reply_id));
+  subReplies.value = subReplies.value.concat(newReplies);
   loading.value = false;
   if (isLast.value) showSnackbar.warn("没有更多了");
 }
