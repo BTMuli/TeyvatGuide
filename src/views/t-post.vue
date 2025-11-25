@@ -519,6 +519,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   position: relative;
   display: flex;
   width: fit-content;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   margin-top: 4px;
@@ -636,6 +637,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   display: flex;
   align-items: center;
   justify-content: start;
+  margin-top: 4px;
   color: var(--box-text-4);
   column-gap: 8px;
   font-size: 12px;
