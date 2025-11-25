@@ -11,6 +11,7 @@
         {{ postViewWide ? "mdi-arrow-collapse-horizontal" : "mdi-arrow-expand-horizontal" }}
       </v-icon>
     </div>
+    <div class="tpw2-beta-hint" title="测试功能，可能存在适配问题">β</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -73,5 +74,22 @@ function switchPostWidth(): void {
   height: 20px;
   align-items: center;
   justify-content: center;
+}
+
+.tpw2-beta-hint {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tgc-od-green);
+  box-shadow: 1px 3px 6px var(--common-shadow-2);
+  color: var(--tgc-blue-1);
+  font-size: 10px;
+  font-weight: bold;
 }
 </style>
