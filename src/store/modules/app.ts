@@ -1,7 +1,6 @@
 /**
- * @file store/modules/app.ts
- * @description App store module
- * @since Beta v0.8.3
+ * 应用状态管理
+ * @since Beta v0.8.7
  */
 
 import { AnnoLangEnum } from "@enum/anno.js";
@@ -11,54 +10,64 @@ import { getInitDeviceInfo } from "@utils/toolFunc.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-// 用于存储用户数据的路径
+/* 用于存储用户数据的路径 */
 const userDataDir: Readonly<string> = `${await path.appLocalDataDir()}${path.sep()}userData`;
-// 用于存放数据库的路径
+/* 用于存放数据库的路径 */
 const dbDataPath: Readonly<string> = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
-// 用于存放日志的路径
+/* 用于存放日志的路径 */
 const logDataDir: Readonly<string> = await path.appLogDir();
-
+/* 咨讯类型 TODO:改成枚举类 */
 export type NewsType = "notice" | "activity" | "news";
 
 const useAppStore = defineStore(
   "app",
   () => {
-    // 应用打包时间
+    /* 应用打包时间 */
     const buildTime = ref<string>("");
-    // 侧边栏设置
+    /* 侧边栏设置 */
     const sidebar = ref({ collapse: true });
-    // 开发者模式
+    /* 开发者模式 */
     const devMode = ref<boolean>(false);
-    // 应用主题
+    /* 应用主题 */
     const theme = ref<string>("default");
-    // 是否登录
+    /* 是否登录 */
     const isLogin = ref<boolean>(false);
-    // 用户数据目录
+    /* 用户数据目录 */
     const userDir = ref<string>(userDataDir);
-    // 数据库路径
+    /* 数据库路径 */
     const dbPath = ref<Readonly<string>>(dbDataPath);
-    // 日志目录
+    /* 日志目录 */
     const logDir = ref<string>(logDataDir);
-    // 游戏安装目录
+    /* 游戏安装目录 */
     const gameDir = ref<string>("未设置");
-    // 设备信息
+    /* 设备信息 */
     const deviceInfo = ref<TGApp.App.Device.DeviceInfo>(getInitDeviceInfo());
-    // 服务器
+    /* 服务器 */
     const server = ref<TGApp.Game.Base.ServerTypeEnum>(GameServerEnum.CN_QD01);
-    // 语言
+    /* 语言 */
     const lang = ref<TGApp.BBS.Announcement.AnnoLangEnum>(AnnoLangEnum.CHS);
-    // 最近的咨讯类型
+    /* 最近的咨讯类型 */
     const recentNewsType = ref<NewsType>("notice");
-    // 是否开启分辨率回正
+    /* 是否开启分辨率回正 */
     const needResize = ref<string>("true");
-    // 分享图生成默认设置，为0表示默认保存到文件，为数字表示当大小超过xMB时保存到文件，否则保存到剪贴板
+    /**
+     * 分享图生成默认设置
+     * @remarks 为0表示默认保存到文件，为数字表示当大小超过xMB时保存到文件，否则保存到剪贴板
+     */
     const shareDefaultFile = ref<number>(10);
-    // 图像压缩质量
+    /* 图像压缩质量 */
     const imageQualityPercent = ref<number>(80);
-    // 无痕浏览
+    /* 无痕浏览 */
     const incognito = ref<boolean>(true);
+    /* 帖子宽窄视图 */
+    const postViewWide = ref<boolean>(true);
 
-    // 初始化
+    /**
+     * 初始化应用状态
+     * @since Beta v0.8.7
+     * @remarks 用于首次运行或重置应用状态
+     * @returns void
+     */
     function init(): void {
       devMode.value = false;
       theme.value = "default";
@@ -72,18 +81,35 @@ const useAppStore = defineStore(
       shareDefaultFile.value = 10;
       imageQualityPercent.value = 10;
       incognito.value = true;
+      postViewWide.value = true;
       initDevice();
     }
 
+    /**
+     * 切换应用主题
+     * @since unknown
+     * @returns void
+     */
     function changeTheme(): void {
       if (theme.value === "default") theme.value = "dark";
       else theme.value = "default";
     }
 
+    /**
+     * 初始化设备信息
+     * @since unknown
+     * @returns void
+     */
     function initDevice(): void {
       deviceInfo.value = getInitDeviceInfo();
     }
 
+    /**
+     * 获取图片压缩后的URL
+     * @param {string} url 图片原始URL
+     * @param {string} [fmt] 图片格式
+     * @returns {string} 压缩后的图片URL
+     */
     function getImageUrl(url: string, fmt?: string): string {
       let check = true;
       if (fmt && !["jpg", "png", "webp", "gif", "jpeg"].includes(fmt.toLowerCase())) check = false;
@@ -109,6 +135,7 @@ const useAppStore = defineStore(
       shareDefaultFile,
       imageQualityPercent,
       incognito,
+      postViewWide,
       init,
       changeTheme,
       getImageUrl,
@@ -134,6 +161,7 @@ const useAppStore = defineStore(
           "imageQualityPercent",
           "incognito",
           "sidebar",
+          "postViewWide",
         ],
       },
       {

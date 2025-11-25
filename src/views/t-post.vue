@@ -1,6 +1,7 @@
 <template>
   <TSwitchTheme />
   <TPinWin />
+  <TPostWidth />
   <VpBtnCollect :model-value="postId" :data="postData" />
   <TShareBtn selector=".tp-post-body" :title="`Post_${postId}`" />
   <VpBtnReply :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
@@ -21,32 +22,34 @@
             <span>{{ postData.forum.name }}</span>
           </div>
         </div>
-        <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
-          <v-icon size="16">mdi-eye</v-icon>
-          <span>{{ postData?.stat?.view_num }}</span>
-        </div>
-        <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
-          <v-icon size="16">mdi-star</v-icon>
-          <span>{{ postData?.stat?.bookmark_num }}</span>
-        </div>
-        <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
-          <v-icon size="16">mdi-comment</v-icon>
-          <span>{{ postData?.stat?.reply_num }}</span>
-        </div>
-        <!-- TODO: 展示不同种类点赞图标&数量 -->
-        <div
-          class="mpm-item"
-          :title="`点赞数：${postData?.stat?.like_num}`"
-          @click="tryLike()"
-          :class="{ like: isLike }"
-        >
-          <v-icon size="16">mdi-thumb-up</v-icon>
-          <span>{{ postData?.stat?.like_num }}</span>
-        </div>
-        <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
-          <v-icon size="16">mdi-share-variant</v-icon>
-          <span>{{ postData?.stat?.forward_num }}</span>
-        </div>
+        <template v-if="postViewWide">
+          <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
+            <v-icon size="16">mdi-eye</v-icon>
+            <span>{{ postData?.stat?.view_num }}</span>
+          </div>
+          <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
+            <v-icon size="16">mdi-star</v-icon>
+            <span>{{ postData?.stat?.bookmark_num }}</span>
+          </div>
+          <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
+            <v-icon size="16">mdi-comment</v-icon>
+            <span>{{ postData?.stat?.reply_num }}</span>
+          </div>
+          <!-- TODO: 展示不同种类点赞图标&数量 -->
+          <div
+            class="mpm-item"
+            :title="`点赞数：${postData?.stat?.like_num}`"
+            @click="tryLike()"
+            :class="{ like: isLike }"
+          >
+            <v-icon size="16">mdi-thumb-up</v-icon>
+            <span>{{ postData?.stat?.like_num }}</span>
+          </div>
+          <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
+            <v-icon size="16">mdi-share-variant</v-icon>
+            <span>{{ postData?.stat?.forward_num }}</span>
+          </div>
+        </template>
       </div>
       <TpAvatar
         :data="postData.user"
@@ -99,6 +102,34 @@
         @click="toTopic(topic)"
       />
     </div>
+    <div class="tp-post-data" v-if="!postViewWide">
+      <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
+        <v-icon size="16">mdi-eye</v-icon>
+        <span>{{ postData?.stat?.view_num }}</span>
+      </div>
+      <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
+        <v-icon size="16">mdi-star</v-icon>
+        <span>{{ postData?.stat?.bookmark_num }}</span>
+      </div>
+      <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
+        <v-icon size="16">mdi-comment</v-icon>
+        <span>{{ postData?.stat?.reply_num }}</span>
+      </div>
+      <!-- TODO: 展示不同种类点赞图标&数量 -->
+      <div
+        class="mpm-item"
+        :title="`点赞数：${postData?.stat?.like_num}`"
+        @click="tryLike()"
+        :class="{ like: isLike }"
+      >
+        <v-icon size="16">mdi-thumb-up</v-icon>
+        <span>{{ postData?.stat?.like_num }}</span>
+      </div>
+      <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
+        <v-icon size="16">mdi-share-variant</v-icon>
+        <span>{{ postData?.stat?.forward_num }}</span>
+      </div>
+    </div>
     <div class="tp-post-subtitle">
       <span :title="`更新于:${getDate(postData.post.updated_at)}`">
         创建于:{{ getDate(postData.post.created_at) }}
@@ -126,6 +157,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TPinWin from "@comp/app/t-pinWin.vue";
+import TPostWidth from "@comp/app/t-postWidth.vue";
 import TShareBtn from "@comp/app/t-shareBtn.vue";
 import TSwitchTheme from "@comp/app/t-switchTheme.vue";
 import showLoading from "@comp/func/loading.js";
@@ -151,10 +183,10 @@ import TGClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createTGWindow } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { computed, onBeforeMount, onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { useRoute } from "vue-router";
 
-const { incognito } = storeToRefs(useAppStore());
+const { incognito, postViewWide } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 const { cookie } = storeToRefs(useUserStore());
 
@@ -167,6 +199,7 @@ const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 const renderPost = shallowRef<Array<TGApp.BBS.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.BBS.Post.FullData>();
+const viewWidth = computed<string>(() => (postViewWide.value ? "800px" : "400px"));
 
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;
@@ -453,18 +486,17 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 @use "@styles/github.styles.scss" as github-styles;
 
 .tp-post-body {
-  width: 800px;
+  width: v-bind(viewWidth); /* stylelint-disable-line value-keyword-case */
   margin: 0 auto;
   font-family: var(--font-text);
+  transition: width 0.3s ease-in-out;
 }
 
 .tp-post-title {
-  display: flex;
+  position: relative;
   width: fit-content;
-  align-items: center;
-  justify-content: start;
+  margin-bottom: 4px;
   color: var(--common-text-title);
-  column-gap: 4px;
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
@@ -476,6 +508,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   justify-content: center;
   padding: 0 4px;
   border-radius: 4px;
+  margin-right: 4px;
   background: var(--common-shadow-1);
   color: var(--box-text-5);
   font-size: 16px;
@@ -488,7 +521,8 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   width: fit-content;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   column-gap: 8px;
   font-size: 12px;
   opacity: 0.8;
@@ -507,7 +541,7 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 .tp-post-info {
   position: relative;
   display: flex;
-  align-items: end;
+  align-items: v-bind("postViewWide ? 'end' : 'center'");
   justify-content: space-between;
   column-gap: 8px;
 }
@@ -525,18 +559,19 @@ function handleUser(user: TGApp.BBS.Post.User): void {
 
 .tp-post-version {
   position: absolute;
-  top: 0;
+  top: v-bind("postViewWide ? '0' : '42px'");
   left: 0;
   color: var(--box-text-1);
-  font-family: var(--font-title);
-  font-size: 14px;
-  opacity: 0.6;
+  font-size: v-bind("postViewWide ? '12px' : '10px'");
+  opacity: 0.3;
 }
 
 .tp-post-meta {
   display: flex;
   align-items: flex-end;
   justify-content: start;
+
+  // flex-wrap: wrap;
   color: var(--box-text-4);
   column-gap: 8px;
   font-size: 14px;
@@ -594,6 +629,16 @@ function handleUser(user: TGApp.BBS.Post.User): void {
   align-items: center;
   justify-content: start;
   gap: 8px 4px;
+}
+
+.tp-post-data {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  color: var(--box-text-4);
+  column-gap: 8px;
+  font-size: 12px;
 }
 
 .tp-post-contribution {
