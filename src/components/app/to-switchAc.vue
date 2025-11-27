@@ -122,6 +122,7 @@ async function tryConfirm(): Promise<void> {
     await userStore.switchGameAccount(game.gameUid);
     showSnackbar.success(`成功切换到用户${uid.value}的游戏UID${game.gameUid}`);
     await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${game.gameUid}成功`);
+    visible.value = false;
   }
 }
 </script>

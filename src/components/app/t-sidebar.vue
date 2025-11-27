@@ -237,7 +237,9 @@
           prepend-icon="mdi-account-switch"
           v-if="isLogin"
           :disabled="isTryLogin"
-        />
+        >
+          <v-list-item-title>切换账号</v-list-item-title>
+        </v-list-item>
         <!-- 主题切换 -->
         <v-list-item
           :title.attr="themeTitle"
