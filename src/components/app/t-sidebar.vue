@@ -258,6 +258,7 @@
   </v-navigation-drawer>
   <vp-overlay-follow v-model="showFollow" />
   <ToGameLogin v-model="showLoginQr" @success="tryGetTokens" :launcher="false" />
+  <ToSwitchAc v-model="showAcSwitch" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -279,6 +280,8 @@ import mhyClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+
+import ToSwitchAc from "./to-switchAc.vue";
 
 const { sidebar, theme, isLogin, recentNewsType } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
