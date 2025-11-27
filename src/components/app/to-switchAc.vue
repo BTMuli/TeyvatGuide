@@ -44,7 +44,6 @@
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
-import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
@@ -106,11 +105,6 @@ async function tryConfirm(): Promise<void> {
     showSnackbar.warn("无需切换当前账号");
     return;
   }
-  const check = await showDialog.check(
-    "确认切换账号？",
-    `UID: ${curUid.value}\n游戏UID: ${curGameUid.value}`,
-  );
-  if (!check) return;
   const acFind = ac.value.find((u) => u.user.uid === curUid.value);
   if (!acFind) {
     showSnackbar.error("未找到对应用户信息，请重试");
