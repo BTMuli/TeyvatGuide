@@ -1,3 +1,4 @@
+<!-- 投票组件 -->
 <template>
   <div class="tp-vote-box">
     <div class="tp-vote-info">
@@ -22,6 +23,8 @@
 </template>
 <script lang="ts" setup>
 import ApiHubReq from "@req/apiHubReq.js";
+import useAppStore from "@store/app.js";
+import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef } from "vue";
 
 type TpVote = { insert: { vote: { id: string; uid: string } } };
@@ -32,6 +35,8 @@ type TpVoteInfo = { title: string; count: number; is_over: boolean; data: Array<
 const props = defineProps<TpVoteProps>();
 const votes = shallowRef<TpVoteInfo>();
 const maxCnt = ref<number>(0);
+
+const { postViewWide } = storeToRefs(useAppStore());
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
@@ -69,6 +74,7 @@ function getWidth(item: TpVoteData): string {
 
 .tp-vote-info {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
 }
@@ -81,12 +87,13 @@ function getWidth(item: TpVoteData): string {
 .tp-vote-list {
   display: grid;
   gap: 12px 16px;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: v-bind("postViewWide ? '1fr 1fr' : '1fr'");
 }
 
 .tp-vote-item {
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 4px;
 }
 
@@ -94,6 +101,7 @@ function getWidth(item: TpVoteData): string {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+  column-gap: 4px;
 
   .title {
     font-size: 16px;
