@@ -1,3 +1,4 @@
+<!-- 版块小组件菜单 -->
 <template>
   <div class="tgn-container">
     <div v-for="navItem in nav" :key="navItem.id" class="tgn-nav" @click="toNav(navItem)">
@@ -13,7 +14,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ApiHubReq from "@req/apiHubReq.js";
@@ -27,18 +27,19 @@ import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
+import TMiImg from "./t-mi-img.vue";
 import ToLivecode from "./to-livecode.vue";
+
+const { isLogin } = storeToRefs(useAppStore());
 
 const model = defineModel<number>({ default: 2 });
 
-const { isLogin } = storeToRefs(useAppStore());
+const actId = ref<string>();
+const showOverlay = ref<boolean>(false);
 const nav = shallowRef<TGApp.BBS.Navigator.Navigator[]>([]);
 const codeData = shallowRef<TGApp.BBS.Navigator.CodeData[]>([]);
-const showOverlay = ref<boolean>(false);
-const actId = ref<string>();
-
 const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
-  const liveNames = ["前瞻直播", "前瞻节目", "直播兑换码"];
+  const liveNames = ["前瞻直播", "前瞻节目", "直播兑换码", "特别节目"];
   const find = nav.value.find((item) => liveNames.includes(item.name));
   if (find) return find;
   return nav.value.find((item) => item.name.includes("前瞻"));
@@ -51,34 +52,55 @@ watch(
   async () => await loadNav(),
 );
 
+/**
+ * 加载组件数据
+ * @returns {Promise<void>}
+ */
 async function loadNav(): Promise<void> {
-  nav.value = await ApiHubReq.home(model.value);
+  try {
+    nav.value = await ApiHubReq.home(model.value);
+    console.debug(`[TGameNav][loadNav] 组件数据：`, nav.value);
+  } catch (e) {
+    await TGLogger.Error(`[TGameNav][loadNav] 加载组件数据失败：${e}`);
+  }
 }
 
+/**
+ * 获取兑换码
+ * @returns {Promise<void>}
+ */
 async function tryGetCode(): Promise<void> {
   if (!hasNav.value) return;
   const actIdFind = new URL(hasNav.value.app_path).searchParams.get("act_id");
   if (!actIdFind) {
     showSnackbar.warn("未找到活动ID");
+    await TGLogger.Warn(`[TGameNav][tryGetCode] 未找到活动ID，链接：${hasNav.value.app_path}`);
     return;
   }
   actId.value = actIdFind;
   const res = await OtherApi.code(actIdFind);
   if (!Array.isArray(res)) {
     showSnackbar.warn(`[${res.retcode}] ${res.message}`);
+    await TGLogger.Warn(`[TGameNav][tryGetCode] 获取兑换码失败：${JSON.stringify(res)}`);
     return;
   }
   codeData.value = res;
+  console.debug(`[TGameNave][tryGetCode] 兑换码数据：`, codeData.value);
   showSnackbar.success("获取兑换码成功");
-  await TGLogger.Info(JSON.stringify(res));
   showOverlay.value = true;
 }
 
+/**
+ * 跳转到活动页面
+ * @param {TGApp.BBS.Navigator.Navigator} item 导航项
+ * @returns {Promise<void>}
+ */
 async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
   if (!isLogin.value) {
     showSnackbar.warn("请先登录");
     return;
   }
+  console.debug(`[TGameNav][toNav] 跳转到活动页面：`, item);
   await TGLogger.Info(`[TGameNav][toNav] 打开网页活动 ${item.name}`);
   await TGLogger.Info(`[TGameNav][toNav] ${item.app_path}`);
   const link = new URL(item.app_path);
@@ -112,7 +134,11 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
   else await TGClient.open("web_act", item.app_path);
 }
 
-// 处理 protocol
+/**
+ * 处理米游社论坛链接
+ * @param {URL} link 链接
+ * @returns {Promise<void>}
+ */
 async function toBBS(link: URL): Promise<void> {
   if (link.protocol == "mihoyobbs:") {
     if (link.hostname === "article") {
@@ -150,25 +176,26 @@ async function toBBS(link: URL): Promise<void> {
   border-radius: 4px;
   color: var(--tgc-white-1);
   cursor: pointer;
+
+  img {
+    width: 28px;
+    height: 28px;
+  }
+
+  span {
+    display: none;
+    margin-left: 4px;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 16px;
+  }
+
+  &:hover span {
+    display: block;
+  }
 }
 
 .dark .tgn-nav {
   @include github-styles.github-card("dark");
-}
-
-.tgn-nav img {
-  width: 28px;
-  height: 28px;
-}
-
-.tgn-nav span {
-  display: none;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 16px;
-}
-
-.tgn-nav:hover span {
-  display: block;
 }
 </style>

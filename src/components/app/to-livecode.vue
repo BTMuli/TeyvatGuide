@@ -1,3 +1,4 @@
+<!-- 兑换码浮窗组件 -->
 <template>
   <TOverlay v-model="visible" class="tolc-overlay">
     <div class="tolc-box">
@@ -34,6 +35,7 @@
           />
         </div>
       </div>
+      <div v-if="props.data.length === 0">暂无兑换码数据</div>
     </div>
   </TOverlay>
 </template>
@@ -48,9 +50,15 @@ import { computed } from "vue";
 import TMiImg from "./t-mi-img.vue";
 import TOverlay from "./t-overlay.vue";
 
+/**
+ * 兑换码浮窗组件参数
+ */
 type ToLiveCodeProps = {
+  /* 兑换码数据 */
   data: Array<TGApp.BBS.Navigator.CodeData>;
+  /* 前瞻活动ID */
   actId: string | undefined;
+  /* 分区ID */
   gid: number;
 };
 
@@ -58,23 +66,32 @@ const { gameList } = storeToRefs(useBBSStore());
 
 const props = defineProps<ToLiveCodeProps>();
 const visible = defineModel<boolean>({ default: false });
-const gameInfo = computed<TGApp.BBS.Game.Item | undefined>(() => {
-  return gameList.value.find((i) => i.id === props.gid);
-});
+const gameInfo = computed<TGApp.BBS.Game.Item | undefined>(() =>
+  gameList.value.find((i) => i.id === props.gid),
+);
 
-function copy(code: string): void {
-  navigator.clipboard.writeText(code);
+/**
+ * 复制兑换码
+ * @param {string} code 兑换码
+ * @returns {Promise<void>}
+ */
+async function copy(code: string): Promise<void> {
+  await navigator.clipboard.writeText(code);
   showSnackbar.success("已复制到剪贴板");
 }
 
+/**
+ * 生成分享图片
+ * @returns {Promise<void>}
+ */
 async function shareImg(): Promise<void> {
   const element = document.querySelector<HTMLElement>(".tolc-box");
   if (element === null) {
-    showSnackbar.error("未获取到分享内容");
+    showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `LiveCode_${props.actId}_${new Date().getTime()}`;
-  await generateShareImg(fileName, element, 2);
+  const fileName = `LiveCode_${props.gid}_${props.actId}_${new Date().getTime()}`;
+  await generateShareImg(fileName, element, 4);
 }
 </script>
 <style lang="css" scoped>
