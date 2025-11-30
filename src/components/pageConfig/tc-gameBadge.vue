@@ -17,7 +17,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import PassportApi from "@req/passportReq.js";
+import passportReq from "@req/passportReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
@@ -47,7 +47,7 @@ async function tryPlayGame(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  const resp = await PassportApi.authTicket(account.value, cookie.value);
+  const resp = await passportReq.authTicket(account.value, cookie.value);
   if (typeof resp !== "string") {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(

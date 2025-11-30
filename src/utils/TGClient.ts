@@ -4,9 +4,9 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import BBSApi from "@req/bbsReq.js";
+import bbsReq from "@req/bbsReq.js";
 import OtherApi from "@req/otherReq.js";
-import PassportApi from "@req/passportReq.js";
+import passportReq from "@req/passportReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TGSqlite from "@Sql/index.js";
 import useAppStore from "@store/app.js";
@@ -567,7 +567,7 @@ class Client {
     const user = useUserStore();
     if (!user.cookie) return;
     if (arg.payload.forceRefresh) {
-      const res = await PassportApi.cookieToken(user.cookie);
+      const res = await passportReq.cookieToken(user.cookie);
       if (typeof res !== "string") return;
       user.cookie.cookie_token = res;
       await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
@@ -681,7 +681,7 @@ class Client {
   async getUserInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
     if (!user.cookie) return;
-    const userInfo = await BBSApi.userInfo(user.cookie);
+    const userInfo = await bbsReq.userInfo(user.cookie);
     if ("retcode" in userInfo) {
       console.error(`[${arg.callback}] ${userInfo.message}`);
       return;

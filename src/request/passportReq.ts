@@ -1,6 +1,5 @@
 /**
- * @file request/passportReq.ts
- * @description Passport 相关请求
+ * Passport 相关请求
  * @since Beta v0.7.2
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -9,13 +8,13 @@ import TGHttp from "@utils/TGHttp.js";
 import { getDeviceInfo } from "@utils/toolFunc.js";
 import { JSEncrypt } from "jsencrypt";
 
-// PassportApiBaseUrl => pAbu
+/* PassportApiBaseUrl => pAbu */
 const pAbu: Readonly<string> = "https://passport-api.mihoyo.com/";
-// PassportV4ApiBaseUrl => p4Abu
+/* PassportV4ApiBaseUrl => p4Abu */
 const p4Abu: Readonly<string> = "https://passport-api-v4.mihoyo.com/";
-// HoyoLauncherVersion
+/* HoyoLauncherVersion => hlv */
 const hlv: Readonly<string> = "1.3.3.182";
-// 加密密钥
+/* 加密密钥 */
 const PUB_KEY_STR: Readonly<string> = `-----BEGIN PUBLIC KEY-----
 MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDDvekdPMHN3AYhm/vktJT+YJr7cI5DcsNKqdsx5DZX0gDuWFuIjzdwButrIYPNmRJ1G8ybDIF7oDW2eEpm5sMbL9zs
 9ExXCdvqrn51qELbqj0XxtMTIpaCHFSI50PfPpTFV9Xt/hmyVwokoOXFlAEgCn+Q
@@ -25,7 +24,7 @@ const encrypt = new JSEncrypt();
 encrypt.setPublicKey(PUB_KEY_STR);
 
 /**
- * @description rsa 加密
+ * rsa 加密
  * @since Beta v0.5.1
  * @param {string} data - 待加密数据
  * @returns {string} 加密后数据
@@ -37,7 +36,7 @@ function rsaEncrypt(data: string): string {
 }
 
 /**
- * @description 获取登录ticket
+ * 获取登录ticket
  * @since Beta v0.6.0
  * @param {TGApp.Sqlite.Account.Game} account - 账户
  * @param {TGApp.App.Account.Cookie} cookie - cookie
@@ -67,7 +66,7 @@ async function createAuthTicketByGameBiz(
 }
 
 /**
- * @description 获取短信验证码
+ * 获取短信验证码
  * @since Beta v0.7.2
  * @param {string} phone - 手机号
  * @param {string} [aigis] - 验证数据
@@ -109,7 +108,7 @@ async function createLoginCaptcha(
 }
 
 /**
- * @description 创建登录二维码
+ * 创建登录二维码
  * @since Beta v0.6.8
  * @returns {Promise<TGApp.BBS.Response.Base|TGApp.BBS.GameLogin.GetLoginQrData>}
  */
@@ -133,7 +132,7 @@ async function createQrLogin(): Promise<
 }
 
 /**
- * @description 根据 stoken 获取 cookie_token
+ * 根据 stoken 获取 cookie_token
  * @since Beta v0.6.3
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @returns {Promise<string|TGApp.BBS.Response.Base>}
@@ -153,7 +152,7 @@ async function getCookieAccountInfoBySToken(
 }
 
 /**
- * @description 根据 stoken_v2 获取 ltoken
+ * 根据 stoken_v2 获取 ltoken
  * @since Beta v0.5.0
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @returns {Promise<string|TGApp.BBS.Response.Base>}
@@ -173,7 +172,7 @@ async function getLTokenBySToken(
 }
 
 /**
- * @description 通过短信验证码登录
+ * 通过短信验证码登录
  * @since Beta v0.5.1
  * @param {string} phone - 手机号
  * @param {string} captcha - 验证码
@@ -213,7 +212,7 @@ async function loginByMobileCaptcha(
 }
 
 /**
- * @description 获取登录状态
+ * 获取登录状态
  * @since Beta v0.6.8
  * @param {string} ticket - 二维码 ticket
  * @returns {Promise<TGApp.BBS.Response.Base|TGApp.BBS.GameLogin.GetLoginStatusData>}
@@ -239,7 +238,7 @@ async function queryLoginStatus(
 }
 
 /**
- * @description 验证 ltoken 有效性，返回 mid
+ * 验证 ltoken 有效性，返回 mid
  * @since Beta v0.6.5
  * @param {TGApp.App.Account.Cookie} cookie - 账户 cookie
  * @returns {Promise<string | TGApp.BBS.Response.Base>}
@@ -280,7 +279,7 @@ async function verifyLToken(
   return resp.data.user_info.mid;
 }
 
-const PassportApi = {
+const passportReq = {
   authTicket: createAuthTicketByGameBiz,
   cookieToken: getCookieAccountInfoBySToken,
   lToken: { get: getLTokenBySToken, verify: verifyLToken },
@@ -288,4 +287,4 @@ const PassportApi = {
   captcha: { create: createLoginCaptcha, login: loginByMobileCaptcha },
 };
 
-export default PassportApi;
+export default passportReq;

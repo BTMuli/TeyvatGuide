@@ -125,8 +125,7 @@ import showGeetest from "@comp/func/geetest.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToGameLogin from "@comp/pageConfig/tco-gameLogin.vue";
-import BBSApi from "@req/bbsReq.js";
-import PassportApi from "@req/passportReq.js";
+import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
@@ -155,7 +154,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
 
 async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   await showLoading.update("正在获取 LToken");
-  const ltokenRes = await PassportApi.lToken.get(ck);
+  const ltokenRes = await passportReq.lToken.get(ck);
   if (typeof ltokenRes !== "string") {
     await showLoading.end();
     showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
@@ -165,7 +164,7 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   showSnackbar.success("获取LToken成功");
   ck.ltoken = ltokenRes;
   await showLoading.update("正在获取 CookieToken");
-  const cookieTokenRes = await PassportApi.cookieToken(ck);
+  const cookieTokenRes = await passportReq.cookieToken(ck);
   if (typeof cookieTokenRes !== "string") {
     await showLoading.end();
     showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
@@ -177,7 +176,7 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   showSnackbar.success("获取CookieToken成功");
   ck.cookie_token = cookieTokenRes;
   await showLoading.update("正在获取用户信息");
-  const briefRes = await BBSApi.userInfo(ck);
+  const briefRes = await bbsReq.userInfo(ck);
   if ("retcode" in briefRes) {
     await showLoading.end();
     showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
@@ -270,7 +269,7 @@ async function refreshUser(uid: string) {
   }
   let ck = account.cookie;
   await showLoading.start("正在刷新用户信息", "正在验证 LToken");
-  const verifyLTokenRes = await PassportApi.lToken.verify(ck);
+  const verifyLTokenRes = await passportReq.lToken.verify(ck);
   if (typeof verifyLTokenRes === "string") {
     await showLoading.update("验证 LToken 成功");
     showSnackbar.success("验证 LToken 成功");
@@ -282,7 +281,7 @@ async function refreshUser(uid: string) {
     await TGLogger.Warn(
       `[tc-userBadge][refreshUser] ${verifyLTokenRes.retcode}: ${verifyLTokenRes.message}`,
     );
-    const ltokenRes = await PassportApi.lToken.get(ck);
+    const ltokenRes = await passportReq.lToken.get(ck);
     if (typeof ltokenRes === "string") {
       await showLoading.update("获取 LToken 成功");
       ck.ltoken = ltokenRes;
@@ -297,7 +296,7 @@ async function refreshUser(uid: string) {
     }
   }
   await showLoading.update("正在获取 CookieToken");
-  const cookieTokenRes = await PassportApi.cookieToken(ck);
+  const cookieTokenRes = await passportReq.cookieToken(ck);
   if (typeof cookieTokenRes === "string") {
     await showLoading.update("获取 CookieToken 成功");
     ck.cookie_token = cookieTokenRes;
@@ -312,7 +311,7 @@ async function refreshUser(uid: string) {
   }
   account.cookie = ck;
   await showLoading.update("正在获取用户信息");
-  const infoRes = await BBSApi.userInfo(ck);
+  const infoRes = await bbsReq.userInfo(ck);
   if ("retcode" in infoRes) {
     await showLoading.update("获取用户信息失败");
     showSnackbar.error(`[${infoRes.retcode}]${infoRes.message}`);
@@ -490,7 +489,7 @@ async function addByCookie(): Promise<void> {
     ltoken: "",
   };
   await showLoading.update("正在获取 LToken");
-  const ltokenRes = await PassportApi.lToken.get(ck);
+  const ltokenRes = await passportReq.lToken.get(ck);
   if (typeof ltokenRes !== "string") {
     await showLoading.end();
     showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
@@ -499,7 +498,7 @@ async function addByCookie(): Promise<void> {
   }
   ck.ltoken = ltokenRes;
   await showLoading.update("正在获取 CookieToken");
-  const cookieTokenRes = await PassportApi.cookieToken(ck);
+  const cookieTokenRes = await passportReq.cookieToken(ck);
   if (typeof cookieTokenRes !== "string") {
     await showLoading.end();
     showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
@@ -510,7 +509,7 @@ async function addByCookie(): Promise<void> {
   }
   ck.cookie_token = cookieTokenRes;
   await showLoading.update("正在获取用户信息");
-  const briefRes = await BBSApi.userInfo(ck);
+  const briefRes = await bbsReq.userInfo(ck);
   if ("retcode" in briefRes) {
     await showLoading.end();
     showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
