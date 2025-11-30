@@ -1,3 +1,4 @@
+<!-- 帖子回复按钮&一级回复列表组件 -->
 <template>
   <div class="tpr-main-box" title="查看回复">
     <v-menu
@@ -7,7 +8,7 @@
       :persistent="true"
       :no-click-animation="true"
       z-index="60"
-      :offset="[4, 400]"
+      :offset="[12, 0]"
     >
       <template #activator="{ props }">
         <v-btn
@@ -76,21 +77,53 @@ import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import { emit } from "@tauri-apps/api/event";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 
 import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
-type TprMainProps = { gid: number; postId: string };
-type SelectItem = { label: string; value: string };
-const props = defineProps<TprMainProps>();
+/**
+ * 帖子一级回复列表组件参数
+ */
+type TprMainProps = {
+  /* 版块ID */
+  gid: number;
+  /* 帖子ID */
+  postId: string;
+};
+
+/**
+ * 回复排序类型
+ */
+enum ReplyOrderType {
+  /* 热门 */
+  HOT = 0,
+  /* 最新 */
+  LATEST = 2,
+  /* 最早 */
+  OLDEST = 1,
+}
+
+/**
+ * 选择项类型
+ */
+type SelectItem = {
+  /* 文本 */
+  label: string;
+  /* 值 */
+  value: ReplyOrderType;
+};
+
 const { devMode } = storeToRefs(useAppStore());
 
+const props = defineProps<TprMainProps>();
+
 const orderList: Array<SelectItem> = [
-  { label: "热门", value: "hot" },
-  { label: "最新", value: "latest" },
-  { label: "最早", value: "oldest" },
+  { label: "热门", value: ReplyOrderType.HOT },
+  { label: "最新", value: ReplyOrderType.LATEST },
+  { label: "最早", value: ReplyOrderType.OLDEST },
 ];
 
 const pinId = ref<string>("0");
@@ -100,14 +133,12 @@ const loading = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const showDebug = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
-const orderType = ref<"hot" | "latest" | "oldest">("hot");
+const orderType = ref<ReplyOrderType>(ReplyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
-const isHot = computed<boolean>(() => orderType.value === "hot");
+const isHot = computed<boolean>(() => orderType.value === ReplyOrderType.HOT);
 const replyOrder = computed<1 | 2 | undefined>(() => {
-  if (orderType.value === "hot") return undefined;
-  if (orderType.value === "latest") return 2;
-  if (orderType.value === "oldest") return 1;
-  return undefined;
+  if (orderType.value === ReplyOrderType.HOT) return undefined;
+  return orderType.value;
 });
 
 watch(
@@ -161,8 +192,11 @@ async function loadReply(): Promise<void> {
     onlyLz.value,
     replyOrder.value,
   );
+  console.debug("[VpBtnReply] Load Reply Response:", resp);
   if ("retcode" in resp) {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    await TGLogger.Warn(`[VpBtnReply] Load Reply Error: ${resp.retcode} - ${resp.message}`);
+    loading.value = false;
     return;
   }
   isLast.value = resp.is_last;
@@ -222,7 +256,6 @@ async function handleDebug(): Promise<void> {
   position: relative;
   display: flex;
   width: 300px;
-  height: 400px;
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
@@ -234,6 +267,7 @@ async function handleDebug(): Promise<void> {
   box-shadow: 2px 2px 8px var(--common-shadow-4);
   overflow-y: auto;
   row-gap: 8px;
+  transition: height 0.5s ease-in-out;
 }
 
 .tpr-main-filter {
@@ -300,7 +334,7 @@ async function handleDebug(): Promise<void> {
   display: flex;
   overflow: hidden auto;
   width: 100%;
-  height: 360px;
+  height: fit-content;
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
