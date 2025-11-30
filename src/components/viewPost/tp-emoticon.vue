@@ -1,3 +1,4 @@
+<!-- 自定义表情组件 -->
 <template>
   <div class="tp-emo-box" title="自定义表情" v-if="localUrl !== undefined">
     <img
@@ -18,6 +19,7 @@
     v-model="showOverlay"
     v-model:link="localUrl"
     :ori="true"
+    :format="fmt"
     v-model:bgColor="bgColor"
   />
 </template>
@@ -28,34 +30,58 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import type { TpImage } from "./tp-image.vue";
 import VpOverlayImage from "./vp-overlay-image.vue";
 
+/**
+ * 自定义表情组件数据
+ */
 type TpCustomEmoticon = {
+  /* 插入内容 */
   insert: {
+    /* 自定义表情 */
     backup_text: "[自定义表情]";
+    /* 自定义表情信息 */
     custom_emoticon: {
+      /* 表情ID */
       id: string;
+      /* 表情链接 */
       url: string;
-      size: { width: number; height: number; file_size?: number };
+      /* 表情尺寸 */
+      size: {
+        /* 宽度 */
+        width: number;
+        /* 高度 */
+        height: number;
+        /* 文件大小 */
+        file_size?: number;
+      };
+      /* 是否可用 */
       is_available: boolean;
+      /* 哈希值 */
       hash: string;
     };
   };
 };
-type TpEmoticonProps = { data: TpCustomEmoticon };
+/**
+ * 自定义表情组件属性
+ */
+type TpEmoticonProps = {
+  /* 组件数据 */
+  data: TpCustomEmoticon;
+};
 
 const props = defineProps<TpEmoticonProps>();
+
 const localUrl = ref<string>();
 const showOverlay = ref<boolean>(false);
 const bgColor = ref<string>("transparent");
-const image = computed<TpImage>(() => {
-  return {
-    insert: { image: props.data.insert.custom_emoticon.url },
-    attributes: {
-      width: props.data.insert.custom_emoticon.size.width,
-      height: props.data.insert.custom_emoticon.size.height,
-      size: props.data.insert.custom_emoticon.size.file_size,
-    },
-  };
-});
+const fmt = computed<string>(() => getImageExt());
+const image = computed<TpImage>(() => ({
+  insert: { image: props.data.insert.custom_emoticon.url },
+  attributes: {
+    width: props.data.insert.custom_emoticon.size.width,
+    height: props.data.insert.custom_emoticon.size.height,
+    size: props.data.insert.custom_emoticon.size.file_size,
+  },
+}));
 
 console.log("tp-emoticon", props.data.insert.custom_emoticon);
 
@@ -66,6 +92,11 @@ onMounted(async () => {
 onUnmounted(() => {
   if (localUrl.value) URL.revokeObjectURL(localUrl.value);
 });
+
+function getImageExt(): string {
+  const arr = props.data.insert.custom_emoticon.url.split(".");
+  return arr[arr.length - 1];
+}
 </script>
 <style lang="scss" scoped>
 .tp-emo-box {
@@ -102,6 +133,7 @@ onUnmounted(() => {
   cursor: default;
   font-family: var(--font-title);
   font-size: 12px;
+  text-shadow: 1px 1px 1px var(--tgc-dark-1);
   white-space: nowrap;
 }
 </style>
