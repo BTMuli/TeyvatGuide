@@ -55,7 +55,7 @@ async function selectFile(): Promise<void> {
 .tpr-debug-box {
   position: relative;
   display: flex;
-  width: 400px;
+  width: 800px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -70,7 +70,7 @@ async function selectFile(): Promise<void> {
   overflow: hidden;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 5px;
   border-bottom: 1px solid var(--box-bg-2);
   font-family: var(--font-title);
@@ -79,7 +79,8 @@ async function selectFile(): Promise<void> {
 
   :nth-child(2) {
     overflow: hidden;
-    width: 300px;
+    max-width: 600px;
+    margin-right: auto;
     color: var(--common-text-title);
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -90,7 +91,7 @@ async function selectFile(): Promise<void> {
   display: flex;
   width: 100%;
   min-height: 50px;
-  max-height: 300px;
+  max-height: 800px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;

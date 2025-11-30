@@ -1,7 +1,6 @@
 /**
- * @file utils/TGShare.ts
- * @description 生成分享截图并保存到本地
- * @since Beta v0.8.3
+ * 生成分享截图并保存到本地
+ * @since Beta v0.8.7
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -85,8 +84,8 @@ function getShareImgBgColor(): string {
 }
 
 /**
- * @description 生成分享截图
- * @since Beta v0.8.3
+ * 生成分享截图
+ * @since Beta v0.8.7
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -96,7 +95,7 @@ function getShareImgBgColor(): string {
 export async function generateShareImg(
   fileName: string,
   element: HTMLElement,
-  scale: number = 1.2,
+  scale: number = 1.5,
   scrollable: boolean = false,
 ): Promise<void> {
   const canvas = document.createElement("canvas");

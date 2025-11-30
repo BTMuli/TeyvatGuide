@@ -1,3 +1,4 @@
+<!-- 图片浮窗 -->
 <template>
   <TOverlay v-model="visible" blur-val="10px">
     <div class="tpoi-box">
@@ -62,7 +63,13 @@ import { computed, nextTick, ref, shallowRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
 
-type TpoImageProps = { image: TpImage };
+/**
+ * 图片浮窗组件参数
+ */
+type TpoImageProps = {
+  /* 图片数据 */
+  image: TpImage;
+};
 
 const props = defineProps<TpoImageProps>();
 const visible = defineModel<boolean>();
@@ -70,6 +77,7 @@ const localLink = defineModel<string>("link");
 const showOri = defineModel<boolean>("ori");
 const bgColor = defineModel<string>("bgColor", { default: "transparent" });
 const format = defineModel<string>("format", { default: "png" });
+
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
 const buffer = shallowRef<Uint8Array | null>(null);
