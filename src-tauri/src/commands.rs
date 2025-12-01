@@ -70,3 +70,81 @@ pub async fn get_dir_size(path: String) -> u64 {
   }
   size
 }
+
+// 判断是否是管理员权限
+#[cfg(target_os = "windows")]
+#[tauri::command]
+pub fn is_in_admin() -> bool {
+  use windows_sys::Win32::Foundation::HANDLE;
+  use windows_sys::Win32::Security::{
+    AllocateAndInitializeSid, CheckTokenMembership, FreeSid, SID_IDENTIFIER_AUTHORITY, TOKEN_QUERY,
+  };
+  use windows_sys::Win32::System::SystemServices::{
+    DOMAIN_ALIAS_RID_ADMINS, SECURITY_BUILTIN_DOMAIN_RID,
+  };
+  use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
+
+  unsafe {
+    let mut token_handle: HANDLE = std::ptr::null_mut();
+    if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token_handle) != 0 {
+      let nt_authority = SID_IDENTIFIER_AUTHORITY { Value: [0, 0, 0, 0, 0, 5] };
+      let mut admin_group = std::ptr::null_mut();
+      if AllocateAndInitializeSid(
+        &nt_authority,
+        2,
+        SECURITY_BUILTIN_DOMAIN_RID.try_into().unwrap(),
+        DOMAIN_ALIAS_RID_ADMINS.try_into().unwrap(),
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        &mut admin_group,
+      ) != 0
+      {
+        let mut is_admin = 0i32;
+        CheckTokenMembership(std::ptr::null_mut(), admin_group, &mut is_admin);
+        FreeSid(admin_group);
+        return is_admin != 0;
+      }
+    }
+    false
+  }
+}
+
+// 在 Windows 上以管理员权限重启应用
+#[cfg(target_os = "windows")]
+#[tauri::command]
+pub fn run_with_admin() -> Result<(), String> {
+  use std::ffi::OsStr;
+  use std::iter::once;
+  use std::os::windows::ffi::OsStrExt;
+  use std::process::exit;
+  use windows_sys::Win32::UI::Shell::ShellExecuteW;
+  use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+  let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
+  let exe_str: Vec<u16> = OsStr::new(exe_path.to_string_lossy().as_ref())
+    .encode_wide()
+    .chain(std::iter::once(0))
+    .collect();
+  let verb: Vec<u16> = OsStr::new("runas").encode_wide().chain(once(0)).collect();
+
+  let result = unsafe {
+    ShellExecuteW(
+      std::ptr::null_mut(),
+      verb.as_ptr(),
+      exe_str.as_ptr(),
+      std::ptr::null(),
+      std::ptr::null(),
+      SW_SHOWNORMAL,
+    )
+  };
+
+  if result as usize > 32 {
+    exit(0);
+  } else {
+    Err("Failed to restart as administrator.".into())
+  }
+}

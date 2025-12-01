@@ -76,11 +76,13 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
 import TuaSeries from "@comp/userAchi/tua-series.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
+import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { writeTextFile } from "@tauri-apps/plugin-fs";
-import { openUrl } from "@tauri-apps/plugin-opener";
+import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
+import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import {
   getUiafHeader,
@@ -88,15 +90,20 @@ import {
   verifyUiafData,
   verifyUiafDataClipboard,
 } from "@utils/UIAF.js";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 
 const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).map((s) => s.id);
+
 const route = useRoute();
 const router = useRouter();
+const { gameDir } = storeToRefs(useAppStore());
+
 let achiListener: UnlistenFn | null = null;
+let yaeListener: UnlistenFn | null = null;
 
 const search = ref<string>("");
 const isSearch = ref<boolean>(false);
@@ -124,6 +131,21 @@ onMounted(async () => {
     await handleImportOuter(route.query.app);
   }
   achiListener = await listen<void>("updateAchi", async () => await refreshOverview());
+  yaeListener = await listen<TGApp.Plugins.Yae.AchiListRes>(
+    "yae_achi_list",
+    (e: Event<TGApp.Plugins.Yae.AchiListRes>) => tryParseYaeAchi(e.payload),
+  );
+});
+
+onUnmounted(async () => {
+  if (achiListener !== null) {
+    achiListener();
+    achiListener = null;
+  }
+  if (yaeListener !== null) {
+    yaeListener();
+    yaeListener = null;
+  }
 });
 
 watch(() => uidCur.value, refreshOverview);
@@ -278,15 +300,36 @@ async function deleteUid(): Promise<void> {
 }
 
 async function toYae(): Promise<void> {
-  await openUrl("https://github.com/HolographicHat/Yae");
+  if (platform() !== "windows") {
+    showSnackbar.warn("MacOS暂不支持该功能");
+    return;
+  }
+  if (gameDir.value === "未设置") {
+    showSnackbar.warn("请前往设置页面设置游戏安装目录");
+    return;
+  }
+  const gamePath = `${gameDir.value}${path.sep()}YuanShen.exe`;
+  if (!(await exists(gamePath))) {
+    showSnackbar.warn("未检测到原神本体应用！");
+    return;
+  }
+  // 判断是否是管理员权限
+  const isAdmin = await invoke<boolean>("is_in_admin");
+  if (!isAdmin) {
+    const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
+    if (!check) {
+      showSnackbar.cancel("已取消以管理员模式重启");
+      return;
+    }
+    await invoke("run_with_admin");
+  }
+  await invoke("call_yae_dll", { gamePath: gamePath });
 }
 
-onUnmounted(async () => {
-  if (achiListener !== null) {
-    achiListener();
-    achiListener = null;
-  }
-});
+async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
+  console.log(payload);
+  showSnackbar.success(`已收到来自Yae的成就数据，共${payload.list.length}条`);
+}
 </script>
 <style lang="scss" scoped>
 .achi-prepend {
