@@ -199,4 +199,8 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
       }
     }
   });
+  unsafe {
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+  }
 }

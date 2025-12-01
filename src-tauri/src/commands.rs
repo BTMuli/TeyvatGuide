@@ -89,30 +89,39 @@ pub fn is_in_admin() -> bool {
 
   unsafe {
     let mut token_handle: HANDLE = std::ptr::null_mut();
-    if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token_handle) != 0 {
-      let nt_authority = SID_IDENTIFIER_AUTHORITY { Value: [0, 0, 0, 0, 0, 5] };
-      let mut admin_group = std::ptr::null_mut();
-      if AllocateAndInitializeSid(
-        &nt_authority,
-        2,
-        SECURITY_BUILTIN_DOMAIN_RID.try_into().unwrap(),
-        DOMAIN_ALIAS_RID_ADMINS.try_into().unwrap(),
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        &mut admin_group,
-      ) != 0
-      {
-        let mut is_admin = 0i32;
-        CheckTokenMembership(std::ptr::null_mut(), admin_group, &mut is_admin);
-        FreeSid(admin_group);
-        return is_admin != 0;
-      }
+    if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token_handle) == 0 {
+      return false;
     }
-    false
+
+    let nt_authority = SID_IDENTIFIER_AUTHORITY { Value: [0, 0, 0, 0, 0, 5] };
+    let mut admin_group = std::ptr::null_mut();
+
+    let success = AllocateAndInitializeSid(
+      &nt_authority,
+      2,
+      SECURITY_BUILTIN_DOMAIN_RID.try_into().unwrap(),
+      DOMAIN_ALIAS_RID_ADMINS.try_into().unwrap(),
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      &mut admin_group,
+    );
+
+    if success == 0 {
+      CloseHandle(token_handle);
+      return false;
+    }
+
+    let mut is_admin = 0i32;
+    let result = CheckTokenMembership(std::ptr::null_mut(), admin_group, &mut is_admin);
+
+    FreeSid(admin_group);
+    CloseHandle(token_handle);
+
+    result != 0 && is_admin != 0
   }
 }
 
