@@ -58,7 +58,8 @@ jobs:
         run: rustup target add aarch64-apple-darwin
       - name: Output toolchain
         run: rustup show
-
+      - name: Add Offset Conf
+        run: echo "${{ secrets.YAE_CONF }}" > ./src-tauri/lib/conf.json
       - name: setup node
         uses: actions/setup-node@v3
         with:
