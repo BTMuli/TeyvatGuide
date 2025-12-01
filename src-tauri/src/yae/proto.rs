@@ -1,13 +1,12 @@
 //! Yae 成就信息的 Protobuf 定义
-//! @since Beta v0.9.0
+//! @since Beta v0.8.7
 
 use prost::encoding::{decode_key, WireType};
 use prost::DecodeError;
 use prost::Message;
 use serde::Serialize;
 use std::collections::HashMap;
-use std::io::Cursor;
-use std::io::Read;
+use std::io::{Cursor, Read};
 
 #[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementProtoFieldInfo {
@@ -106,15 +105,14 @@ pub struct AchievementInfo {
 }
 
 #[derive(Debug, Default, Serialize)]
-pub struct AchiItemRes {
+pub struct UiafAchiItem {
   pub id: u32,
-  pub total: u32,
-  pub cur: u32,
-  pub ts: u32,
-  pub stat: u32,
+  pub current: u32,
+  pub timestamp: u32,
+  pub status: u32,
 }
 
-pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<AchiItemRes>, DecodeError> {
+pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
   let mut cursor = Cursor::new(bytes);
   let mut dicts: Vec<HashMap<u32, u32>> = Vec::new();
 
@@ -146,13 +144,13 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<AchiItemRes>, DecodeError> {
 
   let achievements = dicts
     .into_iter()
-    .map(|d| AchiItemRes {
+    .map(|d| UiafAchiItem {
       id: d.get(&15).copied().unwrap_or(0),
-      stat: d.get(&11).copied().unwrap_or(0),
-      total: d.get(&8).copied().unwrap_or(0),
-      cur: d.get(&13).copied().unwrap_or(0),
-      ts: d.get(&7).copied().unwrap_or(0),
+      status: d.get(&11).copied().unwrap_or(0),
+      current: d.get(&13).copied().unwrap_or(0),
+      timestamp: d.get(&7).copied().unwrap_or(0),
     })
+    .filter(|a| a.timestamp != 0)
     .collect();
 
   Ok(achievements)

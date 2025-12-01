@@ -7,7 +7,7 @@
  * 成就完成状态枚举
  * @since Beta v0.7.8
  */
-export const YaeAchiStatEnum: typeof TGApp.Plugins.Yae.AchiItemStat = {
+export const UiafAchiStatEnum: typeof TGApp.Plugins.UIAF.AchiItemStat = {
   /** 无效状态 */
   Invalid: 0,
   /** 未完成 */

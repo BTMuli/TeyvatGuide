@@ -1,6 +1,5 @@
-//! @file src/commands.rs
-//! @desc 命令模块，负责处理命令
-//! @since Beta v0.7.4
+//! 命令模块，负责处理命令
+//! @since Beta v0.7.8
 
 use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
@@ -72,9 +71,13 @@ pub async fn get_dir_size(path: String) -> u64 {
 }
 
 // 判断是否是管理员权限
-#[cfg(target_os = "windows")]
 #[tauri::command]
 pub fn is_in_admin() -> bool {
+  #[cfg(not(target_os = "windows"))]
+  {
+    Err("This function is only supported on Windows.".into())
+  }
+
   use windows_sys::Win32::Foundation::HANDLE;
   use windows_sys::Win32::Security::{
     AllocateAndInitializeSid, CheckTokenMembership, FreeSid, SID_IDENTIFIER_AUTHORITY, TOKEN_QUERY,
@@ -113,10 +116,14 @@ pub fn is_in_admin() -> bool {
   }
 }
 
-// 在 Windows 上以管理员权限重启应用
-#[cfg(target_os = "windows")]
+// 以管理员权限重启应用
 #[tauri::command]
 pub fn run_with_admin() -> Result<(), String> {
+  #[cfg(not(target_os = "windows"))]
+  {
+    Err("This function is only supported on Windows.".into())
+  }
+
   use std::ffi::OsStr;
   use std::iter::once;
   use std::os::windows::ffi::OsStrExt;
