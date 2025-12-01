@@ -77,37 +77,28 @@ pub fn parse_achievement_data(bytes: &[u8]) -> Vec<HashMap<u32, u32>> {
 
 use windows_sys::Win32::Foundation::{GetLastError, ERROR_MORE_DATA};
 
-fn read_u32_le<R: io::Read>(r: &mut R) -> io::Result<u32> {
-  let mut b = [0u8; 4];
-  r.read_exact(&mut b)?;
-  Ok(u32::from_le_bytes(b))
-}
-
-fn read_exact_vec<R: io::Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
-  let mut v = vec![0u8; len];
-  r.read_exact(&mut v)?;
-  Ok(v)
-}
-
-/// 从管道中读取完整的 payload
-/// 协议：命令字节已经读过，这里只负责把剩余数据读完
-pub fn read_full_payload<R: Read>(reader: &mut R) -> io::Result<Vec<u8>> {
-  let mut buf = Vec::new();
-  let mut chunk = [0u8; 4096];
-
-  loop {
-    match reader.read(&mut chunk) {
-      Ok(0) => break, // EOF，读完了
-      Ok(n) => buf.extend_from_slice(&chunk[..n]),
-      Err(ref e) if e.raw_os_error() == Some(234) => {
-        // Windows ERROR_MORE_DATA → 继续读
-        continue;
-      }
-      Err(e) => return Err(e),
-    }
+fn read_u32_le<R: Read>(r: &mut R) -> io::Result<u32> {
+  let mut buf = [0u8; 4];
+  match r.read_exact(&mut buf) {
+    Ok(_) => Ok(u32::from_le_bytes(buf)),
+    Err(e) => Err(e),
   }
+}
 
-  Ok(buf)
+fn read_f64_le<R: Read>(r: &mut R) -> io::Result<f64> {
+  let mut buf = [0u8; 8];
+  match r.read_exact(&mut buf) {
+    Ok(_) => Ok(f64::from_le_bytes(buf)),
+    Err(e) => Err(e),
+  }
+}
+
+fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
+  let mut v = vec![0u8; len];
+  match r.read_exact(&mut v) {
+    Ok(_) => Ok(v),
+    Err(e) => Err(e),
+  }
 }
 
 /// 调用 dll
@@ -163,9 +154,39 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
           Ok(_) => {
             println!("收到命令: {}", cmd[0]);
             match cmd[0] {
-              0x01 => println!("AchievementNotify"),
-              0x02 => println!("PlayerStoreNotify"),
-              0x03 => println!("PlayerPropNotify"),
+              0x01 => {
+                println!("AchievementNotify");
+                // 读取剩余数据
+                match read_u32_le(&mut file) {
+                  Ok(len) => match read_exact_vec(&mut file, len as usize) {
+                    Ok(data) => println!("长度: {}", len),
+                    Err(e) => println!("读取数据失败: {:?}", e),
+                  },
+                  Err(e) => println!("读取长度失败: {:?}", e),
+                }
+              }
+              0x02 => {
+                println!("PlayerStoreNotify");
+                // 读取剩余数据
+                match read_u32_le(&mut file) {
+                  Ok(len) => match read_exact_vec(&mut file, len as usize) {
+                    Ok(data) => println!("长度: {}", len),
+                    Err(e) => println!("读取数据失败: {:?}", e),
+                  },
+                  Err(e) => println!("读取长度失败: {:?}", e),
+                }
+              }
+              0x03 => {
+                println!("PlayerPropNotify");
+                // 读取剩余数据
+                match read_u32_le(&mut file) {
+                  Ok(prop_type) => match read_f64_le(&mut file) {
+                    Ok(value) => println!("Prop 类型: {}, 值: {}", prop_type, value),
+                    Err(e) => println!("读取值失败: {:?}", e),
+                  },
+                  Err(e) => println!("读取类型失败: {:?}", e),
+                }
+              }
               0xFC => {
                 let _ = file.write_all(&read_conf("nativeConfig.achievementCmdId").to_le_bytes());
                 let _ = file.write_all(&read_conf("nativeConfig.storeCmdId").to_le_bytes());
