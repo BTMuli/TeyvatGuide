@@ -1,10 +1,15 @@
 //! Yae 成就信息的 Protobuf 定义
 //! @since Beta v0.9.0
 
+use prost::encoding::{decode_key, WireType};
+use prost::DecodeError;
 use prost::Message;
+use serde::Serialize;
 use std::collections::HashMap;
+use std::io::Cursor;
+use std::io::Read;
 
-#[derive(Clone, PartialEq, Message)]
+#[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementProtoFieldInfo {
   #[prost(uint32, tag = "1")]
   pub id: u32,
@@ -22,7 +27,7 @@ pub struct AchievementProtoFieldInfo {
   pub finish_timestamp: u32,
 }
 
-#[derive(Clone, PartialEq, Message)]
+#[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementItem {
   #[prost(uint32, tag = "1")]
   pub pre: u32,
@@ -37,7 +42,7 @@ pub struct AchievementItem {
   pub description: String,
 }
 
-#[derive(Clone, PartialEq, Message)]
+#[derive(Clone, PartialEq, Message, Serialize)]
 pub struct MethodRvaConfig {
   #[prost(uint32, tag = "1")]
   pub do_cmd: u32,
@@ -70,7 +75,7 @@ pub struct MethodRvaConfig {
   pub decompress: u32,
 }
 
-#[derive(Clone, PartialEq, Message)]
+#[derive(Clone, PartialEq, Message, Serialize)]
 pub struct NativeLibConfig {
   #[prost(uint32, tag = "1")]
   pub store_cmd_id: u32,
@@ -82,7 +87,7 @@ pub struct NativeLibConfig {
   pub method_rva: HashMap<u32, MethodRvaConfig>,
 }
 
-#[derive(Clone, PartialEq, Message)]
+#[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementInfo {
   #[prost(string, tag = "1")]
   pub version: String,
@@ -98,4 +103,57 @@ pub struct AchievementInfo {
 
   #[prost(message, tag = "5")]
   pub native_config: Option<NativeLibConfig>,
+}
+
+#[derive(Debug, Default, Serialize)]
+pub struct AchievementEntry {
+  pub id: u32,
+  pub total_progress: u32,
+  pub current_progress: u32,
+  pub finish_timestamp: u32,
+  pub status: u32, // 数值类型
+}
+
+pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<AchievementEntry>, DecodeError> {
+  let mut cursor = Cursor::new(bytes);
+  let mut dicts: Vec<HashMap<u32, u32>> = Vec::new();
+
+  while let Ok((_, wire_type)) = decode_key(&mut cursor) {
+    if wire_type == WireType::LengthDelimited {
+      let len = prost::encoding::decode_varint(&mut cursor)? as usize;
+      let mut buf = vec![0u8; len];
+      if cursor.read_exact(&mut buf).is_err() {
+        continue;
+      }
+
+      let mut inner = Cursor::new(&buf);
+      let mut dict = HashMap::new();
+
+      while let Ok((tag, wire_type)) = decode_key(&mut inner) {
+        if wire_type != WireType::Varint {
+          break;
+        }
+        let value = prost::encoding::decode_varint(&mut inner)? as u32;
+        dict.insert(tag, value);
+      }
+
+      if !dict.is_empty() {
+        println!("Raw dict: {:?}", dict);
+        dicts.push(dict);
+      }
+    }
+  }
+
+  let achievements = dicts
+    .into_iter()
+    .map(|d| AchievementEntry {
+      id: d.get(&15).copied().unwrap_or(0),
+      status: d.get(&11).copied().unwrap_or(0),
+      total_progress: d.get(&8).copied().unwrap_or(0),
+      current_progress: d.get(&13).copied().unwrap_or(0),
+      finish_timestamp: d.get(&7).copied().unwrap_or(0),
+    })
+    .collect();
+
+  Ok(achievements)
 }

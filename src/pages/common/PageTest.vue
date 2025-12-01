@@ -15,51 +15,30 @@
     </div>
     <div class="btn-list">
       <v-btn @click="test()" class="test-btn">测试</v-btn>
-      <v-btn @click="test2()" class="test-btn">测试2</v-btn>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
-import hk4eReq from "@req/hk4eReq.js";
-import takumiReq from "@req/takumiReq.js";
-import useUserStore from "@store/user.js";
+import { event } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { onMounted, onUnmounted } from "vue";
 
-const { cookie, account } = storeToRefs(useUserStore());
+let listener: UnlistenFn | null = null;
 
-const authkey = ref<string>("");
+onMounted(async () => {
+  listener = await event.listen<string>("yae_achi_list", (e: Event<string>) => {
+    console.log(e.payload);
+  });
+});
+onUnmounted(() => {
+  if (listener !== null) {
+    listener();
+    listener = null;
+  }
+});
 
 async function test(): Promise<void> {
-  if (!cookie.value || !account.value) {
-    showSnackbar.warn("请先登录账号");
-    return;
-  }
-  const authkeyRes = await takumiReq.bind.authKey(cookie.value, account.value);
-  if (typeof authkeyRes === "string") {
-    authkey.value = authkeyRes;
-  } else {
-    showSnackbar.error("获取authkey失败");
-    return;
-  }
-  const list: Array<TGApp.Game.Gacha.GachaBItem> = [];
-  let endId = "0";
-  while (true) {
-    const res = await hk4eReq.gachaB(authkey.value, "1000", endId);
-    if (Array.isArray(res)) {
-      if (res.length === 0) break;
-      list.push(...res);
-      endId = res[res.length - 1].id;
-    } else {
-      showSnackbar.warn(`[${res.retcode}] 获取祈愿记录失败:${res.message}`);
-    }
-  }
-  console.log(list);
-}
-
-async function test2(): Promise<void> {
   try {
     await invoke("call_yae_dll", {
       gamePath: "D:\\Games\\Genshin Impact bilibili\\games\\Genshin Impact Game\\YuanShen.exe",

@@ -5,20 +5,27 @@ pub mod inject;
 pub mod proto;
 
 use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
+use prost::encoding::{decode_key, WireType};
+use prost::Message;
+use proto::{parse_achi_list, AchievementInfo};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
 use std::os::windows::io::{FromRawHandle, OwnedHandle, RawHandle};
 use std::sync::Arc;
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use windows_sys::Win32::Storage::FileSystem::ReadFile;
 use windows_sys::Win32::System::Pipes::ConnectNamedPipe;
+
+// 读取配置值
 fn read_rva(key: &str) -> i32 {
   let path = format!("nativeConfig.methodRva.chinese.{}", key);
   read_conf(&path)
 }
 
+// 读取配置文件
 fn read_conf(path: &str) -> i32 {
   // 编译时嵌入 JSON 文件，值都是32位整数
   let data = include_str!("../../lib/conf.json");
@@ -34,9 +41,6 @@ fn read_conf(path: &str) -> i32 {
   }
   current.as_i64().unwrap_or(0) as i32
 }
-
-use prost::encoding::{decode_key, WireType};
-use std::collections::HashMap;
 
 pub fn parse_achievement_data(bytes: &[u8]) -> Vec<HashMap<u32, u32>> {
   let mut cursor = std::io::Cursor::new(bytes);
@@ -155,13 +159,25 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
             println!("收到命令: {}", cmd[0]);
             match cmd[0] {
               0x01 => {
-                println!("AchievementNotify");
-                // 读取剩余数据
                 match read_u32_le(&mut file) {
-                  Ok(len) => match read_exact_vec(&mut file, len as usize) {
-                    Ok(data) => println!("长度: {}", len),
-                    Err(e) => println!("读取数据失败: {:?}", e),
-                  },
+                  Ok(len) => {
+                    // 再读数据
+                    match read_exact_vec(&mut file, len as usize) {
+                      Ok(data) => {
+                        println!("长度: {}", len);
+                        // 解码成 AchievementInfo
+                        match parse_achi_list(&data) {
+                          Ok(list) => {
+                            println!("解码成功，成就列表长度: {}", list.len());
+                            let json = serde_json::to_string_pretty(&list).unwrap();
+                            app_handle.emit("yae_achi_list", json);
+                          }
+                          Err(e) => println!("解析失败: {:?}", e),
+                        }
+                      }
+                      Err(e) => println!("读取数据失败: {:?}", e),
+                    }
+                  }
                   Err(e) => println!("读取长度失败: {:?}", e),
                 }
               }
