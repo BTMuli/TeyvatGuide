@@ -8,6 +8,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Cursor, Read};
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementProtoFieldInfo {
   #[prost(uint32, tag = "1")]
@@ -26,6 +27,7 @@ pub struct AchievementProtoFieldInfo {
   pub finish_timestamp: u32,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementItem {
   #[prost(uint32, tag = "1")]
@@ -41,6 +43,7 @@ pub struct AchievementItem {
   pub description: String,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq, Message, Serialize)]
 pub struct MethodRvaConfig {
   #[prost(uint32, tag = "1")]
@@ -74,6 +77,7 @@ pub struct MethodRvaConfig {
   pub decompress: u32,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq, Message, Serialize)]
 pub struct NativeLibConfig {
   #[prost(uint32, tag = "1")]
@@ -86,6 +90,7 @@ pub struct NativeLibConfig {
   pub method_rva: HashMap<u32, MethodRvaConfig>,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, PartialEq, Message, Serialize)]
 pub struct AchievementInfo {
   #[prost(string, tag = "1")]

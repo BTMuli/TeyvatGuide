@@ -40,43 +40,6 @@ fn read_conf(path: &str) -> i32 {
   current.as_i64().unwrap_or(0) as i32
 }
 
-pub fn parse_achievement_data(bytes: &[u8]) -> Vec<HashMap<u32, u32>> {
-  let mut cursor = std::io::Cursor::new(bytes);
-  let mut data = Vec::new();
-  let mut err_times = 0;
-
-  while let Ok((tag, wire_type)) = decode_key(&mut cursor) {
-    if wire_type == WireType::LengthDelimited {
-      let len = prost::encoding::decode_varint(&mut cursor).unwrap() as usize;
-      let mut buf = vec![0u8; len];
-      if cursor.read_exact(&mut buf).is_err() {
-        continue;
-      }
-
-      let mut inner = std::io::Cursor::new(&buf);
-      let mut dict = HashMap::new();
-      while let Ok((inner_tag, inner_type)) = decode_key(&mut inner) {
-        if inner_type != WireType::Varint {
-          dict.clear();
-          break;
-        }
-        let value = prost::encoding::decode_varint(&mut inner).unwrap() as u32;
-        dict.insert(inner_tag, value);
-      }
-
-      if dict.len() >= 3 {
-        data.push(dict);
-      } else if err_times == 0 {
-        err_times += 1;
-      } else {
-        break;
-      }
-    }
-  }
-
-  data
-}
-
 fn read_u32_le<R: Read>(r: &mut R) -> io::Result<u32> {
   let mut buf = [0u8; 4];
   match r.read_exact(&mut buf) {
@@ -170,7 +133,7 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
                           Ok(list) => {
                             println!("解码成功，成就列表长度: {}", list.len());
                             let json = serde_json::to_string_pretty(&list).unwrap();
-                            app_handle.emit("yae_achi_list", json);
+                            let _ = app_handle.emit("yae_achi_list", json);
                           }
                           Err(e) => println!("解析失败: {:?}", e),
                         }
@@ -186,7 +149,7 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
                 // 读取剩余数据
                 match read_u32_le(&mut file) {
                   Ok(len) => match read_exact_vec(&mut file, len as usize) {
-                    Ok(data) => println!("长度: {}", len),
+                    Ok(_data) => println!("长度: {}", len),
                     Err(e) => println!("读取数据失败: {:?}", e),
                   },
                   Err(e) => println!("读取长度失败: {:?}", e),
