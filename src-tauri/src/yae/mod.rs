@@ -5,13 +5,10 @@ pub mod inject;
 pub mod proto;
 
 use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
-use prost::encoding::{decode_key, WireType};
 use proto::parse_achi_list;
 use serde_json::Value;
-use std::collections::HashMap;
 use std::fs::File;
-use std::io;
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
@@ -69,8 +66,9 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
 pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
   #[cfg(not(target_os = "windows"))]
   {
-    Err("This function is only supported on Windows.".into())
+    return Err("This function is only supported on Windows.".into());
   }
+
   let dll_path = app_handle.path().resource_dir().unwrap().join("resources/YaeAchievementLib.dll");
   dbg!(&dll_path);
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄

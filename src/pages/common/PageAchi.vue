@@ -5,10 +5,10 @@
         <img alt="icon" src="../../assets/icons/achievements.svg" />
         <span>我的成就</span>
         <v-select
-          density="compact"
           v-model="uidCur"
           :hide-details="true"
           :items="uidList"
+          density="compact"
           label="存档UID"
           variant="outlined"
           width="200px"
@@ -19,11 +19,11 @@
     <template #append>
       <div class="achi-append">
         <v-text-field
-          density="compact"
           v-model="search"
           :hide-details="true"
           :single-line="true"
           append-inner-icon="mdi-magnify"
+          density="compact"
           label="搜索"
           @keydown.enter="isSearch = true"
         />
@@ -52,10 +52,10 @@
     <v-virtual-scroll :items="seriesList" class="left-wrap" item-height="60">
       <template #default="{ item }">
         <TuaSeries
-          class="left-item"
           v-model:cur="selectedSeries"
           :series="item"
           :uid="uidCur"
+          class="left-item"
           @click="selectedSeries = item"
         />
       </template>
@@ -79,7 +79,7 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn, type Event } from "@tauri-apps/api/event";
+import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -131,17 +131,14 @@ onMounted(async () => {
     await handleImportOuter(route.query.app);
   }
   achiListener = await listen<void>("updateAchi", async () => await refreshOverview());
-  yaeListener = await listen<TGApp.Plugins.Yae.AchiListRes>(
-    "yae_achi_list",
-    async (e: Event<string>) => {
-      try {
-        await tryParseYaeAchi(JSON.parse(e.payload));
-      } catch (err) {
-        await TGLogger.Error(`[Achievements][yae_achi_list] 解析Yae成就数据失败: ${err}`);
-        showSnackbar.error(`解析Yae成就数据失败:${err}`);
-      }
-    },
-  );
+  yaeListener = await listen<string>("yae_achi_list", async (e: Event<string>) => {
+    try {
+      await tryParseYaeAchi(JSON.parse(e.payload));
+    } catch (err) {
+      await TGLogger.Error(`[Achievements][yae_achi_list] 解析Yae成就数据失败: ${err}`);
+      showSnackbar.error(`解析Yae成就数据失败:${err}`);
+    }
+  });
 });
 
 onUnmounted(async () => {
@@ -308,7 +305,7 @@ async function deleteUid(): Promise<void> {
 
 async function toYae(): Promise<void> {
   if (platform() !== "windows") {
-    showSnackbar.warn("MacOS暂不支持该功能");
+    showSnackbar.warn("该功能仅支持Windows系统");
     return;
   }
   if (gameDir.value === "未设置") {
@@ -321,20 +318,35 @@ async function toYae(): Promise<void> {
     return;
   }
   // 判断是否是管理员权限
-  const isAdmin = await invoke<boolean>("is_in_admin");
+  let isAdmin = false;
+  try {
+    isAdmin = await invoke<boolean>("is_in_admin");
+  } catch (err) {
+    showSnackbar.error("检测管理员权限失败：" + (err?.message || err));
+    return;
+  }
   if (!isAdmin) {
     const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
     if (!check) {
       showSnackbar.cancel("已取消以管理员模式重启");
       return;
     }
-    await invoke("run_with_admin");
+    try {
+      await invoke("run_with_admin");
+    } catch (err) {
+      showSnackbar.error("以管理员模式重启失败：" + (err?.message || err));
+      return;
+    }
   }
-  await invoke("call_yae_dll", { gamePath: gamePath });
+  try {
+    await invoke("call_yae_dll", { gamePath: gamePath });
+  } catch (err) {
+    showSnackbar.error("调用Yae DLL失败：" + (err?.message || err));
+    return;
+  }
 }
 
 async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
-  console.log(typeof payload, payload);
   if (payload.length === 0) {
     showSnackbar.warn(`未从Yae获取到成就数据`);
     return;
@@ -349,7 +361,7 @@ async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<
     return;
   }
   await showLoading.start("正在导入成就数据", `UID:${input},数量:${payload.length}`);
-  await TSUserAchi.mergeUiaf(payload, input);
+  await TSUserAchi.mergeUiaf(payload, Number(input));
   await showLoading.end();
   showSnackbar.success("导入成功，即将刷新页面");
   await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");

@@ -75,7 +75,7 @@ pub async fn get_dir_size(path: String) -> u64 {
 pub fn is_in_admin() -> bool {
   #[cfg(not(target_os = "windows"))]
   {
-    Err("This function is only supported on Windows.".into())
+    return Err("This function is only supported on Windows.".into());
   }
 
   use windows_sys::Win32::Foundation::HANDLE;
@@ -121,7 +121,7 @@ pub fn is_in_admin() -> bool {
 pub fn run_with_admin() -> Result<(), String> {
   #[cfg(not(target_os = "windows"))]
   {
-    Err("This function is only supported on Windows.".into())
+    return Err("This function is only supported on Windows.".into());
   }
 
   use std::ffi::OsStr;

@@ -141,7 +141,6 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
       }
 
       if !dict.is_empty() {
-        println!("Raw dict: {:?}", dict);
         dicts.push(dict);
       }
     }
