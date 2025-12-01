@@ -1,9 +1,9 @@
 /**
- * @file plugins/Sqlite/modules/userAchi.ts
- * @description 用户成就模块
- * @since Beta v0.6.0
+ * 用户成就模块
+ * @since Beta v0.8.7
  */
 
+import { UiafAchiStatEnum } from "@enum/uiaf.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
@@ -155,11 +155,16 @@ async function getAchievements(
 }
 
 /**
- * @description 查找成就数据
- * @since Beta v0.6.0
+ * 查找成就数据
+ * @since Beta v0.8.7
+ * @remarks
+ * 支持三种搜索方式：
+ * 1. 版本搜索：输入 vx.x 格式的关键词（如 v1.2），搜索对应版本的成就
+ * 2. ID搜索：输入 ixxx 格式的关键词（如 i1001），搜索对应ID的成就
+ * 3. 名称/描述搜索：输入任意关键词，搜索成就名称或描述中包含该关键词的成就
  * @param {number} uid - 存档 UID
  * @param {string} keyword - 关键词
- * @returns {Promise<TGApp.Sqlite.Achievement.RenderAchi[]>} 成就数据
+ * @returns {Promise<Array<TGApp.Sqlite.Achievement.RenderAchi>>} 成就数据
  */
 async function searchAchi(
   uid: number,
@@ -167,11 +172,15 @@ async function searchAchi(
 ): Promise<TGApp.Sqlite.Achievement.RenderAchi[]> {
   if (keyword === "") return await getAchievements(uid);
   const versionReg = /^v\d+(\.\d+)?$/;
-  let rawData: TGApp.App.Achievement.Item[];
-  const res: TGApp.Sqlite.Achievement.RenderAchi[] = [];
+  const idReg = /^i\d+$/;
+  let rawData: Array<TGApp.App.Achievement.Item>;
+  const res: Array<TGApp.Sqlite.Achievement.RenderAchi> = [];
   if (versionReg.test(keyword)) {
     const version = keyword.replace("v", "");
     rawData = AppAchievementsData.filter((i) => i.version.includes(version));
+  } else if (idReg.test(keyword)) {
+    const id = parseInt(keyword.replace("i", ""));
+    rawData = AppAchievementsData.filter((a) => a.id === id);
   } else {
     rawData = AppAchievementsData.filter((a) => {
       if (a.name.includes(keyword)) return true;
@@ -312,16 +321,19 @@ async function restoreUiaf(dir: string): Promise<boolean> {
 }
 
 /**
- * @description 导入Uiaf数据
- * @since Beta v0.6.0
- * @param {TGApp.Plugins.UIAF.Achievement[]} data - 成就数据
+ * 导入Uiaf数据
+ * @since Beta v0.7.8
+ * @param {Array<TGApp.Plugins.UIAF.Achievement>} data - 成就数据
  * @param {number} uid - 存档UID
  * @returns {Promise<void>}
  */
-async function mergeUiaf(data: TGApp.Plugins.UIAF.Achievement[], uid: number): Promise<void> {
+async function mergeUiaf(data: Array<TGApp.Plugins.UIAF.Achievement>, uid: number): Promise<void> {
   const db = await TGSqlite.getDB();
   for (const achi of data) {
-    const status = achi.status === 2 || achi.status === 3 ? 1 : 0;
+    const status =
+      achi.status === UiafAchiStatEnum.Finished || achi.status === UiafAchiStatEnum.RewardTaken
+        ? 1
+        : 0;
     const timeC = status === 1 ? timestampToDate(achi.timestamp * 1000) : "";
     const timeN = timestampToDate(new Date().getTime());
     await db.execute(

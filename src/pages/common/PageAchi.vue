@@ -79,7 +79,7 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { listen, type UnlistenFn, type Event } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -133,7 +133,14 @@ onMounted(async () => {
   achiListener = await listen<void>("updateAchi", async () => await refreshOverview());
   yaeListener = await listen<TGApp.Plugins.Yae.AchiListRes>(
     "yae_achi_list",
-    (e: Event<TGApp.Plugins.Yae.AchiListRes>) => tryParseYaeAchi(e.payload),
+    async (e: Event<string>) => {
+      try {
+        await tryParseYaeAchi(JSON.parse(e.payload));
+      } catch (err) {
+        await TGLogger.Error(`[Achievements][yae_achi_list] 解析Yae成就数据失败: ${err}`);
+        showSnackbar.error(`解析Yae成就数据失败:${err}`);
+      }
+    },
   );
 });
 
@@ -327,8 +334,28 @@ async function toYae(): Promise<void> {
 }
 
 async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
-  console.log(payload);
-  showSnackbar.success(`已收到来自Yae的成就数据，共${payload.list.length}条`);
+  console.log(typeof payload, payload);
+  if (payload.length === 0) {
+    showSnackbar.warn(`未从Yae获取到成就数据`);
+    return;
+  }
+  const input = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
+  if (!input) {
+    showSnackbar.cancel("已取消存档导入");
+    return;
+  }
+  if (input === "" || isNaN(Number(input))) {
+    showSnackbar.warn("请输入合法数字");
+    return;
+  }
+  await showLoading.start("正在导入成就数据", `UID:${input},数量:${payload.length}`);
+  await TSUserAchi.mergeUiaf(payload, input);
+  await showLoading.end();
+  showSnackbar.success("导入成功，即将刷新页面");
+  await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  await router.push("/achievements");
+  window.location.reload();
 }
 </script>
 <style lang="scss" scoped>
