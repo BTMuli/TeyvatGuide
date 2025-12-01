@@ -78,7 +78,7 @@ pub fn is_in_admin() -> bool {
     return Err("This function is only supported on Windows.".into());
   }
 
-  use windows_sys::Win32::Foundation::HANDLE;
+  use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
   use windows_sys::Win32::Security::{
     AllocateAndInitializeSid, CheckTokenMembership, FreeSid, SID_IDENTIFIER_AUTHORITY, TOKEN_QUERY,
   };
@@ -136,31 +136,29 @@ pub fn run_with_admin() -> Result<(), String> {
   use std::ffi::OsStr;
   use std::iter::once;
   use std::os::windows::ffi::OsStrExt;
-  use std::process::exit;
+  use windows_sys::Win32::Foundation::HWND;
   use windows_sys::Win32::UI::Shell::ShellExecuteW;
   use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
   let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
-  let exe_str: Vec<u16> = OsStr::new(exe_path.to_string_lossy().as_ref())
-    .encode_wide()
-    .chain(std::iter::once(0))
-    .collect();
+  let exe_str: Vec<u16> = exe_path.as_os_str().encode_wide().chain(once(0)).collect();
   let verb: Vec<u16> = OsStr::new("runas").encode_wide().chain(once(0)).collect();
-
-  let result = unsafe {
-    ShellExecuteW(
-      std::ptr::null_mut(),
+  let workdir: Vec<u16> =
+    exe_path.parent().unwrap().as_os_str().encode_wide().chain(once(0)).collect();
+  unsafe {
+    let result = ShellExecuteW(
+      0 as HWND,
       verb.as_ptr(),
       exe_str.as_ptr(),
       std::ptr::null(),
-      std::ptr::null(),
+      workdir.as_ptr(),
       SW_SHOWNORMAL,
-    )
-  };
+    );
 
-  if result as usize > 32 {
-    exit(0);
-  } else {
-    Err("Failed to restart as administrator.".into())
+    if result as usize > 32 {
+      std::process::exit(0);
+    } else {
+      Err("Failed to restart as administrator.".into())
+    }
   }
 }

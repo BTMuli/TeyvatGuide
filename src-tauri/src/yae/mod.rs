@@ -12,6 +12,7 @@ use std::io::{self, Read, Write};
 use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
+use windows_sys::Win32::Foundation::CloseHandle;
 use windows_sys::Win32::System::Pipes::ConnectNamedPipe;
 
 // 读取配置值
@@ -63,7 +64,7 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
 
 /// 调用 dll
 #[tauri::command]
-pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
+pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> Result<(), String> {
   #[cfg(not(target_os = "windows"))]
   {
     return Err("This function is only supported on Windows.".into());
@@ -203,4 +204,5 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> () {
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
   }
+  Ok(())
 }

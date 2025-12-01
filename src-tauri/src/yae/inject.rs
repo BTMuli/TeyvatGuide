@@ -1,11 +1,11 @@
 //! DLL 注入相关功能
 //! @since Beta v0.9.0
 
-use std::ffi::{c_void, OsStr};
+use std::ffi::OsStr;
 use std::iter::once;
 use std::os::windows::ffi::OsStrExt;
 use std::ptr;
-use windows_sys::Win32::Foundation::{CloseHandle, HANDLE, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Foundation::{CloseHandle, FreeLibrary, HANDLE, INVALID_HANDLE_VALUE};
 use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
@@ -101,12 +101,12 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
     }
 
     let k32 = GetModuleHandleA(b"kernel32.dll\0".as_ptr());
-    if k32 == 0 {
+    if k32 == std::ptr::null_mut() {
       panic!("GetModuleHandleA failed");
     }
 
     let loadlib = GetProcAddress(k32, b"LoadLibraryW\0".as_ptr());
-    if loadlib.is_null() {
+    if loadlib.is_none() {
       panic!("GetProcAddress failed");
     }
 
@@ -162,17 +162,14 @@ pub fn call_yaemain(pi: &PROCESS_INFORMATION, base: usize, dll_path: &str) {
   unsafe {
     let local =
       LoadLibraryExW(dll_path_wide.as_ptr(), std::ptr::null_mut(), DONT_RESOLVE_DLL_REFERENCES);
-    if local == 0 {
+    if local == std::ptr::null_mut() {
       panic!("LoadLibraryExW failed");
     }
 
-    let proc = GetProcAddress(local, b"YaeMain\0".as_ptr());
-    if proc.is_null() {
-      FreeLibrary(local);
-      panic!("无法找到 YaeMain");
-    }
+    let proc = GetProcAddress(local, b"YaeMain\0".as_ptr()).expect("无法找到 YaeMain");
 
-    let proc_addr = proc as usize;
+    // Option<unsafe extern "system" fn() -> isize>
+    let proc_addr = proc as *const () as usize;
     let rva = proc_addr - local as usize;
     println!("YaeMain RVA: {:#x}", rva);
 

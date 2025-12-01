@@ -322,7 +322,8 @@ async function toYae(): Promise<void> {
   try {
     isAdmin = await invoke<boolean>("is_in_admin");
   } catch (err) {
-    showSnackbar.error("检测管理员权限失败：" + (err?.message || err));
+    showSnackbar.error(`检测管理员权限失败：${err}`);
+    await TGLogger.Error(`[pageAchi][toYae]检测管理员权限失败:${err}`);
     return;
   }
   if (!isAdmin) {
@@ -332,16 +333,19 @@ async function toYae(): Promise<void> {
       return;
     }
     try {
-      await invoke("run_with_admin");
+      const res = await invoke("run_with_admin");
+      await TGLogger.Warn(`${res}`);
     } catch (err) {
-      showSnackbar.error("以管理员模式重启失败：" + (err?.message || err));
+      showSnackbar.error(`以管理员模式重启失败：${err}`);
+      await TGLogger.Error(`[pageAchi][toYae]以管理员模式启动失败 - ${err}`);
       return;
     }
   }
   try {
     await invoke("call_yae_dll", { gamePath: gamePath });
   } catch (err) {
-    showSnackbar.error("调用Yae DLL失败：" + (err?.message || err));
+    showSnackbar.error(`调用Yae DLL失败: ${err}`);
+    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
     return;
   }
 }
