@@ -6,17 +6,15 @@ pub mod proto;
 
 use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
 use prost::encoding::{decode_key, WireType};
-use prost::Message;
-use proto::{parse_achi_list, AchievementInfo};
+use proto::parse_achi_list;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::io::{Read, Write};
-use std::os::windows::io::{FromRawHandle, OwnedHandle, RawHandle};
+use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::sync::Arc;
 use tauri::{AppHandle, Emitter, Manager};
-use windows_sys::Win32::Storage::FileSystem::ReadFile;
 use windows_sys::Win32::System::Pipes::ConnectNamedPipe;
 
 // 读取配置值
@@ -78,8 +76,6 @@ pub fn parse_achievement_data(bytes: &[u8]) -> Vec<HashMap<u32, u32>> {
 
   data
 }
-
-use windows_sys::Win32::Foundation::{GetLastError, ERROR_MORE_DATA};
 
 fn read_u32_le<R: Read>(r: &mut R) -> io::Result<u32> {
   let mut buf = [0u8; 4];

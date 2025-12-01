@@ -106,15 +106,15 @@ pub struct AchievementInfo {
 }
 
 #[derive(Debug, Default, Serialize)]
-pub struct AchievementEntry {
+pub struct AchiItemRes {
   pub id: u32,
-  pub total_progress: u32,
-  pub current_progress: u32,
-  pub finish_timestamp: u32,
-  pub status: u32, // 数值类型
+  pub total: u32,
+  pub cur: u32,
+  pub ts: u32,
+  pub stat: u32,
 }
 
-pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<AchievementEntry>, DecodeError> {
+pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<AchiItemRes>, DecodeError> {
   let mut cursor = Cursor::new(bytes);
   let mut dicts: Vec<HashMap<u32, u32>> = Vec::new();
 
@@ -146,12 +146,12 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<AchievementEntry>, DecodeErro
 
   let achievements = dicts
     .into_iter()
-    .map(|d| AchievementEntry {
+    .map(|d| AchiItemRes {
       id: d.get(&15).copied().unwrap_or(0),
-      status: d.get(&11).copied().unwrap_or(0),
-      total_progress: d.get(&8).copied().unwrap_or(0),
-      current_progress: d.get(&13).copied().unwrap_or(0),
-      finish_timestamp: d.get(&7).copied().unwrap_or(0),
+      stat: d.get(&11).copied().unwrap_or(0),
+      total: d.get(&8).copied().unwrap_or(0),
+      cur: d.get(&13).copied().unwrap_or(0),
+      ts: d.get(&7).copied().unwrap_or(0),
     })
     .collect();
 

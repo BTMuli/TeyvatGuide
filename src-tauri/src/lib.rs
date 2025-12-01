@@ -8,7 +8,9 @@ mod utils;
 mod yae;
 
 use crate::client::create_mhy_client;
-use crate::commands::{create_window, execute_js, get_dir_size, init_app};
+use crate::commands::{
+  create_window, execute_js, get_dir_size, init_app, is_in_admin, run_with_admin,
+};
 use crate::plugins::{build_log_plugin, build_si_plugin};
 use crate::yae::call_yae_dll;
 use tauri::{generate_context, generate_handler, Builder, Manager, Window, WindowEvent};
@@ -63,7 +65,9 @@ pub fn run() {
       execute_js,
       get_dir_size,
       create_mhy_client,
-      call_yae_dll
+      call_yae_dll,
+      is_in_admin,
+      run_with_admin
     ])
     .run(generate_context!())
     .expect("error while running tauri application");
