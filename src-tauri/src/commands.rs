@@ -77,51 +77,54 @@ pub fn is_in_admin() -> bool {
   {
     return Err("This function is only supported on Windows.".into());
   }
+  #[cfg(target_os = "windows")]
+  {
+    use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
+    use windows_sys::Win32::Security::{
+      AllocateAndInitializeSid, CheckTokenMembership, FreeSid, SID_IDENTIFIER_AUTHORITY,
+      TOKEN_QUERY,
+    };
+    use windows_sys::Win32::System::SystemServices::{
+      DOMAIN_ALIAS_RID_ADMINS, SECURITY_BUILTIN_DOMAIN_RID,
+    };
+    use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
 
-  use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
-  use windows_sys::Win32::Security::{
-    AllocateAndInitializeSid, CheckTokenMembership, FreeSid, SID_IDENTIFIER_AUTHORITY, TOKEN_QUERY,
-  };
-  use windows_sys::Win32::System::SystemServices::{
-    DOMAIN_ALIAS_RID_ADMINS, SECURITY_BUILTIN_DOMAIN_RID,
-  };
-  use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
+    unsafe {
+      let mut token_handle: HANDLE = std::ptr::null_mut();
+      if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token_handle) == 0 {
+        return false;
+      }
 
-  unsafe {
-    let mut token_handle: HANDLE = std::ptr::null_mut();
-    if OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &mut token_handle) == 0 {
-      return false;
-    }
+      let nt_authority = SID_IDENTIFIER_AUTHORITY { Value: [0, 0, 0, 0, 0, 5] };
+      let mut admin_group = std::ptr::null_mut();
 
-    let nt_authority = SID_IDENTIFIER_AUTHORITY { Value: [0, 0, 0, 0, 0, 5] };
-    let mut admin_group = std::ptr::null_mut();
+      let success = AllocateAndInitializeSid(
+        &nt_authority,
+        2,
+        SECURITY_BUILTIN_DOMAIN_RID.try_into().unwrap(),
+        DOMAIN_ALIAS_RID_ADMINS.try_into().unwrap(),
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        &mut admin_group,
+      );
 
-    let success = AllocateAndInitializeSid(
-      &nt_authority,
-      2,
-      SECURITY_BUILTIN_DOMAIN_RID.try_into().unwrap(),
-      DOMAIN_ALIAS_RID_ADMINS.try_into().unwrap(),
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      &mut admin_group,
-    );
+      if success == 0 {
+        CloseHandle(token_handle);
+        return false;
+      }
 
-    if success == 0 {
+      let mut is_admin = 0i32;
+      let result = CheckTokenMembership(std::ptr::null_mut(), admin_group, &mut is_admin);
+
+      FreeSid(admin_group);
       CloseHandle(token_handle);
-      return false;
+
+      result != 0 && is_admin != 0
     }
-
-    let mut is_admin = 0i32;
-    let result = CheckTokenMembership(std::ptr::null_mut(), admin_group, &mut is_admin);
-
-    FreeSid(admin_group);
-    CloseHandle(token_handle);
-
-    result != 0 && is_admin != 0
   }
 }
 
@@ -132,48 +135,50 @@ pub fn run_with_admin() -> Result<(), String> {
   {
     return Err("This function is only supported on Windows.".into());
   }
+  #[cfg(target_os = "windows")]
+  {
+    use std::ffi::OsStr;
+    use std::iter::once;
+    use std::os::windows::ffi::OsStrExt;
+    use std::ptr::null_mut;
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::Shell::ShellExecuteW;
+    use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
-  use std::ffi::OsStr;
-  use std::iter::once;
-  use std::os::windows::ffi::OsStrExt;
-  use std::ptr::null_mut;
-  use windows_sys::Win32::Foundation::HWND;
-  use windows_sys::Win32::UI::Shell::ShellExecuteW;
-  use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+    fn to_wide(s: &OsStr) -> Vec<u16> {
+      s.encode_wide().chain(once(0)).collect()
+    }
 
-  fn to_wide(s: &OsStr) -> Vec<u16> {
-    s.encode_wide().chain(once(0)).collect()
-  }
+    let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
+    if !exe_path.exists() {
+      return Err(format!("executable not found: {}", exe_path.display()));
+    }
 
-  let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
-  if !exe_path.exists() {
-    return Err(format!("executable not found: {}", exe_path.display()));
-  }
+    let elevated_arg = "--elevated-action=post_install";
+    // /C start "" "<full_path>" --elevated-action=post_install
+    let params = format!("/C start \"\" \"{}\" {}", exe_path.display(), elevated_arg);
 
-  let elevated_arg = "--elevated-action=post_install";
-  // /C start "" "<full_path>" --elevated-action=post_install
-  let params = format!("/C start \"\" \"{}\" {}", exe_path.display(), elevated_arg);
+    let cmd_w = to_wide(OsStr::new("cmd.exe"));
+    let verb_w = to_wide(OsStr::new("runas"));
+    let params_w = to_wide(OsStr::new(&params));
+    let workdir_w =
+      exe_path.parent().map(|p| to_wide(p.as_os_str())).unwrap_or_else(|| to_wide(OsStr::new("")));
 
-  let cmd_w = to_wide(OsStr::new("cmd.exe"));
-  let verb_w = to_wide(OsStr::new("runas"));
-  let params_w = to_wide(OsStr::new(&params));
-  let workdir_w =
-    exe_path.parent().map(|p| to_wide(p.as_os_str())).unwrap_or_else(|| to_wide(OsStr::new("")));
+    unsafe {
+      let result = ShellExecuteW(
+        0 as HWND,
+        verb_w.as_ptr(),
+        cmd_w.as_ptr(),
+        params_w.as_ptr(),
+        if workdir_w.len() > 1 { workdir_w.as_ptr() } else { null_mut() },
+        SW_SHOWNORMAL,
+      );
 
-  unsafe {
-    let result = ShellExecuteW(
-      0 as HWND,
-      verb_w.as_ptr(),
-      cmd_w.as_ptr(),
-      params_w.as_ptr(),
-      if workdir_w.len() > 1 { workdir_w.as_ptr() } else { null_mut() },
-      SW_SHOWNORMAL,
-    );
-
-    if (result as usize) > 32 {
-      Ok(())
-    } else {
-      Err("Failed to restart as administrator via cmd.".into())
+      if (result as usize) > 32 {
+        Ok(())
+      } else {
+        Err("Failed to restart as administrator via cmd.".into())
+      }
     }
   }
 }
