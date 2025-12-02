@@ -67,6 +67,7 @@ pub fn run() {
       execute_js,
       get_dir_size,
       create_mhy_client,
+      #[cfg(target_os = "windows")]
       call_yae_dll,
       is_in_admin,
       run_with_admin
