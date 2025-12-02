@@ -59,7 +59,7 @@ jobs:
       - name: Output toolchain
         run: rustup show
       - name: Add Offset Conf
-        run: echo "${{ secrets.YAE_CONF }}" > ./src-tauri/lib/conf.json
+        run: echo '${{ secrets.YAE_CONF }}' | jq -c . > ./src-tauri/lib/conf.json
       - name: setup node
         uses: actions/setup-node@v3
         with:
