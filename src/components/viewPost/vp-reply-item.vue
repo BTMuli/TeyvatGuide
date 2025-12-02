@@ -38,7 +38,7 @@
           {{ props.modelValue.stat.like_num }}
         </span>
         <span
-          v-if="props.modelValue.sub_reply_count > 0"
+          v-if="props.modelValue.sub_replies.length > 0"
           class="tpr-reply"
           title="查看子回复"
           @click="showReply()"
