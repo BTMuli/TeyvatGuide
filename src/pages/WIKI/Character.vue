@@ -3,17 +3,17 @@
   <div class="wc-box">
     <div class="wc-left">
       <div class="wc-select">
-        <v-btn @click="showSelect = true" class="wc-btn">筛选角色</v-btn>
-        <v-btn @click="resetSelect = true" class="wc-btn">重置筛选</v-btn>
+        <v-btn class="wc-btn" @click="showSelect = true">筛选角色</v-btn>
+        <v-btn class="wc-btn" @click="resetSelect = true">重置筛选</v-btn>
       </div>
       <div class="wc-list">
         <TwcListItem
           v-for="(item, index) in cardsInfo"
-          v-model:cur-item="curItem"
           :key="index"
+          v-model:cur-item="curItem"
           :data="item"
-          @click="switchC(item)"
           mode="character"
+          @click="switchC(item)"
         />
       </div>
     </div>
@@ -21,7 +21,7 @@
       <TwcCharacter :item="curItem" />
     </div>
   </div>
-  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
+  <TwoSelectC v-model="showSelect" v-model:reset="resetSelect" @select-c="handleSelect" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -35,10 +35,17 @@ import { useRoute } from "vue-router";
 
 import { AppCharacterData } from "@/data/index.js";
 
+// 先按star降序，再按元素排序，再按id降序
+const appCData = AppCharacterData.sort((a, b) => {
+  if (a.star !== b.star) return b.star - a.star;
+  if (a.element !== b.element) return a.element.localeCompare(b.element);
+  return b.id - a.id;
+});
+
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
-const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(AppCharacterData);
+const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(appCData);
 const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   id: 0,
   contentId: 0,
@@ -66,9 +73,12 @@ onBeforeMount(() => {
   curItem.value = cardsInfo.value[0];
 });
 
-watch(resetSelect, (val) => {
-  if (val) cardsInfo.value = AppCharacterData;
-});
+watch(
+  () => resetSelect.value,
+  (val) => {
+    if (val) cardsInfo.value = AppCharacterData;
+  },
+);
 
 function handleSelect(val: SelectedCValue): void {
   showSelect.value = false;
@@ -108,7 +118,7 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
   await toObcPage(item.contentId);
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .wc-box {
   position: relative;
   display: flex;
