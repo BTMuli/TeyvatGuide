@@ -1,10 +1,11 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.9.0
+//! @since Beta v0.7.8
 
 mod client;
 mod commands;
 mod plugins;
 mod utils;
+#[cfg(target_os = "windows")]
 mod yae;
 
 use crate::client::create_mhy_client;
@@ -12,6 +13,7 @@ use crate::commands::{
   create_window, execute_js, get_dir_size, init_app, is_in_admin, run_with_admin,
 };
 use crate::plugins::{build_log_plugin, build_si_plugin};
+#[cfg(target_os = "windows")]
 use crate::yae::call_yae_dll;
 use tauri::{generate_context, generate_handler, Builder, Manager, Window, WindowEvent};
 

@@ -1,5 +1,6 @@
 //! Yae 成就信息的 Protobuf 定义
 //! @since Beta v0.8.7
+#![cfg(target_os = "windows")]
 
 use prost::encoding::{decode_key, WireType};
 use prost::DecodeError;

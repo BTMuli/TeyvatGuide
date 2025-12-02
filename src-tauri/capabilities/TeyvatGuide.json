@@ -52,8 +52,7 @@
         { "url": "https://*.miyoushe.com/*" },
         { "url": "https://*.mihoyo.com/*" },
         { "url": "https://homa.snapgenshin.com/*" },
-        { "url": "https://*.hoyoverse.com/*" },
-        { "url": "https://*.geetest.com/*" }
+        { "url": "https://*.hoyoverse.com/*" }
       ]
     },
     {
@@ -61,8 +60,5 @@
       "allow": [{ "name": "exec-sh", "cmd": "powershell", "args": true }]
     }
   ],
-  "remote": {
-    "urls": ["https://*.geetest.com/*"]
-  },
   "platforms": ["windows", "macOS"]
 }

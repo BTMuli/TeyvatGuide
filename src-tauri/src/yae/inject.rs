@@ -1,5 +1,6 @@
 //! DLL 注入相关功能
-//! @since Beta v0.9.0
+//! @since Beta v0.7.8
+#![cfg(target_os = "windows")]
 
 use std::ffi::OsStr;
 use std::iter::once;

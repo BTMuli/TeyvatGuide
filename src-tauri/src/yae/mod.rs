@@ -1,5 +1,6 @@
 //! Yae 相关处理
 //! @since Beta v0.8.7
+#![cfg(target_os = "windows")]
 
 pub mod inject;
 pub mod proto;
@@ -65,11 +66,6 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
 /// 调用 dll
 #[tauri::command]
 pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> Result<(), String> {
-  #[cfg(not(target_os = "windows"))]
-  {
-    return Err("This function is only supported on Windows.".into());
-  }
-
   let dll_path = app_handle.path().resource_dir().unwrap().join("resources/YaeAchievementLib.dll");
   dbg!(&dll_path);
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
