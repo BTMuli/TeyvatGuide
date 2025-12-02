@@ -1,13 +1,14 @@
+<!-- 名片详情浮窗 -->
 <template>
-  <TOverlay v-model="visible" v-if="props.data">
+  <TOverlay v-if="props.data" v-model="visible">
     <div class="ton-container">
       <slot name="left"></slot>
       <div class="ton-box">
         <img
-          alt="bg"
-          class="ton-bg"
           v-if="props.data"
           :src="`/WIKI/nameCard/profile/${props.data.name}.webp`"
+          alt="bg"
+          class="ton-bg"
         />
         <div class="ton-content">
           <span>{{ props.data.name }}</span>
@@ -17,11 +18,11 @@
         <TwnTypeTag :type="props.data.type" class="ton-type" />
         <div class="ton-sign">ID:{{ props.data.id }} | TeyvatGuide v{{ version }}</div>
         <v-btn
-          class="ton-share"
-          @click="shareNameCard"
-          variant="outlined"
           :loading="loading"
+          class="ton-share"
           data-html2canvas-ignore
+          variant="outlined"
+          @click="shareNameCard"
         >
           <v-icon>mdi-share-variant</v-icon>
           <span>分享</span>
@@ -31,7 +32,7 @@
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import TwnTypeTag from "@comp/pageWiki/twn-type-tag.vue";
 import { getVersion } from "@tauri-apps/api/app";
@@ -83,6 +84,7 @@ function parseNameCard(desc: string): string {
 function parseDesc(desc: string, inQuote: boolean = false): string[] {
   let res = desc.replace(/。/g, "。\n");
   res = res.replace(/；/g, "；\n");
+  /* 闲云·鹤云 */
   if (props?.data?.id !== 210187) {
     res = res.replace(/：/g, "：\n");
     res = res.replace(/？/g, "？\n");
@@ -93,12 +95,23 @@ function parseDesc(desc: string, inQuote: boolean = false): string[] {
   if (!desc.includes("！」")) res = res.replace(/！/g, "！\n");
   res = res.replace(/…/g, "…\n");
   res = res.replace(/…\n…/g, "……\n");
+  /* 瓦雷莎·力源 */
   if (props?.data?.id === 210236) res = res.replace(/…\n/g, "…");
+  /* 伊安珊·不懈 */
   if (props?.data?.id === 210237) {
     res = res.replace(/…\n/g, "…\n");
     res = res.replace(/」/g, "」\n");
   }
-  if (props?.data?.id === 210254) res = res.replace(/\n」/g, "」\n");
+  if (
+    /* 菲林斯·誓灯 */
+    props?.data?.id === 210254 ||
+    /* 杜林·曜心 */
+    props?.data?.id === 210263 ||
+    /* 雅珂达·帮手 */
+    props?.data?.id === 210264
+  ) {
+    res = res.replace(/\n」/g, "」\n");
+  }
   const match = res.split("\n");
   let array: string[] = [];
   for (const item of match) {
