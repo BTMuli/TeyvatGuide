@@ -75,7 +75,7 @@ pub async fn get_dir_size(path: String) -> u64 {
 pub fn is_in_admin() -> bool {
   #[cfg(not(target_os = "windows"))]
   {
-    return Err("This function is only supported on Windows.".into());
+    return false;
   }
   #[cfg(target_os = "windows")]
   {
