@@ -97,7 +97,13 @@ function handleSelect(val: SelectedCValue): void {
 }
 
 async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
-  if (item.id === 10000005 || item.id === 10000007) {
+  const outerIdList: ReadonlyArray<number> = [
+    10000005, // 空
+    10000007, // 荧
+    10000117, // 奇偶·男性
+    10000118, // 奇偶·女性
+  ];
+  if (outerIdList.includes(item.id)) {
     await toOuter(item);
     return;
   }
