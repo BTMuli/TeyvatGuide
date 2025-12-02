@@ -140,9 +140,9 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
         let value = prost::encoding::decode_varint(&mut inner)? as u32;
         dict.insert(tag, value);
       }
-
-      if !dict.is_empty() {
-        dicts.push(dict);
+      // dict 至少需要两个 key
+      if dict.len() > 2 {
+        dicts.push(dict)
       }
     }
   }
@@ -155,7 +155,6 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
       current: d.get(&13).copied().unwrap_or(0),
       timestamp: d.get(&7).copied().unwrap_or(0),
     })
-    .filter(|a| a.timestamp != 0)
     .collect();
 
   Ok(achievements)
