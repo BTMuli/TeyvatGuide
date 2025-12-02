@@ -4361,7 +4361,7 @@
     "series": 0,
     "order": 1027,
     "name": "QUEST CLEAR",
-    "description": "完成10次「讨伐悬赏」。",
+    "description": "完成3次「讨伐悬赏」。",
     "reward": 5,
     "version": "1.1",
     "trigger": { "type": "HUNTING_FINISH_NUM" }
@@ -4371,7 +4371,7 @@
     "series": 0,
     "order": 1028,
     "name": "QUEST CLEAR",
-    "description": "完成20次「讨伐悬赏」。",
+    "description": "完成6次「讨伐悬赏」。",
     "reward": 10,
     "version": "1.1",
     "trigger": { "type": "HUNTING_FINISH_NUM" }
@@ -4381,7 +4381,7 @@
     "series": 0,
     "order": 1029,
     "name": "QUEST CLEAR",
-    "description": "完成30次「讨伐悬赏」。",
+    "description": "完成9次「讨伐悬赏」。",
     "reward": 20,
     "version": "1.1",
     "trigger": { "type": "HUNTING_FINISH_NUM" }
@@ -4391,7 +4391,7 @@
     "series": 0,
     "order": 1030,
     "name": "见习勇者",
-    "description": "完成10次「居民请求」。",
+    "description": "完成3次「居民请求」。",
     "reward": 5,
     "version": "1.1",
     "trigger": { "type": "CITY_REPUTATION_FINISH_REQUEST" }
@@ -4401,7 +4401,7 @@
     "series": 0,
     "order": 1031,
     "name": "见习勇者",
-    "description": "完成20次「居民请求」。",
+    "description": "完成6次「居民请求」。",
     "reward": 10,
     "version": "1.1",
     "trigger": { "type": "CITY_REPUTATION_FINISH_REQUEST" }
@@ -4411,7 +4411,7 @@
     "series": 0,
     "order": 1032,
     "name": "见习勇者",
-    "description": "完成30次「居民请求」。",
+    "description": "完成9次「居民请求」。",
     "reward": 20,
     "version": "1.1",
     "trigger": { "type": "CITY_REPUTATION_FINISH_REQUEST" }
@@ -13199,6 +13199,16 @@
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
+    "id": 82303,
+    "series": 0,
+    "order": 2303,
+    "name": "德兹斯拉沃的移动城堡",
+    "description": "击败一艘至少因过热瘫痪过2次的超重型陆巡舰·机动战垒。",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -15933,6 +15943,86 @@
       "type": "FINISH_QUEST_AND",
       "task": [{ "questId": 6020, "name": "命运的回声", "type": "魔神任务" }]
     }
+  },
+  {
+    "id": 84366,
+    "series": 0,
+    "order": 5149,
+    "name": "重要的日子",
+    "description": "节日就是要开开心心。",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84367,
+    "series": 0,
+    "order": 5150,
+    "name": "祈月之夜",
+    "description": "享受在月下世界最后的夜晚。",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84368,
+    "series": 0,
+    "order": 5151,
+    "name": "在永远与须臾间",
+    "description": "月光永远联系着我们，不论日夜。",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84369,
+    "series": 0,
+    "order": 5152,
+    "name": "散于晨雾的月芒",
+    "description": "完成「散于晨雾的月芒」。",
+    "reward": 10,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84370,
+    "series": 0,
+    "order": 5145,
+    "name": "石头抬起时",
+    "description": "说不定会有意外的收获。",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84371,
+    "series": 0,
+    "order": 5146,
+    "name": "如梦幻泡影",
+    "description": "目睹过去在这里发生过的「历史」。",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84372,
+    "series": 0,
+    "order": 5147,
+    "name": "交汇的行迹",
+    "description": "你们曾在某个时刻擦肩而过…",
+    "reward": 5,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84373,
+    "series": 0,
+    "order": 5148,
+    "name": "终北的夜行诗",
+    "description": "完成「终北的夜行诗」。",
+    "reward": 10,
+    "version": "6.2",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84501,

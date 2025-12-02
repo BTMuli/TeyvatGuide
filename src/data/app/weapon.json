@@ -1,4 +1,5 @@
 [
+  { "id": 15515, "contentId": 0, "name": "黎明破晓之史", "star": 5, "weapon": "弓" },
   { "id": 15514, "contentId": 503390, "name": "星鹫赤羽", "star": 5, "weapon": "弓" },
   { "id": 15513, "contentId": 501495, "name": "白雨心弦", "star": 5, "weapon": "弓" },
   { "id": 15512, "contentId": 6936, "name": "最初的大魔术", "star": 5, "weapon": "弓" },
@@ -47,6 +48,7 @@
   { "id": 12503, "contentId": 2039, "name": "松籁响起之时", "star": 5, "weapon": "双手剑" },
   { "id": 12502, "contentId": 218, "name": "狼的末路", "star": 5, "weapon": "双手剑" },
   { "id": 12501, "contentId": 291, "name": "天空之傲", "star": 5, "weapon": "双手剑" },
+  { "id": 11518, "contentId": 0, "name": "黑蚀", "star": 5, "weapon": "单手剑" },
   { "id": 11517, "contentId": 505478, "name": "苍耀", "star": 5, "weapon": "单手剑" },
   { "id": 11516, "contentId": 502898, "name": "岩峰巡歌", "star": 5, "weapon": "单手剑" },
   { "id": 11515, "contentId": 501384, "name": "赦罪", "star": 5, "weapon": "单手剑" },
@@ -61,6 +63,7 @@
   { "id": 11503, "contentId": 2129, "name": "苍古自由之誓", "star": 5, "weapon": "单手剑" },
   { "id": 11502, "contentId": 215, "name": "天空之刃", "star": 5, "weapon": "单手剑" },
   { "id": 11501, "contentId": 293, "name": "风鹰剑", "star": 5, "weapon": "单手剑" },
+  { "id": 15434, "contentId": 0, "name": "虹蛇的雨弦", "star": 4, "weapon": "弓" },
   { "id": 15433, "contentId": 506377, "name": "罗网勾针", "star": 4, "weapon": "弓" },
   { "id": 15432, "contentId": 505322, "name": "冷寂迸音", "star": 4, "weapon": "弓" },
   { "id": 15431, "contentId": 501964, "name": "碎链", "star": 4, "weapon": "弓" },
