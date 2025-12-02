@@ -1,6 +1,5 @@
-//! @file src/plugins.rs
-//! @desc 插件模块，用于注册插件
-//! @since Beta v0.6.2
+//! 插件模块，用于注册插件
+//! @since Beta v0.7.8
 
 use crate::utils::get_current_date;
 use log::LevelFilter;
@@ -11,7 +10,29 @@ use tauri_plugin_single_instance::init;
 
 // 单例插件
 pub fn build_si_plugin<R: Runtime>() -> TauriPlugin<R> {
-  init(move |app, argv, _cwd| app.emit("active_deep_link", argv).unwrap())
+  init(move |app, argv, _cwd| {
+    // 把 argv 转成 Vec<String>
+    let args: Vec<String> = argv.iter().map(|s| s.to_string()).collect();
+
+    // 如果包含提升约定参数，发出专门事件并短路退出
+    if args.iter().any(|a| a.starts_with("--elevated-action"))
+      || args.iter().any(|a| a == "--elevated")
+    {
+      if let Err(e) = app.emit("elevated_launch", args.clone()) {
+        // 记录错误但不要 panic
+        eprintln!("emit elevated_launch failed: {}", e);
+      }
+      // 提升实例通常只负责传参或执行一次性任务，退出避免与主实例冲突
+      std::process::exit(0);
+    }
+
+    // 非提升启动：按原逻辑广播 deep link
+    if let Err(e) = app.emit("active_deep_link", argv) {
+      eprintln!("emit active_deep_link failed: {}", e);
+    }
+
+    // 回调必须返回 unit，直接结束即可
+  })
 }
 
 // 日志插件

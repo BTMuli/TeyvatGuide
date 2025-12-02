@@ -136,29 +136,44 @@ pub fn run_with_admin() -> Result<(), String> {
   use std::ffi::OsStr;
   use std::iter::once;
   use std::os::windows::ffi::OsStrExt;
+  use std::ptr::null_mut;
   use windows_sys::Win32::Foundation::HWND;
   use windows_sys::Win32::UI::Shell::ShellExecuteW;
   use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
+  fn to_wide(s: &OsStr) -> Vec<u16> {
+    s.encode_wide().chain(once(0)).collect()
+  }
+
   let exe_path = std::env::current_exe().map_err(|e| e.to_string())?;
-  let exe_str: Vec<u16> = exe_path.as_os_str().encode_wide().chain(once(0)).collect();
-  let verb: Vec<u16> = OsStr::new("runas").encode_wide().chain(once(0)).collect();
-  let workdir: Vec<u16> =
-    exe_path.parent().unwrap().as_os_str().encode_wide().chain(once(0)).collect();
+  if !exe_path.exists() {
+    return Err(format!("executable not found: {}", exe_path.display()));
+  }
+
+  let elevated_arg = "--elevated-action=post_install";
+  // /C start "" "<full_path>" --elevated-action=post_install
+  let params = format!("/C start \"\" \"{}\" {}", exe_path.display(), elevated_arg);
+
+  let cmd_w = to_wide(OsStr::new("cmd.exe"));
+  let verb_w = to_wide(OsStr::new("runas"));
+  let params_w = to_wide(OsStr::new(&params));
+  let workdir_w =
+    exe_path.parent().map(|p| to_wide(p.as_os_str())).unwrap_or_else(|| to_wide(OsStr::new("")));
+
   unsafe {
     let result = ShellExecuteW(
       0 as HWND,
-      verb.as_ptr(),
-      exe_str.as_ptr(),
-      std::ptr::null(),
-      workdir.as_ptr(),
+      verb_w.as_ptr(),
+      cmd_w.as_ptr(),
+      params_w.as_ptr(),
+      if workdir_w.len() > 1 { workdir_w.as_ptr() } else { null_mut() },
       SW_SHOWNORMAL,
     );
 
-    if result as usize > 32 {
-      std::process::exit(0);
+    if (result as usize) > 32 {
+      Ok(())
     } else {
-      Err("Failed to restart as administrator.".into())
+      Err("Failed to restart as administrator via cmd.".into())
     }
   }
 }

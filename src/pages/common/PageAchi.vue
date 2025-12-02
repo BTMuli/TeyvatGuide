@@ -333,8 +333,7 @@ async function toYae(): Promise<void> {
       return;
     }
     try {
-      const res = await invoke("run_with_admin");
-      await TGLogger.Warn(`${res}`);
+      await invoke("run_with_admin");
     } catch (err) {
       showSnackbar.error(`以管理员模式重启失败：${err}`);
       await TGLogger.Error(`[pageAchi][toYae]以管理员模式启动失败 - ${err}`);

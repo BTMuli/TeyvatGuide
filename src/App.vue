@@ -1,3 +1,4 @@
+<!--主界面 -->
 <template>
   <v-app v-model:theme="vuetifyTheme">
     <TSidebar v-if="isMain" />
@@ -164,7 +165,7 @@ async function getDeepLink(): Promise<UnlistenFn> {
     const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
     if (await windowGet.isMinimized()) await windowGet.unminimize();
     await windowGet.setFocus();
-    const payload = parseDeepLink(e.payload);
+    const payload = await parseDeepLink(e.payload);
     if (payload === false) {
       showSnackbar.error("无效的 deep link！", 3000);
       await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e.payload)}`);
@@ -175,14 +176,14 @@ async function getDeepLink(): Promise<UnlistenFn> {
   });
 }
 
-function parseDeepLink(payload: string | string[]): string | false {
+async function parseDeepLink(payload: string | string[]): Promise<string | false> {
   try {
     if (typeof payload === "string") return payload;
     if (payload.length < 2) return "teyvatguide://";
     return payload[1];
   } catch (e) {
     if (e instanceof Error) {
-      TGLogger.Error(`[App][parseDeepLink] ${e.name}: ${e.message}`);
+      await TGLogger.Error(`[App][parseDeepLink] ${e.name}: ${e.message}`);
     } else console.error(e);
     return false;
   }
