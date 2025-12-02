@@ -1,142 +1,142 @@
 <template>
   <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
-    <v-list class="side-list" density="compact" :nav="true">
+    <v-list :nav="true" class="side-list" density="compact">
       <v-list-item
-        @click="rail = !rail"
-        :prepend-icon="rail ? 'mdi-chevron-right' : undefined"
         :append-icon="!rail ? 'mdi-chevron-left' : undefined"
+        :prepend-icon="rail ? 'mdi-chevron-right' : undefined"
+        @click="rail = !rail"
       />
       <!-- 菜单项 -->
-      <v-list-item :title.attr="'首页'" :link="true" href="/">
+      <v-list-item :link="true" :title.attr="'首页'" href="/">
         <template #title>首页</template>
         <template #prepend>
-          <img src="/source/UI/paimon.webp" alt="homeIcon" class="side-icon paimon" />
+          <img alt="homeIcon" class="side-icon paimon" src="/source/UI/paimon.webp" />
         </template>
       </v-list-item>
-      <v-list-item title.attr="'公告'" :link="true" href="/announcements">
+      <v-list-item :link="true" href="/announcements" title.attr="'公告'">
         <template #title>公告</template>
         <template #prepend>
-          <img src="@/assets/icons/board.svg" alt="annoIcon" class="side-icon" />
+          <img alt="annoIcon" class="side-icon" src="@/assets/icons/board.svg" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'咨讯'" :link="true" :href="`/news/2/${recentNewsType}`">
+      <v-list-item :href="`/news/2/${recentNewsType}`" :link="true" :title.attr="'咨讯'">
         <template #title>咨讯</template>
         <template #prepend>
-          <img src="/platforms/mhy/mys.webp" alt="mihoyo" class="side-icon" />
+          <img alt="mihoyo" class="side-icon" src="/platforms/mhy/mys.webp" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'帖子'" :link="true" href="/posts/forum">
+      <v-list-item :link="true" :title.attr="'帖子'" href="/posts/forum">
         <template #title>帖子</template>
         <template #prepend>
-          <img src="/source/UI/posts.webp" alt="posts" class="side-icon" />
+          <img alt="posts" class="side-icon" src="/source/UI/posts.webp" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'成就'" :link="true" href="/achievements">
+      <v-list-item :link="true" :title.attr="'成就'" href="/achievements">
         <template #title>成就</template>
         <template #prepend>
-          <img src="@/assets/icons/achievements.svg" alt="achievementsIcon" class="side-icon" />
+          <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
         </template>
       </v-list-item>
       <v-divider />
-      <v-list-item :title.attr="'原神战绩'" :link="true" href="/user/record">
+      <v-list-item :link="true" :title.attr="'原神战绩'" href="/user/record">
         <template #title>原神战绩</template>
         <template #prepend>
-          <img src="/source/UI/userRecord.webp" alt="record" class="side-icon" />
+          <img alt="record" class="side-icon" src="/source/UI/userRecord.webp" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'我的角色'" :link="true" href="/user/characters">
+      <v-list-item :link="true" :title.attr="'我的角色'" href="/user/characters">
         <template #title>我的角色</template>
         <template #prepend>
-          <img src="/source/UI/userAvatar.webp" alt="characters" class="side-icon" />
+          <img alt="characters" class="side-icon" src="/source/UI/userAvatar.webp" />
         </template>
       </v-list-item>
-      <v-menu :open-on-click="true" location="end" :offset="[8, 0]">
+      <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
         <template #activator="{ props }">
           <v-list-item :title.attr="'高难挑战'" v-bind="props">
             <template #title>高难挑战</template>
             <template #prepend>
-              <img src="/source/UI/userAbyssLab.webp" alt="abyssLab" class="side-icon" />
+              <img alt="abyssLab" class="side-icon" src="/source/UI/userAbyssLab.webp" />
             </template>
           </v-list-item>
         </template>
-        <v-list class="side-list-menu sub" density="compact" :nav="true">
-          <v-list-item class="side-item-menu" title="深境螺旋" :link="true" href="/user/abyss">
+        <v-list :nav="true" class="side-list-menu sub" density="compact">
+          <v-list-item :link="true" class="side-item-menu" href="/user/abyss" title="深境螺旋">
             <template #prepend>
-              <img src="/source/UI/userAbyss.webp" alt="abyss" class="side-icon-menu" />
+              <img alt="abyss" class="side-icon-menu" src="/source/UI/userAbyss.webp" />
             </template>
           </v-list-item>
-          <v-list-item class="side-item-menu" title="真境剧诗" :link="true" href="/user/combat">
+          <v-list-item :link="true" class="side-item-menu" href="/user/combat" title="真境剧诗">
             <template #prepend>
-              <img src="/source/UI/userCombat.webp" alt="combat" class="side-icon-menu" />
+              <img alt="combat" class="side-icon-menu" src="/source/UI/userCombat.webp" />
             </template>
           </v-list-item>
-          <v-list-item class="side-item-menu" title="幽境危战" :link="true" href="/user/challenge">
+          <v-list-item :link="true" class="side-item-menu" href="/user/challenge" title="幽境危战">
             <template #prepend>
-              <img src="/source/UI/userChallenge.webp" alt="challenge" class="side-icon-menu" />
+              <img alt="challenge" class="side-icon-menu" src="/source/UI/userChallenge.webp" />
             </template>
           </v-list-item>
         </v-list>
       </v-menu>
-      <v-list-item :title.attr="'祈愿记录'" :link="true" href="/user/gacha">
+      <v-list-item :link="true" :title.attr="'祈愿记录'" href="/user/gacha">
         <template #title>祈愿记录</template>
         <template #prepend>
-          <img src="/source/UI/userGacha.webp" alt="gacha" class="side-icon" />
+          <img alt="gacha" class="side-icon" src="/source/UI/userGacha.webp" />
         </template>
       </v-list-item>
-      <v-list-item :title.attr="'实用脚本'" :link="true" href="/user/scripts">
+      <v-list-item :link="true" :title.attr="'实用脚本'" href="/user/scripts">
         <template #title>实用脚本</template>
         <template #prepend>
-          <img src="/source/UI/toolbox.webp" alt="scripts" class="side-icon" />
+          <img alt="scripts" class="side-icon" src="/source/UI/toolbox.webp" />
         </template>
       </v-list-item>
       <v-divider />
       <v-list-item
         v-show="isDevEnv"
-        :title.attr="'测试页面'"
         :link="true"
+        :title.attr="'测试页面'"
         href="/test"
         prepend-icon="mdi-test-tube"
       >
         <template #title>测试页面</template>
       </v-list-item>
       <v-divider v-show="isDevEnv" />
-      <v-menu :open-on-click="true" location="end" :offset="[8, 0]">
+      <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
         <template #activator="{ props }">
           <v-list-item :title.attr="'图鉴'" v-bind="props">
             <template #title>图鉴</template>
             <template #prepend>
-              <img src="/source/UI/wikiIcon.webp" alt="wikiIcon" class="side-icon" />
+              <img alt="wikiIcon" class="side-icon" src="/source/UI/wikiIcon.webp" />
             </template>
           </v-list-item>
         </template>
-        <v-list class="side-list-menu sub" density="compact" :nav="true">
-          <v-list-item class="side-item-menu" title="角色图鉴" :link="true" href="/wiki/character">
+        <v-list :nav="true" class="side-list-menu sub" density="compact">
+          <v-list-item :link="true" class="side-item-menu" href="/wiki/character" title="角色图鉴">
             <template #prepend>
-              <img src="/source/UI/wikiAvatar.webp" alt="characterIcon" class="side-icon-menu" />
+              <img alt="characterIcon" class="side-icon-menu" src="/source/UI/wikiAvatar.webp" />
             </template>
           </v-list-item>
-          <v-list-item class="side-item-menu" title="武器图鉴" :link="true" href="/wiki/weapon">
+          <v-list-item :link="true" class="side-item-menu" href="/wiki/weapon" title="武器图鉴">
             <template #prepend>
-              <img src="/source/UI/wikiWeapon.webp" alt="weaponIcon" class="side-icon-menu" />
+              <img alt="weaponIcon" class="side-icon-menu" src="/source/UI/wikiWeapon.webp" />
             </template>
           </v-list-item>
-          <v-list-item class="side-item-menu" :link="true" href="/wiki/nameCard">
+          <v-list-item :link="true" class="side-item-menu" href="/wiki/nameCard">
             <template #default>
-              <v-icon size="20" color="var(--tgc-yellow-2)">mdi-credit-card-outline</v-icon>
+              <v-icon color="var(--tgc-yellow-2)" size="20">mdi-credit-card-outline</v-icon>
               <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
             </template>
           </v-list-item>
-          <v-list-item class="side-item-menu" title="材料图鉴" :link="true" href="/wiki/material">
+          <v-list-item :link="true" class="side-item-menu" href="/wiki/material" title="材料图鉴">
             <template #prepend>
-              <img src="/source/UI/wikiGCG.webp" alt="gcgIcon" class="side-icon-menu" />
+              <img alt="gcgIcon" class="side-icon-menu" src="/source/UI/wikiGCG.webp" />
             </template>
           </v-list-item>
         </v-list>
       </v-menu>
-      <v-list-item :title.attr="'留影叙佳期'" :link="true" href="/archive/birthday">
+      <v-list-item :link="true" :title.attr="'留影叙佳期'" href="/archive/birthday">
         <template #title>留影叙佳期</template>
         <template #prepend>
-          <img src="/source/UI/act_birthday.webp" alt="archive_birthday_icon" class="side-icon" />
+          <img alt="archive_birthday_icon" class="side-icon" src="/source/UI/act_birthday.webp" />
         </template>
       </v-list-item>
       <!-- 底部菜单 -->
@@ -151,77 +151,87 @@
               </template>
             </v-list-item>
           </template>
-          <v-list class="side-list-menu sub" density="compact" :nav="true">
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
             <v-list-item
-              class="side-item-menu"
               v-if="isLogin"
+              class="side-item-menu"
               title="签到"
               @click="openClient('sign_in')"
             >
               <template #prepend>
-                <img src="/source/UI/userGacha.webp" class="side-icon-menu" alt="sing_in" />
+                <img alt="sing_in" class="side-icon-menu" src="/source/UI/userGacha.webp" />
               </template>
             </v-list-item>
             <v-list-item
-              class="side-item-menu"
               v-if="isLogin"
+              class="side-item-menu"
               title="战绩"
               @click="openClient('game_record')"
             >
               <template #prepend>
-                <img src="/source/UI/userRecord.webp" class="side-icon-menu" alt="game_record" />
+                <img alt="game_record" class="side-icon-menu" src="/source/UI/userRecord.webp" />
               </template>
             </v-list-item>
             <v-list-item
-              class="side-item-menu"
               v-if="isLogin"
+              class="side-item-menu"
               title="便笺"
               @click="openClient('daily_note')"
             >
               <template #prepend>
-                <img src="/icon/material/210.webp" class="side-icon-menu" alt="daily_note" />
+                <img alt="daily_note" class="side-icon-menu" src="/icon/material/210.webp" />
               </template>
             </v-list-item>
-            <v-list-item class="side-item-menu" title="收藏" :link="true" href="/collection">
+            <v-list-item :link="true" class="side-item-menu" href="/collection" title="收藏">
               <template #prepend>
-                <img src="/source/UI/posts.webp" alt="collect" class="side-icon-menu" />
+                <img alt="collect" class="side-icon-menu" src="/source/UI/posts.webp" />
               </template>
             </v-list-item>
             <v-list-item
-              class="side-item-menu"
               v-if="isLogin"
+              class="side-item-menu"
               title="关注"
               @click="showFollow = true"
             >
               <template #prepend>
-                <img src="/platforms/mhy/mys.webp" alt="follow" class="side-icon-menu" />
+                <img alt="follow" class="side-icon-menu" src="/platforms/mhy/mys.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              v-if="canLaunch"
+              class="side-item-menu"
+              title="启动"
+              @click="tryLaunchGame()"
+            >
+              <template #prepend>
+                <img alt="genshin" class="side-icon-menu" src="/icon/material/220120.webp" />
               </template>
             </v-list-item>
           </v-list>
         </v-menu>
         <!-- 添加账号 -->
-        <v-menu location="end" :open-on-click="true" :disabled="isTryLogin">
+        <v-menu :disabled="isTryLogin" :open-on-click="true" location="end">
           <template #activator="{ props }">
-            <v-list-item :title.attr="'添加账号'" v-bind="props" prepend-icon="mdi-account-plus">
+            <v-list-item :title.attr="'添加账号'" prepend-icon="mdi-account-plus" v-bind="props">
               <template #title>添加账号</template>
             </v-list-item>
           </template>
-          <v-list class="side-list-menu" density="compact" :nav="true">
-            <v-list-item @click="tryCaptchaLogin()" class="side-item-menu sub">
+          <v-list :nav="true" class="side-list-menu" density="compact">
+            <v-list-item class="side-item-menu sub" @click="tryCaptchaLogin()">
               <v-list-item-title>验证码登录✨推荐</v-list-item-title>
               <v-list-item-subtitle>使用手机号登录</v-list-item-subtitle>
               <template #prepend>
                 <v-icon class="side-icon-menu">mdi-shield-key-outline</v-icon>
               </template>
             </v-list-item>
-            <v-list-item @click="tryCodeLogin()" class="side-item-menu sub">
+            <v-list-item class="side-item-menu sub" @click="tryCodeLogin()">
               <v-list-item-title>扫码登录✨推荐</v-list-item-title>
               <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
               <template #prepend>
-                <img class="side-icon-menu" src="/platforms/mhy/mys.webp" alt="launcher" />
+                <img alt="launcher" class="side-icon-menu" src="/platforms/mhy/mys.webp" />
               </template>
             </v-list-item>
-            <v-list-item @click="addByCookie()" class="side-item-menu sub">
+            <v-list-item class="side-item-menu sub" @click="addByCookie()">
               <v-list-item-title>手动添加</v-list-item-title>
               <v-list-item-subtitle>手动输入Cookie</v-list-item-subtitle>
               <template #prepend>
@@ -232,34 +242,34 @@
         </v-menu>
         <!-- 切换账号 -->
         <v-list-item
-          :title.attr="'切换账号'"
-          @click="trySwitchAccount()"
-          prepend-icon="mdi-account-switch"
           v-if="isLogin"
           :disabled="isTryLogin"
+          :title.attr="'切换账号'"
+          prepend-icon="mdi-account-switch"
+          @click="trySwitchAccount()"
         >
           <v-list-item-title>切换账号</v-list-item-title>
         </v-list-item>
         <!-- 主题切换 -->
         <v-list-item
+          :prepend-icon="theme === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
           :title.attr="themeTitle"
           @click="switchTheme()"
-          :prepend-icon="theme === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
         >
           <template #title>{{ themeTitle }}</template>
         </v-list-item>
         <!-- 设置页面 -->
-        <v-list-item :title.attr="'设置'" value="config" :link="true" href="/config">
+        <v-list-item :link="true" :title.attr="'设置'" href="/config" value="config">
           <template #title>设置</template>
           <template #prepend>
-            <img src="@/assets/icons/setting.svg" alt="setting" class="side-icon" />
+            <img alt="setting" class="side-icon" src="@/assets/icons/setting.svg" />
           </template>
         </v-list-item>
       </div>
     </v-list>
   </v-navigation-drawer>
   <vp-overlay-follow v-model="showFollow" />
-  <ToGameLogin v-model="showLoginQr" @success="tryGetTokens" :launcher="false" />
+  <ToGameLogin v-model="showLoginQr" :launcher="false" @success="tryGetTokens" />
   <ToSwitchAc v-model="showAcSwitch" />
 </template>
 <script lang="ts" setup>
@@ -275,8 +285,10 @@ import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { event, webviewWindow } from "@tauri-apps/api";
+import { event, path, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { exists } from "@tauri-apps/plugin-fs";
+import { Command } from "@tauri-apps/plugin-shell";
 import mhyClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -284,7 +296,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import ToSwitchAc from "./to-switchAc.vue";
 
-const { sidebar, theme, isLogin, recentNewsType } = storeToRefs(useAppStore());
+const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
@@ -302,6 +314,11 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/source/UI/lumine.webp" };
 });
 const themeTitle = computed<string>(() => (theme.value === "default" ? "深色模式" : "浅色模式"));
+const canLaunch = computed<boolean>(() => {
+  if (!isLogin.value) return false;
+  if (!gameDir.value || gameDir.value === "未设置") return false;
+  return account.value.isOfficial === 1;
+});
 
 onMounted(async () => {
   themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
@@ -318,9 +335,7 @@ onUnmounted(() => {
 });
 
 async function trySwitchAccount(): Promise<void> {
-  console.log("切换账号");
   showAcSwitch.value = true;
-  // TODO: 切换账号浮窗
 }
 
 async function switchTheme(): Promise<void> {
@@ -632,6 +647,40 @@ async function addByCookie(): Promise<void> {
   await showLoading.end();
   showSnackbar.success("成功添加用户!");
   isTryLogin.value = false;
+}
+
+/**
+ * 尝试启动游戏
+ */
+async function tryLaunchGame(): Promise<void> {
+  if (!uid.value || !cookie.value) {
+    showSnackbar.warn("请先登录！");
+    return;
+  }
+  const gamePath = `${gameDir.value}${path.sep()}YuanShen.exe`;
+  if (!(await exists(gamePath))) {
+    showSnackbar.warn("未检测到原神本体应用！");
+    return;
+  }
+  const resp = await passportReq.authTicket(account.value, cookie.value);
+  if (typeof resp !== "string") {
+    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    await TGLogger.Error(
+      `[sidebar][tryLaunchGame] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
+    );
+    await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${JSON.stringify(resp)}`);
+    return;
+  }
+  showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
+  const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
+    cwd: gameDir.value,
+    encoding: "utf-8",
+  });
+  const result = await cmd.execute();
+  if (result.stderr) {
+    await TGLogger.Error(`[sidebar][tryLaunchGame] 启动游戏本体失败！`);
+    showSnackbar.error(`启动游戏本体失败，代码：${result.code}`);
+  }
 }
 </script>
 <style lang="css" scoped>
