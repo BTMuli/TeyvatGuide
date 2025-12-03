@@ -6,15 +6,13 @@ mod commands;
 mod plugins;
 mod utils;
 #[cfg(target_os = "windows")]
+mod watchdog;
+#[cfg(target_os = "windows")]
 mod yae;
 
 use crate::client::create_mhy_client;
-use crate::commands::{
-  create_window, execute_js, get_dir_size, init_app, is_in_admin, run_watchdog, run_with_admin,
-};
+use crate::commands::{create_window, execute_js, get_dir_size, init_app, is_in_admin};
 use crate::plugins::{build_log_plugin, build_si_plugin};
-#[cfg(target_os = "windows")]
-use crate::yae::call_yae_dll;
 use tauri::{generate_context, generate_handler, Manager, Window, WindowEvent};
 
 // 窗口事件处理
@@ -56,7 +54,7 @@ pub fn run() {
         }
       }
       // 等父进程退出后再 runas 启动管理员实例，传入 --elevated 标志
-      let _ = run_watchdog(ppid, "--elevated");
+      let _ = watchdog::run_watchdog(ppid, "--elevated");
       // 看门狗退出
       return;
     }
@@ -93,10 +91,11 @@ pub fn run() {
       execute_js,
       get_dir_size,
       create_mhy_client,
-      #[cfg(target_os = "windows")]
-      call_yae_dll,
       is_in_admin,
-      run_with_admin
+      #[cfg(target_os = "windows")]
+      yae::call_yae_dll,
+      #[cfg(target_os = "windows")]
+      watchdog::run_with_admin
     ])
     .run(generate_context!())
     .expect("error while running tauri application");
