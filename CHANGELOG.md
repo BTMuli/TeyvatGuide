@@ -2,12 +2,38 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2025-11-19
+Update: 2025-12-03
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-11-19 14:08:20`
+> 更新于 `2025-12-03 10:22:56`
+
+## [0.8.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.7) (2025-12-03)
+
+- 🍱 更新 6.2 版本资源
+- ✨ 帖子搜索支持“最新”“最热”排序
+- ✨ 登录支持 Gt4 验证 [`#162`](https://github.com/BTMuli/TeyvatGuide/issues/162)
+- ✨ 帖子视图支持窄视图模式，**未完全适配所有组件，可能存在显示异常**
+- ✨ 支持通过内置 Yae 自动获取成就数据 [`#142`](https://github.com/BTMuli/TeyvatGuide/issues/142)
+- 🐛 修复无法手动关闭极验验证弹窗
+- 🐛 修复数据刷新后渲染异常 [`#163`](https://github.com/BTMuli/TeyvatGuide/issues/163)
+- 🐛 重构祈愿图表，修复祈愿日历没有下拉条 [`#165`](https://github.com/BTMuli/TeyvatGuide/issues/165)
+- 🐛 修复 MacOS 下极验验证浮窗加载异常 [`#164`](https://github.com/BTMuli/TeyvatGuide/issues/164)
+- 🐛 重构回复浮窗处理，调整 UI ，修复滚动异常 [`#168`](https://github.com/BTMuli/TeyvatGuide/issues/168)
+- 🐛 修复自定义表情格式解析异常，增加文本清晰度
+- 🐛 调整回复按钮展示判断，修复特定条件下的数据对应异常
+- 🐛 修复角色 Wiki 左侧列表顺序概率异常
+- ✏️ 修正通过 Yae 导入成就的文本错误
+- ✏️ 修正清除缓存后的提示文本
+- 🚸 执行脚本时不允许切换账号
+- 🚸 调整外部导入祈愿记录时进度显示逻辑，导入后刷新页面
+- 🚸 增加部分 UI 在浅色模式下的可见度
+- 🚸 账号相关操作（添加，切换）移至侧栏 [`#170`](https://github.com/BTMuli/TeyvatGuide/issues/170)
+- 🚸 侧栏添加启动入口，满足条件时显示
+- 🚸 完善角色 Wiki 侧边栏奇偶点击处理
+- 👽️ 完善前瞻识别规则，增加空列表处理
+- 📝 更新Q群链接
 
 ## [0.8.6](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.6) (2025-11-19)
 

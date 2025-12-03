@@ -4,7 +4,14 @@
       class="tp-video-container"
       :src="props.data.insert.video"
       :allowfullscreen="true"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allow="
+        accelerometer;
+        autoplay;
+        clipboard-write;
+        encrypted-media;
+        gyroscope;
+        picture-in-picture;
+      "
       sandbox="allow-forms allow-same-origin allow-popups allow-presentation allow-scripts"
       :id="`tp-video-${props.data.insert.video}`"
     />

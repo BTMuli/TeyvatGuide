@@ -2,16 +2,20 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-11-19
+Update: 2025-12-03
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-11-19 13:21:38`
+> 更新于 `2025-12-03 10:22:51`
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide) ![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide)
 
-![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v3.0-red?style=for-the-badge) ![](https://img.shields.io/badge/UIGF-v4.1-red?style=for-the-badge) ![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)
+[![](https://img.shields.io/github/last-commit/BTMuli/TeyvatGuide)](https://github.com/BTMuli/TeyvatGuide/commits) [![](https://img.shields.io/github/commits-since/BTMuli/TeyvatGuide/latest?include_prereleases)](https://github.com/BTMuli/TeyvatGuide/commits)
+
+[![](https://img.shields.io/badge/UIAF-v1.1-orange?style=for-the-badge)](./docs/standards/UIAF.md) [![](https://img.shields.io/badge/UIGF-v3.0-red?style=for-the-badge)](./docs/standards/UIGF3.md) [![](https://img.shields.io/badge/UIGF-v4.1-red?style=for-the-badge)](./docs/standards/UIGF.md)
+
+[![](https://img.shields.io/github/license/BTMuli/TeyvatGuide?style=for-the-badge)](./LICENSE)
 
 <div style="width: 100%; text-align: center; margin: 0 auto;">
   <img alt="icon" src="https://s2.loli.net/2023/10/19/Y5DpBQRy3usLHEb.png" />
@@ -49,7 +53,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 米游社话题帖子获取（通过话题点击跳转）
-  - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入
+  - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入 & 自动导入（内置Yae）
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.1）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
@@ -102,7 +106,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - UIAF：[UIAF v1.1](docs/standards/UIAF.md)
 - UIGF：[UIGF v3.0](docs/standards/UIGF3.md)，[UIGF v4.0](docs/standards/UIGF.md)
 - [macOS 平台门禁属性导致应用无法打开应用的修复指引](docs/macos-gatekeeper/README.md)
-- [隐私政策](https://app.btmuli.ink/docs/TeyvatGuide/privacy.html)
 - [如何导入胡桃数据库](https://app.btmuli.ink/docs/TeyvatGuide/import-hutao-db.html)
 
 ## 特定项目 / Special Project
@@ -147,5 +150,6 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - [amos-data](https://github.com/yuehaiteam/amos-data)
 - [MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)
 - [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
+- [Yae](https://github.com/HolographicHat/Yae)
 
 [![Star History Chart](https://api.star-history.com/svg?repos=BTMuli/TeyvatGuide&type=Timeline)](https://star-history.com/#BTMuli/TeyvatGuide&Timeline)
