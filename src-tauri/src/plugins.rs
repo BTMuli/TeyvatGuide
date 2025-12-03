@@ -15,13 +15,7 @@ pub fn build_si_plugin<R: Runtime>() -> TauriPlugin<R> {
     let args: Vec<String> = argv.iter().map(|s| s.to_string()).collect();
 
     // 如果包含提升约定参数，发出专门事件并短路退出
-    if args.iter().any(|a| a.starts_with("--elevated-action"))
-      || args.iter().any(|a| a == "--elevated")
-    {
-      if let Err(e) = app.emit("elevated_launch", args.clone()) {
-        // 记录错误但不要 panic
-        eprintln!("emit elevated_launch failed: {}", e);
-      }
+    if args.iter().any(|a| a == "--elevated") {
       // 提升实例通常只负责传参或执行一次性任务，退出避免与主实例冲突
       std::process::exit(0);
     }

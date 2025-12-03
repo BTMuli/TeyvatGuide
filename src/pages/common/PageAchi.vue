@@ -350,6 +350,7 @@ async function toYae(): Promise<void> {
 }
 
 async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
+  console.log(payload);
   if (payload.length === 0) {
     showSnackbar.warn(`未从Yae获取到成就数据`);
     return;

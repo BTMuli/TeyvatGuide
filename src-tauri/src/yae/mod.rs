@@ -23,7 +23,7 @@ fn read_rva(key: &str) -> i32 {
 }
 
 // 读取配置文件
-fn read_conf(path: &str) -> i32 {
+pub fn read_conf(path: &str) -> i32 {
   // 编译时嵌入 JSON 文件，值都是32位整数
   let data = include_str!("../../lib/conf.json");
   let json: Value = serde_json::from_str(data).expect("Invalid JSON");

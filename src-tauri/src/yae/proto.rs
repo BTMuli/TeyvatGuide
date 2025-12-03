@@ -1,7 +1,8 @@
 //! Yae 成就信息的 Protobuf 定义
-//! @since Beta v0.8.7
+//! @since Beta v0.7.9
 #![cfg(target_os = "windows")]
 
+use crate::yae::read_conf;
 use prost::encoding::{decode_key, WireType};
 use prost::DecodeError;
 use prost::Message;
@@ -140,6 +141,8 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
         let value = prost::encoding::decode_varint(&mut inner)? as u32;
         dict.insert(tag, value);
       }
+      // 输出 dict
+      println!("{:?}", dict);
       // dict 至少需要两个 key
       if dict.len() > 2 {
         dicts.push(dict)
@@ -147,14 +150,20 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
     }
   }
 
+  let _id = read_conf("id") as u32;
+  let _status = read_conf("status") as u32;
+  let _cur = read_conf("currentProgress") as u32;
+  let _ts = read_conf("finishTimestamp") as u32;
+
   let achievements = dicts
     .into_iter()
     .map(|d| UiafAchiItem {
-      id: d.get(&15).copied().unwrap_or(0),
-      status: d.get(&11).copied().unwrap_or(0),
-      current: d.get(&13).copied().unwrap_or(0),
-      timestamp: d.get(&7).copied().unwrap_or(0),
+      id: d.get(&_id).copied().unwrap_or(0),
+      status: d.get(&_status).copied().unwrap_or(0),
+      current: d.get(&_cur).copied().unwrap_or(0),
+      timestamp: d.get(&_ts).copied().unwrap_or(0),
     })
+    .filter(|a| a.status != 0)
     .collect();
 
   Ok(achievements)

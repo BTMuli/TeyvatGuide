@@ -154,7 +154,7 @@ pub fn run_with_admin() -> Result<(), String> {
       return Err(format!("executable not found: {}", exe_path.display()));
     }
 
-    let elevated_arg = "--elevated-action=post_install";
+    let elevated_arg = "--elevated";
     // /C start "" "<full_path>" --elevated-action=post_install
     let params = format!("/C start \"\" \"{}\" {}", exe_path.display(), elevated_arg);
 
