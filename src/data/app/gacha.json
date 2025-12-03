@@ -3026,5 +3026,41 @@
     "postId": "70352228",
     "up5List": [13512, 13504],
     "up4List": [11427, 12427, 15427, 13401, 14403]
+  },
+  {
+    "name": "白礜赤成",
+    "version": "6.2",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/11/19/e9291b4ae7e6840d81adf8c3bcf2ad5e_5777095417575400489_transformed.jpg",
+    "from": "2025-12-03T10:00:00+08:00",
+    "to": "2025-12-23T17:59:00+08:00",
+    "type": 301,
+    "postId": "71075619",
+    "up5List": [10000123],
+    "up4List": [10000124, 10000032, 10000076]
+  },
+  {
+    "name": "杯装之诗",
+    "version": "6.2",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/11/19/123cbe77341ba0337e56f56600effd09_1549480919145244906_transformed.webp",
+    "from": "2025-12-03T10:00:00+08:00",
+    "to": "2025-12-23T17:59:00+08:00",
+    "type": 400,
+    "postId": "71075617",
+    "up5List": [10000002],
+    "up4List": [10000124, 10000032, 10000076]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.2",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/11/19/0a9191e9c94c34f1862223aea72f88d8_6761506822979172855_transformed.jpg",
+    "from": "2025-12-03T10:00:00+08:00",
+    "to": "2025-12-23T17:59:00+08:00",
+    "type": 302,
+    "postId": "71075615",
+    "up5List": [11518, 15515],
+    "up4List": [11410, 13427, 14410, 12405, 15402]
   }
 ]

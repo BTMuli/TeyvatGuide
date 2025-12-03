@@ -13206,7 +13206,7 @@
     "description": "击败一艘至少因过热瘫痪过2次的超重型陆巡舰·机动战垒。",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 84000,
@@ -15952,7 +15952,10 @@
     "description": "节日就是要开开心心。",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6027, "name": "月亮回家的夜晚", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84367,
@@ -15962,7 +15965,10 @@
     "description": "享受在月下世界最后的夜晚。",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6027, "name": "月亮回家的夜晚", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84368,
@@ -15972,7 +15978,10 @@
     "description": "月光永远联系着我们，不论日夜。",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6028, "name": "回到月亮上去", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84369,
@@ -15982,7 +15991,10 @@
     "description": "完成「散于晨雾的月芒」。",
     "reward": 10,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6028, "name": "回到月亮上去", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84370,
@@ -15992,7 +16004,10 @@
     "description": "说不定会有意外的收获。",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6025, "name": "月影轮番登台", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84371,
@@ -16002,7 +16017,10 @@
     "description": "目睹过去在这里发生过的「历史」。",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6025, "name": "月影轮番登台", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84372,
@@ -16012,7 +16030,10 @@
     "description": "你们曾在某个时刻擦肩而过…",
     "reward": 5,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6026, "name": "无法传达的涟漪", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84373,
@@ -16022,7 +16043,10 @@
     "description": "完成「终北的夜行诗」。",
     "reward": 10,
     "version": "6.2",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6026, "name": "无法传达的涟漪", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84501,
