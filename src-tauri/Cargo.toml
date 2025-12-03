@@ -21,7 +21,7 @@ tauri-build = { version = "2.5.3", features = [] }
 
 [dependencies]
 chrono = "0.4.42"
-log = "0.4.28"
+log = "0.4.29"
 prost = "0.14.1"
 prost-types = "0.14.1"
 serde = { version = "1.0.228", features = ["derive"] }

@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.7.8
+//! @since Beta v0.8.8
 
 mod client;
 mod commands;
@@ -10,12 +10,12 @@ mod yae;
 
 use crate::client::create_mhy_client;
 use crate::commands::{
-  create_window, execute_js, get_dir_size, init_app, is_in_admin, run_with_admin,
+  create_window, execute_js, get_dir_size, init_app, is_in_admin, run_watchdog, run_with_admin,
 };
 use crate::plugins::{build_log_plugin, build_si_plugin};
 #[cfg(target_os = "windows")]
 use crate::yae::call_yae_dll;
-use tauri::{generate_context, generate_handler, Builder, Manager, Window, WindowEvent};
+use tauri::{generate_context, generate_handler, Manager, Window, WindowEvent};
 
 // 窗口事件处理
 fn window_event_handler(app: &Window, event: &WindowEvent) {
@@ -40,9 +40,35 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  Builder::default()
+  #[cfg(target_os = "windows")]
+  {
+    let args: Vec<String> = std::env::args().collect();
+    let is_watchdog = args.iter().any(|a| a == "--watchdog");
+    // 看门狗模式：不初始化 Tauri，不加载单例，纯等待 + 提权启动
+    if is_watchdog {
+      // 解析父进程 PID
+      let mut ppid: u32 = 0;
+      for a in &args {
+        if let Some(rest) = a.strip_prefix("--ppid=") {
+          if let Ok(v) = rest.parse::<u32>() {
+            ppid = v;
+          }
+        }
+      }
+      // 等父进程退出后再 runas 启动管理员实例，传入 --elevated 标志
+      let _ = run_watchdog(ppid, "--elevated");
+      // 看门狗退出
+      return;
+    }
+  }
+
+  // 正常应用实例：加载单例插件，防止多实例
+  let mut builder = tauri::Builder::default();
+
+  // 只有在正常/管理员实例下才加载单例插件；看门狗不加载
+  builder = builder.plugin(build_si_plugin());
+  builder
     .on_window_event(move |app, event| window_event_handler(app, event))
-    .plugin(build_si_plugin())
     .plugin(tauri_plugin_deep_link::init())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_fs::init())
