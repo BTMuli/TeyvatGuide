@@ -7,7 +7,12 @@ Update: 2025-12-03
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-12-03 10:22:56`
+> 更新于 `2025-12-03 20:02:17`
+
+## [0.8.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.8) (2025-12-03)
+
+- 🐛 修复成就数据读取异常
+- 🐛 重构管理员权限重启逻辑
 
 ## [0.8.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.8.7) (2025-12-03)
 
