@@ -1,3 +1,4 @@
+<!-- 祈愿数据概览 -->
 <template>
   <div class="gro-dv-container">
     <div class="gro-dvt-title">
@@ -8,29 +9,43 @@
       <span v-show="props.dataVal.length === 0">暂无数据</span>
       <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
     </div>
+    <!-- 4星相关数据 -->
     <div class="gro-mid-list">
-      <div class="gro-ml-item">
-        <span>4☆已垫</span>
+      <div class="gro-ml-title s4">★★★★</div>
+      <div class="gro-ml-card">
+        <span>已垫</span>
         <span>{{ reset4count - 1 }}</span>
       </div>
-      <div class="gro-ml-item">
-        <span>5☆已垫</span>
-        <span>{{ reset5count - 1 }}</span>
+      <div class="gro-ml-card">
+        <span>平均</span>
+        <span>{{ star4avg }}</span>
       </div>
-      <div class="gro-ml-item">
-        <span>5☆平均</span>
-        <span>{{ star5avg }}</span>
+      <div class="gro-ml-card">
+        <span>统计</span>
+        <span>{{ star4List.length }}</span>
       </div>
     </div>
+    <!-- 5星相关数据 -->
     <div class="gro-mid-list">
-      <div class="gro-ml-item">
-        <span>5☆统计</span>
-        <span>{{ getTitle("5") }}</span>
+      <div class="gro-ml-title s5">★★★★★</div>
+      <div class="gro-ml-card">
+        <span>已垫</span>
+        <span>{{ reset5count - 1 }}</span>
       </div>
-      <div class="gro-ml-item">
-        <span>4☆统计</span>
-        <span>{{ getTitle("4") }}</span>
+      <div class="gro-ml-card">
+        <span>平均</span>
+        <span>{{ star5avg }}</span>
       </div>
+      <div class="gro-ml-card">
+        <span>统计</span>
+        <span>{{ star5List.length }}</span>
+      </div>
+    </div>
+    <!-- 进度条拼接 -->
+    <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
+      <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
+      <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
+      <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
     </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gro-bottom">
@@ -39,17 +54,17 @@
         <v-tab value="4">4☆</v-tab>
       </v-tabs>
       <v-window v-model="tab" class="gro-bottom-window">
-        <v-window-item value="5" class="gro-b-window-item">
-          <v-virtual-scroll :items="star5List" :item-height="48">
+        <v-window-item class="gro-b-window-item" value="5">
+          <v-virtual-scroll :item-height="48" :items="star5List">
             <template #default="{ item }">
-              <GroDataLine :key="item.data.id" :data="item.data" :count="item.count" />
+              <GroDataLine :key="item.data.id" :count="item.count" :data="item.data" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
-        <v-window-item value="4" class="gro-b-window-item">
-          <v-virtual-scroll :items="star4List" :item-height="48">
+        <v-window-item class="gro-b-window-item" value="4">
+          <v-virtual-scroll :item-height="48" :items="star4List">
             <template #default="{ item }">
-              <GroDataLine :key="item.data.id" :data="item.data" :count="item.count" />
+              <GroDataLine :key="item.data.id" :count="item.count" :data="item.data" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
@@ -58,7 +73,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 
@@ -80,7 +95,11 @@ const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
 const star5avg = ref<string>(""); // 5星平均抽数
+const star4avg = ref<string>(""); // 4星平均抽数
 const tab = ref<string>("5"); // tab
+const pg3 = computed<string>(() => getPg("3"));
+const pg4 = computed<string>(() => getPg("4"));
+const pg5 = computed<string>(() => getPg("5"));
 
 onMounted(() => {
   loadData();
@@ -88,7 +107,7 @@ onMounted(() => {
 });
 
 function loadData(): void {
-  title.value = getTitle("top");
+  title.value = getTitle();
   const tempData = props.dataVal;
   const temp5Data: Array<GroDataLineProps> = [];
   const temp4Data: Array<GroDataLineProps> = [];
@@ -117,35 +136,17 @@ function loadData(): void {
   star5List.value = temp5Data.reverse();
   star4List.value = temp4Data.reverse();
   star5avg.value = getStar5Avg();
+  star4avg.value = getStar4Avg();
 }
 
 // 获取标题
-function getTitle(type: "top" | "5" | "4" | "3"): string {
-  if (type === "top") {
-    if (props.dataType === "new") return "新手祈愿";
-    if (props.dataType === "avatar") return "角色祈愿";
-    if (props.dataType === "weapon") return "武器祈愿";
-    if (props.dataType === "normal") return "常驻祈愿";
-    if (props.dataType === "mix") return "集录祈愿";
-    return "";
-  }
-  if (props.dataVal.length === 0) return "暂无数据";
-  if (type === "5") {
-    // 5星物品统计 00.00%
-    return `${star5List.value.length} [${((star5List.value.length * 100) / props.dataVal.length)
-      .toFixed(2)
-      .padStart(5, "0")}%]`;
-  }
-  if (type === "4") {
-    // 4星物品统计
-    return `${star4List.value.length} [${((star4List.value.length * 100) / props.dataVal.length)
-      .toFixed(2)
-      .padStart(5, "0")}%]`;
-  }
-  // 3星物品统计
-  return `${star3count.value} [${((star3count.value * 100) / props.dataVal.length)
-    .toFixed(2)
-    .padStart(5, "0")}%]`;
+function getTitle(): string {
+  if (props.dataType === "new") return "新手祈愿";
+  if (props.dataType === "avatar") return "角色祈愿";
+  if (props.dataType === "weapon") return "武器祈愿";
+  if (props.dataType === "normal") return "常驻祈愿";
+  if (props.dataType === "mix") return "集录祈愿";
+  return "";
 }
 
 // 获取5星平均抽数
@@ -154,6 +155,28 @@ function getStar5Avg(): string {
   if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
   return (total / star5List.value.length).toFixed(2);
+}
+
+// 获取4星平均抽数
+function getStar4Avg(): string {
+  const resetList = star4List.value.map((item) => item.count);
+  if (resetList.length === 0) return "0";
+  const total = resetList.reduce((a, b) => a + b);
+  return (total / star4List.value.length).toFixed(2);
+}
+
+// 获取占比
+function getPg(star: "5" | "4" | "3"): string {
+  let progress: number;
+  if (star === "5") {
+    progress = (star5List.value.length * 100) / props.dataVal.length;
+  } else if (star === "4") {
+    progress = (star4List.value.length * 100) / props.dataVal.length;
+  } else {
+    progress = (star3count.value * 100) / props.dataVal.length;
+  }
+  if (progress === 0) return "0";
+  return `${progress.toFixed(2)}%`;
 }
 
 // 监听数据变化
@@ -168,6 +191,7 @@ watch(
     startDate.value = "";
     endDate.value = "";
     star5avg.value = "";
+    star4avg.value = "";
     tab.value = "5";
     loadData();
   },
@@ -200,26 +224,77 @@ watch(
 }
 
 .gro-mid-list {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border-top: 1px solid var(--common-shadow-4);
+  display: grid;
+  margin-top: 8px;
+  margin-bottom: 8px;
   color: var(--box-text-7);
+  column-gap: 12px;
+  font-size: 14px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
 }
 
-.gro-ml-item {
+.gro-ml-title {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   font-family: var(--font-title);
-  font-size: 14px;
+
+  &.s4 {
+    color: var(--tgc-od-purple);
+  }
+
+  &.s5 {
+    color: var(--tgc-od-orange);
+  }
+}
+
+.gro-ml-card {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--app-page-bg);
+  column-gap: 4px;
+}
+
+.gro-mid-progress {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  height: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 4px;
+  background: var(--box-bg-2);
+
+  div {
+    position: relative;
+    height: 100%;
+  }
+
+  .s3 {
+    background: var(--tgc-od-blue);
+  }
+
+  .s4 {
+    background: var(--tgc-od-purple);
+  }
+
+  .s5 {
+    background: var(--tgc-od-orange);
+  }
 }
 
 .gro-bottom {
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 150px);
+  height: calc(100% - 120px);
   box-sizing: border-box;
   flex-direction: column;
   gap: 8px;
@@ -227,7 +302,7 @@ watch(
 
 .gro-bottom-window {
   position: relative;
-  height: calc(100vh - 428px);
+  height: calc(100vh - 380px);
   overflow-y: auto;
 }
 
@@ -243,5 +318,6 @@ watch(
 :deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
   margin-top: 8px;
 }
+
 /* stylelint-enable selector-class-pattern */
 </style>

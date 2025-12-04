@@ -1,4 +1,4 @@
-<!-- 千星奇域概览数据视图组件 -->
+<!-- 颂愿数据概览 -->
 <template>
   <div class="gbr-dv-container">
     <div class="gbr-dvt-title">
@@ -9,56 +9,87 @@
       <span v-show="props.dataVal.length === 0">暂无数据</span>
       <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
     </div>
+    <!-- 3星相关数据 -->
     <div class="gbr-mid-list">
-      <div class="gbr-ml-item">
-        <span>4☆已垫</span>
-        <span>{{ reset4count - 1 }}</span>
+      <div class="gbr-ml-title s3">★★★</div>
+      <div class="gbr-ml-card">
+        <span>已垫</span>
+        <span>{{ reset3count - 1 }}</span>
       </div>
-      <div class="gbr-ml-item">
-        <span>5☆已垫</span>
-        <span>{{ reset5count - 1 }}</span>
+      <div class="gbr-ml-card">
+        <span>平均</span>
+        <span>{{ star3avg }}</span>
       </div>
-      <div class="gbr-ml-item">
-        <span>5☆平均</span>
-        <span>{{ star5avg }}</span>
+      <div class="gbr-ml-card">
+        <span>统计</span>
+        <span>{{ star3List.length }}</span>
       </div>
     </div>
+    <!-- 4星相关数据 -->
     <div class="gbr-mid-list">
-      <div class="gbr-ml-item">
-        <span>5☆统计</span>
-        <span>{{ getTitle("5") }}</span>
+      <div class="gbr-ml-title s4">★★★★</div>
+      <div class="gbr-ml-card">
+        <span>已垫</span>
+        <span>{{ reset4count - 1 }}</span>
       </div>
-      <div class="gbr-ml-item">
-        <span>4☆统计</span>
-        <span>{{ getTitle("4") }}</span>
+      <div class="gbr-ml-card">
+        <span>平均</span>
+        <span>{{ star4avg }}</span>
       </div>
+      <div class="gbr-ml-card">
+        <span>统计</span>
+        <span>{{ star4List.length }}</span>
+      </div>
+    </div>
+    <!-- 5星相关数据 -->
+    <div v-if="!isNormalPool" class="gbr-mid-list">
+      <div class="gbr-ml-title s5">★★★★★</div>
+      <div class="gbr-ml-card">
+        <span>已垫</span>
+        <span>{{ reset5count - 1 }}</span>
+      </div>
+      <div class="gbr-ml-card">
+        <span>平均</span>
+        <span>{{ star5avg }}</span>
+      </div>
+      <div class="gbr-ml-card">
+        <span>统计</span>
+        <span>{{ star5List.length }}</span>
+      </div>
+    </div>
+    <!-- 进度条拼接 -->
+    <div v-if="props.dataVal.length > 0" class="gbr-mid-progress">
+      <div v-if="pg2 !== '0'" :style="{ width: pg2 }" :title="`2星占比:${pg2}`" class="s2" />
+      <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
+      <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
+      <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
     </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gbr-bottom">
       <v-tabs v-model="tab" density="compact">
-        <v-tab value="5">5☆</v-tab>
+        <v-tab v-if="!isNormalPool" value="5">5☆</v-tab>
         <v-tab value="4">4☆</v-tab>
         <v-tab value="3">3☆</v-tab>
       </v-tabs>
       <v-window v-model="tab" class="gbr-bottom-window">
-        <v-window-item value="5" class="gbr-b-window-item">
-          <v-virtual-scroll :items="star5List" :item-height="48">
+        <v-window-item class="gbr-b-window-item" value="5">
+          <v-virtual-scroll :item-height="48" :items="star5List">
             <template #default="{ item }">
-              <GbrDataLine :data="item.data" :count="item.count" />
+              <GbrDataLine :count="item.count" :data="item.data" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
-        <v-window-item value="4" class="gbr-b-window-item">
-          <v-virtual-scroll :items="star4List" :item-height="48">
+        <v-window-item class="gbr-b-window-item" value="4">
+          <v-virtual-scroll :item-height="48" :items="star4List">
             <template #default="{ item }">
-              <GbrDataLine :data="item.data" :count="item.count" />
+              <GbrDataLine :count="item.count" :data="item.data" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
-        <v-window-item value="3" class="gbr-b-window-item">
-          <v-virtual-scroll :items="star3List" :item-height="48">
+        <v-window-item class="gbr-b-window-item" value="3">
+          <v-virtual-scroll :item-height="48" :items="star3List">
             <template #default="{ item }">
-              <GbrDataLine :data="item.data" :count="item.count" />
+              <GbrDataLine :count="item.count" :data="item.data" />
             </template>
           </v-virtual-scroll>
         </v-window-item>
@@ -67,7 +98,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import GbrDataLine, { type GbrDataLineProps } from "./gbr-data-line.vue";
 
@@ -77,6 +108,7 @@ type GachaDataViewProps = {
 };
 
 const props = defineProps<GachaDataViewProps>();
+const isNormalPool = computed<boolean>(() => props.dataType === "normal");
 
 // data
 const loading = ref<boolean>(true); // 是否加载完
@@ -85,13 +117,19 @@ const startDate = ref<string>(""); // 最早的时间
 const endDate = ref<string>(""); // 最晚的时间
 const star5List = shallowRef<Array<GbrDataLineProps>>([]); // 5星物品数据
 const star4List = shallowRef<Array<GbrDataLineProps>>([]); // 4星物品数据
-const star3List = shallowRef<Array<GbrDataLineProps>>([]);
+const star3List = shallowRef<Array<GbrDataLineProps>>([]); // 3星物品数据
 const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const reset3count = ref<number>(1); // 3星垫抽数量
-const star3count = ref<number>(0); // 3星物品数量
+const star2count = ref<number>(0); // 2星物品数量
 const star5avg = ref<string>(""); // 5星平均抽数
-const tab = ref<string>("5"); // tab
+const star4avg = ref<string>(""); // 4星平均抽数
+const star3avg = ref<string>(""); // 3星平均抽数
+const tab = ref<string>(isNormalPool.value ? "4" : "5"); // tab
+const pg2 = computed<string>(() => getPg("2"));
+const pg3 = computed<string>(() => getPg("3"));
+const pg4 = computed<string>(() => getPg("4"));
+const pg5 = computed<string>(() => getPg("5"));
 
 onMounted(() => {
   loadData();
@@ -99,7 +137,7 @@ onMounted(() => {
 });
 
 function loadData(): void {
-  title.value = getTitle("top");
+  title.value = getTitle();
   const tempData = props.dataVal;
   const temp5Data: Array<GbrDataLineProps> = [];
   const temp4Data: Array<GbrDataLineProps> = [];
@@ -112,6 +150,7 @@ function loadData(): void {
       if (startDate.value === "" || item.time < startDate.value) startDate.value = item.time;
       if (endDate.value === "" || item.time > endDate.value) endDate.value = item.time;
       if (item.rank === "2") {
+        star2count.value++;
         reset3count.value++;
         reset4count.value++;
         reset5count.value++;
@@ -134,33 +173,32 @@ function loadData(): void {
   star4List.value = temp4Data.reverse();
   star3List.value = temp3Data.reverse();
   star5avg.value = getStar5Avg();
+  star4avg.value = getStar4Avg();
+  star3avg.value = getStar3Avg();
 }
 
 // 获取标题
-function getTitle(type: "top" | "5" | "4" | "3"): string {
-  if (type === "top") {
-    if (props.dataType === "normal") return "常驻颂愿";
-    if (props.dataType === "boy") return "活动颂愿（男）";
-    if (props.dataType === "girl") return "活动颂愿（女）";
-    return "";
+function getTitle(): string {
+  if (props.dataType === "normal") return "常驻颂愿";
+  if (props.dataType === "boy") return "活动颂愿（男）";
+  if (props.dataType === "girl") return "活动颂愿（女）";
+  return "";
+}
+
+// 获取占比
+function getPg(star: "5" | "4" | "3" | "2"): string {
+  let progress: number;
+  if (star === "5") {
+    progress = (star5List.value.length * 100) / props.dataVal.length;
+  } else if (star === "4") {
+    progress = (star4List.value.length * 100) / props.dataVal.length;
+  } else if (star === "3") {
+    progress = (star3List.value.length * 100) / props.dataVal.length;
+  } else {
+    progress = (star2count.value * 100) / props.dataVal.length;
   }
-  if (props.dataVal.length === 0) return "暂无数据";
-  if (type === "5") {
-    // 5星物品统计 00.00%
-    return `${star5List.value.length} [${((star5List.value.length * 100) / props.dataVal.length)
-      .toFixed(2)
-      .padStart(5, "0")}%]`;
-  }
-  if (type === "4") {
-    // 4星物品统计
-    return `${star4List.value.length} [${((star4List.value.length * 100) / props.dataVal.length)
-      .toFixed(2)
-      .padStart(5, "0")}%]`;
-  }
-  // 3星物品统计
-  return `${star3count.value} [${((star3count.value * 100) / props.dataVal.length)
-    .toFixed(2)
-    .padStart(5, "0")}%]`;
+  if (progress === 0) return "0";
+  return `${progress.toFixed(2)}%`;
 }
 
 // 获取5星平均抽数
@@ -171,6 +209,22 @@ function getStar5Avg(): string {
   return (total / star5List.value.length).toFixed(2);
 }
 
+// 获取4星平均抽数
+function getStar4Avg(): string {
+  const resetList = star4List.value.map((item) => item.count);
+  if (resetList.length === 0) return "0";
+  const total = resetList.reduce((a, b) => a + b);
+  return (total / star4List.value.length).toFixed(2);
+}
+
+// 获取3星平均抽数
+function getStar3Avg(): string {
+  const resetList = star3List.value.map((item) => item.count);
+  if (resetList.length === 0) return "0";
+  const total = resetList.reduce((a, b) => a + b);
+  return (total / star3List.value.length).toFixed(2);
+}
+
 // 监听数据变化
 watch(
   () => props.dataVal,
@@ -179,11 +233,13 @@ watch(
     star4List.value = [];
     reset5count.value = 1;
     reset4count.value = 1;
-    star3count.value = 1;
+    star2count.value = 0;
     startDate.value = "";
     endDate.value = "";
     star5avg.value = "";
-    tab.value = "5";
+    star4avg.value = "";
+    star3avg.value = "";
+    tab.value = isNormalPool.value ? "4" : "5";
     loadData();
   },
 );
@@ -215,19 +271,78 @@ watch(
 }
 
 .gbr-mid-list {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border-top: 1px solid var(--common-shadow-4);
+  display: grid;
+  margin-top: 8px;
+  margin-bottom: 8px;
   color: var(--box-text-7);
+  column-gap: 12px;
+  font-size: 14px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
 }
 
-.gbr-ml-item {
+.gbr-ml-title {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   font-family: var(--font-title);
-  font-size: 14px;
+
+  &.s3 {
+    color: var(--tgc-od-blue);
+  }
+
+  &.s4 {
+    color: var(--tgc-od-purple);
+  }
+
+  &.s5 {
+    color: var(--tgc-od-orange);
+  }
+}
+
+.gbr-ml-card {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--app-page-bg);
+  column-gap: 4px;
+}
+
+.gbr-mid-progress {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  height: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 4px;
+  background: var(--box-bg-2);
+
+  div {
+    position: relative;
+    height: 100%;
+  }
+
+  .s2 {
+    background: var(--tgc-od-green);
+  }
+
+  .s3 {
+    background: var(--tgc-od-blue);
+  }
+
+  .s4 {
+    background: var(--tgc-od-purple);
+  }
+
+  .s5 {
+    background: var(--tgc-od-orange);
+  }
 }
 
 .gbr-bottom {
