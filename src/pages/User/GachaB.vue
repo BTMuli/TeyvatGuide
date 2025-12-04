@@ -32,7 +32,8 @@
     <v-tabs v-model="tab" align-tabs="start" class="gb-tab" density="compact">
       <v-tab value="overview">数据概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
-      <v-tab value="iframe" v-if="isLogin">祈愿详情</v-tab>
+      <!-- TODO: 暂时隐藏内置祈愿链接 -->
+      <v-tab value="iframe" v-if="false">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gb-window">
       <v-window-item value="overview" class="gb-window-item">

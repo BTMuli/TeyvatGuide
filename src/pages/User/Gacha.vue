@@ -48,7 +48,8 @@
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
-      <v-tab value="iframe" v-if="isLogin">祈愿详情</v-tab>
+      <!-- TODO: 暂时隐藏内置祈愿链接 -->
+      <v-tab value="iframe" v-if="false">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item value="overview" class="gacha-window-item">
@@ -83,7 +84,7 @@ import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
-import useAppStore from "@store/app.js";
+// import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
@@ -97,7 +98,7 @@ import { AppCharacterData, AppWeaponData } from "@/data/index.js";
 
 const router = useRouter();
 
-const { isLogin } = storeToRefs(useAppStore());
+// const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 
 const authkey = ref<string>("");
