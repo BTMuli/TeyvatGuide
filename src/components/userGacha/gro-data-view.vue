@@ -1,6 +1,6 @@
 <!-- 祈愿数据概览 -->
 <template>
-  <div ref="containerRef" class="gro-dv-container">
+  <div ref="groDvBoxRef" class="gro-dv-container">
     <div ref="headerRef" class="gro-dv-header">
       <div class="gro-dvt-title">
         <span>{{ title }}</span>
@@ -58,12 +58,12 @@
       </div>
     </div>
     <!-- 这边放具体物品的列表 -->
-    <div class="gro-bottom" :style="{ height: bottomHeight }">
+    <div class="gro-bottom">
       <v-tabs v-model="tab" density="compact">
         <v-tab value="5">5☆</v-tab>
         <v-tab value="4">4☆</v-tab>
       </v-tabs>
-      <v-window v-model="tab" class="gro-bottom-window" :style="{ height: windowHeight }">
+      <v-window v-model="tab" class="gro-bottom-window">
         <v-window-item class="gro-b-window-item" value="5">
           <v-virtual-scroll :item-height="48" :items="star5List">
             <template #default="{ item }">
@@ -93,7 +93,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 
@@ -107,8 +107,8 @@ type GachaDataViewProps = {
 const props = defineProps<GachaDataViewProps>();
 
 // Template refs for dynamic height calculation
-const containerRef = ref<HTMLElement | null>(null);
-const headerRef = ref<HTMLElement | null>(null);
+const groDvBoxEl = useTemplateRef<HTMLElement>("groDvBoxRef");
+const headerEl = useTemplateRef<HTMLElement>("headerRef");
 
 // Dynamic heights
 const bottomHeight = ref<string>("auto");
@@ -136,10 +136,10 @@ const isUpPool = computed<boolean>(() => props.dataType !== "new" && props.dataT
 
 // Calculate dynamic heights
 function calculateHeights(): void {
-  if (!containerRef.value || !headerRef.value) return;
-  const containerHeight = containerRef.value.clientHeight;
-  const headerHeight = headerRef.value.clientHeight;
-  const padding = 16; // 8px padding top + 8px padding bottom
+  if (!groDvBoxEl.value || !headerEl.value) return;
+  const containerHeight = groDvBoxEl.value.clientHeight;
+  const headerHeight = headerEl.value.clientHeight;
+  const padding = 20; // 8px padding top + 8px padding bottom + 4px magic
   const tabsHeight = 36; // v-tabs compact height
   const gap = 8; // gap between tabs and window
   const bottomHeightPx = containerHeight - headerHeight - padding;
@@ -404,6 +404,7 @@ watch(
   position: relative;
   display: flex;
   width: 100%;
+  height: v-bind(bottomHeight); /* stylelint-disable-line value-keyword-case */
   box-sizing: border-box;
   flex-direction: column;
   gap: 8px;
@@ -411,6 +412,7 @@ watch(
 
 .gro-bottom-window {
   position: relative;
+  height: v-bind(windowHeight); /* stylelint-disable-line value-keyword-case */
   overflow-y: auto;
 }
 
