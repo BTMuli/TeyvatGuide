@@ -10,7 +10,7 @@
     </div>
     <div class="gro-dl-info">
       <div class="gro-dl-cnt">{{ props.count }}</div>
-      <div class="gro-dl-hint" v-if="hint !== ''">{{ hint }}</div>
+      <div class="gro-dl-hint" v-if="props.hint !== ''">{{ props.hint }}</div>
     </div>
   </div>
 </template>
@@ -18,12 +18,13 @@
 import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
-import { AppGachaData } from "@/data/index.js";
-
-export type GroDataLineProps = { data: TGApp.Sqlite.GachaRecords.TableGacha; count: number };
+export type GroDataLineProps = {
+  data: TGApp.Sqlite.GachaRecords.TableGacha;
+  count: number;
+  hint: string;
+};
 
 const props = defineProps<GroDataLineProps>();
-const hint = getEndHint();
 
 function getIcon(): string {
   const find = getWikiBrief(props.data.itemId);
@@ -32,32 +33,10 @@ function getIcon(): string {
   return `/WIKI/weapon/${props.data.itemId}.webp`;
 }
 
-function getEndHint(): string {
-  if (props.data.gachaType === "100" || props.data.gachaType === "200") return "";
-  // if (props.data.rank !== "5") return "";
-  const itemTime = new Date(props.data.time).getTime();
-  const poolsFind = AppGachaData.filter((pool) => {
-    if (pool.type.toLocaleString() !== props.data.gachaType) return false;
-    const startTime = new Date(pool.from).getTime();
-    const endTime = new Date(pool.to).getTime();
-    return itemTime >= startTime && itemTime <= endTime;
-  });
-  if (poolsFind.length === 0) return "";
-  if (props.data.rank === "5") {
-    if (poolsFind.some((pool) => pool.up5List.includes(Number(props.data.itemId)))) return "UP";
-    return "歪";
-  }
-  if (props.data.rank === "4") {
-    if (poolsFind.some((pool) => pool.up4List.includes(Number(props.data.itemId)))) return "UP";
-    return "歪";
-  }
-  return "";
-}
-
 const progressColor = computed<string>(() => {
-  if (hint === "UP" && props.data.rank === "5") return "#d19a66";
-  if (hint === "UP" && props.data.rank === "4") return "#c678dd";
-  if (hint === "歪") return "#e06c75";
+  if (props.hint === "UP" && props.data.rank === "5") return "#d19a66";
+  if (props.hint === "UP" && props.data.rank === "4") return "#c678dd";
+  if (props.hint === "歪") return "#e06c75";
   return "#61afef";
 });
 const progressWidth = computed<string>(() => {
