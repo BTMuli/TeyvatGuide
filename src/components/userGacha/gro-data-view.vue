@@ -1,67 +1,69 @@
 <!-- 祈愿数据概览 -->
 <template>
-  <div class="gro-dv-container">
-    <div class="gro-dvt-title">
-      <span>{{ title }}</span>
-      <span>{{ props.dataVal.length }}</span>
-    </div>
-    <div class="gro-dvt-subtitle">
-      <span v-show="props.dataVal.length === 0">暂无数据</span>
-      <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
-    </div>
-    <!-- 4星相关数据 -->
-    <div :class="{ 'has-up': isUpPool }" class="gro-mid-list">
-      <div class="gro-ml-title s4">★★★★</div>
-      <div class="gro-ml-card">
-        <span>垫</span>
-        <span>{{ reset4count - 1 }}</span>
+  <div ref="containerRef" class="gro-dv-container">
+    <div ref="headerRef" class="gro-dv-header">
+      <div class="gro-dvt-title">
+        <span>{{ title }}</span>
+        <span>{{ props.dataVal.length }}</span>
       </div>
-      <div class="gro-ml-card">
-        <span>均</span>
-        <span>{{ star4avg }}</span>
+      <div class="gro-dvt-subtitle">
+        <span v-show="props.dataVal.length === 0">暂无数据</span>
+        <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
       </div>
-      <div v-if="star4UpAvg !== ''" class="gro-ml-card">
-        <span>UP</span>
-        <span>{{ star4UpAvg }}</span>
+      <!-- 4星相关数据 -->
+      <div :class="{ 'has-up': isUpPool }" class="gro-mid-list">
+        <div class="gro-ml-title s4">★★★★</div>
+        <div class="gro-ml-card">
+          <span>垫</span>
+          <span>{{ reset4count - 1 }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>均</span>
+          <span>{{ star4avg }}</span>
+        </div>
+        <div v-if="star4UpAvg !== ''" class="gro-ml-card">
+          <span>UP</span>
+          <span>{{ star4UpAvg }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>总</span>
+          <span>{{ star4List.length }}</span>
+        </div>
       </div>
-      <div class="gro-ml-card">
-        <span>总</span>
-        <span>{{ star4List.length }}</span>
+      <!-- 5星相关数据 -->
+      <div :class="{ 'has-up': star5UpAvg !== '' }" class="gro-mid-list">
+        <div class="gro-ml-title s5">★★★★★</div>
+        <div class="gro-ml-card">
+          <span>垫</span>
+          <span>{{ reset5count - 1 }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>均</span>
+          <span>{{ star5avg }}</span>
+        </div>
+        <div v-if="star5UpAvg !== ''" class="gro-ml-card">
+          <span>UP</span>
+          <span>{{ star5UpAvg }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>总</span>
+          <span>{{ star5List.length }}</span>
+        </div>
       </div>
-    </div>
-    <!-- 5星相关数据 -->
-    <div :class="{ 'has-up': star5UpAvg !== '' }" class="gro-mid-list">
-      <div class="gro-ml-title s5">★★★★★</div>
-      <div class="gro-ml-card">
-        <span>垫</span>
-        <span>{{ reset5count - 1 }}</span>
+      <!-- 进度条拼接 -->
+      <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
+        <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
+        <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
+        <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
       </div>
-      <div class="gro-ml-card">
-        <span>均</span>
-        <span>{{ star5avg }}</span>
-      </div>
-      <div v-if="star5UpAvg !== ''" class="gro-ml-card">
-        <span>UP</span>
-        <span>{{ star5UpAvg }}</span>
-      </div>
-      <div class="gro-ml-card">
-        <span>总</span>
-        <span>{{ star5List.length }}</span>
-      </div>
-    </div>
-    <!-- 进度条拼接 -->
-    <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
-      <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
-      <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
-      <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
     </div>
     <!-- 这边放具体物品的列表 -->
-    <div class="gro-bottom">
+    <div class="gro-bottom" :style="{ height: bottomHeight }">
       <v-tabs v-model="tab" density="compact">
         <v-tab value="5">5☆</v-tab>
         <v-tab value="4">4☆</v-tab>
       </v-tabs>
-      <v-window v-model="tab" class="gro-bottom-window">
+      <v-window v-model="tab" class="gro-bottom-window" :style="{ height: windowHeight }">
         <v-window-item class="gro-b-window-item" value="5">
           <v-virtual-scroll :item-height="48" :items="star5List">
             <template #default="{ item }">
@@ -91,7 +93,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 
@@ -103,6 +105,14 @@ type GachaDataViewProps = {
 };
 
 const props = defineProps<GachaDataViewProps>();
+
+// Template refs for dynamic height calculation
+const containerRef = ref<HTMLElement | null>(null);
+const headerRef = ref<HTMLElement | null>(null);
+
+// Dynamic heights
+const bottomHeight = ref<string>("auto");
+const windowHeight = ref<string>("auto");
 
 // data
 const loading = ref<boolean>(true); // 是否加载完
@@ -124,9 +134,25 @@ const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
 const isUpPool = computed<boolean>(() => props.dataType !== "new" && props.dataType !== "normal");
 
-onMounted(() => {
+// Calculate dynamic heights
+function calculateHeights(): void {
+  if (!containerRef.value || !headerRef.value) return;
+  const containerHeight = containerRef.value.clientHeight;
+  const headerHeight = headerRef.value.clientHeight;
+  const padding = 16; // 8px padding top + 8px padding bottom
+  const tabsHeight = 36; // v-tabs compact height
+  const gap = 8; // gap between tabs and window
+  const bottomHeightPx = containerHeight - headerHeight - padding;
+  const windowHeightPx = bottomHeightPx - tabsHeight - gap;
+  bottomHeight.value = `${bottomHeightPx}px`;
+  windowHeight.value = `${windowHeightPx}px`;
+}
+
+onMounted(async () => {
   loadData();
   loading.value = false;
+  await nextTick();
+  calculateHeights();
 });
 
 function loadData(): void {
@@ -253,7 +279,7 @@ function getPg(star: "5" | "4" | "3"): string {
 // 监听数据变化
 watch(
   () => props.dataVal,
-  () => {
+  async () => {
     star5List.value = [];
     star4List.value = [];
     reset5count.value = 1;
@@ -267,18 +293,23 @@ watch(
     star4UpAvg.value = "";
     tab.value = "5";
     loadData();
+    await nextTick();
+    calculateHeights();
   },
 );
 </script>
 <style lang="css" scoped>
 .gro-dv-container {
-  display: flex;
+  position: relative;
   height: 100%;
   box-sizing: border-box;
-  flex-direction: column;
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
+}
+
+.gro-dv-header {
+  position: relative;
 }
 
 .gro-dvt-title {
@@ -372,21 +403,15 @@ watch(
 .gro-bottom {
   position: relative;
   display: flex;
-  overflow: hidden;
   width: 100%;
-  min-height: 0;
   box-sizing: border-box;
-  flex: 1;
   flex-direction: column;
   gap: 8px;
 }
 
 .gro-bottom-window {
   position: relative;
-  overflow: hidden;
-  height: 100%;
-  min-height: 0;
-  flex: 1;
+  overflow-y: auto;
 }
 
 .gro-b-window-item {
@@ -395,7 +420,6 @@ watch(
   height: 100%;
   box-sizing: border-box;
   padding-right: 4px;
-  overflow-y: auto;
 }
 
 /* stylelint-disable selector-class-pattern */
