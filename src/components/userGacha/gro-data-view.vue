@@ -272,8 +272,10 @@ watch(
 </script>
 <style lang="css" scoped>
 .gro-dv-container {
+  display: flex;
   height: 100%;
   box-sizing: border-box;
+  flex-direction: column;
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
@@ -371,19 +373,17 @@ watch(
   position: relative;
   display: flex;
   width: 100%;
-
-  /* TODO: 元素获取动态计算 */
-  height: calc(100% - 108px);
+  min-height: 0;
   box-sizing: border-box;
+  flex: 1;
   flex-direction: column;
   gap: 8px;
 }
 
 .gro-bottom-window {
   position: relative;
-
-  /* TODO: 元素获取动态计算 */
-  height: calc(100vh - 368px);
+  min-height: 0;
+  flex: 1;
   overflow-y: auto;
 }
 
