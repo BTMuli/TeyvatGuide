@@ -52,9 +52,9 @@
       </div>
       <!-- 进度条拼接 -->
       <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
-        <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
-        <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
-        <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
+        <div v-if="pg3 !== '0'" :style="{ width: pg3 }" class="s3" />
+        <div v-if="pg4 !== '0'" :style="{ width: pg4 }" class="s4" />
+        <div v-if="pg5 !== '0'" :style="{ width: pg5 }" class="s5" />
       </div>
     </div>
     <!-- 这边放具体物品的列表 -->
@@ -154,6 +154,14 @@ onMounted(async () => {
   await nextTick();
   calculateHeights();
 });
+
+watch(
+  () => [props.dataVal, props.dataType],
+  async () => {
+    await nextTick();
+    calculateHeights();
+  },
+);
 
 function loadData(): void {
   title.value = getTitle();
@@ -265,12 +273,17 @@ function getStar4UpAvg(): string {
 // 获取占比
 function getPg(star: "5" | "4" | "3"): string {
   let progress: number;
+  // 开根号
+  const sq5 = Math.sqrt(star5List.value.length);
+  const sq4 = Math.sqrt(star4List.value.length);
+  const sq3 = Math.sqrt(star3count.value);
+  const total = sq5 + sq4 + sq3;
   if (star === "5") {
-    progress = (star5List.value.length * 100) / props.dataVal.length;
+    progress = (sq5 * 100) / total;
   } else if (star === "4") {
-    progress = (star4List.value.length * 100) / props.dataVal.length;
+    progress = (sq4 * 100) / total;
   } else {
-    progress = (star3count.value * 100) / props.dataVal.length;
+    progress = (sq3 * 100) / total;
   }
   if (progress === 0) return "0";
   return `${progress.toFixed(2)}%`;
