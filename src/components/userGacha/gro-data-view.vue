@@ -372,6 +372,7 @@ watch(
 .gro-bottom {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 100%;
   min-height: 0;
   box-sizing: border-box;
@@ -382,16 +383,19 @@ watch(
 
 .gro-bottom-window {
   position: relative;
+  overflow: hidden;
+  height: 100%;
   min-height: 0;
   flex: 1;
-  overflow-y: auto;
 }
 
 .gro-b-window-item {
   position: relative;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
   padding-right: 4px;
+  overflow-y: auto;
 }
 
 /* stylelint-disable selector-class-pattern */
