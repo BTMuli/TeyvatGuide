@@ -170,6 +170,7 @@ function isStar5Up(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean {
   // 新手池和常驻池不存在UP概念
   if (item.gachaType === "100" || item.gachaType === "200") return false;
   const itemTime = new Date(item.time).getTime();
+  const itemIdNum = Number(item.itemId);
   const poolsFind = AppGachaData.filter((pool) => {
     if (pool.type.toLocaleString() !== item.gachaType) return false;
     const startTime = new Date(pool.from).getTime();
@@ -177,7 +178,7 @@ function isStar5Up(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean {
     return itemTime >= startTime && itemTime <= endTime;
   });
   if (poolsFind.length === 0) return false;
-  return poolsFind.some((pool) => pool.up5List.includes(Number(item.itemId)));
+  return poolsFind.some((pool) => pool.up5List.includes(itemIdNum));
 }
 
 // 获取5星UP平均抽数
