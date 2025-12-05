@@ -1,20 +1,46 @@
 <template>
-  <div class="gro-o-container">
-    <GroDataView v-if="newData.length !== 0" :data-val="newData" data-type="new" />
-    <GroDataView :data-val="normalData" data-type="normal" />
-    <GroDataView :data-val="avatarData" data-type="avatar" />
-    <GroDataView :data-val="weaponData" data-type="weapon" />
-    <GroDataView v-if="mixData.length !== 0" :data-val="mixData" data-type="mix" />
-  </div>
+  <Swiper
+    :autoplay="false"
+    :centered-slides="false"
+    :loop="false"
+    :modules="swiperModules"
+    :pagination="{ clickable: true }"
+    :slides-per-view="3"
+    :space-between="12"
+    class="gro-o-swiper"
+  >
+    <SwiperSlide v-if="newData.length !== 0">
+      <GroDataView :data-val="newData" data-type="new" />
+    </SwiperSlide>
+    <SwiperSlide>
+      <GroDataView :data-val="normalData" data-type="normal" />
+    </SwiperSlide>
+    <SwiperSlide>
+      <GroDataView :data-val="avatarData" data-type="avatar" />
+    </SwiperSlide>
+    <SwiperSlide>
+      <GroDataView :data-val="weaponData" data-type="weapon" />
+    </SwiperSlide>
+    <SwiperSlide v-if="mixData.length !== 0">
+      <GroDataView :data-val="mixData" data-type="mix" />
+    </SwiperSlide>
+  </Swiper>
 </template>
 <script lang="ts" setup>
-import { computed, ref, watch } from "vue";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { A11y, Autoplay, Pagination } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { computed } from "vue";
 
 import GroDataView from "./gro-data-view.vue";
 
 type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGacha> };
 
 const props = defineProps<GachaOverviewProps>();
+const swiperModules = [Autoplay, A11y, Pagination];
+
 const newData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "100"),
 );
@@ -30,33 +56,21 @@ const weaponData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
 const mixData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "500"),
 );
-
-const cnCols = ref<string>(getCnCols());
-
-function getCnCols(): string {
-  let total = 5;
-  if (newData.value.length === 0) {
-    total -= 1;
-  }
-  if (mixData.value.length === 0) {
-    total -= 1;
-  }
-  if (total === 5) return "repeat(5, 0.2fr)";
-  if (total === 4) return "repeat(4, 0.25fr)";
-  return "repeat(3, 0.33fr)";
-}
-
-// 监听数据变化
-watch(
-  () => props.modelValue,
-  () => (cnCols.value = getCnCols()),
-);
 </script>
 <style lang="css" scoped>
-.gro-o-container {
-  display: grid;
+.gro-o-swiper {
+  width: 100%;
   height: 100%;
   column-gap: 8px;
-  grid-template-columns: v-bind(cnCols); /* stylelint-disable-line value-keyword-case */
+}
+
+/* swiper dot */
+
+:deep(.swiper-pagination-bullet) {
+  background: var(--tgc-od-white);
+}
+
+:deep(.swiper-pagination-bullet-active) {
+  background-color: var(--tgc-pink-1);
 }
 </style>
