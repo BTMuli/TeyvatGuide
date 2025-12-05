@@ -26,7 +26,7 @@
       </div>
     </div>
     <!-- 5星相关数据 -->
-    <div class="gro-mid-list">
+    <div class="gro-mid-list" :class="{ 'has-up': star5UpAvg !== '' }">
       <div class="gro-ml-title s5">★★★★★</div>
       <div class="gro-ml-card">
         <span>已垫</span>
@@ -35,6 +35,10 @@
       <div class="gro-ml-card">
         <span>平均</span>
         <span>{{ star5avg }}</span>
+      </div>
+      <div v-if="star5UpAvg !== ''" class="gro-ml-card">
+        <span>UP均</span>
+        <span>{{ star5UpAvg }}</span>
       </div>
       <div class="gro-ml-card">
         <span>统计</span>
@@ -77,6 +81,8 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 
+import { AppGachaData } from "@/data/index.js";
+
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
   dataVal: Array<TGApp.Sqlite.GachaRecords.TableGacha>;
@@ -95,6 +101,7 @@ const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
 const star5avg = ref<string>(""); // 5星平均抽数
+const star5UpAvg = ref<string>(""); // 5星UP平均抽数
 const star4avg = ref<string>(""); // 4星平均抽数
 const tab = ref<string>("5"); // tab
 const pg3 = computed<string>(() => getPg("3"));
@@ -136,6 +143,7 @@ function loadData(): void {
   star5List.value = temp5Data.reverse();
   star4List.value = temp4Data.reverse();
   star5avg.value = getStar5Avg();
+  star5UpAvg.value = getStar5UpAvg();
   star4avg.value = getStar4Avg();
 }
 
@@ -155,6 +163,31 @@ function getStar5Avg(): string {
   if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
   return (total / star5List.value.length).toFixed(2);
+}
+
+// 检查5星物品是否为UP
+function isStar5Up(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean {
+  // 新手池和常驻池不存在UP概念
+  if (item.gachaType === "100" || item.gachaType === "200") return false;
+  const itemTime = new Date(item.time).getTime();
+  const poolsFind = AppGachaData.filter((pool) => {
+    if (pool.type.toLocaleString() !== item.gachaType) return false;
+    const startTime = new Date(pool.from).getTime();
+    const endTime = new Date(pool.to).getTime();
+    return itemTime >= startTime && itemTime <= endTime;
+  });
+  if (poolsFind.length === 0) return false;
+  return poolsFind.some((pool) => pool.up5List.includes(Number(item.itemId)));
+}
+
+// 获取5星UP平均抽数
+function getStar5UpAvg(): string {
+  // 新手池和常驻池不显示UP平均
+  if (props.dataType === "new" || props.dataType === "normal") return "";
+  const upList = star5List.value.filter((item) => isStar5Up(item.data));
+  if (upList.length === 0) return "0";
+  const total = upList.reduce((a, b) => a + b.count, 0);
+  return (total / upList.length).toFixed(2);
 }
 
 // 获取4星平均抽数
@@ -191,6 +224,7 @@ watch(
     startDate.value = "";
     endDate.value = "";
     star5avg.value = "";
+    star5UpAvg.value = "";
     star4avg.value = "";
     tab.value = "5";
     loadData();
@@ -231,6 +265,10 @@ watch(
   column-gap: 12px;
   font-size: 14px;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+
+  &.has-up {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  }
 }
 
 .gro-ml-title {
