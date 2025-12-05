@@ -371,7 +371,9 @@ watch(
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 120px);
+
+  /* TODO: 元素获取动态计算 */
+  height: calc(100% - 108px);
   box-sizing: border-box;
   flex-direction: column;
   gap: 8px;
@@ -379,7 +381,9 @@ watch(
 
 .gro-bottom-window {
   position: relative;
-  height: calc(100vh - 380px);
+
+  /* TODO: 元素获取动态计算 */
+  height: calc(100vh - 368px);
   overflow-y: auto;
 }
 
