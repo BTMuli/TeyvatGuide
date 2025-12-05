@@ -10,42 +10,42 @@
       <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
     </div>
     <!-- 4星相关数据 -->
-    <div class="gro-mid-list" :class="{ 'has-up': star4UpAvg !== '' }">
+    <div :class="{ 'has-up': isUpPool }" class="gro-mid-list">
       <div class="gro-ml-title s4">★★★★</div>
       <div class="gro-ml-card">
-        <span>已垫</span>
+        <span>垫</span>
         <span>{{ reset4count - 1 }}</span>
       </div>
       <div class="gro-ml-card">
-        <span>平均</span>
+        <span>均</span>
         <span>{{ star4avg }}</span>
       </div>
       <div v-if="star4UpAvg !== ''" class="gro-ml-card">
-        <span>UP均</span>
+        <span>UP</span>
         <span>{{ star4UpAvg }}</span>
       </div>
       <div class="gro-ml-card">
-        <span>统计</span>
+        <span>总</span>
         <span>{{ star4List.length }}</span>
       </div>
     </div>
     <!-- 5星相关数据 -->
-    <div class="gro-mid-list" :class="{ 'has-up': star5UpAvg !== '' }">
+    <div :class="{ 'has-up': star5UpAvg !== '' }" class="gro-mid-list">
       <div class="gro-ml-title s5">★★★★★</div>
       <div class="gro-ml-card">
-        <span>已垫</span>
+        <span>垫</span>
         <span>{{ reset5count - 1 }}</span>
       </div>
       <div class="gro-ml-card">
-        <span>平均</span>
+        <span>均</span>
         <span>{{ star5avg }}</span>
       </div>
       <div v-if="star5UpAvg !== ''" class="gro-ml-card">
-        <span>UP均</span>
+        <span>UP</span>
         <span>{{ star5UpAvg }}</span>
       </div>
       <div class="gro-ml-card">
-        <span>统计</span>
+        <span>总</span>
         <span>{{ star5List.length }}</span>
       </div>
     </div>
@@ -69,7 +69,7 @@
                 :key="item.data.id"
                 :count="item.count"
                 :data="item.data"
-                :hint="item.hint"
+                :is-up="item.isUp"
               />
             </template>
           </v-virtual-scroll>
@@ -81,7 +81,7 @@
                 :key="item.data.id"
                 :count="item.count"
                 :data="item.data"
-                :hint="item.hint"
+                :is-up="item.isUp"
               />
             </template>
           </v-virtual-scroll>
@@ -122,6 +122,7 @@ const tab = ref<string>("5"); // tab
 const pg3 = computed<string>(() => getPg("3"));
 const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
+const isUpPool = computed<boolean>(() => props.dataType !== "new" && props.dataType !== "normal");
 
 onMounted(() => {
   loadData();
@@ -147,11 +148,11 @@ function loadData(): void {
         star3count.value++;
       } else if (item.rank === "4") {
         reset5count.value++;
-        temp4Data.push({ data: item, count: reset4count.value, hint: getItemHint(item) });
+        temp4Data.push({ data: item, count: reset4count.value, isUp: checkIsUp(item) });
         reset4count.value = 1;
       } else if (item.rank === "5") {
         reset4count.value++;
-        temp5Data.push({ data: item, count: reset5count.value, hint: getItemHint(item) });
+        temp5Data.push({ data: item, count: reset5count.value, isUp: checkIsUp(item) });
         reset5count.value = 1;
       }
     });
@@ -181,10 +182,14 @@ function getStar5Avg(): string {
   return (total / star5List.value.length).toFixed(2);
 }
 
-// 获取物品的UP/歪提示
-function getItemHint(item: TGApp.Sqlite.GachaRecords.TableGacha): string {
+/**
+ * 判断是否是Up物品
+ * @param {TGApp.Sqlite.GachaRecords.TableGacha} item 原始数据
+ * @returns {boolean|undefined}
+ */
+function checkIsUp(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean | undefined {
   // 新手池和常驻池不存在UP概念
-  if (item.gachaType === "100" || item.gachaType === "200") return "";
+  if (item.gachaType === "100" || item.gachaType === "200") return undefined;
   const itemTime = new Date(item.time).getTime();
   const itemIdNum = Number(item.itemId);
   const poolsFind = AppGachaData.filter((pool) => {
@@ -193,23 +198,21 @@ function getItemHint(item: TGApp.Sqlite.GachaRecords.TableGacha): string {
     const endTime = new Date(pool.to).getTime();
     return itemTime >= startTime && itemTime <= endTime;
   });
-  if (poolsFind.length === 0) return "";
+  if (poolsFind.length === 0) return undefined;
   if (item.rank === "5") {
-    if (poolsFind.some((pool) => pool.up5List.includes(itemIdNum))) return "UP";
-    return "歪";
+    return poolsFind.some((pool) => pool.up5List.includes(itemIdNum));
   }
   if (item.rank === "4") {
-    if (poolsFind.some((pool) => pool.up4List.includes(itemIdNum))) return "UP";
-    return "歪";
+    return poolsFind.some((pool) => pool.up4List.includes(itemIdNum));
   }
-  return "";
+  return undefined;
 }
 
 // 获取5星UP平均抽数
 function getStar5UpAvg(): string {
   // 新手池和常驻池不显示UP平均
   if (props.dataType === "new" || props.dataType === "normal") return "";
-  const upList = star5List.value.filter((item) => item.hint === "UP");
+  const upList = star5List.value.filter((item) => item.isUp);
   if (upList.length === 0) return "0";
   const total = upList.reduce((a, b) => a + b.count, 0);
   return (total / upList.length).toFixed(2);
@@ -227,7 +230,7 @@ function getStar4Avg(): string {
 function getStar4UpAvg(): string {
   // 新手池和常驻池不显示UP平均
   if (props.dataType === "new" || props.dataType === "normal") return "";
-  const upList = star4List.value.filter((item) => item.hint === "UP");
+  const upList = star4List.value.filter((item) => item.isUp);
   if (upList.length === 0) return "0";
   const total = upList.reduce((a, b) => a + b.count, 0);
   return (total / upList.length).toFixed(2);
@@ -295,10 +298,10 @@ watch(
 
 .gro-mid-list {
   display: grid;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   color: var(--box-text-7);
-  column-gap: 12px;
+  column-gap: 4px;
   font-size: 14px;
   grid-template-columns: 1fr 1fr 1fr 1fr;
 

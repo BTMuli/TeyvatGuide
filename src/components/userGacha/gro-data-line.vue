@@ -1,3 +1,4 @@
+<!-- 祈愿数据项展示行 -->
 <template>
   <div class="gro-dl-box">
     <div class="gro-dl-progress" />
@@ -10,7 +11,7 @@
     </div>
     <div class="gro-dl-info">
       <div class="gro-dl-cnt">{{ props.count }}</div>
-      <div class="gro-dl-hint" v-if="props.hint !== ''">{{ props.hint }}</div>
+      <div v-if="props.isUp !== undefined" class="gro-dl-hint">{{ props.isUp ? "UP" : "歪" }}</div>
     </div>
   </div>
 </template>
@@ -18,10 +19,16 @@
 import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
+/**
+ * 祈愿数据项展示行组件参数
+ */
 export type GroDataLineProps = {
+  /* 原始数据 */
   data: TGApp.Sqlite.GachaRecords.TableGacha;
+  /* 抽数 */
   count: number;
-  hint: string;
+  /* 是否是 Up */
+  isUp: boolean | undefined;
 };
 
 const props = defineProps<GroDataLineProps>();
@@ -34,9 +41,10 @@ function getIcon(): string {
 }
 
 const progressColor = computed<string>(() => {
-  if (props.hint === "UP" && props.data.rank === "5") return "#d19a66";
-  if (props.hint === "UP" && props.data.rank === "4") return "#c678dd";
-  if (props.hint === "歪") return "#e06c75";
+  if (props.isUp === undefined) return "#61afef";
+  if (props.isUp && props.data.rank === "5") return "#d19a66";
+  if (props.isUp && props.data.rank === "4") return "#c678dd";
+  if (!props.isUp) return "#e06c75";
   return "#61afef";
 });
 const progressWidth = computed<string>(() => {
