@@ -1,51 +1,61 @@
 <!-- 祈愿数据概览 -->
 <template>
-  <div class="gro-dv-container">
-    <div class="gro-dvt-title">
-      <span>{{ title }}</span>
-      <span>{{ props.dataVal.length }}</span>
-    </div>
-    <div class="gro-dvt-subtitle">
-      <span v-show="props.dataVal.length === 0">暂无数据</span>
-      <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
-    </div>
-    <!-- 4星相关数据 -->
-    <div class="gro-mid-list">
-      <div class="gro-ml-title s4">★★★★</div>
-      <div class="gro-ml-card">
-        <span>已垫</span>
-        <span>{{ reset4count - 1 }}</span>
+  <div ref="groDvBoxRef" class="gro-dv-container">
+    <div ref="headerRef" class="gro-dv-header">
+      <div class="gro-dvt-title">
+        <span>{{ title }}</span>
+        <span>{{ props.dataVal.length }}</span>
       </div>
-      <div class="gro-ml-card">
-        <span>平均</span>
-        <span>{{ star4avg }}</span>
+      <div class="gro-dvt-subtitle">
+        <span v-show="props.dataVal.length === 0">暂无数据</span>
+        <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
       </div>
-      <div class="gro-ml-card">
-        <span>统计</span>
-        <span>{{ star4List.length }}</span>
+      <!-- 4星相关数据 -->
+      <div :class="{ 'has-up': isUpPool }" class="gro-mid-list">
+        <div class="gro-ml-title s4">★★★★</div>
+        <div class="gro-ml-card">
+          <span>垫</span>
+          <span>{{ reset4count - 1 }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>均</span>
+          <span>{{ star4avg }}</span>
+        </div>
+        <div v-if="star4UpAvg !== ''" class="gro-ml-card">
+          <span>UP</span>
+          <span>{{ star4UpAvg }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>总</span>
+          <span>{{ star4List.length }}</span>
+        </div>
       </div>
-    </div>
-    <!-- 5星相关数据 -->
-    <div class="gro-mid-list">
-      <div class="gro-ml-title s5">★★★★★</div>
-      <div class="gro-ml-card">
-        <span>已垫</span>
-        <span>{{ reset5count - 1 }}</span>
+      <!-- 5星相关数据 -->
+      <div :class="{ 'has-up': star5UpAvg !== '' }" class="gro-mid-list">
+        <div class="gro-ml-title s5">★★★★★</div>
+        <div class="gro-ml-card">
+          <span>垫</span>
+          <span>{{ reset5count - 1 }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>均</span>
+          <span>{{ star5avg }}</span>
+        </div>
+        <div v-if="star5UpAvg !== ''" class="gro-ml-card">
+          <span>UP</span>
+          <span>{{ star5UpAvg }}</span>
+        </div>
+        <div class="gro-ml-card">
+          <span>总</span>
+          <span>{{ star5List.length }}</span>
+        </div>
       </div>
-      <div class="gro-ml-card">
-        <span>平均</span>
-        <span>{{ star5avg }}</span>
+      <!-- 进度条拼接 -->
+      <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
+        <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
+        <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
+        <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
       </div>
-      <div class="gro-ml-card">
-        <span>统计</span>
-        <span>{{ star5List.length }}</span>
-      </div>
-    </div>
-    <!-- 进度条拼接 -->
-    <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
-      <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
-      <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
-      <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
     </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gro-bottom">
@@ -57,14 +67,24 @@
         <v-window-item class="gro-b-window-item" value="5">
           <v-virtual-scroll :item-height="48" :items="star5List">
             <template #default="{ item }">
-              <GroDataLine :key="item.data.id" :count="item.count" :data="item.data" />
+              <GroDataLine
+                :key="item.data.id"
+                :count="item.count"
+                :data="item.data"
+                :is-up="item.isUp"
+              />
             </template>
           </v-virtual-scroll>
         </v-window-item>
         <v-window-item class="gro-b-window-item" value="4">
           <v-virtual-scroll :item-height="48" :items="star4List">
             <template #default="{ item }">
-              <GroDataLine :key="item.data.id" :count="item.count" :data="item.data" />
+              <GroDataLine
+                :key="item.data.id"
+                :count="item.count"
+                :data="item.data"
+                :is-up="item.isUp"
+              />
             </template>
           </v-virtual-scroll>
         </v-window-item>
@@ -73,9 +93,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
+
+import { AppGachaData } from "@/data/index.js";
 
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
@@ -83,6 +105,14 @@ type GachaDataViewProps = {
 };
 
 const props = defineProps<GachaDataViewProps>();
+
+// Template refs for dynamic height calculation
+const groDvBoxEl = useTemplateRef<HTMLElement>("groDvBoxRef");
+const headerEl = useTemplateRef<HTMLElement>("headerRef");
+
+// Dynamic heights
+const bottomHeight = ref<string>("auto");
+const windowHeight = ref<string>("auto");
 
 // data
 const loading = ref<boolean>(true); // 是否加载完
@@ -95,15 +125,34 @@ const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
 const star5avg = ref<string>(""); // 5星平均抽数
+const star5UpAvg = ref<string>(""); // 5星UP平均抽数
 const star4avg = ref<string>(""); // 4星平均抽数
+const star4UpAvg = ref<string>(""); // 4星UP平均抽数
 const tab = ref<string>("5"); // tab
 const pg3 = computed<string>(() => getPg("3"));
 const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
+const isUpPool = computed<boolean>(() => props.dataType !== "new" && props.dataType !== "normal");
 
-onMounted(() => {
+// Calculate dynamic heights
+function calculateHeights(): void {
+  if (!groDvBoxEl.value || !headerEl.value) return;
+  const containerHeight = groDvBoxEl.value.clientHeight;
+  const headerHeight = headerEl.value.clientHeight;
+  const padding = 20; // 8px padding top + 8px padding bottom + 4px magic
+  const tabsHeight = 36; // v-tabs compact height
+  const gap = 8; // gap between tabs and window
+  const bottomHeightPx = containerHeight - headerHeight - padding;
+  const windowHeightPx = bottomHeightPx - tabsHeight - gap;
+  bottomHeight.value = `${bottomHeightPx}px`;
+  windowHeight.value = `${windowHeightPx}px`;
+}
+
+onMounted(async () => {
   loadData();
   loading.value = false;
+  await nextTick();
+  calculateHeights();
 });
 
 function loadData(): void {
@@ -125,18 +174,20 @@ function loadData(): void {
         star3count.value++;
       } else if (item.rank === "4") {
         reset5count.value++;
-        temp4Data.push({ data: item, count: reset4count.value });
+        temp4Data.push({ data: item, count: reset4count.value, isUp: checkIsUp(item) });
         reset4count.value = 1;
       } else if (item.rank === "5") {
         reset4count.value++;
-        temp5Data.push({ data: item, count: reset5count.value });
+        temp5Data.push({ data: item, count: reset5count.value, isUp: checkIsUp(item) });
         reset5count.value = 1;
       }
     });
   star5List.value = temp5Data.reverse();
   star4List.value = temp4Data.reverse();
   star5avg.value = getStar5Avg();
+  star5UpAvg.value = getStar5UpAvg();
   star4avg.value = getStar4Avg();
+  star4UpAvg.value = getStar4UpAvg();
 }
 
 // 获取标题
@@ -157,12 +208,58 @@ function getStar5Avg(): string {
   return (total / star5List.value.length).toFixed(2);
 }
 
+/**
+ * 判断是否是Up物品
+ * @param {TGApp.Sqlite.GachaRecords.TableGacha} item 原始数据
+ * @returns {boolean|undefined}
+ */
+function checkIsUp(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean | undefined {
+  // 新手池和常驻池不存在UP概念
+  if (item.gachaType === "100" || item.gachaType === "200") return undefined;
+  const itemTime = new Date(item.time).getTime();
+  const itemIdNum = Number(item.itemId);
+  const poolsFind = AppGachaData.filter((pool) => {
+    if (pool.type.toLocaleString() !== item.gachaType) return false;
+    const startTime = new Date(pool.from).getTime();
+    const endTime = new Date(pool.to).getTime();
+    return itemTime >= startTime && itemTime <= endTime;
+  });
+  if (poolsFind.length === 0) return undefined;
+  if (item.rank === "5") {
+    return poolsFind.some((pool) => pool.up5List.includes(itemIdNum));
+  }
+  if (item.rank === "4") {
+    return poolsFind.some((pool) => pool.up4List.includes(itemIdNum));
+  }
+  return undefined;
+}
+
+// 获取5星UP平均抽数
+function getStar5UpAvg(): string {
+  // 新手池和常驻池不显示UP平均
+  if (props.dataType === "new" || props.dataType === "normal") return "";
+  const upList = star5List.value.filter((item) => item.isUp);
+  if (upList.length === 0) return "0";
+  const total = upList.reduce((a, b) => a + b.count, 0);
+  return (total / upList.length).toFixed(2);
+}
+
 // 获取4星平均抽数
 function getStar4Avg(): string {
   const resetList = star4List.value.map((item) => item.count);
   if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
   return (total / star4List.value.length).toFixed(2);
+}
+
+// 获取4星UP平均抽数
+function getStar4UpAvg(): string {
+  // 新手池和常驻池不显示UP平均
+  if (props.dataType === "new" || props.dataType === "normal") return "";
+  const upList = star4List.value.filter((item) => item.isUp);
+  if (upList.length === 0) return "0";
+  const total = upList.reduce((a, b) => a + b.count, 0);
+  return (total / upList.length).toFixed(2);
 }
 
 // 获取占比
@@ -182,7 +279,7 @@ function getPg(star: "5" | "4" | "3"): string {
 // 监听数据变化
 watch(
   () => props.dataVal,
-  () => {
+  async () => {
     star5List.value = [];
     star4List.value = [];
     reset5count.value = 1;
@@ -191,19 +288,28 @@ watch(
     startDate.value = "";
     endDate.value = "";
     star5avg.value = "";
+    star5UpAvg.value = "";
     star4avg.value = "";
+    star4UpAvg.value = "";
     tab.value = "5";
     loadData();
+    await nextTick();
+    calculateHeights();
   },
 );
 </script>
 <style lang="css" scoped>
 .gro-dv-container {
+  position: relative;
   height: 100%;
   box-sizing: border-box;
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
+}
+
+.gro-dv-header {
+  position: relative;
 }
 
 .gro-dvt-title {
@@ -225,12 +331,16 @@ watch(
 
 .gro-mid-list {
   display: grid;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   color: var(--box-text-7);
-  column-gap: 12px;
+  column-gap: 4px;
   font-size: 14px;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+
+  &.has-up {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  }
 }
 
 .gro-ml-title {
@@ -294,7 +404,7 @@ watch(
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 120px);
+  height: v-bind(bottomHeight); /* stylelint-disable-line value-keyword-case */
   box-sizing: border-box;
   flex-direction: column;
   gap: 8px;
@@ -302,13 +412,14 @@ watch(
 
 .gro-bottom-window {
   position: relative;
-  height: calc(100vh - 380px);
+  height: v-bind(windowHeight); /* stylelint-disable-line value-keyword-case */
   overflow-y: auto;
 }
 
 .gro-b-window-item {
   position: relative;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
   padding-right: 4px;
 }
