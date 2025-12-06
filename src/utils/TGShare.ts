@@ -115,7 +115,6 @@ export async function generateShareImg(
     canvas,
     x: -15,
     y: -15,
-    dpi: 350,
   };
   let canvasData;
   try {

@@ -1,16 +1,23 @@
+<!-- 剧诗数据概览 -->
 <template>
   <div class="tuco-box">
-    <TucTile title="最佳记录" :val="getBestVal()" />
-    <TucTile :title="`获得星章-${props.data.medal_num}`" :val="props.data.get_medal_round_list" />
-    <TucTile :title="getRoundTitle()" :val="getRoundVal()" />
-    <TucTile title="消耗幻剧之花" :val="props.data.coin_num" />
-    <TucFight label="最快完成演出" :data="props.fights.shortest_avatar_list" />
-    <TucTile title="总耗时" :val="getTime()" />
-    <!--    <TucTile title="助演角色支援" :val="`${props.data.rent_cnt}次`" />-->
-    <!--    <TucTile title="场外声援" :val="`${props.data.avatar_bonus_num}次`" />-->
-    <TucFight label="击败最多敌人" :data="props.fights.max_defeat_avatar" />
-    <TucFight label="最高伤害输出" :data="props.fights.max_damage_avatar" />
-    <TucFight label="最高承受伤害" :data="props.fights.max_take_damage_avatar" />
+    <div class="tuco-line1">
+      <TucTile :val="getBestVal()" title="最佳记录" />
+      <TucTile :val="props.data.coin_num" title="消耗幻剧之花" />
+      <TucTile :val="getTime()" title="总耗时" />
+      <TucTile :title="getRoundTitle()" :val="getRoundVal()" />
+    </div>
+    <div class="tuco-line2">
+      <TucFight :data="props.fights.max_defeat_avatar" label="击败最多敌人" />
+      <TucFight :data="props.fights.max_take_damage_avatar" label="最高承受伤害" />
+      <TucFight :data="props.fights.shortest_avatar_list" label="最快完成演出" />
+      <TucFight :data="props.fights.max_damage_avatar" label="最高伤害输出" />
+    </div>
+    <div class="tuco-line3">
+      <TucTile :val="`${props.data.rent_cnt}次`" title="助演角色支援" />
+      <TucTile :title="`获得星章-${props.data.medal_num}`" :val="props.data.get_medal_round_list" />
+      <TucTile :val="`${props.data.avatar_bonus_num}次`" title="场外声援" />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -58,9 +65,36 @@ function getTime(): string {
 </script>
 <style lang="css" scoped>
 .tuco-box {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 8px;
+}
+
+.tuco-line1 {
+  position: relative;
   display: grid;
   width: 100%;
-  gap: 8px;
+  column-gap: 8px;
+  grid-template-columns: 1fr 2fr 2fr 1fr;
+}
+
+.tuco-line2 {
+  position: relative;
+  display: grid;
+  width: 100%;
+  column-gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.tuco-line3 {
+  position: relative;
+  display: grid;
+  width: 100%;
+  column-gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>

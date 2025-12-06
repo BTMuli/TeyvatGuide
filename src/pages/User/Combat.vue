@@ -1,4 +1,4 @@
-<!-- 真境剧诗页面 TODO: 重构UI -->
+<!-- 真境剧诗页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -6,19 +6,19 @@
         <img alt="icon" src="/source/UI/userCombat.webp" />
         <span>幻想真境剧诗</span>
         <v-select
-          density="compact"
-          variant="outlined"
           v-model="uidCur"
-          :items="uidList"
           :hide-details="true"
+          :items="uidList"
+          density="compact"
           label="游戏UID"
+          variant="outlined"
         />
         <v-btn :rounded="true" class="uc-btn" @click="toAbyss()">
-          <img src="/source/UI/userAbyss.webp" alt="abyss" />
+          <img alt="abyss" src="/source/UI/userAbyss.webp" />
           <span>深境螺旋</span>
         </v-btn>
         <v-btn :rounded="true" class="uc-btn" @click="toChallenge()">
-          <img src="/source/UI/userChallenge.webp" alt="challenge" />
+          <img alt="challenge" src="/source/UI/userChallenge.webp" />
           <span>幽境危战</span>
         </v-btn>
       </div>
@@ -26,28 +26,28 @@
     <template #append>
       <div class="uct-right">
         <v-btn
-          class="uc-btn"
-          @click="shareCombat()"
-          :rounded="true"
           :disabled="localCombat.length === 0"
+          :rounded="true"
+          class="uc-btn"
           prepend-icon="mdi-share"
+          @click="shareCombat()"
         >
           分享
         </v-btn>
-        <v-btn class="uc-btn" @click="refreshCombat()" :rounded="true" prepend-icon="mdi-refresh">
+        <v-btn :rounded="true" class="uc-btn" prepend-icon="mdi-refresh" @click="refreshCombat()">
           刷新
         </v-btn>
-        <v-btn class="uc-btn" @click="tryReadCombat()" :rounded="true" prepend-icon="mdi-download">
+        <v-btn :rounded="true" class="uc-btn" prepend-icon="mdi-download" @click="tryReadCombat()">
           导入
         </v-btn>
-        <v-btn class="uc-btn" @click="deleteCombat()" :rounded="true" prepend-icon="mdi-delete">
+        <v-btn :rounded="true" class="uc-btn" prepend-icon="mdi-delete" @click="deleteCombat()">
           删除
         </v-btn>
       </div>
     </template>
   </v-app-bar>
   <div class="uc-box">
-    <v-tabs v-model="userTab" direction="vertical" class="uc-tabs-box" center-active>
+    <v-tabs v-model="userTab" center-active class="uc-tabs-box" direction="vertical">
       <v-tab v-for="item in localCombat" :key="item.id" :value="item.id"> 第{{ item.id }}期</v-tab>
     </v-tabs>
     <v-window v-model="userTab" class="uc-window">
@@ -64,15 +64,18 @@
               <span>{{ item.id }}</span>
               <span>期 UID</span>
               <span>{{ uidCur }}</span>
-              <span>更新于</span>
-              <span>{{ item.updated }}</span>
             </div>
             <div class="ucw-share">真境剧诗 | Render by TeyvatGuide v{{ version }}</div>
           </div>
-          <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
+          <TSubLine>
+            <div class="ucw-subtitle">
+              <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
+              <span>{{ item.updated }}更新</span>
+            </div>
+          </TSubLine>
           <TucOverview :data="item.stat" :fights="item.detail.fight_statisic" />
           <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
-          <TucAvatars :model-value="item.detail.backup_avatars" :detail="false" />
+          <TucAvatars :detail="false" :model-value="item.detail.backup_avatars" />
           <div class="ucw-rounds">
             <TucRound v-for="(round, idx) in item.detail.rounds_data" :key="idx" :round="round" />
           </div>
@@ -80,7 +83,7 @@
       </v-window-item>
     </v-window>
     <div v-show="localCombat.length === 0" class="user-empty">
-      <img src="/source/UI/empty.webp" alt="empty" />
+      <img alt="empty" src="/source/UI/empty.webp" />
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
@@ -210,7 +213,7 @@ async function shareCombat(): Promise<void> {
     return;
   }
   await showLoading.start("正在生成图片", fileName);
-  await generateShareImg(fileName, shareDom);
+  await generateShareImg(fileName, shareDom, 2.0);
   await showLoading.end();
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
 }
@@ -374,18 +377,28 @@ async function tryReadCombat(): Promise<void> {
   align-items: center;
   color: var(--common-text-title);
   column-gap: 4px;
-  font-family: var(--font-title);
-  font-size: 20px;
-}
+  font-size: 18px;
 
-.ucw-title :nth-child(2n) {
-  color: var(--tgc-yellow-1);
+  :nth-child(2n) {
+    color: var(--tgc-od-orange);
+    font-family: var(--font-title);
+  }
 }
 
 .ucw-share {
   z-index: -1;
   font-size: 12px;
   opacity: 0.8;
+}
+
+.ucw-subtitle {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 8px;
+  padding-left: 4px;
 }
 
 .user-empty {
@@ -406,8 +419,11 @@ async function tryReadCombat(): Promise<void> {
 }
 
 .ucw-rounds {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  row-gap: 8px;
 }
 </style>

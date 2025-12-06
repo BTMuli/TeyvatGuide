@@ -1,21 +1,28 @@
-<!-- 真境剧诗概况卡片组件 -->
+<!-- 真境剧诗概况卡片 -->
 <template>
   <div class="tuct-box">
     <div class="tuct-title">
       <slot name="title">{{ props.title }}</slot>
     </div>
-    <div class="tuct-text" v-if="!Array.isArray(props.val)">
+    <div v-if="!Array.isArray(props.val)" class="tuct-text">
       <slot name="text">{{ props.val }}</slot>
     </div>
-    <div class="tuct-icons" v-else>
+    <div v-else class="tuct-icons">
       <template v-for="(v, idx) in props.val" :key="idx">
         <img
           v-if="idx < 10"
-          :src="`/icon/combat/star_${v}.webp`"
           :alt="`${v}`"
+          :class="`stat${v}`"
+          :src="`/icon/combat/star_${v}.webp`"
           :title="`第${idx + 1}幕`"
         />
-        <img v-else :src="`/icon/combat/tarot_${v}.webp`" :alt="`${v}`" :title="`圣牌${idx - 9}`" />
+        <img
+          v-else
+          :alt="`${v}`"
+          :class="`stat${v}`"
+          :src="`/icon/combat/tarot_${v}.webp`"
+          :title="`圣牌${idx - 9}`"
+        />
       </template>
     </div>
   </div>
@@ -36,19 +43,17 @@ const props = defineProps<TucTileProps>();
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
+  font-family: var(--font-title);
 }
 
 .tuct-title {
   color: var(--box-text-4);
-  font-family: var(--font-title);
   font-size: 20px;
 }
 
 .tuct-text {
-  color: var(--tgc-yellow-1);
-  font-family: var(--font-text);
+  color: var(--box-text-8);
   font-size: 20px;
-  font-weight: bold;
 }
 
 .tuct-icons {
@@ -59,6 +64,14 @@ const props = defineProps<TucTileProps>();
   img {
     height: 30px;
     object-fit: contain;
+
+    &.stat0 {
+      filter: invert(0.4);
+    }
   }
+}
+
+.dark .tuct-icons img.stat0 {
+  filter: unset;
 }
 </style>

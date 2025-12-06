@@ -1,7 +1,6 @@
 /**
- * @file assets/themes/default.css
- * @description 主题样式文件-默认（浅色）主题
- * @since Beta v0.7.2
+ * 主题样式文件-默认（浅色）主题
+ * @since v0.8.9
  */
 
 /* default(light) theme */
@@ -30,6 +29,7 @@ html.default {
   --box-text-4: var(--tgc-blue-3); /* subtitle */
   --box-text-5: var(--tgc-pink-1); /* tag */
   --box-text-7: var(--tgc-dark-7); /* quote */
+  --box-text-8: var(--tgc-od-orange); /* sth hint */
 
   /* button */
   --btn-text: var(--tgc-yellow-2); /* with tgc-btn-1 */

@@ -1,6 +1,9 @@
+<!-- 标题栏组件 -->
 <template>
   <div class="tsl-box">
-    <img src="@/assets/icons/arrow-right.svg" alt="right" />
+    <slot name="icon">
+      <img alt="right" class="tsl-icon" src="@/assets/icons/arrow-right.svg" />
+    </slot>
     <slot></slot>
   </div>
 </template>
@@ -18,7 +21,7 @@
   gap: 4px;
 }
 
-.tsl-box :first-child {
+.tsl-icon {
   width: 24px;
   height: 24px;
   box-sizing: border-box;
@@ -26,7 +29,7 @@
   filter: invert(0.75);
 }
 
-.dark .tsl-box :first-child {
+.dark .tsl-icon {
   filter: none;
 }
 </style>

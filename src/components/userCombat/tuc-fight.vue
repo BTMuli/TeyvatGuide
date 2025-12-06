@@ -9,7 +9,7 @@
     <div v-else-if="!Array.isArray(props.data)" class="tucfi-data">
       <TItemBox :model-value="getBox(props.data)" />
     </div>
-    <div class="tucfi-icons" v-else>
+    <div v-else class="tucfi-icons">
       <div v-for="(item, idx) in props.data" :key="idx" class="tucfi-icon">
         <TItemBox :model-value="getBox2(item)" />
       </div>
@@ -68,17 +68,16 @@ function getBox2(item: TGApp.Game.Combat.AvatarMini): TItemBoxData {
   padding: 10px;
   border-radius: 5px;
   background: var(--box-bg-1);
+  font-family: var(--font-title);
 }
 
 .tucfi-label {
   color: var(--box-text-4);
-  font-family: var(--font-title);
   font-size: 20px;
 }
 
 .tucfi-data {
-  color: var(--tgc-yellow-1);
-  font-family: var(--font-text);
+  color: var(--box-text-8);
   font-size: 20px;
 }
 

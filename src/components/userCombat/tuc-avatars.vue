@@ -1,5 +1,6 @@
+<!-- 剧诗角色列表 -->
 <template>
-  <div class="tuca-box" :class="{ grid: props.detail }">
+  <div :class="{ grid: props.detail }" class="tuca-box">
     <TItemBox v-for="(item, idx) in props.modelValue" :key="idx" :model-value="getItemBox(item)" />
   </div>
 </template>
@@ -52,7 +53,7 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   &.grid {
     display: grid;
     width: 100%;
-    grid-gap: 4px;
+    gap: 4px;
     grid-template-columns: repeat(2, 1fr);
   }
 }
