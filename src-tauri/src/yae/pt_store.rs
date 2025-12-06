@@ -3,7 +3,7 @@
 #![cfg(target_os = "windows")]
 
 use prost::encoding::{decode_key, decode_varint, WireType};
-use prost::{DecodeError, Message};
+use prost::DecodeError;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::io::{Cursor, Read, Seek};
@@ -540,7 +540,7 @@ fn parse_reliquary_from_buf(buf: &[u8]) -> Result<ReliquaryTmp, DecodeError> {
         let mut packed = vec![0u8; len];
         cur.read_exact(&mut packed).map_err(|_| DecodeError::new("read append_prop failed"))?;
         let mut pcur = Cursor::new(&packed);
-        while let Ok((tag2, wt2)) = decode_key(&mut pcur) {
+        while let Ok((_tag2, wt2)) = decode_key(&mut pcur) {
           // packed repeated of primitive types usually has no inner tags; but some encoders write raw varints
           // 为兼容性，直接尝试读取 varints直到耗尽
           if wt2 == WireType::Varint {

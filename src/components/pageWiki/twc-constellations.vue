@@ -69,7 +69,9 @@ watch(() => props.data, loadData);
 }
 
 .twc-constellation-desc {
-  padding-left: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
   white-space: pre-wrap;
 }
 </style>

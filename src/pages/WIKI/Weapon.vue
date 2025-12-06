@@ -1,19 +1,19 @@
-<!-- TODO: UI一致性 -->
+<!-- 武器Wiki TODO: UI一致性 -->
 <template>
   <div class="ww-box">
     <div class="ww-left">
       <div class="ww-select">
-        <v-btn @click="showSelect = true" class="ww-btn">筛选武器</v-btn>
-        <v-btn @click="resetSelect = true" class="ww-btn">重置筛选</v-btn>
+        <v-btn class="ww-btn" @click="showSelect = true">筛选武器</v-btn>
+        <v-btn class="ww-btn" @click="resetSelect = true">重置筛选</v-btn>
       </div>
       <div class="ww-list">
         <TwcListItem
           v-for="(item, index) in cardsInfo"
-          v-model:cur-item="curItem"
           :key="index"
+          v-model:cur-item="curItem"
           :data="item"
-          @click="switchW(item)"
           mode="weapon"
+          @click="switchW(item)"
         />
       </div>
     </div>
@@ -21,7 +21,7 @@
       <TwcWeapon :item="curItem" @error="toOuter(curItem)" />
     </div>
   </div>
-  <TwoSelectW v-model="showSelect" @select-w="handleSelectW" v-model:reset="resetSelect" />
+  <TwoSelectW v-model="showSelect" v-model:reset="resetSelect" @select-w="handleSelectW" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -35,10 +35,16 @@ import { useRoute } from "vue-router";
 
 import { AppWeaponData } from "@/data/index.js";
 
+const sortedData = AppWeaponData.sort((a, b) => {
+  if (a.star !== b.star) return b.star - a.star;
+  if (a.weapon !== b.weapon) return a.weapon.localeCompare(b.weapon);
+  return b.id - a.id;
+});
+
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
-const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(AppWeaponData);
+const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(sortedData);
 const curItem = shallowRef<TGApp.App.Weapon.WikiBriefInfo>({
   id: 0,
   contentId: 0,
