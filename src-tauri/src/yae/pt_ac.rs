@@ -1,5 +1,5 @@
-//! Yae 成就信息的 Protobuf 定义
-//! @since Beta v0.7.9
+//! Yae 成就信息的 Protobuf 定义&解析
+//! @since Beta v0.8.9
 #![cfg(target_os = "windows")]
 
 use crate::yae::read_conf;
@@ -142,7 +142,7 @@ pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
         dict.insert(tag, value);
       }
       // 输出 dict
-      println!("{:?}", dict);
+      // println!("{:?}", dict);
       // dict 至少需要两个 key
       if dict.len() > 2 {
         dicts.push(dict)

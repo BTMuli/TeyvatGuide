@@ -1,12 +1,14 @@
 //! Yae 相关处理
-//! @since Beta v0.8.7
+//! @since Beta v0.8.9
 #![cfg(target_os = "windows")]
 
 pub mod inject;
-pub mod proto;
+pub mod pt_ac;
+pub mod pt_store;
 
 use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
-use proto::parse_achi_list;
+use pt_ac::parse_achi_list;
+use pt_store::parse_store_list;
 use serde_json::Value;
 use std::fs::File;
 use std::io::{self, Read, Write};
@@ -144,7 +146,17 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> Result<(), Stri
                 // 读取剩余数据
                 match read_u32_le(&mut file) {
                   Ok(len) => match read_exact_vec(&mut file, len as usize) {
-                    Ok(_data) => println!("长度: {}", len),
+                    Ok(_data) => {
+                      println!("长度: {}", len);
+                      match parse_store_list(&_data) {
+                        Ok(list) => {
+                          println!("解码成功，物品列表长度: {}", list.len());
+                          let json = serde_json::to_string_pretty(&list).unwrap();
+                          let _ = app_handle.emit("yae_store_list", json);
+                        }
+                        Err(e) => println!("解析失败: {:?}", e),
+                      }
+                    }
                     Err(e) => println!("读取数据失败: {:?}", e),
                   },
                   Err(e) => println!("读取长度失败: {:?}", e),
