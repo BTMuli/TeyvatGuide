@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.8.7
+ * @since Beta v0.8.9
  */
 
 import { AnnoLangEnum } from "@enum/anno.js";
@@ -61,10 +61,12 @@ const useAppStore = defineStore(
     const incognito = ref<boolean>(true);
     /* 帖子宽窄视图 */
     const postViewWide = ref<boolean>(true);
+    /* 是否取消点赞 */
+    const cancelLike = ref<boolean>(true);
 
     /**
      * 初始化应用状态
-     * @since Beta v0.8.7
+     * @since Beta v0.8.9
      * @remarks 用于首次运行或重置应用状态
      * @returns void
      */
@@ -82,6 +84,7 @@ const useAppStore = defineStore(
       imageQualityPercent.value = 10;
       incognito.value = true;
       postViewWide.value = true;
+      cancelLike.value = true;
       initDevice();
     }
 
@@ -136,6 +139,7 @@ const useAppStore = defineStore(
       imageQualityPercent,
       incognito,
       postViewWide,
+      cancelLike,
       init,
       changeTheme,
       getImageUrl,
@@ -162,6 +166,7 @@ const useAppStore = defineStore(
           "incognito",
           "sidebar",
           "postViewWide",
+          "cancelLike",
         ],
       },
       {

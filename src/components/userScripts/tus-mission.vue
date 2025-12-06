@@ -3,8 +3,10 @@
     <div class="tusm-top">
       <div class="tusm-title">米游币任务({{ todayPoints }}/{{ totalPoints }})</div>
       <div class="tusm-acts">
-        <v-btn @click="tryRefresh()" class="tusm-btn" :loading="loadState">刷新</v-btn>
-        <v-btn @click="tryAuto()" class="tusm-btn" :loading="loadMission">执行</v-btn>
+        <span>{{ cancelLike ? "点赞后取消" : "点赞后不取消" }}</span>
+        <v-switch v-model="cancelLike" class="tusm-switch" color="var(--tgc-od-red)" />
+        <v-btn :loading="loadState" class="tusm-btn" @click="tryRefresh()">刷新</v-btn>
+        <v-btn :loading="loadMission" class="tusm-btn" @click="tryAuto()">执行</v-btn>
       </div>
     </div>
     <div class="tusm-content">
@@ -18,10 +20,10 @@
         <div class="right">
           <span>
             <v-progress-linear
-              rounded
               :model-value="(mission.process / mission.total) * 100"
-              height="8"
               color="var(--tgc-od-blue)"
+              height="8"
+              rounded
             />
           </span>
           <span>{{ mission.process }}/{{ mission.total }}</span>
@@ -36,6 +38,7 @@ import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
 import painterReq from "@req/painterReq.js";
 import postReq from "@req/postReq.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -53,7 +56,10 @@ type ParseMission = {
 };
 
 const { cookie, uid } = storeToRefs(useUserStore());
+const { cancelLike } = storeToRefs(useAppStore());
+
 const loadScript = defineModel<boolean>();
+
 const todayPoints = ref<number>(0);
 const totalPoints = ref<number>(0);
 const loadState = ref<boolean>(false);
@@ -209,15 +215,17 @@ async function tryAuto(): Promise<void> {
           await TGLogger.Script(`[米游币任务]点赞失败：${likeResp.retcode} ${likeResp.message}`);
           continue;
         }
-        await TGLogger.Script(`[米游币任务]正在取消点赞帖子${post.post.post_id}`);
-        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-        const unlikeResp = await apiHubReq.post.like(post.post.post_id, ckPost, true);
-        if (unlikeResp.retcode === 0) {
-          await TGLogger.Script("[米游币任务]取消点赞成功");
-        } else {
-          await TGLogger.Script(
-            `[米游币任务]取消点赞失败：${unlikeResp.retcode} ${unlikeResp.message}`,
-          );
+        if (cancelLike.value) {
+          await TGLogger.Script(`[米游币任务]正在取消点赞帖子${post.post.post_id}`);
+          await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+          const unlikeResp = await apiHubReq.post.like(post.post.post_id, ckPost, true);
+          if (unlikeResp.retcode === 0) {
+            await TGLogger.Script("[米游币任务]取消点赞成功");
+          } else {
+            await TGLogger.Script(
+              `[米游币任务]取消点赞失败：${unlikeResp.retcode} ${unlikeResp.message}`,
+            );
+          }
         }
       }
     }
@@ -328,7 +336,16 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
 
 .tusm-acts {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.tusm-switch {
+  display: flex;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
 }
 
 .tusm-btn {
