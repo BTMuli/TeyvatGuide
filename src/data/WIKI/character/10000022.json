@@ -81,6 +81,13 @@
       "Icon": "Skill_E_Venti_01"
     },
     {
+      "GroupId": 2251,
+      "Id": 225101,
+      "Name": "魔女的前夜礼·颂时风若",
+      "Description": "完成<color=#FFD780FF>魔女的课业·风起之题</color>后，温迪将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n元素爆发<color=#FFD780FF>风神之诗</color>创造的暴风之眼存在期间，附近的当前场上角色触发扩散反应后的4秒内，该角色造成的伤害提升50%，并使温迪自己的暴风之眼造成原本135%的伤害。",
+      "Icon": "UI_Talent_S_Venti_07"
+    },
+    {
       "GroupId": 2221,
       "Id": 222101,
       "Name": "绪风之拥",
