@@ -1,3 +1,4 @@
+<!-- 祈愿数据概览轮播 -->
 <template>
   <Swiper
     :autoplay="false"
@@ -9,9 +10,6 @@
     :space-between="12"
     class="gro-o-swiper"
   >
-    <SwiperSlide v-if="newData.length !== 0">
-      <GroDataView :data-val="newData" data-type="new" />
-    </SwiperSlide>
     <SwiperSlide>
       <GroDataView :data-val="normalData" data-type="normal" />
     </SwiperSlide>
@@ -23,6 +21,9 @@
     </SwiperSlide>
     <SwiperSlide v-if="mixData.length !== 0">
       <GroDataView :data-val="mixData" data-type="mix" />
+    </SwiperSlide>
+    <SwiperSlide v-if="newData.length !== 0">
+      <GroDataView :data-val="newData" data-type="new" />
     </SwiperSlide>
   </Swiper>
 </template>
