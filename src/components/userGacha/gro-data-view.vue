@@ -246,9 +246,9 @@ function checkIsUp(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean | undefi
 function getStar5UpAvg(): string {
   // 新手池和常驻池不显示UP平均
   if (props.dataType === "new" || props.dataType === "normal") return "";
-  const upList = star5List.value.filter((item) => item.isUp);
+  const upList = star5List.value.filter((item) => item.isUp === true);
   if (upList.length === 0) return "0";
-  const total = upList.reduce((a, b) => a + b.count, 0);
+  const total = star5List.value.reduce((a, b) => a + b.count, 0);
   return (total / upList.length).toFixed(2);
 }
 
@@ -264,9 +264,9 @@ function getStar4Avg(): string {
 function getStar4UpAvg(): string {
   // 新手池和常驻池不显示UP平均
   if (props.dataType === "new" || props.dataType === "normal") return "";
-  const upList = star4List.value.filter((item) => item.isUp);
+  const upList = star4List.value.filter((item) => item.isUp === true);
   if (upList.length === 0) return "0";
-  const total = upList.reduce((a, b) => a + b.count, 0);
+  const total = star4List.value.reduce((a, b) => a + b.count, 0);
   return (total / upList.length).toFixed(2);
 }
 
