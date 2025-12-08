@@ -1,5 +1,16 @@
--- @brief sqlite数据库创建表语句
--- @since Beta v0.8.4
+-- sqlite数据库创建表语句
+-- @since Beta v0.9.0
+
+-- @brief 创建背包物品表
+create table if not exists UserBagMaterial
+(
+    uid     integer not null,
+    id      integer not null,
+    count   integer default 0,
+    records text,
+    updated text,
+    primary key (uid, id)
+);
 
 -- @brief 创建成就数据表
 create table if not exists Achievements
