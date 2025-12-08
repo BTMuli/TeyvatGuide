@@ -1,11 +1,11 @@
-<!-- 千星奇域数据表格 -->
+<!-- 颂愿数据表格 -->
 <template>
   <v-data-table
     :headers="headers"
     :items="props.modelValue"
-    fixed-header
-    fixed-footer
     class="gbr-t-box"
+    fixed-footer
+    fixed-header
   >
     <template v-slot:item="{ item }">
       <tr class="gbr-t-tr">
@@ -13,12 +13,20 @@
         <td>{{ getPool(item.opGachaType) }}</td>
         <td>{{ item.type }}</td>
         <td>{{ item.name }}</td>
+        <td width="80">
+          <div class="gbr-t-icon">
+            <img :src="`/icon/bg/${item.rank}-BGC.webp`" alt="icon" class="bg" />
+            <img :src="getIcon(item.itemId)" alt="icon" class="icon" />
+          </div>
+        </td>
         <td>{{ item.rank }}</td>
       </tr>
     </template>
   </v-data-table>
 </template>
 <script lang="ts" setup>
+import { AppGachaBData } from "@/data/index.js";
+
 type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGachaB> };
 
 const props = defineProps<GroTableProps>();
@@ -28,6 +36,7 @@ const headers = <const>[
   { title: "卡池", align: "center", key: "opGachaType" },
   { title: "类型", align: "center", key: "type" },
   { title: "名称", align: "center", key: "name" },
+  { title: "图标", align: "center", key: "icon" },
   { title: "星级", align: "center", key: "rank" },
 ];
 
@@ -47,6 +56,12 @@ function getPool(type: string) {
       return "未知";
   }
 }
+
+function getIcon(id: string): string {
+  const find = AppGachaBData.find((i) => i.id.toString() === id);
+  if (!find) return `/source/UI/paimon.webp`;
+  return `/WIKI/gachaB/${find.icon}.webp`;
+}
 </script>
 <style lang="css" scoped>
 .gbr-t-box {
@@ -58,5 +73,35 @@ function getPool(type: string) {
 
 .gbr-t-tr {
   text-align: center;
+}
+
+.gbr-t-icon {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin: 4px 0;
+
+  .bg {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .icon {
+    position: relative;
+    z-index: 1;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
 }
 </style>

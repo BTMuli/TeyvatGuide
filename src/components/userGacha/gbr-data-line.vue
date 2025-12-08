@@ -1,4 +1,4 @@
-<!-- 千星奇域概览单项组件 -->
+<!-- 颂愿数据项展示行 -->
 <template>
   <div class="gbr-dl-box">
     <div class="gbr-dl-progress" />
@@ -11,12 +11,14 @@
     </div>
     <div class="gbr-dl-info">
       <div class="gbr-dl-cnt">{{ props.count }}</div>
-      <div class="gbr-dl-hint" v-if="hint !== ''">{{ hint }}</div>
+      <div v-if="hint !== ''" class="gbr-dl-hint">{{ hint }}</div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
+
+import { AppGachaBData } from "@/data/index.js";
 
 export type GbrDataLineProps = { data: TGApp.Sqlite.GachaRecords.TableGachaB; count: number };
 
@@ -24,12 +26,9 @@ const props = defineProps<GbrDataLineProps>();
 const hint = getEndHint();
 
 function getIcon(): string {
-  console.log(props.data);
-  // const find = AppGachaBData.find((i) => i.id.toString() === props.data.itemId);
-  // if (!find) return `/source/UI/paimon.webp`;
-  // return `https://api.hakush.in/gi/UI/${find.icon}.webp`;
-  // TODO: 缺失元数据
-  return `/source/UI/paimon.webp`;
+  const find = AppGachaBData.find((i) => i.id.toString() === props.data.itemId);
+  if (!find) return `/source/UI/paimon.webp`;
+  return `/WIKI/gachaB/${find.icon}.webp`;
 }
 
 function getEndHint(): string {

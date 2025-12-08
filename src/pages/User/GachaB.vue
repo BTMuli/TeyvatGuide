@@ -158,15 +158,16 @@ async function confirmRefresh(force: boolean): Promise<void> {
     return;
   }
   await refreshGachaPool("1000", "常驻颂愿", force);
-  await refreshGachaPool("20011", "活动颂愿·男", force);
-  await refreshGachaPool("20012", "活动颂愿·男2", force);
-  await refreshGachaPool("20021", "活动颂愿·女", force);
-  await refreshGachaPool("20022", "活动颂愿·女2", force);
+  await refreshGachaPool("2000", "活动颂愿", force);
+  // await refreshGachaPool("20011", "活动颂愿·男", force);
+  // await refreshGachaPool("20012", "活动颂愿·男2", force);
+  // await refreshGachaPool("20021", "活动颂愿·女", force);
+  // await refreshGachaPool("20022", "活动颂愿·女2", force);
   await showLoading.end();
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}] 刷新祈愿数据完成`);
   showSnackbar.success("祈愿数据刷新完成，即将刷新页面");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  window.location.reload();
+  // window.location.reload();
 }
 
 /**
@@ -191,6 +192,7 @@ async function refreshGachaPool(
   while (true) {
     page++;
     const gachaRes = await hk4eReq.gachaB(authkey.value, gachaType, reqId);
+    console.log(gachaRes);
     if (!Array.isArray(gachaRes)) {
       showSnackbar.error(`[${gachaType}][${gachaRes.retcode}] ${gachaRes.message}`);
       await TGLogger.Error(
