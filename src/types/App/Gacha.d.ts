@@ -1,6 +1,6 @@
 /**
  * 本应用的祈愿相关类型定义
- * @since Beta v0.8.7
+ * @since Beta v0.8.9
  */
 
 declare namespace TGApp.App.Gacha {
@@ -94,14 +94,8 @@ declare namespace TGApp.App.Gacha {
   };
 
   /**
-   * 千星奇域套装类型
-   * @since Beta v0.8.4
-   */
-  type GachaBSetType = "装扮部件" | "装扮套装";
-
-  /**
    * 千星奇域祈愿元数据
-   * @since Beta v0.8.4
+   * @since Beta v0.8.9
    */
   type GachaBMeta = {
     /** ID */
@@ -113,6 +107,6 @@ declare namespace TGApp.App.Gacha {
     /** 稀有度 */
     rank: number;
     /** 类型 */
-    type: GachaBSetType;
+    type: string;
   };
 }
