@@ -3,7 +3,8 @@
   <div class="gbr-dl-box">
     <div class="gbr-dl-progress" />
     <div class="gbr-dl-icon">
-      <img :alt="props.data.name" :src="getIcon()" />
+      <img :src="`/icon/bg/${props.data.rank}-BGC.webp`" alt="bg" class="bg" />
+      <img :alt="props.data.name" :src="getIcon()" class="icon" />
     </div>
     <div class="gbr-dl-base">
       <div class="gbr-dl-name">{{ props.data.name }}</div>
@@ -81,14 +82,30 @@ const progressWidth = computed<string>(() => {
 }
 
 .gbr-dl-icon {
+  position: relative;
   display: flex;
+  overflow: hidden;
   width: 32px;
   height: 32px;
+  box-sizing: border-box;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
 
-  img {
+  .bg {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .icon {
+    position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
   }
