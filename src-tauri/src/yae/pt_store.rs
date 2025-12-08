@@ -4,7 +4,8 @@
 
 use prost::encoding::{decode_key, decode_varint, WireType};
 use prost::DecodeError;
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Serialize, Serializer};
 use std::collections::HashMap;
 use std::io::{Cursor, Read, Seek};
 
@@ -17,7 +18,8 @@ pub enum StoreType {
   StoreTypeDepot = 2,
 }
 
-/// MaterialDeleteInfo message
+//// Protobuf 消息定义（用于 prost 生成/互操作）
+// MaterialDeleteInfo message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MaterialDeleteInfo {
   #[prost(bool, tag = "1")]
@@ -174,9 +176,14 @@ pub struct PlayerStoreNotify {
   pub item_list: Vec<Item>,
 }
 
-/// 扁平化的物品种类，便于上层使用
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ItemKind {
+///// --------------- 修改后的扁平化结构与解析实现 ---------------
+
+/// 扁平化的物品信息（原 ItemKind 改名为 ItemInfo）
+/// 将 is_locked 移动到对应的变体中（Option<bool>，为 None 时序列化省略）
+/// 注意：实现了自定义 Serialize，使得序列化输出为
+/// info: { count: ... } 或 info: { level: ..., is_locked: true, ... }
+#[derive(Debug, Clone, Deserialize)]
+pub enum ItemInfo {
   Material {
     count: u32,
   },
@@ -187,6 +194,7 @@ pub enum ItemKind {
     main_prop_id: u32,
     append_prop_id_list: Vec<u32>,
     is_marked: bool,
+    is_locked: Option<bool>,
   },
   Weapon {
     level: u32,
@@ -194,6 +202,7 @@ pub enum ItemKind {
     promote_level: u32,
     affix_map: HashMap<u32, u32>,
     is_arkhe_ousia: bool,
+    is_locked: Option<bool>,
   },
   Furniture {
     count: u32,
@@ -204,16 +213,92 @@ pub enum ItemKind {
   Unknown,
 }
 
-/// 扁平化物品数据结构
+/// 自定义序列化：将 enum 变体展开为一个扁平的 map（没有变体名包裹）
+/// 例如：ItemInfo::Material { count: 5 } -> { "count": 5 }
+impl Serialize for ItemInfo {
+  fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+  where
+    S: Serializer,
+  {
+    match self {
+      ItemInfo::Material { count } => {
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_entry("count", count)?;
+        map.end()
+      }
+      ItemInfo::Reliquary {
+        level,
+        exp,
+        promote_level,
+        main_prop_id,
+        append_prop_id_list,
+        is_marked,
+        is_locked,
+      } => {
+        // 变体字段数量不固定（is_locked 可选）
+        let mut len = 6usize; // level, exp, promote_level, main_prop_id, append_prop_id_list, is_marked
+        if is_locked.is_some() {
+          len += 1;
+        }
+        let mut map = serializer.serialize_map(Some(len))?;
+        map.serialize_entry("level", level)?;
+        map.serialize_entry("exp", exp)?;
+        map.serialize_entry("promote_level", promote_level)?;
+        map.serialize_entry("main_prop_id", main_prop_id)?;
+        map.serialize_entry("append_prop_id_list", append_prop_id_list)?;
+        map.serialize_entry("is_marked", is_marked)?;
+        if let Some(v) = is_locked {
+          map.serialize_entry("is_locked", v)?;
+        }
+        map.end()
+      }
+      ItemInfo::Weapon { level, exp, promote_level, affix_map, is_arkhe_ousia, is_locked } => {
+        // affix_map 会被序列化为对象
+        let mut len = 6usize; // level, exp, promote_level, affix_map, is_arkhe_ousia, (maybe is_locked)
+        if is_locked.is_some() {
+          len += 1;
+        }
+        let mut map = serializer.serialize_map(Some(len))?;
+        map.serialize_entry("level", level)?;
+        map.serialize_entry("exp", exp)?;
+        map.serialize_entry("promote_level", promote_level)?;
+        map.serialize_entry("affix_map", affix_map)?;
+        map.serialize_entry("is_arkhe_ousia", is_arkhe_ousia)?;
+        if let Some(v) = is_locked {
+          map.serialize_entry("is_locked", v)?;
+        }
+        map.end()
+      }
+      ItemInfo::Furniture { count } => {
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_entry("count", count)?;
+        map.end()
+      }
+      ItemInfo::VirtualItem { count } => {
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_entry("count", count)?;
+        map.end()
+      }
+      ItemInfo::Unknown => {
+        // 序列化为空对象
+        let map = serializer.serialize_map(Some(0))?;
+        map.end()
+      }
+    }
+  }
+}
+
+/// 扁平化物品数据结构（移除 guid，kind 改为字符串，info 为 ItemInfo）
+/// kind: "material", "weapon", "reliquary", "furniture", "virtual"
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ItemData {
   pub item_id: u32,
-  pub guid: u64,
-  pub kind: ItemKind,
-  pub is_locked: Option<bool>,
+  pub kind: String,
+  pub info: ItemInfo,
 }
 
 /// 解析顶层 bytes，返回 ItemData 列表（低级解析）
+/// 说明：不再解析 guid（tag=2），kind 为字符串，info 为 ItemInfo
 pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
   let mut cursor = Cursor::new(bytes);
   let mut out: Vec<ItemData> = Vec::new();
@@ -252,24 +337,20 @@ pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
 }
 
 /// 解析单个 Item 子消息（buf 为该子消息的完整 bytes）
+/// 不再解析 guid（tag=2），kind 为字符串，info 为 ItemInfo
 fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
   let mut inner = Cursor::new(buf);
 
   // 默认值
   let mut item_id: u32 = 0;
-  let mut guid: u64 = 0;
-  let mut kind = ItemKind::Unknown;
-  let mut is_locked: Option<bool> = None;
+  let mut kind_str = String::from("unknown");
+  let mut info = ItemInfo::Unknown;
 
   while let Ok((tag, wire_type)) = decode_key(&mut inner) {
     match (tag, wire_type) {
       (1, WireType::Varint) => {
         // item_id: uint32
         item_id = decode_varint(&mut inner)? as u32;
-      }
-      (2, WireType::Varint) => {
-        // guid: uint64 (varint)
-        guid = decode_varint(&mut inner)? as u64;
       }
       // oneof detail: Material=5, Equip=6, Furniture=7, VirtualItem=255
       (5, WireType::LengthDelimited) => {
@@ -278,7 +359,8 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
         let mut mbuf = vec![0u8; len];
         inner.read_exact(&mut mbuf).map_err(|_| DecodeError::new("read material buf failed"))?;
         if let Ok(m) = parse_material_from_buf(&mbuf) {
-          kind = ItemKind::Material { count: m };
+          kind_str = "material".to_string();
+          info = ItemInfo::Material { count: m };
         }
       }
       (6, WireType::LengthDelimited) => {
@@ -286,9 +368,13 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
         let len = decode_varint(&mut inner)? as usize;
         let mut eb = vec![0u8; len];
         inner.read_exact(&mut eb).map_err(|_| DecodeError::new("read equip buf failed"))?;
-        if let Ok((k, locked)) = parse_equip_from_buf(&eb) {
-          kind = k;
-          is_locked = Some(locked);
+        if let Ok(item_info) = parse_equip_from_buf(&eb) {
+          match &item_info {
+            ItemInfo::Reliquary { .. } => kind_str = "reliquary".to_string(),
+            ItemInfo::Weapon { .. } => kind_str = "weapon".to_string(),
+            _ => {}
+          }
+          info = item_info;
         }
       }
       (7, WireType::LengthDelimited) => {
@@ -297,7 +383,8 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
         let mut fb = vec![0u8; len];
         inner.read_exact(&mut fb).map_err(|_| DecodeError::new("read furniture buf failed"))?;
         if let Ok(cnt) = parse_furniture_from_buf(&fb) {
-          kind = ItemKind::Furniture { count: cnt };
+          kind_str = "furniture".to_string();
+          info = ItemInfo::Furniture { count: cnt };
         }
       }
       (255, WireType::LengthDelimited) => {
@@ -306,7 +393,8 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
         let mut vb = vec![0u8; len];
         inner.read_exact(&mut vb).map_err(|_| DecodeError::new("read virtual buf failed"))?;
         if let Ok(cnt) = parse_virtual_from_buf(&vb) {
-          kind = ItemKind::VirtualItem { count: cnt };
+          kind_str = "virtual".to_string();
+          info = ItemInfo::VirtualItem { count: cnt };
         }
       }
       // 如果 detail 出现为非 length-delimited（异常），尝试跳过
@@ -336,7 +424,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
     }
   }
 
-  Ok(ItemData { item_id, guid, kind, is_locked })
+  Ok(ItemData { item_id, kind: kind_str, info })
 }
 
 /// 解析 Material 子消息，返回 count（uint32）
@@ -436,74 +524,6 @@ fn parse_virtual_from_buf(buf: &[u8]) -> Result<i64, DecodeError> {
     }
   }
   Err(DecodeError::new("virtual count not found"))
-}
-
-/// 解析 Equip 子消息，返回 (ItemKind, is_locked)
-fn parse_equip_from_buf(buf: &[u8]) -> Result<(ItemKind, bool), DecodeError> {
-  let mut cur = Cursor::new(buf);
-  let mut kind = ItemKind::Unknown;
-  let mut is_locked = false;
-
-  while let Ok((tag, wire_type)) = decode_key(&mut cur) {
-    match (tag, wire_type) {
-      // Reliquary = 1 (message)
-      (1, WireType::LengthDelimited) => {
-        let len = decode_varint(&mut cur)? as usize;
-        let mut rb = vec![0u8; len];
-        cur.read_exact(&mut rb).map_err(|_| DecodeError::new("read reliquary buf failed"))?;
-        if let Ok(r) = parse_reliquary_from_buf(&rb) {
-          kind = ItemKind::Reliquary {
-            level: r.level,
-            exp: r.exp,
-            promote_level: r.promote_level,
-            main_prop_id: r.main_prop_id,
-            append_prop_id_list: r.append_prop_id_list,
-            is_marked: r.is_marked,
-          };
-        }
-      }
-      // Weapon = 2 (message)
-      (2, WireType::LengthDelimited) => {
-        let len = decode_varint(&mut cur)? as usize;
-        let mut wb = vec![0u8; len];
-        cur.read_exact(&mut wb).map_err(|_| DecodeError::new("read weapon buf failed"))?;
-        if let Ok(w) = parse_weapon_from_buf(&wb) {
-          kind = ItemKind::Weapon {
-            level: w.level,
-            exp: w.exp,
-            promote_level: w.promote_level,
-            affix_map: w.affix_map,
-            is_arkhe_ousia: w.is_arkhe_ousia,
-          };
-        }
-      }
-      // is_locked = 3 (bool varint)
-      (3, WireType::Varint) => {
-        is_locked = decode_varint(&mut cur)? != 0;
-      }
-      // 跳过未知字段
-      (_, WireType::Varint) => {
-        let _ = decode_varint(&mut cur)?;
-      }
-      (_, WireType::SixtyFourBit) => {
-        let mut tmp = [0u8; 8];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
-      }
-      (_, WireType::LengthDelimited) => {
-        let len = decode_varint(&mut cur)? as usize;
-        cur
-          .seek(std::io::SeekFrom::Current(len as i64))
-          .map_err(|_| DecodeError::new("skip failed"))?;
-      }
-      (_, WireType::ThirtyTwoBit) => {
-        let mut tmp = [0u8; 4];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
-      }
-      _ => return Err(DecodeError::new("unknown wire type in equip")),
-    }
-  }
-
-  Ok((kind, is_locked))
 }
 
 /// 简单的 Reliquary 结构用于解析
@@ -662,4 +682,110 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
   }
 
   Ok(w)
+}
+
+/// 解析 Equip 子消息，返回 ItemInfo（包含 is_locked: Option<bool>）
+/// 将原先返回 (ItemKind, is_locked) 的逻辑合并到 ItemInfo 中
+fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
+  let mut cur = Cursor::new(buf);
+  let mut is_locked: Option<bool> = None;
+  let mut info: ItemInfo = ItemInfo::Unknown;
+
+  while let Ok((tag, wire_type)) = decode_key(&mut cur) {
+    match (tag, wire_type) {
+      // Reliquary = 1 (message)
+      (1, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        let mut rb = vec![0u8; len];
+        cur.read_exact(&mut rb).map_err(|_| DecodeError::new("read reliquary buf failed"))?;
+        if let Ok(r) = parse_reliquary_from_buf(&rb) {
+          info = ItemInfo::Reliquary {
+            level: r.level,
+            exp: r.exp,
+            promote_level: r.promote_level,
+            main_prop_id: r.main_prop_id,
+            append_prop_id_list: r.append_prop_id_list,
+            is_marked: r.is_marked,
+            is_locked: None, // 可能在后面被设置
+          };
+        }
+      }
+      // Weapon = 2 (message)
+      (2, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        let mut wb = vec![0u8; len];
+        cur.read_exact(&mut wb).map_err(|_| DecodeError::new("read weapon buf failed"))?;
+        if let Ok(w) = parse_weapon_from_buf(&wb) {
+          info = ItemInfo::Weapon {
+            level: w.level,
+            exp: w.exp,
+            promote_level: w.promote_level,
+            affix_map: w.affix_map,
+            is_arkhe_ousia: w.is_arkhe_ousia,
+            is_locked: None, // 可能在后续 tag=3 中被设置
+          };
+        }
+      }
+      // is_locked = 3 (bool varint) -> 移入 ItemInfo 的 is_locked 字段（Option）
+      (3, WireType::Varint) => {
+        let locked = decode_varint(&mut cur)? != 0;
+        is_locked = Some(locked);
+      }
+      // 跳过未知字段
+      (_, WireType::Varint) => {
+        let _ = decode_varint(&mut cur)?;
+      }
+      (_, WireType::SixtyFourBit) => {
+        let mut tmp = [0u8; 8];
+        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+      }
+      (_, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        cur
+          .seek(std::io::SeekFrom::Current(len as i64))
+          .map_err(|_| DecodeError::new("skip failed"))?;
+      }
+      (_, WireType::ThirtyTwoBit) => {
+        let mut tmp = [0u8; 4];
+        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+      }
+      _ => return Err(DecodeError::new("unknown wire type in equip")),
+    }
+  }
+
+  // 如果解析到 is_locked，则把值写入 info 中对应的变体
+  if let Some(lock_val) = is_locked {
+    info = match info {
+      ItemInfo::Reliquary {
+        level,
+        exp,
+        promote_level,
+        main_prop_id,
+        append_prop_id_list,
+        is_marked,
+        ..
+      } => ItemInfo::Reliquary {
+        level,
+        exp,
+        promote_level,
+        main_prop_id,
+        append_prop_id_list,
+        is_marked,
+        is_locked: Some(lock_val),
+      },
+      ItemInfo::Weapon { level, exp, promote_level, affix_map, is_arkhe_ousia, .. } => {
+        ItemInfo::Weapon {
+          level,
+          exp,
+          promote_level,
+          affix_map,
+          is_arkhe_ousia,
+          is_locked: Some(lock_val),
+        }
+      }
+      other => other,
+    };
+  }
+
+  Ok(info)
 }
