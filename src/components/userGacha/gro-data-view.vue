@@ -93,6 +93,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
@@ -105,6 +106,7 @@ type GachaDataViewProps = {
 };
 
 const props = defineProps<GachaDataViewProps>();
+const curWin = getCurrentWindow();
 
 // Template refs for dynamic height calculation
 const groDvBoxEl = useTemplateRef<HTMLElement>("groDvBoxRef");
@@ -162,6 +164,11 @@ watch(
     calculateHeights();
   },
 );
+
+curWin.onResized(async () => {
+  await nextTick();
+  calculateHeights();
+});
 
 function loadData(): void {
   title.value = getTitle();
