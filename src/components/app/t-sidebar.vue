@@ -37,6 +37,12 @@
           <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
         </template>
       </v-list-item>
+      <v-list-item v-if="isDevEnv" :link="true" :title.attr="'背包材料'" href="/bag/material">
+        <template #title>背包材料</template>
+        <template #prepend>
+          <img alt="materialBagIcon" class="side-icon" src="/icon/material/121234.webp" />
+        </template>
+      </v-list-item>
       <v-divider />
       <v-list-item :link="true" :title.attr="'原神战绩'" href="/user/record">
         <template #title>原神战绩</template>

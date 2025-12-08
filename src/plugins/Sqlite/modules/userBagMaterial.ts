@@ -95,14 +95,15 @@ async function getMaterial(
 ): Promise<Array<TGApp.Sqlite.UserBag.TableMaterial>> {
   const db = await TGSqlite.getDB();
   let res: Array<TGApp.Sqlite.UserBag.TableMaterialRaw>;
-  if (id) {
+  // TODO: 排序
+  if (id !== undefined) {
     res = await db.select<Array<TGApp.Sqlite.UserBag.TableMaterialRaw>>(
-      "SELECT * FROM UserBagMaterial WHERE uid = ? AND id = ?",
+      "SELECT * FROM UserBagMaterial WHERE uid = ? AND id = ?;",
       [uid, id],
     );
   } else {
     res = await db.select<Array<TGApp.Sqlite.UserBag.TableMaterialRaw>>(
-      "SELECT * FROM UserBagMaterial WHERE uid =",
+      "SELECT * FROM UserBagMaterial WHERE uid =?;",
       [uid],
     );
   }

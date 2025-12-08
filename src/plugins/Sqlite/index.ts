@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.8.4
+ * @since Beta v0.9.0
  */
 
 import { app } from "@tauri-apps/api";
@@ -27,6 +27,8 @@ class Sqlite {
     "UserAccount",
     "UserCharacters",
     "UserRecord",
+    // TODO: v0.9.0 进行注释移除
+    // "UserBagMaterial"
   ];
   private db: Database | null = null;
   private static instance: Sqlite | null = null;

@@ -1,7 +1,6 @@
 /**
- * @file router/modules/main.ts
- * @description 主路由模块
- * @since Beta v0.6.3
+ * 主路由模块
+ * @since Beta v0.9.0
  */
 import type { RouteRecordRaw } from "vue-router";
 
@@ -35,6 +34,11 @@ const mainRoutes = (<const>[
     path: "/achievements/:app?",
     name: "成就",
     component: async () => await import("@/pages/common/PageAchi.vue"),
+  },
+  {
+    path: "/bag/material",
+    name: "背包材料",
+    component: async () => await import("@/pages/common/PageBagMaterial.vue"),
   },
   {
     path: "/collection",
