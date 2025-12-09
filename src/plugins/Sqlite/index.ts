@@ -27,8 +27,7 @@ class Sqlite {
     "UserAccount",
     "UserCharacters",
     "UserRecord",
-    // TODO: v0.9.0 进行注释移除
-    // "UserBagMaterial"
+    "UserBagMaterial",
   ];
   private db: Database | null = null;
   private static instance: Sqlite | null = null;

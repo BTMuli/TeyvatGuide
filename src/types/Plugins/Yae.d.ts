@@ -130,6 +130,8 @@ declare namespace TGApp.Plugins.Yae {
    * @since Beta v0.9.0
    */
   type ReliquaryInfo = {
+    /** GUID */
+    guid: number;
     /** 等级 */
     level: number;
     /** 经验 */
@@ -151,6 +153,8 @@ declare namespace TGApp.Plugins.Yae {
    * @since Beta v0.9.0
    */
   type WeaponInfo = {
+    /** GUID */
+    guid: number;
     /** 等级 */
     level: number;
     /** 经验 */

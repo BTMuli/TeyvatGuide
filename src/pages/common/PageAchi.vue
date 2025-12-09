@@ -43,9 +43,14 @@
           <span>隐藏已完成</span>
         </div>
       </div>
-      <div class="top-link" title="使用Yae导入" @click="toYae()">
-        <v-icon>mdi-comment-question-outline</v-icon>
-      </div>
+      <v-btn
+        class="top-link top-btn"
+        prepend-icon="mdi-import"
+        title="通过Yae导入"
+        @click="toYae()"
+      >
+        YAE
+      </v-btn>
     </template>
   </v-app-bar>
   <div class="wrap">
@@ -408,12 +413,6 @@ async function toYae(): Promise<void> {
 .top-link {
   margin-right: 16px;
   margin-left: auto;
-  color: var(--tgc-od-white);
-  cursor: pointer;
-
-  &:hover {
-    color: var(--tgc-od-orange);
-  }
 }
 
 .wrap {

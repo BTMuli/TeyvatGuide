@@ -66,6 +66,8 @@ async function shareMaterial(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .pbom-container {
   display: flex;
   align-items: center;
@@ -135,15 +137,15 @@ async function shareMaterial(): Promise<void> {
   }
 
   .cnt {
+    @include github-styles.github-tag-dark-gen(#ffcd0c);
+
     position: absolute;
-    top: -4px;
+    bottom: -4px;
     left: 40px;
     width: fit-content;
     padding: 0 4px;
-    border: 1px solid var(--common-shadow-1);
     border-radius: 12px;
-    background: var(--box-bg-2);
-    color: var(--box-text-2);
+    backdrop-filter: blur(5px);
     font-size: 10px;
     text-align: center;
   }
