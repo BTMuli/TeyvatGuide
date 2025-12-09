@@ -14,11 +14,13 @@
       </div>
     </div>
     <div class="btn-list">
-      <v-btn @click="test()" class="test-btn">测试</v-btn>
+      <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import { event } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
@@ -27,8 +29,18 @@ import { onMounted, onUnmounted } from "vue";
 let listener: UnlistenFn | null = null;
 
 onMounted(async () => {
-  listener = await event.listen<string>("yae_achi_list", (e: Event<string>) => {
-    console.log(e.payload);
+  listener = await event.listen<string>("yae_store_list", async (e: Event<string>) => {
+    console.log(e.payload, typeof e.payload);
+    const parse: TGApp.Plugins.Yae.BagListRes = JSON.parse(e.payload);
+    const materialList = parse.filter((i) => i.kind === "material");
+    const now = new Date();
+    if (materialList && materialList.length > 0) {
+      await TSUserBagMaterial.saveYaeData(500299765, materialList);
+    }
+    const cost = new Date().getTime() - now.getTime();
+    showSnackbar.success(
+      `成功导入 ${materialList.length} 条数据，耗时 ${Math.floor(cost / 1000)}s`,
+    );
   });
 });
 onUnmounted(() => {

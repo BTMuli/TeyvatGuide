@@ -1,35 +1,38 @@
 <!-- 背包材料物品项 -->
 <template>
-  <div v-if="info" :title="info.name" class="pb-mi-box" @click="toMaterial()">
+  <div :title="props.info.name" class="pb-mi-box" @click="toMaterial()">
     <div class="pb-mi-left">
-      <img :src="`/icon/bg/${info.star}-Star.webp`" alt="bg" class="pb-mi-bg" />
-      <img :src="`/icon/material/${info.id}.webp`" alt="icon" class="pb-mi-icon" />
+      <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="pb-mi-bg" />
+      <img :src="`/icon/material/${props.info.id}.webp`" alt="icon" class="pb-mi-icon" />
     </div>
-    <div class="pb-mi-right">{{ info.name }}</div>
-    <div class="pb-mi-id">{{ item.count }}_{{ info.id }}</div>
+    <div class="pb-mi-right">{{ props.info.name }}</div>
+    <div class="pb-mi-id">{{ props.info.id }}</div>
+    <div class="pb-mi-cnt">{{ item.count }}</div>
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, shallowRef } from "vue";
+import { shallowRef } from "vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
-type PbMaterialItemProps = { tb: TGApp.Sqlite.UserBag.TableMaterial };
+/** 组件参数 */
+type PbMaterialItemProps = MaterialInfo;
+/** 组件事件 */
+type PbMaterialItemEmits = (e: "select", v: MaterialInfo) => void;
 
 const props = defineProps<PbMaterialItemProps>();
+const emits = defineEmits<PbMaterialItemEmits>();
 
-const info = shallowRef<TGApp.App.Material.WikiItem>();
 const item = shallowRef<TGApp.Sqlite.UserBag.TableMaterial>(props.tb);
 
-onMounted(() => {
-  const find = WikiMaterialData.find((i) => i.id === props.tb.id);
-  if (find) info.value = find;
-});
-
 // TODO: 点击修改数量/查看更改历史
-function toMaterial(): void {}
+function toMaterial(): void {
+  emits("select", { tb: item.value, info: props.info });
+}
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .pb-mi-box {
   position: relative;
   display: flex;
@@ -79,5 +82,22 @@ function toMaterial(): void {}
   bottom: 2px;
   font-size: 8px;
   opacity: 0.6;
+}
+
+.pb-mi-cnt {
+  @include github-styles.github-tag-dark-gen(#82aaff);
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding-right: 4px;
+  padding-left: 12px;
+  border-top: unset;
+  border-left: unset;
+  border-bottom-left-radius: 20px;
+  border-top-right-radius: 4px;
+  font-family: var(--font-title);
+  font-size: 10px;
+  text-align: center;
 }
 </style>

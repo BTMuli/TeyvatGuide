@@ -68,6 +68,15 @@ async function getAllUid(): Promise<Array<number>> {
 }
 
 /**
+ * 删除指定UID数据
+ * @since Beta v0.9.0
+ */
+async function delUid(uid: number): Promise<void> {
+  const db = await TGSqlite.getDB();
+  await db.execute("DELETE FROM UserBagMaterial WHERE uid = ?;", [uid]);
+}
+
+/**
  * 解析表格数据
  * @since Beta v0.9.0
  * @param {TGApp.Sqlite.UserBag.TableMaterialRaw} raw 原始数据
@@ -141,6 +150,7 @@ async function saveYaeData(
 
 const TSUserBagMaterial = {
   getAllUid,
+  delUid,
   saveYaeData,
   getMaterial,
   insertMaterial,

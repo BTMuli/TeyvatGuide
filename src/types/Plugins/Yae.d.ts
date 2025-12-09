@@ -21,12 +21,18 @@ declare namespace TGApp.Plugins.Yae {
    * @since Beta v0.9.0
    */
   type BagItemUnion =
-    | BagItem<"material">
+    | BagItemMaterial
     | BagItem<"weapon">
     | BagItem<"reliquary">
     | BagItem<"furniture">
     | BagItem<"virtual">
     | BagItem<"unknown">;
+
+  /**
+   * 背包物品-材料
+   * @since Beta v0.9.0
+   */
+  type BagItemMaterial = BagItem<"material">;
 
   /**
    * 背包物品信息
