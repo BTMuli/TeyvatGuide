@@ -1,5 +1,5 @@
 //! Yae 背包信息的 Protobuf 定义&解析
-//! @since Beta v0.8.9
+//! @since Beta v0.9.0
 #![cfg(target_os = "windows")]
 
 use prost::encoding::{decode_key, decode_varint, WireType};
@@ -77,7 +77,8 @@ pub struct Material {
   pub delete_info: Option<MaterialDeleteInfo>,
 }
 
-/// Reliquary message
+//// 物品相关消息（Reliquary/Weapon/Furniture/VirtualItem/Item 等）
+// Reliquary message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Reliquary {
   #[prost(uint32, tag = "1")]
@@ -94,7 +95,7 @@ pub struct Reliquary {
   pub is_marked: bool,
 }
 
-/// Weapon message
+// Weapon message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Weapon {
   #[prost(uint32, tag = "1")]
@@ -109,7 +110,7 @@ pub struct Weapon {
   pub is_arkhe_ousia: bool,
 }
 
-/// Equip message (包含一个 oneof: Reliquary | Weapon)
+// Equip message (包含一个 oneof: Reliquary | Weapon)
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Equip {
   #[prost(oneof = "EquipDetail", tags = "1, 2")]
@@ -118,7 +119,7 @@ pub struct Equip {
   pub is_locked: bool,
 }
 
-/// oneof for Equip
+// oneof for Equip
 #[derive(Clone, PartialEq, ::prost::Oneof)]
 pub enum EquipDetail {
   #[prost(message, tag = "1")]
@@ -127,21 +128,21 @@ pub enum EquipDetail {
   Weapon(Weapon),
 }
 
-/// Furniture message
+// Furniture message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Furniture {
   #[prost(uint32, tag = "1")]
   pub count: u32,
 }
 
-/// VirtualItem message
+// VirtualItem message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct VirtualItem {
   #[prost(int64, tag = "1")]
   pub count: i64,
 }
 
-/// Item message (包含 oneof detail: Material | Equip | Furniture | VirtualItem)
+// Item message (包含 oneof detail: Material | Equip | Furniture | VirtualItem)
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Item {
   #[prost(uint32, tag = "1")]
@@ -152,7 +153,7 @@ pub struct Item {
   pub detail: Option<ItemDetail>,
 }
 
-/// oneof for Item
+// oneof for Item
 #[derive(Clone, PartialEq, ::prost::Oneof)]
 pub enum ItemDetail {
   #[prost(message, tag = "5")]
@@ -165,7 +166,7 @@ pub enum ItemDetail {
   VirtualItem(VirtualItem),
 }
 
-/// PlayerStoreNotify message
+// PlayerStoreNotify message
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct PlayerStoreNotify {
   #[prost(uint32, tag = "1")]
@@ -180,8 +181,7 @@ pub struct PlayerStoreNotify {
 
 /// 扁平化的物品信息（原 ItemKind 改名为 ItemInfo）
 /// 将 is_locked 移动到对应的变体中（Option<bool>，为 None 时序列化省略）
-/// 注意：实现了自定义 Serialize，使得序列化输出为
-/// info: { count: ... } 或 info: { level: ..., is_locked: true, ... }
+/// 对于武器和圣遗物，添加 guid 字段（来源于 ItemData 的 guid）
 #[derive(Debug, Clone, Deserialize)]
 pub enum ItemInfo {
   Material {
@@ -195,6 +195,7 @@ pub enum ItemInfo {
     append_prop_id_list: Vec<u32>,
     is_marked: bool,
     is_locked: Option<bool>,
+    guid: u64,
   },
   Weapon {
     level: u32,
@@ -203,6 +204,7 @@ pub enum ItemInfo {
     affix_map: HashMap<u32, u32>,
     is_arkhe_ousia: bool,
     is_locked: Option<bool>,
+    guid: u64,
   },
   Furniture {
     count: u32,
@@ -234,9 +236,10 @@ impl Serialize for ItemInfo {
         append_prop_id_list,
         is_marked,
         is_locked,
+        guid,
       } => {
         // 变体字段数量不固定（is_locked 可选）
-        let mut len = 6usize; // level, exp, promote_level, main_prop_id, append_prop_id_list, is_marked
+        let mut len = 7usize; // level, exp, promote_level, main_prop_id, append_prop_id_list, is_marked, guid
         if is_locked.is_some() {
           len += 1;
         }
@@ -250,11 +253,20 @@ impl Serialize for ItemInfo {
         if let Some(v) = is_locked {
           map.serialize_entry("is_locked", v)?;
         }
+        map.serialize_entry("guid", guid)?;
         map.end()
       }
-      ItemInfo::Weapon { level, exp, promote_level, affix_map, is_arkhe_ousia, is_locked } => {
+      ItemInfo::Weapon {
+        level,
+        exp,
+        promote_level,
+        affix_map,
+        is_arkhe_ousia,
+        is_locked,
+        guid,
+      } => {
         // affix_map 会被序列化为对象
-        let mut len = 6usize; // level, exp, promote_level, affix_map, is_arkhe_ousia, (maybe is_locked)
+        let mut len = 7usize; // level, exp, promote_level, affix_map, is_arkhe_ousia, guid, (maybe is_locked)
         if is_locked.is_some() {
           len += 1;
         }
@@ -267,6 +279,7 @@ impl Serialize for ItemInfo {
         if let Some(v) = is_locked {
           map.serialize_entry("is_locked", v)?;
         }
+        map.serialize_entry("guid", guid)?;
         map.end()
       }
       ItemInfo::Furniture { count } => {
@@ -288,17 +301,18 @@ impl Serialize for ItemInfo {
   }
 }
 
-/// 扁平化物品数据结构（移除 guid，kind 改为字符串，info 为 ItemInfo）
+/// 扁平化物品数据结构
 /// kind: "material", "weapon", "reliquary", "furniture", "virtual"
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ItemData {
   pub item_id: u32,
+  pub guid: u64,
   pub kind: String,
   pub info: ItemInfo,
 }
 
 /// 解析顶层 bytes，返回 ItemData 列表（低级解析）
-/// 说明：不再解析 guid（tag=2），kind 为字符串，info 为 ItemInfo
+/// 说明：现在解析 guid（tag=2），kind 为字符串，info 为 ItemInfo
 pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
   let mut cursor = Cursor::new(bytes);
   let mut out: Vec<ItemData> = Vec::new();
@@ -337,12 +351,13 @@ pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
 }
 
 /// 解析单个 Item 子消息（buf 为该子消息的完整 bytes）
-/// 不再解析 guid（tag=2），kind 为字符串，info 为 ItemInfo
+/// 现在解析 guid（tag=2），并将 guid 传入 Equip 解析以写入导出数据
 fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
   let mut inner = Cursor::new(buf);
 
   // 默认值
   let mut item_id: u32 = 0;
+  let mut guid: u64 = 0;
   let mut kind_str = String::from("unknown");
   let mut info = ItemInfo::Unknown;
 
@@ -351,6 +366,10 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
       (1, WireType::Varint) => {
         // item_id: uint32
         item_id = decode_varint(&mut inner)? as u32;
+      }
+      (2, WireType::Varint) => {
+        // guid: uint64
+        guid = decode_varint(&mut inner)? as u64;
       }
       // oneof detail: Material=5, Equip=6, Furniture=7, VirtualItem=255
       (5, WireType::LengthDelimited) => {
@@ -368,7 +387,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
         let len = decode_varint(&mut inner)? as usize;
         let mut eb = vec![0u8; len];
         inner.read_exact(&mut eb).map_err(|_| DecodeError::new("read equip buf failed"))?;
-        if let Ok(item_info) = parse_equip_from_buf(&eb) {
+        if let Ok(item_info) = parse_equip_from_buf(&eb, guid) {
           match &item_info {
             ItemInfo::Reliquary { .. } => kind_str = "reliquary".to_string(),
             ItemInfo::Weapon { .. } => kind_str = "weapon".to_string(),
@@ -424,7 +443,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
     }
   }
 
-  Ok(ItemData { item_id, kind: kind_str, info })
+  Ok(ItemData { item_id, guid, kind: kind_str, info })
 }
 
 /// 解析 Material 子消息，返回 count（uint32）
@@ -684,9 +703,10 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
   Ok(w)
 }
 
-/// 解析 Equip 子消息，返回 ItemInfo（包含 is_locked: Option<bool>）
+/// 解析 Equip 子消息，返回 ItemInfo（包含 is_locked: Option<bool> 和 guid）
 /// 将原先返回 (ItemKind, is_locked) 的逻辑合并到 ItemInfo 中
-fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
+/// 现在接收 guid 参数并把它写入 Reliquary/Weapon 变体
+fn parse_equip_from_buf(buf: &[u8], guid: u64) -> Result<ItemInfo, DecodeError> {
   let mut cur = Cursor::new(buf);
   let mut is_locked: Option<bool> = None;
   let mut info: ItemInfo = ItemInfo::Unknown;
@@ -707,6 +727,7 @@ fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
             append_prop_id_list: r.append_prop_id_list,
             is_marked: r.is_marked,
             is_locked: None, // 可能在后面被设置
+            guid,
           };
         }
       }
@@ -723,6 +744,7 @@ fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
             affix_map: w.affix_map,
             is_arkhe_ousia: w.is_arkhe_ousia,
             is_locked: None, // 可能在后续 tag=3 中被设置
+            guid,
           };
         }
       }
@@ -763,6 +785,7 @@ fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
         main_prop_id,
         append_prop_id_list,
         is_marked,
+        guid,
         ..
       } => ItemInfo::Reliquary {
         level,
@@ -772,8 +795,9 @@ fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
         append_prop_id_list,
         is_marked,
         is_locked: Some(lock_val),
+        guid,
       },
-      ItemInfo::Weapon { level, exp, promote_level, affix_map, is_arkhe_ousia, .. } => {
+      ItemInfo::Weapon { level, exp, promote_level, affix_map, is_arkhe_ousia, guid, .. } => {
         ItemInfo::Weapon {
           level,
           exp,
@@ -781,6 +805,7 @@ fn parse_equip_from_buf(buf: &[u8]) -> Result<ItemInfo, DecodeError> {
           affix_map,
           is_arkhe_ousia,
           is_locked: Some(lock_val),
+          guid,
         }
       }
       other => other,
