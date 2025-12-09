@@ -86,14 +86,13 @@ import PbMaterialItem from "@comp/pageBag/pb-materialItem.vue";
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
-import { event, path } from "@tauri-apps/api";
+import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -114,8 +113,6 @@ export type MaterialInfo = {
 
 const { gameDir } = storeToRefs(useAppStore());
 
-let yaeListener: UnlistenFn | null = null;
-
 const curUid = ref<number>();
 const selectType = ref<string | null>(null);
 const search = ref<string>();
@@ -134,18 +131,6 @@ onMounted(async () => {
   // TODO: 如果用户已登录，优先当前登录UID
   if (uidList.value.length > 0) curUid.value = uidList.value[0];
   else await showLoading.end();
-  yaeListener = await event.listen<string>("yae_store_list", async (e: Event<string>) => {
-    const parse: TGApp.Plugins.Yae.BagListRes = JSON.parse(e.payload);
-    const materialList = parse.filter((i) => i.kind === "material");
-    await tryImport(materialList);
-  });
-});
-
-onUnmounted(() => {
-  if (yaeListener) {
-    yaeListener();
-    yaeListener = null;
-  }
 });
 
 watch(
@@ -254,25 +239,6 @@ async function tryCallYae(): Promise<void> {
       return;
     }
   }
-  try {
-    await invoke("call_yae_dll", { gamePath: gamePath });
-  } catch (err) {
-    showSnackbar.error(`调用Yae DLL失败: ${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
-    return;
-  }
-}
-
-/**
- * 尝试导入材料
- * @param {Array<TGApp.Plugins.Yae.BagItem<"material">>} data 材料数据
- * @returns {Promise<void>}
- */
-async function tryImport(data: Array<TGApp.Plugins.Yae.BagItem<"material">>): Promise<void> {
-  if (data.length === 0) {
-    showSnackbar.warn("获取材料数据为空");
-    return;
-  }
   const input = await showDialog.input("请输入存档UID", "UID:", curUid.value?.toString());
   if (!input) {
     showSnackbar.cancel("已取消存档导入");
@@ -282,17 +248,12 @@ async function tryImport(data: Array<TGApp.Plugins.Yae.BagItem<"material">>): Pr
     showSnackbar.warn("请输入合法数字");
     return;
   }
-  await showLoading.start("正在导入材料数据", `UID:${input},数量:${data.length}`);
-  const now = new Date();
-  const skip = await TSUserBagMaterial.saveYaeData(Number(input), data);
-  await showLoading.end();
-  const cost = new Date().getTime() - now.getTime();
-  if (skip === 0) {
-    showSnackbar.success(`成功导入 ${data.length} 条数据，耗时 ${Math.floor(cost / 1000)}s`);
-  } else if (skip === data.length) {
-    showSnackbar.success(`未检测到数据更新，耗时 ${Math.floor(cost / 1000)}s`);
-  } else {
-    showSnackbar.success(`成功更新 ${data.length - skip} 条数据`);
+  try {
+    await invoke("call_yae_dll", { gamePath: gamePath, uid: input.toString() });
+  } catch (err) {
+    showSnackbar.error(`调用Yae DLL失败: ${err}`);
+    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
+    return;
   }
 }
 

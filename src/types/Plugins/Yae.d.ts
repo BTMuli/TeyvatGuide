@@ -5,6 +5,19 @@
 
 declare namespace TGApp.Plugins.Yae {
   /**
+   * 后端返的事件数据
+   * @since Beta v0.9.0
+   */
+  type RsEvent = {
+    /** 数据，序列化后的JSON */
+    data: string;
+    /** 类型，成就或背包 */
+    type: "achievement" | "store";
+    /** 存档UID，需要预先输入 */
+    uid: string;
+  };
+
+  /**
    * 后端返的成就列表数据
    * @since Beta v0.7.8
    */
@@ -22,8 +35,8 @@ declare namespace TGApp.Plugins.Yae {
    */
   type BagItemUnion =
     | BagItemMaterial
-    | BagItem<"weapon">
-    | BagItem<"reliquary">
+    | BagItemWeapon
+    | BagItemRelic
     | BagItem<"furniture">
     | BagItem<"virtual">
     | BagItem<"unknown">;
@@ -33,6 +46,18 @@ declare namespace TGApp.Plugins.Yae {
    * @since Beta v0.9.0
    */
   type BagItemMaterial = BagItem<"material">;
+
+  /**
+   * 背包物品-武器
+   * @since Beta v0.9.0
+   */
+  type BagItemWeapon = BagItem<"weapon">;
+
+  /**
+   * 背包物品-圣遗物
+   * @since Beta v0.9.0
+   */
+  type BagItemRelic = BagItem<"reliquary">;
 
   /**
    * 背包物品信息

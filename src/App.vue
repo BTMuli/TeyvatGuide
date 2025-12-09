@@ -14,10 +14,13 @@
 import TBackTop from "@comp/app/t-backTop.vue";
 import TSidebar from "@comp/app/t-sidebar.vue";
 import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import OtherApi from "@req/otherReq.js";
 import TGSqlite from "@Sql/index.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
+import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
@@ -35,46 +38,177 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const { theme, needResize, deviceInfo, isLogin, userDir, buildTime } = storeToRefs(useAppStore());
 const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
+
 const isMain = ref<boolean>(false);
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
 
 let themeListener: UnlistenFn | null = null;
-let urlListener: UnlistenFn | null = null;
+let dpListener: UnlistenFn | null = null;
 let resizeListener: UnlistenFn | null = null;
+let yaeListener: UnlistenFn | null = null;
+let yaeFlag: Array<string> = [];
 
 onMounted(async () => {
   const win = getCurrentWindow();
-  const webview = webviewWindow.getCurrentWebviewWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
     await listenOnInit();
     await core.invoke("init_app");
-    urlListener = await getDeepLink();
+    dpListener = await event.listen<string>("active_deep_link", handleDpListen);
+    yaeListener = await event.listen<TGApp.Plugins.Yae.RsEvent>("yae_read", handleYaeListen);
   }
   if (needResize.value !== "false") await resizeWindow();
   document.documentElement.className = theme.value;
-  themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
-    theme.value = e.payload;
-    document.documentElement.className = theme.value;
-  });
-  resizeListener = await event.listen<string>("needResize", async (e: Event<string>) => {
-    if (e.payload !== "false") {
-      await resizeWindow();
-    } else {
-      const size = getWindowSize(webview.label);
-      await win.setSize(new LogicalSize(size.width, size.height));
-      await webview.setZoom(1);
-    }
-    await win.center();
-  });
+  themeListener = await event.listen<string>("readTheme", handleThemeListen);
+  resizeListener = await event.listen<string>("needResize", handleResizeListen);
   const isShow = await win.isVisible();
   if (!isShow) {
     await win.center();
     await win.show();
   }
 });
+
+onUnmounted(() => {
+  if (dpListener !== null) {
+    dpListener();
+    dpListener = null;
+  }
+  if (yaeListener !== null) {
+    yaeListener();
+    yaeListener = null;
+  }
+  if (themeListener !== null) {
+    themeListener();
+    themeListener = null;
+  }
+  if (resizeListener !== null) {
+    resizeListener();
+    resizeListener = null;
+  }
+});
+
+/**
+ * 自定义URL协议监听处理
+ * @param {Event<string>} event - 事件
+ * @returns {Promise<void>}
+ */
+async function handleDpListen(event: Event<string>): Promise<void> {
+  const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
+  if (await windowGet.isMinimized()) await windowGet.unminimize();
+  await windowGet.setFocus();
+  const payload = await parseDeepLink(event.payload);
+  if (payload === false) {
+    showSnackbar.error("无效的 deep link！", 3000);
+    await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(event.payload)}`);
+    return;
+  }
+  await TGLogger.Info(`[App][getDeepLink] ${event.payload}`);
+  await handleDeepLink(payload);
+}
+
+/**
+ * Yae监听处理
+ * @param {Event<TGApp.Plugins.Yae.RsEvent>} event
+ * @returns {Promise<void>}
+ */
+async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise<void> {
+  if (event.payload.type === "achievement") {
+    await loadYaeAchi(event.payload.uid, JSON.parse(event.payload.data));
+    if (!yaeFlag.includes("achievement")) yaeFlag.push("achievement");
+  } else if (event.payload.type === "store") {
+    await loadYaeBag(event.payload.uid, JSON.parse(event.payload.data));
+    if (!yaeFlag.includes("store")) yaeFlag.push("store");
+  }
+  if (yaeFlag.length === 2) {
+    yaeFlag = [];
+    showSnackbar.success(`导入Yae数据完成，即将刷新页面`);
+    await showLoading.end();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    window.location.reload();
+  }
+}
+
+/**
+ * 导入成就
+ * @param {string} uid - 存档UID
+ * @param {TGApp.Plugins.Yae.AchiListRes} data - 成就数据
+ * @returns {Promise<void>}
+ */
+async function loadYaeAchi(uid: string, data: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
+  await showLoading.start("正在导入成就数据", `UID:${uid},数量:${data.length}`);
+  await TGLogger.Info(`[App][loadYaeAchi] 开始处理 ${uid} 的 ${data.length} 条成就数据`);
+  try {
+    await TSUserAchi.mergeUiaf(data, Number(uid));
+    showSnackbar.success(`成功导入 ${uid} 的 ${data.length}条成就数据`);
+    await TGLogger.Info(`[App][loadYaeAchi] 成功导入 ${uid} 的 ${data.length} 条成就数据`);
+  } catch (e) {
+    console.error(e);
+    await TGLogger.Error(`[App][loadYaeAchi] 成就导入失败：${e}`);
+  }
+}
+
+/**
+ * 导入材料
+ * @param {string} uid
+ * @param {TGApp.Plugins.Yae.BagListRes} data - 背包数据
+ * @returns {Promise<void>}
+ */
+async function loadYaeBag(uid: string, data: TGApp.Plugins.Yae.BagListRes): Promise<void> {
+  const listM = data.filter((i) => i.kind === "material");
+  const listW = data.filter((i) => i.kind === "weapon");
+  const listR = data.filter((i) => i.kind === "reliquary");
+  await TGLogger.Info(`[App][loadYaeBag] 接收到 ${uid} 的背包数据`);
+  await TGLogger.Info(
+    `[App][loadYaeBag] 材料：${listM.length},武器：${listW.length},圣遗物：${listR.length}`,
+  );
+  await showLoading.start("正在导入材料数据", `UID:${uid},数量:${listM.length}`);
+  try {
+    const now = new Date();
+    const skip = await TSUserBagMaterial.saveYaeData(Number(uid), listM);
+    const cost = new Date().getTime() - now.getTime();
+    await TGLogger.Info(`[App][loadYaeBag] Skip: ${skip}`);
+    if (skip === 0) {
+      showSnackbar.success(`成功导入 ${listM.length} 条数据，耗时 ${Math.floor(cost / 1000)}s`);
+    } else if (skip === listM.length) {
+      showSnackbar.success(`未检测到数据更新，耗时 ${Math.floor(cost / 1000)}s`);
+    } else {
+      showSnackbar.success(`成功更新 ${listM.length - skip} 条数据`);
+    }
+  } catch (e) {
+    console.error(e);
+    await TGLogger.Error(`[App][loadYaeBag] 导入材料失败：${e}`);
+  }
+}
+
+/**
+ * 主题监听处理
+ * @param {Event<string>} event - 事件
+ * @returns {void}
+ */
+function handleThemeListen(event: Event<string>): void {
+  theme.value = event.payload;
+  document.documentElement.className = theme.value;
+}
+
+/**
+ * 窗口适配监听处理
+ * @param {Event<string>} event 事件
+ * @returns {Promise<void>}
+ */
+async function handleResizeListen(event: Event<string>): Promise<void> {
+  const win = getCurrentWindow();
+  const webview = webviewWindow.getCurrentWebviewWindow();
+  if (event.payload !== "false") {
+    await resizeWindow();
+  } else {
+    const size = getWindowSize(webview.label);
+    await win.setSize(new LogicalSize(size.width, size.height));
+    await webview.setZoom(1);
+  }
+  await win.center();
+}
 
 // 启动后只执行一次的监听
 async function listenOnInit(): Promise<void> {
@@ -160,22 +294,6 @@ async function checkUserLoad(): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 1000));
 }
 
-async function getDeepLink(): Promise<UnlistenFn> {
-  return await event.listen<string>("active_deep_link", async (e: Event<string>) => {
-    const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
-    if (await windowGet.isMinimized()) await windowGet.unminimize();
-    await windowGet.setFocus();
-    const payload = await parseDeepLink(e.payload);
-    if (payload === false) {
-      showSnackbar.error("无效的 deep link！", 3000);
-      await TGLogger.Error(`[App][getDeepLink] 无效的 deep link！ ${JSON.stringify(e.payload)}`);
-      return;
-    }
-    await TGLogger.Info(`[App][getDeepLink] ${e.payload}`);
-    await handleDeepLink(payload);
-  });
-}
-
 async function parseDeepLink(payload: string | string[]): Promise<string | false> {
   try {
     if (typeof payload === "string") return payload;
@@ -239,21 +357,6 @@ async function checkUpdate(): Promise<void> {
     await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
   }
 }
-
-onUnmounted(() => {
-  if (themeListener !== null) {
-    themeListener();
-    themeListener = null;
-  }
-  if (urlListener !== null) {
-    urlListener();
-    urlListener = null;
-  }
-  if (resizeListener !== null) {
-    resizeListener();
-    resizeListener = null;
-  }
-});
 </script>
 <style lang="css" scoped>
 .app-container {

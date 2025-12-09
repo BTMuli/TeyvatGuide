@@ -79,7 +79,7 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
@@ -103,7 +103,6 @@ const router = useRouter();
 const { gameDir } = storeToRefs(useAppStore());
 
 let achiListener: UnlistenFn | null = null;
-let yaeListener: UnlistenFn | null = null;
 
 const search = ref<string>("");
 const isSearch = ref<boolean>(false);
@@ -131,24 +130,12 @@ onMounted(async () => {
     await handleImportOuter(route.query.app);
   }
   achiListener = await listen<void>("updateAchi", async () => await refreshOverview());
-  yaeListener = await listen<string>("yae_achi_list", async (e: Event<string>) => {
-    try {
-      await tryParseYaeAchi(JSON.parse(e.payload));
-    } catch (err) {
-      await TGLogger.Error(`[Achievements][yae_achi_list] 解析Yae成就数据失败: ${err}`);
-      showSnackbar.error(`解析Yae成就数据失败:${err}`);
-    }
-  });
 });
 
 onUnmounted(async () => {
   if (achiListener !== null) {
     achiListener();
     achiListener = null;
-  }
-  if (yaeListener !== null) {
-    yaeListener();
-    yaeListener = null;
   }
 });
 
@@ -340,21 +327,6 @@ async function toYae(): Promise<void> {
       return;
     }
   }
-  try {
-    await invoke("call_yae_dll", { gamePath: gamePath });
-  } catch (err) {
-    showSnackbar.error(`调用Yae DLL失败: ${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
-    return;
-  }
-}
-
-async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
-  console.log(payload);
-  if (payload.length === 0) {
-    showSnackbar.warn(`未从Yae获取到成就数据`);
-    return;
-  }
   const input = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
   if (!input) {
     showSnackbar.cancel("已取消存档导入");
@@ -364,14 +336,13 @@ async function tryParseYaeAchi(payload: TGApp.Plugins.Yae.AchiListRes): Promise<
     showSnackbar.warn("请输入合法数字");
     return;
   }
-  await showLoading.start("正在导入成就数据", `UID:${input},数量:${payload.length}`);
-  await TSUserAchi.mergeUiaf(payload, Number(input));
-  await showLoading.end();
-  showSnackbar.success("导入成功，即将刷新页面");
-  await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
-  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  await router.push("/achievements");
-  window.location.reload();
+  try {
+    await invoke("call_yae_dll", { gamePath: gamePath, uid: input });
+  } catch (err) {
+    showSnackbar.error(`调用Yae DLL失败: ${err}`);
+    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
+    return;
+  }
 }
 </script>
 <style lang="scss" scoped>

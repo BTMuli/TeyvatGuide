@@ -54,6 +54,7 @@ async function test(): Promise<void> {
   try {
     await invoke("call_yae_dll", {
       gamePath: "D:\\Games\\Genshin Impact bilibili\\games\\Genshin Impact Game\\YuanShen.exe",
+      uid: "500299765",
     });
   } catch (e) {
     console.error(e);

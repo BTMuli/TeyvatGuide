@@ -67,7 +67,7 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
 
 /// 调用 dll
 #[tauri::command]
-pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> Result<(), String> {
+pub fn call_yae_dll(app_handle: AppHandle, game_path: String, uid: String) -> Result<(), String> {
   let dll_path = app_handle.path().resource_dir().unwrap().join("resources/YaeAchievementLib.dll");
   dbg!(&dll_path);
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
@@ -130,7 +130,9 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> Result<(), Stri
                           Ok(list) => {
                             println!("解码成功，成就列表长度: {}", list.len());
                             let json = serde_json::to_string_pretty(&list).unwrap();
-                            let _ = app_handle.emit("yae_achi_list", json);
+                            let payload =
+                              serde_json::json!({"type":"achievement","data":json,"uid":&uid});
+                            let _ = app_handle.emit("yae_read", payload);
                           }
                           Err(e) => println!("解析失败: {:?}", e),
                         }
@@ -152,7 +154,8 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String) -> Result<(), Stri
                         Ok(list) => {
                           println!("解码成功，物品列表长度: {}", list.len());
                           let json = serde_json::to_string_pretty(&list).unwrap();
-                          let _ = app_handle.emit("yae_store_list", json);
+                          let payload = serde_json::json!({"type":"store","data":json,"uid":&uid});
+                          let _ = app_handle.emit("yae_read", payload);
                         }
                         Err(e) => println!("解析失败: {:?}", e),
                       }
