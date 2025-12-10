@@ -15,7 +15,10 @@
     </div>
     <TucAeBox :avatars="props.round.avatars" :enemies="props.round.enemies" />
     <div class="tucr-content">
-      <TucBuffBox :model-value="props.round.splendour_buff" />
+      <TucBuffBox
+        :class="props.round.choice_cards.length === 0 ? 'fill' : ''"
+        :model-value="props.round.splendour_buff"
+      />
       <TucCardBox :model-value="props.round.choice_cards" />
     </div>
   </div>
@@ -78,8 +81,13 @@ function getIcon(): string {
   position: relative;
   display: flex;
   width: 100%;
+  max-width: 100%;
   align-items: stretch;
   justify-content: flex-start;
   column-gap: 8px;
+
+  .fill {
+    width: 100%;
+  }
 }
 </style>

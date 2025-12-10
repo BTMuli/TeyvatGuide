@@ -10,7 +10,7 @@
           <span>辉彩祝福</span>
         </div>
       </div>
-      <div class="tuc-buff-total" v-html="parseHtmlText(props.modelValue.summary.desc)" />
+      <div class="tuc-buff-total" v-html="getBuffDesc(props.modelValue.summary.desc)" />
     </div>
     <template v-for="(buff, idx) in props.modelValue.buffs" :key="idx">
       <div v-if="buff.level > 1" class="tuc-buff-item">
@@ -29,7 +29,7 @@
               <img :src="effect.icon" alt="icon" />
               <span v-html="parseHtmlText(effect.name)" />
             </div>
-            <span class="tuc-effect-desc" v-html="parseHtmlText(effect.desc)" />
+            <span class="tuc-effect-desc" v-html="getEffectDesc(effect.desc)" />
           </div>
         </div>
       </div>
@@ -45,14 +45,23 @@ type TucBuffBoxProps = {
 };
 
 const props = defineProps<TucBuffBoxProps>();
+
+function getBuffDesc(desc: string): string {
+  return parseHtmlText(desc.replaceAll("点，", "点，\n"));
+}
+
+function getEffectDesc(desc: string): string {
+  return parseHtmlText(desc.replaceAll("；", "；\n")).replaceAll("\n<br />", "<br />");
+}
 </script>
 <style lang="css" scoped>
 .tuc-buff-box {
   position: relative;
   display: flex;
-  width: 100%;
+  width: fit-content;
   box-sizing: border-box;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: center;
   justify-content: flex-start;
   padding: 8px;
@@ -147,5 +156,6 @@ const props = defineProps<TucBuffBoxProps>();
   position: relative;
   display: block;
   font-size: 10px;
+  white-space: pre;
 }
 </style>

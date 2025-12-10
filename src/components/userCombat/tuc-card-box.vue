@@ -29,10 +29,9 @@ const props = defineProps<TucCardBoxProps>();
 .tuc-card-box {
   position: relative;
   display: flex;
-  width: 300px;
+  width: 100%;
   box-sizing: border-box;
   flex-direction: column;
-  flex-shrink: 0;
   align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
