@@ -234,7 +234,8 @@ function checkIsUp(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean | undefi
   const itemTime = new Date(item.time).getTime();
   const itemIdNum = Number(item.itemId);
   const poolsFind = AppGachaData.filter((pool) => {
-    if (pool.type.toLocaleString() !== item.gachaType) return false;
+    // 对于武器池，严格要求 gachaType 对应，角色池放宽以修复特殊情况下的异常
+    if (pool.type.toLocaleString() !== item.gachaType && item.gachaType === "302") return false;
     const startTime = new Date(pool.from).getTime();
     const endTime = new Date(pool.to).getTime();
     return itemTime >= startTime && itemTime <= endTime;
