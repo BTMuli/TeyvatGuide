@@ -1,20 +1,21 @@
+<!-- 首页近期活动组件 -->
 <template>
   <THomeCard :append="isLogin">
     <template #title>近期活动</template>
-    <template #title-append v-if="isLogin">
-      <v-switch class="tp-switch" v-model="isUserPos"></v-switch>
+    <template v-if="isLogin" #title-append>
+      <v-switch v-model="isUserPos" class="tp-switch"></v-switch>
       <span>{{ isUserPos ? "用户" : "百科" }}</span>
     </template>
     <template #default>
-      <div class="tp-grid" v-show="!isUserPos">
+      <div v-show="!isUserPos" class="tp-grid">
         <PhPosObc v-for="(card, index) in obsPos" :key="index" :pos="card" />
       </div>
-      <div class="tp-grid" v-show="isUserPos">
+      <div v-show="isUserPos" class="tp-grid">
         <PhPosUser
-          @click-m="handleMaterial"
           v-for="(card, index) in userPos"
           :key="index"
           :pos="card"
+          @click-m="handleMaterial"
         />
       </div>
     </template>
@@ -34,7 +35,7 @@ import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { onMounted, shallowRef, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
@@ -78,6 +79,7 @@ async function loadUserPosition(): Promise<void> {
   }
   if (isInit.value) await showLoading.start("正在获取近期活动");
   const resp = await recordReq.actCalendar(cookie.value, account.value);
+  console.log(resp);
   if (isInit.value) await showLoading.end();
   if ("retcode" in resp) {
     showSnackbar.error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);

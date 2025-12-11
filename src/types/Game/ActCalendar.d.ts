@@ -104,8 +104,7 @@ declare namespace TGApp.Game.ActCalendar {
 
   /**
    * 活动类型枚举
-   * @since Beta v0.8.0
-   * @remarks TODO:可能不完整，等待补充
+   * @since Beta v0.9.0
    */
   const ActType = <const>{
     /** 幽境危战 */
@@ -118,6 +117,10 @@ declare namespace TGApp.Game.ActCalendar {
     Double: "ActTypeDouble",
     /** 探索活动 */
     Explore: "ActTypeExplore",
+    /** 立本活动 */
+    LiBen: "ActTypeLiBen",
+    /** 累登活动 */
+    SignIn: "ActTypeSignIn",
     /** 其他活动 */
     Other: "ActTypeOther",
   };
@@ -130,7 +133,7 @@ declare namespace TGApp.Game.ActCalendar {
 
   /**
    * 活动信息
-   * @since Beta v0.8.0
+   * @since Beta v0.9.0
    */
   type ActItem =
     | ActItemHardChallenge
@@ -138,6 +141,8 @@ declare namespace TGApp.Game.ActCalendar {
     | ActItemTower
     | ActItemDouble
     | ActItemExplore
+    | ActItemLiBen
+    | ActItemSignIn
     | ActItemOther;
 
   /**
@@ -170,7 +175,6 @@ declare namespace TGApp.Game.ActCalendar {
      * @remarks
      * 1:未开始
      * 2:进行中
-     * 3:已结束
      */
     status: number;
     /** 活动奖励列表 */
@@ -201,7 +205,7 @@ declare namespace TGApp.Game.ActCalendar {
   };
 
   /**
-   * 活动信息-幽境危战
+   * 幽境危战
    * @since Beta v0.8.0
    */
   type ActItemHardChallenge = ActItemBase<"ActTypeHardChallenge"> & {
@@ -231,16 +235,16 @@ declare namespace TGApp.Game.ActCalendar {
    * @since Beta v0.8.0
    */
   type ActHardChallengeSub = {
-    /** 挑战耗时(秒) */
+    /** 紊乱爆发期剩余时间 */
     seconds: number;
-    /** 未知参数 */
+    /** 已获得奖励进度 */
     x: number;
-    /** 未知参数 */
+    /** 总奖励进度 */
     y: number;
   };
 
   /**
-   * 活动信息-真境剧诗
+   * 真境剧诗
    * @since Beta v0.8.0剧诗活动详情
    */
   type ActItemRoleCombat = ActItemBase<"ActTypeRoleCombat"> & {
@@ -266,7 +270,7 @@ declare namespace TGApp.Game.ActCalendar {
   };
 
   /**
-   * 活动信息-深渊螺旋
+   * 深渊螺旋
    * @since Beta v0.8.0
    */
   type ActItemTower = ActItemBase<"ActTypeTower"> & {
@@ -290,7 +294,7 @@ declare namespace TGApp.Game.ActCalendar {
   };
 
   /**
-   * 活动信息-双倍活动
+   * 双倍活动
    * @since Beta v0.8.0
    */
   type ActItemDouble = ActItemBase<"ActTypeDouble"> & {
@@ -310,7 +314,7 @@ declare namespace TGApp.Game.ActCalendar {
   };
 
   /**
-   * 活动信息-探索活动
+   * 探索活动
    * @since Beta v0.8.0
    */
   type ActItemExplore = ActItemBase<"ActTypeExplore"> & {
@@ -330,7 +334,59 @@ declare namespace TGApp.Game.ActCalendar {
   };
 
   /**
-   * 活动信息-其他活动
+   * 立本活动
+   * @since Beta v0.9.0
+   */
+  type ActItemLiBen = ActItemBase<"ActTypeLiBen"> & {
+    /** 立本活动详情 */
+    liben_detail: ActLiBen;
+  };
+
+  /**
+   * 立本活动详情
+   * @since Beta v0.9.0
+   */
+  type ActLiBen = {
+    /**
+     * 状态
+     * @remarks 1-未兑换，2-已兑换
+     */
+    status: number;
+    /** 进度 */
+    progress: number;
+    /** 总数 */
+    total: number;
+    /** 是否领取大礼盒 */
+    is_has_taken_special_reward: boolean;
+  };
+
+  /**
+   * 累登活动
+   * @since Beta v0.9.0
+   */
+  type ActItemSignIn = ActItemBase<"ActTypeSignIn"> & {
+    /** 累登活动详情 */
+    sign_in_detail: ActSignIn;
+  };
+
+  /**
+   * 累登活动详情
+   * @since Beta v0.9.0
+   */
+  type ActSignIn = {
+    /**
+     * 状态
+     * @remarks 1-未领取，2-已领取
+     */
+    status: number;
+    /** 进度 */
+    progress: number;
+    /** 总数 */
+    total: number;
+  };
+
+  /**
+   * 其他活动
    * @since Beta v0.8.0
    */
   type ActItemOther = ActItemBase<"ActTypeOther"> & {

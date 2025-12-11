@@ -1,23 +1,24 @@
+<!-- 首页 -->
 <template>
   <div class="home-container">
     <div class="home-top">
-      <div class="home-tools" v-if="isLogin">
+      <div v-if="isLogin" class="home-tools">
         <v-select
           v-model="curGid"
-          class="home-tool-select"
-          :items="games"
           :hide-details="true"
+          :items="games"
+          class="home-tool-select"
           item-value="gid"
+          label="小工具（右侧）分区"
           variant="outlined"
-          label="分区"
         >
           <template #selection="{ item }">
             <div class="select-item main">
               <TMiImg
                 v-if="item.raw.icon"
+                :alt="item.raw.title"
                 :ori="true"
                 :src="item.raw.icon"
-                :alt="item.raw.title"
                 :title="item.raw.title"
                 class="icon"
               />
@@ -26,14 +27,14 @@
           </template>
           <template #item="{ props, item }">
             <div
-              v-bind="props"
-              class="select-item sub"
               :class="item.raw.gid === curGid ? 'selected' : ''"
+              class="select-item sub"
+              v-bind="props"
             >
               <TMiImg
                 v-if="item.raw.icon"
-                :src="item.raw.icon"
                 :alt="item.raw.title"
+                :src="item.raw.icon"
                 :title="item.raw.title"
                 class="icon"
               />
@@ -45,16 +46,16 @@
       </div>
       <div class="home-select">
         <v-select
-          width="300px"
-          variant="outlined"
           v-model="showItems"
-          :items="showItemsAll"
-          :hide-details="true"
-          :multiple="true"
           :chips="true"
+          :hide-details="true"
+          :items="showItemsAll"
+          :multiple="true"
           label="首页组件显示"
+          variant="outlined"
+          width="300px"
         />
-        <v-btn class="select-btn" @click="submitHome" :rounded="true">确定</v-btn>
+        <v-btn :rounded="true" class="select-btn" @click="submitHome">确定</v-btn>
       </div>
     </div>
     <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />

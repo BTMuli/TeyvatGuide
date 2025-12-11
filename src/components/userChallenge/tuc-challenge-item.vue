@@ -49,7 +49,7 @@ import TucMonsterTag from "./tuc-monster-tag.vue";
 
 import { AppCharacterData } from "@/data/index.js";
 
-type TucChallengeItemProps = { data: TGApp.Game.Challenge.ChallengeList };
+type TucChallengeItemProps = { data: TGApp.Game.Challenge.ChallengeData };
 
 const props = defineProps<TucChallengeItemProps>();
 

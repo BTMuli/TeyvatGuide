@@ -1,7 +1,6 @@
 /**
- * @file plugins/Sqlite/utils/transUserRecord.ts
- * @description Sqlite 数据转换 用户战绩数据转换模块
- * @since Beta v0.8.1
+ * 原神战绩数据转换
+ * @since Beta v0.9.0
  */
 
 import { getZhElement } from "@utils/toolFunc.js";
@@ -63,13 +62,15 @@ function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar
 }
 
 /**
- * @description 获取幽境危战难度描述
- * @since Beta v0.8.0
+ * 获取幽境危战难度描述
+ * @since Beta v0.9.0
  * @param {number} difficulty 幽境危战难度
  * @return {string} 幽境危战难度描述
  */
 export function getHardChallengeDesc(difficulty: number): string {
   switch (difficulty) {
+    case 0:
+      return "未挑战";
     case 1:
       return "普通";
     case 2:

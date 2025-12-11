@@ -6,20 +6,20 @@
         <img alt="icon" src="/source/UI/userChallenge.webp" />
         <span>幽境危战</span>
         <v-select
-          density="compact"
-          variant="outlined"
           v-model="uidCur"
-          :items="uidList"
           :hide-details="true"
+          :items="uidList"
+          density="compact"
           label="游戏UID"
+          variant="outlined"
           @update:model-value="switchUid"
         />
         <v-btn :rounded="true" class="ucp-btn" @click="toAbyss()">
-          <img src="/source/UI/userAbyss.webp" alt="abyss" />
+          <img alt="abyss" src="/source/UI/userAbyss.webp" />
           <span>深境螺旋</span>
         </v-btn>
         <v-btn :rounded="true" class="ucp-btn" @click="toCombat()">
-          <img src="/source/UI/userCombat.webp" alt="abyss" />
+          <img alt="abyss" src="/source/UI/userCombat.webp" />
           <span>真境剧诗</span>
         </v-btn>
       </div>
@@ -27,14 +27,14 @@
     <template #append>
       <div class="ucp-top-append">
         <v-select
-          :items="serverList"
           v-model="server"
+          :disabled="reqPop"
+          :items="serverList"
+          density="compact"
           item-title="text"
           item-value="value"
           label="服务器"
           width="200px"
-          density="compact"
-          :disabled="reqPop"
         />
       </div>
     </template>
@@ -42,28 +42,28 @@
       <div class="ucp-top-extension">
         <div class="act-list">
           <v-btn
-            class="ucp-btn"
-            @click="shareChallenge()"
             :disabled="localChallenge.length === 0"
+            class="ucp-btn"
             prepend-icon="mdi-share"
+            @click="shareChallenge()"
           >
             分享
           </v-btn>
-          <v-btn class="ucp-btn" @click="refreshChallenge()" prepend-icon="mdi-refresh">刷新</v-btn>
-          <v-btn class="ucp-btn" @click="tryReadChallenge()" prepend-icon="mdi-download">
+          <v-btn class="ucp-btn" prepend-icon="mdi-refresh" @click="refreshChallenge()">刷新</v-btn>
+          <v-btn class="ucp-btn" prepend-icon="mdi-download" @click="tryReadChallenge()">
             导入
           </v-btn>
-          <v-btn class="ucp-btn" @click="deleteChallenge()" prepend-icon="mdi-delete">删除</v-btn>
+          <v-btn class="ucp-btn" prepend-icon="mdi-delete" @click="deleteChallenge()">删除</v-btn>
         </div>
         <div class="pop-list">
           <TucPopItem v-for="avatar in popList" :key="avatar.avatar_id" :avatar />
           <v-btn
-            :loading="reqPop"
-            size="36"
-            class="pop-btn"
-            @click="refreshPopList"
-            icon="mdi-refresh"
             :disabled="reqPop"
+            :loading="reqPop"
+            class="pop-btn"
+            icon="mdi-refresh"
+            size="36"
+            @click="refreshPopList"
           />
         </div>
       </div>
@@ -71,11 +71,11 @@
   </v-app-bar>
   <div class="user-challenge-box">
     <v-tabs
-      v-model="userTab"
-      direction="vertical"
-      class="ucb-tabs"
-      center-active
       v-if="localChallenge.length > 0"
+      v-model="userTab"
+      center-active
+      class="ucb-tabs"
+      direction="vertical"
     >
       <v-tab v-for="item in localChallenge" :key="item.id" :value="item.id">
         <div class="ucb-tab">
@@ -102,14 +102,14 @@
               幽境危战 | UID-{{ item.uid }} | Render by TeyvatGuide v{{ version }}
             </div>
           </div>
-          <TucBlings :data="item.blings" v-if="item.blings.length > 0" />
-          <TucOverview title="单人模式" :data="item.single" />
-          <TucOverview title="联机模式" :data="item.mp" v-if="item.mp.has_data" />
+          <TucBlings v-if="item.blings.length > 0" :data="item.blings" />
+          <TucOverview :data="item.single" title="单人模式" />
+          <TucOverview v-if="item.mp.has_data" :data="item.mp" title="联机模式" />
         </div>
       </v-window-item>
     </v-window>
     <div v-show="localChallenge.length === 0" class="ucb-empty">
-      <img src="/source/UI/empty.webp" alt="empty" />
+      <img alt="empty" src="/source/UI/empty.webp" />
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
@@ -276,6 +276,7 @@ async function refreshChallenge(): Promise<void> {
   await TGLogger.Info("[UserChallenge][refreshChallenge] 开始刷新挑战数据");
   await showLoading.start(`正在获取${account.value.gameUid}的幽境危战数据`);
   const resp = await recordReq.challenge.detail(cookie.value, account.value);
+  console.log(resp);
   if ("retcode" in resp) {
     await showLoading.end();
     isReq.value = false;
@@ -326,6 +327,7 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
     await showLoading.start("正在加载赋光之人列表", `服务器： ${getGameServerDesc(server.value)}`);
   }
   const resp = await recordReq.challenge.pop(server.value);
+  console.log("赋光之人列表", resp);
   if (resp.retcode !== 0) {
     reqPop.value = false;
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);

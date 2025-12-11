@@ -1,18 +1,18 @@
 <!-- 近期活动卡片组件（用户）-->
 <template>
-  <div class="ph-pos-user-card" ref="posRef">
+  <div ref="posRef" class="ph-pos-user-card">
     <div class="ph-puc-top">
       <div class="title">
-        <v-icon title="已完成" color="var(--tgc-od-green)" v-if="props.pos.is_finished">
+        <v-icon v-if="props.pos.is_finished" color="var(--tgc-od-green)" title="已完成">
           mdi-checkbox-marked-circle-outline
         </v-icon>
-        <v-icon v-else title="未完成" color="var(--tgc-od-white)">mdi-circle</v-icon>
-        <span @click="sharePos()" title="点击分享">{{ props.pos.name }}</span>
+        <v-icon v-else color="var(--tgc-od-white)" title="未完成">mdi-circle</v-icon>
+        <span title="点击分享" @click="sharePos()">{{ props.pos.name }}</span>
       </div>
       <div class="subtitle">
         <!-- 处理幽境危战 -->
         <template v-if="props.pos.type === ActCalendarTypeEnum.HardChallenge">
-          <div class="challenge-append" @click="toChallenge()" title="点击前往幽境页面">
+          <div class="challenge-append" title="点击前往幽境页面" @click="toChallenge()">
             <template v-if="!props.pos.hard_challenge_detail.is_unlock">
               <span>未解锁</span>
             </template>
@@ -20,22 +20,31 @@
               <span>最佳记录</span>
               <span>{{ props.pos.hard_challenge_detail.second }}s</span>
               <img
-                :title="getHardChallengeDesc(props.pos.hard_challenge_detail.difficulty)"
                 :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.pos.hard_challenge_detail.difficulty}.webp`"
+                :title="getHardChallengeDesc(props.pos.hard_challenge_detail.difficulty)"
                 alt="medal"
               />
+              <div
+                v-if="props.pos.hard_challenge_detail.sub.seconds > 0"
+                :title="`紊乱爆发期结束:${endHd}`"
+                class="challenge-sub"
+              >
+                <span>{{ props.pos.hard_challenge_detail.sub.x }}</span>
+                <span>/{{ props.pos.hard_challenge_detail.sub.y }}</span>
+                <img alt="sub" src="/icon/challenge/pos_sub.webp" />
+              </div>
             </template>
           </div>
         </template>
         <!-- 处理真境剧诗 -->
         <template v-else-if="props.pos.type === ActCalendarTypeEnum.RoleCombat">
-          <div class="combat-append" @click="toCombat()" title="点击前往剧诗页面">
+          <div class="combat-append" title="点击前往剧诗页面" @click="toCombat()">
             <span>{{ getCombatStat(props.pos.role_combat_detail) }}</span>
           </div>
         </template>
         <!-- 处理深境螺旋 -->
         <template v-else-if="props.pos.type === ActCalendarTypeEnum.Tower">
-          <div class="abyss-append" @click="toAbyss()" title="点击前往深渊页面">
+          <div class="abyss-append" title="点击前往深渊页面" @click="toAbyss()">
             <template v-if="!props.pos.tower_detail.is_unlock">
               <span>未解锁</span>
             </template>
@@ -46,7 +55,7 @@
               <span>
                 {{ props.pos.tower_detail.max_star }}/{{ props.pos.tower_detail.total_star }}
               </span>
-              <img src="/icon/star/Abyss.webp" alt="abyss" />
+              <img alt="abyss" src="/icon/star/Abyss.webp" />
             </template>
           </div>
         </template>
@@ -60,11 +69,24 @@
             剩余双倍次数: {{ props.pos.double_detail.left }}/{{ props.pos.double_detail.total }}
           </span>
         </template>
+        <!-- 处理立本活动 TODO:待完善 -->
+        <template v-else-if="props.pos.type === ActCalendarTypeEnum.LiBen">
+          <span>当天{{ props.pos.liben_detail.status === 1 ? "未" : "已" }}兑换</span>
+          <span>{{ props.pos.liben_detail.progress }}/{{ props.pos.liben_detail.total }}</span>
+          <span>
+            {{ props.pos.liben_detail.is_has_taken_special_reward ? "已" : "未" }}领取礼盒
+          </span>
+        </template>
+        <!-- 处理累登活动 TODO:待完善 -->
+        <template v-else-if="props.pos.type === ActCalendarTypeEnum.SignIn">
+          <span>{{ props.pos.sign_in_detail.progress }}/{{ props.pos.sign_in_detail.total }}</span>
+          <span>当天{{ props.pos.sign_in_detail.status === 1 ? "未领取" : "已领取" }}</span>
+        </template>
       </div>
     </div>
     <div class="ph-puc-duration">
       <template v-if="isStart">
-        <span title="剩余时间" data-html2canvas-ignore>{{ stamp2LastTime(restTs * 1000) }}</span>
+        <span data-html2canvas-ignore title="剩余时间">{{ stamp2LastTime(restTs * 1000) }}</span>
         <span title="活动时间">
           {{ timestampToDate(Number(props.pos.start_timestamp) * 1000) }} ~
           {{ timestampToDate(Number(props.pos.end_timestamp) * 1000) }}
@@ -74,16 +96,17 @@
         <span>未开始</span>
       </template>
     </div>
+    <div class="ph-puc-desc">{{ props.pos.desc }}</div>
     <div class="ph-puc-rewards">
       <div
-        :title="`${reward.name}${reward.num > 0 ? `x${reward.num}` : ''}`"
         v-for="reward in props.pos.reward_list"
         :key="reward.item_id"
+        :title="`${reward.name}${reward.num > 0 ? `x${reward.num}` : ''}`"
         class="ph-puc-reward"
         @click="showMaterial(reward)"
       >
-        <img :src="`/icon/bg/${reward.rarity}-Star.webp`" class="bg" alt="bg" />
-        <TMiImg :ori="true" :alt="reward.name" :src="reward.icon" class="icon" />
+        <img :src="`/icon/bg/${reward.rarity}-Star.webp`" alt="bg" class="bg" />
+        <TMiImg :alt="reward.name" :ori="true" :src="reward.icon" class="icon" />
         <span v-if="reward.num > 0" class="count">{{ reward.num }}</span>
       </div>
     </div>
@@ -112,6 +135,7 @@ const posEl = useTemplateRef<HTMLDivElement>("posRef");
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
+const endHd = ref<string>();
 const isStart = computed<boolean>(() => {
   return props.pos.start_timestamp !== "0";
 });
@@ -124,6 +148,12 @@ onMounted(() => {
   }
   if (timer !== null) clearInterval(timer);
   timer = setInterval(handlePosition, 1000);
+  if (
+    props.pos.type === "ActTypeHardChallenge" &&
+    props.pos.hard_challenge_detail.sub.seconds >= 0
+  ) {
+    endHd.value = timestampToDate(Date.now() + props.pos.hard_challenge_detail.sub.seconds * 1000);
+  }
 });
 
 onUnmounted(() => {
@@ -226,7 +256,20 @@ async function sharePos(): Promise<void> {
       img {
         width: 24px;
         height: 24px;
+        padding: 2px;
+        border-radius: 50%;
+        background: #2c313c;
         cursor: pointer;
+      }
+    }
+
+    .challenge-sub {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      img {
+        background: unset;
       }
     }
   }
@@ -245,6 +288,11 @@ async function sharePos(): Promise<void> {
     font-size: 10px;
     opacity: 0.6;
   }
+}
+
+.ph-puc-desc {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .ph-puc-rewards {

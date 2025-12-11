@@ -9,9 +9,9 @@ declare namespace TGApp.Plugins.UIAF {
    * @since Alpha v0.1.5
    */
   type Data = {
-    /* UIAF 头部信息 */
+    /** UIAF 头部信息 */
     info: Export;
-    /* UIAF 成就列表 */
+    /** UIAF 成就列表 */
     list: Array<Achievement>;
   };
 
@@ -20,13 +20,13 @@ declare namespace TGApp.Plugins.UIAF {
    * @since Alpha v0.1.5
    */
   type Export = {
-    /* 导出的应用名称 */
+    /** 导出的应用名称 */
     export_app: string;
-    /* 导出时间戳，秒级 */
+    /** 导出时间戳，秒级 */
     export_timestamp: number;
-    /* 导出的应用版本 */
+    /** 导出的应用版本 */
     export_app_version: string;
-    /* UIAF 版本 */
+    /** UIAF 版本 */
     uiaf_version: string;
   };
 
@@ -35,13 +35,13 @@ declare namespace TGApp.Plugins.UIAF {
    * @since Beta v0.7.8
    */
   const AchiItemStat = <const>{
-    /* 无效状态 */
+    /** 无效状态 */
     Invalid: 0,
-    /* 未完成 */
+    /** 未完成 */
     Unfinished: 1,
-    /* 已完成未领取奖励 */
+    /** 已完成未领取奖励 */
     Finished: 2,
-    /* 已领取奖励 */
+    /** 已领取奖励 */
     RewardTaken: 3,
   };
 
@@ -57,13 +57,13 @@ declare namespace TGApp.Plugins.UIAF {
    * @description UIAF 单个成就数据
    */
   type Achievement = {
-    /* 成就 ID */
+    /** 成就 ID */
     id: number;
-    /* 成就记录时间戳，秒级 */
+    /** 成就记录时间戳，秒级 */
     timestamp: number;
-    /* 成就进度 */
+    /** 成就进度 */
     current: number;
-    /* 成就状态 */
+    /** 成就状态 */
     status: AchiItemStatEnum;
   };
 }

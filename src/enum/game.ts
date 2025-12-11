@@ -1,6 +1,6 @@
 /**
  * 游戏相关枚举
- * @since Beta v0.8.0
+ * @since Beta v0.9.0
  */
 
 /**
@@ -47,7 +47,7 @@ export function getGameServerDesc(server: TGApp.Game.Base.ServerTypeEnum): strin
 
 /**
  * 近期活动活动类型枚举
- * @since Beta v0.8.0
+ * @since Beta v0.9.0
  */
 export const ActCalendarTypeEnum: typeof TGApp.Game.ActCalendar.ActType = {
   /** 幽境危战 */
@@ -60,6 +60,10 @@ export const ActCalendarTypeEnum: typeof TGApp.Game.ActCalendar.ActType = {
   Double: "ActTypeDouble",
   /** 探索活动 */
   Explore: "ActTypeExplore",
+  /** 立本活动 */
+  LiBen: "ActTypeLiBen",
+  /** 累登活动 */
+  SignIn: "ActTypeSignIn",
   /** 其他活动 */
   Other: "ActTypeOther",
 };

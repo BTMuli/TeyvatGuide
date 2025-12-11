@@ -1,28 +1,26 @@
 /**
- * @file types/Game/Challenge.d.ts
- * @description 幽境危战相关类型定义文件
+ * 幽境危战
  * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Game.Challenge {
   /**
-   * @description 幽境危战赋光之人列表返回响应
+   * 赋光之人列表返回响应
    * @since Beta v0.8.0
-   * @interface PopularityResp
-   * @extends TGApp.BBS.Response.BaseWithData<PopularityRes>
    */
   type PopularityResp = TGApp.BBS.Response.BaseWithData<PopularityRes>;
 
   /**
-   * @description 幽境危战赋光之人列表数据
+   * 赋光之人列表数据
    * @since Beta v0.8.0
-   * @interface PopularityRes
-   * @property {Array<PopularityItem>} avatar_list - 赋光之人列表
    */
-  type PopularityRes = { avatar_list: Array<PopularityItem> };
+  type PopularityRes = {
+    /** 赋光之人列表 */
+    avatar_list: Array<PopularityItem>;
+  };
 
   /**
-   * @description 幽境危战赋光之人列表项
+   * 赋光之人
    * @since Beta v0.8.0
    * @interface PopularityItem
    * @property {number} avatar_id - 角色 ID
@@ -32,204 +30,232 @@ declare namespace TGApp.Game.Challenge {
    * @property {number} rarity - 角色稀有度
    */
   type PopularityItem = {
+    /** 角色ID */
     avatar_id: number;
+    /** 角色名称 */
     name: string;
+    /**
+     * 角色元素
+     * @remarks Anemo,Cryo,Electro等
+     */
     element: string;
+    /** 角色图标 */
     image: string;
+    /** 角色星级 */
     rarity: number;
   };
 
   /**
-   * @description 挑战数据返回响应（详细）
+   * 挑战数据返回响应（详细）
    * @since Beta v0.8.0
-   * @interface ChallengeResp
-   * @extends TGApp.BBS.Response.BaseWithData<ChallengeRes>
    */
   type ChallengeResp = TGApp.BBS.Response.BaseWithData<ChallengeRes>;
 
   /**
-   * @description 挑战数据返回（详细）
+   * 挑战数据（详细）
    * @since Beta v0.8.0
-   * @interface ChallengeRes
-   * @property {Array<ChallengeItem>} data - 挑战数据列表
-   * @property {boolean} is_unlock - 是否解锁挑战
-   * @property {ChallengeLink} link - 挑战链接信息
    */
-  type ChallengeRes = { data: Array<ChallengeItem>; is_unlock: boolean; link: ChallengeLink };
+  type ChallengeRes = {
+    /** 挑战数据 */
+    data: Array<ChallengeItem>;
+    /** 是否解锁 */
+    is_unlock: boolean;
+    /** 外部链接 */
+    link: ChallengeLink;
+  };
 
   /**
-   * @description 挑战链接信息
+   * 外部链接
    * @since Beta v0.8.0
-   * @interface ChallengeLink
-   * @property {string} lineup_link - 队伍配置链接
-   * @property {string} play_link - 挑战链接
    */
-  type ChallengeLink = { lineup_link: string; play_link: string };
+  type ChallengeLink = {
+    /** 未知URL */
+    lineup_link: string;
+    /** 活动攻略链接 */
+    play_link: string;
+  };
 
   /**
-   * @description 挑战数据项
+   * 挑战数据
    * @since Beta v0.8.0
-   * @interface ChallengeItem
-   * @property {ChallengeSchedule} schedule - 挑战周期信息
-   * @property {Challenge} single - 单次挑战数据
-   * @property {Challenge} mp - 多人挑战数据
-   * @property {ChallengeBlings} blings - 赋予辉光数据
    */
   type ChallengeItem = {
+    /** 周期数据 */
     schedule: ChallengeSchedule;
+    /** 单人挑战 */
     single: Challenge;
+    /** 联机挑战 */
     mp: Challenge;
+    /** 赋光信息 */
     blings: ChallengeBlings;
   };
 
   /**
-   * @description 挑战周期信息
+   * 挑战周期信息
    * @since Beta v0.8.0
-   * @interface ChallengeSchedule
-   * @property {string} schedule_id - 挑战周期 ID
-   * @property {string} start_time - 挑战开始时间(秒级时间戳)
-   * @property {string} end_time - 挑战结束时间(秒级时间戳)
-   * @property {TGApp.Game.Base.DateTime} start_date_time - 挑战开始时间（DateTime 对象）
-   * @property {TGApp.Game.Base.DateTime} end_date_time - 挑战结束时间（DateTime 对象）
-   * @property {boolean} is_valid - 是否有效
-   * @property {string} name - 挑战名称
    */
   type ChallengeSchedule = {
+    /** 周期ID */
     schedule_id: string;
+    /** 开始时间戳（秒级） */
     start_time: string;
+    /** 结束时间戳（秒级） */
     end_time: string;
+    /** 开始时间 */
     start_date_time: TGApp.Game.Base.DateTime;
+    /** 结束时间 */
     end_date_time: TGApp.Game.Base.DateTime;
+    /** 是否有效 */
     is_valid: boolean;
+    /** 名称 */
     name: string;
   };
 
   /**
-   * @description 单次挑战数据
+   * 挑战数据
    * @since Beta v0.8.0
-   * @interface Challenge
-   * @property {ChallengeBest} best - 最佳挑战数据
-   * @property {Array<ChallengeList>} challenge - 挑战列表
-   * @property {boolean} has_data - 是否有数据
    */
-  type Challenge = { best: ChallengeBest; challenge: Array<ChallengeList>; has_data: boolean };
+  type Challenge = {
+    /** 最佳数据 */
+    best: ChallengeBest;
+    /** 挑战列表 */
+    challenge: Array<ChallengeData>;
+    /** 是否有数据 */
+    has_data: boolean;
+  };
 
   /**
-   * @description 单次挑战最佳数据
+   * 最佳数据
    * @since Beta v0.8.0
-   * @interface ChallengeBest
-   * @property {number} difficulty - 挑战难度
-   * @property {number} second - 挑战用时（秒）
-   * @property {string} icon - 挑战图标名称
    */
-  type ChallengeBest = { difficulty: number; second: number; icon: string };
-
-  /**
-   * @description 单次挑战数据项
-   * @since Beta v0.8.0
-   * @interface ChallengeList
-   * @property {string} name - 怪物名称
-   * @property {number} second - 挑战用时（秒）
-   * @property {Array<ChallengeTeam>} teams - 挑战队伍列表
-   * @property {Array<ChallengeAvatar>} best_avatar - 最佳角色列表
-   * @property {ChallengeMonster} monster - 挑战怪物数据
-   */
-  type ChallengeList = {
-    name: string;
+  type ChallengeBest = {
+    /** 难度 */
+    difficulty: number;
+    /** 耗时（秒） */
     second: number;
+    /** 图标 */
+    icon: string;
+  };
+
+  /**
+   * 挑战数据
+   * @since Beta v0.8.0
+   */
+  type ChallengeData = {
+    /** 怪物名称 */
+    name: string;
+    /** 耗时（秒） */
+    second: number;
+    /** 上场队伍 */
     teams: Array<ChallengeTeam>;
+    /** 最佳角色 */
     best_avatar: Array<ChallengeAvatar>;
+    /** 怪物信息 */
     monster: ChallengeMonster;
   };
 
   /**
-   * @description 单次挑战队伍数据
+   * 队伍数据
    * @since Beta v0.8.0
-   * @interface ChallengeTeam
-   * @property {number} avatar_id - 角色 ID
-   * @property {string} name - 角色名称
-   * @property {string} element - 角色元素
-   * @property {string} image - 角色头像图片 URL
-   * @property {number} level - 角色等级
-   * @property {number} rarity - 角色稀有度
-   * @property {number} rank - 角色命座
    */
   type ChallengeTeam = {
+    /** 角色ID */
     avatar_id: number;
+    /** 角色名称 */
     name: string;
+    /**
+     * 角色元素
+     * @remarks Cryo 等
+     */
     element: string;
+    /** 角色图标 */
     image: string;
+    /** 角色等级 */
     level: number;
+    /** 角色星级 */
     rarity: number;
+    /** 角色命座 */
     rank: number;
   };
 
   /**
-   * @description 单次挑战最佳角色数据
+   * 最佳角色数据
    * @since Beta v0.8.0
-   * @interface ChallengeAvatar
-   * @property {number} avatar_id - 角色 ID
-   * @property {string} side_icon - 角色侧边图标 URL
-   * @property {string} dps - 角色 DPS 数据
-   * @property {number} type - 1-最强一击，2-最高总伤害
    */
-  type ChallengeAvatar = { avatar_id: number; side_icon: string; dps: string; type: number };
-
-  /**
-   * @description 单次挑战怪物数据
-   * @since Beta v0.8.0
-   * @interface ChallengeMonster
-   * @property {string} name - 怪物名称
-   * @property {number} level - 怪物等级
-   * @property {string} icon - 怪物图标 URL
-   * @property {Array<string>} desc - 怪物描述列表
-   * @property {Array<MonsterTag>} tags - 怪物标签列表
-   * @property {string} monster_id - 怪物 ID
-   */
-  type ChallengeMonster = {
-    name: string;
-    level: number;
-    icon: string;
-    desc: Array<string>;
-    tags: Array<MonsterTag>;
-    monster_id: string;
+  type ChallengeAvatar = {
+    /** 角色ID */
+    avatar_id: number;
+    /** 侧边图标 */
+    side_icon: string;
+    /**输出 */
+    dps: string;
+    /**
+     * 数据类型
+     * @remarks 1-最强一击，2-最高总伤
+     */
+    type: number;
   };
 
   /**
-   * @description 怪物标签
+   * 怪物数据
    * @since Beta v0.8.0
-   * @interface MonsterTag
-   * @property {string} type - 标签类型
-   * @property {string} desc - 标签描述
    */
-  type MonsterTag = { type: string; desc: string };
+  type ChallengeMonster = {
+    /** 名称 */
+    name: string;
+    /** 等级 */
+    level: number;
+    /** 图标 */
+    icon: string;
+    /** 描述 */
+    desc: Array<string>;
+    /**
+     * 标签
+     * @remarks 一般为空
+     */
+    tags: Array<MonsterTag>;
+    /** 怪物ID */
+    monster_id: number;
+  };
 
   /**
-   * @description 赋予辉光数据
+   * 怪物标签
    * @since Beta v0.8.0
-   * @interface ChallengeBlings
+   */
+  type MonsterTag = {
+    /** 标签类型 */
+    type: string;
+    /** 标签描述 */
+    desc: string;
+  };
+
+  /**
+   * 赋予辉光数据
+   * @since Beta v0.8.0
    */
   type ChallengeBlings = Array<ChallengeBling>;
 
   /**
-   * @description 赋予辉光数据项
+   * 赋予辉光数据项
    * @since Beta v0.8.0
-   * @interface ChallengeBling
-   * @property {number} avatar_id - 角色 ID
-   * @property {string} name - 角色名称
-   * @property {string} element - 角色元素
-   * @property {string} image - 角色头像图片 URL
-   * @property {string} side_icon - 角色侧边图标 URL
-   * @property {number} rarity - 角色稀有度
-   * @property {boolean} is_plus - 是否上榜
    */
   type ChallengeBling = {
+    /** 角色ID */
     avatar_id: number;
+    /** 角色名称 */
     name: string;
+    /**
+     * 角色元素
+     * @remarks Cyro 等
+     */
     element: string;
+    /** 角色图标 */
     image: string;
+    /** 侧边栏图标 */
     side_icon: string;
+    /** 星级 */
     rarity: number;
+    /** 是否上榜 */
     is_plus: boolean;
   };
 }
