@@ -1,157 +1,165 @@
 /**
- * @file types/Game/Abyss.d.ts
- * @description 游戏深渊相关类型定义文件
- * @since Alpha v0.2.0
+ * 深境螺旋相关类型
+ * @since Beta v0.9.0
  */
 
-/**
- * @description 深渊数据相关类型
- * @since Alpha v0.2.0
- * @namespace TGApp.Game.Abyss
- * @memberof TGApp.Game
- */
 declare namespace TGApp.Game.Abyss {
   /**
-   * @description 深渊数据返回类型
-   * @interface Response
+   * 深渊数据返回响应
    * @since Alpha v0.2.0
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {FullData} data - 深渊数据
-   * @return Response
    */
-  interface Response extends TGApp.BBS.Response.BaseWithData {
-    data: FullData;
-  }
+  type Response = TGApp.BBS.Response.BaseWithData<FullData>;
 
   /**
-   * @description 深渊数据类型
-   * @interface FullData
+   * 深渊数据
    * @since Beta v0.6.1
-   * @property {number} schedule_id - 深渊周期 ID
-   * @property {string} start_time - 深渊开始时间，单位：秒
-   * @property {string} end_time - 深渊结束时间，单位：秒
-   * @property {number} total_battle_times - 总战斗次数
-   * @property {number} total_win_times - 总胜利次数
-   * @property {string} max_floor - 最深抵达 // 12-3
-   * @property {Character[]} reveal_rank - 出站次数 // 最多的 4 个角色
-   * @property {Character[]} defeat_rank - 最多击破数
-   * @property {Character[]} damage_rank - 最强一击
-   * @property {Character[]} take_damage_rank - 承受最多伤害
-   * @property {Character[]} normal_skill_rank - 元素战技释放数
-   * @property {Character[]} energy_skill_rank - 元素爆发次数
-   * @property {Floor[]} floors - 深渊各层数据
-   * @property {number} total_star - 总星数
-   * @property {boolean} is_unlock - 是否解锁
-   * @property {boolean} is_just_skipped_floor - 是否跳过楼层
-   * @property {boolean} skipped_floor - 跳过楼层
-   * @return FullData
    */
-  interface FullData {
+  type FullData = {
+    /** 周期ID */
     schedule_id: number;
+    /** 开始时间戳（秒） */
     start_time: string;
+    /** 结束时间戳（秒） */
     end_time: string;
+    /** 战斗次数 */
     total_battle_times: number;
+    /** 胜利次数 */
     total_win_times: number;
+    /** 最大楼层 */
     max_floor: string;
-    reveal_rank: CharacterData[];
-    defeat_rank: CharacterData[];
-    damage_rank: CharacterData[];
-    take_damage_rank: CharacterData[];
-    normal_skill_rank: CharacterData[];
-    energy_skill_rank: CharacterData[];
-    floors: Floor[];
+    /** 出战次数 */
+    reveal_rank: Array<CharacterData>;
+    /** 最多击败 */
+    defeat_rank: Array<CharacterData>;
+    /** 最强一击 */
+    damage_rank: Array<CharacterData>;
+    /** 最多承伤 */
+    take_damage_rank: Array<CharacterData>;
+    /** 元素战技释放数 */
+    normal_skill_rank: Array<CharacterData>;
+    /** 元素爆发释放数 */
+    energy_skill_rank: Array<CharacterData>;
+    /** 楼层数据 */
+    floors: Array<Floor>;
+    /** 总星数 */
     total_star: number;
+    /** 是否解锁 */
     is_unlock: boolean;
+    /** 是否有跳过楼层 */
     is_just_skipped_floor: boolean;
+    /** 跳过楼层 */
     skipped_floor: string;
-  }
+  };
 
   /**
-   * @description 深渊角色数据类型
-   * @interface CharacterData
+   * 角色数据
    * @since Alpha v0.2.0
-   * @property {number} avatar_id - 角色 ID
-   * @property {string} avatar_icon - 角色图标
-   * @property {number} value - 值
-   * @property {number} rarity - 角色星级
-   * @return CharacterData
    */
-  interface CharacterData {
+  type CharacterData = {
+    /** 角色ID */
     avatar_id: number;
+    /** 角色图标 */
     avatar_icon: string;
+    /** 值 */
     value: number;
+    /** 角色星级 */
     rarity: number;
-  }
+  };
 
   /**
-   * @description 深渊层数据类型
-   * @interface Floor
-   * @since Alpha v0.2.0
-   * @property {number} index - 层索引
-   * @property {string} icon - 层图标
-   * @property {boolean} is_unlock - 是否解锁
-   * @property {number} settle_time
-   * @property {number} star - 获得星数
-   * @property {number} max_star - 最大星数
-   * @property {Level[]} levels - 层内关卡数据
-   * @return Floor
+   * 楼层数据
+   * @since Beta v0.9.0
    */
-  interface Floor {
+  type Floor = {
+    /** 楼层 */
     index: number;
+    /**
+     * 图标
+     * @remarks 一般为空字符串
+     */
     icon: string;
+    /** 是否解锁 */
     is_unlock: boolean;
-    settle_time: number;
+    /** 结束时间戳（秒级）
+     * @remarks 一般为 0
+     */
+    settle_time: string;
+    /** 获得星数 */
     star: number;
+    /** 最大星数 */
     max_star: number;
-    levels: Level[];
-  }
+    /** 关卡数据 */
+    levels: Array<Level>;
+    /** 结束时间
+     * @remarks 一般为 null
+     */
+    settle_date_time: TGApp.Game.Base.DateTime | null;
+    /** 关卡Buff */
+    ley_line_disorder: Array<string>;
+  };
 
   /**
-   * @description 深渊关卡数据类型
-   * @interface Level
-   * @since Alpha v0.2.0
-   * @property {number} index - 关卡索引
-   * @property {number} star - 获得星数
-   * @property {number} max_star - 最大星数
-   * @property {Battle[]} battles - 关卡内战斗数据
-   * @return Level
+   * 关卡数据
+   * @since Beta v0.9.0
    */
-  interface Level {
+  type Level = {
+    /** 关卡索引  */
     index: number;
+    /** 获得星数 */
     star: number;
+    /** 最大星数 */
     max_star: number;
-    battles: Battle[];
-  }
+    /** 战斗数据 */
+    battles: Array<Battle>;
+    /** 上半场怪物数据 */
+    top_half_floor_monster: Array<MonsterInfo>;
+    /** 下半场怪物数据 */
+    bottom_half_floor_monster: Array<MonsterInfo>;
+  };
 
   /**
-   * @description 深渊战斗数据类型
-   * @interface Battle
-   * @since Alpha v0.2.0
-   * @property {number} index - 战斗索引 // 1为上半场，2为下半场
-   * @property {string} timestamp - 战斗时间戳
-   * @property {CharacterInfo[]} avatars - 角色信息
-   * @return Battle
+   * 怪物数据
+   * @since Beta v0.9.0
    */
-  interface Battle {
-    index: number;
-    timestamp: string;
-    avatars: CharacterInfo[];
-  }
-
-  /**
-   * @description 深渊角色信息类型
-   * @interface CharacterInfo
-   * @since Alpha v0.2.0
-   * @property {number} id - 角色 ID
-   * @property {string} icon - 角色图标
-   * @property {number} level - 角色等级
-   * @property {number} rarity - 角色星级
-   * @return CharacterInfo
-   */
-  interface CharacterInfo {
-    id: number;
+  type MonsterInfo = {
+    /** 名称 */
+    name: string;
+    /** 图标 */
     icon: string;
+    /** 等级 */
     level: number;
+  };
+
+  /**
+   * 战斗数据
+   * @since Alpha v0.2.0
+   */
+  type Battle = {
+    /**
+     * 战斗索引
+     * @remarks 1-上半场，2-下半场
+     */
+    index: number;
+    /** 结束时间戳 */
+    timestamp: string;
+    /** 上场角色 */
+    avatars: Array<CharacterInfo>;
+    /** 结束时间 */
+    settle_date_time: TGApp.Game.Base.DateTime;
+  };
+
+  /**
+   * 角色信息
+   * @since Alpha v0.2.0
+   */
+  type CharacterInfo = {
+    /** 角色ID */
+    id: number;
+    /** 角色图标 */
+    icon: string;
+    /** 角色等级 */
+    level: number;
+    /** 角色星级 */
     rarity: number;
-  }
+  };
 }
