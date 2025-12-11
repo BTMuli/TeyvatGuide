@@ -60,7 +60,7 @@
     </template>
   </v-app-bar>
   <div class="pbm-container">
-    <template v-for="material in materialShow" :key="material.info.id">
+    <template v-for="material in materialShow" :key="`${curUid}-${material.info.id}`">
       <PbMaterialItem :info="material.info" :tb="material.tb" @select="handleSelect" />
     </template>
   </div>
@@ -113,7 +113,7 @@ export type MaterialInfo = {
 
 const { gameDir } = storeToRefs(useAppStore());
 
-const curUid = ref<number>();
+const curUid = ref<number>(0);
 const selectType = ref<string | null>(null);
 const search = ref<string>();
 const showOverlay = ref<boolean>(false);
@@ -135,9 +135,9 @@ onMounted(async () => {
 
 watch(
   () => curUid.value,
-  async (value) => {
+  async () => {
     if (showOverlay.value) showOverlay.value = false;
-    if (value) await loadMaterialList(value);
+    await loadMaterialList(curUid.value);
   },
 );
 watch(
@@ -156,12 +156,16 @@ watch(
 /**
  * 加载存档数据
  * @param {number} uid 存档UID
- * @todo 重构加载逻辑，支持空存档
  * @returns {Promise<void>}
  */
 async function loadMaterialList(uid: number): Promise<void> {
   if (showOverlay.value) showOverlay.value = false;
   await showLoading.start(`正在加载 ${uid} 的材料数据`);
+  // 初始化
+  materialTypes.value = [];
+  materialShow.value = [];
+  materialList.value = [];
+  selectType.value = null;
   const dList = await TSUserBagMaterial.getMaterial(uid);
   const mList = [];
   const tList: Array<MaterialType> = [];
@@ -180,7 +184,6 @@ async function loadMaterialList(uid: number): Promise<void> {
   materialShow.value = mList;
   materialTypes.value = tList;
   curIdx.value = 0;
-  selectType.value = null;
   await showLoading.end();
 }
 
@@ -299,6 +302,9 @@ async function deleteUid(): Promise<void> {
   uidList.value = uidList.value.filter((e) => e !== curUid.value);
   if (uidList.value.length === 0) uidList.value = [0];
   curUid.value = uidList.value[0];
+  showSnackbar.success(`已删除对应存档，即将刷新`);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+  window.location.reload();
 }
 
 /**

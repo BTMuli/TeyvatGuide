@@ -6,6 +6,19 @@ import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
+import { WikiMaterialData } from "@/data/index.js";
+
+/**
+ * 获取有效材料ID
+ * @since Beta v0.9.0
+ * @return {Array<number>}
+ */
+function getValidMIds(): Array<number> {
+  const skipType = ["系统开放", "好感成长", "风之翼", "挑战结算道具", "稀有货币", "通用货币"];
+  const filter = WikiMaterialData.filter((m) => !skipType.includes(m.type));
+  return filter.map((f) => f.id);
+}
+
 /**
  * 获取插入Sql
  * @since Beta v0.9.0
@@ -116,7 +129,11 @@ async function getMaterial(
       [uid],
     );
   }
-  return res.map(parseMaterial);
+  const list = res.map(parseMaterial);
+  const ids = new Set<number>(getValidMIds());
+  for (const item of list) if (ids.has(item.id)) ids.delete(item.id);
+  for (const item of ids) list.push({ uid: uid, id: item, count: 0, records: [], updated: "" });
+  return list;
 }
 
 /**
@@ -128,10 +145,17 @@ async function getMaterial(
  */
 async function saveYaeData(
   uid: number,
-  list: Array<TGApp.Plugins.Yae.BagItem<"material">>,
+  list: Array<TGApp.Plugins.Yae.BagItemMaterial>,
 ): Promise<number> {
   let skip = 0;
-  for (const item of list) {
+  const ids = new Set<number>(getValidMIds());
+  const newList = list;
+  for (const item of list) if (ids.has(item.item_id)) ids.delete(item.item_id);
+  // 处理0数据
+  for (const item of ids.values()) {
+    newList.push({ item_id: item, kind: "material", info: { count: 0 } });
+  }
+  for (const item of newList) {
     const read = await getMaterial(uid, item.item_id);
     if (read.length === 0) {
       await insertMaterial(uid, item.item_id, item.info.count);
@@ -154,6 +178,7 @@ const TSUserBagMaterial = {
   saveYaeData,
   getMaterial,
   insertMaterial,
+  getValidMIds,
 };
 
 export default TSUserBagMaterial;
