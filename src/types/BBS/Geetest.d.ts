@@ -21,16 +21,16 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.8.7
    */
   type GtCreateRes = {
-    /* gt */
+    /** gt */
     gt: string;
-    /* challenge */
+    /** challenge */
     challenge: string;
-    /* 是否是新验证码 */
+    /** 是否是新验证码 */
     new_captcha: number;
-    /* 验证成功标志 */
+    /** 验证成功标志 */
     success: number;
-    /* 是否使用 Gt4 验证 */
-    use_v4: boolean;
+    /** 是否使用 Gt4 验证 */
+    use_v4?: boolean;
   };
 
   /**
@@ -38,15 +38,15 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.8.7
    */
   type Gt4CreateRes = {
-    /* gt */
+    /** gt */
     gt: string;
-    /* 是否是新验证码 */
+    /** 是否是新验证码 */
     new_captcha: number;
-    /* 风险类型 */
+    /** 风险类型 */
     risk_type: string;
-    /* 验证成功标志 */
+    /** 验证成功标志 */
     success: number;
-    /* 是否使用 Gt4 验证 */
+    /** 是否使用 Gt4 验证 */
     use_v4: boolean;
   };
 
@@ -61,7 +61,7 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.7.1
    */
   type VerifyRes = {
-    /* 极验验证 challenge */
+    /** 极验验证 challenge */
     challenge: string;
   };
 
@@ -70,19 +70,19 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.8.7
    */
   type InitGeetestParams = {
-    /* gt */
+    /** gt */
     gt: string;
-    /* challenge */
+    /** challenge */
     challenge: string;
-    /* 是否离线 */
+    /** 是否离线 */
     offline: boolean;
-    /* 是否是新验证码 */
+    /** 是否是新验证码 */
     new_captcha: boolean;
-    /* 验证形式 */
+    /** 验证形式 */
     product: string;
-    /* 宽度 */
+    /** 宽度 */
     width: string;
-    /* 覆盖区域 */
+    /** 覆盖区域 */
     area: string;
     /** 是否使用 https 协议 */
     https: boolean;
@@ -93,19 +93,19 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.8.7
    */
   type InitGeetest4Params = {
-    /* 验证ID */
+    /** 验证ID */
     captchaId: string;
-    /* 验证形式 */
+    /** 验证形式 */
     riskType: string;
-    /* 展现形式 */
+    /** 展现形式 */
     product: string;
-    /* 宽度 */
+    /** 宽度 */
     nextWidth: string;
-    /* 用户信息 */
+    /** 用户信息 */
     userInfo: unknown;
-    /* 语言 */
+    /** 语言 */
     lang: string;
-    /* 协议头 */
+    /** 协议头 */
     protocol: string;
   };
 
@@ -114,15 +114,15 @@ declare namespace TGApp.BBS.Geetest {
    * @since Beta v0.8.7
    */
   type GeetestCaptcha = {
-    /* 将验证码添加到指定的选择器中 */
+    /** 将验证码添加到指定的选择器中 */
     appendTo: (selector: string) => void;
-    /* 获取验证结果 */
+    /** 获取验证结果 */
     getValidate: () => Promise<GeetestVerifyRes>;
-    /* 关闭回调 */
+    /** 关闭回调 */
     onClose: (callback: () => void) => boolean;
-    /* 准备就绪回调 */
+    /** 准备就绪回调 */
     onReady: (callback: () => void) => void;
-    /* 成功回调 */
+    /** 成功回调 */
     onSuccess: (callback: () => void) => void;
   };
 

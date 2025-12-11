@@ -1,131 +1,119 @@
 /**
- * @file types/BBS/Sign.d.ts
- * @description 米游社游戏签到模块相关类型声明
+ * 游戏签到类型声明
  * @since Beta v0.7.2
  */
 
 declare namespace TGApp.BBS.Sign {
   /**
-   * @description 获取签到奖励信息返回
-   * @interface HomeResp
+   * 获取签到奖励信息返回响应
    * @since Beta v0.7.2
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {HomeRes} data - 返回数据
-   * @returns HomeResp
    */
   type HomeResp = TGApp.BBS.Response.BaseWithData<HomeRes>;
 
   /**
-   * @description 获取签到奖励信返回数据
-   * @interface HomeRes
-   * @property {number} month - 月份
-   * @property {Array<HomeAward>} awards - 签到奖励列表
-   * @property {string} biz - 业务标识
-   * @property {boolean} resign - 是否补签
-   * @property {HomeAwardExtra} short_extra_award - 签到额外奖励
-   * @returns HomeRes
+   * 签到奖励信息
+   * @since Beta v0.7.2
    */
   type HomeRes = {
+    /** 月份 */
     month: number;
+    /** 奖励列表 */
     awards: Array<HomeAward>;
+    /** 业务标识 */
     biz: string;
+    /** 是否补签 TODO:描述不清晰 */
     resign: boolean;
+    /** 活动额外奖励 */
     short_extra_award: HomeAwardExtra;
   };
 
   /**
-   * @description 签到奖励
-   * @interface HomeAward
-   * @property {string} icon - 奖励图标
-   * @property {string} name - 奖励名称
-   * @property {number} cnt - 奖励数量
-   * @returns HomeAward
+   * 签到奖励
+   * @since Beta v0.7.2
    */
-  type HomeAward = { icon: string; name: string; cnt: number };
+  type HomeAward = {
+    /** 图标 */
+    icon: string;
+    /** 名称 */
+    name: string;
+    /** 数量 */
+    cnt: number;
+  };
 
   /**
-   * @description 签到额外奖励
-   * @interface HomeAwardExtra
-   * @property {boolean} has_extra_award - 是否有额外奖励
-   * @property {string} start_time - 额外奖励开始时间
-   * @property {string} end_time - 额外奖励结束时间
-   * @property {Array<HomeAward>} list - 额外奖励列表
-   * @property {string} start_timestamp - 额外奖励开始时间戳
-   * @property {string} end_timestamp - 额外奖励结束时间戳
-   * @returns HomeAwardExtra
+   * 签到额外奖励
+   * @since Beta v0.7.2
    */
   type HomeAwardExtra = {
+    /** 是否有活动 */
     has_extra_award: boolean;
+    /** 开始时间 */
     start_time: string;
+    /** 结束时间 */
     end_time: string;
+    /** 奖励列表 */
     list: Array<HomeAward>;
+    /** 开始时间戳（秒） */
     start_timestamp: string;
+    /** 结束时间戳（秒） */
     end_timestamp: string;
   };
 
   /**
-   * @description 获取签到信息返回
+   * 获取签到信息返回响应
    * @interface InfoResp
    * @since Beta v0.7.2
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {InfoRes} data - 返回数据
-   * @returns InfoResp
    */
   type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;
 
   /**
-   * @description 获取签到信息返回数据
-   * @interface InfoRes
+   * 签到信息返回
    * @since Beta v0.7.2
-   * @property {number} total_sign_day - 总签到天数
-   * @property {string} today - 今日日期
-   * @property {boolean} is_sign - 是否已签到
-   * @property {boolean} is_sub - 是否已补签
-   * @property {string} region - 服务器
-   * @property {number} sign_cnt_missed - 未签到天数
-   * @property {number} short_sign_day - 未知属性
-   * @property {boolean} send_first - 是否首签
-   * @return InfoRes
    */
   type InfoRes = {
+    /** 总签到天数 */
     total_sign_day: number;
+    /** 今日日期 */
     today: string;
+    /** 是否签到 */
     is_sign: boolean;
+    /** TODO: 未知字段 */
     is_sub: boolean;
+    /**
+     * 服务器
+     * @remarks cn_gf01,cn_qd01等
+     */
     region: string;
+    /** 漏签天数 */
     sign_cnt_missed: number;
+    /** 额外活动签到天数 */
     short_sign_day: number;
+    /** TODO: 未知字段 */
     send_first: boolean;
   };
 
   /**
-   * @description 签到返回
-   * @interface SignResp
+   * 签到返回响应
    * @since Beta v0.7.2
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {SignRes} data - 返回数据
-   * @returns SignResp
    */
   type SignResp = TGApp.BBS.Response.BaseWithData<SignRes>;
 
   /**
-   * @description 签到返回数据
-   * @interface SignRes
+   * 签到返回
    * @since Beta v0.7.2
-   * @property {string} challenge - gt-challenge
-   * @property {string} code - 签到状态码
-   * @property {string} gt - gt
-   * @property {boolean} is_risk - 是否有风险
-   * @property {number} risk_code - 风险码
-   * @property {number} success - 是否成功
-   * @return SignRes
    */
   type SignRes = {
+    /** 极验Challenge */
     challenge: string;
+    /** 签到状态码 */
     code: string;
+    /** 极验Gt */
     gt: string;
+    /** 是否高风险 */
     is_risk: boolean;
+    /** 风险码 */
     risk_code: number;
+    /** 是否成功 */
     success: number;
   };
 }

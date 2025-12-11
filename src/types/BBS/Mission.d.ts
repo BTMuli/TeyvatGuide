@@ -1,112 +1,109 @@
 /**
- * @file types/BBS/Mission.d.ts
- * @description BBS 任务相关类型定义文件
+ * 米游币任务数据类型
  * @since Beta v0.7.0
  */
 
 declare namespace TGApp.BBS.Mission {
   /**
-   * @description 任务信息返回
-   * @interface InfoResp
-   * @extends TGApp.BBS.Response.BaseWithData
+   * @description 任务信息返回响应
    * @since Beta v0.7.0
-   * @property {TGApp.BBS.Mission.InfoRes} data 任务信息
-   * @return InfoResp
    */
   type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;
 
   /**
-   * @description 任务信息
-   * @interface InfoRes
+   * 任务信息返回
    * @since Beta v0.7.0
-   * @property {Array<MissionItem>} missions 任务列表
-   * @property {Array<MissionItem>} more_missions 更多任务列表
-   * @return InfoRes
    */
-  type InfoRes = { missions: Array<MissionItem>; more_missions: Array<MissionItem> };
+  type InfoRes = {
+    /** 任务列表 */
+    missions: Array<MissionItem>;
+    /** 更多任务列表 */
+    more_missions: Array<MissionItem>;
+  };
 
   /**
-   * @description 任务项
-   * @interface MissionItem
+   * 任务
    * @since Beta v0.7.0
-   * @property {number} id 任务 ID
-   * @property {string} name 任务名称
-   * @property {string} desc 任务描述
-   * @property {number} threshold 任务完成阈值
-   * @property {number} limit 任务限制
-   * @property {number} exp 任务经验
-   * @property {number} points 米游币
-   * @property {number} active_time 任务激活时间，秒级时间戳
-   * @property {number} end_time 任务结束时间
-   * @property {boolean} is_auto_send_award 是否自动发放奖励
-   * @property {number} continuous_cycle_times 连续周期次数
-   * @property {number} next_points 下一次奖励米游币
-   * @property {string} mission_key 任务 key
-   * @return MissionItem
    */
   type MissionItem = {
+    /** 任务ID */
     id: number;
+    /** 任务名称 */
     name: string;
+    /** 任务描述 */
     desc: string;
+    /** 阈值 */
     threshold: number;
+    /** 完成次数 */
     limit: number;
+    /** 提供经验 */
     exp: number;
+    /** 米游币 */
     points: number;
+    /** 激活时间戳（秒） */
     active_time: number;
+    /** 结束时间戳（秒）
+     * @remarks 通常为0
+     */
     end_time: number;
+    /** 是否自动发送奖励 */
     is_auto_send_award: boolean;
+    /** 持续次数 */
     continuous_cycle_times: number;
+    /** 下一次完成奖励 */
     next_points: number;
+    /**
+     * 任务Key
+     * @remarks 与状态的任务Key对应
+     */
     mission_key: string;
   };
 
   /**
-   * @description 任务状态返回
-   * @interface StateResp
-   * @extends TGApp.BBS.Response.BaseWithData
+   * 任务状态返回响应
    * @since Beta v0.7.0
-   * @property {TGApp.BBS.Mission.StateRes} data 任务状态
-   * @return StateResp
    */
   type StateResp = TGApp.BBS.Response.BaseWithData<StateRes>;
 
   /**
-   * @description 任务状态
-   * @interface StateRes
+   * 任务状态
    * @since Beta v0.7.0
-   * @property {Array<StateItem>} states 任务状态列表
-   * @property {number} already_received_points 已领取的米游币
-   * @property {number} total_points 总米游币
-   * @property {number} today_total_points 今日总米游币
-   * @property {boolean} is_unclaimed 是否有未领取的奖励
-   * @property {number} can_get_points 可领取的米游币
-   * @return StateRes
    */
   type StateRes = {
+    /** 任务状态列表 */
     states: Array<StateItem>;
+    /** 已领取米游币 */
     already_received_points: number;
+    /** 米游币总数 */
     total_points: number;
+    /** 今日获取米游币 */
     today_total_points: number;
+    /** 是否有未领取的奖励 */
     is_unclaimed: boolean;
+    /** 还能获取的米游币 */
     can_get_points: number;
   };
 
   /**
-   * @description 任务状态项
-   * @interface StateItem
+   * 任务状态项
    * @since Beta v0.7.0
-   * @property {number} mission_id 任务 ID
-   * @property {number} process 任务进度 0：未完成，1：已完成
-   * @property {number} happened_times 发生次数
-   * @property {boolean} is_get_award 是否领取奖励
-   * @property {string} mission_key 任务 key
-   * @return StateItem
    */
   type StateItem = {
+    /** 任务ID */
     mission_id: number;
+    /**
+     * 任务进度
+     * @remarks 0-未完成，1-已完成
+     */
     process: number;
+    /** 发生次数 */
     happened_times: number;
+    /** 是否获取奖励 */
     is_get_award: boolean;
+    /**
+     * 任务Key
+     * @remarks 与任务项Key对应
+     */
     mission_key: string;
   };
 }

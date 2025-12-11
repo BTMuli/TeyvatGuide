@@ -174,7 +174,9 @@ async function loadYaeBag(uid: string, data: TGApp.Plugins.Yae.BagListRes): Prom
     } else if (skip === listM.length) {
       showSnackbar.success(`未检测到数据更新，耗时 ${Math.floor(cost / 1000)}s`);
     } else {
-      showSnackbar.success(`成功更新 ${listM.length - skip} 条数据`);
+      showSnackbar.success(
+        `成功更新 ${listM.length - skip} 条数据，耗时 ${Math.floor(cost / 1000)}s`,
+      );
     }
   } catch (e) {
     console.error(e);

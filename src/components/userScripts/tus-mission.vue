@@ -1,12 +1,21 @@
+<!-- 米游币任务 -->
 <template>
   <div class="tusm-box">
     <div class="tusm-top">
       <div class="tusm-title">米游币任务({{ todayPoints }}/{{ totalPoints }})</div>
       <div class="tusm-acts">
-        <span>{{ cancelLike ? "点赞后取消" : "点赞后不取消" }}</span>
-        <v-switch v-model="cancelLike" class="tusm-switch" color="var(--tgc-od-red)" />
         <v-btn :loading="loadState" class="tusm-btn" @click="tryRefresh()">刷新</v-btn>
         <v-btn :loading="loadMission" class="tusm-btn" @click="tryAuto()">执行</v-btn>
+      </div>
+    </div>
+    <div class="tusm-mid">
+      <div class="tusm-total">
+        <span>持有米游币：</span>
+        <span>{{ userPoints }}</span>
+      </div>
+      <div class="tusm-switch-box">
+        <span>{{ cancelLike ? "点赞后取消" : "直接点赞" }}</span>
+        <v-switch v-model="cancelLike" class="tusm-switch" color="var(--tgc-od-red)" />
       </div>
     </div>
     <div class="tusm-content">
@@ -44,14 +53,23 @@ import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, watch } from "vue";
 
+/** 用于渲染的任务项 */
 type ParseMission = {
+  /** 任务ID */
   id: number;
+  /** 任务Key */
   key: string;
+  /** 任务名称 */
   name: string;
+  /** 任务进度 */
   process: number;
+  /** 任务总进度 */
   total: number;
+  /** 是否完成任务 */
   status: boolean;
+  /** 米游币奖励 */
   reward: number;
+  /** 完成次数 */
   cycleTimes?: number;
 };
 
@@ -62,6 +80,7 @@ const loadScript = defineModel<boolean>();
 
 const todayPoints = ref<number>(0);
 const totalPoints = ref<number>(0);
+const userPoints = ref<number>(0);
 const loadState = ref<boolean>(false);
 const loadMission = ref<boolean>(false);
 const parseMissions = shallowRef<Array<ParseMission>>([]);
@@ -74,6 +93,7 @@ watch(
   () => {
     todayPoints.value = 0;
     totalPoints.value = 0;
+    userPoints.value = 0;
     parseMissions.value = [];
     missionList.value = [];
   },
@@ -247,6 +267,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   if (missionList.value.length === 0) {
     await TGLogger.Script("[米游币任务]未检测到任务列表，正在获取");
     const listResp = await apiHubReq.mission.list(ckState);
+    console.log("米游币任务列表", listResp);
     if (listResp.retcode !== 0) {
       await TGLogger.Script(
         `[米游币任务]获取任务列表失败：${listResp.retcode} ${listResp.message}`,
@@ -259,6 +280,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   }
   await TGLogger.Script("[米游币任务]正在获取任务状态");
   const stateResp = await apiHubReq.mission.state(ckState);
+  console.log("米游币任务状态", stateResp);
   if (stateResp.retcode !== 0) {
     await TGLogger.Script(
       `[米游币任务]获取任务状态失败：${stateResp.retcode} ${stateResp.message}`,
@@ -269,6 +291,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   await TGLogger.Script("[米游币任务]获取任务状态成功");
   todayPoints.value = stateResp.data.already_received_points;
   totalPoints.value = stateResp.data.today_total_points;
+  userPoints.value = stateResp.data.total_points;
   await TGLogger.Script("[米游币任务]合并任务数据");
   mergeMission(missionList.value, stateResp.data.states);
   await TGLogger.Script("[米游币任务]任务数据合并完成");
@@ -288,6 +311,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
   await painterReq.forum.recent(26, 2, 1, undefined, 20, ckSign);
   const resp = await apiHubReq.sign(ckSign, 2, ch);
+  console.log("打卡情况", resp);
   if (resp.retcode !== 0) {
     if (resp.retcode !== 1034) {
       await TGLogger.Script(`[米游币任务]打卡失败：${resp.retcode} ${resp.message}`);
@@ -318,10 +342,10 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
   border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
-  gap: 8px;
 }
 
-.tusm-top {
+.tusm-top,
+.tusm-mid {
   position: relative;
   display: flex;
   width: 100%;
@@ -338,6 +362,14 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.tusm-switch-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
 }
 
 .tusm-switch {

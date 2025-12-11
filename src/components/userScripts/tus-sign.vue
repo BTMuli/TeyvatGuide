@@ -1,19 +1,20 @@
+<!-- 游戏签到 TODO: 补签 -->
 <template>
   <div class="tuss-box">
     <div class="tuss-top">
       <div class="tuss-title">签到任务</div>
       <div class="tuss-acts">
-        <v-btn @click="tryRefresh()" class="tuss-btn" :loading="loadState">刷新</v-btn>
-        <v-btn @click="tryAuto()" class="tuss-btn" :loading="loadSign">执行</v-btn>
+        <v-btn :loading="loadState" class="tuss-btn" @click="tryRefresh()">刷新</v-btn>
+        <v-btn :loading="loadSign" class="tuss-btn" @click="tryAuto()">执行</v-btn>
       </div>
     </div>
     <div class="tuss-content">
       <div
         v-for="(item, idx) in signAccounts"
         :key="idx"
-        @click="item.selected = !item.selected"
         :class="{ selected: item.selected }"
         class="tuss-item"
+        @click="item.selected = !item.selected"
       >
         <v-icon v-if="item.selected" color="var(--tgc-od-blue)">
           mdi-checkbox-marked-outline
@@ -23,23 +24,23 @@
           <div class="tuss-icon">
             <img :src="item.info.icon" alt="icon" />
             <div
-              class="delete"
               v-if="item.account.gameBiz !== 'hk4e_cn'"
-              @click.stop="deleteAccount(item)"
+              class="delete"
               title="删除账户"
+              @click.stop="deleteAccount(item)"
             >
-              <v-icon size="12" color="var(--tgc-od-red)">mdi-delete</v-icon>
+              <v-icon color="var(--tgc-od-red)" size="12">mdi-delete</v-icon>
             </div>
           </div>
           <span>{{ item.account.gameUid }} {{ item.account.regionName }}</span>
         </div>
         <div class="tuss-stat">
           <div
-            class="tuss-reward"
             v-if="item.reward"
             :title="`${item.reward.name}x${item.reward.cnt}`"
+            class="tuss-reward"
           >
-            <TMiImg :src="item.reward.icon" alt="icon" :ori="true" />
+            <TMiImg :ori="true" :src="item.reward.icon" alt="icon" />
             <span>{{ item.reward.cnt }}</span>
           </div>
           <v-icon v-if="item.stat?.is_sign" color="var(--tgc-od-green)" title="已签到">
@@ -51,7 +52,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showGeetest from "@comp/func/geetest.js";
@@ -66,12 +67,26 @@ import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
-type SignGameInfo = { title: string; icon: string; gid: number };
+/** 签到游戏信息 */
+type SignGameInfo = {
+  /** 名称 */
+  title: string;
+  /** 图标 */
+  icon: string;
+  /** 分区ID */
+  gid: number;
+};
+/** 签到账号信息 */
 type SignAccount = {
+  /** 是否已选中 */
   selected: boolean;
+  /** 账号信息 */
   account: TGApp.Sqlite.Account.Game;
+  /** 游戏信息 */
   info: SignGameInfo;
+  /** 签到状态 */
   stat?: TGApp.BBS.Sign.InfoRes;
+  /** 奖励信息 */
   reward?: TGApp.BBS.Sign.HomeAward;
 };
 
@@ -222,6 +237,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
     );
     if (item.reward === undefined) {
       const rewardResp = await lunaReq.home(item.account, cookie);
+      console.log("签到奖励", item, rewardResp);
       if ("retcode" in rewardResp) {
         await TGLogger.Script(
           `[签到任务]获取签到奖励失败:${rewardResp.retcode} ${rewardResp.message}`,
@@ -230,6 +246,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
       } else item.reward = rewardResp.awards[dayNow - 1];
     }
     const statResp = await lunaReq.info(item.account, cookie);
+    console.log("签到状态", item, statResp);
     if ("retcode" in statResp) {
       await TGLogger.Script(`[签到任务]获取签到状态失败:${statResp.retcode} ${statResp.message}`);
       showSnackbar.error(`[${statResp.retcode}] ${statResp.message}`);
@@ -251,6 +268,7 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
     let challenge: string | undefined = undefined;
     while (!check) {
       const signResp = await lunaReq.sign(item.account, cookie, challenge);
+      console.log("签到信息", item, signResp);
       if (challenge !== undefined) challenge = undefined;
       if ("retcode" in signResp) {
         if (signResp.retcode === 1034) {

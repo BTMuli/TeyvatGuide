@@ -1,6 +1,5 @@
 /**
- * @file request/apiHubReq.ts
- * @description apiHub下的请求
+ * apiHub下的请求
  * @since Beta v0.8.2
  */
 
@@ -59,7 +58,7 @@ async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
 }
 
 /**
- * @description 获取用户米游币任务完成情况
+ * 获取用户米游币任务列表
  * @since Beta v0.7.2
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Mission.InfoRes>}
@@ -99,9 +98,9 @@ async function getShareConf(
 }
 
 /**
- * @description 获取任务完成情况
+ * 获取用户米游币任务完成状态
  * @since Beta v0.7.2
- * @description **需要验证码登录的 Cookie**
+ * @remarks 需要验证码登录的 Cookie
  * @param {Record<string,string>} cookie 用户 Cookie
  * @return {Promise<TGApp.BBS.Mission.StateResp>}
  */
