@@ -1,0 +1,38 @@
+engines:
+  dependency:
+    enabled: true
+
+  eslint:
+    config_file: "eslint.config.mjs"
+    enabled: true
+    patterns:
+      - "**/*.ts"
+      - "**/*.scss"
+      - "**/*.vue"
+  prettier:
+    config_file: ".prettierrc.yml"
+    enabled: true
+    patterns:
+      - "**/*.{js,ts,vue,css,scss,json,md}"
+  security:
+    enabled: true
+    tools:
+      - "npm-audit"
+      - "snyk"
+  stylelint:
+    config_file: ".stylelintrc.yml"
+    enabled: true
+    patterns:
+      - "src/**/*.{css,scss,vue}"
+exclude_paths:
+  - "node_modules/**"
+  - "dist/**"
+  - "public/assets/**"
+  - "src-tauri/target/**"
+  - "src-tauri/binaries/**"
+  - "pnpm-lock.yaml"
+
+pull_request:
+  comment: true
+  enabled: true
+  severity_threshold: "minor"
