@@ -1,180 +1,217 @@
 /**
- * @file types/Sqlite/Abyss.d.ts
- * @description 数据库深境螺旋相关类型定义文件
- * @since Beta v0.6.3
+ * 深境螺旋数据库
+ * @since Beta v0.9.0
  */
 
 declare namespace TGApp.Sqlite.Abyss {
   /**
-   * @description 数据库-深境螺旋表
+   * 深境螺旋表
    * @since Beta v0.6.1
-   * @interface TableRaw
-   * @property {string} uid - 用户 UID
-   * @property {number} id - 深境螺旋 ID
-   * @property {string} startTime - 开始时间
-   * @property {string} endTime - 结束时间
-   * @property {number} totalBattleTimes - 总战斗次数
-   * @property {number} totalWinTimes - 总胜利次数
-   * @property {string} maxFloor - 最深抵达
-   * @property {number} totalStar - 总星数
-   * @property {boolean} isUnlock - 是否解锁
-   * @description 后面的几个数据在数据库中是存储的 JSON 字符串，需要在使用时进行 JSON.parse
-   * @property {Character[]} revealRank - 出战次数
-   * @property {Character[]} defeatRank - 最多击破数
-   * @property {Character[]} damageRank - 最强一击
-   * @property {Character[]} takeDamageRank - 承受最多伤害
-   * @property {Character[]} normalSkillRank - 元素战技释放数
-   * @property {Character[]} energySkillRank - 元素爆发次数
-   * @property {Floor[]} floors - 深境螺旋各层数据
-   * @property {string} skippedFloor - 跳过楼层
-   * @property {string} updated - 更新时间
-   * @return TableRaw
    */
-  interface TableRaw {
+  type TableRaw = {
+    /** 用户UID */
     uid: string;
+    /** 深渊ID */
     id: number;
+    /** 开始时间 */
     startTime: string;
+    /** 结束时间 */
     endTime: string;
+    /** 总战斗次数 */
     totalBattleTimes: number;
+    /** 总胜利次数 */
     totalWinTimes: number;
+    /** 最深抵达 */
     maxFloor: string;
+    /** 总星数 */
     totalStar: number;
+    /** 是否解锁
+     * @remarks 0-未解锁，1-已解锁
+     */
     isUnlock: 0 | 1;
-    revealRank: string; // Character[]
-    defeatRank: string; // Character[]
-    damageRank: string; // Character[]
-    takeDamageRank: string; // Character[]
-    normalSkillRank: string; // Character[]
-    energySkillRank: string; // Character[]
-    floors: string; // Floor[]
-    skippedFloor: string;
+    /**
+     * 出战次数
+     * @remarks 序列化，反序列化后是 Array<Character>
+     */
+    revealRank: string;
+    /**
+     * 最多击败数
+     * @remarks 序列化，反序列化后是 Array<Character>
+     */
+    defeatRank: string;
+    /**
+     * 最强一击
+     * @remarks 序列化，反序列化后是 Array<Character>
+     */
+    damageRank: string;
+    /**
+     * 最多承伤
+     * @remarks 序列化，反序列化后是 Array<Character>
+     */
+    takeDamageRank: string;
+    /**
+     * 元素战技
+     * @remarks 序列化，反序列化后是 Array<Character>
+     */
+    normalSkillRank: string;
+    /**
+     * 元素爆发
+     * @remarks 序列化，反序列化后是 Array<Character>
+     */
+    energySkillRank: string;
+    /**
+     * 楼层数据
+     * @remarks 序列化，反序列化后是 Array<Floor>
+     */
+    floors: string;
+    /** 跳过楼层 */
+    skippedFloor: string | null;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 
   /**
-   * @description 数据库-深境螺旋表
+   * 深境螺旋表-解析
    * @since Beta v0.6.1
-   * @interface TableData
-   * @property {string} uid - 用户 UID
-   * @property {number} id - 深境螺旋 ID
-   * @property {string} startTime - 开始时间
-   * @property {string} endTime - 结束时间
-   * @property {number} totalBattleTimes - 总战斗次数
-   * @property {number} totalWinTimes - 总胜利次数
-   * @property {string} maxFloor - 最深抵达
-   * @property {number} totalStar - 总星数
-   * @property {boolean} isUnlock - 是否解锁
-   * @description 后面的几个数据在数据库中是存储的 JSON 字符串，需要在使用时进行 JSON.parse
-   * @property {Character[]} revealRank - 出战次数
-   * @property {Character[]} defeatRank - 最多击破数
-   * @property {Character[]} damageRank - 最强一击
-   * @property {Character[]} takeDamageRank - 承受最多伤害
-   * @property {Character[]} normalSkillRank - 元素战技释放数
-   * @property {Character[]} energySkillRank - 元素爆发次数
-   * @property {Floor[]} floors - 深境螺旋各层数据
-   * @property {string} skippedFloor - 跳过楼层
-   * @property {string} updated - 更新时间
-   * @return TableData
    */
-  interface TableData {
+  type TableData = {
+    /** 用户UID */
     uid: string;
+    /** 深渊ID */
     id: number;
+    /** 开始时间 */
     startTime: string;
+    /** 结束时间 */
     endTime: string;
+    /** 总战斗次数 */
     totalBattleTimes: number;
+    /** 总胜利次数 */
     totalWinTimes: number;
+    /** 最深抵达 */
     maxFloor: string;
+    /** 总星数 */
     totalStar: number;
+    /** 是否解锁
+     * @remarks 0-未解锁，1-已解锁
+     */
     isUnlock: 0 | 1;
-    revealRank: Character[];
-    defeatRank: Character[];
-    damageRank: Character[];
-    takeDamageRank: Character[];
-    normalSkillRank: Character[];
-    energySkillRank: Character[];
-    floors: Floor[];
-    skippedFloor: string;
+    /** 出战次数 */
+    revealRank: Array<CharacterData>;
+    /** 最多击败数 */
+    defeatRank: Array<CharacterData>;
+    /** 最强一击 */
+    damageRank: Array<CharacterData>;
+    /** 最多承伤 */
+    takeDamageRank: Array<CharacterData>;
+    /** 元素战技 */
+    normalSkillRank: Array<CharacterData>;
+    /** 元素爆发 */
+    energySkillRank: Array<CharacterData>;
+    /** 楼层数据 */
+    floors: Array<Floor>;
+    /** 跳过楼层 */
+    skippedFloor: string | null;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 
   /**
-   * @description 数据库-深境螺旋表-角色数据
+   * 角色数据
    * @since Alpha v0.2.0
-   * @interface Character
-   * @property {number} id - 角色 ID
-   * @property {number} value - 值
-   * @property {number} star - 星级
-   * @return Character
    */
-  interface Character {
+  type CharacterData = {
+    /** 角色ID */
     id: number;
+    /** 值 */
     value: number;
+    /** 星级 */
     star: number;
-  }
+  };
 
   /**
-   * @description 数据库-深境螺旋表-层数据
-   * @since Alpha v0.2.0
-   * @interface Floor
-   * @property {number} id - 层 ID
-   * @property {number} winStar - 获得星数
-   * @property {number} maxStar - 最大星级
-   * @property {boolean} isUnlock - 是否解锁
-   * @property {Level[]} levels - 关卡数据
-   * @return Floor
+   * 楼层数据
+   * @since Beta v0.9.0
    */
-  interface Floor {
+  type Floor = {
+    /** 楼层 */
     id: number;
-    winStar: number;
-    maxStar: number;
+    /**
+     * 是否解锁
+     * @remarks 0-未解锁，1-已解锁
+     */
     isUnlock: 0 | 1;
-    levels: Level[];
-  }
-
-  /**
-   * @description 数据库-深境螺旋表-关卡数据
-   * @since Beta v0.3.9
-   * @interface Level
-   * @property {number} id - 关卡 ID
-   * @property {number} winStar - 获得星数
-   * @property {number} maxStar - 最大星级
-   * @property {Battle} upBattle - 上半场数据
-   * @property {Battle} downBattle - 下半场数据
-   * @return Level
-   */
-  interface Level {
-    id: number;
+    /** 获得星数 */
     winStar: number;
+    /** 最大星数 */
     maxStar: number;
-    upBattle?: Battle;
-    downBattle?: Battle;
-  }
+    /** 关卡数据 */
+    levels: Array<Level>;
+    /**
+     * 地脉异常
+     * @remarks v0.9.0新增，之前数据缺失
+     */
+    buff?: Array<string>;
+  };
 
   /**
-   * @description 数据库-深境螺旋表-战斗数据
-   * @since Alpha v0.2.0
-   * @interface Battle
+   * 关卡数据
+   * @since Beta v0.3.9
+   */
+  type Level = {
+    /** 关卡ID */
+    id: number;
+    /** 获得星数 */
+    winStar: number;
+    /** 最大星数 */
+    maxStar: number;
+    /** 上半场数据 */
+    upBattle?: Battle;
+    /** 下半场数据 */
+    downBattle?: Battle;
+  };
+
+  /**
+   * 战斗数据
+   * @since Beta v0.9.0
    * @property {string} time - 时间
    * @property {CharacterInfo[]} characters - 角色数据
    * @return Battle
    */
   interface Battle {
+    /** 结束时间 */
     time: string;
-    characters: CharacterInfo[];
+    /** 上场角色 */
+    characters: Array<CharacterInfo>;
+    /**
+     * 怪物数据
+     * @remarks v0.9.0 版本新增，之前数据缺失
+     */
+    monsters?: Array<MonsterInfo>;
   }
 
   /**
-   * @description 数据库-深境螺旋表-角色数据
+   * 角色信息
    * @since Alpha v0.2.0
-   * @interface CharacterInfo
-   * @property {number} id - 角色 ID
-   * @property {number} star - 星级
-   * @property {number} level - 等级
-   * @return CharacterInfo
    */
-  interface CharacterInfo {
+  type CharacterInfo = {
+    /** 角色ID */
     id: number;
+    /** 角色等级 */
     level: number;
+    /** 角色星级 */
     star: number;
-  }
+  };
+
+  /**
+   * 怪物信息
+   * @since Beta v0.9.0
+   */
+  type MonsterInfo = {
+    /** 名称 */
+    name: string;
+    /** 图标 */
+    icon: string;
+    /** 等级 */
+    level: number;
+  };
 }

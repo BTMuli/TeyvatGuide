@@ -16,7 +16,7 @@
       <div class="tuc-ae-flex">
         <div v-for="(enemy, idx) in props.enemies" :key="idx" class="tuc-enemy">
           <div class="tuc-enemy-icon">
-            <img :src="enemy.icon" alt="icon" />
+            <TMiImg :ori="true" :src="enemy.icon" alt="icon" />
           </div>
           <div class="tuc-enemy-info">
             <span>{{ enemy.name }}</span>
@@ -29,6 +29,7 @@
 </template>
 <script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import { getWikiBrief, getZhElement } from "@utils/toolFunc.js";
 
 type TucAeBoxProps = {

@@ -94,7 +94,7 @@ declare namespace TGApp.Game.Abyss {
      * @remarks 一般为 null
      */
     settle_date_time: TGApp.Game.Base.DateTime | null;
-    /** 关卡Buff */
+    /** 地脉异常 */
     ley_line_disorder: Array<string>;
   };
 

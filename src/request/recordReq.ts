@@ -1,6 +1,5 @@
 /**
- * @file request/recordReq.ts
- * @description TakumiRecordGenshinApi 相关请求
+ * TakumiRecordGenshinApi 相关请求
  * @since Beta v0.8.0
  */
 
@@ -107,7 +106,7 @@ async function roleCombat(
 }
 
 /**
- * @description 获取深渊螺旋记录
+ * 获取深渊螺旋记录
  * @since Beta v0.6.3
  * @param {TGApp.App.Account.Cookie} cookie Cookie
  * @param {TGApp.Sqlite.Account.Game} user 用户

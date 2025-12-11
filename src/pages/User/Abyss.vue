@@ -80,7 +80,7 @@
             <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
           </div>
           <div class="uaw-d-box">
-            <TuaDetail v-for="floor in item.floors" :key="floor.id" :model-value="floor" />
+            <TuaDetail v-for="floor in item.floors" :key="floor.id" :floor />
           </div>
         </div>
       </v-window-item>
@@ -178,6 +178,7 @@ async function refreshAbyss(): Promise<void> {
   await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
   await showLoading.start(`正在获取${account.value.gameUid}的深渊数据`, "正在获取上期数据");
   const resP = await recordReq.spiralAbyss(cookie.value, account.value, "2");
+  console.log(resP);
   if ("retcode" in resP) {
     await showLoading.end();
     showSnackbar.error(`[${resP.retcode}]${resP.message}`);
@@ -192,6 +193,7 @@ async function refreshAbyss(): Promise<void> {
   await TSUserAbyss.saveAbyss(account.value.gameUid, resP);
   await showLoading.update("正在获取本期深渊数据");
   const res = await recordReq.spiralAbyss(cookie.value, account.value, "1");
+  console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);

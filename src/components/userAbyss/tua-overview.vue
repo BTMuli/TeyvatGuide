@@ -1,3 +1,4 @@
+<!-- 概览 -->
 <template>
   <div class="tuao-box">
     <div class="tuao-title">
@@ -23,15 +24,19 @@ import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { AppCharacterData } from "@/data/index.js";
 
 type TAOProps = {
+  /** 标题 */
   title: string;
+  /**值文本 */
   valText?: string | number;
-  valIcons?: Array<TGApp.Sqlite.Abyss.Character>;
+  /** 值图标 */
+  valIcons?: Array<TGApp.Sqlite.Abyss.CharacterData>;
+  /* 是否多个 */
   multi4?: boolean;
 };
 
 const props = defineProps<TAOProps>();
 
-function getBoxData(avatar: TGApp.Sqlite.Abyss.Character): TItemBoxData {
+function getBoxData(avatar: TGApp.Sqlite.Abyss.CharacterData): TItemBoxData {
   const res = AppCharacterData.find((a) => a.id === avatar.id);
   return {
     height: "80px",
@@ -42,6 +47,7 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.Character): TItemBoxData {
     lt: `/icon/element/${res?.element ?? "风"}元素.webp`,
     innerText: avatar.value.toString(),
     display: "inner",
+    innerBlur: "5px",
     size: "80px",
     innerHeight: 20,
   };
