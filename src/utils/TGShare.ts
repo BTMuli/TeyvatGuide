@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.8.7
+ * @since Beta v0.9.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -72,15 +72,15 @@ export async function getImageBuffer(url: string): Promise<Uint8Array> {
 }
 
 /**
- * @description 获取分享截图背景色
- * @since Beta v0.3.2
+ * 获取分享截图背景色
+ * @since Beta v0.9.0
  * @returns {string} 背景色
  */
 function getShareImgBgColor(): string {
   let theme = localStorage.getItem("theme");
   if (theme) theme = JSON.parse(theme).theme;
   if (theme === "dark") return "#1e1e1e";
-  return "#f9f6f2";
+  return "#ffffff";
 }
 
 /**
