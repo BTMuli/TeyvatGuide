@@ -1,20 +1,20 @@
+<!-- 首页限时祈愿组件 -->
 <template>
-  <THomeCard :append="false">
-    <template #title>限时祈愿</template>
+  <THomeCard :append="false" title="限时祈愿">
     <template #default>
-      <div class="pool-grid" v-if="pools.length < 3">
+      <div v-if="pools.length < 3" class="pool-grid">
         <PhPoolCard v-for="(pool, idx) in pools" :key="idx" :pool="pool" />
       </div>
       <!-- TODO: 优化Swiper效果 -->
       <Swiper
         v-else
+        :autoplay="{ delay: 3000, disableOnInteraction: false }"
+        :centered-slides="true"
+        :loop="true"
+        :modules="swiperModules"
+        :navigation="true"
         :slides-per-view="2"
         :space-between="12"
-        :loop="true"
-        :centered-slides="true"
-        :navigation="true"
-        :autoplay="{ delay: 3000, disableOnInteraction: false }"
-        :modules="swiperModules"
         class="pool-swiper"
       >
         <SwiperSlide v-for="(pool, idx) in pools" :key="idx">
@@ -33,7 +33,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PhPoolCard from "@comp/pageHome/ph-pool-card.vue";
 import takumiReq from "@req/takumiReq.js";
 import TGLogger from "@utils/TGLogger.js";
-import { Autoplay, A11y } from "swiper/modules";
+import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { onMounted, shallowRef } from "vue";
 

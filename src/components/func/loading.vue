@@ -1,22 +1,24 @@
+<!-- Loading 组件 -->
 <template>
   <transition name="func-loading">
     <div v-show="showBox || showOuter" class="loading-overlay">
       <transition name="func-loading-inner">
         <div v-show="showInner" class="loading-container">
           <div class="loading-box">
+            <!-- TODO: 适配长title -->
             <div class="loading-title">
               <span>{{ data.title }}</span>
-              <div class="loading-circle" v-show="!data.empty">
+              <div v-show="!data.empty" class="loading-circle">
                 <div />
                 <div />
               </div>
             </div>
-            <div class="loading-subtitle" v-show="data.subtitle && data.subtitle !== ''">
+            <div v-show="data.subtitle && data.subtitle !== ''" class="loading-subtitle">
               {{ data.subtitle }}
             </div>
             <div class="loading-img">
-              <img v-if="!data.empty" src="/source/UI/loading.webp" alt="loading" />
-              <img v-else src="/source/UI/empty.webp" alt="empty" />
+              <img v-if="!data.empty" alt="loading" src="/source/UI/loading.webp" />
+              <img v-else alt="empty" src="/source/UI/empty.webp" />
             </div>
           </div>
         </div>
@@ -150,12 +152,12 @@ defineExpose({ displayBox });
 .loading-title {
   display: flex;
   width: 100%;
-  height: 50px;
   align-items: center;
   justify-content: center;
   column-gap: 5px;
   font-family: var(--font-title);
-  font-size: 2rem;
+  font-size: 1.75rem;
+  word-break: break-all;
 }
 
 .loading-subtitle {

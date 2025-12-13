@@ -3,42 +3,45 @@
   <v-app-bar>
     <template #prepend>
       <div class="gacha-top-title">
-        <img src="/source/UI/userGacha.webp" alt="gacha" />
+        <img alt="gacha" src="/source/UI/userGacha.webp" />
         <span>祈愿记录</span>
         <v-select
-          :hide-details="true"
-          density="compact"
           v-model="uidCur"
+          :hide-details="true"
           :items="selectItem"
-          variant="outlined"
+          density="compact"
           label="游戏UID"
+          variant="outlined"
         />
         <img
+          alt="byd"
           class="gacha-top-byd"
           src="/icon/nation/千星奇域.webp"
-          alt="byd"
-          @click="toBeyond()"
           title="千星奇域"
+          @click="toBeyond()"
         />
       </div>
     </template>
     <template #extension>
       <div class="gacha-top-btns">
-        <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(false)">
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(false)">
           增量刷新
         </v-btn>
-        <v-btn prepend-icon="mdi-refresh" class="gacha-top-btn" @click="confirmRefresh(true)">
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(true)">
           全量刷新
         </v-btn>
-        <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf()">导入</v-btn>
-        <v-btn prepend-icon="mdi-import" class="gacha-top-btn" @click="importUigf4()">
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-import" @click="importUigf()">导入</v-btn>
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-import" @click="importUigf4()">
           导入(v4)
         </v-btn>
-        <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf()">导出</v-btn>
-        <v-btn prepend-icon="mdi-export" class="gacha-top-btn" @click="exportUigf4()">
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-export" @click="exportUigf()">导出</v-btn>
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-export" @click="exportUigf4()">
           导出(v4)
         </v-btn>
-        <v-btn prepend-icon="mdi-delete" class="gacha-top-btn" @click="deleteGacha()">删除</v-btn>
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-delete" @click="deleteGacha()">删除</v-btn>
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-database-check" @click="checkData()">
+          检测数据
+        </v-btn>
       </div>
     </template>
   </v-app-bar>
@@ -49,22 +52,22 @@
       <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
       <!-- TODO: 暂时隐藏内置祈愿链接 -->
-      <v-tab value="iframe" v-if="false">祈愿详情</v-tab>
+      <v-tab v-if="false" value="iframe">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
-      <v-window-item value="overview" class="gacha-window-item">
+      <v-window-item class="gacha-window-item" value="overview">
         <gro-overview v-model="gachaListCur" />
       </v-window-item>
-      <v-window-item value="echarts" class="gacha-window-item">
-        <gro-echarts :uid="uidCur" v-if="uidCur" />
+      <v-window-item class="gacha-window-item" value="echarts">
+        <gro-echarts v-if="uidCur" :uid="uidCur" />
       </v-window-item>
-      <v-window-item value="table" class="gacha-window-item">
+      <v-window-item class="gacha-window-item" value="table">
         <gro-table v-model="gachaListCur" />
       </v-window-item>
-      <v-window-item value="history" class="gacha-window-item">
+      <v-window-item class="gacha-window-item" value="history">
         <gro-history />
       </v-window-item>
-      <v-window-item value="iframe" class="gacha-window-item">
+      <v-window-item class="gacha-window-item" value="iframe">
         <gro-iframe mode="normal" />
       </v-window-item>
     </v-window>
@@ -88,6 +91,7 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import Hakushi from "@utils/Hakushi.js";
 import TGLogger from "@utils/TGLogger.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
@@ -108,9 +112,12 @@ const ovShow = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
 const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.TableGacha>>([]);
+const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
 
 onMounted(async () => {
-  await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
+  await showLoading.start("正在加载祈愿数据", "正在获取Hakushi元数据");
+  hakushiData.value = await Hakushi.fetch();
+  await showLoading.update("正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   selectItem.value = await TSUserGacha.getUidList();
   if (selectItem.value.length === 0) {
@@ -259,6 +266,16 @@ async function refreshGachaPool(
         const find = AppWeaponData.find((weapon) => weapon.name === item.name);
         if (find) tempItem.item_id = find.id.toString();
       }
+      if (tempItem.item_id === "") {
+        const find = hakushiData.value.find(
+          (i) => i.type === item.item_type && i.name === item.name,
+        );
+        if (find) tempItem.item_id = find.id.toString();
+        else {
+          showSnackbar.warn(`无法搜索到 ${item.item_type} ${item.name} 的ID，请等待元数据更新`);
+          continue;
+        }
+      }
       uigfList.push(tempItem);
       if (force) {
         if (!gachaDataMap) gachaDataMap = {};
@@ -385,6 +402,30 @@ async function deleteGacha(): Promise<void> {
   await TGLogger.Info(
     `[UserGacha][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
   );
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
+}
+
+async function checkData(): Promise<void> {
+  let cnt = 0;
+  let fail = 0;
+  await showLoading.start("正在检测数据", `UID:${uidCur.value}，共${gachaListCur.value.length}条`);
+  for (const data of gachaListCur.value) {
+    if (data.itemId === "") {
+      const find = hakushiData.value.find((i) => i.name === data.name && i.type === data.type);
+      if (find) {
+        await showLoading.update(`${data.name} -> ${find.id}`);
+        await TSUserGacha.update.itemId(data, find.id);
+        cnt++;
+      } else {
+        await showLoading.update(`[${data.id}]${data.type}-${data.name}未找到ID`);
+        await TGLogger.Warn(`[${data.id}]${data.type}-${data.name}未找到ID`);
+        fail++;
+      }
+    }
+  }
+  await showLoading.end();
+  showSnackbar.success(`成功补充遗漏数据${cnt}条，失败${fail}条，即将刷新`);
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
 }

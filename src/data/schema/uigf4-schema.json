@@ -89,7 +89,9 @@
                 },
                 "item_id": {
                   "type": "string",
-                  "description": "物品的内部 ID"
+                  "description": "物品的内部 ID",
+                  "minLength": 1,
+                  "pattern": "^[0-9]+$"
                 },
                 "count": {
                   "type": "string",

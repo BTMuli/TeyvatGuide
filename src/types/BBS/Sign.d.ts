@@ -21,7 +21,7 @@ declare namespace TGApp.BBS.Sign {
     awards: Array<HomeAward>;
     /** 业务标识 */
     biz: string;
-    /** 是否补签 TODO:描述不清晰 */
+    /** 是否补签 */
     resign: boolean;
     /** 活动额外奖励 */
     short_extra_award: HomeAwardExtra;
@@ -77,7 +77,7 @@ declare namespace TGApp.BBS.Sign {
     today: string;
     /** 是否签到 */
     is_sign: boolean;
-    /** TODO: 未知字段 */
+    /** 是否补签 */
     is_sub: boolean;
     /**
      * 服务器
@@ -115,5 +115,59 @@ declare namespace TGApp.BBS.Sign {
     risk_code: number;
     /** 是否成功 */
     success: number;
+  };
+
+  /**
+   * 获取补签信息返回响应
+   * @since Beta v0.9.0
+   */
+  type ResignInfoResp = TGApp.BBS.Response.BaseWithData<ResignInfoRes>;
+
+  /**
+   * 补签信息返回
+   * @since Beta v0.9.0
+   */
+  type ResignInfoRes = {
+    /** 日 */
+    resign_info_daily: number;
+    /** 月 */
+    resign_info_monthly: number;
+    /** 日限制 */
+    resign_limit_daily: number;
+    /** 月限制 */
+    resign_limit_monthly: number;
+    /** 漏签天数 */
+    sign_cnt_missed: number;
+    /** 米游币 */
+    coin_cnt: number;
+    /** 补签花费  */
+    coin_cost: number;
+    /** 补签规则 */
+    rule: string;
+    /** 是否签到 */
+    signed: boolean;
+    /** 签到天数 */
+    sign_days: number;
+    /** 花费 */
+    cost: number;
+    /** 月补签次数 */
+    month_quality_cnt: number;
+    /** 剩余补签次数*/
+    quality_cnt: number;
+  };
+
+  /**
+   * 执行补签返回响应
+   * @since Beta v0.9.0
+   */
+  type ResignResp = TGApp.BBS.Response.BaseWithData<ResignRes>;
+
+  /**
+   * 执行补签返回信息
+   * @since Beta v0.9.0
+   */
+  type ResignRes = {
+    /** 信息 */
+    message: string;
   };
 }

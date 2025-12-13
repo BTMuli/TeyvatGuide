@@ -188,6 +188,7 @@ async function toBBS(link: URL): Promise<void> {
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 16px;
+    white-space: nowrap;
   }
 
   &:hover span {
