@@ -135,7 +135,7 @@ async function handleDelete(account: TGApp.Sqlite.Account.Game): Promise<void> {
     await TSUserAccount.game.deleteAccount(account);
     signAccounts.value = signAccounts.value.filter(
       (item) =>
-        item.account.gameUid !== account.gameUid && item.account.gameBiz !== account.gameBiz,
+        item.account.gameUid !== account.gameUid || item.account.gameBiz !== account.gameBiz,
     );
     showSnackbar.success("账号已删除");
   } catch (error) {

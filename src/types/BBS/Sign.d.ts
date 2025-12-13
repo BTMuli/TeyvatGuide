@@ -21,7 +21,7 @@ declare namespace TGApp.BBS.Sign {
     awards: Array<HomeAward>;
     /** 业务标识 */
     biz: string;
-    /** 是否补签 TODO:描述不清晰 */
+    /** 是否补签 */
     resign: boolean;
     /** 活动额外奖励 */
     short_extra_award: HomeAwardExtra;
