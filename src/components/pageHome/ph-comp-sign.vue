@@ -44,13 +44,12 @@
             :disabled="signStat?.is_sign || signing"
             :loading="signing"
             class="sign-btn"
+            prepend-icon="mdi-calendar-check"
             @click="handleSign"
           >
-            <v-icon left>mdi-calendar-check</v-icon>
             签到
           </v-btn>
-          <v-btn :disabled="true" class="sign-btn resign-btn" @click="handleResign">
-            <v-icon left>mdi-calendar-refresh</v-icon>
+          <v-btn :disabled="true" class="sign-btn resign-btn" prepend-icon="mdi-calendar-refresh" @click="handleResign">
             补签
           </v-btn>
         </div>
