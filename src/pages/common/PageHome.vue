@@ -222,7 +222,7 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
 }
 
 .home-tool-select {
-  width: 250px;
+  width: 220px;
   max-width: 250px;
   margin-left: 16px;
 }
