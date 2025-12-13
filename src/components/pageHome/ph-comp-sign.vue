@@ -1,18 +1,18 @@
 <!-- 首页签到卡片 -->
 <template>
   <THomeCard :append="isLogin">
-    <template #title>签到</template>
+    <template #title>游戏签到</template>
     <template v-if="isLogin" #title-append>
       <PhUserSwitch
-        :nickname="briefInfo.nickname"
         :current-uid="uid ?? ''"
+        :nickname="briefInfo.nickname"
         @switch-user="handleUserSwitch"
       />
     </template>
     <template #default>
       <div v-if="!isLogin" class="sign-not-login">请先登录</div>
       <div v-else-if="loading" class="sign-loading">
-        <v-progress-circular indeterminate color="primary" />
+        <v-progress-circular color="primary" indeterminate />
       </div>
       <div v-else-if="signAccounts.length === 0" class="sign-not-login">暂无游戏账户</div>
       <div v-else class="sign-container">
@@ -20,15 +20,15 @@
           v-for="item in signAccounts"
           :key="item.account.gameUid"
           :account="item.account"
-          :game-info="item.info"
-          :sign-stat="item.stat"
-          :rewards="item.rewards"
           :extra-rewards="item.extraRewards"
-          :has-extra-rewards="item.hasExtraRewards"
           :extra-time-range="item.extraTimeRange"
+          :game-info="item.info"
+          :has-extra-rewards="item.hasExtraRewards"
+          :rewards="item.rewards"
+          :sign-stat="item.stat"
           :signing="item.signing"
-          @sign="handleSign(item)"
           @resign="handleResign"
+          @sign="handleSign(item)"
         />
       </div>
     </template>
@@ -37,9 +37,6 @@
 <script lang="ts" setup>
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import THomeCard from "@comp/pageHome/ph-comp-card.vue";
-import PhSignItem from "@comp/pageHome/ph-sign-item.vue";
-import PhUserSwitch from "@comp/pageHome/ph-user-switch.vue";
 import lunaReq from "@req/lunaReq.js";
 import miscReq from "@req/miscReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
@@ -49,6 +46,10 @@ import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
+
+import THomeCard from "./ph-comp-card.vue";
+import PhSignItem from "./ph-sign-item.vue";
+import PhUserSwitch from "./ph-user-switch.vue";
 
 type SignGameInfo = {
   title: string;
@@ -104,11 +105,11 @@ async function loadData(): Promise<void> {
 
   loading.value = true;
   signAccounts.value = [];
-  
+
   try {
     // Get all game accounts for current user
     const accounts = await TSUserAccount.game.getAccount(uid.value);
-    
+
     if (accounts.length === 0) {
       await TGLogger.Warn("[Sign Card] No game accounts found");
       loading.value = false;
@@ -135,15 +136,20 @@ async function loadData(): Promise<void> {
         lunaReq.info(gameAccount, ck),
       ]);
 
-      if (rewardsResp.status === 'fulfilled') {
+      if (rewardsResp.status === "fulfilled") {
         const rewards = rewardsResp.value;
         if ("retcode" in rewards) {
-          await TGLogger.Error(`[Sign Card] Failed to get rewards for ${info.title}: ${rewards.message}`);
+          await TGLogger.Error(
+            `[Sign Card] Failed to get rewards for ${info.title}: ${rewards.message}`,
+          );
         } else {
           signAccount.rewards = rewards.awards;
-          
+
           // Handle extra rewards
-          if (rewards.short_extra_award?.has_extra_award && rewards.short_extra_award.list.length > 0) {
+          if (
+            rewards.short_extra_award?.has_extra_award &&
+            rewards.short_extra_award.list.length > 0
+          ) {
             signAccount.hasExtraRewards = true;
             signAccount.extraRewards = rewards.short_extra_award.list;
             signAccount.extraTimeRange = {
@@ -154,10 +160,12 @@ async function loadData(): Promise<void> {
         }
       }
 
-      if (statResp.status === 'fulfilled') {
+      if (statResp.status === "fulfilled") {
         const stat = statResp.value;
         if ("retcode" in stat) {
-          await TGLogger.Error(`[Sign Card] Failed to get status for ${info.title}: ${stat.message}`);
+          await TGLogger.Error(
+            `[Sign Card] Failed to get status for ${info.title}: ${stat.message}`,
+          );
         } else {
           signAccount.stat = stat;
         }
@@ -188,7 +196,11 @@ async function handleSign(item: SignAccount): Promise<void> {
   item.signing = true;
   try {
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const ckSign = { stoken: cookie.value.stoken, stuid: cookie.value.stuid, mid: cookie.value.mid };
+    const ckSign = {
+      stoken: cookie.value.stoken,
+      stuid: cookie.value.stuid,
+      mid: cookie.value.mid,
+    };
 
     let check = false;
     let challenge: string | undefined = undefined;
@@ -268,8 +280,8 @@ async function handleResign(): Promise<void> {
 
 .sign-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 12px;
   padding: 8px;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 }
 </style>

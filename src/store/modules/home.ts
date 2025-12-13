@@ -10,7 +10,7 @@ import { ref } from "vue";
  * 默认展示项
  */
 const defaultHomeShow: Array<TGApp.Store.Home.ShowItem> = [
-  { show: false, order: 4, label: "签到" },
+  { show: false, order: 4, label: "游戏签到" },
   { show: true, order: 1, label: "限时祈愿" },
   { show: true, order: 2, label: "近期活动" },
   { show: true, order: 3, label: "素材日历" },

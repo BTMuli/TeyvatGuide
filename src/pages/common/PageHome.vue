@@ -99,7 +99,7 @@ const bbsStore = useBBSStore();
 const { devMode, isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
 
-const showItemsAll: Array<string> = ["签到", "素材日历", "限时祈愿", "近期活动"];
+const showItemsAll: Array<string> = ["游戏签到", "素材日历", "限时祈愿", "近期活动"];
 
 const curGid = ref<number>(2);
 
@@ -136,7 +136,7 @@ async function loadComp(): Promise<void> {
   const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
     switch (item) {
-      case "签到":
+      case "游戏签到":
         temp.push(PhCompSign);
         break;
       case "限时祈愿":
