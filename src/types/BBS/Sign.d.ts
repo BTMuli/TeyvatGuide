@@ -77,7 +77,7 @@ declare namespace TGApp.BBS.Sign {
     today: string;
     /** 是否签到 */
     is_sign: boolean;
-    /** TODO: 未知字段 */
+    /** 是否补签 */
     is_sub: boolean;
     /**
      * 服务器

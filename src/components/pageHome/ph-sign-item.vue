@@ -195,6 +195,7 @@ async function loadResignInfo(): Promise<void> {
   try {
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
     const resignResp = await lunaReq.resign.info(props.account, ck);
+    console.log(resignResp);
     if ("retcode" in resignResp) {
       await TGLogger.Warn(`[Sign Item] Failed to load resign info: ${resignResp.message}`);
     } else {
@@ -203,22 +204,6 @@ async function loadResignInfo(): Promise<void> {
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Load resign info error: ${error}`);
-  }
-}
-
-async function refreshData(): Promise<void> {
-  if (!cookie.value) return;
-  try {
-    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const statResp = await lunaReq.sign.stat(props.account, ck);
-    if ("retcode" in statResp) {
-      await TGLogger.Error(`[Sign Item] Failed to refresh stat: ${statResp.message}`);
-    } else {
-      signStat.value = statResp;
-      await TGLogger.Info(`[Sign Item] Data refreshed for ${props.account.gameUid}`);
-    }
-  } catch (error) {
-    await TGLogger.Error(`[Sign Item] Refresh data error: ${error}`);
   }
 }
 
@@ -354,8 +339,8 @@ async function handleResign(): Promise<void> {
   }
 
   // Confirm resign
-  const confirmMsg = `确认补签？\n\n漏签天数: ${missedDays}\n剩余补签次数: ${resignInfo.value.quality_cnt}\n花费: ${coinCost} 米游币\n当前米游币: ${coinCnt}`;
-  const confirmed = await showDialog.check("补签确认", confirmMsg);
+  const confirmMsg = `漏签天数: ${missedDays} 剩余补签次数: ${resignInfo.value.quality_cnt}\n花费: ${coinCost} 米游币 当前米游币: ${coinCnt}`;
+  const confirmed = await showDialog.check("确认补签?", confirmMsg);
   if (!confirmed) {
     showSnackbar.cancel("已取消补签");
     return;
