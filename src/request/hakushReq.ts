@@ -41,7 +41,7 @@ let weaponCache: Record<string, HakushWeapon> | null = null;
  */
 async function getCharacters(): Promise<Record<string, HakushCharacter> | false> {
   if (characterCache) return characterCache;
-  
+
   try {
     const resp = await TGHttp<Record<string, HakushCharacter>>(
       `${hakushBaseUrl}character.json`,
@@ -62,7 +62,7 @@ async function getCharacters(): Promise<Record<string, HakushCharacter> | false>
  */
 async function getWeapons(): Promise<Record<string, HakushWeapon> | false> {
   if (weaponCache) return weaponCache;
-  
+
   try {
     const resp = await TGHttp<Record<string, HakushWeapon>>(`${hakushBaseUrl}weapon.json`, {
       method: "GET",

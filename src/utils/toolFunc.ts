@@ -340,14 +340,14 @@ export async function getWikiBriefFromHakush(
 ): Promise<TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | false> {
   const idStr = id.toString();
   const len = idStr.length;
-  
+
   if (len === 5) {
     // Weapon
     const weaponData = await HakushApi.weapon();
     if (!weaponData) return false;
     const weapon = weaponData[idStr];
     if (!weapon) return false;
-    
+
     return {
       id: Number(weapon.id),
       contentId: 0,
@@ -361,7 +361,7 @@ export async function getWikiBriefFromHakush(
     if (!characterData) return false;
     const character = characterData[idStr];
     if (!character) return false;
-    
+
     return {
       id: Number(character.id),
       contentId: 0,
