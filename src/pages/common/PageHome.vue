@@ -53,7 +53,7 @@
           :multiple="true"
           label="首页组件显示"
           variant="outlined"
-          width="300px"
+          width="360px"
         />
         <v-btn :rounded="true" class="select-btn" @click="submitHome">确定</v-btn>
       </div>
@@ -77,13 +77,27 @@ import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 
+/**
+ * 单文件组件类型
+ */
 type SFComp = ReturnType<typeof defineComponent>;
-type SelectItem = { icon: string; title: string; gid: number };
+/**
+ * 选项类型
+ */
+type SelectItem = {
+  /** 图标 */
+  icon: string;
+  /** 标题 */
+  title: string;
+  /** 分区ID */
+  gid: number;
+};
 
+const homeStore = useHomeStore();
 const bbsStore = useBBSStore();
+
 const { devMode, isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
-const homeStore = useHomeStore();
 
 const showItemsAll: Array<string> = ["签到", "素材日历", "限时祈愿", "近期活动"];
 
