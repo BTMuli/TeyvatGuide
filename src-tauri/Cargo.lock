@@ -5011,7 +5011,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-deep-link"
 version = "2.4.5"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "dunce",
  "plist",
@@ -5031,7 +5031,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-dialog"
 version = "2.4.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "log",
  "raw-window-handle",
@@ -5048,7 +5048,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-fs"
 version = "2.4.4"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "anyhow",
  "dunce",
@@ -5069,7 +5069,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-http"
 version = "2.5.4"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "bytes",
  "cookie_store",
@@ -5092,7 +5092,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-log"
 version = "2.7.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "android_logger",
  "byte-unit",
@@ -5113,7 +5113,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-opener"
 version = "2.5.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "dunce",
  "glob",
@@ -5134,7 +5134,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-os"
 version = "2.3.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "gethostname",
  "log",
@@ -5151,7 +5151,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-process"
 version = "2.3.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "tauri",
  "tauri-plugin",
@@ -5160,7 +5160,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-shell"
 version = "2.3.3"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "encoding_rs",
  "log",
@@ -5180,7 +5180,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-single-instance"
 version = "2.3.6"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "serde",
  "serde_json",
@@ -5194,7 +5194,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-sql"
 version = "2.3.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d9d51eb8ea2fd6ce3298ec0dc370cc04351a9b98"
+source = "git+https://github.com/tauri-apps/plugins-workspace.git?branch=v2#ce6835d50ff7800dcfb8508a98e9ee83771fb283"
 dependencies = [
  "futures-core",
  "indexmap 2.12.1",

@@ -4,6 +4,7 @@
 mod client;
 mod commands;
 mod plugins;
+mod tray;
 mod utils;
 #[cfg(target_os = "windows")]
 mod watchdog;
@@ -21,16 +22,12 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
     WindowEvent::CloseRequested { api, .. } => {
       api.prevent_close();
       if app.label() == "TeyvatGuide" {
-        // 子窗口 label 的数组
-        const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
-        for label in SUB_WINDOW_LABELS.iter() {
-          let sub = app.get_webview_window(label);
-          if sub.is_some() {
-            sub.unwrap().destroy().unwrap();
-          }
-        }
+        // 主窗口：隐藏到托盘而不是关闭
+        app.hide().unwrap();
+      } else {
+        // 子窗口：直接销毁
+        app.destroy().unwrap();
       }
-      app.destroy().unwrap();
     }
     _ => {}
   }
@@ -78,6 +75,8 @@ pub fn run() {
     .plugin(tauri_plugin_sql::Builder::default().build())
     .plugin(build_log_plugin())
     .setup(|_app| {
+      // 创建系统托盘图标
+      tray::create_tray(_app.handle()).expect("Failed to create tray");
       let _window = _app.get_webview_window("TeyvatGuide");
       #[cfg(debug_assertions)]
       if _window.is_some() {
