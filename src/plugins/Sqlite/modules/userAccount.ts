@@ -1,7 +1,6 @@
 /**
- * @file plugins/Sqlite/modules/userAccounts.ts
- * @description 用户账户模块
- * @since Beta v0.7.8
+ * 用户账户模块
+ * @since Beta v0.9.0
  */
 
 import { path } from "@tauri-apps/api";
@@ -215,15 +214,15 @@ function copyCookie(cookie: TGApp.App.Account.Cookie): string {
 }
 
 /**
- * @description 获取指定用户账号
- * @since Beta v0.7.2
+ * 获取指定用户账号
+ * @since Beta v0.9.0
  * @param {string} uid - 用户UID
- * @returns {Promise<TGApp.Sqlite.Account.Game[]>}
+ * @returns {Promise<Array<TGApp.Sqlite.Account.Game>>}
  */
-async function getGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game[]> {
+async function getGameAccount(uid: string): Promise<Array<TGApp.Sqlite.Account.Game>> {
   const db = await TGSqlite.getDB();
-  return await db.select<TGApp.Sqlite.Account.Game[]>(
-    "SELECT * FROM GameAccount WHERE uid = ? ORDER BY region, gameUid;",
+  return await db.select<Array<TGApp.Sqlite.Account.Game>>(
+    "SELECT * FROM GameAccount WHERE uid = ? ORDER BY gameBiz, gameUid;",
     [uid],
   );
 }
