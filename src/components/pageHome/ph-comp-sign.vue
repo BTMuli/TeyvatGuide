@@ -25,7 +25,6 @@
           :info="item.info"
           :stat="item.stat"
           @delete="handleDelete"
-          @refresh="handleRefresh"
         />
       </div>
     </template>
@@ -142,28 +141,6 @@ async function handleDelete(account: TGApp.Sqlite.Account.Game): Promise<void> {
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Delete account error: ${error}`);
     showSnackbar.error("删除账号失败");
-  }
-}
-
-async function handleRefresh(account: TGApp.Sqlite.Account.Game): Promise<void> {
-  if (!cookie.value) return;
-  try {
-    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const index = signAccounts.value.findIndex((item) => item.account.gameUid === account.gameUid);
-    if (index === -1) return;
-    let info, stat;
-    const infoResp = await lunaReq.home(account, ck);
-    if ("retcode" in infoResp) {
-      console.log(infoResp);
-    } else info = infoResp;
-    const statResp = await lunaReq.info(account, ck);
-    if ("retcode" in statResp) {
-      console.log(statResp);
-    } else stat = statResp;
-    signAccounts.value[index] = { account, info, stat };
-    await TGLogger.Info(`[Sign Card] Refreshed data for ${account.gameUid}`);
-  } catch (error) {
-    await TGLogger.Error(`[Sign Card] Refresh account error: ${error}`);
   }
 }
 </script>

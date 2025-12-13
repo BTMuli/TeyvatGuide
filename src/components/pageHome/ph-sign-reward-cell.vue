@@ -7,7 +7,7 @@
   >
     <img :alt="reward.name" :src="reward.icon" class="reward-icon" />
     <span class="reward-count">{{ reward.cnt }}</span>
-    <div v-if="state === 'signed'" class="reward-check">
+    <div v-if="state === RewardState.SIGNED" class="reward-check">
       <img alt="finish" src="/source/UI/finish.webp" />
     </div>
     <div v-if="!isExtra" class="reward-day">{{ dayNumber }}</div>
@@ -16,7 +16,13 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-type RewardState = "signed" | "next-reward" | "missed" | "normal";
+// Reward state enum
+export enum RewardState {
+  NORMAL = 0,
+  SIGNED = 1,
+  NEXT_REWARD = 2,
+  MISSED = 3,
+}
 
 type Props = {
   reward: TGApp.BBS.Sign.HomeAward;
@@ -29,8 +35,15 @@ const props = withDefaults(defineProps<Props>(), {
   isExtra: false,
 });
 
+const STATE_CLASS_MAP: Record<RewardState, string> = {
+  [RewardState.NORMAL]: "state-normal",
+  [RewardState.SIGNED]: "state-signed",
+  [RewardState.NEXT_REWARD]: "state-next-reward",
+  [RewardState.MISSED]: "state-missed",
+};
+
 const stateClass = computed(() => {
-  return `state-${props.state}`;
+  return STATE_CLASS_MAP[props.state];
 });
 
 function getTitle(): string {

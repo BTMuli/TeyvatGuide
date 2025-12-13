@@ -7,12 +7,12 @@
       </div>
       <div class="ph-sit-info">
         <div class="ph-sit-title">
-          <span class="hint">{{ props.info?.month }}</span>
+          <span class="hint">{{ signInfo?.month }}</span>
           <span>月</span>
           <span>累计签到</span>
-          <span class="hint">{{ props.stat?.total_sign_day ?? 0 }}</span>
+          <span class="hint">{{ signStat?.total_sign_day ?? 0 }}</span>
           <span>天</span>
-          <span class="hint">{{ props.stat?.is_sign ? "已签到" : "未签到" }}</span>
+          <span class="hint">{{ signStat?.is_sign ? "已签到" : "未签到" }}</span>
         </div>
         <div class="ph-sit-sub">
           {{ account.nickname }} - {{ account.gameUid }} ({{ account.regionName }})
@@ -95,6 +95,14 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useTemplateRef } from "vue";
 
+// Reward state enum
+enum RewardState {
+  NORMAL = 0,
+  SIGNED = 1,
+  NEXT_REWARD = 2,
+  MISSED = 3,
+}
+
 type SignGameInfo = { title: string; icon: string; gid: number };
 type PhSignItemProps = {
   account: TGApp.Sqlite.Account.Game;
@@ -103,7 +111,6 @@ type PhSignItemProps = {
 };
 type PhSignItemEmits = {
   (e: "delete", account: TGApp.Sqlite.Account.Game): void;
-  (e: "refresh", account: TGApp.Sqlite.Account.Game): void;
 };
 
 const props = defineProps<PhSignItemProps>();
@@ -116,6 +123,9 @@ const signItemEl = useTemplateRef<HTMLDivElement>("signItemRef");
 
 const isSign = ref<boolean>(false);
 const isResign = ref<boolean>(false);
+const signInfo = ref<TGApp.BBS.Sign.HomeRes | undefined>(props.info);
+const signStat = ref<TGApp.BBS.Sign.InfoRes | undefined>(props.stat);
+
 const gameInfo = computed<SignGameInfo>(() => {
   const biz = props.account.gameBiz;
   const enName = biz.split("_")[0];
@@ -124,59 +134,75 @@ const gameInfo = computed<SignGameInfo>(() => {
   if (findGame) return { title: findGame.name, icon: findGame.app_icon, gid: findGame.id };
   return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
 });
-const rewards = computed<Array<TGApp.BBS.Sign.HomeAward>>(() => props.info?.awards ?? []);
+const rewards = computed<Array<TGApp.BBS.Sign.HomeAward>>(() => signInfo.value?.awards ?? []);
 const extraRewards = computed<Array<TGApp.BBS.Sign.HomeAward>>(() => {
-  if (!props.info) return [];
+  if (!signInfo.value) return [];
   if (
-    props.info.short_extra_award.has_extra_award &&
-    props.info.short_extra_award.list.length > 0
+    signInfo.value.short_extra_award.has_extra_award &&
+    signInfo.value.short_extra_award.list.length > 0
   ) {
-    return props.info.short_extra_award.list;
+    return signInfo.value.short_extra_award.list;
   }
   return [];
 });
 const hasExtraRewards = computed<boolean>(() => extraRewards.value.length > 0);
 const extraTimeStr = computed<string>(() => {
-  if (!props.info) return "";
-  if (!props.info.short_extra_award.has_extra_award) return "";
-  return `${props.info.short_extra_award.start_time}~${props.info.short_extra_award.end_time}`;
+  if (!signInfo.value) return "";
+  if (!signInfo.value.short_extra_award.has_extra_award) return "";
+  return `${signInfo.value.short_extra_award.start_time}~${signInfo.value.short_extra_award.end_time}`;
 });
 const currentDay = computed<number>(() => new Date().getDate());
-const totalSignedDays = computed<number>(() => props.stat?.total_sign_day ?? 0);
-const extraSignedDays = computed<number>(() => props.stat?.short_sign_day ?? 0);
-const isTodaySigned = computed<boolean>(() => props.stat?.is_sign ?? false);
+const totalSignedDays = computed<number>(() => signStat.value?.total_sign_day ?? 0);
+const extraSignedDays = computed<number>(() => signStat.value?.short_sign_day ?? 0);
+const isTodaySigned = computed<boolean>(() => signStat.value?.is_sign ?? false);
 const canResign = computed<boolean>(() => {
   const missed = currentDay.value - 1 - totalSignedDays.value;
   return missed > 0 && isTodaySigned.value;
 });
 
 // Get reward state for regular rewards
-function getRewardState(index: number): "signed" | "next-reward" | "missed" | "normal" {
+function getRewardState(index: number): RewardState {
   const signedDays = totalSignedDays.value;
   const today = currentDay.value;
   // Already signed
   if (index < signedDays) {
-    return "signed";
+    return RewardState.SIGNED;
   }
   // Next reward to receive
   if (index === signedDays && !isTodaySigned.value) {
-    return "next-reward";
+    return RewardState.NEXT_REWARD;
   }
   // Missed days (between signed count and current date)
   if (index < today - 1 && index >= signedDays) {
-    return "missed";
+    return RewardState.MISSED;
   }
-  return "normal";
+  return RewardState.NORMAL;
 }
 
 // Get reward state for extra rewards
-function getExtraRewardState(index: number): "signed" | "next-reward" | "missed" | "normal" {
+function getExtraRewardState(index: number): RewardState {
   const signedDays = extraSignedDays.value;
   // Already signed
-  if (index < signedDays) return "signed";
+  if (index < signedDays) return RewardState.SIGNED;
   // Next reward to receive (extra rewards don't have missed state, only available during event)
-  if (index === signedDays && !isTodaySigned.value) return "next-reward";
-  return "normal";
+  if (index === signedDays && !isTodaySigned.value) return RewardState.NEXT_REWARD;
+  return RewardState.NORMAL;
+}
+
+async function refreshData(): Promise<void> {
+  if (!cookie.value) return;
+  try {
+    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+    const statResp = await lunaReq.info(props.account, ck);
+    if ("retcode" in statResp) {
+      await TGLogger.Error(`[Sign Item] Failed to refresh stat: ${statResp.message}`);
+    } else {
+      signStat.value = statResp;
+      await TGLogger.Info(`[Sign Item] Data refreshed for ${props.account.gameUid}`);
+    }
+  } catch (error) {
+    await TGLogger.Error(`[Sign Item] Refresh data error: ${error}`);
+  }
 }
 
 async function handleSign(): Promise<void> {
@@ -236,7 +262,7 @@ async function handleSign(): Promise<void> {
     }
     if (check) {
       showSnackbar.success("签到成功");
-      emits("refresh", props.account);
+      await refreshData();
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
