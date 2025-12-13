@@ -52,7 +52,8 @@
         { "url": "https://*.miyoushe.com/*" },
         { "url": "https://*.mihoyo.com/*" },
         { "url": "https://homa.snapgenshin.com/*" },
-        { "url": "https://*.hoyoverse.com/*" }
+        { "url": "https://*.hoyoverse.com/*" },
+        { "url": "https://api.hakush.in/*" }
       ]
     },
     {
