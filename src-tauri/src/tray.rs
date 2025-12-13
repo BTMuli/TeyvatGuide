@@ -11,11 +11,8 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
   // 创建托盘菜单
   let show_item = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
   let quit_item = MenuItemBuilder::with_id("quit", "退出应用").build(app)?;
-  
-  let menu = MenuBuilder::new(app)
-    .item(&show_item)
-    .item(&quit_item)
-    .build()?;
+
+  let menu = MenuBuilder::new(app).item(&show_item).item(&quit_item).build()?;
 
   // 创建托盘图标并设置事件处理
   // Tauri v2 会自动使用配置文件中指定的图标
@@ -45,7 +42,12 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
       }
     })
     .on_tray_icon_event(|tray, event| {
-      if let TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. } = event {
+      if let TrayIconEvent::Click {
+        button: MouseButton::Left,
+        button_state: MouseButtonState::Up,
+        ..
+      } = event
+      {
         let app = tray.app_handle();
         if let Some(window) = app.get_webview_window("TeyvatGuide") {
           let _ = window.show();
