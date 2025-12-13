@@ -53,6 +53,7 @@
         :day-number="ridx + 1"
         :reward="reward"
         :state="getRewardState(ridx)"
+        @click="handleRewardCellClick(ridx)"
       />
     </div>
     <!-- 签到操作 -->
@@ -190,6 +191,18 @@ function getExtraRewardState(index: number): RewardStateEnum {
   // Next reward to receive (extra rewards don't have missed state, only available during event)
   if (index === signedDays && !isTodaySigned.value) return RewardState.NEXT_REWARD;
   return RewardState.NORMAL;
+}
+
+// Handle reward cell click
+function handleRewardCellClick(index: number): void {
+  const state = getRewardState(index);
+  if (state === RewardState.NEXT_REWARD) {
+    // Click on next reward cell triggers sign-in
+    handleSign();
+  } else if (state === RewardState.MISSED) {
+    // Click on missed day triggers resign
+    handleResign();
+  }
 }
 
 async function loadResignInfo(): Promise<void> {

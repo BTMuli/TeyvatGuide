@@ -1,9 +1,10 @@
 <!-- 单个签到奖励格子 TODO:额外奖励格子需要测试 -->
 <template>
   <div
-    :class="['reward-cell', stateClass, { extra: isExtra }]"
+    :class="['reward-cell', stateClass, { extra: isExtra, clickable: isClickable }]"
     :title="getTitle()"
     class="sign-reward-cell"
+    @click="handleClick"
   >
     <img :alt="reward.name" :src="reward.icon" class="reward-icon" />
     <span class="reward-count">{{ reward.cnt }}</span>
@@ -32,9 +33,14 @@ type Props = {
   isExtra?: boolean;
 };
 
+type Emits = {
+  (e: "click"): void;
+};
+
 const props = withDefaults(defineProps<Props>(), {
   isExtra: false,
 });
+const emits = defineEmits<Emits>();
 
 const STATE_CLASS_MAP: Record<RewardStateEnum, string> = {
   [RewardState.NORMAL]: "state-normal",
@@ -47,8 +53,24 @@ const stateClass = computed(() => {
   return STATE_CLASS_MAP[props.state];
 });
 
+const isClickable = computed(() => {
+  return props.state === RewardState.NEXT_REWARD || props.state === RewardState.MISSED;
+});
+
 function getTitle(): string {
-  return `${props.reward.name}x${props.reward.cnt}`;
+  let title = `${props.reward.name}x${props.reward.cnt}`;
+  if (props.state === RewardState.NEXT_REWARD) {
+    title += " - 点击签到";
+  } else if (props.state === RewardState.MISSED) {
+    title += " - 点击补签";
+  }
+  return title;
+}
+
+function handleClick(): void {
+  if (isClickable.value) {
+    emits("click");
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -88,12 +110,19 @@ function getTitle(): string {
     animation: pulse 2s ease-in-out infinite;
     background: var(--box-bg-3);
     box-shadow: 0 0 12px rgb(59 130 246 / 60%);
-    cursor: pointer;
   }
 
   &.state-missed {
     border-color: var(--tgc-od-red);
     opacity: 0.6;
+  }
+
+  &.clickable {
+    cursor: pointer;
+
+    &:active {
+      transform: scale(0.95);
+    }
   }
 
   &:hover {
