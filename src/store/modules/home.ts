@@ -22,11 +22,11 @@ const useHomeStore = defineStore("home", () => {
     const homeShowLocal = localStorage.getItem("homeShow");
     if (homeShowLocal === null || !Array.isArray(JSON.parse(homeShowLocal))) {
       localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
+      homeShow.value = JSON.parse(localStorage.getItem("homeShow")!);
     } else {
       // Load stored items
       const storedItems: Array<ShowItem> = JSON.parse(homeShowLocal);
       // Merge with default items to add new items
-      const defaultLabels = homeShow.value.map((i) => i.label);
       const storedLabels = storedItems.map((i) => i.label);
       // Add new items from default that don't exist in stored
       for (const defaultItem of homeShow.value) {
@@ -35,10 +35,10 @@ const useHomeStore = defineStore("home", () => {
         }
       }
       // Remove items that no longer exist in default
+      const defaultLabels = homeShow.value.map((i) => i.label);
       homeShow.value = storedItems.filter((item) => defaultLabels.includes(item.label));
       localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
     }
-    homeShow.value = JSON.parse(localStorage.getItem("homeShow")!);
     return homeShow.value
       .filter((item) => item.show)
       .sort((a, b) => a.order - b.order)
