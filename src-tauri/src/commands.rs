@@ -140,8 +140,7 @@ pub async fn hide_main_window(app_handle: AppHandle) {
 #[tauri::command]
 pub async fn quit_app(app_handle: AppHandle) {
   // 关闭所有子窗口
-  const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
-  for label in SUB_WINDOW_LABELS.iter() {
+  for label in crate::SUB_WINDOW_LABELS.iter() {
     if let Some(sub) = app_handle.get_webview_window(label) {
       let _ = sub.destroy();
     }
