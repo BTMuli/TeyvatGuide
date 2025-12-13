@@ -16,8 +16,8 @@
       <div v-else-if="signAccounts.length === 0" class="sign-not-login">暂无游戏账户</div>
       <div v-else class="sign-container">
         <div
-          v-for="(item, idx) in signAccounts"
-          :key="idx"
+          v-for="item in signAccounts"
+          :key="item.account.gameUid"
           class="sign-item"
         >
           <div class="sign-header">
@@ -158,8 +158,8 @@ async function loadData(): Promise<void> {
 
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
 
-    // Load data for each account
-    for (const gameAccount of accounts) {
+    // Load data for all accounts concurrently
+    const promises = accounts.map(async (gameAccount) => {
       const info = getGameInfo(gameAccount.gameBiz);
       const signAccount: SignAccount = {
         account: gameAccount,
@@ -168,24 +168,34 @@ async function loadData(): Promise<void> {
         signing: false,
       };
 
-      // Get sign-in rewards
-      const rewardsResp = await lunaReq.home(gameAccount, ck);
-      if ("retcode" in rewardsResp) {
-        await TGLogger.Error(`[Sign Card] Failed to get rewards for ${info.title}: ${rewardsResp.message}`);
-      } else {
-        signAccount.rewards = rewardsResp.awards;
+      // Get sign-in rewards and status concurrently
+      const [rewardsResp, statResp] = await Promise.allSettled([
+        lunaReq.home(gameAccount, ck),
+        lunaReq.info(gameAccount, ck),
+      ]);
+
+      if (rewardsResp.status === 'fulfilled') {
+        const rewards = rewardsResp.value;
+        if ("retcode" in rewards) {
+          await TGLogger.Error(`[Sign Card] Failed to get rewards for ${info.title}: ${rewards.message}`);
+        } else {
+          signAccount.rewards = rewards.awards;
+        }
       }
 
-      // Get sign-in status
-      const statResp = await lunaReq.info(gameAccount, ck);
-      if ("retcode" in statResp) {
-        await TGLogger.Error(`[Sign Card] Failed to get status for ${info.title}: ${statResp.message}`);
-      } else {
-        signAccount.stat = statResp;
+      if (statResp.status === 'fulfilled') {
+        const stat = statResp.value;
+        if ("retcode" in stat) {
+          await TGLogger.Error(`[Sign Card] Failed to get status for ${info.title}: ${stat.message}`);
+        } else {
+          signAccount.stat = stat;
+        }
       }
 
-      signAccounts.value.push(signAccount);
-    }
+      return signAccount;
+    });
+
+    signAccounts.value = await Promise.all(promises);
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Error loading data: ${error}`);
   } finally {
