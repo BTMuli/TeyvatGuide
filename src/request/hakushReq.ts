@@ -30,17 +30,24 @@ export type HakushWeapon = {
   star: number;
 };
 
+// Cache for character and weapon data
+let characterCache: Record<string, HakushCharacter> | null = null;
+let weaponCache: Record<string, HakushWeapon> | null = null;
+
 /**
  * @description Fetch character metadata from Hakush API
  * @since Beta v0.8.8
  * @returns {Promise<Record<string, HakushCharacter>|false>} Character metadata or false on error
  */
 async function getCharacters(): Promise<Record<string, HakushCharacter> | false> {
+  if (characterCache) return characterCache;
+  
   try {
     const resp = await TGHttp<Record<string, HakushCharacter>>(
       `${hakushBaseUrl}character.json`,
       { method: "GET" },
     );
+    characterCache = resp;
     return resp;
   } catch (error) {
     await TGLogger.Error(`Failed to fetch character metadata from Hakush: ${error}`);
@@ -54,10 +61,13 @@ async function getCharacters(): Promise<Record<string, HakushCharacter> | false>
  * @returns {Promise<Record<string, HakushWeapon>|false>} Weapon metadata or false on error
  */
 async function getWeapons(): Promise<Record<string, HakushWeapon> | false> {
+  if (weaponCache) return weaponCache;
+  
   try {
     const resp = await TGHttp<Record<string, HakushWeapon>>(`${hakushBaseUrl}weapon.json`, {
       method: "GET",
     });
+    weaponCache = resp;
     return resp;
   } catch (error) {
     await TGLogger.Error(`Failed to fetch weapon metadata from Hakush: ${error}`);
