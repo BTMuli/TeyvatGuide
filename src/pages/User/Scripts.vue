@@ -5,19 +5,19 @@
         <img alt="icon" src="/source/UI/toolbox.webp" />
         <span>实用脚本</span>
         <v-select
-          density="compact"
-          class="us-top-select"
-          variant="outlined"
           v-model="curAccount"
-          :items="accounts"
-          item-title="uid"
-          :hide-details="true"
-          label="账号"
           :disabled="runScript || runAll"
+          :hide-details="true"
+          :items="accounts"
+          class="us-top-select"
+          density="compact"
+          item-title="uid"
+          label="账号"
+          variant="outlined"
         >
           <template #selection="{ item }">
             <div class="select-main">
-              <img alt="icon" :src="item.raw.brief.avatar" />
+              <img :src="item.raw.brief.avatar" alt="icon" />
               <div class="content">
                 <span>{{ item.raw.brief.nickname }}</span>
                 <span>UID:{{ item.raw.uid }}</span>
@@ -26,7 +26,7 @@
           </template>
           <template #item="{ props, item }">
             <div class="select-item" v-bind="props">
-              <img alt="icon" :src="item.raw.brief.avatar" />
+              <img :src="item.raw.brief.avatar" alt="icon" />
               <div class="content">
                 <span>{{ item.raw.brief.nickname }}</span>
                 <span>UID:{{ item.raw.uid }}</span>
@@ -37,8 +37,8 @@
                 </v-icon>
                 <v-icon
                   v-else
-                  size="small"
                   icon="mdi-account-convert"
+                  size="small"
                   title="切换用户"
                   @click="loadAccount(item.raw.uid)"
                 />
@@ -46,10 +46,13 @@
             </div>
           </template>
         </v-select>
+        <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecAll()"
+          >一键执行</v-btn
+        >
       </div>
     </template>
     <template #append>
-      <span class="top-hint" @click="tryCkVerify()" title="点击验证">
+      <span class="top-hint" title="点击验证" @click="tryCkVerify()">
         需要验证码登录/游戏扫码登录所需cookie！！！
       </span>
     </template>
@@ -57,10 +60,6 @@
   <div class="us-page-container">
     <!-- 左侧脚本列表 -->
     <div class="us-scripts">
-      <div class="us-title">
-        <span>脚本列表</span>
-        <v-btn @click="tryExecAll()" class="btn" :loading="runAll">一键执行</v-btn>
-      </div>
       <TusMission ref="mission" v-model="runScript" />
       <TusSign ref="sign" v-model="runScript" />
     </div>
@@ -299,25 +298,12 @@ async function tryExecAll(): Promise<void> {
   row-gap: 8px;
 }
 
-.us-title {
-  position: sticky;
-  z-index: 2;
-  top: 0;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--app-page-bg);
+.run-all-btn {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+}
 
-  span {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 24px;
-  }
-
-  .btn {
-    background: var(--tgc-btn-1);
-    color: var(--btn-text);
-  }
+.dark .run-all-btn {
+  border: 1px solid var(--common-shadow-1);
 }
 </style>
