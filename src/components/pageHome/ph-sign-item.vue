@@ -89,20 +89,11 @@ const totalSignedDays = computed(() => props.signStat?.total_sign_day ?? 0);
 // Whether today is already signed
 const isTodaySigned = computed(() => props.signStat?.is_sign ?? false);
 
-// Can resign if: there are missed days (currentDay > totalSignedDays + 1) and all caught up today
+// Can resign if: there are missed days (currentDay - 1 > totalSignedDays) and today is already signed
 const canResign = computed(() => {
   const missed = currentDay.value - 1 - totalSignedDays.value;
   return missed > 0 && isTodaySigned.value;
 });
-
-function handleSign() {
-  emits("sign");
-}
-
-function handleResign() {
-  emits("resign");
-}
-</script>
 
 function handleSign() {
   emits("sign");
