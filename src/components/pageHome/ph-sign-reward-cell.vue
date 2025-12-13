@@ -1,20 +1,19 @@
-<!-- 单个签到奖励格子 -->
+<!-- 单个签到奖励格子 TODO:额外奖励格子需要测试 -->
 <template>
   <div
     :class="['reward-cell', stateClass, { extra: isExtra }]"
+    :title="getTitle()"
     class="sign-reward-cell"
   >
-    <TMiImg :ori="true" :src="reward.icon" :alt="reward.name" class="reward-icon" />
-    <span class="reward-count">×{{ reward.cnt }}</span>
+    <img :alt="reward.name" :src="reward.icon" class="reward-icon" />
+    <span class="reward-count">{{ reward.cnt }}</span>
     <div v-if="state === 'signed'" class="reward-check">
-      <v-icon color="success" size="14">mdi-check</v-icon>
+      <img alt="finish" src="/source/UI/finish.webp" />
     </div>
     <div v-if="!isExtra" class="reward-day">{{ dayNumber }}</div>
   </div>
 </template>
-
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import { computed } from "vue";
 
 type RewardState = "signed" | "next-reward" | "missed" | "normal";
@@ -33,80 +32,87 @@ const props = withDefaults(defineProps<Props>(), {
 const stateClass = computed(() => {
   return `state-${props.state}`;
 });
-</script>
 
+function getTitle(): string {
+  return `${props.reward.name}x${props.reward.cnt}`;
+}
+</script>
 <style lang="scss" scoped>
 .sign-reward-cell {
   position: relative;
   display: flex;
+  overflow: hidden;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 6px 4px;
-  border-radius: 8px;
-  background: var(--box-bg-2);
-  border: 2px solid var(--common-shadow-2);
-  transition: all 0.2s;
-  min-width: 0;
-  min-height: 80px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--box-bg-3);
 
   &.extra {
+    padding: 8px;
     border-radius: 50%;
     aspect-ratio: 1;
-    padding: 8px;
   }
 
   &.state-signed {
-    opacity: 0.6;
-    background: var(--box-bg-3);
+    background: var(--box-bg-4);
+    color: var(--box-text-4);
+
+    .reward-icon {
+      opacity: 0.5;
+    }
   }
 
   &.state-next-reward {
-    border-color: var(--tgc-od-blue);
-    border-width: 3px;
-    background: var(--box-bg-3);
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
-    animation: pulse 2s ease-in-out infinite;
-    
-    /* Higher z-index to ensure it's on top */
-    z-index: 10;
     position: relative;
+    border-width: 1px;
+    border-color: var(--tgc-od-blue);
+    animation: pulse 2s ease-in-out infinite;
+    background: var(--box-bg-3);
+    box-shadow: 0 0 12px rgb(59 130 246 / 60%);
+    cursor: pointer;
   }
 
   &.state-missed {
-    border-color: var(--tgc-od-orange);
-    background: var(--box-bg-3);
-    opacity: 0.5;
+    border-color: var(--tgc-od-red);
+    opacity: 0.6;
   }
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 5;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+    transform: scale(1.05);
   }
 }
 
 .dark .sign-reward-cell {
   &:hover {
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgb(255 255 255 / 10%);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgb(59 130 246 / 60%);
     transform: scale(1);
   }
+
   50% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.9);
+    box-shadow: 0 0 20px rgb(59 130 246 / 90%);
     transform: scale(1.02);
   }
 }
 
 .reward-icon {
+  position: relative;
+  z-index: 1;
   width: 28px;
   height: 28px;
-  border-radius: 50%;
   flex-shrink: 0;
 }
 
@@ -116,11 +122,13 @@ const stateClass = computed(() => {
 }
 
 .reward-count {
-  margin-top: 2px;
+  position: absolute;
+  z-index: 0;
+  top: -2px;
+  right: 2px;
   font-size: 9px;
-  color: var(--box-text-1);
-  font-weight: 600;
-  white-space: nowrap;
+  font-style: italic;
+  opacity: 0.5;
 }
 
 .extra .reward-count {
@@ -130,24 +138,26 @@ const stateClass = computed(() => {
 
 .reward-check {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  z-index: 2;
   display: flex;
+  width: 32px;
+  height: 32px;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  background: var(--box-bg-4);
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  z-index: 2;
+
+  img {
+    width: 32px;
+    height: 32px;
+  }
 }
 
 .reward-day {
-  margin-top: 1px;
-  font-size: 8px;
-  color: var(--box-text-3);
-  font-weight: 400;
-  opacity: 0.5;
+  position: absolute;
+  z-index: 0;
+  bottom: -8px;
+  left: -4px;
+  color: var(--tgc-od-white);
+  font-family: var(--font-title);
+  opacity: 0.4;
 }
 </style>

@@ -281,7 +281,7 @@ async function handleResign(): Promise<void> {
 .sign-container {
   display: grid;
   padding: 8px;
-  gap: 12px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 }
 </style>
