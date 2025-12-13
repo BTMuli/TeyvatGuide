@@ -11,6 +11,7 @@ import { v4 } from "uuid";
 import { score } from "wcag-color";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+import HakushApi, { type HakushCharacter, type HakushWeapon } from "@request/hakushReq.js";
 
 /**
  * @description 时间戳转换为时间字符串
@@ -326,6 +327,54 @@ export function getWikiBrief(
     return AppWeaponData.find((item) => item.id.toString() === id.toString()) ?? false;
   }
   return AppCharacterData.find((item) => item.id.toString() === id.toString()) ?? false;
+}
+
+/**
+ * @description 从 Hakush API 获取角色/武器简略信息 (fallback)
+ * @since Beta v0.8.8
+ * @param {number|string} id - 角色/武器 ID
+ * @returns {Promise<TGApp.App.Character.WikiBriefInfo|TGApp.App.Weapon.WikiBriefInfo|false>}
+ */
+export async function getWikiBriefFromHakush(
+  id: number | string,
+): Promise<TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | false> {
+  const idStr = id.toString();
+  const len = idStr.length;
+  
+  if (len === 5) {
+    // Weapon
+    const weaponData = await HakushApi.weapon();
+    if (!weaponData) return false;
+    const weapon = weaponData[idStr];
+    if (!weapon) return false;
+    
+    return {
+      id: Number(weapon.id),
+      contentId: 0,
+      name: weapon.name,
+      star: weapon.star,
+      weapon: "",
+    };
+  } else {
+    // Character
+    const characterData = await HakushApi.character();
+    if (!characterData) return false;
+    const character = characterData[idStr];
+    if (!character) return false;
+    
+    return {
+      id: Number(character.id),
+      contentId: 0,
+      name: character.name,
+      title: "",
+      area: "",
+      birthday: [],
+      star: character.star,
+      element: "",
+      weapon: "",
+      nameCard: "",
+    };
+  }
 }
 
 /**

@@ -8,7 +8,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
-import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { getWikiBrief, getWikiBriefFromHakush, timestampToDate } from "@utils/toolFunc.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 
 import TGSqlite from "../index.js";
@@ -60,14 +60,18 @@ function getUtc8Time(time: string, timezone: number): string {
  * @since Beta v0.7.5
  * @param {TGApp.Plugins.UIGF.GachaItem} gacha - UIGF数据
  * @param {number} timezone - 时区
- * @return {TGApp.Plugins.UIGF.GachaItem} 转换后的数据
+ * @return {Promise<TGApp.Plugins.UIGF.GachaItem>} 转换后的数据
  */
-function transGacha(
+async function transGacha(
   gacha: TGApp.Plugins.UIGF.GachaItem,
   timezone: number = 8,
-): TGApp.Plugins.UIGF.GachaItem {
-  const find = getWikiBrief(gacha.item_id);
-  if (!find) return gacha;
+): Promise<TGApp.Plugins.UIGF.GachaItem> {
+  let find = getWikiBrief(gacha.item_id);
+  if (!find) {
+    // Fallback to Hakush API
+    find = await getWikiBriefFromHakush(gacha.item_id);
+    if (!find) return gacha;
+  }
   return {
     gacha_type: gacha.gacha_type,
     item_id: gacha.item_id,
@@ -215,7 +219,7 @@ async function mergeUIGF(
   const len = data.length;
   let progress = 0;
   for (const gacha of data) {
-    const trans = transGacha(gacha);
+    const trans = await transGacha(gacha);
     if (cnt % 20 === 0) {
       progress = Math.round((cnt / len) * 100 * 100) / 100;
       if (showProgress) {
@@ -246,7 +250,7 @@ async function mergeUIGF4(
   const len = data.list.length;
   let progress: number = 0;
   for (const gacha of data.list) {
-    const trans = transGacha(gacha, data.timezone);
+    const trans = await transGacha(gacha, data.timezone);
     if (cnt % 20 === 0) {
       progress = Math.round((cnt / len) * 100 * 100) / 100;
       if (showProgress) {
