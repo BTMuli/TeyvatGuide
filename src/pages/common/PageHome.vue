@@ -1,7 +1,7 @@
 <!-- 首页 -->
 <template>
-  <div class="home-container">
-    <div class="home-top">
+  <v-app-bar>
+    <template #prepend>
       <div v-if="isLogin" class="home-tools">
         <v-select
           v-model="curGid"
@@ -11,6 +11,7 @@
           item-value="gid"
           label="小工具（右侧）分区"
           variant="outlined"
+          density="compact"
         >
           <template #selection="{ item }">
             <div class="select-item main">
@@ -44,6 +45,8 @@
         </v-select>
         <TGameNav :model-value="curGid" />
       </div>
+    </template>
+    <template #append>
       <div class="home-select">
         <v-select
           v-model="showItems"
@@ -53,11 +56,16 @@
           :multiple="true"
           label="首页组件显示"
           variant="outlined"
-          width="300px"
+          width="360px"
+          density="compact"
         />
-        <v-btn :rounded="true" class="select-btn" @click="submitHome">确定</v-btn>
+        <v-btn variant="elevated" :rounded="true" class="select-btn" @click="submitHome">
+          确定
+        </v-btn>
       </div>
-    </div>
+    </template>
+  </v-app-bar>
+  <div class="home-container">
     <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />
   </div>
 </template>
@@ -69,6 +77,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
 import PhCompPool from "@comp/pageHome/ph-comp-pool.vue";
 import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
+import PhCompSign from "@comp/pageHome/ph-comp-sign.vue";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
@@ -76,15 +85,29 @@ import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 
+/**
+ * 单文件组件类型
+ */
 type SFComp = ReturnType<typeof defineComponent>;
-type SelectItem = { icon: string; title: string; gid: number };
+/**
+ * 选项类型
+ */
+type SelectItem = {
+  /** 图标 */
+  icon: string;
+  /** 标题 */
+  title: string;
+  /** 分区ID */
+  gid: number;
+};
 
+const homeStore = useHomeStore();
 const bbsStore = useBBSStore();
+
 const { devMode, isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
-const homeStore = useHomeStore();
 
-const showItemsAll: Array<string> = ["素材日历", "限时祈愿", "近期活动"];
+const showItemsAll: Array<string> = ["游戏签到", "素材日历", "限时祈愿", "近期活动"];
 
 const curGid = ref<number>(2);
 
@@ -121,6 +144,9 @@ async function loadComp(): Promise<void> {
   const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
     switch (item) {
+      case "游戏签到":
+        temp.push(PhCompSign);
+        break;
       case "限时祈愿":
         temp.push(PhCompPool);
         break;
@@ -150,6 +176,8 @@ async function submitHome(): Promise<void> {
 
 function getName(name: string): string | undefined {
   switch (name) {
+    case "ph-comp-sign":
+      return "签到";
     case "ph-comp-pool":
       return "限时祈愿";
     case "ph-comp-position":
@@ -194,15 +222,17 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
 }
 
 .home-tool-select {
-  width: 250px;
+  width: 220px;
   max-width: 250px;
+  margin-left: 16px;
 }
 
 .home-select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  margin-right: 16px;
+  gap: 8px;
 }
 
 .select-btn {

@@ -85,7 +85,7 @@ function getShareImgBgColor(): string {
 
 /**
  * 生成分享截图
- * @since Beta v0.8.7
+ * @since Beta v0.9.0
  * @param {string} fileName - 文件名
  * @param {HTMLElement} element - 元素
  * @param {number} scale - 缩放比例
@@ -99,7 +99,7 @@ export async function generateShareImg(
   scrollable: boolean = false,
 ): Promise<void> {
   const canvas = document.createElement("canvas");
-  const maxHeight = element.style.maxHeight;
+  const maxHeight = element.style?.maxHeight;
   if (scrollable) element.style.maxHeight = "100%";
   const width = element.clientWidth + 30;
   const height = (scrollable ? element.scrollHeight : element.clientHeight) + 30;

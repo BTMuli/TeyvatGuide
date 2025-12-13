@@ -1,7 +1,6 @@
 <!-- 首页近期活动组件 -->
 <template>
-  <THomeCard :append="isLogin">
-    <template #title>近期活动</template>
+  <THomeCard :append="isLogin" title="近期活动">
     <template v-if="isLogin" #title-append>
       <v-switch v-model="isUserPos" class="tp-switch"></v-switch>
       <span>{{ isUserPos ? "用户" : "百科" }}</span>
@@ -63,6 +62,16 @@ watch(
   },
 );
 
+watch(
+  () => account.value.gameUid,
+  async () => {
+    if (isUserPos.value && isInit.value) {
+      userPos.value = [];
+      await loadUserPosition(true);
+    }
+  },
+);
+
 onMounted(async () => {
   if (isLogin.value) await loadUserPosition();
   else await loadWikiPosition();
@@ -70,8 +79,8 @@ onMounted(async () => {
   isInit.value = true;
 });
 
-async function loadUserPosition(): Promise<void> {
-  if (userPos.value.length > 0) return;
+async function loadUserPosition(forceReload: boolean = false): Promise<void> {
+  if (userPos.value.length > 0 && !forceReload) return;
   if (!cookie.value) {
     showSnackbar.warn("获取近期活动失败：未登录");
     isLogin.value = false;

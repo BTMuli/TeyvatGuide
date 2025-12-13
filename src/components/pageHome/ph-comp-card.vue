@@ -1,7 +1,7 @@
 <template>
-  <div class="thc-container">
-    <div class="thc-title">
-      <slot name="title" />
+  <div ref="thcRef" class="thc-container">
+    <div class="thc-title" title="点击生成分享" @click="share()">
+      <slot name="title">{{ props.title }}</slot>
     </div>
     <div v-if="append" class="thc-append">
       <slot name="title-append" />
@@ -12,7 +12,25 @@
   </div>
 </template>
 <script lang="ts" setup>
-defineProps<{ append?: boolean }>();
+import { generateShareImg } from "@utils/TGShare.js";
+import { useTemplateRef } from "vue";
+
+/** 首页组件参数 */
+type PhCompCardProps = {
+  /** 标题 */
+  title?: string;
+  /** 是否显示append */
+  append?: boolean;
+};
+
+const props = defineProps<PhCompCardProps>();
+
+const thcEl = useTemplateRef<HTMLDivElement>("thcRef");
+
+async function share(): Promise<void> {
+  if (!thcEl.value) return;
+  await generateShareImg(`HomeComp_${props.title}`, thcEl.value);
+}
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
@@ -51,6 +69,7 @@ defineProps<{ append?: boolean }>();
 .thc-title {
   left: 8px;
   color: var(--tgc-white-1);
+  cursor: pointer;
   font-size: 20px;
 }
 

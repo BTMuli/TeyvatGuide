@@ -1,6 +1,6 @@
+<!-- 首页今日素材组件 -->
 <template>
-  <THomeCard append>
-    <template #title>今日素材 {{ dateNow }}</template>
+  <THomeCard :title="`今日素材 ${dateNow}`" append>
     <template #title-append>
       <v-switch class="tc-switch" @change="switchType()" />
       <span>{{ selectedType === "character" ? "角色" : "武器" }}</span>
@@ -11,15 +11,15 @@
           <v-btn
             v-for="text of btnText"
             :key="text.week"
-            rounded
-            class="tc-btn"
             :class="{ selected: text.week === btnNow, today: text.week === weekNow }"
+            class="tc-btn"
+            rounded
             @click="switchDay(text.week)"
           >
             {{ text.text }}
           </v-btn>
         </div>
-        <v-pagination class="tc-page" v-model="page" :total-visible="9" :length="length" />
+        <v-pagination v-model="page" :length="length" :total-visible="9" class="tc-page" />
       </div>
       <div class="tc-content">
         <TCalendarBirth />
@@ -27,8 +27,8 @@
           <TItemBox
             v-for="item in renderItems"
             :key="item.id"
-            @click="selectItem(item)"
             :model-value="getBoxData(item)"
+            @click="selectItem(item)"
           />
         </div>
       </div>
@@ -176,7 +176,7 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
 .calendar-grid {
   display: grid;
   height: 100%;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(8, 100px);
   place-items: flex-start flex-start;
 }
