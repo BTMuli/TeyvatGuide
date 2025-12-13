@@ -1,7 +1,6 @@
 <!-- 首页签到卡片 -->
 <template>
-  <THomeCard :append="isLogin">
-    <template #title>游戏签到</template>
+  <THomeCard :append="isLogin" title="游戏签到">
     <template v-if="isLogin" #title-append>
       <PhUserSwitch
         :current-uid="uid ?? ''"
@@ -264,6 +263,7 @@ async function handleSign(item: SignAccount): Promise<void> {
 }
 
 async function handleResign(): Promise<void> {
+  // TODO: 补签
   showSnackbar.info("补签功能暂未开放");
 }
 </script>
