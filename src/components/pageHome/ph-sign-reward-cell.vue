@@ -1,7 +1,7 @@
 <!-- 单个签到奖励格子 TODO:额外奖励格子需要测试 -->
 <template>
   <div
-    :class="['reward-cell', stateClass, { extra: isExtra, clickable: isClickable }]"
+    :class="['reward-cell', stateClass, { extra: isExtra, clickable: isClickableComputed }]"
     :title="getTitle()"
     class="sign-reward-cell"
     @click="handleClick"
@@ -31,6 +31,7 @@ type Props = {
   dayNumber: number;
   state: RewardStateEnum;
   isExtra?: boolean;
+  isClickable?: boolean; // Explicitly control if this cell is clickable
 };
 
 type Emits = {
@@ -39,6 +40,7 @@ type Emits = {
 
 const props = withDefaults(defineProps<Props>(), {
   isExtra: false,
+  isClickable: undefined, // Default to undefined, will be computed if not provided
 });
 const emits = defineEmits<Emits>();
 
@@ -53,7 +55,12 @@ const stateClass = computed(() => {
   return STATE_CLASS_MAP[props.state];
 });
 
-const isClickable = computed(() => {
+const isClickableComputed = computed(() => {
+  // If isClickable prop is explicitly provided, use it
+  if (props.isClickable !== undefined) {
+    return props.isClickable;
+  }
+  // Otherwise, fall back to default logic
   return props.state === RewardState.NEXT_REWARD || props.state === RewardState.MISSED;
 });
 
@@ -62,13 +69,17 @@ function getTitle(): string {
   if (props.state === RewardState.NEXT_REWARD) {
     title += " - 点击签到";
   } else if (props.state === RewardState.MISSED) {
-    title += " - 点击补签";
+    if (isClickableComputed.value) {
+      title += " - 点击补签";
+    } else {
+      title += " - 漏签";
+    }
   }
   return title;
 }
 
 function handleClick(): void {
-  if (isClickable.value) {
+  if (isClickableComputed.value) {
     emits("click");
   }
 }

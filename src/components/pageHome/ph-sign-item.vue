@@ -51,6 +51,7 @@
         v-for="(reward, ridx) in rewards"
         :key="ridx"
         :day-number="ridx + 1"
+        :is-clickable="getRewardClickable(ridx)"
         :reward="reward"
         :state="getRewardState(ridx)"
         @click="handleRewardCellClick(ridx)"
@@ -193,6 +194,20 @@ function getExtraRewardState(index: number): RewardStateEnum {
   return RewardState.NORMAL;
 }
 
+// Get if reward cell is clickable (for missed days, only first missed day is clickable)
+function getRewardClickable(index: number): boolean {
+  const state = getRewardState(index);
+  if (state === RewardState.NEXT_REWARD) {
+    return true;
+  } else if (state === RewardState.MISSED) {
+    // Only the first missed day is clickable for resign
+    // According to MiHoYo rules, you can only make up the first missed day
+    const signedDays = signStat.value?.total_sign_day ?? 0;
+    return index === signedDays;
+  }
+  return false;
+}
+
 // Handle reward cell click
 function handleRewardCellClick(index: number): void {
   const state = getRewardState(index);
@@ -200,8 +215,14 @@ function handleRewardCellClick(index: number): void {
     // Click on next reward cell triggers sign-in
     handleSign();
   } else if (state === RewardState.MISSED) {
-    // Click on missed day triggers resign
-    handleResign();
+    // Only allow clicking the first missed day for resign
+    // According to MiHoYo rules, you can only make up the first missed day
+    const signedDays = signStat.value?.total_sign_day ?? 0;
+    if (index === signedDays) {
+      // This is the first missed day, allow resign
+      handleResign();
+    }
+    // If it's not the first missed day, do nothing (clicking won't trigger resign)
   }
 }
 
