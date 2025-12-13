@@ -1,30 +1,29 @@
 <!-- 单个游戏账户签到卡片 -->
 <template>
-  <div ref="signItemRef" class="sign-item">
-    <div class="sign-header">
-      <div :title="gameInfo.title" class="sign-icon" @click="shareItem()">
+  <div ref="signItemRef" class="ph-si-box">
+    <div class="ph-si-top">
+      <div :title="gameInfo.title" class="ph-sit-icon" @click="shareItem()">
         <img :alt="gameInfo.title" :src="gameInfo.icon" />
       </div>
-      <div class="sign-info">
-        <div class="sign-month">
-          <span class="hint">{{ currentMonth }}</span>
+      <div class="ph-sit-info">
+        <div class="ph-sit-title">
+          <span class="hint">{{ props.info?.month }}</span>
           <span>月</span>
           <span>累计签到</span>
-          <span class="hint">{{ signStat?.total_sign_day ?? 0 }}</span>
+          <span class="hint">{{ props.stat?.total_sign_day ?? 0 }}</span>
           <span>天</span>
-          <span class="hint">{{ signStat?.is_sign ? "已签到" : "未签到" }}</span>
+          <span class="hint">{{ props.stat?.is_sign ? "已签到" : "未签到" }}</span>
         </div>
-        <div class="sign-account">
+        <div class="ph-sit-sub">
           {{ account.nickname }} - {{ account.gameUid }} ({{ account.regionName }})
         </div>
       </div>
       <v-btn
-        class="delete-btn"
-        color="error"
+        v-if="props.account.gameBiz !== 'hk4e_cn'"
+        class="ph-sit-delete"
         icon="mdi-delete"
         size="x-small"
-        variant="text"
-        @click="handleDeleteClick"
+        @click="tryDelete()"
       />
     </div>
     <!-- 额外签到奖励部分 -->
@@ -33,7 +32,7 @@
         <v-icon color="orange" size="small">mdi-star</v-icon>
         <span class="extra-title">额外奖励</span>
         <span class="extra-days">({{ extraSignedDays }}/{{ extraRewards.length }})</span>
-        <span class="extra-time">{{ extraTimeInfo }}</span>
+        <span class="extra-time">{{ extraTimeStr }}</span>
       </div>
       <div class="extra-grid">
         <PhSignRewardCell
@@ -59,8 +58,8 @@
     <!-- 签到操作 -->
     <div class="sign-actions" data-html2canvas-ignore>
       <v-btn
-        :disabled="isTodaySigned || signing"
-        :loading="signing"
+        :disabled="isTodaySigned || isSign || isResign"
+        :loading="isSign"
         class="sign-btn"
         prepend-icon="mdi-calendar-check"
         size="small"
@@ -69,7 +68,9 @@
         签到
       </v-btn>
       <v-btn
-        :disabled="!canResign || signing"
+        v-if="canResign"
+        :disabled="!canResign || isSign || isResign"
+        :loading="isResign"
         class="sign-btn resign-btn"
         prepend-icon="mdi-calendar-refresh"
         size="small"
@@ -81,6 +82,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhSignRewardCell from "@comp/pageHome/ph-sign-reward-cell.vue";
@@ -93,34 +95,28 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useTemplateRef } from "vue";
 
-type SignGameInfo = {
-  title: string;
-  icon: string;
-  gid: number;
-};
-
-type Props = {
+type SignGameInfo = { title: string; icon: string; gid: number };
+type PhSignItemProps = {
   account: TGApp.Sqlite.Account.Game;
-  infoResp?: TGApp.BBS.Sign.HomeRes | TGApp.BBS.Base.BaseRet;
-  statResp?: TGApp.BBS.Sign.InfoRes | TGApp.BBS.Base.BaseRet;
+  info?: TGApp.BBS.Sign.HomeRes;
+  stat?: TGApp.BBS.Sign.InfoRes;
 };
-
-type Emits = {
-  (e: "delete", gameUid: string): void;
+type PhSignItemEmits = {
+  (e: "delete", account: TGApp.Sqlite.Account.Game): void;
   (e: "refresh", account: TGApp.Sqlite.Account.Game): void;
 };
 
-const props = defineProps<Props>();
-const emits = defineEmits<Emits>();
+const props = defineProps<PhSignItemProps>();
+const emits = defineEmits<PhSignItemEmits>();
 
 const { cookie } = storeToRefs(useUserStore());
 const { gameList } = storeToRefs(useBBSStore());
 
 const signItemEl = useTemplateRef<HTMLDivElement>("signItemRef");
-const signing = ref<boolean>(false);
 
-// Compute game info from gameBiz
-const gameInfo = computed((): SignGameInfo => {
+const isSign = ref<boolean>(false);
+const isResign = ref<boolean>(false);
+const gameInfo = computed<SignGameInfo>(() => {
   const biz = props.account.gameBiz;
   const enName = biz.split("_")[0];
   if (!enName) return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
@@ -128,103 +124,58 @@ const gameInfo = computed((): SignGameInfo => {
   if (findGame) return { title: findGame.name, icon: findGame.app_icon, gid: findGame.id };
   return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
 });
-
-// Process sign stat from response
-const signStat = computed((): TGApp.BBS.Sign.InfoRes | undefined => {
-  if (!props.statResp || "retcode" in props.statResp) return undefined;
-  return props.statResp;
-});
-
-// Process rewards from response
-const rewards = computed((): TGApp.BBS.Sign.HomeAward[] => {
-  if (!props.infoResp || "retcode" in props.infoResp) return [];
-  return props.infoResp.awards;
-});
-
-// Process extra rewards from response
-const extraRewards = computed((): TGApp.BBS.Sign.HomeAward[] => {
-  if (!props.infoResp || "retcode" in props.infoResp) return [];
+const rewards = computed<Array<TGApp.BBS.Sign.HomeAward>>(() => props.info?.awards ?? []);
+const extraRewards = computed<Array<TGApp.BBS.Sign.HomeAward>>(() => {
+  if (!props.info) return [];
   if (
-    props.infoResp.short_extra_award?.has_extra_award &&
-    props.infoResp.short_extra_award.list.length > 0
+    props.info.short_extra_award.has_extra_award &&
+    props.info.short_extra_award.list.length > 0
   ) {
-    return props.infoResp.short_extra_award.list;
+    return props.info.short_extra_award.list;
   }
   return [];
 });
-
-const hasExtraRewards = computed(() => extraRewards.value.length > 0);
-
-const extraTimeRange = computed(() => {
-  if (!props.infoResp || "retcode" in props.infoResp) return undefined;
-  if (!props.infoResp.short_extra_award?.has_extra_award) return undefined;
-  return {
-    start: props.infoResp.short_extra_award.start_time,
-    end: props.infoResp.short_extra_award.end_time,
-  };
+const hasExtraRewards = computed<boolean>(() => extraRewards.value.length > 0);
+const extraTimeStr = computed<string>(() => {
+  if (!props.info) return "";
+  if (!props.info.short_extra_award.has_extra_award) return "";
+  return `${props.info.short_extra_award.start_time}~${props.info.short_extra_award.end_time}`;
 });
-
-const currentMonth = computed(() => new Date().getMonth() + 1);
-const currentDay = computed(() => new Date().getDate());
-
-// Total days signed (from API)
-const totalSignedDays = computed(() => signStat.value?.total_sign_day ?? 0);
-
-// Extra sign-in days
-const extraSignedDays = computed(() => signStat.value?.short_sign_day ?? 0);
-
-// Whether today is already signed
-const isTodaySigned = computed(() => signStat.value?.is_sign ?? false);
-
-// Can resign if: there are missed days (currentDay - 1 > totalSignedDays) and today is already signed
-const canResign = computed(() => {
+const currentDay = computed<number>(() => new Date().getDate());
+const totalSignedDays = computed<number>(() => props.stat?.total_sign_day ?? 0);
+const extraSignedDays = computed<number>(() => props.stat?.short_sign_day ?? 0);
+const isTodaySigned = computed<boolean>(() => props.stat?.is_sign ?? false);
+const canResign = computed<boolean>(() => {
   const missed = currentDay.value - 1 - totalSignedDays.value;
   return missed > 0 && isTodaySigned.value;
-});
-
-// Extra rewards time range info
-const extraTimeInfo = computed(() => {
-  if (!extraTimeRange.value) return "";
-  return `${extraTimeRange.value.start} ~ ${extraTimeRange.value.end}`;
 });
 
 // Get reward state for regular rewards
 function getRewardState(index: number): "signed" | "next-reward" | "missed" | "normal" {
   const signedDays = totalSignedDays.value;
   const today = currentDay.value;
-
   // Already signed
   if (index < signedDays) {
     return "signed";
   }
-
   // Next reward to receive
   if (index === signedDays && !isTodaySigned.value) {
     return "next-reward";
   }
-
   // Missed days (between signed count and current date)
   if (index < today - 1 && index >= signedDays) {
     return "missed";
   }
-
   return "normal";
 }
 
 // Get reward state for extra rewards
 function getExtraRewardState(index: number): "signed" | "next-reward" | "missed" | "normal" {
   const signedDays = extraSignedDays.value;
-
   // Already signed
-  if (index < signedDays) {
-    return "signed";
-  }
-
+  if (index < signedDays) return "signed";
   // Next reward to receive (extra rewards don't have missed state, only available during event)
-  if (index === signedDays && !isTodaySigned.value) {
-    return "next-reward";
-  }
-
+  if (index === signedDays && !isTodaySigned.value) return "next-reward";
   return "normal";
 }
 
@@ -233,8 +184,7 @@ async function handleSign(): Promise<void> {
     showSnackbar.warn("请先登录");
     return;
   }
-
-  signing.value = true;
+  isSign.value = true;
   try {
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
     const ckSign = {
@@ -248,9 +198,7 @@ async function handleSign(): Promise<void> {
 
     while (!check) {
       const signResp = await lunaReq.sign(props.account, ck, challenge);
-
       if (challenge !== undefined) challenge = undefined;
-
       if ("retcode" in signResp) {
         if (signResp.retcode === 1034) {
           await TGLogger.Info("[Sign Item] Captcha required");
@@ -286,27 +234,31 @@ async function handleSign(): Promise<void> {
         break;
       }
     }
-
     if (check) {
       showSnackbar.success("签到成功");
-      // Notify parent to refresh data for this account
       emits("refresh", props.account);
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
     showSnackbar.error("签到失败，请重试");
   } finally {
-    signing.value = false;
+    isSign.value = false;
   }
 }
 
 async function handleResign(): Promise<void> {
   // TODO: 补签
-  showSnackbar.info("补签功能暂未开放");
+  showSnackbar.warn("补签功能暂未开放");
 }
 
-async function handleDeleteClick(): Promise<void> {
-  emits("delete", props.account.gameUid);
+async function tryDelete(): Promise<void> {
+  const infoStr = `${gameInfo.value.title}-${props.account.regionName}-${props.account.gameUid}`;
+  const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后仅能通过刷新游戏账号恢复`);
+  if (!check) {
+    showSnackbar.cancel(`已取消删除${infoStr}`);
+    return;
+  }
+  emits("delete", props.account);
 }
 
 async function shareItem(): Promise<void> {
@@ -316,7 +268,7 @@ async function shareItem(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-.sign-item {
+.ph-si-box {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -327,26 +279,29 @@ async function shareItem(): Promise<void> {
   row-gap: 8px;
 }
 
-.sign-header {
+.ph-si-top {
   position: relative;
   display: flex;
   width: 100%;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--common-shadow-2);
-  gap: 8px;
+  gap: 4px;
+}
 
-  .delete-btn {
-    margin-left: auto;
-    opacity: 0.6;
+.ph-sit-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--tgc-btn-1);
+  color: var(--tgc-od-red);
 
-    &:hover {
-      opacity: 1;
-    }
+  &:hover {
+    opacity: 1;
   }
 }
 
-.sign-icon {
+.ph-sit-icon {
   overflow: hidden;
   width: 40px;
   height: 40px;
@@ -360,14 +315,14 @@ async function shareItem(): Promise<void> {
   }
 }
 
-.sign-info {
+.ph-sit-info {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: 2px;
 }
 
-.sign-month {
+.ph-sit-title {
   display: flex;
   color: var(--box-text-1);
   column-gap: 4px;
@@ -380,7 +335,7 @@ async function shareItem(): Promise<void> {
   }
 }
 
-.sign-account {
+.ph-sit-sub {
   color: var(--box-text-1);
   font-size: 13px;
   font-weight: 500;

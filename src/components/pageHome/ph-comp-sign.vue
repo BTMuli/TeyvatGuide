@@ -13,22 +13,17 @@
       <div v-else-if="gameAccounts.length === 0" class="sign-not-login">暂无游戏账户</div>
       <div v-else-if="loading" class="sign-loading">
         <div class="loading-content">
-          <v-progress-linear
-            :model-value="loadingProgress"
-            color="primary"
-            height="6"
-            rounded
-          />
+          <v-progress-linear :model-value="loadingProgress" color="primary" height="6" rounded />
           <div class="loading-text">{{ loadingText }}</div>
         </div>
       </div>
       <div v-else class="sign-container">
         <PhSignItem
           v-for="item in signAccounts"
-          :key="item.account.gameUid"
+          :key="`${item.account.gameBiz}_${item.account.gameUid}`"
           :account="item.account"
-          :info-resp="item.infoResp"
-          :stat-resp="item.statResp"
+          :info="item.info"
+          :stat="item.stat"
           @delete="handleDelete"
           @refresh="handleRefresh"
         />
@@ -52,8 +47,8 @@ import PhUserSwitch from "./ph-user-switch.vue";
 
 type SignAccount = {
   account: TGApp.Sqlite.Account.Game;
-  infoResp?: TGApp.BBS.Sign.HomeRes | TGApp.BBS.Base.BaseRet;
-  statResp?: TGApp.BBS.Sign.InfoRes | TGApp.BBS.Base.BaseRet;
+  info?: TGApp.BBS.Sign.HomeRes;
+  stat?: TGApp.BBS.Sign.InfoRes;
 };
 
 type TSignEmits = {
@@ -76,9 +71,7 @@ watch(
   async () => await loadData(),
 );
 
-onMounted(async () => {
-  await loadData();
-});
+onMounted(async () => await loadData());
 
 async function loadData(): Promise<void> {
   if (!isLogin.value || uid.value === undefined || !cookie.value) {
@@ -86,68 +79,48 @@ async function loadData(): Promise<void> {
     signAccounts.value = [];
     return;
   }
-
   signAccounts.value = [];
-
   try {
-    // Get all game accounts for current user
     const accounts = await TSUserAccount.game.getAccount(uid.value);
     gameAccounts.value = accounts;
-
     if (accounts.length === 0) {
       await TGLogger.Warn("[Sign Card] No game accounts found");
       emits("success");
       return;
     }
-
-    // Emit success immediately after getting accounts
     emits("success");
-
-    // Start loading data sequentially
     loading.value = true;
     loadingProgress.value = 0;
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-
-    // Load data for each account sequentially
     for (let i = 0; i < accounts.length; i++) {
-      const gameAccount = accounts[i];
-      loadingText.value = `正在加载 ${gameAccount.gameBiz} - ${gameAccount.gameUid}...`;
-
-      const signAccount: SignAccount = {
-        account: gameAccount,
-      };
-
+      const account = accounts[i];
+      loadingText.value = `正在加载 ${account.gameBiz} - ${account.gameUid}...`;
+      loadingProgress.value = (i / accounts.length) * 100;
+      let info, stat;
       try {
-        // Get sign-in rewards and status sequentially
-        const infoResp = await lunaReq.home(gameAccount, ck);
-        signAccount.infoResp = infoResp;
-
-        const statResp = await lunaReq.info(gameAccount, ck);
-        signAccount.statResp = statResp;
-
+        const infoResp = await lunaReq.home(account, ck);
         if ("retcode" in infoResp) {
           await TGLogger.Error(
-            `[Sign Card] Failed to get rewards for ${gameAccount.gameBiz}: ${infoResp.message}`,
+            `[Sign Card] Failed to get rewards for ${account.gameBiz}: ${infoResp.message}`,
           );
-        }
-
+        } else info = infoResp;
+        const statResp = await lunaReq.info(account, ck);
         if ("retcode" in statResp) {
           await TGLogger.Error(
-            `[Sign Card] Failed to get status for ${gameAccount.gameBiz}: ${statResp.message}`,
+            `[Sign Card] Failed to get status for ${account.gameBiz}: ${statResp.message}`,
           );
-        }
+        } else stat = statResp;
       } catch (error) {
-        await TGLogger.Error(
-          `[Sign Card] Error loading data for ${gameAccount.gameBiz}: ${error}`,
-        );
+        await TGLogger.Error(`[Sign Card] Error loading data for ${account.gameBiz}: ${error}`);
       }
-
-      signAccounts.value.push(signAccount);
-      loadingProgress.value = ((i + 1) / accounts.length) * 100;
+      signAccounts.value.push({ account, info, stat });
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Error loading data: ${error}`);
   } finally {
+    loadingProgress.value = 100;
+    loadingText.value = "加载完成";
+    await new Promise<void>((resolve) => setTimeout(resolve, 200));
     loading.value = false;
     loadingProgress.value = 0;
     loadingText.value = "";
@@ -155,23 +128,17 @@ async function loadData(): Promise<void> {
 }
 
 async function handleUserSwitch(newUid: string): Promise<void> {
-  // Data will automatically reload via uid watcher
   await TGLogger.Info(`[Sign Card] User switched to ${newUid}`);
 }
 
-async function handleDelete(gameUid: string): Promise<void> {
+async function handleDelete(account: TGApp.Sqlite.Account.Game): Promise<void> {
   try {
-    // Delete from database
-    const success = await TSUserAccount.game.delAccount(gameUid);
-    if (success) {
-      // Remove from UI
-      signAccounts.value = signAccounts.value.filter((item) => item.account.gameUid !== gameUid);
-      gameAccounts.value = gameAccounts.value.filter((item) => item.gameUid !== gameUid);
-      emits("delete", gameUid);
-      showSnackbar.success("账号已删除");
-    } else {
-      showSnackbar.error("删除账号失败");
-    }
+    await TSUserAccount.game.deleteAccount(account);
+    signAccounts.value = signAccounts.value.filter(
+      (item) =>
+        item.account.gameUid !== account.gameUid && item.account.gameBiz !== account.gameBiz,
+    );
+    showSnackbar.success("账号已删除");
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Delete account error: ${error}`);
     showSnackbar.error("删除账号失败");
@@ -180,25 +147,20 @@ async function handleDelete(gameUid: string): Promise<void> {
 
 async function handleRefresh(account: TGApp.Sqlite.Account.Game): Promise<void> {
   if (!cookie.value) return;
-  
   try {
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    
-    // Find the account in our list
     const index = signAccounts.value.findIndex((item) => item.account.gameUid === account.gameUid);
     if (index === -1) return;
-    
-    // Refresh data for this account
+    let info, stat;
     const infoResp = await lunaReq.home(account, ck);
+    if ("retcode" in infoResp) {
+      console.log(infoResp);
+    } else info = infoResp;
     const statResp = await lunaReq.info(account, ck);
-    
-    // Update the account data
-    signAccounts.value[index] = {
-      account,
-      infoResp,
-      statResp,
-    };
-    
+    if ("retcode" in statResp) {
+      console.log(statResp);
+    } else stat = statResp;
+    signAccounts.value[index] = { account, info, stat };
     await TGLogger.Info(`[Sign Card] Refreshed data for ${account.gameUid}`);
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Refresh account error: ${error}`);
@@ -224,9 +186,9 @@ async function handleRefresh(account: TGApp.Sqlite.Account.Game): Promise<void> 
 
 .loading-content {
   display: flex;
-  flex-direction: column;
   width: 100%;
   max-width: 400px;
+  flex-direction: column;
   gap: 12px;
 }
 
