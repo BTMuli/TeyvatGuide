@@ -76,7 +76,7 @@
         size="small"
         @click="handleResign"
       >
-        补签
+        补签{{ resignCount > 0 ? ` (${resignCount})` : "" }}
       </v-btn>
     </div>
   </div>
@@ -124,6 +124,7 @@ const isSign = ref<boolean>(false);
 const isResign = ref<boolean>(false);
 const signInfo = ref<TGApp.BBS.Sign.HomeRes | undefined>(props.info);
 const signStat = ref<TGApp.BBS.Sign.InfoRes | undefined>(props.stat);
+const resignInfo = ref<TGApp.BBS.Sign.ResignInfoRes | undefined>(undefined);
 
 const gameInfo = computed<SignGameInfo>(() => {
   const biz = props.account.gameBiz;
@@ -158,6 +159,7 @@ const canResign = computed<boolean>(() => {
   const missed = currentDay.value - 1 - totalSignedDays.value;
   return missed > 0 && isTodaySigned.value;
 });
+const resignCount = computed<number>(() => resignInfo.value?.quality_cnt ?? 0);
 
 // Get reward state for regular rewards
 function getRewardState(index: number): RewardStateEnum {
@@ -188,6 +190,22 @@ function getExtraRewardState(index: number): RewardStateEnum {
   return RewardState.NORMAL;
 }
 
+async function loadResignInfo(): Promise<void> {
+  if (!cookie.value) return;
+  try {
+    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+    const resignResp = await lunaReq.resign.info(props.account, ck);
+    if ("retcode" in resignResp) {
+      await TGLogger.Warn(`[Sign Item] Failed to load resign info: ${resignResp.message}`);
+    } else {
+      resignInfo.value = resignResp;
+      await TGLogger.Info(`[Sign Item] Resign info loaded for ${props.account.gameUid}`);
+    }
+  } catch (error) {
+    await TGLogger.Error(`[Sign Item] Load resign info error: ${error}`);
+  }
+}
+
 async function refreshData(): Promise<void> {
   if (!cookie.value) return;
   try {
@@ -201,6 +219,33 @@ async function refreshData(): Promise<void> {
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Refresh data error: ${error}`);
+  }
+}
+
+// Update local data after successful sign/resign without API call
+function updateLocalDataAfterSign(): void {
+  if (!signStat.value) return;
+  // Increment sign count
+  signStat.value.total_sign_day += 1;
+  // Mark as signed today
+  signStat.value.is_sign = true;
+  // Update extra sign day if has extra award
+  if (signInfo.value?.short_extra_award.has_extra_award) {
+    signStat.value.short_sign_day += 1;
+  }
+}
+
+function updateLocalDataAfterResign(): void {
+  if (!signStat.value || !resignInfo.value) return;
+  // Increment sign count
+  signStat.value.total_sign_day += 1;
+  // Decrement missed count
+  if (signStat.value.sign_cnt_missed > 0) {
+    signStat.value.sign_cnt_missed -= 1;
+  }
+  // Decrement resign count
+  if (resignInfo.value.quality_cnt > 0) {
+    resignInfo.value.quality_cnt -= 1;
   }
 }
 
@@ -261,7 +306,9 @@ async function handleSign(): Promise<void> {
     }
     if (check) {
       showSnackbar.success("签到成功");
-      await refreshData();
+      updateLocalDataAfterSign();
+      // Load resign info after sign to get updated resign count
+      await loadResignInfo();
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
@@ -272,8 +319,92 @@ async function handleSign(): Promise<void> {
 }
 
 async function handleResign(): Promise<void> {
-  // TODO: 补签
-  showSnackbar.warn("补签功能暂未开放");
+  if (!cookie.value) {
+    showSnackbar.warn("请先登录");
+    return;
+  }
+
+  // Load resign info first
+  await loadResignInfo();
+
+  if (!resignInfo.value) {
+    showSnackbar.error("获取补签信息失败");
+    return;
+  }
+
+  // Check if can resign
+  const missedDays = signStat.value?.sign_cnt_missed ?? 0;
+  if (missedDays === 0) {
+    showSnackbar.warn("没有漏签天数，无需补签");
+    return;
+  }
+
+  // Check resign count
+  if (resignInfo.value.quality_cnt <= 0) {
+    showSnackbar.warn("补签次数不足");
+    return;
+  }
+
+  // Check coin
+  const coinCost = resignInfo.value.coin_cost;
+  const coinCnt = resignInfo.value.coin_cnt;
+  if (coinCnt < coinCost) {
+    showSnackbar.warn(`米游币不足，需要 ${coinCost} 米游币`);
+    return;
+  }
+
+  // Confirm resign
+  const confirmMsg = `确认补签？\n\n漏签天数: ${missedDays}\n剩余补签次数: ${resignInfo.value.quality_cnt}\n花费: ${coinCost} 米游币\n当前米游币: ${coinCnt}`;
+  const confirmed = await showDialog.check("补签确认", confirmMsg);
+  if (!confirmed) {
+    showSnackbar.cancel("已取消补签");
+    return;
+  }
+
+  isResign.value = true;
+  try {
+    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+    const ckSign = {
+      stoken: cookie.value.stoken,
+      stuid: cookie.value.stuid,
+      mid: cookie.value.mid,
+    };
+
+    let check = false;
+    let challenge: string | undefined = undefined;
+
+    while (!check) {
+      const resignResp = await lunaReq.resign.oper(props.account, ck, challenge);
+      if (challenge !== undefined) challenge = undefined;
+      if ("retcode" in resignResp) {
+        if (resignResp.retcode === 1034) {
+          await TGLogger.Info("[Sign Item] Captcha required for resign");
+          const challengeGet = await miscReq.challenge(ckSign);
+          if (challengeGet === false) {
+            showSnackbar.error("验证码验证失败");
+            break;
+          }
+          challenge = challengeGet;
+          continue;
+        }
+        await TGLogger.Error(`[Sign Item] Resign failed: ${resignResp.message}`);
+        showSnackbar.error(`补签失败: ${resignResp.message}`);
+        break;
+      }
+
+      // Resign successful
+      check = true;
+      showSnackbar.success(`补签成功: ${resignResp.message}`);
+      updateLocalDataAfterResign();
+      // Reload resign info to get updated count and coin
+      await loadResignInfo();
+    }
+  } catch (error) {
+    await TGLogger.Error(`[Sign Item] Resign error: ${error}`);
+    showSnackbar.error("补签失败，请重试");
+  } finally {
+    isResign.value = false;
+  }
 }
 
 async function tryDelete(): Promise<void> {
