@@ -10,37 +10,36 @@
     </template>
     <template #default>
       <div v-if="!isLogin" class="sign-not-login">请先登录</div>
+      <div v-else-if="gameAccounts.length === 0" class="sign-not-login">暂无游戏账户</div>
       <div v-else-if="loading" class="sign-loading">
-        <v-progress-circular color="primary" indeterminate />
+        <div class="loading-content">
+          <v-progress-linear
+            :model-value="loadingProgress"
+            color="primary"
+            height="6"
+            rounded
+          />
+          <div class="loading-text">{{ loadingText }}</div>
+        </div>
       </div>
-      <div v-else-if="signAccounts.length === 0" class="sign-not-login">暂无游戏账户</div>
       <div v-else class="sign-container">
         <PhSignItem
           v-for="item in signAccounts"
           :key="item.account.gameUid"
           :account="item.account"
-          :extra-rewards="item.extraRewards"
-          :extra-time-range="item.extraTimeRange"
-          :game-info="item.info"
-          :has-extra-rewards="item.hasExtraRewards"
-          :rewards="item.rewards"
-          :sign-stat="item.stat"
-          :signing="item.signing"
-          @resign="handleResign"
-          @sign="handleSign(item)"
+          :info-resp="item.infoResp"
+          :stat-resp="item.statResp"
+          @delete="handleDelete"
         />
       </div>
     </template>
   </THomeCard>
 </template>
 <script lang="ts" setup>
-import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import lunaReq from "@req/lunaReq.js";
-import miscReq from "@req/miscReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
-import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -50,31 +49,25 @@ import THomeCard from "./ph-comp-card.vue";
 import PhSignItem from "./ph-sign-item.vue";
 import PhUserSwitch from "./ph-user-switch.vue";
 
-type SignGameInfo = {
-  title: string;
-  icon: string;
-  gid: number;
-};
-
 type SignAccount = {
   account: TGApp.Sqlite.Account.Game;
-  info: SignGameInfo;
-  stat?: TGApp.BBS.Sign.InfoRes;
-  rewards: TGApp.BBS.Sign.HomeAward[];
-  extraRewards: TGApp.BBS.Sign.HomeAward[];
-  hasExtraRewards: boolean;
-  extraTimeRange?: { start: string; end: string };
-  signing: boolean;
+  infoResp?: TGApp.BBS.Sign.HomeRes | TGApp.BBS.Base.BaseRet;
+  statResp?: TGApp.BBS.Sign.InfoRes | TGApp.BBS.Base.BaseRet;
 };
 
-type TSignEmits = (e: "success") => void;
+type TSignEmits = {
+  (e: "success"): void;
+  (e: "delete", gameUid: string): void;
+};
 
 const emits = defineEmits<TSignEmits>();
 const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
 const { isLogin } = storeToRefs(useAppStore());
-const { gameList } = storeToRefs(useBBSStore());
 
-const loading = ref<boolean>(true);
+const loading = ref<boolean>(false);
+const loadingProgress = ref<number>(0);
+const loadingText = ref<string>("");
+const gameAccounts = ref<TGApp.Sqlite.Account.Game[]>([]);
 const signAccounts = ref<SignAccount[]>([]);
 
 watch(
@@ -84,100 +77,79 @@ watch(
 
 onMounted(async () => {
   await loadData();
-  emits("success");
 });
-
-function getGameInfo(biz: string): SignGameInfo {
-  const enName = biz.split("_")[0];
-  if (!enName) return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
-  const findGame = gameList.value.find((i) => i.op_name === enName);
-  if (findGame) return { title: findGame.name, icon: findGame.app_icon, gid: findGame.id };
-  return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
-}
 
 async function loadData(): Promise<void> {
   if (!isLogin.value || uid.value === undefined || !cookie.value) {
-    loading.value = false;
+    gameAccounts.value = [];
     signAccounts.value = [];
     return;
   }
 
-  loading.value = true;
   signAccounts.value = [];
 
   try {
     // Get all game accounts for current user
     const accounts = await TSUserAccount.game.getAccount(uid.value);
+    gameAccounts.value = accounts;
 
     if (accounts.length === 0) {
       await TGLogger.Warn("[Sign Card] No game accounts found");
-      loading.value = false;
+      emits("success");
       return;
     }
 
+    // Emit success immediately after getting accounts
+    emits("success");
+
+    // Start loading data sequentially
+    loading.value = true;
+    loadingProgress.value = 0;
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
 
-    // Load data for all accounts concurrently
-    const promises = accounts.map(async (gameAccount) => {
-      const info = getGameInfo(gameAccount.gameBiz);
+    // Load data for each account sequentially
+    for (let i = 0; i < accounts.length; i++) {
+      const gameAccount = accounts[i];
+      loadingText.value = `正在加载 ${gameAccount.gameBiz} - ${gameAccount.gameUid}...`;
+
       const signAccount: SignAccount = {
         account: gameAccount,
-        info,
-        rewards: [],
-        extraRewards: [],
-        hasExtraRewards: false,
-        signing: false,
       };
 
-      // Get sign-in rewards and status concurrently
-      const [rewardsResp, statResp] = await Promise.allSettled([
-        lunaReq.home(gameAccount, ck),
-        lunaReq.info(gameAccount, ck),
-      ]);
+      try {
+        // Get sign-in rewards and status sequentially
+        const infoResp = await lunaReq.home(gameAccount, ck);
+        signAccount.infoResp = infoResp;
 
-      if (rewardsResp.status === "fulfilled") {
-        const rewards = rewardsResp.value;
-        if ("retcode" in rewards) {
+        const statResp = await lunaReq.info(gameAccount, ck);
+        signAccount.statResp = statResp;
+
+        if ("retcode" in infoResp) {
           await TGLogger.Error(
-            `[Sign Card] Failed to get rewards for ${info.title}: ${rewards.message}`,
+            `[Sign Card] Failed to get rewards for ${gameAccount.gameBiz}: ${infoResp.message}`,
           );
-        } else {
-          signAccount.rewards = rewards.awards;
-
-          // Handle extra rewards
-          if (
-            rewards.short_extra_award?.has_extra_award &&
-            rewards.short_extra_award.list.length > 0
-          ) {
-            signAccount.hasExtraRewards = true;
-            signAccount.extraRewards = rewards.short_extra_award.list;
-            signAccount.extraTimeRange = {
-              start: rewards.short_extra_award.start_time,
-              end: rewards.short_extra_award.end_time,
-            };
-          }
         }
+
+        if ("retcode" in statResp) {
+          await TGLogger.Error(
+            `[Sign Card] Failed to get status for ${gameAccount.gameBiz}: ${statResp.message}`,
+          );
+        }
+      } catch (error) {
+        await TGLogger.Error(
+          `[Sign Card] Error loading data for ${gameAccount.gameBiz}: ${error}`,
+        );
       }
 
-      if (statResp.status === "fulfilled") {
-        const stat = statResp.value;
-        if ("retcode" in stat) {
-          await TGLogger.Error(
-            `[Sign Card] Failed to get status for ${info.title}: ${stat.message}`,
-          );
-        } else {
-          signAccount.stat = stat;
-        }
-      }
-
-      return signAccount;
-    });
-
-    signAccounts.value = await Promise.all(promises);
+      signAccounts.value.push(signAccount);
+      loadingProgress.value = ((i + 1) / accounts.length) * 100;
+    }
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Error loading data: ${error}`);
   } finally {
     loading.value = false;
+    loadingProgress.value = 0;
+    loadingText.value = "";
   }
 }
 
@@ -186,96 +158,54 @@ async function handleUserSwitch(newUid: string): Promise<void> {
   await TGLogger.Info(`[Sign Card] User switched to ${newUid}`);
 }
 
-async function handleSign(item: SignAccount): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.warn("请先登录");
-    return;
-  }
-
-  item.signing = true;
+async function handleDelete(gameUid: string): Promise<void> {
   try {
-    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const ckSign = {
-      stoken: cookie.value.stoken,
-      stuid: cookie.value.stuid,
-      mid: cookie.value.mid,
-    };
-
-    let check = false;
-    let challenge: string | undefined = undefined;
-
-    while (!check) {
-      const signResp = await lunaReq.sign(item.account, ck, challenge);
-
-      if (challenge !== undefined) challenge = undefined;
-
-      if ("retcode" in signResp) {
-        if (signResp.retcode === 1034) {
-          await TGLogger.Info("[Sign Card] Captcha required");
-          const challengeGet = await miscReq.challenge(ckSign);
-          if (challengeGet === false) {
-            showSnackbar.error("验证码验证失败");
-            break;
-          }
-          challenge = challengeGet;
-          continue;
-        }
-        await TGLogger.Error(`[Sign Card] Sign-in failed: ${signResp.message}`);
-        showSnackbar.error(`签到失败: ${signResp.message}`);
-        break;
-      }
-
-      if (signResp.success === 0) {
-        check = true;
-      } else if (signResp.is_risk) {
-        await TGLogger.Info("[Sign Card] Risk verification required");
-        const gtRes = await showGeetest({
-          gt: signResp.gt,
-          challenge: signResp.challenge,
-          new_captcha: 1,
-          success: 1,
-        });
-        if (gtRes === false) {
-          showSnackbar.error("验证码验证失败");
-          break;
-        }
-        challenge = signResp.challenge;
-      } else {
-        break;
-      }
-    }
-
-    if (check) {
-      showSnackbar.success("签到成功");
-      // Refresh only this account's data
-      const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-      const statResp = await lunaReq.info(item.account, ck);
-      if (!("retcode" in statResp)) {
-        item.stat = statResp;
-      }
+    // Delete from database
+    const success = await TSUserAccount.game.delAccount(gameUid);
+    if (success) {
+      // Remove from UI
+      signAccounts.value = signAccounts.value.filter((item) => item.account.gameUid !== gameUid);
+      gameAccounts.value = gameAccounts.value.filter((item) => item.gameUid !== gameUid);
+      emits("delete", gameUid);
+      showSnackbar.success("账号已删除");
+    } else {
+      showSnackbar.error("删除账号失败");
     }
   } catch (error) {
-    await TGLogger.Error(`[Sign Card] Sign-in error: ${error}`);
-    showSnackbar.error("签到失败，请重试");
-  } finally {
-    item.signing = false;
+    await TGLogger.Error(`[Sign Card] Delete account error: ${error}`);
+    showSnackbar.error("删除账号失败");
   }
-}
-
-async function handleResign(): Promise<void> {
-  // TODO: 补签
-  showSnackbar.info("补签功能暂未开放");
 }
 </script>
 <style lang="scss" scoped>
-.sign-not-login,
-.sign-loading {
+.sign-not-login {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
   color: var(--box-text-1);
   font-size: 16px;
+}
+
+.sign-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  gap: 12px;
+}
+
+.loading-text {
+  color: var(--box-text-2);
+  font-size: 14px;
+  text-align: center;
 }
 
 .sign-container {

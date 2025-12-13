@@ -18,8 +18,16 @@
           {{ account.nickname }} - {{ account.gameUid }} ({{ account.regionName }})
         </div>
       </div>
+      <v-btn
+        class="delete-btn"
+        color="error"
+        icon="mdi-delete"
+        size="x-small"
+        variant="text"
+        @click="handleDeleteClick"
+      />
     </div>
-    <!-- 额外签到奖励部分 TODO：需测试 -->
+    <!-- 额外签到奖励部分 -->
     <div v-if="hasExtraRewards" class="sign-extra-rewards">
       <div class="extra-header">
         <v-icon color="orange" size="small">mdi-star</v-icon>
@@ -73,9 +81,17 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showGeetest from "@comp/func/geetest.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import PhSignRewardCell from "@comp/pageHome/ph-sign-reward-cell.vue";
+import lunaReq from "@req/lunaReq.js";
+import miscReq from "@req/miscReq.js";
+import useBBSStore from "@store/bbs.js";
+import useUserStore from "@store/user.js";
+import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { computed, useTemplateRef } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, ref, useTemplateRef, watch } from "vue";
 
 type SignGameInfo = {
   title: string;
@@ -85,36 +101,79 @@ type SignGameInfo = {
 
 type Props = {
   account: TGApp.Sqlite.Account.Game;
-  gameInfo: SignGameInfo;
-  signStat?: TGApp.BBS.Sign.InfoRes;
-  rewards: TGApp.BBS.Sign.HomeAward[];
-  extraRewards: TGApp.BBS.Sign.HomeAward[];
-  hasExtraRewards: boolean;
-  extraTimeRange?: { start: string; end: string };
-  signing: boolean;
+  infoResp?: TGApp.BBS.Sign.HomeRes | TGApp.BBS.Base.BaseRet;
+  statResp?: TGApp.BBS.Sign.InfoRes | TGApp.BBS.Base.BaseRet;
 };
 
 type Emits = {
-  (e: "sign"): void;
-  (e: "resign"): void;
+  (e: "delete", gameUid: string): void;
 };
 
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();
 
+const { cookie } = storeToRefs(useUserStore());
+const { gameList } = storeToRefs(useBBSStore());
+
 const signItemEl = useTemplateRef<HTMLDivElement>("signItemRef");
+const signing = ref<boolean>(false);
+
+// Compute game info from gameBiz
+const gameInfo = computed((): SignGameInfo => {
+  const biz = props.account.gameBiz;
+  const enName = biz.split("_")[0];
+  if (!enName) return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
+  const findGame = gameList.value.find((i) => i.op_name === enName);
+  if (findGame) return { title: findGame.name, icon: findGame.app_icon, gid: findGame.id };
+  return { title: biz, icon: "/platforms/mhy/mys.webp", gid: 0 };
+});
+
+// Process sign stat from response
+const signStat = computed((): TGApp.BBS.Sign.InfoRes | undefined => {
+  if (!props.statResp || "retcode" in props.statResp) return undefined;
+  return props.statResp;
+});
+
+// Process rewards from response
+const rewards = computed((): TGApp.BBS.Sign.HomeAward[] => {
+  if (!props.infoResp || "retcode" in props.infoResp) return [];
+  return props.infoResp.awards;
+});
+
+// Process extra rewards from response
+const extraRewards = computed((): TGApp.BBS.Sign.HomeAward[] => {
+  if (!props.infoResp || "retcode" in props.infoResp) return [];
+  if (
+    props.infoResp.short_extra_award?.has_extra_award &&
+    props.infoResp.short_extra_award.list.length > 0
+  ) {
+    return props.infoResp.short_extra_award.list;
+  }
+  return [];
+});
+
+const hasExtraRewards = computed(() => extraRewards.value.length > 0);
+
+const extraTimeRange = computed(() => {
+  if (!props.infoResp || "retcode" in props.infoResp) return undefined;
+  if (!props.infoResp.short_extra_award?.has_extra_award) return undefined;
+  return {
+    start: props.infoResp.short_extra_award.start_time,
+    end: props.infoResp.short_extra_award.end_time,
+  };
+});
 
 const currentMonth = computed(() => new Date().getMonth() + 1);
 const currentDay = computed(() => new Date().getDate());
 
 // Total days signed (from API)
-const totalSignedDays = computed(() => props.signStat?.total_sign_day ?? 0);
+const totalSignedDays = computed(() => signStat.value?.total_sign_day ?? 0);
 
 // Extra sign-in days
-const extraSignedDays = computed(() => props.signStat?.short_sign_day ?? 0);
+const extraSignedDays = computed(() => signStat.value?.short_sign_day ?? 0);
 
 // Whether today is already signed
-const isTodaySigned = computed(() => props.signStat?.is_sign ?? false);
+const isTodaySigned = computed(() => signStat.value?.is_sign ?? false);
 
 // Can resign if: there are missed days (currentDay - 1 > totalSignedDays) and today is already signed
 const canResign = computed(() => {
@@ -124,8 +183,8 @@ const canResign = computed(() => {
 
 // Extra rewards time range info
 const extraTimeInfo = computed(() => {
-  if (!props.extraTimeRange) return "";
-  return `${props.extraTimeRange.start} ~ ${props.extraTimeRange.end}`;
+  if (!extraTimeRange.value) return "";
+  return `${extraTimeRange.value.start} ~ ${extraTimeRange.value.end}`;
 });
 
 // Get reward state for regular rewards
@@ -168,13 +227,112 @@ function getExtraRewardState(index: number): "signed" | "next-reward" | "missed"
   return "normal";
 }
 
-function handleSign() {
-  emits("sign");
+async function handleSign(): Promise<void> {
+  if (!cookie.value) {
+    showSnackbar.warn("请先登录");
+    return;
+  }
+
+  signing.value = true;
+  try {
+    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+    const ckSign = {
+      stoken: cookie.value.stoken,
+      stuid: cookie.value.stuid,
+      mid: cookie.value.mid,
+    };
+
+    let check = false;
+    let challenge: string | undefined = undefined;
+
+    while (!check) {
+      const signResp = await lunaReq.sign(props.account, ck, challenge);
+
+      if (challenge !== undefined) challenge = undefined;
+
+      if ("retcode" in signResp) {
+        if (signResp.retcode === 1034) {
+          await TGLogger.Info("[Sign Item] Captcha required");
+          const challengeGet = await miscReq.challenge(ckSign);
+          if (challengeGet === false) {
+            showSnackbar.error("验证码验证失败");
+            break;
+          }
+          challenge = challengeGet;
+          continue;
+        }
+        await TGLogger.Error(`[Sign Item] Sign-in failed: ${signResp.message}`);
+        showSnackbar.error(`签到失败: ${signResp.message}`);
+        break;
+      }
+
+      if (signResp.success === 0) {
+        check = true;
+      } else if (signResp.is_risk) {
+        await TGLogger.Info("[Sign Item] Risk verification required");
+        const gtRes = await showGeetest({
+          gt: signResp.gt,
+          challenge: signResp.challenge,
+          new_captcha: 1,
+          success: 1,
+        });
+        if (gtRes === false) {
+          showSnackbar.error("验证码验证失败");
+          break;
+        }
+        challenge = signResp.challenge;
+      } else {
+        break;
+      }
+    }
+
+    if (check) {
+      showSnackbar.success("签到成功");
+      // Reload data after successful sign-in
+      await loadData();
+    }
+  } catch (error) {
+    await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
+    showSnackbar.error("签到失败，请重试");
+  } finally {
+    signing.value = false;
+  }
 }
 
-function handleResign() {
-  emits("resign");
+async function handleResign(): Promise<void> {
+  // TODO: 补签
+  showSnackbar.info("补签功能暂未开放");
 }
+
+async function handleDeleteClick(): Promise<void> {
+  emits("delete", props.account.gameUid);
+}
+
+// Reload sign-in data
+async function loadData(): Promise<void> {
+  if (!cookie.value) return;
+  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+  
+  try {
+    const statResp = await lunaReq.info(props.account, ck);
+    if (!("retcode" in statResp)) {
+      // Update parent component by triggering a re-render
+      // Since we can't mutate props, we rely on the parent to refresh
+      await TGLogger.Info("[Sign Item] Data reloaded successfully");
+    }
+  } catch (error) {
+    await TGLogger.Error(`[Sign Item] Failed to reload data: ${error}`);
+  }
+}
+
+// Watch for prop changes to log
+watch(
+  () => props.statResp,
+  () => {
+    // Data updated from parent
+  },
+  { immediate: false },
+);
 
 async function shareItem(): Promise<void> {
   if (!signItemEl.value) return;
@@ -202,6 +360,15 @@ async function shareItem(): Promise<void> {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--common-shadow-2);
   gap: 8px;
+
+  .delete-btn {
+    margin-left: auto;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 
 .sign-icon {
