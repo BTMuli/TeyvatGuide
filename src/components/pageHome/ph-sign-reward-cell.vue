@@ -170,7 +170,7 @@ function getTitle(): string {
   z-index: 0;
   bottom: -8px;
   left: -4px;
-  color: var(--tgc-od-green);
+  color: var(--tgc-od-orange);
   font-family: var(--font-title);
   opacity: 0.4;
 }

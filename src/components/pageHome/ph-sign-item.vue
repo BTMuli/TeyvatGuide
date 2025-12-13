@@ -68,7 +68,6 @@
         签到
       </v-btn>
       <v-btn
-        v-if="canResign"
         :disabled="!canResign || isSign || isResign"
         :loading="isResign"
         class="sign-btn resign-btn"
@@ -156,6 +155,9 @@ const totalSignedDays = computed<number>(() => signStat.value?.total_sign_day ??
 const extraSignedDays = computed<number>(() => signStat.value?.short_sign_day ?? 0);
 const isTodaySigned = computed<boolean>(() => signStat.value?.is_sign ?? false);
 const canResign = computed<boolean>(() => {
+  if (!signStat.value?.is_sign) return false;
+  if (signInfo.value?.resign) return false;
+  if (resignInfo.value?.quality_cnt === 0) return false;
   const missed = currentDay.value - 1 - totalSignedDays.value;
   return missed > 0 && isTodaySigned.value;
 });
@@ -232,6 +234,7 @@ function updateLocalDataAfterResign(): void {
   if (resignInfo.value.quality_cnt > 0) {
     resignInfo.value.quality_cnt -= 1;
   }
+  if (signInfo.value) signInfo.value.resign = true;
 }
 
 async function handleSign(): Promise<void> {
@@ -311,7 +314,17 @@ async function handleResign(): Promise<void> {
     showSnackbar.warn("请先登录");
     return;
   }
-
+  // Check if already resigned today
+  if (signInfo.value?.resign) {
+    showSnackbar.warn("今日已补签，无法再次补签");
+    return;
+  }
+  // Check if can resign
+  const missedDays = signStat.value?.sign_cnt_missed ?? 0;
+  if (missedDays === 0) {
+    showSnackbar.warn("没有漏签天数，无需补签");
+    return;
+  }
   // Load resign info first
   await loadResignInfo();
 
@@ -319,22 +332,9 @@ async function handleResign(): Promise<void> {
     showSnackbar.error("获取补签信息失败");
     return;
   }
-
-  // Check if already resigned today
-  if (signStat.value?.is_sub) {
-    showSnackbar.warn("今日已补签，无法再次补签");
-    return;
-  }
-
-  // Check if can resign
-  const missedDays = signStat.value?.sign_cnt_missed ?? 0;
-  if (missedDays === 0) {
-    showSnackbar.warn("没有漏签天数，无需补签");
-    return;
-  }
-
+  const resignCnt = resignInfo.value.quality_cnt;
   // Check resign count
-  if (resignInfo.value.quality_cnt <= 0) {
+  if (resignCnt <= 0) {
     showSnackbar.warn("补签次数不足");
     return;
   }
@@ -389,12 +389,9 @@ async function handleResign(): Promise<void> {
       // Resign successful
       check = true;
       updateLocalDataAfterResign();
-      // Reload resign info to get updated count and coin
-      await loadResignInfo();
-      // Show success message with remaining info
-      const remainingResigns = resignInfo.value?.quality_cnt ?? 0;
-      const remainingCoins = resignInfo.value?.coin_cnt ?? 0;
-      showSnackbar.success(`补签成功，剩余补签次数${remainingResigns}次，剩余米游币${remainingCoins}`);
+      showSnackbar.success(
+        `补签成功，剩余补签次数${resignCnt - 1}次，剩余米游币${coinCnt - coinCost}`,
+      );
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Resign error: ${error}`);
