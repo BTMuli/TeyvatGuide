@@ -63,6 +63,8 @@ const useAppStore = defineStore(
     const postViewWide = ref<boolean>(true);
     /* 是否取消点赞 */
     const cancelLike = ref<boolean>(true);
+    /* 关闭窗口时最小化到托盘 */
+    const closeToTray = ref<boolean>(false);
 
     /**
      * 初始化应用状态
@@ -85,6 +87,7 @@ const useAppStore = defineStore(
       incognito.value = true;
       postViewWide.value = true;
       cancelLike.value = true;
+      closeToTray.value = false;
       initDevice();
     }
 
@@ -140,6 +143,7 @@ const useAppStore = defineStore(
       incognito,
       postViewWide,
       cancelLike,
+      closeToTray,
       init,
       changeTheme,
       getImageUrl,
@@ -167,6 +171,7 @@ const useAppStore = defineStore(
           "sidebar",
           "postViewWide",
           "cancelLike",
+          "closeToTray",
         ],
       },
       {
