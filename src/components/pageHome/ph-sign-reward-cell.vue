@@ -16,18 +16,19 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-// Reward state enum
-export enum RewardState {
-  NORMAL = 0,
-  SIGNED = 1,
-  NEXT_REWARD = 2,
-  MISSED = 3,
-}
+// Reward state enum TODO:完善类型
+const RewardState = <const>{
+  NORMAL: 0,
+  SIGNED: 1,
+  NEXT_REWARD: 2,
+  MISSED: 3,
+};
+export type RewardStateEnum = (typeof RewardState)[keyof typeof RewardState];
 
 type Props = {
   reward: TGApp.BBS.Sign.HomeAward;
   dayNumber: number;
-  state: RewardState;
+  state: RewardStateEnum;
   isExtra?: boolean;
 };
 
@@ -35,7 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
   isExtra: false,
 });
 
-const STATE_CLASS_MAP: Record<RewardState, string> = {
+const STATE_CLASS_MAP: Record<RewardStateEnum, string> = {
   [RewardState.NORMAL]: "state-normal",
   [RewardState.SIGNED]: "state-signed",
   [RewardState.NEXT_REWARD]: "state-next-reward",

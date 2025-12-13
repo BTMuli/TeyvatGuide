@@ -85,7 +85,7 @@
 import showDialog from "@comp/func/dialog.js";
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PhSignRewardCell from "@comp/pageHome/ph-sign-reward-cell.vue";
+import PhSignRewardCell, { RewardStateEnum } from "@comp/pageHome/ph-sign-reward-cell.vue";
 import lunaReq from "@req/lunaReq.js";
 import miscReq from "@req/miscReq.js";
 import useBBSStore from "@store/bbs.js";
@@ -95,13 +95,12 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, useTemplateRef } from "vue";
 
-// Reward state enum
-enum RewardState {
-  NORMAL = 0,
-  SIGNED = 1,
-  NEXT_REWARD = 2,
-  MISSED = 3,
-}
+const RewardState = <const>{
+  NORMAL: 0,
+  SIGNED: 1,
+  NEXT_REWARD: 2,
+  MISSED: 3,
+};
 
 type SignGameInfo = { title: string; icon: string; gid: number };
 type PhSignItemProps = {
@@ -161,7 +160,7 @@ const canResign = computed<boolean>(() => {
 });
 
 // Get reward state for regular rewards
-function getRewardState(index: number): RewardState {
+function getRewardState(index: number): RewardStateEnum {
   const signedDays = totalSignedDays.value;
   const today = currentDay.value;
   // Already signed
@@ -180,7 +179,7 @@ function getRewardState(index: number): RewardState {
 }
 
 // Get reward state for extra rewards
-function getExtraRewardState(index: number): RewardState {
+function getExtraRewardState(index: number): RewardStateEnum {
   const signedDays = extraSignedDays.value;
   // Already signed
   if (index < signedDays) return RewardState.SIGNED;
