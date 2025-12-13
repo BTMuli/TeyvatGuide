@@ -16,14 +16,15 @@
         v-for="(reward, ridx) in rewards"
         :key="ridx"
         :class="{ 
-          current: ridx === currentDay - 1, 
-          signed: ridx < (signStat?.total_sign_day ?? 0)
+          signed: ridx < totalSignedDays,
+          'next-reward': ridx === totalSignedDays && !isTodaySigned,
+          missed: ridx < currentDay - 1 && ridx >= totalSignedDays
         }"
         class="sign-reward-item"
       >
         <TMiImg :ori="true" :src="reward.icon" :alt="reward.name" class="reward-icon" />
         <span class="reward-count">×{{ reward.cnt }}</span>
-        <div v-if="ridx < (signStat?.total_sign_day ?? 0)" class="reward-check">
+        <div v-if="ridx < totalSignedDays" class="reward-check">
           <v-icon color="success" size="14">mdi-check</v-icon>
         </div>
         <div class="reward-day">{{ ridx + 1 }}</div>
@@ -31,7 +32,7 @@
     </div>
     <div class="sign-actions">
       <v-btn
-        :disabled="signStat?.is_sign || signing"
+        :disabled="isTodaySigned || signing"
         :loading="signing"
         class="sign-btn"
         size="small"
@@ -41,7 +42,7 @@
         签到
       </v-btn>
       <v-btn 
-        :disabled="true" 
+        :disabled="!canResign || signing" 
         class="sign-btn resign-btn" 
         size="small"
         prepend-icon="mdi-calendar-refresh" 
@@ -81,6 +82,27 @@ const emits = defineEmits<Emits>();
 
 const currentMonth = computed(() => new Date().getMonth() + 1);
 const currentDay = computed(() => new Date().getDate());
+
+// Total days signed (from API)
+const totalSignedDays = computed(() => props.signStat?.total_sign_day ?? 0);
+
+// Whether today is already signed
+const isTodaySigned = computed(() => props.signStat?.is_sign ?? false);
+
+// Can resign if: there are missed days (currentDay > totalSignedDays + 1) and all caught up today
+const canResign = computed(() => {
+  const missed = currentDay.value - 1 - totalSignedDays.value;
+  return missed > 0 && isTodaySigned.value;
+});
+
+function handleSign() {
+  emits("sign");
+}
+
+function handleResign() {
+  emits("resign");
+}
+</script>
 
 function handleSign() {
   emits("sign");
@@ -170,16 +192,24 @@ function handleResign() {
   border: 2px solid var(--common-shadow-2);
   transition: all 0.2s;
   min-width: 0;
-
-  &.current {
-    border-color: var(--tgc-od-blue);
-    background: var(--box-bg-3);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
-  }
+  min-height: 80px; /* Fixed height to prevent layout shift */
 
   &.signed {
     opacity: 0.6;
     background: var(--box-bg-3);
+  }
+
+  &.next-reward {
+    border-color: var(--tgc-od-blue);
+    background: var(--box-bg-3);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  &.missed {
+    border-color: var(--tgc-od-orange);
+    background: var(--box-bg-3);
+    opacity: 0.7;
   }
 
   &:hover {
@@ -194,10 +224,20 @@ function handleResign() {
   }
 }
 
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(59, 130, 246, 0.8);
+  }
+}
+
 .reward-icon {
   width: 28px;
   height: 28px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .reward-count {
@@ -205,6 +245,7 @@ function handleResign() {
   font-size: 9px;
   color: var(--box-text-1);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .reward-check {
@@ -244,10 +285,20 @@ function handleResign() {
     background: var(--box-bg-3);
     color: var(--box-text-2);
   }
+
+  &:not(:disabled).resign-btn {
+    background: var(--tgc-od-orange);
+    color: var(--tgc-white-1);
+  }
 }
 
 .dark .sign-btn.resign-btn {
   background: var(--box-bg-3);
   color: var(--box-text-2);
+
+  &:not(:disabled) {
+    background: var(--tgc-od-orange);
+    color: var(--tgc-white-1);
+  }
 }
 </style>
