@@ -81,6 +81,7 @@ import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
+import Hakushi from "@plugins/Hakushi/index.js";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
@@ -187,6 +188,11 @@ async function confirmRefresh(force: boolean): Promise<void> {
     await showLoading.end();
     return;
   }
+  // 刷新 Hakushi 元数据
+  await showLoading.update("正在刷新角色和武器元数据");
+  await Hakushi.character.refresh();
+  await Hakushi.weapon.refresh();
+  await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 元数据刷新完成`);
   await refreshGachaPool("100", "新手祈愿", force);
   await refreshGachaPool("200", "常驻祈愿", force);
   await refreshGachaPool("301", "角色祈愿", force);

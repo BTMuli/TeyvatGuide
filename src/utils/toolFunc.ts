@@ -11,7 +11,7 @@ import { v4 } from "uuid";
 import { score } from "wcag-color";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
-import HakushApi, { type HakushCharacter, type HakushWeapon } from "@request/hakushReq.js";
+import Hakushi from "@plugins/Hakushi/index.js";
 
 /**
  * @description 时间戳转换为时间字符串
@@ -330,7 +330,7 @@ export function getWikiBrief(
 }
 
 /**
- * @description 从 Hakush API 获取角色/武器简略信息 (fallback)
+ * @description 从 Hakushi 获取角色/武器简略信息 (fallback)
  * @since Beta v0.8.8
  * @param {number|string} id - 角色/武器 ID
  * @returns {Promise<TGApp.App.Character.WikiBriefInfo|TGApp.App.Weapon.WikiBriefInfo|false>}
@@ -343,7 +343,7 @@ export async function getWikiBriefFromHakush(
 
   if (len === 5) {
     // Weapon
-    const weaponData = await HakushApi.weapon();
+    const weaponData = await Hakushi.weapon.get();
     if (!weaponData) return false;
     const weapon = weaponData[idStr];
     if (!weapon) return false;
@@ -357,7 +357,7 @@ export async function getWikiBriefFromHakush(
     };
   } else {
     // Character
-    const characterData = await HakushApi.character();
+    const characterData = await Hakushi.character.get();
     if (!characterData) return false;
     const character = characterData[idStr];
     if (!character) return false;
