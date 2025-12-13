@@ -1,7 +1,7 @@
 <!-- 首页 -->
 <template>
-  <div class="home-container">
-    <div class="home-top">
+  <v-app-bar>
+    <template #prepend>
       <div v-if="isLogin" class="home-tools">
         <v-select
           v-model="curGid"
@@ -11,6 +11,7 @@
           item-value="gid"
           label="小工具（右侧）分区"
           variant="outlined"
+          density="compact"
         >
           <template #selection="{ item }">
             <div class="select-item main">
@@ -44,6 +45,8 @@
         </v-select>
         <TGameNav :model-value="curGid" />
       </div>
+    </template>
+    <template #append>
       <div class="home-select">
         <v-select
           v-model="showItems"
@@ -54,10 +57,15 @@
           label="首页组件显示"
           variant="outlined"
           width="360px"
+          density="compact"
         />
-        <v-btn :rounded="true" class="select-btn" @click="submitHome">确定</v-btn>
+        <v-btn variant="elevated" :rounded="true" class="select-btn" @click="submitHome">
+          确定
+        </v-btn>
       </div>
-    </div>
+    </template>
+  </v-app-bar>
+  <div class="home-container">
     <component :is="item" v-for="item in components" :key="item" @success="loadEnd(item)" />
   </div>
 </template>
@@ -216,13 +224,15 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
 .home-tool-select {
   width: 250px;
   max-width: 250px;
+  margin-left: 16px;
 }
 
 .home-select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  margin-right: 16px;
+  gap: 8px;
 }
 
 .select-btn {
