@@ -15,7 +15,11 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
   let menu = MenuBuilder::new(app).item(&show_item).item(&quit_item).build()?;
 
   // 创建托盘图标并设置事件处理
-  // Tauri v2 会自动使用配置文件中指定的图标
+  // 图标路径由 tauri.conf.json 中的 app.trayIcon.iconPath 配置
+  // 在不同操作系统上，托盘图标的显示效果可能有所不同：
+  // - Windows: 使用 .ico 格式获得最佳效果
+  // - macOS: 支持 .icns 和 .png 格式
+  // - Linux: 通常使用 .png 格式
   let _tray = TrayIconBuilder::new()
     .tooltip("Teyvat Guide")
     .menu(&menu)
@@ -29,8 +33,7 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         }
         "quit" => {
           // 关闭所有子窗口
-          const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
-          for label in SUB_WINDOW_LABELS.iter() {
+          for label in crate::SUB_WINDOW_LABELS.iter() {
             if let Some(sub) = app.get_webview_window(label) {
               let _ = sub.destroy();
             }

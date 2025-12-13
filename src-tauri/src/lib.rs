@@ -16,6 +16,9 @@ use crate::commands::{create_window, execute_js, get_dir_size, init_app, is_in_a
 use crate::plugins::{build_log_plugin, build_si_plugin};
 use tauri::{generate_context, generate_handler, Manager, Window, WindowEvent};
 
+// 子窗口 label 的数组
+pub const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
+
 // 窗口事件处理
 fn window_event_handler(app: &Window, event: &WindowEvent) {
   match event {
@@ -76,7 +79,8 @@ pub fn run() {
     .plugin(build_log_plugin())
     .setup(|_app| {
       // 创建系统托盘图标
-      tray::create_tray(_app.handle()).expect("Failed to create tray");
+      tray::create_tray(_app.handle())
+        .expect("Failed to initialize system tray icon. Please check if the tray icon file exists and the system supports tray icons.");
       let _window = _app.get_webview_window("TeyvatGuide");
       #[cfg(debug_assertions)]
       if _window.is_some() {
