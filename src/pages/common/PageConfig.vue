@@ -98,6 +98,22 @@
           />
         </template>
       </v-list-item>
+      <v-list-item title="关闭到托盘" subtitle="关闭窗口时最小化到系统托盘而不是退出应用">
+        <template #prepend>
+          <div class="config-icon">
+            <v-icon>mdi-tray-arrow-down</v-icon>
+          </div>
+        </template>
+        <template #append>
+          <v-switch
+            v-model="appStore.closeToTray"
+            :label="appStore.closeToTray ? '开启' : '关闭'"
+            :inset="true"
+            class="config-switch"
+            color="#FAC51E"
+          />
+        </template>
+      </v-list-item>
       <v-list-item title="无痕浏览" subtitle="关闭后将记录帖子浏览记录">
         <template #prepend>
           <div class="config-icon">

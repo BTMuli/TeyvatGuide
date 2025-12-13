@@ -127,3 +127,25 @@ pub fn is_in_admin() -> bool {
     }
   }
 }
+
+// 隐藏主窗口到托盘
+#[tauri::command]
+pub async fn hide_main_window(app_handle: AppHandle) {
+  if let Some(window) = app_handle.get_webview_window("TeyvatGuide") {
+    let _ = window.hide();
+  }
+}
+
+// 退出应用
+#[tauri::command]
+pub async fn quit_app(app_handle: AppHandle) {
+  // 关闭所有子窗口
+  const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
+  for label in SUB_WINDOW_LABELS.iter() {
+    if let Some(sub) = app_handle.get_webview_window(label) {
+      let _ = sub.destroy();
+    }
+  }
+  // 退出应用
+  app_handle.exit(0);
+}
