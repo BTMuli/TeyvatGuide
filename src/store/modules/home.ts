@@ -11,9 +11,10 @@ export type ShowItem = { show: boolean; order: number; label: string };
 
 const useHomeStore = defineStore("home", () => {
   const homeShow = ref<Array<ShowItem>>([
-    { show: true, order: 1, label: "限时祈愿" },
-    { show: true, order: 2, label: "近期活动" },
-    { show: true, order: 3, label: "素材日历" },
+    { show: true, order: 1, label: "签到" },
+    { show: true, order: 2, label: "限时祈愿" },
+    { show: true, order: 3, label: "近期活动" },
+    { show: true, order: 4, label: "素材日历" },
   ]);
   const poolCover = ref<Record<number, string>>();
 
@@ -31,9 +32,10 @@ const useHomeStore = defineStore("home", () => {
 
   function init(): void {
     homeShow.value = [
-      { show: true, order: 1, label: "限时祈愿" },
-      { show: true, order: 2, label: "近期活动" },
-      { show: true, order: 3, label: "素材日历" },
+      { show: true, order: 1, label: "签到" },
+      { show: true, order: 2, label: "限时祈愿" },
+      { show: true, order: 3, label: "近期活动" },
+      { show: true, order: 4, label: "素材日历" },
     ];
     localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
   }

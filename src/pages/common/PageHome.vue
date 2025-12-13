@@ -69,6 +69,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
 import PhCompPool from "@comp/pageHome/ph-comp-pool.vue";
 import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
+import PhCompSign from "@comp/pageHome/ph-comp-sign.vue";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
@@ -84,7 +85,7 @@ const { devMode, isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
 const homeStore = useHomeStore();
 
-const showItemsAll: Array<string> = ["素材日历", "限时祈愿", "近期活动"];
+const showItemsAll: Array<string> = ["签到", "素材日历", "限时祈愿", "近期活动"];
 
 const curGid = ref<number>(2);
 
@@ -121,6 +122,9 @@ async function loadComp(): Promise<void> {
   const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
     switch (item) {
+      case "签到":
+        temp.push(PhCompSign);
+        break;
       case "限时祈愿":
         temp.push(PhCompPool);
         break;
@@ -150,6 +154,8 @@ async function submitHome(): Promise<void> {
 
 function getName(name: string): string | undefined {
   switch (name) {
+    case "ph-comp-sign":
+      return "签到";
     case "ph-comp-pool":
       return "限时祈愿";
     case "ph-comp-position":
