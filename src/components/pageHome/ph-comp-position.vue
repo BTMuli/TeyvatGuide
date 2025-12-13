@@ -63,6 +63,16 @@ watch(
   },
 );
 
+watch(
+  () => account.value.gameUid,
+  async () => {
+    if (isUserPos.value && isInit.value) {
+      userPos.value = [];
+      await loadUserPosition();
+    }
+  },
+);
+
 onMounted(async () => {
   if (isLogin.value) await loadUserPosition();
   else await loadWikiPosition();
@@ -71,7 +81,6 @@ onMounted(async () => {
 });
 
 async function loadUserPosition(): Promise<void> {
-  if (userPos.value.length > 0) return;
   if (!cookie.value) {
     showSnackbar.warn("获取近期活动失败：未登录");
     isLogin.value = false;

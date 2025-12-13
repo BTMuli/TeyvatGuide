@@ -1,80 +1,81 @@
 <!-- 首页签到卡片 -->
 <template>
-  <THomeCard :append="false">
+  <THomeCard :append="isLogin">
     <template #title>签到</template>
+    <template v-if="isLogin" #title-append>
+      <div class="sign-account-info" @click="showSwitchAccount = true">
+        <span>{{ briefInfo.nickname }}({{ account.gameUid }})</span>
+        <v-icon size="small">mdi-chevron-down</v-icon>
+      </div>
+    </template>
     <template #default>
       <div v-if="!isLogin" class="sign-not-login">请先登录</div>
       <div v-else-if="loading" class="sign-loading">
         <v-progress-circular indeterminate color="primary" />
       </div>
-      <div v-else-if="signAccounts.length === 0" class="sign-not-login">暂无游戏账户</div>
+      <div v-else-if="currentSignAccount === null" class="sign-not-login">暂无游戏账户</div>
       <div v-else class="sign-container">
-        <div
-          v-for="(item, idx) in signAccounts"
-          :key="idx"
-          class="sign-item"
-        >
-          <div class="sign-header">
-            <div class="sign-icon">
-              <img :src="item.info.icon" :alt="item.info.title" />
-            </div>
-            <div class="sign-info">
-              <div class="sign-month">{{ currentMonth }}月 累计签到 {{ item.stat?.total_sign_day ?? 0 }} 天</div>
-              <div class="sign-game">{{ item.info.title }} - {{ item.account.regionName }}</div>
-            </div>
+        <div class="sign-header">
+          <div class="sign-icon">
+            <img :src="currentSignAccount.info.icon" :alt="currentSignAccount.info.title" />
           </div>
-          <div v-if="item.rewards.length > 0" class="sign-rewards">
-            <div
-              v-for="(reward, ridx) in item.rewards.slice(0, 7)"
-              :key="ridx"
-              :class="{ 
-                current: ridx === currentDay - 1, 
-                signed: ridx < (item.stat?.total_sign_day ?? 0)
-              }"
-              class="sign-reward-item"
-            >
-              <TMiImg :ori="true" :src="reward.icon" :alt="reward.name" class="reward-icon" />
-              <span class="reward-count">×{{ reward.cnt }}</span>
-              <div v-if="ridx < (item.stat?.total_sign_day ?? 0)" class="reward-check">
-                <v-icon color="success" size="14">mdi-check</v-icon>
-              </div>
-              <div class="reward-day">{{ ridx + 1 }}</div>
+          <div class="sign-info">
+            <div class="sign-month">{{ currentMonth }}月 累计签到 {{ currentSignAccount.stat?.total_sign_day ?? 0 }} 天</div>
+            <div class="sign-game">{{ currentSignAccount.info.title }} - {{ currentSignAccount.account.regionName }}</div>
+          </div>
+        </div>
+        <div v-if="currentSignAccount.rewards.length > 0" class="sign-rewards">
+          <div
+            v-for="(reward, ridx) in currentSignAccount.rewards"
+            :key="ridx"
+            :class="{ 
+              current: ridx === currentDay - 1, 
+              signed: ridx < (currentSignAccount.stat?.total_sign_day ?? 0)
+            }"
+            class="sign-reward-item"
+          >
+            <TMiImg :ori="true" :src="reward.icon" :alt="reward.name" class="reward-icon" />
+            <span class="reward-count">×{{ reward.cnt }}</span>
+            <div v-if="ridx < (currentSignAccount.stat?.total_sign_day ?? 0)" class="reward-check">
+              <v-icon color="success" size="14">mdi-check</v-icon>
             </div>
+            <div class="reward-day">{{ ridx + 1 }}</div>
           </div>
-          <div class="sign-actions">
-            <v-btn
-              :disabled="item.stat?.is_sign || item.signing"
-              :loading="item.signing"
-              class="sign-btn"
-              size="small"
-              prepend-icon="mdi-calendar-check"
-              @click="handleSign(item)"
-            >
-              签到
-            </v-btn>
-            <v-btn 
-              :disabled="true" 
-              class="sign-btn resign-btn" 
-              size="small"
-              prepend-icon="mdi-calendar-refresh" 
-              @click="handleResign"
-            >
-              补签
-            </v-btn>
-          </div>
+        </div>
+        <div class="sign-actions">
+          <v-btn
+            :disabled="currentSignAccount.stat?.is_sign || currentSignAccount.signing"
+            :loading="currentSignAccount.signing"
+            class="sign-btn"
+            size="small"
+            prepend-icon="mdi-calendar-check"
+            @click="handleSign(currentSignAccount)"
+          >
+            签到
+          </v-btn>
+          <v-btn 
+            :disabled="true" 
+            class="sign-btn resign-btn" 
+            size="small"
+            prepend-icon="mdi-calendar-refresh" 
+            @click="handleResign"
+          >
+            补签
+          </v-btn>
         </div>
       </div>
     </template>
   </THomeCard>
+  <ToSwitchAc v-model="showSwitchAccount" />
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import ToSwitchAc from "@comp/app/to-switchAc.vue";
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import THomeCard from "@comp/pageHome/ph-comp-card.vue";
 import lunaReq from "@req/lunaReq.js";
 import miscReq from "@req/miscReq.js";
-import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
@@ -100,15 +101,23 @@ type SignAccount = {
 type TSignEmits = (e: "success") => void;
 
 const emits = defineEmits<TSignEmits>();
-const { cookie, uid } = storeToRefs(useUserStore());
+const { cookie, uid, account, briefInfo } = storeToRefs(useUserStore());
 const { isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 
 const loading = ref<boolean>(true);
-const signAccounts = ref<SignAccount[]>([]);
+const showSwitchAccount = ref<boolean>(false);
+const currentSignAccount = ref<SignAccount | null>(null);
 
 const currentMonth = computed(() => new Date().getMonth() + 1);
 const currentDay = computed(() => new Date().getDate());
+
+watch(
+  () => account.value.gameUid,
+  async () => {
+    await loadData();
+  },
+);
 
 watch(
   () => uid.value,
@@ -131,52 +140,50 @@ function getGameInfo(biz: string): SignGameInfo {
 async function loadData(): Promise<void> {
   if (!isLogin.value || uid.value === undefined || !cookie.value) {
     loading.value = false;
+    currentSignAccount.value = null;
     return;
   }
 
   loading.value = true;
-  signAccounts.value = [];
+  currentSignAccount.value = null;
   
   try {
-    // Get all game accounts
-    const accounts = await TSUserAccount.game.getAccount(uid.value);
+    // Get current game account
+    const gameAccount = account.value;
     
-    if (accounts.length === 0) {
-      await TGLogger.Warn("[Sign Card] No game accounts found");
+    if (!gameAccount.gameUid) {
+      await TGLogger.Warn("[Sign Card] No game account selected");
       loading.value = false;
       return;
     }
 
+    const info = getGameInfo(gameAccount.gameBiz);
+    const signAccount: SignAccount = {
+      account: gameAccount,
+      info,
+      rewards: [],
+      signing: false,
+    };
+
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
 
-    // Load data for each account
-    for (const account of accounts) {
-      const info = getGameInfo(account.gameBiz);
-      const signAccount: SignAccount = {
-        account,
-        info,
-        rewards: [],
-        signing: false,
-      };
-
-      // Get sign-in rewards
-      const rewardsResp = await lunaReq.home(account, ck);
-      if ("retcode" in rewardsResp) {
-        await TGLogger.Error(`[Sign Card] Failed to get rewards for ${info.title}: ${rewardsResp.message}`);
-      } else {
-        signAccount.rewards = rewardsResp.awards;
-      }
-
-      // Get sign-in status
-      const statResp = await lunaReq.info(account, ck);
-      if ("retcode" in statResp) {
-        await TGLogger.Error(`[Sign Card] Failed to get status for ${info.title}: ${statResp.message}`);
-      } else {
-        signAccount.stat = statResp;
-      }
-
-      signAccounts.value.push(signAccount);
+    // Get sign-in rewards
+    const rewardsResp = await lunaReq.home(gameAccount, ck);
+    if ("retcode" in rewardsResp) {
+      await TGLogger.Error(`[Sign Card] Failed to get rewards for ${info.title}: ${rewardsResp.message}`);
+    } else {
+      signAccount.rewards = rewardsResp.awards;
     }
+
+    // Get sign-in status
+    const statResp = await lunaReq.info(gameAccount, ck);
+    if ("retcode" in statResp) {
+      await TGLogger.Error(`[Sign Card] Failed to get status for ${info.title}: ${statResp.message}`);
+    } else {
+      signAccount.stat = statResp;
+    }
+
+    currentSignAccount.value = signAccount;
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Error loading data: ${error}`);
   } finally {
@@ -261,6 +268,18 @@ async function handleResign(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
+.sign-account-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
 .sign-not-login,
 .sign-loading {
   display: flex;
@@ -274,24 +293,16 @@ async function handleResign(): Promise<void> {
 .sign-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 8px;
-}
-
-.sign-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  background: var(--box-bg-2);
-  border: 1px solid var(--common-shadow-2);
 }
 
 .sign-header {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-2);
 }
 
 .sign-icon {
@@ -328,11 +339,12 @@ async function handleResign(): Promise<void> {
 }
 
 .sign-rewards {
-  display: flex;
-  gap: 6px;
-  padding: 8px 4px;
-  background: var(--box-bg-1);
-  border-radius: 6px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 8px;
+  background: var(--box-bg-2);
+  border-radius: 8px;
 }
 
 .sign-reward-item {
@@ -341,25 +353,33 @@ async function handleResign(): Promise<void> {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 6px 4px;
-  border-radius: 6px;
-  background: var(--box-bg-2);
-  border: 2px solid transparent;
+  padding: 8px 4px;
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  border: 2px solid var(--common-shadow-2);
   transition: all 0.2s;
   min-width: 0;
-  flex: 1 1 0;
 
   &.current {
     border-color: var(--tgc-od-blue);
     background: var(--box-bg-3);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
   }
 
   &.signed {
-    opacity: 0.7;
+    opacity: 0.6;
+    background: var(--box-bg-3);
   }
 
   &:hover {
     transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.dark .sign-reward-item {
+  &:hover {
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -373,6 +393,7 @@ async function handleResign(): Promise<void> {
   margin-top: 2px;
   font-size: 10px;
   color: var(--box-text-1);
+  font-weight: 500;
 }
 
 .reward-check {
@@ -386,12 +407,14 @@ async function handleResign(): Promise<void> {
   height: 18px;
   background: var(--box-bg-4);
   border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .reward-day {
   margin-top: 2px;
   font-size: 10px;
   color: var(--box-text-2);
+  font-weight: 500;
 }
 
 .sign-actions {
@@ -404,9 +427,16 @@ async function handleResign(): Promise<void> {
   flex: 1;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
+  font-weight: 500;
 
   &.resign-btn {
     background: var(--box-bg-3);
+    color: var(--box-text-2);
   }
+}
+
+.dark .sign-btn.resign-btn {
+  background: var(--box-bg-3);
+  color: var(--box-text-2);
 }
 </style>
