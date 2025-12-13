@@ -30,6 +30,7 @@
           :info-resp="item.infoResp"
           :stat-resp="item.statResp"
           @delete="handleDelete"
+          @refresh="handleRefresh"
         />
       </div>
     </template>
@@ -174,6 +175,33 @@ async function handleDelete(gameUid: string): Promise<void> {
   } catch (error) {
     await TGLogger.Error(`[Sign Card] Delete account error: ${error}`);
     showSnackbar.error("删除账号失败");
+  }
+}
+
+async function handleRefresh(account: TGApp.Sqlite.Account.Game): Promise<void> {
+  if (!cookie.value) return;
+  
+  try {
+    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+    
+    // Find the account in our list
+    const index = signAccounts.value.findIndex((item) => item.account.gameUid === account.gameUid);
+    if (index === -1) return;
+    
+    // Refresh data for this account
+    const infoResp = await lunaReq.home(account, ck);
+    const statResp = await lunaReq.info(account, ck);
+    
+    // Update the account data
+    signAccounts.value[index] = {
+      account,
+      infoResp,
+      statResp,
+    };
+    
+    await TGLogger.Info(`[Sign Card] Refreshed data for ${account.gameUid}`);
+  } catch (error) {
+    await TGLogger.Error(`[Sign Card] Refresh account error: ${error}`);
   }
 }
 </script>

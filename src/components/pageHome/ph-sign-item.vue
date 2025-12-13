@@ -91,7 +91,7 @@ import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { computed, ref, useTemplateRef, watch } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 
 type SignGameInfo = {
   title: string;
@@ -107,6 +107,7 @@ type Props = {
 
 type Emits = {
   (e: "delete", gameUid: string): void;
+  (e: "refresh", account: TGApp.Sqlite.Account.Game): void;
 };
 
 const props = defineProps<Props>();
@@ -288,8 +289,8 @@ async function handleSign(): Promise<void> {
 
     if (check) {
       showSnackbar.success("签到成功");
-      // Reload data after successful sign-in
-      await loadData();
+      // Notify parent to refresh data for this account
+      emits("refresh", props.account);
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
@@ -308,35 +309,9 @@ async function handleDeleteClick(): Promise<void> {
   emits("delete", props.account.gameUid);
 }
 
-// Reload sign-in data
-async function loadData(): Promise<void> {
-  if (!cookie.value) return;
-  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-  
-  try {
-    const statResp = await lunaReq.info(props.account, ck);
-    if (!("retcode" in statResp)) {
-      // Update parent component by triggering a re-render
-      // Since we can't mutate props, we rely on the parent to refresh
-      await TGLogger.Info("[Sign Item] Data reloaded successfully");
-    }
-  } catch (error) {
-    await TGLogger.Error(`[Sign Item] Failed to reload data: ${error}`);
-  }
-}
-
-// Watch for prop changes to log
-watch(
-  () => props.statResp,
-  () => {
-    // Data updated from parent
-  },
-  { immediate: false },
-);
-
 async function shareItem(): Promise<void> {
   if (!signItemEl.value) return;
-  const fileName = `游戏签到_${props.gameInfo.title}_${props.account.gameUid}`;
+  const fileName = `游戏签到_${gameInfo.value.title}_${props.account.gameUid}`;
   await generateShareImg(fileName, signItemEl.value, 2);
 }
 </script>
