@@ -93,7 +93,7 @@ async function loadData(): Promise<void> {
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
     for (let i = 0; i < accounts.length; i++) {
       const account = accounts[i];
-      loadingText.value = `正在加载 ${account.gameBiz} - ${account.gameUid}...`;
+      loadingText.value = `正在加载 ${account.gameBiz} - ${account.regionName} - ${account.gameUid}...`;
       loadingProgress.value = (i / accounts.length) * 100;
       let info, stat;
       try {
