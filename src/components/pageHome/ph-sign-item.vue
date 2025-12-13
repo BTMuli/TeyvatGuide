@@ -292,8 +292,11 @@ async function handleSign(): Promise<void> {
     if (check) {
       showSnackbar.success("签到成功");
       updateLocalDataAfterSign();
-      // Load resign info after sign to get updated resign count
-      await loadResignInfo();
+      // Load resign info only if there are missed days
+      const missedDays = signStat.value?.sign_cnt_missed ?? 0;
+      if (missedDays > 0) {
+        await loadResignInfo();
+      }
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
@@ -314,6 +317,12 @@ async function handleResign(): Promise<void> {
 
   if (!resignInfo.value) {
     showSnackbar.error("获取补签信息失败");
+    return;
+  }
+
+  // Check if already resigned today
+  if (signStat.value?.is_sub) {
+    showSnackbar.warn("今日已补签，无法再次补签");
     return;
   }
 
@@ -379,10 +388,13 @@ async function handleResign(): Promise<void> {
 
       // Resign successful
       check = true;
-      showSnackbar.success(`补签成功: ${resignResp.message}`);
       updateLocalDataAfterResign();
       // Reload resign info to get updated count and coin
       await loadResignInfo();
+      // Show success message with remaining info
+      const remainingResigns = resignInfo.value?.quality_cnt ?? 0;
+      const remainingCoins = resignInfo.value?.coin_cnt ?? 0;
+      showSnackbar.success(`补签成功，剩余补签次数${remainingResigns}次，剩余米游币${remainingCoins}`);
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Resign error: ${error}`);
