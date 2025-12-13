@@ -68,7 +68,7 @@ watch(
   async () => {
     if (isUserPos.value && isInit.value) {
       userPos.value = [];
-      await loadUserPosition();
+      await loadUserPosition(true);
     }
   },
 );
@@ -80,7 +80,8 @@ onMounted(async () => {
   isInit.value = true;
 });
 
-async function loadUserPosition(): Promise<void> {
+async function loadUserPosition(forceReload: boolean = false): Promise<void> {
+  if (userPos.value.length > 0 && !forceReload) return;
   if (!cookie.value) {
     showSnackbar.warn("获取近期活动失败：未登录");
     isLogin.value = false;
