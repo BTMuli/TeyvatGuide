@@ -158,7 +158,6 @@ const extraSignedDays = computed<number>(() => signStat.value?.short_sign_day ??
 const isTodaySigned = computed<boolean>(() => signStat.value?.is_sign ?? false);
 const canResign = computed<boolean>(() => {
   if (!signStat.value?.is_sign) return false;
-  if (signInfo.value?.resign) return false;
   if (resignInfo.value?.quality_cnt === 0) return false;
   const missed = currentDay.value - 1 - totalSignedDays.value;
   return missed > 0 && isTodaySigned.value;
@@ -346,11 +345,6 @@ async function handleSign(): Promise<void> {
 async function handleResign(): Promise<void> {
   if (!cookie.value) {
     showSnackbar.warn("请先登录");
-    return;
-  }
-  // Check if already resigned today
-  if (signInfo.value?.resign) {
-    showSnackbar.warn("今日已补签，无法再次补签");
     return;
   }
   // Check if can resign
