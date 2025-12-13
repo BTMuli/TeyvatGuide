@@ -97,13 +97,13 @@ async function loadData(): Promise<void> {
       loadingProgress.value = (i / accounts.length) * 100;
       let info, stat;
       try {
-        const infoResp = await lunaReq.home(account, ck);
+        const infoResp = await lunaReq.sign.info(account, ck);
         if ("retcode" in infoResp) {
           await TGLogger.Error(
             `[Sign Card] Failed to get rewards for ${account.gameBiz}: ${infoResp.message}`,
           );
         } else info = infoResp;
-        const statResp = await lunaReq.info(account, ck);
+        const statResp = await lunaReq.sign.stat(account, ck);
         if ("retcode" in statResp) {
           await TGLogger.Error(
             `[Sign Card] Failed to get status for ${account.gameBiz}: ${statResp.message}`,

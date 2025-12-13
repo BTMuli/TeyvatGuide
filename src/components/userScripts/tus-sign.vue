@@ -236,7 +236,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
       `[签到任务]刷新${item.info.title}-${item.account.regionName}-${item.account.gameUid}`,
     );
     if (item.reward === undefined) {
-      const rewardResp = await lunaReq.home(item.account, cookie);
+      const rewardResp = await lunaReq.sign.info(item.account, cookie);
       console.log("签到奖励", item, rewardResp);
       if ("retcode" in rewardResp) {
         await TGLogger.Script(
@@ -245,7 +245,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
         showSnackbar.error(`[${rewardResp.retcode}] ${rewardResp.message}`);
       } else item.reward = rewardResp.awards[dayNow - 1];
     }
-    const statResp = await lunaReq.info(item.account, cookie);
+    const statResp = await lunaReq.sign.stat(item.account, cookie);
     console.log("签到状态", item, statResp);
     if ("retcode" in statResp) {
       await TGLogger.Script(`[签到任务]获取签到状态失败:${statResp.retcode} ${statResp.message}`);
@@ -267,7 +267,7 @@ async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise
     let check = false;
     let challenge: string | undefined = undefined;
     while (!check) {
-      const signResp = await lunaReq.sign(item.account, cookie, challenge);
+      const signResp = await lunaReq.sign.oper(item.account, cookie, challenge);
       console.log("签到信息", item, signResp);
       if (challenge !== undefined) challenge = undefined;
       if ("retcode" in signResp) {

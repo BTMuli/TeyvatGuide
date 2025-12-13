@@ -192,7 +192,7 @@ async function refreshData(): Promise<void> {
   if (!cookie.value) return;
   try {
     const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const statResp = await lunaReq.info(props.account, ck);
+    const statResp = await lunaReq.sign.stat(props.account, ck);
     if ("retcode" in statResp) {
       await TGLogger.Error(`[Sign Item] Failed to refresh stat: ${statResp.message}`);
     } else {
@@ -222,7 +222,7 @@ async function handleSign(): Promise<void> {
     let challenge: string | undefined = undefined;
 
     while (!check) {
-      const signResp = await lunaReq.sign(props.account, ck, challenge);
+      const signResp = await lunaReq.sign.oper(props.account, ck, challenge);
       if (challenge !== undefined) challenge = undefined;
       if ("retcode" in signResp) {
         if (signResp.retcode === 1034) {
