@@ -20,24 +20,33 @@ const useHomeStore = defineStore("home", () => {
 
   function getShowItems(): Array<string> {
     const homeShowLocal = localStorage.getItem("homeShow");
-    if (homeShowLocal === null || !Array.isArray(JSON.parse(homeShowLocal))) {
+    if (homeShowLocal === null) {
       localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
-      homeShow.value = JSON.parse(localStorage.getItem("homeShow")!);
     } else {
-      // Load stored items
-      const storedItems: Array<ShowItem> = JSON.parse(homeShowLocal);
-      // Merge with default items to add new items
-      const storedLabels = storedItems.map((i) => i.label);
-      // Add new items from default that don't exist in stored
-      for (const defaultItem of homeShow.value) {
-        if (!storedLabels.includes(defaultItem.label)) {
-          storedItems.push({ ...defaultItem });
+      try {
+        // Load stored items
+        const storedItems: Array<ShowItem> = JSON.parse(homeShowLocal);
+        if (!Array.isArray(storedItems)) {
+          // Invalid data, reset to default
+          localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
+        } else {
+          // Merge with default items to add new items
+          const storedLabels = storedItems.map((i) => i.label);
+          // Add new items from default that don't exist in stored
+          for (const defaultItem of homeShow.value) {
+            if (!storedLabels.includes(defaultItem.label)) {
+              storedItems.push({ ...defaultItem });
+            }
+          }
+          // Remove items that no longer exist in default
+          const defaultLabels = homeShow.value.map((i) => i.label);
+          homeShow.value = storedItems.filter((item) => defaultLabels.includes(item.label));
+          localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
         }
+      } catch (e) {
+        // Invalid JSON, reset to default
+        localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
       }
-      // Remove items that no longer exist in default
-      const defaultLabels = homeShow.value.map((i) => i.label);
-      homeShow.value = storedItems.filter((item) => defaultLabels.includes(item.label));
-      localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
     }
     return homeShow.value
       .filter((item) => item.show)
