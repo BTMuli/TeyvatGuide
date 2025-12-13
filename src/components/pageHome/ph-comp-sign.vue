@@ -346,7 +346,8 @@ async function handleResign(): Promise<void> {
   background: var(--box-bg-2);
   border: 2px solid transparent;
   transition: all 0.2s;
-  flex: 1;
+  min-width: 0;
+  flex: 1 1 0;
 
   &.current {
     border-color: var(--tgc-od-blue);
