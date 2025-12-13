@@ -23,6 +23,9 @@
           :game-info="item.info"
           :sign-stat="item.stat"
           :rewards="item.rewards"
+          :extra-rewards="item.extraRewards"
+          :has-extra-rewards="item.hasExtraRewards"
+          :extra-time-range="item.extraTimeRange"
           :signing="item.signing"
           @sign="handleSign(item)"
           @resign="handleResign"
@@ -58,6 +61,9 @@ type SignAccount = {
   info: SignGameInfo;
   stat?: TGApp.BBS.Sign.InfoRes;
   rewards: TGApp.BBS.Sign.HomeAward[];
+  extraRewards: TGApp.BBS.Sign.HomeAward[];
+  hasExtraRewards: boolean;
+  extraTimeRange?: { start: string; end: string };
   signing: boolean;
 };
 
@@ -118,6 +124,8 @@ async function loadData(): Promise<void> {
         account: gameAccount,
         info,
         rewards: [],
+        extraRewards: [],
+        hasExtraRewards: false,
         signing: false,
       };
 
@@ -133,6 +141,16 @@ async function loadData(): Promise<void> {
           await TGLogger.Error(`[Sign Card] Failed to get rewards for ${info.title}: ${rewards.message}`);
         } else {
           signAccount.rewards = rewards.awards;
+          
+          // Handle extra rewards
+          if (rewards.short_extra_award?.has_extra_award && rewards.short_extra_award.list.length > 0) {
+            signAccount.hasExtraRewards = true;
+            signAccount.extraRewards = rewards.short_extra_award.list;
+            signAccount.extraTimeRange = {
+              start: rewards.short_extra_award.start_time,
+              end: rewards.short_extra_award.end_time,
+            };
+          }
         }
       }
 
