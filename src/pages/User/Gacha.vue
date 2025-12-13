@@ -39,7 +39,9 @@
           导出(v4)
         </v-btn>
         <v-btn class="gacha-top-btn" prepend-icon="mdi-delete" @click="deleteGacha()">删除</v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-delete" @click="checkData()">检测数据</v-btn>
+        <v-btn class="gacha-top-btn" prepend-icon="mdi-database-check" @click="checkData()">
+          检测数据
+        </v-btn>
       </div>
     </template>
   </v-app-bar>
@@ -405,8 +407,27 @@ async function deleteGacha(): Promise<void> {
 }
 
 async function checkData(): Promise<void> {
-  // TODO: 读取当前UID数据并补充itemId
-  showSnackbar.warn("尚未实现");
+  let cnt = 0;
+  let fail = 0;
+  await showLoading.start("正在检测数据", `UID:${uidCur.value}，共${gachaListCur.value.length}条`);
+  for (const data of gachaListCur.value) {
+    if (data.itemId === "") {
+      const find = hakushiData.value.find((i) => i.name === data.name && i.type === data.type);
+      if (find) {
+        await showLoading.update(`${data.name} -> ${find.id}`);
+        await TSUserGacha.update.itemId(data, find.id);
+        cnt++;
+      } else {
+        await showLoading.update(`[${data.id}]${data.type}-${data.name}未找到ID`);
+        await TGLogger.Warn(`[${data.id}]${data.type}-${data.name}未找到ID`);
+        fail++;
+      }
+    }
+  }
+  await showLoading.end();
+  showSnackbar.success(`成功补充遗漏数据${cnt}条，失败${fail}条，即将刷新`);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 </script>
 <style lang="css" scoped>

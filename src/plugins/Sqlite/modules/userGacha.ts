@@ -1,6 +1,6 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.8.7
+ * @since Beta v0.9.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -25,19 +25,19 @@ function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string 
       INSERT INTO GachaRecords (uid, gachaType, itemId, count, time, name, type, rank, id, uigfType, updated)
       VALUES ('${uid}', '${gacha.gacha_type}', '${gacha.item_id ?? null}', '${gacha.count ?? null}', '${gacha.time}',
               '${gacha.name}', '${gacha.item_type ?? null}', '${gacha.rank_type ?? null}', '${gacha.id}',
-              '${gacha.uigf_gacha_type}', datetime('now', 'localtime')) ON CONFLICT (id)
-          DO
-      UPDATE
-          SET uid = '${uid}',
-          gachaType = '${gacha.gacha_type}',
-          uigfType = '${gacha.uigf_gacha_type}',
-          time = '${gacha.time}',
-          itemId = '${gacha.item_id ?? null}',
-          count = '${gacha.count ?? null}',
-          name = '${gacha.name}',
-          type = '${gacha.item_type ?? null}',
-          rank = '${gacha.rank_type ?? null}',
-          updated = datetime('now', 'localtime');
+              '${gacha.uigf_gacha_type}', datetime('now', 'localtime'))
+      ON CONFLICT (id)
+          DO UPDATE
+          SET uid       = '${uid}',
+              gachaType = '${gacha.gacha_type}',
+              uigfType  = '${gacha.uigf_gacha_type}',
+              time      = '${gacha.time}',
+              itemId    = '${gacha.item_id ?? null}',
+              count     = '${gacha.count ?? null}',
+              name      = '${gacha.name}',
+              type      = '${gacha.item_type ?? null}',
+              rank      = '${gacha.rank_type ?? null}',
+              updated   = datetime('now', 'localtime');
   `;
 }
 
@@ -317,6 +317,21 @@ async function restoreUigf(dir: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * 更新单条数据ID
+ * @since Beta v0.9.0
+ * @param {TGApp.Sqlite.GachaRecords.TableGacha} raw - 原始数据
+ * @param {number} itemId - 物品ID
+ * @returns {Promise<void>}
+ */
+async function updateItemIdById(
+  raw: TGApp.Sqlite.GachaRecords.TableGacha,
+  itemId: string,
+): Promise<void> {
+  const db = await TGSqlite.getDB();
+  await db.execute("UPDATE GachaRecords SET itemId = ? WHERE id = ?;", [itemId.toString(), raw.id]);
+}
+
 const TSUserGacha = {
   getUidList,
   getGachaCheck,
@@ -328,6 +343,9 @@ const TSUserGacha = {
   mergeUIGF4,
   backUpUigf,
   restoreUigf,
+  update: {
+    itemId: updateItemIdById,
+  },
 };
 
 export default TSUserGacha;
