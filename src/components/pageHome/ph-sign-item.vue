@@ -59,25 +59,37 @@
     </div>
     <!-- 签到操作 -->
     <div class="sign-actions" data-html2canvas-ignore>
+      <template v-if="signInfo && signStat">
+        <v-btn
+          :disabled="isTodaySigned || isSign || isResign"
+          :loading="isSign"
+          class="sign-btn"
+          prepend-icon="mdi-calendar-check"
+          size="small"
+          @click="handleSign"
+        >
+          签到
+        </v-btn>
+        <v-btn
+          :disabled="!canResign || isSign || isResign"
+          :loading="isResign"
+          class="sign-btn resign-btn"
+          prepend-icon="mdi-calendar-refresh"
+          size="small"
+          @click="handleResign"
+        >
+          补签{{ resignCount > 0 ? ` (${resignCount})` : "" }}
+        </v-btn>
+      </template>
       <v-btn
-        :disabled="isTodaySigned || isSign || isResign"
-        :loading="isSign"
+        :disabled="isRefresh"
+        :loading="isRefresh"
         class="sign-btn"
-        prepend-icon="mdi-calendar-check"
         size="small"
-        @click="handleSign"
+        prepend-icon="mdi-refresh"
+        @click="refreshData()"
       >
-        签到
-      </v-btn>
-      <v-btn
-        :disabled="!canResign || isSign || isResign"
-        :loading="isResign"
-        class="sign-btn resign-btn"
-        prepend-icon="mdi-calendar-refresh"
-        size="small"
-        @click="handleResign"
-      >
-        补签{{ resignCount > 0 ? ` (${resignCount})` : "" }}
+        刷新数据
       </v-btn>
     </div>
   </div>
@@ -123,6 +135,7 @@ const signItemEl = useTemplateRef<HTMLDivElement>("signItemRef");
 
 const isSign = ref<boolean>(false);
 const isResign = ref<boolean>(false);
+const isRefresh = ref<boolean>(false);
 const signInfo = ref<TGApp.BBS.Sign.HomeRes | undefined>(props.info);
 const signStat = ref<TGApp.BBS.Sign.InfoRes | undefined>(props.stat);
 const resignInfo = ref<TGApp.BBS.Sign.ResignInfoRes | undefined>(undefined);
@@ -163,6 +176,27 @@ const canResign = computed<boolean>(() => {
   return missed > 0 && isTodaySigned.value;
 });
 const resignCount = computed<number>(() => resignInfo.value?.quality_cnt ?? 0);
+
+// 刷新数据
+async function refreshData(): Promise<void> {
+  if (!cookie.value) return;
+  isRefresh.value = true;
+  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+  try {
+    const infoResp = await lunaReq.sign.info(props.account, ck);
+    if ("retcode" in infoResp) {
+      showSnackbar.warn(`刷新信息失败: ${infoResp.retcode} ${infoResp.message}`);
+    } else signInfo.value = infoResp;
+    const statResp = await lunaReq.sign.stat(props.account, ck);
+    if ("retcode" in statResp) {
+      showSnackbar.warn(`刷新状态失败: ${statResp.retcode} ${statResp.message}`);
+    } else signStat.value = statResp;
+    showSnackbar.success(`成功刷新签到信息`);
+  } catch (e) {
+    console.error(e);
+  }
+  isRefresh.value = false;
+}
 
 // Get reward state for regular rewards
 function getRewardState(index: number): RewardStateEnum {
