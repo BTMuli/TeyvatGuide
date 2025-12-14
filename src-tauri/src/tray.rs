@@ -2,6 +2,7 @@
 //! @desc 系统托盘模块，负责创建和管理系统托盘图标
 //! @since Beta v0.8.8
 
+use tauri::image::Image;
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager, Runtime};
@@ -14,13 +15,23 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
 
   let menu = MenuBuilder::new(app).item(&show_item).item(&quit_item).build()?;
 
-  // 创建托盘图标并设置事件处理
-  // 图标路径由 tauri.conf.json 中的 app.trayIcon.iconPath 配置
+  // 加载托盘图标
   // 在不同操作系统上，托盘图标的显示效果可能有所不同：
   // - Windows: 使用 .ico 格式获得最佳效果
   // - macOS: 支持 .icns 和 .png 格式
   // - Linux: 通常使用 .png 格式
+  let icon_bytes = include_bytes!("../icons/32x32.png");
+
+  // 使用 image crate 解码 PNG 图标
+  let img = image::load_from_memory(icon_bytes)
+    .map_err(|e| tauri::Error::Anyhow(anyhow::anyhow!("Failed to load tray icon: {}", e)))?;
+  let rgba = img.to_rgba8();
+  let (width, height) = rgba.dimensions();
+  let icon = Image::new_owned(rgba.into_raw(), width, height);
+
+  // 创建托盘图标并设置事件处理
   let _tray = TrayIconBuilder::new()
+    .icon(icon)
     .tooltip("Teyvat Guide")
     .menu(&menu)
     .on_menu_event(|app, event| {

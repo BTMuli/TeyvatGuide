@@ -48,11 +48,7 @@
         "visible": false
       }
     ],
-    "security": { "capabilities": ["TeyvatGuide", "Mys", "SubWindow", "DevJson"] },
-    "trayIcon": {
-      "iconPath": "icons/32x32.png",
-      "iconAsTemplate": false
-    }
+    "security": { "capabilities": ["TeyvatGuide", "Mys", "SubWindow", "DevJson"] }
   },
   "plugins": { "deep-link": { "desktop": { "schemes": ["teyvatguide"] }, "mobile": [] } }
 }

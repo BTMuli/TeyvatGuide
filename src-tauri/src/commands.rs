@@ -131,6 +131,13 @@ pub fn is_in_admin() -> bool {
 // 隐藏主窗口到托盘
 #[tauri::command]
 pub async fn hide_main_window(app_handle: AppHandle) {
+  // 关闭所有子窗口
+  for label in crate::SUB_WINDOW_LABELS.iter() {
+    if let Some(sub) = app_handle.get_webview_window(label) {
+      let _ = sub.destroy();
+    }
+  }
+  // 隐藏主窗口
   if let Some(window) = app_handle.get_webview_window("TeyvatGuide") {
     let _ = window.hide();
   }
