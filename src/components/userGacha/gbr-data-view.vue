@@ -1,6 +1,6 @@
 <!-- 颂愿数据概览 -->
 <template>
-  <div ref="gbrDvBoxRef" class="gbr-dv-container">
+  <div class="gbr-dv-container">
     <div ref="headerRef" class="gbr-dv-header">
       <div class="gbr-dvt-title">
         <span>{{ title }}</span>
@@ -100,8 +100,18 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import GbrDataLine, { type GbrDataLineProps } from "./gbr-data-line.vue";
 
@@ -111,11 +121,11 @@ type GachaDataViewProps = {
 };
 
 const props = defineProps<GachaDataViewProps>();
-const curWin = getCurrentWindow();
+
 const isNormalPool = computed<boolean>(() => props.dataType === "normal");
 
-// Template refs for dynamic height calculation
-const gbrDvBoxEl = useTemplateRef<HTMLElement>("gbrDvBoxRef");
+// 尺寸变化监听
+let resizeListener: UnlistenFn | null = null;
 const headerEl = useTemplateRef<HTMLElement>("headerRef");
 
 // Dynamic heights
@@ -145,13 +155,14 @@ const pg5 = computed<string>(() => getPg("5"));
 
 // Calculate dynamic heights
 function calculateHeights(): void {
-  if (!gbrDvBoxEl.value || !headerEl.value) return;
-  const containerHeight = gbrDvBoxEl.value.clientHeight;
+  const gbrDvBoxEl = document.querySelector(".gbr-o-container");
+  if (!gbrDvBoxEl || !headerEl.value) return;
+  const containerHeight = gbrDvBoxEl.clientHeight;
   const headerHeight = headerEl.value.clientHeight;
   const padding = 20; // 8px padding top + 8px padding bottom + 4px magic
   const tabsHeight = 36; // v-tabs compact height
   const gap = 8; // gap between tabs and window
-  const bottomHeightPx = containerHeight - headerHeight - padding - 8;
+  const bottomHeightPx = containerHeight - headerHeight - padding;
   const windowHeightPx = bottomHeightPx - tabsHeight - gap;
   bottomHeight.value = `${bottomHeightPx}px`;
   windowHeight.value = `${windowHeightPx}px`;
@@ -162,6 +173,16 @@ onMounted(async () => {
   loading.value = false;
   await nextTick();
   calculateHeights();
+  resizeListener = await getCurrentWindow().onResized(async () => {
+    await nextTick();
+    calculateHeights();
+  });
+});
+onUnmounted(() => {
+  if (resizeListener) {
+    resizeListener();
+    resizeListener = null;
+  }
 });
 
 watch(
@@ -171,11 +192,6 @@ watch(
     calculateHeights();
   },
 );
-
-curWin.onResized(async () => {
-  await nextTick();
-  calculateHeights();
-});
 
 function loadData(): void {
   title.value = getTitle();
@@ -342,7 +358,7 @@ watch(
   },
 );
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .gbr-dv-container {
   position: relative;
   height: 100%;
@@ -375,10 +391,10 @@ watch(
 
 .gbr-mid-list {
   display: grid;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   color: var(--box-text-7);
-  column-gap: 12px;
+  column-gap: 4px;
   font-size: 14px;
   grid-template-columns: 1fr 1fr 1fr 1fr;
 }
@@ -467,6 +483,7 @@ watch(
 .gbr-b-window-item {
   position: relative;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
   padding-right: 4px;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="gro-o-container">
+  <div class="gbr-o-container">
     <GbrDataView :data-val="normalData" data-type="normal" />
     <GbrDataView :data-val="eventData" data-type="boy" />
     <GbrDataView :data-val="eventData" data-type="girl" />
@@ -21,12 +21,11 @@ const eventData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
 );
 </script>
 <style lang="css" scoped>
-.gro-o-container {
+.gbr-o-container {
   position: relative;
   display: grid;
-  overflow: hidden;
   height: 100%;
   column-gap: 8px;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 0.33fr);
 }
 </style>

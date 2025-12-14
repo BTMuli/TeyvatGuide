@@ -167,7 +167,7 @@ async function confirmRefresh(force: boolean): Promise<void> {
   await TGLogger.Info(`[UserGacha][${account.value.gameUid}] 刷新祈愿数据完成`);
   showSnackbar.success("祈愿数据刷新完成，即将刷新页面");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  // window.location.reload();
+  window.location.reload();
 }
 
 /**
