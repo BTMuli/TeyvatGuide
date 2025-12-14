@@ -36,7 +36,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { theme, needResize, deviceInfo, isLogin, userDir, buildTime } = storeToRefs(useAppStore());
+const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray } = storeToRefs(useAppStore());
 const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
 const appStore = useAppStore();
 
@@ -375,7 +375,7 @@ async function checkUpdate(): Promise<void> {
 async function handleWindowClose(): Promise<void> {
   try {
     // 根据用户设置决定是隐藏到托盘还是退出应用
-    if (appStore.closeToTray) {
+    if (closeToTray.value) {
       await core.invoke("hide_main_window");
     } else {
       await core.invoke("quit_app");

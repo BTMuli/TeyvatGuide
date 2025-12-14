@@ -106,8 +106,8 @@
         </template>
         <template #append>
           <v-switch
-            v-model="appStore.closeToTray"
-            :label="appStore.closeToTray ? '开启' : '关闭'"
+            v-model="closeToTray"
+            :label="closeToTray ? '开启' : '关闭'"
             :inset="true"
             class="config-switch"
             color="#FAC51E"
@@ -200,6 +200,7 @@ const {
   buildTime,
   imageQualityPercent,
   incognito,
+  closeToTray,
 } = storeToRefs(appStore);
 const homeStore = useHomeStore();
 
