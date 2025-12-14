@@ -1,9 +1,8 @@
-<!-- 千星奇域祈愿概览组件 -->
 <template>
   <div class="gro-o-container">
     <GbrDataView :data-val="normalData" data-type="normal" />
-    <GbrDataView :data-val="boyData" data-type="boy" />
-    <GbrDataView :data-val="girlData" data-type="girl" />
+    <GbrDataView :data-val="boyData" :shared-pool-data="eventData" data-type="boy" />
+    <GbrDataView :data-val="girlData" :shared-pool-data="eventData" data-type="girl" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -17,11 +16,20 @@ const props = defineProps<GachaOverviewProps>();
 const normalData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
   props.modelValue.filter((item) => item.opGachaType === "1000"),
 );
+const eventData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
+  props.modelValue.filter(
+    (item) =>
+      item.opGachaType === "20011" ||
+      item.opGachaType === "20012" ||
+      item.opGachaType === "20021" ||
+      item.opGachaType === "20022",
+  ),
+);
 const girlData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
-  props.modelValue.filter((item) => item.opGachaType === "20011" || item.opGachaType === "20012"),
+  props.modelValue.filter((item) => item.opGachaType === "20021" || item.opGachaType === "20022"),
 );
 const boyData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
-  props.modelValue.filter((item) => item.opGachaType === "20021" || item.opGachaType === "20022"),
+  props.modelValue.filter((item) => item.opGachaType === "20011" || item.opGachaType === "20012"),
 );
 </script>
 <style lang="css" scoped>

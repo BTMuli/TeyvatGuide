@@ -105,6 +105,7 @@ import GbrDataLine, { type GbrDataLineProps } from "./gbr-data-line.vue";
 type GachaDataViewProps = {
   dataType: "normal" | "boy" | "girl";
   dataVal: Array<TGApp.Sqlite.GachaRecords.TableGachaB>;
+  sharedPoolData?: Array<TGApp.Sqlite.GachaRecords.TableGachaB>;
 };
 
 const props = defineProps<GachaDataViewProps>();
@@ -139,34 +140,76 @@ onMounted(() => {
 function loadData(): void {
   title.value = getTitle();
   const tempData = props.dataVal;
+  // For event pools (boy/girl), use shared pool data for pity calculation
+  const pityData = props.sharedPoolData ?? tempData;
   const temp5Data: Array<GbrDataLineProps> = [];
   const temp4Data: Array<GbrDataLineProps> = [];
   const temp3Data: Array<GbrDataLineProps> = [];
-  // 按照 id 升序
+  
+  // Create a map to store pity counts for each item by ID
+  const pityMap = new Map<string, { count5: number; count4: number; count3: number }>();
+  let currentReset5 = 1;
+  let currentReset4 = 1;
+  let currentReset3 = 1;
+  
+  // First pass: calculate pity counts using shared pool data (or tempData for normal pool)
+  pityData
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .forEach((item) => {
+      if (item.rank === "2") {
+        currentReset3++;
+        currentReset4++;
+        currentReset5++;
+      } else if (item.rank === "3") {
+        currentReset4++;
+        currentReset5++;
+        pityMap.set(item.id, {
+          count3: currentReset3,
+          count4: currentReset4,
+          count5: currentReset5,
+        });
+        currentReset3 = 1;
+      } else if (item.rank === "4") {
+        currentReset5++;
+        pityMap.set(item.id, {
+          count3: currentReset3,
+          count4: currentReset4,
+          count5: currentReset5,
+        });
+        currentReset4 = 1;
+      } else if (item.rank === "5") {
+        currentReset4++;
+        pityMap.set(item.id, {
+          count3: currentReset3,
+          count4: currentReset4,
+          count5: currentReset5,
+        });
+        currentReset5 = 1;
+      }
+    });
+  
+  // Store current reset counts for display
+  reset5count.value = currentReset5;
+  reset4count.value = currentReset4;
+  reset3count.value = currentReset3;
+  
+  // Second pass: build display data using only the filtered data for this pool
   tempData
     .sort((a, b) => a.id.localeCompare(b.id))
     .forEach((item) => {
       // 处理时间
       if (startDate.value === "" || item.time < startDate.value) startDate.value = item.time;
       if (endDate.value === "" || item.time > endDate.value) endDate.value = item.time;
+      
+      const pityCounts = pityMap.get(item.id);
       if (item.rank === "2") {
         star2count.value++;
-        reset3count.value++;
-        reset4count.value++;
-        reset5count.value++;
-      } else if (item.rank === "3") {
-        reset4count.value++;
-        reset5count.value++;
-        temp3Data.push({ data: item, count: reset3count.value });
-        reset3count.value = 1;
-      } else if (item.rank === "4") {
-        reset5count.value++;
-        temp4Data.push({ data: item, count: reset4count.value });
-        reset4count.value = 1;
-      } else if (item.rank === "5") {
-        reset4count.value++;
-        temp5Data.push({ data: item, count: reset5count.value });
-        reset5count.value = 1;
+      } else if (item.rank === "3" && pityCounts) {
+        temp3Data.push({ data: item, count: pityCounts.count3 });
+      } else if (item.rank === "4" && pityCounts) {
+        temp4Data.push({ data: item, count: pityCounts.count4 });
+      } else if (item.rank === "5" && pityCounts) {
+        temp5Data.push({ data: item, count: pityCounts.count5 });
       }
     });
   star5List.value = temp5Data.reverse();
