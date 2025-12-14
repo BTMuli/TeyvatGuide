@@ -1,7 +1,8 @@
-<!-- 颂愿数据概览 TODO: 页面高度动态计算，参考GroDataView -->
+<!-- 颂愿数据概览 -->
 <template>
-  <div class="gbr-dv-container">
-    <div class="gbr-dvt-title">
+  <div ref="gbrDvBoxRef" class="gbr-dv-container">
+    <div ref="headerRef" class="gbr-dv-header">
+      <div class="gbr-dvt-title">
       <span>{{ title }}</span>
       <span>{{ props.dataVal.length }}</span>
     </div>
@@ -64,6 +65,7 @@
       <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
       <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
     </div>
+    </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gbr-bottom">
       <v-tabs v-model="tab" density="compact">
@@ -98,7 +100,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import GbrDataLine, { type GbrDataLineProps } from "./gbr-data-line.vue";
 
@@ -108,7 +111,16 @@ type GachaDataViewProps = {
 };
 
 const props = defineProps<GachaDataViewProps>();
+const curWin = getCurrentWindow();
 const isNormalPool = computed<boolean>(() => props.dataType === "normal");
+
+// Template refs for dynamic height calculation
+const gbrDvBoxEl = useTemplateRef<HTMLElement>("gbrDvBoxRef");
+const headerEl = useTemplateRef<HTMLElement>("headerRef");
+
+// Dynamic heights
+const bottomHeight = ref<string>("auto");
+const windowHeight = ref<string>("auto");
 
 // data
 const loading = ref<boolean>(true); // 是否加载完
@@ -131,9 +143,38 @@ const pg3 = computed<string>(() => getPg("3"));
 const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
 
-onMounted(() => {
+// Calculate dynamic heights
+function calculateHeights(): void {
+  if (!gbrDvBoxEl.value || !headerEl.value) return;
+  const containerHeight = gbrDvBoxEl.value.clientHeight;
+  const headerHeight = headerEl.value.clientHeight;
+  const padding = 20; // 8px padding top + 8px padding bottom + 4px magic
+  const tabsHeight = 36; // v-tabs compact height
+  const gap = 8; // gap between tabs and window
+  const bottomHeightPx = containerHeight - headerHeight - padding;
+  const windowHeightPx = bottomHeightPx - tabsHeight - gap;
+  bottomHeight.value = `${bottomHeightPx}px`;
+  windowHeight.value = `${windowHeightPx}px`;
+}
+
+onMounted(async () => {
   loadData();
   loading.value = false;
+  await nextTick();
+  calculateHeights();
+});
+
+watch(
+  () => [props.dataVal, props.dataType],
+  async () => {
+    await nextTick();
+    calculateHeights();
+  },
+);
+
+curWin.onResized(async () => {
+  await nextTick();
+  calculateHeights();
 });
 
 function loadData(): void {
@@ -283,7 +324,7 @@ function getStar3Avg(): string {
 // 监听数据变化
 watch(
   () => props.dataVal,
-  () => {
+  async () => {
     star5List.value = [];
     star4List.value = [];
     reset5count.value = 1;
@@ -296,16 +337,23 @@ watch(
     star3avg.value = "";
     tab.value = isNormalPool.value ? "4" : "5";
     loadData();
+    await nextTick();
+    calculateHeights();
   },
 );
 </script>
 <style lang="css" scoped>
 .gbr-dv-container {
+  position: relative;
   height: 100%;
   box-sizing: border-box;
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
+}
+
+.gbr-dv-header {
+  position: relative;
 }
 
 .gbr-dvt-title {
@@ -404,7 +452,7 @@ watch(
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 150px);
+  height: v-bind(bottomHeight); /* stylelint-disable-line value-keyword-case */
   box-sizing: border-box;
   flex-direction: column;
   gap: 8px;
@@ -412,7 +460,7 @@ watch(
 
 .gbr-bottom-window {
   position: relative;
-  height: calc(100vh - 428px);
+  height: v-bind(windowHeight); /* stylelint-disable-line value-keyword-case */
   overflow-y: auto;
 }
 
