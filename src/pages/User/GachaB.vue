@@ -1,30 +1,30 @@
-<!-- 千星奇域祈愿记录页面 -->
+<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次数共享 -->
 <template>
   <v-app-bar>
     <template #prepend>
       <div class="gb-top-title">
-        <img class="gb-top-byd" src="/icon/nation/千星奇域.webp" alt="byd" />
+        <img alt="byd" class="gb-top-byd" src="/icon/nation/千星奇域.webp" />
         <span>祈愿记录</span>
         <v-select
-          :hide-details="true"
-          density="compact"
           v-model="uidCur"
+          :hide-details="true"
           :items="selectItem"
-          variant="outlined"
+          density="compact"
           label="游戏UID"
+          variant="outlined"
         />
-        <img src="/source/UI/userGacha.webp" alt="gacha" @click="toGacha()" title="祈愿" />
+        <img alt="gacha" src="/source/UI/userGacha.webp" title="祈愿" @click="toGacha()" />
       </div>
     </template>
     <template #extension>
       <div class="gb-top-btns">
-        <v-btn prepend-icon="mdi-refresh" class="gb-top-btn" @click="confirmRefresh(false)">
+        <v-btn class="gb-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(false)">
           增量刷新
         </v-btn>
-        <v-btn prepend-icon="mdi-refresh" class="gb-top-btn" @click="confirmRefresh(true)">
+        <v-btn class="gb-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(true)">
           全量刷新
         </v-btn>
-        <v-btn prepend-icon="mdi-delete" class="gb-top-btn" @click="deleteGacha()">删除</v-btn>
+        <v-btn class="gb-top-btn" prepend-icon="mdi-delete" @click="deleteGacha()">删除</v-btn>
       </div>
     </template>
   </v-app-bar>
@@ -33,16 +33,16 @@
       <v-tab value="overview">数据概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
       <!-- TODO: 暂时隐藏内置祈愿链接 -->
-      <v-tab value="iframe" v-if="false">祈愿详情</v-tab>
+      <v-tab v-if="false" value="iframe">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gb-window">
-      <v-window-item value="overview" class="gb-window-item">
+      <v-window-item class="gb-window-item" value="overview">
         <gbr-overview v-model="gachaListCur" />
       </v-window-item>
-      <v-window-item value="table" class="gb-window-item">
+      <v-window-item class="gb-window-item" value="table">
         <gbr-table v-model="gachaListCur" />
       </v-window-item>
-      <v-window-item value="iframe" class="gb-window-item">
+      <v-window-item class="gb-window-item" value="iframe">
         <gro-iframe mode="beyond" />
       </v-window-item>
     </v-window>
