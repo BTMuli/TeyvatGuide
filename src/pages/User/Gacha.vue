@@ -425,9 +425,13 @@ async function checkData(): Promise<void> {
     }
   }
   await showLoading.end();
-  showSnackbar.success(`成功补充遗漏数据${cnt}条，失败${fail}条，即将刷新`);
-  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  window.location.reload();
+  if (cnt > 0 || fail > 0) {
+    showSnackbar.success(`成功补充遗漏数据${cnt}条，失败${fail}条，即将刷新`);
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    window.location.reload();
+  } else {
+    showSnackbar.success(`成功检测${gachaListCur.value.length}条数据，无需更新`);
+  }
 }
 </script>
 <style lang="css" scoped>
