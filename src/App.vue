@@ -36,8 +36,9 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { theme, needResize, deviceInfo, isLogin, userDir, buildTime } = storeToRefs(useAppStore());
+const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray } = storeToRefs(useAppStore());
 const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
+const appStore = useAppStore();
 
 const isMain = ref<boolean>(false);
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
@@ -46,6 +47,7 @@ let themeListener: UnlistenFn | null = null;
 let dpListener: UnlistenFn | null = null;
 let resizeListener: UnlistenFn | null = null;
 let yaeListener: UnlistenFn | null = null;
+let closeListener: UnlistenFn | null = null;
 let yaeFlag: Array<string> = [];
 
 onMounted(async () => {
@@ -58,6 +60,7 @@ onMounted(async () => {
     await core.invoke("init_app");
     dpListener = await event.listen<string>("active_deep_link", handleDpListen);
     yaeListener = await event.listen<TGApp.Plugins.Yae.RsEvent>("yae_read", handleYaeListen);
+    closeListener = await event.listen("main-window-close-requested", handleWindowClose);
   }
   if (needResize.value !== "false") await resizeWindow();
   document.documentElement.className = theme.value;
@@ -86,6 +89,10 @@ onUnmounted(() => {
   if (resizeListener !== null) {
     resizeListener();
     resizeListener = null;
+  }
+  if (closeListener !== null) {
+    closeListener();
+    closeListener = null;
   }
 });
 
@@ -357,6 +364,26 @@ async function checkUpdate(): Promise<void> {
     await TGSqlite.update();
     showSnackbar.success("数据库已更新！", 3000);
     await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
+  }
+}
+
+/**
+ * 处理主窗口关闭请求
+ * @since Beta v0.8.8
+ * @returns {Promise<void>}
+ */
+async function handleWindowClose(): Promise<void> {
+  try {
+    // 根据用户设置决定是隐藏到托盘还是退出应用
+    if (closeToTray.value) {
+      await core.invoke("hide_main_window");
+    } else {
+      await core.invoke("quit_app");
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      await TGLogger.Error(`[App][handleWindowClose] ${e.name}: ${e.message}`);
+    } else console.error(e);
   }
 }
 </script>

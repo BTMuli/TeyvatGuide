@@ -4,6 +4,7 @@
 mod client;
 mod commands;
 mod plugins;
+mod tray;
 mod utils;
 #[cfg(target_os = "windows")]
 mod watchdog;
@@ -11,9 +12,14 @@ mod watchdog;
 mod yae;
 
 use crate::client::create_mhy_client;
-use crate::commands::{create_window, execute_js, get_dir_size, init_app, is_in_admin};
+use crate::commands::{
+  create_window, execute_js, get_dir_size, hide_main_window, init_app, is_in_admin, quit_app,
+};
 use crate::plugins::{build_log_plugin, build_si_plugin};
-use tauri::{generate_context, generate_handler, Manager, Window, WindowEvent};
+use tauri::{generate_context, generate_handler, Emitter, Manager, Window, WindowEvent};
+
+// 子窗口 label 的数组
+pub const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
 
 // 窗口事件处理
 fn window_event_handler(app: &Window, event: &WindowEvent) {
@@ -21,16 +27,12 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
     WindowEvent::CloseRequested { api, .. } => {
       api.prevent_close();
       if app.label() == "TeyvatGuide" {
-        // 子窗口 label 的数组
-        const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
-        for label in SUB_WINDOW_LABELS.iter() {
-          let sub = app.get_webview_window(label);
-          if sub.is_some() {
-            sub.unwrap().destroy().unwrap();
-          }
-        }
+        // 主窗口：发送事件让前端根据配置决定是隐藏还是退出
+        let _ = app.emit("main-window-close-requested", ());
+      } else {
+        // 子窗口：直接销毁
+        app.destroy().unwrap();
       }
-      app.destroy().unwrap();
     }
     _ => {}
   }
@@ -78,6 +80,9 @@ pub fn run() {
     .plugin(tauri_plugin_sql::Builder::default().build())
     .plugin(build_log_plugin())
     .setup(|_app| {
+      // 创建系统托盘图标
+      tray::create_tray(_app.handle())
+        .expect("Failed to initialize system tray icon. Please check if the tray icon file exists and the system supports tray icons.");
       let _window = _app.get_webview_window("TeyvatGuide");
       #[cfg(debug_assertions)]
       if _window.is_some() {
@@ -92,6 +97,8 @@ pub fn run() {
       get_dir_size,
       create_mhy_client,
       is_in_admin,
+      hide_main_window,
+      quit_app,
       #[cfg(target_os = "windows")]
       yae::call_yae_dll,
       #[cfg(target_os = "windows")]
