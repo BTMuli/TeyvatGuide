@@ -1,44 +1,37 @@
 /**
- * @file types/App/Character.d.ts
- * @description 角色相关类型定义文件
- * @since Beta v0.4.3
+ * 角色相关类型定义文件
+ * @since Beta v0.9.0
  */
 
-/**
- * @description 应用内角色命名空间
- * @since Beta v0.4.3
- * @namespace Character
- * @memberof TGApp.App
- */
 declare namespace TGApp.App.Character {
   /**
-   * @description Wiki 页简略信息
-   * @since Beta v0.4.3
-   * @interface WikiBriefInfo
-   * @property {number} id - 角色 ID
-   * @property {number} contentId - 观测枢的 content_id
-   * @property {string} name - 角色名称
-   * @property {string} title - 角色称号
-   * @property {string} area - 角色地区
-   * @property {number[]} birthday - 角色生日 [月, 日]
-   * @property {number} star - 角色星级
-   * @property {string} element - 角色元素类型图标
-   * @property {string} weapon - 角色武器类型图标
-   * @property {string} nameCard - 角色名片
-   * @return WikiBriefInfo
+   * Wiki 页简略信息
+   * @since Beta v0.9.0
    */
-  interface WikiBriefInfo {
+  type WikiBriefInfo = {
+    /** 角色 ID */
     id: number;
+    /** 观测枢的 content_id */
     contentId: number;
+    /** 角色名称 */
     name: string;
+    /** 角色称号 */
     title: string;
+    /** 角色地区 */
     area: string;
+    /** 角色生日 [月, 日] */
     birthday: number[];
+    /** 角色星级 */
     star: number;
+    /** 角色元素类型图标 */
     element: string;
+    /** 角色上线时间 */
+    release: string;
+    /** 角色武器类型图标 */
     weapon: string;
+    /** 角色名片  */
     nameCard: string;
-  }
+  };
 
   /**
    * @description Wiki 页详细信息-角色技能

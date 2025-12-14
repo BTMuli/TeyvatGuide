@@ -36,11 +36,10 @@ import { useRoute } from "vue-router";
 import { AppCharacterData } from "@/data/index.js";
 
 // 先按star降序，再按元素排序，再按id降序
-const appCData = AppCharacterData.sort((a, b) => {
-  if (a.star !== b.star) return b.star - a.star;
-  if (a.element !== b.element) return a.element.localeCompare(b.element);
-  return b.id - a.id;
-});
+const appCData = AppCharacterData.sort(
+  (a, b) =>
+    b.star - a.star || new Date(b.release).getTime() - new Date(a.release).getTime() || b.id - a.id,
+);
 
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);
@@ -55,6 +54,7 @@ const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   birthday: [0, 0],
   star: 0,
   element: "",
+  release: "",
   weapon: "",
   nameCard: "",
 });
