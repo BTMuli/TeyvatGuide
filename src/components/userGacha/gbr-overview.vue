@@ -22,7 +22,9 @@ const eventData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
 </script>
 <style lang="css" scoped>
 .gro-o-container {
+  position: relative;
   display: grid;
+  overflow: hidden;
   height: 100%;
   column-gap: 8px;
   grid-template-columns: repeat(3, 1fr);

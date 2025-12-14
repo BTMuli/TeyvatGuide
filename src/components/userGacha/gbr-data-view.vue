@@ -3,68 +3,68 @@
   <div ref="gbrDvBoxRef" class="gbr-dv-container">
     <div ref="headerRef" class="gbr-dv-header">
       <div class="gbr-dvt-title">
-      <span>{{ title }}</span>
-      <span>{{ props.dataVal.length }}</span>
-    </div>
-    <div class="gbr-dvt-subtitle">
-      <span v-show="props.dataVal.length === 0">暂无数据</span>
-      <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
-    </div>
-    <!-- 3星相关数据 -->
-    <div class="gbr-mid-list">
-      <div class="gbr-ml-title s3">★★★</div>
-      <div class="gbr-ml-card">
-        <span>已垫</span>
-        <span>{{ reset3count - 1 }}</span>
+        <span>{{ title }}</span>
+        <span>{{ props.dataVal.length }}</span>
       </div>
-      <div class="gbr-ml-card">
-        <span>平均</span>
-        <span>{{ star3avg }}</span>
+      <div class="gbr-dvt-subtitle">
+        <span v-show="props.dataVal.length === 0">暂无数据</span>
+        <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
       </div>
-      <div class="gbr-ml-card">
-        <span>统计</span>
-        <span>{{ star3List.length }}</span>
+      <!-- 3星相关数据 -->
+      <div class="gbr-mid-list">
+        <div class="gbr-ml-title s3">★★★</div>
+        <div class="gbr-ml-card">
+          <span>已垫</span>
+          <span>{{ reset3count - 1 }}</span>
+        </div>
+        <div class="gbr-ml-card">
+          <span>平均</span>
+          <span>{{ star3avg }}</span>
+        </div>
+        <div class="gbr-ml-card">
+          <span>统计</span>
+          <span>{{ star3List.length }}</span>
+        </div>
       </div>
-    </div>
-    <!-- 4星相关数据 -->
-    <div class="gbr-mid-list">
-      <div class="gbr-ml-title s4">★★★★</div>
-      <div class="gbr-ml-card">
-        <span>已垫</span>
-        <span>{{ reset4count - 1 }}</span>
+      <!-- 4星相关数据 -->
+      <div class="gbr-mid-list">
+        <div class="gbr-ml-title s4">★★★★</div>
+        <div class="gbr-ml-card">
+          <span>已垫</span>
+          <span>{{ reset4count - 1 }}</span>
+        </div>
+        <div class="gbr-ml-card">
+          <span>平均</span>
+          <span>{{ star4avg }}</span>
+        </div>
+        <div class="gbr-ml-card">
+          <span>统计</span>
+          <span>{{ star4List.length }}</span>
+        </div>
       </div>
-      <div class="gbr-ml-card">
-        <span>平均</span>
-        <span>{{ star4avg }}</span>
+      <!-- 5星相关数据 -->
+      <div v-if="!isNormalPool" class="gbr-mid-list">
+        <div class="gbr-ml-title s5">★★★★★</div>
+        <div class="gbr-ml-card">
+          <span>已垫</span>
+          <span>{{ reset5count - 1 }}</span>
+        </div>
+        <div class="gbr-ml-card">
+          <span>平均</span>
+          <span>{{ star5avg }}</span>
+        </div>
+        <div class="gbr-ml-card">
+          <span>统计</span>
+          <span>{{ star5List.length }}</span>
+        </div>
       </div>
-      <div class="gbr-ml-card">
-        <span>统计</span>
-        <span>{{ star4List.length }}</span>
+      <!-- 进度条拼接 -->
+      <div v-if="props.dataVal.length > 0" class="gbr-mid-progress">
+        <div v-if="pg2 !== '0'" :style="{ width: pg2 }" :title="`2星占比:${pg2}`" class="s2" />
+        <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
+        <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
+        <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
       </div>
-    </div>
-    <!-- 5星相关数据 -->
-    <div v-if="!isNormalPool" class="gbr-mid-list">
-      <div class="gbr-ml-title s5">★★★★★</div>
-      <div class="gbr-ml-card">
-        <span>已垫</span>
-        <span>{{ reset5count - 1 }}</span>
-      </div>
-      <div class="gbr-ml-card">
-        <span>平均</span>
-        <span>{{ star5avg }}</span>
-      </div>
-      <div class="gbr-ml-card">
-        <span>统计</span>
-        <span>{{ star5List.length }}</span>
-      </div>
-    </div>
-    <!-- 进度条拼接 -->
-    <div v-if="props.dataVal.length > 0" class="gbr-mid-progress">
-      <div v-if="pg2 !== '0'" :style="{ width: pg2 }" :title="`2星占比:${pg2}`" class="s2" />
-      <div v-if="pg3 !== '0'" :style="{ width: pg3 }" :title="`3星占比:${pg3}`" class="s3" />
-      <div v-if="pg4 !== '0'" :style="{ width: pg4 }" :title="`4星占比:${pg4}`" class="s4" />
-      <div v-if="pg5 !== '0'" :style="{ width: pg5 }" :title="`5星占比:${pg5}`" class="s5" />
-    </div>
     </div>
     <!-- 这边放具体物品的列表 -->
     <div class="gbr-bottom">
@@ -151,7 +151,7 @@ function calculateHeights(): void {
   const padding = 20; // 8px padding top + 8px padding bottom + 4px magic
   const tabsHeight = 36; // v-tabs compact height
   const gap = 8; // gap between tabs and window
-  const bottomHeightPx = containerHeight - headerHeight - padding;
+  const bottomHeightPx = containerHeight - headerHeight - padding - 8;
   const windowHeightPx = bottomHeightPx - tabsHeight - gap;
   bottomHeight.value = `${bottomHeightPx}px`;
   windowHeight.value = `${windowHeightPx}px`;
@@ -183,13 +183,13 @@ function loadData(): void {
   const temp5Data: Array<GbrDataLineProps> = [];
   const temp4Data: Array<GbrDataLineProps> = [];
   const temp3Data: Array<GbrDataLineProps> = [];
-  
+
   // Create a map to store pity counts for each item by ID
   const pityMap = new Map<string, { count5: number; count4: number; count3: number }>();
   let currentReset5 = 1;
   let currentReset4 = 1;
   let currentReset3 = 1;
-  
+
   // First pass: calculate pity counts using all pool data
   tempData
     .sort((a, b) => a.id.localeCompare(b.id))
@@ -225,12 +225,12 @@ function loadData(): void {
         currentReset5 = 1;
       }
     });
-  
+
   // Store current reset counts for display
   reset5count.value = currentReset5;
   reset4count.value = currentReset4;
   reset3count.value = currentReset3;
-  
+
   // Helper function to check if item should be displayed based on dataType
   function shouldDisplay(item: TGApp.Sqlite.GachaRecords.TableGachaB): boolean {
     if (props.dataType === "normal") return true;
@@ -242,18 +242,18 @@ function loadData(): void {
     }
     return false;
   }
-  
+
   // Second pass: build display data, filtering by dataType for event pools
   tempData
     .sort((a, b) => a.id.localeCompare(b.id))
     .forEach((item) => {
       // Only process items that should be displayed for this view
       if (!shouldDisplay(item)) return;
-      
+
       // 处理时间
       if (startDate.value === "" || item.time < startDate.value) startDate.value = item.time;
       if (endDate.value === "" || item.time > endDate.value) endDate.value = item.time;
-      
+
       const pityCounts = pityMap.get(item.id);
       if (item.rank === "2") {
         star2count.value++;
