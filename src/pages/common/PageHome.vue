@@ -177,7 +177,7 @@ async function submitHome(): Promise<void> {
 function getName(name: string): string | undefined {
   switch (name) {
     case "ph-comp-sign":
-      return "签到";
+      return "游戏签到";
     case "ph-comp-pool":
       return "限时祈愿";
     case "ph-comp-position":
