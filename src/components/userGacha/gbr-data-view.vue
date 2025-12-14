@@ -105,7 +105,6 @@ import GbrDataLine, { type GbrDataLineProps } from "./gbr-data-line.vue";
 type GachaDataViewProps = {
   dataType: "normal" | "boy" | "girl";
   dataVal: Array<TGApp.Sqlite.GachaRecords.TableGachaB>;
-  sharedPoolData?: Array<TGApp.Sqlite.GachaRecords.TableGachaB>;
 };
 
 const props = defineProps<GachaDataViewProps>();
@@ -140,8 +139,6 @@ onMounted(() => {
 function loadData(): void {
   title.value = getTitle();
   const tempData = props.dataVal;
-  // For event pools (boy/girl), use shared pool data for pity calculation
-  const pityData = props.sharedPoolData ?? tempData;
   const temp5Data: Array<GbrDataLineProps> = [];
   const temp4Data: Array<GbrDataLineProps> = [];
   const temp3Data: Array<GbrDataLineProps> = [];
@@ -152,8 +149,8 @@ function loadData(): void {
   let currentReset4 = 1;
   let currentReset3 = 1;
   
-  // First pass: calculate pity counts using shared pool data (or tempData for normal pool)
-  pityData
+  // First pass: calculate pity counts using all pool data
+  tempData
     .sort((a, b) => a.id.localeCompare(b.id))
     .forEach((item) => {
       if (item.rank === "2") {
@@ -193,10 +190,25 @@ function loadData(): void {
   reset4count.value = currentReset4;
   reset3count.value = currentReset3;
   
-  // Second pass: build display data using only the filtered data for this pool
+  // Helper function to check if item should be displayed based on dataType
+  function shouldDisplay(item: TGApp.Sqlite.GachaRecords.TableGachaB): boolean {
+    if (props.dataType === "normal") return true;
+    if (props.dataType === "boy") {
+      return item.opGachaType === "20011" || item.opGachaType === "20012";
+    }
+    if (props.dataType === "girl") {
+      return item.opGachaType === "20021" || item.opGachaType === "20022";
+    }
+    return false;
+  }
+  
+  // Second pass: build display data, filtering by dataType for event pools
   tempData
     .sort((a, b) => a.id.localeCompare(b.id))
     .forEach((item) => {
+      // Only process items that should be displayed for this view
+      if (!shouldDisplay(item)) return;
+      
       // 处理时间
       if (startDate.value === "" || item.time < startDate.value) startDate.value = item.time;
       if (endDate.value === "" || item.time > endDate.value) endDate.value = item.time;
