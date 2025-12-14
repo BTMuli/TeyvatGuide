@@ -6,7 +6,6 @@ version = 4
 name = "TeyvatGuide"
 version = "0.8.8"
 dependencies = [
- "anyhow",
  "chrono",
  "image",
  "log",

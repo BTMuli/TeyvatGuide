@@ -20,7 +20,6 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.5.3", features = [] }
 
 [dependencies]
-anyhow = "1.0"
 chrono = "0.4.42"
 image = "0.25"
 log = "0.4.29"
@@ -47,6 +46,8 @@ features = [
 ]
 
 # deep link 插件
+# 注意：原本使用 SSH URL，但在 CI 环境中 SSH 认证不可用
+# 本地开发建议使用 SSH URL 以获得更好的稳定性
 [dependencies.tauri-plugin-deep-link]
 git = "https://github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"

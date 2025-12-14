@@ -3,7 +3,7 @@
 //! @since Beta v0.8.8
 
 use tauri::image::Image;
-use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Manager, Runtime};
 
@@ -11,9 +11,10 @@ use tauri::{AppHandle, Manager, Runtime};
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
   // 创建托盘菜单
   let show_item = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
+  let separator = PredefinedMenuItem::separator(app)?;
   let quit_item = MenuItemBuilder::with_id("quit", "退出应用").build(app)?;
 
-  let menu = MenuBuilder::new(app).item(&show_item).item(&quit_item).build()?;
+  let menu = MenuBuilder::new(app).item(&show_item).item(&separator).item(&quit_item).build()?;
 
   // 加载托盘图标
   // 在不同操作系统上，托盘图标的显示效果可能有所不同：
@@ -23,8 +24,10 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
   let icon_bytes = include_bytes!("../icons/32x32.png");
 
   // 使用 image crate 解码 PNG 图标
-  let img = image::load_from_memory(icon_bytes)
-    .map_err(|e| tauri::Error::Anyhow(anyhow::anyhow!("Failed to load tray icon: {}", e)))?;
+  // Tauri 的 Image 结构只接受原始 RGBA 数据，因此需要使用 image crate 解码 PNG
+  let img = image::load_from_memory(icon_bytes).map_err(|e| {
+    tauri::Error::InvalidIcon(std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+  })?;
   let rgba = img.to_rgba8();
   let (width, height) = rgba.dimensions();
   let icon = Image::new_owned(rgba.into_raw(), width, height);
