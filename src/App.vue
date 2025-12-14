@@ -36,9 +36,9 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray } = storeToRefs(useAppStore());
+const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray } =
+  storeToRefs(useAppStore());
 const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
-const appStore = useAppStore();
 
 const isMain = ref<boolean>(false);
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
@@ -104,6 +104,7 @@ onUnmounted(() => {
 async function handleDpListen(event: Event<string>): Promise<void> {
   const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
   if (await windowGet.isMinimized()) await windowGet.unminimize();
+  if (!(await windowGet.isVisible())) await windowGet.show();
   await windowGet.setFocus();
   const payload = await parseDeepLink(event.payload);
   if (payload === false) {
