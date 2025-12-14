@@ -46,60 +46,58 @@ features = [
 ]
 
 # deep link 插件
-# 注意：原本使用 SSH URL，但在 CI 环境中 SSH 认证不可用
-# 本地开发建议使用 SSH URL 以获得更好的稳定性
 [dependencies.tauri-plugin-deep-link]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # dialog 插件
 [dependencies.tauri-plugin-dialog]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # fs 插件
 [dependencies.tauri-plugin-fs]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # http 插件
 [dependencies.tauri-plugin-http]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 features = ["unsafe-headers"]
 
 # log 插件
 [dependencies.tauri-plugin-log]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # opener 插件
 [dependencies.tauri-plugin-opener]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # os 插件
 [dependencies.tauri-plugin-os]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # process 插件
 [dependencies.tauri-plugin-process]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # shell 插件
 [dependencies.tauri-plugin-shell]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # single-instance 插件
 [dependencies.tauri-plugin-single-instance]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
 # sqlite 插件
 [dependencies.tauri-plugin-sql]
-git = "https://github.com/tauri-apps/plugins-workspace.git"
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 features = ["sqlite"]
