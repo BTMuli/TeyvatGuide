@@ -102,7 +102,7 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import { nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -217,7 +217,6 @@ function handleUpdate(info: MaterialInfo): void {
   if (find !== undefined) {
     find = info;
     curMaterial.value = info;
-    triggerRef(materialList);
   }
 }
 
