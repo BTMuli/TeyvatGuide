@@ -91,8 +91,8 @@ async function loadUserPosition(forceReload: boolean = false): Promise<void> {
   console.log(resp);
   if (isInit.value) await showLoading.end();
   if ("retcode" in resp) {
-    showSnackbar.error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
-    await TGLogger.Error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
+    showSnackbar.error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
+    await TGLogger.Error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
     return;
   }
   userPos.value = [...resp.act_list, ...resp.fixed_act_list].filter(
@@ -109,8 +109,8 @@ async function loadWikiPosition(): Promise<void> {
     obsPos.value = resp;
     if (resp.length === 0) showSnackbar.warn("暂无近期活动");
   } else {
-    showSnackbar.error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
-    await TGLogger.Error(`获取近期活动失败：[${resp.retcode}-${resp.message}`);
+    showSnackbar.error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
+    await TGLogger.Error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
   }
 }
 

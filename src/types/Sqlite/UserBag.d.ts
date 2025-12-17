@@ -47,5 +47,10 @@ declare namespace TGApp.Sqlite.UserBag {
     count: number;
     /** 时间戳（秒） */
     time: number;
+    /**
+     * 是否是手动更新
+     * @remarks 该字段默认不存在，手动更新时添加该字段
+     */
+    manual?: boolean;
   };
 }

@@ -43,6 +43,7 @@ function getInsertSql(tb: TGApp.Sqlite.UserBag.TableMaterialRaw): string {
  * @param {number} itemId - 材料ID
  * @param {number} count - 材料数量
  * @param {Array<TGApp.Sqlite.UserBag.MaterialRecord>} [records] - 更新记录
+ * @param {boolean} manual - 是否手动
  * @returns {Promise<void>}
  */
 async function insertMaterial(
@@ -50,12 +51,14 @@ async function insertMaterial(
   itemId: number,
   count: number,
   records: Array<TGApp.Sqlite.UserBag.MaterialRecord> = [],
+  manual: boolean = false,
 ): Promise<void> {
   const now = Date.now();
   const newRecord: TGApp.Sqlite.UserBag.MaterialRecord = {
     count: count,
     time: Math.floor(now / 1000),
   };
+  if (manual) newRecord.manual = true;
   const newRecords = [...records, newRecord];
   const newTable: TGApp.Sqlite.UserBag.TableMaterialRaw = {
     uid: uid,
@@ -100,7 +103,9 @@ function parseMaterial(
 ): TGApp.Sqlite.UserBag.TableMaterial {
   return {
     ...raw,
-    records: JSON.parse(raw.records),
+    records: (<Array<TGApp.Sqlite.UserBag.MaterialRecord>>JSON.parse(raw.records)).sort(
+      (a, b) => b.time - a.time,
+    ),
   };
 }
 

@@ -61,11 +61,21 @@
   </v-app-bar>
   <div class="pbm-container">
     <template v-for="material in materialShow" :key="`${curUid}-${material.info.id}`">
-      <PbMaterialItem :info="material.info" :tb="material.tb" @select="handleSelect" />
+      <PbMaterialItem
+        :info="material.info"
+        :tb="material.tb"
+        @select="handleSelect"
+        :cur="curMaterial"
+      />
     </template>
   </div>
-  <!-- TODO: 更改记录 -->
-  <PboMaterial v-if="curMaterial" v-model="showOverlay" :data="curMaterial" :uid="`${curUid}`">
+  <PboMaterial
+    v-if="curMaterial"
+    v-model="showOverlay"
+    :data="curMaterial"
+    :uid="`${curUid}`"
+    @updateDB="handleUpdate"
+  >
     <template #left>
       <div class="card-arrow" @click="switchMaterial(false)">
         <img alt="right" src="@/assets/icons/arrow-right.svg" />
@@ -92,7 +102,7 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -200,6 +210,15 @@ function getItemInfo(id: number): TGApp.App.Material.WikiItem | false {
 
 function searchMaterial(): void {
   //TODO:搜索材料
+}
+
+function handleUpdate(info: MaterialInfo): void {
+  let find = materialList.value.find((i) => i.info.id === info.info.id);
+  if (find !== undefined) {
+    find = info;
+    curMaterial.value = info;
+    triggerRef(materialList);
+  }
 }
 
 /**

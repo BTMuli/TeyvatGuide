@@ -11,12 +11,19 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { shallowRef } from "vue";
+import { shallowRef, watch } from "vue";
 
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
 /** 组件参数 */
-type PbMaterialItemProps = MaterialInfo;
+type PbMaterialItemProps = {
+  /** 数据库数据 */
+  tb: TGApp.Sqlite.UserBag.TableMaterial;
+  /** WIKI 数据 */
+  info: TGApp.App.Material.WikiItem;
+  /** 当前选中材料 */
+  cur?: MaterialInfo;
+};
 /** 组件事件 */
 type PbMaterialItemEmits = (e: "select", v: MaterialInfo) => void;
 
@@ -25,10 +32,18 @@ const emits = defineEmits<PbMaterialItemEmits>();
 
 const item = shallowRef<TGApp.Sqlite.UserBag.TableMaterial>(props.tb);
 
-// TODO: 点击修改数量/查看更改历史
 function toMaterial(): void {
   emits("select", { tb: item.value, info: props.info });
 }
+
+watch(
+  () => props.cur,
+  () => {
+    if (props.cur && props.cur.info.id === props.info.id) {
+      item.value = props.cur.tb;
+    }
+  },
+);
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
