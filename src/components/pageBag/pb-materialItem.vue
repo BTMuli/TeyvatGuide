@@ -2,16 +2,17 @@
 <template>
   <div :title="props.info.name" class="pb-mi-box" @click="toMaterial()">
     <div class="pb-mi-left">
-      <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="pb-mi-bg" />
-      <img :src="`/icon/material/${props.info.id}.webp`" alt="icon" class="pb-mi-icon" />
+      <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
+      <img :src="`/icon/material/${props.info.id}.webp`" alt="icon" class="icon" />
     </div>
     <div class="pb-mi-right">{{ props.info.name }}</div>
-    <div class="pb-mi-id">{{ props.info.id }}</div>
+    <div class="pb-mi-id">{{ props.info.type }}·{{ props.info.id }}</div>
     <div class="pb-mi-cnt">{{ item.count }}</div>
   </div>
 </template>
 <script lang="ts" setup>
-import { shallowRef, watch } from "vue";
+import { getOdStarColor } from "@utils/colorFunc.js";
+import { computed, shallowRef, watch } from "vue";
 
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
@@ -44,6 +45,8 @@ watch(
     }
   },
 );
+
+const idColor = computed<string>(() => getOdStarColor(props.info.star));
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
@@ -51,39 +54,37 @@ watch(
 .pb-mi-box {
   position: relative;
   display: flex;
-  height: 45px;
+  overflow: hidden;
+  height: 48px;
   align-items: center;
   justify-content: flex-start;
-  padding-right: 5px;
+  padding-right: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 4px;
   background: var(--box-bg-1);
-  column-gap: 5px;
+  column-gap: 4px;
   cursor: pointer;
 }
 
 .pb-mi-left {
   position: relative;
-  width: 45px;
-  height: 45px;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
-}
+  height: 100%;
+  flex-shrink: 0;
+  aspect-ratio: 1;
 
-.pb-mi-bg,
-.pb-mi-icon {
-  position: absolute;
-  top: 0;
-  width: 45px;
-  height: 45px;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
+  .bg,
+  .icon {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .pb-mi-right {
   position: relative;
   overflow: hidden;
-  max-width: calc(100% - 50px);
+  max-width: 100%;
   color: var(--box-text-2);
   font-size: 14px;
   text-overflow: ellipsis;
@@ -93,26 +94,30 @@ watch(
 
 .pb-mi-id {
   position: absolute;
-  right: 4px;
-  bottom: 2px;
+  z-index: 1;
+  right: 2px;
+  bottom: 0;
+  color: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   font-size: 8px;
-  opacity: 0.6;
+  font-style: italic;
+  opacity: 0.8;
 }
 
 .pb-mi-cnt {
-  @include github-styles.github-tag-dark-gen(#82aaff);
+  @include github-styles.github-tag-dark-gen(#009688);
 
   position: absolute;
   top: 0;
   right: 0;
+  box-sizing: border-box;
   padding-right: 4px;
   padding-left: 12px;
   border-top: unset;
-  border-left: unset;
-  border-bottom-left-radius: 20px;
-  border-top-right-radius: 4px;
+  border-right: unset;
+  border-bottom-left-radius: 12px;
   font-family: var(--font-title);
   font-size: 10px;
+  line-height: 12px;
   text-align: center;
 }
 </style>

@@ -1,11 +1,11 @@
 <template>
-  <span class="tag-label" :title="`点击跳转#${props.tag}#`">
+  <span :title="`点击跳转#${props.tag}#`" class="tag-label">
     {{ props.tag }}
   </span>
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
-import { str2Color } from "@utils/toolFunc.js";
+import { str2Color } from "@utils/colorFunc.js";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
 

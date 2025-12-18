@@ -2,14 +2,14 @@
   <div
     v-if="card"
     :id="`post-card-${card.postId}`"
-    class="tpc-card"
     :class="{ 'select-mode': props.selectMode }"
+    class="tpc-card"
     @click="trySelect()"
   >
     <div class="tpc-top">
       <div class="tpc-cover" @click="toPost()">
-        <TMiImg :src="card.cover" alt="cover" :ori="true" v-if="card.cover !== ''" />
-        <img src="/source/UI/defaultCover.webp" alt="cover" v-else />
+        <TMiImg v-if="card.cover !== ''" :ori="true" :src="card.cover" alt="cover" />
+        <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
         <div v-if="card.status" class="tpc-act">
           <div class="tpc-status">{{ card.status?.label }}</div>
           <div class="tpc-time">
@@ -19,20 +19,20 @@
         </div>
         <div
           v-else-if="props.modelValue.post.images.length > 1"
-          class="tpc-image-cnt"
           :title="`图片数：${props.modelValue.post.images.length}`"
+          class="tpc-image-cnt"
         >
           <v-icon size="10">mdi-folder-multiple-image</v-icon>
           <span>{{ props.modelValue.post.images.length }}</span>
         </div>
       </div>
-      <div class="tpc-title" :title="card.title" @click="shareCard()">{{ card.title }}</div>
+      <div :title="card.title" class="tpc-title" @click="shareCard()">{{ card.title }}</div>
     </div>
-    <div class="tpc-mid" v-if="card.user !== null">
+    <div v-if="card.user !== null" class="tpc-mid">
       <TpAvatar
         :data="card.user"
-        position="left"
         :style="{ cursor: props.userClick ? 'pointer' : 'default' }"
+        position="left"
         @click="onUserClick()"
       />
     </div>
@@ -45,41 +45,41 @@
         <TpcTag
           v-for="topic in card.topics"
           :key="topic.id"
-          @click="toTopic(topic)"
           :tag="topic.name"
+          @click="toTopic(topic)"
         />
       </div>
-      <div class="tpc-data" v-if="card.data !== null">
-        <div class="tpc-info-item" :title="`浏览数：${card.data.view}`">
+      <div v-if="card.data !== null" class="tpc-data">
+        <div :title="`浏览数：${card.data.view}`" class="tpc-info-item">
           <v-icon size="12">mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
         </div>
-        <div class="tpc-info-item" :title="`收藏数：${card.data.mark}`">
+        <div :title="`收藏数：${card.data.mark}`" class="tpc-info-item">
           <v-icon size="12">mdi-star</v-icon>
           <span>{{ card.data.mark }}</span>
         </div>
-        <div class="tpc-info-item" :title="`回复数：${card.data.reply}`">
+        <div :title="`回复数：${card.data.reply}`" class="tpc-info-item">
           <v-icon size="12">mdi-comment</v-icon>
           <span>{{ card.data.reply }}</span>
         </div>
-        <div class="tpc-info-item" :title="`点赞数：${card.data.like}`">
+        <div :title="`点赞数：${card.data.like}`" class="tpc-info-item">
           <v-icon size="12">mdi-thumb-up</v-icon>
           <span>{{ card.data.like }}</span>
         </div>
-        <div class="tpc-info-item" :title="`转发数：${card.data.forward}`">
+        <div :title="`转发数：${card.data.forward}`" class="tpc-info-item">
           <v-icon size="12">mdi-share-variant</v-icon>
           <span>{{ card.data.forward }}</span>
         </div>
       </div>
       <div class="tpc-data">
-        <div class="tpc-info-item" :title="`创建时间: ${card.meta.create_time}`">
+        <div :title="`创建时间: ${card.meta.create_time}`" class="tpc-info-item">
           <v-icon size="12">mdi-calendar-clock</v-icon>
           <span>{{ card.meta.create_time }}</span>
         </div>
         <div
           v-if="card.meta.update_time"
-          class="tpc-info-item"
           :title="`更新时间: ${card.meta.update_time}`"
+          class="tpc-info-item"
         >
           <v-icon size="12">mdi-calendar-edit</v-icon>
           <span>{{ card.meta.update_time }}</span>
@@ -87,30 +87,30 @@
       </div>
     </div>
     <div
-      class="tpc-forum"
+      v-if="card.forum !== null && card.forum.name !== ''"
       :style="{
         background: str2Color(`${card.forum.id}${card.forum.name}`, -60),
       }"
-      v-if="card.forum !== null && card.forum.name !== ''"
       :title="`频道: ${card.forum.name}`"
+      class="tpc-forum"
       @click="toForum(card.forum)"
     >
-      <img v-if="card.forum.icon !== ''" :src="card.forum.icon" :alt="card.forum.name" />
+      <img v-if="card.forum.icon !== ''" :alt="card.forum.name" :src="card.forum.icon" />
       <span>{{ card.forum.name }}</span>
     </div>
     <v-checkbox-btn
-      v-model="isSelected"
       v-if="props.selectMode"
+      v-model="isSelected"
       class="tpc-select"
-      @click.stop="trySelect()"
       data-html2canvas-ignore
+      @click.stop="trySelect()"
     />
     <div
-      class="tpc-info-id"
+      v-else
       :style="{
         background: str2Color(`${props.modelValue.post.post_id}`, 0),
       }"
-      v-else
+      class="tpc-info-id"
     >
       <span>{{ props.modelValue.post.post_id }}</span>
       <template v-if="isDevEnv">
@@ -125,9 +125,10 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import { emit } from "@tauri-apps/api/event";
+import { str2Color } from "@utils/colorFunc.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
-import { str2Color, timestampToDate } from "@utils/toolFunc.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 

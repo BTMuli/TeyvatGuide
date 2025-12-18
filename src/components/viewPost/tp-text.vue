@@ -1,22 +1,22 @@
 <template>
   <span
     v-if="mode == 'link'"
+    :style="getTextStyle()"
+    :title="props.data.attributes?.link"
     class="tp-text-link"
     @click="toLink()"
     @contextmenu="copyLink()"
-    :title="props.data.attributes?.link"
-    :style="getTextStyle()"
   >
     {{ decodeRegExp(props.data.insert) }}
   </span>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
-    <img :src="getEmojiUrl()" :alt="getEmojiName()" :title="getEmojiName()" />
+    <img :alt="getEmojiName()" :src="getEmojiUrl()" :title="getEmojiName()" />
   </span>
   <TpText
-    v-else-if="mode == 'emojis'"
     v-for="(emoji, indexE) in emojis"
-    :data="emoji"
+    v-else-if="mode == 'emojis'"
     :key="indexE"
+    :data="emoji"
   />
   <span v-else :style="getTextStyle()">{{ decodeRegExp(props.data.insert) }}</span>
 </template>
@@ -24,8 +24,9 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { isColorSimilar } from "@utils/colorFunc.js";
 import { parseLink, parsePost } from "@utils/linkParser.js";
-import { isColorSimilar, decodeRegExp } from "@utils/toolFunc.js";
+import { decodeRegExp } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
 
 export type TpText = {

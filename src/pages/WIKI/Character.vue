@@ -12,6 +12,7 @@
           :key="index"
           v-model:cur-item="curItem"
           :data="item"
+          :width="160"
           mode="character"
           @click="switchC(item)"
         />
@@ -128,30 +129,31 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
 .wc-box {
   position: relative;
   display: flex;
-  height: calc(100vh - 40px);
-  column-gap: 10px;
+  max-height: calc(100vh - 32px);
+  column-gap: 8px;
 }
 
 .wc-left {
   display: flex;
-  width: 500px;
+  width: fit-content;
   flex-direction: column;
-  gap: 10px;
+  flex-shrink: 0;
+  gap: 8px;
 }
 
 .wc-select {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .wc-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
@@ -159,21 +161,20 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
 .wc-list {
   position: relative;
   display: grid;
-  width: 500px;
-  height: calc(100% - 40px);
-  padding-right: 10px;
-  gap: 10px;
-  grid-auto-rows: 45px;
-  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  width: 100%;
+  padding-right: 8px;
+  gap: 8px;
+  grid-template-columns: repeat(3, 160px);
   overflow-y: auto;
 }
 
 .wc-detail {
-  max-height: 100%;
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px var(--common-shadow-2);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 4px;
+  box-shadow: 0 0 4px var(--common-shadow-2);
   overflow-y: auto;
 }
 </style>

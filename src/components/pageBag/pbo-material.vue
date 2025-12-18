@@ -41,6 +41,7 @@
               <span class="cnt">{{ record.count }}</span>
               <span class="type">{{ record.manual ? "手动更新" : "自动导入" }}</span>
             </div>
+            <div v-if="dbInfo.records.length === 0">暂无记录</div>
           </div>
         </div>
       </div>

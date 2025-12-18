@@ -1,4 +1,4 @@
-<!-- 游戏签到 TODO: 补签 -->
+<!-- 游戏签到 -->
 <template>
   <div class="tuss-box">
     <div class="tuss-top">

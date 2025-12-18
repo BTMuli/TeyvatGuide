@@ -1,14 +1,12 @@
 /**
  * 一些工具函数
+ * @since Beta v0.9.0
  */
 
 import { AvatarExtResTypeEnum, AvatarExtTypeEnum } from "@enum/bbs.js";
 import { path } from "@tauri-apps/api";
 import { type } from "@tauri-apps/plugin-os";
-import colorConvert from "color-convert";
-import type { KEYWORD } from "color-convert/conversions.js";
 import { v4 } from "uuid";
-import { score } from "wcag-color";
 
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
 
@@ -180,43 +178,6 @@ export function getRandomString(length: number, type: string = "all"): string {
 }
 
 /**
- * @description 将颜色转为 hex
- * @since Beta v0.3.9
- * @param {string} color - 颜色
- * @returns {string} hex
- */
-function color2Hex(color: string): string {
-  if (color.startsWith("#")) return color;
-  if (color.startsWith("rgb")) {
-    // 正则获取 rgb(0, 0, 0) 或 rgba(0, 0, 0, 0) 或 rgb(0 0 0/0)
-    const reg = /rgba?\((.*?)\)/;
-    const match = reg.exec(color);
-    if (match === null) return "#000000";
-    const rgb = match[1];
-    const rgbArr = rgb.split(/[ ,/]/);
-    if (rgbArr.length < 3) return "#000000";
-    const r = parseInt(rgbArr[0]);
-    const g = parseInt(rgbArr[1]);
-    const b = parseInt(rgbArr[2]);
-    return colorConvert.rgb.hex([r, g, b]);
-  }
-  return colorConvert.keyword.hex(<KEYWORD>color);
-}
-
-/**
- * @description 判断颜色是否相似
- * @since Beta v0.3.9
- * @param {string} colorBg - 背景颜色
- * @param {string} colorText - 文本颜色
- * @returns {boolean} 是否相似
- */
-export function isColorSimilar(colorBg: string, colorText: string): boolean {
-  const hexBg = color2Hex(colorBg);
-  const hexText = color2Hex(colorText);
-  return score(hexText, hexBg) === "Fail";
-}
-
-/**
  * @description 解析带样式的文本
  * @since Beta v0.8.1
  * @param {string} desc - 带样式的文本
@@ -356,25 +317,4 @@ export function getUserAvatar(
   }
   // TODO: 处理其他类型头像
   return user.avatar_url;
-}
-
-/**
- * @description 根据字符串生成颜色
- * @since Beta v0.8.2
- * @param {string} str - 输入字符串
- * @param {number} adjust - 亮度调整值，正数变亮，负数变暗
- * @returns {string} 生成的颜色 rgb(r, g, b)
- */
-export function str2Color(str: string, adjust: number): string {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  let r = (hash >> 16) & 0xff;
-  let g = (hash >> 8) & 0xff;
-  let b = hash & 0xff;
-  r = Math.min(Math.max(r + adjust, 0), 255);
-  g = Math.min(Math.max(g + adjust, 0), 255);
-  b = Math.min(Math.max(b + adjust, 0), 255);
-  return `rgb(${r}, ${g}, ${b})`;
 }

@@ -278,12 +278,12 @@ async function refresh(): Promise<void> {
       return;
     }
   }
-  await TGLogger.Info(`[Character][refreshRoles][${account.value.gameUid}] 正在更新角色数据`);
   if (!cookie.value) {
     showSnackbar.warn("请先登录");
     loadData.value = false;
     return;
   }
+  await TGLogger.Info(`[Character][refreshRoles][${account.value.gameUid}] 正在更新角色数据`);
   await showLoading.start(`正在更新${account.value.gameUid}的角色数据`);
   loadData.value = true;
   await showLoading.update("正在刷新首页数据");
@@ -308,7 +308,7 @@ async function refresh(): Promise<void> {
     return;
   }
   const idList = listRes.map((i) => i.id.toString());
-  await showLoading.update(`共${idList.length}个角色`);
+  await showLoading.update(`共${idList.length}个角色，正在获取角色详情`);
   const res = await recordReq.character.detail(cookie.value, account.value, idList);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);

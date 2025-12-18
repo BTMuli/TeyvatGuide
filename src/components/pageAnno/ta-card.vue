@@ -14,14 +14,14 @@
       {{ parseTitle(model.subtitle) }}
     </div>
     <div
+      :style="{ background: str2Color(`${model.tagIcon}${model.tagLabel}`, 40) }"
       :title="`标签：${model.tagLabel}`"
       class="anno-label"
-      :style="{ background: str2Color(`${model.tagIcon}${model.tagLabel}`, 40) }"
     >
-      <TMiImg :src="model.tagIcon" alt="tag" :ori="true" />
+      <TMiImg :ori="true" :src="model.tagIcon" alt="tag" />
       <span>{{ model.tagLabel }}</span>
     </div>
-    <div class="anno-id" :style="{ background: str2Color(`${model.id}`, 0) }">
+    <div :style="{ background: str2Color(`${model.id}`, 0) }" class="anno-id">
       ID:{{ model.id }}
     </div>
   </div>
@@ -31,10 +31,11 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { AnnoTypeEnum } from "@enum/anno.js";
 import useAppStore from "@store/app.js";
+import { str2Color } from "@utils/colorFunc.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createTGWindow } from "@utils/TGWindow.js";
-import { decodeRegExp, str2Color } from "@utils/toolFunc.js";
+import { decodeRegExp } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
