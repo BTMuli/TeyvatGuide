@@ -24,6 +24,7 @@
         icon="mdi-delete"
         size="x-small"
         @click="tryDelete()"
+        data-html2canvas-ignore
       />
     </div>
     <!-- 额外签到奖励部分 -->
