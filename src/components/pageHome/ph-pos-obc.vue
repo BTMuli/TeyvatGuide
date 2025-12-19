@@ -1,19 +1,20 @@
+<!-- 观测枢活动组件组件  -->
 <template>
-  <div class="ph-pos-obc-card">
-    <div class="top">
-      <div class="main">
-        <div class="left" @click="openPosition()">
+  <div class="ph-po-card">
+    <div class="ph-po-top">
+      <div class="ph-po-main">
+        <div class="ph-po-left" @click="openPosition()">
           <TMiImg :ori="true" :src="props.pos.icon" alt="icon" />
         </div>
-        <div class="right">
-          <div class="title">{{ props.pos.title }}</div>
-          <div class="sub">{{ props.pos.abstract }}</div>
+        <div class="ph-po-right">
+          <div class="ph-po-title">{{ props.pos.title }}</div>
+          <div class="ph-po-sub">{{ props.pos.abstract }}</div>
         </div>
       </div>
-      <v-btn class="btn" @click="openPosition()">查看</v-btn>
+      <v-btn class="ph-po-btn" variant="elevated" @click="openPosition()">查看</v-btn>
     </div>
-    <div class="bottom">
-      <div class="period">
+    <div class="ph-po-bottom">
+      <div class="ph-po-period">
         <v-icon>mdi-calendar-clock</v-icon>
         <span class="time">
           {{ props.pos.create_time }}
@@ -21,7 +22,7 @@
           {{ endTs === 0 ? "未知" : timestampToDate(endTs) }}
         </span>
       </div>
-      <div class="rest">
+      <div class="ph-po-rest">
         <v-icon>mdi-clock-outline</v-icon>
         <span v-if="!hasEndTime">未知</span>
         <span v-else-if="restTs === 0">已结束</span>
@@ -36,7 +37,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { parseLink } from "@utils/linkParser.js";
-import { toObcPage, createPost } from "@utils/TGWindow.js";
+import { createPost, toObcPage } from "@utils/TGWindow.js";
 import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
@@ -93,7 +94,7 @@ onUnmounted(() => {
 });
 </script>
 <style lang="scss" scoped>
-.ph-pos-obc-card {
+.ph-po-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -105,7 +106,7 @@ onUnmounted(() => {
   color: var(--box-text-1);
 }
 
-.top {
+.ph-po-top {
   position: relative;
   display: flex;
   width: 100%;
@@ -114,66 +115,64 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 8px;
   border-bottom: 1px solid var(--common-shadow-2);
+}
 
-  .main {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    column-gap: 8px;
+.ph-po-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 8px;
+}
 
-    .left {
-      position: relative;
-      overflow: hidden;
-      width: 40px;
-      height: 40px;
-      border-radius: 3px;
-      background: var(--box-bg-2);
-      object-fit: contain;
+.ph-po-left {
+  position: relative;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
+  background: var(--box-bg-2);
+  object-fit: contain;
 
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: all 0.5s;
-      }
-
-      &:hover img {
-        cursor: pointer;
-        scale: 1.2;
-      }
-    }
-
-    .right {
-      position: relative;
-      display: flex;
-      height: 100%;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: space-between;
-
-      .title {
-        font-family: var(--font-title);
-        font-size: 16px;
-      }
-
-      .sub {
-        font-size: 14px;
-        opacity: 0.8;
-      }
-    }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.5s;
   }
 
-  .btn {
-    border: 1px solid var(--common-shadow-4);
-    border-radius: 5px;
-    background: var(--tgc-btn-1);
-    color: var(--btn-text);
-    font-family: var(--font-title);
+  &:hover img {
+    cursor: pointer;
+    scale: 1.2;
   }
 }
 
-.bottom {
+.ph-po-right {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.ph-po-title {
+  font-family: var(--font-title);
+  font-size: 16px;
+}
+
+.ph-po-sub {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.ph-po-btn {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+  font-family: var(--font-title);
+}
+
+.ph-po-bottom {
   position: relative;
   display: flex;
   width: 100%;
@@ -183,31 +182,31 @@ onUnmounted(() => {
   padding: 8px;
   font-size: 14px;
   gap: 6px;
+}
 
-  .period {
-    position: relative;
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: flex-start;
-    column-gap: 4px;
+.ph-po-period {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 4px;
 
-    :first-child {
-      color: var(--tgc-od-orange);
-    }
+  :first-child {
+    color: var(--tgc-od-orange);
   }
+}
 
-  .rest {
-    position: relative;
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: flex-end;
-    column-gap: 4px;
+.ph-po-rest {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  column-gap: 4px;
 
-    :first-child {
-      color: var(--tgc-od-green);
-    }
+  :first-child {
+    color: var(--tgc-od-green);
   }
 }
 </style>
