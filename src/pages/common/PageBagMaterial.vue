@@ -201,7 +201,9 @@ async function loadMaterialList(uid: number): Promise<void> {
       tList.push({ type: info.type, number: material.count });
     }
   }
-  materialList.value = mList;
+  materialList.value = mList.sort(
+    (a, b) => a.info.type.localeCompare(b.info.type) || b.info.id - a.info.id,
+  );
   materialShow.value = mList;
   materialTypes.value = tList;
   curIdx.value = 0;

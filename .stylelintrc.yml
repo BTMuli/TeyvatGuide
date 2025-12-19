@@ -25,6 +25,8 @@ rules:
     - true
     - severity: warning
   order/order:
+    - name: use
+      type: at-rule
     - name: include
       type: at-rule
     - custom-properties

@@ -1,6 +1,11 @@
 <!-- 背包材料物品项 -->
 <template>
-  <div :title="props.info.name" class="pwm-box" @click="toMaterial()">
+  <div
+    :class="{ empty: item.count === 0 }"
+    :title="props.info.name"
+    class="pwm-box"
+    @click="toMaterial()"
+  >
     <div class="pwm-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/icon/material/${props.info.id}.webp`" alt="icon" class="icon" />
@@ -46,10 +51,15 @@ watch(
   },
 );
 
-const idColor = computed<string>(() => getOdStarColor(props.info.star));
+const idColor = computed<string>(() => {
+  if (item.value.count > 0) return getOdStarColor(props.info.star);
+  return "var(--tgc-od-red)";
+});
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
+
+$pwm-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
 
 .pwm-box {
   position: relative;
@@ -59,11 +69,15 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
   align-items: center;
   justify-content: flex-start;
   padding-right: 8px;
-  border: 1px solid var(--common-shadow-1);
+  border: 1px solid $pwm-base;
   border-radius: 4px;
   background: var(--box-bg-1);
   column-gap: 4px;
   cursor: pointer;
+
+  &.empty {
+    opacity: 0.4;
+  }
 }
 
 .pwm-left {
@@ -97,14 +111,14 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
   z-index: 1;
   right: 2px;
   bottom: 0;
-  color: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
+  color: $pwm-base;
   font-size: 8px;
   font-style: italic;
   opacity: 0.8;
 }
 
 .pb-mi-cnt {
-  @include github-styles.github-tag-dark-gen(#009688);
+  @include github-styles.github-tag-dark-gen($pwm-base);
 
   position: absolute;
   top: 0;
