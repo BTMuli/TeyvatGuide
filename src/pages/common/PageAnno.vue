@@ -1,42 +1,57 @@
+<!-- 公告页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
-      <v-tabs v-model="tab" align-tabs="start" class="anno-tab">
-        <v-tab v-for="(tab, index) in tabList" :key="index" :value="tab.value">
-          {{ tab.text }}
-        </v-tab>
-      </v-tabs>
-      <div class="anno-selects">
-        <v-select
-          class="anno-select"
-          :items="serverList"
-          v-model="server"
-          item-title="text"
-          item-value="value"
-          label="服务器"
-          width="200px"
-          density="compact"
-          :disabled="isReq"
-        />
-        <v-select
-          class="anno-select"
-          :items="langList"
-          v-model="lang"
-          item-title="text"
-          item-value="value"
-          label="语言"
-          width="200px"
-          density="compact"
-          :disabled="isReq"
-        />
+      <div class="pa-prepend">
+        <v-tabs v-model="tab" align-tabs="start" class="pa-tabs">
+          <v-tab v-for="(tab, index) in tabList" :key="index" :value="tab.value">
+            {{ tab.text }}
+          </v-tab>
+        </v-tabs>
+        <div class="pa-selects">
+          <v-select
+            v-model="server"
+            :disabled="isReq"
+            :items="serverList"
+            class="anno-select"
+            density="compact"
+            item-title="text"
+            item-value="value"
+            label="服务器"
+            width="200px"
+          />
+          <v-select
+            v-model="lang"
+            :disabled="isReq"
+            :items="langList"
+            class="anno-select"
+            density="compact"
+            item-title="text"
+            item-value="value"
+            label="语言"
+            width="200px"
+          />
+        </div>
       </div>
     </template>
     <template #append>
       <div class="anno-top-append">
-        <v-btn class="anno-switch-btn" @click="switchNews" prepend-icon="mdi-bullhorn">
+        <v-btn
+          class="anno-btn"
+          prepend-icon="mdi-bullhorn"
+          rounded
+          variant="elevated"
+          @click="switchNews"
+        >
           切换米游社咨讯
         </v-btn>
-        <v-btn class="anno-switch-btn" v-if="isLogin" @click="showIframe()">
+        <v-btn
+          v-if="isLogin"
+          class="anno-btn"
+          size="small"
+          variant="elevated"
+          @click="showIframe()"
+        >
           <v-icon>mdi-web</v-icon>
         </v-btn>
       </div>
@@ -57,7 +72,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TaCard from "@comp/pageAnno/ta-card.vue";
 import TaoIframe from "@comp/pageAnno/tao-iframe.vue";
 import { AnnoLangEnum, AnnoTypeEnum, getAnnoLangDesc, getAnnoTypeDesc } from "@enum/anno.js";
-import { getGameServerDesc, GameServerEnum } from "@enum/game.js";
+import { GameServerEnum, getGameServerDesc } from "@enum/game.js";
 import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -216,24 +231,34 @@ async function switchNews(): Promise<void> {
   await router.push("/news/2");
 }
 </script>
+<style lang="scss" scoped>
+.pa-prepend {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  column-gap: 8px;
+}
 
-<style lang="css" scoped>
-.anno-tab {
+.pa-tabs {
+  margin-bottom: 8px;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
-.anno-selects {
+.pa-selects {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 25px;
-  margin: 0 10px;
-  gap: 10px;
+  margin: 0 8px;
+  column-gap: 8px;
 }
 
 .anno-select {
   width: 150px;
+  height: 40px;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }
@@ -242,19 +267,15 @@ async function switchNews(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
+  margin-right: 12px;
   column-gap: 8px;
 }
 
-.anno-switch-btn {
+.anno-btn {
   height: 40px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-}
-
-.dark .anno-switch-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .anno-grid {

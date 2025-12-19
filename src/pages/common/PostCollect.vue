@@ -2,88 +2,102 @@
   <v-app-bar>
     <div class="pc-top">
       <div class="pc-title">
-        <img src="/source/UI/posts.webp" alt="posts" />
+        <img alt="posts" src="/source/UI/posts.webp" />
         <span>收藏</span>
       </div>
       <v-select
-        :hide-details="true"
-        density="compact"
         v-model="curSelect"
-        class="pc-select"
-        :items="collections"
         :clearable="curSelect !== '未分类'"
-        variant="outlined"
+        :hide-details="true"
+        :items="collections"
+        class="pc-select"
+        density="compact"
         label="合集"
+        variant="outlined"
       >
         <template v-slot:item="{ props, item }">
-          <v-list-item v-bind="props" :title="item.raw.title" :subtitle="item.raw.desc" />
+          <v-list-item :subtitle="item.raw.desc" :title="item.raw.title" v-bind="props" />
         </template>
       </v-select>
     </div>
-    <template #append>
-      <v-pagination class="pc-page" v-model="page" :total-visible="view" :length="length" />
-    </template>
     <template #extension>
-      <div class="pc-btns">
-        <v-btn
+      <div class="pc-extension">
+        <div class="pc-btns">
+          <v-btn
+            :title="sortId ? '按更新时间排序' : '按帖子ID排序'"
+            class="pc-btn"
+            icon="mdi-sort"
+            size="small"
+            variant="elevated"
+            @click="sortPost(!sortId)"
+          />
+          <v-btn
+            :disabled="selectedMode"
+            class="pc-btn"
+            icon="mdi-refresh"
+            size="small"
+            title="获取用户收藏"
+            variant="elevated"
+            @click="freshUser()"
+          />
+          <v-btn
+            :disabled="selectedMode"
+            class="pc-btn"
+            icon="mdi-import"
+            size="small"
+            title="导入其他用户收藏"
+            variant="elevated"
+            @click="freshOther"
+          />
+          <v-btn
+            :icon="selectedMode ? 'mdi-folder-move' : 'mdi-pencil'"
+            class="pc-btn"
+            size="small"
+            title="编辑收藏"
+            variant="elevated"
+            @click="toSelect()"
+          />
+          <v-btn
+            :disabled="selectedMode"
+            class="pc-btn"
+            icon="mdi-plus"
+            size="small"
+            title="新建分类"
+            variant="elevated"
+            @click="addCollect"
+          />
+          <v-btn
+            :disabled="selectedMode || curSelect === '未分类'"
+            class="pc-btn"
+            icon="mdi-information"
+            size="small"
+            title="编辑分类"
+            variant="elevated"
+            @click="toEdit()"
+          />
+          <v-btn
+            :title="selectedMode ? '删除帖子分类' : '清空合集'"
+            class="pc-btn"
+            icon="mdi-delete"
+            size="small"
+            variant="elevated"
+            @click="deleteOper(false)"
+          />
+          <v-btn
+            :title="selectedMode ? '删除帖子' : '删除合集'"
+            class="pc-btn"
+            icon="mdi-delete-forever"
+            size="small"
+            variant="elevated"
+            @click="deleteOper(true)"
+          />
+        </div>
+        <v-pagination
+          v-model="page"
+          :length="length"
+          :total-visible="view"
           size="small"
-          class="pc-btn"
-          icon="mdi-sort"
-          @click="sortPost(!sortId)"
-          :title="sortId ? '按更新时间排序' : '按帖子ID排序'"
-        />
-        <v-btn
-          :disabled="selectedMode"
-          size="small"
-          class="pc-btn"
-          icon="mdi-refresh"
-          title="获取用户收藏"
-          @click="freshUser()"
-        />
-        <v-btn
-          :disabled="selectedMode"
-          size="small"
-          class="pc-btn"
-          icon="mdi-import"
-          @click="freshOther"
-          title="导入其他用户收藏"
-        />
-        <v-btn
-          size="small"
-          class="pc-btn"
-          :icon="selectedMode ? 'mdi-folder-move' : 'mdi-pencil'"
-          @click="toSelect()"
-          title="编辑收藏"
-        />
-        <v-btn
-          :disabled="selectedMode"
-          size="small"
-          class="pc-btn"
-          icon="mdi-plus"
-          @click="addCollect"
-          title="新建分类"
-        />
-        <v-btn
-          :disabled="selectedMode || curSelect === '未分类'"
-          size="small"
-          class="pc-btn"
-          icon="mdi-information"
-          @click="toEdit()"
-          title="编辑分类"
-        />
-        <v-btn
-          size="small"
-          class="pc-btn"
-          icon="mdi-delete"
-          @click="deleteOper(false)"
-          :title="selectedMode ? '删除帖子分类' : '清空合集'"
-        />
-        <v-btn
-          size="small"
-          class="pc-btn"
-          icon="mdi-delete-forever"
-          @click="deleteOper(true)"
-          :title="selectedMode ? '删除帖子' : '删除合集'"
+          variant="elevated"
         />
       </div>
     </template>
@@ -91,15 +105,15 @@
   <div class="pc-posts">
     <div v-for="item in curPosts" :key="item.post.post_id">
       <TPostCard
-        @onSelected="handleSelected"
         :model-value="item"
         :select-mode="selectedMode"
         :user-click="true"
+        @onSelected="handleSelected"
         @onUserClick="handleUserClick"
       />
     </div>
   </div>
-  <ToCollectPost @submit="load" :post="selectedPost" v-model="showCollect" />
+  <ToCollectPost v-model="showCollect" :post="selectedPost" @submit="load" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
@@ -405,6 +419,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 </script>
 <style lang="css" scoped>
 .pc-top {
+  position: relative;
   display: flex;
   margin-left: 12px;
   gap: 8px;
@@ -432,11 +447,21 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   min-width: 150px;
 }
 
+.pc-extension {
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  margin-bottom: 4px;
+}
+
 .pc-btns {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 16px;
   gap: 8px;
 }
 
@@ -447,14 +472,10 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   font-family: var(--font-title);
 }
 
-.dark .pc-btn {
-  border: 1px solid var(--common-shadow-2);
-}
-
 .pc-posts {
   display: grid;
   grid-auto-rows: auto;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 </style>

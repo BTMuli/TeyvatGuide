@@ -1,13 +1,13 @@
 <template>
-  <v-app-bar density="compact">
+  <v-app-bar>
     <template #prepend>
-      <v-tabs v-model="tab" align-tabs="start" class="news-tab">
+      <v-tabs v-model="tab" align-tabs="center" class="news-tab">
         <v-tab
           v-for="(value, index) in tabValues"
           :key="index"
+          :disabled="loading"
           :value="value"
           @click="firstLoad(value)"
-          :disabled="loading"
         >
           {{ rawData[value].name }}
         </v-tab>
@@ -16,28 +16,36 @@
     <template #title>
       <v-text-field
         v-model="search"
-        class="news-search"
-        append-icon="mdi-magnify"
-        label="请输入帖子 ID 或搜索词"
-        :single-line="true"
         :hide-details="true"
+        :single-line="true"
+        append-icon="mdi-magnify"
+        class="news-search"
+        density="compact"
+        label="请输入帖子 ID 或搜索词"
         @keydown.enter="searchPost()"
         @click:append="searchPost()"
       />
     </template>
     <template #append>
       <v-btn
-        class="post-news-btn"
         :loading="loading"
-        @click="firstLoad(tab, true)"
-        icon="mdi-refresh"
-      />
-      <v-btn class="post-news-btn" @click="handleList()" icon="mdi-view-list" />
-      <v-btn
         class="post-news-btn"
-        @click="switchAnno"
+        size="small"
+        variant="elevated"
+        @click="firstLoad(tab, true)"
+      >
+        <v-icon>mdi-refresh</v-icon>
+      </v-btn>
+      <v-btn class="post-news-btn" size="small" variant="elevated" @click="handleList()">
+        <v-icon>mdi-view-list</v-icon>
+      </v-btn>
+      <v-btn
         v-if="gid === '2'"
+        class="post-news-btn"
         prepend-icon="mdi-bullhorn"
+        rounded
+        variant="elevated"
+        @click="switchAnno"
       >
         切换游戏内公告
       </v-btn>
@@ -53,7 +61,7 @@
     </v-window-item>
   </v-window>
   <ToChannel v-model="showList" :gid="gid" />
-  <VpOverlaySearch :gid="gid" v-model="showSearch" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="gid" :keyword="search" />
 </template>
 <script lang="ts" setup>
 import TPostCard from "@comp/app/t-postcard.vue";
@@ -198,20 +206,23 @@ async function searchPost(): Promise<void> {
 </script>
 <style lang="scss" scoped>
 .news-tab {
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   color: var(--common-text-title);
   font-family: var(--font-title);
+
+  &:first-child {
+    margin-left: 12px;
+  }
 }
 
 .post-news-btn {
   height: 40px;
-  border-radius: 3px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
 
   &:last-child {
-    margin-right: 16px;
+    margin-right: 12px;
   }
 }
 
@@ -219,20 +230,16 @@ async function searchPost(): Promise<void> {
   margin-left: 8px;
 }
 
-.dark .post-news-btn {
-  border: 1px solid var(--common-shadow-2);
-}
-
 .news-search {
-  margin: 0 10px;
+  margin: 0 16px;
   color: var(--box-text-1);
 }
 
 .news-grid {
   display: grid;
   font-family: var(--font-title);
+  gap: 8px;
   grid-auto-rows: auto;
-  grid-gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 </style>

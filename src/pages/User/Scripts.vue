@@ -46,15 +46,15 @@
             </div>
           </template>
         </v-select>
-        <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecAll()"
-          >一键执行</v-btn
-        >
+        <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecAll()">
+          一键执行
+        </v-btn>
       </div>
     </template>
     <template #append>
-      <span class="top-hint" title="点击验证" @click="tryCkVerify()">
-        需要验证码登录/游戏扫码登录所需cookie！！！
-      </span>
+      <v-btn class="us-test-btn" title="点击验证" variant="elevated" @click="tryCkVerify()">
+        打卡测试
+      </v-btn>
     </template>
   </v-app-bar>
   <div class="us-page-container">
@@ -180,8 +180,8 @@ async function tryExecAll(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
+  margin-left: 12px;
+  column-gap: 8px;
 
   img {
     width: 32px;
@@ -298,12 +298,13 @@ async function tryExecAll(): Promise<void> {
   row-gap: 8px;
 }
 
-.run-all-btn {
+.run-all-btn,
+.us-test-btn {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
 
-.dark .run-all-btn {
-  border: 1px solid var(--common-shadow-1);
+.us-test-btn {
+  margin-right: 12px;
 }
 </style>

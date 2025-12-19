@@ -6,19 +6,19 @@
         <img alt="icon" src="/source/UI/userAbyss.webp" />
         <span>深境螺旋</span>
         <v-select
-          density="compact"
-          variant="outlined"
           v-model="uidCur"
-          :items="uidList"
           :hide-details="true"
+          :items="uidList"
+          density="compact"
           label="游戏UID"
+          variant="outlined"
         />
-        <v-btn :rounded="true" class="ua-btn" @click="toCombat()">
-          <img src="/source/UI/userCombat.webp" alt="combat" />
+        <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="toCombat()">
+          <img alt="combat" src="/source/UI/userCombat.webp" />
           <span>真境剧诗</span>
         </v-btn>
-        <v-btn :rounded="true" class="ua-btn" @click="toChallenge()">
-          <img src="/source/UI/userChallenge.webp" alt="challenge" />
+        <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="toChallenge()">
+          <img alt="challenge" src="/source/UI/userChallenge.webp" />
           <span>幽境危战</span>
         </v-btn>
       </div>
@@ -26,21 +26,33 @@
     <template #append>
       <div class="uat-acts">
         <v-btn
-          class="ua-btn"
-          @click="shareAbyss()"
           :disabled="localAbyss.length === 0"
+          class="ua-btn"
           prepend-icon="mdi-share"
+          variant="elevated"
+          @click="shareAbyss()"
         >
           分享
         </v-btn>
-        <v-btn class="ua-btn" @click="refreshAbyss()" prepend-icon="mdi-refresh">刷新</v-btn>
-        <v-btn class="ua-btn" @click="tryReadAbyss()" prepend-icon="mdi-download">导入</v-btn>
-        <v-btn class="ua-btn" @click="deleteAbyss()" prepend-icon="mdi-delete">删除</v-btn>
+        <v-btn class="ua-btn" prepend-icon="mdi-refresh" variant="elevated" @click="refreshAbyss()">
+          刷新
+        </v-btn>
+        <v-btn
+          class="ua-btn"
+          prepend-icon="mdi-download"
+          variant="elevated"
+          @click="tryReadAbyss()"
+        >
+          导入
+        </v-btn>
+        <v-btn class="ua-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteAbyss()">
+          删除
+        </v-btn>
       </div>
     </template>
   </v-app-bar>
   <div class="ua-box">
-    <v-tabs v-model="userTab" direction="vertical" class="ua-tabs-box" center-active>
+    <v-tabs v-model="userTab" center-active class="ua-tabs-box" direction="vertical">
       <v-tab v-for="item in localAbyss" :key="item.id" :value="item.id">第{{ item.id }}期</v-tab>
     </v-tabs>
     <v-window v-model="userTab" class="ua-window">
@@ -64,20 +76,20 @@
           </div>
           <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
           <div class="uaw-o-box">
-            <TuaOverview title="战斗次数" :val-text="item.totalBattleTimes" />
-            <TuaOverview title="获得渊星" :val-text="item.totalStar" />
+            <TuaOverview :val-text="item.totalBattleTimes" title="战斗次数" />
+            <TuaOverview :val-text="item.totalStar" title="获得渊星" />
             <TuaOverview
-              title="最深抵达"
               :val-text="
                 item.skippedFloor !== '' ? `${item.maxFloor}(${item.skippedFloor})` : item.maxFloor
               "
+              title="最深抵达"
             />
-            <TuaOverview title="最多击破" :val-icons="item.defeatRank" />
-            <TuaOverview title="最多承伤" :val-icons="item.takeDamageRank" />
-            <TuaOverview title="最强一击" :val-icons="item.damageRank" />
-            <TuaOverview title="元素战技" :val-icons="item.normalSkillRank" />
-            <TuaOverview title="出战次数" :val-icons="item.revealRank" :multi4="true" />
-            <TuaOverview title="元素爆发" :val-icons="item.energySkillRank" />
+            <TuaOverview :val-icons="item.defeatRank" title="最多击破" />
+            <TuaOverview :val-icons="item.takeDamageRank" title="最多承伤" />
+            <TuaOverview :val-icons="item.damageRank" title="最强一击" />
+            <TuaOverview :val-icons="item.normalSkillRank" title="元素战技" />
+            <TuaOverview :multi4="true" :val-icons="item.revealRank" title="出战次数" />
+            <TuaOverview :val-icons="item.energySkillRank" title="元素爆发" />
           </div>
           <div class="uaw-d-box">
             <TuaDetail v-for="floor in item.floors" :key="floor.id" :floor />
@@ -86,7 +98,7 @@
       </v-window-item>
     </v-window>
     <div v-show="localAbyss.length === 0" class="user-empty">
-      <img src="/source/UI/empty.webp" alt="empty" />
+      <img alt="empty" src="/source/UI/empty.webp" />
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
@@ -128,7 +140,6 @@ onMounted(async () => {
   else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else uidCur.value = "";
   await showLoading.update(`正在加载${uidCur.value}的深渊数据`);
-  await loadAbyss();
   await showLoading.end();
   showSnackbar.success(`已加载${uidCur.value}的${localAbyss.value.length}条深渊数据`);
 });
@@ -295,7 +306,7 @@ async function tryReadAbyss(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 8px;
+  margin-left: 12px;
   gap: 8px;
 
   img {
@@ -314,11 +325,11 @@ async function tryReadAbyss(): Promise<void> {
 }
 
 .uat-acts {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-left: 8px;
+  margin-right: 12px;
   gap: 8px;
 }
 
@@ -333,10 +344,6 @@ async function tryReadAbyss(): Promise<void> {
     margin-right: 4px;
     object-fit: contain;
   }
-}
-
-.dark .ua-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .ua-box {

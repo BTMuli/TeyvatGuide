@@ -53,19 +53,30 @@
     </template>
     <template #append>
       <div class="pbm-nav-extension">
-        <v-btn class="pbm-ne-btn" prepend-icon="mdi-import" @click="tryCallYae()">导入</v-btn>
-        <v-btn class="pbm-ne-btn" prepend-icon="mdi-plus" @click="createUid()">新建存档</v-btn>
-        <v-btn class="pbm-ne-btn" prepend-icon="mdi-delete" @click="deleteUid()">删除存档</v-btn>
+        <v-btn
+          class="pbm-ne-btn"
+          prepend-icon="mdi-import"
+          variant="elevated"
+          @click="tryCallYae()"
+        >
+          导入
+        </v-btn>
+        <v-btn class="pbm-ne-btn" prepend-icon="mdi-plus" variant="elevated" @click="createUid()">
+          新建存档
+        </v-btn>
+        <v-btn class="pbm-ne-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteUid()">
+          删除存档
+        </v-btn>
       </div>
     </template>
   </v-app-bar>
   <div class="pbm-container">
     <template v-for="material in materialShow" :key="`${curUid}-${material.info.id}`">
       <PbMaterialItem
+        :cur="curMaterial"
         :info="material.info"
         :tb="material.tb"
         @select="handleSelect"
-        :cur="curMaterial"
       />
     </template>
   </div>
@@ -380,13 +391,12 @@ function switchMaterial(isNext: boolean): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
+  margin-right: 12px;
   column-gap: 8px;
 }
 
 .pbm-ne-btn {
   height: 40px;
-  border: 1px solid var(--common-shadow-2);
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);

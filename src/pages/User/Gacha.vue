@@ -24,25 +24,64 @@
     </template>
     <template #extension>
       <div class="gacha-top-btns">
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(false)">
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-refresh"
+          variant="elevated"
+          @click="confirmRefresh(false)"
+        >
           增量刷新
         </v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(true)">
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-refresh"
+          variant="elevated"
+          @click="confirmRefresh(true)"
+        >
           全量刷新
         </v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-import" @click="importUigf()">导入</v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-import" @click="importUigf4()">
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-import"
+          variant="elevated"
+          @click="importUigf()"
+          >导入</v-btn
+        >
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-import"
+          variant="elevated"
+          @click="importUigf4()"
+        >
           导入(v4)
         </v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-export" @click="exportUigf()">导出</v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-export" @click="exportUigf4()">
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-export"
+          variant="elevated"
+          @click="exportUigf()"
+          >导出</v-btn
+        >
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-export"
+          variant="elevated"
+          @click="exportUigf4()"
+        >
           导出(v4)
         </v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-delete" @click="deleteGacha()">删除</v-btn>
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-delete"
+          variant="elevated"
+          @click="deleteGacha()"
+          >删除</v-btn
+        >
         <v-btn
           class="gacha-top-btn"
           prepend-icon="mdi-database-check"
           title="检测并补充遗漏的itemId"
+          variant="elevated"
           @click="checkData()"
         >
           检测数据
@@ -480,18 +519,14 @@ async function checkData(): Promise<void> {
 
 .gacha-top-btns {
   display: flex;
+  margin-bottom: 4px;
   margin-left: 16px;
   column-gap: 8px;
 }
 
 .gacha-top-btn {
-  border-radius: 5px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-}
-
-.dark .gacha-top-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .gacha-container {

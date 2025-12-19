@@ -13,11 +13,11 @@
           label="游戏UID"
           variant="outlined"
         />
-        <v-btn :rounded="true" class="uc-btn" @click="toAbyss()">
+        <v-btn class="uc-btn" rounded variant="elevated" @click="toAbyss()">
           <img alt="abyss" src="/source/UI/userAbyss.webp" />
           <span>深境螺旋</span>
         </v-btn>
-        <v-btn :rounded="true" class="uc-btn" @click="toChallenge()">
+        <v-btn class="uc-btn" rounded variant="elevated" @click="toChallenge()">
           <img alt="challenge" src="/source/UI/userChallenge.webp" />
           <span>幽境危战</span>
         </v-btn>
@@ -27,20 +27,30 @@
       <div class="uct-right">
         <v-btn
           :disabled="localCombat.length === 0"
-          :rounded="true"
           class="uc-btn"
           prepend-icon="mdi-share"
+          variant="elevated"
           @click="shareCombat()"
         >
           分享
         </v-btn>
-        <v-btn :rounded="true" class="uc-btn" prepend-icon="mdi-refresh" @click="refreshCombat()">
+        <v-btn
+          class="uc-btn"
+          prepend-icon="mdi-refresh"
+          variant="elevated"
+          @click="refreshCombat()"
+        >
           刷新
         </v-btn>
-        <v-btn :rounded="true" class="uc-btn" prepend-icon="mdi-download" @click="tryReadCombat()">
+        <v-btn
+          class="uc-btn"
+          prepend-icon="mdi-download"
+          variant="elevated"
+          @click="tryReadCombat()"
+        >
           导入
         </v-btn>
-        <v-btn :rounded="true" class="uc-btn" prepend-icon="mdi-delete" @click="deleteCombat()">
+        <v-btn class="uc-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteCombat()">
           删除
         </v-btn>
       </div>
@@ -322,10 +332,6 @@ async function tryReadCombat(): Promise<void> {
     margin-right: 4px;
     object-fit: contain;
   }
-}
-
-.dark .uc-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .uc-box {

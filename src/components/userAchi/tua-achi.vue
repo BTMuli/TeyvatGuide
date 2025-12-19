@@ -1,5 +1,5 @@
 <template>
-  <div class="achi-container" :title="getAchiTitle()" @click="selectAchi()">
+  <div :title="getAchiTitle()" class="achi-container" @click="selectAchi()">
     <div class="achi-version">v{{ data.version }}</div>
     <div class="achi-pre">
       <div class="achi-pre-icon">
@@ -190,33 +190,16 @@ async function setAchiStat(stat: boolean): Promise<void> {
   }
 }
 
-.achi-append-icon span {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  height: 10px;
-  align-items: center;
-  justify-content: center;
-  background: #00000080;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  color: var(--tgc-white-1);
-  font-size: 8px;
-}
-
 .achi-append {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  column-gap: 10px;
-}
+  column-gap: 8px;
 
-.achi-append :nth-last-child(2) {
-  margin-right: 10px;
-  color: var(--box-text-4);
-  font-size: small;
+  :first-child:not(:last-child) {
+    color: var(--box-text-4);
+    font-size: small;
+  }
 }
 
 .achi-append-icon {
@@ -226,10 +209,27 @@ async function setAchiStat(stat: boolean): Promise<void> {
   border-radius: 4px;
   background-image: url("/icon/bg/5-Star.webp");
   background-size: cover;
-}
 
-.achi-append-icon img {
-  width: 40px;
-  height: 40px;
+  img {
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  span {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    width: 100%;
+    height: 10px;
+    align-items: stretch;
+    justify-content: center;
+    background: #00000080;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: var(--tgc-white-1);
+    font-size: 8px;
+  }
 }
 </style>

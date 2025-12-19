@@ -1,4 +1,4 @@
-<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次数共享 -->
+variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次数共享 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -18,13 +18,30 @@
     </template>
     <template #extension>
       <div class="gb-top-btns">
-        <v-btn class="gb-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(false)">
+        <v-btn
+          class="gb-top-btn"
+          prepend-icon="mdi-refresh"
+          variant="elevated"
+          @click="confirmRefresh(false)"
+        >
           增量刷新
         </v-btn>
-        <v-btn class="gb-top-btn" prepend-icon="mdi-refresh" @click="confirmRefresh(true)">
+        <v-btn
+          class="gb-top-btn"
+          prepend-icon="mdi-refresh"
+          variant="elevated"
+          @click="confirmRefresh(true)"
+        >
           全量刷新
         </v-btn>
-        <v-btn class="gb-top-btn" prepend-icon="mdi-delete" @click="deleteGacha()">删除</v-btn>
+        <v-btn
+          class="gb-top-btn"
+          prepend-icon="mdi-delete"
+          variant="elevated"
+          @click="deleteGacha()"
+        >
+          删除
+        </v-btn>
       </div>
     </template>
   </v-app-bar>
@@ -303,18 +320,14 @@ async function deleteGacha(): Promise<void> {
 
 .gb-top-btns {
   display: flex;
+  margin-bottom: 4px;
   margin-left: 16px;
   column-gap: 8px;
 }
 
 .gb-top-btn {
-  border-radius: 4px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-}
-
-.dark .gb-top-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .gb-container {

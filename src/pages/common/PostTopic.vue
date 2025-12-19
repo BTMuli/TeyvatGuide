@@ -1,34 +1,40 @@
+<!-- 话题页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
-      <div class="post-topic-top" v-if="topicInfo" :class="sidebar.collapse ? 'wide' : 'thin'">
-        <TMiImg :src="topicInfo.topic.cover" alt="cover" :ori="true" />
+      <div v-if="topicInfo" :class="sidebar.collapse ? 'wide' : 'thin'" class="post-topic-top">
+        <TMiImg :ori="true" :src="topicInfo.topic.cover" alt="cover" />
         <div class="post-topic-info">
-          <span>{{ curTopic }}-{{ topicInfo.topic.name }}</span>
-          <span :title="topicInfo.topic.desc">{{ topicInfo.topic.desc }}</span>
+          <span class="post-topic-title">{{ topicInfo.topic.name }}</span>
+          <span :title="topicInfo.topic.desc" class="post-topic-desc">{{
+            topicInfo.topic.desc
+          }}</span>
+        </div>
+        <div :title="`话题ID：${topicInfo.topic.id}`" class="post-topic-id">
+          {{ topicInfo.topic.id }}
         </div>
       </div>
     </template>
     <template #extension>
-      <TGameNav :model-value="curGid" v-if="curGid !== 0" style="margin-left: 8px" />
+      <TGameNav v-if="curGid !== 0" :model-value="curGid" style="margin-left: 8px" />
     </template>
     <div class="post-topic-switch">
       <v-select
         v-model="curGame"
-        class="post-switch-item"
-        :items="getGameList(topicInfo?.game_info_list)"
-        item-title="name"
-        :item-value="(item) => item"
-        variant="outlined"
-        label="分区"
         :disabled="isReq"
+        :item-value="(item) => item"
+        :items="getGameList(topicInfo?.game_info_list)"
+        class="post-switch-item"
+        item-title="name"
+        label="分区"
+        variant="outlined"
       >
         <template #selection="{ item }">
           <div class="select-item main">
             <img
               v-if="item.raw.icon"
-              :src="item.raw.icon"
               :alt="item.raw.name"
+              :src="item.raw.icon"
               :title="item.raw.name"
               class="icon"
             />
@@ -36,11 +42,11 @@
           </div>
         </template>
         <template #item="{ props, item }">
-          <div v-bind="props" class="select-item sub" :class="{ selected: item.raw.id === curGid }">
+          <div :class="{ selected: item.raw.id === curGid }" class="select-item sub" v-bind="props">
             <img
               v-if="item.raw.icon"
-              :src="item.raw.icon"
               :alt="item.raw.name"
+              :src="item.raw.icon"
               :title="item.raw.name"
               class="icon"
             />
@@ -50,30 +56,32 @@
       </v-select>
       <v-select
         v-model="curSortType"
-        class="post-switch-item"
+        :disabled="isReq"
         :items="sortList"
+        class="post-switch-item"
         item-title="text"
         item-value="value"
-        variant="outlined"
         label="排序"
-        :disabled="isReq"
+        variant="outlined"
       />
       <v-text-field
         v-model="search"
-        class="post-switch-item"
+        :hide-details="true"
+        :single-line="true"
         append-inner-icon="mdi-magnify"
+        class="post-switch-item"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
-        :single-line="true"
-        :hide-details="true"
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
       <v-btn
         :loading="isReq"
         class="post-topic-btn"
-        @click="freshPostData()"
         prepend-icon="mdi-refresh"
+        rounded
+        variant="elevated"
+        @click="freshPostData()"
       >
         刷新
       </v-btn>
@@ -84,7 +92,7 @@
       <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="curGid.toString()" :keyword="search" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
@@ -295,6 +303,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   display: flex;
   overflow: hidden;
   max-width: 100%;
+  height: 48px;
   box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
@@ -305,8 +314,9 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   gap: 4px;
 
   img {
-    width: 50px;
-    height: 50px;
+    height: 100%;
+    flex-shrink: 0;
+    aspect-ratio: 1;
   }
 
   &.wide {
@@ -331,21 +341,33 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+}
 
-  :first-child {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 18px;
-  }
+.post-topic-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 18px;
+  line-height: 20px;
+}
 
-  :last-child {
-    overflow: hidden;
-    max-width: 100%;
-    max-lines: 1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    word-break: break-all;
-  }
+.post-topic-desc {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 16px;
+  max-lines: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
+}
+
+.post-topic-id {
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  right: 2px;
+  color: var(--tgc-od-red);
+  font-size: 8px;
 }
 
 .post-topic-switch {
@@ -366,10 +388,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-}
-
-.dark .post-topic-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .post-topic-grid {

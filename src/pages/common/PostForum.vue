@@ -2,28 +2,28 @@
   <v-app-bar>
     <template #prepend>
       <div class="posts-top">
-        <img src="/source/UI/posts.webp" alt="posts" />
+        <img alt="posts" src="/source/UI/posts.webp" />
         <span>帖子</span>
       </div>
     </template>
     <div class="posts-switch">
       <v-select
         v-model="curGid"
-        class="post-switch-item"
+        :disabled="isReq"
         :items="sortGameList"
+        class="post-switch-item"
         item-title="text"
         item-value="gid"
-        variant="outlined"
         label="分区"
-        :disabled="isReq"
+        variant="outlined"
       >
         <template #selection="{ item }">
           <div class="select-item main">
             <TMiImg
               v-if="item.raw.icon"
-              :src="item.raw.icon"
-              :ori="true"
               :alt="item.raw.text"
+              :ori="true"
+              :src="item.raw.icon"
               :title="item.raw.text"
               class="icon"
             />
@@ -32,16 +32,16 @@
         </template>
         <template #item="{ props, item }">
           <div
-            v-bind="props"
-            class="select-item sub"
             :class="{ selected: item.raw.gid === curGid }"
+            class="select-item sub"
+            v-bind="props"
           >
             <TMiImg
               v-if="item.raw.icon"
-              :src="item.raw.icon"
               :alt="item.raw.text"
-              class="icon"
               :ori="true"
+              :src="item.raw.icon"
+              class="icon"
             />
             <span>{{ item.raw.text }}</span>
           </div>
@@ -49,19 +49,19 @@
       </v-select>
       <v-select
         v-model="selectedForum"
-        class="post-switch-item"
-        :items="curForums"
-        item-title="text"
-        variant="outlined"
-        label="版块"
         :disabled="isReq"
+        :items="curForums"
+        class="post-switch-item"
+        item-title="text"
+        label="版块"
+        variant="outlined"
       >
         <template #selection="{ item }">
           <div class="select-item main">
             <TMiImg
-              :src="item.raw.icon"
               :alt="item.raw.text"
               :ori="true"
+              :src="item.raw.icon"
               :title="item.raw.text"
               class="icon"
             />
@@ -70,38 +70,44 @@
         </template>
         <template #item="{ props, item }">
           <div
-            v-bind="props"
-            class="select-item sub"
-            @click="selectedForum = item.raw"
             :class="{ selected: item.raw.value === selectedForum?.value }"
+            class="select-item sub"
+            v-bind="props"
+            @click="selectedForum = item.raw"
           >
-            <TMiImg :src="item.raw.icon" :alt="item.raw.text" :ori="true" class="icon" />
+            <TMiImg :alt="item.raw.text" :ori="true" :src="item.raw.icon" class="icon" />
             <span>{{ item.raw.text }}</span>
           </div>
         </template>
       </v-select>
       <v-select
         v-model="curSortType"
-        class="post-switch-item"
+        :disabled="isReq"
         :items="sortOrderList"
+        class="post-switch-item"
         item-title="text"
         item-value="value"
-        variant="outlined"
         label="排序"
-        :disabled="isReq"
+        variant="outlined"
       />
       <v-text-field
         v-model="search"
-        class="post-switch-item"
+        :hide-details="true"
+        :single-line="true"
         append-inner-icon="mdi-magnify"
+        class="post-switch-item"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
-        :single-line="true"
-        :hide-details="true"
         @click:append="searchPost"
         @keyup.enter="searchPost"
       />
-      <v-btn :rounded="true" class="post-forum-btn" @click="freshPostData()" :loading="isReq">
+      <v-btn
+        :loading="isReq"
+        :rounded="true"
+        class="post-forum-btn"
+        variant="elevated"
+        @click="freshPostData()"
+      >
         <v-icon>mdi-refresh</v-icon>
         <span>刷新</span>
       </v-btn>
@@ -115,10 +121,10 @@
       <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch :gid="curGid.toString()" v-model="showSearch" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="curGid.toString()" :keyword="search" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
@@ -395,15 +401,11 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   font-family: var(--font-title);
 }
 
-.dark .post-forum-btn {
-  border: 1px solid var(--common-shadow-2);
-}
-
 .posts-grid {
   display: grid;
   font-family: var(--font-title);
   grid-auto-rows: auto;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 

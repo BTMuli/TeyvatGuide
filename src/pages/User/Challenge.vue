@@ -14,11 +14,11 @@
           variant="outlined"
           @update:model-value="switchUid"
         />
-        <v-btn :rounded="true" class="ucp-btn" @click="toAbyss()">
+        <v-btn class="ucp-btn" rounded variant="elevated" @click="toAbyss()">
           <img alt="abyss" src="/source/UI/userAbyss.webp" />
           <span>深境螺旋</span>
         </v-btn>
-        <v-btn :rounded="true" class="ucp-btn" @click="toCombat()">
+        <v-btn class="ucp-btn" rounded variant="elevated" @click="toCombat()">
           <img alt="abyss" src="/source/UI/userCombat.webp" />
           <span>真境剧诗</span>
         </v-btn>
@@ -45,15 +45,33 @@
             :disabled="localChallenge.length === 0"
             class="ucp-btn"
             prepend-icon="mdi-share"
+            variant="elevated"
             @click="shareChallenge()"
           >
             分享
           </v-btn>
-          <v-btn class="ucp-btn" prepend-icon="mdi-refresh" @click="refreshChallenge()">刷新</v-btn>
-          <v-btn class="ucp-btn" prepend-icon="mdi-download" @click="tryReadChallenge()">
+          <v-btn
+            class="ucp-btn"
+            prepend-icon="mdi-refresh"
+            variant="elevated"
+            @click="refreshChallenge()"
+            >刷新
+          </v-btn>
+          <v-btn
+            class="ucp-btn"
+            prepend-icon="mdi-download"
+            variant="elevated"
+            @click="tryReadChallenge()"
+          >
             导入
           </v-btn>
-          <v-btn class="ucp-btn" prepend-icon="mdi-delete" @click="deleteChallenge()">删除</v-btn>
+          <v-btn
+            class="ucp-btn"
+            prepend-icon="mdi-delete"
+            variant="elevated"
+            @click="deleteChallenge()"
+            >删除
+          </v-btn>
         </div>
         <div class="pop-list">
           <TucPopItem v-for="avatar in popList" :key="avatar.avatar_id" :avatar />
@@ -393,7 +411,7 @@ async function tryReadChallenge(): Promise<void> {
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  margin-left: 12px;
   column-gap: 8px;
 
   img {
@@ -424,16 +442,12 @@ async function tryReadChallenge(): Promise<void> {
   }
 }
 
-.dark .ucp-btn {
-  border: 1px solid var(--common-shadow-2);
-}
-
 .ucp-top-append {
   position: relative;
   width: fit-content;
-  height: 100%;
+  height: 40px;
   box-sizing: border-box;
-  padding: 8px;
+  margin-right: 12px;
 }
 
 .ucp-top-extension {
@@ -443,7 +457,8 @@ async function tryReadChallenge(): Promise<void> {
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  padding: 0 8px;
+  padding: 0 16px;
+  margin-bottom: 4px;
 }
 
 .act-list {

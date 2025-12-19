@@ -5,38 +5,46 @@
         <img alt="icon" src="/source/UI/userRecord.webp" />
         <span>原神战绩</span>
         <v-select
-          density="compact"
-          variant="outlined"
           v-model="uidCur"
-          :items="uidList"
           :hide-details="true"
+          :items="uidList"
+          density="compact"
           label="游戏UID"
+          variant="outlined"
         />
       </div>
     </template>
     <template #append>
       <div class="ur-top-btns">
-        <v-btn prepend-icon="mdi-refresh" class="ur-top-btn" @click="refreshRecord()">更新</v-btn>
         <v-btn
-          prepend-icon="mdi-share"
           class="ur-top-btn"
-          @click="shareRecord()"
+          prepend-icon="mdi-refresh"
+          variant="elevated"
+          @click="refreshRecord()"
+          >更新</v-btn
+        >
+        <v-btn
           :disabled="recordData === undefined"
+          class="ur-top-btn"
+          prepend-icon="mdi-share"
+          variant="elevated"
+          @click="shareRecord()"
         >
           分享
         </v-btn>
         <v-btn
-          prepend-icon="mdi-delete"
-          class="ur-top-btn"
-          @click="deleteRecord()"
           :disabled="recordData === undefined"
+          class="ur-top-btn"
+          prepend-icon="mdi-delete"
+          variant="elevated"
+          @click="deleteRecord()"
         >
           删除
         </v-btn>
       </div>
     </template>
   </v-app-bar>
-  <div class="ur-box" v-if="recordData">
+  <div v-if="recordData" class="ur-box">
     <div class="ur-box-title">
       <TurRoleInfo :role="recordData.role" :uid="uidCur ?? 0" />
       <span class="sign">TeyvatGuide v{{ version }} | {{ recordData.updated }}</span>
@@ -58,7 +66,7 @@
       <TurHomeGrid :model-value="recordData.homes" />
     </PhCompCard>
   </div>
-  <div class="ur-empty" v-else>
+  <div v-else class="ur-empty">
     <img alt="empty" src="/source/UI/empty.webp" />
     <span>DATA NOT FOUND</span>
   </div>
@@ -207,8 +215,7 @@ async function deleteRecord(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-left: 8px;
+  margin-left: 12px;
   gap: 8px;
 
   img {
@@ -226,7 +233,7 @@ async function deleteRecord(): Promise<void> {
 .ur-top-btns {
   position: relative;
   display: flex;
-  margin-right: 16px;
+  margin-right: 12px;
   gap: 8px;
 }
 
@@ -235,10 +242,6 @@ async function deleteRecord(): Promise<void> {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
-}
-
-.dark .ur-top-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .ur-box {

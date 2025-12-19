@@ -5,35 +5,38 @@
       <div class="uc-top-title">
         <img alt="icon" src="/source/UI/userAvatar.webp" />
         <span>我的角色</span>
-        <v-btn class="uc-top-btn" @click="showSelect = true">筛选角色</v-btn>
-        <v-btn class="uc-top-btn" @click="resetSelect = true">重置筛选</v-btn>
+        <v-btn class="uc-top-btn" variant="elevated" @click="showSelect = true">筛选角色</v-btn>
+        <v-btn class="uc-top-btn" variant="elevated" @click="resetSelect = true">重置筛选</v-btn>
       </div>
     </template>
     <template #append>
       <div class="uc-top-btns">
         <v-btn
+          v-model:loading="loadData"
           class="uc-top-btn"
           prepend-icon="mdi-refresh"
+          variant="elevated"
           @click="refresh()"
-          v-model:loading="loadData"
         >
           刷新
         </v-btn>
         <v-btn
+          v-model:loading="loadShare"
+          :disabled="enableShare"
           class="uc-top-btn"
           prepend-icon="mdi-share"
-          :disabled="enableShare"
+          variant="elevated"
           @click="share()"
-          v-model:loading="loadShare"
         >
           分享
         </v-btn>
         <v-btn
+          v-model:loading="loadDel"
+          :disabled="uidCur === undefined"
           class="uc-top-btn"
           prepend-icon="mdi-delete"
+          variant="elevated"
           @click="deleteUid()"
-          :disabled="uidCur === undefined"
-          v-model:loading="loadDel"
         >
           删除
         </v-btn>
@@ -43,23 +46,23 @@
       <div class="uc-select">
         <v-select
           v-model="showMode"
-          :items="modeList"
-          label="详情视图模式"
           :hide-details="true"
-          item-title="label"
-          item-value="value"
-          variant="outlined"
+          :items="modeList"
           class="uc-select-btn"
           density="compact"
+          item-title="label"
+          item-value="value"
+          label="详情视图模式"
+          variant="outlined"
         />
         <v-select
           v-model="uidCur"
-          :items="uidList"
-          label="当前UID"
           :hide-details="true"
-          variant="outlined"
+          :items="uidList"
           class="uc-select-btn"
           density="compact"
+          label="当前UID"
+          variant="outlined"
         />
       </div>
     </template>
@@ -69,10 +72,10 @@
       <div class="uc-box-title">
         <span class="uc-box-uid">UID：{{ uidCur }}</span>
         <span
-          class="uc-ov-item"
           v-for="(item, index) in roleOverview"
           :key="index"
           :title="`${item.label}：${item.cnt}`"
+          class="uc-ov-item"
         >
           <img :src="`/icon/element/${item.label}.webp`" alt="element" />
           <span>{{ item.cnt }}</span>
@@ -84,7 +87,7 @@
         <span>更新于 {{ getUpdateTime() }}</span>
       </div>
     </div>
-    <div class="uc-grid" v-if="!isEmpty">
+    <div v-if="!isEmpty" class="uc-grid">
       <TuaAvatarBox
         v-for="(role, index) in selectedList"
         :key="index"
@@ -92,20 +95,20 @@
         @click="selectRole(role)"
       />
     </div>
-    <div class="uc-empty" v-else>
-      <img src="/source/UI/empty.webp" alt="empty" />
+    <div v-else class="uc-empty">
+      <img alt="empty" src="/source/UI/empty.webp" />
     </div>
   </div>
   <TuaDetailOverlay
     v-if="dataVal"
     v-model="showOverlay"
+    v-model:mode="showMode"
     :avatar="dataVal"
     :avatars="selectedList"
-    v-model:mode="showMode"
     @to-next="handleSwitch"
     @to-avatar="selectRole"
   />
-  <TwoSelectC v-model="showSelect" @select-c="handleSelect" v-model:reset="resetSelect" />
+  <TwoSelectC v-model="showSelect" v-model:reset="resetSelect" @select-c="handleSelect" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -430,8 +433,7 @@ function handleSwitch(next: boolean): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-left: 8px;
+  margin-left: 12px;
   gap: 8px;
 
   img {
@@ -450,8 +452,8 @@ function handleSwitch(next: boolean): void {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-bottom: 4px;
   margin-left: 16px;
-  gap: 8px;
 }
 
 .uc-select-btn {
@@ -522,19 +524,14 @@ function handleSwitch(next: boolean): void {
 .uc-top-btns {
   display: flex;
   align-content: center;
-  margin-right: 16px;
+  margin-right: 12px;
   column-gap: 8px;
 }
 
 .uc-top-btn {
-  border-radius: 5px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
-}
-
-.dark .uc-top-btn {
-  border: 1px solid var(--common-shadow-2);
 }
 
 .uc-grid {

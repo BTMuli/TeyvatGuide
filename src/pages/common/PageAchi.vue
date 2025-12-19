@@ -31,10 +31,18 @@
     </template>
     <template #extension>
       <div class="top-extension">
-        <v-btn class="top-btn" prepend-icon="mdi-import" @click="importJson()">导入</v-btn>
-        <v-btn class="top-btn" prepend-icon="mdi-export" @click="exportJson()">导出</v-btn>
-        <v-btn class="top-btn" prepend-icon="mdi-plus" @click="createUid()">新建存档</v-btn>
-        <v-btn class="top-btn" prepend-icon="mdi-delete" @click="deleteUid()">删除存档</v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-import" variant="elevated" @click="importJson()"
+          >导入</v-btn
+        >
+        <v-btn class="top-btn" prepend-icon="mdi-export" variantelevated @click="exportJson()"
+          >导出</v-btn
+        >
+        <v-btn class="top-btn" prepend-icon="mdi-plus" variant="elevated" @click="createUid()"
+          >新建存档</v-btn
+        >
+        <v-btn class="top-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteUid()"
+          >删除存档</v-btn
+        >
         <div class="top-switch" @click="switchHideFin">
           <v-icon v-if="hideFin" color="var(--tgc-od-green)">
             mdi-checkbox-marked-circle-outline
@@ -47,6 +55,7 @@
         class="top-link top-btn"
         prepend-icon="mdi-import"
         title="通过Yae导入"
+        variant="elevated"
         @click="toYae()"
       >
         YAE
@@ -377,7 +386,6 @@ async function toYae(): Promise<void> {
   height: 50px;
   align-items: center;
   justify-content: center;
-  padding: 10px;
   margin: 0 10px;
   color: var(--box-text-1);
 }
@@ -387,14 +395,13 @@ async function toYae(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  margin-left: 8px;
+  margin-bottom: 4px;
+  margin-left: 16px;
   column-gap: 8px;
 }
 
 .top-btn {
   height: 40px;
-  border: 1px solid var(--common-shadow-2);
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
@@ -412,6 +419,7 @@ async function toYae(): Promise<void> {
 
 .top-link {
   margin-right: 16px;
+  margin-bottom: 4px;
   margin-left: auto;
 }
 
