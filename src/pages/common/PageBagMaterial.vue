@@ -84,7 +84,7 @@
     v-if="curMaterial"
     v-model="showOverlay"
     :data="curMaterial"
-    :uid="`${curUid}`"
+    :uid="curUid"
     @updateDB="handleUpdate"
   >
     <template #left>

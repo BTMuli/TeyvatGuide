@@ -1,0 +1,19 @@
+/**
+ * 一些功能集合
+ * @since Beta v0.9.0
+ */
+@use "sass:map";
+/** 根据传入星级返回颜色 */
+@function get-od-star-color($star:0) {
+  $star-color-map: (
+          1:#abb2bfff,
+          2:#98c379ff,
+          3:#61afefff,
+          4:#c678ddff,
+          5:#d19a66ff
+  );
+  @if map.has-key($star-color-map, $star) {
+    @return map.get($star-color-map, $star);
+  }
+  @return #e06c75ff;
+}

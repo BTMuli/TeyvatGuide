@@ -11,10 +11,9 @@
           <div class="pbom-icon">
             <img :src="`/icon/bg/${props.data.info.star}-BGC.webp`" alt="bg" class="bg" />
             <img :src="`/icon/material/${props.data.info.id}.webp`" alt="icon" class="icon" />
-            <span class="cnt">{{ dbInfo.count }}</span>
           </div>
           <div class="pbom-name" @click="shareMaterial()">{{ props.data.info.name }}</div>
-          <div class="pbom-type">{{ props.data.info.type }}</div>
+          <div class="pbom-type">持有{{ dbInfo.count }}·{{ props.data.info.type }}</div>
         </div>
         <div class="pbom-mid">
           <div class="pbom-desc" v-html="parseHtmlText(props.data.info.description)" />
@@ -22,10 +21,11 @@
             <TwoSource v-for="(item, index) in props.data.info.source" :key="index" :data="item" />
           </div>
           <div v-if="props.data.info.convert.length > 0" class="pbom-convert">
-            <TwoConvert
+            <PboConvert
               v-for="(item, index) in props.data.info.convert"
               :key="index"
               :data="item"
+              :uid="props.uid"
             />
           </div>
         </div>
@@ -53,7 +53,6 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TwoConvert from "@comp/pageWiki/two-convert.vue";
 import TwoSource from "@comp/pageWiki/two-source.vue";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import { getVersion } from "@tauri-apps/api/app";
@@ -61,9 +60,11 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
+import PboConvert from "./pbo-convert.vue";
+
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
-type PboMaterialProps = { data: MaterialInfo; uid: string };
+type PboMaterialProps = { data: MaterialInfo; uid: number };
 type PboMaterialEmits = (e: "updateDB", v: MaterialInfo) => void;
 
 const props = defineProps<PboMaterialProps>();
@@ -141,7 +142,7 @@ async function tryEdit(): Promise<void> {
   flex-direction: column;
   padding: 10px;
   border-radius: 10px;
-  background: var(--box-bg-1);
+  background: var(--app-page-bg);
   overflow-y: auto;
   row-gap: 10px;
 }
@@ -193,20 +194,6 @@ async function tryEdit(): Promise<void> {
     width: 56px;
     height: 56px;
   }
-
-  .cnt {
-    @include github-styles.github-tag-dark-gen(#ffcd0c);
-
-    position: absolute;
-    bottom: -4px;
-    left: 40px;
-    width: fit-content;
-    padding: 0 4px;
-    border-radius: 12px;
-    backdrop-filter: blur(5px);
-    font-size: 10px;
-    text-align: center;
-  }
 }
 
 .pbom-name {
@@ -234,8 +221,8 @@ async function tryEdit(): Promise<void> {
 .pbom-convert {
   padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
 }
 
 .pbom-desc {
@@ -268,7 +255,7 @@ async function tryEdit(): Promise<void> {
   justify-content: flex-start;
   padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-2);
+  background: var(--box-bg-1);
   row-gap: 8px;
 }
 

@@ -63,6 +63,7 @@ $pb-mi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   display: flex;
   overflow: hidden;
   height: 48px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
   padding-right: 8px;

@@ -1,68 +1,68 @@
 /**
- * @file types/App/Material.d.ts
- * @description 应用素材日历相关类型定义文件
- * @since Beta v0.4.2
+ * 应用素材日历相关类型定义文件
+ * @since Beta v0.9.0
  */
 
 declare namespace TGApp.App.Material {
   /**
-   * @description wiki 页的信息
+   * WIKI信息
    * @since Beta v0.4.2
-   * @interface WikiItem
-   * @property {number} id - 材料id
-   * @property {string} name - 材料名称
-   * @property {string} description - 材料简介
-   * @property {string} type - 材料类型
-   * @property {number} star - 材料星级
-   * @property {Source[]} source - 材料来源
-   * @property {Convert[]} convert - 材料转换
-   * @return WikiItem
    */
-  interface WikiItem {
+  type WikiItem = {
+    /** 材料ID */
     id: number;
+    /** 材料名称 */
     name: string;
+    /** 材料简介 */
     description: string;
+    /** 材料类型 */
     type: string;
+    /** 材料星级 */
     star: number;
-    source: Source[];
-    convert: Convert[];
-  }
+    /** 材料来源 */
+    source: Array<Source>;
+    /** 材料转换 */
+    convert: Array<Convert>;
+  };
 
   /**
-   * @description 材料来源
+   * 材料来源
    * @since Beta v0.4.4
-   * @interface Source
-   * @property {string} name - 来源名称
-   * @property {string} type - 来源类型
-   * @property {number[]} days - 来源日
-   * @return Source
    */
-  interface Source {
+  type Source = {
+    /** 来源名称 */
     name: string;
+    /** 来源类型 */
     type: string;
-    days?: number[];
-  }
+    /** 掉落日期 */
+    days?: Array<number>;
+  };
 
   /**
-   * @description 材料转换
-   * @since Beta v0.4.2
-   * @interface Convert
-   * @property {string} id 转换ID
-   * @property {string} souce[].id 转换前材料ID
-   * @property {string} souce[].name 转换前材料名称
-   * @property {string} source[].type 转换前材料类型
-   * @property {number} source[].star 转换前材料星级
-   * @property {number} souce[].count 转换前材料数量
-   * @return Convert
+   * 材料转换
+   * @since Beta v0.9.0
    */
-  interface Convert {
+  type Convert = {
+    /** 合成ID */
     id: string;
-    source: Array<{
-      id: string;
-      name: string;
-      type: string;
-      star: number;
-      count: number;
-    }>;
-  }
+    /** 合成材料 */
+    source: Array<ConvertSrc>;
+  };
+
+  /**
+   * 转换来源
+   * @since Beta v0.9.0
+   */
+  type ConvertSrc = {
+    /** 材料ID */
+    id: number;
+    /** 材料名称 */
+    name: string;
+    /** 材料类型 */
+    type: string;
+    /** 材料星级 */
+    star: number;
+    /** 需要数量 */
+    count: number;
+  };
 }
