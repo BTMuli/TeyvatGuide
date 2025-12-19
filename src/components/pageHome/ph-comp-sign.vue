@@ -179,6 +179,6 @@ async function handleDelete(account: TGApp.Sqlite.Account.Game): Promise<void> {
   display: grid;
   padding: 8px;
   gap: 8px;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 0.34fr));
 }
 </style>
