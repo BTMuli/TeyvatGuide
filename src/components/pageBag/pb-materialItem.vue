@@ -3,15 +3,15 @@
   <div
     :class="{ empty: item.count === 0 }"
     :title="props.info.name"
-    class="pwm-box"
+    class="pb-mi-box"
     @click="toMaterial()"
   >
-    <div class="pwm-left">
+    <div class="pb-mi-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/icon/material/${props.info.id}.webp`" alt="icon" class="icon" />
     </div>
-    <div class="pwm-right">{{ props.info.name }}</div>
-    <div class="pwm-extra">{{ props.info.type }}·{{ props.info.id }}</div>
+    <div class="pb-mi-right">{{ props.info.name }}</div>
+    <div class="pb-mi-extra">{{ props.info.type }}·{{ props.info.id }}</div>
     <div class="pb-mi-cnt">{{ item.count }}</div>
   </div>
 </template>
@@ -51,17 +51,14 @@ watch(
   },
 );
 
-const idColor = computed<string>(() => {
-  if (item.value.count > 0) return getOdStarColor(props.info.star);
-  return "var(--tgc-od-red)";
-});
+const idColor = computed<string>(() => getOdStarColor(props.info.star));
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
-$pwm-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
+$pb-mi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
 
-.pwm-box {
+.pb-mi-box {
   position: relative;
   display: flex;
   overflow: hidden;
@@ -69,18 +66,22 @@ $pwm-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   align-items: center;
   justify-content: flex-start;
   padding-right: 8px;
-  border: 1px solid $pwm-base;
+  border: 1px solid color-mix(in srgb, $pb-mi-base 20%, transparent);
   border-radius: 4px;
-  background: var(--box-bg-1);
+  background: color-mix(in srgb, $pb-mi-base 15%, transparent);
   column-gap: 4px;
   cursor: pointer;
 
   &.empty {
     opacity: 0.4;
+
+    .pb-mi-cnt {
+      color: var(--tgc-od-red);
+    }
   }
 }
 
-.pwm-left {
+.pb-mi-left {
   position: relative;
   height: 100%;
   flex-shrink: 0;
@@ -92,10 +93,11 @@ $pwm-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
     top: 0;
     width: 100%;
     height: 100%;
+    vertical-align: center;
   }
 }
 
-.pwm-right {
+.pb-mi-right {
   position: relative;
   overflow: hidden;
   max-width: 100%;
@@ -106,19 +108,19 @@ $pwm-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   word-break: break-all;
 }
 
-.pwm-extra {
+.pb-mi-extra {
   position: absolute;
   z-index: 1;
   right: 2px;
   bottom: 0;
-  color: $pwm-base;
+  color: $pb-mi-base;
   font-size: 8px;
   font-style: italic;
   opacity: 0.8;
 }
 
 .pb-mi-cnt {
-  @include github-styles.github-tag-dark-gen($pwm-base);
+  @include github-styles.github-tag-dark-gen($pb-mi-base);
 
   position: absolute;
   top: 0;

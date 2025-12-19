@@ -21,6 +21,8 @@ const idColor = computed<string>(() => getOdStarColor(props.material.star));
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
+$pw-mi-base: v-bind(idcolor); /* stylelint-disable-line value-keyword-case */
+
 .pw-mi-box {
   position: relative;
   display: flex;
@@ -29,9 +31,9 @@ const idColor = computed<string>(() => getOdStarColor(props.material.star));
   align-items: center;
   justify-content: flex-start;
   padding-right: 8px;
-  border: 1px solid var(--common-shadow-1);
+  border: 1px solid color-mix(in srgb, $pw-mi-base 20%, transparent);
   border-radius: 4px;
-  background: var(--box-bg-1);
+  background: color-mix(in srgb, $pw-mi-base 15%, transparent);
   column-gap: 4px;
 }
 
@@ -66,7 +68,7 @@ const idColor = computed<string>(() => getOdStarColor(props.material.star));
   z-index: 1;
   right: 2px;
   bottom: 0;
-  color: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
+  color: $pw-mi-base;
   font-size: 8px;
   font-style: italic;
   opacity: 0.8;
