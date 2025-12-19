@@ -1,21 +1,22 @@
+<!-- 材料WIKI -->
 <template>
   <v-app-bar>
     <template #prepend>
       <div class="twm-top-prepend">
         <div class="title">
-          <img src="/source/UI/wikiGCG.webp" alt="icon" />
+          <img alt="icon" src="/source/UI/wikiGCG.webp" />
           <span>材料图鉴</span>
         </div>
         <v-select
           v-model="selectType"
-          :items="materialTypes"
-          item-title="type"
-          :hide-details="true"
           :clearable="true"
-          width="250px"
-          label="材料类别"
+          :hide-details="true"
+          :items="materialTypes"
           density="compact"
+          item-title="type"
+          label="材料类别"
           variant="outlined"
+          width="250px"
         >
           <template #item="{ props, item }">
             <v-list-item v-bind="props">
@@ -31,12 +32,12 @@
       <div class="twm-top-append">
         <v-text-field
           v-model="search"
-          variant="outlined"
-          density="compact"
-          prepend-inner-icon="mdi-magnify"
-          label="搜索"
-          :single-line="true"
           :hide-details="true"
+          :single-line="true"
+          density="compact"
+          label="搜索"
+          prepend-inner-icon="mdi-magnify"
+          variant="outlined"
           @keydown.enter="searchMaterial()"
           @click:prepend-inner="searchMaterial()"
         />
@@ -44,36 +45,30 @@
     </template>
   </v-app-bar>
   <div class="twm-box">
-    <div
+    <PwMaterialItem
+      v-for="material in sortMaterialsData"
+      :key="material.id"
+      :material
       class="twm-item"
-      v-for="item in sortMaterialsData"
-      :key="item.id"
-      @click="toMaterial(item)"
-      :title="item.name"
-    >
-      <div class="twm-item-left">
-        <img class="twm-item-bg" :src="`/icon/bg/${item.star}-Star.webp`" alt="bg" />
-        <img class="twm-item-icon" :src="`/icon/material/${item.id}.webp`" alt="icon" />
-      </div>
-      <div class="twm-item-right">{{ item.name }}</div>
-      <div class="twm-item-id">{{ item.id }}</div>
-    </div>
+      @click="toMaterial(material)"
+    />
   </div>
-  <TwoMaterial v-model="visible" :data="curMaterial" v-if="curMaterial">
+  <TwoMaterial v-if="curMaterial" v-model="visible" :data="curMaterial">
     <template #left>
       <div class="card-arrow" @click="switchMaterial(false)">
-        <img src="@/assets/icons/arrow-right.svg" alt="right" />
+        <img alt="right" src="@/assets/icons/arrow-right.svg" />
       </div>
     </template>
     <template #right>
       <div class="card-arrow" @click="switchMaterial(true)">
-        <img src="@/assets/icons/arrow-right.svg" alt="right" />
+        <img alt="right" src="@/assets/icons/arrow-right.svg" />
       </div>
     </template>
   </TwoMaterial>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import PwMaterialItem from "@comp/pageWiki/pw-material-item.vue";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
@@ -213,43 +208,6 @@ function searchMaterial(): void {
   background: var(--box-bg-1);
   column-gap: 5px;
   cursor: pointer;
-}
-
-.twm-item-left {
-  position: relative;
-  width: 45px;
-  height: 45px;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
-}
-
-.twm-item-bg,
-.twm-item-icon {
-  position: absolute;
-  top: 0;
-  width: 45px;
-  height: 45px;
-  border-bottom-left-radius: 5px;
-  border-top-left-radius: 5px;
-}
-
-.twm-item-right {
-  position: relative;
-  overflow: hidden;
-  max-width: calc(100% - 50px);
-  color: var(--box-text-2);
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  word-break: break-all;
-}
-
-.twm-item-id {
-  position: absolute;
-  right: 4px;
-  bottom: 2px;
-  font-size: 8px;
-  opacity: 0.6;
 }
 
 .card-arrow {

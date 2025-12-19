@@ -1,31 +1,32 @@
+<!-- 武器WIKI详情 -->
 <template>
-  <div class="tww-box" v-if="data !== undefined">
+  <div v-if="data" class="tww-box">
     <div class="tww-brief">
       <TItemBox :model-value="box" />
       <div class="tww-brief-info">
         <div class="tww-brief-title">
           <span>{{ data.name }}</span>
           <img
-            title="前往观测枢"
-            alt="observer"
-            @click="toWiki()"
             v-if="props.item.contentId !== 0"
+            alt="observer"
             src="/platforms/mhy/observer.webp"
+            title="前往观测枢"
+            @click="toWiki()"
           />
         </div>
         <v-rating
           v-if="data.affix"
-          class="tww-brief-rating"
           v-model="select"
           :length="selectItems.length"
           :size="24"
+          class="tww-brief-rating"
           dense
         />
         <div class="tww-brief-desc">{{ data.description }}</div>
       </div>
     </div>
-    <TwcMaterials :data="data.materials" />
-    <v-expansion-panels class="tww-affix" v-if="data.affix">
+    <PwMaterialList :data="data.materials" />
+    <v-expansion-panels v-if="data.affix" class="tww-affix">
       <v-expansion-panel expand-icon="mdi-menu-down">
         <template #title>
           <span class="tww-text-title">{{ data.affix.Name }}-精炼 {{ select }}</span>
@@ -40,9 +41,9 @@
     </v-expansion-panels>
     <v-expansion-panels class="tww-story">
       <v-expansion-panel
-        expand-icon="mdi-menu-down"
         v-for="(story, index) in data.story"
         :key="index"
+        expand-icon="mdi-menu-down"
       >
         <template #title>
           <span class="tww-text-title">
@@ -63,7 +64,7 @@ import { toObcPage } from "@utils/TGWindow.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import TwcMaterials from "./twc-materials.vue";
+import PwMaterialList from "./pw-material-list.vue";
 
 import { WikiWeaponData } from "@/data/index.js";
 
@@ -151,10 +152,6 @@ async function toWiki(): Promise<void> {
     cursor: pointer;
     object-fit: contain;
   }
-}
-
-.tww-brief-info :last-child {
-  cursor: pointer;
 }
 
 .tww-brief-rating {

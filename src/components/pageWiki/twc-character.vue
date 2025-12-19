@@ -1,5 +1,6 @@
+<!-- 角色WIKI详情 -->
 <template>
-  <div class="twc-box" v-if="data !== undefined">
+  <div v-if="data !== undefined" class="twc-box">
     <div class="twc-brief">
       <TItembox :model-value="box" />
       <div class="twc-brief-info">
@@ -8,11 +9,11 @@
             <span>{{ data.name }}</span>
             <span>{{ data.title }}</span>
             <img
-              title="前往观测枢"
-              alt="observer"
-              @click="toWiki()"
               v-if="props.item.contentId !== 0"
+              alt="observer"
               src="/platforms/mhy/observer.webp"
+              title="前往观测枢"
+              @click="toWiki()"
             />
           </div>
           <div class="twc-bi-desc">{{ data.description }}</div>
@@ -55,8 +56,8 @@
         </div>
       </div>
     </div>
-    <TopNameCard :data="nameCard" @selected="showNc = !showNc" v-if="nameCard" />
-    <TwcMaterials :data="data.materials" />
+    <TopNameCard v-if="nameCard" :data="nameCard" @selected="showNc = !showNc" />
+    <PwMaterialList :data="data.materials" />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
     <v-expansion-panels class="twc-text-item">
@@ -65,9 +66,9 @@
         <template #text>
           <v-expansion-panels variant="popout">
             <v-expansion-panel
-              expand-icon="mdi-menu-down"
               v-for="(item, index) in data?.talks"
               :key="index"
+              expand-icon="mdi-menu-down"
             >
               <template #title>
                 <span class="twc-text-item-title">{{ item.Title }}</span>
@@ -84,9 +85,9 @@
         <template #text>
           <v-expansion-panels variant="popout">
             <v-expansion-panel
-              expand-icon="mdi-menu-down"
               v-for="(item, index) in data.stories"
               :key="index"
+              expand-icon="mdi-menu-down"
             >
               <template #title>
                 <span class="twc-text-item-title">{{ item.Title }}</span>
@@ -102,7 +103,7 @@
     <ToNameCard v-if="hasNc" v-model="showNc" :data="nameCard" />
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
@@ -112,8 +113,8 @@ import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import PwMaterialList from "./pw-material-list.vue";
 import TwcConstellations from "./twc-constellations.vue";
-import TwcMaterials from "./twc-materials.vue";
 import TwcSkills from "./twc-skills.vue";
 
 import { AppCharacterData, AppNameCardsData, getWikiCharacterById } from "@/data/index.js";

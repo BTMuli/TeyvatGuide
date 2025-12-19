@@ -1,12 +1,12 @@
 <!-- 背包材料物品项 -->
 <template>
-  <div :title="props.info.name" class="pb-mi-box" @click="toMaterial()">
-    <div class="pb-mi-left">
+  <div :title="props.info.name" class="pwm-box" @click="toMaterial()">
+    <div class="pwm-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/icon/material/${props.info.id}.webp`" alt="icon" class="icon" />
     </div>
-    <div class="pb-mi-right">{{ props.info.name }}</div>
-    <div class="pb-mi-id">{{ props.info.type }}·{{ props.info.id }}</div>
+    <div class="pwm-right">{{ props.info.name }}</div>
+    <div class="pwm-extra">{{ props.info.type }}·{{ props.info.id }}</div>
     <div class="pb-mi-cnt">{{ item.count }}</div>
   </div>
 </template>
@@ -51,7 +51,7 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
-.pb-mi-box {
+.pwm-box {
   position: relative;
   display: flex;
   overflow: hidden;
@@ -66,7 +66,7 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
   cursor: pointer;
 }
 
-.pb-mi-left {
+.pwm-left {
   position: relative;
   height: 100%;
   flex-shrink: 0;
@@ -81,7 +81,7 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
   }
 }
 
-.pb-mi-right {
+.pwm-right {
   position: relative;
   overflow: hidden;
   max-width: 100%;
@@ -92,7 +92,7 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
   word-break: break-all;
 }
 
-.pb-mi-id {
+.pwm-extra {
   position: absolute;
   z-index: 1;
   right: 2px;
