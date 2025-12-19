@@ -9,7 +9,7 @@ import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
 import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
-import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
+import { exportUigf4Data, readUigf4Data, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 
 import TGSqlite from "../index.js";
 
@@ -199,7 +199,7 @@ async function cleanGachaRecords(
 
 /**
  * 合并祈愿数据
- * @since Beta v0.8.7
+ * @since Beta v0.9.0
  * @param {string} uid - UID
  * @param {Array<TGApp.Plugins.UIGF.GachaItem>} data - UIGF数据
  * @param {boolean} showProgress - 是否显示进度
@@ -214,25 +214,32 @@ async function mergeUIGF(
   let cnt = 0;
   const len = data.length;
   let progress = 0;
+  let timer: NodeJS.Timeout | null = null;
+  if (showProgress) {
+    timer = setInterval(async () => {
+      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      const current = data[cnt]?.time ?? "";
+      const name = data[cnt]?.name ?? "";
+      const rank = data[cnt]?.rank_type ?? "0";
+      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`);
+    }, 1000);
+  }
   for (const gacha of data) {
     const trans = transGacha(gacha);
-    if (cnt % 20 === 0) {
-      progress = Math.round((cnt / len) * 100 * 100) / 100;
-      if (showProgress) {
-        await showLoading.update(
-          `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
-        );
-      }
-      cnt++;
-    }
     const sql = getInsertSql(uid, trans);
     await db.execute(sql);
+    cnt++;
+  }
+  if (timer) {
+    clearInterval(timer);
+    progress = 100;
+    await showLoading.update(`[${progress}%] 完成`);
   }
 }
 
 /**
  * 合并祈愿数据（v4.0）
- * @since Beta v0.8.7
+ * @since Beta v0.9.0
  * @param {TGApp.Plugins.UIGF.GachaHk4e} data - UIGF数据
  * @param {boolean} showProgress - 是否显示进度
  * @return {Promise<void>}
@@ -245,25 +252,32 @@ async function mergeUIGF4(
   let cnt: number = 0;
   const len = data.list.length;
   let progress: number = 0;
+  let timer: NodeJS.Timeout | null = null;
+  if (showProgress) {
+    timer = setInterval(async () => {
+      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      const current = data.list[cnt]?.time ?? "";
+      const name = data.list[cnt]?.name ?? "";
+      const rank = data.list[cnt]?.rank_type ?? "0";
+      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`);
+    }, 1000);
+  }
   for (const gacha of data.list) {
     const trans = transGacha(gacha, data.timezone);
-    if (cnt % 20 === 0) {
-      progress = Math.round((cnt / len) * 100 * 100) / 100;
-      if (showProgress) {
-        await showLoading.update(
-          `[${progress}%][${trans.time}] ${"⭐".repeat(Number(trans.rank_type))}-${trans.name}`,
-        );
-      }
-    }
     const sql = getInsertSql(data.uid.toString(), trans);
     await db.execute(sql);
     cnt++;
   }
+  if (timer) {
+    clearInterval(timer);
+    progress = 100;
+    await showLoading.update(`[${progress}%] 完成`);
+  }
 }
 
 /**
- * @description 备份祈愿数据
- * @since Beta v0.6.0
+ * 备份祈愿数据
+ * @since Beta v0.9.0
  * @param {string} dir - 备份目录
  * @returns {Promise<void>}
  */
@@ -273,17 +287,14 @@ async function backUpUigf(dir: string): Promise<void> {
     await mkdir(dir, { recursive: true });
   }
   const uidList = await getUidList();
-  for (const uid of uidList) {
-    const dataGacha = await getGachaRecords(uid);
-    const savePath = `${dir}${path.sep()}UIGF_${uid}.json`;
-    await exportUigfData(uid, dataGacha, savePath);
-  }
+  const savePath = `${dir}${path.sep()}UIGF4.json`;
+  await exportUigf4Data(uidList, savePath);
   await TGLogger.Info("祈愿数据备份完成");
 }
 
 /**
- * @description 恢复祈愿数据
- * @since Beta v0.6.0
+ * 恢复祈愿数据
+ * @since Beta v0.9.0
  * @param {string} dir - 备份目录
  * @returns {Promise<boolean>}
  */
@@ -292,29 +303,55 @@ async function restoreUigf(dir: string): Promise<boolean> {
     await TGLogger.Warn("不存在指定的祈愿备份目录");
     return false;
   }
-  const filesRead = await readDir(dir);
-  // 校验 UIGF_xxx.json 文件
-  const fileRegex = /^UIGF_\d+\.json$/;
-  const files = filesRead.filter((item) => item.isFile && fileRegex.test(item.name));
-  if (files.length === 0) return false;
-  try {
-    for (const file of files) {
-      const filePath = `${dir}${path.sep()}${file.name}`;
-      const check = await verifyUigfData(filePath);
+  let cnt = 0;
+  // 旧版备份文件 UIGF_{{uid}}
+  const legacyReg = /^UIGF_\d+\.json$/;
+  const legacyFiles = (await readDir(dir)).filter(
+    (item) => item.isFile && legacyReg.test(item.name),
+  );
+  if (legacyFiles.length > 0) {
+    try {
+      for (const file of legacyFiles) {
+        await showLoading.update(`祈愿文件:${file.name}`);
+        const filePath = `${dir}${path.sep()}${file.name}`;
+        const check = await verifyUigfData(filePath);
+        if (!check) {
+          await showLoading.update(`UIGF数据校验失败`);
+          await TGLogger.Warn(`UIGF数据校验失败${filePath}`);
+          continue;
+        }
+        const data = await readUigfData(filePath);
+        const uid = data.info.uid;
+        await showLoading.update(`正在导入${data.info.uid}的${data.list.length}条祈愿数据`);
+        await mergeUIGF(uid, data.list, true);
+        cnt++;
+      }
+    } catch (e) {
+      await TGLogger.Error(`恢复祈愿数据失败${dir}`);
+      await TGLogger.Error(typeof e === "string" ? e : JSON.stringify(e));
+    }
+  }
+  const filePath = `${dir}${path.sep()}UIGF4.json`;
+  if (!(await exists(filePath))) {
+    await TGLogger.Warn(`未检测到UIGF4备份文件`);
+  } else {
+    try {
+      const check = await verifyUigfData(filePath, true);
       if (!check) {
         await TGLogger.Warn(`UIGF数据校验失败${filePath}`);
-        continue;
+      } else {
+        const data = await readUigf4Data(filePath);
+        for (const uidData of data.hk4e) {
+          await showLoading.update(`正在导入${uidData.uid}的${uidData.list.length}条祈愿记录`);
+          await mergeUIGF4(uidData, true);
+        }
       }
-      const data = await readUigfData(filePath);
-      const uid = data.info.uid;
-      await mergeUIGF(uid, data.list);
+    } catch (e) {
+      await TGLogger.Error(`恢复祈愿数据失败${dir}`);
+      await TGLogger.Error(typeof e === "string" ? e : JSON.stringify(e));
     }
-  } catch (e) {
-    await TGLogger.Error(`恢复祈愿数据失败${dir}`);
-    await TGLogger.Error(typeof e === "string" ? e : JSON.stringify(e));
-    return false;
   }
-  return true;
+  return cnt > 0;
 }
 
 /**

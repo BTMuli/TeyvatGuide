@@ -1,9 +1,9 @@
 /**
- * @file utils/UIGF.ts
- * @description UIGF工具类
- * @since Beta v0.7.10
+ * UIGF工具类
+ * @since Beta v0.9.0
  */
 
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import { app, path } from "@tauri-apps/api";
@@ -17,7 +17,7 @@ import { timestampToDate } from "./toolFunc.js";
 import { Uigf4Schema, UigfSchema } from "@/data/index.js";
 
 /**
- * @description 获取 UIGF 时区
+ * 获取 UIGF 时区
  * @since Beta v0.3.5
  * @param {string} uid - UID
  * @returns {number} 时区
@@ -29,7 +29,7 @@ function getUigfTimeZone(uid: string): number {
 }
 
 /**
- * @description 传入utc8时间字符串跟目标时区，转成目标时区时间字符串
+ * 传入utc8时间字符串跟目标时区，转成目标时区时间字符串
  * @since Beta v0.7.5
  * @param {string} time - 时间字符串
  * @param {number} timezone - 时区
@@ -43,7 +43,7 @@ function getExportTime(time: string, timezone: number): string {
 }
 
 /**
- * @description 获取 UIGF 头部信息
+ * 获取 UIGF 头部信息
  * @since Beta v0.7.5
  * @param {string} uid - UID
  * @param {number} timezone - 时区
@@ -64,7 +64,7 @@ async function getUigfHeader(uid: string, timezone: number): Promise<TGApp.Plugi
 }
 
 /**
- * @description 获取 UIGF v4.1 头部信息
+ * 获取 UIGF v4.1 头部信息
  * @since Beta v0.7.10
  * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.1 头部信息
  */
@@ -80,7 +80,7 @@ export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
 }
 
 /**
- * @description 数据转换-数据库到 UIGF
+ * 数据转换-数据库到 UIGF
  * @since Beta v0.7.5
  * @param {TGApp.Sqlite.GachaRecords.TableGacha[]} data - 数据库数据
  * @param {number} timezone - 时区
@@ -106,7 +106,7 @@ function convertDataToUigf(
 }
 
 /**
- * @description 检测是否存在 UIGF 数据，采用 ajv 验证 schema
+ * 检测是否存在 UIGF 数据，采用 ajv 验证 schema
  * @since Beta v0.6.5
  * @param {string} path - UIGF 数据路径
  * @param {boolean} isVersion4 - 是否为 UIGF v4.0
@@ -127,7 +127,7 @@ export async function verifyUigfData(path: string, isVersion4: boolean = false):
 }
 
 /**
- * @description 验证 UIGF 数据
+ * 验证 UIGF 数据
  * @since Beta v0.5.1
  * @param {object} data - UIGF 数据
  * @returns {boolean} 是否验证通过
@@ -150,7 +150,7 @@ function validateUigfData(data: object): boolean {
 }
 
 /**
- * @description 验证 UIGF v4.0 数据
+ * 验证 UIGF v4.0 数据
  * @since Beta v0.5.0
  * @param {object} data - UIGF 数据
  * @returns {boolean} 是否验证通过
@@ -166,7 +166,7 @@ function validateUigf4Data(data: object): boolean {
 }
 
 /**
- * @description 读取 UIGF 数据
+ * 读取 UIGF 数据
  * @since Beta v0.5.0
  * @param {string} userPath - UIGF 数据路径
  * @returns {Promise<TGApp.Plugins.UIGF.Schema>} UIGF 数据
@@ -177,7 +177,7 @@ export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF
 }
 
 /**
- * @description 读取 UIGF 4.0 数据
+ * 读取 UIGF 4.0 数据
  * @since Beta v0.5.0
  * @param {string} userPath - UIGF 数据路径
  * @returns {Promise<TGApp.Plugins.UIGF.Schema4>} UIGF 数据
@@ -188,7 +188,7 @@ export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIG
 }
 
 /**
- * @description 导出 UIGF 数据
+ * 导出 UIGF 数据
  * @since Beta v0.7.5
  * @param {string} uid - UID
  * @param {TGApp.Sqlite.GachaRecords.TableGacha[]} gachaList - 祈愿列表
@@ -210,13 +210,22 @@ export async function exportUigfData(
 }
 
 /**
- * @description 获取单项UID的UIGF4.0数据
- * @since Beta v0.7.5
- * @param {string} uid - UID
- * @returns {Promise<TGApp.Plugins.UIGF.GachaHk4e>}
+ * 导出UIGF4数据
+ * @since Beta v0.9.0
+ * @param {Array<string>} uids - UID列表
+ * @param {string} [savePath] - 保存路径
+ * @returns {Promise<void>}
  */
-export async function getUigf4Item(uid: string): Promise<TGApp.Plugins.UIGF.GachaHk4e> {
-  const gachaList = await TSUserGacha.getGachaRecords(uid);
-  const timezone = getUigfTimeZone(uid);
-  return { uid: uid, timezone: timezone, list: convertDataToUigf(gachaList, timezone) };
+export async function exportUigf4Data(uids: Array<string> = [], savePath?: string): Promise<void> {
+  const header = await getUigf4Header();
+  const filePath = savePath ?? `${await path.appLocalDataDir()}userData\\UIGF4.json`;
+  const data: Array<TGApp.Plugins.UIGF.GachaHk4e> = [];
+  for (const uid of uids) {
+    const gachaList = await TSUserGacha.getGachaRecords(uid);
+    await showLoading.update(`正在导出${uid}的${gachaList.length}条祈愿记录`);
+    const timezone = getUigfTimeZone(uid);
+    data.push({ uid: uid, timezone: timezone, list: convertDataToUigf(gachaList, timezone) });
+  }
+  const uigf4Data: TGApp.Plugins.UIGF.Schema4 = { info: header, hk4e: data };
+  await writeTextFile(filePath, JSON.stringify(uigf4Data, null, 2));
 }

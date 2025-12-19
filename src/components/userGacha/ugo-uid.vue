@@ -5,7 +5,7 @@
         <div class="ugo-title">{{ title }}</div>
         <div class="ugo-fp" title="点击选择文件路径" @click="selectFile()">文件路径:{{ fp }}</div>
       </div>
-      <div class="ugo-header" v-if="props.mode === 'import' && dataRaw">
+      <div v-if="props.mode === 'import' && dataRaw" class="ugo-header">
         <div class="ugo-header-item">
           <div>应用信息：</div>
           <div>{{ dataRaw.info.export_app }} {{ dataRaw.info.export_app_version }}</div>
@@ -19,7 +19,7 @@
           <div>{{ timestampToDate(Number(dataRaw.info.export_timestamp) * 1000) }}</div>
         </div>
       </div>
-      <v-item-group multiple v-model="selectedData" class="ugo-content">
+      <v-item-group v-model="selectedData" class="ugo-content" multiple>
         <v-item
           v-for="(item, index) in data"
           :key="index"
@@ -40,8 +40,8 @@
         </v-item>
       </v-item-group>
       <div class="ugo-bottom">
-        <v-btn class="ugo-item-btn" @click="visible = false" :rounded="true">取消</v-btn>
-        <v-btn class="ugo-item-btn" @click="handleSelected()" :rounded="true">确定</v-btn>
+        <v-btn :rounded="true" class="ugo-item-btn" @click="visible = false">取消</v-btn>
+        <v-btn :rounded="true" class="ugo-item-btn" @click="handleSelected()">确定</v-btn>
       </div>
     </div>
   </TOverlay>
@@ -53,10 +53,9 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
-import { writeTextFile } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { getUigf4Header, getUigf4Item, readUigf4Data, verifyUigfData } from "@utils/UIGF.js";
+import { exportUigf4Data, readUigf4Data, verifyUigfData } from "@utils/UIGF.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 type UgoUidProps = { mode: "import" | "export" };
@@ -77,14 +76,14 @@ onMounted(async () => {
 });
 
 watch(
-  () => visible.value,
+  () => [visible.value, props.mode],
   async () => {
     if (visible.value) await refreshData();
   },
 );
 
 async function getDefaultSavePath(): Promise<string> {
-  const tsNow = new Date().getTime();
+  const tsNow = Math.floor(Date.now() / 1000);
   return `${await path.downloadDir()}${path.sep()}UIGFv4.1_${tsNow}.json`;
 }
 
@@ -208,22 +207,21 @@ async function handleExport(): Promise<void> {
     showSnackbar.warn("请至少选择一个!");
     return;
   }
-  await showLoading.start("正在导出数据...", "正在生成文件头");
-  const header = await getUigf4Header();
-  const data: TGApp.Plugins.UIGF.GachaHk4e[] = [];
-  for (const item of selectedData.value) {
-    await showLoading.update(`正在导出UID: ${item.uid}`);
-    const dataItem = await getUigf4Item(item.uid);
-    data.push(dataItem);
-  }
-  await showLoading.update("正在写入文件...");
-  await writeTextFile(fp.value, JSON.stringify({ info: header, hk4e: data }));
+  const totalCnt = selectedData.value.map((s) => s.length).reduce((a, b) => a + b, 0);
+  await showLoading.start(
+    "正在导出数据...",
+    `${selectedData.value.length}条UID - ${totalCnt}条记录`,
+  );
+  await exportUigf4Data(
+    selectedData.value.map((s) => s.uid.toString()),
+    fp.value,
+  );
   await showLoading.end();
   showSnackbar.success(`导出成功! 文件路径: ${fp.value}`);
   fp.value = await getDefaultSavePath();
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .ugo-box {
   position: relative;
   width: 600px;

@@ -1,7 +1,6 @@
 /**
- * @file utils/dataBS.ts
- * @description 用户数据的备份、恢复、迁移
- * @since Beta v0.8.0
+ * 用户数据的备份、恢复、迁移
+ * @since Beta v0.9.0
  */
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -16,8 +15,9 @@ import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import TGLogger from "./TGLogger.js";
 
 /**
- * @description 备份用户数据
- * @since Beta v0.8.0
+ * 备份用户数据
+ * @since Beta v0.9.0
+ * @TODO 重构祈愿部分备份&读取，处理胡桃数据&应用自身数据的导入
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
@@ -41,8 +41,8 @@ export async function backUpUserData(dir: string): Promise<void> {
 }
 
 /**
- * @description 恢复用户数据
- * @since Beta v0.8.0
+ * 恢复用户数据
+ * @since Beta v0.9.0
  * @param {string} dir 备份目录路径
  * @returns {Promise<void>}
  */
