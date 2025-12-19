@@ -129,8 +129,8 @@ async function delCombat(uid: string): Promise<void> {
 }
 
 /**
- * @description 备份剧诗数据
- * @since Beta v0.6.3
+ * 备份剧诗数据
+ * @since Beta v0.9.0
  * @param {string} dir - 备份目录
  * @returns {Promise<void>}
  */
@@ -140,7 +140,7 @@ async function backupCombat(dir: string): Promise<void> {
     await TGLogger.Warn(`[TSUserCombat][Backup] 未检测到备份目录，已创建`);
   }
   const data = await getCombat();
-  await writeTextFile(`${dir}${path.sep()}combat.json`, JSON.stringify(data));
+  await writeTextFile(`${dir}${path.sep()}combat.json`, JSON.stringify(data, null, 2));
 }
 
 /**

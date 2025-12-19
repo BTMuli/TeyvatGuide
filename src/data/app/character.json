@@ -8,6 +8,7 @@
     "birthday": [3, 14],
     "star": 5,
     "element": "火",
+    "release": "2025-12-02 00:00:00",
     "weapon": "单手剑",
     "nameCard": "杜林·曜心"
   },
@@ -20,6 +21,7 @@
     "birthday": [5, 9],
     "star": 5,
     "element": "草",
+    "release": "2025-10-21 00:00:00",
     "weapon": "法器",
     "nameCard": "奈芙尔·秘闻"
   },
@@ -32,6 +34,7 @@
     "birthday": [10, 31],
     "star": 5,
     "element": "雷",
+    "release": "2025-09-30 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "菲林斯·誓灯"
   },
@@ -44,6 +47,7 @@
     "birthday": [3, 1],
     "star": 5,
     "element": "草",
+    "release": "2025-09-09 00:00:00",
     "weapon": "法器",
     "nameCard": "菈乌玛·枝角"
   },
@@ -56,6 +60,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "火",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -68,6 +73,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "火",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -80,6 +86,7 @@
     "birthday": [4, 2],
     "star": 5,
     "element": "雷",
+    "release": "2025-07-29 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "伊涅芙·指令"
   },
@@ -92,6 +99,7 @@
     "birthday": [11, 5],
     "star": 5,
     "element": "冰",
+    "release": "2025-06-17 00:00:00",
     "weapon": "单手剑",
     "nameCard": "丝柯克·孤影"
   },
@@ -104,6 +112,7 @@
     "birthday": [6, 8],
     "star": 5,
     "element": "冰",
+    "release": "2025-05-06 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "爱可菲·韵味"
   },
@@ -116,6 +125,7 @@
     "birthday": [11, 15],
     "star": 5,
     "element": "雷",
+    "release": "2025-03-25 00:00:00",
     "weapon": "法器",
     "nameCard": "瓦雷莎·力源"
   },
@@ -128,6 +138,7 @@
     "birthday": [3, 16],
     "star": 5,
     "element": "风",
+    "release": "2025-02-11 00:00:00",
     "weapon": "法器",
     "nameCard": "梦见月瑞希·噩喰"
   },
@@ -140,6 +151,7 @@
     "birthday": [1, 20],
     "star": 5,
     "element": "冰",
+    "release": "2024-12-31 00:00:00",
     "weapon": "法器",
     "nameCard": "茜特菈莉·白星"
   },
@@ -152,6 +164,7 @@
     "birthday": [8, 28],
     "star": 5,
     "element": "火",
+    "release": "2024-12-31 00:00:00",
     "weapon": "双手剑",
     "nameCard": "玛薇卡·日冕"
   },
@@ -164,6 +177,7 @@
     "birthday": [12, 10],
     "star": 5,
     "element": "风",
+    "release": "2024-11-19 00:00:00",
     "weapon": "弓",
     "nameCard": "恰斯卡·全弹"
   },
@@ -176,6 +190,7 @@
     "birthday": [3, 13],
     "star": 5,
     "element": "岩",
+    "release": "2024-10-08 00:00:00",
     "weapon": "单手剑",
     "nameCard": "希诺宁·律动"
   },
@@ -188,6 +203,7 @@
     "birthday": [8, 3],
     "star": 5,
     "element": "水",
+    "release": "2024-08-27 00:00:00",
     "weapon": "法器",
     "nameCard": "玛拉妮·鲨鲨"
   },
@@ -200,6 +216,7 @@
     "birthday": [11, 11],
     "star": 5,
     "element": "草",
+    "release": "2024-09-17 18:00:00",
     "weapon": "双手剑",
     "nameCard": "基尼奇·阿乔"
   },
@@ -212,6 +229,7 @@
     "birthday": [9, 22],
     "star": 5,
     "element": "草",
+    "release": "2024-08-06 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "艾梅莉埃·后调"
   },
@@ -224,6 +242,7 @@
     "birthday": [9, 20],
     "star": 5,
     "element": "雷",
+    "release": "2024-06-04 00:00:00",
     "weapon": "单手剑",
     "nameCard": "克洛琳德·取人"
   },
@@ -236,6 +255,7 @@
     "birthday": [8, 22],
     "star": 5,
     "element": "火",
+    "release": "2024-04-23 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "阿蕾奇诺·法度"
   },
@@ -248,6 +268,7 @@
     "birthday": [3, 30],
     "star": 5,
     "element": "水",
+    "release": "2024-06-26 18:00:00",
     "weapon": "弓",
     "nameCard": "希格雯·疗法"
   },
@@ -260,6 +281,7 @@
     "birthday": [8, 17],
     "star": 5,
     "element": "岩",
+    "release": "2024-03-12 00:00:00",
     "weapon": "单手剑",
     "nameCard": "千织·展袖"
   },
@@ -272,6 +294,7 @@
     "birthday": [4, 11],
     "star": 5,
     "element": "风",
+    "release": "2024-01-30 00:00:00",
     "weapon": "法器",
     "nameCard": "闲云·鹤云"
   },
@@ -284,6 +307,7 @@
     "birthday": [8, 16],
     "star": 5,
     "element": "岩",
+    "release": "2023-12-19 00:00:00",
     "weapon": "双手剑",
     "nameCard": "娜维娅·刺玫"
   },
@@ -296,6 +320,7 @@
     "birthday": [10, 13],
     "star": 5,
     "element": "水",
+    "release": "2023-11-07 00:00:00",
     "weapon": "单手剑",
     "nameCard": "芙宁娜·欢宴"
   },
@@ -308,6 +333,7 @@
     "birthday": [12, 18],
     "star": 5,
     "element": "水",
+    "release": "2023-09-26 00:00:00",
     "weapon": "法器",
     "nameCard": "那维莱特·流澜"
   },
@@ -320,6 +346,7 @@
     "birthday": [11, 23],
     "star": 5,
     "element": "冰",
+    "release": "2023-10-17 18:00:00",
     "weapon": "法器",
     "nameCard": "莱欧斯利·缄锁"
   },
@@ -332,6 +359,7 @@
     "birthday": [2, 2],
     "star": 5,
     "element": "火",
+    "release": "2023-08-15 00:00:00",
     "weapon": "弓",
     "nameCard": "林尼·弄假"
   },
@@ -344,6 +372,7 @@
     "birthday": [4, 25],
     "star": 5,
     "element": "草",
+    "release": "2023-05-02 18:00:00",
     "weapon": "法器",
     "nameCard": "白术·祛风"
   },
@@ -356,6 +385,7 @@
     "birthday": [4, 7],
     "star": 5,
     "element": "火",
+    "release": "2023-02-28 00:00:00",
     "weapon": "双手剑",
     "nameCard": "迪希雅·净焰"
   },
@@ -368,6 +398,7 @@
     "birthday": [2, 11],
     "star": 5,
     "element": "草",
+    "release": "2023-01-17 00:00:00",
     "weapon": "单手剑",
     "nameCard": "艾尔海森·诲明"
   },
@@ -380,6 +411,7 @@
     "birthday": [1, 3],
     "star": 5,
     "element": "风",
+    "release": "2022-12-06 00:00:00",
     "weapon": "法器",
     "nameCard": "流浪者·浮歌"
   },
@@ -392,6 +424,7 @@
     "birthday": [10, 27],
     "star": 5,
     "element": "草",
+    "release": "2022-11-01 00:00:00",
     "weapon": "法器",
     "nameCard": "纳西妲·仰月"
   },
@@ -404,6 +437,7 @@
     "birthday": [6, 23],
     "star": 5,
     "element": "雷",
+    "release": "2022-09-27 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "赛诺·幽缄"
   },
@@ -416,6 +450,7 @@
     "birthday": [12, 3],
     "star": 5,
     "element": "水",
+    "release": "2022-10-14 18:00:00",
     "weapon": "单手剑",
     "nameCard": "妮露·莲舞"
   },
@@ -428,6 +463,7 @@
     "birthday": [12, 29],
     "star": 5,
     "element": "草",
+    "release": "2022-08-24 00:00:00",
     "weapon": "弓",
     "nameCard": "提纳里·沐露"
   },
@@ -440,6 +476,7 @@
     "birthday": [3, 26],
     "star": 5,
     "element": "水",
+    "release": "2022-03-30 00:00:00",
     "weapon": "单手剑",
     "nameCard": "神里绫人·涟漪"
   },
@@ -452,6 +489,7 @@
     "birthday": [3, 10],
     "star": 5,
     "element": "冰",
+    "release": "2022-01-05 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "申鹤·栉掠"
   },
@@ -464,6 +502,7 @@
     "birthday": [4, 4],
     "star": 5,
     "element": "冰",
+    "release": "2021-09-01 00:00:00",
     "weapon": "弓",
     "nameCard": "埃洛伊·曙光记"
   },
@@ -476,6 +515,7 @@
     "birthday": [4, 20],
     "star": 5,
     "element": "水",
+    "release": "2022-05-31 00:00:00",
     "weapon": "弓",
     "nameCard": "夜兰·一掷"
   },
@@ -488,6 +528,7 @@
     "birthday": [6, 27],
     "star": 5,
     "element": "雷",
+    "release": "2022-02-16 00:00:00",
     "weapon": "法器",
     "nameCard": "八重神子·梦狐"
   },
@@ -500,6 +541,7 @@
     "birthday": [6, 1],
     "star": 5,
     "element": "岩",
+    "release": "2021-12-14 18:00:00",
     "weapon": "双手剑",
     "nameCard": "一斗·鬼颜"
   },
@@ -512,6 +554,7 @@
     "birthday": [2, 22],
     "star": 5,
     "element": "水",
+    "release": "2021-09-21 18:00:00",
     "weapon": "法器",
     "nameCard": "珊瑚宫心海·渊"
   },
@@ -524,6 +567,7 @@
     "birthday": [6, 26],
     "star": 5,
     "element": "雷",
+    "release": "2021-09-01 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "雷电将军·开眼"
   },
@@ -536,6 +580,7 @@
     "birthday": [10, 25],
     "star": 5,
     "element": "冰",
+    "release": "2021-05-18 18:00:00",
     "weapon": "双手剑",
     "nameCard": "优菈·冰印"
   },
@@ -548,6 +593,7 @@
     "birthday": [6, 21],
     "star": 5,
     "element": "火",
+    "release": "2021-08-10 18:00:00",
     "weapon": "弓",
     "nameCard": "宵宫·琉金火花"
   },
@@ -560,6 +606,7 @@
     "birthday": [10, 29],
     "star": 5,
     "element": "风",
+    "release": "2021-06-29 18:00:00",
     "weapon": "单手剑",
     "nameCard": "枫原万叶·秋山椛狩"
   },
@@ -572,6 +619,7 @@
     "birthday": [7, 15],
     "star": 5,
     "element": "火",
+    "release": "2021-03-02 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "胡桃·安神"
   },
@@ -584,6 +632,7 @@
     "birthday": [11, 20],
     "star": 5,
     "element": "雷",
+    "release": "2020-09-15 04:00:00",
     "weapon": "单手剑",
     "nameCard": "刻晴·雷楔"
   },
@@ -596,6 +645,7 @@
     "birthday": [8, 31],
     "star": 5,
     "element": "水",
+    "release": "2020-09-15 04:00:00",
     "weapon": "法器",
     "nameCard": "莫娜·天星"
   },
@@ -608,6 +658,7 @@
     "birthday": [9, 13],
     "star": 5,
     "element": "岩",
+    "release": "2020-12-22 00:00:00",
     "weapon": "单手剑",
     "nameCard": "阿贝多·阳花"
   },
@@ -620,6 +671,7 @@
     "birthday": [12, 2],
     "star": 5,
     "element": "冰",
+    "release": "2021-01-12 18:00:00",
     "weapon": "弓",
     "nameCard": "甘雨·麟迹"
   },
@@ -632,6 +684,7 @@
     "birthday": [3, 3],
     "star": 5,
     "element": "冰",
+    "release": "2020-09-15 04:00:00",
     "weapon": "单手剑",
     "nameCard": "七七·冷藏"
   },
@@ -644,6 +697,7 @@
     "birthday": [7, 20],
     "star": 5,
     "element": "水",
+    "release": "2020-11-11 04:00:00",
     "weapon": "弓",
     "nameCard": "公子·魔装"
   },
@@ -656,6 +710,7 @@
     "birthday": [12, 31],
     "star": 5,
     "element": "岩",
+    "release": "2020-12-02 04:00:00",
     "weapon": "长柄武器",
     "nameCard": "钟离·天星"
   },
@@ -668,6 +723,7 @@
     "birthday": [7, 27],
     "star": 5,
     "element": "火",
+    "release": "2020-09-15 04:00:00",
     "weapon": "法器",
     "nameCard": "可莉·爆弹"
   },
@@ -680,6 +736,7 @@
     "birthday": [4, 17],
     "star": 5,
     "element": "风",
+    "release": "2021-02-02 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "魈·傩面"
   },
@@ -692,6 +749,7 @@
     "birthday": [6, 16],
     "star": 5,
     "element": "风",
+    "release": "2020-09-15 04:00:00",
     "weapon": "弓",
     "nameCard": "温迪·天青"
   },
@@ -704,6 +762,7 @@
     "birthday": [4, 30],
     "star": 5,
     "element": "火",
+    "release": "2020-09-15 04:00:00",
     "weapon": "双手剑",
     "nameCard": "迪卢克·燃烧"
   },
@@ -716,6 +775,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "火",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -728,6 +788,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "水",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -740,6 +801,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "草",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -752,6 +814,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "雷",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -764,6 +827,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "岩",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -776,6 +840,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "风",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -788,6 +853,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "火",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -800,6 +866,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "水",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -812,6 +879,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "草",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -824,6 +892,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "雷",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -836,6 +905,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "岩",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -848,6 +918,7 @@
     "birthday": [0, 0],
     "star": 5,
     "element": "风",
+    "release": "",
     "weapon": "单手剑",
     "nameCard": ""
   },
@@ -860,6 +931,7 @@
     "birthday": [3, 14],
     "star": 5,
     "element": "风",
+    "release": "2020-09-15 04:00:00",
     "weapon": "单手剑",
     "nameCard": "琴·风向"
   },
@@ -872,6 +944,7 @@
     "birthday": [9, 28],
     "star": 5,
     "element": "冰",
+    "release": "2021-07-21 00:00:00",
     "weapon": "单手剑",
     "nameCard": "神里绫华·扇子"
   },
@@ -884,6 +957,7 @@
     "birthday": [1, 5],
     "star": 4,
     "element": "风",
+    "release": "2025-12-02 00:00:00",
     "weapon": "弓",
     "nameCard": "雅珂达·帮手"
   },
@@ -896,6 +970,7 @@
     "birthday": [9, 21],
     "star": 4,
     "element": "水",
+    "release": "2025-09-09 00:00:00",
     "weapon": "双手剑",
     "nameCard": "爱诺·哎鸭"
   },
@@ -908,6 +983,7 @@
     "birthday": [5, 25],
     "star": 4,
     "element": "水",
+    "release": "2025-06-17 00:00:00",
     "weapon": "单手剑",
     "nameCard": "塔利雅·天职"
   },
@@ -920,6 +996,7 @@
     "birthday": [3, 23],
     "star": 4,
     "element": "风",
+    "release": "2025-05-06 00:00:00",
     "weapon": "法器",
     "nameCard": "伊法·哥们"
   },
@@ -932,6 +1009,7 @@
     "birthday": [8, 8],
     "star": 4,
     "element": "雷",
+    "release": "2025-03-25 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "伊安珊·不懈"
   },
@@ -944,6 +1022,7 @@
     "birthday": [1, 6],
     "star": 4,
     "element": "风",
+    "release": "2025-01-21 18:00:00",
     "weapon": "法器",
     "nameCard": "蓝砚·银燕"
   },
@@ -956,6 +1035,7 @@
     "birthday": [10, 14],
     "star": 4,
     "element": "雷",
+    "release": "2024-11-19 00:00:00",
     "weapon": "弓",
     "nameCard": "欧洛伦·夜翳"
   },
@@ -968,6 +1048,7 @@
     "birthday": [4, 22],
     "star": 4,
     "element": "岩",
+    "release": "2024-08-27 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "卡齐娜·转转"
   },
@@ -980,6 +1061,7 @@
     "birthday": [5, 31],
     "star": 4,
     "element": "雷",
+    "release": "2024-06-04 00:00:00",
     "weapon": "弓",
     "nameCard": "赛索斯·跋灵"
   },
@@ -992,6 +1074,7 @@
     "birthday": [12, 22],
     "star": 4,
     "element": "火",
+    "release": "2024-01-30 00:00:00",
     "weapon": "双手剑",
     "nameCard": "嘉明·文仔"
   },
@@ -1004,6 +1087,7 @@
     "birthday": [1, 10],
     "star": 4,
     "element": "火",
+    "release": "2024-01-09 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "夏沃蕾·贰型"
   },
@@ -1016,6 +1100,7 @@
     "birthday": [4, 10],
     "star": 4,
     "element": "冰",
+    "release": "2023-11-07 00:00:00",
     "weapon": "法器",
     "nameCard": "夏洛蒂·独家"
   },
@@ -1028,6 +1113,7 @@
     "birthday": [9, 24],
     "star": 4,
     "element": "冰",
+    "release": "2023-09-05 18:00:00",
     "weapon": "双手剑",
     "nameCard": "菲米尼·行进"
   },
@@ -1040,6 +1126,7 @@
     "birthday": [2, 2],
     "star": 4,
     "element": "风",
+    "release": "2023-08-15 00:00:00",
     "weapon": "单手剑",
     "nameCard": "琳妮特·成真"
   },
@@ -1052,6 +1139,7 @@
     "birthday": [7, 9],
     "star": 4,
     "element": "草",
+    "release": "2023-05-02 18:00:00",
     "weapon": "双手剑",
     "nameCard": "卡维·穹庭"
   },
@@ -1064,6 +1152,7 @@
     "birthday": [8, 11],
     "star": 4,
     "element": "冰",
+    "release": "2023-03-21 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "米卡·索引"
   },
@@ -1076,6 +1165,7 @@
     "birthday": [3, 6],
     "star": 4,
     "element": "草",
+    "release": "2023-01-17 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "瑶瑶·月桂"
   },
@@ -1088,6 +1178,7 @@
     "birthday": [8, 20],
     "star": 4,
     "element": "风",
+    "release": "2022-12-06 00:00:00",
     "weapon": "弓",
     "nameCard": "珐露珊·封秘"
   },
@@ -1100,6 +1191,7 @@
     "birthday": [12, 19],
     "star": 4,
     "element": "冰",
+    "release": "2022-11-18 18:00:00",
     "weapon": "单手剑",
     "nameCard": "莱依拉·昼梦"
   },
@@ -1112,6 +1204,7 @@
     "birthday": [5, 3],
     "star": 4,
     "element": "水",
+    "release": "2022-09-27 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "坎蒂丝·苍鹭"
   },
@@ -1124,6 +1217,7 @@
     "birthday": [12, 21],
     "star": 4,
     "element": "雷",
+    "release": "2022-09-09 18:00:00",
     "weapon": "双手剑",
     "nameCard": "多莉·魔灯"
   },
@@ -1136,6 +1230,7 @@
     "birthday": [5, 8],
     "star": 4,
     "element": "草",
+    "release": "2022-08-24 00:00:00",
     "weapon": "弓",
     "nameCard": "柯莱·豹蔚"
   },
@@ -1148,6 +1243,7 @@
     "birthday": [7, 27],
     "star": 4,
     "element": "雷",
+    "release": "2022-06-21 18:00:00",
     "weapon": "单手剑",
     "nameCard": "久岐忍·络"
   },
@@ -1160,6 +1256,7 @@
     "birthday": [5, 21],
     "star": 4,
     "element": "岩",
+    "release": "2022-01-05 00:00:00",
     "weapon": "长柄武器",
     "nameCard": "云堇·对韵"
   },
@@ -1172,6 +1269,7 @@
     "birthday": [1, 22],
     "star": 4,
     "element": "草",
+    "release": "2023-05-23 00:00:00",
     "weapon": "单手剑",
     "nameCard": "绮良良·猫箱"
   },
@@ -1184,6 +1282,7 @@
     "birthday": [7, 24],
     "star": 4,
     "element": "风",
+    "release": "2022-07-13 00:00:00",
     "weapon": "法器",
     "nameCard": "鹿野院平藏·鞠毬"
   },
@@ -1196,6 +1295,7 @@
     "birthday": [7, 14],
     "star": 4,
     "element": "雷",
+    "release": "2021-09-01 00:00:00",
     "weapon": "弓",
     "nameCard": "九条裟罗·天狗"
   },
@@ -1208,6 +1308,7 @@
     "birthday": [5, 18],
     "star": 4,
     "element": "岩",
+    "release": "2021-12-14 18:00:00",
     "weapon": "弓",
     "nameCard": "五郎·悠犬"
   },
@@ -1220,6 +1321,7 @@
     "birthday": [10, 19],
     "star": 4,
     "element": "风",
+    "release": "2021-08-10 18:00:00",
     "weapon": "双手剑",
     "nameCard": "早柚·不倒貉貉"
   },
@@ -1232,6 +1334,7 @@
     "birthday": [1, 9],
     "star": 4,
     "element": "火",
+    "release": "2021-11-02 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "托马·炎袖"
   },
@@ -1244,6 +1347,7 @@
     "birthday": [7, 28],
     "star": 4,
     "element": "火",
+    "release": "2021-04-27 00:00:00",
     "weapon": "法器",
     "nameCard": "烟绯·公正"
   },
@@ -1256,6 +1360,7 @@
     "birthday": [1, 24],
     "star": 4,
     "element": "冰",
+    "release": "2021-04-06 18:00:00",
     "weapon": "长柄武器",
     "nameCard": "罗莎莉亚·苦役"
   },
@@ -1268,6 +1373,7 @@
     "birthday": [10, 16],
     "star": 4,
     "element": "火",
+    "release": "2020-12-02 04:00:00",
     "weapon": "双手剑",
     "nameCard": "辛焱·唱罢"
   },
@@ -1280,6 +1386,7 @@
     "birthday": [11, 26],
     "star": 4,
     "element": "风",
+    "release": "2020-09-15 04:00:00",
     "weapon": "法器",
     "nameCard": "砂糖·创生"
   },
@@ -1292,6 +1399,7 @@
     "birthday": [1, 18],
     "star": 4,
     "element": "冰",
+    "release": "2020-11-11 04:00:00",
     "weapon": "弓",
     "nameCard": "迪奥娜·呜喵"
   },
@@ -1304,6 +1412,7 @@
     "birthday": [9, 7],
     "star": 4,
     "element": "冰",
+    "release": "2020-09-15 04:00:00",
     "weapon": "双手剑",
     "nameCard": "重云·灵刃"
   },
@@ -1316,6 +1425,7 @@
     "birthday": [3, 21],
     "star": 4,
     "element": "岩",
+    "release": "2020-09-15 04:00:00",
     "weapon": "双手剑",
     "nameCard": "诺艾尔·守护"
   },
@@ -1328,6 +1438,7 @@
     "birthday": [2, 29],
     "star": 4,
     "element": "火",
+    "release": "2020-09-15 04:00:00",
     "weapon": "单手剑",
     "nameCard": "班尼特·认可"
   },
@@ -1340,6 +1451,7 @@
     "birthday": [5, 27],
     "star": 4,
     "element": "雷",
+    "release": "2020-09-15 04:00:00",
     "weapon": "弓",
     "nameCard": "菲谢尔·夜鸦"
   },
@@ -1352,6 +1464,7 @@
     "birthday": [8, 26],
     "star": 4,
     "element": "岩",
+    "release": "2020-09-15 04:00:00",
     "weapon": "法器",
     "nameCard": "凝光·凤仪"
   },
@@ -1364,6 +1477,7 @@
     "birthday": [10, 9],
     "star": 4,
     "element": "水",
+    "release": "2020-09-15 04:00:00",
     "weapon": "单手剑",
     "nameCard": "行秋·雨虹"
   },
@@ -1376,6 +1490,7 @@
     "birthday": [2, 14],
     "star": 4,
     "element": "雷",
+    "release": "2020-09-15 04:00:00",
     "weapon": "双手剑",
     "nameCard": "北斗·拔锚"
   },
@@ -1388,6 +1503,7 @@
     "birthday": [11, 2],
     "star": 4,
     "element": "火",
+    "release": "2020-09-15 04:00:00",
     "weapon": "长柄武器",
     "nameCard": "香菱·出锅"
   },
@@ -1400,6 +1516,7 @@
     "birthday": [8, 10],
     "star": 4,
     "element": "火",
+    "release": "2020-09-15 04:00:00",
     "weapon": "弓",
     "nameCard": "安柏·兔兔"
   },
@@ -1412,6 +1529,7 @@
     "birthday": [9, 9],
     "star": 4,
     "element": "雷",
+    "release": "2020-09-15 04:00:00",
     "weapon": "双手剑",
     "nameCard": "雷泽·奔狼"
   },
@@ -1424,6 +1542,7 @@
     "birthday": [11, 30],
     "star": 4,
     "element": "冰",
+    "release": "2020-09-15 04:00:00",
     "weapon": "单手剑",
     "nameCard": "凯亚·孔雀"
   },
@@ -1436,6 +1555,7 @@
     "birthday": [7, 5],
     "star": 4,
     "element": "水",
+    "release": "2020-09-15 04:00:00",
     "weapon": "法器",
     "nameCard": "芭芭拉·流淌"
   },
@@ -1448,6 +1568,7 @@
     "birthday": [6, 9],
     "star": 4,
     "element": "雷",
+    "release": "2020-09-15 04:00:00",
     "weapon": "法器",
     "nameCard": "丽莎·沙漏"
   }

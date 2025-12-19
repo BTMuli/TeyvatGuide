@@ -3242,7 +3242,7 @@
   },
   {
     "id": "262502",
-    "name": "通用装扮·「疾风迅影·蓝白」",
+    "name": "通用眉毛·「疾风迅影·蓝白」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0284",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3256,7 +3256,7 @@
   },
   {
     "id": "262504",
-    "name": "通用装扮·「疾风迅影·灰粉」",
+    "name": "通用眉毛·「疾风迅影·灰粉」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0285",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3291,42 +3291,42 @@
   },
   {
     "id": "262517",
-    "name": "通用装扮·「垂枝犹怜」",
+    "name": "通用眉毛·「垂枝犹怜」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0043",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262519",
-    "name": "通用装扮·「雪落枝头」",
+    "name": "通用眉毛·「雪落枝头」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0044",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262521",
-    "name": "通用装扮·「幽夜隐隐·灰紫」",
+    "name": "通用眉毛·「幽夜隐隐·灰紫」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0267",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262523",
-    "name": "通用装扮·「幽夜隐隐·蓝绿」",
+    "name": "通用眉毛·「幽夜隐隐·蓝绿」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0270",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262525",
-    "name": "通用装扮·「岔路从容·灰紫」",
+    "name": "通用眉毛·「岔路从容·灰紫」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0272",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262527",
-    "name": "通用装扮·「岔路从容·蓝绿」",
+    "name": "通用眉毛·「岔路从容·蓝绿」",
     "icon": "UI_Beyd_Avatar_Girl_Eyebrow_P0273",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3417,84 +3417,84 @@
   },
   {
     "id": "262901",
-    "name": "女性装扮·「露垂落影」",
+    "name": "女性眼眶·「露垂落影」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0051",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262902",
-    "name": "男性装扮·「露垂落影」",
+    "name": "男性眼眶·「露垂落影」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0051",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262903",
-    "name": "女性装扮·「星光片语」",
+    "name": "女性眼眶·「星光片语」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0052",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262904",
-    "name": "男性装扮·「星光片语」",
+    "name": "男性眼眶·「星光片语」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0052",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262905",
-    "name": "女性装扮·「凛冽银光」",
+    "name": "女性眼眶·「凛冽银光」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0053",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262906",
-    "name": "男性装扮·「凛冽银光」",
+    "name": "男性眼眶·「凛冽银光」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0053",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262907",
-    "name": "男性装扮·「破晓暗刃」",
+    "name": "男性眼眶·「破晓暗刃」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0054",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262908",
-    "name": "女性装扮·「映月漪漪」",
+    "name": "女性眼眶·「映月漪漪」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0055",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262909",
-    "name": "男性装扮·「映月漪漪」",
+    "name": "男性眼眶·「映月漪漪」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0055",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262910",
-    "name": "男性装扮·「澄天清曜」",
+    "name": "男性眼眶·「澄天清曜」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0056",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262911",
-    "name": "女性装扮·「林梢霜华」",
+    "name": "女性眼眶·「林梢霜华」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0268",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262912",
-    "name": "女性装扮·「霞彩掠光」",
+    "name": "女性眼眶·「霞彩掠光」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0271",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3585,14 +3585,14 @@
   },
   {
     "id": "262925",
-    "name": "男性装扮·「骑士品格」",
+    "name": "男性眼眶·「骑士品格」",
     "icon": "UI_Beyd_Avatar_Boy_Face_P0283",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "262926",
-    "name": "女性装扮·「骑士品格」",
+    "name": "女性眼眶·「骑士品格」",
     "icon": "UI_Beyd_Avatar_Girl_Face_P0283",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3606,7 +3606,7 @@
   },
   {
     "id": "263202",
-    "name": "通用装扮·「灿耀夕照」",
+    "name": "通用瞳孔·「灿耀夕照」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0286",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3620,7 +3620,7 @@
   },
   {
     "id": "263204",
-    "name": "通用装扮·「黛紫烟霞」",
+    "name": "通用瞳孔·「黛紫烟霞」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0287",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3655,42 +3655,42 @@
   },
   {
     "id": "263213",
-    "name": "通用装扮·「薄荷巧糖」",
+    "name": "通用瞳孔·「薄荷巧糖」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0063",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263216",
-    "name": "通用装扮·「紫晶魔法」",
+    "name": "通用瞳孔·「紫晶魔法」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0065",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263219",
-    "name": "通用装扮·「焰火之约」",
+    "name": "通用瞳孔·「焰火之约」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0066",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263221",
-    "name": "通用装扮·「瀚海鲸歌」",
+    "name": "通用瞳孔·「瀚海鲸歌」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0068",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263223",
-    "name": "通用装扮·「夜幕星河」",
+    "name": "通用瞳孔·「夜幕星河」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0266",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263225",
-    "name": "通用装扮·「金翡琉璃」",
+    "name": "通用瞳孔·「金翡琉璃」",
     "icon": "UI_Beyd_Avatar_Girl_Pupil_P0269",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3739,42 +3739,42 @@
   },
   {
     "id": "263605",
-    "name": "通用装扮·「午夜魔咒」",
+    "name": "通用唇妆·「午夜魔咒」",
     "icon": "UI_Beyd_Avatar_Girl_Lipstick_P0027",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263607",
-    "name": "女性装扮·「酒浸葡萄」",
+    "name": "女性唇妆·「酒浸葡萄」",
     "icon": "UI_Beyd_Avatar_Girl_Lipstick_P0028",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263609",
-    "name": "女性装扮·「西柚果茶」",
+    "name": "女性唇妆·「西柚果茶」",
     "icon": "UI_Beyd_Avatar_Girl_Lipstick_P0029",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263611",
-    "name": "女性装扮·「冰霜玫瑰」",
+    "name": "女性唇妆·「冰霜玫瑰」",
     "icon": "UI_Beyd_Avatar_Girl_Lipstick_P0030",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263613",
-    "name": "通用装扮·「狂欢南瓜」",
+    "name": "通用唇妆·「狂欢南瓜」",
     "icon": "UI_Beyd_Avatar_Girl_Lipstick_P0031",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263615",
-    "name": "通用装扮·「秘境晶簇」",
+    "name": "通用唇妆·「秘境晶簇」",
     "icon": "UI_Beyd_Avatar_Girl_Lipstick_P0032",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3795,42 +3795,42 @@
   },
   {
     "id": "263706",
-    "name": "通用装扮·「甜蜜软糖·晕染」",
+    "name": "通用眼妆·「甜蜜软糖·晕染」",
     "icon": "UI_Beyd_Avatar_Girl_EyeShadow_P0045",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263708",
-    "name": "通用装扮·「甜蜜软糖·平铺」",
+    "name": "通用眼妆·「甜蜜软糖·平铺」",
     "icon": "UI_Beyd_Avatar_Girl_EyeShadow_P0046",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263710",
-    "name": "女性装扮·「粼粼星梦·晕染」",
+    "name": "女性眼妆·「粼粼星梦·晕染」",
     "icon": "UI_Beyd_Avatar_Girl_EyeShadow_P0047",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263712",
-    "name": "通用装扮·「松石斑蓝·平铺」",
+    "name": "通用眼妆·「松石斑蓝·平铺」",
     "icon": "UI_Beyd_Avatar_Girl_EyeShadow_P0048",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263714",
-    "name": "女性装扮·「午夜天鹅·晕染」",
+    "name": "女性眼妆·「午夜天鹅·晕染」",
     "icon": "UI_Beyd_Avatar_Girl_EyeShadow_P0049",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263716",
-    "name": "通用装扮·「雪后初霁·平铺」",
+    "name": "通用眼妆·「雪后初霁·平铺」",
     "icon": "UI_Beyd_Avatar_Girl_EyeShadow_P0050",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3844,7 +3844,7 @@
   },
   {
     "id": "263902",
-    "name": "通用装扮·「极彩巧匠妆容」",
+    "name": "通用面妆·「极彩巧匠妆容」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0299",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
@@ -3865,49 +3865,49 @@
   },
   {
     "id": "263907",
-    "name": "女性装扮·「甜莓果汁」",
+    "name": "女性面妆·「甜莓果汁」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0073",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263909",
-    "name": "通用装扮·「不屈之痕」",
+    "name": "通用面妆·「不屈之痕」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0075",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263910",
-    "name": "女性装扮·「蔷薇回忆」",
+    "name": "女性面妆·「蔷薇回忆」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0074",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263911",
-    "name": "通用装扮·「坚毅之痕」",
+    "name": "通用面妆·「坚毅之痕」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0076",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263913",
-    "name": "通用装扮·「意志之痕」",
+    "name": "通用面妆·「意志之痕」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0077",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263915",
-    "name": "通用装扮·「一睡不醒」",
+    "name": "通用面妆·「一睡不醒」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0078",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
   },
   {
     "id": "263917",
-    "name": "通用装扮·「柑橘果汁」",
+    "name": "通用面妆·「柑橘果汁」",
     "icon": "UI_Beyd_Avatar_Girl_FacialMakeup_P0274",
     "type": "BEYOND_MATERIAL_COSTUME",
     "rank": 4
