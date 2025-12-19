@@ -1,7 +1,6 @@
 /**
- * @file styles/github.styles.scss
- * @description GitHub styles
- * @since Beta v0.7.7
+ * GitHub styles
+ * @since Beta v0.9.0
  */
 
 /* Card，传入theme参数 */
@@ -20,13 +19,11 @@
 /* CardShadow，传入theme参数 */
 @mixin github-card-shadow($theme: "default") {
   @if $theme == "default" {
-    box-shadow:
-      #1f23280f 0 1px 1px 0,
-      #1f23280f 0 1px 3px 0;
+    box-shadow: #1f23280f 0 1px 1px 0,
+    #1f23280f 0 1px 3px 0;
   } @else {
-    box-shadow:
-      #01040999 0 1px 1px 0,
-      #01040999 0 1px 3px 0;
+    box-shadow: #01040999 0 1px 1px 0,
+    #01040999 0 1px 3px 0;
   }
 }
 
@@ -43,7 +40,7 @@
 
 /* tags，深色主题 */
 @mixin github-tag-dark-gen($color: #548af7) {
-  border: 1px solid rgba($color, 0.3);
-  background: rgba($color, 0.18);
+  border: 1px solid color-mix(in srgb, $color 30%, transparent);
+  background: color-mix(in srgb, $color 18%, transparent);
   color: $color;
 }
