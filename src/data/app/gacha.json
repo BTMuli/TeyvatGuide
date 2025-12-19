@@ -3062,5 +3062,41 @@
     "postId": "71075615",
     "up5List": [11518, 15515],
     "up4List": [11410, 13427, 14410, 12405, 15402]
+  },
+  {
+    "name": "饫宴角戏",
+    "version": "6.2",
+    "order": 2,
+    "banner": "https://sdk.hoyoverse.com/upload/ann/2025/12/08/6204e5bbef0c15cc42fc0719ebe5a73a_21634477180572852_transformed.jpg",
+    "from": "2025-12-23T18:00:00+08:00",
+    "to": "2026-01-13T14:59:00+08:00",
+    "type": 301,
+    "postId": "71557463",
+    "up5List": [10000111],
+    "up4List": [10000110, 10000090, 10000092]
+  },
+  {
+    "name": "煅火的祝赐",
+    "version": "6.2",
+    "order": 2,
+    "banner": "https://sdk.hoyoverse.com/upload/ann/2025/12/08/a99468bd6aeb63e168f6cdf24ddac4d5_6068882650937578288_transformed.jpg",
+    "from": "2025-12-23T18:00:00+08:00",
+    "to": "2026-01-13T14:59:00+08:00",
+    "type": 400,
+    "postId": "71557460",
+    "up5List": [10000103],
+    "up4List": [10000110, 10000090, 10000092]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.2",
+    "order": 2,
+    "banner": "https://sdk.hoyoverse.com/upload/ann/2025/12/08/9526db584785e3d4432fe4dec8e5d292_6231559174467090783_transformed.jpg",
+    "from": "2025-12-23T18:00:00+08:00",
+    "to": "2026-01-13T14:59:00+08:00",
+    "type": 302,
+    "postId": "71557457",
+    "up5List": [14519, 11516],
+    "up4List": [12430, 15410, 11401, 13407, 14402]
   }
 ]
