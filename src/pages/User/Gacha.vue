@@ -39,7 +39,12 @@
           导出(v4)
         </v-btn>
         <v-btn class="gacha-top-btn" prepend-icon="mdi-delete" @click="deleteGacha()">删除</v-btn>
-        <v-btn class="gacha-top-btn" prepend-icon="mdi-database-check" @click="checkData()">
+        <v-btn
+          class="gacha-top-btn"
+          prepend-icon="mdi-database-check"
+          title="检测并补充遗漏的itemId"
+          @click="checkData()"
+        >
           检测数据
         </v-btn>
       </div>
@@ -116,7 +121,14 @@ const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在加载祈愿数据", "正在获取Hakushi元数据");
-  hakushiData.value = await Hakushi.fetch();
+  try {
+    hakushiData.value = await Hakushi.fetch();
+  } catch (e) {
+    console.error(e);
+    showSnackbar.warn(`获取Hakushi元数据失败`);
+    await TGLogger.Error(`[UserGacha][onMounted]获取Hakushi元数据失败`);
+    await TGLogger.Error(`${e}`);
+  }
   await showLoading.update("正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   selectItem.value = await TSUserGacha.getUidList();
