@@ -1,6 +1,6 @@
 /**
  * 用户成就模块
- * @since Beta v0.8.7
+ * @since Beta v0.9.0
  */
 
 import { UiafAchiStatEnum } from "@enum/uiaf.js";
@@ -14,17 +14,17 @@ import TGSqlite from "../index.js";
 import { AppAchievementsData, AppAchievementSeriesData } from "@/data/index.js";
 
 /**
- * @description 根据 completed 跟 progress 获取 status
- * @since Beta v0.6.0
+ * 根据 completed 跟 progress 获取 status
+ * @since Beta v0.9.0
  * @param {boolean} completed - 是否完成
  * @param {number} progress - 进度
  * @returns {number} status
  */
-function getUiafStatus(completed: boolean, progress: number): number {
-  if (progress !== 0 && !completed) return 1;
-  if (progress === 0 && completed) return 2;
-  if (progress !== 0 && completed) return 3;
-  return 0;
+function getUiafStatus(completed: boolean, progress: number): TGApp.Plugins.UIAF.AchiItemStatEnum {
+  if (!completed) return UiafAchiStatEnum.Unfinished;
+  if (progress === 0) return UiafAchiStatEnum.Finished;
+  if (progress !== 0) return UiafAchiStatEnum.RewardTaken;
+  return UiafAchiStatEnum.Invalid;
 }
 
 /**
@@ -228,7 +228,7 @@ async function updateAchi(data: TGApp.Sqlite.Achievement.RenderAchi): Promise<vo
 }
 
 /**
- * @description 将数据库数据转换为UIAF数据
+ * 将数据库数据转换为UIAF数据
  * @since Beta v0.6.0
  * @param {TGApp.Sqlite.Achievement.TableAchi} data 数据库数据
  * @returns {TGApp.Plugins.UIAF.Achievement} UIAF数据
