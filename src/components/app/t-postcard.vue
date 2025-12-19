@@ -1,3 +1,4 @@
+<!-- 帖子卡片组件 -->
 <template>
   <div
     v-if="card"
@@ -88,9 +89,6 @@
     </div>
     <div
       v-if="card.forum !== null && card.forum.name !== ''"
-      :style="{
-        background: str2Color(`${card.forum.id}${card.forum.name}`, -60),
-      }"
       :title="`频道: ${card.forum.name}`"
       class="tpc-forum"
       @click="toForum(card.forum)"
@@ -105,13 +103,7 @@
       data-html2canvas-ignore
       @click.stop="trySelect()"
     />
-    <div
-      v-else
-      :style="{
-        background: str2Color(`${props.modelValue.post.post_id}`, 0),
-      }"
-      class="tpc-info-id"
-    >
+    <div v-else class="tpc-info-id">
       <span>{{ props.modelValue.post.post_id }}</span>
       <template v-if="isDevEnv">
         <span data-html2canvas-ignore>[{{ props.modelValue.post.view_type }}]</span>
@@ -177,6 +169,10 @@ const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.color;
   return "none";
 });
+const forumBg = computed<string>(() =>
+  str2Color(`${props.modelValue.forum?.id}${props.modelValue.forum?.name}`, -60),
+);
+const idBg = computed<string>(() => str2Color(`${props.modelValue.post.post_id}`, 0));
 
 onMounted(async () => (card.value = getPostCard(props.modelValue)));
 
@@ -308,7 +304,6 @@ function onUserClick(): void {
 
   position: relative;
   display: flex;
-  overflow: hidden;
   width: 100%;
   height: 100%;
   flex-direction: column;
@@ -328,10 +323,13 @@ function onUserClick(): void {
 
 .tpc-top {
   display: flex;
+  overflow: hidden;
   width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
   row-gap: 4px;
 }
 
@@ -347,8 +345,11 @@ function onUserClick(): void {
   cursor: pointer;
 
   img {
+    overflow: hidden;
     width: 100%;
     height: 100%;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     object-fit: cover;
     object-position: center;
     transition: all 0.3s linear;
@@ -421,7 +422,9 @@ function onUserClick(): void {
   padding: 4px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  background: v-bind(forumBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   cursor: pointer;
@@ -548,13 +551,15 @@ function onUserClick(): void {
   top: 0;
   left: 0;
   display: flex;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  background: var(--tgc-od-orange);
+  background: v-bind(idBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
   box-shadow: 1px 1px 6px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;

@@ -6,27 +6,28 @@
       <div class="tops-act">
         <div class="tops-game">
           <span>分区：{{ label }}</span>
+          <span>加载帖子：{{ results.length }}</span>
         </div>
         <div class="tops-sort">
           <v-select
-            density="compact"
             v-model="sortType"
+            :disabled="load"
             :items="sortOrderList"
+            density="compact"
             item-title="text"
             item-value="value"
-            variant="outlined"
             label="排序"
-            :disabled="load"
+            variant="outlined"
           />
         </div>
       </div>
       <div class="tops-divider" />
-      <div class="tops-list" ref="listRef">
+      <div ref="listRef" class="tops-list">
         <TPostCard
-          class="tops-item"
-          :model-value="item"
           v-for="item in results"
           :key="item.post.post_id"
+          :model-value="item"
+          class="tops-item"
         />
       </div>
     </div>
@@ -164,15 +165,15 @@ async function searchPosts(): Promise<void> {
 .tops-box {
   position: relative;
   display: flex;
-  width: 400px;
-  height: 500px;
+  width: 1080px;
+  height: 600px;
   box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: var(--box-bg-1);
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--app-page-bg);
   row-gap: 8px;
 }
 
@@ -193,8 +194,16 @@ async function searchPosts(): Promise<void> {
   position: relative;
   display: flex;
   width: 100%;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+}
+
+.tops-game {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
 }
 
 .tops-sort {
@@ -211,19 +220,12 @@ async function searchPosts(): Promise<void> {
 
 .tops-list {
   position: relative;
-  display: flex;
+  display: grid;
   width: 100%;
-  height: 100%;
   box-sizing: border-box;
-  flex-direction: column;
-  padding-right: 8px;
-  padding-bottom: 8px;
+  padding-right: 4px;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   overflow-y: auto;
-  row-gap: 10px;
-}
-
-.tops-item {
-  height: fit-content;
-  flex-shrink: 0;
 }
 </style>
