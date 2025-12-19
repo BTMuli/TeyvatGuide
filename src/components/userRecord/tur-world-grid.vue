@@ -13,7 +13,7 @@ defineProps<{ modelValue: Array<TGApp.Sqlite.Record.WorldExplore> }>();
 .tur-wg-box {
   display: grid;
   width: 100%;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(3, 0.33fr);
 }
 </style>

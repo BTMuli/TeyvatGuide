@@ -29,10 +29,11 @@ rules:
       type: at-rule
     - name: include
       type: at-rule
-    - custom-properties
+    - at-rules
     - declarations
     - rules
-    - at-rules
+    - name: keyframes
+      type: at-rule
   prettier/prettier: true
   property-no-vendor-prefix:
     - true

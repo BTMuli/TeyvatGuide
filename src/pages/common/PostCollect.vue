@@ -474,8 +474,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
 .pc-posts {
   display: grid;
-  grid-auto-rows: auto;
   gap: 8px;
+  grid-auto-rows: auto;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
 </style>

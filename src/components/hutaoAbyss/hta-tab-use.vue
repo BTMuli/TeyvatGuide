@@ -71,7 +71,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   padding: 10px;
-  grid-gap: 10px;
+  gap: 10px;
   grid-template-columns: repeat(auto-fill, minmax(180px, 0.2fr));
 }
 </style>

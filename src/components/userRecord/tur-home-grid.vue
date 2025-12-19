@@ -13,7 +13,7 @@ defineProps<{ modelValue: Array<TGApp.Sqlite.Record.Home> }>();
 .tur-hg-box {
   display: grid;
   width: 100%;
-  grid-gap: 8px;
+  gap: 8px;
   grid-template-columns: repeat(3, 1fr);
 }
 </style>
