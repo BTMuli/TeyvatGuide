@@ -21,7 +21,9 @@ const idColor = computed<string>(() => getOdStarColor(props.material.star));
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
-$pw-mi-base: v-bind(idcolor); /* stylelint-disable-line value-keyword-case */
+/* stylelint-disable value-keyword-case */
+$pw-mi-base: v-bind(idColor);
+/* stylelint-enable */
 
 .pw-mi-box {
   position: relative;
