@@ -7,7 +7,7 @@
       <slot name="icon"><img :src="props.modelValue.icon" alt="icon" /></slot>
     </div>
     <div class="tib-cover">
-      <div class="tib-lt" v-show="props.modelValue.lt !== ''">
+      <div v-show="props.modelValue.lt !== ''" class="tib-lt">
         <img :src="props.modelValue.lt" alt="lt" />
       </div>
       <div v-show="props.modelValue.rt" class="tib-rt">{{ props.modelValue.rt }}</div>
@@ -54,7 +54,7 @@ type TItemBoxProps = { modelValue: TItemBoxData };
 
 const props = defineProps<TItemBoxProps>();
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tib-box {
   position: relative;
   width: v-bind("props.modelValue.size");
@@ -64,39 +64,43 @@ const props = defineProps<TItemBoxProps>();
 
 .tib-bg {
   position: absolute;
+  z-index: 0;
   top: 0;
   left: 0;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
   height: v-bind("props.modelValue.size");
   border-radius: 4px;
-}
 
-.tib-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .tib-icon {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   width: v-bind("props.modelValue.size");
   height: v-bind("props.modelValue.size");
   border-radius: 4px;
-}
 
-.tib-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .tib-cover {
   position: absolute;
+  z-index: 2;
   top: 0;
   left: 0;
   display: flex;
+  overflow: hidden;
   width: v-bind("props.modelValue.size");
   height: v-bind("props.modelValue.size");
   flex-direction: column;
@@ -114,12 +118,12 @@ const props = defineProps<TItemBoxProps>();
   height: v-bind("props.modelValue.ltSize");
   align-items: center;
   justify-content: center;
-}
 
-.tib-lt img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .tib-rt {
@@ -143,33 +147,38 @@ const props = defineProps<TItemBoxProps>();
   bottom: 0;
   left: 0;
   display: flex;
+  overflow: hidden;
   width: 100%;
-  height: v-bind("props.modelValue.innerHeight ?? 0") px;
+  height: v-bind("`${props.modelValue.innerHeight ?? 0}px`");
   flex-grow: 1;
   flex-shrink: 0;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
+  border-radius: 0 0 4px 4px;
   -webkit-backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
   backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
-  background: #14141466;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
+  background: #14141480;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
-  font-size: v-bind("((props.modelValue.innerHeight ?? 0) / 2).toString() + 'px'");
-}
+  font-size: v-bind("`${(props.modelValue.innerHeight ?? 0)/2}px`");
+  line-height: v-bind(
+    "props.modelValue.innerHeight ? `${props.modelValue.innerHeight}px` : 'auto'"
+  );
 
-.tib-inner img {
-  width: v-bind("(props.modelValue.innerHeight ?? 0).toString() + 'px'");
-  height: v-bind("(props.modelValue.innerHeight ?? 0).toString() + 'px'");
-  padding: 1px;
-}
+  img {
+    position: relative;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    padding: 1%;
+    aspect-ratio: 1;
+  }
 
-.tib-inner span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  word-break: break-all;
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+  }
 }
 
 .tib-outer {
@@ -177,11 +186,12 @@ const props = defineProps<TItemBoxProps>();
   bottom: 0;
   display: flex;
   width: 100%;
-  height: v-bind("(props.modelValue.outerHeight ?? 0).toString() + 'px'");
+  height: v-bind("`${props.modelValue.outerHeight ?? 0}px`");
   align-items: center;
   justify-content: center;
   color: var(--common-text-title);
-  font-size: v-bind("((props.modelValue.outerHeight ?? 0)/2).toString() + 'px'");
+  font-size: v-bind("`${(props.modelValue.outerHeight ?? 0)/2}px`");
+  line-height: v-bind("`${(props.modelValue.outerHeight ?? 0)/2}px`");
   text-align: center;
 }
 </style>
