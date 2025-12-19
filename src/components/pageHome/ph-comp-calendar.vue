@@ -34,7 +34,7 @@
       </div>
     </template>
   </THomeCard>
-  <ToCalendar v-model="showItem" :data-type="selectedType" :data-val="selectedItem" />
+  <ToCalendar v-model="showItem" :item="selectedItem" />
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";

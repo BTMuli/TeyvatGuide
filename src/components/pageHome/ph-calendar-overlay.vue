@@ -1,3 +1,4 @@
+<!-- 素材日历项浮窗 -->
 <template>
   <TOverlay v-model="visible">
     <div class="toc-box">
@@ -5,23 +6,19 @@
         <div class="toc-top">
           <TItemBox :model-value="boxData" />
           <div class="toc-material-grid">
-            <TibCalendarMaterial
-              v-for="(item, index) in props.dataVal.materials"
-              :key="index"
-              :item="item"
-            />
+            <PwMaterialItem v-for="(material, index) in materialList" :key="index" :material />
           </div>
         </div>
         <img alt="line" class="toc-line" src="/source/UI/item-line.webp" />
         <div class="toc-bottom">
           <div class="toc-src-box">
             <div class="toc-src-text">来源：</div>
-            <img :src="`/icon/nation/${props.dataVal.source.area}.webp`" alt="icon" />
+            <img :src="`/icon/nation/${props.item.source.area}.webp`" alt="icon" />
             <div class="toc-src-text">
-              {{ props.dataVal.source.area }} - {{ props.dataVal.source.name }}
+              {{ props.item.source.area }} - {{ props.item.source.name }}
             </div>
           </div>
-          <v-btn variant="outlined" @click="toDetail(props.dataVal)">详情</v-btn>
+          <v-btn variant="outlined" @click="toDetail(props.item)">详情</v-btn>
         </div>
       </div>
     </div>
@@ -31,32 +28,43 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import PwMaterialItem from "@comp/pageWiki/pw-material-item.vue";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
-import TibCalendarMaterial from "./ph-calendar-material.vue";
+import { WikiMaterialData } from "@/data/index.js";
 
-type ToCalendarProps = { dataType: "weapon" | "character"; dataVal: TGApp.App.Calendar.Item };
+type ToCalendarProps = { item: TGApp.App.Calendar.Item };
 
 const router = useRouter();
 
 const props = defineProps<ToCalendarProps>();
 const visible = defineModel<boolean>();
+const materialList = computed<Array<TGApp.App.Material.WikiItem>>(() => loadData());
 const boxData = computed<TItemBoxData>(() => ({
-  bg: `/icon/bg/${props.dataVal.star}-Star.webp`,
-  icon: `/WIKI/${props.dataType}/${props.dataVal.id}.webp`,
+  bg: `/icon/bg/${props.item.star}-Star.webp`,
+  icon: `/WIKI/${props.item.itemType}/${props.item.id}.webp`,
   size: "100px",
   height: "100px",
   display: "inner",
   clickable: false,
-  lt: props.dataVal.element
-    ? `/icon/element/${props.dataVal.element}元素.webp`
-    : `/icon/weapon/${props.dataVal.weapon}.webp`,
+  lt: props.item.element
+    ? `/icon/element/${props.item.element}元素.webp`
+    : `/icon/weapon/${props.item.weapon}.webp`,
   ltSize: "20px",
   innerHeight: 25,
-  innerIcon: props.dataVal.element ? `/icon/weapon/${props.dataVal.weapon}.webp` : undefined,
-  innerText: props.dataVal.name,
+  innerIcon: props.item.element ? `/icon/weapon/${props.item.weapon}.webp` : undefined,
+  innerText: props.item.name,
 }));
+
+function loadData(): Array<TGApp.App.Material.WikiItem> {
+  const tmp: Array<TGApp.App.Material.WikiItem> = [];
+  for (const d of props.item.materials) {
+    const material = WikiMaterialData.find((m) => m.id === d.id);
+    if (material) tmp.push(material);
+  }
+  return tmp;
+}
 
 async function toDetail(item: TGApp.App.Calendar.Item): Promise<void> {
   if (!["character", "weapon"].includes(item.itemType)) {
@@ -96,7 +104,7 @@ async function toDetail(item: TGApp.App.Calendar.Item): Promise<void> {
   display: grid;
   width: 100%;
   font-family: var(--font-title);
-  grid-gap: 10px;
+  gap: 10px;
   grid-template-columns: repeat(2, 1fr);
 }
 

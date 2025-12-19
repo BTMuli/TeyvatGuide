@@ -28,23 +28,23 @@ function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableData): string {
               ${data.totalWinTimes}, '${data.maxFloor}', ${data.totalStar},
               ${data.isUnlock}, '${data.revealRank}', '${data.defeatRank}', '${data.damageRank}',
               '${data.takeDamageRank}', '${data.normalSkillRank}', '${data.energySkillRank}', '${data.floors}',
-              '${timeNow}') ON CONFLICT(uid, id) DO
-      UPDATE
-          SET startTime = '${data.startTime}',
-          endTime = '${data.endTime}',
-          totalBattleTimes = ${data.totalBattleTimes},
-          totalWinTimes = ${data.totalWinTimes},
-          maxFloor = '${data.maxFloor}',
-          totalStar = ${data.totalStar},
-          isUnlock = ${data.isUnlock},
-          revealRank = '${data.revealRank}',
-          defeatRank = '${data.defeatRank}',
-          damageRank = '${data.damageRank}',
-          takeDamageRank = '${data.takeDamageRank}',
-          normalSkillRank = '${data.normalSkillRank}',
-          energySkillRank = '${data.energySkillRank}',
-          floors = '${data.floors}',
-          updated = '${timeNow}';
+              '${timeNow}')
+      ON CONFLICT(uid, id) DO UPDATE
+          SET startTime        = '${data.startTime}',
+              endTime          = '${data.endTime}',
+              totalBattleTimes = ${data.totalBattleTimes},
+              totalWinTimes    = ${data.totalWinTimes},
+              maxFloor         = '${data.maxFloor}',
+              totalStar        = ${data.totalStar},
+              isUnlock         = ${data.isUnlock},
+              revealRank       = '${data.revealRank}',
+              defeatRank       = '${data.defeatRank}',
+              damageRank       = '${data.damageRank}',
+              takeDamageRank   = '${data.takeDamageRank}',
+              normalSkillRank  = '${data.normalSkillRank}',
+              energySkillRank  = '${data.energySkillRank}',
+              floors           = '${data.floors}',
+              updated          = '${timeNow}';
   `;
 }
 
@@ -75,24 +75,24 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
       VALUES ('${uid}', ${data.schedule_id}, '${startTime}', '${endTime}', ${data.total_battle_times},
               ${data.total_win_times}, '${data.max_floor}', ${data.total_star}, ${isUnlock},
               '${revealRank}', '${defeatRank}', '${damageRank}', '${takeDamageRank}', '${normalSkillRank}',
-              '${energySkillRank}', '${floors}', '${skippedFloor}', '${timeNow}') ON CONFLICT(uid, id) DO
-      UPDATE
-          SET startTime = '${startTime}',
-          endTime = '${endTime}',
-          totalBattleTimes = ${data.total_battle_times},
-          totalWinTimes = ${data.total_win_times},
-          maxFloor = '${data.max_floor}',
-          totalStar = ${data.total_star},
-          isUnlock = ${isUnlock},
-          revealRank = '${revealRank}',
-          defeatRank = '${defeatRank}',
-          damageRank = '${damageRank}',
-          takeDamageRank = '${takeDamageRank}',
-          normalSkillRank = '${normalSkillRank}',
-          energySkillRank = '${energySkillRank}',
-          floors = '${floors}',
-          skippedFloor = '${skippedFloor}',
-          updated = '${timeNow}';
+              '${energySkillRank}', '${floors}', '${skippedFloor}', '${timeNow}')
+      ON CONFLICT(uid, id) DO UPDATE
+          SET startTime        = '${startTime}',
+              endTime          = '${endTime}',
+              totalBattleTimes = ${data.total_battle_times},
+              totalWinTimes    = ${data.total_win_times},
+              maxFloor         = '${data.max_floor}',
+              totalStar        = ${data.total_star},
+              isUnlock         = ${isUnlock},
+              revealRank       = '${revealRank}',
+              defeatRank       = '${defeatRank}',
+              damageRank       = '${damageRank}',
+              takeDamageRank   = '${takeDamageRank}',
+              normalSkillRank  = '${normalSkillRank}',
+              energySkillRank  = '${energySkillRank}',
+              floors           = '${floors}',
+              skippedFloor     = '${skippedFloor}',
+              updated          = '${timeNow}';
   `;
 }
 
@@ -223,7 +223,7 @@ async function backupAbyss(dir: string): Promise<void> {
     await TGLogger.Warn(`未检测到备份目录，已创建`);
   }
   const data = await getAbyss();
-  await writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(data));
+  await writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(data, null, 2));
 }
 
 /**

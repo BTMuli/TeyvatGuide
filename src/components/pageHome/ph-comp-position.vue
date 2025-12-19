@@ -20,10 +20,12 @@
     </template>
   </THomeCard>
   <TwoMaterial v-model="showMaterial" :data="curMaterial" />
+  <ToCalendar v-model="showCalendar" :item="curItemC" />
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import ToCalendar from "@comp/pageHome/ph-calendar-overlay.vue";
 import PhPosObc from "@comp/pageHome/ph-pos-obc.vue";
 import PhPosUser from "@comp/pageHome/ph-pos-user.vue";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
@@ -38,7 +40,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { AppCalendarData, WikiMaterialData } from "@/data/index.js";
 
 type TPositionEmits = (e: "success") => void;
 
@@ -50,7 +52,10 @@ const emits = defineEmits<TPositionEmits>();
 const isInit = ref<boolean>(false);
 const isUserPos = ref<boolean>(isLogin.value);
 const showMaterial = ref<boolean>(false);
+const showCalendar = ref<boolean>(false);
 const curMaterial = shallowRef<TGApp.App.Material.WikiItem>(WikiMaterialData[0]);
+const curTypeC = ref<"character" | "weapon">("character");
+const curItemC = shallowRef<TGApp.App.Calendar.Item>(AppCalendarData[0]);
 const obsPos = shallowRef<Array<TGApp.BBS.Obc.PositionItem>>([]);
 const userPos = shallowRef<Array<TGApp.Game.ActCalendar.ActItem>>([]);
 
@@ -115,13 +120,21 @@ async function loadWikiPosition(): Promise<void> {
 }
 
 async function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): Promise<void> {
-  const find = WikiMaterialData.find((i) => i.id === cur.item_id);
-  if (!find) {
-    await openUrl(cur.wiki_url);
+  const findM = WikiMaterialData.find((i) => i.id === cur.item_id);
+  if (findM) {
+    curMaterial.value = findM;
+    showMaterial.value = true;
     return;
   }
-  curMaterial.value = find;
-  showMaterial.value = true;
+  // 尝试查找角色&武器
+  const findC = AppCalendarData.find((i) => i.id === cur.item_id);
+  if (findC) {
+    curTypeC.value = findC.itemType === "weapon" ? "weapon" : "character";
+    curItemC.value = findC;
+    showCalendar.value = true;
+    return;
+  }
+  await openUrl(cur.wiki_url);
 }
 </script>
 <style lang="scss" scoped>
