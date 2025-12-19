@@ -51,7 +51,7 @@ type XmlTextParse = { name: string; icon?: string; text: string };
 const props = defineProps<ToArcBirthProps>();
 const visible = defineModel<boolean>();
 const showText = ref<boolean>(false);
-const buffer = shallowRef<Uint8Array | null>(null);
+const buffer = shallowRef<ArrayBuffer | null>(null);
 const textParse = shallowRef<Array<XmlTextParse>>([]);
 
 onMounted(() => clearData());

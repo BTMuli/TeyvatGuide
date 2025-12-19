@@ -57,7 +57,7 @@ const appStore = useAppStore();
 const props = defineProps<TpVodProps>();
 const coverUrl = ref<string>();
 const vodAspectRatio = ref<number>(16 / 9);
-const coverBuffer = shallowRef<Uint8Array | null>(null);
+const coverBuffer = shallowRef<ArrayBuffer | null>(null);
 const container = shallowRef<Artplayer | null>(null);
 
 console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);

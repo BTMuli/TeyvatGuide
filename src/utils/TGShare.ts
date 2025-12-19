@@ -18,15 +18,15 @@ import TGLogger from "./TGLogger.js";
 import { bytesToSize } from "./toolFunc.js";
 
 /**
- * @description 保存图片-canvas
- * @since Beta v0.7.2
+ * 保存图片-canvas
+ * @since Beta v0.9.0
  * @param {Uint8Array} buffer - 图片数据
  * @param {string} filename - 文件名
  * @param {string} format - 文件格式
  * @returns {Promise<void>} 无返回值
  */
 export async function saveCanvasImg(
-  buffer: Uint8Array,
+  buffer: ArrayBuffer,
   filename: string,
   format?: string,
 ): Promise<void> {
@@ -41,10 +41,11 @@ export async function saveCanvasImg(
     showSnackbar.cancel("未选择保存路径");
     return;
   }
-  await writeFile(res, buffer);
+  const bf = new Uint8Array(buffer);
+  await writeFile(res, bf);
   const realName = res.split(sep()).pop();
   await TGLogger.Info(`[saveCanvasImg][${realName}] 已将图像保存到本地`);
-  showSnackbar.success(`已将 ${realName} 保存到本地，大小为 ${bytesToSize(buffer.length)}`);
+  showSnackbar.success(`已将 ${realName} 保存到本地，大小为 ${bytesToSize(bf.length)}`);
 }
 
 /**
@@ -61,14 +62,13 @@ export async function saveImgLocal(url: string): Promise<string> {
 }
 
 /**
- * @description 返回图片 buffer
- * @since Beta v0.5.0
+ * 返回图片 buffer
+ * @since Beta v0.9.0
  * @param {string} url - 图片链接
  * @returns {Promise<Uint8Array>} 图片 buffer
  */
-export async function getImageBuffer(url: string): Promise<Uint8Array> {
-  const res = await TGHttp<Uint8Array>(url, { method: "GET", isBlob: true });
-  return new Uint8Array(res);
+export async function getImageBuffer(url: string): Promise<ArrayBuffer> {
+  return await TGHttp<ArrayBuffer>(url, { method: "GET", isBlob: true });
 }
 
 /**
@@ -126,41 +126,42 @@ export async function generateShareImg(
     return;
   }
   if (scrollable) element.style.maxHeight = maxHeight;
-  const buffer = new Uint8Array(
+  const bf = new Uint8Array(
     atob(canvasData.toDataURL("image/png").split(",")[1])
       .split("")
       .map((item) => item.charCodeAt(0)),
   );
-  const size = buffer.length;
+  const size = bf.length;
   const sizeStr = bytesToSize(size);
   await TGLogger.Info(`[generateShareImg][${fileName}] 图像大小为 ${sizeStr}`);
   const { shareDefaultFile } = storeToRefs(useAppStore());
   if (shareDefaultFile.value === 0) {
-    await saveCanvasImg(buffer, fileName);
+    await saveCanvasImg(bf.buffer, fileName);
     return;
   }
   if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1024 * 1024) {
-    await saveCanvasImg(buffer, fileName);
+    await saveCanvasImg(bf.buffer, fileName);
     return;
   }
   try {
-    await copyToClipboard(buffer);
+    await copyToClipboard(bf.buffer);
     showSnackbar.success(`已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`);
     await TGLogger.Info(`[generateShareImg][${fileName}] 已将图像复制到剪贴板`);
   } catch (e) {
     await TGLogger.Error(`[generateShareImg][${fileName}] 复制到剪贴板失败 ${e}`);
-    await saveCanvasImg(buffer, fileName);
+    await saveCanvasImg(bf.buffer, fileName);
   }
 }
 
 /**
- * @description 复制到剪贴板
- * @since Beta v0.6.8
+ * 复制到剪贴板
+ * @since Beta v0.9.0
  * @param {Uint8Array} buffer - 图片数据
  * @returns {Promise<void>} 无返回值
  */
-export async function copyToClipboard(buffer: Uint8Array): Promise<void> {
-  const blob = new Blob([buffer], { type: "image/png" });
+export async function copyToClipboard(buffer: ArrayBuffer): Promise<void> {
+  const bf = new Uint8Array(buffer);
+  const blob = new Blob([bf], { type: "image/png" });
   const url = URL.createObjectURL(blob);
   // todo mac 会报错: https://bugs.webkit.org/show_bug.cgi?id=222262
   if (platform() === "macos") {

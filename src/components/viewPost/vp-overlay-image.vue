@@ -80,7 +80,7 @@ const format = defineModel<string>("format", { default: "png" });
 
 const bgMode = ref<number>(0); // 0: transparent, 1: black, 2: white
 const isOriSize = ref<boolean>(false);
-const buffer = shallowRef<Uint8Array | null>(null);
+const buffer = shallowRef<ArrayBuffer | null>(null);
 const oriLink = computed<string>(() => miniImgUrl());
 const showCopy = computed<boolean>(() => {
   // 只能显示 png/jpg/jpeg/webp 格式的复制按钮

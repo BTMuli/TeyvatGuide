@@ -1,10 +1,10 @@
 /**
- * @file vite.config.ts
- * @description vite 配置文件
- * @since Beta v0.7.7
+ * vite 配置文件
+ * @since Beta v0.9.0
  */
 
 import vue from "@vitejs/plugin-vue";
+import postcssPresetEnv from "postcss-preset-env";
 import { defineConfig } from "vite";
 import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
@@ -40,6 +40,8 @@ export default defineConfig({
     hmr: host ? { protocol: "ws", host, port: 4001 } : undefined,
     watch: { ignored: ["**/src-tauri/**"] },
   },
-  esbuild: { supported: { "top-level-await": true } },
   build: { chunkSizeWarningLimit: 8192 },
+  css: {
+    postcss: { plugins: [postcssPresetEnv({ stage: 1, features: { "color-function": true } })] },
+  },
 });
