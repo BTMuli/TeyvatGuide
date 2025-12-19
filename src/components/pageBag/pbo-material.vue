@@ -13,7 +13,10 @@
             <img :src="`/icon/material/${props.data.info.id}.webp`" alt="icon" class="icon" />
           </div>
           <div class="pbom-name" @click="shareMaterial()">{{ props.data.info.name }}</div>
-          <div class="pbom-type">持有{{ dbInfo.count }}·{{ props.data.info.type }}</div>
+          <div class="pbom-type">
+            <span v-if="showRecord">持有{{ dbInfo.count }}·</span>
+            <span>{{ props.data.info.type }}</span>
+          </div>
         </div>
         <div class="pbom-mid">
           <div class="pbom-desc" v-html="parseHtmlText(props.data.info.description)" />
@@ -29,7 +32,7 @@
             />
           </div>
         </div>
-        <div class="pbom-bottom">
+        <div v-if="showRecord" class="pbom-bottom">
           <div class="pbom-bt-title">
             <v-icon color="var(--tgc-od-white)" size="16">mdi-clock-edit-outline</v-icon>
             <span>更新记录</span>
@@ -54,11 +57,11 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwoSource from "@comp/pageWiki/two-source.vue";
-import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
+import TSUserBagMaterial, { SKIP_BAG_TYPES } from "@Sqlm/userBagMaterial.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText, timestampToDate } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import PboConvert from "./pbo-convert.vue";
 
@@ -71,6 +74,7 @@ const props = defineProps<PboMaterialProps>();
 const emits = defineEmits<PboMaterialEmits>();
 const visible = defineModel<boolean>();
 const version = ref<string>();
+const showRecord = computed<boolean>(() => !SKIP_BAG_TYPES.includes(props.data.info.type));
 
 onMounted(async () => (version.value = await getVersion()));
 

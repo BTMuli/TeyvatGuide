@@ -8,14 +8,22 @@ import TGSqlite from "../index.js";
 
 import { WikiMaterialData } from "@/data/index.js";
 
+export const SKIP_BAG_TYPES: ReadonlyArray<string> = [
+  "系统开放",
+  "好感成长",
+  "风之翼",
+  "挑战结算道具",
+  "稀有货币",
+  "通用货币",
+];
+
 /**
  * 获取有效材料ID
  * @since Beta v0.9.0
  * @return {Array<number>}
  */
 function getValidMIds(): Array<number> {
-  const skipType = ["系统开放", "好感成长", "风之翼", "挑战结算道具", "稀有货币", "通用货币"];
-  const filter = WikiMaterialData.filter((m) => !skipType.includes(m.type));
+  const filter = WikiMaterialData.filter((m) => !SKIP_BAG_TYPES.includes(m.type));
   return filter.map((f) => f.id);
 }
 

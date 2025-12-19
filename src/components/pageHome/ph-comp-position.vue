@@ -19,28 +19,31 @@
       </div>
     </template>
   </THomeCard>
-  <TwoMaterial v-model="showMaterial" :data="curMaterial" />
+  <PboMaterial v-model="showMaterial" :data="curMaterial" :uid="Number(account.gameUid)" />
   <ToCalendar v-model="showCalendar" :item="curItemC" />
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import ToCalendar from "@comp/pageHome/ph-calendar-overlay.vue";
 import PhPosObc from "@comp/pageHome/ph-pos-obc.vue";
 import PhPosUser from "@comp/pageHome/ph-pos-user.vue";
-import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import recordReq from "@req/recordReq.js";
 import takumiReq from "@req/takumiReq.js";
+import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
+import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
 import { AppCalendarData, WikiMaterialData } from "@/data/index.js";
+import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
 type TPositionEmits = (e: "success") => void;
 
@@ -53,7 +56,7 @@ const isInit = ref<boolean>(false);
 const isUserPos = ref<boolean>(isLogin.value);
 const showMaterial = ref<boolean>(false);
 const showCalendar = ref<boolean>(false);
-const curMaterial = shallowRef<TGApp.App.Material.WikiItem>(WikiMaterialData[0]);
+const curMaterial = shallowRef<MaterialInfo>(genEmptyMaterial(WikiMaterialData[0]));
 const curTypeC = ref<"character" | "weapon">("character");
 const curItemC = shallowRef<TGApp.App.Calendar.Item>(AppCalendarData[0]);
 const obsPos = shallowRef<Array<TGApp.BBS.Obc.PositionItem>>([]);
@@ -119,10 +122,30 @@ async function loadWikiPosition(): Promise<void> {
   }
 }
 
+function genEmptyMaterial(material: TGApp.App.Material.WikiItem): MaterialInfo {
+  return {
+    info: material,
+    tb: {
+      uid: Number(account.value.gameUid),
+      id: material.id,
+      count: 0,
+      records: [],
+      updated: timestampToDate(Date.now()),
+    },
+  };
+}
+
+async function loadMaterial(material: TGApp.App.Material.WikiItem): Promise<MaterialInfo> {
+  const dbGet = await TSUserBagMaterial.getMaterial(Number(account.value.gameUid), material.id);
+  let res: MaterialInfo = genEmptyMaterial(material);
+  if (dbGet.length > 0) res.tb = dbGet[0];
+  return res;
+}
+
 async function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): Promise<void> {
   const findM = WikiMaterialData.find((i) => i.id === cur.item_id);
   if (findM) {
-    curMaterial.value = findM;
+    curMaterial.value = await loadMaterial(findM);
     showMaterial.value = true;
     return;
   }
