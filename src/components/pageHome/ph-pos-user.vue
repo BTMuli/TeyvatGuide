@@ -96,7 +96,7 @@
         <span>未开始</span>
       </template>
     </div>
-    <div class="ph-puc-desc">{{ props.pos.desc }}</div>
+    <div class="ph-puc-desc" v-html="parseHtmlText(props.pos.desc)" />
     <div class="ph-puc-rewards">
       <div
         v-for="reward in props.pos.reward_list"
@@ -117,7 +117,7 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import { ActCalendarTypeEnum } from "@enum/game.js";
 import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
+import { parseHtmlText, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
