@@ -197,16 +197,6 @@ function searchMaterial(): void {
 }
 
 .twm-item {
-  position: relative;
-  display: flex;
-  height: 45px;
-  align-items: center;
-  justify-content: flex-start;
-  padding-right: 5px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  background: var(--box-bg-1);
-  column-gap: 5px;
   cursor: pointer;
 }
 
