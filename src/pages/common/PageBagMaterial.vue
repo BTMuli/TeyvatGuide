@@ -36,23 +36,21 @@
         </v-select>
       </div>
     </template>
-    <template v-if="false" #extension>
-      <div v-if="false" class="pbm-nav-append">
-        <v-text-field
-          v-model="search"
-          :hide-details="true"
-          :single-line="true"
-          density="compact"
-          label="搜索"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          @keydown.enter="searchMaterial()"
-          @click:prepend-inner="searchMaterial()"
-        />
-      </div>
-    </template>
     <template #append>
       <div class="pbm-nav-extension">
+        <div class="pbm-nav-search">
+          <v-text-field
+            v-model="search"
+            :hide-details="true"
+            :single-line="true"
+            density="compact"
+            label="搜索"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            @keydown.enter="searchMaterial()"
+            @click:prepend-inner="searchMaterial()"
+          />
+        </div>
         <v-btn
           class="pbm-ne-btn"
           prepend-icon="mdi-import"
@@ -165,14 +163,19 @@ watch(
   () => selectType.value,
   async () => {
     if (showOverlay.value) showOverlay.value = false;
-    if (!selectType.value) {
-      materialShow.value = materialList.value;
-    } else {
-      materialShow.value = materialList.value.filter((i) => i.info.type === selectType.value);
-    }
+    materialShow.value = getSelectMaterials();
     curIdx.value = 0;
   },
 );
+
+/**
+ * 获取对应类别下的材料列表
+ * @return {Array<MaterialInfo>}
+ */
+function getSelectMaterials(): Array<MaterialInfo> {
+  if (!selectType.value) return materialList.value;
+  return materialList.value.filter((i) => i.info.type === selectType.value);
+}
 
 /**
  * 加载存档数据
@@ -222,7 +225,25 @@ function getItemInfo(id: number): TGApp.App.Material.WikiItem | false {
 }
 
 function searchMaterial(): void {
-  //TODO:搜索材料
+  let selectData = getSelectMaterials();
+  if (search.value === undefined || search.value === "") {
+    if (materialShow.value.length === selectData.length) {
+      showSnackbar.warn("请输入搜索内容!");
+      return;
+    }
+    materialShow.value = selectData;
+    showSnackbar.success("已重置!");
+    return;
+  }
+  selectData = selectData.filter(
+    (i) => i.info.name.includes(search.value!) || i.info.description.includes(search.value!),
+  );
+  if (selectData.length === 0) {
+    showSnackbar.warn("未找到符合条件的材料!");
+    return;
+  }
+  materialShow.value = selectData;
+  showSnackbar.success(`找到${selectData.length}条符合条件的材料`);
 }
 
 function handleUpdate(info: MaterialInfo): void {
@@ -382,7 +403,7 @@ function switchMaterial(isNext: boolean): void {
   }
 }
 
-.pbm-nav-append {
+.pbm-nav-search {
   position: relative;
   width: 240px;
   margin-right: 8px;
