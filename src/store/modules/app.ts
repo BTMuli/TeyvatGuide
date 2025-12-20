@@ -16,7 +16,7 @@ const userDataDir: Readonly<string> = `${await path.appLocalDataDir()}${path.sep
 const dbDataPath: Readonly<string> = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
 /* 用于存放日志的路径 */
 const logDataDir: Readonly<string> = await path.appLogDir();
-/* 咨讯类型 TODO:改成枚举类 */
+/* 资讯类型 TODO:改成枚举类 */
 export type NewsType = "notice" | "activity" | "news";
 
 const useAppStore = defineStore(
@@ -46,7 +46,7 @@ const useAppStore = defineStore(
     const server = ref<TGApp.Game.Base.ServerTypeEnum>(GameServerEnum.CN_QD01);
     /* 语言 */
     const lang = ref<TGApp.BBS.Announcement.AnnoLangEnum>(AnnoLangEnum.CHS);
-    /* 最近的咨讯类型 */
+    /* 最近的资讯类型 */
     const recentNewsType = ref<NewsType>("notice");
     /* 是否开启分辨率回正 */
     const needResize = ref<string>("true");
