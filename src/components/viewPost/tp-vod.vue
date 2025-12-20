@@ -1,13 +1,14 @@
+<!-- 米社视频组件 -->
 <template>
   <div class="tp-vod-box">
     <div
+      :id="`tp-vod-${props.data.insert.vod.id}`"
       class="tp-vod-container"
       data-html2canvas-ignore
-      :id="`tp-vod-${props.data.insert.vod.id}`"
     ></div>
     <div class="tp-vod-share">
-      <img alt="cover" :src="coverUrl" class="tp-vod-cover" />
-      <img src="/source/UI/video_play.svg" alt="icon" class="tp-vod-icon" />
+      <img :src="coverUrl" alt="cover" class="tp-vod-cover" />
+      <img alt="icon" class="tp-vod-icon" src="/source/UI/video_play.svg" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
         <span>{{ getVideoDuration(props.data.insert.vod.duration) }}</span>
@@ -27,7 +28,8 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@utils/TGShare.js";
 import { getVideoDuration } from "@utils/toolFunc.js";
 import Artplayer, { type Option } from "artplayer";
-import { onMounted, onUnmounted, ref, shallowRef, toRaw } from "vue";
+import { storeToRefs } from "pinia";
+import { onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
 
 type TpVod = {
   insert: {
@@ -55,10 +57,18 @@ type TpVodProps = { data: TpVod };
 
 const appStore = useAppStore();
 const props = defineProps<TpVodProps>();
+
+const { postViewWide } = storeToRefs(appStore);
+
 const coverUrl = ref<string>();
 const vodAspectRatio = ref<number>(16 / 9);
 const coverBuffer = shallowRef<ArrayBuffer | null>(null);
 const container = shallowRef<Artplayer | null>(null);
+
+watch(
+  () => postViewWide.value,
+  () => (vodAspectRatio.value = calcAspectRatio()),
+);
 
 console.log("tpVod", props.data.insert.vod.id, toRaw(props.data).insert.vod);
 
@@ -67,12 +77,7 @@ onMounted(async () => {
   const highestResolution = resolutions.reduce((prev, curr) =>
     prev.size > curr.size ? prev : curr,
   );
-  const width = highestResolution.width;
-  const height = highestResolution.height;
-  if (width && height) {
-    if (width > height) vodAspectRatio.value = width / height;
-    else vodAspectRatio.value = height / width;
-  }
+  vodAspectRatio.value = calcAspectRatio();
   const localUrl = appStore.getImageUrl(props.data.insert.vod.cover);
   coverUrl.value = await saveImgLocal(localUrl);
   const option: Option = {
@@ -82,7 +87,7 @@ onMounted(async () => {
     poster: coverUrl.value,
     type: highestResolution.format,
     playbackRate: true,
-    aspectRatio: true,
+    aspectRatio: false,
     setting: true,
     hotkey: true,
     pip: true,
@@ -100,14 +105,19 @@ onMounted(async () => {
         name: "subtitle",
         index: 100,
         position: "left",
-        html: `<i class="mdi mdi-eye"></i><span style="padding-left: 5px">${props.data.insert.vod?.view_num ?? 0}</span>`,
+        html: `
+          <span class="vod-box-view">
+            <i class="mdi mdi-eye"></i>
+            <span>${props.data.insert.vod?.view_num ?? 0}</span>
+          </span>
+        `,
         tooltip: `播放数：${props.data.insert.vod?.view_num ?? 0}`,
       },
       {
         name: "download-cover",
         index: 0,
         position: "right",
-        html: `<span class="mdi mdi-image-check"></span>`,
+        html: `<span class="mdi mdi-image-check vod-box-act" />`,
         tooltip: "下载封面",
         click: async () => {
           await showLoading.start("正在下载封面", props.data.insert.vod.cover);
@@ -122,7 +132,7 @@ onMounted(async () => {
         name: "download-video",
         index: 0,
         position: "right",
-        html: `<span class="mdi mdi-video-check"></span>`,
+        html: `<span class="mdi mdi-video-check vod-box-act" />`,
         tooltip: "下载视频",
         click: async () => {
           if (!container.value) return;
@@ -134,6 +144,18 @@ onMounted(async () => {
   container.value = new Artplayer(option);
   container.value?.on("fullscreen", async (s) => await getCurrentWindow().setFullscreen(s));
 });
+
+function calcAspectRatio(): number {
+  const resolutions = props.data.insert.vod.resolutions;
+  const highestResolution = resolutions.reduce((prev, curr) =>
+    prev.size > curr.size ? prev : curr,
+  );
+  const width = highestResolution.width;
+  const height = highestResolution.height;
+  if (!postViewWide.value) return width / height;
+  if (width > height) return width / height;
+  return height / width;
+}
 
 onUnmounted(() => {
   container.value?.destroy();
@@ -214,5 +236,43 @@ onUnmounted(() => {
   font-family: var(--font-title);
   font-size: 12px;
   gap: 4px;
+}
+
+/** Artplayer 内部控件 */
+
+:deep(.art-video-player) {
+  --art-control-height: 32px;
+  --art-control-icon-size: 24px;
+  --art-control-icon-scale: 1;
+  --art-padding: 8px;
+  --art-bottom-gap: 4px;
+
+  .art-bottom {
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--art-padding);
+  }
+
+  .art-controls {
+    height: fit-content;
+    flex-wrap: wrap;
+  }
+
+  .art-controls-left,
+  .art-controls-right {
+    height: fit-content;
+  }
+}
+
+:deep(.vod-box-view) {
+  font-size: 16px;
+}
+
+:deep(.vod-box-act) {
+  margin: 0 4px;
+  cursor: pointer;
+  font-size: 20px;
 }
 </style>
