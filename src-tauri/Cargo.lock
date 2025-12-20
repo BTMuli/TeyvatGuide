@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "TeyvatGuide"
-version = "0.8.8"
+version = "0.9.0"
 dependencies = [
  "chrono",
  "image",
