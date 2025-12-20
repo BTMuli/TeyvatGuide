@@ -136,7 +136,7 @@ watch(
 async function searchPosts(): Promise<void> {
   if (load.value || !search.value) return;
   load.value = true;
-  if (!props.gid || !props.keyword) {
+  if (!props.gid) {
     showSnackbar.warn("参数错误");
     load.value = false;
     return;
