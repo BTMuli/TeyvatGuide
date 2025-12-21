@@ -1,21 +1,25 @@
 <!-- 投票组件 -->
 <template>
-  <div class="tp-vote-box">
+  <div v-if="votes" class="tp-vote-box">
     <div class="tp-vote-info">
-      <span>{{ votes?.title }}</span>
-      <span>{{ votes?.count }}人已参与|{{ votes?.is_over ? "已截止" : "投票中" }}</span>
+      <div class="tp-vote-title">
+        {{ votes.title }}
+      </div>
+      <div class="tp-vote-overview">
+        <span>{{ votes.count }}人已参与</span>
+        <span>{{ votes.is_over ? "已截止" : `投票中 ${votes.endTime} 结束` }}</span>
+      </div>
     </div>
     <div class="tp-vote-list">
-      <div v-for="(item, index) in votes?.data" :key="index" class="tp-vote-item">
-        <div class="tp-vote-item-title">
-          <span class="title">{{ item.title }}</span>
-          <span class="val">
-            <span>{{ item.count }}票</span>
-            <span>{{ item.percent.toFixed(2) }}%</span>
-          </span>
+      <div v-for="(item, index) in votes.data" :key="index" class="tp-vote-item">
+        <!-- TODO: 投票  -->
+        <div class="tp-vi-title">{{ item.title }}</div>
+        <div class="tp-vi-stat">
+          <span class="tp-vi-cnt">{{ item.count }}票</span>
+          <span class="tp-vi-percent">{{ item.percent.toFixed(2) }}%</span>
         </div>
-        <div class="tp-vote-progress">
-          <div class="tp-vote-val" :style="getWidth(item)" />
+        <div class="tp-vi-progress">
+          <div :style="getWidth(item)" class="tp-vote-val" />
         </div>
       </div>
     </div>
@@ -23,25 +27,58 @@
 </template>
 <script lang="ts" setup>
 import ApiHubReq from "@req/apiHubReq.js";
-import useAppStore from "@store/app.js";
-import { storeToRefs } from "pinia";
+import { timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef } from "vue";
 
-type TpVote = { insert: { vote: { id: string; uid: string } } };
+/** 投票组件数据类型 */
+type TpVote = {
+  /** 插入数据 */
+  insert: {
+    /** 投票数据 */
+    vote: {
+      /** 投票ID */
+      id: string;
+      /** 投票发布者UID */
+      uid: string;
+    };
+  };
+};
 type TpVoteProps = { data: TpVote };
-type TpVoteData = { title: string; count: number; percent: number };
-type TpVoteInfo = { title: string; count: number; is_over: boolean; data: Array<TpVoteData> };
+/** 投票选项数据 */
+type TpVoteData = {
+  /** 标题 */
+  title: string;
+  /** 票数 */
+  count: number;
+  /** 百分比 */
+  percent: number;
+};
+/** 投票信息 */
+type TpVoteInfo = {
+  /** 标题 */
+  title: string;
+  /** 参与人数 */
+  count: number;
+  /** 是否结束 */
+  is_over: boolean;
+  /** 选项数据 */
+  data: Array<TpVoteData>;
+  /** 结束时间 */
+  endTime: string;
+};
 
 const props = defineProps<TpVoteProps>();
 const votes = shallowRef<TpVoteInfo>();
 const maxCnt = ref<number>(0);
 
-const { postViewWide } = storeToRefs(useAppStore());
+console.log("tp-vote:", props.data);
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
   const voteInfo = await ApiHubReq.vote.info(vote.id, vote.uid);
+  console.log(`[${props.data.insert.vote.id}]voteInfo:`, voteInfo);
   const voteResult = await ApiHubReq.vote.result(vote.id, vote.uid);
+  console.log("[${props.data.insert.vote.id}]voteResult:", voteResult);
   votes.value = {
     title: voteInfo.title,
     count: voteResult.user_cnt,
@@ -51,6 +88,7 @@ onMounted(async () => {
       count: voteResult.option_stats[index] ?? 0,
       percent: ((voteResult.option_stats[index] ?? 0) / voteResult.user_cnt) * 100,
     })),
+    endTime: timestampToDate(voteInfo.end_time * 1000),
   };
   maxCnt.value = Math.max(...votes.value.data.map((item) => item.count));
 });
@@ -60,71 +98,77 @@ function getWidth(item: TpVoteData): string {
   return `width: ${(item.count / maxCnt.value) * 100}%;`;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tp-vote-box {
   display: flex;
   flex-direction: column;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  margin: 12px 0;
+  margin: 8px 0;
   background: var(--box-bg-1);
   row-gap: 8px;
 }
 
 .tp-vote-info {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.tp-vote-info :first-child {
+.tp-vote-title {
+  font-family: var(--font-title);
   font-size: 20px;
-  font-weight: bold;
+}
+
+.tp-vote-overview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  column-gap: 4px;
+  font-size: 12px;
+  font-style: italic;
 }
 
 .tp-vote-list {
+  position: relative;
   display: grid;
-  gap: 12px 16px;
-  grid-template-columns: v-bind("postViewWide ? '1fr 1fr' : '1fr'");
+  width: 100%;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .tp-vote-item {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   gap: 4px;
 }
 
-.tp-vote-item-title {
+.tp-vi-title {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   column-gap: 4px;
-
-  .title {
-    font-size: 16px;
-    font-weight: bold;
-  }
-
-  .val {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    white-space: nowrap;
-
-    :first-child {
-      font-size: 12px;
-    }
-
-    :last-child {
-      font-size: 10px;
-    }
-  }
+  font-size: 16px;
+  font-weight: bold;
 }
 
-.tp-vote-progress {
+.tp-vi-stat {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  column-gap: 4px;
+  font-size: 12px;
+}
+
+.tp-vi-progress {
   overflow: hidden;
   width: 100%;
   height: 8px;
