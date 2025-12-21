@@ -1,6 +1,6 @@
 /**
  * 应用素材日历相关类型定义文件
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
 declare namespace TGApp.App.Material {
@@ -51,11 +51,11 @@ declare namespace TGApp.App.Material {
 
   /**
    * 转换来源
-   * @since Beta v0.9.0
+   * @since Beta v0.9.1
    */
   type ConvertSrc = {
     /** 材料ID */
-    id: number;
+    id: string;
     /** 材料名称 */
     name: string;
     /** 材料类型 */
