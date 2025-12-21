@@ -1,6 +1,7 @@
+<!-- Snackbar 组件 -->
 <template>
   <transition name="func-snackbar">
-    <div class="func-snackbar-container" v-show="show">
+    <div v-show="show" class="func-snackbar-container">
       <div class="func-snackbar">
         <slot name="text">
           <span class="func-snackbar-text">{{ data.text }}</span>
@@ -70,7 +71,7 @@ onUnmounted(() => {
 
 defineExpose({ displayBox });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .func-snackbar-enter-active,
 .func-snackbar-leave-active {
   transition: all 0.3s;
@@ -90,7 +91,7 @@ defineExpose({ displayBox });
 
 .func-snackbar-container {
   position: fixed;
-  z-index: 9999;
+  z-index: var(--tgi-snackbar);
   bottom: 0;
   left: 0;
   display: flex;

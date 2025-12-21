@@ -1,3 +1,4 @@
+<!-- 极验验证组件 -->
 <template>
   <transition name="func-geetest-outer">
     <div v-show="show || showOuter" class="geetest-overlay" @click.self.prevent>
@@ -14,7 +15,7 @@
     </div>
   </transition>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import "https://static.geetest.com/static/js/gt.0.4.9.js";
 import "https://static.geetest.com/v4/gt4.js";
 import { ref, useTemplateRef, watch } from "vue";
@@ -116,7 +117,7 @@ async function displayBox(
 
 defineExpose({ displayBox });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .func-geetest-outer-enter-active,
 .func-geetest-outer-leave-active,
 .func-geetest-inner-enter-active {
@@ -155,7 +156,7 @@ defineExpose({ displayBox });
 
 .geetest-overlay {
   position: fixed;
-  z-index: 100;
+  z-index: var(--tgi-geetest);
   top: 0;
   left: 0;
   display: flex;

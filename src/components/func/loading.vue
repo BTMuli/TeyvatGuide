@@ -113,7 +113,7 @@ defineExpose({ displayBox });
 
 .loading-overlay {
   position: fixed;
-  z-index: 100;
+  z-index: var(--tgi-loading);
   top: 0;
   left: 0;
   display: flex;

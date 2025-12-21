@@ -1,3 +1,4 @@
+<!-- Dialog 组件 -->
 <template>
   <transition name="func-dialog-outer">
     <div v-show="show || showOuter" class="dialog-overlay" @click.self.prevent="handleOuter">
@@ -6,17 +7,17 @@
           <div class="dialog-title">{{ data.title }}</div>
           <div
             v-show="data?.text !== '' && data.mode === 'check'"
-            class="dialog-subtitle"
             :title="data.text"
+            class="dialog-subtitle"
           >
             {{ data.text }}
           </div>
           <div v-show="data?.text !== '' && data.mode === 'input'" class="dialog-input">
             <div class="dialog-input-label">{{ data.text }}</div>
             <input
+              ref="inputRef"
               v-model="inputDefault"
               class="dialog-input-box"
-              ref="inputRef"
               @keydown.enter="handleConfirm"
             />
           </div>
@@ -159,7 +160,7 @@ function handleOuter(): void {
 
 defineExpose({ displayInputBox, displayCheckBox });
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .func-dialog-outer-enter-active,
 .func-dialog-outer-leave-active,
 .func-dialog-inner-enter-active {
@@ -202,7 +203,7 @@ defineExpose({ displayInputBox, displayCheckBox });
   --dialog-bg: var(--tgc-white-1);
 
   position: fixed;
-  z-index: 100;
+  z-index: var(--tgi-dialog);
   top: 0;
   left: 0;
   display: flex;

@@ -1,7 +1,8 @@
+<!-- 回顶组件 -->
 <template>
   <transition name="fade">
     <div v-show="canTop" class="back-top" @click="handleScrollTop">
-      <img src="@/assets/icons/back-top.svg" alt="back-icon" />
+      <img alt="back-icon" src="@/assets/icons/back-top.svg" />
     </div>
   </transition>
 </template>
@@ -39,10 +40,10 @@ function handleScrollTop(): void {
 onMounted(() => window.addEventListener("scroll", handleScroll));
 onUnmounted(() => window.removeEventListener("scroll", handleScroll));
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .back-top {
   position: fixed;
-  z-index: 1;
+  z-index: var(--tgi-top);
   right: 10px;
   bottom: 10px;
   width: 40px;

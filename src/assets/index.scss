@@ -1,7 +1,6 @@
-/*
- * @file assets/index.css
- * @description 全局样式文件
- * @since Beta v0.7.7
+/**
+ * 全局样式文件
+ * @since Beta v0.9.1
  */
 
 @use "fonts/index";
@@ -47,6 +46,13 @@
 
   /* some css same in dark and default theme */
   --tgc-btn-1: var(--tgc-dark-7); /* button bg */
+
+  /** Some Comp ZIndex */
+  --tgi-top: 10;
+  --tgi-dialog: 100;
+  --tgi-geetest: 100;
+  --tgi-loading: 100;
+  --tgi-snackbar: 9999;
 }
 
 /*
