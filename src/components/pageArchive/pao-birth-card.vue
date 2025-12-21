@@ -1,38 +1,35 @@
+<!-- 留影叙佳期浮窗 TODO 左右SLOT -->
 <template>
   <TOverlay v-model="visible" blur-val="5px">
-    <div class="toab-container" v-if="props.data">
-      <div class="toab-img">
-        <TMiImg :ori="true" :src="props.data.take_picture[Number(props.choice)]" alt="顶部图像" />
-        <div class="toab-dialog" v-show="showText">
-          <div v-for="(item, index) in textParse" :key="index" class="toab-dialog-item">
-            <div class="toab-dialog-item-icon" v-if="item.icon" :title="item.name">
-              <TMiImg :src="item.icon" alt="对白头像" :ori="true" />
-            </div>
-            <div v-else-if="item.name !== '未知'" class="toab-dialog-item-name">
-              {{ item.name }}
-            </div>
-            <div
-              :class="{
-                'toab-dialog-item-text': item.icon !== undefined,
-                'toab-dialog-item-text-mini': item.icon === undefined,
-              }"
-            >
-              {{ item.text }}
-            </div>
+    <div class="pao-bc-container">
+      <div v-if="props.data" class="pao-bc-cover">
+        <TMiImg v-if="props.choice" :ori="true" :src="props.data.take_picture[1]" alt="顶部图像" />
+        <TMiImg v-else :ori="true" :src="props.data.take_picture[0]" alt="顶部图像" />
+      </div>
+      <div v-show="showText" class="pao-bc-comments">
+        <div v-for="(item, index) in textParse" :key="index" class="pao-bc-comment">
+          <div v-if="item.icon" :title="item.name" class="pao-bcc-icon">
+            <TMiImg :ori="true" :src="item.icon" alt="对白头像" />
+          </div>
+          <div v-else-if="item.name !== '未知'" class="pao-bcc-name">
+            {{ item.name }}
+          </div>
+          <div :class="item.icon ? 'pao-bcc-text' : 'pao-bcc-quote'">
+            {{ item.text }}
           </div>
         </div>
       </div>
-      <div class="toab-top-tools">
-        <v-icon @click="onCopy" title="复制到剪贴板">mdi-content-copy</v-icon>
-        <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
-        <v-icon @click="loadText" :title="showText ? '隐藏对白' : '显示对白'">
+      <div class="pao-bc-top-tools">
+        <v-icon title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
+        <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
+        <v-icon :title="showText ? '隐藏对白' : '显示对白'" @click="showComments()">
           {{ showText ? "mdi-eye-off" : "mdi-eye" }}
         </v-icon>
       </div>
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -54,14 +51,25 @@ const showText = ref<boolean>(false);
 const buffer = shallowRef<ArrayBuffer | null>(null);
 const textParse = shallowRef<Array<XmlTextParse>>([]);
 
-onMounted(() => clearData());
-watch(() => props.data, clearData);
-watch(() => props.choice, clearData);
+onMounted(async () => await clearData());
+watch(
+  () => [props.data, props.choice],
+  async () => await clearData(),
+);
+watch(
+  () => showText.value,
+  async () => {
+    if (showText.value) await loadText();
+    else textParse.value = [];
+  },
+);
 
-function clearData(): void {
+async function clearData(): Promise<void> {
   buffer.value = null;
-  textParse.value = [];
-  showText.value = false;
+  if (showText.value) {
+    textParse.value = [];
+    await loadText();
+  }
 }
 
 async function onCopy(): Promise<void> {
@@ -82,6 +90,10 @@ async function onDownload(): Promise<void> {
   showSnackbar.success(`图片已下载到本地，大小：${size}`);
 }
 
+function showComments(): void {
+  showText.value = !showText.value;
+}
+
 async function loadText(): Promise<void> {
   if (!props.data) return;
   if (textParse.value.length > 0) {
@@ -95,13 +107,14 @@ async function loadText(): Promise<void> {
   }
   const keyMap = getKeyMap(resSource);
   const resXml: unknown = await parseXml(props.data.gal_xml);
+  console.log(resXml);
   const textList = getTextList(resXml);
+  console.log(textList);
   textParse.value = textList.map((item) => {
     const key = keyMap.find((keyItem) => keyItem.id === item.img);
     if (!key) return { name: "未知", text: item.text };
     return { name: key.group ?? key.id, text: item.text, icon: key.icon };
   });
-  showText.value = true;
 }
 
 function getKeyMap(resSource: unknown): Array<XmlKeyMap> {
@@ -124,6 +137,7 @@ function getKeyMap(resSource: unknown): Array<XmlKeyMap> {
   return res;
 }
 
+// TODO: 重构文本解析||调整渲染方式
 function getTextList(resXml: unknown): Array<XmlTextList> {
   const res: Array<XmlTextList> = [];
   if (!resXml || typeof resXml !== "object") return res;
@@ -143,7 +157,11 @@ function getTextList(resXml: unknown): Array<XmlTextList> {
     if (!("chara" in attr) || !("img" in attr)) continue;
     if (item.name !== "simple_dialog") continue;
     const img = props.choice ? attr.img : attr.img.replace("aether", "lumine");
-    res.push({ chara: attr.chara, img: img, text: item.elements[0].text });
+    let findText = "";
+    const arr5 = item.elements[0].elements;
+    if (arr5 && arr5.length > 0 && arr5[0].text !== "") findText = arr5[0].text;
+    else findText = item.elements[0].text;
+    res.push({ chara: attr.chara, img: img, text: findText });
   }
   return res;
 }
@@ -164,90 +182,105 @@ async function parseXml(link: string): Promise<false | unknown> {
 }
 </script>
 <style lang="css" scoped>
-.toab-container {
+.pao-bc-container {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 50vw;
   align-items: center;
   justify-content: center;
+  border-radius: 4px;
+  aspect-ratio: 125 / 54;
+  background: var(--app-page-bg);
 }
 
-.toab-img {
+.pao-bc-cover {
   position: relative;
+  z-index: 0;
   display: flex;
   width: 100%;
+  height: 100%;
   align-items: center;
   justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
 }
 
-.toab-img img {
-  overflow: hidden;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  border-radius: 10px;
-}
-
-.toab-top-tools {
+.pao-bc-comments {
   position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px;
+  border-radius: 4px;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  background: var(--common-shadow-t-2);
+  color: var(--box-text-1);
+  overflow-y: auto;
+  row-gap: 4px;
+}
+
+.pao-bc-comment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 4px;
+}
+
+.pao-bcc-icon {
+  position: relative;
+  width: 40px;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+  }
+}
+
+.pao-bcc-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.pao-bcc-text {
+  font-size: 16px;
+  text-shadow: 0 0 2px var(--common-shadow-t-8);
+  word-break: break-all;
+}
+
+.pao-bcc-quote {
+  margin-left: 3rem;
+  font-size: 1rem;
+  opacity: 0.8;
+  word-break: break-all;
+}
+
+.pao-bc-top-tools {
+  position: absolute;
+  z-index: 2;
   right: 0;
   bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 5px;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   background-color: var(--common-shadow-t-2);
   border-bottom-right-radius: 5px;
   border-top-left-radius: 5px;
-}
-
-.toab-dialog {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  max-height: 40vh;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  border-radius: 10px;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-  background: var(--common-shadow-t-2);
-  color: var(--box-text-1);
-  overflow-y: auto;
-}
-
-.toab-dialog-item {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.toab-dialog-item-icon {
-  width: 50px;
-  min-width: 50px;
-}
-
-.toab-dialog-item-name {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.toab-dialog-item-text {
-  font-size: 1.2rem;
-  word-break: break-all;
-}
-
-.toab-dialog-item-text-mini {
-  margin-left: 3rem;
-  font-size: 1rem;
-  opacity: 0.8;
-  word-break: break-all;
 }
 </style>
