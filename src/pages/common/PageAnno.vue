@@ -43,7 +43,7 @@
           variant="elevated"
           @click="switchNews"
         >
-          切换米游社咨讯
+          切换米游社资讯
         </v-btn>
         <v-btn
           v-if="isLogin"
@@ -227,7 +227,7 @@ function getAnnoCard(
 }
 
 async function switchNews(): Promise<void> {
-  await TGLogger.Info("[Announcements][switchNews] 切换米游社咨讯");
+  await TGLogger.Info("[Announcements][switchNews] 切换米游社资讯");
   await router.push("/news/2");
 }
 </script>

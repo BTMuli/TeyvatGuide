@@ -109,7 +109,7 @@ const postData = reactive<PostData>({
 const rawData = reactive<RawData>({
   notice: shallowRef<RawItem>({ isLast: false, name: "公告", lastId: 0 }),
   activity: shallowRef<RawItem>({ isLast: false, name: "活动", lastId: 0 }),
-  news: shallowRef<RawItem>({ isLast: false, name: "咨讯", lastId: 0 }),
+  news: shallowRef<RawItem>({ isLast: false, name: "资讯", lastId: 0 }),
 });
 const tab = computed<NewsType>({
   get: () => ((recentNewsType.value satisfies NewsType) ? recentNewsType.value : "notice"),

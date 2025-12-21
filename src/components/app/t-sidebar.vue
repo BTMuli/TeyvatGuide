@@ -19,8 +19,8 @@
           <img alt="annoIcon" class="side-icon" src="@/assets/icons/board.svg" />
         </template>
       </v-list-item>
-      <v-list-item :href="`/news/2/${recentNewsType}`" :link="true" :title.attr="'咨讯'">
-        <template #title>咨讯</template>
+      <v-list-item :href="`/news/2/${recentNewsType}`" :link="true" :title.attr="'资讯'">
+        <template #title>资讯</template>
         <template #prepend>
           <img alt="mihoyo" class="side-icon" src="/platforms/mhy/mys.webp" />
         </template>

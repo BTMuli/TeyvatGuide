@@ -13,7 +13,7 @@ const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
  * @description 获取 News 列表
  * @since Beta v0.7.1
  * @param {string} gid GID
- * @param {string} newsType 咨讯类型: 1 为公告，2 为活动，3 为咨讯
+ * @param {string} newsType 资讯类型: 1 为公告，2 为活动，3 为资讯
  * @param {number} pageSize 返回数量
  * @param {number} lastId 上一次请求的最后一条数据的 id
  * @return {Promise<TGApp.BBS.Post.NewsRes>}

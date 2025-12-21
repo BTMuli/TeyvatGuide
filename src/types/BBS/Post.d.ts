@@ -44,17 +44,17 @@ declare namespace TGApp.BBS.Post {
   };
 
   /**
-   * 咨讯返回响应
+   * 资讯返回响应
    * @since Beta v0.7.2
    */
   type NewsResp = TGApp.BBS.Response.BaseWithData<NewsRes>;
 
   /**
-   * 咨讯数据
+   * 资讯数据
    * @since Beta v0.7.2
    */
   type NewsRes = {
-    /** 咨讯列表 */
+    /** 资讯列表 */
     list: Array<FullData>;
     /** 列表内最后一个 ID，用于索引 */
     last_id: string;
@@ -147,7 +147,7 @@ declare namespace TGApp.BBS.Post {
     forum_rank_info: unknown | null;
     /** 链接卡片列表，可能为空 */
     link_card_list: Array<LinkCard>;
-    /** 咨讯元数据，可能为 null */
+    /** 资讯元数据，可能为 null */
     news_meta?: NewsMeta | null;
     /** 推荐理由，可能为 null */
     recommend_reason: RecommendReason | null;
@@ -643,7 +643,7 @@ declare namespace TGApp.BBS.Post {
   };
 
   /**
-   * 咨讯元数据，只有活动咨讯才有
+   * 资讯元数据，只有活动资讯才有
    * @since Beta v0.7.1
    */
   type NewsMeta = {

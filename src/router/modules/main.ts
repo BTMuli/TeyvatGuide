@@ -17,7 +17,7 @@ const mainRoutes = (<const>[
   },
   {
     path: "/news/:gid/:type?",
-    name: "咨讯",
+    name: "资讯",
     component: async () => await import("@/pages/common/PostNews.vue"),
   },
   {
