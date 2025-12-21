@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-12-03
+Update: 2025-12-21
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-12-03 10:22:51`
+> 更新于 `2025-12-21 18:32:25`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide)
 
@@ -55,6 +55,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 米游社话题帖子获取（通过话题点击跳转）
   - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入 & 自动导入（内置Yae）
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.1）
+  - [x] 背包物品获取（内置YAE）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
   - [x] 帖子评论查看&分享
@@ -63,6 +64,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
   > 支持 扫码/验证码/Cookie 登陆，支持多账号管理
   - [x] 近期活动（首页组件）
+  - [x] 游戏签到（首页组件）
   - [x] 原神战绩
   - [x] 角色详情
   - [x] 螺旋深渊
