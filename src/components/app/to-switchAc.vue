@@ -3,30 +3,30 @@
   <TOverlay v-model="visible">
     <div class="to-sac-box">
       <div class="tsb-title">账号管理</div>
-      <v-list variant="text" class="tsb-list" v-model:opened="openList">
+      <v-list v-model:opened="openList" class="tsb-list" variant="text">
         <v-list-group v-for="item in ac" :key="item.user.uid" :title.attr="'点击展开/收起'">
           <template v-slot:activator="{ props }">
             <v-list-item v-bind="props">
               <template #title>{{ item.user.brief.nickname }}[{{ item.user.uid }}]</template>
               <template #subtitle>{{ item.user.brief.desc }}</template>
               <template #prepend>
-                <img class="tsb-avatar" :src="item.user.brief.avatar" alt="userIcon" />
+                <img :src="item.user.brief.avatar" alt="userIcon" class="tsb-avatar" />
               </template>
               <template #append>
                 <v-checkbox-btn
                   :model-value="item.user.uid === curUid"
-                  @click="trySelect(item.user)"
                   readonly
+                  @click="trySelect(item.user)"
                 />
               </template>
             </v-list-item>
           </template>
           <v-list-item
-            density="compact"
             v-for="(game, idx) in item.gameAc"
             :key="idx"
             :value="game.gameUid"
             class="tsb-list-game"
+            density="compact"
             @click="trySelect(item.user, game)"
           >
             <template #title>{{ game.nickname }}</template>
@@ -49,7 +49,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { shallowRef, ref, watch } from "vue";
+import { ref, shallowRef, watch } from "vue";
 
 type TsaAcItem = { user: TGApp.App.Account.User; gameAc: Array<TGApp.Sqlite.Account.Game> };
 
@@ -105,6 +105,7 @@ async function tryConfirm(): Promise<void> {
     showSnackbar.warn("无需切换当前账号");
     return;
   }
+  console.log(curUid.value, curGameUid.value);
   const acFind = ac.value.find((u) => u.user.uid === curUid.value);
   if (!acFind) {
     showSnackbar.error("未找到对应用户信息，请重试");
@@ -118,8 +119,8 @@ async function tryConfirm(): Promise<void> {
     showSnackbar.error("未找到对应游戏账号信息，请重试");
     return;
   } else {
-    account.value = game;
-    await userStore.switchGameAccount(game.gameUid);
+    const res = await userStore.switchGameAccount(game.gameUid);
+    if (!res) return;
     showSnackbar.success(`成功切换到用户${uid.value}的游戏UID${game.gameUid}`);
     await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${game.gameUid}成功`);
     visible.value = false;
