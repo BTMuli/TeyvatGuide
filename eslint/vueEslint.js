@@ -18,6 +18,7 @@ const tsConfigRules = {
   "@typescript-eslint/no-explicit-any": "off",
   "@typescript-eslint/no-unused-expressions": ["error", { allowShortCircuit: false }],
   "@typescript-eslint/array-type": ["error", { "default": "generic" }],
+  "@typescript-eslint/consistent-type-definitions": ["error", "type"],
   "import/order": [
     "error",
     {
