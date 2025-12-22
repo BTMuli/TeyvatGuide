@@ -247,15 +247,35 @@
           </v-list>
         </v-menu>
         <!-- 切换账号 -->
-        <v-list-item
+        <v-menu
           v-if="isLogin"
           :disabled="isTryLogin"
-          :title.attr="'切换账号'"
-          prepend-icon="mdi-account-switch"
-          @click="trySwitchAccount()"
+          :open-on-click="true"
+          location="end"
+          @update:model-value="(v) => (v ? loadAllGameAc() : {})"
         >
-          <v-list-item-title>切换账号</v-list-item-title>
-        </v-list-item>
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'切换账号'" prepend-icon="mdi-account-switch" v-bind="props">
+              <v-list-item-title>切换账号</v-list-item-title>
+            </v-list-item>
+          </template>
+          <v-list :nav="true" class="side-list-menu">
+            <v-list-item
+              v-for="ac in allGameAc"
+              :key="ac.gameUid"
+              class="side-item-menu sub"
+              @click="trySwitchGameAccount(ac)"
+            >
+              <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
+              <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }})</v-list-item-subtitle>
+              <template #append>
+                <div v-if="ac.gameUid === account.gameUid" title="当前登录账号">
+                  <v-icon color="green">mdi-check</v-icon>
+                </div>
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <!-- 主题切换 -->
         <v-list-item
           :prepend-icon="theme === 'default' ? 'mdi-weather-night' : 'mdi-weather-sunny'"
@@ -276,7 +296,6 @@
   </v-navigation-drawer>
   <vp-overlay-follow v-model="showFollow" />
   <ToGameLogin v-model="showLoginQr" :launcher="false" @success="tryGetTokens" />
-  <ToSwitchAc v-model="showAcSwitch" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -299,19 +318,19 @@ import { Command } from "@tauri-apps/plugin-shell";
 import mhyClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
-import ToSwitchAc from "./to-switchAc.vue";
-
+const userStore = useUserStore();
 const { sidebar, theme, isLogin, recentNewsType, gameDir, isInAdmin } = storeToRefs(useAppStore());
-const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
+const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
 const isDevEnv = import.meta.env.MODE === "development";
 const showFollow = ref<boolean>();
 const showLoginQr = ref<boolean>(false);
-const showAcSwitch = ref<boolean>(false);
 const isTryLogin = ref<boolean>(false);
+const allGameAc = shallowRef<Array<TGApp.Sqlite.Account.Game>>([]);
+
 const rail = computed<boolean>({
   get: () => sidebar.value.collapse,
   set: (v) => (sidebar.value.collapse = v),
@@ -341,8 +360,31 @@ onUnmounted(() => {
   }
 });
 
-async function trySwitchAccount(): Promise<void> {
-  showAcSwitch.value = true;
+async function loadAllGameAc(): Promise<void> {
+  allGameAc.value = [];
+  let res: Array<TGApp.Sqlite.Account.Game> = [];
+  const uidList = await TSUserAccount.account.getAllUid();
+  for (const r of uidList) {
+    const gameAcs = await TSUserAccount.game.getAccount(r);
+    res = res.concat(gameAcs);
+  }
+  res = res.filter((i) => i.gameBiz === "hk4e_cn");
+  allGameAc.value = res;
+}
+
+async function trySwitchGameAccount(ac: TGApp.Sqlite.Account.Game): Promise<void> {
+  const acM = await TSUserAccount.account.getAccount(ac.uid);
+  if (!acM) {
+    showSnackbar.warn(`未找到米社用户${ac.uid}的用户信息`);
+    return;
+  }
+  uid.value = ac.uid;
+  briefInfo.value = acM.brief;
+  cookie.value = acM.cookie;
+  const res = await userStore.switchGameAccount(ac.gameUid);
+  if (!res) return;
+  showSnackbar.success(`成功切换到用户${uid.value}的游戏UID${ac.gameUid}`);
+  await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${ac.gameUid}成功`);
 }
 
 async function switchTheme(): Promise<void> {
