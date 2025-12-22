@@ -21,10 +21,10 @@
       <v-btn
         v-if="props.account.gameBiz !== 'hk4e_cn'"
         class="ph-sit-delete"
+        data-html2canvas-ignore
         icon="mdi-delete"
         size="x-small"
         @click="tryDelete()"
-        data-html2canvas-ignore
       />
     </div>
     <!-- 额外签到奖励部分 -->
@@ -65,11 +65,14 @@
           :disabled="isTodaySigned || isSign || isResign"
           :loading="isSign"
           class="sign-btn"
-          prepend-icon="mdi-calendar-check"
           size="small"
           @click="handleSign"
         >
-          签到
+          <template #prepend>
+            <v-icon v-if="isTodaySigned" color="green">mdi-check-circle</v-icon>
+            <v-icon v-else>mdi-calendar-check</v-icon>
+          </template>
+          {{ isTodaySigned ? "已签到" : "签到" }}
         </v-btn>
         <v-btn
           :disabled="!canResign || isSign || isResign"
@@ -86,8 +89,8 @@
         :disabled="isRefresh"
         :loading="isRefresh"
         class="sign-btn"
-        size="small"
         prepend-icon="mdi-refresh"
+        size="small"
         @click="refreshData()"
       >
         刷新数据
@@ -185,10 +188,12 @@ async function refreshData(): Promise<void> {
   const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
   try {
     const infoResp = await lunaReq.sign.info(props.account, ck);
+    console.log("signInfo", infoResp);
     if ("retcode" in infoResp) {
       showSnackbar.warn(`刷新信息失败: ${infoResp.retcode} ${infoResp.message}`);
     } else signInfo.value = infoResp;
     const statResp = await lunaReq.sign.stat(props.account, ck);
+    console.log("signStat", statResp);
     if ("retcode" in statResp) {
       showSnackbar.warn(`刷新状态失败: ${statResp.retcode} ${statResp.message}`);
     } else signStat.value = statResp;
