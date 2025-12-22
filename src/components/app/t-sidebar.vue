@@ -303,7 +303,7 @@ import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import ToSwitchAc from "./to-switchAc.vue";
 
-const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());
+const { sidebar, theme, isLogin, recentNewsType, gameDir, isInAdmin } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
@@ -669,14 +669,6 @@ async function tryLaunchGame(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  let isAdmin = false;
-  try {
-    isAdmin = await invoke<boolean>("is_in_admin");
-  } catch (err) {
-    showSnackbar.error(`检测管理员权限失败：${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]检测管理员权限失败:${err}`);
-    return;
-  }
   const resp = await passportReq.authTicket(account.value, cookie.value);
   if (typeof resp !== "string") {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
@@ -686,7 +678,7 @@ async function tryLaunchGame(): Promise<void> {
     await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${JSON.stringify(resp)}`);
     return;
   }
-  if (!isAdmin) {
+  if (!isInAdmin.value) {
     showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
     const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
       cwd: gameDir.value,

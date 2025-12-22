@@ -130,7 +130,7 @@ export type MaterialInfo = {
   info: TGApp.App.Material.WikiItem;
 };
 
-const { gameDir } = storeToRefs(useAppStore());
+const { gameDir, isInAdmin } = storeToRefs(useAppStore());
 
 const curUid = ref<number>(0);
 const selectType = ref<string | null>(null);
@@ -271,16 +271,7 @@ async function tryCallYae(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  // 判断是否是管理员权限
-  let isAdmin = false;
-  try {
-    isAdmin = await invoke<boolean>("is_in_admin");
-  } catch (err) {
-    showSnackbar.error(`检测管理员权限失败：${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]检测管理员权限失败:${err}`);
-    return;
-  }
-  if (!isAdmin) {
+  if (!isInAdmin.value) {
     const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
     if (!check) {
       showSnackbar.cancel("已取消以管理员模式重启");

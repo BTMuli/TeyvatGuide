@@ -31,18 +31,18 @@
     </template>
     <template #extension>
       <div class="top-extension">
-        <v-btn class="top-btn" prepend-icon="mdi-import" variant="elevated" @click="importJson()"
-          >导入</v-btn
-        >
-        <v-btn class="top-btn" prepend-icon="mdi-export" variantelevated @click="exportJson()"
-          >导出</v-btn
-        >
-        <v-btn class="top-btn" prepend-icon="mdi-plus" variant="elevated" @click="createUid()"
-          >新建存档</v-btn
-        >
-        <v-btn class="top-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteUid()"
-          >删除存档</v-btn
-        >
+        <v-btn class="top-btn" prepend-icon="mdi-import" variant="elevated" @click="importJson()">
+          导入
+        </v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-export" variantelevated @click="exportJson()">
+          导出
+        </v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-plus" variant="elevated" @click="createUid()">
+          新建存档
+        </v-btn>
+        <v-btn class="top-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteUid()">
+          删除存档
+        </v-btn>
         <div class="top-switch" @click="switchHideFin">
           <v-icon v-if="hideFin" color="var(--tgc-od-green)">
             mdi-checkbox-marked-circle-outline
@@ -114,7 +114,7 @@ const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).ma
 
 const route = useRoute();
 const router = useRouter();
-const { gameDir } = storeToRefs(useAppStore());
+const { gameDir, isInAdmin } = storeToRefs(useAppStore());
 
 let achiListener: UnlistenFn | null = null;
 
@@ -318,16 +318,7 @@ async function toYae(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  // 判断是否是管理员权限
-  let isAdmin = false;
-  try {
-    isAdmin = await invoke<boolean>("is_in_admin");
-  } catch (err) {
-    showSnackbar.error(`检测管理员权限失败：${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]检测管理员权限失败:${err}`);
-    return;
-  }
-  if (!isAdmin) {
+  if (!isInAdmin.value) {
     const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
     if (!check) {
       showSnackbar.cancel("已取消以管理员模式重启");

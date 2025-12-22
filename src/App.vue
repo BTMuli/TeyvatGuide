@@ -31,12 +31,13 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { getBuildTime } from "@utils/TGBuild.js";
 import TGLogger from "@utils/TGLogger.js";
 import { getWindowSize, resizeWindow } from "@utils/TGWindow.js";
+import { isRunInAdmin } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray } =
+const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray, isInAdmin } =
   storeToRefs(useAppStore());
 const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
 
@@ -61,6 +62,8 @@ onMounted(async () => {
     dpListener = await event.listen<string>("active_deep_link", handleDpListen);
     yaeListener = await event.listen<TGApp.Plugins.Yae.RsEvent>("yae_read", handleYaeListen);
     closeListener = await event.listen("main-window-close-requested", handleWindowClose);
+    await nextTick();
+    if (isInAdmin.value) await win.setTitle(`${title} - AdminMode`);
   }
   if (needResize.value !== "false") await resizeWindow();
   document.documentElement.className = theme.value;
@@ -225,6 +228,7 @@ async function handleResizeListen(event: Event<string>): Promise<void> {
 async function listenOnInit(): Promise<void> {
   console.info("[App][listenOnInit] 监听初始化事件！");
   await event.listen<void>("initApp", async () => {
+    await checkIsAdmin();
     await checkAppLoad();
     await checkDeviceFp();
     try {
@@ -236,6 +240,10 @@ async function listenOnInit(): Promise<void> {
     }
     await checkUpdate();
   });
+}
+
+async function checkIsAdmin(): Promise<void> {
+  isInAdmin.value = await isRunInAdmin();
 }
 
 async function checkAppLoad(): Promise<void> {
