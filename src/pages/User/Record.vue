@@ -1,3 +1,4 @@
+<!-- 用户战绩页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -21,8 +22,9 @@
           prepend-icon="mdi-refresh"
           variant="elevated"
           @click="refreshRecord()"
-          >更新</v-btn
         >
+          更新
+        </v-btn>
         <v-btn
           :disabled="recordData === undefined"
           class="ur-top-btn"

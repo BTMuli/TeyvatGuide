@@ -95,18 +95,12 @@ const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>([]
 onMounted(async () => {
   await TGLogger.Info("[UserGachaB][onMounted] 进入千星奇域页面");
   await showLoading.start("正在加载千星奇域祈愿数据", "正在获取UID列表...");
-  selectItem.value = await TSUserGachaB.getUidList();
-  await TGLogger.Info(`[UserGachaB][onMounted] 总UID数：${selectItem.value.length}`);
-  if (selectItem.value.length === 0) {
-    await showLoading.end();
-    await TGLogger.Info("[UserGachaB][onMounted] UID列表为空");
-    return;
+  await reloadUid();
+  if (uidCur.value) {
+    await showLoading.update(`UID: ${uidCur.value}`);
+    gachaListCur.value = await TSUserGachaB.getGachaRecords(uidCur.value);
+    await TGLogger.Info(`[UserGachaB][onMounted] 祈愿记录数: ${gachaListCur.value.length}`);
   }
-  uidCur.value = selectItem.value[0];
-  await TGLogger.Info(`[UserGachaB][onMounted] 当前UID:${uidCur.value}`);
-  await showLoading.update(`UID: ${uidCur.value}`);
-  gachaListCur.value = await TSUserGachaB.getGachaRecords(uidCur.value);
-  await TGLogger.Info(`[UserGachaB][onMounted] 祈愿记录数: ${gachaListCur.value.length}`);
   await showLoading.end();
   showSnackbar.success(`加载完成，共 ${gachaListCur.value.length} 条祈愿记录`);
 });
@@ -128,6 +122,16 @@ watch(
  */
 async function toGacha(): Promise<void> {
   await router.push({ name: "祈愿记录" });
+}
+
+async function reloadUid(): Promise<void> {
+  selectItem.value = await TSUserGachaB.getUidList();
+  if (selectItem.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  else if (selectItem.value.length > 0) uidCur.value = selectItem.value[0];
+  else if (isLogin.value) {
+    selectItem.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = undefined;
 }
 
 /**

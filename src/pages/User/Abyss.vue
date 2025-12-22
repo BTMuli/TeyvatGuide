@@ -112,6 +112,7 @@ import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOverview from "@comp/userAbyss/tua-overview.vue";
 import recordReq from "@req/recordReq.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -123,6 +124,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const version = ref<string>();
@@ -135,16 +137,23 @@ onMounted(async () => {
   version.value = await getVersion();
   await TGLogger.Info("[UserAbyss][onMounted] 打开角色深渊页面");
   await showLoading.update("正在获取UID列表");
-  uidList.value = await TSUserAbyss.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else uidCur.value = "";
+  await reloadUid();
   await showLoading.update(`正在加载${uidCur.value}的深渊数据`);
   await showLoading.end();
   showSnackbar.success(`已加载${uidCur.value}的${localAbyss.value.length}条深渊数据`);
 });
 
 watch(() => uidCur.value, loadAbyss);
+
+async function reloadUid(): Promise<void> {
+  uidList.value = await TSUserAbyss.getAllUid();
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else if (isLogin.value) {
+    uidList.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = undefined;
+}
 
 async function toCombat(): Promise<void> {
   await router.push({ name: "真境剧诗" });
@@ -218,8 +227,7 @@ async function refreshAbyss(): Promise<void> {
   await TSUserAbyss.saveAbyss(account.value.gameUid, res);
   await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${account.value.gameUid}的本期深渊数据`);
   await showLoading.update("正在加载深渊数据");
-  uidList.value = await TSUserAbyss.getAllUid();
-  uidCur.value = account.value.gameUid;
+  await reloadUid();
   await loadAbyss();
   await showLoading.end();
   showSnackbar.success(`已加载${account.value.gameUid}的${localAbyss.value.length}条深渊数据`);
@@ -254,9 +262,7 @@ async function deleteAbyss(): Promise<void> {
   await TSUserAbyss.delAbyss(uidCur.value);
   await showLoading.end();
   showSnackbar.success(`已清除 ${uidCur.value} 的深渊数据`);
-  uidList.value = await TSUserAbyss.getAllUid();
-  if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else uidCur.value = undefined;
+  await reloadUid();
   await loadAbyss();
 }
 

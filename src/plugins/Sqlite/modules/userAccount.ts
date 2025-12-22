@@ -25,15 +25,15 @@ function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): str
       INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
       VALUES ('${uid}', '${data.game_biz}', '${data.game_uid}', ${isChosen}, ${isOfficial}, ${data.level},
               '${data.nickname}', '${data.region}', '${data.region_name}', '${timeNow}
-              ') ON CONFLICT(uid, gameUid, gameBiz) DO
-      UPDATE
-          SET isChosen = ${isChosen},
-          isOfficial = ${isOfficial},
-          level = ${data.level},
-          nickname = '${data.nickname}',
-          region = '${data.region}',
-          regionName = '${data.region_name}',
-          updated = '${timeNow}';
+              ')
+      ON CONFLICT(uid, gameUid, gameBiz) DO UPDATE
+          SET isChosen   = ${isChosen},
+              isOfficial = ${isOfficial},
+              level      = ${data.level},
+              nickname   = '${data.nickname}',
+              region     = '${data.region}',
+              regionName = '${data.region_name}',
+              updated    = '${timeNow}';
   `;
 }
 
@@ -47,11 +47,11 @@ function getInsertAccountSql(user: TGApp.App.Account.User): string {
   const table = transUser(user);
   return `
       INSERT INTO UserAccount(uid, cookie, brief, updated)
-      VALUES ('${table.uid}', '${table.cookie}', '${table.brief}', '${table.updated}') ON CONFLICT(uid) DO
-      UPDATE
-          SET cookie = '${table.cookie}',
-          brief = '${table.brief}',
-          updated = '${table.updated}';
+      VALUES ('${table.uid}', '${table.cookie}', '${table.brief}', '${table.updated}')
+      ON CONFLICT(uid) DO UPDATE
+          SET cookie  = '${table.cookie}',
+              brief   = '${table.brief}',
+              updated = '${table.updated}';
   `;
 }
 

@@ -142,6 +142,7 @@ import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
 import { GameServerEnum, getGameServerDesc } from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
 import TSUserChallenge from "@Sqlm/userChallenge.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -164,6 +165,7 @@ const serverList: ReadonlyArray<SelectItem<TGApp.Game.Base.ServerTypeEnum>> = [
 ].map((i) => ({ text: getGameServerDesc(i), value: i }));
 
 const router = useRouter();
+const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 
 const version = ref<string>();
@@ -238,13 +240,13 @@ async function shareChallenge(): Promise<void> {
 async function reloadChallenge(): Promise<void> {
   await showLoading.start("正在加载UID列表");
   uidList.value = await TSUserChallenge.getAllUid();
-  if (uidList.value.length === 0) {
-    uidCur.value = "";
-  } else {
-    if (uidCur.value === undefined || uidCur.value === "") {
-      if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-      else uidCur.value = uidList.value[0];
-    }
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else if (isLogin.value) {
+    uidList.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = undefined;
+  if (uidCur.value) {
     await showLoading.update(`正在加载UID${uidCur.value}的幽境危战数据`);
     await loadChallenge();
   }
@@ -316,7 +318,6 @@ async function refreshChallenge(): Promise<void> {
     await TSUserChallenge.saveChallenge(account.value.gameUid, challenge);
   }
   isReq.value = false;
-  // await showLoading.end();
   uidCur.value = account.value.gameUid;
   await reloadChallenge();
 }

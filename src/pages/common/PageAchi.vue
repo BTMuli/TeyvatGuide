@@ -91,6 +91,7 @@ import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
 import TuaSeries from "@comp/userAchi/tua-series.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
@@ -114,7 +115,8 @@ const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).ma
 
 const route = useRoute();
 const router = useRouter();
-const { gameDir, isInAdmin } = storeToRefs(useAppStore());
+const { gameDir, isInAdmin, isLogin } = storeToRefs(useAppStore());
+const { account } = storeToRefs(useUserStore());
 
 let achiListener: UnlistenFn | null = null;
 
@@ -134,9 +136,7 @@ onMounted(async () => {
   await showLoading.start("正在加载成就数据");
   await TGLogger.Info("[Achievements][onMounted] 打开成就页面");
   await showLoading.update("正在读取UID列表");
-  uidList.value = await TSUserAchi.getAllUid();
-  if (uidList.value.length === 0) uidList.value = [0];
-  uidCur.value = uidList.value[0];
+  await reloadUid();
   await showLoading.update("正在获取成就概况");
   await refreshOverview();
   await showLoading.end();
@@ -154,6 +154,16 @@ onUnmounted(async () => {
 });
 
 watch(() => uidCur.value, refreshOverview);
+
+async function reloadUid(): Promise<void> {
+  uidList.value = await TSUserAchi.getAllUid();
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else if (isLogin.value) {
+    uidList.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = 0;
+}
 
 function switchHideFin(): void {
   const text = hideFin.value ? "显示已完成" : "隐藏已完成";
@@ -299,9 +309,7 @@ async function deleteUid(): Promise<void> {
     return;
   }
   await TSUserAchi.delUid(uidCur.value);
-  uidList.value = uidList.value.filter((e) => e !== uidCur.value);
-  if (uidList.value.length === 0) uidList.value = [0];
-  uidCur.value = uidList.value[0];
+  await reloadUid();
 }
 
 async function toYae(): Promise<void> {

@@ -108,6 +108,7 @@ import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
 import recordReq from "@req/recordReq.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -119,6 +120,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const version = ref<string>();
@@ -131,15 +133,11 @@ onMounted(async () => {
   version.value = await getVersion();
   await TGLogger.Info("[UserCombat][onMounted] 打开真境剧诗页面");
   await showLoading.update("正在加载UID列表");
-  uidList.value = await TSUserCombat.getAllUid();
-  if (uidList.value.length === 0) {
-    uidCur.value = "";
-  } else {
-    if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-    else uidCur.value = uidList.value[0];
+  await reloadUid();
+  if (uidCur.value) {
     await showLoading.update(`正在加载UID${uidCur.value}的剧诗数据`);
+    await loadCombat();
   }
-  await loadCombat();
   await showLoading.end();
 });
 
@@ -151,6 +149,16 @@ async function toAbyss(): Promise<void> {
 
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
+}
+
+async function reloadUid(): Promise<void> {
+  uidList.value = await TSUserCombat.getAllUid();
+  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else if (isLogin.value) {
+    uidList.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = undefined;
 }
 
 async function loadCombat(): Promise<void> {
@@ -207,8 +215,7 @@ async function refreshCombat(): Promise<void> {
     await TSUserCombat.saveCombat(account.value.gameUid, combat);
   }
   await showLoading.update("正在加载剧诗数据");
-  uidList.value = await TSUserCombat.getAllUid();
-  uidCur.value = account.value.gameUid;
+  await reloadUid();
   await loadCombat();
   await showLoading.end();
 }
@@ -242,9 +249,7 @@ async function deleteCombat(): Promise<void> {
   await TSUserCombat.delCombat(uidCur.value);
   showSnackbar.success(`已清除 ${uidCur.value} 的剧诗数据`);
   await showLoading.update("正在加载剧诗数据");
-  uidList.value = await TSUserCombat.getAllUid();
-  if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else uidCur.value = undefined;
+  await reloadUid();
   await loadCombat();
   await showLoading.end();
 }

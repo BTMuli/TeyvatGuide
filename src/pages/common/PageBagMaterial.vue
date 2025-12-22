@@ -105,6 +105,7 @@ import PbMaterialItem from "@comp/pageBag/pb-materialItem.vue";
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
@@ -130,7 +131,8 @@ export type MaterialInfo = {
   info: TGApp.App.Material.WikiItem;
 };
 
-const { gameDir, isInAdmin } = storeToRefs(useAppStore());
+const { gameDir, isInAdmin, isLogin } = storeToRefs(useAppStore());
+const { account } = storeToRefs(useUserStore());
 
 const curUid = ref<number>(0);
 const selectType = ref<string | null>(null);
@@ -145,11 +147,8 @@ const materialShow = shallowRef<Array<MaterialInfo>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
-  uidList.value = await TSUserBagMaterial.getAllUid();
-  await showLoading.update(`存档数：${uidList.value.length}`);
-  // TODO: 如果用户已登录，优先当前登录UID
-  if (uidList.value.length > 0) curUid.value = uidList.value[0];
-  else await showLoading.end();
+  await reloadUid();
+  await showLoading.end();
 });
 
 watch(
@@ -167,6 +166,17 @@ watch(
     curIdx.value = 0;
   },
 );
+
+async function reloadUid(): Promise<void> {
+  uidList.value = await TSUserBagMaterial.getAllUid();
+  if (uidList.value.includes(Number(account.value.gameUid))) {
+    curUid.value = Number(account.value.gameUid);
+  } else if (uidList.value.length > 0) curUid.value = uidList.value[0];
+  else if (isLogin.value) {
+    uidList.value = [Number(account.value.gameUid)];
+    curUid.value = Number(account.value.gameUid);
+  } else curUid.value = 0;
+}
 
 /**
  * 获取对应类别下的材料列表
@@ -342,12 +352,8 @@ async function deleteUid(): Promise<void> {
     return;
   }
   await TSUserBagMaterial.delUid(curUid.value);
-  uidList.value = uidList.value.filter((e) => e !== curUid.value);
-  if (uidList.value.length === 0) uidList.value = [0];
-  curUid.value = uidList.value[0];
+  await reloadUid();
   showSnackbar.success(`已删除对应存档，即将刷新`);
-  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-  window.location.reload();
 }
 
 /**

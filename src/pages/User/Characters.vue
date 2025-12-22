@@ -119,6 +119,7 @@ import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
 import recordReq from "@req/recordReq.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
@@ -137,7 +138,10 @@ const modeList: Readonly<Array<TabItem>> = [
   { label: "卡片视图（简略）", value: "card" },
   { label: "卡片视图（详细）", value: "dev" },
 ];
+
+const { isLogin } = storeToRefs(useAppStore());
 const { cookie, account, propMap } = storeToRefs(useUserStore());
+
 const loadData = ref<boolean>(false);
 const loadShare = ref<boolean>(false);
 const loadDel = ref<boolean>(false);
@@ -227,9 +231,12 @@ function getOverview(data: Array<TGApp.Sqlite.Character.UserRole>): Array<Overvi
 
 async function loadUid(): Promise<void> {
   uidList.value = await TSUserAvatar.getAllUid();
-  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
   if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else uidCur.value = uidList.value[0];
+  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  else if (isLogin.value) {
+    uidList.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = undefined;
 }
 
 async function loadRole(): Promise<void> {

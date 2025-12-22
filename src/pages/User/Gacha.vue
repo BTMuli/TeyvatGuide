@@ -45,8 +45,9 @@
           prepend-icon="mdi-import"
           variant="elevated"
           @click="importUigf()"
-          >导入</v-btn
         >
+          导入
+        </v-btn>
         <v-btn
           class="gacha-top-btn"
           prepend-icon="mdi-import"
@@ -60,8 +61,9 @@
           prepend-icon="mdi-export"
           variant="elevated"
           @click="exportUigf()"
-          >导出</v-btn
         >
+          导出
+        </v-btn>
         <v-btn
           class="gacha-top-btn"
           prepend-icon="mdi-export"
@@ -75,8 +77,9 @@
           prepend-icon="mdi-delete"
           variant="elevated"
           @click="deleteGacha()"
-          >删除</v-btn
         >
+          删除
+        </v-btn>
         <v-btn
           class="gacha-top-btn"
           prepend-icon="mdi-database-check"
@@ -131,7 +134,7 @@ import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
-// import useAppStore from "@store/app.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
@@ -146,7 +149,7 @@ import { AppCharacterData, AppWeaponData } from "@/data/index.js";
 
 const router = useRouter();
 
-// const { isLogin } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 
 const authkey = ref<string>("");
@@ -170,19 +173,14 @@ onMounted(async () => {
   }
   await showLoading.update("正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
-  selectItem.value = await TSUserGacha.getUidList();
-  if (selectItem.value.length === 0) {
-    await showLoading.end();
-    showSnackbar.error("暂无祈愿数据，请先导入祈愿数据");
-    await TGLogger.Warn("[UserGacha][onMounted] 暂无祈愿数据，请先导入祈愿数据");
-    return;
+  await reloadUid();
+  if (uidCur.value) {
+    await showLoading.update(`UID：${uidCur.value}`);
+    gachaListCur.value = await TSUserGacha.getGachaRecords(uidCur.value);
+    await TGLogger.Info(
+      `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
+    );
   }
-  uidCur.value = selectItem.value[0];
-  await showLoading.update(`UID：${uidCur.value}`);
-  gachaListCur.value = await TSUserGacha.getGachaRecords(uidCur.value);
-  await TGLogger.Info(
-    `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
-  );
   await showLoading.end();
   showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
 });
@@ -202,6 +200,16 @@ watch(
 
 async function toBeyond(): Promise<void> {
   await router.push({ name: "千星奇域祈愿记录" });
+}
+
+async function reloadUid(): Promise<void> {
+  selectItem.value = await TSUserGacha.getUidList();
+  if (selectItem.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
+  if (selectItem.value.length > 0) uidCur.value = selectItem.value[0];
+  else if (isLogin.value) {
+    selectItem.value = [account.value.gameUid];
+    uidCur.value = account.value.gameUid;
+  } else uidCur.value = undefined;
 }
 
 // 刷新按钮点击事件
