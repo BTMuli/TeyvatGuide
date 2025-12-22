@@ -292,6 +292,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { event, path, webviewWindow } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
@@ -668,6 +669,14 @@ async function tryLaunchGame(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
+  let isAdmin = false;
+  try {
+    isAdmin = await invoke<boolean>("is_in_admin");
+  } catch (err) {
+    showSnackbar.error(`检测管理员权限失败：${err}`);
+    await TGLogger.Error(`[pageAchi][toYae]检测管理员权限失败:${err}`);
+    return;
+  }
   const resp = await passportReq.authTicket(account.value, cookie.value);
   if (typeof resp !== "string") {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
@@ -677,15 +686,29 @@ async function tryLaunchGame(): Promise<void> {
     await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${JSON.stringify(resp)}`);
     return;
   }
-  showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
-  const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
-    cwd: gameDir.value,
-    encoding: "utf-8",
-  });
-  const result = await cmd.execute();
-  if (result.stderr) {
-    await TGLogger.Error(`[sidebar][tryLaunchGame] 启动游戏本体失败！`);
-    showSnackbar.error(`启动游戏本体失败，代码：${result.code}`);
+  if (!isAdmin) {
+    showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
+    const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
+      cwd: gameDir.value,
+      encoding: "utf-8",
+    });
+    const result = await cmd.execute();
+    if (result.stderr) {
+      await TGLogger.Error(`[sidebar][tryLaunchGame] 启动游戏本体失败！`);
+      showSnackbar.error(`启动游戏本体失败，代码：${result.code}`);
+    }
+  } else {
+    try {
+      await invoke("call_yae_dll", {
+        gamePath: gamePath,
+        uid: account.value.gameUid,
+        ticket: resp,
+      });
+    } catch (err) {
+      showSnackbar.error(`调用Yae DLL失败: ${err}`);
+      await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
+      return;
+    }
   }
 }
 </script>

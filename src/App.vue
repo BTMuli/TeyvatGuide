@@ -133,8 +133,8 @@ async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise
     yaeFlag = [];
     showSnackbar.success(`导入Yae数据完成，即将刷新页面`);
     await showLoading.end();
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    window.location.reload();
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // window.location.reload();
   }
 }
 
@@ -145,6 +145,7 @@ async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise
  * @returns {Promise<void>}
  */
 async function loadYaeAchi(uid: string, data: TGApp.Plugins.Yae.AchiListRes): Promise<void> {
+  console.warn("成就数据", data);
   await showLoading.start("正在导入成就数据", `UID:${uid},数量:${data.length}`);
   await TGLogger.Info(`[App][loadYaeAchi] 开始处理 ${uid} 的 ${data.length} 条成就数据`);
   try {

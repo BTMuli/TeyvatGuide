@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.8.9
+//! @since Beta v0.9.1
 #![cfg(target_os = "windows")]
 
 pub mod inject;
@@ -67,7 +67,12 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
 
 /// 调用 dll
 #[tauri::command]
-pub fn call_yae_dll(app_handle: AppHandle, game_path: String, uid: String) -> Result<(), String> {
+pub fn call_yae_dll(
+  app_handle: AppHandle,
+  game_path: String,
+  uid: String,
+  ticket: Option<String>,
+) -> Result<(), String> {
   let dll_path = app_handle.path().resource_dir().unwrap().join("resources/YaeAchievementLib.dll");
   dbg!(&dll_path);
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
@@ -75,7 +80,7 @@ pub fn call_yae_dll(app_handle: AppHandle, game_path: String, uid: String) -> Re
   let _pipe_handle = create_named_pipe("YaeAchievementPipe");
 
   // 1. 启动游戏进程
-  let pi = spawn_process(&game_path);
+  let pi = spawn_process(&game_path, ticket);
   dbg!("游戏进程启动完成");
 
   // 2. 注入 DLL

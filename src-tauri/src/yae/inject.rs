@@ -1,5 +1,5 @@
 //! DLL 注入相关功能
-//! @since Beta v0.7.8
+//! @since Beta v0.9.1
 #![cfg(target_os = "windows")]
 
 use std::ffi::OsStr;
@@ -53,33 +53,38 @@ pub fn create_named_pipe(pipe_name: &str) -> HANDLE {
 }
 
 /// 启动目标进程，附加cwd
-pub fn spawn_process(path: &str) -> PROCESS_INFORMATION {
-  let wide_path: Vec<u16> = to_wide_string(path);
-  let cwd = std::path::Path::new(path).parent().unwrap().to_str().unwrap();
-  let wide_cwd: Vec<u16> = to_wide_string(cwd);
-
+pub fn spawn_process(path: &str, ticket: Option<String>) -> PROCESS_INFORMATION {
+  let wide_path: Vec<u16> = to_wide_string(path); // 如果有 ticket，构造命令行
+  let mut wide_cmd: Option<Vec<u16>> = None;
+  if let Some(ref t) = ticket {
+    let cmdline = format!("{} login_auth_ticket={}", path, t);
+    wide_cmd = Some(to_wide_string(&cmdline));
+  } // 如果没有 ticket，使用 cwd
+  let wide_cwd: Option<Vec<u16>> = if ticket.is_none() {
+    let cwd = std::path::Path::new(path).parent().unwrap().to_str().unwrap();
+    Some(to_wide_string(cwd))
+  } else {
+    None
+  };
   unsafe {
     let mut si: STARTUPINFOW = std::mem::zeroed();
     si.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
     let mut pi: PROCESS_INFORMATION = std::mem::zeroed();
-
     let success = CreateProcessW(
       wide_path.as_ptr(),
-      ptr::null_mut(),
+      wide_cmd.as_mut().map(|v| v.as_mut_ptr()).unwrap_or(ptr::null_mut()), // 有 ticket 时传命令行
       ptr::null_mut(),
       ptr::null_mut(),
       0,
       0,
       ptr::null_mut(),
-      wide_cwd.as_ptr(),
+      wide_cwd.as_ref().map(|v| v.as_ptr()).unwrap_or(ptr::null()), // 无 ticket 时传 cwd
       &mut si,
       &mut pi,
     );
-
     if success == 0 {
       panic!("CreateProcessW failed");
     }
-
     pi
   }
 }
