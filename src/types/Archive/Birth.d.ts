@@ -1,112 +1,178 @@
 /**
- * @file types/Archive/Birth.d.ts
- * @description 存档-留影叙佳期-数据类型
- * @since Beta v0.4.4
+ * 留影叙佳期
+ * @since Beta v0.9.1
  */
 
-/**
- * @description 存档-留影叙佳期-命名空间
- * @since Beta v0.4.4
- * @namespace TGApp.Archive.Birth
- * @memberof TGApp.Archive
- */
 declare namespace TGApp.Archive.Birth {
   /**
-   * @description 日历数据
+   * 日历数据
    * @since Beta v0.4.4
-   * @interface CalendarData
-   * @returns CalendarData
    */
-  type CalendarData = Record<string, CalendarItem[]>;
+  type CalendarData = Record<string, Array<CalendarItem>>;
 
   /**
-   * @description 日历数据-条目
+   * 日历数据条目
    * @since Beta v0.4.4
-   * @interface CalendarItem
-   * @property {number} role_id 角色ID
-   * @property {string} name 角色名
-   * @property {string} role_birthday 角色生日
-   * @property {string} head_icon 头像
-   * @property {boolean} is_subscribe 是否订阅
-   * @returns CalendarItem
    */
-  interface CalendarItem {
+  type CalendarItem = {
+    /** 角色ID */
     role_id: number;
+    /** 角色名 */
     name: string;
+    /** 角色生日 */
     role_birthday: string;
+    /** 头像 */
     head_icon: string;
+    /** 是否订阅 */
     is_subscribe: boolean;
-  }
+  };
 
   /**
-   * @description 卡片数据条目
+   * 卡片数据条目
    * @since Beta v0.4.4
-   * @interface DrawItem
-   * @property {string} word_text - 留言
-   * @property {number} year - 年份
-   * @property {string} birthday - 生日 m/d
-   * @property {number} role_id - 角色 id
-   * @property {string} role_name - 角色名
-   * @property {string[]} take_picture - 画片地址 [荧，空]
-   * @property {string[]} unread_picture - 未读画片地址 [荧，空]
-   * @property {string} gal_xml - 画片 xml
-   * @property {string} gal_resource - 画片资源
-   * @property {number} op_id - 操作 id
-   * @returns DrawItem
    */
-  interface DrawItem {
+  type DrawItem = {
+    /** 留言 */
     word_text: string;
+    /** 年份 */
     year: number;
+    /** 生日 m/d */
     birthday: string;
+    /** 角色 id */
     role_id: number;
+    /** 角色名 */
     role_name: string;
-    take_picture: string[];
-    unread_picture: string[];
+    /** 画片地址 [荧，空] */
+    take_picture: Array<string> & { length: 2 };
+    /** 未读画片地址 [荧，空] */
+    unread_picture: Array<string> & { length: 2 };
+    /** 画片 xml */
     gal_xml: string;
+    /** 画片资源 */
     gal_resource: string;
+    /** 操作 id */
     op_id: number;
-  }
+  };
 
   /**
-   * @description 角色数据条目
+   * 角色数据条目
    * @since Beta v0.4.4
-   * @interface RoleItem
-   * @property {number} role_id - 角色 id
-   * @property {string} name - 角色名
-   * @property {string} belong - 所属
-   * @property {string} divine_type - 神力类型
-   * @property {boolean} is_god - 是否是神
-   * @property {string} seat_life - 命座
-   * @property {string} element - 元素
-   * @property {string} text - 介绍
-   * @property {string} role_birthday - 生日 m/d
-   * @property {string} head_icon - 头像
-   * @property {string} head_image - 头像
-   * @property {string} introduce - 介绍
-   * @property {boolean} is_subscribe - 是否订阅
-   * @property {boolean} is_finish_task - 是否完成任务
-   * @property {number} current_compensate_num - 当前补偿数量
-   * @property {boolean} is_compensate_num - 是否补偿数量
-   * @property {number} year_compensate_num - 年份补偿数量
-   * @returns RoleItem
    */
-  interface RoleItem {
+  type RoleItem = {
+    /** 角色 id */
     role_id: number;
+    /** 角色名 */
     name: string;
+    /** 所属 */
     belong: string;
+    /** 神力类型 */
     divine_type: string;
+    /** 是否是神 */
     is_god: boolean;
+    /** 命座 */
     seat_life: string;
+    /** 元素 */
     element: string;
+    /** 介绍 */
     text: string;
+    /** 生日 m/d */
     role_birthday: string;
+    /** 头像 */
     head_icon: string;
+    /** 头像 */
     head_image: string;
+    /** 介绍 */
     introduce: string;
+    /** 是否订阅 */
     is_subscribe: boolean;
+    /** 是否完成任务 */
     is_finish_task: boolean;
+    /** 当前补偿数量 */
     current_compensate_num: number;
+    /** 是否补偿数量 */
     is_compensate_num: boolean;
+    /** 年份补偿数量 */
     year_compensate_num: number;
-  }
+  };
+
+  /**
+   * 转换后的资源数据
+   * @since Beta v0.9.1
+   */
+  type GalSrcFull = {
+    /** 资源数据 */
+    resource: Array<GalSrcRes>;
+    /** 角色数据 */
+    roles: Array<GalSrcRole>;
+  };
+
+  /**
+   * 资源数据条目
+   * @since Beta v0.9.1
+   */
+  type GalSrcRes = {
+    /** 资源类型 */
+    type: string;
+    /** 资源引用 */
+    rel: string;
+    /** 资源地址 */
+    src: string;
+    /** 资源ID */
+    id: string;
+    /** 资源Group */
+    group: string;
+  };
+
+  /**
+   * 角色资源数据条目
+   * @since Beta v0.9.1
+   */
+  type GalSrcRole = {
+    /** 角色ID */
+    id: string;
+    /** 角色名 */
+    name: string;
+    /** 角色Key */
+    key?: string;
+  };
+
+  /**
+   * 转换后的播放数据
+   * @since Beta v0.9.1
+   */
+  type GalScenes = Array<GalScriptScene>;
+
+  /**
+   * 播放场景数据条目
+   * @since Beta v0.9.1
+   */
+  type GalScriptScene = {
+    /** 场景ID */
+    id: string;
+    /** 场景名称 */
+    title: string;
+    /** 场景背景bg名称 */
+    bg: string;
+    /** 前一个场景ID */
+    prev?: string;
+    /** 场景脚本 */
+    scripts: Array<GalDialog>;
+  };
+
+  /**
+   * 播放脚本数据条目
+   * @since Beta v0.9.1
+   */
+  type GalDialog = {
+    /** key */
+    key: string;
+    /** 角色 */
+    role?: string;
+    /** 图片名称 */
+    img?: string;
+    /** 位置 */
+    pos?: string;
+    /** 对话内容 */
+    text: string;
+  };
 }

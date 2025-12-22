@@ -19,45 +19,28 @@
   </div>
 </template>
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
-import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
-import { event } from "@tauri-apps/api";
-import { invoke } from "@tauri-apps/api/core";
-import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { onMounted, onUnmounted } from "vue";
+import { fetch } from "@tauri-apps/plugin-http";
+import { parseBirthGal, parseBirthSrc } from "@utils/birthParser.js";
 
-let listener: UnlistenFn | null = null;
+import { ArcBirDraw } from "@/data/index.js";
 
-onMounted(async () => {
-  listener = await event.listen<string>("yae_store_list", async (e: Event<string>) => {
-    console.log(e.payload, typeof e.payload);
-    const parse: TGApp.Plugins.Yae.BagListRes = JSON.parse(e.payload);
-    const materialList = parse.filter((i) => i.kind === "material");
-    const now = new Date();
-    if (materialList && materialList.length > 0) {
-      await TSUserBagMaterial.saveYaeData(500299765, materialList);
-    }
-    const cost = new Date().getTime() - now.getTime();
-    showSnackbar.success(
-      `成功导入 ${materialList.length} 条数据，耗时 ${Math.floor(cost / 1000)}s`,
-    );
-  });
-});
-onUnmounted(() => {
-  if (listener !== null) {
-    listener();
-    listener = null;
-  }
-});
-
-async function test(): Promise<void> {
-  try {
-    await invoke("call_yae_dll", {
-      gamePath: "D:\\Games\\Genshin Impact bilibili\\games\\Genshin Impact Game\\YuanShen.exe",
-      uid: "500299765",
+async function test() {
+  for (const item of ArcBirDraw) {
+    console.log("尝试解析", item.op_id, item.role_name);
+    const srcResp = await fetch(item.gal_resource, {
+      method: "GET",
+      headers: { "Content-Type": "text/xml" },
     });
-  } catch (e) {
-    console.error(e);
+    const srcRes = await srcResp.text();
+    const parseSrc = parseBirthSrc(new DOMParser().parseFromString(srcRes, "text/xml"));
+    console.log("parsedSrc", parseSrc);
+    const galResp = await fetch(item.gal_xml, {
+      method: "GET",
+      headers: { "Content-Type": "text/xml" },
+    });
+    const galRes = await galResp.text();
+    const parseGal = parseBirthGal(new DOMParser().parseFromString(galRes, "text/xml"));
+    console.log("parsedScene", parseGal);
   }
 }
 </script>
