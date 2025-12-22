@@ -52,7 +52,7 @@
           density="compact"
           item-title="label"
           item-value="value"
-          label="详情视图模式"
+          label="详情浮窗视图模式"
           variant="outlined"
         />
         <v-select
