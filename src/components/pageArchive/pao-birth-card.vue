@@ -2,30 +2,39 @@
 <template>
   <TOverlay v-model="visible" blur-val="5px">
     <div class="pao-bc-container">
-      <div v-if="props.data" class="pao-bc-cover">
-        <TMiImg v-if="props.choice" :ori="true" :src="props.data.take_picture[1]" alt="顶部图像" />
-        <TMiImg v-else :ori="true" :src="props.data.take_picture[0]" alt="顶部图像" />
-      </div>
-      <div v-show="showText" class="pao-bc-comments">
-        <div v-for="(item, index) in textParse" :key="index" class="pao-bc-comment">
-          <div v-if="item.icon" :title="item.name" class="pao-bcc-icon">
-            <TMiImg :ori="true" :src="item.icon" alt="对白头像" />
-          </div>
-          <div v-else-if="item.name !== '未知'" class="pao-bcc-name">
-            {{ item.name }}
-          </div>
-          <div :class="item.icon ? 'pao-bcc-text' : 'pao-bcc-quote'">
-            {{ item.text }}
+      <slot name="left"></slot>
+      <div class="pao-bc-main">
+        <div v-if="props.data" class="pao-bc-cover">
+          <TMiImg
+            v-if="props.choice"
+            :ori="true"
+            :src="props.data.take_picture[1]"
+            alt="顶部图像"
+          />
+          <TMiImg v-else :ori="true" :src="props.data.take_picture[0]" alt="顶部图像" />
+        </div>
+        <div v-show="showText" class="pao-bc-comments">
+          <div v-for="(item, index) in textParse" :key="index" class="pao-bc-comment">
+            <div v-if="item.icon" :title="item.name" class="pao-bcc-icon">
+              <TMiImg :ori="true" :src="item.icon" alt="对白头像" />
+            </div>
+            <div v-else-if="item.name !== '未知'" class="pao-bcc-name">
+              {{ item.name }}
+            </div>
+            <div :class="item.icon ? 'pao-bcc-text' : 'pao-bcc-quote'">
+              {{ item.text }}
+            </div>
           </div>
         </div>
+        <div class="pao-bc-top-tools">
+          <v-icon title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
+          <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
+          <v-icon :title="showText ? '隐藏对白' : '显示对白'" @click="showComments()">
+            {{ showText ? "mdi-eye-off" : "mdi-eye" }}
+          </v-icon>
+        </div>
       </div>
-      <div class="pao-bc-top-tools">
-        <v-icon title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
-        <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
-        <v-icon :title="showText ? '隐藏对白' : '显示对白'" @click="showComments()">
-          {{ showText ? "mdi-eye-off" : "mdi-eye" }}
-        </v-icon>
-      </div>
+      <slot name="right"></slot>
     </div>
   </TOverlay>
 </template>
@@ -183,6 +192,14 @@ async function parseXml(link: string): Promise<false | unknown> {
 </script>
 <style lang="css" scoped>
 .pao-bc-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 16px;
+}
+
+.pao-bc-main {
   position: relative;
   display: flex;
   overflow: hidden;

@@ -3,7 +3,7 @@
   <v-app-bar>
     <div class="ab-top">
       <div class="ab-title">
-        <img alt="archive_birthday_icon" src="/source/UI/act_birthday.webp" @click="toAct()" />
+        <img alt="archive_birthday_icon" src="/source/UI/act_birthday.webp" />
         <span>留影叙佳期</span>
       </div>
       <div class="ab-switch">
@@ -31,8 +31,8 @@
     <template #append>
       <div class="ab-top-append">
         <v-pagination
-          v-model="page"
-          :length="length"
+          v-model="curPage"
+          :length="pageNum"
           :total-visible="visible"
           density="compact"
           variant="elevated"
@@ -42,37 +42,47 @@
   </v-app-bar>
   <div class="ab-grid-container">
     <PacBirthCard
-      v-for="item in selectedItem"
+      v-for="item in renderItems"
       :key="item.op_id"
       :isAether
       :item
       @open="showImg(item)"
     />
   </div>
-  <!-- TODO: 左右SLOT -->
-  <ToArcBrith v-model="showOverlay" :choice="isAether" :data="current" />
+  <ToArcBrith v-model="showOverlay" :choice="isAether" :data="current">
+    <template #left>
+      <div class="card-arrow" @click="switchCard(false)">
+        <img alt="right" src="@/assets/icons/arrow-right.svg" />
+      </div>
+    </template>
+    <template #right>
+      <div class="card-arrow" @click="switchCard(true)">
+        <img alt="right" src="@/assets/icons/arrow-right.svg" />
+      </div>
+    </template>
+  </ToArcBrith>
 </template>
 <script lang="ts" setup>
 import PacBirthCard from "@comp/pageArchive/pac-birth-card.vue";
 import ToArcBrith from "@comp/pageArchive/pao-birth-card.vue";
-import TGClient from "@utils/TGClient.js";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { ArcBirDraw, ArcBirRole } from "@/data/index.js";
 
 const route = useRoute();
 
-const page = ref<number>(1);
-const length = ref<number>(0);
+const curPage = ref<number>(1);
+const pageNum = ref<number>(0);
 const visible = ref<number>(0);
 const isAether = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
-const renderItems = shallowRef<Array<TGApp.Archive.Birth.DrawItem>>([]);
+const curIndex = ref<number>(0);
+const selectedItems = shallowRef<Array<TGApp.Archive.Birth.DrawItem>>([]);
 const curSelect = shallowRef<TGApp.Archive.Birth.RoleItem | null>(null);
 const current = shallowRef<TGApp.Archive.Birth.DrawItem>();
-const selectedItem = computed<Array<TGApp.Archive.Birth.DrawItem>>(() =>
-  renderItems.value.slice((page.value - 1) * 12, page.value * 12),
+const renderItems = computed<Array<TGApp.Archive.Birth.DrawItem>>(() =>
+  selectedItems.value.slice((curPage.value - 1) * 12, curPage.value * 12),
 );
 
 onMounted(() => {
@@ -80,33 +90,42 @@ onMounted(() => {
   if (date) {
     const dataFind = ArcBirRole.find((i) => i.role_birthday === date);
     if (dataFind) curSelect.value = dataFind;
-  } else renderItems.value = ArcBirDraw;
-  length.value = Math.ceil(renderItems.value.length / 12);
-  visible.value = length.value > 5 ? 5 : length.value;
-  page.value = 1;
+  } else selectedItems.value = ArcBirDraw;
+  pageNum.value = Math.ceil(selectedItems.value.length / 12);
+  visible.value = pageNum.value > 5 ? 5 : pageNum.value;
+  curPage.value = 1;
 });
 
 watch(
   () => curSelect.value,
-  () => {
+  async () => {
     if (curSelect.value) {
-      renderItems.value = ArcBirDraw.filter(
+      selectedItems.value = ArcBirDraw.filter(
         (item) => item.birthday === curSelect.value?.role_birthday,
       );
-    } else renderItems.value = ArcBirDraw;
-    length.value = Math.ceil(renderItems.value.length / 12);
-    page.value = 1;
-    visible.value = length.value > 5 ? 5 : length.value;
+    } else selectedItems.value = ArcBirDraw;
+    pageNum.value = Math.ceil(selectedItems.value.length / 12);
+    curPage.value = 1;
+    curIndex.value = 0;
+    current.value = renderItems.value[0];
+    await nextTick();
+    visible.value = pageNum.value > 5 ? 5 : pageNum.value;
+  },
+);
+
+watch(
+  () => curPage.value,
+  (newPage, oldPage) => {
+    if (oldPage !== undefined && oldPage > newPage) {
+      curIndex.value = renderItems.value.length - 1;
+    } else curIndex.value = 0;
   },
 );
 
 function showImg(item: TGApp.Archive.Birth.DrawItem): void {
   current.value = item;
+  curIndex.value = renderItems.value.findIndex((i) => i.op_id === item.op_id);
   showOverlay.value = true;
-}
-
-async function toAct(): Promise<void> {
-  await TGClient.open("birthday");
 }
 
 function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
@@ -114,6 +133,22 @@ function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
     title: `${item.name} ${item.role_birthday}`,
     prependAvatar: item.head_icon,
   };
+}
+
+async function switchCard(isNext: boolean): Promise<void> {
+  if (isNext) {
+    if (curIndex.value === renderItems.value.length - 1) {
+      if (curPage.value >= pageNum.value) return;
+      curPage.value++;
+    } else curIndex.value++;
+  } else {
+    if (curIndex.value === 0) {
+      if (curPage.value <= 1) return;
+      curPage.value--;
+    } else curIndex.value--;
+  }
+  await nextTick();
+  current.value = renderItems.value[curIndex.value];
 }
 </script>
 <style lang="scss" scoped>
@@ -133,7 +168,6 @@ function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
   img {
     width: 32px;
     height: 32px;
-    cursor: pointer;
   }
 
   span {
@@ -180,5 +214,28 @@ function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
   gap: 8px;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(3, 1fr);
+}
+
+.card-arrow {
+  position: relative;
+  display: flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+
+  &:first-child img {
+    transform: rotate(180deg);
+  }
+}
+
+.dark .card-arrow {
+  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
 }
 </style>
