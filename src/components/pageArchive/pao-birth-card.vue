@@ -1,37 +1,53 @@
-<!-- 留影叙佳期浮窗 TODO 左右SLOT -->
+<!-- 留影叙佳期浮窗 -->
 <template>
   <TOverlay v-model="visible" blur-val="5px">
     <div class="pao-bc-container">
       <slot name="left"></slot>
-      <div class="pao-bc-main">
-        <div v-if="props.data" class="pao-bc-cover">
+      <div v-if="props.data" class="pao-bc-main">
+        <div class="pao-bc-cover">
+          <TMiImg v-if="showText" :ori="true" :src="curScene.bg" alt="顶部图像" />
           <TMiImg
-            v-if="props.choice"
+            v-else-if="props.choice"
             :ori="true"
             :src="props.data.take_picture[1]"
             alt="顶部图像"
           />
           <TMiImg v-else :ori="true" :src="props.data.take_picture[0]" alt="顶部图像" />
         </div>
-        <div v-show="showText" class="pao-bc-comments">
-          <div v-for="(item, index) in textParse" :key="index" class="pao-bc-comment">
-            <div v-if="item.icon" :title="item.name" class="pao-bcc-icon">
-              <TMiImg :ori="true" :src="item.icon" alt="对白头像" />
+        <div v-if="showText" class="pao-bc-comments">
+          <!--          <div v-for="(scene, idx) in birthScenes" :key="idx" class="pao-bc-scene">-->
+          <div v-for="(item, index) in curScene.comments" :key="index" class="pao-bc-comment">
+            <div v-if="item.img" :title="item.role" class="pao-bcc-icon">
+              <template v-if="item.role === 'player'">
+                <TMiImg
+                  :ori="true"
+                  :src="props.choice ? item.img : (item.img2 ?? '')"
+                  alt="对白头像"
+                />
+              </template>
+              <TMiImg v-else :ori="true" :src="item.img" alt="对白头像" />
             </div>
-            <div v-else-if="item.name !== '未知'" class="pao-bcc-name">
-              {{ item.name }}
+            <div v-else class="pao-bcc-name">
+              {{ item.role }}
             </div>
-            <div :class="item.icon ? 'pao-bcc-text' : 'pao-bcc-quote'">
+            <div :class="item.img ? 'pao-bcc-text' : 'pao-bcc-quote'">
               {{ item.text }}
             </div>
           </div>
+          <!--          </div>-->
         </div>
         <div class="pao-bc-top-tools">
           <v-icon title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
           <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
+          <template v-if="showText && birthScenes && birthScenes.length > 0">
+            <v-icon title="上一幕" @click="switchScene(false)">mdi-arrow-left</v-icon>
+          </template>
           <v-icon :title="showText ? '隐藏对白' : '显示对白'" @click="showComments()">
             {{ showText ? "mdi-eye-off" : "mdi-eye" }}
           </v-icon>
+          <template v-if="showText && birthScenes && birthScenes.length > 0">
+            <v-icon title="下一幕" @click="switchScene(true)">mdi-arrow-right</v-icon>
+          </template>
         </div>
       </div>
       <slot name="right"></slot>
@@ -43,42 +59,40 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
-import TGLogger from "@utils/TGLogger.js";
+import { parseBirthGal, parseBirthSrc } from "@utils/birthParser.js";
 import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, watch } from "vue";
-import { xml2json } from "xml-js";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 type ToArcBirthProps = { data?: TGApp.Archive.Birth.DrawItem; choice: boolean };
-type XmlKeyMap = { id: string; rel: string; group?: string; icon: string };
-type XmlTextList = { chara: string; img: string; text: string };
-type XmlTextParse = { name: string; icon?: string; text: string };
 
 const props = defineProps<ToArcBirthProps>();
 const visible = defineModel<boolean>();
 const showText = ref<boolean>(false);
+const isLoad = ref<boolean>(false);
+const sceneIdx = ref<number>(0);
 const buffer = shallowRef<ArrayBuffer | null>(null);
-const textParse = shallowRef<Array<XmlTextParse>>([]);
+const birthSrc = shallowRef<TGApp.Archive.Birth.GalSrcFull | null>(null);
+const birthScenes = shallowRef<TGApp.Archive.Birth.GalScenes>([]);
+const curScene = computed<TGApp.Archive.Birth.GalScriptScene>(
+  () => birthScenes.value![sceneIdx.value],
+);
 
 onMounted(async () => await clearData());
 watch(
-  () => [props.data, props.choice],
+  () => props.data,
   async () => await clearData(),
 );
 watch(
   () => showText.value,
   async () => {
-    if (showText.value) await loadText();
-    else textParse.value = [];
+    if (showText.value && !isLoad.value) await loadText();
   },
 );
 
 async function clearData(): Promise<void> {
   buffer.value = null;
-  if (showText.value) {
-    textParse.value = [];
-    await loadText();
-  }
+  if (showText.value) await loadText();
 }
 
 async function onCopy(): Promise<void> {
@@ -103,91 +117,40 @@ function showComments(): void {
   showText.value = !showText.value;
 }
 
+function switchScene(isNext: boolean): void {
+  if (sceneIdx.value < birthScenes.value.length - 1 && isNext) {
+    sceneIdx.value++;
+  } else if (sceneIdx.value > 0 && !isNext) {
+    sceneIdx.value--;
+  }
+}
+
 async function loadText(): Promise<void> {
   if (!props.data) return;
-  if (textParse.value.length > 0) {
-    showText.value = !showText.value;
-    return;
-  }
-  const resSource: unknown = await parseXml(props.data.gal_resource);
-  if (resSource === false) {
-    showSnackbar.warn("对白数据加载失败");
-    return;
-  }
-  const keyMap = getKeyMap(resSource);
-  const resXml: unknown = await parseXml(props.data.gal_xml);
-  console.log(resXml);
-  const textList = getTextList(resXml);
-  console.log(textList);
-  textParse.value = textList.map((item) => {
-    const key = keyMap.find((keyItem) => keyItem.id === item.img);
-    if (!key) return { name: "未知", text: item.text };
-    return { name: key.group ?? key.id, text: item.text, icon: key.icon };
+  birthSrc.value = null;
+  birthScenes.value = [];
+  birthSrc.value = await loadXmlSrc(props.data.gal_resource);
+  birthScenes.value = await loadXmlGal(props.data.gal_xml);
+}
+
+async function loadXmlSrc(link: string): Promise<TGApp.Archive.Birth.GalSrcFull> {
+  console.log("srcLink", link);
+  const srcResp = await fetch(link, {
+    method: "GET",
+    headers: { "Content-Type": "text/xml" },
   });
+  const srcRes = await srcResp.text();
+  return parseBirthSrc(new DOMParser().parseFromString(srcRes, "text/xml"));
 }
 
-function getKeyMap(resSource: unknown): Array<XmlKeyMap> {
-  const res: Array<XmlKeyMap> = [];
-  if (!resSource || typeof resSource !== "object") return res;
-  if (!("elements" in resSource) || !Array.isArray(resSource["elements"])) return res;
-  const arr1 = resSource.elements;
-  if (arr1.length === 0 || !("elements" in arr1[0]) || !Array.isArray(arr1[0].elements)) return res;
-  const arr2 = arr1[0].elements;
-  if (arr2.length === 0 || !("elements" in arr2[0]) || !Array.isArray(arr2[0].elements)) return res;
-  const arr3 = arr2[0].elements;
-  for (const item of arr3) {
-    if (!("name" in item)) continue;
-    if (!("attributes" in item)) continue;
-    const attr = item.attributes;
-    if (!("id" in attr) || !("rel" in attr) || !("group" in attr) || !("src" in attr)) continue;
-    if (item.name !== "chara") continue;
-    res.push({ id: attr.id, rel: attr.rel, group: attr.group, icon: attr.src });
-  }
-  return res;
-}
-
-// TODO: 重构文本解析||调整渲染方式
-function getTextList(resXml: unknown): Array<XmlTextList> {
-  const res: Array<XmlTextList> = [];
-  if (!resXml || typeof resXml !== "object") return res;
-  if (!("elements" in resXml) || !Array.isArray(resXml["elements"])) return res;
-  const arr1 = resXml.elements;
-  if (arr1.length === 0 || !("elements" in arr1[0]) || !Array.isArray(arr1[0].elements)) return res;
-  const arr2 = arr1[0].elements;
-  if (arr2.length === 0 || !("elements" in arr2[0]) || !Array.isArray(arr2[0].elements)) return res;
-  const arr3 = arr2[0].elements;
-  if (arr3.length === 0 || !("elements" in arr3[0]) || !Array.isArray(arr3[0].elements)) return res;
-  const arr4 = arr3[0].elements;
-  for (const item of arr4) {
-    if (!("name" in item)) continue;
-    if (!("attributes" in item)) continue;
-    if (!("elements" in item) || !Array.isArray(item.elements)) continue;
-    const attr = item.attributes;
-    if (!("chara" in attr) || !("img" in attr)) continue;
-    if (item.name !== "simple_dialog") continue;
-    const img = props.choice ? attr.img : attr.img.replace("aether", "lumine");
-    let findText = "";
-    const arr5 = item.elements[0].elements;
-    if (arr5 && arr5.length > 0 && arr5[0].text !== "") findText = arr5[0].text;
-    else findText = item.elements[0].text;
-    res.push({ chara: attr.chara, img: img, text: findText });
-  }
-  return res;
-}
-
-async function parseXml(link: string): Promise<false | unknown> {
-  try {
-    const response = await fetch(link, { method: "GET" });
-    const data = await response.arrayBuffer();
-    return JSON.parse(xml2json(new TextDecoder("utf-8").decode(data)));
-  } catch (error) {
-    if (error instanceof Error) {
-      await TGLogger.Error(`[to-arcBirth] parseXml: ${error.message}`);
-    } else {
-      await TGLogger.Error(`[to-arcBirth] parseXml: 未知错误-${error}`);
-    }
-    return false;
-  }
+async function loadXmlGal(link: string): Promise<TGApp.Archive.Birth.GalScenes> {
+  console.log("sceneLink", link);
+  const galResp = await fetch(link, {
+    method: "GET",
+    headers: { "Content-Type": "text/xml" },
+  });
+  const galRes = await galResp.text();
+  return parseBirthGal(new DOMParser().parseFromString(galRes, "text/xml"), birthSrc.value!);
 }
 </script>
 <style lang="css" scoped>
@@ -293,11 +256,11 @@ async function parseXml(link: string): Promise<false | unknown> {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
+  padding: 4px;
   -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   background-color: var(--common-shadow-t-2);
-  border-bottom-right-radius: 5px;
-  border-top-left-radius: 5px;
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
 }
 </style>

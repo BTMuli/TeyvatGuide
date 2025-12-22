@@ -156,7 +156,7 @@ declare namespace TGApp.Archive.Birth {
     /** 前一个场景ID */
     prev?: string;
     /** 场景脚本 */
-    scripts: Array<GalDialog>;
+    comments: Array<GalDialog>;
   };
 
   /**
@@ -170,6 +170,8 @@ declare namespace TGApp.Archive.Birth {
     role?: string;
     /** 图片名称 */
     img?: string;
+    /** 图片2 */
+    img2?: string;
     /** 位置 */
     pos?: string;
     /** 对话内容 */
