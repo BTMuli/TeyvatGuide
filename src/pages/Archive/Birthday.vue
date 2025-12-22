@@ -63,6 +63,7 @@
   </ToArcBrith>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import PacBirthCard from "@comp/pageArchive/pac-birth-card.vue";
 import ToArcBrith from "@comp/pageArchive/pao-birth-card.vue";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
@@ -138,12 +139,18 @@ function getItemProps(item: TGApp.Archive.Birth.RoleItem) {
 async function switchCard(isNext: boolean): Promise<void> {
   if (isNext) {
     if (curIndex.value === renderItems.value.length - 1) {
-      if (curPage.value >= pageNum.value) return;
+      if (curPage.value >= pageNum.value) {
+        showSnackbar.warn("已经是最后一张了");
+        return;
+      }
       curPage.value++;
     } else curIndex.value++;
   } else {
     if (curIndex.value === 0) {
-      if (curPage.value <= 1) return;
+      if (curPage.value <= 1) {
+        showSnackbar.warn("已经是第一张了");
+        return;
+      }
       curPage.value--;
     } else curIndex.value--;
   }

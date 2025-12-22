@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.8.9
+ * @since Beta v0.9.1
  */
 
 import { AnnoLangEnum } from "@enum/anno.js";

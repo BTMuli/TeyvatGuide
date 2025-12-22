@@ -5,7 +5,7 @@
       <slot name="left"></slot>
       <div v-if="props.data" class="pao-bc-main">
         <div class="pao-bc-cover">
-          <TMiImg v-if="showText" :ori="true" :src="curScene.bg" alt="顶部图像" />
+          <TMiImg v-if="showText && curScene" :ori="true" :src="curScene.bg" alt="顶部图像" />
           <TMiImg
             v-else-if="props.choice"
             :ori="true"
@@ -14,10 +14,9 @@
           />
           <TMiImg v-else :ori="true" :src="props.data.take_picture[0]" alt="顶部图像" />
         </div>
-        <div v-if="showText" class="pao-bc-comments">
-          <!--          <div v-for="(scene, idx) in birthScenes" :key="idx" class="pao-bc-scene">-->
+        <div v-if="showText && curScene" class="pao-bc-comments">
           <div v-for="(item, index) in curScene.comments" :key="index" class="pao-bc-comment">
-            <div v-if="item.img" :title="item.role" class="pao-bcc-icon">
+            <div v-if="item.img && item.img !== ''" :title="item.role" class="pao-bcc-icon">
               <template v-if="item.role === 'player'">
                 <TMiImg
                   :ori="true"
@@ -27,28 +26,30 @@
               </template>
               <TMiImg v-else :ori="true" :src="item.img" alt="对白头像" />
             </div>
-            <div v-else class="pao-bcc-name">
-              {{ item.role }}
-            </div>
             <div :class="item.img ? 'pao-bcc-text' : 'pao-bcc-quote'">
-              {{ item.text }}
+              {{ item.img ? "" : item.role === "" ? "" : `${item.role}：` }}{{ item.text }}
             </div>
           </div>
-          <!--          </div>-->
         </div>
         <div class="pao-bc-top-tools">
           <v-icon title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
           <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
-          <template v-if="showText && birthScenes && birthScenes.length > 0">
+          <template v-if="showText && birthScenes && birthScenes.length > 1">
             <v-icon title="上一幕" @click="switchScene(false)">mdi-arrow-left</v-icon>
           </template>
           <v-icon :title="showText ? '隐藏对白' : '显示对白'" @click="showComments()">
             {{ showText ? "mdi-eye-off" : "mdi-eye" }}
           </v-icon>
-          <template v-if="showText && birthScenes && birthScenes.length > 0">
+          <template v-if="showText && birthScenes && birthScenes.length > 1">
             <v-icon title="下一幕" @click="switchScene(true)">mdi-arrow-right</v-icon>
           </template>
         </div>
+      </div>
+      <div v-if="props.data" class="pao-bc-info">
+        <span class="pao-bci-title">
+          {{ props.data.role_name }} {{ props.data.year }}/{{ props.data.birthday }}
+        </span>
+        <span class="pao-bci-desc">{{ props.data.word_text }}</span>
       </div>
       <slot name="right"></slot>
     </div>
@@ -131,6 +132,8 @@ async function loadText(): Promise<void> {
   birthScenes.value = [];
   birthSrc.value = await loadXmlSrc(props.data.gal_resource);
   birthScenes.value = await loadXmlGal(props.data.gal_xml);
+  sceneIdx.value = 0;
+  console.log("birthSrc", curScene.value);
 }
 
 async function loadXmlSrc(link: string): Promise<TGApp.Archive.Birth.GalSrcFull> {
@@ -167,6 +170,7 @@ async function loadXmlGal(link: string): Promise<TGApp.Archive.Birth.GalScenes> 
   display: flex;
   overflow: hidden;
   width: 50vw;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
@@ -215,6 +219,7 @@ async function loadXmlGal(link: string): Promise<TGApp.Archive.Birth.GalScenes> 
 .pao-bc-comment {
   position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: flex-start;
   column-gap: 4px;
@@ -222,7 +227,7 @@ async function loadXmlGal(link: string): Promise<TGApp.Archive.Birth.GalScenes> 
 
 .pao-bcc-icon {
   position: relative;
-  width: 40px;
+  width: 64px;
   flex-shrink: 0;
 
   img {
@@ -230,22 +235,24 @@ async function loadXmlGal(link: string): Promise<TGApp.Archive.Birth.GalScenes> 
   }
 }
 
-.pao-bcc-name {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
 .pao-bcc-text {
-  font-size: 16px;
+  font-size: 18px;
   text-shadow: 0 0 2px var(--common-shadow-t-8);
   word-break: break-all;
 }
 
 .pao-bcc-quote {
-  margin-left: 3rem;
-  font-size: 1rem;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 64px;
+  font-size: 16px;
+  font-style: italic;
   opacity: 0.8;
-  word-break: break-all;
+  text-align: center;
+  text-decoration: underline;
+  text-shadow: 0 0 2px var(--common-shadow-t-8);
+  text-underline-offset: 4px;
 }
 
 .pao-bc-top-tools {
@@ -262,5 +269,35 @@ async function loadXmlGal(link: string): Promise<TGApp.Archive.Birth.GalScenes> 
   background-color: var(--common-shadow-t-2);
   border-bottom-right-radius: 4px;
   border-top-left-radius: 4px;
+}
+
+.pao-bc-info {
+  position: absolute;
+  z-index: 1;
+  top: calc(50vw * 54 / 125 + 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pao-bci-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-orange);
+  column-gap: 8px;
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.pao-bci-desc {
+  position: relative;
+  width: fit-content;
+  color: var(--tgc-od-red);
+  font-family: var(--font-title);
+  font-size: 16px;
+  text-align: center;
 }
 </style>

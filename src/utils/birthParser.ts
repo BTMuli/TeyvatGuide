@@ -98,9 +98,12 @@ function parseBirthScenes(
     if (imgKey.startsWith("aether")) {
       img2Src = src.resource.find((i) => i.id === imgKey.replace("aether", "lumine"))?.src ?? "";
     }
+    const roleKey = dialogEl.getAttribute("chara") ?? "";
+    let roleName = src.roles.find((i) => i.id === roleKey)?.name ?? "";
+    if (roleName === "text") roleName = "";
     const scriptItem: TGApp.Archive.Birth.GalDialog = {
       key: dialogEl.getAttribute("key") ?? "",
-      role: dialogEl.getAttribute("chara") ?? undefined,
+      role: roleName,
       img: imgSrc,
       img2: img2Src,
       pos: dialogEl.getAttribute("pos") ?? undefined,
