@@ -1,11 +1,11 @@
 /**
- * @file eslint/vueEslint.js
- * @description Vue相关的ESLint配置
- * @since Beta v0.8.0
+ * Vue&Typescirpt 文件的 Eslint 配置
+ * @since Beta v0.9.1
  */
 import pluginImport from "eslint-plugin-import";
 import pluginPrettier from "eslint-plugin-prettier";
 import pluginVue from "eslint-plugin-vue";
+import pluginTsDoc from "eslint-plugin-tsdoc";
 import globals from "globals";
 import eslintTs from "typescript-eslint";
 import parserVue from "vue-eslint-parser";
@@ -30,12 +30,15 @@ const tsConfigRules = {
 
 const tsConfig = {
   files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts"],
-  plugins: { typescript: eslintTs, import: pluginImport, prettier: pluginPrettier },
+  plugins: { typescript: eslintTs, import: pluginImport, prettier: pluginPrettier, tsdoc: pluginTsDoc },
   languageOptions: {
     parser: eslintTs.parser,
     parserOptions: { project: "tsconfig.json", tsconfigRootDir: appRootPath.path },
   },
-  rules: tsConfigRules,
+  rules: {
+    ...tsConfigRules,
+    "tsdoc/syntax": "warn",
+  },
 };
 
 const vueConfig = {

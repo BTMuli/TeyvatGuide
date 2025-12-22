@@ -1,0 +1,22 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+  "supportForTags": {
+    "@since": true,
+    "@link": true,
+    "@remarks": true,
+    "@param": true,
+    "@returns": true,
+    "@TODO": true
+  },
+  "tagDefinitions": [
+    {
+      "tagName": "@since",
+      "syntaxKind": "block",
+      "allowMultiple": false
+    },
+    {
+      "tagName": "@TODO",
+      "syntaxKind": "block"
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 /**
- * @file eslint/jsonEslint.js
- * @description JSON相关的ESLint配置
- * @since Beta v0.7.7
+ * JSON 文件的 ESLint 配置
+ * @since Beta v0.9.1
  */
 
 import pluginJsonc from "eslint-plugin-jsonc";
@@ -63,7 +62,7 @@ const tscJsonConfig = {
 };
 
 const jsoncConfig = {
-  files: ["source/data/out/**/*.json", ".vscode/**/*.json"],
+  files: ["source/data/out/**/*.json", ".vscode/**/*.json", "./tsdoc.json"],
   plugins: { jsonc: pluginJsonc },
   languageOptions: { parser: parserJsonc },
   rules: {
