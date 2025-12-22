@@ -17,7 +17,7 @@
         <div v-if="showText && curScene" class="pao-bc-comments">
           <div v-for="(item, index) in curScene.comments" :key="index" class="pao-bc-comment">
             <div v-if="item.img && item.img !== ''" :title="item.role" class="pao-bcc-icon">
-              <template v-if="item.role === 'player'">
+              <template v-if="item.role === '旅行者'">
                 <TMiImg
                   :ori="true"
                   :src="props.choice ? item.img : (item.img2 ?? '')"
