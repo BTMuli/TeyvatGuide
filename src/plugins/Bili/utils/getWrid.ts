@@ -1,6 +1,5 @@
 /**
- * @file plugins/Bili/utils/getWrid.ts
- * @description Bili 插件获取 wrid 工具函数
+ * Bili 插件获取 wrid 工具函数
  * @since Beta v0.4.1
  */
 
@@ -8,19 +7,19 @@ import getNav from "@Bili/request/getNav.js";
 import md5 from "js-md5";
 
 /**
- * @description 获取 key 值
+ * 获取 key 值
  * @since Beta v0.4.0
- * @param {string} key key 名称
- * @return {string} key 值
+ * @param key - key 名称
+ * @returns key 值
  */
 function getKeyVal(key: string): string {
   return key.split("/").pop()?.split(".")[0] ?? "";
 }
 
 /**
- * @description 获取 mixin_key
+ * 获取 mixin_key
  * @since Beta v0.4.1
- * @return {Promise<string>} mixin_key
+ * @returns mixin_key
  */
 async function getMixinKey(): Promise<string> {
   const nav = await getNav();
@@ -38,10 +37,10 @@ async function getMixinKey(): Promise<string> {
 }
 
 /**
- * @description 获取 wrid
+ * 获取 wrid
  * @since Beta v0.4.1
- * @param {Record<string,string|number>} params 请求参数
- * @returns {Promise<[string|string]>} wrid
+ * @param params - 请求参数
+ * @returns wrid
  */
 async function getWrid(
   params: Record<string, string | number | boolean>,

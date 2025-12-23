@@ -39,7 +39,7 @@ async function test() {
       headers: { "Content-Type": "text/xml" },
     });
     const galRes = await galResp.text();
-    const parseGal = parseBirthGal(new DOMParser().parseFromString(galRes, "text/xml"));
+    const parseGal = parseBirthGal(new DOMParser().parseFromString(galRes, "text/xml"), parseSrc);
     console.log("parsedScene", parseGal);
   }
 }

@@ -61,7 +61,6 @@ declare namespace TGApp.BBS.Sign {
 
   /**
    * 获取签到信息返回响应
-   * @interface InfoResp
    * @since Beta v0.7.2
    */
   type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;

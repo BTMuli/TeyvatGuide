@@ -60,7 +60,13 @@ declare namespace TGApp.Game.ActCalendar {
     end_time: TGApp.Game.Base.DateTime;
     /** 跳转链接 */
     jump_url: string;
-    /** 卡池状态 // 1:未开始 2:进行中 3:已结束 */
+    /**
+     * 卡池状态
+     * @example
+     * 1:未开始
+     * 2:进行中
+     * 3:已结束
+     */
     pool_status: number;
     /** 距离结束倒计时(秒) */
     countdown_seconds: number;
@@ -172,7 +178,7 @@ declare namespace TGApp.Game.ActCalendar {
     countdown_seconds: number;
     /**
      * 活动状态
-     * @remarks
+     * @example
      * 1:未开始
      * 2:进行中
      */

@@ -1,110 +1,104 @@
 /**
- * @file types/Sqlite/Character.d.ts
- * @description 角色相关类型定义文件
+ * 角色相关类型定义文件
  * @since Beta v0.5.3
  */
 
-/**
- * @namespace TGApp.Sqlite.Character
- * @since Beta v0.5.3
- * @description 角色相关类型定义命名空间
- * @memberof TGApp.Sqlite
- */
 declare namespace TGApp.Sqlite.Character {
   /**
-   * @description 应用数据库中的角色类型
-   * @since Alpha v0.2.0
-   * @interface AppData
-   * @property {number} id - 角色 ID
-   * @property {string} name - 角色名称
-   * @property {string} title - 角色称号
-   * @property {string} birthday - 角色生日
-   * @property {number} star - 角色星级
-   * @property {string} element - 角色元素类型
-   * @property {string} weapon - 角色武器类型
-   * @property {string} nameCard - 角色名片
-   * @property {string} updated - 数据更新时间
-   * @return AppData
-   */
-  interface AppData {
-    id: number;
-    name: string;
-    title: string;
-    birthday: string;
-    star: number;
-    element: string;
-    weapon: string;
-    nameCard: string;
-    updated: string;
-  }
-
-  /**
-   * @description 用户角色列表的角色类型
+   * 角色表数据
    * @since Beta v0.5.3
-   * @interface UserRole
-   * @property {number} uid - 用户 ID
-   * @property {number} cid - 角色 ID
-   * @property {TGApp.Game.Avatar.Avatar} avatar - 角色信息
-   * @property {TGApp.Game.Avatar.WeaponDetail} weapon - 角色武器信息
-   * @property {TGApp.Game.Avatar.Relic[]} relics - 角色圣遗物信息
-   * @property {TGApp.Game.Avatar.Constellation[]} constellations - 角色命之座信息
-   * @property {TGApp.Game.Avatar.Costume[]} costumes - 角色衣装信息
-   * @property {TGApp.Game.Avatar.Skill[]} skills - 角色技能信息
-   * @property {TGApp.Game.Avatar.Prop[]} propSelected - 角色属性信息
-   * @property {TGApp.Game.Avatar.Prop[]} propBase - 角色基础属性信息
-   * @property {TGApp.Game.Avatar.Prop[]} propExtra - 角色额外属性信息
-   * @property {TGApp.Game.Avatar.RelicRecommendProp} propRecommend - 角色推荐属性信息
-   * @property {string} updated - 数据更新时间
-   * @return UserRole
+   * @remarks UserCharacters 表
    */
-  interface UserRole {
+  type TableRaw = {
+    /** 用户 UID */
     uid: number;
+    /** 角色 ID */
     cid: number;
-    avatar: TGApp.Game.Avatar.Avatar;
-    weapon: TGApp.Game.Avatar.WeaponDetail;
-    relics: TGApp.Game.Avatar.Relic[];
-    constellations: TGApp.Game.Avatar.Constellation[];
-    costumes: TGApp.Game.Avatar.Costume[];
-    skills: TGApp.Game.Avatar.Skill[];
-    propSelected: TGApp.Game.Avatar.Prop[];
-    propBase: TGApp.Game.Avatar.Prop[];
-    propExtra: TGApp.Game.Avatar.Prop[];
-    propRecommend: TGApp.Game.Avatar.RelicRecommendProp;
-    updated: string;
-  }
-
-  /**
-   * @description 存于数据库的角色数据
-   * @since Beta v0.5.3
-   * @interface UserRoleDB
-   * @property {number} uid - 用户 ID
-   * @property {number} cid - 角色 ID
-   * @property {string} avatar - 角色信息
-   * @property {string} weapon - 角色武器信息
-   * @property {string} relics - 角色圣遗物信息
-   * @property {string} constellations - 角色命之座信息
-   * @property {string} costumes - 角色衣装信息
-   * @property {string} skills - 角色技能信息
-   * @property {string} propSelected - 角色属性信息
-   * @property {string} propBase - 角色基础属性信息
-   * @property {string} propExtra - 角色额外属性信息
-   * @property {string} propRecommend - 角色推荐属性信息
-   * @property {string} updated - 数据更新时间
-   * @return UserRoleDB
-   */
-  interface UserRoleDB {
-    uid: number;
-    cid: number;
+    /**
+     * 角色信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Avatar} 类型
+     */
     avatar: string;
+    /**
+     * 武器信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.WeaponDetail} 类型
+     */
     weapon: string;
+    /**
+     * 圣遗物信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Relic} 数组
+     */
     relics: string;
+    /**
+     * 命座信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Constellation} 数组
+     */
     constellations: string;
+    /**
+     * 衣装信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Costume} 数组
+     */
     costumes: string;
+    /**
+     * 技能信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Skill} 数组
+     */
     skills: string;
+    /**
+     * 角色属性信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Prop} 数组
+     */
     propSelected: string;
+    /**
+     * 角色基础属性信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Prop} 数组
+     */
     propBase: string;
+    /**
+     * 角色额外属性信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.Prop} 数组
+     */
     propExtra: string;
+    /**
+     * 角色推荐属性信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Avatar.RelicRecommendProp} 类型
+     */
     propRecommend: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
+
+  /**
+   * 用户角色列表的角色类型
+   * @since Beta v0.5.3
+   * @remarks 解析自 {@link TableRaw} 数据
+   */
+  type TableTrans = {
+    /** 用户 UID */
+    uid: number;
+    /** 角色 ID */
+    cid: number;
+    /** 角色信息 */
+    avatar: TGApp.Game.Avatar.Avatar;
+    /** 武器信息 */
+    weapon: TGApp.Game.Avatar.WeaponDetail;
+    /** 圣遗物信息 */
+    relics: Array<TGApp.Game.Avatar.Relic>;
+    /** 命座信息 */
+    constellations: Array<TGApp.Game.Avatar.Constellation>;
+    /** 衣装信息 */
+    costumes: Array<TGApp.Game.Avatar.Costume>;
+    /** 技能信息 */
+    skills: Array<TGApp.Game.Avatar.Skill>;
+    /** 角色属性信息 */
+    propSelected: Array<TGApp.Game.Avatar.Prop>;
+    /** 角色基础属性信息 */
+    propBase: string;
+    /** 角色额外属性信息 */
+    propExtra: Array<TGApp.Game.Avatar.Prop>;
+    /** 角色推荐属性信息 */
+    propRecommend: TGApp.Game.Avatar.RelicRecommendProp;
+    /** 更新时间 */
+    updated: string;
+  };
 }

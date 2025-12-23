@@ -18,8 +18,8 @@ import TGLogger from "./TGLogger.js";
  * 备份用户数据
  * @since Beta v0.9.0
  * @TODO 重构祈愿部分备份&读取，处理胡桃数据&应用自身数据的导入
- * @param {string} dir 备份目录路径
- * @returns {Promise<void>}
+ * @param dir - 备份目录路径
+ * @returns 无返回值
  */
 export async function backUpUserData(dir: string): Promise<void> {
   if (!(await exists(dir))) {
@@ -43,8 +43,8 @@ export async function backUpUserData(dir: string): Promise<void> {
 /**
  * 恢复用户数据
  * @since Beta v0.9.0
- * @param {string} dir 备份目录路径
- * @returns {Promise<void>}
+ * @param dir - 备份目录路径
+ * @returns 无返回值
  */
 export async function restoreUserData(dir: string): Promise<void> {
   let errNum = 0;

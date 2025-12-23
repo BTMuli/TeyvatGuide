@@ -8,8 +8,8 @@ import { timestampToDate } from "@utils/toolFunc.js";
 /**
  * 转换角色数据
  * @since Alpha v0.2.0
- * @param {Array<TGApp.Game.Abyss.CharacterData>} data 接口获取角色数据
- * @returns {string} 转换后的角色数据
+ * @param data - 接口获取角色数据
+ * @returns 转换后的角色数据
  */
 export function transCharacterData(data: Array<TGApp.Game.Abyss.CharacterData>): string {
   const res: Array<TGApp.Sqlite.Abyss.CharacterData> = data.map((item) => ({
@@ -23,11 +23,11 @@ export function transCharacterData(data: Array<TGApp.Game.Abyss.CharacterData>):
 /**
  * 转换楼层数据
  * @since Beta v0.9.0
- * @param {Array<TGApp.Game.Abyss.Floor>} data 接口获取楼层数据
- * @returns {string} 转换后的楼层数据
+ * @param data - 接口获取楼层数据
+ * @returns 转换后的楼层数据
  */
 export function transFloorData(data: Array<TGApp.Game.Abyss.Floor>): string {
-  const floor: TGApp.Sqlite.Abyss.Floor[] = data.map((item) => ({
+  const floor: Array<TGApp.Sqlite.Abyss.Floor> = data.map((item) => ({
     id: item.index,
     winStar: item.star,
     maxStar: item.max_star,
@@ -41,8 +41,8 @@ export function transFloorData(data: Array<TGApp.Game.Abyss.Floor>): string {
 /**
  * 转换关卡数据
  * @since Beta v0.9.0
- * @param {TGApp.Game.Abyss.Level} data 接口获取关卡数据
- * @returns {TGApp.Sqlite.Abyss.Level} 转换后的关卡数据
+ * @param data - 接口获取关卡数据
+ * @returns 转换后的关卡数据
  */
 function transLevelData(data: TGApp.Game.Abyss.Level): TGApp.Sqlite.Abyss.Level {
   const res: TGApp.Sqlite.Abyss.Level = {
@@ -60,9 +60,9 @@ function transLevelData(data: TGApp.Game.Abyss.Level): TGApp.Sqlite.Abyss.Level 
 /**
  * 转换战斗数据
  * @since Beta v0.9.0
- * @param {TGApp.Game.Abyss.Battle} data 接口获取战斗数据
- * @param {Array<TGApp.Game.Abyss.MonsterInfo>} monsters 对应战斗怪物数据
- * @returns {TGApp.Sqlite.Abyss.Battle} 转换后的深渊数据
+ * @param data - 接口获取战斗数据
+ * @param monsters - 对应战斗怪物数据
+ * @returns 转换后的深渊数据
  */
 function transBattleData(
   data: TGApp.Game.Abyss.Battle,

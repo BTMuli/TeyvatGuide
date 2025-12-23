@@ -85,8 +85,8 @@ async function getCalendarOptions(): Promise<EChartsOption> {
   // 获取年份
   const yearsSet = new Set(Object.keys(records).map((v) => v.split("-")[0]));
 
-  function getYearData(year: string): [string, number][] {
-    const res: [string, number][] = [];
+  function getYearData(year: string): Array<[string, number]> {
+    const res: Array<[string, number]> = [];
     for (const key in records) {
       if (key.startsWith(year)) res.push([key, records[key].length]);
     }

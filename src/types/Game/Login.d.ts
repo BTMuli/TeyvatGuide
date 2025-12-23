@@ -1,102 +1,102 @@
 /**
- * @file types/Game/Login.d.ts
- * @description 扫码登录模块类型定义文件
+ * 登录相关定义文件
  * @since Beta v0.7.0
  */
 
 declare namespace TGApp.Game.Login {
   /**
-   * @description 获取登录二维码返回数据
+   * 获取登录二维码返回数据响应
    * @since Beta v0.7.0
-   * @interface QrResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {QrRes} data 数据
-   * @return QrResp
    */
   type QrResp = TGApp.BBS.Response.BaseWithData & { data: QrRes };
 
   /**
-   * @description 获取登录二维码返回数据
+   * 获取登录二维码返回数据
    * @since Beta v0.7.0
-   * @interface QrRes
-   * @property {string} url 二维码链接
-   * @return QrRes
    */
-  type QrRes = { url: string };
+  type QrRes = {
+    /** 二维码 URL */
+    url: string;
+  };
 
   /**
-   * @description 获取登录状态返回数据
+   * 获取登录状态返回响应
    * @since Beta v0.7.0
-   * @interface StatusResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {StatusRes} data 数据
-   * @return StatusResp
    */
-  type StatusResp = TGApp.BBS.Response.BaseWithData & { data: StatusRes };
+  type StatResp = TGApp.BBS.Response.BaseWithData & { data: StatRes };
 
   /**
-   * @description 二维码状态
-   * @since Beta v0.7.0
-   * @interface QrStatus
-   * @return QrStatus
+   * 登录二维码状态
+   * @since Beta v0.9.1
    */
-  type QrStatus = "Init" | "Scanned" | "Confirmed";
+  const QrStat = <const>{
+    INIT: "Init",
+    SCANNED: "Scanned",
+    CONFIRMED: "Confirmed",
+  };
 
   /**
-   * @description 获取登录状态返回数据
-   * @since Beta v0.7.0
-   * @interface StatusRes
-   * @property {string} stat 状态 // Init: 未扫码，Scanned: 已扫码，Confirmed: 已确认
-   * @property {string} payload 状态数据
-   * @return StatusRes
+   * 登录二维码状态枚举
+   * @since Beta v0.9.1
    */
-  type StatusRes = { stat: QrStatus; payload: StatusPayload };
+  type QrStatEnum = (typeof QrStat)[keyof typeof QrStat];
 
   /**
-   * @description 获取登录状态返回数据
+   * 获取登录状态返回数据
    * @since Beta v0.7.0
-   * @interface StatusPayload
-   * @property {string} ext 未知
-   * @property {string} proto 未知
-   * @property {string} raw 序列化数据，反序列化后是 StatusPayloadRaw
-   * @return StatusPayload
    */
-  type StatusPayload = { ext: string; proto: string; raw: string };
+  type StatRes = {
+    /** 二维码状态 */
+    stat: QrStatEnum;
+    /** 状态数据 */
+    payload: StatPayloadFull;
+  };
 
   /**
-   * @description 反序列化后的登录状态数据
+   * 登录状态Payload
    * @since Beta v0.7.0
-   * @interface StatusPayloadRaw
-   * @property {string} uid 用户 UID
-   * @property {string} token 用户 token
-   * @return StatusPayloadRaw
    */
-  type StatusPayloadRaw = { uid: string; token: string };
+  type StatPayloadFull = {
+    /** 未知数据 */
+    ext: string;
+    /** 未知数据 */
+    proto: string;
+    /**
+     * 元数据
+     * @remarks 序列化，反序列化后是 {@link StatPayloadRaw}
+     */
+    raw: string;
+  };
 
   /**
-   * @description GameToken获取Stoken返回
+   * 反序列化后的登录状态数据
+   * @since Beta v0.7.0
+   */
+  type StatPayloadRaw = {
+    /** 用户 UID */
+    uid: string;
+    /** 用户 Token */
+    token: string;
+  };
+
+  /**
+   * GameToken获取SToken返回响应
    * @since Beta v0.7.2
-   * @interface StResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {StRes} data 数据
-   * @return StResp
    */
   type StResp = TGApp.BBS.Response.BaseWithData<StRes>;
 
   /**
-   * @description GameToken获取Stoken返回数据
+   * GameToken获取SToken返回数据
    * @since Beta v0.7.2
-   * @interface StRes
-   * @property {TGApp.BBS.GameLogin.GetLoginStatusDataToken} token token
-   * @property {TGApp.BBS.GameLogin.GetLoginStatusDataUserInfo} user_info 用户信息
-   * @property {unknown} realname_info 未知
-   * @property {boolean} need_realperson 是否需要真人验证
-   * @return StRes
    */
   type StRes = {
+    /** Token */
     token: TGApp.BBS.GameLogin.GetLoginStatusDataToken;
+    /** 用户信息 */
     user_info: TGApp.BBS.GameLogin.GetLoginStatusDataUserInfo;
+    /** 实名信息 */
     realname_info: unknown;
+    /** 是否需要实名 */
     need_realperson: boolean;
   };
 }

@@ -1,64 +1,50 @@
 /**
- * @file plugins/Hutao/types/Combat.d.ts
- * @description 幻想真境剧诗
+ * 幻想真境剧诗
  * @since Beta v0.6.3
  */
 
 declare namespace TGApp.Plugins.Hutao.Combat {
   /**
-   * @description 上传返回
+   * 上传返回
    * @since Beta v0.6.3
-   * @interface UploadResponse
-   * @extends TGApp.Plugins.Hutao.Base.Response
-   * @return UploadResponse
    */
-  type UploadResponse = TGApp.Plugins.Hutao.Base.Response;
+  type UploadResp = TGApp.Plugins.Hutao.Base.Resp;
 
   /**
-   * @description 上传数据
+   * 上传数据
    * @since Beta v0.6.3
-   * @interface UploadData
-   * @property {number} Version
-   * @property {string} Uid
-   * @property {string} Identity
-   * @property {number[]} BackupAvatars
-   * @property {number} ScheduleId
-   * @return UploadData
    */
-  interface UploadData {
+  type UploadData = {
+    /** 版本号 */
     Version: number;
+    /** 用户 UID */
     Uid: string;
+    /** 身份标识 */
     Identity: string;
+    /** 备选角色 ID 列表 */
     BackupAvatars: Array<number>;
+    /** 期数 ID */
     ScheduleId: number;
-  }
+  };
 
   /**
-   * @description 数据获取返回
+   * 数据获取返回
    * @since Beta v0.6.3
-   * @interface Response
-   * @extends TGApp.Plugins.Hutao.Base.Response
-   * @property {Data} data
-   * @return Response
    */
-  interface Response extends TGApp.Plugins.Hutao.Base.Response {
-    data: Data;
-  }
+  type Response = TGApp.Plugins.Hutao.Base.Resp<Data>;
 
   /**
-   * @description 数据
+   * 数据
    * @since Beta v0.6.3
-   * @interface Data
-   * @property {string} ScheduleId 期数
-   * @property {number} RecordTotal 总数
-   * @property {number} Timestamp 时间戳
-   * @property {Array<TGApp.Plugins.Hutao.Base.Rate>} BackupAvatarRates 使用率
-   * @return Data
    */
-  interface Data {
+  type Data = {
+    /** 期数 */
     ScheduleId: string;
+    /** 总数 */
     RecordTotal: number;
+    /** 时间戳 */
     Timestamp: number;
+    /** 使用率 */
     BackupAvatarRates: Array<TGApp.Plugins.Hutao.Base.Rate>;
-  }
+  };
 }

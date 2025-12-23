@@ -1,6 +1,5 @@
 /**
- * @file utils/TGLogger.ts
- * @description 日志工具
+ * 日志工具
  * @since Beta v0.7.0
  */
 
@@ -10,7 +9,7 @@ import { attachConsole, debug, error, info, warn } from "@tauri-apps/plugin-log"
 import { timestampToDate } from "./toolFunc.js";
 
 /**
- * @description 日志工具
+ * 日志工具
  * @since Beta v0.4.4
  */
 class Logger {
@@ -28,11 +27,11 @@ class Logger {
   }
 
   /**
-   * @description 输出日志-调试
+   * 输出日志-调试
    * @since Beta v0.6.8
-   * @param {string} message 日志信息
-   * @param {boolean} [write] 是否写入日志文件，默认为 true
-   * @returns {Promise<void>} 无返回值
+   * @param message - 日志信息
+   * @param write - 是否写入日志文件，默认为 true
+   * @returns 无返回值
    */
   async Debug(message: string, write: boolean = true): Promise<void> {
     if (write) await debug(message);
@@ -40,11 +39,11 @@ class Logger {
   }
 
   /**
-   * @description 输出日志-信息
+   * 输出日志-信息
    * @since Beta v0.4.2
-   * @param {string} message 日志信息
-   * @param {boolean} [write] 是否写入日志文件，默认为 true
-   * @returns {Promise<void>} 无返回值
+   * @param message - 日志信息
+   * @param write - 是否写入日志文件，默认为 true
+   * @returns 无返回值
    */
   async Info(message: string, write: boolean = true): Promise<void> {
     if (write) await info(message);
@@ -52,11 +51,11 @@ class Logger {
   }
 
   /**
-   * @description 输出日志-警告
+   * 输出日志-警告
    * @since Beta v0.4.2
-   * @param {string} message 日志信息
-   * @param {boolean} [write] 是否写入日志文件，默认为 true
-   * @returns {Promise<void>} 无返回值
+   * @param message - 日志信息
+   * @param write - 是否写入日志文件，默认为 true
+   * @returns 无返回值
    */
   async Warn(message: string, write: boolean = true): Promise<void> {
     if (write) await warn(message);
@@ -64,11 +63,11 @@ class Logger {
   }
 
   /**
-   * @description 输出日志-错误
+   * 输出日志-错误
    * @since Beta v0.4.2
-   * @param {string} message 日志信息
-   * @param {boolean} [write] 是否写入日志文件，默认为 true
-   * @returns {Promise<void>} 无返回值
+   * @param message - 日志信息
+   * @param write - 是否写入日志文件，默认为 true
+   * @returns 无返回值
    */
   async Error(message: string, write: boolean = true): Promise<void> {
     if (write) await error(message);
@@ -76,10 +75,10 @@ class Logger {
   }
 
   /**
-   * @description 输出日志-脚本
+   * 输出日志-脚本
    * @since Beta v0.7.0
-   * @param {string} message 日志信息
-   * @returns {Promise<void>} 无返回值
+   * @param message - 日志信息
+   * @returns 无返回值
    */
   async Script(message: string): Promise<void> {
     const timeNow = timestampToDate(new Date().getTime());
@@ -89,11 +88,11 @@ class Logger {
   }
 
   /**
-   * @description 输出日志-脚本分隔符
+   * 输出日志-脚本分隔符
    * @since Beta v0.7.0
-   * @param {string} label 标签
-   * @param {boolean} [start] 是否为开始，默认为 true
-   * @returns {Promise<void>} 无返回值
+   * @param label - 标签
+   * @param start - 是否为开始，默认为 true
+   * @returns 无返回值
    */
   async ScriptSep(label: string, start: boolean = true): Promise<void> {
     const midStr = `${label} ${start ? "START" : "END--"}`;

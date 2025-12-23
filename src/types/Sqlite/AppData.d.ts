@@ -1,43 +1,37 @@
 /**
- * @file types/Sqlite/AppData.d.ts
- * @description Sqlite AppData 类型定义文件
+ * AppData 表类型定义文件
  * @since Beta v0.4.1
  */
 
 declare namespace TGApp.Sqlite.AppData {
   /**
-   * @description AppData 数据库 - key 枚举
+   * AppData 表键值
    * @since Beta v0.4.1
-   * @enum {string}
-   * @property {string} APP_VERSION - App 版本
-   * @property {string} DATA_UPDATED - 数据库更新时间
-   * @property {string} COOKIE - Cookie
-   * @property {string} USER_INFO - 用户信息
-   * @property {string} DEVICE_INFO - 设备信息
-   * @property {string} USER_DIR - 用户数据目录
-   * @return {string}
+   * @TODO 枚举
    */
   enum DBKey {
+    /** 应用版本 */
     APP_VERSION = "appVersion",
+    /** 数据库更新时间 */
     DATA_UPDATED = "dataUpdated",
+    /** 当前用户 Cookie */
     COOKIE = "cookie",
-    USER_INFO = "userInfo",
+    /** 设备信息 */
     DEVICE_INFO = "deviceInfo",
+    /** 数据目录 */
     USER_DIR = "userDir",
   }
 
   /**
-   * @description AppData 数据
+   * AppData 行数据
    * @since Beta v0.3.3
-   * @interface Item
-   * @property {DBKey} key - 键
-   * @property {string} value - 值
-   * @property {string} updated - 数据库更新时间
-   * @return Item
    */
-  interface Item {
+  type Item = {
+    /** 键 */
     key: DBKey;
+    /** 值 */
     value: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 }

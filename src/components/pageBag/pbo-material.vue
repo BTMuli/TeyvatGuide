@@ -78,7 +78,7 @@ const showRecord = computed<boolean>(() => !SKIP_BAG_TYPES.includes(props.data.i
 
 onMounted(async () => (version.value = await getVersion()));
 
-const dbInfo = shallowRef<TGApp.Sqlite.UserBag.TableMaterial>(props.data.tb);
+const dbInfo = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.data.tb);
 
 watch(
   () => props.data.info,

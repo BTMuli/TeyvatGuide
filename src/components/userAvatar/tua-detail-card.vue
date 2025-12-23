@@ -90,7 +90,7 @@ import TuaDcWeapon from "./tua-dc-weapon.vue";
 
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
-type TuaDetailCardProps = { modelValue: TGApp.Sqlite.Character.UserRole };
+type TuaDetailCardProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
 
 const props = defineProps<TuaDetailCardProps>();
 const userStore = useUserStore();

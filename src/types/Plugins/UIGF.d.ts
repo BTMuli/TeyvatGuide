@@ -1,14 +1,14 @@
 /**
  * UIGF 标准类型定义文件
  * @since Beta v0.8.4
- * @version UIGF v3.0 | UIGF v4.1
+ * @remarks UIGF v3.0 | UIGF v4.1
  */
 
 declare namespace TGApp.Plugins.UIGF {
   /**
    * UIGF 数据
    * @since Beta v0.5.0
-   * @version UIGF v3.0
+   * @remarks UIGF v3.0
    */
   type Schema = {
     /** 头部信息 */
@@ -33,7 +33,7 @@ declare namespace TGApp.Plugins.UIGF {
   /**
    * UIGF 头部信息
    * @since Beta v0.5.0
-   * @version UIGF v3.0
+   * @remarks UIGF v3.0
    */
   type Info = {
     /** UID */
@@ -57,7 +57,7 @@ declare namespace TGApp.Plugins.UIGF {
   /**
    * UIGF 头部信息
    * @since Beta v0.5.1
-   * @version v4.0+
+   * @remarks UIGF v4.0+
    */
   type Info4 = {
     /** 导出时间戳(秒) */
@@ -107,7 +107,7 @@ declare namespace TGApp.Plugins.UIGF {
   /**
    * UIGF 祈愿项-原神
    * @since Beta v0.5.1
-   * @version UIGF v3.0
+   * @remarks UIGF v3.0
    */
   type GachaItem = {
     /** UIGF 祈愿类型 */

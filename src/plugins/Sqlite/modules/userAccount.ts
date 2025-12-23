@@ -11,11 +11,11 @@ import { timestampToDate } from "@utils/toolFunc.js";
 import TGSqlite from "../index.js";
 
 /**
- * @description 获取插入游戏账号数据的sql
+ * 获取插入游戏账号数据的sql
  * @since Beta v0.7.2
- * @param {string} uid - 米社UID
- * @param {TGApp.BBS.Game.Account} data - 游戏账号数据
- * @return {string}
+ * @param uid - 米社UID
+ * @param data - 游戏账号数据
+ * @returns 插入Sql
  */
 function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): string {
   const isChosen = data.is_chosen ? 1 : 0;
@@ -38,10 +38,10 @@ function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): str
 }
 
 /**
- * @description 获取插入账号数据的 sql
+ * 获取插入账号数据的 sql
  * @since Beta v0.6.1
- * @param {TGApp.App.Account.User} user
- * @returns {string}
+ * @param user - 账号
+ * @returns 插入Sql
  */
 function getInsertAccountSql(user: TGApp.App.Account.User): string {
   const table = transUser(user);
@@ -56,10 +56,10 @@ function getInsertAccountSql(user: TGApp.App.Account.User): string {
 }
 
 /**
- * @description 数据库转成可用数据
+ * 数据库转成可用数据
  * @since Beta v0.6.0
- * @param {TGApp.Sqlite.Account.User} data - 用户数据
- * @returns {TGApp.App.Account.User}
+ * @param data - 用户数据
+ * @returns 解析后的数据
  */
 function parseUser(data: TGApp.Sqlite.Account.User): TGApp.App.Account.User {
   return {
@@ -71,10 +71,10 @@ function parseUser(data: TGApp.Sqlite.Account.User): TGApp.App.Account.User {
 }
 
 /**
- * @description 转成数据库数据方便存储
+ * 转成数据库数据方便存储
  * @since Beta v0.6.0
- * @param {TGApp.App.Account.User} data - 用户数据
- * @returns {TGApp.Sqlite.Account.User}
+ * @param data - 用户数据
+ * @returns 数据库存储数据
  */
 function transUser(data: TGApp.App.Account.User): TGApp.Sqlite.Account.User {
   return {
@@ -86,22 +86,22 @@ function transUser(data: TGApp.App.Account.User): TGApp.Sqlite.Account.User {
 }
 
 /**
- * @description 获取所有用户数据
+ * 获取所有用户数据
  * @since Beta v0.6.0
- * @returns {Promise<TGApp.App.Account.User[]>}
+ * @returns 用户数据列表
  */
-async function getAllAccount(): Promise<TGApp.App.Account.User[]> {
+async function getAllAccount(): Promise<Array<TGApp.App.Account.User>> {
   const db = await TGSqlite.getDB();
-  const res = await db.select<TGApp.Sqlite.Account.User[]>("SELECT * FROM UserAccount;");
+  const res = await db.select<Array<TGApp.Sqlite.Account.User>>("SELECT * FROM UserAccount;");
   return res.map(parseUser);
 }
 
 /**
- * @description 获取所有UID
+ * 获取所有UID
  * @since Beta v0.6.0
- * @returns {Promise<string[]>}
+ * @returns uid 列表
  */
-async function getAllAccountId(): Promise<string[]> {
+async function getAllAccountId(): Promise<Array<string>> {
   const db = await TGSqlite.getDB();
   type resType = Array<{ uid: string }>;
   const res = await db.select<resType>("SELECT DISTINCT uid FROM GameAccount;");
@@ -109,14 +109,14 @@ async function getAllAccountId(): Promise<string[]> {
 }
 
 /**
- * @description 获取指定用户数据
+ * 获取指定用户数据
  * @since Beta v0.6.0
- * @param {string} uid - 用户UID
- * @returns {Promise<TGApp.App.Account.User|false>}
+ * @param uid - 用户UID
+ * @returns 用户数据
  */
 async function getUserAccount(uid: string): Promise<TGApp.App.Account.User | false> {
   const db = await TGSqlite.getDB();
-  const res = await db.select<TGApp.Sqlite.Account.User[]>(
+  const res = await db.select<Array<TGApp.Sqlite.Account.User>>(
     "SELECT * FROM UserAccount WHERE uid = ?",
     [uid],
   );
@@ -125,10 +125,10 @@ async function getUserAccount(uid: string): Promise<TGApp.App.Account.User | fal
 }
 
 /**
- * @description 更新用户数据
+ * 更新用户数据
  * @since Beta v0.6.1
- * @param {TGApp.App.Account.User} data - 用户cookie
- * @returns {Promise<void>}
+ * @param data - 用户cookie
+ * @returns 无返回值
  */
 async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -137,10 +137,10 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
 }
 
 /**
- * @description 备份用户数据
+ * 备份用户数据
  * @since Beta v0.6.0
- * @param {string} dir - 备份目录
- * @returns {Promise<void>}
+ * @param dir - 备份目录
+ * @returns 无返回值
  */
 async function backUpAccount(dir: string): Promise<void> {
   if (!(await exists(dir))) {
@@ -153,10 +153,10 @@ async function backUpAccount(dir: string): Promise<void> {
 }
 
 /**
- * @description 恢复用户数据
+ * 恢复用户数据
  * @since Beta v0.6.0
- * @param {string} dir
- * @returns {Promise<boolean>}
+ * @param dir - 恢复目录
+ * @returns 是否恢复成功
  */
 async function restoreAccount(dir: string): Promise<boolean> {
   if (!(await exists(dir))) {
@@ -170,7 +170,7 @@ async function restoreAccount(dir: string): Promise<boolean> {
       return false;
     }
     const data = await readTextFile(filePath);
-    const accounts: TGApp.App.Account.User[] = JSON.parse(data);
+    const accounts: Array<TGApp.App.Account.User> = JSON.parse(data);
     for (const account of accounts) {
       await saveAccount(account);
     }
@@ -182,10 +182,10 @@ async function restoreAccount(dir: string): Promise<boolean> {
 }
 
 /**
- * @description 复制cookie
+ * 复制cookie
  * @since Beta v0.6.0
- * @param {TGApp.App.Account.Cookie} cookie - cookie
- * @return {string}
+ * @param cookie - cookie
+ * @returns ck
  */
 function copyCookie(cookie: TGApp.App.Account.Cookie): string {
   let res = "";
@@ -216,8 +216,8 @@ function copyCookie(cookie: TGApp.App.Account.Cookie): string {
 /**
  * 获取指定用户账号
  * @since Beta v0.9.0
- * @param {string} uid - 用户UID
- * @returns {Promise<Array<TGApp.Sqlite.Account.Game>>}
+ * @param uid - 用户UID
+ * @returns 用户账号
  */
 async function getGameAccount(uid: string): Promise<Array<TGApp.Sqlite.Account.Game>> {
   const db = await TGSqlite.getDB();
@@ -228,11 +228,11 @@ async function getGameAccount(uid: string): Promise<Array<TGApp.Sqlite.Account.G
 }
 
 /**
- * @description 切换到指定游戏账号
+ * 切换到指定游戏账号
  * @since Beta v0.6.0
- * @param {string} uid - 米社UID
- * @param {string} gameUid - 游戏UID
- * @returns {Promise<void>}
+ * @param uid - 米社UID
+ * @param gameUid - 游戏UID
+ * @returns 无返回值
  */
 async function switchGameAccount(uid: string, gameUid: string): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -248,10 +248,10 @@ async function switchGameAccount(uid: string, gameUid: string): Promise<void> {
 }
 
 /**
- * @description 获取最近的游戏账户
+ * 获取最近的游戏账户
  * @since Beta v0.7.8
- * @param {string} uid - 米社UID
- * @return {Promise<TGApp.Sqlite.Account.Game|false>}
+ * @param uid - 米社UID
+ * @returns 游戏账户
  */
 async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game | false> {
   const gameAccounts = await getGameAccount(uid);
@@ -264,11 +264,11 @@ async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game
 }
 
 /**
- * @description 保存游戏账户数据
+ * 保存游戏账户数据
  * @since Beta v0.7.2
- * @param {string} uid - 米社UID
- * @param {Array<TGApp.BBS.Game.Account>} accounts - 账户数据
- * @return {Promise<void>}
+ * @param uid - 米社UID
+ * @param accounts - 账户数据
+ * @returns 无返回值
  */
 async function saveGameAccount(
   uid: string,
@@ -279,10 +279,10 @@ async function saveGameAccount(
 }
 
 /**
- * @description 删除指定游戏账户
+ * 删除指定游戏账户
  * @since Beta v0.7.2
- * @param {TGApp.Sqlite.Account.Game} account - 游戏账户
- * @return {Promise<void>}
+ * @param account - 游戏账户
+ * @returns 无返回值
  */
 async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -294,10 +294,10 @@ async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<vo
 }
 
 /**
- * @description 删除游戏账户数据
+ * 删除游戏账户数据
  * @since Beta v0.6.0
- * @param {string} uid - 米社UID
- * @returns {Promise<void>}
+ * @param uid - 米社UID
+ * @returns 无返回值
  */
 async function deleteAccount(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();

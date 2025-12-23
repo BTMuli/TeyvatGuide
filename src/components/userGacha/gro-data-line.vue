@@ -24,7 +24,7 @@ import { computed } from "vue";
  */
 export type GroDataLineProps = {
   /* 原始数据 */
-  data: TGApp.Sqlite.GachaRecords.TableGacha;
+  data: TGApp.Sqlite.Gacha.Gacha;
   /* 抽数 */
   count: number;
   /* 是否是 Up */

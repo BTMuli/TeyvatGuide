@@ -126,7 +126,7 @@ type MaterialType = {
 /** 材料信息 */
 export type MaterialInfo = {
   /** 数据库数据 */
-  tb: TGApp.Sqlite.UserBag.TableMaterial;
+  tb: TGApp.Sqlite.UserBag.MaterialTable;
   /** WIKI 数据 */
   info: TGApp.App.Material.WikiItem;
 };

@@ -1,53 +1,53 @@
 /**
- * @file types/Sqlite/Account.d.ts
- * @description Sqlite Account 类型定义文件
+ * Sqlite Account 类型定义文件
  * @since Beta v0.6.0
  */
 
 declare namespace TGApp.Sqlite.Account {
   /**
-   * @description UserAccount 表数据类型
+   * 米社账号类型
    * @since Beta v0.6.0
-   * @interface User
-   * @property {string} uid - 米社UID
-   * @property {string} brief - 用户信息
-   * @property {string} cookie - 用户cookie
-   * @property {string} updated - 更新时间
-   * @returns User
+   * @remarks UserAccount 表
    */
-  interface User {
+  type User = {
+    /** 米社UID */
     uid: string;
+    /**
+     * 用户信息
+     * @remarks 序列化，反序列化后是 {@link TGApp.App.Account.BriefInfo} 对象
+     */
     brief: string;
+    /** 用户Cookie */
     cookie: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 
   /**
-   * @description 游戏账号类型
+   * 游戏账号类型
    * @since Beta v0.6.0
-   * @interface Game
-   * @property {string} uid 米社UID
-   * @property {string} gameBiz 游戏 biz，例如 hk4e_cn
-   * @property {string} gameUid 游戏 uid
-   * @property {number} isChosen 是否为当前选中账号
-   * @property {number} isOfficial 是否为官服账号
-   * @property {string} level 游戏等级
-   * @property {string} nickname 游戏昵称
-   * @property {string} region 游戏区域
-   * @property {string} regionName 游戏区域名称
-   * @property {string} updated 更新时间
-   * @return Game
+   * @remarks GameAccount 表
    */
-  interface Game {
+  type Game = {
+    /** 米社UID */
     uid: string;
+    /** 游戏Biz */
     gameBiz: string;
+    /** 游戏UID */
     gameUid: string;
+    /** 是否为当前选中账号 */
     isChosen: 0 | 1;
+    /** 是否是官服账号 */
     isOfficial: 0 | 1;
+    /** 游戏等级 */
     level: string;
+    /** 游戏昵称 */
     nickname: string;
+    /** 所在服务器 */
     region: string;
+    /** 服务器名称 */
     regionName: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 }

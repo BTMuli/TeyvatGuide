@@ -1,61 +1,64 @@
 /**
- * @file types/Sqlite/Combat.d.ts
- * @description 幻想真境剧诗类型定义文件
+ * 幻想真境剧诗类型定义文件
  * @since Beta v0.6.3
  */
 
 declare namespace TGApp.Sqlite.Combat {
   /**
-   * @description 数据库-幻想真境剧诗表
+   * 数据库-幻想真境剧诗表
    * @since Beta v0.6.3
-   * @interface SingleTable
-   * @property {string} uid - 用户 UID
-   * @property {number} id - 剧诗 ID
-   * @property {string} startTime - 开始时间
-   * @property {string} endTime - 结束时间
-   * @property {boolean} hasData - 是否有数据
-   * @property {boolean} hasDetailData - 是否有详细数据
-   * @property {TGApp.Game.Combat.Stat} stat - 概况
-   * @property {TGApp.Game.Combat.Detail} detail - 详情
-   * @property {string} updated - 更新时间
-   * @return SingleTable
+   * @remarks RoleCombat 表
    */
-  interface RawTable {
+  type TableRaw = {
+    /** 用户 UID */
     uid: string;
+    /** 剧诗 ID */
     id: number;
+    /** 开始时间 */
     startTime: string;
+    /** 结束时间 */
     endTime: string;
+    /** 是否有数据 */
     hasData: 0 | 1;
+    /** 是否有详细数据 */
     hasDetailData: 0 | 1;
+    /**
+     * 概况
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Combat.Stat} 类型
+     */
     stat: string;
+    /**
+     * 详情
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Combat.Detail} 类型
+     */
     detail: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 
   /**
-   * @description 数据库-幻想真境剧诗表
+   * 幻想真境剧诗数据
    * @since Beta v0.6.3
-   * @interface SingleTable
-   * @property {string} uid - 用户 UID
-   * @property {number} id - 剧诗 ID
-   * @property {string} startTime - 开始时间
-   * @property {string} endTime - 结束时间
-   * @property {boolean} hasData - 是否有数据
-   * @property {boolean} hasDetailData - 是否有详细数据
-   * @property {TGApp.Game.Combat.Stat} stat - 概况
-   * @property {TGApp.Game.Combat.Detail} detail - 详情
-   * @property {string} updated - 更新时间
-   * @return SingleTable
+   * @remarks 解析自 {@link TableRaw} 数据
    */
-  interface SingleTable {
+  type TableTrans = {
+    /** 用户 UID */
     uid: string;
+    /** 剧诗 ID */
     id: number;
+    /** 开始时间 */
     startTime: string;
+    /** 结束时间 */
     endTime: string;
+    /** 是否有数据 */
     hasData: boolean;
+    /** 是否有详细数据 */
     hasDetailData: boolean;
+    /** 概况 */
     stat: TGApp.Game.Combat.Stat;
+    /** 详情 */
     detail: TGApp.Game.Combat.Detail;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 }

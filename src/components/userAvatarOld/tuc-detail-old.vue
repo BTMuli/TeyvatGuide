@@ -84,7 +84,7 @@ import TucDetailDescWeapon from "./tuc-detail-desc-weapon.vue";
 import TucDetailItemBox from "./tuc-detail-itembox.vue";
 import TucDetailRelic from "./tuc-detail-relic.vue";
 
-type ToUcDetailProps = { modelValue: TGApp.Sqlite.Character.UserRole };
+type ToUcDetailProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
 type ToUcDetailSelect = { type: "命座" | "武器" | "圣遗物"; pos: number };
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;

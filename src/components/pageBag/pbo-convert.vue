@@ -37,7 +37,7 @@ async function loadData(): Promise<void> {
   const tmp: Array<PboConvertSource> = [];
   for (const item of props.data.source) {
     let cnt: number = 0;
-    const dbGet = await TSUserBagMaterial.getMaterial(props.uid, item.id);
+    const dbGet = await TSUserBagMaterial.getMaterial(props.uid, Number(item.id));
     if (dbGet.length > 0) cnt = dbGet[0].count;
     tmp.push({ ...item, local: cnt });
   }

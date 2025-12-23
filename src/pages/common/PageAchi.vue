@@ -1,3 +1,4 @@
+<!-- 成就页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -69,7 +70,6 @@
           v-model:cur="selectedSeries"
           :series="item"
           :uid="uidCur"
-          class="left-item"
           @click="selectedSeries = item"
         />
       </template>
@@ -123,10 +123,10 @@ let achiListener: UnlistenFn | null = null;
 const search = ref<string>("");
 const isSearch = ref<boolean>(false);
 const hideFin = ref<boolean>(false);
-const uidList = ref<number[]>([]);
+const uidList = ref<Array<number>>([]);
 const uidCur = ref<number>(0);
 const selectedSeries = ref<number>(-1);
-const overview = shallowRef<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 1 });
+const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 1 });
 const title = computed<string>(() => {
   const percentage = ((overview.value.fin * 100) / overview.value.total).toFixed(2);
   return `${overview.value.fin}/${overview.value.total} ${percentage}%`;
@@ -157,11 +157,12 @@ watch(() => uidCur.value, refreshOverview);
 
 async function reloadUid(): Promise<void> {
   uidList.value = await TSUserAchi.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
+  if (uidList.value.includes(Number(account.value.gameUid))) {
+    uidCur.value = Number(account.value.gameUid);
+  } else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
   else if (isLogin.value) {
-    uidList.value = [account.value.gameUid];
-    uidCur.value = account.value.gameUid;
+    uidList.value = [Number(account.value.gameUid)];
+    uidCur.value = Number(account.value.gameUid);
   } else uidCur.value = 0;
 }
 

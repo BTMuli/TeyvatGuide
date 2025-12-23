@@ -1,8 +1,8 @@
 /**
- * @file request/painterReq.ts
- * @description painter 下的请求
+ * painter 下的请求
  * @since Beta v0.8.3
  */
+import bbsEnum from "@enum/bbs.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
 
@@ -10,17 +10,17 @@ import TGHttp from "@utils/TGHttp.js";
 const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/painter/wapi/";
 
 /**
- * @description 获取 News 列表
+ * 获取 News 列表
  * @since Beta v0.7.1
- * @param {string} gid GID
- * @param {string} newsType 资讯类型: 1 为公告，2 为活动，3 为资讯
- * @param {number} pageSize 返回数量
- * @param {number} lastId 上一次请求的最后一条数据的 id
- * @return {Promise<TGApp.BBS.Post.NewsRes>}
+ * @param gid - GID
+ * @param newsType - 资讯类型: 1 为公告，2 为活动，3 为资讯
+ * @param pageSize - 返回数量
+ * @param lastId - 上一次请求的最后一条数据的 id
+ * @returns News 列表响应数据
  */
 async function getNewsList(
   gid: string = "2",
-  newsType: string = "1",
+  newsType: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NEWS,
   pageSize: number = 20,
   lastId: number = 0,
 ): Promise<TGApp.BBS.Post.NewsRes> {
@@ -34,13 +34,13 @@ async function getNewsList(
 }
 
 /**
- * @description 获取最近版块热门帖子列表
+ * 获取最近版块热门帖子列表
  * @since Beta v0.7.9
- * @param {number} forumId 版块 ID
- * @param {number} gid 社区 ID
- * @param {number} pageSize 每页数量
- * @param {string} lastId 最后 ID
- * @return {Promise<TGApp.BBS.Forum.PostForumRes>}
+ * @param forumId - 版块 ID
+ * @param gid - 社区 ID
+ * @param pageSize - 每页数量
+ * @param lastId - 最后 ID
+ * @returns 帖子列表数据
  */
 async function getHotForumPostList(
   forumId: number,
@@ -72,15 +72,15 @@ async function getHotForumPostList(
 }
 
 /**
- * @description 获取最近版块帖子列表
+ * 获取最近版块帖子列表
  * @since Beta v0.8.3
- * @param {number} forumId 版块 ID
- * @param {number} gid 社区 ID
- * @param {number} type 排序方式: 1-最新回复，2-最新发布
- * @param {string} lastId 最后 ID
- * @param {number} pageSize 每页数量
- * @param {Record<string, string>} [cookie] 用户 Cookie
- * @return {Promise<TGApp.BBS.Forum.PostForumRes>}
+ * @param forumId - 版块 ID
+ * @param gid - 社区 ID
+ * @param type - 排序方式: 1-最新回复，2-最新发布
+ * @param lastId - 最后 ID
+ * @param pageSize - 每页数量
+ * @param cookie - 用户 Cookie
+ * @returns 帖子列表数据
  */
 async function getRecentForumPostList(
   forumId: number,
@@ -118,11 +118,11 @@ async function getRecentForumPostList(
 }
 
 /**
- * @description 获取关注动态帖子
+ * 获取关注动态帖子
  * @since Beta v0.7.2
- * @param {TGApp.App.Account.Cookie} cookie 用户 Cookie
- * @param {number} offset
- * @return {Promise<TGApp.BBS.Response.Base|TGApp.BBS.Post.FollowPostRes>}
+ * @param cookie - 用户 Cookie
+ * @param offset - 偏移量
+ * @returns 帖子
  */
 async function getTimelineList(
   cookie: TGApp.App.Account.Cookie,
@@ -145,10 +145,10 @@ async function getTimelineList(
 }
 
 /**
- * @description 获取抽奖信息
+ * 获取抽奖信息
  * @since Beta v0.7.1
- * @param {string} lotteryId 抽奖 ID
- * @return {Promise<TGApp.BBS.Response.Base|TGApp.BBS.Lottery.FullData>}
+ * @param lotteryId - 抽奖 ID
+ * @returns 抽奖详情
  */
 async function lotteryUserShow(
   lotteryId: string,

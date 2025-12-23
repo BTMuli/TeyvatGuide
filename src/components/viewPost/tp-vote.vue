@@ -78,7 +78,7 @@ onMounted(async () => {
   const voteInfo = await ApiHubReq.vote.info(vote.id, vote.uid);
   console.log(`[${props.data.insert.vote.id}]voteInfo:`, voteInfo);
   const voteResult = await ApiHubReq.vote.result(vote.id, vote.uid);
-  console.log("[${props.data.insert.vote.id}]voteResult:", voteResult);
+  console.log(`[${props.data.insert.vote.id}]voteResult:`, voteResult);
   votes.value = {
     title: voteInfo.title,
     count: voteResult.user_cnt,

@@ -1,69 +1,80 @@
 /**
- * @file types/BBS/Vote.d.ts
- * @description Mys 插件投票类型
+ * 米社帖子投票相关类型
  * @since Beta v0.6.8
  */
 
 declare namespace TGApp.BBS.Vote {
   /**
-   * @description 投票信息返回
+   * 投票信息返回响应
    * @since Beta v0.3.9
-   * @interface InfoResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {Info[]} data.data 投票信息
-   * @return InfoResponse
    */
-  type InfoResp = TGApp.BBS.Response.BaseWithData & { data: { data: Array<Info> } };
+  type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;
 
   /**
-   * @description 投票结果返回
+   * 投票结果返回响应
    * @since Beta v0.3.9
-   * @interface ResultResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {Result[]} data.data 投票结果
-   * @return ResultResponse
    */
-  type ResultResp = TGApp.BBS.Response.BaseWithData & { data: { data: Array<Result> } };
+  type ResultResp = TGApp.BBS.Response.BaseWithData<ResultRes>;
 
   /**
-   * @description 投票信息
-   * @since Beta v0.3.9
-   * @interface Info
-   * @property {string} vote_id 投票 ID
-   * @property {string} uid 用户 ID
-   * @property {number} vote_limit 投票限制
-   * @property {number} end_time 投票结束时间（秒级时间戳）
-   * @property {string} title 投票标题
-   * @property {string[]} vote_option_indexes 投票选项索引
-   * @property {string} created_at 投票创建时间（秒级时间戳）
-   * @return Info
+   * 投票信息返回
+   * @since Beta v0.9.1
    */
-  interface Info {
-    vote_id: string;
-    uid: string;
-    vote_limit: number;
-    end_time: number;
-    title: string;
-    vote_option_indexes: string[];
+  type InfoRes = {
+    /** 投票信息 */
+    data: Array<Info>;
+  };
+
+  /**
+   * 投票结果返回
+   * @since Beta v0.9.1
+   */
+  type ResultRes = {
+    /** 投票结果 */
+    data: Array<Result>;
+  };
+
+  /**
+   * 投票信息
+   * @since Beta v0.3.9
+   */
+  type Info = {
+    /**
+     * 创建时间
+     * @remarks 秒级时间戳
+     */
     created_at: string;
-  }
+    /**
+     * 结束时间
+     * @remarks 秒级时间戳
+     */
+    end_time: number;
+    /** 投票标题 */
+    title: string;
+    /** 用户 ID */
+    uid: string;
+    /** 投票 ID */
+    vote_id: string;
+    /** 投票限制 */
+    vote_limit: number;
+    /** 投票选项索引 */
+    vote_option_indexes: Array<string>;
+  };
 
   /**
-   * @description 投票结果
+   * 投票结果
    * @since Beta v0.3.9
-   * @interface Result
-   * @property {string} vote_id 投票 ID
-   * @property {boolean} is_over 是否已结束
-   * @property {Record<string, number>} option_stats 投票选项统计
-   * @property {number} user_cnt 投票人数
-   * @property {unknown[]} vote_option_indexes 投票选项索引
-   * @return Result
    */
-  interface Result {
+  type Result = {
+    /** 投票ID */
     vote_id: string;
+    /** 是否结束 */
     is_over: boolean;
+    /** 投票选项统计 */
     option_stats: Record<string, number>;
+    /** 投票人数 */
     user_cnt: number;
-    vote_option_indexes: unknown[];
-  }
+    /** 投票选项索引 */
+    vote_option_indexes: Array<unknown>;
+  };
 }

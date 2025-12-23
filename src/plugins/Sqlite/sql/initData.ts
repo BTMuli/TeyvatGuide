@@ -1,6 +1,5 @@
 /**
- * @file plugins/Sqlite/sql/initData.ts
- * @description Sqlite 初始化数据 sql 语句
+ * Sqlite 初始化数据 sql 语句
  * @since Beta v0.7.2
  */
 
@@ -10,12 +9,12 @@ import { getBuildTime } from "@utils/TGBuild.js";
 import createTable from "./createTable.sql?raw";
 
 /**
- * @description 初始化应用表数据
+ * 初始化应用表数据
  * @since Alpha v0.2.2
- * @returns {Promise<string[]>} sql
+ * @returns sql
  */
-async function initAppData(): Promise<string[]> {
-  const sqlRes: string[] = [];
+async function initAppData(): Promise<Array<string>> {
+  const sqlRes: Array<string> = [];
   const appVersion = await app.getVersion();
   const buildTime: string = getBuildTime();
   // 初始化应用版本
@@ -39,12 +38,12 @@ async function initAppData(): Promise<string[]> {
 }
 
 /**
- * @description 初始化数据
+ * 初始化数据
  * @since Beta v0.7.2
- * @returns {Promise<string[]>} sql
+ * @returns sql
  */
-async function initDataSql(): Promise<string[]> {
-  const sqlRes: string[] = [];
+async function initDataSql(): Promise<Array<string>> {
+  const sqlRes: Array<string> = [];
   sqlRes.push(createTable);
   sqlRes.push(...(await initAppData()));
   return sqlRes;

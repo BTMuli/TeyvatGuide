@@ -15,8 +15,8 @@ const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) m
 
 /**
  * salt 值
- * @version 2.95.1
  * @since Beta v0.8.4
+ * @remarks 2.95.1
  */
 const BBS_SALT: Readonly<Record<SaltKey, string>> = {
   K2: "sfYPEgpxkOe1I3XVMLdwp1Lyt9ORgZsq",

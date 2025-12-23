@@ -1,6 +1,5 @@
 /**
- * @file component/func/loading.ts
- * @description loading 组件封装，函数式调用
+ * loading 组件封装，函数式调用
  * @since Beta v0.6.7
  */
 
@@ -17,9 +16,9 @@ type LoadingUpdateParams = Omit<LoadingParams, "show" | "subtitle"> & { timeout?
 const TIMEOUT: Readonly<number> = 150;
 
 /**
- * @description 自定义 loading 组件
+ * 自定义 loading 组件
  * @since Beta v0.6.7
- * @return LoadingInstance
+ * @returns LoadingInstance
  */
 type LoadingInstance = ComponentInternalInstance & {
   exposeProxy: { displayBox: (props: LoadingParams) => Promise<void> };

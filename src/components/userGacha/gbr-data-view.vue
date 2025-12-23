@@ -117,7 +117,7 @@ import GbrDataLine, { type GbrDataLineProps } from "./gbr-data-line.vue";
 
 type GachaDataViewProps = {
   dataType: "normal" | "boy" | "girl";
-  dataVal: Array<TGApp.Sqlite.GachaRecords.TableGachaB>;
+  dataVal: Array<TGApp.Sqlite.Gacha.GachaB>;
 };
 
 const props = defineProps<GachaDataViewProps>();
@@ -248,7 +248,7 @@ function loadData(): void {
   reset3count.value = currentReset3;
 
   // Helper function to check if item should be displayed based on dataType
-  function shouldDisplay(item: TGApp.Sqlite.GachaRecords.TableGachaB): boolean {
+  function shouldDisplay(item: TGApp.Sqlite.Gacha.GachaB): boolean {
     if (props.dataType === "normal") return true;
     if (props.dataType === "boy") {
       return item.opGachaType === "20011" || item.opGachaType === "20012";

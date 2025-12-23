@@ -1,128 +1,131 @@
 /**
- * @file types/BBS/Forum.d.ts
- * @description BBS 版块类型定义
+ * 米社版块类型
  * @since Beta v0.8.4
  */
 
 declare namespace TGApp.BBS.Forum {
   /**
-   * @description 获取所有版块信息返回
+   * 获取所有版块信息返回
    * @since Beta v0.6.8
-   * @interface GameForumResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {Array<GameForum>} data.list 所有版块信息
    */
-  type GameForumResp = TGApp.BBS.Response.BaseWithData & { data: { list: Array<GameForum> } };
+  type GameForumResp = TGApp.BBS.Response.BaseWithData & {
+    /** 所有版块信息 */
+    data: {
+      list: Array<GameForum>;
+    };
+  };
 
   /**
-   * @description 获取版块帖子列表返回
+   * 获取版块帖子列表返回
    * @since Beta v0.7.1
-   * @interface PostForumResp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {PostForumRes} data 版块帖子列表
    */
   type PostForumResp = TGApp.BBS.Response.BaseWithData<PostForumRes>;
 
   /**
-   * @description 分区版块信息
+   * 分区版块信息
    * @since Beta v0.6.8
-   * @interface GameForum
-   * @property {number} game_id 游戏 ID
-   * @property {Array<GameForumItem>} forums 版块信息
    */
-  type GameForum = { game_id: number; forums: Array<GameForumItem> };
+  type GameForum = {
+    /** 游戏 ID */
+    game_id: number;
+    /** 版块信息 */
+    forums: Array<GameForumItem>;
+  };
 
   /**
-   * @description 版块信息
+   * 版块信息
    * @since Beta v0.6.8
-   * @interface GameForumItem
-   * @property {number} id 版块 ID
-   * @property {number} game_id 游戏 ID
-   * @property {string} name 版块名称
-   * @property {number} order 排序
-   * @property {number} f_id 父版块 ID
-   * @property {number} visible 是否可见 // 1 可见 0 不可见
-   * @property {number} create_type 创建类型
-   * @property {number} post_limit 发帖限制
-   * @property {number} max_top 最大置顶数
-   * @property {string} post_order 发帖排序 // reply 最新回复
-   * @property {number} src_type 来源类型
-   * @property {string} icon 图标
-   * @property {string} header_image 头图
-   * @property {number} hot_score 热度
-   * @property {string} icon_pure 图标
-   * @property {string} des 描述
-   * @property {number} post_num 帖子数
-   * @property {number} today_post 今日帖子数
-   * @property {number} reply_type 回复类型
-   * @property {number} edit_post 编辑帖子
-   * @property {string} created_at 创建时间 // yyyy-MM-dd HH:mm:ss
-   * @property {string} updated_at 更新时间 // yyyy-MM-dd HH:mm:ss
-   * @property {number} show_type 显示类型
-   * @property {number} default_tab 默认标签
-   * @property {string} read_me 说明
-   * @property {Array<ForumCate>} forum_cate_list 分类列表
-   * @property {Array<ForumCate>} video_cat_list 视频分类列表
    */
   type GameForumItem = {
+    /** 版块 ID */
     id: number;
+    /** 游戏 ID */
     game_id: number;
+    /** 版块名称 */
     name: string;
+    /** 排序 */
     order: number;
+    /** 父版块 ID */
     f_id: number;
+    /** 是否可见（1 可见，0 不可见） */
     visible: number;
+    /** 创建类型 */
     create_type: number;
+    /** 发帖限制 */
     post_limit: number;
+    /** 最大置顶数 */
     max_top: number;
+    /** 发帖排序（如 reply 表示按最新回复） */
     post_order: string;
+    /** 来源类型 */
     src_type: number;
+    /** 图标 */
     icon: string;
+    /** 头图 */
     header_image: string;
+    /** 热度 */
     hot_score: number;
+    /** 纯图标 */
     icon_pure: string;
+    /** 描述 */
     des: string;
+    /** 帖子数 */
     post_num: number;
+    /** 今日帖子数 */
     today_post: number;
+    /** 回复类型 */
     reply_type: number;
+    /** 编辑帖子权限 */
     edit_post: number;
+    /** 创建时间（格式：yyyy-MM-dd HH:mm:ss） */
     created_at: string;
+    /** 更新时间（格式：yyyy-MM-dd HH:mm:ss） */
     updated_at: string;
+    /** 显示类型 */
     show_type: number;
+    /** 默认标签 */
     default_tab: number;
+    /** 说明 */
     read_me: string;
+    /** 分类列表 */
     forum_cate_list: Array<ForumCate>;
+    /** 视频分类列表 */
     video_cat_list: Array<ForumCate>;
   };
 
   /**
-   * @description 视频分类
+   * 视频分类
    * @since Beta v0.8.4
-   * @interface ForumCate
-   * @property {number} id 分类 ID
-   * @property {string} name 分类名称
-   * @property {number} forum_id 版块 ID
-   * @property {string} [desc] 描述
-   * @property {string} [remark] 备注
    */
-  type ForumCate = { id: number; name: string; forum_id: number; desc?: string; remark?: string };
+  type ForumCate = {
+    /** 分类 ID */
+    id: number;
+    /** 分类名称 */
+    name: string;
+    /** 版块 ID */
+    forum_id: number;
+    /** 描述 */
+    desc?: string;
+    /** 备注 */
+    remark?: string;
+  };
 
   /**
-   * @description 版块帖子列表
+   * 版块帖子列表
    * @since Beta v0.7.2
-   * @interface PostForumRes
-   * @property {string} last_id 最后一条帖子 ID
-   * @property {boolean} is_last 是否最后一页
-   * @property {boolean} is_origin 是否原创
-   * @property {number} page 页码
-   * @property {unknown} databox 数据盒子
-   * @property {Array<TGApp.BBS.Post.FullData>} list 帖子列表
    */
   type PostForumRes = {
+    /** 最后一条帖子 ID */
     last_id: string;
+    /** 是否最后一页 */
     is_last: boolean;
+    /** 是否原创 */
     is_origin: boolean;
+    /** 当前页码 */
     page: number;
+    /** 数据盒子 */
     databox: unknown;
+    /** 帖子列表 */
     list: Array<TGApp.BBS.Post.FullData>;
   };
 }

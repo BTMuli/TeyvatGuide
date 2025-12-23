@@ -54,7 +54,6 @@ declare namespace TGApp.Plugins.UIAF {
   /**
    * 成就信息
    * @since Beta v0.7.8
-   * @description UIAF 单个成就数据
    */
   type Achievement = {
     /** 成就 ID */

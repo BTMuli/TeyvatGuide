@@ -63,7 +63,7 @@ import TuaRelicBox from "./tua-relic-box.vue";
 
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type AvatarRelics = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
-type TuaAvatarBoxProps = { modelValue: TGApp.Sqlite.Character.UserRole };
+type TuaAvatarBoxProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
 
 const props = defineProps<TuaAvatarBoxProps>();
 const userStore = useUserStore();
@@ -121,7 +121,7 @@ const nameCard = computed<string>(() => {
 
 function getWeaponTitle(): string {
   const weapon = props.modelValue.weapon;
-  const title: string[] = [];
+  const title: Array<string> = [];
   title.push(`${weapon.type_name} - ${weapon.name}`);
   title.push(`${weapon.rarity}星 精炼${weapon.affix_level} Lv.${weapon.level}`);
   const propMain = userStore.getProp(weapon.main_property.property_type);

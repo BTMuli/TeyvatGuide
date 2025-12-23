@@ -102,12 +102,12 @@ watch(
   () => sortData(getSelectNameCards()),
 );
 
-function getSelectNameCards(): TGApp.App.NameCard.Item[] {
+function getSelectNameCards(): Array<TGApp.App.NameCard.Item> {
   if (selectType.value === null) return AppNameCardsData;
   else return AppNameCardsData.filter((item) => item.type === selectType.value);
 }
 
-function sortData(data: TGApp.App.NameCard.Item[]): void {
+function sortData(data: Array<TGApp.App.NameCard.Item>): void {
   sortNameCardsData.value = data.sort((a, b) => a.type.localeCompare(b.type) || a.id - b.id);
   curIndex.value = 0;
   total.value = sortNameCardsData.value.length;

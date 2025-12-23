@@ -26,7 +26,7 @@ type TbCollectProps = { modelValue: number; data?: TGApp.BBS.Post.FullData };
 const props = defineProps<TbCollectProps>();
 const isCollected = ref<boolean>(false);
 const showEdit = ref<boolean>(false);
-const collect = shallowRef<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
+const collect = shallowRef<Array<TGApp.Sqlite.Collection.PcMap>>([]);
 
 onBeforeMount(async () => await refresh());
 

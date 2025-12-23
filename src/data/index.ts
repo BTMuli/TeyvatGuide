@@ -46,9 +46,9 @@ export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial
 const avatarFiles = import.meta.glob("./WIKI/character/*.json");
 
 /**
- * @description 传入角色id，获取对应character/id.json的内容，如果没有则返回false
- * @param {number} id - 角色id
- * @return {TGApp.App.Character.WikiItem|false} 角色数据或false
+ * 传入角色id，获取对应character/id.json的内容，如果没有则返回false
+ * @param id - 角色id
+ * @returns 角色数据或false
  */
 export async function getWikiCharacterById(
   id: number,

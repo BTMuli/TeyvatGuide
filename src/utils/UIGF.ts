@@ -19,8 +19,8 @@ import { Uigf4Schema, UigfSchema } from "@/data/index.js";
 /**
  * 获取 UIGF 时区
  * @since Beta v0.3.5
- * @param {string} uid - UID
- * @returns {number} 时区
+ * @param uid - UID
+ * @returns 时区
  */
 function getUigfTimeZone(uid: string): number {
   if (uid.startsWith("6")) return -5;
@@ -31,9 +31,9 @@ function getUigfTimeZone(uid: string): number {
 /**
  * 传入utc8时间字符串跟目标时区，转成目标时区时间字符串
  * @since Beta v0.7.5
- * @param {string} time - 时间字符串
- * @param {number} timezone - 时区
- * @return {string} 转换后的时间字符串
+ * @param time - 时间字符串
+ * @param timezone - 时区
+ * @returns 转换后的时间字符串
  */
 function getExportTime(time: string, timezone: number): string {
   const date = new Date(time);
@@ -45,9 +45,9 @@ function getExportTime(time: string, timezone: number): string {
 /**
  * 获取 UIGF 头部信息
  * @since Beta v0.7.5
- * @param {string} uid - UID
- * @param {number} timezone - 时区
- * @returns {Promise<TGApp.Plugins.UIGF.Info>}
+ * @param uid - UID
+ * @param timezone - 时区
+ * @returns UIGF头部信息
  */
 async function getUigfHeader(uid: string, timezone: number): Promise<TGApp.Plugins.UIGF.Info> {
   const stamp = Date.now();
@@ -66,7 +66,7 @@ async function getUigfHeader(uid: string, timezone: number): Promise<TGApp.Plugi
 /**
  * 获取 UIGF v4.1 头部信息
  * @since Beta v0.7.10
- * @returns {TGApp.Plugins.UIGF.Info4} UIGF v4.1 头部信息
+ * @returns UIGF v4.1 头部信息
  */
 export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
   const stamp = Date.now();
@@ -82,14 +82,14 @@ export async function getUigf4Header(): Promise<TGApp.Plugins.UIGF.Info4> {
 /**
  * 数据转换-数据库到 UIGF
  * @since Beta v0.7.5
- * @param {TGApp.Sqlite.GachaRecords.TableGacha[]} data - 数据库数据
- * @param {number} timezone - 时区
- * @returns {TGApp.Plugins.UIGF.GachaItem[]} UIGF 数据
+ * @param data - 数据库数据
+ * @param timezone - 时区
+ * @returns UIGF 数据
  */
 function convertDataToUigf(
-  data: TGApp.Sqlite.GachaRecords.TableGacha[],
+  data: Array<TGApp.Sqlite.Gacha.Gacha>,
   timezone: number,
-): TGApp.Plugins.UIGF.GachaItem[] {
+): Array<TGApp.Plugins.UIGF.GachaItem> {
   return data.map((gacha) => {
     return {
       gacha_type: gacha.gachaType,
@@ -108,9 +108,9 @@ function convertDataToUigf(
 /**
  * 检测是否存在 UIGF 数据，采用 ajv 验证 schema
  * @since Beta v0.6.5
- * @param {string} path - UIGF 数据路径
- * @param {boolean} isVersion4 - 是否为 UIGF v4.0
- * @returns {Promise<boolean>} 是否存在 UIGF 数据
+ * @param path - UIGF 数据路径
+ * @param isVersion4 - 是否为 UIGF v4.0
+ * @returns 是否存在 UIGF 数据
  */
 export async function verifyUigfData(path: string, isVersion4: boolean = false): Promise<boolean> {
   try {
@@ -129,8 +129,8 @@ export async function verifyUigfData(path: string, isVersion4: boolean = false):
 /**
  * 验证 UIGF 数据
  * @since Beta v0.5.1
- * @param {object} data - UIGF 数据
- * @returns {boolean} 是否验证通过
+ * @param data - UIGF 数据
+ * @returns 是否验证通过
  */
 function validateUigfData(data: object): boolean {
   const ajv = new Ajv();
@@ -152,8 +152,8 @@ function validateUigfData(data: object): boolean {
 /**
  * 验证 UIGF v4.0 数据
  * @since Beta v0.5.0
- * @param {object} data - UIGF 数据
- * @returns {boolean} 是否验证通过
+ * @param data - UIGF 数据
+ * @returns 是否验证通过
  */
 function validateUigf4Data(data: object): boolean {
   const ajv = new Ajv();
@@ -168,8 +168,8 @@ function validateUigf4Data(data: object): boolean {
 /**
  * 读取 UIGF 数据
  * @since Beta v0.5.0
- * @param {string} userPath - UIGF 数据路径
- * @returns {Promise<TGApp.Plugins.UIGF.Schema>} UIGF 数据
+ * @param userPath - UIGF 数据路径
+ * @returns UIGF 数据
  */
 export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF.Schema> {
   const fileData: string = await readTextFile(userPath);
@@ -179,8 +179,8 @@ export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF
 /**
  * 读取 UIGF 4.0 数据
  * @since Beta v0.5.0
- * @param {string} userPath - UIGF 数据路径
- * @returns {Promise<TGApp.Plugins.UIGF.Schema4>} UIGF 数据
+ * @param userPath - UIGF 数据路径
+ * @returns UIGF 数据
  */
 export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIGF.Schema4> {
   const fileData: string = await readTextFile(userPath);
@@ -190,14 +190,14 @@ export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIG
 /**
  * 导出 UIGF 数据
  * @since Beta v0.7.5
- * @param {string} uid - UID
- * @param {TGApp.Sqlite.GachaRecords.TableGacha[]} gachaList - 祈愿列表
- * @param {string} savePath - 保存路径
- * @returns {Promise<void>}
+ * @param uid - UID
+ * @param gachaList - 祈愿列表
+ * @param savePath - 保存路径
+ * @returns 无返回值
  */
 export async function exportUigfData(
   uid: string,
-  gachaList: TGApp.Sqlite.GachaRecords.TableGacha[],
+  gachaList: Array<TGApp.Sqlite.Gacha.Gacha>,
   savePath?: string,
 ): Promise<void> {
   const timezone = getUigfTimeZone(uid);
@@ -212,9 +212,9 @@ export async function exportUigfData(
 /**
  * 导出UIGF4数据
  * @since Beta v0.9.0
- * @param {Array<string>} uids - UID列表
- * @param {string} [savePath] - 保存路径
- * @returns {Promise<void>}
+ * @param uids - UID列表
+ * @param savePath - 保存路径
+ * @returns
  */
 export async function exportUigf4Data(uids: Array<string> = [], savePath?: string): Promise<void> {
   const header = await getUigf4Header();

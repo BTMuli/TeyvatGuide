@@ -51,7 +51,7 @@ import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import DucDetailRelic from "./duc-detail-relic.vue";
 
-type DucDetailOverlayProps = { modelValue: TGApp.Sqlite.Character.UserRole };
+type DucDetailOverlayProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 

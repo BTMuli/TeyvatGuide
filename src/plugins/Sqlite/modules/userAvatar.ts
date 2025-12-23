@@ -1,6 +1,5 @@
 /**
- * @file plugins/Sqlite/modules/userAvatar.ts
- * @description 用户角色模块
+ * 用户角色模块
  * @since Beta v0.6.0
  */
 
@@ -11,14 +10,14 @@ import TGSqlite from "../index.js";
 import { AppCharacterData } from "@/data/index.js";
 
 /**
- * @description 获取角色插入Sql
+ * 获取角色插入Sql
  * @since Beta v0.6.0
- * @param {string} uid - 用户UID
- * @param {TGApp.Game.Avatar.DetailList} data - 角色数据
- * @return {string}
+ * @param uid - 用户UID
+ * @param data - 角色数据
+ * @returns sql
  */
-function getInsertSql(uid: string, data: TGApp.Game.Avatar.DetailList): string {
-  const role: TGApp.Sqlite.Character.UserRoleDB = {
+function getInsertSql(uid: string, data: TGApp.Game.Avatar.AvatarDetail): string {
+  const role: TGApp.Sqlite.Character.TableRaw = {
     uid: Number(uid),
     cid: data.base.id,
     avatar: JSON.stringify(data.base),
@@ -55,11 +54,11 @@ function getInsertSql(uid: string, data: TGApp.Game.Avatar.DetailList): string {
 }
 
 /**
- * @description 获取用户UID列表
+ * 获取用户UID列表
  * @since Beta v0.6.0
- * @returns {Promise<string[]>} 角色id列表
+ * @returns 角色id列表
  */
-async function getAllUid(): Promise<string[]> {
+async function getAllUid(): Promise<Array<string>> {
   const db = await TGSqlite.getDB();
   type resType = Array<{ uid: number }>;
   const res = await db.select<resType>("SELECT DISTINCT uid FROM UserCharacters;");
@@ -67,14 +66,14 @@ async function getAllUid(): Promise<string[]> {
 }
 
 /**
- * @description 获取用户角色数据
+ * 获取用户角色数据
  * @since Beta v0.5.3
- * @param {number} uid 用户 uid
- * @returns {Promise<TGApp.Sqlite.Character.UserRole[]>}
+ * @param uid - 用户 uid
+ * @returns 用户角色数据
  */
-async function getAvatars(uid: number): Promise<TGApp.Sqlite.Character.UserRole[]> {
+async function getAvatars(uid: number): Promise<Array<TGApp.Sqlite.Character.TableTrans>> {
   const db = await TGSqlite.getDB();
-  type resType = Array<TGApp.Sqlite.Character.UserRoleDB>;
+  type resType = Array<TGApp.Sqlite.Character.TableRaw>;
   const res = await db.select<resType>("SELECT * FROM UserCharacters WHERE uid = ?;", [uid]);
   return res.map((i) => {
     return {
@@ -96,22 +95,25 @@ async function getAvatars(uid: number): Promise<TGApp.Sqlite.Character.UserRole[
 }
 
 /**
- * @description 保存用户角色数据
+ * 保存用户角色数据
  * @since Beta v0.6.0
- * @param {string} uid 用户 uid
- * @param {TGApp.Game.Avatar.DetailList[]} data 角色数据
- * @returns {Promise<void>}
+ * @param uid - 用户 uid
+ * @param data - 角色数据
+ * @returns 无返回值
  */
-async function saveAvatars(uid: string, data: TGApp.Game.Avatar.DetailList[]): Promise<void> {
+async function saveAvatars(
+  uid: string,
+  data: Array<TGApp.Game.Avatar.AvatarDetail>,
+): Promise<void> {
   const db = await TGSqlite.getDB();
   for (const role of data) await db.execute(getInsertSql(uid, role));
 }
 
 /**
- * @description 获取角色名片
+ * 获取角色名片
  * @since Beta v0.6.0
- * @param {number} id 角色 id
- * @returns {string|false}
+ * @param id - 角色 id
+ * @returns 名片
  */
 function getAvatarCard(id: number): string {
   const find = AppCharacterData.find((c) => c.id === id);
@@ -120,10 +122,10 @@ function getAvatarCard(id: number): string {
 }
 
 /**
- * @description 删除指定UID的数据
+ * 删除指定UID的数据
  * @since Beta v0.6.0
- * @param {string} uid - 游戏UID
- * @return {Promise<void>}
+ * @param uid - 游戏UID
+ * @returns 无返回值
  */
 async function deleteUid(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();

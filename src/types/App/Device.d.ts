@@ -1,34 +1,31 @@
 /**
- * @file types/App/Device.d.ts
- * @description App 设备信息类型定义文件
+ * App 设备信息类型定义文件
  * @since Beta v0.4.1
  */
 
-/**
- * @description App 设备信息类型 namespace
- * @since Beta v0.4.1
- * @namespace TGApp.App.Device
- * @memberof TGApp.App
- */
 declare namespace TGApp.App.Device {
   /**
-   * @description 设备信息
+   * 设备信息
    * @since Beta v0.4.1
-   * @interface DeviceInfo
-   * @property {string} device_id - 设备 ID
-   * @property {string} product - 产品
-   * @property {string} device_name - 设备名称
-   * @property {string} seed_id - 种子 ID
-   * @property {string} seed_time - 种子时间
-   * @property {string} device_fp - 设备指纹
-   * @return DeviceInfo
    */
-  interface DeviceInfo {
+  type DeviceInfo = {
+    /** 设备ID */
     device_id: string;
+    /** 产品 */
     product: string;
+    /** 设备名称 */
     device_name: string;
+    /** 做种ID */
     seed_id: string;
+    /** 做种时间 */
     seed_time: string;
+    /** 设备指纹 */
     device_fp: string;
-  }
+  };
+
+  /**
+   * 设备信息Key
+   * @since Beta v0.9.1
+   */
+  type DeviceInfoKey = keyof DeviceInfo;
 }

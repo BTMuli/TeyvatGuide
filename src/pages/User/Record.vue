@@ -61,7 +61,7 @@
     </PhCompCard>
     <PhCompCard>
       <template #title>世界探索</template>
-      <TurWorldGrid :model-value="recordData.worldExplore" />
+      <TurWorldGrid :worlds="recordData.worldExplore" />
     </PhCompCard>
     <PhCompCard>
       <template #title>尘歌壶</template>
@@ -97,7 +97,7 @@ const { account, cookie } = storeToRefs(userStore);
 const uidCur = ref<number>();
 const version = ref<string>();
 const uidList = shallowRef<Array<number>>([]);
-const recordData = shallowRef<TGApp.Sqlite.Record.RenderData>();
+const recordData = shallowRef<TGApp.Sqlite.Record.TableTrans>();
 
 onMounted(async () => {
   await showLoading.start("正在获取战绩数据");

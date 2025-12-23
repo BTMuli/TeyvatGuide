@@ -7,8 +7,8 @@ import { score } from "wcag-color";
 /**
  * 根据传入星级获取对应颜色
  * @since Beta v0.9.0
- * @param {number} star
- * @returns {string} color
+ * @param star - 星级
+ * @returns 颜色变量字符串
  */
 export function getOdStarColor(star: number): string {
   switch (star) {
@@ -30,20 +30,20 @@ export function getOdStarColor(star: number): string {
 /**
  * 判断颜色是否相似
  * @since Beta v0.9.0
- * @param {string} colorBg - 背景颜色
- * @param {string} colorText - 文本颜色
- * @returns {boolean} 是否相似
+ * @param colorBg - 背景颜色
+ * @param colorText - 文本颜色
+ * @returns 是否相似
  */
 export function isColorSimilar(colorBg: string, colorText: string): boolean {
   return score(colorText, colorBg) === "Fail";
 }
 
 /**
- * @description 根据字符串生成颜色
+ * 根据字符串生成颜色
  * @since Beta v0.8.2
- * @param {string} str - 输入字符串
- * @param {number} adjust - 亮度调整值，正数变亮，负数变暗
- * @returns {string} 生成的颜色 rgb(r, g, b)
+ * @param str - 输入字符串
+ * @param adjust - 亮度调整值，正数变亮，负数变暗
+ * @returns 生成的颜色 rgb(r, g, b)
  */
 export function str2Color(str: string, adjust: number): string {
   let hash = 0;

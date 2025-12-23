@@ -1,6 +1,5 @@
 /**
- * @file plugins/Hutao/index.ts
- * @description Hutao 插件入口
+ * Hutao 插件入口
  * @since Beta v0.6.3
  */
 

@@ -61,10 +61,10 @@ const showOverlay = ref<boolean>(false);
 const isFinish = ref<boolean>(false);
 
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
-const achievements = shallowRef<Array<TGApp.Sqlite.Achievement.RenderAchi>>([]);
-const selectedAchi = shallowRef<TGApp.Sqlite.Achievement.RenderAchi>();
+const achievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
+const selectedAchi = shallowRef<TGApp.App.Achievement.RenderItem>();
 
-const renderAchi = computed<Array<TGApp.Sqlite.Achievement.RenderAchi>>(() => {
+const renderAchi = computed<Array<TGApp.App.Achievement.RenderItem>>(() => {
   if (props.hideFin) return achievements.value.filter((a) => !a.isCompleted);
   return achievements.value;
 });
@@ -116,7 +116,7 @@ async function loadAchi(): Promise<void> {
   showSnackbar.success(`已获取 ${achievements.value.length} 条成就数据`);
 }
 
-function selectAchi(data: TGApp.Sqlite.Achievement.RenderAchi): void {
+function selectAchi(data: TGApp.App.Achievement.RenderItem): void {
   selectedAchi.value = data;
   showOverlay.value = true;
 }

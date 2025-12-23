@@ -1,6 +1,5 @@
 /**
- * @file router/modules/sub.ts
- * @description 子路由模块，用于二级窗口
+ * 子路由模块，用于二级窗口
  * @since Beta v0.4.5
  */
 import type { RouteRecordRaw } from "vue-router";

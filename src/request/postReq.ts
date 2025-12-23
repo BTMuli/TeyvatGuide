@@ -10,11 +10,11 @@ const bapBu: Readonly<string> = "https://bbs-api.miyoushe.com/post/wapi/";
 const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
- * @description 获取单个帖子信息
+ * 获取单个帖子信息
  * @since Beta v0.7.9
- * @param {number|string} postId 帖子 ID
- * @param {Record<string, string>} cookie Cookie
- * @return {Promise<TGApp.BBS.Post.FullData | TGApp.BBS.Response.Base>}
+ * @param postId - 帖子 ID
+ * @param cookie - Cookie
+ * @returns 帖子信息
  */
 async function getPostFull(
   postId: number | string,
@@ -38,10 +38,10 @@ async function getPostFull(
 }
 
 /**
- * @description 获取合集帖子
+ * 获取合集帖子
  * @since Beta v0.7.9
- * @param {string} collectionId 合集 ID
- * @returns {Promise<Array<TGApp.BBS.Post.FullData>>}
+ * @param collectionId - 合集 ID
+ * @returns 帖子数据
  */
 async function getPostFullInCollection(
   collectionId: string,
@@ -56,16 +56,16 @@ async function getPostFullInCollection(
 }
 
 /**
- * @description 获取帖子回复信息
+ * 获取帖子回复信息
  * @since Beta v0.7.1
- * @param {string} postId 帖子 ID
- * @param {number} gid 社区 ID
- * @param {boolean} isHot 是否热门
- * @param {boolean} onlyMaster 是否只看楼主
- * @param {number} orderType 排序类型
- * @param {string} lastId 最后 ID
- * @param {number} size 每页大小
- * @return {Promise<TGApp.BBS.Reply.MainRes|TGApp.BBS.Response.Base>}
+ * @param postId - 帖子 ID
+ * @param gid - 社区 ID
+ * @param isHot - 是否热门
+ * @param onlyMaster - 是否只看楼主
+ * @param orderType - 排序类型
+ * @param lastId - 最后 ID
+ * @param size - 每页大小
+ * @returns 回复信息
  */
 async function getPostReplies(
   postId: string,
@@ -103,14 +103,14 @@ async function getPostReplies(
 }
 
 /**
- * @description 获取帖子子回复信息
+ * 获取帖子子回复信息
  * @since Beta v0.7.1
- * @param {number} floorId 楼层 ID
- * @param {number} gid 社区 ID
- * @param {string} postId 帖子 ID
- * @param {string} lastId 最后 ID
- * @param {number} size 每页大小
- * @return {Promise<TGApp.BBS.Reply.SubRes|TGApp.BBS.Response.Base>}
+ * @param floorId - 楼层 ID
+ * @param gid - 社区 ID
+ * @param postId - 帖子 ID
+ * @param lastId - 最后 ID
+ * @param size - 每页大小
+ * @returns 子回复
  */
 async function getSubReplies(
   floorId: number,
@@ -138,14 +138,14 @@ async function getSubReplies(
 }
 
 /**
- * @description 获取特定话题帖子列表
+ * 获取特定话题帖子列表
  * @since Beta v0.7.1
- * @param {number} gid 游戏分区 ID
- * @param {string} topicId 话题 ID
- * @param {string} orderType 排序方式
- * @param {string} lastId 最后一条帖子 ID
- * @param {number} size 每页大小
- * @return {Promise<TGApp.BBS.Topic.PostRes|TGApp.BBS.Response.Base>}
+ * @param gid - 游戏分区 ID
+ * @param topicId - 话题 ID
+ * @param orderType - 排序方式
+ * @param lastId - 最后一条帖子 ID
+ * @param size - 每页大小
+ * @returns 话题帖子列表数据
  */
 async function getTopicPostList(
   gid: number,
@@ -171,12 +171,12 @@ async function getTopicPostList(
 }
 
 /**
- * @description 获取用户发布帖子
+ * 获取用户发布帖子
  * @since Beta v0.7.2
- * @param {string} uid 用户 ID
- * @param {number} gid 社区 ID
- * @param {string} offset 偏移量
- * @returns {Promise<TGApp.BBS.Post.UserPostRes|TGApp.BBS.Response.Base>}
+ * @param uid - 用户 ID
+ * @param gid - 社区 ID
+ * @param offset - 偏移量
+ * @returns 用户帖子
  */
 async function getUserPost(
   uid: string,
@@ -196,11 +196,11 @@ async function getUserPost(
 /**
  * 搜索帖子
  * @since Beta v0.8.7
- * @param {string} gid 游戏分区 ID
- * @param {string} keyword 关键词
- * @param {string} lastId 最后一条帖子 ID
- * @param {number} orderType 排序方式,1-最热，2-最新
- * @return {Promise<TGApp.BBS.Post.SearchRes>} 返回帖子列表
+ * @param gid - 游戏分区 ID
+ * @param keyword - 关键词
+ * @param lastId - 最后一条帖子 ID
+ * @param orderType - 排序方式 1-最热，2-最新
+ * @returns 返回帖子列表
  */
 async function searchPosts(
   gid: string = "2",
@@ -218,12 +218,12 @@ async function searchPosts(
 }
 
 /**
- * @description 获取用户收藏帖子
+ * 获取用户收藏帖子
  * @since Beta v0.7.4
- * @param {TGApp.App.Account.Cookie} cookie - 用户 cookie
- * @param {string} uid - 用户 uid
- * @param {string} offset - 偏移量
- * @returns {Promise<TGApp.BBS.Collection.UserPostRes|TGApp.BBS.Response.Base>} 用户收藏帖子
+ * @param cookie - 用户 cookie
+ * @param uid - 用户 UID
+ * @param offset - 偏移量
+ * @returns 用户收藏帖子
  */
 async function userFavouritePost(
   cookie: TGApp.App.Account.Cookie,

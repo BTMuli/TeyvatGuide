@@ -9,10 +9,10 @@ import { h, render } from "vue";
 import { decodeRegExp } from "./toolFunc.js";
 
 /**
- * @description 预处理table
+ * 预处理table
  * @since Beta v0.4.7
- * @param {HTMLTableElement} table table 元素
- * @returns {HTMLTableElement} 解析后的 table 元素
+ * @param table - table 元素
+ * @returns 解析后的 table 元素
  */
 function handleAnnoTable(table: HTMLTableElement): HTMLTableElement {
   table.style.borderColor = "var(--common-shadow-2)";
@@ -25,10 +25,10 @@ function handleAnnoTable(table: HTMLTableElement): HTMLTableElement {
 }
 
 /**
- * @description 预处理公告内容
+ * 预处理公告内容
  * @since Beta v0.7.0
- * @param {string} data 游戏内公告数据
- * @returns {string} 解析后的数据
+ * @param data - 游戏内公告数据
+ * @returns 解析后的数据
  */
 function handleAnnoContent(data: string): string {
   const htmlBase = new DOMParser().parseFromString(decodeRegExp(data), "text/html");
@@ -39,10 +39,10 @@ function handleAnnoContent(data: string): string {
 /**
  * 解析公告内容，转换为结构化数据
  * @since Beta v0.8.4
- * @param {TGApp.BBS.Announcement.AnnoDetail} anno - 公告内容
- * @returns {Array<TGApp.BBS.SctPost.Base>} 结构化数据
+ * @param anno - 公告内容
+ * @returns 结构化数据
  */
-function parseAnnoContent(anno: TGApp.BBS.Announcement.AnnoDetail): Array<TGApp.BBS.SctPost.Base> {
+function parseAnnoContent(anno: TGApp.Game.Anno.AnnoDetail): Array<TGApp.BBS.SctPost.Base> {
   const parser = new DOMParser();
   const first = handleAnnoContent(anno.content);
   const doc = parser.parseFromString(first, "text/html");
@@ -57,11 +57,11 @@ function parseAnnoContent(anno: TGApp.BBS.Announcement.AnnoDetail): Array<TGApp.
 }
 
 /**
- * @description 解析公告节点
+ * 解析公告节点
  * @since Beta v0.7.0
- * @param {Node} node - 节点
- * @param {Record<string, string>} attr - 属性
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param node - 节点
+ * @param attr - 属性
+ * @returns 结构化数据
  */
 function parseAnnoNode(node: Node, attr?: Record<string, string>): Array<TGApp.BBS.SctPost.Base> {
   let defaultRes: TGApp.BBS.SctPost.Base = {
@@ -139,11 +139,11 @@ function parseAnnoNode(node: Node, attr?: Record<string, string>): Array<TGApp.B
 }
 
 /**
- * @description 解析公告段落
+ * 解析公告段落
  * @since Beta v0.7.0
- * @param {HTMLElement} p - 段落元素
- * @param {Record<string, string>} attr - 属性
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param p - 段落元素
+ * @param attr - 属性
+ * @returns 结构化数据
  */
 function parseAnnoParagraph(p: HTMLElement, attr?: Record<string, string>): TGApp.BBS.SctPost.Base {
   const defaultRes = {
@@ -218,11 +218,11 @@ function parseAnnoParagraph(p: HTMLElement, attr?: Record<string, string>): TGAp
 }
 
 /**
- * @description 解析公告 span
+ * 解析公告 span
  * @since Beta v0.7.0
- * @param {HTMLElement} span - span 元素
- * @param {Record<string, string>} attr - 属性
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param span - span 元素
+ * @param attr - 属性
+ * @returns 结构化数据
  */
 function parseAnnoSpan(span: HTMLElement, attr?: Record<string, string>): TGApp.BBS.SctPost.Base {
   const defaultRes = {
@@ -269,10 +269,10 @@ function parseAnnoSpan(span: HTMLElement, attr?: Record<string, string>): TGApp.
 }
 
 /**
- * @description 解析公告图片
+ * 解析公告图片
  * @since Beta v0.7.0
- * @param {HTMLElement} img - 图片元素
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param img - 图片元素
+ * @returns 结构化数据
  */
 function parseAnnoImage(img: HTMLElement): TGApp.BBS.SctPost.Base {
   if (img.tagName !== "IMG") {
@@ -292,10 +292,10 @@ function parseAnnoImage(img: HTMLElement): TGApp.BBS.SctPost.Base {
 }
 
 /**
- * @description 解析公告锚点
+ * 解析公告锚点
  * @since Beta v0.7.0
- * @param {HTMLElement} a - 锚点元素
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param a - 锚点元素
+ * @returns 结构化数据
  */
 function parseAnnoAnchor(a: HTMLElement): TGApp.BBS.SctPost.Base {
   if (a.tagName !== "A") {
@@ -321,10 +321,10 @@ function parseAnnoAnchor(a: HTMLElement): TGApp.BBS.SctPost.Base {
 }
 
 /**
- * @description 解析公告详情
+ * 解析公告详情
  * @since Beta v0.7.0
- * @param {HTMLElement} details - 详情元素
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param details - 详情元素
+ * @returns 结构化数据
  */
 function parseAnnoDetails(details: HTMLElement): TGApp.BBS.SctPost.Base {
   const defaultRes = {
@@ -356,10 +356,10 @@ function parseAnnoDetails(details: HTMLElement): TGApp.BBS.SctPost.Base {
 }
 
 /**
- * @description 解析公告表格
+ * 解析公告表格
  * @since Beta v0.7.0
- * @param {HTMLElement} table - 表格元素
- * @returns {TGApp.BBS.SctPost.Base} 结构化数据
+ * @param table - 表格元素
+ * @returns 结构化数据
  */
 function parseAnnoTable(table: HTMLElement): TGApp.BBS.SctPost.Base {
   const defaultRes = {

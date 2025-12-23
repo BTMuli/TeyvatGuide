@@ -313,7 +313,7 @@ async function checkUserLoad(): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 1000));
 }
 
-async function parseDeepLink(payload: string | string[]): Promise<string | false> {
+async function parseDeepLink(payload: string | Array<string>): Promise<string | false> {
   try {
     if (typeof payload === "string") return payload;
     if (payload.length < 2) return "teyvatguide://";

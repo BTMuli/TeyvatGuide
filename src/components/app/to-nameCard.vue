@@ -81,7 +81,7 @@ function parseNameCard(desc: string): string {
   return res;
 }
 
-function parseDesc(desc: string, inQuote: boolean = false): string[] {
+function parseDesc(desc: string, inQuote: boolean = false): Array<string> {
   let res = desc.replace(/。/g, "。\n");
   res = res.replace(/；/g, "；\n");
   /* 闲云·鹤云 */
@@ -113,7 +113,7 @@ function parseDesc(desc: string, inQuote: boolean = false): string[] {
     res = res.replace(/\n」/g, "」\n");
   }
   const match = res.split("\n");
-  let array: string[] = [];
+  let array: Array<string> = [];
   for (const item of match) {
     if (item.length > 0 && item.length <= 32) {
       array.push(item);

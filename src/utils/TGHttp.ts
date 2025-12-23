@@ -1,6 +1,5 @@
 /**
- * @file utils/TGHttp.ts
- * @description 封装HTTP请求
+ * 封装HTTP请求
  * @since Beta v0.6.8
  */
 
@@ -9,30 +8,29 @@ import { fetch } from "@tauri-apps/plugin-http";
 import TGLogger from "./TGLogger.js";
 
 /**
- * @description 请求参数
+ * 请求参数
  * @since Beta v0.5.1
- * @property {"GET"|"POST"} method 请求方法
- * @property {Record<string,string>} headers 请求头
- * @property {Record<string,string>} query 请求参数
- * @property {string} body 请求体
- * @property {boolean} isBlob 是否为Blob
- * @return TGHttpParams
  */
 type TGHttpParams = {
+  /** 请求方法 */
   method: "GET" | "POST";
+  /** 请求头 */
   headers?: Record<string, string>;
+  /** 请求参数 */
   query?: Record<string, any>;
+  /** 请求体 */
   body?: string;
+  /** 是否是Blob */
   isBlob?: boolean;
 };
 
 /**
- * @description 发送请求
+ * 发送请求
  * @since Beta v0.5.1
- * @template T
- * @param {string} url 请求地址
- * @param {TGHttpParams} options 请求参数
- * @returns {Promise<T>} 请求结果
+ * @typeParam T - 返回数据类型
+ * @param url - 请求地址
+ * @param options - 请求参数
+ * @returns 请求结果
  */
 async function TGHttp<T>(url: string, options: TGHttpParams): Promise<T>;
 async function TGHttp<T>(

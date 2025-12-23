@@ -7,6 +7,7 @@ declare namespace TGApp.Sqlite.Abyss {
   /**
    * 深境螺旋表
    * @since Beta v0.6.1
+   * @remarks SpiralAbyss 表
    */
   type TableRaw = {
     /** 用户UID */
@@ -25,43 +26,41 @@ declare namespace TGApp.Sqlite.Abyss {
     maxFloor: string;
     /** 总星数 */
     totalStar: number;
-    /** 是否解锁
-     * @remarks 0-未解锁，1-已解锁
-     */
+    /** 是否解锁 */
     isUnlock: 0 | 1;
     /**
      * 出战次数
-     * @remarks 序列化，反序列化后是 Array<Character>
+     * @remarks 序列化，反序列化后是 {@link Character} 数组
      */
     revealRank: string;
     /**
      * 最多击败数
-     * @remarks 序列化，反序列化后是 Array<Character>
+     * @remarks 序列化，反序列化后是 {@link Character} 数组
      */
     defeatRank: string;
     /**
      * 最强一击
-     * @remarks 序列化，反序列化后是 Array<Character>
+     * @remarks 序列化，反序列化后是 {@link Character} 数组
      */
     damageRank: string;
     /**
      * 最多承伤
-     * @remarks 序列化，反序列化后是 Array<Character>
+     * @remarks 序列化，反序列化后是 {@link Character} 数组
      */
     takeDamageRank: string;
     /**
      * 元素战技
-     * @remarks 序列化，反序列化后是 Array<Character>
+     * @remarks 序列化，反序列化后是 {@link Character} 数组
      */
     normalSkillRank: string;
     /**
      * 元素爆发
-     * @remarks 序列化，反序列化后是 Array<Character>
+     * @remarks 序列化，反序列化后是 {@link Character} 数组
      */
     energySkillRank: string;
     /**
      * 楼层数据
-     * @remarks 序列化，反序列化后是 Array<Floor>
+     * @remarks 序列化，反序列化后是 {@link Floor} 数组
      */
     floors: string;
     /** 跳过楼层 */
@@ -72,9 +71,9 @@ declare namespace TGApp.Sqlite.Abyss {
 
   /**
    * 深境螺旋表-解析
-   * @since Beta v0.6.1
+   * @since Beta v0.9.1
    */
-  type TableData = {
+  type TableTrans = {
     /** 用户UID */
     uid: string;
     /** 深渊ID */
@@ -91,9 +90,7 @@ declare namespace TGApp.Sqlite.Abyss {
     maxFloor: string;
     /** 总星数 */
     totalStar: number;
-    /** 是否解锁
-     * @remarks 0-未解锁，1-已解锁
-     */
+    /** 是否解锁 */
     isUnlock: 0 | 1;
     /** 出战次数 */
     revealRank: Array<CharacterData>;
@@ -135,10 +132,7 @@ declare namespace TGApp.Sqlite.Abyss {
   type Floor = {
     /** 楼层 */
     id: number;
-    /**
-     * 是否解锁
-     * @remarks 0-未解锁，1-已解锁
-     */
+    /** 是否解锁 */
     isUnlock: 0 | 1;
     /** 获得星数 */
     winStar: number;
@@ -173,11 +167,8 @@ declare namespace TGApp.Sqlite.Abyss {
   /**
    * 战斗数据
    * @since Beta v0.9.0
-   * @property {string} time - 时间
-   * @property {CharacterInfo[]} characters - 角色数据
-   * @return Battle
    */
-  interface Battle {
+  type Battle = {
     /** 结束时间 */
     time: string;
     /** 上场角色 */
@@ -187,7 +178,7 @@ declare namespace TGApp.Sqlite.Abyss {
      * @remarks v0.9.0 版本新增，之前数据缺失
      */
     monsters?: Array<MonsterInfo>;
-  }
+  };
 
   /**
    * 角色信息

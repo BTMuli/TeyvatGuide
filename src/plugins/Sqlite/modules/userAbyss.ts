@@ -12,12 +12,12 @@ import TGSqlite from "../index.js";
 import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
 
 /**
- * @description 直接插入数据
+ * 直接插入数据
  * @since Beta v0.6.8
- * @param {TGApp.Sqlite.Abyss.TableRaw} tableData - 数据
- * @returns {string}
+ * @param tableData - 数据
+ * @returns sql
  */
-function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableData): string {
+function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableTrans): string {
   const data = data2Raw(tableData);
   const timeNow = timestampToDate(new Date().getTime());
   return `
@@ -51,9 +51,9 @@ function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableData): string {
 /**
  * 获取深渊数据的插入更新Sql
  * @since Beta v0.8.6
- * @param {string} uid - 用户UID
- * @param {TGApp.Game.Abyss.FullData} data -深渊数据
- * @returns {string}
+ * @param uid - 用户UID
+ * @param data -深渊数据
+ * @returns sql
  */
 function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
   const startTime = timestampToDate(Number(data.start_time) * 1000);
@@ -97,12 +97,12 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
 }
 
 /**
- * @description 原始数据转table数据
+ * 原始数据转table数据
  * @since Beta v0.6.1
- * @param {TGApp.Sqlite.Abyss.TableRaw} data - 原始数据
- * @returns {TGApp.Sqlite.Abyss.TableData}
+ * @param data - 原始数据
+ * @returns 转换后的数据
  */
-function raw2Data(data: TGApp.Sqlite.Abyss.TableRaw): TGApp.Sqlite.Abyss.TableData {
+function raw2Data(data: TGApp.Sqlite.Abyss.TableRaw): TGApp.Sqlite.Abyss.TableTrans {
   return {
     uid: data.uid,
     id: data.id,
@@ -126,12 +126,12 @@ function raw2Data(data: TGApp.Sqlite.Abyss.TableRaw): TGApp.Sqlite.Abyss.TableDa
 }
 
 /**
- * @description data数据转table数据
+ * data数据转table数据
  * @since Beta v0.6.8
- * @param {TGApp.Sqlite.Abyss.TableData} data - 原始数据
- * @returns {TGApp.Sqlite.Abyss.TableRaw}
+ * @param data - 原始数据
+ * @returns table数据
  */
-function data2Raw(data: TGApp.Sqlite.Abyss.TableData): TGApp.Sqlite.Abyss.TableRaw {
+function data2Raw(data: TGApp.Sqlite.Abyss.TableTrans): TGApp.Sqlite.Abyss.TableRaw {
   return {
     uid: data.uid,
     id: data.id,
@@ -155,9 +155,9 @@ function data2Raw(data: TGApp.Sqlite.Abyss.TableData): TGApp.Sqlite.Abyss.TableR
 }
 
 /**
- * @description 获取所有有数据的UID
+ * 获取所有有数据的UID
  * @since Beta v0.6.0
- * @returns {Promise<void>}
+ * @returns uid列表
  */
 async function getAllUid(): Promise<Array<string>> {
   const db = await TGSqlite.getDB();
@@ -167,20 +167,20 @@ async function getAllUid(): Promise<Array<string>> {
 }
 
 /**
- * @description 获取深渊数据
+ * 获取深渊数据
  * @since Beta v0.6.3
- * @param {string} uid - 游戏UID
- * @returns {Promise<TGApp.Sqlite.Abyss.TableRaw[]>}
+ * @param uid - 游戏UID
+ * @returns 深渊数据
  */
-async function getAbyss(uid?: string): Promise<TGApp.Sqlite.Abyss.TableData[]> {
+async function getAbyss(uid?: string): Promise<Array<TGApp.Sqlite.Abyss.TableTrans>> {
   const db = await TGSqlite.getDB();
-  let res: TGApp.Sqlite.Abyss.TableRaw[];
+  let res: Array<TGApp.Sqlite.Abyss.TableRaw>;
   if (uid === undefined) {
-    res = await db.select<TGApp.Sqlite.Abyss.TableRaw[]>(
+    res = await db.select<Array<TGApp.Sqlite.Abyss.TableRaw>>(
       "SELECT * FROM SpiralAbyss order by id DESC;",
     );
   } else {
-    res = await db.select<TGApp.Sqlite.Abyss.TableRaw[]>(
+    res = await db.select<Array<TGApp.Sqlite.Abyss.TableRaw>>(
       "SELECT * FROM SpiralAbyss WHERE uid = ? order by id DESC;",
       [uid],
     );
@@ -189,11 +189,11 @@ async function getAbyss(uid?: string): Promise<TGApp.Sqlite.Abyss.TableData[]> {
 }
 
 /**
- * @description 保存深渊数据
+ * 保存深渊数据
  * @since Beta v0.6.0
- * @param {string} uid - 游戏UID
- * @param {TGApp.Game.Abyss.FullData} data - 深渊数据
- * @returns {Promise<void>}
+ * @param uid - 游戏UID
+ * @param data - 深渊数据
+ * @returns 无返回值
  */
 async function saveAbyss(uid: string, data: TGApp.Game.Abyss.FullData): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -201,10 +201,10 @@ async function saveAbyss(uid: string, data: TGApp.Game.Abyss.FullData): Promise<
 }
 
 /**
- * @description 删除指定UID存档的数据
+ * 删除指定UID存档的数据
  * @since Beta v0.6.0
- * @param {string} uid - 游戏UID
- * @returns {Promise<void>}
+ * @param uid - 游戏UID
+ * @returns 无返回值
  */
 async function delAbyss(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -212,10 +212,10 @@ async function delAbyss(uid: string): Promise<void> {
 }
 
 /**
- * @description 备份深渊数据
+ * 备份深渊数据
  * @since Beta v0.6.0
- * @param {string} dir - 备份目录
- * @returns {Promise<void>}
+ * @param dir - 备份目录
+ * @returns 无返回值
  */
 async function backupAbyss(dir: string): Promise<void> {
   if (!(await exists(dir))) {
@@ -227,16 +227,16 @@ async function backupAbyss(dir: string): Promise<void> {
 }
 
 /**
- * @description 恢复深渊数据
+ * 恢复深渊数据
  * @since Beta v0.6.8
- * @param {string} dir - 备份文件目录
- * @returns {Promise<boolean>}
+ * @param dir - 备份文件目录
+ * @returns 是否恢复成功
  */
 async function restoreAbyss(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}abyss.json`;
   if (!(await exists(filePath))) return false;
   try {
-    const data: TGApp.Sqlite.Abyss.TableData[] = JSON.parse(await readTextFile(filePath));
+    const data: Array<TGApp.Sqlite.Abyss.TableTrans> = JSON.parse(await readTextFile(filePath));
     const db = await TGSqlite.getDB();
     for (const abyss of data) {
       await db.execute(getRestoreSql(abyss));

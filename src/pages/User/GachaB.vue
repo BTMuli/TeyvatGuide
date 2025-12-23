@@ -90,7 +90,7 @@ const authkey = ref<string>("");
 const uidCur = ref<string>();
 const tab = ref<string>("overview");
 const selectItem = shallowRef<Array<string>>([]);
-const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>([]);
+const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.GachaB>>([]);
 
 onMounted(async () => {
   await TGLogger.Info("[UserGachaB][onMounted] 进入千星奇域页面");

@@ -1,9 +1,9 @@
 <template>
   <div class="user-gacha-history-card-comp">
     <img
-      class="ug-his-banner"
       :src="props.pool.banner"
       alt="banner"
+      class="ug-his-banner"
       @click="createPost(pool.postId)"
     />
     <div class="ug-his-info">
@@ -37,6 +37,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 import { useRouter } from "vue-router";
@@ -45,6 +46,17 @@ type UgHisCardProps = { pool: TGApp.App.Gacha.PoolItem };
 
 const router = useRouter();
 const props = defineProps<UgHisCardProps>();
+
+const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
+  TGApp.Game.Gacha.GachaType.AvatarUp,
+  TGApp.Game.Gacha.GachaType.AvatarUp2,
+  TGApp.Game.Gacha.GachaType.WeaponUp,
+  TGApp.Game.Gacha.GachaType.MixUp,
+];
+
+function isPoolGachaType(x: string): x is TGApp.App.Gacha.PoolGachaType {
+  return (<ReadonlyArray<string>>gachaTypeList).includes(x);
+}
 
 async function toWiki(id: number): Promise<void> {
   const find = getWikiBrief(id);
@@ -59,19 +71,23 @@ async function toWiki(id: number): Promise<void> {
   await router.push({ name: "武器图鉴", params: { id: id.toString() } });
 }
 
-function getType(type: TGApp.App.Gacha.WishType): string {
-  switch (type) {
-    case 301:
-      return "角色活动祈愿";
-    case 400:
-      return "角色活动祈愿2";
-    case 302:
-      return "武器活动祈愿";
-    case 500:
-      return "集录祈愿";
-    default:
-      return `未知类型 ${type}`;
+function getType(type: number): string {
+  const typeStr = type.toString();
+  if (isPoolGachaType(typeStr)) {
+    switch (typeStr) {
+      case gameEnum.gachaType.AvatarUp:
+        return "角色活动祈愿";
+      case gameEnum.gachaType.AvatarUp2:
+        return "角色活动祈愿2";
+      case gameEnum.gachaType.WeaponUp:
+        return "武器活动祈愿";
+      case gameEnum.gachaType.MixUp:
+        return "集录祈愿";
+      default:
+        return `未知类型 ${type}`;
+    }
   }
+  return `未知类型 ${type}`;
 }
 
 function getTimeStr(pool: TGApp.App.Gacha.PoolItem): string {

@@ -1,6 +1,5 @@
 /**
- * @file request/miscReq.ts
- * @description 杂项请求
+ * Misc路径下的请求
  * @since Beta v0.7.1
  */
 import showGeetest from "@comp/func/geetest.js";
@@ -12,11 +11,11 @@ import TGHttp from "@utils/TGHttp.js";
 const bamBu: Readonly<string> = "https://bbs-api.miyoushe.com/misc/api/";
 
 /**
- * @description 创建极验验证
+ * 创建极验验证
  * @since Beta v0.7.1
- * @param {Record<string,string>} cookie Cookie
- * @param {boolean} useK2 是否使用 K2
- * @returns {Promise<TGApp.BBS.Response.Base | TGApp.BBS.Geetest.CreateRes>}
+ * @param cookie - Cookie
+ * @param useK2 - 是否使用 K2
+ * @returns 极验创建结果或基础响应
  */
 async function createVerification(
   cookie: Record<string, string>,
@@ -40,12 +39,12 @@ async function createVerification(
 }
 
 /**
- * @description 验证极验验证
+ * 验证极验验证
  * @since Beta v0.7.1
- * @param {TGApp.BBS.Geetest.GeetestVerifyRes} data 极验验证数据
- * @param {Record<string,string>} cookie Cookie
- * @param {boolean} useK2 是否使用 K2
- * @returns {Promise<TGApp.BBS.Response.Base|string>}
+ * @param data - 极验验证数据
+ * @param cookie - Cookie
+ * @param useK2 - 是否使用 K2
+ * @returns 验证结果或基础响应
  */
 async function verifyVerification(
   data: TGApp.BBS.Geetest.GeetestVerifyRes,
@@ -69,11 +68,11 @@ async function verifyVerification(
 }
 
 /**
- * @description 获取极验验证 challenge
+ * 获取极验验证 challenge
  * @since Beta v0.7.1
- * @param {Record<string,string>} cookie Cookie
- * @param {boolean} useK2 是否使用 K2
- * @returns {Promise<string>}
+ * @param cookie - Cookie
+ * @param useK2 - 是否使用 K2
+ * @returns challenge 字符串
  */
 async function getGeetestChallenge(
   cookie: Record<string, string>,

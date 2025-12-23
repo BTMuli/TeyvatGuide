@@ -13,18 +13,15 @@ const geetestId = "tg-func-geetest";
 /**
  * 自定义 geetest 组件
  * @since Beta v0.8.7
- * @extends ComponentInternalInstance
- * @property {Function} exposeProxy.displayBox 弹出 geetest 验证
- * @return GeetestInstance
  */
-interface GeetestInstance extends ComponentInternalInstance {
+type GeetestInstance = {
   exposeProxy: {
     displayBox: (
       props: TGApp.BBS.Geetest.CreateRes,
       raw?: TGApp.BBS.CaptchaLogin.CaptchaAigis,
     ) => Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false>;
   };
-}
+} & ComponentInternalInstance;
 
 function renderBox(props: TGApp.BBS.Geetest.CreateRes): VNode {
   const container = document.createElement("div");
@@ -40,9 +37,9 @@ let geetestInstance: VNode;
 /**
  * 弹出 geetest 验证
  * @since Beta v0.8.7
- * @param {TGApp.BBS.Geetest.CreateRes} props geetest 验证的参数
- * @param {TGApp.BBS.CaptchaLogin.CaptchaAigis} raw 原始数据，一般用于 Gt4 验证
- * @return {Promise<TGApp.BBS.Geetest.GeetestVerifyRes|false>} 验证成功返回验证数据
+ * @param props - geetest 验证的参数
+ * @param raw - 原始数据，一般用于 Gt4 验证
+ * @returns 验证数据
  */
 async function showGeetest(
   props: TGApp.BBS.Geetest.CreateRes,

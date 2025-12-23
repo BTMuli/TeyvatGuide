@@ -1,82 +1,73 @@
 /**
- * @file types/BBS/Emoji.d.ts
- * @description 表情包类型声明文件
+ * 米社表情包类型
  * @since Beta v0.7.2
  */
 
 declare namespace TGApp.BBS.Emoji {
   /**
-   * @description 获取表情包列表返回
+   * 获取表情包列表返回响应
    * @since Beta v0.7.2
-   * @interface Resp
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {Series[]} data.list 表情包列表
-   * @property {unknown} data.recently_emoticon 最近使用的表情包
-   * @return Resp
    */
   type Resp = TGApp.BBS.Response.BaseWithData<Res>;
 
   /**
-   * @description 获取表情包列表返回
+   * 表情包列表数据
    * @since Beta v0.7.2
-   * @interface Res
-   * @property {Array<Series>} list 表情包列表
-   * @property {unknown} recently_emoticon 最近使用的表情包
-   * @return Res;
    */
-  type Res = { list: Array<Series>; recently_emoticon: unknown };
+  type Res = {
+    /** 表情包列表 */
+    list: Array<Series>;
+    /** 最近使用的表情包 */
+    recently_emoticon: unknown;
+  };
 
   /**
-   * @description 表情包系列
+   * 表情包系列
    * @since Beta v0.7.2
-   * @interface Series
-   * @property {number} id 表情包系列 ID
-   * @property {string} name 表情包系列名称
-   * @property {string} icon 表情包系列图标
-   * @property {number} sort_order 表情包系列排序
-   * @property {number} num 表情包系列数量
-   * @property {string} status 表情包系列状态
-   * @property {Item[]} list 表情包系列列表
-   * @property {number} updated_at 表情包系列更新时间
-   * @property {boolean} is_available 表情包系列是否可用
-   * @return Series
    */
   type Series = {
+    /** 表情包系列 ID */
     id: number;
+    /** 表情包系列名称 */
     name: string;
+    /** 表情包系列图标 */
     icon: string;
+    /** 表情包系列排序 */
     sort_order: number;
+    /** 表情包系列数量 */
     num: number;
+    /** 表情包系列状态 */
     status: string;
+    /** 表情包系列列表 */
     list: Array<Item>;
+    /** 表情包系列更新时间 */
     updated_at: number;
+    /** 表情包系列是否可用 */
     is_available: boolean;
   };
 
   /**
-   * @description 表情包
+   * 表情包
    * @since Beta v0.7.2
-   * @interface Item
-   * @property {number} id 表情包 ID
-   * @property {string} name 表情包名称
-   * @property {string} icon 表情包图标
-   * @property {number} sort_order 表情包排序
-   * @property {string} static_icon 表情包静态图标
-   * @property {number} updated_at 表情包更新时间
-   * @property {boolean} is_available 表情包是否可用
-   * @property {string} status 表情包状态
-   * @property {unknown[]} keywords 表情包关键词
-   * @return Item
    */
   type Item = {
+    /** 表情包 ID */
     id: number;
+    /** 表情包名称 */
     name: string;
+    /** 表情包图标 */
     icon: string;
+    /** 表情包排序 */
     sort_order: number;
+    /** 表情包静态图标 */
     static_icon: string;
+    /** 表情包更新时间 */
     updated_at: number;
+    /** 表情包是否可用 */
     is_available: boolean;
+    /** 表情包状态 */
     status: string;
+    /** 表情包关键词 */
     keywords: Array<unknown>;
   };
 }

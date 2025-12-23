@@ -26,8 +26,8 @@ encrypt.setPublicKey(PUB_KEY_STR);
 /**
  * rsa 加密
  * @since Beta v0.5.1
- * @param {string} data - 待加密数据
- * @returns {string} 加密后数据
+ * @param data - 待加密数据
+ * @returns 加密后数据
  */
 function rsaEncrypt(data: string): string {
   const res = encrypt.encrypt(data.toString());
@@ -38,9 +38,9 @@ function rsaEncrypt(data: string): string {
 /**
  * 获取登录ticket
  * @since Beta v0.6.0
- * @param {TGApp.Sqlite.Account.Game} account - 账户
- * @param {TGApp.App.Account.Cookie} cookie - cookie
- * @returns {Promise<TGApp.BBS.Response.Base|string>}
+ * @param account - 账户
+ * @param cookie - cookie
+ * @returns ticket
  */
 async function createAuthTicketByGameBiz(
   account: TGApp.Sqlite.Account.Game,
@@ -68,9 +68,9 @@ async function createAuthTicketByGameBiz(
 /**
  * 获取短信验证码
  * @since Beta v0.7.2
- * @param {string} phone - 手机号
- * @param {string} [aigis] - 验证数据
- * @returns {Promise<TGApp.BBS.CaptchaLogin.CaptchaRes | TGApp.BBS.Response.BaseWithData<string>>}
+ * @param phone - 手机号
+ * @param aigis - 验证数据
+ * @returns  验证码返回
  */
 async function createLoginCaptcha(
   phone: string,
@@ -110,7 +110,7 @@ async function createLoginCaptcha(
 /**
  * 创建登录二维码
  * @since Beta v0.6.8
- * @returns {Promise<TGApp.BBS.Response.Base|TGApp.BBS.GameLogin.GetLoginQrData>}
+ * @returns 二维码URL
  */
 async function createQrLogin(): Promise<
   TGApp.BBS.Response.Base | TGApp.BBS.GameLogin.GetLoginQrData
@@ -134,8 +134,8 @@ async function createQrLogin(): Promise<
 /**
  * 根据 stoken 获取 cookie_token
  * @since Beta v0.6.3
- * @param {TGApp.App.Account.Cookie} cookie Cookie
- * @returns {Promise<string|TGApp.BBS.Response.Base>}
+ * @param cookie - Cookie
+ * @returns cookie_token
  */
 async function getCookieAccountInfoBySToken(
   cookie: TGApp.App.Account.Cookie,
@@ -154,8 +154,8 @@ async function getCookieAccountInfoBySToken(
 /**
  * 根据 stoken_v2 获取 ltoken
  * @since Beta v0.5.0
- * @param {TGApp.App.Account.Cookie} cookie Cookie
- * @returns {Promise<string|TGApp.BBS.Response.Base>}
+ * @param cookie - Cookie
+ * @returns ltoken
  */
 async function getLTokenBySToken(
   cookie: TGApp.App.Account.Cookie,
@@ -174,11 +174,11 @@ async function getLTokenBySToken(
 /**
  * 通过短信验证码登录
  * @since Beta v0.5.1
- * @param {string} phone - 手机号
- * @param {string} captcha - 验证码
- * @param {string} action_type - 操作类型
- * @param {string} [aigis] - 验证数据
- * @returns {Promise<TGApp.BBS.CaptchaLogin.LoginRes | TGApp.BBS.Response.Base>}
+ * @param phone - 手机号
+ * @param captcha - 验证码
+ * @param action_type - 操作类型
+ * @param aigis - 验证数据
+ * @returns 登录返回
  */
 async function loginByMobileCaptcha(
   phone: string,
@@ -214,8 +214,8 @@ async function loginByMobileCaptcha(
 /**
  * 获取登录状态
  * @since Beta v0.6.8
- * @param {string} ticket - 二维码 ticket
- * @returns {Promise<TGApp.BBS.Response.Base|TGApp.BBS.GameLogin.GetLoginStatusData>}
+ * @param ticket - 二维码 ticket
+ * @returns 登录状态
  */
 async function queryLoginStatus(
   ticket: string,
@@ -240,8 +240,8 @@ async function queryLoginStatus(
 /**
  * 验证 ltoken 有效性，返回 mid
  * @since Beta v0.6.5
- * @param {TGApp.App.Account.Cookie} cookie - 账户 cookie
- * @returns {Promise<string | TGApp.BBS.Response.Base>}
+ * @param cookie - 账户 cookie
+ * @returns mid
  */
 async function verifyLToken(
   cookie: TGApp.App.Account.Cookie,

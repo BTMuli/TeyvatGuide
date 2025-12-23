@@ -1,284 +1,283 @@
 /**
- * @file types/Game/Record.d.ts
- * @description 原神战绩相关类型定义文件
+ * 原神战绩相关类型定义文件
+ *
  * @since Beta v0.8.1
  */
-
 declare namespace TGApp.Game.Record {
   /**
-   * @description 原神战绩数据返回类型
-   * @interface Response
+   * 原神战绩数据返回响应
+   *
    * @since Alpha v0.2.0
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {FullData} data - 原神战绩数据
    */
-  type Response = TGApp.BBS.Response.BaseWithData<FullData>;
+  type Resp = TGApp.BBS.Response.BaseWithData<FullData>;
 
   /**
-   * @description 原神战绩数据类型
-   * @interface FullData
+   * 原神战绩返回数据
+   *
    * @since Beta v0.7.2
-   * @property {Role} role - 角色信息
-   * @property {Array<Avatar>} avatars - 角色列表
-   * @property {Stats} stats - 统计信息
-   * @property {Array<unknown>} city_explorations - 城市探索信息
-   * @property {Array<WorldExplore>} world_explorations - 世界探索信息
-   * @property {Array<Home>} homes - 尘歌壶信息
-   * @property {string} query_tool_link - 查询工具链接
-   * @property {string} query_tool_image - 查询工具图片
    */
   type FullData = {
+    /** 角色信息 */
     role: Role;
+    /** 角色列表 */
     avatars: Array<Avatar>;
+    /** 统计信息 */
     stats: Stats;
+    /** 城市探索信息 */
     city_explorations: Array<unknown>;
+    /** 世界探索信息 */
     world_explorations: Array<WorldExplore>;
+    /** 尘歌壶信息 */
     homes: Array<Home>;
+    /** 查询工具链接 */
     query_tool_link: string;
+    /** 查询工具图片 */
     query_tool_image: string;
   };
 
   /**
-   * @description 角色信息类型
-   * @interface Role
+   * 角色信息类型
    * @since Beta v0.5.0
-   * @property {string} AvatarUrl - 角色头像 // 通常为 ""
-   * @property {string} nickname - 角色昵称
-   * @property {string} region - 区域
-   * @property {number} level - 等级
-   * @property {string} game_head_icon - 游戏头像
    */
   type Role = {
+    /** 角色头像，通常为 "" */
     AvatarUrl: string;
+    /** 角色昵称 */
     nickname: string;
+    /** 区域 */
     region: string;
+    /** 等级 */
     level: number;
+    /** 游戏头像 */
     game_head_icon: string;
   };
 
   /**
-   * @description 角色列表类型
-   * @interface Avatar
+   * 角色列表类型
    * @since Beta v0.7.2
-   * @property {number} id - 角色 ID
-   * @property {string} image - 角色头像
-   * @property {string} name - 角色名称
-   * @property {string} element - 角色元素
-   * @property {number} fetter - 角色羁绊等级
-   * @property {number} level - 角色等级
-   * @property {number} rarity - 角色稀有度
-   * @property {number} actived_constellation_num - 角色已激活命座数量
-   * @property {number} card_image - 角色卡片图片
-   * @property {boolean} is_chosen - 角色是否展示
-   * @property {unknown} weapon - 角色武器 // null
-   * @property {Array<unknown>} relics - 角色圣遗物 // []
    */
   type Avatar = {
+    /** 角色 ID */
     id: number;
+    /** 角色头像 */
     image: string;
+    /** 角色名称 */
     name: string;
+    /** 角色元素 */
     element: string;
+    /** 羁绊等级 */
     fetter: number;
+    /** 角色等级 */
     level: number;
+    /** 稀有度 */
     rarity: number;
+    /** 已激活命座数量 */
     actived_constellation_num: number;
+    /** 卡片图片 */
     card_image: number;
+    /** 是否展示 */
     is_chosen: boolean;
+    /** 武器，通常为 null */
     weapon: unknown;
+    /** 圣遗物，通常为空数组 */
     relics: Array<unknown>;
   };
 
   /**
-   * @description 统计信息类型
-   * @interface Stats
+   * 统计信息类型
    * @since Beta v0.8.1
-   * @property {number} achievement_number - 成就数量
-   * @property {number} active_day_number - 活跃天数
-   * @property {number} anemoculus_number - 风神瞳数量
-   * @property {number} avatar_number - 角色数量
-   * @property {number} common_chest_number - 普通宝箱数量
-   * @property {number} dendroculus_number - 草神瞳数量
-   * @property {number} domain_number - 解锁秘境数量
-   * @property {number} electroculus_number - 雷神瞳数量
-   * @property {number} exquisite_chest_number - 精致宝箱数量
-   * @property {unknown} field_ext_map - 数据对应链接的map，用不到设为 unknown
-   * @property {number} full_fetter_avatar_num - 满好感角色数
-   * @property {number} geoculus_number - 岩神瞳数量
-   * @property {ChallengeStats} hard_challenge - 幽境危战挑战数据
-   * @property {number} hydroculus_number - 水神瞳数量
-   * @property {number} luxurious_chest_number - 豪华宝箱数量
-   * @property {number} magic_chest_number - 奇馈宝箱数量
-   * @property {number} moonoculus_number - 月神瞳数量
-   * @property {number} precious_chest_number - 珍贵宝箱数量
-   * @property {number} pyroculus_number - 火神瞳数量
-   * @property {CombatStats} role_combat - 幻想真境剧诗数据
-   * @property {string} spiral_abyss - 深境螺旋最深达到几层
-   * @property {number} way_point_number - 解锁传送点数量
    */
   type Stats = {
+    /** 成就数量 */
     achievement_number: number;
+    /** 活跃天数 */
     active_day_number: number;
+    /** 风神瞳数量 */
     anemoculus_number: number;
+    /** 角色数量 */
     avatar_number: number;
+    /** 普通宝箱数量 */
     common_chest_number: number;
+    /** 草神瞳数量 */
     dendroculus_number: number;
+    /** 解锁秘境数量 */
     domain_number: number;
+    /** 雷神瞳数量 */
     electroculus_number: number;
+    /** 精致宝箱数量 */
     exquisite_chest_number: number;
+    /** 数据对应链接的 map，用不到设为 unknown */
     field_ext_map: unknown;
+    /** 满好感角色数 */
     full_fetter_avatar_num: number;
+    /** 岩神瞳数量 */
     geoculus_number: number;
+    /** 幽境危战挑战数据 */
     hard_challenge: ChallengeStats;
+    /** 水神瞳数量 */
     hydroculus_number: number;
+    /** 豪华宝箱数量 */
     luxurious_chest_number: number;
+    /** 奇馈宝箱数量 */
     magic_chest_number: number;
+    /** 月神瞳数量 */
     moonoculus_number: number;
+    /** 珍贵宝箱数量 */
     precious_chest_number: number;
+    /** 火神瞳数量 */
     pyroculus_number: number;
+    /** 幻想真境剧诗数据 */
     role_combat: CombatStats;
+    /** 深境螺旋最深达到几层 */
     spiral_abyss: string;
+    /** 解锁传送点数量 */
     way_point_number: number;
   };
 
   /**
-   * @description 幻想真境剧诗数据类型
-   * @interface CombatStats
+   * 幻想真境剧诗数据类型
    * @since Beta v0.5.0
-   * @property {boolean} is_unlock - 是否解锁
-   * @property {number} max_round_id - 最大报幕数
-   * @property {boolean} has_data - 是否有数据
-   * @property {boolean} has_detail_data - 是否有详细数据
    */
   type CombatStats = {
+    /** 是否解锁 */
     is_unlock: boolean;
+    /** 最大报幕数 */
     max_round_id: number;
+    /** 是否有数据 */
     has_data: boolean;
+    /** 是否有详细数据 */
     has_detail_data: boolean;
   };
 
   /**
-   * @description 幽境危战挑战数据类型
-   * @interface ChallengeStats
+   * 幽境危战挑战数据类型
    * @since Beta v0.8.0
-   * @property {boolean} is_unlock - 是否解锁
-   * @property {number} difficulty - 挑战难度
-   * @property {boolean} has_data - 是否有数据
-   * @property {string} name - 挑战名称
    */
   type ChallengeStats = {
+    /** 是否解锁 */
     is_unlock: boolean;
+    /** 挑战难度 */
     difficulty: number;
+    /** 是否有数据 */
     has_data: boolean;
+    /** 挑战名称 */
     name: string;
   };
 
   /**
-   * @description 世界探索信息类型
-   * @interface WorldExplore
-   * @since Beta 0.8.1
-   * @property {number} level - 声望等级
-   * @property {number} exploration_percentage - 探索千分比
-   * @property {string} icon - 图标
-   * @property {string} name - 名称
-   * @property {string} type - 类型 // Reputation: 声望,Offering: 奉献
-   * @property {WorldOffering[]} offerings - 奉献物品
-   * @property {number} id - ID
-   * @property {number} parent_id - 父级 ID
-   * @property {string} map_url - 地图 URL
-   * @property {string} strategy_url - 攻略 URL
-   * @property {string} background_image - 背景图片 URL
-   * @property {string} inner_icon - 内部图标 URL
-   * @property {string} cover - 封面 URL
-   * @property {Array<unknown>} area_exploration_list - 区域探索列表
-   * @property {Array<unknown>} boss_list - Boss 列表
-   * @property {boolean} is_hot - 是否热门
-   * @property {boolean} index_active - 索引激活
-   * @property {boolean} detail_active - 详细激活
-   * @property {number} seven_status_level - 七天神像等级
-   * @property {NataReputation | null} nata_reputation - 纳塔声望
-   * @property {number} world_type - 世界类型
+   * 世界探索信息类型
+   * @since Beta v0.8.1
    */
   type WorldExplore = {
+    /** 声望等级 */
     level: number;
+    /** 探索千分比 */
     exploration_percentage: number;
+    /** 图标 */
     icon: string;
+    /** 名称 */
     name: string;
+    /** 类型
+     * @example Reputation: 声望, Offering: 奉献
+     */
     type: string;
+    /** 奉献物品 */
     offerings: Array<WorldOffering>;
+    /** ID */
     id: number;
+    /** 父级 ID */
     parent_id: number;
+    /** 地图 URL */
     map_url: string;
+    /** 攻略 URL */
     strategy_url: string;
+    /** 背景图片 URL */
     background_image: string;
+    /** 内部图标 URL */
     inner_icon: string;
+    /** 封面 URL */
     cover: string;
+    /** 区域探索列表 */
     area_exploration_list: Array<AreaExploration>;
+    /** Boss 列表 */
     boss_list: Array<unknown>;
+    /** 是否热门 */
     is_hot: boolean;
+    /** 索引激活 */
     index_active: boolean;
+    /** 详细激活 */
     detail_active: boolean;
+    /** 七天神像等级 */
     seven_status_level: number;
+    /** 纳塔声望 */
     nata_reputation: NataReputation | null;
+    /** 世界类型 */
     world_type: number;
   };
 
   /**
-   * @description 奉献物品类型
-   * @interface WorldOffering
+   * 奉献物品类型
    * @since Alpha v0.2.0
-   * @property {string} name - 名称
-   * @property {number} level - 等级
-   * @property {string} icon - 图标
    */
-  type WorldOffering = { name: string; level: number; icon: string };
+  type WorldOffering = {
+    /** 名称 */
+    name: string;
+    /** 等级 */
+    level: number;
+    /** 图标 */
+    icon: string;
+  };
 
   /**
-   * @description 区域探索类型
-   * @interface AreaExploration
+   * 区域探索类型
    * @since Beta v0.8.1
-   * @property {string} name - 名称
-   * @property {number} exploration_percentage - 探索千分比
    */
-  type AreaExploration = { name: string; exploration_percentage: number };
+  type AreaExploration = {
+    /** 名称 */
+    name: string;
+    /** 探索千分比 */
+    exploration_percentage: number;
+  };
 
   /**
-   * @description 纳塔声望类型
-   * @interface NataReputation
+   * 纳塔声望类型
    * @since Beta v0.7.2
-   * @property {Array<NataOffering>} tribal_list - 部落列表
    */
-  type NataReputation = { tribal_list: Array<NataOffering> };
+  type NataReputation = {
+    /** 部落列表 */
+    tribal_list: Array<NataOffering>;
+  };
 
   /**
-   * @description 部落列表类型
-   * @interface NataOffering
-   * @extends WorldOffering
-   * @property {number} id - ID
-   * @property {string} image - 图片
+   * 部落列表类型
    */
-  type NataOffering = WorldOffering & { id: number; image: string };
+  type NataOffering = WorldOffering & {
+    /** ID */
+    id: number;
+    /** 图片 */
+    image: string;
+  };
 
   /**
-   * @description 尘歌壶信息类型
-   * @interface Home
+   * 尘歌壶信息类型
    * @since Alpha v0.2.0
-   * @property {number} level - 等级
-   * @property {number} visit_num - 访问次数
-   * @property {number} comfort_num - 最高洞天仙力
-   * @property {number} item_num - 获得摆设数
-   * @property {number} name - 名称
-   * @property {string} icon - 图标
-   * @property {string} comfort_level_name - 洞天仙力等级名称
-   * @property {string} comfort_level_icon - 洞天仙力等级图标
    */
   type Home = {
+    /** 等级 */
     level: number;
+    /** 访问次数 */
     visit_num: number;
+    /** 最高洞天仙力 */
     comfort_num: number;
+    /** 获得摆设数 */
     item_num: number;
+    /** 名称 */
     name: string;
+    /** 图标 */
     icon: string;
+    /** 洞天仙力等级名称 */
     comfort_level_name: string;
+    /** 洞天仙力等级图标 */
     comfort_level_icon: string;
   };
 }

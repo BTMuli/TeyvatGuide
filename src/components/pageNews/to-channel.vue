@@ -6,11 +6,11 @@
         <div
           v-for="(item, index) in channelList"
           :key="index"
-          class="toc-list-item"
           :class="props.gid === item.gid.toString() ? 'active' : ''"
+          class="toc-list-item"
           @click="toChannel(item)"
         >
-          <TMiImg :src="item.icon" alt="icon" :ori="true" />
+          <TMiImg :ori="true" :src="item.icon" alt="icon" />
           <span class="toc-list-title">{{ item.title }}</span>
           <span class="toc-list-id">GID:{{ item.gid }}</span>
         </div>
@@ -22,7 +22,8 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import useAppStore, { type NewsType } from "@store/app.js";
+import bbsEnum from "@enum/bbs.js";
+import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
 import { onMounted, shallowRef } from "vue";
@@ -49,11 +50,11 @@ async function toChannel(item: ChannelItem): Promise<void> {
   }
   visible.value = false;
   let link = `/news/${item.gid}/{type}`;
-  if (recentNewsType.value satisfies NewsType) {
-    link = link.replace("{type}", recentNewsType.value);
+  if (recentNewsType.value satisfies TGApp.BBS.Post.NewsTypeEnum) {
+    link = link.replace("{type}", recentNewsType.value.toString());
   } else {
-    link = link.replace("{type}", "notice");
-    recentNewsType.value = "notice";
+    link = link.replace("{type}", bbsEnum.post.newsType.NOTICE.toString());
+    recentNewsType.value = bbsEnum.post.newsType.NOTICE;
   }
   window.location.href = link;
 }

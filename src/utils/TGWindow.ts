@@ -1,6 +1,5 @@
 /**
- * @file utils/TGWindow.ts
- * @description 窗口创建相关工具函数
+ * 窗口创建相关工具函数
  * @since Beta v0.7.9
  */
 
@@ -14,17 +13,16 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "./TGLogger.js";
 
 /**
- * @description 创建TG窗口
+ * 创建TG窗口
  * @since Beta v0.5.0
- * @see https://github.com/tauri-apps/tauri/issues/5380
- * @param {string} url 窗口地址
- * @param {string} label 窗口标签
- * @param {string} title 窗口标题
- * @param {number} width 窗口宽度
- * @param {number} height 窗口高度
- * @param {boolean} resizable 是否可调整大小
- * @param {boolean} visible 是否可见
- * @returns {Promise<void>}
+ * @param url - 窗口地址
+ * @param label - 窗口标签
+ * @param title - 窗口标题
+ * @param width - 窗口宽度
+ * @param height - 窗口高度
+ * @param resizable - 是否可调整大小
+ * @param visible - 是否可见
+ * @returns 无返回值
  */
 export async function createTGWindow(
   url: string,
@@ -48,11 +46,11 @@ export async function createTGWindow(
 }
 
 /**
- * @description 打开帖子
+ * 打开帖子
  * @since Beta v0.4.2
- * @param {RenderCard | string | number} item 帖子内容或ID
- * @param {string} title 帖子标题
- * @returns {Promise<void>}
+ * @param item - 帖子内容或ID
+ * @param title - 帖子标题
+ * @returns 无返回值
  */
 export async function createPost(
   item: RenderCard | string | number,
@@ -72,10 +70,10 @@ export async function createPost(
 }
 
 /**
- * @description 打开观测枢
+ * 打开观测枢
  * @since Beta 0.7.6
- * @param {string} contentId
- * @returns {Promise<void>}
+ * @param contentId - 观测枢内容ID
+ * @returns 无返回值
  */
 export async function toObcPage(contentId: number): Promise<void> {
   const obcUrl = `https://bbs.mihoyo.com/ys/obc/content/${contentId}/detail?bbs_presentation_style=no_header`;
@@ -83,10 +81,10 @@ export async function toObcPage(contentId: number): Promise<void> {
 }
 
 /**
- * @description 获取不同label下的默认窗口大小
+ * 获取不同label下的默认窗口大小
  * @since Beta v0.7.2
- * @param {string} label 窗口标签
- * @returns {PhysicalSize}
+ * @param label - 窗口标签
+ * @returns 物理大小
  */
 export function getWindowSize(label: string): PhysicalSize {
   switch (label) {
@@ -101,9 +99,9 @@ export function getWindowSize(label: string): PhysicalSize {
 }
 
 /**
- * @description 窗口适配
+ * 窗口适配
  * @since Beta v0.7.9
- * @returns Promise<void>
+ * @returns 无返回值
  */
 export async function resizeWindow(): Promise<void> {
   const screen = await currentMonitor();

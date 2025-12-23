@@ -8,7 +8,6 @@ import Database from "@tauri-apps/plugin-sql";
 import TGLogger from "@utils/TGLogger.js";
 
 import initDataSql from "./sql/initData.js";
-import { insertAppData } from "./sql/insertData.js";
 
 class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
@@ -37,12 +36,10 @@ class Sqlite {
     return this.instance;
   }
 
-  private constructor() {}
-
   /**
    * 获取数据库实例
    * @since Beta v0.3.3
-   * @returns {Promise<Database>}
+   * @returns 数据库实例
    */
   public async getDB(): Promise<Database> {
     if (this.db === null) this.db = await Database.load(this.dbPath);
@@ -52,7 +49,7 @@ class Sqlite {
   /**
    * 检测是否需要创建数据库
    * @since Beta v0.6.1
-   * @returns {Promise<boolean>}
+   * @returns 是否需要创建数据库
    */
   public async check(): Promise<boolean> {
     try {
@@ -73,7 +70,7 @@ class Sqlite {
   /**
    * 初始化数据库
    * @since Beta v0.4.5
-   * @returns {Promise<void>}
+   * @returns 无返回值
    */
   public async initDB(): Promise<void> {
     const db = await this.getDB();
@@ -84,9 +81,10 @@ class Sqlite {
   /**
    * 获取数据库信息
    * @since Beta v0.3.3
-   * @returns {Promise<TGApp.Sqlite.AppData.Item[]>}
+   * @TODO 简化或者完善类型
+   * @returns AppData表数据
    */
-  public async getAppData(): Promise<TGApp.Sqlite.AppData.Item[]> {
+  public async getAppData(): Promise<Array<TGApp.Sqlite.AppData.Item>> {
     const db = await this.getDB();
     const sql = "SELECT * FROM AppData;";
     return await db.select(sql);
@@ -95,7 +93,7 @@ class Sqlite {
   /**
    * 对比数据判断是否需要更新
    * @since Beta v0.3.3
-   * @returns {Promise<boolean>}
+   * @returns 是否需要更新
    */
   public async checkUpdate(): Promise<boolean> {
     const dbData = await this.getAppData();
@@ -106,22 +104,38 @@ class Sqlite {
   }
 
   /**
+   * 插入应用数据
+   * @since Alpha v0.2.0
+   * @param key - 键
+   * @param value - 值
+   * @returns sql
+   */
+  insertAppData(key: string, value: string): string {
+    return `
+        INSERT INTO AppData (key, value, updated)
+        VALUES ('${key}', '${value}', datetime('now', 'localtime'))
+        ON CONFLICT(key) DO UPDATE SET value   = '${value}',
+                                       updated = datetime('now', 'localtime');
+    `;
+  }
+
+  /**
    * 保存 appData
    * @since Beta v0.3.3
-   * @param {string} key
-   * @param {string} value
-   * @returns {Promise<void>}
+   * @param key - 键
+   * @param value - 值
+   * @returns 无返回值
    */
   public async saveAppData(key: string, value: string): Promise<void> {
     const db = await this.getDB();
-    const sql = insertAppData(key, value);
+    const sql = this.insertAppData(key, value);
     await db.execute(sql);
   }
 
   /**
    * 已有数据表跟触发器不变的情况下，更新数据库数据
    * @since Beta v0.3.3
-   * @returns {Promise<void>}
+   * @returns 无返回值
    */
   public async update(): Promise<void> {
     const db = await this.getDB();
@@ -134,7 +148,7 @@ class Sqlite {
   /**
    * 更新 SpiralAbyss 表
    * @since Beta v0.6.1
-   * @returns {Promise<void>}
+   * @returns 无返回值
    */
   public async updateAbyss(): Promise<void> {
     const db = await this.getDB();
@@ -150,7 +164,7 @@ class Sqlite {
   /**
    * 重置数据库
    * @since Beta v0.4.0
-   * @returns {Promise<void>}
+   * @returns 无返回值
    */
   public async reset(): Promise<void> {
     const db = await this.getDB();

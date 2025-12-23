@@ -1,69 +1,64 @@
 /**
- * @file types/Sqlite/Collection.d.ts
- * @description Sqlite UserCollection 类型定义文件
+ * 收藏帖子类型定义文件
  * @since Beta v0.4.5
  */
 
-/**
- * @description 用户收藏命名空间
- * @since Beta v0.4.5
- * @namespace TGApp.Sqlite.UserCollection
- * @memberof TGApp.Sqlite
- */
-declare namespace TGApp.Sqlite.UserCollection {
+declare namespace TGApp.Sqlite.Collection {
   /**
-   * @description 数据库-用户收藏帖子表
+   * 用户收藏帖子表
    * @since Beta v0.4.5
-   * @interface UFPost
-   * @property {string} id - 帖子 ID
-   * @property {string} title - 标题
-   * @description 反序列化后是 TGApp.BBS.Post.FullData
-   * @property {string} content - 内容
-   * @property {string} updated - 更新时间
-   * @return UFPost
+   * @remarks UFPost 表
    */
-  interface UFPost {
+  type PostRaw = {
+    /** 帖子 ID */
     id: string;
+    /** 帖子标题 */
     title: string;
+    /**
+     * 帖子内容
+     * @remarks 序列化，反序列化后是 {@link TGApp.BBS.Post.FullData} 类型
+     */
     content: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 
   /**
-   * @description 数据库-用户收藏合集表
+   * 用户收藏合集表
    * @since Beta v0.4.5
-   * @interface UFCollection
-   * @property {string} id - 合集 ID
-   * @property {string} title - 标题
-   * @property {string} desc - 描述
-   * @property {string} updated - 更新时间
-   * @return UFCollection
+   * @remarks UFCollection 表
    */
-  interface UFCollection {
+  type Collection = {
+    /**
+     * 合集ID
+     * @remarks 自增ID
+     */
     id: string;
+    /** 合集标题 */
     title: string;
+    /** 合集描述 */
     desc: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 
   /**
-   * @description 数据库-用户收藏帖子合集关联表
+   * 帖子-合集对应数据
    * @since Beta v0.4.5
-   * @interface UFMap
-   * @property {string} postId - 帖子 ID
-   * @property {string} collectionId - 合集 ID
-   * @property {string} post - 帖子标题
-   * @property {string} collection - 合集标题
-   * @property {string} desc - 合集描述
-   * @property {string} updated - 更新时间
-   * @return UFMap
+   * @remarks UFMap 表
    */
-  interface UFMap {
+  type PcMap = {
+    /** 帖子 ID */
     postId: string;
+    /** 合集ID */
     collectionId: string;
+    /** 帖子标题 */
     post: string;
+    /** 合集标题 */
     collection: string;
+    /** 合集描述 */
     desc: string;
+    /** 更新时间 */
     updated: string;
-  }
+  };
 }

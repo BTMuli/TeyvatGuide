@@ -55,7 +55,8 @@
             prepend-icon="mdi-refresh"
             variant="elevated"
             @click="refreshChallenge()"
-            >刷新
+          >
+            刷新
           </v-btn>
           <v-btn
             class="ucp-btn"
@@ -70,7 +71,8 @@
             prepend-icon="mdi-delete"
             variant="elevated"
             @click="deleteChallenge()"
-            >删除
+          >
+            删除
           </v-btn>
         </div>
         <div class="pop-list">
@@ -139,7 +141,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TucBlings from "@comp/userChallenge/tuc-blings.vue";
 import TucOverview from "@comp/userChallenge/tuc-overview.vue";
 import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
-import { GameServerEnum, getGameServerDesc } from "@enum/game.js";
+import gameEnum from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
 import TSUserChallenge from "@Sqlm/userChallenge.js";
 import useAppStore from "@store/app.js";
@@ -155,14 +157,9 @@ import { useRouter } from "vue-router";
 
 type SelectItem<T = string> = { text: string; value: T };
 const serverList: ReadonlyArray<SelectItem<TGApp.Game.Base.ServerTypeEnum>> = [
-  GameServerEnum.CN_GF01,
-  GameServerEnum.CN_QD01,
-  // TODO: 目前不支持国际服务器
-  // GameServerEnum.OS_ASIA,
-  // GameServerEnum.OS_EURO,
-  // GameServerEnum.OS_USA,
-  // GameServerEnum.OS_CHT,
-].map((i) => ({ text: getGameServerDesc(i), value: i }));
+  gameEnum.server.CN_GF01,
+  gameEnum.server.CN_QD01,
+].map((i) => ({ text: gameEnum.serverDesc(i), value: i }));
 
 const router = useRouter();
 const { isLogin } = storeToRefs(useAppStore());
@@ -174,9 +171,9 @@ const isReq = ref<boolean>(false);
 const userTab = ref<number>(0);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
-const localChallenge = shallowRef<Array<TGApp.Sqlite.Challenge.SingleTable>>([]);
+const localChallenge = shallowRef<Array<TGApp.Sqlite.Challenge.TableTrans>>([]);
 
-const server = ref<TGApp.Game.Base.ServerTypeEnum>(GameServerEnum.CN_GF01);
+const server = ref<TGApp.Game.Base.ServerTypeEnum>(gameEnum.server.CN_GF01);
 const reqPop = ref<boolean>(false);
 const popList = shallowRef<Array<TGApp.Game.Challenge.PopularityItem>>([]);
 
@@ -184,14 +181,14 @@ onMounted(async () => {
   version.value = await getVersion();
   await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
   await reloadChallenge();
-  if (uidCur.value?.startsWith("5")) server.value = GameServerEnum.CN_QD01;
+  if (uidCur.value?.startsWith("5")) server.value = gameEnum.server.CN_QD01;
   await refreshPopList(false);
 });
 
 watch(
   () => server.value,
   async () => {
-    const name = getGameServerDesc(server.value);
+    const name = gameEnum.serverDesc(server.value);
     await TGLogger.Info(`[UserChallenge][watch][server] 切换服务器: ${name}`);
     await refreshPopList();
   },
@@ -343,7 +340,10 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
   if (reqPop.value) return;
   reqPop.value = true;
   if (hint) {
-    await showLoading.start("正在加载赋光之人列表", `服务器： ${getGameServerDesc(server.value)}`);
+    await showLoading.start(
+      "正在加载赋光之人列表",
+      `服务器： ${gameEnum.serverDesc(server.value)}`,
+    );
   }
   const resp = await recordReq.challenge.pop(server.value);
   console.log("赋光之人列表", resp);
@@ -360,7 +360,7 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
   await showLoading.end();
   reqPop.value = false;
   showSnackbar.success(
-    `已刷新 ${getGameServerDesc(server.value)} 的 ${popList.value.length} 位赋光之人`,
+    `已刷新 ${gameEnum.serverDesc(server.value)} 的 ${popList.value.length} 位赋光之人`,
   );
 }
 

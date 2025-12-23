@@ -39,17 +39,17 @@ import { ref, toRaw, watch } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 
-type TuaAchiProps = { modelValue: TGApp.Sqlite.Achievement.RenderAchi };
-type TuaAchiEmits = (e: "select-achi", data: TGApp.Sqlite.Achievement.RenderAchi) => void;
+type TuaAchiProps = { modelValue: TGApp.App.Achievement.RenderItem };
+type TuaAchiEmits = (e: "select-achi", data: TGApp.App.Achievement.RenderItem) => void;
 
 const props = defineProps<TuaAchiProps>();
 const emits = defineEmits<TuaAchiEmits>();
-const model = defineModel<TGApp.Sqlite.Achievement.RenderAchi>();
-const data = ref<TGApp.Sqlite.Achievement.RenderAchi>(toRaw(props.modelValue));
+const model = defineModel<TGApp.App.Achievement.RenderItem>();
+const data = ref<TGApp.App.Achievement.RenderItem>(toRaw(props.modelValue));
 
 watch(
   () => props.modelValue,
-  (newVal: TGApp.Sqlite.Achievement.RenderAchi) => {
+  (newVal: TGApp.App.Achievement.RenderItem) => {
     data.value = toRaw(newVal);
   },
 );

@@ -155,9 +155,9 @@ const resetSelect = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>([]);
 const roleOverview = shallowRef<Array<OverviewItem>>([]);
-const roleList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
-const selectedList = shallowRef<Array<TGApp.Sqlite.Character.UserRole>>([]);
-const dataVal = shallowRef<TGApp.Sqlite.Character.UserRole>();
+const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
+const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
+const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 const enableShare = computed<boolean>(
   () => showOverlay.value || showSelect.value || loadData.value,
 );
@@ -206,8 +206,8 @@ watch(
 watch(() => uidCur.value, loadRole);
 
 function getOrderedList(
-  data: Array<TGApp.Sqlite.Character.UserRole>,
-): Array<TGApp.Sqlite.Character.UserRole> {
+  data: Array<TGApp.Sqlite.Character.TableTrans>,
+): Array<TGApp.Sqlite.Character.TableTrans> {
   return data.sort((a, b) => {
     if (a.avatar.rarity !== b.avatar.rarity) return b.avatar.rarity - a.avatar.rarity;
     if (a.avatar.element === b.avatar.element) return a.cid - b.cid;
@@ -215,7 +215,7 @@ function getOrderedList(
   });
 }
 
-function getOverview(data: Array<TGApp.Sqlite.Character.UserRole>): Array<OverviewItem> {
+function getOverview(data: Array<TGApp.Sqlite.Character.TableTrans>): Array<OverviewItem> {
   const overview: Array<OverviewItem> = [];
   for (const role of data) {
     const element = role.avatar.element;
@@ -390,7 +390,7 @@ function getUpdateTime(): string {
   return timestampToDate(lastUpdateTime);
 }
 
-function selectRole(role: TGApp.Sqlite.Character.UserRole): void {
+function selectRole(role: TGApp.Sqlite.Character.TableTrans): void {
   dataVal.value = role;
   selectIndex.value = selectedList.value.indexOf(role);
   if (!showOverlay.value) showOverlay.value = true;

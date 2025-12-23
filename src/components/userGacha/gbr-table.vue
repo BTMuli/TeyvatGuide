@@ -27,7 +27,7 @@
 <script lang="ts" setup>
 import { AppGachaBData } from "@/data/index.js";
 
-type GroTableProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGachaB> };
+type GroTableProps = { modelValue: Array<TGApp.Sqlite.Gacha.GachaB> };
 
 const props = defineProps<GroTableProps>();
 
@@ -40,6 +40,7 @@ const headers = <const>[
   { title: "星级", align: "center", key: "rank" },
 ];
 
+// TODO: 枚举类
 function getPool(type: string) {
   switch (type) {
     case "1000":

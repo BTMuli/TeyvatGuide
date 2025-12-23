@@ -2,10 +2,10 @@
   <TSwitchTheme />
   <TPinWin />
   <TPostWidth />
-  <VpBtnCollect :model-value="postId" :data="postData" />
-  <TShareBtn selector=".tp-post-body" :title="`Post_${postId}`" />
-  <VpBtnReply :gid="postData.post.game_id" :post-id="postData.post.post_id" v-if="postData" />
-  <div class="tp-post-body" v-if="postData">
+  <VpBtnCollect :data="postData" :model-value="postId" />
+  <TShareBtn :title="`Post_${postId}`" selector=".tp-post-body" />
+  <VpBtnReply v-if="postData" :gid="postData.post.game_id" :post-id="postData.post.post_id" />
+  <div v-if="postData" class="tp-post-body">
     <div class="tp-post-info">
       <div class="tp-post-version" @click="openJson()">
         PostID：{{ postId }} | Render by TeyvatGuide v{{ appVersion }}
@@ -17,68 +17,68 @@
             alt="gameIcon"
             @click="toGame(postData?.forum?.game_id || postData.post.game_id)"
           />
-          <div class="mpm-forum" v-if="postData.forum" @click="toForum(postData.forum)">
-            <TMiImg :src="postData.forum.icon" alt="forumIcon" :ori="true" />
+          <div v-if="postData.forum" class="mpm-forum" @click="toForum(postData.forum)">
+            <TMiImg :ori="true" :src="postData.forum.icon" alt="forumIcon" />
             <span>{{ postData.forum.name }}</span>
           </div>
         </div>
         <template v-if="postViewWide">
-          <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
+          <div :title="`浏览数：${postData?.stat?.view_num}`" class="mpm-item">
             <v-icon size="16">mdi-eye</v-icon>
             <span>{{ postData?.stat?.view_num }}</span>
           </div>
-          <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
+          <div :title="`收藏数：${postData?.stat?.bookmark_num}`" class="mpm-item">
             <v-icon size="16">mdi-star</v-icon>
             <span>{{ postData?.stat?.bookmark_num }}</span>
           </div>
-          <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
+          <div :title="`回复数：${postData?.stat?.reply_num}`" class="mpm-item">
             <v-icon size="16">mdi-comment</v-icon>
             <span>{{ postData?.stat?.reply_num }}</span>
           </div>
           <!-- TODO: 展示不同种类点赞图标&数量 -->
           <div
-            class="mpm-item"
-            :title="`点赞数：${postData?.stat?.like_num}`"
-            @click="tryLike()"
             :class="{ like: isLike }"
+            :title="`点赞数：${postData?.stat?.like_num}`"
+            class="mpm-item"
+            @click="tryLike()"
           >
             <v-icon size="16">mdi-thumb-up</v-icon>
             <span>{{ postData?.stat?.like_num }}</span>
           </div>
-          <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
+          <div :title="`转发数：${postData?.stat?.forward_num}`" class="mpm-item">
             <v-icon size="16">mdi-share-variant</v-icon>
             <span>{{ postData?.stat?.forward_num }}</span>
           </div>
         </template>
       </div>
       <TpAvatar
+        v-if="postData.user"
         :data="postData.user"
         position="right"
         style="cursor: pointer"
-        v-if="postData.user"
         @click="handleUser(postData.user)"
       />
     </div>
     <div class="tp-post-divider" />
     <div class="tp-post-title" @click="toPost()">
-      <span class="mpt-official" v-if="postData.post.post_status.is_official">官</span>
+      <span v-if="postData.post.post_status.is_official" class="mpt-official">官</span>
       <span>{{ postData.post.subject }}</span>
     </div>
     <!-- 一些附加信息，比如 topic、collection 等 -->
     <div class="tp-post-extra">
       <div
-        class="tp-post-contribution"
         v-if="postData.contribution_act"
         :title="`投稿活动：${postData.contribution_act.title}`"
+        class="tp-post-contribution"
         @click="toAct()"
       >
         <v-icon size="10">mdi-party-popper</v-icon>
         <span>{{ postData.contribution_act.title }}</span>
       </div>
       <div
-        class="tp-post-collection"
-        :title="`合集ID：${postData.collection.collection_id}`"
         v-if="postData.collection"
+        :title="`合集ID：${postData.collection.collection_id}`"
+        class="tp-post-collection"
         @click="showOverlayC()"
       >
         <v-icon size="10">mdi-widgets</v-icon>
@@ -102,30 +102,30 @@
         @click="toTopic(topic)"
       />
     </div>
-    <div class="tp-post-data" v-if="!postViewWide">
-      <div class="mpm-item" :title="`浏览数：${postData?.stat?.view_num}`">
+    <div v-if="!postViewWide" class="tp-post-data">
+      <div :title="`浏览数：${postData?.stat?.view_num}`" class="mpm-item">
         <v-icon size="16">mdi-eye</v-icon>
         <span>{{ postData?.stat?.view_num }}</span>
       </div>
-      <div class="mpm-item" :title="`收藏数：${postData?.stat?.bookmark_num}`">
+      <div :title="`收藏数：${postData?.stat?.bookmark_num}`" class="mpm-item">
         <v-icon size="16">mdi-star</v-icon>
         <span>{{ postData?.stat?.bookmark_num }}</span>
       </div>
-      <div class="mpm-item" :title="`回复数：${postData?.stat?.reply_num}`">
+      <div :title="`回复数：${postData?.stat?.reply_num}`" class="mpm-item">
         <v-icon size="16">mdi-comment</v-icon>
         <span>{{ postData?.stat?.reply_num }}</span>
       </div>
       <!-- TODO: 展示不同种类点赞图标&数量 -->
       <div
-        class="mpm-item"
-        :title="`点赞数：${postData?.stat?.like_num}`"
-        @click="tryLike()"
         :class="{ like: isLike }"
+        :title="`点赞数：${postData?.stat?.like_num}`"
+        class="mpm-item"
+        @click="tryLike()"
       >
         <v-icon size="16">mdi-thumb-up</v-icon>
         <span>{{ postData?.stat?.like_num }}</span>
       </div>
-      <div class="mpm-item" :title="`转发数：${postData?.stat?.forward_num}`">
+      <div :title="`转发数：${postData?.stat?.forward_num}`" class="mpm-item">
         <v-icon size="16">mdi-share-variant</v-icon>
         <span>{{ postData?.stat?.forward_num }}</span>
       </div>
@@ -147,12 +147,12 @@
     <TpParser v-model:data="renderPost" />
   </div>
   <VpOverlayCollection
+    v-if="postData?.collection && postData"
     v-model="showCollection"
     :collection="postData.collection"
     :gid="postData.post.game_id"
-    v-if="postData?.collection && postData"
   />
-  <VpOverlayUser v-if="postData" :gid="postData.post.game_id" :uid="curUid" v-model="showUser" />
+  <VpOverlayUser v-if="postData" v-model="showUser" :gid="postData.post.game_id" :uid="curUid" />
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
@@ -169,7 +169,7 @@ import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
-import { PostViewTypeEnum } from "@enum/bbs.js";
+import bbsEnum from "@enum/bbs.js";
 import apiHubReq from "@req/apiHubReq.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
@@ -311,15 +311,15 @@ async function getRenderPost(
   data: TGApp.BBS.Post.FullData,
 ): Promise<Array<TGApp.BBS.SctPost.Base>> {
   if (
-    data.post.view_type === PostViewTypeEnum.NORMAL ||
-    data.post.view_type === PostViewTypeEnum.VOD
+    data.post.view_type === bbsEnum.post.viewType.NORMAL ||
+    data.post.view_type === bbsEnum.post.viewType.VOD
   ) {
     return JSON.parse(data.post.structured_content);
   }
-  if (data.post.view_type === PostViewTypeEnum.PIC) {
+  if (data.post.view_type === bbsEnum.post.viewType.PIC) {
     return await parsePostPic(data);
   }
-  if (data.post.view_type === PostViewTypeEnum.UGC) {
+  if (data.post.view_type === bbsEnum.post.viewType.UGC) {
     return parsePostUgc(data.post);
   }
   const postContent = data.post.content;
@@ -346,7 +346,7 @@ async function parsePostPic(
 ): Promise<Array<TGApp.BBS.SctPost.Base>> {
   const content = fullData.post.content;
   const data: TGApp.BBS.SctPost.Pic = JSON.parse(content);
-  const result: TGApp.BBS.SctPost.Base[] = [];
+  const result: Array<TGApp.BBS.SctPost.Base> = [];
   for (const key of Object.keys(data)) {
     switch (key) {
       case "describe":

@@ -32,12 +32,12 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <TGApp.Game.Base.ServerTypeEnum>route.params.region;
-const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
+const lang = <TGApp.Game.Anno.AnnoLangEnum>route.params.lang;
 
 const { devMode } = storeToRefs(useAppStore());
 
 const appVersion = ref<string>();
-const annoData = shallowRef<TGApp.BBS.Announcement.AnnoDetail>();
+const annoData = shallowRef<TGApp.Game.Anno.AnnoDetail>();
 
 onMounted(async () => {
   await showLoading.start("正在加载公告数据");

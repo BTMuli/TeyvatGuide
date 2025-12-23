@@ -130,7 +130,7 @@ const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
-const localAbyss = shallowRef<TGApp.Sqlite.Abyss.TableData[]>([]);
+const localAbyss = shallowRef<Array<TGApp.Sqlite.Abyss.TableTrans>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在加载深渊数据");

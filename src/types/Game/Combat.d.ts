@@ -1,282 +1,308 @@
 /**
- * @file types/Game/Combat.d.ts
- * @description 幻想真境剧诗类型定义
+ * 幻想真境剧诗类型定义
  * @since Beta v0.8.3
  */
-
 declare namespace TGApp.Game.Combat {
   /**
-   * @description 幻想真境剧诗数据返回类型
-   * @interface Response
+   * 幻想真境剧诗数据返回响应
    * @since Beta v0.6.3
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {FullData} data
    */
   type Response = TGApp.BBS.Response.BaseWithData<FullData>;
 
   /**
-   * @description 返回完整数据类型
-   * @interface FullData
+   * 幻想真境剧诗数据返回
    * @since Beta v0.6.3
-   * @property {boolean} is_unlock 是否解锁
-   * @property {Record<string,string>} links 相关链接
-   * @property {Array<Combat>} data 挑战数据
-   * @property {TarotState} tarot_card_state 塔罗牌状态
    */
   type FullData = {
+    /** 是否解锁 */
     is_unlock: boolean;
+    /** 相关链接 */
     links: Record<string, string>;
+    /** 挑战数据 */
     data: Array<Combat>;
+    /** 月谕圣牌 */
     tarot_card_state: TarotState;
   };
 
   /**
-   * @description 角色数据
-   * @interface Avatar
+   * 角色数据
    * @since Beta v0.6.3
-   * @property {number} avatar_id 角色id
-   * @property {number} avatar_type 角色类型 // 0-自己角色，1-试用角色，2-助演角色
-   * @property {string} name 角色名称
-   * @property {string} element 角色元素
-   * @property {string} image 角色图像
-   * @property {number} level 角色等级
-   * @property {number} rarity 角色稀有度
    */
   type Avatar = {
+    /** 角色ID */
     avatar_id: number;
+    /**
+     * 角色类型
+     * @TODO 枚举类
+     * @remarks
+     * - 0: 自己角色
+     * - 1: 试用角色
+     * - 2: 助演角色
+     */
     avatar_type: number;
+    /** 角色名称 */
     name: string;
+    /** 角色元素 */
     element: string;
+    /** 角色图像 */
     image: string;
+    /** 角色等级 */
     level: number;
+    /** 角色星级 */
     rarity: number;
   };
 
   /**
-   * @description 简要角色
-   * @interface AvatarMini
+   * 角色简要信息
    * @since Beta v0.6.3
-   * @property {number} avatar_id 角色id
-   * @property {number} avatar_icon 角色图标
-   * @property {string} value 值
-   * @property {number} rarity 角色稀有度
    */
-  type AvatarMini = { avatar_id: number; avatar_icon: string; value: string; rarity?: number };
+  type AvatarMini = {
+    /** 角色 ID */
+    avatar_id: number;
+    /** 角色图标 */
+    avatar_icon: string;
+    /** 值 */
+    value: string;
+    /** 角色稀有度 */
+    rarity?: number;
+  };
 
   /**
-   * @description Buff
-   * @interface Buff
+   * Buff
    * @since Beta v0.6.3
-   * @property {string} name 名称
-   * @property {string} icon 图标
-   * @property {number} level 等级
-   * @property {Array<BuffEffect>} level_effect 不同等级下的助益
    */
-  type Buff = { name: string; icon: string; level: number; level_effect: Array<BuffEffect> };
+  type Buff = {
+    /** 名称 */
+    name: string;
+    /** 图标 */
+    icon: string;
+    /** 等级 */
+    level: number;
+    /** 增益 */
+    level_effect: Array<BuffEffect>;
+  };
 
   /**
-   * @description Buff助益
-   * @interface BuffEffect
+   * Buff增益
    * @since Beta v0.6.3
-   * @property {string} icon 图标
-   * @property {string} name 名称
-   * @property {string} desc 描述
-   * @return BuffEffect
    */
-  type BuffEffect = { icon: string; name: string; desc: string };
+  type BuffEffect = {
+    /** 图标 */
+    icon: string;
+    /** 名称 */
+    name: string;
+    /**
+     * 描述
+     * @remarks html 文本
+     */
+    desc: string;
+  };
 
   /**
-   * @description 卡片
-   * @interface Card
+   * 卡片
    * @since Beta v0.6.3
-   * @property {string} icon 图标
-   * @property {string} name 名称
-   * @property {string} desc 描述
-   * @property {boolean} is_enhanced 是否加强
-   * @property {number} id ID
    */
-  type Card = { icon: string; name: string; desc: string; is_enhanced: boolean; id: number };
+  type Card = {
+    /** 图标 */
+    icon: string;
+    /** 名称 */
+    name: string;
+    /** 描述 */
+    desc: string;
+    /** 是否加强 */
+    is_enhanced: boolean;
+    /** ID */
+    id: number;
+  };
 
   /**
-   * @description 状态
-   * @interface Stat
+   * 状态
    * @since Beta v0.8.3
-   * @property {number} difficulty_id 难度等级
-   * @property {number} max_round_id 最多层数
-   * @property {number} heraldry 纹章数
-   * @property {Array<0|1>} get_medal_round_list 星章获取状况
-   * @property {number} medal_num 星章获取数
-   * @property {number} coin_num 硬币数
-   * @property {number} avatar_bonus_num 角色声援数
-   * @property {number} rent_cnt 出借次数
-   * @property {number} tarot_finished_cnt 塔罗牌完成数
    */
   type Stat = {
+    /** 难度等级 */
     difficulty_id: number;
+    /** 最大层数 */
     max_round_id: number;
+    /** 纹章数 */
     heraldry: number;
+    /** 星章获取情况 */
     get_medal_round_list: Array<0 | 1>;
+    /** 星章获取数 */
     medal_num: number;
+    /** 硬币数 */
     coin_num: number;
+    /** 角色声援数 */
     avatar_bonus_num: number;
+    /** 出借次数 */
     rent_cnt: number;
+    /** 月谕圣牌完成数 */
     tarot_finished_cnt: number;
   };
 
   /**
-   * @description 敌人
-   * @interface Enemy
+   * 敌人
    * @since Beta v0.6.3
-   * @property {string} name 名称
-   * @property {string} icon 图标
-   * @property {number} level 等级
    */
-  type Enemy = { name: string; icon: string; level: number };
+  type Enemy = {
+    /** 名称 */
+    name: string;
+    /** 图标 */
+    icon: string;
+    /** 等级 */
+    level: number;
+  };
 
   /**
-   * @description 单期挑战数据
-   * @interface Combat
+   * 单期挑战数据
    * @since Beta v0.6.3
-   * @property {Detail} detail 挑战详情
-   * @property {Stat} stat 挑战状态
-   * @property {Schedule} schedule 挑战期数
-   * @property {boolean} has_data 是否有数据
-   * @property {boolean} has_detail_data 是否有详细数据
    */
   type Combat = {
+    /** 挑战详情 */
     detail: Detail;
+    /** 挑战概况 */
     stat: Stat;
+    /** 挑战排期 */
     schedule: Schedule;
+    /** 是否有数据 */
     has_data: boolean;
+    /** 是否有详细数据 */
     has_detail_data: boolean;
   };
 
   /**
-   * @description 挑战详情
-   * @interface Detail
+   * 挑战详情
    * @since Beta v0.6.3
-   * @property {Array<RoundData>} rounds_data 轮次数据
-   * @property {Stat} detail_stat 详细状态
-   * @property {string} lineup_link 未知链接
-   * @property {Array<Avatar>} backup_avatars 后备角色
-   * @property {FightStatisic} fight_statisic buff加成
    */
   type Detail = {
+    /** 轮次数据 */
     rounds_data: Array<RoundData>;
+    /** 详细状态 */
     detail_stat: Stat;
+    /** 未知链接 */
     lineup_link: string;
+    /** 后备角色 */
     backup_avatars: Array<Avatar>;
+    /** buff加成 */
     fight_statisic: FightStatisic;
   };
 
   /**
-   * @description 轮次数据
+   * 轮次数据
    * @since Beta v0.8.3
-   * @interface RoundData
-   * @property {Array<Avatar>} avatars 角色
-   * @property {Array<Card>} choice_cards 选中卡片
-   * @property {Array<Buff>} buffs 获得 助益
-   * @property {boolean} is_get_medal 是否获得星章
-   * @property {number} round_id 轮次ID
-   * @property {string} finish_time 完成时间（秒级时间戳）
-   * @property {TGApp.Game.Base.DateTime} finish_date_time 完成时间
-   * @property {Array<Enemy>} enemies 敌人
-   * @property {SplendourBuff} splendour_buff 总体Buff
-   * @property {boolean} is_tarot 是否为塔罗牌
-   * @property {number} tarot_serial_no 塔罗牌序号
    */
   type RoundData = {
+    /** 角色 */
     avatars: Array<Avatar>;
+    /** 选中卡片 */
     choice_cards: Array<Card>;
+    /** 获得助益 */
     buffs: Array<Buff>;
+    /** 是否获得星章 */
     is_get_medal: boolean;
+    /** 轮次ID */
     round_id: number;
+    /** 完成时间（秒级时间戳） */
     finish_time: string;
+    /** 完成时间 */
     finish_date_time: TGApp.Game.Base.DateTime;
+    /** 敌人 */
     enemies: Array<Enemy>;
+    /** 总体Buff */
     splendour_buff: SplendourBuff;
+    /** 是否为塔罗牌 */
     is_tarot: boolean;
+    /** 塔罗牌序号 */
     tarot_serial_no: number;
   };
 
   /**
-   * @description 总体buff
-   * @interface SplendourBuff
+   * 总体buff
    * @since Beta v0.8.0
-   * @property {SplendourBuffSummary} summary 概况
-   * @property {Array<Buff>} buffs 助益
    */
-  type SplendourBuff = { summary: SplendourBuffSummary; buffs: Array<Buff> };
+  type SplendourBuff = {
+    /** 概况 */
+    summary: SplendourBuffSummary;
+    /** 助益 */
+    buffs: Array<Buff>;
+  };
 
   /**
-   * @description 总体buff概况
-   * @interface SplendourBuffSummary
+   * 总体buff概况
    * @since Beta v0.8.0
-   * @property {number} total_level 总等级
-   * @property {string} desc 描述
    */
-  type SplendourBuffSummary = { total_level: number; desc: string };
+  type SplendourBuffSummary = {
+    /** 总等级 */
+    total_level: number;
+    /** 描述 */
+    desc: string;
+  };
 
   /**
-   * @description 战斗数据
-   * @interface FightStatisic
+   * 战斗数据
    * @since Beta v0.6.5
-   * @property {AvatarMini} max_defeat_avatar 击败最多敌人
-   * @property {AvatarMini} max_damage_avatar 最高伤害输出
-   * @property {AvatarMini} max_take_damage_avatar 最高承受伤害
-   * @property {AvatarMini} total_coin_consumed 消耗幻剧之花
-   * @property {Array<AvatarMini>} shortest_avatar_list 最快完成演出队伍
-   * @property {number} total_use_time 总时间
-   * @property {boolean} is_show_battle_stats 是否展示
    */
   type FightStatisic = {
+    /** 击败最多敌人 */
     max_defeat_avatar: AvatarMini | null;
+    /** 最高伤害输出 */
     max_damage_avatar: AvatarMini | null;
+    /** 最高承受伤害 */
     max_take_damage_avatar: AvatarMini | null;
+    /** 消耗幻剧之花 */
     total_coin_consumed: AvatarMini | null;
+    /** 最快完成演出队伍 */
     shortest_avatar_list: Array<AvatarMini>;
+    /** 总时间 */
     total_use_time: number;
+    /** 是否展示 */
     is_show_battle_stats: boolean;
   };
 
   /**
-   * @description 期数
-   * @interface Schedule
+   * 期数
    * @since Beta v0.8.0
-   * @property {string} start_time 开始时间（秒级时间戳）
-   * @property {string} end_time 结束时间（秒级时间戳）
-   * @property {number} schedule_type 类型 // 1-本期。2-上期
-   * @property {number} schedule_id ID
-   * @property {TGApp.Game.Base.DateTime} start_date_time 开始时间
-   * @property {TGApp.Game.Base.DateTime} end_date_time 结束时间
    */
   type Schedule = {
+    /** 开始时间（秒级时间戳） */
     start_time: string;
+    /** 结束时间（秒级时间戳） */
     end_time: string;
+    /** 类型，1-本期，2-上期 */
     schedule_type: number;
+    /** ID */
     schedule_id: number;
+    /** 开始时间 */
     start_date_time: TGApp.Game.Base.DateTime;
+    /** 结束时间 */
     end_date_time: TGApp.Game.Base.DateTime;
   };
 
   /**
-   * @description 塔罗牌状态
+   * 塔罗牌状态
    * @since Beta v0.8.3
-   * @interface TarotState
-   * @property {number} total_num 总数
-   * @property {number} curr_num 当前数
-   * @property {Array<TarotCard>} list 卡片列表
    */
-  type TarotState = { total_num: number; curr_num: number; list: Array<TarotCard> };
+  type TarotState = {
+    /** 总数 */
+    total_num: number;
+    /** 当前数 */
+    curr_num: number;
+    /** 卡片列表 */
+    list: Array<TarotCard>;
+  };
 
   /**
-   * @description 塔罗牌
-   * @interface TarotCard
+   * 塔罗牌
    * @since Beta v0.8.3
-   * @property {string} icon 图标
-   * @property {string} name 名称
-   * @property {boolean} is_unlocked 是否解锁
-   * @property {number} unlock_num 解锁数
    */
-  type TarotCard = { icon: string; name: string; is_unlocked: boolean; unlock_num: number };
+  type TarotCard = {
+    /** 图标 */
+    icon: string;
+    /** 名称 */
+    name: string;
+    /** 是否解锁 */
+    is_unlocked: boolean;
+    /** 解锁数 */
+    unlock_num: number;
+  };
 }

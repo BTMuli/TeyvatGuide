@@ -44,6 +44,26 @@ declare namespace TGApp.BBS.Post {
   };
 
   /**
+   * 咨讯类型
+   * @since Beta v0.9.1
+   * @remarks 用于相关接口参数请求
+   */
+  const NewsType = <const>{
+    /** 公告 */
+    NOTICE: 1,
+    /** 活动 */
+    ACTIVITY: 2,
+    /** 咨讯 */
+    NEWS: 3,
+  };
+
+  /**
+   * 咨讯类型枚举
+   * @since Beta v0.9.1
+   */
+  type NewsTypeEnum = (typeof NewsType)[keyof typeof NewsType];
+
+  /**
    * 资讯返回响应
    * @since Beta v0.7.2
    */

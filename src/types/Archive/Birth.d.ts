@@ -43,9 +43,9 @@ declare namespace TGApp.Archive.Birth {
     /** 角色名 */
     role_name: string;
     /** 画片地址 [荧，空] */
-    take_picture: Array<string> & { length: 2 };
+    take_picture: Array<string>;
     /** 未读画片地址 [荧，空] */
-    unread_picture: Array<string> & { length: 2 };
+    unread_picture: Array<string>;
     /** 画片 xml */
     gal_xml: string;
     /** 画片资源 */

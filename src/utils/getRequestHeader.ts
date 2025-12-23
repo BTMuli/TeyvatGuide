@@ -1,6 +1,5 @@
 /**
- * @file web/utils/getRequestHeader.ts
- * @description 获取请求头
+ * 获取请求头
  * @since Beta v0.7.6
  */
 
@@ -10,24 +9,24 @@ import TGBbs, { type SaltKey } from "./TGBbs.js";
 import { getDeviceInfo, getRandomString } from "./toolFunc.js";
 
 /**
- * @description 获取随机数
+ * 获取随机数
  * @since Alpha v0.2.0
- * @param {number} min 最小值
- * @param {number} max 最大值
- * @returns {number} 随机数
+ * @param min - 最小值
+ * @param max - 最大值
+ * @returns 随机数
  */
 function getRandomNumber(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 /**
- * @description 获取 ds
+ * 获取 ds
  * @since Beta v0.7.3
- * @param {string} method 请求方法
- * @param {string} data 请求数据
- * @param {SaltKey} saltType salt 类型
- * @param {boolean} isSign 是否为签名
- * @returns {string} ds
+ * @param method - 请求方法
+ * @param data - 请求数据
+ * @param saltType - salt 类型
+ * @param isSign - 是否为签名
+ * @returns ds
  */
 function getDS(method: string, data: string, saltType: SaltKey, isSign: boolean): string {
   const salt = TGBbs.salt[saltType];
@@ -43,10 +42,10 @@ function getDS(method: string, data: string, saltType: SaltKey, isSign: boolean)
 }
 
 /**
- * @description ds 算法需要数据转换后的字符串是按照字典序排序的
+ * ds 算法需要数据转换后的字符串是按照字典序排序的
  * @since Beta v0.6.5
- * @param { Record<string, string | number | boolean | Array<string>> | string} obj object
- * @returns {string} query string
+ * @param obj - object
+ * @returns query string
  */
 function transParams(
   obj: Record<string, string | number | boolean | Array<string>> | string,
@@ -61,10 +60,10 @@ function transParams(
 }
 
 /**
- * @description 将 cookie 对象转换为字符串
+ * 将 cookie 对象转换为字符串
  * @since Alpha v0.1.5
- * @param {Record<string, string>} cookie cookie
- * @returns {string} 转换后的 cookie
+ * @param cookie - cookie
+ * @returns 转换后的 cookie
  */
 function transCookie(cookie: Record<string, string>): string {
   let res = "";
@@ -75,14 +74,14 @@ function transCookie(cookie: Record<string, string>): string {
 }
 
 /**
- * @description 获取请求头
+ * 获取请求头
  * @since Beta v0.7.3
- * @param {Record<string, string>} cookie cookie
- * @param {string} method 请求方法
- * @param {Record<string, string | number | boolean | Array<string>> | string} data 请求数据
- * @param {SaltKey} saltType salt 类型
- * @param {boolean} isSign 是否为签名
- * @returns {Record<string, string>} 请求头
+ * @param cookie - cookie
+ * @param method - 请求方法
+ * @param data - 请求数据
+ * @param saltType - salt 类型
+ * @param isSign - 是否为签名
+ * @returns 请求头
  */
 export function getRequestHeader(
   cookie: Record<string, string>,
@@ -105,13 +104,13 @@ export function getRequestHeader(
 }
 
 /**
- * @description 获取 DS
+ * 获取 DS
  * @since Beta v0.7.3
- * @param {SaltKey} saltType salt 类型
- * @param {number} dsType ds 类型
- * @param {Record<string, string|number>|string} body
- * @param {Record<string, string|number>|string} query
- * @returns {string} DS
+ * @param saltType -  salt 类型
+ * @param dsType - ds 类型
+ * @param body - body
+ * @param query - query
+ * @returns DS
  */
 export function getDS4JS(saltType: SaltKey, dsType: 1, body?: never, query?: never): string;
 export function getDS4JS(

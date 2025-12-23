@@ -1,6 +1,5 @@
 /**
- * @file utils/UIAF.ts
- * @description UIAF工具类
+ * UIAF工具类
  * @since Beta v0.6.0
  */
 
@@ -15,9 +14,9 @@ import TGLogger from "./TGLogger.js";
 import { UiafSchema } from "@/data/index.js";
 
 /**
- * @description 获取 UIAF 头部信息
+ * 获取 UIAF 头部信息
  * @since Beta v0.3.4
- * @returns {Promise<TGApp.Plugins.UIAF.Export>}
+ * @returns UIAF 头部信息
  */
 export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
   return {
@@ -29,10 +28,10 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
 }
 
 /**
- * @description 检测是否存在 UIAF 数据，采用 ajv 验证 schema
+ * 检测是否存在 UIAF 数据，采用 ajv 验证 schema
  * @since Beta v0.5.0
- * @param {string} path - UIAF 数据路径
- * @returns {Promise<boolean>} 是否存在 UIAF 数据
+ * @param path - UIAF 数据路径
+ * @returns 是否存在 UIAF 数据
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await readTextFile(path);
@@ -59,9 +58,9 @@ export async function verifyUiafData(path: string): Promise<boolean> {
 }
 
 /**
- * @description 验证UIAF数据-剪贴板
+ * 验证UIAF数据-剪贴板
  * @since Beta v0.4.7
- * @returns {boolean} 是否验证通过
+ * @returns 是否验证通过
  */
 export async function verifyUiafDataClipboard(): Promise<boolean> {
   // @ts-expect-error-next-line
@@ -88,10 +87,10 @@ export async function verifyUiafDataClipboard(): Promise<boolean> {
 }
 
 /**
- * @description 读取 UIAF 数据
+ * 读取 UIAF 数据
  * @since Beta v0.5.0
- * @param {string} userPath - UIAF 数据路径
- * @returns {Promise<TGApp.Plugins.UIAF.Data>} UIAF 数据
+ * @param userPath - UIAF 数据路径
+ * @returns UIAF 数据
  */
 export async function readUiafData(userPath: string): Promise<TGApp.Plugins.UIAF.Data> {
   const fileData = await readTextFile(userPath);

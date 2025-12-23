@@ -46,8 +46,8 @@ const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();
 const visible = defineModel<boolean>();
 const submit = ref<boolean>(false);
-const collectList = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
-const postCollect = shallowRef<Array<TGApp.Sqlite.UserCollection.UFMap>>([]);
+const collectList = shallowRef<Array<TGApp.Sqlite.Collection.Collection>>([]);
+const postCollect = shallowRef<Array<TGApp.Sqlite.Collection.PcMap>>([]);
 const selectList = shallowRef<Array<string>>([]);
 
 watch(
@@ -72,7 +72,7 @@ async function freshData(): Promise<void> {
   }
 }
 
-async function deleteCollect(item: TGApp.Sqlite.UserCollection.UFCollection): Promise<void> {
+async function deleteCollect(item: TGApp.Sqlite.Collection.Collection): Promise<void> {
   const delCheck = await showDialog.check("确定删除分类?", "该分类若有帖子，则会变为未分类");
   if (!delCheck) {
     showSnackbar.cancel("取消删除");

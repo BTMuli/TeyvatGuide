@@ -158,7 +158,7 @@ const tab = ref<string>("overview");
 const ovShow = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
 const selectItem = shallowRef<Array<string>>([]);
-const gachaListCur = shallowRef<Array<TGApp.Sqlite.GachaRecords.TableGacha>>([]);
+const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
 
 onMounted(async () => {
@@ -274,7 +274,7 @@ async function refreshGachaPool(
 ): Promise<void> {
   let endId = "0";
   let reqId = "0";
-  let gachaDataMap: Record<string, string[]> | undefined = undefined;
+  let gachaDataMap: Record<string, Array<string>> | undefined = undefined;
   let page = 0;
   await showLoading.start(`正在刷新${label}数据`);
   if (!force) endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
@@ -301,7 +301,7 @@ async function refreshGachaPool(
       }
       break;
     }
-    const uigfList: TGApp.Plugins.UIGF.GachaItem[] = [];
+    const uigfList: Array<TGApp.Plugins.UIGF.GachaItem> = [];
     if (force) await showLoading.update(`[${label}] 第${page}页，${gachaRes.length}条`);
     for (const item of gachaRes) {
       if (!force) {

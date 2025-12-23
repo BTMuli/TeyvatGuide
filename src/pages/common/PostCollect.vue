@@ -145,8 +145,8 @@ const showCollect = ref<boolean>(false);
 const sortId = ref<boolean>(false);
 
 const selectedPost = shallowRef<Array<string>>([]);
-const collections = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
-const selected = shallowRef<Array<TGApp.Sqlite.UserCollection.UFPost>>([]);
+const collections = shallowRef<Array<TGApp.Sqlite.Collection.Collection>>([]);
+const selected = shallowRef<Array<TGApp.Sqlite.Collection.PostRaw>>([]);
 
 const length = computed<number>(() => Math.ceil(selected.value.length / 12));
 const view = computed<number>(() => (length.value === 1 ? 1 : length.value > 5 ? 5 : length.value));

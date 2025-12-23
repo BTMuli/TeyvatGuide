@@ -1,6 +1,5 @@
 /**
- * @file plugins/Sqlite/modules/avatarBirth.ts
- * @description 角色生日模块
+ * 角色生日模块
  * @since Beta v0.8.0
  */
 
@@ -12,11 +11,11 @@ import {
 } from "@/data/index.js";
 
 /**
- * @description 判断今天是不是角色生日
+ * 判断今天是不是角色生日
  * @since Beta v0.4.6
- * @return {TGApp.Archive.Birth.CalendarItem[]} 角色生日
+ * @returns 角色生日
  */
-function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
+function isAvatarBirth(): Array<TGApp.Archive.Birth.CalendarItem> {
   const date = new Date();
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -37,20 +36,20 @@ function isAvatarBirth(): TGApp.Archive.Birth.CalendarItem[] {
 }
 
 /**
- * @description 校验是否是闰年
+ * 校验是否是闰年
  * @since Beta v0.4.6
- * @param {number} year - 年份
- * @return {boolean} 是否是闰年
+ * @param year - 年份
+ * @returns 是否是闰年
  */
 function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
 /**
- * @description 获取下一个角色生日
+ * 获取下一个角色生日
  * @since Beta v0.7.0
- * @param {[number,number]} date - 日期
- * @return {TGApp.Archive.Birth.RoleItem[]} 下一个角色生日
+ * @param date - 日期
+ * @returns 下一个角色生日
  */
 async function getNextAvatarBirth(
   date?: [number, number],
@@ -79,7 +78,7 @@ async function getNextAvatarBirth(
   const dataGet = AppCharacterData.filter(
     (i) => i.birthday.toString() === birthGet.birthday.toString(),
   );
-  const res: TGApp.Archive.Birth.RoleItem[] = [];
+  const res: Array<TGApp.Archive.Birth.RoleItem> = [];
   for (const i of dataGet) {
     const find = ArcBirRole.find((j) => j.role_id === i.id);
     if (find) {

@@ -8,7 +8,7 @@ declare namespace TGApp.Sqlite.UserBag {
    * 用户背包材料表-存储数据
    * @since Beta v0.9.0
    */
-  type TableMaterialRaw = {
+  type MaterialRaw = {
     /** 存档/用户UID */
     uid: number;
     /** 材料ID */
@@ -25,7 +25,7 @@ declare namespace TGApp.Sqlite.UserBag {
    * 用户背包材料表-解析数据
    * @since Beta v0.9.0
    */
-  type TableMaterial = {
+  type MaterialTable = {
     /** 存档/用户UID */
     uid: number;
     /** 材料ID */

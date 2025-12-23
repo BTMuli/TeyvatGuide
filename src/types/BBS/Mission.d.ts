@@ -5,7 +5,7 @@
 
 declare namespace TGApp.BBS.Mission {
   /**
-   * @description 任务信息返回响应
+   * 任务信息返回响应
    * @since Beta v0.7.0
    */
   type InfoResp = TGApp.BBS.Response.BaseWithData<InfoRes>;

@@ -1,6 +1,5 @@
 /**
- * @file main.ts
- * @description 应用入口
+ * 应用入口
  * @since Beta v0.7.2
  */
 

@@ -46,7 +46,7 @@ function getRelicPosName(): string {
 function getRelicTitle(): string {
   const posName = getRelicPosName();
   if (props.modelValue === false) return `${posName}：未装备`;
-  const relicProps: string[] = [];
+  const relicProps: Array<string> = [];
   const mainProp = userStore.getProp(props.modelValue.main_property.property_type);
   relicProps.push(
     `主词条：${mainProp === false ? "未知属性" : mainProp.name} ${props.modelValue.main_property.value}`,

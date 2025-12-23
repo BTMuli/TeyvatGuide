@@ -1,6 +1,5 @@
 /**
- * @file plugins/Bili/index.ts
- * @description Bili插件
+ * Bili插件
  * @since Beta v0.4.0
  */
 

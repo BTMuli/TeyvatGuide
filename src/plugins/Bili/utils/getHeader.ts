@@ -1,6 +1,5 @@
 /**
- * @file plugins/Bili/utils/getHeader.ts
- * @description 获取请求头
+ * 获取请求头
  * @since Beta v0.5.7
  */
 

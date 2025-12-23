@@ -1,6 +1,5 @@
 /**
- * @file plugins/Sqlite/modules/userCombat.ts
- * @description Sqlite-幻想真境剧诗模块
+ * 幻想真境剧诗模块
  * @since Beta v0.8.0
  */
 
@@ -12,12 +11,12 @@ import { timestampToDate } from "@utils/toolFunc.js";
 import TGSqlite from "../index.js";
 
 /**
- * @description 将通过 api 获取到的数据转换为数据库中的数据
+ * 将通过 api 获取到的数据转换为数据库中的数据
  * @since Beta v0.8.0
- * @param {TGApp.Game.Combat.Combat} data - 剧诗数据
- * @returns {TGApp.Sqlite.Combat.SingleTable} 转换后端数据
+ * @param data - 剧诗数据
+ * @returns 转换后端数据
  */
-function transUserCombat(data: TGApp.Game.Combat.Combat): TGApp.Sqlite.Combat.SingleTable {
+function transUserCombat(data: TGApp.Game.Combat.Combat): TGApp.Sqlite.Combat.TableTrans {
   return {
     uid: "",
     detail: data.detail,
@@ -32,13 +31,13 @@ function transUserCombat(data: TGApp.Game.Combat.Combat): TGApp.Sqlite.Combat.Si
 }
 
 /**
- * @description 直接插入数据
+ * 直接插入数据
  * @since Beta v0.6.3
- * @param {TGApp.Sqlite.Combat.SingleTable} data 剧诗数据
- * @param {string} [uid] 用户UID
- * @returns {string}
+ * @param data - 剧诗数据
+ * @param uid - 用户UID
+ * @returns sql
  */
-function getInsertSql(data: TGApp.Sqlite.Combat.SingleTable, uid?: string): string {
+function getInsertSql(data: TGApp.Sqlite.Combat.TableTrans, uid?: string): string {
   const timeNow = timestampToDate(new Date().getTime());
   const hasData = data.hasData ? 1 : 0;
   const hasDetailData = data.hasDetailData ? 1 : 0;
@@ -58,9 +57,9 @@ function getInsertSql(data: TGApp.Sqlite.Combat.SingleTable, uid?: string): stri
 }
 
 /**
- * @description 获取所有有数据的UID
+ * 获取所有有数据的UID
  * @since Beta v0.6.3
- * @returns {Promise<Array<string>>}
+ * @returns uid列表
  */
 async function getAllUid(): Promise<Array<string>> {
   const db = await TGSqlite.getDB();
@@ -70,25 +69,25 @@ async function getAllUid(): Promise<Array<string>> {
 }
 
 /**
- * @description 获取剧诗数据
+ * 获取剧诗数据
  * @since Beta v0.8.0
- * @param {string} [uid] - 游戏UID
- * @returns {Promise<TGApp.Sqlite.Abyss.TableRaw[]>}
+ * @param uid - 游戏UID
+ * @returns 剧诗数据
  */
-async function getCombat(uid?: string): Promise<TGApp.Sqlite.Combat.SingleTable[]> {
+async function getCombat(uid?: string): Promise<Array<TGApp.Sqlite.Combat.TableTrans>> {
   const db = await TGSqlite.getDB();
-  let resR: Array<TGApp.Sqlite.Combat.RawTable>;
+  let resR: Array<TGApp.Sqlite.Combat.TableRaw>;
   if (uid === undefined) {
-    resR = await db.select<Array<TGApp.Sqlite.Combat.RawTable>>(
+    resR = await db.select<Array<TGApp.Sqlite.Combat.TableRaw>>(
       "SELECT * FROM RoleCombat ORDER BY id DESC;",
     );
   } else {
-    resR = await db.select<Array<TGApp.Sqlite.Combat.RawTable>>(
+    resR = await db.select<Array<TGApp.Sqlite.Combat.TableRaw>>(
       "SELECT * FROM RoleCombat WHERE uid = ? ORDER BY id DESC;",
       [uid],
     );
   }
-  const res: TGApp.Sqlite.Combat.SingleTable[] = [];
+  const res: Array<TGApp.Sqlite.Combat.TableTrans> = [];
   for (const raw of resR) {
     res.push({
       uid: raw.uid,
@@ -106,11 +105,11 @@ async function getCombat(uid?: string): Promise<TGApp.Sqlite.Combat.SingleTable[
 }
 
 /**
- * @description 保存剧诗数据
+ * 保存剧诗数据
  * @since Beta v0.6.3
- * @param {string} uid - 游戏UID
- * @param {TGApp.Game.Abyss.FullData} data - 深渊数据
- * @returns {Promise<void>}
+ * @param uid - 游戏UID
+ * @param data - 深渊数据
+ * @returns 无返回值
  */
 async function saveCombat(uid: string, data: TGApp.Game.Combat.Combat): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -118,10 +117,10 @@ async function saveCombat(uid: string, data: TGApp.Game.Combat.Combat): Promise<
 }
 
 /**
- * @description 删除指定UID存档的数据
+ * 删除指定UID存档的数据
  * @since Beta v0.6.3
- * @param {string} uid - 游戏UID
- * @returns {Promise<void>}
+ * @param uid - 游戏UID
+ * @returns 无返回值
  */
 async function delCombat(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -131,8 +130,8 @@ async function delCombat(uid: string): Promise<void> {
 /**
  * 备份剧诗数据
  * @since Beta v0.9.0
- * @param {string} dir - 备份目录
- * @returns {Promise<void>}
+ * @param dir - 备份目录
+ * @returns 无返回值
  */
 async function backupCombat(dir: string): Promise<void> {
   if (!(await exists(dir))) {
@@ -144,16 +143,16 @@ async function backupCombat(dir: string): Promise<void> {
 }
 
 /**
- * @description 恢复剧诗数据
+ * 恢复剧诗数据
  * @since Beta v0.8.0
- * @param {string} dir - 备份文件目录
- * @returns {Promise<boolean>}
+ * @param dir - 备份文件目录
+ * @returns 是否恢复成功
  */
 async function restoreCombat(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}combat.json`;
   if (!(await exists(filePath))) return false;
   try {
-    const data: Array<TGApp.Sqlite.Combat.SingleTable> = JSON.parse(await readTextFile(filePath));
+    const data: Array<TGApp.Sqlite.Combat.TableTrans> = JSON.parse(await readTextFile(filePath));
     const db = await TGSqlite.getDB();
     for (const abyss of data) await db.execute(getInsertSql(abyss));
     return true;

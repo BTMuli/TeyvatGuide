@@ -1,6 +1,6 @@
 <template>
   <TOverlay v-model="visible" blur-val="5px">
-    <div class="tua-ao-container" v-if="props.data">
+    <div v-if="props.data" class="tua-ao-container">
       <slot name="left"></slot>
       <div class="tua-ao-box">
         <div class="tua-ao-top">
@@ -23,13 +23,13 @@
           <div class="tua-ao-mid-title">
             <span>原石奖励：</span>
             <span>{{ props.data.reward }}</span>
-            <img src="/icon/material/201.webp" alt="原石" />
+            <img alt="原石" src="/icon/material/201.webp" />
           </div>
           <div class="tua-ao-mid-title">
             <span>触发方式：</span>
             <span>{{ parseTriggerType() }}</span>
           </div>
-          <div class="tua-ao-mid-item" v-for="item in props.data.trigger.task" :key="item.questId">
+          <div v-for="item in props.data.trigger.task" :key="item.questId" class="tua-ao-mid-item">
             <v-icon size="16">mdi-alert-decagram</v-icon>
             <span class="tua-ao-click" @click="searchDirect(item.name)">{{ item.name }}</span>
             <span>（{{ item.type }}）</span>
@@ -40,11 +40,11 @@
             <span>是否完成：</span>
             <span>{{ props.data.isCompleted ? "是" : "否" }}</span>
           </div>
-          <div class="tua-ao-bottom-title" v-if="props.data.isCompleted">
+          <div v-if="props.data.isCompleted" class="tua-ao-bottom-title">
             <span>完成时间：</span>
             <span>{{ props.data.completedTime }}</span>
           </div>
-          <div class="tua-ao-bottom-title" v-if="props.data.progress > 0">
+          <div v-if="props.data.progress > 0" class="tua-ao-bottom-title">
             <span>当前进度：</span>
             <span>{{ props.data.progress }}</span>
           </div>
@@ -56,7 +56,7 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
-  <VpOverlaySearch gid="2" v-model="showSearch" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :keyword="search" gid="2" />
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
@@ -68,7 +68,7 @@ import { ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 
-type ToAchiInfoProps = { data: TGApp.Sqlite.Achievement.RenderAchi };
+type ToAchiInfoProps = { data: TGApp.App.Achievement.RenderItem };
 type ToAchiInfoEmits = (e: "select-series", v: number) => void;
 
 const props = defineProps<ToAchiInfoProps>();

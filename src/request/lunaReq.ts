@@ -14,8 +14,8 @@ type ReqParam = { host?: string; actId: string };
 /**
  * 根据服务器获取actId跟host
  * @since Beta v0.9.0
- * @param {string} region - 服务器
- * @returns {string} actId
+ * @param region - 服务器
+ * @returns  actId
  */
 function getActConf(region: string): ReqParam | false {
   switch (region) {
@@ -47,9 +47,9 @@ function getActConf(region: string): ReqParam | false {
 /**
  * 获取签到奖励列表
  * @since Beta v0.7.2
- * @property {TGApp.Sqlite.Account.Game} account - 账号信息
- * @property {Record<string, string>} cookie - cookies
- * @returns {Promise<TGApp.BBS.Sign.HomeRes|TGApp.BBS.Response.Base>}
+ * @param account - 账号信息
+ * @param cookie - cookies
+ * @returns 签到奖励列表或基础响应
  */
 async function getLunaHome(
   account: TGApp.Sqlite.Account.Game,
@@ -81,9 +81,9 @@ async function getLunaHome(
 /**
  * 获取签到信息
  * @since Beta v0.7.2
- * @property {TGApp.Sqlite.Account.Game} account - 账号信息
- * @property {Record<string, string>} cookie - cookies
- * @returns {Promise<TGApp.BBS.Sign.InfoRes|TGApp.BBS.Response.Base>}
+ * @param account - 账号信息
+ * @param cookie - cookies
+ * @returns 签到信息或基础响应
  */
 async function getLunaInfo(
   account: TGApp.Sqlite.Account.Game,
@@ -120,10 +120,10 @@ async function getLunaInfo(
 /**
  * 签到
  * @since Beta v0.9.0
- * @param {TGApp.Sqlite.Account.Game} account - 账号信息
- * @param {Record<string, string>} cookie - cookies
- * @param {string} [challenge] 极验信息
- * @returns {Promise<TGApp.BBS.Sign.SignRes | TGApp.BBS.Response.Base>}
+ * @param account - 账号信息
+ * @param cookie - cookies
+ * @param challenge - 极验信息
+ * @returns 签到结果或基础响应
  */
 async function lunaSign(
   account: TGApp.Sqlite.Account.Game,
@@ -159,9 +159,9 @@ async function lunaSign(
 /**
  * 获取补签信息
  * @since Beta v0.9.0
- * @param {TGApp.Sqlite.Account.Game} account - 账号信息
- * @param {Record<string, string>} cookie - cookies
- * @returns {Promise<TGApp.BBS.Sign.ResignInfoRes|TGApp.BBS.Response.Base>}
+ * @param account - 账号信息
+ * @param cookie - cookies
+ * @returns 补签信息或基础响应
  */
 async function getResignInfo(
   account: TGApp.Sqlite.Account.Game,
@@ -198,10 +198,10 @@ async function getResignInfo(
 /**
  * 补签
  * @since Beta v0.9.0
- * @param {TGApp.Sqlite.Account.Game} account - 账号信息
- * @param {Record<string, string>} cookie - cookies
- * @param {string} [challenge] 极验信息
- * @returns {Promise<TGApp.BBS.Sign.ResignRes | TGApp.BBS.Response.Base>}
+ * @param account - 账号信息
+ * @param cookie - cookies
+ * @param challenge - 极验信息
+ * @returns 补签结果或基础响应
  */
 async function lunaResign(
   account: TGApp.Sqlite.Account.Game,

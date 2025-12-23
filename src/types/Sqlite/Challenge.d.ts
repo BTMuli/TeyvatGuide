@@ -1,59 +1,67 @@
 /**
- * @file types/Sqlite/Challenge.d.ts
- * @description 幽境危战类型定义文件
+ * 幽境危战类型定义文件
  * @since Beta v0.8.0
  */
 
 declare namespace TGApp.Sqlite.Challenge {
   /**
-   * @description 数据库-幽境危战表（原始数据）
+   * 幽静危战表数据
    * @since Beta v0.8.0
-   * @interface RawTable
-   * @property {string} uid - 用户 UID
-   * @property {number} id - 挑战 ID
-   * @property {string} startTime - 开始时间
-   * @property {string} endTime - 结束时间
-   * @property {string} name - 挑战名称
-   * @property {string} single - 挑战单个数据（JSON 字符串）
-   * @property {string} mp - 挑战多人数据（JSON 字符串）
-   * @property {string} blings - 挑战光环数据（JSON 字符串）
-   * @property {string} updated - 更新时间
+   * @remarks HardChallenge 表
    */
-  type RawTable = {
+  type TableRaw = {
+    /** 用户UID */
     uid: string;
+    /** 数据 ID */
     id: number;
+    /** 开始时间 */
     startTime: string;
+    /** 结束时间 */
     endTime: string;
+    /** 挑战名称 */
     name: string;
-    single: string; // JSON 字符串
-    mp: string; // JSON 字符串
-    blings: string; // JSON 字符串
+    /**
+     * 单人挑战数据
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Challenge.Challenge} 类型
+     */
+    single: string;
+    /**
+     * 联机挑战数据
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Challenge.Challenge} 类型
+     */
+    mp: string;
+    /**
+     * 赋光数据
+     * @remarks 序列化，反序列化后是 {@link TGApp.Game.Challenge.ChallengeBlings} 类型
+     */
+    blings: string;
+    /** 更新时间 */
     updated: string;
   };
 
   /**
-   * @description 数据库-幽境危战表
-   * @since Beta v0.8.0
-   * @interface SingleTable
-   * @property {string} uid - 用户 UID
-   * @property {number} id - 挑战 ID
-   * @property {string} startTime - 开始时间
-   * @property {string} endTime - 结束时间
-   * @property {string} name - 挑战名称
-   * @property {TGApp.Game.Challenge.Challenge} single - 挑战单个数据
-   * @property {TGApp.Game.Challenge.Challenge} mp - 挑战多人数据
-   * @property {TGApp.Game.Challenge.ChallengeBlings} blings - 挑战光环数据
-   * @property {string} updated - 更新时间
+   * 幽境危战数据
+   * @since Beta v0.9.1
+   * @remarks 从 {@link TableRaw} 解析过来的数据
    */
-  type SingleTable = {
+  type TableTrans = {
+    /** 用户UID */
     uid: string;
+    /** 数据 ID */
     id: number;
+    /** 开始时间 */
     startTime: string;
+    /** 结束时间 */
     endTime: string;
+    /** 挑战名称 */
     name: string;
+    /** 单人挑战数据 */
     single: TGApp.Game.Challenge.Challenge;
+    /** 联机挑战数据 */
     mp: TGApp.Game.Challenge.Challenge;
+    /** 赋光数据 */
     blings: TGApp.Game.Challenge.ChallengeBlings;
+    /** 更新时间 */
     updated: string;
   };
 }

@@ -1,6 +1,5 @@
 /**
- * @file utils TGBuild.ts
- * @description 用于获取 vite 打包时间
+ * 用于获取 vite 打包时间
  * @see https://gitee.com/lihanspace/vite-plugin-build-time
  * @since Alpha v0.1.4
  */
@@ -9,7 +8,7 @@ import type { Plugin } from "vite";
 
 const buildTimeKey = "buildTime";
 
-const buildTimePlugin = (modes: string[] = []): Plugin => {
+const buildTimePlugin = (modes: Array<string> = []): Plugin => {
   let _mode = "";
   return {
     name: "build-time",

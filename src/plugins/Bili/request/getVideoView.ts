@@ -1,6 +1,5 @@
 /**
- * @file plugins/Bili/request/getVideoView.ts
- * @description Bili插件-获取视频基本信息
+ * Bili插件-获取视频基本信息
  * @since Beta v0.5.0
  */
 
@@ -10,11 +9,11 @@ import TGHttp from "@utils/TGHttp.js";
 import TGLogger from "@utils/TGLogger.js";
 
 /**
- * @description 获取视频基本信息
+ * 获取视频基本信息
  * @since Beta v0.5.0
- * @param {string} [aid] 视频AV号
- * @param {string} [bvid] 视频BV号
- * @returns {Promise<TGApp.Plugins.Bili.Video.ViewData>} 视频基本信息
+ * @param aid - 视频 AV 号
+ * @param bvid - 视频 BV 号
+ * @returns 视频基本信息
  */
 async function getVideoView(
   aid?: string,

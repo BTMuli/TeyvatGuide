@@ -1,6 +1,5 @@
 /**
- * @file sqlite/modules/userChallenge.ts
- * @description 幽境危战模块
+ * 幽境危战模块
  * @since Beta v0.7.10
  */
 
@@ -12,14 +11,14 @@ import { timestampToDate } from "@utils/toolFunc.js";
 import TGSqlite from "../index.js";
 
 /**
- * @description 将通过 api 获取到的数据转换为数据库中的数据
+ * 将通过 api 获取到的数据转换为数据库中的数据
  * @since Beta v0.8.0
- * @param {TGApp.Game.Challenge.ChallengeItem} data - 挑战数据
- * @returns {TGApp.Sqlite.Challenge.SingleTable} 转换后的数据
+ * @param data - 挑战数据
+ * @returns 转换后的数据
  */
 function transUserChallenge(
   data: TGApp.Game.Challenge.ChallengeItem,
-): TGApp.Sqlite.Challenge.SingleTable {
+): TGApp.Sqlite.Challenge.TableTrans {
   return {
     uid: "",
     id: Number(data.schedule.schedule_id),
@@ -34,13 +33,13 @@ function transUserChallenge(
 }
 
 /**
- * @description 直接插入数据
+ * 直接插入数据
  * @since Beta v0.8.0
- * @param {TGApp.Sqlite.Challenge.SingleTable} data - 挑战数据
- * @param {string} [uid] - 用户UID
- * @returns {string} - 插入 SQL 语句
+ * @param data - 挑战数据
+ * @param uid - 用户UID
+ * @returns 插入 SQL 语句
  */
-function getInsertSql(data: TGApp.Sqlite.Challenge.SingleTable, uid?: string): string {
+function getInsertSql(data: TGApp.Sqlite.Challenge.TableTrans, uid?: string): string {
   const timeNow = timestampToDate(new Date().getTime());
   return `
       INSERT INTO HardChallenge(uid, id, startTime, endTime, name, single, mp, blings, updated)
@@ -59,9 +58,9 @@ function getInsertSql(data: TGApp.Sqlite.Challenge.SingleTable, uid?: string): s
 }
 
 /**
- * @description 获取所有数据的UID
+ * 获取所有数据的UID
  * @since Beta v0.8.0
- * @return {Promise<Array<string>} - 所有数据的UID
+ * @returns 所有数据的UID
  */
 async function getAllUid(): Promise<Array<string>> {
   const db = await TGSqlite.getDB();
@@ -71,20 +70,20 @@ async function getAllUid(): Promise<Array<string>> {
 }
 
 /**
- * @description 获取挑战数据
+ * 获取挑战数据
  * @since Beta v0.7.10
- * @param {string} [uid] - 游戏UID
- * @return {Promise<Array<TGApp.Sqlite.Challenge.SingleTable>>} - 挑战数据
+ * @param uid - 游戏UID
+ * @returns 挑战数据
  */
-async function getChallenge(uid?: string): Promise<Array<TGApp.Sqlite.Challenge.SingleTable>> {
+async function getChallenge(uid?: string): Promise<Array<TGApp.Sqlite.Challenge.TableTrans>> {
   const db = await TGSqlite.getDB();
-  let resR: Array<TGApp.Sqlite.Challenge.RawTable>;
+  let resR: Array<TGApp.Sqlite.Challenge.TableRaw>;
   if (uid === undefined) {
-    resR = await db.select<Array<TGApp.Sqlite.Challenge.RawTable>>(
+    resR = await db.select<Array<TGApp.Sqlite.Challenge.TableRaw>>(
       "SELECT * FROM HardChallenge ORDER BY id DESC;",
     );
   } else {
-    resR = await db.select<Array<TGApp.Sqlite.Challenge.RawTable>>(
+    resR = await db.select<Array<TGApp.Sqlite.Challenge.TableRaw>>(
       `SELECT *
        FROM HardChallenge
        WHERE uid = ?
@@ -92,7 +91,7 @@ async function getChallenge(uid?: string): Promise<Array<TGApp.Sqlite.Challenge.
       [uid],
     );
   }
-  const res: Array<TGApp.Sqlite.Challenge.SingleTable> = [];
+  const res: Array<TGApp.Sqlite.Challenge.TableTrans> = [];
   for (const raw of resR) {
     res.push({
       uid: raw.uid,
@@ -110,11 +109,11 @@ async function getChallenge(uid?: string): Promise<Array<TGApp.Sqlite.Challenge.
 }
 
 /**
- * @description 保存挑战数据
+ * 保存挑战数据
  * @since Beta v0.8.0
- * @param {string} uid - 游戏UID
- * @param {TGApp.Game.Challenge.ChallengeItem} data - 挑战数据
- * @return {Promise<void>}
+ * @param uid - 游戏UID
+ * @param data - 挑战数据
+ * @returns 无返回值
  */
 async function saveChallenge(uid: string, data: TGApp.Game.Challenge.ChallengeItem): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -122,10 +121,10 @@ async function saveChallenge(uid: string, data: TGApp.Game.Challenge.ChallengeIt
 }
 
 /**
- * @description 删除指定UID的挑战数据
+ * 删除指定UID的挑战数据
  * @since Beta v0.8.0
- * @param {string} uid - 游戏UID
- * @return {Promise<void>}
+ * @param uid - 游戏UID
+ * @returns 无返回值
  */
 async function delChallenge(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -133,10 +132,10 @@ async function delChallenge(uid: string): Promise<void> {
 }
 
 /**
- * @description 备份挑战数据
+ * 备份挑战数据
  * @since Beta v0.8.0
- * @param {string} dir - 备份目录
- * @return {Promise<void>}
+ * @param dir - 备份目录
+ * @returns 无返回值
  */
 async function backupChallenge(dir: string): Promise<void> {
   if (!(await exists(dir))) {
@@ -148,18 +147,16 @@ async function backupChallenge(dir: string): Promise<void> {
 }
 
 /**
- * @description 恢复挑战数据
+ * 恢复挑战数据
  * @since Beta v0.8.0
- * @param {string} dir - 备份目录
- * @return {Promise<boolean>}
+ * @param dir - 备份目录
+ * @returns 是否恢复成功
  */
 async function restoreChallenge(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}challenge.json`;
   if (!(await exists(filePath))) return false;
   try {
-    const data: Array<TGApp.Sqlite.Challenge.SingleTable> = JSON.parse(
-      await readTextFile(filePath),
-    );
+    const data: Array<TGApp.Sqlite.Challenge.TableTrans> = JSON.parse(await readTextFile(filePath));
     const db = await TGSqlite.getDB();
     for (const challenge of data) await db.execute(getInsertSql(challenge));
     return true;

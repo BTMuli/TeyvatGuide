@@ -20,10 +20,10 @@ import { bytesToSize } from "./toolFunc.js";
 /**
  * 保存图片-canvas
  * @since Beta v0.9.0
- * @param {Uint8Array} buffer - 图片数据
- * @param {string} filename - 文件名
- * @param {string} format - 文件格式
- * @returns {Promise<void>} 无返回值
+ * @param buffer - 图片数据
+ * @param filename - 文件名
+ * @param format - 文件格式
+ * @returns 无返回值
  */
 export async function saveCanvasImg(
   buffer: ArrayBuffer,
@@ -49,10 +49,10 @@ export async function saveCanvasImg(
 }
 
 /**
- * @description 将图片保存到本地
+ * 将图片保存到本地
  * @since Beta v0.5.0
- * @param {string} url - 图片链接
- * @returns {Promise<string>} 图片元素
+ * @param url - 图片链接
+ * @returns 图片元素
  */
 export async function saveImgLocal(url: string): Promise<string> {
   const res = await TGHttp<Uint8Array>(url, { method: "GET", isBlob: true });
@@ -64,8 +64,8 @@ export async function saveImgLocal(url: string): Promise<string> {
 /**
  * 返回图片 buffer
  * @since Beta v0.9.0
- * @param {string} url - 图片链接
- * @returns {Promise<Uint8Array>} 图片 buffer
+ * @param url - 图片链接
+ * @returns 图片 buffer
  */
 export async function getImageBuffer(url: string): Promise<ArrayBuffer> {
   return await TGHttp<ArrayBuffer>(url, { method: "GET", isBlob: true });
@@ -74,7 +74,7 @@ export async function getImageBuffer(url: string): Promise<ArrayBuffer> {
 /**
  * 获取分享截图背景色
  * @since Beta v0.9.0
- * @returns {string} 背景色
+ * @returns 背景色
  */
 function getShareImgBgColor(): string {
   let theme = localStorage.getItem("theme");
@@ -86,11 +86,11 @@ function getShareImgBgColor(): string {
 /**
  * 生成分享截图
  * @since Beta v0.9.0
- * @param {string} fileName - 文件名
- * @param {HTMLElement} element - 元素
- * @param {number} scale - 缩放比例
- * @param {boolean} scrollable - 是否可滚动，一般为上下滚动
- * @returns {Promise<void>} 无返回值
+ * @param fileName - 文件名
+ * @param element - 元素
+ * @param scale - 缩放比例
+ * @param scrollable - 是否可滚动，一般为上下滚动
+ * @returns 无返回值
  */
 export async function generateShareImg(
   fileName: string,
@@ -156,8 +156,8 @@ export async function generateShareImg(
 /**
  * 复制到剪贴板
  * @since Beta v0.9.0
- * @param {Uint8Array} buffer - 图片数据
- * @returns {Promise<void>} 无返回值
+ * @param buffer - 图片数据
+ * @returns 无返回值
  */
 export async function copyToClipboard(buffer: ArrayBuffer): Promise<void> {
   const bf = new Uint8Array(buffer);

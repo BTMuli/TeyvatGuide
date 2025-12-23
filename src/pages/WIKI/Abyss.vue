@@ -99,7 +99,7 @@ onMounted(async () => {
   const curData = await Hutao.Abyss.overview();
   overview.value = { cur: curData, last: lastData };
   await showLoading.update("正在获取角色使用率数据");
-  abyssData.use = <AbyssDataItem<TGApp.Plugins.Hutao.Abyss.AvatarUse[]>>await getData("use");
+  abyssData.use = <AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>>await getData("use");
   await showLoading.end();
 });
 

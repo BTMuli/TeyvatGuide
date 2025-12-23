@@ -1,6 +1,5 @@
 /**
- * @file store/modules/user.ts
- * @description 用户信息模块
+ * 用户信息模块
  * @since Beta v0.7.6
  */
 

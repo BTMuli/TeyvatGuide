@@ -20,76 +20,78 @@ declare namespace TGApp.App.Character {
     /** 角色地区 */
     area: string;
     /** 角色生日 [月, 日] */
-    birthday: number[];
+    birthday: Array<number>;
     /** 角色星级 */
     star: number;
     /** 角色元素类型图标 */
     element: string;
     /** 角色上线时间 */
     release: string;
-    /** 角色武器类型图标 */
+    /**
+     * 武器类型
+     * @example 弓，法器，长柄武器，双手剑，单手剑
+     */
     weapon: string;
     /** 角色名片  */
     nameCard: string;
   };
 
   /**
-   * @description Wiki 页详细信息-角色技能
+   * Wiki 页详细信息-角色技能
    * @since Beta v0.3.8
-   * @interface WikiSkill
-   * @memberof TGApp.App.Character
-   * @return WikiSkill
    */
   type WikiSkill = Omit<TGApp.Plugins.Hutao.Character.RhisdSkill, "Proud">;
 
   /**
-   * @description Wiki 详细数据
-   * @since Beta v0.4.2
-   * @interface WikiItem
-   * @memberof TGApp.Plugins.Hutao.Character
-   * @property {number} id 角色编号
-   * @property {string} name 角色名称
-   * @property {string} title 角色称号
-   * @property {string} description 角色简介
-   * @property {string} area 角色地区 // 蒙德、璃月、稻妻、须弥、枫丹、愚人众、其他
-   * @property {object} brief 角色简介
-   * @property {string} brief.camp 角色地区
-   * @property {string} brief.constellation 角色星座
-   * @property {string} brief.birth 角色生日
-   * @property {object} brief.cv 角色声优
-   * @property {string} brief.cv.cn 角色声优-中文
-   * @property {string} brief.cv.jp 角色声优-日文
-   * @property {string} brief.cv.en 角色声优-英文
-   * @property {string} brief.cv.kr 角色声优-韩文
-   * @property {number} star 角色星级
-   * @property {string} element 角色元素类型
-   * @property {TGApp.Plugins.Hutao.Base.WeaponType} weapon 角色武器类型
-   * @property {TGApp.App.Calendar.Material[]} materials 角色培养材料
-   * @property {TGApp.Plugins.Hutao.Character.RhisdSkill[]} skills 角色技能
-   * @property {TGApp.Plugins.Hutao.Character.RhisdTalent[]} constellation 角色命座
-   * @property {TGApp.Plugins.Hutao.Character.RhiFetter[]} talks 闲聊
-   * @property {TGApp.Plugins.Hutao.Character.RhiFetter[]} stories 故事
-   * @return WikiItem
+   * 详细数据
+   * @since Beta v0.9.1
    */
   type WikiItem = {
+    /** 角色ID */
     id: number;
+    /** 角色名称 */
     name: string;
+    /** 角色称号 */
     title: string;
+    /** 角色描述 */
     description: string;
+    /** 角色所在地区 */
     area: string;
+    /** 角色简介 */
     brief: {
+      /** 角色阵营 */
       camp: string;
+      /** 角色命座 */
       constellation: string;
+      /** 角色生日 */
       birth: string;
-      cv: { cn: string; jp: string; en: string; kr: string };
+      /** 角色配音 */
+      cv: {
+        /** 中文配音 */
+        cn: string;
+        /** 日语配音 */
+        jp: string;
+        /** 英语配音 */
+        en: string;
+        /** 韩语配音 */
+        kr: string;
+      };
     };
+    /** 角色星级 */
     star: number;
+    /** 角色元素 */
     element: string;
+    /** 角色武器类型 */
     weapon: string;
-    materials: TGApp.App.Calendar.Material[];
-    skills: WikiSkill[];
-    constellation: TGApp.Plugins.Hutao.Character.RhisdTalent[];
-    talks: TGApp.Plugins.Hutao.Character.RhiFetter[];
-    stories: TGApp.Plugins.Hutao.Character.RhiFetter[];
+    /** 角色养成材料 */
+    materials: Array<TGApp.App.Calendar.Material>;
+    /** 角色技能信息 */
+    skills: Array<WikiSkill>;
+    /** 角色命座信息 */
+    constellation: Array<TGApp.Plugins.Hutao.Character.RhisdTalent>;
+    /** 角色闲聊 */
+    talks: Array<TGApp.Plugins.Hutao.Character.RhiFetter>;
+    /** 角色故事 */
+    stories: Array<TGApp.Plugins.Hutao.Character.RhiFetter>;
   };
 }

@@ -126,7 +126,7 @@ const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
-const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.SingleTable>>([]);
+const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在加载剧诗数据");

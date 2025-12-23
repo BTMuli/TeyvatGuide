@@ -4,20 +4,21 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
-import { AvatarExtResTypeEnum, AvatarExtTypeEnum } from "@enum/bbs.js";
+import bbsEnum from "@enum/bbs.js";
+import staticDataEnum from "@enum/staticData.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { type } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import { v4 } from "uuid";
 
-import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
 
 /**
- * @description 时间戳转换为时间字符串
+ * 时间戳转换为时间字符串
  * @since Beta v0.8.0
- * @param {number} time - 时间戳（毫秒）
- * @returns {string} 时间字符串 d天 hh:mm:ss
+ * @param time - 时间戳（毫秒）
+ * @returns 时间字符串 d天 hh:mm:ss
  */
 export function stamp2LastTime(time: number): string {
   const day = Math.floor(time / (24 * 3600 * 1000));
@@ -30,10 +31,10 @@ export function stamp2LastTime(time: number): string {
 }
 
 /**
- * @description 时间戳转换为日期
+ * 时间戳转换为日期
  * @since Beta v0.6.0
- * @param {number} timestamp - 时间戳（毫秒）
- * @returns {string} 日期 2021-01-01 00:00:00
+ * @param timestamp - 时间戳（毫秒）
+ * @returns 日期 2021-01-01 00:00:00
  */
 export function timestampToDate(timestamp: number): string {
   const date = new Date(timestamp);
@@ -47,13 +48,15 @@ export function timestampToDate(timestamp: number): string {
 }
 
 /**
- * @description 获取相近时间
- * @description 如果是今天，只显示 hh:mm
- * @description 如果是今年，显示 MM-dd
- * @description 否则显示 yyyy-MM-dd
+ * 获取相近时间
  * @since Beta v0.7.2
- * @param {number} timestamp - 时间戳（秒）
- * @returns {string} 相近时间
+ * @remarks
+ * - 如果是今天，只显示 hh:mm
+ * - 如果是今年，显示 MM-dd
+ * - 否则显示 yyyy-MM-dd
+ *
+ * @param timestamp - 时间戳（秒）
+ * @returns 相近时间
  */
 export function getNearTime(timestamp: number): string {
   const date = new Date(timestamp * 1000);
@@ -75,9 +78,9 @@ export function getNearTime(timestamp: number): string {
 }
 
 /**
- * @description 获取设备信息（初始化时）
+ * 获取设备信息（初始化时）
  * @since Beta v0.4.1
- * @returns {TGApp.App.Device.DeviceInfo} 设备信息
+ * @returns 设备信息
  */
 export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
   return {
@@ -91,12 +94,12 @@ export function getInitDeviceInfo(): TGApp.App.Device.DeviceInfo {
 }
 
 /**
- * @description 获取设备信息（登录时）
+ * 获取设备信息（登录时）
  * @since Beta v0.3.6
- * @param {string} key - 设备信息 key
- * @returns {string} 设备信息
+ * @param key - 设备信息 key
+ * @returns 设备信息
  */
-export function getDeviceInfo(key: keyof TGApp.App.Device.DeviceInfo): string {
+export function getDeviceInfo(key: TGApp.App.Device.DeviceInfoKey): string {
   const localDevice = localStorage.getItem("deviceInfo");
   let deviceInfo: TGApp.App.Device.DeviceInfo;
   if (localDevice === null) {
@@ -107,10 +110,10 @@ export function getDeviceInfo(key: keyof TGApp.App.Device.DeviceInfo): string {
 }
 
 /**
- * @description byte 转成 KB MB GB
+ * byte 转成 KB MB GB
  * @since Beta v0.3.4
- * @param {number} bytes - 字节数
- * @returns {string} KB MB GB
+ * @param bytes - 字节数
+ * @returns KB MB GB
  */
 export function bytesToSize(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -122,7 +125,8 @@ export function bytesToSize(bytes: number): string {
 
 /**
  * 获取缓存目录
- * @returns {Array<string>|false} 缓存目录
+ * @since Beta v0.9.1
+ * @returns 缓存目录
  */
 export async function getCacheDir(): Promise<Array<string> | false> {
   const cacheDir = await path.appCacheDir();
@@ -138,11 +142,11 @@ export async function getCacheDir(): Promise<Array<string> | false> {
 }
 
 /**
- * @description 获取随机字符串
+ * 获取随机字符串
  * @since Beta v0.4.1
- * @param {number} length 字符串长度
- * @param {string} type
- * @returns {string} 随机字符串
+ * @param length - 字符串长度
+ * @param type - 字符串类型
+ * @returns 随机字符串
  */
 export function getRandomString(length: number, type: string = "all"): string {
   const char = "abcdefghijklmnopqrstuvwxyz";
@@ -181,10 +185,10 @@ export function getRandomString(length: number, type: string = "all"): string {
 }
 
 /**
- * @description 解析带样式的文本
+ * 解析带样式的文本
  * @since Beta v0.8.1
- * @param {string} desc - 带样式的文本
- * @returns {string} 解析后的文本
+ * @param desc - 带样式的文本
+ * @returns 解析后的文本
  */
 export function parseHtmlText(desc: string): string {
   const linkReg = /\{LINK#(.*?)}(.*?)\{\/LINK}/g;
@@ -212,10 +216,10 @@ export function parseHtmlText(desc: string): string {
 }
 
 /**
- * @description 根据英文element获取中文
+ * 根据英文element获取中文
  * @since Beta v0.5.3
- * @param {string} element - 英文element
- * @returns {string} 中文element
+ * @param element - 英文element
+ * @returns 中文element
  */
 export function getZhElement(element: string): string {
   const elementUpper = element.toUpperCase();
@@ -240,10 +244,10 @@ export function getZhElement(element: string): string {
 }
 
 /**
- * @description 获取视频时长
+ * 获取视频时长
  * @since Beta v0.6.7
- * @param {number} durationMill - 视频时长（毫秒）
- * @returns {string} 视频时长
+ * @param durationMill - 视频时长（毫秒）
+ * @returns 视频时长
  */
 export function getVideoDuration(durationMill: number): string {
   const duration = Math.floor(durationMill / 1000);
@@ -258,10 +262,10 @@ export function getVideoDuration(durationMill: number): string {
 }
 
 /**
- * @description 转义正则表达式
+ * 转义正则表达式
  * @since Beta v0.3.3
- * @param {string} data 内容
- * @returns {string} 转义后的内容
+ * @param data - 内容
+ * @returns 转义后的内容
  */
 export function decodeRegExp(data: string): string {
   let res = data;
@@ -277,44 +281,57 @@ export function decodeRegExp(data: string): string {
 }
 
 /**
- * @description 根据id获取对应角色/武器数据
- * @since Beta v0.6.8
- * @param {number|string} id
- * @returns {TGApp.App.Character.WikiBriefInfo|TGApp.App.Weapon.WikiBriefInfo}
+ * 根据id获取对应角色/武器数据
+ * @since Beta v0.9.1
+ * @param id - id
+ * @returns 角色/武器数据
  */
 export function getWikiBrief(
   id: number | string,
 ): TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | false {
-  const len = id.toString().length;
-  if (len === 5) {
+  const find = AppCalendarData.find((i) => i.id === id);
+  if (find === undefined) return false;
+  if (find.itemType === staticDataEnum.calendarItem.weapon) {
     return AppWeaponData.find((item) => item.id.toString() === id.toString()) ?? false;
   }
   return AppCharacterData.find((item) => item.id.toString() === id.toString()) ?? false;
 }
 
 /**
- * @description 根据传入角色信息获取头像
- * @since Beta v0.7.9
- * @param {TGApp.BBS.Reply.User|TGApp.BBS.Post.User} user - 用户信息
- * @returns {string} 头像链接
+ * 根据传入角色信息获取头像
+ * @since Beta v0.9.1
+ * @param user - 用户信息
+ * @returns 头像链接
  */
 export function getUserAvatar(
   user: TGApp.BBS.Reply.User | TGApp.BBS.Post.User | TGApp.BBS.User.Info,
 ): string {
   if (!user.avatar_ext) return user.avatar_url;
-  if (user.avatar_ext.avatar_type === AvatarExtTypeEnum.CUSTOM) return user.avatar_url;
-  if (user.avatar_ext.avatar_type === AvatarExtTypeEnum.GIF) {
-    const findGH = user.avatar_ext.hd_resources.find((i) => i.format === AvatarExtResTypeEnum.GIF);
+  if (user.avatar_ext.avatar_type === bbsEnum.user.avatarExtType.CUSTOM) return user.avatar_url;
+  if (user.avatar_ext.avatar_type === bbsEnum.user.avatarExtType.GIF) {
+    const findGH = user.avatar_ext.hd_resources.find(
+      (i) => i.format === bbsEnum.user.avatarResType.GIF,
+    );
     if (findGH) return findGH.url;
-    const findG = user.avatar_ext.resources.find((i) => i.format === AvatarExtResTypeEnum.GIF);
+    const findG = user.avatar_ext.resources.find(
+      (i) => i.format === bbsEnum.user.avatarResType.GIF,
+    );
     if (findG) return findG.url;
-    const findWH = user.avatar_ext.hd_resources.find((i) => i.format === AvatarExtResTypeEnum.WEBP);
+    const findWH = user.avatar_ext.hd_resources.find(
+      (i) => i.format === bbsEnum.user.avatarResType.WEBP,
+    );
     if (findWH) return findWH.url;
-    const findW = user.avatar_ext.resources.find((i) => i.format === AvatarExtResTypeEnum.WEBP);
+    const findW = user.avatar_ext.resources.find(
+      (i) => i.format === bbsEnum.user.avatarResType.WEBP,
+    );
     if (findW) return findW.url;
-    const findPH = user.avatar_ext.hd_resources.find((i) => i.format === AvatarExtResTypeEnum.PNG);
+    const findPH = user.avatar_ext.hd_resources.find(
+      (i) => i.format === bbsEnum.user.avatarResType.PNG,
+    );
     if (findPH) return findPH.url;
-    const findP = user.avatar_ext.resources.find((i) => i.format === AvatarExtResTypeEnum.PNG);
+    const findP = user.avatar_ext.resources.find(
+      (i) => i.format === bbsEnum.user.avatarResType.PNG,
+    );
     if (findP) return findP.url;
     return user.avatar_url;
   }

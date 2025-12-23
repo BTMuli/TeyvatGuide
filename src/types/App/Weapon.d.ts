@@ -1,52 +1,52 @@
 /**
- * @file types/App/Weapon.d.ts
- * @description 本应用的武器类型定义文件
+ * 武器类型定义文件
  * @since Beta v0.6.7
  */
 
 declare namespace TGApp.App.Weapon {
   /**
-   * @description Wiki页的武器简略信息
+   * Wiki页的武器简略信息
    * @since Beta v0.6.7
-   * @interface WikiBriefInfo
-   * @property {number} id - 武器 ID
-   * @property {number} contentId - 观测枢 id
-   * @property {string} name - 武器名称
-   * @property {number} star - 武器星级
-   * @property {string} weapon - 武器类型图标
-   * @return WikiBriefInfo
    */
-  interface WikiBriefInfo {
+  type WikiBriefInfo = {
+    /** 武器 ID */
     id: number;
+    /** 观测枢 id */
     contentId: number;
+    /** 名称 */
     name: string;
+    /** 星级 */
     star: number;
+    /**
+     * 武器类型
+     * @example 弓，法器，长柄武器，双手剑，单手剑
+     */
     weapon: string;
-  }
+  };
 
   /**
-   * @description 转换后的武器数据
+   * 转换后的武器数据
    * @since Beta v0.4.1
-   * @interface WikiItem
-   * @memberof TGApp.App.Weapon
-   * @property {number} id 武器 id
-   * @property {string} name 武器名称
-   * @property {string} description 武器简介
-   * @property {number} star 武器星级
-   * @property {string} weapon 武器类型
-   * @property {TGApp.App.Calendar.Material[]} materials 武器培养材料
-   * @property {TGApp.Plugins.Hutao.Weapon.RhiAffix} affix 精炼描述
-   * @property {string[]} story 武器故事
-   * @return WikiItem
    */
-  interface WikiItem {
+  type WikiItem = {
+    /** 武器 ID */
     id: number;
+    /** 名称 */
     name: string;
+    /** 简介 */
     description: string;
+    /** 星级 */
     star: number;
+    /**
+     * 武器类型
+     * @example 弓，法器，长柄武器，双手剑，单手剑
+     */
     weapon: string;
-    materials: TGApp.App.Calendar.Material[];
+    /** 养成材料 */
+    materials: Array<TGApp.App.Calendar.Material>;
+    /** 精炼描述 */
     affix?: TGApp.Plugins.Hutao.Weapon.RhiAffix;
-    story: string[];
-  }
+    /** 武器故事 */
+    story: Array<string>;
+  };
 }

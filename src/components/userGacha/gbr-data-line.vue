@@ -21,7 +21,7 @@ import { computed } from "vue";
 
 import { AppGachaBData } from "@/data/index.js";
 
-export type GbrDataLineProps = { data: TGApp.Sqlite.GachaRecords.TableGachaB; count: number };
+export type GbrDataLineProps = { data: TGApp.Sqlite.Gacha.GachaB; count: number };
 
 const props = defineProps<GbrDataLineProps>();
 const hint = getEndHint();
@@ -47,7 +47,7 @@ const progressColor = computed<string>(() => {
 const progressWidth = computed<string>(() => {
   let final = 10;
   if (props.data.rank === "5") {
-    if (props.data.gachaType === "302") final = 80;
+    if (props.data.gachaType === "2000") final = 80;
     else final = 90;
   } else if (props.data.rank === "4") final = 10;
   else return "0%";

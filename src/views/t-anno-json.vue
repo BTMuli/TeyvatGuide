@@ -10,15 +10,15 @@
         <template #text>
           <div class="taj-box">
             <vue-json-pretty
+              :collapsed-on-click-brackets="true"
               :data="JSON.parse(JSON.stringify(jsonList))"
+              :deep="2"
+              :show-double-quotes="true"
               :show-icon="true"
+              :show-key-value-space="true"
               :show-length="true"
               :show-line="true"
               :show-line-number="true"
-              :show-double-quotes="true"
-              :show-key-value-space="true"
-              :collapsed-on-click-brackets="true"
-              :deep="2"
               :theme="jsonTheme"
             />
           </div>
@@ -31,15 +31,15 @@
         <template #text>
           <div class="taj-box">
             <vue-json-pretty
+              :collapsed-on-click-brackets="true"
               :data="JSON.parse(JSON.stringify(jsonContent))"
+              :deep="2"
+              :show-double-quotes="true"
               :show-icon="true"
+              :show-key-value-space="true"
               :show-length="true"
               :show-line="true"
               :show-line-number="true"
-              :show-double-quotes="true"
-              :show-key-value-space="true"
-              :collapsed-on-click-brackets="true"
-              :deep="2"
               :theme="jsonTheme"
             />
           </div>
@@ -52,15 +52,15 @@
         <template #text>
           <div class="taj-box">
             <vue-json-pretty
+              :collapsed-on-click-brackets="true"
               :data="JSON.parse(JSON.stringify(parsedJson))"
+              :deep="2"
+              :show-double-quotes="true"
               :show-icon="true"
+              :show-key-value-space="true"
               :show-length="true"
               :show-line="true"
               :show-line-number="true"
-              :show-double-quotes="true"
-              :show-key-value-space="true"
-              :collapsed-on-click-brackets="true"
-              :deep="2"
               :theme="jsonTheme"
             />
           </div>
@@ -88,10 +88,10 @@ const { theme } = storeToRefs(useAppStore());
 const route = useRoute();
 const annoId = Number(route.params.anno_id);
 const region = <TGApp.Game.Base.ServerTypeEnum>route.params.region;
-const lang = <TGApp.BBS.Announcement.AnnoLangEnum>route.params.lang;
+const lang = <TGApp.Game.Anno.AnnoLangEnum>route.params.lang;
 
-const jsonList = shallowRef<TGApp.BBS.Announcement.AnnoSingle>();
-const jsonContent = shallowRef<TGApp.BBS.Announcement.AnnoDetail>();
+const jsonList = shallowRef<TGApp.Game.Anno.ListAnno>();
+const jsonContent = shallowRef<TGApp.Game.Anno.AnnoDetail>();
 const parsedJson = shallowRef<Array<TGApp.BBS.SctPost.Base>>();
 const jsonTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 
@@ -103,6 +103,8 @@ onMounted(async () => {
   }
   await showLoading.update(`公告ID: ${annoId}`);
   const listResp = await hk4eReq.anno.list(region, lang);
+  console.log("annoList", listResp);
+  // TODO: 动态Type
   for (const listItem of listResp.list) {
     for (const single of listItem.list) {
       if (single.ann_id === annoId) {

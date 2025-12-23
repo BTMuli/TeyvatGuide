@@ -36,8 +36,8 @@ const model = defineModel<number>({ default: 2 });
 
 const actId = ref<string>();
 const showOverlay = ref<boolean>(false);
-const nav = shallowRef<TGApp.BBS.Navigator.Navigator[]>([]);
-const codeData = shallowRef<TGApp.BBS.Navigator.CodeData[]>([]);
+const nav = shallowRef<Array<TGApp.BBS.Navigator.Navigator>>([]);
+const codeData = shallowRef<Array<TGApp.BBS.Navigator.CodeData>>([]);
 const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
   const liveNames = ["前瞻直播", "前瞻节目", "直播兑换码", "特别节目"];
   const find = nav.value.find((item) => liveNames.includes(item.name));

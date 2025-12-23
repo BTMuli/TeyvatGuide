@@ -12,7 +12,7 @@ const mbBu: Readonly<string> = "https://bbs-api.miyoushe.com/";
 /**
  * 获取表情包列表
  * @since Beta v0.7.3
- * @return {Promise<Record<string,string>|TGApp.BBS.Response.Base>}
+ * @returns 转换后的表情包列表
  */
 async function getEmoticonSet(): Promise<Record<string, string> | TGApp.BBS.Response.Base> {
   const resp = await TGHttp<TGApp.BBS.Emoji.Resp>(`${mbBu}misc/api/emoticon_set`, {
@@ -31,8 +31,8 @@ async function getEmoticonSet(): Promise<Record<string, string> | TGApp.BBS.Resp
 /**
  * 根据 cookie 获取用户信息
  * @since Beta v0.5.0
- * @param {TGApp.App.Account.Cookie} cookie - 账户 cookie
- * @returns {Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info>}
+ * @param cookie - 账户 cookie
+ * @returns 用户信息
  */
 async function getUserFullInfo(
   cookie: TGApp.App.Account.Cookie,
@@ -51,9 +51,9 @@ async function getUserFullInfo(
 /**
  * 根据gid和id获取用户信息
  * @since Beta v0.7.2
- * @param {string} gid - gid
- * @param {string} userId - 用户 id
- * @returns {Promise<TGApp.BBS.Response.Base | TGApp.BBS.User.Info>}
+ * @param gid - gid
+ * @param userId - 用户 id
+ * @returns 用户信息
  */
 async function getOtherUserInfo(
   gid: string,
@@ -72,10 +72,10 @@ async function getOtherUserInfo(
 /**
  * 获取合集信息
  * @since Beta v0.7.3
- * @todo salt计算异常
- * @param {string} cid - 合集 id
- * @param {number} gid - gid
- * @returns {Promise<TGApp.BBS.Collection.InfoRes|TGApp.BBS.Response.Base>}
+ * @TODO salt计算异常
+ * @param cid - 合集 id
+ * @param gid - gid
+ * @returns 合集信息
  */
 async function getCollectionDetail(
   cid: string,

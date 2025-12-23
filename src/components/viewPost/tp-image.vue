@@ -103,7 +103,7 @@ function miniImgUrl(): string {
 }
 
 function getImageTitle(): string {
-  const res: string[] = [];
+  const res: Array<string> = [];
   if (props.data.attributes) {
     res.push(`宽度：${props.data.attributes.width}px`);
     res.push(`高度：${props.data.attributes.height}px`);

@@ -42,6 +42,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import bbsEnum from "@enum/bbs.js";
 import TSAvatarBirth from "@Sqlm/avatarBirth.js";
 import useAppStore from "@store/app.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
@@ -90,8 +91,8 @@ async function toBirth(data: TGApp.Archive.Birth.CalendarItem): Promise<void> {
 }
 
 async function toNews(): Promise<void> {
-  recentNewsType.value = "news";
-  await router.push({ name: "资讯", params: { gid: 2, type: "news" } });
+  recentNewsType.value = bbsEnum.post.newsType.NEWS;
+  await router.push({ name: "资讯", params: { gid: 2 } });
 }
 </script>
 <style lang="scss" scoped>

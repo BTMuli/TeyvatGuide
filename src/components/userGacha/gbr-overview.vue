@@ -10,13 +10,13 @@ import { computed } from "vue";
 
 import GbrDataView from "./gbr-data-view.vue";
 
-type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGachaB> };
+type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.Gacha.GachaB> };
 
 const props = defineProps<GachaOverviewProps>();
-const normalData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
+const normalData = computed<Array<TGApp.Sqlite.Gacha.GachaB>>(() =>
   props.modelValue.filter((item) => item.gachaType === "1000"),
 );
-const eventData = computed<Array<TGApp.Sqlite.GachaRecords.TableGachaB>>(() =>
+const eventData = computed<Array<TGApp.Sqlite.Gacha.GachaB>>(() =>
   props.modelValue.filter((item) => item.gachaType === "2000"),
 );
 </script>

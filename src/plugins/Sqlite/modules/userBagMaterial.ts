@@ -20,7 +20,7 @@ export const SKIP_BAG_TYPES: ReadonlyArray<string> = [
 /**
  * 获取有效材料ID
  * @since Beta v0.9.0
- * @return {Array<number>}
+ * @returns ID列表
  */
 function getValidMIds(): Array<number> {
   const filter = WikiMaterialData.filter((m) => !SKIP_BAG_TYPES.includes(m.type));
@@ -30,10 +30,10 @@ function getValidMIds(): Array<number> {
 /**
  * 获取插入Sql
  * @since Beta v0.9.0
- * @param {TGApp.Sqlite.UserBag.TableMaterialRaw} tb -表格
- * @returns {string}
+ * @param  tb -表格
+ * @returns sql
  */
-function getInsertSql(tb: TGApp.Sqlite.UserBag.TableMaterialRaw): string {
+function getInsertSql(tb: TGApp.Sqlite.UserBag.MaterialRaw): string {
   return `
       INSERT INTO UserBagMaterial(uid, id, count, records, updated)
       VALUES (${tb.uid}, ${tb.id}, ${tb.count}, '${tb.records}', '${tb.updated}') ON CONFLICT(uid, id) DO
@@ -47,12 +47,12 @@ function getInsertSql(tb: TGApp.Sqlite.UserBag.TableMaterialRaw): string {
 /**
  * 插入或更新材料数据
  * @since Beta v0.9.0
- * @param {number} uid - 存档UID
- * @param {number} itemId - 材料ID
- * @param {number} count - 材料数量
- * @param {Array<TGApp.Sqlite.UserBag.MaterialRecord>} [records] - 更新记录
- * @param {boolean} manual - 是否手动
- * @returns {Promise<void>}
+ * @param uid - 存档UID
+ * @param itemId - 材料ID
+ * @param count - 材料数量
+ * @param records - 更新记录
+ * @param manual - 是否手动
+ * @returns 无返回值
  */
 async function insertMaterial(
   uid: number,
@@ -68,7 +68,7 @@ async function insertMaterial(
   };
   if (manual) newRecord.manual = true;
   const newRecords = [...records, newRecord];
-  const newTable: TGApp.Sqlite.UserBag.TableMaterialRaw = {
+  const newTable: TGApp.Sqlite.UserBag.MaterialRaw = {
     uid: uid,
     id: itemId,
     count: count,
@@ -103,12 +103,10 @@ async function delUid(uid: number): Promise<void> {
 /**
  * 解析表格数据
  * @since Beta v0.9.0
- * @param {TGApp.Sqlite.UserBag.TableMaterialRaw} raw 原始数据
- * @return {TGApp.Sqlite.UserBag.TableMaterial} 解析数据
+ * @param raw - 原始数据
+ * @returns 解析数据
  */
-function parseMaterial(
-  raw: TGApp.Sqlite.UserBag.TableMaterialRaw,
-): TGApp.Sqlite.UserBag.TableMaterial {
+function parseMaterial(raw: TGApp.Sqlite.UserBag.MaterialRaw): TGApp.Sqlite.UserBag.MaterialTable {
   return {
     ...raw,
     records: (<Array<TGApp.Sqlite.UserBag.MaterialRecord>>JSON.parse(raw.records)).sort(
@@ -120,24 +118,24 @@ function parseMaterial(
 /**
  * 获取指定UID的材料数据
  * @since Beta v0.9.0
- * @param {number} uid - 存档UID
- * @param {number} [id] - 材料ID
- * @returns {Promise<Array<TGApp.Sqlite.UserBag.TableMaterial>>}
+ * @param uid - 存档UID
+ * @param id - 材料ID
+ * @returns 材料数据
  */
 async function getMaterial(
   uid: number,
   id?: number,
-): Promise<Array<TGApp.Sqlite.UserBag.TableMaterial>> {
+): Promise<Array<TGApp.Sqlite.UserBag.MaterialTable>> {
   const db = await TGSqlite.getDB();
-  let res: Array<TGApp.Sqlite.UserBag.TableMaterialRaw>;
+  let res: Array<TGApp.Sqlite.UserBag.MaterialRaw>;
   // TODO: 排序
   if (id !== undefined) {
-    res = await db.select<Array<TGApp.Sqlite.UserBag.TableMaterialRaw>>(
+    res = await db.select<Array<TGApp.Sqlite.UserBag.MaterialRaw>>(
       "SELECT * FROM UserBagMaterial WHERE uid = ? AND id = ?;",
       [uid, id],
     );
   } else {
-    res = await db.select<Array<TGApp.Sqlite.UserBag.TableMaterialRaw>>(
+    res = await db.select<Array<TGApp.Sqlite.UserBag.MaterialRaw>>(
       "SELECT * FROM UserBagMaterial WHERE uid =?;",
       [uid],
     );
@@ -152,9 +150,9 @@ async function getMaterial(
 /**
  * 保存Yae获取的材料数据
  * @since Beta v0.9.0
- * @param {number} uid - 存档UID
- * @param {Array<TGApp.Plugins.Yae.BagItem<"material">>} list - 材料数据
- * @returns {Promise<void>}
+ * @param uid - 存档UID
+ * @param list - 材料数据
+ * @returns 无返回值
  */
 async function saveYaeData(
   uid: number,

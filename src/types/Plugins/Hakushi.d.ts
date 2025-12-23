@@ -7,14 +7,14 @@ declare namespace TGApp.Plugins.Hakushi {
   /**
    * 武器JSON返回
    * @since Beta v0.9.0
-   * @remarks https://api.hakush.in/gi/data/weapon.json
+   * @see https://api.hakush.in/gi/data/weapon.json
    */
   type WeaponResp = Record<string, WeaponBrief>;
 
   /**
    * 角色JSON返回
    * @since Beta v0.9.0
-   * @remarks https://api.hakush.in/gi/data/character.json
+   * @see https://api.hakush.in/gi/data/character.json
    */
   type AvatarResp = Record<string, AvatarBrief>;
 
@@ -30,6 +30,7 @@ declare namespace TGApp.Plugins.Hakushi {
     /**
      * 类型
      * @remarks 枚举
+     * @example
      * - WEAPON_BOW 弓
      */
     type: string;
@@ -51,7 +52,7 @@ declare namespace TGApp.Plugins.Hakushi {
    */
   type AvatarBrief = {
     /** 生日 */
-    birth: Array<number> & { length: 2 };
+    birth: Array<number>;
     /** 图标 */
     icon: string;
     /** 稀有度 */
@@ -59,6 +60,7 @@ declare namespace TGApp.Plugins.Hakushi {
     /**
      * 武器类型
      * @remarks 枚举
+     * @example
      * - WEAPON_BOW 弓
      */
     weapon: string;

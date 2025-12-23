@@ -57,11 +57,11 @@ type TpVillaCard = {
       owner_nickname: string;
       owner_avatar_url: string;
       villa_introduce?: string;
-      tag_list?: string[];
+      tag_list?: Array<string>;
       villa_member_num: string;
       is_official?: boolean;
       is_available: boolean;
-      hot_member_avatar?: string[];
+      hot_member_avatar?: Array<string>;
       hot_room?: VillaRoom;
     };
   };

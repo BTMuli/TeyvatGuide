@@ -1,6 +1,5 @@
 /**
- * @file plugins/Sqlite/modules/userRecord.ts
- * @description Sqlite-用户战绩模块
+ * 用户战绩模块
  * @since Beta v0.6.0
  */
 
@@ -10,13 +9,13 @@ import TGSqlite from "../index.js";
 import { transUserRecord } from "../utils/transUserRecord.js";
 
 /**
- * @description 获取插入Sql
+ * 获取插入Sql
  * @since Beta v0.6.0
- * @param {number} uid - 游戏UID
- * @param {TGApp.Sqlite.Record.SingleTable} data - 战绩数据
- * @returns {string}
+ * @param uid - 游戏UID
+ * @param data - 战绩数据
+ * @returns sql
  */
-function getInsertSql(uid: number, data: TGApp.Sqlite.Record.SingleTable): string {
+function getInsertSql(uid: number, data: TGApp.Sqlite.Record.TableRaw): string {
   return `
       INSERT INTO UserRecord(uid, role, avatars, stats, worldExplore, homes, updated)
       VALUES (${uid}, '${data.role}', '${data.avatars}', '${data.stats}',
@@ -32,12 +31,12 @@ function getInsertSql(uid: number, data: TGApp.Sqlite.Record.SingleTable): strin
 }
 
 /**
- * @description 解析数据库数据
+ * 解析数据库数据
  * @since Beta v0.6.0
- * @param {TGApp.Sqlite.Record.SingleTable} data - 数据库数据
- * @returns {TGApp.Sqlite.Record.RenderData} 渲染数据
+ * @param data - 数据库数据
+ * @returns 渲染数据
  */
-function parseRecord(data: TGApp.Sqlite.Record.SingleTable): TGApp.Sqlite.Record.RenderData {
+function parseRecord(data: TGApp.Sqlite.Record.TableRaw): TGApp.Sqlite.Record.TableTrans {
   return {
     uid: data.uid,
     role: JSON.parse(data.role),
@@ -50,16 +49,13 @@ function parseRecord(data: TGApp.Sqlite.Record.SingleTable): TGApp.Sqlite.Record
 }
 
 /**
- * @description 转换数据库数据
+ * 转换数据库数据
  * @since Beta v0.6.0
- * @param {number} uid - 游戏UID
- * @param {TGApp.Game.Record.FullData} data - 战绩数据
- * @returns {TGApp.Sqlite.Record.SingleTable}
+ * @param uid - 游戏UID
+ * @param data - 战绩数据
+ * @returns 数据库数据
  */
-function transRecord(
-  uid: number,
-  data: TGApp.Game.Record.FullData,
-): TGApp.Sqlite.Record.SingleTable {
+function transRecord(uid: number, data: TGApp.Game.Record.FullData): TGApp.Sqlite.Record.TableRaw {
   const transData = transUserRecord(uid, data);
   return {
     uid: uid,
@@ -73,11 +69,11 @@ function transRecord(
 }
 
 /**
- * @description 获取UID列表
+ * 获取UID列表
  * @since Beta v0.6.0
- * @returns {Promise<number[]>}
+ * @returns uid列表
  */
-async function getAllUid(): Promise<number[]> {
+async function getAllUid(): Promise<Array<number>> {
   const db = await TGSqlite.getDB();
   type resType = Array<{ uid: number }>;
   const res = await db.select<resType>("SELECT DISTINCT uid FROM UserRecord;");
@@ -85,14 +81,14 @@ async function getAllUid(): Promise<number[]> {
 }
 
 /**
- * @description 获取指定UID的战绩数据
+ * 获取指定UID的战绩数据
  * @since Beta v0.6.0
- * @param {number} uid - 游戏UID
- * @returns {Promise<TGApp.Sqlite.Record.RenderData | false>}
+ * @param uid - 游戏UID
+ * @returns 战绩数据
  */
-async function getRecord(uid: number): Promise<TGApp.Sqlite.Record.RenderData | false> {
+async function getRecord(uid: number): Promise<TGApp.Sqlite.Record.TableTrans | false> {
   const db = await TGSqlite.getDB();
-  const res = await db.select<TGApp.Sqlite.Record.SingleTable[]>(
+  const res = await db.select<Array<TGApp.Sqlite.Record.TableRaw>>(
     "SELECT * FROM UserRecord WHERE uid = ?;",
     [uid],
   );
@@ -101,11 +97,11 @@ async function getRecord(uid: number): Promise<TGApp.Sqlite.Record.RenderData | 
 }
 
 /**
- * @description 保存战绩数据
+ * 保存战绩数据
  * @since Beta v0.6.0
- * @param {number} uid - 游戏UID
- * @param {TGApp.Game.Record.FullData} data - 战绩数据
- * @returns {Promise<void>}
+ * @param uid - 游戏UID
+ * @param data - 战绩数据
+ * @returns 无返回值
  */
 async function saveRecord(uid: number, data: TGApp.Game.Record.FullData): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -114,10 +110,10 @@ async function saveRecord(uid: number, data: TGApp.Game.Record.FullData): Promis
 }
 
 /**
- * @description 删除战绩数据
+ * 删除战绩数据
  * @since Beta v0.6.0
- * @param {number} uid
- * @returns {Promise<void>}
+ * @param uid - uid
+ * @returns 无返回值
  */
 async function deleteUid(uid: number): Promise<void> {
   const db = await TGSqlite.getDB();

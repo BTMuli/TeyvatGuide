@@ -1,403 +1,352 @@
 /**
- * @file types/Game/Avatar.d.ts
- * @description 游戏角色详情相关类型定义文件
+ * 游戏角色详情相关类型定义文件
  * @since Beta v0.5.3
  */
 
-/**
- * @description 游戏角色详情相关类型定义命名空间
- * @since Beta v0.5.3
- * @namespace TGApp.Game.Avatar
- * @memberof TGApp.Game
- */
 declare namespace TGApp.Game.Avatar {
   /**
-   * @description 角色列表数据返回类型
-   * @interface ListResponse
+   * 角色列表数据返回响应
    * @since Beta v0.5.3
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {Avatar[]} data.list - 角色列表
-   * @return ListResponse
    */
-  interface ListResponse extends TGApp.BBS.Response.BaseWithData {
-    data: {
-      list: Avatar[];
-    };
-  }
+  type ListResp = TGApp.BBS.Response.BaseWithData<ListRes>;
 
   /**
-   * @description 角色详情数据返回类型
-   * @interface DetailResponse
-   * @since Beta v0.5.3
-   * @extends TGApp.BBS.Response.BaseWithData
-   * @property {AvatarDetail} data - 角色详情
-   * @return DetailResponse
+   * 角色列表数据返回
+   * @since Beta v0.9.1
    */
-  interface DetailResponse extends TGApp.BBS.Response.BaseWithData {
-    data: AvatarDetail;
-  }
+  type ListRes = {
+    /** 角色列表 */
+    list: Array<Avatar>;
+  };
 
   /**
-   * @description 角色列表数据类型
-   * @interface Avatar
+   * 角色详情数据返回响应
    * @since Beta v0.5.3
-   * @property {number} actived_constellation_num - 角色已激活命座数量
-   * @property {string} element - 角色元素
-   * @property {number} fetter - 角色好感等级
-   * @property {string} icon - 角色头像
-   * @property {number} id - 角色 ID
-   * @property {string} image - 角色全身像
-   * @property {boolean} is_chosen - 是否选中作为展示
-   * @property {number} level - 角色等级
-   * @property {string} name - 角色名称
-   * @property {number} rarity - 角色稀有度
-   * @property {string} side_icon - 角色侧边头像
-   * @property {Weapon} weapon - 角色武器
-   * @property {number} weapon_type - 角色武器类型
-   * @return Avatar
    */
-  interface Avatar {
+  type DetailResp = TGApp.BBS.Response.BaseWithData<DetailRes>;
+
+  /**
+   * 角色列表数据类型
+   * @since Beta v0.5.3
+   */
+  type Avatar = {
+    /** 角色已激活命座数量 */
     actived_constellation_num: number;
+    /** 角色元素 */
     element: string;
+    /** 角色好感等级 */
     fetter: number;
+    /** 角色头像 */
     icon: string;
+    /** 角色 ID */
     id: number;
+    /** 角色全身像 */
     image: string;
+    /** 是否选中作为展示 */
     is_chosen: boolean;
+    /** 角色等级 */
     level: number;
+    /** 角色名称 */
     name: string;
+    /** 角色稀有度 */
     rarity: number;
+    /** 角色侧边头像 */
     side_icon: string;
+    /** 角色武器 */
     weapon: Weapon;
+    /** 角色武器类型 */
     weapon_type: number;
-  }
+  };
 
   /**
-   * @description 角色武器数据类型
-   * @interface Weapon
+   * 角色武器数据类型
    * @since Beta v0.5.3
-   * @property {number} affix_level - 武器精炼等级
-   * @property {string} icon - 武器图标
-   * @property {number} id - 武器 ID
-   * @property {number} level - 武器等级
-   * @property {number} rarity - 武器稀有度
-   * @property {number} type - 武器类型，与上面的 weapon_type 一致
-   * @return Weapon
    */
-  interface Weapon {
+  type Weapon = {
+    /** 武器精炼等级 */
     affix_level: number;
+    /** 武器图标 */
     icon: string;
+    /** 武器 ID */
     id: number;
+    /** 武器等级 */
     level: number;
+    /** 武器稀有度 */
     rarity: number;
+    /** 武器类型，与 weapon_type 一致 */
     type: number;
-  }
+  };
 
   /**
-   * @description 角色详情数据类型
-   * @interface AvatarDetail
+   * 角色详情数据类型
    * @since Beta v0.5.3
-   * @property {DetailList[]} list - 角色详情列表
-   * @property {PropMap} property_map - 角色属性映射
-   * @property {PropRecommend} relic_property_options - 圣遗物属性选项
-   * @property {Record<string, string>} relic_wiki - 圣遗物属性对应的百科
-   * @property {Record<string, string>} weapon_wiki - 武器属性对应的百科
-   * @property {Record<string, string>} avatar_wiki - 角色属性对应的百科
-   * @return AvatarDetail
    */
-  interface AvatarDetail {
-    list: DetailList[];
+  type DetailRes = {
+    /** 角色详情列表 */
+    list: Array<AvatarDetail>;
+    /** 角色属性映射 */
     property_map: PropMap;
+    /** 圣遗物属性选项 */
     relic_property_options: PropRecommend;
+    /** 圣遗物属性对应的百科 */
     relic_wiki: Record<string, string>;
+    /** 武器属性对应的百科 */
     weapon_wiki: Record<string, string>;
+    /** 角色属性对应的百科 */
     avatar_wiki: Record<string, string>;
-  }
+  };
 
   /**
-   * @description 角色详情列表数据类型
-   * @interface DetailList
+   * 角色详情列表数据类型
    * @since Beta v0.5.3
-   * @property {Avatar} base - 角色基础信息
-   * @property {WeaponDetail} weapon - 角色武器信息
-   * @property {Relic[]} relics - 角色圣遗物信息
-   * @property {Constellation[]} constellations - 角色命座信息
-   * @property {Costume[]} costumes - 角色时装信息
-   * @property {Prop[]} selected_properties - 角色选中属性
-   * @property {Prop[]} base_properties - 角色基础属性
-   * @property {Prop[]} extra_properties - 角色额外属性
-   * @property {Prop[]} element_properties - 角色元素属性
-   * @property {Skill[]} skills - 角色技能信息
-   * @property {RelicRecommendProp} recommend_relic_property - 推荐圣遗物属性
-   * @return DetailList
    */
-  interface DetailList {
+  type AvatarDetail = {
+    /** 角色基础信息 */
     base: Avatar;
+    /** 角色武器信息 */
     weapon: WeaponDetail;
-    relics: Relic[];
-    constellations: Constellation[];
-    costumes: Costume[];
-    selected_properties: Prop[];
-    base_properties: Prop[];
-    extra_properties: Prop[];
-    element_properties: Prop[];
-    skills: Skill[];
+    /** 角色圣遗物信息 */
+    relics: Array<Relic>;
+    /** 角色命座信息 */
+    constellations: Array<Constellation>;
+    /** 角色时装信息 */
+    costumes: Array<Costume>;
+    /** 角色选中属性 */
+    selected_properties: Array<Prop>;
+    /** 角色基础属性 */
+    base_properties: Array<Prop>;
+    /** 角色额外属性 */
+    extra_properties: Array<Prop>;
+    /** 角色元素属性 */
+    element_properties: Array<Prop>;
+    /** 角色技能信息 */
+    skills: Array<Skill>;
+    /** 推荐圣遗物属性 */
     recommend_relic_property: RelicRecommendProp;
-  }
+  };
 
   /**
-   * @description 角色详情武器数据类型
-   * @interface WeaponDetail
+   * 角色详情武器数据类型
    * @since Beta v0.5.3
-   * @property {number} id - 武器 ID
-   * @property {string} name - 武器名称
-   * @property {string} icon - 武器图标
-   * @property {number} type - 武器类型
-   * @property {number} rarity - 武器稀有度
-   * @property {number} level - 武器等级
-   * @property {number} promote_level - 武器突破等级
-   * @property {string} type_name - 武器类型名称
-   * @property {string} desc - 武器描述
-   * @property {number} affix_level - 武器精炼等级
-   * @property {Prop} main_property - 武器主属性
-   * @property {Prop} sub_property - 武器副属性
-   * @return WeaponDetail
    */
-  interface WeaponDetail {
+  type WeaponDetail = {
+    /** 武器 ID */
     id: number;
+    /** 武器名称 */
     name: string;
+    /** 武器图标 */
     icon: string;
+    /** 武器类型 */
     type: number;
+    /** 武器稀有度 */
     rarity: number;
+    /** 武器等级 */
     level: number;
+    /** 武器突破等级 */
     promote_level: number;
+    /** 武器类型名称 */
     type_name: string;
+    /** 武器描述 */
     desc: string;
+    /** 武器精炼等级 */
     affix_level: number;
+    /** 武器主属性 */
     main_property: Prop;
+    /** 武器副属性 */
     sub_property: Prop | null;
-  }
+  };
 
   /**
-   * @description 角色详情武器属性数据类型
-   * @interface Prop
+   * 角色属性数据类型
    * @since Beta v0.5.3
-   * @property {number} property_type - 属性类型
-   * @property {string} base - 基础属性
-   * @property {string} add - 附加属性
-   * @property {string} final - 最终属性
-   * @return Prop
    */
-  interface Prop {
+  type Prop = {
+    /** 属性类型 */
     property_type: number;
+    /** 基础属性 */
     base: string;
+    /** 附加属性 */
     add: string;
+    /** 最终属性 */
     final: string;
-  }
+  };
 
   /**
-   * @description 角色详情圣遗物数据类型
-   * @interface Relic
+   * 角色圣遗物数据类型
    * @since Beta v0.5.3
-   * @property {number} id - 圣遗物 ID
-   * @property {string} name - 圣遗物名称
-   * @property {string} icon - 圣遗物图标
-   * @property {number} pos - 圣遗物位置
-   * @property {number} rarity - 圣遗物稀有度
-   * @property {number} level - 圣遗物等级
-   * @property {RelicSet} set - 圣遗物套装
-   * @property {string} pos_name - 圣遗物位置名称
-   * @property {RelicProp} main_property - 圣遗物主属性
-   * @property {RelicProp[]} sub_property_list - 圣遗物副属性
-   * @return Relic
    */
-  interface Relic {
+  type Relic = {
+    /** 圣遗物 ID */
     id: number;
+    /** 圣遗物名称 */
     name: string;
+    /** 圣遗物图标 */
     icon: string;
+    /** 圣遗物位置 */
     pos: number;
+    /** 圣遗物稀有度 */
     rarity: number;
+    /** 圣遗物等级 */
     level: number;
+    /** 圣遗物套装 */
     set: RelicSet;
+    /** 圣遗物位置名称 */
     pos_name: string;
+    /** 圣遗物主属性 */
     main_property: RelicProp;
-    sub_property_list: RelicProp[];
-  }
+    /** 圣遗物副属性 */
+    sub_property_list: Array<RelicProp>;
+  };
 
   /**
-   * @description 圣遗物套装数据类型
-   * @interface RelicSet
+   * 圣遗物套装数据类型
    * @since Beta v0.5.3
-   * @property {number} id - 圣遗物套装 ID
-   * @property {string} name - 圣遗物套装名称
-   * @property {RelicSetAffix[]} affixes - 圣遗物套装效果
-   * @return RelicSet
    */
-  interface RelicSet {
+  type RelicSet = {
+    /** 圣遗物套装 ID */
     id: number;
+    /** 圣遗物套装名称 */
     name: string;
-    affixes: RelicSetAffix[];
-  }
+    /** 圣遗物套装效果 */
+    affixes: Array<RelicSetAffix>;
+  };
 
   /**
-   * @description 圣遗物套装效果数据类型
-   * @interface RelicSetAffix
+   * 圣遗物套装效果数据类型
    * @since Beta v0.5.3
-   * @property {number} activation_number - 圣遗物套装激活数量
-   * @property {string} effect - 圣遗物套装效果
-   * @return RelicSetAffix
    */
-  interface RelicSetAffix {
+  type RelicSetAffix = {
+    /** 圣遗物套装激活数量 */
     activation_number: number;
+    /** 圣遗物套装效果 */
     effect: string;
-  }
+  };
 
   /**
-   * @description 圣遗物属性数据类型
-   * @interface RelicProp
+   * 圣遗物属性数据类型
    * @since Beta v0.5.3
-   * @property {number} property_type - 属性类型
-   * @property {string} value - 属性值
-   * @property {number} times - 强化次数
-   * @return RelicProp
    */
-  interface RelicProp {
+  type RelicProp = {
+    /** 属性类型 */
     property_type: number;
+    /** 属性值 */
     value: string;
+    /** 强化次数 */
     times: number;
-  }
+  };
 
   /**
-   * @description 角色详情命座数据类型
-   * @interface Constellation
+   * 命座数据类型
    * @since Beta v0.5.3
-   * @property {number} id - 命座 ID
-   * @property {string} name - 命座名称
-   * @property {string} icon - 命座图标
-   * @property {string} effect - 命座效果
-   * @property {boolean} is_actived - 命座是否激活
-   * @property {number} pos - 命座位置
-   * @return Constellation
    */
-  interface Constellation {
+  type Constellation = {
+    /** 命座 ID */
     id: number;
+    /** 命座名称 */
     name: string;
+    /** 命座图标 */
     icon: string;
+    /** 命座效果 */
     effect: string;
+    /** 命座是否激活 */
     is_actived: boolean;
+    /** 命座位置 */
     pos: number;
-  }
+  };
 
   /**
-   * @description 角色详情时装数据类型
-   * @interface Costume
+   * 时装数据类型
    * @since Beta v0.5.3
-   * @property {number} id - 时装 ID
-   * @property {string} name - 时装名称
-   * @property {string} icon - 时装图标
-   * @return Costume
    */
-  interface Costume {
+  type Costume = {
+    /** 时装 ID */
     id: number;
+    /** 时装名称 */
     name: string;
+    /** 时装图标 */
     icon: string;
-  }
+  };
 
   /**
-   * @description 角色详情技能数据类型
-   * @interface Skill
+   * 技能数据类型
    * @since Beta v0.5.3
-   * @property {number} skill_id - 技能 ID
-   * @property {number} skill_type - 技能类型
-   * @property {number} level - 技能等级
-   * @property {string} desc - 技能描述
-   * @property {SkillAffix[]} skill_affix_list - 技能效果
-   * @property {string} icon - 技能图标
-   * @property {boolean} is_unlock - 技能是否解锁
-   * @property {string} name - 技能名称
-   * @return Skill
    */
-  interface Skill {
+  type Skill = {
+    /** 技能 ID */
     skill_id: number;
+    /** 技能类型 */
     skill_type: number;
+    /** 技能等级 */
     level: number;
+    /** 技能描述 */
     desc: string;
-    skill_affix_list: SkillAffix[];
+    /** 技能效果 */
+    skill_affix_list: Array<SkillAffix>;
+    /** 技能图标 */
     icon: string;
+    /** 技能是否解锁 */
     is_unlock: boolean;
+    /** 技能名称 */
     name: string;
-  }
+  };
 
   /**
-   * @description 技能效果数据类型
-   * @interface SkillAffix
+   * 技能效果数据类型
    * @since Beta v0.5.3
-   * @property {string} name - 效果名称
-   * @property {string} value - 效果值
-   * @return SkillAffix
    */
-  interface SkillAffix {
+  type SkillAffix = {
+    /** 效果名称 */
     name: string;
+    /** 效果值 */
     value: string;
-  }
+  };
 
   /**
-   * @description 推荐圣遗物属性数据类型
-   * @interface RelicRecommendProp
+   * 推荐圣遗物属性数据类型
    * @since Beta v0.5.3
-   * @property {PropRecommend} recommend_properties - 推荐属性
-   * @property {PropRecommend|null} custom_properties - 自定义属性
-   * @property {boolean} has_set_recommend_prop - 是否有套装推荐属性
-   * @return RelicRecommendProp
    */
-  interface RelicRecommendProp {
+  type RelicRecommendProp = {
+    /** 推荐属性 */
     recommend_properties: PropRecommend;
+    /** 自定义属性 */
     custom_properties: PropRecommend | null;
+    /** 是否有套装推荐属性 */
     has_set_recommend_prop: boolean;
-  }
+  };
 
   /**
-   * @description 推荐属性数据类型
-   * @interface PropRecommend
+   * 推荐属性数据类型
    * @since Beta v0.5.3
-   * @property {number[]} sand_main_property_list - 推荐主属性列表
-   * @property {number[]} goblet_main_property_list - 推荐主属性列表
-   * @property {number[]} circlet_main_property_list - 推荐主属性列表
-   * @property {number[]} sub_property_list - 推荐副属性列表
-   * @return PropRecommend
    */
-  interface PropRecommend {
-    sand_main_property_list: number[];
-    goblet_main_property_list: number[];
-    circlet_main_property_list: number[];
-    sub_property_list: number[];
-  }
+  type PropRecommend = {
+    /** 推荐主属性列表（沙漏） */
+    sand_main_property_list: Array<number>;
+    /** 推荐主属性列表（圣杯） */
+    goblet_main_property_list: Array<number>;
+    /** 推荐主属性列表（头冠） */
+    circlet_main_property_list: Array<number>;
+    /** 推荐副属性列表 */
+    sub_property_list: Array<number>;
+  };
 
   /**
-   * @description 角色属性映射数据类型
-   * @interface PropMap
+   * 角色属性映射数据类型
    * @since Beta v0.5.3
-   * @type {[key:string]:DetailPropMapItem} - 属性映射
-   * @return PropMap
    */
-  interface PropMap {
-    [key: string]: PropMapItem;
-  }
+  type PropMap = Record<string, PropMapItem>;
 
   /**
-   * @description 角色属性映射项数据类型
-   * @interface PropMapItem
+   * 角色属性映射项数据类型
    * @since Beta v0.5.3
-   * @property {number} property_type - 属性类型，与key一致
-   * @property {string} name - 属性名称
-   * @property {string} icon - 属性图标
-   * @property {string} filter_name - 属性过滤名称
-   * @return PropMapItem
    */
-  interface PropMapItem {
+  type PropMapItem = {
+    /** 属性类型，与 key 一致 */
     property_type: number;
+    /** 属性名称 */
     name: string;
+    /** 属性图标 */
     icon: string;
+    /** 属性过滤名称 */
     filter_name: string;
-  }
+  };
 }

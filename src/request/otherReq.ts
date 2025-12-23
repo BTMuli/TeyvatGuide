@@ -1,6 +1,5 @@
 /**
- * @file request/otherReq.ts
- * @description Other API
+ * Other API
  * @since Beta v0.7.2
  */
 
@@ -10,10 +9,10 @@ import TGLogger from "@utils/TGLogger.js";
 import { getInitDeviceInfo } from "@utils/toolFunc.js";
 
 /**
- * @description 获取设备指纹
+ * 获取设备指纹
  * @since Beta v0.7.2
- * @param {TGApp.App.Device.DeviceInfo} Info - 设备信息
- * @returns {Promise<TGApp.App.Device.DeviceInfo>} 设备指纹
+ * @param Info - 设备信息
+ * @returns 设备指纹
  */
 async function getDeviceFp(
   Info?: TGApp.App.Device.DeviceInfo,
@@ -107,15 +106,15 @@ async function getDeviceFp(
 }
 
 /**
- * @description 获取兑换码请求
+ * 获取兑换码请求
  * @since Beta v0.5.3
- * @param {string} actId - 活动 id
- * @return {Promise<TGApp.BBS.Navigator.CodeData[]|TGApp.BBS.Response.Base>}
+ * @param actId - 活动 id
+ * @returns 兑换码
  */
 async function refreshCode(
   actId: string,
-): Promise<TGApp.BBS.Navigator.CodeData[] | TGApp.BBS.Response.Base> {
-  const res = await TGHttp<TGApp.BBS.Navigator.CodeResponse | TGApp.BBS.Response.Base>(
+): Promise<Array<TGApp.BBS.Navigator.CodeData> | TGApp.BBS.Response.Base> {
+  const res = await TGHttp<TGApp.BBS.Navigator.CodeResp | TGApp.BBS.Response.Base>(
     "https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode",
     { method: "GET", headers: { "x-rpc-act_id": actId } },
   );

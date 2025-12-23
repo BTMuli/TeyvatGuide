@@ -24,7 +24,7 @@ import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 /** 组件参数 */
 type PbMaterialItemProps = {
   /** 数据库数据 */
-  tb: TGApp.Sqlite.UserBag.TableMaterial;
+  tb: TGApp.Sqlite.UserBag.MaterialTable;
   /** WIKI 数据 */
   info: TGApp.App.Material.WikiItem;
   /** 当前选中材料 */
@@ -36,7 +36,7 @@ type PbMaterialItemEmits = (e: "select", v: MaterialInfo) => void;
 const props = defineProps<PbMaterialItemProps>();
 const emits = defineEmits<PbMaterialItemEmits>();
 
-const item = shallowRef<TGApp.Sqlite.UserBag.TableMaterial>(props.tb);
+const item = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.tb);
 
 function toMaterial(): void {
   emits("select", { tb: item.value, info: props.info });

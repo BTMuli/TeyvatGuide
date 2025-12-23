@@ -1,13 +1,14 @@
+<!-- 咨讯页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
-      <v-tabs v-model="tab" align-tabs="center" class="news-tab">
+      <v-tabs v-model="recentNewsType" align-tabs="center" class="news-tab">
         <v-tab
-          v-for="(value, index) in tabValues"
+          v-for="(value, index) in bbsEnum.post.newsTypeList"
           :key="index"
           :disabled="loading"
-          :value="value"
-          @click="firstLoad(value)"
+          :value
+          @click="firstLoad()"
         >
           {{ rawData[value].name }}
         </v-tab>
@@ -32,7 +33,7 @@
         class="post-news-btn"
         size="small"
         variant="elevated"
-        @click="firstLoad(tab, true)"
+        @click="firstLoad(true)"
       >
         <v-icon>mdi-refresh</v-icon>
       </v-btn>
@@ -51,8 +52,8 @@
       </v-btn>
     </template>
   </v-app-bar>
-  <v-window v-model="tab">
-    <v-window-item v-for="(value, index) in tabValues" :key="index" :value="value">
+  <v-window v-model="recentNewsType">
+    <v-window-item v-for="(value, index) in bbsEnum.post.newsTypeList" :key="index" :value="value">
       <div class="news-grid">
         <div v-for="item in postData[value]" :key="item.post.post_id">
           <TPostCard :model-value="item" />
@@ -69,9 +70,10 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToChannel from "@comp/pageNews/to-channel.vue";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
+import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
-import useAppStore, { type NewsType } from "@store/app.js";
+import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
@@ -79,9 +81,9 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, reactive, Ref, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type PostData = { [key in NewsType]: Ref<Array<TGApp.BBS.Post.FullData>> };
+type PostData = Record<TGApp.BBS.Post.NewsTypeEnum, Ref<Array<TGApp.BBS.Post.FullData>>>;
 type RawItem = { isLast: boolean; name: string; lastId: number };
-type RawData = { [key in NewsType]: Ref<RawItem> };
+type RawData = Record<TGApp.BBS.Post.NewsTypeEnum, Ref<RawItem>>;
 
 const router = useRouter();
 const { recentNewsType } = storeToRefs(useAppStore());
@@ -90,8 +92,6 @@ const { gid } = <{ gid: string }>useRoute().params;
 
 const { isReachBottom } = usePageReachBottom();
 
-const tabValues: Readonly<Array<NewsType>> = ["notice", "activity", "news"];
-const tabMap: Readonly<Record<NewsType, string>> = { notice: "1", activity: "2", news: "3" };
 const label = computed<string>(() => {
   const game = gameList.value.find((v) => v.id.toString() === gid);
   return game?.name || "未知分区";
@@ -101,34 +101,42 @@ const loading = ref<boolean>(false);
 const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
 const search = ref<string>("");
-const postData = reactive<PostData>({
-  notice: shallowRef<Array<TGApp.BBS.Post.FullData>>([]),
-  activity: shallowRef<Array<TGApp.BBS.Post.FullData>>([]),
-  news: shallowRef<Array<TGApp.BBS.Post.FullData>>([]),
-});
-const rawData = reactive<RawData>({
-  notice: shallowRef<RawItem>({ isLast: false, name: "公告", lastId: 0 }),
-  activity: shallowRef<RawItem>({ isLast: false, name: "活动", lastId: 0 }),
-  news: shallowRef<RawItem>({ isLast: false, name: "资讯", lastId: 0 }),
-});
-const tab = computed<NewsType>({
-  get: () => ((recentNewsType.value satisfies NewsType) ? recentNewsType.value : "notice"),
-  set: (v) => (recentNewsType.value = v),
-});
 
-onMounted(async () => await firstLoad(tab.value));
+const postData = reactive<PostData>(
+  <PostData>(
+    Object.fromEntries(
+      bbsEnum.post.newsTypeList.map((v) => [v, shallowRef<Array<TGApp.BBS.Post.FullData>>([])]),
+    )
+  ),
+);
+const rawData = reactive<RawData>(
+  <RawData>Object.fromEntries(
+    bbsEnum.post.newsTypeList.map((type) => [
+      type,
+      shallowRef<RawItem>({
+        isLast: false,
+        name: bbsEnum.post.newsTypeDesc(type),
+        lastId: 0,
+      }),
+    ]),
+  ),
+);
+
+onMounted(async () => await firstLoad());
 
 watch(
   () => isReachBottom.value,
   async () => {
     if (!isReachBottom.value) return;
-    await loadMore(tab.value);
+    await loadMore();
   },
 );
 
-async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void> {
+async function firstLoad(refresh: boolean = false): Promise<void> {
   if (loading.value) return;
   loading.value = true;
+  let key: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NOTICE;
+  if (bbsEnum.post.newsTypeList.includes(recentNewsType.value)) key = recentNewsType.value;
   if (rawData[key].lastId !== 0) {
     if (!refresh) {
       loading.value = false;
@@ -139,7 +147,7 @@ async function firstLoad(key: NewsType, refresh: boolean = false): Promise<void>
     rawData[key].lastId = 0;
   }
   await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
-  const getData = await painterReq.news(gid, tabMap[key]);
+  const getData = await painterReq.news(gid, key);
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData[key] = { isLast: getData.is_last, name: rawData[key].name, lastId: getData.list.length };
   postData[key] = getData.list;
@@ -162,9 +170,11 @@ function handleList(): void {
 }
 
 // 加载更多
-async function loadMore(key: NewsType): Promise<void> {
+async function loadMore(): Promise<void> {
   if (loading.value) return;
   loading.value = true;
+  let key: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NOTICE;
+  if (bbsEnum.post.newsTypeList.includes(recentNewsType.value)) key = recentNewsType.value;
   if (rawData[key].isLast) {
     showSnackbar.warn("已经是最后一页了");
     loading.value = false;
@@ -173,7 +183,7 @@ async function loadMore(key: NewsType): Promise<void> {
   await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
   const mod = rawData[key].lastId % 20;
   const pageSize = mod === 0 ? 20 : 20 - mod;
-  const getData = await painterReq.news(gid, tabMap[key], pageSize, rawData[key].lastId);
+  const getData = await painterReq.news(gid, key, pageSize, rawData[key].lastId);
   await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
   rawData[key].lastId = rawData[key].lastId + getData.list.length;
   rawData[key].isLast = getData.is_last;

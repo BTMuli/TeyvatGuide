@@ -99,7 +99,7 @@ async function getStackBarOptions(): Promise<EChartsOption> {
     temp4.push(star4);
     temp3.push(star3);
   }
-  const series: BarSeriesOption[] = [
+  const series: Array<BarSeriesOption> = [
     { data: temp5, type: "bar", stack: "a", name: "五星数量" },
     { data: temp4, type: "bar", stack: "a", name: "四星数量" },
     { data: temp3, type: "bar", stack: "a", name: "三星数量" },

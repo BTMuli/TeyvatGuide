@@ -1,29 +1,30 @@
+<!-- 成就系列 -->
 <template>
   <div
-    class="tuas-card"
-    @click="selectSeries"
     v-if="data"
-    :title="data.name"
     :class="{
       'tuas-selected': props.cur === props.series,
       'tuas-radius': showCard,
     }"
+    :title="data.name"
+    class="tuas-card"
+    @click="selectSeries"
   >
     <div class="tuas-version">v{{ data.version }}</div>
-    <div class="tuas-reward" v-if="showCard">
+    <div v-if="showCard" class="tuas-reward">
       <img
         :class="{ finish: progress === 100 }"
-        alt="card"
         :src="`/WIKI/nameCard/bg/${data.card}.webp`"
+        alt="card"
       />
     </div>
     <div class="tuas-icon">
-      <img alt="icon" :src="`/icon/achievement/${data.icon}.webp`" />
+      <img :src="`/icon/achievement/${data.icon}.webp`" alt="icon" />
       <v-progress-circular
-        class="progress"
-        bg-color="var(--tgc-od-white)"
-        color="var(--tgc-yellow-2)"
         :model-value="progress"
+        bg-color="var(--tgc-od-white)"
+        class="progress"
+        color="var(--tgc-yellow-2)"
       />
     </div>
     <div class="tuas-content">
@@ -47,7 +48,7 @@ let achiListener: UnlistenFn | null = null;
 const props = defineProps<TuaSeriesProps>();
 const emits = defineEmits<TuaSeriesEmits>();
 
-const overview = shallowRef<TGApp.Sqlite.Achievement.Overview>({ fin: 0, total: 0 });
+const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 0 });
 const data = computed<TGApp.App.Achievement.Series | undefined>(() =>
   AppAchievementSeriesData.find((s) => s.id === props.series),
 );
@@ -109,6 +110,7 @@ function selectSeries(): void {
   justify-content: flex-start;
   padding: 8px;
   border-radius: 4px;
+  background: var(--app-page-bg);
   color: var(--box-text-1);
   column-gap: 8px;
   cursor: pointer;

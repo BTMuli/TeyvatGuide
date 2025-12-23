@@ -14,11 +14,11 @@ import { exportUigf4Data, readUigf4Data, readUigfData, verifyUigfData } from "@u
 import TGSqlite from "../index.js";
 
 /**
- * @description 获取导入 Sql
+ * 获取导入 Sql
  * @since Beta v.6.0
- * @param {string} uid - UID
- * @param {TGApp.Plugins.UIGF.GachaItem} gacha - UIGF数据
- * @returns {string}
+ * @param uid - UID
+ * @param gacha - UIGF数据
+ * @returns sql
  */
 function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string {
   return `
@@ -42,11 +42,11 @@ function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string 
 }
 
 /**
- * @description 传入时间字符串跟对应时区，转成utc8时间字符串
+ * 传入时间字符串跟对应时区，转成utc8时间字符串
  * @since Beta v0.7.5
- * @param {string} time - 时间字符串
- * @param {number} timezone - 时区
- * @return {string} 转换后的时间戳
+ * @param time - 时间字符串
+ * @param timezone - 时区
+ * @returns 转换后的时间戳
  */
 function getUtc8Time(time: string, timezone: number): string {
   const date = new Date(time);
@@ -56,11 +56,11 @@ function getUtc8Time(time: string, timezone: number): string {
 }
 
 /**
- * @description 转换祈愿数据，防止多语言
+ * 转换祈愿数据，防止多语言
  * @since Beta v0.7.5
- * @param {TGApp.Plugins.UIGF.GachaItem} gacha - UIGF数据
- * @param {number} timezone - 时区
- * @return {TGApp.Plugins.UIGF.GachaItem} 转换后的数据
+ * @param gacha - UIGF数据
+ * @param timezone - 时区
+ * @returns 转换后的数据
  */
 function transGacha(
   gacha: TGApp.Plugins.UIGF.GachaItem,
@@ -82,11 +82,11 @@ function transGacha(
 }
 
 /**
- * @description 获取数据库的uid列表
+ * 获取数据库的uid列表
  * @since Beta v0.4.7
- * @return {Promise<string[]>}
+ * @returns uid列表
  */
-async function getUidList(): Promise<string[]> {
+async function getUidList(): Promise<Array<string>> {
   const db = await TGSqlite.getDB();
   type resType = Array<{ uid: string }>;
   const res = await db.select<resType>("SELECT DISTINCT uid FROM GachaRecords;");
@@ -94,11 +94,11 @@ async function getUidList(): Promise<string[]> {
 }
 
 /**
- * @description 获取检测增量更新的记录 ID
+ * 获取检测增量更新的记录 ID
  * @since Beta v0.4.7
- * @param {string} uid - UID
- * @param {string} type - 类型
- * @returns {Promise<string|undefined>}
+ * @param uid - UID
+ * @param type - 类型
+ * @returns ID
  */
 async function getGachaCheck(uid: string, type: string): Promise<string | undefined> {
   const db = await TGSqlite.getDB();
@@ -112,29 +112,29 @@ async function getGachaCheck(uid: string, type: string): Promise<string | undefi
 }
 
 /**
- * @description 获取用户祈愿记录
+ * 获取用户祈愿记录
  * @since Beta v0.4.7
- * @param {string} uid - UID
- * @return {Promise<TGApp.Sqlite.GachaRecords.TableGacha[]>}
+ * @param uid - UID
+ * @returns 祈愿记录
  */
-async function getGachaRecords(uid: string): Promise<TGApp.Sqlite.GachaRecords.TableGacha[]> {
+async function getGachaRecords(uid: string): Promise<Array<TGApp.Sqlite.Gacha.Gacha>> {
   const db = await TGSqlite.getDB();
   return await db.select("SELECT * FROM GachaRecords WHERE uid = ?;", [uid]);
 }
 
 /**
- * @description 获取用户祈愿记录，并按照日期进行分组排序
+ * 获取用户祈愿记录，并按照日期进行分组排序
  * @since Beta v0.6.8
- * @param {string} uid - UID
- * @param {string} type - 类型
- * @return {Promise<Record<string, TGApp.Sqlite.GachaRecords.SingleTable[]>} 日期分组的祈愿记录
+ * @param uid - UID
+ * @param type - 类型
+ * @returns 日期分组的祈愿记录
  */
 async function getGachaRecordsGroupByDate(
   uid: string,
   type?: string,
-): Promise<Record<string, TGApp.Sqlite.GachaRecords.TableGacha[]>> {
+): Promise<Record<string, Array<TGApp.Sqlite.Gacha.Gacha>>> {
   const db = await TGSqlite.getDB();
-  type resType = Array<TGApp.Sqlite.GachaRecords.TableGacha>;
+  type resType = Array<TGApp.Sqlite.Gacha.Gacha>;
   let res: resType;
   if (type) {
     res = await db.select<resType>(
@@ -146,7 +146,7 @@ async function getGachaRecordsGroupByDate(
       uid,
     ]);
   }
-  const map: Record<string, TGApp.Sqlite.GachaRecords.TableGacha[]> = {};
+  const map: Record<string, Array<TGApp.Sqlite.Gacha.Gacha>> = {};
   for (const item of res) {
     // key 是 yyyy-MM-dd hh:mm:ss，按照日期分组
     const key = item.time.split(" ")[0];
@@ -157,10 +157,10 @@ async function getGachaRecordsGroupByDate(
 }
 
 /**
- * @description 删除指定UID的祈愿记录
+ * 删除指定UID的祈愿记录
  * @since Beta v0.4.7
- * @param {string} uid - UID
- * @return {Promise<void>}
+ * @param uid - UID
+ * @returns 无返回值
  */
 async function deleteGachaRecords(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();
@@ -168,17 +168,17 @@ async function deleteGachaRecords(uid: string): Promise<void> {
 }
 
 /**
- * @description 清理祈愿记录
+ * 清理祈愿记录
  * @since Beta v0.6.4
- * @param {string} uid - UID
- * @param {string} pool - 池子
- * @param {Record<string,string[]>} map - 祈愿数据
- * @return {Promise<void>}
+ * @param uid - UID
+ * @param pool - 池子
+ * @param map - 祈愿数据
+ * @returns 无返回值
  */
 async function cleanGachaRecords(
   uid: string,
   pool: string,
-  map: Record<string, string[]>,
+  map: Record<string, Array<string>>,
 ): Promise<void> {
   const db = await TGSqlite.getDB();
   for (const [time, ids] of Object.entries(map)) {
@@ -200,10 +200,10 @@ async function cleanGachaRecords(
 /**
  * 合并祈愿数据
  * @since Beta v0.9.0
- * @param {string} uid - UID
- * @param {Array<TGApp.Plugins.UIGF.GachaItem>} data - UIGF数据
- * @param {boolean} showProgress - 是否显示进度
- * @return {Promise<void>}
+ * @param uid - UID
+ * @param data - UIGF数据
+ * @param showProgress - 是否显示进度
+ * @returns 无返回值
  */
 async function mergeUIGF(
   uid: string,
@@ -240,9 +240,9 @@ async function mergeUIGF(
 /**
  * 合并祈愿数据（v4.0）
  * @since Beta v0.9.0
- * @param {TGApp.Plugins.UIGF.GachaHk4e} data - UIGF数据
- * @param {boolean} showProgress - 是否显示进度
- * @return {Promise<void>}
+ * @param data - UIGF数据
+ * @param showProgress - 是否显示进度
+ * @returns 无返回值
  */
 async function mergeUIGF4(
   data: TGApp.Plugins.UIGF.GachaHk4e,
@@ -278,8 +278,8 @@ async function mergeUIGF4(
 /**
  * 备份祈愿数据
  * @since Beta v0.9.0
- * @param {string} dir - 备份目录
- * @returns {Promise<void>}
+ * @param dir - 备份目录
+ * @returns 无返回值
  */
 async function backUpUigf(dir: string): Promise<void> {
   if (!(await exists(dir))) {
@@ -295,8 +295,8 @@ async function backUpUigf(dir: string): Promise<void> {
 /**
  * 恢复祈愿数据
  * @since Beta v0.9.0
- * @param {string} dir - 备份目录
- * @returns {Promise<boolean>}
+ * @param dir - 备份目录
+ * @returns 是否恢复成功
  */
 async function restoreUigf(dir: string): Promise<boolean> {
   if (!(await exists(dir))) {
@@ -357,14 +357,11 @@ async function restoreUigf(dir: string): Promise<boolean> {
 /**
  * 更新单条数据ID
  * @since Beta v0.9.0
- * @param {TGApp.Sqlite.GachaRecords.TableGacha} raw - 原始数据
- * @param {number} itemId - 物品ID
- * @returns {Promise<void>}
+ * @param raw - 原始数据
+ * @param itemId - 物品ID
+ * @returns 无返回值
  */
-async function updateItemIdById(
-  raw: TGApp.Sqlite.GachaRecords.TableGacha,
-  itemId: string,
-): Promise<void> {
+async function updateItemIdById(raw: TGApp.Sqlite.Gacha.Gacha, itemId: string): Promise<void> {
   const db = await TGSqlite.getDB();
   await db.execute("UPDATE GachaRecords SET itemId = ? WHERE id = ?;", [itemId.toString(), raw.id]);
 }

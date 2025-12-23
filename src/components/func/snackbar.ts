@@ -1,6 +1,5 @@
 /**
- * @file component/func/snackbar.ts
- * @description snackbar 组件封装，函数式调用
+ * snackbar 组件封装，函数式调用
  * @since Beta v0.6.3
  */
 
@@ -14,15 +13,14 @@ const snackbarId = "tg-func-snackbar";
 export type SnackbarParams = { text: string; color: string; timeout: number };
 
 /**
- * @description 自定义 snackbar 组件
+ * 自定义 snackbar 组件
  * @since Beta v0.6.3
- * @return SnackbarInstance
  */
-interface SnackbarInstance extends ComponentInternalInstance {
+type SnackbarInstance = {
   exposeProxy: {
     displayBox: (props: SnackbarParams) => void;
   };
-}
+} & ComponentInternalInstance;
 
 function renderBox(props: SnackbarParams): VNode {
   const container = document.createElement("div");

@@ -194,7 +194,7 @@ async function cycleGetDataGame(): Promise<void> {
       model.value = false;
       return;
     }
-    const statusRaw: TGApp.Game.Login.StatusPayloadRaw = JSON.parse(res.payload.raw);
+    const statusRaw: TGApp.Game.Login.StatPayloadRaw = JSON.parse(res.payload.raw);
     await showLoading.start("正在获取SToken");
     const stResp = await takumiReq.game.stoken(statusRaw);
     await showLoading.end();

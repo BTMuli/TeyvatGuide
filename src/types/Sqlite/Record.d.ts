@@ -1,222 +1,249 @@
 /**
- * @file types/Sqlite/Record.d.ts
- * @description Sqlite 原神战绩相关类型定义文件
+ * 原神战绩类型定义文件
  * @since Beta v0.8.1
  */
 
 declare namespace TGApp.Sqlite.Record {
   /**
-   * @description 原神战绩数据表
-   * @interface SingleTable
+   * 原神战绩数据
    * @since Beta v0.6.0
-   * @property {number} uid - UID
-   * @property {string} role - 角色信息
-   * @property {string} avatars - 角色列表
-   * @property {string} stats - 统计信息
-   * @property {string} worldExplore - 世界探索信息
-   * @property {string} homes - 尘歌壶信息
-   * @property {string} updated - 更新时间
+   * @remarks UserRecord 表
+   * @TODO 直接从接口写入，不要转换
    */
-  type SingleTable = {
+  type TableRaw = {
+    /** 用户 UID */
     uid: number;
+    /**
+     * 用户游戏信息
+     * @remarks 序列化，反序列化后是 {@link Role} 数据
+     */
     role: string;
+    /**
+     * 角色列表
+     * @remarks 序列化，反序列化后是 {@link Avatar} 数组
+     */
     avatars: string;
+    /**
+     * 统计信息
+     * @remarks 序列化，反序列化后是 {@link Stats} 数据
+     */
     stats: string;
+    /**
+     * 探索信息
+     * @remarks 序列化，反序列化后是 {@link WorldExplore} 数组
+     */
     worldExplore: string;
+    /**
+     * 尘歌壶信息
+     * @remarks 序列化，反序列化后是 {@link Home} 数组
+     */
     homes: string;
+    /** 更新时间 */
     updated: string;
   };
 
   /**
-   * @description 渲染用数据
-   * @interface RenderData
+   * 战绩数据
    * @since Beta v0.6.0
-   * @property {number} uid - UID
-   * @property {Role} role - 用户信息
-   * @property {Avatar[]} avatars - 角色列表
-   * @property {Stats} stats - 统计信息
-   * @property {WorldExplore[]} worldExplore - 世界探索信息
-   * @property {Home[]} homes - 尘歌壶信息
-   * @property {string} updated - 更新时间
+   * @remarks 解析自 {@link TableRaw} 数据
    */
-  type RenderData = {
+  type TableTrans = {
+    /** 用户 UID */
     uid: number;
+    /** 游戏信息 */
     role: Role;
-    avatars: Avatar[];
+    /** 角色列表 */
+    avatars: Array<Avatar>;
+    /** 统计信息 */
     stats: Stats;
-    worldExplore: WorldExplore[];
-    homes: Home[];
+    /** 探索信息 */
+    worldExplore: Array<WorldExplore>;
+    /** 尘歌壶信息 */
+    homes: Array<Home>;
+    /** 更新时间 */
     updated: string;
   };
 
   /**
-   * @description 角色信息类型
-   * @interface Role
+   * 用户信息
    * @since Beta v0.6.0
-   * @property {string} nickname - 角色昵称
-   * @property {string} region - 区域
-   * @property {number} level - 等级
-   * @property {string} avatar - 头像
    */
-  type Role = { nickname: string; region: string; level: number; avatar: string };
+  type Role = {
+    /** 昵称 */
+    nickname: string;
+    /** 服务器 */
+    region: string;
+    /** 等级 */
+    level: number;
+    /** 头像 */
+    avatar: string;
+  };
 
   /**
-   * @description 角色列表类型
-   * @interface Avatar
+   * 角色信息
    * @since Alpha v0.2.0
-   * @property {number} id - 角色 ID
-   * @property {string} name - 角色名称
-   * @property {string} element - 角色元素
-   * @property {number} fetter - 角色羁绊等级
-   * @property {number} level - 角色等级
-   * @property {number} star - 角色星级
-   * @property {number} constellation - 角色命座
-   * @property {boolean} isShow - 角色是否展示
    */
   type Avatar = {
+    /** 角色ID */
     id: number;
+    /** 名称 */
     name: string;
+    /**
+     * 元素
+     * @example 火水草雷风岩冰
+     */
     element: string;
+    /**
+     * 好感度
+     * @remarks 奇偶跟旅行者好感度恒为0
+     */
     fetter: number;
+    /** 等级 */
     level: number;
+    /**
+     * 稀有度
+     * @remarks 埃洛伊稀有度为105，转换为5
+     */
     star: number;
+    /** 命座数 */
     constellation: number;
+    /** 是否设为展示角色 */
     isShow: 0 | 1;
   };
 
   /**
-   * @description 统计信息类型
-   * @interface Stats
+   * 统计信息
    * @since Beta v0.8.1
-   * @property {number} activeDays - 活跃天数
-   * @property {number} achievementNumber - 成就达成数
-   * @property {number} avatarNumber - 获得角色数
-   * @property {number} avatarFetter - 满好感角色数
-   * @property {number} wayPoints - 解锁传送点数
-   * @property {number} domainNumber - 解锁秘境数
-   * @property {number} anemoCulus - 风神瞳数
-   * @property {number} geoCulus - 岩神瞳数
-   * @property {number} electroCulus - 雷神瞳数
-   * @property {number} dendroCulus - 草神瞳数
-   * @property {number} hydroCulus - 水神瞳数
-   * @property {number} pyroCulus - 火神瞳数
-   * @property {number} moonCulus - 月神瞳数
-   * @property {string} sprialAbyss - 深境螺旋信息
-   * @property {string} combatRole - 幻想真境剧诗
-   * @property {string} hardChallenge - 幽境危战挑战
-   * @property {number} luxuriousChest - 华丽宝箱数
-   * @property {number} preciousChest - 珍贵宝箱数
-   * @property {number} exquisiteChest - 精致宝箱数
-   * @property {number} commonChest - 普通宝箱数
-   * @property {number} magicChest - 奇馈宝箱数
    */
   type Stats = {
+    /** 活跃天数 */
     activeDays: number;
+    /** 成就达成数 */
     achievementNumber: number;
+    /** 持有角色数 */
     avatarNumber: number;
+    /** 满好感角色数 */
     avatarFetter: number;
+    /** 解锁传送点数 */
     wayPoints: number;
+    /** 解锁秘境数 */
     domainNumber: number;
+    /** 风神瞳数 */
     anemoCulus: number;
+    /** 岩神瞳数 */
     geoCulus: number;
+    /** 雷神瞳 */
     electroCulus: number;
+    /** 草神瞳数 */
     dendroCulus: number;
+    /** 水神瞳数 */
     hydroCulus: number;
+    /** 火神瞳数 */
     pyroCulus: number;
+    /** 月神瞳数 */
     moonCulus: number;
+    /** 深渊 */
     sprialAbyss: string;
+    /** 剧诗 */
     combatRole: string;
+    /** 危战 */
     hardChallenge: string;
+    /** 华丽宝箱数 */
     luxuriousChest: number;
+    /** 珍贵宝箱数 */
     preciousChest: number;
+    /** 精致宝箱数 */
     exquisiteChest: number;
+    /** 普通宝箱数 */
     commonChest: number;
+    /** 奇馈宝箱数 */
     magicChest: number;
   };
 
   /**
-   * @description 世界探索信息类型
-   * @interface WorldExplore
+   * 世界探索信息
    * @since Beta v0.8.1
-   * @property {number} id - 地区 ID
-   * @property {string} name - 地区名称
-   * @property {string} iconLight - 地区图标（亮）
-   * @property {string} bg - 背景
-   * @property {string} cover - 封面
-   * @property {number} reputation - 地区声望等级
-   * @property {WorldOffering} offering - 地区供奉信息
-   * @property {Array<WorldOffering>} offerings - 地区供奉列表
-   * @property {number} exploration - 地区探索进度
-   * @property {Array<WorldChild>} children - 子地区
    */
   type WorldExplore = {
+    /** 地区ID */
     id: number;
+    /** 地区名称 */
     name: string;
+    /** 浅色模式下的图标 */
     iconLight: string;
-    icon?: string;
+    /** 背景 */
     bg: string;
+    /** 封面 */
     cover: string;
+    /** 地区声望等级 */
     reputation?: number;
-    /**
-     * @deprecated 已弃用，建议使用 offerings
-     */
-    offering?: WorldOffering;
+    /** 供奉信息 */
     offerings?: Array<WorldOffering>;
+    /** 探索度 */
     exploration: number;
+    /** 探索进度 */
     area_exploration_list?: Array<AreaExploration>;
+    /** 子地区 */
     children: Array<WorldChild>;
   };
 
   /**
-   * @description 祭祀物类型
-   * @interface WorldOffering
+   * 地区供奉信息
    * @since Alpha v0.2.0
-   * @property {string} name - 名称
-   * @property {number} level - 等级
-   * @property {string} icon - 图标
    */
-  type WorldOffering = { name: string; level: number; icon: string };
+  type WorldOffering = {
+    /** 名称 */
+    name: string;
+    /** 等级 */
+    level: number;
+    /** 图标 */
+    icon: string;
+  };
 
   /**
-   * @description 区域探索类型
-   * @interface AreaExploration
+   * 区域探索
    * @since Beta v0.8.1
-   * @property {string} name - 名称
-   * @property {number} exploration_percentage - 探索千分比
    */
-  type AreaExploration = { name: string; exploration_percentage: number };
+  type AreaExploration = {
+    /** 名称 */
+    name: string;
+    /** 千分比 */
+    exploration_percentage: number;
+  };
 
   /**
-   * @description 子地区类型
-   * @interface WorldChild
+   * 子地区
    * @since Beta v0.4.3
-   * @property {number} id - 子地区 ID
-   * @property {string} name - 子地区名称
-   * @property {number} exploration - 子地区探索进度
    */
-  type WorldChild = { id: number; name: string; exploration: number };
+  type WorldChild = {
+    /** 地区 ID */
+    id: number;
+    /** 名称 */
+    name: string;
+    /** 探索千分比 */
+    exploration: number;
+  };
 
   /**
-   * @description 尘歌壶信息类型
-   * @interface Home
+   * 尘歌壶信息
    * @since Alpha v0.2.0
-   * @property {string} comfortIcon - 洞天仙力图标
-   * @property {string} comfortName - 洞天仙力名称
-   * @property {string} name - 洞天名称
-   * @property {number} level - 信任等阶
-   * @property {number} comfort - 最高洞天仙力
-   * @property {number} furniture - 获得摆设数
-   * @property {number} visit - ；历史访客数
-   * @property {string} bg - 背景
    */
   type Home = {
+    /** 洞天仙力图标 */
     comfortIcon: string;
+    /** 洞天仙力名称 */
     comfortName: string;
+    /** 洞天名称 */
     name: string;
+    /** 信任等阶 */
     level: number;
+    /** 最高洞天仙力 */
     comfort: number;
+    /** 获得摆设数 */
     furniture: number;
+    /** 历史访客数 */
     visit: number;
+    /** 背景 */
     bg: string;
   };
 }

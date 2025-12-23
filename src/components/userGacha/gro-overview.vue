@@ -37,24 +37,24 @@ import { computed } from "vue";
 
 import GroDataView from "./gro-data-view.vue";
 
-type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.GachaRecords.TableGacha> };
+type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.Gacha.Gacha> };
 
 const props = defineProps<GachaOverviewProps>();
 const swiperModules = [Autoplay, A11y, Pagination];
 
-const newData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
+const newData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "100"),
 );
-const normalData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
+const normalData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "200"),
 );
-const avatarData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
+const avatarData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "301"),
 );
-const weaponData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
+const weaponData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "302"),
 );
-const mixData = computed<Array<TGApp.Sqlite.GachaRecords.TableGacha>>(() =>
+const mixData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
   props.modelValue.filter((item) => item.uigfType === "500"),
 );
 </script>

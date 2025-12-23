@@ -24,7 +24,7 @@ import { getDeviceInfo } from "./toolFunc.js";
 
 class Client {
   private listener: UnlistenFn | undefined;
-  private route: string[] = [];
+  private route: Array<string> = [];
 
   private constructor() {
     this.route = [];
@@ -56,9 +56,9 @@ class Client {
   /**
    * 回调函数
    * @since Beta v0.5.0
-   * @param {string} callback - 回调函数名
-   * @param {object} data - 回调数据
-   * @returns Promise<void>
+   * @param callback - 回调函数名
+   * @param data - 回调数据
+   * @returns 无返回值
    */
   async callback(callback: string, data: object): Promise<void> {
     const response = { retcode: 0, message: "success", data: data ?? {} };
@@ -70,8 +70,8 @@ class Client {
   /**
    * 获取保存图片的 JS
    * @since Beta v0.5.1
-   * @param {string} url - 图片链接
-   * @param {string} format - 图片格式
+   * @param url - 图片链接
+   * @param format - 图片格式
    * @returns JS代码字符串
    */
   getSaveImgJS(url: string, format: string): string {
@@ -97,8 +97,8 @@ class Client {
   /**
    * 获取 url
    * @since Beta v0.5.0
-   * @param {string} func - 方法名
-   * @returns {string} - url
+   * @param func - 方法名
+   * @returns url
    */
   getUrl(func: string): string {
     switch (func) {
@@ -122,8 +122,8 @@ class Client {
   /**
    * 处理米游社客户端的 callback
    * @since Beta v0.6.1
-   * @param {Event<string>} arg - 事件参数
-   * @returns {Promise<void>} - 返回值
+   * @param arg - 事件参数
+   * @returns - 返回值
    */
   async handleCallback(arg: Event<string>): Promise<void> {
     const argParse: TGApp.Plugins.JSBridge.Arg<any> = JSON.parse(arg.payload);
@@ -234,11 +234,10 @@ class Client {
   }
 
   /**
-   * @func handleCustomCallback
+   * 处理自定义的 callback
    * @since Beta v0.7.6
-   * @desc 处理自定义的 callback
-   * @param {TGApp.Plugins.JSBridge.Arg<any>} arg - 事件参数
-   * @returns {Promise<void>} - 返回值
+   * @param arg - 事件参数
+   * @returns 返回值
    */
   async handleCustomCallback(arg: TGApp.Plugins.JSBridge.Arg<any>): Promise<void> {
     await TGLogger.Info(`[TGClient][handleCustomCallback] ${JSON.stringify(arg)}`);
@@ -347,10 +346,9 @@ class Client {
   }
 
   /**
-   * @func hideOverlay
+   * 隐藏遮罩
    * @since Beta v0.5.0
-   * @desc 隐藏遮罩
-   * @returns {Promise<void>}
+   * @returns 无返回值
    */
   async hideOverlay(): Promise<void> {
     const executeJS = `javascript:(function(){
@@ -363,10 +361,9 @@ class Client {
   }
 
   /**
-   * @func hideSideBar
+   * 隐藏侧边栏
    * @since Beta v0.5.0
-   * @desc 隐藏侧边栏
-   * @returns {void} - 无返回值
+   * @returns 无返回值
    */
   async hideSideBar(): Promise<void> {
     const executeJS = `javascript:(function(){
@@ -383,10 +380,9 @@ class Client {
   }
 
   /**
-   * @func loadJSBridge
+   * 加载 JSBridge
    * @since Beta v0.5.0
-   * @desc 加载 JSBridge
-   * @returns {void} - 无返回值
+   * @returns 无返回值
    */
   async loadJSBridge(): Promise<void> {
     const executeJS = `javascript:(function() {
@@ -400,23 +396,21 @@ class Client {
   }
 
   /**
-   * @func nullCallback
+   * 空回调函数
    * @since Beta v0.3.9
-   * @desc 空回调函数
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 回调参数
-   * @returns {void} - 无返回值
+   * @param arg - 回调参数
+   * @returns 无返回值
    */
   async nullCallback(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     await this.callback(arg.callback, {});
   }
 
   /**
-   * @func open
+   * 打开米游社客户端
    * @since Beta v0.5.5
-   * @desc 打开米游社客户端
-   * @param {string} func - 方法名
-   * @param {string} url - url
-   * @returns {void} - 无返回值
+   * @param func - 方法名
+   * @param url - url
+   * @returns 无返回值
    */
   async open(func: string, url?: string): Promise<void> {
     if (url === undefined) url = this.getUrl(func);
@@ -437,11 +431,10 @@ class Client {
 
   /* JSBridge 回调处理 */
   /**
-   * @func closePage
+   * 关闭米游社客户端的页面
    * @since Beta v0.5.0
-   * @desc 关闭米游社客户端的页面
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async closePage(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     this.route.pop();
@@ -460,11 +453,10 @@ class Client {
   }
 
   /**
-   * @func configShare
+   * 配置分享
    * @since Beta v0.3.9
-   * @desc 配置分享
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.ConfigSharePayload>} arg - 请求参数
-   * @returns {Promise<void>} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async configShare(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.ConfigSharePayload>,
@@ -475,11 +467,10 @@ class Client {
   }
 
   /**
-   * @func eventTrack
+   * 事件跟踪
    * @since Beta v0.3.9
-   * @desc 事件跟踪
-   * @param {TGApp.Plugins.Arg<TGApp.Plugins.JSBridge.EventTrackPayload>} arg - 请求参数
-   * @returns {Promise<void>} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async eventTrack(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.EventTrackPayload>,
@@ -490,11 +481,10 @@ class Client {
   }
 
   /**
-   * @func genAuthKey
+   * 获取米游社客户端的 authkey
    * @since Beta v0.3.9
-   * @desc 获取米游社客户端的 authkey
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GenAuthkeyPayload>} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async genAuthKey(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GenAuthkeyPayload>,
@@ -507,11 +497,10 @@ class Client {
   }
 
   /**
-   * @func getActionTicket
+   * 获取米游社客户端的 action_ticket
    * @since Beta v0.3.9
-   * @desc 获取米游社客户端的 action_ticket
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetActionTicketPayload>} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async getActionTicket(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetActionTicketPayload>,
@@ -527,11 +516,10 @@ class Client {
   }
 
   /**
-   * @func getCookieInfo
+   * 获取米游社客户端的 cookie
    * @since Beta v0.8.3
-   * @desc 获取米游社客户端的 cookie
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async getCookieInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
@@ -555,11 +543,10 @@ class Client {
   }
 
   /**
-   * @func getCookieToken
+   * 获取米游社客户端的 cookie_token
    * @since Beta v0.8.3
-   * @desc 获取米游社客户端的 cookie_token
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async getCookieToken(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetCookieTokenPayload>,
@@ -591,11 +578,10 @@ class Client {
   }
 
   /**
-   * @func getDS
+   * 获取米游社客户端的 DS 参数
    * @since Beta v0.7.3
-   * @desc 获取米游社客户端的 DS 参数
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 方法参数
-   * @returns {void} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async getDS(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const data = { DS: getDS4JS("LK2", 1) };
@@ -603,11 +589,10 @@ class Client {
   }
 
   /**
-   * @func getDS2
+   * 获取米游社客户端的 DS 参数
    * @since Beta v0.3.9
-   * @desc 获取米游社客户端的 DS 参数
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetDS2Payload>} arg
-   * @returns {Promise<void>}
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async getDS2(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetDS2Payload>,
@@ -619,11 +604,10 @@ class Client {
   }
 
   /**
-   * @func getHTTPRequestHeaders
+   * 获取米游社客户端的 HTTP 请求头
    * @since Beta v0.3.9
-   * @desc 获取米游社客户端的 HTTP 请求头
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async getHTTPRequestHeaders(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const localFp = getDeviceInfo("device_fp");
@@ -640,11 +624,10 @@ class Client {
   }
 
   /**
-   * @func getStatusBarHeight
+   * 获取状态栏高度
    * @since Beta v0.3.9
-   * @desc 获取状态栏高度
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 请求参数
-   * @returns {void} - 无返回值
+   * @param arg - 请求参数
+   * @returns 无返回值
    */
   async getStatusBarHeight(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const data = { statusBarHeight: 0 };
@@ -654,8 +637,8 @@ class Client {
   /**
    * 获取对应区服的角色信息
    * @since Beta v0.8.4
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetRegionRoleInfoPayload>} arg - 方法参数
-   * @returns {Promise<void>} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async getRegionRoleInfo(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.GetRegionRoleInfoPayload>,
@@ -672,11 +655,10 @@ class Client {
   }
 
   /**
-   * @func getUserInfo
+   * 获取米游社客户端的用户信息
    * @since Beta v0.3.9
-   * @desc 获取米游社客户端的用户信息
-   * @param {TGApp.Plugins.JSBridge.NullArg} arg - 类型参数
-   * @returns {void} - 无返回值
+   * @param arg - 类型参数
+   * @returns 无返回值
    */
   async getUserInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
@@ -690,11 +672,10 @@ class Client {
   }
 
   /**
-   * @func onClickImg
+   * 点击图片，下载到本地
    * @since Beta v0.5.0
-   * @desc 点击图片，下载到本地
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OnClickImgPayload>} arg - 方法参数
-   * @returns {void} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async onClickImg(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OnClickImgPayload>,
@@ -706,11 +687,10 @@ class Client {
   }
 
   /**
-   * @func openApplication
+   * 打开应用
    * @since Beta v0.5.5
-   * @desc 打开应用
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>} arg - 方法参数
-   * @returns {void} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async openApplication(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenApplicationPayload>,
@@ -725,11 +705,10 @@ class Client {
   }
 
   /**
-   * @func openSystemBrowser
+   * 打开系统浏览器
    * @since Beta v0.6.1
-   * @desc 打开系统浏览器
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>} arg - 方法参数
-   * @returns {Promise<void>}
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async openSystemBrowser(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.OpenSystemBrowserPayload>,
@@ -740,11 +719,10 @@ class Client {
   }
 
   /**
-   * @func pushPage
+   * 打开米游社客户端的页面
    * @since Beta v0.5.5
-   * @desc 打开米游社客户端的页面
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>} arg - 方法参数
-   * @returns {Promise<void>} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async pushPage(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.PushPagePayload>,
@@ -781,11 +759,10 @@ class Client {
   }
 
   /**
-   * @func setPresentationStyle
+   * 设置米游社客户端的展示方式
    * @since Beta v0.3.9
-   * @desc 设置米游社客户端的展示方式
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SetPresentationStylePayload>} arg - 方法参数
-   * @returns {Promise<void>} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async setPresentationStyle(
     arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SetPresentationStylePayload>,
@@ -796,11 +773,10 @@ class Client {
   }
 
   /**
-   * @func share
+   * 分享
    * @since Beta v0.5.1
-   * @desc 分享
-   * @param {TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>} arg - 方法参数
-   * @returns {Promise<void>} - 无返回值
+   * @param arg - 方法参数
+   * @returns 无返回值
    */
   async share(arg: TGApp.Plugins.JSBridge.Arg<TGApp.Plugins.JSBridge.SharePayload>): Promise<void> {
     if (arg.payload.type === "default") {

@@ -22,12 +22,6 @@ declare namespace TGApp.Game.Challenge {
   /**
    * 赋光之人
    * @since Beta v0.8.0
-   * @interface PopularityItem
-   * @property {number} avatar_id - 角色 ID
-   * @property {string} name - 角色名称
-   * @property {string} element - 角色元素
-   * @property {string} image - 角色头像图片 URL
-   * @property {number} rarity - 角色稀有度
    */
   type PopularityItem = {
     /** 角色ID */

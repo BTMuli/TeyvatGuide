@@ -55,12 +55,12 @@ import { computed, ref, watch } from "vue";
 import TuaDetailCard from "./tua-detail-card.vue";
 
 type TuaDetailOverlayProps = {
-  avatar: TGApp.Sqlite.Character.UserRole;
-  avatars: Array<TGApp.Sqlite.Character.UserRole>;
+  avatar: TGApp.Sqlite.Character.TableTrans;
+  avatars: Array<TGApp.Sqlite.Character.TableTrans>;
 };
 type TuaDetailOverlayEmits = {
   (e: "toNext", val: boolean): void;
-  (e: "toAvatar", val: TGApp.Sqlite.Character.UserRole): void;
+  (e: "toAvatar", val: TGApp.Sqlite.Character.TableTrans): void;
 };
 
 const props = defineProps<TuaDetailOverlayProps>();

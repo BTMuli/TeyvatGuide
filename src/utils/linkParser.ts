@@ -13,8 +13,8 @@ import { createPost } from "./TGWindow.js";
 /**
  * 处理帖子链接
  * @since Beta v0.6.9
- * @param {string} link
- * @returns {Promise<false|string>} - 处理情况，或者转换后的链接
+ * @param link - 链接
+ * @returns 处理情况，或者转换后的链接
  */
 export async function parsePost(link: string): Promise<false | string> {
   const url = new URL(link);
@@ -54,9 +54,9 @@ export async function parsePost(link: string): Promise<false | string> {
 /**
  * 处理链接
  * @since Beta v0.7.2
- * @param {string} link - 链接
- * @param {boolean} useInner - 是否采用内置 JSBridge 打开
- * @returns {Promise<boolean|string>} - 处理情况，或者转换后的链接
+ * @param link - 链接
+ * @param useInner - 是否采用内置 JSBridge 打开
+ * @returns 处理情况，或者转换后的链接
  */
 export async function parseLink(
   link: string,

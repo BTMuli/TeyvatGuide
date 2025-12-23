@@ -1,6 +1,5 @@
 /**
- * @file component/func/dialog.ts
- * @description dialog 组件封装，函数式调用
+ * dialog 组件封装，函数式调用
  * @since Beta v0.6.3
  */
 
@@ -27,18 +26,15 @@ export type DialogInputParams = {
 };
 
 /**
- * @description 自定义 confirm 组件
+ * 自定义 confirm 组件
  * @since Beta v0.6.3
- * @extends ComponentInternalInstance
- * @property {Function} exposeProxy.displayBox 显示 confirm
- * @return DialogInstance
  */
-interface DialogInstance extends ComponentInternalInstance {
+type DialogInstance = {
   exposeProxy: {
     displayCheckBox: (props: DialogCheckParams) => Promise<boolean | undefined>;
     displayInputBox: (props: DialogInputParams) => Promise<string | false | undefined>;
   };
-}
+} & ComponentInternalInstance;
 
 function renderBox(props: DialogParams): VNode {
   const container = document.createElement("div");

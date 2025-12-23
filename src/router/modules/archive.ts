@@ -1,6 +1,5 @@
 /**
- * @file router/modules/archive.ts
- * @description 存档路由模块
+ * 存档路由模块
  * @since Beta v0.4.5
  */
 

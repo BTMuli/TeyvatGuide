@@ -112,7 +112,7 @@ import { AppGachaData } from "@/data/index.js";
 
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
-  dataVal: Array<TGApp.Sqlite.GachaRecords.TableGacha>;
+  dataVal: Array<TGApp.Sqlite.Gacha.Gacha>;
 };
 
 const props = defineProps<GachaDataViewProps>();
@@ -240,10 +240,10 @@ function getStar5Avg(): string {
 
 /**
  * 判断是否是Up物品
- * @param {TGApp.Sqlite.GachaRecords.TableGacha} item 原始数据
+ * @param {TGApp.Sqlite.Gacha.Gacha} item 原始数据
  * @returns {boolean|undefined}
  */
-function checkIsUp(item: TGApp.Sqlite.GachaRecords.TableGacha): boolean | undefined {
+function checkIsUp(item: TGApp.Sqlite.Gacha.Gacha): boolean | undefined {
   // 新手池和常驻池不存在UP概念
   if (item.gachaType === "100" || item.gachaType === "200") return undefined;
   const itemTime = new Date(item.time).getTime();

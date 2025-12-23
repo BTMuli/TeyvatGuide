@@ -254,7 +254,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   }
 }
 
-async function trySign(ac: SignAccount[], ck: TGApp.App.Account.Cookie): Promise<void> {
+async function trySign(ac: Array<SignAccount>, ck: TGApp.App.Account.Cookie): Promise<void> {
   const cookie = { cookie_token: ck.cookie_token, account_id: ck.account_id };
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
   for (const item of ac) {

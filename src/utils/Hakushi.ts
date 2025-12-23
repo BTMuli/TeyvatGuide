@@ -9,7 +9,7 @@ const HAKUSHI_API = "https://api.hakush.in/gi/data/";
 /**
  * 请求角色数据
  * @since Beta v0.9.0
- * @returns {Promise<TGApp.Plugins.Hakushi.AvatarResp>}
+ * @returns 角色数据
  */
 async function fetchAvatar(): Promise<TGApp.Plugins.Hakushi.AvatarResp> {
   return await TGHttp<TGApp.Plugins.Hakushi.AvatarResp>(`${HAKUSHI_API}character.json`, {
@@ -20,7 +20,7 @@ async function fetchAvatar(): Promise<TGApp.Plugins.Hakushi.AvatarResp> {
 /**
  * 请求武器数据
  * @since Beta v0.9.0
- * @returns {Promise<TGApp.Plugins.Hakushi.WeaponResp>}
+ * @returns 武器数据
  */
 async function fetchWeapon(): Promise<TGApp.Plugins.Hakushi.WeaponResp> {
   return await TGHttp<TGApp.Plugins.Hakushi.WeaponResp>(`${HAKUSHI_API}weapon.json`, {

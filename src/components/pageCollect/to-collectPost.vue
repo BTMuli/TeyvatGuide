@@ -36,7 +36,7 @@ const emits = defineEmits<ToPostCollectEmits>();
 const visible = defineModel<boolean>();
 const select = ref<string>();
 const submit = ref<boolean>(false);
-const collectList = shallowRef<Array<TGApp.Sqlite.UserCollection.UFCollection>>([]);
+const collectList = shallowRef<Array<TGApp.Sqlite.Collection.Collection>>([]);
 
 watch(
   () => visible.value,

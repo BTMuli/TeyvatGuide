@@ -1,6 +1,5 @@
 /**
- * @file router index.ts
- * @description 路由入口
+ * 路由入口
  * @since Beta v0.7.0
  */
 

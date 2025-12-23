@@ -1,6 +1,5 @@
 /**
- * @file hooks/reachBottom.ts
- * @description 触底检测
+ * 触底检测
  * @since Beta v0.7.7
  */
 
@@ -11,10 +10,9 @@ type ReachBottomReturn = {
 };
 
 /**
- * @function usePageReachBottom
- * @description 页面触底检测
+ * 页面触底检测
  * @since Beta v0.7.7
- * @return ReachBottomReturn
+ * @returns ReachBottomReturn
  */
 export function usePageReachBottom(): ReachBottomReturn {
   const isReachBottom = ref<boolean>(false);
@@ -41,11 +39,10 @@ export function usePageReachBottom(): ReachBottomReturn {
 }
 
 /**
- * @function useBoxReachBottom
- * @description 元素触底检测
+ * 元素触底检测
  * @since Beta v0.7.7
- * @param {TemplateRef<HTMLElement>} boxRef - 需要检测的元素引用
- * @return ReachBottomReturn
+ * @param boxRef - 需要检测的元素引用
+ * @returns ReachBottomReturn
  */
 export function useBoxReachBottom(boxRef: TemplateRef<HTMLElement>): ReachBottomReturn {
   const isReachBottom = ref<boolean>(false);

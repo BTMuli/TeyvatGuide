@@ -1,20 +1,21 @@
 /**
  * 数据库抽卡记录相关类型定义文件
- * @since Beta v0.8.4
+ * @since Beta v0.9.1
  */
 
-declare namespace TGApp.Sqlite.GachaRecords {
+declare namespace TGApp.Sqlite.Gacha {
   /**
-   * 原神抽卡记录表类型定义
-   * @since Alpha v0.2.3
+   * 祈愿数据类型
+   * @since Beta v0.9.1
+   * @remarks GachaRecords 表
    */
-  type TableGacha = {
+  type Gacha = {
     /** 抽卡记录 ID */
     id: string;
     /** UID */
     uid: string;
     /** 抽卡类型 */
-    gachaType: string;
+    gachaType: TGApp.Game.Gacha.GachaTypeEnum;
     /** UIGF 类型 */
     uigfType: string;
     /**
@@ -47,10 +48,11 @@ declare namespace TGApp.Sqlite.GachaRecords {
   };
 
   /**
-   * 千星奇域抽卡记录表类型定义
-   * @since Beta v0.8.4
+   * 颂愿数据类型
+   * @since Beta v0.9.1
+   * @remarks GachaBRecords 表
    */
-  type TableGachaB = {
+  type GachaB = {
     /** 抽卡记录 ID */
     id: string;
     /** UID */
@@ -61,7 +63,7 @@ declare namespace TGApp.Sqlite.GachaRecords {
     scheduleId: string;
     /**
      * 抽卡类型
-     * @remarks
+     * @example
      * 1000-常驻池
      * 2000-活动池
      * 20011-男活动池
@@ -69,12 +71,12 @@ declare namespace TGApp.Sqlite.GachaRecords {
      * 20021-女活动池
      * 20022-女活动池2
      */
-    gachaType: string;
+    gachaType: TGApp.Game.Gacha.GachaBTypeEnum;
     /**
      * 抽卡类型（接口用）
-     * @remarks
-     * 100-常驻池
-     * 200-活动池
+     * @example
+     * 1000-常驻池
+     * 2000-活动池
      */
     opGachaType: string;
     /** 抽卡时间 */
@@ -97,11 +99,8 @@ declare namespace TGApp.Sqlite.GachaRecords {
     type: string;
     /** 抽卡物品星级 */
     rank: string;
-    /**
-     * 是否是 UP 物品
-     * @remarks 0-否，1-是
-     */
-    isUp: string;
+    /** 是否是 UP 物品 */
+    isUp: 0 | 1;
     /** 数据库更新时间 */
     updated: string;
   };

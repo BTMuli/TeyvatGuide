@@ -9,8 +9,8 @@
  */
 export function parseBirthSrc(data: Document): TGApp.Archive.Birth.GalSrcFull {
   const res: TGApp.Archive.Birth.GalSrcFull = { resource: [], roles: [] };
-  const tmpRes: TGApp.Archive.Birth.GalSrcRes[] = [];
-  const tmpRoles: TGApp.Archive.Birth.GalSrcRole[] = [];
+  const tmpRes: Array<TGApp.Archive.Birth.GalSrcRes> = [];
+  const tmpRoles: Array<TGApp.Archive.Birth.GalSrcRole> = [];
   const resElements = data.querySelector("resource");
   const roleElements = data.querySelector("characters");
   if (resElements !== null) {
@@ -47,9 +47,9 @@ export function parseBirthSrc(data: Document): TGApp.Archive.Birth.GalSrcFull {
 /**
  * 解析Gal数据
  * @since Beta v0.9.1
- * @param {Document} data - XML数据
- * @param {TGApp.Archive.Birth.GalSrcFull} src - 解析的资源数据
- * @return {TGApp.Archive.Birth.GalScenes}
+ * @param data - XML数据
+ * @param src - 解析的资源数据
+ * @returns 解析结果
  */
 export function parseBirthGal(
   data: Document,
@@ -68,9 +68,9 @@ export function parseBirthGal(
 /**
  * 解析场景数据
  * @since Beta v0.9.1
- * @param {Document} data - XML数据
- * @param {TGApp.Archive.Birth.GalSrcFull} src - 解析的资源数据
- * @return {TGApp.Archive.Birth.GalScriptScene}
+ * @param data - XML数据
+ * @param src - 解析的资源数据
+ * @returns 解析结果
  */
 function parseBirthScenes(
   data: Element,
@@ -89,7 +89,7 @@ function parseBirthScenes(
     res.bg = src.resource.find((i) => i.id === bgKey)?.src ?? "";
   }
   const dialogElements = data.querySelectorAll("simple_dialog");
-  const tmpScripts: TGApp.Archive.Birth.GalDialog[] = [];
+  const tmpScripts: Array<TGApp.Archive.Birth.GalDialog> = [];
   for (let di = 0; di < dialogElements.length; di++) {
     const dialogEl = dialogElements.item(di);
     const imgKey = dialogEl.getAttribute("img") ?? "";

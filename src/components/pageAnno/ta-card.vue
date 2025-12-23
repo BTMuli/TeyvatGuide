@@ -1,7 +1,7 @@
 <template>
-  <div :id="`anno_card_${model.id}`" class="anno-card">
-    <div :title="model.title" class="anno-cover" @click="createAnno">
-      <TMiImg v-if="model.banner !== ''" :ori="true" :src="model.banner" alt="cover" />
+  <div :id="`anno_card_${props.anno.ann_id}`" class="anno-card">
+    <div :title="props.anno.title" class="anno-cover" @click="createAnno">
+      <TMiImg v-if="props.anno.banner !== ''" :ori="true" :src="props.anno.banner" alt="cover" />
       <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
       <div class="anno-info">
         <div class="anno-time">
@@ -10,26 +10,19 @@
         </div>
       </div>
     </div>
-    <div :title="model.title" class="anno-title" @click="shareAnno">
-      {{ parseTitle(model.subtitle) }}
+    <div :title="props.anno.title" class="anno-title" @click="shareAnno">
+      {{ parseTitle(props.anno.subtitle) }}
     </div>
-    <div
-      :style="{ background: str2Color(`${model.tagIcon}${model.tagLabel}`, 40) }"
-      :title="`标签：${model.tagLabel}`"
-      class="anno-label"
-    >
-      <TMiImg :ori="true" :src="model.tagIcon" alt="tag" />
-      <span>{{ model.tagLabel }}</span>
+    <div :title="`标签：${props.anno.tag_label}`" class="anno-label">
+      <TMiImg :ori="true" :src="props.anno.tag_icon" alt="tag" />
+      <span>{{ props.anno.tag_label }}</span>
     </div>
-    <div :style="{ background: str2Color(`${model.id}`, 0) }" class="anno-id">
-      ID:{{ model.id }}
-    </div>
+    <div class="anno-id">ID:{{ props.anno.ann_id }}</div>
   </div>
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { AnnoTypeEnum } from "@enum/anno.js";
 import useAppStore from "@store/app.js";
 import { str2Color } from "@utils/colorFunc.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -37,19 +30,26 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { createTGWindow } from "@utils/TGWindow.js";
 import { decodeRegExp } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
-import type { AnnoCard } from "@/pages/common/PageAnno.vue";
+type TaCardProps = { anno: TGApp.Game.Anno.ListAnno; detail?: TGApp.Game.Anno.AnnoDetail };
 
 const { server, lang } = storeToRefs(useAppStore());
-const model = defineModel<AnnoCard>({ required: true });
-const timeStr = ref<string>(model.value.timeStr);
+
+const props = defineProps<TaCardProps>();
+const timeStr = ref<string>("");
+
+const idColor = computed<string>(() => str2Color(`${props.anno.ann_id}`, 0));
+const tagColor = computed<string>(() =>
+  str2Color(`${props.anno.tag_icon}${props.anno.tag_label}`, 40),
+);
 
 onMounted(() => refreshAnnoTime());
+
 watch(
-  () => model.value,
+  () => props.anno,
   (newVal, oldVal) => {
-    if (newVal.id !== oldVal.id) refreshAnnoTime();
+    if (newVal.ann_id !== oldVal.ann_id) refreshAnnoTime();
   },
 );
 
@@ -59,15 +59,15 @@ function parseTitle(title: string): string {
 }
 
 async function createAnno(): Promise<void> {
-  const annoPath = `/anno_detail/${server.value}/${model.value.id}/${lang.value}`;
-  const annoTitle = `Anno_${model.value.id} ${model.value.title}`;
-  await TGLogger.Info(`[Announcements][createAnno][${model.value.id}] 打开公告窗口`);
+  const annoPath = `/anno_detail/${server.value}/${props.anno.ann_id}/${lang.value}`;
+  const annoTitle = `Anno_${props.anno.ann_id} ${props.anno.title}`;
+  await TGLogger.Info(`[Announcements][createAnno][${props.anno.ann_id}] 打开公告窗口`);
   await createTGWindow(annoPath, "Sub_window", annoTitle, 960, 720, false, false);
 }
 
 async function shareAnno(): Promise<void> {
-  const fileName = `AnnoCard_${model.value.id}_${model.value.subtitle}`;
-  const element = document.querySelector<HTMLElement>(`#anno_card_${model.value.id}`);
+  const fileName = `AnnoCard_${props.anno.ann_id}_${props.anno.subtitle}`;
+  const element = document.querySelector<HTMLElement>(`#anno_card_${props.anno.ann_id}`);
   if (element === null) {
     showSnackbar.error("分享失败，未找到分享元素");
     return;
@@ -76,18 +76,19 @@ async function shareAnno(): Promise<void> {
 }
 
 async function refreshAnnoTime(): Promise<void> {
-  if (model.value.typeLabel === AnnoTypeEnum.GAME) timeStr.value = model.value.timeStr;
-  const strGet = getAnnoTime(model.value.detail.content);
+  // MAGIC ANNO TYPE
+  if (props.anno.type !== 1) timeStr.value = `${props.anno.start_time} ~ ${props.anno.end_time}`;
+  const strGet = getAnnoTime(props.detail?.content ?? "");
   if (strGet !== false) timeStr.value = strGet;
+  else timeStr.value = `${props.anno.start_time} ~ ${props.anno.end_time}`;
 }
 
 function getAnnoTime(content: string): string | false {
   const regexes = [
     /〓活动时间〓.*?(\d\.\d|「月之[一二三四五六七八九]」)版本期间持续开放/,
-    /(?:〓活动时间〓|〓任务开放时间〓).*?(?:(\d\.\d|「月之[一二三四五六七八九]」)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
+    /(?:〓活动时间〓|〓(任务|玩法)开放时间〓).*?(?:(\d\.\d|「月之[一二三四五六七八九]」)版本更新(?:完成|)|&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt; *?)后永久开放/s,
     /(?:〓活动时间〓|祈愿时间|【上架时间】|〓折扣时间〓|〓获取奖励时限〓).*?(\d\.\d|「月之[一二三四五六七八九]」)版本更新后.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
     /(?:〓(?:活动|折扣)时间〓|祈愿时间|【上架时间】).*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;.*?~.*?&lt;t class="t_(?:gl|lc)".*?&gt;(.*?)&lt;\/t&gt;/s,
-    // /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}).*?(\d\.\d版本结束)/
     /〓活动时间〓.*?(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}).*?((\d\.\d|「月之[一二三四五六七八九]」)版本结束)/s,
   ];
   if (content.match(regexes[0])) {
@@ -224,6 +225,7 @@ function getAnnoTime(content: string): string | false {
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
+  background: v-bind(tagColor); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 6px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
@@ -244,7 +246,7 @@ function getAnnoTime(content: string): string | false {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  background: var(--tgc-od-orange);
+  background: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   border-bottom-right-radius: 4px;
   box-shadow: 0 0 8px var(--tgc-dark-1);
   color: var(--tgc-white-1);

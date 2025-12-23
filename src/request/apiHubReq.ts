@@ -11,9 +11,9 @@ const Mahbu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/";
 const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
- * @description 获取所有版块
+ * 获取所有版块
  * @since Beta v0.6.8
- * @return {Promise<Array<TGApp.BBS.Forum.GameForum>>}
+ * @returns 版块信息
  */
 async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
   return (
@@ -25,10 +25,10 @@ async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
 }
 
 /**
- * @description 获取应用配置
+ * 获取应用配置
  * @since Beta v0.8.2
- * @param {string} gid 分区ID
- * @return {Promise<TGApp.BBS.AppConfig.FullData|TGApp.BBS.Response.Base>}
+ * @param gid - 分区ID
+ * @returns 应用配置
  */
 async function getAppConfig(
   gid?: string,
@@ -44,9 +44,9 @@ async function getAppConfig(
 }
 
 /**
- * @description 获取所有分区
+ * 获取所有分区
  * @since Beta v0.6.8
- * @return {Promise<Array<TGApp.BBS.Game.Item>>}
+ * @returns 分区信息
  */
 async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
   return (
@@ -60,8 +60,8 @@ async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
 /**
  * 获取用户米游币任务列表
  * @since Beta v0.7.2
- * @param {Record<string,string>} cookie 用户 Cookie
- * @return {Promise<TGApp.BBS.Mission.InfoRes>}
+ * @param cookie - 用户 Cookie
+ * @returns 用户米游币任务列表
  */
 async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mission.InfoResp> {
   const param = { point_sn: "myb" };
@@ -74,12 +74,12 @@ async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mi
 }
 
 /**
- * @description 获取分享配置
+ * 获取分享配置
  * @since Beta v0.7.0
- * @description **需要验证码登录返回的 Cookie**
- * @param {string} postId 帖子 ID
- * @param {Record<string,string>} cookie 用户 Cookie
- * @return {Promise<TGApp.BBS.Response.Base>}
+ * @remarks **需要验证码登录返回的 Cookie**
+ * @param postId - 帖子 ID
+ * @param cookie - 用户 Cookie
+ * @returns 基础响应
  */
 async function getShareConf(
   postId: string,
@@ -100,9 +100,9 @@ async function getShareConf(
 /**
  * 获取用户米游币任务完成状态
  * @since Beta v0.7.2
- * @remarks 需要验证码登录的 Cookie
- * @param {Record<string,string>} cookie 用户 Cookie
- * @return {Promise<TGApp.BBS.Mission.StateResp>}
+ * @remarks **需要验证码登录的 Cookie**
+ * @param cookie - 用户 Cookie
+ * @returns 米游币任务完成状态
  */
 async function getUserMissionsState(
   cookie: Record<string, string>,
@@ -117,11 +117,11 @@ async function getUserMissionsState(
 }
 
 /**
- * @description 获取投票信息
+ * 获取投票信息
  * @since Beta v0.6.2
- * @param {string} id 投票 ID
- * @param {string} uid 用户 ID
- * @return {Promise<TGApp.BBS.Vote.Info>}
+ * @param id - 投票 ID
+ * @param uid - 用户 ID
+ * @returns 投票信息
  */
 async function getVotes(id: string, uid: string): Promise<TGApp.BBS.Vote.Info> {
   return (
@@ -134,11 +134,11 @@ async function getVotes(id: string, uid: string): Promise<TGApp.BBS.Vote.Info> {
 }
 
 /**
- * @description 获取投票结果
+ * 获取投票结果
  * @since Beta v0.6.2
- * @param {string} id 投票 ID
- * @param {string} uid 用户 ID
- * @return {Promise<TGApp.BBS.Vote.Result>}
+ * @param id - 投票 ID
+ * @param uid - 用户 ID
+ * @returns 投票结果
  */
 async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.Result> {
   return (
@@ -151,14 +151,14 @@ async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.Re
 }
 
 /**
- * @description 获取首页导航列表
+ * 获取首页导航列表
  * @since Beta v0.6.2
- * @param {number} gid GID
- * @return {Promise<TGApp.BBS.Navigator.Navigator[]>}
+ * @param gid - GID
+ * @returns 首页导航列表
  */
-async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]> {
+async function homeNew(gid: number = 2): Promise<Array<TGApp.BBS.Navigator.Navigator>> {
   return (
-    await TGHttp<TGApp.BBS.Navigator.HomeResponse>(`${Mahbu}api/home/new`, {
+    await TGHttp<TGApp.BBS.Navigator.HomeResp>(`${Mahbu}api/home/new`, {
       method: "GET",
       headers: { "x-rpc-client_type": "2" },
       query: { gids: gid },
@@ -167,13 +167,13 @@ async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.Navigator[]
 }
 
 /**
- * @description 签到
+ * 签到
  * @since Beta v0.7.1
- * @description **需要验证码登录获取的 Cookie**
- * @param {Record<string,string>} cookie 用户 Cookie
- * @param {string} gid
- * @param {string} challenge
- * @return {Promise<TGApp.BBS.Response.Base>}
+ * @remarks **需要验证码登录获取的 Cookie**
+ * @param cookie - 用户 Cookie
+ * @param gid - 分区ID
+ * @param challenge - 极验参数
+ * @returns 基础响应
  */
 async function signIn(
   cookie: Record<string, string>,
@@ -194,12 +194,12 @@ async function signIn(
 }
 
 /**
- * @description 点赞
+ * 点赞
  * @since Beta v0.7.0
- * @param {string} id 帖子 ID
- * @param {Record<string,string>} cookie 用户 Cookie
- * @param {boolean} cancel 是否取消点赞
- * @return {Promise<TGApp.BBS.Response.Base>}
+ * @param id - 帖子 ID
+ * @param cookie - 用户 Cookie
+ * @param cancel - 是否取消点赞
+ * @returns 基础响应
  */
 async function upVotePost(
   id: string,

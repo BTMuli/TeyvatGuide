@@ -1,17 +1,16 @@
 /**
- * @file plugins/Hutao/utils/abyssUtil.ts
- * @description 将本地数据转为上传用的数据
+ * 将本地数据转为上传用的数据
  * @since Beta v0.6.3
  */
 
 /**
- * @description 将本地数据转为上传用的数据
+ * 将本地数据转为上传用的数据
  * @since Beta v0.6.3
- * @param {TGApp.Sqlite.Abyss.TableRaw} data 本地数据
- * @returns {TGApp.Plugins.Hutao.Abyss.RecordUpload} 上传用的数据
+ * @param data - 本地数据
+ * @returns 上传用的数据
  */
 export function transAbyssLocal(
-  data: TGApp.Sqlite.Abyss.TableData,
+  data: TGApp.Sqlite.Abyss.TableTrans,
 ): TGApp.Plugins.Hutao.Abyss.RecordUpload {
   return {
     Uid: data.uid,
@@ -23,12 +22,12 @@ export function transAbyssLocal(
 }
 
 /**
- * @description 转换深渊数据
+ * 转换深渊数据
  * @since Beta v0.6.3
- * @param {TGApp.Sqlite.Abyss.TableRaw} data 本地数据
- * @returns {TGApp.Plugins.Hutao.Abyss.RecordData} 上传用的数据
+ * @param data - 本地数据
+ * @returns 上传用的数据
  */
-function transAbyssData(data: TGApp.Sqlite.Abyss.TableData): TGApp.Plugins.Hutao.Abyss.RecordData {
+function transAbyssData(data: TGApp.Sqlite.Abyss.TableTrans): TGApp.Plugins.Hutao.Abyss.RecordData {
   return {
     ScheduleId: data.id,
     TotalBattleTimes: data.totalBattleTimes,
@@ -58,10 +57,10 @@ function transAbyssData(data: TGApp.Sqlite.Abyss.TableData): TGApp.Plugins.Hutao
 }
 
 /**
- * @description 转换层数数据
+ * 转换层数数据
  * @since Alpha v0.2.1
- * @param {TGApp.Sqlite.Abyss.Floor} data 本地数据
- * @returns {TGApp.Plugins.Hutao.Abyss.Floor} 上传用的数据
+ * @param data - 本地数据
+ * @returns 上传用的数据
  */
 function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.Abyss.Floor {
   return {
@@ -72,13 +71,13 @@ function transFloor(data: TGApp.Sqlite.Abyss.Floor): TGApp.Plugins.Hutao.Abyss.F
 }
 
 /**
- * @description 转换层-关卡数据
+ * 转换层-关卡数据
  * @since Alpha v0.2.1
- * @param {TGApp.Sqlite.Abyss.Level} data 本地数据
- * @returns {TGApp.Plugins.Hutao.Abyss.Level} 上传用的数据
+ * @param data - 本地数据
+ * @returns 上传用的数据
  */
 function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.Level {
-  const battles: Array<{ Index: number; Avatars: number[] }> = [];
+  const battles: Array<{ Index: number; Avatars: Array<number> }> = [];
   battles.push({
     Index: 1,
     Avatars: data.upBattle!.characters.map((character) => character.id),
@@ -95,14 +94,14 @@ function transLevel(data: TGApp.Sqlite.Abyss.Level): TGApp.Plugins.Hutao.Abyss.L
 }
 
 /**
- * @description 转换角色数据
+ * 转换角色数据
  * @since Beta v0.5.5
- * @param {TGApp.Sqlite.Character.UserRole[]} avatars 角色数据
- * @returns {TGApp.Plugins.Hutao.Abyss.Avatar[]} 上传用的数据
+ * @param avatars - 角色数据
+ * @returns 上传用的数据
  */
 export function transAbyssAvatars(
-  avatars: TGApp.Sqlite.Character.UserRole[],
-): TGApp.Plugins.Hutao.Abyss.Avatar[] {
+  avatars: Array<TGApp.Sqlite.Character.TableTrans>,
+): Array<TGApp.Plugins.Hutao.Abyss.Avatar> {
   return avatars.map((avatar) => {
     return {
       AvatarId: avatar.avatar.id,

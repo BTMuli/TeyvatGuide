@@ -1,6 +1,5 @@
 /**
- * @file router/modules/user.ts
- * @description user 路由模块
+ * user 路由模块
  * @since Beta v0.8.4
  */
 import type { RouteRecordRaw } from "vue-router";

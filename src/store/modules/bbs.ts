@@ -1,6 +1,5 @@
 /**
- * @file store/modules/bbs.ts
- * @description BBS 模块状态管理
+ * 米社数据状态管理
  * @since Beta v0.8.2
  */
 import apiHubReq from "@req/apiHubReq.js";
@@ -24,7 +23,9 @@ const useBBSStore = defineStore(
     async function refreshGameUidCards(): Promise<void> {
       const resp = await apiHubReq.appConfig();
       if ("retcode" in resp) return;
-      const conf = <TGApp.BBS.AppConfig.GameUidCardFullConf>JSON.parse(resp.game_uid_card_config);
+      const conf = <TGApp.BBS.AppConfig.GameUidCardConfigParse>(
+        JSON.parse(resp.game_uid_card_config)
+      );
       gameUidCards.value = conf.game_uid_card_conf;
     }
 

@@ -62,8 +62,8 @@ const { isLogin } = storeToRefs(useAppStore());
 const loading = ref<boolean>(false);
 const loadingProgress = ref<number>(0);
 const loadingText = ref<string>("");
-const gameAccounts = ref<TGApp.Sqlite.Account.Game[]>([]);
-const signAccounts = ref<SignAccount[]>([]);
+const gameAccounts = ref<Array<TGApp.Sqlite.Account.Game>>([]);
+const signAccounts = ref<Array<SignAccount>>([]);
 
 watch(
   () => uid.value,
