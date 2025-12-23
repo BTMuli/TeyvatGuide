@@ -1,11 +1,13 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
   "supportForTags": {
-    "@since": true,
+    "@example": true,
     "@link": true,
-    "@remarks": true,
     "@param": true,
+    "@remarks": true,
     "@returns": true,
+    "@see": true,
+    "@since": true,
     "@TODO": true
   },
   "tagDefinitions": [

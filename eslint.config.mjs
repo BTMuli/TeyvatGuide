@@ -1,6 +1,5 @@
 /**
- * @file eslint.config.mjs
- * @description ESLint配置文件
+ * ESLint配置文件
  * @since 2025-05-29
  */
 import eslintPluginJsonc from "eslint-plugin-jsonc";
@@ -29,6 +28,7 @@ export default [
       "src-tauri/tauri.conf.json",
       "src-tauri/**/*.json",
       "qodana.yaml",
+      "node_modules",
       ".github",
     ],
   },

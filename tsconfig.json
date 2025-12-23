@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "lib": ["DOM", "ESNext"],
     "skipLibCheck": true,
-    "types": ["vite/client", "node", "color-convert", "js-md5", "uuid"],
+    "types": ["vite/client", "node", "js-md5", "uuid"],
     "allowSyntheticDefaultImports": true,
     "composite": true,
     "erasableSyntaxOnly": false,
@@ -52,5 +52,6 @@
     ".prettierrc.yml",
     ".stylelintrc.yml",
     "eslint/*.js"
-  ]
+  ],
+  "exclude": ["node_modules"]
 }
