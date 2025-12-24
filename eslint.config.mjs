@@ -27,7 +27,6 @@ export default [
       "src/data/**/*.json",
       "src-tauri/tauri.conf.json",
       "src-tauri/**/*.json",
-      "qodana.yaml",
       "node_modules",
       ".github",
     ],

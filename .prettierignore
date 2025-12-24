@@ -7,8 +7,6 @@ dist
 src-tauri/target
 # Pnpm
 pnpm-lock.yaml
-# Qodana
-qodana.yaml
 # sourse
 *.webp
 *.png
