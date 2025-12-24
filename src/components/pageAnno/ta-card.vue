@@ -1,5 +1,5 @@
 <template>
-  <div :id="`anno_card_${props.anno.ann_id}`" class="anno-card">
+  <div :id="`anno_card_${props.anno.ann_id}`" class="anno-card" @click="console.log(props)">
     <div :title="props.anno.title" class="anno-cover" @click="createAnno">
       <TMiImg v-if="props.anno.banner !== ''" :ori="true" :src="props.anno.banner" alt="cover" />
       <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
@@ -13,9 +13,9 @@
     <div :title="props.anno.title" class="anno-title" @click="shareAnno">
       {{ parseTitle(props.anno.subtitle) }}
     </div>
-    <div :title="`标签：${props.anno.tag_label}`" class="anno-label">
+    <div :title="`标签：${annoTag}`" class="anno-label">
       <TMiImg :ori="true" :src="props.anno.tag_icon" alt="tag" />
-      <span>{{ props.anno.tag_label }}</span>
+      <span>{{ annoTag }}</span>
     </div>
     <div class="anno-id">ID:{{ props.anno.ann_id }}</div>
   </div>
@@ -39,10 +39,9 @@ const { server, lang } = storeToRefs(useAppStore());
 const props = defineProps<TaCardProps>();
 const timeStr = ref<string>("");
 
+const annoTag = computed<string>(() => getTag());
 const idColor = computed<string>(() => str2Color(`${props.anno.ann_id}`, 0));
-const tagColor = computed<string>(() =>
-  str2Color(`${props.anno.tag_icon}${props.anno.tag_label}`, 40),
-);
+const tagColor = computed<string>(() => str2Color(`${props.anno.tag_icon}${annoTag.value}`, 40));
 
 onMounted(() => refreshAnnoTime());
 
@@ -52,6 +51,22 @@ watch(
     if (newVal.ann_id !== oldVal.ann_id) refreshAnnoTime();
   },
 );
+
+function getTag(): string {
+  switch (props.anno.tag_label) {
+    case "1":
+    case "11":
+    case "重要":
+      return "公告";
+    case "2":
+    case "扭蛋":
+      return "祈愿";
+    case "3":
+      return "活动";
+    default:
+      return props.anno.tag_label;
+  }
+}
 
 function parseTitle(title: string): string {
   const dom = new DOMParser().parseFromString(title, "text/html");

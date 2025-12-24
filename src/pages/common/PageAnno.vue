@@ -4,8 +4,8 @@
     <template #prepend>
       <div class="pa-prepend">
         <v-tabs v-model="tab" align-tabs="start" class="pa-tabs">
-          <v-tab v-for="tab in tabList" :key="tab.id" :value="tab.id">
-            {{ tab.name }}
+          <v-tab v-for="tab in tabList" :key="tab.id" :value="tab.id" :title="tab.name">
+            {{ tab.mi18n_name }}
           </v-tab>
         </v-tabs>
         <div class="pa-selects">
@@ -150,6 +150,7 @@ async function loadData(): Promise<void> {
     `服务器：${gameEnum.serverDesc(server.value)}，语言：${gameEnum.anno.langDesc(lang.value)}`,
   );
   const listResp = await hk4eReq.anno.list(server.value, lang.value);
+  console.log("annoList", listResp);
   annoList.value = listResp;
   tabList.value = listResp.type_list;
   tab.value = tabList.value[0].id;
