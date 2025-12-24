@@ -1,12 +1,18 @@
+<!-- 链接卡片组件 -->
 <template>
-  <div class="tp-link-card-box">
-    <TMiImg :src="props.data.insert.link_card.cover" alt="cover" @click="toLink()" />
-    <div class="tp-link-card-content">
-      <span>{{ props.data.insert.link_card.title }}</span>
-      <div v-if="props.data.insert.link_card.price" class="tp-link-card-price">
+  <div class="tp-lc-box">
+    <TMiImg
+      :src="props.data.insert.link_card.cover"
+      alt="cover"
+      class="tp-lc-cover"
+      @click="toLink()"
+    />
+    <div class="tp-lc-info">
+      <span class="tp-lc-title">{{ props.data.insert.link_card.title }}</span>
+      <div v-if="props.data.insert.link_card.price" class="tp-lc-price">
         {{ props.data.insert.link_card.price }}
       </div>
-      <div @click="toLink()" class="tp-link-card-btn">{{ btnText }} ></div>
+      <div class="tp-lc-btn" @click="toLink()">{{ btnText }} ></div>
     </div>
   </div>
 </template>
@@ -18,20 +24,38 @@ import { parseLink, parsePost } from "@utils/linkParser.js";
 import { computed, toRaw } from "vue";
 import { useRouter } from "vue-router";
 
+/** 链接卡片组件 */
 type TpLinkCard = {
+  /** 插入内容 */
   insert: {
+    /** 链接卡片数据 */
     link_card: {
-      link_type: number;
-      origin_url: string;
-      landing_url: string;
-      cover: string;
-      title: string;
+      /** 卡片ID */
       card_id: string;
+      /** 卡片状态 */
       card_status: number;
-      market_price: string;
-      price?: string;
-      button_text?: string;
+      /** 封面 */
+      cover: string;
+      /** 落地URL */
+      landing_url: string;
+      /** 落地URL类型 */
       landing_url_type: number;
+      /**
+       * 链接类型
+       * @example
+       * 1-帖子
+       */
+      link_type: number;
+      /** 原始URL */
+      origin_url: string;
+      /** 标题 */
+      title: string;
+      /** 市场价格 */
+      market_price?: string;
+      /** 价格 */
+      price?: string;
+      /** 按钮文本 */
+      button_text?: string;
     };
   };
 };
@@ -65,8 +89,9 @@ async function toLink(): Promise<void> {
   await openUrl(res);
 }
 </script>
-<style lang="css" scoped>
-.tp-link-card-box {
+<style lang="scss" scoped>
+.tp-lc-box {
+  position: relative;
   display: flex;
   width: 100%;
   box-sizing: border-box;
@@ -78,41 +103,42 @@ async function toLink(): Promise<void> {
   column-gap: 8px;
 }
 
-.tp-link-card-box img {
+.tp-lc-cover {
   max-width: 50%;
   max-height: 180px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.5s;
+
+  &:hover {
+    scale: 0.9;
+  }
 }
 
-.tp-link-card-box img:hover {
-  scale: 0.9;
-}
-
-.tp-link-card-content {
+.tp-lc-info {
+  position: relative;
   display: flex;
   width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  font-family: var(--font-title);
 }
 
-.tp-link-card-content :nth-child(1) {
-  width: 100%;
+.tp-lc-title {
   color: var(--common-text-title);
-  font-size: 20px;
+  font-family: var(--font-title);
+  font-size: 18px;
   text-align: left;
+  word-break: break-all;
 }
 
-.tp-link-card-price {
+.tp-lc-price {
   display: inline-block;
   color: #ff6d6dff;
-  font-size: 20px;
+  font-size: 16px;
 }
 
-.tp-link-card-btn {
+.tp-lc-btn {
   display: inline-block;
   margin-left: auto;
   color: #00c3ffff;
