@@ -1,6 +1,5 @@
 <!-- 背包材料页面 -->
 <template>
-  <!-- TODO: 顶部栏，参考材料WIKI页面 -->
   <v-app-bar>
     <template #prepend>
       <div class="pbm-nav-prepend">
@@ -15,29 +14,10 @@
           variant="outlined"
           width="200px"
         />
-        <v-select
-          v-model="selectType"
-          :clearable="true"
-          :hide-details="true"
-          :items="materialTypes"
-          density="compact"
-          item-title="type"
-          label="材料类别"
-          variant="outlined"
-          width="250px"
-        >
-          <template #item="{ props, item }">
-            <v-list-item v-bind="props">
-              <template #append>
-                <v-chip>{{ item.raw.number }}</v-chip>
-              </template>
-            </v-list-item>
-          </template>
-        </v-select>
       </div>
     </template>
     <template #append>
-      <div class="pbm-nav-extension">
+      <div class="pbm-nav-append">
         <div class="pbm-nav-search">
           <v-text-field
             v-model="search"
@@ -67,9 +47,44 @@
         </v-btn>
       </div>
     </template>
+    <template #extension>
+      <div class="pbm-nav-extension">
+        <v-select
+          v-model="selectType"
+          :clearable="true"
+          :hide-details="true"
+          :items="materialTypes"
+          density="compact"
+          item-title="type"
+          label="材料类别"
+          variant="outlined"
+          width="250px"
+        >
+          <template #item="{ props, item }">
+            <v-list-item v-bind="props">
+              <template #append>
+                <v-chip>{{ item.raw.number }}</v-chip>
+              </template>
+            </v-list-item>
+          </template>
+        </v-select>
+        <v-select
+          v-model="curSort"
+          :clearable="true"
+          :hide-details="true"
+          :items="sortList"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          label="排序"
+          variant="outlined"
+          width="160px"
+        />
+      </div>
+    </template>
   </v-app-bar>
   <div class="pbm-container">
-    <template v-for="material in materialShow" :key="`${curUid}-${material.info.id}`">
+    <template v-for="material in materialShow" :key="material.info.id">
       <PbMaterialItem
         :cur="curMaterial"
         :info="material.info"
@@ -103,7 +118,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PbMaterialItem from "@comp/pageBag/pb-materialItem.vue";
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
-import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
+import TSUserBagMaterial, { BAG_TYPE_LIST } from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
@@ -112,9 +127,21 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
+
+/**
+ * 材料排序类型枚举
+ */
+enum MaterialSortType {
+  /** 最近更新 */
+  Latest,
+  /** 最多数量 */
+  MaxCount,
+  /** 最少数量 */
+  MinCount,
+}
 
 /** 材料类型 */
 type MaterialType = {
@@ -122,6 +149,13 @@ type MaterialType = {
   type: string;
   /** 计数 */
   number: number;
+};
+/** 材料排序 */
+type MaterialSort = {
+  /** 文本 */
+  text: string;
+  /** 值 */
+  value: MaterialSortType;
 };
 /** 材料信息 */
 export type MaterialInfo = {
@@ -134,11 +168,18 @@ export type MaterialInfo = {
 const { gameDir, isInAdmin, isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
+const sortList: Array<MaterialSort> = [
+  { text: "最近更新", value: MaterialSortType.Latest },
+  { text: "最多数量", value: MaterialSortType.MaxCount },
+  { text: "最少数量", value: MaterialSortType.MinCount },
+];
+
 const curUid = ref<number>(0);
 const selectType = ref<string | null>(null);
 const search = ref<string>();
 const showOverlay = ref<boolean>(false);
 const curIdx = ref<number>(0);
+const curSort = ref<MaterialSortType | null>(null);
 const uidList = shallowRef<Array<number>>([]);
 const materialTypes = shallowRef<Array<MaterialType>>([]);
 const curMaterial = shallowRef<MaterialInfo>();
@@ -159,10 +200,12 @@ watch(
   },
 );
 watch(
-  () => selectType.value,
+  () => [selectType.value, curSort.value],
   async () => {
     if (showOverlay.value) showOverlay.value = false;
-    materialShow.value = getSelectMaterials();
+    const renderMaterials = getSelectMaterials();
+    materialShow.value = sortMaterials(renderMaterials);
+    triggerRef(materialShow);
     curIdx.value = 0;
   },
 );
@@ -185,6 +228,26 @@ async function reloadUid(): Promise<void> {
 function getSelectMaterials(): Array<MaterialInfo> {
   if (!selectType.value) return materialList.value;
   return materialList.value.filter((i) => i.info.type === selectType.value);
+}
+
+function sortMaterials(data: Array<MaterialInfo>): Array<MaterialInfo> {
+  if (curSort.value === null) {
+    return data.sort(
+      (a, b) =>
+        BAG_TYPE_LIST.indexOf(a.info.type) - BAG_TYPE_LIST.indexOf(b.info.type) ||
+        a.info.type.localeCompare(b.info.type) ||
+        b.info.star - a.info.star ||
+        a.info.id - b.info.id,
+    );
+  }
+  switch (curSort.value) {
+    case MaterialSortType.Latest:
+      return data.sort((a, b) => b.tb.updated.localeCompare(a.tb.updated));
+    case MaterialSortType.MaxCount:
+      return data.sort((a, b) => b.tb.count - a.tb.count);
+    case MaterialSortType.MinCount:
+      return data.sort((a, b) => a.tb.count - b.tb.count);
+  }
 }
 
 /**
@@ -214,11 +277,14 @@ async function loadMaterialList(uid: number): Promise<void> {
       tList.push({ type: info.type, number: material.count });
     }
   }
-  materialList.value = mList.sort(
-    (a, b) => a.info.type.localeCompare(b.info.type) || b.info.id - a.info.id,
+  tList.sort(
+    (a, b) =>
+      BAG_TYPE_LIST.indexOf(a.type) - BAG_TYPE_LIST.indexOf(b.type) || a.type.localeCompare(b.type),
   );
-  materialShow.value = mList;
+  materialList.value = sortMaterials(mList);
+  materialShow.value = materialList.value;
   materialTypes.value = tList;
+  curSort.value = null;
   curIdx.value = 0;
   await showLoading.end();
 }
@@ -406,7 +472,7 @@ function switchMaterial(isNext: boolean): void {
   margin-right: 8px;
 }
 
-.pbm-nav-extension {
+.pbm-nav-append {
   position: relative;
   display: flex;
   align-items: center;
@@ -420,6 +486,16 @@ function switchMaterial(isNext: boolean): void {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
+}
+
+.pbm-nav-extension {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  margin-left: 16px;
+  column-gap: 8px;
 }
 
 .pbm-container {
