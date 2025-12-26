@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -289,7 +289,7 @@ export function decodeRegExp(data: string): string {
 export function getWikiBrief(
   id: number | string,
 ): TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | false {
-  const find = AppCalendarData.find((i) => i.id === id);
+  const find = AppCalendarData.find((i) => i.id.toString() === id.toString());
   if (find === undefined) return false;
   if (find.itemType === staticDataEnum.calendarItem.weapon) {
     return AppWeaponData.find((item) => item.id.toString() === id.toString()) ?? false;
