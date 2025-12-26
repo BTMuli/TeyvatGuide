@@ -1,7 +1,8 @@
 /**
  * 颜色相关处理
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
+import { colord } from "colord";
 import { score } from "wcag-color";
 
 /**
@@ -29,13 +30,19 @@ export function getOdStarColor(star: number): string {
 
 /**
  * 判断颜色是否相似
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  * @param colorBg - 背景颜色
  * @param colorText - 文本颜色
  * @returns 是否相似
  */
 export function isColorSimilar(colorBg: string, colorText: string): boolean {
-  return score(colorText, colorBg) === "Fail";
+  let res = true;
+  try {
+    res = score(colord(colorBg).toHex(), colord(colorText).toHex()) === "Fail";
+  } catch (e) {
+    console.error("isColorSimilar", e);
+  }
+  return res;
 }
 
 /**

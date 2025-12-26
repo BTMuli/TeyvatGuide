@@ -3,7 +3,7 @@
   "version": "0.9.0",
   "description": "Game Tool for GenshinImpact player",
   "private": true,
-  "packageManager": "pnpm@10.26.1",
+  "packageManager": "pnpm@10.26.2",
   "type": "module",
   "scripts": {
     "build": "tauri build",
@@ -84,6 +84,7 @@
     "@tauri-apps/plugin-sql": "^2.3.1",
     "ajv": "^8.17.1",
     "artplayer": "^5.3.0",
+    "colord": "^2.9.3",
     "echarts": "^6.0.0",
     "html2canvas": "^1.4.1",
     "js-md5": "^0.8.3",
@@ -98,7 +99,7 @@
     "vue-echarts": "^8.0.1",
     "vue-json-pretty": "^2.6.0",
     "vue-router": "^4.6.4",
-    "vuetify": "^3.11.4",
+    "vuetify": "^3.11.5",
     "wcag-color": "^1.1.1"
   },
   "devDependencies": {
@@ -111,7 +112,7 @@
     "@types/js-md5": "^0.8.0",
     "@types/node": "^25.0.3",
     "@typescript-eslint/parser": "^8.50.1",
-    "@typescript/native-preview": "7.0.0-dev.20251223.1",
+    "@typescript/native-preview": "7.0.0-dev.20251225.1",
     "@vitejs/plugin-vue": "^6.0.3",
     "app-root-path": "^3.1.0",
     "concurrently": "^9.2.1",

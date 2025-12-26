@@ -1,6 +1,5 @@
 <template>
   <div
-    class="tp-texts"
     :class="{
       'tp-inline': props.data.attributes === undefined || props.data.attributes.align === undefined,
       'tp-texts-header1': props.data.attributes && props.data.attributes.header === 1,
@@ -11,17 +10,18 @@
       'tp-texts-header6': props.data.attributes && props.data.attributes.header === 6,
     }"
     :title="getTitle()"
+    class="tp-texts"
   >
     <component
       :is="getComp(text)"
       v-for="(text, index) in props.data.children"
-      :data="text"
       :key="index"
+      :data="text"
     />
   </div>
 </template>
 <script lang="ts" setup>
-import type { Component } from "vue";
+import { type Component, toRaw } from "vue";
 
 import TpImage from "./tp-image.vue";
 import TpMention, { type TpMention as TpMentionType } from "./tp-mention.vue";
@@ -32,6 +32,7 @@ type TpTexts = { children: Array<TpTextType | TpMentionType> } & TpTextType;
 type TpTextsProps = { data: TpTexts };
 
 const props = defineProps<TpTextsProps>();
+console.log("tpTexts", toRaw(props.data));
 
 function getComp(text: TpTextType | TpMentionType): Component {
   if (typeof text.insert === "string") return TpText;

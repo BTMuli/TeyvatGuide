@@ -219,9 +219,9 @@ dependencies = [
 
 [[package]]
 name = "async-lock"
-version = "3.4.1"
+version = "3.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fd03604047cee9b6ce9de9f70c6cd540a0520c813cbd49bae61f33ab80ed1dc"
+checksum = "290f7f2596bd5b78a9fec8088ccd89180d7f9f55b94b0576823bbbdc72ee8311"
 dependencies = [
  "event-listener",
  "event-listener-strategy",
@@ -533,7 +533,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8c6d47a4e2961fb8721bcfc54feae6455f2f64e7054f9bc67e875f0e77f4c58d"
 dependencies = [
  "rust_decimal",
- "schemars 1.1.0",
+ "schemars 1.2.0",
  "serde",
  "utf8-width",
 ]
@@ -656,9 +656,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.50"
+version = "1.2.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f50d563227a1c37cc0a263f64eca3334388c01c5e4c4861a9def205c614383c"
+checksum = "7a0aeaff4ff1a90589618835a598e545176939b97874f7abc7851caa0618f203"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -1456,9 +1456,9 @@ dependencies = [
 
 [[package]]
 name = "find-msvc-tools"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a3076410a55c90011c298b04d0cfa770b00fa04e1e3c97d3f6c9de105a03844"
+checksum = "645cbb3a84e60b7531617d5ae4e57f7e27308f6445f5abf653209ea76dec8dff"
 
 [[package]]
 name = "flate2"
@@ -2367,7 +2367,7 @@ dependencies = [
  "rgb",
  "tiff",
  "zune-core 0.5.0",
- "zune-jpeg 0.5.7",
+ "zune-jpeg 0.5.8",
 ]
 
 [[package]]
@@ -4252,9 +4252,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.12.26"
+version = "0.12.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b4c14b2d9afca6a60277086b0cc6a6ae0b568f6f7916c943a8cdc79f8be240f"
+checksum = "eddd3ca559203180a307f12d114c268abf583f59b03cb906fd0b3ff8646c1147"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -4432,9 +4432,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "1.1.2"
+version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd15f8a2c5551a84d56efdc1cd049089e409ac19a3072d5037a17fd70719ff3e"
+checksum = "146c9e247ccc180c1f61615433868c99f3de3ae256a30a43b49f67c2d9171f34"
 dependencies = [
  "bitflags 2.10.0",
  "errno",
@@ -4528,9 +4528,9 @@ dependencies = [
 
 [[package]]
 name = "schemars"
-version = "1.1.0"
+version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9558e172d4e8533736ba97870c4b2cd63f84b382a3d6eb063da41b91cce17289"
+checksum = "54e910108742c57a770f492731f99be216a52fadd361b06c8fb59d74ccc267d2"
 dependencies = [
  "dyn-clone",
  "ref-cast",
@@ -4645,15 +4645,15 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.145"
+version = "1.0.147"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "402a6f66d8c709116cf22f558eab210f5a50187f702eb4d7e5ef38d9a7f1c79c"
+checksum = "6af14725505314343e673e9ecb7cd7e8a36aa9791eb936235a3567cc31447ae4"
 dependencies = [
  "itoa",
  "memchr",
- "ryu",
  "serde",
  "serde_core",
+ "zmij",
 ]
 
 [[package]]
@@ -4709,7 +4709,7 @@ dependencies = [
  "indexmap 1.9.3",
  "indexmap 2.12.1",
  "schemars 0.9.0",
- "schemars 1.1.0",
+ "schemars 1.2.0",
  "serde_core",
  "serde_json",
  "serde_with_macros",
@@ -4822,10 +4822,11 @@ dependencies = [
 
 [[package]]
 name = "signal-hook-registry"
-version = "1.4.7"
+version = "1.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7664a098b8e616bdfcc2dc0e9ac44eb231eedf41db4e9fe95d8d32ec728dedad"
+checksum = "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b"
 dependencies = [
+ "errno",
  "libc",
 ]
 
@@ -5509,7 +5510,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-deep-link"
 version = "2.4.5"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "dunce",
  "plist",
@@ -5529,7 +5530,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-dialog"
 version = "2.4.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "log",
  "raw-window-handle",
@@ -5546,7 +5547,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-fs"
 version = "2.4.4"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "anyhow",
  "dunce",
@@ -5567,7 +5568,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-http"
 version = "2.5.4"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "bytes",
  "cookie_store 0.21.1",
@@ -5590,7 +5591,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-log"
 version = "2.7.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "android_logger",
  "byte-unit",
@@ -5611,7 +5612,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-opener"
 version = "2.5.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "dunce",
  "glob",
@@ -5632,7 +5633,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-os"
 version = "2.3.2"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "gethostname",
  "log",
@@ -5649,7 +5650,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-process"
 version = "2.3.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "tauri",
  "tauri-plugin",
@@ -5658,7 +5659,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-shell"
 version = "2.3.3"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "encoding_rs",
  "log",
@@ -5678,7 +5679,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-single-instance"
 version = "2.3.6"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "serde",
  "serde_json",
@@ -5692,7 +5693,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-sql"
 version = "2.3.1"
-source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#d528c88b4f2a79130e933e4aa695188f8a54ccf3"
+source = "git+ssh://git@github.com/tauri-apps/plugins-workspace.git?branch=v2#54e21f142b2622ad74a3e8696eb0b5ec2fb58c48"
 dependencies = [
  "futures-core",
  "indexmap 2.12.1",
@@ -5810,9 +5811,9 @@ dependencies = [
 
 [[package]]
 name = "tempfile"
-version = "3.23.0"
+version = "3.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d31c77bdf42a745371d260a26ca7163f1e0924b64afa0b688e61b5a9fa02f16"
+checksum = "655da9c7eb6305c55742045d5a8d2037996d61d8de95806335c7c86ce0f82e9c"
 dependencies = [
  "fastrand",
  "getrandom 0.3.4",
@@ -7476,6 +7477,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "zmij"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d0095ecd462946aa3927d9297b63ef82fb9a5316d7a37d134eeb36e58228615a"
+
+[[package]]
 name = "zune-core"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7507,9 +7514,9 @@ dependencies = [
 
 [[package]]
 name = "zune-jpeg"
-version = "0.5.7"
+version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51d915729b0e7d5fe35c2f294c5dc10b30207cc637920e5b59077bfa3da63f28"
+checksum = "e35aee689668bf9bd6f6f3a6c60bb29ba1244b3b43adfd50edd554a371da37d5"
 dependencies = [
  "zune-core 0.5.0",
 ]
