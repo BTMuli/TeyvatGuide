@@ -317,11 +317,12 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
 import mhyClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
+import { isRunInAdmin } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
 const userStore = useUserStore();
-const { sidebar, theme, isLogin, recentNewsType, gameDir, isInAdmin } = storeToRefs(useAppStore());
+const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
 // @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
@@ -720,7 +721,8 @@ async function tryLaunchGame(): Promise<void> {
     await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${JSON.stringify(resp)}`);
     return;
   }
-  if (!isInAdmin.value) {
+  const isInAdmin = await isRunInAdmin();
+  if (!isInAdmin) {
     showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
     const cmd = Command.create("exec-sh", [`&"${gamePath}" login_auth_ticket=${resp}`], {
       cwd: gameDir.value,

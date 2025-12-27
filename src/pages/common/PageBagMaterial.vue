@@ -126,6 +126,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { exists } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
+import { isRunInAdmin } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
@@ -165,7 +166,7 @@ export type MaterialInfo = {
   info: TGApp.App.Material.WikiItem;
 };
 
-const { gameDir, isInAdmin, isLogin } = storeToRefs(useAppStore());
+const { gameDir, isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 const sortList: Array<MaterialSort> = [
@@ -347,7 +348,8 @@ async function tryCallYae(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  if (!isInAdmin.value) {
+  const isInAdmin = await isRunInAdmin();
+  if (!isInAdmin) {
     const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
     if (!check) {
       showSnackbar.cancel("已取消以管理员模式重启");

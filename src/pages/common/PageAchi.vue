@@ -99,6 +99,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
+import { isRunInAdmin } from "@utils/toolFunc.js";
 import {
   getUiafHeader,
   readUiafData,
@@ -115,7 +116,7 @@ const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).ma
 
 const route = useRoute();
 const router = useRouter();
-const { gameDir, isInAdmin, isLogin } = storeToRefs(useAppStore());
+const { gameDir, isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 let achiListener: UnlistenFn | null = null;
@@ -327,7 +328,8 @@ async function toYae(): Promise<void> {
     showSnackbar.warn("未检测到原神本体应用！");
     return;
   }
-  if (!isInAdmin.value) {
+  const isInAdmin = await isRunInAdmin();
+  if (!isInAdmin) {
     const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
     if (!check) {
       showSnackbar.cancel("已取消以管理员模式重启");

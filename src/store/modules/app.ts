@@ -65,8 +65,6 @@ const useAppStore = defineStore(
     const cancelLike = ref<boolean>(true);
     /** 关闭窗口时最小化到托盘 */
     const closeToTray = ref<boolean>(false);
-    /** 是否是管理员模式 */
-    const isInAdmin = ref<boolean>(false);
 
     /**
      * 初始化应用状态
@@ -150,7 +148,6 @@ const useAppStore = defineStore(
       init,
       changeTheme,
       getImageUrl,
-      isInAdmin,
     };
   },
   {
