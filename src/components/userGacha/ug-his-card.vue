@@ -1,21 +1,23 @@
 <!-- 单个卡池抽卡记录 -->
 <template>
-  <div class="user-gacha-history-card-comp">
+  <div class="ug-his-cc">
+    <!-- 卡池封面 -->
     <img
       :src="props.pool.banner"
       alt="banner"
-      class="ug-his-banner"
+      class="ug-hisc-banner"
       @click="createPost(pool.postId)"
     />
-    <div class="ug-his-info">
-      <div class="ug-his-title">
+    <!-- 卡池信息 -->
+    <div class="ug-hisc-info">
+      <div class="ug-hisci-title">
         <span>{{ props.pool.name }}</span>
-        <span class="ug-his-tag">{{ props.pool.order === 1 ? "上半" : "下半" }}</span>
-        <span class="ug-his-tag">{{ getType(props.pool.type) }}</span>
+        <span class="ug-hisci-tag">{{ props.pool.order === 1 ? "上半" : "下半" }}</span>
+        <span class="ug-hisci-tag">{{ getType(props.pool.type) }}</span>
       </div>
-      <div class="ug-his-time">{{ getTimeStr(props.pool) }}</div>
-      <div class="ug-his-sub">Up 五星</div>
-      <div class="ug-his-up lv5">
+      <div class="ug-hisci-time">{{ getTimeStr(props.pool) }}</div>
+      <div class="ug-hisci-sub">Up 五星</div>
+      <div class="ug-hisci-up lv5">
         <TItemBox
           v-for="i in props.pool.up5List"
           :key="i"
@@ -23,13 +25,26 @@
           @click="toWiki(i)"
         />
       </div>
-      <div class="ug-his-sub">Up 四星</div>
-      <div class="ug-his-up lv4">
+      <div class="ug-hisci-sub">Up 四星</div>
+      <div class="ug-hisci-up lv4">
         <TItemBox
           v-for="i in props.pool.up4List"
           :key="i"
           :model-value="getBox(i)"
           @click="toWiki(i)"
+        />
+      </div>
+    </div>
+    <!-- 抽卡信息 -->
+    <div v-if="gachaRecords.length > 0" class="ug-hisc-records">
+      <div class="ug-hiscr-title">抽卡记录({{ gachaRecords.length }}条)</div>
+      <div class="ug-hiscr-list">
+        <TItemBox
+          v-for="(item, idx) in gachaBoxes"
+          :key="idx"
+          :model-value="getBox2(item)"
+          :title="item.name"
+          class="ug-hicr-item"
         />
       </div>
     </div>
@@ -51,6 +66,18 @@ type UgHisCardProps = {
   /** UID */
   uid?: string;
 };
+type UgcHisCardBox = {
+  /** 星级 */
+  rank: number;
+  /** 名称 */
+  name: string;
+  /** itemId */
+  id: number;
+  /** 列表 */
+  list: Array<TGApp.Sqlite.Gacha.Gacha>;
+  /** 数量 */
+  cnt: number;
+};
 
 const router = useRouter();
 const props = defineProps<UgHisCardProps>();
@@ -62,16 +89,36 @@ const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
   gameEnum.gachaType.MixUp,
 ];
 const gachaRecords = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
+const gachaBoxes = shallowRef<Array<UgcHisCardBox>>([]);
 
 watch(
   () => props.uid,
-  async () => loadRecords(),
+  async () => await loadRecords(),
   { immediate: true },
 );
 
 async function loadRecords(): Promise<void> {
   if (!props.uid) gachaRecords.value = [];
   else gachaRecords.value = await TSUserGacha.record.pool(props.pool, props.uid);
+  gachaBoxes.value = [];
+  const tmpBoxes: Record<string, UgcHisCardBox> = {};
+  for (const r of gachaRecords.value) {
+    if (r.itemId in tmpBoxes) {
+      tmpBoxes[r.itemId].list.push(r);
+      tmpBoxes[r.itemId].cnt++;
+    } else {
+      tmpBoxes[r.itemId] = {
+        rank: Number(r.rank),
+        id: Number(r.itemId),
+        name: r.name,
+        list: [r],
+        cnt: 1,
+      };
+    }
+  }
+  gachaBoxes.value = Array.from(Object.values(tmpBoxes)).sort(
+    (a, b) => b.rank - a.rank || b.cnt - a.cnt || b.id - a.id,
+  );
 }
 
 function isPoolGachaType(x: string): x is TGApp.App.Gacha.PoolGachaType {
@@ -139,7 +186,7 @@ function getBox(id: number): TItemBoxData {
       size: "80px",
       height: "80px",
       display: "inner",
-      clickable: true,
+      clickable: false,
       lt: `/icon/element/${bFind.element}元素.webp`,
       ltSize: "20px",
       innerHeight: 20,
@@ -160,26 +207,79 @@ function getBox(id: number): TItemBoxData {
     innerText: bFind.name,
   };
 }
+
+function getBox2(item: UgcHisCardBox): TItemBoxData {
+  const bFind = getWikiBrief(item.id);
+  if (!bFind) {
+    return {
+      bg: "/icon/bg/0-Star.webp",
+      icon: "/source/UI/empty/webp",
+      size: "40px",
+      height: "64px",
+      display: "outer",
+      clickable: false,
+      lt: "",
+      ltSize: "0",
+      innerHeight: 0,
+      innerText: "",
+      outerHeight: 24,
+      outerText: item.cnt.toString(),
+    };
+  }
+  if ("element" in bFind) {
+    return {
+      bg: `/icon/bg/${bFind.star}-Star.webp`,
+      icon: `/WIKI/character/${bFind.id}.webp`,
+      size: "40px",
+      height: "64px",
+      display: "outer",
+      clickable: false,
+      lt: `/icon/element/${bFind.element}元素.webp`,
+      ltSize: "12px",
+      innerText: "",
+      innerHeight: 0,
+      outerText: item.cnt.toString(),
+      outerHeight: 24,
+    };
+  }
+  return {
+    bg: `/icon/bg/${bFind.star}-Star.webp`,
+    icon: `/WIKI/weapon/${bFind.id}.webp`,
+    size: "40px",
+    height: "64px",
+    display: "outer",
+    clickable: false,
+    lt: `/icon/weapon/${bFind.weapon}.webp`,
+    ltSize: "12px",
+    innerHeight: 0,
+    innerText: "",
+    outerText: item.cnt.toString(),
+    outerHeight: 24,
+  };
+}
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
-.user-gacha-history-card-comp {
+.ug-his-cc {
   position: relative;
   display: flex;
   width: 100%;
+  box-sizing: border-box;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: stretch;
   padding: 8px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-1);
   column-gap: 8px;
 }
 
-.ug-his-banner {
+.ug-hisc-banner {
   @include github-styles.github-card-shadow;
 
-  width: 50vw;
+  height: 270px;
+  flex-shrink: 0;
   border-radius: 4px;
   cursor: pointer;
   transition: 0.5s ease-in-out;
@@ -190,28 +290,29 @@ function getBox(id: number): TItemBoxData {
   }
 }
 
-.ug-his-info {
+.ug-hisc-info,
+.ug-hisc-records {
+  position: relative;
   display: flex;
-  height: 100%;
+  width: 100%;
+  height: 270px;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
 }
 
-.ug-his-title {
+.ug-hisci-title,
+.ug-hiscr-title {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  color: var(--common-text-title);
   column-gap: 8px;
-
-  :first-child {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 20px;
-  }
+  font-family: var(--font-title);
+  font-size: 20px;
 }
 
-.ug-his-tag {
+.ug-hisci-tag {
   @include github-styles.github-tag-dark-gen(#e06c63);
 
   display: flex;
@@ -220,15 +321,16 @@ function getBox(id: number): TItemBoxData {
   justify-content: center;
   padding: 0 8px;
   border-radius: 4px;
+  font-family: var(--font-text);
   font-size: 16px;
 }
 
-.ug-his-sub {
+.ug-hisci-sub {
   font-family: var(--font-title);
   font-size: 18px;
 }
 
-.ug-his-up {
+.ug-hisci-up {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -241,7 +343,17 @@ function getBox(id: number): TItemBoxData {
   }
 
   &.lv4 {
-    max-height: 168px;
+    max-height: 80px;
   }
+}
+
+.ug-hiscr-list {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 4px;
+  overflow-y: auto;
 }
 </style>

@@ -47,7 +47,7 @@ onMounted(() => {
   historyTab.value = res[0].tab;
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .gro-container {
   display: flex;
   width: 100%;
@@ -57,7 +57,7 @@ onMounted(() => {
 }
 
 .gro-tabs {
-  width: 100px;
+  width: 80px;
   height: 100%;
 }
 
@@ -71,12 +71,8 @@ onMounted(() => {
 
 .gro-window {
   position: relative;
-  display: flex;
   width: 100%;
   height: 100%;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
   padding-right: 8px;
   overflow-y: scroll;
 }

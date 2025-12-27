@@ -182,8 +182,7 @@ const props = defineProps<TItemBoxProps>();
 }
 
 .tib-outer {
-  position: absolute;
-  bottom: 0;
+  position: relative;
   display: flex;
   width: 100%;
   height: v-bind("`${props.modelValue.outerHeight ?? 0}px`");
@@ -191,7 +190,7 @@ const props = defineProps<TItemBoxProps>();
   justify-content: center;
   color: var(--common-text-title);
   font-size: v-bind("`${(props.modelValue.outerHeight ?? 0)/2}px`");
-  line-height: v-bind("`${(props.modelValue.outerHeight ?? 0)/2}px`");
+  line-height: v-bind("`${(props.modelValue.outerHeight ?? 0)}px`");
   text-align: center;
 }
 </style>
