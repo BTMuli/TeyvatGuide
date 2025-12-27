@@ -92,7 +92,7 @@
       <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="curGid.toString()" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="curGid" :keyword="search" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>

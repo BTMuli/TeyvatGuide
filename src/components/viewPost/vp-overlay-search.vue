@@ -43,7 +43,7 @@ import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
-type ToPostSearchProps = { gid: string; keyword?: string };
+type ToPostSearchProps = { gid: number; keyword?: string };
 type SortSelect = { text: string; value: number };
 
 const sortOrderList: Array<SortSelect> = [
@@ -73,7 +73,7 @@ const label = computed<string>(() => {
 });
 
 onMounted(async () => {
-  gameId.value = props.gid;
+  gameId.value = props.gid.toString();
   if (props.keyword && props.keyword !== "") search.value = props.keyword;
   if (visible.value) await searchPosts();
 });
@@ -124,8 +124,8 @@ watch(
 watch(
   () => props.gid,
   async () => {
-    if (gameId.value !== props.gid) {
-      gameId.value = props.gid;
+    if (gameId.value !== props.gid.toString()) {
+      gameId.value = props.gid.toString();
       results.value = [];
       lastId.value = "";
       isLast.value = false;
