@@ -1,5 +1,5 @@
-//! 命令模块，负责处理命令
-//! @since Beta v0.8.8
+// 命令模块，负责处理命令
+// @since Beta v0.9.1
 
 use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
@@ -81,11 +81,7 @@ pub fn is_in_admin() -> bool {
   {
     use windows_sys::Win32::Foundation::{CloseHandle, HANDLE};
     use windows_sys::Win32::Security::{
-      AllocateAndInitializeSid, CheckTokenMembership, FreeSid, SID_IDENTIFIER_AUTHORITY,
-      TOKEN_QUERY,
-    };
-    use windows_sys::Win32::System::SystemServices::{
-      DOMAIN_ALIAS_RID_ADMINS, SECURITY_BUILTIN_DOMAIN_RID,
+      GetTokenInformation, TokenElevation, TOKEN_ELEVATION, TOKEN_QUERY,
     };
     use windows_sys::Win32::System::Threading::{GetCurrentProcess, OpenProcessToken};
 
@@ -95,35 +91,20 @@ pub fn is_in_admin() -> bool {
         return false;
       }
 
-      let nt_authority = SID_IDENTIFIER_AUTHORITY { Value: [0, 0, 0, 0, 0, 5] };
-      let mut admin_group = std::ptr::null_mut();
+      let mut elevation = TOKEN_ELEVATION { TokenIsElevated: 0 };
+      let mut return_length = 0;
 
-      let success = AllocateAndInitializeSid(
-        &nt_authority,
-        2,
-        SECURITY_BUILTIN_DOMAIN_RID.try_into().unwrap(),
-        DOMAIN_ALIAS_RID_ADMINS.try_into().unwrap(),
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        &mut admin_group,
+      let result = GetTokenInformation(
+        token_handle,
+        TokenElevation,
+        &mut elevation as *mut _ as *mut _,
+        std::mem::size_of::<TOKEN_ELEVATION>() as u32,
+        &mut return_length,
       );
 
-      if success == 0 {
-        CloseHandle(token_handle);
-        return false;
-      }
-
-      let mut is_admin = 0i32;
-      let result = CheckTokenMembership(std::ptr::null_mut(), admin_group, &mut is_admin);
-
-      FreeSid(admin_group);
       CloseHandle(token_handle);
 
-      result != 0 && is_admin != 0
+      result != 0 && elevation.TokenIsElevated != 0
     }
   }
 }
