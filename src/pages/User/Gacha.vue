@@ -395,7 +395,7 @@ async function importUigf(): Promise<void> {
 async function exportUigf(): Promise<void> {
   if (!uidCur.value) return;
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf] 导出祈愿数据`);
-  const gachaList = await TSUserGacha.getGachaRecords(uidCur.value);
+  const gachaList = await TSUserGacha.record.all(uidCur.value);
   if (gachaList.length === 0) {
     showSnackbar.error(`UID ${uidCur.value} 暂无祈愿数据`);
     return;
