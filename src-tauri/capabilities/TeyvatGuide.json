@@ -51,7 +51,7 @@
       "allow": [
         { "url": "https://*.miyoushe.com/*" },
         { "url": "https://*.mihoyo.com/*" },
-        { "url": "https://homa.snapgenshin.com/*" },
+        { "url": "https://homa.gentle.house/*" },
         { "url": "https://*.hoyoverse.com/*" },
         { "url": "https://api.hakush.in/*" }
       ]
