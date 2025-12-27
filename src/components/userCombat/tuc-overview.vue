@@ -15,7 +15,7 @@
     </div>
     <div class="tuco-line3">
       <TucTile :val="`${props.data.rent_cnt}次`" title="助演角色支援" />
-      <TucTile :title="`获得星章-${props.data.medal_num}`" :val="props.data.get_medal_round_list" />
+      <TucTile :title="`获得星章-${getMedalNum()}`" :val="props.data.get_medal_round_list" />
       <TucTile :val="`${props.data.avatar_bonus_num}次`" title="场外声援" />
     </div>
   </div>
@@ -61,6 +61,14 @@ function getTime(): string {
   const sec = props.fights.total_use_time % 60;
   const min = (props.fights.total_use_time - sec) / 60;
   return `${min}分${sec}秒`;
+}
+
+function getMedalNum(): string {
+  if (props.data.difficulty_id < 5) return props.data.medal_num.toString();
+  if (props.data.tarot_finished_cnt > 0) {
+    return `${props.data.medal_num + props.data.tarot_finished_cnt}(${props.data.medal_num}+${props.data.tarot_finished_cnt})`;
+  }
+  return props.data.medal_num.toString();
 }
 </script>
 <style lang="css" scoped>
