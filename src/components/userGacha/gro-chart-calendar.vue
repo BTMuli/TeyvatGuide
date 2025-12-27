@@ -79,7 +79,7 @@ const chartHeight = computed<string>(() => {
  * @returns {EChartsOption}
  */
 async function getCalendarOptions(): Promise<EChartsOption> {
-  const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
+  const records = await TSUserGacha.record.time(props.uid, props.gachaType);
   // 获取最大长度
   const maxLen = Math.max(...Object.values(records).map((v) => v.length));
   // 获取年份

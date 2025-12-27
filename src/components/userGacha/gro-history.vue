@@ -1,6 +1,7 @@
+<!-- 抽卡历史 -->
 <template>
   <div class="gro-container">
-    <v-tabs class="gro-tabs" v-model="historyTab" align-tabs="start" direction="vertical">
+    <v-tabs v-model="historyTab" align-tabs="start" class="gro-tabs" direction="vertical">
       <v-tab v-for="(item, index) in tabList" :key="index" :value="item.tab">
         {{ item.tab }}
       </v-tab>
@@ -12,7 +13,7 @@
         :value="item.tab"
         class="gro-pools"
       >
-        <UgHisCard v-for="pool in item.value" :key="pool.order" :pool="pool" />
+        <UgHisCard v-for="pool in item.value" :key="pool.order" :pool="pool" :uid="props.uid" />
       </v-window-item>
     </v-window>
   </div>
@@ -25,6 +26,9 @@ import UgHisCard from "./ug-his-card.vue";
 import { AppGachaData } from "@/data/index.js";
 
 type GroHistoryMap = { tab: string; value: Array<TGApp.App.Gacha.PoolItem> };
+type GroHistoryProps = { uid?: string };
+
+const props = defineProps<GroHistoryProps>();
 
 const historyTab = ref<string>("");
 const tabList = shallowRef<Array<GroHistoryMap>>([]);
@@ -62,6 +66,7 @@ onMounted(() => {
 .gro-container :deep(.v-tabs.v-slide-group--vertical) {
   max-height: 100%;
 }
+
 /* stylelint-enable selector-class-pattern */
 
 .gro-window {
@@ -81,6 +86,7 @@ onMounted(() => {
 .gro-window :deep(.v-window__container) {
   width: 100%;
 }
+
 /* stylelint-enable selector-class-pattern */
 
 .gro-pools {

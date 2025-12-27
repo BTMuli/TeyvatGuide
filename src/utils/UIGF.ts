@@ -211,7 +211,7 @@ export async function exportUigfData(
 
 /**
  * 导出UIGF4数据
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  * @param uids - UID列表
  * @param savePath - 保存路径
  * @returns
@@ -221,7 +221,7 @@ export async function exportUigf4Data(uids: Array<string> = [], savePath?: strin
   const filePath = savePath ?? `${await path.appLocalDataDir()}userData\\UIGF4.json`;
   const data: Array<TGApp.Plugins.UIGF.GachaHk4e> = [];
   for (const uid of uids) {
-    const gachaList = await TSUserGacha.getGachaRecords(uid);
+    const gachaList = await TSUserGacha.record.all(uid);
     await showLoading.update(`正在导出${uid}的${gachaList.length}条祈愿记录`);
     const timezone = getUigfTimeZone(uid);
     data.push({ uid: uid, timezone: timezone, list: convertDataToUigf(gachaList, timezone) });

@@ -1,6 +1,6 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -25,19 +25,19 @@ function getInsertSql(uid: string, gacha: TGApp.Plugins.UIGF.GachaItem): string 
       INSERT INTO GachaRecords (uid, gachaType, itemId, count, time, name, type, rank, id, uigfType, updated)
       VALUES ('${uid}', '${gacha.gacha_type}', '${gacha.item_id ?? null}', '${gacha.count ?? null}', '${gacha.time}',
               '${gacha.name}', '${gacha.item_type ?? null}', '${gacha.rank_type ?? null}', '${gacha.id}',
-              '${gacha.uigf_gacha_type}', datetime('now', 'localtime'))
-      ON CONFLICT (id)
-          DO UPDATE
-          SET uid       = '${uid}',
-              gachaType = '${gacha.gacha_type}',
-              uigfType  = '${gacha.uigf_gacha_type}',
-              time      = '${gacha.time}',
-              itemId    = '${gacha.item_id ?? null}',
-              count     = '${gacha.count ?? null}',
-              name      = '${gacha.name}',
-              type      = '${gacha.item_type ?? null}',
-              rank      = '${gacha.rank_type ?? null}',
-              updated   = datetime('now', 'localtime');
+              '${gacha.uigf_gacha_type}', datetime('now', 'localtime')) ON CONFLICT (id)
+          DO
+      UPDATE
+          SET uid = '${uid}',
+          gachaType = '${gacha.gacha_type}',
+          uigfType = '${gacha.uigf_gacha_type}',
+          time = '${gacha.time}',
+          itemId = '${gacha.item_id ?? null}',
+          count = '${gacha.count ?? null}',
+          name = '${gacha.name}',
+          type = '${gacha.item_type ?? null}',
+          rank = '${gacha.rank_type ?? null}',
+          updated = datetime('now', 'localtime');
   `;
 }
 
@@ -129,7 +129,7 @@ async function getGachaRecords(uid: string): Promise<Array<TGApp.Sqlite.Gacha.Ga
  * @param type - 类型
  * @returns 日期分组的祈愿记录
  */
-async function getGachaRecordsGroupByDate(
+async function getGachaRecordsByDate(
   uid: string,
   type?: string,
 ): Promise<Record<string, Array<TGApp.Sqlite.Gacha.Gacha>>> {
@@ -154,6 +154,30 @@ async function getGachaRecordsGroupByDate(
     map[key].push(item);
   }
   return map;
+}
+
+/**
+ * 获取指定卡池的祈愿记录
+ * @since Beta v0.9.1
+ * @param pool - 卡池信息
+ * @param uid - 用户UID
+ */
+async function getGachaRecordsByPool(
+  pool: TGApp.App.Gacha.PoolItem,
+  uid: string,
+): Promise<Array<TGApp.Sqlite.Gacha.Gacha>> {
+  console.log(pool, uid);
+  const db = await TGSqlite.getDB();
+  type resType = Array<TGApp.Sqlite.Gacha.Gacha>;
+  return await db.select<resType>(
+    "SELECT * FROM GachaRecords WHERE uid = ? AND gachaType = ? AND time >= ? AND time <= ?;",
+    [
+      uid.toString(),
+      pool.type.toString(),
+      pool.from.slice(0, 19).replace("T", " "),
+      pool.to.slice(0, 19).replace("T", " "),
+    ],
+  );
 }
 
 /**
@@ -369,8 +393,6 @@ async function updateItemIdById(raw: TGApp.Sqlite.Gacha.Gacha, itemId: string): 
 const TSUserGacha = {
   getUidList,
   getGachaCheck,
-  getGachaRecords,
-  getGachaRecordsGroupByDate,
   deleteGachaRecords,
   cleanGachaRecords,
   mergeUIGF,
@@ -379,6 +401,11 @@ const TSUserGacha = {
   restoreUigf,
   update: {
     itemId: updateItemIdById,
+  },
+  record: {
+    all: getGachaRecords,
+    time: getGachaRecordsByDate,
+    pool: getGachaRecordsByPool,
   },
 };
 

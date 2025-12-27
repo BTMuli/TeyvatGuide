@@ -156,7 +156,7 @@ async function handleExportData(): Promise<void> {
   const uidList = await TSUserGacha.getUidList();
   const tmpData: Array<UgoUidItem> = [];
   for (const uid of uidList) {
-    const dataRaw = await TSUserGacha.getGachaRecords(uid);
+    const dataRaw = await TSUserGacha.record.all(uid);
     tmpData.push(parseDataRaw(dataRaw));
   }
   data.value = tmpData;

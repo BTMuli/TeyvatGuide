@@ -72,7 +72,7 @@ const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
  * @returns {EChartsOption}
  */
 async function getStackBarOptions(): Promise<EChartsOption> {
-  const records = await TSUserGacha.getGachaRecordsGroupByDate(props.uid, props.gachaType);
+  const records = await TSUserGacha.record.time(props.uid, props.gachaType);
   const dataCount = Object.keys(records).length;
   const xAxis = {
     type: <const>"category",

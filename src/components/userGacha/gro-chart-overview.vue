@@ -72,7 +72,7 @@ const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
  * @returns {EChartsOption}
  */
 async function getOverviewOptions(): Promise<EChartsOption> {
-  const records = await TSUserGacha.getGachaRecords(props.uid);
+  const records = await TSUserGacha.record.all(props.uid);
   const data: EChartsOption = {
     title: [
       { text: ">> 祈愿系统大数据分析 <<", left: "center", top: "5%" },

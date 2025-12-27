@@ -112,7 +112,7 @@
         <gro-table v-model="gachaListCur" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="history">
-        <gro-history />
+        <gro-history :uid="uidCur" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="iframe">
         <gro-iframe mode="normal" />
@@ -176,7 +176,7 @@ onMounted(async () => {
   await reloadUid();
   if (uidCur.value) {
     await showLoading.update(`UID：${uidCur.value}`);
-    gachaListCur.value = await TSUserGacha.getGachaRecords(uidCur.value);
+    gachaListCur.value = await TSUserGacha.record.all(uidCur.value);
     await TGLogger.Info(
       `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
     );
@@ -190,7 +190,7 @@ watch(
   () => uidCur.value,
   async (newUid) => {
     if (!newUid) return;
-    gachaListCur.value = await TSUserGacha.getGachaRecords(newUid);
+    gachaListCur.value = await TSUserGacha.record.all(newUid);
     showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
     await TGLogger.Info(
       `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,

@@ -1,3 +1,4 @@
+<!-- 单个卡池抽卡记录 -->
 <template>
   <div class="user-gacha-history-card-comp">
     <img
@@ -38,21 +39,40 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-type UgHisCardProps = { pool: TGApp.App.Gacha.PoolItem };
+type UgHisCardProps = {
+  /** 卡池信息 */
+  pool: TGApp.App.Gacha.PoolItem;
+  /** UID */
+  uid?: string;
+};
 
 const router = useRouter();
 const props = defineProps<UgHisCardProps>();
 
 const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
-  TGApp.Game.Gacha.GachaType.AvatarUp,
-  TGApp.Game.Gacha.GachaType.AvatarUp2,
-  TGApp.Game.Gacha.GachaType.WeaponUp,
-  TGApp.Game.Gacha.GachaType.MixUp,
+  gameEnum.gachaType.AvatarUp,
+  gameEnum.gachaType.AvatarUp2,
+  gameEnum.gachaType.WeaponUp,
+  gameEnum.gachaType.MixUp,
 ];
+const gachaRecords = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
+
+watch(
+  () => props.uid,
+  async () => loadRecords(),
+  { immediate: true },
+);
+
+async function loadRecords(): Promise<void> {
+  if (!props.uid) gachaRecords.value = [];
+  else gachaRecords.value = await TSUserGacha.record.pool(props.pool, props.uid);
+}
 
 function isPoolGachaType(x: string): x is TGApp.App.Gacha.PoolGachaType {
   return (<ReadonlyArray<string>>gachaTypeList).includes(x);
