@@ -111,6 +111,32 @@ async function insertMaterial(
 }
 
 /**
+ * 删除记录
+ * @since Beta v0.9.1
+ * @param uid - 存档UID
+ * @param itemId - 材料ID
+ * @param count - 材料数量
+ * @returns 无返回值
+ */
+async function deleteRecord(uid: number, itemId: number, count: number): Promise<void> {
+  const now = Date.now();
+  const newRecord: TGApp.Sqlite.UserBag.MaterialRecord = {
+    count: count,
+    time: Math.floor(now / 1000),
+  };
+  const newTable: TGApp.Sqlite.UserBag.MaterialRaw = {
+    uid: uid,
+    id: itemId,
+    count: count,
+    records: JSON.stringify([newRecord]),
+    updated: timestampToDate(now),
+  };
+  const db = await TGSqlite.getDB();
+  const sql = getInsertSql(newTable);
+  await db.execute(sql);
+}
+
+/**
  * 获取UID列表
  * @since Beta v0.9.0
  */
@@ -244,6 +270,7 @@ const TSUserBagMaterial = {
   saveYaeCoin,
   getMaterial,
   insertMaterial,
+  deleteRecord,
   getValidMIds,
 };
 

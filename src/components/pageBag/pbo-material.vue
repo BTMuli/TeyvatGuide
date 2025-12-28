@@ -34,9 +34,10 @@
         </div>
         <div v-if="showRecord" class="pbom-bottom">
           <div class="pbom-bt-title">
-            <v-icon color="var(--tgc-od-white)" size="16">mdi-clock-edit-outline</v-icon>
+            <v-icon color="var(--tgc-od-blue)" size="16">mdi-clock-edit-outline</v-icon>
             <span>更新记录</span>
             <span class="edit" @click="tryEdit()">手动更新</span>
+            <span class="delete" @click="tryDelete()">删除记录</span>
           </div>
           <div class="pbom-bt-records">
             <div v-for="record in dbInfo.records" :key="record.time" class="pbom-record">
@@ -59,6 +60,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TwoSource from "@comp/pageWiki/two-source.vue";
 import TSUserBagMaterial, { SKIP_BAG_TYPES } from "@Sqlm/userBagMaterial.js";
 import { getVersion } from "@tauri-apps/api/app";
+import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -126,6 +128,29 @@ async function tryEdit(): Promise<void> {
   await refreshDb();
   emits("updateDB", { info: props.data.info, tb: dbInfo.value });
   showSnackbar.success("成功更新记录");
+}
+
+async function tryDelete(): Promise<void> {
+  if (dbInfo.value.records.length === 0) {
+    showSnackbar.warn("没有可以删除的记录");
+    return;
+  }
+  if (dbInfo.value.records.length === 1) {
+    showSnackbar.warn("最少保留一条记录");
+    return;
+  }
+  const check = await showDialog.check("确定删除？", "删除后仅保留一条记录");
+  if (!check) {
+    showSnackbar.cancel("取消删除记录");
+    return;
+  }
+  await TGLogger.Info(
+    `[pboMaterial][${dbInfo.value.uid}][${dbInfo.value.id}] 删除 ${props.data.info.name} 记录`,
+  );
+  await TSUserBagMaterial.deleteRecord(props.uid, dbInfo.value.id, dbInfo.value.count);
+  await refreshDb();
+  emits("updateDB", { info: props.data.info, tb: dbInfo.value });
+  showSnackbar.success("成功删除记录");
 }
 </script>
 <style lang="scss" scoped>
@@ -276,6 +301,11 @@ async function tryEdit(): Promise<void> {
   .edit {
     margin-left: auto;
     color: var(--tgc-od-red);
+    cursor: pointer;
+  }
+
+  .delete {
+    color: var(--tgc-od-white);
     cursor: pointer;
   }
 }
