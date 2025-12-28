@@ -68,28 +68,31 @@
         </div>
         <div class="uc-sort">
           <v-btn
+            :prepend-icon="getSortIcon(isLevelUp)"
+            :title.attr="getSortDesc(isLevelUp)"
             class="uc-top-btn"
             variant="elevated"
             @click="() => (isLevelUp = toggleSort(isLevelUp))"
           >
-            <span>等级</span>
-            <v-icon :title="getSortDesc(isLevelUp)">{{ getSortIcon(isLevelUp) }}</v-icon>
+            等级
           </v-btn>
           <v-btn
+            :prepend-icon="getSortIcon(isFetterUp)"
+            :title.attr="getSortDesc(isFetterUp)"
             class="uc-top-btn"
             variant="elevated"
             @click="() => (isFetterUp = toggleSort(isFetterUp))"
           >
-            <span>好感</span>
-            <v-icon :title="getSortDesc(isFetterUp)">{{ getSortIcon(isFetterUp) }}</v-icon>
+            好感
           </v-btn>
           <v-btn
+            :prepend-icon="getSortIcon(isConstUp)"
+            :title.attr="getSortDesc(isConstUp)"
             class="uc-top-btn"
             variant="elevated"
             @click="() => (isConstUp = toggleSort(isConstUp))"
           >
-            <span>命座</span>
-            <v-icon :title="getSortDesc(isConstUp)">{{ getSortIcon(isConstUp) }}</v-icon>
+            命座
           </v-btn>
         </div>
       </div>
@@ -106,7 +109,11 @@
           class="uc-ov-item"
         >
           <img :src="`/icon/element/${item.label}.webp`" alt="element" />
-          <span>{{ item.cnt }}{{ isSelected ? `(${getElementCnt(item.element)})` : "" }}</span>
+          <template v-if="isSelected">
+            <span>{{ getElementCnt(item.element) }}</span>
+            <span class="uc-ov-cnt">/{{ item.cnt }}</span>
+          </template>
+          <span v-else>{{ item.cnt }}</span>
         </span>
       </div>
       <div class="uc-box-info">
@@ -232,22 +239,22 @@ watch(
   async () => {
     let tmp = selectedList.value;
     if (isLevelUp.value === true) {
-      tmp = tmp.sort((a, b) => b.avatar.level - a.avatar.level);
-    } else if (isLevelUp.value === false) {
       tmp = tmp.sort((a, b) => a.avatar.level - b.avatar.level);
+    } else if (isLevelUp.value === false) {
+      tmp = tmp.sort((a, b) => b.avatar.level - a.avatar.level);
     }
     if (isFetterUp.value === true) {
-      tmp = tmp.sort((a, b) => b.avatar.fetter - a.avatar.fetter);
-    } else if (isFetterUp.value === false) {
       tmp = tmp.sort((a, b) => a.avatar.fetter - b.avatar.fetter);
+    } else if (isFetterUp.value === false) {
+      tmp = tmp.sort((a, b) => b.avatar.fetter - a.avatar.fetter);
     }
     if (isConstUp.value === true) {
       tmp = tmp.sort(
-        (a, b) => b.avatar.actived_constellation_num - a.avatar.actived_constellation_num,
+        (a, b) => a.avatar.actived_constellation_num - b.avatar.actived_constellation_num,
       );
     } else if (isConstUp.value === false) {
       tmp = tmp.sort(
-        (a, b) => a.avatar.actived_constellation_num - b.avatar.actived_constellation_num,
+        (a, b) => b.avatar.actived_constellation_num - a.avatar.actived_constellation_num,
       );
     }
     selectedList.value = tmp;
@@ -285,7 +292,7 @@ function getSortDesc(value: boolean | null): string {
     case false:
       return "降序";
     default:
-      return "默认";
+      return "默认排序";
   }
 }
 
@@ -640,6 +647,14 @@ function handleSwitch(next: boolean): void {
     height: 20px;
     flex-shrink: 0;
   }
+}
+
+.uc-ov-cnt {
+  position: relative;
+  top: 4px;
+  left: -4px;
+  color: var(--tgc-od-white);
+  font-size: 12px;
 }
 
 .uc-box-info {
