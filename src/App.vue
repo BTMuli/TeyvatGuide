@@ -129,13 +129,16 @@ async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise
   } else if (event.payload.type === "store") {
     await loadYaeBag(event.payload.uid, JSON.parse(event.payload.data));
     if (!yaeFlag.includes("store")) yaeFlag.push("store");
+  } else if (event.payload.type === "prop") {
+    await loadYaeProp(event.payload.uid, JSON.parse(event.payload.data));
+    if (!yaeFlag.includes("prop")) yaeFlag.push("prop");
   }
-  if (yaeFlag.length === 2) {
+  if (yaeFlag.length === 3) {
     yaeFlag = [];
     showSnackbar.success(`导入Yae数据完成，即将刷新页面`);
     await showLoading.end();
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    // window.location.reload();
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    window.location.reload();
   }
 }
 
@@ -191,6 +194,18 @@ async function loadYaeBag(uid: string, data: TGApp.Plugins.Yae.BagListRes): Prom
   } catch (e) {
     console.error(e);
     await TGLogger.Error(`[App][loadYaeBag] 导入材料失败：${e}`);
+  }
+}
+
+/**
+ * 处理属性
+ * @param uid - 用户UID
+ * @param data - 属性数据
+ * @returns 无返回值
+ */
+async function loadYaeProp(uid: string, data: TGApp.Plugins.Yae.PropRes): Promise<void> {
+  for (const [k, v] of Object.entries(data)) {
+    await TSUserBagMaterial.saveYaeCoin(Number(uid), Number(k), v);
   }
 }
 

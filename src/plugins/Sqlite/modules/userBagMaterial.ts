@@ -14,16 +14,14 @@ export const SKIP_BAG_TYPES: ReadonlyArray<string> = [
   "风之翼",
   /**TODO:数据获取*/
   "挑战结算道具",
-  /**TODO:数据获取*/
-  "稀有货币",
-  /**TODO:数据获取*/
-  "通用货币",
 ];
 export const BAG_TYPE_LIST: ReadonlyArray<string> = [
   "高级兑换券",
   "普通兑换券",
   "限定祈愿道具",
   "祈愿道具",
+  "稀有货币",
+  "通用货币",
   "任务道具",
   "七国徽印",
   "冒险道具",
@@ -68,11 +66,11 @@ function getValidMIds(): Array<number> {
 function getInsertSql(tb: TGApp.Sqlite.UserBag.MaterialRaw): string {
   return `
       INSERT INTO UserBagMaterial(uid, id, count, records, updated)
-      VALUES (${tb.uid}, ${tb.id}, ${tb.count}, '${tb.records}', '${tb.updated}') ON CONFLICT(uid, id) DO
-      UPDATE
-          SET count = ${tb.count},
-          records = '${tb.records}',
-          updated = '${tb.updated}';
+      VALUES (${tb.uid}, ${tb.id}, ${tb.count}, '${tb.records}', '${tb.updated}')
+      ON CONFLICT(uid, id) DO UPDATE
+          SET count   = ${tb.count},
+              records = '${tb.records}',
+              updated = '${tb.updated}';
   `;
 }
 
@@ -192,6 +190,11 @@ async function saveYaeData(
 ): Promise<number> {
   let skip = 0;
   const ids = new Set<number>(getValidMIds());
+  // 移除货币数据
+  ids.delete(201);
+  ids.delete(202);
+  ids.delete(203);
+  ids.delete(204);
   const newList = list;
   for (const item of list) if (ids.has(item.item_id)) ids.delete(item.item_id);
   // 处理0数据
@@ -215,10 +218,30 @@ async function saveYaeData(
   return skip;
 }
 
+/**
+ * 保存货币数据
+ * @since Beta v0.9.1
+ * @param uid - 存档UID
+ * @param id - 货币ID
+ * @param cnt - 货币数量
+ * @returns 无返回值
+ */
+async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> {
+  const read = await getMaterial(uid, id);
+  if (read.length === 0) {
+    await insertMaterial(uid, id, cnt);
+    return;
+  }
+  const local = read[0];
+  if (cnt === local.count) return;
+  await insertMaterial(uid, id, cnt, local.records);
+}
+
 const TSUserBagMaterial = {
   getAllUid,
   delUid,
   saveYaeData,
+  saveYaeCoin,
   getMaterial,
   insertMaterial,
   getValidMIds,

@@ -1,18 +1,18 @@
 /**
  * Yae 插件类型定义
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
 declare namespace TGApp.Plugins.Yae {
   /**
    * 后端返的事件数据
-   * @since Beta v0.9.0
+   * @since Beta v0.9.1
    */
   type RsEvent = {
     /** 数据，序列化后的JSON */
     data: string;
-    /** 类型，成就或背包 */
-    type: "achievement" | "store";
+    /** 类型，成就或背包或属性 */
+    type: "achievement" | "store" | "prop";
     /** 存档UID，需要预先输入 */
     uid: string;
   };
@@ -28,6 +28,12 @@ declare namespace TGApp.Plugins.Yae {
    * @since Beta v0.9.0
    */
   type BagListRes = Array<BagItemUnion>;
+
+  /**
+   * 后端返回的属性数据
+   * @since Beta v0.9.1
+   */
+  type PropRes = Record<number, number>;
 
   /**
    * 背包物品类型
