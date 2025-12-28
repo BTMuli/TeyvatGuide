@@ -243,7 +243,7 @@ watch(
 );
 watch(() => uidCur.value, loadRole);
 watch(
-  () => [isLevelUp.value, isLevelUp.value, isConstUp.value],
+  () => [isLevelUp.value, isFetterUp.value, isConstUp.value],
   async () => {
     let tmp = selectedList.value;
     if (isLevelUp.value === true) {
