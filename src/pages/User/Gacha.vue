@@ -162,16 +162,7 @@ const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
 
 onMounted(async () => {
-  await showLoading.start("正在加载祈愿数据", "正在获取Hakushi元数据");
-  try {
-    hakushiData.value = await Hakushi.fetch();
-  } catch (e) {
-    console.error(e);
-    showSnackbar.warn(`获取Hakushi元数据失败`);
-    await TGLogger.Error(`[UserGacha][onMounted]获取Hakushi元数据失败`);
-    await TGLogger.Error(`${e}`);
-  }
-  await showLoading.update("正在获取祈愿 UID 列表");
+  await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   await reloadUid();
   if (uidCur.value) {
@@ -326,6 +317,10 @@ async function refreshGachaPool(
         if (find) tempItem.item_id = find.id.toString();
       }
       if (tempItem.item_id === "") {
+        if (hakushiData.value.length === 0) {
+          await showLoading.update(`未查找到 ${tempItem.name} 的 ItemId，正在获取 Hakushi 数据`);
+          await loadHakushi();
+        }
         const find = hakushiData.value.find(
           (i) => i.type === item.item_type && i.name === item.name,
         );
@@ -352,6 +347,17 @@ async function refreshGachaPool(
 function importUigf4(): void {
   ovMode.value = "import";
   ovShow.value = true;
+}
+
+async function loadHakushi(): Promise<void> {
+  try {
+    hakushiData.value = await Hakushi.fetch();
+  } catch (e) {
+    console.error(e);
+    showSnackbar.warn(`获取Hakushi元数据失败`);
+    await TGLogger.Error(`[UserGacha][onMounted]获取Hakushi元数据失败`);
+    await TGLogger.Error(`${e}`);
+  }
 }
 
 async function importUigf(): Promise<void> {
