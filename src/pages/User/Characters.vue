@@ -106,12 +106,14 @@
           class="uc-ov-item"
         >
           <img :src="`/icon/element/${item.label}.webp`" alt="element" />
-          <span>{{ item.cnt }}</span>
+          <span>{{ item.cnt }}{{ isSelected ? `(${getElementCnt(item.element)})` : "" }}</span>
         </span>
       </div>
       <div class="uc-box-info">
         <span>角色详情</span>
-        <span>|Render by TeyvatGuide v{{ version }}|</span>
+        <span>|</span>
+        <span>TeyvatGuide v{{ version }}</span>
+        <span>|</span>
         <span>更新于 {{ getUpdateTime() }}</span>
       </div>
     </div>
@@ -195,6 +197,7 @@ const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 const enableShare = computed<boolean>(
   () => showOverlay.value || showSelect.value || loadData.value,
 );
+const isSelected = computed<boolean>(() => selectedList.value.length !== roleList.value.length);
 
 onMounted(async () => {
   await showLoading.start("正在获取角色数据");
@@ -326,6 +329,10 @@ function getOverview(data: Array<TGApp.Sqlite.Character.TableTrans>): Array<Over
     }
   }
   return overview.sort((a, b) => b.cnt - a.cnt);
+}
+
+function getElementCnt(element: string): number {
+  return selectedList.value.filter((i) => i.avatar.element === element).length;
 }
 
 async function loadUid(): Promise<void> {
@@ -627,20 +634,24 @@ function handleSwitch(next: boolean): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
   font-family: var(--font-title);
   font-size: 18px;
   gap: 4px;
 
   img {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
   }
 }
 
 .uc-box-info {
+  position: relative;
   z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 4px;
   font-size: 14px;
   opacity: 0.8;
 }
