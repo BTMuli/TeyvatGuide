@@ -30,12 +30,12 @@ import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
 import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
 import { toObcPage } from "@utils/TGWindow.js";
-import { onBeforeMount, ref, shallowRef } from "vue";
+import { onBeforeMount, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { AppWeaponData } from "@/data/index.js";
 
-const sortedData = AppWeaponData.sort((a, b) => {
+const appWData = AppWeaponData.sort((a, b) => {
   if (a.star !== b.star) return b.star - a.star;
   if (a.weapon !== b.weapon) return a.weapon.localeCompare(b.weapon);
   return b.id - a.id;
@@ -44,7 +44,7 @@ const sortedData = AppWeaponData.sort((a, b) => {
 const id = useRoute().params.id.toString() ?? "0";
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
-const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(sortedData);
+const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(appWData);
 const curItem = shallowRef<TGApp.App.Weapon.WikiBriefInfo>({
   id: 0,
   contentId: 0,
@@ -67,15 +67,24 @@ onBeforeMount(() => {
   curItem.value = cardsInfo.value[0];
 });
 
+watch(
+  () => resetSelect.value,
+  () => {
+    if (resetSelect.value) {
+      cardsInfo.value = appWData;
+    }
+  },
+);
+
 function switchW(item: TGApp.App.Weapon.WikiBriefInfo): void {
   curItem.value = item;
 }
 
 function handleSelectW(val: SelectedWValue) {
-  if (!val.isReset) showSelect.value = true;
+  showSelect.value = false;
   const filterW = AppWeaponData.filter((item) => {
-    if (!val.star.includes(item.star)) return false;
-    return val.weapon.includes(item.weapon);
+    if (val.star.length > 0 && !val.star.includes(item.star)) return false;
+    return !(val.weapon.length > 0 && !val.weapon.includes(item.weapon));
   });
   if (filterW.length === 0) {
     showSnackbar.warn("未找到符合条件的武器");
@@ -139,7 +148,7 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   padding-right: 8px;
   gap: 8px;
   grid-template-columns: repeat(3, 160px);
-  overflow-y: auto;
+  overflow: hidden auto;
 }
 
 .ww-detail {

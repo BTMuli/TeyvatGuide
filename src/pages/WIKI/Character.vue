@@ -77,17 +77,17 @@ onBeforeMount(() => {
 watch(
   () => resetSelect.value,
   (val) => {
-    if (val) cardsInfo.value = AppCharacterData;
+    if (val) cardsInfo.value = appCData;
   },
 );
 
 function handleSelect(val: SelectedCValue): void {
   showSelect.value = false;
   const filterC = AppCharacterData.filter((item) => {
-    if (!val.star.includes(item.star)) return false;
-    if (!val.weapon.includes(item.weapon)) return false;
-    if (!val.elements.includes(item.element)) return false;
-    return val.area.includes(item.area);
+    if (val.star.length > 0 && !val.star.includes(item.star)) return false;
+    if (val.weapon.length > 0 && !val.weapon.includes(item.weapon)) return false;
+    if (val.elements.length > 0 && !val.elements.includes(item.element)) return false;
+    return !(val.area.length > 0 && val.area.includes(item.area));
   });
   if (filterC.length === 0) {
     showSnackbar.warn("未找到符合条件的角色");
@@ -134,6 +134,7 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
 }
 
 .wc-left {
+  position: relative;
   display: flex;
   width: fit-content;
   flex-direction: column;
@@ -161,11 +162,11 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
 .wc-list {
   position: relative;
   display: grid;
+  overflow: hidden auto;
   width: 100%;
   padding-right: 8px;
   gap: 8px;
   grid-template-columns: repeat(3, 160px);
-  overflow-y: auto;
 }
 
 .wc-detail {
