@@ -1,43 +1,44 @@
 <!-- 选项组件 -->
 <template>
   <div class="uav-select-chips-box">
-    <v-chip-group :model-value="result" multiple>
-      <!-- ALL -->
-      <v-chip
-        :size="props.size"
-        :value="'__all__'"
-        class="uav-scb-all"
-        filter
-        title="全部"
-        variant="elevated"
-        @click="toggleAll()"
-      >
-        <template #filter>
+    <!-- ALL -->
+    <v-chip
+      key="all"
+      :size="props.size"
+      class="uav-scb-all"
+      title="全部"
+      variant="elevated"
+      @click.stop="toggleAll"
+    >
+      <template #prepend>
+        <div :class="{ active: isAllSelected }" class="icon-wrap">
           <v-icon color="var(--tgc-od-green)">mdi-check</v-icon>
-        </template>
-        <slot :selected="selectAll" name="all">All</slot>
-      </v-chip>
+        </div>
+      </template>
+      <div :class="{ shifted: isAllSelected }" class="all-label">
+        <slot :selected="isAllSelected" name="all">All</slot>
+      </div>
+    </v-chip>
+    <v-chip-group v-model="result" filter multiple>
       <!-- Options -->
       <v-chip
-        v-for="(item, idx) in props.items"
-        :key="idx"
+        v-for="item in props.items"
+        :key="item.value"
         :size="props.size"
-        :title="getItemTitle(item)"
-        :value="getItemValue(item)"
+        :title="item.title"
+        :value="item.value"
         class="uav-scb-item"
         filter
         variant="elevated"
-        @click="selectItem(item)"
       >
         <template #filter>
           <v-icon color="var(--tgc-od-blue)">mdi-check</v-icon>
         </template>
-        <slot :selected="result.includes(getItemValue(item))" name="item">
-          <template v-if="typeof item === 'string'">{{ item }}</template>
-          <template v-else>
+        <slot :selected="result.includes(item.value)" name="item">
+          <div class="uav-scb-inner">
             <TMiImg v-if="item.icon" :src="item.icon" alt="icon" />
             <span>{{ item.label }}</span>
-          </template>
+          </div>
         </slot>
       </v-chip>
     </v-chip-group>
@@ -46,25 +47,36 @@
 
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { computed, defineModel, defineProps, shallowRef, triggerRef, watch } from "vue";
+import { computed, defineProps, ref, watch } from "vue";
 
 export type UavSelectChipsItem = {
-  label: string;
+  /** 渲染文本 */
+  label?: string;
+  /** 渲染图标 */
   icon?: string;
-  title?: string;
+  /** 提示文本 */
+  title: string;
+  /** 选项值 */
   value: string;
 };
 type UavSelectChipsProps = {
+  /** 选中 */
+  selected: Array<string>;
   /** 选项 */
-  items: Array<string | UavSelectChipsItem>;
+  items: Array<UavSelectChipsItem>;
   /** 尺寸 */
   size?: "x-small" | "small" | "default" | "large" | "x-large" | number;
 };
+type UavSelectChipsEmits = (e: "chip-select", v: Array<string>) => void;
 
 const props = withDefaults(defineProps<UavSelectChipsProps>(), { size: "default" });
-const result = shallowRef<Array<string>>([]);
-const model = defineModel<Array<string>>({ default: [] });
-const selectAll = computed<boolean>(() => result.value.includes("__all__"));
+const emits = defineEmits<UavSelectChipsEmits>();
+
+const result = ref<Array<string>>(props.selected);
+const isAllSelected = computed<boolean>(() => {
+  if (!props.items || props.items.length === 0) return false;
+  return props.items.every((i) => result.value.includes(i.value.toString()));
+});
 const iconHeight = computed<string>(() => {
   switch (props.size) {
     case "x-small":
@@ -83,40 +95,21 @@ const iconHeight = computed<string>(() => {
 });
 
 watch(
+  () => props.selected,
+  (v) => (result.value = [...v]),
+  { deep: true },
+);
+watch(
   () => result.value,
-  () => {
-    model.value = result.value.filter((i) => i !== "__all__");
-  },
+  () => emits("chip-select", result.value),
+  { deep: true },
 );
 
 async function toggleAll(): Promise<void> {
-  if (result.value.includes("__all__")) {
+  if (isAllSelected.value) {
     result.value = [];
   } else {
-    result.value = ["__all__", ...props.items.map(getItemValue)];
-  }
-}
-
-function getItemValue(item: UavSelectChipsItem | string): string {
-  if (typeof item === "string") return item;
-  return item.value;
-}
-
-function getItemTitle(item: UavSelectChipsItem | string): string | undefined {
-  if (typeof item === "string") return item;
-  return item.title;
-}
-
-function selectItem(item: UavSelectChipsItem | string): void {
-  const itemValue = getItemValue(item);
-  if (result.value.includes(itemValue)) {
-    result.value = result.value.filter((i) => i !== "__all__" && i !== itemValue);
-  } else {
-    result.value.push(itemValue);
-    if (result.value.length === props.items.length) {
-      result.value.push("__all__");
-    }
-    triggerRef(result);
+    result.value = props.items.map((i) => i.value);
   }
 }
 </script>
@@ -133,12 +126,53 @@ function selectItem(item: UavSelectChipsItem | string): void {
 
 .uav-scb-all {
   @include github-styles.github-tag-dark-gen(#41b883);
+
+  --icon-size: 16px;
+  --icon-gap: 2px;
+
+  display: inline-flex;
+  align-items: center;
+
+  .icon-wrap {
+    display: inline-flex;
+    overflow: hidden;
+    width: 0;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0;
+    opacity: 0;
+    transition:
+      width 0.3s ease-in-out,
+      opacity 0.3s ease-in-out,
+      margin-right 0.3s ease-in-out;
+
+    &.active {
+      width: var(--icon-size);
+      margin-right: var(--icon-gap);
+      opacity: 1;
+    }
+  }
+
+  .all-label {
+    display: inline-block;
+    transform: translateX(0);
+    transition: transform var(--anim-duration) var(--anim-ease);
+    will-change: transform;
+  }
 }
 
 .uav-scb-item {
   @include github-styles.github-tag-dark-gen(#548af7);
 
   position: relative;
+}
+
+.uav-scb-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 2px;
 
   img {
     position: relative;

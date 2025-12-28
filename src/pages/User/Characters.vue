@@ -6,7 +6,7 @@
         <img alt="icon" src="/source/UI/userAvatar.webp" />
         <span>我的角色</span>
         <v-btn class="uc-top-btn" variant="elevated" @click="showSelect = true">筛选角色</v-btn>
-        <v-btn class="uc-top-btn" variant="elevated" @click="resetSelect = true">重置筛选</v-btn>
+        <v-btn class="uc-top-btn" variant="elevated" @click="resetList()">重置筛选</v-btn>
       </div>
     </template>
     <template #append>
@@ -138,15 +138,16 @@
     @to-next="handleSwitch"
     @to-avatar="selectRole"
   />
-  <TwoSelectC v-model="showSelect" v-model:reset="resetSelect" @select-c="handleSelect" />
+  <!--  <TwoSelectC v-model="showSelect" v-model:reset="resetSelect" @select-c="handleSelect" />-->
+  <UavSelect v-model:show="showSelect" :model-value="selectOpts" @select="handleSelect" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
 import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
+import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
 import recordReq from "@req/recordReq.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import useAppStore from "@store/app.js";
@@ -181,7 +182,6 @@ const showOverlay = ref<boolean>(false);
 const selectIndex = ref<number>(0);
 const showSelect = ref<boolean>(false);
 const showMode = ref<"classic" | "card" | "dev">("dev");
-const resetSelect = ref<boolean>(false);
 const uidCur = ref<string>();
 
 // 排序
@@ -192,6 +192,7 @@ const isConstUp = ref<boolean | null>(null);
 const uidList = shallowRef<Array<string>>([]);
 const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
+const selectOpts = shallowRef<UavSelectModel>({ star: [], weapon: [], area: [], element: [] });
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 const enableShare = computed<boolean>(
@@ -208,25 +209,6 @@ onMounted(async () => {
   loadData.value = false;
   await showLoading.end();
 });
-
-watch(
-  () => resetSelect.value,
-  () => {
-    if (resetSelect.value) {
-      selectedList.value = getOrderedList(roleList.value);
-      showSnackbar.success("已重置筛选条件");
-      if (!dataVal.value) return;
-      selectIndex.value = selectedList.value.indexOf(dataVal.value);
-      if (selectIndex.value === -1) {
-        dataVal.value = selectedList.value[0];
-        selectIndex.value = 0;
-      }
-      isLevelUp.value = null;
-      isFetterUp.value = null;
-      isConstUp.value = null;
-    }
-  },
-);
 
 watch(
   () => showMode.value,
@@ -305,6 +287,21 @@ function getSortDesc(value: boolean | null): string {
     default:
       return "默认";
   }
+}
+
+function resetList(): void {
+  selectedList.value = getOrderedList(roleList.value);
+  showSnackbar.success("已重置筛选条件");
+  if (!dataVal.value) return;
+  selectIndex.value = selectedList.value.indexOf(dataVal.value);
+  if (selectIndex.value === -1) {
+    dataVal.value = selectedList.value[0];
+    selectIndex.value = 0;
+  }
+  isLevelUp.value = null;
+  isFetterUp.value = null;
+  isConstUp.value = null;
+  selectOpts.value = { star: [], weapon: [], area: [], element: [] };
 }
 
 function getOrderedList(
@@ -502,13 +499,13 @@ function selectRole(role: TGApp.Sqlite.Character.TableTrans): void {
   if (!showOverlay.value) showOverlay.value = true;
 }
 
-function handleSelect(val: SelectedCValue) {
-  showSelect.value = false;
+function handleSelect(val: UavSelectModel): void {
+  selectOpts.value = val;
   const filterC = AppCharacterData.filter((avatar) => {
-    if (!val.star.includes(avatar.star)) return false;
-    if (!val.weapon.includes(avatar.weapon)) return false;
-    if (!val.elements.includes(avatar.element)) return false;
-    if (!val.area.includes(avatar.area)) return false;
+    if (val.star.length > 0 && !val.star.includes(avatar.star.toString())) return false;
+    if (val.weapon.length > 0 && !val.weapon.includes(avatar.weapon)) return false;
+    if (val.element.length > 0 && !val.element.includes(avatar.element)) return false;
+    if (val.area.length > 0 && !val.area.includes(avatar.area)) return false;
     return roleList.value.find(
       (role) =>
         role.avatar.id === avatar.id && getZhElement(role.avatar.element) === avatar.element,
