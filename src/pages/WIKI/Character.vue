@@ -87,7 +87,7 @@ function handleSelect(val: SelectedCValue): void {
     if (val.star.length > 0 && !val.star.includes(item.star)) return false;
     if (val.weapon.length > 0 && !val.weapon.includes(item.weapon)) return false;
     if (val.elements.length > 0 && !val.elements.includes(item.element)) return false;
-    return !(val.area.length > 0 && val.area.includes(item.area));
+    return !(val.area.length > 0 && !val.area.includes(item.area));
   });
   if (filterC.length === 0) {
     showSnackbar.warn("未找到符合条件的角色");
