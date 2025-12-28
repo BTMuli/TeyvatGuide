@@ -43,27 +43,55 @@
       </div>
     </template>
     <template #extension>
-      <div class="uc-select">
-        <v-select
-          v-model="showMode"
-          :hide-details="true"
-          :items="modeList"
-          class="uc-select-btn"
-          density="compact"
-          item-title="label"
-          item-value="value"
-          label="详情浮窗视图模式"
-          variant="outlined"
-        />
-        <v-select
-          v-model="uidCur"
-          :hide-details="true"
-          :items="uidList"
-          class="uc-select-btn"
-          density="compact"
-          label="当前UID"
-          variant="outlined"
-        />
+      <div class="uc-extension">
+        <div class="uc-select">
+          <v-select
+            v-model="showMode"
+            :hide-details="true"
+            :items="modeList"
+            class="uc-select-btn"
+            density="compact"
+            item-title="label"
+            item-value="value"
+            label="详情浮窗视图模式"
+            variant="outlined"
+          />
+          <v-select
+            v-model="uidCur"
+            :hide-details="true"
+            :items="uidList"
+            class="uc-select-btn"
+            density="compact"
+            label="当前UID"
+            variant="outlined"
+          />
+        </div>
+        <div class="uc-sort">
+          <v-btn
+            class="uc-top-btn"
+            variant="elevated"
+            @click="() => (isLevelUp = toggleSort(isLevelUp))"
+          >
+            <span>等级</span>
+            <v-icon :title="getSortDesc(isLevelUp)">{{ getSortIcon(isLevelUp) }}</v-icon>
+          </v-btn>
+          <v-btn
+            class="uc-top-btn"
+            variant="elevated"
+            @click="() => (isFetterUp = toggleSort(isFetterUp))"
+          >
+            <span>好感</span>
+            <v-icon :title="getSortDesc(isFetterUp)">{{ getSortIcon(isFetterUp) }}</v-icon>
+          </v-btn>
+          <v-btn
+            class="uc-top-btn"
+            variant="elevated"
+            @click="() => (isConstUp = toggleSort(isConstUp))"
+          >
+            <span>命座</span>
+            <v-icon :title="getSortDesc(isConstUp)">{{ getSortIcon(isConstUp) }}</v-icon>
+          </v-btn>
+        </div>
       </div>
     </template>
   </v-app-bar>
@@ -126,7 +154,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
 
@@ -153,6 +181,12 @@ const showSelect = ref<boolean>(false);
 const showMode = ref<"classic" | "card" | "dev">("dev");
 const resetSelect = ref<boolean>(false);
 const uidCur = ref<string>();
+
+// 排序
+const isLevelUp = ref<boolean | null>(null);
+const isFetterUp = ref<boolean | null>(null);
+const isConstUp = ref<boolean | null>(null);
+
 const uidList = shallowRef<Array<string>>([]);
 const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
@@ -184,9 +218,13 @@ watch(
         dataVal.value = selectedList.value[0];
         selectIndex.value = 0;
       }
+      isLevelUp.value = null;
+      isFetterUp.value = null;
+      isConstUp.value = null;
     }
   },
 );
+
 watch(
   () => showMode.value,
   () => {
@@ -204,6 +242,67 @@ watch(
   },
 );
 watch(() => uidCur.value, loadRole);
+watch(
+  () => [isLevelUp.value, isLevelUp.value, isConstUp.value],
+  async () => {
+    let tmp = selectedList.value;
+    if (isLevelUp.value === true) {
+      tmp = tmp.sort((a, b) => b.avatar.level - a.avatar.level);
+    } else if (isLevelUp.value === false) {
+      tmp = tmp.sort((a, b) => a.avatar.level - b.avatar.level);
+    }
+    if (isFetterUp.value === true) {
+      tmp = tmp.sort((a, b) => b.avatar.fetter - a.avatar.fetter);
+    } else if (isFetterUp.value === false) {
+      tmp = tmp.sort((a, b) => a.avatar.fetter - b.avatar.fetter);
+    }
+    if (isConstUp.value === true) {
+      tmp = tmp.sort(
+        (a, b) => b.avatar.actived_constellation_num - a.avatar.actived_constellation_num,
+      );
+    } else if (isConstUp.value === false) {
+      tmp = tmp.sort(
+        (a, b) => a.avatar.actived_constellation_num - b.avatar.actived_constellation_num,
+      );
+    }
+    selectedList.value = tmp;
+    triggerRef(selectedList);
+    await nextTick();
+  },
+);
+
+function toggleSort(value: boolean | null): boolean {
+  switch (value) {
+    case true:
+      return false;
+    case false:
+      return true;
+    case null:
+      return true;
+  }
+}
+
+function getSortIcon(value: boolean | null): string {
+  switch (value) {
+    case true:
+      return "mdi-arrow-up";
+    case false:
+      return "mdi-arrow-down";
+    default:
+      return "mdi-sort";
+  }
+}
+
+function getSortDesc(value: boolean | null): string {
+  switch (value) {
+    case true:
+      return "升序";
+    case false:
+      return "降序";
+    default:
+      return "默认";
+  }
+}
 
 function getOrderedList(
   data: Array<TGApp.Sqlite.Character.TableTrans>,
@@ -455,12 +554,22 @@ function handleSwitch(next: boolean): void {
   }
 }
 
+.uc-extension {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 16px;
+  margin-bottom: 4px;
+  margin-left: 16px;
+}
+
 .uc-select {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: 4px;
-  margin-left: 16px;
+  column-gap: 8px;
 }
 
 .uc-select-btn {
@@ -471,6 +580,14 @@ function handleSwitch(next: boolean): void {
   align-items: center;
   justify-content: flex-start;
   font-size: 14px;
+}
+
+.uc-sort {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
 }
 
 .uc-box {
