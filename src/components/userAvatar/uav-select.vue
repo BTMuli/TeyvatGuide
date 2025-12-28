@@ -5,45 +5,25 @@
       <div class="uav-select-item">
         <div class="uav-select-title">星级</div>
         <div class="uav-select-props">
-          <UavSelectChips
-            :items="starOpts"
-            :selected="model.star"
-            size="small"
-            @chipSelect="handleStarSelect"
-          />
+          <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small" />
         </div>
       </div>
       <div class="uav-select-item">
         <div class="uav-select-title">武器</div>
         <div class="uav-select-props">
-          <UavSelectChips
-            :items="weaponOpts"
-            :selected="model.weapon"
-            size="small"
-            @chipSelect="handleWeaponSelect"
-          />
+          <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small" />
         </div>
       </div>
       <div class="uav-select-item">
         <div class="uav-select-title">元素</div>
         <div class="uav-select-props">
-          <UavSelectChips
-            :items="elementOpts"
-            :selected="model.element"
-            size="small"
-            @chipSelect="handleElementSelect"
-          />
+          <UavSelectChips v-model:selected="elementSelected" :items="elementOpts" size="small" />
         </div>
       </div>
       <div class="uav-select-item">
         <div class="uav-select-title">地区</div>
         <div class="uav-select-props">
-          <UavSelectChips
-            :items="areaOpts"
-            :selected="model.area"
-            size="small"
-            @chipSelect="handleAreaSelect"
-          />
+          <UavSelectChips v-model:selected="areaSelected" :items="areaOpts" size="small" />
         </div>
       </div>
       <div class="uav-select-acts">
@@ -59,7 +39,7 @@
 </template>
 <script lang="ts" setup>
 import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-select-chips.vue";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 /** 返回数据 */
 export type UavSelectModel = {
@@ -113,40 +93,31 @@ const model = defineModel<UavSelectModel>({
 });
 const visible = defineModel<boolean>("show");
 
+watch(
+  () => visible.value,
+  () => {
+    if (visible.value) {
+      starSelected.value = model.value.star;
+      weaponSelected.value = model.value.weapon;
+      areaSelected.value = model.value.area;
+      elementSelected.value = model.value.element;
+    }
+  },
+);
+
 function onCancel(): void {
   visible.value = false;
 }
 
-async function onConfirm(): Promise<void> {
+function onConfirm(): void {
   model.value = {
     star: starSelected.value,
     weapon: weaponSelected.value,
     element: elementSelected.value,
     area: areaSelected.value,
   };
-  // await nextTick();
   emits("select", model.value);
   visible.value = false;
-}
-
-function handleStarSelect(e: Array<string>): void {
-  console.log("starSelect", e);
-  starSelected.value = e;
-}
-
-function handleWeaponSelect(e: Array<string>): void {
-  console.log("weaponSelect", e);
-  weaponSelected.value = e;
-}
-
-function handleElementSelect(e: Array<string>): void {
-  console.log("elementSelect", e);
-  elementSelected.value = e;
-}
-
-function handleAreaSelect(e: Array<string>): void {
-  console.log("areaSelect", e);
-  areaSelected.value = e;
 }
 </script>
 <style lang="scss" scoped>

@@ -198,7 +198,7 @@ const isConstUp = ref<boolean | null>(null);
 const uidList = shallowRef<Array<string>>([]);
 const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
-const selectOpts = shallowRef<UavSelectModel>({ star: [], weapon: [], area: [], element: [] });
+const selectOpts = ref<UavSelectModel>({ star: [], weapon: [], area: [], element: [] });
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 const enableShare = computed<boolean>(
@@ -275,6 +275,10 @@ function getSortDesc(value: boolean | null): string {
 }
 
 function resetList(): void {
+  isLevelUp.value = null;
+  isFetterUp.value = null;
+  isConstUp.value = null;
+  selectOpts.value = { star: [], weapon: [], area: [], element: [] };
   selectedList.value = getOrderedList(roleList.value);
   showSnackbar.success("已重置筛选条件");
   if (!dataVal.value) return;
@@ -283,10 +287,6 @@ function resetList(): void {
     dataVal.value = selectedList.value[0];
     selectIndex.value = 0;
   }
-  isLevelUp.value = null;
-  isFetterUp.value = null;
-  isConstUp.value = null;
-  selectOpts.value = { star: [], weapon: [], area: [], element: [] };
 }
 
 function getOrderedList(

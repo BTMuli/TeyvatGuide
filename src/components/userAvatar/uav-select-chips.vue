@@ -19,11 +19,12 @@
         <slot :selected="isAllSelected" name="all">All</slot>
       </div>
     </v-chip>
-    <v-chip-group v-model="result" filter multiple>
+    <v-chip-group v-model="selected" filter multiple>
       <!-- Options -->
       <v-chip
         v-for="item in props.items"
         :key="item.value"
+        :class="selected.includes(item.value) ? 'selected' : ''"
         :size="props.size"
         :title="item.title"
         :value="item.value"
@@ -32,14 +33,12 @@
         variant="elevated"
       >
         <template #filter>
-          <v-icon color="var(--tgc-od-blue)">mdi-check</v-icon>
+          <v-icon color="var(--tgc-od-red)">mdi-check</v-icon>
         </template>
-        <slot :selected="result.includes(item.value)" name="item">
-          <div class="uav-scb-inner">
-            <TMiImg v-if="item.icon" :src="item.icon" alt="icon" />
-            <span>{{ item.label }}</span>
-          </div>
-        </slot>
+        <div class="uav-scb-inner">
+          <TMiImg v-if="item.icon" :src="item.icon" alt="icon" />
+          <span>{{ item.label }}</span>
+        </div>
       </v-chip>
     </v-chip-group>
   </div>
@@ -47,7 +46,7 @@
 
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { computed, defineProps, ref, watch } from "vue";
+import { computed, defineProps } from "vue";
 
 export type UavSelectChipsItem = {
   /** 渲染文本 */
@@ -60,22 +59,18 @@ export type UavSelectChipsItem = {
   value: string;
 };
 type UavSelectChipsProps = {
-  /** 选中 */
-  selected: Array<string>;
   /** 选项 */
   items: Array<UavSelectChipsItem>;
   /** 尺寸 */
   size?: "x-small" | "small" | "default" | "large" | "x-large" | number;
 };
-type UavSelectChipsEmits = (e: "chip-select", v: Array<string>) => void;
 
 const props = withDefaults(defineProps<UavSelectChipsProps>(), { size: "default" });
-const emits = defineEmits<UavSelectChipsEmits>();
 
-const result = ref<Array<string>>(props.selected);
+const selected = defineModel<Array<string>>("selected", { default: [] });
 const isAllSelected = computed<boolean>(() => {
   if (!props.items || props.items.length === 0) return false;
-  return props.items.every((i) => result.value.includes(i.value.toString()));
+  return props.items.every((i) => selected.value.includes(i.value.toString()));
 });
 const iconHeight = computed<string>(() => {
   switch (props.size) {
@@ -94,22 +89,11 @@ const iconHeight = computed<string>(() => {
   }
 });
 
-watch(
-  () => props.selected,
-  (v) => (result.value = [...v]),
-  { deep: true },
-);
-watch(
-  () => result.value,
-  () => emits("chip-select", result.value),
-  { deep: true },
-);
-
 async function toggleAll(): Promise<void> {
   if (isAllSelected.value) {
-    result.value = [];
+    selected.value = [];
   } else {
-    result.value = props.items.map((i) => i.value);
+    selected.value = props.items.map((i) => i.value);
   }
 }
 </script>
@@ -165,6 +149,10 @@ async function toggleAll(): Promise<void> {
   @include github-styles.github-tag-dark-gen(#548af7);
 
   position: relative;
+
+  &.selected {
+    @include github-styles.github-tag-dark-gen(#fb7299);
+  }
 }
 
 .uav-scb-inner {
