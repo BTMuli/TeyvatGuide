@@ -145,7 +145,6 @@
     @to-next="handleSwitch"
     @to-avatar="selectRole"
   />
-  <!--  <TwoSelectC v-model="showSelect" v-model:reset="resetSelect" @select-c="handleSelect" />-->
   <UavSelect v-model:show="showSelect" :model-value="selectOpts" @select="handleSelect" />
 </template>
 <script lang="ts" setup>
@@ -164,7 +163,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
 
@@ -236,30 +235,9 @@ watch(
 watch(() => uidCur.value, loadRole);
 watch(
   () => [isLevelUp.value, isFetterUp.value, isConstUp.value],
-  async () => {
-    let tmp = selectedList.value;
-    if (isLevelUp.value === true) {
-      tmp = tmp.sort((a, b) => a.avatar.level - b.avatar.level);
-    } else if (isLevelUp.value === false) {
-      tmp = tmp.sort((a, b) => b.avatar.level - a.avatar.level);
-    }
-    if (isFetterUp.value === true) {
-      tmp = tmp.sort((a, b) => a.avatar.fetter - b.avatar.fetter);
-    } else if (isFetterUp.value === false) {
-      tmp = tmp.sort((a, b) => b.avatar.fetter - a.avatar.fetter);
-    }
-    if (isConstUp.value === true) {
-      tmp = tmp.sort(
-        (a, b) => a.avatar.actived_constellation_num - b.avatar.actived_constellation_num,
-      );
-    } else if (isConstUp.value === false) {
-      tmp = tmp.sort(
-        (a, b) => b.avatar.actived_constellation_num - a.avatar.actived_constellation_num,
-      );
-    }
-    selectedList.value = tmp;
+  () => {
+    selectedList.value = getOrderedList(selectedList.value);
     triggerRef(selectedList);
-    await nextTick();
   },
 );
 
@@ -315,6 +293,27 @@ function getOrderedList(
   data: Array<TGApp.Sqlite.Character.TableTrans>,
 ): Array<TGApp.Sqlite.Character.TableTrans> {
   return data.sort((a, b) => {
+    if (a.avatar.actived_constellation_num !== b.avatar.actived_constellation_num) {
+      if (isConstUp.value === true) {
+        return a.avatar.actived_constellation_num - b.avatar.actived_constellation_num;
+      } else if (isConstUp.value === false) {
+        return b.avatar.actived_constellation_num - a.avatar.actived_constellation_num;
+      }
+    }
+    if (a.avatar.fetter !== b.avatar.fetter) {
+      if (isFetterUp.value === true) {
+        return a.avatar.fetter - b.avatar.fetter;
+      } else if (isConstUp.value === false) {
+        return b.avatar.fetter - a.avatar.fetter;
+      }
+    }
+    if (a.avatar.level !== b.avatar.level) {
+      if (isLevelUp.value === true) {
+        return a.avatar.level - b.avatar.level;
+      } else if (isLevelUp.value === false) {
+        return b.avatar.level - a.avatar.level;
+      }
+    }
     if (a.avatar.rarity !== b.avatar.rarity) return b.avatar.rarity - a.avatar.rarity;
     if (a.avatar.element === b.avatar.element) return a.cid - b.cid;
     return a.avatar.element.localeCompare(b.avatar.element);
@@ -524,7 +523,8 @@ function handleSelect(val: UavSelectModel): void {
   }
   showSnackbar.success(`筛选出符合条件的角色 ${filterC.length} 个`);
   const selectedId = filterC.map((item) => item.id);
-  selectedList.value = roleList.value.filter((role) => selectedId.includes(role.cid));
+  const tmpSelect = roleList.value.filter((role) => selectedId.includes(role.cid));
+  selectedList.value = getOrderedList(tmpSelect);
   if (!dataVal.value) return;
   if (!selectedList.value.includes(dataVal.value)) {
     dataVal.value = selectedList.value[0];
