@@ -1,3 +1,4 @@
+<!-- 角色卡片组件 -->
 <template>
   <div class="tua-ab-box" title="点击查看详情">
     <div class="tua-ab-top">
@@ -18,35 +19,35 @@
       </div>
     </div>
     <div class="tua-abl-mid">
-      <div class="tua-abl-bg" :class="{ ori: isFetterMax }">
+      <div :class="{ ori: isFetterMax }" class="tua-abl-bg">
         <img :src="nameCard" alt="nameCard" />
       </div>
       <div class="tua-abl-skills">
         <div
           v-for="skill in skills"
           :key="skill.skill_id"
-          class="tua-abl-skill"
           :title="`${skill.name} Lv.${skill.level}`"
+          class="tua-abl-skill"
         >
           <img :src="skill.icon" alt="skill" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
       <div class="tua-abl-bottom">
-        <div class="tua-abl-fetter" :title="`好感度：${props.modelValue.avatar.fetter}`">
-          <img src="/icon/material/105.webp" alt="fetter" />
+        <div :title="`好感度：${props.modelValue.avatar.fetter}`" class="tua-abl-fetter">
+          <img alt="fetter" src="/icon/material/105.webp" />
           <span>{{ props.modelValue.avatar.fetter }}</span>
         </div>
-        <div class="tua-abl-other">
-          <span v-if="!isFetterMax" title="好感度未满">
-            <v-icon>mdi-lock-outline</v-icon>
-          </span>
+        <div class="tua-abl-costume">
           <span
             v-if="props.modelValue.costumes.length > 0"
             :title="`衣装: ${props.modelValue.costumes.map((i) => i.name).join(', ')}`"
           >
-            <v-icon>mdi-tshirt-crew-outline</v-icon>
+            <v-icon size="small">mdi-tshirt-crew</v-icon>
           </span>
+        </div>
+        <div class="tua-abl-level">
+          <span>Lv.{{ props.modelValue.avatar.level }}</span>
         </div>
       </div>
     </div>
@@ -194,7 +195,7 @@ function getWeaponTitle(): string {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 4px;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
@@ -202,6 +203,7 @@ function getWeaponTitle(): string {
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);
+  column-gap: 4px;
   font-family: var(--font-title);
 }
 
@@ -216,6 +218,15 @@ function getWeaponTitle(): string {
     height: 20px;
     object-fit: contain;
   }
+}
+
+.tua-abl-costume {
+  margin-right: auto;
+  font-size: 14px;
+}
+
+.tua-abl-level {
+  font-size: 12px;
 }
 
 .tua-abl-mid {
