@@ -507,24 +507,20 @@ function selectRole(role: TGApp.Sqlite.Character.TableTrans): void {
 
 function handleSelect(val: UavSelectModel): void {
   selectOpts.value = val;
-  const filterC = AppCharacterData.filter((avatar) => {
-    if (val.star.length > 0 && !val.star.includes(avatar.star.toString())) return false;
-    if (val.weapon.length > 0 && !val.weapon.includes(avatar.weapon)) return false;
-    if (val.element.length > 0 && !val.element.includes(avatar.element)) return false;
-    if (val.area.length > 0 && !val.area.includes(avatar.area)) return false;
-    return roleList.value.find(
-      (role) =>
-        role.avatar.id === avatar.id && getZhElement(role.avatar.element) === avatar.element,
-    );
+  const filterC = roleList.value.filter((role) => {
+    const info = AppCharacterData.find((i) => i.id === role.cid);
+    if (val.star.length > 0 && !val.star.includes(role.avatar.rarity.toString())) return false;
+    if (val.weapon.length > 0 && !val.weapon.includes(role.weapon.type_name)) return false;
+    if (val.element.length > 0 && !val.element.includes(getZhElement(role.avatar.element)))
+      return false;
+    return !(val.area.length > 0 && !val.area.includes(info?.area ?? ""));
   });
   if (filterC.length === 0) {
     showSnackbar.warn("未找到符合条件的角色");
     return;
   }
   showSnackbar.success(`筛选出符合条件的角色 ${filterC.length} 个`);
-  const selectedId = filterC.map((item) => item.id);
-  const tmpSelect = roleList.value.filter((role) => selectedId.includes(role.cid));
-  selectedList.value = getOrderedList(tmpSelect);
+  selectedList.value = getOrderedList(filterC);
   if (!dataVal.value) return;
   if (!selectedList.value.includes(dataVal.value)) {
     dataVal.value = selectedList.value[0];
