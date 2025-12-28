@@ -2,12 +2,9 @@
 <template>
   <div class="ug-his-cc">
     <!-- 卡池封面 -->
-    <img
-      :src="props.pool.banner"
-      alt="banner"
-      class="ug-hisc-banner"
-      @click="createPost(pool.postId)"
-    />
+    <div class="ug-hisc-banner">
+      <TMiImg :ori="true" :src="props.pool.banner" alt="banner" @click="createPost(pool.postId)" />
+    </div>
     <!-- 卡池信息 -->
     <div class="ug-hisc-info">
       <div class="ug-hisci-title">
@@ -52,6 +49,7 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
@@ -278,11 +276,22 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
 .ug-hisc-banner {
   @include github-styles.github-card-shadow;
 
+  display: flex;
+  min-width: 550px;
   height: 270px;
   flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
+  background: var(--box-bg-2);
   cursor: pointer;
   transition: 0.5s ease-in-out;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+  }
 
   &:hover {
     scale: 0.95;
@@ -325,9 +334,14 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   font-size: 16px;
 }
 
+.ug-hisci-time {
+  position: relative;
+  font-size: 12px;
+}
+
 .ug-hisci-sub {
   font-family: var(--font-title);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .ug-hisci-up {
