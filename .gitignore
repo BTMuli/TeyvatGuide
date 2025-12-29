@@ -8,3 +8,6 @@ dist
 .env.sh
 # vue-tsc --noEmit
 *.tsbuildinfo
+
+# Sentry Config File
+.env.sentry-build-plugin

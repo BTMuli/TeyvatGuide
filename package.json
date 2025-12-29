@@ -71,6 +71,8 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
+    "@sentry/vite-plugin": "^4.6.1",
+    "@sentry/vue": "^10.32.1",
     "@tauri-apps/api": "^2.9.1",
     "@tauri-apps/plugin-deep-link": "^2.4.5",
     "@tauri-apps/plugin-dialog": "^2.4.2",

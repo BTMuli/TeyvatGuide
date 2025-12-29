@@ -1,27 +1,31 @@
 <template>
   <div class="tab-box">
-    <img class="tab-icon" src="/icon.webp" alt="App" />
+    <img alt="App" class="tab-icon" src="/icon.webp" />
     <div class="tab-info click" title="点击前往 Github Release" @click="toRelease()">
       TeyvatGuide Beta
     </div>
     <div class="tab-info">v{{ versionApp }}.{{ buildTime === "" ? "Dev" : buildTime }}</div>
     <div class="tab-links">
-      <div class="tab-link" @click="toGroup()" title="点击加入反馈群">
-        <img src="/platforms/other/qq.webp" alt="qq" />
+      <div class="tab-link" title="反馈BUG" @click="toReport()">
+        <v-icon color="white">mdi-contactless-payment-circle-outline</v-icon>
       </div>
-      <div class="tab-link" @click="toGithub()" title="点击查看仓库">
-        <img src="/platforms/other/github.webp" alt="github" />
+      <div class="tab-link" title="点击加入反馈群" @click="toGroup()">
+        <img alt="qq" src="/platforms/other/qq.webp" />
       </div>
-      <div class="tab-link" @click="toStore()" title="点击查看商店页面">
-        <img src="/platforms/other/microsoft-store.webp" alt="store" />
+      <div class="tab-link" title="点击查看仓库" @click="toGithub()">
+        <img alt="github" src="/platforms/other/github.webp" />
       </div>
-      <div class="tab-link" @click="toSite()" title="点击查看更新说明">
+      <div class="tab-link" title="点击查看商店页面" @click="toStore()">
+        <img alt="store" src="/platforms/other/microsoft-store.webp" />
+      </div>
+      <div class="tab-link" title="点击查看更新说明" @click="toSite()">
         <v-icon color="white">mdi-update</v-icon>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import * as Sentry from "@sentry/vue";
 import useAppStore from "@store/app.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -32,6 +36,11 @@ const { buildTime } = storeToRefs(useAppStore());
 const versionApp = ref<string>();
 
 onMounted(async () => (versionApp.value = await app.getVersion()));
+
+async function toReport(): Promise<void> {
+  const eventId = Sentry.captureMessage("设置页反馈", "info");
+  Sentry.showReportDialog({ eventId: eventId });
+}
 
 async function toRelease(): Promise<void> {
   await openUrl("https://github.com/BTMuli/TeyvatGuide/releases/latest");

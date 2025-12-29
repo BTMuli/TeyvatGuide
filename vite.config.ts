@@ -1,21 +1,38 @@
 /**
  * vite 配置文件
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import vue from "@vitejs/plugin-vue";
 import postcssPresetEnv from "postcss-preset-env";
 import { defineConfig } from "vite";
 import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
 
+import pkgJson from "./package.json" with { type: "json" };
 import buildTimePlugin from "./src/utils/TGBuild.js";
 
 const host = process.env.TAURI_DEV_HOST;
+const commitHash = (process.env.APP_VERSION || "").slice(0, 7);
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vuetify(), buildTimePlugin(), VueDevtools()],
+  plugins: [
+    vue(),
+    vuetify(),
+    buildTimePlugin(),
+    VueDevtools(),
+    sentryVitePlugin({
+      org: "teyvat-guide",
+      project: "teyvat-guide",
+      authToken: process.env.SENTRY_AUTH_TOKEN ?? "",
+      release: {
+        name: `TeyvatGuide@${pkgJson.version}_${commitHash}`,
+        setCommits: { auto: true },
+      },
+    }),
+  ],
   resolve: {
     alias: {
       "@/": "/src/",
@@ -40,7 +57,10 @@ export default defineConfig({
     hmr: host ? { protocol: "ws", host, port: 4001 } : undefined,
     watch: { ignored: ["**/src-tauri/**"] },
   },
-  build: { chunkSizeWarningLimit: 8192 },
+  build: {
+    chunkSizeWarningLimit: 8192,
+    sourcemap: true,
+  },
   css: {
     postcss: { plugins: [postcssPresetEnv({ stage: 1, features: { "color-function": true } })] },
   },

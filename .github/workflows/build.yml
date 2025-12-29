@@ -27,6 +27,9 @@ jobs:
             args: "--target aarch64-apple-darwin"
             target: "macos-arm"
     runs-on: ${{ matrix.settings.platform }}
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      APP_VERSION: ${{ github.sha }}
 
     steps:
       - name: Checkout
