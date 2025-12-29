@@ -14,7 +14,7 @@ import pkgJson from "./package.json" with { type: "json" };
 import buildTimePlugin from "./src/utils/TGBuild.js";
 
 const host = process.env.TAURI_DEV_HOST;
-const commitHash = (process.env.APP_VERSION || "").slice(0, 7);
+const commitHash = (process.env.APP_VERSION || "test").slice(0, 7);
 
 // https://vitejs.dev/config/
 export default defineConfig({
