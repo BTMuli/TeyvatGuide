@@ -1,7 +1,17 @@
-name: Build Debug for Mac
+name: Test Build
 on:
   workflow_dispatch:
     inputs:
+      build-mac:
+        description: "Build for Mac"
+        required: true
+        default: true
+        type: boolean
+      build-win:
+        description: "Build for Win"
+        required: true
+        default: false
+        type: boolean
       build-debug:
         description: "Build debug version"
         required: true
@@ -13,7 +23,8 @@ on:
         default: false
         type: boolean
 jobs:
-  build-debug-mac:
+  build-mac:
+    if: inputs.build-mac
     permissions:
       contents: write
     strategy:
@@ -129,3 +140,81 @@ jobs:
         with:
           name: release-macos-arm
           path: TeyvatGuide_${{ env.COMMIT_HASH }}_arm-release.dmg
+
+  build-win:
+    if: inputs.build-win
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    env:
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      COMMIT_HASH: ${{ github.sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Add Github RSA
+        run: |
+          echo "${{ secrets.KNOWN_GITHUB_RSA }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+      - name: Test SSH connection
+        run: ssh -T git@github.com || true
+
+      - name: Rust setup
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Add Offset Conf
+        run: echo '${{ secrets.YAE_CONF }}' | jq -c . > ./src-tauri/lib/conf.json
+
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 24.8.0
+      - name: setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.23.0
+      - name: Install frontend dependencies
+        run: pnpm install
+
+      # Build Debug
+      - name: Build debug app
+        if: github.event.inputs.build-debug == 'true'
+        uses: tauri-apps/tauri-action@dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --debug
+      - name: Move Debug
+        if: github.event.inputs.build-debug == 'true'
+        run: mv src-tauri/target/debug/bundle/msi/*.msi TeyvatGuide_${{ env.COMMIT_HASH }}_win-debug.msi
+      - name: Upload Debug
+        if: github.event.inputs.build-debug == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-win
+          path: TeyvatGuide_${{ env.COMMIT_HASH }}_win-debug.msi
+      # Build Release
+      - name: Build app
+        if: github.event.inputs.build-release == 'true'
+        uses: tauri-apps/tauri-action@dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Move Release
+        if: github.event.inputs.build-release == 'true'
+        run: mv src-tauri/target/release/bundle/msi/*.msi TeyvatGuide_${{ env.COMMIT_HASH }}_win-release.msi
+      - name: Upload Release
+        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-release
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-win
+          path: TeyvatGuide_${{ env.COMMIT_HASH }}_win-release.msi
