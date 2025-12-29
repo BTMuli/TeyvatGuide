@@ -97,7 +97,7 @@ jobs:
           prerelease: false
 
       - name: Upload Sentry Pdb
-        if: matrix.settings.target == windows
+        if: matrix.settings.target == 'windows'
         run: |
           echo "Uploading release: $SENTRY_RELEASE"
           sentry-cli releases new "$SENTRY_RELEASE"

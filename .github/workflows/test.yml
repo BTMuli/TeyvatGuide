@@ -221,7 +221,7 @@ jobs:
           name: release-win
           path: TeyvatGuide_${{ env.COMMIT_HASH }}_win-release.msi
       - name: Upload Sentry Pdb
-        if: matrix.settings.target == windows
+        if: matrix.settings.target == 'windows'
         run: |
           echo "Uploading release: $SENTRY_RELEASE"
           sentry-cli releases new "$SENTRY_RELEASE"
