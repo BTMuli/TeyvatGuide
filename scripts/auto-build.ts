@@ -58,7 +58,7 @@ const pdbGlob = "src-tauri/target/release/TeyvatGuide.pdb";
 try {
   console.log(`📦 Uploading PDBs from ${pdbGlob}...`);
   execSync(`sentry-cli releases new "${release}"`, { stdio: "inherit" });
-  execSync(`sentry-cli upload-dif ${pdbGlob}`, { stdio: "inherit" });
+  execSync(`sentry-cli debug-files upload --include-sources ${pdbGlob}`, { stdio: "inherit" });
   execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
   console.log("✅ PDB upload complete!");
 } catch (err) {
