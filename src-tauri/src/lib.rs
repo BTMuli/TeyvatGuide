@@ -88,8 +88,8 @@ pub fn run() {
       tray::create_tray(_app.handle())
         .expect("Failed to initialize system tray icon. Please check if the tray icon file exists and the system supports tray icons.");
       let _window = _app.get_webview_window("TeyvatGuide");
-      #[cfg(debug_assertions)]
       plugins::text_scale::init(_app.handle().clone());
+      #[cfg(debug_assertions)]
       if _window.is_some() {
         _window.unwrap().open_devtools();
       }

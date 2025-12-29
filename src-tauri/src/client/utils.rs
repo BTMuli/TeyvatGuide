@@ -17,7 +17,7 @@ pub fn get_window_size2(monitor: Monitor, width: f64, height: f64) -> (f64, f64)
   let monitor_scale = monitor.scale_factor();
   let width_scale = monitor_width / 1920.0;
   let height_scale = monitor_height / 1080.0;
-  let mut text_scale = utils::read_text_scale_factor().unwrap_or(1.0);
+  let text_scale = utils::read_text_scale_factor().unwrap_or(1.0);
   let mut get_width: f64 = 0.0;
   let mut get_height: f64 = 0.0;
   // 忽略未使用
