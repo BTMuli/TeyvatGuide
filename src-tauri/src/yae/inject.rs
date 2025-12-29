@@ -2,10 +2,8 @@
 //! @since Beta v0.9.1
 #![cfg(target_os = "windows")]
 
-use std::ffi::OsStr;
-use std::iter::once;
-use std::os::windows::ffi::OsStrExt;
 use std::ptr;
+use widestring::U16CString;
 use windows_sys::Win32::Foundation::{CloseHandle, FreeLibrary, HANDLE, INVALID_HANDLE_VALUE};
 use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
@@ -24,15 +22,10 @@ use windows_sys::Win32::System::Threading::{
   STARTUPINFOW,
 };
 
-/// 转为宽字符串
-pub fn to_wide_string(s: &str) -> Vec<u16> {
-  OsStr::new(s).encode_wide().chain(once(0)).collect()
-}
-
 /// 创建命名管道
 pub fn create_named_pipe(pipe_name: &str) -> HANDLE {
   let full_pipe_name = format!(r"\\.\pipe\{}", pipe_name);
-  let wide: Vec<u16> = to_wide_string(&full_pipe_name);
+  let wide = U16CString::from_str(&full_pipe_name).expect("invalid pipe name");
 
   unsafe {
     let handle = CreateNamedPipeW(
@@ -52,46 +45,52 @@ pub fn create_named_pipe(pipe_name: &str) -> HANDLE {
   }
 }
 
-/// 启动目标进程，附加cwd
+/// 启动目标进程，附加 cwd 或 ticket
 pub fn spawn_process(path: &str, ticket: Option<String>) -> PROCESS_INFORMATION {
-  let wide_path: Vec<u16> = to_wide_string(path); // 如果有 ticket，构造命令行
-  let mut wide_cmd: Option<Vec<u16>> = None;
-  if let Some(ref t) = ticket {
+  let wide_path = U16CString::from_str(path).expect("invalid path");
+
+  let wide_cmd = ticket.as_ref().map(|t| {
     let cmdline = format!("{} login_auth_ticket={}", path, t);
-    wide_cmd = Some(to_wide_string(&cmdline));
-  } // 如果没有 ticket，使用 cwd
-  let wide_cwd: Option<Vec<u16>> = if ticket.is_none() {
-    let cwd = std::path::Path::new(path).parent().unwrap().to_str().unwrap();
-    Some(to_wide_string(cwd))
+    U16CString::from_str(&cmdline).expect("invalid cmdline")
+  });
+
+  let wide_cwd: Option<U16CString> = if ticket.is_none() {
+    std::path::Path::new(path)
+      .parent()
+      .and_then(|p| Some(U16CString::from_os_str(p.as_os_str()).unwrap()))
   } else {
     None
   };
+
   unsafe {
     let mut si: STARTUPINFOW = std::mem::zeroed();
     si.cb = std::mem::size_of::<STARTUPINFOW>() as u32;
     let mut pi: PROCESS_INFORMATION = std::mem::zeroed();
+
     let success = CreateProcessW(
       wide_path.as_ptr(),
-      wide_cmd.as_mut().map(|v| v.as_mut_ptr()).unwrap_or(ptr::null_mut()), // 有 ticket 时传命令行
+      wide_cmd.as_ref().map(|s| s.as_ptr() as *mut u16).unwrap_or(ptr::null_mut()),
       ptr::null_mut(),
       ptr::null_mut(),
       0,
       0,
       ptr::null_mut(),
-      wide_cwd.as_ref().map(|v| v.as_ptr()).unwrap_or(ptr::null()), // 无 ticket 时传 cwd
+      wide_cwd.as_ref().map(|s: &widestring::U16CString| s.as_ptr()).unwrap_or(ptr::null()),
       &mut si,
       &mut pi,
     );
+
     if success == 0 {
       panic!("CreateProcessW failed");
     }
+
     pi
   }
 }
 
 /// 注入 DLL
 pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
-  let dll_utf16: Vec<u16> = to_wide_string(dll_path);
+  let dll_utf16 = U16CString::from_str(dll_path).expect("invalid dll path");
   let size = dll_utf16.len() * 2;
 
   unsafe {
@@ -107,7 +106,7 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
     }
 
     let k32 = GetModuleHandleA(b"kernel32.dll\0".as_ptr());
-    if k32 == std::ptr::null_mut() {
+    if k32.is_null() {
       panic!("GetModuleHandleA failed");
     }
 
@@ -164,33 +163,32 @@ pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
 
 /// 执行 YaeMain
 pub fn call_yaemain(pi: &PROCESS_INFORMATION, base: usize, dll_path: &str) {
-  let dll_path_wide: Vec<u16> = to_wide_string(dll_path);
+  let dll_path_wide = U16CString::from_str(dll_path).expect("invalid dll path");
+
   unsafe {
     let local =
-      LoadLibraryExW(dll_path_wide.as_ptr(), std::ptr::null_mut(), DONT_RESOLVE_DLL_REFERENCES);
-    if local == std::ptr::null_mut() {
+      LoadLibraryExW(dll_path_wide.as_ptr(), ptr::null_mut(), DONT_RESOLVE_DLL_REFERENCES);
+    if local.is_null() {
       panic!("LoadLibraryExW failed");
     }
 
     let proc = GetProcAddress(local, b"YaeMain\0".as_ptr()).expect("无法找到 YaeMain");
 
-    // Option<unsafe extern "system" fn() -> isize>
-    let proc_addr = proc as *const () as usize;
+    let proc_addr = proc as usize;
     let rva = proc_addr - local as usize;
     println!("YaeMain RVA: {:#x}", rva);
 
     FreeLibrary(local);
 
     let remote_yaemain = (base + rva) as *mut std::ffi::c_void;
-    // 在远程进程里调用 YaeMain(hModule)
     CreateRemoteThread(
       pi.hProcess,
-      std::ptr::null_mut(),
+      ptr::null_mut(),
       0,
       Some(std::mem::transmute(remote_yaemain)),
       base as *mut _,
       0,
-      std::ptr::null_mut(),
+      ptr::null_mut(),
     );
   }
 }
