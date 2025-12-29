@@ -26,20 +26,6 @@
     </template>
     <template #append>
       <div class="ucp-top-append">
-        <v-select
-          v-model="server"
-          :disabled="reqPop"
-          :items="serverList"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          label="服务器"
-          width="200px"
-        />
-      </div>
-    </template>
-    <template #extension>
-      <div class="ucp-top-extension">
         <div class="act-list">
           <v-btn
             :disabled="localChallenge.length === 0"
@@ -75,8 +61,11 @@
             删除
           </v-btn>
         </div>
+      </div>
+    </template>
+    <template #extension>
+      <div class="ucp-top-extension">
         <div class="pop-list">
-          <TucPopItem v-for="avatar in popList" :key="avatar.avatar_id" :avatar />
           <v-btn
             :disabled="reqPop"
             :loading="reqPop"
@@ -85,7 +74,21 @@
             size="36"
             @click="refreshPopList"
           />
+          <TucPopItem v-for="avatar in popList" :key="avatar.avatar_id" :avatar />
         </div>
+        <v-select
+          v-model="server"
+          :disabled="reqPop"
+          :hide-details="true"
+          :items="serverList"
+          class="uct-extension-select"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          label="赋光之人服务器"
+          variant="outlined"
+          width="200px"
+        />
       </div>
     </template>
   </v-app-bar>
@@ -460,6 +463,11 @@ async function tryReadChallenge(): Promise<void> {
   justify-content: space-between;
   padding: 0 16px;
   margin-bottom: 4px;
+}
+
+.uct-extension-select {
+  position: relative;
+  max-width: 200px;
 }
 
 .act-list {
