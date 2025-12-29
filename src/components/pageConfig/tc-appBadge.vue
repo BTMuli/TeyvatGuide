@@ -4,7 +4,7 @@
     <div class="tab-info click" title="点击前往 Github Release" @click="toRelease()">
       TeyvatGuide Beta
     </div>
-    <div class="tab-info">v{{ versionApp }}.{{ buildTime === "" ? "Dev" : buildTime }}</div>
+    <div class="tab-info">{{ buildTime.replace("TeyvatGuide@", "") }}</div>
     <div class="tab-links">
       <div class="tab-link" title="点击加入反馈群" @click="toGroup()">
         <img alt="qq" src="/platforms/other/qq.webp" />
@@ -22,13 +22,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-import useAppStore from "@store/app.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
-const { buildTime } = storeToRefs(useAppStore());
+// @ts-expect-error import.meta
+const buildTime = import.meta.env.VITE_SENTRY_RELEASE;
 const versionApp = ref<string>();
 
 onMounted(async () => (versionApp.value = await app.getVersion()));
@@ -76,6 +75,7 @@ async function toSite(): Promise<void> {
   font-size: 14px;
   text-align: center;
   text-shadow: 0 0 2px #13547acc;
+  word-break: break-all;
 }
 
 .tab-info.click {

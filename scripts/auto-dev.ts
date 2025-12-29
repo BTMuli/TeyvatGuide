@@ -18,9 +18,6 @@ const pkgVersion = pkgJson.version;
 // 获取提交哈希
 const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
 
-// 获取当前时间
-const timeNow = Math.floor(Date.now() / 1000);
-
 // 获取当前平台
 let platform = "unknown";
 if (process.platform === "win32") {
@@ -32,7 +29,7 @@ if (process.platform === "win32") {
 }
 
 // 构建 Release 字符串
-const release = `TeyvatGuide@${pkgVersion}_dev_${commitHash}_${platform}_${timeNow}`;
+const release = `TeyvatGuide@${pkgVersion}_dev_${commitHash}_${platform}`;
 console.log(`🍄 gen sentry dev release ${release}`);
 
 // 修改 .env.development.local
