@@ -8,8 +8,6 @@ import * as Sentry from "@sentry/vue";
 import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 
-import pkgJson from "../package.json" with { type: "json" };
-
 import App from "./App.vue";
 import router from "./router/index.js";
 import store from "./store/index.js";
@@ -23,7 +21,7 @@ const app = createApp(App);
 Sentry.init({
   app,
   dsn: "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",
-  release: `TeyvatGuide@${pkgJson.version}`,
+  release: import.meta.env.VITE_SENTRY_RELEASE,
   enableLogs: true,
   integrations: [
     Sentry.feedbackAsyncIntegration(<FeedbackInternalOptions>{

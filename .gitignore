@@ -10,4 +10,4 @@ dist
 *.tsbuildinfo
 
 # Sentry Config File
-.env.sentry-build-plugin
+.env.development.local

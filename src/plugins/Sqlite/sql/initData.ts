@@ -1,10 +1,9 @@
 /**
  * Sqlite 初始化数据 sql 语句
- * @since Beta v0.7.2
+ * @since Beta v0.9.1
  */
 
 import { app } from "@tauri-apps/api";
-import { getBuildTime } from "@utils/TGBuild.js";
 
 import createTable from "./createTable.sql?raw";
 
@@ -16,7 +15,8 @@ import createTable from "./createTable.sql?raw";
 async function initAppData(): Promise<Array<string>> {
   const sqlRes: Array<string> = [];
   const appVersion = await app.getVersion();
-  const buildTime: string = getBuildTime();
+  // @ts-expect-error import.meta
+  const buildTime: string = import.meta.VITE_SENTRY_RELEASE;
   // 初始化应用版本
   sqlRes.push(`
       INSERT INTO AppData (key, value, updated)

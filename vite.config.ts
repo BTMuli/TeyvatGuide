@@ -10,25 +10,20 @@ import { defineConfig } from "vite";
 import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
 
-import pkgJson from "./package.json" with { type: "json" };
-import buildTimePlugin from "./src/utils/TGBuild.js";
-
 const host = process.env.TAURI_DEV_HOST;
-const commitHash = (process.env.APP_VERSION || "test").slice(0, 7);
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     vuetify(),
-    buildTimePlugin(),
     VueDevtools(),
     sentryVitePlugin({
       org: "teyvat-guide",
       project: "teyvat-guide",
       authToken: process.env.SENTRY_AUTH_TOKEN ?? "",
       release: {
-        name: `TeyvatGuide@${pkgJson.version}_${commitHash}`,
+        name: process.env.VITE_SENTRY_RELEASE,
         setCommits: { auto: true },
       },
     }),

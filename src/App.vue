@@ -28,7 +28,6 @@ import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { getBuildTime } from "@utils/TGBuild.js";
 import TGLogger from "@utils/TGLogger.js";
 import { getWindowSize, resizeWindow } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -384,7 +383,8 @@ async function checkUpdate(): Promise<void> {
       showSnackbar.error("请到设置页手动更新数据库！", 3000);
       return;
     }
-    buildTime.value = getBuildTime();
+    // @ts-expect-error import.meta
+    buildTime.value = import.meta.env.VITE_SENTRY_RELEASE;
     await TGSqlite.update();
     showSnackbar.success("数据库已更新！", 3000);
     await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");

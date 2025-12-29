@@ -37,7 +37,7 @@
           {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
         </v-list-item-subtitle>
         <template #append>
-          <v-icon @click="confirmUpdateDevice(true)" title="强制刷新设备信息">mdi-bug</v-icon>
+          <v-icon title="强制刷新设备信息" @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
         </template>
       </v-list-item>
       <v-list-item title="清除缓存" @click="confirmDelCache">
@@ -64,7 +64,7 @@
       </v-list-item>
       <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
       <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item v-if="isDevEnv" title="调试模式" subtitle="开启后将显示调试信息">
+      <v-list-item v-if="isDevEnv" subtitle="开启后将显示调试信息" title="调试模式">
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-bug-play</v-icon>
@@ -73,15 +73,15 @@
         <template #append>
           <v-switch
             v-model="devMode"
-            :label="devMode ? '开启' : '关闭'"
             :inset="true"
-            color="#FAC51E"
+            :label="devMode ? '开启' : '关闭'"
             class="config-switch"
+            color="#FAC51E"
             @click="submitDevMode"
           />
         </template>
       </v-list-item>
-      <v-list-item title="窗口回正" subtitle="根据分辨率动态调整窗体大小">
+      <v-list-item subtitle="根据分辨率动态调整窗体大小" title="窗口回正">
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-window-restore</v-icon>
@@ -90,15 +90,15 @@
         <template #append>
           <v-switch
             v-model="isNeedResize"
-            :label="isNeedResize ? '开启' : '关闭'"
             :inset="true"
-            color="#FAC51E"
+            :label="isNeedResize ? '开启' : '关闭'"
             class="config-switch"
+            color="#FAC51E"
             @click="submitResize"
           />
         </template>
       </v-list-item>
-      <v-list-item title="关闭到托盘" subtitle="关闭窗口时最小化到系统托盘而不是退出应用">
+      <v-list-item subtitle="关闭窗口时最小化到系统托盘而不是退出应用" title="关闭到托盘">
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-tray-arrow-down</v-icon>
@@ -107,14 +107,14 @@
         <template #append>
           <v-switch
             v-model="closeToTray"
-            :label="closeToTray ? '开启' : '关闭'"
             :inset="true"
+            :label="closeToTray ? '开启' : '关闭'"
             class="config-switch"
             color="#FAC51E"
           />
         </template>
       </v-list-item>
-      <v-list-item title="无痕浏览" subtitle="关闭后将记录帖子浏览记录">
+      <v-list-item subtitle="关闭后将记录帖子浏览记录" title="无痕浏览">
         <template #prepend>
           <div class="config-icon">
             <v-icon>mdi-incognito</v-icon>
@@ -123,15 +123,15 @@
         <template #append>
           <v-switch
             v-model="appStore.incognito"
-            :label="appStore.incognito ? '开启' : '关闭'"
             :inset="true"
+            :label="appStore.incognito ? '开启' : '关闭'"
             class="config-switch"
             color="#FAC51E"
             @click="switchIncognito"
           />
         </template>
       </v-list-item>
-      <v-list-item title="分享设置" v-if="platform() === 'windows'">
+      <v-list-item v-if="platform() === 'windows'" title="分享设置">
         <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
         <template #prepend>
           <div class="config-icon">
@@ -184,7 +184,6 @@ import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
-import { getBuildTime } from "@utils/TGBuild.js";
 import TGLogger from "@utils/TGLogger.js";
 import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
@@ -292,7 +291,8 @@ async function confirmUpdate(title?: string): Promise<void> {
   }
   await showLoading.start("正在更新数据库", "");
   await TGSqlite.update();
-  buildTime.value = getBuildTime();
+  // @ts-expect-error import.meta
+  buildTime.value = import.meta.env.VITE_SENTRY_RELEASE;
   await showLoading.end();
   showSnackbar.success("数据库已更新!即将刷新页面");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");
@@ -446,9 +446,8 @@ async function tryShowReset(): Promise<void> {
     showSnackbar.cancel("已取消");
     return;
   }
-  const time = getBuildTime();
-  const code = time.startsWith("dev.") ? "dev" : time;
-  if (codeInput === code || codeInput === "reset1128") {
+  // @ts-expect-error import.meta
+  if (codeInput === import.meta.env.VITE_SENTRY_RELEASE || codeInput === "reset1128") {
     showReset.value = true;
     showSnackbar.success("已开启重置数据库选项");
     return;

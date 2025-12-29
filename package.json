@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.26.2",
   "type": "module",
   "scripts": {
-    "build": "tauri build",
+    "build": "tsx scripts/auto-build.ts",
     "debug": "tauri build --debug",
     "dev": "tauri dev --exit-on-panic",
     "eslint:pre": "pnpx @eslint/config-inspector@latest",
@@ -119,6 +119,7 @@
     "@vitejs/plugin-vue": "^6.0.3",
     "app-root-path": "^3.1.0",
     "concurrently": "^9.2.1",
+    "envfile": "^7.1.0",
     "eslint": "^9.39.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsonc": "^2.21.0",

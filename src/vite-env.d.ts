@@ -26,6 +26,10 @@ declare type ImportMeta = {
      * - `"test"` 测试模式
      */
     MODE: string;
+    /**
+     * Sentry Release
+     */
+    VITE_SENTRY_RELEASE: string;
   };
 };
 
