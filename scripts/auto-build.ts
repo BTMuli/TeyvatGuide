@@ -46,6 +46,12 @@ execSync("pnpm tauri build", { stdio: "inherit" });
 
 // 上传pdb
 if (isGitHubActions) {
+  if (process.env.GITHUB_ENV) {
+    writeFileSync(process.env.GITHUB_ENV, `SENTRY_RELEASE=${release}\n`, { flag: "a" });
+    console.log("📦 SENTRY_RELEASE exported to GitHub Actions env.");
+  } else {
+    console.warn("⚠️ Not running inside GitHub Actions. Skipping env export.");
+  }
   process.exit();
 }
 const pdbGlob = "src-tauri/target/release/TeyvatGuide.pdb";

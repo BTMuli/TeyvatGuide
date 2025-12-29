@@ -73,6 +73,8 @@ jobs:
           version: 10.23.0
       - name: Install frontend dependencies
         run: pnpm install
+      - name: Setup sentry-cli
+        run: npm install -g @sentry/cli
 
       - name: Build app
         uses: tauri-apps/tauri-action@dev
@@ -93,3 +95,14 @@ jobs:
             </a>
           releaseDraft: true
           prerelease: false
+
+      - name: Upload Sentry Pdb
+        if: matrix.settings.target == windows
+        run: |
+          echo "Uploading release: $SENTRY_RELEASE"
+          sentry-cli releases new "$SENTRY_RELEASE"
+          sentry-cli upload-dif src-tauri/target/release/TeyvatGuide.pdb
+          sentry-cli releases finalize "$SENTRY_RELEASE"
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_RELEASE: ${{ env.SENTRY_RELEASE }}
