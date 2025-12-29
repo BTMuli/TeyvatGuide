@@ -5,10 +5,25 @@
 
 html #sentry-feedback {
   --page-margin: 8px 8px 64px 8px;
+  --outline: unset;
+  --border: 1px solid var(--common-shadow-1);
   --background: var(--tgc-btn-1);
   --foreground: var(--btn-text);
   --font-family: var(--font-text);
+  --accent-background: var(--tgc-od-blue);
+
   --dialog-color: var(--common-text-title);
+  --dialog-background: var(--app-page-bg);
+
   --input-color: var(--app-page-content);
+  --input-border: 1px solid var(--common-shadow-1);
+
   --button-color: var(--tgc-od-blue);
+  --button-background: var(--app-side-bg);
+  --button-hover-background: var(--box-bg-1);
+  --button-primary-hover-background: var(--tgc-od-red);
+
+  --success-color: var(--tgc-od-green);
+  --error-color: var(--tgc-od-red);
+  --interactive-filter: none;
 }
