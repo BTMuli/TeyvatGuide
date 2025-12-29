@@ -109,6 +109,7 @@
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
     "@microsoft/tsdoc": "^0.16.0",
+    "@sentry/core": "^10.32.1",
     "@tauri-apps/cli": "2.9.6",
     "@types/fs-extra": "^11.0.4",
     "@types/js-md5": "^0.8.0",

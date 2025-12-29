@@ -6,9 +6,6 @@
     </div>
     <div class="tab-info">v{{ versionApp }}.{{ buildTime === "" ? "Dev" : buildTime }}</div>
     <div class="tab-links">
-      <div class="tab-link" title="反馈BUG" @click="toReport()">
-        <v-icon color="white">mdi-contactless-payment-circle-outline</v-icon>
-      </div>
       <div class="tab-link" title="点击加入反馈群" @click="toGroup()">
         <img alt="qq" src="/platforms/other/qq.webp" />
       </div>
@@ -25,7 +22,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import * as Sentry from "@sentry/vue";
 import useAppStore from "@store/app.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -36,11 +32,6 @@ const { buildTime } = storeToRefs(useAppStore());
 const versionApp = ref<string>();
 
 onMounted(async () => (versionApp.value = await app.getVersion()));
-
-async function toReport(): Promise<void> {
-  const eventId = Sentry.captureMessage("设置页反馈", "info");
-  Sentry.showReportDialog({ eventId: eventId });
-}
 
 async function toRelease(): Promise<void> {
   await openUrl("https://github.com/BTMuli/TeyvatGuide/releases/latest");

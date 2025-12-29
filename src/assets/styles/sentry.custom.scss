@@ -1,0 +1,14 @@
+/**
+ * 自定义 Sentry 反馈 BUG 按钮样式
+ * @since Beta v0.9.1
+ */
+
+html #sentry-feedback {
+  --page-margin: 8px 8px 64px 8px;
+  --background: var(--tgc-btn-1);
+  --foreground: var(--btn-text);
+  --font-family: var(--font-text);
+  --dialog-color: var(--common-text-title);
+  --input-color: var(--app-page-content);
+  --button-color: var(--tgc-od-blue);
+}

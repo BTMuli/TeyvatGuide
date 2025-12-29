@@ -120,6 +120,9 @@ importers:
       '@microsoft/tsdoc':
         specifier: ^0.16.0
         version: 0.16.0
+      '@sentry/core':
+        specifier: ^10.32.1
+        version: 10.32.1
       '@tauri-apps/cli':
         specifier: 2.9.6
         version: 2.9.6
