@@ -1,6 +1,7 @@
 // 命令模块，负责处理命令
 // @since Beta v0.9.1
 
+use crate::utils;
 use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
 
@@ -135,4 +136,11 @@ pub async fn quit_app(app_handle: AppHandle) {
   }
   // 退出应用
   app_handle.exit(0);
+}
+
+/// 获取当前系统的文本缩放比例（TextScaleFactor）
+/// 返回值示例：1.0 表示 100%，1.25 表示 125%
+#[tauri::command]
+pub fn read_text_scale() -> Result<f64, String> {
+  utils::read_text_scale_factor()
 }

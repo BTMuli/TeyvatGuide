@@ -32,7 +32,10 @@ tauri = { version = "2.9.5", features = ["tray-icon"] }
 tauri-utils = "2.8.1"
 url = "2.5.7"
 walkdir = "2.5.0"
+widestring = "1.2.1"
 
+[target.'cfg(windows)'.dependencies.winreg]
+version = "0.55.0"
 [target.'cfg(windows)'.dependencies.windows-sys]
 version = "0.61.2"
 features = [

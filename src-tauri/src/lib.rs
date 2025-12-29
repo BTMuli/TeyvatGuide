@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.8.8
+//! @since Beta v0.9.1
 
 mod client;
 mod commands;
@@ -14,8 +14,8 @@ mod yae;
 use crate::client::create_mhy_client;
 use crate::commands::{
   create_window, execute_js, get_dir_size, hide_main_window, init_app, is_in_admin, quit_app,
+  read_text_scale,
 };
-use crate::plugins::{build_log_plugin, build_si_plugin};
 use tauri::{generate_context, generate_handler, Emitter, Manager, Window, WindowEvent};
 
 // 子窗口 label 的数组
@@ -66,7 +66,11 @@ pub fn run() {
   let mut builder = tauri::Builder::default();
 
   // 只有在正常/管理员实例下才加载单例插件；看门狗不加载
-  builder = builder.plugin(build_si_plugin());
+  builder = builder.plugin(tauri_plugin_single_instance::init(move |app, argv, _cwd| {
+    if let Err(e) = app.emit("active_deep_link", argv) {
+      eprintln!("emit active_deep_link failed: {}", e);
+    }
+  }));
   builder
     .on_window_event(move |app, event| window_event_handler(app, event))
     .plugin(tauri_plugin_deep_link::init())
@@ -78,13 +82,14 @@ pub fn run() {
     .plugin(tauri_plugin_process::init())
     .plugin(tauri_plugin_shell::init())
     .plugin(tauri_plugin_sql::Builder::default().build())
-    .plugin(build_log_plugin())
+    .plugin(plugins::custom_log::build_log_plugin())
     .setup(|_app| {
       // 创建系统托盘图标
       tray::create_tray(_app.handle())
         .expect("Failed to initialize system tray icon. Please check if the tray icon file exists and the system supports tray icons.");
       let _window = _app.get_webview_window("TeyvatGuide");
       #[cfg(debug_assertions)]
+      plugins::text_scale::init(_app.handle().clone());
       if _window.is_some() {
         _window.unwrap().open_devtools();
       }
@@ -99,6 +104,7 @@ pub fn run() {
       is_in_admin,
       hide_main_window,
       quit_app,
+      read_text_scale,
       #[cfg(target_os = "windows")]
       yae::call_yae_dll,
       #[cfg(target_os = "windows")]
