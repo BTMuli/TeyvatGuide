@@ -48,6 +48,7 @@ let dpListener: UnlistenFn | null = null;
 let resizeListener: UnlistenFn | null = null;
 let yaeListener: UnlistenFn | null = null;
 let closeListener: UnlistenFn | null = null;
+let textScaleListener: UnlistenFn | null = null;
 let yaeFlag: Array<string> = [];
 
 onMounted(async () => {
@@ -67,6 +68,7 @@ onMounted(async () => {
   document.documentElement.className = theme.value;
   themeListener = await event.listen<string>("readTheme", handleThemeListen);
   resizeListener = await event.listen<string>("needResize", handleResizeListen);
+  textScaleListener = await event.listen<void>("text_scale_change", resizeWindow);
   const isShow = await win.isVisible();
   if (!isShow) {
     await win.center();
@@ -94,6 +96,10 @@ onUnmounted(() => {
   if (closeListener !== null) {
     closeListener();
     closeListener = null;
+  }
+  if (textScaleListener !== null) {
+    textScaleListener();
+    textScaleListener = null;
   }
 });
 

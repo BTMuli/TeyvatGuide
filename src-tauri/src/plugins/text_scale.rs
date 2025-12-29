@@ -1,7 +1,6 @@
 // 监听系统文本放缩
 // @since Beta v0.9.1
 
-use crate::utils;
 use std::{thread, time::Duration};
 use tauri::{AppHandle, Emitter};
 use widestring::U16CString;
@@ -29,9 +28,7 @@ pub fn init(app: AppHandle) {
         RegNotifyChangeKeyValue(hkey, 0, REG_NOTIFY_CHANGE_LAST_SET, std::ptr::null_mut(), 0);
 
       if notify_status == ERROR_SUCCESS {
-        if let Ok(scale) = utils::read_text_scale_factor() {
-          let _ = app.emit("text_scale_change", scale);
-        }
+        let _ = app.emit("text_scale_change", "");
       } else {
         eprintln!("❌ 注册表监听失败: {}", notify_status);
         break;

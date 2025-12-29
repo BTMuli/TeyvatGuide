@@ -1,11 +1,12 @@
 /**
  * 窗口创建相关工具函数
- * @since Beta v0.7.9
+ * @since Beta v0.9.1
  */
 
 import type { RenderCard } from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -100,7 +101,7 @@ export function getWindowSize(label: string): PhysicalSize {
 
 /**
  * 窗口适配
- * @since Beta v0.7.9
+ * @since Beta v0.9.1
  * @returns 无返回值
  */
 export async function resizeWindow(): Promise<void> {
@@ -110,6 +111,7 @@ export async function resizeWindow(): Promise<void> {
     return;
   }
   const windowCur = webviewWindow.getCurrentWebviewWindow();
+  const textScale = await invoke<number>("read_text_scale");
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
   const widthScale = screen.size.width / 1920;
@@ -117,7 +119,7 @@ export async function resizeWindow(): Promise<void> {
   const targetWidth = Math.round(designSize.width * widthScale);
   const targetHeight = Math.round(designSize.height * heightScale);
   await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
-  const targetZoom = Math.min(widthScale, heightScale) / screen.scaleFactor;
+  const targetZoom = Math.min(widthScale, heightScale) / (screen.scaleFactor * textScale);
   await windowCur.setZoom(targetZoom);
   await windowCur.setFocus();
 }

@@ -19,29 +19,26 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { fetch } from "@tauri-apps/plugin-http";
-import { parseBirthGal, parseBirthSrc } from "@utils/birthParser.js";
+import { invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import { onMounted, onUnmounted } from "vue";
 
-import { ArcBirDraw } from "@/data/index.js";
+let textScaleListener: UnlistenFn | null = null;
+onMounted(async () => {
+  textScaleListener = await listen("text_scale_change", (payload) => {
+    console.log(payload);
+  });
+});
+onUnmounted(() => {
+  if (textScaleListener !== null) {
+    textScaleListener();
+    textScaleListener = null;
+  }
+});
 
 async function test() {
-  for (const item of ArcBirDraw) {
-    console.log("尝试解析", item.op_id, item.role_name);
-    const srcResp = await fetch(item.gal_resource, {
-      method: "GET",
-      headers: { "Content-Type": "text/xml" },
-    });
-    const srcRes = await srcResp.text();
-    const parseSrc = parseBirthSrc(new DOMParser().parseFromString(srcRes, "text/xml"));
-    console.log("parsedSrc", parseSrc);
-    const galResp = await fetch(item.gal_xml, {
-      method: "GET",
-      headers: { "Content-Type": "text/xml" },
-    });
-    const galRes = await galResp.text();
-    const parseGal = parseBirthGal(new DOMParser().parseFromString(galRes, "text/xml"), parseSrc);
-    console.log("parsedScene", parseGal);
-  }
+  const res = await invoke("read_text_scale");
+  console.log(res);
 }
 </script>
 <style lang="css" scoped>
