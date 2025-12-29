@@ -213,7 +213,7 @@ jobs:
         if: github.event.inputs.build-release == 'true'
         run: mv src-tauri/target/release/bundle/msi/*.msi TeyvatGuide_${{ env.COMMIT_HASH }}_win-release.msi
       - name: Upload Release
-        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-release
+        if: github.event.inputs.build-release
         uses: actions/upload-artifact@v4
         with:
           name: release-win
