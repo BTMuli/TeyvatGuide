@@ -1,14 +1,14 @@
 <template>
   <img
-    :src="localUrl"
-    :alt="props.alt"
-    :title="props.title"
     v-if="localUrl"
-    @click="emits('click')"
+    :alt="props.alt"
     :class="props.class"
+    :src="localUrl"
+    :title="props.title"
+    @click="emits('click')"
   />
-  <div class="progress" v-else>
-    <v-progress-circular indeterminate color="primary" size="25" />
+  <div v-else class="progress">
+    <v-progress-circular color="primary" indeterminate size="25" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -48,7 +48,8 @@ watch(
     if (localUrl.value) URL.revokeObjectURL(localUrl.value);
     localUrl.value = undefined;
     const link = props.ori ? props.src : appStore.getImageUrl(props.src);
-    localUrl.value = await saveImgLocal(link);
+    if (!props.src.startsWith("http")) localUrl.value = props.src;
+    else localUrl.value = await saveImgLocal(link);
   },
 );
 
