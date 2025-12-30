@@ -1,12 +1,12 @@
 /**
  * 角色相关类型定义文件
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
 declare namespace TGApp.App.Character {
   /**
    * Wiki 页简略信息
-   * @since Beta v0.9.0
+   * @since Beta v0.9.1
    */
   type WikiBriefInfo = {
     /** 角色 ID */
@@ -34,6 +34,23 @@ declare namespace TGApp.App.Character {
     weapon: string;
     /** 角色名片  */
     nameCard: string;
+    /** 衣装信息 */
+    costumes: Array<Costume>;
+  };
+
+  /**
+   * 衣装信息
+   * @since Beta v.0.9.1
+   */
+  type Costume = {
+    /** ID */
+    id: number;
+    /** 是否是默认服装 */
+    isDefault: boolean;
+    /** 名称 */
+    name: string;
+    /** 描述 */
+    desc: string;
   };
 
   /**
