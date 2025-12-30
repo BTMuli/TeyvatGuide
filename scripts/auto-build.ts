@@ -17,6 +17,11 @@ const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
 // 获取版本
 const pkgVersion = pkgJson.version;
 
+// 解析命令行参数
+const args = process.argv.slice(2);
+const skipUpload = args.includes("su");
+console.log(`🍄 SkipUpload:${skipUpload}`);
+
 // 获取提交哈希
 const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
 
@@ -54,6 +59,7 @@ if (isGitHubActions) {
   }
   process.exit();
 }
+if (skipUpload) process.exit();
 const pdbGlob = "src-tauri/target/release/TeyvatGuide.pdb";
 try {
   console.log(`📦 Uploading PDBs from ${pdbGlob}...`);
