@@ -22,7 +22,7 @@ Sentry.init({
   app,
   dsn: "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",
   release: import.meta.env.VITE_SENTRY_RELEASE,
-  enableLogs: true,
+  enableLogs: process.env.NODE_ENV === "production",
   integrations: [
     Sentry.feedbackAsyncIntegration(<FeedbackInternalOptions>{
       // 🌗 主题与注入行为
