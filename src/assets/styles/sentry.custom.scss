@@ -27,3 +27,7 @@ html #sentry-feedback {
   --error-color: var(--tgc-od-red);
   --interactive-filter: none;
 }
+
+html .sentry-error-embed-wrapper {
+  z-index: 9999;
+}
