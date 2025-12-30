@@ -89,18 +89,18 @@ import TuaDcRelic from "./tua-dc-relic.vue";
 import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
 
-import { AppCharacterData } from "@/data/index.js";
-
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
-type TuaDetailCardProps = { avatar: TGApp.Sqlite.Character.TableTrans };
+type TuaDetailCardProps = {
+  avatar: TGApp.Sqlite.Character.TableTrans;
+  costume: TGApp.App.Character.Costume | false;
+};
 
 const props = defineProps<TuaDetailCardProps>();
 const userStore = useUserStore();
 
 const fullIcon = computed<string>(() => {
-  const costume = getCostume();
-  if (costume) return `/WIKI/costume/${costume.id}_full.webp`;
+  if (props.costume) return `/WIKI/costume/${props.costume.id}_full.webp`;
   return props.avatar.avatar.image;
 });
 const relicList = computed<RelicList>(() => {
@@ -132,18 +132,6 @@ async function share(): Promise<void> {
   loading.value = true;
   await generateShareImg(fileName, shareBox);
   loading.value = false;
-}
-
-function getCostume(): TGApp.App.Character.Costume | false {
-  if (props.avatar.costumes.length === 0) return false;
-  const findC = AppCharacterData.find((i) => i.id === props.avatar.cid);
-  if (!findC) return false;
-  let res: TGApp.App.Character.Costume | false = false;
-  for (const costume of props.avatar.costumes) {
-    const findCostume = findC.costumes.find((i) => i.id === costume.id);
-    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
-  }
-  return res;
 }
 </script>
 <style lang="css" scoped>

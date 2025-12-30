@@ -4,7 +4,7 @@
     <div class="duc-doc-bgc" />
     <!-- 左上角色跟武器 -->
     <div class="duc-doc-lt">
-      <DucDetailOlt :costume :data="props.avatar.avatar" mode="character" />
+      <DucDetailOlt :costume="props.costume" :data="props.avatar.avatar" mode="character" />
       <DucDetailOlt :data="props.avatar.weapon" mode="weapon" />
       <div class="duc-relic">
         <DucDetailRelic
@@ -51,9 +51,10 @@ import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import DucDetailRelic from "./duc-detail-relic.vue";
 
-import { AppCharacterData } from "@/data/index.js";
-
-type DucDetailOverlayProps = { avatar: TGApp.Sqlite.Character.TableTrans };
+type DucDetailOverlayProps = {
+  avatar: TGApp.Sqlite.Character.TableTrans;
+  costume: TGApp.App.Character.Costume | false;
+};
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 
@@ -72,7 +73,6 @@ const relicList = computed<RelicList>(() => {
 });
 
 const nameCard = ref<string | false>(false);
-const costume = ref<TGApp.App.Character.Costume | false>(false);
 
 onMounted(async () => {
   version.value = await app.getVersion();
@@ -83,7 +83,6 @@ watch(() => props.avatar, loadData);
 function loadData(): void {
   const card = TSUserAvatar.getAvatarCard(props.avatar.cid);
   nameCard.value = `/WIKI/nameCard/profile/${card}.webp`;
-  costume.value = getCostume();
 }
 
 async function share(): Promise<void> {
@@ -96,18 +95,6 @@ async function share(): Promise<void> {
   loading.value = true;
   await generateShareImg(fileName, detailBox);
   loading.value = false;
-}
-
-function getCostume(): TGApp.App.Character.Costume | false {
-  if (props.avatar.costumes.length === 0) return false;
-  const findC = AppCharacterData.find((i) => i.id === props.avatar.cid);
-  if (!findC) return false;
-  let res: TGApp.App.Character.Costume | false = false;
-  for (const costume of props.avatar.costumes) {
-    const findCostume = findC.costumes.find((i) => i.id === costume.id);
-    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
-  }
-  return res;
 }
 </script>
 <style lang="css" scoped>

@@ -46,7 +46,7 @@
 
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { computed, defineProps } from "vue";
+import { computed } from "vue";
 
 export type UavSelectChipsItem = {
   /** 渲染文本 */

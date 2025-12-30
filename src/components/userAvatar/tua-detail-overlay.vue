@@ -4,22 +4,29 @@
       <div class="tdo-avatars-container">
         <v-tabs
           v-model="avatarTab"
-          density="compact"
           center-active
+          density="compact"
           slider-color="var(--tgc-od-white)"
         >
           <v-tab
             v-for="avatar in avatars"
             :key="avatar.avatar.id"
+            :title="avatar.avatar.name"
             :value="avatar.avatar.id"
             @click="emits('toAvatar', avatar)"
-            :title="avatar.avatar.name"
           >
             <div
-              class="tdo-avatar"
               :class="{ selected: props.avatar.avatar.id === avatar.avatar.id }"
+              class="tdo-avatar"
             >
-              <img :src="avatar.avatar.side_icon" :alt="avatar.avatar.name" />
+              <img
+                :alt="avatar.avatar.name"
+                :src="
+                  props.avatar.avatar.id === avatar.avatar.id && costume
+                    ? `/WIKI/costume/${costume.id}_side.webp`
+                    : avatar.avatar.side_icon
+                "
+              />
             </div>
           </v-tab>
         </v-tabs>
@@ -28,15 +35,15 @@
         <div class="tdo-box-arrow" @click="handleClick('left')">
           <img alt="left" src="@/assets/icons/arrow-right.svg" />
         </div>
-        <v-window class="tdo-box-container" v-model="modeTab">
+        <v-window v-model="modeTab" class="tdo-box-container">
           <v-window-item value="classic">
             <TucDetailOld :model-value="avatar" />
           </v-window-item>
           <v-window-item value="card">
-            <TucDetailCard :avatar />
+            <TucDetailCard :avatar :costume />
           </v-window-item>
           <v-window-item value="dev">
-            <TuaDetailCard :avatar />
+            <TuaDetailCard :avatar :costume />
           </v-window-item>
         </v-window>
         <div class="tdo-box-arrow" @click="handleClick('right')">
@@ -54,6 +61,8 @@ import { computed, ref, watch } from "vue";
 
 import TuaDetailCard from "./tua-detail-card.vue";
 
+import { AppCharacterData } from "@/data/index.js";
+
 type TuaDetailOverlayProps = {
   avatar: TGApp.Sqlite.Character.TableTrans;
   avatars: Array<TGApp.Sqlite.Character.TableTrans>;
@@ -69,6 +78,7 @@ const visible = defineModel<boolean>();
 const modeTab = defineModel<"classic" | "card" | "dev">("mode");
 const avatarTab = ref<number>();
 
+const costume = computed<TGApp.App.Character.Costume | false>(() => getCostume());
 const avatarsWidth = computed<string>(() => {
   switch (modeTab.value) {
     case "classic":
@@ -92,6 +102,18 @@ watch(
 function handleClick(pos: "left" | "right"): void {
   if (pos === "left") emits("toNext", false);
   else emits("toNext", true);
+}
+
+function getCostume(): TGApp.App.Character.Costume | false {
+  if (props.avatar.costumes.length === 0) return false;
+  const findC = AppCharacterData.find((i) => i.id === props.avatar.cid);
+  if (!findC) return false;
+  let res: TGApp.App.Character.Costume | false = false;
+  for (const costume of props.avatar.costumes) {
+    const findCostume = findC.costumes.find((i) => i.id === costume.id);
+    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
+  }
+  return res;
 }
 </script>
 <style lang="css" scoped>
