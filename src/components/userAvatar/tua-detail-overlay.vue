@@ -33,10 +33,10 @@
             <TucDetailOld :model-value="avatar" />
           </v-window-item>
           <v-window-item value="card">
-            <TucDetailCard :model-value="avatar" />
+            <TucDetailCard :avatar />
           </v-window-item>
           <v-window-item value="dev">
-            <TuaDetailCard :model-value="avatar" />
+            <TuaDetailCard :avatar />
           </v-window-item>
         </v-window>
         <div class="tdo-box-arrow" @click="handleClick('right')">

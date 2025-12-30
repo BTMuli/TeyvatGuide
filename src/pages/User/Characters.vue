@@ -128,7 +128,7 @@
       <TuaAvatarBox
         v-for="(role, index) in selectedList"
         :key="index"
-        :model-value="role"
+        :role
         @click="selectRole(role)"
       />
     </div>

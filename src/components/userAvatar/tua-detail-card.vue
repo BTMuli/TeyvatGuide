@@ -1,34 +1,35 @@
+<!-- 卡片视图（详细） -->
 <template>
   <div class="tua-dc-container">
     <div class="tua-dc-avatar">
-      <TMiImg :src="props.modelValue.avatar.image" :ori="true" alt="avatar" />
+      <TMiImg :ori="true" :src="fullIcon" alt="avatar" />
     </div>
     <v-btn
-      class="tua-dc-share"
-      prepend-icon="mdi-share-variant"
-      @click="share"
-      variant="outlined"
       :loading="loading"
+      class="tua-dc-share"
       data-html2canvas-ignore
+      prepend-icon="mdi-share-variant"
       size="small"
+      variant="outlined"
+      @click="share"
     >
       分享
     </v-btn>
     <!-- 右上整体属性&角色-->
     <div class="tua-dc-rt">
       <div class="tua-dcr-avatar">
-        <span>{{ props.modelValue.avatar.name }}</span>
-        <span>Lv.{{ props.modelValue.avatar.level }}</span>
-        <span>好感{{ props.modelValue.avatar.fetter }}</span>
+        <span>{{ props.avatar.avatar.name }}</span>
+        <span>Lv.{{ props.avatar.avatar.level }}</span>
+        <span>好感{{ props.avatar.avatar.fetter }}</span>
         <v-icon
-          :title="`解锁衣装：${props.modelValue.costumes.map((i) => i.name).join(',')}`"
-          v-if="props.modelValue.costumes.length !== 0"
+          v-if="props.avatar.costumes.length !== 0"
+          :title="`解锁衣装：${props.avatar.costumes.map((i) => i.name).join(',')}`"
           size="14"
         >
           mdi-tshirt-crew
         </v-icon>
       </div>
-      <div v-for="(prop, index) in props.modelValue.propSelected" :key="index">
+      <div v-for="(prop, index) in props.avatar.propSelected" :key="index">
         <div v-if="propMain[index] !== false" class="tua-dc-prop">
           <TuaDcProp :model-value="prop" :prop="propMain[index]" />
         </div>
@@ -37,40 +38,40 @@
     <!-- 右侧武器跟圣遗物具体属性 -->
     <div class="tua-dc-detail">
       <TuaDcWeapon
-        :model-value="props.modelValue.weapon"
-        :uid="props.modelValue.uid"
-        :updated="props.modelValue.updated"
+        :model-value="props.avatar.weapon"
+        :uid="props.avatar.uid"
+        :updated="props.avatar.updated"
       />
       <TuaDcRelic
         :model-value="relicList[0]"
+        :recommend="props.avatar.propRecommend.recommend_properties"
         pos="1"
-        :recommend="props.modelValue.propRecommend.recommend_properties"
       />
       <TuaDcRelic
         :model-value="relicList[1]"
+        :recommend="props.avatar.propRecommend.recommend_properties"
         pos="2"
-        :recommend="props.modelValue.propRecommend.recommend_properties"
       />
       <TuaDcRelic
         :model-value="relicList[2]"
+        :recommend="props.avatar.propRecommend.recommend_properties"
         pos="3"
-        :recommend="props.modelValue.propRecommend.recommend_properties"
       />
       <TuaDcRelic
         :model-value="relicList[3]"
+        :recommend="props.avatar.propRecommend.recommend_properties"
         pos="4"
-        :recommend="props.modelValue.propRecommend.recommend_properties"
       />
       <TuaDcRelic
         :model-value="relicList[4]"
+        :recommend="props.avatar.propRecommend.recommend_properties"
         pos="5"
-        :recommend="props.modelValue.propRecommend.recommend_properties"
       />
     </div>
     <!-- 左下命座跟天赋 -->
     <div class="tua-dc-lb">
-      <TuaDcTalents :model-value="props.modelValue.skills" />
-      <TuaDcConstellations :model-value="props.modelValue.constellations" />
+      <TuaDcTalents :model-value="props.avatar.skills" />
+      <TuaDcConstellations :model-value="props.avatar.constellations" />
     </div>
   </div>
 </template>
@@ -88,28 +89,35 @@ import TuaDcRelic from "./tua-dc-relic.vue";
 import TuaDcTalents from "./tua-dc-talents.vue";
 import TuaDcWeapon from "./tua-dc-weapon.vue";
 
+import { AppCharacterData } from "@/data/index.js";
+
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
-type TuaDetailCardProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
+type TuaDetailCardProps = { avatar: TGApp.Sqlite.Character.TableTrans };
 
 const props = defineProps<TuaDetailCardProps>();
 const userStore = useUserStore();
 
+const fullIcon = computed<string>(() => {
+  const costume = getCostume();
+  if (costume) return `/WIKI/costume/${costume.id}_full.webp`;
+  return props.avatar.avatar.image;
+});
 const relicList = computed<RelicList>(() => {
   return [
-    props.modelValue.relics.find((item) => item.pos === 1) || false,
-    props.modelValue.relics.find((item) => item.pos === 2) || false,
-    props.modelValue.relics.find((item) => item.pos === 3) || false,
-    props.modelValue.relics.find((item) => item.pos === 4) || false,
-    props.modelValue.relics.find((item) => item.pos === 5) || false,
+    props.avatar.relics.find((item) => item.pos === 1) || false,
+    props.avatar.relics.find((item) => item.pos === 2) || false,
+    props.avatar.relics.find((item) => item.pos === 3) || false,
+    props.avatar.relics.find((item) => item.pos === 4) || false,
+    props.avatar.relics.find((item) => item.pos === 5) || false,
   ];
 });
 const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
-  props.modelValue.propSelected.map((item) => userStore.getProp(item.property_type)),
+  props.avatar.propSelected.map((item) => userStore.getProp(item.property_type)),
 );
 
 const bg = computed<string>(() => {
-  const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
+  const card = TSUserAvatar.getAvatarCard(props.avatar.cid);
   return `url("/WIKI/nameCard/profile/${card}.webp")`;
 });
 const loading = ref<boolean>(false);
@@ -120,10 +128,22 @@ async function share(): Promise<void> {
     showSnackbar.error("分享失败，未找到分享内容");
     return;
   }
-  const fileName = `【角色详情】${props.modelValue.avatar.name}`;
+  const fileName = `【角色详情】${props.avatar.avatar.name}`;
   loading.value = true;
   await generateShareImg(fileName, shareBox);
   loading.value = false;
+}
+
+function getCostume(): TGApp.App.Character.Costume | false {
+  if (props.avatar.costumes.length === 0) return false;
+  const findC = AppCharacterData.find((i) => i.id === props.avatar.cid);
+  if (!findC) return false;
+  let res: TGApp.App.Character.Costume | false = false;
+  for (const costume of props.avatar.costumes) {
+    const findCostume = findC.costumes.find((i) => i.id === costume.id);
+    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
+  }
+  return res;
 }
 </script>
 <style lang="css" scoped>

@@ -34,20 +34,20 @@
         </div>
       </div>
       <div class="tua-abl-bottom">
-        <div :title="`好感度：${props.modelValue.avatar.fetter}`" class="tua-abl-fetter">
+        <div :title="`好感度：${props.role.avatar.fetter}`" class="tua-abl-fetter">
           <img alt="fetter" src="/icon/material/105.webp" />
-          <span>{{ props.modelValue.avatar.fetter }}</span>
+          <span>{{ props.role.avatar.fetter }}</span>
         </div>
         <div class="tua-abl-costume">
           <span
-            v-if="props.modelValue.costumes.length > 0"
-            :title="`衣装: ${props.modelValue.costumes.map((i) => i.name).join(', ')}`"
+            v-if="props.role.costumes.length > 0"
+            :title="`衣装: ${props.role.costumes.map((i) => i.name).join(', ')}`"
           >
             <v-icon size="small">mdi-tshirt-crew</v-icon>
           </span>
         </div>
         <div class="tua-abl-level">
-          <span>Lv.{{ props.modelValue.avatar.level }}</span>
+          <span>Lv.{{ props.role.avatar.level }}</span>
         </div>
       </div>
     </div>
@@ -62,23 +62,30 @@ import { computed } from "vue";
 
 import TuaRelicBox from "./tua-relic-box.vue";
 
+import { AppCharacterData } from "@/data/index.js";
+
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type AvatarRelics = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
-type TuaAvatarBoxProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
+type TuaAvatarBoxProps = { role: TGApp.Sqlite.Character.TableTrans };
 
 const props = defineProps<TuaAvatarBoxProps>();
 const userStore = useUserStore();
 
+const avatarIcon = computed<string>(() => {
+  const costume = getCostume();
+  if (costume) return `/WIKI/costume/${costume.id}.webp`;
+  return `/WIKI/character/${props.role.avatar.id}.webp`;
+});
 const avatarBox = computed<TItemBoxData>(() => ({
   size: "100px",
   height: "100px",
-  bg: `/icon/bg/${props.modelValue.avatar.rarity}-Star.webp`,
-  icon: `/WIKI/character/${props.modelValue.avatar.id}.webp`,
-  lt: `/icon/element/${getZhElement(props.modelValue.avatar.element)}元素.webp`,
+  bg: `/icon/bg/${props.role.avatar.rarity}-Star.webp`,
+  icon: avatarIcon.value,
+  lt: `/icon/element/${getZhElement(props.role.avatar.element)}元素.webp`,
   ltSize: "20px",
-  rt: props.modelValue.avatar.actived_constellation_num.toString() || "0",
+  rt: props.role.avatar.actived_constellation_num.toString() || "0",
   rtSize: "20px",
-  innerText: props.modelValue.avatar.name,
+  innerText: props.role.avatar.name,
   innerHeight: 30,
   display: "inner",
   clickable: true,
@@ -86,19 +93,19 @@ const avatarBox = computed<TItemBoxData>(() => ({
 const weaponBox = computed<TItemBoxData>(() => ({
   size: "65px",
   height: "65px",
-  bg: `/icon/bg/${props.modelValue.weapon.rarity}-Star.webp`,
-  icon: `/WIKI/weapon/${props.modelValue.weapon.id}.webp`,
-  lt: `/icon/weapon/${props.modelValue.weapon.type_name}.webp`,
+  bg: `/icon/bg/${props.role.weapon.rarity}-Star.webp`,
+  icon: `/WIKI/weapon/${props.role.weapon.id}.webp`,
+  lt: `/icon/weapon/${props.role.weapon.type_name}.webp`,
   ltSize: "20px",
-  rt: props.modelValue.weapon.affix_level.toString(),
+  rt: props.role.weapon.affix_level.toString(),
   rtSize: "20px",
-  innerText: props.modelValue.weapon.name,
+  innerText: props.role.weapon.name,
   innerHeight: 20,
   display: "inner",
   clickable: true,
 }));
 const relicsBox = computed<AvatarRelics>(() => {
-  const relics = props.modelValue.relics;
+  const relics = props.role.relics;
   return [
     relics.find((i) => i.pos === 1) || false,
     relics.find((i) => i.pos === 2) || false,
@@ -109,19 +116,31 @@ const relicsBox = computed<AvatarRelics>(() => {
 });
 const isFetterMax = computed<boolean>(() => {
   const skipList = [10000005, 10000007, 10000117, 10000118];
-  if (skipList.includes(props.modelValue.avatar.id)) return true;
-  return props.modelValue.avatar.fetter === 10;
+  if (skipList.includes(props.role.avatar.id)) return true;
+  return props.role.avatar.fetter === 10;
 });
 const skills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
-  props.modelValue.skills.filter((skill) => skill.skill_type === 1),
+  props.role.skills.filter((skill) => skill.skill_type === 1),
 );
 const nameCard = computed<string>(() => {
-  const cardFind = TSUserAvatar.getAvatarCard(props.modelValue.avatar.id);
+  const cardFind = TSUserAvatar.getAvatarCard(props.role.avatar.id);
   return `/WIKI/nameCard/profile/${cardFind}.webp`;
 });
 
+function getCostume(): TGApp.App.Character.Costume | false {
+  if (props.role.costumes.length === 0) return false;
+  const findC = AppCharacterData.find((i) => i.id === props.role.cid);
+  if (!findC) return false;
+  let res: TGApp.App.Character.Costume | false = false;
+  for (const costume of props.role.costumes) {
+    const findCostume = findC.costumes.find((i) => i.id === costume.id);
+    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
+  }
+  return res;
+}
+
 function getWeaponTitle(): string {
-  const weapon = props.modelValue.weapon;
+  const weapon = props.role.weapon;
   const title: Array<string> = [];
   title.push(`${weapon.type_name} - ${weapon.name}`);
   title.push(`${weapon.rarity}星 精炼${weapon.affix_level} Lv.${weapon.level}`);

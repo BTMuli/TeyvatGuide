@@ -1,6 +1,6 @@
 <template>
   <div class="ddo-lt-box">
-    <div class="ddo-ltb-icon" :title="props.data.name">
+    <div :title="title" class="ddo-ltb-icon">
       <TItemBox :model-value="boxData" />
     </div>
     <div class="ddo-ltb-info">
@@ -18,6 +18,7 @@ import { computed } from "vue";
 type DucDetailOltProps =
   | {
       data: TGApp.Game.Avatar.Avatar;
+      costume: TGApp.App.Character.Costume | false;
       mode: "character";
     }
   | {
@@ -26,9 +27,18 @@ type DucDetailOltProps =
     };
 
 const props = defineProps<DucDetailOltProps>();
+
+const icon = computed(() => {
+  if (props.mode === "weapon" || !props.costume) return `/WIKI/${props.mode}/${props.data.id}.webp`;
+  return `/WIKI/costume/${props.costume.id}.webp`;
+});
+const title = computed<string>(() => {
+  if (props.mode === "weapon" || !props.costume) return props.data.name;
+  return `${props.data.name}-${props.costume.name}`;
+});
 const boxData = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${props.data.rarity}-Star.webp`,
-  icon: `/WIKI/${props.mode}/${props.data.id}.webp`,
+  icon: icon.value,
   size: "100px",
   height: "100px",
   display: "inner",

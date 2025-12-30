@@ -1,11 +1,11 @@
 <template>
   <div class="duc-do-container">
-    <img :src="nameCard" class="duc-doc-bg" v-if="nameCard !== false" alt="bg" />
+    <img v-if="nameCard !== false" :src="nameCard" alt="bg" class="duc-doc-bg" />
     <div class="duc-doc-bgc" />
     <!-- 左上角色跟武器 -->
     <div class="duc-doc-lt">
-      <DucDetailOlt :data="props.modelValue.avatar" mode="character" />
-      <DucDetailOlt :data="props.modelValue.weapon" mode="weapon" />
+      <DucDetailOlt :costume :data="props.avatar.avatar" mode="character" />
+      <DucDetailOlt :data="props.avatar.weapon" mode="weapon" />
       <div class="duc-relic">
         <DucDetailRelic
           v-for="(relic, index) in relicList"
@@ -16,26 +16,26 @@
       </div>
     </div>
     <v-btn
-      class="duc-doc-btn"
-      @click="share"
-      variant="outlined"
       :loading="loading"
+      class="duc-doc-btn"
       data-html2canvas-ignore
+      variant="outlined"
+      @click="share"
     >
       <v-icon>mdi-share-variant</v-icon>
       <span>分享</span>
     </v-btn>
     <!-- 右侧天赋 -->
     <div class="duc-doc-rt">
-      <DucDetailOrt :model-value="props.modelValue.skills" />
+      <DucDetailOrt :model-value="props.avatar.skills" />
     </div>
     <!-- 左下命座 -->
     <div class="duc-doc-lb">
-      <DucDetailOlb :model-value="props.modelValue.constellations" />
+      <DucDetailOlb :model-value="props.avatar.constellations" />
     </div>
     <!-- 底部水印信息 -->
     <div class="duc-doc-bt">
-      UID: {{ props.modelValue.uid }} {{ props.modelValue.updated }} | TeyvatGuide v{{ version }}
+      UID: {{ props.avatar.uid }} {{ props.avatar.updated }} | TeyvatGuide v{{ version }}
     </div>
   </div>
 </template>
@@ -51,7 +51,9 @@ import DucDetailOlt from "./duc-detail-olt.vue";
 import DucDetailOrt from "./duc-detail-ort.vue";
 import DucDetailRelic from "./duc-detail-relic.vue";
 
-type DucDetailOverlayProps = { modelValue: TGApp.Sqlite.Character.TableTrans };
+import { AppCharacterData } from "@/data/index.js";
+
+type DucDetailOverlayProps = { avatar: TGApp.Sqlite.Character.TableTrans };
 type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type RelicList = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 
@@ -61,25 +63,27 @@ const loading = ref<boolean>(false);
 
 const relicList = computed<RelicList>(() => {
   return [
-    props.modelValue.relics.find((item) => item.pos === 1) || false,
-    props.modelValue.relics.find((item) => item.pos === 2) || false,
-    props.modelValue.relics.find((item) => item.pos === 3) || false,
-    props.modelValue.relics.find((item) => item.pos === 4) || false,
-    props.modelValue.relics.find((item) => item.pos === 5) || false,
+    props.avatar.relics.find((item) => item.pos === 1) || false,
+    props.avatar.relics.find((item) => item.pos === 2) || false,
+    props.avatar.relics.find((item) => item.pos === 3) || false,
+    props.avatar.relics.find((item) => item.pos === 4) || false,
+    props.avatar.relics.find((item) => item.pos === 5) || false,
   ];
 });
 
 const nameCard = ref<string | false>(false);
+const costume = ref<TGApp.App.Character.Costume | false>(false);
 
 onMounted(async () => {
   version.value = await app.getVersion();
   loadData();
 });
-watch(() => props.modelValue, loadData);
+watch(() => props.avatar, loadData);
 
 function loadData(): void {
-  const card = TSUserAvatar.getAvatarCard(props.modelValue.cid);
+  const card = TSUserAvatar.getAvatarCard(props.avatar.cid);
   nameCard.value = `/WIKI/nameCard/profile/${card}.webp`;
+  costume.value = getCostume();
 }
 
 async function share(): Promise<void> {
@@ -88,10 +92,22 @@ async function share(): Promise<void> {
     showSnackbar.error("未找到角色详情");
     return;
   }
-  const fileName = `【角色详情】-${props.modelValue.avatar.name}`;
+  const fileName = `【角色详情】-${props.avatar.avatar.name}`;
   loading.value = true;
   await generateShareImg(fileName, detailBox);
   loading.value = false;
+}
+
+function getCostume(): TGApp.App.Character.Costume | false {
+  if (props.avatar.costumes.length === 0) return false;
+  const findC = AppCharacterData.find((i) => i.id === props.avatar.cid);
+  if (!findC) return false;
+  let res: TGApp.App.Character.Costume | false = false;
+  for (const costume of props.avatar.costumes) {
+    const findCostume = findC.costumes.find((i) => i.id === costume.id);
+    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
+  }
+  return res;
 }
 </script>
 <style lang="css" scoped>
