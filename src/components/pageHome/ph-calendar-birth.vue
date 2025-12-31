@@ -70,21 +70,16 @@ onBeforeMount(async () => {
 });
 
 function hasBirthRaw(raw: TGApp.Archive.Birth.CalendarItem): boolean {
-  const monthList = ArcBirCalendar[raw.role_birthday[0]];
+  const monthList = ArcBirCalendar[raw.role_birthday.split("/")[0]];
   if (!monthList) return false;
   const find = monthList.find((i) => i.role_id === raw.role_id);
   return !!find;
 }
 
 async function toBirth(data: TGApp.Archive.Birth.CalendarItem): Promise<void> {
-  let dateStr;
   const hasRaw = hasBirthRaw(data);
   if (hasRaw) {
-    const date = new Date();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    dateStr = `${month}/${day}`;
-    await router.push({ name: "留影叙佳期", params: { date: dateStr } });
+    await router.push({ name: "留影叙佳期", params: { date: data.role_birthday } });
     return;
   }
   await router.push({ name: "角色图鉴", params: { id: data.role_id } });
