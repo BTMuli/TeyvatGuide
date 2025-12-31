@@ -52,7 +52,6 @@ import HtaTabHold from "@comp/hutaoAbyss/hta-tab-hold.vue";
 import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
-import Hutao from "@Hutao/index.js";
 import hutao from "@Hutao/index.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, reactive, ref, type ShallowRef, shallowRef, watch } from "vue";
@@ -147,7 +146,7 @@ async function getUseData(): Promise<void> {
   } else {
     cur = curResp;
   }
-  const lastResp = await Hutao.Abyss.avatar.use(true);
+  const lastResp = await hutao.Abyss.avatar.use(true);
   if (!Array.isArray(lastResp)) {
     await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
   } else {
@@ -166,7 +165,7 @@ async function getUpData(): Promise<void> {
   } else {
     cur = curResp;
   }
-  const lastResp = await Hutao.Abyss.avatar.use(true);
+  const lastResp = await hutao.Abyss.avatar.use(true);
   if (!Array.isArray(lastResp)) {
     await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
   } else {
@@ -195,7 +194,7 @@ async function getHoldData(): Promise<void> {
   } else {
     cur = curResp;
   }
-  const lastResp = await Hutao.Abyss.avatar.hold(true);
+  const lastResp = await hutao.Abyss.avatar.hold(true);
   if (!Array.isArray(lastResp)) {
     await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
   } else {

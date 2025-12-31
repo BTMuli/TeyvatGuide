@@ -33,7 +33,7 @@ const useUserStore = defineStore(
     const cookie = ref<TGApp.App.Account.Cookie>();
     const propMap = ref<TGApp.Game.Avatar.PropMap>();
 
-    // 胡桃账号（邮箱），用于上传深渊记录
+    /** 胡桃云邮箱 */
     const hutaoEmail = ref<string>();
 
     function getProp(prop: number): TGApp.Game.Avatar.PropMapItem | false {

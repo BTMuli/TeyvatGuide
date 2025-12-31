@@ -55,6 +55,25 @@
         </v-btn>
       </div>
     </template>
+    <template #extension>
+      <div class="uct-extension">
+        <v-btn class="uc-btn" variant="elevated" @click="loadWiki()">
+          <img alt="abyss" src="/source/UI/wikiAbyss.webp" />
+          <span>统计数据</span>
+        </v-btn>
+        <div class="uct-extension-right">
+          <span @click="editHutaoEmail()">{{ hutaoEmail ?? "设置胡桃云邮箱" }}</span>
+          <v-btn
+            class="uc-btn"
+            prepend-icon="mdi-cloud-upload"
+            variant="elevated"
+            @click="uploadCombat()"
+          >
+            上传
+          </v-btn>
+        </div>
+      </div>
+    </template>
   </v-app-bar>
   <div class="uc-box">
     <v-tabs v-model="userTab" center-active class="uc-tabs-box" direction="vertical">
@@ -97,6 +116,7 @@
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
+  <TucOverlay v-model="showData" :data="cloudCombat" />
 </template>
 <script lang="ts" setup>
 import TSubLine from "@comp/app/t-subline.vue";
@@ -104,8 +124,10 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucAvatars from "@comp/userCombat/tuc-avatars.vue";
+import TucOverlay from "@comp/userCombat/tuc-overlay.vue";
 import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
+import hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
 import useAppStore from "@store/app.js";
@@ -121,11 +143,13 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const { isLogin } = storeToRefs(useAppStore());
-const { account, cookie } = storeToRefs(useUserStore());
+const { account, cookie, hutaoEmail } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
+const showData = ref<boolean>(false);
 const uidList = shallowRef<Array<string>>();
+const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
 
 onMounted(async () => {
@@ -151,6 +175,16 @@ async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
 }
 
+async function loadWiki(): Promise<void> {
+  await showLoading.start("正在加载统计数据");
+  const res = await hutao.Combat.data();
+  if (res === undefined) showSnackbar.error("未获取到剧诗数据");
+  else cloudCombat.value = <TGApp.Plugins.Hutao.Combat.Data>res;
+  await showLoading.end();
+  showSnackbar.success("成功获取统计数据");
+  showData.value = true;
+}
+
 async function reloadUid(): Promise<void> {
   uidList.value = await TSUserCombat.getAllUid();
   if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
@@ -166,6 +200,29 @@ async function loadCombat(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") return;
   localCombat.value = await TSUserCombat.getCombat(uidCur.value);
   if (localCombat.value.length > 0) userTab.value = localCombat.value[0].id;
+}
+
+async function editHutaoEmail(): Promise<void> {
+  if (hutaoEmail.value) {
+    const chgCheck = await showDialog.check("是否更改胡桃云账号", `当前账号：${hutaoEmail.value}`);
+    if (!chgCheck) {
+      showSnackbar.cancel("已取消更改胡桃云账号");
+      return;
+    }
+  }
+  const newEmail = await showDialog.input("请输入胡桃云账号", "胡桃云账号", hutaoEmail.value);
+  if (!newEmail) {
+    showSnackbar.cancel("已取消设置胡桃云账号");
+    return;
+  }
+  // 简单验证邮箱格式
+  const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (!mailReg.test(newEmail)) {
+    showSnackbar.error("邮箱格式错误");
+    return;
+  }
+  hutaoEmail.value = newEmail;
+  showSnackbar.success("已设置胡桃云账号");
 }
 
 async function refreshCombat(): Promise<void> {
@@ -254,6 +311,54 @@ async function deleteCombat(): Promise<void> {
   await showLoading.end();
 }
 
+async function uploadCombat(): Promise<void> {
+  if (!hutaoEmail.value || hutaoEmail.value === "") {
+    const check = await showDialog.check("确定上传？", "未设置胡桃云账号");
+    if (!check) return;
+  }
+  await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据");
+  const maxId = Math.max(...localCombat.value.map((i) => i.id));
+  const combatData = localCombat.value.find((item) => item.id === maxId);
+  if (!combatData) {
+    showSnackbar.error("未找到剧诗数据");
+    await TGLogger.Warn("[UserCombat][uploadCombat] 未找到深渊数据");
+    return;
+  }
+  if (!combatData.hasDetailData) {
+    showSnackbar.error("未获取到详情数据");
+    await TGLogger.Warn(`[UserCombat][uploadCombat] 未获取到详细数据`);
+    return;
+  }
+  const startTime = new Date(combatData.startTime).getTime();
+  const endTime = new Date(combatData.endTime).getTime();
+  const nowTime = new Date().getTime();
+  if (nowTime < startTime || nowTime > endTime) {
+    showSnackbar.warn("非最新剧诗数据，请刷新剧诗数据后重试！");
+    await TGLogger.Warn("[UserCombat][uploadCombat] 非最新剧诗数据");
+    return;
+  }
+  try {
+    await showLoading.start("正在上传剧诗数据");
+    const transCombat = hutao.Combat.trans(combatData);
+    const res = await hutao.Combat.upload(transCombat);
+    if (res.retcode === 0) {
+      showSnackbar.success(res.message ?? "上传剧诗数据成功");
+      await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
+    } else {
+      showSnackbar.error(`[${res.retcode}]${res.message}`);
+      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
+      await TGLogger.Error(`[UserCombat][uploadCombat] ${res.retcode} ${res.message}`);
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      showSnackbar.error(e.message);
+      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
+      await TGLogger.Error(`[UserCombat][uploadCombat] ${e.message}`);
+    }
+  }
+  await showLoading.end();
+}
+
 /**
  * 尝试读取胡桃工具箱导出的剧诗数据
  * @since Beta v0.8.6
@@ -315,6 +420,31 @@ async function tryReadCombat(): Promise<void> {
 
   span :first-child {
     color: var(--common-text-title);
+  }
+}
+
+.uct-extension {
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 16px;
+  padding-left: 16px;
+  margin-bottom: 4px;
+}
+
+.uct-extension-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+
+  span {
+    color: var(--tgc-od-red);
+    cursor: pointer;
   }
 }
 

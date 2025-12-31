@@ -50,6 +50,20 @@
         </v-btn>
       </div>
     </template>
+    <template #extension>
+      <div class="uat-extension">
+        <v-btn :rounded="true" variant="elevated" class="ua-btn" @click="toWiki()">
+          <img alt="wiki" src="/source/UI/wikiAbyss.webp" />
+          <span>统计数据</span>
+        </v-btn>
+        <div class="uat-extension-right">
+          <span @click="editHutaoEmail()">{{ hutaoEmail ?? "胡桃云邮箱" }}</span>
+          <v-btn class="ua-btn" prepend-icon="mdi-upload" variant="elevated" @click="uploadAbyss()">
+            上传
+          </v-btn>
+        </div>
+      </div>
+    </template>
   </v-app-bar>
   <div class="ua-box">
     <v-tabs v-model="userTab" center-active class="ua-tabs-box" direction="vertical">
@@ -110,8 +124,10 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOverview from "@comp/userAbyss/tua-overview.vue";
+import hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
+import TSUserAvatar from "@Sqlm/userAvatar.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
@@ -125,7 +141,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const { isLogin } = storeToRefs(useAppStore());
-const { account, cookie } = storeToRefs(useUserStore());
+const { account, cookie, hutaoEmail } = storeToRefs(useUserStore());
 const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
@@ -161,6 +177,33 @@ async function toCombat(): Promise<void> {
 
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
+}
+
+async function toWiki(): Promise<void> {
+  await router.push({ name: "深渊数据库" });
+}
+
+async function editHutaoEmail(): Promise<void> {
+  if (hutaoEmail.value) {
+    const chgCheck = await showDialog.check("是否更改胡桃云账号", `当前账号：${hutaoEmail.value}`);
+    if (!chgCheck) {
+      showSnackbar.cancel("已取消更改胡桃云账号");
+      return;
+    }
+  }
+  const newEmail = await showDialog.input("请输入胡桃云账号", "胡桃云账号", hutaoEmail.value);
+  if (!newEmail) {
+    showSnackbar.cancel("已取消设置胡桃云账号");
+    return;
+  }
+  // 简单验证邮箱格式
+  const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+  if (!mailReg.test(newEmail)) {
+    showSnackbar.error("邮箱格式错误");
+    return;
+  }
+  hutaoEmail.value = newEmail;
+  showSnackbar.success("已设置胡桃云账号");
 }
 
 async function loadAbyss(): Promise<void> {
@@ -306,6 +349,67 @@ async function tryReadAbyss(): Promise<void> {
     showSnackbar.error("导入深渊数据失败，请检查文件格式是否正确");
   }
 }
+
+async function uploadAbyss(): Promise<void> {
+  if (!hutaoEmail.value || hutaoEmail.value === "") {
+    const check = await showDialog.check("确定上传？", "未设置胡桃云账号");
+    if (!check) return;
+  }
+  await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
+  const maxId = Math.max(...localAbyss.value.map((i) => i.id));
+  const abyssData = localAbyss.value.find((item) => item.id === maxId);
+  if (!abyssData) {
+    showSnackbar.warn("未找到深渊数据");
+    await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
+    return;
+  }
+  const maxFloor = Number(abyssData.maxFloor.split("-")[0]);
+  if (isNaN(maxFloor) || maxFloor <= 9) {
+    showSnackbar.warn("尚未完成深渊，请完成深渊后重试！");
+    await TGLogger.Warn(`[UserAbyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
+    return;
+  }
+  const startTime = new Date(abyssData.startTime).getTime();
+  const endTime = new Date(abyssData.endTime).getTime();
+  const nowTime = new Date().getTime();
+  if (nowTime < startTime || nowTime > endTime) {
+    showSnackbar.warn("非最新深渊数据，请刷新深渊数据后重试！");
+    await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
+    return;
+  }
+  try {
+    await showLoading.start(`正在上传${account.value.gameUid}的深渊数据`, `期数：${abyssData.id}`);
+    const transAbyss = hutao.Abyss.utils.transData(abyssData);
+    if (hutaoEmail.value) transAbyss.ReservedUserName = hutaoEmail.value;
+    await showLoading.update("正在获取角色数据");
+    const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
+    if (!roles) {
+      await showLoading.end();
+      showSnackbar.warn("未找到角色数据");
+      return;
+    }
+    await showLoading.update("正在转换角色数据");
+    transAbyss.Avatars = hutao.Abyss.utils.transAvatars(roles);
+    await showLoading.update("正在上传深渊数据");
+    const res = await hutao.Abyss.upload(transAbyss);
+    if (res.retcode !== 0) {
+      showSnackbar.error(`[${res.retcode}]${res.message}`);
+      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
+      return;
+    }
+    showSnackbar.success(res.message ?? "上传深渊数据成功");
+    await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
+    await TGLogger.Info(`[${res.retcode}] ${res.message}`);
+  } catch (e) {
+    if (e instanceof Error) {
+      showSnackbar.error(e.message);
+      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${e.message}`);
+    }
+  }
+  await showLoading.end();
+}
 </script>
 <style lang="css" scoped>
 .uat-left {
@@ -349,6 +453,31 @@ async function tryReadAbyss(): Promise<void> {
     height: 24px;
     margin-right: 4px;
     object-fit: contain;
+  }
+}
+
+.uat-extension {
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 16px;
+  padding-left: 16px;
+  margin-bottom: 4px;
+}
+
+.uat-extension-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+
+  span {
+    color: var(--tgc-od-red);
+    cursor: pointer;
   }
 }
 

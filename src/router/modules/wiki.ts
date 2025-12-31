@@ -1,10 +1,15 @@
 /**
  * wiki 路由模块
- * @since Beta v0.8.6
+ * @since Beta v0.9.1
  */
 import type { RouteRecordRaw } from "vue-router";
 
 const wikiRoutes = (<const>[
+  {
+    path: "/wiki/abyss",
+    name: "深渊数据库",
+    component: async () => await import("@/pages/WIKI/Abyss.vue"),
+  },
   {
     path: "/wiki/character/:id?",
     name: "角色图鉴",

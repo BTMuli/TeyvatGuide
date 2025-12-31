@@ -116,6 +116,11 @@
           </v-list-item>
         </template>
         <v-list :nav="true" class="side-list-menu sub" density="compact">
+          <v-list-item class="side-item-menu" title="深渊数据库" :link="true" href="/wiki/abyss">
+            <template #prepend>
+              <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon-menu" />
+            </template>
+          </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/wiki/character" title="角色图鉴">
             <template #prepend>
               <img alt="characterIcon" class="side-icon-menu" src="/source/UI/wikiAvatar.webp" />
