@@ -59,14 +59,16 @@ try {
   execSync(`sentry-cli debug-files upload --include-sources src-tauri/src ${pdbGlob}`, {
     stdio: "inherit",
   });
-  execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
   console.log("✅ PDB upload complete!");
   const distDir = resolve(__dirname, "../dist");
   execSync(
-    `sentry-cli releases files "${release}" upload-sourcemaps "${distDir}" --rewrite --url-prefix "~/"`,
+    `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
     { stdio: "inherit" },
   );
   console.log("✅ Frontend sourcemaps upload complete!");
+
+  execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
+  console.log("🎉 Sentry release finalized!");
 } catch (err) {
   console.error("❌ Failed to upload PDBs:", err);
   process.exit(1);

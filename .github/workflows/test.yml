@@ -229,4 +229,4 @@ jobs:
           sentry-cli releases finalize "$SENTRY_RELEASE"
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_RELEASE: ${{ env.SENTRY_RELEASE }}
+          SENTRY_RELEASE: ${{ env.VITE_SENTRY_RELEASE }}
