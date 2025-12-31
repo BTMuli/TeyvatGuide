@@ -2,21 +2,26 @@
   <div class="hta-ol-container">
     <div class="hta-ol-title">{{ props.label }}</div>
     <div class="hta-ol-val">
-      <div class="hta-olv-cur">{{ getNumStr(props.cur) }}</div>
+      <div class="hta-olv-cur">{{ getNumStr(localCur) }}</div>
       <div
         v-if="props.showDiff"
+        :class="{ 'hta-olv-up': localCur > localLast, 'hta-olv-down': localCur < localLast }"
+        :title="`上期数据：${getNumStr(localLast)}`"
         class="hta-olv-diff"
-        :title="`上期数据：${getNumStr(props.last)}`"
-        :class="{ 'hta-olv-up': props.cur > props.last, 'hta-olv-down': props.cur < props.last }"
       >
-        {{ getDiff(props.cur, props.last) }}
+        {{ getDiff(localCur, localLast) }}
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { computed } from "vue";
+
 type HtaOverviewLineProps = { label: string; cur: number; last: number; showDiff?: boolean };
 const props = withDefaults(defineProps<HtaOverviewLineProps>(), { showDiff: true });
+
+const localCur = computed<number>(() => (isNaN(props.cur) ? 0 : props.cur));
+const localLast = computed<number>(() => (isNaN(props.last) ? 0 : props.last));
 
 function getNumStr(num: number): string {
   if (Number.isInteger(num)) return num.toString();

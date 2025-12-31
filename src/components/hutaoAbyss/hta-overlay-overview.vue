@@ -69,6 +69,8 @@ const props = defineProps<HtaOverlayOverviewProps>();
 const visible = defineModel<boolean>();
 const loadShare = ref<boolean>(false);
 
+console.log(props.data);
+
 async function share(): Promise<void> {
   loadShare.value = true;
   const shareEl = document.querySelector<HTMLElement>(".hta-oo-box");
@@ -101,6 +103,9 @@ async function share(): Promise<void> {
   position: absolute;
   top: 8px;
   right: 8px;
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
+  font-size: 8px;
 }
 
 .hta-oob-title {
