@@ -1,6 +1,6 @@
 <template>
   <div class="hta-tt-box">
-    <v-tabs v-model="tab" direction="vertical" class="hta-tt-tab">
+    <v-tabs v-model="tab" class="hta-tt-tab" direction="vertical">
       <v-tab :value="10">第10层</v-tab>
       <v-tab :value="11">第11层</v-tab>
       <v-tab :value="12">第12层</v-tab>
@@ -10,19 +10,21 @@
         <div class="hta-tt-flex">
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">上半</div>
-            <v-virtual-scroll :items="selectItem.Up" item-height="100" class="hta-tuf-item">
+            <v-virtual-scroll :items="selectItem.Up" class="hta-tuf-item" item-height="100">
               <template #default="{ item }">
                 <HtaTeamLine :model-value="item" />
               </template>
             </v-virtual-scroll>
+            <span v-if="selectItem.Up.length === 0">暂无数据</span>
           </div>
           <div class="hta-tuf-box">
             <div class="hta-tuf-title">下半</div>
-            <v-virtual-scroll :items="selectItem.Down" item-height="100" class="hta-tuf-item">
+            <v-virtual-scroll :items="selectItem.Down" class="hta-tuf-item" item-height="100">
               <template #default="{ item }">
                 <HtaTeamLine :model-value="item" />
               </template>
             </v-virtual-scroll>
+            <span v-if="selectItem.Down.length === 0">暂无数据</span>
           </div>
         </div>
       </v-window-item>

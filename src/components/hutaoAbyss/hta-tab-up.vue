@@ -13,6 +13,7 @@
             :model-value="item"
           />
         </div>
+        <div v-if="selectItem.Ranks.length === 0">暂无数据</div>
       </v-window-item>
     </v-window>
   </div>

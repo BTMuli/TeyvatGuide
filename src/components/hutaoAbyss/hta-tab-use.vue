@@ -1,6 +1,6 @@
 <template>
   <div class="hta-tus-box">
-    <v-tabs v-model="tab" direction="vertical" class="hta-tus-tab">
+    <v-tabs v-model="tab" class="hta-tus-tab" direction="vertical">
       <v-tab :value="11">第11层</v-tab>
       <v-tab :value="12">第12层</v-tab>
     </v-tabs>
@@ -13,6 +13,7 @@
             :model-value="item"
           />
         </div>
+        <div v-if="selectItem.Ranks.length === 0">暂无数据</div>
       </v-window-item>
     </v-window>
   </div>

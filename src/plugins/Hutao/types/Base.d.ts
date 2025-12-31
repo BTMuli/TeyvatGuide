@@ -2,16 +2,17 @@
  * Hutao 插件基础类型定义文件
  * @since Beta v0.6.2
  */
+
 declare namespace TGApp.Plugins.Hutao.Base {
   /**
-   * Hutao Response 统一接口
-   * @since Alpha v0.2.1
+   * 统一接口
+   * @since Beta v0.9.1
    */
-  type Resp<T = unknown> = {
+  type Resp<T = never> = {
     /** 状态码 */
-    retcode?: number;
+    retcode: number;
     /** 状态信息 */
-    message?: string;
+    message: string;
     /** 数据 */
     data?: T;
   };

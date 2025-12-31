@@ -1,22 +1,27 @@
+<!-- 胡桃云统计数据 -->
 <template>
   <v-app-bar>
     <template #prepend>
       <div class="hta-top-prepend">
-        <img src="/source/UI/wikiAbyss.webp" alt="icon" />
-        <span>深渊统计</span>
+        <div class="hta-top-title">
+          <img alt="icon" src="/source/UI/wikiAbyss.webp" />
+          <span>深渊统计</span>
+        </div>
         <v-select
           v-model="tab"
           :items="abyssList"
+          class="hta-top-select"
+          density="compact"
           item-title="label"
           item-value="value"
-          density="compact"
+          label="数据类型"
           variant="outlined"
         />
       </div>
     </template>
     <template #append>
       <div class="hta-top-append">
-        <span @click="showDialog = !showDialog" v-if="overview">
+        <span v-if="overview" @click="showDialog = !showDialog">
           更新于 {{ timestampToDate(overview.cur.Timestamp) }}
         </span>
       </div>
@@ -25,16 +30,16 @@
   <div class="hta-box">
     <v-window v-model="tab" class="hta-tab-item">
       <v-window-item value="use">
-        <HtaTabUse v-if="abyssData.use !== null" :data="abyssData.use" />
+        <HtaTabUse v-if="abyssData.use" :data="abyssData.use" />
       </v-window-item>
       <v-window-item value="up">
-        <HtaTabUp v-if="abyssData.up !== null" :data="abyssData.up" />
+        <HtaTabUp v-if="abyssData.up" :data="abyssData.up" />
       </v-window-item>
       <v-window-item value="team">
-        <HtaTabTeam v-if="abyssData.team !== null" :model-value="abyssData.team" />
+        <HtaTabTeam v-if="abyssData.team" :model-value="abyssData.team" />
       </v-window-item>
       <v-window-item value="hold">
-        <HtaTabHold v-if="abyssData.hold !== null" :data="abyssData.hold" />
+        <HtaTabHold v-if="abyssData.hold" :data="abyssData.hold" />
       </v-window-item>
     </v-window>
   </div>
@@ -48,6 +53,7 @@ import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
 import Hutao from "@Hutao/index.js";
+import hutao from "@Hutao/index.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, reactive, ref, type ShallowRef, shallowRef, watch } from "vue";
 
@@ -71,12 +77,6 @@ const abyssList: Readonly<AbyssList> = [
   { label: "队伍出场", value: "team" },
   { label: "角色持有", value: "hold" },
 ];
-const abyssMap: Readonly<Record<AbyssTab, string>> = {
-  use: "角色使用率",
-  up: "角色出场率",
-  team: "队伍出场率",
-  hold: "角色持有率",
-};
 const showDialog = ref<boolean>(false);
 const tab = shallowRef<AbyssTab>("use");
 const overview = shallowRef<AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
@@ -93,89 +93,155 @@ watch(
 );
 
 onMounted(async () => {
-  await showLoading.start("正在获取深渊数据", "正在获取上期深渊概览");
-  const lastData = await Hutao.Abyss.overview(true);
-  await showLoading.update("正在获取本期深渊概览");
-  const curData = await Hutao.Abyss.overview();
-  overview.value = { cur: curData, last: lastData };
-  await showLoading.update("正在获取角色使用率数据");
-  abyssData.use = <AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>>>await getData("use");
+  await getOverview();
+  await getUseData();
   await showLoading.end();
 });
 
 async function refreshData(type: AbyssTab): Promise<void> {
   if (abyssData && abyssData[type] !== null) return;
-  await showLoading.start("正在获取深渊数据", `正在获取 ${abyssMap[type]} 数据`);
-  const data = await getData(type);
   switch (type) {
     case "use":
-      abyssData.use = <AbyssDataItemType<"use">>data;
+      await getUseData();
       break;
     case "up":
-      abyssData.up = <AbyssDataItemType<"up">>data;
+      await getUpData();
       break;
     case "team":
-      abyssData.team = <AbyssDataItemType<"team">>data;
+      await getTeamData();
       break;
     case "hold":
-      abyssData.hold = <AbyssDataItemType<"hold">>data;
+      await getHoldData();
       break;
   }
   await showLoading.end();
 }
 
-async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {
-  switch (type) {
-    case "use":
-      return {
-        cur: await Hutao.Abyss.avatar.use(),
-        last: await Hutao.Abyss.avatar.use(true),
-      };
-    case "up":
-      return {
-        cur: await Hutao.Abyss.avatar.up(),
-        last: await Hutao.Abyss.avatar.up(true),
-      };
-    case "team":
-      return await Hutao.Abyss.team();
-    case "hold":
-      return {
-        cur: await Hutao.Abyss.avatar.hold(),
-        last: await Hutao.Abyss.avatar.hold(true),
-      };
+async function getOverview(): Promise<void> {
+  await showLoading.start("正在获取深渊概览");
+  let cur: TGApp.Plugins.Hutao.Abyss.OverviewData | undefined = undefined;
+  let last: TGApp.Plugins.Hutao.Abyss.OverviewData | undefined = undefined;
+  const curResp = await hutao.Abyss.overview();
+  if ("retcode" in curResp) {
+    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+  } else {
+    cur = curResp;
+  }
+  const lastResp = await hutao.Abyss.overview(true);
+  if ("retcode" in lastResp) {
+    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+  } else {
+    last = lastResp;
+  }
+  if (cur && last) overview.value = { cur, last };
+  else overview.value = undefined;
+}
+
+async function getUseData(): Promise<void> {
+  await showLoading.start("正在获取角色使用率数据");
+  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> = [];
+  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> = [];
+  const curResp = await hutao.Abyss.avatar.use();
+  if (!Array.isArray(curResp)) {
+    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+  } else {
+    cur = curResp;
+  }
+  const lastResp = await Hutao.Abyss.avatar.use(true);
+  if (!Array.isArray(lastResp)) {
+    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+  } else {
+    last = lastResp;
+  }
+  abyssData.use = { cur, last };
+}
+
+async function getUpData(): Promise<void> {
+  await showLoading.start("正在获取角色出场率数据");
+  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> = [];
+  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> = [];
+  const curResp = await hutao.Abyss.avatar.up();
+  if (!Array.isArray(curResp)) {
+    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+  } else {
+    cur = curResp;
+  }
+  const lastResp = await Hutao.Abyss.avatar.use(true);
+  if (!Array.isArray(lastResp)) {
+    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+  } else {
+    last = lastResp;
+  }
+  abyssData.up = { cur, last };
+}
+
+async function getTeamData(): Promise<void> {
+  await showLoading.start("正在获取队伍出场数据");
+  const teamResp = await hutao.Abyss.team();
+  if ("retcode" in teamResp) {
+    await showLoading.update(`[${teamResp.retcode}] ${teamResp.message}`);
+  } else {
+    abyssData.team = teamResp;
   }
 }
+
+async function getHoldData(): Promise<void> {
+  await showLoading.start("正在获取角色持有数据");
+  let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> = [];
+  let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> = [];
+  const curResp = await hutao.Abyss.avatar.hold();
+  if (!Array.isArray(curResp)) {
+    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+  } else {
+    cur = curResp;
+  }
+  const lastResp = await Hutao.Abyss.avatar.hold(true);
+  if (!Array.isArray(lastResp)) {
+    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+  } else {
+    last = lastResp;
+  }
+  abyssData.hold = { cur, last };
+}
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .hta-top-prepend {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  margin-left: 12px;
+  column-gap: 16px;
+}
+
+.hta-top-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--common-text-title);
+  column-gap: 4px;
+  font-family: var(--font-title);
+  font-size: 20px;
 
   img {
     width: 32px;
     height: 32px;
-  }
-
-  span {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 20px;
-  }
-
-  :last-child {
-    height: 50px;
-    margin-top: 20px;
+    object-fit: cover;
   }
 }
 
+.hta-top-select {
+  position: relative;
+  height: 40px;
+}
+
 .hta-top-append {
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding-right: 10px;
+  margin-right: 12px;
   cursor: pointer;
   font-family: var(--font-title);
 }
@@ -184,8 +250,8 @@ async function getData(type: AbyssTab): Promise<AbyssDataItemType<AbyssTab>> {
   overflow: auto;
   width: 100%;
   box-sizing: border-box;
-  border-radius: 5px;
-  box-shadow: 0 0 10px var(--common-shadow-4);
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--common-shadow-4);
 }
 
 .hta-tab-item {
