@@ -1,6 +1,6 @@
 /**
  * 封装HTTP请求
- * @since Beta v0.6.8
+ * @since Beta v0.9.1
  */
 
 import { fetch } from "@tauri-apps/plugin-http";
@@ -26,7 +26,7 @@ type TGHttpParams = {
 
 /**
  * 发送请求
- * @since Beta v0.5.1
+ * @since Beta v0.9.1
  * @typeParam T - 返回数据类型
  * @param url - 请求地址
  * @param options - 请求参数
@@ -69,7 +69,13 @@ async function TGHttp<T>(
       throw new Error(`HTTP error! status: ${res.status}`);
     })
     .catch((err) => {
-      console.error("HTTP error: ", err);
+      console.error(`Request ${url} error`);
+      console.error(`Options: ${JSON.stringify(options)}`);
+      if (err instanceof Error || typeof err === "object") {
+        console.error(`Error: ${JSON.stringify(err)}`);
+      } else {
+        console.error(`Error: ${err}`);
+      }
       return err;
     });
 }
