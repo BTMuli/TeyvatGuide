@@ -61,6 +61,12 @@ try {
   });
   execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
   console.log("✅ PDB upload complete!");
+  const distDir = resolve(__dirname, "../dist");
+  execSync(
+    `sentry-cli releases files "${release}" upload-sourcemaps "${distDir}" --rewrite --url-prefix "~/"`,
+    { stdio: "inherit" },
+  );
+  console.log("✅ Frontend sourcemaps upload complete!");
 } catch (err) {
   console.error("❌ Failed to upload PDBs:", err);
   process.exit(1);
