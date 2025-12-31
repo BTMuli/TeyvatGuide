@@ -96,6 +96,8 @@ declare namespace TGApp.App.Character {
     };
     /** 角色星级 */
     star: number;
+    /** 元素描述 */
+    elePrefix: string;
     /** 角色元素 */
     element: string;
     /** 角色武器类型 */

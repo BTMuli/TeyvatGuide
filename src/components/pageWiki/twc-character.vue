@@ -20,12 +20,16 @@
         </div>
         <div class="twc-bi-grid1">
           <div class="twc-big-item">
-            <span>所属</span>
-            <span>{{ data.brief.camp }}</span>
+            <span>{{ data.elePrefix }}</span>
+            <span>{{ data.element }}</span>
           </div>
           <div class="twc-big-item">
             <span>命之座</span>
             <span>{{ data.brief.constellation }}</span>
+          </div>
+          <div class="twc-big-item">
+            <span>所属</span>
+            <span>{{ data.brief.camp }}</span>
           </div>
           <div
             class="twc-big-item active"
@@ -235,7 +239,7 @@ async function toBirth(date: string): Promise<void> {
 .twc-bi-grid1 {
   display: grid;
   column-gap: 10px;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .twc-bi-grid2 {

@@ -2,7 +2,7 @@
   "area": "枫丹",
   "brief": {
     "camp": "枫丹廷",
-    "constellation": "？？？",
+    "constellation": "原海巨灵座",
     "birth": "12月18日",
     "cv": { "cn": "桑毓泽", "jp": "神谷浩史", "en": "雷·查斯", "kr": "郭允相" }
   },
@@ -47,6 +47,7 @@
     }
   ],
   "description": "枫丹的最高审判官，因其无懈可击的「秉公无私」而闻名。",
+  "elePrefix": "古龙大权",
   "element": "水",
   "id": 10000087,
   "materials": [

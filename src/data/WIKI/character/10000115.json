@@ -47,6 +47,7 @@
     }
   ],
   "description": "西风教会的助祭，风神在教会的代行人。",
+  "elePrefix": "神之眼",
   "element": "水",
   "id": 10000115,
   "materials": [

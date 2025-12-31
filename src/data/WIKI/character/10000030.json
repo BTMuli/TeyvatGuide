@@ -2,7 +2,7 @@
   "area": "璃月",
   "brief": {
     "camp": "璃月港",
-    "constellation": "？？？",
+    "constellation": "岩王帝君座",
     "birth": "12月31日",
     "cv": { "cn": "彭博", "jp": "前野智昭", "en": "基思·西尔弗斯坦", "kr": "表永宰" }
   },
@@ -47,6 +47,7 @@
     }
   ],
   "description": "被「往生堂」请来的神秘客人，知识渊博，对各种事物都颇有见地。",
+  "elePrefix": "神之心",
   "element": "岩",
   "id": 10000030,
   "materials": [

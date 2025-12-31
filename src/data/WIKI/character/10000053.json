@@ -47,6 +47,7 @@
     }
   ],
   "description": "隶属于「终末番」的忍者。身形小巧，总像没睡饱一样。",
+  "elePrefix": "神之眼",
   "element": "风",
   "id": 10000053,
   "materials": [
