@@ -103,9 +103,9 @@ async function loadUserPosition(forceReload: boolean = false): Promise<void> {
     await TGLogger.Error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
     return;
   }
-  userPos.value = [...resp.act_list, ...resp.fixed_act_list].filter(
-    (i) => i.start_timestamp !== "0",
-  );
+  userPos.value = [...resp.act_list, ...resp.fixed_act_list]
+    .filter((i) => i.start_timestamp !== "0")
+    .sort((a, b) => Number(a.is_finished) - Number(b.is_finished) || b.id - a.id);
 }
 
 async function loadWikiPosition(): Promise<void> {
