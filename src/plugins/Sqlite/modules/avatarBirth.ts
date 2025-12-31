@@ -1,6 +1,6 @@
 /**
  * 角色生日模块
- * @since Beta v0.8.0
+ * @since Beta v0.9.1
  */
 
 import {
@@ -47,7 +47,7 @@ function isLeapYear(year: number): boolean {
 
 /**
  * 获取下一个角色生日
- * @since Beta v0.7.0
+ * @since Beta v0.9.1
  * @param date - 日期
  * @returns 下一个角色生日
  */
@@ -62,7 +62,9 @@ async function getNextAvatarBirth(
     month = new Date().getMonth() + 1;
     day = new Date().getDate();
   }
-  const sortList = AppCharacterData.sort((a, b) => {
+  const sortList = AppCharacterData.filter(
+    (a) => JSON.stringify(a.birthday) !== JSON.stringify([0, 0]),
+  ).sort((a, b) => {
     if (a.birthday[0] === b.birthday[0]) return a.birthday[1] - b.birthday[1];
     return a.birthday[0] - b.birthday[0];
   });
