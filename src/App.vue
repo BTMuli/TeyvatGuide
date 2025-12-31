@@ -384,7 +384,7 @@ async function checkUpdate(): Promise<void> {
       return;
     }
     // @ts-expect-error import.meta
-    buildTime.value = import.meta.env.VITE_SENTRY_RELEASE;
+    buildTime.value = import.meta.env.VITE_BUILD_TIME;
     await TGSqlite.update();
     showSnackbar.success("数据库已更新！", 3000);
     await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");

@@ -12,7 +12,7 @@
         <span class="ug-hisci-tag">{{ props.pool.order === 1 ? "上半" : "下半" }}</span>
         <span class="ug-hisci-tag">{{ getType(props.pool.type) }}</span>
       </div>
-      <div class="ug-hisci-time">{{ getTimeStr(props.pool) }}</div>
+      <div :title="getTimeStr(props.pool)" class="ug-hisci-time">{{ getTimeStr(props.pool) }}</div>
       <div class="ug-hisci-sub">Up 五星</div>
       <div class="ug-hisci-up lv5">
         <TItemBox
@@ -308,15 +308,18 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  overflow-x: hidden;
 }
 
 .ug-hisci-title,
 .ug-hiscr-title {
+  position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   color: var(--common-text-title);
-  column-gap: 8px;
+  gap: 4px;
   font-family: var(--font-title);
   font-size: 20px;
 }
@@ -328,15 +331,22 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   height: fit-content;
   align-items: center;
   justify-content: center;
-  padding: 0 8px;
+  padding: 0 4px;
   border-radius: 4px;
   font-family: var(--font-text);
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .ug-hisci-time {
   position: relative;
+  display: inline;
+  overflow: hidden;
+  max-width: 100%;
   font-size: 12px;
+  max-lines: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
 }
 
 .ug-hisci-sub {
@@ -353,10 +363,11 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   overflow-y: auto;
 
   &.lv5 {
-    max-height: 80px;
+    min-height: 80px;
   }
 
   &.lv4 {
+    min-height: 80px;
     max-height: 80px;
   }
 }
@@ -364,6 +375,7 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
 .ug-hiscr-list {
   position: relative;
   display: flex;
+  width: 100%;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
