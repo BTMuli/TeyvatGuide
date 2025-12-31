@@ -1,6 +1,6 @@
 /**
  * 数据文件入口
- * @since Beta v0.8.4
+ * @since Beta v0.9.1
  */
 
 import type { Schema } from "ajv";
@@ -53,8 +53,10 @@ const avatarFiles = import.meta.glob("./WIKI/character/*.json");
 export async function getWikiCharacterById(
   id: number,
 ): Promise<TGApp.App.Character.WikiItem | false> {
+  const key = `./WIKI/character/${id}.json`;
+  if (!(key in avatarFiles)) return false;
   try {
-    const data = await avatarFiles[`./WIKI/character/${id}.json`]();
+    const data = await avatarFiles[key]();
     if (data && typeof data === "object" && "default" in data) {
       console.log(data.default);
       return <TGApp.App.Character.WikiItem>data.default;

@@ -292,7 +292,7 @@ async function confirmUpdate(title?: string): Promise<void> {
   await showLoading.start("正在更新数据库", "");
   await TGSqlite.update();
   // @ts-expect-error import.meta
-  buildTime.value = import.meta.env.VITE_SENTRY_RELEASE;
+  buildTime.value = import.meta.env.VITE_BUILD_TIME;
   await showLoading.end();
   showSnackbar.success("数据库已更新!即将刷新页面");
   await TGLogger.Info("[Config][confirmUpdate] 数据库更新完成");

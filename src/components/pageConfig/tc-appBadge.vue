@@ -4,7 +4,7 @@
     <div class="tab-info click" title="点击前往 Github Release" @click="toRelease()">
       TeyvatGuide Beta
     </div>
-    <div class="tab-info">{{ buildTime.replace("TeyvatGuide@", "") }}</div>
+    <div class="tab-info">{{ versionApp }}_{{ buildTime }}</div>
     <div class="tab-links">
       <div class="tab-link" title="点击加入反馈群" @click="toGroup()">
         <img alt="qq" src="/platforms/other/qq.webp" />
@@ -27,7 +27,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { onMounted, ref } from "vue";
 
 // @ts-expect-error import.meta
-const buildTime = import.meta.env.VITE_SENTRY_RELEASE;
+const buildTime = import.meta.env.VITE_BUILD_TIME;
 const versionApp = ref<string>();
 
 onMounted(async () => (versionApp.value = await app.getVersion()));

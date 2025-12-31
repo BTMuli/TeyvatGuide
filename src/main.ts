@@ -22,7 +22,8 @@ Sentry.init({
   app,
   dsn: "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",
   release: import.meta.env.VITE_SENTRY_RELEASE,
-  enableLogs: process.env.NODE_ENV === "production",
+  enableLogs: true,
+  environment: process.env.NODE_ENV,
   integrations: [
     Sentry.feedbackAsyncIntegration(<FeedbackInternalOptions>{
       // 🌗 主题与注入行为
@@ -55,6 +56,7 @@ Sentry.init({
       hideToolText: "遮挡敏感信息",
     }),
     Sentry.consoleLoggingIntegration({ levels: ["error"] }),
+    Sentry.browserTracingIntegration({ router }),
   ],
   beforeSend(event, hint) {
     console.log(hint);
@@ -68,5 +70,8 @@ Sentry.init({
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
 });
+
+Sentry.setTag("commitHash", import.meta.env.VITE_COMMIT_HASH);
+Sentry.setTag("buildTime", import.meta.env.VITE_BUILD_TIME);
 
 app.use(router).use(store).use(createVuetify()).mount("#app");

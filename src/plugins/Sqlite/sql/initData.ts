@@ -16,7 +16,7 @@ async function initAppData(): Promise<Array<string>> {
   const sqlRes: Array<string> = [];
   const appVersion = await app.getVersion();
   // @ts-expect-error import.meta
-  const buildTime: string = import.meta.VITE_SENTRY_RELEASE;
+  const buildTime: string = import.meta.VITE_BUILD_TIME;
   // 初始化应用版本
   sqlRes.push(`
       INSERT INTO AppData (key, value, updated)

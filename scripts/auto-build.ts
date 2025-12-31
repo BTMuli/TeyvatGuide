@@ -25,24 +25,16 @@ console.log(`🍄 SkipUpload:${skipUpload}`);
 // 获取提交哈希
 const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
 
-// 获取当前平台
-let platform = "unknown";
-if (process.platform === "win32") {
-  platform = "windows";
-} else if (process.platform === "darwin") {
-  platform = process.arch === "arm64" ? "macos-arm" : "macos-intel";
-} else {
-  platform = `${process.platform}-${process.arch}`;
-}
-
 // 构建 Release 字符串
-const release = `TeyvatGuide@${pkgVersion}_${commitHash}_${platform}`;
-console.log(`🍄 gen sentry release ${release}`);
+const release = `TeyvatGuide@${pkgVersion}`;
+console.log(`🍄 gen sentry release ${release} env`);
 
 // 修改 .env.production
 const envPath = resolve(__dirname, "../.env.production");
 const envRead = parse(readFileSync(envPath, "utf-8"));
 envRead.VITE_SENTRY_RELEASE = release;
+envRead.VITE_COMMIT_HASH = commitHash;
+envRead.VITE_BUILD_TIME = Math.floor(Date.now() / 1000).toString();
 writeFileSync(envPath, stringify(envRead), "utf-8");
 console.log("✅ .env.production updated!");
 
