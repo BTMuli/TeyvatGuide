@@ -93,7 +93,7 @@ const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 // 路由参数
 const autoRun = ref<boolean>(false);
 const exitAfter = ref<boolean>(false);
-const skipGeetest = ref<boolean>(true);
+const skipGeetest = ref<boolean>(false);
 const targetUids = shallowRef<Array<string>>([]);
 
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
