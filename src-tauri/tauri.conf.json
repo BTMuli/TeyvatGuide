@@ -50,5 +50,32 @@
     ],
     "security": { "capabilities": ["TeyvatGuide", "Mys", "SubWindow", "DevJson"] }
   },
-  "plugins": { "deep-link": { "desktop": { "schemes": ["teyvatguide"] }, "mobile": [] } }
+  "plugins": {
+    "deep-link": { "desktop": { "schemes": ["teyvatguide"] }, "mobile": [] },
+    "cli": {
+      "description": "The Command Func for TeyvatGuide",
+      "subcommands": {
+        "us": {
+          "description": "Run User Scripts",
+          "args": [
+            { "name": "no-default-features", "description": "the workaround for cargo dev args" },
+            {
+              "name": "color",
+              "description": "the workaround for cargo dev args",
+              "takesValue": true
+            },
+            {
+              "short": "u",
+              "name": "uids",
+              "description": "Target Miyoushe UID",
+              "takesValue": true,
+              "multiple": true
+            },
+            { "short": "s", "name": "skip", "description": "Skip Geetest Verify" },
+            { "short": "e", "name": "exit", "description": "Exit App after command" }
+          ]
+        }
+      }
+    }
+  }
 }

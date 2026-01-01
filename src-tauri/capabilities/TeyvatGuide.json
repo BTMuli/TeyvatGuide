@@ -23,6 +23,8 @@
     "core:window:allow-set-title",
     "core:window:allow-show",
     "core:window:allow-unminimize",
+    "cli:default",
+    "cli:allow-cli-matches",
     "dialog:default",
     "dialog:allow-save",
     "fs:default",

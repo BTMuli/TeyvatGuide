@@ -17,6 +17,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import OtherApi from "@req/otherReq.js";
+import * as Sentry from "@sentry/vue";
 import TGSqlite from "@Sql/index.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
@@ -26,6 +27,7 @@ import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
@@ -256,6 +258,12 @@ async function listenOnInit(): Promise<void> {
       } else console.error(e);
     }
     await checkUpdate();
+    try {
+      await handleCommands(await getMatches());
+    } catch (e) {
+      console.error("获取启动参数异常");
+      console.error(e);
+    }
   });
 }
 
@@ -408,6 +416,24 @@ async function handleWindowClose(): Promise<void> {
     if (e instanceof Error) {
       await TGLogger.Error(`[App][handleWindowClose] ${e.name}: ${e.message}`);
     } else console.error(e);
+  }
+}
+
+// 处理命令行参数
+async function handleCommands(cmds: CliMatches): Promise<void> {
+  if (cmds.subcommand === null) return;
+  Sentry.logger.info(`捕获到启动参数:${JSON.stringify(cmds)}`);
+  // 用户脚本
+  if (cmds.subcommand.name === "us") {
+    const usMatch = cmds.subcommand.matches;
+    await router.push({
+      name: "实用脚本",
+      query: {
+        uids: <Array<string>>usMatch.args.uids.value ?? [],
+        exit: `${usMatch.args.exit.value ?? false}`,
+        skip: `${usMatch.args.skip.value ?? false}`,
+      },
+    });
   }
 }
 </script>

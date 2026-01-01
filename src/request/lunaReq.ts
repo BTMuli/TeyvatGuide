@@ -68,7 +68,7 @@ async function getLunaHome(
       .map((key) => `${key}=${cookie[key]}`)
       .join("; "),
   };
-  if (conf.host) if (conf.host) header["x-rpc-signgame"] = conf.host;
+  if (conf.host) header["x-rpc-signgame"] = conf.host;
   const resp = await TGHttp<TGApp.BBS.Sign.HomeResp>(url, {
     method: "GET",
     query: params,

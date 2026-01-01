@@ -49,6 +49,11 @@ features = [
     "Win32_System_WindowsProgramming",
 ]
 
+# cli 插件
+[dependencies.tauri-plugin-cli]
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
+branch = "v2"
+
 # deep link 插件
 [dependencies.tauri-plugin-deep-link]
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"

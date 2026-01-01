@@ -80,9 +80,19 @@ import painterReq from "@req/painterReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, useTemplateRef } from "vue";
+import { onBeforeMount, onMounted, ref, shallowRef, useTemplateRef } from "vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
 
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
+
+// 路由参数
+const exitAfter = ref<boolean>(false);
+const skipGeetest = ref<boolean>(true);
+const targetUids = shallowRef<Array<string>>([]);
+
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
 const curAccount = shallowRef<TGApp.App.Account.User>();
 const runScript = ref<boolean>(false);
@@ -90,9 +100,25 @@ const runAll = ref<boolean>(false);
 const missionEl = useTemplateRef("mission");
 const signEl = useTemplateRef("sign");
 
+onBeforeMount(async () => {
+  if (Object.keys(route.query).length > 0) {
+    exitAfter.value = route.query.exit === "true";
+    skipGeetest.value = route.query.skip === "true";
+    if (route.query.uids) {
+      if (Array.isArray(route.query.uids)) {
+        targetUids.value = <Array<string>>route.query.uids;
+      } else {
+        targetUids.value = [route.query.uids];
+      }
+    }
+    await router.replace({ path: route.path, query: {} });
+  }
+});
+
 onMounted(async () => {
   accounts.value = await TSUserAccount.account.getAllAccount();
   curAccount.value = accounts.value.find((i) => i.uid === uid.value);
+  await showLoading.end();
 });
 
 async function loadAccount(ac: string): Promise<void> {
