@@ -50,6 +50,7 @@ import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
+import TGNotify from "@utils/TGNotify.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, watch } from "vue";
 
@@ -320,6 +321,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
     }
     if (skip) {
       await TGLogger.Script("已设置跳过验证，打卡失败");
+      await TGNotify.normal("自动打卡触发验证", `UID:${ck.stuid}`);
       return;
     }
     await TGLogger.Script(`[米游币任务]社区签到触发验证码，正在尝试验证`);

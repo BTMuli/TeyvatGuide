@@ -64,6 +64,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
+import TGNotify from "@utils/TGNotify.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
@@ -277,7 +278,11 @@ async function trySign(
       if ("retcode" in signResp) {
         if (signResp.retcode === 1034) {
           if (skip) {
-            await TGLogger.Script("已设置跳过验证，签到失败");
+            await TGLogger.Script("已设置跳过验证，打卡失败");
+            await TGNotify.normal(
+              "自动打卡触发验证",
+              `${item.account.regionName}-${item.account.gameUid}-${item.account.nickname}`,
+            );
             break;
           }
           await TGLogger.Script(`[签到任务]触发验证码，正在尝试验证`);

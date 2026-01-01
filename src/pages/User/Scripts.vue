@@ -80,6 +80,7 @@ import painterReq from "@req/painterReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
 import { exit } from "@tauri-apps/plugin-process";
+import TGNotify from "@utils/TGNotify.js";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -133,12 +134,15 @@ async function tryAutoRun(): Promise<void> {
   } else {
     uids = targetUids.value;
   }
+  const startTime = Date.now();
   for (const uid of uids) {
     await loadAccount(uid);
     await tryExecAll();
   }
   if (exitAfter.value) {
     showSnackbar.success("任务执行完成，即将自动退出");
+    const costTime = Date.now() - startTime;
+    await TGNotify.normal("自动脚本执行完成", `耗时${Math.floor(costTime / 1000)}s`);
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     await exit();
   }
