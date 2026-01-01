@@ -169,7 +169,7 @@ async function tryRefresh(): Promise<void> {
   loadState.value = false;
 }
 
-async function tryAuto(): Promise<void> {
+async function tryAuto(skip: boolean = false): Promise<void> {
   if (loadScript.value) {
     showSnackbar.warn("任务正在执行中，请稍后再试");
     return;
@@ -199,7 +199,7 @@ async function tryAuto(): Promise<void> {
     loadSign.value = false;
     return;
   }
-  await trySign(selected, cookie.value);
+  await trySign(selected, cookie.value, skip);
   await refreshState(cookie.value);
   await TGLogger.Script("[签到任务]签到任务执行完毕");
   await TGLogger.ScriptSep("签到任务", false);
@@ -254,7 +254,11 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   }
 }
 
-async function trySign(ac: Array<SignAccount>, ck: TGApp.App.Account.Cookie): Promise<void> {
+async function trySign(
+  ac: Array<SignAccount>,
+  ck: TGApp.App.Account.Cookie,
+  skip: boolean,
+): Promise<void> {
   const cookie = { cookie_token: ck.cookie_token, account_id: ck.account_id };
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
   for (const item of ac) {
@@ -272,6 +276,10 @@ async function trySign(ac: Array<SignAccount>, ck: TGApp.App.Account.Cookie): Pr
       if (challenge !== undefined) challenge = undefined;
       if ("retcode" in signResp) {
         if (signResp.retcode === 1034) {
+          if (skip) {
+            await TGLogger.Script("已设置跳过验证，签到失败");
+            break;
+          }
           await TGLogger.Script(`[签到任务]触发验证码，正在尝试验证`);
           const challengeGet = await miscReq.challenge(ckSign);
           if (challengeGet === false) {

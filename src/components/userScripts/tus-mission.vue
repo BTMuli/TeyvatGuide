@@ -155,7 +155,7 @@ async function tryRefresh(): Promise<void> {
   loadState.value = false;
 }
 
-async function tryAuto(): Promise<void> {
+async function tryAuto(skip: boolean = false): Promise<void> {
   if (loadScript.value) {
     showSnackbar.warn("任务正在执行中，请稍后再试");
     return;
@@ -177,7 +177,7 @@ async function tryAuto(): Promise<void> {
     loadMission.value = false;
     return;
   }
-  await autoSign(cookie.value);
+  await autoSign(cookie.value, skip);
   const postFilter = parseMissions.value.filter((i) => i.key !== "continuous_sign");
   if (postFilter.every((i) => i.status)) {
     await TGLogger.Script("[米游币任务]所有任务已完成");
@@ -297,7 +297,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   await TGLogger.Script("[米游币任务]任务数据合并完成");
 }
 
-async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void> {
+async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string): Promise<void> {
   const signFind = parseMissions.value.find((i) => i.key === "continuous_sign");
   if (!signFind) {
     await TGLogger.Script("[米游币任务]未找到打卡任务");
@@ -318,13 +318,17 @@ async function autoSign(ck: TGApp.App.Account.Cookie, ch?: string): Promise<void
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
       return;
     }
+    if (skip) {
+      await TGLogger.Script("已设置跳过验证，打卡失败");
+      return;
+    }
     await TGLogger.Script(`[米游币任务]社区签到触发验证码，正在尝试验证`);
     const challenge = await miscReq.challenge(ckSign);
     if (challenge === false) {
       await TGLogger.Script(`[米游币任务]验证失败`);
       return;
     }
-    await autoSign(ck, challenge);
+    await autoSign(ck, skip, challenge);
     return;
   }
   await TGLogger.Script("[米游币任务]打卡成功");

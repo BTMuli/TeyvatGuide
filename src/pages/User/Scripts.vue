@@ -79,6 +79,7 @@ import miscReq from "@req/miscReq.js";
 import painterReq from "@req/painterReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useUserStore from "@store/user.js";
+import { exit } from "@tauri-apps/plugin-process";
 import { storeToRefs } from "pinia";
 import { onBeforeMount, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -89,6 +90,7 @@ const router = useRouter();
 const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
 
 // 路由参数
+const autoRun = ref<boolean>(false);
 const exitAfter = ref<boolean>(false);
 const skipGeetest = ref<boolean>(true);
 const targetUids = shallowRef<Array<string>>([]);
@@ -104,6 +106,7 @@ onBeforeMount(async () => {
   if (Object.keys(route.query).length > 0) {
     exitAfter.value = route.query.exit === "true";
     skipGeetest.value = route.query.skip === "true";
+    autoRun.value = route.query.auto === "true";
     if (route.query.uids) {
       if (Array.isArray(route.query.uids)) {
         targetUids.value = <Array<string>>route.query.uids;
@@ -117,9 +120,29 @@ onBeforeMount(async () => {
 
 onMounted(async () => {
   accounts.value = await TSUserAccount.account.getAllAccount();
+  targetUids.value = targetUids.value.filter((u) => accounts.value.some((a) => a.uid === u));
   curAccount.value = accounts.value.find((i) => i.uid === uid.value);
   await showLoading.end();
+  if (autoRun.value) await tryAutoRun();
 });
+
+async function tryAutoRun(): Promise<void> {
+  let uids: Array<string> = accounts.value.map((u) => u.uid);
+  if (targetUids.value.length === 0) {
+    showSnackbar.warn("未接收到合法UID列表，默认全部执行");
+  } else {
+    uids = targetUids.value;
+  }
+  for (const uid of uids) {
+    await loadAccount(uid);
+    await tryExecAll();
+  }
+  if (exitAfter.value) {
+    showSnackbar.success("任务执行完成，即将自动退出");
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+    await exit();
+  }
+}
 
 async function loadAccount(ac: string): Promise<void> {
   if (uid.value && ac === uid.value) {
@@ -196,8 +219,8 @@ async function tryExecAll(): Promise<void> {
     return;
   }
   runAll.value = true;
-  await missionEl.value?.tryAuto();
-  await signEl.value?.tryAuto();
+  await missionEl.value?.tryAuto(skipGeetest.value);
+  await signEl.value?.tryAuto(skipGeetest.value);
   runAll.value = false;
 }
 </script>

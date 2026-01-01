@@ -429,6 +429,7 @@ async function handleCommands(cmds: CliMatches): Promise<void> {
     await router.push({
       name: "实用脚本",
       query: {
+        auto: "true",
         uids: <Array<string>>usMatch.args.uids.value ?? [],
         exit: `${usMatch.args.exit.value ?? false}`,
         skip: `${usMatch.args.skip.value ?? false}`,
