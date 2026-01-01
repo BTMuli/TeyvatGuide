@@ -1,5 +1,5 @@
 /**
- * Vue&Typescirpt 文件的 Eslint 配置
+ * Vue & Typescript 文件的 Eslint 配置
  * @since Beta v0.9.1
  */
 import pluginImport from "eslint-plugin-import";
@@ -47,7 +47,7 @@ const vueConfig = {
   files: ["src/**/*.vue", "src/App.vue"],
   plugins: { vue: pluginVue, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
-    globals: { ...globals.browser, ...globals.es2021, TGApp: "readonly", window: "readonly" },
+    globals: { ...globals.browser, ...globals.es2021, TGApp: "readonly", window: "readonly", proEnv: "readonly" },
     ecmaVersion: "latest",
     sourceType: "module",
     parser: parserVue,

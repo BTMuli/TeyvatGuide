@@ -51,3 +51,8 @@ declare type TauriProcessEnv = NodeJS.ProcessEnv & {
   /** 平台类型，例如 `"desktop"`。 */
   TAURI_PLATFORM_TYPE?: string;
 };
+
+/**
+ * ProcessEnv的转换
+ */
+declare const proEnv: TauriProcessEnv;

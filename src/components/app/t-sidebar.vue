@@ -330,8 +330,8 @@ const userStore = useUserStore();
 const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
-// @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
-const isDevEnv = import.meta.env.MODE === "development";
+
+const isDevEnv = proEnv.TAURI_ENV_DEBUG;
 const showFollow = ref<boolean>();
 const showLoginQr = ref<boolean>(false);
 const isTryLogin = ref<boolean>(false);
