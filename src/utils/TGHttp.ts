@@ -68,13 +68,12 @@ async function TGHttp<T>(
       }
       throw new Error(`HTTP error! status: ${res.status}`);
     })
-    .catch((err) => {
-      console.error(`Request ${url} error`);
-      console.error(`Options: ${JSON.stringify(options)}`);
+    .catch(async (err) => {
+      await TGLogger.Error(`Request ${url} error`);
       if (err instanceof Error || typeof err === "object") {
-        console.error(`Error: ${JSON.stringify(err)}`);
+        await TGLogger.Error(`Error: ${JSON.stringify(err)}`);
       } else {
-        console.error(`Error: ${err}`);
+        await TGLogger.Error(`Error: ${err}`);
       }
       return err;
     });
