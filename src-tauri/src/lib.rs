@@ -74,7 +74,7 @@ pub fn run() {
   builder
     .on_window_event(move |app, event| window_event_handler(app, event))
     .plugin(tauri_plugin_deep_link::init())
-        .plugin(tauri_plugin_cli::init())
+    .plugin(tauri_plugin_cli::init())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_fs::init())
     .plugin(tauri_plugin_http::init())

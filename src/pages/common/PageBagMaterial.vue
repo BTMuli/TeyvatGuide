@@ -312,9 +312,20 @@ function searchMaterial(): void {
     showSnackbar.success("已重置!");
     return;
   }
-  selectData = selectData.filter(
-    (i) => i.info.name.includes(search.value!) || i.info.description.includes(search.value!),
-  );
+  // 正则
+  const overReg = /^>(\d+)$/;
+  const lessReg = /^<(\d+)$/;
+  if (overReg.test(search.value.trim())) {
+    const overNum = Number(search.value.trim().match(overReg)?.[1] ?? 0);
+    selectData = selectData.filter((i) => i.tb.count > overNum);
+  } else if (lessReg.test(search.value.trim())) {
+    const lessNum = Number(search.value.trim().match(lessReg)?.[1] ?? 0);
+    selectData = selectData.filter((i) => i.tb.count < lessNum);
+  } else {
+    selectData = selectData.filter(
+      (i) => i.info.name.includes(search.value!) || i.info.description.includes(search.value!),
+    );
+  }
   if (selectData.length === 0) {
     showSnackbar.warn("未找到符合条件的材料!");
     return;
