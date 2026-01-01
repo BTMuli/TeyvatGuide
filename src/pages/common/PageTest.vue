@@ -19,26 +19,22 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { invoke } from "@tauri-apps/api/core";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { onMounted, onUnmounted } from "vue";
-
-let textScaleListener: UnlistenFn | null = null;
-onMounted(async () => {
-  textScaleListener = await listen("text_scale_change", (payload) => {
-    console.log(payload);
-  });
-});
-onUnmounted(() => {
-  if (textScaleListener !== null) {
-    textScaleListener();
-    textScaleListener = null;
-  }
-});
+import showSnackbar from "@comp/func/snackbar.js";
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from "@tauri-apps/plugin-notification";
 
 async function test() {
-  const res = await invoke("read_text_scale");
-  console.log(res);
+  const check = await isPermissionGranted();
+  console.log(check);
+  if (!check) {
+    showSnackbar.warn("没有通知权限");
+    const permission = await requestPermission();
+    console.log(permission);
+  }
+  sendNotification({ title: "New Message", body: "You have a new message" });
 }
 </script>
 <style lang="css" scoped>

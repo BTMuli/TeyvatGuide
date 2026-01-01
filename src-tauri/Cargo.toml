@@ -80,6 +80,11 @@ features = ["unsafe-headers"]
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
+# notification 插件
+[dependencies.tauri-plugin-notification]
+git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
+branch = "v2"
+
 # opener 插件
 [dependencies.tauri-plugin-opener]
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"

@@ -31,6 +31,7 @@
     "http:allow-fetch",
     "log:default",
     "log:allow-log",
+    "notification:default",
     "opener:default",
     "process:default",
     "process:allow-exit",
