@@ -14,14 +14,14 @@
       <div class="left-info">
         <div class="team-box">
           <TItemBox
-            :model-value="getTeamBox(avatar)"
             v-for="(avatar, idx) in props.data.teams"
             :key="idx"
+            :model-value="getTeamBox(avatar)"
           />
         </div>
         <div class="best-dps">
-          <div class="best-dps-item" v-for="(avatar, idx) in props.data.best_avatar" :key="idx">
-            <TMiImg :src="avatar.side_icon" :ori="true" :alt="`${avatar.avatar_id}`" />
+          <div v-for="(avatar, idx) in props.data.best_avatar" :key="idx" class="best-dps-item">
+            <TMiImg :alt="`${avatar.avatar_id}`" :ori="true" :src="avatar.side_icon" />
             <span>{{ avatar.type === 1 ? "最强一击" : "最高总伤害" }}</span>
             <span>{{ avatar.dps }}</span>
           </div>
@@ -29,21 +29,21 @@
       </div>
       <div class="right-desc">
         <span
-          v-html="parseHtmlText(desc)"
           v-for="(desc, idx) in props.data.monster.desc"
           :key="idx"
+          v-html="parseHtmlText(desc)"
         />
       </div>
     </div>
     <div class="monster-icon">
-      <TMiImg :src="props.data.monster.icon" :alt="props.data.name" :ori="true" />
+      <TMiImg :alt="props.data.name" :ori="true" :src="props.data.monster.icon" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { getZhElement, parseHtmlText } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement, parseHtmlText } from "@utils/toolFunc.js";
 
 import TucMonsterTag from "./tuc-monster-tag.vue";
 
@@ -57,7 +57,7 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   const find = AppCharacterData.find((i) => i.id === avatar.avatar_id);
   if (!find) {
     return {
-      bg: `/icon/bg/${avatar.rarity}-BGC.webp`,
+      bg: `/icon/bg/${getRcStar(avatar.avatar_id, avatar.rarity)}-BGC.webp`,
       clickable: false,
       icon: avatar.image,
       lt: `/icon/element/${getZhElement(avatar.element)}元素.webp`,

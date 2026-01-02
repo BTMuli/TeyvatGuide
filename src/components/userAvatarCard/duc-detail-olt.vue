@@ -12,13 +12,13 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import { getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
 type DucDetailOltProps =
   | {
       data: TGApp.Game.Avatar.Avatar;
-      costume: TGApp.App.Character.Costume | false;
+      costume?: TGApp.App.Character.Costume | false;
       mode: "character";
     }
   | {
@@ -37,7 +37,7 @@ const title = computed<string>(() => {
   return `${props.data.name}-${props.costume.name}`;
 });
 const boxData = computed<TItemBoxData>(() => ({
-  bg: `/icon/bg/${props.data.rarity}-Star.webp`,
+  bg: `/icon/bg/${props.mode === "weapon" ? props.data.rarity : getRcStar(props.data.id, props.data.rarity)}-Star.webp`,
   icon: icon.value,
   size: "100px",
   height: "100px",

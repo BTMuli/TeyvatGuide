@@ -44,7 +44,7 @@ function transRole(data: TGApp.Game.Record.Role): TGApp.Sqlite.Record.Role {
 
 /**
  * 转换角色数据
- * @since Beta v0.6.0
+ * @since Beta v0.9.1
  * @param data - 角色数据
  * @returns 转换后的角色数据
  */

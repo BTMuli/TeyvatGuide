@@ -1,6 +1,6 @@
 <template>
   <TOverlay v-model="visible">
-    <div class="tuc-overlay-box" v-if="data">
+    <div v-if="data" class="tuc-overlay-box">
       <div class="tuc-overlay-top">
         <span class="tuc-overlay-title" @click="share()">
           真境剧诗统计-第{{ data.ScheduleId }}期
@@ -40,7 +40,7 @@ const raw = computed<Array<TGApp.Plugins.Hutao.Base.Rate>>(() => {
 function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
   const avatar = AppCharacterData.find((i) => i.id === item.Item);
   return {
-    bg: `/icon/bg/${avatar?.star}-Star.webp`,
+    bg: `/icon/bg/${avatar?.star ?? 3}-Star.webp`,
     clickable: false,
     display: "outer",
     icon: `/WIKI/character/${item.Item}.webp`,

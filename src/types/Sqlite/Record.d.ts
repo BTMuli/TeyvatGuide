@@ -100,10 +100,7 @@ declare namespace TGApp.Sqlite.Record {
     fetter: number;
     /** 等级 */
     level: number;
-    /**
-     * 稀有度
-     * @remarks 埃洛伊稀有度为105，转换为5
-     */
+    /** 稀有度 */
     star: number;
     /** 命座数 */
     constellation: number;

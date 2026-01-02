@@ -29,7 +29,7 @@ const props = defineProps<TucFightProps>();
 
 function getBox(role: TGApp.Game.Combat.AvatarMini): TItemBoxData {
   return {
-    bg: `/icon/bg/${role.rarity === 105 ? 5 : role.rarity}-BGC.webp`,
+    bg: `/icon/bg/${role.rarity}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "60px",
@@ -45,7 +45,7 @@ function getBox(role: TGApp.Game.Combat.AvatarMini): TItemBoxData {
 
 function getBox2(item: TGApp.Game.Combat.AvatarMini): TItemBoxData {
   return {
-    bg: `/icon/bg/${item.rarity === 105 ? 5 : item.rarity}-BGC.webp`,
+    bg: `/icon/bg/${item.rarity}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "60px",

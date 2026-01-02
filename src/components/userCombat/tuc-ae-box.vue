@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import { getWikiBrief, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getWikiBrief, getZhElement } from "@utils/toolFunc.js";
 
 type TucAeBoxProps = {
   /* 上场角色数据 */
@@ -50,7 +50,7 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
     if (innerText === "") innerText = findAvatar.name;
   }
   return {
-    bg: `/icon/bg/${item.rarity === 105 ? 5 : item.rarity}-BGC.webp`,
+    bg: `/icon/bg/${getRcStar(item.avatar_id, item.rarity)}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "80px",

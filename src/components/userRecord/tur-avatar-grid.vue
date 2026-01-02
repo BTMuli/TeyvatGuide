@@ -11,6 +11,7 @@
 </template>
 <script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import { getRcStar } from "@utils/toolFunc.js";
 
 type TurAvatarGridProps = { modelValue: Array<TGApp.Sqlite.Record.Avatar> };
 
@@ -25,7 +26,7 @@ function getBoxData(avatar: TGApp.Sqlite.Record.Avatar): TItemBoxData {
     height: "80px",
     ltSize: "20px",
     clickable: false,
-    bg: `/icon/bg/${avatar.star}-Star.webp`,
+    bg: `/icon/bg/${getRcStar(avatar.id, avatar.star)}-Star.webp`,
     icon: `/WIKI/character/${avatar.id}.webp`,
     lt: `/icon/element/${avatar.element}元素.webp`,
     rt: avatar.constellation.toString() || "0",

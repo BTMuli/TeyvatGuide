@@ -1,14 +1,14 @@
 <!-- 幽境危战赋光之人 -->
 <template>
-  <div class="tuc-pop-item-comp" :title="props.avatar.name">
+  <div :title="props.avatar.name" class="tuc-pop-item-comp">
     <div class="bg">
       <img :src="bg" alt="Avatar" />
     </div>
     <div class="icon">
-      <TMiImg :src="icon" :alt="props.avatar.name" :ori="true" />
+      <TMiImg :alt="props.avatar.name" :ori="true" :src="icon" />
     </div>
     <div class="buff" title="赋光之人">
-      <img src="/icon/challenge/buff.webp" alt="Buff" />
+      <img alt="Buff" src="/icon/challenge/buff.webp" />
     </div>
   </div>
 </template>
@@ -28,7 +28,7 @@ const avatarR = computed<TGApp.App.Character.WikiBriefInfo | undefined>(() => {
 });
 const bg = computed<string>(() => {
   if (avatarR.value) return `/icon/bg/${avatarR.value.star}-BGC.webp`;
-  return `/icon/bg/${props.avatar.rarity > 5 ? 5 : props.avatar.rarity}-BGC.webp`;
+  return `/icon/bg/${props.avatar.rarity}-BGC.webp`;
 });
 const icon = computed<string>(() => {
   if (avatarR.value) return `/WIKI/character/${avatarR.value.id}.webp`;

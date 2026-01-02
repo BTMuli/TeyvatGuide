@@ -354,3 +354,15 @@ export async function isRunInAdmin(): Promise<boolean> {
   }
   return isAdmin;
 }
+
+/**
+ * 传入角色ID跟星级，返回渲染星级
+ * @since Beta v0.9.1
+ * @param cid - 角色ID
+ * @param star - 角色星级
+ * @returns 渲染星级
+ */
+export function getRcStar(cid: number, star: number): number {
+  const star105List = [10000062, 10000117, 10000118];
+  return star105List.includes(cid) ? 105 : star;
+}

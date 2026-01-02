@@ -1,6 +1,6 @@
 /**
  * 用户战绩模块
- * @since Beta v0.6.0
+ * @since Beta v0.9.1
  */
 
 import { timestampToDate } from "@utils/toolFunc.js";
@@ -32,15 +32,18 @@ function getInsertSql(uid: number, data: TGApp.Sqlite.Record.TableRaw): string {
 
 /**
  * 解析数据库数据
- * @since Beta v0.6.0
+ * @since Beta v0.9.1
  * @param data - 数据库数据
  * @returns 渲染数据
  */
 function parseRecord(data: TGApp.Sqlite.Record.TableRaw): TGApp.Sqlite.Record.TableTrans {
+  const avatars: Array<TGApp.Sqlite.Record.Avatar> = JSON.parse(data.avatars);
+  // TODO: 完善排序
+  avatars.sort((a, b) => Number(b.isShow) - Number(a.isShow) || b.star - a.star || b.id - a.id);
   return {
     uid: data.uid,
     role: JSON.parse(data.role),
-    avatars: JSON.parse(data.avatars),
+    avatars: avatars,
     stats: JSON.parse(data.stats),
     worldExplore: JSON.parse(data.worldExplore),
     homes: JSON.parse(data.homes),

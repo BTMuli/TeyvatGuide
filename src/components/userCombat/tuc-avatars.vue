@@ -6,7 +6,7 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import { getWikiBrief, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getWikiBrief, getZhElement } from "@utils/toolFunc.js";
 
 type TucAvatarsProps = { modelValue: Array<TGApp.Game.Combat.Avatar>; detail: boolean };
 
@@ -21,7 +21,7 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
     if (innerText === "") innerText = findAvatar.name;
   }
   return {
-    bg: `/icon/bg/${item.rarity === 105 ? 5 : item.rarity}-BGC.webp`,
+    bg: `/icon/bg/${getRcStar(item.avatar_id, item.rarity)}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "80px",

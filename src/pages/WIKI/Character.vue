@@ -39,7 +39,9 @@ import { AppCharacterData } from "@/data/index.js";
 // 先按star降序，再按元素排序，再按id降序
 const appCData = AppCharacterData.sort(
   (a, b) =>
-    b.star - a.star || new Date(b.release).getTime() - new Date(a.release).getTime() || b.id - a.id,
+    (b.star % 100) - (a.star % 100) ||
+    new Date(b.release).getTime() - new Date(a.release).getTime() ||
+    b.id - a.id,
 );
 
 const id = useRoute().params.id.toString() ?? "0";
@@ -47,6 +49,7 @@ const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
 const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(appCData);
 const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
+  costumes: [],
   id: 0,
   contentId: 0,
   name: "",
@@ -84,7 +87,7 @@ watch(
 function handleSelect(val: SelectedCValue): void {
   showSelect.value = false;
   const filterC = AppCharacterData.filter((item) => {
-    if (val.star.length > 0 && !val.star.includes(item.star)) return false;
+    if (val.star.length > 0 && !val.star.includes(item.star % 100)) return false;
     if (val.weapon.length > 0 && !val.weapon.includes(item.weapon)) return false;
     if (val.elements.length > 0 && !val.elements.includes(item.element)) return false;
     return !(val.area.length > 0 && !val.area.includes(item.area));

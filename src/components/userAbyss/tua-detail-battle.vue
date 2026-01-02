@@ -25,6 +25,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { getRcStar } from "@utils/toolFunc.js";
 
 import { AppCharacterData } from "@/data/index.js";
 
@@ -52,7 +53,7 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
     clickable: false,
     height: "70px",
     ltSize: "20px",
-    bg: `/icon/bg/${avatar.star}-Star.webp`,
+    bg: `/icon/bg/${getRcStar(avatar.id, avatar.star)}-Star.webp`,
     icon: `/WIKI/character/${avatar.id}.webp`,
     lt: `/icon/element/${res?.element ?? "风"}元素.webp`,
     innerText: `Lv.${avatar.level}`,

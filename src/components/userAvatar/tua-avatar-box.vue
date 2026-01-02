@@ -57,7 +57,7 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import useUserStore from "@store/user.js";
-import { getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import { computed } from "vue";
 
 import TuaRelicBox from "./tua-relic-box.vue";
@@ -79,7 +79,7 @@ const avatarIcon = computed<string>(() => {
 const avatarBox = computed<TItemBoxData>(() => ({
   size: "100px",
   height: "100px",
-  bg: `/icon/bg/${props.role.avatar.rarity}-Star.webp`,
+  bg: `/icon/bg/${getRcStar(props.role.cid, props.role.avatar.rarity)}-Star.webp`,
   icon: avatarIcon.value,
   lt: `/icon/element/${getZhElement(props.role.avatar.element)}元素.webp`,
   ltSize: "20px",
