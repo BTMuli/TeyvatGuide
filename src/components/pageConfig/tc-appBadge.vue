@@ -9,7 +9,7 @@
       <div class="tab-link" title="点击加入反馈群" @click="toGroup()">
         <img alt="qq" src="/platforms/other/qq.webp" />
       </div>
-      <div class="tab-link" title="点击查看仓库" @click="toGithub()">
+      <div :title="`当前提交:${buildHash}`" class="tab-link" @click="toGithub()">
         <img alt="github" src="/platforms/other/github.webp" />
       </div>
       <div class="tab-link" title="点击查看商店页面" @click="toStore()">
@@ -28,6 +28,8 @@ import { onMounted, ref } from "vue";
 
 // @ts-expect-error import.meta
 const buildTime = import.meta.env.VITE_BUILD_TIME;
+// @ts-expect-error import.meta
+const buildHash = import.meta.env.VITE_COMMIT_HASH;
 const versionApp = ref<string>();
 
 onMounted(async () => (versionApp.value = await app.getVersion()));
@@ -41,7 +43,7 @@ async function toGroup(): Promise<void> {
 }
 
 async function toGithub(): Promise<void> {
-  await openUrl("https://github.com/BTMuli/TeyvatGuide");
+  await openUrl(`https://github.com/BTMuli/TeyvatGuide/commit/${buildHash}`);
 }
 
 async function toStore(): Promise<void> {
