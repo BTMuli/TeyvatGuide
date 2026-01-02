@@ -28,7 +28,7 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
   let menu = MenuBuilder::new(app).item(&show_item).item(&separator).item(&quit_item).build()?;
 
   // 加载托盘图标
-  let icon_bytes = include_bytes!("../icons/32x32.png");
+  let icon_bytes = include_bytes!("../icons/icon.ico");
   let img = image::load_from_memory(icon_bytes).map_err(|e| {
     tauri::Error::InvalidIcon(std::io::Error::new(std::io::ErrorKind::InvalidData, e))
   })?;
