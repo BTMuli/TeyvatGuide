@@ -4,6 +4,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[cfg(target_os = "windows")]
+fn enable_dpi_v2() {
+  use windows_sys::Win32::UI::HiDpi::{
+    SetProcessDpiAwarenessContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2,
+  };
+
+  unsafe {
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+  }
+}
+
 fn main() {
   let _guard = sentry::init((
     "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",
@@ -12,6 +23,7 @@ fn main() {
       send_default_pii: true,
       ..Default::default()
   }));
-
+  #[cfg(target_os = "windows")]
+  enable_dpi_v2();
   teyvat_guide_lib::run()
 }
