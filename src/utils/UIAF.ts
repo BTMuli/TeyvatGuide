@@ -29,7 +29,7 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
 
 /**
  * 检测是否存在 UIAF 数据，采用 ajv 验证 schema
- * @since Beta v0.5.0
+ * @since Beta v0.9.1
  * @param path - UIAF 数据路径
  * @returns 是否存在 UIAF 数据
  */
@@ -45,7 +45,7 @@ export async function verifyUiafData(path: string): Promise<boolean> {
       const error: ErrorObject = validate.errors[0];
       showSnackbar.error(`${error.instancePath || error.schemaPath} ${error.message}`);
       await TGLogger.Error(`UIAF 数据验证失败，文件路径：${path}`);
-      await TGLogger.Error(`错误信息 ${validate.errors?.toString()}`);
+      await TGLogger.Error(`错误信息 ${JSON.stringify(validate.errors)}`);
       return false;
     }
     return true;
