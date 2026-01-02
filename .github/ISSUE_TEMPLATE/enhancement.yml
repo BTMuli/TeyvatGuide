@@ -21,20 +21,20 @@ body:
           required: false
         - label: 我阅读过[提问的艺术](https://github.com/betaseeker/How-To-Ask-Questions)
           required: false
+  - type: input
+    id: version
+    attributes:
+      label: 当前使用版本
+      description: 请填写当前使用版本
+      placeholder: 如 Beta v0.9.1，**如果是微软应用商店下载的请注明**
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
       label: 新功能描述
       description: 请详细描述新功能的内容
       placeholder: 请详细描述新功能的内容
-    validations:
-      required: true
-  - type: input
-    id: version
-    attributes:
-      label: 当前使用版本
-      description: 请填写当前使用版本
-      placeholder: 如 Beta v0.3.7
     validations:
       required: true
   - type: textarea
