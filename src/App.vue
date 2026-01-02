@@ -435,6 +435,8 @@ async function handleCommands(cmds: CliMatches): Promise<void> {
         skip: `${usMatch.args.skip.value ?? false}`,
       },
     });
+  } else if (cmds.subcommand.name === "srs") {
+    needResize.value = "true";
   }
 }
 </script>

@@ -55,6 +55,7 @@
     "cli": {
       "description": "The Command Func for TeyvatGuide",
       "subcommands": {
+        "srs": { "description": "Set auto resize to true" },
         "us": {
           "description": "Run User Scripts",
           "args": [
