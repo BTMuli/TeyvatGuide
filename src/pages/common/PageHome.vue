@@ -8,10 +8,10 @@
           :hide-details="true"
           :items="games"
           class="home-tool-select"
+          density="compact"
           item-value="gid"
           label="小工具（右侧）分区"
           variant="outlined"
-          density="compact"
         >
           <template #selection="{ item }">
             <div class="select-item main">
@@ -49,17 +49,18 @@
     <template #append>
       <div class="home-select">
         <v-select
-          v-model="showItems"
+          v-model="oldItems"
           :chips="true"
           :hide-details="true"
           :items="showItemsAll"
           :multiple="true"
+          density="compact"
           label="首页组件显示"
           variant="outlined"
           width="360px"
-          density="compact"
+          @update:menu="handleMenu"
         />
-        <v-btn variant="elevated" :rounded="true" class="select-btn" @click="submitHome">
+        <v-btn :rounded="true" class="select-btn" variant="elevated" @click="submitHome">
           确定
         </v-btn>
       </div>
@@ -83,7 +84,7 @@ import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { computed, defineComponent, onMounted, ref, shallowRef, watch } from "vue";
+import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 
 /**
  * 单文件组件类型
@@ -107,17 +108,14 @@ const bbsStore = useBBSStore();
 const { devMode, isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
 
-const showItemsAll: Array<string> = ["游戏签到", "素材日历", "限时祈愿", "近期活动"];
-
 const curGid = ref<number>(2);
 
 const games = shallowRef<Array<SelectItem>>();
 const loadItems = shallowRef<Array<string>>([]);
 const components = shallowRef<Array<SFComp>>([]);
-const showItems = computed<Array<string>>({
-  get: () => homeStore.getShowItems(),
-  set: (v: Array<string>) => homeStore.setShowItems(v),
-});
+const showItems = shallowRef<Array<string>>([]);
+const showItemsAll = shallowRef<Array<string>>(["素材日历", "限时祈愿", "近期活动"]);
+const oldItems = shallowRef<Array<string>>([]);
 
 onMounted(async () => {
   await bbsStore.refreshGameList();
@@ -128,7 +126,12 @@ onMounted(async () => {
   if (isLogin.value) {
     await showLoading.start("正在加载首页小部件");
     games.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
+    showItems.value = homeStore.getShowItems();
+    showItemsAll.value = ["游戏签到", "素材日历", "限时祈愿", "近期活动"];
+  } else {
+    showItems.value = homeStore.getShowItems().filter((i) => i !== "游戏签到");
   }
+  oldItems.value = showItems.value;
   await loadComp();
 });
 
@@ -140,12 +143,22 @@ watch(
   },
 );
 
+function handleMenu(v: boolean): void {
+  if (!v) {
+    oldItems.value = showItems.value;
+  }
+}
+
 async function loadComp(): Promise<void> {
   const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
     switch (item) {
       case "游戏签到":
-        temp.push(PhCompSign);
+        if (isLogin.value) {
+          temp.push(PhCompSign);
+        } else {
+          showSnackbar.warn("未登录不可设置游戏签到组件");
+        }
         break;
       case "限时祈愿":
         temp.push(PhCompPool);
@@ -164,6 +177,7 @@ async function loadComp(): Promise<void> {
 }
 
 async function submitHome(): Promise<void> {
+  showItems.value = oldItems.value;
   if (showItems.value.length === 0) {
     showSnackbar.warn("请至少选择一个!");
     return;
