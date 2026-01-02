@@ -125,6 +125,7 @@
         <span>|</span>
         <span>更新于 {{ getUpdateTime() }}</span>
       </div>
+      <!-- TODO: 渲染筛选条件 -->
     </div>
     <div v-if="!isEmpty" class="uc-grid">
       <TuaAvatarBox
@@ -610,15 +611,17 @@ function handleSwitch(next: boolean): void {
 }
 
 .uc-box-top {
+  position: relative;
   display: flex;
   width: 100%;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 8px 0;
   border-bottom: 1px solid var(--common-shadow-2);
 }
 
 .uc-box-title {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -656,8 +659,10 @@ function handleSwitch(next: boolean): void {
 }
 
 .uc-box-info {
-  position: relative;
+  position: absolute;
   z-index: -1;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
   justify-content: center;
