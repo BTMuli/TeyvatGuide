@@ -116,9 +116,9 @@
           </v-list-item>
         </template>
         <v-list :nav="true" class="side-list-menu sub" density="compact">
-          <v-list-item class="side-item-menu" title="深渊数据库" :link="true" href="/wiki/abyss">
+          <v-list-item :link="true" class="side-item-menu" href="/wiki/abyss" title="深渊数据库">
             <template #prepend>
-              <img src="/source/UI/wikiAbyss.webp" alt="abyssIcon" class="side-icon-menu" />
+              <img alt="abyssIcon" class="side-icon-menu" src="/source/UI/wikiAbyss.webp" />
             </template>
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/wiki/character" title="角色图鉴">
@@ -669,17 +669,20 @@ async function addByCookie(): Promise<void> {
     isTryLogin.value = false;
     return;
   }
-  const briefInfo: TGApp.App.Account.BriefInfo = {
+  const briefInfoGet: TGApp.App.Account.BriefInfo = {
     nickname: briefRes.nickname,
     uid: briefRes.uid,
     avatar: briefRes.avatar_url,
     desc: briefRes.introduce,
   };
+  uid.value = briefRes.uid;
+  briefInfo.value = briefInfoGet;
+  isLogin.value = true;
   await showLoading.update("正在保存用户数据");
   await TSUserAccount.account.saveAccount({
-    uid: briefInfo.uid,
+    uid: briefInfoGet.uid,
     cookie: ck,
-    brief: briefInfo,
+    brief: briefInfo.value,
     updated: "",
   });
   await showLoading.update("正在获取游戏账号");
@@ -691,14 +694,15 @@ async function addByCookie(): Promise<void> {
     return;
   }
   await showLoading.update("正在保存游戏账号");
-  await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
-  const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
+  await TSUserAccount.game.saveAccounts(briefInfoGet.uid, gameRes);
+  const curAccount = await TSUserAccount.game.getCurAccount(briefInfoGet.uid);
   if (!curAccount) {
     await showLoading.end();
     showSnackbar.warn("未检测到游戏账号，请重新刷新");
     isTryLogin.value = false;
     return;
   }
+  account.value = curAccount;
   await showLoading.end();
   showSnackbar.success("成功添加用户!");
   isTryLogin.value = false;
