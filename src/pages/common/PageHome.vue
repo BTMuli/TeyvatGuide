@@ -58,7 +58,6 @@
           label="首页组件显示"
           variant="outlined"
           width="360px"
-          @update:menu="handleMenu"
         />
         <v-btn :rounded="true" class="select-btn" variant="elevated" @click="submitHome">
           确定
@@ -143,12 +142,6 @@ watch(
   },
 );
 
-function handleMenu(v: boolean): void {
-  if (!v) {
-    oldItems.value = showItems.value;
-  }
-}
-
 async function loadComp(): Promise<void> {
   const temp: Array<SFComp> = [];
   for (const item of showItems.value) {
@@ -177,11 +170,12 @@ async function loadComp(): Promise<void> {
 }
 
 async function submitHome(): Promise<void> {
-  showItems.value = oldItems.value;
-  if (showItems.value.length === 0) {
+  if (oldItems.value.length === 0) {
     showSnackbar.warn("请至少选择一个!");
+    oldItems.value = showItems.value;
     return;
   }
+  homeStore.setShowItems(showItems.value);
   showSnackbar.success("设置成功!");
   await TGLogger.Info("[Home][submitHome] 首页设置成功，当前显示：" + showItems.value.join("、"));
   loadItems.value = showItems.value.filter((i) => loadItems.value.includes(i));
