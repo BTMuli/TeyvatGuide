@@ -1,5 +1,54 @@
 [
   {
+    "id": 10000118,
+    "contentId": 506961,
+    "name": "奇偶·女性",
+    "title": "",
+    "area": "主角",
+    "birthday": [0, 0],
+    "star": 105,
+    "element": "火",
+    "release": "",
+    "weapon": "单手剑",
+    "nameCard": "",
+    "costumes": []
+  },
+  {
+    "id": 10000117,
+    "contentId": 506960,
+    "name": "奇偶·男性",
+    "title": "",
+    "area": "主角",
+    "birthday": [0, 0],
+    "star": 105,
+    "element": "火",
+    "release": "",
+    "weapon": "单手剑",
+    "nameCard": "",
+    "costumes": []
+  },
+  {
+    "id": 10000062,
+    "contentId": 2415,
+    "name": "埃洛伊",
+    "title": "「异界的救世主」",
+    "area": "游侠",
+    "birthday": [4, 4],
+    "star": 105,
+    "element": "冰",
+    "release": "2021-09-01 00:00:00",
+    "weapon": "弓",
+    "nameCard": "埃洛伊·曙光记",
+    "costumes": [
+      {
+        "id": 206200,
+        "isDefault": true,
+        "name": "机动猎手",
+        "desc": "埃洛伊的装扮款式。适合林野生活的猎手装束。"
+      }
+    ]
+  },
+  {
     "id": 10000123,
     "contentId": 507241,
     "name": "杜林",
@@ -88,34 +137,6 @@
         "desc": "菈乌玛的装扮款式。月之祭司菈乌玛的身姿常在鹿形与人形之间变幻，但无论身体是何形态，不变的是对万千生灵的珍视与爱。"
       }
     ]
-  },
-  {
-    "id": 10000118,
-    "contentId": 506961,
-    "name": "奇偶·女性",
-    "title": "",
-    "area": "主角",
-    "birthday": [0, 0],
-    "star": 5,
-    "element": "火",
-    "release": "",
-    "weapon": "单手剑",
-    "nameCard": "",
-    "costumes": []
-  },
-  {
-    "id": 10000117,
-    "contentId": 506960,
-    "name": "奇偶·男性",
-    "title": "",
-    "area": "主角",
-    "birthday": [0, 0],
-    "star": 5,
-    "element": "火",
-    "release": "",
-    "weapon": "单手剑",
-    "nameCard": "",
-    "costumes": []
   },
   {
     "id": 10000116,
@@ -798,27 +819,6 @@
         "isDefault": true,
         "name": "缚绝红尘",
         "desc": "申鹤的装扮款式。伴随申鹤常年修行的优雅衣装，缠绕身躯的红绳既是束缚也是庇护。"
-      }
-    ]
-  },
-  {
-    "id": 10000062,
-    "contentId": 2415,
-    "name": "埃洛伊",
-    "title": "「异界的救世主」",
-    "area": "游侠",
-    "birthday": [4, 4],
-    "star": 5,
-    "element": "冰",
-    "release": "2021-09-01 00:00:00",
-    "weapon": "弓",
-    "nameCard": "埃洛伊·曙光记",
-    "costumes": [
-      {
-        "id": 206200,
-        "isDefault": true,
-        "name": "机动猎手",
-        "desc": "埃洛伊的装扮款式。适合林野生活的猎手装束。"
       }
     ]
   },

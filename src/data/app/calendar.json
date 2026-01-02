@@ -1,5 +1,22 @@
 [
   {
+    "id": 10000062,
+    "contentId": 2415,
+    "dropDays": [1, 4, 7],
+    "name": "埃洛伊",
+    "itemType": "character",
+    "star": 105,
+    "weapon": "弓",
+    "element": "冰",
+    "release": "2021-09-01 00:00:00",
+    "materials": [
+      { "id": 104301, "name": "「自由」的教导", "star": 2 },
+      { "id": 104302, "name": "「自由」的指引", "star": 3 },
+      { "id": 104303, "name": "「自由」的哲学", "star": 4 }
+    ],
+    "source": { "index": 1, "area": "蒙德", "name": "霜凝祭坛" }
+  },
+  {
     "id": 10000051,
     "contentId": 2040,
     "dropDays": [2, 5, 7],
@@ -15,23 +32,6 @@
       { "id": 104306, "name": "「抗争」的哲学", "star": 4 }
     ],
     "source": { "index": 1, "area": "蒙德", "name": "冰封废渊" }
-  },
-  {
-    "id": 10000062,
-    "contentId": 2415,
-    "dropDays": [1, 4, 7],
-    "name": "埃洛伊",
-    "itemType": "character",
-    "star": 5,
-    "weapon": "弓",
-    "element": "冰",
-    "release": "2021-09-01 00:00:00",
-    "materials": [
-      { "id": 104301, "name": "「自由」的教导", "star": 2 },
-      { "id": 104302, "name": "「自由」的指引", "star": 3 },
-      { "id": 104303, "name": "「自由」的哲学", "star": 4 }
-    ],
-    "source": { "index": 1, "area": "蒙德", "name": "霜凝祭坛" }
   },
   {
     "id": 10000035,
