@@ -22,8 +22,12 @@
             />
           </div>
           <div class="dialog-btn-box">
-            <button class="dialog-btn no-btn" @click="handleCancel">取消</button>
-            <button class="dialog-btn ok-btn" @click="handleConfirm">确定</button>
+            <button class="dialog-btn no-btn" @click="handleCancel">
+              {{ data.cancelLabel }}
+            </button>
+            <button class="dialog-btn ok-btn" @click="handleConfirm">
+              {{ data.confirmLabel }}
+            </button>
           </div>
         </div>
       </transition>
@@ -35,7 +39,14 @@ import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue
 
 import type { DialogCheckParams, DialogInputParams, DialogParams } from "./dialog.js";
 
-const defaultProp: DialogParams = { title: "", text: "", mode: "check", otcancel: false };
+const defaultProp: DialogParams = {
+  title: "",
+  text: "",
+  mode: "check",
+  otcancel: false,
+  cancelLabel: "取消",
+  confirmLabel: "确认",
+};
 const props = defineProps<DialogParams>();
 
 // 组件参数
@@ -101,6 +112,8 @@ async function displayCheckBox(params: DialogCheckParams): Promise<boolean | und
     text: params.text ?? "",
     mode: "check",
     otcancel: params.otcancel ?? true,
+    confirmLabel: params.confirmLabel ?? defaultProp.confirmLabel,
+    cancelLabel: params.cancelLabel ?? defaultProp.cancelLabel,
   };
   show.value = true;
   return await new Promise<boolean | undefined>((resolve) => {
@@ -120,6 +133,8 @@ async function displayInputBox(params: DialogInputParams): Promise<string | fals
     text: params.text ?? "",
     mode: "input",
     otcancel: params.otcancel ?? true,
+    confirmLabel: params.confirmLabel ?? defaultProp.confirmLabel,
+    cancelLabel: params.cancelLabel ?? defaultProp.cancelLabel,
   };
   inputDefault.value = params.input ?? "";
   show.value = true;
