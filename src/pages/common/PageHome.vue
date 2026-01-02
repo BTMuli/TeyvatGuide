@@ -175,6 +175,7 @@ async function submitHome(): Promise<void> {
     oldItems.value = showItems.value;
     return;
   }
+  showItems.value = oldItems.value;
   homeStore.setShowItems(showItems.value);
   showSnackbar.success("设置成功!");
   await TGLogger.Info("[Home][submitHome] 首页设置成功，当前显示：" + showItems.value.join("、"));
