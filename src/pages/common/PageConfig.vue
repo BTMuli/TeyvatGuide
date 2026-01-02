@@ -228,7 +228,11 @@ onMounted(async () => {
 
 // 备份数据
 async function confirmBackup(): Promise<void> {
-  const bcCheck = await showDialog.check("是否备份到默认路径", "取消则自选路径，点击外部不做处理");
+  const bcCheck = await showDialog.checkF({
+    title: "是否备份到默认路径",
+    text: `${userDir.value}`,
+    cancelLabel: "自选路径",
+  });
   if (bcCheck === undefined) {
     showSnackbar.cancel("已取消备份");
     return;

@@ -29,6 +29,9 @@
               {{ data.confirmLabel }}
             </button>
           </div>
+          <div v-if="!!data.otcancel" class="dialog-close-btn" title="关闭" @click="handleOuter">
+            x
+          </div>
         </div>
       </transition>
     </div>
@@ -238,6 +241,7 @@ defineExpose({ displayInputBox, displayCheckBox });
 }
 
 .dialog-box {
+  position: relative;
   display: flex;
   width: 520px;
   height: 240px;
@@ -310,6 +314,26 @@ defineExpose({ displayInputBox, displayCheckBox });
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
+}
+
+.dialog-close-btn {
+  position: absolute;
+  right: 50%;
+  bottom: -40px;
+  display: flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--dialog-title);
+  color: var(--tgc-yellow-3);
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 16px;
+  line-height: 24px;
+  transform: translateX(50%);
+  user-select: none;
 }
 
 .no-btn {
