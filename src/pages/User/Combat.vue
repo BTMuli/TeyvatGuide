@@ -470,8 +470,9 @@ async function tryReadCombat(): Promise<void> {
 }
 
 .uc-box {
+  position: relative;
   display: flex;
-  height: calc(100vh - 96px);
+  height: calc(100vh - 144px);
   align-items: flex-start;
   justify-content: center;
   border: 1px solid var(--common-shadow-2);
