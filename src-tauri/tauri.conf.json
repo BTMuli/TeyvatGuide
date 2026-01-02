@@ -58,12 +58,6 @@
         "us": {
           "description": "Run User Scripts",
           "args": [
-            { "name": "no-default-features", "description": "the workaround for cargo dev args" },
-            {
-              "name": "color",
-              "description": "the workaround for cargo dev args",
-              "takesValue": true
-            },
             {
               "short": "u",
               "name": "uids",
