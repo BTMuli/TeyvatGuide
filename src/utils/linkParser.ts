@@ -1,6 +1,6 @@
 /**
  * 处理链接
- * @since Beta v0.8.4
+ * @since Beta v0.9.1
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -53,7 +53,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * 处理链接
- * @since Beta v0.7.2
+ * @since Beta v0.9.1
  * @param link - 链接
  * @param useInner - 是否采用内置 JSBridge 打开
  * @returns 处理情况，或者转换后的链接
@@ -151,13 +151,16 @@ export async function parseLink(
     "mihoyo.genshinnet.com",
   ];
   if (prefix.includes(url.hostname) && !useInner) {
-    const openCheck = await showDialog.check("采用内置 JSBridge？", "取消则使用外部浏览器打开");
+    const openCheck = await showDialog.checkF({
+      title: "采用内置 JSBridge？",
+      cancelLabel: "浏览器打开",
+    });
     if (openCheck === undefined) {
       showSnackbar.cancel("已取消打开");
       return true;
     }
     if (!openCheck) return url.href;
-    const typeCheck = await showDialog.check("采用宽屏模式？", "取消则使用默认竖屏");
+    const typeCheck = await showDialog.checkF({ title: "采用宽屏模式？", cancelLabel: "竖屏打开" });
     if (!typeCheck) await TGClient.open("web_act_thin", link);
     else await TGClient.open("web_act", link);
     return true;

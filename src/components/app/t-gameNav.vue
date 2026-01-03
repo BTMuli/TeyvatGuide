@@ -2,15 +2,15 @@
 <template>
   <div class="tgn-container">
     <div v-for="navItem in nav" :key="navItem.id" class="tgn-nav" @click="toNav(navItem)">
-      <TMiImg alt="navIcon" :src="navItem.icon" :ori="true" />
+      <TMiImg :ori="true" :src="navItem.icon" alt="navIcon" />
       <span>{{ navItem.name }}</span>
     </div>
     <div v-if="hasNav" class="tgn-nav">
-      <v-icon size="25" @click="tryGetCode" title="查看兑换码" color="var(--tgc-od-orange)">
+      <v-icon color="var(--tgc-od-orange)" size="25" title="查看兑换码" @click="tryGetCode">
         mdi-code-tags-check
       </v-icon>
     </div>
-    <ToLivecode v-model="showOverlay" :gid="model" :data="codeData" :actId="actId" />
+    <ToLivecode v-model="showOverlay" :actId="actId" :data="codeData" :gid="model" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -125,7 +125,10 @@ async function toNav(item: TGApp.BBS.Navigator.Navigator): Promise<void> {
     await TGClient.open("web_act_thin", item.app_path);
     return;
   }
-  const modeCheck = await showDialog.check("是否采用宽屏模式打开？", "取消则采用竖屏模式打开");
+  const modeCheck = await showDialog.checkF({
+    title: "是否采用宽屏模式打开？",
+    cancelLabel: "采用竖屏模式",
+  });
   if (modeCheck === undefined) {
     showSnackbar.cancel("已取消打开");
     return;
