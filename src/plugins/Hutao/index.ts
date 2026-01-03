@@ -14,6 +14,7 @@ import {
 } from "./request/abyssReq.js";
 import { getUserInfo, loginPassport, refreshToken } from "./request/accountReq.js";
 import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
+import { getEndIds, getEntries, getGachaLogs } from "./request/gachaReq.js";
 import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
 import { transCombatLocal } from "./utils/combatUtil.js";
 
@@ -49,15 +50,17 @@ const Hutao = {
       username: _,
       password: _,
     },
-    token: {
-      refresh: refreshToken,
-      revoke: _,
-      revokeAll: _,
-    },
     info: getUserInfo,
   },
+  Token: {
+    refresh: refreshToken,
+    revoke: _,
+    revokeAll: _,
+  },
   Gacha: {
-    log: _,
+    entry: getEntries,
+    endIds: getEndIds,
+    logs: getGachaLogs,
     upload: _,
     delete: _,
   },

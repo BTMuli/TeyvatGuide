@@ -78,7 +78,7 @@ const useHutaoStore = defineStore(
         return;
       }
       try {
-        const resp = await hutao.Account.token.refresh(refreshToken.value);
+        const resp = await hutao.Token.refresh(refreshToken.value);
         if ("retcode" in resp) {
           showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
           console.error(resp);

@@ -31,7 +31,7 @@ async function test() {
   if (!hutaoStore.checkIsValid()) {
     await hutaoStore.tryRefreshToken();
   }
-  const resp = await hutao.Account.info(accessToken.value!);
+  const resp = await hutao.Gacha.entry(accessToken.value!);
   if ("retcode" in resp) {
     showSnackbar.warn(`${resp.retcode}-${resp.message}`);
     return;
