@@ -70,7 +70,8 @@
             { "short": "e", "name": "exit", "description": "Exit App after command" }
           ]
         }
-      }
+      },
+      "args": [{ "description": "Run as admin flag", "name": "elevated" }]
     }
   }
 }
