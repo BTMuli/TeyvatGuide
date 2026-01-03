@@ -260,7 +260,11 @@ async function confirmBackup(): Promise<void> {
 
 // 恢复数据
 async function confirmRestore(): Promise<void> {
-  const rsCheck = await showDialog.check("是否从默认路径恢复", "取消则自选路径，点击外部不做处理");
+  const rsCheck = await showDialog.checkF({
+    title: "是否从默认路径恢复",
+    text: userDir.value,
+    cancelLabel: "自选恢复目录",
+  });
   if (rsCheck === undefined) {
     showSnackbar.cancel("已取消恢复");
     return;
