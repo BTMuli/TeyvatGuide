@@ -319,7 +319,6 @@ import { event, path, webviewWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists } from "@tauri-apps/plugin-fs";
-import { Command } from "@tauri-apps/plugin-shell";
 import mhyClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
 import { isRunInAdmin } from "@utils/toolFunc.js";
@@ -733,18 +732,10 @@ async function tryLaunchGame(): Promise<void> {
   const isInAdmin = await isRunInAdmin();
   if (!isInAdmin) {
     showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
-    const cmd = Command.create(
-      "exec-sh",
-      [
-        "-Command",
-        `Start-Process -FilePath '${gamePath}' -ArgumentList 'login_auth_ticket=${resp}' -Verb RunAs`,
-      ],
-      { cwd: gameDir.value, encoding: "utf-8" },
-    );
-    const result = await cmd.execute();
-    if (result.stderr) {
-      await TGLogger.Error(`[sidebar][tryLaunchGame] 启动游戏本体失败！`);
-      showSnackbar.error(`启动游戏本体失败，代码：${result.code}`);
+    try {
+      await invoke("launch_game", { path: gamePath, ticket: resp });
+    } catch (error) {
+      showSnackbar.error(`${error}`);
     }
   } else {
     try {

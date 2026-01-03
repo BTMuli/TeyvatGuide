@@ -144,3 +144,45 @@ pub async fn quit_app(app_handle: AppHandle) {
 pub fn read_text_scale() -> Result<f64, String> {
   utils::read_text_scale_factor()
 }
+
+#[tauri::command]
+pub fn launch_game(path: String, ticket: String) -> Result<(), String> {
+  #[cfg(target_os = "windows")]
+  {
+    // 依赖 widestring 和 windows-sys
+    use widestring::U16CString;
+    use windows_sys::Win32::Foundation::HWND;
+    use windows_sys::Win32::UI::Shell::ShellExecuteW;
+    use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+    // 构造参数字符串
+    let args = format!("login_auth_ticket={}", ticket);
+
+    // 转为 UTF-16 C 字符串
+    let operation =
+      U16CString::from_str("runas").map_err(|e| format!("encode operation error: {}", e))?;
+    let file = U16CString::from_str(&path).map_err(|e| format!("encode path error: {}", e))?;
+    let params = U16CString::from_str(&args).map_err(|e| format!("encode params error: {}", e))?;
+
+    // 调用 ShellExecuteW
+    unsafe {
+      let res = ShellExecuteW(
+        0 as HWND,
+        operation.as_ptr(),
+        file.as_ptr(),
+        params.as_ptr(),
+        std::ptr::null(),
+        SW_SHOWNORMAL,
+      );
+      let code = res as isize;
+      if code <= 32 {
+        return Err(format!("ShellExecuteW failed, code: {}.", code));
+      }
+    }
+    Ok(())
+  }
+  #[cfg(not(target_os = "windows"))]
+  {
+    Err("This command is only supported on Windows".into())
+  }
+}

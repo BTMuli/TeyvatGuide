@@ -35,9 +35,6 @@
     "opener:default",
     "process:default",
     "process:allow-exit",
-    "shell:default",
-    "shell:allow-open",
-    "shell:allow-execute",
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",
@@ -58,10 +55,6 @@
         { "url": "https://*.hoyoverse.com/*" },
         { "url": "https://api.hakush.in/*" }
       ]
-    },
-    {
-      "identifier": "shell:allow-execute",
-      "allow": [{ "name": "exec-sh", "cmd": "powershell", "args": true }]
     }
   ],
   "platforms": ["windows", "macOS"]

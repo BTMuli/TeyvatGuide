@@ -101,11 +101,6 @@ branch = "v2"
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 
-# shell 插件
-[dependencies.tauri-plugin-shell]
-git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
-branch = "v2"
-
 # single-instance 插件
 [dependencies.tauri-plugin-single-instance]
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
