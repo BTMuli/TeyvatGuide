@@ -63,17 +63,19 @@ async function TGHttp<T>(
     console.debug(options);
   }
   return await fetch(url, fetchOptions)
-    .then((res) => {
+    .then(async (res) => {
       if (res.ok) {
-        const data = options.isBlob ? res.arrayBuffer() : res.json();
+        const data = options.isBlob ? await res.arrayBuffer() : await res.json();
         if (fullResponse) return { data, resp: res };
         return data;
       }
-      throw new Error(`HTTP error! status: ${res.status}`);
+      await TGLogger.Error(`Fetch URL: ${url} ERROR: ${res.status} ${res.statusText}`);
+      throw new Error(await res.text(), { cause: `${res.status} ${res.statusText}` });
     })
     .catch(async (err) => {
-      await TGLogger.Error(`Request ${url} error`);
-      if (err instanceof Error || typeof err === "object") {
+      if (err instanceof Error) {
+        console.error(err.message);
+      } else if (typeof err === "object") {
         await TGLogger.Error(`Error: ${JSON.stringify(err)}`);
       } else {
         await TGLogger.Error(`Error: ${err}`);
