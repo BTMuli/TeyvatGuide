@@ -86,6 +86,9 @@ importers:
       qrcode.vue:
         specifier: ^3.6.0
         version: 3.6.0(vue@3.5.26(typescript@5.9.3))
+      rsa-oaep-encryption:
+        specifier: ^1.1.0
+        version: 1.1.0
       sass-embedded:
         specifier: ^1.97.1
         version: 1.97.1
@@ -3575,6 +3578,9 @@ packages:
     resolution: {integrity: sha512-Qd9c2p0XKZdgT5AYd+KgAMggJ8ZmCs3JnS9PTMWkyUfteKlfmKtxJbWTHkVakxwXs1Ub7jrRYVeFeF7N0sQxyw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
+
+  rsa-oaep-encryption@1.1.0:
+    resolution: {integrity: sha512-GzbbyA//t8Safvj2k4KrGjuA1iHHrvCqkjCG49aOO9tdMV+CG0nNjuUNqRUibz5QoO851u24n/wgbSMi6ZZ01w==}
 
   run-applescript@7.1.0:
     resolution: {integrity: sha512-DPe5pVFaAsinSaV6QjQ6gdiedWDcRCbUuiQfQa2wmWV7+xC9bGulGI8+TdRmoFkAPaBXk8CrAbnlY2ISniJ47Q==}
@@ -7863,6 +7869,8 @@ snapshots:
       '@rolldown/binding-wasm32-wasi': 1.0.0-beta.53
       '@rolldown/binding-win32-arm64-msvc': 1.0.0-beta.53
       '@rolldown/binding-win32-x64-msvc': 1.0.0-beta.53
+
+  rsa-oaep-encryption@1.1.0: {}
 
   run-applescript@7.1.0: {}
 

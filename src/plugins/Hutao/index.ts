@@ -1,6 +1,6 @@
 /**
  * Hutao 插件入口
- * @since Beta v0.6.3
+ * @since Beta v0.9.1
  */
 
 import {
@@ -12,9 +12,12 @@ import {
   getTeamCollect,
   uploadAbyssData,
 } from "./request/abyssReq.js";
+import { loginPassport } from "./request/accountReq.js";
 import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
 import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
 import { transCombatLocal } from "./utils/combatUtil.js";
+
+const _ = "Not Implemented";
 
 const Hutao = {
   Abyss: {
@@ -36,6 +39,27 @@ const Hutao = {
     upload: uploadCombatData,
     data: getCombatStatistic,
     trans: transCombatLocal,
+  },
+  Account: {
+    register: _,
+    login: loginPassport,
+    verify: _,
+    cancel: _,
+    reset: {
+      username: _,
+      password: _,
+    },
+    token: {
+      refresh: _,
+      revoke: _,
+      revokeAll: _,
+    },
+    info: _,
+  },
+  Gacha: {
+    log: _,
+    upload: _,
+    delete: _,
   },
 };
 

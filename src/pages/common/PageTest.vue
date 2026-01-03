@@ -19,22 +19,18 @@
   </div>
 </template>
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import {
-  isPermissionGranted,
-  requestPermission,
-  sendNotification,
-} from "@tauri-apps/plugin-notification";
+import hutao from "@Hutao/index.js";
 
 async function test() {
-  const check = await isPermissionGranted();
-  console.log(check);
-  if (!check) {
-    showSnackbar.warn("没有通知权限");
-    const permission = await requestPermission();
-    console.log(permission);
+  const inputN = await showDialog.input("UserName");
+  const inputP = await showDialog.input("Pwd");
+  if (!inputN || !inputP) return;
+  const resp = await hutao.Account.login(inputN, inputP);
+  if ("retcode" in resp) {
+    showSnackbar.warn(`${resp.retcode}-${resp.message}`);
   }
-  sendNotification({ title: "New Message", body: "You have a new message" });
 }
 </script>
 <style lang="css" scoped>

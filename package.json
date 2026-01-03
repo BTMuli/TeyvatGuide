@@ -96,6 +96,7 @@
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
     "qrcode.vue": "^3.6.0",
+    "rsa-oaep-encryption": "^1.1.0",
     "sass-embedded": "^1.97.1",
     "swiper": "^12.0.3",
     "uuid": "^13.0.0",
