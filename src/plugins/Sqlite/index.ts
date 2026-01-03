@@ -1,8 +1,9 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 
+import showSnackbar from "@comp/func/snackbar.js";
 import { app } from "@tauri-apps/api";
 import Database from "@tauri-apps/plugin-sql";
 import TGLogger from "@utils/TGLogger.js";
@@ -163,16 +164,42 @@ class Sqlite {
 
   /**
    * 重置数据库
-   * @since Beta v0.4.0
+   * @since Beta v0.9.1
    * @returns 无返回值
    */
   public async reset(): Promise<void> {
     const db = await this.getDB();
-    for (const item of this.tables) {
-      const sql = `DROP TABLE IF EXISTS ${item};`;
-      await db.execute(sql);
+    const maxAttempts = 5;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        // 让 SQLite 在遇到锁时等待（毫秒）
+        await db.execute("PRAGMA busy_timeout = 5000;");
+        // 立即获取写锁，减少中途被抢占的概率
+        await db.execute("BEGIN IMMEDIATE;");
+        try {
+          for (const item of this.tables) {
+            const sql = `DROP TABLE IF EXISTS "${item}";`;
+            await db.execute(sql);
+          }
+          await db.execute("COMMIT;");
+        } catch (innerErr) {
+          await db.execute("ROLLBACK;");
+          console.error(innerErr);
+        }
+        await this.initDB();
+        return;
+      } catch (err: any) {
+        const msg = String(err);
+        // 如果是 BUSY/LOCKED，做指数退避重试
+        if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg) && attempt < maxAttempts) {
+          const wait = 100 * Math.pow(2, attempt - 1); // 100, 200, 400, ...
+          await new Promise((r) => setTimeout(r, wait));
+          continue;
+        }
+        console.error(err);
+        showSnackbar.error("数据库重置失败，请退出应用后手动删除数据库文件");
+      }
     }
-    await this.initDB();
   }
 }
 
