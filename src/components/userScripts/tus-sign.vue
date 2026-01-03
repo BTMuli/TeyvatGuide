@@ -136,7 +136,7 @@ async function deleteAccount(item: SignAccount): Promise<void> {
   const idx = signAccounts.value.findIndex((i) => i === item);
   if (idx === -1) return;
   const infoStr = `${item.info.title}-${item.account.regionName}-${item.account.gameUid}`;
-  const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后仅能通过刷新游戏账号恢复`);
+  const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后可通过刷新游戏账号恢复`);
   if (!check) {
     showSnackbar.cancel(`已取消删除${infoStr}`);
     return;

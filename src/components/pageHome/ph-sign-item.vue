@@ -471,7 +471,7 @@ async function handleResign(): Promise<void> {
 
 async function tryDelete(): Promise<void> {
   const infoStr = `${gameInfo.value.title}-${props.account.regionName}-${props.account.gameUid}`;
-  const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后仅能通过刷新游戏账号恢复`);
+  const check = await showDialog.check(`确定删除?`, `${infoStr}\n删除后可通过刷新游戏账号恢复`);
   if (!check) {
     showSnackbar.cancel(`已取消删除${infoStr}`);
     return;
