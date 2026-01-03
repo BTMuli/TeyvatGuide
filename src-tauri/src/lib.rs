@@ -83,6 +83,7 @@ pub fn run() {
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_process::init())
     .plugin(tauri_plugin_sql::Builder::default().build())
+    .plugin(tauri_plugin_machine_uid::init())
     .plugin(plugins::custom_log::build_log_plugin())
     .setup(|_app| {
       // 创建系统托盘图标
