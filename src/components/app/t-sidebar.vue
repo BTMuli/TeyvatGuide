@@ -388,7 +388,7 @@ async function trySwitchGameAccount(ac: TGApp.Sqlite.Account.Game): Promise<void
   cookie.value = acM.cookie;
   const res = await userStore.switchGameAccount(ac.gameUid);
   if (!res) return;
-  showSnackbar.success(`成功切换到用户${uid.value}的游戏UID${ac.gameUid}`);
+  showSnackbar.success(`成功切换游戏UID-${ac.gameUid}`);
   await TGLogger.Info(`[ToSwitchAc] 切换到用户${uid.value}的游戏UID${ac.gameUid}成功`);
 }
 
