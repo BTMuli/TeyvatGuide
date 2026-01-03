@@ -12,7 +12,7 @@ import {
   getTeamCollect,
   uploadAbyssData,
 } from "./request/abyssReq.js";
-import { loginPassport } from "./request/accountReq.js";
+import { getUserInfo, loginPassport, refreshToken } from "./request/accountReq.js";
 import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
 import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
 import { transCombatLocal } from "./utils/combatUtil.js";
@@ -50,11 +50,11 @@ const Hutao = {
       password: _,
     },
     token: {
-      refresh: _,
+      refresh: refreshToken,
       revoke: _,
       revokeAll: _,
     },
-    info: _,
+    info: getUserInfo,
   },
   Gacha: {
     log: _,

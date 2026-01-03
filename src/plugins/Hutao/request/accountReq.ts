@@ -62,5 +62,39 @@ export async function loginPassport(
     body: JSON.stringify(data),
   });
   if (resp.retcode !== 0) return <TGApp.Plugins.Hutao.Base.Resp>resp;
-  return resp.data;
+  return <TGApp.Plugins.Hutao.Account.LoginRes>resp.data;
+}
+
+/**
+ * 刷新访问令牌
+ * @since Beta v0.9.1
+ */
+export async function refreshToken(token: string) {
+  const url = `${PassportUrl}RefreshToken`;
+  const header = await getReqHeader();
+  const data = { RefreshToken: rsaEncrypt(token) };
+  const resp = await TGHttp<TGApp.Plugins.Hutao.Account.RefreshTokenResp>(url, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(data),
+  });
+  if (resp.retcode !== 0) return <TGApp.Plugins.Hutao.Base.Resp>resp;
+  return <TGApp.Plugins.Hutao.Account.RefreshTokenRes>resp.data;
+}
+
+/**
+ * 获取用户信息
+ * @since Beta v0.9.1
+ */
+export async function getUserInfo(
+  token: string,
+): Promise<TGApp.Plugins.Hutao.Account.InfoRes | TGApp.Plugins.Hutao.Base.Resp> {
+  const url = `${PassportUrl}UserInfo`;
+  const header = await getReqHeader(token);
+  const resp = await TGHttp<TGApp.Plugins.Hutao.Account.InfoResp>(url, {
+    method: "GET",
+    headers: header,
+  });
+  if (resp.retcode !== 0) return <TGApp.Plugins.Hutao.Base.Resp>resp;
+  return <TGApp.Plugins.Hutao.Account.InfoRes>resp.data;
 }

@@ -55,4 +55,47 @@ declare namespace TGApp.Plugins.Hutao.Account {
     /** refresh */
     RefreshToken: string;
   };
+
+  /**
+   * 刷新Token返回响应
+   * @since Beta v0.9.1
+   */
+  type RefreshTokenResp = TGApp.Plugins.Hutao.Base.Resp<RefreshTokenRes>;
+
+  /**
+   * 刷新Token返回
+   * @since Beta v0.9.1
+   */
+  type RefreshTokenRes = LoginRes;
+
+  /**
+   * 信息返回响应
+   * @since Beta v0.9.1
+   */
+  type InfoResp = TGApp.Plugins.Hutao.Base.Resp<InfoRes>;
+
+  /**
+   * 信息返回
+   * @since Beta v0.9.1
+   */
+  type InfoRes = {
+    /**
+     * CDN 过期时间
+     * @example 2025-09-18T01:01:39+00:00
+     */
+    CdnExpireAt: string;
+    /**
+     * 胡桃云祈愿过期时间
+     * @remarks 与 CDN 过期时间格式一致
+     */
+    GachaLogExpireAt: string;
+    /** 是否是开发者 */
+    IsLicenseDeveloper: boolean;
+    /** 是否是主开发 */
+    IsMaintainer: boolean;
+    /** 常规用户名 */
+    NormalizedUserName: string;
+    /** 用户名 */
+    UserName: string;
+  };
 }

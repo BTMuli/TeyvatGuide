@@ -21,6 +21,18 @@ const useHutaoStore = defineStore(
     const refreshToken = ref<string>();
     /** 超时时间 */
     const accessExpire = ref<number>(0);
+    /** 用户信息 */
+    const userInfo = ref<TGApp.Plugins.Hutao.Account.InfoRes>();
+
+    /**
+     * 检测是否超时
+     */
+    function checkIsValid(): boolean {
+      if (accessExpire.value === 0 || !refreshToken.value || refreshToken.value === "") {
+        return false;
+      }
+      return Date.now() < accessExpire.value;
+    }
 
     async function tryLogin(): Promise<void> {
       const inputN = await showDialog.input("请输入胡桃云账号", "邮箱：");
@@ -50,8 +62,8 @@ const useHutaoStore = defineStore(
         userName.value = inputN;
         accessToken.value = resp.AccessToken;
         refreshToken.value = resp.RefreshToken;
-        // TODO: 判断返回单位处理expire
-        // accessExpire.value = Date.now();
+        accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
+        showSnackbar.success("成功登录胡桃云");
       } catch (err) {
         console.error(err);
         showSnackbar.error("登录胡桃云失败");
@@ -60,12 +72,37 @@ const useHutaoStore = defineStore(
       }
     }
 
+    async function tryRefreshToken(): Promise<void> {
+      if (!refreshToken.value || refreshToken.value == "") {
+        showSnackbar.warn("未找到胡桃云RefreshToken");
+        return;
+      }
+      try {
+        const resp = await hutao.Account.token.refresh(refreshToken.value);
+        if ("retcode" in resp) {
+          showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+          console.error(resp);
+          return;
+        }
+        accessToken.value = resp.AccessToken;
+        refreshToken.value = resp.RefreshToken;
+        accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
+        showSnackbar.success("成功刷新胡桃云Token");
+      } catch (e) {
+        console.error(e);
+        showSnackbar.error("刷新胡桃云Token失败");
+      }
+    }
+
     return {
       userName,
       accessToken,
       refreshToken,
       accessExpire,
+      userInfo,
+      checkIsValid,
       tryLogin,
+      tryRefreshToken,
     };
   },
   {

@@ -19,27 +19,28 @@
   </div>
 </template>
 <script lang="ts" setup>
-import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
 import useHutaoStore from "@store/hutao.js";
 import { storeToRefs } from "pinia";
 
-const { userName, accessToken, refreshToken } = storeToRefs(useHutaoStore());
+const hutaoStore = useHutaoStore();
+const { accessToken } = storeToRefs(hutaoStore);
 
 async function test() {
-  const inputN = await showDialog.input("UserName");
-  const inputP = await showDialog.input("Pwd");
-  if (!inputN || !inputP) return;
-  const resp = await hutao.Account.login(inputN, inputP);
+  if (!hutaoStore.checkIsValid()) {
+    await hutaoStore.tryRefreshToken();
+  }
+  const resp = await hutao.Account.info(accessToken.value!);
   if ("retcode" in resp) {
     showSnackbar.warn(`${resp.retcode}-${resp.message}`);
     return;
   }
-  userName.value = inputN;
-  accessToken.value = resp.AccessToken;
-  refreshToken.value = resp.RefreshToken;
-  showSnackbar.success("登录成功!");
+  console.log(resp);
+  // userName.value = inputN;
+  // accessToken.value = resp.AccessToken;
+  // refreshToken.value = resp.RefreshToken;
+  // showSnackbar.success("登录成功!");
 }
 </script>
 <style lang="css" scoped>
