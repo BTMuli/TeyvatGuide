@@ -3,8 +3,10 @@
   <v-app-bar>
     <template #prepend>
       <div class="uat-left">
-        <img alt="icon" src="/source/UI/userAbyss.webp" />
-        <span>深境螺旋</span>
+        <div class="uat-title">
+          <img alt="icon" src="/source/UI/userAbyss.webp" />
+          <span>深境螺旋</span>
+        </div>
         <v-select
           v-model="uidCur"
           :hide-details="true"
@@ -52,8 +54,8 @@
     </template>
     <template #extension>
       <div class="uat-extension">
-        <v-btn :rounded="true" variant="elevated" class="ua-btn" @click="toWiki()">
-          <img alt="wiki" src="/source/UI/wikiAbyss.webp" />
+        <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="toWiki()">
+          <img alt="wiki" src="/platforms/other/hutao.webp" />
           <span>统计数据</span>
         </v-btn>
         <div class="uat-extension-right">
@@ -413,11 +415,20 @@ async function uploadAbyss(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .uat-left {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-left: 12px;
   gap: 8px;
+}
+
+.uat-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 4px;
 
   img {
     width: 32px;
@@ -425,12 +436,9 @@ async function uploadAbyss(): Promise<void> {
   }
 
   span {
+    color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
-  }
-
-  span :first-child {
-    color: var(--common-text-title);
   }
 }
 
@@ -446,7 +454,7 @@ async function uploadAbyss(): Promise<void> {
 .ua-btn {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-  font-family: var(--font-text);
+  font-family: var(--font-title);
 
   img {
     width: 24px;

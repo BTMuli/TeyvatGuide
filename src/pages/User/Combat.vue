@@ -3,8 +3,10 @@
   <v-app-bar>
     <template #prepend>
       <div class="uct-left">
-        <img alt="icon" src="/source/UI/userCombat.webp" />
-        <span>幻想真境剧诗</span>
+        <div class="uct-title">
+          <img alt="icon" src="/source/UI/userCombat.webp" />
+          <span>幻想真境剧诗</span>
+        </div>
         <v-select
           v-model="uidCur"
           :hide-details="true"
@@ -58,7 +60,7 @@
     <template #extension>
       <div class="uct-extension">
         <v-btn class="uc-btn" variant="elevated" @click="loadWiki()">
-          <img alt="abyss" src="/source/UI/wikiAbyss.webp" />
+          <img alt="abyss" src="/platforms/other/hutao.webp" />
           <span>统计数据</span>
         </v-btn>
         <div class="uct-extension-right">
@@ -407,6 +409,14 @@ async function tryReadCombat(): Promise<void> {
   justify-content: center;
   margin-left: 12px;
   gap: 8px;
+}
+
+.uct-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 4px;
 
   img {
     width: 32px;
@@ -414,12 +424,9 @@ async function tryReadCombat(): Promise<void> {
   }
 
   span {
+    color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
-  }
-
-  span :first-child {
-    color: var(--common-text-title);
   }
 }
 

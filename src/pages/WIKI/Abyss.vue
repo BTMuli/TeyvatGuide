@@ -4,7 +4,7 @@
     <template #prepend>
       <div class="hta-top-prepend">
         <div class="hta-top-title">
-          <img alt="icon" src="/source/UI/wikiAbyss.webp" />
+          <img alt="icon" src="/platforms/other/hutao.webp" />
           <span>深渊统计</span>
         </div>
         <v-select
