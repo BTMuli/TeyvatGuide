@@ -511,17 +511,20 @@ async function addByCookie(): Promise<void> {
     await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
     return;
   }
-  const briefInfo: TGApp.App.Account.BriefInfo = {
+  const briefGet: TGApp.App.Account.BriefInfo = {
     nickname: briefRes.nickname,
     uid: briefRes.uid,
     avatar: briefRes.avatar_url,
     desc: briefRes.introduce,
   };
+  uid.value = briefRes.uid;
+  briefInfo.value = briefGet;
+  isLogin.value = true;
   await showLoading.update("正在保存用户数据");
   await TSUserAccount.account.saveAccount({
-    uid: briefInfo.uid,
+    uid: briefGet.uid,
     cookie: ck,
-    brief: briefInfo,
+    brief: briefGet,
     updated: "",
   });
   await showLoading.update("正在获取游戏账号");
@@ -532,13 +535,14 @@ async function addByCookie(): Promise<void> {
     return;
   }
   await showLoading.update("正在保存游戏账号");
-  await TSUserAccount.game.saveAccounts(briefInfo.uid, gameRes);
-  const curAccount = await TSUserAccount.game.getCurAccount(briefInfo.uid);
+  await TSUserAccount.game.saveAccounts(briefGet.uid, gameRes);
+  const curAccount = await TSUserAccount.game.getCurAccount(briefGet.uid);
   if (!curAccount) {
     await showLoading.end();
     showSnackbar.warn("未检测到游戏账号，请重新刷新");
     return;
   }
+  account.value = curAccount;
   await showLoading.end();
   showSnackbar.success("成功添加用户!");
 }
