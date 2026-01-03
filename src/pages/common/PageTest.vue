@@ -22,6 +22,10 @@
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
+import useHutaoStore from "@store/hutao.js";
+import { storeToRefs } from "pinia";
+
+const { userName, accessToken, refreshToken } = storeToRefs(useHutaoStore());
 
 async function test() {
   const inputN = await showDialog.input("UserName");
@@ -30,7 +34,12 @@ async function test() {
   const resp = await hutao.Account.login(inputN, inputP);
   if ("retcode" in resp) {
     showSnackbar.warn(`${resp.retcode}-${resp.message}`);
+    return;
   }
+  userName.value = inputN;
+  accessToken.value = resp.AccessToken;
+  refreshToken.value = resp.RefreshToken;
+  showSnackbar.success("登录成功!");
 }
 </script>
 <style lang="css" scoped>

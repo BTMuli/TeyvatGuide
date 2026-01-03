@@ -33,9 +33,6 @@ const useUserStore = defineStore(
     const cookie = ref<TGApp.App.Account.Cookie>();
     const propMap = ref<TGApp.Game.Avatar.PropMap>();
 
-    /** 胡桃云邮箱 */
-    const hutaoEmail = ref<string>();
-
     function getProp(prop: number): TGApp.Game.Avatar.PropMapItem | false {
       if (!propMap.value) return false;
       return propMap.value[prop.toString()] || false;
@@ -68,7 +65,6 @@ const useUserStore = defineStore(
       briefInfo,
       account,
       propMap,
-      hutaoEmail,
       getProp,
       switchGameAccount,
     };
@@ -81,7 +77,6 @@ const useUserStore = defineStore(
         pick: ["uid", "briefInfo", "cookie", "account"],
       },
       { key: "propMap", storage: window.localStorage, pick: ["propMap"] },
-      { key: "hutaoAccount", storage: window.localStorage, pick: ["hutaoEmail"] },
     ],
   },
 );

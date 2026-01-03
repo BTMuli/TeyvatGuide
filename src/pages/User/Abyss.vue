@@ -59,7 +59,7 @@
           <span>统计数据</span>
         </v-btn>
         <div class="uat-extension-right">
-          <span @click="editHutaoEmail()">{{ hutaoEmail ?? "胡桃云邮箱" }}</span>
+          <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
           <v-btn class="ua-btn" prepend-icon="mdi-upload" variant="elevated" @click="uploadAbyss()">
             上传
           </v-btn>
@@ -131,6 +131,7 @@ import recordReq from "@req/recordReq.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import useAppStore from "@store/app.js";
+import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -142,8 +143,11 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const hutaoStore = useHutaoStore();
+
 const { isLogin } = storeToRefs(useAppStore());
-const { account, cookie, hutaoEmail } = storeToRefs(useUserStore());
+const { account, cookie } = storeToRefs(useUserStore());
+const { userName } = storeToRefs(hutaoStore);
 const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
@@ -185,27 +189,8 @@ async function toWiki(): Promise<void> {
   await router.push({ name: "深渊数据库" });
 }
 
-async function editHutaoEmail(): Promise<void> {
-  if (hutaoEmail.value) {
-    const chgCheck = await showDialog.check("是否更改胡桃云账号", `当前账号：${hutaoEmail.value}`);
-    if (!chgCheck) {
-      showSnackbar.cancel("已取消更改胡桃云账号");
-      return;
-    }
-  }
-  const newEmail = await showDialog.input("请输入胡桃云账号", "胡桃云账号", hutaoEmail.value);
-  if (!newEmail) {
-    showSnackbar.cancel("已取消设置胡桃云账号");
-    return;
-  }
-  // 简单验证邮箱格式
-  const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-  if (!mailReg.test(newEmail)) {
-    showSnackbar.error("邮箱格式错误");
-    return;
-  }
-  hutaoEmail.value = newEmail;
-  showSnackbar.success("已设置胡桃云账号");
+async function tryLoginHutao(): Promise<void> {
+  if (!userName.value) await hutaoStore.tryLogin();
 }
 
 async function loadAbyss(): Promise<void> {
@@ -353,7 +338,7 @@ async function tryReadAbyss(): Promise<void> {
 }
 
 async function uploadAbyss(): Promise<void> {
-  if (!hutaoEmail.value || hutaoEmail.value === "") {
+  if (!userName.value || userName.value === "") {
     const check = await showDialog.check("确定上传？", "未设置胡桃云账号");
     if (!check) return;
   }
@@ -382,7 +367,7 @@ async function uploadAbyss(): Promise<void> {
   try {
     await showLoading.start(`正在上传${account.value.gameUid}的深渊数据`, `期数：${abyssData.id}`);
     const transAbyss = hutao.Abyss.utils.transData(abyssData);
-    if (hutaoEmail.value) transAbyss.ReservedUserName = hutaoEmail.value;
+    if (userName.value) transAbyss.ReservedUserName = userName.value;
     await showLoading.update("正在获取角色数据");
     const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
     if (!roles) {
