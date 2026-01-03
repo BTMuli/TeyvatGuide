@@ -3,13 +3,13 @@
  * @since Beta v0.9.1
  */
 
-import { fetch } from "@tauri-apps/plugin-http";
+import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
 
 import TGLogger from "./TGLogger.js";
 
 /**
  * 请求参数
- * @since Beta v0.5.1
+ * @since Beta v0.9.1
  */
 type TGHttpParams = {
   /** 请求方法 */
@@ -47,17 +47,20 @@ async function TGHttp<T>(
   if (options.headers) {
     for (const key in options.headers) httpHeaders.append(key, options.headers[key]);
   }
-  const fetchOptions: RequestInit = { method: options.method, headers: httpHeaders };
+  const fetchOptions: RequestInit & ClientOptions = {
+    method: options.method,
+    headers: httpHeaders,
+  };
   if (options.body) fetchOptions.body = options.body;
   if (options.query) {
     const query = new URLSearchParams(options.query).toString();
     url += `?${query}`;
   }
   if (options.isBlob) {
-    await TGLogger.Debug(`Fetch Image: ${url}`);
+    console.debug(`Fetch Blob: ${url}`);
   } else {
-    await TGLogger.Debug(`Fetch URL: ${url}`);
-    await TGLogger.Debug(`Fetch Options: ${JSON.stringify(options)}`);
+    console.debug(`Fetch URL: ${url}`);
+    console.debug(options);
   }
   return await fetch(url, fetchOptions)
     .then((res) => {
