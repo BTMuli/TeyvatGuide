@@ -12,8 +12,8 @@
           >
             {{ data.text }}
           </div>
-          <div v-show="data?.text !== '' && data.mode === 'input'" class="dialog-input">
-            <div class="dialog-input-label">{{ data.text }}</div>
+          <div v-show="data.mode === 'input'" class="dialog-input">
+            <div v-show="data?.text !== ''" class="dialog-input-label">{{ data.text }}</div>
             <input
               ref="inputRef"
               v-model="inputDefault"
