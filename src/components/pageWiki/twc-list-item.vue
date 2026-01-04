@@ -2,7 +2,6 @@
 <template>
   <div :class="{ selected: props.curItem.id === props.data.id }" class="twc-li-box">
     <div class="twc-li-left">
-      <!-- TODO: 角色添加元素&武器类型，武器添加类型 -->
       <img :src="`/icon/bg/${props.data.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/WIKI/${props.mode}/${props.data.id}.webp`" alt="icon" class="icon" />
     </div>
@@ -140,5 +139,13 @@ const idColor = computed<string>(() => getOdStarColor(props.data.star));
     width: 16px;
     height: 16px;
   }
+
+  .weapon {
+    filter: invert(60%);
+  }
+}
+
+.dark .twc-li-icons .weapon {
+  filter: none;
 }
 </style>
