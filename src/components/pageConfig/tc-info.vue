@@ -4,7 +4,7 @@
     <v-divider :inset="true" class="border-opacity-75" />
     <v-list-item title="Tauri 版本" @click="openUrl('https://v2.tauri.app/')">
       <template #prepend>
-        <v-img class="config-icon" src="/platforms/tauri.webp" alt="Tauri" />
+        <v-img alt="Tauri" class="config-icon" src="/platforms/tauri.webp" />
       </template>
       <template #append>
         <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
@@ -12,7 +12,7 @@
     </v-list-item>
     <v-list-item title="成就版本">
       <template #prepend>
-        <img class="config-icon" src="@/assets/icons/achievements.svg" alt="Achievements" />
+        <img alt="Achievements" class="config-icon" src="@/assets/icons/achievements.svg" />
       </template>
       <template #append>
         <v-list-item-subtitle>{{ latestAchiVersion }}</v-list-item-subtitle>
@@ -36,6 +36,16 @@
       </template>
       <template #append>
         <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
+      </template>
+    </v-list-item>
+    <v-list-item title="设备ID">
+      <template #prepend>
+        <div class="config-icon">
+          <v-icon>mdi-chip</v-icon>
+        </div>
+      </template>
+      <template #append>
+        <v-list-item-subtitle>{{ machineId }}</v-list-item-subtitle>
       </template>
     </v-list-item>
     <v-list-item title="数据库更新时间">
@@ -74,6 +84,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import { commands } from "@skipperndt/plugin-machine-uid";
 import TGSqlite from "@Sql/index.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { app } from "@tauri-apps/api";
@@ -86,6 +97,7 @@ const latestAchiVersion = TSUserAchi.getLatestAchiVersion();
 const osPlatform = platform();
 const osVersion = version();
 
+const machineId = ref<string>("");
 const versionApp = ref<string>("");
 const versionTauri = ref<string>("");
 const iconPlatform = ref<string>("mdi-microsoft-windows");
@@ -94,6 +106,10 @@ const dbInfo = shallowRef<Array<TGApp.Sqlite.AppData.Item>>([]);
 onMounted(async () => {
   versionApp.value = await app.getVersion();
   versionTauri.value = await app.getTauriVersion();
+  const deviceRes = await commands.getMachineUid();
+  if (deviceRes.status === "ok") {
+    machineId.value = deviceRes.data.id ?? "";
+  }
   switch (osPlatform) {
     case "linux":
       iconPlatform.value = "mdi-linux";
