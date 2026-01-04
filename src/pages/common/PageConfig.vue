@@ -1,165 +1,168 @@
 <template>
-  <div class="config-box">
-    <TcInfo />
-    <v-list class="config-list">
-      <v-list-subheader :inset="true" class="config-header" title="数据相关" />
-      <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item title="数据备份" @click="confirmBackup()">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-export</v-icon>
-          </div>
-        </template>
-      </v-list-item>
-      <v-list-item title="数据恢复" @click="confirmRestore()">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-import</v-icon>
-          </div>
-        </template>
-      </v-list-item>
-      <v-list-item title="数据更新" @click="confirmUpdate()">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-arrow-up</v-icon>
-          </div>
-        </template>
-      </v-list-item>
-      <v-list-item>
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-refresh</v-icon>
-          </div>
-        </template>
-        <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
-        <v-list-item-subtitle>
-          <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
-          {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
-        </v-list-item-subtitle>
-        <template #append>
-          <v-icon title="强制刷新设备信息" @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item title="清除缓存" @click="confirmDelCache">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-remove</v-icon>
-          </div>
-        </template>
-        <template #append>{{ bytesToSize(cacheSize) }}</template>
-      </v-list-item>
-      <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-database-settings</v-icon>
-          </div>
-        </template>
-      </v-list-item>
-      <v-list-item title="恢复默认设置" @click="confirmResetApp">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-cog-sync</v-icon>
-          </div>
-        </template>
-      </v-list-item>
-      <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
-      <v-divider :inset="true" class="border-opacity-75" />
-      <v-list-item v-if="isDevEnv" subtitle="开启后将显示调试信息" title="调试模式">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-bug-play</v-icon>
-          </div>
-        </template>
-        <template #append>
-          <v-switch
-            v-model="devMode"
-            :inset="true"
-            :label="devMode ? '开启' : '关闭'"
-            class="config-switch"
-            color="#FAC51E"
-            @click="submitDevMode"
-          />
-        </template>
-      </v-list-item>
-      <v-list-item subtitle="根据分辨率动态调整窗体大小" title="窗口回正">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-window-restore</v-icon>
-          </div>
-        </template>
-        <template #append>
-          <v-switch
-            v-model="isNeedResize"
-            :inset="true"
-            :label="isNeedResize ? '开启' : '关闭'"
-            class="config-switch"
-            color="#FAC51E"
-            @click="submitResize"
-          />
-        </template>
-      </v-list-item>
-      <v-list-item subtitle="关闭窗口时最小化到系统托盘而不是退出应用" title="关闭到托盘">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-tray-arrow-down</v-icon>
-          </div>
-        </template>
-        <template #append>
-          <v-switch
-            v-model="closeToTray"
-            :inset="true"
-            :label="closeToTray ? '开启' : '关闭'"
-            class="config-switch"
-            color="#FAC51E"
-          />
-        </template>
-      </v-list-item>
-      <v-list-item subtitle="关闭后将记录帖子浏览记录" title="无痕浏览">
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-incognito</v-icon>
-          </div>
-        </template>
-        <template #append>
-          <v-switch
-            v-model="appStore.incognito"
-            :inset="true"
-            :label="appStore.incognito ? '开启' : '关闭'"
-            class="config-switch"
-            color="#FAC51E"
-            @click="switchIncognito"
-          />
-        </template>
-      </v-list-item>
-      <v-list-item v-if="platform() === 'windows'" title="分享设置">
-        <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-share-variant</v-icon>
-          </div>
-        </template>
-        <template #append>
-          <v-icon @click="confirmShare()">mdi-cog</v-icon>
-        </template>
-      </v-list-item>
-      <v-list-item title="图片质量调整">
-        <template #subtitle>当前图像质量：{{ imageQualityPercent }}%</template>
-        <template #prepend>
-          <div class="config-icon">
-            <v-icon>mdi-image-filter-vintage</v-icon>
-          </div>
-        </template>
-        <template #append>
-          <v-icon @click="confirmImgQuality()">mdi-cog</v-icon>
-        </template>
-      </v-list-item>
-    </v-list>
-    <TcDataDir />
-  </div>
-  <div class="config-right">
-    <TcAppBadge />
-    <TcUserBadge />
-    <TcGameBadge v-if="platform() === 'windows'" />
+  <div class="pc-page">
+    <div class="config-box">
+      <TcInfo />
+      <v-list class="config-list">
+        <v-list-subheader :inset="true" class="config-header" title="数据相关" />
+        <v-divider :inset="true" class="border-opacity-75" />
+        <v-list-item title="数据备份" @click="confirmBackup()">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-database-export</v-icon>
+            </div>
+          </template>
+        </v-list-item>
+        <v-list-item title="数据恢复" @click="confirmRestore()">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-database-import</v-icon>
+            </div>
+          </template>
+        </v-list-item>
+        <v-list-item title="数据更新" @click="confirmUpdate()">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-database-arrow-up</v-icon>
+            </div>
+          </template>
+        </v-list-item>
+        <v-list-item>
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-refresh</v-icon>
+            </div>
+          </template>
+          <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
+          <v-list-item-subtitle>
+            <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
+            {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
+          </v-list-item-subtitle>
+          <template #append>
+            <v-icon title="强制刷新设备信息" @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
+          </template>
+        </v-list-item>
+        <v-list-item title="清除缓存" @click="confirmDelCache">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-database-remove</v-icon>
+            </div>
+          </template>
+          <template #append>{{ bytesToSize(cacheSize) }}</template>
+        </v-list-item>
+        <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-database-settings</v-icon>
+            </div>
+          </template>
+        </v-list-item>
+        <v-list-item title="恢复默认设置" @click="confirmResetApp">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-cog-sync</v-icon>
+            </div>
+          </template>
+        </v-list-item>
+        <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
+        <v-divider :inset="true" class="border-opacity-75" />
+        <v-list-item v-if="isDevEnv" subtitle="开启后将显示调试信息" title="调试模式">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-bug-play</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-switch
+              v-model="devMode"
+              :inset="true"
+              :label="devMode ? '开启' : '关闭'"
+              class="config-switch"
+              color="#FAC51E"
+              @click="submitDevMode"
+            />
+          </template>
+        </v-list-item>
+        <v-list-item subtitle="根据分辨率动态调整窗体大小" title="窗口回正">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-window-restore</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-switch
+              v-model="isNeedResize"
+              :inset="true"
+              :label="isNeedResize ? '开启' : '关闭'"
+              class="config-switch"
+              color="#FAC51E"
+              @click="submitResize"
+            />
+          </template>
+        </v-list-item>
+        <v-list-item subtitle="关闭窗口时最小化到系统托盘而不是退出应用" title="关闭到托盘">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-tray-arrow-down</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-switch
+              v-model="closeToTray"
+              :inset="true"
+              :label="closeToTray ? '开启' : '关闭'"
+              class="config-switch"
+              color="#FAC51E"
+            />
+          </template>
+        </v-list-item>
+        <v-list-item subtitle="关闭后将记录帖子浏览记录" title="无痕浏览">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-incognito</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-switch
+              v-model="appStore.incognito"
+              :inset="true"
+              :label="appStore.incognito ? '开启' : '关闭'"
+              class="config-switch"
+              color="#FAC51E"
+              @click="switchIncognito"
+            />
+          </template>
+        </v-list-item>
+        <v-list-item v-if="platform() === 'windows'" title="分享设置">
+          <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-share-variant</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-icon @click="confirmShare()">mdi-cog</v-icon>
+          </template>
+        </v-list-item>
+        <v-list-item title="图片质量调整">
+          <template #subtitle>当前图像质量：{{ imageQualityPercent }}%</template>
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-image-filter-vintage</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-icon @click="confirmImgQuality()">mdi-cog</v-icon>
+          </template>
+        </v-list-item>
+      </v-list>
+      <TcDataDir />
+    </div>
+    <div class="config-right">
+      <TcAppBadge />
+      <TcUserBadge />
+      <TcGameBadge v-if="platform() === 'windows'" />
+      <TcHutaoBadge />
+    </div>
   </div>
   <TcoImgQuality v-model="showImgQuality" />
 </template>
@@ -170,6 +173,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TcAppBadge from "@comp/pageConfig/tc-appBadge.vue";
 import TcDataDir from "@comp/pageConfig/tc-dataDir.vue";
 import TcGameBadge from "@comp/pageConfig/tc-gameBadge.vue";
+import TcHutaoBadge from "@comp/pageConfig/tc-hutaoBadge.vue";
 import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
 import TcoImgQuality from "@comp/pageConfig/tco-imgQuality.vue";
@@ -511,17 +515,33 @@ async function switchIncognito(): Promise<void> {
   showSnackbar.success("已关闭无痕浏览!");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+.pc-page {
+  position: relative;
+  display: flex;
+  height: calc(100vh - 32px);
+  align-items: stretch;
+  column-gap: 8px;
+}
+
 .config-box {
   position: relative;
   display: flex;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
-  row-gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  padding-right: 8px;
+  overflow-y: auto;
+  row-gap: 8px;
 }
 
 .config-list {
-  border-radius: 10px;
-  margin-right: 260px;
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--box-text-4);
   font-family: var(--font-text);
@@ -553,12 +573,15 @@ async function switchIncognito(): Promise<void> {
 }
 
 .config-right {
-  position: fixed;
-  top: 16px;
-  right: 10px;
+  position: relative;
   display: flex;
+  overflow: hidden auto;
   width: 256px;
+  height: 100%;
+  box-sizing: border-box;
   flex-direction: column;
-  row-gap: 15px;
+  flex-shrink: 0;
+  justify-content: flex-start;
+  row-gap: 8px;
 }
 </style>

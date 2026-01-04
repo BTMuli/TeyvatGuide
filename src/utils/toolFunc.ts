@@ -4,12 +4,14 @@
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
+import { tz } from "@date-fns/tz";
 import bbsEnum from "@enum/bbs.js";
 import staticDataEnum from "@enum/staticData.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { type } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
+import { format, parseISO } from "date-fns";
 import { v4 } from "uuid";
 
 import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
@@ -365,4 +367,17 @@ export async function isRunInAdmin(): Promise<boolean> {
 export function getRcStar(cid: number, star: number): number {
   const star105List = [10000062, 10000117, 10000118];
   return star105List.includes(cid) ? 105 : star;
+}
+
+/**
+ * 接收时间字符串，转成utf8时区
+ * @since Beta v0.9.1
+ * @param str - 时间字符串
+ * @example 2025-09-18T01:01:39+00:00
+ * @returns 转换后的时间
+ */
+export function timeStr2str(str: string): string {
+  return format(parseISO(str), "yyyy-MM-dd HH:mm:ss", {
+    in: tz("Asia/Shanghai"),
+  });
 }

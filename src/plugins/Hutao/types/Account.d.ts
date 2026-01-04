@@ -90,7 +90,7 @@ declare namespace TGApp.Plugins.Hutao.Account {
      */
     GachaLogExpireAt: string;
     /** 是否是开发者 */
-    IsLicenseDeveloper: boolean;
+    IsLicensedDeveloper: boolean;
     /** 是否是主开发 */
     IsMaintainer: boolean;
     /** 常规用户名 */

@@ -68,7 +68,9 @@ async function tryPlayGame(): Promise<void> {
 .tgb-box {
   position: relative;
   display: flex;
+  width: 100%;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: flex-start;
   justify-content: center;
   padding: 10px;

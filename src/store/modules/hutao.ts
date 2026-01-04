@@ -13,6 +13,8 @@ import { ref } from "vue";
 const useHutaoStore = defineStore(
   "hutao",
   () => {
+    /** 是否登录 */
+    const isLogin = ref<boolean>(false);
     /** 账号 */
     const userName = ref<string>();
     /** token */
@@ -59,6 +61,7 @@ const useHutaoStore = defineStore(
           await showLoading.end();
           return;
         }
+        isLogin.value = true;
         userName.value = inputN;
         accessToken.value = resp.AccessToken;
         refreshToken.value = resp.RefreshToken;
@@ -70,6 +73,22 @@ const useHutaoStore = defineStore(
       } finally {
         await showLoading.end();
       }
+      if (isLogin.value) {
+        await tryRefreshInfo();
+      }
+    }
+
+    async function tryRefreshInfo(): Promise<void> {
+      if (!checkIsValid()) {
+        await tryRefreshToken();
+      }
+      const resp = await hutao.Account.info(accessToken.value!);
+      if ("retcode" in resp) {
+        showSnackbar.warn(`刷新用户信息失败：${resp.retcode}-${resp.message}`);
+        return;
+      }
+      userInfo.value = resp;
+      showSnackbar.success("成功刷新用户信息");
     }
 
     async function tryRefreshToken(): Promise<void> {
@@ -95,6 +114,7 @@ const useHutaoStore = defineStore(
     }
 
     return {
+      isLogin,
       userName,
       accessToken,
       refreshToken,
@@ -103,6 +123,7 @@ const useHutaoStore = defineStore(
       checkIsValid,
       tryLogin,
       tryRefreshToken,
+      tryRefreshInfo,
     };
   },
   {

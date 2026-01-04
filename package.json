@@ -70,6 +70,7 @@
     "doc": "docs"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@mdi/font": "7.4.47",
     "@sentry/vite-plugin": "^4.6.1",
     "@sentry/vue": "^10.32.1",
@@ -89,6 +90,7 @@
     "ajv": "^8.17.1",
     "artplayer": "^5.3.0",
     "colord": "^2.9.3",
+    "date-fns": "^4.1.0",
     "echarts": "^6.0.0",
     "html2canvas": "^1.4.1",
     "js-md5": "^0.8.3",

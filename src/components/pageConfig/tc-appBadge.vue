@@ -54,16 +54,18 @@ async function toSite(): Promise<void> {
   await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tab-box {
+  position: relative;
   display: flex;
+  width: 100%;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   background-image: linear-gradient(to right, #f78ca0 0%, #f9748f 19%, #fd868c 60%, #fe9a8b 100%);
-  box-shadow: 0 0 10px var(--common-shadow-2);
 }
 
 .tab-icon {

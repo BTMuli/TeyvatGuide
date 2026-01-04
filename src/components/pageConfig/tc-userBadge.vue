@@ -5,7 +5,7 @@
       <v-avatar :image="userInfo.avatar" />
     </template>
     <template #title>{{ userInfo.nickname }}</template>
-    <template #subtitle>UID:{{ userInfo.uid }}</template>
+    <template #subtitle>{{ userInfo.uid }}</template>
     <template #text>{{ userInfo.desc }}</template>
     <template #append>
       <v-menu location="start">
@@ -565,7 +565,10 @@ async function clearUser(user: TGApp.App.Account.User): Promise<void> {
 </script>
 <style lang="css" scoped>
 .tcu-box {
-  border-radius: 10px;
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 8px;
   background-image: linear-gradient(to right, #f78ca0 0%, #f9748f 19%, #fd868c 60%, #fe9a8b 100%);
   color: var(--tgc-white-1);
 }
