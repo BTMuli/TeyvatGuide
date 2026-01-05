@@ -22,6 +22,31 @@
         />
       </div>
     </template>
+    <template #append>
+      <div class="gacha-top-append">
+        <div class="gacha-hutao-box">
+          <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
+          <v-btn
+            :disabled="!isLoginHutao"
+            class="gacha-top-btn"
+            prepend-icon="mdi-upload"
+            variant="elevated"
+            @click="tryUploadGacha()"
+          >
+            上传
+          </v-btn>
+          <v-btn
+            :disabled="!isLoginHutao"
+            class="gacha-top-btn"
+            prepend-icon="mdi-download"
+            variant="elevated"
+            @click="tryDownloadGacha()"
+          >
+            下载
+          </v-btn>
+        </div>
+      </div>
+    </template>
     <template #extension>
       <div class="gacha-top-btns">
         <v-btn
@@ -120,6 +145,7 @@
     </v-window>
   </div>
   <UgoUid v-model="ovShow" :mode="ovMode" />
+  <UgoHutaoDownload v-model="showHutaoD" @selected="handleHutaoDownload" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -130,11 +156,13 @@ import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
+import UgoHutaoDownload from "@comp/userGacha/ugo-hutao-download.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
+import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
@@ -148,14 +176,17 @@ import { useRouter } from "vue-router";
 import { AppCharacterData, AppWeaponData } from "@/data/index.js";
 
 const router = useRouter();
+const hutaoStore = useHutaoStore();
 
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
+const { isLogin: isLoginHutao, userName } = storeToRefs(hutaoStore);
 
 const authkey = ref<string>("");
 const uidCur = ref<string>();
 const tab = ref<string>("overview");
 const ovShow = ref<boolean>(false);
+const showHutaoD = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
 const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
@@ -191,6 +222,24 @@ watch(
 
 async function toBeyond(): Promise<void> {
   await router.push({ name: "千星奇域祈愿记录" });
+}
+
+async function tryLoginHutao(): Promise<void> {
+  if (!userName.value) await hutaoStore.tryLogin();
+}
+
+async function tryUploadGacha(): Promise<void> {
+  // TODO: implement upload gacha records to hutao cloud
+}
+
+async function tryDownloadGacha(): Promise<void> {
+  if (!isLoginHutao.value) return;
+  showHutaoD.value = true;
+}
+
+async function handleHutaoDownload(uids: Array<string>): Promise<void> {
+  console.log(uids);
+  // TODO: implement download gacha records from hutao cloud
 }
 
 async function reloadUid(): Promise<void> {
@@ -499,7 +548,7 @@ async function checkData(): Promise<void> {
   }
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .gacha-top-title {
   display: flex;
   align-items: center;
@@ -529,6 +578,24 @@ async function checkData(): Promise<void> {
 
 .dark .gacha-top-byd {
   filter: none;
+}
+
+.gacha-top-append {
+  position: relative;
+  margin-right: 16px;
+}
+
+.gacha-hutao-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+
+  span {
+    color: var(--tgc-od-red);
+    cursor: pointer;
+  }
 }
 
 .gacha-top-btns {
