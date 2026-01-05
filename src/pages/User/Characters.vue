@@ -52,20 +52,20 @@
             class="uc-select-btn"
             density="compact"
             item-title="label"
-            width="200px"
             item-value="value"
             label="详情浮窗视图模式"
             variant="outlined"
+            width="200px"
           />
           <v-select
             v-model="uidCur"
             :hide-details="true"
             :items="uidList"
             class="uc-select-btn"
-            width="200px"
             density="compact"
             label="当前UID"
             variant="outlined"
+            width="200px"
           />
         </div>
         <div class="uc-sort">
@@ -201,7 +201,13 @@ const isConstUp = ref<boolean | null>(null);
 const uidList = shallowRef<Array<string>>([]);
 const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
-const selectOpts = ref<UavSelectModel>({ star: [], weapon: [], area: [], element: [] });
+const selectOpts = ref<UavSelectModel>({
+  costume: [],
+  star: [],
+  weapon: [],
+  area: [],
+  element: [],
+});
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 const enableShare = computed<boolean>(
@@ -281,7 +287,7 @@ function resetList(): void {
   isLevelUp.value = null;
   isFetterUp.value = null;
   isConstUp.value = null;
-  selectOpts.value = { star: [], weapon: [], area: [], element: [] };
+  selectOpts.value = { costume: [], star: [], weapon: [], area: [], element: [] };
   selectedList.value = getOrderedList(roleList.value);
   showSnackbar.success("已重置筛选条件");
   if (!dataVal.value) return;
@@ -516,7 +522,16 @@ function handleSelect(val: UavSelectModel): void {
     if (val.weapon.length > 0 && !val.weapon.includes(role.weapon.type_name)) return false;
     if (val.element.length > 0 && !val.element.includes(getZhElement(role.avatar.element)))
       return false;
-    return !(val.area.length > 0 && !val.area.includes(info?.area ?? ""));
+    if (val.area.length > 0 && !val.area.includes(info?.area ?? "")) return false;
+    if (val.costume.length > 0) {
+      if (val.costume.length === 2) return true;
+      const hasCostume = role.costumes.some((c) =>
+        info?.costumes.find((i) => i.id === c.id && !i.isDefault),
+      );
+      if (val.costume.includes("true")) return hasCostume;
+      if (val.costume.includes("false")) return !hasCostume;
+    }
+    return true;
   });
   if (filterC.length === 0) {
     showSnackbar.warn("未找到符合条件的角色");

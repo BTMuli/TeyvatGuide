@@ -3,6 +3,12 @@
   <v-bottom-sheet v-model="visible">
     <div class="uav-select-container">
       <div class="uav-select-item">
+        <div class="uav-select-title">衣装</div>
+        <div class="uav-select-props">
+          <UavSelectChips v-model:selected="costumeSelected" :items="costumeOpts" size="small" />
+        </div>
+      </div>
+      <div class="uav-select-item">
         <div class="uav-select-title">星级</div>
         <div class="uav-select-props">
           <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small" />
@@ -43,6 +49,8 @@ import { ref, watch } from "vue";
 
 /** 返回数据 */
 export type UavSelectModel = {
+  /** 皮肤 */
+  costume: Array<string>;
   /** 星级 */
   star: Array<string>;
   /** 武器 */
@@ -55,6 +63,10 @@ export type UavSelectModel = {
 
 type UavSelectEmits = (e: "select", v: UavSelectModel) => void;
 
+const costumeOpts: Array<UavSelectChipsItem> = [
+  { label: "有", value: "true", title: "有衣装" },
+  { label: "无", value: "false", title: "无衣装" },
+];
 const starOpts: Array<UavSelectChipsItem> = [
   { label: "⭐⭐⭐⭐", value: "4", title: "四星" },
   { label: "⭐⭐⭐⭐⭐", value: "5", title: "五星" },
@@ -83,13 +95,14 @@ const areaOpts: Array<UavSelectChipsItem> = [
 
 const emits = defineEmits<UavSelectEmits>();
 
+const costumeSelected = ref<Array<string>>([]);
 const starSelected = ref<Array<string>>([]);
 const weaponSelected = ref<Array<string>>([]);
 const elementSelected = ref<Array<string>>([]);
 const areaSelected = ref<Array<string>>([]);
 
 const model = defineModel<UavSelectModel>({
-  default: { star: [], weapon: [], area: [], element: [] },
+  default: { costume: [], star: [], weapon: [], area: [], element: [] },
 });
 const visible = defineModel<boolean>("show");
 
@@ -97,6 +110,7 @@ watch(
   () => visible.value,
   () => {
     if (visible.value) {
+      costumeSelected.value = model.value.costume;
       starSelected.value = model.value.star;
       weaponSelected.value = model.value.weapon;
       areaSelected.value = model.value.area;
@@ -111,6 +125,7 @@ function onCancel(): void {
 
 function onConfirm(): void {
   model.value = {
+    costume: costumeSelected.value,
     star: starSelected.value,
     weapon: weaponSelected.value,
     element: elementSelected.value,
