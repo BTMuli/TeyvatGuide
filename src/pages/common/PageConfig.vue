@@ -319,7 +319,7 @@ async function confirmShare(): Promise<void> {
     "阈值：",
     shareDefaultFile.value.toString(),
   );
-  if (input === undefined) {
+  if (!input) {
     showSnackbar.cancel("已取消修改分享设置");
     return;
   }
