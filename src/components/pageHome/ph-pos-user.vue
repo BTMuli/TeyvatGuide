@@ -3,7 +3,7 @@
   <div ref="posRef" class="ph-pos-user-card">
     <div class="ph-puc-top">
       <div class="title">
-        <v-icon v-if="props.pos.is_finished" color="var(--tgc-od-green)" title="已完成">
+        <v-icon v-if="isFin" color="var(--tgc-od-green)" title="已完成">
           mdi-checkbox-marked-circle-outline
         </v-icon>
         <v-icon v-else color="var(--tgc-od-white)" title="未完成">mdi-circle</v-icon>
@@ -69,7 +69,7 @@
             剩余双倍次数: {{ props.pos.double_detail.left }}/{{ props.pos.double_detail.total }}
           </span>
         </template>
-        <!-- 处理立本活动 TODO:待完善 -->
+        <!-- 处理立本活动 -->
         <template v-else-if="props.pos.type === gameEnum.actCalendarType.LiBen">
           <span>当天{{ props.pos.liben_detail.status === 1 ? "未" : "已" }}兑换</span>
           <span>{{ props.pos.liben_detail.progress }}/{{ props.pos.liben_detail.total }}</span>
@@ -138,6 +138,12 @@ const durationTs = ref<number>(0);
 const endHd = ref<string>();
 const isStart = computed<boolean>(() => {
   return props.pos.start_timestamp !== "0";
+});
+const isFin = computed<boolean>(() => {
+  if (props.pos.type === gameEnum.actCalendarType.LiBen) {
+    return props.pos.liben_detail.is_has_taken_special_reward;
+  }
+  return props.pos.is_finished;
 });
 
 onMounted(() => {
