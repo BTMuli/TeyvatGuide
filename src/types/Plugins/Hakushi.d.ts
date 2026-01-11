@@ -82,11 +82,16 @@ declare namespace TGApp.Plugins.Hakushi {
 
   /**
    * 转换后的数据
-   * @since Beta v0.9.0
+   * @since Beta v0.9.1
    */
   type ConvertData = {
+    /** ID */
     id: string;
+    /** 名称 */
     name: string;
+    /** 类型 */
     type: "武器" | "角色";
+    /** 星级 */
+    star: number;
   };
 }

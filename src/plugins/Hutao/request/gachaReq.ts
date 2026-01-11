@@ -41,6 +41,7 @@ export async function getEndIds(
     method: "GET",
     headers: header,
     query: { Uid: uid },
+    hasBigInt: true,
   });
   if (resp.retcode !== 0) return <TGApp.Plugins.Hutao.Base.Resp>resp;
   return <TGApp.Plugins.Hutao.Gacha.EndIdRes>resp.data;
@@ -59,24 +60,23 @@ export async function getGachaLogs(
   tk: string,
   uid: string,
   gType: number,
-  endId: number,
   count: number,
-): Promise<TGApp.Plugins.Hutao.Gacha.GachaLogRes | TGApp.Plugins.Hutao.Base.Resp> {
+  endId: string | undefined = undefined,
+): Promise<TGApp.Plugins.Hutao.Gacha.GachaLogResp> {
   const url = `${GachaUrl}LimitedRetrieve`;
   const header = await getReqHeader(tk);
-  const params = {
+  const params: Record<string, string | number> = {
     uid: uid,
     configType: gType,
-    endId: endId,
     count: count,
   };
-  const resp = await TGHttp<TGApp.Plugins.Hutao.Gacha.GachaLogResp>(url, {
+  if (endId) params.endId = endId;
+  return await TGHttp<TGApp.Plugins.Hutao.Gacha.GachaLogResp>(url, {
     method: "GET",
     headers: header,
     query: params,
+    hasBigInt: true,
   });
-  if (resp.retcode !== 0) return <TGApp.Plugins.Hutao.Base.Resp>resp;
-  return <TGApp.Plugins.Hutao.Gacha.GachaLogRes>resp.data;
 }
 
 /**
@@ -89,12 +89,32 @@ export async function getGachaLogs(
 export async function uploadGachaLogs(
   tk: string,
   data: TGApp.Plugins.Hutao.Gacha.UploadData,
-): Promise<TGApp.Plugins.Hutao.Gacha.UploadResp | TGApp.Plugins.Hutao.Base.Resp> {
+): Promise<TGApp.Plugins.Hutao.Gacha.UploadResp> {
   const url = `${GachaUrl}Upload`;
   const header = await getReqHeader(tk);
   return await TGHttp<TGApp.Plugins.Hutao.Gacha.UploadResp>(url, {
     method: "POST",
     headers: header,
-    body: JSON.stringify(data, (_, v) => (typeof v === "bigint" ? v.toString() : v)),
+    body: JSON.stringify(data),
+  });
+}
+
+/**
+ * 删除祈愿记录
+ * @since Beta v0.9.1
+ * @param tk - token
+ * @param uid - uid
+ * @returns 删除结果
+ */
+export async function deleteGachaLogs(
+  tk: string,
+  uid: string,
+): Promise<TGApp.Plugins.Hutao.Gacha.DeleteResp> {
+  const url = `${GachaUrl}Delete`;
+  const header = await getReqHeader(tk);
+  return await TGHttp<TGApp.Plugins.Hutao.Gacha.DeleteResp>(url, {
+    method: "GET",
+    headers: header,
+    query: { Uid: uid },
   });
 }

@@ -2,7 +2,7 @@
 <template>
   <TOverlay v-model="visible" blur-val="5px">
     <div class="ugo-hutao-du">
-      <div class="ugo-hd-title">请选择要{{ props.mode === "upload" ? "上传" : "下载" }}的数据</div>
+      <div class="ugo-hd-title">请选择要{{ title }}的数据</div>
       <v-progress-circular v-if="loading" color="var(--tgc-od-blue)" indeterminate />
       <v-item-group v-else v-model="selectedUid" :multiple="true" class="ugo-hd-list">
         <v-item
@@ -38,12 +38,13 @@ import hutao from "@Hutao/index.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useHutaoStore from "@store/hutao.js";
 import { storeToRefs } from "pinia";
-import { ref, shallowRef, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 
+export type UgoHutaoMode = "download" | "upload" | "delete";
 type UgoHutaoDuUid = { uid: string; cnt: number };
 
-type UgoHutaoDuProps = { mode: "download" | "upload" };
-type UgoHutaoDuEmits = (e: "selected", v: Array<string>, m: boolean) => void;
+type UgoHutaoDuProps = { mode: UgoHutaoMode };
+type UgoHutaoDuEmits = (e: "selected", v: Array<string>, m: UgoHutaoMode) => void;
 
 const visible = defineModel<boolean>();
 const emits = defineEmits<UgoHutaoDuEmits>();
@@ -52,6 +53,18 @@ const props = defineProps<UgoHutaoDuProps>();
 const loading = ref<boolean>(false);
 const uidList = shallowRef<Array<UgoHutaoDuUid>>([]);
 const selectedUid = shallowRef<Array<string>>([]);
+const title = computed<string>(() => {
+  switch (props.mode) {
+    case "upload":
+      return "上传";
+    case "download":
+      return "下载";
+    case "delete":
+      return "删除";
+    default:
+      return "";
+  }
+});
 
 const hutaoStore = useHutaoStore();
 const { accessToken, isLogin } = storeToRefs(hutaoStore);
@@ -63,10 +76,10 @@ watch(
       loading.value = true;
       selectedUid.value = [];
       uidList.value = [];
-      if (props.mode == "download") {
-        await loadDownload();
-      } else {
+      if (props.mode == "upload") {
         await loadUpload();
+      } else {
+        await loadDownload();
       }
       loading.value = false;
     }
@@ -105,7 +118,7 @@ function handleSelected(): void {
     showSnackbar.warn("请选择至少一个UID");
     return;
   }
-  emits("selected", selectedUid.value, props.mode === "upload");
+  emits("selected", selectedUid.value, props.mode);
   visible.value = false;
 }
 </script>

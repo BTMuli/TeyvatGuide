@@ -79,9 +79,7 @@ const useHutaoStore = defineStore(
     }
 
     async function tryRefreshInfo(): Promise<void> {
-      if (!checkIsValid()) {
-        await tryRefreshToken();
-      }
+      await tryRefreshToken();
       const resp = await hutao.Account.info(accessToken.value!);
       if ("retcode" in resp) {
         showSnackbar.warn(`刷新用户信息失败：${resp.retcode}-${resp.message}`);
@@ -96,6 +94,7 @@ const useHutaoStore = defineStore(
         showSnackbar.warn("未找到胡桃云RefreshToken");
         return;
       }
+      if (checkIsValid()) return;
       try {
         const resp = await hutao.Token.refresh(refreshToken.value);
         if ("retcode" in resp) {

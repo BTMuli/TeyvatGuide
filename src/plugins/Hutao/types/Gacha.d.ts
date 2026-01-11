@@ -83,7 +83,7 @@ declare namespace TGApp.Plugins.Hutao.Gacha {
      */
     Time: string;
     /** Id */
-    Id: number | bigint;
+    Id: string | bigint;
   };
 
   /**
@@ -102,4 +102,10 @@ declare namespace TGApp.Plugins.Hutao.Gacha {
     /** 数据 */
     Items: Array<GachaLog>;
   };
+
+  /**
+   * 删除响应
+   * @since Beta v0.9.1
+   */
+  type DeleteResp = TGApp.Plugins.Hutao.Base.Resp<string>;
 }

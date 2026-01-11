@@ -14,7 +14,13 @@ import {
 } from "./request/abyssReq.js";
 import { getUserInfo, loginPassport, refreshToken } from "./request/accountReq.js";
 import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
-import { getEndIds, getEntries, getGachaLogs, uploadGachaLogs } from "./request/gachaReq.js";
+import {
+  deleteGachaLogs,
+  getEndIds,
+  getEntries,
+  getGachaLogs,
+  uploadGachaLogs,
+} from "./request/gachaReq.js";
 import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
 import { transCombatLocal } from "./utils/combatUtil.js";
 
@@ -62,7 +68,7 @@ const Hutao = {
     endIds: getEndIds,
     logs: getGachaLogs,
     upload: uploadGachaLogs,
-    delete: _,
+    delete: deleteGachaLogs,
   },
 };
 

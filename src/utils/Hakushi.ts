@@ -30,17 +30,17 @@ async function fetchWeapon(): Promise<TGApp.Plugins.Hakushi.WeaponResp> {
 
 /**
  * 转换数据
- * @since Beta v0.9.0
+ * @since Beta v0.9.1
  */
 async function fetchJson(): Promise<Array<TGApp.Plugins.Hakushi.ConvertData>> {
   const jsonW = await fetchWeapon();
   const jsonA = await fetchAvatar();
   const res: Array<TGApp.Plugins.Hakushi.ConvertData> = [];
   for (const [id, data] of Object.entries(jsonW)) {
-    res.push({ id: id.toString(), name: data.CHS, type: "武器" });
+    res.push({ id: id.toString(), name: data.CHS, type: "武器", star: data.rank });
   }
   for (const [id, data] of Object.entries(jsonA)) {
-    res.push({ id: id.toString(), name: data.CHS, type: "角色" });
+    res.push({ id: id.toString(), name: data.CHS, type: "角色", star: data.rank });
   }
   return res;
 }

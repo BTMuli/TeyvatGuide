@@ -44,6 +44,15 @@
           >
             下载
           </v-btn>
+          <v-btn
+            :disabled="!isLoginHutao"
+            class="gacha-top-btn"
+            prepend-icon="mdi-delete"
+            variant="elevated"
+            @click="tryDeleteGacha()"
+          >
+            删除
+          </v-btn>
         </div>
       </div>
     </template>
@@ -156,7 +165,7 @@ import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
-import UgoHutaoDu from "@comp/userGacha/ugo-hutao-du.vue";
+import UgoHutaoDu, { type UgoHutaoMode } from "@comp/userGacha/ugo-hutao-du.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hutao from "@Hutao/index.js";
 import hk4eReq from "@req/hk4eReq.js";
@@ -175,7 +184,7 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { AppCharacterData, AppWeaponData } from "@/data/index.js";
+import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
 
 const router = useRouter();
 const hutaoStore = useHutaoStore();
@@ -190,7 +199,7 @@ const tab = ref<string>("overview");
 const ovShow = ref<boolean>(false);
 const hutaoShow = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
-const htMode = ref<"download" | "upload">("download");
+const htMode = ref<UgoHutaoMode>("download");
 const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
@@ -243,9 +252,24 @@ async function tryDownloadGacha(): Promise<void> {
   hutaoShow.value = true;
 }
 
-async function handleHutaoDu(uids: Array<string>, isUpload: boolean): Promise<void> {
-  if (isUpload) await handleHutaoUpload(uids);
-  else await handleHutaoDownload(uids);
+async function tryDeleteGacha(): Promise<void> {
+  if (!isLoginHutao.value) return;
+  htMode.value = "delete";
+  hutaoShow.value = true;
+}
+
+async function handleHutaoDu(uids: Array<string>, mode: UgoHutaoMode): Promise<void> {
+  switch (mode) {
+    case "download":
+      await handleHutaoDownload(uids);
+      break;
+    case "upload":
+      await handleHutaoUpload(uids);
+      break;
+    case "delete":
+      await handleHutaoDelete(uids);
+      break;
+  }
 }
 
 async function handleHutaoUpload(uids: Array<string>): Promise<void> {
@@ -284,7 +308,7 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
         QueryType: Number(i.uigfType),
         ItemId: Number(i.itemId),
         Time: str2timeStr(i.time),
-        Id: BigInt(i.id),
+        Id: i.id.toString(),
       })),
     };
     const resp = await hutao.Gacha.upload(accessToken.value!, data);
@@ -298,8 +322,124 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
 }
 
 async function handleHutaoDownload(uids: Array<string>): Promise<void> {
-  console.log(uids);
-  // TODO:implement download gacha logs
+  if (uids.length === 0) {
+    showSnackbar.warn("没有选中的UID");
+    return;
+  }
+  if (!isLoginHutao.value) {
+    showSnackbar.warn("未登录胡桃云账号");
+    return;
+  }
+  if (!userInfo.value) {
+    await hutaoStore.tryRefreshInfo();
+    if (!userInfo.value) {
+      showSnackbar.warn("未检测到胡桃云用户信息");
+      return;
+    }
+  }
+  await showLoading.start("正在下载胡桃云祈愿记录...", "正在刷新Token");
+  for (const u of uids) {
+    await showLoading.start(`正在下载UID:${u}的祈愿记录`, "正在获取EndIds");
+    const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
+    if ("retcode" in endIdResp) {
+      showSnackbar.warn(`[${endIdResp.retcode}] ${endIdResp.message}`);
+      continue;
+    }
+    for (const [p, i] of Object.entries(endIdResp)) {
+      if (i === 0) continue;
+      let endId: string | undefined = undefined;
+      let flag = true;
+      const pageSize = 200;
+      await showLoading.start(`正在下载卡池 ${p}`);
+      const uigfList: Array<TGApp.Plugins.UIGF.GachaItem> = [];
+      while (flag) {
+        await showLoading.update(`EndId:${endId ?? "无"}`);
+        await hutaoStore.tryRefreshToken();
+        const gachaResp = await hutao.Gacha.logs(accessToken.value!, u, Number(p), pageSize, endId);
+        if (gachaResp.retcode !== 0) {
+          showSnackbar.warn(`[${gachaResp.retcode}] ${gachaResp.message}`);
+          break;
+        }
+        const data: TGApp.Plugins.Hutao.Gacha.GachaLogRes = gachaResp.data ?? [];
+        if (data.length === pageSize) {
+          endId = data[data.length - 1].Id.toString();
+        } else flag = false;
+        for (const item of data) {
+          const tempItem: TGApp.Plugins.UIGF.GachaItem = {
+            gacha_type: item.GachaType.toString(),
+            item_id: item.ItemId.toString(),
+            count: "1",
+            time: item.Time,
+            name: "",
+            item_type: "",
+            rank_type: "",
+            id: BigInt(item.Id).toString(),
+            uigf_gacha_type: item.QueryType.toString(),
+          };
+          const find = AppCalendarData.find((i) => i.id.toString() === item.ItemId.toString());
+          if (find) {
+            tempItem.name = find.name;
+            tempItem.item_type = find.itemType;
+            tempItem.rank_type = find.star.toString();
+          } else {
+            if (hakushiData.value.length === 0) {
+              await showLoading.update(
+                `未查找到 ${tempItem.item_id} 的 信息，正在获取 Hakushi 数据`,
+              );
+              await loadHakushi();
+            }
+            const findH = hakushiData.value.find((i) => i.id.toString() === item.ItemId.toString());
+            if (findH) {
+              tempItem.name = findH.name;
+              tempItem.item_type = findH.type;
+              tempItem.rank_type = findH.star.toString();
+            } else {
+              showSnackbar.warn(`无法搜索到 ${item.ItemId} 的信息，请等待元数据更新`);
+              continue;
+            }
+          }
+          uigfList.push(tempItem);
+        }
+      }
+      await showLoading.start(`正在写入卡池 ${p}-${uigfList.length}`);
+      await TSUserGacha.mergeUIGF(u, uigfList, true);
+    }
+  }
+  await showLoading.end();
+  showSnackbar.success("成功下载，即将刷新页面");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+  window.location.reload();
+}
+
+async function handleHutaoDelete(uids: Array<string>): Promise<void> {
+  if (uids.length === 0) {
+    showSnackbar.warn("没有选中的UID");
+    return;
+  }
+  if (!isLoginHutao.value) {
+    showSnackbar.warn("未登录胡桃云账号");
+    return;
+  }
+  if (!userInfo.value) {
+    await hutaoStore.tryRefreshInfo();
+    if (!userInfo.value) {
+      showSnackbar.warn("未检测到胡桃云用户信息");
+      return;
+    }
+  }
+  const check = await showDialog.check("确定删除？", uids.join("、"));
+  if (!check) return;
+  await showLoading.start("正在删除胡桃云祈愿记录");
+  for (const u of uids) {
+    await showLoading.update(`UID:${u}`);
+    const deleteResp = await hutao.Gacha.delete(accessToken.value!, u);
+    if (deleteResp.retcode === 0) {
+      showSnackbar.success(`删除记录成功：${deleteResp.message}`);
+    } else {
+      showSnackbar.warn(`[${deleteResp.retcode}] ${deleteResp.message}`);
+    }
+  }
+  await showLoading.end();
 }
 
 async function reloadUid(): Promise<void> {
