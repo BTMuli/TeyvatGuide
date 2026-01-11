@@ -8,7 +8,7 @@ mod utils;
 use tauri::{AppHandle, Manager, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;
 
-static BBS_VERSION: &'static str = "2.99.1";
+static BBS_VERSION: &'static str = "2.100.0";
 
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
