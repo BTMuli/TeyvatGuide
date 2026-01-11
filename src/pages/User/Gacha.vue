@@ -145,7 +145,7 @@
     </v-window>
   </div>
   <UgoUid v-model="ovShow" :mode="ovMode" />
-  <UgoHutaoDownload v-model="showHutaoD" @selected="handleHutaoDownload" />
+  <UgoHutaoDu v-model="hutaoShow" :mode="htMode" @selected="handleHutaoDu" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -156,8 +156,9 @@ import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
-import UgoHutaoDownload from "@comp/userGacha/ugo-hutao-download.vue";
+import UgoHutaoDu from "@comp/userGacha/ugo-hutao-du.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
+import hutao from "@Hutao/index.js";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
@@ -168,6 +169,7 @@ import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import Hakushi from "@utils/Hakushi.js";
 import TGLogger from "@utils/TGLogger.js";
+import { str2timeStr, timeStr2str } from "@utils/toolFunc.js";
 import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
@@ -180,14 +182,15 @@ const hutaoStore = useHutaoStore();
 
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
-const { isLogin: isLoginHutao, userName } = storeToRefs(hutaoStore);
+const { isLogin: isLoginHutao, accessToken, userName, userInfo } = storeToRefs(hutaoStore);
 
 const authkey = ref<string>("");
 const uidCur = ref<string>();
 const tab = ref<string>("overview");
 const ovShow = ref<boolean>(false);
-const showHutaoD = ref<boolean>(false);
+const hutaoShow = ref<boolean>(false);
 const ovMode = ref<"export" | "import">("import");
+const htMode = ref<"download" | "upload">("download");
 const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
@@ -229,17 +232,74 @@ async function tryLoginHutao(): Promise<void> {
 }
 
 async function tryUploadGacha(): Promise<void> {
-  // TODO: implement upload gacha records to hutao cloud
+  if (!isLoginHutao.value) return;
+  htMode.value = "upload";
+  hutaoShow.value = true;
 }
 
 async function tryDownloadGacha(): Promise<void> {
   if (!isLoginHutao.value) return;
-  showHutaoD.value = true;
+  htMode.value = "download";
+  hutaoShow.value = true;
+}
+
+async function handleHutaoDu(uids: Array<string>, isUpload: boolean): Promise<void> {
+  if (isUpload) await handleHutaoUpload(uids);
+  else await handleHutaoDownload(uids);
+}
+
+async function handleHutaoUpload(uids: Array<string>): Promise<void> {
+  if (uids.length === 0) {
+    showSnackbar.warn("没有选中的UID");
+    return;
+  }
+  if (!isLoginHutao.value) {
+    showSnackbar.warn("未登录胡桃云账号");
+    return;
+  }
+  if (!userInfo.value) {
+    await hutaoStore.tryRefreshInfo();
+    if (!userInfo.value) {
+      showSnackbar.warn("未检测到胡桃云用户信息");
+      return;
+    }
+  }
+  const isExpire = hutaoStore.checkGachaExpire();
+  if (isExpire) {
+    const check = await showDialog.checkF({
+      title: "胡桃云祈愿已过期，确定上传？",
+      text: `到期时间:${timeStr2str(userInfo.value.GachaLogExpireAt)}`,
+    });
+    if (!check) return;
+  }
+  await showLoading.start("正在上传至胡桃云...", "正在刷新Token");
+  await hutaoStore.tryRefreshToken();
+  for (const u of uids) {
+    await showLoading.update(`正在上传UID:${u}`);
+    const dataRaw = await TSUserGacha.record.all(u);
+    const data: TGApp.Plugins.Hutao.Gacha.UploadData = {
+      Uid: u,
+      Items: dataRaw.map((i) => ({
+        GachaType: Number(i.gachaType),
+        QueryType: Number(i.uigfType),
+        ItemId: Number(i.itemId),
+        Time: str2timeStr(i.time),
+        Id: BigInt(i.id),
+      })),
+    };
+    const resp = await hutao.Gacha.upload(accessToken.value!, data);
+    if (resp.retcode === 0) {
+      showSnackbar.success(`成功上传祈愿数据：${resp.message}`);
+    } else {
+      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+    }
+  }
+  await showLoading.end();
 }
 
 async function handleHutaoDownload(uids: Array<string>): Promise<void> {
   console.log(uids);
-  // TODO: implement download gacha records from hutao cloud
+  // TODO:implement download gacha logs
 }
 
 async function reloadUid(): Promise<void> {

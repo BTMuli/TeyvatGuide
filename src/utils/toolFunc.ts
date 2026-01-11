@@ -11,7 +11,7 @@ import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { type } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
-import { format, parseISO } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
 import { v4 } from "uuid";
 
 import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
@@ -380,4 +380,17 @@ export function timeStr2str(str: string): string {
   return format(parseISO(str), "yyyy-MM-dd HH:mm:ss", {
     in: tz("Asia/Shanghai"),
   });
+}
+
+/**
+ * 接收本地时间字符串，转成 ISO8601（含 +08:00）
+ * @since Beta v0.9.1
+ * @param str - 时间字符串
+ * @example "2025-09-18 09:01:39" → "2025-09-18T09:01:39+08:00"
+ */
+export function str2timeStr(str: string): string {
+  // 解析为上海时区的本地日期（你可以改成别的时区）
+  const d = parse(str, "yyyy-MM-dd HH:mm:ss", new Date(), { in: tz("Asia/Shanghai") });
+  // 输出为 UTC 的 ISO 字符串
+  return format(d, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { in: tz("UTC") });
 }

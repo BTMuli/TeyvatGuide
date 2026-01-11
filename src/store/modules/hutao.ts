@@ -113,6 +113,13 @@ const useHutaoStore = defineStore(
       }
     }
 
+    function checkGachaExpire(): boolean {
+      if (!userInfo.value) return true;
+      if (userInfo.value.IsMaintainer || userInfo.value.IsLicensedDeveloper) return false;
+      const expire = new Date(userInfo.value.GachaLogExpireAt).getTime();
+      return Date.now() < expire;
+    }
+
     return {
       isLogin,
       userName,
@@ -124,6 +131,7 @@ const useHutaoStore = defineStore(
       tryLogin,
       tryRefreshToken,
       tryRefreshInfo,
+      checkGachaExpire,
     };
   },
   {

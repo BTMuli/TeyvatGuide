@@ -1,12 +1,12 @@
 <!-- 胡桃悬浮层 -->
 <template>
   <TOverlay v-model="visible" blur-val="5px">
-    <div class="ugo-hutao-download">
-      <div class="ugo-hd-title">请选择要下载的数据</div>
+    <div class="ugo-hutao-du">
+      <div class="ugo-hd-title">请选择要{{ props.mode === "upload" ? "上传" : "下载" }}的数据</div>
       <v-progress-circular v-if="loading" color="var(--tgc-od-blue)" indeterminate />
-      <v-item-group v-else v-model="selectedUid" class="ugo-hd-list">
+      <v-item-group v-else v-model="selectedUid" :multiple="true" class="ugo-hd-list">
         <v-item
-          v-for="(item, idx) in uploadInfo"
+          v-for="(item, idx) in uidList"
           :key="idx"
           v-slot="{ isSelected, toggle }"
           :value="item.uid"
@@ -35,38 +35,56 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
+import TSUserGacha from "@Sqlm/userGacha.js";
 import useHutaoStore from "@store/hutao.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, watch } from "vue";
 
-type UgoHutaoDownloadUid = { uid: string; cnt: number };
+type UgoHutaoDuUid = { uid: string; cnt: number };
 
-type UgoHutaoDownloadEmits = (e: "selected", v: Array<string>) => void;
+type UgoHutaoDuProps = { mode: "download" | "upload" };
+type UgoHutaoDuEmits = (e: "selected", v: Array<string>, m: boolean) => void;
 
 const visible = defineModel<boolean>();
-const emits = defineEmits<UgoHutaoDownloadEmits>();
+const emits = defineEmits<UgoHutaoDuEmits>();
+const props = defineProps<UgoHutaoDuProps>();
+
 const loading = ref<boolean>(false);
-const uploadInfo = shallowRef<Array<UgoHutaoDownloadUid>>([]);
+const uidList = shallowRef<Array<UgoHutaoDuUid>>([]);
 const selectedUid = shallowRef<Array<string>>([]);
 
 const hutaoStore = useHutaoStore();
 const { accessToken, isLogin } = storeToRefs(hutaoStore);
 
 watch(
-  () => visible.value,
+  () => [visible.value, props.mode],
   async () => {
     if (visible.value) {
       loading.value = true;
       selectedUid.value = [];
-      uploadInfo.value = [];
-      await loadOverview();
+      uidList.value = [];
+      if (props.mode == "download") {
+        await loadDownload();
+      } else {
+        await loadUpload();
+      }
       loading.value = false;
     }
   },
   { immediate: true },
 );
 
-async function loadOverview(): Promise<void> {
+async function loadUpload(): Promise<void> {
+  const uids = await TSUserGacha.getUidList();
+  const tmpData: Array<UgoHutaoDuUid> = [];
+  for (const uid of uids) {
+    const dataRaw = await TSUserGacha.record.all(uid);
+    tmpData.push({ uid: uid, cnt: dataRaw.length });
+  }
+  uidList.value = tmpData;
+}
+
+async function loadDownload(): Promise<void> {
   if (!isLogin.value) return;
   if (!hutaoStore.checkIsValid()) await hutaoStore.tryRefreshToken();
   if (!accessToken.value) return;
@@ -76,7 +94,7 @@ async function loadOverview(): Promise<void> {
       showSnackbar.warn(`[${info.retcode}] ${info.message}`);
       return;
     }
-    uploadInfo.value = info.map((i) => ({ uid: i.Uid, cnt: i.ItemCount }));
+    uidList.value = info.map((i) => ({ uid: i.Uid, cnt: i.ItemCount }));
   } catch (e) {
     console.error(e);
   }
@@ -87,12 +105,12 @@ function handleSelected(): void {
     showSnackbar.warn("请选择至少一个UID");
     return;
   }
-  emits("selected", selectedUid.value);
+  emits("selected", selectedUid.value, props.mode === "upload");
   visible.value = false;
 }
 </script>
 <style lang="scss" scoped>
-.ugo-hutao-download {
+.ugo-hutao-du {
   position: relative;
   display: flex;
   width: 400px;

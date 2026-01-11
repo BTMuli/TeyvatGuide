@@ -78,3 +78,23 @@ export async function getGachaLogs(
   if (resp.retcode !== 0) return <TGApp.Plugins.Hutao.Base.Resp>resp;
   return <TGApp.Plugins.Hutao.Gacha.GachaLogRes>resp.data;
 }
+
+/**
+ * 上传抽卡记录
+ * @since Beta v0.9.1
+ * @param tk - token
+ * @param data - 上传数据
+ * @returns 上传结果
+ */
+export async function uploadGachaLogs(
+  tk: string,
+  data: TGApp.Plugins.Hutao.Gacha.UploadData,
+): Promise<TGApp.Plugins.Hutao.Gacha.UploadResp | TGApp.Plugins.Hutao.Base.Resp> {
+  const url = `${GachaUrl}Upload`;
+  const header = await getReqHeader(tk);
+  return await TGHttp<TGApp.Plugins.Hutao.Gacha.UploadResp>(url, {
+    method: "POST",
+    headers: header,
+    body: JSON.stringify(data, (_, v) => (typeof v === "bigint" ? v.toString() : v)),
+  });
+}

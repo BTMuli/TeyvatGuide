@@ -83,6 +83,23 @@ declare namespace TGApp.Plugins.Hutao.Gacha {
      */
     Time: string;
     /** Id */
-    Id: number;
+    Id: number | bigint;
+  };
+
+  /**
+   * 上传响应
+   * @since Beta v0.9.1
+   */
+  type UploadResp = TGApp.Plugins.Hutao.Base.Resp<string>;
+
+  /**
+   * 上传数据
+   * @since Beta v0.9.1
+   */
+  type UploadData = {
+    /** UID */
+    Uid: string;
+    /** 数据 */
+    Items: Array<GachaLog>;
   };
 }
