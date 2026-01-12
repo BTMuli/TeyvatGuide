@@ -116,7 +116,7 @@ const useHutaoStore = defineStore(
       if (!userInfo.value) return true;
       if (userInfo.value.IsMaintainer || userInfo.value.IsLicensedDeveloper) return false;
       const expire = new Date(userInfo.value.GachaLogExpireAt).getTime();
-      return Date.now() < expire;
+      return Date.now() > expire;
     }
 
     return {
