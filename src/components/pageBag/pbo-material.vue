@@ -36,14 +36,14 @@
           <div class="pbom-bt-title">
             <v-icon color="var(--tgc-od-blue)" size="16">mdi-clock-edit-outline</v-icon>
             <span>更新记录</span>
-            <span class="edit" @click="tryEdit()">手动更新</span>
-            <span class="delete" @click="tryDelete()">删除记录</span>
+            <span class="edit" data-html2canvas-ignore @click="tryEdit()">手动更新</span>
+            <span class="delete" data-html2canvas-ignore @click="tryDelete()">删除记录</span>
           </div>
           <div class="pbom-bt-records">
             <div v-for="record in dbInfo.records" :key="record.time" class="pbom-record">
               <span class="time">[{{ timestampToDate(record.time * 1000) }}]</span>
-              <span class="cnt">{{ record.count }}</span>
               <span class="type">{{ record.manual ? "手动更新" : "自动导入" }}</span>
+              <span class="cnt">{{ record.count }}</span>
             </div>
             <div v-if="dbInfo.records.length === 0">暂无记录</div>
           </div>

@@ -26,19 +26,20 @@
             </div>
           </template>
         </v-list-item>
-        <v-list-item>
+        <v-list-item @click="confirmUpdateDevice()" title="刷新设备信息">
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-refresh</v-icon>
             </div>
           </template>
-          <v-list-item-title @click="confirmUpdateDevice()">刷新设备信息</v-list-item-title>
           <v-list-item-subtitle>
             <!-- @ts-expect-error eslint-disable-next-line Deprecated symbol used -->
             {{ deviceInfo.device_name }}({{ deviceInfo.product }}) - {{ deviceInfo.device_fp }}
           </v-list-item-subtitle>
           <template #append>
-            <v-icon title="强制刷新设备信息" @click="confirmUpdateDevice(true)">mdi-bug</v-icon>
+            <v-icon title="强制刷新设备信息" @click.stop="confirmUpdateDevice(true)">
+              mdi-bug
+            </v-icon>
           </template>
         </v-list-item>
         <v-list-item title="清除缓存" @click="confirmDelCache">

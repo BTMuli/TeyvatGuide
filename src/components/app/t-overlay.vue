@@ -22,7 +22,7 @@ type TolProps = {
 
 const props = withDefaults(defineProps<TolProps>(), {
   blurVal: "20px",
-  outerClose: false,
+  outerClose: true,
   zIndex: 100,
 });
 

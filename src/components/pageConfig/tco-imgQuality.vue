@@ -31,8 +31,8 @@
         />
       </div>
       <div class="toi-bottom">
-        <button class="toi-btn no-btn" @click="onCancel()">取消</button>
-        <button class="toi-btn ok-btn" @click="onConfirm()">确定</button>
+        <v-btn variant="flat" class="toi-btn no-btn" @click="onCancel()">取消</v-btn>
+        <v-btn variant="elevated" class="toi-btn ok-btn" @click="onConfirm()">确定</v-btn>
       </div>
     </div>
   </TOverlay>
@@ -135,13 +135,5 @@ async function onConfirm(): Promise<void> {
   color: var(--btn-text);
   cursor: pointer;
   font-family: var(--font-title);
-
-  &.no-btn {
-    opacity: 0.8;
-  }
-
-  &:hover {
-    opacity: 0.75;
-  }
 }
 </style>
