@@ -33,6 +33,7 @@
         @click="hutaoStore.tryRefreshInfo()"
       />
       <v-btn icon="mdi-lock-reset" title="重置密码" variant="outlined" @click="showVerify = true" />
+      <v-btn icon="mdi-cart" title="购买胡桃云" variant="outlined" @click="toDonate()" />
     </template>
   </v-card>
   <TcoHutaoVerify v-model="showVerify" />
@@ -41,6 +42,7 @@
 import showDialog from "@comp/func/dialog.js";
 import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
 import useHutaoStore from "@store/hutao.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { timeStr2str } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { ref } from "vue";
@@ -67,6 +69,10 @@ async function tryLogin(): Promise<void> {
   }
   isLogin.value = false;
   await hutaoStore.tryLogin();
+}
+
+async function toDonate(): Promise<void> {
+  await openUrl("https://afdian.com/item/80d3b9decf9011edb5f452540025c377");
 }
 </script>
 <style lang="scss" scoped>
