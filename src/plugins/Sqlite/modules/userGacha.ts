@@ -123,6 +123,29 @@ async function getGachaRecords(uid: string): Promise<Array<TGApp.Sqlite.Gacha.Ga
 }
 
 /**
+ * 获取指定EndId后的祈愿记录
+ * @since Beta v0.9.1
+ * @param uid - UID
+ * @param pool - Pool
+ * @param endId - endId
+ * @returns 祈愿记录
+ */
+async function getGachaRecordsByEndId(
+  uid: string,
+  pool: string,
+  endId?: string,
+): Promise<Array<TGApp.Sqlite.Gacha.Gacha>> {
+  const db = await TGSqlite.getDB();
+  if (endId && endId !== "0") {
+    return await db.select(
+      "SELECT * FROM GachaRecords WHERE uid = ? AND uigfType = ? AND id > ?;",
+      [uid, pool, endId],
+    );
+  }
+  return await db.select("SELECT * FROM GachaRecords WHERE uid = ? AND uigfType = ?;", [uid, pool]);
+}
+
+/**
  * 获取用户祈愿记录，并按照日期进行分组排序
  * @since Beta v0.6.8
  * @param uid - UID
@@ -404,6 +427,7 @@ const TSUserGacha = {
   },
   record: {
     all: getGachaRecords,
+    endId: getGachaRecordsByEndId,
     time: getGachaRecordsByDate,
     pool: getGachaRecordsByPool,
   },

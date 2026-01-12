@@ -299,8 +299,24 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
   await showLoading.start("正在上传至胡桃云...", "正在刷新Token");
   await hutaoStore.tryRefreshToken();
   for (const u of uids) {
-    await showLoading.update(`正在上传UID:${u}`);
-    const dataRaw = await TSUserGacha.record.all(u);
+    await showLoading.start(`正在上传UID:${u}`, "正在获取EndId");
+    let endIdRes: TGApp.Plugins.Hutao.Gacha.EndIdRes = {
+      "100": 0,
+      "200": 0,
+      "301": 0,
+      "302": 0,
+      "500": 0,
+    };
+    const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
+    if ("retcode" in endIdResp) {
+      showSnackbar.warn(`[${endIdResp.retcode}] ${endIdResp.message}`);
+    } else endIdRes = endIdResp;
+    const dataRaw: Array<TGApp.Sqlite.Gacha.Gacha> = [];
+    for (const [k, v] of Object.entries(endIdRes)) {
+      const gachaRead = await TSUserGacha.record.endId(u, k, v.toString());
+      await showLoading.update(`${k}-${v.toString()}-${gachaRead.length}条`);
+      dataRaw.push(...gachaRead);
+    }
     const data: TGApp.Plugins.Hutao.Gacha.UploadData = {
       Uid: u,
       Items: dataRaw.map((i) => ({
