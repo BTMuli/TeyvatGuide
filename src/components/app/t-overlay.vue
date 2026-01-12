@@ -11,9 +11,20 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 
-type TolProps = { blurVal?: string; outerClose?: boolean };
+type TolProps = {
+  /** 背景 blur */
+  blurVal?: string;
+  /** 点击外部关闭 */
+  outerClose?: boolean;
+  /** zIndex */
+  zIndex?: number;
+};
 
-const props = withDefaults(defineProps<TolProps>(), { blurVal: "20px", outerClose: false });
+const props = withDefaults(defineProps<TolProps>(), {
+  blurVal: "20px",
+  outerClose: false,
+  zIndex: 100,
+});
 
 const model = defineModel<boolean>({ default: false });
 const showTolo = ref<boolean>(false);
@@ -82,7 +93,7 @@ function toClick(): void {
 
 .tolo-box {
   position: fixed;
-  z-index: 100;
+  z-index: v-bind(zIndex); /* stylelint-disable-line value-keyword-case */
   top: 0;
   left: 0;
   display: flex;
