@@ -1,3 +1,4 @@
+<!-- 基础悬浮窗组件 -->
 <template>
   <transition enter-from-class="tolo-enter-from" name="tolo">
     <div v-if="showTolo" class="tolo-box" @click.self.prevent="toClick()">
@@ -10,8 +11,10 @@
 <script lang="ts" setup>
 import { ref, watch } from "vue";
 
-type TolProps = { blurVal?: string };
-withDefaults(defineProps<TolProps>(), { blurVal: "20px" });
+type TolProps = { blurVal?: string; outerClose?: boolean };
+
+const props = withDefaults(defineProps<TolProps>(), { blurVal: "20px", outerClose: false });
+
 const model = defineModel<boolean>({ default: false });
 const showTolo = ref<boolean>(false);
 const showToli = ref<boolean>(false);
@@ -32,6 +35,7 @@ watch(
 );
 
 function toClick(): void {
+  if (!props.outerClose) return;
   model.value = false;
 }
 </script>
