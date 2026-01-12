@@ -32,17 +32,23 @@
         variant="outlined"
         @click="hutaoStore.tryRefreshInfo()"
       />
+      <v-btn icon="mdi-lock-reset" title="重置密码" variant="outlined" @click="showVerify = true" />
     </template>
   </v-card>
+  <TcoHutaoVerify v-model="showVerify" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
 import useHutaoStore from "@store/hutao.js";
 import { timeStr2str } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
 const hutaoStore = useHutaoStore();
 const { userName, userInfo, isLogin } = storeToRefs(useHutaoStore());
+
+const showVerify = ref<boolean>(false);
 
 function getAccountDesc(): string {
   if (!isLogin.value) return "未登录";
@@ -80,7 +86,7 @@ async function tryLogin(): Promise<void> {
 
 .logo {
   position: absolute;
-  z-index: 1;
+  z-index: 0;
   right: -20px;
   bottom: -20px;
   width: 160px;

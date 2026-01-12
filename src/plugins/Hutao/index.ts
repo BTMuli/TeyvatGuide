@@ -12,7 +12,13 @@ import {
   getTeamCollect,
   uploadAbyssData,
 } from "./request/abyssReq.js";
-import { getUserInfo, loginPassport, refreshToken } from "./request/accountReq.js";
+import {
+  getResetPwdCode,
+  getUserInfo,
+  loginPassport,
+  refreshToken,
+  resetPwd,
+} from "./request/accountReq.js";
 import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
 import {
   deleteGachaLogs,
@@ -50,11 +56,16 @@ const Hutao = {
   Account: {
     register: _,
     login: loginPassport,
-    verify: _,
+    verify: {
+      username: _,
+      usernameNew: _,
+      pwd: getResetPwdCode,
+      cancel: _,
+    },
     cancel: _,
     reset: {
       username: _,
-      password: _,
+      pwd: resetPwd,
     },
     info: getUserInfo,
   },

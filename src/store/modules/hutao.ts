@@ -7,6 +7,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
+import { validEmail } from "@utils/toolFunc.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -42,8 +43,7 @@ const useHutaoStore = defineStore(
         showSnackbar.cancel("已取消胡桃云账号输入");
         return;
       }
-      const mailReg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-      if (!mailReg.test(inputN.trim())) {
+      if (!validEmail(inputN.trim())) {
         showSnackbar.warn("请输入合法邮箱地址");
         return;
       }
@@ -63,6 +63,33 @@ const useHutaoStore = defineStore(
         }
         isLogin.value = true;
         userName.value = inputN;
+        accessToken.value = resp.AccessToken;
+        refreshToken.value = resp.RefreshToken;
+        accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
+        showSnackbar.success("成功登录胡桃云");
+      } catch (err) {
+        console.error(err);
+        showSnackbar.error("登录胡桃云失败");
+      } finally {
+        await showLoading.end();
+      }
+      if (isLogin.value) {
+        await tryRefreshInfo();
+      }
+    }
+
+    async function autoLogin(username: string, pwd: string): Promise<void> {
+      await showLoading.start("正在登录胡桃云", username);
+      try {
+        const resp = await hutao.Account.login(username, pwd);
+        if ("retcode" in resp) {
+          showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+          console.error(resp);
+          await showLoading.end();
+          return;
+        }
+        isLogin.value = true;
+        userName.value = username;
         accessToken.value = resp.AccessToken;
         refreshToken.value = resp.RefreshToken;
         accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
@@ -128,6 +155,7 @@ const useHutaoStore = defineStore(
       userInfo,
       checkIsValid,
       tryLogin,
+      autoLogin,
       tryRefreshToken,
       tryRefreshInfo,
       checkGachaExpire,

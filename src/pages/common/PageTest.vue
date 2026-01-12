@@ -16,31 +16,17 @@
     <div class="btn-list">
       <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
+    <TcoHutaoVerify v-model="show" />
   </div>
 </template>
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
-import hutao from "@Hutao/index.js";
-import useHutaoStore from "@store/hutao.js";
-import { storeToRefs } from "pinia";
+import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
+import { ref } from "vue";
 
-const hutaoStore = useHutaoStore();
-const { accessToken } = storeToRefs(hutaoStore);
+const show = ref<boolean>(false);
 
 async function test() {
-  if (!hutaoStore.checkIsValid()) {
-    await hutaoStore.tryRefreshToken();
-  }
-  const resp = await hutao.Gacha.entry(accessToken.value!);
-  if ("retcode" in resp) {
-    showSnackbar.warn(`${resp.retcode}-${resp.message}`);
-    return;
-  }
-  console.log(resp);
-  // userName.value = inputN;
-  // accessToken.value = resp.AccessToken;
-  // refreshToken.value = resp.RefreshToken;
-  // showSnackbar.success("登录成功!");
+  show.value = true;
 }
 </script>
 <style lang="css" scoped>

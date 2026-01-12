@@ -394,3 +394,14 @@ export function str2timeStr(str: string): string {
   // 输出为 UTC 的 ISO 字符串
   return format(d, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { in: tz("UTC") });
 }
+
+/**
+ * 验证邮箱
+ * @since Beta v0.9.1
+ * @param email - 邮箱
+ * @returns 验证结果
+ */
+export function validEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
