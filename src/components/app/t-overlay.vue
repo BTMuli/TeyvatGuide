@@ -46,7 +46,7 @@ watch(
 );
 
 function toClick(): void {
-  if (!props.outerClose) return;
+  if (props.outerClose !== undefined && props.outerClose) return;
   model.value = false;
 }
 </script>
