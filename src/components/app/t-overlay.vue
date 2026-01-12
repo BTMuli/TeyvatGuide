@@ -46,7 +46,8 @@ watch(
 );
 
 function toClick(): void {
-  if (props.outerClose !== undefined && props.outerClose) return;
+  // 当且仅当 outerClose === false 时不处理
+  if (props.outerClose !== undefined && !props.outerClose) return;
   model.value = false;
 }
 </script>
