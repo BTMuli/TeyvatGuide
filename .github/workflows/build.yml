@@ -45,7 +45,9 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
       - name: Test SSH connection
         run: ssh -T git@github.com || true
-
+      - name: Load env.production
+        run: |
+          echo "VITE_SENTRY_RELEASE=$(grep VITE_SENTRY_RELEASE .env.production | cut -d '=' -f2)" >> $GITHUB_ENV
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
       - name: Rust cache
