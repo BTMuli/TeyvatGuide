@@ -20,6 +20,7 @@ const pkgVersion = pkgJson.version;
 // 解析命令行参数
 const args = process.argv.slice(2);
 const skipUpload = args.includes("su");
+const buildArgs = args.filter((arg) => arg !== "su");
 console.log(`🍄 SkipUpload:${skipUpload}`);
 
 // 获取提交哈希
@@ -39,7 +40,7 @@ writeFileSync(envPath, stringify(envRead), "utf-8");
 console.log("✅ .env.production updated!");
 
 // 执行 pnpm build
-execSync("pnpm tauri build", { stdio: "inherit" });
+execSync(`pnpm tauri build ${buildArgs.join(" ")}`, { stdio: "inherit" });
 
 // 上传pdb
 if (isGitHubActions) {
@@ -60,13 +61,14 @@ try {
     stdio: "inherit",
   });
   console.log("✅ PDB upload complete!");
-  const distDir = resolve(__dirname, "../dist");
-  execSync(
-    `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
-    { stdio: "inherit" },
-  );
-  console.log("✅ Frontend sourcemaps upload complete!");
-
+  if (!isGitHubActions) {
+    const distDir = resolve(__dirname, "../dist");
+    execSync(
+      `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
+      { stdio: "inherit" },
+    );
+    console.log("✅ Frontend sourcemaps upload complete!");
+  }
   execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
   console.log("🎉 Sentry release finalized!");
 } catch (err) {
