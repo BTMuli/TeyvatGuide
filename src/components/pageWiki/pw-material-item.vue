@@ -22,7 +22,7 @@ const idColor = computed<string>(() => getOdStarColor(props.material.star));
 @use "@styles/github.styles.scss" as github-styles;
 
 /* stylelint-disable value-keyword-case */
-$pw-mi-base: v-bind(idColor);
+$pw-mi-base: v-bind(idcolor);
 /* stylelint-enable */
 
 .pw-mi-box {
@@ -37,6 +37,7 @@ $pw-mi-base: v-bind(idColor);
   border-radius: 4px;
   background: color-mix(in srgb, $pw-mi-base 15%, transparent);
   column-gap: 4px;
+  cursor: pointer;
 }
 
 .pw-mi-left {

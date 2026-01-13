@@ -15,7 +15,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { computed, onMounted, shallowRef } from "vue";
 
@@ -45,7 +45,24 @@ const box = computed<TItemBoxData>(() => ({
   height: "60px",
 }));
 
-onMounted(() => (avatar.value = AppCharacterData.find((a) => a.id === props.modelValue.cur.Item)));
+onMounted(() => {
+  if ([10000005, 10000007].includes(props.modelValue.cur.Item)) {
+    avatar.value = {
+      area: "",
+      birthday: [0, 0],
+      contentId: 0,
+      costumes: [],
+      element: "",
+      id: props.modelValue.cur.Item,
+      name: props.modelValue.cur.Item === 10000005 ? "空" : "荧",
+      nameCard: "",
+      release: "",
+      star: 5,
+      title: "",
+      weapon: "单手剑",
+    };
+  } else avatar.value = AppCharacterData.find((a) => a.id === props.modelValue.cur.Item);
+});
 
 function getDiffStr(): string {
   if (props.modelValue.cur.Rate === props.modelValue.last.Rate) return "";

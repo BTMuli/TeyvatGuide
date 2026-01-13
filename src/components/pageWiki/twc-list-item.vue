@@ -1,6 +1,6 @@
 <!-- 角色/武器WIKI侧边栏项 -->
 <template>
-  <div :class="{ selected: props.curItem.id === props.data.id }" class="twc-li-box">
+  <div :class="props.curItem.id === props.data.id ? 'selected' : ''" class="twc-li-box">
     <div class="twc-li-left">
       <img :src="`/icon/bg/${props.data.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/WIKI/${props.mode}/${props.data.id}.webp`" alt="icon" class="icon" />
@@ -13,7 +13,7 @@
       {{ props.data.id }}
     </div>
     <div class="twc-li-icons">
-      <template v-if="props.mode === 'character'">
+      <template v-if="props.mode === 'character' && props.data.element !== ''">
         <img
           :src="`/icon/element/${props.data.element}元素.webp`"
           :title="`${props.data.element}元素`"

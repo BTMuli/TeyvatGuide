@@ -1,5 +1,6 @@
+<!-- 角色持有率表格 -->
 <template>
-  <v-data-table :headers="headers" fixed-header :items="holdData" height="calc(100vh - 160px)">
+  <v-data-table :headers="headers" :items="holdData" fixed-header height="calc(100vh - 160px)">
     <template v-slot:item="{ item }">
       <tr class="hta-th-tr">
         <td class="hta-th-icon">
@@ -37,6 +38,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { onMounted, shallowRef } from "vue";
+import { DataTableHeader } from "vuetify/lib/components/VDataTable/types.js";
 
 import { AppCharacterData } from "@/data/index.js";
 import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
@@ -51,18 +53,65 @@ type HtaTabHoldData = {
 
 const props = defineProps<HtaTabHoldProps>();
 const holdData = shallowRef<Array<HtaTabHoldData>>([]);
-
-const headers = <const>[
-  { title: "角色", align: "center", key: "AvatarId" },
-  { title: "持有", align: "center", key: "HoldingRate.cur" },
-  { title: "0命", align: "center", key: "Constellations[0].RateCur" },
-  { title: "1命", align: "center", key: "Constellations[1].RateCur" },
-  { title: "2命", align: "center", key: "Constellations[2].RateCur" },
-  { title: "3命", align: "center", key: "Constellations[3].RateCur" },
-  { title: "4命", align: "center", key: "Constellations[4].RateCur" },
-  { title: "5命", align: "center", key: "Constellations[5].RateCur" },
-  { title: "6命", align: "center", key: "Constellations[6].RateCur" },
-];
+const headers = shallowRef<Array<DataTableHeader>>([
+  { title: "角色", align: "center", key: "role", sortable: true, value: (v) => v.AvatarId },
+  {
+    title: "持有",
+    align: "center",
+    key: "hold",
+    sortable: true,
+    value: (v) => v.HoldingRate.cur,
+  },
+  {
+    title: "0命",
+    align: "center",
+    key: "const0",
+    sortable: true,
+    value: (v) => v.Constellations[0].RateCur,
+  },
+  {
+    title: "1命",
+    align: "center",
+    key: "const1",
+    sortable: true,
+    value: (v) => v.Constellations[1].RateCur,
+  },
+  {
+    title: "2命",
+    align: "center",
+    key: "const2",
+    sortable: true,
+    value: (v) => v.Constellations[2].RateCur,
+  },
+  {
+    title: "3命",
+    align: "center",
+    key: "const3",
+    sortable: true,
+    value: (v) => v.Constellations[3].RateCur,
+  },
+  {
+    title: "4命",
+    align: "center",
+    key: "const4",
+    sortable: true,
+    value: (v) => v.Constellations[4].RateCur,
+  },
+  {
+    title: "5命",
+    align: "center",
+    key: "const5",
+    sortable: true,
+    value: (v) => v.Constellations[5].RateCur,
+  },
+  {
+    title: "6命",
+    align: "center",
+    key: "const6",
+    sortable: true,
+    value: (v) => v.Constellations[6].RateCur,
+  },
+]);
 
 onMounted(() => {
   const tmpData: Array<HtaTabHoldData> = [];
@@ -96,6 +145,21 @@ function getRateStr(cur: number, last: number): string {
 }
 
 function getBoxData(id: number): TItemBoxData {
+  if ([10000005, 10000007].includes(id)) {
+    return {
+      bg: `/icon/bg/5-Star.webp`,
+      clickable: false,
+      display: "inner",
+      height: "80px",
+      icon: `/WIKI/character/${id}.webp`,
+      innerHeight: 20,
+      innerText: id === 10000005 ? "空" : "荧",
+      lt: `/icon/weapon/单手剑.webp`,
+      ltSize: "20px",
+      size: "80px",
+      innerBlur: "5px",
+    };
+  }
   const avatar = AppCharacterData.find((a) => a.id === id);
   return {
     bg: `/icon/bg/${avatar?.star ?? 5}-Star.webp`,
@@ -113,7 +177,8 @@ function getBoxData(id: number): TItemBoxData {
           : `/icon/weapon/${avatar.weapon}.webp`,
     ltSize: "20px",
     size: "80px",
-    innerIcon: `/icon/weapon/${avatar?.weapon ?? "单手剑"}.webp`,
+    innerIcon:
+      avatar?.element === "" ? undefined : `/icon/weapon/${avatar?.weapon ?? "单手剑"}.webp`,
     innerBlur: "5px",
   };
 }
@@ -125,6 +190,8 @@ function getBoxData(id: number): TItemBoxData {
 }
 
 .hta-th-icon {
+  position: relative;
+  z-index: 0;
   width: 100px;
 }
 
