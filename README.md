@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2025-12-21
+Update: 2026-01-14
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2025-12-21 18:32:25`
+> 更新于 `2026-01-14 00:09:05`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide)
 
@@ -67,11 +67,9 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 游戏签到（首页组件）
   - [x] 原神战绩
   - [x] 角色详情
-  - [x] 螺旋深渊
-  - [x] 真境剧诗
-  - [x] 幽境危战
+  - [x] 高难挑战（深境螺旋/真境剧诗/幽境危战）
   - [x] 祈愿数据获取（近一年）
-  - [x] 千星奇域祈愿数据获取（近一年）
+  - [x] 千星奇域颂愿数据获取（近一年）
   - [x] 用户收藏帖子获取
   - [x] 用户关注帖子获取
   - [x] 一键完成米游币每日任务
@@ -86,6 +84,8 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - 应用功能：
   - [x] 浅色/深色主题切换
   - [x] 米游社 JSBridge
+  - [x] 终端命令行调用
+  - [x] 支持胡桃云
 
 ## 贡献者 / Contributors
 
@@ -129,6 +129,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - [Artplayer](https://artplayer.org/)：用于米游社帖子视频播放解析
 - [Echarts](https://echarts.apache.org/zh/index.html)：用于祈愿概览图生成
 - [Html2Canvas](https://github.com/niklasvh/html2canvas)：用于分享图生成
+- [Sentry](https://github.com/getsentry/sentry)：用于收集应用崩溃信息
 
 ## 协议 / License
 

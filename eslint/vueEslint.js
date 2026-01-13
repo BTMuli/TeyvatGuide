@@ -17,7 +17,7 @@ const tsConfigRules = {
   "@typescript-eslint/strict-boolean-expressions": "off",
   "@typescript-eslint/no-explicit-any": "off",
   "@typescript-eslint/no-unused-expressions": ["error", { allowShortCircuit: false }],
-  "@typescript-eslint/array-type": ["error", { "default": "generic" }],
+  "@typescript-eslint/array-type": ["error", { default: "generic" }],
   "@typescript-eslint/consistent-type-definitions": ["error", "type"],
   "import/order": [
     "error",
@@ -32,7 +32,12 @@ const tsConfigRules = {
 
 const tsConfig = {
   files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts"],
-  plugins: { typescript: eslintTs, import: pluginImport, prettier: pluginPrettier, tsdoc: pluginTsDoc },
+  plugins: {
+    typescript: eslintTs,
+    import: pluginImport,
+    prettier: pluginPrettier,
+    tsdoc: pluginTsDoc,
+  },
   languageOptions: {
     parser: eslintTs.parser,
     parserOptions: { project: "tsconfig.json", tsconfigRootDir: appRootPath.path },
@@ -47,7 +52,13 @@ const vueConfig = {
   files: ["src/**/*.vue", "src/App.vue"],
   plugins: { vue: pluginVue, import: pluginImport, prettier: pluginPrettier },
   languageOptions: {
-    globals: { ...globals.browser, ...globals.es2021, TGApp: "readonly", window: "readonly", proEnv: "readonly" },
+    globals: {
+      ...globals.browser,
+      ...globals.es2021,
+      TGApp: "readonly",
+      window: "readonly",
+      proEnv: "readonly",
+    },
     ecmaVersion: "latest",
     sourceType: "module",
     parser: parserVue,

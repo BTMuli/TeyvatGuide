@@ -2,12 +2,63 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2025-12-20
+Update: 2026-01-14
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2025-12-20 16:14:28`
+> 更新于 `2026-01-14 00:08:50`
+
+## [0.9.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.1) (2025-01-14)
+
+- 🍱 元数据：更新6.3版本资源
+- 🍱 元数据：精简部分材料来源描述
+- 🍱 元数据：增加元素描述，如 `丝柯克` 为 `蛇之七变 冰`（修改前为`神之眼 冰`）
+- 🍱 元数据：增加 `埃洛伊` `奇偶` 的红色背景并进行相应处理 [`#198`](https://github.com/BTMuli/TeyvatGuide/issues/198)
+- ✏️ 修正文本，`咨讯` → `资讯`，感谢 [`@LuoYunXi0407`](https://github.com/LuoYunXi0407)
+- ✨ 祈愿页面：过往祈愿支持查看抽卡记录，更新图源以提升加载速度 [`#188`](https://github.com/BTMuli/TeyvatGuide/issues/188)
+- ✨ 背包物品：新增货币数据获取，支持删除记录
+- ✨ 角色列表页面：重构筛选逻辑，增加 `等级`/`好感`/`命座` 排序
+- ✨ 窗口回正增加文本放缩处理 [`#192`](https://github.com/BTMuli/TeyvatGuide/issues/192)
+- ✨ 引入 [Sentry](https://sentry.io) 用于分析应用崩溃/异常，同步更新隐私政策
+- ✨ 增加衣装相关资源 [`#190`](https://github.com/BTMuli/TeyvatGuide/issues/190)并在 `角色列表`/`角色图鉴` 进行展示。
+- ✨ 胡桃深渊数据库回归，剧诗概览回归
+- ✨ 支持通过命令行调用 [`#195`](https://github.com/BTMuli/TeyvatGuide/issues/195)
+- ✨ 支持胡桃云账号 `登录`/`密码重置` 等操作，支持胡桃云祈愿记录 `上传`/`下载`/`删除` [`#202`](https://github.com/BTMuli/TeyvatGuide/issues/202)
+- 🐛 修复程序最小化时托盘点击异常
+- 🐛 修复 wcag-color 无法对比 keyword 导致的渲染异常
+- 🐛 修复特定情况下管理员模式判断异常 [`#189`](https://github.com/BTMuli/TeyvatGuide/issues/189)
+- 🐛 修复从网络图更新到本地图导致的渲染异常
+- 🐛 尝试修复托盘图标初始化异常
+- 🐛 重构首页组件加载逻辑，存储中间值，增加登录态判断 [`#200`](https://github.com/BTMuli/TeyvatGuide/issues/200)
+- 🐛 修复通过 ck 登录没有即时刷新登录态
+- 🐛 修复特定情况下 UAC 调用异常
+- 🐛 补充缺失权限，修复浏览器跳转异常
+- 🐛 修复数据库重置异常
+- 🐛 修复部分帖子获取内容异常
+- 🐛 修复修改分享阈值点击取消时的取值异常 [`#203`](https://github.com/BTMuli/TeyvatGuide/issues/203)
+- 🐛 尝试修复调用内置 YAE 时特定条件下的匹配异常
+- 🚸 重构侧边栏账号切换逻辑，降低交互次数
+- 🚸 移除ck复制的确认浮窗
+- 🚸 管理员模式下侧边栏启动使用YAE导入
+- 🚸 背包物品页面：新增 `最近更新`/`最多数量`/`最少数量` 排序，调整默认排序逻辑，优化搜索处理 [`#196`](https://github.com/BTMuli/TeyvatGuide/issues/196)
+- 🚸 修正月谕圣牌下的星章计算逻辑
+- 🚸 调整Hakushi获取逻辑
+- 🚸 首页组件：已完成活动置后，调整完成判断逻辑
+- 🚸 调整部分弹窗提示 [`#201`](https://github.com/BTMuli/TeyvatGuide/issues/201)
+- 🚸 调用内置 YAE 时检测本地游戏版本
+- 💄 帖子详情：调整投票组件样式
+- 💄 首页组件：调整首页生日组件交互
+- 💄 首页签到组件：根据签到状态调整图标&文本
+- 💄 角色列表页面：角色卡片显示等级
+- 💄 幽境危战页面：调整顶部布局
+- 💄 帖子组件：增加自定义表情 tag 在浅色模式下的清晰度
+- 💄 设置页面：调整 `刷新页面设备信息` 交互
+- 🌐 公告页面：处理国际化
+- ♻️ 重构留影叙佳期页面，处理部分文本加载异常
+- ♻️ 统一 UID 选取逻辑
+- ♻️ 重构 WIKI 筛选组件筛选逻辑
+- ♻️ 重构游戏启动逻辑，修复特定条件下的启动失败
 
 ## [0.9.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.0) (2025-12-20)
 
