@@ -73,12 +73,14 @@ import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
 import useHutaoStore from "@store/hutao.js";
 import { validEmail } from "@utils/toolFunc.js";
+import { storeToRefs } from "pinia";
 import { onUnmounted, ref, shallowRef, useTemplateRef } from "vue";
 import { VForm, VTextField } from "vuetify/components";
 
 type VuetifyRules = VTextField["rules"];
 
 const hutaoStore = useHutaoStore();
+const { userName } = storeToRefs(hutaoStore);
 
 // eslint-disable-next-line no-undef
 let codeTimer: NodeJS.Timeout | null = null;
@@ -89,7 +91,7 @@ const formRef = useTemplateRef<VForm>("formEl");
 const formDisabled = ref<boolean>(false);
 const formLoad = ref<boolean>(false);
 
-const username = ref<string>();
+const username = ref<string | undefined>(userName.value);
 const usernameRef = useTemplateRef<VTextField>("usernameInput");
 const usernameRules = shallowRef<VuetifyRules>([
   (v) => !!v || "请填写用户名",

@@ -33,7 +33,7 @@
         @click="hutaoStore.tryRefreshInfo()"
       />
       <v-btn icon="mdi-lock-reset" title="重置密码" variant="outlined" @click="showVerify = true" />
-      <v-btn icon="mdi-cart" title="购买胡桃云" variant="outlined" @click="toDonate()" />
+      <v-btn icon="mdi-cart" title="胡桃云祈愿记录服务" variant="outlined" @click="toDonate()" />
     </template>
   </v-card>
   <TcoHutaoVerify v-model="showVerify" />
