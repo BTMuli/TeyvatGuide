@@ -9,6 +9,7 @@ use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
   CreateToolhelp32Snapshot, Module32FirstW, Module32NextW, MODULEENTRY32W, TH32CS_SNAPMODULE,
+  TH32CS_SNAPMODULE32,
 };
 use windows_sys::Win32::System::LibraryLoader::{
   GetModuleHandleA, GetProcAddress, LoadLibraryExW, DONT_RESOLVE_DLL_REFERENCES,
@@ -132,10 +133,15 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
   }
 }
 
+fn utf16_to_string(buf: &[u16]) -> String {
+  let nul_pos = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
+  String::from_utf16_lossy(&buf[..nul_pos])
+}
+
 /// 枚举模块，找到 DLL 基址
 pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
   unsafe {
-    let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
+    let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
     if snapshot == INVALID_HANDLE_VALUE {
       return None;
     }
@@ -145,8 +151,8 @@ pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
 
     if Module32FirstW(snapshot, &mut me32) != 0 {
       loop {
-        let name = String::from_utf16_lossy(&me32.szModule);
-        if name.contains(dll_name) {
+        let module_name = utf16_to_string(&me32.szModule);
+        if module_name.eq_ignore_ascii_case(dll_name) {
           CloseHandle(snapshot);
           return Some(me32.modBaseAddr as usize);
         }
