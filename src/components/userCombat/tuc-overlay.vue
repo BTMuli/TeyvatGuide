@@ -38,6 +38,22 @@ const raw = computed<Array<TGApp.Plugins.Hutao.Base.Rate>>(() => {
 });
 
 function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
+  if ([10000005, 10000007].includes(item.Item)) {
+    return {
+      bg: `/icon/bg/5-Star.webp`,
+      clickable: false,
+      display: "outer",
+      icon: `/WIKI/character/${item.Item}.webp`,
+      innerHeight: 20,
+      innerText: item.Item === 10000005 ? "空" : "荧",
+      outerText: `${(item.Rate * 100).toFixed(3)}%`,
+      outerHeight: 25,
+      lt: `/icon/weapon/单手剑.webp`,
+      ltSize: "20px",
+      size: "80px",
+      height: "100px",
+    };
+  }
   const avatar = AppCharacterData.find((i) => i.id === item.Item);
   return {
     bg: `/icon/bg/${avatar?.star ?? 3}-Star.webp`,
@@ -54,8 +70,8 @@ function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
         : avatar.element !== ""
           ? `/icon/element/${avatar.element}元素.webp`
           : `/icon/weapon/${avatar.weapon}.webp`,
-    ltSize: "15px",
-    size: "75px",
+    ltSize: "20px",
+    size: "80px",
     height: "100px",
   };
 }
@@ -112,8 +128,9 @@ async function share(): Promise<void> {
 .tuc-overlay-content {
   display: grid;
   width: 100%;
-  padding-right: 10px;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+  padding-right: 8px;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  overflow-y: auto;
 }
 </style>
