@@ -186,7 +186,10 @@ async function loadWiki(): Promise<void> {
   await showLoading.start("正在加载统计数据");
   const res = await hutao.Combat.data();
   if (res === undefined) showSnackbar.error("未获取到剧诗数据");
-  else cloudCombat.value = <TGApp.Plugins.Hutao.Combat.Data>res;
+  else if ("retcode" in res) {
+    showSnackbar.warn(`[${res.retcode}] ${res.message}`);
+    await TGLogger.Warn(`[Combat][loadWiki] ${JSON.stringify(res)}`);
+  } else cloudCombat.value = res;
   await showLoading.end();
   showSnackbar.success("成功获取统计数据");
   showData.value = true;
