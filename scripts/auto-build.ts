@@ -52,7 +52,7 @@ if (isGitHubActions) {
   }
   process.exit();
 }
-if (skipUpload) process.exit();
+if (skipUpload || isGitHubActions) process.exit();
 const pdbGlob = "src-tauri/target/release/TeyvatGuide.pdb";
 try {
   console.log(`📦 Uploading PDBs from ${pdbGlob}...`);
@@ -61,14 +61,12 @@ try {
     stdio: "inherit",
   });
   console.log("✅ PDB upload complete!");
-  if (!isGitHubActions) {
-    const distDir = resolve(__dirname, "../dist");
-    execSync(
-      `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
-      { stdio: "inherit" },
-    );
-    console.log("✅ Frontend sourcemaps upload complete!");
-  }
+  const distDir = resolve(__dirname, "../dist");
+  execSync(
+    `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
+    { stdio: "inherit" },
+  );
+  console.log("✅ Frontend sourcemaps upload complete!");
   execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
   console.log("🎉 Sentry release finalized!");
 } catch (err) {
