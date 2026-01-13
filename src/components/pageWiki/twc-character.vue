@@ -62,6 +62,7 @@
     </div>
     <TopNameCard v-if="nameCard" :data="nameCard" @selected="showNc = !showNc" />
     <PwMaterialList :data="data.materials" />
+    <TwcCostumes :costumes />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
     <v-expansion-panels class="twc-text-item">
@@ -112,6 +113,7 @@ import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import TwcCostumes from "@comp/pageWiki/twc-costumes.vue";
 import { toObcPage } from "@utils/TGWindow.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -132,6 +134,7 @@ const hasNc = ref<boolean>(false);
 const showNc = ref<boolean>(false);
 const nameCard = shallowRef<TGApp.App.NameCard.Item>();
 const data = shallowRef<TGApp.App.Character.WikiItem>();
+const costumes = shallowRef<Array<TGApp.App.Character.Costume>>([]);
 const box = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${data.value?.star ?? 5}-Star.webp`,
   icon: `/WIKI/character/${data.value?.id ?? 10000005}.webp`,
@@ -161,6 +164,7 @@ async function loadData(): Promise<void> {
   if (appC !== undefined) {
     hasNc.value = true;
     nameCard.value = AppNameCardsData.find((i) => i.name === appC.nameCard);
+    costumes.value = appC.costumes.sort((a, b) => a.id - b.id);
   } else hasNc.value = false;
   showSnackbar.success(`成功获取角色 ${props.item.name} 的 Wiki 数据`);
 }
