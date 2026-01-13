@@ -16,17 +16,17 @@
     <div class="btn-list">
       <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
-    <TcoHutaoVerify v-model="show" />
   </div>
 </template>
 <script lang="ts" setup>
-import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
-import { ref } from "vue";
+import useAppStore from "@store/app.js";
+import { tryReadGameVer } from "@utils/TGGame.js";
+import { storeToRefs } from "pinia";
 
-const show = ref<boolean>(false);
+const { gameDir } = storeToRefs(useAppStore());
 
 async function test() {
-  show.value = true;
+  await tryReadGameVer(gameDir.value);
 }
 </script>
 <style lang="css" scoped>

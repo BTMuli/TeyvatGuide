@@ -93,13 +93,11 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
-import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
-import { platform } from "@tauri-apps/plugin-os";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { tryCallYae } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
-import { isRunInAdmin } from "@utils/toolFunc.js";
 import {
   getUiafHeader,
   readUiafData,
@@ -315,50 +313,7 @@ async function deleteUid(): Promise<void> {
 }
 
 async function toYae(): Promise<void> {
-  if (platform() !== "windows") {
-    showSnackbar.warn("该功能仅支持Windows系统");
-    return;
-  }
-  if (gameDir.value === "未设置") {
-    showSnackbar.warn("请前往设置页面设置游戏安装目录");
-    return;
-  }
-  const gamePath = `${gameDir.value}${path.sep()}YuanShen.exe`;
-  if (!(await exists(gamePath))) {
-    showSnackbar.warn("未检测到原神本体应用！");
-    return;
-  }
-  const isInAdmin = await isRunInAdmin();
-  if (!isInAdmin) {
-    const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
-    if (!check) {
-      showSnackbar.cancel("已取消以管理员模式重启");
-      return;
-    }
-    try {
-      await invoke("run_with_admin");
-    } catch (err) {
-      showSnackbar.error(`以管理员模式重启失败：${err}`);
-      await TGLogger.Error(`[pageAchi][toYae]以管理员模式启动失败 - ${err}`);
-      return;
-    }
-  }
-  const input = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
-  if (!input) {
-    showSnackbar.cancel("已取消存档导入");
-    return;
-  }
-  if (input === "" || isNaN(Number(input))) {
-    showSnackbar.warn("请输入合法数字");
-    return;
-  }
-  try {
-    await invoke("call_yae_dll", { gamePath: gamePath, uid: input });
-  } catch (err) {
-    showSnackbar.error(`调用Yae DLL失败: ${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
-    return;
-  }
+  await tryCallYae(gameDir.value, uidCur.value.toString());
 }
 </script>
 <style lang="scss" scoped>

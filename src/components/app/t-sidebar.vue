@@ -320,8 +320,8 @@ import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists } from "@tauri-apps/plugin-fs";
 import mhyClient from "@utils/TGClient.js";
+import { isRunInAdmin, tryReadGameVer, YAE_GAME_VER } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
-import { isRunInAdmin } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
@@ -730,25 +730,26 @@ async function tryLaunchGame(): Promise<void> {
     return;
   }
   const isInAdmin = await isRunInAdmin();
-  if (!isInAdmin) {
+  const gameVer = await tryReadGameVer(gameDir.value);
+  if (!isInAdmin || !gameVer || gameVer !== YAE_GAME_VER) {
     showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
     try {
       await invoke("launch_game", { path: gamePath, ticket: resp });
     } catch (error) {
       showSnackbar.error(`${error}`);
     }
-  } else {
-    try {
-      await invoke("call_yae_dll", {
-        gamePath: gamePath,
-        uid: account.value.gameUid,
-        ticket: resp,
-      });
-    } catch (err) {
-      showSnackbar.error(`调用Yae DLL失败: ${err}`);
-      await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
-      return;
-    }
+    return;
+  }
+  try {
+    await invoke("call_yae_dll", {
+      gamePath: gamePath,
+      uid: account.value.gameUid,
+      ticket: resp,
+    });
+  } catch (err) {
+    showSnackbar.error(`调用Yae DLL失败: ${err}`);
+    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
+    return;
   }
 }
 </script>

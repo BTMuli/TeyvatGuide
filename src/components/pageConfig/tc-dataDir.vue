@@ -2,7 +2,7 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="路径" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="用户数据目录" :subtitle="userDir">
+    <v-list-item :subtitle="userDir" title="用户数据目录">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-key</v-icon>
@@ -10,13 +10,13 @@
       </template>
       <template #append>
         <div class="config-opers">
-          <v-icon @click="confirmCUD()" title="修改用户数据目录"> mdi-pencil</v-icon>
-          <v-icon @click="openDataPath('user')" title="打开用户数据目录"> mdi-folder-open</v-icon>
-          <v-icon @click="copyPath('user')" title="复制用户数据目录路径"> mdi-content-copy</v-icon>
+          <v-icon title="修改用户数据目录" @click="confirmCUD()"> mdi-pencil</v-icon>
+          <v-icon title="打开用户数据目录" @click="openDataPath('user')"> mdi-folder-open</v-icon>
+          <v-icon title="复制用户数据目录路径" @click="copyPath('user')"> mdi-content-copy</v-icon>
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="应用数据库路径" :subtitle="dbPath">
+    <v-list-item :subtitle="dbPath" title="应用数据库路径">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-account</v-icon>
@@ -24,12 +24,16 @@
       </template>
       <template #append>
         <div class="config-opers">
-          <v-icon @click="openDataPath('db')" title="打开数据库目录"> mdi-folder-open</v-icon>
-          <v-icon @click="copyPath('db')" title="复制数据库目录路径"> mdi-content-copy</v-icon>
+          <v-icon title="打开数据库目录" @click="openDataPath('db')"> mdi-folder-open</v-icon>
+          <v-icon title="复制数据库目录路径" @click="copyPath('db')"> mdi-content-copy</v-icon>
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="游戏安装目录" :subtitle="gameDir" v-if="platform() === 'windows'">
+    <v-list-item
+      v-if="platform() === 'windows'"
+      :subtitle="gameDir"
+      :title="`游戏安装目录${gameVer ? `(v${gameVer})` : ''}`"
+    >
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-gamepad</v-icon>
@@ -37,13 +41,13 @@
       </template>
       <template #append>
         <div class="config-opers">
-          <v-icon @click="confirmCGD()" title="修改游戏安装目录"> mdi-pencil</v-icon>
-          <v-icon @click="openDataPath('game')" title="打开游戏安装目录"> mdi-folder-open</v-icon>
-          <v-icon @click="copyPath('game')" title="复制游戏安装目录"> mdi-content-copy</v-icon>
+          <v-icon title="修改游戏安装目录" @click="confirmCGD()"> mdi-pencil</v-icon>
+          <v-icon title="打开游戏安装目录" @click="openDataPath('game')"> mdi-folder-open</v-icon>
+          <v-icon title="复制游戏安装目录" @click="copyPath('game')"> mdi-content-copy</v-icon>
         </div>
       </template>
     </v-list-item>
-    <v-list-item title="日志目录" :subtitle="logDir">
+    <v-list-item :subtitle="logDir" title="日志目录">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-multiple</v-icon>
@@ -51,9 +55,9 @@
       </template>
       <template #append>
         <div class="config-opers">
-          <v-icon @click="confirmCLD()" title="清理日志文件"> mdi-delete</v-icon>
-          <v-icon @click="openDataPath('log')" title="打开日志目录"> mdi-folder-open</v-icon>
-          <v-icon @click="copyPath('log')" title="复制日志目录路径"> mdi-content-copy</v-icon>
+          <v-icon title="清理日志文件" @click="confirmCLD()"> mdi-delete</v-icon>
+          <v-icon title="打开日志目录" @click="openDataPath('log')"> mdi-folder-open</v-icon>
+          <v-icon title="复制日志目录路径" @click="copyPath('log')"> mdi-content-copy</v-icon>
         </div>
       </template>
     </v-list-item>
@@ -72,10 +76,21 @@ import { exists, readDir, remove } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { platform } from "@tauri-apps/plugin-os";
 import { backUpUserData } from "@utils/dataBS.js";
+import { tryReadGameVer } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const { dbPath, logDir, userDir, gameDir } = storeToRefs(useAppStore());
+const gameVer = ref<string>();
+
+watch(
+  () => gameDir.value,
+  async () => {
+    const gv = await tryReadGameVer(gameDir.value);
+    if (gv) gameVer.value = gv;
+  },
+  { immediate: true },
+);
 
 onMounted(async () => {
   const logDirGet = await path.appLogDir();

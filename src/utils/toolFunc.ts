@@ -3,14 +3,11 @@
  * @since Beta v0.9.1
  */
 
-import showSnackbar from "@comp/func/snackbar.js";
 import { tz } from "@date-fns/tz";
 import bbsEnum from "@enum/bbs.js";
 import staticDataEnum from "@enum/staticData.js";
 import { path } from "@tauri-apps/api";
-import { invoke } from "@tauri-apps/api/core";
 import { type } from "@tauri-apps/plugin-os";
-import TGLogger from "@utils/TGLogger.js";
 import { format, parse, parseISO } from "date-fns";
 import { v4 } from "uuid";
 
@@ -339,22 +336,6 @@ export function getUserAvatar(
   }
   // TODO: 处理其他类型头像
   return user.avatar_url;
-}
-
-/**
- * 判断是否是管理员模式
- * @since Beta v0.9.1
- */
-export async function isRunInAdmin(): Promise<boolean> {
-  let isAdmin = false;
-  try {
-    isAdmin = await invoke<boolean>("is_in_admin");
-  } catch (err) {
-    showSnackbar.error(`检测管理员权限失败：${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]检测管理员权限失败:${err}`);
-    return false;
-  }
-  return isAdmin;
 }
 
 /**
