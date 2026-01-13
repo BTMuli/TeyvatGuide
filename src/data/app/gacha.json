@@ -3098,5 +3098,77 @@
     "postId": "71557457",
     "up5List": [14519, 11516],
     "up4List": [12430, 15410, 11401, 13407, 14402]
+  },
+  {
+    "name": "伴月同眠",
+    "version": "6.3",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/12/30/f8d20dd5053613895b29579b7d177a2b_2259975683841769504_transformed.jpg",
+    "from": "2026-01-14T06:00:00+08:00",
+    "to": "2026-02-03T17:59:00+08:00",
+    "type": 301,
+    "postId": "72261672",
+    "up5List": [10000125],
+    "up4List": [10000097, 10000031, 10000113]
+  },
+  {
+    "name": "聚星源动",
+    "version": "6.3",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/12/30/00521a1d20471b8f36df4e2c244820f0_971147450552748948_transformed.jpg",
+    "from": "2026-01-14T06:00:00+08:00",
+    "to": "2026-02-03T17:59:00+08:00",
+    "type": 400,
+    "postId": "72261671",
+    "up5List": [10000116],
+    "up4List": [10000097, 10000031, 10000113]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.3",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/12/30/f919688294d05af0ab64ec40d017c02c_2450262039538928453_transformed.jpg",
+    "from": "2026-01-14T06:00:00+08:00",
+    "to": "2026-02-03T17:59:00+08:00",
+    "type": 302,
+    "postId": "72261667",
+    "up5List": [14522, 13515],
+    "up4List": [13430, 14430, 15412, 11402, 12403]
+  },
+  {
+    "name": "华黍由仪",
+    "version": "6.3",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/01/05/2fd5f6e6f977f72be9e24457bc521652_2193071980009451938_transformed.jpg",
+    "from": "2026-02-03T18:00:00+08:00",
+    "to": "2026-02-24T14:59:00+08:00",
+    "type": 301,
+    "postId": "72261669",
+    "up5List": [10000126],
+    "up4List": [10000127, 10000121, 10000055]
+  },
+  {
+    "name": "渊海界令",
+    "version": "6.3",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/01/05/ba74e6f0a33d943220b1e481420b95dc_474816230471761045_transformed.jpg",
+    "from": "2026-02-03T18:00:00+08:00",
+    "to": "2026-02-24T14:59:00+08:00",
+    "type": 400,
+    "postId": "72261668",
+    "up5List": [10000087],
+    "up4List": [10000127, 10000121, 10000055]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.3",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2025/12/30/2b6f07e83de6658c313107f4f2b9c5e0_2971205701042370776_transformed.webp",
+    "from": "2026-02-03T18:00:00+08:00",
+    "to": "2026-02-24T14:59:00+08:00",
+    "type": 302,
+    "postId": "72261670",
+    "up5List": [11519, 14514],
+    "up4List": [11418, 12401, 13401, 14409, 15401]
   }
 ]

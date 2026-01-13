@@ -204,6 +204,23 @@
     "source": { "index": 2, "area": "璃月", "name": "焚尽之环" }
   },
   {
+    "id": 10000126,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "兹白",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "单手剑",
+    "element": "岩",
+    "release": "2026-02-03 18:00:00",
+    "materials": [
+      { "id": 104316, "name": "「黄金」的教导", "star": 2 },
+      { "id": 104317, "name": "「黄金」的指引", "star": 3 },
+      { "id": 104318, "name": "「黄金」的哲学", "star": 4 }
+    ],
+    "source": { "index": 2, "area": "璃月", "name": "焚尽之环" }
+  },
+  {
     "id": 10000057,
     "contentId": 3276,
     "dropDays": [2, 5, 7],
@@ -440,6 +457,23 @@
       { "id": 104349, "name": "「角逐」的哲学", "star": 4 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "转竟" }
+  },
+  {
+    "id": 10000125,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "哥伦比娅",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "水",
+    "release": "2026-01-13 00:00:00",
+    "materials": [
+      { "id": 104356, "name": "「月光」的教导", "star": 2 },
+      { "id": 104357, "name": "「月光」的指引", "star": 3 },
+      { "id": 104358, "name": "「月光」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "墟都" }
   },
   {
     "id": 10000016,
@@ -1224,6 +1258,23 @@
     "source": { "index": 6, "area": "纳塔", "name": "旋复" }
   },
   {
+    "id": 10000127,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "叶洛亚",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "长柄武器",
+    "element": "岩",
+    "release": "2026-02-03 18:00:00",
+    "materials": [
+      { "id": 104359, "name": "「乐园」的教导", "star": 2 },
+      { "id": 104360, "name": "「乐园」的指引", "star": 3 },
+      { "id": 104361, "name": "「乐园」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "遗荫" }
+  },
+  {
     "id": 10000014,
     "contentId": 61,
     "dropDays": [1, 4, 7],
@@ -1913,6 +1964,22 @@
       { "id": 114020, "name": "雾海云间的转还", "star": 5 }
     ],
     "source": { "index": 2, "area": "璃月", "name": "鸣雷城墟" }
+  },
+  {
+    "id": 11519,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "朏魄含光",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "单手剑",
+    "materials": [
+      { "id": 114021, "name": "漆黑陨铁的一粒", "star": 2 },
+      { "id": 114022, "name": "漆黑陨铁的一片", "star": 3 },
+      { "id": 114023, "name": "漆黑陨铁的一角", "star": 4 },
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 }
+    ],
+    "source": { "index": 2, "area": "璃月", "name": "古雷试炼场" }
   },
   {
     "id": 11509,
@@ -2649,6 +2716,22 @@
       { "id": 114076, "name": "奇巧秘器的真愿", "star": 5 }
     ],
     "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
+  },
+  {
+    "id": 14522,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "帷间夜曲",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114081, "name": "终北遗嗣的哀荣", "star": 2 },
+      { "id": 114082, "name": "终北遗嗣的迷顽", "star": 3 },
+      { "id": 114083, "name": "终北遗嗣的祷献", "star": 4 },
+      { "id": 114084, "name": "终北遗嗣的煌熠", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祭月" }
   },
   {
     "id": 13502,

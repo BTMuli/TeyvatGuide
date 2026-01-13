@@ -4167,6 +4167,202 @@
     "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
+    "id": 80456,
+    "series": 65,
+    "order": 417,
+    "name": "十摩拉纸浆幻想",
+    "description": "集齐全套《大盗雷德·米勒传奇》。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
+  },
+  {
+    "id": 80457,
+    "series": 65,
+    "order": 418,
+    "name": "奉予虚无的信仰",
+    "description": "集齐全套《终北祷歌集》。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
+  },
+  {
+    "id": 80458,
+    "series": 65,
+    "order": 419,
+    "name": "…如同蜜产于蜂",
+    "description": "集齐全套《海螺的回响》。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
+  },
+  {
+    "id": 80459,
+    "series": 65,
+    "order": 420,
+    "name": "拨开天的雪幕",
+    "description": "集齐全套《朔风集》。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
+  },
+  {
+    "id": 80460,
+    "series": 65,
+    "order": 421,
+    "name": "一个城市的历史",
+    "description": "集齐全套《苍星妖灵史略》。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
+  },
+  {
+    "id": 80461,
+    "series": 65,
+    "order": 422,
+    "name": "月下的妖精国",
+    "description": "集齐全套《边乡夜语》。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
+  },
+  {
+    "id": 80462,
+    "series": 66,
+    "order": 423,
+    "name": "月尘的寻宝者·其二",
+    "description": "在虚海望、逐浪野、烟硌山峰开启45个宝箱。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
+  },
+  {
+    "id": 80463,
+    "series": 66,
+    "order": 424,
+    "name": "月尘的寻宝者·其二",
+    "description": "在虚海望、逐浪野、烟硌山峰开启90个宝箱。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
+  },
+  {
+    "id": 80464,
+    "series": 66,
+    "order": 425,
+    "name": "月尘的寻宝者·其二",
+    "description": "在虚海望、逐浪野、烟硌山峰开启180个宝箱。",
+    "reward": 20,
+    "version": "6.3",
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
+  },
+  {
+    "id": 80465,
+    "series": 66,
+    "order": 426,
+    "name": "月尘的冒险家·其二",
+    "description": "在虚海望、逐浪野、烟硌山峰完成5个大世界限时挑战。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80466,
+    "series": 66,
+    "order": 427,
+    "name": "大地勘探·月华濯沐之岛·其二",
+    "description": "点亮挪德卡莱区域中，虚海望、逐浪野、烟硌山峰的地图。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "UNLOCK_AREA" }
+  },
+  {
+    "id": 80467,
+    "series": 66,
+    "order": 428,
+    "name": "远渡苍夜的霜林·其二",
+    "description": "解锁挪德卡莱区域中，虚海望、逐浪野、烟硌山峰所有传送锚点。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "UNLOCK_TRANS_POINT" }
+  },
+  {
+    "id": 80468,
+    "series": 66,
+    "order": 429,
+    "name": "圣龛巡礼·月华濯沐之岛·其二",
+    "description": "解除挪德卡莱区域中，虚海望、逐浪野、烟硌山峰所有地灵龛的封印。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": { "type": "UNLOCK_GATE_TEMPLE" }
+  },
+  {
+    "id": 80469,
+    "series": 66,
+    "order": 430,
+    "name": "夜馈寻迹·月华濯沐之岛·其二",
+    "description": "解除挪德卡莱区域中，虚海望、逐浪野、烟硌山峰所有月灵盈藏之所的封印。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80470,
+    "series": 66,
+    "order": 431,
+    "name": "风已醒来，落叶飞旋",
+    "description": "口衔燃芯的莺鸟，只会在黑夜到来时起飞。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76093, "name": "风起微澜", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 80471,
+    "series": 66,
+    "order": 432,
+    "name": "如果种子不死",
+    "description": "纵然花朵败落，叶片也会信守承诺。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76101, "name": "终至破晓", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 80472,
+    "series": 66,
+    "order": 433,
+    "name": "聚所共建· 望崖营壁",
+    "description": "将「望崖营壁」共建至满级。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "OFFERING_LEVEL" }
+  },
+  {
+    "id": 80473,
+    "series": 66,
+    "order": 434,
+    "name": "聚所共建·魔女的花园",
+    "description": "将「魔女的花园」共建至满级。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "OFFERING_LEVEL" }
+  },
+  {
+    "id": 80474,
+    "series": 66,
+    "order": 435,
+    "name": "聚所共建·西风戍垒",
+    "description": "将「西风戍垒」共建至满级。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "OFFERING_LEVEL" }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -10329,6 +10525,211 @@
     }
   },
   {
+    "id": 81625,
+    "series": 0,
+    "order": 1619,
+    "name": "月的白夜歌",
+    "description": "完成「伴月纪闻·其三」。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76123, "name": "她的礼赠", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81626,
+    "series": 0,
+    "order": 1620,
+    "name": "以罪行惩戒罪人",
+    "description": "帮助雅努什解决了噩影泽地的魔物。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76090, "name": "以罪行惩戒罪人", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81627,
+    "series": 0,
+    "order": 1621,
+    "name": "死牌",
+    "description": "末日尚未来临。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76098, "name": "物归原主", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81628,
+    "series": 0,
+    "order": 1622,
+    "name": "告别希望，告别恐惧",
+    "description": "见证古老的宫殿从地中升起。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76074, "name": "放逐者的荒歌", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81629,
+    "series": 0,
+    "order": 1623,
+    "name": "「月之东，日之西」",
+    "description": "完成「月之东，日之西」。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76110, "name": "寒鸦的系谱", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81630,
+    "series": 0,
+    "order": 1624,
+    "name": "何人监管监管之人",
+    "description": "知晓了格蕾兹娜的计划。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+  },
+  {
+    "id": 81631,
+    "series": 0,
+    "order": 1625,
+    "name": "离群野狼的回忆",
+    "description": "从此，染血的骑士告别了人理…",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81632,
+    "series": 0,
+    "order": 1626,
+    "name": "英灵的归处",
+    "description": "见证「凛风之马」最后的故事。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76142, "name": "英灵的残响", "type": "世界任务" }]
+    }
+  },
+  {
+    "id": 81633,
+    "series": 0,
+    "order": 1627,
+    "name": "归乡歧旅",
+    "description": "为库济米奇的返乡之旅做出贡献。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
+  },
+  {
+    "id": 81634,
+    "series": 0,
+    "order": 1628,
+    "name": "面包会有的",
+    "description": "使用烤炉烤制了热腾腾的「蘑幻之菇」。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81635,
+    "series": 0,
+    "order": 1629,
+    "name": "月下之丘",
+    "description": "解开无名的亥珀波瑞亚人留下的时间胶囊。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81636,
+    "series": 0,
+    "order": 1630,
+    "name": "荣归之路向坟茔",
+    "description": "翦除了「教授」霍德望的所有党羽。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [
+        { "questId": 76101, "name": "终至破晓", "type": "世界任务" },
+        { "questId": 76090, "name": "以罪行惩戒罪人", "type": "世界任务" },
+        { "questId": 76098, "name": "物归原主", "type": "世界任务" }
+      ]
+    }
+  },
+  {
+    "id": 81637,
+    "series": 0,
+    "order": 1631,
+    "name": "一切在于时机",
+    "description": "准确把握住了反击的时机。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 81638,
+    "series": 0,
+    "order": 1632,
+    "name": "别掉地上",
+    "description": "用月矩力吸取并投掷曼陀草。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 81639,
+    "series": 0,
+    "order": 1633,
+    "name": "细细的黑线",
+    "description": "净化了流溢的深渊之力。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 81640,
+    "series": 0,
+    "order": 1634,
+    "name": "悠游浮跃",
+    "description": "感受到了棉韧花的柔软与弹性。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 81641,
+    "series": 0,
+    "order": 1635,
+    "name": "牧羊人",
+    "description": "与獭懒羊一起悠闲散步。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 81642,
+    "series": 0,
+    "order": 1636,
+    "name": "湮于淤黑",
+    "description": "因「深渊蚀能」的侵蚀而倒下。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "KILLED_BY_SPECIFIC_ABILITY" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -13209,6 +13610,36 @@
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
+    "id": 82304,
+    "series": 0,
+    "order": 2304,
+    "name": "事情本应如此发展",
+    "description": "见证魇月的复归。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82305,
+    "series": 0,
+    "order": 2305,
+    "name": "神明，不可以试探",
+    "description": "违抗多托雷制定的规则。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82306,
+    "series": 0,
+    "order": 2306,
+    "name": "「我们称之为高效」",
+    "description": "在未消灭任何由深黯魇语之主召唤出的深黯钓客的情况下，破除它的护盾。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -16046,6 +16477,110 @@
     "trigger": {
       "type": "FINISH_QUEST_AND",
       "task": [{ "questId": 6026, "name": "无法传达的涟漪", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84374,
+    "series": 0,
+    "order": 5149,
+    "name": "如果在冬夜，一个旅人",
+    "description": "她的道路将通向何方？",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6022, "name": "你我交错的时空", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84375,
+    "series": 0,
+    "order": 5150,
+    "name": "漫游者和他的影子",
+    "description": "或许这才是你本应拥有的力量。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6022, "name": "你我交错的时空", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84376,
+    "series": 0,
+    "order": 5151,
+    "name": "异端的「理想乡」",
+    "description": "调查「博士」制造的能量界域。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6023, "name": "循着过往的足迹", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84377,
+    "series": 0,
+    "order": 5152,
+    "name": "遥仰亘古的月色",
+    "description": "在囚禁「月神」的监牢，见到了「过去」的三月女神。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6015, "name": "最初的那抹月光", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84378,
+    "series": 0,
+    "order": 5153,
+    "name": "新月重临",
+    "description": "此刻「新月」初升，牵动起命运的纺轮…",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6016, "name": "月之将坠", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84379,
+    "series": 0,
+    "order": 5154,
+    "name": "向着未来启航",
+    "description": "见证挪德卡莱各方势力的联合。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6017, "name": "空月归乡", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84380,
+    "series": 0,
+    "order": 5155,
+    "name": "To the Moon",
+    "description": "抵达月亮的表面。",
+    "reward": 5,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6017, "name": "空月归乡", "type": "魔神任务" }]
+    }
+  },
+  {
+    "id": 84381,
+    "series": 0,
+    "order": 5156,
+    "name": "真实之月",
+    "description": "完成「真实之月」。",
+    "reward": 10,
+    "version": "6.3",
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6017, "name": "空月归乡", "type": "魔神任务" }]
     }
   },
   {

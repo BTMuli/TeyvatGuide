@@ -42,7 +42,7 @@
     {
       "Id": 1216,
       "Name": "天才之为构造之责任",
-      "Description": "施放元素爆发<color=#FFD780FF>{LINK#S11215}精密水冷仪{/LINK}</color>后的15秒内，附近的当前场上角色触发的感电、绽放、月感电、月绽放造成的伤害提升15%。\n<color=#FFD780FF>月兆·满辉</color>：上述反应造成的伤害额外提升20%。",
+      "Description": "施放元素爆发<color=#FFD780FF>{LINK#S11215}精密水冷仪{/LINK}</color>后的15秒内，附近的当前场上角色触发的感电、绽放、月感电、月绽放、月结晶造成的伤害提升15%。\n<color=#FFD780FF>月兆·满辉</color>：上述反应造成的伤害额外提升20%。",
       "Icon": "UI_Talent_S_Aino_04"
     }
   ],
