@@ -5,7 +5,7 @@
     "description": "冒险阅历，用于提升冒险等阶",
     "type": "系统开放",
     "star": 3,
-    "source": [{ "type": "single", "name": "秘境获取" }],
+    "source": [{ "name": "秘境获取", "type": "single" }],
     "convert": []
   },
   {
@@ -14,7 +14,7 @@
     "description": "好感经验，用于提升好感等级",
     "type": "好感成长",
     "star": 3,
-    "source": [{ "type": "single", "name": "秘境获取" }],
+    "source": [{ "name": "秘境获取", "type": "single" }],
     "convert": []
   },
   {
@@ -45,7 +45,7 @@
       { "name": "冒险与探索奖励", "type": "single" },
       { "name": "洞天百宝兑换", "type": "single" },
       { "name": "激活藏金之花奖励", "type": "single" },
-      { "type": "single", "name": "秘境获取" }
+      { "name": "秘境获取", "type": "single" }
     ],
     "convert": []
   },

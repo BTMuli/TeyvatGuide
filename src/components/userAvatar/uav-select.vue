@@ -27,7 +27,7 @@
         </div>
       </div>
       <div class="uav-select-item">
-        <div class="uav-select-title">地区</div>
+        <div class="uav-select-title">阵营</div>
         <div class="uav-select-props">
           <UavSelectChips v-model:selected="areaSelected" :items="areaOpts" size="small" />
         </div>
@@ -91,6 +91,7 @@ const areaOpts: Array<UavSelectChipsItem> = [
   "至冬",
   "寰宇劫灭",
   "挪德卡莱",
+  "璃月港",
 ].map((i) => ({ label: i, value: i, title: i }));
 
 const emits = defineEmits<UavSelectEmits>();

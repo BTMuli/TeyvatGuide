@@ -96,6 +96,7 @@ const selectAreaList = [
   "至冬",
   "寰宇劫灭",
   "挪德卡莱",
+  "璃月港",
 ];
 
 const selectedStar = ref<Array<number>>([]);
