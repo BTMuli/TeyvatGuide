@@ -19,14 +19,12 @@
   </div>
 </template>
 <script lang="ts" setup>
-import useAppStore from "@store/app.js";
-import { tryReadGameVer } from "@utils/TGGame.js";
-import { storeToRefs } from "pinia";
-
-const { gameDir } = storeToRefs(useAppStore());
+import showLoading from "@comp/func/loading.js";
 
 async function test() {
-  await tryReadGameVer(gameDir.value);
+  await showLoading.start("测试");
+  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+  await showLoading.end();
 }
 </script>
 <style lang="css" scoped>

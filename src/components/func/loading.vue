@@ -17,8 +17,8 @@
               {{ data.subtitle }}
             </div>
             <div class="loading-img">
-              <img v-if="!data.empty" alt="loading" src="/source/UI/loading.webp" />
-              <img v-else alt="empty" src="/source/UI/empty.webp" />
+              <img v-if="data.empty" alt="loading" src="/source/UI/empty.webp" />
+              <img v-else :src="iconUrl" alt="empty" />
             </div>
           </div>
         </div>
@@ -27,9 +27,13 @@
   </transition>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import bbsReq from "@req/bbsReq.js";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
 import { LoadingParams } from "./loading.js";
+
+const defaultIcon = "/source/UI/loading.webp";
 
 const showBox = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
@@ -37,6 +41,8 @@ const showInner = ref<boolean>(false);
 
 const props = defineProps<LoadingParams>();
 const data = shallowRef<LoadingParams>(props);
+const localEmojis = shallowRef<Array<string>>([]);
+const iconUrl = ref<string>(defaultIcon);
 
 watch(
   () => showBox.value,
@@ -56,11 +62,27 @@ watch(
 
 onMounted(async () => await displayBox(props));
 
+async function getRandomEmoji(): Promise<void> {
+  if (localEmojis.value.length === 0) {
+    const resp = await bbsReq.emojis();
+    if ("retcode" in resp) {
+      console.error(resp);
+      showSnackbar.error("获取表情包失败！");
+      iconUrl.value = defaultIcon;
+      return;
+    }
+    localEmojis.value = Object.values(resp);
+    localStorage.setItem("emojis", JSON.stringify(resp));
+  }
+  iconUrl.value = localEmojis.value[Math.floor(Math.random() * localEmojis.value.length)];
+}
+
 async function displayBox(params: LoadingParams): Promise<void> {
   if (!params.show) {
     showBox.value = false;
     await new Promise<void>((resolve) => setTimeout(resolve, 500));
     data.value = { show: false, title: undefined, subtitle: undefined, empty: undefined };
+    await getRandomEmoji();
     return;
   }
   data.value = {
@@ -175,14 +197,15 @@ defineExpose({ displayBox });
 .loading-img {
   display: flex;
   width: 100%;
-  height: 200px;
+  height: 160px;
   align-items: center;
   justify-content: center;
 
   img {
     max-width: 100%;
-    max-height: 200px;
-    border-radius: 5px;
+    max-height: 160px;
+    border-radius: 4px;
+    aspect-ratio: 1;
   }
 }
 
