@@ -64,15 +64,19 @@ onMounted(async () => await displayBox(props));
 
 async function getRandomEmoji(): Promise<void> {
   if (localEmojis.value.length === 0) {
-    const resp = await bbsReq.emojis();
-    if ("retcode" in resp) {
-      console.error(resp);
-      showSnackbar.error("获取表情包失败！");
-      iconUrl.value = defaultIcon;
-      return;
+    const emojisRead = localStorage.getItem("emojis");
+    if (emojisRead) localEmojis.value = Object.values(JSON.parse(emojisRead));
+    else {
+      const resp = await bbsReq.emojis();
+      if ("retcode" in resp) {
+        console.error(resp);
+        showSnackbar.error("获取表情包失败！");
+        iconUrl.value = defaultIcon;
+        return;
+      }
+      localEmojis.value = Object.values(resp);
+      localStorage.setItem("emojis", JSON.stringify(resp));
     }
-    localEmojis.value = Object.values(resp);
-    localStorage.setItem("emojis", JSON.stringify(resp));
   }
   iconUrl.value = localEmojis.value[Math.floor(Math.random() * localEmojis.value.length)];
 }
