@@ -1,6 +1,6 @@
 /**
  * UIAF工具类
- * @since Beta v0.6.0
+ * @since Beta v0.9.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -59,14 +59,14 @@ export async function verifyUiafData(path: string): Promise<boolean> {
 
 /**
  * 验证UIAF数据-剪贴板
- * @since Beta v0.4.7
+ * @since Beta v0.9.2
+ * @param data - 剪贴板文本
  * @returns 是否验证通过
  */
-export async function verifyUiafDataClipboard(): Promise<boolean> {
+export async function verifyUiafDataClipboard(data: string): Promise<boolean> {
   // @ts-expect-error-next-line
   const ajv = new Ajv();
   const validate = ajv.compile(UiafSchema);
-  const data = await window.navigator.clipboard.readText();
   try {
     const fileJson = JSON.parse(data);
     if (!validate(fileJson)) {
@@ -80,7 +80,6 @@ export async function verifyUiafDataClipboard(): Promise<boolean> {
     return true;
   } catch (e) {
     showSnackbar.error(`UIAF 数据格式错误 ${e}`);
-    await TGLogger.Error(`UIAF 数据格式错误，剪贴板数据：${data}`);
     await TGLogger.Error(`错误信息 ${e}`);
     return false;
   }

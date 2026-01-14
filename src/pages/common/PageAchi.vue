@@ -253,7 +253,7 @@ async function handleImportOuter(app: string): Promise<void> {
   await showLoading.start("正在导入数据", "正在读取剪贴板");
   const clipboard = await window.navigator.clipboard.readText();
   await showLoading.update("正在验证数据");
-  const check = await verifyUiafDataClipboard();
+  const check = await verifyUiafDataClipboard(clipboard);
   if (!check) {
     await showLoading.end();
     return;
