@@ -46,8 +46,10 @@ jobs:
       - name: Test SSH connection
         run: ssh -T git@github.com || true
       - name: Load env.production
+        id: env
         run: |
-          echo "VITE_SENTRY_RELEASE=$(grep VITE_SENTRY_RELEASE .env.production | cut -d '=' -f2)" >> $GITHUB_ENV
+          VITE_SENTRY_RELEASE=$(awk -F= '/^VITE_SENTRY_RELEASE=/ {print $2}' .env.production)
+          echo "VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE" >> $GITHUB_ENV
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
       - name: Rust cache
@@ -107,4 +109,4 @@ jobs:
           sentry-cli releases finalize "$SENTRY_RELEASE"
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_RELEASE: ${{ env.VITE_SENTRY_RELEASE }}
+          SENTRY_RELEASE: ${{ steps.env.outputs.VITE_SENTRY_RELEASE }}

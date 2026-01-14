@@ -184,7 +184,7 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
+import { AppCalendarData } from "@/data/index.js";
 
 const router = useRouter();
 const hutaoStore = useHutaoStore();
@@ -574,13 +574,9 @@ async function refreshGachaPool(
         id: item.id.toString(),
         uigf_gacha_type: item.gacha_type === "400" ? "301" : item.gacha_type,
       };
-      if (item.item_type === "角色") {
-        const find = AppCharacterData.find((char) => char.name === item.name);
-        if (find) tempItem.item_id = find.id.toString();
-      } else if (item.item_type === "武器") {
-        const find = AppWeaponData.find((weapon) => weapon.name === item.name);
-        if (find) tempItem.item_id = find.id.toString();
-      }
+      // TODO: 如果有名字重复的需要注意
+      const find = AppCalendarData.find((i) => i.name === item.name);
+      if (find) tempItem.item_id = find.id.toString();
       if (tempItem.item_id === "") {
         if (hakushiData.value.length === 0) {
           await showLoading.update(`未查找到 ${tempItem.name} 的 ItemId，正在获取 Hakushi 数据`);
@@ -742,16 +738,28 @@ async function checkData(): Promise<void> {
   await showLoading.start("正在检测数据", `UID:${uidCur.value}，共${gachaListCur.value.length}条`);
   for (const data of gachaListCur.value) {
     if (data.itemId === "") {
-      const find = hakushiData.value.find((i) => i.name === data.name && i.type === data.type);
+      // TODO: 如果有名字重复的需要注意
+      const find = AppCalendarData.find((i) => i.name === data.name);
       if (find) {
         await showLoading.update(`${data.name} -> ${find.id}`);
-        await TSUserGacha.update.itemId(data, find.id);
+        await TSUserGacha.update.itemId(data, find.id.toString());
         cnt++;
-      } else {
-        await showLoading.update(`[${data.id}]${data.type}-${data.name}未找到ID`);
-        await TGLogger.Warn(`[${data.id}]${data.type}-${data.name}未找到ID`);
-        fail++;
+        continue;
       }
+      if (hakushiData.value.length === 0) {
+        await showLoading.update(`尝试获取Hakushi数据`);
+        await loadHakushi();
+      }
+      const find2 = hakushiData.value.find((i) => i.name === data.name && i.type === data.type);
+      if (find2) {
+        await showLoading.update(`${data.name} -> ${find2.id}`);
+        await TSUserGacha.update.itemId(data, find2.id);
+        cnt++;
+        continue;
+      }
+      await showLoading.update(`[${data.id}]${data.type}-${data.name}未找到ID`);
+      await TGLogger.Warn(`[${data.id}]${data.type}-${data.name}未找到ID`);
+      fail++;
     }
   }
   await showLoading.end();
