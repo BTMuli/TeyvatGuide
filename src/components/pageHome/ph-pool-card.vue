@@ -1,8 +1,8 @@
 <template>
   <div class="ph-pool-card">
     <div class="ph-pool-cover" @click="toPool()">
-      <TMiImg v-if="cover" :src="cover" alt="cover" :ori="true" />
-      <img src="/source/UI/empty.webp" class="empty" v-else alt="empty" />
+      <img v-if="cover" :src="cover" alt="cover" />
+      <img v-else alt="empty" class="empty" src="/source/UI/empty.webp" />
     </div>
     <div class="ph-pool-bottom">
       <div class="ph-pool-avatars">
@@ -14,10 +14,10 @@
         >
           <TItemBox
             v-if="avatar.info"
-            :title="avatar.info.name"
             :model-value="getBox(avatar.info)"
+            :title="avatar.info.name"
           />
-          <TMiImg v-else :src="avatar.icon" alt="icon" :ori="true" />
+          <img v-else :src="avatar.icon" alt="icon" />
         </div>
       </div>
       <div class="ph-pool-info">
@@ -25,7 +25,7 @@
           <v-icon>mdi-calendar-clock</v-icon>
           <span>{{ props.pool.start_time }} ~ {{ props.pool.end_time }}</span>
         </div>
-        <v-progress-linear color="var(--tgc-od-green)" :model-value="percent" :rounded="true" />
+        <v-progress-linear :model-value="percent" :rounded="true" color="var(--tgc-od-green)" />
         <div v-if="restTs > durationTs" class="ph-pool-stat">未开始</div>
         <div v-else-if="restTs > 0" class="ph-pool-stat">
           剩余时间：{{ stamp2LastTime(restTs) }}
@@ -37,7 +37,6 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
-import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useHomeStore from "@store/home.js";

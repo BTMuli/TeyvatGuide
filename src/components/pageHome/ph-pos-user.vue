@@ -106,14 +106,13 @@
         @click="showMaterial(reward)"
       >
         <img :src="`/icon/bg/${reward.rarity}-Star.webp`" alt="bg" class="bg" />
-        <TMiImg :alt="reward.name" :ori="true" :src="reward.icon" class="icon" />
+        <img :alt="reward.name" :src="reward.icon" class="icon" />
         <span v-if="reward.num > 0" class="count">{{ reward.num }}</span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import gameEnum from "@enum/game.js";
 import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
 import { generateShareImg } from "@utils/TGShare.js";
