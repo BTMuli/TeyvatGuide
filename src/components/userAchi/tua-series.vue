@@ -1,25 +1,26 @@
 <!-- 成就系列 -->
 <template>
   <div
-    v-if="data"
+    v-if="series"
+    v-show="!(hideFin && progress === 100)"
     :class="{
-      'tuas-selected': props.cur === props.series,
+      'tuas-selected': props.cur === props.series.id,
       'tuas-radius': showCard,
     }"
-    :title="data.name"
+    :title="series.name"
     class="tuas-card"
     @click="selectSeries"
   >
-    <div class="tuas-version">v{{ data.version }}</div>
+    <div class="tuas-version">v{{ series.version }}</div>
     <div v-if="showCard" class="tuas-reward">
       <img
-        :class="{ finish: progress === 100 }"
-        :src="`/WIKI/nameCard/bg/${data.card}.webp`"
+        :class="progress === 100 ? 'finish' : ''"
+        :src="`/WIKI/nameCard/bg/${series.card}.webp`"
         alt="card"
       />
     </div>
     <div class="tuas-icon">
-      <img :src="`/icon/achievement/${data.icon}.webp`" alt="icon" />
+      <img :src="`/icon/achievement/${series.icon}.webp`" alt="icon" />
       <v-progress-circular
         :model-value="progress"
         bg-color="var(--tgc-od-white)"
@@ -28,37 +29,39 @@
       />
     </div>
     <div class="tuas-content">
-      <span :title="data.name">{{ data.name }}</span>
+      <span :title="series.name">{{ series.name }}</span>
       <span>{{ overview.fin }}/{{ overview.total }}</span>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 
-import { AppAchievementSeriesData } from "@/data/index.js";
-
-type TuaSeriesProps = { uid: number; series: number; cur: number };
-type TuaSeriesEmits = (e: "selectSeries", v: number) => void;
+type TuaSeriesProps = {
+  /** 存档 UID */
+  uid: number;
+  /** 成就系列数据 */
+  series: TGApp.App.Achievement.Series;
+  /** 当前选中系列 ID，-1表示未选择 */
+  cur: number;
+  /** 是否隐藏已完成 */
+  hideFin: boolean;
+};
+type TuaSeriesEmits = (e: "selected", v: number) => void;
 
 let achiListener: UnlistenFn | null = null;
 const props = defineProps<TuaSeriesProps>();
 const emits = defineEmits<TuaSeriesEmits>();
 
 const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 0 });
-const data = computed<TGApp.App.Achievement.Series | undefined>(() =>
-  AppAchievementSeriesData.find((s) => s.id === props.series),
-);
 const progress = computed<number>(() => {
   if (overview.value.total === 0) return 0;
   return Math.round((overview.value.fin / overview.value.total) * 100);
 });
 const showCard = computed<boolean>(() => {
-  if (data.value === undefined) return false;
-  return data.value.card !== "";
+  return props.series.card !== "";
 });
 
 onMounted(async () => {
@@ -72,12 +75,12 @@ watch(
 );
 
 async function refreshOverview(): Promise<void> {
-  overview.value = await TSUserAchi.getOverview(props.uid, props.series);
+  overview.value = await TSUserAchi.getOverview(props.uid, props.series.id);
 }
 
 async function listenAchi(): Promise<UnlistenFn> {
   return await listen<number>("updateAchi", async (e: Event<number>) => {
-    if (e.payload === props.series) await refreshOverview();
+    if (e.payload === props.series.id) await refreshOverview();
   });
 }
 
@@ -89,11 +92,7 @@ onUnmounted(async () => {
 });
 
 function selectSeries(): void {
-  if (props.cur === props.series) {
-    showSnackbar.warn("已选中当前系列！");
-    return;
-  }
-  emits("selectSeries", props.series);
+  emits("selected", props.series.id);
 }
 </script>
 <style lang="scss" scoped>
@@ -106,6 +105,7 @@ function selectSeries(): void {
   display: flex;
   overflow: hidden;
   height: 60px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: flex-start;
   padding: 8px;

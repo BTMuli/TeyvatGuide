@@ -17,8 +17,8 @@
               {{ data.subtitle }}
             </div>
             <div class="loading-img">
-              <img v-if="data.empty" alt="loading" src="/source/UI/empty.webp" />
-              <img v-else :src="iconUrl" alt="empty" />
+              <img v-if="data.empty" alt="empty" src="/source/UI/empty.webp" />
+              <img v-else :src="iconUrl" alt="loading" />
             </div>
           </div>
         </div>

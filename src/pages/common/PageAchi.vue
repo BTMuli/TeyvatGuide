@@ -64,21 +64,22 @@
     </template>
   </v-app-bar>
   <div class="wrap">
-    <v-virtual-scroll :items="seriesList" class="left-wrap" item-height="60">
-      <template #default="{ item }">
-        <TuaSeries
-          v-model:cur="selectedSeries"
-          :series="item"
-          :uid="uidCur"
-          @click="selectedSeries = item"
-        />
-      </template>
-    </v-virtual-scroll>
+    <div class="left-wrap">
+      <TuaSeries
+        v-for="item in seriesList"
+        :key="item.id"
+        v-model:cur="selectedSeries"
+        :hideFin
+        :series="item"
+        :uid="uidCur"
+        @selected="handleSeriesSelect"
+      />
+    </div>
     <TuaAchiList
       v-model:isSearch="isSearch"
       v-model:search="search"
       v-model:series="selectedSeries"
-      :hideFin="hideFin"
+      :hideFin
       :uid="uidCur"
     />
   </div>
@@ -110,7 +111,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 
-const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order).map((s) => s.id);
+const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order);
 
 const route = useRoute();
 const router = useRouter();
@@ -169,6 +170,14 @@ function switchHideFin(): void {
   const text = hideFin.value ? "显示已完成" : "隐藏已完成";
   hideFin.value = !hideFin.value;
   showSnackbar.success(`已${text}`);
+}
+
+function handleSeriesSelect(id: number): void {
+  if (selectedSeries.value === id) {
+    showSnackbar.warn("已经选中当前系列");
+    return;
+  }
+  selectedSeries.value = id;
 }
 
 async function refreshOverview(): Promise<void> {
@@ -388,12 +397,15 @@ async function toYae(): Promise<void> {
 
 .left-wrap {
   position: relative;
+  display: flex;
   width: 332px;
   height: 100%;
   box-sizing: border-box;
+  flex-direction: column;
   flex-shrink: 0;
   padding-right: 8px;
   overflow-y: auto;
+  row-gap: 8px;
 }
 
 :deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {

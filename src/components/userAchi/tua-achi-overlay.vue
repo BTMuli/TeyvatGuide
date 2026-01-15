@@ -56,7 +56,7 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
-  <VpOverlaySearch v-model="showSearch" :keyword="search" gid="2" />
+  <VpOverlaySearch v-model="showSearch" :keyword="search" :gid="2" />
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
