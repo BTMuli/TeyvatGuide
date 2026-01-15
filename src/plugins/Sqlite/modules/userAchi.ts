@@ -1,6 +1,6 @@
 /**
  * 用户成就模块
- * @since Beta v0.9.0
+ * @since Beta v0.9.2
  */
 
 import { UiafAchiStatEnum } from "@enum/uiaf.js";
@@ -125,7 +125,7 @@ async function getAchi(
 
 /**
  * 获取成就数据
- * @since Beta v0.6.0
+ * @since Beta v0.9.2
  * @param uid - 存档 UID
  * @param series - 成就系列ID
  * @returns 成就数据
@@ -149,7 +149,11 @@ async function getAchievements(
     res.push(achievement);
   }
   res.sort(
-    (a, b) => a.isCompleted.toString().localeCompare(b.isCompleted.toString()) || a.order - b.order,
+    (a, b) =>
+      Number(a.isCompleted) - Number(b.isCompleted) ||
+      b.version.localeCompare(a.version) ||
+      b.series - a.series ||
+      b.order - a.order,
   );
   return res;
 }
