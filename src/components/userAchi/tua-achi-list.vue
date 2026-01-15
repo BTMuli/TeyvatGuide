@@ -1,41 +1,44 @@
 <template>
   <div class="tua-al-container">
     <div v-if="ncData !== undefined" class="tua-al-nc">
-      <TopNameCard :data="ncData" @selected="showNc = true" :finish="isFinish" />
+      <TopNameCard :data="ncData" :finish="isFinish" @selected="showNc = true" />
     </div>
-    <v-virtual-scroll :items="renderAchi" :item-height="60" class="tua-al-list">
+    <v-virtual-scroll :item-height="60" :items="renderAchi" class="tua-al-list">
       <template #default="{ item }">
         <TuaAchi :modelValue="item" @select-achi="selectAchi" />
       </template>
     </v-virtual-scroll>
-    <ToNameCard v-model="showNc" :data="ncData" v-if="ncData" />
-    <ToAchiInfo
+    <ToNameCard v-if="ncData" v-model="showNc" :data="ncData" />
+    <TuaAchiOverlay
       v-if="selectedAchi"
       v-model="showOverlay"
       :data="selectedAchi"
+      @search="handleSearch"
       @select-series="selectSeries"
     >
       <template #left>
         <div class="card-arrow" @click="switchAchiInfo(false)">
-          <img src="@/assets/icons/arrow-right.svg" alt="right" />
+          <img alt="right" src="@/assets/icons/arrow-right.svg" />
         </div>
       </template>
       <template #right>
         <div class="card-arrow" @click="switchAchiInfo(true)">
-          <img src="@/assets/icons/arrow-right.svg" alt="right" />
+          <img alt="right" src="@/assets/icons/arrow-right.svg" />
         </div>
       </template>
-    </ToAchiInfo>
+    </TuaAchiOverlay>
+    <VpOverlaySearch v-model="showSearch" :gid="2" :keyword="searchWd" />
   </div>
 </template>
 <script lang="ts" setup>
 import ToNameCard from "@comp/app/to-nameCard.vue";
 import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-import ToAchiInfo from "./tua-achi-overlay.vue";
+import TuaAchiOverlay from "./tua-achi-overlay.vue";
 import TuaAchi from "./tua-achi.vue";
 
 import { AppAchievementSeriesData, AppNameCardsData } from "@/data/index.js";
@@ -59,6 +62,8 @@ const nameCard = ref<string>();
 const showNc = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const isFinish = ref<boolean>(false);
+const searchWd = ref<string>();
+const showSearch = ref<boolean>(false);
 
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
 const achievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
@@ -73,6 +78,11 @@ onMounted(async () => await loadAchi());
 
 watch(() => [props.search, props.isSearch], searchAchi);
 watch(() => [props.series, props.uid], loadAchi);
+
+function handleSearch(kw: string): void {
+  searchWd.value = kw;
+  showSearch.value = true;
+}
 
 async function searchAchi(): Promise<void> {
   if (!props.isSearch) return;

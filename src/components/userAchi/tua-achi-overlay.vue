@@ -56,31 +56,28 @@
       <slot name="right"></slot>
     </div>
   </TOverlay>
-  <VpOverlaySearch v-model="showSearch" :keyword="search" :gid="2" />
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 
 type ToAchiInfoProps = { data: TGApp.App.Achievement.RenderItem };
-type ToAchiInfoEmits = (e: "select-series", v: number) => void;
+type ToAchiInfoEmits = {
+  (e: "select-series", v: number): void;
+  (e: "search", v: string): void;
+};
 
 const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
 const visible = defineModel<boolean>();
-const showSearch = ref<boolean>(false);
-const search = ref<string>();
 
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);
-  search.value = word;
-  showSearch.value = true;
+  emits("search", word);
 }
 
 async function share(): Promise<void> {
