@@ -18,6 +18,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import OtherApi from "@req/otherReq.js";
 import * as Sentry from "@sentry/vue";
+import { commands } from "@skipperndt/plugin-machine-uid";
 import TGSqlite from "@Sql/index.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
@@ -248,6 +249,7 @@ async function handleResizeListen(event: Event<string>): Promise<void> {
 async function listenOnInit(): Promise<void> {
   console.info("[App][listenOnInit] 监听初始化事件！");
   await event.listen<void>("initApp", async () => {
+    await setSentryUser();
     await checkAppLoad();
     await checkDeviceFp();
     try {
@@ -265,6 +267,11 @@ async function listenOnInit(): Promise<void> {
       console.error(e);
     }
   });
+}
+
+async function setSentryUser(): Promise<void> {
+  const deviceRes = await commands.getMachineUid();
+  if (deviceRes.status === "ok") Sentry.setUser({ id: deviceRes.data.id! });
 }
 
 async function checkAppLoad(): Promise<void> {
