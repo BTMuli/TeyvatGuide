@@ -135,7 +135,7 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px 4px 4px;
+  padding: 4px 20px 4px 4px;
   border-radius: 40px;
   background: var(--box-bg-3);
   column-gap: 4px;

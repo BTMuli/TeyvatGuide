@@ -88,7 +88,7 @@
         :value="item.id"
         class="uc-window-item"
       >
-        <div :id="`user-combat-${item.id}`" class="ucw-i-ref">
+        <div :class="userTab === item.id ? 'ucw-i-ref active' : 'ucw-i-ref'">
           <div class="ucw-top">
             <div class="ucw-title">
               <span>第</span>
@@ -108,7 +108,13 @@
           <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
           <TucAvatars :detail="false" :model-value="item.detail.backup_avatars" />
           <div class="ucw-rounds">
-            <TucRound v-for="(round, idx) in item.detail.rounds_data" :key="idx" :round="round" />
+            <TucRound
+              v-for="(round, idx) in item.detail.rounds_data"
+              :id="item.id"
+              :key="idx"
+              :round="round"
+              :uid="item.uid"
+            />
           </div>
         </div>
       </v-window-item>
@@ -271,7 +277,7 @@ async function refreshCombat(): Promise<void> {
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
   const fileName = `【真境剧诗】${userTab.value}-${uidCur.value}.png`;
-  const shareDom = document.querySelector<HTMLElement>(`#user-combat-${userTab.value}`);
+  const shareDom = document.querySelector<HTMLElement>(`.ucw-i-ref.active`);
   if (shareDom === null) {
     showSnackbar.error("未找到分享数据");
     await TGLogger.Warn(`[UserCombat][shareCombat][${userTab.value}] 未找到分享数据`);
