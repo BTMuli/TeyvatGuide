@@ -5,18 +5,22 @@
         <div class="ugo-title">{{ title }}</div>
         <div class="ugo-fp" title="点击选择文件路径" @click="selectFile()">文件路径:{{ fp }}</div>
       </div>
-      <div v-if="props.mode === 'import' && dataRaw" class="ugo-header">
+      <div v-if="props.mode === 'import' && importRaw" class="ugo-header">
         <div class="ugo-header-item">
           <div>应用信息：</div>
-          <div>{{ dataRaw.info.export_app }} {{ dataRaw.info.export_app_version }}</div>
+          <div>
+            {{ importRaw.data.info.export_app }} {{ importRaw.data.info.export_app_version }}
+          </div>
         </div>
         <div class="ugo-header-item">
           <div>文件UIGF版本：</div>
-          <div>{{ dataRaw.info.version }}</div>
+          <div>
+            {{ importRaw.isV4 ? importRaw.data.info.version : importRaw.data.info.uigf_version }}
+          </div>
         </div>
         <div class="ugo-header-item">
           <div>导出时间：</div>
-          <div>{{ timestampToDate(Number(dataRaw.info.export_timestamp) * 1000) }}</div>
+          <div>{{ timestampToDate(Number(importRaw.data.info.export_timestamp) * 1000) }}</div>
         </div>
       </div>
       <v-item-group v-model="selectedData" class="ugo-content" multiple>
@@ -55,17 +59,27 @@ import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { exportUigf4Data, readUigf4Data, verifyUigfData } from "@utils/UIGF.js";
+import { checkUigfData, exportUigf4Data, readUigf4Data, readUigfData } from "@utils/UIGF.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
-type UgoUidProps = { mode: "import" | "export" };
+type UgoUidProps = {
+  /** 导入/导出 */
+  mode: "import" | "export";
+  /** filePathImport，导出路径 */
+  fpi?: string;
+};
 type UgoUidItem = { uid: string; length: number; time: string };
+/** 兼容不同版本的导入 */
+type UgoUidImportRaw =
+  | { isV4: true; data: TGApp.Plugins.UIGF.Schema4 }
+  | { isV4: false; data: TGApp.Plugins.UIGF.Schema };
 
 const fpEmptyText = "点击选择文件路径";
 
 const props = defineProps<UgoUidProps>();
 const visible = defineModel<boolean>();
 const fp = ref<string>(fpEmptyText);
+const importRaw = shallowRef<UgoUidImportRaw>();
 const dataRaw = shallowRef<TGApp.Plugins.UIGF.Schema4>();
 const data = shallowRef<Array<UgoUidItem>>([]);
 const selectedData = shallowRef<Array<UgoUidItem>>([]);
@@ -76,7 +90,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => [visible.value, props.mode],
+  () => [visible.value, props.mode, props.fpi],
   async () => {
     if (visible.value) await refreshData();
   },
@@ -91,12 +105,13 @@ async function refreshData(): Promise<void> {
   selectedData.value = [];
   data.value = [];
   dataRaw.value = undefined;
+  importRaw.value = undefined;
   if (props.mode === "import") {
-    fp.value = fpEmptyText;
-    await handleImportData();
+    fp.value = props.fpi ?? fpEmptyText;
+    await refreshImport();
   } else {
     fp.value = await getDefaultSavePath();
-    await handleExportData();
+    await refreshExport();
   }
 }
 
@@ -115,22 +130,30 @@ async function selectFile(): Promise<void> {
     return;
   }
   fp.value = file;
-  if (props.mode === "import") await handleImportData();
+  if (props.mode === "import") await refreshImport();
 }
 
-async function handleImportData(): Promise<void> {
+async function refreshImport(): Promise<void> {
   if (fp.value === fpEmptyText) return;
   try {
     await showLoading.start("正在导入数据...", "正在验证数据...");
-    const check = await verifyUigfData(fp.value, true);
-    if (!check) {
+    const isV4 = await checkUigfData(fp.value);
+    console.info(isV4);
+    if (isV4 === null) {
       await showLoading.end();
       return;
     }
     await showLoading.update("数据验证成功，正在读取数据...");
-    const uigfData = await readUigf4Data(fp.value);
-    dataRaw.value = uigfData;
-    data.value = uigfData.hk4e.map(parseData);
+    if (isV4) {
+      const read = await readUigf4Data(fp.value);
+      importRaw.value = { isV4: true, data: read };
+      data.value = read.hk4e.map(parseData4);
+    } else {
+      const read = await readUigfData(fp.value);
+      console.log(read.list.length);
+      importRaw.value = { isV4: false, data: read };
+      data.value = [parseData(read)];
+    }
     await showLoading.end();
   } catch (e) {
     if (e instanceof Error) {
@@ -143,7 +166,16 @@ async function handleImportData(): Promise<void> {
   }
 }
 
-function parseData(data: TGApp.Plugins.UIGF.GachaHk4e): UgoUidItem {
+function parseData(data: TGApp.Plugins.UIGF.Schema): UgoUidItem {
+  const timeList = data.list.map((item) => new Date(item.time).getTime());
+  return {
+    uid: data.info.uid,
+    length: data.list.length,
+    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+  };
+}
+
+function parseData4(data: TGApp.Plugins.UIGF.GachaHk4e): UgoUidItem {
   const timeList = data.list.map((item) => new Date(item.time).getTime());
   return {
     uid: data.uid.toString(),
@@ -152,7 +184,7 @@ function parseData(data: TGApp.Plugins.UIGF.GachaHk4e): UgoUidItem {
   };
 }
 
-async function handleExportData(): Promise<void> {
+async function refreshExport(): Promise<void> {
   const uidList = await TSUserGacha.getUidList();
   const tmpData: Array<UgoUidItem> = [];
   for (const uid of uidList) {
@@ -177,7 +209,7 @@ async function handleSelected(): Promise<void> {
 }
 
 async function handleImport(): Promise<void> {
-  if (!dataRaw.value) {
+  if (!importRaw.value) {
     showSnackbar.error("未获取到数据!");
     fp.value = fpEmptyText;
     return;
@@ -187,15 +219,21 @@ async function handleImport(): Promise<void> {
     return;
   }
   await showLoading.start("正在导入数据...");
-  for (const item of selectedData.value) {
-    await showLoading.update(`正在导入UID: ${item.uid}`);
-    const dataFind = dataRaw.value.hk4e.find((i) => i.uid.toString() === item.uid);
-    if (!dataFind) {
-      showSnackbar.error(`未找到UID: ${item.uid}`);
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-      continue;
+  if (importRaw.value.isV4) {
+    for (const item of selectedData.value) {
+      await showLoading.update(`正在导入UID: ${item.uid}`);
+      const dataFind = importRaw.value.data.hk4e.find((i) => i.uid.toString() === item.uid);
+      if (!dataFind) {
+        showSnackbar.error(`未找到UID: ${item.uid}`);
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+        continue;
+      }
+      await TSUserGacha.mergeUIGF4(dataFind, true);
     }
-    await TSUserGacha.mergeUIGF4(dataFind, true);
+  } else {
+    const iUid = selectedData.value[0].uid;
+    await showLoading.update(`正在导入UID:${iUid}`);
+    await TSUserGacha.mergeUIGF(iUid, importRaw.value.data.list, true);
   }
   await showLoading.end();
   showSnackbar.success("导入成功!即将刷新页面...");

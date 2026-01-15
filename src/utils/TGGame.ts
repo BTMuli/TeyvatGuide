@@ -62,7 +62,7 @@ export async function isRunInAdmin(): Promise<boolean> {
 
 /**
  * 尝试调用Yae
- * @since Beta v0.9.1
+ * @since Beta v0.9.2
  * @param gameDir - 游戏目录
  * @param uid - 启动UID
  * @returns void
@@ -92,7 +92,6 @@ export async function tryCallYae(gameDir: string, uid?: string): Promise<void> {
   }
   const adminCheck = await isRunInAdmin();
   if (!adminCheck) {
-    showSnackbar.warn("未检测到管理员权限");
     const check = await showDialog.check("是否以管理员模式重启？", "该功能需要管理员权限才能使用");
     if (!check) {
       showSnackbar.cancel("已取消以管理员模式重启");

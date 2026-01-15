@@ -84,14 +84,6 @@
         </v-btn>
         <v-btn
           class="gacha-top-btn"
-          prepend-icon="mdi-import"
-          variant="elevated"
-          @click="importUigf4()"
-        >
-          导入(v4)
-        </v-btn>
-        <v-btn
-          class="gacha-top-btn"
           prepend-icon="mdi-export"
           variant="elevated"
           @click="exportUigf()"
@@ -153,7 +145,7 @@
       </v-window-item>
     </v-window>
   </div>
-  <UgoUid v-model="ovShow" :mode="ovMode" />
+  <UgoUid v-model="ovShow" :fpi="ovFpi" :mode="ovMode" />
   <UgoHutaoDu v-model="hutaoShow" :mode="htMode" @selected="handleHutaoDu" />
 </template>
 <script lang="ts" setup>
@@ -179,7 +171,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import Hakushi from "@utils/Hakushi.js";
 import TGLogger from "@utils/TGLogger.js";
 import { str2timeStr, timeStr2str } from "@utils/toolFunc.js";
-import { exportUigfData, readUigfData, verifyUigfData } from "@utils/UIGF.js";
+import { exportUigfData } from "@utils/UIGF.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -193,12 +185,14 @@ const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const { isLogin: isLoginHutao, accessToken, userName, userInfo } = storeToRefs(hutaoStore);
 
+const ovMode = ref<"export" | "import">("import");
+const ovShow = ref<boolean>(false);
+const ovFpi = ref<string>();
+
 const authkey = ref<string>("");
 const uidCur = ref<string>();
 const tab = ref<string>("overview");
-const ovShow = ref<boolean>(false);
 const hutaoShow = ref<boolean>(false);
-const ovMode = ref<"export" | "import">("import");
 const htMode = ref<UgoHutaoMode>("download");
 const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
@@ -605,11 +599,6 @@ async function refreshGachaPool(
   }
 }
 
-function importUigf4(): void {
-  ovMode.value = "import";
-  ovShow.value = true;
-}
-
 async function loadHakushi(): Promise<void> {
   try {
     hakushiData.value = await Hakushi.fetch();
@@ -634,28 +623,9 @@ async function importUigf(): Promise<void> {
     showSnackbar.cancel("已取消文件选择");
     return;
   }
-  await showLoading.start("正在导入祈愿数据", "正在验证祈愿数据");
-  const check = await verifyUigfData(selectedFile, false);
-  if (!check) {
-    await showLoading.end();
-    return;
-  }
-  await showLoading.update("正在读取祈愿数据");
-  const remoteData = await readUigfData(selectedFile);
-  await showLoading.update(`UID：${remoteData.info.uid}，共 ${remoteData.list.length} 条数据`);
-  if (remoteData.list.length === 0) {
-    await showLoading.end();
-    showSnackbar.error("导入的祈愿数据为空");
-    return;
-  }
-  await TSUserGacha.mergeUIGF(remoteData.info.uid, remoteData.list, true);
-  await showLoading.end();
-  showSnackbar.success(`成功导入 ${remoteData.list.length} 条祈愿数据，即将刷新页面`);
-  await TGLogger.Info(
-    `[UserGacha][importUigf] 成功导入 ${remoteData.info.uid} 的 ${remoteData.list.length} 条祈愿数据`,
-  );
-  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  window.location.reload();
+  ovFpi.value = selectedFile;
+  ovMode.value = "import";
+  ovShow.value = true;
 }
 
 // 导出当前UID的祈愿数据

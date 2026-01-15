@@ -1,6 +1,6 @@
 /**
  * UIGF工具类
- * @since Beta v0.9.0
+ * @since Beta v0.9.2
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -103,6 +103,36 @@ function convertDataToUigf(
       uigf_gacha_type: gacha.uigfType,
     };
   });
+}
+
+/**
+ * 检测是否是v4版本的UIGF
+ * @since Beta v0.9.2
+ * @param path - UIGF 文件路径
+ * @returns 是否是v4，null表示数据异常
+ */
+export async function checkUigfData(path: string): Promise<boolean | null> {
+  try {
+    const fileData: string = await readTextFile(path);
+    const fileJson = JSON.parse(fileData);
+    if (!("info" in fileJson) || typeof fileJson.info !== "object") {
+      validateUigf4Data(fileJson);
+      return null;
+    }
+    if ("uigf_version" in fileJson.info) {
+      const check = validateUigfData(fileJson);
+      if (!check) return null;
+      return false;
+    }
+    const check = validateUigf4Data(fileJson);
+    if (!check) return null;
+    return true;
+  } catch (e) {
+    showSnackbar.error(`UIGF校验异常：${e}`);
+    await TGLogger.Error(`[checkUigfData]路径:${path}`);
+    await TGLogger.Error(`[checkUigfData]异常:${e}`);
+    return null;
+  }
 }
 
 /**
