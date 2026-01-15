@@ -170,7 +170,7 @@ const cardBg = computed<string>(() => {
   return "none";
 });
 const forumBg = computed<string>(() =>
-  str2Color(`${props.modelValue.forum?.id}${props.modelValue.forum?.name}`, -60),
+  str2Color(`${card.value?.forum?.id}${card.value?.forum?.icon}${card.value?.forum?.name}`, -60),
 );
 const idBg = computed<string>(() => str2Color(`${props.modelValue.post.post_id}`, 0));
 
@@ -220,7 +220,13 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
   let forumData: RenderForum | null = null;
   let statData: RenderData | null = null;
   if (item.forum !== null) {
-    forumData = { name: item.forum.name, icon: item.forum.icon, id: item.forum.id };
+    // 对部分缺失图标进行补充
+    let forumIcon = item.forum.icon;
+    if (item.forum.name === "攻略" && item.forum.id === 43) {
+      forumIcon =
+        "https://upload-bbs.mihoyo.com/upload/2020/09/14/ce666cea7c971b04e4b4a6fe0a9ebfd0.png";
+    }
+    forumData = { name: item.forum.name, icon: forumIcon, id: item.forum.id };
   }
   if (item.stat !== null) {
     statData = {
