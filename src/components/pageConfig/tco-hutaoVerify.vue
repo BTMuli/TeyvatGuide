@@ -7,6 +7,7 @@
       density="compact"
       title="重置胡桃云密码"
     >
+      <img src="/platforms/other/hutao2.webp" alt="logo" class="thvc-logo" />
       <v-form ref="formEl" class="thvc-mid">
         <v-text-field
           ref="usernameInput"
@@ -172,6 +173,15 @@ onUnmounted(() => {
   padding: 8px;
   border-radius: 4px;
   background-color: var(--box-bg-1);
+}
+
+.thvc-logo {
+  position: absolute;
+  z-index: 0;
+  bottom: -16px;
+  left: -16px;
+  width: 128px;
+  height: 128px;
 }
 
 .thvc-mid {
