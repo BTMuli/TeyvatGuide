@@ -96,7 +96,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
 @use "@styles/github.styles.scss" as github-styles;
 
 .achi-container {
-  @include github-styles.github-card;
+  @include github-styles.github-card-shadow;
 
   position: relative;
   display: flex;
@@ -105,12 +105,14 @@ async function setAchiStat(stat: boolean): Promise<void> {
   align-items: center;
   justify-content: space-between;
   padding: 8px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
+  background: var(--box-bg-1);
   cursor: pointer;
 }
 
 .dark .achi-container {
-  @include github-styles.github-card("dark");
+  @include github-styles.github-card-shadow("dark");
 }
 
 .achi-version {
