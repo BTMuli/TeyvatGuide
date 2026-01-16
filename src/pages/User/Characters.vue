@@ -418,7 +418,7 @@ async function refresh(): Promise<void> {
   const indexRes = await recordReq.index(cookie.value, account.value, 1);
   if ("retcode" in indexRes) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
-    await TGLogger.Error(JSON.stringify(indexRes.message));
+    await TGLogger.Error(JSON.stringify(indexRes));
     await showLoading.end();
     loadData.value = false;
     return;

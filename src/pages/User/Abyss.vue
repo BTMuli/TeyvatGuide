@@ -146,7 +146,7 @@ const router = useRouter();
 const hutaoStore = useHutaoStore();
 
 const { isLogin } = storeToRefs(useAppStore());
-const { account, cookie } = storeToRefs(useUserStore());
+const { account, cookie, propMap } = storeToRefs(useUserStore());
 const { userName } = storeToRefs(hutaoStore);
 const userTab = ref<number>(0);
 const version = ref<string>();
@@ -342,6 +342,10 @@ async function uploadAbyss(): Promise<void> {
     const check = await showDialog.check("确定上传？", "未设置胡桃云账号");
     if (!check) return;
   }
+  if (!cookie.value) {
+    showSnackbar.warn("请登录米社账号");
+    return;
+  }
   await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
   const maxId = Math.max(...localAbyss.value.map((i) => i.id));
   const abyssData = localAbyss.value.find((item) => item.id === maxId);
@@ -368,7 +372,8 @@ async function uploadAbyss(): Promise<void> {
     await showLoading.start(`正在上传${account.value.gameUid}的深渊数据`, `期数：${abyssData.id}`);
     const transAbyss = hutao.Abyss.utils.transData(abyssData);
     if (userName.value) transAbyss.ReservedUserName = userName.value;
-    await showLoading.update("正在获取角色数据");
+    const check = await refreshAvatars(cookie.value, account.value);
+    if (!check) return;
     const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
     if (!roles) {
       await showLoading.end();
@@ -378,6 +383,7 @@ async function uploadAbyss(): Promise<void> {
     await showLoading.update("正在转换角色数据");
     transAbyss.Avatars = hutao.Abyss.utils.transAvatars(roles);
     await showLoading.update("正在上传深渊数据");
+    console.log("uploadAbyss", transAbyss);
     const res = await hutao.Abyss.upload(transAbyss);
     if (res.retcode !== 0) {
       showSnackbar.error(`[${res.retcode}]${res.message}`);
@@ -396,6 +402,44 @@ async function uploadAbyss(): Promise<void> {
     }
   }
   await showLoading.end();
+}
+
+async function refreshAvatars(
+  ck: TGApp.App.Account.Cookie,
+  ac: TGApp.Sqlite.Account.Game,
+): Promise<boolean> {
+  await showLoading.update("正在更新角色数据");
+  const idxRes = await recordReq.index(ck, ac, 1);
+  if ("retcode" in idxRes) {
+    await showLoading.update("角色更新失败");
+    showSnackbar.error(`[${idxRes.retcode}] ${idxRes.message}`);
+    await TGLogger.Error(JSON.stringify(idxRes));
+    await showLoading.end();
+    return false;
+  }
+  await showLoading.update("正在更新角色列表");
+  const listRes = await recordReq.character.list(ck, account.value);
+  if ("retcode" in listRes) {
+    await showLoading.update("角色列表更新失败");
+    showSnackbar.error(`[${listRes.message}] ${listRes.message}`);
+    await TGLogger.Error(JSON.stringify(listRes));
+    await showLoading.end();
+    return false;
+  }
+  const idList = listRes.map((i) => i.id.toString());
+  await showLoading.update(`正在获取 ${idList.length} 个角色详情`);
+  const detailRes = await recordReq.character.detail(ck, ac, idList);
+  if ("retcode" in detailRes) {
+    await showLoading.update("角色详情获取失败");
+    showSnackbar.error(`[${detailRes.retcode}] ${detailRes.message}`);
+    await TGLogger.Error(JSON.stringify(detailRes));
+    await showLoading.end();
+    return false;
+  }
+  propMap.value = detailRes.property_map;
+  await showLoading.update("正在保存角色数据");
+  await TSUserAvatar.saveAvatars(ac.gameUid, detailRes.list);
+  return true;
 }
 </script>
 <style lang="css" scoped>
