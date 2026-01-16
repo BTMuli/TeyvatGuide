@@ -37,5 +37,5 @@
       ]
     }
   ],
-  "platforms": ["windows", "macOS"]
+  "platforms": ["windows", "macOS", "linux"]
 }

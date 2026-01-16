@@ -61,5 +61,5 @@
       ]
     }
   ],
-  "platforms": ["windows", "macOS"]
+  "platforms": ["linux"]
 }

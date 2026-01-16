@@ -1,6 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "bundle": {
-    "resources": { "lib/YaeAchievementLib.dll": "resources/YaeAchievementLib.dll" }
+    "resources": { "lib/YaeAchievementLib.dll": "resources/YaeAchievementLib.dll" },
+    "targets": ["msi"],
+    "windows": { "wix": { "language": "zh-CN" } }
   }
 }

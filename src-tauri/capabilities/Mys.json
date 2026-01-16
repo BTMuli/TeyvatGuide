@@ -34,5 +34,5 @@
   "remote": {
     "urls": ["https://*.mihoyo.com/*", "https://*.miyoushe.com/*", "https://*.genshinnet.com/*"]
   },
-  "platforms": ["windows", "macOS"]
+  "platforms": ["windows", "macOS", "linux"]
 }

@@ -27,10 +27,7 @@
       "icons/Square150x150Logo.png",
       "icons/Square284x284Logo.png",
       "icons/Square310x310Logo.png"
-    ],
-    "targets": ["msi", "app", "dmg"],
-    "windows": { "wix": { "language": "zh-CN" } },
-    "macOS": {}
+    ]
   },
   "app": {
     "withGlobalTauri": true,
