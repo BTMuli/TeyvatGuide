@@ -26,7 +26,7 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
   match event {
     WindowEvent::CloseRequested { api, .. } => {
       api.prevent_close();
-      if app.label() == "Teyvat.Guide" {
+      if app.label() == "TeyvatGuide" {
         // 主窗口：发送事件让前端根据配置决定是隐藏还是退出
         let _ = app.emit("main-window-close-requested", ());
       } else {
