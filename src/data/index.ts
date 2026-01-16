@@ -1,6 +1,6 @@
 /**
  * 数据文件入口
- * @since Beta v0.9.1
+ * @since Beta v0.9.2
  */
 
 import type { Schema } from "ajv";
@@ -11,6 +11,7 @@ import calendar from "./app/calendar.json" with { type: "json" };
 import character from "./app/character.json" with { type: "json" };
 import gacha from "./app/gacha.json" with { type: "json" };
 import gachaB from "./app/gachaB.json" with { type: "json" };
+import hyperlink from "./app/hyperlink.json" with { type: "json" };
 import nameCards from "./app/namecard.json" with { type: "json" };
 import weapon from "./app/weapon.json" with { type: "json" };
 import arcBirCalendar from "./archive/birth_calendar.json" with { type: "json" };
@@ -42,6 +43,7 @@ export const ArcBirRole: Array<TGApp.Archive.Birth.RoleItem> = arcBirRole;
 // Wiki
 export const WikiWeaponData: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
 export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial;
+export const WikiHyperLinkData: TGApp.App.HyperLink.AppHyperLink = hyperlink;
 
 const avatarFiles = import.meta.glob("./WIKI/character/*.json");
 

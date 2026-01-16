@@ -1,14 +1,15 @@
 /**
  * 应用入口
- * @since Beta v0.9.1
+ * @since Beta v0.9.2
  */
 
 import type { FeedbackInternalOptions } from "@sentry/core";
 import * as Sentry from "@sentry/vue";
-import { createApp } from "vue";
+import { createApp, defineCustomElement } from "vue";
 import { createVuetify } from "vuetify";
 
 import App from "./App.vue";
+import TLink from "./components/web/t-link.vue";
 import router from "./router/index.js";
 import store from "./store/index.js";
 
@@ -17,6 +18,7 @@ import "vuetify/styles";
 import "./assets/index.scss";
 
 const app = createApp(App);
+customElements.define("t-link", defineCustomElement(TLink));
 
 Sentry.init({
   app,

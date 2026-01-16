@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.9.1
+ * @since Beta v0.9.2
  */
 
 import { tz } from "@date-fns/tz";
@@ -185,7 +185,7 @@ export function getRandomString(length: number, type: string = "all"): string {
 
 /**
  * 解析带样式的文本
- * @since Beta v0.8.1
+ * @since Beta v0.9.2
  * @param desc - 带样式的文本
  * @returns 解析后的文本
  */
@@ -195,8 +195,10 @@ export function parseHtmlText(desc: string): string {
   while (linkMatch !== null) {
     const link = linkMatch[1];
     const text = linkMatch[2];
-    // TODO: 后续处理 t-link
-    desc = desc.replace(linkMatch[0], `<t-link data-link="${link}">${text}</t-link>`);
+    desc = desc.replace(
+      linkMatch[0],
+      `<t-link content="${encodeURIComponent(text)}" link="${link}"></t-link>`,
+    );
     linkMatch = linkReg.exec(desc);
   }
   const colorReg = /<color=(.*?)>(.*?)<\/color>/g;
