@@ -16,7 +16,7 @@ use crate::commands::{
   create_window, execute_js, get_dir_size, hide_main_window, init_app, is_in_admin, launch_game,
   quit_app, read_text_scale,
 };
-use tauri::{generate_context, generate_handler, Emitter, Manager, Window, WindowEvent};
+use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
 // 子窗口 label 的数组
 pub const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
@@ -26,7 +26,7 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
   match event {
     WindowEvent::CloseRequested { api, .. } => {
       api.prevent_close();
-      if app.label() == "TeyvatGuide" {
+      if app.label() == "Teyvat.Guide" {
         // 主窗口：发送事件让前端根据配置决定是隐藏还是退出
         let _ = app.emit("main-window-close-requested", ());
       } else {

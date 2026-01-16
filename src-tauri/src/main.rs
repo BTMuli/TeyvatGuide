@@ -7,7 +7,7 @@
 #[cfg(target_os = "windows")]
 fn enable_dpi_v2() {
   use windows_sys::Win32::UI::HiDpi::{
-    SetProcessDpiAwarenessContext, DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2,
+    DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2, SetProcessDpiAwarenessContext,
   };
 
   unsafe {
@@ -22,8 +22,14 @@ fn main() {
       release: sentry::release_name!().into(),
       send_default_pii: true,
       ..Default::default()
-  }));
+    },
+  ));
   #[cfg(target_os = "windows")]
   enable_dpi_v2();
+  #[cfg(target_os = "linux")]
+  unsafe {
+    // Not unsafe if you don't use edition 2024
+    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+  }
   teyvat_guide_lib::run()
 }

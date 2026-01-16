@@ -4,6 +4,6 @@
 
 max_width = 100
 tab_spaces = 2
-edition = "2018"
+edition = "2024"
 use_small_heuristics = "Max"
 newline_style = "Auto"

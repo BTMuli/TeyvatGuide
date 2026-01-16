@@ -5,7 +5,7 @@ description = "Game Tool for Genshin Impact player"
 authors = ["BTMuli <bt-muli@outlook.com>"]
 license = "MIT"
 repository = "https://github.com/BTMuli/TeyvatGuide"
-edition = "2021"
+edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -1,6 +1,6 @@
 {
   "$schema": "./schemas/desktop-schema.json",
-  "identifier": "TeyvatGuide",
+  "identifier": "Teyvat.Guide",
   "description": "Capability for the main window",
   "windows": ["TeyvatGuide"],
   "permissions": [
