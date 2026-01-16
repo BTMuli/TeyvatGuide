@@ -8,7 +8,7 @@ use tauri::AppHandle;
 use widestring::U16CString;
 use windows_sys::Win32::Foundation::{HANDLE, HWND};
 use windows_sys::Win32::Storage::FileSystem::SYNCHRONIZE;
-use windows_sys::Win32::System::Threading::{OpenProcess, WaitForSingleObject, INFINITE};
+use windows_sys::Win32::System::Threading::{INFINITE, OpenProcess, WaitForSingleObject};
 use windows_sys::Win32::UI::Shell::ShellExecuteW;
 use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
@@ -37,11 +37,7 @@ fn shell_runas_with_args(args: &str) -> Result<(), String> {
       if cwd_wide.len() > 1 { cwd_wide.as_ptr() } else { null_mut() },
       SW_SHOWNORMAL,
     );
-    if (result as usize) > 32 {
-      Ok(())
-    } else {
-      Err("ShellExecuteW runas 启动失败".into())
-    }
+    if (result as usize) > 32 { Ok(()) } else { Err("ShellExecuteW runas 启动失败".into()) }
   }
 }
 

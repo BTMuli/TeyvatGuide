@@ -6,8 +6,8 @@ use tauri::{AppHandle, Emitter};
 use widestring::U16CString;
 use windows_sys::Win32::Foundation::ERROR_SUCCESS;
 use windows_sys::Win32::System::Registry::{
-  RegNotifyChangeKeyValue, RegOpenKeyExW, HKEY, HKEY_CURRENT_USER, KEY_NOTIFY, KEY_READ,
-  REG_NOTIFY_CHANGE_LAST_SET,
+  HKEY, HKEY_CURRENT_USER, KEY_NOTIFY, KEY_READ, REG_NOTIFY_CHANGE_LAST_SET,
+  RegNotifyChangeKeyValue, RegOpenKeyExW,
 };
 
 pub fn init(app: AppHandle) {

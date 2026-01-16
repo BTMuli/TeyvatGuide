@@ -10,8 +10,8 @@ pub fn read_text_scale_factor() -> Result<f64, String> {
   }
   #[cfg(target_os = "windows")]
   {
-    use winreg::enums::*;
     use winreg::RegKey;
+    use winreg::enums::*;
     let hkcu = RegKey::predef(HKEY_CURRENT_USER);
     // 如果打开失败，直接返回默认值 1.0
     let key = match hkcu.open_subkey("Software\\Microsoft\\Accessibility") {

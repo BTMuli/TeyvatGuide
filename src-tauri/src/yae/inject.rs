@@ -8,19 +8,19 @@ use windows_sys::Win32::Foundation::{CloseHandle, FreeLibrary, HANDLE, INVALID_H
 use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
-  CreateToolhelp32Snapshot, Module32FirstW, Module32NextW, MODULEENTRY32W, TH32CS_SNAPMODULE,
+  CreateToolhelp32Snapshot, MODULEENTRY32W, Module32FirstW, Module32NextW, TH32CS_SNAPMODULE,
   TH32CS_SNAPMODULE32,
 };
 use windows_sys::Win32::System::LibraryLoader::{
-  GetModuleHandleA, GetProcAddress, LoadLibraryExW, DONT_RESOLVE_DLL_REFERENCES,
+  DONT_RESOLVE_DLL_REFERENCES, GetModuleHandleA, GetProcAddress, LoadLibraryExW,
 };
-use windows_sys::Win32::System::Memory::{VirtualAllocEx, MEM_COMMIT, PAGE_READWRITE};
+use windows_sys::Win32::System::Memory::{MEM_COMMIT, PAGE_READWRITE, VirtualAllocEx};
 use windows_sys::Win32::System::Pipes::{
   CreateNamedPipeW, PIPE_READMODE_MESSAGE, PIPE_TYPE_MESSAGE, PIPE_UNLIMITED_INSTANCES, PIPE_WAIT,
 };
 use windows_sys::Win32::System::Threading::{
-  CreateProcessW, CreateRemoteThread, WaitForSingleObject, INFINITE, PROCESS_INFORMATION,
-  STARTUPINFOW,
+  CreateProcessW, CreateRemoteThread, INFINITE, PROCESS_INFORMATION, STARTUPINFOW,
+  WaitForSingleObject,
 };
 
 /// 创建命名管道

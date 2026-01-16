@@ -2,8 +2,8 @@
 //! @since Beta v0.9.0
 #![cfg(target_os = "windows")]
 
-use prost::encoding::{decode_key, decode_varint, WireType};
 use prost::DecodeError;
+use prost::encoding::{WireType, decode_key, decode_varint};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 use std::collections::HashMap;

@@ -3,9 +3,9 @@
 #![cfg(target_os = "windows")]
 
 use crate::yae::read_conf;
-use prost::encoding::{decode_key, WireType};
 use prost::DecodeError;
 use prost::Message;
+use prost::encoding::{WireType, decode_key};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::{Cursor, Read};
