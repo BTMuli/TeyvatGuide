@@ -1,7 +1,8 @@
 //! DLL 注入相关功能
-//! @since Beta v0.9.1
+//! @since Beta v0.9.2
 #![cfg(target_os = "windows")]
 
+use std::path::Path;
 use std::ptr;
 use widestring::U16CString;
 use windows_sys::Win32::Foundation::{CloseHandle, FreeLibrary, HANDLE, INVALID_HANDLE_VALUE};
@@ -133,9 +134,16 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
   }
 }
 
+/// 将 UTF-16 缓冲区转成 String
 fn utf16_to_string(buf: &[u16]) -> String {
   let nul_pos = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
   String::from_utf16_lossy(&buf[..nul_pos])
+}
+
+/// 统一 DLL 名称：转小写并补全 .dll 后缀
+fn normalize_module_name(name: &str) -> String {
+  let lower = name.to_ascii_lowercase();
+  if lower.ends_with(".dll") { lower } else { format!("{}.dll", lower) }
 }
 
 /// 枚举模块，找到 DLL 基址
@@ -149,13 +157,22 @@ pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
     let mut me32 =
       MODULEENTRY32W { dwSize: std::mem::size_of::<MODULEENTRY32W>() as u32, ..Default::default() };
 
+    let target_name = normalize_module_name(dll_name);
+
     if Module32FirstW(snapshot, &mut me32) != 0 {
       loop {
-        let module_name = utf16_to_string(&me32.szModule);
-        if module_name.eq_ignore_ascii_case(dll_name) {
+        // 取文件名部分，避免路径干扰
+        let module_name = Path::new(&utf16_to_string(&me32.szModule))
+          .file_name()
+          .and_then(|s| s.to_str())
+          .unwrap_or("")
+          .to_ascii_lowercase();
+
+        if module_name == target_name {
           CloseHandle(snapshot);
           return Some(me32.modBaseAddr as usize);
         }
+
         if Module32NextW(snapshot, &mut me32) == 0 {
           break;
         }
