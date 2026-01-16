@@ -157,6 +157,10 @@ async function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): Promise<vo
     showCalendar.value = true;
     return;
   }
+  if (cur.wiki_url === "") {
+    showSnackbar.warn("未检测到跳转链接");
+    return;
+  }
   await openUrl(cur.wiki_url);
 }
 </script>
