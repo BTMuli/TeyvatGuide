@@ -108,7 +108,13 @@
             <TuaOverview :val-icons="item.energySkillRank" title="元素爆发" />
           </div>
           <div class="uaw-d-box">
-            <TuaDetail v-for="floor in item.floors" :key="floor.id" :floor />
+            <TuaDetail
+              :uid="uidCur"
+              :id="item.id"
+              v-for="floor in item.floors"
+              :key="floor.id"
+              :floor
+            />
           </div>
         </div>
       </v-window-item>
@@ -520,7 +526,7 @@ async function refreshAvatars(
 
 .ua-box {
   display: flex;
-  height: calc(100vh - 96px);
+  height: calc(100vh - 144px);
   align-items: flex-start;
   justify-content: center;
   border: 1px solid var(--common-shadow-2);
