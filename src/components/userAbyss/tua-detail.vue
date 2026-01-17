@@ -11,9 +11,17 @@
     </div>
     <div class="tuad-mid">
       <div v-if="show" class="tuad-share">UID {{ props.uid }} | 第{{ props.id }}期</div>
-      <div v-if="props.floor.buff && props.floor.buff.length > 0" class="tuad-buff">
+      <div class="tuad-buff">
         <span>地脉异常:</span>
-        <span v-for="(b, i) in props.floor.buff" :key="i">{{ b }}</span>
+        <template v-if="props.floor.buff === undefined">
+          <span>数据缺失</span>
+        </template>
+        <template v-else-if="props.floor.buff.length > 0">
+          <span v-for="(b, i) in props.floor.buff" :key="i">{{ b }}</span>
+        </template>
+        <template v-else>
+          <span>无地脉异常</span>
+        </template>
       </div>
     </div>
     <div class="tuad-index-box">
@@ -28,7 +36,7 @@ import { nextTick, ref, useTemplateRef } from "vue";
 
 import TuaDetailLevel from "./tua-detail-level.vue";
 
-type TuaDetailProps = { floor: TGApp.Sqlite.Abyss.Floor; uid: number; id: number };
+type TuaDetailProps = { floor: TGApp.Sqlite.Abyss.Floor; uid?: string; id: number };
 
 const props = defineProps<TuaDetailProps>();
 const show = ref<boolean>(false);
@@ -41,7 +49,7 @@ async function shareFloor(): Promise<void> {
   }
   show.value = true;
   await nextTick();
-  const fileName = `深境螺旋_第${props.id}期_${props.uid}_${props.floor.id}`;
+  const fileName = `深境螺旋_第${props.id}期_${props?.uid ?? ""}_${props.floor.id}`;
   await generateShareImg(fileName, floorRef.value);
   show.value = false;
 }
