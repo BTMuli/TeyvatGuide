@@ -90,6 +90,12 @@
       >
         <div :class="userTab === item.id ? 'ucw-i-ref active' : 'ucw-i-ref'">
           <div class="ucw-top">
+            <img
+              v-if="isFinTarot(item)"
+              alt="tarot"
+              class="ucw-tarot"
+              src="/icon/combat/tarot.webp"
+            />
             <div class="ucw-title">
               <span>第</span>
               <span>{{ item.id }}</span>
@@ -396,6 +402,11 @@ async function tryReadCombat(): Promise<void> {
     showSnackbar.error("导入剧诗数据失败，请检查文件格式是否正确");
   }
 }
+
+function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
+  if (!data.hasData) return false;
+  return data.stat.max_round_id === 10 && data.stat.tarot_finished_cnt > 0;
+}
 </script>
 <style lang="scss" scoped>
 .uct-left {
@@ -513,7 +524,8 @@ async function tryReadCombat(): Promise<void> {
   display: flex;
   width: 100%;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: flex-start;
+  column-gap: 8px;
 }
 
 .ucw-title {
@@ -529,8 +541,13 @@ async function tryReadCombat(): Promise<void> {
   }
 }
 
+.ucw-tarot {
+  width: 48px;
+}
+
 .ucw-share {
   z-index: -1;
+  margin-left: auto;
   font-size: 12px;
   opacity: 0.8;
 }
