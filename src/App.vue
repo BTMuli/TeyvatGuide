@@ -34,7 +34,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
 import { getWindowSize, resizeWindow } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onBeforeMount, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -53,7 +53,7 @@ let closeListener: UnlistenFn | null = null;
 let textScaleListener: UnlistenFn | null = null;
 let yaeFlag: Array<string> = [];
 
-onBeforeMount(async () => {
+onMounted(async () => {
   const win = getCurrentWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
