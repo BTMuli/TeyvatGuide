@@ -36,7 +36,7 @@ import TopNameCard from "@comp/app/top-nameCard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
 import TuaAchiOverlay from "./tua-achi-overlay.vue";
 import TuaAchi from "./tua-achi.vue";
@@ -51,7 +51,7 @@ type TuaAchiListProps = {
   isSearch: boolean;
 };
 type TuaAchiListEmits = {
-  (e: "update:series", v: number | undefined): void;
+  (e: "update:series", v: number): void;
   (e: "update:isSearch", v: boolean): false;
 };
 
@@ -93,17 +93,21 @@ async function searchAchi(): Promise<void> {
   }
   nameCard.value = undefined;
   ncData.value = undefined;
-  achievements.value = await TSUserAchi.searchAchi(props.uid, props.search);
+  const searchRes = await TSUserAchi.searchAchi(props.uid, props.search);
   if (showOverlay.value) showOverlay.value = false;
-  if (achievements.value.length > 0) {
+  if (searchRes.length > 0) {
+    achievements.value = searchRes;
     showSnackbar.success(`成功获取${achievements.value.length}条成就`);
-    emits("update:series", undefined);
+    emits("update:series", -1);
+    await nextTick();
+  } else {
+    showSnackbar.warn("未搜索到相关成就");
   }
   emits("update:isSearch", false);
 }
 
 async function loadAchi(): Promise<void> {
-  if (props.isSearch || props.series === undefined) return;
+  if (props.isSearch) return;
   achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
   const ov = await TSUserAchi.getOverview(props.uid, props.series);
   isFinish.value = ov.fin === ov.total;

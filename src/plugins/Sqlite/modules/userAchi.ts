@@ -124,6 +124,27 @@ async function getAchi(
 }
 
 /**
+ * 对混合系列成就数据进行排序
+ * @since Beta v0.9.2
+ * @param data - 成旧数据
+ * @returns 排序后的成就数据
+ */
+function sortMixAchi(
+  data: Array<TGApp.App.Achievement.RenderItem>,
+): Array<TGApp.App.Achievement.RenderItem> {
+  return data.sort((a, b) => {
+    if (a.isCompleted !== b.isCompleted) return Number(a.isCompleted) - Number(b.isCompleted);
+    if (!a.isCompleted) {
+      if (a.version !== b.version) return Number(b.version) - Number(a.version);
+      return a.order - b.order;
+    }
+    if (b.completedTime !== a.completedTime) return b.completedTime.localeCompare(a.completedTime);
+    if (a.version !== b.version) return Number(b.version) - Number(a.version);
+    return b.order - a.order;
+  });
+}
+
+/**
  * 获取成就数据
  * @since Beta v0.9.2
  * @param uid - 存档 UID
@@ -135,7 +156,7 @@ async function getAchievements(
   series?: number,
 ): Promise<Array<TGApp.App.Achievement.RenderItem>> {
   const db = await TGSqlite.getDB();
-  const res: Array<TGApp.App.Achievement.RenderItem> = [];
+  let res: Array<TGApp.App.Achievement.RenderItem> = [];
   const userData = await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
     "SELECT * FROM Achievements WHERE uid = ?;",
     [uid],
@@ -148,13 +169,11 @@ async function getAchievements(
     const achievement = getRenderAchi(achi, uid, achiFind);
     res.push(achievement);
   }
-  res.sort(
-    (a, b) =>
-      Number(a.isCompleted) - Number(b.isCompleted) ||
-      b.version.localeCompare(a.version) ||
-      b.series - a.series ||
-      b.order - a.order,
-  );
+  if (series && series !== -1) {
+    res.sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted) || a.order - b.order);
+  } else {
+    res = sortMixAchi(res);
+  }
   return res;
 }
 
@@ -177,7 +196,7 @@ async function searchAchi(
   const versionReg = /^v\d+(\.\d+)?$/;
   const idReg = /^i\d+$/;
   let rawData: Array<TGApp.App.Achievement.Item>;
-  const res: Array<TGApp.App.Achievement.RenderItem> = [];
+  let res: Array<TGApp.App.Achievement.RenderItem> = [];
   if (versionReg.test(keyword)) {
     const version = keyword.replace("v", "");
     rawData = AppAchievementsData.filter((i) => i.version.includes(version));
@@ -197,9 +216,7 @@ async function searchAchi(
     else achievement = getRenderAchi(data, uid, achiFind);
     res.push(achievement);
   }
-  res.sort(
-    (a, b) => a.isCompleted.toString().localeCompare(b.isCompleted.toString()) || a.order - b.order,
-  );
+  res = sortMixAchi(res);
   return res;
 }
 

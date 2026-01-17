@@ -78,7 +78,8 @@ export async function tryCopyYae(): Promise<boolean> {
   await copyFile(srcDllPath, targetPath);
   const check2 = await exists(targetPath);
   if (!check2) {
-    showSnackbar.warn("移动 dll 失败");
+    showSnackbar.warn("移动 dll 失败，请手动移动");
+    // TODO: 跳转手动移动说明站点
     return false;
   }
   return true;
