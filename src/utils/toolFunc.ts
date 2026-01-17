@@ -190,7 +190,21 @@ export function getRandomString(length: number, type: string = "all"): string {
  * @returns 解析后的文本
  */
 export function parseHtmlText(desc: string): string {
+  const colorReg = /<color=(.*?)>(.*?)<\/color>/g;
   const linkReg = /\{LINK#(.*?)}(.*?)\{\/LINK}/g;
+  let colorMatch = colorReg.exec(desc);
+  while (colorMatch !== null) {
+    const color = colorMatch[1];
+    const text = new DOMParser().parseFromString(colorMatch[2], "text/html").body.textContent;
+    let title = text;
+    const colorLinkMatch = linkReg.exec(text);
+    if (colorLinkMatch !== null) title = colorLinkMatch[2];
+    desc = desc.replace(
+      colorMatch[0],
+      `<span title="${title}" style="color: ${color}">${text}</span>`,
+    );
+    colorMatch = colorReg.exec(desc);
+  }
   let linkMatch = linkReg.exec(desc);
   while (linkMatch !== null) {
     const link = linkMatch[1];
@@ -200,17 +214,6 @@ export function parseHtmlText(desc: string): string {
       `<t-link content="${encodeURIComponent(text)}" link="${link}"></t-link>`,
     );
     linkMatch = linkReg.exec(desc);
-  }
-  const colorReg = /<color=(.*?)>(.*?)<\/color>/g;
-  let colorMatch = colorReg.exec(desc);
-  while (colorMatch !== null) {
-    const color = colorMatch[1];
-    const text = new DOMParser().parseFromString(colorMatch[2], "text/html").body.textContent;
-    desc = desc.replace(
-      colorMatch[0],
-      `<span title="${text}" style="color: ${color}">${text}</span>`,
-    );
-    colorMatch = colorReg.exec(desc);
   }
   desc = desc.replace(/\\n/g, "<br />");
   return desc;
