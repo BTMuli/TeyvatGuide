@@ -2,15 +2,16 @@
 //! @since Beta v0.9.2
 #![cfg(target_os = "windows")]
 
-use std::path::Path;
 use std::ptr;
 use widestring::U16CString;
-use windows_sys::Win32::Foundation::{CloseHandle, FreeLibrary, HANDLE, INVALID_HANDLE_VALUE};
+use windows_sys::Win32::Foundation::{
+  CloseHandle, ERROR_BAD_LENGTH, ERROR_SUCCESS, FreeLibrary, GetLastError, HANDLE,
+  INVALID_HANDLE_VALUE, SetLastError,
+};
 use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
   CreateToolhelp32Snapshot, MODULEENTRY32W, Module32FirstW, Module32NextW, TH32CS_SNAPMODULE,
-  TH32CS_SNAPMODULE32,
 };
 use windows_sys::Win32::System::LibraryLoader::{
   DONT_RESOLVE_DLL_REFERENCES, GetModuleHandleA, GetProcAddress, LoadLibraryExW,
@@ -134,54 +135,50 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
   }
 }
 
-/// 将 UTF-16 缓冲区转成 String
-fn utf16_to_string(buf: &[u16]) -> String {
-  let nul_pos = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
-  String::from_utf16_lossy(&buf[..nul_pos])
-}
-
-/// 统一 DLL 名称：转小写并补全 .dll 后缀
-fn normalize_module_name(name: &str) -> String {
-  let lower = name.to_ascii_lowercase();
-  if lower.ends_with(".dll") { lower } else { format!("{}.dll", lower) }
+fn create_snapshot(pid: u32) -> Option<HANDLE> {
+  unsafe {
+    loop {
+      SetLastError(ERROR_SUCCESS);
+      let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
+      let error = GetLastError();
+      if error == ERROR_SUCCESS && snapshot != INVALID_HANDLE_VALUE {
+        return Some(snapshot);
+      }
+      if error != ERROR_BAD_LENGTH {
+        return None;
+      }
+    }
+  }
 }
 
 /// 枚举模块，找到 DLL 基址
 pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
   unsafe {
-    let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
-    if snapshot == INVALID_HANDLE_VALUE {
-      return None;
-    }
+    let snapshot = match create_snapshot(pid) {
+      Some(h) => h,
+      None => return None,
+    };
 
     let mut me32 =
       MODULEENTRY32W { dwSize: std::mem::size_of::<MODULEENTRY32W>() as u32, ..Default::default() };
-
-    let target_name = normalize_module_name(dll_name);
-
     if Module32FirstW(snapshot, &mut me32) != 0 {
       loop {
-        // 取文件名部分，避免路径干扰
-        let module_name = Path::new(&utf16_to_string(&me32.szModule))
-          .file_name()
-          .and_then(|s| s.to_str())
-          .unwrap_or("")
-          .to_ascii_lowercase();
-
-        if module_name == target_name {
+        let name = String::from_utf16_lossy(
+          &me32.szModule
+            [..me32.szModule.iter().position(|&c| c == 0).unwrap_or(me32.szModule.len())],
+        );
+        if name.eq_ignore_ascii_case(dll_name) {
           CloseHandle(snapshot);
           return Some(me32.modBaseAddr as usize);
         }
-
         if Module32NextW(snapshot, &mut me32) == 0 {
           break;
         }
       }
     }
-
     CloseHandle(snapshot);
+    None
   }
-  None
 }
 
 /// 执行 YaeMain
