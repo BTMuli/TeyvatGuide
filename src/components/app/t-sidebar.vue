@@ -320,7 +320,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists } from "@tauri-apps/plugin-fs";
 import mhyClient from "@utils/TGClient.js";
-import { isRunInAdmin, tryReadGameVer, YAE_GAME_VER } from "@utils/TGGame.js";
+import { isRunInAdmin, tryCopyYae, tryReadGameVer, YAE_GAME_VER } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
@@ -740,6 +740,8 @@ async function tryLaunchGame(): Promise<void> {
     }
     return;
   }
+  const tryCopy = await tryCopyYae();
+  if (!tryCopy) return;
   try {
     await invoke("call_yae_dll", {
       gamePath: gamePath,

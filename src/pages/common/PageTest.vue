@@ -19,12 +19,16 @@
   </div>
 </template>
 <script lang="ts" setup>
-import showLoading from "@comp/func/loading.js";
+import { appConfigDir, resourceDir } from "@tauri-apps/api/path";
+import { copyFile, exists } from "@tauri-apps/plugin-fs";
 
 async function test() {
-  await showLoading.start("测试");
-  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-  await showLoading.end();
+  const filePath = `${await resourceDir()}\\resources\\YaeAchievementLib.dll`;
+  console.log(filePath);
+  const check = await exists(filePath);
+  console.log(check);
+  const targetPath = `${await appConfigDir()}\\YaeAchievementLib.dll`;
+  await copyFile(filePath, targetPath);
 }
 </script>
 <style lang="css" scoped>

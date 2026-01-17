@@ -1,13 +1,13 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.9.1
+ * @since Beta v0.9.2
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { invoke } from "@tauri-apps/api/core";
-import { sep } from "@tauri-apps/api/path";
-import { exists, readTextFile, readTextFileLines } from "@tauri-apps/plugin-fs";
+import { appConfigDir, resourceDir, sep } from "@tauri-apps/api/path";
+import { copyFile, exists, readTextFile, readTextFileLines } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 
@@ -61,6 +61,30 @@ export async function isRunInAdmin(): Promise<boolean> {
 }
 
 /**
+ * 尝试移动dll
+ * @since Beta v0.9.2
+ * @returns 无返回值
+ */
+export async function tryCopyYae(): Promise<boolean> {
+  const srcDllPath = `${await resourceDir()}${sep()}resources${sep()}YaeAchievementLib.dll`;
+  console.log(srcDllPath);
+  const srcCheck = await exists(srcDllPath);
+  if (!srcCheck) {
+    showSnackbar.warn("未检测到本地 dll");
+    return false;
+  }
+  const targetPath = `${await appConfigDir()}${sep()}YaeAchievementLib.dll`;
+  console.log(targetPath);
+  await copyFile(srcDllPath, targetPath);
+  const check2 = await exists(targetPath);
+  if (!check2) {
+    showSnackbar.warn("移动 dll 失败");
+    return false;
+  }
+  return true;
+}
+
+/**
  * 尝试调用Yae
  * @since Beta v0.9.2
  * @param gameDir - 游戏目录
@@ -106,6 +130,8 @@ export async function tryCallYae(gameDir: string, uid?: string): Promise<void> {
     }
     return;
   }
+  const tryCopy = await tryCopyYae();
+  if (!tryCopy) return;
   const input = await showDialog.input("请输入存档UID", "UID:", uid);
   if (!input) {
     showSnackbar.cancel("已取消存档导入");
