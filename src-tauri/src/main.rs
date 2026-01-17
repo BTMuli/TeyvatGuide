@@ -1,5 +1,5 @@
 // 主模块，用于启动应用
-// @since Beta v0.9.1
+// @since Beta v0.9.2
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -25,7 +25,12 @@ fn main() {
     },
   ));
   #[cfg(target_os = "windows")]
-  enable_dpi_v2();
+  {
+    enable_dpi_v2();
+    unsafe {
+      std::env::set_var("RUST_BACKTRACE", "1");
+    }
+  }
   #[cfg(target_os = "linux")]
   unsafe {
     // Not unsafe if you don't use edition 2024

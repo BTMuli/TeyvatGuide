@@ -3,6 +3,8 @@
 #![cfg(target_os = "windows")]
 
 use std::ptr;
+use std::thread::sleep;
+use std::time::Duration;
 use widestring::U16CString;
 use windows_sys::Win32::Foundation::{
   CloseHandle, ERROR_BAD_LENGTH, ERROR_SUCCESS, FreeLibrary, GetLastError, HANDLE,
@@ -12,6 +14,7 @@ use windows_sys::Win32::Storage::FileSystem::PIPE_ACCESS_DUPLEX;
 use windows_sys::Win32::System::Diagnostics::Debug::WriteProcessMemory;
 use windows_sys::Win32::System::Diagnostics::ToolHelp::{
   CreateToolhelp32Snapshot, MODULEENTRY32W, Module32FirstW, Module32NextW, TH32CS_SNAPMODULE,
+  TH32CS_SNAPMODULE32,
 };
 use windows_sys::Win32::System::LibraryLoader::{
   DONT_RESOLVE_DLL_REFERENCES, GetModuleHandleA, GetProcAddress, LoadLibraryExW,
@@ -135,48 +138,76 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
   }
 }
 
-fn create_snapshot(pid: u32) -> Option<HANDLE> {
-  unsafe {
-    loop {
-      SetLastError(ERROR_SUCCESS);
-      let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
-      let error = GetLastError();
-      if error == ERROR_SUCCESS && snapshot != INVALID_HANDLE_VALUE {
-        return Some(snapshot);
-      }
-      if error != ERROR_BAD_LENGTH {
-        return None;
+struct Snapshot(HANDLE);
+impl Drop for Snapshot {
+  fn drop(&mut self) {
+    unsafe {
+      if self.0 != INVALID_HANDLE_VALUE {
+        CloseHandle(self.0);
       }
     }
   }
 }
 
-/// 枚举模块，找到 DLL 基址
+fn create_snapshot(pid: u32) -> Option<Snapshot> {
+  loop {
+    unsafe {
+      SetLastError(ERROR_SUCCESS);
+      // 加上 SNAPMODULE32 提高兼容性
+      let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
+      let error = GetLastError();
+
+      if error == ERROR_SUCCESS && snapshot != INVALID_HANDLE_VALUE {
+        return Some(Snapshot(snapshot));
+      }
+
+      // 如果不是 BAD_LENGTH，直接返回错误
+      if error != ERROR_BAD_LENGTH {
+        eprintln!("CreateToolhelp32Snapshot failed: GetLastError = {}", error);
+        return None;
+      }
+      // 如果是 ERROR_BAD_LENGTH，继续重试
+    }
+  }
+}
+
 pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
   unsafe {
     let snapshot = match create_snapshot(pid) {
-      Some(h) => h,
+      Some(s) => s,
       None => return None,
     };
 
     let mut me32 =
       MODULEENTRY32W { dwSize: std::mem::size_of::<MODULEENTRY32W>() as u32, ..Default::default() };
-    if Module32FirstW(snapshot, &mut me32) != 0 {
-      loop {
-        let name = String::from_utf16_lossy(
-          &me32.szModule
-            [..me32.szModule.iter().position(|&c| c == 0).unwrap_or(me32.szModule.len())],
-        );
-        if name.eq_ignore_ascii_case(dll_name) {
-          CloseHandle(snapshot);
-          return Some(me32.modBaseAddr as usize);
+
+    // 尝试多次枚举以应对时序问题
+    for _attempt in 0..5 {
+      if Module32FirstW(snapshot.0, &mut me32) != 0 {
+        loop {
+          let len = me32.szModule.iter().position(|&c| c == 0).unwrap_or(me32.szModule.len());
+          let name = String::from_utf16_lossy(&me32.szModule[..len]);
+          eprintln!("Enumerated module: {}", name);
+
+          // 精确文件名比较或后缀比较（大小写不敏感）
+          if name.eq_ignore_ascii_case(dll_name)
+            || name.to_lowercase().ends_with(&dll_name.to_lowercase())
+          {
+            return Some(me32.modBaseAddr as usize);
+          }
+
+          if Module32NextW(snapshot.0, &mut me32) == 0 {
+            break;
+          }
         }
-        if Module32NextW(snapshot, &mut me32) == 0 {
-          break;
-        }
+      } else {
+        let err = GetLastError();
+        eprintln!("Module32FirstW failed: GetLastError = {}", err);
       }
+      // 等待再重试
+      sleep(Duration::from_millis(100));
     }
-    CloseHandle(snapshot);
+
     None
   }
 }
