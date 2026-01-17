@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "tsx scripts/auto-build.ts",
-    "debug": "tauri build --debug",
+    "debug": "tsx scripts/auto-build.ts su --debug",
     "dev": "tsx scripts/auto-dev.ts",
     "eslint:pre": "pnpx @eslint/config-inspector@latest",
     "oxlint": "oxlint",
