@@ -197,10 +197,10 @@ async function cycleGetDataGame(): Promise<void> {
     const statusRaw: TGApp.Game.Login.StatPayloadRaw = JSON.parse(res.payload.raw);
     await showLoading.start("正在获取SToken");
     const stResp = await takumiReq.game.stoken(statusRaw);
-    await showLoading.end();
     if ("retcode" in stResp) {
       showSnackbar.error(`[${stResp.retcode}] ${stResp.message}`);
       model.value = false;
+      await showLoading.end();
       return;
     }
     const ck: TGApp.App.Account.Cookie = {
