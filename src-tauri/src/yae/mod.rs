@@ -11,7 +11,7 @@ use pt_ac::parse_achi_list;
 use pt_store::parse_store_list;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{self, Read, Write};
 use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::sync::Arc;
@@ -74,7 +74,14 @@ pub fn call_yae_dll(
   uid: String,
   ticket: Option<String>,
 ) -> Result<(), String> {
-  let dll_path = app_handle.path().resource_dir().unwrap().join("resources/YaeAchievementLib.dll");
+  let dll_local_path =
+    app_handle.path().resource_dir().unwrap().join("resources/YaeAchievementLib.dll");
+  let dll_path = app_handle.path().app_config_dir().unwrap().join("YaeAchievementLib.dll");
+  // -1. 移动 dll 到应用目录以解决权限问题
+  match fs::copy(&dll_local_path, &dll_path) {
+    Ok(_) => println!("✅ DLL 已成功复制到 {:?}", dll_path),
+    Err(e) => eprintln!("❌ 复制 DLL 失败: {:?}", e),
+  }
   dbg!(&dll_path);
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
   dbg!("开始启动 YaeAchievementPipe 命名管道");

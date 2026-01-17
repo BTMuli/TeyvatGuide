@@ -187,7 +187,6 @@ pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
         loop {
           let len = me32.szModule.iter().position(|&c| c == 0).unwrap_or(me32.szModule.len());
           let name = String::from_utf16_lossy(&me32.szModule[..len]);
-          eprintln!("Enumerated module: {}", name);
 
           // 精确文件名比较或后缀比较（大小写不敏感）
           if name.eq_ignore_ascii_case(dll_name)

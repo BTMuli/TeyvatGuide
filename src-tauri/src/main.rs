@@ -25,12 +25,7 @@ fn main() {
     },
   ));
   #[cfg(target_os = "windows")]
-  {
-    enable_dpi_v2();
-    unsafe {
-      std::env::set_var("RUST_BACKTRACE", "1");
-    }
-  }
+  enable_dpi_v2();
   #[cfg(target_os = "linux")]
   unsafe {
     // Not unsafe if you don't use edition 2024
