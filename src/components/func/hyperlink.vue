@@ -3,8 +3,8 @@
   <transition name="func-hyperlink">
     <div v-show="show || showOuter" class="hyperlink-overlay" @click.self.prevent="handleOuter">
       <transition name="func-hyperlink-inner">
-        <div v-show="showInner" class="hyperlink-box">
-          <div class="hyperlink-title">{{ data.name }}</div>
+        <div v-show="showInner" ref="hyperlinkRef" class="hyperlink-box">
+          <div class="hyperlink-title" @click="shareHyperLink()">{{ data.name }}</div>
           <div class="hyperlink-desc">
             <span v-html="parseHtmlText(data.desc)" />
           </div>
@@ -15,8 +15,10 @@
   </transition>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import type { HyperLinkParams } from "./hyperlink.js";
 
@@ -26,6 +28,7 @@ const showInner = ref<boolean>(false);
 
 const props = defineProps<HyperLinkParams>();
 const data = shallowRef<HyperLinkParams>(props);
+const hyperLinkEl = useTemplateRef<HTMLDivElement>("hyperlinkRef");
 
 watch(
   () => show.value,
@@ -52,6 +55,15 @@ function handleOuter(): void {
 async function displayBox(params: HyperLinkParams): Promise<void> {
   data.value = params;
   show.value = true;
+}
+
+async function shareHyperLink(): Promise<void> {
+  if (!hyperLinkEl.value) {
+    showSnackbar.warn("未捕获到 HyperLinkBox");
+    return;
+  }
+  const fileName = `Hyperlink_${props.id}_${props.name}`;
+  await generateShareImg(fileName, hyperLinkEl.value);
 }
 
 defineExpose({ displayBox });
@@ -111,21 +123,23 @@ defineExpose({ displayBox });
   position: relative;
   display: flex;
   width: 520px;
-  height: 240px;
+  max-height: 800px;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 10px 10px 16px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--app-page-bg);
   box-shadow: 0 0 10px var(--common-shadow-t-1);
   color: var(--app-page-content);
+  row-gap: 8px;
 }
 
 .hyperlink-title {
   position: relative;
   color: var(--common-text-title);
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
 }
