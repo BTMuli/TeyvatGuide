@@ -3,8 +3,10 @@
   <v-app-bar>
     <template #prepend>
       <div class="ucp-top-prepend">
-        <img alt="icon" src="/source/UI/userChallenge.webp" />
-        <span>幽境危战</span>
+        <div class="ucp-top-title">
+          <img alt="icon" src="/source/UI/userChallenge.webp" />
+          <span>幽境危战</span>
+        </div>
         <v-select
           v-model="uidCur"
           :hide-details="true"
@@ -417,19 +419,21 @@ async function tryReadChallenge(): Promise<void> {
   justify-content: center;
   margin-left: 12px;
   column-gap: 8px;
+}
+
+.ucp-top-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--common-text-title);
+  column-gap: 8px;
+  font-family: var(--font-title);
+  font-size: 20px;
 
   img {
     width: 32px;
     height: 32px;
-  }
-
-  span {
-    font-family: var(--font-title);
-    font-size: 20px;
-  }
-
-  span :first-child {
-    color: var(--common-text-title);
   }
 }
 

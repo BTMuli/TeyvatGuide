@@ -489,7 +489,6 @@ async function refreshAvatars(
 .ua-btn {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-  font-family: var(--font-title);
 
   img {
     width: 24px;
