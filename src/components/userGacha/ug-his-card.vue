@@ -319,9 +319,9 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   align-items: center;
   justify-content: flex-start;
   color: var(--common-text-title);
-  gap: 4px;
   font-family: var(--font-title);
   font-size: 20px;
+  gap: 4px;
 }
 
 .ug-hisci-tag {

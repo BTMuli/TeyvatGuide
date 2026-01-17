@@ -144,11 +144,11 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
 .ww-list {
   position: relative;
   display: grid;
+  overflow: hidden auto;
   width: 100%;
   padding-right: 8px;
   gap: 8px;
   grid-template-columns: repeat(3, 160px);
-  overflow: hidden auto;
 }
 
 .ww-detail {

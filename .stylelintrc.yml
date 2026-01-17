@@ -37,7 +37,7 @@ rules:
   prettier/prettier: true
   property-no-vendor-prefix:
     - true
-    - ignoreProperties: [backdrop-filter]
+    - ignoreProperties: [-webkit-backdrop-filter]
   rule-empty-line-before:
     - always
     - except: ["first-nested"]

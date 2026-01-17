@@ -115,7 +115,7 @@ defineExpose({ displayBox });
   height: 100%;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
