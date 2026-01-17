@@ -65,6 +65,8 @@ const useAppStore = defineStore(
     const cancelLike = ref<boolean>(true);
     /** 关闭窗口时最小化到托盘 */
     const closeToTray = ref<boolean>(false);
+    /** 展示反馈按钮 */
+    const showFeedback = ref<boolean>(true);
 
     /**
      * 初始化应用状态
@@ -88,6 +90,7 @@ const useAppStore = defineStore(
       postViewWide.value = true;
       cancelLike.value = true;
       closeToTray.value = false;
+      showFeedback.value = true;
       initDevice();
     }
 
@@ -145,6 +148,7 @@ const useAppStore = defineStore(
       postViewWide,
       cancelLike,
       closeToTray,
+      showFeedback,
       init,
       changeTheme,
       getImageUrl,
@@ -173,6 +177,7 @@ const useAppStore = defineStore(
           "postViewWide",
           "cancelLike",
           "closeToTray",
+          "showFeedback",
         ],
       },
       {

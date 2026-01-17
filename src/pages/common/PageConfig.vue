@@ -26,7 +26,7 @@
             </div>
           </template>
         </v-list-item>
-        <v-list-item @click="confirmUpdateDevice()" title="刷新设备信息">
+        <v-list-item title="刷新设备信息" @click="confirmUpdateDevice()">
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-refresh</v-icon>
@@ -130,6 +130,22 @@
               class="config-switch"
               color="#FAC51E"
               @click="switchIncognito"
+            />
+          </template>
+        </v-list-item>
+        <v-list-item subtitle="右下反馈按钮显隐，页面刷新后生效" title="用户反馈">
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-lightbulb-on-outline</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-switch
+              v-model="appStore.showFeedback"
+              :inset="true"
+              :label="appStore.showFeedback ? '开启' : '关闭'"
+              class="config-switch"
+              color="#FAC51E"
             />
           </template>
         </v-list-item>
