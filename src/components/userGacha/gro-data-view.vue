@@ -93,6 +93,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import gameEnum from "@enum/game.js";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
@@ -248,9 +249,14 @@ function checkIsUp(item: TGApp.Sqlite.Gacha.Gacha): boolean | undefined {
   if (item.gachaType === "100" || item.gachaType === "200") return undefined;
   const itemTime = new Date(item.time).getTime();
   const itemIdNum = Number(item.itemId);
+  const strictPool: Array<string> = [gameEnum.gachaType.WeaponUp, gameEnum.gachaType.MixUp];
+  const avatarUpPool: Array<string> = [gameEnum.gachaType.AvatarUp, gameEnum.gachaType.AvatarUp2];
   const poolsFind = AppGachaData.filter((pool) => {
-    // 对于武器池，严格要求 gachaType 对应，角色池放宽以修复特殊情况下的异常
-    if (pool.type.toLocaleString() !== item.gachaType && item.gachaType === "302") return false;
+    // 对于武器池&集录池，严格要求 gachaType 对应，角色池放宽以修复特殊情况下的异常
+    if (pool.type.toString() !== item.gachaType) {
+      if (strictPool.includes(item.gachaType.toString())) return false;
+      if (!avatarUpPool.includes(pool.type.toString())) return false;
+    }
     const startTime = new Date(pool.from).getTime();
     const endTime = new Date(pool.to).getTime();
     return itemTime >= startTime && itemTime <= endTime;
