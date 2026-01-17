@@ -197,7 +197,7 @@ export function parseHtmlText(desc: string): string {
     const color = colorMatch[1];
     const text = new DOMParser().parseFromString(colorMatch[2], "text/html").body.textContent;
     let title = text;
-    const colorLinkMatch = linkReg.exec(text);
+    const colorLinkMatch = text.match(linkReg);
     if (colorLinkMatch !== null) title = colorLinkMatch[2];
     desc = desc.replace(
       colorMatch[0],
