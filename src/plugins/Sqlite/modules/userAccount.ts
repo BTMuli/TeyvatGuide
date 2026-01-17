@@ -1,8 +1,12 @@
 /**
  * 用户账户模块
- * @since Beta v0.9.0
+ * @since Beta v0.9.2
  */
 
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import bbsReq from "@req/bbsReq.js";
+import passportReq from "@req/passportReq.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import TGLogger from "@utils/TGLogger.js";
@@ -134,6 +138,72 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
   const db = await TGSqlite.getDB();
   const sql = getInsertAccountSql(data);
   await db.execute(sql);
+}
+
+/**
+ * 检测并更新
+ * @since Beta v0.9.2
+ * @returns 无返回值
+ */
+async function updateAllAccountCk(): Promise<void> {
+  const accounts = await getAllAccount();
+  const checkTime = 5 * 24 * 3600 * 1000;
+  for (const account of accounts) {
+    const diffTime = Date.now() - new Date(account.updated).getTime();
+    if (diffTime > checkTime) {
+      const update = await updateAccountCk(account);
+      if (update) {
+        showSnackbar.success(`成功更新${account.uid}的Cookie`);
+      }
+    }
+  }
+}
+
+/**
+ * 更新用户Cookie
+ * @since Beta v0.9.2
+ * @param data - 用户信息
+ * @returns 是否更新成功
+ */
+async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
+  await showLoading.start("正在更新用户Cookie", `UID:${data.uid}，上次更新:${data.updated}`);
+  const ck = data.cookie;
+  await showLoading.update("正在获取 LToken");
+  const ltokenRes = await passportReq.lToken.get(ck);
+  if (typeof ltokenRes !== "string") {
+    await showLoading.end();
+    showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
+    await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+    return false;
+  }
+  ck.ltoken = ltokenRes;
+  await showLoading.update("正在获取 CookieToken");
+  const cookieTokenRes = await passportReq.cookieToken(ck);
+  if (typeof cookieTokenRes !== "string") {
+    await showLoading.end();
+    showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
+    await TGLogger.Error(
+      `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
+    );
+    return false;
+  }
+  ck.cookie_token = cookieTokenRes;
+  await showLoading.update("正在获取用户信息");
+  const briefRes = await bbsReq.userInfo(ck);
+  if ("retcode" in briefRes) {
+    await showLoading.end();
+    showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
+    await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+    return false;
+  }
+  const updated = timestampToDate(new Date().getTime());
+  await showLoading.update("正在写入数据库");
+  const db = await TGSqlite.getDB();
+  await db.execute(
+    "UPDATE UserAccount SET cookie = '?' AND brief = '?' AND updated = '?' WHERE uid = '?';",
+    [JSON.stringify(ck), JSON.stringify(briefRes), updated, data.uid],
+  );
+  return true;
 }
 
 /**
@@ -311,6 +381,7 @@ const TSUserAccount = {
     getAllAccount,
     getAccount: getUserAccount,
     saveAccount,
+    updateCk: updateAllAccountCk,
     copy: copyCookie,
     deleteAccount,
     backup: backUpAccount,

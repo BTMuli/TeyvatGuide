@@ -34,7 +34,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
 import { getWindowSize, resizeWindow } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onBeforeMount, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -53,18 +53,18 @@ let closeListener: UnlistenFn | null = null;
 let textScaleListener: UnlistenFn | null = null;
 let yaeFlag: Array<string> = [];
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const win = getCurrentWindow();
   isMain.value = win.label === "TeyvatGuide";
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
     await listenOnInit();
-    await core.invoke("init_app");
     dpListener = await event.listen<string>("active_deep_link", handleDpListen);
     yaeListener = await event.listen<TGApp.Plugins.Yae.RsEvent>("yae_read", handleYaeListen);
     closeListener = await event.listen("main-window-close-requested", handleWindowClose);
     await nextTick();
+    await core.invoke("init_app");
   }
   if (needResize.value !== "false") await resizeWindow();
   document.documentElement.className = theme.value;
@@ -317,6 +317,8 @@ async function checkUserLoad(): Promise<void> {
     isLogin.value = false;
     return;
   }
+  // 检测ck刷新
+  await TSUserAccount.account.updateCk();
   if (!isLogin.value) isLogin.value = true;
   // 然后获取最近的UID
   if (uid.value === undefined || !uidDB.includes(uid.value)) {
