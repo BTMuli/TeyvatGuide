@@ -47,9 +47,9 @@ jobs:
         run: ssh -T git@github.com || true
       - name: Load env.production
         id: env
+        if: matrix.settings.target == 'windows'
         run: |
-          VITE_SENTRY_RELEASE=$(awk -F= '/^VITE_SENTRY_RELEASE=/ {print $2}' .env.production)
-          echo "VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE" >> $GITHUB_ENV
+          $VITE_SENTRY_RELEASE = Get-Content .env.production | Where-Object { $_ -match '^VITE_SENTRY_RELEASE=' } | ForEach-Object { ($_ -split '=')[1] }
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
       - name: Rust cache
