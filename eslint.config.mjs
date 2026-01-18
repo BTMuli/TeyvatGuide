@@ -1,6 +1,6 @@
 /**
- * ESLint配置文件
- * @since 2025-05-29
+ * ESLint 配置文件
+ * @since Beta v0.9.3
  */
 import eslintPluginJsonc from "eslint-plugin-jsonc";
 import eslintPluginJs from "@eslint/js";
@@ -18,7 +18,7 @@ export default [
   ...eslintPluginVue.configs["flat/essential"],
   ...eslintConfigJson,
   ...eslintConfigVue,
-  eslintConfigYml,
+  ...eslintConfigYml,
   {
     ignores: [
       "dist",
