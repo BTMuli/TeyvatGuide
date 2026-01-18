@@ -27,10 +27,11 @@
       <v-btn icon="mdi-login" title="登录胡桃云" variant="outlined" @click="tryLogin()" />
       <v-btn
         :disabled="!userName"
+        :loading="loadInfo"
         icon="mdi-refresh"
         title="刷新用户信息"
         variant="outlined"
-        @click="hutaoStore.tryRefreshInfo()"
+        @click="refreshInfo()"
       />
       <v-btn icon="mdi-lock-reset" title="重置密码" variant="outlined" @click="showVerify = true" />
       <v-btn icon="mdi-cart" title="胡桃云祈愿记录服务" variant="outlined" @click="toDonate()" />
@@ -51,6 +52,7 @@ const hutaoStore = useHutaoStore();
 const { userName, userInfo, isLogin } = storeToRefs(useHutaoStore());
 
 const showVerify = ref<boolean>(false);
+const loadInfo = ref<boolean>(false);
 
 function getAccountDesc(): string {
   if (!isLogin.value) return "未登录";
@@ -60,6 +62,12 @@ function getAccountDesc(): string {
     return "普通用户";
   }
   return "未知";
+}
+
+async function refreshInfo(): Promise<void> {
+  loadInfo.value = true;
+  await hutaoStore.tryRefreshInfo();
+  loadInfo.value = false;
 }
 
 async function tryLogin(): Promise<void> {

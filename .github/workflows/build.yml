@@ -103,6 +103,7 @@ jobs:
 
       - name: Upload Sentry Pdb
         if: matrix.settings.target == 'windows'
+        # TODO：调整 script
         run: |
           echo "Uploading release: $SENTRY_RELEASE"
           sentry-cli releases new "$SENTRY_RELEASE"
