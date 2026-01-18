@@ -2,12 +2,32 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2026-01-14
+Update: 2026-01-18
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2026-01-14 00:08:50`
+> 更新于 `2026-01-18 20:35:21`
+
+## [0.9.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.2) (2025-01-18)
+
+- 🍱 增加旅行者衣装相关资源
+- ✨ WIKI新增 `{LINK#xx}{/LINK}` 数据支持 [`#156`](https://github.com/BTMuli/TeyvatGuide/issues/156)
+- ✨ 自动更新 Cookie [`#197`](https://github.com/BTMuli/TeyvatGuide/issues/197)
+- 🐛 修复祈愿页面检测数据更新异常
+- 🐛 修复特定情况下生成剧诗分享图时应用白屏
+- 🐛 修复首页活动奖励点击异常
+- 🐛 上传深渊记录时更新角色列表，以修复 `511001` 异常
+- 🐛 调整五星 UP 判断逻辑，修复特定数据 UP 判断异常
+- 🐛 修复微软应用商店版本材料&成就导入异常 [`#206`](https://github.com/BTMuli/TeyvatGuide/issues/206)
+- 🚸 `loading` 组件随机加载图标
+- 🚸 隐藏完成成就支持隐藏成就系列 [`#205`](https://github.com/BTMuli/TeyvatGuide/issues/205)
+- 🚸 调整首页部分图片缓存策略
+- 🚸 调整成就排序&搜索逻辑
+- 🚸 添加用户反馈显示控制入口
+- 🥅 修复文本放缩比读取异常，注册表不存在时返回 1.0
+- ♻️ 祈愿页面导入功能合并，仅显示一个导入按钮
+- 💄 深渊支持单楼层分享，剧诗支持单幕分享
 
 ## [0.9.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.1) (2025-01-14)
 
