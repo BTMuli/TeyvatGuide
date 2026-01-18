@@ -460,7 +460,7 @@
   },
   {
     "id": 10000125,
-    "contentId": 0,
+    "contentId": 507505,
     "dropDays": [1, 4, 7],
     "name": "哥伦比娅",
     "itemType": "character",
@@ -2719,7 +2719,7 @@
   },
   {
     "id": 14522,
-    "contentId": 0,
+    "contentId": 507623,
     "dropDays": [3, 6, 7],
     "name": "帷间夜曲",
     "itemType": "weapon",
