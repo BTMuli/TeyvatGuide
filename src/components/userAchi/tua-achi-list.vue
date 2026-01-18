@@ -91,11 +91,11 @@ async function searchAchi(): Promise<void> {
     emits("update:isSearch", false);
     return;
   }
-  nameCard.value = undefined;
-  ncData.value = undefined;
   const searchRes = await TSUserAchi.searchAchi(props.uid, props.search);
   if (showOverlay.value) showOverlay.value = false;
   if (searchRes.length > 0) {
+    nameCard.value = undefined;
+    ncData.value = undefined;
     achievements.value = searchRes;
     showSnackbar.success(`成功获取${achievements.value.length}条成就`);
     emits("update:series", -1);
