@@ -7,7 +7,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { invoke } from "@tauri-apps/api/core";
 import { documentDir, resourceDir, sep } from "@tauri-apps/api/path";
-import { copyFile, exists, readTextFile, readTextFileLines } from "@tauri-apps/plugin-fs";
+import { copyFile, exists, mkdir, readTextFile, readTextFileLines } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 
@@ -72,7 +72,9 @@ export async function tryCopyYae(): Promise<boolean> {
     showSnackbar.warn("未检测到本地 dll");
     return false;
   }
-  const targetPath = `${await documentDir()}${sep()}TeyvatGuide${sep()}YaeAchievementLib.dll`;
+  const targetDir = `${await documentDir()}${sep()}TeyvatGuide`;
+  await mkdir(targetDir, { recursive: true });
+  const targetPath = `${targetDir}${sep()}YaeAchievementLib.dll`;
   console.log(targetPath);
   await copyFile(srcDllPath, targetPath);
   const check2 = await exists(targetPath);
