@@ -10,7 +10,9 @@
           <TibWikiAbyss
             v-for="(item, index) in selectItem.Ranks"
             :key="index"
-            :model-value="item"
+            :cur="item.cur.Rate"
+            :last="item.last.Rate"
+            :role="item.cur.Item"
           />
         </div>
         <div v-if="selectItem.Ranks.length === 0">暂无数据</div>
@@ -47,7 +49,7 @@ onMounted(async () => {
   select.value = tmpData;
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .hta-tu-box {
   display: flex;
   height: 100%;

@@ -107,4 +107,13 @@ onMounted(async () => {
   border-radius: 5px;
   background: var(--box-bg-1);
 }
+
+/* stylelint-disable selector-class-pattern */
+
+:deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
+  border-top: 1px solid var(--common-shadow-1);
+  margin-top: 8px;
+}
+
+/* stylelint-enable selector-class-pattern */
 </style>

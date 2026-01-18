@@ -56,22 +56,24 @@ function getBoxData(id: number): TItemBoxData {
   };
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .hta-tl-box {
   position: relative;
   display: flex;
   width: calc(100% - 20px);
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
-  border-radius: 5px;
-  margin: 10px;
-  background: var(--box-bg-2);
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .hta-tl-item {
   display: grid;
-  column-gap: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  background: var(--box-bg-2);
+  column-gap: 8px;
   grid-template-columns: repeat(4, 1fr);
 }
 

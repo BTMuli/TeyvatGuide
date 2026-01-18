@@ -1,4 +1,4 @@
-<!-- 胡桃云统计数据 TODO: 角色持有优化&旅行者处理 -->
+<!-- 胡桃云统计数据 -->
 <template>
   <v-app-bar>
     <template #prepend>

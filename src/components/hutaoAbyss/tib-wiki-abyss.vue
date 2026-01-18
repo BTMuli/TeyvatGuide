@@ -1,14 +1,16 @@
+<!-- 单角色使用率/上场率 -->
 <template>
   <div class="twa-container">
     <TItemBox :model-value="box" />
-    <div class="twa-diff">
+    <div class="twa-info">
       <span>{{ avatar?.name ?? "旅行者" }}</span>
-      <span>{{ `${(props.modelValue.cur.Rate * 100).toFixed(3)}%` }}</span>
+      <span>{{ `${(props.cur * 100).toFixed(3)}%` }}</span>
       <span
         :class="{
-          up: props.modelValue.cur.Rate > props.modelValue.last.Rate,
-          down: props.modelValue.cur.Rate < props.modelValue.last.Rate,
+          up: props.cur > props.last,
+          down: props.cur < props.last,
         }"
+        :title="`${(props.last * 100).toFixed(3)}%`"
       >
         {{ getDiffStr() }}
       </span>
@@ -20,9 +22,15 @@ import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { computed, onMounted, shallowRef } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
-import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
 
-type TibWikiAbyssProps = { modelValue: AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate> };
+type TibWikiAbyssProps = {
+  /** 角色ID */
+  role: number;
+  /** 当前数据 */
+  cur: number;
+  /** 上一期数据 */
+  last: number;
+};
 
 const props = defineProps<TibWikiAbyssProps>();
 const avatar = shallowRef<TGApp.App.Character.WikiBriefInfo>();
@@ -46,30 +54,29 @@ const box = computed<TItemBoxData>(() => ({
 }));
 
 onMounted(() => {
-  if ([10000005, 10000007].includes(props.modelValue.cur.Item)) {
+  if ([10000005, 10000007].includes(props.role)) {
     avatar.value = {
       area: "",
       birthday: [0, 0],
       contentId: 0,
       costumes: [],
       element: "",
-      id: props.modelValue.cur.Item,
-      name: props.modelValue.cur.Item === 10000005 ? "空" : "荧",
+      id: props.role,
+      name: props.role === 10000005 ? "空" : "荧",
       nameCard: "",
       release: "",
       star: 5,
       title: "",
       weapon: "单手剑",
     };
-  } else avatar.value = AppCharacterData.find((a) => a.id === props.modelValue.cur.Item);
+  } else avatar.value = AppCharacterData.find((a) => a.id === props.role);
 });
 
 function getDiffStr(): string {
-  if (props.modelValue.cur.Rate === props.modelValue.last.Rate) return "";
-  if (props.modelValue.last.Rate > props.modelValue.cur.Rate) {
-    return `↓${((props.modelValue.last.Rate - props.modelValue.cur.Rate) * 100).toFixed(3)}%`;
-  }
-  return `↑${((props.modelValue.cur.Rate - props.modelValue.last.Rate) * 100).toFixed(3)}%`;
+  const diff = (Math.abs(props.cur - props.last) * 100).toFixed(3);
+  if (props.cur === props.last) return `-${diff}%`;
+  if (props.last > props.cur) return `↓${diff}%`;
+  return `↑${diff}%`;
 }
 </script>
 <style lang="css" scoped>
@@ -84,12 +91,12 @@ function getDiffStr(): string {
   column-gap: 5px;
 }
 
-.twa-diff {
+.twa-info {
   display: flex;
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   color: var(--box-text-4);
   font-size: 12px;
 
@@ -97,15 +104,18 @@ function getDiffStr(): string {
     font-family: var(--font-title);
     font-size: 15px;
   }
-}
 
-.twa-diff .up {
-  color: var(--tgc-od-red);
-  font-family: var(--font-title);
-}
+  :last-child {
+    color: var(--tgc-od-blue);
+    font-family: var(--font-title);
 
-.twa-diff .down {
-  color: var(--tgc-od-green);
-  font-family: var(--font-title);
+    &.up {
+      color: var(--tgc-od-red);
+    }
+
+    &.down {
+      color: var(--tgc-od-green);
+    }
+  }
 }
 </style>
