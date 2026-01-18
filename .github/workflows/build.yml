@@ -50,6 +50,7 @@ jobs:
         if: matrix.settings.target == 'windows'
         run: |
           $VITE_SENTRY_RELEASE = Get-Content .env.production | Where-Object { $_ -match '^VITE_SENTRY_RELEASE=' } | ForEach-Object { ($_ -split '=')[1] }
+          "VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE" >> $env:GITHUB_OUTPUT
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
       - name: Rust cache
