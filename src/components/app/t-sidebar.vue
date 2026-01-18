@@ -740,13 +740,17 @@ async function tryLaunchGame(): Promise<void> {
     }
     return;
   }
-  const tryCopy = await tryCopyYae();
-  if (!tryCopy) return;
+  const isMsix = await invoke<boolean>("is_msix");
+  if (isMsix) {
+    const copy = await tryCopyYae();
+    if (!copy) return;
+  }
   try {
     await invoke("call_yae_dll", {
       gamePath: gamePath,
       uid: account.value.gameUid,
       ticket: resp,
+      is_msix: isMsix,
     });
   } catch (err) {
     showSnackbar.error(`调用Yae DLL失败: ${err}`);

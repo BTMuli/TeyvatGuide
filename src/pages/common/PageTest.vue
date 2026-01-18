@@ -19,10 +19,12 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { invoke } from "@tauri-apps/api/core";
 import { appConfigDir, resourceDir } from "@tauri-apps/api/path";
 import { copyFile, exists } from "@tauri-apps/plugin-fs";
 
 async function test() {
+  await invoke("is_msix");
   const filePath = `${await resourceDir()}\\resources\\YaeAchievementLib.dll`;
   console.log(filePath);
   const check = await exists(filePath);

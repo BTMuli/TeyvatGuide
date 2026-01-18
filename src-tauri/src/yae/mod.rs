@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.9.1
+//! @since Beta v0.9.2
 #![cfg(target_os = "windows")]
 
 pub mod inject;
@@ -11,7 +11,7 @@ use pt_ac::parse_achi_list;
 use pt_store::parse_store_list;
 use serde_json::Value;
 use std::collections::HashMap;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::{self, Read, Write};
 use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::sync::Arc;
@@ -73,8 +73,12 @@ pub fn call_yae_dll(
   game_path: String,
   uid: String,
   ticket: Option<String>,
+  is_msix: bool,
 ) -> Result<(), String> {
-  let dll_path = app_handle.path().app_config_dir().unwrap().join("YaeAchievementLib.dll");
+  let mut dll_path = app_handle.path().app_config_dir().unwrap().join("YaeAchievementLib.dll");
+  if (is_msix) {
+    dll_path = app_handle.path().document_dir().unwrap().join("TeyvatGuide\\YaeAchievementLib.dll");
+  }
   dbg!(&dll_path);
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
   dbg!("开始启动 YaeAchievementPipe 命名管道");

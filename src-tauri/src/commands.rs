@@ -186,3 +186,35 @@ pub fn launch_game(path: String, ticket: String) -> Result<(), String> {
     Err("This command is only supported on Windows".into())
   }
 }
+
+#[tauri::command]
+pub fn is_msix() -> bool {
+  #[cfg(not(windows))]
+  {
+    false
+  }
+  #[cfg(windows)]
+  {
+    use std::ptr;
+    use widestring::U16CStr;
+    use windows_sys::Win32::Foundation::ERROR_INSUFFICIENT_BUFFER;
+    use windows_sys::Win32::Storage::Packaging::Appx::GetCurrentPackageFullName;
+    unsafe {
+      let mut length: u32 = 0;
+      let result = GetCurrentPackageFullName(&mut length, ptr::null_mut());
+      if result != ERROR_INSUFFICIENT_BUFFER {
+        println!("Not running in MSIX package. Error code: {}", result);
+        return false;
+      }
+      let mut buffer = vec![0u16; length as usize];
+      let result = GetCurrentPackageFullName(&mut length, buffer.as_mut_ptr());
+      if result != 0 {
+        println!("Failed to retrieve package full name. Error code: {}", result);
+        return false;
+      }
+      let pkg_name = U16CStr::from_ptr_str(buffer.as_ptr());
+      println!("MSIX Package Full Name: {}", pkg_name.to_string_lossy());
+      true
+    }
+  }
+}
