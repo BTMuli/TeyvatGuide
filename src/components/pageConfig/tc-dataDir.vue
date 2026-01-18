@@ -146,7 +146,7 @@ async function confirmCGD(): Promise<void> {
   const oriEmpty = gameDir.value === "未设置";
   const editCheck = await showDialog.check(
     oriEmpty ? "确认设置游戏目录？" : "确认修改游戏目录？",
-    oriEmpty ? "请选择启动器所在目录" : `当前：${gameDir.value}`,
+    oriEmpty ? "请选择 Yuanshen.exe 所在目录" : `当前：${gameDir.value}`,
   );
   if (!editCheck) {
     showSnackbar.cancel(oriEmpty ? "已取消设置" : "已取消修改");

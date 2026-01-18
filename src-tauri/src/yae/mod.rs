@@ -76,7 +76,7 @@ pub fn call_yae_dll(
   is_msix: bool,
 ) -> Result<(), String> {
   let mut dll_path = app_handle.path().app_config_dir().unwrap().join("YaeAchievementLib.dll");
-  if (is_msix) {
+  if is_msix {
     dll_path = app_handle.path().document_dir().unwrap().join("TeyvatGuide\\YaeAchievementLib.dll");
   }
   dbg!(&dll_path);
