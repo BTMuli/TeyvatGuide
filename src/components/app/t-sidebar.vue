@@ -750,7 +750,7 @@ async function tryLaunchGame(): Promise<void> {
       gamePath: gamePath,
       uid: account.value.gameUid,
       ticket: resp,
-      is_msix: isMsix,
+      isMsix: isMsix,
     });
   } catch (err) {
     showSnackbar.error(`调用Yae DLL失败: ${err}`);

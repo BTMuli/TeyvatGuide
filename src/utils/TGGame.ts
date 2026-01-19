@@ -143,7 +143,7 @@ export async function tryCallYae(gameDir: string, uid?: string): Promise<void> {
     return;
   }
   try {
-    await invoke("call_yae_dll", { gamePath: gamePath, uid: input, is_msix: isMsix });
+    await invoke("call_yae_dll", { gamePath: gamePath, uid: input, isMsix: isMsix });
   } catch (err) {
     showSnackbar.error(`调用Yae DLL失败: ${err}`);
   }
