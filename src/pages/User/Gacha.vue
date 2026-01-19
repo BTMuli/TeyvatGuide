@@ -720,7 +720,8 @@ async function checkData(): Promise<void> {
         await showLoading.update(`尝试获取Hakushi数据`);
         await loadHakushi();
       }
-      const find2 = hakushiData.value.find((i) => i.name === data.name && i.type === data.type);
+      // TODO: 如果有名字重复的需要注意
+      const find2 = hakushiData.value.find((i) => i.name === data.name);
       if (find2) {
         await showLoading.update(`${data.name} -> ${find2.id}`);
         await TSUserGacha.update.itemId(data, find2.id);

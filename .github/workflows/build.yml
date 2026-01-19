@@ -107,7 +107,7 @@ jobs:
         run: |
           echo "Uploading release: $SENTRY_RELEASE"
           sentry-cli releases new "$SENTRY_RELEASE"
-          sentry-cli upload-dif src-tauri/target/release/TeyvatGuide.pdb
+          sentry-cli debug-files upload --include-sources src-tauri/src src-tauri/target/release/TeyvatGuide.pdb
           sentry-cli releases finalize "$SENTRY_RELEASE"
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

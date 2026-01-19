@@ -2,12 +2,17 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2026-01-18
+Update: 2026-01-19
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2026-01-18 20:35:21`
+> 更新于 `2026-01-19 12:43:24`
+
+## [0.9.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.3) (2025-01-19)
+
+- 🐛 修复导入调用参数异常
+- 🚸 设置页胡桃云用户信息刷新防抖处理
 
 ## [0.9.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.2) (2025-01-18)
 

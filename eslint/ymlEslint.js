@@ -6,7 +6,6 @@ import pluginYml from "eslint-plugin-yml";
 import * as ymlParser from "yaml-eslint-parser";
 
 const eslintConfigYml = [
-  ...pluginYml.configs.recommended,
   {
     files: ["**/*.yml", "**/*.yaml"],
     plugins: { yml: pluginYml },
