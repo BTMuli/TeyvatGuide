@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.9.2
+ * @since Beta v0.9.4
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -62,20 +62,16 @@ export async function isRunInAdmin(): Promise<boolean> {
 
 /**
  * 尝试移动dll
- * @since Beta v0.9.2
- * @returns 无返回值
+ * @since Beta v0.9.4
+ * @returns 是否存在 YaeAchievementLib.dll
  */
 export async function tryCopyYae(): Promise<boolean> {
-  const srcDllPath = `${await resourceDir()}${sep()}resources${sep()}YaeAchievementLib.dll`;
-  const srcCheck = await exists(srcDllPath);
-  if (!srcCheck) {
-    showSnackbar.warn("未检测到本地 dll");
-    return false;
-  }
   const targetDir = `${await documentDir()}${sep()}TeyvatGuide`;
-  await mkdir(targetDir, { recursive: true });
   const targetPath = `${targetDir}${sep()}YaeAchievementLib.dll`;
-  console.log(targetPath);
+  const check = await exists(targetPath);
+  if (check) return true;
+  await mkdir(targetDir, { recursive: true });
+  const srcDllPath = `${await resourceDir()}${sep()}resources${sep()}YaeAchievementLib.dll`;
   await copyFile(srcDllPath, targetPath);
   const check2 = await exists(targetPath);
   if (!check2) {
