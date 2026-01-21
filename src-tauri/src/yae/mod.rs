@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.9.2
+//! @since Beta v0.9.4
 #![cfg(target_os = "windows")]
 
 pub mod inject;
@@ -75,11 +75,19 @@ pub fn call_yae_dll(
   ticket: Option<String>,
   is_msix: bool,
 ) -> Result<(), String> {
-  let mut dll_path = app_handle.path().app_config_dir().unwrap().join("YaeAchievementLib.dll");
+  let mut dll_path =
+    app_handle.path().resource_dir().unwrap().join("resources\\YaeAchievementLib.dll");
   if is_msix {
     dll_path = app_handle.path().document_dir().unwrap().join("TeyvatGuide\\YaeAchievementLib.dll");
   }
-  dbg!(&dll_path);
+  log::info!("Resolved DLL path: {}", dll_path.display());
+
+  // 检测 dll 存在
+  if !dll_path.exists() {
+    let msg = format!("未检测到 DLL，路径: {}", dll_path.display());
+    return Err(msg);
+  }
+
   // 0. 创建 YaeAchievementPipe 的 命名管道，获取句柄
   dbg!("开始启动 YaeAchievementPipe 命名管道");
   let _pipe_handle = create_named_pipe("YaeAchievementPipe");

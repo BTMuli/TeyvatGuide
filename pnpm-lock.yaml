@@ -14,6 +14,9 @@ importers:
       '@mdi/font':
         specifier: 7.4.47
         version: 7.4.47
+      '@sentry/core':
+        specifier: ^10.35.0
+        version: 10.35.0
       '@sentry/vite-plugin':
         specifier: ^4.7.0
         version: 4.7.0
@@ -138,9 +141,6 @@ importers:
       '@microsoft/tsdoc':
         specifier: ^0.16.0
         version: 0.16.0
-      '@sentry/core':
-        specifier: ^10.35.0
-        version: 10.35.0
       '@tauri-apps/cli':
         specifier: 2.9.6
         version: 2.9.6
