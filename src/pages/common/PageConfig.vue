@@ -236,7 +236,10 @@ onMounted(async () => {
   await showLoading.start("正在加载设置页面", "正在获取缓存大小");
   await TGLogger.Info("[Config] 打开设置页面");
   const cacheDir = await getCacheDir();
-  if (cacheDir === false) return;
+  if (cacheDir === false) {
+    await showLoading.end();
+    return;
+  }
   let cacheBSize: number = 0;
   for (const dir of cacheDir) {
     const size: number = await core.invoke("get_dir_size", { path: dir });
