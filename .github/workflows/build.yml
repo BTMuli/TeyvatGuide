@@ -45,12 +45,6 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
       - name: Test SSH connection
         run: ssh -T git@github.com || true
-      - name: Load env.production
-        id: env
-        if: matrix.settings.target == 'windows'
-        run: |
-          $VITE_SENTRY_RELEASE = Get-Content .env.production | Where-Object { $_ -match '^VITE_SENTRY_RELEASE=' } | ForEach-Object { ($_ -split '=')[1] }
-          "VITE_SENTRY_RELEASE=$VITE_SENTRY_RELEASE" >> $env:GITHUB_OUTPUT
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
       - name: Rust cache
@@ -100,15 +94,3 @@ jobs:
             </a>
           releaseDraft: true
           prerelease: false
-
-      - name: Upload Sentry Pdb
-        if: matrix.settings.target == 'windows'
-        # TODO：调整 script
-        run: |
-          echo "Uploading release: $SENTRY_RELEASE"
-          sentry-cli releases new "$SENTRY_RELEASE"
-          sentry-cli debug-files upload --include-sources src-tauri/src src-tauri/target/release/TeyvatGuide.pdb
-          sentry-cli releases finalize "$SENTRY_RELEASE"
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_RELEASE: ${{ steps.env.outputs.VITE_SENTRY_RELEASE }}

@@ -2,12 +2,18 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2026-01-19
+Update: 2026-01-22
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2026-01-19 12:43:24`
+> 更新于 `2026-01-22 01:28:01`
+
+## [0.9.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.4) (2025-01-22)
+
+- 🐛 修复`msi`版本导入`dll`调用路径异常，捕获`dll`路径异常错误
+- 🎨 调整商店版本`dll`检测逻辑，存在时不复制
+- 🚸 调整导入相关提示文本
 
 ## [0.9.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.3) (2025-01-19)
 

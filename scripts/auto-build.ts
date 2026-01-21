@@ -1,6 +1,6 @@
 /**
  * 本地构建脚本
- * @since Beta v0.9.1
+ * @since Beta v0.9.4
  */
 import { resolve } from "path";
 import { fileURLToPath } from "node:url";
@@ -25,6 +25,9 @@ console.log(`🍄 SkipUpload:${skipUpload}`);
 
 // 获取提交哈希
 const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+// 获取构建平台
+const platform = process.platform;
+console.log(`🖥️  Build platform: ${platform}`);
 
 // 构建 Release 字符串
 const release = `TeyvatGuide@${pkgVersion}`;
@@ -52,7 +55,7 @@ if (isGitHubActions) {
   }
   process.exit();
 }
-if (skipUpload || isGitHubActions) process.exit();
+if (skipUpload || platform !== "win32") process.exit();
 const pdbGlob = "src-tauri/target/release/TeyvatGuide.pdb";
 try {
   console.log(`📦 Uploading PDBs from ${pdbGlob}...`);
@@ -62,11 +65,13 @@ try {
   });
   console.log("✅ PDB upload complete!");
   const distDir = resolve(__dirname, "../dist");
-  execSync(
-    `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
-    { stdio: "inherit" },
-  );
-  console.log("✅ Frontend sourcemaps upload complete!");
+  if (!isGitHubActions) {
+    execSync(
+      `sentry-cli sourcemaps upload -r "${release}" "${distDir}" --rewrite --url-prefix "~/"`,
+      { stdio: "inherit" },
+    );
+    console.log("✅ Frontend sourcemaps upload complete!");
+  }
   execSync(`sentry-cli releases finalize "${release}"`, { stdio: "inherit" });
   console.log("🎉 Sentry release finalized!");
 } catch (err) {
