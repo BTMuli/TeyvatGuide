@@ -4,7 +4,7 @@ variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次�
     <template #prepend>
       <div class="gb-top-title">
         <img alt="byd" class="gb-top-byd" src="/icon/nation/千星奇域.webp" />
-        <span>祈愿记录</span>
+        <span>颂愿记录</span>
         <v-select
           v-model="uidCur"
           :hide-details="true"
