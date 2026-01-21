@@ -203,7 +203,7 @@ import { emit } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
 import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
-import { relaunch } from "@tauri-apps/plugin-process";
+import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
 import TGLogger from "@utils/TGLogger.js";
 import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
@@ -448,7 +448,8 @@ async function confirmDelCache(): Promise<void> {
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");
   showSnackbar.success("缓存已清除!即将重启...");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  await relaunch();
+  if (isDevEnv.value) await exit();
+  else await relaunch();
 }
 
 // 恢复默认设置

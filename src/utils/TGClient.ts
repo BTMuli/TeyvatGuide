@@ -1,6 +1,6 @@
 /**
  * 负责米游社客户端的 callback 处理
- * @since Beta v0.8.3
+ * @since Beta v0.9.4
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -544,7 +544,7 @@ class Client {
 
   /**
    * 获取米游社客户端的 cookie_token
-   * @since Beta v0.8.3
+   * @since Beta v0.9.4
    * @param arg - 请求参数
    * @returns 无返回值
    */
@@ -553,7 +553,7 @@ class Client {
   ): Promise<void> {
     const user = useUserStore();
     if (!user.cookie) return;
-    if (arg.payload.forceRefresh) {
+    if (typeof arg.payload === "object" && arg.payload.forceRefresh) {
       const res = await passportReq.cookieToken(user.cookie);
       if (typeof res !== "string") return;
       user.cookie.cookie_token = res;
