@@ -124,8 +124,6 @@
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
-      <!-- TODO: 暂时隐藏内置祈愿链接 -->
-      <v-tab v-if="false" value="iframe">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item class="gacha-window-item" value="overview">
@@ -140,9 +138,6 @@
       <v-window-item class="gacha-window-item" value="history">
         <gro-history :uid="uidCur" />
       </v-window-item>
-      <v-window-item class="gacha-window-item" value="iframe">
-        <gro-iframe mode="normal" />
-      </v-window-item>
     </v-window>
   </div>
   <UgoUid v-model="ovShow" :fpi="ovFpi" :mode="ovMode" />
@@ -154,7 +149,6 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import GroEcharts from "@comp/userGacha/gro-echarts.vue";
 import GroHistory from "@comp/userGacha/gro-history.vue";
-import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoHutaoDu, { type UgoHutaoMode } from "@comp/userGacha/ugo-hutao-du.vue";

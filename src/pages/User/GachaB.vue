@@ -49,8 +49,6 @@ variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次�
     <v-tabs v-model="tab" align-tabs="start" class="gb-tab" density="compact">
       <v-tab value="overview">数据概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
-      <!-- TODO: 暂时隐藏内置祈愿链接 -->
-      <v-tab v-if="false" value="iframe">祈愿详情</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gb-window">
       <v-window-item class="gb-window-item" value="overview">
@@ -58,9 +56,6 @@ variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次�
       </v-window-item>
       <v-window-item class="gb-window-item" value="table">
         <gbr-table v-model="gachaListCur" />
-      </v-window-item>
-      <v-window-item class="gb-window-item" value="iframe">
-        <gro-iframe mode="beyond" />
       </v-window-item>
     </v-window>
   </div>
@@ -71,7 +66,6 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import GbrOverview from "@comp/userGacha/gbr-overview.vue";
 import GbrTable from "@comp/userGacha/gbr-table.vue";
-import GroIframe from "@comp/userGacha/gro-iframe.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
