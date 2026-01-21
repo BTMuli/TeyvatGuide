@@ -55,7 +55,7 @@
       <v-btn
         class="top-link top-btn"
         prepend-icon="mdi-import"
-        title="通过Yae导入"
+        title="通过Yae导入（请确保导入前游戏未启动）"
         variant="elevated"
         @click="toYae()"
       >

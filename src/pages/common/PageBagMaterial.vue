@@ -36,6 +36,7 @@
           prepend-icon="mdi-import"
           variant="elevated"
           @click="tryImportMaterial()"
+          title="通过Yae导入（请确保导入前游戏未启动）"
         >
           导入
         </v-btn>
