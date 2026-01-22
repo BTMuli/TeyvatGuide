@@ -1,6 +1,6 @@
 /**
  * 极验验证相关类型定义文件
- * @since Beta v0.8.7
+ * @since Beta v0.9.5
  */
 
 declare namespace TGApp.BBS.Geetest {
@@ -90,7 +90,7 @@ declare namespace TGApp.BBS.Geetest {
 
   /**
    * 初始化 Gt4 验证的请求参数
-   * @since Beta v0.8.7
+   * @since Beta v0.9.5
    */
   type InitGeetest4Params = {
     /** 验证ID */
@@ -107,6 +107,13 @@ declare namespace TGApp.BBS.Geetest {
     lang: string;
     /** 协议头 */
     protocol: string;
+    /**
+     * 使用 https 协议
+     * @remarks 改配置在部署文档中未提及但是在 js 中具有
+     * - 部署文档：https://docs.geetest.com/gt4/apirefer/api/web#%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0
+     * - JS: https://static.geetest.com/v4/gt4.js
+     */
+    https: boolean;
   };
 
   /**

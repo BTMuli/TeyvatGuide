@@ -58,6 +58,7 @@ async function displayBox(
 ): Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false> {
   if ("challenge" in props) {
     return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false>((resolve) => {
+      console.log("initGeetest", props);
       initGeetest(
         {
           gt: props.gt,
@@ -85,6 +86,7 @@ async function displayBox(
     });
   }
   return await new Promise<TGApp.BBS.Geetest.GeetestVerifyRes | false>((resolve) => {
+    console.log("initGeetest4", props, raw);
     initGeetest4(
       {
         captchaId: props.gt,
@@ -93,7 +95,7 @@ async function displayBox(
         nextWidth: "250px",
         lang: "zho",
         userInfo: JSON.stringify({ session_id: raw?.session_id }),
-        protocol: "https",
+        https: true,
       },
       (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
         if (geetestEl.value === null) return;

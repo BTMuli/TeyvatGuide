@@ -565,7 +565,7 @@ async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | fa
 
 /**
  * 尝试通过验证码登录
- * @since Beta v0.8.7
+ * @since Beta v0.9.5
  * @param {string} phone 手机号
  * @param {string} captcha 验证码
  * @param {string} actionType action_type
@@ -585,10 +585,11 @@ async function tryLoginByCaptcha(
       await TGLogger.Error(
         `[tc-userBadge][tryLoginByCaptcha] ${loginResp.retcode} ${loginResp.message}`,
       );
+      await new Promise<void>((resolve) => setTimeout(resolve, 3000));
       return false;
     }
     const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
-    const resp = await showGeetest(JSON.parse(aigisResp.data));
+    const resp = await showGeetest(JSON.parse(aigisResp.data), aigisResp);
     const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
     return await tryLoginByCaptcha(phone, captcha, actionType, aigisStr);
   }
