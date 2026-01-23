@@ -19,7 +19,7 @@
         alt="card"
       />
     </div>
-    <div class="tuas-icon">
+    <div :title="`完成进度:${progress}%`" class="tuas-icon">
       <img :src="`/icon/achievement/${series.icon}.webp`" alt="icon" />
       <v-progress-circular
         :model-value="progress"
@@ -58,7 +58,7 @@ const emits = defineEmits<TuaSeriesEmits>();
 const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 0 });
 const progress = computed<number>(() => {
   if (overview.value.total === 0) return 0;
-  return Math.round((overview.value.fin / overview.value.total) * 100);
+  return Math.round((overview.value.fin / overview.value.total) * 1000) / 10;
 });
 const showCard = computed<boolean>(() => {
   return props.series.card !== "";
