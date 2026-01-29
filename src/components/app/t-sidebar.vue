@@ -428,6 +428,7 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   ck.cookie_token = cookieTokenRes;
   await showLoading.update("正在获取用户信息");
   const briefRes = await bbsReq.userInfo(ck);
+  console.debug(briefRes);
   if ("retcode" in briefRes) {
     await showLoading.end();
     showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);

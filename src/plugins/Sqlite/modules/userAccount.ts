@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.9.2
+ * @since Beta v0.9.5
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -38,24 +38,6 @@ function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): str
               region     = '${data.region}',
               regionName = '${data.region_name}',
               updated    = '${timeNow}';
-  `;
-}
-
-/**
- * 获取插入账号数据的 sql
- * @since Beta v0.6.1
- * @param user - 账号
- * @returns 插入Sql
- */
-function getInsertAccountSql(user: TGApp.App.Account.User): string {
-  const table = transUser(user);
-  return `
-      INSERT INTO UserAccount(uid, cookie, brief, updated)
-      VALUES ('${table.uid}', '${table.cookie}', '${table.brief}', '${table.updated}')
-      ON CONFLICT(uid) DO UPDATE
-          SET cookie  = '${table.cookie}',
-              brief   = '${table.brief}',
-              updated = '${table.updated}';
   `;
 }
 
@@ -130,14 +112,22 @@ async function getUserAccount(uid: string): Promise<TGApp.App.Account.User | fal
 
 /**
  * 更新用户数据
- * @since Beta v0.6.1
+ * @since Beta v0.9.5
  * @param data - 用户cookie
  * @returns 无返回值
  */
 async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
   const db = await TGSqlite.getDB();
-  const sql = getInsertAccountSql(data);
-  await db.execute(sql);
+  const user = transUser(data);
+  await db.execute(
+    `INSERT INTO UserAccount(uid, cookie, brief, updated)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT(uid) DO UPDATE
+         SET cookie  = $2,
+             brief   = $3,
+             updated = $4`,
+    [user.uid, user.cookie, user.brief, user.updated],
+  );
 }
 
 /**
