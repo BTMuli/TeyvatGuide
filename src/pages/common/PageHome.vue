@@ -78,6 +78,7 @@ import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
 import PhCompPool from "@comp/pageHome/ph-comp-pool.vue";
 import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
 import PhCompSign from "@comp/pageHome/ph-comp-sign.vue";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
@@ -123,6 +124,7 @@ onMounted(async () => {
   const isProdEnv = import.meta.env.MODE === "production";
   if (isProdEnv && devMode.value) devMode.value = false;
   if (isLogin.value) {
+    await TSUserAccount.account.updateCk();
     await showLoading.start("正在加载首页小部件");
     games.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
     showItems.value = homeStore.getShowItems();

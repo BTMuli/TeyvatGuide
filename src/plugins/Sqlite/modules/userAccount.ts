@@ -132,7 +132,7 @@ async function saveAccount(data: TGApp.App.Account.User): Promise<void> {
 
 /**
  * 检测并更新
- * @since Beta v0.9.2
+ * @since Beta v0.9.5
  * @returns 无返回值
  */
 async function updateAllAccountCk(): Promise<void> {
@@ -142,25 +142,26 @@ async function updateAllAccountCk(): Promise<void> {
   for (const account of accounts) {
     const diffTime = Date.now() - new Date(account.updated).getTime();
     if (diffTime > checkTime) {
+      await showLoading.start(`更新${account.uid}Cookie`, `上次更新:${account.updated}`);
       await TGLogger.Info(`更新${account.uid}Cookie，上次更新:${account.updated}`);
       const update = await updateAccountCk(account);
       if (update) {
         showSnackbar.success(`成功更新${account.uid}的Cookie`);
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
         cnt++;
       }
     }
   }
-  if (cnt > 0) await showLoading.end();
+  if (cnt > 0) showSnackbar.success(`成功更新${cnt}位账户的Cookie`);
 }
 
 /**
  * 更新用户Cookie
- * @since Beta v0.9.2
+ * @since Beta v0.9.5
  * @param data - 用户信息
  * @returns 是否更新成功
  */
 async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
-  await showLoading.start("正在更新用户Cookie", `UID:${data.uid}，上次更新:${data.updated}`);
   const ck = data.cookie;
   await showLoading.update("正在获取 LToken");
   const ltokenRes = await passportReq.lToken.get(ck);
@@ -190,23 +191,27 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
     await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
     return false;
   }
+  const briefInfo: TGApp.App.Account.BriefInfo = {
+    nickname: briefRes.nickname,
+    uid: briefRes.uid,
+    avatar: briefRes.avatar_url,
+    desc: briefRes.introduce,
+  };
   const updated = timestampToDate(new Date().getTime());
   await showLoading.update("正在写入数据库");
   const db = await TGSqlite.getDB();
   try {
-    // 让 SQLite 在遇到锁时等待（毫秒）
-    await db.execute("PRAGMA busy_timeout = 1000;");
-    // 立即获取写锁，减少中途被抢占的概率
+    await db.execute("PRAGMA busy_timeout = 5000;");
     await db.execute("BEGIN IMMEDIATE;");
     await db.execute(
-      "UPDATE UserAccount SET cookie = '?' AND brief = '?' AND updated = '?' WHERE uid = '?';",
-      [JSON.stringify(ck), JSON.stringify(briefRes), updated, data.uid],
+      "UPDATE UserAccount SET cookie = $1, brief = $2, updated = $3 WHERE uid = $4;",
+      [JSON.stringify(ck), JSON.stringify(briefInfo), updated, data.uid],
     );
     await db.execute("COMMIT;");
     return true;
   } catch (innerErr) {
-    await db.execute("ROLLBACK;");
     console.error(innerErr);
+    await db.execute("ROLLBACK;");
     return false;
   }
 }

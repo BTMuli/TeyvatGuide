@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.9.1
+ * @since Beta v0.9.5
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -164,7 +164,7 @@ class Sqlite {
 
   /**
    * 重置数据库
-   * @since Beta v0.9.1
+   * @since Beta v0.9.5
    * @returns 无返回值
    */
   public async reset(): Promise<void> {
@@ -178,13 +178,12 @@ class Sqlite {
         await db.execute("BEGIN IMMEDIATE;");
         try {
           for (const item of this.tables) {
-            const sql = `DROP TABLE IF EXISTS "${item}";`;
-            await db.execute(sql);
+            await db.execute("DROP TABLE IF EXISTS $1", [item]);
           }
           await db.execute("COMMIT;");
         } catch (innerErr) {
-          await db.execute("ROLLBACK;");
           console.error(innerErr);
+          await db.execute("ROLLBACK;");
         }
         await this.initDB();
         return;

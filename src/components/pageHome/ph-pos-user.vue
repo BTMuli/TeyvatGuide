@@ -77,7 +77,7 @@
             {{ props.pos.liben_detail.is_has_taken_special_reward ? "已" : "未" }}领取礼盒
           </span>
         </template>
-        <!-- 处理累登活动 TODO:待完善 -->
+        <!-- 处理累登活动 -->
         <template v-else-if="props.pos.type === gameEnum.actCalendarType.SignIn">
           <span>{{ props.pos.sign_in_detail.progress }}/{{ props.pos.sign_in_detail.total }}</span>
           <span>当天{{ props.pos.sign_in_detail.status === 1 ? "未领取" : "已领取" }}</span>

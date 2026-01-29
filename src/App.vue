@@ -354,8 +354,6 @@ async function checkUserLoad(): Promise<void> {
     isLogin.value = false;
     return;
   }
-  // 检测ck刷新
-  await TSUserAccount.account.updateCk();
   if (!isLogin.value) isLogin.value = true;
   // 然后获取最近的UID
   if (uid.value === undefined || !uidDB.includes(uid.value)) {
