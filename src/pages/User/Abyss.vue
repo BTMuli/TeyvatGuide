@@ -397,9 +397,12 @@ async function uploadAbyss(): Promise<void> {
       await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
       return;
     }
-    showSnackbar.success(res.message ?? "上传深渊数据成功");
+    showSnackbar.success(res.message ?? "上传深渊数据成功，即将刷新祈愿时长");
     await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
     await TGLogger.Info(`[${res.retcode}] ${res.message}`);
+    // 等待5s刷新时长
+    await new Promise<void>((resolve) => setTimeout(resolve, 5000));
+    await hutaoStore.tryRefreshInfo();
   } catch (e) {
     if (e instanceof Error) {
       showSnackbar.error(e.message);
