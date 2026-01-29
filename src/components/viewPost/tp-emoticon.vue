@@ -1,31 +1,33 @@
 <!-- 自定义表情组件 -->
 <template>
-  <div class="tp-emo-box" title="自定义表情" v-if="localUrl !== undefined">
+  <div v-if="localUrl !== undefined" class="tp-emo-box" title="自定义表情">
     <img
-      :src="localUrl"
-      @click="showOverlay = true"
+      ref="emoticonRef"
       :alt="props.data.insert.custom_emoticon.hash"
+      :src="localUrl"
+      @click="handleEmoticonClick"
+      @error="handleEmoticonError"
     />
-    <div class="tp-emo-info" v-if="props.data.insert.custom_emoticon.size.width > 100">
+    <div v-if="props.data.insert.custom_emoticon.size.width > 100" class="tp-emo-info">
       自定义表情
     </div>
   </div>
-  <div v-else class="tp-image-load" :title="props.data.insert.custom_emoticon.url">
+  <div v-else :title="props.data.insert.custom_emoticon.url" class="tp-image-load">
     <v-progress-circular :indeterminate="true" color="primary" size="small" />
     <span>加载中...</span>
   </div>
   <VpOverlayImage
-    :image="image"
     v-model="showOverlay"
-    v-model:link="localUrl"
-    :ori="true"
-    :format="fmt"
     v-model:bgColor="bgColor"
+    v-model:link="localUrl"
+    :format="fmt"
+    :image="image"
+    :ori="true"
   />
 </template>
 <script lang="ts" setup>
 import { saveImgLocal } from "@utils/TGShare.js";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
 import VpOverlayImage from "./vp-overlay-image.vue";
@@ -73,6 +75,8 @@ const props = defineProps<TpEmoticonProps>();
 const localUrl = ref<string>();
 const showOverlay = ref<boolean>(false);
 const bgColor = ref<string>("transparent");
+const loadErr = ref<boolean>(false);
+const emoticonEl = useTemplateRef<HTMLImageElement>("emoticonRef");
 const fmt = computed<string>(() => getImageExt());
 const image = computed<TpImage>(() => ({
   insert: { image: props.data.insert.custom_emoticon.url },
@@ -96,6 +100,24 @@ onUnmounted(() => {
 function getImageExt(): string {
   const arr = props.data.insert.custom_emoticon.url.split(".");
   return arr[arr.length - 1];
+}
+
+async function handleEmoticonClick(): Promise<void> {
+  if (loadErr.value) {
+    localUrl.value = undefined;
+    await nextTick();
+    localUrl.value = await saveImgLocal(props.data.insert.custom_emoticon.url);
+    return;
+  }
+  showOverlay.value = true;
+}
+
+function handleEmoticonError(): void {
+  if (!emoticonEl.value) return;
+  loadErr.value = true;
+  emoticonEl.value.alt = "自定义表情";
+  emoticonEl.value.title = props.data.insert.custom_emoticon.url;
+  emoticonEl.value.style.cursor = "default";
 }
 </script>
 <style lang="scss" scoped>
