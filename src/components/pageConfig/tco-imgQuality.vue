@@ -1,6 +1,6 @@
 <!-- 设置图片质量浮窗 -->
 <template>
-  <TOverlay v-model="model" hide blur-val="10px">
+  <TOverlay v-model="model" :outer-close="clickOuter" blur-val="10px">
     <div class="toi-box">
       <div class="toi-top">
         <div class="toi-title">调整图片质量</div>
@@ -8,31 +8,33 @@
       </div>
       <div class="toi-mid">
         <v-slider
-          thumb-label="always"
-          color="var(--tgc-od-blue)"
-          thumb-color="var(--tgc-od-red)"
           v-model="quality"
           :max="100"
           :min="5"
           :step="1"
+          color="var(--tgc-od-blue)"
           hide-details
+          thumb-color="var(--tgc-od-red)"
+          thumb-label="always"
+          @end="handleSliderEnd"
+          @start="() => (clickOuter = false)"
         />
         <v-number-input
-          class="toi-input"
           v-model="quality"
-          control-variant="stacked"
-          density="compact"
-          variant="outlined"
-          style="max-width: 100px"
-          type="number"
           :max="100"
           :min="5"
           :step="1"
+          class="toi-input"
+          control-variant="stacked"
+          density="compact"
+          type="number"
+          variant="outlined"
+          width="100px"
         />
       </div>
       <div class="toi-bottom">
-        <v-btn variant="flat" class="toi-btn no-btn" @click="onCancel()">取消</v-btn>
-        <v-btn variant="elevated" class="toi-btn ok-btn" @click="onConfirm()">确定</v-btn>
+        <v-btn class="toi-btn no-btn" variant="flat" @click="onCancel()">取消</v-btn>
+        <v-btn class="toi-btn ok-btn" variant="elevated" @click="onConfirm()">确定</v-btn>
       </div>
     </div>
   </TOverlay>
@@ -48,6 +50,7 @@ const { imageQualityPercent } = storeToRefs(useAppStore());
 
 const model = defineModel<boolean>({ default: false });
 const quality = ref<number>(imageQualityPercent.value);
+const clickOuter = ref<boolean>(true);
 
 function onCancel(): void {
   model.value = false;
@@ -63,6 +66,11 @@ async function onConfirm(): Promise<void> {
   imageQualityPercent.value = quality.value;
   model.value = false;
   showSnackbar.success(`图片质量已修改为 ${quality.value}%`);
+}
+
+async function handleSliderEnd(): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  clickOuter.value = true;
 }
 </script>
 <style lang="scss" scoped>
