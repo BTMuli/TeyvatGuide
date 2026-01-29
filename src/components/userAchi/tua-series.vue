@@ -116,6 +116,8 @@ function selectSeries(): void {
   cursor: pointer;
 
   &.tuas-selected {
+    border-style: dashed;
+    border-color: var(--tgc-od-orange);
     background: var(--box-bg-1);
   }
 
@@ -137,6 +139,8 @@ function selectSeries(): void {
   @include github-styles.github-card("dark");
 
   &.tuas-selected {
+    border-style: dashed;
+    border-color: var(--tgc-od-orange);
     background: var(--box-bg-1);
   }
 }
