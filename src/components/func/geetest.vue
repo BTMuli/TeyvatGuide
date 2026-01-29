@@ -96,6 +96,7 @@ async function displayBox(
         lang: "zho",
         userInfo: JSON.stringify({ session_id: raw?.session_id }),
         https: true,
+        protocol: "https",
       },
       (captchaObj: TGApp.BBS.Geetest.GeetestCaptcha) => {
         if (geetestEl.value === null) return;
