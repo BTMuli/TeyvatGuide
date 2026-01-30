@@ -25,13 +25,13 @@
         </span>
         <span>{{ props.modelValue.main_property.final }}</span>
       </div>
-      <div class="tua-prop-sub">
+      <div class="tua-prop-sub" v-if="props.modelValue.sub_property">
         <span>
           <img v-if="propSub !== false && propSub.icon !== ''" :src="propSub.icon" alt="propSub" />
           <v-icon class="icon" v-else size="14">mdi-adjust</v-icon>
           <span>{{ propSub !== false ? propSub.name : "未知属性" }}</span>
         </span>
-        <span>{{ props.modelValue.sub_property?.final }}</span>
+        <span>{{ props.modelValue.sub_property.final }}</span>
       </div>
     </div>
     <div class="tua-dcw-share">
@@ -64,7 +64,7 @@ const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   return userStore.getProp(props.modelValue.main_property.property_type);
 });
 const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
-  if (props.modelValue.sub_property === null) return false;
+  if (props.modelValue.sub_property === undefined) return false;
   return userStore.getProp(props.modelValue.sub_property.property_type);
 });
 </script>
