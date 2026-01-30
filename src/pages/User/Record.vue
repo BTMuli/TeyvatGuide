@@ -51,20 +51,17 @@
       <TurRoleInfo :role="recordData.role" :uid="uidCur ?? 0" />
       <span class="sign">TeyvatGuide v{{ version }} | {{ recordData.updated }}</span>
     </div>
-    <PhCompCard>
-      <template #title>数据总览</template>
+    <PhCompCard title="数据总览">
       <TurOverviewGrid :model-value="recordData.stats" />
     </PhCompCard>
-    <PhCompCard>
-      <template #title>角色信息</template>
+    <PhCompCard title="角色信息">
       <TurAvatarGrid :model-value="recordData.avatars" />
     </PhCompCard>
-    <PhCompCard>
-      <template #title>世界探索</template>
+    <PhCompCard title="世界探索">
       <TurWorldGrid :worlds="recordData.worldExplore" />
     </PhCompCard>
-    <PhCompCard>
-      <template #title>尘歌壶</template>
+    <!-- TODO: 优化UI -->
+    <PhCompCard title="尘歌壶">
       <TurHomeGrid :model-value="recordData.homes" />
     </PhCompCard>
   </div>

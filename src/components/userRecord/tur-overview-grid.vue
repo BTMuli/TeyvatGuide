@@ -1,7 +1,7 @@
 <template>
   <div v-if="!modelValue">暂无数据</div>
   <div v-else>
-    <div class="tur-og-box">
+    <div class="tur-og-box grid4">
       <TurOverviewSub
         :text="modelValue.activeDays"
         icon="/source/UI/userRecord.webp"
@@ -83,6 +83,8 @@
         icon="/icon/material/107028.webp"
         title="火神瞳"
       />
+    </div>
+    <div class="tur-og-box grid5">
       <TurOverviewSub :text="modelValue.luxuriousChest" title="华丽宝箱数" />
       <TurOverviewSub :text="modelValue.preciousChest" title="珍贵宝箱数" />
       <TurOverviewSub :text="modelValue.exquisiteChest" title="精致宝箱数" />
@@ -102,13 +104,17 @@ defineProps<{ modelValue: TGApp.Sqlite.Record.Stats }>();
   width: 100%;
   gap: 8px;
   grid-template-columns: repeat(3, 0.33fr);
-}
 
-.tur-og-box-3 {
-  display: grid;
-  width: 100%;
-  margin-bottom: 8px;
-  gap: 8px;
-  grid-template-columns: repeat(3, 1fr);
+  &.grid4 {
+    grid-template-columns: repeat(4, 0.25fr);
+  }
+
+  &.grid5 {
+    grid-template-columns: repeat(5, 0.2fr);
+  }
+
+  & + & {
+    margin-top: 8px;
+  }
 }
 </style>

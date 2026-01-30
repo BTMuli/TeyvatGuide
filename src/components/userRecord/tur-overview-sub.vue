@@ -8,7 +8,7 @@
       </div>
       <slot name="val-text">{{ props.text }}</slot>
     </div>
-    <div class="tur-os-title">
+    <div class="tur-os-label">
       <slot name="title">{{ props.title }}</slot>
     </div>
   </div>
@@ -22,10 +22,10 @@ const props = defineProps<TAOProps>();
 </script>
 <style lang="css" scoped>
 .tur-os-box {
+  position: relative;
   display: flex;
   width: 100%;
   height: auto;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 8px;
@@ -34,9 +34,13 @@ const props = defineProps<TAOProps>();
   background: var(--box-bg-1);
 }
 
-.tur-os-title {
+.tur-os-label {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
   color: var(--box-text-4);
-  font-family: var(--font-title);
+  font-family: var(--font-text);
+  font-size: 12px;
 }
 
 .tur-os-text {
@@ -45,7 +49,7 @@ const props = defineProps<TAOProps>();
   justify-content: center;
   color: var(--tgc-yellow-1);
   column-gap: 4px;
-  font-family: var(--font-text);
+  font-family: var(--font-title);
   font-size: 18px;
   line-height: 24px;
 }
