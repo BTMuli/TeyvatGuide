@@ -121,7 +121,7 @@ import TpParser from "./tp-parser.vue";
 
 type TprReplyProps =
   | { mode: "sub"; modelValue: TGApp.BBS.Reply.ReplyFull }
-  | { mode: "main"; modelValue: TGApp.BBS.Reply.ReplyFull; pinId: string };
+  | { mode: "main"; modelValue: TGApp.BBS.Reply.ReplyFull; pinId?: string };
 
 const props = defineProps<TprReplyProps>();
 const replyId = `reply_${props.modelValue.reply.post_id}_${props.modelValue.reply.floor_id}_${props.modelValue.reply.reply_id}`;
