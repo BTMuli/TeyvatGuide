@@ -14,7 +14,7 @@
       </div>
       <div :title="getTimeStr(props.pool)" class="ug-hisci-time">{{ getTimeStr(props.pool) }}</div>
       <div class="ug-hisci-sub">Up 五星</div>
-      <div class="ug-hisci-up lv5">
+      <div class="ug-hisci-up">
         <TItemBox
           v-for="i in props.pool.up5List"
           :key="i"
@@ -23,7 +23,7 @@
         />
       </div>
       <div class="ug-hisci-sub">Up 四星</div>
-      <div class="ug-hisci-up lv4">
+      <div class="ug-hisci-up">
         <TItemBox
           v-for="i in props.pool.up4List"
           :key="i"
@@ -356,20 +356,13 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
 
 .ug-hisci-up {
   display: flex;
+  min-height: 80px;
+  max-height: 80px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
   overflow-y: auto;
-
-  &.lv5 {
-    min-height: 80px;
-  }
-
-  &.lv4 {
-    min-height: 80px;
-    max-height: 80px;
-  }
 }
 
 .ug-hiscr-list {

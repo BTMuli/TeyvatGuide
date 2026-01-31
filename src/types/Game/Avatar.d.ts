@@ -1,6 +1,6 @@
 /**
  * 游戏角色详情相关类型定义文件
- * @since Beta v0.5.3
+ * @since Beta v0.9.5
  */
 
 declare namespace TGApp.Game.Avatar {
@@ -127,7 +127,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * 角色详情武器数据类型
-   * @since Beta v0.5.3
+   * @since Beta v0.9.5
    */
   type WeaponDetail = {
     /** 武器 ID */
@@ -153,7 +153,7 @@ declare namespace TGApp.Game.Avatar {
     /** 武器主属性 */
     main_property: Prop;
     /** 武器副属性 */
-    sub_property: Prop | null;
+    sub_property?: Prop;
   };
 
   /**
