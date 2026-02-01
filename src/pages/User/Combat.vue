@@ -282,7 +282,7 @@ async function refreshCombat(): Promise<void> {
 
 async function shareCombat(): Promise<void> {
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片`);
-  const fileName = `【真境剧诗】${userTab.value}-${uidCur.value}.png`;
+  const fileName = `【真境剧诗】${userTab.value}-${uidCur.value}`;
   const shareDom = document.querySelector<HTMLElement>(`.ucw-i-ref.active`);
   if (shareDom === null) {
     showSnackbar.error("未找到分享数据");
