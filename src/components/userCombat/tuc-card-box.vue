@@ -31,6 +31,7 @@ const props = defineProps<TucCardBoxProps>();
   display: flex;
   width: 100%;
   box-sizing: border-box;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -95,5 +96,6 @@ const props = defineProps<TucCardBoxProps>();
   position: relative;
   flex-shrink: 0;
   font-size: 12px;
+  word-break: break-all;
 }
 </style>

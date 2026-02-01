@@ -60,9 +60,9 @@ function getEffectDesc(desc: string): string {
   display: flex;
   width: fit-content;
   box-sizing: border-box;
+  flex: 2;
   flex-direction: column;
-  flex-shrink: 0;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
@@ -156,6 +156,6 @@ function getEffectDesc(desc: string): string {
   position: relative;
   display: block;
   font-size: 10px;
-  white-space: pre;
+  white-space: pre-wrap;
 }
 </style>
