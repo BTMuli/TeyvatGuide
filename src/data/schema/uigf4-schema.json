@@ -309,7 +309,110 @@
         },
         "required": ["uid", "timezone", "list"]
       }
+    },
+    "hk4e_ugc": {
+      "type": "array",
+      "properties": {
+        "uid": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "UID"
+        },
+        "timezone": {
+          "type": "integer",
+          "description": "Time zone offset"
+        },
+        "lang": {
+          "type": "string",
+          "description": "Language code",
+          "enum": [
+            "de-de",
+            "en-us",
+            "es-es",
+            "fr-fr",
+            "id-id",
+            "it-it",
+            "ja-jp",
+            "ko-kr",
+            "pt-pt",
+            "ru-ru",
+            "th-th",
+            "tr-tr",
+            "vi-vn",
+            "zh-cn",
+            "zh-tw"
+          ]
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The internal ID of the record, returned by MiHoYo API",
+                "maxLength": 19,
+                "minLength": 1,
+                "pattern": "^[0-9]+$"
+              },
+              "schedule_id": {
+                "type": "string",
+                "description": "The schedule ID of the record, returned by MiHoYo API",
+                "minLength": 1,
+                "pattern": "^[0-9]+$"
+              },
+              "item_type": {
+                "type": "string",
+                "description": "The type of the item, returned by MiHoYo API"
+              },
+              "item_id": {
+                "type": "string",
+                "description": "The internal ID of the item",
+                "minLength": 1,
+                "pattern": "^[0-9]+$"
+              },
+              "item_name": {
+                "type": "string",
+                "description": "The name of the item, returned by MiHoYo API"
+              },
+              "rank_type": {
+                "type": "string",
+                "description": "The rank of the item, returned by MiHoYo API",
+                "minLength": 1,
+                "pattern": "^[0-9]+$"
+              },
+              "time": {
+                "type": "string",
+                "description": "The local time in the timezone of the item being drawn.This MUST BE THE String typed value captured intact from the gacha record webpage WITHOUT ANY CONVERTION TO ANY DATE TYPES. Any conversion of such can cause potential timezone mistakes if the device time zone differs from the server time zone, unless special treatments are applied by individual app devs.",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$"
+              },
+              "op_gacha_type": {
+                "type": "string",
+                "description": "The gacha type of the record, returned by MiHoYo API",
+                "enum": ["1000", "2000", "20011", "20012", "20021", "20022"]
+              }
+            },
+            "required": [
+              "id",
+              "schedule_id",
+              "item_type",
+              "item_id",
+              "item_name",
+              "rank_type",
+              "time",
+              "op_gacha_type"
+            ]
+          }
+        }
+      },
+      "required": ["uid", "timezone", "list"]
     }
   },
-  "required": ["info", "hk4e"]
+  "required": ["info"]
 }
