@@ -1,4 +1,4 @@
-<!-- 单个签到奖励格子 TODO:额外奖励格子需要测试 -->
+<!-- 单个签到奖励格子 -->
 <template>
   <div
     :class="['reward-cell', stateClass, { extra: isExtra, clickable: isClickableComputed }]"
@@ -100,7 +100,8 @@ function handleClick(): void {
   background: var(--box-bg-3);
 
   &.extra {
-    padding: 8px;
+    width: fit-content;
+    padding: 4px;
     border-radius: 50%;
     aspect-ratio: 1;
   }

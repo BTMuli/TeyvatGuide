@@ -563,9 +563,9 @@ async function shareItem(): Promise<void> {
   display: flex;
   flex-direction: column;
   padding: 8px;
-  border: 1px solid rgb(255 165 0 / 30%);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgb(255 165 0 / 10%), rgb(255 215 0 / 10%));
+  border: 1px solid rgb(255 152 0 / 30%);
+  border-radius: 4px;
+  background: rgb(255 152 0 / 10%);
   gap: 6px;
 }
 
@@ -590,7 +590,7 @@ async function shareItem(): Promise<void> {
 
 .extra-time {
   margin-left: auto;
-  color: var(--box-text-3);
+  color: var(--box-text-4);
   font-size: 10px;
   opacity: 0.7;
 }
