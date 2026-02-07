@@ -43,6 +43,7 @@
           :is-extra="true"
           :reward="reward"
           :state="getExtraRewardState(idx)"
+          @click="handleExtraRewardCellClick(idx)"
         />
       </div>
     </div>
@@ -239,29 +240,35 @@ function getRewardClickable(index: number): boolean {
   if (state === RewardState.NEXT_REWARD) {
     return true;
   } else if (state === RewardState.MISSED) {
-    // Only the first missed day is clickable for resign
-    // According to MiHoYo rules, you can only make up the first missed day
     const signedDays = signStat.value?.total_sign_day ?? 0;
     return index === signedDays;
   }
   return false;
 }
 
-// Handle reward cell click
-function handleRewardCellClick(index: number): void {
-  const state = getRewardState(index);
+// Handle extra reward cell click
+async function handleExtraRewardCellClick(index: number): Promise<void> {
+  const state = getExtraRewardState(index);
   if (state === RewardState.NEXT_REWARD) {
-    // Click on next reward cell triggers sign-in
-    handleSign();
+    await handleSign();
   } else if (state === RewardState.MISSED) {
-    // Only allow clicking the first missed day for resign
-    // According to MiHoYo rules, you can only make up the first missed day
     const signedDays = signStat.value?.total_sign_day ?? 0;
     if (index === signedDays) {
-      // This is the first missed day, allow resign
-      handleResign();
+      await handleResign();
     }
-    // If it's not the first missed day, do nothing (clicking won't trigger resign)
+  }
+}
+
+// Handle reward cell click
+async function handleRewardCellClick(index: number): Promise<void> {
+  const state = getRewardState(index);
+  if (state === RewardState.NEXT_REWARD) {
+    await handleSign();
+  } else if (state === RewardState.MISSED) {
+    const signedDays = signStat.value?.total_sign_day ?? 0;
+    if (index === signedDays) {
+      await handleResign();
+    }
   }
 }
 
