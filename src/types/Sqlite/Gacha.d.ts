@@ -1,6 +1,6 @@
 /**
  * 数据库抽卡记录相关类型定义文件
- * @since Beta v0.9.1
+ * @since Beta v0.9.5
  */
 
 declare namespace TGApp.Sqlite.Gacha {
@@ -57,7 +57,10 @@ declare namespace TGApp.Sqlite.Gacha {
     id: string;
     /** UID */
     uid: string;
-    /** 服务器区域 */
+    /**
+     * 服务器区域
+     * @deprecated 弃用
+     */
     region: string;
     /** 排期 ID */
     scheduleId: string;
@@ -99,7 +102,10 @@ declare namespace TGApp.Sqlite.Gacha {
     type: string;
     /** 抽卡物品星级 */
     rank: string;
-    /** 是否是 UP 物品 */
+    /**
+     * 是否是 UP 物品
+     * @deprecated 弃用
+     */
     isUp: 0 | 1;
     /** 数据库更新时间 */
     updated: string;

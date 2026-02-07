@@ -182,12 +182,12 @@ create table if not exists GachaRecords
     updated   text
 );
 
--- @brief 创建千星奇域祈愿数据表
+-- @brief 创建颂愿数据表
 create table if not exists GachaBRecords
 (
     id          text primary key not null,
     uid         text,
-    region      text,
+    region      text, -- @deprecated
     scheduleId  text,
     gachaType   text,
     opGachaType text,
@@ -196,7 +196,7 @@ create table if not exists GachaBRecords
     name        text,
     type        text,
     rank        text,
-    isUp        text,
+    isUp        text, -- @deprecated
     updated     text
 );
 

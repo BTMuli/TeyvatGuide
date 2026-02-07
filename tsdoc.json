@@ -9,7 +9,8 @@
     "@see": true,
     "@since": true,
     "@TODO": true,
-    "@typeParam": true
+    "@typeParam": true,
+    "@deprecated": true
   },
   "tagDefinitions": [
     {

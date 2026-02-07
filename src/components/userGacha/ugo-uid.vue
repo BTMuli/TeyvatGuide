@@ -1,3 +1,4 @@
+<!-- UIGF4导入导出组件 -->
 <template>
   <TOverlay v-model="visible" blur-val="5px">
     <div class="ugo-box">
@@ -32,7 +33,10 @@
         >
           <div class="ugo-item" @click="toggle">
             <div class="ugo-item-left">
-              <div class="ugo-item-title">{{ item.uid }} - {{ item.length }}条记录</div>
+              <div class="ugo-item-title">
+                <span>{{ item.uid }} - {{ item.length }}条</span>
+                <span>{{ item.isUgc ? "颂愿记录" : "祈愿记录" }}</span>
+              </div>
               <div class="ugo-item-sub">{{ item.time }}</div>
             </div>
             <div class="ugo-item-right">
@@ -55,6 +59,7 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
+import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import TGLogger from "@utils/TGLogger.js";
@@ -68,7 +73,19 @@ type UgoUidProps = {
   /** filePathImport，导出路径 */
   fpi?: string;
 };
-type UgoUidItem = { uid: string; length: number; time: string };
+/**
+ * UID项
+ */
+type UgoUidItem = {
+  /** UID */
+  uid: string;
+  /** 数据条数 */
+  length: number;
+  /** 数据时间段 */
+  time: string;
+  /** 是否是颂愿数据 */
+  isUgc: boolean;
+};
 /** 兼容不同版本的导入 */
 type UgoUidImportRaw =
   | { isV4: true; data: TGApp.Plugins.UIGF.Schema4 }
@@ -98,7 +115,7 @@ watch(
 
 async function getDefaultSavePath(): Promise<string> {
   const tsNow = Math.floor(Date.now() / 1000);
-  return `${await path.downloadDir()}${path.sep()}UIGFv4.1_${tsNow}.json`;
+  return `${await path.downloadDir()}${path.sep()}UIGFv4.2_${tsNow}.json`;
 }
 
 async function refreshData(): Promise<void> {
@@ -147,7 +164,9 @@ async function refreshImport(): Promise<void> {
     if (isV4) {
       const read = await readUigf4Data(fp.value);
       importRaw.value = { isV4: true, data: read };
-      data.value = read.hk4e.map(parseData4);
+      const hk4eUids = read.hk4e?.map(parseData4) ?? [];
+      const ugcUids = read.hk4e_ugc?.map(parseUgc) ?? [];
+      data.value = [...hk4eUids, ...ugcUids];
     } else {
       const read = await readUigfData(fp.value);
       console.log(read.list.length);
@@ -172,6 +191,7 @@ function parseData(data: TGApp.Plugins.UIGF.Schema): UgoUidItem {
     uid: data.info.uid,
     length: data.list.length,
     time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    isUgc: false,
   };
 }
 
@@ -181,25 +201,52 @@ function parseData4(data: TGApp.Plugins.UIGF.GachaHk4e): UgoUidItem {
     uid: data.uid.toString(),
     length: data.list.length,
     time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    isUgc: false,
+  };
+}
+
+function parseUgc(data: TGApp.Plugins.UIGF.GachaUgc): UgoUidItem {
+  const timeList = data.list.map((item) => new Date(item.time).getTime());
+  return {
+    uid: data.uid.toString(),
+    length: data.list.length,
+    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    isUgc: true,
   };
 }
 
 async function refreshExport(): Promise<void> {
-  const uidList = await TSUserGacha.getUidList();
+  const uidHk4e = await TSUserGacha.getUidList();
+  const uidUgc = await TSUserGachaB.getUidList();
   const tmpData: Array<UgoUidItem> = [];
-  for (const uid of uidList) {
+  for (const uid of uidHk4e) {
     const dataRaw = await TSUserGacha.record.all(uid);
-    tmpData.push(parseDataRaw(dataRaw));
+    tmpData.push(parseLocalHk4e(dataRaw));
+  }
+  for (const uid of uidUgc) {
+    const dataRaw = await TSUserGachaB.getGachaRecords(uid);
+    tmpData.push(parseLocalUgc(dataRaw));
   }
   data.value = tmpData;
 }
 
-function parseDataRaw(data: Array<TGApp.Sqlite.Gacha.Gacha>): UgoUidItem {
+function parseLocalHk4e(data: Array<TGApp.Sqlite.Gacha.Gacha>): UgoUidItem {
   const timeList = data.map((item) => new Date(item.time).getTime());
   return {
     uid: data[0].uid,
     length: data.length,
     time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    isUgc: false,
+  };
+}
+
+function parseLocalUgc(data: Array<TGApp.Sqlite.Gacha.GachaB>): UgoUidItem {
+  const timeList = data.map((item) => new Date(item.time).getTime());
+  return {
+    uid: data[0].uid,
+    length: data.length,
+    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    isUgc: true,
   };
 }
 
@@ -222,13 +269,23 @@ async function handleImport(): Promise<void> {
   if (importRaw.value.isV4) {
     for (const item of selectedData.value) {
       await showLoading.update(`正在导入UID: ${item.uid}`);
-      const dataFind = importRaw.value.data.hk4e.find((i) => i.uid.toString() === item.uid);
-      if (!dataFind) {
-        showSnackbar.error(`未找到UID: ${item.uid}`);
-        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-        continue;
+      if (!item.isUgc) {
+        const dataFind = importRaw.value.data.hk4e?.find((i) => i.uid.toString() === item.uid);
+        if (!dataFind) {
+          showSnackbar.error(`未找到UID: ${item.uid}`);
+          await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+          continue;
+        }
+        await TSUserGacha.mergeUIGF4(dataFind, true);
+      } else {
+        const dataFind = importRaw.value.data.hk4e_ugc?.find((i) => i.uid.toString() === item.uid);
+        if (!dataFind) {
+          showSnackbar.error(`未找到UID: ${item.uid}`);
+          await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+          continue;
+        }
+        await TSUserGachaB.mergeUIGF4(dataFind, true);
       }
-      await TSUserGacha.mergeUIGF4(dataFind, true);
     }
   } else {
     const iUid = selectedData.value[0].uid;
@@ -251,7 +308,8 @@ async function handleExport(): Promise<void> {
     `${selectedData.value.length}条UID - ${totalCnt}条记录`,
   );
   await exportUigf4Data(
-    selectedData.value.map((s) => s.uid.toString()),
+    selectedData.value.filter((i) => !i.isUgc).map((s) => s.uid.toString()),
+    selectedData.value.filter((i) => i.isUgc).map((s) => s.uid.toString()),
     fp.value,
   );
   await showLoading.end();
@@ -348,8 +406,17 @@ async function handleExport(): Promise<void> {
 }
 
 .ugo-item-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 8px;
   font-family: var(--font-title);
   font-size: 16px;
+
+  :last-child {
+    color: var(--tgc-od-red);
+  }
 }
 
 .ugo-item-sub {

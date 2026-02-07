@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.9.2
+ * @since Beta v0.9.5
  */
 
 import { tz } from "@date-fns/tz";
@@ -390,4 +390,18 @@ export function str2timeStr(str: string): string {
 export function validEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+}
+
+/**
+ * 传入时间字符串跟对应时区，转成utc8时间字符串
+ * @since Beta v0.9.5
+ * @param time - 时间字符串
+ * @param timezone - 时区
+ * @returns 转换后的时间戳
+ */
+export function getUtc8Time(time: string, timezone: number): string {
+  const date = new Date(time);
+  const diffTimezone = -timezone + 8;
+  const realDate = new Date(date.getTime() + diffTimezone * 60 * 60 * 1000);
+  return timestampToDate(realDate.getTime());
 }

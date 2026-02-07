@@ -1,56 +1,132 @@
 /**
  * 千星奇域祈愿模块
- * @since Beta v0.8.4
+ * @since Beta v0.9.5
  */
 
-import showSnackbar from "@comp/func/snackbar.js";
+import showLoading from "@comp/func/loading.js";
 import TGSqlite from "@Sql/index.js";
-import { exists, mkdir } from "@tauri-apps/plugin-fs";
-import TGLogger from "@utils/TGLogger.js";
+import { getUtc8Time, timestampToDate } from "@utils/toolFunc.js";
+
+import { AppGachaBData } from "@/data/index.js";
 
 /**
- * 获取导入 Sql
- * @since Beta v0.8.4
- * @param gacha - 抽卡记录数据
- * @returns sql
+ * 插入颂愿数据
+ * @since Beta v0.9.5
+ * @param uid - UID
+ * @param item - 颂愿数据
+ * @returns 无返回值
  */
-function getInsertSql(gacha: TGApp.Game.Gacha.GachaBItem): string {
-  return `
-      INSERT INTO GachaBRecords(id, uid, region, scheduleId, gachaType,
-                                opGachaType, time, itemId, name, type,
-                                rank, isUp, updated)
-      VALUES ('${gacha.id}', '${gacha.uid}', '${gacha.region}', '${gacha.schedule_id}',
-              '${gacha.op_gacha_type === "1000" ? "1000" : "2000"}', '${gacha.op_gacha_type}', '${gacha.time}',
-              '${gacha.item_id}', '${gacha.item_name}', '${gacha.item_type}',
-              '${gacha.rank_type}', '${gacha.is_up}', datetime('now', 'localtime'))
-      ON CONFLICT (id)
-          DO UPDATE
-          SET uid         = '${gacha.uid}',
-              region      = '${gacha.region}',
-              scheduleId  = '${gacha.schedule_id}',
-              gachaType   = '${gacha.op_gacha_type === "1000" ? "1000" : "2000"}',
-              opGachaType = '${gacha.op_gacha_type}',
-              time        = '${gacha.time}',
-              itemId      = '${gacha.item_id}',
-              name        = '${gacha.item_name}',
-              type        = '${gacha.item_type}',
-              rank        = '${gacha.rank_type}',
-              isUp        = '${gacha.is_up}',
-              updated     = datetime('now', 'localtime');
-  `;
+async function insertGachaItem(uid: string, item: TGApp.Plugins.UIGF.GachaItemB): Promise<void> {
+  const db = await TGSqlite.getDB();
+  const gachaType = item.op_gacha_type === "1000" ? "1000" : "2000";
+  const updateTime = timestampToDate(Date.now());
+  await db.execute(
+    `
+        INSERT INTO GachaBRecords(id, uid, scheduleId, gachaType, opGachaType, time,
+                                  itemId, name, type, rank, updated)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        ON CONFLICT (id)
+            DO UPDATE
+            SET uid         = $2,
+                scheduleId  = $3,
+                gachaType   = $4,
+                opGachaType = $5,
+                time        = $6,
+                itemId      = $7,
+                name        = $8,
+                type        = $9,
+                rank        = $10,
+                updated     = $11;
+    `,
+    [
+      item.id,
+      uid,
+      item.schedule_id,
+      gachaType,
+      item.op_gacha_type,
+      item.time,
+      item.item_id,
+      item.item_name,
+      item.item_type,
+      item.rank_type,
+      updateTime,
+    ],
+  );
 }
 
 /**
  * 插入列表数据
- * @since Beta v0.8.4
+ * @since Beta v0.9.5
+ * @param uid - UID
  * @param list - 抽卡记录列表
  * @returns 无返回值
  */
-async function insertGachaList(list: Array<TGApp.Game.Gacha.GachaBItem>): Promise<void> {
-  const db = await TGSqlite.getDB();
+async function insertGachaList(
+  uid: string,
+  list: Array<TGApp.Plugins.UIGF.GachaItemB>,
+): Promise<void> {
   for (const gacha of list) {
-    const sql = getInsertSql(gacha);
-    await db.execute(sql);
+    await insertGachaItem(uid, gacha);
+  }
+}
+
+/**
+ * 转换颂愿数据，防止多语言
+ * @since Beta v0.9.5
+ * @param gacha - 颂愿数据
+ * @param timezone - 时区
+ * @returns 转换后的数据
+ */
+function transGacha(
+  gacha: TGApp.Plugins.UIGF.GachaItemB,
+  timezone: number = 8,
+): TGApp.Plugins.UIGF.GachaItemB {
+  const find = AppGachaBData.find((i) => i.id === gacha.item_id);
+  if (!find) return gacha;
+  return {
+    id: gacha.id,
+    item_id: gacha.item_id,
+    item_name: find.name,
+    item_type: find.type,
+    op_gacha_type: gacha.op_gacha_type,
+    rank_type: find.rank.toString(),
+    schedule_id: gacha.schedule_id,
+    time: getUtc8Time(gacha.time, timezone),
+  };
+}
+
+/**
+ * 插入UIGF4数据
+ * @since Beta v0.9.5
+ * @param data - UIGF数据
+ * @param showProgress - 是否显示进度
+ * @returns 无返回值
+ */
+async function mergeUIGF4(
+  data: TGApp.Plugins.UIGF.GachaUgc,
+  showProgress: boolean = false,
+): Promise<void> {
+  let cnt: number = 0;
+  const len = data.list.length;
+  let progress: number = 0;
+  let timer: NodeJS.Timeout | null = null;
+  if (showProgress) {
+    timer = setInterval(async () => {
+      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      const current = data.list[cnt].time ?? "";
+      const name = data.list[cnt].item_name ?? "";
+      const rank = data.list[cnt].rank_type ?? "0";
+      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`);
+    }, 1000);
+  }
+  for (const gacha of data.list) {
+    await insertGachaItem(data.uid.toString(), transGacha(gacha, data.timezone));
+    cnt++;
+  }
+  if (timer) {
+    clearInterval(timer);
+    progress = 100;
+    await showLoading.update(`[${progress}%] 完成`);
   }
 }
 
@@ -106,35 +182,6 @@ async function getGachaRecords(
 }
 
 /**
- * 备份祈愿数据
- * @since Beta v0.8.4
- * @param dir - 备份目录
- * @remarks 等UIGF标准最终确定后与TSUserGacha合并
- */
-async function backUpUigf(dir: string): Promise<void> {
-  if (!(await exists(dir))) {
-    await TGLogger.Warn("不存在指定的祈愿备份目录，即将创建");
-    await mkdir(dir, { recursive: true });
-  }
-  showSnackbar.error(`千星奇域祈愿数据备份功能尚未实现，请耐心等待后续版本更新。`);
-}
-
-/**
- * 恢复祈愿数据
- * @since Beta v0.8.4
- * @param dir - 恢复目录
- * @remarks 等UIGF标准最终确定后与TSUserGacha合并
- * @returns 是否恢复成功
- */
-async function restoreUigf(dir: string): Promise<boolean> {
-  if (!(await exists(dir))) {
-    await TGLogger.Warn("不存在指定的祈愿备份目录");
-    return false;
-  }
-  return true;
-}
-
-/**
  * 删除用户祈愿数据
  * @since Beta v0.8.4
  * @param uid - UID
@@ -145,18 +192,13 @@ async function deleteRecords(uid: string): Promise<void> {
   await db.execute("DELETE FROM GachaBRecords WHERE uid = ?;", [uid]);
 }
 
-/**
- * 千星奇域祈愿模块
- * @since Beta v0.8.4
- */
 const TSUserGachaB = {
   getUidList,
   getGachaCheck,
   getGachaRecords,
   insertGachaList,
-  backUpUigf,
-  restoreUigf,
   deleteRecords,
+  mergeUIGF4,
 };
 
 export default TSUserGachaB;

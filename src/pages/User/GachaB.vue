@@ -1,4 +1,4 @@
-variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次数共享 -->
+<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次数共享 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -36,6 +36,31 @@ variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次�
         </v-btn>
         <v-btn
           class="gb-top-btn"
+          prepend-icon="mdi-import"
+          variant="elevated"
+          @click="importUigf()"
+        >
+          导入
+        </v-btn>
+        <v-btn
+          class="gb-top-btn"
+          prepend-icon="mdi-export"
+          variant="elevated"
+          @click="exportUigf()"
+        >
+          导出
+        </v-btn>
+        <v-btn
+          class="gb-top-btn"
+          prepend-icon="mdi-database"
+          title="将数据库中非中文数据转换为中文"
+          variant="elevated"
+          @click="checkData()"
+        >
+          检测数据
+        </v-btn>
+        <v-btn
+          class="gb-top-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
           @click="deleteGacha()"
@@ -59,6 +84,7 @@ variantelevated<!-- 千星奇域祈愿记录页面 TODO：处理活动卡池次�
       </v-window-item>
     </v-window>
   </div>
+  <UgoUid v-model="ovShow" :fpi="ovFpi" :mode="ovMode" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -66,11 +92,14 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import GbrOverview from "@comp/userGacha/gbr-overview.vue";
 import GbrTable from "@comp/userGacha/gbr-table.vue";
+import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { path } from "@tauri-apps/api";
+import { open } from "@tauri-apps/plugin-dialog";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
@@ -79,6 +108,10 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
+
+const ovMode = ref<"export" | "import">("import");
+const ovShow = ref<boolean>(false);
+const ovFpi = ref<string>();
 
 const authkey = ref<string>("");
 const uidCur = ref<string>();
@@ -219,27 +252,26 @@ async function refreshGachaPool(
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       break;
     }
-    if (gachaRes.length === 0) {
-      // if (force) {
-      //   await showLoading.update(`正在清理${label}数据`);
-      //   if (gachaDataMap) {
-      //     await TSUserGacha.cleanGachaRecords(account.value.gameUid, type, gachaDataMap);
-      //   }
-      // }
-      break;
-    }
+    if (gachaRes.length === 0) break;
+    const uigfList: Array<TGApp.Plugins.UIGF.GachaItemB> = [];
     if (force) await showLoading.update(`[${gachaName}] 第${page}页，${gachaRes.length}条`);
     for (const item of gachaRes) {
       if (!force) {
         await showLoading.update(`[${item.item_type}][${item.time}] ${item.item_name}`);
       }
-      if (force) {
-        // if (!gachaDataMap) gachaDataMap = {};
-        // if (!gachaDataMap[item.time]) gachaDataMap[item.time] = [];
-        // gachaDataMap[item.time].push(item.id.toString());
-      }
+      const tempItem: TGApp.Plugins.UIGF.GachaItemB = {
+        id: item.id,
+        item_id: item.item_id,
+        item_name: item.item_name,
+        item_type: item.item_type,
+        op_gacha_type: item.op_gacha_type,
+        rank_type: item.rank_type,
+        schedule_id: item.schedule_id,
+        time: item.time,
+      };
+      uigfList.push(tempItem);
     }
-    await TSUserGachaB.insertGachaList(gachaRes);
+    await TSUserGachaB.insertGachaList(account.value.gameUid, uigfList);
     if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
     reqId = gachaRes[gachaRes.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
@@ -282,6 +314,39 @@ async function deleteGacha(): Promise<void> {
   );
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   window.location.reload();
+}
+
+async function importUigf(): Promise<void> {
+  await TGLogger.Info(`[UserGachaB][importUigf] 导入祈愿数据`);
+  const selectedFile = await open({
+    multiple: false,
+    title: "导入UIGF文件",
+    filters: [{ name: "UIGF JSON", extensions: ["json"] }],
+    defaultPath: await path.downloadDir(),
+    directory: false,
+  });
+  if (selectedFile === null) {
+    showSnackbar.cancel("已取消文件选择");
+    return;
+  }
+  ovFpi.value = selectedFile;
+  ovMode.value = "import";
+  ovShow.value = true;
+}
+
+async function exportUigf(): Promise<void> {
+  if (!uidCur.value) {
+    showSnackbar.error("未获取到 UID");
+    return;
+  }
+  await TGLogger.Info(`[UserGachaB][${uidCur.value}][exportUigf] 导出祈愿数据`);
+  ovMode.value = "export";
+  ovShow.value = true;
+}
+
+async function checkData(): Promise<void> {
+  // TODO
+  showSnackbar.warn("暂未支持");
 }
 </script>
 <style lang="scss" scoped>
