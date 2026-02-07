@@ -1,7 +1,7 @@
 /**
  * UIGF 标准类型定义文件
- * @since Beta v0.8.4
- * @remarks UIGF v3.0 | UIGF v4.1
+ * @since Beta v0.9.5
+ * @remarks UIGF v3.0 | UIGF v4.2
  */
 
 declare namespace TGApp.Plugins.UIGF {
@@ -18,16 +18,34 @@ declare namespace TGApp.Plugins.UIGF {
   };
 
   /**
-   * UIGF 数据， v4.0
-   * @since Beta v0.8.4
+   * Root键
+   * @since Beta v0.9.5
+   * @remarks hk4e - 祈愿数据
+   * @remarks hk4e_ugc - 颂愿数据
    */
-  type Schema4 = {
+  type Schema4RootKey = "hk4e" | "hk4e_ugc";
+
+  /**
+   * Root键对应类型
+   * @since Beta v0.9.5
+   */
+  type Schema4RootType<T extends Schema4RootKey> = T extends "hk4e"
+    ? Array<GachaHk4e>
+    : T extends "hk4e_ugc"
+      ? Array<GachaUgc>
+      : never;
+
+  /**
+   * UIGF 数据， v4.2
+   * @since Beta v0.9.5
+   */
+  type Schema4<K extends Schema4RootKey = never> = {
     /** 头部信息 */
     info: Info4;
-    /** 祈愿列表，原神数据 */
-    hk4e: Array<GachaHk4e>;
-    /** 祈愿列表，千星奇域数据 */
-    hk4e_ugc?: Array<GachaUgc>;
+  } & {
+    [P in K]: Schema4RootType<P>;
+  } & {
+    [P in Exclude<Schema4RootKey, K>]?: Schema4RootType<P>;
   };
 
   /**
@@ -83,13 +101,13 @@ declare namespace TGApp.Plugins.UIGF {
     timezone: number;
     /** 语言 */
     lang?: string;
+    /** 祈愿数据 */
     list: Array<GachaItem>;
   };
 
   /**
    * UIGF4 祈愿项，千星奇域
-   * @since Beta v0.8.4
-   * @remarks 该标准尚未最终确定
+   * @since Beta v0.9.5
    */
   type GachaUgc = {
     /** UID */
@@ -98,9 +116,7 @@ declare namespace TGApp.Plugins.UIGF {
     timezone: number;
     /** 语言 */
     lang?: string;
-    /** 服务器区域 */
-    region: string;
-    /** 祈愿列表 */
+    /** 颂愿数据 */
     list: Array<GachaItemB>;
   };
 
@@ -132,8 +148,7 @@ declare namespace TGApp.Plugins.UIGF {
 
   /**
    * UIGF 祈愿项-千星奇域
-   * @since Beta v0.8.4
-   * @remarks 该标准尚未最终确定
+   * @since Beta v0.9.5
    */
   type GachaItemB = {
     /** id */
@@ -148,17 +163,8 @@ declare namespace TGApp.Plugins.UIGF {
     item_name: string;
     /** 稀有度 */
     rank_type: string;
-    /** 是否限定 */
-    is_up: string;
     /** 时间 yyyy-MM-dd HH:mm:ss */
     time: string;
-    /**
-     * 祈愿类型
-     * @remarks
-     * 1000-常驻池
-     * 2000-活动池
-     */
-    gacha_type: string;
     /** 祈愿类型，用于接口请求 */
     op_gacha_type: string;
   };
