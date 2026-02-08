@@ -12,6 +12,7 @@ Update: 2026-02-07
 > 本文档为 [UIGF v4.2](https://github.com/UIGF-org/UIGF-org.github.io/blob/main/docs/zh/standards/uigf.md) 的备份，仅供参考。
 
 # 统一可交换抽卡记录标准 v4.2
+
 > Uniformed Interchangeable GachaLog Format standard (UIGF) v4.2 <Badge text="Current" type="message" />
 
 ::: warning 中断性更新警告
@@ -19,14 +20,15 @@ Update: 2026-02-07
 :::
 
 ## 更新记录
-| 版本     | 说明                          | 兼容         |
-|--------|-----------------------------|------------|
-| `v3.0` | 低版本的更新日志请查看历史版本             | v3.0 及更低版本 |
-| `v4.0` | 合并 SRGF，新增绝区零抽卡格式支持         | v4.0       |
-| `v4.1` | 新增对星穹铁道 v3.4 版所引入的新的卡池类型的支持 | v4.1/v4.0* |
-| `v4.2` | 新增对于千星奇域的支持                 | v4.1       |
 
-* 对于无需处理星穹铁道的应用，v4.1 与 v4.0 兼容。
+| 版本   | 说明                                             | 兼容            |
+| ------ | ------------------------------------------------ | --------------- |
+| `v3.0` | 低版本的更新日志请查看历史版本                   | v3.0 及更低版本 |
+| `v4.0` | 合并 SRGF，新增绝区零抽卡格式支持                | v4.0            |
+| `v4.1` | 新增对星穹铁道 v3.4 版所引入的新的卡池类型的支持 | v4.1/v4.0\*     |
+| `v4.2` | 新增对于千星奇域的支持                           | v4.1            |
+
+- 对于无需处理星穹铁道的应用，v4.1 与 v4.0 兼容。
 
 ## 前言
 
@@ -91,12 +93,7 @@ Update: 2026-02-07
           "description": "导出档案的 UIGF 版本号，格式为 'v{major}.{minor}'，如 v4.0"
         }
       },
-      "required": [
-        "export_timestamp",
-        "export_app",
-        "export_app_version",
-        "version"
-      ]
+      "required": ["export_timestamp", "export_app", "export_app_version", "version"]
     },
     "hk4e": {
       "type": "array",
@@ -147,25 +144,12 @@ Update: 2026-02-07
                 "uigf_gacha_type": {
                   "type": "string",
                   "description": "UIGF 卡池类型，用于区分卡池类型不同，但卡池保底计算相同的物品",
-                  "enum": [
-                    "100",
-                    "200",
-                    "301",
-                    "302",
-                    "500"
-                  ]
+                  "enum": ["100", "200", "301", "302", "500"]
                 },
                 "gacha_type": {
                   "type": "string",
                   "description": "卡池类型，米哈游 API 返回",
-                  "enum": [
-                    "100",
-                    "200",
-                    "301",
-                    "302",
-                    "400",
-                    "500"
-                  ]
+                  "enum": ["100", "200", "301", "302", "400", "500"]
                 },
                 "item_id": {
                   "type": "string",
@@ -200,21 +184,11 @@ Update: 2026-02-07
                   "pattern": "^[0-9]+$"
                 }
               },
-              "required": [
-                "uigf_gacha_type",
-                "gacha_type",
-                "item_id",
-                "time",
-                "id"
-              ]
+              "required": ["uigf_gacha_type", "gacha_type", "item_id", "time", "id"]
             }
           }
         },
-        "required": [
-          "uid",
-          "timezone",
-          "list"
-        ]
+        "required": ["uid", "timezone", "list"]
       }
     },
     "hkrpg": {
@@ -270,14 +244,7 @@ Update: 2026-02-07
                 "gacha_type": {
                   "type": "string",
                   "description": "卡池类型",
-                  "enum": [
-                    "1",
-                    "2",
-                    "11",
-                    "12",
-                    "21",
-                    "22"
-                  ]
+                  "enum": ["1", "2", "11", "12", "21", "22"]
                 },
                 "item_id": {
                   "type": "string",
@@ -312,21 +279,11 @@ Update: 2026-02-07
                   "pattern": "^[0-9]+$"
                 }
               },
-              "required": [
-                "gacha_type",
-                "gacha_id",
-                "time",
-                "item_id",
-                "id"
-              ]
+              "required": ["gacha_type", "gacha_id", "time", "item_id", "id"]
             }
           }
         },
-        "required": [
-          "uid",
-          "timezone",
-          "list"
-        ]
+        "required": ["uid", "timezone", "list"]
       }
     },
     "nap": {
@@ -382,12 +339,7 @@ Update: 2026-02-07
                 "gacha_type": {
                   "type": "string",
                   "description": "卡池类型",
-                  "enum": [
-                    "1",
-                    "2",
-                    "3",
-                    "5"
-                  ]
+                  "enum": ["1", "2", "3", "5"]
                 },
                 "item_id": {
                   "type": "string",
@@ -422,20 +374,11 @@ Update: 2026-02-07
                   "pattern": "^[0-9]+$"
                 }
               },
-              "required": [
-                "gacha_type",
-                "item_id",
-                "time",
-                "id"
-              ]
+              "required": ["gacha_type", "item_id", "time", "id"]
             }
           }
         },
-        "required": [
-          "uid",
-          "timezone",
-          "list"
-        ]
+        "required": ["uid", "timezone", "list"]
       }
     },
     "hk4e_ugc": {
@@ -523,25 +466,25 @@ Update: 2026-02-07
               "op_gacha_type": {
                 "type": "string",
                 "description": "卡池类型，米哈游 API 返回",
-                "enum": [
-                  "1000",
-                  "2000",
-                  "20011",
-                  "20012",
-                  "20021",
-                  "20022"
-                ]
+                "enum": ["1000", "2000", "20011", "20012", "20021", "20022"]
               }
             },
-            "required": ["id","schedule_id","item_type","item_id","item_name","rank_type","time","op_gacha_type"]
+            "required": [
+              "id",
+              "schedule_id",
+              "item_type",
+              "item_id",
+              "item_name",
+              "rank_type",
+              "time",
+              "op_gacha_type"
+            ]
           }
         }
       },
       "required": ["uid", "timezone", "list"]
     }
   },
-  "required": [
-    "info"
-  ]
+  "required": ["info"]
 }
 ```
