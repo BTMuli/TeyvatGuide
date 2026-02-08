@@ -1,6 +1,6 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.9.5
+ * @since Beta v0.9.6
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -11,7 +11,7 @@ import TGSqlite from "../index.js";
 
 /**
  * 导入物品
- * @since Beta v0.9.5
+ * @since Beta v0.9.6
  * @param uid - UID
  * @param item - UIGF数据
  * @returns Promise<void>
@@ -23,7 +23,7 @@ async function insertGachaItem(uid: string, item: TGApp.Plugins.UIGF.GachaItem):
     `INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
                               name, type, rank, id, uigfType, updated)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-     ON CONFLICT DO UPDATE
+     ON CONFLICT(id) DO UPDATE
          SET uid       = $1,
              gachaType = $2,
              itemId    = $3,

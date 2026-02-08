@@ -70,18 +70,14 @@
       </div>
     </v-menu>
   </div>
-  <VpReplyDebug v-if="devMode" v-model="showDebug" />
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import { emit } from "@tauri-apps/api/event";
 import TGLogger from "@utils/TGLogger.js";
-import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 
-import VpReplyDebug from "./vp-reply-debug.vue";
 import VpReplyItem from "./vp-reply-item.vue";
 
 /**
@@ -116,8 +112,6 @@ type SelectItem = {
   value: ReplyOrderType;
 };
 
-const { devMode } = storeToRefs(useAppStore());
-
 const props = defineProps<TprMainProps>();
 
 const orderList: Array<SelectItem> = [
@@ -131,7 +125,6 @@ const lastId = ref<string>();
 const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
-const showDebug = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
 const orderType = ref<ReplyOrderType>(ReplyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
@@ -212,11 +205,6 @@ async function loadReply(): Promise<void> {
 }
 
 async function handleDebug(): Promise<void> {
-  if (devMode.value) {
-    showDebug.value = true;
-    return;
-  }
-  if (showDebug.value) showDebug.value = false;
   await reloadReply();
 }
 </script>

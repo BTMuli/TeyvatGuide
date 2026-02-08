@@ -14,14 +14,24 @@
       </div>
     </div>
     <div class="btn-list">
+      <v-btn class="test-btn" @click="testReply()">回复测试</v-btn>
       <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
   </div>
+  <VpReplyDebug v-model="showReply" />
 </template>
 <script lang="ts" setup>
+import VpReplyDebug from "@comp/viewPost/vp-reply-debug.vue";
 import { invoke } from "@tauri-apps/api/core";
 import { appConfigDir, resourceDir } from "@tauri-apps/api/path";
 import { copyFile, exists } from "@tauri-apps/plugin-fs";
+import { ref } from "vue";
+
+const showReply = ref<boolean>(false);
+
+function testReply(): void {
+  showReply.value = true;
+}
 
 async function test() {
   await invoke("is_msix");

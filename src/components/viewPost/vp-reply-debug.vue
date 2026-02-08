@@ -4,7 +4,7 @@
       <div class="tpr-debug-title">
         <span>文件：</span>
         <span :title="filePath">{{ filePath }}</span>
-        <v-btn @click="selectFile" color="primary">选择文件</v-btn>
+        <v-btn size="small" @click="selectFile" color="primary">选择文件</v-btn>
       </div>
       <div class="tpr-debug-reply">
         <TprReply mode="main" :modelValue="replyData" v-if="replyData !== null" pinId="0" />
@@ -56,28 +56,32 @@ async function selectFile(): Promise<void> {
   position: relative;
   display: flex;
   width: 800px;
+  max-height: 600px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
   box-shadow: 0 0 5px var(--common-shadow-1);
+  row-gap: 8px;
 }
 
 .tpr-debug-title {
+  position: relative;
   display: flex;
   overflow: hidden;
   width: 100%;
+  flex-shrink: 0;
   align-items: center;
   justify-content: flex-start;
-  padding: 5px;
+  padding: 4px;
   border-bottom: 1px solid var(--box-bg-2);
   font-family: var(--font-title);
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  :nth-child(2) {
+  span:nth-child(2) {
     overflow: hidden;
     max-width: 600px;
     margin-right: auto;

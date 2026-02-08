@@ -1,8 +1,8 @@
 <template>
   <component
+    :is="getTpName(tp)"
     v-for="(tp, index) in getParsedData(props.data)"
     :key="index"
-    :is="getTpName(tp)"
     :data="tp"
   />
 </template>
@@ -44,6 +44,7 @@ function getParsedData(data: SctPostDataArr): SctPostDataArr {
       continue;
     }
     if (tpName !== TpText) {
+      if (child.length > 0) res.push(...child);
       cur = tp;
       child = [];
       res.push(cur);
