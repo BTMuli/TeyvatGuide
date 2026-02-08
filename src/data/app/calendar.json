@@ -205,7 +205,7 @@
   },
   {
     "id": 10000126,
-    "contentId": 0,
+    "contentId": 507503,
     "dropDays": [3, 6, 7],
     "name": "兹白",
     "itemType": "character",
@@ -1259,7 +1259,7 @@
   },
   {
     "id": 10000127,
-    "contentId": 0,
+    "contentId": 507504,
     "dropDays": [2, 5, 7],
     "name": "叶洛亚",
     "itemType": "character",
@@ -1967,7 +1967,7 @@
   },
   {
     "id": 11519,
-    "contentId": 0,
+    "contentId": 507943,
     "dropDays": [3, 6, 7],
     "name": "朏魄含光",
     "itemType": "weapon",
