@@ -1,6 +1,6 @@
 /**
  * 米社数据状态管理
- * @since Beta v0.8.2
+ * @since Beta v0.9.6
  */
 import apiHubReq from "@req/apiHubReq.js";
 import { defineStore } from "pinia";
@@ -13,10 +13,17 @@ const useBBSStore = defineStore(
     const gameList = shallowRef<Array<TGApp.BBS.Game.Item>>([]);
     // 游戏卡片配置项
     const gameUidCards = shallowRef<Record<string, TGApp.BBS.AppConfig.GameUidCardConf>>({});
+    // 版块数据
+    const forumList = shallowRef<Array<TGApp.BBS.Forum.GameForum>>([]);
 
     // 刷新游戏列表
     async function refreshGameList(): Promise<void> {
       gameList.value = await apiHubReq.game();
+    }
+
+    // 刷新版块列表
+    async function refreshForumList(): Promise<void> {
+      forumList.value = await apiHubReq.forum();
     }
 
     // 刷新游戏卡片配置项
@@ -29,7 +36,14 @@ const useBBSStore = defineStore(
       gameUidCards.value = conf.game_uid_card_conf;
     }
 
-    return { gameList, refreshGameList, gameUidCards, refreshGameUidCards };
+    return {
+      gameList,
+      refreshGameList,
+      forumList,
+      refreshForumList,
+      gameUidCards,
+      refreshGameUidCards,
+    };
   },
   { persist: true },
 );

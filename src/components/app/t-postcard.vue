@@ -116,11 +116,13 @@ import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
+import useBBSStore from "@store/bbs.js";
 import { emit } from "@tauri-apps/api/event";
 import { str2Color } from "@utils/colorFunc.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
 import { timestampToDate } from "@utils/toolFunc.js";
+import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -158,11 +160,15 @@ const stats: Readonly<Array<RenderStatus>> = [
   { stat: 2, label: "评选中", color: "var(--tgc-od-orange)" },
   { stat: 3, label: "已结束", color: "var(--tgc-od-white)" },
 ];
+
 const route = useRoute();
 const router = useRouter();
+const { forumList } = storeToRefs(useBBSStore());
+
 const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
-const isSelected = ref<boolean>(false);
 const emits = defineEmits<TPostCardEmits>();
+
+const isSelected = ref<boolean>(false);
 const card = shallowRef<RenderCard>();
 
 const cardBg = computed<string>(() => {
@@ -220,11 +226,12 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
   let forumData: RenderForum | null = null;
   let statData: RenderData | null = null;
   if (item.forum !== null) {
-    // 对部分缺失图标进行补充
     let forumIcon = item.forum.icon;
-    if (item.forum.name === "攻略" && item.forum.id === 43) {
-      forumIcon =
-        "https://upload-bbs.mihoyo.com/upload/2020/09/14/ce666cea7c971b04e4b4a6fe0a9ebfd0.png";
+    const findG = forumList.value.find((i) => i.game_id === item.post.game_id);
+    if (findG) {
+      console.log(findG, item);
+      const findF = findG.forums.find((i) => i.id === item.forum.id);
+      if (findF) forumIcon = findF.icon_pure;
     }
     forumData = { name: item.forum.name, icon: forumIcon, id: item.forum.id };
   }

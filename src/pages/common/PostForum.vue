@@ -1,3 +1,4 @@
+<!-- 帖子页面 -->
 <template>
   <v-app-bar>
     <template #prepend>
@@ -121,7 +122,7 @@
       <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="curGid.toString()" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="curGid" :keyword="search" />
   <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
@@ -133,7 +134,6 @@ import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
-import ApiHubReq from "@req/apiHubReq.js";
 import painterReq from "@req/painterReq.js";
 import useBBSStore from "@store/bbs.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -166,7 +166,8 @@ const showSearch = ref<boolean>(false);
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
 
-const { gameList } = storeToRefs(useBBSStore());
+const bbsStore = useBBSStore();
+const { gameList, forumList } = storeToRefs(bbsStore);
 const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
@@ -232,9 +233,9 @@ watch(
 
 // 初始化
 async function loadForums(): Promise<void> {
-  const allForums = await ApiHubReq.forum();
+  await bbsStore.refreshForumList();
   const list: Array<SortSelectGame> = [];
-  for (const gameForum of allForums) {
+  for (const gameForum of forumList.value) {
     const gameFind = gameList.value.find((i) => i.id === gameForum.game_id);
     if (!gameFind) continue;
     const gameItem: SortSelectGame = {
