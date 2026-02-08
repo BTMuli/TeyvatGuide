@@ -192,6 +192,25 @@ async function deleteRecords(uid: string): Promise<void> {
   await db.execute("DELETE FROM GachaBRecords WHERE uid = ?;", [uid]);
 }
 
+/**
+ * 更新单条数据名称&类型
+ * @since Beta v0.9.5
+ * @param raw - 原始数据
+ * @param data - 对应数据
+ * @returns 无返回值
+ */
+async function updateNt(
+  raw: TGApp.Sqlite.Gacha.GachaB,
+  data: TGApp.App.Gacha.GachaBMeta,
+): Promise<void> {
+  const db = await TGSqlite.getDB();
+  await db.execute("UPDATE GachaBRecords SET name = $1,type = $2 WHERE id = $3;", [
+    data.name,
+    data.type,
+    raw.id,
+  ]);
+}
+
 const TSUserGachaB = {
   getUidList,
   getGachaCheck,
@@ -199,6 +218,7 @@ const TSUserGachaB = {
   insertGachaList,
   deleteRecords,
   mergeUIGF4,
+  updateNt,
 };
 
 export default TSUserGachaB;

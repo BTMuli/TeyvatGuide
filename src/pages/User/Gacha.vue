@@ -699,7 +699,10 @@ async function deleteGacha(): Promise<void> {
 async function checkData(): Promise<void> {
   let cnt = 0;
   let fail = 0;
-  await showLoading.start("正在检测数据", `UID:${uidCur.value}，共${gachaListCur.value.length}条`);
+  await showLoading.start(
+    "正在检测数据",
+    `UID:${uidCur.value}，共${gachaListCur.value.length}条祈愿数据`,
+  );
   for (const data of gachaListCur.value) {
     if (data.itemId === "") {
       // TODO: 如果有名字重复的需要注意

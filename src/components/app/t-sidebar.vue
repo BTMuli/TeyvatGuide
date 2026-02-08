@@ -1,3 +1,4 @@
+<!-- 应用侧边栏 TODO:样式适配 -->
 <template>
   <v-navigation-drawer :permanent="true" :rail="rail" class="tsb-box">
     <v-list :nav="true" class="side-list" density="compact">
@@ -763,11 +764,13 @@ async function tryLaunchGame(): Promise<void> {
 </script>
 <style lang="css" scoped>
 .tsb-box {
+  position: relative;
   background: var(--app-side-bg);
   color: var(--app-side-content);
 }
 
 .side-list {
+  position: relative;
   height: 100%;
   font-family: var(--font-title);
 }

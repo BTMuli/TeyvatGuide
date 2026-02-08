@@ -105,6 +105,8 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import { AppGachaBData } from "@/data/index.js";
+
 const router = useRouter();
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
@@ -345,8 +347,33 @@ async function exportUigf(): Promise<void> {
 }
 
 async function checkData(): Promise<void> {
-  // TODO
-  showSnackbar.warn("暂未支持");
+  let cnt = 0;
+  let fail = 0;
+  await showLoading.start(
+    "正在检测数据",
+    `UID:${uidCur.value}，共${gachaListCur.value.length}条颂愿数据`,
+  );
+  for (const data of gachaListCur.value) {
+    const find = AppGachaBData.find((i) => i.id === data.itemId);
+    if (!find) {
+      await showLoading.update(`未找到 ${data.itemId} 对应元数据，跳过`);
+      fail++;
+      continue;
+    }
+    if (data.name !== find.name) {
+      await showLoading.update(`${data.name}->${find.name}`);
+      await TSUserGachaB.updateNt(data, find);
+      cnt++;
+    }
+  }
+  await showLoading.end();
+  if (cnt > 0 || fail > 0) {
+    showSnackbar.success(`成功补充遗漏数据${cnt}条，失败${fail}条，即将刷新`);
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+    window.location.reload();
+  } else {
+    showSnackbar.success(`成功检测${gachaListCur.value.length}条数据，无需更新`);
+  }
 }
 </script>
 <style lang="scss" scoped>
