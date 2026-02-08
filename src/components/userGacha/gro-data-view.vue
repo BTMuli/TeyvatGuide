@@ -65,6 +65,12 @@
       </v-tabs>
       <v-window v-model="tab" class="gro-bottom-window">
         <v-window-item class="gro-b-window-item" value="5">
+          <GroDataReset
+            v-if="props.dataType !== 'new'"
+            :count="reset5count - 1"
+            :gacha="props.dataType"
+            compute="5"
+          />
           <v-virtual-scroll :item-height="48" :items="star5List">
             <template #default="{ item }">
               <GroDataLine
@@ -77,6 +83,12 @@
           </v-virtual-scroll>
         </v-window-item>
         <v-window-item class="gro-b-window-item" value="4">
+          <GroDataReset
+            v-if="props.dataType !== 'new'"
+            :count="reset4count - 1"
+            :gacha="props.dataType"
+            compute="4"
+          />
           <v-virtual-scroll :item-height="48" :items="star4List">
             <template #default="{ item }">
               <GroDataLine
@@ -108,6 +120,7 @@ import {
 } from "vue";
 
 import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
+import GroDataReset from "./gro-data-reset.vue";
 
 import { AppGachaData } from "@/data/index.js";
 
