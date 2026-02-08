@@ -2,25 +2,45 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2026-01-22
+Update: 2026-02-08
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2026-01-22 01:28:01`
+> 更新于 `2026-02-08 14:32:58`
 
-## [0.9.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.4) (2025-01-22)
+## [0.9.5](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.5) (2026-02-08)
+
+- ✨ 重构UIGF导入导出备份恢复，支持UIGF4.2
+- 🍱 精简颂愿元数据
+- 🐛 由于Gt4配置变更，修复验证码登录时极验未正确触发
+- 🐛 保存用户信息采用参数绑定，修复特殊数据导致的sql拼接异常
+- 🐛 将ck更新逻辑移至首页，修复ck自动更新异常
+- 🐛 修正剧诗概况星章计算逻辑
+- 💄 调整战绩数据总览样式，更为紧凑
+- 💄 处理特定武器没有副属性时的渲染
+- 💄 修复集录祈愿卡池渲染异常
+- 💄 调整剧诗详情布局，统一比例 2/1
+- 💄 调整签到组件额外奖励样式，处理额外奖励点击
+- 🚸 暴露成就系列完成百分比，1位小数
+- 🚸 优化当前选中成就系列区分度
+- 🚸 深渊上传成功后自动刷新胡桃云用户信息
+- 🚸 修复图片质量调整特定条件下浮窗异常关闭 [`#207`](https://github.com/BTMuli/TeyvatGuide/issues/207)
+- 🚸 自定义表情加载失败点击重新加载
+- 🚸 优化祈愿垫数展示UI
+
+## [0.9.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.4) (2026-01-22)
 
 - 🐛 修复`msi`版本导入`dll`调用路径异常，捕获`dll`路径异常错误
 - 🎨 调整商店版本`dll`检测逻辑，存在时不复制
 - 🚸 调整导入相关提示文本
 
-## [0.9.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.3) (2025-01-19)
+## [0.9.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.3) (2026-01-19)
 
 - 🐛 修复导入调用参数异常
 - 🚸 设置页胡桃云用户信息刷新防抖处理
 
-## [0.9.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.2) (2025-01-18)
+## [0.9.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.2) (2026-01-18)
 
 - 🍱 增加旅行者衣装相关资源
 - ✨ WIKI新增 `{LINK#xx}{/LINK}` 数据支持 [`#156`](https://github.com/BTMuli/TeyvatGuide/issues/156)
@@ -40,7 +60,7 @@ Update: 2026-01-22
 - ♻️ 祈愿页面导入功能合并，仅显示一个导入按钮
 - 💄 深渊支持单楼层分享，剧诗支持单幕分享
 
-## [0.9.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.1) (2025-01-14)
+## [0.9.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.1) (2026-01-14)
 
 - 🍱 元数据：更新6.3版本资源
 - 🍱 元数据：精简部分材料来源描述
