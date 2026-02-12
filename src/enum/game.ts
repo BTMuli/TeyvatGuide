@@ -1,6 +1,6 @@
 /**
  * 游戏相关枚举
- * @since Beta v0.9.1
+ * @since Beta v0.9.6
  */
 
 /**
@@ -136,6 +136,16 @@ function getGameAnnoLangDesc(lang: TGApp.Game.Anno.AnnoLangEnum): string {
   }
 }
 
+/**
+ * 绘想游迹状态枚举
+ * @since Beta v0.9.6
+ */
+const CombatCharMasterStatEnum: typeof TGApp.Game.Combat.CharMasterStat = {
+  LOCK: 1,
+  UNFINISH: 2,
+  DONE: 3,
+};
+
 /** 游戏相关枚举 */
 const gameEnum = {
   actCalendarType: ActCalendarTypeEnum,
@@ -148,6 +158,9 @@ const gameEnum = {
     lang: GameAnnoLangEnum,
     langList: GameAnnoLangList,
     langDesc: getGameAnnoLangDesc,
+  },
+  combat: {
+    charMasterStat: CombatCharMasterStatEnum,
   },
 };
 

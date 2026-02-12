@@ -1,19 +1,26 @@
 /**
  * 幻想真境剧诗类型定义
- * @since Beta v0.8.3
+ * @since Beta v0.9.6
  */
+
 declare namespace TGApp.Game.Combat {
   /**
    * 幻想真境剧诗数据返回响应
-   * @since Beta v0.6.3
+   * @since Beta v0.9.6
    */
-  type Response = TGApp.BBS.Response.BaseWithData<FullData>;
+  type CombatResp = TGApp.BBS.Response.BaseWithData<CombatRes>;
+
+  /**
+   * 绘想游迹数据返回响应
+   * @since Beta v0.9.6
+   */
+  type CharResp = TGApp.BBS.Response.BaseWithData<CharRes>;
 
   /**
    * 幻想真境剧诗数据返回
-   * @since Beta v0.6.3
+   * @since Beta v0.9.6
    */
-  type FullData = {
+  type CombatRes = {
     /** 是否解锁 */
     is_unlock: boolean;
     /** 相关链接 */
@@ -22,6 +29,17 @@ declare namespace TGApp.Game.Combat {
     data: Array<Combat>;
     /** 月谕圣牌 */
     tarot_card_state: TarotState;
+  };
+
+  /**
+   * 绘想游迹数据返回
+   * @since Beta v0.9.6
+   */
+  type CharRes = {
+    /** 绘想游迹列表 */
+    list: Array<CharMaster>;
+    /** 是否解锁 */
+    is_unlock: boolean;
   };
 
   /**
@@ -293,7 +311,7 @@ declare namespace TGApp.Game.Combat {
 
   /**
    * 塔罗牌
-   * @since Beta v0.8.3
+   * @since Beta v0.9.6
    */
   type TarotCard = {
     /** 图标 */
@@ -301,8 +319,52 @@ declare namespace TGApp.Game.Combat {
     /** 名称 */
     name: string;
     /** 是否解锁 */
-    is_unlocked: boolean;
+    is_unlock: boolean;
     /** 解锁数 */
     unlock_num: number;
+  };
+
+  /**
+   * 绘想游迹状态类型
+   * @since Beta v0.9.6
+   */
+  const CharMasterStat = <const>{
+    /** 未解锁 */
+    LOCK: 1,
+    /** 未挑战 */
+    UNFINISH: 2,
+    /** 已拥有 */
+    DONE: 3,
+  };
+
+  /**
+   * 绘想游迹状态枚举
+   * @since Beta v0.9.6
+   */
+  type CharMasterStatEnum = (typeof CharMasterStat)[keyof typeof CharMasterStat];
+
+  /**
+   * 绘想游迹数据
+   * @since Beta v0.9.6
+   */
+  type CharMaster = {
+    /** 角色 ID */
+    avatar_id: number;
+    /** 角色名称 */
+    name: string;
+    /** 角色图标 */
+    icon: string;
+    /**
+     * 状态
+     * @example
+     * 1 - 未解锁
+     * 2 - 未挑战
+     * 3 - 已拥有
+     */
+    status: CharMasterStatEnum;
+    /** 是否有红点 */
+    has_red_dot: boolean;
+    /** 等级ID */
+    level_id: number;
   };
 }

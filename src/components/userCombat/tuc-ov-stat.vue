@@ -83,7 +83,7 @@ async function share(): Promise<void> {
     showSnackbar.error("未获取到分享内容");
     return;
   }
-  const fileName = `真境剧诗_${new Date().getTime()}.png`;
+  const fileName = `真境剧诗统计_${new Date().getTime()}.png`;
   await showLoading.start("正在生成分享图", fileName);
   isShare.value = true;
   await generateShareImg(fileName, element, 1.2, true);

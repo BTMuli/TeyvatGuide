@@ -1,6 +1,6 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.9.1
+ * @since Beta v0.9.6
  */
 
 import gameEnum from "@enum/game.js";
@@ -81,7 +81,7 @@ async function index(
 
 /**
  * 获取真境剧诗数据
- * @since Beta v0.6.3
+ * @since Beta v0.9.6
  * @param cookie - Cookie
  * @param user - 用户
  * @returns 真境剧诗数据
@@ -89,7 +89,7 @@ async function index(
 async function roleCombat(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<Array<TGApp.Game.Combat.Combat> | TGApp.BBS.Response.Base | false> {
+): Promise<TGApp.Game.Combat.CombatRes | TGApp.BBS.Response.Base> {
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,
@@ -97,13 +97,38 @@ async function roleCombat(
     ltuid: cookie.ltuid,
   };
   const params = { role_id: user.gameUid, server: user.region, active: 1, need_detail: true };
-  const resp = await TGHttp<TGApp.Game.Combat.Response | TGApp.BBS.Response.Base>(
+  const resp = await TGHttp<TGApp.Game.Combat.CombatResp | TGApp.BBS.Response.Base>(
     `${trgAbu}role_combat`,
     { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  if (!resp.data.is_unlock) return false;
-  return resp.data.data;
+  return resp.data;
+}
+
+/**
+ * 获取绘想游迹数据
+ * @since Beta v0.9.6
+ * @param cookie - Cookie
+ * @param user - 用户
+ * @returns 绘想游迹数据
+ */
+async function charMaster(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.BBS.Response.Base | TGApp.Game.Combat.CharRes> {
+  const ck = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltoken: cookie.ltoken,
+    ltuid: cookie.ltuid,
+  };
+  const params = { role_id: user.gameUid, server: user.region };
+  const resp = await TGHttp<TGApp.Game.Combat.CharResp | TGApp.BBS.Response.Base>(
+    `${trgAbu}char_master`,
+    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
+  );
+  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 /**
@@ -209,7 +234,10 @@ const recordReq = {
   index: index,
   actCalendar: actCalendar,
   character: { list: characterList, detail: characterDetail },
-  roleCombat: roleCombat,
+  combat: {
+    base: roleCombat,
+    char: charMaster,
+  },
   spiralAbyss: spiralAbyss,
   challenge: {
     detail: hardChallengeDetail,

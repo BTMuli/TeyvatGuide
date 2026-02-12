@@ -59,10 +59,20 @@
     </template>
     <template #extension>
       <div class="uct-extension">
-        <v-btn class="uc-btn" variant="elevated" @click="loadWiki()">
-          <img alt="abyss" src="/platforms/other/hutao.webp" />
-          <span>统计数据</span>
-        </v-btn>
+        <div class="uct-extension-left">
+          <v-btn class="uc-btn" variant="elevated" @click="loadWiki()">
+            <img alt="abyss" src="/platforms/other/hutao.webp" />
+            <span>统计数据</span>
+          </v-btn>
+          <v-btn class="uc-btn" variant="elevated" @click="loadCharMaster()">
+            <img alt="char" src="/UI/combat/charMaster.webp" />
+            <span>绘想游迹</span>
+          </v-btn>
+          <v-btn class="uc-btn" variant="elevated" @click="loadTarot()">
+            <img alt="char" src="/UI/combat/tarotDefault.webp" />
+            <span>月谕圣牌</span>
+          </v-btn>
+        </div>
         <div class="uct-extension-right">
           <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
           <v-btn
@@ -130,7 +140,9 @@
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>
-  <TucOverlay v-model="showData" :data="cloudCombat" />
+  <TucOvStat v-model="showStat" :data="cloudCombat" />
+  <TucOvChar v-model="showChar" :data="charMasters" :uid="uidCur" />
+  <TucOvTarot v-model="showTarot" :data="tarotStat" :uid="uidCur" />
 </template>
 <script lang="ts" setup>
 import TSubLine from "@comp/app/t-subline.vue";
@@ -138,7 +150,9 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucAvatars from "@comp/userCombat/tuc-avatars.vue";
-import TucOverlay from "@comp/userCombat/tuc-overlay.vue";
+import TucOvChar from "@comp/userCombat/tuc-ov-char.vue";
+import TucOvStat from "@comp/userCombat/tuc-ov-stat.vue";
+import TucOvTarot from "@comp/userCombat/tuc-ov-tarot.vue";
 import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
 import hutao from "@Hutao/index.js";
@@ -166,10 +180,15 @@ const { userName } = storeToRefs(hutaoStore);
 const userTab = ref<number>(0);
 const version = ref<string>();
 const uidCur = ref<string>();
-const showData = ref<boolean>(false);
 const uidList = shallowRef<Array<string>>();
-const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
+
+const showStat = ref<boolean>(false);
+const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
+const showChar = ref<boolean>(false);
+const charMasters = shallowRef<Array<TGApp.Game.Combat.CharMaster>>([]);
+const showTarot = ref<boolean>(false);
+const tarotStat = shallowRef<TGApp.Game.Combat.TarotState>();
 
 onMounted(async () => {
   await showLoading.start("正在加载剧诗数据");
@@ -204,7 +223,9 @@ async function loadWiki(): Promise<void> {
   } else cloudCombat.value = res;
   await showLoading.end();
   showSnackbar.success("成功获取统计数据");
-  showData.value = true;
+  if (showTarot.value) showTarot.value = false;
+  if (showChar.value) showChar.value = false;
+  showStat.value = true;
 }
 
 async function reloadUid(): Promise<void> {
@@ -255,13 +276,8 @@ async function refreshCombat(): Promise<void> {
   }
   await TGLogger.Info("[UserCombat][refreshCombat] 更新剧诗数据");
   await showLoading.start(`正在获取${account.value.gameUid}的剧诗数据`);
-  const res = await recordReq.roleCombat(cookie.value, account.value);
+  const res = await recordReq.combat.base(cookie.value, account.value);
   console.log(res);
-  if (res === false) {
-    await showLoading.end();
-    showSnackbar.warn("用户未解锁幻想真境剧诗");
-    return;
-  }
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
@@ -269,8 +285,13 @@ async function refreshCombat(): Promise<void> {
     await TGLogger.Error(`[UserCombat][refreshCombat] ${res.retcode} ${res.message}`);
     return;
   }
+  if (!res.is_unlock) {
+    await showLoading.end();
+    showSnackbar.warn("用户未解锁幻想真境剧诗");
+    return;
+  }
   await showLoading.update("正在保存剧诗数据");
-  for (const combat of res) {
+  for (const combat of res.data) {
     await showLoading.update("正在保存剧诗数据");
     await TSUserCombat.saveCombat(account.value.gameUid, combat);
   }
@@ -278,6 +299,102 @@ async function refreshCombat(): Promise<void> {
   await reloadUid();
   await loadCombat();
   await showLoading.end();
+}
+
+async function loadCharMaster(): Promise<void> {
+  if (!cookie.value) {
+    showSnackbar.error("未登录");
+    await TGLogger.Warn("[UserCombat][loadCharMaster] 未登录");
+    return;
+  }
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
+    const switchCheck = await showDialog.check(
+      "是否切换游戏账户",
+      `确认则尝试切换至 ${uidCur.value}`,
+    );
+    if (switchCheck) {
+      await useUserStore().switchGameAccount(uidCur.value);
+      await refreshCombat();
+      return;
+    }
+    const freshCheck = await showDialog.check(
+      "确定刷新？",
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
+    );
+    if (!freshCheck) {
+      showSnackbar.cancel("已取消剧诗数据刷新");
+      return;
+    }
+  }
+  await TGLogger.Info("[UserCombat][loadCharMaster] 获取绘想游迹数据");
+  await showLoading.start(`正在获取${account.value.gameUid}的绘想游迹数据`);
+  const res = await recordReq.combat.char(cookie.value, account.value);
+  console.log(res);
+  if ("retcode" in res) {
+    await showLoading.end();
+    showSnackbar.error(`[${res.retcode}]${res.message}`);
+    await TGLogger.Error(`[UserCombat][loadCharMaster] 获取${account.value.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[UserCombat][loadCharMaster] ${res.retcode} ${res.message}`);
+    return;
+  }
+  if (!res.is_unlock) {
+    await showLoading.end();
+    showSnackbar.warn("用户未解锁绘想游迹");
+    return;
+  } else charMasters.value = res.list;
+  showSnackbar.success("成功获取绘想游迹数据");
+  await showLoading.end();
+  if (showStat.value) showStat.value = false;
+  if (showTarot.value) showTarot.value = false;
+  showChar.value = true;
+}
+
+async function loadTarot(): Promise<void> {
+  if (!cookie.value) {
+    showSnackbar.error("未登录");
+    await TGLogger.Warn("[UserCombat][loadTarot] 未登录");
+    return;
+  }
+  if (uidCur.value && uidCur.value !== account.value.gameUid) {
+    const switchCheck = await showDialog.check(
+      "是否切换游戏账户",
+      `确认则尝试切换至 ${uidCur.value}`,
+    );
+    if (switchCheck) {
+      await useUserStore().switchGameAccount(uidCur.value);
+      await refreshCombat();
+      return;
+    }
+    const freshCheck = await showDialog.check(
+      "确定刷新？",
+      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
+    );
+    if (!freshCheck) {
+      showSnackbar.cancel("已取消剧诗数据刷新");
+      return;
+    }
+  }
+  await TGLogger.Info("[UserCombat][loadTarot] 获取月谕圣牌数据");
+  await showLoading.start(`正在获取${account.value.gameUid}的月谕圣牌数据`);
+  const res = await recordReq.combat.base(cookie.value, account.value);
+  console.log(res);
+  if ("retcode" in res) {
+    await showLoading.end();
+    showSnackbar.error(`[${res.retcode}]${res.message}`);
+    await TGLogger.Error(`[UserCombat][loadTarot] 获取${account.value.gameUid}的月谕圣牌数据失败`);
+    await TGLogger.Error(`[UserCombat][loadTarot] ${res.retcode} ${res.message}`);
+    return;
+  }
+  if (!res.is_unlock) {
+    await showLoading.end();
+    showSnackbar.warn("用户未解锁幻想真境剧诗");
+    return;
+  } else tarotStat.value = res.tarot_card_state;
+  showSnackbar.success("成功获取月谕圣牌数据");
+  await showLoading.end();
+  if (showStat.value) showStat.value = false;
+  if (showChar.value) showChar.value = false;
+  showTarot.value = true;
 }
 
 async function shareCombat(): Promise<void> {
@@ -448,6 +565,14 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   margin-bottom: 4px;
 }
 
+.uct-extension-left {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+}
+
 .uct-extension-right {
   position: relative;
   display: flex;
@@ -475,7 +600,6 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   font-family: var(--font-text);
 
   img {
-    width: 24px;
     height: 24px;
     margin-right: 4px;
     object-fit: contain;
