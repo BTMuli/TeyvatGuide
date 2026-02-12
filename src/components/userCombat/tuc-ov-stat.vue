@@ -1,16 +1,15 @@
+<!-- 剧诗统计浮窗 -->
 <template>
   <TOverlay v-model="visible">
-    <div v-if="data" class="tuc-overlay-box">
-      <div class="tuc-overlay-top">
-        <span class="tuc-overlay-title" @click="share()">
-          真境剧诗统计-第{{ data.ScheduleId }}期
-        </span>
-        <span class="tuc-overlay-sub">
+    <div v-if="data" :class="{ share: isShare }" class="tuc-ovs-box">
+      <div class="tuc-ovs-top">
+        <span class="tuc-ovs-title" @click="share()"> 真境剧诗统计-第{{ data.ScheduleId }}期 </span>
+        <span class="tuc-ovs-sub">
           <span>共{{ data.RecordTotal }}条数据 | </span>
           <span>更新于{{ timestampToDate(data.Timestamp) }}</span>
         </span>
       </div>
-      <div class="tuc-overlay-content">
+      <div class="tuc-ovs-content">
         <TItemBox v-for="(item, index) in raw" :key="index" :model-value="getBoxData(item)" />
       </div>
     </div>
@@ -23,14 +22,16 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
 
-type TucOverlayProps = { data: TGApp.Plugins.Hutao.Combat.Data | undefined };
+type TucOvStatProps = { data: TGApp.Plugins.Hutao.Combat.Data | undefined };
 
-const props = defineProps<TucOverlayProps>();
+const props = defineProps<TucOvStatProps>();
 const visible = defineModel<boolean>();
+
+const isShare = ref<boolean>(false);
 const raw = computed<Array<TGApp.Plugins.Hutao.Base.Rate>>(() => {
   if (!props.data) return [];
   const res = props.data.BackupAvatarRates;
@@ -77,46 +78,57 @@ function getBoxData(item: TGApp.Plugins.Hutao.Base.Rate): TItemBoxData {
 }
 
 async function share(): Promise<void> {
-  const element = document.querySelector<HTMLElement>(".tuc-overlay-box");
+  const element = document.querySelector<HTMLElement>(".tuc-ovs-box");
   if (element === null) {
     showSnackbar.error("未获取到分享内容");
     return;
   }
   const fileName = `真境剧诗_${new Date().getTime()}.png`;
   await showLoading.start("正在生成分享图", fileName);
+  isShare.value = true;
   await generateShareImg(fileName, element, 1.2, true);
+  isShare.value = false;
   await showLoading.end();
 }
 </script>
 <style lang="css" scoped>
-.tuc-overlay-box {
+.tuc-ovs-box {
+  position: relative;
   display: flex;
   width: 800px;
-  height: 600px;
+  max-height: 600px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--app-page-bg);
-  gap: 10px;
+  gap: 8px;
+
+  &.share {
+    overflow-y: auto;
+
+    .tuc-ovs-content {
+      overflow-y: unset;
+    }
+  }
 }
 
-.tuc-overlay-top {
+.tuc-ovs-top {
   display: flex;
   width: 100%;
   align-items: flex-end;
   justify-content: space-between;
 }
 
-.tuc-overlay-title {
+.tuc-ovs-title {
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 20px;
 }
 
-.tuc-overlay-sub {
+.tuc-ovs-sub {
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -125,7 +137,7 @@ async function share(): Promise<void> {
   white-space: pre;
 }
 
-.tuc-overlay-content {
+.tuc-ovs-content {
   display: grid;
   width: 100%;
   padding-right: 8px;
