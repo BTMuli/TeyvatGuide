@@ -7,7 +7,8 @@
       data-html2canvas-ignore
     ></div>
     <div class="tp-vod-share">
-      <img :src="coverUrl" alt="cover" class="tp-vod-cover" />
+      <img v-if="coverUrl" :src="coverUrl" alt="cover" class="tp-vod-cover" />
+      <v-progress-circular v-else color="primary" indeterminate size="25" />
       <img alt="icon" class="tp-vod-icon" src="/source/UI/video_play.svg" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
@@ -169,9 +170,12 @@ onUnmounted(() => {
   max-width: 100%;
   margin: 8px auto;
   aspect-ratio: v-bind(vodAspectRatio); /* stylelint-disable-line value-keyword-case */
+  background: var(--box-bg-1);
 }
 
 .tp-vod-container {
+  position: relative;
+  z-index: 1;
   overflow: hidden;
   max-width: 100%;
   border-radius: 8px;
@@ -180,7 +184,7 @@ onUnmounted(() => {
 
 .tp-vod-share {
   position: absolute;
-  z-index: -1;
+  z-index: 0;
   top: 0;
   left: 0;
   display: flex;
