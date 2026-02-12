@@ -28,7 +28,7 @@ const hint = getEndHint();
 
 function getIcon(): string {
   const find = AppGachaBData.find((i) => i.id.toString() === props.data.itemId);
-  if (!find) return `/source/UI/paimon.webp`;
+  if (!find) return `/UI/nav/paimon.webp`;
   return `/WIKI/gachaB/${find.icon}.webp`;
 }
 

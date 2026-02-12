@@ -3,7 +3,7 @@
   <v-app-bar>
     <div class="ab-top">
       <div class="ab-title">
-        <img alt="archive_birthday_icon" src="/source/UI/act_birthday.webp" />
+        <img alt="archive_birthday_icon" src="/UI/nav/act_birthday.webp" />
         <span>留影叙佳期</span>
       </div>
       <div class="ab-switch">

@@ -4,7 +4,7 @@
     <template #prepend>
       <div class="twm-top-prepend">
         <div class="title">
-          <img alt="icon" src="/source/UI/wikiGCG.webp" />
+          <img alt="icon" src="/UI/nav/wikiGCG.webp" />
           <span>材料图鉴</span>
         </div>
         <v-select

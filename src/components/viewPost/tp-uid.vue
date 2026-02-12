@@ -43,7 +43,7 @@ const defaultCard: TGApp.BBS.AppConfig.GameUidCardConf = {
   main_text_color: "#a17a58ff",
   is_open: true,
   background_color: "#ffffff",
-  image_url: "/source/post/tp_uid_bg.webp",
+  image_url: "/UI/post/tp_uid_bg.webp",
 };
 
 const props = defineProps<TpUidProps>();

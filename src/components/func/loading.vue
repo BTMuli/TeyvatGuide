@@ -17,7 +17,7 @@
               {{ data.subtitle }}
             </div>
             <div class="loading-img">
-              <img v-if="data.empty" alt="empty" src="/source/UI/empty.webp" />
+              <img v-if="data.empty" alt="empty" src="/UI/app/empty.webp" />
               <img v-else :src="iconUrl" alt="loading" />
             </div>
           </div>
@@ -33,7 +33,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 
 import { LoadingParams } from "./loading.js";
 
-const defaultIcon = "/source/UI/loading.webp";
+const defaultIcon = "/UI/app/loading.webp";
 
 const showBox = ref<boolean>(false);
 const showOuter = ref<boolean>(false);

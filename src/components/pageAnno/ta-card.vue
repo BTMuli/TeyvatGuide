@@ -2,7 +2,7 @@
   <div :id="`anno_card_${props.anno.ann_id}`" class="anno-card" @click="console.log(props)">
     <div :title="props.anno.title" class="anno-cover" @click="createAnno">
       <TMiImg v-if="props.anno.banner !== ''" :ori="true" :src="props.anno.banner" alt="cover" />
-      <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
+      <img v-else alt="cover" src="/UI/post/defaultCover.webp" />
       <div class="anno-info">
         <div class="anno-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>

@@ -11,7 +11,7 @@
       <v-list-item :link="true" :title.attr="'首页'" href="/">
         <template #title>首页</template>
         <template #prepend>
-          <img alt="homeIcon" class="side-icon paimon" src="/source/UI/paimon.webp" />
+          <img alt="homeIcon" class="side-icon paimon" src="/UI/nav/paimon.webp" />
         </template>
       </v-list-item>
       <v-list-item :link="true" href="/announcements" title.attr="'公告'">
@@ -29,7 +29,7 @@
       <v-list-item :link="true" :title.attr="'帖子'" href="/posts/forum">
         <template #title>帖子</template>
         <template #prepend>
-          <img alt="posts" class="side-icon" src="/source/UI/posts.webp" />
+          <img alt="posts" class="side-icon" src="/UI/nav/posts.webp" />
         </template>
       </v-list-item>
       <v-list-item :link="true" :title.attr="'成就'" href="/achievements">
@@ -48,13 +48,13 @@
       <v-list-item :link="true" :title.attr="'原神战绩'" href="/user/record">
         <template #title>原神战绩</template>
         <template #prepend>
-          <img alt="record" class="side-icon" src="/source/UI/userRecord.webp" />
+          <img alt="record" class="side-icon" src="/UI/nav/userRecord.webp" />
         </template>
       </v-list-item>
       <v-list-item :link="true" :title.attr="'我的角色'" href="/user/characters">
         <template #title>我的角色</template>
         <template #prepend>
-          <img alt="characters" class="side-icon" src="/source/UI/userAvatar.webp" />
+          <img alt="characters" class="side-icon" src="/UI/nav/userAvatar.webp" />
         </template>
       </v-list-item>
       <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
@@ -62,24 +62,24 @@
           <v-list-item :title.attr="'高难挑战'" v-bind="props">
             <template #title>高难挑战</template>
             <template #prepend>
-              <img alt="abyssLab" class="side-icon" src="/source/UI/userAbyssLab.webp" />
+              <img alt="abyssLab" class="side-icon" src="/UI/nav/userAbyssLab.webp" />
             </template>
           </v-list-item>
         </template>
         <v-list :nav="true" class="side-list-menu sub" density="compact">
           <v-list-item :link="true" class="side-item-menu" href="/user/abyss" title="深境螺旋">
             <template #prepend>
-              <img alt="abyss" class="side-icon-menu" src="/source/UI/userAbyss.webp" />
+              <img alt="abyss" class="side-icon-menu" src="/UI/nav/userAbyss.webp" />
             </template>
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/user/combat" title="真境剧诗">
             <template #prepend>
-              <img alt="combat" class="side-icon-menu" src="/source/UI/userCombat.webp" />
+              <img alt="combat" class="side-icon-menu" src="/UI/nav/userCombat.webp" />
             </template>
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/user/challenge" title="幽境危战">
             <template #prepend>
-              <img alt="challenge" class="side-icon-menu" src="/source/UI/userChallenge.webp" />
+              <img alt="challenge" class="side-icon-menu" src="/UI/nav/userChallenge.webp" />
             </template>
           </v-list-item>
         </v-list>
@@ -87,13 +87,13 @@
       <v-list-item :link="true" :title.attr="'祈愿记录'" href="/user/gacha">
         <template #title>祈愿记录</template>
         <template #prepend>
-          <img alt="gacha" class="side-icon" src="/source/UI/userGacha.webp" />
+          <img alt="gacha" class="side-icon" src="/UI/nav/userGacha.webp" />
         </template>
       </v-list-item>
       <v-list-item :link="true" :title.attr="'实用脚本'" href="/user/scripts">
         <template #title>实用脚本</template>
         <template #prepend>
-          <img alt="scripts" class="side-icon" src="/source/UI/toolbox.webp" />
+          <img alt="scripts" class="side-icon" src="/UI/nav/toolbox.webp" />
         </template>
       </v-list-item>
       <v-divider />
@@ -112,7 +112,7 @@
           <v-list-item :title.attr="'图鉴'" v-bind="props">
             <template #title>图鉴</template>
             <template #prepend>
-              <img alt="wikiIcon" class="side-icon" src="/source/UI/wikiIcon.webp" />
+              <img alt="wikiIcon" class="side-icon" src="/UI/nav/wikiIcon.webp" />
             </template>
           </v-list-item>
         </template>
@@ -124,12 +124,12 @@
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/wiki/character" title="角色图鉴">
             <template #prepend>
-              <img alt="characterIcon" class="side-icon-menu" src="/source/UI/wikiAvatar.webp" />
+              <img alt="characterIcon" class="side-icon-menu" src="/UI/nav/wikiAvatar.webp" />
             </template>
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/wiki/weapon" title="武器图鉴">
             <template #prepend>
-              <img alt="weaponIcon" class="side-icon-menu" src="/source/UI/wikiWeapon.webp" />
+              <img alt="weaponIcon" class="side-icon-menu" src="/UI/nav/wikiWeapon.webp" />
             </template>
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/wiki/nameCard">
@@ -140,7 +140,7 @@
           </v-list-item>
           <v-list-item :link="true" class="side-item-menu" href="/wiki/material" title="材料图鉴">
             <template #prepend>
-              <img alt="gcgIcon" class="side-icon-menu" src="/source/UI/wikiGCG.webp" />
+              <img alt="gcgIcon" class="side-icon-menu" src="/UI/nav/wikiGCG.webp" />
             </template>
           </v-list-item>
         </v-list>
@@ -148,7 +148,7 @@
       <v-list-item :link="true" :title.attr="'留影叙佳期'" href="/archive/birthday">
         <template #title>留影叙佳期</template>
         <template #prepend>
-          <img alt="archive_birthday_icon" class="side-icon" src="/source/UI/act_birthday.webp" />
+          <img alt="archive_birthday_icon" class="side-icon" src="/UI/nav/act_birthday.webp" />
         </template>
       </v-list-item>
       <!-- 底部菜单 -->
@@ -171,7 +171,7 @@
               @click="openClient('sign_in')"
             >
               <template #prepend>
-                <img alt="sing_in" class="side-icon-menu" src="/source/UI/userGacha.webp" />
+                <img alt="sing_in" class="side-icon-menu" src="/UI/nav/userGacha.webp" />
               </template>
             </v-list-item>
             <v-list-item
@@ -181,7 +181,7 @@
               @click="openClient('game_record')"
             >
               <template #prepend>
-                <img alt="game_record" class="side-icon-menu" src="/source/UI/userRecord.webp" />
+                <img alt="game_record" class="side-icon-menu" src="/UI/nav/userRecord.webp" />
               </template>
             </v-list-item>
             <v-list-item
@@ -196,7 +196,7 @@
             </v-list-item>
             <v-list-item :link="true" class="side-item-menu" href="/collection" title="收藏">
               <template #prepend>
-                <img alt="collect" class="side-icon-menu" src="/source/UI/posts.webp" />
+                <img alt="collect" class="side-icon-menu" src="/UI/nav/posts.webp" />
               </template>
             </v-list-item>
             <v-list-item
@@ -343,7 +343,7 @@ const rail = computed<boolean>({
 });
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   if (briefInfo.value && briefInfo.value.nickname) return briefInfo.value;
-  return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/source/UI/lumine.webp" };
+  return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/UI/nav/lumine.webp" };
 });
 const themeTitle = computed<string>(() => (theme.value === "default" ? "深色模式" : "浅色模式"));
 const canLaunch = computed<boolean>(() => {

@@ -60,7 +60,7 @@ function getPool(type: string) {
 
 function getIcon(id: string): string {
   const find = AppGachaBData.find((i) => i.id.toString() === id);
-  if (!find) return `/source/UI/paimon.webp`;
+  if (!find) return `/UI/nav/paimon.webp`;
   return `/WIKI/gachaB/${find.icon}.webp`;
 }
 </script>

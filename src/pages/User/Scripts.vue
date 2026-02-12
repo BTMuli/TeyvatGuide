@@ -2,7 +2,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="us-top-title">
-        <img alt="icon" src="/source/UI/toolbox.webp" />
+        <img alt="icon" src="/UI/nav/toolbox.webp" />
         <span>实用脚本</span>
         <v-select
           v-model="curAccount"

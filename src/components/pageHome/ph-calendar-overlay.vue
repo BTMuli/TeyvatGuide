@@ -9,7 +9,7 @@
             <PwMaterialItem v-for="(material, index) in materialList" :key="index" :material />
           </div>
         </div>
-        <img alt="line" class="toc-line" src="/source/UI/item-line.webp" />
+        <img alt="line" class="toc-line" src="/UI/app/item-line.webp" />
         <div class="toc-bottom">
           <div class="toc-src-box">
             <div class="toc-src-text">来源：</div>

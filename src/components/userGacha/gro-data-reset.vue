@@ -3,7 +3,7 @@
   <div class="gro-dr-box">
     <div class="gro-dr-progress" />
     <div class="gro-dr-icon">
-      <img alt="empty" src="/source/UI/empty.webp" />
+      <img alt="empty" src="/UI/app/empty.webp" />
     </div>
     <div class="gro-dr-info">
       <div class="gro-dr-cnt">{{ props.count }}</div>
@@ -60,7 +60,7 @@ const progressWidth = computed<string>(() => {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: v-bind(progressWidth); /* stylelint-disable-line value-keyword-case */
+  width: v-bind(progresswidth); /* stylelint-disable-line value-keyword-case */
   max-width: 100%;
   height: 4px;
   border-radius: 4px;

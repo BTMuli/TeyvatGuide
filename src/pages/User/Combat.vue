@@ -4,7 +4,7 @@
     <template #prepend>
       <div class="uct-left">
         <div class="uct-title">
-          <img alt="icon" src="/source/UI/userCombat.webp" />
+          <img alt="icon" src="/UI/nav/userCombat.webp" />
           <span>幻想真境剧诗</span>
         </div>
         <v-select
@@ -16,11 +16,11 @@
           variant="outlined"
         />
         <v-btn class="uc-btn" rounded variant="elevated" @click="toAbyss()">
-          <img alt="abyss" src="/source/UI/userAbyss.webp" />
+          <img alt="abyss" src="/UI/nav/userAbyss.webp" />
           <span>深境螺旋</span>
         </v-btn>
         <v-btn class="uc-btn" rounded variant="elevated" @click="toChallenge()">
-          <img alt="challenge" src="/source/UI/userChallenge.webp" />
+          <img alt="challenge" src="/UI/nav/userChallenge.webp" />
           <span>幽境危战</span>
         </v-btn>
       </div>
@@ -136,7 +136,7 @@
       </v-window-item>
     </v-window>
     <div v-show="localCombat.length === 0" class="user-empty">
-      <img alt="empty" src="/source/UI/empty.webp" />
+      <img alt="empty" src="/UI/app/empty.webp" />
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>

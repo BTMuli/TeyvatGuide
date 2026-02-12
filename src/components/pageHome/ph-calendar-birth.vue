@@ -2,11 +2,11 @@
 <template>
   <div class="pcb-container">
     <div v-if="!isBirthday" class="pcb-top-none">
-      <img alt="empty" class="pcb-top-empty" src="/source/UI/empty.webp" />
+      <img alt="empty" class="pcb-top-empty" src="/UI/app/empty.webp" />
       <span>今天没有角色过生日哦~</span>
     </div>
     <div v-else class="pcb-top-active">
-      <img alt="empty" class="pcb-news" src="/source/UI/act_birthday.webp" @click="toNews()" />
+      <img alt="empty" class="pcb-news" src="/UI/nav/act_birthday.webp" @click="toNews()" />
       <span>今天是</span>
       <TMiImg
         v-for="i in cur"

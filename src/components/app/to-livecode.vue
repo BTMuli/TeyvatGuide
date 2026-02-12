@@ -16,7 +16,7 @@
       <div class="tolc-info">ActID:{{ props.actId }}</div>
       <div v-for="(item, index) in props.data" :key="index" class="tolc-list-box">
         <div class="tolc-list-icon">
-          <img v-if="item.img === ''" src="/source/UI/empty.webp" alt="empty" />
+          <img v-if="item.img === ''" src="/UI/app/empty.webp" alt="empty" />
           <TMiImg :src="item.img" :ori="true" v-else alt="award" />
         </div>
         <div class="tolc-list-info">

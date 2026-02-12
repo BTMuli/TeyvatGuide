@@ -15,7 +15,7 @@
   />
   <details v-else-if="props.data.insert.fold" class="tp-backup-fold">
     <summary class="tp-backup-summary">
-      <img alt="marker" src="/source/post/fold_marker.webp" class="tp-backup-marker" />
+      <img alt="marker" src="/UI/post/fold_marker.webp" class="tp-backup-marker" />
       <TpParser :data="JSON.parse(props.data.insert.fold.title)" />
     </summary>
     <div class="tp-backup-details">

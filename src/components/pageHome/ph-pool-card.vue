@@ -2,7 +2,7 @@
   <div class="ph-pool-card">
     <div class="ph-pool-cover" @click="toPool()">
       <img v-if="cover" :src="cover" alt="cover" />
-      <img v-else alt="empty" class="empty" src="/source/UI/empty.webp" />
+      <img v-else alt="empty" class="empty" src="/UI/app/empty.webp" />
     </div>
     <div class="ph-pool-bottom">
       <div class="ph-pool-avatars">

@@ -3,7 +3,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="ur-top-title">
-        <img alt="icon" src="/source/UI/userRecord.webp" />
+        <img alt="icon" src="/UI/nav/userRecord.webp" />
         <span>原神战绩</span>
         <v-select
           v-model="uidCur"
@@ -66,7 +66,7 @@
     </PhCompCard>
   </div>
   <div v-else class="ur-empty">
-    <img alt="empty" src="/source/UI/empty.webp" />
+    <img alt="empty" src="/UI/app/empty.webp" />
     <span>DATA NOT FOUND</span>
   </div>
 </template>

@@ -35,7 +35,7 @@ const props = defineProps<GroDataLineProps>();
 
 function getIcon(): string {
   const find = getWikiBrief(props.data.itemId);
-  if (!find) return `/source/UI/paimon.webp`;
+  if (!find) return `/UI/nav/paimon.webp`;
   if ("element" in find) return `/WIKI/character/${props.data.itemId}.webp`;
   return `/WIKI/weapon/${props.data.itemId}.webp`;
 }

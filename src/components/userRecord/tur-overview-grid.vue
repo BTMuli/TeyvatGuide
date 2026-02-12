@@ -4,27 +4,27 @@
     <div class="tur-og-box grid4">
       <TurOverviewSub
         :text="modelValue.activeDays"
-        icon="/source/UI/userRecord.webp"
+        icon="/UI/nav/userRecord.webp"
         title="活跃天数"
       />
       <TurOverviewSub
         :text="modelValue.sprialAbyss"
-        icon="/source/UI/userAbyss.webp"
+        icon="/UI/nav/userAbyss.webp"
         title="深境螺旋"
       />
       <TurOverviewSub
         :text="modelValue.combatRole"
-        icon="/source/UI/userCombat.webp"
+        icon="/UI/nav/userCombat.webp"
         title="幻想真境剧诗"
       />
       <TurOverviewSub
         :text="modelValue.hardChallenge"
-        icon="/source/UI/userChallenge.webp"
+        icon="/UI/nav/userChallenge.webp"
         title="幽境危战"
       />
       <TurOverviewSub
         :text="modelValue.avatarNumber"
-        icon="/source/UI/userAvatar.webp"
+        icon="/UI/nav/userAvatar.webp"
         title="获得角色数"
       />
       <TurOverviewSub

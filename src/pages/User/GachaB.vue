@@ -13,7 +13,7 @@
           label="游戏UID"
           variant="outlined"
         />
-        <img alt="gacha" src="/source/UI/userGacha.webp" title="祈愿" @click="toGacha()" />
+        <img alt="gacha" src="/UI/nav/userGacha.webp" title="祈愿" @click="toGacha()" />
       </div>
     </template>
     <template #extension>

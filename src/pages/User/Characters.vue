@@ -3,7 +3,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="uc-top-title">
-        <img alt="icon" src="/source/UI/userAvatar.webp" />
+        <img alt="icon" src="/UI/nav/userAvatar.webp" />
         <span>我的角色</span>
         <v-btn class="uc-top-btn" variant="elevated" @click="showSelect = true">筛选角色</v-btn>
         <v-btn class="uc-top-btn" variant="elevated" @click="resetList()">重置筛选</v-btn>
@@ -136,7 +136,7 @@
       />
     </div>
     <div v-else class="uc-empty">
-      <img alt="empty" src="/source/UI/empty.webp" />
+      <img alt="empty" src="/UI/app/empty.webp" />
     </div>
   </div>
   <TuaDetailOverlay

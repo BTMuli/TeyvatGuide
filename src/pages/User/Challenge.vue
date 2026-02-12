@@ -4,7 +4,7 @@
     <template #prepend>
       <div class="ucp-top-prepend">
         <div class="ucp-top-title">
-          <img alt="icon" src="/source/UI/userChallenge.webp" />
+          <img alt="icon" src="/UI/nav/userChallenge.webp" />
           <span>幽境危战</span>
         </div>
         <v-select
@@ -17,11 +17,11 @@
           @update:model-value="switchUid"
         />
         <v-btn class="ucp-btn" rounded variant="elevated" @click="toAbyss()">
-          <img alt="abyss" src="/source/UI/userAbyss.webp" />
+          <img alt="abyss" src="/UI/nav/userAbyss.webp" />
           <span>深境螺旋</span>
         </v-btn>
         <v-btn class="ucp-btn" rounded variant="elevated" @click="toCombat()">
-          <img alt="abyss" src="/source/UI/userCombat.webp" />
+          <img alt="abyss" src="/UI/nav/userCombat.webp" />
           <span>真境剧诗</span>
         </v-btn>
       </div>
@@ -134,7 +134,7 @@
       </v-window-item>
     </v-window>
     <div v-show="localChallenge.length === 0" class="ucb-empty">
-      <img alt="empty" src="/source/UI/empty.webp" />
+      <img alt="empty" src="/UI/app/empty.webp" />
       <span>暂无数据，请尝试刷新</span>
     </div>
   </div>

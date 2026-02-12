@@ -3,7 +3,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="gacha-top-title">
-        <img alt="gacha" src="/source/UI/userGacha.webp" />
+        <img alt="gacha" src="/UI/nav/userGacha.webp" />
         <span>祈愿记录</span>
         <v-select
           v-model="uidCur"

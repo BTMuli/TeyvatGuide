@@ -4,7 +4,7 @@
     <div class="tuc-buff-item">
       <div class="tuc-buff-summary">
         <div class="tuc-buff-icon">
-          <img alt="total" class="summary" src="/source/UI/combatCrown.webp" />
+          <img alt="total" class="summary" src="/UI/combat/combatCrown.webp" />
         </div>
         <div class="tuc-buff-desc">
           <span>辉彩祝福</span>

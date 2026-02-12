@@ -166,7 +166,7 @@ function getBox(id: number): TItemBoxData {
   if (!bFind) {
     return {
       bg: "/icon/bg/0-Star.webp",
-      icon: "/source/UI/empty/webp",
+      icon: "/UI/app/empty.webp",
       size: "80px",
       height: "80px",
       display: "inner",
@@ -211,7 +211,7 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   if (!bFind) {
     return {
       bg: "/icon/bg/0-Star.webp",
-      icon: "/source/UI/empty/webp",
+      icon: "/UI/app/empty.webp",
       size: "40px",
       height: "64px",
       display: "outer",

@@ -2,7 +2,7 @@
   <v-app-bar>
     <div class="pc-top">
       <div class="pc-title">
-        <img alt="posts" src="/source/UI/posts.webp" />
+        <img alt="posts" src="/UI/nav/posts.webp" />
         <span>收藏</span>
       </div>
       <v-select

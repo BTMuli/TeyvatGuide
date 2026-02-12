@@ -9,7 +9,7 @@
     <img :alt="reward.name" :src="reward.icon" class="reward-icon" />
     <span class="reward-count">{{ reward.cnt }}</span>
     <div v-if="state === RewardState.SIGNED" class="reward-check">
-      <img alt="finish" src="/source/UI/finish.webp" />
+      <img alt="finish" src="/UI/app/finish.webp" />
     </div>
     <div v-if="!isExtra" class="reward-day">{{ dayNumber }}</div>
   </div>

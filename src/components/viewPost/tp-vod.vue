@@ -9,7 +9,7 @@
     <div class="tp-vod-share">
       <img v-if="coverUrl" :src="coverUrl" alt="cover" class="tp-vod-cover" />
       <v-progress-circular v-else color="primary" indeterminate size="25" />
-      <img alt="icon" class="tp-vod-icon" src="/source/UI/video_play.svg" />
+      <img alt="icon" class="tp-vod-icon" src="/UI/post/video_play.svg" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
         <span>{{ getVideoDuration(props.data.insert.vod.duration) }}</span>
@@ -98,7 +98,7 @@ onMounted(async () => {
       url: resolution.url,
     })),
     fullscreen: true,
-    icons: { state: `<img src="/source/UI/video_play.svg" alt="icon" />` },
+    icons: { state: `<img src="/UI/post/video_play.svg" alt="icon" />` },
     lang: "zh-cn",
     airplay: true,
     controls: [

@@ -148,7 +148,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
     nickname: "未登录",
     uid: "-1",
     desc: "请登录",
-    avatar: "/source/UI/lumine.webp",
+    avatar: "/UI/nav/lumine.webp",
   };
 });
 

@@ -7,7 +7,7 @@
           mdi-circle
         </v-icon>
         <v-icon v-else class="achi-finish" @click.stop="setAchiStat(false)">
-          <img alt="finish" src="/source/UI/finish.webp" />
+          <img alt="finish" src="/UI/app/finish.webp" />
         </v-icon>
       </div>
       <div class="achi-pre-info">

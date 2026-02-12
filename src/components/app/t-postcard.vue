@@ -10,7 +10,7 @@
     <div class="tpc-top">
       <div class="tpc-cover" @click="toPost()">
         <TMiImg v-if="card.cover !== ''" :ori="true" :src="card.cover" alt="cover" />
-        <img v-else alt="cover" src="/source/UI/defaultCover.webp" />
+        <img v-else alt="cover" src="/UI/post/defaultCover.webp" />
         <div v-if="card.status" class="tpc-act">
           <div class="tpc-status">{{ card.status?.label }}</div>
           <div class="tpc-time">

@@ -1,7 +1,7 @@
 <template>
   <div class="tp-vc-box">
     <div class="tp-vc-lock">
-      <img src="/source/UI/empty.webp" alt="empty" />
+      <img src="/UI/app/empty.webp" alt="empty" />
       <span>该功能已下线</span>
     </div>
     <div class="tp-vc-cover">

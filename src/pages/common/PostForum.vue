@@ -3,7 +3,7 @@
   <v-app-bar>
     <template #prepend>
       <div class="posts-top">
-        <img alt="posts" src="/source/UI/posts.webp" />
+        <img alt="posts" src="/UI/nav/posts.webp" />
         <span>帖子</span>
       </div>
     </template>

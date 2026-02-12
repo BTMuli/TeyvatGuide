@@ -1,8 +1,9 @@
+<!-- 分割线 -->
 <template>
   <div class="tp-divider-box" v-if="isInclude">
     <img
       alt="divider"
-      :src="`/source/post/divider_${props.data.insert.divider}.webp`"
+      :src="`/UI/post/divider_${props.data.insert.divider}.webp`"
       :title="props.data.insert.divider"
     />
   </div>
