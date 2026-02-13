@@ -107,6 +107,7 @@ async function handleEmoticonClick(): Promise<void> {
     localUrl.value = undefined;
     await nextTick();
     localUrl.value = await saveImgLocal(props.data.insert.custom_emoticon.url);
+    loadErr.value = false;
     return;
   }
   showOverlay.value = true;

@@ -10,7 +10,14 @@
     {{ decodeRegExp(props.data.insert) }}
   </span>
   <span v-else-if="mode == 'emoji'" class="tp-text-emoji">
-    <img :alt="getEmojiName()" :src="getEmojiUrl()" :title="getEmojiName()" />
+    <img
+      ref="emojiRef"
+      :alt="getEmojiName()"
+      :src="getEmojiUrl()"
+      :title="getEmojiName()"
+      @click="handleEmojiClick"
+      @error="handleEmojiError"
+    />
   </span>
   <TpText
     v-for="(emoji, indexE) in emojis"
@@ -27,7 +34,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { isColorSimilar } from "@utils/colorFunc.js";
 import { parseLink, parsePost } from "@utils/linkParser.js";
 import { decodeRegExp } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, StyleValue, toRaw } from "vue";
+import { onMounted, ref, shallowRef, StyleValue, toRaw, useTemplateRef } from "vue";
 
 export type TpText = {
   insert: string;
@@ -45,6 +52,9 @@ type TpTextProps = { data: TpText };
 const props = defineProps<TpTextProps>();
 const mode = ref<string>("text");
 const localEmojis = ref<string | null>(localStorage.getItem("emojis"));
+
+const emojiErr = ref<boolean>(true);
+const emojiEl = useTemplateRef<HTMLImageElement>("emojiRef");
 const emojis = shallowRef<Array<TpText>>([]);
 
 console.log("tpText", JSON.stringify(props.data.insert), toRaw(props.data)?.attributes);
@@ -132,8 +142,6 @@ function getEmojiUrl(): string {
     bbsReq.emojis().then((res) => {
       if ("retcode" in res) {
         console.error(res);
-        showSnackbar.error("获取表情包失败！");
-        mode.value = "text";
         return "";
       }
       localEmojis.value = JSON.stringify(res);
@@ -149,6 +157,23 @@ function getEmojiUrl(): string {
 
 function getEmojiName(): string {
   return props.data.insert.slice(2, -1);
+}
+
+function handleEmojiClick(): void {
+  if (!emojiErr.value || !emojiEl.value) return;
+  const name = getEmojiName();
+  emojiEl.value.src = getEmojiUrl();
+  emojiEl.value.title = name;
+  emojiEl.value.alt = name;
+  emojiEl.value.style.cursor = "unset";
+  emojiErr.value = false;
+}
+
+function handleEmojiError(): void {
+  if (!emojiEl.value) return;
+  emojiErr.value = true;
+  emojiEl.value.style.cursor = "pointer";
+  emojiEl.value.title = "点击重新加载";
 }
 </script>
 <style lang="css" scoped>
