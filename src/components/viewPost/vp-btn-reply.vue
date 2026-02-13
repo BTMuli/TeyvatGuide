@@ -244,6 +244,7 @@ async function handleDebug(): Promise<void> {
   position: relative;
   display: flex;
   width: 300px;
+  max-height: calc(100vh - 24px);
   box-sizing: border-box;
   flex-direction: column;
   align-items: center;
