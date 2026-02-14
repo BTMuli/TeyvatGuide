@@ -162,10 +162,10 @@ import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
-import Hakushi from "@utils/Hakushi.js";
 import TGLogger from "@utils/TGLogger.js";
 import { str2timeStr, timeStr2str } from "@utils/toolFunc.js";
 import { exportUigfData } from "@utils/UIGF.js";
+import fetchYattaJson from "@utils/Yatta.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -190,7 +190,7 @@ const hutaoShow = ref<boolean>(false);
 const htMode = ref<UgoHutaoMode>("download");
 const selectItem = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
-const hakushiData = shallowRef<Array<TGApp.Plugins.Hakushi.ConvertData>>([]);
+const yattaData = shallowRef<Array<TGApp.Plugins.Yatta.ConvertData>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
@@ -386,13 +386,11 @@ async function handleHutaoDownload(uids: Array<string>): Promise<void> {
             tempItem.item_type = find.itemType;
             tempItem.rank_type = find.star.toString();
           } else {
-            if (hakushiData.value.length === 0) {
-              await showLoading.update(
-                `未查找到 ${tempItem.item_id} 的 信息，正在获取 Hakushi 数据`,
-              );
-              await loadHakushi();
+            if (yattaData.value.length === 0) {
+              await showLoading.update(`未查找到 ${tempItem.item_id} 的 信息，正在获取 Yatta 数据`);
+              await loadYatta();
             }
-            const findH = hakushiData.value.find((i) => i.id.toString() === item.ItemId.toString());
+            const findH = yattaData.value.find((i) => i.id.toString() === item.ItemId.toString());
             if (findH) {
               tempItem.name = findH.name;
               tempItem.item_type = findH.type;
@@ -566,13 +564,11 @@ async function refreshGachaPool(
       const find = AppCalendarData.find((i) => i.name === item.name);
       if (find) tempItem.item_id = find.id.toString();
       if (tempItem.item_id === "") {
-        if (hakushiData.value.length === 0) {
-          await showLoading.update(`未查找到 ${tempItem.name} 的 ItemId，正在获取 Hakushi 数据`);
-          await loadHakushi();
+        if (yattaData.value.length === 0) {
+          await showLoading.update(`未查找到 ${tempItem.name} 的 ItemId，正在获取 Yatta 数据`);
+          await loadYatta();
         }
-        const find = hakushiData.value.find(
-          (i) => i.type === item.item_type && i.name === item.name,
-        );
+        const find = yattaData.value.find((i) => i.type === item.item_type && i.name === item.name);
         if (find) tempItem.item_id = find.id.toString();
         else {
           showSnackbar.warn(`无法搜索到 ${item.item_type} ${item.name} 的ID，请等待元数据更新`);
@@ -593,13 +589,13 @@ async function refreshGachaPool(
   }
 }
 
-async function loadHakushi(): Promise<void> {
+async function loadYatta(): Promise<void> {
   try {
-    hakushiData.value = await Hakushi.fetch();
+    yattaData.value = await fetchYattaJson();
   } catch (e) {
     console.error(e);
-    showSnackbar.warn(`获取Hakushi元数据失败`);
-    await TGLogger.Error(`[UserGacha][onMounted]获取Hakushi元数据失败`);
+    showSnackbar.warn(`获取 Yatta 元数据失败`);
+    await TGLogger.Error(`[UserGacha][onMounted]获取 Yatta 元数据失败`);
     await TGLogger.Error(`${e}`);
   }
 }
@@ -713,12 +709,12 @@ async function checkData(): Promise<void> {
         cnt++;
         continue;
       }
-      if (hakushiData.value.length === 0) {
-        await showLoading.update(`尝试获取Hakushi数据`);
-        await loadHakushi();
+      if (yattaData.value.length === 0) {
+        await showLoading.update(`尝试获取 Yatta 数据`);
+        await loadYatta();
       }
       // TODO: 如果有名字重复的需要注意
-      const find2 = hakushiData.value.find((i) => i.name === data.name);
+      const find2 = yattaData.value.find((i) => i.name === data.name);
       if (find2) {
         await showLoading.update(`${data.name} -> ${find2.id}`);
         await TSUserGacha.update.itemId(data, find2.id);
