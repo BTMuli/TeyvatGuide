@@ -81,6 +81,7 @@ import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import TurWorldGrid from "@comp/userRecord/tur-world-grid.vue";
 import recordReq from "@req/recordReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
@@ -105,13 +106,20 @@ onMounted(async () => {
 });
 
 watch(() => uidCur.value, loadRecord);
+watch(
+  () => account.value,
+  async () => await loadUid(),
+);
 
-async function loadUid(): Promise<void> {
+async function loadUid(uid?: string): Promise<void> {
   uidList.value = await TSUserRecord.getAllUid();
   if (uidList.value.length === 0) uidList.value = [Number(account.value.gameUid)];
   if (uidList.value.includes(Number(account.value.gameUid))) {
-    uidCur.value = Number(account.value.gameUid);
-  } else uidCur.value = uidList.value[0];
+    if (uid === undefined) uidCur.value = Number(account.value.gameUid);
+  } else {
+    uidList.value = [Number(account.value.gameUid), ...uidList.value];
+    if (uid === undefined) uidCur.value = uidList.value[0];
+  }
 }
 
 async function loadRecord(): Promise<void> {
@@ -124,52 +132,59 @@ async function loadRecord(): Promise<void> {
 }
 
 async function refreshRecord(): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.warn("请先登录");
-    await TGLogger.Warn(`[UserRecord][refresh][${account.value.gameUid}] 未登录`);
-    return;
-  }
-  if (uidCur.value && uidCur.value.toString() !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await userStore.switchGameAccount(uidCur.value.toString());
-      await refreshRecord();
+  let rfAccount = account.value;
+  let rfCk = cookie.value;
+  if (!uidCur.value) {
+    if (!rfCk) {
+      showSnackbar.warn("请先登录");
+      await TGLogger.Warn(`[UserRecord][refresh][${rfAccount.gameUid}] 未登录`);
       return;
     }
-    const freshCheck = await showDialog.check(
-      "是否刷新战绩数据",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消战绩数据刷新");
-      return;
+  } else {
+    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
+    console.log(uidCur.value, gcFind);
+    if (!gcFind) {
+      const check = await showDialog.check(
+        `确定刷新？`,
+        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+      );
+      if (!check) return;
+    } else {
+      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+      if (!acFind) {
+        const check = await showDialog.check(
+          `确定刷新？`,
+          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+        );
+        if (!check) return;
+      } else {
+        rfAccount = gcFind;
+        rfCk = acFind.cookie;
+      }
     }
   }
-  await showLoading.start(`正在刷新${account.value.gameUid}的战绩数据`);
-  await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 刷新战绩数据`);
-  const resp = await recordReq.index(cookie.value, account.value);
+  await showLoading.start(`正在刷新${rfAccount.gameUid}的战绩数据`);
+  await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 刷新战绩数据`);
+  const resp = await recordReq.index(rfCk!, rfAccount);
   console.log(resp);
   if ("retcode" in resp) {
     await showLoading.end();
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await TGLogger.Error(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据失败`);
+    await TGLogger.Error(`[UserRecord][refresh][${rfAccount.gameUid}] 获取战绩数据失败`);
     await TGLogger.Error(
-      `[UserRecord][refresh][${account.value.gameUid}] ${resp.retcode} ${resp.message}`,
+      `[UserRecord][refresh][${rfAccount.gameUid}] ${resp.retcode} ${resp.message}`,
     );
     return;
   }
-  await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}] 获取战绩数据成功`);
-  await TGLogger.Info(`[UserRecord][refresh][${account.value.gameUid}]`, false);
+  await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 获取战绩数据成功`);
+  await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}]`, false);
   await showLoading.update("正在保存战绩数据");
-  await TSUserRecord.saveRecord(Number(account.value.gameUid), resp);
+  await TSUserRecord.saveRecord(Number(rfAccount.gameUid), resp);
   await showLoading.update("正在加载战绩数据");
-  await loadUid();
+  await loadUid(rfAccount.gameUid);
   await loadRecord();
   await showLoading.end();
-  showSnackbar.success(`成功刷新${account.value.gameUid}的战绩数据`);
+  showSnackbar.success(`成功刷新${rfAccount.gameUid}的战绩数据`);
 }
 
 async function shareRecord(): Promise<void> {
@@ -177,17 +192,17 @@ async function shareRecord(): Promise<void> {
     showSnackbar.warn("未找到战绩数据，请尝试刷新");
     return;
   }
-  await TGLogger.Info(`[UserRecord][shareRecord][${account.value.gameUid}] 生成分享图片`);
+  await TGLogger.Info(`[UserRecord][shareRecord][${uidCur.value}] 生成分享图片`);
   const recordBox = document.querySelector<HTMLElement>(".ur-box");
   if (recordBox === null) {
     showSnackbar.error("未找到战绩数据，请尝试刷新");
     return;
   }
-  const fileName = `【原神战绩】-${account.value.gameUid}.png`;
+  const fileName = `【原神战绩】-${uidCur.value}.png`;
   await showLoading.start("正在生成图片", fileName);
   await generateShareImg(fileName, recordBox);
   await showLoading.end();
-  await TGLogger.Info(`[UserRecord][shareRecord][${account.value.gameUid}] 生成分享图片成功`);
+  await TGLogger.Info(`[UserRecord][shareRecord][${uidCur.value}] 生成分享图片成功`);
 }
 
 async function deleteRecord(): Promise<void> {

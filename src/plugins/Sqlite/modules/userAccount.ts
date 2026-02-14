@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.9.5
+ * @since Beta v0.9.6
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -308,6 +308,26 @@ async function getGameAccount(uid: string): Promise<Array<TGApp.Sqlite.Account.G
 }
 
 /**
+ * 获取指定 GameUid 的 uid
+ * @since Beta v0.9.6
+ * @param gid - 游戏 UID
+ * @param biz - 游戏 BIZ
+ * @returns UID或false
+ */
+async function getGameAccountByGid(
+  gid: string,
+  biz: string = "hk4e_cn",
+): Promise<TGApp.Sqlite.Account.Game | false> {
+  const db = await TGSqlite.getDB();
+  const res = await db.select<Array<TGApp.Sqlite.Account.Game>>(
+    "SELECT * FROM GameAccount WHERE gameUid = $1 AND gameBiz = $2",
+    [gid, biz],
+  );
+  if (res.length === 0) return false;
+  return res[0];
+}
+
+/**
  * 切换到指定游戏账号
  * @since Beta v0.6.0
  * @param uid - 米社UID
@@ -399,6 +419,7 @@ const TSUserAccount = {
   },
   game: {
     getAccount: getGameAccount,
+    getAccountByGid: getGameAccountByGid,
     switchAccount: switchGameAccount,
     getCurAccount: getCurGameAccount,
     saveAccounts: saveGameAccount,
