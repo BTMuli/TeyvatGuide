@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 
-type TurRoleInfoProps = { uid: number; role: TGApp.Sqlite.Record.Role };
+type TurRoleInfoProps = { uid: number | string; role: TGApp.Sqlite.Record.Role };
 
 defineProps<TurRoleInfoProps>();
 </script>

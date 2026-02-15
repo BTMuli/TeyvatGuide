@@ -103,7 +103,8 @@
   <div class="uc-box">
     <div class="uc-box-top">
       <div class="uc-box-title">
-        <span class="uc-box-uid">UID：{{ uidCur }}</span>
+        <TurRoleInfo v-if="roleRecord && uidCur" :role="roleRecord" :uid="uidCur" />
+        <span v-else class="uc-box-uid">UID：{{ uidCur }}</span>
         <span
           v-for="(item, index) in roleOverview"
           :key="index"
@@ -137,6 +138,7 @@
     </div>
     <div v-else class="uc-empty">
       <img alt="empty" src="/UI/app/empty.webp" />
+      <span>DATA NOT FOUND</span>
     </div>
   </div>
   <TuaDetailOverlay
@@ -157,9 +159,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
 import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
+import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import recordReq from "@req/recordReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
-import useAppStore from "@store/app.js";
+import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
@@ -179,12 +183,12 @@ const modeList: Readonly<Array<TabItem>> = [
   { label: "卡片视图（详细）", value: "dev" },
 ];
 
-const { isLogin } = storeToRefs(useAppStore());
 const { cookie, account, propMap } = storeToRefs(useUserStore());
 
 const loadData = ref<boolean>(false);
 const loadShare = ref<boolean>(false);
 const loadDel = ref<boolean>(false);
+
 const version = ref<string>();
 const isEmpty = ref<boolean>(true);
 const showOverlay = ref<boolean>(false);
@@ -197,10 +201,6 @@ const uidCur = ref<string>();
 const isLevelUp = ref<boolean | null>(null);
 const isFetterUp = ref<boolean | null>(null);
 const isConstUp = ref<boolean | null>(null);
-
-const uidList = shallowRef<Array<string>>([]);
-const roleOverview = shallowRef<Array<OverviewItem>>([]);
-const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const selectOpts = ref<UavSelectModel>({
   costume: [],
   star: [],
@@ -209,7 +209,13 @@ const selectOpts = ref<UavSelectModel>({
   element: [],
 });
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
+
+const uidList = shallowRef<Array<string>>([]);
+const roleRecord = shallowRef<TGApp.Sqlite.Record.Role | undefined>();
+const roleOverview = shallowRef<Array<OverviewItem>>([]);
+const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
+
 const enableShare = computed<boolean>(
   () => showOverlay.value || showSelect.value || loadData.value,
 );
@@ -242,6 +248,10 @@ watch(
   },
 );
 watch(() => uidCur.value, loadRole);
+watch(
+  () => account.value,
+  async () => await loadUid(),
+);
 watch(
   () => [isLevelUp.value, isFetterUp.value, isConstUp.value],
   () => {
@@ -347,14 +357,27 @@ function getElementCnt(element: string): number {
   return selectedList.value.filter((i) => i.avatar.element === element).length;
 }
 
-async function loadUid(): Promise<void> {
+async function hideAllOverlay(): Promise<void> {
+  if (showSelect.value) {
+    showSelect.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  }
+  if (showOverlay.value) {
+    showOverlay.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  }
+}
+
+async function loadUid(uid?: string): Promise<void> {
+  await hideAllOverlay();
   uidList.value = await TSUserAvatar.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else if (isLogin.value) {
-    uidList.value = [account.value.gameUid];
-    uidCur.value = account.value.gameUid;
-  } else uidCur.value = undefined;
+  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
+  if (uidList.value.includes(account.value.gameUid)) {
+    if (uid === undefined) uidCur.value = account.value.gameUid;
+  } else {
+    uidList.value = [account.value.gameUid, ...uidList.value];
+    if (uid === undefined) uidCur.value = uidList.value[0];
+  }
 }
 
 async function loadRole(): Promise<void> {
@@ -364,6 +387,9 @@ async function loadRole(): Promise<void> {
   }
   roleList.value = [];
   const roleData = await TSUserAvatar.getAvatars(Number(uidCur.value));
+  const gameRole = await TSUserRecord.getRecord(Number(uidCur.value));
+  if (gameRole === false) roleRecord.value = undefined;
+  else roleRecord.value = gameRole.role;
   roleList.value = getOrderedList(roleData);
   roleOverview.value = getOverview(roleData);
   selectedList.value = roleList.value;
@@ -375,47 +401,43 @@ async function loadRole(): Promise<void> {
 }
 
 async function refresh(): Promise<void> {
-  if (!account.value) {
-    showSnackbar.warn("未获取到游戏账户");
-    return;
-  }
-  if (showSelect.value) {
-    showSelect.value = false;
-    await new Promise<void>((resolve) => setTimeout(resolve, 500));
-  }
-  if (showOverlay.value) {
-    showOverlay.value = false;
-    await new Promise<void>((resolve) => setTimeout(resolve, 500));
-  }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await refresh();
+  let rfAccount = account.value;
+  let rfCk = cookie.value;
+  if (!uidCur.value) {
+    if (!rfCk) {
+      showSnackbar.warn("请先登录");
+      await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 未登录`);
       return;
     }
-    const freshCheck = await showDialog.check(
-      "是否刷新角色数据",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消角色数据刷新");
-      return;
+  } else {
+    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
+    console.log(uidCur.value, gcFind);
+    if (!gcFind) {
+      const check = await showDialog.check(
+        `确定刷新？`,
+        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+      );
+      if (!check) return;
+    } else {
+      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+      if (!acFind) {
+        const check = await showDialog.check(
+          `确定刷新？`,
+          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+        );
+        if (!check) return;
+      } else {
+        rfAccount = gcFind;
+        rfCk = acFind.cookie;
+      }
     }
   }
-  if (!cookie.value) {
-    showSnackbar.warn("请先登录");
-    loadData.value = false;
-    return;
-  }
-  await TGLogger.Info(`[Character][refreshRoles][${account.value.gameUid}] 正在更新角色数据`);
-  await showLoading.start(`正在更新${account.value.gameUid}的角色数据`);
+  await hideAllOverlay();
+  await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
+  await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
   loadData.value = true;
   await showLoading.update("正在刷新首页数据");
-  const indexRes = await recordReq.index(cookie.value, account.value, 1);
+  const indexRes = await recordReq.index(rfCk!, rfAccount, 1);
   if ("retcode" in indexRes) {
     showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
     await TGLogger.Error(JSON.stringify(indexRes));
@@ -424,12 +446,12 @@ async function refresh(): Promise<void> {
     return;
   }
   await showLoading.update("正在获取角色列表");
-  const listRes = await recordReq.character.list(cookie.value, account.value);
+  const listRes = await recordReq.character.list(rfCk!, rfAccount);
   if (!Array.isArray(listRes)) {
     showSnackbar.error(`[${listRes.retcode}] ${listRes.message}`);
-    await TGLogger.Error(`[Character][refreshRoles][${account.value.gameUid}] 获取角色列表失败`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表失败`);
     await TGLogger.Error(
-      `[Character][refreshRoles][${account.value.gameUid}] ${listRes.retcode} ${listRes.message}`,
+      `[Character][refresh][${rfAccount.gameUid}] ${listRes.retcode} ${listRes.message}`,
     );
     await showLoading.end();
     loadData.value = false;
@@ -437,12 +459,12 @@ async function refresh(): Promise<void> {
   }
   const idList = listRes.map((i) => i.id.toString());
   await showLoading.update(`共${idList.length}个角色，正在获取角色详情`);
-  const res = await recordReq.character.detail(cookie.value, account.value, idList);
+  const res = await recordReq.character.detail(rfCk!, rfAccount, idList);
   if ("retcode" in res) {
     showSnackbar.error(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Error(`[Character][refreshRoles][${account.value.gameUid}] 获取角色数据失败`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色数据失败`);
     await TGLogger.Error(
-      `[Character][refreshRoles][${account.value.gameUid}] ${res.retcode} ${res.message}`,
+      `[Character][refresh][${rfAccount.gameUid}] ${res.retcode} ${res.message}`,
     );
     await showLoading.end();
     loadData.value = false;
@@ -450,36 +472,36 @@ async function refresh(): Promise<void> {
   }
   propMap.value = res.property_map;
   await showLoading.update("正在保存角色数据");
-  await TSUserAvatar.saveAvatars(account.value.gameUid, res.list);
-  await TGLogger.Info(`[Character][refreshRoles][${account.value.gameUid}] 成功更新角色数据`);
+  await TSUserAvatar.saveAvatars(rfAccount.gameUid, res.list);
+  await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
   await TGLogger.Info(
-    `[Character][refreshRoles][${account.value.gameUid}] 共更新${res.list.length}个角色`,
+    `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${res.list.length}个角色`,
   );
   await showLoading.update("正在加载角色数据");
-  await loadUid();
+  await loadUid(uidCur.value);
   await loadRole();
   await showLoading.end();
   loadData.value = false;
 }
 
 async function share(): Promise<void> {
-  if (!account.value || isEmpty.value) {
+  if (!uidCur.value || isEmpty.value) {
     showSnackbar.warn("暂无数据");
     return;
   }
-  await TGLogger.Info(`[Character][shareRoles][${account.value.gameUid}] 正在生成分享图片`);
+  await TGLogger.Info(`[Character][share][${uidCur.value}] 正在生成分享图片`);
   const rolesBox = document.querySelector<HTMLElement>(".uc-box");
   if (rolesBox === null) {
     showSnackbar.error("未找到角色列表");
     return;
   }
-  const fileName = `【角色列表】-${account.value.gameUid}.png`;
+  const fileName = `角色列表_${uidCur.value}.png`;
   await showLoading.start("正在生成图片", fileName);
   loadShare.value = true;
   await generateShareImg(fileName, rolesBox);
   loadShare.value = false;
   await showLoading.end();
-  await TGLogger.Info(`[Character][shareRoles][${account.value.gameUid}] 生成分享图片成功`);
+  await TGLogger.Info(`[Character][share][${uidCur.value}] 生成分享图片成功`);
 }
 
 async function deleteUid(): Promise<void> {
@@ -706,8 +728,10 @@ function handleSwitch(next: boolean): void {
 }
 
 .uc-empty {
+  position: relative;
   display: flex;
   height: 100%;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
