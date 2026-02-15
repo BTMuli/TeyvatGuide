@@ -15,33 +15,6 @@ import { timestampToDate } from "@utils/toolFunc.js";
 import TGSqlite from "../index.js";
 
 /**
- * 获取插入游戏账号数据的sql
- * @since Beta v0.7.2
- * @param uid - 米社UID
- * @param data - 游戏账号数据
- * @returns 插入Sql
- */
-function getInsertGameAccountSql(uid: string, data: TGApp.BBS.Game.Account): string {
-  const isChosen = data.is_chosen ? 1 : 0;
-  const isOfficial = data.is_official ? 1 : 0;
-  const timeNow = timestampToDate(new Date().getTime());
-  return `
-      INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial, level, nickname, region, regionName, updated)
-      VALUES ('${uid}', '${data.game_biz}', '${data.game_uid}', ${isChosen}, ${isOfficial}, ${data.level},
-              '${data.nickname}', '${data.region}', '${data.region_name}', '${timeNow}
-              ')
-      ON CONFLICT(uid, gameUid, gameBiz) DO UPDATE
-          SET isChosen   = ${isChosen},
-              isOfficial = ${isOfficial},
-              level      = ${data.level},
-              nickname   = '${data.nickname}',
-              region     = '${data.region}',
-              regionName = '${data.region_name}',
-              updated    = '${timeNow}';
-  `;
-}
-
-/**
  * 数据库转成可用数据
  * @since Beta v0.6.0
  * @param data - 用户数据
@@ -365,7 +338,7 @@ async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game
 
 /**
  * 保存游戏账户数据
- * @since Beta v0.7.2
+ * @since Beta v0.9.6
  * @param uid - 米社UID
  * @param accounts - 账户数据
  * @returns 无返回值
@@ -375,7 +348,39 @@ async function saveGameAccount(
   accounts: Array<TGApp.BBS.Game.Account>,
 ): Promise<void> {
   const db = await TGSqlite.getDB();
-  await Promise.all(accounts.map((account) => db.execute(getInsertGameAccountSql(uid, account))));
+  for (const account of accounts) {
+    const isChosen = account.is_chosen ? 1 : 0;
+    const isOfficial = account.is_official ? 1 : 0;
+    const timeNow = timestampToDate(new Date().getTime());
+    await db.execute(
+      `
+          INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial,
+                                  level, nickname, region, regionName, updated)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+          ON CONFLICT(uid, gameUid, gameBiz)
+              DO UPDATE
+              SET isChosen   = $4,
+                  isOfficial = $5,
+                  level      = $6,
+                  nickname   = $7,
+                  region     = $8,
+                  regionName = $9,
+                  updated    = $10;
+      `,
+      [
+        uid,
+        account.game_biz,
+        account.game_uid,
+        isChosen,
+        isOfficial,
+        account.level,
+        account.nickname,
+        account.region,
+        account.region_name,
+        timeNow,
+      ],
+    );
+  }
 }
 
 /**
