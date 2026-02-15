@@ -5,10 +5,11 @@
       <TMiImg :ori="true" :src="navItem.icon" alt="navIcon" />
       <span>{{ navItem.name }}</span>
     </div>
-    <div v-if="hasNav" class="tgn-nav">
-      <v-icon color="var(--tgc-od-orange)" size="25" title="查看兑换码" @click="tryGetCode">
+    <div v-if="hasNav" class="tgn-nav" title="查看兑换码">
+      <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="25" @click="tryGetCode">
         mdi-code-tags-check
       </v-icon>
+      <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="25" />
     </div>
     <ToLivecode v-model="showOverlay" :actId="actId" :data="codeData" :gid="model" />
   </div>
@@ -36,6 +37,7 @@ const model = defineModel<number>({ default: 2 });
 
 const actId = ref<string>();
 const showOverlay = ref<boolean>(false);
+const loadCode = ref<boolean>(false);
 const nav = shallowRef<Array<TGApp.BBS.Navigator.Navigator>>([]);
 const codeData = shallowRef<Array<TGApp.BBS.Navigator.CodeData>>([]);
 const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
@@ -60,6 +62,7 @@ async function loadNav(): Promise<void> {
   try {
     nav.value = await ApiHubReq.home(model.value);
     console.debug(`[TGameNav][loadNav] 组件数据：`, nav.value);
+    if (loadCode.value) loadCode.value = false;
   } catch (e) {
     await TGLogger.Error(`[TGameNav][loadNav] 加载组件数据失败：${e}`);
   }
@@ -70,9 +73,11 @@ async function loadNav(): Promise<void> {
  * @returns {Promise<void>}
  */
 async function tryGetCode(): Promise<void> {
-  if (!hasNav.value) return;
+  if (!hasNav.value || loadCode.value) return;
+  loadCode.value = true;
   const actIdFind = new URL(hasNav.value.app_path).searchParams.get("act_id");
   if (!actIdFind) {
+    loadCode.value = false;
     showSnackbar.warn("未找到活动ID");
     await TGLogger.Warn(`[TGameNav][tryGetCode] 未找到活动ID，链接：${hasNav.value.app_path}`);
     return;
@@ -80,6 +85,7 @@ async function tryGetCode(): Promise<void> {
   actId.value = actIdFind;
   const res = await OtherApi.code(actIdFind);
   if (!Array.isArray(res)) {
+    loadCode.value = false;
     showSnackbar.warn(`[${res.retcode}] ${res.message}`);
     await TGLogger.Warn(`[TGameNav][tryGetCode] 获取兑换码失败：${JSON.stringify(res)}`);
     return;
@@ -88,6 +94,7 @@ async function tryGetCode(): Promise<void> {
   console.debug(`[TGameNave][tryGetCode] 兑换码数据：`, codeData.value);
   showSnackbar.success("获取兑换码成功");
   showOverlay.value = true;
+  loadCode.value = false;
 }
 
 /**
