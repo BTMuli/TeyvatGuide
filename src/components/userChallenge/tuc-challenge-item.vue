@@ -21,7 +21,7 @@
         </div>
         <div class="best-dps">
           <div v-for="(avatar, idx) in props.data.best_avatar" :key="idx" class="best-dps-item">
-            <TMiImg :alt="`${avatar.avatar_id}`" :ori="true" :src="avatar.side_icon" />
+            <TMiImg :size="24" :alt="`${avatar.avatar_id}`" :ori="true" :src="avatar.side_icon" />
             <span>{{ avatar.type === 1 ? "最强一击" : "最高总伤害" }}</span>
             <span>{{ avatar.dps }}</span>
           </div>

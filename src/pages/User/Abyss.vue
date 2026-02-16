@@ -203,7 +203,6 @@ async function tryLoginHutao(): Promise<void> {
 }
 
 async function loadAbyss(): Promise<void> {
-  localAbyss.value = [];
   if (uidCur.value === undefined || uidCur.value === "") return;
   localAbyss.value = await TSUserAbyss.getAbyss(uidCur.value);
   if (localAbyss.value.length > 0) userTab.value = localAbyss.value[0].id;

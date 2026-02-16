@@ -14,7 +14,6 @@
           density="compact"
           label="游戏UID"
           variant="outlined"
-          @update:model-value="switchUid"
         />
         <v-btn class="ucp-btn" rounded variant="elevated" @click="toAbyss()">
           <img alt="abyss" src="/UI/nav/userAbyss.webp" />
@@ -132,11 +131,11 @@
           <TucOverview v-if="item.mp.has_data" :data="item.mp" title="联机模式" />
         </div>
       </v-window-item>
+      <div v-show="localChallenge.length === 0" class="ucb-empty">
+        <img alt="empty" src="/UI/app/empty.webp" />
+        <span>暂无数据，请尝试刷新</span>
+      </div>
     </v-window>
-    <div v-show="localChallenge.length === 0" class="ucb-empty">
-      <img alt="empty" src="/UI/app/empty.webp" />
-      <span>暂无数据，请尝试刷新</span>
-    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -148,8 +147,8 @@ import TucOverview from "@comp/userChallenge/tuc-overview.vue";
 import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
 import gameEnum from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserChallenge from "@Sqlm/userChallenge.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -167,12 +166,10 @@ const serverList: ReadonlyArray<SelectItem<TGApp.Game.Base.ServerTypeEnum>> = [
 ].map((i) => ({ text: gameEnum.serverDesc(i), value: i }));
 
 const router = useRouter();
-const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 
 const version = ref<string>();
 
-const isReq = ref<boolean>(false);
 const userTab = ref<number>(0);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
@@ -183,9 +180,11 @@ const reqPop = ref<boolean>(false);
 const popList = shallowRef<Array<TGApp.Game.Challenge.PopularityItem>>([]);
 
 onMounted(async () => {
+  await showLoading.start("正在加载危战数据");
   version.value = await getVersion();
   await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
-  await reloadChallenge();
+  await showLoading.update("正在获取UID列表");
+  await reloadUid();
   if (uidCur.value?.startsWith("5")) server.value = gameEnum.server.CN_QD01;
   await refreshPopList(false);
 });
@@ -198,16 +197,20 @@ watch(
     await refreshPopList();
   },
 );
+watch(
+  () => uidCur.value,
+  async () => await loadChallenge(),
+);
 
-async function switchUid(): Promise<void> {
-  if (uidCur.value === undefined || uidCur.value === "") return;
-  await TGLogger.Info(`[UserChallenge][watch][uidCur] 切换UID: ${uidCur.value}`);
-  await showLoading.start(`正在加载UID ${uidCur.value} 的幽境危战数据`);
-  await loadChallenge();
-  await showLoading.end();
-  showSnackbar.success(
-    `已加载UID ${uidCur.value} 的 ${localChallenge.value.length} 条幽境危战数据`,
-  );
+async function reloadUid(uid?: string): Promise<void> {
+  uidList.value = await TSUserChallenge.getAllUid();
+  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
+  if (uidList.value.includes(account.value.gameUid)) {
+    if (uid === undefined) uidCur.value = account.value.gameUid;
+  } else {
+    uidList.value = [account.value.gameUid, ...uidList.value];
+    if (uid === undefined) uidCur.value = uidList.value[0];
+  }
 }
 
 async function toAbyss(): Promise<void> {
@@ -239,29 +242,6 @@ async function shareChallenge(): Promise<void> {
   await TGLogger.Info(`[UserChallenge][shareChallenge][${userTab.value}] 成功生成分享图片`);
 }
 
-async function reloadChallenge(): Promise<void> {
-  await showLoading.start("正在加载UID列表");
-  uidList.value = await TSUserChallenge.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else if (isLogin.value) {
-    uidList.value = [account.value.gameUid];
-    uidCur.value = account.value.gameUid;
-  } else uidCur.value = undefined;
-  if (uidCur.value) {
-    await showLoading.update(`正在加载UID${uidCur.value}的幽境危战数据`);
-    await loadChallenge();
-  }
-  await showLoading.end();
-  if (uidCur.value !== undefined && uidCur.value !== "") {
-    showSnackbar.success(
-      `已加载UID ${uidCur.value} 的 ${localChallenge.value.length} 条幽境危战数据`,
-    );
-  } else {
-    showSnackbar.warn("未检测到可用UID，请尝试刷新数据！");
-  }
-}
-
 async function loadChallenge(): Promise<void> {
   if (uidCur.value === undefined || uidCur.value === "") return;
   localChallenge.value = await TSUserChallenge.getChallenge(uidCur.value);
@@ -269,59 +249,62 @@ async function loadChallenge(): Promise<void> {
 }
 
 async function refreshChallenge(): Promise<void> {
-  if (isReq.value) return;
-  if (!cookie.value) {
-    showSnackbar.error("未登录");
-    await TGLogger.Warn("[UserChallenge][refreshChallenge] 未登录");
-    return;
-  }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至 ${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await refreshChallenge();
+  let rfAccount = account.value;
+  let rfCk = cookie.value;
+  if (!uidCur.value) {
+    if (!rfCk) {
+      showSnackbar.warn("请先登录");
+      await TGLogger.Warn(`[Challenge][refreshChallenge][${rfAccount.gameUid}] 未登录`);
       return;
     }
-    const freshCheck = await showDialog.check(
-      "确定刷新？",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消幽境危战数据刷新");
-      return;
+  } else {
+    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
+    console.log(uidCur.value, gcFind);
+    if (!gcFind) {
+      const check = await showDialog.check(
+        `确定刷新？`,
+        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+      );
+      if (!check) return;
+    } else {
+      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+      if (!acFind) {
+        const check = await showDialog.check(
+          `确定刷新？`,
+          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+        );
+        if (!check) return;
+      } else {
+        rfAccount = gcFind;
+        rfCk = acFind.cookie;
+      }
     }
   }
-  isReq.value = true;
-  await TGLogger.Info("[UserChallenge][refreshChallenge] 开始刷新挑战数据");
-  await showLoading.start(`正在获取${account.value.gameUid}的幽境危战数据`);
-  const resp = await recordReq.challenge.detail(cookie.value, account.value);
+  await TGLogger.Info("[Challenge][refreshChallenge] 开始刷新挑战数据");
+  await showLoading.start(`正在获取${rfAccount.gameUid}的幽境危战数据`);
+  const resp = await recordReq.challenge.detail(rfCk!, rfAccount);
   console.log(resp);
   if ("retcode" in resp) {
     await showLoading.end();
-    isReq.value = false;
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await TGLogger.Error(`[UserChallenge][refreshChallenge] ${resp.retcode} - ${resp.message}`);
+    await TGLogger.Error(`[Challenge][refreshChallenge] ${resp.retcode} - ${resp.message}`);
     return;
   }
   if (!resp.is_unlock) {
     await showLoading.end();
-    isReq.value = false;
     showSnackbar.warn("幽境危战未解锁");
-    await TGLogger.Warn("[UserChallenge][refreshChallenge] 幽境危战未解锁");
+    await TGLogger.Warn("[Challenge][refreshChallenge] 幽境危战未解锁");
     return;
   }
   await showLoading.update("", { title: "正在保存幽境危战数据" });
   for (const challenge of resp.data) {
     if (challenge.schedule.schedule_id === "0") continue;
     await showLoading.update(`ScheduleID：${challenge.schedule.schedule_id}`);
-    await TSUserChallenge.saveChallenge(account.value.gameUid, challenge);
+    await TSUserChallenge.saveChallenge(rfAccount.gameUid, challenge);
   }
-  isReq.value = false;
-  uidCur.value = account.value.gameUid;
-  await reloadChallenge();
+  await reloadUid(uidCur.value);
+  await loadChallenge();
+  await showLoading.end();
 }
 
 async function deleteChallenge(): Promise<void> {
@@ -337,8 +320,9 @@ async function deleteChallenge(): Promise<void> {
   await showLoading.start("正在删除幽境危战数据", `UID: ${uidCur.value}`);
   await TSUserChallenge.delChallenge(uidCur.value);
   showSnackbar.success(`已清除 ${uidCur.value} 的幽境危战数据`);
-  uidCur.value = "";
-  await reloadChallenge();
+  await reloadUid();
+  await loadChallenge();
+  await showLoading.end();
 }
 
 async function refreshPopList(hint: boolean = true): Promise<void> {
@@ -557,18 +541,18 @@ async function tryReadChallenge(): Promise<void> {
 
 .ucb-empty {
   position: absolute;
-  top: calc(50vh - 200px);
-  left: calc(50vw - 400px);
+  top: 0;
+  left: 0;
   display: flex;
-  width: 800px;
-  height: 400px;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
   align-items: center;
-  border-radius: 5px;
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-2);
+  justify-content: center;
   color: var(--common-text-title);
   font-family: var(--font-title);
+  font-size: 1.5rem;
+  row-gap: 12px;
 }
 
 .ucw-top {
