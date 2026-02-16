@@ -3,11 +3,11 @@
   <div class="tua-db-box">
     <div class="tua-db-time">{{ props.title }} {{ props.battle.time }}</div>
     <div v-if="props.battle.monsters && props.battle.monsters.length > 0" class="tua-db-monsters">
-      <div v-for="(monster, idx) in props.battle.monsters" :key="idx" class="tua-db-monster">
-        <div class="icon">
-          <TMiImg :ori="true" :src="monster.icon" alt="icon" />
+      <div v-for="(monster, idx) in props.battle.monsters" :key="idx" class="tua-dbm-item">
+        <div class="tua-dbm-cover">
+          <TMiImg :size="28" :ori="true" :src="monster.icon" alt="icon" />
         </div>
-        <div class="info">
+        <div class="tua-dbm-info">
           <span>{{ monster.name }}</span>
           <span>Lv.{{ monster.level }}</span>
         </div>
@@ -97,7 +97,7 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   gap: 4px;
 }
 
-.tua-db-monster {
+.tua-dbm-item {
   position: relative;
   display: flex;
   align-items: center;
@@ -107,35 +107,38 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   background: var(--box-bg-3);
   color: var(--box-text-4);
   column-gap: 4px;
+}
 
-  .icon {
-    position: relative;
-    overflow: hidden;
+.tua-dbm-cover {
+  position: relative;
+  display: flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--box-bg-4);
+
+  img {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--box-bg-4);
-
-    img {
-      width: 100%;
-      height: 100%;
-    }
   }
+}
 
-  .info {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    font-size: 12px;
+.tua-dbm-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  font-size: 12px;
 
-    span {
-      line-height: 14px;
+  span {
+    line-height: 14px;
 
-      &:first-child {
-        font-family: var(--font-title);
-      }
+    &:first-child {
+      font-family: var(--font-title);
     }
   }
 }

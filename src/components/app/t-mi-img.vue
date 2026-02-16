@@ -8,7 +8,7 @@
     @click="emits('click')"
   />
   <div v-else class="progress">
-    <v-progress-circular color="primary" indeterminate size="25" />
+    <v-progress-circular :size="props.size" color="primary" indeterminate />
   </div>
 </template>
 <script lang="ts" setup>
@@ -23,9 +23,10 @@ type TMiImgProps = {
   title?: string;
   class?: string;
   ori?: boolean;
+  size?: number;
 };
 type TMiImgEmits = (e: "click") => void;
-const props = defineProps<TMiImgProps>();
+const props = withDefaults(defineProps<TMiImgProps>(), { size: 25 });
 const emits = defineEmits<TMiImgEmits>();
 
 const appStore = useAppStore();
@@ -61,8 +62,8 @@ onUnmounted(() => {
 .progress {
   position: relative;
   display: flex;
-  width: 25px;
-  height: 25px;
+  width: v-bind("`${props.size}px`");
+  height: v-bind("`${props.size}px`");
   align-items: center;
   justify-content: center;
 }
