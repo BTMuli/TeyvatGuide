@@ -30,7 +30,7 @@ const progressColor = computed<string>(() => {
   if (props.compute === "5") return "#d19a66";
   return "#61afef";
 });
-const progressWidth = computed<string>(() => {
+const width = computed<string>(() => {
   let final = 10;
   if (props.compute === "5") {
     if (props.gacha === "302") final = 80;
@@ -60,7 +60,7 @@ const progressWidth = computed<string>(() => {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: v-bind(progresswidth); /* stylelint-disable-line value-keyword-case */
+  width: v-bind(width);
   max-width: 100%;
   height: 4px;
   border-radius: 4px;
