@@ -109,20 +109,20 @@
           </div>
           <div class="uaw-d-box">
             <TuaDetail
-              :uid="uidCur"
-              :id="item.id"
               v-for="floor in item.floors"
+              :id="item.id"
               :key="floor.id"
               :floor
+              :uid="uidCur"
             />
           </div>
         </div>
       </v-window-item>
+      <div v-show="localAbyss.length === 0" class="ua-empty">
+        <img alt="empty" src="/UI/app/empty.webp" />
+        <span>暂无数据，请尝试刷新</span>
+      </div>
     </v-window>
-    <div v-show="localAbyss.length === 0" class="user-empty">
-      <img alt="empty" src="/UI/app/empty.webp" />
-      <span>暂无数据，请尝试刷新</span>
-    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -135,8 +135,8 @@ import TuaOverview from "@comp/userAbyss/tua-overview.vue";
 import hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
-import useAppStore from "@store/app.js";
 import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
@@ -151,7 +151,6 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const hutaoStore = useHutaoStore();
 
-const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie, propMap } = storeToRefs(useUserStore());
 const { userName } = storeToRefs(hutaoStore);
 const userTab = ref<number>(0);
@@ -166,21 +165,25 @@ onMounted(async () => {
   await TGLogger.Info("[UserAbyss][onMounted] 打开角色深渊页面");
   await showLoading.update("正在获取UID列表");
   await reloadUid();
-  await showLoading.update(`正在加载${uidCur.value}的深渊数据`);
   await showLoading.end();
   showSnackbar.success(`已加载${uidCur.value}的${localAbyss.value.length}条深渊数据`);
 });
 
 watch(() => uidCur.value, loadAbyss);
+watch(
+  () => account.value,
+  async () => await reloadUid(),
+);
 
-async function reloadUid(): Promise<void> {
+async function reloadUid(uid?: string): Promise<void> {
   uidList.value = await TSUserAbyss.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else if (isLogin.value) {
-    uidList.value = [account.value.gameUid];
-    uidCur.value = account.value.gameUid;
-  } else uidCur.value = undefined;
+  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
+  if (uidList.value.includes(account.value.gameUid)) {
+    if (uid === undefined) uidCur.value = account.value.gameUid;
+  } else {
+    uidList.value = [account.value.gameUid, ...uidList.value];
+    if (uid === undefined) uidCur.value = uidList.value[0];
+  }
 }
 
 async function toCombat(): Promise<void> {
@@ -207,66 +210,69 @@ async function loadAbyss(): Promise<void> {
 }
 
 async function refreshAbyss(): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.warn("未登录");
-    await TGLogger.Warn("[UserAbyss][getAbyssData] 未登录");
-    return;
-  }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至 ${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await refreshAbyss();
+  let rfAccount = account.value;
+  let rfCk = cookie.value;
+  if (!uidCur.value) {
+    if (!rfCk) {
+      showSnackbar.warn("请先登录");
+      await TGLogger.Warn(`[Abyss][refreshAbyss][${rfAccount.gameUid}] 未登录`);
       return;
     }
-    const freshCheck = await showDialog.check(
-      "确定刷新？",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消深渊数据刷新");
-      return;
+  } else {
+    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
+    console.log(uidCur.value, gcFind);
+    if (!gcFind) {
+      const check = await showDialog.check(
+        `确定刷新？`,
+        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+      );
+      if (!check) return;
+    } else {
+      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+      if (!acFind) {
+        const check = await showDialog.check(
+          `确定刷新？`,
+          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+        );
+        if (!check) return;
+      } else {
+        rfAccount = gcFind;
+        rfCk = acFind.cookie;
+      }
     }
   }
-  await TGLogger.Info("[UserAbyss][getAbyssData] 更新深渊数据");
-  await showLoading.start(`正在获取${account.value.gameUid}的深渊数据`, "正在获取上期数据");
-  const resP = await recordReq.spiralAbyss(cookie.value, account.value, "2");
+  await TGLogger.Info("[Abyss][refreshAbyss] 更新深渊数据");
+  await showLoading.start(`正在获取 ${rfAccount.gameUid} 的深渊数据`, "正在获取上期数据");
+  const resP = await recordReq.spiralAbyss(rfCk!, rfAccount, "2");
   console.log(resP);
   if ("retcode" in resP) {
     await showLoading.end();
     showSnackbar.error(`[${resP.retcode}]${resP.message}`);
-    await TGLogger.Error(
-      `[UserAbyss][getAbyssData] 获取${account.value.gameUid}的上期深渊数据失败`,
-    );
-    await TGLogger.Error(`[UserAbyss][getAbyssData] ${resP.retcode} ${resP.message}`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] 获取${rfAccount.gameUid}的上期深渊数据失败`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] ${resP.retcode} ${resP.message}`);
     return;
   }
-  await TGLogger.Info("[UserAbyss][getAbyssData] 成功获取上期深渊数据");
+  await TGLogger.Info("[Abyss][refreshAbyss] 成功获取上期深渊数据");
   await showLoading.update("正在保存上期深渊数据");
-  await TSUserAbyss.saveAbyss(account.value.gameUid, resP);
+  await TSUserAbyss.saveAbyss(rfAccount.gameUid, resP);
   await showLoading.update("正在获取本期深渊数据");
-  const res = await recordReq.spiralAbyss(cookie.value, account.value, "1");
+  const res = await recordReq.spiralAbyss(rfCk!, rfAccount, "1");
   console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(
-      `[UserAbyss][getAbyssData] 获取${account.value.gameUid}的本期深渊数据失败`,
-    );
-    await TGLogger.Error(`[UserAbyss][getAbyssData] ${res.retcode} ${res.message}`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] 获取${rfAccount.gameUid}的本期深渊数据失败`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] ${res.retcode} ${res.message}`);
     return;
   }
   await showLoading.update("正在保存本期深渊数据");
-  await TSUserAbyss.saveAbyss(account.value.gameUid, res);
-  await TGLogger.Info(`[UserAbyss][getAbyssData] 成功获取${account.value.gameUid}的本期深渊数据`);
+  await TSUserAbyss.saveAbyss(rfAccount.gameUid, res);
+  await TGLogger.Info(`[Abyss][refreshAbyss] 成功获取${rfAccount.gameUid}的本期深渊数据`);
   await showLoading.update("正在加载深渊数据");
-  await reloadUid();
+  await reloadUid(uidCur.value);
   await loadAbyss();
   await showLoading.end();
-  showSnackbar.success(`已加载${account.value.gameUid}的${localAbyss.value.length}条深渊数据`);
+  showSnackbar.success(`已加载${rfAccount.gameUid}的${localAbyss.value.length}条深渊数据`);
 }
 
 async function shareAbyss(): Promise<void> {
@@ -348,22 +354,18 @@ async function uploadAbyss(): Promise<void> {
     const check = await showDialog.check("确定上传？", "未设置胡桃云账号");
     if (!check) return;
   }
-  if (!cookie.value) {
-    showSnackbar.warn("请登录米社账号");
-    return;
-  }
-  await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据");
+  await TGLogger.Info("[Abyss][uploadAbyss] 上传深渊数据");
   const maxId = Math.max(...localAbyss.value.map((i) => i.id));
   const abyssData = localAbyss.value.find((item) => item.id === maxId);
   if (!abyssData) {
     showSnackbar.warn("未找到深渊数据");
-    await TGLogger.Warn("[UserAbyss][uploadAbyss] 未找到深渊数据");
+    await TGLogger.Warn("[Abyss][uploadAbyss] 未找到深渊数据");
     return;
   }
   const maxFloor = Number(abyssData.maxFloor.split("-")[0]);
   if (isNaN(maxFloor) || maxFloor <= 9) {
     showSnackbar.warn("尚未完成深渊，请完成深渊后重试！");
-    await TGLogger.Warn(`[UserAbyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
+    await TGLogger.Warn(`[Abyss][uploadAbyss] 尚未完成深渊 ${abyssData.maxFloor}`);
     return;
   }
   const startTime = new Date(abyssData.startTime).getTime();
@@ -371,16 +373,31 @@ async function uploadAbyss(): Promise<void> {
   const nowTime = new Date().getTime();
   if (nowTime < startTime || nowTime > endTime) {
     showSnackbar.warn("非最新深渊数据，请刷新深渊数据后重试！");
-    await TGLogger.Warn("[UserAbyss][uploadAbyss] 非最新深渊数据");
+    await TGLogger.Warn("[Abyss][uploadAbyss] 非最新深渊数据");
     return;
   }
+  let upAccount = account.value;
+  let upCk = cookie.value;
+  const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
+  console.log(uidCur.value, gcFind);
+  if (!gcFind) {
+    showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法刷新角色数据进行上传`);
+    return;
+  }
+  upAccount = gcFind;
+  const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+  if (!acFind) {
+    showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法刷新角色数据进行上传`);
+    return;
+  }
+  upCk = acFind.cookie;
   try {
-    await showLoading.start(`正在上传${account.value.gameUid}的深渊数据`, `期数：${abyssData.id}`);
+    await showLoading.start(`正在上传 ${upAccount.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
     const transAbyss = hutao.Abyss.utils.transData(abyssData);
     if (userName.value) transAbyss.ReservedUserName = userName.value;
-    const check = await refreshAvatars(cookie.value, account.value);
+    const check = await refreshAvatars(upCk!, upAccount);
     if (!check) return;
-    const roles = await TSUserAvatar.getAvatars(Number(account.value.gameUid));
+    const roles = await TSUserAvatar.getAvatars(Number(upAccount.gameUid));
     if (!roles) {
       await showLoading.end();
       showSnackbar.warn("未找到角色数据");
@@ -393,21 +410,22 @@ async function uploadAbyss(): Promise<void> {
     const res = await hutao.Abyss.upload(transAbyss);
     if (res.retcode !== 0) {
       showSnackbar.error(`[${res.retcode}]${res.message}`);
-      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${res.retcode} ${res.message}`);
+      await TGLogger.Error("[Abyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Error(`[Abyss][uploadAbyss] ${res.retcode} ${res.message}`);
       return;
     }
     showSnackbar.success(res.message ?? "上传深渊数据成功，即将刷新祈愿时长");
-    await TGLogger.Info("[UserAbyss][uploadAbyss] 上传深渊数据成功");
+    await TGLogger.Info("[Abyss][uploadAbyss] 上传深渊数据成功");
     await TGLogger.Info(`[${res.retcode}] ${res.message}`);
     // 等待5s刷新时长
+    await showLoading.update("正在刷新胡桃云数据");
     await new Promise<void>((resolve) => setTimeout(resolve, 5000));
     await hutaoStore.tryRefreshInfo();
   } catch (e) {
     if (e instanceof Error) {
       showSnackbar.error(e.message);
-      await TGLogger.Error("[UserAbyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Error(`[UserAbyss][uploadAbyss] ${e.message}`);
+      await TGLogger.Error("[Abyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Error(`[Abyss][uploadAbyss] ${e.message}`);
     }
   }
   await showLoading.end();
@@ -427,7 +445,7 @@ async function refreshAvatars(
     return false;
   }
   await showLoading.update("正在更新角色列表");
-  const listRes = await recordReq.character.list(ck, account.value);
+  const listRes = await recordReq.character.list(ck, ac);
   if ("retcode" in listRes) {
     await showLoading.update("角色列表更新失败");
     showSnackbar.error(`[${listRes.message}] ${listRes.message}`);
@@ -547,9 +565,8 @@ async function refreshAvatars(
   width: 100%;
   height: 100%;
   padding: 8px;
+  border-radius: 4px;
   background: var(--app-page-bg);
-  border-bottom-right-radius: 4px;
-  border-top-right-radius: 4px;
 }
 
 .ua-window-item {
@@ -604,20 +621,19 @@ async function refreshAvatars(
   gap: 8px;
 }
 
-.user-empty {
+.ua-empty {
   position: absolute;
-  top: calc(50vh - 200px);
-  left: calc(50vw - 400px);
+  top: 0;
+  left: 0;
   display: flex;
-  width: 800px;
-  height: 400px;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
   align-items: center;
-  border-radius: 4px;
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-2);
+  justify-content: center;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 1.5rem;
+  row-gap: 12px;
 }
 </style>
