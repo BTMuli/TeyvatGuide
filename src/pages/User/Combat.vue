@@ -134,11 +134,11 @@
           </div>
         </div>
       </v-window-item>
+      <div v-show="localCombat.length === 0" class="ucm-empty">
+        <img alt="empty" src="/UI/app/empty.webp" />
+        <span>暂无数据，请尝试刷新</span>
+      </div>
     </v-window>
-    <div v-show="localCombat.length === 0" class="user-empty">
-      <img alt="empty" src="/UI/app/empty.webp" />
-      <span>暂无数据，请尝试刷新</span>
-    </div>
   </div>
   <TucOvStat v-model="showStat" :data="cloudCombat" />
   <TucOvChar v-model="showChar" :data="charMasters" :uid="uidCur" />
@@ -157,8 +157,8 @@ import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
 import hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
-import useAppStore from "@store/app.js";
 import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
@@ -173,7 +173,6 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const hutaoStore = useHutaoStore();
 
-const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const { userName } = storeToRefs(hutaoStore);
 
@@ -196,14 +195,14 @@ onMounted(async () => {
   await TGLogger.Info("[UserCombat][onMounted] 打开真境剧诗页面");
   await showLoading.update("正在加载UID列表");
   await reloadUid();
-  if (uidCur.value) {
-    await showLoading.update(`正在加载UID${uidCur.value}的剧诗数据`);
-    await loadCombat();
-  }
   await showLoading.end();
 });
 
 watch(() => uidCur.value, loadCombat);
+watch(
+  () => account.value,
+  async () => await reloadUid(),
+);
 
 async function toAbyss(): Promise<void> {
   await router.push({ name: "深境螺旋" });
@@ -211,6 +210,21 @@ async function toAbyss(): Promise<void> {
 
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
+}
+
+async function hideAllOverlay(): Promise<void> {
+  if (showTarot.value) {
+    showTarot.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  }
+  if (showChar.value) {
+    showChar.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  }
+  if (showStat.value) {
+    showStat.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  }
 }
 
 async function loadWiki(): Promise<void> {
@@ -221,21 +235,21 @@ async function loadWiki(): Promise<void> {
     showSnackbar.warn(`[${res.retcode}] ${res.message}`);
     await TGLogger.Warn(`[Combat][loadWiki] ${JSON.stringify(res)}`);
   } else cloudCombat.value = res;
-  await showLoading.end();
   showSnackbar.success("成功获取统计数据");
-  if (showTarot.value) showTarot.value = false;
-  if (showChar.value) showChar.value = false;
+  await hideAllOverlay();
+  await showLoading.end();
   showStat.value = true;
 }
 
-async function reloadUid(): Promise<void> {
+async function reloadUid(uid?: string): Promise<void> {
   uidList.value = await TSUserCombat.getAllUid();
-  if (uidList.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  else if (uidList.value.length > 0) uidCur.value = uidList.value[0];
-  else if (isLogin.value) {
-    uidList.value = [account.value.gameUid];
-    uidCur.value = account.value.gameUid;
-  } else uidCur.value = undefined;
+  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
+  if (uidList.value.includes(account.value.gameUid)) {
+    if (uid === undefined) uidCur.value = account.value.gameUid;
+  } else {
+    uidList.value = [account.value.gameUid, ...uidList.value];
+    if (uid === undefined) uidCur.value = uidList.value[0];
+  }
 }
 
 async function loadCombat(): Promise<void> {
@@ -250,39 +264,46 @@ async function tryLoginHutao(): Promise<void> {
 }
 
 async function refreshCombat(): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.error("未登录");
-    await TGLogger.Warn("[UserCombat][refreshCombat] 未登录");
-    return;
-  }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至 ${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await refreshCombat();
+  let rfAccount = account.value;
+  let rfCk = cookie.value;
+  if (!uidCur.value) {
+    if (!rfCk) {
+      showSnackbar.warn("请先登录");
+      await TGLogger.Warn(`[Combat][refreshCombat][${rfAccount.gameUid}] 未登录`);
       return;
     }
-    const freshCheck = await showDialog.check(
-      "确定刷新？",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消剧诗数据刷新");
-      return;
+  } else {
+    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
+    console.log(uidCur.value, gcFind);
+    if (!gcFind) {
+      const check = await showDialog.check(
+        `确定刷新？`,
+        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+      );
+      if (!check) return;
+    } else {
+      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+      if (!acFind) {
+        const check = await showDialog.check(
+          `确定刷新？`,
+          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+        );
+        if (!check) return;
+      } else {
+        rfAccount = gcFind;
+        rfCk = acFind.cookie;
+      }
     }
   }
-  await TGLogger.Info("[UserCombat][refreshCombat] 更新剧诗数据");
-  await showLoading.start(`正在获取${account.value.gameUid}的剧诗数据`);
-  const res = await recordReq.combat.base(cookie.value, account.value);
+  await TGLogger.Info("[Combat][refreshCombat] 更新剧诗数据");
+  await showLoading.start(`正在获取${rfAccount.gameUid}的剧诗数据`);
+  const res = await recordReq.combat.base(rfCk!, rfAccount);
   console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[UserCombat][refreshCombat] 获取${account.value.gameUid}的剧诗数据失败`);
-    await TGLogger.Error(`[UserCombat][refreshCombat] ${res.retcode} ${res.message}`);
+    await TGLogger.Error(`[Combat][refreshCombat] 获取${rfAccount.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[Combat][refreshCombat] ${res.retcode} ${res.message}`);
     return;
   }
   if (!res.is_unlock) {
@@ -293,48 +314,39 @@ async function refreshCombat(): Promise<void> {
   await showLoading.update("正在保存剧诗数据");
   for (const combat of res.data) {
     await showLoading.update("正在保存剧诗数据");
-    await TSUserCombat.saveCombat(account.value.gameUid, combat);
+    await TSUserCombat.saveCombat(rfAccount.gameUid, combat);
   }
   await showLoading.update("正在加载剧诗数据");
-  await reloadUid();
+  await reloadUid(uidCur.value);
   await loadCombat();
   await showLoading.end();
 }
 
 async function loadCharMaster(): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.error("未登录");
-    await TGLogger.Warn("[UserCombat][loadCharMaster] 未登录");
+  let cmAccount = account.value;
+  let cmCk = cookie.value;
+  const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
+  console.log(uidCur.value, gcFind);
+  if (!gcFind) {
+    showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应游迹数据`);
     return;
   }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至 ${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await refreshCombat();
-      return;
-    }
-    const freshCheck = await showDialog.check(
-      "确定刷新？",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消剧诗数据刷新");
-      return;
-    }
+  cmAccount = gcFind;
+  const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+  if (!acFind) {
+    showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法获取对应游迹数据`);
+    return;
   }
-  await TGLogger.Info("[UserCombat][loadCharMaster] 获取绘想游迹数据");
-  await showLoading.start(`正在获取${account.value.gameUid}的绘想游迹数据`);
-  const res = await recordReq.combat.char(cookie.value, account.value);
+  cmCk = acFind.cookie;
+  await TGLogger.Info("[Combat][loadCharMaster] 获取绘想游迹数据");
+  await showLoading.start(`正在获取${cmAccount.gameUid}的绘想游迹数据`);
+  const res = await recordReq.combat.char(cmCk!, cmAccount);
   console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[UserCombat][loadCharMaster] 获取${account.value.gameUid}的剧诗数据失败`);
-    await TGLogger.Error(`[UserCombat][loadCharMaster] ${res.retcode} ${res.message}`);
+    await TGLogger.Error(`[Combat][loadCharMaster] 获取${cmAccount.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[Combat][loadCharMaster] ${res.retcode} ${res.message}`);
     return;
   }
   if (!res.is_unlock) {
@@ -342,47 +354,37 @@ async function loadCharMaster(): Promise<void> {
     showSnackbar.warn("用户未解锁绘想游迹");
     return;
   } else charMasters.value = res.list;
-  showSnackbar.success("成功获取绘想游迹数据");
+  showSnackbar.success(`成功获取 ${uidCur.value} 的绘想游迹数据`);
+  await hideAllOverlay();
   await showLoading.end();
-  if (showStat.value) showStat.value = false;
-  if (showTarot.value) showTarot.value = false;
   showChar.value = true;
 }
 
 async function loadTarot(): Promise<void> {
-  if (!cookie.value) {
-    showSnackbar.error("未登录");
-    await TGLogger.Warn("[UserCombat][loadTarot] 未登录");
+  let trAccount = account.value;
+  let trCk = cookie.value;
+  const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
+  console.log(uidCur.value, gcFind);
+  if (!gcFind) {
+    showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应圣牌数据`);
     return;
   }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至 ${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await refreshCombat();
-      return;
-    }
-    const freshCheck = await showDialog.check(
-      "确定刷新？",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消剧诗数据刷新");
-      return;
-    }
+  trAccount = gcFind;
+  const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+  if (!acFind) {
+    showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法获取对应圣牌数据`);
+    return;
   }
-  await TGLogger.Info("[UserCombat][loadTarot] 获取月谕圣牌数据");
-  await showLoading.start(`正在获取${account.value.gameUid}的月谕圣牌数据`);
-  const res = await recordReq.combat.base(cookie.value, account.value);
+  trCk = acFind.cookie;
+  await TGLogger.Info("[Combat][loadTarot] 获取月谕圣牌数据");
+  await showLoading.start(`正在获取${trAccount.gameUid}的月谕圣牌数据`);
+  const res = await recordReq.combat.base(trCk!, trAccount);
   console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[UserCombat][loadTarot] 获取${account.value.gameUid}的月谕圣牌数据失败`);
-    await TGLogger.Error(`[UserCombat][loadTarot] ${res.retcode} ${res.message}`);
+    await TGLogger.Error(`[Combat][loadTarot] 获取${trAccount.gameUid}的月谕圣牌数据失败`);
+    await TGLogger.Error(`[Combat][loadTarot] ${res.retcode} ${res.message}`);
     return;
   }
   if (!res.is_unlock) {
@@ -390,10 +392,9 @@ async function loadTarot(): Promise<void> {
     showSnackbar.warn("用户未解锁幻想真境剧诗");
     return;
   } else tarotStat.value = res.tarot_card_state;
-  showSnackbar.success("成功获取月谕圣牌数据");
+  showSnackbar.success(`成功获取${uidCur.value}的月谕圣牌数据`);
+  await hideAllOverlay();
   await showLoading.end();
-  if (showStat.value) showStat.value = false;
-  if (showChar.value) showChar.value = false;
   showTarot.value = true;
 }
 
@@ -686,23 +687,6 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   padding-left: 4px;
 }
 
-.user-empty {
-  position: absolute;
-  top: calc(50vh - 200px);
-  left: calc(50vw - 400px);
-  display: flex;
-  width: 800px;
-  height: 400px;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 5px;
-  background: var(--common-shadow-t-2);
-  box-shadow: 0 0 5px var(--common-shadow-2);
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 1.5rem;
-}
-
 .ucw-rounds {
   display: flex;
   width: 100%;
@@ -710,5 +694,21 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   align-items: center;
   justify-content: center;
   row-gap: 8px;
+}
+
+.ucm-empty {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  row-gap: 12px;
 }
 </style>

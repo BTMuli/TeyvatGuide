@@ -16,7 +16,7 @@
       <div class="tuc-ae-flex">
         <div v-for="(enemy, idx) in props.enemies" :key="idx" class="tuc-enemy">
           <div class="tuc-enemy-icon">
-            <TMiImg :ori="true" :src="enemy.icon" alt="icon" />
+            <TMiImg :size="40" :ori="true" :src="enemy.icon" alt="icon" />
           </div>
           <div class="tuc-enemy-info">
             <span>{{ enemy.name }}</span>
