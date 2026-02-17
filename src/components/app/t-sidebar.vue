@@ -7,190 +7,203 @@
         :prepend-icon="rail ? 'mdi-chevron-right' : undefined"
         @click="rail = !rail"
       />
-      <!-- 菜单项 -->
-      <v-list-item :link="true" :title.attr="'首页'" href="/">
-        <template #title>首页</template>
-        <template #prepend>
-          <img alt="homeIcon" class="side-icon paimon" src="/UI/nav/paimon.webp" />
-        </template>
-      </v-list-item>
-      <v-list-item :link="true" href="/announcements" title.attr="'公告'">
-        <template #title>公告</template>
-        <template #prepend>
-          <img alt="annoIcon" class="side-icon" src="@/assets/icons/board.svg" />
-        </template>
-      </v-list-item>
-      <v-list-item :href="`/news/2/${recentNewsType}`" :link="true" :title.attr="'资讯'">
-        <template #title>资讯</template>
-        <template #prepend>
-          <img alt="mihoyo" class="side-icon" src="/platforms/mhy/mys.webp" />
-        </template>
-      </v-list-item>
-      <v-list-item :link="true" :title.attr="'帖子'" href="/posts/forum">
-        <template #title>帖子</template>
-        <template #prepend>
-          <img alt="posts" class="side-icon" src="/UI/nav/posts.webp" />
-        </template>
-      </v-list-item>
-      <v-list-item :link="true" :title.attr="'成就'" href="/achievements">
-        <template #title>成就</template>
-        <template #prepend>
-          <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
-        </template>
-      </v-list-item>
-      <v-list-item :link="true" :title.attr="'背包材料'" href="/bag/material">
-        <template #title>背包材料</template>
-        <template #prepend>
-          <img alt="materialBagIcon" class="side-icon" src="/icon/material/121234.webp" />
-        </template>
-      </v-list-item>
-      <v-divider />
-      <!-- 游戏数据，包括战绩&角色&祈愿 -->
-      <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
-        <template #activator="{ props }">
-          <v-list-item :title.attr="'游戏数据'" v-bind="props">
-            <template #title>游戏数据</template>
-            <template #prepend>
-              <img alt="gameLab" class="side-icon" src="/UI/nav/gameRecord.webp" />
-            </template>
-          </v-list-item>
-        </template>
-        <v-list :nav="true" class="side-list-menu sub" density="compact">
-          <v-list-item
-            :link="true"
-            :title.attr="'原神战绩'"
-            class="side-item-menu"
-            href="/user/record"
-          >
-            <template #title>原神战绩</template>
-            <template #prepend>
-              <img alt="record" class="side-icon-menu" src="/UI/nav/userRecord.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item
-            :link="true"
-            :title.attr="'角色列表'"
-            class="side-item-menu"
-            href="/user/characters"
-          >
-            <template #title>角色列表</template>
-            <template #prepend>
-              <img alt="characters" class="side-icon-menu" src="/UI/nav/userAvatar.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item
-            :link="true"
-            :title.attr="'祈愿记录'"
-            class="side-item-menu"
-            href="/user/gacha"
-          >
-            <template #title>祈愿记录</template>
-            <template #prepend>
-              <img alt="gacha" class="side-icon-menu" src="/UI/nav/userGacha.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item
-            :link="true"
-            :title.attr="'颂愿记录'"
-            class="side-item-menu"
-            href="/user/gachaB"
-          >
-            <template #title>颂愿记录</template>
-            <template #prepend>
-              <img alt="gachaB" class="side-icon-menu" src="/icon/nation/千星奇域.webp" />
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <!-- 高难挑战，包括深渊&剧诗&危战 -->
-      <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
-        <template #activator="{ props }">
-          <v-list-item :title.attr="'高难挑战'" v-bind="props">
-            <template #title>高难挑战</template>
-            <template #prepend>
-              <img alt="abyssLab" class="side-icon" src="/UI/nav/userAbyssLab.webp" />
-            </template>
-          </v-list-item>
-        </template>
-        <v-list :nav="true" class="side-list-menu sub" density="compact">
-          <v-list-item :link="true" class="side-item-menu" href="/user/abyss" title="深境螺旋">
-            <template #prepend>
-              <img alt="abyss" class="side-icon-menu" src="/UI/nav/userAbyss.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item :link="true" class="side-item-menu" href="/user/combat" title="真境剧诗">
-            <template #prepend>
-              <img alt="combat" class="side-icon-menu" src="/UI/nav/userCombat.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item :link="true" class="side-item-menu" href="/user/challenge" title="幽境危战">
-            <template #prepend>
-              <img alt="challenge" class="side-icon-menu" src="/UI/nav/userChallenge.webp" />
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-list-item :link="true" :title.attr="'实用脚本'" href="/user/scripts">
-        <template #title>实用脚本</template>
-        <template #prepend>
-          <img alt="scripts" class="side-icon" src="/UI/nav/toolbox.webp" />
-        </template>
-      </v-list-item>
-      <v-divider />
-      <v-list-item
-        v-show="isDevEnv"
-        :link="true"
-        :title.attr="'测试页面'"
-        href="/test"
-        prepend-icon="mdi-test-tube"
-      >
-        <template #title>测试页面</template>
-      </v-list-item>
-      <v-divider v-show="isDevEnv" />
-      <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
-        <template #activator="{ props }">
-          <v-list-item :title.attr="'图鉴'" v-bind="props">
-            <template #title>图鉴</template>
-            <template #prepend>
-              <img alt="wikiIcon" class="side-icon" src="/UI/nav/wikiIcon.webp" />
-            </template>
-          </v-list-item>
-        </template>
-        <v-list :nav="true" class="side-list-menu sub" density="compact">
-          <v-list-item :link="true" class="side-item-menu" href="/wiki/abyss" title="深渊统计">
-            <template #prepend>
-              <img alt="abyssIcon" class="side-icon-menu" src="/platforms/other/hutao.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item :link="true" class="side-item-menu" href="/wiki/character" title="角色图鉴">
-            <template #prepend>
-              <img alt="characterIcon" class="side-icon-menu" src="/UI/nav/wikiAvatar.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item :link="true" class="side-item-menu" href="/wiki/weapon" title="武器图鉴">
-            <template #prepend>
-              <img alt="weaponIcon" class="side-icon-menu" src="/UI/nav/wikiWeapon.webp" />
-            </template>
-          </v-list-item>
-          <v-list-item :link="true" class="side-item-menu" href="/wiki/nameCard">
-            <template #default>
-              <v-icon color="var(--tgc-yellow-2)" size="20">mdi-credit-card-outline</v-icon>
-              <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
-            </template>
-          </v-list-item>
-          <v-list-item :link="true" class="side-item-menu" href="/wiki/material" title="材料图鉴">
-            <template #prepend>
-              <img alt="gcgIcon" class="side-icon-menu" src="/UI/nav/wikiGCG.webp" />
-            </template>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-list-item :link="true" :title.attr="'留影叙佳期'" href="/archive/birthday">
-        <template #title>留影叙佳期</template>
-        <template #prepend>
-          <img alt="archive_birthday_icon" class="side-icon" src="/UI/nav/act_birthday.webp" />
-        </template>
-      </v-list-item>
+      <div class="mid-menu">
+        <!-- 菜单项 -->
+        <v-list-item :link="true" :title.attr="'首页'" href="/">
+          <template #title>首页</template>
+          <template #prepend>
+            <img alt="homeIcon" class="side-icon paimon" src="/UI/nav/paimon.webp" />
+          </template>
+        </v-list-item>
+        <v-list-item :link="true" href="/announcements" title.attr="'公告'">
+          <template #title>公告</template>
+          <template #prepend>
+            <img alt="annoIcon" class="side-icon" src="@/assets/icons/board.svg" />
+          </template>
+        </v-list-item>
+        <v-list-item :href="`/news/2/${recentNewsType}`" :link="true" :title.attr="'资讯'">
+          <template #title>资讯</template>
+          <template #prepend>
+            <img alt="mihoyo" class="side-icon" src="/platforms/mhy/mys.webp" />
+          </template>
+        </v-list-item>
+        <v-list-item :link="true" :title.attr="'帖子'" href="/posts/forum">
+          <template #title>帖子</template>
+          <template #prepend>
+            <img alt="posts" class="side-icon" src="/UI/nav/posts.webp" />
+          </template>
+        </v-list-item>
+        <v-list-item :link="true" :title.attr="'成就'" href="/achievements">
+          <template #title>成就</template>
+          <template #prepend>
+            <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
+          </template>
+        </v-list-item>
+        <v-list-item :link="true" :title.attr="'背包材料'" href="/bag/material">
+          <template #title>背包材料</template>
+          <template #prepend>
+            <img alt="materialBagIcon" class="side-icon" src="/icon/material/121234.webp" />
+          </template>
+        </v-list-item>
+        <v-divider />
+        <!-- 游戏数据，包括战绩&角色&祈愿 -->
+        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'游戏数据'" v-bind="props">
+              <template #title>游戏数据</template>
+              <template #prepend>
+                <img alt="gameLab" class="side-icon" src="/UI/nav/gameRecord.webp" />
+              </template>
+            </v-list-item>
+          </template>
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item
+              :link="true"
+              :title.attr="'原神战绩'"
+              class="side-item-menu"
+              href="/user/record"
+            >
+              <template #title>原神战绩</template>
+              <template #prepend>
+                <img alt="record" class="side-icon-menu" src="/UI/nav/userRecord.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :link="true"
+              :title.attr="'角色列表'"
+              class="side-item-menu"
+              href="/user/characters"
+            >
+              <template #title>角色列表</template>
+              <template #prepend>
+                <img alt="characters" class="side-icon-menu" src="/UI/nav/userAvatar.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :link="true"
+              :title.attr="'祈愿记录'"
+              class="side-item-menu"
+              href="/user/gacha"
+            >
+              <template #title>祈愿记录</template>
+              <template #prepend>
+                <img alt="gacha" class="side-icon-menu" src="/UI/nav/userGacha.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :link="true"
+              :title.attr="'颂愿记录'"
+              class="side-item-menu"
+              href="/user/gachaB"
+            >
+              <template #title>颂愿记录</template>
+              <template #prepend>
+                <img alt="gachaB" class="side-icon-menu" src="/icon/nation/千星奇域.webp" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <!-- 高难挑战，包括深渊&剧诗&危战 -->
+        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'高难挑战'" v-bind="props">
+              <template #title>高难挑战</template>
+              <template #prepend>
+                <img alt="abyssLab" class="side-icon" src="/UI/nav/userAbyssLab.webp" />
+              </template>
+            </v-list-item>
+          </template>
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item :link="true" class="side-item-menu" href="/user/abyss" title="深境螺旋">
+              <template #prepend>
+                <img alt="abyss" class="side-icon-menu" src="/UI/nav/userAbyss.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/user/combat" title="真境剧诗">
+              <template #prepend>
+                <img alt="combat" class="side-icon-menu" src="/UI/nav/userCombat.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :link="true"
+              class="side-item-menu"
+              href="/user/challenge"
+              title="幽境危战"
+            >
+              <template #prepend>
+                <img alt="challenge" class="side-icon-menu" src="/UI/nav/userChallenge.webp" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-list-item :link="true" :title.attr="'实用脚本'" href="/user/scripts">
+          <template #title>实用脚本</template>
+          <template #prepend>
+            <img alt="scripts" class="side-icon" src="/UI/nav/toolbox.webp" />
+          </template>
+        </v-list-item>
+        <v-divider />
+        <v-list-item
+          v-show="isDevEnv"
+          :link="true"
+          :title.attr="'测试页面'"
+          href="/test"
+          prepend-icon="mdi-test-tube"
+        >
+          <template #title>测试页面</template>
+        </v-list-item>
+        <v-divider v-show="isDevEnv" />
+        <!-- 图鉴 -->
+        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'图鉴'" v-bind="props">
+              <template #title>图鉴</template>
+              <template #prepend>
+                <img alt="wikiIcon" class="side-icon" src="/UI/nav/wikiIcon.webp" />
+              </template>
+            </v-list-item>
+          </template>
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item :link="true" class="side-item-menu" href="/wiki/abyss" title="深渊统计">
+              <template #prepend>
+                <img alt="abyssIcon" class="side-icon-menu" src="/platforms/other/hutao.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item
+              :link="true"
+              class="side-item-menu"
+              href="/wiki/character"
+              title="角色图鉴"
+            >
+              <template #prepend>
+                <img alt="characterIcon" class="side-icon-menu" src="/UI/nav/wikiAvatar.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/wiki/weapon" title="武器图鉴">
+              <template #prepend>
+                <img alt="weaponIcon" class="side-icon-menu" src="/UI/nav/wikiWeapon.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/wiki/nameCard">
+              <template #default>
+                <v-icon color="var(--tgc-yellow-2)" size="20">mdi-credit-card-outline</v-icon>
+                <span style="margin-left: 10px; font-size: 0.8125rem">名片图鉴</span>
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/wiki/material" title="材料图鉴">
+              <template #prepend>
+                <img alt="gcgIcon" class="side-icon-menu" src="/UI/nav/wikiGCG.webp" />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-list-item :link="true" :title.attr="'留影叙佳期'" href="/archive/birthday">
+          <template #title>留影叙佳期</template>
+          <template #prepend>
+            <img alt="archive_birthday_icon" class="side-icon" src="/UI/nav/act_birthday.webp" />
+          </template>
+        </v-list-item>
+      </div>
       <!-- 底部菜单 -->
       <div class="bottom-menu">
         <!-- 用户菜单 -->
@@ -812,7 +825,17 @@ async function tryLaunchGame(): Promise<void> {
 .side-list {
   position: relative;
   height: 100%;
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
   font-family: var(--font-title);
+}
+
+.mid-menu {
+  position: relative;
+  width: 100%;
+  max-height: calc(100vh - 280px);
+  overflow: hidden auto;
 }
 
 .bottom-menu {
