@@ -1,26 +1,26 @@
 /**
  * 关于 BBS 的工具函数
- * @since Beta v0.9.1
+ * @since Beta v0.9.6
  */
 
 /**
  * salt 类型
- * @since Beta v0.9.1
+ * @since Beta v0.9.6
  */
 export type SaltKey = "K2" | "LK2" | "X4" | "X6" | "PROD";
 
-const BBS_VERSION: Readonly<string> = "2.100.0";
+const BBS_VERSION: Readonly<string> = "2.102.1";
 const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
 const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) miHoYoBBS/${BBS_VERSION}`;
 
 /**
  * salt 值
- * @since Beta v0.9.1
- * @remarks 2.100.0
+ * @since Beta v0.9.6
+ * @remarks 2.102.1
  */
 const BBS_SALT: Readonly<Record<SaltKey, string>> = {
-  K2: "SVHcDPuPJYhcm57aSLDe7IwI5gvjgAib",
-  LK2: "AUtLYA9P6PLDXW6VC7pEBDLRarap3RsA",
+  K2: "lX8m5VO5at5JG7hR8hzqFwzyL5aB1tYo",
+  LK2: "yBh10ikxtLPoIhgwgPZSv5dmfaOTSJ6a",
   X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
   X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
   PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",

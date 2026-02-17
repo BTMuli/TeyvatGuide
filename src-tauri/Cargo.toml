@@ -25,7 +25,7 @@ image = "0.25.9"
 log = "0.4.29"
 prost = "=0.14.1"
 prost-types = "=0.14.1"
-sentry = { version = "0.46.1", features = ["backtrace", "panic"] }
+sentry = { version = "0.46.2", features = ["backtrace", "panic"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 tauri = { version = "2.10.2", features = ["tray-icon"] }

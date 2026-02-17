@@ -8,7 +8,7 @@
         <v-select
           v-model="uidCur"
           :hide-details="true"
-          :items="selectItem"
+          :items="uidList"
           density="compact"
           label="游戏UID"
           variant="outlined"
@@ -156,8 +156,8 @@ import UgoUid from "@comp/userGacha/ugo-uid.vue";
 import hutao from "@Hutao/index.js";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
-import useAppStore from "@store/app.js";
 import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
@@ -175,7 +175,6 @@ import { AppCalendarData } from "@/data/index.js";
 const router = useRouter();
 const hutaoStore = useHutaoStore();
 
-const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const { isLogin: isLoginHutao, accessToken, userName, userInfo } = storeToRefs(hutaoStore);
 
@@ -188,7 +187,7 @@ const uidCur = ref<string>();
 const tab = ref<string>("overview");
 const hutaoShow = ref<boolean>(false);
 const htMode = ref<UgoHutaoMode>("download");
-const selectItem = shallowRef<Array<string>>([]);
+const uidList = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const yattaData = shallowRef<Array<TGApp.Plugins.Yatta.ConvertData>>([]);
 
@@ -196,28 +195,16 @@ onMounted(async () => {
   await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
   await reloadUid();
-  if (uidCur.value) {
-    await showLoading.update(`UID：${uidCur.value}`);
-    gachaListCur.value = await TSUserGacha.record.all(uidCur.value);
-    await TGLogger.Info(
-      `[UserGacha][onMounted] 获取到 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`,
-    );
-  }
   await showLoading.end();
-  showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
 });
 
-// 监听 UID 变化
 watch(
   () => uidCur.value,
-  async (newUid) => {
-    if (!newUid) return;
-    gachaListCur.value = await TSUserGacha.record.all(newUid);
-    showSnackbar.success(`成功获取 ${gachaListCur.value.length} 条祈愿数据`);
-    await TGLogger.Info(
-      `[UserGacha][${newUid}][watch] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
-    );
-  },
+  async () => await loadGachaList(),
+);
+watch(
+  () => account.value,
+  async () => await reloadUid(),
 );
 
 async function toBeyond(): Promise<void> {
@@ -444,72 +431,89 @@ async function handleHutaoDelete(uids: Array<string>): Promise<void> {
   await showLoading.end();
 }
 
-async function reloadUid(): Promise<void> {
-  selectItem.value = await TSUserGacha.getUidList();
-  if (selectItem.value.includes(account.value.gameUid)) uidCur.value = account.value.gameUid;
-  if (selectItem.value.length > 0) uidCur.value = selectItem.value[0];
-  else if (isLogin.value) {
-    selectItem.value = [account.value.gameUid];
-    uidCur.value = account.value.gameUid;
-  } else uidCur.value = undefined;
+async function loadGachaList(): Promise<void> {
+  if (uidCur.value === undefined || uidCur.value === "") return;
+  gachaListCur.value = await TSUserGacha.record.all(uidCur.value);
+  showSnackbar.success(`成功获取 ${uidCur.value} 的 ${gachaListCur.value.length} 条祈愿数据`);
+  await TGLogger.Info(
+    `[UserGacha][loadGachaList] 成功获取 ${gachaListCur.value.length} 条祈愿数据`,
+  );
+}
+
+async function reloadUid(uid?: string): Promise<void> {
+  uidList.value = await TSUserGacha.getUidList();
+  if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
+  if (uidList.value.includes(account.value.gameUid)) {
+    if (uid === undefined) uidCur.value = account.value.gameUid;
+  } else {
+    uidList.value = [account.value.gameUid, ...uidList.value];
+    if (uid === undefined) uidCur.value = uidList.value[0];
+  }
 }
 
 // 刷新按钮点击事件
 async function confirmRefresh(force: boolean): Promise<void> {
-  await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据`);
-  if (!cookie.value) {
-    showSnackbar.error("请先登录");
-    await TGLogger.Warn("[UserGacha][${account.gameUid}][confirmRefresh] 未检测到 cookie");
-    return;
-  }
-  if (uidCur.value && uidCur.value !== account.value.gameUid) {
-    const switchCheck = await showDialog.check(
-      "是否切换游戏账户",
-      `确认则尝试切换至 ${uidCur.value}`,
-    );
-    if (switchCheck) {
-      await useUserStore().switchGameAccount(uidCur.value);
-      await confirmRefresh(force);
+  let rfAccount = account.value;
+  let rfCk = cookie.value;
+  if (!uidCur.value) {
+    if (!rfCk) {
+      showSnackbar.warn("请先登录");
+      await TGLogger.Warn(`[Gacha][confirmRefresh][${rfAccount.gameUid}] 未登录`);
       return;
     }
-    const freshCheck = await showDialog.check(
-      "确定刷新?",
-      `用户${account.value.gameUid}与当前UID${uidCur.value}不一致`,
-    );
-    if (!freshCheck) {
-      showSnackbar.cancel("已取消祈愿数据刷新");
-      return;
+  } else {
+    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
+    console.log(uidCur.value, gcFind);
+    if (!gcFind) {
+      const check = await showDialog.check(
+        `确定刷新？`,
+        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
+      );
+      if (!check) return;
+    } else {
+      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
+      if (!acFind) {
+        const check = await showDialog.check(
+          `确定刷新？`,
+          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
+        );
+        if (!check) return;
+      } else {
+        rfAccount = gcFind;
+        rfCk = acFind.cookie;
+      }
     }
   }
-  await showLoading.start(`正在刷新祈愿数据`, `UID:${account.value.gameUid},正在获取 authkey`);
-  const authkeyRes = await takumiReq.bind.authKey(cookie.value, account.value);
+  await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据`);
+  await showLoading.start(`正在刷新祈愿数据`, `UID:${rfAccount.gameUid},正在获取 authkey`);
+  const authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
   if (typeof authkeyRes === "string") {
     authkey.value = authkeyRes;
-    await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 成功获取 authkey`);
+    await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 成功获取 authkey`);
   } else {
     showSnackbar.error("获取 authkey 失败");
-    await TGLogger.Error(`[UserGacha][${account.value.gameUid}][confirmRefresh] 获取 authkey 失败`);
+    await TGLogger.Error(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 获取 authkey 失败`);
     await TGLogger.Error(
-      `[UserGacha][${account.value.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
+      `[Gacha][${rfAccount.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
     );
     await showLoading.end();
     return;
   }
-  await refreshGachaPool("100", "新手祈愿", force);
-  await refreshGachaPool("200", "常驻祈愿", force);
-  await refreshGachaPool("301", "角色祈愿", force);
-  await refreshGachaPool("400", "角色祈愿2", force);
-  await refreshGachaPool("302", "武器祈愿", force);
-  await refreshGachaPool("500", "集录祈愿", force);
+  await refreshGachaPool(rfAccount, "100", "新手祈愿", force);
+  await refreshGachaPool(rfAccount, "200", "常驻祈愿", force);
+  await refreshGachaPool(rfAccount, "301", "角色祈愿", force);
+  await refreshGachaPool(rfAccount, "400", "角色祈愿2", force);
+  await refreshGachaPool(rfAccount, "302", "武器祈愿", force);
+  await refreshGachaPool(rfAccount, "500", "集录祈愿", force);
+  await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
+  await reloadUid(uidCur.value);
+  await loadGachaList();
   await showLoading.end();
-  await TGLogger.Info(`[UserGacha][${account.value.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
-  showSnackbar.success("祈愿数据刷新完成，即将刷新页面");
-  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  window.location.reload();
 }
 
 // 刷新单个池子
 async function refreshGachaPool(
+  ac: TGApp.Sqlite.Account.Game,
   type: string,
   label: string,
   force: boolean = false,
@@ -519,17 +523,15 @@ async function refreshGachaPool(
   let gachaDataMap: Record<string, Array<string>> | undefined = undefined;
   let page = 0;
   await showLoading.start(`正在刷新${label}数据`);
-  if (!force) endId = (await TSUserGacha.getGachaCheck(account.value.gameUid, type)) ?? "0";
+  if (!force) endId = (await TSUserGacha.getGachaCheck(ac.gameUid, type)) ?? "0";
   while (true) {
     page++;
     const gachaRes = await hk4eReq.gacha(authkey.value, type, reqId);
     if (!Array.isArray(gachaRes)) {
       showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
+      await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败`);
       await TGLogger.Error(
-        `[UserGacha][${account.value.gameUid}][refreshGachaPool] 获取祈愿数据失败`,
-      );
-      await TGLogger.Error(
-        `[UserGacha][${account.value.gameUid}][refreshGachaPool] ${gachaRes.retcode} ${gachaRes.message}`,
+        `[Gacha][${ac.gameUid}][refreshGachaPool] ${gachaRes.retcode} ${gachaRes.message}`,
       );
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       break;
@@ -538,7 +540,7 @@ async function refreshGachaPool(
       if (force) {
         await showLoading.update(`正在清理${label}数据`);
         if (gachaDataMap) {
-          await TSUserGacha.cleanGachaRecords(account.value.gameUid, type, gachaDataMap);
+          await TSUserGacha.cleanGachaRecords(ac.gameUid, type, gachaDataMap);
         }
       }
       break;
@@ -582,7 +584,7 @@ async function refreshGachaPool(
         gachaDataMap[item.time].push(item.id.toString());
       }
     }
-    await TSUserGacha.mergeUIGF(account.value.gameUid, uigfList);
+    await TSUserGacha.mergeUIGF(ac.gameUid, uigfList);
     if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
     reqId = gachaRes[gachaRes.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
@@ -683,13 +685,10 @@ async function deleteGacha(): Promise<void> {
   }
   await showLoading.start("正在删除祈愿数据", `UID:${uidCur.value}`);
   await TSUserGacha.deleteGachaRecords(uidCur.value);
+  await reloadUid();
+  await loadGachaList();
   await showLoading.end();
   showSnackbar.success(`已成功删除 ${uidCur.value} 的祈愿数据，即将刷新页面`);
-  await TGLogger.Info(
-    `[UserGacha][${uidCur.value}][deleteGacha] 成功删除 ${gachaListCur.value.length} 条祈愿数据`,
-  );
-  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  window.location.reload();
 }
 
 async function checkData(): Promise<void> {
