@@ -208,7 +208,7 @@ watch(
 );
 
 async function toBeyond(): Promise<void> {
-  await router.push({ name: "千星奇域祈愿记录" });
+  await router.push({ name: "颂愿记录" });
 }
 
 async function tryLoginHutao(): Promise<void> {

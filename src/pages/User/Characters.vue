@@ -4,7 +4,7 @@
     <template #prepend>
       <div class="uc-top-title">
         <img alt="icon" src="/UI/nav/userAvatar.webp" />
-        <span>我的角色</span>
+        <span>角色列表</span>
         <v-btn class="uc-top-btn" variant="elevated" @click="showSelect = true">筛选角色</v-btn>
         <v-btn class="uc-top-btn" variant="elevated" @click="resetList()">重置筛选</v-btn>
       </div>
