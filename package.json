@@ -102,7 +102,7 @@
     "qrcode.vue": "^3.8.0",
     "rsa-oaep-encryption": "^1.1.0",
     "sass-embedded": "^1.97.3",
-    "swiper": "^12.1.1",
+    "swiper": "^12.1.2",
     "uuid": "^13.0.0",
     "vue": "^3.5.28",
     "vue-echarts": "^8.0.1",
