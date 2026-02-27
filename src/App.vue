@@ -74,7 +74,11 @@ onMounted(async () => {
   textScaleListener = await event.listen<void>("text_scale_change", resizeWindow);
   const isShow = await win.isVisible();
   if (!isShow) {
-    await setWindowPos();
+    if (needResize.value === "false") {
+      await setWindowPos();
+    } else {
+      await win.center();
+    }
     await win.show();
   }
   if (showFeedback.value) {
@@ -150,10 +154,7 @@ function getSentryFeedback(): Integration {
 async function handleDpListen(event: Event<string>): Promise<void> {
   const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
   if (await windowGet.isMinimized()) await windowGet.unminimize();
-  if (!(await windowGet.isVisible())) {
-    await setWindowPos();
-    await windowGet.show();
-  }
+  if (!(await windowGet.isVisible())) await windowGet.show();
   await windowGet.setFocus();
   const payload = await parseDeepLink(event.payload);
   if (payload === false) {
@@ -277,12 +278,13 @@ async function handleResizeListen(event: Event<string>): Promise<void> {
   const webview = webviewWindow.getCurrentWebviewWindow();
   if (event.payload !== "false") {
     await resizeWindow();
+    await win.center();
   } else {
     const size = getWindowSize(webview.label);
     await win.setSize(new LogicalSize(size.width, size.height));
     await webview.setZoom(1);
+    await setWindowPos();
   }
-  await setWindowPos();
 }
 
 // 启动后只执行一次的监听
