@@ -138,10 +138,13 @@ export async function resizeWindow(): Promise<void> {
   const heightScale = screen.size.height / 1080;
   const targetWidth = Math.round(designSize.width * widthScale);
   const targetHeight = Math.round(designSize.height * heightScale);
-  if (await windowCur.isMaximized()) {
-    await windowCur.unmaximize();
+  if (targetWidth < designSize.width || targetHeight < designSize.height) {
+    // 计算后的尺寸小于基准尺寸(1920x1080 150%)下的设计尺寸，回退到窗口回正处理
+    await setWindowPos();
+    return;
   }
   await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
   const targetZoom = Math.min(widthScale, heightScale) / (screen.scaleFactor * textScale);
   await windowCur.setZoom(targetZoom);
+  await windowCur.center();
 }

@@ -28,7 +28,7 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow, LogicalPosition } from "@tauri-apps/api/window";
 import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -75,7 +75,12 @@ onMounted(async () => {
   textScaleListener = await event.listen<void>("text_scale_change", resizeWindow);
   const isShow = await win.isVisible();
   if (!isShow) {
-    if (needResize.value !== "false") await win.center();
+    if (needResize.value !== "false") {
+      await win.center();
+    } else {
+      const position = new LogicalPosition(20, 20);
+      await win.setPosition(position);
+    }
     await win.show();
   }
   if (showFeedback.value) {
