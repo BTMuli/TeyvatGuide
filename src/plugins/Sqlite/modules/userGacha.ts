@@ -275,13 +275,13 @@ async function mergeUIGF(
     try {
       for (const item of batch) {
         await insertGachaItem(uid, item);
+        cnt++;
       }
       await db.execute("COMMIT;");
     } catch (e) {
       await db.execute("ROLLBACK;");
       throw e;
     }
-    cnt = Math.min(i + BATCH_SIZE, len);
   }
   if (timer) {
     clearInterval(timer);
@@ -324,13 +324,13 @@ async function mergeUIGF4(
     try {
       for (const item of batch) {
         await insertGachaItem(uid, item);
+        cnt++;
       }
       await db.execute("COMMIT;");
     } catch (e) {
       await db.execute("ROLLBACK;");
       throw e;
     }
-    cnt = Math.min(i + BATCH_SIZE, len);
   }
   if (timer) {
     clearInterval(timer);

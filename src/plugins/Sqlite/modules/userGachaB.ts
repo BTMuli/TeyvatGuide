@@ -141,13 +141,13 @@ async function mergeUIGF4(
     try {
       for (const gacha of batch) {
         await insertGachaItem(uid, transGacha(gacha, data.timezone));
+        cnt++;
       }
       await db.execute("COMMIT;");
     } catch (e) {
       await db.execute("ROLLBACK;");
       throw e;
     }
-    cnt = Math.min(i + BATCH_SIZE, len);
   }
   if (timer) {
     clearInterval(timer);
