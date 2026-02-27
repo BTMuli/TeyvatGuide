@@ -111,21 +111,11 @@ export async function setWindowPos(): Promise<void> {
     return;
   }
   const windowCur = webviewWindow.getCurrentWebviewWindow();
-  const textScale = await invoke<number>("read_text_scale");
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
-  const availWidth = screen.size.width / (screen.scaleFactor * textScale);
-  const availHeight = screen.size.height / (screen.scaleFactor * textScale);
-  if (designSize.width > availWidth || designSize.height > availHeight) {
-    const clampedWidth = Math.min(designSize.width, availWidth);
-    const clampedHeight = Math.min(designSize.height, availHeight);
-    await windowCur.setSize(
-      new PhysicalSize(
-        Math.round(clampedWidth * screen.scaleFactor),
-        Math.round(clampedHeight * screen.scaleFactor),
-      ),
-    );
-  }
+  const clampedWidth = Math.min(designSize.width, screen.size.width);
+  const clampedHeight = Math.min(designSize.height, screen.size.height);
+  await windowCur.setSize(new PhysicalSize(clampedWidth, clampedHeight));
   await windowCur.center();
 }
 
