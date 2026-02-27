@@ -7,7 +7,7 @@ import type { RenderCard } from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { PhysicalSize } from "@tauri-apps/api/dpi";
+import { LogicalSize, PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -100,7 +100,7 @@ export function getWindowSize(label: string): PhysicalSize {
 }
 
 /**
- * 判断窗口位置
+ * 判断窗口位置，确保窗口不超出屏幕并居中
  * @since Beta v0.9.8
  * @returns 无返回值
  */
@@ -111,18 +111,22 @@ export async function setWindowPos(): Promise<void> {
     return;
   }
   const windowCur = webviewWindow.getCurrentWebviewWindow();
-  const textScale = await invoke<number>("read_text_scale");
   if (await windowCur.isMaximized()) return;
-  const designSize = getWindowSize(windowCur.label);
-  console.log(textScale, designSize);
-  // TODO: 判断设计大小是否会超出窗口大小
-  // 如果超出，设计合适窗口位置使得顶部能够展示或者将窗口最大化
-  // 否则直接居中
+  const curSize = await windowCur.innerSize();
+  if (curSize.width > screen.size.width || curSize.height > screen.size.height) {
+    const ratio = Math.min(screen.size.width / curSize.width, screen.size.height / curSize.height);
+    const newWidth = Math.round(curSize.width * ratio);
+    const newHeight = Math.round(curSize.height * ratio);
+    await windowCur.setSize(new PhysicalSize(newWidth, newHeight));
+  }
+  await windowCur.center();
 }
 
 /**
  * 窗口适配
  * @since Beta v0.9.6
+ * 根据系统分辨率、放缩比、文本缩放及设计尺寸计算合适大小
+ * 底线：1920x1080，150%缩放，若计算后的尺寸小于底线则回退到回正处理
  * @returns 无返回值
  */
 export async function resizeWindow(): Promise<void> {
@@ -139,10 +143,23 @@ export async function resizeWindow(): Promise<void> {
   const heightScale = screen.size.height / 1080;
   const targetWidth = Math.round(designSize.width * widthScale);
   const targetHeight = Math.round(designSize.height * heightScale);
+  // 底线：1920x1080@150%时 target 等于 designSize
+  if (targetWidth < designSize.width || targetHeight < designSize.height) {
+    // 计算后尺寸小于底线，回退到回正处理并钳制到屏幕范围
+    const screenLogicalWidth = screen.size.width / screen.scaleFactor;
+    const screenLogicalHeight = screen.size.height / screen.scaleFactor;
+    const clampedWidth = Math.min(designSize.width, screenLogicalWidth);
+    const clampedHeight = Math.min(designSize.height, screenLogicalHeight);
+    await windowCur.setSize(new LogicalSize(clampedWidth, clampedHeight));
+    await windowCur.setZoom(1);
+    return;
+  }
+  const clampedWidth = Math.min(targetWidth, screen.size.width);
+  const clampedHeight = Math.min(targetHeight, screen.size.height);
   if (await windowCur.isMaximized()) {
     await windowCur.unmaximize();
   }
-  await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
+  await windowCur.setSize(new PhysicalSize(clampedWidth, clampedHeight));
   const targetZoom = Math.min(widthScale, heightScale) / (screen.scaleFactor * textScale);
   await windowCur.setZoom(targetZoom);
 }

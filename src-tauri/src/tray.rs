@@ -13,6 +13,7 @@ fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
     if let Ok(true) = window.is_minimized() {
       let _ = window.unminimize();
     }
+    let _ = window.center();
     let _ = window.show();
     let _ = window.set_focus();
   }
