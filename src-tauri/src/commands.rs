@@ -38,8 +38,16 @@ pub async fn create_window(
   let url_parse = WebviewUrl::App(url.parse().unwrap());
   let trans_size =
     crate::client::utils::get_window_size(app_handle.clone(), option.width, option.height);
+  // 底线: 1920x1080 150%, 计算后的尺寸不应小于该情况下的尺寸
+  let min_width = (option.width / 1.5_f64).round();
+  let min_height = (option.height / 1.5_f64).round();
+  let final_size = if trans_size.0 < min_width || trans_size.1 < min_height {
+    (option.width, option.height)
+  } else {
+    trans_size
+  };
   WebviewWindowBuilder::new(&app_handle, &label, url_parse)
-    .inner_size(trans_size.0, trans_size.1)
+    .inner_size(final_size.0, final_size.1)
     .resizable(option.resizable)
     .visible(option.visible)
     .title(option.title)
