@@ -113,11 +113,16 @@ export async function setWindowPos(): Promise<void> {
   const windowCur = webviewWindow.getCurrentWebviewWindow();
   if (await windowCur.isMaximized()) return;
   const curSize = await windowCur.innerSize();
-  if (curSize.width > screen.size.width || curSize.height > screen.size.height) {
-    const ratio = Math.min(screen.size.width / curSize.width, screen.size.height / curSize.height);
-    const newWidth = Math.round(curSize.width * ratio);
-    const newHeight = Math.round(curSize.height * ratio);
-    await windowCur.setSize(new PhysicalSize(newWidth, newHeight));
+  if (curSize.width > 0 && curSize.height > 0) {
+    if (curSize.width > screen.size.width || curSize.height > screen.size.height) {
+      const ratio = Math.min(
+        screen.size.width / curSize.width,
+        screen.size.height / curSize.height,
+      );
+      const newWidth = Math.round(curSize.width * ratio);
+      const newHeight = Math.round(curSize.height * ratio);
+      await windowCur.setSize(new PhysicalSize(newWidth, newHeight));
+    }
   }
   await windowCur.center();
 }

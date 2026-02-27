@@ -151,7 +151,7 @@ async function handleDpListen(event: Event<string>): Promise<void> {
   const windowGet = new webviewWindow.WebviewWindow("TeyvatGuide");
   if (await windowGet.isMinimized()) await windowGet.unminimize();
   if (!(await windowGet.isVisible())) {
-    await windowGet.center();
+    await setWindowPos();
     await windowGet.show();
   }
   await windowGet.setFocus();
