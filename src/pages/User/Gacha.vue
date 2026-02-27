@@ -549,7 +549,7 @@ async function refreshGachaPool(
     if (force) await showLoading.update(`[${label}] 第${page}页，${gachaRes.length}条`);
     for (const item of gachaRes) {
       if (!force) {
-        await showLoading.update(`[${item.item_type}][${item.time}] ${item.name}`);
+        await showLoading.update(`[${item.item_type}][${item.time}] ${item.name}`, { timeout: 0 });
       }
       const tempItem: TGApp.Plugins.UIGF.GachaItem = {
         gacha_type: item.gacha_type,

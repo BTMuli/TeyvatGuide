@@ -65,8 +65,20 @@ async function insertGachaList(
   uid: string,
   list: Array<TGApp.Plugins.UIGF.GachaItemB>,
 ): Promise<void> {
-  for (const gacha of list) {
-    await insertGachaItem(uid, gacha);
+  const db = await TGSqlite.getDB();
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < list.length; i += BATCH_SIZE) {
+    const batch = list.slice(i, i + BATCH_SIZE);
+    await db.execute("BEGIN TRANSACTION;");
+    try {
+      for (const gacha of batch) {
+        await insertGachaItem(uid, gacha);
+      }
+      await db.execute("COMMIT;");
+    } catch (e) {
+      await db.execute("ROLLBACK;");
+      throw e;
+    }
   }
 }
 
@@ -106,27 +118,40 @@ async function mergeUIGF4(
   data: TGApp.Plugins.UIGF.GachaUgc,
   showProgress: boolean = false,
 ): Promise<void> {
-  let cnt: number = 0;
+  const db = await TGSqlite.getDB();
   const len = data.list.length;
-  let progress: number = 0;
+  let cnt: number = 0;
   let timer: NodeJS.Timeout | null = null;
   if (showProgress) {
     timer = setInterval(async () => {
-      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      const progress = Math.round((cnt / len) * 100 * 100) / 100;
       const current = data.list[cnt].time ?? "";
       const name = data.list[cnt].item_name ?? "";
       const rank = data.list[cnt].rank_type ?? "0";
-      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`);
+      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`, {
+        timeout: 0,
+      });
     }, 1000);
   }
-  for (const gacha of data.list) {
-    await insertGachaItem(data.uid.toString(), transGacha(gacha, data.timezone));
-    cnt++;
+  const uid = data.uid.toString();
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < data.list.length; i += BATCH_SIZE) {
+    const batch = data.list.slice(i, i + BATCH_SIZE);
+    await db.execute("BEGIN TRANSACTION;");
+    try {
+      for (const gacha of batch) {
+        await insertGachaItem(uid, transGacha(gacha, data.timezone));
+        cnt++;
+      }
+      await db.execute("COMMIT;");
+    } catch (e) {
+      await db.execute("ROLLBACK;");
+      throw e;
+    }
   }
   if (timer) {
     clearInterval(timer);
-    progress = 100;
-    await showLoading.update(`[${progress}%] 完成`);
+    await showLoading.update(`[100%] 完成`, { timeout: 0 });
   }
 }
 

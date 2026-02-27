@@ -11,3 +11,4 @@ dist
 
 # Sentry Config File
 .env.development.local
+package-lock.json

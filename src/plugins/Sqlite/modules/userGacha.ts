@@ -235,7 +235,6 @@ async function cleanGachaRecords(
     const res = await db.execute(sql);
     if (res.rowsAffected > 0) {
       showSnackbar.success(`[${uid}][${pool}][${time}]清理了${res.rowsAffected}条祈愿记录`);
-      await new Promise<void>((resolve) => setTimeout(resolve, 1500));
     }
   }
 }
@@ -253,27 +252,40 @@ async function mergeUIGF(
   data: Array<TGApp.Plugins.UIGF.GachaItem>,
   showProgress: boolean = false,
 ): Promise<void> {
-  let cnt = 0;
+  const db = await TGSqlite.getDB();
   const len = data.length;
-  let progress = 0;
+  let cnt = 0;
   let timer: NodeJS.Timeout | null = null;
   if (showProgress) {
     timer = setInterval(async () => {
-      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      const progress = Math.round((cnt / len) * 100 * 100) / 100;
       const current = data[cnt]?.time ?? "";
       const name = data[cnt]?.name ?? "";
       const rank = data[cnt]?.rank_type ?? "0";
-      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`);
+      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`, {
+        timeout: 0,
+      });
     }, 1000);
   }
-  for (const gacha of data) {
-    await insertGachaItem(uid, transGacha(gacha));
-    cnt++;
+  const transformed = data.map((g) => transGacha(g));
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < transformed.length; i += BATCH_SIZE) {
+    const batch = transformed.slice(i, i + BATCH_SIZE);
+    await db.execute("BEGIN TRANSACTION;");
+    try {
+      for (const item of batch) {
+        await insertGachaItem(uid, item);
+        cnt++;
+      }
+      await db.execute("COMMIT;");
+    } catch (e) {
+      await db.execute("ROLLBACK;");
+      throw e;
+    }
   }
   if (timer) {
     clearInterval(timer);
-    progress = 100;
-    await showLoading.update(`[${progress}%] 完成`);
+    await showLoading.update(`[100%] 完成`, { timeout: 0 });
   }
 }
 
@@ -288,27 +300,41 @@ async function mergeUIGF4(
   data: TGApp.Plugins.UIGF.GachaHk4e,
   showProgress: boolean = false,
 ): Promise<void> {
-  let cnt: number = 0;
+  const db = await TGSqlite.getDB();
   const len = data.list.length;
-  let progress: number = 0;
+  let cnt: number = 0;
   let timer: NodeJS.Timeout | null = null;
   if (showProgress) {
     timer = setInterval(async () => {
-      progress = Math.round((cnt / len) * 100 * 100) / 100;
+      const progress = Math.round((cnt / len) * 100 * 100) / 100;
       const current = data.list[cnt]?.time ?? "";
       const name = data.list[cnt]?.name ?? data.list[cnt]?.item_id;
       const rank = data.list[cnt]?.rank_type ?? "0";
-      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`);
+      await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`, {
+        timeout: 0,
+      });
     }, 1000);
   }
-  for (const gacha of data.list) {
-    await insertGachaItem(data.uid.toString(), transGacha(gacha, data.timezone));
-    cnt++;
+  const uid = data.uid.toString();
+  const transformed = data.list.map((g) => transGacha(g, data.timezone));
+  const BATCH_SIZE = 500;
+  for (let i = 0; i < transformed.length; i += BATCH_SIZE) {
+    const batch = transformed.slice(i, i + BATCH_SIZE);
+    await db.execute("BEGIN TRANSACTION;");
+    try {
+      for (const item of batch) {
+        await insertGachaItem(uid, item);
+        cnt++;
+      }
+      await db.execute("COMMIT;");
+    } catch (e) {
+      await db.execute("ROLLBACK;");
+      throw e;
+    }
   }
   if (timer) {
     clearInterval(timer);
-    progress = 100;
-    await showLoading.update(`[${progress}%] 完成`);
+    await showLoading.update(`[100%] 完成`, { timeout: 0 });
   }
 }
 
