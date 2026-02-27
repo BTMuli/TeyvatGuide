@@ -3,7 +3,7 @@
 //! @since Beta v0.9.6
 
 mod menu;
-mod utils;
+pub(crate) mod utils;
 
 use tauri::{AppHandle, Manager, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;

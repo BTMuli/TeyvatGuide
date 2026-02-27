@@ -114,10 +114,19 @@ export async function setWindowPos(): Promise<void> {
   const textScale = await invoke<number>("read_text_scale");
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
-  console.log(textScale, designSize);
-  // TODO: 判断设计大小是否会超出窗口大小
-  // 如果超出，设计合适窗口位置使得顶部能够展示或者将窗口最大化
-  // 否则直接居中
+  const availWidth = screen.size.width / (screen.scaleFactor * textScale);
+  const availHeight = screen.size.height / (screen.scaleFactor * textScale);
+  if (designSize.width > availWidth || designSize.height > availHeight) {
+    const clampedWidth = Math.min(designSize.width, availWidth);
+    const clampedHeight = Math.min(designSize.height, availHeight);
+    await windowCur.setSize(
+      new PhysicalSize(
+        Math.round(clampedWidth * screen.scaleFactor),
+        Math.round(clampedHeight * screen.scaleFactor),
+      ),
+    );
+  }
+  await windowCur.center();
 }
 
 /**

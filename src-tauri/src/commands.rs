@@ -36,8 +36,10 @@ pub async fn create_window(
     return;
   }
   let url_parse = WebviewUrl::App(url.parse().unwrap());
+  let trans_size =
+    crate::client::utils::get_window_size(app_handle.clone(), option.width, option.height);
   WebviewWindowBuilder::new(&app_handle, &label, url_parse)
-    .inner_size(option.width, option.height)
+    .inner_size(trans_size.0, trans_size.1)
     .resizable(option.resizable)
     .visible(option.visible)
     .title(option.title)
