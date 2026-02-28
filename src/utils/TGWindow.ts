@@ -7,7 +7,7 @@ import type { RenderCard } from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { PhysicalSize } from "@tauri-apps/api/dpi";
+import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -107,6 +107,7 @@ export function getWindowSize(label: string): PhysicalSize {
  */
 export async function setWindowPos(): Promise<void> {
   const screen = await currentMonitor();
+  const NavHeight = 28;
   if (screen === null) {
     showSnackbar.error("获取屏幕信息失败！", 3000);
     return;
@@ -114,18 +115,21 @@ export async function setWindowPos(): Promise<void> {
   const windowCur = webviewWindow.getCurrentWebviewWindow();
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
-  const widthScale = screen.size.width / 1920;
-  const heightScale = screen.size.height / 1080;
-  const targetWidth = Math.round(designSize.width * widthScale);
-  const targetHeight = Math.round(designSize.height * heightScale);
-  if (targetWidth > screen.size.width && targetHeight > screen.size.height) {
+  const screenScale = screen.scaleFactor;
+  const targetWidth = Math.round(designSize.width * screenScale);
+  const targetHeight = Math.round(designSize.height * screenScale);
+  const cpWidth = screen.size.width - NavHeight * screenScale;
+  const cpHeight = screen.size.height - NavHeight * screenScale;
+  if (targetWidth > cpWidth && targetHeight > cpHeight) {
     await resizeWindow();
     await windowCur.center();
     return;
-  } else if (targetHeight > screen.size.height) {
-    // TODO: 将窗口水平居中，距离顶部 24px
+  } else if (targetHeight > cpHeight) {
+    const left = (screen.size.width - targetWidth) / 2;
+    await windowCur.setPosition(new PhysicalPosition(left, 24));
   } else if (targetWidth > screen.size.width) {
-    // TODO: 将窗口垂直居中，距离左侧24px
+    const top = (screen.size.height - targetHeight) / 2;
+    await windowCur.setPosition(new PhysicalPosition(24, top));
   } else await windowCur.center();
 }
 
