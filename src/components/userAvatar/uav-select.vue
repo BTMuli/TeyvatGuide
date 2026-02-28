@@ -15,6 +15,12 @@
         </div>
       </div>
       <div class="uav-select-item">
+        <div class="uav-select-title">等级</div>
+        <div class="uav-select-props">
+          <UavSelectChips v-model:selected="levelSelected" :items="levelOpts" size="small" />
+        </div>
+      </div>
+      <div class="uav-select-item">
         <div class="uav-select-title">武器</div>
         <div class="uav-select-props">
           <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small" />
@@ -53,6 +59,8 @@ export type UavSelectModel = {
   costume: Array<string>;
   /** 星级 */
   star: Array<string>;
+  /** 等级 */
+  level: Array<string>;
   /** 武器 */
   weapon: Array<string>;
   /** 元素 */
@@ -70,6 +78,10 @@ const costumeOpts: Array<UavSelectChipsItem> = [
 const starOpts: Array<UavSelectChipsItem> = [
   { label: "⭐⭐⭐⭐", value: "4", title: "四星" },
   { label: "⭐⭐⭐⭐⭐", value: "5", title: "五星" },
+];
+const levelOpts: Array<UavSelectChipsItem> = [
+  { label: "≥70", value: "true", title: "不低于70级" },
+  { label: "<70", value: "false", title: "低于70级" },
 ];
 const weaponOpts: Array<UavSelectChipsItem> = ["单手剑", "双手剑", "弓", "法器", "长柄武器"].map(
   (i) => ({ label: i, value: i, title: i, icon: `/icon/weapon/${i}.webp` }),
@@ -98,6 +110,7 @@ const emits = defineEmits<UavSelectEmits>();
 
 const costumeSelected = ref<Array<string>>([]);
 const starSelected = ref<Array<string>>([]);
+const levelSelected = ref<Array<string>>([]);
 const weaponSelected = ref<Array<string>>([]);
 const elementSelected = ref<Array<string>>([]);
 const areaSelected = ref<Array<string>>([]);
@@ -113,6 +126,7 @@ watch(
     if (visible.value) {
       costumeSelected.value = model.value.costume;
       starSelected.value = model.value.star;
+      levelSelected.value = model.value.level;
       weaponSelected.value = model.value.weapon;
       areaSelected.value = model.value.area;
       elementSelected.value = model.value.element;
@@ -128,6 +142,7 @@ function onConfirm(): void {
   model.value = {
     costume: costumeSelected.value,
     star: starSelected.value,
+    level: levelSelected.value,
     weapon: weaponSelected.value,
     element: elementSelected.value,
     area: areaSelected.value,

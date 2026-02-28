@@ -204,6 +204,7 @@ const isConstUp = ref<boolean | null>(null);
 const selectOpts = ref<UavSelectModel>({
   costume: [],
   star: [],
+  level: [],
   weapon: [],
   area: [],
   element: [],
@@ -297,7 +298,7 @@ function resetList(): void {
   isLevelUp.value = null;
   isFetterUp.value = null;
   isConstUp.value = null;
-  selectOpts.value = { costume: [], star: [], weapon: [], area: [], element: [] };
+  selectOpts.value = { costume: [], star: [], level: [], weapon: [], area: [], element: [] };
   selectedList.value = getOrderedList(roleList.value);
   showSnackbar.success("已重置筛选条件");
   if (!dataVal.value) return;
@@ -544,6 +545,10 @@ function handleSelect(val: UavSelectModel): void {
   const filterC = roleList.value.filter((role) => {
     const info = AppCharacterData.find((i) => i.id === role.cid);
     if (val.star.length > 0 && !val.star.includes(role.avatar.rarity.toString())) return false;
+    if (val.level.length > 0) {
+      if (!val.level.includes("true") && role.avatar.level >= 70) return false;
+      if (!val.level.includes("false") && role.avatar.level < 70) return false;
+    }
     if (val.weapon.length > 0 && !val.weapon.includes(role.weapon.type_name)) return false;
     if (val.element.length > 0 && !val.element.includes(getZhElement(role.avatar.element)))
       return false;
