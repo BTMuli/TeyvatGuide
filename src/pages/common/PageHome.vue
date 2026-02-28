@@ -1,7 +1,7 @@
 <!-- 首页 -->
 <template>
   <v-app-bar>
-    <div :class="{ full: isLogin }" class="home-top-nav">
+    <div class="home-top-nav">
       <div v-if="isLogin" class="home-tools">
         <v-select
           v-model="curGid"
@@ -212,13 +212,10 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
   display: flex;
   width: 100%;
   max-width: 100%;
+  height: 100%;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
   overflow-x: auto;
-
-  &.full {
-    justify-content: space-between;
-  }
 }
 
 .home-container {
@@ -226,14 +223,6 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.home-top {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
 }
 
 .home-tools {
@@ -249,10 +238,12 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
 }
 
 .home-select {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   margin-right: 16px;
+  margin-left: auto;
   gap: 8px;
 }
 

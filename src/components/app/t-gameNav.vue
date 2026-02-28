@@ -1,9 +1,14 @@
 <!-- 版块小组件菜单 -->
 <template>
   <div class="tgn-container">
-    <div v-for="navItem in nav" :key="navItem.id" class="tgn-nav" @click="toNav(navItem)">
+    <div
+      v-for="navItem in nav"
+      :key="navItem.id"
+      :title="navItem.name"
+      class="tgn-nav"
+      @click="toNav(navItem)"
+    >
       <TMiImg :ori="true" :src="navItem.icon" alt="navIcon" />
-      <span>{{ navItem.name }}</span>
     </div>
     <div v-if="hasNav" class="tgn-nav" title="查看兑换码">
       <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="25" @click="tryGetCode">
