@@ -116,12 +116,10 @@ export async function setWindowPos(): Promise<void> {
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
   const screenScale = screen.scaleFactor;
-  const widthScale = screen.size.width / 1920;
-  const heightScale = screen.size.height / 1080;
-  const targetWidth = Math.round(designSize.width * widthScale * screenScale);
-  const targetHeight = Math.round(designSize.height * heightScale * screenScale);
-  const cpWidth = screen.size.width - NavHeight * heightScale;
-  const cpHeight = screen.size.height - NavHeight * heightScale;
+  const targetWidth = Math.round(designSize.width * screenScale);
+  const targetHeight = Math.round(designSize.height * screenScale);
+  const cpWidth = screen.size.width - NavHeight * screenScale;
+  const cpHeight = screen.size.height - NavHeight * screenScale;
   console.log(screen.size.width, screen.size.height, screenScale);
   console.log(targetWidth, targetHeight, cpWidth, cpHeight);
   if (targetWidth > cpWidth && targetHeight > cpHeight) {
