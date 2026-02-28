@@ -42,7 +42,7 @@
             </div>
           </template>
         </v-select>
-        <TGameNav :model-value="curGid" />
+        <TGameNav :gid="curGid" />
       </div>
       <div class="home-select">
         <v-select

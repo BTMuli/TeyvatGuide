@@ -1,22 +1,27 @@
 <!-- 版块小组件菜单 -->
 <template>
   <div class="tgn-container">
-    <div
+    <TGameNavItem
       v-for="navItem in nav"
       :key="navItem.id"
-      :title="navItem.name"
+      :label="navItem.name"
+      :mini
       class="tgn-nav"
       @click="toNav(navItem)"
     >
-      <TMiImg :ori="true" :src="navItem.icon" alt="navIcon" />
-    </div>
-    <div v-if="hasNav" class="tgn-nav" title="查看兑换码">
-      <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="25" @click="tryGetCode">
-        mdi-code-tags-check
-      </v-icon>
-      <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="25" />
-    </div>
-    <ToLivecode v-model="showOverlay" :actId="actId" :data="codeData" :gid="model" />
+      <template #icon>
+        <TMiImg :size="28" :ori="true" :src="navItem.icon" alt="navIcon" />
+      </template>
+    </TGameNavItem>
+    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码">
+      <template #icon>
+        <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28" @click="tryGetCode">
+          mdi-code-tags-check
+        </v-icon>
+        <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
+      </template>
+    </TGameNavItem>
+    <ToLivecode v-model="showOverlay" :actId="actId" :data="codeData" :gid />
   </div>
 </template>
 <script lang="ts" setup>
@@ -33,12 +38,15 @@ import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
+import TGameNavItem from "./t-gameNavItem.vue";
 import TMiImg from "./t-mi-img.vue";
 import ToLivecode from "./to-livecode.vue";
 
-const { isLogin } = storeToRefs(useAppStore());
+type TGameNavProps = { gid: number; mini?: boolean };
 
-const model = defineModel<number>({ default: 2 });
+const props = withDefaults(defineProps<TGameNavProps>(), { gid: 2, mini: false });
+
+const { isLogin } = storeToRefs(useAppStore());
 
 const actId = ref<string>();
 const showOverlay = ref<boolean>(false);
@@ -55,7 +63,7 @@ const hasNav = computed<TGApp.BBS.Navigator.Navigator | undefined>(() => {
 onMounted(async () => await loadNav());
 
 watch(
-  () => model.value,
+  () => props.gid,
   async () => await loadNav(),
 );
 
@@ -65,7 +73,7 @@ watch(
  */
 async function loadNav(): Promise<void> {
   try {
-    nav.value = await ApiHubReq.home(model.value);
+    nav.value = await ApiHubReq.home(props.gid);
     console.debug(`[TGameNav][loadNav] 组件数据：`, nav.value);
     if (loadCode.value) loadCode.value = false;
   } catch (e) {
@@ -163,7 +171,7 @@ async function toBBS(link: URL): Promise<void> {
     }
     if (link.hostname === "forum") {
       const forumId = link.pathname.split("/").pop();
-      const localPath = `/posts/forum/${model.value}/${forumId}`;
+      const localPath = `/posts/forum/${props.gid}/${forumId}`;
       await emit("active_deep_link", `router?path=${localPath}`);
       return;
     }
@@ -184,30 +192,9 @@ async function toBBS(link: URL): Promise<void> {
 .tgn-nav {
   @include github-styles.github-card;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 4px;
-  color: var(--tgc-white-1);
-  cursor: pointer;
-
   img {
     width: 28px;
     height: 28px;
-  }
-
-  span {
-    display: none;
-    margin-left: 4px;
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 16px;
-    white-space: nowrap;
-  }
-
-  &:hover span {
-    display: block;
   }
 }
 
