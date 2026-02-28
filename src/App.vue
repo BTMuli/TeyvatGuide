@@ -275,14 +275,14 @@ function handleThemeListen(event: Event<string>): void {
  */
 async function handleResizeListen(event: Event<string>): Promise<void> {
   const win = getCurrentWindow();
-  const webview = webviewWindow.getCurrentWebviewWindow();
+  // const webview = webviewWindow.getCurrentWebviewWindow();
   if (event.payload !== "false") {
     await resizeWindow();
     await win.center();
   } else {
     // const size = getWindowSize(webview.label);
     // await win.setSize(new LogicalSize(size.width, size.height));
-    await webview.setZoom(1);
+    // await webview.setZoom(1);
     await setWindowPos();
   }
 }

@@ -116,21 +116,33 @@ export async function setWindowPos(): Promise<void> {
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
   const screenScale = screen.scaleFactor;
-  const targetWidth = Math.round(designSize.width * screenScale);
-  const targetHeight = Math.round(designSize.height * screenScale);
-  const cpWidth = screen.size.width - NavHeight * screenScale;
-  const cpHeight = screen.size.height - NavHeight * screenScale;
+  const widthScale = screen.size.width / 1920;
+  const heightScale = screen.size.height / 1080;
+  const targetWidth = Math.round(designSize.width * widthScale * screenScale);
+  const targetHeight = Math.round(designSize.height * heightScale * screenScale);
+  const cpWidth = screen.size.width - NavHeight * heightScale;
+  const cpHeight = screen.size.height - NavHeight * heightScale;
+  console.log(screen.size.width, screen.size.height, screenScale);
+  console.log(targetWidth, targetHeight, cpWidth, cpHeight);
   if (targetWidth > cpWidth && targetHeight > cpHeight) {
     await resizeWindow();
+    await windowCur.setZoom(1);
     await windowCur.center();
-    return;
   } else if (targetHeight > cpHeight) {
     const left = (screen.size.width - targetWidth) / 2;
+    await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
     await windowCur.setPosition(new PhysicalPosition(left, 24));
+    await windowCur.setZoom(1);
   } else if (targetWidth > screen.size.width) {
     const top = (screen.size.height - targetHeight) / 2;
+    await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
     await windowCur.setPosition(new PhysicalPosition(24, top));
-  } else await windowCur.center();
+    await windowCur.setZoom(1);
+  } else {
+    await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
+    await windowCur.setZoom(1);
+    await windowCur.center();
+  }
 }
 
 /**
