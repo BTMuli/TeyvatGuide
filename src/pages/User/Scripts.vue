@@ -40,8 +40,17 @@
             </div>
           </template>
         </v-select>
-        <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecAll()">
-          一键执行
+        <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecSingle()">
+          一键执行当前账号
+        </v-btn>
+        <v-btn
+          :loading="runAll"
+          class="run-all-btn"
+          variant="elevated"
+          @click="tryExecAllAccounts()"
+          style="margin-left: 8px"
+        >
+          一键执行全部账号
         </v-btn>
       </div>
     </template>
@@ -77,7 +86,7 @@ import { exit } from "@tauri-apps/plugin-process";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
 import { storeToRefs } from "pinia";
-import { onBeforeMount, onMounted, ref, shallowRef, useTemplateRef } from "vue";
+import { onBeforeMount, onMounted, ref, shallowRef, useTemplateRef, nextTick } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -139,7 +148,8 @@ async function tryAutoRun(): Promise<void> {
       continue;
     }
     curAccount.value = acFind;
-    await tryExecAll();
+    await nextTick();
+    await tryExecSingle();
   }
   if (exitAfter.value) {
     showSnackbar.success("任务执行完成，即将自动退出");
@@ -189,7 +199,7 @@ async function tryCkVerify(): Promise<void> {
   else showSnackbar.success("CK验证成功");
 }
 
-async function tryExecAll(): Promise<void> {
+async function tryExecSingle(): Promise<void> {
   if (!curAccount.value) {
     showSnackbar.warn("当前账号未选择，请先选择账号");
     return;
@@ -202,6 +212,41 @@ async function tryExecAll(): Promise<void> {
   await missionEl.value?.tryAuto(skipGeetest.value);
   await signEl.value?.tryAuto(skipGeetest.value);
   runAll.value = false;
+}
+
+async function tryExecAllAccounts(): Promise<void> {
+  if (accounts.value.length === 0) {
+    showSnackbar.warn("未检测到可用账号");
+    return;
+  }
+  if (runScript.value || runAll.value) {
+    showSnackbar.warn("脚本正在执行，请稍后");
+    return;
+  }
+
+  runAll.value = true;
+
+  await TGLogger.ScriptSep(`全量执行`);
+  for (const account of accounts.value) {
+    curAccount.value = account;
+
+    // 【核心点】必须等待 nextTick，确保子组件的 watch 触发并完成 props 更新
+    await nextTick();
+
+    await TGLogger.Script(`账号 UID:${account.uid} 执行开始`);
+
+    if (missionEl.value) await missionEl.value.tryAuto(skipGeetest.value);
+    if (signEl.value) await signEl.value.tryAuto(skipGeetest.value);
+
+    await TGLogger.Script(`账号 UID:${account.uid} 执行完毕`);
+
+    // 增加 2 秒延时，防止并发请求过高触发极验或被限制
+    await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+  }
+  await TGLogger.ScriptSep(`全量执行`, false);
+
+  runAll.value = false;
+  showSnackbar.success("所有账号均已执行完毕");
 }
 </script>
 <style lang="scss" scoped>
