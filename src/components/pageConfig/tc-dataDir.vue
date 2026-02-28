@@ -109,7 +109,7 @@ onMounted(async () => {
 
 async function confirmCUD(): Promise<void> {
   const oriDir = userDir.value;
-  const changeCheck = await showDialog.check("确认修改用户数据路径吗？");
+  const changeCheck = await showDialog.check("确认修改用户数据路径吗？", "请选取空目录");
   if (!changeCheck) {
     showSnackbar.cancel("已取消修改");
     return;
@@ -123,11 +123,24 @@ async function confirmCUD(): Promise<void> {
     showSnackbar.warn("路径未修改!");
     return;
   }
+  const dirRead = await readDir(dir);
+  if (dirRead.length !== 0) {
+    showSnackbar.warn("请选择空目录");
+    return;
+  }
   userDir.value = dir;
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
   showSnackbar.success("已修改用户数据路径!");
   const delCheck = await showDialog.check("是否删除原用户数据目录？");
+  const delDirRead = await readDir(oriDir);
+  if (delDirRead.some((i) => i.isDirectory)) {
+    const check = await showDialog.check(`检测到子目录，确定删除？`, oriDir);
+    if (!check) {
+      showSnackbar.cancel(`取消删除原数据目录`);
+      return;
+    }
+  }
   if (delCheck) {
     await remove(oriDir, { recursive: true });
     showSnackbar.success("已删除原用户数据目录!");

@@ -87,6 +87,7 @@ async function switchCollect(): Promise<void> {
   @include github-styles.github-card;
 
   position: fixed;
+  z-index: 1;
   top: 64px;
   right: 16px;
   display: flex;

@@ -26,7 +26,12 @@
             </div>
           </template>
           <template #item="{ props, item }">
-            <div class="us-select-item" v-bind="props" @click="() => (curAccount = item)">
+            <div
+              :class="{ selected: item.uid === curAccount?.uid }"
+              class="us-select-item"
+              v-bind="props"
+              @click="() => (curAccount = item)"
+            >
               <img :src="item.brief.avatar" alt="icon" />
               <div class="us-si-content">
                 <span>{{ item.brief.nickname }}</span>
@@ -35,9 +40,24 @@
             </div>
           </template>
         </v-select>
-        <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecAll()">
-          一键执行
-        </v-btn>
+        <template v-if="accounts.length > 1">
+          <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecSingle()">
+            一键执行当前账号
+          </v-btn>
+          <v-btn
+            :loading="runAll"
+            class="run-all-btn"
+            variant="elevated"
+            @click="tryExecAllAccounts()"
+          >
+            一键执行全部账号
+          </v-btn>
+        </template>
+        <template v-else>
+          <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecSingle()">
+            一键执行
+          </v-btn>
+        </template>
       </div>
     </template>
     <template #append>
@@ -134,7 +154,7 @@ async function tryAutoRun(): Promise<void> {
       continue;
     }
     curAccount.value = acFind;
-    await tryExecAll();
+    await tryExecSingle();
   }
   if (exitAfter.value) {
     showSnackbar.success("任务执行完成，即将自动退出");
@@ -184,7 +204,7 @@ async function tryCkVerify(): Promise<void> {
   else showSnackbar.success("CK验证成功");
 }
 
-async function tryExecAll(): Promise<void> {
+async function tryExecSingle(): Promise<void> {
   if (!curAccount.value) {
     showSnackbar.warn("当前账号未选择，请先选择账号");
     return;
@@ -197,6 +217,35 @@ async function tryExecAll(): Promise<void> {
   await missionEl.value?.tryAuto(skipGeetest.value);
   await signEl.value?.tryAuto(skipGeetest.value);
   runAll.value = false;
+}
+
+async function tryExecAllAccounts(): Promise<void> {
+  if (accounts.value.length === 0) {
+    showSnackbar.warn("未检测到可用账号");
+    return;
+  }
+  if (runScript.value || runAll.value) {
+    showSnackbar.warn("脚本正在执行，请稍后");
+    return;
+  }
+
+  runAll.value = true;
+
+  await TGLogger.ScriptSep(`全量执行`);
+  for (const account of accounts.value) {
+    curAccount.value = account;
+
+    await TGLogger.Script(`账号 UID:${account.uid} 执行开始`);
+
+    if (missionEl.value) await missionEl.value.tryAuto(skipGeetest.value);
+    if (signEl.value) await signEl.value.tryAuto(skipGeetest.value);
+
+    await TGLogger.Script(`账号 UID:${account.uid} 执行完毕`);
+  }
+  await TGLogger.ScriptSep(`全量执行`, false);
+
+  runAll.value = false;
+  showSnackbar.success("所有账号均已执行完毕");
 }
 </script>
 <style lang="scss" scoped>
@@ -264,8 +313,12 @@ async function tryExecAll(): Promise<void> {
   column-gap: 4px;
   cursor: pointer;
 
-  &:hover {
+  &.selected:not(:hover) {
     background: var(--common-shadow-1);
+  }
+
+  &:hover {
+    background: var(--common-shadow-2);
   }
 
   img {
@@ -289,7 +342,7 @@ async function tryExecAll(): Promise<void> {
   }
 }
 
-.append {
+.us-si-append {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -327,6 +380,10 @@ async function tryExecAll(): Promise<void> {
   padding-right: 8px;
   overflow-y: auto;
   row-gap: 8px;
+}
+
+.run-all-btn + .run-all-btn {
+  margin-left: 8px;
 }
 
 .run-all-btn,

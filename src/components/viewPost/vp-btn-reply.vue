@@ -211,6 +211,7 @@ async function handleDebug(): Promise<void> {
 <style lang="scss" scoped>
 .tpr-main-box {
   position: fixed;
+  z-index: 1;
   bottom: 16px;
   left: 16px;
   display: flex;

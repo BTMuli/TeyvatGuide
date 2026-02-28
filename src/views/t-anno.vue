@@ -94,6 +94,7 @@ async function createAnnoJson(): Promise<void> {
 
 .anno-body {
   width: 800px;
+  max-width: calc(100% - 100px);
   margin: 0 auto;
   font-family: var(--font-text);
 }

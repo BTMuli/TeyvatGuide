@@ -31,6 +31,7 @@ function switchPostWidth(): void {
   @include github-styles.github-card;
 
   position: fixed;
+  z-index: 1;
   top: 112px;
   left: 16px;
   display: flex;

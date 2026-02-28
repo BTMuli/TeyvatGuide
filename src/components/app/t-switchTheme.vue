@@ -43,6 +43,7 @@ onUnmounted(() => {
 
 .switch-box {
   position: fixed;
+  z-index: 1;
   top: 16px;
   left: 16px;
   display: flex;

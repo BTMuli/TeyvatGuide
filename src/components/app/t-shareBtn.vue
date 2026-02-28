@@ -41,6 +41,7 @@ async function shareContent(): Promise<void> {
 
 .share-box {
   position: fixed;
+  z-index: 1;
   top: 16px;
   right: 16px;
   display: flex;

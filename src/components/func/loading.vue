@@ -1,7 +1,7 @@
 <!-- Loading 组件 -->
 <template>
   <transition name="func-loading">
-    <div v-show="showBox || showOuter" class="loading-overlay">
+    <div v-show="showBox || showOuter" ref="LoadingRef" class="loading-overlay">
       <transition name="func-loading-inner">
         <div v-show="showInner" class="loading-container">
           <div class="loading-box">
@@ -29,20 +29,22 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { LoadingParams } from "./loading.js";
 
 const defaultIcon = "/UI/app/loading.webp";
 
+const props = defineProps<LoadingParams>();
+
 const showBox = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 
-const props = defineProps<LoadingParams>();
+const iconUrl = ref<string>(defaultIcon);
 const data = shallowRef<LoadingParams>(props);
 const localEmojis = shallowRef<Array<string>>([]);
-const iconUrl = ref<string>(defaultIcon);
+const loadingEl = useTemplateRef<HTMLDivElement>("LoadingRef");
 
 watch(
   () => showBox.value,
@@ -60,7 +62,11 @@ watch(
   },
 );
 
-onMounted(async () => await displayBox(props));
+onMounted(async () => {
+  await displayBox(props);
+  loadingEl.value?.addEventListener("contextmenu", (e) => e.preventDefault());
+});
+onUnmounted(() => loadingEl.value?.removeEventListener("contextmenu", (e) => e.preventDefault()));
 
 async function getRandomEmoji(): Promise<void> {
   if (localEmojis.value.length === 0) {
