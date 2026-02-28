@@ -1,6 +1,6 @@
 /**
  * 窗口创建相关工具函数
- * @since Beta v0.9.6
+ * @since Beta v0.9.8
  */
 
 import type { RenderCard } from "@comp/app/t-postcard.vue";
@@ -107,7 +107,7 @@ export function getWindowSize(label: string): PhysicalSize {
  */
 export async function setWindowPos(): Promise<void> {
   const screen = await currentMonitor();
-  const NavHeight = 28;
+  const NAV_BAR_HEIGHT = 28;
   if (screen === null) {
     showSnackbar.error("获取屏幕信息失败！", 3000);
     return;
@@ -118,29 +118,24 @@ export async function setWindowPos(): Promise<void> {
   const screenScale = screen.scaleFactor;
   const targetWidth = Math.round(designSize.width * screenScale);
   const targetHeight = Math.round(designSize.height * screenScale);
-  const cpWidth = screen.size.width - NavHeight * screenScale;
-  const cpHeight = screen.size.height - NavHeight * screenScale;
-  console.log(screen.size.width, screen.size.height, screenScale);
-  console.log(targetWidth, targetHeight, cpWidth, cpHeight);
+  const cpWidth = screen.size.width - NAV_BAR_HEIGHT * screenScale;
+  const cpHeight = screen.size.height - NAV_BAR_HEIGHT * screenScale;
   if (targetWidth > cpWidth && targetHeight > cpHeight) {
     await resizeWindow();
-    await windowCur.setZoom(1);
     await windowCur.center();
   } else if (targetHeight > cpHeight) {
     const left = (screen.size.width - targetWidth) / 2;
     await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
     await windowCur.setPosition(new PhysicalPosition(left, 24));
-    await windowCur.setZoom(1);
   } else if (targetWidth > screen.size.width) {
     const top = (screen.size.height - targetHeight) / 2;
     await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
     await windowCur.setPosition(new PhysicalPosition(24, top));
-    await windowCur.setZoom(1);
   } else {
     await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
-    await windowCur.setZoom(1);
     await windowCur.center();
   }
+  await windowCur.setZoom(1);
 }
 
 /**
