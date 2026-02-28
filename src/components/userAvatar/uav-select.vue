@@ -22,7 +22,7 @@
       </div>
       <div class="uav-select-item">
         <div class="uav-select-title">武器</div>
-        <div class="uav-select-props">
+        <div class="uav-select-props weapon">
           <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small" />
         </div>
       </div>
@@ -175,6 +175,14 @@ function onConfirm(): void {
   justify-content: flex-start;
   color: var(--common-text-title);
   column-gap: 8px;
+}
+
+.uav-select-props.weapon:deep(img) {
+  filter: invert(0.75);
+}
+
+.dark .uav-select-props.weapon:deep(img) {
+  filter: unset;
 }
 
 .uav-select-acts {
