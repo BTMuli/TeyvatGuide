@@ -28,12 +28,12 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { getCurrentWindow, LogicalPosition, LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
-import { getWindowSize, resizeWindow } from "@utils/TGWindow.js";
+import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -74,11 +74,10 @@ onMounted(async () => {
   textScaleListener = await event.listen<void>("text_scale_change", resizeWindow);
   const isShow = await win.isVisible();
   if (!isShow) {
-    if (needResize.value !== "false") await win.center();
-    else {
-      // TODO: 结合窗口尺寸&放缩以及设计尺寸放置合适位置
-      const position = new LogicalPosition(20, 20);
-      await win.setPosition(position);
+    if (needResize.value === "false") {
+      await setWindowPos();
+    } else {
+      await win.center();
     }
     await win.show();
   }
@@ -275,15 +274,11 @@ function handleThemeListen(event: Event<string>): void {
  * @returns {Promise<void>}
  */
 async function handleResizeListen(event: Event<string>): Promise<void> {
-  const win = getCurrentWindow();
-  const webview = webviewWindow.getCurrentWebviewWindow();
   if (event.payload !== "false") {
     await resizeWindow();
-    await win.center();
+    await getCurrentWindow().center();
   } else {
-    const size = getWindowSize(webview.label);
-    await win.setSize(new LogicalSize(size.width, size.height));
-    await webview.setZoom(1);
+    await setWindowPos();
   }
 }
 

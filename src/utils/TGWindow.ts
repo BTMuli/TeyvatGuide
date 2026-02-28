@@ -1,13 +1,13 @@
 /**
  * 窗口创建相关工具函数
- * @since Beta v0.9.6
+ * @since Beta v0.9.8
  */
 
 import type { RenderCard } from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
-import { PhysicalSize } from "@tauri-apps/api/dpi";
+import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
@@ -100,24 +100,42 @@ export function getWindowSize(label: string): PhysicalSize {
 }
 
 /**
- * 判断窗口位置
+ * 判断窗口位置，确保窗口不超出屏幕并居中
  * @since Beta v0.9.8
+ * @remarks 当窗口超出屏幕时回滚到 resizeWindow，此时回正配置默认生效
  * @returns 无返回值
  */
 export async function setWindowPos(): Promise<void> {
   const screen = await currentMonitor();
+  const NAV_BAR_HEIGHT = 28;
   if (screen === null) {
     showSnackbar.error("获取屏幕信息失败！", 3000);
     return;
   }
   const windowCur = webviewWindow.getCurrentWebviewWindow();
-  const textScale = await invoke<number>("read_text_scale");
   if (await windowCur.isMaximized()) return;
   const designSize = getWindowSize(windowCur.label);
-  console.log(textScale, designSize);
-  // TODO: 判断设计大小是否会超出窗口大小
-  // 如果超出，设计合适窗口位置使得顶部能够展示或者将窗口最大化
-  // 否则直接居中
+  const screenScale = screen.scaleFactor;
+  const targetWidth = Math.round(designSize.width * screenScale);
+  const targetHeight = Math.round(designSize.height * screenScale);
+  const cpWidth = screen.size.width - NAV_BAR_HEIGHT * screenScale;
+  const cpHeight = screen.size.height - NAV_BAR_HEIGHT * screenScale;
+  if (targetWidth > cpWidth && targetHeight > cpHeight) {
+    await resizeWindow();
+    await windowCur.center();
+  } else if (targetHeight > cpHeight) {
+    const left = (screen.size.width - targetWidth) / 2;
+    await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
+    await windowCur.setPosition(new PhysicalPosition(left, 24));
+  } else if (targetWidth > screen.size.width) {
+    const top = (screen.size.height - targetHeight) / 2;
+    await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
+    await windowCur.setPosition(new PhysicalPosition(24, top));
+  } else {
+    await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
+    await windowCur.center();
+  }
+  await windowCur.setZoom(1);
 }
 
 /**
