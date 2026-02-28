@@ -40,7 +40,6 @@
             </div>
           </template>
         </v-select>
-
         <template v-if="accounts.length > 1">
           <v-btn :loading="runAll" class="run-all-btn" variant="elevated" @click="tryExecSingle()">
             一键执行当前账号
