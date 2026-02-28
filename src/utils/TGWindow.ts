@@ -102,7 +102,7 @@ export function getWindowSize(label: string): PhysicalSize {
 /**
  * 判断窗口位置，确保窗口不超出屏幕并居中
  * @since Beta v0.9.8
- * 底线：1920x1080，150%缩放，若计算后的尺寸小于底线则回退到resizeWindow
+ * @remarks 当窗口超出屏幕时回滚到 resizeWindow，此时回正配置默认生效
  * @returns 无返回值
  */
 export async function setWindowPos(): Promise<void> {
@@ -118,14 +118,15 @@ export async function setWindowPos(): Promise<void> {
   const heightScale = screen.size.height / 1080;
   const targetWidth = Math.round(designSize.width * widthScale);
   const targetHeight = Math.round(designSize.height * heightScale);
-  const textScale = await invoke<number>("read_text_scale");
-  const targetZoom = Math.min(widthScale, heightScale) / (screen.scaleFactor * textScale);
-  if (targetWidth < designSize.width || targetHeight < designSize.height || targetZoom < 1) {
+  if (targetWidth > screen.size.width && targetHeight > screen.size.height) {
     await resizeWindow();
     await windowCur.center();
     return;
-  }
-  await windowCur.center();
+  } else if (targetHeight > screen.size.height) {
+    // TODO: 将窗口水平居中，距离顶部 24px
+  } else if (targetWidth > screen.size.width) {
+    // TODO: 将窗口垂直居中，距离左侧24px
+  } else await windowCur.center();
 }
 
 /**

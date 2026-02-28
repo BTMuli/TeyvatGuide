@@ -28,12 +28,12 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
 import { mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
-import { getWindowSize, resizeWindow, setWindowPos } from "@utils/TGWindow.js";
+import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -280,8 +280,8 @@ async function handleResizeListen(event: Event<string>): Promise<void> {
     await resizeWindow();
     await win.center();
   } else {
-    const size = getWindowSize(webview.label);
-    await win.setSize(new LogicalSize(size.width, size.height));
+    // const size = getWindowSize(webview.label);
+    // await win.setSize(new LogicalSize(size.width, size.height));
     await webview.setZoom(1);
     await setWindowPos();
   }
