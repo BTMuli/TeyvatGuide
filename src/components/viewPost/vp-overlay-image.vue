@@ -30,7 +30,10 @@
               <span>大小：</span>
               <span>{{ bytesToSize(props.image.attributes.size ?? 0) }}</span>
             </span>
-            <span class="tpoi-info-item">
+            <span
+              v-if="props.image.attributes?.width && props.image.attributes?.height"
+              class="tpoi-info-item"
+            >
               <span>尺寸：</span>
               <span>{{ props.image.attributes.width }}x{{ props.image.attributes.height }}</span>
             </span>
@@ -41,19 +44,19 @@
           </div>
         </template>
         <div class="tpoi-tools">
-          <v-icon @click="setBlackBg" title="切换背景色" v-if="showOri">
+          <v-icon v-if="showOri" title="切换背景色" @click="setBlackBg">
             mdi-format-color-fill
           </v-icon>
-          <v-icon @click="showOri = true" title="查看原图" v-else>mdi-magnify</v-icon>
-          <v-icon @click="onCopy" title="复制到剪贴板" v-if="showCopy">mdi-content-copy</v-icon>
-          <v-icon @click="onDownload" title="下载到本地">mdi-download</v-icon>
-          <v-icon @click="visible = false" title="关闭浮窗">mdi-close</v-icon>
+          <v-icon v-else title="查看原图" @click="showOri = true">mdi-magnify</v-icon>
+          <v-icon v-if="showCopy" title="复制到剪贴板" @click="onCopy">mdi-content-copy</v-icon>
+          <v-icon title="下载到本地" @click="onDownload">mdi-download</v-icon>
+          <v-icon title="关闭浮窗" @click="visible = false">mdi-close</v-icon>
         </div>
       </div>
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";

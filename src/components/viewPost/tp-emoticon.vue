@@ -8,9 +8,7 @@
       @click="handleEmoticonClick"
       @error="handleEmoticonError"
     />
-    <div v-if="props.data.insert.custom_emoticon.size.width > 100" class="tp-emo-info">
-      自定义表情
-    </div>
+    <div v-if="showLabel" class="tp-emo-info">自定义表情</div>
   </div>
   <div v-else :title="props.data.insert.custom_emoticon.url" class="tp-image-load">
     <v-progress-circular :indeterminate="true" color="blue" size="small" />
@@ -86,6 +84,11 @@ const image = computed<TpImage>(() => ({
     size: props.data.insert.custom_emoticon.size.file_size,
   },
 }));
+const showLabel = computed<boolean>(() => {
+  if (props.data.insert.custom_emoticon.size.width > 100) return true;
+  if (!emoticonEl.value) return false;
+  return emoticonEl.value.clientWidth > 100;
+});
 
 console.log("tp-emoticon", props.data.insert.custom_emoticon);
 
