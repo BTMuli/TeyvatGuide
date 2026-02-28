@@ -32,6 +32,11 @@
                 <span>{{ item.brief.nickname }}</span>
                 <span>UID:{{ item.uid }}</span>
               </div>
+              <div class="append">
+                <v-icon v-if="item.uid === curAccount?.uid" color="green" title="当前登录账号">
+                  mdi-account-check
+                </v-icon>
+              </div>
             </div>
           </template>
         </v-select>
