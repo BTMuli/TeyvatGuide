@@ -36,14 +36,17 @@ const props = defineProps<TAOProps>();
 
 .tur-os-label {
   position: absolute;
+  z-index: 0;
   right: 2px;
-  bottom: 0;
+  bottom: -2px;
   color: var(--box-text-4);
   font-family: var(--font-text);
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .tur-os-text {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
