@@ -118,22 +118,12 @@ export async function setWindowPos(): Promise<void> {
   const heightScale = screen.size.height / 1080;
   const targetWidth = Math.round(designSize.width * widthScale);
   const targetHeight = Math.round(designSize.height * heightScale);
-  if (targetWidth < designSize.width || targetHeight < designSize.height) {
+  const textScale = await invoke<number>("read_text_scale");
+  const targetZoom = Math.min(widthScale, heightScale) / (screen.scaleFactor * textScale);
+  if (targetWidth < designSize.width || targetHeight < designSize.height || targetZoom < 1) {
     await resizeWindow();
     await windowCur.center();
     return;
-  }
-  const curSize = await windowCur.innerSize();
-  if (curSize.width > 0 && curSize.height > 0) {
-    if (curSize.width > screen.size.width || curSize.height > screen.size.height) {
-      const ratio = Math.min(
-        screen.size.width / curSize.width,
-        screen.size.height / curSize.height,
-      );
-      const newWidth = Math.round(curSize.width * ratio);
-      const newHeight = Math.round(curSize.height * ratio);
-      await windowCur.setSize(new PhysicalSize(newWidth, newHeight));
-    }
   }
   await windowCur.center();
 }
