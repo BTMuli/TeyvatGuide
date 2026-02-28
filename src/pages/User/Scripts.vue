@@ -26,16 +26,16 @@
             </div>
           </template>
           <template #item="{ props, item }">
-            <div class="us-select-item" v-bind="props" @click="() => (curAccount = item)">
+            <div
+              :class="{ selected: item.uid === curAccount?.uid }"
+              class="us-select-item"
+              v-bind="props"
+              @click="() => (curAccount = item)"
+            >
               <img :src="item.brief.avatar" alt="icon" />
               <div class="us-si-content">
                 <span>{{ item.brief.nickname }}</span>
                 <span>UID:{{ item.uid }}</span>
-              </div>
-              <div class="us-si-append">
-                <v-icon v-if="item.uid === curAccount?.uid" color="green" title="当前账号">
-                  mdi-account-check
-                </v-icon>
               </div>
             </div>
           </template>
@@ -314,8 +314,12 @@ async function tryExecAllAccounts(): Promise<void> {
   column-gap: 4px;
   cursor: pointer;
 
-  &:hover {
+  &.selected:not(:hover) {
     background: var(--common-shadow-1);
+  }
+
+  &:hover {
+    background: var(--common-shadow-2);
   }
 
   img {
@@ -379,7 +383,7 @@ async function tryExecAllAccounts(): Promise<void> {
   row-gap: 8px;
 }
 
-.run-all-btn {
+.run-all-btn + .run-all-btn {
   margin-left: 8px;
 }
 
