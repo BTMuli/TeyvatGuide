@@ -133,6 +133,10 @@ async function confirmCUD(): Promise<void> {
   await backUpUserData(dir);
   showSnackbar.success("已修改用户数据路径!");
   const delCheck = await showDialog.check("是否删除原用户数据目录？");
+  if (!delCheck) {
+    showSnackbar.cancel(`取消删除原数据目录`);
+    return;
+  }
   const delDirRead = await readDir(oriDir);
   if (delDirRead.some((i) => i.isDirectory)) {
     const check = await showDialog.check(`检测到子目录，确定删除？`, oriDir);
@@ -141,13 +145,13 @@ async function confirmCUD(): Promise<void> {
       return;
     }
   }
-  if (delCheck) {
-    await remove(oriDir, { recursive: true });
-    showSnackbar.success("已删除原用户数据目录!");
+  const delCheck2 = await showDialog.check("无法通过回收站恢复，确认删除？", oriDir);
+  if (!delCheck2) {
+    showSnackbar.cancel(`取消删除原数据目录`);
+    return;
   }
-  showSnackbar.info("即将刷新页面...");
-  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
-  window.location.reload();
+  await remove(oriDir, { recursive: true });
+  showSnackbar.success("已删除原用户数据目录!");
 }
 
 async function confirmCGD(): Promise<void> {
