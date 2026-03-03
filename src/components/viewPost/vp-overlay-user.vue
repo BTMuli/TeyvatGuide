@@ -1,14 +1,14 @@
 <template>
   <TOverlay v-model="visible">
     <div class="vp-ou-box">
-      <div class="vp-ou-user" v-if="userInfo">
+      <div v-if="userInfo" class="vp-ou-user" @click="toUserProfile()">
         <div class="vp-ouu-info">
           <div class="left">
             <div class="avatar">
-              <TMiImg :src="getUserAvatar(userInfo)" alt="avatar" :ori="true" />
+              <TMiImg :ori="true" :src="getUserAvatar(userInfo)" alt="avatar" />
             </div>
-            <div class="pendant" v-if="userInfo.pendant !== ''">
-              <TMiImg :src="userInfo.pendant" alt="pendant" :ori="true" />
+            <div v-if="userInfo.pendant !== ''" class="pendant">
+              <TMiImg :ori="true" :src="userInfo.pendant" alt="pendant" />
             </div>
           </div>
           <div class="right">
@@ -16,29 +16,29 @@
               <div class="nickname">{{ userInfo.nickname }}</div>
               <div class="level">Lv.{{ userInfo.level_exp.level }}</div>
             </div>
-            <div class="desc" :title="userInfo.introduce">{{ userInfo.introduce }}</div>
+            <div :title="userInfo.introduce" class="desc">{{ userInfo.introduce }}</div>
           </div>
         </div>
       </div>
       <div class="vp-ou-mid">
-        <div class="vp-ouu-extra" v-if="userInfo">
+        <div v-if="userInfo" class="vp-ouu-extra">
           <span>ID:{{ userInfo.uid }}</span>
           <span>IP:{{ userInfo.ip_region }}</span>
         </div>
       </div>
       <div class="vp-ou-divider" />
-      <div class="vp-ou-list" ref="listRef">
+      <div ref="listRef" class="vp-ou-list">
         <TPostCard
-          class="vp-ou-item"
-          :model-value="item"
           v-for="item in results"
           :key="item.post.post_id"
+          :model-value="item"
+          class="vp-ou-item"
         />
       </div>
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
@@ -46,6 +46,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -107,6 +108,12 @@ async function loadUser(): Promise<void> {
   userInfo.value = resp;
 }
 
+async function toUserProfile(): Promise<void> {
+  // TODO: 专门的个人页面
+  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${props.uid}`;
+  await openUrl(profileUrl);
+}
+
 async function loadPosts(): Promise<void> {
   if (load.value) return;
   load.value = true;
@@ -152,6 +159,7 @@ async function loadPosts(): Promise<void> {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  cursor: pointer;
   row-gap: 4px;
 }
 
