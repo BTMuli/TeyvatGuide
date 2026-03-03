@@ -57,6 +57,11 @@ function tag2Color(str: string, isDarkMode: boolean = false): string {
   height: 100%;
   flex-shrink: 0;
   object-fit: cover;
+  opacity: 0.8;
+}
+
+.dark .tur-hi-bg {
+  opacity: 1;
 }
 
 .tur-hi-empty {

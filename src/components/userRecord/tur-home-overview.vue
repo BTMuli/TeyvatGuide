@@ -28,7 +28,7 @@
       </div>
     </div>
     <div v-if="props.homes.length > 0" class="tur-hoc-list">
-      <TurHomeName
+      <TurHomeItem
         v-for="(item, idx) in props.homes"
         :key="idx"
         :icon="item.bg"
@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import TurHomeName from "./tur-home-item.vue";
+import TurHomeItem from "./tur-home-item.vue";
 
 type TurHomeOverviewProps = { homes: Array<TGApp.Sqlite.Record.Home> };
 
