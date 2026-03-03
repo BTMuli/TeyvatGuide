@@ -265,7 +265,6 @@ function getWeaponTitle(): string {
   justify-content: flex-end;
   border-radius: 4px;
   aspect-ratio: 21/10;
-  row-gap: 4px;
 }
 
 .tua-abl-bg {

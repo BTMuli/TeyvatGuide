@@ -101,6 +101,13 @@
     </template>
   </v-app-bar>
   <div class="uc-box">
+    <div class="uc-box-info">
+      <span>角色详情</span>
+      <span>|</span>
+      <span>TeyvatGuide v{{ version }}</span>
+      <span>|</span>
+      <span>更新于 {{ getUpdateTime() }}</span>
+    </div>
     <div class="uc-box-top">
       <div class="uc-box-title">
         <TurRoleInfo v-if="roleRecord && uidCur" :role="roleRecord" :uid="uidCur" />
@@ -119,15 +126,9 @@
           <span v-else>{{ item.cnt }}</span>
         </span>
       </div>
-      <div class="uc-box-info">
-        <span>角色详情</span>
-        <span>|</span>
-        <span>TeyvatGuide v{{ version }}</span>
-        <span>|</span>
-        <span>更新于 {{ getUpdateTime() }}</span>
-      </div>
-      <!-- TODO: 渲染筛选条件 -->
+      <TuaSelectVals :isConstUp :isFetterUp :isLevelUp :isSelected :selectOpts />
     </div>
+    <div class="uc-divider" />
     <div v-if="!isEmpty" class="uc-grid">
       <TuaAvatarBox
         v-for="(role, index) in selectedList"
@@ -158,6 +159,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
+import TuaSelectVals from "@comp/userAvatar/tua-select-vals.vue";
 import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import recordReq from "@req/recordReq.js";
@@ -650,6 +652,7 @@ function handleSwitch(next: boolean): void {
 }
 
 .uc-box {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 8px;
@@ -663,10 +666,18 @@ function handleSwitch(next: boolean): void {
   position: relative;
   display: flex;
   width: 100%;
-  align-items: flex-end;
-  justify-content: flex-start;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--common-shadow-2);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  row-gap: 8px;
+}
+
+.uc-divider {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  border-radius: 1px;
+  background: var(--common-shadow-2);
 }
 
 .uc-box-title {
@@ -710,8 +721,8 @@ function handleSwitch(next: boolean): void {
 .uc-box-info {
   position: absolute;
   z-index: -1;
-  right: 0;
-  bottom: 0;
+  top: 2px;
+  right: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
