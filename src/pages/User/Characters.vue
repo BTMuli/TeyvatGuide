@@ -205,6 +205,7 @@ const isFetterUp = ref<boolean | null>(null);
 const isConstUp = ref<boolean | null>(null);
 const selectOpts = ref<UavSelectModel>({
   costume: [],
+  fetter: [],
   star: [],
   level: [],
   weapon: [],
@@ -300,7 +301,15 @@ function resetList(): void {
   isLevelUp.value = null;
   isFetterUp.value = null;
   isConstUp.value = null;
-  selectOpts.value = { costume: [], star: [], level: [], weapon: [], area: [], element: [] };
+  selectOpts.value = {
+    costume: [],
+    fetter: [],
+    star: [],
+    level: [],
+    weapon: [],
+    area: [],
+    element: [],
+  };
   selectedList.value = getOrderedList(roleList.value);
   showSnackbar.success("已重置筛选条件");
   if (!dataVal.value) return;
@@ -550,6 +559,10 @@ function handleSelect(val: UavSelectModel): void {
     if (val.level.length > 0) {
       if (!val.level.includes("true") && role.avatar.level >= 70) return false;
       if (!val.level.includes("false") && role.avatar.level < 70) return false;
+    }
+    if (val.fetter.length > 0) {
+      if (!val.fetter.includes("true") && role.avatar.fetter === 10) return false;
+      if (!val.fetter.includes("false") && role.avatar.fetter !== 10) return false;
     }
     if (val.weapon.length > 0 && !val.weapon.includes(role.weapon.type_name)) return false;
     if (val.element.length > 0 && !val.element.includes(getZhElement(role.avatar.element)))

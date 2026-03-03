@@ -9,6 +9,12 @@
         </div>
       </div>
       <div class="uav-select-item">
+        <div class="uav-select-title">好感</div>
+        <div class="uav-select-props">
+          <UavSelectChips v-model:selected="fetterSelected" :items="fetterOpts" size="small" />
+        </div>
+      </div>
+      <div class="uav-select-item">
         <div class="uav-select-title">星级</div>
         <div class="uav-select-props">
           <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small" />
@@ -57,6 +63,8 @@ import { ref, watch } from "vue";
 export type UavSelectModel = {
   /** 皮肤 */
   costume: Array<string>;
+  /** 满好感 */
+  fetter: Array<string>;
   /** 星级 */
   star: Array<string>;
   /** 等级 */
@@ -74,6 +82,10 @@ type UavSelectEmits = (e: "select", v: UavSelectModel) => void;
 const costumeOpts: Array<UavSelectChipsItem> = [
   { label: "有", value: "true", title: "有衣装" },
   { label: "无", value: "false", title: "无衣装" },
+];
+const fetterOpts: Array<UavSelectChipsItem> = [
+  { label: "已满", value: "true", title: "满好感" },
+  { label: "未满", value: "false", title: "好感未满" },
 ];
 const starOpts: Array<UavSelectChipsItem> = [
   { label: "⭐⭐⭐⭐", value: "4", title: "四星" },
@@ -109,6 +121,7 @@ const areaOpts: Array<UavSelectChipsItem> = [
 const emits = defineEmits<UavSelectEmits>();
 
 const costumeSelected = ref<Array<string>>([]);
+const fetterSelected = ref<Array<string>>([]);
 const starSelected = ref<Array<string>>([]);
 const levelSelected = ref<Array<string>>([]);
 const weaponSelected = ref<Array<string>>([]);
@@ -116,7 +129,7 @@ const elementSelected = ref<Array<string>>([]);
 const areaSelected = ref<Array<string>>([]);
 
 const model = defineModel<UavSelectModel>({
-  default: { costume: [], star: [], weapon: [], area: [], element: [] },
+  default: { costume: [], fetter: [], star: [], weapon: [], area: [], element: [] },
 });
 const visible = defineModel<boolean>("show");
 
@@ -125,6 +138,7 @@ watch(
   () => {
     if (visible.value) {
       costumeSelected.value = model.value.costume;
+      fetterSelected.value = model.value.fetter;
       starSelected.value = model.value.star;
       levelSelected.value = model.value.level;
       weaponSelected.value = model.value.weapon;
@@ -141,6 +155,7 @@ function onCancel(): void {
 function onConfirm(): void {
   model.value = {
     costume: costumeSelected.value,
+    fetter: fetterSelected.value,
     star: starSelected.value,
     level: levelSelected.value,
     weapon: weaponSelected.value,

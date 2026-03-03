@@ -11,6 +11,13 @@
         <v-icon size="14">mdi-tshirt-crew</v-icon>
         <v-icon v-if="props.selectOpts.costume[0] === 'false'" size="14">mdi-block-helper</v-icon>
       </div>
+      <div
+        v-if="props.selectOpts.fetter.length === 1"
+        :class="props.selectOpts.fetter[0] === 'true' ? 'pass' : 'ban'"
+        class="tua-svs-item"
+      >
+        <span>好感:{{ getFetterLabel(props.selectOpts.fetter[0]) }}</span>
+      </div>
       <div v-if="props.selectOpts.star.length === 1" class="tua-svs-item">
         <span>{{ getStarLabel(props.selectOpts.star[0]) }}</span>
       </div>
@@ -102,6 +109,11 @@ const props = defineProps<TuaSelectValsProps>();
 const isOrdered = computed<boolean>(() => {
   return !(props.isLevelUp === null && props.isFetterUp === null && props.isConstUp === null);
 });
+
+function getFetterLabel(fetter: string): string {
+  if (fetter === "true") return "已满";
+  return "未满";
+}
 
 function getStarLabel(star: string): string {
   if (star === "4") return "⭐⭐⭐⭐";
