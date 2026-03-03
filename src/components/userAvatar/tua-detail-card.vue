@@ -2,7 +2,7 @@
 <template>
   <div class="tua-dc-container">
     <div class="tua-dc-avatar">
-      <TMiImg :ori="true" :src="fullIcon" alt="avatar" />
+      <img :src="fullIcon" alt="avatar" />
     </div>
     <v-btn
       :loading="loading"
@@ -76,7 +76,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import useUserStore from "@store/user.js";
