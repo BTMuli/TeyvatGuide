@@ -60,9 +60,8 @@
     <PhCompCard title="世界探索">
       <TurWorldGrid :worlds="recordData.worldExplore" />
     </PhCompCard>
-    <!-- TODO: 优化UI -->
     <PhCompCard title="尘歌壶">
-      <TurHomeGrid :model-value="recordData.homes" />
+      <TurHomeOverview :homes="recordData.homes" />
     </PhCompCard>
   </div>
   <div v-else class="ur-empty">
@@ -76,7 +75,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCard from "@comp/pageHome/ph-comp-card.vue";
 import TurAvatarGrid from "@comp/userRecord/tur-avatar-grid.vue";
-import TurHomeGrid from "@comp/userRecord/tur-home-grid.vue";
+import TurHomeOverview from "@comp/userRecord/tur-home-overview.vue";
 import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import TurWorldGrid from "@comp/userRecord/tur-world-grid.vue";
