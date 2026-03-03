@@ -263,12 +263,12 @@ watch(
   },
 );
 
-function toggleSort(value: boolean | null): boolean {
+function toggleSort(value: boolean | null): boolean | null {
   switch (value) {
     case true:
       return false;
     case false:
-      return true;
+      return null;
     case null:
       return true;
   }
