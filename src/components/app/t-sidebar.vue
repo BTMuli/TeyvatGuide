@@ -690,6 +690,7 @@ async function addByCookie(): Promise<void> {
   };
   uid.value = briefRes.uid;
   briefInfo.value = briefInfoGet;
+  cookie.value = ck;
   isLogin.value = true;
   await showLoading.update("正在保存用户数据");
   await TSUserAccount.account.saveAccount({

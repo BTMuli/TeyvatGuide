@@ -359,6 +359,7 @@ async function loadAccount(ac: string): Promise<void> {
 }
 
 async function confirmRefreshUser(ac: string): Promise<void> {
+  // TODO: 选择同时刷新游戏账号还是只刷新ck
   const freshCheck = await showDialog.check("确认刷新用户信息吗？", "将会重新获取用户信息");
   if (!freshCheck) {
     showSnackbar.cancel("已取消刷新用户信息");
@@ -510,6 +511,7 @@ async function addByCookie(): Promise<void> {
   };
   uid.value = briefRes.uid;
   briefInfo.value = briefGet;
+  cookie.value = ck;
   isLogin.value = true;
   await showLoading.update("正在保存用户数据");
   await TSUserAccount.account.saveAccount({
