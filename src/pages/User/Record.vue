@@ -18,6 +18,7 @@
     <template #append>
       <div class="ur-top-btns">
         <v-btn
+          :loading="isRefresh"
           class="ur-top-btn"
           prepend-icon="mdi-refresh"
           variant="elevated"
@@ -26,7 +27,7 @@
           更新
         </v-btn>
         <v-btn
-          :disabled="recordData === undefined"
+          :disabled="recordData === undefined || isRefresh"
           class="ur-top-btn"
           prepend-icon="mdi-share"
           variant="elevated"
@@ -35,7 +36,7 @@
           分享
         </v-btn>
         <v-btn
-          :disabled="recordData === undefined"
+          :disabled="recordData === undefined || isRefresh"
           class="ur-top-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
@@ -91,8 +92,10 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 
 const userStore = useUserStore();
 const { account, cookie } = storeToRefs(userStore);
-const uidCur = ref<number>();
+
 const version = ref<string>();
+const isRefresh = ref<boolean>(false);
+const uidCur = ref<number>();
 const uidList = shallowRef<Array<number>>([]);
 const recordData = shallowRef<TGApp.Sqlite.Record.TableTrans>();
 
@@ -101,6 +104,7 @@ onMounted(async () => {
   await TGLogger.Info("[UserRecord][onMounted] 打开角色战绩页面");
   version.value = await getVersion();
   await loadUid();
+  isRefresh.value = false;
   await showLoading.end();
 });
 
@@ -164,6 +168,7 @@ async function refreshRecord(): Promise<void> {
   }
   await showLoading.start(`正在刷新${rfAccount.gameUid}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 刷新战绩数据`);
+  isRefresh.value = true;
   const resp = await recordReq.index(rfCk!, rfAccount);
   console.log(resp);
   if ("retcode" in resp) {
@@ -173,6 +178,7 @@ async function refreshRecord(): Promise<void> {
     await TGLogger.Error(
       `[UserRecord][refresh][${rfAccount.gameUid}] ${resp.retcode} ${resp.message}`,
     );
+    isRefresh.value = false;
     return;
   }
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 获取战绩数据成功`);
@@ -183,6 +189,7 @@ async function refreshRecord(): Promise<void> {
   await loadUid(rfAccount.gameUid);
   await loadRecord();
   await showLoading.end();
+  isRefresh.value = false;
   showSnackbar.success(`成功刷新${rfAccount.gameUid}的战绩数据`);
 }
 
