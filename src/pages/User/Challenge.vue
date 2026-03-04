@@ -29,7 +29,7 @@
       <div class="ucp-top-append">
         <div class="act-list">
           <v-btn
-            :disabled="localChallenge.length === 0"
+            :disabled="localChallenge.length === 0 || isRefresh"
             class="ucp-btn"
             prepend-icon="mdi-share"
             variant="elevated"
@@ -38,6 +38,7 @@
             分享
           </v-btn>
           <v-btn
+            :loading="isRefresh"
             class="ucp-btn"
             prepend-icon="mdi-refresh"
             variant="elevated"
@@ -54,6 +55,7 @@
             导入
           </v-btn>
           <v-btn
+            :disabled="isRefresh"
             class="ucp-btn"
             prepend-icon="mdi-delete"
             variant="elevated"
@@ -171,6 +173,7 @@ const { account, cookie } = storeToRefs(useUserStore());
 const version = ref<string>();
 
 const userTab = ref<number>(0);
+const isRefresh = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localChallenge = shallowRef<Array<TGApp.Sqlite.Challenge.TableTrans>>([]);
@@ -185,6 +188,7 @@ onMounted(async () => {
   await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
   await showLoading.update("正在获取UID列表");
   await reloadUid();
+  isRefresh.value = false;
   if (uidCur.value?.startsWith("5")) server.value = gameEnum.server.CN_QD01;
   await refreshPopList(false);
 });
@@ -282,15 +286,18 @@ async function refreshChallenge(): Promise<void> {
   }
   await TGLogger.Info("[Challenge][refreshChallenge] 开始刷新挑战数据");
   await showLoading.start(`正在获取${rfAccount.gameUid}的幽境危战数据`);
+  isRefresh.value = true;
   const resp = await recordReq.challenge.detail(rfCk!, rfAccount);
   console.log(resp);
   if ("retcode" in resp) {
+    isRefresh.value = false;
     await showLoading.end();
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(`[Challenge][refreshChallenge] ${resp.retcode} - ${resp.message}`);
     return;
   }
   if (!resp.is_unlock) {
+    isRefresh.value = false;
     await showLoading.end();
     showSnackbar.warn("幽境危战未解锁");
     await TGLogger.Warn("[Challenge][refreshChallenge] 幽境危战未解锁");
@@ -304,6 +311,7 @@ async function refreshChallenge(): Promise<void> {
   }
   await reloadUid(uidCur.value);
   await loadChallenge();
+  isRefresh.value = false;
   await showLoading.end();
 }
 
