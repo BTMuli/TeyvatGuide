@@ -6,9 +6,94 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import Database from "@tauri-apps/plugin-sql";
 import { getUtc8Time, getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { ref, Ref } from "vue";
 
 import TGSqlite from "../index.js";
+
+/**
+ * 批量插入祈愿数据
+ * @since Beta v0.9.8
+ * @param db - 数据库
+ * @param uid - 用户UID
+ * @param data - 祈愿数据
+ * @param size - batchSize
+ * @param cnt - cntRef
+ */
+async function insertGachaList(
+  db: Database,
+  uid: string,
+  data: Array<TGApp.Plugins.UIGF.GachaItem>,
+  size: number,
+  cnt: Ref<number>,
+): Promise<void> {
+  await db.execute("PRAGMA busy_timeout = 5000;");
+  for (let i = 0; i < data.length; i += size) {
+    await db.execute("BEGIN IMMEDIATE;");
+    try {
+      const batch = data.slice(i, i + size);
+      let batchSql = "";
+      const batchParams = [];
+      for (const item of batch) {
+        const updateTime = timestampToDate(Date.now());
+        batchSql += `
+            INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
+                                     name, type, rank, id, uigfType, updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id)
+                DO UPDATE
+                SET uid=?,
+                    gachaType=?,
+                    itemId=?,
+                    count=?,
+                    time=?,
+                    name=?,
+                    type=?,
+                    rank=?,
+                    uigfType=?,
+                    updated=?;
+        `;
+        batchParams.push(
+          uid,
+          item.gacha_type,
+          item.item_id ?? null,
+          item.count ?? 1,
+          item.time,
+          item.name,
+          item.item_type ?? null,
+          item.rank_type ?? null,
+          item.id,
+          item.uigf_gacha_type,
+          updateTime,
+          // update 部分
+          uid,
+          item.gacha_type,
+          item.item_id ?? null,
+          item.count ?? 1,
+          item.time,
+          item.name,
+          item.item_type ?? null,
+          item.rank_type ?? null,
+          item.uigf_gacha_type,
+          updateTime,
+        );
+        cnt.value++;
+      }
+      await db.execute(batchSql, batchParams);
+      await db.execute("COMMIT;");
+    } catch (e) {
+      const msg = String(e);
+      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
+        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
+        return;
+      }
+      // 其他错误直接抛出
+      await db.execute("ROLLBACK;");
+      throw e;
+    }
+  }
+}
 
 /**
  * 转换祈愿数据，防止多语言
@@ -213,86 +298,21 @@ async function mergeUIGF(
 ): Promise<void> {
   const db = await TGSqlite.getDB();
   const len = data.length;
-  let cnt = 0;
+  const cnt = ref<number>(0);
   let timer: NodeJS.Timeout | null = null;
   if (showProgress) {
     timer = setInterval(async () => {
-      const progress = Math.round((cnt / len) * 100 * 100) / 100;
-      const current = data[cnt]?.time ?? "";
-      const name = data[cnt]?.name ?? "";
-      const rank = data[cnt]?.rank_type ?? "0";
+      const progress = Math.round((cnt.value / len) * 100 * 100) / 100;
+      const current = data[cnt.value]?.time ?? "";
+      const name = data[cnt.value]?.name ?? "";
+      const rank = data[cnt.value]?.rank_type ?? "0";
       await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`, {
         timeout: 0,
       });
     }, 1000);
   }
   const transformed = data.map((g) => transGacha(g));
-  const BATCH_SIZE = 100;
-  await db.execute("PRAGMA busy_timeout = 5000;");
-  for (let i = 0; i < transformed.length; i += BATCH_SIZE) {
-    await db.execute("BEGIN IMMEDIATE;");
-    try {
-      const batch = transformed.slice(i, i + BATCH_SIZE);
-      let batchSql = "";
-      const batchParams = [];
-      for (const item of batch) {
-        const updateTime = timestampToDate(Date.now());
-        batchSql += `
-            INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
-                                     name, type, rank, id, uigfType, updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id)
-                DO UPDATE
-                SET uid=?,
-                    gachaType=?,
-                    itemId=?,
-                    count=?,
-                    time=?,
-                    name=?,
-                    type=?,
-                    rank=?,
-                    uigfType=?,
-                    updated=?;
-        `;
-        batchParams.push(
-          uid,
-          item.gacha_type,
-          item.item_id ?? null,
-          item.count ?? 1,
-          item.time,
-          item.name,
-          item.item_type ?? null,
-          item.rank_type ?? null,
-          item.id,
-          item.uigf_gacha_type,
-          updateTime,
-          // update 部分
-          uid,
-          item.gacha_type,
-          item.item_id ?? null,
-          item.count ?? 1,
-          item.time,
-          item.name,
-          item.item_type ?? null,
-          item.rank_type ?? null,
-          item.uigf_gacha_type,
-          updateTime,
-        );
-        cnt++;
-      }
-      await db.execute(batchSql, batchParams);
-      await db.execute("COMMIT;");
-    } catch (e) {
-      const msg = String(e);
-      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
-        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
-        return;
-      }
-      // 其他错误直接抛出
-      await db.execute("ROLLBACK;");
-      throw e;
-    }
-  }
+  await insertGachaList(db, uid, transformed, 100, cnt);
   if (timer) {
     clearInterval(timer);
     await showLoading.update(`[100%] 完成`, { timeout: 0 });
@@ -312,14 +332,14 @@ async function mergeUIGF4(
 ): Promise<void> {
   const db = await TGSqlite.getDB();
   const len = data.list.length;
-  let cnt: number = 0;
+  const cnt = ref<number>(0);
   let timer: NodeJS.Timeout | null = null;
   if (showProgress) {
     timer = setInterval(async () => {
-      const progress = Math.round((cnt / len) * 100 * 100) / 100;
-      const current = data.list[cnt]?.time ?? "";
-      const name = data.list[cnt]?.name ?? data.list[cnt]?.item_id;
-      const rank = data.list[cnt]?.rank_type ?? "0";
+      const progress = Math.round((cnt.value / len) * 100 * 100) / 100;
+      const current = data.list[cnt.value]?.time ?? "";
+      const name = data.list[cnt.value]?.name ?? data.list[cnt.value]?.item_id;
+      const rank = data.list[cnt.value]?.rank_type ?? "0";
       await showLoading.update(`[${progress}%][${current}] ${"⭐".repeat(Number(rank))}-${name}`, {
         timeout: 0,
       });
@@ -327,72 +347,7 @@ async function mergeUIGF4(
   }
   const uid = data.uid.toString();
   const transformed = data.list.map((g) => transGacha(g, data.timezone));
-  const BATCH_SIZE = 100;
-  await db.execute("PRAGMA busy_timeout = 5000;");
-  for (let i = 0; i < transformed.length; i += BATCH_SIZE) {
-    await db.execute("BEGIN IMMEDIATE;");
-    try {
-      const batch = transformed.slice(i, i + BATCH_SIZE);
-      let batchSql = "";
-      const batchParams = [];
-      for (const item of batch) {
-        const updateTime = timestampToDate(Date.now());
-        batchSql += `
-            INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
-                                     name, type, rank, id, uigfType, updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id)
-                DO UPDATE
-                SET uid=?,
-                    gachaType=?,
-                    itemId=?,
-                    count=?,
-                    time=?,
-                    name=?,
-                    type=?,
-                    rank=?,
-                    uigfType=?,
-                    updated=?;
-        `;
-        batchParams.push(
-          uid,
-          item.gacha_type,
-          item.item_id ?? null,
-          item.count ?? 1,
-          item.time,
-          item.name,
-          item.item_type ?? null,
-          item.rank_type ?? null,
-          item.id,
-          item.uigf_gacha_type,
-          updateTime,
-          // update 部分
-          uid,
-          item.gacha_type,
-          item.item_id ?? null,
-          item.count ?? 1,
-          item.time,
-          item.name,
-          item.item_type ?? null,
-          item.rank_type ?? null,
-          item.uigf_gacha_type,
-          updateTime,
-        );
-        cnt++;
-      }
-      await db.execute(batchSql, batchParams);
-      await db.execute("COMMIT;");
-    } catch (e) {
-      const msg = String(e);
-      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
-        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
-        return;
-      }
-      // 其他错误直接抛出
-      await db.execute("ROLLBACK;");
-      throw e;
-    }
-  }
+  await insertGachaList(db, uid, transformed, 100, cnt);
   if (timer) {
     clearInterval(timer);
     await showLoading.update(`[100%] 完成`, { timeout: 0 });
