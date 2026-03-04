@@ -684,11 +684,14 @@ async function deleteGacha(): Promise<void> {
     }
   }
   await showLoading.start("正在删除祈愿数据", `UID:${uidCur.value}`);
+  const label = `已成功删除 ${uidCur.value} 的祈愿数据，即将刷新页面`;
   await TSUserGacha.deleteGachaRecords(uidCur.value);
   await reloadUid();
   await loadGachaList();
   await showLoading.end();
-  showSnackbar.success(`已成功删除 ${uidCur.value} 的祈愿数据，即将刷新页面`);
+  showSnackbar.success(label);
+  await new Promise<void>((resolve) => setTimeout(resolve, 1500));
+  window.location.reload();
 }
 
 async function checkData(): Promise<void> {

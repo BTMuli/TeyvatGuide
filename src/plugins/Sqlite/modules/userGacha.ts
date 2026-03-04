@@ -1,55 +1,14 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.9.6
+ * @since Beta v0.9.8
  */
 
+import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { getUtc8Time, getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
-
-/**
- * 导入物品
- * @since Beta v0.9.6
- * @param uid - UID
- * @param item - UIGF数据
- * @returns Promise<void>
- */
-async function insertGachaItem(uid: string, item: TGApp.Plugins.UIGF.GachaItem): Promise<void> {
-  const db = await TGSqlite.getDB();
-  const updateTime = timestampToDate(Date.now());
-  await db.execute(
-    `INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
-                              name, type, rank, id, uigfType, updated)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-     ON CONFLICT(id) DO UPDATE
-         SET uid       = $1,
-             gachaType = $2,
-             itemId    = $3,
-             count     = $4,
-             time      = $5,
-             name      = $6,
-             type      = $7,
-             rank      = $8,
-             uigfType  = $10,
-             updated   = $11;
-    `,
-    [
-      uid,
-      item.gacha_type,
-      item.item_id ?? null,
-      item.count ?? 1,
-      item.time,
-      item.name,
-      item.item_type ?? null,
-      item.rank_type ?? null,
-      item.id,
-      item.uigf_gacha_type,
-      updateTime,
-    ],
-  );
-}
 
 /**
  * 转换祈愿数据，防止多语言
@@ -241,7 +200,7 @@ async function cleanGachaRecords(
 
 /**
  * 合并祈愿数据
- * @since Beta v0.9.5
+ * @since Beta v0.9.8
  * @param uid - UID
  * @param data - UIGF数据
  * @param showProgress - 是否显示进度
@@ -268,17 +227,68 @@ async function mergeUIGF(
     }, 1000);
   }
   const transformed = data.map((g) => transGacha(g));
-  const BATCH_SIZE = 500;
+  const BATCH_SIZE = 100;
+  await db.execute("PRAGMA busy_timeout = 5000;");
   for (let i = 0; i < transformed.length; i += BATCH_SIZE) {
-    const batch = transformed.slice(i, i + BATCH_SIZE);
-    await db.execute("BEGIN TRANSACTION;");
+    await db.execute("BEGIN IMMEDIATE;");
     try {
+      const batch = transformed.slice(i, i + BATCH_SIZE);
+      let batchSql = "";
+      const batchParams = [];
       for (const item of batch) {
-        await insertGachaItem(uid, item);
+        const updateTime = timestampToDate(Date.now());
+        batchSql += `
+            INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
+                                     name, type, rank, id, uigfType, updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id)
+                DO UPDATE
+                SET uid=?,
+                    gachaType=?,
+                    itemId=?,
+                    count=?,
+                    time=?,
+                    name=?,
+                    type=?,
+                    rank=?,
+                    uigfType=?,
+                    updated=?;
+        `;
+        batchParams.push(
+          uid,
+          item.gacha_type,
+          item.item_id ?? null,
+          item.count ?? 1,
+          item.time,
+          item.name,
+          item.item_type ?? null,
+          item.rank_type ?? null,
+          item.id,
+          item.uigf_gacha_type,
+          updateTime,
+          // update 部分
+          uid,
+          item.gacha_type,
+          item.item_id ?? null,
+          item.count ?? 1,
+          item.time,
+          item.name,
+          item.item_type ?? null,
+          item.rank_type ?? null,
+          item.uigf_gacha_type,
+          updateTime,
+        );
         cnt++;
       }
+      await db.execute(batchSql, batchParams);
       await db.execute("COMMIT;");
     } catch (e) {
+      const msg = String(e);
+      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
+        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
+        return;
+      }
+      // 其他错误直接抛出
       await db.execute("ROLLBACK;");
       throw e;
     }
@@ -291,7 +301,7 @@ async function mergeUIGF(
 
 /**
  * 合并祈愿数据（v4.x）
- * @since Beta v0.9.5
+ * @since Beta v0.9.8
  * @param data - UIGF数据
  * @param showProgress - 是否显示进度
  * @returns 无返回值
@@ -317,17 +327,68 @@ async function mergeUIGF4(
   }
   const uid = data.uid.toString();
   const transformed = data.list.map((g) => transGacha(g, data.timezone));
-  const BATCH_SIZE = 500;
+  const BATCH_SIZE = 100;
+  await db.execute("PRAGMA busy_timeout = 5000;");
   for (let i = 0; i < transformed.length; i += BATCH_SIZE) {
-    const batch = transformed.slice(i, i + BATCH_SIZE);
-    await db.execute("BEGIN TRANSACTION;");
+    await db.execute("BEGIN IMMEDIATE;");
     try {
+      const batch = transformed.slice(i, i + BATCH_SIZE);
+      let batchSql = "";
+      const batchParams = [];
       for (const item of batch) {
-        await insertGachaItem(uid, item);
+        const updateTime = timestampToDate(Date.now());
+        batchSql += `
+            INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
+                                     name, type, rank, id, uigfType, updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(id)
+                DO UPDATE
+                SET uid=?,
+                    gachaType=?,
+                    itemId=?,
+                    count=?,
+                    time=?,
+                    name=?,
+                    type=?,
+                    rank=?,
+                    uigfType=?,
+                    updated=?;
+        `;
+        batchParams.push(
+          uid,
+          item.gacha_type,
+          item.item_id ?? null,
+          item.count ?? 1,
+          item.time,
+          item.name,
+          item.item_type ?? null,
+          item.rank_type ?? null,
+          item.id,
+          item.uigf_gacha_type,
+          updateTime,
+          // update 部分
+          uid,
+          item.gacha_type,
+          item.item_id ?? null,
+          item.count ?? 1,
+          item.time,
+          item.name,
+          item.item_type ?? null,
+          item.rank_type ?? null,
+          item.uigf_gacha_type,
+          updateTime,
+        );
         cnt++;
       }
+      await db.execute(batchSql, batchParams);
       await db.execute("COMMIT;");
     } catch (e) {
+      const msg = String(e);
+      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
+        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
+        return;
+      }
+      // 其他错误直接抛出
       await db.execute("ROLLBACK;");
       throw e;
     }
