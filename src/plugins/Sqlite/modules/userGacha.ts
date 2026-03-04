@@ -8,7 +8,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import Database from "@tauri-apps/plugin-sql";
 import { getUtc8Time, getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
-import { ref, Ref } from "vue";
+import { ref, type Ref } from "vue";
 
 import TGSqlite from "../index.js";
 
