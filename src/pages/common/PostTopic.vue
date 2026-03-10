@@ -6,9 +6,9 @@
         <TMiImg :ori="true" :src="topicInfo.topic.cover" alt="cover" />
         <div class="post-topic-info">
           <span class="post-topic-title">{{ topicInfo.topic.name }}</span>
-          <span :title="topicInfo.topic.desc" class="post-topic-desc">{{
-            topicInfo.topic.desc
-          }}</span>
+          <span :title="topicInfo.topic.desc" class="post-topic-desc">
+            {{ topicInfo.topic.desc }}
+          </span>
         </div>
         <div :title="`话题ID：${topicInfo.topic.id}`" class="post-topic-id">
           {{ topicInfo.topic.id }}
@@ -67,12 +67,11 @@
       <v-text-field
         v-model="search"
         :hide-details="true"
-        :single-line="true"
         append-inner-icon="mdi-magnify"
         class="post-switch-item"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
-        @click:append="searchPost"
+        @click:append-inner="searchPost"
         @keyup.enter="searchPost"
       />
       <v-btn
