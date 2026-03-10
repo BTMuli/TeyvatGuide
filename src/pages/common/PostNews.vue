@@ -1,8 +1,8 @@
 <!-- 咨讯页面 -->
 <template>
   <v-app-bar>
-    <template #prepend>
-      <v-tabs v-model="recentNewsType" align-tabs="center" class="news-tab">
+    <div class="pn-nav">
+      <v-tabs v-model="recentNewsType" align-tabs="center" class="pn-nav-tabs">
         <v-tab
           v-for="(value, index) in bbsEnum.post.newsTypeList"
           :key="index"
@@ -13,38 +13,36 @@
           {{ rawData[value].name }}
         </v-tab>
       </v-tabs>
-    </template>
-    <template #title>
       <v-text-field
         v-model="search"
         :hide-details="true"
-        :single-line="true"
-        append-icon="mdi-magnify"
-        class="news-search"
+        append-inner-icon="mdi-magnify"
+        class="pn-nav-search"
         density="compact"
         label="请输入帖子 ID 或搜索词"
+        variant="outlined"
         @keydown.enter="searchPost()"
-        @click:append="searchPost()"
+        @click:append-inner="searchPost()"
       />
-    </template>
-    <template #append>
-      <v-btn
-        :loading="loading"
-        class="post-news-btn"
-        size="small"
-        variant="elevated"
-        @click="firstLoad(true)"
-      >
-        <v-icon>mdi-refresh</v-icon>
-      </v-btn>
-      <v-btn class="post-news-btn" size="small" variant="elevated" @click="handleList()">
-        <v-icon>mdi-view-list</v-icon>
-      </v-btn>
-    </template>
+      <div class="pn-nav-btns">
+        <v-btn
+          :loading="loading"
+          class="pn-nav-btn"
+          size="small"
+          variant="elevated"
+          @click="firstLoad(true)"
+        >
+          <v-icon>mdi-refresh</v-icon>
+        </v-btn>
+        <v-btn class="pn-nav-btn" size="small" variant="elevated" @click="handleList()">
+          <v-icon>mdi-view-list</v-icon>
+        </v-btn>
+      </div>
+    </div>
   </v-app-bar>
   <v-window v-model="recentNewsType">
     <v-window-item v-for="(value, index) in bbsEnum.post.newsTypeList" :key="index" :value="value">
-      <div class="news-grid">
+      <div class="pn-grid">
         <div v-for="item in postData[value]" :key="item.post.post_id">
           <TPostCard :model-value="item" />
         </div>
@@ -199,37 +197,47 @@ async function searchPost(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-.news-tab {
-  margin-bottom: 8px;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-
-  &:first-child {
-    margin-left: 12px;
-  }
+.pn-nav {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 16px;
+  padding-left: 16px;
+  column-gap: 16px;
+  overflow: auto hidden;
 }
 
-.post-news-btn {
+.pn-nav-tabs {
+  position: relative;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+}
+
+.pn-nav-search {
+  color: var(--box-text-1);
+}
+
+.pn-nav-btns {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+}
+
+.pn-nav-btn {
   height: 40px;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-
-  &:last-child {
-    margin-right: 12px;
-  }
 }
 
-.post-news-btn + .post-news-btn {
-  margin-left: 8px;
-}
-
-.news-search {
-  margin: 0 16px;
-  color: var(--box-text-1);
-}
-
-.news-grid {
+.pn-grid {
   display: grid;
   font-family: var(--font-title);
   gap: 8px;
