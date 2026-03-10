@@ -68,6 +68,7 @@
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
+import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
@@ -78,6 +79,10 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
+import { getVersion } from "@tauri-apps/api/app";
+import { invoke } from "@tauri-apps/api/core";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { getLatestReleaseVersion } from "@utils/Github.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
@@ -101,7 +106,7 @@ type SelectItem = {
 const homeStore = useHomeStore();
 const bbsStore = useBBSStore();
 
-const { devMode, isLogin } = storeToRefs(useAppStore());
+const { devMode, isLogin, lastUcts } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
 
 const curGid = ref<number>(2);
@@ -130,6 +135,7 @@ onMounted(async () => {
   }
   oldItems.value = showItems.value;
   await loadComp();
+  await checkAppUpdate();
 });
 
 watch(
@@ -204,6 +210,37 @@ async function loadEnd(item: ReturnType<typeof defineComponent>): Promise<void> 
   if (!loadItems.value.includes(compName)) loadItems.value.push(compName);
   else showSnackbar.warn(`${compName} 已加载`);
   if (loadItems.value.length === components.value.length) await showLoading.end();
+}
+
+async function checkAppUpdate(): Promise<void> {
+  const nowTs = Math.floor(Date.now() / 1000);
+  const diffTime = nowTs - lastUcts.value;
+  if (diffTime < 60 * 60 * 24) return;
+  await TGLogger.Info("[Home][CheckAppUpdate]检测版本更新");
+  const versionApp = await getVersion();
+  const versionCheck = await getLatestReleaseVersion();
+  if (versionCheck === "0") return;
+  if (versionCheck === versionApp) {
+    await TGLogger.Info(`[Home][CheckAppUpdate]版本号一致：${versionCheck}`);
+    lastUcts.value = nowTs;
+    return;
+  }
+  await TGLogger.Info(`[Home][CheckAppUpdate]检测到新版本:${versionCheck}`);
+  const check = await showDialog.checkF({
+    title: "检测到新版本",
+    text: `${versionApp}→${versionCheck}`,
+    otcancel: false,
+    confirmLabel: "前往更新",
+    cancelLabel: "稍后提醒",
+  });
+  lastUcts.value = nowTs;
+  if (!check) return;
+  const isMsix = await invoke<boolean>("is_msix");
+  if (isMsix) {
+    await openUrl("ms-windows-store://pdp/?ProductId=9nlbnnnbnsjn");
+    return;
+  }
+  await openUrl("https://github.com/BTMuli/TeyvatGuide/releases/latest");
 }
 </script>
 <style lang="scss" scoped>

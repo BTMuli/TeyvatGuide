@@ -59,7 +59,7 @@
         { "url": "https://*.mihoyo.com/*" },
         { "url": "https://homa.gentle.house/*" },
         { "url": "https://*.hoyoverse.com/*" },
-        { "url": "https://api.hakush.in/*" }
+        { "url": "https://api.github.com/repos/BTMuli/TeyvatGuide/releases/latest" }
       ]
     }
   ],
