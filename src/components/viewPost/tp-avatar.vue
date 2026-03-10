@@ -2,7 +2,8 @@
   <div class="tp-avatar-box">
     <div class="tpa-img">
       <div class="tpa-icon">
-        <TMiImg :ori="true" :src="getUserAvatar(props.data)" alt="avatar" />
+        <img v-if="avatarUrl.endsWith('.gif')" :src="avatarUrl" alt="avatar" />
+        <TMiImg v-else :ori="true" :src="avatarUrl" alt="avatar" />
       </div>
       <div v-if="props.data.pendant !== ''" class="tpa-pendant">
         <TMiImg :ori="true" :src="props.data.pendant" alt="pendant" />
@@ -32,11 +33,11 @@ type TpAvatarProps = { data: TGApp.BBS.Post.User; position: "left" | "right" };
 
 const props = defineProps<TpAvatarProps>();
 
+const avatarUrl = computed<string>(() => getUserAvatar(props.data));
 const authorDesc = computed<string>(() => {
   if (props.data.certification.label !== "") return props.data.certification.label;
   return props.data.introduce;
 });
-
 const levelColor = computed<string>(() => {
   if (!props.data.level_exp) return "var(--tgc-od-white)";
   const level = props.data.level_exp.level;
