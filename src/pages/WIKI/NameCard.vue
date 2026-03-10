@@ -8,14 +8,14 @@
         </div>
         <v-select
           v-model="selectType"
-          :items="namecardTypes"
-          item-title="type"
-          :hide-details="true"
           :clearable="true"
-          width="250px"
-          label="名片类别"
+          :hide-details="true"
+          :items="namecardTypes"
           density="compact"
+          item-title="type"
+          label="名片类别"
           variant="outlined"
+          width="250px"
         >
           <template #item="{ props, item }">
             <v-list-item v-bind="props">
@@ -31,33 +31,34 @@
       <div class="wnc-top-append">
         <v-text-field
           v-model="search"
-          density="compact"
-          prepend-inner-icon="mdi-magnify"
-          label="搜索"
+          :clearable="true"
           :hide-details="true"
+          append-inner-icon="mdi-magnify"
+          density="compact"
+          label="搜索"
           variant="outlined"
-          @click:prepend-inner="searchNameCard()"
+          @click:append-inner="searchNameCard()"
           @keyup.enter="searchNameCard()"
         />
       </div>
     </template>
   </v-app-bar>
   <div class="tw-nc-list">
-    <v-virtual-scroll class="v-scroll" :items="sortNameCardsData" :item-height="80" item-key="id">
+    <v-virtual-scroll :item-height="80" :items="sortNameCardsData" class="v-scroll" item-key="id">
       <template #default="{ item }">
-        <TopNameCard class="item" :data="item" @selected="showNameCard(item)" />
+        <TopNameCard :data="item" class="item" @selected="showNameCard(item)" />
       </template>
     </v-virtual-scroll>
   </div>
   <ToNameCard v-model="visible" :data="curNameCard">
     <template #left>
       <div class="card-arrow left" @click="switchCard(false)">
-        <img src="@/assets/icons/arrow-right.svg" alt="right" />
+        <img alt="right" src="@/assets/icons/arrow-right.svg" />
       </div>
     </template>
     <template #right>
       <div class="card-arrow" @click="switchCard(true)">
-        <img src="@/assets/icons/arrow-right.svg" alt="right" />
+        <img alt="right" src="@/assets/icons/arrow-right.svg" />
       </div>
     </template>
   </ToNameCard>
@@ -135,8 +136,9 @@ function switchCard(isNext: boolean): void {
 }
 
 function searchNameCard(): void {
-  if (search.value === undefined) {
+  if (search.value === undefined || search.value === null) {
     sortData(AppNameCardsData);
+    showSnackbar.success("已重置");
     return;
   }
   if (search.value === "") {

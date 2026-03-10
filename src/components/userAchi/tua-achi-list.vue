@@ -86,7 +86,13 @@ function handleSearch(kw: string): void {
 
 async function searchAchi(): Promise<void> {
   if (!props.isSearch) return;
-  if (!props.search || props.search === "") {
+  if (!props.search) {
+    achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
+    showSnackbar.success("已重置");
+    emits("update:isSearch", false);
+    return;
+  }
+  if (props.search === "") {
     showSnackbar.warn("请输入搜索内容");
     emits("update:isSearch", false);
     return;

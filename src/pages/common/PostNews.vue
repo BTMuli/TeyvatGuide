@@ -21,6 +21,7 @@
         density="compact"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
+        :clearable="true"
         @keydown.enter="searchPost()"
         @click:append-inner="searchPost()"
       />
@@ -200,6 +201,7 @@ async function searchPost(): Promise<void> {
 .pn-nav {
   position: relative;
   display: flex;
+  overflow: auto hidden;
   width: 100%;
   max-width: 100%;
   height: 100%;
@@ -209,7 +211,6 @@ async function searchPost(): Promise<void> {
   padding-right: 16px;
   padding-left: 16px;
   column-gap: 16px;
-  overflow: auto hidden;
 }
 
 .pn-nav-tabs {

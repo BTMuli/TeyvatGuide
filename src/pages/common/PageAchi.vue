@@ -22,9 +22,10 @@
         <v-text-field
           v-model="search"
           :hide-details="true"
-          :single-line="true"
           append-inner-icon="mdi-magnify"
           @click:append-inner="isSearch = true"
+          variant="outlined"
+          :clearable="true"
           density="compact"
           label="搜索"
           @keydown.enter="isSearch = true"

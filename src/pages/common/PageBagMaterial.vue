@@ -21,14 +21,14 @@
         <div class="pbm-nav-search">
           <v-text-field
             v-model="search"
+            :clearable="true"
             :hide-details="true"
-            :single-line="true"
+            append-inner-icon="mdi-magnify"
             density="compact"
             label="搜索"
-            prepend-inner-icon="mdi-magnify"
             variant="outlined"
             @keydown.enter="searchMaterial()"
-            @click:prepend-inner="searchMaterial()"
+            @click:append-inner="searchMaterial()"
           />
         </div>
         <v-btn
@@ -299,7 +299,7 @@ function getItemInfo(id: number): TGApp.App.Material.WikiItem | false {
 
 function searchMaterial(): void {
   let selectData = getSelectMaterials();
-  if (search.value === undefined || search.value === "") {
+  if (search.value === undefined || search.value === "" || search.value === null) {
     if (materialShow.value.length === selectData.length) {
       showSnackbar.warn("请输入搜索内容!");
       return;

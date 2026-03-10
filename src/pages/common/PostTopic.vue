@@ -67,6 +67,7 @@
       <v-text-field
         v-model="search"
         :hide-details="true"
+        :clearable="true"
         append-inner-icon="mdi-magnify"
         class="post-switch-item"
         label="请输入帖子 ID 或搜索词"

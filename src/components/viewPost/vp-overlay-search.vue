@@ -111,7 +111,7 @@ watch(
       search.value = props.keyword;
       return;
     }
-    if (search.value !== props.keyword && props.keyword !== "") {
+    if (search.value !== props.keyword && props.keyword !== "" && props.keyword !== null) {
       search.value = props.keyword;
       results.value = [];
       lastId.value = "";
