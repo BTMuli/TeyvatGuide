@@ -1,6 +1,6 @@
 /**
  * 帖子类型定义文件
- * @since Beta v0.8.6
+ * @since Beta v0.9.8
  */
 
 declare namespace TGApp.BBS.Post {
@@ -124,7 +124,7 @@ declare namespace TGApp.BBS.Post {
 
   /**
    * 帖子数据
-   * @since Beta v0.7.2
+   * @since Beta v0.9.8
    */
   type FullData = {
     /** 帖子信息 */
@@ -136,7 +136,7 @@ declare namespace TGApp.BBS.Post {
     /** 发帖人，可能为 null */
     user: User | null;
     /** 当前用户操作 */
-    self_operation: TGApp.BBS.User.SelfOperation;
+    self_operation: TGApp.BBS.User.SelfOperation | null;
     /** 帖子统计，可能为 null */
     stat: Stat | null;
     /** 帮助系统，可能为 null */

@@ -245,7 +245,7 @@ onMounted(async () => {
   }
   postData.value = resp;
   console.log(resp);
-  isLike.value = postData.value.self_operation.upvote_type !== 0;
+  isLike.value = (postData.value.self_operation?.upvote_type ?? 0) > 0;
   await showLoading.update("正在渲染数据");
   renderPost.value = await getRenderPost(postData.value);
   await webviewWindow

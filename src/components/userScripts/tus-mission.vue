@@ -226,7 +226,7 @@ async function tryAuto(skip: boolean = false): Promise<void> {
       }
       viewCnt++;
       if (likeCnt < 5) {
-        const isLike = detailResp.self_operation.upvote_type === 1;
+        const isLike = (detailResp.self_operation?.upvote_type ?? 0) > 0;
         if (isLike) {
           await TGLogger.Script(`[米游币任务]帖子${post.post.post_id}已点赞，跳过`);
           continue;
