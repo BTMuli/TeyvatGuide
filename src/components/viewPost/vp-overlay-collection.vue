@@ -2,20 +2,20 @@
   <TOverlay v-model="visible" blur-val="5px">
     <div class="tpoc-box">
       <div class="tpoc-top">
-        <span>{{ props.collection.collection_title }}</span>
+        <span @click="toOuterCollect()">{{ props.collection.collection_title }}</span>
         <span>合集ID：{{ props.collection.collection_id }}</span>
       </div>
-      <div class="tpoc-list" ref="postListRef">
-        <div class="tpoc-load" v-if="postList.length === 0">
-          <v-progress-circular indeterminate color="blue" size="24" />
+      <div ref="postListRef" class="tpoc-list">
+        <div v-if="postList.length === 0" class="tpoc-load">
+          <v-progress-circular color="blue" indeterminate size="24" />
           <span>加载中...</span>
         </div>
         <TPostcard
-          class="tpoc-item"
           v-for="(item, index) in postList"
           :key="index"
-          :model-value="item"
           :class="{ selected: index === props.collection.cur - 1 }"
+          :model-value="item"
+          class="tpoc-item"
         />
       </div>
     </div>
@@ -26,6 +26,7 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
@@ -64,6 +65,10 @@ async function refreshInfo(): Promise<void> {
 async function refreshPosts(): Promise<void> {
   postList.value = await postReq.collection(props.collection.collection_id);
 }
+
+async function toOuterCollect(): Promise<void> {
+  await openUrl(`https://www.miyoushe.com/ys/collection/${props.collection.collection_id}`);
+}
 </script>
 <style lang="scss" scoped>
 .tpoc-box {
@@ -73,21 +78,23 @@ async function refreshPosts(): Promise<void> {
 }
 
 .tpoc-top {
+  position: relative;
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid var(--common-shadow-2);
   margin-bottom: 10px;
-}
 
-.tpoc-top :nth-child(1) {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 20px;
-}
+  :first-child {
+    color: var(--common-text-title);
+    cursor: pointer;
+    font-family: var(--font-title);
+    font-size: 20px;
+  }
 
-.tpoc-top :nth-child(2) {
-  font-size: 14px;
-  opacity: 0.8;
+  :last-child {
+    font-size: 14px;
+    opacity: 0.8;
+  }
 }
 
 .tpoc-list {
