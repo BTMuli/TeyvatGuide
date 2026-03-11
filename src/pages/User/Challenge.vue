@@ -155,6 +155,7 @@ import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -361,12 +362,21 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
   );
 }
 
-/**
- * 尝试读取胡桃工具箱导出的危战数据
- * @since Beta v0.8.6
- * @return {Promise<void>}
- */
+/** 尝试读取胡桃工具箱导出的危战数据 */
 async function tryReadChallenge(): Promise<void> {
+  const checkF = await showDialog.checkF({
+    title: "确认导入外部数据？",
+    text: "仅适用于特定工具导出的胡桃危战数据\n（不适配本应用备份数据）",
+    cancelLabel: "查看详细说明",
+  });
+  if (checkF === undefined) {
+    showSnackbar.cancel("取消导入危战数据");
+    return;
+  }
+  if (!checkF) {
+    await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/import-hutao-db.html");
+    return;
+  }
   const file = await open({
     multiple: false,
     title: "选择胡桃工具箱导出的危战数据文件",
