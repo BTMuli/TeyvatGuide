@@ -62,6 +62,11 @@
         </template>
         <v-list>
           <v-list-item v-for="ac in accounts" :key="ac.uid">
+            <template #prepend>
+              <v-avatar>
+                <v-img :src="ac.brief.avatar" alt="avatar" />
+              </v-avatar>
+            </template>
             <v-list-item-title>{{ ac.brief.nickname }}</v-list-item-title>
             <v-list-item-subtitle>{{ ac.brief.uid }}</v-list-item-subtitle>
             <template #append>
@@ -252,7 +257,7 @@ async function tryCodeLogin(): Promise<void> {
   showLoginQr.value = true;
 }
 
-async function refreshUser(uid: string) {
+async function refreshUser(uid: string, full: boolean) {
   let account = await TSUserAccount.account.getAccount(uid);
   if (!account) {
     showSnackbar.warn(`未获取到${uid}账号数据，请重新登录!`);
@@ -318,15 +323,19 @@ async function refreshUser(uid: string) {
     };
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取用户信息成功");
   }
+  if (!full) {
+    await showLoading.end();
+    return;
+  }
   await TSUserAccount.account.saveAccount(account);
-  await showLoading.update("正在获取账号信息");
+  await showLoading.update("正在获取游戏账号信息");
   const accountRes = await takumiReq.bind.gameRoles(ck);
   if (Array.isArray(accountRes)) {
-    await showLoading.update("获取账号信息成功");
+    await showLoading.update("获取游戏账号信息成功");
     await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
     await TSUserAccount.game.saveAccounts(account.uid, accountRes);
   } else {
-    await showLoading.update("获取账号信息失败");
+    await showLoading.update("获取游戏账号信息失败");
     showSnackbar.error(`[${accountRes.retcode}]${accountRes.message}`);
     await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取账号信息失败");
     await TGLogger.Error(
@@ -360,12 +369,16 @@ async function loadAccount(ac: string): Promise<void> {
 
 async function confirmRefreshUser(ac: string): Promise<void> {
   // TODO: 选择同时刷新游戏账号还是只刷新ck
-  const freshCheck = await showDialog.check("确认刷新用户信息吗？", "将会重新获取用户信息");
-  if (!freshCheck) {
+  const freshCheck = await showDialog.checkF({
+    title: "确认刷新用户信息?",
+    text: "将刷新用户Cookie跟游戏账号",
+    cancelLabel: "仅刷新Cookie",
+  });
+  if (freshCheck === undefined) {
     showSnackbar.cancel("已取消刷新用户信息");
     return;
   }
-  await refreshUser(ac);
+  await refreshUser(ac, freshCheck);
   if (uid.value === ac) {
     showSnackbar.success("成功刷新用户信息");
     return;
