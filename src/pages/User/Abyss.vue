@@ -94,12 +94,7 @@
           <div class="uaw-o-box">
             <TuaOverview :val-text="item.totalBattleTimes" title="战斗次数" />
             <TuaOverview :val-text="item.totalStar" title="获得渊星" />
-            <TuaOverview
-              :val-text="
-                item.skippedFloor !== '' ? `${item.maxFloor}(${item.skippedFloor})` : item.maxFloor
-              "
-              title="最深抵达"
-            />
+            <TuaOverview :val-text="getMaxFloor(item)" title="最深抵达" />
             <TuaOverview :val-icons="item.defeatRank" title="最多击破" />
             <TuaOverview :val-icons="item.takeDamageRank" title="最多承伤" />
             <TuaOverview :val-icons="item.damageRank" title="最强一击" />
@@ -174,6 +169,13 @@ watch(
   () => account.value,
   async () => await reloadUid(),
 );
+
+function getMaxFloor(abyss: TGApp.Sqlite.Abyss.TableTrans): string {
+  if (abyss.skippedFloor !== null && abyss.skippedFloor !== "") {
+    return `${abyss.maxFloor}(${abyss.skippedFloor})`;
+  }
+  return `${abyss.maxFloor}`;
+}
 
 async function reloadUid(uid?: string): Promise<void> {
   uidList.value = await TSUserAbyss.getAllUid();
