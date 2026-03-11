@@ -271,6 +271,12 @@ async function trySign(
       const signResp = await lunaReq.sign.oper(item.account, cookie, challenge);
       console.log("签到信息", item, signResp);
       if (challenge !== undefined) challenge = undefined;
+      if (typeof signResp !== "object") {
+        await TGLogger.Script(
+          `[签到任务]${item.info.title}-${item.account.regionName}-${item.account.gameUid} ${signResp}`,
+        );
+        break;
+      }
       if ("retcode" in signResp) {
         if (signResp.retcode === 1034) {
           if (skip) {

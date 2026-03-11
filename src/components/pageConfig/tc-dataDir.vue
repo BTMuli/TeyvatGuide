@@ -76,6 +76,7 @@ import { openPath } from "@tauri-apps/plugin-opener";
 import { platform } from "@tauri-apps/plugin-os";
 import { backUpUserData } from "@utils/dataBS.js";
 import { tryReadGameVer } from "@utils/TGGame.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
@@ -128,6 +129,7 @@ async function confirmCUD(): Promise<void> {
     showSnackbar.warn("请选择空目录");
     return;
   }
+  await TGLogger.Info(`[TcDataDir] 修改用户数据目录： ${userDir.value} → ${dir}`);
   userDir.value = dir;
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
@@ -150,7 +152,14 @@ async function confirmCUD(): Promise<void> {
     showSnackbar.cancel(`取消删除原数据目录`);
     return;
   }
-  await remove(oriDir, { recursive: true });
+  try {
+    await remove(oriDir, { recursive: true });
+  } catch (err) {
+    if (err instanceof Error) {
+      showSnackbar.error(err.message);
+    } else showSnackbar.error(`${err}`);
+    return;
+  }
   showSnackbar.success("已删除原用户数据目录!");
 }
 
