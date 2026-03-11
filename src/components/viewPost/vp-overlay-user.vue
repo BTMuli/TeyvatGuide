@@ -5,7 +5,8 @@
         <div class="vp-ouu-info">
           <div class="left">
             <div class="avatar">
-              <TMiImg :ori="true" :src="getUserAvatar(userInfo)" alt="avatar" />
+              <img v-if="avatarUrl.endsWith('.gif')" :src="avatarUrl" alt="avatar" />
+              <TMiImg v-else :ori="true" :src="avatarUrl" alt="avatar" />
             </div>
             <div v-if="userInfo.pendant !== ''" class="pendant">
               <TMiImg :ori="true" :src="userInfo.pendant" alt="pendant" />
@@ -62,6 +63,10 @@ const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
 const userInfo = shallowRef<TGApp.BBS.User.Info>();
 const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+const avatarUrl = computed<string>(() => {
+  if (!userInfo.value) return "";
+  return getUserAvatar(userInfo.value);
+});
 const levelColor = computed<string>(() => {
   if (!userInfo.value) return "var(--tgc-od-white)";
   const level = userInfo.value.level_exp.level;

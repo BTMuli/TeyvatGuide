@@ -10,7 +10,8 @@
     <div class="tpr-user" @click="handleUser()">
       <div class="tpru-left">
         <div class="avatar">
-          <TMiImg :ori="true" :src="getUserAvatar(props.modelValue.user)" alt="avatar" />
+          <img v-if="avatarUrl.endsWith('.gif')" :src="avatarUrl" alt="avatar" />
+          <TMiImg v-else :ori="true" :src="avatarUrl" alt="avatar" />
         </div>
         <div v-if="props.modelValue.user.pendant !== ''" class="pendant">
           <TMiImg :ori="true" :src="props.modelValue.user.pendant" alt="pendant" />
@@ -147,6 +148,7 @@ const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const subReplies = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
 const vpReplyEl = useTemplateRef<HTMLDivElement>("VpReplyRef");
+const avatarUrl = computed<string>(() => getUserAvatar(props.modelValue.user));
 const levelColor = computed<string>(() => {
   const level = props.modelValue.user.level_exp.level;
   if (level < 5) return "var(--tgc-od-green)";
