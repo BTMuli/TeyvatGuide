@@ -15,9 +15,15 @@
           <TMiImg
             :src="getGameIcon(postData?.forum?.game_id || postData.post.game_id)"
             alt="gameIcon"
+            title="点击前往资讯页面"
             @click="toGame(postData?.forum?.game_id || postData.post.game_id)"
           />
-          <div v-if="postData.forum" class="mpm-forum" @click="toForum(postData.forum)">
+          <div
+            v-if="postData.forum"
+            class="mpm-forum"
+            title="点击前往版块页面"
+            @click="toForum(postData.forum)"
+          >
             <TMiImg :ori="true" :src="postData.forum.icon" alt="forumIcon" />
             <span>{{ postData.forum.name }}</span>
           </div>
@@ -455,7 +461,7 @@ async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
 }
 
 async function toGame(gameId: number): Promise<void> {
-  await emit("active_deep_link", `router?path=/posts/forum/${gameId}`);
+  await emit("active_deep_link", `router?path=/news/${gameId}`);
 }
 
 async function toForum(forum: TGApp.BBS.Post.Forum): Promise<void> {
