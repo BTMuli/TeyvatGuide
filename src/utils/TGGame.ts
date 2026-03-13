@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.9.6
+ * @since Beta v0.9.8
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -40,7 +40,10 @@ export async function tryReadGameVer(gameDir: string): Promise<false | string> {
     const iniRead = await readTextFileLines(iniPath);
     while (true) {
       const line = await iniRead.next();
-      if (line.value.startsWith("game_version=")) return line.value.split("=")[1];
+      const lineRead = line.value;
+      if (typeof lineRead === "string" && lineRead.startsWith("game_version=")) {
+        return lineRead.split("=")[1];
+      }
       if (line.done) break;
     }
   }
