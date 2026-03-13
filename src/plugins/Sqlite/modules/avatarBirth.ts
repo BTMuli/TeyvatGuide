@@ -1,6 +1,6 @@
 /**
  * 角色生日模块
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  */
 
 import {
@@ -12,7 +12,7 @@ import {
 
 /**
  * 判断今天是不是角色生日
- * @since Beta v0.4.6
+ * @since Beta v0.9.9
  * @returns 角色生日
  */
 function isAvatarBirth(): Array<TGApp.Archive.Birth.CalendarItem> {
@@ -20,19 +20,28 @@ function isAvatarBirth(): Array<TGApp.Archive.Birth.CalendarItem> {
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const days = ArcBirCalendar[month];
-  const find = days.filter((i) => i.role_birthday === `${month}/${day}`);
-  if (find.length > 0) {
-    for (const i of find) i.is_subscribe = true;
-    return find;
+  const resId = new Set<number>();
+  const res: Array<TGApp.Archive.Birth.CalendarItem> = [];
+  const rawFind = days.filter((i) => i.role_birthday === `${month}/${day}`);
+  if (rawFind.length > 0) {
+    res.push(...rawFind);
+    rawFind.map((i) => resId.add(i.role_id));
   }
-  const find2 = AppCharacterData.filter((i) => i.birthday.toString() === [month, day].toString());
-  return find2.map((i) => ({
-    role_id: i.id,
-    name: i.name,
-    role_birthday: `${month}/${day}`,
-    head_icon: `/WIKI/character/${i.id}.webp`,
-    is_subscribe: false,
-  }));
+  const wikiFind = AppCharacterData.filter(
+    (i) => i.birthday.toString() === [month, day].toString(),
+  );
+  for (const i of wikiFind) {
+    if (resId.has(i.id)) continue;
+    res.push({
+      role_id: i.id,
+      name: i.name,
+      role_birthday: `${month}/${day}`,
+      head_icon: `/WIKI/character/${i.id}.webp`,
+      is_subscribe: false,
+    });
+    resId.add(i.id);
+  }
+  return res;
 }
 
 /**
