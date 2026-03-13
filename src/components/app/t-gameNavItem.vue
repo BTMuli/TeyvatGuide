@@ -1,8 +1,8 @@
 <!-- 版块组件项 -->
 <template>
-  <div class="tgni-box" :title="props.label">
+  <div :title="props.label" class="tgni-box">
     <slot name="icon"></slot>
-    <span ref="TgniLabelRef">{{ props.label }}</span>
+    <span v-show="!props.mini" ref="TgniLabelRef">{{ props.label }}</span>
   </div>
 </template>
 <script lang="ts" setup>
