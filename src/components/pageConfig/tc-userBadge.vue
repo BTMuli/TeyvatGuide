@@ -368,7 +368,6 @@ async function loadAccount(ac: string): Promise<void> {
 }
 
 async function confirmRefreshUser(ac: string): Promise<void> {
-  // TODO: 选择同时刷新游戏账号还是只刷新ck
   const freshCheck = await showDialog.checkF({
     title: "确认刷新用户信息?",
     text: "将刷新用户Cookie跟游戏账号",

@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-02-25
+Update: 2026-03-13
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-02-25 19:28:26`
+> 更新于 `2026-03-13 13:46:30`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -89,10 +89,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 ## 贡献者 / Contributors
 
-- [BTMuli](https://github.com/BTMuli)
-- [舰队的偶像岛风酱！](https://github.com/frg2089)
-- [jerry765](https://github.com/jerry765)
-- [AuroraZiling](https://github.com/AuroraZiling)
+[Contributors](https://github.com/BTMuli/TeyvatGuide/graphs/contributors)
 
 ## UI 参考 / UI Reference
 

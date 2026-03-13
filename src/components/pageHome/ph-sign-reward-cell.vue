@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-// Reward state enum TODO:完善类型
+// Reward state enum
 const RewardState = <const>{
   NORMAL: 0,
   SIGNED: 1,

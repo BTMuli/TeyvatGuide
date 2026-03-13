@@ -5,7 +5,6 @@
       <div v-if="pools.length < 3" class="pool-grid">
         <PhPoolCard v-for="(pool, idx) in pools" :key="idx" :pool="pool" />
       </div>
-      <!-- TODO: 优化Swiper效果 -->
       <Swiper
         v-else
         :autoplay="{ delay: 3000, disableOnInteraction: false }"

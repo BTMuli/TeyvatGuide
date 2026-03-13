@@ -2,12 +2,36 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2026-02-26
+Update: 2026-03-13
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2026-02-26 18:31:44`
+> 更新于 `2026-03-13 13:41:58`
+
+## [0.9.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.8) (2026-03-13)
+
+- 🍱 更新下半卡池数据
+- 🐛 处理UI框架升级导致的分享图生成异常
+- 🐛 修复采用ck登录后本地ck未同步更新
+- ✏️ 修正深渊最深抵达描述计算逻辑
+- ⚡️大幅提升UIGF导入速度 [`#222`](https://github.com/BTMuli/TeyvatGuide/issues/222)
+- ✨ 角色列表页展示当前筛选&排序
+- ✨ 定时检测版本更新并提醒 [`#231`](https://github.com/BTMuli/TeyvatGuide/issues/231)
+- 🔒️ 调整用户数据目录选取&旧目录删除处理，增加子目录检测&二次确认 [`#228`](https://github.com/BTMuli/TeyvatGuide/issues/228)
+- 🚸 导入胡桃深渊/剧诗/危战数据前进行提示
+- 🚸 设置页刷新信息允许仅刷新Cookie而不刷新游戏账号
+- 🚸 搜索框增加清空按钮，并进行对应适配处理
+- 🚸 完善非回正模式下的窗口位置&大小处理 [`#199`](https://github.com/BTMuli/TeyvatGuide/pull/199) [`#223`](https://github.com/BTMuli/TeyvatGuide/pull/223)
+- 🚸 实用脚本支持一键执行多账号 by [HLFromZ](https://github.com/BTMuli/TeyvatGuide/pull/227)
+- 🚸 角色列表页新增`等级>=70`筛选 [`#229`](https://github.com/BTMuli/TeyvatGuide/issues/229)
+- 🚸 角色列表页新增满好感筛选
+- 🚸 处理帖子标题为空时的渲染&事件
+- 🚸 调整部分图片缓存策略
+- 🚸 增加个人主页&合集主页的外部跳转
+- 💄 优化调整多处样式 [`#221`](https://github.com/BTMuli/TeyvatGuide/issues/221)
+- 💄 调整展开后的侧边栏宽度
+- 💄 自定义表情：调整浮窗信息显示逻辑，优化自定义表情label显示判断
 
 ## [0.9.7](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.7) (2026-02-26)
 
