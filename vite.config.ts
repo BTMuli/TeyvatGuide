@@ -1,6 +1,6 @@
 /**
  * vite 配置文件
- * @since Beta v0.9.6
+ * @since Beta v0.9.9
  */
 
 import { sentryVitePlugin } from "@sentry/vite-plugin";
