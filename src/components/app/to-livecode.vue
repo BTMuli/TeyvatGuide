@@ -1,23 +1,23 @@
 <!-- 兑换码浮窗组件 -->
 <template>
   <TOverlay v-model="visible" class="tolc-overlay">
-    <div class="tolc-box">
+    <div ref="TolcRef" class="tolc-box">
       <div class="tolc-title">
         <span>{{ gameInfo?.name ?? "" }}兑换码</span>
         <v-icon
+          data-html2canvas-ignore
+          icon="mdi-share-variant"
           size="18px"
           title="share"
-          @click="shareImg()"
-          icon="mdi-share-variant"
           variant="outlined"
-          data-html2canvas-ignore
+          @click="shareImg()"
         />
       </div>
       <div class="tolc-info">ActID:{{ props.actId }}</div>
       <div v-for="(item, index) in props.data" :key="index" class="tolc-list-box">
         <div class="tolc-list-icon">
-          <img v-if="item.img === ''" src="/UI/app/empty.webp" alt="empty" />
-          <TMiImg :src="item.img" :ori="true" v-else alt="award" />
+          <img v-if="item.img === ''" alt="empty" src="/UI/app/empty.webp" />
+          <TMiImg v-else :ori="true" :src="item.img" alt="award" />
         </div>
         <div class="tolc-list-info">
           <span>{{ item.code === "" ? "暂无兑换码" : item.code }}</span>
@@ -26,12 +26,12 @@
         </div>
         <div class="tolc-list-btn">
           <v-btn
-            size="small"
             :disabled="item.code === ''"
-            @click="copy(item.code)"
-            icon="mdi-content-copy"
-            variant="outlined"
             data-html2canvas-ignore
+            icon="mdi-content-copy"
+            size="small"
+            variant="outlined"
+            @click="copy(item.code)"
           />
         </div>
       </div>
@@ -39,13 +39,13 @@
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import useBBSStore from "@store/bbs.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed } from "vue";
+import { computed, useTemplateRef } from "vue";
 
 import TMiImg from "./t-mi-img.vue";
 import TOverlay from "./t-overlay.vue";
@@ -66,6 +66,7 @@ const { gameList } = storeToRefs(useBBSStore());
 
 const props = defineProps<ToLiveCodeProps>();
 const visible = defineModel<boolean>({ default: false });
+const tolcEl = useTemplateRef<HTMLDivElement>("TolcRef");
 const gameInfo = computed<TGApp.BBS.Game.Item | undefined>(() =>
   gameList.value.find((i) => i.id === props.gid),
 );
@@ -80,23 +81,27 @@ async function copy(code: string): Promise<void> {
   showSnackbar.success("已复制到剪贴板");
 }
 
-/**
- * 生成分享图片
- * @returns {Promise<void>}
- */
 async function shareImg(): Promise<void> {
-  const element = document.querySelector<HTMLElement>(".tolc-box");
-  if (element === null) {
+  if (tolcEl.value === null) {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
   const fileName = `LiveCode_${props.gid}_${props.actId}_${new Date().getTime()}`;
-  await generateShareImg(fileName, element, 4);
+  await generateShareImg(fileName, tolcEl.value, 4);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+/** 解决默认样式的上下 margin */
+
+:deep(p) {
+  margin-block: 0;
+}
+
 .tolc-overlay {
+  position: fixed;
+  z-index: 1;
   height: 100vh;
+  color: var(--app-page-content);
 }
 
 .tolc-box {
