@@ -11,10 +11,11 @@
           <span>加载中...</span>
         </div>
         <TPostcard
-          v-for="(item, index) in postList"
+          v-for="(post, index) in postList"
           :key="index"
           :class="{ selected: index === props.collection.cur - 1 }"
-          :model-value="item"
+          :post
+          @onUserClick="toUserProfile"
           class="tpoc-item"
         />
       </div>
@@ -68,6 +69,13 @@ async function refreshPosts(): Promise<void> {
 
 async function toOuterCollect(): Promise<void> {
   await openUrl(`https://www.miyoushe.com/ys/collection/${props.collection.collection_id}`);
+}
+
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
+  // TODO: 专门的个人页面
+  console.log(user, gid);
+  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${user.uid}`;
+  await openUrl(profileUrl);
 }
 </script>
 <style lang="scss" scoped>

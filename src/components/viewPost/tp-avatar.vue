@@ -1,3 +1,4 @@
+<!-- 头像组件 -->
 <template>
   <div class="tp-avatar-box">
     <div class="tpa-img">
@@ -48,7 +49,7 @@ const levelColor = computed<string>(() => {
   return "var(--tgc-od-white)";
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tp-avatar-box {
   display: flex;
   overflow: hidden;
@@ -57,6 +58,7 @@ const levelColor = computed<string>(() => {
   flex-direction: v-bind("props.position === 'left' ? 'row' : 'row-reverse'");
   align-items: center;
   justify-content: v-bind("props.position === 'left' ? 'flex-start' : 'flex-end'");
+  cursor: pointer;
 }
 
 .tpa-text {

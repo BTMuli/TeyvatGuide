@@ -6,7 +6,7 @@
         <span>{{ timeStatus }}</span>
       </div>
       <div class="tpol-info">
-        <TpAvatar :data="card.creator" position="left" />
+        <TpAvatar @click="toUserProfile(card.creator.uid)" :data="card.creator" position="left" />
         <div>参与方式：{{ upWay }}</div>
         <div>奖品详情：</div>
         <div v-for="reward in card.rewards" :key="reward.name" class="tpol-info-reward">
@@ -41,6 +41,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import painterReq from "@req/painterReq.js";
 import { emit } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { generateShareImg } from "@utils/TGShare.js";
 import { stamp2LastTime } from "@utils/toolFunc.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
@@ -153,6 +154,12 @@ async function shareLottery(): Promise<void> {
   if (!shareDom) return;
   const fileName = `lottery-${card.value?.id}.png`;
   await generateShareImg(fileName, shareDom, 2, true);
+}
+
+async function toUserProfile(uid: string): Promise<void> {
+  // TODO: 专门的个人页面
+  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${uid}`;
+  await openUrl(profileUrl);
 }
 
 onUnmounted(() => {

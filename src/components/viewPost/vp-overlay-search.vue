@@ -24,9 +24,10 @@
       <div class="tops-divider" />
       <div ref="listRef" class="tops-list">
         <TPostCard
-          v-for="item in results"
-          :key="item.post.post_id"
-          :model-value="item"
+          v-for="post in results"
+          :key="post.post.post_id"
+          :post
+          @onUserClick="toUserProfile"
           class="tops-item"
         />
       </div>
@@ -40,6 +41,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useBBSStore from "@store/bbs.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -159,6 +161,13 @@ async function searchPosts(): Promise<void> {
   load.value = false;
   if (!visible.value) visible.value = true;
   showSnackbar.success(`成功加载${res.posts.length}条数据`);
+}
+
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
+  // TODO: 专门的个人页面
+  console.log(user, gid);
+  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${user.uid}`;
+  await openUrl(profileUrl);
 }
 </script>
 <style lang="css" scoped>

@@ -102,7 +102,7 @@
   </v-app-bar>
   <div class="posts-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :model-value="post" :user-click="true" @onUserClick="handleUserClick" />
+      <TPostCard :post @onUserClick="handleUserClick" />
     </div>
   </div>
   <VpOverlaySearch v-model="showSearch" :gid="curGid" :keyword="search" />

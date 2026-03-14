@@ -44,8 +44,8 @@
   <v-window v-model="recentNewsType">
     <v-window-item v-for="(value, index) in bbsEnum.post.newsTypeList" :key="index" :value="value">
       <div class="pn-grid">
-        <div v-for="item in postData[value]" :key="item.post.post_id">
-          <TPostCard :model-value="item" />
+        <div v-for="post in postData[value]" :key="post.post.post_id">
+          <TPostCard :post />
         </div>
       </div>
     </v-window-item>

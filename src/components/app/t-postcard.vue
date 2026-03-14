@@ -19,23 +19,18 @@
           </div>
         </div>
         <div
-          v-else-if="props.modelValue.post.images.length > 1"
-          :title="`图片数：${props.modelValue.post.images.length}`"
+          v-else-if="props.post.post.images.length > 1"
+          :title="`图片数：${props.post.post.images.length}`"
           class="tpc-image-cnt"
         >
           <v-icon size="10">mdi-folder-multiple-image</v-icon>
-          <span>{{ props.modelValue.post.images.length }}</span>
+          <span>{{ props.post.post.images.length }}</span>
         </div>
       </div>
       <div :title="card.title" class="tpc-title" @click="shareCard()">{{ card.title }}</div>
     </div>
     <div v-if="card.user !== null" class="tpc-mid">
-      <TpAvatar
-        :data="card.user"
-        :style="{ cursor: props.userClick ? 'pointer' : 'default' }"
-        position="left"
-        @click="onUserClick()"
-      />
+      <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
     </div>
     <div class="tpc-bottom">
       <div class="tpc-tags">
@@ -104,9 +99,9 @@
       @click.stop="trySelect()"
     />
     <div v-else class="tpc-info-id" @click="shareCard()">
-      <span>{{ props.modelValue.post.post_id }}</span>
+      <span>{{ props.post.post.post_id }}</span>
       <template v-if="isDevEnv">
-        <span data-html2canvas-ignore>[{{ props.modelValue.post.view_type }}]</span>
+        <span data-html2canvas-ignore>[{{ props.post.post.view_type }}]</span>
       </template>
     </div>
   </div>
@@ -126,10 +121,12 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+/** 帖子卡片参数 */
 type TPostCardProps = {
-  modelValue: TGApp.BBS.Post.FullData;
+  /** 帖子数据 */
+  post: TGApp.BBS.Post.FullData;
+  /** 是否开启选择模式 */
   selectMode?: boolean;
-  userClick?: boolean;
 };
 type TPostCardEmits = {
   (e: "onSelected", v: string): void;
@@ -178,17 +175,17 @@ const cardBg = computed<string>(() => {
 const forumBg = computed<string>(() =>
   str2Color(`${card.value?.forum?.id}${card.value?.forum?.icon}${card.value?.forum?.name}`, -60),
 );
-const idBg = computed<string>(() => str2Color(`${props.modelValue.post.post_id}`, 0));
+const idBg = computed<string>(() => str2Color(`${props.post.post.post_id}`, 0));
 
-onMounted(async () => (card.value = getPostCard(props.modelValue)));
+onMounted(async () => (card.value = getPostCard(props.post)));
 
 watch(
-  () => props.modelValue,
-  async () => (card.value = getPostCard(props.modelValue)),
+  () => props.post,
+  async () => (card.value = getPostCard(props.post)),
 );
 
 function trySelect(): void {
-  if (props.selectMode) emits("onSelected", props.modelValue.post.post_id);
+  if (props.selectMode) emits("onSelected", props.post.post.post_id);
   isSelected.value = !isSelected.value;
 }
 
@@ -293,20 +290,20 @@ async function shareCard(): Promise<void> {
 
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
   if (props.selectMode) return;
-  const gid = props.modelValue.post.game_id;
+  const gid = props.post.post.game_id;
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
 async function toForum(forum: RenderForum): Promise<void> {
   if (props.selectMode) return;
-  const gid = props.modelValue.post.game_id;
+  const gid = props.post.post.game_id;
   await emit("active_deep_link", `router?path=/posts/forum/${gid}/${forum.id}`);
 }
 
 function onUserClick(): void {
   if (props.selectMode) return;
   if (!card.value || card.value.user === null) return;
-  emits("onUserClick", card.value.user, props.modelValue.post.game_id);
+  emits("onUserClick", card.value.user, props.post.post.game_id);
 }
 </script>
 <style lang="scss" scoped>

@@ -30,9 +30,10 @@
       <div class="vp-ou-divider" />
       <div ref="listRef" class="vp-ou-list">
         <TPostCard
-          v-for="item in results"
-          :key="item.post.post_id"
-          :model-value="item"
+          @onUserClick="toUserProfile()"
+          v-for="post in results"
+          :key="post.post.post_id"
+          :post
           class="vp-ou-item"
         />
       </div>

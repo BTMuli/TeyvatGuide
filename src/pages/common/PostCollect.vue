@@ -103,11 +103,10 @@
     </template>
   </v-app-bar>
   <div class="pc-posts">
-    <div v-for="item in curPosts" :key="item.post.post_id">
+    <div v-for="post in curPosts" :key="post.post.post_id">
       <TPostCard
-        :model-value="item"
+        :post
         :select-mode="selectedMode"
-        :user-click="true"
         @onSelected="handleSelected"
         @onUserClick="handleUserClick"
       />

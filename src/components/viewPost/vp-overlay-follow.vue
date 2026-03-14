@@ -13,9 +13,9 @@
       </div>
       <div ref="listRef" class="vp-of-list">
         <TPostcard
-          v-for="(item, index) in posts"
-          :key="index"
-          :model-value="item"
+          v-for="post in posts"
+          :key="post.post.post_id"
+          :post
           class="vp-of-list-item"
           @onUserClick="toUserProfile"
         />
