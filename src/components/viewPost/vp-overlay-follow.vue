@@ -3,32 +3,34 @@
     <div class="vp-of-box">
       <div class="vo-of-top">
         <div class="vo-oft-left">
-          <img src="/platforms/mhy/mys.webp" alt="icon" />
+          <img alt="icon" src="/platforms/mhy/mys.webp" />
           <span>关注动态</span>
         </div>
         <div class="vo-oft-right">已加载：{{ posts.length }}条</div>
       </div>
       <div class="vo-of-actions">
-        <v-btn class="vo-of-btn" @click="loadMore(true)" :loading="loading">刷新</v-btn>
+        <v-btn :loading="loading" class="vo-of-btn" @click="loadMore(true)">刷新</v-btn>
       </div>
-      <div class="vp-of-list" ref="listRef">
+      <div ref="listRef" class="vp-of-list">
         <TPostcard
-          class="vp-of-list-item"
           v-for="(item, index) in posts"
           :key="index"
           :model-value="item"
+          class="vp-of-list-item"
+          @onUserClick="toUserProfile"
         />
       </div>
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useUserStore from "@store/user.js";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -86,6 +88,13 @@ async function loadMore(refresh: boolean = false): Promise<void> {
   if (refresh && listEl.value) {
     listEl.value.scrollTo({ top: 0, behavior: "smooth" });
   }
+}
+
+async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {
+  // TODO: 专门的个人页面
+  console.log(user, gid);
+  const profileUrl = `https://www.miyoushe.com/ys/accountCenter/postList?id=${user.uid}`;
+  await openUrl(profileUrl);
 }
 </script>
 <style lang="scss" scoped>
