@@ -816,6 +816,7 @@ async function tryLaunchGame(): Promise<void> {
   width: 24px;
   height: 24px;
   border-radius: 4px;
+  transition: transform 0.2s ease;
 
   &.paimon {
     position: relative;
@@ -823,6 +824,10 @@ async function tryLaunchGame(): Promise<void> {
     width: 32px;
     height: 32px;
     border-radius: 50%;
+  }
+
+  &:hover {
+    transform: scale(1.15);
   }
 }
 

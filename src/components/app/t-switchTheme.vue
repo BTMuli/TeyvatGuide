@@ -1,6 +1,6 @@
 <template>
   <div class="switch-box" :title="isDefault ? '切换到深色模式' : '切换到浅色模式'">
-    <div class="switch-btn" @click="switchTheme()">
+    <div class="switch-btn" :class="{ 'is-dark': !isDefault }" @click="switchTheme()">
       <v-icon size="20">
         {{ isDefault ? "mdi-weather-night" : "mdi-weather-sunny" }}
       </v-icon>
@@ -57,6 +57,12 @@ onUnmounted(() => {
   box-shadow: 1px 3px 6px var(--common-shadow-2);
   color: var(--btn-text);
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.switch-box:hover {
+  box-shadow: 1px 3px 10px var(--common-shadow-4);
+  transform: scale(1.1);
 }
 
 .dark .switch-box {
@@ -72,5 +78,10 @@ onUnmounted(() => {
   height: 20px;
   align-items: center;
   justify-content: center;
+  transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.switch-btn.is-dark {
+  transform: rotate(360deg);
 }
 </style>

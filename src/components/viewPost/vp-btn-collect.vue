@@ -98,6 +98,7 @@ async function switchCollect(): Promise<void> {
   justify-content: center;
   border-radius: 50%;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.active {
     background: var(--tgc-btn-1);
@@ -107,6 +108,15 @@ async function switchCollect(): Promise<void> {
 
   &:hover:not(.active) {
     background: var(--common-shadow-1);
+  }
+
+  &:hover {
+    box-shadow: 2px 4px 12px var(--common-shadow-4);
+    transform: scale(1.15);
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 }
 

@@ -42,8 +42,16 @@ function switchPostWidth(): void {
   justify-content: center;
   border-radius: 50%;
   cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:active {
+    transform: scale(0.92);
+  }
 
   &.active {
+    animation: width-pulse 0.3s ease;
     background: var(--tgc-btn-1);
     box-shadow: 1px 3px 6px var(--common-shadow-2);
     color: var(--btn-text);
@@ -51,6 +59,21 @@ function switchPostWidth(): void {
 
   &:hover:not(.active) {
     background: var(--common-shadow-1);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes width-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 

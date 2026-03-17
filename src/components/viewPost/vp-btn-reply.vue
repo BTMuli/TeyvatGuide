@@ -225,6 +225,16 @@ async function handleDebug(): Promise<void> {
   box-shadow: 1px 3px 6px var(--common-shadow-2);
   color: var(--btn-text);
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tpr-main-box:hover {
+  box-shadow: 2px 4px 12px var(--common-shadow-4);
+  transform: scale(1.15);
+}
+
+.tpr-main-box:active {
+  transform: scale(0.95);
 }
 
 .dark .tpr-main-box {

@@ -176,9 +176,9 @@ defineExpose({ displayBox });
   align-items: center;
   justify-content: center;
   padding: 10px;
-  border: #f4d8a8ff 1px solid;
+  border: var(--tgc-yellow-3) 1px solid;
   border-radius: 5px;
-  color: #f4d8a8ff;
+  color: var(--tgc-yellow-2);
 }
 
 .loading-title {
