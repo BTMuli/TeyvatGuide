@@ -70,8 +70,10 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 type UgoUidProps = {
   /** 导入/导出 */
   mode: "import" | "export";
-  /** filePathImport，导出路径 */
+  /** filePathImport，导入路径 */
   fpi?: string;
+  /** filePathExport，导出路径 */
+  fpe?: string;
 };
 /**
  * UID项
@@ -107,7 +109,7 @@ onMounted(async () => {
 });
 
 watch(
-  () => [visible.value, props.mode, props.fpi],
+  () => [visible.value, props.mode, props.fpi, props.fpe],
   async () => {
     if (visible.value) await refreshData();
   },
@@ -127,7 +129,7 @@ async function refreshData(): Promise<void> {
     fp.value = props.fpi ?? fpEmptyText;
     await refreshImport();
   } else {
-    fp.value = await getDefaultSavePath();
+    fp.value = props.fpe ?? (await getDefaultSavePath());
     await refreshExport();
   }
 }

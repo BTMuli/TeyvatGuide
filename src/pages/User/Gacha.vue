@@ -140,7 +140,7 @@
       </v-window-item>
     </v-window>
   </div>
-  <UgoUid v-model="ovShow" :fpi="ovFpi" :mode="ovMode" />
+  <UgoUid v-model="ovShow" :fpe="ovFpe" :fpi="ovFpi" :mode="ovMode" />
   <UgoHutaoDu v-model="hutaoShow" :mode="htMode" @selected="handleHutaoDu" />
 </template>
 <script lang="ts" setup>
@@ -181,6 +181,7 @@ const { isLogin: isLoginHutao, accessToken, userName, userInfo } = storeToRefs(h
 const ovMode = ref<"export" | "import">("import");
 const ovShow = ref<boolean>(false);
 const ovFpi = ref<string>();
+const ovFpe = ref<string>();
 
 const authkey = ref<string>("");
 const uidCur = ref<string>();
@@ -654,7 +655,18 @@ async function exportUigf4(): Promise<void> {
     showSnackbar.error("未获取到 UID");
     return;
   }
+  const tsNow = Math.floor(Date.now() / 1000);
+  const file = await save({
+    title: "导出祈愿数据",
+    filters: [{ name: "UIGF JSON", extensions: ["json"] }],
+    defaultPath: `${await path.downloadDir()}${path.sep()}UIGFv4.2_${tsNow}.json`,
+  });
+  if (!file) {
+    showSnackbar.cancel("已取消文件保存");
+    return;
+  }
   await TGLogger.Info(`[UserGacha][${uidCur.value}][exportUigf4] 导出祈愿数据(v4)`);
+  ovFpe.value = file;
   ovMode.value = "export";
   ovShow.value = true;
 }

@@ -84,7 +84,7 @@
       </v-window-item>
     </v-window>
   </div>
-  <UgoUid v-model="ovShow" :fpi="ovFpi" :mode="ovMode" />
+  <UgoUid v-model="ovShow" :fpe="ovFpe" :fpi="ovFpi" :mode="ovMode" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -99,7 +99,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
@@ -113,6 +113,7 @@ const { account, cookie } = storeToRefs(useUserStore());
 const ovMode = ref<"export" | "import">("import");
 const ovShow = ref<boolean>(false);
 const ovFpi = ref<string>();
+const ovFpe = ref<string>();
 
 const authkey = ref<string>("");
 const uidCur = ref<string>();
@@ -351,7 +352,18 @@ async function exportUigf(): Promise<void> {
     showSnackbar.error("未获取到 UID");
     return;
   }
+  const tsNow = Math.floor(Date.now() / 1000);
+  const file = await save({
+    title: "导出祈愿数据",
+    filters: [{ name: "UIGF JSON", extensions: ["json"] }],
+    defaultPath: `${await path.downloadDir()}${path.sep()}UIGFv4.2_${tsNow}.json`,
+  });
+  if (!file) {
+    showSnackbar.cancel("已取消文件保存");
+    return;
+  }
   await TGLogger.Info(`[UserGachaB][${uidCur.value}][exportUigf] 导出祈愿数据`);
+  ovFpe.value = file;
   ovMode.value = "export";
   ovShow.value = true;
 }
