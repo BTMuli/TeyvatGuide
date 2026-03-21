@@ -1,6 +1,6 @@
 <!-- 应用侧边栏 -->
 <template>
-  <v-navigation-drawer :width="160" :permanent="true" :rail="rail" class="tsb-box">
+  <v-navigation-drawer :permanent="true" :rail="rail" :width="160" class="tsb-box">
     <v-list :nav="true" class="side-list" density="compact">
       <v-list-item
         :append-icon="!rail ? 'mdi-chevron-left' : undefined"
@@ -332,7 +332,6 @@ import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { readDir } from "@tauri-apps/plugin-fs";
 import mhyClient from "@utils/TGClient.js";
-import { isRunInAdmin, tryCopyYae, tryReadGameVer, YAE_GAME_VER } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
@@ -750,34 +749,13 @@ async function tryLaunchGame(): Promise<void> {
     await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${JSON.stringify(resp)}`);
     return;
   }
-  const isInAdmin = await isRunInAdmin();
-  const gameVer = await tryReadGameVer(gameDir.value);
-  if (!isInAdmin || !gameVer || gameVer !== YAE_GAME_VER) {
-    showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
-    try {
-      await invoke("launch_game", { path: gamePath, ticket: resp });
-    } catch (error) {
-      showSnackbar.error(`${error}`);
-    }
-    return;
-  }
-  const isMsix = await invoke<boolean>("is_msix");
-  if (isMsix) {
-    const copy = await tryCopyYae();
-    if (!copy) return;
-  }
+  showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
   try {
-    await invoke("call_yae_dll", {
-      gamePath: gamePath,
-      uid: account.value.gameUid,
-      ticket: resp,
-      isMsix: isMsix,
-    });
-  } catch (err) {
-    showSnackbar.error(`调用Yae DLL失败: ${err}`);
-    await TGLogger.Error(`[pageAchi][toYae]调用Yae DLL失败: ${err}`);
-    return;
+    await invoke("launch_game", { path: gamePath, ticket: resp });
+  } catch (error) {
+    showSnackbar.error(`${error}`);
   }
+  return;
 }
 </script>
 <style lang="scss" scoped>
