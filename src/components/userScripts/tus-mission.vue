@@ -50,6 +50,7 @@ import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
+import { postDetailRateLimiter } from "@utils/rateLimiter.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, watch } from "vue";
 
@@ -216,8 +217,13 @@ async function tryAuto(skip: boolean = false): Promise<void> {
       }
     }
     if (likeCnt < 5 || viewCnt < 3) {
-      await TGLogger.Script(`[米游币任务]正在浏览帖子${post.post.post_id}`);
-      const detailResp = await postReq.post(post.post.post_id, ckPost);
+      const currentCount = postDetailRateLimiter.getRequestCount();
+      await TGLogger.Script(
+        `[米游币任务]正在浏览帖子${post.post.post_id} (当前 1 分钟内请求数：${currentCount}/10)`,
+      );
+      const detailResp = await postDetailRateLimiter.execute(() =>
+        postReq.post(post.post.post_id, ckPost),
+      );
       if ("retcode" in detailResp) {
         await TGLogger.Script(
           `[米游币任务]获取帖子${post.post.post_id}失败：${detailResp.retcode} ${detailResp.message}`,
