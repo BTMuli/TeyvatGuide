@@ -7,6 +7,7 @@
         class="tpoi-top"
         @click="onBoxClick"
         @mousedown="onBoxMouseDown"
+        @mousemove="onBoxMouseMove"
         @mouseup="onBoxMouseUp"
         @wheel="onWheel"
       >
@@ -18,7 +19,6 @@
           alt="图片"
           @click="onImgClick"
           @mousedown="onImgMouseDown"
-          @mouseleave="onImgMouseUp"
           @mousemove="onImgMouseMove"
           @mouseup="onImgMouseUp"
         />
@@ -85,7 +85,17 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
-import { computed, nextTick, ref, shallowRef, type StyleValue, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  type StyleValue,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import type { TpImage } from "./tp-image.vue";
 
@@ -95,13 +105,11 @@ type VpoiPos = { x: number; y: number };
 
 const BG_LABELS: ReadonlyArray<string> = ["透明", "黑色", "白色"];
 const FMT_ARR: ReadonlyArray<string> = ["png", "jpg", "jpeg", "webp"];
-const RESET_DELAY: Readonly<number> = 800;
-const SCALE_HINT_DELAY: Readonly<number> = 1000;
-const OUTER_CLOSE_DELAY: Readonly<number> = 800;
-const DRAG_THRESHOLD: Readonly<number> = 5;
-const MIN_SCALE: Readonly<number> = 0.1;
-const MAX_SCALE: Readonly<number> = 10;
-const ZOOM_STEP: Readonly<number> = 0.1;
+const DRAG_THRESHOLD: number = 5;
+const MIN_SCALE: number = 0.1;
+const MAX_SCALE: number = 10;
+const ZOOM_STEP: number = 0.1;
+const MAX_BYTE: number = 80000000;
 
 const props = defineProps<TpoImageProps>();
 const visible = defineModel<boolean>();
@@ -111,6 +119,7 @@ const bgColor = defineModel<string>("bgColor", { default: "transparent" });
 const format = defineModel<string>("format", { default: "png" });
 
 let scaleHintTimer: number | null = null;
+let resetTimer: number | null = null;
 
 const bgMode = ref<number>(0);
 const scale = ref<number>(1);
@@ -123,28 +132,27 @@ const outerClose = ref<boolean>(true);
 
 const buffer = shallowRef<ArrayBuffer | null>(null);
 const imgPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
-const dragPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
 const clickPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
+const dragPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
 const imgOriSize = shallowRef<VpoiSize>({ width: 0, height: 0 });
 const imgEl = useTemplateRef<HTMLImageElement>("VpOiRef");
 
 const oriLink = computed<string>(() => miniImgUrl());
 const showCopy = computed<boolean>(() => FMT_ARR.includes(format.value.toLowerCase()));
 const imgStyle = computed<StyleValue>(() => {
-  const baseStyle: Array<StyleValue> = [];
-  baseStyle.push(
+  const baseStyle: Array<StyleValue> = [
     `transform: translate(${imgPos.value.x}px, ${imgPos.value.y}px) scale(${scale.value});`,
-  );
-  baseStyle.push("transformOrigin: center center;");
-  baseStyle.push(`transition: ${isDragging.value ? "none" : "transform 0.3s ease"};`);
-  baseStyle.push(
+    "transformOrigin: center center;",
+    `transition: ${isDragging.value ? "none" : "transform 0.3s ease"};`,
     `cursor: ${isDragMode.value ? (isDragging.value ? "grabbing" : "grab") : "zoom-in"};`,
-  );
+  ];
   if (isDragMode.value && imgOriSize.value.width > 0 && imgOriSize.value.height > 0) {
-    baseStyle.push(`width: ${imgOriSize.value.width}px;`);
-    baseStyle.push(`height: ${imgOriSize.value.height}px;`);
-    baseStyle.push("maxWidth: none;");
-    baseStyle.push("maxHeight: none;");
+    baseStyle.push(
+      `width: ${imgOriSize.value.width}px;`,
+      `height: ${imgOriSize.value.height}px;`,
+      "maxWidth: none;",
+      "maxHeight: none;",
+    );
   }
   return baseStyle;
 });
@@ -155,6 +163,7 @@ watch(
     if (!newVal) {
       scale.value = 1;
       imgPos.value = { x: 0, y: 0 };
+      dragPos.value = { x: 0, y: 0 };
       isDragging.value = false;
       isDragMode.value = false;
       isResetting.value = false;
@@ -164,28 +173,20 @@ watch(
     }
   },
 );
-watch(
-  () => scale.value,
-  () => {
-    if (!showScaleHint.value) {
-      showScaleHint.value = true;
-    }
-  },
-);
-watch(
-  () => showScaleHint.value,
-  () => {
-    if (showScaleHint.value) {
-      if (scaleHintTimer !== null) {
-        clearTimeout(scaleHintTimer);
-      }
-      scaleHintTimer = window.setTimeout(() => {
-        showScaleHint.value = false;
-        scaleHintTimer = null;
-      }, SCALE_HINT_DELAY);
-    }
-  },
-);
+
+onMounted(() => {
+  document.addEventListener("mouseup", onDocumentMouseUp);
+});
+
+onUnmounted(() => {
+  document.removeEventListener("mouseup", onDocumentMouseUp);
+  if (scaleHintTimer !== null) {
+    clearTimeout(scaleHintTimer);
+  }
+  if (resetTimer !== null) {
+    clearTimeout(resetTimer);
+  }
+});
 
 function getImgOriSize(): VpoiSize {
   if (typeof props.image.insert.image !== "string") {
@@ -215,76 +216,143 @@ function miniImgUrl(): string {
   return `${link.origin}${link.pathname}`;
 }
 
-async function resetTransform(): Promise<void> {
+function resetTransform(): void {
   isResetting.value = true;
   scale.value = 1;
   imgPos.value = { x: 0, y: 0 };
-  await nextTick();
+  dragPos.value = { x: 0, y: 0 };
+  imgOriSize.value = { width: 0, height: 0 };
   isDragMode.value = false;
-  await new Promise((resolve) => setTimeout(resolve, RESET_DELAY));
-  isResetting.value = false;
+  hasDragged.value = false;
 }
 
 function onBoxClick(event: MouseEvent): void {
   if (event.button !== 0) return;
-  if (event.target === imgEl.value) return;
-  if (isDragMode.value && !hasDragged.value) {
+  if (hasDragged.value) return;
+  if (!isDragMode.value) {
+    isDragMode.value = true;
+    imgOriSize.value = getImgOriSize();
+    scale.value = 1;
+    imgPos.value = { x: 0, y: 0 };
+    showOri.value = true;
+  } else {
     resetTransform();
   }
-  hasDragged.value = false;
 }
 
-function onBoxMouseDown(): void {
+function onBoxMouseDown(event: MouseEvent): void {
   outerClose.value = false;
+  clickPos.value = { x: event.clientX, y: event.clientY };
+  if (isDragMode.value) {
+    dragPos.value = { x: imgPos.value.x, y: imgPos.value.y };
+    isDragging.value = true;
+    hasDragged.value = false;
+  } else {
+    hasDragged.value = false;
+  }
 }
 
-async function onBoxMouseUp(): Promise<void> {
-  await nextTick();
-  await new Promise<void>((resolve) => window.setTimeout(resolve, OUTER_CLOSE_DELAY));
-  outerClose.value = true;
+function onBoxMouseMove(event: MouseEvent): void {
+  if (!isDragging.value && !isDragMode.value) {
+    const dx = event.clientX - clickPos.value.x;
+    const dy = event.clientY - clickPos.value.y;
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+      hasDragged.value = true;
+    }
+    return;
+  }
+  if (!isDragMode.value || !isDragging.value) return;
+  const dx = event.clientX - clickPos.value.x;
+  const dy = event.clientY - clickPos.value.y;
+  if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+    hasDragged.value = true;
+  }
+  imgPos.value = { x: dragPos.value.x + dx, y: dragPos.value.y + dy };
+}
+
+function onDocumentMouseUp(): void {
+  if (isDragging.value) {
+    isDragging.value = false;
+  }
+  setTimeout(() => {
+    outerClose.value = true;
+  }, 100);
+}
+
+function onBoxMouseUp(): void {
+  if (isDragging.value) {
+    isDragging.value = false;
+    if (hasDragged.value) {
+      setTimeout(() => {
+        outerClose.value = true;
+      }, 100);
+    }
+  }
 }
 
 async function onImgClick(event: MouseEvent): Promise<void> {
+  event.stopPropagation();
   if (event.button !== 0) return;
+  const wasDragging = isDragging.value;
   if (!isDragMode.value) {
-    if (!showOri.value) {
-      showOri.value = true;
+    if (wasDragging) return;
+    if (hasDragged.value) {
+      hasDragged.value = false;
       return;
     }
     isDragMode.value = true;
     imgOriSize.value = getImgOriSize();
     scale.value = 1;
     imgPos.value = { x: 0, y: 0 };
-  } else if (!hasDragged.value) {
-    await resetTransform();
+    showOri.value = true;
+  } else if (!hasDragged.value && !wasDragging) {
+    resetTransform();
   }
   hasDragged.value = false;
 }
 
-function onImgMouseDown(event: MouseEvent): void {
-  if (event.button !== 0 || !isDragMode.value) return;
-  event.preventDefault();
+async function onImgMouseDown(event: MouseEvent): Promise<void> {
+  event.stopPropagation();
   clickPos.value = { x: event.clientX, y: event.clientY };
-  isDragging.value = true;
-  hasDragged.value = false;
-  dragPos.value = { x: event.clientX - imgPos.value.x, y: event.clientY - imgPos.value.y };
+  if (isDragMode.value) {
+    event.preventDefault();
+    dragPos.value = { x: imgPos.value.x, y: imgPos.value.y };
+    isDragging.value = true;
+    hasDragged.value = false;
+  } else {
+    hasDragged.value = false;
+  }
+  outerClose.value = false;
 }
 
 function onImgMouseMove(event: MouseEvent): void {
-  if (!isDragging.value || !isDragMode.value) return;
+  if (!isDragging.value && !isDragMode.value) {
+    const dx = event.clientX - clickPos.value.x;
+    const dy = event.clientY - clickPos.value.y;
+    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+      hasDragged.value = true;
+    }
+    return;
+  }
+  if (!isDragMode.value || !isDragging.value) return;
   event.preventDefault();
   const dx = event.clientX - clickPos.value.x;
   const dy = event.clientY - clickPos.value.y;
   if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
     hasDragged.value = true;
   }
-  imgPos.value = { x: event.clientX - dragPos.value.x, y: event.clientY - dragPos.value.y };
+  imgPos.value = { x: dragPos.value.x + dx, y: dragPos.value.y + dy };
 }
 
 function onImgMouseUp(event: MouseEvent): void {
   if (!isDragging.value) return;
   event.stopPropagation();
   isDragging.value = false;
+  if (hasDragged.value) {
+    setTimeout(() => {
+      outerClose.value = true;
+    }, 100);
+  }
 }
 
 function onWheel(event: WheelEvent): void {
@@ -293,6 +361,20 @@ function onWheel(event: WheelEvent): void {
   const delta = event.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
   const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale.value + delta));
   if (newScale !== scale.value) {
+    const rect = imgEl.value?.getBoundingClientRect();
+    if (!rect) return;
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    const imgX = mouseX / scale.value;
+    const imgY = mouseY / scale.value;
+    const newImgX = mouseX / newScale;
+    const newImgY = mouseY / newScale;
+    const offsetX = (newImgX - imgX) * scale.value;
+    const offsetY = (newImgY - imgY) * scale.value;
+    imgPos.value = {
+      x: imgPos.value.x - offsetX,
+      y: imgPos.value.y - offsetY,
+    };
     scale.value = newScale;
   }
 }
@@ -323,7 +405,7 @@ async function onDownload(): Promise<void> {
   }
   await showLoading.start("正在下载图片到本地", oriLink.value);
   if (buffer.value === null) buffer.value = await getImageBuffer(oriLink.value);
-  if (buffer.value.byteLength > 80000000) {
+  if (buffer.value.byteLength > MAX_BYTE) {
     showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
@@ -333,7 +415,7 @@ async function onDownload(): Promise<void> {
   await showLoading.end();
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tpoi-box {
   position: relative;
   display: flex;
@@ -358,10 +440,20 @@ async function onDownload(): Promise<void> {
   border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
   background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
+  user-select: none;
 }
 
 .tpoi-top-scroll {
   overflow: auto;
+}
+
+.tpoi-top:not(.tpoi-top-scroll) {
+  overflow: hidden;
+  cursor: grab;
+}
+
+.tpoi-top:not(.tpoi-top-scroll):active {
+  cursor: grabbing;
 }
 
 .tpoi-top img {
