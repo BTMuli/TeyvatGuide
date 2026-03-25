@@ -140,5 +140,5 @@ git commit -m "📝 更新 TypeScript 类型注解规范"
 
 ## 参考文档
 
-- [Git Commit Rules](../rules/git-commit-rules.md)
-- [Git Commit Skill](./git-commit-skill/SKILL.md)
+- [Git Commit 规范](./git-commit.md) - Git Commit 格式规范
+- [Git Commit Rules](../rules/git-commit-rules.md) - Git Commit 规则
