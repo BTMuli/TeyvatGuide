@@ -18,7 +18,7 @@
             </div>
             <div class="loading-img">
               <img v-if="data.empty" alt="empty" src="/UI/app/empty.webp" />
-              <img v-else :src="iconUrl" alt="loading" />
+              <img v-else :src="iconUrl" :title="iconKey" alt="loading" />
             </div>
           </div>
         </div>
@@ -37,13 +37,16 @@ const defaultIcon = "/UI/app/loading.webp";
 
 const props = defineProps<LoadingParams>();
 
+type EmojiItem = Array<string> & { length: 2 };
+
 const showBox = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
 const showInner = ref<boolean>(false);
 
 const iconUrl = ref<string>(defaultIcon);
+const iconKey = ref<string>();
 const data = shallowRef<LoadingParams>(props);
-const localEmojis = shallowRef<Array<string>>([]);
+const localEmojis = shallowRef<Array<EmojiItem>>([]);
 const loadingEl = useTemplateRef<HTMLDivElement>("LoadingRef");
 
 watch(
@@ -71,8 +74,11 @@ onUnmounted(() => loadingEl.value?.removeEventListener("contextmenu", (e) => e.p
 async function getRandomEmoji(): Promise<void> {
   if (localEmojis.value.length === 0) {
     const emojisRead = localStorage.getItem("emojis");
-    if (emojisRead) localEmojis.value = Object.values(JSON.parse(emojisRead));
-    else {
+    if (emojisRead) {
+      let tmpArr: Array<EmojiItem> = [];
+      for (const [k, v] of Object.entries(JSON.parse(emojisRead))) tmpArr.push([`${k}`, `${v}`]);
+      localEmojis.value = tmpArr;
+    } else {
       const resp = await bbsReq.emojis();
       if ("retcode" in resp) {
         console.error(resp);
@@ -80,11 +86,16 @@ async function getRandomEmoji(): Promise<void> {
         iconUrl.value = defaultIcon;
         return;
       }
-      localEmojis.value = Object.values(resp);
       localStorage.setItem("emojis", JSON.stringify(resp));
+      let tmpArr: Array<EmojiItem> = [];
+      for (const [k, v] of Object.entries(resp)) {
+        tmpArr.push([k, v]);
+        localEmojis.value = tmpArr;
+      }
     }
   }
-  iconUrl.value = localEmojis.value[Math.floor(Math.random() * localEmojis.value.length)];
+  [iconKey.value, iconUrl.value] =
+    localEmojis.value[Math.floor(Math.random() * localEmojis.value.length)];
 }
 
 async function displayBox(params: LoadingParams): Promise<void> {
