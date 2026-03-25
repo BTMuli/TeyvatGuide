@@ -30,6 +30,7 @@
 <script lang="ts" setup>
 import TItembox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
+import gameEnum from "@enum/game.js";
 import { getRcStar, getWikiBrief, getZhElement } from "@utils/toolFunc.js";
 
 type TucAeBoxProps = {
@@ -43,7 +44,7 @@ const props = defineProps<TucAeBoxProps>();
 
 function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   const findAvatar = getWikiBrief(item.avatar_id);
-  let innerText = item.avatar_type === 2 ? "试用角色" : item.avatar_type === 3 ? "助演角色" : "";
+  let innerText = gameEnum.combat.avatarTypeDesc(item.avatar_type);
   let findWeapon;
   if (findAvatar) {
     findWeapon = findAvatar.weapon;

@@ -1,6 +1,6 @@
 /**
  * 游戏相关枚举
- * @since Beta v0.9.6
+ * @since Beta v0.9.9
  */
 
 /**
@@ -137,6 +137,34 @@ function getGameAnnoLangDesc(lang: TGApp.Game.Anno.AnnoLangEnum): string {
 }
 
 /**
+ * 剧诗角色类型枚举
+ * @since Beta v0.9.9
+ * @see TGApp.Game.Combat.AvatarTypeEnum
+ */
+const CombatAvatarTypeEnum: typeof TGApp.Game.Combat.AvatarType = {
+  SELF: 1,
+  TRIAL: 2,
+  SUPPORT: 3,
+};
+
+/**
+ * 获取剧诗角色类型描述
+ * @since Beta v0.9.9
+ * @param avatarType - 剧诗角色类型
+ * @returns 剧诗角色类型描述
+ */
+function getCombatAvatarTypeDesc(avatarType: TGApp.Game.Combat.AvatarTypeEnum): string {
+  switch (avatarType) {
+    case CombatAvatarTypeEnum.SELF:
+      return "";
+    case CombatAvatarTypeEnum.TRIAL:
+      return "试用角色";
+    case CombatAvatarTypeEnum.SUPPORT:
+      return "助演角色";
+  }
+}
+
+/**
  * 绘想游迹状态枚举
  * @since Beta v0.9.6
  */
@@ -161,6 +189,8 @@ const gameEnum = {
   },
   combat: {
     charMasterStat: CombatCharMasterStatEnum,
+    avatarType: CombatAvatarTypeEnum,
+    avatarTypeDesc: getCombatAvatarTypeDesc,
   },
 };
 

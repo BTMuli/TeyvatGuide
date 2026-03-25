@@ -1,6 +1,6 @@
 /**
  * 幻想真境剧诗类型定义
- * @since Beta v0.9.6
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.Game.Combat {
@@ -43,21 +43,34 @@ declare namespace TGApp.Game.Combat {
   };
 
   /**
+   * 角色类型
+   * @since Beta v0.9.9
+   * @see TGApp.Game.Combat.AvatarTypeEnum
+   */
+  const AvatarType = <const>{
+    /** 自己角色 */
+    SELF: 1,
+    /** 试用角色 */
+    TRIAL: 2,
+    /** 助演角色 */
+    SUPPORT: 3,
+  };
+
+  /**
+   * 角色类型枚举
+   * @since Beta v0.9.9
+   */
+  type AvatarTypeEnum = (typeof AvatarType)[keyof typeof AvatarType];
+
+  /**
    * 角色数据
-   * @since Beta v0.6.3
+   * @since Beta v0.9.9
    */
   type Avatar = {
     /** 角色ID */
     avatar_id: number;
-    /**
-     * 角色类型
-     * @TODO 枚举类
-     * @remarks
-     * - 0: 自己角色
-     * - 1: 试用角色
-     * - 2: 助演角色
-     */
-    avatar_type: number;
+    /** 角色类型 */
+    avatar_type: AvatarTypeEnum;
     /** 角色名称 */
     name: string;
     /** 角色元素 */
