@@ -48,13 +48,12 @@ const progressColor = computed<string>(() => {
   return "#61afef";
 });
 const progressWidth = computed<string>(() => {
-  let final = 10;
   if (props.data.rank === "5") {
-    if (props.data.gachaType === "302") final = 80;
-    else final = 90;
-  } else if (props.data.rank === "4") final = 10;
-  else return "0%";
-  return ((props.count / final) * 100).toFixed(2) + "%";
+    if (props.data.gachaType === "302") return ((props.count / 80) * 100).toFixed(2) + "%";
+    return ((props.count / 90) * 100).toFixed(2) + "%";
+  }
+  if (props.data.rank === "4") return ((props.count / 10) * 100).toFixed(2) + "%";
+  return "0%";
 });
 </script>
 <style lang="scss" scoped>

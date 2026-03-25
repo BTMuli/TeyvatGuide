@@ -59,15 +59,14 @@ export async function tryReadGameVer(gameDir: string): Promise<false | string> {
  * @since Beta v0.9.1
  */
 export async function isRunInAdmin(): Promise<boolean> {
-  let isAdmin = false;
   try {
-    isAdmin = await invoke<boolean>("is_in_admin");
+    const isAdmin = await invoke<boolean>("is_in_admin");
+    return isAdmin;
   } catch (err) {
     showSnackbar.error(`检测管理员权限失败：${err}`);
     await TGLogger.Error(`[TGGame][isRunInAdmin]检测管理员权限失败:${err}`);
     return false;
   }
-  return isAdmin;
 }
 
 /**

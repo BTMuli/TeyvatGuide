@@ -331,9 +331,9 @@ function searchMaterial(): void {
 }
 
 function handleUpdate(info: MaterialInfo): void {
-  let find = materialList.value.find((i) => i.info.id === info.info.id);
+  const find = materialList.value.find((i) => i.info.id === info.info.id);
   if (find !== undefined) {
-    find = info;
+    Object.assign(find, info);
     curMaterial.value = info;
   }
 }

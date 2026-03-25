@@ -5,15 +5,15 @@
       v-for="navItem in nav"
       :key="navItem.id"
       :label="navItem.name"
-      :mini
+      :mini="true"
       class="tgn-nav"
       @click="toNav(navItem)"
     >
       <template #icon>
-        <TMiImg :size="28" :ori="true" :src="navItem.icon" alt="navIcon" />
+        <TMiImg :ori="true" :size="28" :src="navItem.icon" alt="navIcon" />
       </template>
     </TGameNavItem>
-    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码">
+    <TGameNavItem v-if="hasNav" :mini="true" class="tgn-nav" label="兑换码">
       <template #icon>
         <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28" @click="tryGetCode">
           mdi-code-tags-check
@@ -74,7 +74,7 @@ watch(
 async function loadNav(): Promise<void> {
   try {
     nav.value = await ApiHubReq.home(props.gid);
-    console.debug(`[TGameNav][loadNav] 组件数据：`, nav.value);
+    console.warn(`[TGameNav][loadNav] 组件数据：`, nav.value);
     if (loadCode.value) loadCode.value = false;
   } catch (e) {
     await TGLogger.Error(`[TGameNav][loadNav] 加载组件数据失败：${e}`);

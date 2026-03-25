@@ -302,29 +302,25 @@ async function refreshCombat(): Promise<void> {
 }
 
 async function loadCharMaster(): Promise<void> {
-  let cmAccount = account.value;
-  let cmCk = cookie.value;
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
   console.log(uidCur.value, gcFind);
   if (!gcFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应游迹数据`);
     return;
   }
-  cmAccount = gcFind;
   const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
   if (!acFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法获取对应游迹数据`);
     return;
   }
-  cmCk = acFind.cookie;
   await TGLogger.Info("[Combat][loadCharMaster] 获取绘想游迹数据");
-  await showLoading.start(`正在获取${cmAccount.gameUid}的绘想游迹数据`);
-  const res = await recordReq.combat.char(cmCk!, cmAccount);
+  await showLoading.start(`正在获取${gcFind.gameUid}的绘想游迹数据`);
+  const res = await recordReq.combat.char(acFind.cookie!, gcFind);
   console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[Combat][loadCharMaster] 获取${cmAccount.gameUid}的剧诗数据失败`);
+    await TGLogger.Error(`[Combat][loadCharMaster] 获取${gcFind.gameUid}的剧诗数据失败`);
     await TGLogger.Error(`[Combat][loadCharMaster] ${res.retcode} ${res.message}`);
     return;
   }
@@ -340,29 +336,25 @@ async function loadCharMaster(): Promise<void> {
 }
 
 async function loadTarot(): Promise<void> {
-  let trAccount = account.value;
-  let trCk = cookie.value;
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
   console.log(uidCur.value, gcFind);
   if (!gcFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应圣牌数据`);
     return;
   }
-  trAccount = gcFind;
   const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
   if (!acFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法获取对应圣牌数据`);
     return;
   }
-  trCk = acFind.cookie;
   await TGLogger.Info("[Combat][loadTarot] 获取月谕圣牌数据");
-  await showLoading.start(`正在获取${trAccount.gameUid}的月谕圣牌数据`);
-  const res = await recordReq.combat.base(trCk!, trAccount);
+  await showLoading.start(`正在获取${gcFind.gameUid}的月谕圣牌数据`);
+  const res = await recordReq.combat.base(acFind.cookie!, gcFind);
   console.log(res);
   if ("retcode" in res) {
     await showLoading.end();
     showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[Combat][loadTarot] 获取${trAccount.gameUid}的月谕圣牌数据失败`);
+    await TGLogger.Error(`[Combat][loadTarot] 获取${gcFind.gameUid}的月谕圣牌数据失败`);
     await TGLogger.Error(`[Combat][loadTarot] ${res.retcode} ${res.message}`);
     return;
   }

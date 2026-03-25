@@ -365,28 +365,24 @@ async function uploadAbyss(): Promise<void> {
     await TGLogger.Warn("[Abyss][uploadAbyss] 非最新深渊数据");
     return;
   }
-  let upAccount = account.value;
-  let upCk = cookie.value;
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
   console.log(uidCur.value, gcFind);
   if (!gcFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法刷新角色数据进行上传`);
     return;
   }
-  upAccount = gcFind;
   const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
   if (!acFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法刷新角色数据进行上传`);
     return;
   }
-  upCk = acFind.cookie;
   try {
-    await showLoading.start(`正在上传 ${upAccount.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
+    await showLoading.start(`正在上传 ${gcFind.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
     const transAbyss = hutao.Abyss.utils.transData(abyssData);
     if (userName.value) transAbyss.ReservedUserName = userName.value;
-    const check = await refreshAvatars(upCk!, upAccount);
+    const check = await refreshAvatars(acFind.cookie!, gcFind);
     if (!check) return;
-    const roles = await TSUserAvatar.getAvatars(Number(upAccount.gameUid));
+    const roles = await TSUserAvatar.getAvatars(Number(gcFind.gameUid));
     if (!roles) {
       await showLoading.end();
       showSnackbar.warn("未找到角色数据");
