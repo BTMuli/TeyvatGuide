@@ -1,6 +1,6 @@
 /**
  * 全局类型定义文件
- * @since Beta v0.7.6
+ * @since Beta v0.9.9
  */
 
 /**
@@ -76,4 +76,37 @@ declare module "echarts/features.js" {
 }
 declare module "echarts/renderers.js" {
   export * from "echarts/types/src/export/renderers.d.ts";
+}
+
+/**
+ * 解决极验验证 CDN 脚本导入问题
+ * @since Beta v0.9.9
+ */
+declare module "https://static.geetest.com/static/js/gt.0.4.9.js" {
+  export {};
+}
+declare module "https://static.geetest.com/v4/gt4.js" {
+  export {};
+}
+
+/**
+ * 解决 Swiper CSS 导入问题
+ * @since Beta v0.9.9
+ */
+declare module "swiper/css" {
+  export {};
+}
+declare module "swiper/css/pagination" {
+  export {};
+}
+declare module "swiper/css/navigation" {
+  export {};
+}
+
+/**
+ * 解决 Vuetify 导入问题
+ * @since Beta v0.9.9
+ */
+declare module "vuetify/styles" {
+  export {};
 }
