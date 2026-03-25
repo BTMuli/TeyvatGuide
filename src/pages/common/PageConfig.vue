@@ -66,7 +66,12 @@
         </v-list-item>
         <v-list-subheader :inset="true" class="config-header" title="调试" @click="tryShowReset" />
         <v-divider :inset="true" class="border-opacity-75" />
-        <v-list-item v-if="isDevEnv" subtitle="开启后将显示调试信息" title="调试模式">
+        <v-list-item
+          v-if="isDevEnv"
+          subtitle="开启后将显示调试信息"
+          title="调试模式"
+          @click="switchDevMode()"
+        >
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-bug-play</v-icon>
@@ -74,16 +79,16 @@
           </template>
           <template #append>
             <v-switch
-              v-model="devMode"
               :inset="true"
               :label="devMode ? '开启' : '关闭'"
+              :model-value="devMode"
+              :readonly="true"
               class="config-switch"
               color="#FAC51E"
-              @click="submitDevMode"
             />
           </template>
         </v-list-item>
-        <v-list-item subtitle="根据分辨率动态调整窗体大小" title="窗口回正">
+        <v-list-item subtitle="根据分辨率动态调整窗体大小" title="窗口回正" @click="switchResize()">
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-window-restore</v-icon>
@@ -91,16 +96,20 @@
           </template>
           <template #append>
             <v-switch
-              v-model="isNeedResize"
               :inset="true"
               :label="isNeedResize ? '开启' : '关闭'"
+              :model-value="isNeedResize"
+              :readonly="true"
               class="config-switch"
               color="#FAC51E"
-              @click="submitResize"
             />
           </template>
         </v-list-item>
-        <v-list-item subtitle="关闭窗口时最小化到系统托盘而不是退出应用" title="关闭到托盘">
+        <v-list-item
+          subtitle="关闭窗口时最小化到系统托盘而不是退出应用"
+          title="关闭到托盘"
+          @click="switchTray()"
+        >
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-tray-arrow-down</v-icon>
@@ -108,15 +117,20 @@
           </template>
           <template #append>
             <v-switch
-              v-model="closeToTray"
               :inset="true"
               :label="closeToTray ? '开启' : '关闭'"
+              :model-value="closeToTray"
+              :readonly="true"
               class="config-switch"
               color="#FAC51E"
             />
           </template>
         </v-list-item>
-        <v-list-item subtitle="关闭后将记录帖子浏览记录" title="无痕浏览">
+        <v-list-item
+          subtitle="关闭后将记录帖子浏览记录"
+          title="无痕浏览"
+          @click="switchIncognito()"
+        >
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-incognito</v-icon>
@@ -124,16 +138,20 @@
           </template>
           <template #append>
             <v-switch
-              v-model="appStore.incognito"
               :inset="true"
-              :label="appStore.incognito ? '开启' : '关闭'"
+              :label="incognito ? '开启' : '关闭'"
+              :model-value="incognito"
+              :readonly="true"
               class="config-switch"
               color="#FAC51E"
-              @click="switchIncognito"
             />
           </template>
         </v-list-item>
-        <v-list-item subtitle="右下反馈按钮显隐，页面刷新后生效" title="用户反馈">
+        <v-list-item
+          subtitle="右下反馈按钮显隐，页面刷新后生效"
+          title="用户反馈"
+          @click="switchFeedback()"
+        >
           <template #prepend>
             <div class="config-icon">
               <v-icon>mdi-lightbulb-on-outline</v-icon>
@@ -141,15 +159,16 @@
           </template>
           <template #append>
             <v-switch
-              v-model="appStore.showFeedback"
               :inset="true"
-              :label="appStore.showFeedback ? '开启' : '关闭'"
+              :label="showFeedback ? '开启' : '关闭'"
+              :model-value="showFeedback"
+              :readonly="true"
               class="config-switch"
               color="#FAC51E"
             />
           </template>
         </v-list-item>
-        <v-list-item v-if="platform() === 'windows'" title="分享设置">
+        <v-list-item v-if="platform() === 'windows'" title="分享设置" @click="confirmShare()">
           <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
           <template #prepend>
             <div class="config-icon">
@@ -157,10 +176,10 @@
             </div>
           </template>
           <template #append>
-            <v-icon @click="confirmShare()">mdi-cog</v-icon>
+            <v-icon>mdi-cog</v-icon>
           </template>
         </v-list-item>
-        <v-list-item title="图片质量调整">
+        <v-list-item title="图片质量调整" @click="submitImgQuality()">
           <template #subtitle>当前图像质量：{{ imageQualityPercent }}%</template>
           <template #prepend>
             <div class="config-icon">
@@ -168,7 +187,7 @@
             </div>
           </template>
           <template #append>
-            <v-icon @click="confirmImgQuality()">mdi-cog</v-icon>
+            <v-icon>mdi-cog</v-icon>
           </template>
         </v-list-item>
       </v-list>
@@ -221,6 +240,7 @@ const {
   imageQualityPercent,
   incognito,
   closeToTray,
+  showFeedback,
 } = storeToRefs(appStore);
 const homeStore = useHomeStore();
 
@@ -376,7 +396,7 @@ async function confirmShare(): Promise<void> {
 }
 
 // 图片质量调整
-async function confirmImgQuality(): Promise<void> {
+async function submitImgQuality(): Promise<void> {
   showImgQuality.value = true;
 }
 
@@ -513,31 +533,52 @@ async function confirmResetDB(title?: string): Promise<void> {
   window.location.reload();
 }
 
-// 开启 dev 模式
-function submitDevMode(): void {
-  if (appStore.devMode) {
+function switchDevMode(): void {
+  devMode.value = !devMode.value;
+  if (!devMode.value) {
     showSnackbar.success("已关闭 dev 模式!");
     return;
   }
   showSnackbar.success("已开启 dev 模式!");
 }
 
-// 开启窗口回正
-async function submitResize(): Promise<void> {
-  needResize.value = (!isNeedResize.value).toString();
-  if (isNeedResize.value) showSnackbar.success("已关闭窗口回正!");
-  else showSnackbar.success("已开启窗口回正!");
+async function switchResize(): Promise<void> {
+  isNeedResize.value = !isNeedResize.value;
+  needResize.value = isNeedResize.value.toString();
   await emit("needResize", needResize.value);
+  if (isNeedResize.value) {
+    showSnackbar.success("已关闭窗口回正!");
+    return;
+  }
+  showSnackbar.success("已开启窗口回正!");
 }
 
-// 开启无痕浏览
+async function switchTray(): Promise<void> {
+  closeToTray.value = !closeToTray.value;
+  if (closeToTray.value) {
+    showSnackbar.success("关闭应用时将最小化到系统托盘");
+    return;
+  }
+  showSnackbar.success("关闭应用时直接退出");
+}
+
 async function switchIncognito(): Promise<void> {
+  incognito.value = !incognito.value;
   await event.emitTo("Sub_window", "switchIncognito");
   if (incognito.value) {
     showSnackbar.success("已开启无痕浏览!");
     return;
   }
   showSnackbar.success("已关闭无痕浏览!");
+}
+
+async function switchFeedback(): Promise<void> {
+  showFeedback.value = !showFeedback.value;
+  if (showFeedback.value) {
+    showSnackbar.success("显示反馈入口");
+    return;
+  }
+  showSnackbar.success("隐藏反馈入口");
 }
 </script>
 <style lang="scss" scoped>
@@ -594,7 +635,11 @@ async function switchIncognito(): Promise<void> {
 }
 
 .config-switch {
+  position: relative;
+  display: flex;
   height: 40px;
+  align-items: center;
+  justify-content: center;
 }
 
 .config-right {
