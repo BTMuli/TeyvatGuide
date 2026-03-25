@@ -7,6 +7,25 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 
 本文档定义了项目提交信息的格式规范，确保提交历史清晰可读。
 
+## 核心原则
+
+### 🎯 原子提交原则
+
+**每个 commit 只包含一个主题的变更**。如果一次修改涉及多个方面，应该拆分成多个 commit：
+
+```bash
+# ✅ 正确：拆分成两个独立的 commit
+git add src/components/viewpost/vp-overlay-image.vue
+git commit -m "♻️ 重构图片浮窗组件拖拽缩放逻辑"
+
+git add .trae/skills/typescript-standards/skill.md
+git commit -m "📝 更新 TypeScript 类型注解规范"
+
+# ❌ 错误：不要混在一个 commit 中
+git add src/components/viewpost/vp-overlay-image.vue .trae/skills/typescript-standards/skill.md
+git commit -m "♻️ 重构组件并更新 TypeScript 规范"
+```
+
 ## 提交格式
 
 ```
@@ -17,6 +36,16 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 - **描述**：使用中文，以动词开头，简短明了
 - **一行不超过 100 字符**
 - **禁止括号声明**：不要使用 `✨ feat(xxx)` 或 `✨ feat` 这种格式，仅保留图标
+
+## 拆分指南
+
+| 场景 | 拆分方式 | 示例 |
+|------|---------|------|
+| 代码重构 + 文档更新 | 分成两个 commit | `♻️ 重构组件` + `📝 更新文档` |
+| 功能开发 + Bug 修复 | 分成两个 commit | `✨ 添加功能` + `🐛 修复问题` |
+| 多个组件修改 | 按组件拆分 commit | `♻️ 重构组件 A` + `♻️ 重构组件 B` |
+| 代码修改 + 配置文件 | 分成两个 commit | `✨ 实现功能` + `🔧 更新配置` |
+| 功能开发 + 样式调整 | 分成两个 commit | `✨ 添加功能` + `💄 调整样式` |
 
 ## Emoji 选择指南
 
@@ -35,7 +64,7 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 | Emoji | 场景 | 示例 |
 |-------|------|------|
 | 🐛 | Bug 修复 | `🐛 修复角色生日判断逻辑` |
-| 🩹 | 小修复/补丁 | `🩹 补充首页mini参数处理` |
+| 🩹 | 小修复/补丁 | `🩹 补充首页 mini 参数处理` |
 | ⚡️ | 性能优化 | `⚡️ 优化角色列表渲染性能` |
 | ♻️ | 重构 | `♻️ 重构数据库操作层` |
 | 💄 | UI/样式 | `💄 调整首页卡片布局` |
@@ -47,7 +76,7 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 |-------|------|------|
 | 🔥 | 删除代码/文件 | `🔥 移除废弃组件` |
 | ⚰️ | 删除死代码 | `⚰️ 清理未使用的导入` |
-| 🗑️ | 代码弃用 | `🗑️ 弃用旧版API` |
+| 🗑️ | 代码弃用 | `🗑️ 弃用旧版 API` |
 
 ### 📦 依赖/配置
 | Emoji | 场景 | 示例 |
@@ -81,8 +110,8 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 ### 🔒 安全/权限
 | Emoji | 场景 | 示例 |
 |-------|------|------|
-| 🔒 | 安全问题 | `🔒 修复XSS漏洞` |
-| 🔐 | 密钥/凭证 | `🔐 更新API密钥配置` |
+| 🔒 | 安全问题 | `🔒 修复 XSS 漏洞` |
+| 🔐 | 密钥/凭证 | `🔐 更新 API 密钥配置` |
 
 ### 📊 分析/监控
 | Emoji | 场景 | 示例 |
@@ -126,21 +155,21 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 | ✈️ | 离线支持 | `✈️ 提升离线体验` |
 | 🦖 | 向后兼容 | `🦖 添加兼容性处理` |
 | 💸 | 金钱相关 | `💸 优化资源加载成本` |
-| 👽 | API 变更 | `👽 适配新版API` |
+| 👽 | API 变更 | `👽 适配新版 API` |
 | 🚚 | 移动/重命名 | `🚚 迁移文件到新目录` |
 | 📄 | 许可证 | `📄 添加 MIT 许可证` |
 | 💥 | 重大变更 | `💥 重构核心模块` |
 | 🍱 | 静态资源 | `🍱 更新应用图标` |
-| ♿️ | 无障碍 | `♿️ 添加ARIA标签` |
+| ♿️ | 无障碍 | `♿️ 添加 ARIA 标签` |
 | 🏷️ | 类型定义 | `🏷️ 完善类型定义` |
 | 🚩 | 功能开关 | `🚩 添加灰度开关` |
 | ⚗️ | 实验 | `⚗️ 尝试新方案` |
 | 🔍 | SEO | `🔍 优化页面索引` |
-| 🙈 | .gitignore | `🙈 更新gitignore规则` |
+| 🙈 | .gitignore | `🙈 更新 gitignore 规则` |
 | 📸 | 快照 | `📸 添加截图` |
 | 🥚 | 彩蛋 | `🥚 添加开发者彩蛋` |
-| 🤡 | Mock | `🤡 添加mock数据` |
-| 🍻 | 酒后代码 | `🍻 修复奇怪bug` |
+| 🤡 | Mock | `🤡 添加 mock 数据` |
+| 🍻 | 酒后代码 | `🍻 修复奇怪 bug` |
 | 💬 | 文本更新 | `💬 更新界面文案` |
 | 👥 | 贡献者 | `👥 更新贡献者列表` |
 
@@ -148,15 +177,15 @@ description: "Git commit 规范参考。Invoke when user wants to make commits, 
 
 ```
 ✨ 添加用户个人页面跳转功能
-🐛 修复角色生日判断逻辑，优化返回结果
-🩹 补充首页mini参数&组件参数处理
+🐛 修复角色生日判断逻辑
+🩹 补充首页 mini 参数&组件参数处理
 ♻️ 重构数据库操作为事务模式
 ⚡️ 优化角色列表渲染性能
 💄 调整深色模式配色方案
 📝 添加组件使用文档
 ⬆️ 更新依赖版本，修复安全警告
 🔧 更新 vite 配置以支持新插件
-🚸 统一UIGF导出交互，导出前选择导出路径
+🚸 统一 UIGF 导出交互，导出前选择导出路径
 💫 添加页面转场动画效果
 🐛 修复抽卡记录导出为空的问题
 🏗️ 引入 Pinia 状态管理
