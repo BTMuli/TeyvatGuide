@@ -56,3 +56,24 @@ declare type TauriProcessEnv = NodeJS.ProcessEnv & {
  * ProcessEnv的转换
  */
 declare const proEnv: TauriProcessEnv;
+
+/**
+ * 解决 Echarts 导入问题
+ * @see https://github.com/apache/echarts/issues/19992
+ * @since Beta v0.9.9
+ */
+declare module "echarts/core.js" {
+  export * from "echarts/types/src/export/core.d.ts";
+}
+declare module "echarts/charts.js" {
+  export * from "echarts/types/src/export/charts.d.ts";
+}
+declare module "echarts/components.js" {
+  export * from "echarts/types/src/export/components.d.ts";
+}
+declare module "echarts/features.js" {
+  export * from "echarts/types/src/export/features.d.ts";
+}
+declare module "echarts/renderers.js" {
+  export * from "echarts/types/src/export/renderers.d.ts";
+}
