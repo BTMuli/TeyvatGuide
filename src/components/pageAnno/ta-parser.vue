@@ -17,7 +17,7 @@ import type { Component } from "vue";
 
 import TaTable from "./ta-table.vue";
 
-type TaParserProps = { data: TGApp.BBS.Announcement.AnnoDetail };
+type TaParserProps = { data: TGApp.Game.Anno.AnnoDetail };
 const props = defineProps<TaParserProps>();
 
 function getTaName(ta: TGApp.BBS.SctPost.Base): Component {
