@@ -1,6 +1,6 @@
 /**
  * 帖子类型定义文件
- * @since Beta v0.9.8
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.BBS.Post {
@@ -62,6 +62,61 @@ declare namespace TGApp.BBS.Post {
    * @since Beta v0.9.1
    */
   type NewsTypeEnum = (typeof NewsType)[keyof typeof NewsType];
+
+  /**
+   * 话题排序类型
+   * @since Beta v0.9.9
+   */
+  const PostTopicSortType = <const>{
+    /** 最新 */
+    LATEST: 0,
+    /** 精选 */
+    FEATURED: 1,
+    /** 热门 */
+    HOT: 2,
+  };
+
+  /**
+   * 话题排序类型枚举
+   * @since Beta v0.9.9
+   */
+  type PostTopicSortTypeEnum = (typeof PostTopicSortType)[keyof typeof PostTopicSortType];
+
+  /**
+   * 论坛排序类型
+   * @since Beta v0.9.9
+   */
+  const ForumSortType = <const>{
+    /** 最新回复 */
+    LATEST_REPLY: 1,
+    /** 最新发布 */
+    LATEST_POST: 2,
+    /** 热门 */
+    HOT: 3,
+  };
+
+  /**
+   * 论坛排序类型枚举
+   * @since Beta v0.9.9
+   */
+  type ForumSortTypeEnum = (typeof ForumSortType)[keyof typeof ForumSortType];
+
+  /**
+   * 搜索排序类型
+   * @since Beta v0.9.9
+   */
+  const SearchSortType = <const>{
+    /** 最热 */
+    HOT: 1,
+    /** 最新 */
+    LATEST: 2,
+  };
+
+  /**
+   * 搜索排序类型枚举
+   * @since Beta v0.9.9
+   */
+  type SearchSortTypeEnum = (typeof SearchSortType)[keyof typeof SearchSortType];
 
   /**
    * 资讯返回响应

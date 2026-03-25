@@ -76,8 +76,8 @@
       />
       <v-text-field
         v-model="search"
-        :hide-details="true"
         :clearable="true"
+        :hide-details="true"
         append-inner-icon="mdi-magnify"
         class="post-switch-item"
         label="请输入帖子 ID 或搜索词"
@@ -97,7 +97,7 @@
       </v-btn>
     </div>
     <template #extension>
-      <TGameNav :mini="false" :gid="curGid" style="margin-left: 8px" />
+      <TGameNav :gid="curGid" :mini="false" style="margin-left: 8px" />
     </template>
   </v-app-bar>
   <div class="posts-grid">
@@ -115,6 +115,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useBBSStore from "@store/bbs.js";
@@ -124,20 +125,26 @@ import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type SortSelect = { text: string; value: number; icon: string };
+type SortSelect<T extends number = number> = { text: string; value: T; icon: string };
+type SortSelectForum = Omit<SortSelect<TGApp.BBS.Post.ForumSortTypeEnum>, "icon">;
 type SortSelectGame = { gid: number; forum: Array<SortSelect>; text: string; icon?: string };
 type PostRaw = { isLast: boolean; lastId: string; total: number };
 
-const sortOrderList: Array<Omit<SortSelect, "icon">> = [
-  { text: "最新回复", value: 1 },
-  { text: "最新发布", value: 2 },
-  { text: "热门", value: 3 },
-];
+// 简单封装选项生成
+const genSortOrderItem = (order: TGApp.BBS.Post.ForumSortTypeEnum): SortSelectForum => ({
+  text: bbsEnum.post.forumSortTypeDesc(order),
+  value: order,
+});
+const sortOrderList: ReadonlyArray<SortSelectForum> = [
+  bbsEnum.post.forumSortType.LATEST_REPLY,
+  bbsEnum.post.forumSortType.LATEST_POST,
+  bbsEnum.post.forumSortType.HOT,
+].map(genSortOrderItem);
 
 const route = useRoute();
 const router = useRouter();
 const curGid = ref<number>(2);
-const curSortType = ref<number>(1);
+const curSortType = ref<TGApp.BBS.Post.ForumSortTypeEnum>(bbsEnum.post.forumSortType.LATEST_REPLY);
 const firstLoad = ref<boolean>(false);
 const isReq = ref<boolean>(false);
 

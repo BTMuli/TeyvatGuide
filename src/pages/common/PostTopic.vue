@@ -66,8 +66,8 @@
       />
       <v-text-field
         v-model="search"
-        :hide-details="true"
         :clearable="true"
+        :hide-details="true"
         append-inner-icon="mdi-magnify"
         class="post-switch-item"
         label="请输入帖子 ID 或搜索词"
@@ -103,6 +103,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import VpOverlaySearch from "@comp/viewPost/vp-overlay-search.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
+import bbsEnum from "@enum/bbs.js";
 import { usePageReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
@@ -113,9 +114,17 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-type SortSelect = { text: string; value: number };
+type SortSelect<T extends number = number> = { text: string; value: T };
 type PostMiniData = { isLast: boolean; lastId: string; total: number };
 type GameList = TGApp.BBS.Topic.GameInfo & { icon?: string };
+
+// 简单封装选项生成
+const genSortOrderItem = (
+  sort: TGApp.BBS.Post.PostTopicSortTypeEnum,
+): SortSelect<TGApp.BBS.Post.PostTopicSortTypeEnum> => ({
+  text: bbsEnum.post.topicSortTypeDesc(sort),
+  value: sort,
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -125,7 +134,7 @@ const { sidebar } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 
 const curGid = ref<number>(0);
-const curSortType = ref<0 | 1 | 2>(0);
+const curSortType = ref<TGApp.BBS.Post.PostTopicSortTypeEnum>(bbsEnum.post.topicSortType.LATEST);
 const curTopic = ref<string>("");
 
 const search = ref<string>("");
@@ -139,19 +148,19 @@ const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 }
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const curGame = shallowRef<GameList>();
-const sortList = computed<Array<SortSelect>>(() => {
+const sortList = computed<Array<SortSelect<TGApp.BBS.Post.PostTopicSortTypeEnum>>>(() => {
   if (!topicInfo.value) return [];
+  let sortArr: ReadonlyArray<TGApp.BBS.Post.PostTopicSortTypeEnum>;
   if (!topicInfo.value.good_post_exist) {
-    return [
-      { text: "最新", value: 0 },
-      { text: "热门", value: 2 },
+    sortArr = [bbsEnum.post.topicSortType.LATEST, bbsEnum.post.topicSortType.HOT];
+  } else {
+    sortArr = [
+      bbsEnum.post.topicSortType.LATEST,
+      bbsEnum.post.topicSortType.HOT,
+      bbsEnum.post.topicSortType.FEATURED,
     ];
   }
-  return [
-    { text: "最新", value: 0 },
-    { text: "热门", value: 2 },
-    { text: "精选", value: 1 },
-  ];
+  return sortArr.map(genSortOrderItem);
 });
 
 onMounted(async () => {

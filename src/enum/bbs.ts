@@ -1,6 +1,6 @@
 /**
  * 米游社相关枚举
- * @since Beta v0.7.9
+ * @since Beta v0.9.9
  */
 
 /**
@@ -73,6 +73,107 @@ function getPostNewsTypeDesc(newsType: TGApp.BBS.Post.NewsTypeEnum): string {
   }
 }
 
+/**
+ * 话题排序类型
+ * @since Beta v0.9.9
+ * @see TGApp.BBS.Post.PostTopicSortType
+ */
+const PostTopicSortTypeEnum: typeof TGApp.BBS.Post.PostTopicSortType = {
+  LATEST: 0,
+  FEATURED: 1,
+  HOT: 2,
+};
+
+/**
+ * 根据话题排序类型获取描述
+ * @since Beta v0.9.9
+ */
+function getPostTopicSortTypeDesc(sortType: TGApp.BBS.Post.PostTopicSortTypeEnum): string {
+  switch (sortType) {
+    case PostTopicSortTypeEnum.LATEST:
+      return "最新";
+    case PostTopicSortTypeEnum.FEATURED:
+      return "精选";
+    case PostTopicSortTypeEnum.HOT:
+      return "热门";
+  }
+}
+
+/**
+ * 论坛排序类型
+ * @since Beta v0.9.9
+ * @see TGApp.BBS.Post.ForumSortType
+ */
+const ForumSortTypeEnum: typeof TGApp.BBS.Post.ForumSortType = {
+  LATEST_REPLY: 1,
+  LATEST_POST: 2,
+  HOT: 3,
+};
+
+/**
+ * 根据论坛排序类型获取描述
+ * @since Beta v0.9.9
+ */
+function getForumSortTypeDesc(sortType: TGApp.BBS.Post.ForumSortTypeEnum): string {
+  switch (sortType) {
+    case ForumSortTypeEnum.LATEST_REPLY:
+      return "最新回复";
+    case ForumSortTypeEnum.LATEST_POST:
+      return "最新发布";
+    case ForumSortTypeEnum.HOT:
+      return "热门";
+  }
+}
+
+/**
+ * 搜索排序类型
+ * @since Beta v0.9.9
+ * @see TGApp.BBS.Post.SearchSortType
+ */
+const SearchSortTypeEnum: typeof TGApp.BBS.Post.SearchSortType = {
+  HOT: 1,
+  LATEST: 2,
+};
+
+/**
+ * 根据搜索排序类型获取描述
+ * @since Beta v0.9.9
+ */
+function getSearchSortTypeDesc(sortType: TGApp.BBS.Post.SearchSortTypeEnum): string {
+  switch (sortType) {
+    case SearchSortTypeEnum.HOT:
+      return "最热";
+    case SearchSortTypeEnum.LATEST:
+      return "最新";
+  }
+}
+
+/**
+ * 回复排序类型
+ * @since Beta v0.9.9
+ * @see TGApp.BBS.Reply.ReplyOrderType
+ */
+const ReplyOrderTypeEnum: typeof TGApp.BBS.Reply.ReplyOrderType = {
+  HOT: 0,
+  OLDEST: 1,
+  LATEST: 2,
+};
+
+/**
+ * 获取回复排序类型描述
+ * @since Beta v0.9.9
+ */
+function getReplyOrderTypeDesc(replyType: TGApp.BBS.Reply.ReplyOrderTypeEnum): string {
+  switch (replyType) {
+    case ReplyOrderTypeEnum.HOT:
+      return "热门";
+    case ReplyOrderTypeEnum.OLDEST:
+      return "最早";
+    case ReplyOrderTypeEnum.LATEST:
+      return "最新";
+  }
+}
+
 /** 米游社相关枚举 */
 const bbsEnum = {
   /** 用户信息相关枚举 */
@@ -86,6 +187,14 @@ const bbsEnum = {
     newsType: PostNewsTypeEnum,
     newsTypeList: PostNewsTypeList,
     newsTypeDesc: getPostNewsTypeDesc,
+    topicSortType: PostTopicSortTypeEnum,
+    topicSortTypeDesc: getPostTopicSortTypeDesc,
+    forumSortType: ForumSortTypeEnum,
+    forumSortTypeDesc: getForumSortTypeDesc,
+    searchSortType: SearchSortTypeEnum,
+    searchSortTypeDesc: getSearchSortTypeDesc,
+    replyOrderType: ReplyOrderTypeEnum,
+    replyOrderTypeDesc: getReplyOrderTypeDesc,
   },
 };
 

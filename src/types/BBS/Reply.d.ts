@@ -1,8 +1,28 @@
 /**
  * 回复数据类型定义文件
- * @since Beta v0.7.2
+ * @since Beta v0.9.9
  */
+
 declare namespace TGApp.BBS.Reply {
+  /**
+   * 回复排序类型
+   * @since Beta v0.9.9
+   */
+  const ReplyOrderType = <const>{
+    /* 热门 */
+    HOT: 0,
+    /* 最早 */
+    OLDEST: 1,
+    /* 最新 */
+    LATEST: 2,
+  };
+
+  /**
+   * 回复排序类型枚举
+   * @since Beta v0.9.9
+   */
+  type ReplyOrderTypeEnum = (typeof ReplyOrderType)[keyof typeof ReplyOrderType];
+
   /**
    * 帖子回复数据类型
    * @since Beta v0.7.1

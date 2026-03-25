@@ -1,7 +1,8 @@
 /**
  * 帖子相关的请求
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  */
+import bbsEnum from "@enum/bbs.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
 
@@ -54,7 +55,7 @@ async function getPostFullInCollection(
 
 /**
  * 获取帖子回复信息
- * @since Beta v0.7.1
+ * @since Beta v0.9.9
  * @param postId - 帖子 ID
  * @param gid - 社区 ID
  * @param isHot - 是否热门
@@ -70,7 +71,7 @@ async function getPostReplies(
   isHot: boolean = true,
   lastId?: string,
   onlyMaster: boolean = false,
-  orderType?: 1 | 2,
+  orderType?: TGApp.BBS.Reply.ReplyOrderTypeEnum,
   size: number = 20,
 ): Promise<TGApp.BBS.Reply.MainRes | TGApp.BBS.Response.Base> {
   type GprParam = {
@@ -79,7 +80,7 @@ async function getPostReplies(
     is_hot: boolean;
     size: number;
     last_id?: string;
-    order_type?: 1 | 2;
+    order_type?: TGApp.BBS.Reply.ReplyOrderTypeEnum;
     only_master?: boolean;
   };
   const params: GprParam = { post_id: postId, gids: gid, is_hot: isHot, size: size };
@@ -136,7 +137,7 @@ async function getSubReplies(
 
 /**
  * 获取特定话题帖子列表
- * @since Beta v0.7.1
+ * @since Beta v0.9.9
  * @param gid - 游戏分区 ID
  * @param topicId - 话题 ID
  * @param orderType - 排序方式
@@ -147,7 +148,7 @@ async function getSubReplies(
 async function getTopicPostList(
   gid: number,
   topicId: string,
-  orderType: number = 0,
+  orderType: TGApp.BBS.Post.PostTopicSortTypeEnum = bbsEnum.post.topicSortType.LATEST,
   lastId?: string,
   size: number = 20,
 ): Promise<TGApp.BBS.Topic.PostRes | TGApp.BBS.Response.Base> {
@@ -192,7 +193,7 @@ async function getUserPost(
 
 /**
  * 搜索帖子
- * @since Beta v0.8.7
+ * @since Beta v0.9.9
  * @param gid - 游戏分区 ID
  * @param keyword - 关键词
  * @param lastId - 最后一条帖子 ID
@@ -203,7 +204,7 @@ async function searchPosts(
   gid: string = "2",
   keyword: string,
   lastId: string,
-  orderType: number,
+  orderType: TGApp.BBS.Post.SearchSortTypeEnum,
 ): Promise<TGApp.BBS.Post.SearchRes> {
   return (
     await TGHttp<TGApp.BBS.Post.SearchResp>(`${bapBu}searchPosts`, {

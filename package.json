@@ -122,7 +122,6 @@
     "@types/json-bigint": "^1.0.4",
     "@types/node": "^25.5.0",
     "@typescript-eslint/parser": "^8.57.2",
-    "@typescript/native-preview": "7.0.0-dev.20260321.1",
     "@vitejs/plugin-vue": "^6.0.5",
     "app-root-path": "^3.1.0",
     "concurrently": "^9.2.1",

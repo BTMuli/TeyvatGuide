@@ -2,22 +2,22 @@
 <template>
   <div class="tpr-main-box" title="查看回复">
     <v-menu
-      location="end"
-      :close-on-content-click="false"
       v-model="showOverlay"
-      :persistent="true"
+      :close-on-content-click="false"
       :no-click-animation="true"
-      z-index="60"
       :offset="[12, 0]"
+      :persistent="true"
+      location="end"
+      z-index="60"
     >
       <template #activator="{ props }">
         <v-btn
           :loading="loading"
           class="tpr-btn"
+          size="36"
+          v-bind="props"
           variant="outlined"
           @click="showReply()"
-          v-bind="props"
-          size="36"
         >
           <template #default>
             <v-icon size="20">mdi-message-text-outline</v-icon>
@@ -28,7 +28,7 @@
         <div class="tpr-main-filter">
           <div class="tpr-title">
             <span title="刷新" @click="handleDebug">回复列表</span>
-            <v-btn @click="showOverlay = false" icon="mdi-close" class="tpr-btn-close" size="32" />
+            <v-btn class="tpr-btn-close" icon="mdi-close" size="32" @click="showOverlay = false" />
           </div>
           <div class="tpr-subtitle">
             <div class="tpr-switch" @click="switchOnlyLz()">
@@ -40,14 +40,14 @@
             </div>
             <div class="tpr-select">
               <v-select
-                :hide-details="true"
-                variant="outlined"
-                density="compact"
                 v-model="orderType"
+                :hide-details="true"
                 :items="orderList"
+                density="compact"
                 item-title="label"
                 item-value="value"
                 label="排序方式"
+                variant="outlined"
               />
             </div>
           </div>
@@ -57,14 +57,14 @@
             v-for="(item, index) in reply"
             :key="index"
             :modelValue="item"
-            mode="main"
             :pinId="pinId"
+            mode="main"
           />
           <div v-if="isLast" class="tpr-list-item">
             <v-chip color="blue" label>没有更多了</v-chip>
           </div>
           <div v-else class="tpr-list-item">
-            <v-btn @click="loadReply()" color="blue" :loading="loading">加载更多</v-btn>
+            <v-btn :loading="loading" color="blue" @click="loadReply()">加载更多</v-btn>
           </div>
         </v-list>
       </div>
@@ -73,6 +73,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import bbsEnum from "@enum/bbs.js";
 import postReq from "@req/postReq.js";
 import { emit } from "@tauri-apps/api/event";
 import TGLogger from "@utils/TGLogger.js";
@@ -91,34 +92,27 @@ type TprMainProps = {
 };
 
 /**
- * 回复排序类型
- */
-enum ReplyOrderType {
-  /* 热门 */
-  HOT = 0,
-  /* 最新 */
-  LATEST = 2,
-  /* 最早 */
-  OLDEST = 1,
-}
-
-/**
  * 选择项类型
  */
 type SelectItem = {
   /* 文本 */
   label: string;
   /* 值 */
-  value: ReplyOrderType;
+  value: TGApp.BBS.Reply.ReplyOrderTypeEnum;
 };
 
 const props = defineProps<TprMainProps>();
 
+// 简单封装选项
+const genOrderItem = (order: TGApp.BBS.Reply.ReplyOrderTypeEnum): SelectItem => ({
+  label: bbsEnum.post.replyOrderTypeDesc(order),
+  value: order,
+});
 const orderList: Array<SelectItem> = [
-  { label: "热门", value: ReplyOrderType.HOT },
-  { label: "最新", value: ReplyOrderType.LATEST },
-  { label: "最早", value: ReplyOrderType.OLDEST },
-];
+  bbsEnum.post.replyOrderType.HOT,
+  bbsEnum.post.replyOrderType.LATEST,
+  bbsEnum.post.replyOrderType.OLDEST,
+].map(genOrderItem);
 
 const pinId = ref<string>("0");
 const lastId = ref<string>();
@@ -126,11 +120,11 @@ const isLast = ref<boolean>(false);
 const loading = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const onlyLz = ref<boolean>(false);
-const orderType = ref<ReplyOrderType>(ReplyOrderType.HOT);
+const orderType = ref<TGApp.BBS.Reply.ReplyOrderTypeEnum>(bbsEnum.post.replyOrderType.HOT);
 const reply = shallowRef<Array<TGApp.BBS.Reply.ReplyFull>>([]);
-const isHot = computed<boolean>(() => orderType.value === ReplyOrderType.HOT);
-const replyOrder = computed<1 | 2 | undefined>(() => {
-  if (orderType.value === ReplyOrderType.HOT) return undefined;
+const isHot = computed<boolean>(() => orderType.value === bbsEnum.post.replyOrderType.HOT);
+const replyOrder = computed<TGApp.BBS.Reply.ReplyOrderTypeEnum | undefined>(() => {
+  if (orderType.value === bbsEnum.post.replyOrderType.HOT) return undefined;
   return orderType.value;
 });
 

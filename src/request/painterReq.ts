@@ -1,6 +1,6 @@
 /**
  * painter 下的请求
- * @since Beta v0.8.3
+ * @since Beta v0.9.9
  */
 import bbsEnum from "@enum/bbs.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
@@ -73,7 +73,7 @@ async function getHotForumPostList(
 
 /**
  * 获取最近版块帖子列表
- * @since Beta v0.8.3
+ * @since Beta v0.9.9
  * @param forumId - 版块 ID
  * @param gid - 社区 ID
  * @param type - 排序方式: 1-最新回复，2-最新发布
@@ -85,7 +85,7 @@ async function getHotForumPostList(
 async function getRecentForumPostList(
   forumId: number,
   gid: number,
-  type: number = 1,
+  type: TGApp.BBS.Post.ForumSortTypeEnum = bbsEnum.post.forumSortType.LATEST_REPLY,
   lastId?: string,
   pageSize: number = 20,
   cookie?: Record<string, string>,
@@ -93,7 +93,7 @@ async function getRecentForumPostList(
   type ReqParams = {
     forum_id: number;
     gids: number;
-    sort_type: number;
+    sort_type: TGApp.BBS.Post.ForumSortTypeEnum;
     is_good: boolean;
     page_size: number;
     last_id?: string;

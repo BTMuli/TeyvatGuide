@@ -27,8 +27,8 @@
           v-for="post in results"
           :key="post.post.post_id"
           :post
-          @onUserClick="toUserProfile"
           class="tops-item"
+          @onUserClick="toUserProfile"
         />
       </div>
     </div>
@@ -38,6 +38,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostCard from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import bbsEnum from "@enum/bbs.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useBBSStore from "@store/bbs.js";
@@ -46,12 +47,19 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 type ToPostSearchProps = { gid: number; keyword?: string };
-type SortSelect = { text: string; value: number };
+type SortSelect<T extends number = number> = { text: string; value: T };
 
-const sortOrderList: Array<SortSelect> = [
-  { text: "最新", value: 2 },
-  { text: "最热", value: 1 },
-];
+// 简单封装选项
+const genSortItem = (
+  sort: TGApp.BBS.Post.SearchSortTypeEnum,
+): SortSelect<TGApp.BBS.Post.SearchSortTypeEnum> => ({
+  text: bbsEnum.post.searchSortTypeDesc(sort),
+  value: sort,
+});
+const sortOrderList: ReadonlyArray<SortSelect<TGApp.BBS.Post.SearchSortTypeEnum>> = [
+  bbsEnum.post.searchSortType.LATEST,
+  bbsEnum.post.searchSortType.HOT,
+].map(genSortItem);
 
 const { gameList } = storeToRefs(useBBSStore());
 
@@ -66,7 +74,7 @@ const lastId = ref<string>("");
 const gameId = ref<string>("2");
 const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
-const sortType = ref<number>(1);
+const sortType = ref<TGApp.BBS.Post.SearchSortTypeEnum>(bbsEnum.post.searchSortType.HOT);
 const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
 const label = computed<string>(() => {
   const gameFind = gameList.value.find((v) => v.id.toString() === gameId.value);
