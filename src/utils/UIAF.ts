@@ -1,13 +1,12 @@
 /**
  * UIAF工具类
- * @since Beta v0.9.2
+ * @since Beta v0.9.9
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import { app } from "@tauri-apps/api";
 import { readTextFile } from "@tauri-apps/plugin-fs";
-import Ajv from "ajv";
-import type { ErrorObject } from "ajv/lib/types/index.js";
+import Ajv, { type ErrorObject } from "ajv";
 
 import TGLogger from "./TGLogger.js";
 
@@ -29,14 +28,13 @@ export async function getUiafHeader(): Promise<TGApp.Plugins.UIAF.Export> {
 
 /**
  * 检测是否存在 UIAF 数据，采用 ajv 验证 schema
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  * @param path - UIAF 数据路径
  * @returns 是否存在 UIAF 数据
  */
 export async function verifyUiafData(path: string): Promise<boolean> {
   const fileData: string = await readTextFile(path);
-  // @ts-expect-error-next-line
-  const ajv = new Ajv();
+  const ajv = new Ajv.Ajv();
   const validate = ajv.compile(UiafSchema);
   try {
     const fileJson = JSON.parse(fileData);
@@ -59,13 +57,12 @@ export async function verifyUiafData(path: string): Promise<boolean> {
 
 /**
  * 验证UIAF数据-剪贴板
- * @since Beta v0.9.2
+ * @since Beta v0.9.9
  * @param data - 剪贴板文本
  * @returns 是否验证通过
  */
 export async function verifyUiafDataClipboard(data: string): Promise<boolean> {
-  // @ts-expect-error-next-line
-  const ajv = new Ajv();
+  const ajv = new Ajv.Ajv();
   const validate = ajv.compile(UiafSchema);
   try {
     const fileJson = JSON.parse(data);

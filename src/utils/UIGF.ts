@@ -1,6 +1,6 @@
 /**
  * UIGF工具类
- * @since Beta v0.9.5
+ * @since Beta v0.9.9
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -9,8 +9,7 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { app, path } from "@tauri-apps/api";
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
-import { Ajv } from "ajv";
-import type { ErrorObject } from "ajv/lib/types/index.js";
+import Ajv, { type ErrorObject } from "ajv";
 
 import TGLogger from "./TGLogger.js";
 import { timestampToDate } from "./toolFunc.js";
@@ -181,12 +180,12 @@ export async function verifyUigfData(path: string, isVersion4: boolean = false):
 
 /**
  * 验证 UIGF 数据
- * @since Beta v0.5.1
+ * @since Beta v0.9.9
  * @param data - UIGF 数据
  * @returns 是否验证通过
  */
 function validateUigfData(data: object): boolean {
-  const ajv = new Ajv();
+  const ajv = new Ajv.Ajv();
   const validate = ajv.compile(UigfSchema);
   if (!validate(data)) {
     if (!validate.errors || validate.errors.length === 0) return false;
@@ -204,12 +203,12 @@ function validateUigfData(data: object): boolean {
 
 /**
  * 验证 UIGF v4.2 数据
- * @since Beta v0.5.0
+ * @since Beta v0.9.9
  * @param data - UIGF 数据
  * @returns 是否验证通过
  */
 function validateUigf4Data(data: object): boolean {
-  const ajv = new Ajv();
+  const ajv = new Ajv.Ajv();
   const validate4 = ajv.compile(Uigf4Schema);
   if (validate4(data)) return true;
   if (!validate4.errors || validate4.errors.length === 0) return false;
