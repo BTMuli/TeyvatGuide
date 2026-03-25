@@ -10,6 +10,7 @@
     "isolatedModules": true,
     "lib": ["DOM", "ESNext"],
     "skipLibCheck": true,
+    "noUncheckedSideEffectImports": false,
     "types": ["vite/client", "node", "js-md5", "uuid"],
     "composite": true,
     "paths": {
