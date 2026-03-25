@@ -138,6 +138,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { getRfAc } from "@utils/acUtils.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -212,37 +213,14 @@ async function loadAbyss(): Promise<void> {
 }
 
 async function refreshAbyss(): Promise<void> {
-  let rfAccount = account.value;
-  let rfCk = cookie.value;
-  if (!uidCur.value) {
-    if (!rfCk) {
-      showSnackbar.warn("请先登录");
-      await TGLogger.Warn(`[Abyss][refreshAbyss][${rfAccount.gameUid}] 未登录`);
-      return;
-    }
-  } else {
-    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
-    console.log(uidCur.value, gcFind);
-    if (!gcFind) {
-      const check = await showDialog.check(
-        `确定刷新？`,
-        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
-      );
-      if (!check) return;
-    } else {
-      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
-      if (!acFind) {
-        const check = await showDialog.check(
-          `确定刷新？`,
-          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
-        );
-        if (!check) return;
-      } else {
-        rfAccount = gcFind;
-        rfCk = acFind.cookie;
-      }
-    }
-  }
+  const refreshData = await getRfAc(
+    uidCur.value,
+    account.value,
+    cookie.value,
+    "Abyss.refreshAbyss",
+  );
+  if (!refreshData) return;
+  const { account: rfAccount, cookie: rfCk } = refreshData;
   await TGLogger.Info("[Abyss][refreshAbyss] 更新深渊数据");
   await showLoading.start(`正在获取 ${rfAccount.gameUid} 的深渊数据`, "正在获取上期数据");
   const resP = await recordReq.spiralAbyss(rfCk!, rfAccount, "2");

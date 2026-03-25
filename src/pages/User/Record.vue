@@ -81,10 +81,10 @@ import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import TurWorldGrid from "@comp/userRecord/tur-world-grid.vue";
 import recordReq from "@req/recordReq.js";
-import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import { getRfAc } from "@utils/acUtils.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -135,37 +135,14 @@ async function loadRecord(): Promise<void> {
 }
 
 async function refreshRecord(): Promise<void> {
-  let rfAccount = account.value;
-  let rfCk = cookie.value;
-  if (!uidCur.value) {
-    if (!rfCk) {
-      showSnackbar.warn("请先登录");
-      await TGLogger.Warn(`[UserRecord][refresh][${rfAccount.gameUid}] 未登录`);
-      return;
-    }
-  } else {
-    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
-    console.log(uidCur.value, gcFind);
-    if (!gcFind) {
-      const check = await showDialog.check(
-        `确定刷新？`,
-        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
-      );
-      if (!check) return;
-    } else {
-      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
-      if (!acFind) {
-        const check = await showDialog.check(
-          `确定刷新？`,
-          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
-        );
-        if (!check) return;
-      } else {
-        rfAccount = gcFind;
-        rfCk = acFind.cookie;
-      }
-    }
-  }
+  const refreshData = await getRfAc(
+    uidCur.value?.toString(),
+    account.value,
+    cookie.value,
+    "UserRecord.refresh",
+  );
+  if (!refreshData) return;
+  const { account: rfAccount, cookie: rfCk } = refreshData;
   await showLoading.start(`正在刷新${rfAccount.gameUid}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 刷新战绩数据`);
   isRefresh.value = true;

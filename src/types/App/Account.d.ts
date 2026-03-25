@@ -1,6 +1,6 @@
 /**
  * App 账号相关类型定义文件
- * @since Beta v0.6.0
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.App.Account {
@@ -53,5 +53,16 @@ declare namespace TGApp.App.Account {
     stoken: string;
     /** STUid */
     stuid: string;
+  };
+
+  /**
+   * 获取当前刷新账号返回
+   * @since Beta v0.9.9
+   */
+  type RfAc = {
+    /** 账号 */
+    account: TGApp.Sqlite.Account.Game;
+    /** Cookie */
+    cookie: Cookie;
   };
 }

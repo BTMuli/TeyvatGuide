@@ -163,11 +163,11 @@ import TuaSelectVals from "@comp/userAvatar/tua-select-vals.vue";
 import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import recordReq from "@req/recordReq.js";
-import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
+import { getRfAc } from "@utils/acUtils.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
@@ -413,37 +413,9 @@ async function loadRole(): Promise<void> {
 }
 
 async function refresh(): Promise<void> {
-  let rfAccount = account.value;
-  let rfCk = cookie.value;
-  if (!uidCur.value) {
-    if (!rfCk) {
-      showSnackbar.warn("请先登录");
-      await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 未登录`);
-      return;
-    }
-  } else {
-    const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
-    console.log(uidCur.value, gcFind);
-    if (!gcFind) {
-      const check = await showDialog.check(
-        `确定刷新？`,
-        `未找到 ${uidCur.value} 对应 UID，将刷新 ${rfAccount.gameUid} 数据`,
-      );
-      if (!check) return;
-    } else {
-      const acFind = await TSUserAccount.account.getAccount(gcFind.uid);
-      if (!acFind) {
-        const check = await showDialog.check(
-          `确定刷新？`,
-          `未找到 ${uidCur.value} 对应 CK，将刷新 ${rfAccount.gameUid} 数据`,
-        );
-        if (!check) return;
-      } else {
-        rfAccount = gcFind;
-        rfCk = acFind.cookie;
-      }
-    }
-  }
+  const refreshData = await getRfAc(uidCur.value, account.value, cookie.value, "Character.refresh");
+  if (!refreshData) return;
+  const { account: rfAccount, cookie: rfCk } = refreshData;
   await hideAllOverlay();
   await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
   await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
