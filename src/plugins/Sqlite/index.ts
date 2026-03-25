@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.9.5
+ * @since Beta v0.9.9
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -105,32 +105,24 @@ class Sqlite {
   }
 
   /**
-   * 插入应用数据
-   * @since Alpha v0.2.0
-   * @param key - 键
-   * @param value - 值
-   * @returns sql
-   */
-  insertAppData(key: string, value: string): string {
-    return `
-        INSERT INTO AppData (key, value, updated)
-        VALUES ('${key}', '${value}', datetime('now', 'localtime'))
-        ON CONFLICT(key) DO UPDATE SET value   = '${value}',
-                                       updated = datetime('now', 'localtime');
-    `;
-  }
-
-  /**
    * 保存 appData
-   * @since Beta v0.3.3
+   * @since Beta v0.9.9
    * @param key - 键
    * @param value - 值
    * @returns 无返回值
    */
   public async saveAppData(key: string, value: string): Promise<void> {
     const db = await this.getDB();
-    const sql = this.insertAppData(key, value);
-    await db.execute(sql);
+    await db.execute(
+      `
+          INSERT INTO AppData (key, value, updated)
+          VALUES ($1, $2, datetime('now', 'localtime'))
+          ON CONFLICT(key)
+              DO UPDATE SET value   = $2,
+                            updated = datetime('now', 'localtime');
+      `,
+      [key, value],
+    );
   }
 
   /**
