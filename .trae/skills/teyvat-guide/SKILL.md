@@ -44,15 +44,49 @@ const GameServerEnum = <const>{
 enum GameServerEnum { ... }
 ```
 
-**JSDoc**: 导出函数必须包含 `@since` 标签
+**JSDoc**: 导出函数必须包含 `@since` 标签，类型定义的子成员修改时需同步更新版本号
 
 ```typescript
+/**
+ * 角色相关类型定义
+ * @since Beta v0.9.6
+ */
+
 /**
  * 函数描述
  * @since Beta v0.9.6
  * @param param - 参数描述
  * @returns 返回描述
  */
+```
+
+**版本更新规则**：当修改类型的子成员时（如添加字段），需要：
+1. 更新父级类型的 `@since` 为当前项目版本（递增）
+2. 如该文件是主要变更文件，同步更新文件头的 `@since`
+
+示例（项目版本从 0.9.8 → 0.9.9）：
+
+```typescript
+// 修改前
+/**
+ * 角色信息对象
+ * @since Beta v0.9.6
+ */
+type Character = {
+  id: number;
+  name: string;
+};
+
+// 修改后 - 添加新字段
+/**
+ * 角色信息对象
+ * @since Beta v0.9.9  // 递增版本号
+ */
+type Character = {
+  id: number;
+  name: string;
+  element: string; // 新增字段
+};
 ```
 
 **Import 顺序**: 1. 内置模块 2. 外部包 3. 别名 (@/*) 4. 相对导入

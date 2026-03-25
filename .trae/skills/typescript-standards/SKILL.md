@@ -57,7 +57,7 @@ const result: string = getValue();
 const el: HTMLInputElement = <HTMLInputElement>document.getElementById('id');
 const data = <MyDataType>unknownValue;
 
-// ✅ 正确 - 函数参数和返回值
+// ✅ 正确 - 函数定义优先使用 function 关键字
 function getUser(id: number): UserProfile {
   return { id, name: "User" };
 }
@@ -65,6 +65,11 @@ function getUser(id: number): UserProfile {
 // ❌ 错误 - as 断言风格
 const value = someValue as string;
 const result = getValue() as string;
+
+// ❌ 错误 - 使用 const 定义函数（优先使用 function）
+const getUser = (id: number): UserProfile => {
+  return { id, name: "User" };
+};
 
 // ❌ 错误 - 缺少类型注解
 function getUser(id): UserProfile {
@@ -110,7 +115,36 @@ interface UserProfile {
 }
 ```
 
-### 5. 类型注解规范
+### 5. 函数定义规范
+
+**优先使用 `function` 关键字定义函数，而不是箭头函数赋值给 `const`**
+
+```typescript
+// ✅ 正确 - 使用 function 关键字
+function getUser(id: number): UserProfile {
+  return { id, name: "User" };
+}
+
+async function loadData(): Promise<void> {
+  await fetch("/api/data");
+}
+
+// ❌ 错误 - 使用 const + 箭头函数（除非需要捕获 this 或用于回调）
+const getUser = (id: number): UserProfile => {
+  return { id, name: "User" };
+};
+
+const loadData = async (): Promise<void> => {
+  await fetch("/api/data");
+};
+```
+
+**例外情况（可以使用箭头函数）：**
+- 需要捕获词法 `this` 时
+- 作为回调函数传递给其他函数时
+- 对象字面量中的方法（根据场景判断）
+
+### 6. 类型注解规范
 
 - 函数参数和返回值必须显式类型注解
 - 使用 `unknown` 而非 `any`
@@ -135,18 +169,64 @@ function getUser(id): UserProfile { // 缺少参数类型
 }
 ```
 
-### 6. JSDoc 注释
+### 7. JSDoc 注释
 
 - 所有导出函数必须包含 `@since` 标签
 - 枚举常量需要 `@see` 标签
+- 类型定义的子成员修改时，需同步更新父级类型和文件头的 `@since` 版本号
 
 ```typescript
+/**
+ * 角色相关类型定义
+ * @since Beta v0.9.6
+ */
+
 /**
  * 获取角色信息
  * @since Beta v0.9.6
  * @param id - 角色 ID
  */
 function getCharacter(id: number): Character;
+
+/**
+ * 角色信息对象
+ * @since Beta v0.9.6
+ */
+type Character = {
+  id: number;
+  name: string;
+};
+```
+
+**版本更新规则：**
+
+当修改类型的子成员时（如添加字段），需要：
+1. 更新父级类型的 `@since` 为当前项目版本（递增）
+2. 如该文件是主要变更文件，同步更新文件头的 `@since`
+
+示例（项目版本从 0.9.8 → 0.9.9）：
+
+```typescript
+// 修改前
+/**
+ * 角色信息对象
+ * @since Beta v0.9.6
+ */
+type Character = {
+  id: number;
+  name: string;
+};
+
+// 修改后 - 添加新字段
+/**
+ * 角色信息对象
+ * @since Beta v0.9.9  // 递增版本号
+ */
+type Character = {
+  id: number;
+  name: string;
+  element: string; // 新增字段
+};
 ```
 
 ## ESLint 规则对应
