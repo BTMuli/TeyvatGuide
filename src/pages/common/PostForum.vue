@@ -97,7 +97,7 @@
       </v-btn>
     </div>
     <template #extension>
-      <TGameNav :gid="curGid" :mini="false" style="margin-left: 8px" />
+      <TGameNav :gid="curGid" style="margin-left: 8px" />
     </template>
   </v-app-bar>
   <div class="posts-grid">

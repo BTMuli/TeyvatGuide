@@ -8,9 +8,9 @@
 <script lang="ts" setup>
 import { computed, useTemplateRef } from "vue";
 
-type TGameNavItemProps = { label: string; mini: boolean };
+type TGameNavItemProps = { label: string; mini?: boolean };
 
-const props = defineProps<TGameNavItemProps>();
+const props = withDefaults(defineProps<TGameNavItemProps>(), { mini: false });
 const labelEl = useTemplateRef<HTMLSpanElement>("TgniLabelRef");
 const width = computed<string>(() => {
   if (!labelEl.value || props.mini) return "38px";

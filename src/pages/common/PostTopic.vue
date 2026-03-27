@@ -16,7 +16,7 @@
       </div>
     </template>
     <template #extension>
-      <TGameNav v-if="curGid !== 0" :gid="curGid" :mini="false" style="margin-left: 8px" />
+      <TGameNav v-if="curGid !== 0" :gid="curGid" style="margin-left: 8px" />
     </template>
     <div class="post-topic-switch">
       <v-select

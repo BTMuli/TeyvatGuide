@@ -5,7 +5,7 @@
       v-for="navItem in nav"
       :key="navItem.id"
       :label="navItem.name"
-      :mini="true"
+      :mini
       class="tgn-nav"
       @click="toNav(navItem)"
     >
@@ -13,7 +13,7 @@
         <TMiImg :ori="true" :size="28" :src="navItem.icon" alt="navIcon" />
       </template>
     </TGameNavItem>
-    <TGameNavItem v-if="hasNav" :mini="true" class="tgn-nav" label="兑换码">
+    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码">
       <template #icon>
         <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28" @click="tryGetCode">
           mdi-code-tags-check
