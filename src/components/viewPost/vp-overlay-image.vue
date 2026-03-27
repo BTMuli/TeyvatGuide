@@ -43,6 +43,10 @@
               <span>格式：</span>
               <span>{{ format }}</span>
             </span>
+            <span class="tpoi-info-item">
+              <span>缩放：</span>
+              <span>{{ Math.round(scale * 100) }}%</span>
+            </span>
           </div>
         </template>
         <template v-else-if="props.image.attributes">
@@ -105,11 +109,13 @@ type VpoiPos = { x: number; y: number };
 
 const BG_LABELS: ReadonlyArray<string> = ["透明", "黑色", "白色"];
 const FMT_ARR: ReadonlyArray<string> = ["png", "jpg", "jpeg", "webp"];
-const DRAG_THRESHOLD: number = 5;
-const MIN_SCALE: number = 0.1;
-const MAX_SCALE: number = 10;
-const ZOOM_STEP: number = 0.1;
-const MAX_BYTE: number = 80000000;
+const DRAG_THRESHOLD: Readonly<number> = 5;
+const MIN_SCALE: Readonly<number> = 0.1;
+const MAX_SCALE: Readonly<number> = 10;
+const ZOOM_STEP: Readonly<number> = 0.1;
+const MAX_FILE_SIZE: Readonly<number> = 80000000;
+const SCALE_HINT_DURATION: Readonly<number> = 1500;
+const OUTER_CLOSE_DELAY: Readonly<number> = 100;
 
 const props = defineProps<TpoImageProps>();
 const visible = defineModel<boolean>();
@@ -119,7 +125,7 @@ const bgColor = defineModel<string>("bgColor", { default: "transparent" });
 const format = defineModel<string>("format", { default: "png" });
 
 let scaleHintTimer: number | null = null;
-let resetTimer: number | null = null;
+let scaleHintPending: boolean = false;
 
 const bgMode = ref<number>(0);
 const scale = ref<number>(1);
@@ -161,6 +167,10 @@ watch(
   () => visible.value,
   (newVal) => {
     if (!newVal) {
+      if (scaleHintTimer !== null) {
+        clearTimeout(scaleHintTimer);
+        scaleHintTimer = null;
+      }
       scale.value = 1;
       imgPos.value = { x: 0, y: 0 };
       dragPos.value = { x: 0, y: 0 };
@@ -182,9 +192,7 @@ onUnmounted(() => {
   document.removeEventListener("mouseup", onDocumentMouseUp);
   if (scaleHintTimer !== null) {
     clearTimeout(scaleHintTimer);
-  }
-  if (resetTimer !== null) {
-    clearTimeout(resetTimer);
+    scaleHintTimer = null;
   }
 });
 
@@ -226,18 +234,26 @@ function resetTransform(): void {
   hasDragged.value = false;
 }
 
-function onBoxClick(event: MouseEvent): void {
-  if (event.button !== 0) return;
+function enterDragMode(): void {
+  isDragMode.value = true;
+  imgOriSize.value = getImgOriSize();
+  scale.value = 1;
+  imgPos.value = { x: 0, y: 0 };
+  showOri.value = true;
+}
+
+function handleClick(): void {
   if (hasDragged.value) return;
   if (!isDragMode.value) {
-    isDragMode.value = true;
-    imgOriSize.value = getImgOriSize();
-    scale.value = 1;
-    imgPos.value = { x: 0, y: 0 };
-    showOri.value = true;
+    enterDragMode();
   } else {
     resetTransform();
   }
+}
+
+function onBoxClick(event: MouseEvent): void {
+  if (event.button !== 0) return;
+  handleClick();
 }
 
 function onBoxMouseDown(event: MouseEvent): void {
@@ -252,7 +268,7 @@ function onBoxMouseDown(event: MouseEvent): void {
   }
 }
 
-function onBoxMouseMove(event: MouseEvent): void {
+function handleMouseMove(event: MouseEvent): void {
   if (!isDragging.value && !isDragMode.value) {
     const dx = event.clientX - clickPos.value.x;
     const dy = event.clientY - clickPos.value.y;
@@ -270,13 +286,17 @@ function onBoxMouseMove(event: MouseEvent): void {
   imgPos.value = { x: dragPos.value.x + dx, y: dragPos.value.y + dy };
 }
 
+function onBoxMouseMove(event: MouseEvent): void {
+  handleMouseMove(event);
+}
+
 function onDocumentMouseUp(): void {
   if (isDragging.value) {
     isDragging.value = false;
   }
   setTimeout(() => {
     outerClose.value = true;
-  }, 100);
+  }, OUTER_CLOSE_DELAY);
 }
 
 function onBoxMouseUp(): void {
@@ -300,11 +320,7 @@ async function onImgClick(event: MouseEvent): Promise<void> {
       hasDragged.value = false;
       return;
     }
-    isDragMode.value = true;
-    imgOriSize.value = getImgOriSize();
-    scale.value = 1;
-    imgPos.value = { x: 0, y: 0 };
-    showOri.value = true;
+    enterDragMode();
   } else if (!hasDragged.value && !wasDragging) {
     resetTransform();
   }
@@ -326,22 +342,10 @@ async function onImgMouseDown(event: MouseEvent): Promise<void> {
 }
 
 function onImgMouseMove(event: MouseEvent): void {
-  if (!isDragging.value && !isDragMode.value) {
-    const dx = event.clientX - clickPos.value.x;
-    const dy = event.clientY - clickPos.value.y;
-    if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-      hasDragged.value = true;
-    }
-    return;
+  if (isDragMode.value && isDragging.value) {
+    event.preventDefault();
   }
-  if (!isDragMode.value || !isDragging.value) return;
-  event.preventDefault();
-  const dx = event.clientX - clickPos.value.x;
-  const dy = event.clientY - clickPos.value.y;
-  if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-    hasDragged.value = true;
-  }
-  imgPos.value = { x: dragPos.value.x + dx, y: dragPos.value.y + dy };
+  handleMouseMove(event);
 }
 
 function onImgMouseUp(event: MouseEvent): void {
@@ -351,7 +355,7 @@ function onImgMouseUp(event: MouseEvent): void {
   if (hasDragged.value) {
     setTimeout(() => {
       outerClose.value = true;
-    }, 100);
+    }, OUTER_CLOSE_DELAY);
   }
 }
 
@@ -365,17 +369,25 @@ function onWheel(event: WheelEvent): void {
     if (!rect) return;
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
-    const imgX = mouseX / scale.value;
-    const imgY = mouseY / scale.value;
-    const newImgX = mouseX / newScale;
-    const newImgY = mouseY / newScale;
-    const offsetX = (newImgX - imgX) * scale.value;
-    const offsetY = (newImgY - imgY) * scale.value;
+    const imgX = (mouseX - imgPos.value.x) / scale.value;
+    const imgY = (mouseY - imgPos.value.y) / scale.value;
     imgPos.value = {
-      x: imgPos.value.x - offsetX,
-      y: imgPos.value.y - offsetY,
+      x: mouseX - imgX * newScale,
+      y: mouseY - imgY * newScale,
     };
     scale.value = newScale;
+    showScaleHint.value = true;
+    if (!scaleHintPending) {
+      scaleHintPending = true;
+      if (scaleHintTimer !== null) {
+        clearTimeout(scaleHintTimer);
+      }
+      scaleHintTimer = window.setTimeout(() => {
+        showScaleHint.value = false;
+        scaleHintTimer = null;
+        scaleHintPending = false;
+      }, SCALE_HINT_DURATION);
+    }
   }
 }
 
@@ -405,7 +417,7 @@ async function onDownload(): Promise<void> {
   }
   await showLoading.start("正在下载图片到本地", oriLink.value);
   if (buffer.value === null) buffer.value = await getImageBuffer(oriLink.value);
-  if (buffer.value.byteLength > MAX_BYTE) {
+  if (buffer.value.byteLength > MAX_FILE_SIZE) {
     showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
