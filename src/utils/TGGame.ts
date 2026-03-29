@@ -1,25 +1,32 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.9.8
+ * @since Beta v0.9.9
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { parse } from "ini";
 import { invoke } from "@tauri-apps/api/core";
 import { documentDir, resourceDir, sep } from "@tauri-apps/api/path";
-import {
-  copyFile,
-  exists,
-  mkdir,
-  readDir,
-  readTextFile,
-  readTextFileLines,
-} from "@tauri-apps/plugin-fs";
+import { copyFile, exists, mkdir, readDir, readTextFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 
 // YAE支持的游戏版本
 export const YAE_GAME_VER: Readonly<string> = "6.4.0";
+
+/**
+ * 验证游戏格式
+ * @since Beta v0.9.9
+ * @param data - ini数据
+ * @returns 类型收束
+ */
+function verifyConfigIni(data: object): data is TGApp.Game.Config.GameConf {
+  if (!("general" in data) || typeof data.general !== "object" || data.general === null) return false;
+  if (!("game_version" in data.general) || typeof data.general.game_version !== "string") return false;
+  // 简单验证general跟game_version
+  return true;
+}
 
 /**
  * 尝试获取游戏版本
@@ -37,14 +44,12 @@ export async function tryReadGameVer(gameDir: string): Promise<false | string> {
   }
   const iniPath = `${gameDir}${sep()}config.ini`;
   if (await exists(iniPath)) {
-    const iniRead = await readTextFileLines(iniPath);
-    while (true) {
-      const line = await iniRead.next();
-      const lineRead = line.value;
-      if (typeof lineRead === "string" && lineRead.startsWith("game_version=")) {
-        return lineRead.split("=")[1];
-      }
-      if (line.done) break;
+    const iniRead = await readTextFile(iniPath);
+    try {
+      const iniParse = parse(iniRead);
+      if (verifyConfigIni(iniParse)) return iniParse.general.game_version;
+    } catch (e) {
+      showSnackbar.warn("config.ini 配置格式异常");
     }
   }
   const scriptPath = `${gameDir}${sep()}YuanShen_Data${sep()}Persistent${sep()}ScriptVersion`;
@@ -56,12 +61,11 @@ export async function tryReadGameVer(gameDir: string): Promise<false | string> {
 
 /**
  * 判断是否是管理员模式
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  */
 export async function isRunInAdmin(): Promise<boolean> {
   try {
-    const isAdmin = await invoke<boolean>("is_in_admin");
-    return isAdmin;
+    return await invoke<boolean>("is_in_admin");
   } catch (err) {
     showSnackbar.error(`检测管理员权限失败：${err}`);
     await TGLogger.Error(`[TGGame][isRunInAdmin]检测管理员权限失败:${err}`);
