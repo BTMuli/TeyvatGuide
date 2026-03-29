@@ -1,0 +1,254 @@
+{
+  "type": "object",
+  "properties": {
+    "uid": {
+      "type": "string",
+      "title": "用户 UID",
+      "description": "游戏 UID"
+    },
+    "schedule_id": {
+      "type": "number",
+      "title": "周期 ID",
+      "description": "深渊期数 ID"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "schedule_id": {
+          "type": "number",
+          "title": "周期 ID"
+        },
+        "start_time": {
+          "type": "string",
+          "title": "开始时间戳",
+          "description": "秒级时间戳"
+        },
+        "end_time": {
+          "type": "string",
+          "title": "结束时间戳",
+          "description": "秒级时间戳"
+        },
+        "total_battle_times": {
+          "type": "number",
+          "title": "战斗次数"
+        },
+        "total_win_times": {
+          "type": "number",
+          "title": "胜利次数"
+        },
+        "max_floor": {
+          "type": "string",
+          "title": "最大楼层"
+        },
+        "total_star": {
+          "type": "number",
+          "title": "总星数"
+        },
+        "is_unlock": {
+          "type": "boolean",
+          "title": "是否解锁"
+        },
+        "is_just_skipped_floor": {
+          "type": "boolean",
+          "title": "是否有跳过楼层"
+        },
+        "skipped_floor": {
+          "type": "string",
+          "title": "跳过楼层"
+        },
+        "reveal_rank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar_id": { "type": "number" },
+              "avatar_icon": { "type": "string" },
+              "value": { "type": "number" },
+              "rarity": { "type": "number" }
+            },
+            "required": ["avatar_id", "value"]
+          }
+        },
+        "defeat_rank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar_id": { "type": "number" },
+              "avatar_icon": { "type": "string" },
+              "value": { "type": "number" },
+              "rarity": { "type": "number" }
+            },
+            "required": ["avatar_id", "value"]
+          }
+        },
+        "damage_rank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar_id": { "type": "number" },
+              "avatar_icon": { "type": "string" },
+              "value": { "type": "number" },
+              "rarity": { "type": "number" }
+            },
+            "required": ["avatar_id", "value"]
+          }
+        },
+        "take_damage_rank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar_id": { "type": "number" },
+              "avatar_icon": { "type": "string" },
+              "value": { "type": "number" },
+              "rarity": { "type": "number" }
+            },
+            "required": ["avatar_id", "value"]
+          }
+        },
+        "normal_skill_rank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar_id": { "type": "number" },
+              "avatar_icon": { "type": "string" },
+              "value": { "type": "number" },
+              "rarity": { "type": "number" }
+            },
+            "required": ["avatar_id", "value"]
+          }
+        },
+        "energy_skill_rank": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "avatar_id": { "type": "number" },
+              "avatar_icon": { "type": "string" },
+              "value": { "type": "number" },
+              "rarity": { "type": "number" }
+            },
+            "required": ["avatar_id", "value"]
+          }
+        },
+        "floors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "index": { "type": "number" },
+              "icon": { "type": "string" },
+              "is_unlock": { "type": "boolean" },
+              "settle_time": { "type": "string" },
+              "star": { "type": "number" },
+              "max_star": { "type": "number" },
+              "ley_line_disorder": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "settle_date_time": {
+                "type": ["object", "null"],
+                "properties": {
+                  "year": { "type": "number" },
+                  "month": { "type": "number" },
+                  "day": { "type": "number" },
+                  "hour": { "type": "number" },
+                  "minute": { "type": "number" },
+                  "second": { "type": "number" }
+                }
+              },
+              "levels": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "index": { "type": "number" },
+                    "star": { "type": "number" },
+                    "max_star": { "type": "number" },
+                    "battles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "index": { "type": "number" },
+                          "timestamp": { "type": "string" },
+                          "settle_date_time": {
+                            "type": "object",
+                            "properties": {
+                              "year": { "type": "number" },
+                              "month": { "type": "number" },
+                              "day": { "type": "number" },
+                              "hour": { "type": "number" },
+                              "minute": { "type": "number" },
+                              "second": { "type": "number" }
+                            }
+                          },
+                          "avatars": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": { "type": "number" },
+                                "icon": { "type": "string" },
+                                "level": { "type": "number" },
+                                "rarity": { "type": "number" }
+                              },
+                              "required": ["id", "level", "rarity"]
+                            }
+                          }
+                        },
+                        "required": ["index", "timestamp", "avatars", "settle_date_time"]
+                      }
+                    },
+                    "top_half_floor_monster": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "icon": { "type": "string" },
+                          "level": { "type": "number" }
+                        },
+                        "required": ["name", "level"]
+                      }
+                    },
+                    "bottom_half_floor_monster": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "icon": { "type": "string" },
+                          "level": { "type": "number" }
+                        },
+                        "required": ["name", "level"]
+                      }
+                    }
+                  },
+                  "required": ["index", "star", "max_star", "battles"]
+                }
+              }
+            },
+            "required": ["index", "is_unlock", "star", "max_star", "levels"]
+          }
+        }
+      },
+      "required": [
+        "schedule_id",
+        "start_time",
+        "end_time",
+        "total_battle_times",
+        "total_win_times",
+        "max_floor",
+        "total_star",
+        "is_unlock",
+        "floors"
+      ]
+    }
+  },
+  "required": ["uid", "schedule_id", "data"],
+  "title": "深境螺旋数据 Schema"
+}
