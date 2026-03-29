@@ -99,6 +99,7 @@ defineExpose({ displayBox });
   height: 80px;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
 }
 
 .func-snackbar {
@@ -113,6 +114,7 @@ defineExpose({ displayBox });
   border-radius: 5px;
   background-color: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
   box-shadow: 0 0 10px #00000033;
+  pointer-events: auto;
   word-break: break-all;
 }
 
