@@ -155,7 +155,7 @@ import TucOvStat from "@comp/userCombat/tuc-ov-stat.vue";
 import TucOvTarot from "@comp/userCombat/tuc-ov-tarot.vue";
 import TucOverview from "@comp/userCombat/tuc-overview.vue";
 import TucRound from "@comp/userCombat/tuc-round.vue";
-import hutao from "@Hutao/index.js";
+import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
@@ -231,7 +231,7 @@ async function hideAllOverlay(): Promise<void> {
 
 async function loadWiki(): Promise<void> {
   await showLoading.start("正在加载统计数据");
-  const res = await hutao.Combat.data();
+  const res = await Hutao.Combat.data();
   if (res === undefined) showSnackbar.error("未获取到剧诗数据");
   else if ("retcode" in res) {
     showSnackbar.warn(`[${res.retcode}] ${res.message}`);
@@ -431,8 +431,8 @@ async function uploadCombat(): Promise<void> {
   }
   try {
     await showLoading.start("正在上传剧诗数据");
-    const transCombat = hutao.Combat.trans(combatData);
-    const res = await hutao.Combat.upload(transCombat);
+    const transCombat = Hutao.Combat.trans(combatData);
+    const res = await Hutao.Combat.upload(transCombat);
     if (res.retcode === 0) {
       showSnackbar.success(res.message ?? "上传剧诗数据成功");
       await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
@@ -484,10 +484,15 @@ async function tryReadCombat(): Promise<void> {
       showSnackbar.warn("文件数据格式错误");
       return;
     }
-    // TODO:数据结构
+    if (!Hutao.raw.valid.combat(fileData)) {
+      await showLoading.end();
+      showSnackbar.warn("剧诗数据验证失败，请检查数据格式");
+      return;
+    }
+    // 类型收束后的安全访问
     for (const item of fileData) {
-      await showLoading.update(`Uid: ${item["uid"]},ScheduleId: ${item["schedule_id"]}`);
-      await TSUserCombat.saveCombat(item["uid"], item["data"]);
+      await showLoading.update(`Uid: ${item.uid},ScheduleId: ${item.schedule_id}`);
+      await TSUserCombat.saveCombat(item.uid, item.data);
     }
     await showLoading.end();
     showSnackbar.success(`成功导入 ${fileData.length} 条剧诗数据，即将刷新页面`);

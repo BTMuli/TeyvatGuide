@@ -127,7 +127,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
 import TuaOverview from "@comp/userAbyss/tua-overview.vue";
-import hutao from "@Hutao/index.js";
+import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAbyss from "@Sqlm/userAbyss.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
@@ -321,10 +321,15 @@ async function tryReadAbyss(): Promise<void> {
       showSnackbar.warn("文件数据格式错误");
       return;
     }
-    // TODO:数据结构
+    if (!Hutao.raw.valid.abyss(fileData)) {
+      await showLoading.end();
+      showSnackbar.warn("深渊数据验证失败，请检查数据格式");
+      return;
+    }
+    // 类型收束后的安全访问
     for (const item of fileData) {
-      await showLoading.update(`Uid: ${item["uid"]},ScheduleId: ${item["schedule_id"]}`);
-      await TSUserAbyss.saveAbyss(item["uid"], item["data"]);
+      await showLoading.update(`Uid: ${item.uid},ScheduleId: ${item.schedule_id}`);
+      await TSUserAbyss.saveAbyss(item.uid, item.data);
     }
     await showLoading.end();
     showSnackbar.success(`成功导入 ${fileData.length} 条深渊数据，即将刷新页面`);
@@ -378,7 +383,7 @@ async function uploadAbyss(): Promise<void> {
   }
   try {
     await showLoading.start(`正在上传 ${gcFind.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
-    const transAbyss = hutao.Abyss.utils.transData(abyssData);
+    const transAbyss = Hutao.Abyss.utils.transData(abyssData);
     if (userName.value) transAbyss.ReservedUserName = userName.value;
     const check = await refreshAvatars(acFind.cookie!, gcFind);
     if (!check) return;
@@ -389,10 +394,10 @@ async function uploadAbyss(): Promise<void> {
       return;
     }
     await showLoading.update("正在转换角色数据");
-    transAbyss.Avatars = hutao.Abyss.utils.transAvatars(roles);
+    transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
     await showLoading.update("正在上传深渊数据");
     console.log("uploadAbyss", transAbyss);
-    const res = await hutao.Abyss.upload(transAbyss);
+    const res = await Hutao.Abyss.upload(transAbyss);
     if (res.retcode !== 0) {
       showSnackbar.error(`[${res.retcode}]${res.message}`);
       await TGLogger.Error("[Abyss][uploadAbyss] 上传深渊数据失败");

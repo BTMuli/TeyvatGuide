@@ -155,6 +155,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import Hutao from "@Hutao/index.js";
 import { getRfAc } from "@utils/acUtils.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
@@ -372,10 +373,15 @@ async function tryReadChallenge(): Promise<void> {
       showSnackbar.warn("文件数据格式错误");
       return;
     }
-    // TODO:数据结构
+    if (!Hutao.raw.valid.challenge(fileData)) {
+      await showLoading.end();
+      showSnackbar.warn("危战数据验证失败，请检查数据格式");
+      return;
+    }
+    // 类型收束后的安全访问
     for (const item of fileData) {
-      await showLoading.update(`Uid: ${item["uid"]},ScheduleId: ${item["schedule_id"]}`);
-      await TSUserChallenge.saveChallenge(item["uid"], item["data"]);
+      await showLoading.update(`Uid: ${item.uid},ScheduleId: ${item.schedule_id}`);
+      await TSUserChallenge.saveChallenge(item.uid, item.data);
     }
     await showLoading.end();
     showSnackbar.success(`成功导入 ${fileData.length} 条危战数据，即将刷新页面`);
