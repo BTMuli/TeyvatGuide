@@ -29,6 +29,7 @@ import {
 } from "./request/gachaReq.js";
 import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
 import { transCombatLocal } from "./utils/combatUtil.js";
+import { RawValidator } from "./utils/RawValidator.js";
 
 const _ = "Not Implemented";
 
@@ -80,6 +81,9 @@ const Hutao = {
     logs: getGachaLogs,
     upload: uploadGachaLogs,
     delete: deleteGachaLogs,
+  },
+  raw: {
+    valid: RawValidator,
   },
 };
 
