@@ -1,9 +1,25 @@
 /**
  * 幻想真境剧诗
- * @since Beta v0.6.3
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.Plugins.Hutao.Combat {
+  /**
+   * 导入数据结构
+   * @since Beta v0.9.9
+   */
+  type ImportData = {
+    uid: string;
+    schedule_id: number;
+    start_time: string;
+    end_time: string;
+    has_data: boolean;
+    has_detail_data: boolean;
+    stat: TGApp.Game.Combat.Stat;
+    detail: TGApp.Game.Combat.Detail;
+    schedule: TGApp.Game.Combat.Schedule;
+    data: TGApp.Game.Combat.Combat;
+  };
   /**
    * 上传返回
    * @since Beta v0.6.3

@@ -1,9 +1,18 @@
 /**
  * 深境螺旋
- * @since Beta v0.3.0
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.Plugins.Hutao.Abyss {
+  /**
+   * 导入数据结构
+   * @since Beta v0.9.9
+   */
+  type ImportData = {
+    uid: string;
+    schedule_id: number;
+    data: TGApp.Game.Abyss.FullData;
+  };
   /**
    * 深渊记录上传数据
    * @since Alpha v0.2.1
