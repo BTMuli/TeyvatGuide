@@ -1,8 +1,9 @@
 /**
  * 原神战绩数据转换
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  */
 
+import gameEnum from "@enum/game.js";
 import { getZhElement } from "@utils/toolFunc.js";
 
 /**
@@ -62,35 +63,8 @@ function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar
 }
 
 /**
- * 获取幽境危战难度描述
- * @since Beta v0.9.0
- * @param difficulty - 幽境危战难度
- * @returns 幽境危战难度描述
- */
-export function getHardChallengeDesc(difficulty: number): string {
-  switch (difficulty) {
-    case 0:
-      return "未挑战";
-    case 1:
-      return "普通";
-    case 2:
-      return "进阶";
-    case 3:
-      return "困难";
-    case 4:
-      return "险恶";
-    case 5:
-      return "无畏";
-    case 6:
-      return "绝境";
-    default:
-      return `难度${difficulty}`;
-  }
-}
-
-/**
  * 转换统计信息
- * @since Beta v0.8.1
+ * @since Beta v0.9.9
  * @param data - 统计信息
  * @returns 转换后的统计信息
  */
@@ -112,7 +86,7 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
     sprialAbyss: data.spiral_abyss,
     combatRole: data.role_combat.is_unlock ? `第 ${data.role_combat.max_round_id} 幕` : "未解锁",
     hardChallenge: data.hard_challenge.is_unlock
-      ? `${data.hard_challenge.name}-${getHardChallengeDesc(data.hard_challenge.difficulty)}`
+      ? `${data.hard_challenge.name}-${gameEnum.challenge.diffDesc(data.hard_challenge.difficulty)}`
       : "未解锁",
     luxuriousChest: data.luxurious_chest_number,
     preciousChest: data.precious_chest_number,

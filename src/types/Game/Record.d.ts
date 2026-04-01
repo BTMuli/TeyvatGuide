@@ -1,8 +1,8 @@
 /**
  * 原神战绩相关类型定义文件
- *
- * @since Beta v0.8.1
+ * @since Beta v0.9.9
  */
+
 declare namespace TGApp.Game.Record {
   /**
    * 原神战绩数据返回响应
@@ -151,13 +151,13 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 幽境危战挑战数据类型
-   * @since Beta v0.8.0
+   * @since Beta v0.9.9
    */
   type ChallengeStats = {
     /** 是否解锁 */
     is_unlock: boolean;
     /** 挑战难度 */
-    difficulty: number;
+    difficulty: TGApp.Game.Challenge.DiffEnum;
     /** 是否有数据 */
     has_data: boolean;
     /** 挑战名称 */

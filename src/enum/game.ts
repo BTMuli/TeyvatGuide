@@ -165,6 +165,87 @@ function getCombatAvatarTypeDesc(avatarType: TGApp.Game.Combat.AvatarTypeEnum): 
 }
 
 /**
+ * 剧诗难度类型枚举
+ * @since Beta v0.9.9
+ * @see TGApp.Game.Combat.DiffEnum
+ */
+const CombatDiffEnum: typeof TGApp.Game.Combat.Difficulty = {
+  NONE: 0,
+  EASY: 1,
+  NORMAL: 2,
+  HARD: 3,
+  MASTER: 4,
+  TAROT: 5,
+};
+
+/**
+ * 获取剧诗难度描述
+ * @since Beta v0.9.9
+ * @param difficultyId - 剧诗难度等级
+ * @returns 剧诗难度描述
+ */
+function getCombatDiffDesc(difficultyId: TGApp.Game.Combat.DiffEnum): string {
+  switch (difficultyId) {
+    case CombatDiffEnum.NONE:
+      return "未选择";
+    case CombatDiffEnum.EASY:
+      return "轻简模式";
+    case CombatDiffEnum.NORMAL:
+      return "普通模式";
+    case CombatDiffEnum.HARD:
+      return "困难模式";
+    case CombatDiffEnum.MASTER:
+      return "卓越模式";
+    case CombatDiffEnum.TAROT:
+      return "月谕模式";
+    default:
+      return `未知模式${difficultyId}`;
+  }
+}
+
+/**
+ * 幽境危战难度类型枚举
+ * @since Beta v0.9.9
+ * @see TGApp.Game.Challenge.DiffEnum
+ */
+const ChallengeDiffEnum: typeof TGApp.Game.Challenge.Difficulty = {
+  NONE: 0,
+  NORMAL: 1,
+  ADVANCED: 2,
+  HARD: 3,
+  DANGEROUS: 4,
+  FEARLESS: 5,
+  DESPERATE: 6,
+};
+
+/**
+ * 获取幽境危战难度描述
+ * @since Beta v0.9.9
+ * @param difficulty - 幽境危战难度
+ * @returns 幽境危战难度描述
+ */
+function getChallengeDiffDesc(difficulty: TGApp.Game.Challenge.DiffEnum): string {
+  switch (difficulty) {
+    case ChallengeDiffEnum.NONE:
+      return "未挑战";
+    case ChallengeDiffEnum.NORMAL:
+      return "普通";
+    case ChallengeDiffEnum.ADVANCED:
+      return "进阶";
+    case ChallengeDiffEnum.HARD:
+      return "困难";
+    case ChallengeDiffEnum.DANGEROUS:
+      return "险恶";
+    case ChallengeDiffEnum.FEARLESS:
+      return "无畏";
+    case ChallengeDiffEnum.DESPERATE:
+      return "绝境";
+    default:
+      return `难度${difficulty}`;
+  }
+}
+
+/**
  * 绘想游迹状态枚举
  * @since Beta v0.9.6
  */
@@ -191,6 +272,12 @@ const gameEnum = {
     charMasterStat: CombatCharMasterStatEnum,
     avatarType: CombatAvatarTypeEnum,
     avatarTypeDesc: getCombatAvatarTypeDesc,
+    diff: CombatDiffEnum,
+    diffDesc: getCombatDiffDesc,
+  },
+  challenge: {
+    diff: ChallengeDiffEnum,
+    diffDesc: getChallengeDiffDesc,
   },
 };
 

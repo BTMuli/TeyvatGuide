@@ -1,9 +1,37 @@
 /**
  * 幽境危战
- * @since Beta v0.8.0
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.Game.Challenge {
+  /**
+   * 幽境危战难度
+   * @since Beta v0.9.9
+   * @see TGApp.Game.Challenge.DiffEnum
+   */
+  const Difficulty = <const>{
+    /** 未挑战 */
+    NONE: 0,
+    /** 普通 */
+    NORMAL: 1,
+    /** 进阶 */
+    ADVANCED: 2,
+    /** 困难 */
+    HARD: 3,
+    /** 险恶 */
+    DANGEROUS: 4,
+    /** 无畏 */
+    FEARLESS: 5,
+    /** 绝境 */
+    DESPERATE: 6,
+  };
+
+  /**
+   * 幽境危战难度枚举
+   * @since Beta v0.9.9
+   */
+  type DiffEnum = (typeof Difficulty)[keyof typeof Difficulty];
+
   /**
    * 赋光之人列表返回响应
    * @since Beta v0.8.0
@@ -120,11 +148,11 @@ declare namespace TGApp.Game.Challenge {
 
   /**
    * 最佳数据
-   * @since Beta v0.8.0
+   * @since Beta v0.9.9
    */
   type ChallengeBest = {
     /** 难度 */
-    difficulty: number;
+    difficulty: DiffEnum;
     /** 耗时（秒） */
     second: number;
     /** 图标 */

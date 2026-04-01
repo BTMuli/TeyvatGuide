@@ -7,7 +7,7 @@
         <span>最佳记录</span>
         <span>{{ props.data.best.second }}s</span>
         <img
-          :title="getHardChallengeDesc(props.data.best.difficulty)"
+          :title="gameEnum.challenge.diffDesc(props.data.best.difficulty)"
           :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.data.best.difficulty}.webp`"
           alt="medal"
         />
@@ -21,7 +21,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
+import gameEnum from "@enum/game.js";
 
 import TucChallengeItem from "./tuc-challenge-item.vue";
 

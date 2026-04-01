@@ -21,7 +21,7 @@
               <span>{{ props.pos.hard_challenge_detail.second }}s</span>
               <img
                 :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.pos.hard_challenge_detail.difficulty}.webp`"
-                :title="getHardChallengeDesc(props.pos.hard_challenge_detail.difficulty)"
+                :title="gameEnum.challenge.diffDesc(props.pos.hard_challenge_detail.difficulty)"
                 alt="medal"
               />
               <div
@@ -114,7 +114,6 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import { getHardChallengeDesc } from "@Sql/utils/transUserRecord.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";

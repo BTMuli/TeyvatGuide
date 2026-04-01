@@ -5,7 +5,7 @@
       <TucTile :val="getBestVal()" title="最佳记录" />
       <TucTile :val="props.data.coin_num" title="消耗幻剧之花" />
       <TucTile :val="getTime()" title="总耗时" />
-      <TucTile :title="getRoundTitle()" :val="getRoundVal()" />
+      <TucTile :title="gameEnum.combat.diffDesc(props.data.difficulty_id)" :val="getRoundVal()" />
     </div>
     <div class="tuco-line2">
       <TucFight :data="props.fights.max_defeat_avatar" label="击败最多敌人" />
@@ -21,6 +21,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import gameEnum from "@enum/game.js";
+
 import TucFight from "./tuc-fight.vue";
 import TucTile from "./tuc-tile.vue";
 
@@ -28,32 +30,17 @@ type TucOverviewProps = { data: TGApp.Game.Combat.Stat; fights: TGApp.Game.Comba
 
 const props = defineProps<TucOverviewProps>();
 
-function getRoundTitle(): string {
-  switch (props.data.difficulty_id) {
-    case 0:
-      return "未选择";
-    case 1:
-      return "轻简模式";
-    case 2:
-      return "普通模式";
-    case 3:
-      return "困难模式";
-    case 4:
-      return "卓越模式";
-    case 5:
-      return "月谕模式";
-    default:
-      return `未知模式${props.data.difficulty_id}`;
-  }
-}
-
 function getBestVal(): string {
-  if (props.data.difficulty_id < 5) return `第${props.data.max_round_id}幕`;
+  if (props.data.difficulty_id < gameEnum.combat.diff.TAROT) {
+    return `第${props.data.max_round_id}幕`;
+  }
   return `第${props.data.max_round_id}幕·圣牌${props.data.tarot_finished_cnt}`;
 }
 
 function getRoundVal(): string {
-  if (props.data.difficulty_id < 5) return `第${props.data.max_round_id}幕`;
+  if (props.data.difficulty_id < gameEnum.combat.diff.TAROT) {
+    return `第${props.data.max_round_id}幕`;
+  }
   return `${props.data.tarot_finished_cnt + props.data.max_round_id}`;
 }
 

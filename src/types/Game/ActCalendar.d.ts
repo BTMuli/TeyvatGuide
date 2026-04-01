@@ -1,6 +1,6 @@
 /**
  * 游戏-活动日历相关类型定义文件
- * @since Beta v0.8.3
+ * @since Beta v0.9.9
  */
 
 declare namespace TGApp.Game.ActCalendar {
@@ -221,13 +221,13 @@ declare namespace TGApp.Game.ActCalendar {
 
   /**
    * 幽境危战活动详情
-   * @since Beta v0.8.0
+   * @since Beta v0.9.9
    */
   type ActHardChallenge = {
     /** 是否解锁 */
     is_unlock: boolean;
     /** 当前难度 */
-    difficulty: number;
+    difficulty: TGApp.Game.Challenge.DiffEnum;
     /** 挑战耗时(秒) */
     second: number;
     /** 活动图标 */
@@ -260,11 +260,11 @@ declare namespace TGApp.Game.ActCalendar {
 
   /**
    * 真境剧诗活动详情
-   * @since Beta v0.8.3
+   * @since Beta v0.9.9
    */
   type ActRoleCombat = {
     /** 难度id */
-    difficulty_id: number;
+    difficulty_id: TGApp.Game.Combat.DiffEnum;
     /** 是否有数据 */
     has_data: boolean;
     /** 是否解锁 */

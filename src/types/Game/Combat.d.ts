@@ -43,6 +43,32 @@ declare namespace TGApp.Game.Combat {
   };
 
   /**
+   * 剧诗难度等级
+   * @since Beta v0.9.9
+   * @see TGApp.Game.Combat.DiffEnum
+   */
+  const Difficulty = <const>{
+    /** 未选择 */
+    NONE: 0,
+    /** 轻简模式 */
+    EASY: 1,
+    /** 普通模式 */
+    NORMAL: 2,
+    /** 困难模式 */
+    HARD: 3,
+    /** 卓越模式 */
+    MASTER: 4,
+    /** 月谕模式 */
+    TAROT: 5,
+  };
+
+  /**
+   * 剧诗难度等级枚举
+   * @since Beta v0.9.9
+   */
+  type DiffEnum = (typeof Difficulty)[keyof typeof Difficulty];
+
+  /**
    * 角色类型
    * @since Beta v0.9.9
    * @see TGApp.Game.Combat.AvatarTypeEnum
@@ -148,11 +174,11 @@ declare namespace TGApp.Game.Combat {
 
   /**
    * 状态
-   * @since Beta v0.8.3
+   * @since Beta v0.9.9
    */
   type Stat = {
     /** 难度等级 */
-    difficulty_id: number;
+    difficulty_id: DiffEnum;
     /** 最大层数 */
     max_round_id: number;
     /** 纹章数 */
