@@ -1,6 +1,6 @@
 /**
  * Vue & Typescript 文件的 Eslint 配置
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  */
 import pluginImport from "eslint-plugin-import";
 import pluginPrettier from "eslint-plugin-prettier";
@@ -19,14 +19,15 @@ const tsConfigRules = {
   "@typescript-eslint/no-unused-expressions": ["error", { allowShortCircuit: false }],
   "@typescript-eslint/array-type": ["error", { default: "generic" }],
   "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-  "import/order": [
-    "error",
-    {
-      groups: ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
-      "newlines-between": "always",
-      alphabetize: { order: "asc", caseInsensitive: true },
-    },
-  ],
+  // TODO: 等后续 eslint-plugin-import 适配 ESLint 10 后再启用
+  // "import/order": [
+  //   "error",
+  //   {
+  //     groups: ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
+  //     "newlines-between": "always",
+  //     alphabetize: { order: "asc", caseInsensitive: true },
+  //   },
+  // ],
   "prettier/prettier": "error",
 };
 
