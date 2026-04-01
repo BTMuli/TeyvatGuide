@@ -192,13 +192,13 @@ const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
 
+const simpleMode = ref<boolean>(false);
 const showStat = ref<boolean>(false);
 const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
 const showChar = ref<boolean>(false);
 const charMasters = shallowRef<Array<TGApp.Game.Combat.CharMaster>>([]);
 const showTarot = ref<boolean>(false);
 const tarotStat = shallowRef<TGApp.Game.Combat.TarotState>();
-const simpleMode = ref<boolean>(false);
 
 onMounted(async () => {
   await showLoading.start("正在加载剧诗数据");
@@ -630,8 +630,7 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
 .uc-window-item {
   height: 100%;
   padding-right: 8px;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
 }
 
 .ucw-i-ref {

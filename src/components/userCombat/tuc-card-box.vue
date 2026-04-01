@@ -5,7 +5,10 @@
     ref="containerRef"
     :class="['tuc-card-box', { 'simple-mode': props.simpleMode }]"
   >
-    <div class="tuc-card-title">神秘收获 {{ props.modelValue.length }}</div>
+    <div class="tuc-card-title">
+      <span>神秘收获</span>
+      <span>{{ props.modelValue.length }}</span>
+    </div>
     <div :class="{ 'simple-mode': props.simpleMode }" class="tuc-card-list">
       <div
         v-for="card in props.modelValue"
@@ -14,10 +17,7 @@
         class="tuc-card-item"
       >
         <div class="tuc-card-summary">
-          <div
-            class="tuc-ci-icon"
-            :title="props.simpleMode ? card.name : undefined"
-          >
+          <div :title="props.simpleMode ? card.name : undefined" class="tuc-ci-icon">
             <img :src="card.icon" alt="icon" />
           </div>
           <span v-if="props.simpleMode" class="tuc-card-name">{{ card.name }}</span>
@@ -88,8 +88,6 @@ watch(
     });
 
     if (animations.length > 0) {
-      containerRef.value.offsetHeight;
-
       animationFrameId = requestAnimationFrame(() => {
         animations.forEach(({ el }) => {
           el.style.transition = "transform 0.3s ease";
@@ -111,6 +109,7 @@ onUnmounted(() => {
 .tuc-card-box {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 100%;
   box-sizing: border-box;
   flex: 1;
@@ -122,12 +121,20 @@ onUnmounted(() => {
   border-radius: 4px;
   background: var(--box-bg-2);
   row-gap: 8px;
-  overflow: hidden;
 }
 
 .tuc-card-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--box-text-2);
+  column-gap: 4px;
   font-family: var(--font-title);
+
+  span:last-child {
+    color: var(--tgc-od-orange);
+  }
 }
 
 .tuc-card-list {
@@ -141,8 +148,7 @@ onUnmounted(() => {
 }
 
 .tuc-card-list.simple-mode {
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-flow: row wrap;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
