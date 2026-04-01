@@ -1,3 +1,4 @@
+<!-- 剧诗概况战斗数据 -->
 <template>
   <div class="tucfi-box">
     <div class="tucfi-label">
@@ -19,6 +20,7 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import { getWikiBrief } from "@utils/toolFunc.js";
 
 type TucFightProps = {
   label: string;
@@ -44,20 +46,22 @@ function getBox(role: TGApp.Game.Combat.AvatarMini): TItemBoxData {
 }
 
 function getBox2(item: TGApp.Game.Combat.AvatarMini): TItemBoxData {
+  let findI = getWikiBrief(item.avatar_id);
   return {
     bg: `/icon/bg/${item.rarity}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "60px",
     icon: `/WIKI/character/${item.avatar_id}.webp`,
-    innerText: "",
+    innerText: findI ? findI.name : "",
+    innerHeight: findI ? 20 : 0,
     lt: "",
     ltSize: "0",
     size: "60px",
   };
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tucfi-box {
   display: flex;
   width: 100%;

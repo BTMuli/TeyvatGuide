@@ -63,7 +63,7 @@ function getTime(): string {
   return `${min}分${sec}秒`;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tuco-box {
   position: relative;
   display: flex;
