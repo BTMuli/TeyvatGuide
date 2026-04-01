@@ -19,8 +19,9 @@
       <TucBuffBox
         :class="props.round.choice_cards.length === 0 ? 'fill' : ''"
         :model-value="props.round.splendour_buff"
+        :simple-mode="props.simpleMode"
       />
-      <TucCardBox :model-value="props.round.choice_cards" />
+      <TucCardBox :model-value="props.round.choice_cards" :simple-mode="props.simpleMode" />
     </div>
   </div>
 </template>
@@ -34,7 +35,12 @@ import TucAeBox from "./tuc-ae-box.vue";
 import TucBuffBox from "./tuc-buff-box.vue";
 import TucCardBox from "./tuc-card-box.vue";
 
-type TucRoundProps = { round: TGApp.Game.Combat.RoundData; uid: string; id: number };
+type TucRoundProps = {
+  round: TGApp.Game.Combat.RoundData;
+  uid: string;
+  id: number;
+  simpleMode?: boolean;
+};
 const props = defineProps<TucRoundProps>();
 const showInfo = ref<boolean>(false);
 const tucrRef = useTemplateRef<HTMLDivElement>("tucrEl");

@@ -72,6 +72,13 @@
             <img alt="char" src="/UI/combat/tarotDefault.webp" />
             <span>月谕圣牌</span>
           </v-btn>
+          <v-switch
+            v-model="simpleMode"
+            class="uc-switch"
+            color="var(--tgc-od-orange)"
+            hide-details
+            label="简略模式"
+          />
         </div>
         <div class="uct-extension-right">
           <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
@@ -129,6 +136,7 @@
               :id="item.id"
               :key="idx"
               :round="round"
+              :simpleMode
               :uid="item.uid"
             />
           </div>
@@ -190,6 +198,7 @@ const showChar = ref<boolean>(false);
 const charMasters = shallowRef<Array<TGApp.Game.Combat.CharMaster>>([]);
 const showTarot = ref<boolean>(false);
 const tarotStat = shallowRef<TGApp.Game.Combat.TarotState>();
+const simpleMode = ref<boolean>(false);
 
 onMounted(async () => {
   await showLoading.start("正在加载剧诗数据");
@@ -622,6 +631,7 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   height: 100%;
   padding-right: 8px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .ucw-i-ref {
@@ -695,5 +705,9 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   font-family: var(--font-title);
   font-size: 1.5rem;
   row-gap: 12px;
+}
+
+.uc-switch {
+  margin-left: 8px;
 }
 </style>
