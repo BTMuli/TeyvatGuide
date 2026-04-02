@@ -492,11 +492,13 @@ async function confirmRefresh(force: boolean): Promise<void> {
     authkey.value = authkeyRes;
     await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 成功获取 authkey`);
   } else {
-    showSnackbar.error("获取 authkey 失败");
+    await showLoading.update("获取authkey失败");
+    showSnackbar.error(`[${authkeyRes.retcode}] ${authkeyRes.message}`);
     await TGLogger.Error(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 获取 authkey 失败`);
     await TGLogger.Error(
       `[Gacha][${rfAccount.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
     );
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     await showLoading.end();
     return;
   }
