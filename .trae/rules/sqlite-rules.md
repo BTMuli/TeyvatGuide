@@ -1,3 +1,8 @@
+---
+alwaysApply: false
+description: SQLite 数据库操作规范，包括参数占位符、异步模式、插入/更新模式等规则
+---
+
 # SQLite 数据库操作规则
 
 ## 参数占位符
