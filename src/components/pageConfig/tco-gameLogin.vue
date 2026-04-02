@@ -1,16 +1,18 @@
+<!-- 游戏扫码登录浮窗 -->
 <template>
-  <TOverlay v-model="model" hide blur-val="20px">
+  <TOverlay v-model="model" blur-val="20px" hide>
     <div class="tog-box">
       <div class="tog-top">
         <div class="tog-title">请使用米游社进行扫码操作</div>
+        <div class="tog-hint">仅用于登录米社账号，与实际游戏账号无关</div>
         <div class="tog-select">
           <div
-            class="tog-select-item"
             v-for="item in selects"
             :key="item.value"
             :class="{ active: codeGid === item.value }"
-            @click="codeGid = item.value"
             :title="item.title"
+            class="tog-select-item"
+            @click="codeGid = item.value"
           >
             <img :src="item.icon" alt="icon" />
           </div>
@@ -20,20 +22,20 @@
       <div class="tog-mid">
         <qrcode-vue
           v-if="codeUrl"
-          class="tog-qr"
-          :value="codeUrl"
-          render-as="svg"
           :background="'var(--tgc-white-1)'"
           :foreground="'var(--tgc-dark-7)'"
+          :value="codeUrl"
+          class="tog-qr"
+          render-as="svg"
         />
       </div>
       <div class="tog-bottom" @click="share()">
-        <img src="/platforms/mhy/mys.webp" alt="icon" />
+        <img alt="icon" src="/platforms/mhy/mys.webp" />
       </div>
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -174,7 +176,7 @@ onUnmounted(() => {
   cycleTimer = null;
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tog-box {
   display: flex;
   flex-direction: column;
@@ -199,6 +201,11 @@ onUnmounted(() => {
 .tog-title {
   color: var(--common-text-title);
   font-size: 20px;
+}
+
+.tog-hint {
+  color: var(--tgc-od-red);
+  font-size: 14px;
 }
 
 .tog-select {
