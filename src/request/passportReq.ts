@@ -1,6 +1,6 @@
 /**
  * Passport 相关请求
- * @since Beta v0.7.2
+ * @since Beta v0.9.9
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGBbs from "@utils/TGBbs.js";
@@ -37,7 +37,7 @@ function rsaEncrypt(data: string): string {
 
 /**
  * 获取登录ticket
- * @since Beta v0.6.0
+ * @since Beta v0.9.9
  * @param account - 账户
  * @param cookie - cookie
  * @returns ticket
@@ -45,7 +45,7 @@ function rsaEncrypt(data: string): string {
 async function createAuthTicketByGameBiz(
   account: TGApp.Sqlite.Account.Game,
   cookie: TGApp.App.Account.Cookie,
-): Promise<TGApp.BBS.Response.Base | string> {
+): Promise<TGApp.BBS.Response.Base | TGApp.Game.Login.GameAuthTicketRes> {
   const params: Record<string, string> = {
     game_biz: account.gameBiz,
     stoken: cookie.stoken,
@@ -56,13 +56,12 @@ async function createAuthTicketByGameBiz(
     "x-rpc-client_type": "3",
     "x-rpc-app_id": "ddxf5dufpuyo",
   };
-  type ResType = { ticket: string };
-  const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
+  const resp = await TGHttp<TGApp.Game.Login.GameAuthTicketResp>(
     `${pAbu}account/ma-cn-verifier/app/createAuthTicketByGameBiz`,
     { method: "POST", headers: headers, query: params },
   );
   if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.ticket;
+  return resp.data;
 }
 
 /**

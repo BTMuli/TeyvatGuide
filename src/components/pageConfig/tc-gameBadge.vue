@@ -50,7 +50,12 @@ async function tryPlayGame(): Promise<void> {
   }
   const gamePath = `${gameDir.value}${path.sep()}${find.name}`;
   const resp = await passportReq.authTicket(account.value, cookie.value);
-  if (typeof resp !== "string") {
+  if (typeof resp !== "object") {
+    showSnackbar.error(resp);
+    await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${resp}`);
+    return;
+  }
+  if ("retcode" in resp) {
     showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
     await TGLogger.Error(
       `[config][gameBadge] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
@@ -60,7 +65,7 @@ async function tryPlayGame(): Promise<void> {
   }
   showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
   try {
-    await invoke("launch_game", { path: gamePath, ticket: resp });
+    await invoke("launch_game", { path: gamePath, ticket: resp.ticket });
   } catch (error) {
     showSnackbar.error(`${error}`);
   }

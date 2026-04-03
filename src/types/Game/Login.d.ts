@@ -99,4 +99,19 @@ declare namespace TGApp.Game.Login {
     /** 是否需要实名 */
     need_realperson: boolean;
   };
+
+  /**
+   * 游戏启动 Ticket 返回响应
+   * @since Beta v0.9.9
+   */
+  type GameAuthTicketResp = TGApp.BBS.Response.BaseWithData<GameAuthTicketRes>;
+
+  /**
+   * 游戏启动 Ticket 返回
+   * @since Beta v0.9.9
+   */
+  type GameAuthTicketRes = {
+    /** Ticket */
+    ticket: string;
+  };
 }
