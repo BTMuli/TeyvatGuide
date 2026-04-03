@@ -63,7 +63,7 @@ async function tryPlayGame(): Promise<void> {
     await TGLogger.Error(`[config][gameBadge] resp: ${JSON.stringify(resp)}`);
     return;
   }
-  showSnackbar.success(`成功获取ticket:${resp}，正在启动应用...`);
+  showSnackbar.success(`成功获取ticket，正在启动应用...`);
   try {
     await invoke("launch_game", { path: gamePath, ticket: resp.ticket });
   } catch (error) {
