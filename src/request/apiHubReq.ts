@@ -1,10 +1,11 @@
 /**
  * apiHub下的请求
- * @since Beta v0.8.2
+ * @since Beta v0.9.9
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 
 // MysApiHubBaseUrl => Mahbu
 const Mahbu: Readonly<string> = "https://bbs-api.miyoushe.com/apihub/";
@@ -152,18 +153,18 @@ async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.Re
 
 /**
  * 获取首页导航列表
- * @since Beta v0.6.2
+ * @since Beta v0.9.9
  * @param gid - GID
+ * @TODO 测试带ck请求
  * @returns 首页导航列表
  */
-async function homeNew(gid: number = 2): Promise<Array<TGApp.BBS.Navigator.Navigator>> {
-  return (
-    await TGHttp<TGApp.BBS.Navigator.HomeResp>(`${Mahbu}api/home/new`, {
-      method: "GET",
-      headers: { "x-rpc-client_type": "2" },
-      query: { gids: gid },
-    })
-  ).data.navigator;
+async function homeNew(
+  gid: number = 2,
+): Promise<TGApp.App.Response.Resp<TGApp.BBS.Navigator.HomeResp>> {
+  return await TGHttps.get<TGApp.BBS.Navigator.HomeResp>(`${Mahbu}api/home/new`, {
+    headers: { "x-rpc-client_type": "2" },
+    query: { gids: gid },
+  });
 }
 
 /**

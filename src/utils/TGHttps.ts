@@ -6,8 +6,6 @@
 import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
 import JSONBig from "json-bigint";
 
-import TGLogger from "./TGLogger.js";
-
 /**
  * 构建 URL 查询字符串
  * @since Beta v0.10.0
@@ -165,10 +163,8 @@ async function request<T>(
     } else {
       httpError = createHttpError(String(error), { cause: error });
     }
-
-    // 记录错误日志
-    await TGLogger.Error(`[TGHttps] Request failed: ${httpError.message}`);
-
+    // 记录错误日志 TODO：根据实际情况调整日志
+    // await TGLogger.Error(`[TGHttps] Request failed: ${httpError.message}`);
     throw httpError;
   }
 }
@@ -211,6 +207,21 @@ const TGHttps = {
     url: string,
     config?: TGApp.App.Response.ReqConfParams,
   ): Promise<TGApp.App.Response.Resp<T>> => request<T>(method, url, config),
+
+  /**
+   * 判断是否为 HTTP 错误
+   * @since Beta v0.10.0
+   * @param error - 错误对象
+   * @returns 是否为 HTTP 错误
+   */
+  isHttpErr: (error: unknown): error is TGApp.App.Response.HttpErr => {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof error.message === "string"
+    );
+  },
 };
 
 export default TGHttps;

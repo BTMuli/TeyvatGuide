@@ -27,12 +27,13 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import ApiHubReq from "@req/apiHubReq.js";
+import apiHubReq from "@req/apiHubReq.js";
 import OtherApi from "@req/otherReq.js";
 import useAppStore from "@store/app.js";
 import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGClient from "@utils/TGClient.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -67,16 +68,18 @@ watch(
   async () => await loadNav(),
 );
 
-/**
- * 加载组件数据
- * @returns {Promise<void>}
- */
 async function loadNav(): Promise<void> {
   try {
-    nav.value = await ApiHubReq.home(props.gid);
-    console.warn(`[TGameNav][loadNav] 组件数据：`, nav.value);
+    const resp = await apiHubReq.home(props.gid);
+    nav.value = resp.data.data.navigator;
     if (loadCode.value) loadCode.value = false;
   } catch (e) {
+    if (TGHttps.isHttpErr(e)) {
+      const errMsg = e.status ? `[${e.status}] ${e.message}` : e.message;
+      showSnackbar.error(`加载导航失败: ${errMsg}`);
+    } else {
+      showSnackbar.error(`加载导航失败: ${String(e)}`);
+    }
     await TGLogger.Error(`[TGameNav][loadNav] 加载组件数据失败：${e}`);
   }
 }
@@ -96,18 +99,29 @@ async function tryGetCode(): Promise<void> {
     return;
   }
   actId.value = actIdFind;
-  const res = await OtherApi.code(actIdFind);
-  if (!Array.isArray(res)) {
+  try {
+    const resp = await OtherApi.code(actIdFind);
+    if (resp.data.retcode !== 0) {
+      loadCode.value = false;
+      showSnackbar.warn(`[${resp.data.retcode}] ${resp.data.message}`);
+      await TGLogger.Warn(`[TGameNav][tryGetCode] 获取兑换码失败：${JSON.stringify(resp.data)}`);
+      return;
+    }
+    codeData.value = resp.data.data.code_list;
+    console.debug(`[TGameNave][tryGetCode] 兑换码数据：`, codeData.value);
+    showSnackbar.success("获取兑换码成功");
+    showOverlay.value = true;
     loadCode.value = false;
-    showSnackbar.warn(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Warn(`[TGameNav][tryGetCode] 获取兑换码失败：${JSON.stringify(res)}`);
-    return;
+  } catch (e) {
+    loadCode.value = false;
+    if (TGHttps.isHttpErr(e)) {
+      const errMsg = e.status ? `[${e.status}] ${e.message}` : e.message;
+      showSnackbar.error(`获取兑换码失败: ${errMsg}`);
+    } else {
+      showSnackbar.error(`获取兑换码失败: ${String(e)}`);
+    }
+    await TGLogger.Error(`[TGameNav][tryGetCode] 获取兑换码失败：${e}`);
   }
-  codeData.value = res;
-  console.debug(`[TGameNave][tryGetCode] 兑换码数据：`, codeData.value);
-  showSnackbar.success("获取兑换码成功");
-  showOverlay.value = true;
-  loadCode.value = false;
 }
 
 /**

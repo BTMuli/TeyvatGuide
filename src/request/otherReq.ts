@@ -1,16 +1,29 @@
 /**
  * Other API
- * @since Beta v0.7.2
+ * @since Beta v0.9.9
  */
 
 import TGBbs from "@utils/TGBbs.js";
-import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { getInitDeviceInfo } from "@utils/toolFunc.js";
 
 /**
+ * 设备指纹返回类型
+ * @since Beta v0.9.9
+ */
+type DeviceFpResp = {
+  /** 设备指纹 */
+  device_fp: string;
+  /** 状态码 */
+  code: number;
+  /** 信息 */
+  msg: string;
+};
+
+/**
  * 获取设备指纹
- * @since Beta v0.7.2
+ * @since Beta v0.9.9
  * @param Info - 设备信息
  * @returns 设备指纹
  */
@@ -90,14 +103,13 @@ async function getDeviceFp(
     "x-requested-with": "com.mihoyo.hyperion",
     Referer: "https://webstatic.mihoyo.com/",
   };
-  type ResType = { device_fp: string; code: number; msg: string };
   try {
-    const resp = await TGHttp<TGApp.BBS.Response.BaseWithData<ResType>>(
+    const resp = await TGHttps.post<TGApp.BBS.Response.BaseWithData<DeviceFpResp>>(
       "https://public-data-api.mihoyo.com/device-fp/api/getFp",
-      { method: "POST", body: JSON.stringify(data), headers: header },
+      { headers: header, body: JSON.stringify(data) },
     );
-    if (resp.retcode !== 0) info.device_fp = "0000000000000";
-    else info.device_fp = resp.data.device_fp;
+    if (resp.data.retcode !== 0) info.device_fp = "0000000000000";
+    else info.device_fp = resp.data.data.device_fp;
   } catch (error) {
     info.device_fp = "0000000000000";
     await TGLogger.Error(`获取设备指纹失败: ${error}`);
@@ -107,19 +119,17 @@ async function getDeviceFp(
 
 /**
  * 获取兑换码请求
- * @since Beta v0.5.3
+ * @since Beta v0.9.9
  * @param actId - 活动 id
  * @returns 兑换码
  */
 async function refreshCode(
   actId: string,
-): Promise<Array<TGApp.BBS.Navigator.CodeData> | TGApp.BBS.Response.Base> {
-  const res = await TGHttp<TGApp.BBS.Navigator.CodeResp | TGApp.BBS.Response.Base>(
+): Promise<TGApp.App.Response.Resp<TGApp.BBS.Navigator.CodeResp>> {
+  return await TGHttps.get<TGApp.BBS.Navigator.CodeResp>(
     "https://api-takumi-static.mihoyo.com/event/miyolive/refreshCode",
-    { method: "GET", headers: { "x-rpc-act_id": actId } },
+    { headers: { "x-rpc-act_id": actId } },
   );
-  if (res.retcode !== 0) return <TGApp.BBS.Response.Base>res;
-  return res.data.code_list;
 }
 
 const OtherApi = { code: refreshCode, fp: getDeviceFp };
