@@ -3262,5 +3262,41 @@
     "postId": "73885911",
     "up5List": [11517, 13514],
     "up4List": [11402, 12402, 13407, 14401, 15405]
+  },
+  {
+    "name": "呀吼吼博物志",
+    "version": "6.5",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/03/25/91d7dec054f9b125fd8fe3422c616200_1096131082577307525_transformed.jpg",
+    "from": "2026-04-08T06:00:00+08:00",
+    "to": "2026-04-28T17:59:00+08:00",
+    "type": 301,
+    "postId": "74412291",
+    "up5List": [10000130],
+    "up4List": [10000127, 10000121, 10000034]
+  },
+  {
+    "name": "饮羽散红",
+    "version": "6.5",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/03/25/92a97d6cfbcc2a0c1249111d94e2612d_4733485681464317629_transformed.jpg",
+    "from": "2026-04-08T06:00:00+08:00",
+    "to": "2026-04-28T17:59:00+08:00",
+    "type": 400,
+    "postId": "74412295",
+    "up5List": [10000104],
+    "up4List": [10000127, 10000121, 10000034]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.5",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/03/25/638c48116d4835671de729f4b6a9e560_9077595635024466630_transformed.jpg",
+    "from": "2026-04-08T06:00:00+08:00",
+    "to": "2026-04-28T17:59:00+08:00",
+    "type": 302,
+    "postId": "74412299",
+    "up5List": [15516, 15514],
+    "up4List": [15430, 11405, 12403, 13401, 14409]
   }
 ]
