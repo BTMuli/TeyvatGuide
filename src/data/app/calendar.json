@@ -289,6 +289,23 @@
     "source": { "index": 6, "area": "纳塔", "name": "空华" }
   },
   {
+    "id": 10000130,
+    "contentId": 508198,
+    "dropDays": [3, 6, 7],
+    "name": "莉奈娅",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "弓",
+    "element": "岩",
+    "release": "2026-04-07 00:00:00",
+    "materials": [
+      { "id": 104362, "name": "「浪迹」的教导", "star": 2 },
+      { "id": 104363, "name": "「浪迹」的指引", "star": 3 },
+      { "id": 104364, "name": "「浪迹」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "覆巢" }
+  },
+  {
     "id": 10000033,
     "contentId": 1220,
     "dropDays": [1, 4, 7],
@@ -936,7 +953,7 @@
   },
   {
     "id": 10000128,
-    "contentId": 0,
+    "contentId": 507995,
     "dropDays": [1, 4, 7],
     "name": "法尔伽",
     "itemType": "character",
@@ -2192,7 +2209,7 @@
   },
   {
     "id": 12515,
-    "contentId": 0,
+    "contentId": 508005,
     "dropDays": [2, 5, 7],
     "name": "狼的武功歌",
     "itemType": "weapon",
@@ -2477,6 +2494,22 @@
       { "id": 114072, "name": "神合秘烟的启示", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "测度" }
+  },
+  {
+    "id": 15516,
+    "contentId": 508253,
+    "dropDays": [2, 5, 7],
+    "name": "霜结的誓金枝",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "弓",
+    "materials": [
+      { "id": 114077, "name": "长夜燧火的余烬", "star": 2 },
+      { "id": 114078, "name": "长夜燧火的残照", "star": 3 },
+      { "id": 114079, "name": "长夜燧火的明焰", "star": 4 },
+      { "id": 114080, "name": "长夜燧火的烈辉", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祷颂" }
   },
   {
     "id": 14501,

@@ -294,7 +294,7 @@
     "series": 4,
     "order": 30,
     "name": "大地勘探·蒙德",
-    "description": "点亮整个蒙德地图（龙脊雪山地区除外）。",
+    "description": "点亮整个蒙德地图（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": { "type": "UNLOCK_AREA" }
@@ -304,7 +304,7 @@
     "series": 4,
     "order": 31,
     "name": "千风拂去",
-    "description": "解锁蒙德的所有传送锚点（龙脊雪山地区除外）。",
+    "description": "解锁蒙德的所有传送锚点（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": { "type": "UNLOCK_TRANS_POINT" }
@@ -334,7 +334,7 @@
     "series": 4,
     "order": 34,
     "name": "风中引路人",
-    "description": "在蒙德追随10个仙灵，并点亮仙灵之庭（龙脊雪山地区除外）。",
+    "description": "在蒙德追随10个仙灵，并点亮仙灵之庭（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -344,7 +344,7 @@
     "series": 4,
     "order": 35,
     "name": "风中引路人",
-    "description": "在蒙德追随20个仙灵，并点亮仙灵之庭（龙脊雪山地区除外）。",
+    "description": "在蒙德追随20个仙灵，并点亮仙灵之庭（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 10,
     "version": "1.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -354,7 +354,7 @@
     "series": 4,
     "order": 36,
     "name": "风中引路人",
-    "description": "在蒙德追随40个仙灵，并点亮仙灵之庭（龙脊雪山地区除外）。",
+    "description": "在蒙德追随40个仙灵，并点亮仙灵之庭（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 20,
     "version": "1.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -364,7 +364,7 @@
     "series": 4,
     "order": 37,
     "name": "逐风的寻宝者",
-    "description": "在蒙德开启100个宝箱（龙脊雪山地区除外）。",
+    "description": "在蒙德开启100个宝箱（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": { "type": "OPEN_CHEST_WITH_GADGET_ID" }
@@ -374,7 +374,7 @@
     "series": 4,
     "order": 38,
     "name": "逐风的寻宝者",
-    "description": "在蒙德开启200个宝箱（龙脊雪山地区除外）。",
+    "description": "在蒙德开启200个宝箱（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 10,
     "version": "1.0",
     "trigger": { "type": "OPEN_CHEST_WITH_GADGET_ID" }
@@ -384,7 +384,7 @@
     "series": 4,
     "order": 39,
     "name": "逐风的寻宝者",
-    "description": "在蒙德开启400个宝箱（龙脊雪山地区除外）。",
+    "description": "在蒙德开启400个宝箱（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 20,
     "version": "1.0",
     "trigger": { "type": "OPEN_CHEST_WITH_GADGET_ID" }
@@ -394,7 +394,7 @@
     "series": 4,
     "order": 40,
     "name": "逐风的冒险家",
-    "description": "在蒙德，完成5个大世界机关限时挑战（龙脊雪山地区除外）。",
+    "description": "在蒙德，完成5个大世界机关限时挑战（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 5,
     "version": "1.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -404,7 +404,7 @@
     "series": 4,
     "order": 41,
     "name": "逐风的冒险家",
-    "description": "在蒙德，完成10个大世界机关限时挑战（龙脊雪山地区除外）。",
+    "description": "在蒙德，完成10个大世界机关限时挑战（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 10,
     "version": "1.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -414,7 +414,7 @@
     "series": 4,
     "order": 42,
     "name": "逐风的冒险家",
-    "description": "在蒙德，完成15个大世界机关限时挑战（龙脊雪山地区除外）。",
+    "description": "在蒙德，完成15个大世界机关限时挑战（龙脊雪山地区、风息山与空之神殿另外计算）。",
     "reward": 20,
     "version": "1.0",
     "trigger": { "type": "GROUP_NOTIFY" }
@@ -4361,6 +4361,146 @@
     "reward": 5,
     "version": "6.3",
     "trigger": { "type": "OFFERING_LEVEL" }
+  },
+  {
+    "id": 80475,
+    "series": 67,
+    "order": 439,
+    "name": "隙间的寻宝者",
+    "description": "在风息山、空之神殿开启45个宝箱。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80476,
+    "series": 67,
+    "order": 440,
+    "name": "隙间的寻宝者",
+    "description": "在风息山、空之神殿开启90个宝箱。",
+    "reward": 10,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80477,
+    "series": 67,
+    "order": 441,
+    "name": "隙间的寻宝者",
+    "description": "在风息山、空之神殿开启180个宝箱。",
+    "reward": 20,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80479,
+    "series": 67,
+    "order": 436,
+    "name": "山风无色",
+    "description": "点亮蒙德区域中，风息山的地图。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80480,
+    "series": 67,
+    "order": 437,
+    "name": "废弃疗养院下车之旅",
+    "description": "点亮蒙德区域中，空之神殿的地图。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80481,
+    "series": 67,
+    "order": 449,
+    "name": "再见，魔山",
+    "description": "完成「山中好长日」。",
+    "reward": 10,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80482,
+    "series": 67,
+    "order": 448,
+    "name": "一个告别与三个再会",
+    "description": "为彩特琳德找回所有丢失的东西。",
+    "reward": 10,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80484,
+    "series": 67,
+    "order": 447,
+    "name": "诚至金开",
+    "description": "解除风息山的宗室密藏之地与空之神殿的诸界秘展之厅的封印。",
+    "reward": 10,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80485,
+    "series": 67,
+    "order": 446,
+    "name": "空间与非自由意志",
+    "description": "将空之神殿的摹忆中枢等级供奉至满级。",
+    "reward": 20,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80486,
+    "series": 67,
+    "order": 438,
+    "name": "提托诺斯的晨歌",
+    "description": "解锁蒙德区域中，风息山、空之神殿所有传送锚点。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80487,
+    "series": 67,
+    "order": 442,
+    "name": "隙间的冒险家",
+    "description": "在风息山、空之神殿完成7个大世界限时挑战。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80488,
+    "series": 67,
+    "order": 443,
+    "name": "隙间的冒险家",
+    "description": "在风息山、空之神殿完成14个大世界限时挑战。",
+    "reward": 10,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80489,
+    "series": 67,
+    "order": 444,
+    "name": "隙间的冒险家",
+    "description": "在风息山、空之神殿完成28个大世界限时挑战。",
+    "reward": 20,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80500,
+    "series": 67,
+    "order": 445,
+    "name": "隙间的引路人",
+    "description": "在风息山、空之神殿追随3个仙灵，并点亮仙灵之庭。",
+    "reward": 10,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 81000,
@@ -10730,6 +10870,196 @@
     "trigger": { "type": "KILLED_BY_SPECIFIC_ABILITY" }
   },
   {
+    "id": 81643,
+    "series": 0,
+    "order": 1637,
+    "name": "该反省的另有其人…",
+    "description": "旧塔下的警戒机关再也不因狂风而闪烁。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81644,
+    "series": 0,
+    "order": 1638,
+    "name": "好书，爱看",
+    "description": "搜集到被书页隐去的所有宝箱。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81645,
+    "series": 0,
+    "order": 1639,
+    "name": "圣杯和奇迹都是存在的",
+    "description": "完成《埃黎尼》的冒险。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81646,
+    "series": 0,
+    "order": 1640,
+    "name": "抽屉里的生态箱",
+    "description": "生命总会自然而然变得茂盛起来。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81647,
+    "series": 0,
+    "order": 1641,
+    "name": "正因如此你有资格",
+    "description": "是否拥有跨过门槛的资格取决于是否能想到绕过门槛的办法…",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81648,
+    "series": 0,
+    "order": 1642,
+    "name": "面面俱到",
+    "description": "…虽然挑战其实就只有两面。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81649,
+    "series": 0,
+    "order": 1643,
+    "name": "十有八九是右撇子",
+    "description": "第一次协同小右施展空间能力。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81650,
+    "series": 0,
+    "order": 1644,
+    "name": "博物馆惊魂夜",
+    "description": "还是让展柜里的东西待在展柜里吧…",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81651,
+    "series": 0,
+    "order": 1645,
+    "name": "紫丁香的庭园",
+    "description": "第一次观看彩特琳德和她姐姐的「回忆」。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81652,
+    "series": 0,
+    "order": 1646,
+    "name": "老派要典",
+    "description": "经典冒险与其构成的形式…",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81653,
+    "series": 0,
+    "order": 1647,
+    "name": "梦生羽翼",
+    "description": "尝试挥动化生的翅膀吧…",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81654,
+    "series": 0,
+    "order": 1648,
+    "name": "掌中观微",
+    "description": "第一次仔细探查微型山水的内部。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81655,
+    "series": 0,
+    "order": 1649,
+    "name": "裁雨幽光今何在？",
+    "description": "那是属于过去的侠义干云的往事。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81656,
+    "series": 0,
+    "order": 1650,
+    "name": "不畏浮云遮望眼",
+    "description": "登上高山，或许就可以不被世事遮拦。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81657,
+    "series": 0,
+    "order": 1651,
+    "name": "Shed a Light",
+    "description": "入尘垂手与遗世绝俗，本就是一条路的两个方向。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81658,
+    "series": 0,
+    "order": 1652,
+    "name": "诉说过往、此刻与未来",
+    "description": "来到空之神殿柱殿中央区。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81659,
+    "series": 0,
+    "order": 1653,
+    "name": "忧郁的治疗，又名黑胆切除",
+    "description": "击败「梅兰塔」。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81660,
+    "series": 0,
+    "order": 1654,
+    "name": "看展的素质",
+    "description": "完成五个展柜的挑战。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81661,
+    "series": 0,
+    "order": 1655,
+    "name": "天地一粟",
+    "description": "高处向下看时看到的一切都很小，或许从低看高处，也不过沧海一粟。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -13648,6 +13978,16 @@
     "reward": 5,
     "version": "6.4",
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82308,
+    "series": 0,
+    "order": 2308,
+    "name": "绝不意气用事",
+    "description": "平等地击破过所有元素类型的「活性元素星」。",
+    "reward": 5,
+    "version": "6.5",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84000,

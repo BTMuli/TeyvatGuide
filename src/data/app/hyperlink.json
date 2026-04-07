@@ -438,5 +438,10 @@
     "id": 11280002,
     "name": "四风将起",
     "desc": "法尔伽的特殊元素战技，对敌人造成无法被附魔覆盖的右手持握大剑的对应元素范围伤害与<color=#80FFD7FF>风元素范围伤害</color>。\n初始处于冷却，至多拥有2次可使用次数。\n法尔伽在<color=#FFD780FF>狂飙突进</color>模式下的普通攻击命中敌人时，<color=#FFD780FF>四风将起</color>的冷却时间将会缩短0.5秒；每次切换至<color=#FFD780FF>狂飙突进</color>模式后，该效果至多触发15次。\n此外，法尔伽可以消耗<color=#FFD780FF>四风将起</color>的可使用次数，进行不消耗体力的特殊重击<color=#FFD780FF>苍噬</color>，造成2次无法被附魔覆盖的右手持握大剑的对应元素伤害与2次<color=#80FFD7FF>风元素伤害</color>。"
+  },
+  {
+    "id": 11300001,
+    "name": "露米·出击形态",
+    "desc": "露米有三种不同的出击形态。\n\n<color=#FFD780FF>超厉害形态</color>\n露米会使用<color=#FFD780FF>捶捶乱打</color>不断攻击附近的敌人，每次攻击会造成2次<color=#FFE699FF>岩元素范围伤害</color>。\n若附近存在月笼，露米则会交替使用<color=#FFD780FF>捶捶乱打</color>与<color=#FFD780FF>加力重锤</color>，不断攻击附近的敌人；<color=#FFD780FF>加力重锤</color>会造成视为月结晶反应伤害的<color=#FFE699FF>岩元素范围伤害</color>。\n\n<color=#FFD780FF>究极厉害形态</color>\n露米会使用究极厉害的<color=#FFD780FF>百万吨重锤</color>，对附近的敌人造成一次格外强力的、视为月结晶反应伤害的<color=#FFE699FF>岩元素范围伤害</color>，并切换至<color=#FFD780FF>普通厉害形态</color>。\n\n<color=#FFD780FF>普通厉害形态</color>\n虽然没有其他形态那么厉害，但也很厉害。\n露米会以更长的间隔使用<color=#FFD780FF>捶捶乱打</color>，不断攻击附近的敌人，每次攻击会造成2次<color=#FFE699FF>岩元素范围伤害</color>。"
   }
 ]
