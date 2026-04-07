@@ -183,7 +183,6 @@ import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
 import { app, webviewWindow } from "@tauri-apps/api";
 import { emit, type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { parseLink, parsePost } from "@utils/linkParser.js";
 import TGClient from "@utils/TGClient.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -476,13 +475,12 @@ async function toAct(): Promise<void> {
     location.href = `/post_detail/${isPost}`;
     return;
   }
-  const res = await parseLink(link);
-  if (res === true) return;
+  const res = await parseLink(link, true);
   if (res === false) {
     showSnackbar.error(`未知链接:${link}`, 3000);
     return;
   }
-  await openUrl(res);
+  await TGClient.open("web_act", link);
 }
 
 function handleUser(user: TGApp.BBS.Post.User): void {
