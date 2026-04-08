@@ -4,7 +4,6 @@
  */
 
 import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
-import JSONBig from "json-bigint";
 
 /**
  * 构建 URL 查询字符串
@@ -38,26 +37,6 @@ function createHttpError(
     data: options.data,
     cause: options.cause,
   };
-}
-
-/**
- * 解析响应数据
- * @since Beta v0.10.0
- * @param response - 原始响应
- * @param config - 请求配置
- * @returns 解析后的数据
- */
-async function parseResponse<T>(
-  response: Response,
-  config: TGApp.App.Response.ReqConf,
-): Promise<T> {
-  if (config.isBlob) {
-    return <T>await response.arrayBuffer();
-  }
-  if (config.hasBigInt) {
-    return <T>JSONBig.parse(await response.text());
-  }
-  return <T>await response.json();
 }
 
 /**
@@ -104,11 +83,7 @@ async function request<T>(
   }
 
   // 调试日志
-  if (config.isBlob) {
-    console.debug(`[TGHttps] Fetch Blob: ${finalUrl}`);
-  } else {
-    console.debug(`[TGHttps] ${method} ${finalUrl}`);
-  }
+  console.debug(`[TGHttps] ${method} ${finalUrl}`);
 
   // 创建超时控制器
   const timeoutController = new AbortController();
@@ -138,10 +113,7 @@ async function request<T>(
         data: errorText,
       });
     }
-
-    // 解析响应
-    const data = await parseResponse<T>(rawResponse, config);
-
+    const data = <T>await rawResponse.json();
     return {
       data: data,
       status: rawResponse.status,
@@ -193,6 +165,39 @@ const TGHttps = {
     url: string,
     config?: TGApp.App.Response.ReqConfParams,
   ): Promise<TGApp.App.Response.Resp<T>> => request<T>("POST", url, config),
+
+  /**
+   * 用于获取图像 ArrayBuffer
+   * @since Beta v0.10.0
+   * @remarks 目前需求较为简单，故不做额外处理
+   * @param url - 图像地址
+   * @returns ArrayBuffer
+   */
+  async buffer(url: string): Promise<ArrayBuffer> {
+    console.debug(`[TGHttps] Fetch Buffer: ${url}`);
+    try {
+      const rawResponse = await fetch(url);
+      if (!rawResponse.ok) {
+        const errorText = await rawResponse.text().catch(() => "Unknown error");
+        throw createHttpError(`HTTP Error: ${rawResponse.status} ${rawResponse.statusText}`, {
+          status: rawResponse.status,
+          statusText: rawResponse.statusText,
+          data: errorText,
+        });
+      }
+      return await rawResponse.arrayBuffer();
+    } catch (error) {
+      let httpError: TGApp.App.Response.HttpErr;
+      if (this.isHttpErr(error)) {
+        httpError = error;
+      } else if (error instanceof Error) {
+        httpError = createHttpError(error.message, { cause: error });
+      } else {
+        httpError = createHttpError(String(error), { cause: error });
+      }
+      throw httpError;
+    }
+  },
 
   /**
    * 通用请求方法

@@ -36,10 +36,6 @@ declare namespace TGApp.App.Response {
     query?: Record<string, string | number | boolean>;
     /** 请求体 */
     body?: string | Record<string, unknown>;
-    /** 是否返回 Blob 数据 */
-    isBlob?: boolean;
-    /** 是否包含 BigInt 数据 */
-    hasBigInt?: boolean;
     /** 请求超时时间（毫秒） */
     timeout?: number;
     /** AbortSignal 用于取消请求 */

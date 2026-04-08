@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.9.0
+ * @since Beta v0.10.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -13,7 +13,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import html2canvas from "html2canvas";
 import { storeToRefs } from "pinia";
 
-import TGHttp from "./TGHttp.js";
+import TGHttps from "./TGHttps.js";
 import TGLogger from "./TGLogger.js";
 import { bytesToSize } from "./toolFunc.js";
 
@@ -50,12 +50,13 @@ export async function saveCanvasImg(
 
 /**
  * 将图片保存到本地
- * @since Beta v0.5.0
+ * @since Beta v0.10.0
+ * @todo format param
  * @param url - 图片链接
  * @returns 图片元素
  */
 export async function saveImgLocal(url: string): Promise<string> {
-  const res = await TGHttp<Uint8Array>(url, { method: "GET", isBlob: true });
+  const res = await TGHttps.buffer(url);
   const buffer = new Uint8Array(res);
   const blob = new Blob([buffer], { type: "image/png" });
   return URL.createObjectURL(blob);
@@ -63,12 +64,13 @@ export async function saveImgLocal(url: string): Promise<string> {
 
 /**
  * 返回图片 buffer
- * @since Beta v0.9.0
+ * @since Beta v0.10.0
+ * @deprecated 使用 TGHttps.buffer
  * @param url - 图片链接
  * @returns 图片 buffer
  */
 export async function getImageBuffer(url: string): Promise<ArrayBuffer> {
-  return await TGHttp<ArrayBuffer>(url, { method: "GET", isBlob: true });
+  return await TGHttp.buffer(url);
 }
 
 /**

@@ -5,7 +5,6 @@
  */
 
 import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
-import JSONBig from "json-bigint";
 
 import TGLogger from "./TGLogger.js";
 
@@ -25,8 +24,6 @@ type TGHttpParams = {
   body?: string;
   /** 是否是Blob */
   isBlob?: boolean;
-  /** 是否有BigInt */
-  hasBigInt?: boolean;
 };
 
 /**
@@ -70,11 +67,7 @@ async function TGHttp<T>(
   return await fetch(url, fetchOptions)
     .then(async (res) => {
       if (res.ok) {
-        const data = options.isBlob
-          ? await res.arrayBuffer()
-          : options.hasBigInt
-            ? JSONBig.parse(await res.text())
-            : await res.json();
+        const data = options.isBlob ? await res.arrayBuffer() : await res.json();
         if (fullResponse) return { data, resp: res };
         return data;
       }
