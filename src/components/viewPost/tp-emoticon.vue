@@ -24,7 +24,7 @@
   />
 </template>
 <script lang="ts" setup>
-import { saveImgLocal } from "@utils/TGShare.js";
+import { saveImgBlob } from "@utils/TGShare.js";
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
@@ -71,6 +71,7 @@ type TpEmoticonProps = {
 const props = defineProps<TpEmoticonProps>();
 
 const localUrl = ref<string>();
+const linkUrl = ref<string>(props.data.insert.custom_emoticon.url);
 const showOverlay = ref<boolean>(false);
 const bgColor = ref<string>("transparent");
 const loadErr = ref<boolean>(false);
@@ -93,11 +94,12 @@ const showLabel = computed<boolean>(() => {
 console.log("tp-emoticon", props.data.insert.custom_emoticon);
 
 onMounted(async () => {
-  localUrl.value = await saveImgLocal(props.data.insert.custom_emoticon.url);
+  linkUrl.value = props.data.insert.custom_emoticon.url;
+  localUrl.value = await saveImgBlob(linkUrl.value);
 });
 
 onUnmounted(() => {
-  if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+  if (localUrl.value && localUrl.value !== linkUrl.value) URL.revokeObjectURL(localUrl.value);
 });
 
 function getImageExt(): string {
@@ -109,7 +111,8 @@ async function handleEmoticonClick(): Promise<void> {
   if (loadErr.value) {
     localUrl.value = undefined;
     await nextTick();
-    localUrl.value = await saveImgLocal(props.data.insert.custom_emoticon.url);
+    linkUrl.value = props.data.insert.custom_emoticon.url;
+    localUrl.value = await saveImgBlob(linkUrl.value);
     loadErr.value = false;
     return;
   }

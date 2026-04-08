@@ -1,20 +1,20 @@
 <!-- 祈愿日历图表组件 -->
 <template>
   <v-chart
-    ref="chartRef"
-    class="gro-chart-calendar"
-    :option="chartOptions"
-    autoresize
-    :theme="echartsTheme"
-    :init-options="{ locale: 'ZH' }"
-    :style="{ height: chartHeight }"
     :key="`gro-chart-calendar-${echartsTheme}`"
+    ref="chartRef"
+    :init-options="{ locale: 'ZH' }"
+    :option="chartOptions"
+    :style="{ height: chartHeight }"
+    :theme="echartsTheme"
+    autoresize
+    class="gro-chart-calendar"
   />
 </template>
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
-import { getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
+import { saveImgFile } from "@utils/TGShare.js";
 import type { HeatmapSeriesOption } from "echarts/charts.js";
 import { HeatmapChart } from "echarts/charts.js";
 import type {
@@ -113,8 +113,7 @@ async function getCalendarOptions(): Promise<EChartsOption> {
               backgroundColor: theme.value === "dark" ? "#2c343c" : "#ffffff",
               excludeComponents: ["toolbox"],
             });
-            const buffer = await getImageBuffer(dataUrl);
-            await saveCanvasImg(buffer, `gacha-chart-calendar-${props.uid}`);
+            await saveImgFile(dataUrl, `gacha-chart-calendar-${props.uid}`);
           },
         },
       },

@@ -1,19 +1,19 @@
 <!-- 祈愿柱状图组件 -->
 <template>
   <v-chart
-    ref="chartRef"
-    class="gro-chart-stackbar"
-    :option="chartOptions"
-    autoresize
-    :theme="echartsTheme"
-    :init-options="{ locale: 'ZH' }"
     :key="`gro-chart-stackbar-${echartsTheme}`"
+    ref="chartRef"
+    :init-options="{ locale: 'ZH' }"
+    :option="chartOptions"
+    :theme="echartsTheme"
+    autoresize
+    class="gro-chart-stackbar"
   />
 </template>
 <script lang="ts" setup>
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
-import { getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
+import { saveImgFile } from "@utils/TGShare.js";
 import type { BarSeriesOption } from "echarts/charts.js";
 import { BarChart } from "echarts/charts.js";
 import type {
@@ -146,8 +146,7 @@ async function getStackBarOptions(): Promise<EChartsOption> {
               backgroundColor: theme.value === "dark" ? "#2c343c" : "#ffffff",
               excludeComponents: ["toolbox"],
             });
-            const buffer = await getImageBuffer(dataUrl);
-            await saveCanvasImg(buffer, `gacha-overview-${props.uid}`);
+            await saveImgFile(dataUrl, `gacha-overview-${props.uid}`);
           },
         },
       },

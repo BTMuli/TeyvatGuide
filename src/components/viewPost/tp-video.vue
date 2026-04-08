@@ -1,9 +1,9 @@
 <template>
-  <div class="tp-video-box" v-if="videoData">
+  <div v-if="videoData" class="tp-video-box">
     <iframe
-      class="tp-video-container"
-      :src="props.data.insert.video"
+      :id="`tp-video-${props.data.insert.video}`"
       :allowfullscreen="true"
+      :src="props.data.insert.video"
       allow="
         accelerometer;
         autoplay;
@@ -12,12 +12,12 @@
         gyroscope;
         picture-in-picture;
       "
+      class="tp-video-container"
       sandbox="allow-forms allow-same-origin allow-popups allow-presentation allow-scripts"
-      :id="`tp-video-${props.data.insert.video}`"
     />
     <div class="tp-video-share">
-      <img alt="cover" :src="videoCover" class="tp-video-cover" />
-      <img alt="icon" src="/UI/post/video_play_bili.webp" class="tp-video-icon" />
+      <img :src="videoCover" alt="cover" class="tp-video-cover" />
+      <img alt="icon" class="tp-video-icon" src="/UI/post/video_play_bili.webp" />
       <div class="tp-video-info">
         <span>{{ videoData.bvid }}|{{ timestampToDate(videoData.ctime * 1000) }}</span>
         <span>{{ videoData.title }}</span>
@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import Bili from "@Bili/index.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { saveImgLocal } from "@utils/TGShare.js";
+import { saveImgBlob } from "@utils/TGShare.js";
 import { getVideoDuration, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
@@ -46,6 +46,7 @@ type TpVideoProps = { data: TpVideo };
 const props = defineProps<TpVideoProps>();
 const videoAspectRatio = ref<number>(16 / 9);
 const videoCover = ref<string>();
+const videoCoverLink = ref<string>();
 const videoData = shallowRef<TGApp.Plugins.Bili.Video.ViewData>();
 
 console.log("tpVideo", props.data.insert.video);
@@ -63,11 +64,14 @@ onMounted(async () => {
   const meta = videoData.value.dimension;
   if (meta.width > meta.height) videoAspectRatio.value = meta.width / meta.height;
   else videoAspectRatio.value = meta.height / meta.width;
-  videoCover.value = await saveImgLocal(videoData.value.pic);
+  videoCoverLink.value = videoData.value.pic;
+  videoCover.value = await saveImgBlob(videoCoverLink.value);
 });
 
 onUnmounted(() => {
-  if (videoCover.value) URL.revokeObjectURL(videoCover.value);
+  if (videoCover.value && videoCover.value !== videoCoverLink.value) {
+    URL.revokeObjectURL(videoCover.value);
+  }
 });
 </script>
 <style lang="css" scoped>

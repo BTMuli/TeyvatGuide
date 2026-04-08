@@ -19,13 +19,13 @@ import { bytesToSize } from "./toolFunc.js";
 
 /**
  * 保存图片-canvas
- * @since Beta v0.9.0
+ * @since Beta v0.10.0
  * @param buffer - 图片数据
  * @param filename - 文件名
  * @param format - 文件格式
  * @returns 无返回值
  */
-export async function saveCanvasImg(
+export async function saveBufferFile(
   buffer: ArrayBuffer,
   filename: string,
   format?: string,
@@ -49,28 +49,52 @@ export async function saveCanvasImg(
 }
 
 /**
+ * 从远程获取buffer并保存到本地文件
+ * @since Beta v0.10.0
+ * @param url - 图片链接
+ * @param fn - 文件名
+ * @returns 保存结果
+ */
+export async function saveImgFile(url: string, fn: string, fmt?: string): Promise<void> {
+  let buffer: ArrayBuffer | undefined;
+  try {
+    buffer = await TGHttps.buffer(url);
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
+    await TGLogger.Error(`[TGShare][saveImgFile] 获取图像Buffer失败：${url}`);
+    await TGLogger.Error(`${e}`);
+    return;
+  }
+  if (buffer === undefined) return;
+  await saveBufferFile(buffer, fn, fmt);
+}
+
+/**
  * 将图片保存到本地
  * @since Beta v0.10.0
  * @todo format param
  * @param url - 图片链接
  * @returns 图片元素
  */
-export async function saveImgLocal(url: string): Promise<string> {
-  const res = await TGHttps.buffer(url);
-  const buffer = new Uint8Array(res);
-  const blob = new Blob([buffer], { type: "image/png" });
+export async function saveImgBlob(url: string): Promise<string> {
+  let buffer: ArrayBuffer | undefined;
+  try {
+    buffer = await TGHttps.buffer(url);
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    await TGLogger.Error(`[TGShare][saveImgBlob] 获取图像Buffer失败: ${url}`);
+    await TGLogger.Error(`[TGShare][saveImgBlob] ${errMsg}`);
+    return url;
+  }
+  const blob = new Blob([new Uint8Array(buffer)], { type: "image/png" });
   return URL.createObjectURL(blob);
-}
-
-/**
- * 返回图片 buffer
- * @since Beta v0.10.0
- * @deprecated 使用 TGHttps.buffer
- * @param url - 图片链接
- * @returns 图片 buffer
- */
-export async function getImageBuffer(url: string): Promise<ArrayBuffer> {
-  return await TGHttp.buffer(url);
 }
 
 /**
@@ -138,11 +162,11 @@ export async function generateShareImg(
   await TGLogger.Info(`[generateShareImg][${fileName}] 图像大小为 ${sizeStr}`);
   const { shareDefaultFile } = storeToRefs(useAppStore());
   if (shareDefaultFile.value === 0) {
-    await saveCanvasImg(bf.buffer, fileName);
+    await saveBufferFile(bf.buffer, fileName);
     return;
   }
   if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1024 * 1024) {
-    await saveCanvasImg(bf.buffer, fileName);
+    await saveBufferFile(bf.buffer, fileName);
     return;
   }
   try {
@@ -151,7 +175,7 @@ export async function generateShareImg(
     await TGLogger.Info(`[generateShareImg][${fileName}] 已将图像复制到剪贴板`);
   } catch (e) {
     await TGLogger.Error(`[generateShareImg][${fileName}] 复制到剪贴板失败 ${e}`);
-    await saveCanvasImg(bf.buffer, fileName);
+    await saveBufferFile(bf.buffer, fileName);
   }
 }
 

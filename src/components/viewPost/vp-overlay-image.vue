@@ -87,7 +87,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
+import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
 import {
   computed,
@@ -102,6 +102,8 @@ import {
 } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 type TpoImageProps = { image: TpImage };
 type VpoiSize = { width: number; height: number };
@@ -397,13 +399,32 @@ function setBlackBg(): void {
   bgColor.value = bgMode.value === 0 ? "transparent" : bgMode.value === 1 ? "black" : "white";
 }
 
+async function loadImageBuffer(): Promise<void> {
+  if (buffer.value !== null) return;
+  try {
+    buffer.value = await TGHttps.buffer(oriLink.value);
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
+    await TGLogger.Error(`[VpOverlayImage][loadImageBuffer] 获取图像Buffer失败：${oriLink.value}`);
+    await TGLogger.Error(`[VpOverlayImage][loadImageBuffer] ${e}`);
+  }
+}
+
 async function onCopy(): Promise<void> {
   if (!showOri.value) {
     showOri.value = true;
     await nextTick();
   }
   await showLoading.start("正在复制图片到剪贴板");
-  if (buffer.value === null) buffer.value = await getImageBuffer(oriLink.value);
+  await loadImageBuffer();
+  if (buffer.value === null) {
+    await showLoading.end();
+    return;
+  }
   const size = bytesToSize(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
   await showLoading.end();
@@ -416,14 +437,19 @@ async function onDownload(): Promise<void> {
     await nextTick();
   }
   await showLoading.start("正在下载图片到本地", oriLink.value);
-  if (buffer.value === null) buffer.value = await getImageBuffer(oriLink.value);
+  await loadImageBuffer();
+  if (buffer.value === null) {
+    await showLoading.end();
+    return;
+  }
   if (buffer.value.byteLength > MAX_FILE_SIZE) {
+    await showLoading.end();
     showSnackbar.warn("图片过大，无法下载到本地");
     return;
   }
   let fileName = oriLink.value.split("/").pop()?.split(".")[0];
   if (fileName === undefined) fileName = Date.now().toString();
-  await saveCanvasImg(buffer.value, fileName, format.value);
+  await saveBufferFile(buffer.value, fileName, format.value);
   await showLoading.end();
 }
 </script>

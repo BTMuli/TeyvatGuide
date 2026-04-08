@@ -1,34 +1,34 @@
 <!-- TODO: 链接处理重构 -->
 <template>
-  <div class="tp-image-box" v-if="localUrl !== undefined">
-    <img :src="localUrl" @click="showOverlay = true" :alt="oriUrl" :title="getImageTitle()" />
+  <div v-if="localUrl !== undefined" class="tp-image-box">
+    <img :alt="oriUrl" :src="localUrl" :title="getImageTitle()" @click="showOverlay = true" />
     <div
-      class="act"
-      @click.stop="showOri = true"
-      title="查看原图"
       v-if="!showOri"
+      class="act"
       data-html2canvas-ignore
+      title="查看原图"
+      @click.stop="showOri = true"
     >
-      <v-icon size="16" color="white">mdi-magnify</v-icon>
+      <v-icon color="white" size="16">mdi-magnify</v-icon>
     </div>
   </div>
-  <div v-else class="tp-image-load" :title="oriUrl">
+  <div v-else :title="oriUrl" class="tp-image-load">
     <v-progress-circular :indeterminate="true" color="blue" size="small" />
     <span>加载中...</span>
   </div>
   <VpOverlayImage
-    :image="props.data"
     v-model="showOverlay"
-    v-model:link="localUrl"
-    v-model:ori="showOri"
     v-model:bgColor="bgColor"
     v-model:format="imgExt"
+    v-model:link="localUrl"
+    v-model:ori="showOri"
+    :image="props.data"
   />
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
-import { saveImgLocal } from "@utils/TGShare.js";
+import { saveImgBlob } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
@@ -53,9 +53,10 @@ const props = defineProps<TpImageProps>();
 const showOverlay = ref<boolean>(false);
 
 const localUrl = ref<string>();
+const linkUrl = ref<string>("");
 const bgColor = ref<string>("transparent");
 
-const oriUrl = ref<string>("");
+const oriUrl = ref<string>(miniImgUrl());
 const imgExt = computed<string>(() => getImageExt());
 const showOri = ref<boolean>(imgExt.value === "gif" || imageQualityPercent.value === 100);
 
@@ -69,8 +70,8 @@ console.log("tp-image", props.data.insert.image, props.data.attributes);
 
 onMounted(async () => {
   oriUrl.value = miniImgUrl();
-  const link = appStore.getImageUrl(oriUrl.value, imgExt.value);
-  localUrl.value = await saveImgLocal(link);
+  linkUrl.value = getLinkUrl();
+  localUrl.value = await saveImgBlob(linkUrl.value);
 });
 
 watch(
@@ -81,14 +82,14 @@ watch(
     if (localUrl.value) URL.revokeObjectURL(localUrl.value);
     const ext = getImageExt();
     if (!["png", "jpg", "jpeg", "gif", "webp"].includes(ext.toLowerCase())) {
-      localUrl.value = await saveImgLocal(`${oriUrl.value}?format=jpg`);
-    } else localUrl.value = await saveImgLocal(oriUrl.value);
+      localUrl.value = await saveImgBlob(`${oriUrl.value}?format=jpg`);
+    } else localUrl.value = await saveImgBlob(oriUrl.value);
     await showLoading.end();
   },
 );
 
 onUnmounted(() => {
-  if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+  if (localUrl.value && localUrl.value !== linkUrl.value) URL.revokeObjectURL(localUrl.value);
 });
 
 function miniImgUrl(): string {
@@ -100,6 +101,10 @@ function miniImgUrl(): string {
   }
   const link = new URL(url);
   return `${link.origin}${link.pathname}`;
+}
+
+function getLinkUrl(): string {
+  return appStore.getImageUrl(oriUrl.value, imgExt.value);
 }
 
 function getImageTitle(): string {

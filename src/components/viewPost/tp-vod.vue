@@ -7,7 +7,7 @@
       data-html2canvas-ignore
     ></div>
     <div class="tp-vod-share">
-      <img v-if="coverUrl" :src="coverUrl" alt="cover" class="tp-vod-cover" />
+      <img v-if="coverLocal" :src="coverLocal" alt="cover" class="tp-vod-cover" />
       <v-progress-circular v-else color="blue" indeterminate size="25" />
       <img alt="icon" class="tp-vod-icon" src="/UI/post/video_play.svg" />
       <div class="tp-vod-time">
@@ -26,11 +26,14 @@ import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { getImageBuffer, saveCanvasImg, saveImgLocal } from "@utils/TGShare.js";
+import { saveBufferFile, saveImgBlob } from "@utils/TGShare.js";
 import { getVideoDuration } from "@utils/toolFunc.js";
 import Artplayer, { type Option } from "artplayer";
 import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
+import TGHttps from "@utils/TGHttps.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TGLogger from "@utils/TGLogger.js";
 
 type TpVod = {
   insert: {
@@ -61,7 +64,8 @@ const props = defineProps<TpVodProps>();
 
 const { postViewWide } = storeToRefs(appStore);
 
-const coverUrl = ref<string>();
+const coverLocal = ref<string>();
+const coverLink = ref<string>(getCoverLink());
 const vodAspectRatio = ref<number>(16 / 9);
 const coverBuffer = shallowRef<ArrayBuffer | null>(null);
 const container = shallowRef<Artplayer | null>(null);
@@ -79,13 +83,13 @@ onMounted(async () => {
     prev.size > curr.size ? prev : curr,
   );
   vodAspectRatio.value = calcAspectRatio();
-  const localUrl = appStore.getImageUrl(props.data.insert.vod.cover);
-  coverUrl.value = await saveImgLocal(localUrl);
+  coverLink.value = getCoverLink();
+  coverLocal.value = await saveImgBlob(coverLink.value);
   const option: Option = {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
     url: highestResolution.url,
-    poster: coverUrl.value,
+    poster: coverLocal.value,
     type: highestResolution.format,
     playbackRate: true,
     aspectRatio: false,
@@ -122,10 +126,12 @@ onMounted(async () => {
         tooltip: "下载封面",
         click: async () => {
           await showLoading.start("正在下载封面", props.data.insert.vod.cover);
-          if (!coverBuffer.value) {
-            coverBuffer.value = await getImageBuffer(props.data.insert.vod.cover);
+          await loadCoverBuffer();
+          if (coverBuffer.value === null) {
+            await showLoading.end();
+            return;
           }
-          await saveCanvasImg(coverBuffer.value, `vod-cover-${props.data.insert.vod.id}`);
+          await saveBufferFile(coverBuffer.value, `vod-cover-${props.data.insert.vod.id}`);
           await showLoading.end();
         },
       },
@@ -146,6 +152,27 @@ onMounted(async () => {
   container.value?.on("fullscreen", async (s) => await getCurrentWindow().setFullscreen(s));
 });
 
+function getCoverLink(): string {
+  return appStore.getImageUrl(props.data.insert.vod.cover);
+}
+
+async function loadCoverBuffer(): Promise<void> {
+  if (coverBuffer.value !== null) return;
+  try {
+    coverBuffer.value = await TGHttps.buffer(props.data.insert.vod.cover);
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
+    await TGLogger.Error(
+      `[TpVod][loadCoverBuffer] 获取图像Buffer失败：${props.data.insert.vod.cover}`,
+    );
+    await TGLogger.Error(`[TpVod][loadCoverBuffer] ${e}`);
+  }
+}
+
 function calcAspectRatio(): number {
   const resolutions = props.data.insert.vod.resolutions;
   const highestResolution = resolutions.reduce((prev, curr) =>
@@ -161,7 +188,9 @@ function calcAspectRatio(): number {
 onUnmounted(() => {
   container.value?.destroy();
   if (coverBuffer.value) coverBuffer.value = null;
-  if (coverUrl.value) URL.revokeObjectURL(coverUrl.value);
+  if (coverLocal.value && coverLocal.value !== coverLink.value) {
+    URL.revokeObjectURL(coverLocal.value);
+  }
 });
 </script>
 <style lang="css" scoped>

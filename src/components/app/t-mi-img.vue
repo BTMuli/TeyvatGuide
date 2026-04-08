@@ -15,7 +15,7 @@
 import useAppStore from "@store/app.js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-import { saveImgLocal } from "@/utils/TGShare.js";
+import { saveImgBlob } from "@/utils/TGShare.js";
 
 type TMiImgProps = {
   src: string;
@@ -31,6 +31,7 @@ const emits = defineEmits<TMiImgEmits>();
 
 const appStore = useAppStore();
 const localUrl = ref<string>();
+const link = ref<string>(getRemoteLink());
 
 onMounted(async () => {
   if (!props.src) return;
@@ -38,24 +39,30 @@ onMounted(async () => {
     localUrl.value = props.src;
     return;
   }
-  const link = props.ori ? props.src : appStore.getImageUrl(props.src);
-  localUrl.value = await saveImgLocal(link);
+  link.value = getRemoteLink();
+  localUrl.value = await saveImgBlob(link.value);
 });
+
+function getRemoteLink(): string {
+  return props.ori ? props.src : appStore.getImageUrl(props.src);
+}
 
 watch(
   () => props.src,
   async () => {
     if (!props.src) return;
-    if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+    if (localUrl.value && localUrl.value !== link.value) URL.revokeObjectURL(localUrl.value);
     localUrl.value = undefined;
-    const link = props.ori ? props.src : appStore.getImageUrl(props.src);
     if (!props.src.startsWith("http")) localUrl.value = props.src;
-    else localUrl.value = await saveImgLocal(link);
+    else {
+      link.value = getRemoteLink();
+      localUrl.value = await saveImgBlob(link.value);
+    }
   },
 );
 
 onUnmounted(() => {
-  if (localUrl.value) URL.revokeObjectURL(localUrl.value);
+  if (localUrl.value && localUrl.value !== link.value) URL.revokeObjectURL(localUrl.value);
 });
 </script>
 <style lang="scss" scoped>

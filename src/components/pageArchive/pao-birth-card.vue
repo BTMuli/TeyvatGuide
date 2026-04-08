@@ -61,9 +61,11 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
 import { parseBirthGal, parseBirthSrc } from "@utils/birthParser.js";
-import { copyToClipboard, getImageBuffer, saveCanvasImg } from "@utils/TGShare.js";
+import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 type ToArcBirthProps = { data?: TGApp.Archive.Birth.DrawItem; choice: boolean };
 
@@ -96,10 +98,26 @@ async function clearData(): Promise<void> {
   if (showText.value) await loadText();
 }
 
+async function loadImageBuffer(): Promise<void> {
+  if (buffer.value !== null || !props.data) return;
+  const imageUrl = props.data.take_picture[Number(props.choice)];
+  try {
+    buffer.value = await TGHttps.buffer(imageUrl);
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
+    await TGLogger.Error(`[PaoBirthCard][loadImageBuffer] 获取图像Buffer失败：${imageUrl}`);
+    await TGLogger.Error(`[PaoBirthCard][loadImageBuffer] ${e}`);
+  }
+}
+
 async function onCopy(): Promise<void> {
   if (!props.data) return;
-  const image = props.data.take_picture[Number(props.choice)];
-  if (buffer.value === null) buffer.value = await getImageBuffer(image);
+  await loadImageBuffer();
+  if (buffer.value === null) return;
   const size = bytesToSize(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
   showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
@@ -107,11 +125,9 @@ async function onCopy(): Promise<void> {
 
 async function onDownload(): Promise<void> {
   if (!props.data) return;
-  const image = props.data.take_picture[Number(props.choice)];
-  if (buffer.value === null) buffer.value = await getImageBuffer(image);
-  const size = bytesToSize(buffer.value.byteLength);
-  await saveCanvasImg(buffer.value, Date.now().toString());
-  showSnackbar.success(`图片已下载到本地，大小：${size}`);
+  await loadImageBuffer();
+  if (buffer.value === null) return;
+  await saveBufferFile(buffer.value, Date.now().toString());
 }
 
 function showComments(): void {
