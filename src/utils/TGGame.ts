@@ -13,7 +13,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 
 // YAE支持的游戏版本
-export const YAE_GAME_VER: Readonly<string> = "6.4.0";
+export const YAE_GAME_VER: Readonly<string> = "6.5.0";
 
 /**
  * 验证游戏格式
@@ -22,15 +22,17 @@ export const YAE_GAME_VER: Readonly<string> = "6.4.0";
  * @returns 类型收束
  */
 function verifyConfigIni(data: object): data is TGApp.Game.Config.GameConf {
-  if (!("general" in data) || typeof data.general !== "object" || data.general === null) return false;
-  if (!("game_version" in data.general) || typeof data.general.game_version !== "string") return false;
+  if (!("general" in data) || typeof data.general !== "object" || data.general === null)
+    return false;
+  if (!("game_version" in data.general) || typeof data.general.game_version !== "string")
+    return false;
   // 简单验证general跟game_version
   return true;
 }
 
 /**
  * 尝试获取游戏版本
- * @since Beta v0.9.1
+ * @since Beta v0.9.9
  * @remarks
  * 1. 读取 config.ini 下的 game_version
  * 2. 没有 config.ini ，读取 YuanShen_Data\\Persistent\\ScriptVersion
@@ -49,6 +51,7 @@ export async function tryReadGameVer(gameDir: string): Promise<false | string> {
       const iniParse = parse(iniRead);
       if (verifyConfigIni(iniParse)) return iniParse.general.game_version;
     } catch (e) {
+      console.error(`config.ini格式异常,${e}`);
       showSnackbar.warn("config.ini 配置格式异常");
     }
   }

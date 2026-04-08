@@ -11,16 +11,10 @@ description: SQLite 数据库操作规范，包括参数占位符、异步模式
 
 ```typescript
 // 正确
-await db.execute(
-  "INSERT INTO Table(key, value) VALUES ($1, $2)",
-  [key, value]
-);
+await db.execute("INSERT INTO Table(key, value) VALUES ($1, $2)", [key, value]);
 
 // 错误
-await db.execute(
-  "INSERT INTO Table(key, value) VALUES (?, ?)",
-  [key, value]
-);
+await db.execute("INSERT INTO Table(key, value) VALUES (?, ?)", [key, value]);
 ```
 
 ## 异步模式
@@ -51,17 +45,14 @@ await db.execute(
 ## 查询模式
 
 ```typescript
-const rows = await db.select<RowType>(
-  "SELECT * FROM Table WHERE id = $1",
-  [id],
-);
+const rows = await db.select<RowType>("SELECT * FROM Table WHERE id = $1", [id]);
 ```
 
 ## 路径别名
 
 数据库相关代码使用以下别名：
 
-| 别名 | 路径 |
-|------|------|
-| `@Sql/*` | `./src/plugins/Sqlite/*` |
+| 别名      | 路径                             |
+| --------- | -------------------------------- |
+| `@Sql/*`  | `./src/plugins/Sqlite/*`         |
 | `@Sqlm/*` | `./src/plugins/Sqlite/modules/*` |

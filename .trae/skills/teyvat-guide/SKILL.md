@@ -18,14 +18,14 @@ description: TeyvatGuide 项目 SKILL。处理 Vue+Tauri+TypeScript 项目开发
 
 ### 通用规则
 
-| 规则 | 要求 |
-|------|------|
-| 语言 | 中文注释，英文代码 |
-| 缩进 | 2 空格 |
-| 引号 | 字符串用双引号，Vue 模板用单引号 |
-| 分号 | 必须 |
-| 尾逗号 | ES5 风格 |
-| 行长度 | ≤100 字符 |
+| 规则   | 要求                             |
+| ------ | -------------------------------- |
+| 语言   | 中文注释，英文代码               |
+| 缩进   | 2 空格                           |
+| 引号   | 字符串用双引号，Vue 模板用单引号 |
+| 分号   | 必须                             |
+| 尾逗号 | ES5 风格                         |
+| 行长度 | ≤100 字符                        |
 
 ### TypeScript 规范
 
@@ -61,6 +61,7 @@ enum GameServerEnum { ... }
 ```
 
 **版本更新规则**：当修改类型的子成员时（如添加字段），需要：
+
 1. 更新父级类型的 `@since` 为当前项目版本（递增）
 2. 如该文件是主要变更文件，同步更新文件头的 `@since`
 
@@ -89,7 +90,7 @@ type Character = {
 };
 ```
 
-**Import 顺序**: 1. 内置模块 2. 外部包 3. 别名 (@/*) 4. 相对导入
+**Import 顺序**: 1. 内置模块 2. 外部包 3. 别名 (@/\*) 4. 相对导入
 
 ### Vue 规范
 
@@ -100,21 +101,21 @@ type Character = {
 
 ## 路径别名
 
-| 别名 | 路径 |
-|------|------|
-| `@/*` | `./src/*` |
-| `@styles/*` | `./src/assets/styles/*` |
-| `@comp/*` | `./src/components/*` |
-| `@enum/*` | `./src/enum/*` |
-| `@hooks/*` | `./src/hooks/*` |
-| `@Bili/*` | `./src/plugins/Bili/*` |
-| `@Hutao/*` | `./src/plugins/Hutao/*` |
-| `@Mys/*` | `./src/plugins/Mys/*` |
-| `@Sql/*` | `./src/plugins/Sqlite/*` |
-| `@Sqlm/*` | `./src/plugins/Sqlite/modules/*` |
-| `@req/*` | `./src/request/*` |
-| `@store/*` | `./src/store/modules/*` |
-| `@utils/*` | `./src/utils/*` |
+| 别名        | 路径                             |
+| ----------- | -------------------------------- |
+| `@/*`       | `./src/*`                        |
+| `@styles/*` | `./src/assets/styles/*`          |
+| `@comp/*`   | `./src/components/*`             |
+| `@enum/*`   | `./src/enum/*`                   |
+| `@hooks/*`  | `./src/hooks/*`                  |
+| `@Bili/*`   | `./src/plugins/Bili/*`           |
+| `@Hutao/*`  | `./src/plugins/Hutao/*`          |
+| `@Mys/*`    | `./src/plugins/Mys/*`            |
+| `@Sql/*`    | `./src/plugins/Sqlite/*`         |
+| `@Sqlm/*`   | `./src/plugins/Sqlite/modules/*` |
+| `@req/*`    | `./src/request/*`                |
+| `@store/*`  | `./src/store/modules/*`          |
+| `@utils/*`  | `./src/utils/*`                  |
 
 ## 数据库 (SQLite)
 

@@ -2,12 +2,28 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2025-09-09
-Update: 2026-03-13
+Update: 2026-04-08
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2025-09-09 14:30:56`
 >
-> 更新于 `2026-03-13 13:41:58`
+> 更新于 `2026-04-08 11:36:37`
+
+## [0.9.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.8) (2026-04-08)
+
+- 🍱 更新 6.5 版本游戏资源
+- ✨ 添加用户个人页面跳转
+- ✨ 增强图片浮窗功能，添加缩放和拖拽支持
+- ✨ 添加帖子详情请求限流 [`#233`](https://github.com/BTMuli/TeyvatGuide/issues/233)
+- ✨ 剧诗页面添加简略模式切换功能，优化战斗和卡片展示
+- 💫 帖子窗口部分按钮添加交互效果
+- 🐛 调整snackbar层级，修复兑换码浮窗分享异常
+- 🐛 修复角色生日判断逻辑异常，优化返回结果
+- 🐛 完善游戏启动ticket请求异常处理，隐藏请求成功后的详细ticket显示
+- 🚸 管理员模式下侧边栏启动仍然为启动游戏
+- 🚸 统一UIGF导出交互，导出前选择导出路径
+- 🚸 添加深渊、剧诗、危战 JSON Schema 验证规则
+- 🚸 扫码登录浮窗添加提示，防止用户误解
 
 ## [0.9.8](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.8) (2026-03-13)
 

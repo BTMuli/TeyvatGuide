@@ -42,15 +42,15 @@ const PostNewsTypeEnum: TGApp.BBS.Post.NewsTypeEnum = { ... };
 
 ## 命名规范
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| Interface/Type | PascalCase | `UserProfile` |
-| const 对象 | PascalCase | `NewsType` |
-| type alias | PascalCase + Enum | `NewsTypeEnum` |
-| enum 常量 | PascalCase + Enum | `PostNewsTypeEnum` |
-| readonly 列表 | PascalCase + List | `PostNewsTypeList` |
-| 描述函数 | camelCase + Desc | `getPostNewsTypeDesc` |
-| 常量 | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
+| 类型           | 规范              | 示例                  |
+| -------------- | ----------------- | --------------------- |
+| Interface/Type | PascalCase        | `UserProfile`         |
+| const 对象     | PascalCase        | `NewsType`            |
+| type alias     | PascalCase + Enum | `NewsTypeEnum`        |
+| enum 常量      | PascalCase + Enum | `PostNewsTypeEnum`    |
+| readonly 列表  | PascalCase + List | `PostNewsTypeList`    |
+| 描述函数       | camelCase + Desc  | `getPostNewsTypeDesc` |
+| 常量           | UPPER_SNAKE_CASE  | `MAX_RETRY_COUNT`     |
 
 ## JSDoc 注释
 
@@ -90,6 +90,7 @@ type Character = {
 ### 版本更新规则
 
 当修改类型定义的子成员时（如添加字段），需要同步更新：
+
 1. **父级类型的 `@since`**：递增为当前项目版本（参考 `package.json`）
 2. **文件头的 `@since`**：如该文件是主要变更文件，同步更新
 
@@ -151,6 +152,7 @@ const getUser = (id: number): UserProfile => {
 ```
 
 **例外情况（可以使用箭头函数）：**
+
 - 需要捕获词法 `this` 时
 - 作为回调函数传递给其他函数时
 - 对象字面量中的方法（根据场景判断）

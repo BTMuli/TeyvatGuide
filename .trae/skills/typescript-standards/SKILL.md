@@ -17,15 +17,15 @@ src/enum/<Module>.ts               # 枚举常量 (.ts)
 
 ## 命名规范
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| Interface/Type | PascalCase | `UserProfile` |
-| const 对象 | PascalCase | `NewsType` |
-| type alias | PascalCase + Enum | `NewsTypeEnum` |
-| enum 常量 | PascalCase + Enum | `PostNewsTypeEnum` |
-| readonly 列表 | PascalCase + List | `PostNewsTypeList` |
-| 描述函数 | camelCase + Desc | `getPostNewsTypeDesc` |
-| 常量 | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
+| 类型           | 规范              | 示例                  |
+| -------------- | ----------------- | --------------------- |
+| Interface/Type | PascalCase        | `UserProfile`         |
+| const 对象     | PascalCase        | `NewsType`            |
+| type alias     | PascalCase + Enum | `NewsTypeEnum`        |
+| enum 常量      | PascalCase + Enum | `PostNewsTypeEnum`    |
+| readonly 列表  | PascalCase + List | `PostNewsTypeList`    |
+| 描述函数       | camelCase + Desc  | `getPostNewsTypeDesc` |
+| 常量           | UPPER_SNAKE_CASE  | `MAX_RETRY_COUNT`     |
 
 ## 核心规则
 
@@ -54,7 +54,7 @@ const count: number = getCount();
 const result: string = getValue();
 
 // ✅ 正确 - 必要时使用类型断言（如 DOM 元素、类型不匹配）
-const el: HTMLInputElement = <HTMLInputElement>document.getElementById('id');
+const el: HTMLInputElement = <HTMLInputElement>document.getElementById("id");
 const data = <MyDataType>unknownValue;
 
 // ✅ 正确 - 函数定义优先使用 function 关键字
@@ -140,6 +140,7 @@ const loadData = async (): Promise<void> => {
 ```
 
 **例外情况（可以使用箭头函数）：**
+
 - 需要捕获词法 `this` 时
 - 作为回调函数传递给其他函数时
 - 对象字面量中的方法（根据场景判断）
@@ -164,7 +165,8 @@ function getUser(id: number): UserProfile {
 const count = ref(0); // 缺少泛型
 const list: string[] = ref([]); // 使用 [] 而非 Array
 
-function getUser(id): UserProfile { // 缺少参数类型
+function getUser(id): UserProfile {
+  // 缺少参数类型
   return { id, name: "User" };
 }
 ```
@@ -201,6 +203,7 @@ type Character = {
 **版本更新规则：**
 
 当修改类型的子成员时（如添加字段），需要：
+
 1. 更新父级类型的 `@since` 为当前项目版本（递增）
 2. 如该文件是主要变更文件，同步更新文件头的 `@since`
 
@@ -231,12 +234,12 @@ type Character = {
 
 ## ESLint 规则对应
 
-| 规则 | ESLint 配置 | 语法要求 |
-|------|------------|---------|
-| 数组类型 | `@typescript-eslint/array-type` | `Array<T>` |
-| 类型断言 | `@typescript-eslint/consistent-type-assertions` | `<Type>` |
-| 类型定义 | `@typescript-eslint/consistent-type-definitions` | `type` |
-| 导入顺序 | `import/order` | 分组排序 |
+| 规则     | ESLint 配置                                      | 语法要求   |
+| -------- | ------------------------------------------------ | ---------- |
+| 数组类型 | `@typescript-eslint/array-type`                  | `Array<T>` |
+| 类型断言 | `@typescript-eslint/consistent-type-assertions`  | `<Type>`   |
+| 类型定义 | `@typescript-eslint/consistent-type-definitions` | `type`     |
+| 导入顺序 | `import/order`                                   | 分组排序   |
 
 ## 详细规范
 

@@ -39,9 +39,12 @@ const PostNewsTypeList: ReadonlyArray<TGApp.BBS.Post.NewsTypeEnum> = [
 // 描述函数
 function getPostNewsTypeDesc(newsType: TGApp.BBS.Post.NewsTypeEnum): string {
   switch (newsType) {
-    case PostNewsTypeEnum.NOTICE: return "公告";
-    case PostNewsTypeEnum.ACTIVITY: return "活动";
-    case PostNewsTypeEnum.NEWS: return "资讯";
+    case PostNewsTypeEnum.NOTICE:
+      return "公告";
+    case PostNewsTypeEnum.ACTIVITY:
+      return "活动";
+    case PostNewsTypeEnum.NEWS:
+      return "资讯";
   }
 }
 ```
