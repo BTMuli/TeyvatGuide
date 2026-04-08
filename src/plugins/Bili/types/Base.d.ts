@@ -7,7 +7,6 @@ declare namespace TGApp.Plugins.Bili.Base {
   /**
    * Bili Response 统一接口
    * @since Beta v0.4.0
-   * @returns 响应结构体
    */
   type Resp<T = unknown> = {
     /** 状态码 */
@@ -19,4 +18,10 @@ declare namespace TGApp.Plugins.Bili.Base {
     /** 数据 */
     data: T;
   };
+
+  /**
+   * Wrid返回
+   * @since Beta v0.10.0
+   */
+  type WridArrRes = Array<string> & { length: 2 };
 }

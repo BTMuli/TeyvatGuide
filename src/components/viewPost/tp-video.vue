@@ -39,6 +39,8 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { saveImgBlob } from "@utils/TGShare.js";
 import { getVideoDuration, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 type TpVideo = { insert: { video: string } };
 type TpVideoProps = { data: TpVideo };
@@ -47,7 +49,7 @@ const props = defineProps<TpVideoProps>();
 const videoAspectRatio = ref<number>(16 / 9);
 const videoCover = ref<string>();
 const videoCoverLink = ref<string>();
-const videoData = shallowRef<TGApp.Plugins.Bili.Video.ViewData>();
+const videoData = shallowRef<TGApp.Plugins.Bili.Video.ViewRes>();
 
 console.log("tpVideo", props.data.insert.video);
 
@@ -55,9 +57,17 @@ onMounted(async () => {
   const url = new URL(props.data.insert.video);
   const aid = url.searchParams.get("aid") ?? undefined;
   const bvid = url.searchParams.get("bvid") ?? undefined;
-  videoData.value = await Bili.video.view(aid, bvid);
-  if (!videoData.value) {
-    showSnackbar.error(`获取B站视频信息失败：${props.data.insert.video}`);
+  try {
+    const viewResp = await Bili.video.view(aid, bvid);
+    videoData.value = viewResp.data;
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取视频信息失败: ${errMsg}`);
+    await TGLogger.Error(`[TpVideo][onMounted] 获取视频信息异常: ${url}`);
+    await TGLogger.Error(`[TpVideo][onMounted] ${e}`);
     return;
   }
   console.log(`videoData ${props.data.insert.video}`, videoData.value);
@@ -74,7 +84,7 @@ onUnmounted(() => {
   }
 });
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tp-video-box {
   position: relative;
   max-width: 100%;

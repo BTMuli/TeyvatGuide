@@ -1,16 +1,15 @@
 /**
  * Bili插件-获取视频基本信息
- * @since Beta v0.5.0
+ * @since Beta v0.10.0
  */
 
-import headerBili from "@Bili/utils/getHeader.js";
-import getWrid from "@Bili/utils/getWrid.js";
-import TGHttp from "@utils/TGHttp.js";
-import TGLogger from "@utils/TGLogger.js";
+import { BILI_HEADER, getWrid } from "../utils.js";
+import TGHttps from "@utils/TGHttps.js";
 
 /**
  * 获取视频基本信息
- * @since Beta v0.5.0
+ * @since Beta v0.10.0
+ * @todo 完善参数类型
  * @param aid - 视频 AV 号
  * @param bvid - 视频 BV 号
  * @returns 视频基本信息
@@ -18,26 +17,19 @@ import TGLogger from "@utils/TGLogger.js";
 async function getVideoView(
   aid?: string,
   bvid?: string,
-): Promise<TGApp.Plugins.Bili.Video.ViewData> {
+): Promise<TGApp.Plugins.Bili.Video.ViewResp> {
   const url = "https://api.bilibili.com/x/web-interface/wbi/view";
   let params: Record<string, string | number | boolean> = { need_view: 1, isGaiaAvoided: true };
   if (aid) params.aid = aid;
   if (bvid) params.bvid = bvid;
   if (!aid && !bvid) throw new Error("aid和bVid不能同时为空");
-  const wrid = await getWrid(params);
-  params = { ...params, wts: wrid[0], w_rid: wrid[1] };
-  try {
-    const resp = await TGHttp<TGApp.Plugins.Bili.Video.ViewResponse>(url, {
-      method: "GET",
-      query: params,
-      headers: headerBili,
-    });
-    return resp.data;
-  } catch (error) {
-    if (error instanceof Error) await TGLogger.Error(`获取视频基本信息失败: ${error.message}`);
-    else await TGLogger.Error(`获取视频基本信息失败: ${error}`);
-  }
-  throw new Error("获取视频基本信息失败");
+  const [wts, w_rid] = await getWrid(params);
+  params = { ...params, wts: wts, w_rid: w_rid };
+  const resp = await TGHttps.get<TGApp.Plugins.Bili.Video.ViewResp>(url, {
+    query: params,
+    headers: BILI_HEADER,
+  });
+  return resp.data;
 }
 
 export default getVideoView;

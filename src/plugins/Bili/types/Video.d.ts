@@ -8,14 +8,14 @@ declare namespace TGApp.Plugins.Bili.Video {
    * Bili 视频基本信息返回
    * @since Beta v0.4.0
    */
-  type ViewResponse = TGApp.Plugins.Bili.Base.Resp<ViewData>;
+  type ViewResp = TGApp.Plugins.Bili.Base.Resp<ViewRes>;
 
   /**
    * Bili 视频基本信息
    * @since Beta v0.4.0
    * @see https://api.bilibili.com/x/web-interface/view?aid=540893019
    */
-  type ViewData = {
+  type ViewRes = {
     /** 视频 BV 号 */
     bvid: string;
     /** 视频 AV 号 */
@@ -150,13 +150,13 @@ declare namespace TGApp.Plugins.Bili.Video {
    * Bili 视频链接返回
    * @since Beta v0.4.0
    */
-  type UrlResponse = TGApp.Plugins.Bili.Base.Resp<UrlData>;
+  type UrlResp = TGApp.Plugins.Bili.Base.Resp<UrlRes>;
 
   /**
    * Bili 视频播放地址返回数据
    * @since Beta v0.4.1
    */
-  type UrlData = {
+  type UrlRes = {
     /** 视频来源 */
     from: string;
     /** 视频播放地址 */
