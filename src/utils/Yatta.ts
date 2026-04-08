@@ -1,20 +1,19 @@
 /**
  * Yatta 插件入口
- * @since Beta v0.9.6
+ * @since Beta v0.10.0
  */
-import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 
 const YATTA_API = "https://gi.yatta.moe/api/v2/";
 
 /**
  * 请求角色数据
- * @since Beta v0.9.6
+ * @since Beta v0.10.0
  * @returns 角色数据
  */
 async function fetchAvatar(): Promise<TGApp.Plugins.Yatta.AvatarResp> {
-  return await TGHttp<TGApp.Plugins.Yatta.AvatarResp>(`${YATTA_API}chs/avatar`, {
-    method: "GET",
-  });
+  const resp = await TGHttps.get<TGApp.Plugins.Yatta.AvatarResp>(`${YATTA_API}chs/avatar`);
+  return resp.data;
 }
 
 /**
@@ -23,9 +22,8 @@ async function fetchAvatar(): Promise<TGApp.Plugins.Yatta.AvatarResp> {
  * @returns 武器数据
  */
 async function fetchWeapon(): Promise<TGApp.Plugins.Yatta.WeaponResp> {
-  return await TGHttp<TGApp.Plugins.Yatta.WeaponResp>(`${YATTA_API}chs/weapon`, {
-    method: "GET",
-  });
+  const resp = await TGHttps.get<TGApp.Plugins.Yatta.WeaponResp>(`${YATTA_API}chs/weapon`);
+  return resp.data;
 }
 
 /**

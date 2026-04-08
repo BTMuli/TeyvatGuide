@@ -171,6 +171,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { AppCalendarData } from "@/data/index.js";
+import TGHttps from "@utils/TGHttps.js";
 
 const router = useRouter();
 const hutaoStore = useHutaoStore();
@@ -398,7 +399,7 @@ async function handleHutaoDownload(uids: Array<string>): Promise<void> {
   await showLoading.end();
   showSnackbar.success("成功下载，即将刷新页面");
   await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-  window.location.reload();
+  // window.location.reload();
 }
 
 async function handleHutaoDelete(uids: Array<string>): Promise<void> {
@@ -598,10 +599,13 @@ async function loadYatta(): Promise<void> {
   try {
     yattaData.value = await fetchYattaJson();
   } catch (e) {
-    console.error(e);
-    showSnackbar.warn(`获取 Yatta 元数据失败`);
-    await TGLogger.Error(`[UserGacha][onMounted]获取 Yatta 元数据失败`);
-    await TGLogger.Error(`${e}`);
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取Yatta数据失败：${errMsg}`);
+    await TGLogger.Error(`[Gacha][loadYatta] 获取Yatta数据失败`);
+    await TGLogger.Error(`[Gacha][loadYatta] ${e}`);
   }
 }
 
