@@ -1,6 +1,7 @@
 /**
  * 封装HTTP请求
- * @since Beta v0.9.1
+ * @since Beta v0.10.0
+ * @deprecated 请使用 TGHttps
  */
 
 import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
@@ -10,8 +11,8 @@ import TGLogger from "./TGLogger.js";
 
 /**
  * 请求参数
- * @since Beta v0.9.1
- * @remarks 请使用 TGHttpsConfig 类型
+ * @since Beta v0.10.0
+ * @deprecated 请使用 TGHttpsConfig 类型
  */
 type TGHttpParams = {
   /** 请求方法 */
@@ -30,8 +31,8 @@ type TGHttpParams = {
 
 /**
  * 发送请求
- * @since Beta v0.9.1
- * @remarks 自 Beta v0.10.0 起弃用，请使用 TGHttps.get() 或 TGHttps.post() 替代
+ * @since Beta v0.10.0
+ * @deprecated 请使用 TGHttps.get() 或 TGHttps.post() 替代
  * @param url - 请求地址
  * @param options - 请求参数
  * @returns 请求结果
