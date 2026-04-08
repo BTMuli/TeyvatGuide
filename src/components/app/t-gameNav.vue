@@ -74,12 +74,11 @@ async function loadNav(): Promise<void> {
     nav.value = resp.data.data.navigator;
     if (loadCode.value) loadCode.value = false;
   } catch (e) {
+    let errMsg = String(e);
     if (TGHttps.isHttpErr(e)) {
-      const errMsg = e.status ? `[${e.status}] ${e.message}` : e.message;
-      showSnackbar.error(`加载导航失败: ${errMsg}`);
-    } else {
-      showSnackbar.error(`加载导航失败: ${String(e)}`);
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
     }
+    showSnackbar.error(`加载组件数据失败: ${errMsg}`);
     await TGLogger.Error(`[TGameNav][loadNav] 加载组件数据失败：${e}`);
   }
 }
@@ -114,12 +113,11 @@ async function tryGetCode(): Promise<void> {
     loadCode.value = false;
   } catch (e) {
     loadCode.value = false;
+    let errMsg = String(e);
     if (TGHttps.isHttpErr(e)) {
-      const errMsg = e.status ? `[${e.status}] ${e.message}` : e.message;
-      showSnackbar.error(`获取兑换码失败: ${errMsg}`);
-    } else {
-      showSnackbar.error(`获取兑换码失败: ${String(e)}`);
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
     }
+    showSnackbar.error(`获取兑换码失败: ${errMsg}`);
     await TGLogger.Error(`[TGameNav][tryGetCode] 获取兑换码失败：${e}`);
   }
 }
