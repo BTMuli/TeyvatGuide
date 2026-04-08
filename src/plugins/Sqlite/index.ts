@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.9.9
+ * @since Beta v0.10.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -127,15 +127,19 @@ class Sqlite {
 
   /**
    * 已有数据表跟触发器不变的情况下，更新数据库数据
-   * @since Beta v0.3.3
+   * @since Beta v0.10.0
+   * @param upt - updateTime 更新时间
    * @returns 无返回值
    */
-  public async update(): Promise<void> {
+  public async update(upt?: string): Promise<void> {
     const db = await this.getDB();
     const sqlD = await initDataSql();
     for (const item of sqlD) await db.execute(item);
     // 检测是否存在字段
     await this.updateAbyss();
+    if (upt !== undefined) {
+      await this.saveAppData("dataUpdated", upt);
+    }
   }
 
   /**

@@ -342,7 +342,8 @@ async function confirmUpdate(title?: string): Promise<void> {
     return;
   }
   await showLoading.start("正在更新数据库", "");
-  await TGSqlite.update();
+  // @ts-expect-error import.meta
+  await TGSqlite.update(import.meta.env.VITE_BUILD_TIME);
   // @ts-expect-error import.meta
   buildTime.value = import.meta.env.VITE_BUILD_TIME;
   await showLoading.end();

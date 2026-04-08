@@ -320,8 +320,12 @@ async function checkAppLoad(): Promise<void> {
       await TGLogger.Error(`[App][checkAppLoad] ${error.name}: ${error.message}`);
     } else console.error(error);
   }
-  if (!checkDB) await TGSqlite.update();
-  else await TGLogger.Info("[App][checkAppLoad] 数据库已成功加载！");
+  if (!checkDB) {
+    // @ts-expect-error import.meta
+    buildTime.value = import.meta.env.VITE_BUILD_TIME;
+    // @ts-expect-error import.meta
+    await TGSqlite.update(import.meta.env.VITE_BUILD_TIME);
+  } else await TGLogger.Info("[App][checkAppLoad] 数据库已成功加载！");
 }
 
 // 检测 deviceFp
@@ -437,7 +441,7 @@ async function checkUpdate(): Promise<void> {
     }
     // @ts-expect-error import.meta
     buildTime.value = import.meta.env.VITE_BUILD_TIME;
-    await TGSqlite.update();
+    await TGSqlite.update(buildTime.value);
     showFeedback.value = true;
     showSnackbar.success("数据库已更新！", 3000);
     await openUrl("https://app.btmuli.ink/docs/TeyvatGuide/changelogs.html");
