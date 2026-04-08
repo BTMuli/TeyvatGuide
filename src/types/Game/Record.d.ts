@@ -1,6 +1,6 @@
 /**
  * 原神战绩相关类型定义文件
- * @since Beta v0.9.9
+ * @since Beta v0.10.0
  */
 
 declare namespace TGApp.Game.Record {
@@ -13,7 +13,6 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 原神战绩返回数据
-   *
    * @since Beta v0.7.2
    */
   type FullData = {
@@ -63,9 +62,12 @@ declare namespace TGApp.Game.Record {
     image: string;
     /** 角色名称 */
     name: string;
-    /** 角色元素 */
+    /**
+     * 角色元素
+     * @example Dendro
+     */
     element: string;
-    /** 羁绊等级 */
+    /** 好感等级 */
     fetter: number;
     /** 角色等级 */
     level: number;
@@ -106,7 +108,16 @@ declare namespace TGApp.Game.Record {
     electroculus_number: number;
     /** 精致宝箱数量 */
     exquisite_chest_number: number;
-    /** 数据对应链接的 map，用不到设为 unknown */
+    /**
+     * 数据对应链接的 map，用不到设为 unknown
+     * @example
+     * ```json
+     * "dendroculus_number": {
+     *   "link": "https://act.mihoyo.com/ys/app/interactive-map/index.html?bbs_presentation_style=no_header&lang=zh-cn&utm_source=gamerecord&utm_medium=ys&utm_campaign=icon&_markerFps=24#/map/2?shown_types=403&center=2008.50,-1084.00&zoom=-3.00",
+     *   "backup_link": ""
+     * },
+     * ```
+     */
     field_ext_map: unknown;
     /** 满好感角色数 */
     full_fetter_avatar_num: number;
@@ -136,7 +147,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 幻想真境剧诗数据类型
-   * @since Beta v0.5.0
+   * @since Beta v0.10.0
    */
   type CombatStats = {
     /** 是否解锁 */
@@ -147,6 +158,10 @@ declare namespace TGApp.Game.Record {
     has_data: boolean;
     /** 是否有详细数据 */
     has_detail_data: boolean;
+    /** 圣牌解锁数量 */
+    tarot_finished_cnt: number;
+    /** 困难等级 */
+    difficulty_id: TGApp.Game.Combat.DiffEnum;
   };
 
   /**
@@ -166,19 +181,28 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索信息类型
-   * @since Beta v0.8.1
+   * @todo 类型更新
+   * @since Beta v0.10.0
    */
   type WorldExplore = {
     /** 声望等级 */
     level: number;
     /** 探索千分比 */
     exploration_percentage: number;
-    /** 图标 */
+    /**
+     * 图标
+     * @remarks 可能为空
+     */
     icon: string;
     /** 名称 */
     name: string;
-    /** 类型
-     * @example Reputation: 声望, Offering: 奉献
+    /**
+     * 类型
+     * @todo 转为枚举类
+     * @example
+     * - Reputation: 声望
+     * - Offering: 奉献
+     * - TypeUnknown: 未知类型
      */
     type: string;
     /** 奉献物品 */
@@ -191,16 +215,25 @@ declare namespace TGApp.Game.Record {
     map_url: string;
     /** 攻略 URL */
     strategy_url: string;
-    /** 背景图片 URL */
+    /**
+     * 背景图片 URL
+     * @remarks 可能为空
+     */
     background_image: string;
-    /** 内部图标 URL */
+    /**
+     * 内部图标 URL
+     * @remarks 可能为空
+     */
     inner_icon: string;
-    /** 封面 URL */
+    /**
+     * 封面 URL
+     * @remarks 可能为空
+     */
     cover: string;
     /** 区域探索列表 */
     area_exploration_list: Array<AreaExploration>;
     /** Boss 列表 */
-    boss_list: Array<unknown>;
+    boss_list: Array<AreaBoss>;
     /** 是否热门 */
     is_hot: boolean;
     /** 索引激活 */
@@ -209,7 +242,10 @@ declare namespace TGApp.Game.Record {
     detail_active: boolean;
     /** 七天神像等级 */
     seven_status_level: number;
-    /** 纳塔声望 */
+    /**
+     * 纳塔声望
+     * @remarks 用于标识纳塔地区声望，其余地区该值为 null
+     */
     nata_reputation: NataReputation | null;
     /** 世界类型 */
     world_type: number;
@@ -217,7 +253,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 奉献物品类型
-   * @since Alpha v0.2.0
+   * @since Beta v0.10.0
    */
   type WorldOffering = {
     /** 名称 */
@@ -226,6 +262,14 @@ declare namespace TGApp.Game.Record {
     level: number;
     /** 图标 */
     icon: string;
+    /**
+     * 开启状态
+     * @todo 枚举
+     * @example
+     * - OfferingOpenStateUnknow
+     * - OfferingOpenStateUnlocked
+     */
+    open_state: string;
   };
 
   /**
@@ -240,6 +284,17 @@ declare namespace TGApp.Game.Record {
   };
 
   /**
+   * 区域Boss类型
+   * @since Beta v0.10.0
+   */
+  type AreaBoss = {
+    /** 名称 */
+    name: string;
+    /** 击杀数 */
+    kill_num: number;
+  };
+
+  /**
    * 纳塔声望类型
    * @since Beta v0.7.2
    */
@@ -250,12 +305,19 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 部落列表类型
+   * @since Beta v0.10.0
    */
-  type NataOffering = WorldOffering & {
-    /** ID */
-    id: number;
+  type NataOffering = {
+    /** 图标 */
+    icon: string;
     /** 图片 */
     image: string;
+    /** 名称 */
+    name: string;
+    /** ID */
+    id: number;
+    /** 等级 */
+    level: number;
   };
 
   /**

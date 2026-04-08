@@ -89,6 +89,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
+import TGHttps from "@utils/TGHttps.js";
 
 const userStore = useUserStore();
 const { account, cookie } = storeToRefs(userStore);
@@ -146,22 +147,37 @@ async function refreshRecord(): Promise<void> {
   await showLoading.start(`正在刷新${rfAccount.gameUid}的战绩数据`);
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 刷新战绩数据`);
   isRefresh.value = true;
-  const resp = await recordReq.index(rfCk!, rfAccount);
-  console.log(resp);
-  if ("retcode" in resp) {
-    await showLoading.end();
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await TGLogger.Error(`[UserRecord][refresh][${rfAccount.gameUid}] 获取战绩数据失败`);
-    await TGLogger.Error(
-      `[UserRecord][refresh][${rfAccount.gameUid}] ${resp.retcode} ${resp.message}`,
-    );
+  // 刷新战绩数据
+  let indexResp: TGApp.Game.Record.Resp | undefined;
+  try {
+    indexResp = await recordReq.index(rfCk!, rfAccount);
+    console.debug("recordIndexResp", indexResp);
+    if (indexResp.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${indexResp.retcode}] ${indexResp.message}`);
+      await TGLogger.Warn(`[UserRecord][refresh][${rfAccount.gameUid}] 获取战绩数据失败`);
+      await TGLogger.Warn(
+        `[UserRecord][refresh][${rfAccount.gameUid}] ${indexResp.retcode} ${indexResp.message}`,
+      );
+      isRefresh.value = false;
+      return;
+    }
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
+    await TGLogger.Error(`[Record][refreshRecord] 获取战绩异常`);
+    await TGLogger.Error(`${e}`);
     isRefresh.value = false;
     return;
   }
+  if (!indexResp) return;
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}] 获取战绩数据成功`);
   await TGLogger.Info(`[UserRecord][refresh][${rfAccount.gameUid}]`, false);
   await showLoading.update("正在保存战绩数据");
-  await TSUserRecord.saveRecord(Number(rfAccount.gameUid), resp);
+  await TSUserRecord.saveRecord(Number(rfAccount.gameUid), indexResp.data);
   await showLoading.update("正在加载战绩数据");
   await loadUid(rfAccount.gameUid);
   await loadRecord();

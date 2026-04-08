@@ -1,10 +1,11 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.9.6
+ * @since Beta v0.10.0
  */
 
 import gameEnum from "@enum/game.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGHttp from "@utils/TGHttp.js";
 
 // TakumiRecordGenshinApiBaseUrl => trgAbu
@@ -57,7 +58,7 @@ async function characterList(
 
 /**
  * 获取首页信息
- * @since Beta v0.6.3
+ * @since Beta v0.10.0
  * @param cookie - Cookie
  * @param user - 用户
  * @param listType - 列表类型
@@ -67,15 +68,13 @@ async function index(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   listType: number = 0,
-): Promise<TGApp.Game.Record.FullData | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Record.Resp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { avatar_list_type: listType, role_id: user.gameUid, server: user.region };
-  const resp = await TGHttp<TGApp.Game.Record.Resp | TGApp.BBS.Response.Base>(`${trgAbu}index`, {
-    method: "GET",
+  const resp = await TGHttps.get<TGApp.Game.Record.Resp>(`${trgAbu}index`, {
     headers: getRequestHeader(ck, "GET", params),
     query: params,
   });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 

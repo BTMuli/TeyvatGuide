@@ -175,6 +175,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
+import TGHttps from "@utils/TGHttps.js";
 
 type TabItem = { label: string; value: string };
 type OverviewItem = { element: string; cnt: number; label: string };
@@ -420,13 +421,28 @@ async function refresh(): Promise<void> {
   await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
   await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
   loadData.value = true;
+  // 刷新战绩数据
   await showLoading.update("正在刷新首页数据");
-  const indexRes = await recordReq.index(rfCk!, rfAccount, 1);
-  console.log(indexRes);
-  if ("retcode" in indexRes) {
-    showSnackbar.error(`[${indexRes.retcode}] ${indexRes.message}`);
-    await TGLogger.Error(JSON.stringify(indexRes));
+  let indexResp: TGApp.Game.Record.Resp | undefined;
+  try {
+    indexResp = await recordReq.index(rfCk!, rfAccount, 1);
+    console.debug("recordIndexResp", indexResp);
+    if (indexResp.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${indexResp.retcode}] ${indexResp.message}`);
+      await TGLogger.Warn(`[Characters] ${indexResp.retcode}-${indexResp.message}`);
+      loadData.value = false;
+      return;
+    }
+  } catch (e) {
     await showLoading.end();
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
+    await TGLogger.Error(`[Characters][refresh] 获取战绩异常`);
+    await TGLogger.Error(`${e}`);
     loadData.value = false;
     return;
   }

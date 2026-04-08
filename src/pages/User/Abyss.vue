@@ -144,6 +144,7 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
+import TGHttps from "@utils/TGHttps.js";
 
 const router = useRouter();
 const hutaoStore = useHutaoStore();
@@ -426,12 +427,25 @@ async function refreshAvatars(
   ac: TGApp.Sqlite.Account.Game,
 ): Promise<boolean> {
   await showLoading.update("正在更新角色数据");
-  const idxRes = await recordReq.index(ck, ac, 1);
-  if ("retcode" in idxRes) {
-    await showLoading.update("角色更新失败");
-    showSnackbar.error(`[${idxRes.retcode}] ${idxRes.message}`);
-    await TGLogger.Error(JSON.stringify(idxRes));
-    await showLoading.end();
+  // 更新战绩数据
+  let indexResp: TGApp.Game.Record.Resp | undefined;
+  try {
+    indexResp = await recordReq.index(ck, ac, 1);
+    if (indexResp.retcode !== 0) {
+      await showLoading.update("角色更新失败");
+      showSnackbar.error(`[${indexResp.retcode}] ${indexResp.message}`);
+      await TGLogger.Warn(`[Abyss][refreshAvatars] ${indexResp.retcode}-${indexResp.message}`);
+      await showLoading.end();
+      return false;
+    }
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
+    await TGLogger.Error(`[Record][refreshRecord] 获取战绩异常`);
+    await TGLogger.Error(`${e}`);
     return false;
   }
   await showLoading.update("正在更新角色列表");

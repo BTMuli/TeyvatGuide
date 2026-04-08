@@ -125,9 +125,7 @@ async function request<T>(
   } catch (error) {
     // 清除超时定时器
     clearTimeout(timeoutId);
-
     let httpError: TGApp.App.Response.HttpErr;
-
     if (typeof error === "object" && error !== null && "message" in error) {
       httpError = <TGApp.App.Response.HttpErr>error;
     } else if (error instanceof Error) {
@@ -135,8 +133,6 @@ async function request<T>(
     } else {
       httpError = createHttpError(String(error), { cause: error });
     }
-    // 记录错误日志 TODO：根据实际情况调整日志
-    // await TGLogger.Error(`[TGHttps] Request failed: ${httpError.message}`);
     throw httpError;
   }
 }

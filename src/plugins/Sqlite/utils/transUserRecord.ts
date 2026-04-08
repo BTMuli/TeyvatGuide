@@ -1,10 +1,60 @@
 /**
  * 原神战绩数据转换
- * @since Beta v0.9.9
+ * @since Beta v0.10.0
  */
 
 import gameEnum from "@enum/game.js";
 import { getZhElement } from "@utils/toolFunc.js";
+
+/**
+ * 地区特殊资源配置项
+ * @since Beta v0.10.0
+ */
+type StaticArea = {
+  /** 地区名称 */
+  name: string;
+  /** 图标 */
+  iconLight: string;
+  /** 背景 */
+  bg: string;
+};
+
+/**
+ * 地区特殊资源配置列表
+ * @since Beta v0.10.0
+ */
+const STATIC_AREA: Readonly<Record<number, StaticArea>> = {
+  15: {
+    name: "纳塔",
+    iconLight:
+      "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-15.fd274778.png",
+    bg: "https://fastcdn.mihoyo.com/static-resource-v2/2024/08/19/8856eafed39be791276a21a6d522426b_6903333123294722705.png",
+  },
+  16: {
+    name: "远古圣山",
+    iconLight:
+      "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-16.1c751ac9.png",
+    bg: "https://fastcdn.mihoyo.com/static-resource-v2/2025/03/17/8ee1648101a8b292ffb37eb49559032e_6583057448168798147.png",
+  },
+  17: {
+    name: "挪德卡莱",
+    iconLight:
+      "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-17.dadac5bf.png",
+    bg: "https://fastcdn.mihoyo.com/static-resource-v2/2025/08/22/ace66cea9c5074b70310ecbbb712cd94_2619077306700596372.png",
+  },
+  18: {
+    name: "风息山",
+    iconLight:
+      "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-1.20b81b5f.png",
+    bg: "https://fastcdn.mihoyo.com/static-resource-v2/2026/04/01/cf1d89b8701d81aee20a56675293d8bf_4405529076047143557.png",
+  },
+  19: {
+    name: "空之神殿",
+    iconLight:
+      "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-19.a9df3078.png",
+    bg: "https://fastcdn.mihoyo.com/static-resource-v2/2026/04/01/e2f71f00220851c475f3babe694b134e_7279058850569905239.png",
+  },
+};
 
 /**
  * 转换战绩口数据
@@ -98,7 +148,7 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
 
 /**
  * 转换探索信息
- * @since Beta v0.9.1
+ * @since Beta v0.10.0
  * @param data - 城市探索信息
  * @returns 转换后的城市探索信息
  */
@@ -122,24 +172,9 @@ function transWorld(
     };
     if (area.type === "Reputation") world.reputation = area.level;
     if (area.offerings !== undefined && area.offerings.length > 0) world.offerings = area.offerings;
-    // 对纳塔的特殊处理
-    if (area.name === "纳塔") {
-      world.iconLight =
-        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-15.fd274778.png";
-      world.bg =
-        "https://fastcdn.mihoyo.com/static-resource-v2/2024/08/19/8856eafed39be791276a21a6d522426b_6903333123294722705.png";
-      // 对远古圣山的特殊处理
-    } else if (area.name === "远古圣山") {
-      world.iconLight =
-        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-16.1c751ac9.png";
-      world.bg =
-        "https://fastcdn.mihoyo.com/static-resource-v2/2025/03/17/8ee1648101a8b292ffb37eb49559032e_6583057448168798147.png";
-      // 对挪德卡莱的特殊处理
-    } else if (area.name === "挪德卡莱") {
-      world.iconLight =
-        "https://webstatic.mihoyo.com/app/community-game-records/images/world-logo-17.dadac5bf.png";
-      world.bg =
-        "https://fastcdn.mihoyo.com/static-resource-v2/2025/08/22/ace66cea9c5074b70310ecbbb712cd94_2619077306700596372.png";
+    if (area.id in STATIC_AREA && STATIC_AREA[area.id].name === area.name) {
+      world.iconLight = STATIC_AREA[area.id].iconLight;
+      world.bg = STATIC_AREA[area.id].bg;
     }
     const children = areaChild.filter((i) => i.parent_id === area.id);
     for (const child of children) {
