@@ -82,7 +82,7 @@ import useHomeStore from "@store/home.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { getLatestReleaseVersion } from "@utils/Github.js";
+import getLrv from "@utils/Github.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
@@ -218,7 +218,7 @@ async function checkAppUpdate(): Promise<void> {
   if (diffTime < 60 * 60 * 24) return;
   await TGLogger.Info("[Home][CheckAppUpdate]检测版本更新");
   const versionApp = await getVersion();
-  const versionCheck = await getLatestReleaseVersion();
+  const versionCheck = await getLrv();
   if (versionCheck === "0") return;
   if (versionCheck === versionApp) {
     await TGLogger.Info(`[Home][CheckAppUpdate]版本号一致：${versionCheck}`);
