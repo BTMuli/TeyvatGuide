@@ -171,7 +171,16 @@ function transWorld(
       children: [],
     };
     if (area.type === "Reputation") world.reputation = area.level;
-    if (area.offerings !== undefined && area.offerings.length > 0) world.offerings = area.offerings;
+    if (area.offerings !== undefined && area.offerings.length > 0) {
+      // 处理空之神殿供奉图标异常 TODO: 后续图标正常加载时替换回来
+      if (area.id === 19) {
+        const offer = {
+          ...area.offerings[0],
+          icon: "https://webstatic.mihoyo.com/app/community-game-records/images/seven-statue-icon.dbb79dd6.png",
+        };
+        world.offerings = [offer];
+      } else world.offerings = area.offerings;
+    }
     if (area.id in STATIC_AREA && STATIC_AREA[area.id].name === area.name) {
       world.iconLight = STATIC_AREA[area.id].iconLight;
       world.bg = STATIC_AREA[area.id].bg;
