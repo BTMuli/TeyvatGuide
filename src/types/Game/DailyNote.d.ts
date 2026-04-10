@@ -128,13 +128,8 @@ declare namespace TGApp.Game.DailyNote {
    * @since Beta v0.10.0
    */
   type DailyTaskReward = {
-    /**
-     * 状态
-     * @todo 枚举
-     * @example
-     * - TaskRewardStatusUnfinished
-     */
-    status: string;
+    /** 状态 */
+    status: TaskRewardStatusEnum;
   };
 
   /**
@@ -142,13 +137,8 @@ declare namespace TGApp.Game.DailyNote {
    * @since Beta v0.10.0
    */
   type AttendanceReward = {
-    /**
-     * 状态
-     * @todo 枚举
-     * @example
-     * - AttendanceRewardStatusTakenAward
-     */
-    status: string;
+    /** 状态 */
+    status: AttendanceRewardStatusEnum;
     /**
      * 进度
      * @remarks 2000 点满
@@ -174,5 +164,97 @@ declare namespace TGApp.Game.DailyNote {
   };
 
   /** 任务 */
-  type ArchonQuest = unknown;
+  type ArchonQuest = {
+    /**
+     * 章节数
+     * @example 第二章 第三幕
+     */
+    chapter_num: string;
+    /**
+     * 章节标题
+     * @example 千手百眼，天下人间
+     */
+    chapter_title: string;
+    /**
+     * 章节类型
+     * @todo 枚举
+     * @example 1
+     */
+    chapter_type: number;
+    /** 任务ID */
+    id: number;
+    /**
+     * 任务状态
+     * @todo 枚举
+     * @example
+     * - StatusNotOpen
+     */
+    status: string;
+  };
+
+  /**
+   * 探索派遣状态
+   * @since Beta v0.10.0
+   * @todo 待确认
+   */
+  const ExpeditionStatus = <const>{
+    ONGOING: "Ongoing",
+    FINISHED: "Finished",
+  };
+
+  /**
+   * 探索派遣状态类型
+   * @since Beta v0.10.0
+   */
+  type ExpeditionStatusEnum = (typeof ExpeditionStatus)[keyof typeof ExpeditionStatus];
+
+  /**
+   * 任务奖励状态
+   * @since Beta v0.10.0
+   * @todo 待确认
+   */
+  const TaskRewardStatus = <const>{
+    UNFINISHED: "TaskRewardStatusUnfinished",
+    FINISHED: "TaskRewardStatusFinished",
+    RECEIVED: "TaskRewardStatusReceived",
+  };
+
+  /**
+   * 任务奖励状态类型
+   * @since Beta v0.10.0
+   */
+  type TaskRewardStatusEnum = (typeof TaskRewardStatus)[keyof typeof TaskRewardStatus];
+
+  /**
+   * 历练点奖励状态
+   * @since Beta v0.10.0
+   * @todo 待确认
+   */
+  const AttendanceRewardStatus = <const>{
+    UNFINISHED: "AttendanceRewardStatusUnfinished",
+    TAKEN: "AttendanceRewardStatusTakenAward",
+  };
+
+  /**
+   * 历练点奖励状态类型
+   * @since Beta v0.10.0
+   */
+  type AttendanceRewardStatusEnum =
+    (typeof AttendanceRewardStatus)[keyof typeof AttendanceRewardStatus];
+
+  /**
+   * 参量质变仪状态
+   * @since Beta v0.10.0
+   * @todo 待确认
+   */
+  const TransformerStatus = <const>{
+    OBTAINED: "Obtained",
+    NOT_OBTAINED: "NotObtained",
+  };
+
+  /**
+   * 参量质变仪状态类型
+   * @since Beta v0.10.0
+   */
+  type TransformerStatusEnum = (typeof TransformerStatus)[keyof typeof TransformerStatus];
 }

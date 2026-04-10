@@ -54,7 +54,7 @@
           density="compact"
           label="首页组件显示"
           variant="outlined"
-          width="360px"
+          width="440px"
         />
         <v-btn :rounded="true" class="select-btn" variant="elevated" @click="submitHome">
           确定
@@ -72,6 +72,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhCompCalendar from "@comp/pageHome/ph-comp-calendar.vue";
+import PhCompDailyNote from "@comp/pageHome/ph-comp-daily-note.vue";
 import PhCompPool from "@comp/pageHome/ph-comp-pool.vue";
 import PhCompPosition from "@comp/pageHome/ph-comp-position.vue";
 import PhCompSign from "@comp/pageHome/ph-comp-sign.vue";
@@ -129,9 +130,10 @@ onMounted(async () => {
     await showLoading.start("正在加载首页小部件");
     games.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
     showItems.value = homeStore.getShowItems();
-    showItemsAll.value = ["游戏签到", "素材日历", "限时祈愿", "近期活动"];
+    showItemsAll.value = ["游戏签到", "实时便笺", "素材日历", "限时祈愿", "近期活动"];
   } else {
     showItems.value = homeStore.getShowItems().filter((i) => i !== "游戏签到");
+    showItemsAll.value = ["实时便笺", "素材日历", "限时祈愿", "近期活动"];
   }
   oldItems.value = showItems.value;
   await loadComp();
@@ -155,6 +157,13 @@ async function loadComp(): Promise<void> {
           temp.push(PhCompSign);
         } else {
           showSnackbar.warn("未登录不可设置游戏签到组件");
+        }
+        break;
+      case "实时便笺":
+        if (isLogin.value) {
+          temp.push(PhCompDailyNote);
+        } else {
+          showSnackbar.warn("未登录不可设置实时便笺组件");
         }
         break;
       case "限时祈愿":
@@ -191,6 +200,8 @@ function getName(name: string): string | undefined {
   switch (name) {
     case "ph-comp-sign":
       return "游戏签到";
+    case "ph-comp-daily-note":
+      return "实时便笺";
     case "ph-comp-pool":
       return "限时祈愿";
     case "ph-comp-position":

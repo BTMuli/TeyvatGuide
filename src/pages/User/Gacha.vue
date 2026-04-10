@@ -399,7 +399,7 @@ async function handleHutaoDownload(uids: Array<string>): Promise<void> {
   await showLoading.end();
   showSnackbar.success("成功下载，即将刷新页面");
   await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-  // window.location.reload();
+  window.location.reload();
 }
 
 async function handleHutaoDelete(uids: Array<string>): Promise<void> {

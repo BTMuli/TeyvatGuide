@@ -1,6 +1,6 @@
 /**
  * 首页组件状态
- * @since Beta v0.9.0
+ * @since Beta v0.10.0
  */
 
 import { defineStore } from "pinia";
@@ -10,10 +10,11 @@ import { ref } from "vue";
  * 默认展示项
  */
 const defaultHomeShow: Array<TGApp.Store.Home.ShowItem> = [
-  { show: false, order: 4, label: "游戏签到" },
   { show: true, order: 1, label: "限时祈愿" },
   { show: true, order: 2, label: "近期活动" },
   { show: true, order: 3, label: "素材日历" },
+  { show: false, order: 4, label: "游戏签到" },
+  { show: true, order: 5, label: "实时便笺" },
 ];
 
 const useHomeStore = defineStore("home", () => {
