@@ -133,7 +133,7 @@ onMounted(async () => {
     showItemsAll.value = ["游戏签到", "实时便笺", "素材日历", "限时祈愿", "近期活动"];
   } else {
     showItems.value = homeStore.getShowItems().filter((i) => i !== "游戏签到");
-    showItemsAll.value = ["实时便笺", "素材日历", "限时祈愿", "近期活动"];
+    showItemsAll.value = ["素材日历", "限时祈愿", "近期活动"];
   }
   oldItems.value = showItems.value;
   await loadComp();

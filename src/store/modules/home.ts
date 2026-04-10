@@ -14,7 +14,7 @@ const defaultHomeShow: Array<TGApp.Store.Home.ShowItem> = [
   { show: true, order: 2, label: "近期活动" },
   { show: true, order: 3, label: "素材日历" },
   { show: false, order: 4, label: "游戏签到" },
-  { show: true, order: 5, label: "实时便笺" },
+  { show: false, order: 5, label: "实时便笺" },
 ];
 
 const useHomeStore = defineStore("home", () => {
