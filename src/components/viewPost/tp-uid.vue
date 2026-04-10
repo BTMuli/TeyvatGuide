@@ -1,7 +1,7 @@
 <template>
   <div class="tpu-box">
     <div class="tpu-top">
-      <span @click="copyUid()" data-html2canvas-ignore>
+      <span data-html2canvas-ignore @click="copyUid()">
         <v-icon size="12">mdi-content-copy</v-icon>
         <span>复制</span>
       </span>
@@ -21,7 +21,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import useBBSStore from "@store/bbs.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef } from "vue";
+import { computed, onMounted, ref, shallowRef } from "vue";
 
 type TpUid = {
   insert: {
@@ -53,6 +53,8 @@ const cardInfo = shallowRef<TGApp.BBS.AppConfig.GameUidCardConf>(defaultCard);
 
 console.log("tpUid", props.data.insert.game_user_info);
 
+const bgImage = computed<string>(() => `url('${cardInfo.value.image_url}')`);
+
 onMounted(async () => {
   nickname.value = decodeURIComponent(props.data.insert.game_user_info.nickname);
   gameInfo.value = getGameInfo();
@@ -82,7 +84,7 @@ function getGameInfo(): TGApp.BBS.Game.Item | undefined {
   padding: 4px 4px 8px;
   border-radius: 2px;
   background-color: v-bind("cardInfo.background_color");
-  background-image: v-bind("'url(' + cardInfo.image_url + ')'");
+  background-image: v-bind(bgImage); /* stylelint-disable-line value-keyword-case */
   background-position: right bottom;
   background-repeat: no-repeat;
   background-size: contain;
