@@ -229,9 +229,30 @@ async function actCalendar(
   return resp.data;
 }
 
+/**
+ * 获取实时便笺
+ * @since Beta v0.10.0
+ * @param cookie - Cookie
+ * @param user - 用户
+ * @returns 实时便笺数据
+ */
+async function dailyNote(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.Game.DailyNote.DnResp> {
+  const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+  const params = { role_id: user.gameUid, server: user.region };
+  const resp = await TGHttps.get<TGApp.Game.DailyNote.DnResp>(`${trgAbu}dailyNote`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
+  return resp.data;
+}
+
 const recordReq = {
   index: index,
   actCalendar: actCalendar,
+  daily: dailyNote,
   character: { list: characterList, detail: characterDetail },
   combat: {
     base: roleCombat,

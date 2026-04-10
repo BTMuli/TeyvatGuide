@@ -22,18 +22,43 @@
 </template>
 <script lang="ts" setup>
 import VpReplyDebug from "@comp/viewPost/vp-reply-debug.vue";
-import { invoke } from "@tauri-apps/api/core";
 import { ref } from "vue";
+import { storeToRefs } from "pinia";
+import useUserStore from "@store/user.js";
+import recordReq from "@req/recordReq.js";
+import TGHttps from "@utils/TGHttps.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import TGLogger from "@utils/TGLogger.js";
 
 const showReply = ref<boolean>(false);
+const { account, cookie } = storeToRefs(useUserStore());
 
 function testReply(): void {
   showReply.value = true;
 }
 
 async function test() {
-  const check = await invoke("is_process_running", { processName: "Yuanshen.exe" });
-  console.log(check);
+  if (!cookie.value) return;
+  let dnResp: TGApp.Game.DailyNote.DnResp | undefined;
+  try {
+    dnResp = await recordReq.daily(cookie.value, account.value);
+    console.debug(`dailyNoteResp`, dnResp);
+    if (dnResp.retcode !== 0) {
+      showSnackbar.warn(`获取实时便笺失败: ${dnResp.retcode}-${dnResp.message}`);
+      await TGLogger.Warn(`[PageTest][test] 获取实时便笺失败`);
+      await TGLogger.Warn(`[PageTest][test] ${dnResp}`);
+      return;
+    }
+    showSnackbar.success("成功获取实时便笺数据");
+  } catch (e) {
+    let errMsg = String(e);
+    if (TGHttps.isHttpErr(e)) {
+      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
+    }
+    showSnackbar.error(`获取实时便笺失败：${errMsg}`);
+    await TGLogger.Error(`[PageTest][test] 获取实时便笺失败`);
+    await TGLogger.Error(`[PageTest][test] ${e}`);
+  }
 }
 </script>
 <style lang="css" scoped>
