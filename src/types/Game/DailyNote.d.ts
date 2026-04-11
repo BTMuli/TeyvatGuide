@@ -43,10 +43,7 @@ declare namespace TGApp.Game.DailyNote {
     max_home_coin: number;
     /** 宝钱回满时间（秒） */
     home_coin_recovery_time: string;
-    /**
-     * 日历
-     * @todo 未知用途，目前为空字符串
-     */
+    /** 日历 */
     calendar_url: string;
     /** 参量质变仪 */
     transformer: TransformerData;
@@ -63,13 +60,8 @@ declare namespace TGApp.Game.DailyNote {
   type Expedition = {
     /** 侧边图 */
     avatar_side_icon: string;
-    /**
-     * 状态
-     * @todo 枚举
-     * @example
-     * - Ongoing
-     */
-    status: string;
+    /** 状态 */
+    status: ExpeditionStatusEnum;
     /** 剩余时间（秒）*/
     remained_time: string;
   };
@@ -183,19 +175,29 @@ declare namespace TGApp.Game.DailyNote {
     chapter_type: number;
     /** 任务ID */
     id: number;
-    /**
-     * 任务状态
-     * @todo 枚举
-     * @example
-     * - StatusNotOpen
-     */
-    status: string;
+    /** 任务状态 */
+    status: ArchonStatusEnum;
   };
+
+  /**
+   * 章节状态
+   * @since Beta v0.10.0
+   */
+  const ArchonStatus = <const>{
+    FINISHED: "StatusFinished",
+    ONGOING: "StatusOngoing",
+    NOT_OPEN: "StatusNotOpen",
+  };
+
+  /**
+   * 章节状态枚举
+   * @since Beta v0.10.0
+   */
+  type ArchonStatusEnum = (typeof ArchonStatus)[keyof typeof ArchonStatus];
 
   /**
    * 探索派遣状态
    * @since Beta v0.10.0
-   * @todo 待确认
    */
   const ExpeditionStatus = <const>{
     ONGOING: "Ongoing",
@@ -211,12 +213,12 @@ declare namespace TGApp.Game.DailyNote {
   /**
    * 任务奖励状态
    * @since Beta v0.10.0
-   * @todo 待确认
    */
   const TaskRewardStatus = <const>{
-    UNFINISHED: "TaskRewardStatusUnfinished",
+    INVALID: "TaskRewardStatusInvalid",
+    TAKEN: "TaskRewardStatusTakenAward",
     FINISHED: "TaskRewardStatusFinished",
-    RECEIVED: "TaskRewardStatusReceived",
+    UNFINISHED: "TaskRewardStatusUnfinished",
   };
 
   /**
@@ -228,11 +230,14 @@ declare namespace TGApp.Game.DailyNote {
   /**
    * 历练点奖励状态
    * @since Beta v0.10.0
-   * @todo 待确认
    */
   const AttendanceRewardStatus = <const>{
-    UNFINISHED: "AttendanceRewardStatusUnfinished",
+    INVALID: "AttendanceRewardStatusInvalid",
     TAKEN: "AttendanceRewardStatusTakenAward",
+    WAIT_TAKEN: "AttendanceRewardStatusWaitTaken",
+    UNFINISHED: "AttendanceRewardStatusUnfinished",
+    NON_REWARD: "AttendanceRewardStatusFinishedNonReward",
+    FORBID: "AttendanceRewardStatusForbid",
   };
 
   /**
@@ -241,20 +246,4 @@ declare namespace TGApp.Game.DailyNote {
    */
   type AttendanceRewardStatusEnum =
     (typeof AttendanceRewardStatus)[keyof typeof AttendanceRewardStatus];
-
-  /**
-   * 参量质变仪状态
-   * @since Beta v0.10.0
-   * @todo 待确认
-   */
-  const TransformerStatus = <const>{
-    OBTAINED: "Obtained",
-    NOT_OBTAINED: "NotObtained",
-  };
-
-  /**
-   * 参量质变仪状态类型
-   * @since Beta v0.10.0
-   */
-  type TransformerStatusEnum = (typeof TransformerStatus)[keyof typeof TransformerStatus];
 }

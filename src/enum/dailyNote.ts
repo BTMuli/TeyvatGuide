@@ -14,47 +14,16 @@ const ExpeditionStatusEnum: typeof TGApp.Game.DailyNote.ExpeditionStatus = {
 };
 
 /**
- * 获取探索派遣状态描述
- * @since Beta v0.10.0
- * @param status - 探索派遣状态
- * @returns 探索派遣状态描述
- */
-function getExpeditionStatusDesc(status: TGApp.Game.DailyNote.ExpeditionStatusEnum): string {
-  switch (status) {
-    case ExpeditionStatusEnum.ONGOING:
-      return "派遣中";
-    case ExpeditionStatusEnum.FINISHED:
-      return "已完成";
-  }
-}
-
-/**
  * 任务奖励状态枚举
  * @since Beta v0.10.0
  * @see TGApp.Game.DailyNote.TaskRewardStatusEnum
  */
 const TaskRewardStatusEnum: typeof TGApp.Game.DailyNote.TaskRewardStatus = {
-  UNFINISHED: "TaskRewardStatusUnfinished",
+  INVALID: "TaskRewardStatusInvalid",
+  TAKEN: "TaskRewardStatusTakenAward",
   FINISHED: "TaskRewardStatusFinished",
-  RECEIVED: "TaskRewardStatusReceived",
+  UNFINISHED: "TaskRewardStatusUnfinished",
 };
-
-/**
- * 获取任务奖励状态描述
- * @since Beta v0.10.0
- * @param status - 任务奖励状态
- * @returns 任务奖励状态描述
- */
-function getTaskRewardStatusDesc(status: TGApp.Game.DailyNote.TaskRewardStatusEnum): string {
-  switch (status) {
-    case TaskRewardStatusEnum.UNFINISHED:
-      return "未完成";
-    case TaskRewardStatusEnum.FINISHED:
-      return "已完成";
-    case TaskRewardStatusEnum.RECEIVED:
-      return "已领取";
-  }
-}
 
 /**
  * 历练点奖励状态枚举
@@ -62,57 +31,33 @@ function getTaskRewardStatusDesc(status: TGApp.Game.DailyNote.TaskRewardStatusEn
  * @see TGApp.Game.DailyNote.AttendanceRewardStatusEnum
  */
 const AttendanceRewardStatusEnum: typeof TGApp.Game.DailyNote.AttendanceRewardStatus = {
+  FORBID: "AttendanceRewardStatusForbid",
+  INVALID: "AttendanceRewardStatusInvalid",
+  NON_REWARD: "AttendanceRewardStatusFinishedNonReward",
+  WAIT_TAKEN: "AttendanceRewardStatusWaitTaken",
   UNFINISHED: "AttendanceRewardStatusUnfinished",
   TAKEN: "AttendanceRewardStatusTakenAward",
 };
 
 /**
- * 获取历练点奖励状态描述
+ * 任务状态枚举
  * @since Beta v0.10.0
- * @param status - 历练点奖励状态
- * @returns 历练点奖励状态描述
  */
-function getAttendanceRewardStatusDesc(
-  status: TGApp.Game.DailyNote.AttendanceRewardStatusEnum,
-): string {
-  switch (status) {
-    case AttendanceRewardStatusEnum.UNFINISHED:
-      return "未完成";
-    case AttendanceRewardStatusEnum.TAKEN:
-      return "已领取";
-  }
-}
-
-/**
- * 参量质变仪状态枚举
- * @since Beta v0.10.0
- * @see TGApp.Game.DailyNote.TransformerStatusEnum
- */
-const TransformerStatusEnum: typeof TGApp.Game.DailyNote.TransformerStatus = {
-  OBTAINED: "Obtained",
-  NOT_OBTAINED: "NotObtained",
+const AnchorQuestStatusEnum: typeof TGApp.Game.DailyNote.ArchonStatus = {
+  FINISHED: "StatusFinished",
+  ONGOING: "StatusOngoing",
+  NOT_OPEN: "StatusNotOpen",
 };
 
 /**
  * 实时便笺枚举
  * @since Beta v0.10.0
  */
-const dailyNoteEnum = {
-  expedition: {
-    status: ExpeditionStatusEnum,
-    statusDesc: getExpeditionStatusDesc,
-  },
-  taskReward: {
-    status: TaskRewardStatusEnum,
-    statusDesc: getTaskRewardStatusDesc,
-  },
-  attendanceReward: {
-    status: AttendanceRewardStatusEnum,
-    statusDesc: getAttendanceRewardStatusDesc,
-  },
-  transformer: {
-    status: TransformerStatusEnum,
-  },
+const dnEnum = {
+  expedition: ExpeditionStatusEnum,
+  task: TaskRewardStatusEnum,
+  attendance: AttendanceRewardStatusEnum,
+  quest: AnchorQuestStatusEnum,
 };
 
-export default dailyNoteEnum;
+export default dnEnum;
