@@ -34,7 +34,7 @@ const max = computed((): number => {
   display: flex;
   width: 100%;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
   gap: 4px;
@@ -65,7 +65,6 @@ const max = computed((): number => {
 .pdb-boss-title {
   font-family: var(--font-title);
   font-size: 13px;
-  font-weight: bold;
   white-space: nowrap;
 }
 

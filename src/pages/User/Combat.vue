@@ -628,9 +628,9 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
 }
 
 .uc-window-item {
+  overflow: hidden auto;
   height: 100%;
   padding-right: 8px;
-  overflow: hidden auto;
 }
 
 .ucw-i-ref {

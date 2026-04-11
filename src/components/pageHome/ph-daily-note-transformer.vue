@@ -1,6 +1,6 @@
 <!-- 参量质变仪显示组件 -->
 <template>
-  <div class="ph-dnt-box">
+  <div :class="{ 'ph-dnt-ready': ready }" class="ph-dnt-box">
     <div class="pdb-trans-icon">
       <img alt="参量质变仪" src="/UI/daily/trans.webp" />
     </div>
@@ -13,7 +13,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { stamp2LastTime } from "@utils/toolFunc.js";
 
@@ -28,7 +28,7 @@ const formattedTime = ref<string>("");
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
-const valueText = computed((): string => {
+const valueText = computed<string>(() => {
   if (!props.trans.obtained && !props.trans.recovery_time.reached) {
     return "恢复中";
   }
@@ -37,6 +37,7 @@ const valueText = computed((): string => {
   }
   return formattedTime.value;
 });
+const ready = computed<boolean>(() => props.trans.obtained || props.trans.recovery_time.reached);
 
 onMounted(() => {
   initTime();
@@ -46,6 +47,16 @@ onMounted(() => {
 onUnmounted(() => {
   stopTimer();
 });
+
+watch(
+  () => props.trans.recovery_time,
+  () => {
+    initTime();
+    stopTimer();
+    startTimer();
+  },
+  { deep: true },
+);
 
 function initTime(): void {
   const time = props.trans.recovery_time;
@@ -93,10 +104,15 @@ function updateFormattedTime(): void {
   display: flex;
   width: 100%;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
-  gap: 6px;
+  gap: 4px;
+  transition: all 0.3s ease;
+
+  &.ph-dnt-ready {
+    background: linear-gradient(135deg, var(--tgc-od-orange) 0%, var(--box-bg-2) 80%);
+  }
 }
 
 .pdb-trans-icon {
@@ -124,7 +140,6 @@ function updateFormattedTime(): void {
 .pdb-trans-title {
   font-family: var(--font-title);
   font-size: 13px;
-  font-weight: bold;
   white-space: nowrap;
 }
 

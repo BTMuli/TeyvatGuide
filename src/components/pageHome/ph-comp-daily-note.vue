@@ -19,10 +19,11 @@
       </div>
       <div v-else class="dn-container">
         <PhDailyNoteItem
-          v-for="item in dailyNoteAccounts"
+          v-for="item in sortedDailyNoteAccounts"
           :key="`${item.account.gameBiz}_${item.account.gameUid}`"
           :account="item.account"
           :data="item.data"
+          :cur="item.account.gameUid === currentGameUid"
           @refresh="handleRefresh(item.account)"
         />
       </div>
@@ -37,7 +38,7 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 import PhDailyNoteItem from "./ph-daily-note-item.vue";
@@ -54,7 +55,7 @@ type TDailyNoteEmits = {
 };
 
 const emits = defineEmits<TDailyNoteEmits>();
-const { cookie, uid, briefInfo } = storeToRefs(useUserStore());
+const { cookie, uid, briefInfo, account } = storeToRefs(useUserStore());
 const { isLogin } = storeToRefs(useAppStore());
 
 const loading = ref<boolean>(false);
@@ -62,6 +63,19 @@ const loadingProgress = ref<number>(0);
 const loadingText = ref<string>("");
 const gameAccounts = ref<Array<TGApp.Sqlite.Account.Game>>([]);
 const dailyNoteAccounts = ref<Array<DailyNoteAccount>>([]);
+
+const currentGameUid = computed(() => account.value?.gameUid || "");
+
+const sortedDailyNoteAccounts = computed(() => {
+  if (!currentGameUid.value) return dailyNoteAccounts.value;
+  return [...dailyNoteAccounts.value].sort((a, b) => {
+    const aIsCurrent = a.account.gameUid === currentGameUid.value;
+    const bIsCurrent = b.account.gameUid === currentGameUid.value;
+    if (aIsCurrent && !bIsCurrent) return -1;
+    if (!aIsCurrent && bIsCurrent) return 1;
+    return 0;
+  });
+});
 
 watch(
   () => uid.value,

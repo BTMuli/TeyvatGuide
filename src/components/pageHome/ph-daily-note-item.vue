@@ -1,12 +1,13 @@
 <!-- 实时便笺单项 -->
 <template>
-  <div class="dni-container">
+  <div :class="{ 'dni-current': cur }" class="dni-container">
     <div class="dni-header">
       <div class="dni-header-title">
         <span>{{ props.account.nickname }}</span>
         <v-icon
           :size="16"
           color="var(--tgc-od-orange)"
+          data-html2canvas-ignore
           icon="mdi-refresh"
           variant="elevated"
           @click="handleRefresh"
@@ -17,7 +18,6 @@
         <span>{{ props.account.regionName }}</span>
       </div>
     </div>
-
     <div v-if="props.data" class="dni-content">
       <div class="dni-grid">
         <div class="dni-row">
@@ -42,18 +42,8 @@
           />
         </div>
       </div>
-      <div class="dni-exp-header">
-        <span class="dni-exp-title">探索派遣</span>
-        <span class="dni-exp-count">
-          {{ props.data.current_expedition_num }}/{{ props.data.max_expedition_num }}
-        </span>
-      </div>
       <div class="dni-exp-grid">
-        <PhDailyNoteExpedition
-          v-for="expedition in props.data.expeditions"
-          :key="expedition.avatar_side_icon"
-          :expedition="expedition"
-        />
+        <PhDailyNoteExpedition v-for="(expedition, i) in expeditions" :key="i" :expedition />
       </div>
     </div>
   </div>
@@ -66,10 +56,13 @@ import PhDailyNoteTransformer from "./ph-daily-note-transformer.vue";
 import PhDailyNoteTask from "./ph-daily-note-task.vue";
 import PhDailyNoteQuest from "./ph-daily-note-quest.vue";
 import PhDailyNoteBoss from "./ph-daily-note-boss.vue";
+import { computed } from "vue";
+import dnEnum from "@enum/dailyNote.js";
 
 type PhDailyNoteItemProps = {
   account: TGApp.Sqlite.Account.Game;
   data?: TGApp.Game.DailyNote.DnRes;
+  cur?: boolean;
 };
 
 type TDailyNoteItemEmits = {
@@ -77,7 +70,24 @@ type TDailyNoteItemEmits = {
 };
 
 const emits = defineEmits<TDailyNoteItemEmits>();
-const props = defineProps<PhDailyNoteItemProps>();
+const props = withDefaults(defineProps<PhDailyNoteItemProps>(), {
+  cur: false,
+});
+const expeditions = computed<Array<TGApp.Game.DailyNote.Expedition>>(() => {
+  if (!props.data) return [];
+  let res: Array<TGApp.Game.DailyNote.Expedition> = [];
+  res.push(...props.data.expeditions);
+  if (res.length < props.data.max_expedition_num) {
+    for (let i = 0; i < props.data.max_expedition_num - res.length; i++) {
+      res.push({
+        avatar_side_icon: "/UI/app/empty.webp",
+        status: dnEnum.expedition.EMPTY,
+        remained_time: "0",
+      });
+    }
+  }
+  return res;
+});
 
 function handleRefresh(): void {
   emits("refresh");
@@ -90,11 +100,15 @@ function handleRefresh(): void {
   width: 100%;
   flex-direction: column;
   padding: 8px;
-  border: 1px solid var(--common-shadow-2);
   border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
-  gap: 6px;
+  gap: 4px;
+  transition: border-color 0.3s ease;
+
+  &.dni-current {
+    border: 1px solid var(--common-shadow-2);
+  }
 }
 
 .dni-header {
@@ -103,7 +117,7 @@ function handleRefresh(): void {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--common-shadow-1);
 }
 
@@ -125,6 +139,7 @@ function handleRefresh(): void {
 
 .dni-content {
   display: flex;
+  height: 100%;
   flex-direction: column;
   gap: 8px;
 }
@@ -132,12 +147,12 @@ function handleRefresh(): void {
 .dni-grid {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .dni-row {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   grid-template-columns: repeat(3, 1fr);
 }
 
@@ -147,10 +162,10 @@ function handleRefresh(): void {
   width: 100%;
   height: 100%;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
-  gap: 6px;
+  gap: 4px;
 }
 
 .dni-icon {
@@ -177,53 +192,13 @@ function handleRefresh(): void {
   gap: 2px;
 }
 
-.dni-title {
-  font-family: var(--font-title);
-  font-size: 13px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.dni-desc {
-  overflow: hidden;
-  color: var(--box-text-2);
-  font-size: 10px;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dni-value {
-  position: relative;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: var(--box-bg-3);
-  font-size: 12px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
 .dni-exp-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 4px;
+  margin-top: auto;
   gap: 8px;
-}
-
-.dni-exp-title {
-  color: var(--box-text-1);
-  font-family: var(--font-title);
-  font-size: 13px;
-  font-weight: bold;
-}
-
-.dni-exp-count {
-  color: var(--box-text-2);
-  font-size: 11px;
 }
 
 .dni-exp-grid {
@@ -231,6 +206,7 @@ function handleRefresh(): void {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  margin-top: auto;
   column-gap: 12px;
 }
 

@@ -1,15 +1,18 @@
 <!-- 探索派遣单项 -->
 <template>
-  <div class="dni-exp-item">
+  <div :class="{ empty: expedition.status === dnEnum.expedition.EMPTY }" class="dni-exp-item">
     <div class="dni-exp-icon">
       <img :src="expedition.avatar_side_icon" alt="角色" />
     </div>
     <div class="dni-exp-info">
-      <div v-if="isFinished" class="dni-exp-status finished">已完成</div>
-      <div v-else class="dni-exp-info-content">
+      <div v-if="expedition.status === dnEnum.expedition.FINISHED" class="dni-exp-status finished">
+        已完成
+      </div>
+      <div v-else-if="expedition.status === dnEnum.expedition.ONGOING" class="dni-exp-info-content">
         <div class="dni-exp-status">派遣中</div>
         <div class="dni-exp-time">{{ formattedTime }}</div>
       </div>
+      <div v-else class="dni-exp-status empty">未派遣</div>
     </div>
   </div>
 </template>
@@ -17,6 +20,8 @@
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
 import { stamp2LastTime } from "@utils/toolFunc.js";
+
+import dnEnum from "@enum/dailyNote";
 
 type PhDailyNoteExpeditionProps = {
   expedition: TGApp.Game.DailyNote.Expedition;
@@ -51,7 +56,8 @@ watch(
 function initTime(): void {
   const time = props.expedition.remained_time;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time;
-  isFinished.value = props.expedition.status === "Finished" || remainedTime.value <= 0;
+  isFinished.value =
+    props.expedition.status === dnEnum.expedition.FINISHED || remainedTime.value <= 0;
   updateFormattedTime();
 }
 
@@ -94,10 +100,16 @@ function updateFormattedTime(): void {
   width: fit-content;
   height: 32px;
   align-items: center;
-  padding-right: 12px;
+  justify-content: flex-start;
+  padding-right: 14px;
   border-radius: 20px;
-  background: linear-gradient(to right, var(--box-bg-2), transparent 120%);
-  gap: 6px;
+  background: linear-gradient(to right, var(--box-bg-2) 32px, var(--box-bg-1) 100%);
+  column-gap: 4px;
+
+  &.empty {
+    background: var(--box-bg-2);
+    opacity: 0.5;
+  }
 }
 
 .dni-exp-icon {
@@ -107,7 +119,7 @@ function updateFormattedTime(): void {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--box-bg-4);
+  background: transparent;
 
   img {
     width: 100%;
@@ -126,18 +138,23 @@ function updateFormattedTime(): void {
   position: relative;
   display: flex;
   flex-direction: column;
+  line-height: 1;
 }
 
 .dni-exp-status {
   overflow: hidden;
-  color: var(--box-text-2);
+  color: var(--tgc-od-orange);
   font-size: 10px;
+  font-weight: bold;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   &.finished {
     color: var(--tgc-od-green);
-    font-weight: bold;
+  }
+
+  &.empty {
+    color: var(--tgc-od-white);
   }
 }
 

@@ -11,6 +11,7 @@
 const ExpeditionStatusEnum: typeof TGApp.Game.DailyNote.ExpeditionStatus = {
   ONGOING: "Ongoing",
   FINISHED: "Finished",
+  EMPTY: "Empty",
 };
 
 /**

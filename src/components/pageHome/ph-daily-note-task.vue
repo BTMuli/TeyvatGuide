@@ -15,52 +15,11 @@
           <span>{{ task.stored_attendance }}</span>
         </div>
       </div>
-      <div class="pdb-task-task-content">
-        <div class="pdb-task-task-row">
-          <span class="pdb-task-task-label">日常</span>
-          <template v-for="i in props.task?.task_rewards" :key="i">
-            <v-icon
-              v-if="i.status === 'TaskRewardStatusFinished'"
-              color="var(--tgc-od-green)"
-              size="14"
-            >
-              mdi-check
-            </v-icon>
-            <v-icon v-else color="var(--tgc-od-white)" size="14"> mdi-square-outline</v-icon>
-          </template>
-        </div>
-        <div v-if="attendanceVisible" class="pdb-task-task-row">
-          <span class="pdb-task-task-label">历练</span>
-          <div class="pdb-task-attendance-list">
-            <div
-              v-for="reward in attendanceRewards"
-              :key="reward.progress"
-              class="pdb-task-attendance-item"
-            >
-              <v-progress-circular
-                :model-value="(Math.min(reward.progress, 2000) / 2000) * 100"
-                :size="14"
-                :width="2"
-                class="pdb-task-attendance-progress"
-                color="var(--tgc-od-orange)"
-              />
-              <span
-                v-if="reward.status !== 'AttendanceRewardStatusUnfinished'"
-                class="pdb-task-attendance-icon"
-              >
-                <v-icon
-                  v-if="reward.status === 'AttendanceRewardStatusTakenAward'"
-                  color="var(--tgc-od-green)"
-                  size="8"
-                >
-                  mdi-check
-                </v-icon>
-                <v-icon v-else color="var(--tgc-od-red)" size="8"> mdi-gift </v-icon>
-              </span>
-            </div>
-          </div>
-          <span v-if="hasUnclaimedAttendance" class="pdb-task-task-warn"> 可领取 </span>
-        </div>
+      <div class="pdb-task-content">
+        <PhDnTr v-for="(reward, i) in props.task?.task_rewards" :key="i" :reward />
+        <template v-if="attendanceVisible">
+          <PhDnAr v-for="(reward, i) in props.task?.attendance_rewards" :key="i" :reward="reward" />
+        </template>
       </div>
     </div>
     <div class="pdb-task-value"></div>
@@ -68,6 +27,8 @@
 </template>
 <script lang="ts" setup>
 import { computed } from "vue";
+import PhDnTr from "./ph-dn-tr.vue";
+import PhDnAr from "@comp/pageHome/ph-dn-ar.vue";
 
 type PhDailyNoteTaskProps = {
   task?: TGApp.Game.DailyNote.DailyTask;
@@ -77,18 +38,6 @@ const props = defineProps<PhDailyNoteTaskProps>();
 
 const attendanceVisible = computed((): boolean => {
   return props.task?.attendance_visible ?? false;
-});
-
-const attendanceRewards = computed((): Array<TGApp.Game.DailyNote.AttendanceReward> => {
-  return props.task?.attendance_rewards ?? [];
-});
-
-const hasUnclaimedAttendance = computed((): boolean => {
-  return (
-    props.task?.attendance_rewards?.some(
-      (r) => r.progress >= 2000 && r.status !== "AttendanceRewardStatusTakenAward",
-    ) ?? false
-  );
 });
 
 const taskStatus = computed((): string => {
@@ -106,12 +55,11 @@ const taskStatus = computed((): string => {
   position: relative;
   display: flex;
   width: 100%;
-  min-height: 64px;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
-  gap: 6px;
+  gap: 4px;
 }
 
 .pdb-task-icon {
@@ -152,70 +100,14 @@ const taskStatus = computed((): string => {
   column-gap: 4px;
   font-family: var(--font-title);
   font-size: 13px;
-  font-weight: bold;
   white-space: nowrap;
 }
 
-.pdb-task-task-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.pdb-task-task-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.pdb-task-task-label {
-  color: var(--box-text-2);
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.pdb-task-task-warn {
-  color: var(--tgc-od-orange);
-  font-size: 10px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.pdb-task-attendance-list {
-  display: flex;
-  align-items: center;
-  column-gap: 2px;
-}
-
-.pdb-task-attendance-item {
+.pdb-task-content {
   position: relative;
   display: flex;
-  width: 16px;
-  height: 16px;
   align-items: center;
-  justify-content: center;
-}
-
-.pdb-task-attendance-progress {
-  position: absolute;
-  z-index: 1;
-}
-
-.pdb-task-attendance-icon {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pdb-task-attendance-progress-text {
-  position: absolute;
-  z-index: 2;
-  color: var(--box-text-1);
-  font-size: 8px;
-  font-weight: bold;
-  white-space: nowrap;
+  justify-content: flex-start;
 }
 
 .pdb-task-stored {

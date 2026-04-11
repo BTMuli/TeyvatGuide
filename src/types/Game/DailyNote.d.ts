@@ -202,6 +202,8 @@ declare namespace TGApp.Game.DailyNote {
   const ExpeditionStatus = <const>{
     ONGOING: "Ongoing",
     FINISHED: "Finished",
+    /** 自定义状态 */
+    EMPTY: "Empty",
   };
 
   /**

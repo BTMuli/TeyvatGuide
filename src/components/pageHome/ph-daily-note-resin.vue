@@ -1,6 +1,6 @@
 <!-- 原粹树脂显示组件 -->
 <template>
-  <div class="ph-dnr-box">
+  <div :class="{ 'ph-dnr-max': full }" class="ph-dnr-box">
     <div class="pdb-resin-icon">
       <img alt="原粹树脂" src="/UI/daily/resin.webp" />
     </div>
@@ -16,7 +16,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { stamp2LastTime } from "@utils/toolFunc.js";
 
@@ -29,9 +29,11 @@ type PhDailyNoteResinProps = {
 const props = defineProps<PhDailyNoteResinProps>();
 
 const current = ref<number>(0);
-const max = ref<number>(0);
 const remainedTime = ref<number>(0);
 const formattedTime = ref<string>("");
+const initialRecoveryTime = ref<number>(0);
+const max = computed<number>(() => props.maxResin ?? 200);
+const full = computed<boolean>(() => current.value === max.value);
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -44,11 +46,20 @@ onUnmounted(() => {
   stopTimer();
 });
 
+watch(
+  () => props.recoveryTime,
+  () => {
+    initTime();
+    stopTimer();
+    startTimer();
+  },
+);
+
 function initTime(): void {
   current.value = props.currentResin || 0;
-  max.value = props.maxResin || 0;
   const time = props.recoveryTime;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time || 0;
+  initialRecoveryTime.value = remainedTime.value;
   updateFormattedTime();
 }
 
@@ -59,10 +70,8 @@ function startTimer(): void {
     if (remainedTime.value > 0) {
       remainedTime.value -= 1;
       updateFormattedTime();
-      // 每 9 分钟恢复 1 点树脂
-      const totalSecondsPassed =
-        (props.recoveryTime ? parseInt(props.recoveryTime) : 0) - remainedTime.value;
-      const resinToRecover = Math.floor(totalSecondsPassed / 540); // 540 秒 = 9 分钟
+      const totalSecondsPassed = initialRecoveryTime.value - remainedTime.value;
+      const resinToRecover = Math.floor(totalSecondsPassed / 540);
       const newCurrent = Math.min(current.value + resinToRecover, max.value);
       if (newCurrent !== current.value) {
         current.value = newCurrent;
@@ -93,10 +102,15 @@ function updateFormattedTime(): void {
   display: flex;
   width: 100%;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
-  gap: 6px;
+  gap: 4px;
+  transition: all 0.3s ease;
+
+  &.ph-dnr-max {
+    background: linear-gradient(135deg, var(--tgc-od-orange) 0%, var(--box-bg-2) 80%);
+  }
 }
 
 .pdb-resin-icon {
@@ -127,7 +141,6 @@ function updateFormattedTime(): void {
   justify-content: space-between;
   font-family: var(--font-title);
   font-size: 13px;
-  font-weight: bold;
   white-space: nowrap;
 }
 

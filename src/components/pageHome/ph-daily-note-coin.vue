@@ -1,6 +1,6 @@
 <!-- 洞天宝钱显示组件 -->
 <template>
-  <div class="ph-dnc-box">
+  <div :class="{ 'ph-dnc-max': full }" class="ph-dnc-box">
     <div class="pdb-coin-icon">
       <img alt="洞天宝钱" src="/UI/daily/coin.webp" />
     </div>
@@ -16,7 +16,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { stamp2LastTime } from "@utils/toolFunc.js";
 
@@ -32,6 +32,7 @@ const current = ref<number>(0);
 const max = ref<number>(0);
 const remainedTime = ref<number>(0);
 const formattedTime = ref<string>("");
+const full = computed<boolean>(() => current.value === max.value);
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -43,6 +44,15 @@ onMounted(() => {
 onUnmounted(() => {
   stopTimer();
 });
+
+watch(
+  () => props.recoveryTime,
+  () => {
+    initTime();
+    stopTimer();
+    startTimer();
+  },
+);
 
 function initTime(): void {
   current.value = props.currentCoin || 0;
@@ -85,10 +95,15 @@ function updateFormattedTime(): void {
   display: flex;
   width: 100%;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
-  gap: 6px;
+  gap: 4px;
+  transition: all 0.3s ease;
+
+  &.ph-dnc-max {
+    background: linear-gradient(135deg, var(--tgc-od-orange) 0%, var(--box-bg-2) 80%);
+  }
 }
 
 .pdb-coin-icon {
@@ -119,7 +134,6 @@ function updateFormattedTime(): void {
   justify-content: space-between;
   font-family: var(--font-title);
   font-size: 13px;
-  font-weight: bold;
   white-space: nowrap;
 }
 

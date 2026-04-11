@@ -15,39 +15,56 @@
           }}
         </span>
       </div>
-      <div class="pdb-quest-desc">
-        <span v-for="q in props.quest.list" :key="q.id">
-          {{ q.chapter_num }} {{ q.chapter_title }} {{ getQuestStatus(q.status) }}
+      <div class="pdb-quest-chips">
+        <span
+          v-for="q in questList"
+          :key="q.id"
+          :class="getQuestClass(q.status)"
+          :title="q.chapter_num"
+          class="pdb-quest-chip"
+        >
+          {{ q.chapter_title }}
         </span>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { computed } from "vue";
+
+import dnEnum from "@enum/dailyNote";
+
 type PhDailyNoteQuestProps = { quest: TGApp.Game.DailyNote.ArchonQuestProgress };
 
 const props = defineProps<PhDailyNoteQuestProps>();
 
-function getQuestStatus(stat: string): string {
+const questList = computed(() => props.quest.list);
+
+function getQuestClass(stat: TGApp.Game.DailyNote.ArchonStatusEnum): string {
   switch (stat) {
-    case "StatusNotOpen":
-      return "未开启";
+    case dnEnum.quest.FINISHED:
+      return "finished";
+    case dnEnum.quest.ONGOING:
+      return "ongoing";
+    case dnEnum.quest.NOT_OPEN:
+      return "not-open";
     default:
-      return stat;
+      return "";
   }
 }
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .ph-dnq-box {
   position: relative;
   display: flex;
   width: 100%;
-  min-height: 64px;
   align-items: center;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
   background: var(--box-bg-2);
-  gap: 6px;
+  gap: 4px;
 }
 
 .pdb-quest-icon {
@@ -80,31 +97,35 @@ function getQuestStatus(stat: string): string {
   justify-content: space-between;
   font-family: var(--font-title);
   font-size: 13px;
-  font-weight: bold;
   white-space: nowrap;
 }
 
-.pdb-quest-desc {
+.pdb-quest-chips {
   display: flex;
   overflow: hidden;
-  flex-direction: column;
-  color: var(--box-text-2);
-  font-size: 10px;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-.pdb-quest-value {
-  position: relative;
-  display: flex;
-  flex-shrink: 0;
+.pdb-quest-chip {
+  display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background: var(--box-bg-3);
-  font-size: 12px;
-  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: 10px;
+  font-size: 10px;
+  line-height: 1.2;
   white-space: nowrap;
+
+  &.finished {
+    @include github-styles.github-tag-dark-gen(#98c379ff);
+  }
+
+  &.ongoing {
+    @include github-styles.github-tag-dark-gen(#d19a66ff);
+  }
+
+  &.not-open {
+    @include github-styles.github-tag-dark-gen(#e06c75ff);
+  }
 }
 </style>
