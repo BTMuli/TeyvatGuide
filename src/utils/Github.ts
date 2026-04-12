@@ -19,10 +19,7 @@ async function getLrv(): Promise<string> {
     const lrResp = await TGHttps.get<TGApp.Plugins.Github.LastestReleaseResp>(LR_API);
     return lrResp.data.tag_name.replace("v", "");
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.warn(`获取远程仓库版本异常：${errMsg}`);
     await TGLogger.Error(`[Github][getLrv] 获取远程仓库版本异常 ${LR_API}`);
     await TGLogger.Error(`[Github][getLrv] ${e}`);

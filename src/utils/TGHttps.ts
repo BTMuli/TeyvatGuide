@@ -137,6 +137,21 @@ async function request<T>(
   }
 }
 
+/**
+ * 判断是否为 HTTP 错误
+ * @since Beta v0.10.0
+ * @param error - 错误对象
+ * @returns 是否为 HTTP 错误
+ */
+function isHttpErr(error: unknown): error is TGApp.App.Response.HttpErr {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof error.message === "string"
+  );
+}
+
 const TGHttps = {
   /**
    * GET 请求
@@ -184,7 +199,7 @@ const TGHttps = {
       return await rawResponse.arrayBuffer();
     } catch (error) {
       let httpError: TGApp.App.Response.HttpErr;
-      if (this.isHttpErr(error)) {
+      if (isHttpErr(error)) {
         httpError = error;
       } else if (error instanceof Error) {
         httpError = createHttpError(error.message, { cause: error });
@@ -210,18 +225,17 @@ const TGHttps = {
   ): Promise<TGApp.App.Response.Resp<T>> => request<T>(method, url, config),
 
   /**
-   * 判断是否为 HTTP 错误
+   * 获取 ErrMsg
    * @since Beta v0.10.0
    * @param error - 错误对象
-   * @returns 是否为 HTTP 错误
+   * @returns 错误信息
    */
-  isHttpErr: (error: unknown): error is TGApp.App.Response.HttpErr => {
-    return (
-      typeof error === "object" &&
-      error !== null &&
-      "message" in error &&
-      typeof error.message === "string"
-    );
+  getErrMsg(error: unknown): string {
+    let res = String(error);
+    if (isHttpErr(error)) {
+      res = error.status ? `[${error.status}] ${error.statusText}` : error.message;
+    }
+    return res;
   },
 };
 

@@ -33,6 +33,8 @@ import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 const { cookie } = storeToRefs(useUserStore());
 
@@ -73,18 +75,34 @@ async function loadMore(refresh: boolean = false): Promise<void> {
     return;
   }
   loading.value = true;
-  const resp = await painterReq.follow(cookie.value, offset.value);
-  if ("retcode" in resp) {
-    showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+  // 获取关注帖子列表
+  let resp: TGApp.BBS.Post.FollowPostResp | undefined;
+  try {
+    resp = await painterReq.follow(cookie.value, offset.value);
+    if (resp.retcode !== 0) {
+      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[VpOverlayFollow][loadMore] [${resp.retcode}] ${resp.message}`);
+      loading.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取关注帖子失败，${errMsg}`);
+    await TGLogger.Error(`[VpOverlayFollow][loadMore] 获取关注帖子失败`);
+    await TGLogger.Error(`[VpOverlayFollow][loadMore] ${e}`);
     loading.value = false;
     return;
   }
-  offset.value = resp.next_offset;
-  isLast.value = resp.is_last;
-  if (refresh) posts.value = resp.list;
-  else posts.value = posts.value.concat(resp.list);
+  if (!resp) {
+    loading.value = false;
+    return;
+  }
+  offset.value = resp.data.next_offset;
+  isLast.value = resp.data.is_last;
+  if (refresh) posts.value = resp.data.list;
+  else posts.value = posts.value.concat(resp.data.list);
   loading.value = false;
-  showSnackbar.success(`成功加载${resp.list.length}条数据`);
+  showSnackbar.success(`成功加载${resp.data.list.length}条数据`);
   if (refresh && listEl.value) {
     listEl.value.scrollTo({ top: 0, behavior: "smooth" });
   }

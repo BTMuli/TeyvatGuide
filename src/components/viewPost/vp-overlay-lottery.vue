@@ -1,21 +1,21 @@
 <template>
   <TOverlay v-model="visible">
-    <div class="tpol-box" v-if="card">
+    <div v-if="card" class="tpol-box">
       <div class="tpol-title">
         <span>抽奖详情</span>
         <span>{{ timeStatus }}</span>
       </div>
       <div class="tpol-info">
-        <TpAvatar @click="toUserProfile(card.creator.uid)" :data="card.creator" position="left" />
+        <TpAvatar :data="card.creator" position="left" @click="toUserProfile(card.creator.uid)" />
         <div>参与方式：{{ upWay }}</div>
         <div>奖品详情：</div>
         <div v-for="reward in card.rewards" :key="reward.name" class="tpol-info-reward">
-          <v-icon size="12" color="var(--tgc-pink-1)">mdi-gift</v-icon>
+          <v-icon color="var(--tgc-pink-1)" size="12">mdi-gift</v-icon>
           <span>{{ reward.name }}</span>
           <span>{{ reward.goal }}份</span>
         </div>
       </div>
-      <div class="tpol-title" v-if="timeStatus === '已开奖'">中奖详情</div>
+      <div v-if="timeStatus === '已开奖'" class="tpol-title">中奖详情</div>
       <template v-if="timeStatus === '已开奖'">
         <template v-for="reward in card.rewards" :key="reward.name">
           <div class="vpol-reward-title">{{ reward.name }} {{ reward.win }}/{{ reward.goal }}</div>
@@ -24,8 +24,8 @@
               v-for="user in reward.users"
               :key="user.uid"
               :data="user"
-              position="left"
               class="tpolr-user"
+              position="left"
               @click="onUserClick(user)"
             />
           </div>
@@ -35,7 +35,7 @@
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
@@ -45,6 +45,8 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { generateShareImg } from "@utils/TGShare.js";
 import { stamp2LastTime } from "@utils/toolFunc.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 type TpoLotteryProps = { lottery: string | undefined };
 type RenderCard = {
@@ -81,13 +83,25 @@ watch(
 async function load(): Promise<void> {
   if (!props.lottery) return;
   if (card.value) return;
-  const resp = await painterReq.lottery(props.lottery);
-  if ("retcode" in resp) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+  let resp: TGApp.BBS.Lottery.Resp | undefined;
+  try {
+    resp = await painterReq.lottery(props.lottery);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[VpOverlayLottery][load] 获取抽奖数据异常`);
+      await TGLogger.Warn(`[VpOverlayLottery][load] [${resp.retcode}] ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取抽奖数据异常: ${errMsg}`);
+    await TGLogger.Error(`[VpOverlayLottery][load] 获取抽奖数据异常`);
+    await TGLogger.Error(`[VpOverlayLottery][load] ${e}`);
     return;
   }
-  jsonData.value = resp;
-  if (resp.status === "Settled") timeStatus.value = "已开奖";
+  if (!resp) return;
+  jsonData.value = resp.data.show_lottery;
+  if (resp.data.show_lottery.status === "Settled") timeStatus.value = "已开奖";
   else {
     if (timer !== undefined) {
       clearInterval(timer);
@@ -95,7 +109,7 @@ async function load(): Promise<void> {
     }
     timer = setInterval(flushTimeStatus, 1000);
   }
-  card.value = transLotteryCard(resp);
+  card.value = transLotteryCard(resp.data.show_lottery);
   upWay.value = getUpWay(card.value?.upWay);
 }
 

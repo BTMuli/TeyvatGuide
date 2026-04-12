@@ -51,10 +51,7 @@ async function test() {
     }
     showSnackbar.success("成功获取实时便笺数据");
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取实时便笺失败：${errMsg}`);
     await TGLogger.Error(`[PageTest][test] 获取实时便笺失败`);
     await TGLogger.Error(`[PageTest][test] ${e}`);

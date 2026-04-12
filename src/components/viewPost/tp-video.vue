@@ -61,10 +61,7 @@ onMounted(async () => {
     const viewResp = await Bili.video.view(aid, bvid);
     videoData.value = viewResp.data;
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取视频信息失败: ${errMsg}`);
     await TGLogger.Error(`[TpVideo][onMounted] 获取视频信息异常: ${url}`);
     await TGLogger.Error(`[TpVideo][onMounted] ${e}`);

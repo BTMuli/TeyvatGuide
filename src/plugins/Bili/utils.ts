@@ -46,10 +46,7 @@ async function getMixinKey(): Promise<string> {
   try {
     navResp = await getNavResp();
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     await TGLogger.Error(`[Bili][GetMixinKey] Nav 请求异常：${errMsg}`);
     return "";
   }

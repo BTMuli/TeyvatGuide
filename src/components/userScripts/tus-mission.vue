@@ -53,6 +53,7 @@ import TGNotify from "@utils/TGNotify.js";
 import { postDetailRateLimiter } from "@utils/rateLimiter.js";
 import { storeToRefs } from "pinia";
 import { ref, shallowRef, watch } from "vue";
+import TGHttps from "@utils/TGHttps.js";
 
 /** 用于渲染的任务项 */
 type ParseMission = {
@@ -197,15 +198,38 @@ async function tryAuto(skip: boolean = false): Promise<void> {
   if (likeFind) likeCnt = likeFind.process;
   const viewFind = postFilter.find((i) => i.key === "view_post_0");
   if (viewFind) viewCnt = viewFind.process;
+  // 获取帖子列表
   await TGLogger.Script("[米游币任务]获取帖子列表");
-  const listResp = await painterReq.forum.recent(26, 2, 2, undefined, 20);
+  let listResp: TGApp.BBS.Forum.PostForumResp | undefined;
+  try {
+    listResp = await painterReq.forum.recent(26, 2, 2, undefined, 20);
+    if (listResp.retcode !== 0) {
+      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+      await TGLogger.Script(`获取帖子列表失败: [${listResp.retcode}] ${listResp.message}`, "warn");
+      await TGLogger.ScriptSep("米游币任务", false);
+      loadScript.value = false;
+      loadMission.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取帖子列表失败：${errMsg}`);
+    await TGLogger.Script(`获取帖子列表失败`, "error");
+    await TGLogger.Error(`[tus-mission][tryAuto] ${e}`);
+    await TGLogger.ScriptSep("米游币任务", false);
+    loadScript.value = false;
+    loadMission.value = false;
+    return;
+  }
+  if (!listResp) return;
+  // 执行操作
   const ckShare = {
     stoken: props.acCur.cookie.stoken,
     stuid: props.acCur.cookie.stuid,
     mid: props.acCur.cookie.mid,
   };
   const ckPost = { ltoken: props.acCur.cookie.ltoken, ltuid: props.acCur.cookie.ltuid };
-  for (const post of listResp.list) {
+  for (const post of listResp.data.list) {
     if (!isShare) {
       await TGLogger.Script(`[米游币任务]正在分享帖子${post.post.post_id}`);
       const shareResp = await apiHubReq.post.share(post.post.post_id, ckShare);
@@ -320,7 +344,6 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
   }
   await TGLogger.Script("[米游币任务]正在执行打卡");
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
-  await painterReq.forum.recent(26, 2, 1, undefined, 20, ckSign);
   const resp = await apiHubReq.sign(ckSign, 2, ch);
   console.log("打卡情况", resp);
   if (resp.retcode !== 0) {

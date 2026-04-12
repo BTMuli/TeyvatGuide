@@ -124,6 +124,9 @@ import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import TGHttps from "@utils/TGHttps.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 
 type SortSelect<T extends number = number> = { text: string; value: T; icon: string };
 type SortSelectForum = Omit<SortSelect<TGApp.BBS.Post.ForumSortTypeEnum>, "icon">;
@@ -157,6 +160,9 @@ const showUser = ref<boolean>(false);
 
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
+const { incognito } = storeToRefs(useAppStore());
+const { cookie } = storeToRefs(useUserStore());
+
 const selectedForum = shallowRef<SortSelect>();
 const sortGameList = shallowRef<Array<SortSelectGame>>([]);
 const postRaw = shallowRef<PostRaw>({ isLast: false, lastId: "", total: 0 });
@@ -166,6 +172,10 @@ const curGame = computed<SortSelectGame | undefined>(() => {
 });
 const curForums = computed<Array<SortSelect>>(() => {
   return curGame.value?.forum ?? [];
+});
+const reqCk = computed<TGApp.App.Account.Cookie | undefined>(() => {
+  if (incognito.value) return undefined;
+  return cookie.value;
 });
 
 onMounted(async () => {
@@ -253,25 +263,26 @@ function getSortLabel(value: number): string {
 async function getCurrentPosts(
   loadMore: boolean = false,
   forum: number,
-): Promise<TGApp.BBS.Forum.PostForumRes> {
+): Promise<TGApp.BBS.Forum.PostForumResp> {
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
   if (curSortType.value === 3) {
-    if (loadMore) {
-      return await painterReq.forum.hot(forum, curGid.value, postRaw.value.lastId, pageSize);
-    }
-    return await painterReq.forum.hot(forum, curGid.value);
-  }
-  if (loadMore) {
-    return await painterReq.forum.recent(
+    return await painterReq.forum.hot(
       forum,
       curGid.value,
-      curSortType.value,
-      postRaw.value.lastId,
-      pageSize,
+      loadMore ? postRaw.value.lastId : undefined,
+      loadMore ? pageSize : 20,
+      reqCk.value,
     );
   }
-  return await painterReq.forum.recent(forum, curGid.value, curSortType.value);
+  return await painterReq.forum.recent(
+    forum,
+    curGid.value,
+    curSortType.value,
+    loadMore ? postRaw.value.lastId : undefined,
+    loadMore ? pageSize : 20,
+    reqCk.value,
+  );
 }
 
 async function freshPostData(): Promise<void> {
@@ -293,14 +304,34 @@ async function freshPostData(): Promise<void> {
   );
   await showLoading.update(`版块：${forumLabel}，排序：${sortLabel}`);
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postsGet = await getCurrentPosts(false, selectedForum.value.value);
-  posts.value = postsGet.list;
+  // 获取帖子列表
+  let postsResp: TGApp.BBS.Forum.PostForumResp | undefined;
+  try {
+    postsResp = await getCurrentPosts(false, selectedForum.value.value);
+    if (postsResp.retcode !== 0) {
+      showSnackbar.error(`[${postsResp.retcode}] ${postsResp.message}`);
+      await TGLogger.Warn(`[PostForum][freshPostData] 获取帖子列表异常`);
+      await TGLogger.Warn(`[PostForum][freshPostData] ${postsResp.retcode}-${postsResp.message}`);
+      await showLoading.end();
+      isReq.value = false;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取帖子列表异常：${errMsg}`);
+    await TGLogger.Error(`[PostForum][freshPostData] 获取帖子列表异常`);
+    await TGLogger.Error(`[PostForum][freshPostData] ${e}`);
+    await showLoading.end();
+    isReq.value = false;
+  }
+  if (!postsResp) return;
+  // 处理帖子列表数据
+  posts.value = postsResp.data.list;
   postRaw.value = {
-    isLast: postsGet.is_last,
-    lastId: postsGet.last_id,
-    total: postsGet.list.length,
+    isLast: postsResp.data.is_last,
+    lastId: postsResp.data.last_id,
+    total: postsResp.data.list.length,
   };
-  showSnackbar.success(`刷新成功，共加载 ${postsGet.list.length} 条帖子`);
+  showSnackbar.success(`刷新成功，共加载 ${postsResp.data.list.length} 条帖子`);
   await showLoading.end();
   isReq.value = false;
 }
@@ -317,17 +348,38 @@ async function loadMore(): Promise<void> {
   if (isReq.value) return;
   isReq.value = true;
   await showLoading.start("正在加载更多帖子数据", `游戏：${curGame.value?.text}`);
-  const postsGet = await getCurrentPosts(true, selectedForum.value.value);
-  await showLoading.update(
-    `版块：${selectedForum.value.text}，排序：${getSortLabel(curSortType.value)}，数量：${postsGet.list.length}`,
-  );
-  posts.value = posts.value.concat(postsGet.list);
+
+  // 获取帖子列表
+  let postsResp: TGApp.BBS.Forum.PostForumResp | undefined;
+  try {
+    postsResp = await getCurrentPosts(true, selectedForum.value.value);
+    if (postsResp.retcode !== 0) {
+      showSnackbar.error(`[${postsResp.retcode}] ${postsResp.message}`);
+      await TGLogger.Warn(`[PostForum][loadMore] 获取帖子列表异常`);
+      await TGLogger.Warn(`[PostForum][loadMore] ${postsResp.retcode}-${postsResp.message}`);
+      await showLoading.end();
+      isReq.value = false;
+    }
+    await showLoading.update(
+      `版块：${selectedForum.value.text}，排序：${getSortLabel(curSortType.value)}，数量：${postsResp.data.list.length}`,
+    );
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取帖子列表异常：${errMsg}`);
+    await TGLogger.Error(`[PostForum][loadMore] 获取帖子列表异常`);
+    await TGLogger.Error(`[PostForum][loadMore] ${e}`);
+    await showLoading.end();
+    isReq.value = false;
+  }
+  if (!postsResp) return;
+  // 处理帖子列表数据
+  posts.value = posts.value.concat(postsResp.data.list);
   postRaw.value = {
-    isLast: postsGet.is_last,
-    lastId: postsGet.last_id,
-    total: postRaw.value.total + postsGet.list.length,
+    isLast: postsResp.data.is_last,
+    lastId: postsResp.data.last_id,
+    total: postRaw.value.total + postsResp.data.list.length,
   };
-  showSnackbar.success(`加载成功，共加载 ${postsGet.list.length} 条帖子`);
+  showSnackbar.success(`加载成功，共加载 ${postsResp.data.list.length} 条帖子`);
   await showLoading.end();
   isReq.value = false;
 }

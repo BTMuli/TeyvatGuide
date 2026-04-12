@@ -1,6 +1,6 @@
 /**
  * 日志工具
- * @since Beta v0.7.0
+ * @since Beta v0.10.0
  */
 
 import { event } from "@tauri-apps/api";
@@ -76,15 +76,18 @@ class Logger {
 
   /**
    * 输出日志-脚本
-   * @since Beta v0.7.0
+   * @since Beta v0.10.0
    * @param message - 日志信息
+   * @param type - 日志类型
    * @returns 无返回值
    */
-  async Script(message: string): Promise<void> {
+  async Script(message: string, type: string = "info"): Promise<void> {
     const timeNow = timestampToDate(new Date().getTime());
-    const msg = `[${timeNow}]${message}`;
+    const msg = `[${type.toUpperCase()}][${timeNow}]${message}`;
     await event.emitTo("TeyvatGuide", "userScriptLog", msg);
-    await info(message);
+    if (type === "info") await info(message);
+    if (type === "warn") await warn(message);
+    if (type === "error") await error(message);
   }
 
   /**

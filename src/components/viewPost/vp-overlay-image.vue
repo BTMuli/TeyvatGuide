@@ -404,10 +404,7 @@ async function loadImageBuffer(): Promise<void> {
   try {
     buffer.value = await TGHttps.buffer(oriLink.value);
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
     await TGLogger.Error(`[VpOverlayImage][loadImageBuffer] 获取图像Buffer失败：${oriLink.value}`);
     await TGLogger.Error(`[VpOverlayImage][loadImageBuffer] ${e}`);

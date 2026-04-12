@@ -599,10 +599,7 @@ async function loadYatta(): Promise<void> {
   try {
     yattaData.value = await fetchYattaJson();
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取Yatta数据失败：${errMsg}`);
     await TGLogger.Error(`[Gacha][loadYatta] 获取Yatta数据失败`);
     await TGLogger.Error(`[Gacha][loadYatta] ${e}`);

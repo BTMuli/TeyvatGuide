@@ -163,10 +163,7 @@ async function refreshRecord(): Promise<void> {
       return;
     }
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
     await TGLogger.Error(`[Record][refreshRecord] 获取战绩异常`);
     await TGLogger.Error(`${e}`);

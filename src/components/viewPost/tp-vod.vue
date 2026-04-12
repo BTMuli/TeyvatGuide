@@ -161,10 +161,7 @@ async function loadCoverBuffer(): Promise<void> {
   try {
     coverBuffer.value = await TGHttps.buffer(props.data.insert.vod.cover);
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
     await TGLogger.Error(
       `[TpVod][loadCoverBuffer] 获取图像Buffer失败：${props.data.insert.vod.cover}`,

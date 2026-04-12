@@ -15,13 +15,13 @@
       </v-tabs>
       <v-text-field
         v-model="search"
+        :clearable="true"
         :hide-details="true"
         append-inner-icon="mdi-magnify"
         class="pn-nav-search"
         density="compact"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
-        :clearable="true"
         @keydown.enter="searchPost()"
         @click:append-inner="searchPost()"
       />
@@ -69,6 +69,7 @@ import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, reactive, type Ref, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
+import TGHttps from "@utils/TGHttps.js";
 
 type PostData = Record<TGApp.BBS.Post.NewsTypeEnum, Ref<Array<TGApp.BBS.Post.FullData>>>;
 type RawItem = { isLast: boolean; name: string; lastId: number };
@@ -134,15 +135,43 @@ async function firstLoad(refresh: boolean = false): Promise<void> {
     postData[key] = [];
     rawData[key].lastId = 0;
   }
+  // 获取咨讯数据
   await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
-  const getData = await painterReq.news(gid, key);
-  await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
-  rawData[key] = { isLast: getData.is_last, name: rawData[key].name, lastId: getData.list.length };
-  postData[key] = getData.list;
+  let getResp: TGApp.BBS.Post.NewsResp | undefined;
+  try {
+    getResp = await painterReq.news(gid, key);
+    if (getResp.retcode !== 0) {
+      showSnackbar.error(`[${getResp.retcode}] ${getResp.message}`);
+      await TGLogger.Warn(`[PostNews][firstLoad] 获取咨讯异常`);
+      await TGLogger.Warn(`[PostNews][firstLoad] [${getResp.retcode}] ${getResp.message}`);
+      await showLoading.end();
+      loading.value = false;
+      return;
+    }
+    await showLoading.update(
+      `数量：${getResp.data.list.length}，是否最后一页：${getResp.data.is_last}`,
+    );
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取${label.value}${rawData[key].name}异常：${errMsg}`);
+    await TGLogger.Error(`[PostNews][firstLoad] 获取咨讯异常`);
+    await TGLogger.Error(`[PostNews][firstLoad] ${e}`);
+    await showLoading.end();
+    loading.value = false;
+    return;
+  }
+  if (!getResp) return;
+  // 处理咨讯数据
+  rawData[key] = {
+    isLast: getResp.data.is_last,
+    name: rawData[key].name,
+    lastId: getResp.data.list.length,
+  };
+  postData[key] = getResp.data.list;
   await showLoading.end();
   await TGLogger.Info(`[News][${gid}][firstLoad] 获取${rawData[key].name}数据成功`);
   showSnackbar.success(
-    `获取${label.value}${rawData[key].name}数据成功，共 ${getData.list.length} 条`,
+    `获取${label.value}${rawData[key].name}数据成功，共 ${getResp.data.list.length} 条`,
   );
   loading.value = false;
 }
@@ -166,11 +195,36 @@ async function loadMore(): Promise<void> {
   await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
   const mod = rawData[key].lastId % 20;
   const pageSize = mod === 0 ? 20 : 20 - mod;
-  const getData = await painterReq.news(gid, key, pageSize, rawData[key].lastId);
-  await showLoading.update(`数量：${getData.list.length}，是否最后一页：${getData.is_last}`);
-  rawData[key].lastId = rawData[key].lastId + getData.list.length;
-  rawData[key].isLast = getData.is_last;
-  postData[key] = postData[key].concat(getData.list);
+  // 获取咨讯数据
+  await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
+  let getResp: TGApp.BBS.Post.NewsResp | undefined;
+  try {
+    getResp = await painterReq.news(gid, key, pageSize, rawData[key].lastId);
+    if (getResp.retcode !== 0) {
+      showSnackbar.error(`[${getResp.retcode}] ${getResp.message}`);
+      await TGLogger.Warn(`[PostNews][loadMore] 获取咨讯异常`);
+      await TGLogger.Warn(`[PostNews][loadMore] [${getResp.retcode}] ${getResp.message}`);
+      await showLoading.end();
+      loading.value = false;
+      return;
+    }
+    await showLoading.update(
+      `数量：${getResp.data.list.length}，是否最后一页：${getResp.data.is_last}`,
+    );
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取${label.value}${rawData[key].name}异常：${errMsg}`);
+    await TGLogger.Error(`[PostNews][loadMore] 获取咨讯异常`);
+    await TGLogger.Error(`[PostNews][loadMore] ${e}`);
+    await showLoading.end();
+    loading.value = false;
+    return;
+  }
+  if (!getResp) return;
+  // 处理咨讯数据
+  rawData[key].lastId = rawData[key].lastId + getResp.data.list.length;
+  rawData[key].isLast = getResp.data.is_last;
+  postData[key] = postData[key].concat(getResp.data.list);
   if (rawData[key].isLast) {
     await showLoading.end();
     showSnackbar.warn("已经是最后一页了");
@@ -179,7 +233,7 @@ async function loadMore(): Promise<void> {
   }
   await showLoading.end();
   loading.value = false;
-  showSnackbar.success(`加载成功，共加载 ${getData.list.length} 条`);
+  showSnackbar.success(`加载成功，共加载 ${getResp.data.list.length} 条`);
 }
 
 async function searchPost(): Promise<void> {

@@ -60,10 +60,7 @@ export async function saveImgFile(url: string, fn: string, fmt?: string): Promis
   try {
     buffer = await TGHttps.buffer(url);
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取图像Buffer失败：${errMsg}`);
     await TGLogger.Error(`[TGShare][saveImgFile] 获取图像Buffer失败：${url}`);
     await TGLogger.Error(`${e}`);
@@ -85,10 +82,7 @@ export async function saveImgBlob(url: string): Promise<string> {
   try {
     buffer = await TGHttps.buffer(url);
   } catch (e) {
-    let errMsg = String(e);
-    if (TGHttps.isHttpErr(e)) {
-      errMsg = e.status ? `[${e.status}] ${e.statusText}` : e.message;
-    }
+    const errMsg = TGHttps.getErrMsg(e);
     await TGLogger.Error(`[TGShare][saveImgBlob] 获取图像Buffer失败: ${url}`);
     await TGLogger.Error(`[TGShare][saveImgBlob] ${errMsg}`);
     return url;

@@ -16,6 +16,28 @@ declare namespace TGApp.BBS.Forum {
   };
 
   /**
+   * 获取版块帖子列表请求参数
+   * @since Beta v0.10.0
+   */
+  type PostForumParams = {
+    /** 版块ID */
+    forum_id: number;
+    /** 分区ID */
+    gids: number;
+    /**
+     * 排序类型
+     * @remarks 仅用于获取最近帖子
+     */
+    sort_type?: TGApp.BBS.Post.ForumSortTypeEnum;
+    /** 页面尺寸 */
+    page_size: number;
+    /** 是否精华 */
+    is_good: boolean;
+    /** 偏移ID */
+    last_id?: string;
+  };
+
+  /**
    * 获取版块帖子列表返回
    * @since Beta v0.7.1
    */
