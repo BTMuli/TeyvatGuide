@@ -28,12 +28,21 @@ type PhDailyNoteResinProps = {
 
 const props = defineProps<PhDailyNoteResinProps>();
 
-const current = ref<number>(0);
 const remainedTime = ref<number>(0);
-const formattedTime = ref<string>("");
 const initialRecoveryTime = ref<number>(0);
+const initialCurrent = ref<number>(0);
+
 const max = computed<number>(() => props.maxResin ?? 200);
+const current = computed<number>(() => {
+  const totalSecondsPassed = initialRecoveryTime.value - remainedTime.value;
+  const resinToRecover = Math.floor(totalSecondsPassed / 540);
+  return Math.min(initialCurrent.value + resinToRecover, max.value);
+});
 const full = computed<boolean>(() => current.value === max.value);
+const formattedTime = computed<string>(() => {
+  if (remainedTime.value <= 0) return "已恢复满";
+  return stamp2LastTime(remainedTime.value * 1000);
+});
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -56,27 +65,16 @@ watch(
 );
 
 function initTime(): void {
-  current.value = props.currentResin || 0;
+  initialCurrent.value = props.currentResin || 0;
   const time = props.recoveryTime;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time || 0;
   initialRecoveryTime.value = remainedTime.value;
-  updateFormattedTime();
 }
 
 function startTimer(): void {
   if (remainedTime.value <= 0) return;
-
   timer = setInterval(() => {
-    if (remainedTime.value > 0) {
-      remainedTime.value -= 1;
-      updateFormattedTime();
-      const totalSecondsPassed = initialRecoveryTime.value - remainedTime.value;
-      const resinToRecover = Math.floor(totalSecondsPassed / 540);
-      const newCurrent = Math.min(current.value + resinToRecover, max.value);
-      if (newCurrent !== current.value) {
-        current.value = newCurrent;
-      }
-    }
+    if (remainedTime.value > 0) remainedTime.value -= 1;
   }, 1000);
 }
 
@@ -85,15 +83,6 @@ function stopTimer(): void {
     clearInterval(timer);
     timer = null;
   }
-}
-
-function updateFormattedTime(): void {
-  if (remainedTime.value <= 0) {
-    formattedTime.value = "已恢复满";
-    return;
-  }
-
-  formattedTime.value = stamp2LastTime(remainedTime.value * 1000);
 }
 </script>
 <style lang="scss" scoped>
