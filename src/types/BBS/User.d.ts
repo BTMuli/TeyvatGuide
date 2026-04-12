@@ -1,7 +1,8 @@
 /**
  * 用户类型定义文件
- * @since Beta v0.7.9
+ * @since Beta v0.10.0
  */
+
 declare namespace TGApp.BBS.User {
   /**
    * 用户信息返回响应
@@ -115,7 +116,7 @@ declare namespace TGApp.BBS.User {
 
   /**
    * 用户操作
-   * @since Beta v0.7.2
+   * @since Beta v0.10.0
    */
   type SelfOperation = {
     /** 操作类型 */
@@ -123,7 +124,7 @@ declare namespace TGApp.BBS.User {
     /** 是否收藏 */
     is_collected: boolean;
     /** 互动类型 */
-    upvote_type: number;
+    upvote_type?: number;
   };
 
   /**

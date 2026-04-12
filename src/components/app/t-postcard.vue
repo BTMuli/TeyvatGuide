@@ -50,7 +50,11 @@
           <v-icon size="12">mdi-eye</v-icon>
           <span>{{ card.data.view }}</span>
         </div>
-        <div :title="`收藏数：${card.data.mark}`" class="tpc-info-item">
+        <div
+          :class="{ collected: props.post.self_operation?.is_collected }"
+          :title="`收藏数：${card.data.mark}`"
+          class="tpc-info-item"
+        >
           <v-icon size="12">mdi-star</v-icon>
           <span>{{ card.data.mark }}</span>
         </div>
@@ -58,7 +62,11 @@
           <v-icon size="12">mdi-comment</v-icon>
           <span>{{ card.data.reply }}</span>
         </div>
-        <div :title="`点赞数：${card.data.like}`" class="tpc-info-item">
+        <div
+          :class="{ love: props.post.self_operation?.upvote_type ?? 0 > 0 }"
+          :title="`点赞数：${card.data.like}`"
+          class="tpc-info-item"
+        >
           <v-icon size="12">mdi-thumb-up</v-icon>
           <span>{{ card.data.like }}</span>
         </div>
@@ -185,8 +193,10 @@ watch(
 );
 
 function trySelect(): void {
-  if (props.selectMode) emits("onSelected", props.post.post.post_id);
-  isSelected.value = !isSelected.value;
+  if (props.selectMode) {
+    emits("onSelected", props.post.post.post_id);
+    isSelected.value = !isSelected.value;
+  }
 }
 
 async function toPost(): Promise<void> {
@@ -484,6 +494,14 @@ function onUserClick(): void {
   gap: 2px;
   opacity: 0.6;
   white-space: nowrap;
+
+  &.love {
+    color: var(--tgc-od-red);
+  }
+
+  &.collect {
+    color: var(--tgc-od-orange);
+  }
 }
 
 .tpc-act {
