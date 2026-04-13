@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-03-13
+Update: 2026-04-13
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-03-13 13:46:30`
+> 更新于 `2026-04-13 12:32:57`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -65,6 +65,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   > 支持 扫码/验证码/Cookie 登陆，支持多账号管理
   - [x] 近期活动（首页组件）
   - [x] 游戏签到（首页组件）
+  - [x] 实时便笺（首页组件）
   - [x] 原神战绩
   - [x] 角色详情
   - [x] 高难挑战（深境螺旋/真境剧诗/幽境危战）
@@ -100,7 +101,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 ## 相关文档 / Docs
 
-- Changelog: [CHANGELOG](CHANGELOG.md)
+- Changelog: [CHANGELOG](./CHANGELOG.md)
 - 资源来源：[项目资源说明](docs/项目资源说明.md)
 - UIAF：[UIAF v1.1](docs/standards/UIAF.md)
 - UIGF：[UIGF v3.0](docs/standards/UIGF3.md)，[UIGF v4.0](docs/standards/UIGF.md)
