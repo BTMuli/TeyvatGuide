@@ -123,6 +123,7 @@ import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 import GroResetCard from "./gro-reset-card.vue";
 
 import { AppGachaData } from "@/data/index.js";
+import { str2timeStr } from "@utils/toolFunc.js";
 
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
@@ -280,7 +281,7 @@ function getStar5Avg(): string {
 function checkIsUp(item: TGApp.Sqlite.Gacha.Gacha): boolean | undefined {
   // 新手池和常驻池不存在UP概念
   if (item.gachaType === "100" || item.gachaType === "200") return undefined;
-  const itemTime = new Date(item.time).getTime();
+  const itemTime = new Date(str2timeStr(item.time)).getTime();
   const itemIdNum = Number(item.itemId);
   const strictPool: Array<string> = [gameEnum.gachaType.WeaponUp, gameEnum.gachaType.MixUp];
   const avatarUpPool: Array<string> = [gameEnum.gachaType.AvatarUp, gameEnum.gachaType.AvatarUp2];
