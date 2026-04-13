@@ -9,6 +9,10 @@ Update: 2026-04-08
 >
 > 更新于 `2026-04-08 11:36:37`
 
+# CHANGELOG v0.9.x
+
+> 本文仅记录 v0.9.x 版本的更新内容
+
 ## [0.9.9](https://github.com/BTMuli/TeyvatGuide/releases/v0.9.8) (2026-04-08)
 
 - 🍱 更新 6.5 版本游戏资源
