@@ -29,14 +29,15 @@ type PhDailyNoteResinProps = {
 const props = defineProps<PhDailyNoteResinProps>();
 
 const remainedTime = ref<number>(0);
-const initialRecoveryTime = ref<number>(0);
 const initialCurrent = ref<number>(0);
 
 const max = computed<number>(() => props.maxResin ?? 200);
 const current = computed<number>(() => {
-  const totalSecondsPassed = initialRecoveryTime.value - remainedTime.value;
-  const resinToRecover = Math.floor(totalSecondsPassed / 540);
-  return Math.min(initialCurrent.value + resinToRecover, max.value);
+  const totalToRecover = max.value - initialCurrent.value;
+  if (totalToRecover <= 0) return max.value;
+  if (remainedTime.value <= 0) return max.value;
+  const recovered = Math.floor(totalToRecover - remainedTime.value / 540);
+  return Math.min(initialCurrent.value + Math.max(recovered, 0), max.value);
 });
 const full = computed<boolean>(() => current.value === max.value);
 const formattedTime = computed<string>(() => {
@@ -68,7 +69,6 @@ function initTime(): void {
   initialCurrent.value = props.currentResin || 0;
   const time = props.recoveryTime;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time || 0;
-  initialRecoveryTime.value = remainedTime.value;
 }
 
 function startTimer(): void {
