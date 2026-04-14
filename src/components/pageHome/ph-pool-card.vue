@@ -69,6 +69,7 @@ import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useHomeStore from "@store/home.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost, createTGWindow } from "@utils/TGWindow.js";
 import { stamp2LastTime } from "@utils/toolFunc.js";
@@ -133,20 +134,29 @@ async function loadCover(): Promise<void> {
     cover.value = poolCover.value[postId];
     return;
   }
-  const resp = await postReq.post(postId, {});
-  if ("retcode" in resp) {
-    showSnackbar.error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
-    await TGLogger.Error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
+  let resp: TGApp.BBS.Post.FullResp | undefined;
+  try {
+    resp = await postReq.post(postId, {});
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[PhPoolCard][${resp.retcode}] ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取帖子封面失败：${errMsg}`);
+    await TGLogger.Error(`[PhPoolCard] 获取帖子封面异常`);
+    await TGLogger.Error(`[PhPoolCard] ${e}`);
     return;
   }
   let coverGet;
-  if (resp.cover) coverGet = resp.cover.url;
-  else if (resp.post.cover && resp.post.cover !== "") coverGet = resp.post.cover;
-  else if (resp.post.images.length > 0) coverGet = resp.post.images[0];
+  if (resp.data.cover) coverGet = resp.data.cover.url;
+  else if (resp.data.post.cover && resp.data.post.cover !== "") coverGet = resp.data.post.cover;
+  else if (resp.data.post.images.length > 0) coverGet = resp.data.post.images[0];
   else coverGet = "";
   cover.value = coverGet;
-  if (!poolCover.value) poolCover.value = { [postId]: resp.post.cover };
-  else poolCover.value[postId] = resp.post.cover;
+  if (!poolCover.value) poolCover.value = { [postId]: resp.data.post.cover };
+  else poolCover.value[postId] = resp.data.post.cover;
 }
 
 function handlePosition(): void {

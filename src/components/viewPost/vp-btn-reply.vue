@@ -76,6 +76,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsEnum from "@enum/bbs.js";
 import postReq from "@req/postReq.js";
 import { emit } from "@tauri-apps/api/event";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { computed, ref, shallowRef, watch } from "vue";
 
@@ -171,31 +172,41 @@ async function reloadReply(): Promise<void> {
 
 async function loadReply(): Promise<void> {
   loading.value = true;
-  const resp = await postReq.reply.main(
-    props.postId,
-    props.gid,
-    isHot.value,
-    lastId.value,
-    onlyLz.value,
-    replyOrder.value,
-  );
-  console.debug("[VpBtnReply] Load Reply Response:", resp);
-  if ("retcode" in resp) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await TGLogger.Warn(`[VpBtnReply] Load Reply Error: ${resp.retcode} - ${resp.message}`);
+  let resp: TGApp.BBS.Reply.MainResp | undefined;
+  try {
+    resp = await postReq.reply.main(
+      props.postId,
+      props.gid,
+      isHot.value,
+      lastId.value,
+      onlyLz.value,
+      replyOrder.value,
+    );
+    console.debug("[VpBtnReply] Load Reply Response:", resp);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[VpBtnReply] Load Reply Error: ${resp.retcode} - ${resp.message}`);
+      loading.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取回复失败：${errMsg}`);
+    await TGLogger.Error(`[VpBtnReply] 获取回复异常`);
+    await TGLogger.Error(`[VpBtnReply] ${e}`);
     loading.value = false;
     return;
   }
-  isLast.value = resp.is_last;
-  lastId.value = resp.last_id;
-  pinId.value = resp.pin_reply_id;
-  reply.value = reply.value.concat(resp.list);
+  isLast.value = resp.data.is_last;
+  lastId.value = resp.data.last_id;
+  pinId.value = resp.data.pin_reply_id;
+  reply.value = reply.value.concat(resp.data.list);
   loading.value = false;
   if (isLast.value) {
     showSnackbar.warn("没有更多了");
     return;
   }
-  showSnackbar.success(`成功加载${resp.list.length}条回复`);
+  showSnackbar.success(`成功加载${resp.data.list.length}条回复`);
 }
 
 async function handleDebug(): Promise<void> {

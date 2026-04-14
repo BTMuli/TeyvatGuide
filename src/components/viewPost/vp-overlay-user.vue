@@ -49,6 +49,8 @@ import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { getUserAvatar } from "@utils/toolFunc.js";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -128,18 +130,29 @@ async function loadPosts(): Promise<void> {
     load.value = false;
     return;
   }
-  const resp = await postReq.user.post(props.uid, 0, offset.value);
-  if ("retcode" in resp) {
-    showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+  let resp: TGApp.BBS.Post.UserPostResp | undefined;
+  try {
+    resp = await postReq.user.post(props.uid, 0, offset.value);
+    if (resp.retcode !== 0) {
+      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+      load.value = false;
+      visible.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取用户帖子失败：${errMsg}`);
+    await TGLogger.Error(`[VpOverlayUser] 获取用户帖子异常`);
+    await TGLogger.Error(`[VpOverlayUser] ${e}`);
     load.value = false;
     visible.value = false;
     return;
   }
-  offset.value = resp.next_offset;
-  isLast.value = resp.is_last;
-  results.value = results.value.concat(resp.list);
+  offset.value = resp.data.next_offset;
+  isLast.value = resp.data.is_last;
+  results.value = results.value.concat(resp.data.list);
   load.value = false;
-  showSnackbar.success(`成功加载${resp.list.length}条数据`);
+  showSnackbar.success(`成功加载${resp.data.list.length}条数据`);
 }
 </script>
 <style lang="scss" scoped>

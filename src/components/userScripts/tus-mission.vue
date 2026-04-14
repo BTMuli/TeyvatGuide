@@ -245,18 +245,26 @@ async function tryAuto(skip: boolean = false): Promise<void> {
       await TGLogger.Script(
         `[米游币任务]正在浏览帖子${post.post.post_id} (当前 1 分钟内请求数：${currentCount}/10)`,
       );
-      const detailResp = await postDetailRateLimiter.execute(() =>
-        postReq.post(post.post.post_id, ckPost),
-      );
-      if ("retcode" in detailResp) {
-        await TGLogger.Script(
-          `[米游币任务]获取帖子${post.post.post_id}失败：${detailResp.retcode} ${detailResp.message}`,
+      let detailResp: TGApp.BBS.Post.FullResp | undefined;
+      try {
+        detailResp = await postDetailRateLimiter.execute(() =>
+          postReq.post(post.post.post_id, ckPost),
         );
+        if (detailResp.retcode !== 0) {
+          await TGLogger.Script(
+            `[米游币任务]获取帖子${post.post.post_id}失败：${detailResp.retcode} ${detailResp.message}`,
+            "warn",
+          );
+          continue;
+        }
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Script(`[米游币任务]获取帖子${post.post.post_id}异常：${errMsg}`, "error");
         continue;
       }
       viewCnt++;
       if (likeCnt < 5) {
-        const isLike = (detailResp.self_operation?.upvote_type ?? 0) > 0;
+        const isLike = (detailResp.data.self_operation?.upvote_type ?? 0) > 0;
         if (isLike) {
           await TGLogger.Script(`[米游币任务]帖子${post.post.post_id}已点赞，跳过`);
           continue;

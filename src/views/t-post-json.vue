@@ -62,6 +62,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef } from "vue";
@@ -85,15 +86,23 @@ onMounted(async () => {
   }
   let ck: Record<string, string> | undefined = undefined;
   if (cookie.value) ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
-  const resp = await postReq.post(postId, ck);
-  if ("retcode" in resp) {
-    await showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
-    showSnackbar.error(`[${resp.retcode}]${resp.message}`);
-    await TGLogger.Error(`[${postId}]获取帖子数据失败：${resp.retcode} ${resp.message}`);
+  try {
+    const resp = await postReq.post(postId, ck);
+    if (resp.retcode !== 0) {
+      await showLoading.empty("获取数据失败", `[${resp.retcode}]${resp.message}`);
+      showSnackbar.error(`[${resp.retcode}]${resp.message}`);
+      await TGLogger.Warn(`[${postId}]获取帖子数据失败：${resp.retcode} ${resp.message}`);
+      return;
+    }
+    jsonData.value = resp.data;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.empty("获取数据失败", errMsg);
+    showSnackbar.error(errMsg);
+    await TGLogger.Error(`[${postId}]获取帖子数据失败：${errMsg}`);
     return;
   }
   await showLoading.update("正在渲染帖子数据");
-  jsonData.value = resp;
   try {
     parseData.value = JSON.parse(jsonData.value.post.content);
   } catch (err) {

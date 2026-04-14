@@ -185,6 +185,7 @@ import { app, webviewWindow } from "@tauri-apps/api";
 import { emit, type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { parseLink, parsePost } from "@utils/linkParser.js";
 import TGClient from "@utils/TGClient.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createTGWindow } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -240,16 +241,25 @@ onMounted(async () => {
   if (cookie.value && incognito.value === false) {
     ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
   }
-  const resp = await postReq.post(postId, ck);
-  if ("retcode" in resp) {
-    await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} ${resp.message}`);
-    await TGLogger.Error(`[t-post][${postId}][onMounted] ${resp.retcode}: ${resp.message}`);
+  try {
+    const resp = await postReq.post(postId, ck);
+    if (resp.retcode !== 0) {
+      await showLoading.empty("数据加载失败", `[${resp.retcode}]${resp.message}`);
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} ${resp.message}`);
+      await TGLogger.Warn(`[t-post][${postId}][onMounted] ${resp.retcode}: ${resp.message}`);
+      return;
+    }
+    postData.value = resp.data;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.empty("数据加载失败", errMsg);
+    showSnackbar.error(errMsg);
+    await webviewWindow.getCurrentWebviewWindow().setTitle(`Post_${postId} ${errMsg}`);
+    await TGLogger.Error(`[t-post][${postId}][onMounted] ${errMsg}`);
     return;
   }
-  postData.value = resp;
-  console.log(resp);
+  console.log(postData.value);
   isLike.value = (postData.value.self_operation?.upvote_type ?? 0) > 0;
   await showLoading.update("正在渲染数据");
   renderPost.value = await getRenderPost(postData.value);

@@ -43,6 +43,8 @@ import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useBBSStore from "@store/bbs.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -161,14 +163,30 @@ async function searchPosts(): Promise<void> {
     load.value = false;
     return;
   }
-  const res = await postReq.search(gameId.value, search.value, lastId.value, sortType.value);
-  if (lastId.value === "") results.value = res.posts;
-  else results.value = results.value.concat(res.posts);
-  lastId.value = res.last_id;
-  isLast.value = res.is_last;
+  let res: TGApp.BBS.Post.SearchResp | undefined;
+  try {
+    res = await postReq.search(gameId.value, search.value, lastId.value, sortType.value);
+    if (res.retcode !== 0) {
+      showSnackbar.error(`搜索失败：[${res.retcode}] ${res.message}`);
+      await TGLogger.Warn(`[VpOverlaySearch] 搜索失败：[${res.retcode}] ${res.message}`);
+      load.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`搜索失败：${errMsg}`);
+    await TGLogger.Error(`[VpOverlaySearch] 搜索异常`);
+    await TGLogger.Error(`[VpOverlaySearch] ${e}`);
+    load.value = false;
+    return;
+  }
+  if (lastId.value === "") results.value = res.data.posts;
+  else results.value = results.value.concat(res.data.posts);
+  lastId.value = res.data.last_id;
+  isLast.value = res.data.is_last;
   load.value = false;
   if (!visible.value) visible.value = true;
-  showSnackbar.success(`成功加载${res.posts.length}条数据`);
+  showSnackbar.success(`成功加载${res.data.posts.length}条数据`);
 }
 
 async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<void> {

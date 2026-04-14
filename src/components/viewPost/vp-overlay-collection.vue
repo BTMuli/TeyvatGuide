@@ -25,9 +25,12 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import TPostcard from "@comp/app/t-postcard.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import postReq from "@req/postReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { nextTick, onMounted, shallowRef, useTemplateRef, watch } from "vue";
 
 type TpoCollectionProps = { collection: TGApp.BBS.Post.Collection; gid: number };
@@ -64,7 +67,24 @@ async function refreshInfo(): Promise<void> {
 }
 
 async function refreshPosts(): Promise<void> {
-  postList.value = await postReq.collection(props.collection.collection_id);
+  let resp: TGApp.BBS.Collection.PostsResp | undefined;
+  try {
+    resp = await postReq.collection(props.collection.collection_id);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`获取合集帖子失败：[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(
+        `[VpOverlayCollection] 获取合集帖子失败：[${resp.retcode}] ${resp.message}`,
+      );
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取合集帖子失败：${errMsg}`);
+    await TGLogger.Error(`[VpOverlayCollection] 获取合集帖子异常`);
+    await TGLogger.Error(`[VpOverlayCollection] ${e}`);
+    return;
+  }
+  postList.value = resp.data.posts;
 }
 
 async function toOuterCollect(): Promise<void> {

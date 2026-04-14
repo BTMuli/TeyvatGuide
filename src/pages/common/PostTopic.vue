@@ -232,22 +232,36 @@ async function freshPostData(): Promise<void> {
     query: { gid: curGid.value, topic: curTopic.value },
   });
   document.documentElement.scrollTo({ top: 0, behavior: "smooth" });
-  const postList = await postReq.topic(curGid.value, curTopic.value, curSortType.value);
-  if ("retcode" in postList) {
+  let postList: TGApp.BBS.Topic.PostResp | undefined;
+  try {
+    postList = await postReq.topic(curGid.value, curTopic.value, curSortType.value);
+    if (postList.retcode !== 0) {
+      await showLoading.end();
+      isReq.value = false;
+      showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${postList.retcode}] ${postList.message}`);
+    isReq.value = false;
+    showSnackbar.error(`获取帖子列表失败：${errMsg}`);
+    await TGLogger.Error(`[PostTopic] 获取帖子列表异常`);
+    await TGLogger.Error(`[PostTopic] ${e}`);
     return;
   }
-  await showLoading.update(`数量：${postList.posts.length}，是否最后一页：${postList.is_last}`);
+  await showLoading.update(
+    `数量：${postList.data.posts.length}，是否最后一页：${postList.data.is_last}`,
+  );
   postRaw.value = {
-    isLast: postList.is_last,
-    lastId: postList.last_id,
-    total: postList.posts.length,
+    isLast: postList.data.is_last,
+    lastId: postList.data.last_id,
+    total: postList.data.posts.length,
   };
-  posts.value = postList.posts;
+  posts.value = postList.data.posts;
   await showLoading.end();
   isReq.value = false;
-  showSnackbar.success(`加载了 ${postList.posts.length} 条帖子`);
+  showSnackbar.success(`加载了 ${postList.data.posts.length} 条帖子`);
 }
 
 async function loadMore(): Promise<void> {
@@ -263,29 +277,40 @@ async function loadMore(): Promise<void> {
   await showLoading.start(`正在刷新${topicInfo.value?.topic.name}帖子列表`);
   const mod20 = postRaw.value.total % 20;
   const pageSize = mod20 === 0 ? 20 : 20 - mod20;
-  const resp = await postReq.topic(
-    curGid.value,
-    curTopic.value,
-    curSortType.value,
-    postRaw.value.lastId,
-    pageSize,
-  );
-  if ("retcode" in resp) {
+  let resp: TGApp.BBS.Topic.PostResp | undefined;
+  try {
+    resp = await postReq.topic(
+      curGid.value,
+      curTopic.value,
+      curSortType.value,
+      postRaw.value.lastId,
+      pageSize,
+    );
+    if (resp.retcode !== 0) {
+      await showLoading.end();
+      isReq.value = false;
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
     isReq.value = false;
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+    showSnackbar.error(`获取帖子列表失败：${errMsg}`);
+    await TGLogger.Error(`[PostTopic] 获取帖子列表异常`);
+    await TGLogger.Error(`[PostTopic] ${e}`);
     return;
   }
-  await showLoading.update(`数量：${resp.posts.length}，是否最后一页：${resp.is_last}`);
+  await showLoading.update(`数量：${resp.data.posts.length}，是否最后一页：${resp.data.is_last}`);
   postRaw.value = {
-    isLast: resp.is_last,
-    lastId: resp.last_id,
-    total: postRaw.value.total + resp.posts.length,
+    isLast: resp.data.is_last,
+    lastId: resp.data.last_id,
+    total: postRaw.value.total + resp.data.posts.length,
   };
-  posts.value = posts.value.concat(resp.posts);
+  posts.value = posts.value.concat(resp.data.posts);
   await showLoading.end();
   isReq.value = false;
-  showSnackbar.success(`加载了 ${resp.posts.length} 条帖子`);
+  showSnackbar.success(`加载了 ${resp.data.posts.length} 条帖子`);
 }
 
 function searchPost(): void {

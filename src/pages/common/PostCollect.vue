@@ -127,6 +127,7 @@ import TSUserCollection from "@Sqlm/userCollect.js";
 import useUserStore from "@store/user.js";
 import { event } from "@tauri-apps/api";
 import type { UnlistenFn } from "@tauri-apps/api/event";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
@@ -379,19 +380,48 @@ async function freshUser(uid?: string): Promise<void> {
   }
   const uidReal = uid || briefInfo.value.uid;
   await showLoading.start(`[${uidReal}]获取用户收藏`);
-  let res = await postReq.user.collect(cookie.value, uidReal);
-  while (true) {
-    if ("retcode" in res) {
+  let res: TGApp.BBS.Collection.UserPostResp | undefined;
+  try {
+    res = await postReq.user.favorite(cookie.value, uidReal);
+    if (res.retcode !== 0) {
       await showLoading.end();
       if (res.retcode === 1001) showSnackbar.warn("用户收藏已设为私密，无法获取");
       else showSnackbar.error(`[${res.retcode}] ${res.message}`);
-      break;
+      return;
     }
-    let posts = res.list;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.end();
+    showSnackbar.error(`获取用户收藏失败：${errMsg}`);
+    await TGLogger.Error(`[PostCollect] 获取用户收藏异常`);
+    await TGLogger.Error(`[PostCollect] ${e}`);
+    return;
+  }
+  let posts = res.data.list;
+  await mergePosts(posts, uid || briefInfo.value.uid);
+  while (!res.data.is_last) {
+    await showLoading.update(`[offset]${res.data.next_offset} [is_last]${res.data.is_last}`);
+    try {
+      res = await postReq.user.favorite(
+        cookie.value,
+        uid || briefInfo.value.uid,
+        res.data.next_offset,
+      );
+      if (res.retcode !== 0) {
+        await showLoading.end();
+        showSnackbar.error(`[${res.retcode}] ${res.message}`);
+        return;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await showLoading.end();
+      showSnackbar.error(`获取用户收藏失败：${errMsg}`);
+      await TGLogger.Error(`[PostCollect] 获取用户收藏异常`);
+      await TGLogger.Error(`[PostCollect] ${e}`);
+      return;
+    }
+    posts = res.data.list;
     await mergePosts(posts, uid || briefInfo.value.uid);
-    if (res.is_last) break;
-    await showLoading.update(`[offset]${res.next_offset} [is_last]${res.is_last}`);
-    res = await postReq.user.collect(cookie.value, uid || briefInfo.value.uid, res.next_offset);
   }
   await showLoading.end();
   showSnackbar.success("获取用户收藏成功，即将刷新页面");

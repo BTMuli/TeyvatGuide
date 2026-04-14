@@ -114,6 +114,8 @@ import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getNearTime, getUserAvatar, timestampToDate } from "@utils/toolFunc.js";
 import {
@@ -235,22 +237,30 @@ async function showReply(): Promise<void> {
 
 async function loadSub(): Promise<void> {
   loading.value = true;
-  const resp = await postReq.reply.sub(
-    props.modelValue.reply.floor_id,
-    props.modelValue.reply.game_id,
-    props.modelValue.reply.post_id,
-    lastId.value,
-  );
-  if ("retcode" in resp) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+  let resp: TGApp.BBS.Reply.SubResp | undefined;
+  try {
+    resp = await postReq.reply.sub(
+      props.modelValue.reply.floor_id,
+      props.modelValue.reply.game_id,
+      props.modelValue.reply.post_id,
+      lastId.value,
+    );
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      loading.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取子回复失败：${errMsg}`);
+    await TGLogger.Error(`[VpReplyItem] 获取子回复异常`);
+    await TGLogger.Error(`[VpReplyItem] ${e}`);
     loading.value = false;
     return;
   }
-  isLast.value = resp.is_last;
-  lastId.value = resp.last_id;
-  // Filter out duplicates using persistent existingIds Set
-  const newReplies = resp.list.filter((r) => !existingIds.has(r.reply.reply_id));
-  // Add new reply IDs to the Set
+  isLast.value = resp.data.is_last;
+  lastId.value = resp.data.last_id;
+  const newReplies = resp.data.list.filter((r) => !existingIds.has(r.reply.reply_id));
   newReplies.forEach((r) => existingIds.add(r.reply.reply_id));
   subReplies.value = subReplies.value.concat(newReplies);
   loading.value = false;

@@ -1,6 +1,6 @@
 /**
  * 回复数据类型定义文件
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  */
 
 declare namespace TGApp.BBS.Reply {
@@ -22,6 +22,44 @@ declare namespace TGApp.BBS.Reply {
    * @since Beta v0.9.9
    */
   type ReplyOrderTypeEnum = (typeof ReplyOrderType)[keyof typeof ReplyOrderType];
+
+  /**
+   * 主回复请求参数
+   * @since Beta v0.10.1
+   */
+  type MainReplyParam = {
+    /** 帖子 ID */
+    post_id: string;
+    /** 社区 ID */
+    gids: number;
+    /** 是否热门排序 */
+    is_hot: boolean;
+    /** 每页大小 */
+    size: number;
+    /** 最后一条回复 ID，用于分页 */
+    last_id?: string;
+    /** 排序类型 */
+    order_type?: ReplyOrderTypeEnum;
+    /** 是否只看楼主 */
+    only_master?: boolean;
+  };
+
+  /**
+   * 子回复请求参数
+   * @since Beta v0.10.1
+   */
+  type SubReplyParam = {
+    /** 楼层 ID */
+    floor_id: number;
+    /** 社区 ID */
+    gids: number;
+    /** 帖子 ID */
+    post_id: string;
+    /** 每页大小 */
+    size: number;
+    /** 最后一条子回复 ID，用于分页 */
+    last_id?: string;
+  };
 
   /**
    * 帖子回复数据类型

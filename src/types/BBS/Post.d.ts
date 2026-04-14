@@ -12,12 +12,9 @@ declare namespace TGApp.BBS.Post {
 
   /**
    * 帖子详情返回数据
-   * @since Beta v0.7.2
+   * @since Beta v0.10.1
    */
-  type FullRes = {
-    /** 帖子数据 */
-    post: FullData;
-  };
+  type FullRes = FullData;
 
   /**
    * 搜索结果返回响应
