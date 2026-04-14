@@ -488,21 +488,32 @@ async function confirmRefresh(force: boolean): Promise<void> {
   }
   await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据`);
   await showLoading.start(`正在刷新祈愿数据`, `UID:${rfAccount.gameUid},正在获取 authkey`);
-  const authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
-  if (typeof authkeyRes === "string") {
-    authkey.value = authkeyRes;
-    await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 成功获取 authkey`);
-  } else {
+  let authkeyRes: TGApp.Game.Gacha.AuthKeyResp | undefined;
+  try {
+    authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
+    if (authkeyRes.retcode !== 0) {
+      await showLoading.update("获取authkey失败");
+      showSnackbar.error(`[${authkeyRes.retcode}] ${authkeyRes.message}`);
+      await TGLogger.Warn(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 获取 authkey 失败`);
+      await TGLogger.Warn(
+        `[Gacha][${rfAccount.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
+      );
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      await showLoading.end();
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.update("获取authkey失败");
-    showSnackbar.error(`[${authkeyRes.retcode}] ${authkeyRes.message}`);
-    await TGLogger.Error(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 获取 authkey 失败`);
-    await TGLogger.Error(
-      `[Gacha][${rfAccount.gameUid}][confirmRefresh] ${authkeyRes.retcode} ${authkeyRes.message}`,
-    );
+    showSnackbar.error(`获取authkey失败：${errMsg}`);
+    await TGLogger.Error(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 获取 authkey 异常`);
+    await TGLogger.Error(`[Gacha][${rfAccount.gameUid}][confirmRefresh] ${e}`);
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     await showLoading.end();
     return;
   }
+  authkey.value = authkeyRes.data.authkey;
+  await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 成功获取 authkey`);
   await refreshGachaPool(rfAccount, "100", "新手祈愿", force);
   await refreshGachaPool(rfAccount, "200", "常驻祈愿", force);
   await refreshGachaPool(rfAccount, "301", "角色祈愿", force);

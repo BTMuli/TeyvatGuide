@@ -31,6 +31,7 @@ import "swiper/css/navigation";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhPoolCard from "@comp/pageHome/ph-pool-card.vue";
 import takumiReq from "@req/takumiReq.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -45,14 +46,26 @@ const pools = shallowRef<Array<TGApp.BBS.Obc.GachaItem>>([]);
 const swiperModules = [Autoplay, A11y];
 
 onMounted(async () => {
-  const resp = await takumiReq.obc.gacha();
-  if (Array.isArray(resp)) {
-    if (resp.length < 3) pools.value = resp;
-    else pools.value = [...resp, ...resp];
-  } else {
-    showSnackbar.error(`获取限时祈愿失败：[${resp.retcode}]${resp.message}`);
-    await TGLogger.Error(`获取限时祈愿失败：[${resp.retcode}]${resp.message}`);
+  let resp: TGApp.BBS.Obc.GachaResp | undefined;
+  try {
+    resp = await takumiReq.obc.gacha();
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`获取限时祈愿失败：[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[PhCompPool] 获取限时祈愿失败：[${resp.retcode}] ${resp.message}`);
+      emits("success");
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取限时祈愿失败：${errMsg}`);
+    await TGLogger.Error(`[PhCompPool] 获取限时祈愿异常`);
+    await TGLogger.Error(`[PhCompPool] ${e}`);
+    emits("success");
+    return;
   }
+  const list = resp.data.list;
+  if (list.length < 3) pools.value = list;
+  else pools.value = [...list, ...list];
   emits("success");
 });
 </script>

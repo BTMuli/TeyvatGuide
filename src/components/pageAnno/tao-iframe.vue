@@ -13,6 +13,8 @@ import showSnackbar from "@comp/func/snackbar.js";
 import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, watch } from "vue";
 
@@ -45,14 +47,26 @@ async function refreshAuthkey(): Promise<void> {
     showSnackbar.warn("请先登录账号");
     return;
   }
-  const authkeyRes = await takumiReq.bind.authKey(cookie.value, account.value);
-  if (typeof authkeyRes === "string") {
-    authkey.value = authkeyRes;
-  } else {
-    showSnackbar.error("获取authkey失败");
+  let authkeyRes: TGApp.Game.Gacha.AuthKeyResp | undefined;
+  try {
+    authkeyRes = await takumiReq.bind.authKey(cookie.value, account.value);
+    if (authkeyRes.retcode !== 0) {
+      showSnackbar.error(`获取authkey失败：[${authkeyRes.retcode}] ${authkeyRes.message}`);
+      await TGLogger.Warn(
+        `[TaoIframe] 获取authkey失败：[${authkeyRes.retcode}] ${authkeyRes.message}`,
+      );
+      visible.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取authkey失败：${errMsg}`);
+    await TGLogger.Error(`[TaoIframe] 获取authkey异常`);
+    await TGLogger.Error(`[TaoIframe] ${e}`);
     visible.value = false;
     return;
   }
+  authkey.value = authkeyRes.data.authkey;
 }
 
 async function getUrl(): Promise<string> {

@@ -130,6 +130,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 
@@ -199,15 +200,25 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   cookie.value = ck;
   isLogin.value = true;
   await showLoading.update("正在获取游戏账号");
-  const gameRes = await takumiReq.bind.gameRoles(cookie.value);
-  if (!Array.isArray(gameRes)) {
+  let gameRes: TGApp.BBS.Game.AccountResp | undefined;
+  try {
+    gameRes = await takumiReq.bind.gameRoles(cookie.value);
+    if (gameRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${gameRes.retcode}] ${gameRes.message}`);
+      await TGLogger.Warn(`获取游戏账号失败：${gameRes.retcode}-${gameRes.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
-    await TGLogger.Error(`获取游戏账号失败：${gameRes.retcode}-${gameRes.message}`);
+    showSnackbar.error(`获取游戏账号失败：${errMsg}`);
+    await TGLogger.Error(`[TcUserBadge] 获取游戏账号异常`);
+    await TGLogger.Error(`[TcUserBadge] ${e}`);
     return;
   }
   showSnackbar.success("获取游戏账号成功");
-  await TSUserAccount.game.saveAccounts(briefInfoGet.uid, gameRes);
+  await TSUserAccount.game.saveAccounts(briefInfoGet.uid, gameRes.data.list);
   const curAccount = await TSUserAccount.game.getCurAccount(briefInfoGet.uid);
   if (!curAccount) {
     showSnackbar.warn("未检测到游戏账号，请重新刷新");
@@ -329,18 +340,27 @@ async function refreshUser(uid: string, full: boolean) {
   }
   await TSUserAccount.account.saveAccount(account);
   await showLoading.update("正在获取游戏账号信息");
-  const accountRes = await takumiReq.bind.gameRoles(ck);
-  if (Array.isArray(accountRes)) {
-    await showLoading.update("获取游戏账号信息成功");
-    await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
-    await TSUserAccount.game.saveAccounts(account.uid, accountRes);
-  } else {
+  let accountRes: TGApp.BBS.Game.AccountResp | undefined;
+  try {
+    accountRes = await takumiReq.bind.gameRoles(ck);
+    if (accountRes.retcode !== 0) {
+      await showLoading.update("获取游戏账号信息失败");
+      showSnackbar.error(`[${accountRes.retcode}] ${accountRes.message}`);
+      await TGLogger.Warn("[tc-userBadge][refreshUserInfo] 获取账号信息失败");
+      await TGLogger.Warn(
+        `[tc-userBadge][refreshUserInfo] ${accountRes.retcode}: ${accountRes.message}`,
+      );
+    } else {
+      await showLoading.update("获取游戏账号信息成功");
+      await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取账号信息成功");
+      await TSUserAccount.game.saveAccounts(account.uid, accountRes.data.list);
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.update("获取游戏账号信息失败");
-    showSnackbar.error(`[${accountRes.retcode}]${accountRes.message}`);
-    await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取账号信息失败");
-    await TGLogger.Error(
-      `[tc-userBadge][refreshUserInfo] ${accountRes.retcode}: ${accountRes.message}`,
-    );
+    showSnackbar.error(`获取游戏账号信息失败：${errMsg}`);
+    await TGLogger.Error("[tc-userBadge][refreshUserInfo] 获取账号信息异常");
+    await TGLogger.Error(`[tc-userBadge][refreshUserInfo] ${e}`);
   }
   await showLoading.end();
 }
@@ -533,14 +553,25 @@ async function addByCookie(): Promise<void> {
     updated: "",
   });
   await showLoading.update("正在获取游戏账号");
-  const gameRes = await takumiReq.bind.gameRoles(ck);
-  if (!Array.isArray(gameRes)) {
+  let gameRes: TGApp.BBS.Game.AccountResp | undefined;
+  try {
+    gameRes = await takumiReq.bind.gameRoles(ck);
+    if (gameRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${gameRes.retcode}] ${gameRes.message}`);
+      await TGLogger.Warn(`获取游戏账号失败：${gameRes.retcode}-${gameRes.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${gameRes.retcode}]${gameRes.message}`);
+    showSnackbar.error(`获取游戏账号失败：${errMsg}`);
+    await TGLogger.Error(`[TcUserBadge] 获取游戏账号异常`);
+    await TGLogger.Error(`[TcUserBadge] ${e}`);
     return;
   }
   await showLoading.update("正在保存游戏账号");
-  await TSUserAccount.game.saveAccounts(briefGet.uid, gameRes);
+  await TSUserAccount.game.saveAccounts(briefGet.uid, gameRes.data.list);
   const curAccount = await TSUserAccount.game.getCurAccount(briefGet.uid);
   if (!curAccount) {
     await showLoading.end();

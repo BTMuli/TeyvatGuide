@@ -1,6 +1,6 @@
 /**
  * 负责米游社客户端的 callback 处理
- * @since Beta v0.9.4
+ * @since Beta v0.10.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -19,6 +19,7 @@ import { getDS4JS } from "@utils/getRequestHeader.js";
 import { parseLink } from "./linkParser.js";
 import TGBbs from "./TGBbs.js";
 import TGLogger from "./TGLogger.js";
+import TGHttps from "./TGHttps.js";
 import { createPost } from "./TGWindow.js";
 import { getDeviceInfo } from "./toolFunc.js";
 
@@ -482,7 +483,7 @@ class Client {
 
   /**
    * 获取米游社客户端的 authkey
-   * @since Beta v0.3.9
+   * @since Beta v0.10.1
    * @param arg - 请求参数
    * @returns 无返回值
    */
@@ -492,13 +493,26 @@ class Client {
     const userStore = useUserStore();
     if (!userStore.cookie) return;
     const cookie = { mid: userStore.cookie.mid, stoken: userStore.cookie.stoken };
-    const res = await takumiReq.bind.authKey2(cookie, arg.payload);
-    await this.callback(arg.callback, res.data);
+    let res: TGApp.BBS.Auth.AuthKeyResp | undefined;
+    try {
+      res = await takumiReq.bind.authKey2(cookie, arg.payload);
+      if (res.retcode !== 0) {
+        await TGLogger.Warn(`[TGClient][genAuthKey] 业务错误：[${res.retcode}] ${res.message}`);
+        await this.callback(arg.callback, res);
+        return;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await TGLogger.Error(`[TGClient][genAuthKey] 网络错误：${errMsg}`);
+      await TGLogger.Error(`[TGClient][genAuthKey] ${e}`);
+      return;
+    }
+    await this.callback(arg.callback, res);
   }
 
   /**
    * 获取米游社客户端的 action_ticket
-   * @since Beta v0.3.9
+   * @since Beta v0.10.1
    * @param arg - 请求参数
    * @returns 无返回值
    */
@@ -507,12 +521,27 @@ class Client {
   ): Promise<void> {
     const userStore = useUserStore();
     if (!userStore.cookie) return;
-    const ActionTicket = await takumiReq.auth.actionTicket(
-      userStore.cookie,
-      userStore.account,
-      arg.payload.action_type,
-    );
-    await this.callback(arg.callback, ActionTicket.data);
+    let actionTicket: TGApp.BBS.Auth.ActionTicketResp | undefined;
+    try {
+      actionTicket = await takumiReq.auth.actionTicket(
+        userStore.cookie,
+        userStore.account,
+        arg.payload.action_type,
+      );
+      if (actionTicket.retcode !== 0) {
+        await TGLogger.Warn(
+          `[TGClient][getActionTicket] 业务错误：[${actionTicket.retcode}] ${actionTicket.message}`,
+        );
+        await this.callback(arg.callback, actionTicket);
+        return;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await TGLogger.Error(`[TGClient][getActionTicket] 网络错误：${errMsg}`);
+      await TGLogger.Error(`[TGClient][getActionTicket] ${e}`);
+      return;
+    }
+    await this.callback(arg.callback, actionTicket);
   }
 
   /**

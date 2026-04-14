@@ -101,6 +101,7 @@ import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -203,21 +204,32 @@ async function confirmRefresh(force: boolean): Promise<void> {
   }
   await TGLogger.Info(`[GachaB][${rfAccount.gameUid}] 开始刷新千星奇域祈愿数据`);
   await showLoading.start(`正在刷新祈愿数据`, `UID:${rfAccount.gameUid},正在获取 authkey`);
-  const authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
-  if (typeof authkeyRes === "string") {
-    authkey.value = authkeyRes;
-    await TGLogger.Info(`[GachaB][${rfAccount.gameUid}] 成功获取 authkey`);
-  } else {
+  let authkeyRes: TGApp.Game.Gacha.AuthKeyResp | undefined;
+  try {
+    authkeyRes = await takumiReq.bind.authKey(rfCk!, rfAccount);
+    if (authkeyRes.retcode !== 0) {
+      await showLoading.update("获取authkey失败");
+      showSnackbar.error(`[${authkeyRes.retcode}] ${authkeyRes.message}`);
+      await TGLogger.Warn(`[GachaB][${rfAccount.gameUid}] 获取 authkey 失败`);
+      await TGLogger.Warn(
+        `[GachaB][${rfAccount.gameUid}] ${authkeyRes.retcode} ${authkeyRes.message}`,
+      );
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+      await showLoading.end();
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.update("获取authkey失败");
-    showSnackbar.error(`[${authkeyRes.retcode}]${authkeyRes.message}`);
-    await TGLogger.Error(`[GachaB][${rfAccount.gameUid}] 获取 authkey 失败`);
-    await TGLogger.Error(
-      `[GachaB][${rfAccount.gameUid}] ${authkeyRes.retcode} ${authkeyRes.message}`,
-    );
+    showSnackbar.error(`获取authkey失败：${errMsg}`);
+    await TGLogger.Error(`[GachaB][${rfAccount.gameUid}] 获取 authkey 异常`);
+    await TGLogger.Error(`[GachaB][${rfAccount.gameUid}] ${e}`);
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     await showLoading.end();
     return;
   }
+  authkey.value = authkeyRes.data.authkey;
+  await TGLogger.Info(`[GachaB][${rfAccount.gameUid}] 成功获取 authkey`);
   await refreshGachaPool(rfAccount, "1000", "常驻颂愿", force);
   await refreshGachaPool(rfAccount, "2000", "活动颂愿", force);
   // await refreshGachaPool(rfAccount, "20011", "活动颂愿·男", force);

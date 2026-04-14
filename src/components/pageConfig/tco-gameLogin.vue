@@ -41,6 +41,8 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import hk4eReq from "@req/hk4eReq.js";
 import takumiReq from "@req/takumiReq.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import QrcodeVue from "qrcode.vue";
 import { onUnmounted, ref, watch } from "vue";
@@ -150,9 +152,21 @@ async function cycleGetDataGame(): Promise<void> {
     }
     const statusRaw: TGApp.Game.Login.StatPayloadRaw = JSON.parse(res.payload.raw);
     await showLoading.start("正在获取SToken");
-    const stResp = await takumiReq.game.stoken(statusRaw);
-    if ("retcode" in stResp) {
-      showSnackbar.error(`[${stResp.retcode}] ${stResp.message}`);
+    let stResp: TGApp.Game.Login.StResp | undefined;
+    try {
+      stResp = await takumiReq.game.stoken(statusRaw);
+      if (stResp.retcode !== 0) {
+        showSnackbar.error(`[${stResp.retcode}] ${stResp.message}`);
+        await TGLogger.Warn(`[TcoGameLogin] 获取SToken失败：[${stResp.retcode}] ${stResp.message}`);
+        model.value = false;
+        await showLoading.end();
+        return;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`获取SToken失败：${errMsg}`);
+      await TGLogger.Error(`[TcoGameLogin] 获取SToken异常`);
+      await TGLogger.Error(`[TcoGameLogin] ${e}`);
       model.value = false;
       await showLoading.end();
       return;
@@ -161,9 +175,9 @@ async function cycleGetDataGame(): Promise<void> {
       account_id: statusRaw.uid,
       ltuid: statusRaw.uid,
       stuid: statusRaw.uid,
-      mid: stResp.user_info.mid,
+      mid: stResp.data.user_info.mid,
       cookie_token: "",
-      stoken: stResp.token.token,
+      stoken: stResp.data.token.token,
       ltoken: "",
     };
     emits("success", ck);

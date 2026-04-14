@@ -3,7 +3,6 @@
  * @since Beta v0.10.1
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttp from "@utils/TGHttp.js";
 import TGHttps from "@utils/TGHttps.js";
 
 // TakumiApiBaseUrl => taBu
@@ -11,13 +10,13 @@ const taBu: Readonly<string> = "https://api-takumi.mihoyo.com/";
 
 /**
  * 根据gameToken获取stoken
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @param raw - 状态数据
- * @returns stoken
+ * @returns stoken响应数据
  */
 async function getSTokenByGameToken(
   raw: TGApp.Game.Login.StatPayloadRaw,
-): Promise<TGApp.BBS.Response.Base | TGApp.Game.Login.StRes> {
+): Promise<TGApp.Game.Login.StResp> {
   const data = { account_id: Number(raw.uid), game_token: raw.token };
   const header = {
     ...getRequestHeader({}, "POST", JSON.stringify(data), "X6"),
@@ -26,51 +25,52 @@ async function getSTokenByGameToken(
     "x-rpc-game_biz": "bbs_cn",
     "x-rpc-sys_version": "12",
   };
-  const resp = await TGHttp<TGApp.Game.Login.StResp>(
+  const resp = await TGHttps.post<TGApp.Game.Login.StResp>(
     `${taBu}account/ma-cn-session/app/getTokenByGameToken`,
     {
-      method: "POST",
       headers: header,
       body: JSON.stringify(data),
     },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 
 /**
  * 根据stoken获取action_ticket
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
  * @param actionType - 动作类型
- * @returns action_ticket
+ * @returns action_ticket响应数据
  */
 async function getActionTicketBySToken(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   actionType: string,
-): Promise<TGApp.BBS.Response.Base> {
+): Promise<TGApp.BBS.Auth.ActionTicketResp> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const params = { action_type: actionType, stoken: cookie.stoken, uid: user.gameUid };
-  return await TGHttp<TGApp.BBS.Response.Base>(`${taBu}auth/api/getActionTicketBySToken`, {
-    method: "GET",
-    headers: getRequestHeader(ck, "GET", params, "K2"),
-    query: params,
-  });
+  const resp = await TGHttps.get<TGApp.BBS.Auth.ActionTicketResp>(
+    `${taBu}auth/api/getActionTicketBySToken`,
+    {
+      headers: getRequestHeader(ck, "GET", params, "K2"),
+      query: params,
+    },
+  );
+  return resp.data;
 }
 
 /**
  * 生成authkey
- * @since Beta v0.6.3
+ * @since Beta v0.10.1
  * @param cookie - cookie
  * @param account - 账户
- * @returns authkey
+ * @returns authkey响应数据
  */
 async function genAuthKey(
   cookie: TGApp.App.Account.Cookie,
   account: TGApp.Sqlite.Account.Game,
-): Promise<string | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Gacha.AuthKeyResp> {
   const ck = { stoken: cookie.stoken, mid: cookie.mid };
   const data = {
     auth_appid: "webview_gacha",
@@ -78,75 +78,64 @@ async function genAuthKey(
     game_uid: account.gameUid,
     region: account.region,
   };
-  const resp = await TGHttp<TGApp.Game.Gacha.AuthKeyResp | TGApp.BBS.Response.Base>(
-    `${taBu}binding/api/genAuthKey`,
-    {
-      method: "POST",
-      headers: getRequestHeader(ck, "POST", JSON.stringify(data), "LK2", true),
-      body: JSON.stringify(data),
-    },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.authkey;
+  const resp = await TGHttps.post<TGApp.Game.Gacha.AuthKeyResp>(`${taBu}binding/api/genAuthKey`, {
+    headers: getRequestHeader(ck, "POST", JSON.stringify(data), "LK2", true),
+    body: JSON.stringify(data),
+  });
+  return resp.data;
 }
 
 /**
  * 生成authkey-v2，专门用于JSBridge
- * @since Beta v0.6.3
+ * @since Beta v0.10.1
  * @param cookie - cookie
  * @param payload - payload
- * @returns authkey2
+ * @returns authkey2响应数据
  */
 async function genAuthKey2(
   cookie: Record<string, string>,
   payload: Record<string, string>,
-): Promise<TGApp.BBS.Response.Base> {
-  return await TGHttp<TGApp.BBS.Response.Base>(`${taBu}binding/api/genAuthKey`, {
-    method: "POST",
+): Promise<TGApp.BBS.Auth.AuthKeyResp> {
+  const resp = await TGHttps.post<TGApp.BBS.Auth.AuthKeyResp>(`${taBu}binding/api/genAuthKey`, {
     headers: getRequestHeader(cookie, "POST", JSON.stringify(payload), "LK2", true),
     body: JSON.stringify(payload),
   });
+  return resp.data;
 }
 
 /**
  * 通过cookie获取游戏账号
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @param cookie - cookie
- * @returns 游戏账号
+ * @returns 游戏账号响应数据
  */
 async function getUserGameRolesByCookie(
   cookie: TGApp.App.Account.Cookie,
-): Promise<Array<TGApp.BBS.Game.Account> | TGApp.BBS.Response.Base> {
+): Promise<TGApp.BBS.Game.AccountResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
-  const resp = await TGHttp<TGApp.BBS.Game.AccountResp>(
+  const resp = await TGHttps.get<TGApp.BBS.Game.AccountResp>(
     `${taBu}binding/api/getUserGameRolesByCookie`,
     {
-      method: "GET",
       headers: getRequestHeader(ck, "GET", {}),
     },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.list;
+  return resp.data;
 }
 
 /**
  * 获取卡池信息
- * @since Beta v0.7.2
- * @returns 卡池信息
+ * @since Beta v0.10.1
+ * @returns 卡池信息响应数据
  */
-async function getObcGachaPool(): Promise<
-  Array<TGApp.BBS.Obc.GachaItem> | TGApp.BBS.Response.Base
-> {
-  const resp = await TGHttp<TGApp.BBS.Obc.GachaResp>(
+async function getObcGachaPool(): Promise<TGApp.BBS.Obc.GachaResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Obc.GachaResp>(
     `${taBu}common/blackboard/ys_obc/v1/gacha_pool`,
     {
-      method: "GET",
-      query: { app_sn: "ys_obc" },
       headers: { "Content-Type": "application/json" },
+      query: { app_sn: "ys_obc" },
     },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.list;
+  return resp.data;
 }
 
 /**

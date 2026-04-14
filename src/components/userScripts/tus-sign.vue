@@ -63,6 +63,7 @@ import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useBBSStore from "@store/bbs.js";
 import TGLogger from "@utils/TGLogger.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGNotify from "@utils/TGNotify.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
@@ -208,21 +209,28 @@ async function tryAuto(skip: boolean = false): Promise<void> {
 async function refreshState(ck: TGApp.App.Account.Cookie, uid: string): Promise<void> {
   if (signAccounts.value.length === 0) {
     await TGLogger.Script("[签到任务]未检测到游戏账户，正在获取");
-    const gameResp = await takumiReq.bind.gameRoles(ck);
-    if (Array.isArray(gameResp)) {
-      await TGLogger.Script("[签到任务]获取游戏账户成功");
-      await TSUserAccount.game.saveAccounts(uid, gameResp);
-      gameAccounts.value = await TSUserAccount.game.getAccount(uid);
-      for (const ac of gameAccounts.value) {
-        const info = getGameInfo(ac.gameBiz);
-        const find = signAccounts.value.find((i) => i.account === ac);
-        if (find) continue;
-        signAccounts.value.push({ selected: true, account: ac, info });
+    let gameResp: TGApp.BBS.Game.AccountResp | undefined;
+    try {
+      gameResp = await takumiReq.bind.gameRoles(ck);
+      if (gameResp.retcode !== 0) {
+        await TGLogger.Script(`[签到任务]获取游戏账户失败:${gameResp.retcode} ${gameResp.message}`);
+        showSnackbar.error(`[${gameResp.retcode}] ${gameResp.message}`);
+        return;
       }
-    } else {
-      await TGLogger.Script(`[签到任务]获取游戏账户失败:${gameResp.retcode} ${gameResp.message}`);
-      showSnackbar.error(`[${gameResp.retcode}] ${gameResp.message}`);
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await TGLogger.Script(`[签到任务]获取游戏账户异常:${errMsg}`);
+      showSnackbar.error(`获取游戏账户失败：${errMsg}`);
       return;
+    }
+    await TGLogger.Script("[签到任务]获取游戏账户成功");
+    await TSUserAccount.game.saveAccounts(uid, gameResp.data.list);
+    gameAccounts.value = await TSUserAccount.game.getAccount(uid);
+    for (const ac of gameAccounts.value) {
+      const info = getGameInfo(ac.gameBiz);
+      const find = signAccounts.value.find((i) => i.account === ac);
+      if (find) continue;
+      signAccounts.value.push({ selected: true, account: ac, info });
     }
   }
   const cookie = { cookie_token: ck.cookie_token, account_id: ck.account_id };
