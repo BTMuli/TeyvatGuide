@@ -174,6 +174,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { getRfAc } from "@utils/acUtils.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -285,22 +286,31 @@ async function refreshCombat(): Promise<void> {
   const { account: rfAccount, cookie: rfCk } = refreshData;
   await TGLogger.Info("[Combat][refreshCombat] 更新剧诗数据");
   await showLoading.start(`正在获取${rfAccount.gameUid}的剧诗数据`);
-  const res = await recordReq.combat.base(rfCk!, rfAccount);
-  console.log(res);
-  if ("retcode" in res) {
+  let resp: TGApp.Game.Combat.CombatResp | undefined;
+  try {
+    resp = await recordReq.combat.base(rfCk!, rfAccount);
+    if (resp.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[Combat][refreshCombat] 获取${rfAccount.gameUid}的剧诗数据失败`);
+      await TGLogger.Warn(`[Combat][refreshCombat] ${resp.retcode} ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[Combat][refreshCombat] 获取${rfAccount.gameUid}的剧诗数据失败`);
-    await TGLogger.Error(`[Combat][refreshCombat] ${res.retcode} ${res.message}`);
+    showSnackbar.error(`获取剧诗数据失败：${errMsg}`);
+    await TGLogger.Error(`[Combat][refreshCombat] 获取剧诗数据异常`);
+    await TGLogger.Error(`[Combat][refreshCombat] ${e}`);
     return;
   }
-  if (!res.is_unlock) {
+  if (!resp.data.is_unlock) {
     await showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");
     return;
   }
   await showLoading.update("正在保存剧诗数据");
-  for (const combat of res.data) {
+  for (const combat of resp.data.data) {
     await showLoading.update("正在保存剧诗数据");
     await TSUserCombat.saveCombat(rfAccount.gameUid, combat);
   }
@@ -312,7 +322,6 @@ async function refreshCombat(): Promise<void> {
 
 async function loadCharMaster(): Promise<void> {
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
-  console.log(uidCur.value, gcFind);
   if (!gcFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应游迹数据`);
     return;
@@ -324,20 +333,30 @@ async function loadCharMaster(): Promise<void> {
   }
   await TGLogger.Info("[Combat][loadCharMaster] 获取绘想游迹数据");
   await showLoading.start(`正在获取${gcFind.gameUid}的绘想游迹数据`);
-  const res = await recordReq.combat.char(acFind.cookie!, gcFind);
-  console.log(res);
-  if ("retcode" in res) {
+  let resp: TGApp.Game.Combat.CharResp | undefined;
+  try {
+    resp = await recordReq.combat.char(acFind.cookie!, gcFind);
+    if (resp.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[Combat][loadCharMaster] 获取${gcFind.gameUid}的剧诗数据失败`);
+      await TGLogger.Warn(`[Combat][loadCharMaster] ${resp.retcode} ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[Combat][loadCharMaster] 获取${gcFind.gameUid}的剧诗数据失败`);
-    await TGLogger.Error(`[Combat][loadCharMaster] ${res.retcode} ${res.message}`);
+    showSnackbar.error(`获取绘想游迹数据失败：${errMsg}`);
+    await TGLogger.Error(`[Combat][loadCharMaster] 获取绘想游迹数据异常`);
+    await TGLogger.Error(`[Combat][loadCharMaster] ${e}`);
     return;
   }
-  if (!res.is_unlock) {
+  if (!resp.data.is_unlock) {
     await showLoading.end();
     showSnackbar.warn("用户未解锁绘想游迹");
     return;
-  } else charMasters.value = res.list;
+  }
+  charMasters.value = resp.data.list;
   showSnackbar.success(`成功获取 ${uidCur.value} 的绘想游迹数据`);
   await hideAllOverlay();
   await showLoading.end();
@@ -346,7 +365,6 @@ async function loadCharMaster(): Promise<void> {
 
 async function loadTarot(): Promise<void> {
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
-  console.log(uidCur.value, gcFind);
   if (!gcFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法获取对应圣牌数据`);
     return;
@@ -358,20 +376,30 @@ async function loadTarot(): Promise<void> {
   }
   await TGLogger.Info("[Combat][loadTarot] 获取月谕圣牌数据");
   await showLoading.start(`正在获取${gcFind.gameUid}的月谕圣牌数据`);
-  const res = await recordReq.combat.base(acFind.cookie!, gcFind);
-  console.log(res);
-  if ("retcode" in res) {
+  let res: TGApp.Game.Combat.CombatResp | undefined;
+  try {
+    res = await recordReq.combat.base(acFind.cookie!, gcFind);
+    if (res.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${res.retcode}] ${res.message}`);
+      await TGLogger.Warn(`[Combat][loadTarot] 获取${gcFind.gameUid}的月谕圣牌数据失败`);
+      await TGLogger.Warn(`[Combat][loadTarot] ${res.retcode} ${res.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[Combat][loadTarot] 获取${gcFind.gameUid}的月谕圣牌数据失败`);
-    await TGLogger.Error(`[Combat][loadTarot] ${res.retcode} ${res.message}`);
+    showSnackbar.error(`获取月谕圣牌数据失败：${errMsg}`);
+    await TGLogger.Error(`[Combat][loadTarot] 获取月谕圣牌数据异常`);
+    await TGLogger.Error(`[Combat][loadTarot] ${e}`);
     return;
   }
-  if (!res.is_unlock) {
+  if (!res.data.is_unlock) {
     await showLoading.end();
     showSnackbar.warn("用户未解锁幻想真境剧诗");
     return;
-  } else tarotStat.value = res.tarot_card_state;
+  }
+  tarotStat.value = res.data.tarot_card_state;
   showSnackbar.success(`成功获取${uidCur.value}的月谕圣牌数据`);
   await hideAllOverlay();
   await showLoading.end();

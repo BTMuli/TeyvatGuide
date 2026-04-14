@@ -224,30 +224,48 @@ async function refreshAbyss(): Promise<void> {
   const { account: rfAccount, cookie: rfCk } = refreshData;
   await TGLogger.Info("[Abyss][refreshAbyss] 更新深渊数据");
   await showLoading.start(`正在获取 ${rfAccount.gameUid} 的深渊数据`, "正在获取上期数据");
-  const resP = await recordReq.spiralAbyss(rfCk!, rfAccount, "2");
-  console.log(resP);
-  if ("retcode" in resP) {
+  let resP: TGApp.Game.Abyss.Response | undefined;
+  try {
+    resP = await recordReq.spiralAbyss(rfCk!, rfAccount, "2");
+    if (resP.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${resP.retcode}] ${resP.message}`);
+      await TGLogger.Warn(`[Abyss][refreshAbyss] 获取${rfAccount.gameUid}的上期深渊数据失败`);
+      await TGLogger.Warn(`[Abyss][refreshAbyss] ${resP.retcode} ${resP.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${resP.retcode}]${resP.message}`);
-    await TGLogger.Error(`[Abyss][refreshAbyss] 获取${rfAccount.gameUid}的上期深渊数据失败`);
-    await TGLogger.Error(`[Abyss][refreshAbyss] ${resP.retcode} ${resP.message}`);
+    showSnackbar.error(`获取上期深渊数据失败：${errMsg}`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] 获取上期深渊数据异常`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] ${e}`);
     return;
   }
   await TGLogger.Info("[Abyss][refreshAbyss] 成功获取上期深渊数据");
   await showLoading.update("正在保存上期深渊数据");
-  await TSUserAbyss.saveAbyss(rfAccount.gameUid, resP);
+  await TSUserAbyss.saveAbyss(rfAccount.gameUid, resP.data);
   await showLoading.update("正在获取本期深渊数据");
-  const res = await recordReq.spiralAbyss(rfCk!, rfAccount, "1");
-  console.log(res);
-  if ("retcode" in res) {
+  let res: TGApp.Game.Abyss.Response | undefined;
+  try {
+    res = await recordReq.spiralAbyss(rfCk!, rfAccount, "1");
+    if (res.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${res.retcode}] ${res.message}`);
+      await TGLogger.Warn(`[Abyss][refreshAbyss] 获取${rfAccount.gameUid}的本期深渊数据失败`);
+      await TGLogger.Warn(`[Abyss][refreshAbyss] ${res.retcode} ${res.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${res.retcode}]${res.message}`);
-    await TGLogger.Error(`[Abyss][refreshAbyss] 获取${rfAccount.gameUid}的本期深渊数据失败`);
-    await TGLogger.Error(`[Abyss][refreshAbyss] ${res.retcode} ${res.message}`);
+    showSnackbar.error(`获取本期深渊数据失败：${errMsg}`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] 获取本期深渊数据异常`);
+    await TGLogger.Error(`[Abyss][refreshAbyss] ${e}`);
     return;
   }
   await showLoading.update("正在保存本期深渊数据");
-  await TSUserAbyss.saveAbyss(rfAccount.gameUid, res);
+  await TSUserAbyss.saveAbyss(rfAccount.gameUid, res.data);
   await TGLogger.Info(`[Abyss][refreshAbyss] 成功获取${rfAccount.gameUid}的本期深渊数据`);
   await showLoading.update("正在加载深渊数据");
   await reloadUid(uidCur.value);
@@ -401,8 +419,8 @@ async function uploadAbyss(): Promise<void> {
     const res = await Hutao.Abyss.upload(transAbyss);
     if (res.retcode !== 0) {
       showSnackbar.error(`[${res.retcode}]${res.message}`);
-      await TGLogger.Error("[Abyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Error(`[Abyss][uploadAbyss] ${res.retcode} ${res.message}`);
+      await TGLogger.Warn("[Abyss][uploadAbyss] 上传深渊数据失败");
+      await TGLogger.Warn(`[Abyss][uploadAbyss] ${res.retcode} ${res.message}`);
       return;
     }
     showSnackbar.success(res.message ?? "上传深渊数据成功，即将刷新祈愿时长");
@@ -427,7 +445,6 @@ async function refreshAvatars(
   ac: TGApp.Sqlite.Account.Game,
 ): Promise<boolean> {
   await showLoading.update("正在更新角色数据");
-  // 更新战绩数据
   let indexResp: TGApp.Game.Record.Resp | undefined;
   try {
     indexResp = await recordReq.index(ck, ac, 1);
@@ -441,32 +458,50 @@ async function refreshAvatars(
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
-    await TGLogger.Error(`[Record][refreshRecord] 获取战绩异常`);
-    await TGLogger.Error(`${e}`);
+    await TGLogger.Error(`[Abyss][refreshAvatars] 获取战绩异常`);
+    await TGLogger.Error(`[Abyss][refreshAvatars] ${e}`);
     return false;
   }
   await showLoading.update("正在更新角色列表");
-  const listRes = await recordReq.character.list(ck, ac);
-  if ("retcode" in listRes) {
-    await showLoading.update("角色列表更新失败");
-    showSnackbar.error(`[${listRes.message}] ${listRes.message}`);
-    await TGLogger.Error(JSON.stringify(listRes));
-    await showLoading.end();
+  let listResp: TGApp.Game.Avatar.ListResp | undefined;
+  try {
+    listResp = await recordReq.character.list(ck, ac);
+    if (listResp.retcode !== 0) {
+      await showLoading.update("角色列表更新失败");
+      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+      await TGLogger.Warn(`[Abyss][refreshAvatars] ${listResp.retcode} ${listResp.message}`);
+      await showLoading.end();
+      return false;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取角色列表异常: ${errMsg}`);
+    await TGLogger.Error(`[Abyss][refreshAvatars] 获取角色列表异常`);
+    await TGLogger.Error(`[Abyss][refreshAvatars] ${e}`);
     return false;
   }
-  const idList = listRes.map((i) => i.id.toString());
+  const idList = listResp.data.list.map((i) => i.id.toString());
   await showLoading.update(`正在获取 ${idList.length} 个角色详情`);
-  const detailRes = await recordReq.character.detail(ck, ac, idList);
-  if ("retcode" in detailRes) {
-    await showLoading.update("角色详情获取失败");
-    showSnackbar.error(`[${detailRes.retcode}] ${detailRes.message}`);
-    await TGLogger.Error(JSON.stringify(detailRes));
-    await showLoading.end();
+  let detailResp: TGApp.Game.Avatar.DetailResp | undefined;
+  try {
+    detailResp = await recordReq.character.detail(ck, ac, idList);
+    if (detailResp.retcode !== 0) {
+      await showLoading.update("角色详情获取失败");
+      showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
+      await TGLogger.Warn(`[Abyss][refreshAvatars] ${detailResp.retcode} ${detailResp.message}`);
+      await showLoading.end();
+      return false;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取角色详情异常: ${errMsg}`);
+    await TGLogger.Error(`[Abyss][refreshAvatars] 获取角色详情异常`);
+    await TGLogger.Error(`[Abyss][refreshAvatars] ${e}`);
     return false;
   }
-  propMap.value = detailRes.property_map;
+  propMap.value = detailResp.data.property_map;
   await showLoading.update("正在保存角色数据");
-  await TSUserAvatar.saveAvatars(ac.gameUid, detailRes.list);
+  await TSUserAvatar.saveAvatars(ac.gameUid, detailResp.data.list);
   return true;
 }
 </script>

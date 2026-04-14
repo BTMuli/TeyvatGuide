@@ -36,6 +36,7 @@ import recordReq from "@req/recordReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, watch } from "vue";
@@ -108,18 +109,20 @@ async function loadData(): Promise<void> {
       loadingText.value = `正在加载 ${account.gameBiz} - ${account.regionName} - ${account.gameUid}...`;
       loadingProgress.value = (i / genshinAccounts.length) * 100;
       let data: TGApp.Game.DailyNote.DnRes | undefined;
+      let dataResp: TGApp.Game.DailyNote.DnResp | undefined;
       try {
-        const dataResp = await recordReq.daily(cookie.value, account);
-        console.debug("dailyResp", account, dataResp);
+        dataResp = await recordReq.daily(cookie.value, account);
         if (dataResp.retcode !== 0) {
-          await TGLogger.Error(
-            `[Daily Note Card] Failed to get daily note for ${account.gameBiz}: ${dataResp.message}`,
+          await TGLogger.Warn(
+            `[Daily Note Card] ${account.gameBiz}: [${dataResp.retcode}] ${dataResp.message}`,
           );
-        } else data = dataResp.data;
-      } catch (error) {
-        await TGLogger.Error(
-          `[Daily Note Card] Error loading data for ${account.gameBiz}: ${error}`,
-        );
+        } else {
+          data = dataResp.data;
+        }
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Error(`[Daily Note Card] ${account.gameBiz}: ${errMsg}`);
+        await TGLogger.Error(`[Daily Note Card] ${e}`);
       }
       dailyNoteAccounts.value.push({ account, data });
     }
@@ -140,24 +143,28 @@ async function handleUserSwitch(newUid: string): Promise<void> {
 }
 
 async function handleRefresh(account: TGApp.Sqlite.Account.Game): Promise<void> {
+  let dataResp: TGApp.Game.DailyNote.DnResp | undefined;
   try {
-    const dataResp = await recordReq.daily(cookie.value!, account);
+    dataResp = await recordReq.daily(cookie.value!, account);
     if (dataResp.retcode !== 0) {
-      await TGLogger.Error(`[Daily Note Card] Refresh failed: ${dataResp.message}`);
-      showSnackbar.error("刷新失败");
+      await TGLogger.Warn(`[Daily Note Card] [${dataResp.retcode}] ${dataResp.message}`);
+      showSnackbar.error(`刷新失败：[${dataResp.retcode}] ${dataResp.message}`);
       return;
     }
-    const item = dailyNoteAccounts.value.find(
-      (i) => i.account.gameUid === account.gameUid && i.account.gameBiz === account.gameBiz,
-    );
-    if (item) {
-      item.data = dataResp.data;
-    }
-    showSnackbar.success("刷新成功");
-  } catch (error) {
-    await TGLogger.Error(`[Daily Note Card] Refresh error: ${error}`);
-    showSnackbar.error("刷新失败");
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await TGLogger.Error(`[Daily Note Card] 刷新失败：${errMsg}`);
+    await TGLogger.Error(`[Daily Note Card] ${e}`);
+    showSnackbar.error(`刷新失败：${errMsg}`);
+    return;
   }
+  const item = dailyNoteAccounts.value.find(
+    (i) => i.account.gameUid === account.gameUid && i.account.gameBiz === account.gameBiz,
+  );
+  if (item) {
+    item.data = dataResp.data;
+  }
+  showSnackbar.success("刷新成功");
 }
 </script>
 <style lang="scss" scoped>

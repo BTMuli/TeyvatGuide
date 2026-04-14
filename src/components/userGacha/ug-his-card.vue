@@ -156,8 +156,8 @@ function getType(type: number): string {
 }
 
 function getTimeStr(pool: TGApp.App.Gacha.PoolItem): string {
-  const startTime = timestampToDate(Date.parse(pool.from));
-  const endTime = timestampToDate(Date.parse(pool.to));
+  const startTime = timestampToDate(new Date(pool.from).getTime());
+  const endTime = timestampToDate(new Date(pool.to).getTime());
   return `${startTime} ~ ${endTime}`;
 }
 

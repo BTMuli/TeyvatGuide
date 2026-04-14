@@ -5,64 +5,60 @@
 
 import gameEnum from "@enum/game.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttp from "@utils/TGHttp.js";
 import TGHttps from "@utils/TGHttps.js";
 
-// TakumiRecordGenshinApiBaseUrl => trgAbu
 const trgAbu: Readonly<string> =
   "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/";
 
 /**
  * 获取角色详情
- * @since Beta v0.6.3
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user -  用户
  * @param avatarIds - 角色 id 列表
- * @returns 角色详情返回
+ * @returns 角色详情响应数据
  */
 async function characterDetail(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   avatarIds: Array<string>,
-): Promise<TGApp.Game.Avatar.DetailRes | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Avatar.DetailResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const data = { role_id: user.gameUid, server: user.region, character_ids: avatarIds };
-  const resp = await TGHttp<TGApp.Game.Avatar.DetailResp | TGApp.BBS.Response.Base>(
-    `${trgAbu}character/detail`,
-    { method: "POST", body: JSON.stringify(data), headers: getRequestHeader(ck, "POST", data) },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  const resp = await TGHttps.post<TGApp.Game.Avatar.DetailResp>(`${trgAbu}character/detail`, {
+    headers: getRequestHeader(ck, "POST", data),
+    body: JSON.stringify(data),
+  });
   return resp.data;
 }
 
 /**
  * 获取角色列表
- * @since Beta v0.6.3
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
- * @returns 角色列表返回
+ * @returns 角色列表响应数据
  */
 async function characterList(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<Array<TGApp.Game.Avatar.Avatar> | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Avatar.ListResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const data = { role_id: user.gameUid, server: user.region };
-  const resp = await TGHttp<TGApp.Game.Avatar.ListResp | TGApp.BBS.Response.Base>(
-    `${trgAbu}character/list`,
-    { method: "POST", body: JSON.stringify(data), headers: getRequestHeader(ck, "POST", data) },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.list;
+  const resp = await TGHttps.post<TGApp.Game.Avatar.ListResp>(`${trgAbu}character/list`, {
+    headers: getRequestHeader(ck, "POST", data),
+    body: JSON.stringify(data),
+  });
+  return resp.data;
 }
 
 /**
  * 获取首页信息
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
  * @param listType - 列表类型
- * @returns 首页返回
+ * @returns 首页响应数据
  */
 async function index(
   cookie: TGApp.App.Account.Cookie,
@@ -80,15 +76,15 @@ async function index(
 
 /**
  * 获取真境剧诗数据
- * @since Beta v0.9.6
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
- * @returns 真境剧诗数据
+ * @returns 真境剧诗响应数据
  */
 async function roleCombat(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<TGApp.Game.Combat.CombatRes | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Combat.CombatResp> {
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,
@@ -96,25 +92,24 @@ async function roleCombat(
     ltuid: cookie.ltuid,
   };
   const params = { role_id: user.gameUid, server: user.region, active: 1, need_detail: true };
-  const resp = await TGHttp<TGApp.Game.Combat.CombatResp | TGApp.BBS.Response.Base>(
-    `${trgAbu}role_combat`,
-    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  const resp = await TGHttps.get<TGApp.Game.Combat.CombatResp>(`${trgAbu}role_combat`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
   return resp.data;
 }
 
 /**
  * 获取绘想游迹数据
- * @since Beta v0.9.6
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
- * @returns 绘想游迹数据
+ * @returns 绘想游迹响应数据
  */
 async function charMaster(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<TGApp.BBS.Response.Base | TGApp.Game.Combat.CharRes> {
+): Promise<TGApp.Game.Combat.CharResp> {
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,
@@ -122,28 +117,27 @@ async function charMaster(
     ltuid: cookie.ltuid,
   };
   const params = { role_id: user.gameUid, server: user.region };
-  const resp = await TGHttp<TGApp.Game.Combat.CharResp | TGApp.BBS.Response.Base>(
-    `${trgAbu}char_master`,
-    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  const resp = await TGHttps.get<TGApp.Game.Combat.CharResp>(`${trgAbu}char_master`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
   return resp.data;
 }
 
 /**
  * 获取深渊螺旋记录
- * @since Beta v0.6.3
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
  * @param schedule - 档期
  * @example 1: 本期, 2: 上期
- * @returns 深渊螺旋记录
+ * @returns 深渊螺旋响应数据
  */
 async function spiralAbyss(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   schedule: string,
-): Promise<TGApp.Game.Abyss.FullData | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Abyss.Response> {
   const ck = {
     account_id: cookie.account_id,
     cookie_token: cookie.cookie_token,
@@ -151,23 +145,22 @@ async function spiralAbyss(
     ltuid: cookie.ltuid,
   };
   const params = { role_id: user.gameUid, schedule_type: schedule, server: user.region };
-  const resp = await TGHttp<TGApp.Game.Abyss.Response | TGApp.BBS.Response.Base>(
-    `${trgAbu}spiralAbyss`,
-    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  const resp = await TGHttps.get<TGApp.Game.Abyss.Response>(`${trgAbu}spiralAbyss`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
   return resp.data;
 }
 
 /**
  * 获取赋光之人列表
- * @since Beta v0.8.0
+ * @since Beta v0.10.1
  * @param server - 区服
- * @returns 赋光之人列表
+ * @returns 赋光之人列表响应数据
  */
 async function hardChallengePopularity(
   server: TGApp.Game.Base.ServerTypeEnum = gameEnum.server.CN_GF01,
-): Promise<TGApp.Game.Challenge.PopularityResp | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Challenge.PopularityResp> {
   let roleId: number | undefined;
   switch (server) {
     case gameEnum.server.CN_GF01:
@@ -177,34 +170,32 @@ async function hardChallengePopularity(
       roleId = 500299765;
       break;
     default:
-      return <TGApp.BBS.Response.Base>{ retcode: -1, message: "不支持的服务器", data: null };
+      throw new Error("不支持的服务器");
   }
-  const resp = await TGHttp<TGApp.Game.Challenge.PopularityResp | TGApp.BBS.Response.Base>(
+  const resp = await TGHttps.get<TGApp.Game.Challenge.PopularityResp>(
     `${trgAbu}hard_challenge/popularity`,
-    { method: "GET", query: { server, role_id: roleId } },
+    { query: { server, role_id: roleId } },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp;
+  return resp.data;
 }
 
 /**
  * 获取幽境危战数据
- * @since Beta v0.8.0
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
- * @returns 幽境危战数据
+ * @returns 幽境危战响应数据
  */
 async function hardChallengeDetail(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<TGApp.Game.Challenge.ChallengeRes | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Challenge.ChallengeResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { need_detail: true, role_id: user.gameUid, server: user.region };
-  const resp = await TGHttp<TGApp.Game.Challenge.ChallengeResp | TGApp.BBS.Response.Base>(
-    `${trgAbu}hard_challenge`,
-    { method: "GET", headers: getRequestHeader(ck, "GET", params), query: params },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  const resp = await TGHttps.get<TGApp.Game.Challenge.ChallengeResp>(`${trgAbu}hard_challenge`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
   return resp.data;
 }
 
@@ -230,10 +221,10 @@ async function actCalendar(
 
 /**
  * 获取实时便笺
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
- * @returns 实时便笺数据
+ * @returns 实时便笺响应数据
  */
 async function dailyNote(
   cookie: TGApp.App.Account.Cookie,

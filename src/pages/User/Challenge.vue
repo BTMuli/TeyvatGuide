@@ -157,6 +157,7 @@ import { readTextFile } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import Hutao from "@Hutao/index.js";
 import { getRfAc } from "@utils/acUtils.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -266,16 +267,26 @@ async function refreshChallenge(): Promise<void> {
   await TGLogger.Info("[Challenge][refreshChallenge] 开始刷新挑战数据");
   await showLoading.start(`正在获取${rfAccount.gameUid}的幽境危战数据`);
   isRefresh.value = true;
-  const resp = await recordReq.challenge.detail(rfCk!, rfAccount);
-  console.log(resp);
-  if ("retcode" in resp) {
+  let resp: TGApp.Game.Challenge.ChallengeResp | undefined;
+  try {
+    resp = await recordReq.challenge.detail(rfCk!, rfAccount);
+    if (resp.retcode !== 0) {
+      isRefresh.value = false;
+      await showLoading.end();
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[Challenge][refreshChallenge] ${resp.retcode} - ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     isRefresh.value = false;
     await showLoading.end();
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await TGLogger.Error(`[Challenge][refreshChallenge] ${resp.retcode} - ${resp.message}`);
+    showSnackbar.error(`获取幽境危战数据失败：${errMsg}`);
+    await TGLogger.Error(`[Challenge][refreshChallenge] 获取幽境危战数据异常`);
+    await TGLogger.Error(`[Challenge][refreshChallenge] ${e}`);
     return;
   }
-  if (!resp.is_unlock) {
+  if (!resp.data.is_unlock) {
     isRefresh.value = false;
     await showLoading.end();
     showSnackbar.warn("幽境危战未解锁");
@@ -283,7 +294,7 @@ async function refreshChallenge(): Promise<void> {
     return;
   }
   await showLoading.update("", { title: "正在保存幽境危战数据" });
-  for (const challenge of resp.data) {
+  for (const challenge of resp.data.data) {
     if (challenge.schedule.schedule_id === "0") continue;
     await showLoading.update(`ScheduleID：${challenge.schedule.schedule_id}`);
     await TSUserChallenge.saveChallenge(rfAccount.gameUid, challenge);
@@ -321,14 +332,24 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
       `服务器： ${gameEnum.serverDesc(server.value)}`,
     );
   }
-  const resp = await recordReq.challenge.pop(server.value);
-  console.log("赋光之人列表", resp);
-  if (resp.retcode !== 0) {
+  let resp: TGApp.Game.Challenge.PopularityResp | undefined;
+  try {
+    resp = await recordReq.challenge.pop(server.value);
+    if (resp.retcode !== 0) {
+      reqPop.value = false;
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(
+        `[UserChallenge][RefreshPopList] Error: ${resp.retcode} - ${resp.message}`,
+      );
+      await showLoading.end();
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     reqPop.value = false;
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-    await TGLogger.Error(
-      `[UserChallenge][RefreshPopList] Error: ${resp.retcode} - ${resp.message}`,
-    );
+    showSnackbar.error(`获取赋光之人列表失败：${errMsg}`);
+    await TGLogger.Error(`[UserChallenge][RefreshPopList] 获取赋光之人列表异常`);
+    await TGLogger.Error(`[UserChallenge][RefreshPopList] ${e}`);
     await showLoading.end();
     return;
   }

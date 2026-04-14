@@ -421,16 +421,14 @@ async function refresh(): Promise<void> {
   await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
   await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
   loadData.value = true;
-  // 刷新战绩数据
   await showLoading.update("正在刷新首页数据");
   let indexResp: TGApp.Game.Record.Resp | undefined;
   try {
     indexResp = await recordReq.index(rfCk!, rfAccount, 1);
-    console.debug("recordIndexResp", indexResp);
     if (indexResp.retcode !== 0) {
       await showLoading.end();
       showSnackbar.error(`[${indexResp.retcode}] ${indexResp.message}`);
-      await TGLogger.Warn(`[Characters] ${indexResp.retcode}-${indexResp.message}`);
+      await TGLogger.Warn(`[Characters][refresh] ${indexResp.retcode}-${indexResp.message}`);
       loadData.value = false;
       return;
     }
@@ -439,43 +437,63 @@ async function refresh(): Promise<void> {
     const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
     await TGLogger.Error(`[Characters][refresh] 获取战绩异常`);
-    await TGLogger.Error(`${e}`);
+    await TGLogger.Error(`[Characters][refresh] ${e}`);
     loadData.value = false;
     return;
   }
   await showLoading.update("正在获取角色列表");
-  const listRes = await recordReq.character.list(rfCk!, rfAccount);
-  console.log(listRes);
-  if (!Array.isArray(listRes)) {
-    showSnackbar.error(`[${listRes.retcode}] ${listRes.message}`);
-    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表失败`);
-    await TGLogger.Error(
-      `[Character][refresh][${rfAccount.gameUid}] ${listRes.retcode} ${listRes.message}`,
-    );
+  let listResp: TGApp.Game.Avatar.ListResp | undefined;
+  try {
+    listResp = await recordReq.character.list(rfCk!, rfAccount);
+    if (listResp.retcode !== 0) {
+      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+      await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表失败`);
+      await TGLogger.Warn(
+        `[Character][refresh][${rfAccount.gameUid}] ${listResp.retcode} ${listResp.message}`,
+      );
+      await showLoading.end();
+      loadData.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取角色列表异常: ${errMsg}`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表异常`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] ${e}`);
     await showLoading.end();
     loadData.value = false;
     return;
   }
-  const idList = listRes.map((i) => i.id.toString());
+  const idList = listResp.data.list.map((i) => i.id.toString());
   await showLoading.update(`共${idList.length}个角色，正在获取角色详情`);
-  const res = await recordReq.character.detail(rfCk!, rfAccount, idList);
-  console.log(res);
-  if ("retcode" in res) {
-    showSnackbar.error(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色数据失败`);
-    await TGLogger.Error(
-      `[Character][refresh][${rfAccount.gameUid}] ${res.retcode} ${res.message}`,
-    );
+  let detailResp: TGApp.Game.Avatar.DetailResp | undefined;
+  try {
+    detailResp = await recordReq.character.detail(rfCk!, rfAccount, idList);
+    if (detailResp.retcode !== 0) {
+      showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
+      await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色数据失败`);
+      await TGLogger.Warn(
+        `[Character][refresh][${rfAccount.gameUid}] ${detailResp.retcode} ${detailResp.message}`,
+      );
+      await showLoading.end();
+      loadData.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取角色详情异常: ${errMsg}`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色详情异常`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] ${e}`);
     await showLoading.end();
     loadData.value = false;
     return;
   }
-  propMap.value = res.property_map;
+  propMap.value = detailResp.data.property_map;
   await showLoading.update("正在保存角色数据");
-  await TSUserAvatar.saveAvatars(rfAccount.gameUid, res.list);
+  await TSUserAvatar.saveAvatars(rfAccount.gameUid, detailResp.data.list);
   await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
   await TGLogger.Info(
-    `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${res.list.length}个角色`,
+    `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${detailResp.data.list.length}个角色`,
   );
   await showLoading.update("正在加载角色数据");
   await loadUid(uidCur.value);
