@@ -21,7 +21,7 @@ import { onMounted, onUnmounted, ref, watch } from "vue";
 
 import { stamp2LastTime } from "@utils/toolFunc.js";
 
-import dnEnum from "@enum/dailyNote";
+import dnEnum from "@enum/dailyNote.js";
 
 type PhDailyNoteExpeditionProps = {
   expedition: TGApp.Game.DailyNote.Expedition;

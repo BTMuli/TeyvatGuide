@@ -32,7 +32,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import dnEnum from "@enum/dailyNote";
+import dnEnum from "@enum/dailyNote.js";
 
 type PhDailyNoteQuestProps = { quest: TGApp.Game.DailyNote.ArchonQuestProgress };
 
