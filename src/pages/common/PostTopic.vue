@@ -109,6 +109,8 @@ import postReq from "@req/postReq.js";
 import topicReq from "@req/topicReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
@@ -172,18 +174,29 @@ onMounted(async () => {
   curGid.value = Number(gid);
   curTopic.value = topic;
   await showLoading.start(`正在加载话题${topic}信息`);
-  const info = await topicReq.info(gid, topic);
-  if ("retcode" in info) {
+  let info: TGApp.BBS.Topic.InfoResp | undefined;
+  try {
+    info = await topicReq.info(gid, topic);
+    if (info.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${info.retcode}] ${info.message}`);
+      await TGLogger.Warn(`[PostTopic] 获取话题信息失败：[${info.retcode}] ${info.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${info.retcode}] ${info.message}`);
+    showSnackbar.error(`获取话题信息失败：${errMsg}`);
+    await TGLogger.Error(`[PostTopic] 获取话题信息异常`);
+    await TGLogger.Error(`[PostTopic] ${e}`);
     return;
   }
-  topicInfo.value = info;
+  topicInfo.value = info.data;
   let tmpGame: GameList | undefined;
   if (curGame.value === undefined) {
-    tmpGame = info.game_info_list.find((i) => i.id === curGid.value);
+    tmpGame = info.data.game_info_list.find((i) => i.id === curGid.value);
   }
-  if (tmpGame === undefined) tmpGame = info.game_info_list[0];
+  if (tmpGame === undefined) tmpGame = info.data.game_info_list[0];
   const gameFind = gameList.value.find((i) => i.id === tmpGame?.id);
   curGame.value = { ...tmpGame, icon: gameFind?.app_icon };
   await freshPostData();
