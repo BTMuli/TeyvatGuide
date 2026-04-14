@@ -23,6 +23,7 @@ import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { readDir } from "@tauri-apps/plugin-fs";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 
@@ -49,23 +50,30 @@ async function tryPlayGame(): Promise<void> {
     return;
   }
   const gamePath = `${gameDir.value}${path.sep()}${find.name}`;
-  const resp = await passportReq.authTicket(account.value, cookie.value);
-  if (typeof resp !== "object") {
-    showSnackbar.error(resp);
-    await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${resp}`);
-    return;
-  }
-  if ("retcode" in resp) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+  let ticket: string;
+  try {
+    const resp = await passportReq.authTicket(account.value, cookie.value);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(
+        `[config][gameBadge] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
+      );
+      await TGLogger.Warn(`[config][gameBadge] ${resp.retcode}: ${resp.message}`);
+      return;
+    }
+    ticket = resp.data.ticket;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取authTicket失败：${errMsg}`);
     await TGLogger.Error(
-      `[config][gameBadge] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
+      `[config][gameBadge] 获取authTicket异常，当前用户：${account.value.uid}-${account.value.gameUid}`,
     );
-    await TGLogger.Error(`[config][gameBadge] resp: ${JSON.stringify(resp)}`);
+    await TGLogger.Error(`[config][gameBadge] ${errMsg}`);
     return;
   }
   showSnackbar.success(`成功获取ticket，正在启动应用...`);
   try {
-    await invoke("launch_game", { path: gamePath, ticket: resp.ticket });
+    await invoke("launch_game", { path: gamePath, ticket });
   } catch (error) {
     showSnackbar.error(`${error}`);
   }

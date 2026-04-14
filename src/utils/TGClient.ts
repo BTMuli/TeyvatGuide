@@ -15,11 +15,11 @@ import { core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { getDS4JS } from "@utils/getRequestHeader.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 import { parseLink } from "./linkParser.js";
 import TGBbs from "./TGBbs.js";
-import TGLogger from "./TGLogger.js";
-import TGHttps from "./TGHttps.js";
 import { createPost } from "./TGWindow.js";
 import { getDeviceInfo } from "./toolFunc.js";
 
@@ -583,10 +583,19 @@ class Client {
     const user = useUserStore();
     if (!user.cookie) return;
     if (typeof arg.payload === "object" && arg.payload.forceRefresh) {
-      const res = await passportReq.cookieToken(user.cookie);
-      if (typeof res !== "string") return;
-      user.cookie.cookie_token = res;
-      await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
+      try {
+        const res = await passportReq.cookieToken(user.cookie);
+        if (res.retcode !== 0) {
+          await TGLogger.Warn(`[TGClient][getCookieToken] ${res.retcode}: ${res.message}`);
+          return;
+        }
+        user.cookie.cookie_token = res.data.cookie_token;
+        await TGSqlite.saveAppData("cookie", JSON.stringify(user.cookie));
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Error(`[TGClient][getCookieToken] 获取cookie_token异常：${errMsg}`);
+        return;
+      }
     }
     const executeJS = `javascript:(function(){
     let domainCur = window.location.hostname;

@@ -9,6 +9,7 @@ import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 
@@ -137,39 +138,69 @@ async function updateAllAccountCk(): Promise<void> {
 async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
   const ck = data.cookie;
   await showLoading.update("正在获取 LToken");
-  const ltokenRes = await passportReq.lToken.get(ck);
-  if (typeof ltokenRes !== "string") {
+  try {
+    const ltokenRes = await passportReq.lToken.get(ck);
+    if (ltokenRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
+      await TGLogger.Warn(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+      return false;
+    }
+    ck.ltoken = ltokenRes.data.ltoken;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
-    await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+    showSnackbar.error(`获取LToken失败：${errMsg}`);
+    await TGLogger.Error(`获取LToken异常：${errMsg}`);
     return false;
   }
-  ck.ltoken = ltokenRes;
   await showLoading.update("正在获取 CookieToken");
-  const cookieTokenRes = await passportReq.cookieToken(ck);
-  if (typeof cookieTokenRes !== "string") {
+  try {
+    const cookieTokenRes = await passportReq.cookieToken(ck);
+    if (cookieTokenRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
+      await TGLogger.Warn(
+        `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
+      );
+      return false;
+    }
+    ck.cookie_token = cookieTokenRes.data.cookie_token;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
-    await TGLogger.Error(
-      `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
-    );
+    showSnackbar.error(`获取CookieToken失败：${errMsg}`);
+    await TGLogger.Error(`获取CookieToken异常：${errMsg}`);
     return false;
   }
-  ck.cookie_token = cookieTokenRes;
   await showLoading.update("正在获取用户信息");
-  const briefRes = await bbsReq.userInfo(ck);
-  if ("retcode" in briefRes) {
+  let briefInfo: TGApp.App.Account.BriefInfo | undefined;
+  try {
+    const briefRes = await bbsReq.userInfo(ck);
+    if ("retcode" in briefRes) {
+      await showLoading.end();
+      showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
+      await TGLogger.Warn(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+      return false;
+    }
+    briefInfo = {
+      nickname: briefRes.nickname,
+      uid: briefRes.uid,
+      avatar: briefRes.avatar_url,
+      desc: briefRes.introduce,
+    };
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
-    await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+    showSnackbar.error(`获取用户信息失败：${errMsg}`);
+    await TGLogger.Error(`获取用户信息异常：${errMsg}`);
     return false;
   }
-  const briefInfo: TGApp.App.Account.BriefInfo = {
-    nickname: briefRes.nickname,
-    uid: briefRes.uid,
-    avatar: briefRes.avatar_url,
-    desc: briefRes.introduce,
-  };
+  if (!briefInfo) {
+    await showLoading.end();
+    showSnackbar.error("获取用户信息失败");
+    return false;
+  }
   const updated = timestampToDate(new Date().getTime());
   await showLoading.update("正在写入数据库");
   const db = await TGSqlite.getDB();

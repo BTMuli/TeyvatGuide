@@ -414,58 +414,92 @@ async function openClient(func: string): Promise<void> {
 }
 
 async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
+  let briefInfoGet: TGApp.App.Account.BriefInfo | undefined;
   await showLoading.update("正在获取 LToken");
-  const ltokenRes = await passportReq.lToken.get(ck);
-  if (typeof ltokenRes !== "string") {
+  try {
+    const ltokenRes = await passportReq.lToken.get(ck);
+    if (ltokenRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
+      await TGLogger.Warn(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+      isTryLogin.value = false;
+      return;
+    }
+    showSnackbar.success("获取LToken成功");
+    ck.ltoken = ltokenRes.data.ltoken;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
-    await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+    showSnackbar.error(`获取LToken失败：${errMsg}`);
+    await TGLogger.Error(`获取LToken异常：${errMsg}`);
     isTryLogin.value = false;
     return;
   }
-  showSnackbar.success("获取LToken成功");
-  ck.ltoken = ltokenRes;
   await showLoading.update("正在获取 CookieToken");
-  const cookieTokenRes = await passportReq.cookieToken(ck);
-  if (typeof cookieTokenRes !== "string") {
+  try {
+    const cookieTokenRes = await passportReq.cookieToken(ck);
+    if (cookieTokenRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
+      await TGLogger.Warn(
+        `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
+      );
+      isTryLogin.value = false;
+      return;
+    }
+    showSnackbar.success("获取CookieToken成功");
+    ck.cookie_token = cookieTokenRes.data.cookie_token;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
-    await TGLogger.Error(
-      `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
-    );
+    showSnackbar.error(`获取CookieToken失败：${errMsg}`);
+    await TGLogger.Error(`获取CookieToken异常：${errMsg}`);
     isTryLogin.value = false;
     return;
   }
-  showSnackbar.success("获取CookieToken成功");
-  ck.cookie_token = cookieTokenRes;
   await showLoading.update("正在获取用户信息");
-  const briefRes = await bbsReq.userInfo(ck);
-  console.debug(briefRes);
-  if ("retcode" in briefRes) {
+  try {
+    const briefRes = await bbsReq.userInfo(ck);
+    console.debug(briefRes);
+    if ("retcode" in briefRes) {
+      await showLoading.end();
+      showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
+      await TGLogger.Warn(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+      isTryLogin.value = false;
+      return;
+    }
+    showSnackbar.success("获取用户信息成功");
+    briefInfoGet = {
+      nickname: briefRes.nickname,
+      uid: briefRes.uid,
+      avatar: briefRes.avatar_url,
+      desc: briefRes.introduce,
+    };
+    await showLoading.update("正在保存用户数据");
+    await TSUserAccount.account.saveAccount({
+      uid: briefInfoGet.uid,
+      cookie: ck,
+      brief: briefInfoGet,
+      updated: "",
+    });
+    uid.value = briefInfoGet.uid;
+    briefInfo.value = briefInfoGet;
+    cookie.value = ck;
+    isLogin.value = true;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
-    await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+    showSnackbar.error(`获取用户信息失败：${errMsg}`);
+    await TGLogger.Error(`获取用户信息异常：${errMsg}`);
     isTryLogin.value = false;
     return;
   }
-  showSnackbar.success("获取用户信息成功");
-  const briefInfoGet: TGApp.App.Account.BriefInfo = {
-    nickname: briefRes.nickname,
-    uid: briefRes.uid,
-    avatar: briefRes.avatar_url,
-    desc: briefRes.introduce,
-  };
-  await showLoading.update("正在保存用户数据");
-  await TSUserAccount.account.saveAccount({
-    uid: briefInfoGet.uid,
-    cookie: ck,
-    brief: briefInfoGet,
-    updated: "",
-  });
-  uid.value = briefInfoGet.uid;
-  briefInfo.value = briefInfoGet;
-  cookie.value = ck;
-  isLogin.value = true;
+  if (!briefInfoGet) {
+    await showLoading.end();
+    showSnackbar.error("获取用户信息失败");
+    isTryLogin.value = false;
+    return;
+  }
   await showLoading.update("正在获取游戏账号");
   let gameRes: TGApp.BBS.Game.AccountResp | undefined;
   try {
@@ -570,21 +604,32 @@ async function tryCodeLogin(): Promise<void> {
  * @returns {Promise<string | null>} 返回 action_type 或 null
  */
 async function tryGetCaptcha(phone: string, aigis?: string): Promise<string | false> {
-  const captchaResp = await passportReq.captcha.create(phone, aigis);
-  if ("retcode" in captchaResp) {
-    if (!captchaResp.data || captchaResp.data === "") {
-      showSnackbar.error(`[${captchaResp.retcode}] ${captchaResp.message}`);
-      await TGLogger.Error(
-        `[tc-userBadge][tryGetCaptcha] ${captchaResp.retcode} ${captchaResp.message}`,
-      );
-      return false;
+  try {
+    const resp = await passportReq.captcha.create(phone, aigis);
+    if (resp.data.retcode !== 0) {
+      // 检查是否需要极验验证
+      const aigisData = resp.headers.get("x-rpc-aigis");
+      if (!aigisData) {
+        showSnackbar.error(`[${resp.data.retcode}] ${resp.data.message}`);
+        await TGLogger.Warn(`[t-sidebar][tryGetCaptcha] ${resp.data.retcode} ${resp.data.message}`);
+        return false;
+      }
+      const aigisResp = <TGApp.BBS.CaptchaLogin.CaptchaAigis>JSON.parse(aigisData);
+      const gtRes = await showGeetest(JSON.parse(aigisResp.data), aigisResp);
+      if (!gtRes) {
+        showSnackbar.error("极验验证失败");
+        return false;
+      }
+      const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(gtRes))}`;
+      return await tryGetCaptcha(phone, aigisStr);
     }
-    const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(captchaResp.data);
-    const resp = await showGeetest(JSON.parse(aigisResp.data), aigisResp);
-    const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
-    return await tryGetCaptcha(phone, aigisStr);
+    return resp.data.data.action_type;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取验证码失败：${errMsg}`);
+    await TGLogger.Error(`[t-sidebar][tryGetCaptcha] 获取验证码异常：${errMsg}`);
+    return false;
   }
-  return captchaResp.action_type;
 }
 
 /**
@@ -602,22 +647,35 @@ async function tryLoginByCaptcha(
   actionType: string,
   aigis?: string,
 ): Promise<TGApp.BBS.CaptchaLogin.LoginRes | false> {
-  const loginResp = await passportReq.captcha.login(phone, captcha, actionType, aigis);
-  if ("retcode" in loginResp) {
-    if (!loginResp.data || loginResp.data === "") {
-      showSnackbar.error(`[${loginResp.retcode}] ${loginResp.message}`);
-      await TGLogger.Error(
-        `[tc-userBadge][tryLoginByCaptcha] ${loginResp.retcode} ${loginResp.message}`,
-      );
-      await new Promise<void>((resolve) => setTimeout(resolve, 3000));
-      return false;
+  try {
+    const resp = await passportReq.captcha.login(phone, captcha, actionType, aigis);
+    if (resp.data.retcode !== 0) {
+      // 检查是否需要极验验证
+      const aigisData = resp.headers.get("x-rpc-aigis");
+      if (!aigisData) {
+        showSnackbar.error(`[${resp.data.retcode}] ${resp.data.message}`);
+        await TGLogger.Warn(
+          `[t-sidebar][tryLoginByCaptcha] ${resp.data.retcode} ${resp.data.message}`,
+        );
+        await new Promise<void>((resolve) => setTimeout(resolve, 3000));
+        return false;
+      }
+      const aigisResp = <TGApp.BBS.CaptchaLogin.CaptchaAigis>JSON.parse(aigisData);
+      const gtRes = await showGeetest(JSON.parse(aigisResp.data), aigisResp);
+      if (!gtRes) {
+        showSnackbar.error("极验验证失败");
+        return false;
+      }
+      const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(gtRes))}`;
+      return await tryLoginByCaptcha(phone, captcha, actionType, aigisStr);
     }
-    const aigisResp: TGApp.BBS.CaptchaLogin.CaptchaAigis = JSON.parse(loginResp.data);
-    const resp = await showGeetest(JSON.parse(aigisResp.data), aigisResp);
-    const aigisStr = `${aigisResp.session_id};${btoa(JSON.stringify(resp))}`;
-    return await tryLoginByCaptcha(phone, captcha, actionType, aigisStr);
+    return resp.data.data;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`验证码登录失败：${errMsg}`);
+    await TGLogger.Error(`[t-sidebar][tryLoginByCaptcha] 验证码登录异常：${errMsg}`);
+    return false;
   }
-  return loginResp;
 }
 
 /**
@@ -663,43 +721,77 @@ async function addByCookie(): Promise<void> {
     ltoken: "",
   };
   await showLoading.update("正在获取 LToken");
-  const ltokenRes = await passportReq.lToken.get(ck);
-  if (typeof ltokenRes !== "string") {
+  try {
+    const ltokenRes = await passportReq.lToken.get(ck);
+    if (ltokenRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
+      await TGLogger.Warn(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+      isTryLogin.value = false;
+      return;
+    }
+    ck.ltoken = ltokenRes.data.ltoken;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${ltokenRes.retcode}]${ltokenRes.message}`);
-    await TGLogger.Error(`获取LToken失败：${ltokenRes.retcode}-${ltokenRes.message}`);
+    showSnackbar.error(`获取LToken失败：${errMsg}`);
+    await TGLogger.Error(`获取LToken异常：${errMsg}`);
     isTryLogin.value = false;
     return;
   }
-  ck.ltoken = ltokenRes;
   await showLoading.update("正在获取 CookieToken");
-  const cookieTokenRes = await passportReq.cookieToken(ck);
-  if (typeof cookieTokenRes !== "string") {
+  try {
+    const cookieTokenRes = await passportReq.cookieToken(ck);
+    if (cookieTokenRes.retcode !== 0) {
+      await showLoading.end();
+      showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
+      await TGLogger.Warn(
+        `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
+      );
+      isTryLogin.value = false;
+      return;
+    }
+    ck.cookie_token = cookieTokenRes.data.cookie_token;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${cookieTokenRes.retcode}]${cookieTokenRes.message}`);
-    await TGLogger.Error(
-      `获取CookieToken失败：${cookieTokenRes.retcode}-${cookieTokenRes.message}`,
-    );
+    showSnackbar.error(`获取CookieToken失败：${errMsg}`);
+    await TGLogger.Error(`获取CookieToken异常：${errMsg}`);
     isTryLogin.value = false;
     return;
   }
-  ck.cookie_token = cookieTokenRes;
   await showLoading.update("正在获取用户信息");
-  const briefRes = await bbsReq.userInfo(ck);
-  if ("retcode" in briefRes) {
+  let briefInfoGet: TGApp.App.Account.BriefInfo | undefined;
+  try {
+    const briefRes = await bbsReq.userInfo(ck);
+    if ("retcode" in briefRes) {
+      await showLoading.end();
+      showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
+      await TGLogger.Warn(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+      isTryLogin.value = false;
+      return;
+    }
+    briefInfoGet = {
+      nickname: briefRes.nickname,
+      uid: briefRes.uid,
+      avatar: briefRes.avatar_url,
+      desc: briefRes.introduce,
+    };
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
     await showLoading.end();
-    showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
-    await TGLogger.Error(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
+    showSnackbar.error(`获取用户信息失败：${errMsg}`);
+    await TGLogger.Error(`获取用户信息异常：${errMsg}`);
     isTryLogin.value = false;
     return;
   }
-  const briefInfoGet: TGApp.App.Account.BriefInfo = {
-    nickname: briefRes.nickname,
-    uid: briefRes.uid,
-    avatar: briefRes.avatar_url,
-    desc: briefRes.introduce,
-  };
-  uid.value = briefRes.uid;
+  if (!briefInfoGet) {
+    await showLoading.end();
+    showSnackbar.error("获取用户信息失败");
+    isTryLogin.value = false;
+    return;
+  }
+  uid.value = briefInfoGet.uid;
   briefInfo.value = briefInfoGet;
   cookie.value = ck;
   isLogin.value = true;
@@ -764,27 +856,33 @@ async function tryLaunchGame(): Promise<void> {
     return;
   }
   const gamePath = `${gameDir.value}${path.sep()}${find.name}`;
-  const resp = await passportReq.authTicket(account.value, cookie.value);
-  if (typeof resp !== "object") {
-    showSnackbar.error(resp);
-    await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${resp}`);
-    return;
-  }
-  if ("retcode" in resp) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+  let ticket: string;
+  try {
+    const resp = await passportReq.authTicket(account.value, cookie.value);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(
+        `[sidebar][tryLaunchGame] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
+      );
+      await TGLogger.Warn(`[sidebar][tryLaunchGame] ${resp.retcode}: ${resp.message}`);
+      return;
+    }
+    ticket = resp.data.ticket;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取authTicket失败：${errMsg}`);
     await TGLogger.Error(
-      `[sidebar][tryLaunchGame] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
+      `[sidebar][tryLaunchGame] 获取authTicket异常，当前用户：${account.value.uid}-${account.value.gameUid}`,
     );
-    await TGLogger.Error(`[sidebar][tryLaunchGame] resp: ${JSON.stringify(resp)}`);
+    await TGLogger.Error(`[sidebar][tryLaunchGame] ${errMsg}`);
     return;
   }
   showSnackbar.success(`成功获取ticket，正在启动应用...`);
   try {
-    await invoke("launch_game", { path: gamePath, ticket: resp.ticket });
+    await invoke("launch_game", { path: gamePath, ticket });
   } catch (error) {
     showSnackbar.error(`${error}`);
   }
-  return;
 }
 </script>
 <style lang="scss" scoped>
