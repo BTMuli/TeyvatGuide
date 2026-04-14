@@ -446,9 +446,17 @@ async function tryLike(): Promise<void> {
     return;
   }
   const ck = { ltoken: cookie.value.ltoken, ltuid: cookie.value.ltuid };
-  const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);
-  if (resp.retcode !== 0) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+  try {
+    const resp = await apiHubReq.post.like(postData.value.post.post_id, ck, isLike.value);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[t-post][tryLike] 点赞失败：${resp.retcode} ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`点赞失败：${errMsg}`);
+    await TGLogger.Error(`[t-post][tryLike] 点赞异常：${errMsg}`);
     return;
   }
   isLike.value = !isLike.value;

@@ -1,19 +1,22 @@
 /**
  * 游戏相关的类型定义
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  */
 
 declare namespace TGApp.BBS.Game {
   /**
-   * 游戏列表返回
-   * @since Beta v0.6.8
+   * 游戏列表返回响应
+   * @since Beta v0.10.1
    */
-  type ListResp = TGApp.BBS.Response.BaseWithData & {
-    /** 游戏列表数据 */
-    data: {
-      /** 游戏列表 */
-      list: Array<Item>;
-    };
+  type ListResp = TGApp.BBS.Response.BaseWithData<ListRes>;
+
+  /**
+   * 游戏列表返回数据
+   * @since Beta v0.10.1
+   */
+  type ListRes = {
+    /** 游戏列表 */
+    list: Array<Item>;
   };
 
   /**

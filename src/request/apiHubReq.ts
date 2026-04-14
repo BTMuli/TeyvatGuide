@@ -1,10 +1,9 @@
 /**
  * apiHub下的请求
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  */
 
 import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttp from "@utils/TGHttp.js";
 import TGHttps from "@utils/TGHttps.js";
 
 // MysApiHubBaseUrl => Mahbu
@@ -13,74 +12,66 @@ const Referer: Readonly<string> = "https://bbs.mihoyo.com/";
 
 /**
  * 获取所有版块
- * @since Beta v0.6.8
- * @returns 版块信息
+ * @since Beta v0.10.1
+ * @returns 版块信息响应数据
  */
-async function getAllGamesForums(): Promise<Array<TGApp.BBS.Forum.GameForum>> {
-  return (
-    await TGHttp<TGApp.BBS.Forum.GameForumResp>(`${Mahbu}wapi/getAllGamesForums`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json", referer: Referer },
-    })
-  ).data.list;
+async function getAllGamesForums(): Promise<TGApp.BBS.Forum.GameForumResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Forum.GameForumResp>(`${Mahbu}wapi/getAllGamesForums`, {
+    headers: { "Content-Type": "application/json", referer: Referer },
+  });
+  return resp.data;
 }
 
 /**
  * 获取应用配置
- * @since Beta v0.8.2
+ * @since Beta v0.10.1
  * @param gid - 分区ID
- * @returns 应用配置
+ * @returns 应用配置响应数据
  */
-async function getAppConfig(
-  gid?: string,
-): Promise<TGApp.BBS.AppConfig.FullData | TGApp.BBS.Response.Base> {
-  let url = `${Mahbu}api/getAppConfig`;
-  if (gid) url += `?gid=${gid}`;
-  const resp = await TGHttp<TGApp.BBS.AppConfig.Resp | TGApp.BBS.Response.Base>(url, {
-    method: "GET",
+async function getAppConfig(gid?: string): Promise<TGApp.BBS.AppConfig.Resp> {
+  const query = gid ? { gid } : undefined;
+  const resp = await TGHttps.get<TGApp.BBS.AppConfig.Resp>(`${Mahbu}api/getAppConfig`, {
     headers: { "Content-Type": "application/json", referer: Referer },
+    query,
   });
-  if (resp.retcode === 0) return resp.data.config;
-  return <TGApp.BBS.Response.Base>resp;
+  return resp.data;
 }
 
 /**
  * 获取所有分区
- * @since Beta v0.6.8
- * @returns 分区信息
+ * @since Beta v0.10.1
+ * @returns 分区信息响应数据
  */
-async function getGameList(): Promise<Array<TGApp.BBS.Game.Item>> {
-  return (
-    await TGHttp<TGApp.BBS.Game.ListResp>(`${Mahbu}wapi/getGameList`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json", referer: Referer },
-    })
-  ).data.list;
+async function getGameList(): Promise<TGApp.BBS.Game.ListResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Game.ListResp>(`${Mahbu}wapi/getGameList`, {
+    headers: { "Content-Type": "application/json", referer: Referer },
+  });
+  return resp.data;
 }
 
 /**
  * 获取用户米游币任务列表
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @param cookie - 用户 Cookie
- * @returns 用户米游币任务列表
+ * @returns 用户米游币任务列表响应数据
  */
 async function getMissions(cookie: Record<string, string>): Promise<TGApp.BBS.Mission.InfoResp> {
   const param = { point_sn: "myb" };
   const header = getRequestHeader(cookie, "GET", param);
-  return await TGHttp<TGApp.BBS.Mission.InfoResp>(`${Mahbu}wapi/getMissions`, {
-    method: "GET",
+  const resp = await TGHttps.get<TGApp.BBS.Mission.InfoResp>(`${Mahbu}wapi/getMissions`, {
     headers: header,
     query: param,
   });
+  return resp.data;
 }
 
 /**
  * 获取分享配置
- * @since Beta v0.7.0
+ * @since Beta v0.10.1
  * @remarks **需要验证码登录返回的 Cookie**
  * @param postId - 帖子 ID
  * @param cookie - 用户 Cookie
- * @returns 基础响应
+ * @returns 基础响应数据
  */
 async function getShareConf(
   postId: string,
@@ -91,90 +82,84 @@ async function getShareConf(
     ...getRequestHeader(cookie, "GET", params, "K2", true),
     "x-rpc-client_type": "2",
   };
-  return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}api/getShareConf`, {
-    method: "GET",
+  const resp = await TGHttps.get<TGApp.BBS.Response.Base>(`${Mahbu}api/getShareConf`, {
     headers: header,
     query: params,
   });
+  return resp.data;
 }
 
 /**
  * 获取用户米游币任务完成状态
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @remarks **需要验证码登录的 Cookie**
  * @param cookie - 用户 Cookie
- * @returns 米游币任务完成状态
+ * @returns 米游币任务完成状态响应数据
  */
 async function getUserMissionsState(
   cookie: Record<string, string>,
 ): Promise<TGApp.BBS.Mission.StateResp> {
   const param = { point_sn: "myb" };
   const header = getRequestHeader(cookie, "GET", param);
-  return await TGHttp<TGApp.BBS.Mission.StateResp>(`${Mahbu}wapi/getUserMissionsState`, {
-    method: "GET",
+  const resp = await TGHttps.get<TGApp.BBS.Mission.StateResp>(`${Mahbu}wapi/getUserMissionsState`, {
     headers: header,
     query: param,
   });
+  return resp.data;
 }
 
 /**
  * 获取投票信息
- * @since Beta v0.6.2
+ * @since Beta v0.10.1
  * @param id - 投票 ID
  * @param uid - 用户 ID
- * @returns 投票信息
+ * @returns 投票信息响应数据
  */
-async function getVotes(id: string, uid: string): Promise<TGApp.BBS.Vote.Info> {
-  return (
-    await TGHttp<TGApp.BBS.Vote.InfoResp>(`${Mahbu}api/getVotes`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json", referer: Referer },
-      query: { owner_uid: uid, vote_ids: id },
-    })
-  ).data.data[0];
+async function getVotes(id: string, uid: string): Promise<TGApp.BBS.Vote.InfoResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Vote.InfoResp>(`${Mahbu}api/getVotes`, {
+    headers: { "Content-Type": "application/json", referer: Referer },
+    query: { owner_uid: uid, vote_ids: id },
+  });
+  return resp.data;
 }
 
 /**
  * 获取投票结果
- * @since Beta v0.6.2
+ * @since Beta v0.10.1
  * @param id - 投票 ID
  * @param uid - 用户 ID
- * @returns 投票结果
+ * @returns 投票结果响应数据
  */
-async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.Result> {
-  return (
-    await TGHttp<TGApp.BBS.Vote.ResultResp>(`${Mahbu}api/getVotesResult`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json", referer: Referer },
-      query: { owner_uid: uid, vote_ids: id },
-    })
-  ).data.data[0];
+async function getVoteResult(id: string, uid: string): Promise<TGApp.BBS.Vote.ResultResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Vote.ResultResp>(`${Mahbu}api/getVotesResult`, {
+    headers: { "Content-Type": "application/json", referer: Referer },
+    query: { owner_uid: uid, vote_ids: id },
+  });
+  return resp.data;
 }
 
 /**
  * 获取首页导航列表
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  * @param gid - GID
- * @TODO 测试带ck请求
- * @returns 首页导航列表
+ * @returns 首页导航列表响应数据
  */
-async function homeNew(
-  gid: number = 2,
-): Promise<TGApp.App.Response.Resp<TGApp.BBS.Navigator.HomeResp>> {
-  return await TGHttps.get<TGApp.BBS.Navigator.HomeResp>(`${Mahbu}api/home/new`, {
+async function homeNew(gid: number = 2): Promise<TGApp.BBS.Navigator.HomeResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Navigator.HomeResp>(`${Mahbu}api/home/new`, {
     headers: { "x-rpc-client_type": "2" },
     query: { gids: gid },
   });
+  return resp.data;
 }
 
 /**
  * 签到
- * @since Beta v0.7.1
+ * @since Beta v0.10.1
  * @remarks **需要验证码登录获取的 Cookie**
  * @param cookie - 用户 Cookie
  * @param gid - 分区ID
  * @param challenge - 极验参数
- * @returns 基础响应
+ * @returns 基础响应数据
  */
 async function signIn(
   cookie: Record<string, string>,
@@ -187,20 +172,20 @@ async function signIn(
     "x-rpc-client_type": "2",
   };
   if (challenge) header = { ...header, "x-rpc-challenge": challenge };
-  return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}app/api/signIn`, {
-    method: "POST",
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(`${Mahbu}app/api/signIn`, {
     headers: header,
-    body: JSON.stringify(data),
+    body: data,
   });
+  return resp.data;
 }
 
 /**
  * 点赞
- * @since Beta v0.7.0
+ * @since Beta v0.10.1
  * @param id - 帖子 ID
  * @param cookie - 用户 Cookie
  * @param cancel - 是否取消点赞
- * @returns 基础响应
+ * @returns 基础响应数据
  */
 async function upVotePost(
   id: string,
@@ -212,11 +197,11 @@ async function upVotePost(
     ...getRequestHeader(cookie, "POST", data, "K2", true),
     "x-rpc-client_type": "2",
   };
-  return await TGHttp<TGApp.BBS.Response.Base>(`${Mahbu}api/upvotePost`, {
-    method: "POST",
+  const resp = await TGHttps.post<TGApp.BBS.Response.Base>(`${Mahbu}api/upvotePost`, {
     headers: header,
-    body: JSON.stringify(data),
+    body: data,
   });
+  return resp.data;
 }
 
 const apiHubReq = {

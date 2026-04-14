@@ -71,7 +71,12 @@ watch(
 async function loadNav(): Promise<void> {
   try {
     const resp = await apiHubReq.home(props.gid);
-    nav.value = resp.data.data.navigator;
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`加载导航失败：[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[TGameNav][loadNav] 加载导航失败：${resp.retcode} ${resp.message}`);
+      return;
+    }
+    nav.value = resp.data.navigator;
     if (loadCode.value) loadCode.value = false;
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);

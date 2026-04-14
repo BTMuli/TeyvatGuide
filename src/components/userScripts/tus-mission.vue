@@ -232,12 +232,16 @@ async function tryAuto(skip: boolean = false): Promise<void> {
   for (const post of listResp.data.list) {
     if (!isShare) {
       await TGLogger.Script(`[米游币任务]正在分享帖子${post.post.post_id}`);
-      const shareResp = await apiHubReq.post.share(post.post.post_id, ckShare);
-      if (shareResp.retcode === 0) {
-        await TGLogger.Script("[米游币任务]分享成功");
-        isShare = true;
-      } else {
-        await TGLogger.Script(`[米游币任务]分享失败：${shareResp.retcode} ${shareResp.message}`);
+      try {
+        const shareResp = await apiHubReq.post.share(post.post.post_id, ckShare);
+        if (shareResp.retcode === 0) {
+          await TGLogger.Script("[米游币任务]分享成功");
+          isShare = true;
+        } else {
+          await TGLogger.Script(`[米游币任务]分享失败：${shareResp.retcode} ${shareResp.message}`);
+        }
+      } catch (e) {
+        await TGLogger.Script(`[米游币任务]分享异常：${TGHttps.getErrMsg(e)}`, "error");
       }
     }
     if (likeCnt < 5 || viewCnt < 3) {
@@ -270,24 +274,33 @@ async function tryAuto(skip: boolean = false): Promise<void> {
           continue;
         }
         await TGLogger.Script(`[米游币任务]正在点赞帖子${post.post.post_id}`);
-        const likeResp = await apiHubReq.post.like(post.post.post_id, ckPost);
-        if (likeResp.retcode === 0) {
-          await TGLogger.Script("[米游币任务]点赞成功");
-          likeCnt++;
-        } else {
-          await TGLogger.Script(`[米游币任务]点赞失败：${likeResp.retcode} ${likeResp.message}`);
+        try {
+          const likeResp = await apiHubReq.post.like(post.post.post_id, ckPost);
+          if (likeResp.retcode === 0) {
+            await TGLogger.Script("[米游币任务]点赞成功");
+            likeCnt++;
+          } else {
+            await TGLogger.Script(`[米游币任务]点赞失败：${likeResp.retcode} ${likeResp.message}`);
+            continue;
+          }
+        } catch (e) {
+          await TGLogger.Script(`[米游币任务]点赞异常：${TGHttps.getErrMsg(e)}`, "error");
           continue;
         }
         if (cancelLike.value) {
           await TGLogger.Script(`[米游币任务]正在取消点赞帖子${post.post.post_id}`);
           await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-          const unlikeResp = await apiHubReq.post.like(post.post.post_id, ckPost, true);
-          if (unlikeResp.retcode === 0) {
-            await TGLogger.Script("[米游币任务]取消点赞成功");
-          } else {
-            await TGLogger.Script(
-              `[米游币任务]取消点赞失败：${unlikeResp.retcode} ${unlikeResp.message}`,
-            );
+          try {
+            const unlikeResp = await apiHubReq.post.like(post.post.post_id, ckPost, true);
+            if (unlikeResp.retcode === 0) {
+              await TGLogger.Script("[米游币任务]取消点赞成功");
+            } else {
+              await TGLogger.Script(
+                `[米游币任务]取消点赞失败：${unlikeResp.retcode} ${unlikeResp.message}`,
+              );
+            }
+          } catch (e) {
+            await TGLogger.Script(`[米游币任务]取消点赞异常：${TGHttps.getErrMsg(e)}`, "error");
           }
         }
       }
@@ -309,35 +322,46 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
   await TGLogger.Script("[米游币任务]刷新任务状态");
   if (missionList.value.length === 0) {
     await TGLogger.Script("[米游币任务]未检测到任务列表，正在获取");
-    const listResp = await apiHubReq.mission.list(ckState);
-    console.log("米游币任务列表", listResp);
-    if (listResp.retcode !== 0) {
-      await TGLogger.Script(
-        `[米游币任务]获取任务列表失败：${listResp.retcode} ${listResp.message}`,
-      );
-      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+    try {
+      const listResp = await apiHubReq.mission.list(ckState);
+      console.log("米游币任务列表", listResp);
+      if (listResp.retcode !== 0) {
+        await TGLogger.Script(
+          `[米游币任务]获取任务列表失败：${listResp.retcode} ${listResp.message}`,
+          "warn",
+        );
+        showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+        return;
+      }
+      missionList.value = listResp.data.missions;
+      await TGLogger.Script("[米游币任务]获取任务列表成功");
+    } catch (e) {
+      await TGLogger.Script(`[米游币任务]获取任务列表异常：${TGHttps.getErrMsg(e)}`, "error");
       return;
     }
-    missionList.value = listResp.data.missions;
-    await TGLogger.Script("[米游币任务]获取任务列表成功");
   }
   await TGLogger.Script("[米游币任务]正在获取任务状态");
-  const stateResp = await apiHubReq.mission.state(ckState);
-  console.log("米游币任务状态", stateResp);
-  if (stateResp.retcode !== 0) {
-    await TGLogger.Script(
-      `[米游币任务]获取任务状态失败：${stateResp.retcode} ${stateResp.message}`,
-    );
-    showSnackbar.error(`[${stateResp.retcode}] ${stateResp.message}`);
-    return;
+  try {
+    const stateResp = await apiHubReq.mission.state(ckState);
+    console.log("米游币任务状态", stateResp);
+    if (stateResp.retcode !== 0) {
+      await TGLogger.Script(
+        `[米游币任务]获取任务状态失败：${stateResp.retcode} ${stateResp.message}`,
+        "warn",
+      );
+      showSnackbar.error(`[${stateResp.retcode}] ${stateResp.message}`);
+      return;
+    }
+    await TGLogger.Script("[米游币任务]获取任务状态成功");
+    todayPoints.value = stateResp.data.already_received_points;
+    totalPoints.value = stateResp.data.today_total_points;
+    userPoints.value = stateResp.data.total_points;
+    await TGLogger.Script("[米游币任务]合并任务数据");
+    mergeMission(missionList.value, stateResp.data.states);
+    await TGLogger.Script("[米游币任务]任务数据合并完成");
+  } catch (e) {
+    await TGLogger.Script(`[米游币任务]获取任务状态异常：${TGHttps.getErrMsg(e)}`, "error");
   }
-  await TGLogger.Script("[米游币任务]获取任务状态成功");
-  todayPoints.value = stateResp.data.already_received_points;
-  totalPoints.value = stateResp.data.today_total_points;
-  userPoints.value = stateResp.data.total_points;
-  await TGLogger.Script("[米游币任务]合并任务数据");
-  mergeMission(missionList.value, stateResp.data.states);
-  await TGLogger.Script("[米游币任务]任务数据合并完成");
 }
 
 async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string): Promise<void> {
@@ -352,8 +376,14 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
   }
   await TGLogger.Script("[米游币任务]正在执行打卡");
   const ckSign = { stoken: ck.stoken, stuid: ck.stuid, mid: ck.mid };
-  const resp = await apiHubReq.sign(ckSign, 2, ch);
-  console.log("打卡情况", resp);
+  let resp: TGApp.BBS.Response.Base;
+  try {
+    resp = await apiHubReq.sign(ckSign, 2, ch);
+    console.log("打卡情况", resp);
+  } catch (e) {
+    await TGLogger.Script(`[米游币任务]打卡异常：${TGHttps.getErrMsg(e)}`, "error");
+    return;
+  }
   if (resp.retcode !== 0) {
     if (resp.retcode !== 1034) {
       await TGLogger.Script(`[米游币任务]打卡失败：${resp.retcode} ${resp.message}`);

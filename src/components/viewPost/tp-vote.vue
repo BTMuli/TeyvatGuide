@@ -27,6 +27,8 @@
 </template>
 <script lang="ts" setup>
 import ApiHubReq from "@req/apiHubReq.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef } from "vue";
 
@@ -75,18 +77,41 @@ console.log("tp-vote:", props.data);
 
 onMounted(async () => {
   const vote = props.data.insert.vote;
-  const voteInfo = await ApiHubReq.vote.info(vote.id, vote.uid);
-  console.log(`[${props.data.insert.vote.id}]voteInfo:`, voteInfo);
-  const voteResult = await ApiHubReq.vote.result(vote.id, vote.uid);
-  console.log(`[${props.data.insert.vote.id}]voteResult:`, voteResult);
+  let voteInfo: TGApp.BBS.Vote.Info | undefined;
+  let voteResult: TGApp.BBS.Vote.Result | undefined;
+  try {
+    const infoResp = await ApiHubReq.vote.info(vote.id, vote.uid);
+    if (infoResp.retcode !== 0) {
+      await TGLogger.Warn(`[TpVote] 获取投票信息失败：${infoResp.retcode} ${infoResp.message}`);
+      return;
+    }
+    voteInfo = infoResp.data.data[0];
+    console.log(`[${props.data.insert.vote.id}]voteInfo:`, voteInfo);
+  } catch (e) {
+    await TGLogger.Error(`[TpVote] 获取投票信息异常：${TGHttps.getErrMsg(e)}`);
+    return;
+  }
+  try {
+    const resultResp = await ApiHubReq.vote.result(vote.id, vote.uid);
+    if (resultResp.retcode !== 0) {
+      await TGLogger.Warn(`[TpVote] 获取投票结果失败：${resultResp.retcode} ${resultResp.message}`);
+      return;
+    }
+    voteResult = resultResp.data.data[0];
+    console.log(`[${props.data.insert.vote.id}]voteResult:`, voteResult);
+  } catch (e) {
+    await TGLogger.Error(`[TpVote] 获取投票结果异常：${TGHttps.getErrMsg(e)}`);
+    return;
+  }
+  if (!voteInfo || !voteResult) return;
   votes.value = {
     title: voteInfo.title,
     count: voteResult.user_cnt,
     is_over: voteResult.is_over,
     data: voteInfo.vote_option_indexes.map((item, index) => ({
       title: item,
-      count: voteResult.option_stats[index] ?? 0,
-      percent: ((voteResult.option_stats[index] ?? 0) / voteResult.user_cnt) * 100,
+      count: voteResult!.option_stats[index] ?? 0,
+      percent: ((voteResult!.option_stats[index] ?? 0) / voteResult!.user_cnt) * 100,
     })),
     endTime: timestampToDate(voteInfo.end_time * 1000),
   };

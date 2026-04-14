@@ -1,18 +1,22 @@
 /**
  * 米社版块类型
- * @since Beta v0.8.4
+ * @since Beta v0.10.1
  */
 
 declare namespace TGApp.BBS.Forum {
   /**
-   * 获取所有版块信息返回
-   * @since Beta v0.6.8
+   * 获取所有版块信息返回响应
+   * @since Beta v0.10.1
    */
-  type GameForumResp = TGApp.BBS.Response.BaseWithData & {
+  type GameForumResp = TGApp.BBS.Response.BaseWithData<GameForumRes>;
+
+  /**
+   * 获取所有版块信息返回数据
+   * @since Beta v0.10.1
+   */
+  type GameForumRes = {
     /** 所有版块信息 */
-    data: {
-      list: Array<GameForum>;
-    };
+    list: Array<GameForum>;
   };
 
   /**

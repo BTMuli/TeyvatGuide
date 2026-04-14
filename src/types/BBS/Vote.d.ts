@@ -17,7 +17,7 @@ declare namespace TGApp.BBS.Vote {
   type ResultResp = TGApp.BBS.Response.BaseWithData<ResultRes>;
 
   /**
-   * 投票信息返回
+   * 投票信息返回数据
    * @since Beta v0.9.1
    */
   type InfoRes = {
@@ -26,7 +26,7 @@ declare namespace TGApp.BBS.Vote {
   };
 
   /**
-   * 投票结果返回
+   * 投票结果返回数据
    * @since Beta v0.9.1
    */
   type ResultRes = {
