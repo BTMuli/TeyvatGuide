@@ -1,14 +1,14 @@
 /**
  * 游戏-活动日历相关类型定义文件
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  */
 
 declare namespace TGApp.Game.ActCalendar {
   /**
    * 获取活动日历返回响应
-   * @since Beta v0.8.0
+   * @since Beta v0.10.1
    */
-  type Response = TGApp.BBS.Response.BaseWithData<ActRes>;
+  type ActResp = TGApp.BBS.Response.BaseWithData<ActRes>;
 
   /**
    * 活动日历返回数据
@@ -214,7 +214,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 幽境危战
    * @since Beta v0.8.0
    */
-  type ActItemHardChallenge = ActItemBase<"ActTypeHardChallenge"> & {
+  type ActItemHardChallenge = ActItemBase<typeof ActType.HardChallenge> & {
     /** 幽境危战活动详情 */
     hard_challenge_detail: ActHardChallenge;
   };
@@ -253,7 +253,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 真境剧诗
    * @since Beta v0.8.0剧诗活动详情
    */
-  type ActItemRoleCombat = ActItemBase<"ActTypeRoleCombat"> & {
+  type ActItemRoleCombat = ActItemBase<typeof ActType.RoleCombat> & {
     /** 真境剧诗活动详情 */
     role_combat_detail: ActRoleCombat;
   };
@@ -279,7 +279,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 深渊螺旋
    * @since Beta v0.8.0
    */
-  type ActItemTower = ActItemBase<"ActTypeTower"> & {
+  type ActItemTower = ActItemBase<typeof ActType.Tower> & {
     /** 深渊螺旋活动详情 */
     tower_detail: ActTower;
   };
@@ -303,7 +303,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 双倍活动
    * @since Beta v0.8.0
    */
-  type ActItemDouble = ActItemBase<"ActTypeDouble"> & {
+  type ActItemDouble = ActItemBase<typeof ActType.Double> & {
     /** 双倍活动详情 */
     double_detail: ActDouble;
   };
@@ -323,7 +323,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 探索活动
    * @since Beta v0.8.0
    */
-  type ActItemExplore = ActItemBase<"ActTypeExplore"> & {
+  type ActItemExplore = ActItemBase<typeof ActType.Explore> & {
     /** 探索活动详情 */
     explore_detail: ActExplore;
   };
@@ -343,7 +343,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 立本活动
    * @since Beta v0.9.0
    */
-  type ActItemLiBen = ActItemBase<"ActTypeLiBen"> & {
+  type ActItemLiBen = ActItemBase<typeof ActType.LiBen> & {
     /** 立本活动详情 */
     liben_detail: ActLiBen;
   };
@@ -370,7 +370,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 累登活动
    * @since Beta v0.9.0
    */
-  type ActItemSignIn = ActItemBase<"ActTypeSignIn"> & {
+  type ActItemSignIn = ActItemBase<typeof ActType.SignIn> & {
     /** 累登活动详情 */
     sign_in_detail: ActSignIn;
   };
@@ -395,7 +395,7 @@ declare namespace TGApp.Game.ActCalendar {
    * 其他活动
    * @since Beta v0.8.0
    */
-  type ActItemOther = ActItemBase<"ActTypeOther"> & {
+  type ActItemOther = ActItemBase<typeof ActType.Other> & {
     /** 是否完成 */
     is_finished: boolean;
   };

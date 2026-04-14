@@ -35,6 +35,7 @@ import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
@@ -95,31 +96,84 @@ async function loadUserPosition(forceReload: boolean = false): Promise<void> {
     return;
   }
   if (isInit.value) await showLoading.start("正在获取近期活动");
-  const resp = await recordReq.actCalendar(cookie.value, account.value);
-  console.log(resp);
-  if (isInit.value) await showLoading.end();
-  if ("retcode" in resp) {
-    showSnackbar.error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
-    await TGLogger.Error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
+  // 获取近期活动
+  let resp: TGApp.Game.ActCalendar.ActResp | undefined;
+  try {
+    resp = await recordReq.actCalendar(cookie.value, account.value);
+    if (resp.retcode !== 0) {
+      if (isInit.value) {
+        showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+        await showLoading.end();
+      }
+      await TGLogger.Warn(`[PhCompPosition][loadUserPosition] 获取近期活动异常`);
+      await TGLogger.Warn(`[PhCompPosition][loadUserPosition] ${resp.retcode}-${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    if (isInit.value) {
+      showSnackbar.error(`获取近期活动失败：${errMsg}`);
+      await showLoading.end();
+    }
+    await TGLogger.Error(`[PhCompPosition][loadUserPosition] 获取近期活动异常`);
+    await TGLogger.Error(`[PhCompPosition][loadUserPosition] ${e}`);
     return;
   }
-  userPos.value = [...resp.act_list, ...resp.fixed_act_list]
+  if (!resp) {
+    if (isInit.value) await showLoading.end();
+    return;
+  }
+  // 处理近期活动数据
+  userPos.value = [...resp.data.act_list, ...resp.data.fixed_act_list]
     .filter((i) => i.start_timestamp !== "0")
     .sort((a, b) => Number(a.is_finished) - Number(b.is_finished) || b.id - a.id);
+  if (isInit.value) await showLoading.end();
 }
 
 async function loadWikiPosition(): Promise<void> {
   if (obsPos.value.length > 0) return;
   if (isInit.value) await showLoading.start("正在加载近期活动");
-  const resp = await takumiReq.obc.position();
-  if (isInit.value) await showLoading.end();
-  if (Array.isArray(resp)) {
-    obsPos.value = resp;
-    if (resp.length === 0) showSnackbar.warn("暂无近期活动");
-  } else {
-    showSnackbar.error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
-    await TGLogger.Error(`获取近期活动失败：[${resp.retcode}]-${resp.message}`);
+  let resp: TGApp.BBS.Obc.PositionResp | undefined;
+  try {
+    resp = await takumiReq.obc.position();
+    if (resp.retcode !== 0) {
+      if (isInit.value) {
+        showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+        await showLoading.end();
+      }
+      await TGLogger.Warn(`[PhCompPosition][loadWikiPosition] 获取近期活动异常`);
+      await TGLogger.Warn(`[PhCompPosition][loadWikiPosition] ${resp.retcode}-${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    if (isInit.value) {
+      showSnackbar.error(`获取近期活动失败：${errMsg}`);
+      await showLoading.end();
+    }
+    await TGLogger.Error(`[PhCompPosition][loadWikiPosition] 获取近期活动异常`);
+    await TGLogger.Error(`[PhCompPosition][loadWikiPosition] ${e}`);
+    return;
   }
+  if (!resp) {
+    if (isInit.value) await showLoading.end();
+    return;
+  }
+  const data = dfsObc(resp.data.list);
+  obsPos.value = data;
+  if (data.length === 0) showSnackbar.warn("暂无近期活动");
+  if (isInit.value) await showLoading.end();
+}
+
+function dfsObc(
+  list: Array<TGApp.BBS.Obc.ObcItem<TGApp.BBS.Obc.PositionItem>>,
+): Array<TGApp.BBS.Obc.PositionItem> {
+  const res: Array<TGApp.BBS.Obc.PositionItem> = [];
+  for (const item of list) {
+    if (item.name === "近期活动") res.push(...item.list);
+    if (item.children) res.push(...dfsObc(item.children));
+  }
+  return res;
 }
 
 function genEmptyMaterial(material: TGApp.App.Material.WikiItem): MaterialInfo {

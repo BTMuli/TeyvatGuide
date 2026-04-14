@@ -1,12 +1,12 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  */
 
 import gameEnum from "@enum/game.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttps from "@utils/TGHttps.js";
 import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 
 // TakumiRecordGenshinApiBaseUrl => trgAbu
 const trgAbu: Readonly<string> =
@@ -210,22 +210,21 @@ async function hardChallengeDetail(
 
 /**
  * 获取活动日历数据
- * @since Beta v0.8.0
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param user - 用户
- * @returns 活动日历数据
+ * @returns 活动日历响应数据
  */
 async function actCalendar(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
-): Promise<TGApp.Game.ActCalendar.ActRes | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.ActCalendar.ActResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const body = { role_id: user.gameUid, server: user.region };
-  const resp = await TGHttp<TGApp.Game.ActCalendar.Response | TGApp.BBS.Response.Base>(
-    `${trgAbu}act_calendar`,
-    { method: "POST", headers: getRequestHeader(ck, "POST", body), body: JSON.stringify(body) },
-  );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
+  const resp = await TGHttps.post<TGApp.Game.ActCalendar.ActResp>(`${trgAbu}act_calendar`, {
+    headers: getRequestHeader(ck, "POST", body),
+    body: JSON.stringify(body),
+  });
   return resp.data;
 }
 

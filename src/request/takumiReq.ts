@@ -1,9 +1,10 @@
 /**
  * Takumi 相关请求函数
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 
 // TakumiApiBaseUrl => taBu
 const taBu: Readonly<string> = "https://api-takumi.mihoyo.com/";
@@ -149,41 +150,16 @@ async function getObcGachaPool(): Promise<
 }
 
 /**
- * 深度优先遍历
- * @since Beta v0.7.2
- * @param  list - 列表
- * @returns 返回列表
- */
-function DfsObc(
-  list: Array<TGApp.BBS.Obc.ObcItem<TGApp.BBS.Obc.PositionItem>>,
-): Array<TGApp.BBS.Obc.PositionItem> {
-  const res: Array<TGApp.BBS.Obc.PositionItem> = [];
-  for (const item of list) {
-    if (item.name === "近期活动") res.push(...item.list);
-    if (item.children) res.push(...DfsObc(item.children));
-  }
-  return res;
-}
-
-/**
  * 获取热点追踪信息
- * @since Beta v0.7.2
- * @returns 近期活动
+ * @since Beta v0.10.1
+ * @returns 近期活动响应数据
  */
-async function getObcHomePosition(): Promise<
-  Array<TGApp.BBS.Obc.PositionItem> | TGApp.BBS.Response.Base
-> {
-  const resp = await TGHttp<TGApp.BBS.Obc.PositionResp>(
+async function getObcHomePosition(): Promise<TGApp.BBS.Obc.PositionResp> {
+  const resp = await TGHttps.get<TGApp.BBS.Obc.PositionResp>(
     `${taBu}common/blackboard/ys_obc/v1/home/position`,
-    {
-      method: "GET",
-      query: { app_sn: "ys_obc" },
-      headers: { "Content-Type": "application/json" },
-    },
+    { headers: { "Content-Type": "application/json" }, query: { app_sn: "ys_obc" } },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  const data = resp.data.list;
-  return DfsObc(data);
+  return resp.data;
 }
 
 const takumiReq = {
