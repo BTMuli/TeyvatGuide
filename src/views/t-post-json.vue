@@ -94,7 +94,7 @@ onMounted(async () => {
       await TGLogger.Warn(`[${postId}]获取帖子数据失败：${resp.retcode} ${resp.message}`);
       return;
     }
-    jsonData.value = resp.data;
+    jsonData.value = resp.data.post;
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     await showLoading.empty("获取数据失败", errMsg);
