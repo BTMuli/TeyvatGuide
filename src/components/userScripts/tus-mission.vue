@@ -251,7 +251,7 @@ async function tryAuto(skip: boolean = false): Promise<void> {
     if (likeCnt < 5 || viewCnt < 3) {
       const currentCount = postDetailRateLimiter.getRequestCount();
       await TGLogger.Script(
-        `[米游币任务]正在浏览帖子${post.post.post_id} (当前 1 分钟内请求数：${currentCount}/10)`,
+        `[米游币任务]正在浏览帖子${post.post.post_id} (${currentCount}/10 req/min)`,
       );
       let detailResp: TGApp.BBS.Post.FullResp | undefined;
       try {
