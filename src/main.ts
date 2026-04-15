@@ -6,8 +6,6 @@
 import * as Sentry from "@sentry/vue";
 import { createApp, defineCustomElement } from "vue";
 import { createVuetify } from "vuetify";
-import * as components from "vuetify/components";
-import * as directives from "vuetify/directives";
 
 import App from "./App.vue";
 import TLink from "./components/web/t-link.vue";
@@ -19,7 +17,7 @@ import "vuetify/styles";
 import "./assets/index.scss";
 
 const app = createApp(App);
-const vuetify = createVuetify({ components, directives });
+const vuetify = createVuetify();
 
 customElements.define("t-link", defineCustomElement(TLink));
 

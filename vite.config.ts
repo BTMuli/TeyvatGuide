@@ -1,6 +1,6 @@
 /**
  * vite 配置文件
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  */
 
 import { sentryVitePlugin } from "@sentry/vite-plugin";
@@ -17,7 +17,7 @@ export default defineConfig({
   define: { proEnv: process.env },
   plugins: [
     vue(),
-    vuetify(),
+    vuetify({ styles: true }),
     VueDevtools(),
     sentryVitePlugin({
       org: "teyvat-guide",
