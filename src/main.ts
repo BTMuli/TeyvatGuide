@@ -1,6 +1,6 @@
 /**
  * 应用入口
- * @since Beta v0.9.6
+ * @since Beta v0.10.1
  */
 
 import * as Sentry from "@sentry/vue";
@@ -36,9 +36,9 @@ Sentry.init({
   beforeSend(event, hint) {
     console.log(hint);
     // Check if it is an exception, and if so, show the report dialog
-    // if (event.exception && event.event_id) {
-    //   Sentry.showReportDialog({ eventId: event.event_id });
-    // }
+    if (event.exception && event.event_id) {
+      Sentry.showReportDialog({ eventId: event.event_id });
+    }
     return event;
   },
   // Setting this option to true will send default PII data to Sentry.
