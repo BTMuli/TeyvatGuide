@@ -265,21 +265,30 @@ async function refreshGachaPool(
   }
   while (true) {
     page++;
-    const gachaRes = await hk4eReq.gachaB(authkey.value, gachaType, reqId);
-    console.log(gachaRes);
-    if (!Array.isArray(gachaRes)) {
-      showSnackbar.error(`[${gachaType}][${gachaRes.retcode}] ${gachaRes.message}`);
-      await TGLogger.Error(`[GachaB][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败`);
-      await TGLogger.Error(
-        `[GachaB][${ac.gameUid}][refreshGachaPool] ${gachaRes.retcode} ${gachaRes.message}`,
-      );
+    let gachaRes: TGApp.Game.Gacha.GachaBLogResp | undefined;
+    try {
+      gachaRes = await hk4eReq.gachaB(authkey.value, gachaType, reqId);
+      if (gachaRes.retcode !== 0) {
+        showSnackbar.error(`[${gachaType}][${gachaRes.retcode}] ${gachaRes.message}`);
+        await TGLogger.Warn(
+          `[GachaB][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败：[${gachaRes.retcode}] ${gachaRes.message}`,
+        );
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+        break;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`[${gachaType}] 获取祈愿数据失败：${errMsg}`);
+      await TGLogger.Error(`[GachaB][${ac.gameUid}][refreshGachaPool] 获取祈愿数据异常：${errMsg}`);
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       break;
     }
-    if (gachaRes.length === 0) break;
+    console.log(gachaRes);
+    const gachaList = gachaRes.data.list;
+    if (gachaList.length === 0) break;
     const uigfList: Array<TGApp.Plugins.UIGF.GachaItemB> = [];
-    if (force) await showLoading.update(`[${gachaName}] 第${page}页，${gachaRes.length}条`);
-    for (const item of gachaRes) {
+    if (force) await showLoading.update(`[${gachaName}] 第${page}页，${gachaList.length}条`);
+    for (const item of gachaList) {
       if (!force) {
         await showLoading.update(`[${item.item_type}][${item.time}] ${item.item_name}`);
       }
@@ -296,8 +305,8 @@ async function refreshGachaPool(
       uigfList.push(tempItem);
     }
     await TSUserGachaB.insertGachaList(ac.gameUid, uigfList);
-    if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
-    reqId = gachaRes[gachaRes.length - 1].id.toString();
+    if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) break;
+    reqId = gachaList[gachaList.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   }
 }

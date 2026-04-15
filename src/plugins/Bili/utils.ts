@@ -1,6 +1,6 @@
 /**
  * Bili 插件工具函数
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  */
 import TGHttps from "@utils/TGHttps.js";
 import md5 from "js-md5";
@@ -14,13 +14,12 @@ export const BILI_HEADER: Readonly<Record<string, string>> = {
 
 /**
  * Bili 插件导航请求
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  * @returns Bili 插件导航请求返回
  */
 async function getNavResp(): Promise<TGApp.Plugins.Bili.Nav.Resp> {
   const url = "https://api.bilibili.com/x/web-interface/nav";
   const resp = await TGHttps.get<TGApp.Plugins.Bili.Nav.Resp>(url, {
-    method: "GET",
     headers: BILI_HEADER,
   });
   return resp.data;

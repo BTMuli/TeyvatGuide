@@ -241,21 +241,35 @@ async function refreshState(ck: TGApp.App.Account.Cookie, uid: string): Promise<
       `[签到任务]刷新${item.info.title}-${item.account.regionName}-${item.account.gameUid}`,
     );
     if (item.reward === undefined) {
-      const rewardResp = await lunaReq.sign.info(item.account, cookie);
-      console.log("签到奖励", item, rewardResp);
-      if ("retcode" in rewardResp) {
-        await TGLogger.Script(
-          `[签到任务]获取签到奖励失败:${rewardResp.retcode} ${rewardResp.message}`,
-        );
-        showSnackbar.error(`[${rewardResp.retcode}] ${rewardResp.message}`);
-      } else item.reward = rewardResp.awards[dayNow - 1];
+      let rewardResp: TGApp.BBS.Sign.HomeResp | undefined;
+      try {
+        rewardResp = await lunaReq.sign.info(item.account, cookie);
+        console.log("签到奖励", item, rewardResp);
+        if (rewardResp.retcode !== 0) {
+          await TGLogger.Script(
+            `[签到任务]获取签到奖励失败:${rewardResp.retcode} ${rewardResp.message}`,
+          );
+          showSnackbar.error(`[${rewardResp.retcode}] ${rewardResp.message}`);
+        } else item.reward = rewardResp.data.awards[dayNow - 1];
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Script(`[签到任务]获取签到奖励异常:${errMsg}`);
+        showSnackbar.error(`获取签到奖励失败：${errMsg}`);
+      }
     }
-    const statResp = await lunaReq.sign.stat(item.account, cookie);
-    console.log("签到状态", item, statResp);
-    if ("retcode" in statResp) {
-      await TGLogger.Script(`[签到任务]获取签到状态失败:${statResp.retcode} ${statResp.message}`);
-      showSnackbar.error(`[${statResp.retcode}] ${statResp.message}`);
-    } else item.stat = statResp;
+    let statResp: TGApp.BBS.Sign.InfoResp | undefined;
+    try {
+      statResp = await lunaReq.sign.stat(item.account, cookie);
+      console.log("签到状态", item, statResp);
+      if (statResp.retcode !== 0) {
+        await TGLogger.Script(`[签到任务]获取签到状态失败:${statResp.retcode} ${statResp.message}`);
+        showSnackbar.error(`[${statResp.retcode}] ${statResp.message}`);
+      } else item.stat = statResp.data;
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await TGLogger.Script(`[签到任务]获取签到状态异常:${errMsg}`);
+      showSnackbar.error(`获取签到状态失败：${errMsg}`);
+    }
   }
 }
 
@@ -276,16 +290,18 @@ async function trySign(
     let check = false;
     let challenge: string | undefined = undefined;
     while (!check) {
-      const signResp = await lunaReq.sign.oper(item.account, cookie, challenge);
-      console.log("签到信息", item, signResp);
-      if (challenge !== undefined) challenge = undefined;
-      if (typeof signResp !== "object") {
-        await TGLogger.Script(
-          `[签到任务]${item.info.title}-${item.account.regionName}-${item.account.gameUid} ${signResp}`,
-        );
+      let signResp: TGApp.BBS.Sign.SignResp | undefined;
+      try {
+        signResp = await lunaReq.sign.oper(item.account, cookie, challenge);
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Script(`[签到任务]签到异常:${errMsg}`);
+        showSnackbar.error(`签到失败：${errMsg}`);
         break;
       }
-      if ("retcode" in signResp) {
+      console.log("签到信息", item, signResp);
+      if (challenge !== undefined) challenge = undefined;
+      if (signResp.retcode !== 0) {
         if (signResp.retcode === 1034) {
           if (skip) {
             await TGLogger.Script("已设置跳过验证，打卡失败");
@@ -308,12 +324,12 @@ async function trySign(
         showSnackbar.error(`[${signResp.retcode}] ${signResp.message}`);
         break;
       }
-      if (signResp.success === 0) check = true;
-      else if (signResp.is_risk) {
+      if (signResp.data.success === 0) check = true;
+      else if (signResp.data.is_risk) {
         await TGLogger.Script("[签到任务]触发风险验证，开始验证");
         const gtRes = await showGeetest({
-          gt: signResp.gt,
-          challenge: signResp.challenge,
+          gt: signResp.data.gt,
+          challenge: signResp.data.challenge,
           new_captcha: 1,
           success: 1,
         });
@@ -321,7 +337,7 @@ async function trySign(
           await TGLogger.Script("[签到任务]验证码验证失败");
           break;
         }
-        challenge = signResp.challenge;
+        challenge = signResp.data.challenge;
       } else break;
     }
     if (check) {

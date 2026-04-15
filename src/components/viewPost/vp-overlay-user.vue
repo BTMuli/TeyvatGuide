@@ -30,11 +30,11 @@
       <div class="vp-ou-divider" />
       <div ref="listRef" class="vp-ou-list">
         <TPostCard
-          @onUserClick="toUserProfile()"
           v-for="post in results"
           :key="post.post.post_id"
           :post
           class="vp-ou-item"
+          @onUserClick="toUserProfile()"
         />
       </div>
     </div>
@@ -108,12 +108,21 @@ watch(
 );
 
 async function loadUser(): Promise<void> {
-  const resp = await bbsReq.otherUserInfo(props.gid.toString(), props.uid);
-  if ("retcode" in resp) {
-    showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+  let resp: TGApp.BBS.User.InfoResp | undefined;
+  try {
+    resp = await bbsReq.otherUserInfo(props.gid.toString(), props.uid);
+    if (resp.retcode !== 0) {
+      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[vp-overlay-user] 获取用户信息失败：[${resp.retcode}] ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取用户信息失败：${errMsg}`);
+    await TGLogger.Error(`[vp-overlay-user] 获取用户信息异常：${errMsg}`);
     return;
   }
-  userInfo.value = resp;
+  userInfo.value = resp.data.user_info;
 }
 
 async function toUserProfile(): Promise<void> {

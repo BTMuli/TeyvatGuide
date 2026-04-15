@@ -694,19 +694,25 @@ class Client {
 
   /**
    * 获取米游社客户端的用户信息
-   * @since Beta v0.3.9
+   * @since Beta v0.10.1
    * @param arg - 类型参数
    * @returns 无返回值
    */
   async getUserInfo(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     const user = useUserStore();
     if (!user.cookie) return;
-    const userInfo = await bbsReq.userInfo(user.cookie);
-    if ("retcode" in userInfo) {
-      console.error(`[${arg.callback}] ${userInfo.message}`);
+    let userInfo: TGApp.BBS.User.InfoResp | undefined;
+    try {
+      userInfo = await bbsReq.userInfo(user.cookie);
+      if (userInfo.retcode !== 0) {
+        console.error(`[${arg.callback}] ${userInfo.message}`);
+        return;
+      }
+    } catch (e) {
+      console.error(`[${arg.callback}] ${TGHttps.getErrMsg(e)}`);
       return;
     }
-    await this.callback(arg.callback, userInfo);
+    await this.callback(arg.callback, userInfo.data.user_info);
   }
 
   /**

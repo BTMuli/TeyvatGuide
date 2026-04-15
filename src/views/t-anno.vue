@@ -23,6 +23,7 @@ import TaParser from "@comp/pageAnno/ta-parser.vue";
 import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
 import { app, webviewWindow } from "@tauri-apps/api";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createTGWindow } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -44,16 +45,29 @@ onMounted(async () => {
   appVersion.value = await app.getVersion();
   if (!annoId || !region) {
     await showLoading.empty("未找到数据", "未解析到公告ID或服务器");
-    await TGLogger.Error("[t-anno.vue] 未找到数据");
+    await TGLogger.Error("[t-anno] 未找到数据");
     return;
   }
   await showLoading.update("正在获取数据");
-  const detailResp = await hk4eReq.anno.detail(region, lang);
+  let detailResp: TGApp.Game.Anno.DetailResp | undefined;
+  try {
+    detailResp = await hk4eReq.anno.detail(region, lang);
+    if (detailResp.retcode !== 0) {
+      await showLoading.empty("获取公告失败", `[${detailResp.retcode}] ${detailResp.message}`);
+      await TGLogger.Warn(`[t-anno] 获取公告失败：[${detailResp.retcode}] ${detailResp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.empty("获取公告失败", errMsg);
+    await TGLogger.Error(`[t-anno] 获取公告异常：${errMsg}`);
+    return;
+  }
   await showLoading.update("正在渲染数据");
-  const find = detailResp.find((item) => item.ann_id === annoId);
+  const find = detailResp.data.list.find((item) => item.ann_id === annoId);
   if (!find) {
     await showLoading.empty("未找到数据", "公告不存在或解析失败");
-    await TGLogger.Error(`[t-anno.vue][${annoId}] 未找到公告`);
+    await TGLogger.Error(`[t-anno][${annoId}] 未找到公告`);
     await webviewWindow.getCurrentWebviewWindow().setTitle(`Anno_${annoId} Not Found`);
     return;
   }

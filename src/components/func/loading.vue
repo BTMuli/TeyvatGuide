@@ -29,6 +29,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
+import TGHttps from "@utils/TGHttps.js";
 import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import { LoadingParams } from "./loading.js";
@@ -79,16 +80,30 @@ async function getRandomEmoji(): Promise<void> {
       for (const [k, v] of Object.entries(JSON.parse(emojisRead))) tmpArr.push([`${k}`, `${v}`]);
       localEmojis.value = tmpArr;
     } else {
-      const resp = await bbsReq.emojis();
-      if ("retcode" in resp) {
-        console.error(resp);
-        showSnackbar.error("获取表情包失败！");
+      let resp: TGApp.BBS.Emoji.Resp | undefined;
+      try {
+        resp = await bbsReq.emojis();
+        if (resp.retcode !== 0) {
+          console.error(resp);
+          showSnackbar.error("获取表情包失败！");
+          iconUrl.value = defaultIcon;
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+        showSnackbar.error(`获取表情包失败：${TGHttps.getErrMsg(e)}`);
         iconUrl.value = defaultIcon;
         return;
       }
-      localStorage.setItem("emojis", JSON.stringify(resp));
+      const emojis: Record<string, string> = {};
+      for (const series of resp.data.list) {
+        for (const emoji of series.list) {
+          emojis[emoji.name] = emoji.icon;
+        }
+      }
+      localStorage.setItem("emojis", JSON.stringify(emojis));
       let tmpArr: Array<EmojiItem> = [];
-      for (const [k, v] of Object.entries(resp)) {
+      for (const [k, v] of Object.entries(emojis)) {
         tmpArr.push([k, v]);
         localEmojis.value = tmpArr;
       }

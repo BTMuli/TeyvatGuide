@@ -108,6 +108,7 @@ import lunaReq from "@req/lunaReq.js";
 import miscReq from "@req/miscReq.js";
 import useBBSStore from "@store/bbs.js";
 import useUserStore from "@store/user.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
@@ -323,70 +324,74 @@ async function handleSign(): Promise<void> {
     return;
   }
   isSign.value = true;
-  try {
-    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const ckSign = {
-      stoken: cookie.value.stoken,
-      stuid: cookie.value.stuid,
-      mid: cookie.value.mid,
-    };
+  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+  const ckSign = {
+    stoken: cookie.value.stoken,
+    stuid: cookie.value.stuid,
+    mid: cookie.value.mid,
+  };
 
-    let check = false;
-    let challenge: string | undefined = undefined;
+  let check = false;
+  let challenge: string | undefined = undefined;
 
-    while (!check) {
-      const signResp = await lunaReq.sign.oper(props.account, ck, challenge);
-      if (challenge !== undefined) challenge = undefined;
-      if ("retcode" in signResp) {
-        if (signResp.retcode === 1034) {
-          await TGLogger.Info("[Sign Item] Captcha required");
-          const challengeGet = await miscReq.challenge(ckSign);
-          if (challengeGet === false) {
-            showSnackbar.error("验证码验证失败");
-            break;
-          }
-          challenge = challengeGet;
-          continue;
-        }
-        await TGLogger.Error(`[Sign Item] Sign-in failed: ${signResp.message}`);
-        showSnackbar.error(`签到失败: ${signResp.message}`);
-        break;
-      }
-
-      if (signResp.success === 0) {
-        check = true;
-      } else if (signResp.is_risk) {
-        await TGLogger.Info("[Sign Item] Risk verification required");
-        const gtRes = await showGeetest({
-          gt: signResp.gt,
-          challenge: signResp.challenge,
-          new_captcha: 1,
-          success: 1,
-        });
-        if (gtRes === false) {
+  while (!check) {
+    let signResp: TGApp.BBS.Sign.SignResp | undefined;
+    try {
+      signResp = await lunaReq.sign.oper(props.account, ck, challenge);
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      await TGLogger.Error(`[Sign Item] Sign-in error: ${errMsg}`);
+      showSnackbar.error(`签到失败: ${errMsg}`);
+      isSign.value = false;
+      break;
+    }
+    if (challenge !== undefined) challenge = undefined;
+    if (signResp.retcode !== 0) {
+      if (signResp.retcode === 1034) {
+        await TGLogger.Info("[Sign Item] Captcha required");
+        const challengeGet = await miscReq.challenge(ckSign);
+        if (challengeGet === false) {
           showSnackbar.error("验证码验证失败");
+          isSign.value = false;
           break;
         }
-        challenge = signResp.challenge;
-      } else {
+        challenge = challengeGet;
+        continue;
+      }
+      await TGLogger.Error(`[Sign Item] Sign-in failed: ${signResp.message}`);
+      showSnackbar.error(`签到失败: ${signResp.message}`);
+      isSign.value = false;
+      break;
+    }
+    if (signResp.data.success === 0) {
+      check = true;
+    } else if (signResp.data.is_risk) {
+      await TGLogger.Info("[Sign Item] Risk verification required");
+      const gtRes = await showGeetest({
+        gt: signResp.data.gt,
+        challenge: signResp.data.challenge,
+        new_captcha: 1,
+        success: 1,
+      });
+      if (gtRes === false) {
+        showSnackbar.error("验证码验证失败");
         break;
       }
+      challenge = signResp.data.challenge;
+    } else {
+      break;
     }
-    if (check) {
-      showSnackbar.success("签到成功");
-      updateLocalDataAfterSign();
-      // Load resign info only if there are missed days
-      const missedDays = signStat.value?.sign_cnt_missed ?? 0;
-      if (missedDays > 0) {
-        await loadResignInfo();
-      }
-    }
-  } catch (error) {
-    await TGLogger.Error(`[Sign Item] Sign-in error: ${error}`);
-    showSnackbar.error("签到失败，请重试");
-  } finally {
-    isSign.value = false;
   }
+  if (check) {
+    showSnackbar.success("签到成功");
+    updateLocalDataAfterSign();
+    // Load resign info only if there are missed days
+    const missedDays = signStat.value?.sign_cnt_missed ?? 0;
+    if (missedDays > 0) {
+      await loadResignInfo();
+    }
+  }
+  isSign.value = false;
 }
 
 async function handleResign(): Promise<void> {
@@ -443,30 +448,38 @@ async function handleResign(): Promise<void> {
     let challenge: string | undefined = undefined;
 
     while (!check) {
-      const resignResp = await lunaReq.resign.oper(props.account, ck, challenge);
-      if (challenge !== undefined) challenge = undefined;
-      if ("retcode" in resignResp) {
-        if (resignResp.retcode === 1034) {
-          await TGLogger.Info("[Sign Item] Captcha required for resign");
-          const challengeGet = await miscReq.challenge(ckSign);
-          if (challengeGet === false) {
-            showSnackbar.error("验证码验证失败");
-            break;
+      let resignResp: TGApp.BBS.Sign.ResignResp | undefined;
+      try {
+        resignResp = await lunaReq.resign.oper(props.account, ck, challenge);
+        if (challenge !== undefined) challenge = undefined;
+        if (resignResp.retcode !== 0) {
+          if (resignResp.retcode === 1034) {
+            await TGLogger.Info("[Sign Item] Captcha required for resign");
+            const challengeGet = await miscReq.challenge(ckSign);
+            if (challengeGet === false) {
+              showSnackbar.error("验证码验证失败");
+              break;
+            }
+            challenge = challengeGet;
+            continue;
           }
-          challenge = challengeGet;
-          continue;
+          await TGLogger.Error(`[Sign Item] Resign failed: ${resignResp.message}`);
+          showSnackbar.error(`补签失败: ${resignResp.message}`);
+          break;
         }
-        await TGLogger.Error(`[Sign Item] Resign failed: ${resignResp.message}`);
-        showSnackbar.error(`补签失败: ${resignResp.message}`);
+
+        // Resign successful
+        check = true;
+        updateLocalDataAfterResign();
+        showSnackbar.success(
+          `补签成功，剩余补签次数${resignCnt - 1}次，剩余米游币${coinCnt - coinCost}`,
+        );
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Error(`[Sign Item] Resign error: ${errMsg}`);
+        showSnackbar.error(`补签失败: ${errMsg}`);
         break;
       }
-
-      // Resign successful
-      check = true;
-      updateLocalDataAfterResign();
-      showSnackbar.success(
-        `补签成功，剩余补签次数${resignCnt - 1}次，剩余米游币${coinCnt - coinCost}`,
-      );
     }
   } catch (error) {
     await TGLogger.Error(`[Sign Item] Resign error: ${error}`);

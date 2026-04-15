@@ -1,26 +1,26 @@
 /**
  * Misc路径下的请求
- * @since Beta v0.7.1
+ * @since Beta v0.10.1
  */
 import showGeetest from "@comp/func/geetest.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { getRequestHeader } from "@utils/getRequestHeader.js";
-import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 
 // BBSApiMiscBaseUrl => bamBu
 const bamBu: Readonly<string> = "https://bbs-api.miyoushe.com/misc/api/";
 
 /**
  * 创建极验验证
- * @since Beta v0.7.1
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param useK2 - 是否使用 K2
- * @returns 极验创建结果或基础响应
+ * @returns 极验创建响应数据
  */
 async function createVerification(
   cookie: Record<string, string>,
   useK2: boolean = true,
-): Promise<TGApp.BBS.Response.Base | TGApp.BBS.Geetest.CreateRes> {
+): Promise<TGApp.BBS.Geetest.CreateResp> {
   const param = { is_high: true };
   let header;
   if (useK2) {
@@ -29,28 +29,26 @@ async function createVerification(
       "x-rpc-client_type": "2",
     };
   } else header = getRequestHeader(cookie, "GET", param, "X4", true);
-  const resp = await TGHttp<TGApp.BBS.Geetest.CreateResp>(`${bamBu}createVerification`, {
-    method: "GET",
+  const resp = await TGHttps.get<TGApp.BBS.Geetest.CreateResp>(`${bamBu}createVerification`, {
     headers: header,
     query: param,
   });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 
 /**
  * 验证极验验证
- * @since Beta v0.7.1
+ * @since Beta v0.10.1
  * @param data - 极验验证数据
  * @param cookie - Cookie
  * @param useK2 - 是否使用 K2
- * @returns 验证结果或基础响应
+ * @returns 验证响应数据
  */
 async function verifyVerification(
   data: TGApp.BBS.Geetest.GeetestVerifyRes,
   cookie: Record<string, string>,
   useK2: boolean = true,
-): Promise<TGApp.BBS.Response.Base | string> {
+): Promise<TGApp.BBS.Geetest.VerifyResp> {
   let header;
   if (useK2) {
     header = {
@@ -58,18 +56,16 @@ async function verifyVerification(
       "x-rpc-client_type": "2",
     };
   } else header = getRequestHeader(cookie, "POST", JSON.stringify(data), "X4");
-  const resp = await TGHttp<TGApp.BBS.Geetest.VerifyResp>(`${bamBu}verifyVerification`, {
-    method: "POST",
+  const resp = await TGHttps.post<TGApp.BBS.Geetest.VerifyResp>(`${bamBu}verifyVerification`, {
     headers: header,
     body: JSON.stringify(data),
   });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.challenge;
+  return resp.data;
 }
 
 /**
  * 获取极验验证 challenge
- * @since Beta v0.7.1
+ * @since Beta v0.10.1
  * @param cookie - Cookie
  * @param useK2 - 是否使用 K2
  * @returns challenge 字符串
@@ -78,19 +74,33 @@ async function getGeetestChallenge(
   cookie: Record<string, string>,
   useK2: boolean = false,
 ): Promise<string | false> {
-  const createResp = await createVerification(cookie, useK2);
-  if ("retcode" in createResp) {
-    showSnackbar.error(`[${createResp.retcode}] ${createResp.message}`);
+  let createResp: TGApp.BBS.Geetest.CreateResp | undefined;
+  try {
+    createResp = await createVerification(cookie, useK2);
+    if (createResp.retcode !== 0) {
+      showSnackbar.error(`[${createResp.retcode}] ${createResp.message}`);
+      return false;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`创建验证失败：${errMsg}`);
     return false;
   }
-  const gtRes = await showGeetest(createResp);
+  const gtRes = await showGeetest(createResp.data);
   if (!gtRes) return false;
-  const verifyRes = await verifyVerification(gtRes, cookie, useK2);
-  if (typeof verifyRes !== "string") {
-    showSnackbar.error(`[${verifyRes.retcode}] ${verifyRes.message}`);
+  let verifyRes: TGApp.BBS.Geetest.VerifyResp | undefined;
+  try {
+    verifyRes = await verifyVerification(gtRes, cookie, useK2);
+    if (verifyRes.retcode !== 0) {
+      showSnackbar.error(`[${verifyRes.retcode}] ${verifyRes.message}`);
+      return false;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`验证失败：${errMsg}`);
     return false;
   }
-  return verifyRes;
+  return verifyRes.data.challenge;
 }
 
 const miscReq = {

@@ -193,7 +193,7 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
   await showLoading.update("正在获取用户信息");
   try {
     const briefRes = await bbsReq.userInfo(ck);
-    if ("retcode" in briefRes) {
+    if (briefRes.retcode !== 0) {
       await showLoading.end();
       showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
       await TGLogger.Warn(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
@@ -201,10 +201,10 @@ async function tryGetTokens(ck: TGApp.App.Account.Cookie): Promise<void> {
     }
     showSnackbar.success("获取用户信息成功");
     briefInfoGet = {
-      nickname: briefRes.nickname,
-      uid: briefRes.uid,
-      avatar: briefRes.avatar_url,
-      desc: briefRes.introduce,
+      nickname: briefRes.data.user_info.nickname,
+      uid: briefRes.data.user_info.uid,
+      avatar: briefRes.data.user_info.avatar_url,
+      desc: briefRes.data.user_info.introduce,
     };
     await showLoading.update("正在保存用户数据");
     await TSUserAccount.account.saveAccount({
@@ -371,7 +371,7 @@ async function refreshUser(uid: string, full: boolean) {
   await showLoading.update("正在获取用户信息");
   try {
     const infoRes = await bbsReq.userInfo(ck);
-    if ("retcode" in infoRes) {
+    if (infoRes.retcode !== 0) {
       await showLoading.update("获取用户信息失败");
       showSnackbar.error(`[${infoRes.retcode}]${infoRes.message}`);
       await TGLogger.Warn("[tc-userBadge][refreshUserInfo] 获取用户信息失败");
@@ -379,10 +379,10 @@ async function refreshUser(uid: string, full: boolean) {
     } else {
       await showLoading.update("获取用户信息成功");
       account.brief = {
-        nickname: infoRes.nickname,
-        uid: infoRes.uid,
-        avatar: infoRes.avatar_url,
-        desc: infoRes.introduce,
+        nickname: infoRes.data.user_info.nickname,
+        uid: infoRes.data.user_info.uid,
+        avatar: infoRes.data.user_info.avatar_url,
+        desc: infoRes.data.user_info.introduce,
       };
       await TGLogger.Info("[tc-userBadge][refreshUserInfo] 获取用户信息成功");
     }
@@ -630,17 +630,17 @@ async function addByCookie(): Promise<void> {
   let briefGet: TGApp.App.Account.BriefInfo | undefined;
   try {
     const briefRes = await bbsReq.userInfo(ck);
-    if ("retcode" in briefRes) {
+    if (briefRes.retcode !== 0) {
       await showLoading.end();
       showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
       await TGLogger.Warn(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
       return;
     }
     briefGet = {
-      nickname: briefRes.nickname,
-      uid: briefRes.uid,
-      avatar: briefRes.avatar_url,
-      desc: briefRes.introduce,
+      nickname: briefRes.data.user_info.nickname,
+      uid: briefRes.data.user_info.uid,
+      avatar: briefRes.data.user_info.avatar_url,
+      desc: briefRes.data.user_info.introduce,
     };
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);

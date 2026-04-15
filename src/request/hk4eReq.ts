@@ -1,10 +1,10 @@
 /**
  * Hk4eApi 请求模块
- * @since Beta v0.8.4
+ * @since Beta v0.10.1
  */
 
 import gameEnum from "@enum/game.js";
-import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 import { getDeviceInfo } from "@utils/toolFunc.js";
 
 const AnnoApi: Readonly<string> = "https://hk4e-ann-api.mihoyo.com/common/hk4e_cn/announcement/api";
@@ -63,17 +63,16 @@ function getAnnoParams(
 
 /**
  * 获取游戏内公告列表
- * @since Beta v0.8.0
+ * @since Beta v0.10.1
  * @param region - 服务器
  * @param lang - 语言
- * @returns 公告列表
+ * @returns 公告列表响应数据
  */
 async function getAnnoList(
   region: TGApp.Game.Base.ServerTypeEnum = gameEnum.server.CN_GF01,
   lang: TGApp.Game.Anno.AnnoLangEnum = gameEnum.anno.lang.CHS,
-): Promise<TGApp.Game.Anno.ListRes> {
-  const resp = await TGHttp<TGApp.Game.Anno.ListResp>(`${getAnnoApi(region)}/getAnnList`, {
-    method: "GET",
+): Promise<TGApp.Game.Anno.ListResp> {
+  const resp = await TGHttps.get<TGApp.Game.Anno.ListResp>(`${getAnnoApi(region)}/getAnnList`, {
     query: getAnnoParams(region, lang),
   });
   return resp.data;
@@ -81,35 +80,35 @@ async function getAnnoList(
 
 /**
  * 获取游戏内公告内容
- * @since Beta v0.8.0
+ * @since Beta v0.10.1
  * @param region - 服务器
  * @param lang - 语言
- * @returns 公告详情
+ * @returns 公告详情响应数据
  */
 async function getAnnoDetail(
   region: TGApp.Game.Base.ServerTypeEnum = gameEnum.server.CN_GF01,
   lang: TGApp.Game.Anno.AnnoLangEnum = gameEnum.anno.lang.CHS,
-): Promise<Array<TGApp.Game.Anno.AnnoDetail>> {
-  const resp = await TGHttp<TGApp.Game.Anno.DetailResp>(`${getAnnoApi(region)}/getAnnContent`, {
-    method: "GET",
-    query: getAnnoParams(region, lang),
-  });
-  return resp.data.list;
+): Promise<TGApp.Game.Anno.DetailResp> {
+  const resp = await TGHttps.get<TGApp.Game.Anno.DetailResp>(
+    `${getAnnoApi(region)}/getAnnContent`,
+    { query: getAnnoParams(region, lang) },
+  );
+  return resp.data;
 }
 
 /**
  * 获取抽卡记录
- * @since Beta v0.5.0
+ * @since Beta v0.10.1
  * @param authKey - authKey
  * @param gachaType - 抽卡类型
  * @param endId - 结束 id，默认为 0
- * @returns 抽卡记录
+ * @returns 抽卡记录响应数据
  */
 async function getGachaLog(
   authKey: string,
   gachaType: string,
   endId: string = "0",
-): Promise<Array<TGApp.Game.Gacha.GachaItem> | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Gacha.GachaLogResp> {
   const params = {
     lang: "zh-cn",
     auth_appid: "webview_gacha",
@@ -120,27 +119,26 @@ async function getGachaLog(
     size: "20",
     end_id: endId,
   };
-  const resp = await TGHttp<TGApp.Game.Gacha.GachaLogResp | TGApp.BBS.Response.Base>(
+  const resp = await TGHttps.get<TGApp.Game.Gacha.GachaLogResp>(
     "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog",
-    { method: "GET", query: params },
+    { query: params },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.list;
+  return resp.data;
 }
 
 /**
  * 获取千星奇域抽卡记录
- * @since Beta v0.8.4
+ * @since Beta v0.10.1
  * @param authKey - authKey
  * @param gachaType - 抽卡类型
  * @param endId - 结束 id，默认为 0
- * @returns 抽卡记录
+ * @returns 抽卡记录响应数据
  */
 async function getBeyondGachaLog(
   authKey: string,
   gachaType: string,
   endId: string = "0",
-): Promise<Array<TGApp.Game.Gacha.GachaBItem> | TGApp.BBS.Response.Base> {
+): Promise<TGApp.Game.Gacha.GachaBLogResp> {
   const params = {
     lang: "zh-cn",
     auth_appid: "webview_gacha",
@@ -151,50 +149,40 @@ async function getBeyondGachaLog(
     size: "5",
     end_id: endId,
   };
-  const resp = await TGHttp<TGApp.Game.Gacha.GachaBLogResp | TGApp.BBS.Response.Base>(
+  const resp = await TGHttps.get<TGApp.Game.Gacha.GachaBLogResp>(
     "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getBeyondGachaLog",
-    { method: "GET", query: params },
+    { query: params },
   );
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
-  return resp.data.list;
+  return resp.data;
 }
 
 /**
  * 获取登录二维码
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @param appId - 应用 ID
  * @remarks 目前只有2/7能用
- * @returns 二维码返回
+ * @returns 二维码响应数据
  */
-async function fetchPandaQr(
-  appId: number,
-): Promise<TGApp.Game.Login.QrRes | TGApp.BBS.Response.Base> {
+async function fetchPandaQr(appId: number): Promise<TGApp.Game.Login.QrResp> {
   const data = { app_id: appId, device: getDeviceInfo("device_id") };
-  const resp = await TGHttp<TGApp.Game.Login.QrResp>(`${SdkApi}combo/panda/qrcode/fetch`, {
-    method: "POST",
+  const resp = await TGHttps.post<TGApp.Game.Login.QrResp>(`${SdkApi}combo/panda/qrcode/fetch`, {
     body: JSON.stringify(data),
   });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 
 /**
  * 获取登录状态
- * @since Beta v0.7.2
+ * @since Beta v0.10.1
  * @param ticket - 二维码 ticket
  * @param appId - 应用 ID
- * @returns 登录状态
+ * @returns 登录状态响应数据
  */
-async function queryPandaQr(
-  ticket: string,
-  appId: number,
-): Promise<TGApp.BBS.Response.Base | TGApp.Game.Login.StatRes> {
+async function queryPandaQr(ticket: string, appId: number): Promise<TGApp.Game.Login.StatResp> {
   const data = { app_id: appId, ticket, device: getDeviceInfo("device_id") };
-  const resp = await TGHttp<TGApp.Game.Login.StatResp>(`${SdkApi}combo/panda/qrcode/query`, {
-    method: "POST",
+  const resp = await TGHttps.post<TGApp.Game.Login.StatResp>(`${SdkApi}combo/panda/qrcode/query`, {
     body: JSON.stringify(data),
   });
-  if (resp.retcode !== 0) return <TGApp.BBS.Response.Base>resp;
   return resp.data;
 }
 

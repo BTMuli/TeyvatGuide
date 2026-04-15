@@ -15,8 +15,8 @@
           :key="index"
           :class="{ selected: index === props.collection.cur - 1 }"
           :post
-          @onUserClick="toUserProfile"
           class="tpoc-item"
+          @onUserClick="toUserProfile"
         />
       </div>
     </div>
@@ -57,12 +57,23 @@ watch(
 onMounted(async () => await Promise.all([refreshInfo(), refreshPosts()]));
 
 async function refreshInfo(): Promise<void> {
-  const infoResp = await bbsReq.collection(props.collection.collection_id, props.gid);
-  if ("retcode" in infoResp) {
-    // showSnackbar.warn(`[合集信息][${infoResp.retcode}] ${infoResp.message}`);
+  let infoResp: TGApp.BBS.Collection.InfoResp | undefined;
+  try {
+    infoResp = await bbsReq.collection(props.collection.collection_id, props.gid);
+    if (infoResp.retcode !== 0) {
+      // showSnackbar.warn(`[合集信息][${infoResp.retcode}] ${infoResp.message}`);
+      await TGLogger.Warn(
+        `[vp-overlay-collection] 获取合集信息失败：[${infoResp.retcode}] ${infoResp.message}`,
+      );
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取合集信息失败：${errMsg}`);
+    await TGLogger.Error(`[vp-overlay-collection] 获取合集信息异常：${errMsg}`);
     return;
   }
-  info.value = infoResp;
+  info.value = infoResp.data;
   console.log(info.value);
 }
 

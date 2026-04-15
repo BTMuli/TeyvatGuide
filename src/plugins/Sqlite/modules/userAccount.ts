@@ -177,17 +177,17 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
   let briefInfo: TGApp.App.Account.BriefInfo | undefined;
   try {
     const briefRes = await bbsReq.userInfo(ck);
-    if ("retcode" in briefRes) {
+    if (briefRes.retcode !== 0) {
       await showLoading.end();
       showSnackbar.error(`[${briefRes.retcode}]${briefRes.message}`);
       await TGLogger.Warn(`获取用户数据失败：${briefRes.retcode}-${briefRes.message}`);
       return false;
     }
     briefInfo = {
-      nickname: briefRes.nickname,
-      uid: briefRes.uid,
-      avatar: briefRes.avatar_url,
-      desc: briefRes.introduce,
+      nickname: briefRes.data.user_info.nickname,
+      uid: briefRes.data.user_info.uid,
+      avatar: briefRes.data.user_info.avatar_url,
+      desc: briefRes.data.user_info.introduce,
     };
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);

@@ -118,39 +118,57 @@ async function share(): Promise<void> {
 }
 
 async function freshQr(): Promise<void> {
-  const resp = await hk4eReq.loginQr.create(codeGid.value);
-  if ("retcode" in resp) {
-    showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+  let resp: TGApp.Game.Login.QrResp | undefined;
+  try {
+    resp = await hk4eReq.loginQr.create(codeGid.value);
+    if (resp.retcode !== 0) {
+      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`创建二维码失败：${errMsg}`);
+    await TGLogger.Error(`[TcoGameLogin][freshQr] 创建二维码异常`);
+    await TGLogger.Error(`[TcoGameLogin][freshQr] ${e}`);
     return;
   }
-  codeUrl.value = resp.url;
+  codeUrl.value = resp.data.url;
   codeTicket.value = new URL(codeUrl.value).searchParams.get("ticket") || "";
 }
 
 async function cycleGetDataGame(): Promise<void> {
-  const res = await hk4eReq.loginQr.state(codeTicket.value, codeGid.value);
-  console.log(res);
-  if ("retcode" in res) {
-    showSnackbar.error(`[${res.retcode}] ${res.message}`);
-    if (res.retcode === -106) {
-      await freshQr();
-    } else {
-      if (cycleTimer) clearInterval(cycleTimer);
-      cycleTimer = null;
-      model.value = false;
+  let res: TGApp.Game.Login.StatResp | undefined;
+  try {
+    res = await hk4eReq.loginQr.state(codeTicket.value, codeGid.value);
+    console.log(res);
+    if (res.retcode !== 0) {
+      showSnackbar.error(`[${res.retcode}] ${res.message}`);
+      if (res.retcode === -106) {
+        await freshQr();
+      } else {
+        if (cycleTimer) clearInterval(cycleTimer);
+        cycleTimer = null;
+        model.value = false;
+      }
+      return;
     }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取登录状态失败：${errMsg}`);
+    await TGLogger.Error(`[TcoGameLogin][cycleGetDataGame] 获取登录状态异常`);
+    await TGLogger.Error(`[TcoGameLogin][cycleGetDataGame] ${e}`);
     return;
   }
-  if (res.stat === "Init" || res.stat === "Scanned") return;
-  if (res.stat === "Confirmed") {
+  if (res.data.stat === "Init" || res.data.stat === "Scanned") return;
+  if (res.data.stat === "Confirmed") {
     if (cycleTimer) clearInterval(cycleTimer);
     cycleTimer = null;
-    if (res.payload.proto === "Raw") {
-      showSnackbar.error(`返回数据异常：${res.payload}`);
+    if (res.data.payload.proto === "Raw") {
+      showSnackbar.error(`返回数据异常：${res.data.payload}`);
       model.value = false;
       return;
     }
-    const statusRaw: TGApp.Game.Login.StatPayloadRaw = JSON.parse(res.payload.raw);
+    const statusRaw: TGApp.Game.Login.StatPayloadRaw = JSON.parse(res.data.payload.raw);
     await showLoading.start("正在获取SToken");
     let stResp: TGApp.Game.Login.StResp | undefined;
     try {

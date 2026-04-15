@@ -35,6 +35,8 @@ import { isColorSimilar } from "@utils/colorFunc.js";
 import { parseLink, parsePost } from "@utils/linkParser.js";
 import { decodeRegExp } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef, StyleValue, toRaw, useTemplateRef } from "vue";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 
 export type TpText = {
   insert: string;
@@ -139,14 +141,26 @@ async function copyLink(): Promise<void> {
 function getEmojiUrl(): string {
   if (localEmojis.value === null || !JSON.parse(localEmojis.value)[getEmojiName()]) {
     console.warn("tpEmoji unknown", getEmojiName());
-    bbsReq.emojis().then((res) => {
-      if ("retcode" in res) {
-        console.error(res);
-        return "";
-      }
-      localEmojis.value = JSON.stringify(res);
-      localStorage.setItem("emojis", localEmojis.value);
-    });
+    bbsReq
+      .emojis()
+      .then((res) => {
+        if (res.retcode !== 0) {
+          console.error(res);
+          return "";
+        }
+        const emojis: Record<string, string> = {};
+        for (const series of res.data.list) {
+          for (const emoji of series.list) {
+            emojis[emoji.name] = emoji.icon;
+          }
+        }
+        localEmojis.value = JSON.stringify(emojis);
+        localStorage.setItem("emojis", localEmojis.value);
+      })
+      .catch(async (e) => {
+        const errMsg = TGHttps.getErrMsg(e);
+        await TGLogger.Error(errMsg);
+      });
   }
   if (localEmojis.value === null) return "";
   const emojiName = getEmojiName();

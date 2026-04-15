@@ -602,17 +602,26 @@ async function refreshGachaPool(
   if (!force) endId = (await TSUserGacha.getGachaCheck(ac.gameUid, type)) ?? "0";
   while (true) {
     page++;
-    const gachaRes = await hk4eReq.gacha(authkey.value, type, reqId);
-    if (!Array.isArray(gachaRes)) {
-      showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
-      await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败`);
-      await TGLogger.Error(
-        `[Gacha][${ac.gameUid}][refreshGachaPool] ${gachaRes.retcode} ${gachaRes.message}`,
-      );
+    let gachaRes: TGApp.Game.Gacha.GachaLogResp | undefined;
+    try {
+      gachaRes = await hk4eReq.gacha(authkey.value, type, reqId);
+      if (gachaRes.retcode !== 0) {
+        showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
+        await TGLogger.Warn(
+          `[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败：[${gachaRes.retcode}] ${gachaRes.message}`,
+        );
+        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+        break;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`[${type}] 获取祈愿数据失败：${errMsg}`);
+      await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据异常：${errMsg}`);
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       break;
     }
-    if (gachaRes.length === 0) {
+    const gachaList = gachaRes.data.list;
+    if (gachaList.length === 0) {
       if (force) {
         await showLoading.update(`正在清理${label}数据`);
         if (gachaDataMap) {
@@ -622,8 +631,8 @@ async function refreshGachaPool(
       break;
     }
     const uigfList: Array<TGApp.Plugins.UIGF.GachaItem> = [];
-    if (force) await showLoading.update(`[${label}] 第${page}页，${gachaRes.length}条`);
-    for (const item of gachaRes) {
+    if (force) await showLoading.update(`[${label}] 第${page}页，${gachaList.length}条`);
+    for (const item of gachaList) {
       if (!force) {
         await showLoading.update(`[${item.item_type}][${item.time}] ${item.name}`, { timeout: 0 });
       }
@@ -661,8 +670,8 @@ async function refreshGachaPool(
       }
     }
     await TSUserGacha.mergeUIGF(ac.gameUid, uigfList);
-    if (!force && gachaRes.some((i) => i.id.toString() === endId.toString())) break;
-    reqId = gachaRes[gachaRes.length - 1].id.toString();
+    if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) break;
+    reqId = gachaList[gachaList.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   }
 }

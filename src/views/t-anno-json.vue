@@ -76,6 +76,8 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import parseAnnoContent from "@utils/annoParser.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, shallowRef } from "vue";
@@ -102,10 +104,27 @@ onMounted(async () => {
     return;
   }
   await showLoading.update(`公告ID: ${annoId}`);
-  const listResp = await hk4eReq.anno.list(region, lang);
+  let listResp: TGApp.Game.Anno.ListResp | undefined;
+  try {
+    listResp = await hk4eReq.anno.list(region, lang);
+    if (listResp.retcode !== 0) {
+      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+      await TGLogger.Warn(
+        `[t-anno-json] 获取公告列表失败：[${listResp.retcode}] ${listResp.message}`,
+      );
+      await showLoading.end();
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取公告列表失败：${errMsg}`);
+    await TGLogger.Error(`[t-anno-json] 获取公告列表异常：${errMsg}`);
+    await showLoading.end();
+    return;
+  }
   console.log("annoList", listResp);
   // TODO: 动态Type
-  for (const listItem of listResp.list) {
+  for (const listItem of listResp.data.list) {
     for (const single of listItem.list) {
       if (single.ann_id === annoId) {
         jsonList.value = single;
@@ -113,10 +132,28 @@ onMounted(async () => {
       }
     }
   }
-  const detailResp = await hk4eReq.anno.detail(region, lang);
-  const find = detailResp.find((item) => item.ann_id === annoId);
+  let detailResp: TGApp.Game.Anno.DetailResp | undefined;
+  try {
+    detailResp = await hk4eReq.anno.detail(region, lang);
+    if (detailResp.retcode !== 0) {
+      showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
+      await TGLogger.Warn(
+        `[t-anno-json] 获取公告详情失败：[${detailResp.retcode}] ${detailResp.message}`,
+      );
+      await showLoading.end();
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取公告详情失败：${errMsg}`);
+    await TGLogger.Error(`[t-anno-json] 获取公告详情异常：${errMsg}`);
+    await showLoading.end();
+    return;
+  }
+  const find = detailResp.data.list.find((item) => item.ann_id === annoId);
   if (!find) {
     showSnackbar.error("未找到公告数据");
+    await showLoading.end();
     return;
   }
   jsonContent.value = find;

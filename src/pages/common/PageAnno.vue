@@ -72,6 +72,7 @@ import TaoIframe from "@comp/pageAnno/tao-iframe.vue";
 import gameEnum from "@enum/game.js";
 import hk4eReq from "@req/hk4eReq.js";
 import useAppStore from "@store/app.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
@@ -140,12 +141,51 @@ async function loadData(): Promise<void> {
     "正在获取公告数据",
     `服务器：${gameEnum.serverDesc(server.value)}，语言：${gameEnum.anno.langDesc(lang.value)}`,
   );
-  const listResp = await hk4eReq.anno.list(server.value, lang.value);
+  let listResp: TGApp.Game.Anno.ListResp | undefined;
+  try {
+    listResp = await hk4eReq.anno.list(server.value, lang.value);
+    if (listResp.retcode !== 0) {
+      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
+      await TGLogger.Warn(
+        `[PageAnno][loadData] 获取公告列表失败：[${listResp.retcode}] ${listResp.message}`,
+      );
+      await showLoading.end();
+      isReq.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取公告列表失败：${errMsg}`);
+    await TGLogger.Error(`[PageAnno][loadData] 获取公告列表异常：${errMsg}`);
+    await showLoading.end();
+    isReq.value = false;
+    return;
+  }
   console.log("annoList", listResp);
-  annoList.value = listResp;
-  tabList.value = listResp.type_list;
+  annoList.value = listResp.data;
+  tabList.value = listResp.data.type_list;
   tab.value = tabList.value[0].id;
-  detailList.value = await hk4eReq.anno.detail(server.value, gameEnum.anno.lang.CHS);
+  let detailResp: TGApp.Game.Anno.DetailResp | undefined;
+  try {
+    detailResp = await hk4eReq.anno.detail(server.value, gameEnum.anno.lang.CHS);
+    if (detailResp.retcode !== 0) {
+      showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
+      await TGLogger.Warn(
+        `[PageAnno][loadData] 获取公告详情失败：[${detailResp.retcode}] ${detailResp.message}`,
+      );
+      await showLoading.end();
+      isReq.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取公告详情失败：${errMsg}`);
+    await TGLogger.Error(`[PageAnno][loadData] 获取公告详情异常：${errMsg}`);
+    await showLoading.end();
+    isReq.value = false;
+    return;
+  }
+  detailList.value = detailResp.data.list;
   await showLoading.end();
   isReq.value = false;
 }
