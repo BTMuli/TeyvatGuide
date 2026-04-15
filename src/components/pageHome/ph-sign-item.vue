@@ -188,21 +188,41 @@ async function refreshData(): Promise<void> {
   if (!cookie.value) return;
   isRefresh.value = true;
   const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+  let infoResp: TGApp.BBS.Sign.HomeResp | undefined;
   try {
-    const infoResp = await lunaReq.sign.info(props.account, ck);
-    console.log("signInfo", infoResp);
-    if ("retcode" in infoResp) {
-      showSnackbar.warn(`刷新信息失败: ${infoResp.retcode} ${infoResp.message}`);
-    } else signInfo.value = infoResp;
-    const statResp = await lunaReq.sign.stat(props.account, ck);
-    console.log("signStat", statResp);
-    if ("retcode" in statResp) {
-      showSnackbar.warn(`刷新状态失败: ${statResp.retcode} ${statResp.message}`);
-    } else signStat.value = statResp;
-    showSnackbar.success(`成功刷新签到信息`);
+    infoResp = await lunaReq.sign.info(props.account, ck);
+    if (infoResp.retcode !== 0) {
+      showSnackbar.warn(`刷新奖励失败: [${infoResp.retcode}] ${infoResp.message}`);
+      await TGLogger.Warn(`[ph-sign-item] 刷新奖励失败: [${infoResp.retcode}] ${infoResp.message}`);
+      isRefresh.value = false;
+      return;
+    }
   } catch (e) {
-    console.error(e);
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`刷新奖励失败: ${errMsg}`);
+    await TGLogger.Error(`[ph-sign-item] 刷新奖励异常: ${errMsg}`);
+    isRefresh.value = false;
+    return;
   }
+  signInfo.value = infoResp.data;
+  let statResp: TGApp.BBS.Sign.InfoResp | undefined;
+  try {
+    statResp = await lunaReq.sign.stat(props.account, ck);
+    if (statResp.retcode !== 0) {
+      showSnackbar.warn(`刷新状态失败: [${statResp.retcode}] ${statResp.message}`);
+      await TGLogger.Warn(`[ph-sign-item] 刷新状态失败: [${statResp.retcode}] ${statResp.message}`);
+      isRefresh.value = false;
+      return;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`刷新状态失败: ${errMsg}`);
+    await TGLogger.Error(`[ph-sign-item] 刷新状态异常: ${errMsg}`);
+    isRefresh.value = false;
+    return;
+  }
+  signStat.value = statResp.data;
+  showSnackbar.success(`成功刷新签到信息`);
   isRefresh.value = false;
 }
 
@@ -275,19 +295,24 @@ async function handleRewardCellClick(index: number): Promise<void> {
 
 async function loadResignInfo(): Promise<void> {
   if (!cookie.value) return;
+  const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
+  let resignResp: TGApp.BBS.Sign.ResignInfoResp | undefined;
   try {
-    const ck = { cookie_token: cookie.value.cookie_token, account_id: cookie.value.account_id };
-    const resignResp = await lunaReq.resign.info(props.account, ck);
-    console.log(resignResp);
-    if ("retcode" in resignResp) {
-      await TGLogger.Warn(`[Sign Item] Failed to load resign info: ${resignResp.message}`);
-    } else {
-      resignInfo.value = resignResp;
-      await TGLogger.Info(`[Sign Item] Resign info loaded for ${props.account.gameUid}`);
+    resignResp = await lunaReq.resign.info(props.account, ck);
+    if (resignResp.retcode !== 0) {
+      showSnackbar.warn(`获取补签信息失败: [${resignResp.retcode}] ${resignResp.message}`);
+      await TGLogger.Warn(
+        `[ph-sign-item] 获取补签信息失败: [${resignResp.retcode}] ${resignResp.message}`,
+      );
+      return;
     }
-  } catch (error) {
-    await TGLogger.Error(`[Sign Item] Load resign info error: ${error}`);
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取补签信息失败: ${errMsg}`);
+    await TGLogger.Error(`[ph-sign-item] 获取补签信息异常: ${errMsg}`);
+    return;
   }
+  resignInfo.value = resignResp.data;
 }
 
 // Update local data after successful sign/resign without API call
