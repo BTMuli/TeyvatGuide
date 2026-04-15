@@ -23,16 +23,17 @@
         <div class="tuss-account">
           <div class="tuss-icon">
             <img :src="item.info.icon" alt="icon" />
-            <div
-              v-if="item.account.gameBiz !== 'hk4e_cn'"
-              class="delete"
-              title="删除账户"
-              @click.stop="deleteAccount(item)"
-            >
-              <v-icon color="var(--tgc-od-red)" size="12">mdi-delete</v-icon>
-            </div>
           </div>
           <span>{{ item.account.gameUid }} {{ item.account.regionName }}</span>
+          <v-icon
+            v-if="item.account.gameBiz !== 'hk4e_cn'"
+            color="var(--tgc-od-red)"
+            size="14"
+            title="删除账户"
+            @click.stop="deleteAccount(item)"
+          >
+            mdi-delete
+          </v-icon>
         </div>
         <div class="tuss-stat">
           <div
@@ -436,20 +437,6 @@ async function trySign(
   img {
     width: 100%;
     height: 100%;
-  }
-
-  .delete {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    width: 16px;
-    height: 16px;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(5px);
-    border-top-right-radius: 8px;
-    cursor: pointer;
   }
 }
 
