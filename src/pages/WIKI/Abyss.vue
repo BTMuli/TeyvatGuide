@@ -53,6 +53,8 @@ import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
 import hutao from "@Hutao/index.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, reactive, ref, type ShallowRef, shallowRef, watch } from "vue";
 
@@ -120,17 +122,35 @@ async function getOverview(): Promise<void> {
   await showLoading.start("正在获取深渊概览");
   let cur: TGApp.Plugins.Hutao.Abyss.OverviewData | undefined = undefined;
   let last: TGApp.Plugins.Hutao.Abyss.OverviewData | undefined = undefined;
-  const curResp = await hutao.Abyss.overview();
-  if ("retcode" in curResp) {
-    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
-  } else {
-    cur = curResp;
+  try {
+    const curResp = await hutao.Abyss.overview();
+    if (curResp.retcode !== 0) {
+      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getOverview] 获取本期概览失败：${curResp.retcode} ${curResp.message}`,
+      );
+    } else {
+      cur = curResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取本期概览失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getOverview] 获取本期概览异常：${errMsg}`);
   }
-  const lastResp = await hutao.Abyss.overview(true);
-  if ("retcode" in lastResp) {
-    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
-  } else {
-    last = lastResp;
+  try {
+    const lastResp = await hutao.Abyss.overview(true);
+    if (lastResp.retcode !== 0) {
+      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getOverview] 获取上期概览失败：${lastResp.retcode} ${lastResp.message}`,
+      );
+    } else {
+      last = lastResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取上期概览失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getOverview] 获取上期概览异常：${errMsg}`);
   }
   if (cur && last) overview.value = { cur, last };
   else overview.value = undefined;
@@ -140,17 +160,35 @@ async function getUseData(): Promise<void> {
   await showLoading.start("正在获取角色使用率数据");
   let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> = [];
   let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUse> = [];
-  const curResp = await hutao.Abyss.avatar.use();
-  if (!Array.isArray(curResp)) {
-    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
-  } else {
-    cur = curResp;
+  try {
+    const curResp = await hutao.Abyss.avatar.use();
+    if (curResp.retcode !== 0) {
+      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getUseData] 获取本期使用率失败：${curResp.retcode} ${curResp.message}`,
+      );
+    } else if (curResp.data) {
+      cur = curResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取本期使用率失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getUseData] 获取本期使用率异常：${errMsg}`);
   }
-  const lastResp = await hutao.Abyss.avatar.use(true);
-  if (!Array.isArray(lastResp)) {
-    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
-  } else {
-    last = lastResp;
+  try {
+    const lastResp = await hutao.Abyss.avatar.use(true);
+    if (lastResp.retcode !== 0) {
+      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getUseData] 获取上期使用率失败：${lastResp.retcode} ${lastResp.message}`,
+      );
+    } else if (lastResp.data) {
+      last = lastResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取上期使用率失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getUseData] 获取上期使用率异常：${errMsg}`);
   }
   abyssData.use = { cur, last };
 }
@@ -159,28 +197,55 @@ async function getUpData(): Promise<void> {
   await showLoading.start("正在获取角色出场率数据");
   let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> = [];
   let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarUp> = [];
-  const curResp = await hutao.Abyss.avatar.up();
-  if (!Array.isArray(curResp)) {
-    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
-  } else {
-    cur = curResp;
+  try {
+    const curResp = await hutao.Abyss.avatar.up();
+    if (curResp.retcode !== 0) {
+      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getUpData] 获取本期出场率失败：${curResp.retcode} ${curResp.message}`,
+      );
+    } else if (curResp.data) {
+      cur = curResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取本期出场率失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getUpData] 获取本期出场率异常：${errMsg}`);
   }
-  const lastResp = await hutao.Abyss.avatar.use(true);
-  if (!Array.isArray(lastResp)) {
-    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
-  } else {
-    last = lastResp;
+  try {
+    const lastResp = await hutao.Abyss.avatar.up(true);
+    if (lastResp.retcode !== 0) {
+      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getUpData] 获取上期出场率失败：${lastResp.retcode} ${lastResp.message}`,
+      );
+    } else if (lastResp.data) {
+      last = lastResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取上期出场率失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getUpData] 获取上期出场率异常：${errMsg}`);
   }
   abyssData.up = { cur, last };
 }
 
 async function getTeamData(): Promise<void> {
   await showLoading.start("正在获取队伍出场数据");
-  const teamResp = await hutao.Abyss.team();
-  if ("retcode" in teamResp) {
-    await showLoading.update(`[${teamResp.retcode}] ${teamResp.message}`);
-  } else {
-    abyssData.team = teamResp;
+  try {
+    const teamResp = await hutao.Abyss.team();
+    if (teamResp.retcode !== 0) {
+      await showLoading.update(`[${teamResp.retcode}] ${teamResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getTeamData] 获取队伍数据失败：${teamResp.retcode} ${teamResp.message}`,
+      );
+    } else if (teamResp.data) {
+      abyssData.team = teamResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取队伍数据失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getTeamData] 获取队伍数据异常：${errMsg}`);
   }
 }
 
@@ -188,17 +253,35 @@ async function getHoldData(): Promise<void> {
   await showLoading.start("正在获取角色持有数据");
   let cur: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> = [];
   let last: Array<TGApp.Plugins.Hutao.Abyss.AvatarHold> = [];
-  const curResp = await hutao.Abyss.avatar.hold();
-  if (!Array.isArray(curResp)) {
-    await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
-  } else {
-    cur = curResp;
+  try {
+    const curResp = await hutao.Abyss.avatar.hold();
+    if (curResp.retcode !== 0) {
+      await showLoading.update(`[${curResp.retcode}] ${curResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getHoldData] 获取本期持有率失败：${curResp.retcode} ${curResp.message}`,
+      );
+    } else if (curResp.data) {
+      cur = curResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取本期持有率失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getHoldData] 获取本期持有率异常：${errMsg}`);
   }
-  const lastResp = await hutao.Abyss.avatar.hold(true);
-  if (!Array.isArray(lastResp)) {
-    await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
-  } else {
-    last = lastResp;
+  try {
+    const lastResp = await hutao.Abyss.avatar.hold(true);
+    if (lastResp.retcode !== 0) {
+      await showLoading.update(`[${lastResp.retcode}] ${lastResp.message}`);
+      await TGLogger.Warn(
+        `[WIKI/Abyss][getHoldData] 获取上期持有率失败：${lastResp.retcode} ${lastResp.message}`,
+      );
+    } else if (lastResp.data) {
+      last = lastResp.data;
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.update(`获取上期持有率失败：${errMsg}`);
+    await TGLogger.Error(`[WIKI/Abyss][getHoldData] 获取上期持有率异常：${errMsg}`);
   }
   abyssData.hold = { cur, last };
 }

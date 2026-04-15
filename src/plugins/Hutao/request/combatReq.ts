@@ -1,42 +1,62 @@
 /**
  * 幻想真境剧诗相关请求
- * @since Beta v0.9.1
+ * @since Beta v0.10.1
  */
-import TGHttp from "@utils/TGHttp.js";
+import TGHttps from "@utils/TGHttps.js";
 
 const CombatUrl: Readonly<string> = "https://homa.gentle.house/RoleCombat/";
 
 /**
- * 获取数据
- * @since Beta v0.9.1
+ * 获取剧诗统计数据
+ * @since Beta v0.10.1
  * @param isLast - 是否获取上期数据
- * @returns 剧诗数据
+ * @returns 剧诗响应
  */
-export async function getCombatStatistic(
-  isLast: boolean = false,
-): Promise<TGApp.Plugins.Hutao.Combat.Data | TGApp.Plugins.Hutao.Base.Resp> {
+async function data(isLast: boolean = false): Promise<TGApp.Plugins.Hutao.Combat.Response> {
   const url = `${CombatUrl}Statistics`;
-  const resp = await TGHttp<TGApp.Plugins.Hutao.Combat.Response>(url, {
-    method: "GET",
+  const resp = await TGHttps.get<TGApp.Plugins.Hutao.Combat.Response>(url, {
     query: { Last: isLast },
   });
-  if (resp.data) return resp.data;
-  return { retcode: resp.retcode, message: resp.message };
+  return resp.data;
 }
 
 /**
- * 上传数据
- * @since Beta v0.6.3
- * @param data - 数据
- * @returns 上传返回
+ * 上传剧诗数据
+ * @since Beta v0.10.1
+ * @param uploadData - 上传数据
+ * @returns 上传响应
  */
-export async function uploadCombatData(
-  data: TGApp.Plugins.Hutao.Combat.UploadData,
+async function upload(
+  uploadData: TGApp.Plugins.Hutao.Combat.UploadData,
 ): Promise<TGApp.Plugins.Hutao.Combat.UploadResp> {
   const url = `${CombatUrl}Upload`;
-  return await TGHttp<TGApp.Plugins.Hutao.Combat.UploadResp>(url, {
-    method: "POST",
-    body: JSON.stringify(data),
+  const resp = await TGHttps.post<TGApp.Plugins.Hutao.Combat.UploadResp>(url, {
+    body: uploadData,
     headers: { "Content-Type": "application/json" },
   });
+  return resp.data;
 }
+
+/**
+ * 将本地数据转为上传用的数据
+ * @since Beta v0.6.3
+ * @param data - 本地数据
+ * @returns 上传用的数据
+ */
+function trans(data: TGApp.Sqlite.Combat.TableTrans): TGApp.Plugins.Hutao.Combat.UploadData {
+  return {
+    Version: 1,
+    Uid: data.uid,
+    Identity: "TeyvatGuide",
+    BackupAvatars: data.detail.backup_avatars.map((i) => i.avatar_id),
+    ScheduleId: data.id,
+  };
+}
+
+const CombatReq = {
+  data,
+  upload,
+  trans,
+};
+
+export default CombatReq;

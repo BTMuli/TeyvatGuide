@@ -37,6 +37,8 @@ import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useHutaoStore from "@store/hutao.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, watch } from "vue";
 
@@ -103,13 +105,23 @@ async function loadDownload(): Promise<void> {
   if (!accessToken.value) return;
   try {
     const info = await hutao.Gacha.entry(accessToken.value);
-    if ("retcode" in info) {
+    if (info.retcode !== 0) {
       showSnackbar.warn(`[${info.retcode}] ${info.message}`);
+      await TGLogger.Warn(
+        `[ugo-hutao-du][loadDownload] 获取入口数据失败：${info.retcode} ${info.message}`,
+      );
       return;
     }
-    uidList.value = info.map((i) => ({ uid: i.Uid, cnt: i.ItemCount }));
+    if (!info.data) {
+      showSnackbar.warn("获取入口数据返回为空");
+      await TGLogger.Warn(`[ugo-hutao-du][loadDownload] 获取入口数据返回为空`);
+      return;
+    }
+    uidList.value = info.data.map((i) => ({ uid: i.Uid, cnt: i.ItemCount }));
   } catch (e) {
-    console.error(e);
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取入口数据失败：${errMsg}`);
+    await TGLogger.Error(`[ugo-hutao-du][loadDownload] 获取入口数据异常：${errMsg}`);
   }
 }
 

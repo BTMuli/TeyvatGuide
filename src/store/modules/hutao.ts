@@ -1,12 +1,14 @@
 /**
  * 胡桃账号
- * @since Beta v0.9.1
+ * @since Beta v0.10.1
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { validEmail } from "@utils/toolFunc.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
@@ -55,21 +57,28 @@ const useHutaoStore = defineStore(
       await showLoading.start("正在登录胡桃云", inputN);
       try {
         const resp = await hutao.Account.login(inputN, inputP);
-        if ("retcode" in resp) {
+        if (resp.retcode !== 0) {
           showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
-          console.error(resp);
+          await TGLogger.Warn(`[HutaoStore][tryLogin] 登录失败：${resp.retcode} ${resp.message}`);
+          await showLoading.end();
+          return;
+        }
+        if (!resp.data) {
+          showSnackbar.error("登录返回数据为空");
+          await TGLogger.Error(`[HutaoStore][tryLogin] 登录返回数据为空`);
           await showLoading.end();
           return;
         }
         isLogin.value = true;
         userName.value = inputN;
-        accessToken.value = resp.AccessToken;
-        refreshToken.value = resp.RefreshToken;
-        accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
+        accessToken.value = resp.data.AccessToken;
+        refreshToken.value = resp.data.RefreshToken;
+        accessExpire.value = Date.now() + resp.data.ExpiresIn * 1000;
         showSnackbar.success("成功登录胡桃云");
-      } catch (err) {
-        console.error(err);
-        showSnackbar.error("登录胡桃云失败");
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        showSnackbar.error(`登录胡桃云失败：${errMsg}`);
+        await TGLogger.Error(`[HutaoStore][tryLogin] 登录异常：${errMsg}`);
       } finally {
         await showLoading.end();
       }
@@ -82,21 +91,28 @@ const useHutaoStore = defineStore(
       await showLoading.start("正在登录胡桃云", username);
       try {
         const resp = await hutao.Account.login(username, pwd);
-        if ("retcode" in resp) {
+        if (resp.retcode !== 0) {
           showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
-          console.error(resp);
+          await TGLogger.Warn(`[HutaoStore][autoLogin] 登录失败：${resp.retcode} ${resp.message}`);
+          await showLoading.end();
+          return;
+        }
+        if (!resp.data) {
+          showSnackbar.error("登录返回数据为空");
+          await TGLogger.Error(`[HutaoStore][autoLogin] 登录返回数据为空`);
           await showLoading.end();
           return;
         }
         isLogin.value = true;
         userName.value = username;
-        accessToken.value = resp.AccessToken;
-        refreshToken.value = resp.RefreshToken;
-        accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
+        accessToken.value = resp.data.AccessToken;
+        refreshToken.value = resp.data.RefreshToken;
+        accessExpire.value = Date.now() + resp.data.ExpiresIn * 1000;
         showSnackbar.success("成功登录胡桃云");
-      } catch (err) {
-        console.error(err);
-        showSnackbar.error("登录胡桃云失败");
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        showSnackbar.error(`登录胡桃云失败：${errMsg}`);
+        await TGLogger.Error(`[HutaoStore][autoLogin] 登录异常：${errMsg}`);
       } finally {
         await showLoading.end();
       }
@@ -107,13 +123,27 @@ const useHutaoStore = defineStore(
 
     async function tryRefreshInfo(): Promise<void> {
       await tryRefreshToken();
-      const resp = await hutao.Account.info(accessToken.value!);
-      if ("retcode" in resp) {
-        showSnackbar.warn(`刷新用户信息失败：${resp.retcode}-${resp.message}`);
-        return;
+      try {
+        const resp = await hutao.Account.info(accessToken.value!);
+        if (resp.retcode !== 0) {
+          showSnackbar.warn(`刷新用户信息失败：${resp.retcode}-${resp.message}`);
+          await TGLogger.Warn(
+            `[HutaoStore][tryRefreshInfo] 刷新用户信息失败：${resp.retcode} ${resp.message}`,
+          );
+          return;
+        }
+        if (!resp.data) {
+          showSnackbar.error("刷新用户信息返回数据为空");
+          await TGLogger.Error(`[HutaoStore][tryRefreshInfo] 刷新用户信息返回数据为空`);
+          return;
+        }
+        userInfo.value = resp.data;
+        showSnackbar.success("成功刷新用户信息");
+      } catch (e) {
+        const errMsg = TGHttps.getErrMsg(e);
+        showSnackbar.error(`刷新用户信息失败：${errMsg}`);
+        await TGLogger.Error(`[HutaoStore][tryRefreshInfo] 刷新用户信息异常：${errMsg}`);
       }
-      userInfo.value = resp;
-      showSnackbar.success("成功刷新用户信息");
     }
 
     async function tryRefreshToken(): Promise<void> {
@@ -124,18 +154,26 @@ const useHutaoStore = defineStore(
       if (checkIsValid()) return;
       try {
         const resp = await hutao.Token.refresh(refreshToken.value);
-        if ("retcode" in resp) {
+        if (resp.retcode !== 0) {
           showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
-          console.error(resp);
+          await TGLogger.Warn(
+            `[HutaoStore][tryRefreshToken] 刷新Token失败：${resp.retcode} ${resp.message}`,
+          );
           return;
         }
-        accessToken.value = resp.AccessToken;
-        refreshToken.value = resp.RefreshToken;
-        accessExpire.value = Date.now() + resp.ExpiresIn * 1000;
+        if (!resp.data) {
+          showSnackbar.error("刷新Token返回数据为空");
+          await TGLogger.Error(`[HutaoStore][tryRefreshToken] 刷新Token返回数据为空`);
+          return;
+        }
+        accessToken.value = resp.data.AccessToken;
+        refreshToken.value = resp.data.RefreshToken;
+        accessExpire.value = Date.now() + resp.data.ExpiresIn * 1000;
         showSnackbar.success("成功刷新胡桃云Token");
       } catch (e) {
-        console.error(e);
-        showSnackbar.error("刷新胡桃云Token失败");
+        const errMsg = TGHttps.getErrMsg(e);
+        showSnackbar.error(`刷新胡桃云Token失败：${errMsg}`);
+        await TGLogger.Error(`[HutaoStore][tryRefreshToken] 刷新Token异常：${errMsg}`);
       }
     }
 

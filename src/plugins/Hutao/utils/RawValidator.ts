@@ -1,6 +1,6 @@
 /**
  * 胡桃原始数据验证器
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -108,11 +108,7 @@ function verifyCombatArray(data: unknown): data is Array<TGApp.Plugins.Hutao.Com
   return data.every(validateCombat);
 }
 
-/**
- * 原始数据验证器
- * @since Beta v0.9.9
- */
-export const RawValidator = {
+const HutaoValid = {
   /** 深渊数据验证 */
   abyss: verifyAbyssArray,
   /** 危战数据验证 */
@@ -120,3 +116,5 @@ export const RawValidator = {
   /** 剧诗数据验证 */
   combat: verifyCombatArray,
 };
+
+export default HutaoValid;

@@ -73,6 +73,8 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import hutao from "@Hutao/index.js";
 import useHutaoStore from "@store/hutao.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { validEmail } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onUnmounted, ref, shallowRef, useTemplateRef } from "vue";
@@ -113,11 +115,20 @@ async function tryGetCode(): Promise<void> {
   const check = await usernameRef.value.validate();
   if (check.length > 0) return;
   codeLoad.value = true;
-  const resp = await hutao.Account.verify.pwd(username.value!);
-  if (resp.retcode !== 0) {
-    showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
-  } else {
-    showSnackbar.success(`${resp.message}`);
+  try {
+    const resp = await hutao.Account.verify.pwd(username.value!);
+    if (resp.retcode !== 0) {
+      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(
+        `[tco-hutaoVerify][tryGetCode] 获取验证码失败：${resp.retcode} ${resp.message}`,
+      );
+    } else {
+      showSnackbar.success(`${resp.message}`);
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取验证码失败：${errMsg}`);
+    await TGLogger.Error(`[tco-hutaoVerify][tryGetCode] 获取验证码异常：${errMsg}`);
   }
   codeLoad.value = false;
   codeDisabled.value = true;
@@ -146,17 +157,28 @@ async function onSubmit(): Promise<void> {
   if (!check.valid) return;
   formDisabled.value = true;
   formLoad.value = true;
-  const resp = await hutao.Account.reset.pwd(username.value!, verifyCode.value!, pwd.value!);
-  formLoad.value = false;
-  if (resp.retcode !== 0) {
-    showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+  try {
+    const resp = await hutao.Account.reset.pwd(username.value!, verifyCode.value!, pwd.value!);
+    formLoad.value = false;
+    if (resp.retcode !== 0) {
+      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(
+        `[tco-hutaoVerify][onSubmit] 重置密码失败：${resp.retcode} ${resp.message}`,
+      );
+      formDisabled.value = false;
+      return;
+    }
+    showSnackbar.success(`${resp.message}`);
+    await hutaoStore.autoLogin(username.value!, pwd.value!);
     formDisabled.value = false;
-    return;
+    visible.value = false;
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    formLoad.value = false;
+    showSnackbar.error(`重置密码失败：${errMsg}`);
+    await TGLogger.Error(`[tco-hutaoVerify][onSubmit] 重置密码异常：${errMsg}`);
+    formDisabled.value = false;
   }
-  showSnackbar.success(`${resp.message}`);
-  await hutaoStore.autoLogin(username.value!, pwd.value!);
-  formDisabled.value = false;
-  visible.value = false;
 }
 
 onUnmounted(() => {

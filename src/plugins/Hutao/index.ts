@@ -1,90 +1,27 @@
 /**
  * Hutao 插件入口
- * @since Beta v0.9.1
+ * @since Beta v0.10.1
  */
 
-import {
-  getAbyssOverview,
-  getAvatarCollect,
-  getAvatarHoldRate,
-  getAvatarUpRate,
-  getAvatarUseRate,
-  getTeamCollect,
-  uploadAbyssData,
-} from "./request/abyssReq.js";
-import {
-  getResetPwdCode,
-  getUserInfo,
-  loginPassport,
-  refreshToken,
-  resetPwd,
-} from "./request/accountReq.js";
-import { getCombatStatistic, uploadCombatData } from "./request/combatReq.js";
-import {
-  deleteGachaLogs,
-  getEndIds,
-  getEntries,
-  getGachaLogs,
-  uploadGachaLogs,
-} from "./request/gachaReq.js";
-import { transAbyssAvatars, transAbyssLocal } from "./utils/abyssUtil.js";
-import { transCombatLocal } from "./utils/combatUtil.js";
-import { RawValidator } from "./utils/RawValidator.js";
+import AbyssReq from "./request/abyssReq.js";
+import AccountReq from "./request/accountReq.js";
+import CombatReq from "./request/combatReq.js";
+import GachaReq from "./request/gachaReq.js";
+import HutaoValid from "./utils/RawValidator.js";
 
 const _ = "Not Implemented";
 
 const Hutao = {
-  Abyss: {
-    avatar: {
-      collect: getAvatarCollect,
-      hold: getAvatarHoldRate,
-      up: getAvatarUpRate,
-      use: getAvatarUseRate,
-    },
-    overview: getAbyssOverview,
-    team: getTeamCollect,
-    upload: uploadAbyssData,
-    utils: {
-      transData: transAbyssLocal,
-      transAvatars: transAbyssAvatars,
-    },
-  },
-  Combat: {
-    upload: uploadCombatData,
-    data: getCombatStatistic,
-    trans: transCombatLocal,
-  },
-  Account: {
-    register: _,
-    login: loginPassport,
-    verify: {
-      username: _,
-      usernameNew: _,
-      pwd: getResetPwdCode,
-      cancel: _,
-    },
-    cancel: _,
-    reset: {
-      username: _,
-      pwd: resetPwd,
-    },
-    info: getUserInfo,
-  },
+  Abyss: AbyssReq,
+  Combat: CombatReq,
+  Account: AccountReq,
   Token: {
-    refresh: refreshToken,
+    refresh: AccountReq.refresh,
     revoke: _,
     revokeAll: _,
   },
-  Gacha: {
-    entry: getEntries,
-    endIds: getEndIds,
-    logs: getGachaLogs,
-    upload: uploadGachaLogs,
-    delete: deleteGachaLogs,
-  },
-  raw: {
-    valid: RawValidator,
-  },
+  Gacha: GachaReq,
+  valid: HutaoValid,
 };
 
 export default Hutao;

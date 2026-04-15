@@ -394,7 +394,7 @@ async function tryReadChallenge(): Promise<void> {
       showSnackbar.warn("文件数据格式错误");
       return;
     }
-    if (!Hutao.raw.valid.challenge(fileData)) {
+    if (!Hutao.valid.challenge(fileData)) {
       await showLoading.end();
       showSnackbar.warn("危战数据验证失败，请检查数据格式");
       return;

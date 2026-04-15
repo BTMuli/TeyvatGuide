@@ -241,13 +241,20 @@ async function hideAllOverlay(): Promise<void> {
 
 async function loadWiki(): Promise<void> {
   await showLoading.start("正在加载统计数据");
-  const res = await Hutao.Combat.data();
-  if (res === undefined) showSnackbar.error("未获取到剧诗数据");
-  else if ("retcode" in res) {
-    showSnackbar.warn(`[${res.retcode}] ${res.message}`);
-    await TGLogger.Warn(`[Combat][loadWiki] ${JSON.stringify(res)}`);
-  } else cloudCombat.value = res;
-  showSnackbar.success("成功获取统计数据");
+  try {
+    const res = await Hutao.Combat.data();
+    if (res.retcode !== 0) {
+      showSnackbar.warn(`[${res.retcode}] ${res.message}`);
+      await TGLogger.Warn(`[Combat][loadWiki] ${res.retcode} ${res.message}`);
+    } else {
+      cloudCombat.value = res.data;
+      showSnackbar.success("成功获取统计数据");
+    }
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`获取统计数据失败：${errMsg}`);
+    await TGLogger.Error(`[Combat][loadWiki] 获取统计数据异常：${errMsg}`);
+  }
   await hideAllOverlay();
   await showLoading.end();
   showStat.value = true;
@@ -474,16 +481,15 @@ async function uploadCombat(): Promise<void> {
       showSnackbar.success(res.message ?? "上传剧诗数据成功");
       await TGLogger.Info("[UserCombat][uploadCombat] 上传剧诗数据成功");
     } else {
-      showSnackbar.error(`[${res.retcode}]${res.message}`);
-      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
-      await TGLogger.Error(`[UserCombat][uploadCombat] ${res.retcode} ${res.message}`);
+      showSnackbar.warn(`[${res.retcode}]${res.message}`);
+      await TGLogger.Warn(
+        `[UserCombat][uploadCombat] 上传剧诗数据失败：${res.retcode} ${res.message}`,
+      );
     }
   } catch (e) {
-    if (e instanceof Error) {
-      showSnackbar.error(e.message);
-      await TGLogger.Error("[UserCombat][uploadCombat] 上传剧诗数据失败");
-      await TGLogger.Error(`[UserCombat][uploadCombat] ${e.message}`);
-    }
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`上传剧诗数据失败：${errMsg}`);
+    await TGLogger.Error(`[UserCombat][uploadCombat] 上传剧诗数据异常：${errMsg}`);
   }
   await showLoading.end();
 }
@@ -521,7 +527,7 @@ async function tryReadCombat(): Promise<void> {
       showSnackbar.warn("文件数据格式错误");
       return;
     }
-    if (!Hutao.raw.valid.combat(fileData)) {
+    if (!Hutao.valid.combat(fileData)) {
       await showLoading.end();
       showSnackbar.warn("剧诗数据验证失败，请检查数据格式");
       return;
@@ -536,7 +542,6 @@ async function tryReadCombat(): Promise<void> {
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     window.location.reload();
   } catch (e) {
-    console.error(e);
     await TGLogger.Error(`[UserCombat][tryReadCombat] 导入剧诗数据失败: ${e}`);
     await showLoading.end();
     showSnackbar.error("导入剧诗数据失败，请检查文件格式是否正确");

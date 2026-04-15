@@ -284,10 +284,21 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
       "302": 0,
       "500": 0,
     };
-    const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
-    if ("retcode" in endIdResp) {
-      showSnackbar.warn(`[${endIdResp.retcode}] ${endIdResp.message}`);
-    } else endIdRes = endIdResp;
+    try {
+      const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
+      if (endIdResp.retcode !== 0) {
+        showSnackbar.warn(`[${endIdResp.retcode}] ${endIdResp.message}`);
+        await TGLogger.Warn(
+          `[Gacha][handleHutaoUpload] 获取EndId失败：${endIdResp.retcode} ${endIdResp.message}`,
+        );
+      } else if (endIdResp.data) {
+        endIdRes = endIdResp.data;
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`获取EndId失败：${errMsg}`);
+      await TGLogger.Error(`[Gacha][handleHutaoUpload] 获取EndId异常：${errMsg}`);
+    }
     const dataRaw: Array<TGApp.Sqlite.Gacha.Gacha> = [];
     for (const [k, v] of Object.entries(endIdRes)) {
       const gachaRead = await TSUserGacha.record.endId(u, k, v.toString());
@@ -304,11 +315,18 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
         Id: i.id.toString(),
       })),
     };
-    const resp = await hutao.Gacha.upload(accessToken.value!, data);
-    if (resp.retcode === 0) {
-      showSnackbar.success(`成功上传祈愿数据：${resp.message}`);
-    } else {
-      showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+    try {
+      const resp = await hutao.Gacha.upload(accessToken.value!, data);
+      if (resp.retcode === 0) {
+        showSnackbar.success(`成功上传祈愿数据：${resp.message}`);
+      } else {
+        showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+        await TGLogger.Warn(`[Gacha][handleHutaoUpload] 上传失败：${resp.retcode} ${resp.message}`);
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`上传祈愿数据失败：${errMsg}`);
+      await TGLogger.Error(`[Gacha][handleHutaoUpload] 上传异常：${errMsg}`);
     }
   }
   await showLoading.end();
@@ -333,67 +351,102 @@ async function handleHutaoDownload(uids: Array<string>): Promise<void> {
   await showLoading.start("正在下载胡桃云祈愿记录...", "正在刷新Token");
   for (const u of uids) {
     await showLoading.start(`正在下载UID:${u}的祈愿记录`, "正在获取EndIds");
-    const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
-    if ("retcode" in endIdResp) {
-      showSnackbar.warn(`[${endIdResp.retcode}] ${endIdResp.message}`);
-      continue;
-    }
-    for (const [p, i] of Object.entries(endIdResp)) {
-      if (i === 0) continue;
-      let endId: string | undefined = undefined;
-      let flag = true;
-      const pageSize = 200;
-      await showLoading.start(`正在下载卡池 ${p}`);
-      const uigfList: Array<TGApp.Plugins.UIGF.GachaItem> = [];
-      while (flag) {
-        await showLoading.update(`EndId:${endId ?? "无"}`);
-        await hutaoStore.tryRefreshToken();
-        const gachaResp = await hutao.Gacha.logs(accessToken.value!, u, Number(p), pageSize, endId);
-        if (gachaResp.retcode !== 0) {
-          showSnackbar.warn(`[${gachaResp.retcode}] ${gachaResp.message}`);
-          break;
-        }
-        const data: TGApp.Plugins.Hutao.Gacha.GachaLogRes = gachaResp.data ?? [];
-        if (data.length === pageSize) {
-          endId = data[data.length - 1].Id.toString();
-        } else flag = false;
-        for (const item of data) {
-          const tempItem: TGApp.Plugins.UIGF.GachaItem = {
-            gacha_type: item.GachaType.toString(),
-            item_id: item.ItemId.toString(),
-            count: "1",
-            time: item.Time,
-            name: "",
-            item_type: "",
-            rank_type: "",
-            id: BigInt(item.Id).toString(),
-            uigf_gacha_type: item.QueryType.toString(),
-          };
-          const find = AppCalendarData.find((i) => i.id.toString() === item.ItemId.toString());
-          if (find) {
-            tempItem.name = find.name;
-            tempItem.item_type = find.itemType;
-            tempItem.rank_type = find.star.toString();
-          } else {
-            if (yattaData.value.length === 0) {
-              await showLoading.update(`未查找到 ${tempItem.item_id} 的 信息，正在获取 Yatta 数据`);
-              await loadYatta();
-            }
-            const findH = yattaData.value.find((i) => i.id.toString() === item.ItemId.toString());
-            if (findH) {
-              tempItem.name = findH.name;
-              tempItem.item_type = findH.type;
-              tempItem.rank_type = findH.star.toString();
-            } else {
-              showSnackbar.warn(`无法搜索到 ${item.ItemId} 的信息，请等待元数据更新`);
-              continue;
-            }
-          }
-          uigfList.push(tempItem);
-        }
+    try {
+      const endIdResp = await hutao.Gacha.endIds(accessToken.value!, u);
+      if (endIdResp.retcode !== 0) {
+        showSnackbar.warn(`[${endIdResp.retcode}] ${endIdResp.message}`);
+        await TGLogger.Warn(
+          `[Gacha][handleHutaoDownload] 获取EndIds失败：${endIdResp.retcode} ${endIdResp.message}`,
+        );
+        continue;
       }
-      await showLoading.start(`正在写入卡池 ${p}-${uigfList.length}`);
-      await TSUserGacha.mergeUIGF(u, uigfList, true);
+      if (!endIdResp.data) {
+        showSnackbar.warn("获取EndIds返回数据为空");
+        await TGLogger.Warn(`[Gacha][handleHutaoDownload] 获取EndIds返回数据为空`);
+        continue;
+      }
+      const endIdRes = endIdResp.data;
+      for (const [p, i] of Object.entries(endIdRes)) {
+        if (i === 0) continue;
+        let endId: string | undefined = undefined;
+        let flag = true;
+        const pageSize = 200;
+        await showLoading.start(`正在下载卡池 ${p}`);
+        const uigfList: Array<TGApp.Plugins.UIGF.GachaItem> = [];
+        while (flag) {
+          await showLoading.update(`EndId:${endId ?? "无"}`);
+          await hutaoStore.tryRefreshToken();
+          try {
+            const gachaResp = await hutao.Gacha.logs(
+              accessToken.value!,
+              u,
+              Number(p),
+              pageSize,
+              endId,
+            );
+            if (gachaResp.retcode !== 0) {
+              showSnackbar.warn(`[${gachaResp.retcode}] ${gachaResp.message}`);
+              await TGLogger.Warn(
+                `[Gacha][handleHutaoDownload] 获取记录失败：${gachaResp.retcode} ${gachaResp.message}`,
+              );
+              break;
+            }
+            const data: TGApp.Plugins.Hutao.Gacha.GachaLogRes = gachaResp.data ?? [];
+            if (data.length === pageSize) {
+              endId = data[data.length - 1].Id.toString();
+            } else flag = false;
+            for (const item of data) {
+              const tempItem: TGApp.Plugins.UIGF.GachaItem = {
+                gacha_type: item.GachaType.toString(),
+                item_id: item.ItemId.toString(),
+                count: "1",
+                time: item.Time,
+                name: "",
+                item_type: "",
+                rank_type: "",
+                id: BigInt(item.Id).toString(),
+                uigf_gacha_type: item.QueryType.toString(),
+              };
+              const find = AppCalendarData.find((i) => i.id.toString() === item.ItemId.toString());
+              if (find) {
+                tempItem.name = find.name;
+                tempItem.item_type = find.itemType;
+                tempItem.rank_type = find.star.toString();
+              } else {
+                if (yattaData.value.length === 0) {
+                  await showLoading.update(
+                    `未查找到 ${tempItem.item_id} 的 信息，正在获取 Yatta 数据`,
+                  );
+                  await loadYatta();
+                }
+                const findH = yattaData.value.find(
+                  (i) => i.id.toString() === item.ItemId.toString(),
+                );
+                if (findH) {
+                  tempItem.name = findH.name;
+                  tempItem.item_type = findH.type;
+                  tempItem.rank_type = findH.star.toString();
+                } else {
+                  showSnackbar.warn(`无法搜索到 ${item.ItemId} 的信息，请等待元数据更新`);
+                  continue;
+                }
+              }
+              uigfList.push(tempItem);
+            }
+          } catch (e) {
+            const errMsg = TGHttps.getErrMsg(e);
+            showSnackbar.error(`获取祈愿记录失败：${errMsg}`);
+            await TGLogger.Error(`[Gacha][handleHutaoDownload] 获取记录异常：${errMsg}`);
+            break;
+          }
+        }
+        await showLoading.start(`正在写入卡池 ${p}-${uigfList.length}`);
+        await TSUserGacha.mergeUIGF(u, uigfList, true);
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`下载祈愿记录失败：${errMsg}`);
+      await TGLogger.Error(`[Gacha][handleHutaoDownload] 下载异常：${errMsg}`);
     }
   }
   await showLoading.end();
@@ -423,11 +476,20 @@ async function handleHutaoDelete(uids: Array<string>): Promise<void> {
   await showLoading.start("正在删除胡桃云祈愿记录");
   for (const u of uids) {
     await showLoading.update(`UID:${u}`);
-    const deleteResp = await hutao.Gacha.delete(accessToken.value!, u);
-    if (deleteResp.retcode === 0) {
-      showSnackbar.success(`删除记录成功：${deleteResp.message}`);
-    } else {
-      showSnackbar.warn(`[${deleteResp.retcode}] ${deleteResp.message}`);
+    try {
+      const deleteResp = await hutao.Gacha.delete(accessToken.value!, u);
+      if (deleteResp.retcode === 0) {
+        showSnackbar.success(`删除记录成功：${deleteResp.message}`);
+      } else {
+        showSnackbar.warn(`[${deleteResp.retcode}] ${deleteResp.message}`);
+        await TGLogger.Warn(
+          `[Gacha][handleHutaoDelete] 删除失败：${deleteResp.retcode} ${deleteResp.message}`,
+        );
+      }
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`删除记录失败：${errMsg}`);
+      await TGLogger.Error(`[Gacha][handleHutaoDelete] 删除异常：${errMsg}`);
     }
   }
   await showLoading.end();
@@ -465,7 +527,6 @@ async function confirmRefresh(force: boolean): Promise<void> {
     }
   } else {
     const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value.toString());
-    console.log(uidCur.value, gcFind);
     if (!gcFind) {
       const check = await showDialog.check(
         `确定刷新？`,

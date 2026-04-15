@@ -340,7 +340,7 @@ async function tryReadAbyss(): Promise<void> {
       showSnackbar.warn("文件数据格式错误");
       return;
     }
-    if (!Hutao.raw.valid.abyss(fileData)) {
+    if (!Hutao.valid.abyss(fileData)) {
       await showLoading.end();
       showSnackbar.warn("深渊数据验证失败，请检查数据格式");
       return;
@@ -355,7 +355,6 @@ async function tryReadAbyss(): Promise<void> {
     await new Promise<void>((resolve) => setTimeout(resolve, 1000));
     window.location.reload();
   } catch (e) {
-    console.error(e);
     await TGLogger.Error(`[UserAbyss][tryReadAbyss] 导入深渊数据失败: ${e}`);
     await showLoading.end();
     showSnackbar.error("导入深渊数据失败，请检查文件格式是否正确");
@@ -390,7 +389,6 @@ async function uploadAbyss(): Promise<void> {
     return;
   }
   const gcFind = await TSUserAccount.game.getAccountByGid(uidCur.value!.toString());
-  console.log(uidCur.value, gcFind);
   if (!gcFind) {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 UID，无法刷新角色数据进行上传`);
     return;
@@ -400,42 +398,58 @@ async function uploadAbyss(): Promise<void> {
     showSnackbar.warn(`未找到 ${uidCur.value} 对应 CK，无法刷新角色数据进行上传`);
     return;
   }
+  await showLoading.start(`正在上传 ${gcFind.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
+  const transAbyss = Hutao.Abyss.utils.transData(abyssData);
+  if (userName.value) transAbyss.ReservedUserName = userName.value;
+  const check = await refreshAvatars(acFind.cookie!, gcFind);
+  if (!check) {
+    await showLoading.end();
+    return;
+  }
+  let roles: Array<TGApp.Sqlite.Character.TableTrans> | undefined;
   try {
-    await showLoading.start(`正在上传 ${gcFind.gameUid} 的深渊数据`, `期数：${abyssData.id}`);
-    const transAbyss = Hutao.Abyss.utils.transData(abyssData);
-    if (userName.value) transAbyss.ReservedUserName = userName.value;
-    const check = await refreshAvatars(acFind.cookie!, gcFind);
-    if (!check) return;
-    const roles = await TSUserAvatar.getAvatars(Number(gcFind.gameUid));
+    roles = await TSUserAvatar.getAvatars(Number(gcFind.gameUid));
     if (!roles) {
       await showLoading.end();
       showSnackbar.warn("未找到角色数据");
       return;
     }
-    await showLoading.update("正在转换角色数据");
-    transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
-    await showLoading.update("正在上传深渊数据");
-    console.log("uploadAbyss", transAbyss);
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.end();
+    showSnackbar.error(`获取角色数据失败：${errMsg}`);
+    await TGLogger.Error(`[Abyss][uploadAbyss] 获取角色数据异常：${errMsg}`);
+    return;
+  }
+  await showLoading.update("正在转换角色数据");
+  transAbyss.Avatars = Hutao.Abyss.utils.transAvatars(roles);
+  await showLoading.update("正在上传深渊数据");
+  try {
     const res = await Hutao.Abyss.upload(transAbyss);
     if (res.retcode !== 0) {
-      showSnackbar.error(`[${res.retcode}]${res.message}`);
-      await TGLogger.Warn("[Abyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Warn(`[Abyss][uploadAbyss] ${res.retcode} ${res.message}`);
+      await showLoading.end();
+      showSnackbar.warn(`[${res.retcode}]${res.message}`);
+      await TGLogger.Warn(`[Abyss][uploadAbyss] 上传深渊数据失败：${res.retcode} ${res.message}`);
       return;
     }
     showSnackbar.success(res.message ?? "上传深渊数据成功，即将刷新祈愿时长");
     await TGLogger.Info("[Abyss][uploadAbyss] 上传深渊数据成功");
     await TGLogger.Info(`[${res.retcode}] ${res.message}`);
-    // 等待5s刷新时长
-    await showLoading.update("正在刷新胡桃云数据");
-    await new Promise<void>((resolve) => setTimeout(resolve, 5000));
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    await showLoading.end();
+    showSnackbar.error(`上传深渊数据失败：${errMsg}`);
+    await TGLogger.Error(`[Abyss][uploadAbyss] 上传深渊数据异常：${errMsg}`);
+    return;
+  }
+  await showLoading.update("正在刷新胡桃云数据");
+  await new Promise<void>((resolve) => setTimeout(resolve, 5000));
+  try {
     await hutaoStore.tryRefreshInfo();
   } catch (e) {
-    if (e instanceof Error) {
-      showSnackbar.error(e.message);
-      await TGLogger.Error("[Abyss][uploadAbyss] 上传深渊数据失败");
-      await TGLogger.Error(`[Abyss][uploadAbyss] ${e.message}`);
-    }
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`刷新胡桃云数据失败：${errMsg}`);
+    await TGLogger.Error(`[Abyss][uploadAbyss] 刷新胡桃云数据异常：${errMsg}`);
   }
   await showLoading.end();
 }
