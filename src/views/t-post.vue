@@ -250,7 +250,7 @@ onMounted(async () => {
       await TGLogger.Warn(`[t-post][${postId}][onMounted] ${resp.retcode}: ${resp.message}`);
       return;
     }
-    postData.value = resp.data;
+    postData.value = resp.data.post;
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     await showLoading.empty("数据加载失败", errMsg);

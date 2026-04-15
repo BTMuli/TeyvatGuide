@@ -150,13 +150,14 @@ async function loadCover(): Promise<void> {
     return;
   }
   let coverGet;
-  if (resp.data.cover) coverGet = resp.data.cover.url;
-  else if (resp.data.post.cover && resp.data.post.cover !== "") coverGet = resp.data.post.cover;
-  else if (resp.data.post.images.length > 0) coverGet = resp.data.post.images[0];
+  if (resp.data.post.cover) coverGet = resp.data.post.cover.url;
+  else if (resp.data.post.post.cover && resp.data.post.post.cover !== "") {
+    coverGet = resp.data.post.post.cover;
+  } else if (resp.data.post.post.images.length > 0) coverGet = resp.data.post.post.images[0];
   else coverGet = "";
   cover.value = coverGet;
-  if (!poolCover.value) poolCover.value = { [postId]: resp.data.post.cover };
-  else poolCover.value[postId] = resp.data.post.cover;
+  if (!poolCover.value) poolCover.value = { [postId]: resp.data.post.post.cover };
+  else poolCover.value[postId] = resp.data.post.post.cover;
 }
 
 function handlePosition(): void {
