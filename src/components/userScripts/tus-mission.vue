@@ -1,9 +1,11 @@
 <!-- 米游币任务 -->
 <template>
-  <div class="tusm-box">
+  <div ref="tusmRef" class="tusm-box">
     <div class="tusm-top">
-      <div class="tusm-title">米游币任务({{ todayPoints }}/{{ totalPoints }})</div>
-      <div class="tusm-acts">
+      <div class="tusm-title" @click="genShare()">
+        米游币任务({{ todayPoints }}/{{ totalPoints }})
+      </div>
+      <div class="tusm-acts" data-html2canvas-ignore>
         <v-btn :loading="loadState" class="tusm-btn" @click="tryRefresh()">刷新</v-btn>
         <v-btn :loading="loadMission" class="tusm-btn" @click="tryAuto()">执行</v-btn>
       </div>
@@ -13,7 +15,7 @@
         <span>持有米游币：</span>
         <span>{{ userPoints }}</span>
       </div>
-      <div class="tusm-switch-box">
+      <div class="tusm-switch-box" data-html2canvas-ignore>
         <span>{{ cancelLike ? "点赞后取消" : "直接点赞" }}</span>
         <v-switch v-model="cancelLike" class="tusm-switch" color="var(--tgc-od-red)" />
       </div>
@@ -52,8 +54,9 @@ import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
 import { postDetailRateLimiter } from "@utils/rateLimiter.js";
 import { storeToRefs } from "pinia";
-import { ref, shallowRef, watch } from "vue";
+import { ref, shallowRef, useTemplateRef, watch } from "vue";
 import TGHttps from "@utils/TGHttps.js";
+import { generateShareImg } from "@utils/TGShare.js";
 
 /** 用于渲染的任务项 */
 type ParseMission = {
@@ -92,6 +95,7 @@ const loadState = ref<boolean>(false);
 const loadMission = ref<boolean>(false);
 const parseMissions = shallowRef<Array<ParseMission>>([]);
 const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
+const tusmEl = useTemplateRef<HTMLDivElement>("tusmRef");
 
 defineExpose({ tryAuto });
 
@@ -406,6 +410,11 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
   }
   await TGLogger.Script("[米游币任务]打卡成功");
 }
+
+async function genShare(): Promise<void> {
+  if (!tusmEl.value) return;
+  await generateShareImg(`MiTasks_${props.acCur?.uid ?? "unknown"}`, tusmEl.value, 2);
+}
 </script>
 <style lang="scss" scoped>
 .tusm-box {
@@ -431,6 +440,7 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
 }
 
 .tusm-title {
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
 }
