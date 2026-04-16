@@ -41,7 +41,7 @@ function createHttpError(
 
 /**
  * 执行 HTTP 请求
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  * @param method - 请求方法
  * @param url - 请求地址
  * @param config - 请求配置
@@ -52,7 +52,8 @@ async function request<T>(
   url: string,
   config: TGApp.App.Response.ReqConf = {},
 ): Promise<TGApp.App.Response.Resp<T>> {
-  const timeout = config.timeout ?? 30000;
+  // 默认超时1min
+  const timeout = config.timeout ?? 60000;
 
   // 构建完整 URL
   let finalUrl = url;
