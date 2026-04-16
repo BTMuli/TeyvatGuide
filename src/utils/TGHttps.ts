@@ -4,6 +4,7 @@
  */
 
 import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
+import TGLogger from "@utils/TGLogger.js";
 
 /**
  * 构建 URL 查询字符串
@@ -88,7 +89,10 @@ async function request<T>(
 
   // 创建超时控制器
   const timeoutController = new AbortController();
-  const timeoutId = setTimeout(() => timeoutController.abort(), timeout);
+  const timeoutId = setTimeout(async () => {
+    timeoutController.abort();
+    await TGLogger.Warn(`[TGHttps] 请求超时，已取消请求: ${method} ${finalUrl}`);
+  }, timeout);
 
   // 合并 AbortSignal
   let combinedSignal: AbortSignal;
