@@ -1,6 +1,6 @@
 /**
  * 深境螺旋数据转换
- * @since Beta v0.9.0
+ * @since Beta v0.10.1
  */
 
 import { timestampToDate } from "@utils/toolFunc.js";
@@ -22,7 +22,7 @@ export function transCharacterData(data: Array<TGApp.Game.Abyss.CharacterData>):
 
 /**
  * 转换楼层数据
- * @since Beta v0.9.0
+ * @since Beta v0.10.1
  * @param data - 接口获取楼层数据
  * @returns 转换后的楼层数据
  */
@@ -33,9 +33,27 @@ export function transFloorData(data: Array<TGApp.Game.Abyss.Floor>): string {
     maxStar: item.max_star,
     isUnlock: item.is_unlock ? 1 : 0,
     levels: item.levels.map(transLevelData),
-    buff: item.ley_line_disorder,
+    buff: transFloorBuff(item),
   }));
   return JSON.stringify(floor);
+}
+
+/**
+ * 转换楼层增益
+ * @since Beta v0.10.1
+ * @param data - 接口获取楼层数据
+ * @returns 增益字符串
+ */
+function transFloorBuff(data: TGApp.Game.Abyss.Floor): Array<string> {
+  const res: Array<string> = [];
+  if (data.ley_line_disorder_upper.length > 0) {
+    res.push(`【上半】${data.ley_line_disorder_upper.join(";")}`);
+  }
+  if (data.ley_line_disorder_lower.length > 0) {
+    res.push(`【下半】${data.ley_line_disorder_lower.join(";")}`);
+  }
+  if (data.ley_line_disorder.length > 0) res.push(...data.ley_line_disorder);
+  return res;
 }
 
 /**

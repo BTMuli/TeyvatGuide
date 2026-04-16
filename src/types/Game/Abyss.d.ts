@@ -1,6 +1,6 @@
 /**
  * 深境螺旋相关类型
- * @since Beta v0.9.0
+ * @since Beta v0.10.1
  */
 
 declare namespace TGApp.Game.Abyss {
@@ -68,7 +68,7 @@ declare namespace TGApp.Game.Abyss {
 
   /**
    * 楼层数据
-   * @since Beta v0.9.0
+   * @since Beta v0.10.1
    */
   type Floor = {
     /** 楼层 */
@@ -96,6 +96,10 @@ declare namespace TGApp.Game.Abyss {
     settle_date_time: TGApp.Game.Base.DateTime | null;
     /** 地脉异常 */
     ley_line_disorder: Array<string>;
+    /** 地脉异常：上半 */
+    ley_line_disorder_upper: Array<string>;
+    /** 地脉异常：下半 */
+    ley_line_disorder_lower: Array<string>;
   };
 
   /**
