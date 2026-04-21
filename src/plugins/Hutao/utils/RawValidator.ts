@@ -10,7 +10,7 @@ import AbyssJson from "../schema/abyss.json" with { type: "json" };
 import ChallengeJson from "../schema/challenge.json" with { type: "json" };
 import CombatJson from "../schema/combat.json" with { type: "json" };
 
-const ajv = new Ajv.Ajv();
+const ajv = new Ajv.Ajv({ strictTypes: false });
 
 const AbyssValidate = ajv.compile(AbyssJson);
 const ChallengeValidate = ajv.compile(ChallengeJson);
