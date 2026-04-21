@@ -19,11 +19,17 @@
             {{ text.text }}
           </v-btn>
         </div>
-        <v-pagination v-model="page" :length="length" :total-visible="9" class="tc-page" />
+        <v-pagination
+          v-model="page"
+          size="small"
+          :length="length"
+          :total-visible="5"
+          class="tc-page"
+        />
       </div>
-      <div class="tc-content">
+      <div ref="contentRef" class="tc-content">
         <TCalendarBirth />
-        <div class="calendar-grid">
+        <div class="calendar-grid" :style="gridStyle">
           <TItemBox
             v-for="item in renderItems"
             :key="item.id"
@@ -39,7 +45,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { computed, onMounted, ref, shallowRef } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
 import TCalendarBirth from "./ph-calendar-birth.vue";
 import ToCalendar from "./ph-calendar-overlay.vue";
@@ -59,24 +65,38 @@ const btnText: Array<BtnItem> = [
   { week: 6, text: "周六" },
 ];
 const emits = defineEmits<TCalendarEmits>();
-const visible = 16;
+const ITEM_SIZE = 100;
+const GAP_SIZE = 8;
 
+const contentRef = ref<HTMLDivElement | null>(null);
 const weekNow = ref<number>(0);
 const btnNow = ref<number>(0);
 const dateNow = ref<string>("");
 const page = ref<number>(1);
 const showItem = ref<boolean>(false);
 const selectedType = ref<"character" | "weapon">("character");
+const gridCols = ref<number>(8);
+let resizeObserver: ResizeObserver | null = null;
+
 const calendarTotal = computed<Array<TGApp.App.Calendar.Item>>(() =>
   AppCalendarData.filter(
     (i) => i.dropDays.includes(btnNow.value) && i.itemType === selectedType.value,
   ),
 );
-const length = computed<number>(() => Math.ceil(calendarTotal.value.length / visible));
-const renderItems = computed<Array<TGApp.App.Calendar.Item>>(() =>
-  calendarTotal.value.slice((page.value - 1) * visible, page.value * visible),
-);
+const visible = computed<number>(() => gridCols.value * 2);
+const length = computed<number>(() => Math.ceil(calendarTotal.value.length / visible.value) || 1);
+const renderItems = computed<Array<TGApp.App.Calendar.Item>>(() => {
+  const currentPage = Math.min(page.value, length.value);
+  return calendarTotal.value.slice((currentPage - 1) * visible.value, currentPage * visible.value);
+});
 const selectedItem = shallowRef<TGApp.App.Calendar.Item>(renderItems.value[0]);
+const gridStyle = computed<Record<string, string>>(() => ({
+  gridTemplateColumns: `repeat(${gridCols.value}, ${ITEM_SIZE}px)`,
+}));
+
+watch(visible, () => {
+  page.value = 1;
+});
 
 onMounted(() => {
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
@@ -85,6 +105,25 @@ onMounted(() => {
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   emits("success");
+
+  if (contentRef.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const width = entry.contentRect.width;
+        const gridWidth = (width * 2) / 3;
+        const cols = Math.floor((gridWidth + GAP_SIZE) / (ITEM_SIZE + GAP_SIZE));
+        gridCols.value = Math.max(2, cols);
+      }
+    });
+    resizeObserver.observe(contentRef.value);
+  }
+});
+
+onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+    resizeObserver = null;
+  }
 });
 
 function switchDay(day: number): void {
@@ -176,8 +215,8 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
 .calendar-grid {
   display: grid;
   height: 100%;
+  flex: 1;
   gap: 8px;
-  grid-template-columns: repeat(8, 100px);
   place-items: flex-start flex-start;
 }
 </style>
