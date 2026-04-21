@@ -1,6 +1,6 @@
 <!-- 单个游戏账户签到卡片 -->
 <template>
-  <div ref="signItemRef" class="ph-si-box">
+  <div ref="signItemRef" :class="{ 'ph-si-current': props.cur }" class="ph-si-box">
     <div class="ph-si-top">
       <div :title="gameInfo.title" class="ph-sit-icon" @click="shareItem()">
         <img :alt="gameInfo.title" :src="gameInfo.icon" />
@@ -126,6 +126,7 @@ type PhSignItemProps = {
   account: TGApp.Sqlite.Account.Game;
   info?: TGApp.BBS.Sign.HomeRes;
   stat?: TGApp.BBS.Sign.InfoRes;
+  cur?: boolean;
 };
 type PhSignItemEmits = {
   (e: "delete", account: TGApp.Sqlite.Account.Game): void;
@@ -540,6 +541,12 @@ async function shareItem(): Promise<void> {
   border-radius: 4px;
   background: var(--box-bg-1);
   row-gap: 8px;
+  transition: border-color 0.3s ease;
+
+  &.ph-si-current {
+    border-width: 2px;
+    border-color: var(--common-shadow-2);
+  }
 }
 
 .ph-si-top {

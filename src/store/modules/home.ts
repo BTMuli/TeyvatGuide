@@ -1,6 +1,6 @@
 /**
  * 首页组件状态
- * @since Beta v0.10.0
+ * @since Beta v0.10.1
  */
 
 import { defineStore } from "pinia";
@@ -13,8 +13,7 @@ const defaultHomeShow: Array<TGApp.Store.Home.ShowItem> = [
   { show: true, order: 1, label: "限时祈愿" },
   { show: true, order: 2, label: "近期活动" },
   { show: true, order: 3, label: "素材日历" },
-  { show: false, order: 4, label: "游戏签到" },
-  { show: false, order: 5, label: "实时便笺" },
+  { show: false, order: 4, label: "便笺签到" },
 ];
 
 const useHomeStore = defineStore("home", () => {
@@ -29,25 +28,20 @@ const useHomeStore = defineStore("home", () => {
       try {
         const storedItems: Array<TGApp.Store.Home.ShowItem> = JSON.parse(homeShowLocal);
         if (!Array.isArray(storedItems)) {
-          // Invalid data, reset to default
           localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
         } else {
-          // Merge with default items to add new items
           const storedLabels = storedItems.map((i) => i.label);
-          // Add new items from default that don't exist in stored
           for (const defaultItem of homeShow.value) {
             if (!storedLabels.includes(defaultItem.label)) {
-              storedItems.push({ ...defaultItem });
+              if (defaultHomeShow.includes(defaultItem)) storedItems.push({ ...defaultItem });
             }
           }
-          // Remove items that no longer exist in default
           const defaultLabels = homeShow.value.map((i) => i.label);
           homeShow.value = storedItems.filter((item) => defaultLabels.includes(item.label));
           localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
         }
       } catch (e) {
         console.error(e);
-        // Invalid JSON, reset to default
         localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
       }
     }
