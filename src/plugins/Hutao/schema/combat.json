@@ -11,162 +11,236 @@
       "title": "周期 ID",
       "description": "剧诗期数 ID"
     },
-    "start_time": {
-      "type": "string",
-      "title": "开始时间戳",
-      "description": "秒级时间戳"
-    },
-    "end_time": {
-      "type": "string",
-      "title": "结束时间戳",
-      "description": "秒级时间戳"
-    },
-    "has_data": {
-      "type": "boolean",
-      "title": "是否有数据"
-    },
-    "has_detail_data": {
-      "type": "boolean",
-      "title": "是否有详细数据"
-    },
-    "stat": {
+    "data": {
       "type": "object",
       "properties": {
-        "difficulty_id": { "type": "number" },
-        "max_round_id": { "type": "number" },
-        "heraldry": { "type": "number" },
-        "get_medal_round_list": {
-          "type": "array",
-          "items": { "type": "number", "enum": [0, 1] }
-        },
-        "medal_num": { "type": "number" },
-        "coin_num": { "type": "number" },
-        "avatar_bonus_num": { "type": "number" },
-        "rent_cnt": { "type": "number" },
-        "tarot_finished_cnt": { "type": "number" }
-      },
-      "required": ["difficulty_id", "max_round_id", "heraldry", "get_medal_round_list", "medal_num"]
-    },
-    "detail": {
-      "type": "object",
-      "properties": {
-        "rounds_data": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "avatars": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "avatar_id": { "type": "number" },
-                    "avatar_type": { "type": "number", "enum": [1, 2, 3] },
-                    "name": { "type": "string" },
-                    "element": { "type": "string" },
-                    "image": { "type": "string" },
-                    "level": { "type": "number" },
-                    "rarity": { "type": "number" }
-                  },
-                  "required": ["avatar_id", "avatar_type", "name", "element"]
-                }
-              },
-              "choice_cards": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "icon": { "type": "string" },
-                    "name": { "type": "string" },
-                    "desc": { "type": "string" },
-                    "is_enhanced": { "type": "boolean" },
-                    "id": { "type": "number" }
-                  },
-                  "required": ["icon", "name", "id"]
-                }
-              },
-              "buffs": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "icon": { "type": "string" },
-                    "level": { "type": "number" },
-                    "level_effect": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "icon": { "type": "string" },
-                          "name": { "type": "string" },
-                          "desc": { "type": "string" }
-                        },
-                        "required": ["icon", "name", "desc"]
-                      }
+        "detail": {
+          "type": "object",
+          "properties": {
+            "rounds_data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "avatars": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "avatar_id": { "type": "number" },
+                        "avatar_type": { "type": "number" },
+                        "name": { "type": "string" },
+                        "element": { "type": "string" },
+                        "image": { "type": "string" },
+                        "level": { "type": "number" },
+                        "rarity": { "type": "number" }
+                      },
+                      "required": ["avatar_id", "avatar_type", "name", "element", "level", "rarity"]
                     }
                   },
-                  "required": ["name", "icon", "level", "level_effect"]
-                }
-              },
-              "is_get_medal": { "type": "boolean" },
-              "round_id": { "type": "number" },
-              "finish_time": { "type": "string" },
-              "finish_date_time": {
-                "type": "object",
-                "properties": {
-                  "year": { "type": "number" },
-                  "month": { "type": "number" },
-                  "day": { "type": "number" },
-                  "hour": { "type": "number" },
-                  "minute": { "type": "number" },
-                  "second": { "type": "number" }
-                },
-                "required": ["year", "month", "day", "hour", "minute", "second"]
-              },
-              "enemies": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": { "type": "string" },
-                    "icon": { "type": "string" },
-                    "level": { "type": "number" }
+                  "choice_cards": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "icon": { "type": "string" },
+                        "name": { "type": "string" },
+                        "desc": { "type": "string" },
+                        "is_enhanced": { "type": "boolean" },
+                        "id": { "type": "number" }
+                      },
+                      "required": ["icon", "name", "id"]
+                    }
                   },
-                  "required": ["name", "level"]
-                }
-              },
-              "splendour_buff": {
-                "type": "object",
-                "properties": {
-                  "summary": {
+                  "buffs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "icon": { "type": "string" },
+                        "level": { "type": "number" },
+                        "level_effect": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "icon": { "type": "string" },
+                              "name": { "type": "string" },
+                              "desc": { "type": "string" }
+                            },
+                            "required": ["icon", "name", "desc"]
+                          }
+                        }
+                      },
+                      "required": ["name", "icon", "level"]
+                    }
+                  },
+                  "enemies": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "icon": { "type": "string" },
+                        "level": { "type": "number" }
+                      },
+                      "required": ["name", "level"]
+                    }
+                  },
+                  "is_get_medal": { "type": "boolean" },
+                  "round_id": { "type": "number" },
+                  "finish_time": { "type": ["string", "integer"] },
+                  "finish_date_time": {
                     "type": "object",
                     "properties": {
-                      "total_level": { "type": "number" },
-                      "desc": { "type": "string" }
+                      "year": { "type": "number" },
+                      "month": { "type": "number" },
+                      "day": { "type": "number" },
+                      "hour": { "type": "number" },
+                      "minute": { "type": "number" },
+                      "second": { "type": "number" }
                     },
-                    "required": ["total_level", "desc"]
+                    "required": ["year", "month", "day", "hour", "minute", "second"]
                   },
-                  "buffs": { "type": "array" }
+                  "splendour_buff": {
+                    "type": "object",
+                    "properties": {
+                      "buffs": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "icon": { "type": "string" },
+                            "name": { "type": "string" },
+                            "level": { "type": "number" },
+                            "level_effect": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "icon": { "type": "string" },
+                                  "name": { "type": "string" },
+                                  "desc": { "type": "string" }
+                                },
+                                "required": ["icon", "name", "desc"]
+                              }
+                            }
+                          },
+                          "required": ["icon", "name", "level"]
+                        }
+                      },
+                      "summary": {
+                        "type": "object",
+                        "properties": {
+                          "total_level": { "type": "number" },
+                          "desc": { "type": "string" }
+                        },
+                        "required": ["total_level", "desc"]
+                      }
+                    },
+                    "required": ["buffs", "summary"]
+                  }
                 },
-                "required": ["summary", "buffs"]
-              },
-              "is_tarot": { "type": "boolean" },
-              "tarot_serial_no": { "type": "number" }
+                "required": [
+                  "avatars",
+                  "choice_cards",
+                  "buffs",
+                  "enemies",
+                  "is_get_medal",
+                  "round_id",
+                  "finish_time"
+                ]
+              }
             },
-            "required": [
-              "avatars",
-              "choice_cards",
-              "buffs",
-              "is_get_medal",
-              "round_id",
-              "finish_time",
-              "enemies",
-              "splendour_buff"
-            ]
-          }
+            "detail_stat": {
+              "type": "object",
+              "properties": {
+                "difficulty_id": { "type": "number" },
+                "max_round_id": { "type": "number" },
+                "heraldry": { "type": "number" },
+                "get_medal_round_list": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "medal_num": { "type": "number" },
+                "coin_num": { "type": "number" },
+                "avatar_bonus_num": { "type": "number" },
+                "rent_cnt": { "type": "number" }
+              },
+              "required": [
+                "difficulty_id",
+                "max_round_id",
+                "heraldry",
+                "get_medal_round_list",
+                "medal_num"
+              ]
+            },
+            "backup_avatars": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "avatar_id": { "type": "number" },
+                  "avatar_type": { "type": "number" },
+                  "name": { "type": "string" },
+                  "element": { "type": "string" },
+                  "image": { "type": "string" },
+                  "level": { "type": "number" },
+                  "rarity": { "type": "number" }
+                },
+                "required": ["avatar_id", "avatar_type", "name", "element", "level", "rarity"]
+              }
+            },
+            "fight_statisic": {
+              "type": "object",
+              "properties": {
+                "max_defeat_avatar": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "avatar_id": { "type": "number" },
+                    "avatar_icon": { "type": "string" },
+                    "value": { "type": ["string", "number"] },
+                    "rarity": { "type": "number" }
+                  }
+                },
+                "max_damage_avatar": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "avatar_id": { "type": "number" },
+                    "avatar_icon": { "type": "string" },
+                    "value": { "type": ["string", "number"] },
+                    "rarity": { "type": "number" }
+                  }
+                },
+                "max_take_damage_avatar": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "avatar_id": { "type": "number" },
+                    "avatar_icon": { "type": "string" },
+                    "value": { "type": ["string", "number"] },
+                    "rarity": { "type": "number" }
+                  }
+                },
+                "total_coin_consumed": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "avatar_id": { "type": "number" },
+                    "avatar_icon": { "type": "string" },
+                    "value": { "type": ["string", "number"] },
+                    "rarity": { "type": "number" }
+                  }
+                },
+                "shortest_avatar_list": { "type": "array" },
+                "total_use_time": { "type": "number" },
+                "is_show_battle_stats": { "type": "boolean" }
+              },
+              "required": ["total_use_time", "is_show_battle_stats"]
+            }
+          },
+          "required": ["rounds_data", "detail_stat", "backup_avatars", "fight_statisic"]
         },
-        "detail_stat": {
+        "stat": {
           "type": "object",
           "properties": {
             "difficulty_id": { "type": "number" },
@@ -174,13 +248,12 @@
             "heraldry": { "type": "number" },
             "get_medal_round_list": {
               "type": "array",
-              "items": { "type": "number", "enum": [0, 1] }
+              "items": { "type": "number" }
             },
             "medal_num": { "type": "number" },
             "coin_num": { "type": "number" },
             "avatar_bonus_num": { "type": "number" },
-            "rent_cnt": { "type": "number" },
-            "tarot_finished_cnt": { "type": "number" }
+            "rent_cnt": { "type": "number" }
           },
           "required": [
             "difficulty_id",
@@ -190,121 +263,37 @@
             "medal_num"
           ]
         },
-        "lineup_link": { "type": "string" },
-        "backup_avatars": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "avatar_id": { "type": "number" },
-              "avatar_type": { "type": "number", "enum": [1, 2, 3] },
-              "name": { "type": "string" },
-              "element": { "type": "string" },
-              "image": { "type": "string" },
-              "level": { "type": "number" },
-              "rarity": { "type": "number" }
-            },
-            "required": ["avatar_id", "avatar_type", "name", "element"]
-          }
-        },
-        "fight_statisic": {
-          "type": "object",
-          "properties": {
-            "max_defeat_avatar": {
-              "type": ["object", "null"],
-              "properties": {
-                "avatar_id": { "type": "number" },
-                "avatar_icon": { "type": "string" },
-                "value": { "type": "string" },
-                "rarity": { "type": "number" }
-              },
-              "required": ["avatar_id", "value"]
-            },
-            "max_damage_avatar": {
-              "type": ["object", "null"],
-              "properties": {
-                "avatar_id": { "type": "number" },
-                "avatar_icon": { "type": "string" },
-                "value": { "type": "string" },
-                "rarity": { "type": "number" }
-              },
-              "required": ["avatar_id", "value"]
-            },
-            "max_take_damage_avatar": {
-              "type": ["object", "null"],
-              "properties": {
-                "avatar_id": { "type": "number" },
-                "avatar_icon": { "type": "string" },
-                "value": { "type": "string" },
-                "rarity": { "type": "number" }
-              },
-              "required": ["avatar_id", "value"]
-            },
-            "total_coin_consumed": {
-              "type": ["object", "null"],
-              "properties": {
-                "avatar_id": { "type": "number" },
-                "avatar_icon": { "type": "string" },
-                "value": { "type": "string" },
-                "rarity": { "type": "number" }
-              },
-              "required": ["avatar_id", "value"]
-            },
-            "shortest_avatar_list": { "type": "array" },
-            "total_use_time": { "type": "number" },
-            "is_show_battle_stats": { "type": "boolean" }
-          },
-          "required": ["total_use_time", "is_show_battle_stats"]
-        }
-      },
-      "required": ["rounds_data", "detail_stat", "backup_avatars", "fight_statisic"]
-    },
-    "schedule": {
-      "type": "object",
-      "properties": {
-        "start_time": { "type": "string" },
-        "end_time": { "type": "string" },
-        "schedule_type": { "type": "number" },
-        "schedule_id": { "type": "number" },
-        "start_date_time": {
-          "type": "object",
-          "properties": {
-            "year": { "type": "number" },
-            "month": { "type": "number" },
-            "day": { "type": "number" },
-            "hour": { "type": "number" },
-            "minute": { "type": "number" },
-            "second": { "type": "number" }
-          },
-          "required": ["year", "month", "day", "hour", "minute", "second"]
-        },
-        "end_date_time": {
-          "type": "object",
-          "properties": {
-            "year": { "type": "number" },
-            "month": { "type": "number" },
-            "day": { "type": "number" },
-            "hour": { "type": "number" },
-            "minute": { "type": "number" },
-            "second": { "type": "number" }
-          },
-          "required": ["year", "month", "day", "hour", "minute", "second"]
-        }
-      },
-      "required": ["start_time", "end_time", "schedule_type", "schedule_id"]
-    },
-    "data": {
-      "type": "object",
-      "properties": {
-        "detail": { "type": "object" },
-        "stat": { "type": "object" },
         "schedule": {
           "type": "object",
           "properties": {
-            "start_time": { "type": "string" },
-            "end_time": { "type": "string" },
+            "start_time": { "type": ["string", "integer"] },
+            "end_time": { "type": ["string", "integer"] },
             "schedule_type": { "type": "number" },
-            "schedule_id": { "type": "number" }
+            "schedule_id": { "type": "number" },
+            "start_date_time": {
+              "type": "object",
+              "properties": {
+                "year": { "type": "number" },
+                "month": { "type": "number" },
+                "day": { "type": "number" },
+                "hour": { "type": "number" },
+                "minute": { "type": "number" },
+                "second": { "type": "number" }
+              },
+              "required": ["year", "month", "day", "hour", "minute", "second"]
+            },
+            "end_date_time": {
+              "type": "object",
+              "properties": {
+                "year": { "type": "number" },
+                "month": { "type": "number" },
+                "day": { "type": "number" },
+                "hour": { "type": "number" },
+                "minute": { "type": "number" },
+                "second": { "type": "number" }
+              },
+              "required": ["year", "month", "day", "hour", "minute", "second"]
+            }
           },
           "required": ["start_time", "end_time", "schedule_type", "schedule_id"]
         },
@@ -314,17 +303,6 @@
       "required": ["detail", "stat", "schedule", "has_data", "has_detail_data"]
     }
   },
-  "required": [
-    "uid",
-    "schedule_id",
-    "start_time",
-    "end_time",
-    "has_data",
-    "has_detail_data",
-    "stat",
-    "detail",
-    "schedule",
-    "data"
-  ],
+  "required": ["uid", "schedule_id", "data"],
   "title": "幻想真境剧诗数据 Schema"
 }
