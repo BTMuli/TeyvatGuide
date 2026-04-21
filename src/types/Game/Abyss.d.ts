@@ -95,16 +95,16 @@ declare namespace TGApp.Game.Abyss {
      */
     settle_date_time: TGApp.Game.Base.DateTime | null;
     /** 地脉异常 */
-    ley_line_disorder: Array<string>;
+    ley_line_disorder?: Array<string>;
     /** 地脉异常：上半 */
-    ley_line_disorder_upper: Array<string>;
+    ley_line_disorder_upper?: Array<string>;
     /** 地脉异常：下半 */
-    ley_line_disorder_lower: Array<string>;
+    ley_line_disorder_lower?: Array<string>;
   };
 
   /**
    * 关卡数据
-   * @since Beta v0.9.0
+   * @since Beta v0.10.1
    */
   type Level = {
     /** 关卡索引  */
@@ -116,9 +116,9 @@ declare namespace TGApp.Game.Abyss {
     /** 战斗数据 */
     battles: Array<Battle>;
     /** 上半场怪物数据 */
-    top_half_floor_monster: Array<MonsterInfo>;
+    top_half_floor_monster?: Array<MonsterInfo>;
     /** 下半场怪物数据 */
-    bottom_half_floor_monster: Array<MonsterInfo>;
+    bottom_half_floor_monster?: Array<MonsterInfo>;
   };
 
   /**

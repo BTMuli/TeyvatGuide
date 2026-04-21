@@ -18,14 +18,15 @@ const CombatValidate = ajv.compile(CombatJson);
 
 /**
  * 验证深渊单条数据
- * @since Beta v0.9.9
+ * @since Beta v0.10.1
  * @param data - 待验证的数据
  * @returns 验证是否通过（类型收束）
  */
 function validateAbyss(data: unknown): data is TGApp.Plugins.Hutao.Abyss.ImportData {
   if (!AbyssValidate(data)) {
-    const error = AbyssValidate.errors?.[0];
-    if (error) {
+    if (AbyssValidate.errors) {
+      const error = AbyssValidate.errors[0];
+      console.error(AbyssValidate.errors);
       showSnackbar.error(
         `深渊数据验证失败：${error.instancePath || error.schemaPath} ${error.message}`,
       );

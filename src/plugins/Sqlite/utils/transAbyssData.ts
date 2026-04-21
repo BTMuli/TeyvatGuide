@@ -44,15 +44,17 @@ export function transFloorData(data: Array<TGApp.Game.Abyss.Floor>): string {
  * @param data - 接口获取楼层数据
  * @returns 增益字符串
  */
-function transFloorBuff(data: TGApp.Game.Abyss.Floor): Array<string> {
+function transFloorBuff(data: TGApp.Game.Abyss.Floor): Array<string> | undefined {
   const res: Array<string> = [];
-  if (data.ley_line_disorder_upper.length > 0) {
+  if (data.ley_line_disorder_upper && data.ley_line_disorder_upper.length > 0) {
     res.push(`【上半】${data.ley_line_disorder_upper.join(";")}`);
   }
-  if (data.ley_line_disorder_lower.length > 0) {
+  if (data.ley_line_disorder_lower && data.ley_line_disorder_lower.length > 0) {
     res.push(`【下半】${data.ley_line_disorder_lower.join(";")}`);
   }
-  if (data.ley_line_disorder.length > 0) res.push(...data.ley_line_disorder);
+  if (data.ley_line_disorder && data.ley_line_disorder.length > 0) {
+    res.push(...data.ley_line_disorder);
+  }
   return res;
 }
 
@@ -69,8 +71,15 @@ function transLevelData(data: TGApp.Game.Abyss.Level): TGApp.Sqlite.Abyss.Level 
     maxStar: data.max_star,
   };
   for (const battle of data.battles) {
-    if (battle.index === 1) res.upBattle = transBattleData(battle, data.top_half_floor_monster);
-    else res.downBattle = transBattleData(battle, data.bottom_half_floor_monster);
+    if (battle.index === 1) {
+      if (data.top_half_floor_monster) {
+        res.upBattle = transBattleData(battle, data.top_half_floor_monster);
+      }
+    } else {
+      if (data.bottom_half_floor_monster) {
+        res.downBattle = transBattleData(battle, data.bottom_half_floor_monster);
+      }
+    }
   }
   return res;
 }

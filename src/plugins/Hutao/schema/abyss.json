@@ -19,12 +19,12 @@
           "title": "周期 ID"
         },
         "start_time": {
-          "type": "string",
+          "type": ["string", "integer"],
           "title": "开始时间戳",
           "description": "秒级时间戳"
         },
         "end_time": {
-          "type": "string",
+          "type": ["string", "integer"],
           "title": "结束时间戳",
           "description": "秒级时间戳"
         },
@@ -139,25 +139,63 @@
           "items": {
             "type": "object",
             "properties": {
-              "index": { "type": "number" },
-              "icon": { "type": "string" },
-              "is_unlock": { "type": "boolean" },
-              "settle_time": { "type": "string" },
-              "star": { "type": "number" },
-              "max_star": { "type": "number" },
+              "index": {
+                "type": "number"
+              },
+              "icon": {
+                "type": "string"
+              },
+              "is_unlock": {
+                "type": "boolean"
+              },
+              "settle_time": {
+                "type": ["string", "integer"]
+              },
+              "star": {
+                "type": "number"
+              },
+              "max_star": {
+                "type": "number"
+              },
               "ley_line_disorder": {
                 "type": "array",
-                "items": { "type": "string" }
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ley_line_disorder_upper": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "ley_line_disorder_lower": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "settle_date_time": {
                 "type": ["object", "null"],
                 "properties": {
-                  "year": { "type": "number" },
-                  "month": { "type": "number" },
-                  "day": { "type": "number" },
-                  "hour": { "type": "number" },
-                  "minute": { "type": "number" },
-                  "second": { "type": "number" }
+                  "year": {
+                    "type": "number"
+                  },
+                  "month": {
+                    "type": "number"
+                  },
+                  "day": {
+                    "type": "number"
+                  },
+                  "hour": {
+                    "type": "number"
+                  },
+                  "minute": {
+                    "type": "number"
+                  },
+                  "second": {
+                    "type": "number"
+                  }
                 }
               },
               "levels": {
@@ -173,8 +211,12 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "index": { "type": "number" },
-                          "timestamp": { "type": "string" },
+                          "index": {
+                            "type": "number"
+                          },
+                          "timestamp": {
+                            "type": ["string", "integer"]
+                          },
                           "settle_date_time": {
                             "type": "object",
                             "properties": {
@@ -200,7 +242,7 @@
                             }
                           }
                         },
-                        "required": ["index", "timestamp", "avatars", "settle_date_time"]
+                        "required": ["index", "timestamp", "avatars"]
                       }
                     },
                     "top_half_floor_monster": {
@@ -220,9 +262,15 @@
                       "items": {
                         "type": "object",
                         "properties": {
-                          "name": { "type": "string" },
-                          "icon": { "type": "string" },
-                          "level": { "type": "number" }
+                          "name": {
+                            "type": "string"
+                          },
+                          "icon": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "number"
+                          }
                         },
                         "required": ["name", "level"]
                       }
