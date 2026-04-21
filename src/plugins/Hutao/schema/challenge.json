@@ -11,207 +11,15 @@
       "title": "周期 ID",
       "description": "危战期数 ID"
     },
-    "start_time": {
-      "type": "string",
-      "title": "开始时间戳",
-      "description": "秒级时间戳"
-    },
-    "end_time": {
-      "type": "string",
-      "title": "结束时间戳",
-      "description": "秒级时间戳"
-    },
-    "name": {
-      "type": "string",
-      "title": "挑战名称"
-    },
-    "single": {
-      "type": "object",
-      "properties": {
-        "best": {
-          "type": "object",
-          "properties": {
-            "difficulty": { "type": "number" },
-            "second": { "type": "number" },
-            "icon": { "type": "string" }
-          },
-          "required": ["difficulty", "second", "icon"]
-        },
-        "challenge": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "second": { "type": "number" },
-              "teams": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "avatar_id": { "type": "number" },
-                    "name": { "type": "string" },
-                    "element": { "type": "string" },
-                    "image": { "type": "string" },
-                    "level": { "type": "number" },
-                    "rarity": { "type": "number" },
-                    "rank": { "type": "number" }
-                  },
-                  "required": ["avatar_id", "name", "element"]
-                }
-              },
-              "best_avatar": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "avatar_id": { "type": "number" },
-                    "side_icon": { "type": "string" },
-                    "dps": { "type": "string" },
-                    "type": { "type": "number" }
-                  },
-                  "required": ["avatar_id", "side_icon", "dps", "type"]
-                }
-              },
-              "monster": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "level": { "type": "number" },
-                  "icon": { "type": "string" },
-                  "desc": {
-                    "type": "array",
-                    "items": { "type": "string" }
-                  },
-                  "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "type": { "type": "string" },
-                        "desc": { "type": "string" }
-                      },
-                      "required": ["type", "desc"]
-                    }
-                  },
-                  "monster_id": { "type": "number" }
-                },
-                "required": ["name", "level", "icon", "desc"]
-              }
-            },
-            "required": ["name", "second", "teams", "best_avatar", "monster"]
-          }
-        },
-        "has_data": { "type": "boolean" }
-      },
-      "required": ["best", "challenge", "has_data"]
-    },
-    "mp": {
-      "type": "object",
-      "properties": {
-        "best": {
-          "type": "object",
-          "properties": {
-            "difficulty": { "type": "number" },
-            "second": { "type": "number" },
-            "icon": { "type": "string" }
-          },
-          "required": ["difficulty", "second", "icon"]
-        },
-        "challenge": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": { "type": "string" },
-              "second": { "type": "number" },
-              "teams": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "avatar_id": { "type": "number" },
-                    "name": { "type": "string" },
-                    "element": { "type": "string" },
-                    "image": { "type": "string" },
-                    "level": { "type": "number" },
-                    "rarity": { "type": "number" },
-                    "rank": { "type": "number" }
-                  },
-                  "required": ["avatar_id", "name", "element"]
-                }
-              },
-              "best_avatar": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "avatar_id": { "type": "number" },
-                    "side_icon": { "type": "string" },
-                    "dps": { "type": "string" },
-                    "type": { "type": "number" }
-                  },
-                  "required": ["avatar_id", "side_icon", "dps", "type"]
-                }
-              },
-              "monster": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "level": { "type": "number" },
-                  "icon": { "type": "string" },
-                  "desc": {
-                    "type": "array",
-                    "items": { "type": "string" }
-                  },
-                  "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "type": { "type": "string" },
-                        "desc": { "type": "string" }
-                      },
-                      "required": ["type", "desc"]
-                    }
-                  },
-                  "monster_id": { "type": "number" }
-                },
-                "required": ["name", "level", "icon", "desc"]
-              }
-            },
-            "required": ["name", "second", "teams", "best_avatar", "monster"]
-          }
-        },
-        "has_data": { "type": "boolean" }
-      },
-      "required": ["best", "challenge", "has_data"]
-    },
-    "blings": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "avatar_id": { "type": "number" },
-          "name": { "type": "string" },
-          "element": { "type": "string" },
-          "image": { "type": "string" },
-          "side_icon": { "type": "string" },
-          "rarity": { "type": "number" },
-          "is_plus": { "type": "boolean" }
-        },
-        "required": ["avatar_id", "name", "element", "image", "side_icon", "rarity"]
-      }
-    },
     "data": {
       "type": "object",
       "properties": {
         "schedule": {
           "type": "object",
           "properties": {
-            "schedule_id": { "type": "string" },
-            "start_time": { "type": "string" },
-            "end_time": { "type": "string" },
+            "schedule_id": { "type": ["string", "number"] },
+            "start_time": { "type": ["string", "integer"] },
+            "end_time": { "type": ["string", "integer"] },
             "name": { "type": "string" }
           },
           "required": ["schedule_id", "start_time", "end_time", "name"]
@@ -255,16 +63,6 @@
       "required": ["schedule", "single", "mp", "blings"]
     }
   },
-  "required": [
-    "uid",
-    "schedule_id",
-    "start_time",
-    "end_time",
-    "name",
-    "single",
-    "mp",
-    "blings",
-    "data"
-  ],
+  "required": ["uid", "schedule_id", "data"],
   "title": "幽境危战数据 Schema"
 }
