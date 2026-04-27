@@ -9,8 +9,11 @@ import postcssPresetEnv from "postcss-preset-env";
 import { defineConfig } from "vite";
 import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
+import pkgJson from "./package.json" with { type: "json" };
 
 const host = process.env.TAURI_DEV_HOST;
+
+const sentryRelease = process.env.VITE_SENTRY_RELEASE || `TeyvatGuide@${pkgJson.version}`;
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,7 +27,7 @@ export default defineConfig({
       project: "teyvat-guide",
       authToken: process.env.SENTRY_AUTH_TOKEN ?? "",
       release: {
-        name: process.env.VITE_SENTRY_RELEASE,
+        name: sentryRelease,
         setCommits: { auto: true },
       },
     }),
