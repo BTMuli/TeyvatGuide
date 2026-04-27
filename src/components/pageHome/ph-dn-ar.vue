@@ -67,7 +67,7 @@ const midIcon = computed<string>(() => {
       return "mdi-cancel";
     case dnEnum.attendance.UNFINISHED:
     default:
-      return "mdi-info";
+      return "mdi-information";
   }
 });
 </script>
