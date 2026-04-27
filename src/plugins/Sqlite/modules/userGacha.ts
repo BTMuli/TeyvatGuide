@@ -1,6 +1,6 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.9.8
+ * @since Beta v0.10.1
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -14,7 +14,7 @@ import TGSqlite from "../index.js";
 
 /**
  * 批量插入祈愿数据
- * @since Beta v0.9.8
+ * @since Beta v0.10.1
  * @param db - 数据库
  * @param uid - 用户UID
  * @param data - 祈愿数据
@@ -83,13 +83,12 @@ async function insertGachaList(
       await db.execute(batchSql, batchParams);
       await db.execute("COMMIT;");
     } catch (e) {
+      await db.execute("ROLLBACK;");
       const msg = String(e);
       if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
         await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
         return;
       }
-      // 其他错误直接抛出
-      await db.execute("ROLLBACK;");
       throw e;
     }
   }
