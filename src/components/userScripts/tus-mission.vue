@@ -3,7 +3,10 @@
   <div ref="tusmRef" class="tusm-box">
     <div class="tusm-top">
       <div class="tusm-title" @click="genShare()">
-        米游币任务({{ todayPoints }}/{{ totalPoints }})
+        <span>米游币任务({{ todayPoints }}/{{ totalPoints }})</span>
+        <v-icon color="var(--tgc-od-red)" size="16" title="相关" @click.stop="toInfoPost()">
+          mdi-information
+        </v-icon>
       </div>
       <div class="tusm-acts" data-html2canvas-ignore>
         <v-btn :loading="loadState" class="tusm-btn" @click="tryRefresh()">刷新</v-btn>
@@ -14,10 +17,6 @@
       <div class="tusm-total">
         <span>持有米游币：</span>
         <span>{{ userPoints }}</span>
-      </div>
-      <div class="tusm-switch-box" data-html2canvas-ignore>
-        <span>{{ cancelLike ? "点赞后取消" : "直接点赞" }}</span>
-        <v-switch v-model="cancelLike" class="tusm-switch" color="var(--tgc-od-red)" />
       </div>
     </div>
     <div class="tusm-content">
@@ -47,16 +46,12 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
-import painterReq from "@req/painterReq.js";
-import postReq from "@req/postReq.js";
-import useAppStore from "@store/app.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
-import { postDetailRateLimiter } from "@utils/rateLimiter.js";
-import { storeToRefs } from "pinia";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
 import TGHttps from "@utils/TGHttps.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { createPost } from "@utils/TGWindow.js";
 
 /** 用于渲染的任务项 */
 type ParseMission = {
@@ -82,8 +77,6 @@ type TusMissionProps = {
   /** 米社账号 */
   acCur: TGApp.App.Account.User | undefined;
 };
-
-const { cancelLike } = storeToRefs(useAppStore());
 
 const loadScript = defineModel<boolean>();
 const props = defineProps<TusMissionProps>();
@@ -185,135 +178,6 @@ async function tryAuto(skip: boolean = false): Promise<void> {
     return;
   }
   await autoSign(props.acCur.cookie, skip);
-  const postFilter = parseMissions.value.filter((i) => i.key !== "continuous_sign");
-  if (postFilter.every((i) => i.status)) {
-    await TGLogger.Script("[米游币任务]所有任务已完成");
-    await TGLogger.ScriptSep("米游币任务", false);
-    loadScript.value = false;
-    loadMission.value = false;
-    return;
-  }
-  let isShare = false;
-  let likeCnt = 0;
-  let viewCnt = 0;
-  const shareFind = postFilter.find((i) => i.key === "share_post_0");
-  if (shareFind) isShare = shareFind.status;
-  const likeFind = postFilter.find((i) => i.key === "post_up_0");
-  if (likeFind) likeCnt = likeFind.process;
-  const viewFind = postFilter.find((i) => i.key === "view_post_0");
-  if (viewFind) viewCnt = viewFind.process;
-  // 获取帖子列表
-  await TGLogger.Script("[米游币任务]获取帖子列表");
-  let listResp: TGApp.BBS.Forum.PostForumResp | undefined;
-  try {
-    listResp = await painterReq.forum.recent(26, 2, 2, undefined, 20);
-    if (listResp.retcode !== 0) {
-      showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
-      await TGLogger.Script(`获取帖子列表失败: [${listResp.retcode}] ${listResp.message}`, "warn");
-      await TGLogger.ScriptSep("米游币任务", false);
-      loadScript.value = false;
-      loadMission.value = false;
-      return;
-    }
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取帖子列表失败：${errMsg}`);
-    await TGLogger.Script(`获取帖子列表失败`, "error");
-    await TGLogger.Error(`[tus-mission][tryAuto] ${e}`);
-    await TGLogger.ScriptSep("米游币任务", false);
-    loadScript.value = false;
-    loadMission.value = false;
-    return;
-  }
-  if (!listResp) return;
-  // 执行操作
-  const ckShare = {
-    stoken: props.acCur.cookie.stoken,
-    stuid: props.acCur.cookie.stuid,
-    mid: props.acCur.cookie.mid,
-  };
-  const ckPost = { ltoken: props.acCur.cookie.ltoken, ltuid: props.acCur.cookie.ltuid };
-  for (const post of listResp.data.list) {
-    if (!isShare) {
-      await TGLogger.Script(`[米游币任务]正在分享帖子${post.post.post_id}`);
-      try {
-        const shareResp = await apiHubReq.post.share(post.post.post_id, ckShare);
-        if (shareResp.retcode === 0) {
-          await TGLogger.Script("[米游币任务]分享成功");
-          isShare = true;
-        } else {
-          await TGLogger.Script(`[米游币任务]分享失败：${shareResp.retcode} ${shareResp.message}`);
-        }
-      } catch (e) {
-        await TGLogger.Script(`[米游币任务]分享异常：${TGHttps.getErrMsg(e)}`, "error");
-      }
-    }
-    if (likeCnt < 5 || viewCnt < 3) {
-      const currentCount = postDetailRateLimiter.getRequestCount();
-      await TGLogger.Script(
-        `[米游币任务]正在浏览帖子${post.post.post_id} (${currentCount}/10 req/min)`,
-      );
-      let detailResp: TGApp.BBS.Post.FullResp | undefined;
-      try {
-        detailResp = await postDetailRateLimiter.execute(() =>
-          postReq.post(post.post.post_id, ckPost),
-        );
-        if (detailResp.retcode !== 0) {
-          await TGLogger.Script(
-            `[米游币任务]获取帖子${post.post.post_id}失败：${detailResp.retcode} ${detailResp.message}`,
-            "warn",
-          );
-          continue;
-        }
-      } catch (e) {
-        const errMsg = TGHttps.getErrMsg(e);
-        await TGLogger.Script(`[米游币任务]获取帖子${post.post.post_id}异常：${errMsg}`, "error");
-        continue;
-      }
-      viewCnt++;
-      if (likeCnt < 5) {
-        const isLike = (detailResp.data.post.self_operation?.upvote_type ?? 0) > 0;
-        if (isLike) {
-          await TGLogger.Script(`[米游币任务]帖子${post.post.post_id}已点赞，跳过`);
-          continue;
-        }
-        await TGLogger.Script(`[米游币任务]正在点赞帖子${post.post.post_id}`);
-        try {
-          const likeResp = await apiHubReq.post.like(post.post.post_id, ckPost);
-          if (likeResp.retcode === 0) {
-            await TGLogger.Script("[米游币任务]点赞成功");
-            likeCnt++;
-          } else {
-            await TGLogger.Script(`[米游币任务]点赞失败：${likeResp.retcode} ${likeResp.message}`);
-            continue;
-          }
-        } catch (e) {
-          await TGLogger.Script(`[米游币任务]点赞异常：${TGHttps.getErrMsg(e)}`, "error");
-          continue;
-        }
-        if (cancelLike.value) {
-          await TGLogger.Script(`[米游币任务]正在取消点赞帖子${post.post.post_id}`);
-          await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-          try {
-            const unlikeResp = await apiHubReq.post.like(post.post.post_id, ckPost, true);
-            if (unlikeResp.retcode === 0) {
-              await TGLogger.Script("[米游币任务]取消点赞成功");
-            } else {
-              await TGLogger.Script(
-                `[米游币任务]取消点赞失败：${unlikeResp.retcode} ${unlikeResp.message}`,
-              );
-            }
-          } catch (e) {
-            await TGLogger.Script(`[米游币任务]取消点赞异常：${TGHttps.getErrMsg(e)}`, "error");
-          }
-        }
-      }
-    }
-    if (isShare && likeCnt >= 5 && viewCnt >= 3) {
-      await TGLogger.Script("[米游币任务]所有任务已完成");
-      break;
-    }
-  }
   await TGLogger.Script("[米游币任务]任务执行完毕，即将刷新任务状态");
   await refreshState(props.acCur.cookie);
   await TGLogger.ScriptSep("米游币任务", false);
@@ -337,7 +201,7 @@ async function refreshState(ck: TGApp.App.Account.Cookie): Promise<void> {
         showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
         return;
       }
-      missionList.value = listResp.data.missions;
+      missionList.value = [...listResp.data.missions, ...listResp.data.more_missions];
       await TGLogger.Script("[米游币任务]获取任务列表成功");
     } catch (e) {
       await TGLogger.Script(`[米游币任务]获取任务列表异常：${TGHttps.getErrMsg(e)}`, "error");
@@ -383,7 +247,6 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
   let resp: TGApp.BBS.Response.Base;
   try {
     resp = await apiHubReq.sign(ckSign, 2, ch);
-    console.log("打卡情况", resp);
   } catch (e) {
     await TGLogger.Script(`[米游币任务]打卡异常：${TGHttps.getErrMsg(e)}`, "error");
     return;
@@ -414,6 +277,10 @@ async function autoSign(ck: TGApp.App.Account.Cookie, skip: boolean, ch?: string
 async function genShare(): Promise<void> {
   if (!tusmEl.value) return;
   await generateShareImg(`MiTasks_${props.acCur?.uid ?? "unknown"}`, tusmEl.value, 2);
+}
+
+async function toInfoPost(): Promise<void> {
+  await createPost(74971515);
 }
 </script>
 <style lang="scss" scoped>
