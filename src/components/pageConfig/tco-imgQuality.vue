@@ -1,6 +1,6 @@
 <!-- 设置图片质量浮窗 -->
 <template>
-  <TOverlay v-model="model" :outer-close="clickOuter" blur-val="10px">
+  <TOverlay v-model="model" :outer-close="clickOuter" blur-val="10px" class="toi-overlay">
     <div class="toi-box">
       <div class="toi-top">
         <div class="toi-title">调整图片质量</div>
@@ -33,8 +33,14 @@
         />
       </div>
       <div class="toi-bottom">
-        <v-btn class="toi-btn no-btn" variant="flat" @click="onCancel()">取消</v-btn>
-        <v-btn class="toi-btn ok-btn" variant="elevated" @click="onConfirm()">确定</v-btn>
+        <button class="toi-btn no-btn" @click="onCancel()">
+          <span>></span>
+          <span>取消</span>
+        </button>
+        <button class="toi-btn ok-btn" @click="onConfirm()">
+          <span>></span>
+          <span>确定</span>
+        </button>
       </div>
     </div>
   </TOverlay>
@@ -74,14 +80,33 @@ async function handleSliderEnd(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
+/* 颜色变量 */
+
+.toi-overlay {
+  --toi-title: var(--tgc-dark-7);
+  --toi-bg: var(--tgc-white-1);
+}
+
+/* 深色模式 */
+
+.dark .toi-overlay {
+  --toi-title: var(--tgc-white-1);
+  --toi-bg: var(--tgc-dark-7);
+}
+
 .toi-box {
+  position: relative;
   display: flex;
   width: 400px;
   flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px;
-  border-radius: 4px;
-  background-color: var(--box-bg-1);
-  color: var(--app-page-content);
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--toi-bg);
+  box-shadow: 0 0 10px var(--common-shadow-t-2);
+  color: var(--tgc-yellow-3);
   gap: 12px;
 }
 
@@ -96,7 +121,7 @@ async function handleSliderEnd(): Promise<void> {
   text-align: center;
 
   .toi-title {
-    color: var(--common-text-title);
+    color: var(--toi-title);
     font-size: 20px;
   }
 
@@ -134,14 +159,34 @@ async function handleSliderEnd(): Promise<void> {
 .toi-btn {
   position: relative;
   display: flex;
-  box-sizing: border-box;
   align-items: center;
   justify-content: center;
-  padding: 4px 20px;
-  border-radius: 24px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
+  padding: 4px 8px;
+  border: unset;
+  border-radius: 4px;
+  background: unset;
+  column-gap: 8px;
   cursor: pointer;
-  font-family: var(--font-title);
+  font-size: 14px;
+
+  span:first-child {
+    font-weight: bold;
+  }
+}
+
+.no-btn {
+  color: var(--tgc-od-white);
+
+  &:hover {
+    background: var(--common-shadow-1);
+  }
+}
+
+.ok-btn {
+  color: var(--box-text-1);
+
+  &:hover {
+    background: var(--common-shadow-2);
+  }
 }
 </style>
