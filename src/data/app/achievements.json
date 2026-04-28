@@ -4370,7 +4370,7 @@
     "description": "在风息山、空之神殿开启45个宝箱。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80476,
@@ -4380,7 +4380,7 @@
     "description": "在风息山、空之神殿开启90个宝箱。",
     "reward": 10,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80477,
@@ -4390,7 +4390,7 @@
     "description": "在风息山、空之神殿开启180个宝箱。",
     "reward": 20,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80479,
@@ -4400,7 +4400,7 @@
     "description": "点亮蒙德区域中，风息山的地图。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_AREA" }
   },
   {
     "id": 80480,
@@ -4410,7 +4410,10 @@
     "description": "点亮蒙德区域中，空之神殿的地图。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 70065, "name": "风停了", "type": "世界任务" }]
+    }
   },
   {
     "id": 80481,
@@ -4420,7 +4423,10 @@
     "description": "完成「山中好长日」。",
     "reward": 10,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76096, "name": "最后的审判", "type": "世界任务" }]
+    }
   },
   {
     "id": 80482,
@@ -4430,7 +4436,10 @@
     "description": "为彩特琳德找回所有丢失的东西。",
     "reward": 10,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76095, "name": "圣殿的一日春秋", "type": "世界任务" }]
+    }
   },
   {
     "id": 80484,
@@ -4440,7 +4449,7 @@
     "description": "解除风息山的宗室密藏之地与空之神殿的诸界秘展之厅的封印。",
     "reward": 10,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80485,
@@ -4450,7 +4459,7 @@
     "description": "将空之神殿的摹忆中枢等级供奉至满级。",
     "reward": 20,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 80486,
@@ -4460,7 +4469,7 @@
     "description": "解锁蒙德区域中，风息山、空之神殿所有传送锚点。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_TRANS_POINT" }
   },
   {
     "id": 80487,
@@ -4470,7 +4479,7 @@
     "description": "在风息山、空之神殿完成7个大世界限时挑战。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80488,
@@ -4480,7 +4489,7 @@
     "description": "在风息山、空之神殿完成14个大世界限时挑战。",
     "reward": 10,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80489,
@@ -4490,7 +4499,7 @@
     "description": "在风息山、空之神殿完成28个大世界限时挑战。",
     "reward": 20,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80500,
@@ -4500,7 +4509,7 @@
     "description": "在风息山、空之神殿追随3个仙灵，并点亮仙灵之庭。",
     "reward": 10,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81000,
@@ -10877,7 +10886,10 @@
     "description": "旧塔下的警戒机关再也不因狂风而闪烁。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 70078, "name": "寂静之塔下的风向", "type": "世界任务" }]
+    }
   },
   {
     "id": 81644,
@@ -10887,7 +10899,7 @@
     "description": "搜集到被书页隐去的所有宝箱。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81645,
@@ -10897,7 +10909,7 @@
     "description": "完成《埃黎尼》的冒险。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81646,
@@ -10907,7 +10919,7 @@
     "description": "生命总会自然而然变得茂盛起来。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81647,
@@ -10917,7 +10929,7 @@
     "description": "是否拥有跨过门槛的资格取决于是否能想到绕过门槛的办法…",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81648,
@@ -10927,7 +10939,7 @@
     "description": "…虽然挑战其实就只有两面。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81649,
@@ -10937,7 +10949,7 @@
     "description": "第一次协同小右施展空间能力。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81650,
@@ -10947,7 +10959,7 @@
     "description": "还是让展柜里的东西待在展柜里吧…",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81651,
@@ -10957,7 +10969,10 @@
     "description": "第一次观看彩特琳德和她姐姐的「回忆」。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76096, "name": "最后的审判", "type": "世界任务" }]
+    }
   },
   {
     "id": 81652,
@@ -10967,7 +10982,7 @@
     "description": "经典冒险与其构成的形式…",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81653,
@@ -10977,7 +10992,7 @@
     "description": "尝试挥动化生的翅膀吧…",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 81654,
@@ -10987,7 +11002,7 @@
     "description": "第一次仔细探查微型山水的内部。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81655,
@@ -10997,7 +11012,10 @@
     "description": "那是属于过去的侠义干云的往事。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76210, "name": "潜龙飞凤", "type": "世界任务" }]
+    }
   },
   {
     "id": 81656,
@@ -11007,7 +11025,7 @@
     "description": "登上高山，或许就可以不被世事遮拦。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81657,
@@ -11017,7 +11035,7 @@
     "description": "入尘垂手与遗世绝俗，本就是一条路的两个方向。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81658,
@@ -11027,7 +11045,7 @@
     "description": "来到空之神殿柱殿中央区。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81659,
@@ -11037,7 +11055,10 @@
     "description": "击败「梅兰塔」。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76096, "name": "最后的审判", "type": "世界任务" }]
+    }
   },
   {
     "id": 81660,
@@ -11047,7 +11068,7 @@
     "description": "完成五个展柜的挑战。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81661,
@@ -11057,7 +11078,7 @@
     "description": "高处向下看时看到的一切都很小，或许从低看高处，也不过沧海一粟。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 82001,
@@ -13987,7 +14008,7 @@
     "description": "平等地击破过所有元素类型的「活性元素星」。",
     "reward": 5,
     "version": "6.5",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_MULTICOND_CONFIG_COMMON" }
   },
   {
     "id": 84000,
