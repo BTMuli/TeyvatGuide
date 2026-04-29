@@ -84,6 +84,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import getLrv from "@utils/Github.js";
 import TGLogger from "@utils/TGLogger.js";
+import { compareVersions } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -221,8 +222,14 @@ async function checkAppUpdate(): Promise<void> {
   const versionApp = await getVersion();
   const versionCheck = await getLrv();
   if (versionCheck === "0") return;
-  if (versionCheck === versionApp) {
+  const versionCompare = compareVersions(versionApp, versionCheck);
+  if (versionCompare === 0) {
     await TGLogger.Info(`[Home][CheckAppUpdate]版本号一致：${versionCheck}`);
+    lastUcts.value = nowTs;
+    return;
+  }
+  if (versionCompare > 0) {
+    await TGLogger.Info(`[Home][CheckAppUpdate]当前版本${versionApp}比远程版本${versionCheck}更新`);
     lastUcts.value = nowTs;
     return;
   }

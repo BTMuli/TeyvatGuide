@@ -1,6 +1,6 @@
 /**
  * 一些工具函数
- * @since Beta v0.9.5
+ * @since Beta v0.10.2
  */
 
 import { tz } from "@date-fns/tz";
@@ -390,6 +390,30 @@ export function str2timeStr(str: string): string {
 export function validEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
+}
+
+/**
+ * 比较两个语义化版本号
+ * @since Beta v0.10.2
+ * @param v1 - 版本号1（当前应用版本）
+ * @param v2 - 版本号2（远程最新版本）
+ * @returns 比较结果：1表示v1更新，-1表示v2更新，0表示相同
+ * @example compareVersions("0.10.1", "0.10.0") // 返回 1
+ * @example compareVersions("0.9.9", "0.10.0") // 返回 -1
+ * @example compareVersions("0.10.0", "0.10.0") // 返回 0
+ */
+export function compareVersions(v1: string, v2: string): number {
+  const parts1 = v1.split(".").map(Number);
+  const parts2 = v2.split(".").map(Number);
+  const maxLength = Math.max(parts1.length, parts2.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const num1 = parts1[i] || 0;
+    const num2 = parts2[i] || 0;
+    if (num1 > num2) return 1;
+    if (num1 < num2) return -1;
+  }
+  return 0;
 }
 
 /**
