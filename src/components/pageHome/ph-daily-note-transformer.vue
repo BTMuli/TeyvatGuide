@@ -1,7 +1,7 @@
 <!-- 参量质变仪显示组件 -->
 <template>
   <div :class="{ 'ph-dnt-ready': ready }" class="ph-dnt-box">
-    <div class="pdb-trans-icon">
+    <div :class="{ 'ph-dnt-none': !props.trans.obtained }" class="pdb-trans-icon">
       <img alt="参量质变仪" src="/UI/daily/trans.webp" />
     </div>
     <div class="pdb-trans-info">
@@ -29,15 +29,13 @@ const formattedTime = ref<string>("");
 let timer: ReturnType<typeof setInterval> | null = null;
 
 const valueText = computed<string>(() => {
-  if (!props.trans.obtained && !props.trans.recovery_time.reached) {
-    return "恢复中";
-  }
-  if (props.trans.obtained || props.trans.recovery_time.reached) {
+  if (!props.trans.obtained) return "未拥有";
+  if (props.trans.recovery_time.reached) {
     return "可使用";
   }
   return formattedTime.value;
 });
-const ready = computed<boolean>(() => props.trans.obtained || props.trans.recovery_time.reached);
+const ready = computed<boolean>(() => props.trans.obtained && props.trans.recovery_time.reached);
 
 onMounted(() => {
   initTime();
@@ -61,10 +59,11 @@ watch(
 function initTime(): void {
   const time = props.trans.recovery_time;
   if (time) {
-    const hours = time.hour || 0;
-    const minutes = time.minute || 0;
-    const seconds = time.second || 0;
-    remainedTime.value = hours * 3600 + minutes * 60 + seconds;
+    const days = time.Day || 0;
+    const hours = time.Hour || 0;
+    const minutes = time.Minute || 0;
+    const seconds = time.Second || 0;
+    remainedTime.value = days * 86400 + hours * 3600 + minutes * 60 + seconds;
   } else {
     remainedTime.value = 0;
   }
@@ -72,8 +71,7 @@ function initTime(): void {
 }
 
 function startTimer(): void {
-  if (remainedTime.value <= 0 || props.trans.obtained || props.trans.recovery_time.reached) return;
-
+  if (remainedTime.value <= 0 || !props.trans.obtained || props.trans.recovery_time.reached) return;
   timer = setInterval(() => {
     if (remainedTime.value > 0) {
       remainedTime.value -= 1;
@@ -91,11 +89,12 @@ function stopTimer(): void {
 
 function updateFormattedTime(): void {
   if (remainedTime.value <= 0) {
-    formattedTime.value = "0 小时 0 分钟 0 秒";
+    formattedTime.value = "00:00:00";
     return;
   }
-
-  formattedTime.value = stamp2LastTime(remainedTime.value * 1000);
+  const days = Math.floor(remainedTime.value / 86400);
+  if (days > 0) formattedTime.value = `${days}天后可再次使用`;
+  else formattedTime.value = stamp2LastTime(remainedTime.value * 1000);
 }
 </script>
 <style lang="scss" scoped>
@@ -127,6 +126,13 @@ function updateFormattedTime(): void {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  &.ph-dnt-none {
+    img {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
   }
 }
 

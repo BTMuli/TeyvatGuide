@@ -71,7 +71,7 @@ declare namespace TGApp.Game.DailyNote {
    * @since Beta v0.10.0
    */
   type TransformerData = {
-    /** 是否可以使用 */
+    /** 是否拥有 */
     obtained: boolean;
     /** 恢复时间 */
     recovery_time: TransformerTime;
@@ -85,10 +85,18 @@ declare namespace TGApp.Game.DailyNote {
 
   /**
    * 时间
-   * @since Beta v0.10.0
+   * @since Beta v0.10.2
    */
-  type TransformerTime = TGApp.Game.Base.DateTime & {
-    /** 是否到达 */
+  type TransformerTime = {
+    /** 天 */
+    Day: number;
+    /** 时 */
+    Hour: number;
+    /** 分 */
+    Minute: number;
+    /** 秒 */
+    Second: number;
+    /** 是否冷却 */
     reached: boolean;
   };
 
