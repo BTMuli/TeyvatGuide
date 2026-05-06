@@ -36,7 +36,7 @@ const current = computed<number>(() => {
   const totalToRecover = max.value - initialCurrent.value;
   if (totalToRecover <= 0) return max.value;
   if (remainedTime.value <= 0) return max.value;
-  const recovered = Math.floor(totalToRecover - remainedTime.value / 540);
+  const recovered = Math.floor(totalToRecover - remainedTime.value / 480);
   return Math.min(initialCurrent.value + Math.max(recovered, 0), max.value);
 });
 const full = computed<boolean>(() => current.value === max.value);
