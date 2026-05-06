@@ -86,7 +86,7 @@ async function insertGachaBList(
     } catch (e) {
       await db.execute("ROLLBACK;");
       const msg = String(e);
-      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
+      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED|database is locked/i.test(msg)) {
         await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
         return;
       }

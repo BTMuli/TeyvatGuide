@@ -1,11 +1,12 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import TGLogger from "@utils/TGLogger.js";
 import Database from "@tauri-apps/plugin-sql";
 import { getUtc8Time, getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 import { ref, type Ref } from "vue";
@@ -85,7 +86,7 @@ async function insertGachaList(
     } catch (e) {
       await db.execute("ROLLBACK;");
       const msg = String(e);
-      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED/i.test(msg)) {
+      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED|database is locked/i.test(msg)) {
         await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
         return;
       }
@@ -310,11 +311,19 @@ async function mergeUIGF(
       });
     }, 1000);
   }
-  const transformed = data.map((g) => transGacha(g));
-  await insertGachaList(db, uid, transformed, 100, cnt);
-  if (timer) {
-    clearInterval(timer);
-    await showLoading.update(`[100%] 完成`, { timeout: 0 });
+  try {
+    const transformed = data.map((g) => transGacha(g));
+    await insertGachaList(db, uid, transformed, 100, cnt);
+  } catch (e) {
+    await TGLogger.Error(`[UserGacha][mergeUIGF] 合并祈愿数据异常`);
+    await TGLogger.Error(`[UserGacha][mergeUIGF] UID: ${uid}, 数据量: ${data.length}`);
+    await TGLogger.Error(`[UserGacha][mergeUIGF] ${e}`);
+    throw e;
+  } finally {
+    if (timer) {
+      clearInterval(timer);
+      await showLoading.update(`[100%] 完成`, { timeout: 0 });
+    }
   }
 }
 

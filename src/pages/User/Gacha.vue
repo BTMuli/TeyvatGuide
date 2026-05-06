@@ -669,7 +669,17 @@ async function refreshGachaPool(
         gachaDataMap[item.time].push(item.id.toString());
       }
     }
-    await TSUserGacha.mergeUIGF(ac.gameUid, uigfList);
+    try {
+      await TSUserGacha.mergeUIGF(ac.gameUid, uigfList);
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`[${label}] 保存祈愿数据失败：${errMsg}`);
+      await TGLogger.Error(
+        `[Gacha][${ac.gameUid}][refreshGachaPool] 保存${label}数据异常：${errMsg}`,
+      );
+      await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] ${e}`);
+      break;
+    }
     if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) break;
     reqId = gachaList[gachaList.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
