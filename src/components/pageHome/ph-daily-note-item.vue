@@ -20,22 +20,25 @@
     </div>
     <div v-if="props.data" class="dni-content">
       <div class="dni-grid">
-        <div class="dni-row">
+        <!-- 日常 -->
+        <div class="dni-row col-4">
           <PhDailyNoteResin
             :current-resin="props.data.current_resin"
             :max-resin="props.data.max_resin"
             :recovery-time="props.data.resin_recovery_time"
           />
+          <PhDailyNoteTask :task="props.data.daily_task" />
           <PhDailyNoteCoin
             :current-coin="props.data.current_home_coin"
             :max-coin="props.data.max_home_coin"
             :recovery-time="props.data.home_coin_recovery_time"
           />
-          <PhDailyNoteTransformer :trans="props.data.transformer" />
+          <PhDailyNoteWeekAct :wap="props.data.week_active_progress" />
         </div>
+        <!-- 周常 -->
         <div class="dni-row">
           <PhDailyNoteQuest :quest="props.data.archon_quest_progress" />
-          <PhDailyNoteTask :task="props.data.daily_task" />
+          <PhDailyNoteTransformer :trans="props.data.transformer" />
           <PhDailyNoteBoss
             :remain-resin-discount-num="props.data.remain_resin_discount_num"
             :resin-discount-num-limit="props.data.resin_discount_num_limit"
@@ -56,6 +59,7 @@ import PhDailyNoteTransformer from "./ph-daily-note-transformer.vue";
 import PhDailyNoteTask from "./ph-daily-note-task.vue";
 import PhDailyNoteQuest from "./ph-daily-note-quest.vue";
 import PhDailyNoteBoss from "./ph-daily-note-boss.vue";
+import PhDailyNoteWeekAct from "./ph-daily-note-week-act.vue";
 import { computed } from "vue";
 import dnEnum from "@enum/dailyNote.js";
 
@@ -154,6 +158,10 @@ function handleRefresh(): void {
   display: grid;
   gap: 4px;
   grid-template-columns: repeat(3, 1fr);
+
+  &.col-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .dni-item {

@@ -1,6 +1,6 @@
 /**
  * 实时便笺数据
- * @since Beta v0.10.0
+ * @since Beta v0.10.2
  */
 
 declare namespace TGApp.Game.DailyNote {
@@ -12,7 +12,7 @@ declare namespace TGApp.Game.DailyNote {
 
   /**
    * 实时便笺返回
-   * @since Beta v0.10.0
+   * @since Beta v0.10.2
    */
   type DnRes = {
     /** 当前体力 */
@@ -51,6 +51,8 @@ declare namespace TGApp.Game.DailyNote {
     daily_task: DailyTask;
     /** 任务进度 */
     archon_quest_progress: ArchonQuestProgress;
+    /** 砺行修远 */
+    week_active_progress: WeekActiveProgress;
   };
 
   /**
@@ -163,7 +165,10 @@ declare namespace TGApp.Game.DailyNote {
     wiki_url: string;
   };
 
-  /** 任务 */
+  /**
+   * 任务
+   * @since Beta v0.10.1
+   */
   type ArchonQuest = {
     /**
      * 章节数
@@ -256,4 +261,30 @@ declare namespace TGApp.Game.DailyNote {
    */
   type AttendanceRewardStatusEnum =
     (typeof AttendanceRewardStatus)[keyof typeof AttendanceRewardStatus];
+
+  /**
+   * 励行修远进度
+   * @since Beta v0.10.2
+   */
+  type WeekActiveProgress = {
+    /** 本周已完成进度 */
+    progress_current: number;
+    /** 本周总进度 */
+    progress_total: number;
+    /** 周数完成进度 */
+    period_progress_current: number;
+    /** 周数总进度 */
+    period_progress_total: number;
+    /** 是否解锁 */
+    unlock: boolean;
+    /**
+     * 进度数组
+     * @remarks 1,2,3 周一，周二，周三
+     */
+    progress_current_arr: Array<number>;
+    /** 是否激活当前进度 */
+    is_active_period: boolean;
+    /** 当前周序数 */
+    current_weekday: number;
+  };
 }

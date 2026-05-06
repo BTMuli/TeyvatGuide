@@ -267,6 +267,7 @@ async function handleRefreshDailyNote(acc: TGApp.Sqlite.Account.Game): Promise<v
   let dataResp: TGApp.Game.DailyNote.DnResp | undefined;
   try {
     dataResp = await recordReq.daily(cookie.value!, acc);
+    console.debug(dataResp);
     if (dataResp.retcode !== 0) {
       await TGLogger.Warn(`[Game Status Card] [${dataResp.retcode}] ${dataResp.message}`);
       showSnackbar.error(`刷新失败：[${dataResp.retcode}] ${dataResp.message}`);
