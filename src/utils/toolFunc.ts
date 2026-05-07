@@ -30,6 +30,23 @@ export function stamp2LastTime(time: number): string {
 }
 
 /**
+ * 计算目标时刻
+ * @since Beta v0.10.2
+ * @param remainedSeconds - 剩余秒数
+ * @returns 时刻字符串 x天后xx:xx:xx
+ */
+export function stamp2FullTime(remainedSeconds: number): string {
+  if (remainedSeconds <= 0) return "";
+  const now = new Date();
+  const fullTime = new Date(now.getTime() + remainedSeconds * 1000);
+  const dayDiff = Math.floor(remainedSeconds / (24 * 3600));
+  const hour = fullTime.getHours().toString().padStart(2, "0");
+  const minute = fullTime.getMinutes().toString().padStart(2, "0");
+  const second = fullTime.getSeconds().toString().padStart(2, "0");
+  return `${dayDiff === 0 ? "" : `${dayDiff}天后`}${hour}:${minute}:${second}`;
+}
+
+/**
  * 时间戳转换为日期
  * @since Beta v0.6.0
  * @param timestamp - 时间戳（毫秒）

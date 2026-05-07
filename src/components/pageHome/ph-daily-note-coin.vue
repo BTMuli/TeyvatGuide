@@ -10,7 +10,8 @@
         <span>{{ current }}/{{ max }}</span>
       </div>
       <div class="pdb-coin-desc">
-        {{ formattedTime }}
+        <span v-if="fullTimeText" class="pdb-coin-fulltime">{{ fullTimeText }}回满</span>
+        <span class="pdb-coin-countdown">{{ formattedTime }}</span>
       </div>
     </div>
   </div>
@@ -18,7 +19,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import { stamp2LastTime } from "@utils/toolFunc.js";
+import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
 
 type PhDailyNoteCoinProps = {
   currentCoin: number;
@@ -32,6 +33,7 @@ const current = ref<number>(0);
 const max = ref<number>(0);
 const remainedTime = ref<number>(0);
 const formattedTime = ref<string>("");
+const fullTimeText = ref<string>("");
 const full = computed<boolean>(() => current.value === max.value);
 
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -59,6 +61,7 @@ function initTime(): void {
   max.value = props.maxCoin || 0;
   const time = props.recoveryTime;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time || 0;
+  fullTimeText.value = stamp2FullTime(remainedTime.value);
   updateFormattedTime();
 }
 
@@ -68,6 +71,9 @@ function startTimer(): void {
   timer = setInterval(() => {
     if (remainedTime.value > 0) {
       remainedTime.value -= 1;
+      if (remainedTime.value <= 0) {
+        fullTimeText.value = "";
+      }
       updateFormattedTime();
     }
   }, 1000);
@@ -138,11 +144,26 @@ function updateFormattedTime(): void {
 }
 
 .pdb-coin-desc {
+  display: flex;
   overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
   color: var(--box-text-2);
   font-size: 10px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  .pdb-coin-fulltime {
+    flex-shrink: 0;
+    color: var(--tgc-od-orange);
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .pdb-coin-countdown {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 </style>

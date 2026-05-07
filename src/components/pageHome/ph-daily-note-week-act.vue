@@ -1,6 +1,6 @@
 <!-- 励行修远进度组件 -->
 <template>
-  <div class="pdnwa-box">
+  <div :class="{ 'pdnwa-incomplete': isTodayIncomplete }" class="pdnwa-box">
     <div class="pdnwa-icon">
       <img alt="励行修远" src="/UI/daily/week_act.webp" />
     </div>
@@ -45,18 +45,27 @@ const weekDays = computed<Array<number>>(() => {
   if (!props.wap) return [];
   return props.wap.progress_current_arr;
 });
+const curWeekday = computed<number>(() => props.wap?.current_weekday ?? 1);
+const isTodayIncomplete = computed<boolean>(() => {
+  if (!props.wap) return false;
+  const currentDay = props.wap.current_weekday ?? 1;
+  if (weekDays.value.includes(currentDay)) return false;
+  if (props.wap.progress_current >= props.wap.progress_total) return false;
+  return props.wap.period_progress_current < props.wap.period_progress_total;
+});
 
 function getDayColor(day: number): string {
-  console.log(day);
   if (weekDays.value.includes(day)) return "var(--tgc-od-green)";
-  if (props.wap?.current_weekday ?? 1 < day) return "var(--tgc-od-white)";
-  return "var(--tgc-od-red)";
+  if (curWeekday.value > day) return "var(--tgc-od-white)";
+  if (curWeekday.value === day) return "var(--tgc-od-red)";
+  return "var(--tgc-od-blue)";
 }
 
 function getDayIcon(day: number): string {
   if (weekDays.value.includes(day)) return "mdi-check-circle";
-  if (props.wap?.current_weekday ?? 1 < day) return "mdi-circle-outline";
-  return "mdi-information";
+  if (curWeekday.value < day) return "mdi-circle-outline";
+  if (curWeekday.value === day) return "mdi-dots-horizontal-circle-outline";
+  return "mdi-cancel";
 }
 </script>
 <style lang="scss" scoped>
@@ -69,6 +78,11 @@ function getDayIcon(day: number): string {
   border-radius: 4px;
   background: var(--box-bg-2);
   gap: 4px;
+  transition: all 0.3s ease;
+
+  &.pdnwa-incomplete {
+    background: linear-gradient(135deg, var(--tgc-od-red) 0%, var(--box-bg-2) 80%);
+  }
 }
 
 .pdnwa-icon {

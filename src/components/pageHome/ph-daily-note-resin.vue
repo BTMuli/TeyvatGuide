@@ -10,7 +10,8 @@
         <span>{{ current }}/{{ max }}</span>
       </div>
       <div class="pdb-resin-desc">
-        {{ formattedTime }}
+        <span v-if="fullTimeText" class="pdb-resin-fulltime">{{ fullTimeText }}回满</span>
+        <span class="pdb-resin-countdown">{{ formattedTime }}</span>
       </div>
     </div>
   </div>
@@ -18,7 +19,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import { stamp2LastTime } from "@utils/toolFunc.js";
+import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
 
 type PhDailyNoteResinProps = {
   currentResin: number;
@@ -30,6 +31,7 @@ const props = defineProps<PhDailyNoteResinProps>();
 
 const remainedTime = ref<number>(0);
 const initialCurrent = ref<number>(0);
+const fullTimeText = ref<string>("");
 
 const max = computed<number>(() => props.maxResin ?? 200);
 const current = computed<number>(() => {
@@ -69,12 +71,18 @@ function initTime(): void {
   initialCurrent.value = props.currentResin || 0;
   const time = props.recoveryTime;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time || 0;
+  fullTimeText.value = stamp2FullTime(remainedTime.value);
 }
 
 function startTimer(): void {
   if (remainedTime.value <= 0) return;
   timer = setInterval(() => {
-    if (remainedTime.value > 0) remainedTime.value -= 1;
+    if (remainedTime.value > 0) {
+      remainedTime.value -= 1;
+      if (remainedTime.value <= 0) {
+        fullTimeText.value = "";
+      }
+    }
   }, 1000);
 }
 
@@ -134,11 +142,26 @@ function stopTimer(): void {
 }
 
 .pdb-resin-desc {
+  display: flex;
   overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
   color: var(--box-text-2);
   font-size: 10px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  .pdb-resin-fulltime {
+    flex-shrink: 0;
+    color: var(--tgc-od-orange);
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .pdb-resin-countdown {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 </style>

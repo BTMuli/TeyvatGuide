@@ -7,7 +7,8 @@
     <div class="pdb-trans-info">
       <div class="pdb-trans-title">参量质变仪</div>
       <div class="pdb-trans-desc">
-        {{ valueText }}
+        <span v-if="fullTimeText" class="pdb-trans-fulltime">{{ fullTimeText }}</span>
+        <span class="pdb-trans-countdown">{{ valueText }}</span>
       </div>
     </div>
   </div>
@@ -15,7 +16,7 @@
 <script lang="ts" setup>
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import { stamp2LastTime } from "@utils/toolFunc.js";
+import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
 
 type PhDailyNoteTransformerProps = {
   trans: TGApp.Game.DailyNote.TransformerData;
@@ -25,6 +26,7 @@ const props = defineProps<PhDailyNoteTransformerProps>();
 
 const remainedTime = ref<number>(0);
 const formattedTime = ref<string>("");
+const fullTimeText = ref<string>("");
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -64,8 +66,14 @@ function initTime(): void {
     const minutes = time.Minute || 0;
     const seconds = time.Second || 0;
     remainedTime.value = days * 86400 + hours * 3600 + minutes * 60 + seconds;
+    if (days === 0 && remainedTime.value > 0) {
+      fullTimeText.value = stamp2FullTime(remainedTime.value);
+    } else {
+      fullTimeText.value = "";
+    }
   } else {
     remainedTime.value = 0;
+    fullTimeText.value = "";
   }
   updateFormattedTime();
 }
@@ -75,6 +83,9 @@ function startTimer(): void {
   timer = setInterval(() => {
     if (remainedTime.value > 0) {
       remainedTime.value -= 1;
+      if (remainedTime.value <= 0) {
+        fullTimeText.value = "";
+      }
       updateFormattedTime();
     }
   }, 1000);
@@ -150,12 +161,27 @@ function updateFormattedTime(): void {
 }
 
 .pdb-trans-desc {
+  display: flex;
   overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
   color: var(--box-text-2);
   font-size: 10px;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  .pdb-trans-fulltime {
+    flex-shrink: 0;
+    color: var(--tgc-od-orange);
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .pdb-trans-countdown {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .pdb-trans-value {
