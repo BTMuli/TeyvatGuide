@@ -53,6 +53,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import lunaReq from "@req/lunaReq.js";
+import miscReq from "@req/miscReq.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
@@ -97,6 +98,61 @@ const dailyNoteAccounts = ref<Array<DailyNoteAccount>>([]);
 const signAccounts = ref<Array<SignAccount>>([]);
 
 const currentGameUid = computed(() => account.value?.gameUid || "");
+
+/**
+ * 构建验证用的签名 Cookie
+ * @since Beta v0.10.2
+ */
+function buildSignCookie(): Record<string, string> {
+  return {
+    stoken: cookie.value!.stoken,
+    stuid: cookie.value!.stuid,
+    mid: cookie.value!.mid,
+  };
+}
+
+/**
+ * 获取实时便笺数据（含 1034 验证处理）
+ * @since Beta v0.10.2
+ * @param acc - 游戏账号
+ * @param shouldVerifyCaptcha - 是否触发验证（单账号或手动刷新时为 true）
+ * @returns 便笺数据，验证失败或错误时返回 undefined
+ */
+async function fetchDailyNoteWithCaptcha(
+  acc: TGApp.Sqlite.Account.Game,
+  shouldVerifyCaptcha: boolean,
+): Promise<TGApp.Game.DailyNote.DnRes | undefined> {
+  const dataResp = await recordReq.daily(cookie.value!, acc);
+  if (dataResp.retcode === 0) return dataResp.data;
+  if (dataResp.retcode !== 1034) {
+    await TGLogger.Warn(
+      `[Game Status Card] ${acc.gameBiz}: [${dataResp.retcode}] ${dataResp.message}`,
+    );
+    return;
+  }
+  if (!shouldVerifyCaptcha) {
+    showSnackbar.warn(`${acc.nickname} 便笺数据需要验证`);
+    await TGLogger.Warn(
+      `[Game Status Card] ${acc.gameBiz}: [1034] 需要验证，账号数量大于1，跳过验证`,
+    );
+    return;
+  }
+  await TGLogger.Info("[Game Status Card] Captcha required for daily note");
+  const challengeGet = await miscReq.challenge(buildSignCookie());
+  if (challengeGet === false) {
+    showSnackbar.error("验证码验证失败");
+    await TGLogger.Warn(`[Game Status Card] ${acc.gameBiz}: [1034] 验证码验证失败`);
+    return;
+  }
+  const retryResp = await recordReq.daily(cookie.value!, acc, challengeGet);
+  if (retryResp.retcode !== 0) {
+    await TGLogger.Warn(
+      `[Game Status Card] ${acc.gameBiz}: [${retryResp.retcode}] ${retryResp.message}`,
+    );
+    return;
+  }
+  return retryResp.data;
+}
 
 const sortedDailyNoteAccounts = computed(() => {
   if (!currentGameUid.value) return dailyNoteAccounts.value;
@@ -168,21 +224,14 @@ async function loadDailyNoteData(): Promise<void> {
     }
     loadingDailyNote.value = true;
     loadingProgress.value = 0;
+    const isSingleAccount = genshinAccounts.length === 1;
     for (let i = 0; i < genshinAccounts.length; i++) {
       const acc = genshinAccounts[i];
       loadingText.value = `正在加载 ${acc.gameBiz} - ${acc.regionName} - ${acc.gameUid}...`;
       loadingProgress.value = (i / genshinAccounts.length) * 100;
       let data: TGApp.Game.DailyNote.DnRes | undefined;
-      let dataResp: TGApp.Game.DailyNote.DnResp | undefined;
       try {
-        dataResp = await recordReq.daily(cookie.value, acc);
-        if (dataResp.retcode !== 0) {
-          await TGLogger.Warn(
-            `[Note Sign Card] ${acc.gameBiz}: [${dataResp.retcode}] ${dataResp.message}`,
-          );
-        } else {
-          data = dataResp.data;
-        }
+        data = await fetchDailyNoteWithCaptcha(acc, isSingleAccount);
       } catch (e) {
         const errMsg = TGHttps.getErrMsg(e);
         await TGLogger.Error(`[Game Status Card] ${acc.gameBiz}: ${errMsg}`);
@@ -264,15 +313,9 @@ async function endLoadSign(): Promise<void> {
 }
 
 async function handleRefreshDailyNote(acc: TGApp.Sqlite.Account.Game): Promise<void> {
-  let dataResp: TGApp.Game.DailyNote.DnResp | undefined;
+  let data: TGApp.Game.DailyNote.DnRes | undefined;
   try {
-    dataResp = await recordReq.daily(cookie.value!, acc);
-    console.debug(dataResp);
-    if (dataResp.retcode !== 0) {
-      await TGLogger.Warn(`[Game Status Card] [${dataResp.retcode}] ${dataResp.message}`);
-      showSnackbar.error(`刷新失败：[${dataResp.retcode}] ${dataResp.message}`);
-      return;
-    }
+    data = await fetchDailyNoteWithCaptcha(acc, true);
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     await TGLogger.Error(`[Game Status Card] 刷新失败：${errMsg}`);
@@ -280,11 +323,15 @@ async function handleRefreshDailyNote(acc: TGApp.Sqlite.Account.Game): Promise<v
     showSnackbar.error(`刷新失败：${errMsg}`);
     return;
   }
+  if (!data) {
+    showSnackbar.error("刷新失败");
+    return;
+  }
   const item = dailyNoteAccounts.value.find(
     (i) => i.account.gameUid === acc.gameUid && i.account.gameBiz === acc.gameBiz,
   );
   if (item) {
-    item.data = dataResp.data;
+    item.data = data;
   }
   showSnackbar.success("刷新成功");
 }

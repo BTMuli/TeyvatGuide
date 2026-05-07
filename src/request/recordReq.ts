@@ -1,6 +1,6 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  */
 
 import gameEnum from "@enum/game.js";
@@ -221,19 +221,23 @@ async function actCalendar(
 
 /**
  * 获取实时便笺
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  * @param cookie - Cookie
  * @param user - 用户
+ * @param challenge - 极验验证信息（可选）
  * @returns 实时便笺响应数据
  */
 async function dailyNote(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
+  challenge?: string,
 ): Promise<TGApp.Game.DailyNote.DnResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const params = { role_id: user.gameUid, server: user.region };
+  const headers = getRequestHeader(ck, "GET", params);
+  if (challenge) headers["x-rpc-challenge"] = challenge;
   const resp = await TGHttps.get<TGApp.Game.DailyNote.DnResp>(`${trgAbu}dailyNote`, {
-    headers: getRequestHeader(ck, "GET", params),
+    headers,
     query: params,
   });
   return resp.data;
