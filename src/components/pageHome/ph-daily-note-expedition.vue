@@ -10,7 +10,22 @@
       </div>
       <div v-else-if="expedition.status === dnEnum.expedition.ONGOING" class="dni-exp-info-content">
         <div class="dni-exp-status">派遣中</div>
-        <div class="dni-exp-time">{{ formattedTime }}</div>
+        <span
+          v-if="!showCountdown && fullTimeText"
+          :title="'点击查看倒计时'"
+          class="dni-exp-time clickable"
+          @click="showCountdown = true"
+        >
+          {{ fullTimeText }}完成
+        </span>
+        <span
+          v-else-if="showCountdown"
+          :title="fullTimeText ? `${fullTimeText}完成` : ''"
+          class="dni-exp-time clickable"
+          @click="showCountdown = false"
+        >
+          {{ formattedTime }}
+        </span>
       </div>
       <div v-else class="dni-exp-status empty">未派遣</div>
     </div>
@@ -19,7 +34,7 @@
 <script lang="ts" setup>
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
-import { stamp2LastTime } from "@utils/toolFunc.js";
+import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
 
 import dnEnum from "@enum/dailyNote.js";
 
@@ -32,6 +47,8 @@ const props = defineProps<PhDailyNoteExpeditionProps>();
 const remainedTime = ref<number>(0);
 const isFinished = ref<boolean>(false);
 const formattedTime = ref<string>("");
+const fullTimeText = ref<string>("");
+const showCountdown = ref<boolean>(true);
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -58,6 +75,7 @@ function initTime(): void {
   remainedTime.value = typeof time === "string" ? parseInt(time) : time;
   isFinished.value =
     props.expedition.status === dnEnum.expedition.FINISHED || remainedTime.value <= 0;
+  fullTimeText.value = stamp2FullTime(remainedTime.value);
   updateFormattedTime();
 }
 
@@ -164,5 +182,13 @@ function updateFormattedTime(): void {
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      font-style: italic;
+    }
+  }
 }
 </style>

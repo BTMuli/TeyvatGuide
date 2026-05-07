@@ -1,6 +1,6 @@
 <!-- 魔神任务显示组件 -->
 <template>
-  <div class="ph-dnq-box">
+  <div :class="{ 'phdnq-highlight': hasIncompleteQuests }" class="ph-dnq-box">
     <div class="pdb-quest-icon">
       <img alt="魔神任务" src="/UI/daily/mission.webp" />
     </div>
@@ -38,7 +38,11 @@ type PhDailyNoteQuestProps = { quest: TGApp.Game.DailyNote.ArchonQuestProgress }
 
 const props = defineProps<PhDailyNoteQuestProps>();
 
-const questList = computed(() => props.quest.list);
+const questList = computed<Array<TGApp.Game.DailyNote.ArchonQuest>>(() => props.quest.list);
+const hasIncompleteQuests = computed<boolean>(() => {
+  if (props.quest.is_finish_all_mainline && props.quest.is_finish_all_interchapter) return false;
+  return props.quest.list.length > 1;
+});
 
 function getQuestClass(stat: TGApp.Game.DailyNote.ArchonStatusEnum): string {
   switch (stat) {
@@ -65,6 +69,11 @@ function getQuestClass(stat: TGApp.Game.DailyNote.ArchonStatusEnum): string {
   border-radius: 4px;
   background: var(--box-bg-2);
   gap: 4px;
+  transition: all 0.3s ease;
+
+  &.phdnq-highlight {
+    background: linear-gradient(135deg, var(--tgc-od-orange) -60%, var(--box-bg-2) 60%);
+  }
 }
 
 .pdb-quest-icon {

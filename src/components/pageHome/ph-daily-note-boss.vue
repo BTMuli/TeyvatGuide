@@ -1,6 +1,6 @@
 <!-- 周本 BOSS 显示组件 -->
 <template>
-  <div class="ph-dnb-box">
+  <div :class="{ 'phdnb-highlight': hasDiscount }" class="ph-dnb-box">
     <div class="pdb-boss-icon">
       <img alt="周本 BOSS" src="/UI/daily/domain.webp" />
     </div>
@@ -20,13 +20,9 @@ type PhDailyNoteBossProps = {
 
 const props = defineProps<PhDailyNoteBossProps>();
 
-const current = computed((): number => {
-  return props.remainResinDiscountNum ?? 0;
-});
-
-const max = computed((): number => {
-  return props.resinDiscountNumLimit ?? 0;
-});
+const current = computed<number>(() => props.remainResinDiscountNum ?? 0);
+const max = computed<number>(() => props.resinDiscountNumLimit ?? 0);
+const hasDiscount = computed<boolean>(() => current.value > 0);
 </script>
 <style lang="scss" scoped>
 .ph-dnb-box {
@@ -38,6 +34,11 @@ const max = computed((): number => {
   border-radius: 4px;
   background: var(--box-bg-2);
   gap: 4px;
+  transition: all 0.3s ease;
+
+  &.phdnb-highlight {
+    background: linear-gradient(135deg, var(--tgc-od-orange) -60%, var(--box-bg-2) 60%);
+  }
 }
 
 .pdb-boss-icon {

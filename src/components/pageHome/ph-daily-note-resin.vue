@@ -10,8 +10,22 @@
         <span>{{ current }}/{{ max }}</span>
       </div>
       <div class="pdb-resin-desc">
-        <span v-if="fullTimeText" class="pdb-resin-fulltime">{{ fullTimeText }}回满</span>
-        <span class="pdb-resin-countdown">{{ formattedTime }}</span>
+        <span
+          v-if="!showCountdown && fullTimeText"
+          class="pdb-resin-fulltime clickable"
+          :title="'点击查看倒计时'"
+          @click="showCountdown = true"
+        >
+          {{ fullTimeText }}回满
+        </span>
+        <span
+          v-if="showCountdown"
+          :title="fullTimeText ? `${fullTimeText}回满` : ''"
+          class="pdb-resin-countdown clickable"
+          @click="showCountdown = false"
+        >
+          {{ formattedTime }}
+        </span>
       </div>
     </div>
   </div>
@@ -32,6 +46,7 @@ const props = defineProps<PhDailyNoteResinProps>();
 const remainedTime = ref<number>(0);
 const initialCurrent = ref<number>(0);
 const fullTimeText = ref<string>("");
+const showCountdown = ref<boolean>(false);
 
 const max = computed<number>(() => props.maxResin ?? 200);
 const current = computed<number>(() => {
@@ -106,7 +121,7 @@ function stopTimer(): void {
   transition: all 0.3s ease;
 
   &.ph-dnr-max {
-    background: linear-gradient(135deg, var(--tgc-od-orange) 0%, var(--box-bg-2) 80%);
+    background: linear-gradient(135deg, var(--tgc-od-red) 0%, var(--box-bg-2) 80%);
   }
 }
 
@@ -157,11 +172,27 @@ function stopTimer(): void {
     color: var(--tgc-od-orange);
     font-size: 10px;
     font-weight: 600;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        font-style: italic;
+      }
+    }
   }
 
   .pdb-resin-countdown {
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        font-style: italic;
+      }
+    }
   }
 }
 </style>

@@ -8,7 +8,7 @@ import bbsEnum from "@enum/bbs.js";
 import staticDataEnum from "@enum/staticData.js";
 import { path } from "@tauri-apps/api";
 import { type } from "@tauri-apps/plugin-os";
-import { format, parse, parseISO } from "date-fns";
+import { format, parse, parseISO, differenceInDays, startOfDay } from "date-fns";
 import { v4 } from "uuid";
 
 import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
@@ -30,20 +30,22 @@ export function stamp2LastTime(time: number): string {
 }
 
 /**
- * 计算目标时刻
+ * 剩余秒数转换为时刻字符串
  * @since Beta v0.10.2
  * @param remainedSeconds - 剩余秒数
- * @returns 时刻字符串 x天后xx:xx:xx
+ * @returns 时刻字符串 次日xx:xx:xx / x天后xx:xx:xx
  */
 export function stamp2FullTime(remainedSeconds: number): string {
   if (remainedSeconds <= 0) return "";
   const now = new Date();
   const fullTime = new Date(now.getTime() + remainedSeconds * 1000);
-  const dayDiff = Math.floor(remainedSeconds / (24 * 3600));
+  const dayDiff = differenceInDays(startOfDay(fullTime), startOfDay(now));
   const hour = fullTime.getHours().toString().padStart(2, "0");
   const minute = fullTime.getMinutes().toString().padStart(2, "0");
   const second = fullTime.getSeconds().toString().padStart(2, "0");
-  return `${dayDiff === 0 ? "" : `${dayDiff}天后`}${hour}:${minute}:${second}`;
+  if (dayDiff === 0) return `${hour}:${minute}:${second}`;
+  if (dayDiff === 1) return `次日${hour}:${minute}:${second}`;
+  return `${dayDiff}天后${hour}:${minute}:${second}`;
 }
 
 /**

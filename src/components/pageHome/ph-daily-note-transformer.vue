@@ -27,6 +27,7 @@ const props = defineProps<PhDailyNoteTransformerProps>();
 const remainedTime = ref<number>(0);
 const formattedTime = ref<string>("");
 const fullTimeText = ref<string>("");
+const remainingDays = ref<number>(0);
 
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -66,6 +67,7 @@ function initTime(): void {
     const minutes = time.Minute || 0;
     const seconds = time.Second || 0;
     remainedTime.value = days * 86400 + hours * 3600 + minutes * 60 + seconds;
+    remainingDays.value = days;
     if (days === 0 && remainedTime.value > 0) {
       fullTimeText.value = stamp2FullTime(remainedTime.value);
     } else {
@@ -73,13 +75,20 @@ function initTime(): void {
     }
   } else {
     remainedTime.value = 0;
+    remainingDays.value = 0;
     fullTimeText.value = "";
   }
   updateFormattedTime();
 }
 
 function startTimer(): void {
-  if (remainedTime.value <= 0 || !props.trans.obtained || props.trans.recovery_time.reached) return;
+  if (
+    remainedTime.value <= 0 ||
+    !props.trans.obtained ||
+    props.trans.recovery_time.reached ||
+    remainingDays.value > 0
+  )
+    return;
   timer = setInterval(() => {
     if (remainedTime.value > 0) {
       remainedTime.value -= 1;
@@ -121,7 +130,7 @@ function updateFormattedTime(): void {
   transition: all 0.3s ease;
 
   &.ph-dnt-ready {
-    background: linear-gradient(135deg, var(--tgc-od-orange) 0%, var(--box-bg-2) 80%);
+    background: linear-gradient(135deg, var(--tgc-od-orange) -60%, var(--box-bg-2) 60%);
   }
 }
 

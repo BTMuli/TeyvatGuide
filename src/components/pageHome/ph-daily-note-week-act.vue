@@ -81,7 +81,7 @@ function getDayIcon(day: number): string {
   transition: all 0.3s ease;
 
   &.pdnwa-incomplete {
-    background: linear-gradient(135deg, var(--tgc-od-red) 0%, var(--box-bg-2) 80%);
+    background: linear-gradient(135deg, var(--tgc-od-orange) 0%, var(--box-bg-2) 80%);
   }
 }
 

@@ -1,6 +1,6 @@
 <!-- 每日委托显示组件 -->
 <template>
-  <div class="ph-dnta-box">
+  <div :class="{ 'phnta-incomplete': isIncomplete }" class="phnta-box">
     <div class="pdb-task-icon">
       <img alt="每日委托" src="/UI/daily/task.webp" />
     </div>
@@ -36,11 +36,8 @@ type PhDailyNoteTaskProps = {
 
 const props = defineProps<PhDailyNoteTaskProps>();
 
-const attendanceVisible = computed((): boolean => {
-  return props.task?.attendance_visible ?? false;
-});
-
-const taskStatus = computed((): string => {
+const attendanceVisible = computed<boolean>(() => props.task?.attendance_visible ?? false);
+const taskStatus = computed<string>(() => {
   if (!props.task) return "";
   const { finished_num, total_num } = props.task;
   if (finished_num === total_num) {
@@ -49,9 +46,14 @@ const taskStatus = computed((): string => {
   }
   return `${finished_num}/${total_num}`;
 });
+const isIncomplete = computed<boolean>(() => {
+  if (!props.task) return false;
+  const { finished_num, total_num } = props.task;
+  return finished_num < total_num;
+});
 </script>
 <style lang="scss" scoped>
-.ph-dnta-box {
+.phnta-box {
   position: relative;
   display: flex;
   width: 100%;
@@ -60,6 +62,11 @@ const taskStatus = computed((): string => {
   border-radius: 4px;
   background: var(--box-bg-2);
   gap: 4px;
+  transition: all 0.3s ease;
+
+  &.phnta-incomplete {
+    background: linear-gradient(135deg, var(--tgc-od-red) 0%, var(--box-bg-2) 80%);
+  }
 }
 
 .pdb-task-icon {

@@ -10,8 +10,22 @@
         <span>{{ current }}/{{ max }}</span>
       </div>
       <div class="pdb-coin-desc">
-        <span v-if="fullTimeText" class="pdb-coin-fulltime">{{ fullTimeText }}回满</span>
-        <span class="pdb-coin-countdown">{{ formattedTime }}</span>
+        <span
+          v-if="!showCountdown && fullTimeText"
+          :title="'点击查看倒计时'"
+          class="pdb-coin-fulltime clickable"
+          @click="showCountdown = true"
+        >
+          {{ fullTimeText }}回满
+        </span>
+        <span
+          v-if="showCountdown"
+          :title="fullTimeText ? `${fullTimeText}回满` : ''"
+          class="pdb-coin-countdown clickable"
+          @click="showCountdown = false"
+        >
+          {{ formattedTime }}
+        </span>
       </div>
     </div>
   </div>
@@ -34,6 +48,7 @@ const max = ref<number>(0);
 const remainedTime = ref<number>(0);
 const formattedTime = ref<string>("");
 const fullTimeText = ref<string>("");
+const showCountdown = ref<boolean>(false);
 const full = computed<boolean>(() => current.value === max.value);
 
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -159,11 +174,27 @@ function updateFormattedTime(): void {
     color: var(--tgc-od-orange);
     font-size: 10px;
     font-weight: 600;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        font-style: italic;
+      }
+    }
   }
 
   .pdb-coin-countdown {
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        font-style: italic;
+      }
+    }
   }
 }
 </style>
