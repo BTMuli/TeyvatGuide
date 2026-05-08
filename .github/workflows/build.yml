@@ -65,11 +65,11 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 24.8.0
+          node-version: 26.1.0
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 10.33.0
+          version: 11.0.8
       - name: Install frontend dependencies
         run: pnpm install
       - name: Setup sentry-cli
