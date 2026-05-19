@@ -76,6 +76,21 @@ function parseNameCard(desc: string): string {
     if (content.length <= 32) array.push(content);
     else array.push(...parseDesc(content));
   }
+  /* 布伦妮·制裁 */
+  if (props?.data?.id === 210281) {
+    const idx = desc.indexOf("」");
+    const quotePart = desc.slice(0, idx + 1);
+    const afterPart = desc.slice(idx + 1).trimStart();
+    array = ["名片纹饰。"];
+    const quoteContent = quotePart.match(/「(.+?)」/)?.[1];
+    if (quoteContent) {
+      array.push("「");
+      array.push(...parseDesc(quoteContent, true));
+      const maxLength = Math.max(...array.map((item) => item.length));
+      array.push("  ".repeat(maxLength - 4) + "」");
+    }
+    array.push(afterPart);
+  }
   const res = array.join("\n");
   if (!res.endsWith("\n")) return res + "\n";
   return res;
