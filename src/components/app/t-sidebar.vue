@@ -330,7 +330,7 @@ import useUserStore from "@store/user.js";
 import { event, path, webviewWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { readDir } from "@tauri-apps/plugin-fs";
+import { exists, readDir } from "@tauri-apps/plugin-fs";
 import mhyClient from "@utils/TGClient.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -847,6 +847,11 @@ async function tryLaunchGame(): Promise<void> {
   }
   if (gameDir.value === "未设置") {
     showSnackbar.warn("请前往设置页面设置游戏安装目录");
+    return;
+  }
+  if (!(await exists(gameDir.value))) {
+    showSnackbar.warn("游戏目录不存在，请检查设置");
+    await TGLogger.Warn(`[sidebar][tryLaunchGame] 游戏目录不存在: ${gameDir.value}`);
     return;
   }
   const dirRead = await readDir(gameDir.value);

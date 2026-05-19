@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.9.9
+ * @since Beta v0.10.2
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -32,7 +32,7 @@ function verifyConfigIni(data: object): data is TGApp.Game.Config.GameConf {
 
 /**
  * 尝试获取游戏版本
- * @since Beta v0.9.9
+ * @since Beta v0.10.2
  * @remarks
  * 1. 读取 config.ini 下的 game_version
  * 2. 没有 config.ini ，读取 YuanShen_Data\\Persistent\\ScriptVersion
@@ -42,6 +42,10 @@ function verifyConfigIni(data: object): data is TGApp.Game.Config.GameConf {
 export async function tryReadGameVer(gameDir: string): Promise<false | string> {
   if (platform() !== "windows") {
     showSnackbar.warn("该功能仅支持Windows系统");
+    return false;
+  }
+  if (!(await exists(gameDir))) {
+    await TGLogger.Warn(`[TGGame][tryReadGameVer] 游戏目录不存在: ${gameDir}`);
     return false;
   }
   const iniPath = `${gameDir}${sep()}config.ini`;
@@ -111,6 +115,11 @@ export async function tryCallYae(gameDir: string, uid?: string): Promise<void> {
   }
   if (gameDir === "未设置") {
     showSnackbar.warn("请前往设置页面设置游戏安装目录");
+    return;
+  }
+  if (!(await exists(gameDir))) {
+    showSnackbar.warn("游戏目录不存在，请检查设置");
+    await TGLogger.Warn(`[TGGame][tryCallYae] 游戏目录不存在: ${gameDir}`);
     return;
   }
   const dirRead = await readDir(gameDir);
