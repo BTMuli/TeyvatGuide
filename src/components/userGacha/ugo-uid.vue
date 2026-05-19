@@ -296,7 +296,7 @@ async function handleImport(): Promise<void> {
   }
   await showLoading.end();
   showSnackbar.success("导入成功!即将刷新页面...");
-  window.location.reload();
+  await new Promise<void>(() => setTimeout(() => window.location.reload(), 1500));
 }
 
 async function handleExport(): Promise<void> {
