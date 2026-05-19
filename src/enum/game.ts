@@ -1,6 +1,6 @@
 /**
  * 游戏相关枚举
- * @since Beta v0.9.9
+ * @since Beta v0.10.2
  */
 
 /**
@@ -56,7 +56,7 @@ function getGameServerDesc(server: TGApp.Game.Base.ServerTypeEnum): string {
 /**
  * 近期活动活动类型枚举
  * @since Beta v0.9.0
- * @see  TGApp.Game.ActCalendar.ActTypeEnum
+ * @see TGApp.Game.ActCalendar.ActTypeEnum
  */
 const ActCalendarTypeEnum: typeof TGApp.Game.ActCalendar.ActType = {
   HardChallenge: "ActTypeHardChallenge",
@@ -67,6 +67,28 @@ const ActCalendarTypeEnum: typeof TGApp.Game.ActCalendar.ActType = {
   LiBen: "ActTypeLiBen",
   SignIn: "ActTypeSignIn",
   Other: "ActTypeOther",
+};
+
+/**
+ * 卡池状态枚举
+ * @since Beta v0.10.2
+ * @see TGApp.Game.ActCalendar.PoolStatusEnum
+ */
+const ActCalendarPoolStatusEnum: typeof TGApp.Game.ActCalendar.PoolStatus = {
+  NotStart: 1,
+  Ongoing: 2,
+  Ended: 3,
+};
+
+/**
+ * 卡池类型枚举
+ * @since Beta v0.10.2
+ * @see TGApp.Game.ActCalendar.PoolTypeEnum
+ */
+const ActCalendarPoolTypeEnum: typeof TGApp.Game.ActCalendar.PoolType = {
+  Avatar: 1,
+  Weapon: 2,
+  Mixed: 3,
 };
 
 /**
@@ -257,7 +279,11 @@ const CombatCharMasterStatEnum: typeof TGApp.Game.Combat.CharMasterStat = {
 
 /** 游戏相关枚举 */
 const gameEnum = {
-  actCalendarType: ActCalendarTypeEnum,
+  actCalendar: {
+    actType: ActCalendarTypeEnum,
+    poolStatus: ActCalendarPoolStatusEnum,
+    poolType: ActCalendarPoolTypeEnum,
+  },
   gachaType: GachaTypeEnum,
   server: GameServerEnum,
   serverList: GameServerList,

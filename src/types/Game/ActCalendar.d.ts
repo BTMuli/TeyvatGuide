@@ -1,6 +1,6 @@
 /**
  * 游戏-活动日历相关类型定义文件
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  */
 
 declare namespace TGApp.Game.ActCalendar {
@@ -34,8 +34,46 @@ declare namespace TGApp.Game.ActCalendar {
   };
 
   /**
+   * 卡池状态枚举
+   * @since Beta v0.10.2
+   */
+  const PoolStatus = <const>{
+    /** 未开始 */
+    NotStart: 1,
+    /** 进行中 */
+    Ongoing: 2,
+    /** 已结束 */
+    Ended: 3,
+  };
+
+  /**
+   * 卡池状态枚举类型
+   * @since Beta v0.10.2
+   */
+  type PoolStatusEnum = (typeof PoolStatus)[keyof typeof PoolStatus];
+
+  /**
+   * 卡池类型枚举
+   * @since Beta v0.10.2
+   */
+  const PoolType = <const>{
+    /** 角色活动祈愿 */
+    Avatar: 1,
+    /** 武器活动祈愿 */
+    Weapon: 2,
+    /** 集录祈愿 */
+    Mixed: 3,
+  };
+
+  /**
+   * 卡池类型枚举类型
+   * @since Beta v0.10.2
+   */
+  type PoolTypeEnum = (typeof PoolType)[keyof typeof PoolType];
+
+  /**
    * 活动卡池信息
-   * @since Beta v0.8.0
+   * @since Beta v0.10.2
    */
   type ActPool = {
     /** 卡池id */
@@ -44,8 +82,8 @@ declare namespace TGApp.Game.ActCalendar {
     version_name: string;
     /** 卡池名称 - 角色活动祈愿 */
     pool_name: string;
-    /** 卡池类型 - 1:角色活动祈愿, 2:武器活动祈愿, 3:混合活动祈愿 */
-    pool_type: number;
+    /** 卡池类型 */
+    pool_type: TGApp.Game.ActCalendar.PoolTypeEnum;
     /** 角色列表 */
     avatars: Array<ActPoolAvatar>;
     /** 武器列表 */
@@ -60,14 +98,8 @@ declare namespace TGApp.Game.ActCalendar {
     end_time: TGApp.Game.Base.DateTime;
     /** 跳转链接 */
     jump_url: string;
-    /**
-     * 卡池状态
-     * @example
-     * 1:未开始
-     * 2:进行中
-     * 3:已结束
-     */
-    pool_status: number;
+    /** 卡池状态 */
+    pool_status: TGApp.Game.ActCalendar.PoolStatusEnum;
     /** 距离结束倒计时(秒) */
     countdown_seconds: number;
   };

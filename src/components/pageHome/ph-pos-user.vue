@@ -11,7 +11,7 @@
       </div>
       <div class="subtitle">
         <!-- 处理幽境危战 -->
-        <template v-if="props.pos.type === gameEnum.actCalendarType.HardChallenge">
+        <template v-if="props.pos.type === gameEnum.actCalendar.actType.HardChallenge">
           <div class="challenge-append" title="点击前往幽境页面" @click="toChallenge()">
             <template v-if="!props.pos.hard_challenge_detail.is_unlock">
               <span>未解锁</span>
@@ -37,13 +37,13 @@
           </div>
         </template>
         <!-- 处理真境剧诗 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendarType.RoleCombat">
+        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.RoleCombat">
           <div class="combat-append" title="点击前往剧诗页面" @click="toCombat()">
             <span>{{ getCombatStat(props.pos.role_combat_detail) }}</span>
           </div>
         </template>
         <!-- 处理深境螺旋 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendarType.Tower">
+        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Tower">
           <div class="abyss-append" title="点击前往深渊页面" @click="toAbyss()">
             <template v-if="!props.pos.tower_detail.is_unlock">
               <span>未解锁</span>
@@ -60,17 +60,17 @@
           </div>
         </template>
         <!-- 处理区域探索 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendarType.Explore">
+        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Explore">
           <span>当前区域探索度: {{ props.pos.explore_detail.explore_percent }}%</span>
         </template>
         <!-- 处理双倍经验 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendarType.Double">
+        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Double">
           <span>
             剩余双倍次数: {{ props.pos.double_detail.left }}/{{ props.pos.double_detail.total }}
           </span>
         </template>
         <!-- 处理立本活动 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendarType.LiBen">
+        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.LiBen">
           <span>当天{{ props.pos.liben_detail.status === 1 ? "未" : "已" }}兑换</span>
           <span>{{ props.pos.liben_detail.progress }}/{{ props.pos.liben_detail.total }}</span>
           <span>
@@ -78,7 +78,7 @@
           </span>
         </template>
         <!-- 处理累登活动 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendarType.SignIn">
+        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.SignIn">
           <span>{{ props.pos.sign_in_detail.progress }}/{{ props.pos.sign_in_detail.total }}</span>
           <span>当天{{ props.pos.sign_in_detail.status === 1 ? "未领取" : "已领取" }}</span>
         </template>
@@ -138,7 +138,7 @@ const isStart = computed<boolean>(() => {
   return props.pos.start_timestamp !== "0";
 });
 const isFin = computed<boolean>(() => {
-  if (props.pos.type === gameEnum.actCalendarType.LiBen) {
+  if (props.pos.type === gameEnum.actCalendar.actType.LiBen) {
     return props.pos.liben_detail.is_has_taken_special_reward;
   }
   return props.pos.is_finished;
