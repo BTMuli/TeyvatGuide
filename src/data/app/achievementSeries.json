@@ -3,7 +3,7 @@
     "id": 0,
     "order": 1,
     "name": "天地万象",
-    "version": "6.5",
+    "version": "6.6",
     "card": "",
     "icon": "UI_AchievementIcon_O001"
   },
@@ -537,7 +537,7 @@
   },
   {
     "id": 67,
-    "order": 68,
+    "order": 69,
     "name": "魔山风息",
     "version": "6.5",
     "card": "蒙德·望楼",

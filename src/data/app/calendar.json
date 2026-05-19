@@ -34,6 +34,23 @@
     "source": { "index": 1, "area": "蒙德", "name": "冰封废渊" }
   },
   {
+    "id": 10000129,
+    "contentId": 0,
+    "dropDays": [2, 5, 7],
+    "name": "洛恩",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "长柄武器",
+    "element": "冰",
+    "release": "2026-06-09 18:00:00",
+    "materials": [
+      { "id": 104304, "name": "「抗争」的教导", "star": 2 },
+      { "id": 104305, "name": "「抗争」的指引", "star": 3 },
+      { "id": 104306, "name": "「抗争」的哲学", "star": 4 }
+    ],
+    "source": { "index": 1, "area": "蒙德", "name": "冰封废渊" }
+  },
+  {
     "id": 10000035,
     "contentId": 1056,
     "dropDays": [1, 4, 7],
@@ -644,6 +661,23 @@
       { "id": 104349, "name": "「角逐」的哲学", "star": 4 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "转竟" }
+  },
+  {
+    "id": 10000131,
+    "contentId": 508596,
+    "dropDays": [2, 5, 7],
+    "name": "尼可",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "火",
+    "release": "2026-05-19 00:00:00",
+    "materials": [
+      { "id": 104359, "name": "「乐园」的教导", "star": 2 },
+      { "id": 104360, "name": "「乐园」的指引", "star": 3 },
+      { "id": 104361, "name": "「乐园」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "遗荫" }
   },
   {
     "id": 10000082,
@@ -1785,6 +1819,23 @@
     "source": { "index": 1, "area": "蒙德", "name": "霜凝祭坛" }
   },
   {
+    "id": 10000132,
+    "contentId": 508597,
+    "dropDays": [2, 5, 7],
+    "name": "布伦妮",
+    "itemType": "character",
+    "star": 4,
+    "weapon": "法器",
+    "element": "风",
+    "release": "2026-05-19 00:00:00",
+    "materials": [
+      { "id": 104304, "name": "「抗争」的教导", "star": 2 },
+      { "id": 104305, "name": "「抗争」的指引", "star": 3 },
+      { "id": 104306, "name": "「抗争」的哲学", "star": 4 }
+    ],
+    "source": { "index": 1, "area": "蒙德", "name": "冰封废渊" }
+  },
+  {
     "id": 10000108,
     "contentId": 503614,
     "dropDays": [2, 5, 7],
@@ -2800,6 +2851,22 @@
     "source": { "index": 7, "area": "挪德卡莱", "name": "祭月" }
   },
   {
+    "id": 14523,
+    "contentId": 508634,
+    "dropDays": [1, 4, 7],
+    "name": "尘光七谕",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114073, "name": "奇巧秘器的残件", "star": 2 },
+      { "id": 114074, "name": "奇巧秘器的模本", "star": 3 },
+      { "id": 114075, "name": "奇巧秘器的继业", "star": 4 },
+      { "id": 114076, "name": "奇巧秘器的真愿", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
+  },
+  {
     "id": 13502,
     "contentId": 1077,
     "dropDays": [3, 6, 7],
@@ -2814,6 +2881,22 @@
       { "id": 114012, "name": "狮牙斗士的理想", "star": 5 }
     ],
     "source": { "index": 1, "area": "蒙德", "name": "渴水的废都" }
+  },
+  {
+    "id": 13517,
+    "contentId": 0,
+    "dropDays": [1, 4, 7],
+    "name": "灾悔",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "长柄武器",
+    "materials": [
+      { "id": 114001, "name": "高塔孤王的破瓦", "star": 2 },
+      { "id": 114002, "name": "高塔孤王的残垣", "star": 3 },
+      { "id": 114003, "name": "高塔孤王的断片", "star": 4 },
+      { "id": 114004, "name": "高塔孤王的碎梦", "star": 5 }
+    ],
+    "source": { "index": 1, "area": "蒙德", "name": "水光之城" }
   },
   {
     "id": 13501,

@@ -4139,7 +4139,7 @@
   {
     "id": 80453,
     "series": 63,
-    "order": 412,
+    "order": 422,
     "name": "聚所共建·终夜长茔",
     "description": "将「终夜长茔」共建至满级。",
     "reward": 5,
@@ -4149,7 +4149,7 @@
   {
     "id": 80454,
     "series": 63,
-    "order": 413,
+    "order": 423,
     "name": "聚所共建·叮铃哐啷蛋卷工坊",
     "description": "将「叮铃哐啷蛋卷工坊」共建至满级。",
     "reward": 5,
@@ -4159,7 +4159,7 @@
   {
     "id": 80455,
     "series": 63,
-    "order": 414,
+    "order": 424,
     "name": "聚所共建·霜月之坊",
     "description": "将「霜月之坊」共建至满级。",
     "reward": 5,
@@ -10384,7 +10384,7 @@
   {
     "id": 81600,
     "series": 63,
-    "order": 415,
+    "order": 420,
     "name": "藏骸所的织密者",
     "description": "探索了最初的咏月使封锁的圣所。",
     "reward": 5,
@@ -10397,7 +10397,7 @@
   {
     "id": 81601,
     "series": 63,
-    "order": 416,
+    "order": 421,
     "name": "谁之罪",
     "description": "完成了在月矩力试验设计局的冒险。",
     "reward": 5,
@@ -14011,6 +14011,16 @@
     "trigger": { "type": "COMBAT_MULTICOND_CONFIG_COMMON" }
   },
   {
+    "id": 82309,
+    "series": 0,
+    "order": 2309,
+    "name": "「不要打破那面墙」",
+    "description": "规避壁障的束缚，瓦解多托雷构筑的囚牢之境。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 84000,
     "series": 0,
     "order": 4001,
@@ -16953,6 +16963,96 @@
       "type": "FINISH_QUEST_AND",
       "task": [{ "questId": 6017, "name": "空月归乡", "type": "魔神任务" }]
     }
+  },
+  {
+    "id": 84382,
+    "series": 0,
+    "order": 5157,
+    "name": "留给异类的终末",
+    "description": "集齐全部「异质的树髓」。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84383,
+    "series": 0,
+    "order": 5158,
+    "name": "一翳在眼，空华乱坠",
+    "description": "在须弥，梦往往是危险的预兆。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84384,
+    "series": 0,
+    "order": 5159,
+    "name": "波浪洪涛，漫过我身",
+    "description": "生命的力量总会互相响应。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84385,
+    "series": 0,
+    "order": 5160,
+    "name": "笔已升起，卷轴已干",
+    "description": "离别是漫长的重逢。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84386,
+    "series": 0,
+    "order": 5161,
+    "name": "身土坏空，五蕴识转",
+    "description": "完成「身土坏空，五蕴识转」。",
+    "reward": 10,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84387,
+    "series": 0,
+    "order": 5162,
+    "name": "苇原行穿，一径阿如",
+    "description": "在与三王的对弈中取得胜利。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84388,
+    "series": 0,
+    "order": 5163,
+    "name": "能深巨海，能敌诡道",
+    "description": "汇集众人的愿望，以此拯救须弥。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84389,
+    "series": 0,
+    "order": 5164,
+    "name": "劫火洞然，大千未坏",
+    "description": "劫火烧却后是澄澈的天空。",
+    "reward": 5,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84390,
+    "series": 0,
+    "order": 5165,
+    "name": "虚空劫灰往世书",
+    "description": "完成「虚空劫灰往世书」。",
+    "reward": 10,
+    "version": "6.6",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84501,
