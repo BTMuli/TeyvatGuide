@@ -44,7 +44,7 @@ const appCData = AppCharacterData.sort(
     b.id - a.id,
 );
 
-const id = useRoute().params.id.toString() ?? "0";
+const id = (useRoute().params?.id ?? 0).toString();
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
 const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(appCData);
