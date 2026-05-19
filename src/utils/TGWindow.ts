@@ -1,6 +1,6 @@
 /**
  * 窗口创建相关工具函数
- * @since Beta v0.9.8
+ * @since Beta v0.10.2
  */
 
 import type { RenderCard } from "@comp/app/t-postcard.vue";
@@ -101,7 +101,7 @@ export function getWindowSize(label: string): PhysicalSize {
 
 /**
  * 判断窗口位置，确保窗口不超出屏幕并居中
- * @since Beta v0.9.8
+ * @since Beta v0.10.2
  * @remarks 当窗口超出屏幕时回滚到 resizeWindow，此时回正配置默认生效
  * @returns 无返回值
  */
@@ -124,11 +124,11 @@ export async function setWindowPos(): Promise<void> {
     await resizeWindow();
     await windowCur.center();
   } else if (targetHeight > cpHeight) {
-    const left = (screen.size.width - targetWidth) / 2;
+    const left = Math.round((screen.size.width - targetWidth) / 2);
     await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
     await windowCur.setPosition(new PhysicalPosition(left, 24));
   } else if (targetWidth > screen.size.width) {
-    const top = (screen.size.height - targetHeight) / 2;
+    const top = Math.round((screen.size.height - targetHeight) / 2);
     await windowCur.setSize(new PhysicalSize(targetWidth, targetHeight));
     await windowCur.setPosition(new PhysicalPosition(24, top));
   } else {
