@@ -232,6 +232,39 @@ type Character = {
 };
 ```
 
+### 8. 枚举使用规范
+
+**在Vue组件中，必须使用类似 `gameEnum` 的常量枚举对象访问常量枚举值，禁止直接使用类型定义中的枚举**
+
+```typescript
+// ✅ 正确 - 使用 gameEnum 访问枚举值
+const statusOrder: Record<TGApp.Game.ActCalendar.PoolStatusEnum, number> = {
+  [gameEnum.actCalendar.poolStatus.Ongoing]: 0,
+  [gameEnum.actCalendar.poolStatus.NotStart]: 1,
+  [gameEnum.actCalendar.poolStatus.Ended]: 2,
+};
+
+// ❌ 错误 - 直接使用类型定义中的枚举
+const statusOrder: Record<TGApp.Game.ActCalendar.PoolStatusEnum, number> = {
+  [TGApp.Game.ActCalendar.PoolStatus.Ongoing]: 0,
+  [TGApp.Game.ActCalendar.PoolStatus.NotStart]: 1,
+  [TGApp.Game.ActCalendar.PoolStatus.Ended]: 2,
+};
+```
+
+**原因：**
+- Vue组件的模板和脚本部分需要运行时可访问的值
+- `TGApp.Game.ActCalendar.PoolStatus` 是类型定义，编译后不存在
+- `gameEnum` 是实际的JavaScript对象，可以在运行时访问
+
+**适用场景：**
+- Vue组件的 `<script setup>` 部分
+- 组件的计算属性和方法中
+- 模板中的条件判断和绑定
+
+**例外情况：**
+- 类型定义文件（`.d.ts`）中可以使用完整类型路径
+
 ## ESLint 规则对应
 
 | 规则     | ESLint 配置                                      | 语法要求   |
