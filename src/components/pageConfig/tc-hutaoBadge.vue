@@ -46,13 +46,15 @@ import useHutaoStore from "@store/hutao.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { timeStr2str } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const hutaoStore = useHutaoStore();
 const { userName, userInfo, isLogin } = storeToRefs(useHutaoStore());
 
 const showVerify = ref<boolean>(false);
 const loadInfo = ref<boolean>(false);
+
+onMounted(async () => await hutaoStore.tryAutoRefresh());
 
 function getAccountDesc(): string {
   if (!isLogin.value) return "未登录";

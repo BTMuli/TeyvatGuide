@@ -1,6 +1,6 @@
 /**
  * 胡桃账号
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -28,6 +28,8 @@ const useHutaoStore = defineStore(
     const accessExpire = ref<number>(0);
     /** 用户信息 */
     const userInfo = ref<TGApp.Plugins.Hutao.Account.InfoRes>();
+    /** 上次刷新时间 */
+    const lastUts = ref<number>(0);
 
     /**
      * 检测是否超时
@@ -40,7 +42,11 @@ const useHutaoStore = defineStore(
     }
 
     async function tryLogin(): Promise<void> {
-      const inputN = await showDialog.input("请输入胡桃云账号", "邮箱：");
+      const inputN = await showDialog.inputF({
+        title: "请输入胡桃云账号",
+        text: "邮箱:",
+        type: "email",
+      });
       if (!inputN) {
         showSnackbar.cancel("已取消胡桃云账号输入");
         return;
@@ -49,7 +55,11 @@ const useHutaoStore = defineStore(
         showSnackbar.warn("请输入合法邮箱地址");
         return;
       }
-      const inputP = await showDialog.input("请输入密码", "密码");
+      const inputP = await showDialog.inputF({
+        title: "请输入密码",
+        text: "密码",
+        type: "password",
+      });
       if (!inputP) {
         showSnackbar.warn("已取消胡桃云登录");
         return;
@@ -123,6 +133,11 @@ const useHutaoStore = defineStore(
 
     async function tryRefreshInfo(): Promise<void> {
       await tryRefreshToken();
+      if (!isLogin.value) return;
+      if (!accessToken.value || accessToken.value === "") {
+        showSnackbar.warn("未找到合法的AccessToken");
+        return;
+      }
       try {
         const resp = await hutao.Account.info(accessToken.value!);
         if (resp.retcode !== 0) {
@@ -139,6 +154,7 @@ const useHutaoStore = defineStore(
         }
         userInfo.value = resp.data;
         showSnackbar.success("成功刷新用户信息");
+        lastUts.value = Math.floor(Date.now() / 1000);
       } catch (e) {
         const errMsg = TGHttps.getErrMsg(e);
         showSnackbar.error(`刷新用户信息失败：${errMsg}`);
@@ -155,10 +171,18 @@ const useHutaoStore = defineStore(
       try {
         const resp = await hutao.Token.refresh(refreshToken.value);
         if (resp.retcode !== 0) {
-          showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
           await TGLogger.Warn(
             `[HutaoStore][tryRefreshToken] 刷新Token失败：${resp.retcode} ${resp.message}`,
           );
+          // 令牌无效或者过期，自动退出账号
+          if (resp.retcode === 514002) {
+            refreshToken.value = "";
+            accessToken.value = "";
+            isLogin.value = false;
+            showSnackbar.warn(`[${resp.retcode}] ${resp.message}，已自动退出`);
+          } else {
+            showSnackbar.warn(`[${resp.retcode}] ${resp.message}`);
+          }
           return;
         }
         if (!resp.data) {
@@ -184,6 +208,19 @@ const useHutaoStore = defineStore(
       return Date.now() > expire;
     }
 
+    async function tryAutoRefresh(): Promise<void> {
+      if (!isLogin.value) return;
+      const nowTs = Math.floor(Date.now() / 1000);
+      const diffTime = nowTs - lastUts.value;
+      if (diffTime < 60 * 60 * 24 * 3) return;
+      try {
+        await tryRefreshInfo();
+      } catch (e) {
+        await TGLogger.Error(`[HutaoStore][tryAutoRefresh]自动刷新异常: ${e}`);
+        lastUts.value = Math.floor(Date.now() / 1000);
+      }
+    }
+
     return {
       isLogin,
       userName,
@@ -197,6 +234,7 @@ const useHutaoStore = defineStore(
       tryRefreshToken,
       tryRefreshInfo,
       checkGachaExpire,
+      tryAutoRefresh,
     };
   },
   {

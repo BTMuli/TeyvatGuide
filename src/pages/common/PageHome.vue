@@ -87,6 +87,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { compareVersions } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
+import useHutaoStore from "@store/hutao.js";
 
 /**
  * 单文件组件类型
@@ -106,6 +107,7 @@ type SelectItem = {
 
 const homeStore = useHomeStore();
 const bbsStore = useBBSStore();
+const hutaoStore = useHutaoStore();
 
 const { devMode, isLogin, lastUcts } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(bbsStore);
@@ -125,9 +127,9 @@ onMounted(async () => {
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.
   const isProdEnv = import.meta.env.MODE === "production";
   if (isProdEnv && devMode.value) devMode.value = false;
+  await showLoading.start("正在加载首页小部件");
   if (isLogin.value) {
     await TSUserAccount.account.updateCk();
-    await showLoading.start("正在加载首页小部件");
     games.value = gameList.value.map((i) => ({ icon: i.app_icon, title: i.name, gid: i.id }));
     showItems.value = homeStore.getShowItems();
     showItemsAll.value = ["便笺签到", "素材日历", "限时祈愿", "近期活动"];
@@ -138,6 +140,7 @@ onMounted(async () => {
   oldItems.value = showItems.value;
   await loadComp();
   await checkAppUpdate();
+  await hutaoStore.tryAutoRefresh();
 });
 
 watch(
