@@ -273,7 +273,7 @@ async function tryCaptchaLogin(): Promise<void> {
   }
   const actionType = await tryGetCaptcha(phone);
   if (!actionType) return;
-  showSnackbar.success(`已发送验证码到 ${phone}`);
+  showSnackbar.success(`已发送验证码到 ${phone}`, 3000);
   const captcha = await showDialog.input("请输入验证码", "验证码：", undefined, false);
   if (!captcha) {
     showSnackbar.warn("输入验证码为空");
