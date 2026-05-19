@@ -1,6 +1,6 @@
 /**
  * dialog 组件封装，函数式调用
- * @since Beta v0.9.1
+ * @since Beta v0.10.2
  */
 
 import type { ComponentInternalInstance, VNode } from "vue";
@@ -35,6 +35,8 @@ export type DialogInputParams = DialogBaseParams & {
   mode: "input";
   /** 默认值 */
   input?: string;
+  /** 输入类型 */
+  type?: string;
 };
 
 /**
@@ -123,11 +125,16 @@ async function showDialogInput(
   }
 }
 
+/**
+ * Input Mode 封装
+ * @since Beta v0.10.2
+ * @param opts - 参数
+ * @returns 输入模式值
+ */
 async function showDialogInputFull(
-  opts: DialogBaseParams,
-  input?: string,
+  opts: Omit<DialogInputParams, "mode">,
 ): Promise<string | false | undefined> {
-  const params: DialogInputParams = { mode: "input", input, ...opts };
+  const params: DialogInputParams = { mode: "input", ...opts };
   if (dialogInstance !== undefined) {
     const boxVue = <DialogInstance>dialogInstance.component;
     return await boxVue.exposeProxy.displayInputBox(params);

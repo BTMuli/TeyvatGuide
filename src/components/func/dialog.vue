@@ -17,6 +17,7 @@
             <input
               ref="inputRef"
               v-model="inputDefault"
+              :type="inputType"
               class="dialog-input-box"
               @keydown.enter="handleConfirm"
             />
@@ -63,6 +64,7 @@ const dialogVal = ref<boolean | string | undefined>();
 
 const inputDefault = ref<string>("");
 const inputEl = useTemplateRef<HTMLInputElement>("inputRef");
+const inputType = ref<string>("text");
 
 const checkVal = computed<boolean | undefined>(() => {
   if (typeof dialogVal.value === "string") return dialogVal.value !== "";
@@ -98,6 +100,7 @@ onMounted(async () => {
       text: props.text,
       input: props.input,
       otcancel: props.otcancel,
+      type: props.type,
     };
     await displayInputBox(param);
   } else {
@@ -142,6 +145,7 @@ async function displayInputBox(params: DialogInputParams): Promise<string | fals
     cancelLabel: params.cancelLabel ?? defaultProp.cancelLabel,
   };
   inputDefault.value = params.input ?? "";
+  inputType.value = params.type ?? "text";
   show.value = true;
   return await new Promise<string | false | undefined>((resolve) => {
     setTimeout(() => inputEl.value?.focus(), 100);
@@ -160,6 +164,7 @@ function handleConfirm(): void {
   if (data.value.mode === "input") {
     dialogVal.value = inputDefault.value;
     inputDefault.value = "";
+    inputType.value = "text";
   } else dialogVal.value = true;
   show.value = false;
 }
