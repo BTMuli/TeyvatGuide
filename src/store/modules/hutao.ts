@@ -228,6 +228,7 @@ const useHutaoStore = defineStore(
       refreshToken,
       accessExpire,
       userInfo,
+      lastUts,
       checkIsValid,
       tryLogin,
       autoLogin,
