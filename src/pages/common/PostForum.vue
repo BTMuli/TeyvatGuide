@@ -192,7 +192,9 @@ onMounted(async () => {
     selectedForum.value = curForums.value[0];
   }
   const gameLabel = curGame.value?.text ?? "";
-  await TGLogger.Info(`[Posts][${gameLabel}][onMounted][${selectedForum.value.text}] 打开帖子列表`);
+  await TGLogger.Info(
+    `[Posts][${gameLabel}][onMounted][${selectedForum.value?.text ?? ""}] 打开帖子列表`,
+  );
   await freshPostData();
   firstLoad.value = true;
 });
