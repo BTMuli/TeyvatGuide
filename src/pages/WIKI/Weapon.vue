@@ -30,8 +30,8 @@ import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
 import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
 import { toObcPage } from "@utils/TGWindow.js";
-import { onBeforeMount, ref, shallowRef, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref, shallowRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { AppWeaponData } from "@/data/index.js";
 
@@ -41,7 +41,8 @@ const appWData = AppWeaponData.sort((a, b) => {
   return b.id - a.id;
 });
 
-const id = (useRoute().params?.id ?? 0).toString();
+const route = useRoute();
+const router = useRouter();
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
 const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(appWData);
@@ -53,7 +54,7 @@ const curItem = shallowRef<TGApp.App.Weapon.WikiBriefInfo>({
   weapon: "",
 });
 
-onBeforeMount(() => {
+function loadCurItem(id: string): void {
   if (id === "0") {
     curItem.value = cardsInfo.value[0];
     return;
@@ -65,7 +66,13 @@ onBeforeMount(() => {
   }
   showSnackbar.warn(`武器 ${id} 不存在`);
   curItem.value = cardsInfo.value[0];
-});
+}
+
+watch(
+  () => route.params.id,
+  (newId) => loadCurItem((newId ?? 0).toString()),
+  { immediate: true },
+);
 
 watch(
   () => resetSelect.value,
@@ -78,6 +85,7 @@ watch(
 
 function switchW(item: TGApp.App.Weapon.WikiBriefInfo): void {
   curItem.value = item;
+  router.replace({ params: { id: item.id.toString() } });
 }
 
 function handleSelectW(val: SelectedWValue) {

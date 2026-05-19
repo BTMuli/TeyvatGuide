@@ -31,8 +31,8 @@ import TwcCharacter from "@comp/pageWiki/twc-character.vue";
 import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
 import { toObcPage } from "@utils/TGWindow.js";
-import { onBeforeMount, ref, shallowRef, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref, shallowRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 import { AppCharacterData } from "@/data/index.js";
 
@@ -44,7 +44,8 @@ const appCData = AppCharacterData.sort(
     b.id - a.id,
 );
 
-const id = (useRoute().params?.id ?? 0).toString();
+const route = useRoute();
+const router = useRouter();
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
 const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(appCData);
@@ -63,7 +64,7 @@ const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   nameCard: "",
 });
 
-onBeforeMount(() => {
+function loadCurItem(id: string): void {
   if (id === "0") {
     curItem.value = cardsInfo.value[0];
     return;
@@ -75,7 +76,13 @@ onBeforeMount(() => {
   }
   showSnackbar.warn(`角色 ${id} 不存在`);
   curItem.value = cardsInfo.value[0];
-});
+}
+
+watch(
+  () => route.params.id,
+  (newId) => loadCurItem((newId ?? 0).toString()),
+  { immediate: true },
+);
 
 watch(
   () => resetSelect.value,
@@ -112,6 +119,7 @@ async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {
     return;
   }
   curItem.value = item;
+  await router.replace({ params: { id: item.id.toString() } });
 }
 
 async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> {
