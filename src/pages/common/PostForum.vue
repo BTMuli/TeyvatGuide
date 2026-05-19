@@ -289,7 +289,7 @@ async function getCurrentPosts(
 
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value || isReq.value) return;
-  await router.push({
+  await router.replace({
     name: "酒馆",
     params: route.params,
     query: { gid: curGid.value, forum: selectedForum.value.value },
