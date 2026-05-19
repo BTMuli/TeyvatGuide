@@ -201,19 +201,23 @@ async function hardChallengeDetail(
 
 /**
  * 获取活动日历数据
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  * @param cookie - Cookie
  * @param user - 用户
+ * @param challenge - 极验验证信息（可选）
  * @returns 活动日历响应数据
  */
 async function actCalendar(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
+  challenge?: string,
 ): Promise<TGApp.Game.ActCalendar.ActResp> {
   const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
   const body = { role_id: user.gameUid, server: user.region };
+  const headers = getRequestHeader(ck, "POST", body);
+  if (challenge) headers["x-rpc-challenge"] = challenge;
   const resp = await TGHttps.post<TGApp.Game.ActCalendar.ActResp>(`${trgAbu}act_calendar`, {
-    headers: getRequestHeader(ck, "POST", body),
+    headers,
     body: JSON.stringify(body),
   });
   return resp.data;

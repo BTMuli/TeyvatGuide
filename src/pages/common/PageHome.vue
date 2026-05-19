@@ -122,6 +122,7 @@ const showItemsAll = shallowRef<Array<string>>(["素材日历", "限时祈愿", 
 const oldItems = shallowRef<Array<string>>([]);
 
 onMounted(async () => {
+  homeStore.actCalendarData = undefined;
   await bbsStore.refreshGameList();
   await bbsStore.refreshGameUidCards();
   // @ts-expect-error-next-line The import.meta meta-property is not allowed in files which will build into CommonJS output.

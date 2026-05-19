@@ -1,6 +1,6 @@
 /**
  * 首页组件状态
- * @since Beta v0.10.1
+ * @since Beta v0.10.2
  */
 
 import { defineStore } from "pinia";
@@ -19,6 +19,7 @@ const defaultHomeShow: Array<TGApp.Store.Home.ShowItem> = [
 const useHomeStore = defineStore("home", () => {
   const homeShow = ref<Array<TGApp.Store.Home.ShowItem>>(defaultHomeShow);
   const poolCover = ref<Record<number, string>>();
+  const actCalendarData = ref<TGApp.Game.ActCalendar.ActRes>();
 
   function getShowItems(): Array<string> {
     const homeShowLocal = localStorage.getItem("homeShow");
@@ -72,7 +73,7 @@ const useHomeStore = defineStore("home", () => {
     localStorage.setItem("homeShow", JSON.stringify(homeShow.value));
   }
 
-  return { poolCover, getShowItems, setShowItems, init };
+  return { poolCover, actCalendarData, getShowItems, setShowItems, init };
 });
 
 export default useHomeStore;

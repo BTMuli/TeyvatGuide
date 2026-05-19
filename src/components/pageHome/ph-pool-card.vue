@@ -265,6 +265,7 @@ async function toPool(): Promise<void> {
   backdrop-filter: blur(20px);
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 -2px 10px var(--common-shadow-2);
 }
 
 .ph-pool-avatars {
@@ -311,6 +312,7 @@ async function toPool(): Promise<void> {
   font-size: 12px;
   gap: 8px;
   text-align: left;
+  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 
 .ph-pool-time {
