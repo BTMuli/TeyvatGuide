@@ -110,6 +110,14 @@
         <span v-if="reward.num > 0" class="count">{{ reward.num }}</span>
       </div>
     </div>
+    <v-progress-linear
+      :reverse="true"
+      v-if="isStart"
+      :rounded="true"
+      :model-value="percent"
+      class="ph-puc-progress"
+      color="var(--tgc-od-green)"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -142,6 +150,11 @@ const isFin = computed<boolean>(() => {
     return props.pos.liben_detail.is_has_taken_special_reward;
   }
   return props.pos.is_finished;
+});
+const percent = computed<number>(() => {
+  if (durationTs.value <= 0) return 0;
+  if (restTs.value > durationTs.value) return 100;
+  return (restTs.value * 100) / durationTs.value;
 });
 
 onMounted(() => {
@@ -206,6 +219,7 @@ async function sharePos(): Promise<void> {
 .ph-pos-user-card {
   position: relative;
   display: flex;
+  height: 100%;
   box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
@@ -358,5 +372,10 @@ async function sharePos(): Promise<void> {
   &:hover .icon {
     transform: scale(1.1);
   }
+}
+
+.ph-puc-progress {
+  position: relative;
+  margin-top: auto;
 }
 </style>

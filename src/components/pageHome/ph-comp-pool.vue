@@ -33,24 +33,9 @@
         </Swiper>
       </div>
       <div v-show="isUserPool">
-        <div v-if="userPools.length < 3" class="pool-grid">
+        <div class="pool-list">
           <PhPoolUser v-for="(pool, idx) in userPools" :key="idx" :pool="pool" />
         </div>
-        <Swiper
-          v-else
-          :autoplay="{ delay: 3000, disableOnInteraction: false }"
-          :centered-slides="true"
-          :loop="true"
-          :modules="swiperModules"
-          :navigation="true"
-          :slides-per-view="2"
-          :space-between="12"
-          class="pool-swiper"
-        >
-          <SwiperSlide v-for="(pool, idx) in userPools" :key="idx">
-            <PhPoolUser :pool="pool" />
-          </SwiperSlide>
-        </Swiper>
       </div>
     </template>
   </THomeCard>
@@ -306,6 +291,12 @@ function filterPools(
   justify-content: space-between;
   gap: 8px;
   grid-template-columns: repeat(2, 0.5fr);
+}
+
+.pool-list {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(calc(400px), 0.5fr));
 }
 
 .pool-swiper {

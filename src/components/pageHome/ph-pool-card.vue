@@ -50,7 +50,12 @@
           <v-icon>mdi-calendar-clock</v-icon>
           <span>{{ props.pool.start_time }} ~ {{ props.pool.end_time }}</span>
         </div>
-        <v-progress-linear :model-value="percent" :rounded="true" color="var(--tgc-od-green)" />
+        <v-progress-linear
+          :reverse="true"
+          :model-value="percent"
+          :rounded="true"
+          color="var(--tgc-od-green)"
+        />
         <div v-if="restTs > durationTs" class="ph-pool-stat">未开始</div>
         <div v-else-if="restTs > 0" class="ph-pool-stat">
           剩余时间：{{ stamp2LastTime(restTs) }}
