@@ -149,6 +149,7 @@ async function loadUserPool(forceReload: boolean = false): Promise<void> {
       data = homeStore.actCalendarData;
     } else {
       const resp = await recordReq.actCalendar(cookie.value, account.value);
+      console.log(resp);
       if (<number>resp.retcode === 1034) {
         await TGLogger.Warn("[PhCompPool][loadUserPool] 触发1034验证");
         if (!isInit.value || !isRefreshing.value) {

@@ -1,10 +1,7 @@
 <!-- 限时祈愿卡片组件（用户模式） -->
 <template>
   <div class="ph-pool-user-card">
-    <div class="ph-pool-type">
-      <span>【{{ poolTypeLabel }}】</span>
-      <span>{{ props.pool.pool_name }}</span>
-    </div>
+    <div class="ph-pool-type">{{ props.pool.pool_name }}</div>
     <div class="ph-pool-cover" @click="toPool()">
       <img v-if="cover" :src="cover" alt="cover" />
       <img v-else alt="empty" class="empty" src="/UI/app/empty.webp" />
@@ -132,7 +129,7 @@ const cover = ref<string>();
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
-const totalItems = computed<number>(() => props.pool.avatars.length + props.pool.weapons.length);
+const totalItems = computed<number>(() => props.pool.avatars.length + props.pool.weapon.length);
 const avatarItems = computed<Array<AvatarItem>>(() =>
   props.pool.avatars.map((av) => {
     const info = getAvatarInfo(av.id);
@@ -140,7 +137,7 @@ const avatarItems = computed<Array<AvatarItem>>(() =>
   }),
 );
 const weaponItems = computed<Array<WeaponItem>>(() =>
-  props.pool.weapons.map((wp) => {
+  props.pool.weapon.map((wp) => {
     const info = getWeaponInfo(wp.id);
     return { weapon: wp, info };
   }),
@@ -337,10 +334,6 @@ async function toPool(): Promise<void> {
   cursor: pointer;
   font-size: 13px;
   text-shadow: 0 0 4px var(--tgc-dark-1);
-
-  span:last-child:not(:first-child) {
-    font-family: var(--font-title);
-  }
 }
 
 .ph-pool-cover {

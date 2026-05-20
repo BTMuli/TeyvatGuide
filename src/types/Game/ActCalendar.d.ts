@@ -87,7 +87,7 @@ declare namespace TGApp.Game.ActCalendar {
     /** 角色列表 */
     avatars: Array<ActPoolAvatar>;
     /** 武器列表 */
-    weapons: Array<ActPoolWeapon>;
+    weapon: Array<ActPoolWeapon>;
     /** 开始时间戳(秒) */
     start_timestamp: string;
     /** 开始时间 */
