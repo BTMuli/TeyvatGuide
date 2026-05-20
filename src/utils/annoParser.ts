@@ -1,6 +1,6 @@
 /**
  * 解析游戏内公告数据
- * @since Beta v0.8.4
+ * @since Beta v0.10.3
  */
 
 import TpText from "@comp/viewPost/tp-text.vue";
@@ -58,7 +58,7 @@ function parseAnnoContent(anno: TGApp.Game.Anno.AnnoDetail): Array<TGApp.BBS.Sct
 
 /**
  * 解析公告节点
- * @since Beta v0.7.0
+ * @since Beta v0.10.3
  * @param node - 节点
  * @param attr - 属性
  * @returns 结构化数据
@@ -91,6 +91,9 @@ function parseAnnoNode(node: Node, attr?: Record<string, string>): Array<TGApp.B
   if (element.tagName === "P") {
     element.innerHTML = decodeRegExp(element.innerHTML);
     return [parseAnnoParagraph(element, attr)];
+  }
+  if (element.tagName === "IMG") {
+    return [parseAnnoImage(element)];
   }
   if (element.tagName === "OL" || element.tagName === "LI" || element.tagName === "UL") {
     const res: Array<TGApp.BBS.SctPost.Base> = [];
