@@ -2,12 +2,29 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-04-13
-Update: 2026-04-28
+Update: 2026-05-20
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-04-13 12:28:20`
 >
-> 更新于 `2026-04-28 20:01:34`
+> 更新于 `2026-05-20 02:00:23`
+
+## [0.10.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.2) (2026-05-20)
+
+- 🍱 更新6.6版本资源
+- ✨ 实时便笺新增励行修远小组件
+- ✨ 限时祈愿增加用户源，与限时活动共享数据
+- ✨ 胡桃云添加自动刷新功能，优化用户信息更新逻辑
+- ✨ 实时便笺增强组件交互性，添加倒计时点击切换功能
+- 🐛 修复树脂计算异常 [`#242`](https://github.com/BTMuli/TeyvatGuide/issues/242)
+- 🐛 修复参量质变仪状态判断异常 [`#244`](https://github.com/BTMuli/TeyvatGuide/issues/244)
+- 🐛 调整路由参数读取，修复特定情况下的跳转异常
+- 🐛 位置取整，修复数据类型异常导致的错误
+- 🐛 完善版本更新检测逻辑
+- 🚨 尝试修复 database is locked
+- 🚸 增加验证码发送成功提示的显示时间
+- 🚸 添加游戏目录存在性检查，优化用户提示信息
+- 🚸 更新 dialog 组件，添加输入类型支持
 
 ## [0.10.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.1) (2026-04-28)
 

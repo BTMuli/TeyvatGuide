@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-04-13
+Update: 2026-05-20
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-04-13 12:32:57`
+> 更新于 `2026-05-20 01:57:29`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -48,7 +48,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 ## 功能 / Features
 
 - 免登陆功能：
-  - [x] 当前卡池、近期活动、素材日历
+  - [x] 限时祈愿、近期活动、素材日历
   - [x] 游戏内公告&活动获取
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
@@ -63,6 +63,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - 登陆功能：
 
   > 支持 扫码/验证码/Cookie 登陆，支持多账号管理
+  - [x] 限时祈愿（首页组件）
   - [x] 近期活动（首页组件）
   - [x] 游戏签到（首页组件）
   - [x] 实时便笺（首页组件）

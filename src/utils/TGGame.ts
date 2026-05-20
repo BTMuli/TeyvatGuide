@@ -13,7 +13,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 
 // YAE支持的游戏版本
-export const YAE_GAME_VER: Readonly<string> = "6.5.0";
+export const YAE_GAME_VER: Readonly<string> = "6.6.0";
 
 /**
  * 验证游戏格式
