@@ -7,13 +7,7 @@
     <div class="pdb-quest-info">
       <div class="pdb-quest-title">
         <span>魔神任务</span>
-        <span>
-          {{
-            props.quest.is_finish_all_mainline && props.quest.is_finish_all_interchapter
-              ? "已完成"
-              : `未完成:${props.quest.list.length}`
-          }}
-        </span>
+        <span>{{ hasIncompleteQuests ? `未完成:${props.quest.list.length}` : "已完成" }}</span>
       </div>
       <div class="pdb-quest-chips">
         <span
@@ -41,7 +35,7 @@ const props = defineProps<PhDailyNoteQuestProps>();
 const questList = computed<Array<TGApp.Game.DailyNote.ArchonQuest>>(() => props.quest.list);
 const hasIncompleteQuests = computed<boolean>(() => {
   if (props.quest.is_finish_all_mainline && props.quest.is_finish_all_interchapter) return false;
-  return props.quest.list.length > 1;
+  return props.quest.list.length > 0;
 });
 
 function getQuestClass(stat: TGApp.Game.DailyNote.ArchonStatusEnum): string {
