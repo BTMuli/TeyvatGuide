@@ -13,9 +13,9 @@
         <TMiImg :ori="true" :size="28" :src="navItem.icon" alt="navIcon" />
       </template>
     </TGameNavItem>
-    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码">
+    <TGameNavItem v-if="hasNav" :mini class="tgn-nav" label="兑换码" @click="tryGetCode">
       <template #icon>
-        <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28" @click="tryGetCode">
+        <v-icon v-if="!loadCode" color="var(--tgc-od-orange)" size="28">
           mdi-code-tags-check
         </v-icon>
         <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
