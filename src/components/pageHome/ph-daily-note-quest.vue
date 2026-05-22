@@ -124,7 +124,7 @@ function getQuestClass(stat: TGApp.Game.DailyNote.ArchonStatusEnum): string {
   }
 
   &.ongoing {
-    @include github-styles.github-tag-dark-gen(#d19a66ff);
+    @include github-styles.github-tag-dark-gen(#42a5f5ff);
   }
 
   &.not-open {
