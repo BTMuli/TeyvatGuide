@@ -2,12 +2,21 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-04-13
-Update: 2026-05-20
+Update: 2026-05-28
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-04-13 12:28:20`
 >
-> 更新于 `2026-05-20 02:00:23`
+> 更新于 `2026-05-28 20:42:25`
+
+## [0.10.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.3) (2026-05-28)
+
+- 🍱 更新卡池信息
+- 🐛 修复特定条件下公告详情渲染异常
+- 🐛 修正实时便笺魔神任务完成状态判断
+- 🎨 调整实时便笺魔神任务`进行中`状态下的标签颜色
+- 🚸 调整兑换码浮窗触发范围
+- 👽️ 修复扫码登录异常，启动器扫码替代米社扫码
 
 ## [0.10.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.2) (2026-05-20)
 

@@ -1,6 +1,6 @@
 {
   "name": "teyvatguide",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "Game Tool for GenshinImpact player",
   "private": true,
   "packageManager": "pnpm@11.4.0",

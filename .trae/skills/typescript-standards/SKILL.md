@@ -253,16 +253,19 @@ const statusOrder: Record<TGApp.Game.ActCalendar.PoolStatusEnum, number> = {
 ```
 
 **原因：**
+
 - Vue组件的模板和脚本部分需要运行时可访问的值
 - `TGApp.Game.ActCalendar.PoolStatus` 是类型定义，编译后不存在
 - `gameEnum` 是实际的JavaScript对象，可以在运行时访问
 
 **适用场景：**
+
 - Vue组件的 `<script setup>` 部分
 - 组件的计算属性和方法中
 - 模板中的条件判断和绑定
 
 **例外情况：**
+
 - 类型定义文件（`.d.ts`）中可以使用完整类型路径
 
 ## ESLint 规则对应
