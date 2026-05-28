@@ -1,6 +1,6 @@
 /**
  * Hk4eApi 请求模块
- * @since Beta v0.10.1
+ * @since Beta v0.10.3
  */
 
 import gameEnum from "@enum/game.js";
@@ -158,7 +158,8 @@ async function getBeyondGachaLog(
 
 /**
  * 获取登录二维码
- * @since Beta v0.10.1
+ * @since Beta v0.10.3
+ * @deprecated https://github.com/pizza-studio/PizzaHelperUnited/issues/227
  * @param appId - 应用 ID
  * @remarks 目前只有2/7能用
  * @returns 二维码响应数据
@@ -173,7 +174,8 @@ async function fetchPandaQr(appId: number): Promise<TGApp.Game.Login.QrResp> {
 
 /**
  * 获取登录状态
- * @since Beta v0.10.1
+ * @since Beta v0.10.3
+ * @deprecated https://github.com/pizza-studio/PizzaHelperUnited/issues/227
  * @param ticket - 二维码 ticket
  * @param appId - 应用 ID
  * @returns 登录状态响应数据

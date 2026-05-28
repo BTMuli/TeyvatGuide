@@ -5,18 +5,6 @@
       <div class="tog-top">
         <div class="tog-title">请使用米游社进行扫码操作</div>
         <div class="tog-hint">仅用于登录米社账号，与实际游戏账号无关</div>
-        <div class="tog-select">
-          <div
-            v-for="item in selects"
-            :key="item.value"
-            :class="{ active: codeGid === item.value }"
-            :title="item.title"
-            class="tog-select-item"
-            @click="codeGid = item.value"
-          >
-            <img :src="item.icon" alt="icon" />
-          </div>
-        </div>
       </div>
       <div class="tog-divider" />
       <div class="tog-mid">
@@ -30,48 +18,22 @@
         />
       </div>
       <div class="tog-bottom" @click="share()">
-        <img alt="icon" src="/platforms/mhy/mys.webp" />
+        <img alt="icon" src="/platforms/mhy/launcher.webp" />
       </div>
     </div>
   </TOverlay>
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
-import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import hk4eReq from "@req/hk4eReq.js";
-import takumiReq from "@req/takumiReq.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import QrcodeVue from "qrcode.vue";
 import { onUnmounted, ref, watch } from "vue";
+import passportReq from "@req/passportReq.js";
 
 type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
-type ToGameLoginSelect = { title: string; value: number; icon: string };
-
-const selects: Array<ToGameLoginSelect> = [
-  {
-    title: "未定事件簿",
-    value: 2,
-    icon: "/platforms/mhy/wd.webp",
-  },
-  {
-    title: "崩坏学园2",
-    value: 7,
-    icon: "/platforms/mhy/bh2.webp",
-  },
-  // {
-  //   title: "崩坏：因缘精灵",
-  //   value: 9,
-  //   icon: "/platforms/mhy/hna.webp",
-  // },
-  // {
-  //   title: "星布谷地",
-  //   value: 10,
-  //   icon: "/platforms/mhy/hyg.webp",
-  // },
-];
 
 // eslint-disable-next-line no-undef
 let cycleTimer: NodeJS.Timeout | null = null;
@@ -118,9 +80,9 @@ async function share(): Promise<void> {
 }
 
 async function freshQr(): Promise<void> {
-  let resp: TGApp.Game.Login.QrResp | undefined;
+  let resp: TGApp.BBS.GameLogin.GetLoginQrResponse | undefined;
   try {
-    resp = await hk4eReq.loginQr.create(codeGid.value);
+    resp = await passportReq.qrLogin.create();
     if (resp.retcode !== 0) {
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
       return;
@@ -133,13 +95,13 @@ async function freshQr(): Promise<void> {
     return;
   }
   codeUrl.value = resp.data.url;
-  codeTicket.value = new URL(codeUrl.value).searchParams.get("ticket") || "";
+  codeTicket.value = resp.data.ticket;
 }
 
 async function cycleGetDataGame(): Promise<void> {
-  let res: TGApp.Game.Login.StatResp | undefined;
+  let res: TGApp.BBS.GameLogin.GetLoginStatusResponse | undefined;
   try {
-    res = await hk4eReq.loginQr.state(codeTicket.value, codeGid.value);
+    res = await passportReq.qrLogin.query(codeTicket.value);
     console.log(res);
     if (res.retcode !== 0) {
       showSnackbar.error(`[${res.retcode}] ${res.message}`);
@@ -159,43 +121,17 @@ async function cycleGetDataGame(): Promise<void> {
     await TGLogger.Error(`[TcoGameLogin][cycleGetDataGame] ${e}`);
     return;
   }
-  if (res.data.stat === "Init" || res.data.stat === "Scanned") return;
-  if (res.data.stat === "Confirmed") {
+  if (res.data.status === "Created" || res.data.status === "Scanned") return;
+  if (res.data.status === "Confirmed") {
     if (cycleTimer) clearInterval(cycleTimer);
     cycleTimer = null;
-    if (res.data.payload.proto === "Raw") {
-      showSnackbar.error(`返回数据异常：${res.data.payload}`);
-      model.value = false;
-      return;
-    }
-    const statusRaw: TGApp.Game.Login.StatPayloadRaw = JSON.parse(res.data.payload.raw);
-    await showLoading.start("正在获取SToken");
-    let stResp: TGApp.Game.Login.StResp | undefined;
-    try {
-      stResp = await takumiReq.game.stoken(statusRaw);
-      if (stResp.retcode !== 0) {
-        showSnackbar.error(`[${stResp.retcode}] ${stResp.message}`);
-        await TGLogger.Warn(`[TcoGameLogin] 获取SToken失败：[${stResp.retcode}] ${stResp.message}`);
-        model.value = false;
-        await showLoading.end();
-        return;
-      }
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
-      showSnackbar.error(`获取SToken失败：${errMsg}`);
-      await TGLogger.Error(`[TcoGameLogin] 获取SToken异常`);
-      await TGLogger.Error(`[TcoGameLogin] ${e}`);
-      model.value = false;
-      await showLoading.end();
-      return;
-    }
     const ck: TGApp.App.Account.Cookie = {
-      account_id: statusRaw.uid,
-      ltuid: statusRaw.uid,
-      stuid: statusRaw.uid,
-      mid: stResp.data.user_info.mid,
+      account_id: res.data.user_info.aid,
+      ltuid: res.data.user_info.aid,
+      stuid: res.data.user_info.aid,
+      mid: res.data.user_info.mid,
       cookie_token: "",
-      stoken: stResp.data.token.token,
+      stoken: res.data.tokens[0].token,
       ltoken: "",
     };
     emits("success", ck);
@@ -238,36 +174,6 @@ onUnmounted(() => {
 .tog-hint {
   color: var(--tgc-od-red);
   font-size: 14px;
-}
-
-.tog-select {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 8px;
-}
-
-.tog-select-item {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0.6;
-
-  &.active {
-    border: 2px solid var(--tgc-od-orange);
-    cursor: default;
-    opacity: 1;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    border-radius: 4px;
-    object-fit: contain;
-  }
 }
 
 .tog-divider {

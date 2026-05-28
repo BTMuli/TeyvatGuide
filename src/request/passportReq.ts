@@ -1,6 +1,6 @@
 /**
  * Passport 相关请求
- * @since Beta v0.10.1
+ * @since Beta v0.10.3
  */
 import { getRequestHeader } from "@utils/getRequestHeader.js";
 import TGBbs from "@utils/TGBbs.js";
@@ -97,8 +97,7 @@ async function createLoginCaptcha(
 
 /**
  * 创建登录二维码
- * @since Beta v0.10.1
- * @deprecated 返回数据不符合要求
+ * @since Beta v0.10.3
  * @returns 二维码响应数据
  */
 async function createQrLogin(): Promise<TGApp.BBS.GameLogin.GetLoginQrResponse> {
@@ -192,8 +191,7 @@ async function loginByMobileCaptcha(
 
 /**
  * 获取登录状态
- * @since Beta v0.10.1
- * @deprecated 返回数据不符合要求
+ * @since Beta v0.10.3
  * @param ticket - 二维码 ticket
  * @returns 登录状态响应数据
  */
