@@ -22,12 +22,12 @@ tauri-build = { version = "2.6.2", features = [] }
 [dependencies]
 chrono = "0.4.44"
 image = "0.25.10"
-log = "0.4.29"
+log = "0.4.30"
 prost = "=0.14.1"
 prost-types = "=0.14.1"
 sentry = { version = "0.48.2", features = ["backtrace", "panic"] }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 tauri = { version = "2.11.2", features = ["tray-icon"] }
 tauri-utils = "2.9.2"
 tauri-plugin-machine-uid = "0.1.3"
