@@ -101,7 +101,7 @@
             <v-list-item-subtitle>使用手机号登录</v-list-item-subtitle>
           </v-list-item>
           <v-list-item @click="tryCodeLogin()">
-            <v-list-item-title>扫码登录✨推荐</v-list-item-title>
+            <v-list-item-title>扫码登录</v-list-item-title>
             <v-list-item-subtitle>使用米游社扫码登录</v-list-item-subtitle>
             <template #append>
               <img alt="launcher" class="menu-icon" src="/platforms/mhy/mys.webp" />

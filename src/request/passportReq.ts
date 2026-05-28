@@ -98,6 +98,7 @@ async function createLoginCaptcha(
 /**
  * 创建登录二维码
  * @since Beta v0.10.3
+ * @remarks 获取到的 stoken 无法用于米社打卡
  * @returns 二维码响应数据
  */
 async function createQrLogin(): Promise<TGApp.BBS.GameLogin.GetLoginQrResponse> {
@@ -192,6 +193,7 @@ async function loginByMobileCaptcha(
 /**
  * 获取登录状态
  * @since Beta v0.10.3
+ * @remarks 获取到的 stoken 无法用于米社打卡
  * @param ticket - 二维码 ticket
  * @returns 登录状态响应数据
  */
