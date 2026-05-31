@@ -1,21 +1,24 @@
 //! Yae 相关处理
-//! @since Beta v0.9.4
+//! @since Beta v0.10.4
 #![cfg(target_os = "windows")]
 
+pub mod cmd_parse;
 pub mod inject;
 pub mod pt_ac;
 pub mod pt_store;
 
+use cmd_parse::{
+  handle_achievement_notify, handle_config_write, handle_prop_list, handle_prop_notify,
+  handle_rva_write, handle_store_notify,
+};
 use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
-use pt_ac::parse_achi_list;
-use pt_store::parse_store_list;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{self, Read, Write};
+use std::io::Read;
 use std::os::windows::io::{FromRawHandle, RawHandle};
 use std::sync::Arc;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Manager};
 use windows_sys::Win32::Foundation::CloseHandle;
 use windows_sys::Win32::System::Pipes::ConnectNamedPipe;
 
@@ -40,30 +43,6 @@ pub fn read_conf(path: &str) -> i32 {
     }
   }
   current.as_i64().unwrap_or(0) as i32
-}
-
-fn read_u32_le<R: Read>(r: &mut R) -> io::Result<u32> {
-  let mut buf = [0u8; 4];
-  match r.read_exact(&mut buf) {
-    Ok(_) => Ok(u32::from_le_bytes(buf)),
-    Err(e) => Err(e),
-  }
-}
-
-fn read_f64_le<R: Read>(r: &mut R) -> io::Result<f64> {
-  let mut buf = [0u8; 8];
-  match r.read_exact(&mut buf) {
-    Ok(_) => Ok(f64::from_le_bytes(buf)),
-    Err(e) => Err(e),
-  }
-}
-
-fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> io::Result<Vec<u8>> {
-  let mut v = vec![0u8; len];
-  match r.read_exact(&mut v) {
-    Ok(_) => Ok(v),
-    Err(e) => Err(e),
-  }
 }
 
 /// 调用 dll
@@ -137,117 +116,13 @@ pub fn call_yae_dll(
           Ok(_) => {
             println!("收到命令: {}", cmd[0]);
             match cmd[0] {
-              0x01 => {
-                println!("AchievementNotify");
-                match read_u32_le(&mut file) {
-                  Ok(len) => {
-                    // 再读数据
-                    match read_exact_vec(&mut file, len as usize) {
-                      Ok(data) => {
-                        println!("长度: {}", len);
-                        // 解码成 AchievementInfo
-                        match parse_achi_list(&data) {
-                          Ok(list) => {
-                            println!("解码成功，成就列表长度: {}", list.len());
-                            let json = serde_json::to_string_pretty(&list).unwrap();
-                            let payload =
-                              serde_json::json!({"type":"achievement","data":json,"uid":&uid});
-                            let _ = app_handle.emit("yae_read", payload);
-                          }
-                          Err(e) => println!("解析失败: {:?}", e),
-                        }
-                      }
-                      Err(e) => println!("读取数据失败: {:?}", e),
-                    }
-                  }
-                  Err(e) => println!("读取长度失败: {:?}", e),
-                }
-              }
-              0x02 => {
-                println!("PlayerStoreNotify");
-                // 读取剩余数据
-                match read_u32_le(&mut file) {
-                  Ok(len) => match read_exact_vec(&mut file, len as usize) {
-                    Ok(_data) => {
-                      println!("长度: {}", len);
-                      match parse_store_list(&_data) {
-                        Ok(list) => {
-                          println!("解码成功，物品列表长度: {}", list.len());
-                          let json = serde_json::to_string_pretty(&list).unwrap();
-                          let payload = serde_json::json!({"type":"store","data":json,"uid":&uid});
-                          let _ = app_handle.emit("yae_read", payload);
-                        }
-                        Err(e) => println!("解析失败: {:?}", e),
-                      }
-                    }
-                    Err(e) => println!("读取数据失败: {:?}", e),
-                  },
-                  Err(e) => println!("读取长度失败: {:?}", e),
-                }
-              }
-              0x03 => {
-                println!("PlayerPropNotify");
-                // 读取剩余数据
-                match read_u32_le(&mut file) {
-                  Ok(prop_type) => match read_f64_le(&mut file) {
-                    Ok(value) => {
-                      prop_map.insert(prop_type, value);
-                    }
-                    Err(e) => println!("读取值失败: {:?}", e),
-                  },
-                  Err(e) => println!("读取类型失败: {:?}", e),
-                }
-              }
-              0xFC => {
-                let _ = file.write_all(&read_conf("nativeConfig.achievementCmdId").to_le_bytes());
-                let _ = file.write_all(&read_conf("nativeConfig.storeCmdId").to_le_bytes());
-              }
-              0xFD => {
-                for key in [
-                  "doCmd",
-                  "updateNormalProp",
-                  "newString",
-                  "findGameObject",
-                  "eventSystemUpdate",
-                  "simulatePointerClick",
-                  "toInt32",
-                  "tcpStatePtr",
-                  "sharedInfoPtr",
-                  "decompress",
-                ] {
-                  let _ = file.write_all(&read_rva(key).to_le_bytes());
-                }
-              }
+              0x01 => handle_achievement_notify(&mut file, &app_handle, &uid),
+              0x02 => handle_store_notify(&mut file, &app_handle, &uid),
+              0x03 => handle_prop_notify(&mut file, &mut prop_map),
+              0xFC => handle_config_write(&mut file),
+              0xFD => handle_rva_write(&mut file),
               0xFF => {
-                println!("处理 Prop 列表，长度: {}", prop_map.len());
-                let mut new_data: HashMap<u32, f64> = HashMap::new();
-                // 201 = 10015 - 10022 原石
-                let v1 = prop_map.get(&10015).copied().unwrap_or(0.0);
-                let v2 = prop_map.get(&10022).copied().unwrap_or(0.0);
-                new_data.insert(201, v1 - v2);
-                // 202 = 10016 - 10023 摩拉
-                let v3 = prop_map.get(&10016).copied().unwrap_or(0.0);
-                let v4 = prop_map.get(&10023).copied().unwrap_or(0.0);
-                new_data.insert(202, v3 - v4);
-                // 203 = 10025 - 10026 创世结晶
-                let v5 = prop_map.get(&10025).copied().unwrap_or(0.0);
-                let v6 = prop_map.get(&10026).copied().unwrap_or(0.0);
-                new_data.insert(203, v5 - v6);
-                // 204 = 10042 - 10043 洞天宝钱
-                let v7 = prop_map.get(&10042).copied().unwrap_or(0.0);
-                let v8 = prop_map.get(&10043).copied().unwrap_or(0.0);
-                new_data.insert(204, v7 - v8);
-                // 206 = 10053
-                // let v9 = prop_map.get(&10053).copied().unwrap_or(0.0);
-                // new_data.insert(206, v9);
-                // 207 = 10058
-                // let va = prop_map.get(&10058).copied().unwrap_or(0.0);
-                // new_data.insert(207, va);
-                // 转成 JSON 输出
-                let json = serde_json::to_string_pretty(&new_data).unwrap();
-                let payload = serde_json::json!({ "type": "prop", "data": json, "uid": uid });
-                let _ = app_handle.emit("yae_read", payload);
-                let _ = file.write_all(&[1]);
+                handle_prop_list(&mut file, &app_handle, &uid, &prop_map);
                 break;
               }
               _ => println!("收到未知命令: {}", cmd[0]),
