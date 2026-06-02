@@ -1,6 +1,6 @@
 /**
  * YAML 文件的 ESLint 配置
- * @since Beta v0.10.2
+ * @since Beta v0.10.3
  */
 import pluginYml from "eslint-plugin-yml";
 import * as ymlParser from "yaml-eslint-parser";
@@ -18,6 +18,10 @@ const eslintConfigYml = [
       "yml/key-spacing": ["error"],
       "yml/quotes": ["error", { prefer: "double", avoidEscape: true }],
       "yml/sort-keys": ["error", "asc"],
+      "yml/sort-sequence-values": [
+        "error",
+        { pathPattern: "^minimumReleaseAgeExclude$", order: { type: "asc" } },
+      ],
     },
   },
 ];
