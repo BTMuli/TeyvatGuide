@@ -179,6 +179,7 @@ async function tryAuto(skip: boolean = false): Promise<void> {
   }
   await autoSign(props.acCur.cookie, skip);
   await TGLogger.Script("[米游币任务]任务执行完毕，即将刷新任务状态");
+  await new Promise<void>((resolve) => setTimeout(resolve, 2000));
   await refreshState(props.acCur.cookie);
   await TGLogger.ScriptSep("米游币任务", false);
   loadScript.value = false;
