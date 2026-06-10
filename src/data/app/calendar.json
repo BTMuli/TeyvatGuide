@@ -35,7 +35,7 @@
   },
   {
     "id": 10000129,
-    "contentId": 0,
+    "contentId": 508598,
     "dropDays": [2, 5, 7],
     "name": "洛恩",
     "itemType": "character",
@@ -2884,7 +2884,7 @@
   },
   {
     "id": 13517,
-    "contentId": 0,
+    "contentId": 508805,
     "dropDays": [1, 4, 7],
     "name": "灾悔",
     "itemType": "weapon",

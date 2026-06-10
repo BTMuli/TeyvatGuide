@@ -14018,7 +14018,7 @@
     "description": "规避壁障的束缚，瓦解多托雷构筑的囚牢之境。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 84000,
@@ -16972,7 +16972,7 @@
     "description": "集齐全部「异质的树髓」。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "FINISH_QUEST_AND" }
   },
   {
     "id": 84383,
@@ -16982,7 +16982,10 @@
     "description": "在须弥，梦往往是危险的预兆。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 3034, "name": "花于何处醒来", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84384,
@@ -16992,7 +16995,10 @@
     "description": "生命的力量总会互相响应。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 3035, "name": "通向自我的歧途", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84385,
@@ -17002,7 +17008,10 @@
     "description": "离别是漫长的重逢。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 3035, "name": "通向自我的歧途", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84386,
@@ -17012,7 +17021,10 @@
     "description": "完成「身土坏空，五蕴识转」。",
     "reward": 10,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 3036, "name": "旧影重现", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84387,
@@ -17022,7 +17034,10 @@
     "description": "在与三王的对弈中取得胜利。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6035, "name": "妄念与真知的通天塔", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84388,
@@ -17032,7 +17047,10 @@
     "description": "汇集众人的愿望，以此拯救须弥。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6036, "name": "虚空劫灰往世书", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84389,
@@ -17042,7 +17060,10 @@
     "description": "劫火烧却后是澄澈的天空。",
     "reward": 5,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6036, "name": "虚空劫灰往世书", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84390,
@@ -17052,7 +17073,10 @@
     "description": "完成「虚空劫灰往世书」。",
     "reward": 10,
     "version": "6.6",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 6038, "name": "你的往事如一座花园", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84501,

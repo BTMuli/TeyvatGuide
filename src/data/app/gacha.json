@@ -3388,5 +3388,41 @@
     "postId": "75443624",
     "up5List": [14523, 11518],
     "up4List": [11434, 15412, 12402, 13401, 14402]
+  },
+  {
+    "name": "霜锋夜白",
+    "version": "6.6",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/05/26/c2a3b8cc3cf10224c248a781325ce2e3_5629417702843428147_transformed.jpg",
+    "from": "2026-06-09T18:00:00+08:00",
+    "to": "2026-06-30T14:59:00+08:00",
+    "type": 301,
+    "postId": "75781475",
+    "up5List": [10000129],
+    "up4List": [10000080, 10000023, 10000032]
+  },
+  {
+    "name": "宿古的赫炎",
+    "version": "6.6",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/05/26/e92b6dbc10613a757f7c775919ae346c_5720336689852618885_transformed.jpg",
+    "from": "2026-06-09T18:00:00+08:00",
+    "to": "2026-06-30T14:59:00+08:00",
+    "type": 400,
+    "postId": "75781476",
+    "up5List": [10000106],
+    "up4List": [10000080, 10000023, 10000032]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.6",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/05/26/f648f6212812b4aa1f5fbf53409470a2_3354070259740915076_transformed.jpg",
+    "from": "2026-06-09T18:00:00+08:00",
+    "to": "2026-06-30T14:59:00+08:00",
+    "type": 302,
+    "postId": "75781477",
+    "up5List": [13517, 12514],
+    "up4List": [11410, 14410, 15410, 12405, 13407]
   }
 ]
