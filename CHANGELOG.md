@@ -2,12 +2,18 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-04-13
-Update: 2026-05-28
+Update: 2026-06-10
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-04-13 12:28:20`
 >
-> 更新于 `2026-05-28 20:42:25`
+> 更新于 `2026-06-10 21:17:06`
+
+## [0.10.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.4) (2026-06-10)
+
+- 🍱 更新卡池信息
+- 🚸 调整扫码登录提示文本
+- 🚸 米社打卡执行后延迟更新任务状态
 
 ## [0.10.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.3) (2026-05-28)
 
