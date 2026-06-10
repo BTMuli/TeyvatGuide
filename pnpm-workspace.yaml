@@ -2,29 +2,58 @@ allowBuilds:
   "@sentry/cli": false
   esbuild: false
 minimumReleaseAgeExclude:
-  - "@types/node@25.9.0"
-  - "@typescript-eslint/eslint-plugin@8.59.4"
-  - "@typescript-eslint/parser@8.59.4"
-  - "@typescript-eslint/project-service@8.59.4"
-  - "@typescript-eslint/scope-manager@8.59.4"
-  - "@typescript-eslint/tsconfig-utils@8.59.4"
-  - "@typescript-eslint/type-utils@8.59.4"
-  - "@typescript-eslint/types@8.59.4"
-  - "@typescript-eslint/typescript-estree@8.59.4"
-  - "@typescript-eslint/utils@8.59.4"
-  - "@typescript-eslint/visitor-keys@8.59.4"
-  - "@vue/language-core@3.3.0"
-  - date-fns@4.2.1
-  - tsx@4.22.2
-  - typescript-eslint@8.59.4
-  - vue-tsc@3.3.0
-  - "@types/node@25.9.1"
-  - "@vue/language-core@3.3.1"
-  - echarts@6.1.0
-  - tsx@4.22.3
-  - vue-tsc@3.3.1
+  - "@oxlint/binding-android-arm-eabi@1.68.0"
+  - "@oxlint/binding-android-arm64@1.68.0"
+  - "@oxlint/binding-darwin-arm64@1.68.0"
+  - "@oxlint/binding-darwin-x64@1.68.0"
+  - "@oxlint/binding-freebsd-x64@1.68.0"
+  - "@oxlint/binding-linux-arm-gnueabihf@1.68.0"
+  - "@oxlint/binding-linux-arm-musleabihf@1.68.0"
+  - "@oxlint/binding-linux-arm64-gnu@1.68.0"
+  - "@oxlint/binding-linux-arm64-musl@1.68.0"
+  - "@oxlint/binding-linux-ppc64-gnu@1.68.0"
+  - "@oxlint/binding-linux-riscv64-gnu@1.68.0"
+  - "@oxlint/binding-linux-riscv64-musl@1.68.0"
+  - "@oxlint/binding-linux-s390x-gnu@1.68.0"
+  - "@oxlint/binding-linux-x64-gnu@1.68.0"
+  - "@oxlint/binding-linux-x64-musl@1.68.0"
+  - "@oxlint/binding-openharmony-arm64@1.68.0"
+  - "@oxlint/binding-win32-arm64-msvc@1.68.0"
+  - "@oxlint/binding-win32-ia32-msvc@1.68.0"
+  - "@oxlint/binding-win32-x64-msvc@1.68.0"
   - "@pkgr/core@0.3.6"
-  - concurrently@10.0.0
+  - "@sentry-internal/browser-utils@10.56.0"
+  - "@sentry-internal/feedback@10.56.0"
+  - "@sentry-internal/replay-canvas@10.56.0"
+  - "@sentry-internal/replay@10.56.0"
+  - "@sentry/browser@10.56.0"
+  - "@sentry/core@10.56.0"
+  - "@sentry/vue@10.56.0"
+  - "@types/node@25.9.0"
+  - "@types/node@25.9.1"
+  - "@typescript-eslint/eslint-plugin@8.60.1"
+  - "@typescript-eslint/parser@8.60.1"
+  - "@typescript-eslint/project-service@8.60.1"
+  - "@typescript-eslint/scope-manager@8.60.1"
+  - "@typescript-eslint/tsconfig-utils@8.60.1"
+  - "@typescript-eslint/type-utils@8.60.1"
+  - "@typescript-eslint/types@8.60.1"
+  - "@typescript-eslint/typescript-estree@8.60.1"
+  - "@typescript-eslint/utils@8.60.1"
+  - "@typescript-eslint/visitor-keys@8.60.1"
+  - "@vue/language-core@3.3.0"
+  - "@vue/language-core@3.3.1"
+  - concurrently@10.0.3
+  - date-fns@4.2.1
+  - echarts@6.1.0
   - eslint-plugin-prettier@5.5.6
+  - oxlint@1.68.0
   - swiper@12.2.0
   - synckit@0.11.13
+  - tsx@4.22.2
+  - tsx@4.22.3
+  - typescript-eslint@8.60.1
+  - vue-eslint-parser@10.4.1
+  - vue-tsc@3.3.0
+  - vue-tsc@3.3.1
+  - vuetify@4.1.0

@@ -219,6 +219,7 @@ async function loadYaeAchi(uid: string, data: TGApp.Plugins.Yae.AchiListRes): Pr
  */
 async function loadYaeBag(uid: string, data: TGApp.Plugins.Yae.BagListRes): Promise<void> {
   const listM = data.filter((i) => i.kind === "material");
+  // TODO: 接受武器&圣遗物数据处理
   const listW = data.filter((i) => i.kind === "weapon");
   const listR = data.filter((i) => i.kind === "reliquary");
   await TGLogger.Info(`[App][loadYaeBag] 接收到 ${uid} 的背包数据`);
