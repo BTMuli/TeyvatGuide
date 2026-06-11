@@ -17,6 +17,9 @@
       <v-btn class="test-btn" @click="testReply()">回复测试</v-btn>
       <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
+    <div style="height: 400px">
+      <gro-rerun />
+    </div>
   </div>
   <VpReplyDebug v-model="showReply" />
 </template>
@@ -29,6 +32,7 @@ import recordReq from "@req/recordReq.js";
 import TGHttps from "@utils/TGHttps.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TGLogger from "@utils/TGLogger.js";
+import GroRerun from "@comp/userGacha/gro-rerun.vue";
 
 const showReply = ref<boolean>(false);
 const { account, cookie } = storeToRefs(useUserStore());

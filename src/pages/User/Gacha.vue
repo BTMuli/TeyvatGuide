@@ -123,6 +123,8 @@
       <v-tab value="overview">数据概览</v-tab>
       <v-tab value="echarts">图表概览</v-tab>
       <v-tab value="table">数据表格</v-tab>
+      <!-- TODO:UI调整 -->
+      <v-tab v-if="false" value="rerun">复刻周期</v-tab>
       <v-tab value="history">过往祈愿</v-tab>
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
@@ -134,6 +136,9 @@
       </v-window-item>
       <v-window-item class="gacha-window-item" value="table">
         <gro-table v-model="gachaListCur" />
+      </v-window-item>
+      <v-window-item class="gacha-window-item" value="rerun">
+        <gro-rerun />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="history">
         <gro-history :uid="uidCur" />
@@ -150,6 +155,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import GroEcharts from "@comp/userGacha/gro-echarts.vue";
 import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
+import GroRerun from "@comp/userGacha/gro-rerun.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoHutaoDu, { type UgoHutaoMode } from "@comp/userGacha/ugo-hutao-du.vue";
 import UgoUid from "@comp/userGacha/ugo-uid.vue";
