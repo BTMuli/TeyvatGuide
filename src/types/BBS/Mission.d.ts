@@ -1,6 +1,6 @@
 /**
  * 米游币任务数据类型
- * @since Beta v0.7.0
+ * @since Beta v0.10.5
  */
 
 declare namespace TGApp.BBS.Mission {
@@ -105,5 +105,63 @@ declare namespace TGApp.BBS.Mission {
      * @remarks 与任务项Key对应
      */
     mission_key: string;
+  };
+
+  /**
+   * 米游币获取/消耗记录返回响应
+   * @since Beta v0.10.5
+   * @remarks 考虑迁移至更合适的位置/命名
+   */
+  type MybRecResp = TGApp.BBS.Response.BaseWithData<MybRecRes>;
+
+  /**
+   * 米游币获取/消耗记录返回数据
+   * @since Beta v0.10.5
+   */
+  type MybRecRes = {
+    /** 记录列表 */
+    list: Array<MybRecItem>;
+  };
+
+  /**
+   * 米游币获取/消耗记录项
+   * @since Beta v0.10.5
+   */
+  type MybRecItem = {
+    /** 积分标识 */
+    point_sn: string;
+    /** 标题 */
+    title: string;
+    /** 订单号 */
+    order_sn: string;
+    /** 备注 */
+    comment: string;
+    /** 来源 */
+    source: string;
+    /**
+     * 操作类型
+     * @example
+     * 1 - 获取
+     * 2 - 消耗
+     */
+    action: number;
+    /** 用户ID */
+    user_id: string;
+    /** 游戏业务 */
+    game_biz: string;
+    /** 区域 */
+    region: string;
+    /** 米游币数量 */
+    num: number;
+    /** 账号UID */
+    account_uid: string;
+    /** 下单时间戳（秒） */
+    order_time: string;
+    /** 任务类型 */
+    type: string;
+    /** 类型名称 */
+    type_name: string;
+    /** 来源名称 */
+    source_name: string;
   };
 }

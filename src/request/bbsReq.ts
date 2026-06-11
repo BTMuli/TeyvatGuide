@@ -74,11 +74,43 @@ async function getCollectionDetail(
   return resp.data;
 }
 
+/**
+ * 获取米游币消耗/增加记录
+ * @since Beta v0.10.5
+ * @param cookie - 用户ck
+ * @param isCostAction - 是否获取消耗记录
+ * @param lastTime - 最后一项的时间戳，初始为0
+ * @returns 米游币消耗/增加记录
+ */
+async function getMybRecordDetail(
+  cookie: TGApp.App.Account.Cookie,
+  isCostAction: boolean = false,
+  lastTime: string = "0",
+): Promise<TGApp.BBS.Mission.MybRecResp> {
+  const ck = { cookie_token: cookie.cookie_token, account_id: cookie.account_id };
+  const params = {
+    app_id: "1",
+    point_sn: "myb",
+    time: lastTime,
+    action: isCostAction ? "2" : "1",
+    size: "20",
+  };
+  const resp = await TGHttps.get<TGApp.BBS.Mission.MybRecResp>(
+    `${mbBu}common/homutreasure/v1/web/user/record`,
+    {
+      headers: getRequestHeader(ck, "GET", params, "X4", true),
+      query: params,
+    },
+  );
+  return resp.data;
+}
+
 const bbsReq = {
   collection: getCollectionDetail,
   emojis: getEmoticonSet,
   userInfo: getUserFullInfo,
   otherUserInfo: getOtherUserInfo,
+  mybRecord: getMybRecordDetail,
 };
 
 export default bbsReq;

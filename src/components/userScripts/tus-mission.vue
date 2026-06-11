@@ -4,8 +4,11 @@
     <div class="tusm-top">
       <div class="tusm-title" @click="genShare()">
         <span>米游币任务({{ todayPoints }}/{{ totalPoints }})</span>
-        <v-icon color="var(--tgc-od-red)" size="16" title="相关" @click.stop="toInfoPost()">
-          mdi-information
+        <v-icon color="var(--tgc-od-blue)" size="16" title="相关记录" @click.stop="openRecord()">
+          mdi-receipt-text
+        </v-icon>
+        <v-icon color="var(--tgc-od-red)" size="16" title="相关公告" @click.stop="toInfoPost()">
+          mdi-bullhorn
         </v-icon>
       </div>
       <div class="tusm-acts" data-html2canvas-ignore>
@@ -41,9 +44,11 @@
       </div>
     </div>
   </div>
+  <TusMoRecord v-model="showRecord" :account="props.acCur" />
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import TusMoRecord from "@comp/userScripts/tus-mo-record.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -89,6 +94,7 @@ const loadMission = ref<boolean>(false);
 const parseMissions = shallowRef<Array<ParseMission>>([]);
 const missionList = shallowRef<Array<TGApp.BBS.Mission.MissionItem>>([]);
 const tusmEl = useTemplateRef<HTMLDivElement>("tusmRef");
+const showRecord = ref<boolean>(false);
 
 defineExpose({ tryAuto });
 
@@ -282,6 +288,10 @@ async function genShare(): Promise<void> {
 
 async function toInfoPost(): Promise<void> {
   await createPost(74971515);
+}
+
+function openRecord(): void {
+  showRecord.value = true;
 }
 </script>
 <style lang="scss" scoped>
