@@ -32,10 +32,6 @@ jobs:
       matrix:
         settings:
           - platform: macos-latest
-            args: "--target x86_64-apple-darwin"
-            target: "macos-intel"
-            artifact: "debug-build-macos-intel"
-          - platform: macos-latest
             args: "--target aarch64-apple-darwin"
             target: "macos-arm"
             artifact: "debug-build-macos-arm"
@@ -66,9 +62,6 @@ jobs:
         with:
           workspaces: "./src-tauri -> target"
 
-      - name: Add Rust targets(macOS Intel)
-        if: matrix.settings.target == 'macos-intel'
-        run: rustup target add x86_64-apple-darwin
       - name: Add Rust targets(macOS ARM)
         if: matrix.settings.target == 'macos-arm'
         run: rustup target add aarch64-apple-darwin
@@ -98,18 +91,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.settings.args }} --debug
-      - name: Move Debug Intel
-        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-debug == 'true'
-        run: mv src-tauri/target/x86_64-apple-darwin/debug/bundle/dmg/*.dmg TeyvatGuide_${{ env.COMMIT_HASH }}_intel-debug.dmg
       - name: Move Debug ARM
         if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-debug == 'true'
         run: mv src-tauri/target/aarch64-apple-darwin/debug/bundle/dmg/*.dmg TeyvatGuide_${{ env.COMMIT_HASH }}_arm-debug.dmg
-      - name: Upload Debug Intel
-        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-debug == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-macos-intel
-          path: TeyvatGuide_${{ env.COMMIT_HASH }}_intel-debug.dmg
       - name: Upload Debug ARM
         if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-debug == 'true'
         uses: actions/upload-artifact@v4
@@ -124,18 +108,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.settings.args }}
-      - name: Move Release Intel
-        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-release == 'true'
-        run: mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*.dmg TeyvatGuide_${{ env.COMMIT_HASH }}_intel-release.dmg
       - name: Move Release ARM
         if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-release == 'true'
         run: mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg TeyvatGuide_${{ env.COMMIT_HASH }}_arm-release.dmg
-      - name: Upload Release Intel
-        if: matrix.settings.target == 'macos-intel' && github.event.inputs.build-release
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-macos-intel
-          path: TeyvatGuide_${{ env.COMMIT_HASH }}_intel-release.dmg
       - name: Upload Release ARM
         if: matrix.settings.target == 'macos-arm' && github.event.inputs.build-release == 'true'
         uses: actions/upload-artifact@v4
