@@ -3,7 +3,7 @@
   <TOverlay v-model="visible" :outer-close="outerClose" blur-val="10px">
     <div class="tpoi-box">
       <div
-        :class="{ 'tpoi-top-scroll': !isDragMode && !isResetting }"
+        :class="{ 'tpoi-top-scroll': !isDragMode }"
         class="tpoi-top"
         @click="onBoxClick"
         @mousedown="onBoxMouseDown"
@@ -133,7 +133,6 @@ const bgMode = ref<number>(0);
 const scale = ref<number>(1);
 const isDragging = ref<boolean>(false);
 const isDragMode = ref<boolean>(false);
-const isResetting = ref<boolean>(false);
 const hasDragged = ref<boolean>(false);
 const showScaleHint = ref<boolean>(false);
 const outerClose = ref<boolean>(true);
@@ -178,7 +177,6 @@ watch(
       dragPos.value = { x: 0, y: 0 };
       isDragging.value = false;
       isDragMode.value = false;
-      isResetting.value = false;
       hasDragged.value = false;
       showScaleHint.value = false;
       outerClose.value = true;
@@ -227,7 +225,6 @@ function miniImgUrl(): string {
 }
 
 function resetTransform(): void {
-  isResetting.value = true;
   scale.value = 1;
   imgPos.value = { x: 0, y: 0 };
   dragPos.value = { x: 0, y: 0 };
