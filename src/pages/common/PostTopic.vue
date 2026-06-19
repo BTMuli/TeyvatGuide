@@ -391,6 +391,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 }
 
 .post-topic-title {
+  position: relative;
+  z-index: 1;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 18px;
@@ -410,8 +412,8 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
 .post-topic-id {
   position: absolute;
-  z-index: 1;
-  top: 2px;
+  z-index: 0;
+  top: 0;
   right: 2px;
   color: var(--tgc-od-red);
   font-size: 8px;
