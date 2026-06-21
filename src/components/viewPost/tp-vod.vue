@@ -40,13 +40,14 @@ type TpVod = {
     vod: {
       id: string;
       duration: number;
-      cover: string;
+      cover?: string;
       resolutions: Array<{
         url: string;
         definition: "480P" | "720P" | "1080P" | "2K"; // 待补充
         height: number;
         width: number;
         bitrate: number;
+        codec: string;
         size: number;
         format: "MP4"; // 待补充
         label: "480P" | "720P" | "1080P" | "2K"; // 待补充
@@ -58,6 +59,7 @@ type TpVod = {
   };
 };
 type TpVodProps = { data: TpVod };
+const WG_COVER: Readonly<string> = "https://upload-bbs.mihoyo.com/weigui.png";
 
 const appStore = useAppStore();
 const props = defineProps<TpVodProps>();
@@ -89,7 +91,7 @@ onMounted(async () => {
     id: props.data.insert.vod.id,
     container: `#tp-vod-${props.data.insert.vod.id}`,
     url: highestResolution.url,
-    poster: coverLocal.value,
+    poster: coverLocal.value ?? "",
     type: highestResolution.format,
     playbackRate: true,
     aspectRatio: false,
@@ -125,6 +127,10 @@ onMounted(async () => {
         html: `<span class="mdi mdi-image-check vod-box-act" />`,
         tooltip: "下载封面",
         click: async () => {
+          if (props.data.insert.vod.cover === undefined) {
+            showSnackbar.warn("未获取到封面链接");
+            return;
+          }
           await showLoading.start("正在下载封面", props.data.insert.vod.cover);
           await loadCoverBuffer();
           if (coverBuffer.value === null) {
@@ -153,11 +159,12 @@ onMounted(async () => {
 });
 
 function getCoverLink(): string {
-  return appStore.getImageUrl(props.data.insert.vod.cover);
+  return appStore.getImageUrl(props.data.insert.vod.cover ?? WG_COVER);
 }
 
 async function loadCoverBuffer(): Promise<void> {
   if (coverBuffer.value !== null) return;
+  if (props.data.insert.vod.cover === undefined) return;
   try {
     coverBuffer.value = await TGHttps.buffer(props.data.insert.vod.cover);
   } catch (e) {
