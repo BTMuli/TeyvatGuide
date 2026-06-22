@@ -16,6 +16,10 @@ edition = "2024"
 name = "teyvat_guide_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+# macOS 27 暂时无法加载被 strip 的过程宏动态库
+[profile.release.package.sqlx-macros]
+strip = "none"
+
 [build-dependencies]
 tauri-build = { version = "2.6.2", features = [] }
 
