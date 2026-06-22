@@ -113,3 +113,7 @@ branch = "v2"
 git = "ssh://git@github.com/tauri-apps/plugins-workspace.git"
 branch = "v2"
 features = ["sqlite"]
+
+# macOS 27 暂时无法加载被 strip 的过程宏动态库
+[profile.release.package.sqlx-macros]
+strip = "none"
