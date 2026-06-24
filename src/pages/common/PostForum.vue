@@ -5,13 +5,6 @@
       <div class="posts-top">
         <img alt="posts" src="/UI/nav/posts.webp" />
         <span>帖子</span>
-        <v-checkbox
-          v-model="syncRefresh"
-          class="post-sync-check"
-          density="compact"
-          hide-details
-          label="同步刷新"
-        />
       </div>
     </template>
     <div class="posts-switch">
@@ -105,11 +98,35 @@
     </div>
     <template #extension>
       <TGameNav :gid="disGid" style="margin-left: 8px" />
+      <div class="posts-conf">
+        <v-checkbox
+          v-model="syncRefresh"
+          class="post-sync-check"
+          density="compact"
+          hide-details
+          label="同步刷新"
+        />
+        <v-btn-toggle
+          v-model="gridMode"
+          :divided="false"
+          :mandatory="true"
+          class="posts-view-conf"
+          color="var(--tgc-od-blue)"
+          variant="outlined"
+        >
+          <v-btn :value="true" size="small" title="网格布局">
+            <v-icon size="16">mdi-view-grid</v-icon>
+          </v-btn>
+          <v-btn :value="false" size="small" title="列表布局">
+            <v-icon size="20">mdi-view-list</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </div>
     </template>
   </v-app-bar>
-  <div class="posts-grid">
+  <div :class="{ grid: gridMode }" class="posts-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :post @onUserClick="handleUserClick" />
+      <TPostCard :listMode="!gridMode" :post @onUserClick="handleUserClick" />
     </div>
   </div>
   <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" />
@@ -173,6 +190,7 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
+const gridMode = ref<boolean>(false);
 
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
@@ -496,10 +514,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   height: 50px;
 }
 
-.post-sync-check {
-  align-self: center;
-}
-
 .post-forum-btn {
   height: 40px;
   background: var(--tgc-btn-1);
@@ -507,12 +521,31 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   font-family: var(--font-title);
 }
 
+.posts-conf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  margin-left: auto;
+  column-gap: 8px;
+}
+
+.posts-view-conf {
+  height: 32px;
+}
+
 .posts-grid {
+  position: relative;
   display: grid;
+  width: 100%;
   font-family: var(--font-title);
   gap: 8px;
   grid-auto-rows: auto;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(2, minmax(360px, 1fr));
+
+  &.grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
 }
 
 .select-item {

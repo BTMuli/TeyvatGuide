@@ -3,90 +3,90 @@
   <div
     v-if="card"
     :id="`post-card-${card.postId}`"
-    :class="{ 'select-mode': props.selectMode }"
+    :class="{ 'select-mode': props.selectMode, 'list-mode': props.listMode }"
     class="tpc-card"
     @click="trySelect()"
   >
-    <div class="tpc-top">
-      <div class="tpc-cover" @click="toPost()">
-        <TMiImg v-if="card.cover !== ''" :ori="true" :src="card.cover" alt="cover" />
-        <img v-else alt="cover" src="/UI/post/defaultCover.webp" />
-        <div v-if="card.status" class="tpc-act">
-          <div class="tpc-status">{{ card.status?.label }}</div>
-          <div class="tpc-time">
-            <v-icon>mdi-clock-time-four-outline</v-icon>
-            <span>{{ card.subtitle }}</span>
+    <div class="tpc-cover" @click="toPost()">
+      <TMiImg v-if="card.cover !== ''" :ori="true" :src="card.cover" alt="cover" />
+      <img v-else alt="cover" src="/UI/post/defaultCover.webp" />
+      <div v-if="card.status" class="tpc-act">
+        <div class="tpc-status">{{ card.status?.label }}</div>
+        <div class="tpc-time">
+          <v-icon>mdi-clock-time-four-outline</v-icon>
+          <span>{{ card.subtitle }}</span>
+        </div>
+      </div>
+      <div
+        v-else-if="props.post.post.images.length > 1"
+        :title="`图片数：${props.post.post.images.length}`"
+        class="tpc-image-cnt"
+      >
+        <v-icon size="10">mdi-folder-multiple-image</v-icon>
+        <span>{{ props.post.post.images.length }}</span>
+      </div>
+    </div>
+    <div class="tpc-body">
+      <div :title="card.title" class="tpc-title" @click="shareCard()">{{ card.title }}</div>
+      <div v-if="card.user !== null" class="tpc-mid">
+        <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
+      </div>
+      <div class="tpc-bottom">
+        <div class="tpc-tags">
+          <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
+            <v-icon size="10">mdi-lightbulb-on</v-icon>
+            <span>{{ reason.text }}</span>
+          </div>
+          <TpcTag
+            v-for="topic in card.topics"
+            :key="topic.id"
+            :tag="topic.name"
+            @click="toTopic(topic)"
+          />
+        </div>
+        <div v-if="card.data !== null" class="tpc-data">
+          <div :title="`浏览数：${card.data.view}`" class="tpc-info-item">
+            <v-icon size="12">mdi-eye</v-icon>
+            <span>{{ card.data.view }}</span>
+          </div>
+          <div
+            :class="{ collected: props.post.self_operation?.is_collected }"
+            :title="`收藏数：${card.data.mark}`"
+            class="tpc-info-item"
+          >
+            <v-icon size="12">mdi-star</v-icon>
+            <span>{{ card.data.mark }}</span>
+          </div>
+          <div :title="`回复数：${card.data.reply}`" class="tpc-info-item">
+            <v-icon size="12">mdi-comment</v-icon>
+            <span>{{ card.data.reply }}</span>
+          </div>
+          <div
+            :class="{ love: props.post.self_operation?.upvote_type ?? 0 > 0 }"
+            :title="`点赞数：${card.data.like}`"
+            class="tpc-info-item"
+          >
+            <v-icon size="12">mdi-thumb-up</v-icon>
+            <span>{{ card.data.like }}</span>
+          </div>
+          <div :title="`转发数：${card.data.forward}`" class="tpc-info-item">
+            <v-icon size="12">mdi-share-variant</v-icon>
+            <span>{{ card.data.forward }}</span>
           </div>
         </div>
-        <div
-          v-else-if="props.post.post.images.length > 1"
-          :title="`图片数：${props.post.post.images.length}`"
-          class="tpc-image-cnt"
-        >
-          <v-icon size="10">mdi-folder-multiple-image</v-icon>
-          <span>{{ props.post.post.images.length }}</span>
-        </div>
-      </div>
-      <div :title="card.title" class="tpc-title" @click="shareCard()">{{ card.title }}</div>
-    </div>
-    <div v-if="card.user !== null" class="tpc-mid">
-      <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
-    </div>
-    <div class="tpc-bottom">
-      <div class="tpc-tags">
-        <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
-          <v-icon size="10">mdi-lightbulb-on</v-icon>
-          <span>{{ reason.text }}</span>
-        </div>
-        <TpcTag
-          v-for="topic in card.topics"
-          :key="topic.id"
-          :tag="topic.name"
-          @click="toTopic(topic)"
-        />
-      </div>
-      <div v-if="card.data !== null" class="tpc-data">
-        <div :title="`浏览数：${card.data.view}`" class="tpc-info-item">
-          <v-icon size="12">mdi-eye</v-icon>
-          <span>{{ card.data.view }}</span>
-        </div>
-        <div
-          :class="{ collected: props.post.self_operation?.is_collected }"
-          :title="`收藏数：${card.data.mark}`"
-          class="tpc-info-item"
-        >
-          <v-icon size="12">mdi-star</v-icon>
-          <span>{{ card.data.mark }}</span>
-        </div>
-        <div :title="`回复数：${card.data.reply}`" class="tpc-info-item">
-          <v-icon size="12">mdi-comment</v-icon>
-          <span>{{ card.data.reply }}</span>
-        </div>
-        <div
-          :class="{ love: props.post.self_operation?.upvote_type ?? 0 > 0 }"
-          :title="`点赞数：${card.data.like}`"
-          class="tpc-info-item"
-        >
-          <v-icon size="12">mdi-thumb-up</v-icon>
-          <span>{{ card.data.like }}</span>
-        </div>
-        <div :title="`转发数：${card.data.forward}`" class="tpc-info-item">
-          <v-icon size="12">mdi-share-variant</v-icon>
-          <span>{{ card.data.forward }}</span>
-        </div>
-      </div>
-      <div class="tpc-data">
-        <div :title="`创建时间: ${card.meta.create_time}`" class="tpc-info-item">
-          <v-icon size="12">mdi-calendar-clock</v-icon>
-          <span>{{ card.meta.create_time }}</span>
-        </div>
-        <div
-          v-if="card.meta.update_time"
-          :title="`更新时间: ${card.meta.update_time}`"
-          class="tpc-info-item"
-        >
-          <v-icon size="12">mdi-calendar-edit</v-icon>
-          <span>{{ card.meta.update_time }}</span>
+        <div class="tpc-data">
+          <div :title="`创建时间: ${card.meta.create_time}`" class="tpc-info-item">
+            <v-icon size="12">mdi-calendar-clock</v-icon>
+            <span>{{ card.meta.create_time }}</span>
+          </div>
+          <div
+            v-if="card.meta.update_time"
+            :title="`更新时间: ${card.meta.update_time}`"
+            class="tpc-info-item"
+          >
+            <v-icon size="12">mdi-calendar-edit</v-icon>
+            <span>{{ card.meta.update_time }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -135,6 +135,8 @@ type TPostCardProps = {
   post: TGApp.BBS.Post.FullData;
   /** 是否开启选择模式 */
   selectMode?: boolean;
+  /** 是否是列表布局 */
+  listMode?: boolean;
 };
 type TPostCardEmits = {
   (e: "onSelected", v: string): void;
@@ -170,7 +172,7 @@ const route = useRoute();
 const router = useRouter();
 const { forumList } = storeToRefs(useBBSStore());
 
-const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false });
+const props = withDefaults(defineProps<TPostCardProps>(), { selectMode: false, listMode: false });
 const emits = defineEmits<TPostCardEmits>();
 
 const isSelected = ref<boolean>(false);
@@ -331,9 +333,18 @@ function onUserClick(): void {
   justify-content: space-between;
   border-radius: 4px;
   row-gap: 8px;
+  transition:
+    flex-direction 0s,
+    column-gap 0.3s ease,
+    row-gap 0.3s ease;
 
   &.select-mode {
     cursor: pointer;
+  }
+
+  &.list-mode {
+    flex-direction: row;
+    gap: 0 8px;
   }
 }
 
@@ -341,16 +352,20 @@ function onUserClick(): void {
   @include github-styles.github-card("dark");
 }
 
-.tpc-top {
+.tpc-body {
+  position: relative;
   display: flex;
-  overflow: hidden;
   width: 100%;
+  height: 100%;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  row-gap: 4px;
+  justify-content: space-between;
+  transition: flex 0.3s ease;
+
+  .list-mode & {
+    overflow: hidden;
+    height: 100%;
+    flex: 1.2;
+  }
 }
 
 .tpc-cover {
@@ -358,18 +373,23 @@ function onUserClick(): void {
   display: flex;
   overflow: hidden;
   width: 100%;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   aspect-ratio: 69 / 32;
   background: var(--common-shadow-2);
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
   cursor: pointer;
+  transition:
+    width 0.3s ease,
+    height 0.3s ease,
+    border-radius 0.3s ease;
 
   img {
     overflow: hidden;
     width: 100%;
     height: 100%;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
     object-fit: cover;
     object-position: center;
     transition: all 0.3s linear;
@@ -377,6 +397,12 @@ function onUserClick(): void {
     &:hover {
       transform: scale(1.2);
     }
+  }
+
+  .list-mode & {
+    height: 100%;
+    flex: 1;
+    border-radius: 4px 0 0 4px;
   }
 }
 
@@ -406,6 +432,13 @@ function onUserClick(): void {
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 18px;
+
+  .list-mode & {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-all;
+  }
 }
 
 .tpc-tags {
@@ -454,6 +487,14 @@ function onUserClick(): void {
     width: 20px;
     height: 20px;
     margin-right: 4px;
+  }
+
+  .list-mode & {
+    top: unset;
+    right: unset;
+    bottom: 0;
+    left: 0;
+    border-radius: 0 4px;
   }
 }
 
