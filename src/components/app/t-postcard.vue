@@ -32,7 +32,10 @@
         <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
       </div>
       <div class="tpc-bottom">
-        <div ref="tagsContainerEl" class="tpc-tags">
+        <div
+          ref="tagsContainerEl"
+          :class="['tpc-tags', { 'is-ready': !props.listMode || tagsReady }]"
+        >
           <div
             v-for="(reason, idx) in card.reasons"
             :key="`r-${idx}`"
@@ -50,8 +53,7 @@
           />
           <span
             v-if="props.listMode"
-            :class="{ 'tpc-tags-more--hidden': hiddenTopics.length === 0 }"
-            class="tpc-tags-more"
+            :class="['tpc-tags-more', { 'tpc-tags-more--hidden': hiddenTopics.length === 0 }]"
             @click.stop="toggleTagsMenu()"
           >
             <v-icon>mdi-dots-horizontal</v-icon>
@@ -207,7 +209,12 @@ const card = shallowRef<RenderCard>();
 const tagsContainerEl = ref<HTMLElement | null>(null);
 const showTagsMenu = ref<boolean>(false);
 const visibleTopicCount = ref<number>(Infinity);
-const lastTotalTopics = ref<number>(0);
+const tagsReady = ref<boolean>(false);
+const tagWidthCache = ref<Array<number>>([]);
+let tagsInited = false;
+let resizeObserver: ResizeObserver | null = null;
+let checkRafId: number | null = null;
+let prefixWidth = 0;
 
 const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.color;
@@ -252,8 +259,6 @@ function toggleTagsMenu(): void {
   }
 }
 
-let resizeObserver: ResizeObserver | null = null;
-
 function closeTagsMenuHandler(e: Event): void {
   if (e.type === "click") {
     const target = <HTMLElement>e.target;
@@ -262,35 +267,62 @@ function closeTagsMenuHandler(e: Event): void {
   showTagsMenu.value = false;
 }
 
-function checkTagsOverflow(): void {
+function measureAndCheck(): void {
   const container = tagsContainerEl.value;
-  if (!container || !props.listMode || !card.value) return;
-  const totalTopics = card.value.topics.length;
-  if (totalTopics !== lastTotalTopics.value) {
-    lastTotalTopics.value = totalTopics;
-    visibleTopicCount.value = Infinity;
-  }
-  if (visibleTopicCount.value !== Infinity) return;
-  const sw = container.scrollWidth;
-  const cw = container.clientWidth;
-  if (sw <= cw + 1) return;
+  if (!container || !card.value) return;
   const children = <Array<HTMLElement>>Array.from(container.children);
-  const GAP = 4;
-  const moreBtn = <HTMLElement | null>container.querySelector(".tpc-tags-more");
-  const moreWidth = moreBtn ? moreBtn.offsetWidth + GAP : 0;
-  const limit = cw - moreWidth;
-  let accWidth = 0;
-  let topicIdx = 0;
+  const widths: Array<number> = [];
+  let prefix = 0;
+  let foundTag = false;
   for (const child of children) {
-    const isTag = child.classList.contains("tag-label");
-    if (!isTag) break;
-    accWidth += child.offsetWidth + GAP;
-    if (accWidth > limit) break;
-    topicIdx++;
+    if (child.classList.contains("tpc-tags-more")) break;
+    if (child.classList.contains("tag-label")) {
+      foundTag = true;
+      widths.push(child.getBoundingClientRect().width);
+    } else if (!foundTag) {
+      prefix += child.getBoundingClientRect().width + 4;
+    }
   }
-  if (topicIdx < totalTopics) {
-    visibleTopicCount.value = Math.max(0, topicIdx);
+  tagWidthCache.value = widths;
+  prefixWidth = prefix;
+  calcVisibleCount();
+  tagsReady.value = true;
+}
+
+function calcVisibleCount(): void {
+  const container = tagsContainerEl.value;
+  if (!container || !card.value) return;
+  const totalTopics = card.value.topics.length;
+  const cw = container.clientWidth;
+  const moreBtn = <HTMLElement | null>container.querySelector(".tpc-tags-more");
+  const moreWidth = moreBtn ? moreBtn.getBoundingClientRect().width + 4 : 0;
+  const limit = cw - prefixWidth - moreWidth;
+  const widths = tagWidthCache.value;
+  if (widths.length !== totalTopics || totalTopics === 0) {
+    visibleTopicCount.value = Infinity;
+    return;
   }
+  let acc = 0;
+  let count = 0;
+  for (const w of widths) {
+    acc += w + 4;
+    if (acc > limit) break;
+    count++;
+  }
+  visibleTopicCount.value = count < totalTopics ? count : Infinity;
+}
+
+function checkTagsOverflow(): void {
+  if (!props.listMode || !card.value) return;
+  if (checkRafId !== null) cancelAnimationFrame(checkRafId);
+  checkRafId = requestAnimationFrame(() => {
+    checkRafId = null;
+    if (tagWidthCache.value.length === 0) {
+      measureAndCheck();
+    } else {
+      calcVisibleCount();
+    }
+  });
 }
 
 onMounted(async () => {
@@ -300,6 +332,10 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   resizeObserver = null;
+  if (checkRafId !== null) {
+    cancelAnimationFrame(checkRafId);
+    checkRafId = null;
+  }
   if (showTagsMenu.value) {
     document.removeEventListener("click", closeTagsMenuHandler);
     document.removeEventListener(TAGS_MENU_CLOSE_EVENT, onTagsMenuClose);
@@ -313,18 +349,28 @@ watch(
   async () => (card.value = getPostCard(props.post)),
 );
 
-let tagsInited = false;
 watch(
   () => card.value,
   async () => {
-    if (!props.listMode || tagsInited) return;
-    if (!card.value || card.value.topics.length === 0) return;
-    await nextTick();
-    if (!tagsContainerEl.value) return;
-    tagsInited = true;
-    resizeObserver = new ResizeObserver(checkTagsOverflow);
-    resizeObserver.observe(tagsContainerEl.value);
-    checkTagsOverflow();
+    if (!props.listMode) return;
+    if (!card.value) return;
+    if (card.value.topics.length === 0) {
+      tagsReady.value = true;
+      return;
+    }
+    if (!tagsInited) {
+      await nextTick();
+      if (!tagsContainerEl.value) return;
+      tagsInited = true;
+      resizeObserver = new ResizeObserver(checkTagsOverflow);
+      resizeObserver.observe(tagsContainerEl.value);
+      checkTagsOverflow();
+    } else {
+      tagWidthCache.value = [];
+      visibleTopicCount.value = Infinity;
+      await nextTick();
+      checkTagsOverflow();
+    }
   },
 );
 
@@ -390,7 +436,6 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
     let forumIcon = item.forum.icon;
     const findG = forumList.value.find((i) => i.game_id === item.post.game_id);
     if (findG) {
-      console.log(findG, item);
       const findF = findG.forums.find((i) => i.id === item.forum!.id);
       if (findF) forumIcon = findF.icon_pure;
     }
@@ -456,7 +501,6 @@ async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
   showTagsMenu.value = false;
   if (props.selectMode) return;
   const gid = props.post.post.game_id;
-  console.log(gid);
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
@@ -600,7 +644,18 @@ function onUserClick(): void {
   .list-mode & {
     position: relative;
     overflow: hidden;
+    width: 100%;
     flex-wrap: nowrap;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+
+    &.is-ready {
+      opacity: 1;
+    }
+
+    :deep(.tag-label) {
+      flex-shrink: 0;
+    }
   }
 }
 
@@ -614,6 +669,7 @@ function onUserClick(): void {
   color: var(--box-text-5);
   cursor: pointer;
   font-size: 14px;
+  transition: opacity 0.15s ease;
   user-select: none;
 
   &:hover {
@@ -621,8 +677,8 @@ function onUserClick(): void {
   }
 
   &--hidden {
+    opacity: 0;
     pointer-events: none;
-    visibility: hidden;
   }
 }
 
