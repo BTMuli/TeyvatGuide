@@ -69,6 +69,7 @@ watch(
 );
 
 async function loadNav(): Promise<void> {
+  if (props.gid <= 0) return;
   try {
     const resp = await apiHubReq.home(props.gid);
     if (resp.retcode !== 0) {
