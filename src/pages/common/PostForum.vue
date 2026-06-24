@@ -107,7 +107,7 @@
           label="同步刷新"
         />
         <v-btn-toggle
-          v-model="gridMode"
+          v-model="postGridMode"
           :divided="false"
           :mandatory="true"
           class="posts-view-conf"
@@ -124,9 +124,9 @@
       </div>
     </template>
   </v-app-bar>
-  <div :class="{ grid: gridMode }" class="posts-grid">
+  <div :class="{ grid: postGridMode }" class="posts-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :listMode="!gridMode" :post @onUserClick="handleUserClick" />
+      <TPostCard :listMode="!postGridMode" :post @onUserClick="handleUserClick" />
     </div>
   </div>
   <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" />
@@ -190,11 +190,10 @@ const search = ref<string>("");
 const showSearch = ref<boolean>(false);
 const curUid = ref<string>("");
 const showUser = ref<boolean>(false);
-const gridMode = ref<boolean>(false);
 
 const bbsStore = useBBSStore();
 const { gameList, forumList } = storeToRefs(bbsStore);
-const { incognito } = storeToRefs(useAppStore());
+const { incognito, postGridMode } = storeToRefs(useAppStore());
 const { cookie } = storeToRefs(useUserStore());
 
 const selectedForum = shallowRef<SortSelect>();
@@ -522,6 +521,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 }
 
 .posts-conf {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -531,7 +531,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 }
 
 .posts-view-conf {
-  height: 32px;
+  height: 36px;
 }
 
 .posts-grid {
@@ -541,7 +541,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   font-family: var(--font-title);
   gap: 8px;
   grid-auto-rows: auto;
-  grid-template-columns: repeat(2, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
 
   &.grid {
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));

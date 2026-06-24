@@ -115,7 +115,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
@@ -128,6 +127,7 @@ import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import TMiImg from "@comp/app/t-mi-img.vue";
 
 /** 帖子卡片参数 */
 type TPostCardProps = {
@@ -333,10 +333,6 @@ function onUserClick(): void {
   justify-content: space-between;
   border-radius: 4px;
   row-gap: 8px;
-  transition:
-    flex-direction 0s,
-    column-gap 0.3s ease,
-    row-gap 0.3s ease;
 
   &.select-mode {
     cursor: pointer;
@@ -364,7 +360,6 @@ function onUserClick(): void {
   .list-mode & {
     overflow: hidden;
     height: 100%;
-    flex: 1.2;
   }
 }
 
@@ -381,15 +376,11 @@ function onUserClick(): void {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   cursor: pointer;
-  transition:
-    width 0.3s ease,
-    height 0.3s ease,
-    border-radius 0.3s ease;
 
   img {
+    position: relative;
     overflow: hidden;
-    width: 100%;
-    height: 100%;
+    aspect-ratio: 69/32;
     object-fit: cover;
     object-position: center;
     transition: all 0.3s linear;
@@ -400,8 +391,8 @@ function onUserClick(): void {
   }
 
   .list-mode & {
-    height: 100%;
-    flex: 1;
+    width: fit-content;
+    height: 160px;
     border-radius: 4px 0 0 4px;
   }
 }
@@ -450,6 +441,16 @@ function onUserClick(): void {
   justify-content: flex-start;
   font-size: 12px;
   gap: 4px;
+  white-space: nowrap;
+
+  .list-mode & {
+    flex-wrap: nowrap;
+    overflow-x: hidden;
+
+    &:hover {
+      overflow-x: auto;
+    }
+  }
 }
 
 .tpc-reason {

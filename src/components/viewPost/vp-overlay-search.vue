@@ -8,24 +8,42 @@
           <span>分区：{{ label }}</span>
           <span>加载帖子：{{ results.length }}</span>
         </div>
-        <div class="tops-sort">
-          <v-select
-            v-model="sortType"
-            :disabled="load"
-            :items="sortOrderList"
-            density="compact"
-            item-title="text"
-            item-value="value"
-            label="排序"
+        <div class="tops-right">
+          <v-btn-toggle
+            v-model="gridMode"
+            :divided="false"
+            :mandatory="true"
+            class="tops-toggle"
+            color="var(--tgc-od-blue)"
             variant="outlined"
-          />
+          >
+            <v-btn :value="true" size="small" title="网格布局">
+              <v-icon size="16">mdi-view-grid</v-icon>
+            </v-btn>
+            <v-btn :value="false" size="small" title="列表布局">
+              <v-icon size="20">mdi-view-list</v-icon>
+            </v-btn>
+          </v-btn-toggle>
+          <div class="tops-sort">
+            <v-select
+              v-model="sortType"
+              :disabled="load"
+              :items="sortOrderList"
+              density="compact"
+              item-title="text"
+              item-value="value"
+              label="排序"
+              variant="outlined"
+            />
+          </div>
         </div>
       </div>
       <div class="tops-divider" />
-      <div ref="listRef" class="tops-list">
+      <div ref="listRef" :class="{ grid: gridMode }" class="tops-list">
         <TPostCard
           v-for="post in results"
           :key="post.post.post_id"
+          :listMode="!gridMode"
           :post
           class="tops-item"
           @onUserClick="toUserProfile"
@@ -42,6 +60,7 @@ import bbsEnum from "@enum/bbs.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import postReq from "@req/postReq.js";
 import useBBSStore from "@store/bbs.js";
+import useAppStore from "@store/app.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -64,6 +83,7 @@ const sortOrderList: ReadonlyArray<SortSelect<TGApp.BBS.Post.SearchSortTypeEnum>
 ].map(genSortItem);
 
 const { gameList } = storeToRefs(useBBSStore());
+const { postGridMode: gridMode } = storeToRefs(useAppStore());
 
 const listEl = useTemplateRef<HTMLElement>("listRef");
 const { isReachBottom } = useBoxReachBottom(listEl);
@@ -241,6 +261,18 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
   column-gap: 8px;
 }
 
+.tops-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  column-gap: 8px;
+}
+
+.tops-toggle {
+  height: 40px;
+}
+
 .tops-sort {
   width: 100px;
   height: 40px;
@@ -255,12 +287,17 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
 
 .tops-list {
   position: relative;
-  display: grid;
+  display: flex;
   width: 100%;
   box-sizing: border-box;
+  flex-direction: column;
   padding-right: 4px;
   gap: 8px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   overflow-y: auto;
+
+  &.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
 }
 </style>

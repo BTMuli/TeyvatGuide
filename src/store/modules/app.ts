@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.9.8
+ * @since Beta v0.10.5
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -61,6 +61,8 @@ const useAppStore = defineStore(
     const incognito = ref<boolean>(true);
     /** 帖子宽窄视图 */
     const postViewWide = ref<boolean>(true);
+    /** 帖子网格/列表视图 */
+    const postGridMode = ref<boolean>(true);
     /** 是否取消点赞 */
     const cancelLike = ref<boolean>(true);
     /** 关闭窗口时最小化到托盘 */
@@ -75,7 +77,7 @@ const useAppStore = defineStore(
 
     /**
      * 初始化应用状态
-     * @since Beta v0.9.1
+     * @since Beta v0.10.5
      * @remarks 用于首次运行或重置应用状态
      * @returns 无返回值
      */
@@ -93,6 +95,7 @@ const useAppStore = defineStore(
       imageQualityPercent.value = 10;
       incognito.value = true;
       postViewWide.value = true;
+      postGridMode.value = true;
       cancelLike.value = true;
       closeToTray.value = false;
       showFeedback.value = true;
@@ -152,6 +155,7 @@ const useAppStore = defineStore(
       imageQualityPercent,
       incognito,
       postViewWide,
+      postGridMode,
       cancelLike,
       closeToTray,
       showFeedback,
@@ -182,6 +186,7 @@ const useAppStore = defineStore(
           "incognito",
           "sidebar",
           "postViewWide",
+          "postGridMode",
           "cancelLike",
           "closeToTray",
           "showFeedback",

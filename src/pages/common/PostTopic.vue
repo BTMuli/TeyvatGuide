@@ -16,7 +16,31 @@
       </div>
     </template>
     <template #extension>
-      <TGameNav v-if="curGid !== 0" :gid="curGid" style="margin-left: 8px" />
+      <TGameNav :gid="disGid" style="margin-left: 8px" />
+      <div class="post-topic-conf">
+        <v-checkbox
+          v-model="syncRefresh"
+          class="post-sync-check"
+          density="compact"
+          hide-details
+          label="同步刷新"
+        />
+        <v-btn-toggle
+          v-model="postGridMode"
+          :divided="false"
+          :mandatory="true"
+          class="post-topic-view-conf"
+          color="var(--tgc-od-blue)"
+          variant="outlined"
+        >
+          <v-btn :value="true" size="small" title="网格布局">
+            <v-icon size="16">mdi-view-grid</v-icon>
+          </v-btn>
+          <v-btn :value="false" size="small" title="列表布局">
+            <v-icon size="20">mdi-view-list</v-icon>
+          </v-btn>
+        </v-btn-toggle>
+      </div>
     </template>
     <div class="post-topic-switch">
       <v-select
@@ -26,7 +50,7 @@
         :items="getGameList(topicInfo?.game_info_list)"
         class="post-switch-item"
         item-title="name"
-        label="分区"
+        :label="gidLabel"
         variant="outlined"
       >
         <template #selection="{ item }">
@@ -61,7 +85,7 @@
         class="post-switch-item"
         item-title="text"
         item-value="value"
-        label="排序"
+        :label="sortLabel"
         variant="outlined"
       />
       <v-text-field
@@ -87,13 +111,13 @@
       </v-btn>
     </div>
   </v-app-bar>
-  <div class="post-topic-grid">
+  <div :class="{ grid: postGridMode }" class="post-topic-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :post @onUserClick="handleUserClick" />
+      <TPostCard :listMode="!postGridMode" :post @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="curGid" :keyword="search" />
-  <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
+  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" />
+  <VpOverlayUser v-model="showUser" :gid="disGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
@@ -132,12 +156,16 @@ const route = useRoute();
 const router = useRouter();
 
 const { isReachBottom } = usePageReachBottom();
-const { sidebar } = storeToRefs(useAppStore());
+const { sidebar, postGridMode } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 
 const curGid = ref<number>(0);
+const disGid = ref<number>(0);
 const curSortType = ref<TGApp.BBS.Post.PostTopicSortTypeEnum>(bbsEnum.post.topicSortType.LATEST);
 const curTopic = ref<string>("");
+
+const gidLabel = ref<string>("分区");
+const sortLabel = ref<string>("排序");
 
 const search = ref<string>("");
 const showSearch = ref<boolean>(false);
@@ -146,6 +174,8 @@ const showUser = ref<boolean>(false);
 
 const isReq = ref<boolean>(false);
 const firstLoad = ref<boolean>(false);
+const syncRefresh = ref<boolean>(true);
+const hasPendingChange = ref<boolean>(false);
 const postRaw = shallowRef<PostMiniData>({ isLast: false, lastId: "", total: 0 });
 const topicInfo = shallowRef<TGApp.BBS.Topic.InfoRes>();
 const posts = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
@@ -172,6 +202,7 @@ onMounted(async () => {
   if (!gid || typeof gid !== "string") gid = "0";
   if (!topic || typeof topic !== "string") topic = "0";
   curGid.value = Number(gid);
+  disGid.value = Number(gid);
   curTopic.value = topic;
   await showLoading.start(`正在加载话题${topic}信息`);
   let info: TGApp.BBS.Topic.InfoResp | undefined;
@@ -207,23 +238,61 @@ watch(
   () => isReachBottom.value,
   async () => {
     if (!isReachBottom.value || !firstLoad.value) return;
-    await loadMore();
+    if (!syncRefresh.value && hasPendingChange.value) {
+      await freshPostData();
+      hasPendingChange.value = false;
+    } else {
+      await loadMore();
+    }
   },
 );
 watch(
   () => curGame.value,
   async () => {
-    if (curGame.value) curGid.value = curGame.value.id;
-    await freshPostData();
+    if (!curGame.value) return;
+    if (!firstLoad.value) return;
+    curGid.value = curGame.value.id;
+    if (syncRefresh.value) {
+      await freshPostData();
+      showSnackbar.success(`已将分区切换到 ${curGame.value.name}`);
+    } else {
+      hasPendingChange.value = true;
+    }
   },
 );
 watch(
   () => curSortType.value,
-  async () => await freshPostData(),
+  async () => {
+    if (syncRefresh.value) {
+      await freshPostData();
+      const sortLabel = getSortLabel(curSortType.value);
+      showSnackbar.success(`已将排序切换到 ${sortLabel}`);
+    } else {
+      hasPendingChange.value = true;
+    }
+  },
+);
+watch(
+  () => syncRefresh.value,
+  async (newVal, oldVal) => {
+    if (!syncRefresh.value) {
+      gidLabel.value = `分区-${curGame.value?.name ?? ""}`;
+      sortLabel.value = `排序-${getSortLabel(curSortType.value)}`;
+    }
+    if (syncRefresh.value) {
+      gidLabel.value = "分区";
+      sortLabel.value = "排序";
+    }
+    if (!oldVal && newVal && hasPendingChange.value) {
+      await freshPostData();
+    }
+  },
 );
 
 async function freshPostData(): Promise<void> {
   if (isReq.value) return;
+  hasPendingChange.value = false;
+  disGid.value = curGid.value;
   isReq.value = true;
   await showLoading.start(`正在加载话题${topicInfo.value?.topic.name}信息`);
   await router.push({
@@ -331,6 +400,11 @@ function getGameList(list: Array<TGApp.BBS.Topic.GameInfo> | undefined): Array<G
     const game = gameList.value.find((i) => i.id === item.id);
     return { ...item, icon: game?.app_icon };
   });
+}
+
+function getSortLabel(value: number): string {
+  const order = sortList.value.find((item) => item.value === value);
+  return order ? order.text : "";
 }
 
 function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
@@ -444,7 +518,24 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   font-family: var(--font-title);
   gap: 8px;
   grid-auto-rows: auto;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
+
+  &.grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+}
+
+.post-topic-conf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16px;
+  margin-left: auto;
+  column-gap: 8px;
+}
+
+.post-topic-view-conf {
+  height: 36px;
 }
 
 .select-item {
