@@ -20,8 +20,8 @@
       </div>
     </div>
     <div class="tpa-text">
-      <div>{{ props.data.nickname }}</div>
-      <div :title="authorDesc">{{ authorDesc }}</div>
+      <span>{{ props.data.nickname }}</span>
+      <span :title="authorDesc">{{ authorDesc }}</span>
     </div>
   </div>
 </template>
@@ -79,7 +79,6 @@ const levelColor = computed<string>(() => {
 .tpa-text :last-child {
   overflow: hidden;
   width: 100%;
-  max-width: 100%;
   height: 26px;
   border-top: 1px dotted var(--common-shadow-4);
   font-size: 14px;
