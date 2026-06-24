@@ -5,6 +5,13 @@
       <div class="posts-top">
         <img alt="posts" src="/UI/nav/posts.webp" />
         <span>帖子</span>
+        <v-checkbox
+          v-model="syncRefresh"
+          class="post-sync-check"
+          density="compact"
+          hide-details
+          label="同步刷新"
+        />
       </div>
     </template>
     <div class="posts-switch">
@@ -12,10 +19,10 @@
         v-model="curGid"
         :disabled="isReq"
         :items="sortGameList"
+        :label="gidLabel"
         class="post-switch-item"
         item-title="text"
         item-value="gid"
-        label="分区"
         variant="outlined"
       >
         <template #selection="{ item }">
@@ -41,9 +48,9 @@
         v-model="selectedForum"
         :disabled="isReq"
         :items="curForums"
+        :label="forumLabel"
         class="post-switch-item"
         item-title="text"
-        label="版块"
         variant="outlined"
       >
         <template #selection="{ item }">
@@ -68,10 +75,10 @@
         v-model="curSortType"
         :disabled="isReq"
         :items="sortOrderList"
+        :label="sortLabel"
         class="post-switch-item"
         item-title="text"
         item-value="value"
-        label="排序"
         variant="outlined"
       />
       <v-text-field
@@ -97,7 +104,7 @@
       </v-btn>
     </div>
     <template #extension>
-      <TGameNav :gid="curGid" style="margin-left: 8px" />
+      <TGameNav :gid="disGid" style="margin-left: 8px" />
     </template>
   </v-app-bar>
   <div class="posts-grid">
@@ -105,8 +112,8 @@
       <TPostCard :post @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="curGid" :keyword="search" />
-  <VpOverlayUser v-model="showUser" :gid="curGid" :uid="curUid" />
+  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" />
+  <VpOverlayUser v-model="showUser" :gid="disGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
 import TGameNav from "@comp/app/t-gameNav.vue";
@@ -146,10 +153,19 @@ const sortOrderList: ReadonlyArray<SortSelectForum> = [
 
 const route = useRoute();
 const router = useRouter();
+
 const curGid = ref<number>(2);
+const disGid = ref<number>(2);
 const curSortType = ref<TGApp.BBS.Post.ForumSortTypeEnum>(bbsEnum.post.forumSortType.LATEST_REPLY);
+
+const gidLabel = ref<string>("分区");
+const forumLabel = ref<string>("版块");
+const sortLabel = ref<string>("排序");
+
 const firstLoad = ref<boolean>(false);
 const isReq = ref<boolean>(false);
+const syncRefresh = ref<boolean>(true);
+const hasPendingChange = ref<boolean>(false);
 
 const { isReachBottom } = usePageReachBottom();
 
@@ -202,7 +218,12 @@ watch(
   () => isReachBottom.value,
   async () => {
     if (!isReachBottom.value || !firstLoad.value) return;
-    await loadMore();
+    if (!syncRefresh.value && hasPendingChange.value) {
+      await freshPostData();
+      hasPendingChange.value = false;
+    } else {
+      await loadMore();
+    }
   },
 );
 watch(
@@ -212,23 +233,51 @@ watch(
     const forumFind = curForums.value.find((item) => item.text === selectedForum.value?.text);
     if (!firstLoad.value) return;
     selectedForum.value = forumFind ?? curForums.value[0];
-    showSnackbar.success(`已将分区切换到 ${curGame.value?.text}`);
+    if (syncRefresh.value) {
+      disGid.value = curGid.value;
+      showSnackbar.success(`已将分区切换到 ${curGame.value?.text}`);
+    }
+    hasPendingChange.value = true;
   },
 );
 watch(
   () => selectedForum.value,
   async () => {
     if (!selectedForum.value) return;
-    await freshPostData();
-    showSnackbar.success(`已将版块切换到 ${selectedForum.value.text}`);
+    if (syncRefresh.value) {
+      await freshPostData();
+      showSnackbar.success(`已将版块切换到 ${selectedForum.value.text}`);
+    } else {
+      hasPendingChange.value = true;
+    }
   },
 );
 watch(
   () => curSortType.value,
   async () => {
-    await freshPostData();
-    const sortLabel = getSortLabel(curSortType.value);
-    showSnackbar.success(`已将排序切换到 ${sortLabel}`);
+    if (syncRefresh.value) {
+      await freshPostData();
+      const sortLabel = getSortLabel(curSortType.value);
+      showSnackbar.success(`已将排序切换到 ${sortLabel}`);
+    } else {
+      hasPendingChange.value = true;
+    }
+  },
+);
+watch(
+  () => syncRefresh.value,
+  async (newVal, oldVal) => {
+    if (!syncRefresh.value) {
+      gidLabel.value = `分区-${curGame.value?.text ?? ""}`;
+      forumLabel.value = `版块-${selectedForum.value?.text ?? ""}`;
+      sortLabel.value = `排序-${getSortLabel(curSortType.value)}`;
+    }
+    if (syncRefresh.value) {
+      refreshSelect();
+    }
+    if (!oldVal && newVal && hasPendingChange.value) {
+      await freshPostData();
+    }
   },
 );
 
@@ -287,8 +336,17 @@ async function getCurrentPosts(
   );
 }
 
+function refreshSelect(): void {
+  disGid.value = curGid.value;
+  gidLabel.value = "分区";
+  forumLabel.value = "版块";
+  sortLabel.value = "排序";
+}
+
 async function freshPostData(): Promise<void> {
   if (!selectedForum.value || isReq.value) return;
+  hasPendingChange.value = false;
+  refreshSelect();
   await router.replace({
     name: "酒馆",
     params: route.params,
@@ -405,7 +463,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   showUser.value = true;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .posts-top {
   display: flex;
   align-items: center;
@@ -436,6 +494,10 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 .post-switch-item {
   width: 250px;
   height: 50px;
+}
+
+.post-sync-check {
+  align-self: center;
 }
 
 .post-forum-btn {
