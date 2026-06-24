@@ -32,17 +32,44 @@
         <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
       </div>
       <div class="tpc-bottom">
-        <div class="tpc-tags">
-          <div v-for="(reason, idx) in card.reasons" :key="idx" class="tpc-reason" title="推荐理由">
+        <div ref="tagsContainerEl" class="tpc-tags">
+          <div
+            v-for="(reason, idx) in card.reasons"
+            :key="`r-${idx}`"
+            class="tpc-reason"
+            title="推荐理由"
+          >
             <v-icon size="10">mdi-lightbulb-on</v-icon>
             <span>{{ reason.text }}</span>
           </div>
           <TpcTag
-            v-for="topic in card.topics"
+            v-for="topic in visibleTopics"
             :key="topic.id"
             :tag="topic.name"
             @click="toTopic(topic)"
           />
+          <span
+            v-if="props.listMode"
+            :class="{ 'tpc-tags-more--hidden': hiddenTopics.length === 0 }"
+            class="tpc-tags-more"
+            @click.stop="toggleTagsMenu()"
+          >
+            <v-icon>mdi-dots-horizontal</v-icon>
+          </span>
+          <Teleport to="body">
+            <div
+              v-if="showTagsMenu && hiddenTopics.length > 0"
+              :style="popupStyle"
+              class="tpc-tags-popup"
+            >
+              <TpcTag
+                v-for="topic in hiddenTopics"
+                :key="topic.id"
+                :tag="topic.name"
+                @click="toTopic(topic)"
+              />
+            </div>
+          </Teleport>
         </div>
         <div v-if="card.data !== null" class="tpc-data">
           <div :title="`浏览数：${card.data.view}`" class="tpc-info-item">
@@ -125,7 +152,7 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import TMiImg from "@comp/app/t-mi-img.vue";
 
@@ -177,6 +204,10 @@ const emits = defineEmits<TPostCardEmits>();
 
 const isSelected = ref<boolean>(false);
 const card = shallowRef<RenderCard>();
+const tagsContainerEl = ref<HTMLElement | null>(null);
+const showTagsMenu = ref<boolean>(false);
+const visibleTopicCount = ref<number>(Infinity);
+const lastTotalTopics = ref<number>(0);
 
 const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.color;
@@ -187,12 +218,133 @@ const forumBg = computed<string>(() =>
 );
 const idBg = computed<string>(() => str2Color(`${props.post.post.post_id}`, 0));
 
-onMounted(async () => (card.value = getPostCard(props.post)));
+const visibleTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
+  if (!props.listMode || !card.value) return card.value?.topics ?? [];
+  return card.value.topics.slice(0, visibleTopicCount.value);
+});
+const hiddenTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
+  if (!props.listMode || !card.value) return [];
+  return card.value.topics.slice(visibleTopicCount.value);
+});
+
+const popupStyle = ref<Record<string, string>>({});
+
+function updatePopupStyle(): void {
+  const btn = <HTMLElement | null>tagsContainerEl.value?.querySelector(".tpc-tags-more");
+  if (!btn) return;
+  const rect = btn.getBoundingClientRect();
+  popupStyle.value = {
+    position: "fixed",
+    top: `${rect.bottom + 4}px`,
+    right: `${window.innerWidth - rect.right}px`,
+  };
+}
+
+const TAGS_MENU_CLOSE_EVENT = "t-postcard-tags-close";
+
+function toggleTagsMenu(): void {
+  if (showTagsMenu.value) {
+    showTagsMenu.value = false;
+  } else {
+    document.dispatchEvent(new CustomEvent(TAGS_MENU_CLOSE_EVENT));
+    updatePopupStyle();
+    showTagsMenu.value = true;
+  }
+}
+
+let resizeObserver: ResizeObserver | null = null;
+
+function closeTagsMenuHandler(e: Event): void {
+  if (e.type === "click") {
+    const target = <HTMLElement>e.target;
+    if (target.closest(".tpc-tags-more") || target.closest(".tpc-tags-popup")) return;
+  }
+  showTagsMenu.value = false;
+}
+
+function checkTagsOverflow(): void {
+  const container = tagsContainerEl.value;
+  if (!container || !props.listMode || !card.value) return;
+  const totalTopics = card.value.topics.length;
+  if (totalTopics !== lastTotalTopics.value) {
+    lastTotalTopics.value = totalTopics;
+    visibleTopicCount.value = Infinity;
+  }
+  if (visibleTopicCount.value !== Infinity) return;
+  const sw = container.scrollWidth;
+  const cw = container.clientWidth;
+  if (sw <= cw + 1) return;
+  const children = <Array<HTMLElement>>Array.from(container.children);
+  const GAP = 4;
+  const moreBtn = <HTMLElement | null>container.querySelector(".tpc-tags-more");
+  const moreWidth = moreBtn ? moreBtn.offsetWidth + GAP : 0;
+  const limit = cw - moreWidth;
+  let accWidth = 0;
+  let topicIdx = 0;
+  for (const child of children) {
+    const isTag = child.classList.contains("tag-label");
+    if (!isTag) break;
+    accWidth += child.offsetWidth + GAP;
+    if (accWidth > limit) break;
+    topicIdx++;
+  }
+  if (topicIdx < totalTopics) {
+    visibleTopicCount.value = Math.max(0, topicIdx);
+  }
+}
+
+onMounted(async () => {
+  card.value = getPostCard(props.post);
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
+  if (showTagsMenu.value) {
+    document.removeEventListener("click", closeTagsMenuHandler);
+    document.removeEventListener(TAGS_MENU_CLOSE_EVENT, onTagsMenuClose);
+    window.removeEventListener("scroll", closeTagsMenuHandler, true);
+    window.removeEventListener("resize", closeTagsMenuHandler);
+  }
+});
 
 watch(
   () => props.post,
   async () => (card.value = getPostCard(props.post)),
 );
+
+let tagsInited = false;
+watch(
+  () => card.value,
+  async () => {
+    if (!props.listMode || tagsInited) return;
+    if (!card.value || card.value.topics.length === 0) return;
+    await nextTick();
+    if (!tagsContainerEl.value) return;
+    tagsInited = true;
+    resizeObserver = new ResizeObserver(checkTagsOverflow);
+    resizeObserver.observe(tagsContainerEl.value);
+    checkTagsOverflow();
+  },
+);
+
+function onTagsMenuClose(): void {
+  showTagsMenu.value = false;
+}
+
+watch(showTagsMenu, (val) => {
+  if (val) {
+    document.addEventListener("click", closeTagsMenuHandler);
+    document.addEventListener(TAGS_MENU_CLOSE_EVENT, onTagsMenuClose);
+    window.addEventListener("scroll", closeTagsMenuHandler, true);
+    window.addEventListener("resize", closeTagsMenuHandler);
+  } else {
+    document.removeEventListener("click", closeTagsMenuHandler);
+    document.removeEventListener(TAGS_MENU_CLOSE_EVENT, onTagsMenuClose);
+    window.removeEventListener("scroll", closeTagsMenuHandler, true);
+    window.removeEventListener("resize", closeTagsMenuHandler);
+  }
+});
 
 function trySelect(): void {
   if (props.selectMode) {
@@ -301,8 +453,10 @@ async function shareCard(): Promise<void> {
 }
 
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
+  showTagsMenu.value = false;
   if (props.selectMode) return;
   const gid = props.post.post.game_id;
+  console.log(gid);
   await emit("active_deep_link", `router?path=/posts/topic/${gid}/${topic.id}`);
 }
 
@@ -444,13 +598,46 @@ function onUserClick(): void {
   white-space: nowrap;
 
   .list-mode & {
+    position: relative;
+    overflow: hidden;
     flex-wrap: nowrap;
-    overflow-x: hidden;
-
-    &:hover {
-      overflow-x: auto;
-    }
   }
+}
+
+.tpc-tags-more {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--box-bg-3);
+  color: var(--box-text-5);
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+
+  &:hover {
+    background: var(--box-bg-4);
+  }
+
+  &--hidden {
+    pointer-events: none;
+    visibility: hidden;
+  }
+}
+
+.tpc-tags-popup {
+  z-index: 10;
+  display: flex;
+  max-width: 240px;
+  flex-wrap: wrap;
+  padding: 4px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--app-page-bg);
+  box-shadow: 2px 2px 4px var(--common-shadow-2);
+  font-size: 12px;
+  gap: 4px;
 }
 
 .tpc-reason {
