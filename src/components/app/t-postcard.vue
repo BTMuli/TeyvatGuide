@@ -685,7 +685,7 @@ function onUserClick(): void {
 .tpc-tags-popup {
   z-index: 10;
   display: flex;
-  max-width: 240px;
+  max-width: 300px;
   flex-wrap: wrap;
   padding: 4px;
   border: 1px solid var(--common-shadow-1);
