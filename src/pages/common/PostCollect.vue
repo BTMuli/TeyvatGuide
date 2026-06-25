@@ -19,6 +19,21 @@
           <v-list-item :subtitle="item.desc" :title="item.title" v-bind="props" />
         </template>
       </v-select>
+      <v-btn-toggle
+        v-model="postGridMode"
+        :divided="false"
+        :mandatory="true"
+        class="pc-view-toggle"
+        color="var(--tgc-od-blue)"
+        variant="outlined"
+      >
+        <v-btn :value="true" size="small" title="网格布局">
+          <v-icon size="16">mdi-view-grid</v-icon>
+        </v-btn>
+        <v-btn :value="false" size="small" title="列表布局">
+          <v-icon size="20">mdi-view-list</v-icon>
+        </v-btn>
+      </v-btn-toggle>
     </div>
     <template #extension>
       <div class="pc-extension">
@@ -102,9 +117,10 @@
       </div>
     </template>
   </v-app-bar>
-  <div class="pc-posts">
+  <div :class="{ grid: postGridMode }" class="pc-posts">
     <div v-for="post in curPosts" :key="post.post.post_id">
       <TPostCard
+        :list-mode="!postGridMode"
         :post
         :select-mode="selectedMode"
         @onSelected="handleSelected"
@@ -124,6 +140,7 @@ import ToCollectPost from "@comp/pageCollect/to-collectPost.vue";
 import VpOverlayUser from "@comp/viewPost/vp-overlay-user.vue";
 import postReq from "@req/postReq.js";
 import TSUserCollection from "@Sqlm/userCollect.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { event } from "@tauri-apps/api";
 import type { UnlistenFn } from "@tauri-apps/api/event";
@@ -133,6 +150,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
 const { cookie, briefInfo } = storeToRefs(useUserStore());
+const { postGridMode } = storeToRefs(useAppStore());
 let collectListener: UnlistenFn | null = null;
 
 const curSelect = ref<string>("未分类");
@@ -505,6 +523,14 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   display: grid;
   gap: 8px;
   grid-auto-rows: auto;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
+
+  &.grid {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  }
+}
+
+.pc-view-toggle {
+  height: 40px;
 }
 </style>

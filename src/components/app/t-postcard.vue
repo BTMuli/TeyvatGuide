@@ -25,6 +25,19 @@
         <v-icon size="10">mdi-folder-multiple-image</v-icon>
         <span>{{ props.post.post.images.length }}</span>
       </div>
+      <div v-if="!(selectMode && !listMode)" class="tpc-info-id" @click="shareCard()">
+        <span>{{ props.post.post.post_id }}</span>
+        <template v-if="isDevEnv">
+          <span data-html2canvas-ignore>[{{ props.post.post.view_type }}]</span>
+        </template>
+      </div>
+      <v-checkbox-btn
+        v-if="props.selectMode"
+        v-model="isSelected"
+        class="tpc-select"
+        data-html2canvas-ignore
+        @click.stop="trySelect()"
+      />
     </div>
     <div class="tpc-body">
       <div :title="card.title" class="tpc-title" @click="shareCard()">{{ card.title }}</div>
@@ -127,19 +140,6 @@
     >
       <img v-if="card.forum.icon !== ''" :alt="card.forum.name" :src="card.forum.icon" />
       <span>{{ card.forum.name }}</span>
-    </div>
-    <v-checkbox-btn
-      v-if="props.selectMode"
-      v-model="isSelected"
-      class="tpc-select"
-      data-html2canvas-ignore
-      @click.stop="trySelect()"
-    />
-    <div v-else class="tpc-info-id" @click="shareCard()">
-      <span>{{ props.post.post.post_id }}</span>
-      <template v-if="isDevEnv">
-        <span data-html2canvas-ignore>[{{ props.post.post.view_type }}]</span>
-      </template>
     </div>
   </div>
 </template>
@@ -734,11 +734,9 @@ function onUserClick(): void {
   }
 
   .list-mode & {
-    top: unset;
+    top: 0;
     right: unset;
-    bottom: 0;
-    left: 0;
-    border-radius: 0 4px;
+    border-radius: 4px 0;
   }
 }
 
@@ -757,6 +755,13 @@ function onUserClick(): void {
   border-bottom-right-radius: 4px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--box-text-5);
+
+  .list-mode & {
+    right: 0;
+    left: unset;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 0;
+  }
 }
 
 .tpc-data {
@@ -819,6 +824,15 @@ function onUserClick(): void {
   column-gap: 2px;
   font-size: 12px;
   line-height: 18px;
+
+  .list-mode & {
+    right: unset;
+    left: 0;
+    padding-right: 8px;
+    padding-left: 4px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 12px;
+  }
 }
 
 .tpc-status {
@@ -861,6 +875,7 @@ function onUserClick(): void {
 
 .tpc-info-id {
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 0;
   display: flex;
@@ -878,5 +893,13 @@ function onUserClick(): void {
   cursor: pointer;
   font-size: 12px;
   text-shadow: 0 0 4px var(--tgc-dark-1);
+
+  .list-mode & {
+    top: unset;
+    right: 0;
+    bottom: 0;
+    left: unset;
+    border-radius: 4px 0 0;
+  }
 }
 </style>
