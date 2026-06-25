@@ -498,7 +498,7 @@ async function toAct(): Promise<void> {
     showSnackbar.error(`未知链接:${link}`, 3000);
     return;
   }
-  await TGClient.open("web_act", link);
+  await TGClient.open("web_act_thin", link);
 }
 
 function handleUser(user: TGApp.BBS.Post.User): void {
