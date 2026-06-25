@@ -292,7 +292,7 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
   box-sizing: border-box;
   flex-direction: column;
   padding-right: 4px;
-  gap: 8px;
+  gap: 12px;
   overflow-y: auto;
 
   &.grid {

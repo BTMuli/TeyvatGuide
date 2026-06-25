@@ -18,6 +18,15 @@
         </div>
       </div>
       <div
+        v-if="card.forum !== null && card.forum.name !== ''"
+        :title="`频道: ${card.forum.name}`"
+        class="tpc-forum"
+        @click="toForum(card.forum)"
+      >
+        <img v-if="card.forum.icon !== ''" :alt="card.forum.name" :src="card.forum.icon" />
+        <span>{{ card.forum.name }}</span>
+      </div>
+      <div
         v-else-if="props.post.post.images.length > 1"
         :title="`图片数：${props.post.post.images.length}`"
         class="tpc-image-cnt"
@@ -131,15 +140,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <div
-      v-if="card.forum !== null && card.forum.name !== ''"
-      :title="`频道: ${card.forum.name}`"
-      class="tpc-forum"
-      @click="toForum(card.forum)"
-    >
-      <img v-if="card.forum.icon !== ''" :alt="card.forum.name" :src="card.forum.icon" />
-      <span>{{ card.forum.name }}</span>
     </div>
   </div>
 </template>
@@ -722,7 +722,7 @@ function onUserClick(): void {
   background: v-bind(forumBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 4px;
   border-top-right-radius: 4px;
-  box-shadow: 0 0 10px var(--tgc-dark-1);
+  box-shadow: 0 0 10px var(--tgc-dark-2);
   color: var(--tgc-white-1);
   cursor: pointer;
   text-shadow: 0 0 4px var(--tgc-dark-1);
@@ -736,7 +736,8 @@ function onUserClick(): void {
   .list-mode & {
     top: 0;
     right: unset;
-    border-radius: 4px 0;
+    left: 0;
+    border-radius: 0 0 4px;
   }
 }
 

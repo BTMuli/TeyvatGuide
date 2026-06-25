@@ -539,7 +539,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   display: grid;
   width: 100%;
   font-family: var(--font-title);
-  gap: 8px;
+  gap: 12px;
   grid-auto-rows: auto;
   grid-template-columns: repeat(auto-fill, minmax(640px, 1fr));
 

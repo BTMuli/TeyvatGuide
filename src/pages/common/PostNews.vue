@@ -295,7 +295,7 @@ async function searchPost(): Promise<void> {
 .pn-grid {
   display: grid;
   font-family: var(--font-title);
-  gap: 8px;
+  gap: 12px;
   grid-auto-rows: auto;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
 }
