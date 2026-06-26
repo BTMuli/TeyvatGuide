@@ -3,7 +3,8 @@
   <TOverlay v-model="visible" :outer-close="outerClose" blur-val="10px">
     <div class="tpoi-box">
       <div
-        :class="{ 'tpoi-top-scroll': !isDragMode }"
+        ref="VpOiTopRef"
+        :style="containerStyle"
         class="tpoi-top"
         @click="onBoxClick"
         @mousedown="onBoxMouseDown"
@@ -12,18 +13,19 @@
         @wheel="onWheel"
       >
         <img
-          ref="VpOiRef"
+          ref="VpOiImgRef"
           :draggable="false"
           :src="localLink"
           :style="imgStyle"
           alt="图片"
           @click="onImgClick"
+          @load="onImgLoad"
           @mousedown="onImgMouseDown"
           @mousemove="onImgMouseMove"
           @mouseup="onImgMouseUp"
         />
         <div :class="showScaleHint ? 'show' : 'hide'" class="tpoi-scale-hint">
-          {{ Math.round(scale * 100) }}%
+          {{ Math.round(displayScale * 100) }}%
         </div>
       </div>
       <div class="tpoi-bottom">
@@ -45,7 +47,7 @@
             </span>
             <span class="tpoi-info-item">
               <span>缩放：</span>
-              <span>{{ Math.round(scale * 100) }}%</span>
+              <span>{{ Math.round(displayScale * 100) }}%</span>
             </span>
           </div>
         </template>
@@ -68,7 +70,7 @@
             </span>
             <span class="tpoi-info-item">
               <span>缩放：</span>
-              <span>{{ Math.round(scale * 100) }}%</span>
+              <span>{{ Math.round(displayScale * 100) }}%</span>
             </span>
           </div>
         </template>
@@ -136,51 +138,83 @@ const isDragMode = ref<boolean>(false);
 const hasDragged = ref<boolean>(false);
 const showScaleHint = ref<boolean>(false);
 const outerClose = ref<boolean>(true);
+const isResetting = ref<boolean>(false);
+const fitScale = ref<number>(1);
+const containerHeight = ref<string>("");
+const containerWidth = ref<string>("");
 
 const buffer = shallowRef<ArrayBuffer | null>(null);
 const imgPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
 const clickPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
 const dragPos = shallowRef<VpoiPos>({ x: 0, y: 0 });
 const imgOriSize = shallowRef<VpoiSize>({ width: 0, height: 0 });
-const imgEl = useTemplateRef<HTMLImageElement>("VpOiRef");
+const containerEl = useTemplateRef<HTMLDivElement>("VpOiTopRef");
+const imgEl = useTemplateRef<HTMLImageElement>("VpOiImgRef");
 
 const oriLink = computed<string>(() => miniImgUrl());
 const showCopy = computed<boolean>(() => FMT_ARR.includes(format.value.toLowerCase()));
-const imgStyle = computed<StyleValue>(() => {
-  const baseStyle: Array<StyleValue> = [
-    `transform: translate(${imgPos.value.x}px, ${imgPos.value.y}px) scale(${scale.value});`,
-    "transformOrigin: center center;",
-    `transition: ${isDragging.value ? "none" : "transform 0.3s ease"};`,
-    `cursor: ${isDragMode.value ? (isDragging.value ? "grabbing" : "grab") : "zoom-in"};`,
-  ];
-  if (isDragMode.value && imgOriSize.value.width > 0 && imgOriSize.value.height > 0) {
-    baseStyle.push(
-      `width: ${imgOriSize.value.width}px;`,
-      `height: ${imgOriSize.value.height}px;`,
-      "maxWidth: none;",
-      "maxHeight: none;",
-    );
+const containerStyle = computed<StyleValue>(() => {
+  const style: Record<string, string> = {
+    overflow: isDragMode.value ? "hidden" : "auto",
+  };
+  if (containerWidth.value) {
+    style.width = containerWidth.value;
   }
-  return baseStyle;
+  if (containerHeight.value) {
+    style.height = containerHeight.value;
+  }
+  return style;
+});
+
+const displayScale = computed<number>(() => {
+  if (isDragMode.value) return scale.value;
+  if (!containerEl.value || imgOriSize.value.width === 0) return 1;
+  return containerEl.value.getBoundingClientRect().width / imgOriSize.value.width;
+});
+const imgStyle = computed<StyleValue>(() => {
+  if (!isDragMode.value) {
+    return {
+      display: "block",
+      width: "100%",
+      height: "auto",
+      borderRadius: "4px",
+      userSelect: "none",
+      cursor: "zoom-in",
+    };
+  }
+  return [
+    `transform: translate(${imgPos.value.x}px, ${imgPos.value.y}px) scale(${scale.value});`,
+    "transformOrigin: 0 0;",
+    `transition: ${isDragging.value ? "none" : "transform 0.3s ease"};`,
+    `cursor: ${isDragging.value ? "grabbing" : "grab"};`,
+    `width: ${imgOriSize.value.width}px;`,
+    `height: ${imgOriSize.value.height}px;`,
+    "position: absolute;",
+    "left: 0;",
+    "top: 0;",
+    "border-radius: 4px;",
+    "user-select: none;",
+  ];
 });
 
 watch(
   () => visible.value,
-  (newVal) => {
-    if (!newVal) {
-      if (scaleHintTimer !== null) {
-        clearTimeout(scaleHintTimer);
-        scaleHintTimer = null;
-      }
-      scale.value = 1;
-      imgPos.value = { x: 0, y: 0 };
-      dragPos.value = { x: 0, y: 0 };
-      isDragging.value = false;
-      isDragMode.value = false;
-      hasDragged.value = false;
-      showScaleHint.value = false;
-      outerClose.value = true;
+  () => {
+    if (visible.value) return;
+    if (scaleHintTimer !== null) {
+      clearTimeout(scaleHintTimer);
+      scaleHintTimer = null;
     }
+    scale.value = fitScale.value;
+    imgPos.value = { x: 0, y: 0 };
+    dragPos.value = { x: 0, y: 0 };
+    isDragging.value = false;
+    isDragMode.value = false;
+    hasDragged.value = false;
+    showScaleHint.value = false;
+    outerClose.value = true;
+    containerWidth.value = "";
+    containerHeight.value = "";
   },
 );
 
@@ -215,6 +249,17 @@ function getImgOriSize(): VpoiSize {
   return { width: 0, height: 0 };
 }
 
+function onImgLoad(): void {
+  const size = getImgOriSize();
+  imgOriSize.value = size;
+  if (containerEl.value && size.width > 0) {
+    const fitS = containerEl.value.clientWidth / size.width;
+    fitScale.value = fitS;
+    scale.value = fitS;
+    imgPos.value = { x: 0, y: 0 };
+  }
+}
+
 function miniImgUrl(): string {
   const url =
     typeof props.image.insert.image === "string"
@@ -224,27 +269,113 @@ function miniImgUrl(): string {
   return `${link.origin}${link.pathname}`;
 }
 
-function resetTransform(): void {
-  scale.value = 1;
-  imgPos.value = { x: 0, y: 0 };
-  dragPos.value = { x: 0, y: 0 };
-  imgOriSize.value = { width: 0, height: 0 };
-  isDragMode.value = false;
+function triggerScaleHint(): void {
+  showScaleHint.value = true;
+  if (!scaleHintPending) {
+    scaleHintPending = true;
+    if (scaleHintTimer !== null) {
+      clearTimeout(scaleHintTimer);
+    }
+    scaleHintTimer = window.setTimeout(() => {
+      showScaleHint.value = false;
+      scaleHintTimer = null;
+      scaleHintPending = false;
+    }, SCALE_HINT_DURATION);
+  }
+}
+
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+async function resetTransform(): Promise<void> {
+  if (!containerEl.value || !imgEl.value || imgOriSize.value.width === 0 || isResetting.value) {
+    isDragMode.value = false;
+    return;
+  }
+  isResetting.value = true;
+  const fitS = containerEl.value.clientWidth / imgOriSize.value.width;
+  const targetScrollTop = (-imgPos.value.y / scale.value) * fitS;
+  fitScale.value = fitS;
   hasDragged.value = false;
-}
-
-function enterDragMode(): void {
-  isDragMode.value = true;
-  imgOriSize.value = getImgOriSize();
-  scale.value = 1;
+  triggerScaleHint();
+  const startScale = scale.value;
+  const visibleTopImgCoord = -imgPos.value.y / startScale;
+  const duration = 300;
+  const startTime = performance.now();
+  isDragging.value = true;
+  await new Promise<void>((resolve) => {
+    const animate = (currentTime: number): void => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOutCubic(progress);
+      const currentScale = startScale + (fitS - startScale) * eased;
+      const currentY = -visibleTopImgCoord * currentScale;
+      if (imgEl.value) {
+        imgEl.value.style.transform = `translate(0px, ${currentY}px) scale(${currentScale})`;
+      }
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        resolve();
+      }
+    };
+    requestAnimationFrame(animate);
+  });
+  isDragging.value = false;
+  isDragMode.value = false;
+  isResetting.value = false;
+  containerWidth.value = "";
+  containerHeight.value = "";
+  scale.value = fitScale.value;
   imgPos.value = { x: 0, y: 0 };
-  showOri.value = true;
+  await nextTick();
+  if (containerEl.value) {
+    containerEl.value.scrollTop = targetScrollTop;
+  }
 }
 
-function handleClick(): void {
+function enterDragMode(event?: MouseEvent): void {
+  if (!containerEl.value || !imgEl.value || imgOriSize.value.width === 0 || isResetting.value)
+    return;
+  const iRectBefore = imgEl.value.getBoundingClientRect();
+  const cRect = containerEl.value.getBoundingClientRect();
+  const currentScale = fitScale.value;
+  const scrollY = containerEl.value.scrollTop;
+  containerWidth.value = `${cRect.width}px`;
+  containerHeight.value = `${cRect.height}px`;
+  isDragMode.value = true;
+  scale.value = currentScale;
+  nextTick(() => {
+    if (!imgEl.value || !containerEl.value) return;
+    containerEl.value.scrollTop = 0;
+    imgPos.value = { x: 0, y: -scrollY };
+    if (event && currentScale > 0) {
+      const imgX = (event.clientX - iRectBefore.left) / currentScale;
+      const imgY = (event.clientY - iRectBefore.top) / currentScale;
+      const cMouseX = event.clientX - cRect.left - containerEl.value.clientLeft;
+      const cMouseY = event.clientY - cRect.top - containerEl.value.clientTop;
+      isDragging.value = true;
+      imgPos.value = {
+        x: cMouseX - imgX,
+        y: cMouseY - imgY,
+      };
+      requestAnimationFrame(() => {
+        isDragging.value = false;
+        scale.value = 1;
+        triggerScaleHint();
+      });
+    } else {
+      scale.value = 1;
+      triggerScaleHint();
+    }
+  });
+}
+
+function handleClick(event?: MouseEvent): void {
   if (hasDragged.value) return;
   if (!isDragMode.value) {
-    enterDragMode();
+    enterDragMode(event);
   } else {
     resetTransform();
   }
@@ -252,7 +383,7 @@ function handleClick(): void {
 
 function onBoxClick(event: MouseEvent): void {
   if (event.button !== 0) return;
-  handleClick();
+  handleClick(event);
 }
 
 function onBoxMouseDown(event: MouseEvent): void {
@@ -319,9 +450,9 @@ async function onImgClick(event: MouseEvent): Promise<void> {
       hasDragged.value = false;
       return;
     }
-    enterDragMode();
+    enterDragMode(event);
   } else if (!hasDragged.value && !wasDragging) {
-    resetTransform();
+    await resetTransform();
   }
   hasDragged.value = false;
 }
@@ -364,29 +495,20 @@ function onWheel(event: WheelEvent): void {
   const delta = event.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
   const newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale.value + delta));
   if (newScale !== scale.value) {
-    const rect = imgEl.value?.getBoundingClientRect();
-    if (!rect) return;
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    const imgX = (mouseX - imgPos.value.x) / scale.value;
-    const imgY = (mouseY - imgPos.value.y) / scale.value;
+    const cRect = containerEl.value?.getBoundingClientRect();
+    if (!cRect || !containerEl.value) return;
+    const borderLeft = containerEl.value.clientLeft;
+    const borderTop = containerEl.value.clientTop;
+    const cMouseX = event.clientX - cRect.left - borderLeft;
+    const cMouseY = event.clientY - cRect.top - borderTop;
+    const imgX = (cMouseX - imgPos.value.x) / scale.value;
+    const imgY = (cMouseY - imgPos.value.y) / scale.value;
     imgPos.value = {
-      x: mouseX - imgX * newScale,
-      y: mouseY - imgY * newScale,
+      x: cMouseX - imgX * newScale,
+      y: cMouseY - imgY * newScale,
     };
     scale.value = newScale;
-    showScaleHint.value = true;
-    if (!scaleHintPending) {
-      scaleHintPending = true;
-      if (scaleHintTimer !== null) {
-        clearTimeout(scaleHintTimer);
-      }
-      scaleHintTimer = window.setTimeout(() => {
-        showScaleHint.value = false;
-        scaleHintTimer = null;
-        scaleHintPending = false;
-      }, SCALE_HINT_DURATION);
-    }
+    triggerScaleHint();
   }
 }
 
@@ -462,37 +584,18 @@ async function onDownload(): Promise<void> {
 
 .tpoi-top {
   position: relative;
-  display: flex;
   overflow: hidden;
   width: 100%;
   max-height: 70%;
   box-sizing: border-box;
-  align-items: flex-start;
-  justify-content: center;
   border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
   background: v-bind(bgColor); /* stylelint-disable-line value-keyword-case */
   user-select: none;
 }
 
-.tpoi-top-scroll {
-  overflow: auto;
-}
-
-.tpoi-top:not(.tpoi-top-scroll) {
-  overflow: hidden;
-  cursor: grab;
-}
-
-.tpoi-top:not(.tpoi-top-scroll):active {
-  cursor: grabbing;
-}
-
 .tpoi-top img {
-  max-width: 100%;
-  max-height: 100%;
   border-radius: 4px;
-  object-fit: contain;
   user-select: none;
 }
 
