@@ -49,7 +49,9 @@
       />
     </div>
     <div class="tpc-body">
-      <div :title="card.title" class="tpc-title" @click="shareCard()">{{ card.title }}</div>
+      <div :title="card.title" class="tpc-title" @click="shareCard()">
+        <TpTitle :text="card.title" :single-line="listMode" />
+      </div>
       <div v-if="card.user !== null" class="tpc-mid">
         <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
       </div>
@@ -157,6 +159,7 @@ import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import TMiImg from "@comp/app/t-mi-img.vue";
+import TpTitle from "@comp/viewPost/tp-title.vue";
 
 /** 帖子卡片参数 */
 type TPostCardProps = {

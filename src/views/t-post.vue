@@ -68,7 +68,7 @@
     <div class="tp-post-divider" />
     <div class="tp-post-title" @click="toPost()">
       <span v-if="postData.post.post_status.is_official" class="mpt-official">官</span>
-      <span>{{ postData.post.subject }}</span>
+      <TpTitle :text="postData.post.subject" />
     </div>
     <!-- 一些附加信息，比如 topic、collection 等 -->
     <div class="tp-post-extra">
@@ -171,6 +171,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import TpParser from "@comp/viewPost/tp-parser.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
+import TpTitle from "@comp/viewPost/tp-title.vue";
 import VpBtnCollect from "@comp/viewPost/vp-btn-collect.vue";
 import VpBtnReply from "@comp/viewPost/vp-btn-reply.vue";
 import VpOverlayCollection from "@comp/viewPost/vp-overlay-collection.vue";
