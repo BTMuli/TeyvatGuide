@@ -1,0 +1,224 @@
+{
+  "1": {
+    "property_type": 1,
+    "name": "基础生命值",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2000.png",
+    "filter_name": "基础生命值"
+  },
+  "2": {
+    "property_type": 2,
+    "name": "生命值",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2000.png",
+    "filter_name": "生命值"
+  },
+  "20": {
+    "property_type": 20,
+    "name": "暴击率",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_20.png",
+    "filter_name": "暴击率"
+  },
+  "2000": {
+    "property_type": 2000,
+    "name": "生命值上限",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2000.png",
+    "filter_name": "生命值上限"
+  },
+  "2001": {
+    "property_type": 2001,
+    "name": "攻击力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2001.png",
+    "filter_name": "攻击力"
+  },
+  "2002": {
+    "property_type": 2002,
+    "name": "防御力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2002.png",
+    "filter_name": "防御力"
+  },
+  "22": {
+    "property_type": 22,
+    "name": "暴击伤害",
+    "icon": "",
+    "filter_name": "暴击伤害"
+  },
+  "23": {
+    "property_type": 23,
+    "name": "元素充能效率",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_23.png",
+    "filter_name": "元素充能效率"
+  },
+  "26": {
+    "property_type": 26,
+    "name": "治疗加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_26.png",
+    "filter_name": "治疗加成"
+  },
+  "27": {
+    "property_type": 27,
+    "name": "受治疗加成",
+    "icon": "",
+    "filter_name": "受治疗加成"
+  },
+  "28": {
+    "property_type": 28,
+    "name": "元素精通",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_28.png",
+    "filter_name": "元素精通"
+  },
+  "29": {
+    "property_type": 29,
+    "name": "物理抗性",
+    "icon": "",
+    "filter_name": "物理抗性"
+  },
+  "3": {
+    "property_type": 3,
+    "name": "生命值",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2000.png",
+    "filter_name": "生命值百分比"
+  },
+  "30": {
+    "property_type": 30,
+    "name": "物理伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_30.png",
+    "filter_name": "物理伤害加成"
+  },
+  "4": {
+    "property_type": 4,
+    "name": "基础攻击力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2001.png",
+    "filter_name": "基础攻击力"
+  },
+  "40": {
+    "property_type": 40,
+    "name": "火元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_40.png",
+    "filter_name": "火元素伤害加成"
+  },
+  "41": {
+    "property_type": 41,
+    "name": "雷元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_41.png",
+    "filter_name": "雷元素伤害加成"
+  },
+  "42": {
+    "property_type": 42,
+    "name": "水元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_42.png",
+    "filter_name": "水元素伤害加成"
+  },
+  "43": {
+    "property_type": 43,
+    "name": "草元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_43.png",
+    "filter_name": "草元素伤害加成"
+  },
+  "44": {
+    "property_type": 44,
+    "name": "风元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_44.png",
+    "filter_name": "风元素伤害加成"
+  },
+  "45": {
+    "property_type": 45,
+    "name": "岩元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_45.png",
+    "filter_name": "岩元素伤害加成"
+  },
+  "46": {
+    "property_type": 46,
+    "name": "冰元素伤害加成",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_46.png",
+    "filter_name": "冰元素伤害加成"
+  },
+  "5": {
+    "property_type": 5,
+    "name": "攻击力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2001.png",
+    "filter_name": "攻击力"
+  },
+  "50": {
+    "property_type": 50,
+    "name": "火元素抗性",
+    "icon": "",
+    "filter_name": "火元素抗性"
+  },
+  "51": {
+    "property_type": 51,
+    "name": "雷元素抗性",
+    "icon": "",
+    "filter_name": "雷元素抗性"
+  },
+  "52": {
+    "property_type": 52,
+    "name": "水元素抗性",
+    "icon": "",
+    "filter_name": "水元素抗性"
+  },
+  "53": {
+    "property_type": 53,
+    "name": "草元素抗性",
+    "icon": "",
+    "filter_name": "草元素抗性"
+  },
+  "54": {
+    "property_type": 54,
+    "name": "风元素抗性",
+    "icon": "",
+    "filter_name": "风元素抗性"
+  },
+  "55": {
+    "property_type": 55,
+    "name": "岩元素抗性",
+    "icon": "",
+    "filter_name": "岩元素抗性"
+  },
+  "56": {
+    "property_type": 56,
+    "name": "冰元素抗性",
+    "icon": "",
+    "filter_name": "冰元素抗性"
+  },
+  "6": {
+    "property_type": 6,
+    "name": "攻击力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2001.png",
+    "filter_name": "攻击力百分比"
+  },
+  "7": {
+    "property_type": 7,
+    "name": "基础防御力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2002.png",
+    "filter_name": "基础防御力"
+  },
+  "8": {
+    "property_type": 8,
+    "name": "防御力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2002.png",
+    "filter_name": "防御力"
+  },
+  "80": {
+    "property_type": 80,
+    "name": "冷却缩减",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_80.png",
+    "filter_name": "冷却缩减"
+  },
+  "81": {
+    "property_type": 81,
+    "name": "护盾强效",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_81.png",
+    "filter_name": "护盾强效"
+  },
+  "9": {
+    "property_type": 9,
+    "name": "防御力",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_2002.png",
+    "filter_name": "防御力百分比"
+  },
+  "999999": {
+    "property_type": 999999,
+    "name": "体力上限",
+    "icon": "https://act-webstatic.mihoyo.com/game_record/genshin/avatar_prop/avatar_prop_99999.png",
+    "filter_name": "体力上限"
+  }
+}
