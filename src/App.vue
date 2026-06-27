@@ -24,6 +24,8 @@ import TGSqlite from "@Sql/index.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
+import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
+import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
@@ -212,39 +214,82 @@ async function loadYaeAchi(uid: string, data: TGApp.Plugins.Yae.AchiListRes): Pr
 }
 
 /**
- * 导入材料
- * @param {string} uid
+ * 导入背包数据
+ * @param {string} uid - 存档UID
  * @param {TGApp.Plugins.Yae.BagListRes} data - 背包数据
  * @returns {Promise<void>}
  */
 async function loadYaeBag(uid: string, data: TGApp.Plugins.Yae.BagListRes): Promise<void> {
   const listM = data.filter((i) => i.kind === "material");
-  // TODO: 接受武器&圣遗物数据处理
   const listW = data.filter((i) => i.kind === "weapon");
   const listR = data.filter((i) => i.kind === "reliquary");
   await TGLogger.Info(`[App][loadYaeBag] 接收到 ${uid} 的背包数据`);
   await TGLogger.Info(
     `[App][loadYaeBag] 材料：${listM.length},武器：${listW.length},圣遗物：${listR.length}`,
   );
-  await showLoading.start("正在导入材料数据", `UID:${uid},数量:${listM.length}`);
+  await showLoading.start("正在导入背包数据", `UID:${uid}`);
   try {
-    const now = new Date();
-    const skip = await TSUserBagMaterial.saveYaeData(Number(uid), listM);
-    const cost = new Date().getTime() - now.getTime();
-    await TGLogger.Info(`[App][loadYaeBag] Skip: ${skip}`);
-    if (skip === 0) {
-      showSnackbar.success(`成功导入 ${listM.length} 条数据，耗时 ${Math.floor(cost / 1000)}s`);
-    } else if (skip === listM.length) {
-      showSnackbar.success(`未检测到数据更新，耗时 ${Math.floor(cost / 1000)}s`);
-    } else {
-      showSnackbar.success(
-        `成功更新 ${listM.length - skip} 条数据，耗时 ${Math.floor(cost / 1000)}s`,
-      );
-    }
+    await showLoading.update(`导入${uid}的${listM.length}条材料数据`);
+    await loadYaeBagMaterial(uid, listM);
+    await showLoading.update(`导入${uid}的${listW.length}条武器数据`);
+    await loadYaeBagWeapon(uid, listW);
+    await showLoading.update(`导入${uid}的${listR.length}条圣遗物数据`);
+    await loadYaeBagRelic(uid, listR);
   } catch (e) {
     console.error(e);
-    await TGLogger.Error(`[App][loadYaeBag] 导入材料失败：${e}`);
+    await TGLogger.Error(`[App][loadYaeBag] 导入背包数据失败：${e}`);
   }
+}
+
+/**
+ * 导入背包材料数据
+ * @param {string} uid - 存档UID
+ * @param {Array<TGApp.Plugins.Yae.BagItemMaterial>} list - 材料数据列表
+ * @returns {Promise<void>}
+ */
+async function loadYaeBagMaterial(
+  uid: string,
+  list: Array<TGApp.Plugins.Yae.BagItemMaterial>,
+): Promise<void> {
+  const skip = await TSUserBagMaterial.saveYaeData(Number(uid), list);
+  await TGLogger.Info(`[App][loadYaeBagMaterial] UID:${uid}, Skip:${skip}, Total:${list.length}`);
+  showSnackbar.success(`成功导入材料 ${list.length - skip} 条，跳过 ${skip} 条`);
+}
+
+/**
+ * 导入背包武器数据
+ * @param {string} uid - 存档UID
+ * @param {Array<TGApp.Plugins.Yae.BagItemWeapon>} list - 武器数据列表
+ * @returns {Promise<void>}
+ */
+async function loadYaeBagWeapon(
+  uid: string,
+  list: Array<TGApp.Plugins.Yae.BagItemWeapon>,
+): Promise<void> {
+  if (list.length === 0) return;
+  const result = await TSUserBagWeapon.saveYaeData(Number(uid), list);
+  await TGLogger.Info(
+    `[App][loadYaeBagWeapon] UID:${uid}, Inserted:${result.inserted}, Updated:${result.updated}, Deleted:${result.deleted}`,
+  );
+  showSnackbar.success(`成功导入 ${list.length} 条武器数据`);
+}
+
+/**
+ * 导入背包圣遗物数据
+ * @param {string} uid - 存档UID
+ * @param {Array<TGApp.Plugins.Yae.BagItemRelic>} list - 圣遗物数据列表
+ * @returns {Promise<void>}
+ */
+async function loadYaeBagRelic(
+  uid: string,
+  list: Array<TGApp.Plugins.Yae.BagItemRelic>,
+): Promise<void> {
+  if (list.length === 0) return;
+  const result = await TSUserBagRelic.saveYaeData(Number(uid), list);
+  await TGLogger.Info(
+    `[App][loadYaeBagRelic] UID:${uid}, Inserted:${result.inserted}, Updated:${result.updated}, Deleted:${result.deleted}`,
+  );
+  showSnackbar.success(`成功导入 ${list.length} 条圣遗物数据`);
 }
 
 /**

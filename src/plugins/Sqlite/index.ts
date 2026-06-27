@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.10.0
+ * @since Beta v0.10.5
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -28,6 +28,8 @@ class Sqlite {
     "UserCharacters",
     "UserRecord",
     "UserBagMaterial",
+    "UserBagWeapon",
+    "UserBagRelic",
   ];
   private db: Database | null = null;
   private static instance: Sqlite | null = null;
