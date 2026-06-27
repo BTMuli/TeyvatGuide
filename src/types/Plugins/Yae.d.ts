@@ -1,6 +1,6 @@
 /**
  * Yae 插件类型定义
- * @since Beta v0.9.1
+ * @since Beta v0.10.5
  */
 
 declare namespace TGApp.Plugins.Yae {
@@ -133,11 +133,11 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 圣遗物物品信息
-   * @since Beta v0.9.0
+   * @since Beta v0.10.5
    */
   type ReliquaryInfo = {
     /** GUID */
-    guid: number;
+    guid: string;
     /** 等级 */
     level: number;
     /** 经验 */
@@ -156,11 +156,11 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 武器信息
-   * @since Beta v0.9.0
+   * @since Beta v0.10.5
    */
   type WeaponInfo = {
     /** GUID */
-    guid: number;
+    guid: string;
     /** 等级 */
     level: number;
     /** 经验 */
