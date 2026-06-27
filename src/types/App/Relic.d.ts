@@ -49,6 +49,8 @@ declare namespace TGApp.App.Relic {
     id: number;
     /** 套装名称 */
     name: string;
+    /** 套装图标 */
+    icon: string;
     /** 效果 */
     affix: Array<SetAffix>;
     /** 子部件 */
@@ -73,6 +75,8 @@ declare namespace TGApp.App.Relic {
   type SetSuit = {
     /** 星级 */
     star: number;
+    /** 部位 */
+    pos: number;
     /** ID列表 */
     list: Array<number>;
   };
