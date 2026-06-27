@@ -20,6 +20,9 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   if (findAvatar) {
     findWeapon = findAvatar.weapon;
     if (innerText === "") innerText = findAvatar.name;
+  } else if (item.name === "旅行者") {
+    findWeapon = "单手剑";
+    innerText = item.name;
   }
   return {
     bg: `/icon/bg/${getRcStar(item.avatar_id, item.rarity)}-BGC.webp`,
