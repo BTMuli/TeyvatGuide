@@ -1,6 +1,6 @@
 /**
  * 主路由模块
- * @since Beta v0.9.0
+ * @since Beta v0.11.0
  */
 import type { RouteRecordRaw } from "vue-router";
 
@@ -39,6 +39,16 @@ const mainRoutes = (<const>[
     path: "/bag/material",
     name: "背包材料",
     component: async () => await import("@/pages/common/PageBagMaterial.vue"),
+  },
+  {
+    path: "/bag/weapon",
+    name: "背包武器",
+    component: async () => await import("@/pages/common/PageBagWeapon.vue"),
+  },
+  {
+    path: "/bag/relic",
+    name: "背包圣遗物",
+    component: async () => await import("@/pages/common/PageBagRelic.vue"),
   },
   {
     path: "/collection",

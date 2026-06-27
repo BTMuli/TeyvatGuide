@@ -14,6 +14,8 @@
           variant="outlined"
           width="200px"
         />
+        <!-- TODO：测试用 -->
+        <img alt="icon" src="/icon/weapon/单手剑.webp" @click="toBagWeapon()" />
       </div>
     </template>
     <template #append>
@@ -127,6 +129,7 @@ import { storeToRefs } from "pinia";
 import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
+import router from "@/router/index.js";
 
 /**
  * 材料排序类型枚举
@@ -216,6 +219,11 @@ async function reloadUid(): Promise<void> {
     uidList.value = [Number(account.value.gameUid)];
     curUid.value = Number(account.value.gameUid);
   } else curUid.value = 0;
+}
+
+async function toBagWeapon(): Promise<void> {
+  // await router.push({ name: "背包武器" });
+  await router.push({ name: "背包圣遗物" });
 }
 
 /**
