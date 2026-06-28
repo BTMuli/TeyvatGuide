@@ -1,6 +1,6 @@
 /**
  * Yae 插件类型定义
- * @since Beta v0.10.5
+ * @since Beta v0.11.0
  */
 
 declare namespace TGApp.Plugins.Yae {
@@ -37,14 +37,15 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 背包物品类型
-   * @since Beta v0.9.0
+   * @since Beta v0.11.0
    */
   type BagItemUnion =
     | BagItemMaterial
     | BagItemWeapon
     | BagItemRelic
     | BagItem<"furniture">
-    | BagItem<"virtual">
+    | BagItem<"facility">
+    | BagItem<"beyond_material">
     | BagItem<"unknown">;
 
   /**
@@ -80,7 +81,7 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 物品信息表，用于锁定类型
-   * @since Beta v0.9.0
+   * @since Beta v0.11.0
    */
   type ItemInfoMap = {
     /** 材料 */
@@ -91,15 +92,17 @@ declare namespace TGApp.Plugins.Yae {
     weapon: WeaponInfo;
     /** 家具 */
     furniture: FurnitureInfo;
-    /** 虚拟物品 */
-    virtual: VirtualInfo;
+    /** Facility */
+    facility: FacilityInfo;
+    /** BeyondMaterial */
+    beyondMaterial: BeyondMaterialInfo;
     /** 未知 */
     unknown: Record<string, never>;
   };
 
   /**
    * 物品类型
-   * @since Beta v0.9.0
+   * @since Beta v0.11.0
    */
   const ItemKindType = <const>{
     /** 材料 */
@@ -110,8 +113,10 @@ declare namespace TGApp.Plugins.Yae {
     weapon: "weapon",
     /** 家具 */
     furniture: "furniture",
-    /** 虚拟物品 */
-    virtual: "virtual",
+    /** Facility */
+    facility: "facility",
+    /** BeyondMaterial */
+    beyondMaterial: "beyond_material",
     /** 未知 */
     unknown: "unknown",
   };
@@ -185,10 +190,19 @@ declare namespace TGApp.Plugins.Yae {
   };
 
   /**
-   * 虚拟物品
-   * @since Beta v0.9.0
+   * Facility信息
+   * @since Beta v0.11.0
    */
-  type VirtualInfo = {
+  type FacilityInfo = {
+    /** 数量 */
+    count: number;
+  };
+
+  /**
+   * BeyondMaterial信息
+   * @since Beta v0.11.0
+   */
+  type BeyondMaterialInfo = {
     /** 数量 */
     count: number;
   };

@@ -1,5 +1,5 @@
 //! Yae 背包信息的 Protobuf 定义&解析
-//! @since Beta v0.10.5
+//! @since Beta v0.11.0
 #![cfg(target_os = "windows")]
 
 use prost::DecodeError;
@@ -93,6 +93,10 @@ pub struct Reliquary {
   pub append_prop_id_list: Vec<u32>,
   #[prost(bool, tag = "6")]
   pub is_marked: bool,
+  #[prost(uint32, repeated, tag = "7")]
+  pub unk6600_dbfgfcjnpoh: Vec<u32>,
+  #[prost(uint32, repeated, tag = "8")]
+  pub unk6600_nghabpmeigd: Vec<u32>,
 }
 
 // Weapon message
@@ -135,11 +139,27 @@ pub struct Furniture {
   pub count: u32,
 }
 
-// VirtualItem message
+// Unk6600Lndfmpdofel message
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct VirtualItem {
-  #[prost(int64, tag = "1")]
-  pub count: i64,
+pub struct Unk6600Lndfmpdofel {
+  #[prost(map = "uint32, uint32", tag = "1")]
+  pub delete_time_num_map: HashMap<u32, u32>,
+}
+
+// BeyondMaterial message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BeyondMaterial {
+  #[prost(uint32, tag = "1")]
+  pub count: u32,
+  #[prost(message, optional, tag = "2")]
+  pub delete_info: Option<Unk6600Lndfmpdofel>,
+}
+
+// Facility message
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Facility {
+  #[prost(uint32, tag = "1")]
+  pub count: u32,
 }
 
 // Item message (包含 oneof detail: Material | Equip | Furniture | VirtualItem)
@@ -149,7 +169,7 @@ pub struct Item {
   pub item_id: u32,
   #[prost(uint64, tag = "2")]
   pub guid: u64,
-  #[prost(oneof = "ItemDetail", tags = "5, 6, 7, 255")]
+  #[prost(oneof = "ItemDetail", tags = "5, 6, 7, 8, 9")]
   pub detail: Option<ItemDetail>,
 }
 
@@ -162,8 +182,10 @@ pub enum ItemDetail {
   Equip(Equip),
   #[prost(message, tag = "7")]
   Furniture(Furniture),
-  #[prost(message, tag = "255")]
-  VirtualItem(VirtualItem),
+  #[prost(message, tag = "8")]
+  BeyondMaterial(BeyondMaterial),
+  #[prost(message, tag = "9")]
+  Facility(Facility),
 }
 
 // PlayerStoreNotify message
@@ -209,8 +231,12 @@ pub enum ItemInfo {
   Furniture {
     count: u32,
   },
-  VirtualItem {
-    count: i64,
+  Facility {
+    count: u32,
+  },
+  BeyondMaterial {
+    count: u32,
+    delete_info: Option<HashMap<u32, u32>>,
   },
   Unknown,
 }
@@ -287,9 +313,21 @@ impl Serialize for ItemInfo {
         map.serialize_entry("count", count)?;
         map.end()
       }
-      ItemInfo::VirtualItem { count } => {
+      ItemInfo::Facility { count } => {
         let mut map = serializer.serialize_map(Some(1))?;
         map.serialize_entry("count", count)?;
+        map.end()
+      }
+      ItemInfo::BeyondMaterial { count, delete_info } => {
+        let mut len = 1usize;
+        if delete_info.is_some() {
+          len += 1;
+        }
+        let mut map = serializer.serialize_map(Some(len))?;
+        map.serialize_entry("count", count)?;
+        if let Some(di) = delete_info {
+          map.serialize_entry("delete_info", di)?;
+        }
         map.end()
       }
       ItemInfo::Unknown => {
@@ -302,7 +340,7 @@ impl Serialize for ItemInfo {
 }
 
 /// 扁平化物品数据结构
-/// kind: "material", "weapon", "reliquary", "furniture", "virtual"
+/// kind: "material", "weapon", "reliquary", "furniture", "facility", "beyond_material"
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ItemData {
   pub item_id: u32,
@@ -363,27 +401,27 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
 
   while let Ok((tag, wire_type)) = decode_key(&mut inner) {
     match (tag, wire_type) {
+      // item_id: uint32
       (1, WireType::Varint) => {
-        // item_id: uint32
         item_id = decode_varint(&mut inner)? as u32;
       }
+      // guid: uint64
       (2, WireType::Varint) => {
-        // guid: uint64
         guid = format!("{}", decode_varint(&mut inner)?);
       }
-      // oneof detail: Material=5, Equip=6, Furniture=7, VirtualItem=255
+      // Material = 5
       (5, WireType::LengthDelimited) => {
-        // Material message: 读取 length 并解析内部 varint count (tag 1)
         let len = decode_varint(&mut inner)? as usize;
         let mut mbuf = vec![0u8; len];
         inner.read_exact(&mut mbuf).map_err(|_| DecodeError::new("read material buf failed"))?;
-        if let Ok(m) = parse_material_from_buf(&mbuf) {
+
+        if let Ok(cnt) = parse_material_from_buf(&mbuf) {
           kind_str = "material".to_string();
-          info = ItemInfo::Material { count: m };
+          info = ItemInfo::Material { count: cnt };
         }
       }
+      // Equip = 6
       (6, WireType::LengthDelimited) => {
-        // Equip message: 读取 length 并解析 Equip（包含 Reliquary/Weapon oneof 与 is_locked）
         let len = decode_varint(&mut inner)? as usize;
         let mut eb = vec![0u8; len];
         inner.read_exact(&mut eb).map_err(|_| DecodeError::new("read equip buf failed"))?;
@@ -396,8 +434,8 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
           info = item_info;
         }
       }
+      // Furniture = 7
       (7, WireType::LengthDelimited) => {
-        // Furniture
         let len = decode_varint(&mut inner)? as usize;
         let mut fb = vec![0u8; len];
         inner.read_exact(&mut fb).map_err(|_| DecodeError::new("read furniture buf failed"))?;
@@ -406,38 +444,45 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
           info = ItemInfo::Furniture { count: cnt };
         }
       }
-      (255, WireType::LengthDelimited) => {
-        // VirtualItem (tag 255)
+      // BeyondMaterial = 8
+      (8, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
-        let mut vb = vec![0u8; len];
-        inner.read_exact(&mut vb).map_err(|_| DecodeError::new("read virtual buf failed"))?;
-        if let Ok(cnt) = parse_virtual_from_buf(&vb) {
-          kind_str = "virtual".to_string();
-          info = ItemInfo::VirtualItem { count: cnt };
+        let mut bb = vec![0u8; len];
+        inner
+          .read_exact(&mut bb)
+          .map_err(|_| DecodeError::new("read beyond_material buf failed"))?;
+        if let Ok((count, delete_info)) = parse_beyond_material_from_buf(&bb) {
+          kind_str = "beyond_material".to_string();
+          info = ItemInfo::BeyondMaterial { count, delete_info };
         }
       }
-      // 如果 detail 出现为非 length-delimited（异常），尝试跳过
+      // Facility = 9
+      (9, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut inner)? as usize;
+        let mut fb2 = vec![0u8; len];
+        inner.read_exact(&mut fb2).map_err(|_| DecodeError::new("read facility buf failed"))?;
+        if let Ok(cnt) = parse_facility_from_buf(&fb2) {
+          kind_str = "facility".to_string();
+          info = ItemInfo::Facility { count: cnt }; // 你可以改成自己的结构体
+        }
+      }
+      // 跳过未知 length-delimited 字段
       (_, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
-        if inner.seek(std::io::SeekFrom::Current(len as i64)).is_err() {
-          break;
-        }
+        inner.seek(std::io::SeekFrom::Current(len as i64)).ok();
       }
+      // 跳过未知 varint 字段
       (_, WireType::Varint) => {
-        // 未知 varint 字段，跳过
         let _ = decode_varint(&mut inner)?;
       }
+      // 跳过 32/64 bit 字段
       (_, WireType::SixtyFourBit) => {
         let mut tmp = [0u8; 8];
-        if inner.read_exact(&mut tmp).is_err() {
-          break;
-        }
+        inner.read_exact(&mut tmp).ok();
       }
       (_, WireType::ThirtyTwoBit) => {
         let mut tmp = [0u8; 4];
-        if inner.read_exact(&mut tmp).is_err() {
-          break;
-        }
+        inner.read_exact(&mut tmp).ok();
       }
       _ => return Err(DecodeError::new("unknown wire type in item")),
     }
@@ -512,39 +557,6 @@ fn parse_furniture_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
   Err(DecodeError::new("furniture count not found"))
 }
 
-/// 解析 VirtualItem 子消息，返回 count（int64）
-fn parse_virtual_from_buf(buf: &[u8]) -> Result<i64, DecodeError> {
-  let mut cur = Cursor::new(buf);
-  while let Ok((tag, wire_type)) = decode_key(&mut cur) {
-    if tag == 1 && wire_type == WireType::Varint {
-      return Ok(decode_varint(&mut cur)? as i64);
-    } else {
-      // 跳过
-      match wire_type {
-        WireType::Varint => {
-          let _ = decode_varint(&mut cur)?;
-        }
-        WireType::SixtyFourBit => {
-          let mut tmp = [0u8; 8];
-          cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
-        }
-        WireType::LengthDelimited => {
-          let len = decode_varint(&mut cur)? as usize;
-          cur
-            .seek(std::io::SeekFrom::Current(len as i64))
-            .map_err(|_| DecodeError::new("skip failed"))?;
-        }
-        WireType::ThirtyTwoBit => {
-          let mut tmp = [0u8; 4];
-          cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
-        }
-        _ => return Err(DecodeError::new("unknown wire type in virtual")),
-      }
-    }
-  }
-  Err(DecodeError::new("virtual count not found"))
-}
-
 /// 简单的 Reliquary 结构用于解析
 struct ReliquaryTmp {
   level: u32,
@@ -574,27 +586,13 @@ fn parse_reliquary_from_buf(buf: &[u8]) -> Result<ReliquaryTmp, DecodeError> {
       (3, WireType::Varint) => r.promote_level = decode_varint(&mut cur)? as u32,
       (4, WireType::Varint) => r.main_prop_id = decode_varint(&mut cur)? as u32,
       (5, WireType::LengthDelimited) => {
-        // repeated uint32 append_prop_id_list encoded as packed varints (length-delimited)
         let len = decode_varint(&mut cur)? as usize;
         let mut packed = vec![0u8; len];
         cur.read_exact(&mut packed).map_err(|_| DecodeError::new("read append_prop failed"))?;
+
         let mut pcur = Cursor::new(&packed);
-        while let Ok((_tag2, wt2)) = decode_key(&mut pcur) {
-          // packed repeated of primitive types usually has no inner tags; but some encoders write raw varints
-          // 为兼容性，直接尝试读取 varints直到耗尽
-          if wt2 == WireType::Varint {
-            let v = decode_varint(&mut pcur)? as u32;
-            r.append_prop_id_list.push(v);
-          } else {
-            break;
-          }
-        }
-        // 如果 packed 里没有 tags（常见），直接按 varint 读取直到 EOF
-        if r.append_prop_id_list.is_empty() {
-          let mut pcur2 = Cursor::new(&packed);
-          while let Ok(v) = decode_varint(&mut pcur2) {
-            r.append_prop_id_list.push(v as u32);
-          }
+        while let Ok(v) = decode_varint(&mut pcur) {
+          r.append_prop_id_list.push(v as u32);
         }
       }
       (6, WireType::Varint) => r.is_marked = decode_varint(&mut cur)? != 0,
@@ -701,6 +699,165 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
   }
 
   Ok(w)
+}
+
+/// 解析 Facility 子消息，返回 ItemInfo
+fn parse_facility_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
+  let mut cur = Cursor::new(buf);
+  let mut count: u32 = 0;
+
+  while let Ok((tag, wire_type)) = decode_key(&mut cur) {
+    match (tag, wire_type) {
+      (1, WireType::Varint) => {
+        count = decode_varint(&mut cur)? as u32;
+      }
+
+      // 跳过未知字段
+      (_, WireType::Varint) => {
+        let _ = decode_varint(&mut cur)?;
+      }
+      (_, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        cur.seek(std::io::SeekFrom::Current(len as i64)).ok();
+      }
+      (_, WireType::SixtyFourBit) => {
+        let mut tmp = [0u8; 8];
+        cur.read_exact(&mut tmp).ok();
+      }
+      (_, WireType::ThirtyTwoBit) => {
+        let mut tmp = [0u8; 4];
+        cur.read_exact(&mut tmp).ok();
+      }
+      _ => {}
+    }
+  }
+
+  Ok(count)
+}
+
+/// 解析 BeyondMaterial 的 Unk6600Lndfmpdofel
+fn parse_unk6600_delete_info(buf: &[u8]) -> Result<HashMap<u32, u32>, DecodeError> {
+  let mut cur = Cursor::new(buf);
+  let mut map_out: HashMap<u32, u32> = HashMap::new();
+
+  while let Ok((tag, wire_type)) = decode_key(&mut cur) {
+    match (tag, wire_type) {
+      // delete_time_num_map = 1 (map entry)
+      (1, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        let mut entry_buf = vec![0u8; len];
+        cur
+          .read_exact(&mut entry_buf)
+          .map_err(|_| DecodeError::new("read delete_time_num_map entry failed"))?;
+
+        // 解析 map entry: key(tag=1), value(tag=2)
+        let mut ecur = Cursor::new(&entry_buf);
+        let mut key: Option<u32> = None;
+        let mut val: Option<u32> = None;
+
+        while let Ok((etag, ewt)) = decode_key(&mut ecur) {
+          match (etag, ewt) {
+            (1, WireType::Varint) => {
+              key = Some(decode_varint(&mut ecur)? as u32);
+            }
+            (2, WireType::Varint) => {
+              val = Some(decode_varint(&mut ecur)? as u32);
+            }
+            (_, WireType::Varint) => {
+              let _ = decode_varint(&mut ecur)?;
+            }
+            (_, WireType::LengthDelimited) => {
+              let l = decode_varint(&mut ecur)? as usize;
+              ecur.seek(std::io::SeekFrom::Current(l as i64)).ok();
+            }
+            (_, WireType::SixtyFourBit) => {
+              let mut tmp = [0u8; 8];
+              ecur.read_exact(&mut tmp).ok();
+            }
+            (_, WireType::ThirtyTwoBit) => {
+              let mut tmp = [0u8; 4];
+              ecur.read_exact(&mut tmp).ok();
+            }
+            _ => {}
+          }
+        }
+
+        if let (Some(k), Some(v)) = (key, val) {
+          map_out.insert(k, v);
+        }
+      }
+
+      // 跳过未知字段
+      (_, WireType::Varint) => {
+        let _ = decode_varint(&mut cur)?;
+      }
+      (_, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        cur.seek(std::io::SeekFrom::Current(len as i64)).ok();
+      }
+      (_, WireType::SixtyFourBit) => {
+        let mut tmp = [0u8; 8];
+        cur.read_exact(&mut tmp).ok();
+      }
+      (_, WireType::ThirtyTwoBit) => {
+        let mut tmp = [0u8; 4];
+        cur.read_exact(&mut tmp).ok();
+      }
+      _ => {}
+    }
+  }
+
+  Ok(map_out)
+}
+
+/// 解析 BeyondMaterial 子消息，返回 ItemInfo
+fn parse_beyond_material_from_buf(
+  buf: &[u8],
+) -> Result<(u32, Option<HashMap<u32, u32>>), DecodeError> {
+  let mut cur = Cursor::new(buf);
+
+  let mut count: u32 = 0;
+  let mut delete_info: Option<HashMap<u32, u32>> = None;
+
+  while let Ok((tag, wire_type)) = decode_key(&mut cur) {
+    match (tag, wire_type) {
+      // count = 1
+      (1, WireType::Varint) => {
+        count = decode_varint(&mut cur)? as u32;
+      }
+
+      // delete_info = 2 (message)
+      (2, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        let mut dbuf = vec![0u8; len];
+        cur
+          .read_exact(&mut dbuf)
+          .map_err(|_| DecodeError::new("read beyond_material.delete_info failed"))?;
+
+        delete_info = Some(parse_unk6600_delete_info(&dbuf)?);
+      }
+
+      // 跳过未知字段
+      (_, WireType::Varint) => {
+        let _ = decode_varint(&mut cur)?;
+      }
+      (_, WireType::LengthDelimited) => {
+        let len = decode_varint(&mut cur)? as usize;
+        cur.seek(std::io::SeekFrom::Current(len as i64)).ok();
+      }
+      (_, WireType::SixtyFourBit) => {
+        let mut tmp = [0u8; 8];
+        cur.read_exact(&mut tmp).ok();
+      }
+      (_, WireType::ThirtyTwoBit) => {
+        let mut tmp = [0u8; 4];
+        cur.read_exact(&mut tmp).ok();
+      }
+      _ => {}
+    }
+  }
+
+  Ok((count, delete_info))
 }
 
 /// 解析 Equip 子消息，返回 ItemInfo（包含 is_locked: Option<bool> 和 guid）
