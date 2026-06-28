@@ -51,6 +51,12 @@ declare namespace TGApp.App.Relic {
     name: string;
     /** 套装图标 */
     icon: string;
+    /** 最大星级 */
+    maxStar: number;
+    /** 星级列表 */
+    stars: Array<number>;
+    /** 部位列表 */
+    pos: Array<number>;
     /** 效果 */
     affix: Array<SetAffix>;
     /** 子部件 */

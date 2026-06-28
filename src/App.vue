@@ -267,10 +267,8 @@ async function loadYaeBagWeapon(
   list: Array<TGApp.Plugins.Yae.BagItemWeapon>,
 ): Promise<void> {
   if (list.length === 0) return;
-  const result = await TSUserBagWeapon.saveYaeData(Number(uid), list);
-  await TGLogger.Info(
-    `[App][loadYaeBagWeapon] UID:${uid}, Inserted:${result.inserted}, Updated:${result.updated}, Deleted:${result.deleted}`,
-  );
+  await TSUserBagWeapon.saveYaeData(Number(uid), list);
+  await TGLogger.Info(`[App][loadYaeBagWeapon] UID:${uid}，len:${list.length}`);
   showSnackbar.success(`成功导入 ${list.length} 条武器数据`);
 }
 
@@ -285,10 +283,8 @@ async function loadYaeBagRelic(
   list: Array<TGApp.Plugins.Yae.BagItemRelic>,
 ): Promise<void> {
   if (list.length === 0) return;
-  const result = await TSUserBagRelic.saveYaeData(Number(uid), list);
-  await TGLogger.Info(
-    `[App][loadYaeBagRelic] UID:${uid}, Inserted:${result.inserted}, Updated:${result.updated}, Deleted:${result.deleted}`,
-  );
+  await TSUserBagRelic.saveYaeData(Number(uid), list);
+  await TGLogger.Info(`[App][loadYaeBagRelic] UID:${uid}，len:${list.length}`);
   showSnackbar.success(`成功导入 ${list.length} 条圣遗物数据`);
 }
 

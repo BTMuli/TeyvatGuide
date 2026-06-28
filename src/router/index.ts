@@ -1,6 +1,6 @@
 /**
  * 路由入口
- * @since Beta v0.10.2
+ * @since Beta v0.11.0
  */
 
 import { createRouter, createWebHistory } from "vue-router";
@@ -9,7 +9,14 @@ import routes from "./routes.js";
 
 const router = createRouter({ history: createWebHistory(), routes: routes });
 // 只有在特定页面忽略参数变化
-const ignoreRoutes: ReadonlyArray<string> = ["酒馆", "话题", "实用脚本", "角色图鉴", "武器图鉴"];
+const ignoreRoutes: ReadonlyArray<string> = [
+  "酒馆",
+  "话题",
+  "实用脚本",
+  "角色图鉴",
+  "武器图鉴",
+  "圣遗物图鉴",
+];
 
 // TODO:路由重构 解决路由重复问题
 router.afterEach((to, from) => {

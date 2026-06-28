@@ -1,6 +1,6 @@
 /**
  * wiki 路由模块
- * @since Beta v0.9.1
+ * @since Beta v0.11.0
  */
 import type { RouteRecordRaw } from "vue-router";
 
@@ -29,6 +29,11 @@ const wikiRoutes = (<const>[
     path: "/wiki/weapon/:id?",
     name: "武器图鉴",
     component: async () => await import("@/pages/WIKI/Weapon.vue"),
+  },
+  {
+    path: "/wiki/relic/:id?",
+    name: "圣遗物图鉴",
+    component: async () => await import("@/pages/WIKI/RelicSet.vue"),
   },
 ]) satisfies Array<RouteRecordRaw>;
 

@@ -24,7 +24,7 @@ import propMap from "./app/propMap.json" with { type: "json" };
 import wikiMaterial from "./WIKI/material.json" with { type: "json" };
 // import wikiRelicMainLv from "./WIKI/relic/MainLv.json" with { type: "json" };
 // import wikiRelicMainProp from "./WIKI/relic/MainProp.json" with { type: "json" };
-// import wikiRelic from "./WIKI/relic/Relic.json" with { type: "json" };
+import wikiRelic from "./WIKI/relic/Relic.json" with { type: "json" };
 import wikiRelicMap from "./WIKI/relic/RelicMap.json" with { type: "json" };
 import wikiRelicSet from "./WIKI/relic/RelicSet.json" with { type: "json" };
 // import wikiRelicSubProp from "./WIKI/relic/SubProp.json" with { type: "json" };
@@ -55,7 +55,7 @@ export const WikiHyperLinkData: TGApp.App.HyperLink.AppHyperLink = hyperlink;
 // 圣遗物数据
 // export const wrMainLv: TGApp.App.Relic.MainLv = wikiRelicMainLv;
 // export const wrMainProp: TGApp.App.Relic.MainProp = wikiRelicMainProp;
-// export const wrRelic: TGApp.App.Relic.RawRelic = wikiRelic;
+export const wrRelic: TGApp.App.Relic.RawRelic = wikiRelic;
 export const wrMap: TGApp.App.Relic.RelicMap = wikiRelicMap;
 export const wrSet: TGApp.App.Relic.RawSet = wikiRelicSet;
 // export const wrSub: TGApp.App.Relic.SubProp = wikiRelicSubProp;

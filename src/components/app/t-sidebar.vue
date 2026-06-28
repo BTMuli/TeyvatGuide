@@ -153,6 +153,15 @@
                 <img alt="gcgIcon" class="side-icon-menu" src="/UI/nav/wikiGCG.webp" />
               </template>
             </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/wiki/relic" title="圣遗物图鉴">
+              <template #prepend>
+                <img
+                  :src="`/WIKI/relic/${wrSet[Math.floor(Math.random() * wrSet.length)].icon}.webp`"
+                  alt="relicIcon"
+                  class="side-icon-menu"
+                />
+              </template>
+            </v-list-item>
           </v-list>
         </v-menu>
         <v-list-item :link="true" :title.attr="'留影叙佳期'" href="/archive/birthday">
@@ -336,6 +345,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
+import { wrSet } from "@/data/index.js";
 
 const userStore = useUserStore();
 const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());
