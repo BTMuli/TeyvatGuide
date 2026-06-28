@@ -1,6 +1,7 @@
 <!-- 圣遗物详情浮窗 -->
 <template>
   <v-navigation-drawer v-model="visible" :location="'right'">
+    <div class="pb-rdt-meta">GUID:{{ props.cur.guid }}</div>
     <div class="pb-rd-box">
       <v-icon class="pb-rdt-act" @click="hide()">mdi-close</v-icon>
       <div class="pb-rd-top">
@@ -13,10 +14,15 @@
             <span>{{ props.cur.info.name }}</span>
             <span>Lv.{{ props.cur.tb.info.level - 1 }}</span>
           </div>
-          <span class="pb-rdt-meta">GUID:{{ props.cur.guid }}</span>
+          <div class="pb-rdt-sub">
+            <span>{{ getPosLabel() }}</span>
+            <span v-if="tbInfo.is_marked || tbInfo.is_locked" class="pb-rdt-stat">
+              <span v-if="tbInfo.is_locked">🔒</span>
+              <span v-if="tbInfo.is_marked">⭐</span>
+            </span>
+          </div>
         </div>
       </div>
-      <div v-if="posInfo" class="pb-rd-desc">{{ posInfo.desc }}</div>
       <div class="pb-rd-props">
         <div v-if="mainProp" class="pb-rdp-main">
           <img v-if="mainProp.info.icon !== ''" :src="mainProp.info.icon" alt="icon" />
@@ -33,14 +39,14 @@
         </div>
       </div>
       <div v-if="setInfo" class="pb-rd-set">
-        <div class="pb-rds-title">套装：{{ setInfo.name }}</div>
+        <div class="pb-rds-title">{{ setInfo.name }}：</div>
         <div v-for="affix in setInfo.affix" :key="affix.cnt" class="pb-rds-effect">
           <span>{{ affix.cnt }}</span>
           <span>件套：</span>
           <span>{{ affix.desc }}</span>
         </div>
       </div>
-      <div v-if="posInfo" class="pb-rd-story">{{ posInfo.story.replace("\r\n", "") }}</div>
+      <div v-if="posInfo" class="pb-rd-desc">{{ posInfo.desc }}</div>
     </div>
   </v-navigation-drawer>
 </template>
@@ -74,6 +80,11 @@ function hide(): void {
   visible.value = false;
 }
 
+function getPosLabel() {
+  const relicPos = ["生之花", "死之羽", "时之沙", "空之杯", "理之冠"];
+  return relicPos[curInfo.value.pos - 1];
+}
+
 function loadPosInfo(): void {
   posInfo.value = wrRelic.find((i) => i.pos === curInfo.value.pos && i.set === curInfo.value.set);
   setInfo.value = wrSet.find((i) => i.id === curInfo.value.set);
@@ -96,6 +107,7 @@ function parseMainProp(): void {
 }
 
 function parseSubProps(): void {
+  console.log(tbInfo.value.append_prop_id_list);
   let tmpProps: Array<PropMix> = [];
   for (const prop of tbInfo.value.append_prop_id_list) {
     const subInfo = wrSub[prop];
@@ -112,7 +124,6 @@ function parseSubProps(): void {
       });
     }
   }
-  console.log(tmpProps);
   subProps.value = tmpProps;
 }
 </script>
@@ -176,8 +187,24 @@ function parseSubProps(): void {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 4px;
+  column-gap: 24px;
   font-family: var(--font-title);
+}
+
+.pb-rdt-sub {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pb-rdt-stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  column-gap: 4px;
 }
 
 .pb-rdt-act {
@@ -191,6 +218,10 @@ function parseSubProps(): void {
 }
 
 .pb-rdt-meta {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: var(--tgc-od-white);
   font-size: 10px;
 }
 
@@ -208,7 +239,7 @@ function parseSubProps(): void {
   justify-content: center;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 2px;
+  border-radius: 4px;
   background: var(--box-bg-3);
   font-size: 14px;
 }
@@ -286,11 +317,11 @@ function parseSubProps(): void {
 .pb-rds-title {
   color: var(--common-text-title);
   font-family: var(--font-title);
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .pb-rds-effect {
-  font-size: 12px;
+  font-size: 14px;
 
   :nth-child(1),
   :nth-child(2) {
@@ -300,14 +331,5 @@ function parseSubProps(): void {
   :nth-child(1) {
     color: var(--tgc-od-orange);
   }
-}
-
-.pb-rd-story {
-  padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 2px;
-  background: var(--box-bg-1);
-  font-size: 12px;
-  white-space: pre-wrap;
 }
 </style>
