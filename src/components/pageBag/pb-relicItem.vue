@@ -1,16 +1,21 @@
 <!-- 背包圣遗物物品项 -->
 <template>
-  <div class="pb-ri-box" @click="toRelic()">
-    <div class="pb-ri-left">
-      <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
-      <img :src="`/WIKI/relic/${props.info.icon}.webp`" alt="icon" class="icon" />
+  <div
+    :style="{
+      backgroundImage: `url('/icon/bg/${props.info.star}-Star.webp')`,
+      backgroundSize: 'cover',
+    }"
+    :title="props.info.name"
+    class="pb-ri-box"
+    @click="toRelic()"
+  >
+    <img :src="`/WIKI/relic/${props.info.icon}.webp`" alt="icon" class="pb-ri-icon" />
+    <img :src="`/icon/relic/${props.info.pos}.webp`" alt="pos" class="pb-ri-pos" />
+    <div v-if="props.tb.info.is_locked || props.tb.info.is_marked" class="pb-ri-sign">
+      <span v-if="props.tb.info.is_locked">🔒</span>
+      <span v-if="props.tb.info.is_marked">⭐</span>
     </div>
-    <div class="pb-ri-right">
-      <div class="pb-ri-name">{{ props.info.name }}</div>
-      <div class="pb-ri-level">Lv.{{ props.tb.info.level - 1 }}</div>
-    </div>
-    <div class="pb-ri-extra">{{ setInfo?.name ?? "未知套装" }}·{{ posLabel }}</div>
-    <div v-if="props.tb.info.is_locked" class="pb-ri-locked">🔒</div>
+    <div class="pb-ri-level">Lv.{{ props.tb.info.level - 1 }}</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -31,37 +36,17 @@ const props = defineProps<PbRelicItemProps>();
 const emits = defineEmits<PbRelicItemEmits>();
 
 const setInfo = shallowRef<TGApp.App.Relic.SetItem>();
-const posLabel = computed<string>(() => {
-  const names: Record<number, string> = {
-    1: "生之花",
-    2: "死之羽",
-    3: "时之沙",
-    4: "空之杯",
-    5: "理之冠",
-  };
-  return names[props.info.pos] || "未知";
-});
 
 onMounted(() => {
   const findSet = wrSet.find((i) => i.id === props.info.set);
   if (findSet) setInfo.value = findSet;
 });
 
-function getStar(): number {
-  const id = props.tb.id;
-  if (id >= 500000 && id < 600000) return 1;
-  if (id >= 510000 && id < 520000) return 2;
-  if (id >= 520000 && id < 530000) return 3;
-  if (id >= 530000 && id < 540000) return 4;
-  if (id >= 540000) return 5;
-  return 3;
-}
-
 function toRelic(): void {
   emits("select", { tb: props.tb, info: props.info, guid: props.tb.guid });
 }
 
-const idColor = computed<string>(() => getOdStarColor(getStar()));
+const idColor = computed<string>(() => getOdStarColor(props.info.star));
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
@@ -72,80 +57,64 @@ $pb-ri-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   position: relative;
   display: flex;
   overflow: hidden;
-  height: 52px;
+  width: 100%;
   box-sizing: border-box;
   align-items: center;
-  justify-content: flex-start;
-  padding-right: 8px;
-  border: 1px solid color-mix(in srgb, $pb-ri-base 20%, transparent);
+  justify-content: center;
   border-radius: 4px;
-  background: color-mix(in srgb, $pb-ri-base 15%, transparent);
+  aspect-ratio: 1;
   column-gap: 8px;
   cursor: pointer;
 }
 
-.pb-ri-left {
+.pb-ri-icon {
   position: relative;
+  width: 100%;
   height: 100%;
-  flex-shrink: 0;
-  aspect-ratio: 1;
-
-  .bg,
-  .icon {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    vertical-align: center;
-  }
 }
 
-.pb-ri-right {
-  position: relative;
-  display: flex;
-  overflow: hidden;
-  max-width: 100%;
-  flex-direction: column;
-  justify-content: center;
-  row-gap: 2px;
-}
-
-.pb-ri-name {
-  overflow: hidden;
-  color: var(--box-text-2);
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.pb-ri-pos {
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
 }
 
 .pb-ri-level {
-  color: var(--tgc-od-green);
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  background: var(--common-shadow-t-2);
+  color: var(--tgc-white-1);
   font-family: var(--font-title);
   font-size: 12px;
+  vertical-align: center;
 }
 
-.pb-ri-extra {
-  position: absolute;
-  z-index: 1;
-  right: 2px;
-  bottom: 0;
-  color: $pb-ri-base;
-  font-size: 8px;
-  font-style: italic;
-  opacity: 0.8;
-}
-
-.pb-ri-locked {
+.pb-ri-sign {
   @include github-styles.github-tag-dark-gen($pb-ri-base);
 
   position: absolute;
+  z-index: 2;
   top: 0;
   right: 0;
+  display: flex;
   box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
   padding-right: 4px;
-  padding-left: 12px;
+  padding-left: 8px;
   border-top: unset;
   border-right: unset;
+  backdrop-filter: blur(4px);
   border-bottom-left-radius: 12px;
   font-family: var(--font-title);
   font-size: 10px;

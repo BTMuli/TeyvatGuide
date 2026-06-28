@@ -351,7 +351,7 @@ function handleSelect(relic: RelicInfo): void {
   position: relative;
   display: grid;
   width: 100%;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
 }
 </style>
