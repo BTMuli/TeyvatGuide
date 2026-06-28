@@ -81,7 +81,13 @@
   </v-app-bar>
   <div class="pbr-container">
     <template v-for="relic in relicShow" :key="relic.tb.guid">
-      <PbRelicItem :info="relic.info" :tb="relic.tb" @select="handleSelect" />
+      <PbRelicItem
+        :info="relic.info"
+        :selected="relic.guid === curRelic?.guid"
+        :detail="showDetail"
+        :tb="relic.tb"
+        @select="handleSelect"
+      />
     </template>
   </div>
   <PbRelicDetail v-if="curRelic" v-model:show="showDetail" :cur="curRelic" />

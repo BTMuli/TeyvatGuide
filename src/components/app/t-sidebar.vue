@@ -39,12 +39,38 @@
             <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
           </template>
         </v-list-item>
-        <v-list-item :link="true" :title.attr="'背包材料'" href="/bag/material">
-          <template #title>背包材料</template>
-          <template #prepend>
-            <img alt="materialBagIcon" class="side-icon" src="/UI/nav/userBag.webp" />
+        <!-- 背包物品，包括材料&武器&圣遗物 -->
+        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+          <template #activator="{ props }">
+            <v-list-item :title.attr="'背包物品'" v-bind="props">
+              <template #title>背包物品</template>
+              <template #prepend>
+                <img alt="bagIcon" class="side-icon" src="/UI/nav/userBag.webp" />
+              </template>
+            </v-list-item>
           </template>
-        </v-list-item>
+          <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item :link="true" class="side-item-menu" href="/bag/material" title="材料">
+              <template #prepend>
+                <img alt="abyss" class="side-icon-menu" src="/icon/material/223.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/bag/weapon" title="武器">
+              <template #prepend>
+                <img alt="combat" class="side-icon-menu" src="/WIKI/weapon/14522.webp" />
+              </template>
+            </v-list-item>
+            <v-list-item :link="true" class="side-item-menu" href="/bag/relic" title="圣遗物">
+              <template #prepend>
+                <img
+                  alt="challenge"
+                  class="side-icon-menu"
+                  src="/WIKI/relic/UI_RelicIcon_15001_1.webp"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+        </v-menu>
         <v-divider />
         <v-list-item :link="true" :title.attr="'原神战绩'" href="/user/record">
           <template #title>原神战绩</template>
@@ -155,11 +181,7 @@
             </v-list-item>
             <v-list-item :link="true" class="side-item-menu" href="/wiki/relic" title="圣遗物图鉴">
               <template #prepend>
-                <img
-                  :src="`/WIKI/relic/${wrSet[Math.floor(Math.random() * wrSet.length)].icon}.webp`"
-                  alt="relicIcon"
-                  class="side-icon-menu"
-                />
+                <img alt="relicIcon" class="side-icon-menu" src="/icon/relic/5.webp" />
               </template>
             </v-list-item>
           </v-list>
@@ -345,7 +367,6 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
-import { wrSet } from "@/data/index.js";
 
 const userStore = useUserStore();
 const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());

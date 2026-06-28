@@ -1,6 +1,7 @@
 <!-- 背包圣遗物物品项 -->
 <template>
   <div
+    :class="{ selected: props.selected, detail: props.detail }"
     :style="{
       backgroundImage: `url('/icon/bg/${props.info.star}-Star.webp')`,
       backgroundSize: 'cover',
@@ -26,6 +27,8 @@ import type { RelicInfo } from "@/pages/common/PageBagRelic.vue";
 import { wrSet } from "@/data/index.js";
 
 type PbRelicItemProps = {
+  selected: boolean;
+  detail: boolean;
   tb: TGApp.Sqlite.UserBag.RelicTable;
   info: TGApp.App.Relic.RelicMini;
 };
@@ -65,6 +68,14 @@ $pb-ri-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   aspect-ratio: 1;
   column-gap: 8px;
   cursor: pointer;
+
+  &.detail {
+    filter: grayscale(0.75);
+
+    &.selected {
+      filter: unset;
+    }
+  }
 }
 
 .pb-ri-icon {

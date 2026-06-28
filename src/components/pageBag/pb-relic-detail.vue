@@ -1,9 +1,9 @@
 <!-- 圣遗物详情浮窗 -->
 <template>
-  <v-navigation-drawer v-model="visible" :location="'right'">
+  <v-navigation-drawer v-model="visible" :location="'right'" :style="{ zIndex: 9 }">
     <div class="pb-rdt-meta">GUID:{{ props.cur.guid }}</div>
     <div class="pb-rd-box">
-      <v-icon class="pb-rdt-act" @click="hide()">mdi-close</v-icon>
+      <v-icon class="pb-rdt-act" size="16" title="收起" @click="hide()">mdi-close</v-icon>
       <div class="pb-rd-top">
         <div class="pb-rdt-left">
           <img :src="`/icon/bg/${props.cur.info.star}-Star.webp`" alt="bg" class="pb-rdtl-bg" />
