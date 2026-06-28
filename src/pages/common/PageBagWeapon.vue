@@ -102,7 +102,7 @@ import { storeToRefs } from "pinia";
 import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { WikiWeaponData } from "@/data/index.js";
-import PbWeaponItem from "@comp/pageBag/pb-weaponItem.vue";
+import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
 
 /** 武器类型 */
 type WeaponType = {

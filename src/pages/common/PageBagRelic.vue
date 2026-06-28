@@ -49,6 +49,7 @@
       </div>
     </template>
     <template #extension>
+      <!-- TODO: 优化筛选，增加套装、主词条、副词条、等级筛选 -->
       <div class="pbr-nav-extension">
         <v-select
           v-model="selectSlot"
@@ -83,6 +84,7 @@
       <PbRelicItem :info="relic.info" :tb="relic.tb" @select="handleSelect" />
     </template>
   </div>
+  <PbRelicDetail v-if="curRelic" v-model:show="showDetail" :cur="curRelic" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -94,8 +96,9 @@ import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
-import PbRelicItem from "@comp/pageBag/pb-relicItem.vue";
+import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
 import { wrMap } from "@/data/index.js";
+import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
 
 /** 圣遗物部位选项 */
 type SlotOption = {
@@ -135,11 +138,15 @@ const slotList: Array<SlotOption> = [
 ];
 
 const curUid = ref<number>(0);
+const uidList = shallowRef<Array<number>>([]);
+
+const search = ref<string>();
 const selectSlot = ref<number | null>(null);
 const selectStar = ref<number | null>(null);
-const search = ref<string>();
+
 const curIdx = ref<number>(0);
-const uidList = shallowRef<Array<number>>([]);
+const showDetail = ref<boolean>(false);
+const curRelic = shallowRef<RelicInfo>();
 const relicList = shallowRef<Array<RelicInfo>>([]);
 const relicShow = shallowRef<Array<RelicInfo>>([]);
 
@@ -292,7 +299,8 @@ async function deleteUid(): Promise<void> {
 }
 
 function handleSelect(relic: RelicInfo): void {
-  console.log("Selected relic:", relic);
+  curRelic.value = relic;
+  showDetail.value = true;
 }
 </script>
 <style lang="scss" scoped>
