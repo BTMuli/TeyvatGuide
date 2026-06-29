@@ -6,35 +6,35 @@
       <v-icon class="pb-rdt-act" size="16" title="收起" @click="hide()">mdi-close</v-icon>
       <div class="pb-rd-top">
         <div class="pb-rdt-left">
-          <img :src="`/icon/bg/${props.cur.info.star}-Star.webp`" alt="bg" class="pb-rdtl-bg" />
-          <img :src="`/WIKI/relic/${props.cur.info.icon}.webp`" alt="icon" class="pb-rdtl-icon" />
+          <img :src="`/icon/bg/${props.cur.brief.star}-Star.webp`" alt="bg" class="pb-rdtl-bg" />
+          <img :src="`/WIKI/relic/${props.cur.brief.icon}.webp`" alt="icon" class="pb-rdtl-icon" />
         </div>
         <div class="pb-rdt-right">
           <div class="pb-rdt-title">
-            <span>{{ props.cur.info.name }}</span>
-            <span>Lv.{{ props.cur.tb.info.level - 1 }}</span>
+            <span>{{ props.cur.brief.name }}</span>
+            <span>Lv.{{ props.cur.level - 1 }}</span>
           </div>
           <div class="pb-rdt-sub">
-            <span>{{ getPosLabel() }}</span>
-            <span v-if="tbInfo.is_marked || tbInfo.is_locked" class="pb-rdt-stat">
-              <span v-if="tbInfo.is_locked">🔒</span>
-              <span v-if="tbInfo.is_marked">⭐</span>
+            <span>{{ relicUtils.pos(props.cur.brief.pos ?? 0) }}</span>
+            <span v-if="props.cur.is_marked || props.cur.is_locked" class="pb-rdt-stat">
+              <span v-if="props.cur.is_locked">🔒</span>
+              <span v-if="props.cur.is_marked">⭐</span>
             </span>
           </div>
         </div>
       </div>
       <div class="pb-rd-props">
-        <div v-if="mainProp" class="pb-rdp-main">
-          <img v-if="mainProp.info.icon !== ''" :src="mainProp.info.icon" alt="icon" />
+        <div class="pb-rdp-main">
+          <img v-if="props.cur.mp.info.icon !== ''" :src="props.cur.mp.info.icon" alt="icon" />
           <span v-else style="width: 16px" />
-          <span>{{ mainProp.info.filter_name }}</span>
-          <span>{{ mainProp.val < 1 ? mainProp.val.toFixed(2) : mainProp.val }}</span>
+          <span>{{ props.cur.mp.info.filter_name }}</span>
+          <span>{{ props.cur.mp.val < 1 ? props.cur.mp.val.toFixed(2) : props.cur.mp.val }}</span>
         </div>
-        <div v-for="(prop, idx) in subProps" :key="idx" class="pb-rdp-sub">
+        <div v-for="(prop, idx) in props.cur.sp" :key="idx" class="pb-rdp-sub">
           <img v-if="prop.info.icon !== ''" :src="prop.info.icon" alt="icon" />
           <span v-else style="width: 16px" />
           <span>{{ prop.info.filter_name }}</span>
-          <span v-if="prop.cnt && prop.cnt > 1" class="pb-rdp-cnt">{{ prop.cnt }}</span>
+          <span v-if="prop.vals.length > 1" class="pb-rdp-cnt">{{ prop.vals.length - 1 }}</span>
           <span>{{ prop.val < 1 ? `${(prop.val * 100).toFixed(2)}%` : prop.val.toFixed(2) }}</span>
         </div>
       </div>
@@ -51,22 +51,16 @@
   </v-navigation-drawer>
 </template>
 <script lang="ts" setup>
-import type { RelicInfo } from "@/pages/common/PageBagRelic.vue";
-import { computed, shallowRef, watch } from "vue";
-import { AppPropMapData, wrMainLv, wrMainProp, wrRelic, wrSet, wrSub } from "@/data/index.js";
+import { shallowRef, watch } from "vue";
+import { wrRelic, wrSet } from "@/data/index.js";
+import relicUtils from "@utils/relicUtils.js";
 
-type PbRelicDetailProps = { cur: RelicInfo };
-type PropMix = { type: number; info: TGApp.Game.Avatar.PropMapItem; val: number; cnt?: number };
+type PbRelicDetailProps = { cur: TGApp.Sqlite.UserBag.RelicTable };
 
 const props = defineProps<PbRelicDetailProps>();
 const visible = defineModel<boolean>("show");
 const posInfo = shallowRef<TGApp.App.Relic.RelicItem>();
 const setInfo = shallowRef<TGApp.App.Relic.SetItem>();
-const mainProp = shallowRef<PropMix>();
-const subProps = shallowRef<Array<PropMix>>([]);
-
-const tbInfo = computed<TGApp.Plugins.Yae.ReliquaryInfo>(() => props.cur.tb.info);
-const curInfo = computed<TGApp.App.Relic.RelicMini>(() => props.cur.info);
 
 watch(
   () => props.cur,
@@ -80,51 +74,11 @@ function hide(): void {
   visible.value = false;
 }
 
-function getPosLabel() {
-  const relicPos = ["生之花", "死之羽", "时之沙", "空之杯", "理之冠"];
-  return relicPos[curInfo.value.pos - 1];
-}
-
 function loadPosInfo(): void {
-  posInfo.value = wrRelic.find((i) => i.pos === curInfo.value.pos && i.set === curInfo.value.set);
-  setInfo.value = wrSet.find((i) => i.id === curInfo.value.set);
-  parseMainProp();
-  parseSubProps();
-}
-
-function parseMainProp(): void {
-  const mainPropType = wrMainProp[tbInfo.value.main_prop_id];
-  const mainLvFind = wrMainLv.find(
-    (i) => i.star === curInfo.value.star && i.level === tbInfo.value.level,
+  posInfo.value = wrRelic.find(
+    (i) => i.pos === props.cur.brief.pos && i.set === props.cur.brief.set,
   );
-  if (mainLvFind) {
-    mainProp.value = {
-      type: mainPropType,
-      val: mainLvFind.prop[mainPropType],
-      info: AppPropMapData[mainPropType],
-    };
-  }
-}
-
-function parseSubProps(): void {
-  console.log(tbInfo.value.append_prop_id_list);
-  let tmpProps: Array<PropMix> = [];
-  for (const prop of tbInfo.value.append_prop_id_list) {
-    const subInfo = wrSub[prop];
-    const find = tmpProps.findIndex((i) => i.type === subInfo.type);
-    if (find !== -1) {
-      tmpProps[find].cnt = (tmpProps[find]?.cnt ?? 0) + 1;
-      tmpProps[find].val += subInfo.val;
-    } else {
-      tmpProps.push({
-        type: subInfo.type,
-        val: subInfo.val,
-        info: AppPropMapData[subInfo.type],
-        cnt: 0,
-      });
-    }
-  }
-  subProps.value = tmpProps;
+  setInfo.value = wrSet.find((i) => i.id === props.cur.brief.set);
 }
 </script>
 <style lang="scss" scoped>

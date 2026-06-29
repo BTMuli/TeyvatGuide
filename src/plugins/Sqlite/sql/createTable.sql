@@ -16,7 +16,7 @@ create table if not exists UserBagMaterial
 create table if not exists UserBagWeapon
 (
     uid     integer not null,
-    guid    text not null,
+    guid    text    not null,
     id      integer not null,
     info    text,
     updated text,
@@ -24,13 +24,20 @@ create table if not exists UserBagWeapon
 );
 
 -- @brief 创建背包物品圣遗物表
+drop table if exists UserBagRelic;
 create table if not exists UserBagRelic
 (
-    uid     integer not null,
-    guid    text not null,
-    id      integer not null,
-    info    text,
-    updated text,
+    guid      text    not null,
+    uid       integer not null,
+    id        integer not null,
+    sets      integer,
+    brief     text,
+    mp        text,
+    sp        text,
+    is_locked boolean default false,
+    is_marked boolean default false,
+    level     integer default 0,
+    updated   text,
     primary key (uid, guid)
 );
 

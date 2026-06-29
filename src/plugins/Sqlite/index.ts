@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.10.5
+ * @since Beta v0.11.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -125,6 +125,17 @@ class Sqlite {
       `,
       [key, value],
     );
+  }
+
+  /**
+   * 删除 appData
+   * @since Beta v0.11.0
+   * @param key - 键
+   * @returns 无返回值
+   */
+  public async deleteAppData(key: string): Promise<void> {
+    const db = await this.getDB();
+    await db.execute("DELETE FROM AppData WHERE key = $1;", [key]);
   }
 
   /**

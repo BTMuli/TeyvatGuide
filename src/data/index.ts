@@ -22,12 +22,12 @@ import schemaUigf from "./schema/uigf-schema.json" with { type: "json" };
 import schemaUigf4 from "./schema/uigf4-schema.json" with { type: "json" };
 import propMap from "./app/propMap.json" with { type: "json" };
 import wikiMaterial from "./WIKI/material.json" with { type: "json" };
-// import wikiRelicMainLv from "./WIKI/relic/MainLv.json" with { type: "json" };
-// import wikiRelicMainProp from "./WIKI/relic/MainProp.json" with { type: "json" };
+import wikiRelicMainLv from "./WIKI/relic/MainLv.json" with { type: "json" };
+import wikiRelicMainProp from "./WIKI/relic/MainProp.json" with { type: "json" };
 import wikiRelic from "./WIKI/relic/Relic.json" with { type: "json" };
 import wikiRelicMap from "./WIKI/relic/RelicMap.json" with { type: "json" };
 import wikiRelicSet from "./WIKI/relic/RelicSet.json" with { type: "json" };
-// import wikiRelicSubProp from "./WIKI/relic/SubProp.json" with { type: "json" };
+import wikiRelicSubProp from "./WIKI/relic/SubProp.json" with { type: "json" };
 import wikiWeapon from "./WIKI/weapon.json" with { type: "json" };
 
 // App
@@ -53,12 +53,12 @@ export const WikiWeaponData: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
 export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial;
 export const WikiHyperLinkData: TGApp.App.HyperLink.AppHyperLink = hyperlink;
 // 圣遗物数据
-// export const wrMainLv: TGApp.App.Relic.MainLv = wikiRelicMainLv;
-// export const wrMainProp: TGApp.App.Relic.MainProp = wikiRelicMainProp;
+export const wrMainLv: TGApp.App.Relic.MainLv = wikiRelicMainLv;
+export const wrMainProp: TGApp.App.Relic.MainProp = wikiRelicMainProp;
 export const wrRelic: TGApp.App.Relic.RawRelic = wikiRelic;
 export const wrMap: TGApp.App.Relic.RelicMap = wikiRelicMap;
 export const wrSet: TGApp.App.Relic.RawSet = wikiRelicSet;
-// export const wrSub: TGApp.App.Relic.SubProp = wikiRelicSubProp;
+export const wrSub: TGApp.App.Relic.SubProp = wikiRelicSubProp;
 
 const avatarFiles = import.meta.glob("./WIKI/character/*.json");
 

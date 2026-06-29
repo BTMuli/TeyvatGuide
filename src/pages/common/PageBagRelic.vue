@@ -49,7 +49,6 @@
       </div>
     </template>
     <template #extension>
-      <!-- TODO: 优化筛选，增加套装、主词条、副词条、等级筛选 -->
       <div class="pbr-nav-extension">
         <v-select
           v-model="selectSlot"
@@ -75,17 +74,57 @@
           variant="outlined"
           width="120px"
         />
-        <!-- TODO: 添加套装筛选 -->
+        <v-select
+          v-model="selectSet"
+          :clearable="true"
+          :hide-details="true"
+          :items="setList"
+          density="compact"
+          item-title="name"
+          item-value="id"
+          label="套装"
+          variant="outlined"
+          width="200px"
+        />
+        <v-select
+          v-model="selectMainProp"
+          :clearable="true"
+          :hide-details="true"
+          :items="mainPropList"
+          density="compact"
+          item-title="name"
+          item-value="id"
+          label="主词条"
+          variant="outlined"
+          width="180px"
+        />
+        <v-btn
+          :class="{ active: selectLocked === true }"
+          density="compact"
+          icon
+          variant="text"
+          @click="toggleLocked()"
+        >
+          🔒
+        </v-btn>
+        <v-btn
+          :class="{ active: selectMarked === true }"
+          icon
+          density="compact"
+          variant="text"
+          @click="toggleMarked()"
+        >
+          ⭐
+        </v-btn>
       </div>
     </template>
   </v-app-bar>
   <div class="pbr-container">
-    <template v-for="relic in relicShow" :key="relic.tb.guid">
+    <template v-for="relic in relicShow" :key="relic.guid">
       <PbRelicItem
-        :info="relic.info"
+        :relic
         :selected="relic.guid === curRelic?.guid"
         :detail="showDetail"
-        :tb="relic.tb"
         @select="handleSelect"
       />
     </template>
@@ -103,7 +142,7 @@ import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
-import { wrMap } from "@/data/index.js";
+import { wrSet, wrMainProp, AppPropMapData } from "@/data/index.js";
 import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
 
 /** 圣遗物部位选项 */
@@ -118,11 +157,16 @@ type StarOption = {
   value: number;
 };
 
-/** 圣遗物信息 */
-export type RelicInfo = {
-  guid: string;
-  tb: TGApp.Sqlite.UserBag.RelicTable;
-  info: TGApp.App.Relic.RelicMini;
+/** 套装选项 */
+type SetOption = {
+  id: number;
+  name: string;
+};
+
+/** 主词条选项 */
+type MainPropOption = {
+  id: number;
+  name: string;
 };
 
 const { gameDir, isLogin } = storeToRefs(useAppStore());
@@ -142,6 +186,16 @@ const slotList: Array<SlotOption> = [
   { text: "空之杯", value: 4 },
   { text: "理之冠", value: 5 },
 ];
+const setList: Array<SetOption> = wrSet.map((s) => ({ id: s.id, name: s.name }));
+const mainPropList: Array<MainPropOption> = Array.from(new Set(Object.values(wrMainProp))).map(
+  (propId) => {
+    const propInfo = AppPropMapData[propId];
+    return {
+      id: propId,
+      name: propInfo ? propInfo.filter_name : `属性${propId}`,
+    };
+  },
+);
 
 const curUid = ref<number>(0);
 const uidList = shallowRef<Array<number>>([]);
@@ -149,12 +203,16 @@ const uidList = shallowRef<Array<number>>([]);
 const search = ref<string>();
 const selectSlot = ref<number | null>(null);
 const selectStar = ref<number | null>(null);
+const selectSet = ref<number | null>(null);
+const selectMainProp = ref<number | null>(null);
+const selectLocked = ref<boolean | null>(null);
+const selectMarked = ref<boolean | null>(null);
 
 const curIdx = ref<number>(0);
 const showDetail = ref<boolean>(false);
-const curRelic = shallowRef<RelicInfo>();
-const relicList = shallowRef<Array<RelicInfo>>([]);
-const relicShow = shallowRef<Array<RelicInfo>>([]);
+const curRelic = shallowRef<TGApp.Sqlite.UserBag.RelicTable>();
+const relicList = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
+const relicShow = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 
 onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
@@ -169,10 +227,16 @@ watch(
   },
 );
 watch(
-  () => [selectSlot.value, selectStar.value],
-  async () => {
-    const renderRelics = getSelectRelics();
-    relicShow.value = sortRelics(renderRelics);
+  () => [
+    selectSlot.value,
+    selectStar.value,
+    selectSet.value,
+    selectMainProp.value,
+    selectLocked.value,
+    selectMarked.value,
+  ],
+  () => {
+    relicShow.value = filterRelics(relicList.value);
     triggerRef(relicShow);
     curIdx.value = 0;
   },
@@ -189,21 +253,36 @@ async function reloadUid(): Promise<void> {
   } else curUid.value = 0;
 }
 
-function getSelectRelics(): Array<RelicInfo> {
-  let result = relicList.value;
+function filterRelics(
+  data: Array<TGApp.Sqlite.UserBag.RelicTable>,
+): Array<TGApp.Sqlite.UserBag.RelicTable> {
+  let result = data;
   if (selectSlot.value !== null) {
-    result = result.filter((i) => i.info.pos === selectSlot.value);
+    result = result.filter((i) => i.brief.pos === selectSlot.value);
   }
   if (selectStar.value !== null) {
-    result = result.filter((i) => i.info.star === selectStar.value);
+    result = result.filter((i) => i.brief.star === selectStar.value);
+  }
+  if (selectSet.value !== null) {
+    result = result.filter((i) => i.sets === selectSet.value);
+  }
+  if (selectMainProp.value !== null) {
+    result = result.filter((i) => i.mp.type === selectMainProp.value);
+  }
+  if (selectLocked.value !== null) {
+    result = result.filter((i) => i.is_locked === selectLocked.value);
+  }
+  if (selectMarked.value !== null) {
+    result = result.filter((i) => i.is_marked === selectMarked.value);
   }
   return result;
 }
 
-function sortRelics(data: Array<RelicInfo>): Array<RelicInfo> {
+function sortRelics(
+  data: Array<TGApp.Sqlite.UserBag.RelicTable>,
+): Array<TGApp.Sqlite.UserBag.RelicTable> {
   return data.sort(
-    (a, b) =>
-      b.info.star - a.info.star || a.info.pos - b.info.pos || b.tb.info.level - a.tb.info.level,
+    (a, b) => b.brief.star - a.brief.star || a.brief.pos - b.brief.pos || b.level - a.level,
   );
 }
 
@@ -213,26 +292,29 @@ async function loadRelicList(uid: number): Promise<void> {
   relicList.value = [];
   selectSlot.value = null;
   selectStar.value = null;
+  selectSet.value = null;
+  selectMainProp.value = null;
+  selectLocked.value = null;
+  selectMarked.value = null;
   const dList = await TSUserBagRelic.getRelic(uid);
-  const rList = [];
-  for (const relic of dList) {
-    const info = getItemInfo(relic.id);
-    if (info === false) continue;
-    rList.push({ guid: relic.guid, tb: relic, info: info });
-  }
-  relicList.value = sortRelics(rList);
+  relicList.value = sortRelics(dList);
   relicShow.value = relicList.value;
   curIdx.value = 0;
   await showLoading.end();
 }
 
-function getItemInfo(id: number): TGApp.App.Relic.RelicMini | false {
-  if (Object.hasOwn(wrMap, id)) return wrMap[id];
-  return false;
+function toggleLocked(): void {
+  selectLocked.value =
+    selectLocked.value === null ? true : selectLocked.value === true ? null : true;
+}
+
+function toggleMarked(): void {
+  selectMarked.value =
+    selectMarked.value === null ? true : selectMarked.value === true ? null : true;
 }
 
 function searchRelic(): void {
-  let selectData = getSelectRelics();
+  let selectData = filterRelics(relicList.value);
   if (search.value === undefined || search.value === "" || search.value === null) {
     if (relicShow.value.length === selectData.length) {
       showSnackbar.warn("请输入搜索内容!");
@@ -243,12 +325,12 @@ function searchRelic(): void {
     return;
   }
   selectData = selectData.filter((i) => {
-    const idStr = i.tb.id.toString();
-    const levelStr = i.tb.info.level.toString();
+    const idStr = i.id.toString();
+    const levelStr = i.level.toString();
     return (
       idStr.includes(search.value!) ||
       levelStr.includes(search.value!) ||
-      i.info.name.includes(search.value!)
+      i.brief.name.includes(search.value!)
     );
   });
   if (selectData.length === 0) {
@@ -304,7 +386,7 @@ async function deleteUid(): Promise<void> {
   showSnackbar.success(`已删除对应存档，即将刷新`);
 }
 
-function handleSelect(relic: RelicInfo): void {
+function handleSelect(relic: TGApp.Sqlite.UserBag.RelicTable): void {
   curRelic.value = relic;
   showDetail.value = true;
 }
@@ -359,6 +441,11 @@ function handleSelect(relic: RelicInfo): void {
   margin-bottom: 4px;
   margin-left: 16px;
   column-gap: 8px;
+
+  .v-btn.active {
+    background: var(--tgc-btn-1);
+    color: var(--btn-text);
+  }
 }
 
 .pbr-container {

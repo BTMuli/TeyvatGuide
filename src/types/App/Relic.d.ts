@@ -144,4 +144,26 @@ declare namespace TGApp.App.Relic {
     /** 故事 */
     story: string;
   };
+
+  /**
+   * 解析后的主词条信息
+   * @since 0.11.0
+   */
+  type MainPropInfo = {
+    /** 词条类型 */
+    type: number;
+    /** 词条信息 */
+    info: TGApp.Game.Avatar.PropMapItem;
+    /** 词条值 */
+    val: number;
+  };
+
+  /**
+   * 解析后的副词条信息
+   * @since 0.11.0
+   */
+  type SubPropInfo = MainPropInfo & {
+    /** 详细 */
+    vals: Array<number>;
+  };
 }

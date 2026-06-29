@@ -3,37 +3,34 @@
   <div
     :class="{ selected: props.selected, detail: props.detail }"
     :style="{
-      backgroundImage: `url('/icon/bg/${props.info.star}-Star.webp')`,
+      backgroundImage: `url('/icon/bg/${props.relic.brief.star}-Star.webp')`,
       backgroundSize: 'cover',
     }"
-    :title="props.info.name"
+    :title="props.relic.brief.name"
     class="pb-ri-box"
     @click="toRelic()"
   >
-    <img :src="`/WIKI/relic/${props.info.icon}.webp`" alt="icon" class="pb-ri-icon" />
-    <img :src="`/icon/relic/${props.info.pos}.webp`" alt="pos" class="pb-ri-pos" />
-    <div v-if="props.tb.info.is_locked || props.tb.info.is_marked" class="pb-ri-sign">
-      <span v-if="props.tb.info.is_locked">🔒</span>
-      <span v-if="props.tb.info.is_marked">⭐</span>
+    <img :src="`/WIKI/relic/${props.relic.brief.icon}.webp`" alt="icon" class="pb-ri-icon" />
+    <img :src="`/icon/relic/${props.relic.brief.pos}.webp`" alt="pos" class="pb-ri-pos" />
+    <div v-if="props.relic.is_locked || props.relic.is_marked" class="pb-ri-sign">
+      <span v-if="props.relic.is_locked">🔒</span>
+      <span v-if="props.relic.is_marked">⭐</span>
     </div>
-    <div class="pb-ri-level">Lv.{{ props.tb.info.level - 1 }}</div>
+    <div class="pb-ri-level">Lv.{{ props.relic.level - 1 }}</div>
   </div>
 </template>
 <script lang="ts" setup>
 import { getOdStarColor } from "@utils/colorFunc.js";
 import { computed, onMounted, shallowRef } from "vue";
-
-import type { RelicInfo } from "@/pages/common/PageBagRelic.vue";
 import { wrSet } from "@/data/index.js";
 
 type PbRelicItemProps = {
   selected: boolean;
   detail: boolean;
-  tb: TGApp.Sqlite.UserBag.RelicTable;
-  info: TGApp.App.Relic.RelicMini;
+  relic: TGApp.Sqlite.UserBag.RelicTable;
 };
 
-type PbRelicItemEmits = (e: "select", v: RelicInfo) => void;
+type PbRelicItemEmits = (e: "select", v: TGApp.Sqlite.UserBag.RelicTable) => void;
 
 const props = defineProps<PbRelicItemProps>();
 const emits = defineEmits<PbRelicItemEmits>();
@@ -41,15 +38,16 @@ const emits = defineEmits<PbRelicItemEmits>();
 const setInfo = shallowRef<TGApp.App.Relic.SetItem>();
 
 onMounted(() => {
-  const findSet = wrSet.find((i) => i.id === props.info.set);
+  const findSet = wrSet.find((i) => i.id === props.relic.sets);
   if (findSet) setInfo.value = findSet;
 });
 
 function toRelic(): void {
-  emits("select", { tb: props.tb, info: props.info, guid: props.tb.guid });
+  console.log(props.relic);
+  emits("select", props.relic);
 }
 
-const idColor = computed<string>(() => getOdStarColor(props.info.star));
+const idColor = computed<string>(() => getOdStarColor(props.relic.brief.star));
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
