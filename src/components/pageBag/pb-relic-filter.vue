@@ -1,0 +1,367 @@
+<!-- 圣遗物筛选浮窗 -->
+<template>
+  <TOverlay v-model="visible">
+    <div class="pbrf-container">
+      <div class="pbrf-tabs">
+        <v-btn
+          v-for="tab in tabs"
+          :key="tab.key"
+          :active="activeTab === tab.key"
+          activeColor="blue"
+          @click="activeTab = tab.key"
+        >
+          {{ tab.label }}
+        </v-btn>
+      </div>
+      <div class="pbrf-content">
+        <!-- 基础筛选 -->
+        <div v-show="activeTab === 'basic'" class="pbrf-section">
+          <div class="pbrf-item">
+            <div class="pbrf-title">部位</div>
+            <v-item-group v-model="selectedSlot" class="pbrf-select" multiple>
+              <div v-for="item in slotList" :key="item.value">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.value">
+                  <v-btn
+                    :active="isSelected"
+                    :title="item.text"
+                    activeColor="blue"
+                    size="small"
+                    @click="toggle"
+                  >
+                    <img
+                      :alt="item.text"
+                      :src="`/icon/relic/${item.value}.webp`"
+                      class="pbrf-icon"
+                    />
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
+          <div class="pbrf-item">
+            <div class="pbrf-title">星级</div>
+            <v-item-group v-model="selectedStar" class="pbrf-select" multiple>
+              <div v-for="item in starList" :key="item.value">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.value">
+                  <v-btn :active="isSelected" activeColor="blue" size="small" @click="toggle">
+                    <v-icon>{{ isSelected ? "mdi-star" : "mdi-star-outline" }}</v-icon>
+                    <span>{{ item.text }}</span>
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
+          <div class="pbrf-item">
+            <div class="pbrf-title">状态</div>
+            <v-item-group v-model="selectedStatus" class="pbrf-select" multiple>
+              <div v-for="item in statusList" :key="item.key">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.key">
+                  <v-btn
+                    :active="isSelected"
+                    :title="item.label"
+                    activeColor="blue"
+                    size="small"
+                    @click="toggle"
+                  >
+                    <v-icon>{{ item.icon }}</v-icon>
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
+        </div>
+        <!-- 套装筛选 -->
+        <div v-show="activeTab === 'set'" class="pbrf-section">
+          <div class="pbrf-item">
+            <v-item-group v-model="selectedSet" class="pbrf-select-set" multiple>
+              <div v-for="item in setList" :key="item.id">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.id">
+                  <v-btn
+                    :active="isSelected"
+                    activeColor="blue"
+                    class="pbrf-set-btn"
+                    @click="toggle"
+                  >
+                    <div class="pbrf-set-left">
+                      <img :src="`/icon/bg/${item.maxStar}-Star.webp`" alt="bg" class="bg" />
+                      <img :src="`/WIKI/relic/${item.icon}.webp`" alt="icon" class="icon" />
+                    </div>
+                    <span class="pbrf-set-name">{{ item.name }}</span>
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
+        </div>
+        <!-- 主词条筛选 -->
+        <div v-show="activeTab === 'mainProp'" class="pbrf-section">
+          <div class="pbrf-item">
+            <v-item-group v-model="selectedMainProp" class="pbrf-select" multiple>
+              <div v-for="item in mainPropList" :key="item.id">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.id">
+                  <v-btn
+                    :active="isSelected"
+                    activeColor="blue"
+                    class="pbrf-pm-btn"
+                    size="small"
+                    @click="toggle"
+                  >
+                    <img v-if="item.icon !== ''" :src="item.icon" alt="icon" />
+                    <span>{{ item.name }}</span>
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
+        </div>
+      </div>
+      <div class="pbrf-submit">
+        <v-btn variant="tonal" @click="resetFilter">重置</v-btn>
+        <v-btn @click="confirmSelect">确定</v-btn>
+      </div>
+    </div>
+  </TOverlay>
+</template>
+<script lang="ts" setup>
+import TOverlay from "@comp/app/t-overlay.vue";
+import { ref, watch } from "vue";
+import { AppPropMapData, wrMainProp, wrSet } from "@/data/index.js";
+
+export type RelicFilterValue = {
+  slot: Array<number>;
+  star: Array<number>;
+  set: Array<number>;
+  mainProp: Array<number>;
+  locked: boolean | null;
+  marked: boolean | null;
+};
+
+type PbRelicFilterEmits = (e: "filter", v: RelicFilterValue) => void;
+
+const emits = defineEmits<PbRelicFilterEmits>();
+
+const tabs = [
+  { key: "basic", label: "基础筛选" },
+  { key: "set", label: "套装筛选" },
+  { key: "mainProp", label: "主词条筛选" },
+];
+
+const slotList = [
+  { text: "生之花", value: 1 },
+  { text: "死之羽", value: 2 },
+  { text: "时之沙", value: 3 },
+  { text: "空之杯", value: 4 },
+  { text: "理之冠", value: 5 },
+];
+
+const starList = [
+  { text: "1星", value: 1 },
+  { text: "2星", value: 2 },
+  { text: "3星", value: 3 },
+  { text: "4星", value: 4 },
+  { text: "5星", value: 5 },
+];
+
+const statusList = [
+  { key: "locked", label: "锁定", icon: "mdi-lock" },
+  { key: "marked", label: "星标", icon: "mdi-star" },
+];
+
+const setList = wrSet
+  .sort((a, b) => b.maxStar - a.maxStar || b.id - a.id)
+  .map((s) => ({
+    id: s.id,
+    name: s.name,
+    icon: s.icon,
+    maxStar: s.maxStar,
+  }));
+
+const mainPropList = Array.from(new Set(Object.values(wrMainProp))).map((propId) => {
+  const propInfo = AppPropMapData[propId];
+  return {
+    id: propId,
+    name: propInfo ? propInfo.filter_name : `属性${propId}`,
+    icon: propInfo.icon,
+  };
+});
+
+const activeTab = ref<string>("basic");
+const selectedSlot = ref<Array<number>>([]);
+const selectedStar = ref<Array<number>>([]);
+const selectedSet = ref<Array<number>>([]);
+const selectedMainProp = ref<Array<number>>([]);
+const selectedStatus = ref<Array<string>>([]);
+
+const visible = defineModel<boolean>();
+const resetModel = defineModel<boolean>("reset");
+
+watch(
+  () => resetModel.value,
+  () => {
+    if (resetModel.value) {
+      selectedSlot.value = [];
+      selectedStar.value = [];
+      selectedSet.value = [];
+      selectedMainProp.value = [];
+      selectedStatus.value = [];
+      resetModel.value = false;
+    }
+  },
+);
+
+function resetFilter(): void {
+  selectedSlot.value = [];
+  selectedStar.value = [];
+  selectedSet.value = [];
+  selectedMainProp.value = [];
+  selectedStatus.value = [];
+  confirmSelect();
+}
+
+function confirmSelect(): void {
+  const value: RelicFilterValue = {
+    slot: selectedSlot.value,
+    star: selectedStar.value,
+    set: selectedSet.value,
+    mainProp: selectedMainProp.value,
+    locked: selectedStatus.value.includes("locked") ? true : null,
+    marked: selectedStatus.value.includes("marked") ? true : null,
+  };
+  emits("filter", value);
+  visible.value = false;
+}
+</script>
+<style lang="css" scoped>
+.pbrf-container {
+  display: flex;
+  width: 500px;
+  max-height: 600px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--box-bg-1);
+  row-gap: 8px;
+}
+
+.pbrf-tabs {
+  display: flex;
+  width: 100%;
+  font-family: var(--font-title);
+  gap: 8px;
+}
+
+.pbrf-content {
+  width: 100%;
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.pbrf-section {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  gap: 8px;
+}
+
+.pbrf-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.pbrf-title {
+  color: var(--common-text-title);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.pbrf-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pbrf-select-set {
+  display: flex;
+  width: 100%;
+  max-height: 350px;
+  flex-wrap: wrap;
+  padding-right: 4px;
+  padding-bottom: 4px;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.pbrf-icon {
+  width: 24px;
+  height: 24px;
+  filter: invert(0.5);
+
+  .dark & {
+    filter: unset;
+  }
+}
+
+.pbrf-set-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  border-radius: 4px;
+  gap: 8px;
+}
+
+.pbrf-set-left {
+  position: relative;
+  overflow: hidden;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-bottom-left-radius: 4px;
+  border-top-left-radius: 4px;
+}
+
+.pbrf-set-left .bg,
+.pbrf-set-left .icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pbrf-set-name {
+  flex: 1;
+  margin-right: 4px;
+  margin-left: 4px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.pbrf-pm-btn {
+  img {
+    width: 16px;
+    height: 16px;
+    margin-right: 2px;
+    filter: invert(0.5);
+  }
+
+  .dark & {
+    img {
+      filter: unset;
+    }
+  }
+}
+
+.pbrf-submit {
+  display: flex;
+  padding-top: 8px;
+  margin-left: auto;
+  gap: 12px;
+}
+</style>

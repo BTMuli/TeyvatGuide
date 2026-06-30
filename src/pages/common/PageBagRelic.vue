@@ -33,6 +33,14 @@
         </div>
         <v-btn
           class="pbr-ne-btn"
+          prepend-icon="mdi-filter"
+          variant="elevated"
+          @click="showFilter = true"
+        >
+          筛选
+        </v-btn>
+        <v-btn
+          class="pbr-ne-btn"
           prepend-icon="mdi-import"
           title="通过Yae导入（请确保导入前游戏未启动）"
           variant="elevated"
@@ -48,76 +56,6 @@
         </v-btn>
       </div>
     </template>
-    <template #extension>
-      <div class="pbr-nav-extension">
-        <v-select
-          v-model="selectSlot"
-          :clearable="true"
-          :hide-details="true"
-          :items="slotList"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          label="部位"
-          variant="outlined"
-          width="140px"
-        />
-        <v-select
-          v-model="selectStar"
-          :clearable="true"
-          :hide-details="true"
-          :items="starList"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          label="星级"
-          variant="outlined"
-          width="120px"
-        />
-        <v-select
-          v-model="selectSet"
-          :clearable="true"
-          :hide-details="true"
-          :items="setList"
-          density="compact"
-          item-title="name"
-          item-value="id"
-          label="套装"
-          variant="outlined"
-          width="200px"
-        />
-        <v-select
-          v-model="selectMainProp"
-          :clearable="true"
-          :hide-details="true"
-          :items="mainPropList"
-          density="compact"
-          item-title="name"
-          item-value="id"
-          label="主词条"
-          variant="outlined"
-          width="180px"
-        />
-        <v-btn
-          :class="{ active: selectLocked === true }"
-          density="compact"
-          icon
-          variant="text"
-          @click="toggleLocked()"
-        >
-          🔒
-        </v-btn>
-        <v-btn
-          :class="{ active: selectMarked === true }"
-          icon
-          density="compact"
-          variant="text"
-          @click="toggleMarked()"
-        >
-          ⭐
-        </v-btn>
-      </div>
-    </template>
   </v-app-bar>
   <div class="pbr-container">
     <template v-for="relic in relicShow" :key="relic.guid">
@@ -130,6 +68,7 @@
     </template>
   </div>
   <PbRelicDetail v-if="curRelic" v-model:show="showDetail" :cur="curRelic" />
+  <PbRelicFilter v-model="showFilter" @filter="handleFilter" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -142,77 +81,31 @@ import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
-import { wrSet, wrMainProp, AppPropMapData } from "@/data/index.js";
 import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
-
-/** 圣遗物部位选项 */
-type SlotOption = {
-  text: string;
-  value: number;
-};
-
-/** 圣遗物星级选项 */
-type StarOption = {
-  text: string;
-  value: number;
-};
-
-/** 套装选项 */
-type SetOption = {
-  id: number;
-  name: string;
-};
-
-/** 主词条选项 */
-type MainPropOption = {
-  id: number;
-  name: string;
-};
+import PbRelicFilter, { type RelicFilterValue } from "@comp/pageBag/pb-relic-filter.vue";
 
 const { gameDir, isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
-
-const starList: Array<StarOption> = [
-  { text: "1星", value: 1 },
-  { text: "2星", value: 2 },
-  { text: "3星", value: 3 },
-  { text: "4星", value: 4 },
-  { text: "5星", value: 5 },
-];
-const slotList: Array<SlotOption> = [
-  { text: "生之花", value: 1 },
-  { text: "死之羽", value: 2 },
-  { text: "时之沙", value: 3 },
-  { text: "空之杯", value: 4 },
-  { text: "理之冠", value: 5 },
-];
-const setList: Array<SetOption> = wrSet.map((s) => ({ id: s.id, name: s.name }));
-const mainPropList: Array<MainPropOption> = Array.from(new Set(Object.values(wrMainProp))).map(
-  (propId) => {
-    const propInfo = AppPropMapData[propId];
-    return {
-      id: propId,
-      name: propInfo ? propInfo.filter_name : `属性${propId}`,
-    };
-  },
-);
 
 const curUid = ref<number>(0);
 const uidList = shallowRef<Array<number>>([]);
 
 const search = ref<string>();
-const selectSlot = ref<number | null>(null);
-const selectStar = ref<number | null>(null);
-const selectSet = ref<number | null>(null);
-const selectMainProp = ref<number | null>(null);
-const selectLocked = ref<boolean | null>(null);
-const selectMarked = ref<boolean | null>(null);
+const showFilter = ref<boolean>(false);
+
+const filterSlot = ref<Array<number>>([]);
+const filterStar = ref<Array<number>>([]);
+const filterSet = ref<Array<number>>([]);
+const filterMainProp = ref<Array<number>>([]);
+const filterLocked = ref<boolean | null>(null);
+const filterMarked = ref<boolean | null>(null);
 
 const curIdx = ref<number>(0);
 const showDetail = ref<boolean>(false);
 const curRelic = shallowRef<TGApp.Sqlite.UserBag.RelicTable>();
 const relicList = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 const relicShow = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
+const isFilterInitialized = ref<boolean>(false);
 
 onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
@@ -226,20 +119,22 @@ watch(
     await loadRelicList(curUid.value);
   },
 );
+
 watch(
-  () => [
-    selectSlot.value,
-    selectStar.value,
-    selectSet.value,
-    selectMainProp.value,
-    selectLocked.value,
-    selectMarked.value,
-  ],
+  [filterSlot, filterStar, filterSet, filterMainProp, filterLocked, filterMarked],
   () => {
     relicShow.value = filterRelics(relicList.value);
     triggerRef(relicShow);
     curIdx.value = 0;
+    if (isFilterInitialized.value) {
+      if (relicShow.value.length === 0) {
+        showSnackbar.warn("未找到符合条件的圣遗物!");
+      } else {
+        showSnackbar.success(`筛选完成，共 ${relicShow.value.length} 件圣遗物`);
+      }
+    }
   },
+  { deep: true },
 );
 
 async function reloadUid(): Promise<void> {
@@ -253,27 +148,37 @@ async function reloadUid(): Promise<void> {
   } else curUid.value = 0;
 }
 
+function handleFilter(value: RelicFilterValue): void {
+  isFilterInitialized.value = true;
+  filterSlot.value = value.slot;
+  filterStar.value = value.star;
+  filterSet.value = value.set;
+  filterMainProp.value = value.mainProp;
+  filterLocked.value = value.locked;
+  filterMarked.value = value.marked;
+}
+
 function filterRelics(
   data: Array<TGApp.Sqlite.UserBag.RelicTable>,
 ): Array<TGApp.Sqlite.UserBag.RelicTable> {
   let result = data;
-  if (selectSlot.value !== null) {
-    result = result.filter((i) => i.brief.pos === selectSlot.value);
+  if (filterSlot.value.length > 0) {
+    result = result.filter((i) => filterSlot.value.includes(i.brief.pos));
   }
-  if (selectStar.value !== null) {
-    result = result.filter((i) => i.brief.star === selectStar.value);
+  if (filterStar.value.length > 0) {
+    result = result.filter((i) => filterStar.value.includes(i.brief.star));
   }
-  if (selectSet.value !== null) {
-    result = result.filter((i) => i.sets === selectSet.value);
+  if (filterSet.value.length > 0) {
+    result = result.filter((i) => filterSet.value.includes(i.sets));
   }
-  if (selectMainProp.value !== null) {
-    result = result.filter((i) => i.mp.type === selectMainProp.value);
+  if (filterMainProp.value.length > 0) {
+    result = result.filter((i) => filterMainProp.value.includes(i.mp.type));
   }
-  if (selectLocked.value !== null) {
-    result = result.filter((i) => i.is_locked === selectLocked.value);
+  if (filterLocked.value !== null) {
+    result = result.filter((i) => i.is_locked === filterLocked.value);
   }
-  if (selectMarked.value !== null) {
-    result = result.filter((i) => i.is_marked === selectMarked.value);
+  if (filterMarked.value !== null) {
+    result = result.filter((i) => i.is_marked === filterMarked.value);
   }
   return result;
 }
@@ -290,27 +195,17 @@ async function loadRelicList(uid: number): Promise<void> {
   await showLoading.start(`正在加载 ${uid} 的圣遗物数据`);
   relicShow.value = [];
   relicList.value = [];
-  selectSlot.value = null;
-  selectStar.value = null;
-  selectSet.value = null;
-  selectMainProp.value = null;
-  selectLocked.value = null;
-  selectMarked.value = null;
+  filterSlot.value = [];
+  filterStar.value = [];
+  filterSet.value = [];
+  filterMainProp.value = [];
+  filterLocked.value = null;
+  filterMarked.value = null;
   const dList = await TSUserBagRelic.getRelic(uid);
   relicList.value = sortRelics(dList);
   relicShow.value = relicList.value;
   curIdx.value = 0;
   await showLoading.end();
-}
-
-function toggleLocked(): void {
-  selectLocked.value =
-    selectLocked.value === null ? true : selectLocked.value === true ? null : true;
-}
-
-function toggleMarked(): void {
-  selectMarked.value =
-    selectMarked.value === null ? true : selectMarked.value === true ? null : true;
 }
 
 function searchRelic(): void {
@@ -431,21 +326,6 @@ function handleSelect(relic: TGApp.Sqlite.UserBag.RelicTable): void {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-}
-
-.pbr-nav-extension {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
-  margin-left: 16px;
-  column-gap: 8px;
-
-  .v-btn.active {
-    background: var(--tgc-btn-1);
-    color: var(--btn-text);
-  }
 }
 
 .pbr-container {
