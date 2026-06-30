@@ -122,32 +122,6 @@ watch(
   },
 );
 
-watch(
-  [
-    filterSlot,
-    filterStar,
-    filterSet,
-    filterMainProp,
-    filterSubProp,
-    filterLocked,
-    filterMarked,
-    filterGrade,
-  ],
-  () => {
-    relicShow.value = filterRelics(relicList.value);
-    triggerRef(relicShow);
-    curIdx.value = 0;
-    if (isFilterInitialized.value) {
-      if (relicShow.value.length === 0) {
-        showSnackbar.warn("未找到符合条件的圣遗物!");
-      } else {
-        showSnackbar.success(`筛选完成，共 ${relicShow.value.length} 件圣遗物`);
-      }
-    }
-  },
-  { deep: true },
-);
-
 async function reloadUid(): Promise<void> {
   uidList.value = await TSUserBagRelic.getAllUid();
   if (uidList.value.includes(Number(account.value.gameUid))) {
@@ -169,6 +143,14 @@ function handleFilter(value: RelicFilterValue): void {
   filterLocked.value = value.locked;
   filterMarked.value = value.marked;
   filterGrade.value = value.grade;
+  relicShow.value = filterRelics(relicList.value);
+  triggerRef(relicShow);
+  curIdx.value = 0;
+  if (relicShow.value.length === 0) {
+    showSnackbar.warn("未找到符合条件的圣遗物!");
+  } else {
+    showSnackbar.success(`筛选完成，共 ${relicShow.value.length} 件圣遗物`);
+  }
 }
 
 function filterRelics(
@@ -205,16 +187,16 @@ function filterRelics(
       for (const grade of filterGrade.value) {
         switch (grade) {
           case "init3":
-            if (i.level === 0 && totalSubPropCount === 3) match = true;
+            if (i.level === 1 && totalSubPropCount === 3) match = true;
             break;
           case "init4":
-            if (i.level === 0 && totalSubPropCount === 4) match = true;
+            if (i.level === 1 && totalSubPropCount === 4) match = true;
             break;
           case "enhance5":
-            if (i.level === 20 && totalSubPropCount === 9) match = true;
+            if (i.level === 21 && totalSubPropCount === 9) match = true;
             break;
           case "enhance4":
-            if (i.level === 20 && totalSubPropCount === 8) match = true;
+            if (i.level === 21 && totalSubPropCount === 8) match = true;
             break;
         }
       }

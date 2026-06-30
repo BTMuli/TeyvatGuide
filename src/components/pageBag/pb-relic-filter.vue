@@ -137,6 +137,18 @@
         <!-- 副词条筛选 -->
         <div v-show="activeTab === 'subProp'" class="pbrf-section">
           <div class="pbrf-item">
+            <div class="pbrf-title">符合词条数</div>
+            <div class="pbrf-sub-prop-count">
+              <v-btn size="small" @click="decreaseSubPropCount">
+                <v-icon>mdi-minus</v-icon>
+              </v-btn>
+              <span class="pbrf-sub-prop-count-value">{{ subPropMatchCount }}</span>
+              <v-btn size="small" @click="increaseSubPropCount">
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </div>
+          </div>
+          <div class="pbrf-item">
             <v-item-group v-model="selectedSubProp" class="pbrf-select" multiple>
               <div v-for="item in subPropList" :key="item.id">
                 <v-item v-slot="{ isSelected, toggle }" :value="item.id">
@@ -174,6 +186,7 @@ export type RelicFilterValue = {
   set: Array<number>;
   mainProp: Array<number>;
   subProp: Array<number>;
+  subPropMatchCount: number;
   locked: boolean | null;
   marked: boolean | null;
   grade: Array<string>;
@@ -261,6 +274,8 @@ const selectedSubProp = ref<Array<number>>([]);
 const selectedStatus = ref<Array<string>>([]);
 const selectedGrade = ref<Array<string>>([]);
 
+const subPropMatchCount = ref<number>(0);
+
 const visible = defineModel<boolean>();
 const resetModel = defineModel<boolean>("reset");
 
@@ -275,10 +290,24 @@ watch(
       selectedSubProp.value = [];
       selectedStatus.value = [];
       selectedGrade.value = [];
+      subPropMatchCount.value = 0;
       resetModel.value = false;
     }
   },
 );
+
+function increaseSubPropCount(): void {
+  const maxCount = Math.min(selectedSubProp.value.length, 4);
+  if (subPropMatchCount.value < maxCount) {
+    subPropMatchCount.value++;
+  }
+}
+
+function decreaseSubPropCount(): void {
+  if (subPropMatchCount.value > 0) {
+    subPropMatchCount.value--;
+  }
+}
 
 function resetFilter(): void {
   selectedSlot.value = [];
@@ -288,16 +317,24 @@ function resetFilter(): void {
   selectedSubProp.value = [];
   selectedStatus.value = [];
   selectedGrade.value = [];
+  subPropMatchCount.value = 0;
   confirmSelect();
 }
 
 function confirmSelect(): void {
+  const maxCount = Math.min(selectedSubProp.value.length, 4);
+  if (subPropMatchCount.value > maxCount) {
+    subPropMatchCount.value = maxCount;
+  } else if (subPropMatchCount.value < 0) {
+    subPropMatchCount.value = 0;
+  }
   const value: RelicFilterValue = {
     slot: selectedSlot.value,
     star: selectedStar.value,
     set: selectedSet.value,
     mainProp: selectedMainProp.value,
     subProp: selectedSubProp.value,
+    subPropMatchCount: subPropMatchCount.value,
     locked: selectedStatus.value.includes("locked") ? true : null,
     marked: selectedStatus.value.includes("marked") ? true : null,
     grade: selectedGrade.value,
@@ -459,6 +496,20 @@ function confirmSelect(): void {
   .dark & {
     filter: unset;
   }
+}
+
+.pbrf-sub-prop-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pbrf-sub-prop-count-value {
+  min-width: 32px;
+  color: var(--common-text-title);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .pbrf-submit {
