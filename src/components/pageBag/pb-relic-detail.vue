@@ -132,6 +132,7 @@ function loadPosInfo(): void {
 .pb-rdt-right {
   position: relative;
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -139,9 +140,9 @@ function loadPosInfo(): void {
 
 .pb-rdt-title {
   display: flex;
+  width: 100%;
   align-items: center;
-  justify-content: flex-start;
-  column-gap: 24px;
+  justify-content: space-between;
   font-family: var(--font-title);
 }
 
@@ -165,7 +166,7 @@ function loadPosInfo(): void {
   position: absolute;
   z-index: 1;
   top: 0;
-  right: 0;
+  left: 0;
   margin-left: auto;
   color: var(--tgc-od-red);
   cursor: pointer;

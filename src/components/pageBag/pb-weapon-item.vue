@@ -15,6 +15,7 @@
       <div class="pb-wi-name">{{ props.info.name }}</div>
       <div class="pb-wi-sub">
         <span class="pb-wi-level">Lv.{{ item.info.level }}</span>
+        <span v-if="props.tb.info.is_locked" class="pb-wi-lock">🔒</span>
       </div>
     </div>
     <div class="pb-wi-extra">{{ props.info.weapon }}·{{ props.info.id }}</div>
@@ -133,12 +134,12 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   max-width: 100%;
   flex-direction: column;
   justify-content: center;
-  row-gap: 2px;
 }
 
 .pb-wi-name {
   overflow: hidden;
   color: var(--box-text-2);
+  font-family: var(--font-title);
   font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -148,7 +149,7 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  column-gap: 12px;
+  column-gap: 4px;
 }
 
 .pb-wi-level {
@@ -157,10 +158,8 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   font-size: 12px;
 }
 
-.pb-wi-attack {
-  color: var(--tgc-od-blue);
-  font-family: var(--font-title);
-  font-size: 11px;
+.pb-wi-lock {
+  font-size: 10px;
 }
 
 .pb-wi-extra {

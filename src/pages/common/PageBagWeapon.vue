@@ -33,6 +33,14 @@
         </div>
         <v-btn
           class="pbw-ne-btn"
+          prepend-icon="mdi-filter"
+          variant="elevated"
+          @click="showFilter = true"
+        >
+          筛选
+        </v-btn>
+        <v-btn
+          class="pbw-ne-btn"
           prepend-icon="mdi-import"
           title="通过Yae导入（请确保导入前游戏未启动）"
           variant="elevated"
@@ -48,55 +56,21 @@
         </v-btn>
       </div>
     </template>
-    <template #extension>
-      <div class="pbw-nav-extension">
-        <v-select
-          v-model="selectType"
-          :clearable="true"
-          :hide-details="true"
-          :items="weaponTypes"
-          density="compact"
-          item-title="type"
-          label="武器类型"
-          variant="outlined"
-          width="200px"
-        >
-          <template #item="{ props, item }">
-            <v-list-item v-bind="props">
-              <template #append>
-                <v-chip>{{ item.number }}</v-chip>
-              </template>
-            </v-list-item>
-          </template>
-        </v-select>
-        <v-select
-          v-model="selectStar"
-          :clearable="true"
-          :hide-details="true"
-          :items="starList"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          label="星级"
-          variant="outlined"
-          width="120px"
-        />
-      </div>
-    </template>
   </v-app-bar>
   <div class="pbw-container">
     <template v-for="weapon in weaponShow" :key="weapon.tb.guid">
       <PbWeaponItem
         :cur="curWeapon"
-        :info="weapon.info"
-        :tb="weapon.tb"
-        :selected="weapon.tb.guid === curWeapon?.tb.guid"
         :detail="showDetail"
+        :info="weapon.info"
+        :selected="weapon.tb.guid === curWeapon?.tb.guid"
+        :tb="weapon.tb"
         @select="handleSelect"
       />
     </template>
   </div>
   <PbWeaponDetail v-if="curWeapon" v-model:show="showDetail" :cur="curWeapon" />
+  <PbWeaponFilter v-model="showFilter" @filter="handleFilter" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -112,18 +86,7 @@ import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 import { wwWeapon } from "@/data/index.js";
 import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
 import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
-
-/** 武器类型 */
-type WeaponType = {
-  type: string;
-  number: number;
-};
-
-/** 武器星级选项 */
-type StarOption = {
-  text: string;
-  value: number;
-};
+import PbWeaponFilter, { type WeaponFilterValue } from "@comp/pageBag/pb-weapon-filter.vue";
 
 /** 武器信息 */
 export type WeaponInfo = {
@@ -135,25 +98,22 @@ export type WeaponInfo = {
 const { gameDir, isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
-const starList: Array<StarOption> = [
-  { text: "1星", value: 1 },
-  { text: "2星", value: 2 },
-  { text: "3星", value: 3 },
-  { text: "4星", value: 4 },
-  { text: "5星", value: 5 },
-];
-
 const curUid = ref<number>(0);
-const selectType = ref<string | null>(null);
-const selectStar = ref<number | null>(null);
 const search = ref<string>();
 const curIdx = ref<number>(0);
 const showDetail = ref<boolean>(false);
+const showFilter = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
-const weaponTypes = shallowRef<Array<WeaponType>>([]);
 const curWeapon = shallowRef<WeaponInfo>();
 const weaponList = shallowRef<Array<WeaponInfo>>([]);
 const weaponShow = shallowRef<Array<WeaponInfo>>([]);
+const filterValue = ref<WeaponFilterValue>({
+  star: [],
+  weaponType: [],
+  refine: [],
+  subProp: [],
+  locked: null,
+});
 
 onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
@@ -167,14 +127,25 @@ watch(
     await loadWeaponList(curUid.value);
   },
 );
+const isFiltering = ref<boolean>(false);
+
 watch(
-  () => [selectType.value, selectStar.value],
+  () => filterValue.value,
   async () => {
     const renderWeapons = getSelectWeapons();
     weaponShow.value = sortWeapons(renderWeapons);
     triggerRef(weaponShow);
     curIdx.value = 0;
+    if (isFiltering.value) {
+      if (weaponShow.value.length === 0) {
+        showSnackbar.warn("未找到符合条件的武器!");
+      } else {
+        showSnackbar.success(`找到${weaponShow.value.length}条符合条件的武器`);
+      }
+      isFiltering.value = false;
+    }
   },
+  { deep: true },
 );
 
 async function reloadUid(): Promise<void> {
@@ -190,13 +161,39 @@ async function reloadUid(): Promise<void> {
 
 function getSelectWeapons(): Array<WeaponInfo> {
   let result = weaponList.value;
-  if (selectType.value) {
-    result = result.filter((i) => i.info.weapon === selectType.value);
+  const filter = filterValue.value;
+  if (filter.star.length > 0) {
+    result = result.filter((i) => filter.star.includes(i.info.star));
   }
-  if (selectStar.value !== null) {
-    result = result.filter((i) => i.info.star === selectStar.value);
+  if (filter.weaponType.length > 0) {
+    result = result.filter((i) => filter.weaponType.includes(i.info.weapon));
+  }
+  if (filter.refine.length > 0) {
+    result = result.filter((i) => {
+      const affixMap = i.tb.info.affix_map;
+      if (!affixMap) return filter.refine.includes(1);
+      const values = Object.values(affixMap);
+      const refineLevel = values.length > 0 ? values[0] + 1 : 1;
+      return filter.refine.includes(refineLevel);
+    });
+  }
+  if (filter.subProp.length > 0) {
+    result = result.filter((i) => {
+      if (!i.info.curves) return false;
+      return i.info.curves.some(
+        (curve) => curve.curve !== 1101 && filter.subProp.includes(curve.prop),
+      );
+    });
+  }
+  if (filter.locked !== null) {
+    result = result.filter((i) => i.tb.info.is_locked === filter.locked);
   }
   return result;
+}
+
+function handleFilter(value: WeaponFilterValue): void {
+  isFiltering.value = true;
+  filterValue.value = value;
 }
 
 function sortWeapons(data: Array<WeaponInfo>): Array<WeaponInfo> {
@@ -210,28 +207,24 @@ function sortWeapons(data: Array<WeaponInfo>): Array<WeaponInfo> {
 
 async function loadWeaponList(uid: number): Promise<void> {
   await showLoading.start(`正在加载 ${uid} 的武器数据`);
-  weaponTypes.value = [];
   weaponShow.value = [];
   weaponList.value = [];
-  selectType.value = null;
-  selectStar.value = null;
+  filterValue.value = {
+    star: [],
+    weaponType: [],
+    refine: [],
+    subProp: [],
+    locked: null,
+  };
   const dList = await TSUserBagWeapon.getWeapon(uid);
   const wList = [];
-  const tList: Array<WeaponType> = [];
   for (const weapon of dList) {
     const info = getItemInfo(weapon.id);
     if (info === false) continue;
     wList.push({ guid: weapon.guid, tb: weapon, info: info });
-    const findT = tList.findIndex((i) => i.type === info.weapon);
-    if (findT !== -1) {
-      tList[findT].number++;
-    } else {
-      tList.push({ type: info.weapon, number: 1 });
-    }
   }
   weaponList.value = sortWeapons(wList);
   weaponShow.value = weaponList.value;
-  weaponTypes.value = tList;
   curIdx.value = 0;
   await showLoading.end();
 }
@@ -354,16 +347,6 @@ function handleSelect(weapon: WeaponInfo): void {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-title);
-}
-
-.pbw-nav-extension {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
-  margin-left: 16px;
-  column-gap: 8px;
 }
 
 .pbw-container {

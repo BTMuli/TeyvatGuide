@@ -67,12 +67,12 @@ function getWeaponStats(
  * @returns 属性文本
  */
 function formatProp(type: number, val: number): string {
+  if (val < 1) return `${(val * 100).toFixed(1)}%`;
   const percentTypes = [
-    20, 23, 26, 27, 29, 3, 30, 40, 41, 42, 43, 44, 45, 46, 50, 51, 52, 53, 54, 55, 56, 6, 80, 81, 9,
+    20, 22, 23, 26, 27, 29, 3, 30, 40, 41, 42, 43, 44, 45, 46, 50, 51, 52, 53, 54, 55, 56, 6, 80,
+    81, 9,
   ];
-  if (percentTypes.includes(type)) {
-    return `${(val * 100).toFixed(1)}%`;
-  }
+  if (percentTypes.includes(type)) return `${(val * 100).toFixed(1)}%`;
   return Math.round(val).toString();
 }
 

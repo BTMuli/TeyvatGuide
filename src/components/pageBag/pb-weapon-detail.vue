@@ -21,7 +21,12 @@
         </div>
       </div>
       <div class="pb-wd-stats">
-        <div v-for="stat in weaponStats" :key="stat.type" class="pb-wd-stat">
+        <div
+          v-for="(stat, idx) in weaponStats"
+          :key="idx"
+          :class="{ sub: idx === 1 }"
+          class="pb-wd-stat"
+        >
           <span class="pb-wd-stat-name">{{ stat.info.name }}</span>
           <span class="pb-wd-stat-val">{{ wikiUtils.propFmt(stat.type, stat.val) }}</span>
         </div>
@@ -73,10 +78,6 @@ const weaponStats = computed(() => {
 });
 </script>
 <style lang="scss" scoped>
-:deep(.v-expansion-panel-title) {
-  background: var(--common-shadow-1);
-}
-
 .pb-wd-box {
   position: relative;
   display: flex;
@@ -127,6 +128,7 @@ const weaponStats = computed(() => {
 .pb-wdt-right {
   position: relative;
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
@@ -134,9 +136,9 @@ const weaponStats = computed(() => {
 
 .pb-wdt-title {
   display: flex;
+  width: 100%;
   align-items: center;
-  justify-content: flex-start;
-  column-gap: 24px;
+  justify-content: space-between;
   font-family: var(--font-title);
 }
 
@@ -152,7 +154,7 @@ const weaponStats = computed(() => {
   position: absolute;
   z-index: 1;
   top: 0;
-  right: 0;
+  left: 0;
   margin-left: auto;
   color: var(--tgc-od-red);
   cursor: pointer;
@@ -176,10 +178,14 @@ const weaponStats = computed(() => {
   position: relative;
   display: flex;
   flex-direction: column;
-  font-size: 14px;
 
   &-title {
     font-family: var(--font-title);
+  }
+
+  &-desc {
+    font-size: 14px;
+    text-shadow: 0 0 2px var(--common-shadow-4);
   }
 }
 
@@ -188,7 +194,10 @@ const weaponStats = computed(() => {
   display: flex;
   width: 100%;
   flex-direction: column;
-  row-gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 2px;
+  background: var(--box-bg-1);
 }
 
 .pb-wd-stat {
@@ -197,15 +206,11 @@ const weaponStats = computed(() => {
   width: 100%;
   align-items: center;
   justify-content: space-between;
+  font-family: var(--font-title);
+  font-size: 16px;
 
-  &-name {
-    color: var(--tgc-od-white);
-    font-size: 12px;
-  }
-
-  &-val {
-    color: var(--tgc-od-green);
-    font-family: var(--font-title);
+  &.sub {
+    font-family: var(--font-text);
     font-size: 14px;
   }
 }
