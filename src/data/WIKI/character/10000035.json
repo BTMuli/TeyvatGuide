@@ -82,6 +82,13 @@
       "Icon": "Skill_E_Qiqi_01"
     },
     {
+      "GroupId": 3551,
+      "Id": 355101,
+      "Name": "七宝奉真",
+      "Description": "元素战技<color=#FFD780FF>仙法·寒病鬼差</color>的冷却时间缩短至15秒。\n<color=#FFD780FF>辉映·星超导</color>：寒病鬼差持续期间，队伍中自己的角色造成的超导、星超导反应伤害提升50%。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时，七七将会进入<color=#FFD780FF>辉映·星超导</color>状态。",
+      "Icon": "UI_Talent_S_Qiqi_08"
+    },
+    {
       "GroupId": 3521,
       "Id": 352101,
       "Name": "延命妙法",

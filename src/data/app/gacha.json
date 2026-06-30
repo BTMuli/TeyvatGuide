@@ -3424,5 +3424,41 @@
     "postId": "75781477",
     "up5List": [13517, 12514],
     "up4List": [11410, 14410, 15410, 12405, 13407]
+  },
+  {
+    "name": "镜中的茶宴",
+    "version": "6.7",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/06/17/e3291fbde4889a6b5c6f498fe10d3f25_5202897138544319925_transformed.jpg",
+    "from": "2026-05-20T06:00:00+08:00",
+    "to": "2026-07-21T17:59:00+08:00",
+    "type": 301,
+    "postId": "76308879",
+    "up5List": [10000133],
+    "up4List": [10000024, 10000039, 10000085]
+  },
+  {
+    "name": "星边夜语",
+    "version": "6.7",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/06/17/224b737812e20929c4485452a2f1e1bc_7347526875978743745_transformed.jpg",
+    "from": "2026-05-20T06:00:00+08:00",
+    "to": "2026-07-21T17:59:00+08:00",
+    "type": 400,
+    "postId": "76308876",
+    "up5List": [10000107],
+    "up4List": [10000024, 10000039, 10000085]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.7",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/06/17/331e1ba3b0d467685cc70edce96fd72c_5362978686770159579_transformed.jpg",
+    "from": "2026-05-20T06:00:00+08:00",
+    "to": "2026-07-21T17:59:00+08:00",
+    "type": 302,
+    "postId": "76308874",
+    "up5List": [12516, 14517],
+    "up4List": [11401, 12405, 13401, 14403, 15403]
   }
 ]

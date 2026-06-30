@@ -4502,6 +4502,106 @@
     "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
+    "id": 80490,
+    "series": 68,
+    "order": 450,
+    "name": "月雾的寻宝者",
+    "description": "在杜南纳深坑、霜月开启45个宝箱。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80491,
+    "series": 68,
+    "order": 451,
+    "name": "月雾的寻宝者",
+    "description": "在杜南纳深坑、霜月开启90个宝箱。",
+    "reward": 10,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80492,
+    "series": 68,
+    "order": 452,
+    "name": "月雾的寻宝者",
+    "description": "在杜南纳深坑、霜月开启180个宝箱。",
+    "reward": 20,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80493,
+    "series": 68,
+    "order": 453,
+    "name": "月雾的冒险家",
+    "description": "在杜南纳深坑、霜月完成4个大世界限时挑战。",
+    "reward": 10,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80494,
+    "series": 68,
+    "order": 454,
+    "name": "致幽厄的哀歌",
+    "description": "点亮杜南纳深坑的地图。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80495,
+    "series": 68,
+    "order": 455,
+    "name": "第二次的满月",
+    "description": "点亮月之高地的地图。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80496,
+    "series": 68,
+    "order": 456,
+    "name": "为你喜爱的色彩",
+    "description": "点亮月之暗面的地图。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80497,
+    "series": 68,
+    "order": 460,
+    "name": "6EQUJ5",
+    "description": "见证宁宁启动「望月者计划」。",
+    "reward": 10,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80498,
+    "series": 68,
+    "order": 458,
+    "name": "月尘的礼物",
+    "description": "解除霜月区域中，月之高地、月荡海、月之暗面所有月灵龛的封印。",
+    "reward": 10,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80499,
+    "series": 68,
+    "order": 459,
+    "name": "是秘藏，我们有救了",
+    "description": "解除霜月区域中，月之高地、月荡海所有月灵盈藏之地的封印。",
+    "reward": 10,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 80500,
     "series": 67,
     "order": 445,
@@ -4510,6 +4610,36 @@
     "reward": 10,
     "version": "6.5",
     "trigger": { "type": "GROUP_NOTIFY" }
+  },
+  {
+    "id": 80501,
+    "series": 68,
+    "order": 457,
+    "name": "月球旅行记",
+    "description": "解锁挪德卡莱与霜月区域中，杜南纳深坑、月之高地、月之暗面所有传送锚点。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80502,
+    "series": 68,
+    "order": 461,
+    "name": "来自星空的黑",
+    "description": "将「幕形态黑体物质笼实验室」供奉至满级。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80503,
+    "series": 68,
+    "order": 462,
+    "name": "内界之光",
+    "description": "将「努尔寂石阵列」供奉至满级。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 81000,
@@ -11081,6 +11211,256 @@
     "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
+    "id": 81665,
+    "series": 0,
+    "order": 1665,
+    "name": "你，飞起来！",
+    "description": "学会使用古月波纹。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81667,
+    "series": 0,
+    "order": 1667,
+    "name": "月下胡德拉",
+    "description": "拆穿假哥伦比娅的伪装。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81669,
+    "series": 0,
+    "order": 1669,
+    "name": "二十五只甘撒",
+    "description": "乘坐登月飞船进入太空。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81670,
+    "series": 0,
+    "order": 1670,
+    "name": "派蒙的一小步",
+    "description": "成功登上月球。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81671,
+    "series": 0,
+    "order": 1671,
+    "name": "F.A.S.T",
+    "description": "启动「伊比尼伯龙之眼」。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81672,
+    "series": 0,
+    "order": 1672,
+    "name": "时间脱节",
+    "description": "穿破帷幕，进入「乌吉恩圈」。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81674,
+    "series": 0,
+    "order": 1675,
+    "name": "「乌吉恩圈，前进四！」",
+    "description": "启动「乌吉恩圈」的动力引擎。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81675,
+    "series": 0,
+    "order": 1676,
+    "name": "永不着陆",
+    "description": "第一次在无重力环境下遨游。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81677,
+    "series": 0,
+    "order": 1678,
+    "name": "天无二月",
+    "description": "击败月灵二大王乌吉。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81678,
+    "series": 0,
+    "order": 1679,
+    "name": "死月",
+    "description": "抵达月之暗面。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81681,
+    "series": 0,
+    "order": 1683,
+    "name": "「月亮大夫」",
+    "description": "见识天基武器的强大威力。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81682,
+    "series": 0,
+    "order": 1684,
+    "name": "穿越麦斯克林",
+    "description": "穿行在天基武器内部的重力异常区域。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81683,
+    "series": 0,
+    "order": 1685,
+    "name": "八十天环游月球",
+    "description": "完成霜月的环行。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81685,
+    "series": 0,
+    "order": 1687,
+    "name": "宁希姬娅生命游戏",
+    "description": "进入月心罅隙。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81686,
+    "series": 0,
+    "order": 1688,
+    "name": "一只特立独行的珠",
+    "description": "替古月源珠摆正它的位置。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81687,
+    "series": 0,
+    "order": 1689,
+    "name": "从白天到夜晚",
+    "description": "与哥伦比娅约定「归旅之夜」。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81688,
+    "series": 0,
+    "order": 1690,
+    "name": "月亮坠落一千次",
+    "description": "帮助来到霜月的梅拉。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81689,
+    "series": 0,
+    "order": 1691,
+    "name": "无秽的永远与三重的须臾",
+    "description": "登上所有停留在霜月的天船。",
+    "reward": 10,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81690,
+    "series": 0,
+    "order": 1692,
+    "name": "阿普卡鲁之书",
+    "description": "修复霜月上的所有数据存储阵列。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81691,
+    "series": 0,
+    "order": 1693,
+    "name": "驭龙领域大神",
+    "description": "在「非完备证明」中超越已有记录。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81692,
+    "series": 0,
+    "order": 1694,
+    "name": "「你今天真好看！」",
+    "description": "获得月灵创作的石头画。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81693,
+    "series": 0,
+    "order": 1695,
+    "name": "与甜甜花同行",
+    "description": "窥见甜甜花的失落世界一角。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81697,
+    "series": 0,
+    "order": 1673,
+    "name": "拉曼恰的名绅士",
+    "description": "用身体向动力引擎的涡轮叶发起冲锋。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81698,
+    "series": 0,
+    "order": 1682,
+    "name": "昔兰尼加的跳蚤",
+    "description": "坠向月心。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81699,
+    "series": 0,
+    "order": 1699,
+    "name": "早知道选六便士",
+    "description": "在古月力浓度过高的区域中倒下。",
+    "reward": 5,
+    "version": "6.7",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -17142,7 +17522,6 @@
         { "questId": 20600, "name": "来自冬天的故事", "type": "每日委托" },
         { "questId": 20600, "name": "来自冬天的故事", "type": "每日委托" },
         { "questId": 20600, "name": "来自冬天的故事", "type": "每日委托" },
-        { "questId": 2060006, "name": "关于「愚人众」…", "type": "subquest" },
         { "questId": 2060008, "name": "关于「邪眼」…", "type": "subquest" },
         { "questId": 2060010, "name": "关于「女皇陛下」…", "type": "subquest" }
       ]

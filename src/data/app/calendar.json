@@ -187,6 +187,23 @@
     "source": { "index": 6, "area": "纳塔", "name": "转竟" }
   },
   {
+    "id": 10000133,
+    "contentId": 508841,
+    "dropDays": [3, 6, 7],
+    "name": "桑多涅",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "双手剑",
+    "element": "冰",
+    "release": "2026-06-30 00:00:00",
+    "materials": [
+      { "id": 104362, "name": "「浪迹」的教导", "star": 2 },
+      { "id": 104363, "name": "「浪迹」的指引", "star": 3 },
+      { "id": 104364, "name": "「浪迹」的哲学", "star": 4 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "覆巢" }
+  },
+  {
     "id": 10000038,
     "contentId": 1360,
     "dropDays": [3, 6, 7],
@@ -2369,6 +2386,22 @@
       { "id": 114064, "name": "贡祭炽心的荣膺", "star": 5 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "冥见" }
+  },
+  {
+    "id": 12516,
+    "contentId": 508913,
+    "dropDays": [3, 6, 7],
+    "name": "超越之匙",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "双手剑",
+    "materials": [
+      { "id": 114081, "name": "终北遗嗣的哀荣", "star": 2 },
+      { "id": 114082, "name": "终北遗嗣的迷顽", "star": 3 },
+      { "id": 114083, "name": "终北遗嗣的祷献", "star": 4 },
+      { "id": 114084, "name": "终北遗嗣的煌熠", "star": 5 }
+    ],
+    "source": { "index": 7, "area": "挪德卡莱", "name": "祭月" }
   },
   {
     "id": 15501,
