@@ -1,6 +1,6 @@
 /**
  * 武器类型定义文件
- * @since Beta v0.6.7
+ * @since Beta v0.11.0
  */
 
 declare namespace TGApp.App.Weapon {
@@ -26,7 +26,7 @@ declare namespace TGApp.App.Weapon {
 
   /**
    * 转换后的武器数据
-   * @since Beta v0.4.1
+   * @since Beta v0.11.0
    */
   type WikiItem = {
     /** 武器 ID */
@@ -46,7 +46,51 @@ declare namespace TGApp.App.Weapon {
     materials: Array<TGApp.App.Calendar.Material>;
     /** 精炼描述 */
     affix?: TGApp.Plugins.Hutao.Weapon.RhiAffix;
+    /** 初始词条(1精1级) */
+    curves: Array<InitCurve>;
     /** 武器故事 */
     story: Array<string>;
   };
+
+  /**
+   * 初始词条
+   * @since Beta v0.11.0
+   */
+  type InitCurve = {
+    /** 词条类型 */
+    curve: number;
+    /** 属性类型 */
+    prop: number;
+    /** 初始值 */
+    val: number;
+  };
+
+  /**
+   * Prop项
+   * @since Beta v0.11.0
+   */
+  type PropItem = {
+    /** 添加的属性值 */
+    addVal: number;
+    /** 属性类型 */
+    type: number;
+  };
+
+  /**
+   * 转换后的武器突破文件
+   * @since Beta v0.11.0
+   */
+  type WeaponPromote = Record<number, PromoteItem>;
+
+  /**
+   * 单个武器突破
+   * @since Beta v0.11.0
+   */
+  type PromoteItem = Record<number, Array<PropItem>>;
+
+  /**
+   * 转换后的武器升级文件
+   * @since Beta v0.11.0
+   */
+  type WeaponCurve = Record<number, Array<PropItem>>;
 }

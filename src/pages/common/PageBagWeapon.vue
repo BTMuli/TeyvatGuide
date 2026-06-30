@@ -109,7 +109,7 @@ import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
-import { WikiWeaponData } from "@/data/index.js";
+import { wwWeapon } from "@/data/index.js";
 import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
 import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
 
@@ -237,7 +237,7 @@ async function loadWeaponList(uid: number): Promise<void> {
 }
 
 function getItemInfo(id: number): TGApp.App.Weapon.WikiItem | false {
-  const find = WikiWeaponData.find((i) => i.id === id);
+  const find = wwWeapon.find((i) => i.id === id);
   if (find) return find;
   return false;
 }

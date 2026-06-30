@@ -28,7 +28,9 @@ import wikiRelic from "./WIKI/relic/Relic.json" with { type: "json" };
 import wikiRelicMap from "./WIKI/relic/RelicMap.json" with { type: "json" };
 import wikiRelicSet from "./WIKI/relic/RelicSet.json" with { type: "json" };
 import wikiRelicSubProp from "./WIKI/relic/SubProp.json" with { type: "json" };
-import wikiWeapon from "./WIKI/weapon.json" with { type: "json" };
+import wikiWeapon from "./WIKI/weapon/weapon.json" with { type: "json" };
+import wikiWeaponPromote from "./WIKI/weapon/promote.json" with { type: "json" };
+import wikiWeaponCurve from "./WIKI/weapon/curve.json" with { type: "json" };
 
 // App
 export const AppAchievementsData: Array<TGApp.App.Achievement.Item> = achievements;
@@ -49,9 +51,12 @@ export const ArcBirCalendar: TGApp.Archive.Birth.CalendarData = arcBirCalendar;
 export const ArcBirDraw: Array<TGApp.Archive.Birth.DrawItem> = arcBirDraw;
 export const ArcBirRole: Array<TGApp.Archive.Birth.RoleItem> = arcBirRole;
 // Wiki
-export const WikiWeaponData: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
 export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial;
 export const WikiHyperLinkData: TGApp.App.HyperLink.AppHyperLink = hyperlink;
+// 武器数据
+export const wwWeapon: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
+export const wwPromote: TGApp.App.Weapon.WeaponPromote = wikiWeaponPromote;
+export const wwCurve: TGApp.App.Weapon.WeaponCurve = wikiWeaponCurve;
 // 圣遗物数据
 export const wrMainLv: TGApp.App.Relic.MainLv = wikiRelicMainLv;
 export const wrMainProp: TGApp.App.Relic.MainProp = wikiRelicMainProp;

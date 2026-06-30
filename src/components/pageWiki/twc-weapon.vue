@@ -66,7 +66,7 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import PwMaterialList from "./pw-material-list.vue";
 
-import { WikiWeaponData } from "@/data/index.js";
+import { wwWeapon } from "@/data/index.js";
 
 type TwcWeaponProps = { item: TGApp.App.Weapon.WikiBriefInfo };
 
@@ -89,7 +89,7 @@ const select = ref<number>(1);
 const selectItems = shallowRef<Array<number>>([]);
 
 function loadData(): void {
-  const res = WikiWeaponData.find((item) => item.id === props.item.id);
+  const res = wwWeapon.find((item) => item.id === props.item.id);
   if (res === undefined) {
     showSnackbar.warn(`未获取到武器 ${props.item.name} 的 Wiki 数据`);
     return;

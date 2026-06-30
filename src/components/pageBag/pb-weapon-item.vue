@@ -9,18 +9,22 @@
     <div class="pb-wi-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/WIKI/weapon/${props.info.id}.webp`" alt="icon" class="icon" />
+      <img :src="`/icon/weapon/${props.info.weapon}.webp`" alt="weapon" class="weapon" />
     </div>
     <div class="pb-wi-right">
       <div class="pb-wi-name">{{ props.info.name }}</div>
-      <div class="pb-wi-level">Lv.{{ props.tb.info.level }}</div>
+      <div class="pb-wi-sub">
+        <span class="pb-wi-level">Lv.{{ item.info.level }}</span>
+      </div>
     </div>
     <div class="pb-wi-extra">{{ props.info.weapon }}·{{ props.info.id }}</div>
-    <div v-if="props.tb.info.affix_map" class="pb-wi-refine">精炼{{ getAffixLevel() }}</div>
+    <div v-if="item.info.affix_map" class="pb-wi-refine">精炼{{ getAffixLevel() }}</div>
   </div>
 </template>
 <script lang="ts" setup>
-import { getOdStarColor } from "@utils/colorFunc.js";
 import { computed, shallowRef, watch } from "vue";
+
+import { getOdStarColor } from "@utils/colorFunc.js";
 
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
 
@@ -41,12 +45,11 @@ const item = shallowRef<TGApp.Sqlite.UserBag.WeaponTable>(props.tb);
 
 function toWeapon(): void {
   emits("select", { guid: item.value.guid, tb: item.value, info: props.info });
-  console.log(props.tb);
 }
 
 function getAffixLevel(): number {
-  if (!props.tb.info.affix_map) return 1;
-  const values = Object.values(props.tb.info.affix_map);
+  if (!item.value.info.affix_map) return 1;
+  const values = Object.values(item.value.info.affix_map);
   return values.length > 0 ? values[0] + 1 : 1;
 }
 
@@ -104,6 +107,23 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
     height: 100%;
     vertical-align: center;
   }
+
+  .bg {
+    z-index: 0;
+  }
+
+  .icon {
+    z-index: 1;
+  }
+
+  .weapon {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .pb-wi-right {
@@ -124,10 +144,23 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   white-space: nowrap;
 }
 
+.pb-wi-sub {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 12px;
+}
+
 .pb-wi-level {
   color: var(--tgc-od-green);
   font-family: var(--font-title);
   font-size: 12px;
+}
+
+.pb-wi-attack {
+  color: var(--tgc-od-blue);
+  font-family: var(--font-title);
+  font-size: 11px;
 }
 
 .pb-wi-extra {

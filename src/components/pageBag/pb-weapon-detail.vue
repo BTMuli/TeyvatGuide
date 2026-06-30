@@ -20,10 +20,16 @@
           </div>
         </div>
       </div>
+      <div class="pb-wd-stats">
+        <div v-for="stat in weaponStats" :key="stat.type" class="pb-wd-stat">
+          <span class="pb-wd-stat-name">{{ stat.info.name }}</span>
+          <span class="pb-wd-stat-val">{{ weaponUtils.format(stat.type, stat.val) }}</span>
+        </div>
+      </div>
       <div class="pb-wd-affix">
-        <span v-if="props.cur.info.affix" class="pb-wd-affix-title">{{
-          props.cur.info.affix.Name
-        }}</span>
+        <span v-if="props.cur.info.affix" class="pb-wd-affix-title">
+          {{ props.cur.info.affix.Name }}：
+        </span>
         <span class="pb-wd-affix-desc" v-html="parseAffixDesc()" />
       </div>
       <div class="pb-wd-desc">{{ props.cur.info.description }}</div>
@@ -31,6 +37,9 @@
   </v-navigation-drawer>
 </template>
 <script lang="ts" setup>
+import { computed } from "vue";
+
+import weaponUtils from "@utils/weaponUtils.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
@@ -56,6 +65,12 @@ function parseAffixDesc(): string {
   const descIndex = Math.min(affixLevel - 1, props.cur.info.affix.Descriptions.length - 1);
   return parseHtmlText(props.cur.info.affix.Descriptions[descIndex].Description);
 }
+
+const weaponStats = computed(() => {
+  const level = props.cur.tb.info.level;
+  const promoteLevel = props.cur.tb.info.promote_level;
+  return weaponUtils.stats(props.cur.info, level, promoteLevel);
+});
 </script>
 <style lang="scss" scoped>
 :deep(.v-expansion-panel-title) {
@@ -165,6 +180,33 @@ function parseAffixDesc(): string {
 
   &-title {
     font-family: var(--font-title);
+  }
+}
+
+.pb-wd-stats {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  row-gap: 4px;
+}
+
+.pb-wd-stat {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+
+  &-name {
+    color: var(--tgc-od-white);
+    font-size: 12px;
+  }
+
+  &-val {
+    color: var(--tgc-od-green);
+    font-family: var(--font-title);
+    font-size: 14px;
   }
 }
 </style>
