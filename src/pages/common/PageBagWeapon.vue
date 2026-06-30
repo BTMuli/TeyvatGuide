@@ -86,9 +86,17 @@
   </v-app-bar>
   <div class="pbw-container">
     <template v-for="weapon in weaponShow" :key="weapon.tb.guid">
-      <PbWeaponItem :cur="curWeapon" :info="weapon.info" :tb="weapon.tb" @select="handleSelect" />
+      <PbWeaponItem
+        :cur="curWeapon"
+        :info="weapon.info"
+        :tb="weapon.tb"
+        :selected="weapon.tb.guid === curWeapon?.tb.guid"
+        :detail="showDetail"
+        @select="handleSelect"
+      />
     </template>
   </div>
+  <PbWeaponDetail v-if="curWeapon" v-model:show="showDetail" :cur="curWeapon" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -99,10 +107,11 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { WikiWeaponData } from "@/data/index.js";
 import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
+import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
 
 /** 武器类型 */
 type WeaponType = {
@@ -139,6 +148,7 @@ const selectType = ref<string | null>(null);
 const selectStar = ref<number | null>(null);
 const search = ref<string>();
 const curIdx = ref<number>(0);
+const showDetail = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
 const weaponTypes = shallowRef<Array<WeaponType>>([]);
 const curWeapon = shallowRef<WeaponInfo>();
@@ -299,10 +309,9 @@ async function deleteUid(): Promise<void> {
   showSnackbar.success(`已删除对应存档，即将刷新`);
 }
 
-async function handleSelect(weapon: WeaponInfo): Promise<void> {
+function handleSelect(weapon: WeaponInfo): void {
   curWeapon.value = weapon;
-  await nextTick();
-  curIdx.value = weaponShow.value.findIndex((i) => i.tb.guid === weapon.tb.guid);
+  showDetail.value = true;
 }
 </script>
 <style lang="scss" scoped>

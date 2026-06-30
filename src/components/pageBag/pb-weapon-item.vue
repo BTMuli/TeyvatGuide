@@ -1,6 +1,11 @@
 <!-- 背包武器物品项 -->
 <template>
-  <div :title="props.info.name" class="pb-wi-box" @click="toWeapon()">
+  <div
+    :class="{ selected: props.selected, detail: props.detail }"
+    :title="props.info.name"
+    class="pb-wi-box"
+    @click="toWeapon()"
+  >
     <div class="pb-wi-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/WIKI/weapon/${props.info.id}.webp`" alt="icon" class="icon" />
@@ -23,6 +28,8 @@ type PbWeaponItemProps = {
   tb: TGApp.Sqlite.UserBag.WeaponTable;
   info: TGApp.App.Weapon.WikiItem;
   cur?: WeaponInfo;
+  selected: boolean;
+  detail: boolean;
 };
 
 type PbWeaponItemEmits = (e: "select", v: WeaponInfo) => void;
@@ -73,6 +80,14 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   background: color-mix(in srgb, $pb-wi-base 15%, transparent);
   column-gap: 8px;
   cursor: pointer;
+
+  &.detail {
+    filter: grayscale(0.75);
+
+    &.selected {
+      filter: unset;
+    }
+  }
 }
 
 .pb-wi-left {
