@@ -97,8 +97,10 @@ const filterSlot = ref<Array<number>>([]);
 const filterStar = ref<Array<number>>([]);
 const filterSet = ref<Array<number>>([]);
 const filterMainProp = ref<Array<number>>([]);
+const filterSubProp = ref<Array<number>>([]);
 const filterLocked = ref<boolean | null>(null);
 const filterMarked = ref<boolean | null>(null);
+const filterGrade = ref<Array<string>>([]);
 
 const curIdx = ref<number>(0);
 const showDetail = ref<boolean>(false);
@@ -121,7 +123,16 @@ watch(
 );
 
 watch(
-  [filterSlot, filterStar, filterSet, filterMainProp, filterLocked, filterMarked],
+  [
+    filterSlot,
+    filterStar,
+    filterSet,
+    filterMainProp,
+    filterSubProp,
+    filterLocked,
+    filterMarked,
+    filterGrade,
+  ],
   () => {
     relicShow.value = filterRelics(relicList.value);
     triggerRef(relicShow);
@@ -154,8 +165,10 @@ function handleFilter(value: RelicFilterValue): void {
   filterStar.value = value.star;
   filterSet.value = value.set;
   filterMainProp.value = value.mainProp;
+  filterSubProp.value = value.subProp;
   filterLocked.value = value.locked;
   filterMarked.value = value.marked;
+  filterGrade.value = value.grade;
 }
 
 function filterRelics(
@@ -174,11 +187,39 @@ function filterRelics(
   if (filterMainProp.value.length > 0) {
     result = result.filter((i) => filterMainProp.value.includes(i.mp.type));
   }
+  if (filterSubProp.value.length > 0) {
+    result = result.filter((i) =>
+      filterSubProp.value.every((propType) => i.sp.some((sp) => sp.type === propType)),
+    );
+  }
   if (filterLocked.value !== null) {
     result = result.filter((i) => i.is_locked === filterLocked.value);
   }
   if (filterMarked.value !== null) {
     result = result.filter((i) => i.is_marked === filterMarked.value);
+  }
+  if (filterGrade.value.length > 0) {
+    result = result.filter((i) => {
+      const totalSubPropCount = i.sp.reduce((sum, sp) => sum + sp.vals.length, 0);
+      let match = false;
+      for (const grade of filterGrade.value) {
+        switch (grade) {
+          case "init3":
+            if (i.level === 0 && totalSubPropCount === 3) match = true;
+            break;
+          case "init4":
+            if (i.level === 0 && totalSubPropCount === 4) match = true;
+            break;
+          case "enhance5":
+            if (i.level === 20 && totalSubPropCount === 9) match = true;
+            break;
+          case "enhance4":
+            if (i.level === 20 && totalSubPropCount === 8) match = true;
+            break;
+        }
+      }
+      return match;
+    });
   }
   return result;
 }
@@ -199,8 +240,10 @@ async function loadRelicList(uid: number): Promise<void> {
   filterStar.value = [];
   filterSet.value = [];
   filterMainProp.value = [];
+  filterSubProp.value = [];
   filterLocked.value = null;
   filterMarked.value = null;
+  filterGrade.value = [];
   const dList = await TSUserBagRelic.getRelic(uid);
   relicList.value = sortRelics(dList);
   relicShow.value = relicList.value;

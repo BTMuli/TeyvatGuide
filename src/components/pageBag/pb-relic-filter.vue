@@ -69,6 +69,18 @@
               </div>
             </v-item-group>
           </div>
+          <div class="pbrf-item">
+            <div class="pbrf-title">强化等级</div>
+            <v-item-group v-model="selectedGrade" class="pbrf-select" multiple>
+              <div v-for="item in gradeList" :key="item.key">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.key">
+                  <v-btn :active="isSelected" activeColor="blue" size="small" @click="toggle">
+                    <span>{{ item.label }}</span>
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
         </div>
         <!-- 套装筛选 -->
         <div v-show="activeTab === 'set'" class="pbrf-section">
@@ -95,9 +107,38 @@
         </div>
         <!-- 主词条筛选 -->
         <div v-show="activeTab === 'mainProp'" class="pbrf-section">
-          <div class="pbrf-item">
+          <div v-for="group in mainPropGroups" :key="group.key" class="pbrf-mp-group">
+            <div class="pbrf-mp-group-title">
+              <img
+                :alt="group.label"
+                :src="`/icon/relic/${group.slot}.webp`"
+                class="pbrf-mp-group-icon"
+              />
+              <span>{{ group.label }}</span>
+            </div>
             <v-item-group v-model="selectedMainProp" class="pbrf-select" multiple>
-              <div v-for="item in mainPropList" :key="item.id">
+              <div v-for="item in group.items" :key="item.id">
+                <v-item v-slot="{ isSelected, toggle }" :value="item.id">
+                  <v-btn
+                    :active="isSelected"
+                    activeColor="blue"
+                    class="pbrf-pm-btn"
+                    size="small"
+                    @click="toggle"
+                  >
+                    <img v-if="item.icon !== ''" :src="item.icon" alt="icon" />
+                    <span>{{ item.name }}</span>
+                  </v-btn>
+                </v-item>
+              </div>
+            </v-item-group>
+          </div>
+        </div>
+        <!-- 副词条筛选 -->
+        <div v-show="activeTab === 'subProp'" class="pbrf-section">
+          <div class="pbrf-item">
+            <v-item-group v-model="selectedSubProp" class="pbrf-select" multiple>
+              <div v-for="item in subPropList" :key="item.id">
                 <v-item v-slot="{ isSelected, toggle }" :value="item.id">
                   <v-btn
                     :active="isSelected"
@@ -125,15 +166,17 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import { ref, watch } from "vue";
-import { AppPropMapData, wrMainProp, wrSet } from "@/data/index.js";
+import { AppPropMapData, wrSet } from "@/data/index.js";
 
 export type RelicFilterValue = {
   slot: Array<number>;
   star: Array<number>;
   set: Array<number>;
   mainProp: Array<number>;
+  subProp: Array<number>;
   locked: boolean | null;
   marked: boolean | null;
+  grade: Array<string>;
 };
 
 type PbRelicFilterEmits = (e: "filter", v: RelicFilterValue) => void;
@@ -144,6 +187,7 @@ const tabs = [
   { key: "basic", label: "基础筛选" },
   { key: "set", label: "套装筛选" },
   { key: "mainProp", label: "主词条筛选" },
+  { key: "subProp", label: "副词条筛选" },
 ];
 
 const slotList = [
@@ -167,6 +211,13 @@ const statusList = [
   { key: "marked", label: "星标", icon: "mdi-star" },
 ];
 
+const gradeList = [
+  { key: "init3", label: "初始3词条" },
+  { key: "init4", label: "初始4词条" },
+  { key: "enhance5", label: "强化5次" },
+  { key: "enhance4", label: "强化4次" },
+];
+
 const setList = wrSet
   .sort((a, b) => b.maxStar - a.maxStar || b.id - a.id)
   .map((s) => ({
@@ -176,21 +227,39 @@ const setList = wrSet
     maxStar: s.maxStar,
   }));
 
-const mainPropList = Array.from(new Set(Object.values(wrMainProp))).map((propId) => {
-  const propInfo = AppPropMapData[propId];
-  return {
-    id: propId,
-    name: propInfo ? propInfo.filter_name : `属性${propId}`,
-    icon: propInfo.icon,
-  };
-});
+const sandMainProps = [6, 9, 3, 28, 23];
+const gobletMainProps = [6, 9, 3, 28, 30, 40, 41, 42, 43, 44, 45, 46];
+const circletMainProps = [6, 9, 3, 28, 20, 22, 26];
+
+const subPropTypes = [2, 3, 5, 6, 8, 9, 20, 22, 23, 28];
+
+function createPropList(propIds: Array<number>): Array<{ id: number; name: string; icon: string }> {
+  return propIds.map((propId) => {
+    const propInfo = AppPropMapData[propId];
+    return {
+      id: propId,
+      name: propInfo ? propInfo.filter_name : `属性${propId}`,
+      icon: propInfo ? propInfo.icon : "",
+    };
+  });
+}
+
+const mainPropGroups = [
+  { key: "sand", label: "时之沙", slot: 3, items: createPropList(sandMainProps) },
+  { key: "goblet", label: "空之杯", slot: 4, items: createPropList(gobletMainProps) },
+  { key: "circlet", label: "理之冠", slot: 5, items: createPropList(circletMainProps) },
+];
+
+const subPropList = createPropList(subPropTypes);
 
 const activeTab = ref<string>("basic");
 const selectedSlot = ref<Array<number>>([]);
 const selectedStar = ref<Array<number>>([]);
 const selectedSet = ref<Array<number>>([]);
 const selectedMainProp = ref<Array<number>>([]);
+const selectedSubProp = ref<Array<number>>([]);
 const selectedStatus = ref<Array<string>>([]);
+const selectedGrade = ref<Array<string>>([]);
 
 const visible = defineModel<boolean>();
 const resetModel = defineModel<boolean>("reset");
@@ -203,7 +272,9 @@ watch(
       selectedStar.value = [];
       selectedSet.value = [];
       selectedMainProp.value = [];
+      selectedSubProp.value = [];
       selectedStatus.value = [];
+      selectedGrade.value = [];
       resetModel.value = false;
     }
   },
@@ -214,7 +285,9 @@ function resetFilter(): void {
   selectedStar.value = [];
   selectedSet.value = [];
   selectedMainProp.value = [];
+  selectedSubProp.value = [];
   selectedStatus.value = [];
+  selectedGrade.value = [];
   confirmSelect();
 }
 
@@ -224,8 +297,10 @@ function confirmSelect(): void {
     star: selectedStar.value,
     set: selectedSet.value,
     mainProp: selectedMainProp.value,
+    subProp: selectedSubProp.value,
     locked: selectedStatus.value.includes("locked") ? true : null,
     marked: selectedStatus.value.includes("marked") ? true : null,
+    grade: selectedGrade.value,
   };
   emits("filter", value);
   visible.value = false;
@@ -355,6 +430,34 @@ function confirmSelect(): void {
     img {
       filter: unset;
     }
+  }
+}
+
+.pbrf-mp-group {
+  margin-bottom: 12px;
+}
+
+.pbrf-mp-group:last-child {
+  margin-bottom: 0;
+}
+
+.pbrf-mp-group-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  color: var(--common-text-title);
+  font-size: 14px;
+  font-weight: 600;
+  gap: 4px;
+}
+
+.pbrf-mp-group-icon {
+  width: 18px;
+  height: 18px;
+  filter: invert(0.5);
+
+  .dark & {
+    filter: unset;
   }
 }
 

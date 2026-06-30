@@ -15,7 +15,7 @@
             <span>Lv.{{ props.cur.tb.info.level }}</span>
           </div>
           <div class="pb-wdt-sub">
-            <span>{{ props.cur.info.weapon }}</span>
+            <span>{{ props.cur.info.weapon }}{{ props.cur.tb.info.is_locked ? "🔒" : "" }}</span>
             <span>精炼{{ getAffixLevel() }}</span>
           </div>
         </div>
