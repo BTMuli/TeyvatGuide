@@ -28,14 +28,20 @@
           <img v-if="props.cur.mp.info.icon !== ''" :src="props.cur.mp.info.icon" alt="icon" />
           <span v-else style="width: 16px" />
           <span>{{ props.cur.mp.info.filter_name }}</span>
-          <span>{{ props.cur.mp.val < 1 ? props.cur.mp.val.toFixed(2) : props.cur.mp.val }}</span>
+          <span>
+            {{
+              props.cur.mp.val < 1
+                ? `${(props.cur.mp.val * 100).toFixed(1)}%`
+                : props.cur.mp.val.toFixed(0)
+            }}
+          </span>
         </div>
         <div v-for="(prop, idx) in props.cur.sp" :key="idx" class="pb-rdp-sub">
           <img v-if="prop.info.icon !== ''" :src="prop.info.icon" alt="icon" />
           <span v-else style="width: 16px" />
           <span>{{ prop.info.filter_name }}</span>
           <span v-if="prop.vals.length > 1" class="pb-rdp-cnt">{{ prop.vals.length - 1 }}</span>
-          <span>{{ prop.val < 1 ? `${(prop.val * 100).toFixed(2)}%` : prop.val.toFixed(2) }}</span>
+          <span>{{ prop.val < 1 ? `${(prop.val * 100).toFixed(1)}%` : prop.val.toFixed(0) }}</span>
         </div>
       </div>
       <div v-if="setInfo" class="pb-rd-set">
