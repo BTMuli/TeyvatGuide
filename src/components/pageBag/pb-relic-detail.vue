@@ -15,7 +15,7 @@
             <span>Lv.{{ props.cur.level - 1 }}</span>
           </div>
           <div class="pb-rdt-sub">
-            <span>{{ relicUtils.pos(props.cur.brief.pos ?? 0) }}</span>
+            <span>{{ wikiUtils.relic.pos(props.cur.brief.pos ?? 0) }}</span>
             <span v-if="props.cur.is_marked || props.cur.is_locked" class="pb-rdt-stat">
               <span v-if="props.cur.is_locked">🔒</span>
               <span v-if="props.cur.is_marked">⭐</span>
@@ -28,20 +28,14 @@
           <img v-if="props.cur.mp.info.icon !== ''" :src="props.cur.mp.info.icon" alt="icon" />
           <span v-else style="width: 16px" />
           <span>{{ props.cur.mp.info.filter_name }}</span>
-          <span>
-            {{
-              props.cur.mp.val < 1
-                ? `${(props.cur.mp.val * 100).toFixed(1)}%`
-                : props.cur.mp.val.toFixed(0)
-            }}
-          </span>
+          <span>{{ wikiUtils.propFmt(props.cur.mp.type, props.cur.mp.val) }}</span>
         </div>
         <div v-for="(prop, idx) in props.cur.sp" :key="idx" class="pb-rdp-sub">
           <img v-if="prop.info.icon !== ''" :src="prop.info.icon" alt="icon" />
           <span v-else style="width: 16px" />
           <span>{{ prop.info.filter_name }}</span>
           <span v-if="prop.vals.length > 1" class="pb-rdp-cnt">{{ prop.vals.length - 1 }}</span>
-          <span>{{ prop.val < 1 ? `${(prop.val * 100).toFixed(1)}%` : prop.val.toFixed(0) }}</span>
+          <span>{{ wikiUtils.propFmt(prop.type, prop.val) }}</span>
         </div>
       </div>
       <div v-if="setInfo" class="pb-rd-set">
@@ -59,7 +53,7 @@
 <script lang="ts" setup>
 import { shallowRef, watch } from "vue";
 import { wrRelic, wrSet } from "@/data/index.js";
-import relicUtils from "@utils/relicUtils.js";
+import wikiUtils from "@utils/wikiUtils.js";
 
 type PbRelicDetailProps = { cur: TGApp.Sqlite.UserBag.RelicTable };
 

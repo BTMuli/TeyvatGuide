@@ -23,7 +23,7 @@
       <div class="pb-wd-stats">
         <div v-for="stat in weaponStats" :key="stat.type" class="pb-wd-stat">
           <span class="pb-wd-stat-name">{{ stat.info.name }}</span>
-          <span class="pb-wd-stat-val">{{ weaponUtils.format(stat.type, stat.val) }}</span>
+          <span class="pb-wd-stat-val">{{ wikiUtils.propFmt(stat.type, stat.val) }}</span>
         </div>
       </div>
       <div class="pb-wd-affix">
@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-import weaponUtils from "@utils/weaponUtils.js";
+import wikiUtils from "@utils/wikiUtils.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
@@ -69,7 +69,7 @@ function parseAffixDesc(): string {
 const weaponStats = computed(() => {
   const level = props.cur.tb.info.level;
   const promoteLevel = props.cur.tb.info.promote_level;
-  return weaponUtils.stats(props.cur.info, level, promoteLevel);
+  return wikiUtils.weapon(props.cur.info, level, promoteLevel);
 });
 </script>
 <style lang="scss" scoped>

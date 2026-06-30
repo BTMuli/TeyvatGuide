@@ -7,7 +7,7 @@ import { wrMap } from "@/data/index.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
-import relicUtils from "@utils/relicUtils.js";
+import wikiUtils from "@utils/wikiUtils.js";
 
 /**
  * 插入或更新圣遗物数据
@@ -26,10 +26,10 @@ async function insertRelic(
 ): Promise<void> {
   const relicInfo = wrMap[itemId];
   if (!relicInfo) return;
-  const mainProp = relicUtils.mp(info.main_prop_id, relicInfo.star, info.level);
+  const mainProp = wikiUtils.relic.mp(info.main_prop_id, relicInfo.star, info.level);
   if (!mainProp) return;
   const now = Date.now();
-  const subProps = relicUtils.sp(info.append_prop_id_list);
+  const subProps = wikiUtils.relic.sp(info.append_prop_id_list);
   const brief = JSON.stringify(relicInfo);
   const mp = JSON.stringify(mainProp);
   const sp = JSON.stringify(subProps);

@@ -93,4 +93,17 @@ declare namespace TGApp.App.Weapon {
    * @since Beta v0.11.0
    */
   type WeaponCurve = Record<number, Array<PropItem>>;
+
+  /**
+   * 属性值
+   * @since Beta v0.11.0
+   */
+  type WeaponProp = {
+    /** 属性类型 */
+    type: number;
+    /** 属性值 */
+    val: number;
+    /** 属性信息 */
+    info: TGApp.Game.Avatar.PropMapItem;
+  };
 }
