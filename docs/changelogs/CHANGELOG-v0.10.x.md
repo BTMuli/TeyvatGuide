@@ -9,6 +9,10 @@ Update: 2026-06-10
 >
 > 更新于 `2026-06-10 21:17:06`
 
+# CHANGELOG v0.10.x
+
+> 本文仅记录 v0.10.x 版本的更新内容
+
 ## [0.10.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.10.4) (2026-06-10)
 
 - 🍱 更新卡池信息
