@@ -161,8 +161,8 @@ function getAvatarBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
   return {
     bg: `/icon/bg/${info.star}-Star.webp`,
     icon: `/WIKI/character/${info.id}.webp`,
-    size: "48px",
-    height: "48px",
+    size: "64px",
+    height: "64px",
     display: "inner",
     clickable: true,
     lt: `/icon/element/${info.element}元素.webp`,
@@ -177,8 +177,8 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
   return {
     bg: `/icon/bg/${info.star}-Star.webp`,
     icon: `/WIKI/weapon/${info.id}.webp`,
-    size: "48px",
-    height: "48px",
+    size: "64px",
+    height: "64px",
     display: "inner",
     clickable: true,
     lt: `/icon/weapon/${info.weapon}.webp`,
@@ -247,18 +247,20 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
 .ph-pool-rewards {
   position: relative;
   display: flex;
+  max-height: 140px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
+  overflow-y: auto;
 }
 
 .ph-pool-reward {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;

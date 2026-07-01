@@ -296,7 +296,7 @@ function filterPools(
 .pool-list {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(calc(400px), 0.5fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(300px), 0.5fr));
 }
 
 .pool-swiper {
