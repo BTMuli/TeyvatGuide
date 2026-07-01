@@ -63,7 +63,7 @@ jobs:
       - name: setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 11.0.8
+          version: 11.9.0
       - name: Install frontend dependencies
         run: pnpm install
       - name: Setup sentry-cli

@@ -55,7 +55,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 米游社话题帖子获取（通过话题点击跳转）
   - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入 & 自动导入（内置Yae）
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.2）
-  - [x] 背包物品获取（内置YAE）
+  - [x] 背包物品获取，包括材料&武器&圣遗物（内置YAE）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
   - [x] 帖子评论查看&分享

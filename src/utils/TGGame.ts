@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.10.2
+ * @since Beta v0.11.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -13,7 +13,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 
 // YAE支持的游戏版本
-export const YAE_GAME_VER: Readonly<string> = "6.6.0";
+export const YAE_GAME_VER: Readonly<string> = "6.7.0";
 
 /**
  * 验证游戏格式
