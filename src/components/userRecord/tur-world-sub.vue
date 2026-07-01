@@ -143,6 +143,7 @@ const imgFilter = computed<string>(() => {
 
 .tur-ws-offerings {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: start;
   column-gap: 8px;
