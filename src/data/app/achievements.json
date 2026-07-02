@@ -4509,7 +4509,7 @@
     "description": "在杜南纳深坑、霜月开启45个宝箱。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80491,
@@ -4519,7 +4519,7 @@
     "description": "在杜南纳深坑、霜月开启90个宝箱。",
     "reward": 10,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80492,
@@ -4529,7 +4529,7 @@
     "description": "在杜南纳深坑、霜月开启180个宝箱。",
     "reward": 20,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80493,
@@ -4539,7 +4539,7 @@
     "description": "在杜南纳深坑、霜月完成4个大世界限时挑战。",
     "reward": 10,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80494,
@@ -4549,7 +4549,7 @@
     "description": "点亮杜南纳深坑的地图。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_AREA" }
   },
   {
     "id": 80495,
@@ -4559,7 +4559,10 @@
     "description": "点亮月之高地的地图。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76127, "name": "先驱", "type": "世界任务" }]
+    }
   },
   {
     "id": 80496,
@@ -4569,7 +4572,10 @@
     "description": "点亮月之暗面的地图。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76062, "name": "星空访客", "type": "世界任务" }]
+    }
   },
   {
     "id": 80497,
@@ -4579,7 +4585,10 @@
     "description": "见证宁宁启动「望月者计划」。",
     "reward": 10,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76143, "name": "望月者计划", "type": "世界任务" }]
+    }
   },
   {
     "id": 80498,
@@ -4589,7 +4598,7 @@
     "description": "解除霜月区域中，月之高地、月荡海、月之暗面所有月灵龛的封印。",
     "reward": 10,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_GATE_TEMPLE" }
   },
   {
     "id": 80499,
@@ -4599,7 +4608,7 @@
     "description": "解除霜月区域中，月之高地、月荡海所有月灵盈藏之地的封印。",
     "reward": 10,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80500,
@@ -4619,7 +4628,7 @@
     "description": "解锁挪德卡莱与霜月区域中，杜南纳深坑、月之高地、月之暗面所有传送锚点。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_TRANS_POINT" }
   },
   {
     "id": 80502,
@@ -4629,7 +4638,7 @@
     "description": "将「幕形态黑体物质笼实验室」供奉至满级。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 80503,
@@ -4639,7 +4648,7 @@
     "description": "将「努尔寂石阵列」供奉至满级。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 81000,
@@ -11218,7 +11227,10 @@
     "description": "学会使用古月波纹。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76132, "name": "先驱", "type": "世界任务" }]
+    }
   },
   {
     "id": 81667,
@@ -11228,7 +11240,10 @@
     "description": "拆穿假哥伦比娅的伪装。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76132, "name": "先驱", "type": "世界任务" }]
+    }
   },
   {
     "id": 81669,
@@ -11238,7 +11253,10 @@
     "description": "乘坐登月飞船进入太空。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76132, "name": "先驱", "type": "世界任务" }]
+    }
   },
   {
     "id": 81670,
@@ -11248,7 +11266,7 @@
     "description": "成功登上月球。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81671,
@@ -11258,7 +11276,10 @@
     "description": "启动「伊比尼伯龙之眼」。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76127, "name": "先驱", "type": "世界任务" }]
+    }
   },
   {
     "id": 81672,
@@ -11268,7 +11289,10 @@
     "description": "穿破帷幕，进入「乌吉恩圈」。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76133, "name": "星空访客", "type": "世界任务" }]
+    }
   },
   {
     "id": 81674,
@@ -11278,7 +11302,10 @@
     "description": "启动「乌吉恩圈」的动力引擎。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76133, "name": "星空访客", "type": "世界任务" }]
+    }
   },
   {
     "id": 81675,
@@ -11288,7 +11315,7 @@
     "description": "第一次在无重力环境下遨游。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81677,
@@ -11298,7 +11325,10 @@
     "description": "击败月灵二大王乌吉。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 76062, "name": "星空访客", "type": "世界任务" }]
+    }
   },
   {
     "id": 81678,
@@ -11308,7 +11338,7 @@
     "description": "抵达月之暗面。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81681,
@@ -11318,7 +11348,7 @@
     "description": "见识天基武器的强大威力。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81682,
@@ -11328,7 +11358,10 @@
     "description": "穿行在天基武器内部的重力异常区域。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76143, "name": "望月者计划", "type": "世界任务" }]
+    }
   },
   {
     "id": 81683,
@@ -11338,7 +11371,7 @@
     "description": "完成霜月的环行。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81685,
@@ -11348,7 +11381,10 @@
     "description": "进入月心罅隙。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 76143, "name": "望月者计划", "type": "世界任务" }]
+    }
   },
   {
     "id": 81686,
@@ -11358,7 +11394,7 @@
     "description": "替古月源珠摆正它的位置。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81687,
@@ -11368,7 +11404,7 @@
     "description": "与哥伦比娅约定「归旅之夜」。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "FINISH_QUEST_AND" }
   },
   {
     "id": 81688,
@@ -11378,7 +11414,7 @@
     "description": "帮助来到霜月的梅拉。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "FINISH_QUEST_AND" }
   },
   {
     "id": 81689,
@@ -11388,7 +11424,7 @@
     "description": "登上所有停留在霜月的天船。",
     "reward": 10,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "FINISH_PARENT_QUEST_AND" }
   },
   {
     "id": 81690,
@@ -11398,7 +11434,7 @@
     "description": "修复霜月上的所有数据存储阵列。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81691,
@@ -11408,7 +11444,7 @@
     "description": "在「非完备证明」中超越已有记录。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81692,
@@ -11418,7 +11454,7 @@
     "description": "获得月灵创作的石头画。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81693,
@@ -11428,7 +11464,7 @@
     "description": "窥见甜甜花的失落世界一角。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81697,
@@ -11438,7 +11474,7 @@
     "description": "用身体向动力引擎的涡轮叶发起冲锋。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81698,
@@ -11448,7 +11484,7 @@
     "description": "坠向月心。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81699,
@@ -11458,7 +11494,7 @@
     "description": "在古月力浓度过高的区域中倒下。",
     "reward": 5,
     "version": "6.7",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82001,
@@ -15068,8 +15104,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 20033, "name": "冒险家，安娜！", "type": "每日委托" },
-        { "questId": 40010, "name": "冒险家测验·作战方式", "type": "task" },
-        { "questId": 40020, "name": "冒险家测验·冒险诀窍", "type": "task" },
         { "questId": 40030, "name": "冒险家测验·起飞方式", "type": "task" },
         { "questId": 40040, "name": "冒险家，安娜！", "type": "task" }
       ]
@@ -15089,7 +15123,6 @@
         { "questId": 21027, "name": "小海盗，要出海！", "type": "每日委托" },
         { "questId": 21027, "name": "小海盗，要出海！", "type": "每日委托" },
         { "questId": 29300, "name": "哎呀！海盗想长大！", "type": "task" },
-        { "questId": 29600, "name": "随水而来的烦恼", "type": "task" },
         { "questId": 29700, "name": "小海盗，要出海！", "type": "task" }
       ]
     }
@@ -17602,9 +17635,7 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 22003, "name": "勿言勿笑", "type": "每日委托" },
-        { "questId": 22004, "name": "独钓江雪", "type": "每日委托" },
-        { "questId": 26400, "name": "独钓江雪", "type": "task" },
-        { "questId": 26500, "name": "勿言勿笑", "type": "task" }
+        { "questId": 22004, "name": "独钓江雪", "type": "每日委托" }
       ]
     }
   },
@@ -17775,7 +17806,6 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 22114, "name": "所谓「工作」", "type": "每日委托" },
-        { "questId": 25100, "name": "港口驶过几艘船，二四六七八", "type": "task" },
         { "questId": 28000, "name": "所谓「工作」", "type": "task" }
       ]
     }
@@ -17821,7 +17851,6 @@
         { "questId": 22107, "name": "好兆头", "type": "每日委托" },
         { "questId": 22107, "name": "好兆头", "type": "每日委托" },
         { "questId": 22107, "name": "好兆头", "type": "每日委托" },
-        { "questId": 2610001, "name": "捕鱼", "type": "subtask" },
         { "questId": 2610002, "name": "落叶", "type": "subtask" },
         { "questId": 2610003, "name": "赶走鸽子", "type": "subtask" },
         { "questId": 2610004, "name": "小狗", "type": "subtask" }
@@ -17848,15 +17877,7 @@
     "version": "2.0",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [
-        { "questId": 22019, "name": "万端珊瑚事件簿·结案时刻", "type": "每日委托" },
-        { "questId": 41070, "name": "万端珊瑚事件簿", "type": "task" },
-        { "questId": 41180, "name": "万端珊瑚事件簿·搜索工作 - 稻妻城", "type": "task" },
-        { "questId": 4118002, "name": "万端珊瑚事件簿·搜索工作 - 甘金岛", "type": "subtask" },
-        { "questId": 4118003, "name": "万端珊瑚事件簿·搜索工作 - 神里屋敷", "type": "subtask" },
-        { "questId": 41080, "name": "万端珊瑚事件簿·合适的身份", "type": "task" },
-        { "questId": 41090, "name": "万端珊瑚事件簿·结案时刻", "type": "task" }
-      ]
+      "task": [{ "questId": 22019, "name": "万端珊瑚事件簿·结案时刻", "type": "每日委托" }]
     }
   },
   {
@@ -17886,8 +17907,7 @@
         { "questId": 22025, "name": "绝对独特的美食", "type": "每日委托" },
         { "questId": 22025, "name": "绝对独特的美食", "type": "每日委托" },
         { "questId": 22025, "name": "绝对独特的美食", "type": "每日委托" },
-        { "questId": 41160, "name": "家乡之味", "type": "task" },
-        { "questId": 41170, "name": "绝对独特的美食", "type": "task" }
+        { "questId": 41160, "name": "家乡之味", "type": "task" }
       ]
     }
   },
@@ -17962,8 +17982,7 @@
       "type": "FINISH_QUEST_AND",
       "task": [
         { "questId": 22037, "name": "售后服务", "type": "每日委托" },
-        { "questId": 41250, "name": "稻妻销售员", "type": "task" },
-        { "questId": 41260, "name": "售后服务", "type": "task" }
+        { "questId": 41250, "name": "稻妻销售员", "type": "task" }
       ]
     }
   },
@@ -18011,8 +18030,7 @@
         { "questId": 22013, "name": "这本小说…有问题？", "type": "每日委托" },
         { "questId": 4101001, "name": "这本小说…厉害吗？ - 顺吉", "type": "subtask" },
         { "questId": 4101002, "name": "这本小说…厉害吗？ - 阿茂", "type": "subtask" },
-        { "questId": 41020, "name": "这本小说…有问题？", "type": "task" },
-        { "questId": 41030, "name": "这本小说…好像看过？", "type": "task" }
+        { "questId": 41020, "name": "这本小说…有问题？", "type": "task" }
       ]
     }
   },
@@ -18065,12 +18083,7 @@
     "version": "2.1",
     "trigger": {
       "type": "FINISH_QUEST_AND",
-      "task": [
-        { "questId": 22050, "name": "鸣神寻踪", "type": "世界任务" },
-        { "questId": 41330, "name": "神社大扫除", "type": "task" },
-        { "questId": 41280, "name": "鱼之味", "type": "task" },
-        { "questId": 41290, "name": "猫之迹", "type": "task" }
-      ]
+      "task": [{ "questId": 22050, "name": "鸣神寻踪", "type": "世界任务" }]
     }
   },
   {
