@@ -24,7 +24,6 @@ create table if not exists UserBagWeapon
 );
 
 -- @brief 创建背包物品圣遗物表
-drop table if exists UserBagRelic;
 create table if not exists UserBagRelic
 (
     guid      text    not null,
