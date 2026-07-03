@@ -2,12 +2,17 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-07-01
-Update: 2026-07-01
+Update: 2026-07-03
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-07-01 05:22:05`
 >
-> 更新于 `2026-07-01 10:40:53`
+> 更新于 `2026-07-03 11:53:01`
+
+## [0.11.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.0) (2026-07-03)
+
+- 🐛 修正6.7卡池开始时间，修复历史祈愿计算异常
+- 💄 首页用户祈愿组件补充遗漏的样式，修复渲染异常
 
 ## [0.11.0](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.0) (2026-07-01)
 
