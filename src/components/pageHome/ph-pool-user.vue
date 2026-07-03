@@ -264,7 +264,13 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
+  border-radius: 4px;
   background: var(--box-bg-2);
   cursor: pointer;
+
+  .icon {
+    width: 64px;
+    height: 64px;
+  }
 }
 </style>
