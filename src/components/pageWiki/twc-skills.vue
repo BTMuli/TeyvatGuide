@@ -4,8 +4,8 @@
       <v-tab
         v-for="(item, index) in tabValues"
         :key="index"
-        :value="item.name"
         :title="item.name"
+        :value="item.name"
         class="twc-skill-tab"
         density="compact"
       >
@@ -14,9 +14,17 @@
       </v-tab>
     </v-tabs>
     <v-window v-model="tab">
-      <v-window-item :value="item.name" v-for="(item, index) in tabValues" :key="index">
-        <div class="twc-skill-special">
+      <v-window-item
+        v-for="(item, index) in tabValues"
+        :key="index"
+        :value="item.name"
+        class="twc-skill-desc"
+      >
+        <div class="twc-skill-normal">
           <span v-html="parseHtmlText(data[index].Description)"></span>
+        </div>
+        <div v-if="data[index].SpecialDescription" class="twc-skill-special">
+          <span v-html="parseHtmlText(data[index].SpecialDescription)"></span>
         </div>
       </v-window-item>
     </v-window>
@@ -71,14 +79,22 @@ watch(() => props.data, loadData);
   filter: brightness(0.75);
 }
 
-.twc-skill-normal {
+.twc-skill-desc {
   display: flex;
+}
+
+.twc-skill-normal {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  white-space: pre-wrap;
 }
 
 .twc-skill-special {
   padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   white-space: pre-wrap;
 }
 </style>

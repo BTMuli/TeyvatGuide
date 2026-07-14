@@ -29,18 +29,18 @@ minimumReleaseAgeExclude:
   - "@sentry/browser@10.56.0"
   - "@sentry/core@10.56.0"
   - "@sentry/vue@10.56.0"
-  - "@types/node@25.9.0 || 25.9.1"
-  - "@typescript-eslint/eslint-plugin@8.60.1"
-  - "@typescript-eslint/parser@8.60.1"
-  - "@typescript-eslint/project-service@8.60.1"
-  - "@typescript-eslint/scope-manager@8.60.1"
-  - "@typescript-eslint/tsconfig-utils@8.60.1"
-  - "@typescript-eslint/type-utils@8.60.1"
-  - "@typescript-eslint/types@8.60.1"
-  - "@typescript-eslint/typescript-estree@8.60.1"
-  - "@typescript-eslint/utils@8.60.1"
-  - "@typescript-eslint/visitor-keys@8.60.1"
-  - "@vue/language-core@3.3.0 || 3.3.1 || 3.3.6"
+  - "@types/node@25.9.0 || 25.9.1 || 26.1.1"
+  - "@typescript-eslint/eslint-plugin@8.60.1 || 8.64.0"
+  - "@typescript-eslint/parser@8.60.1 || 8.64.0"
+  - "@typescript-eslint/project-service@8.60.1 || 8.64.0"
+  - "@typescript-eslint/scope-manager@8.60.1 || 8.64.0"
+  - "@typescript-eslint/tsconfig-utils@8.60.1 || 8.64.0"
+  - "@typescript-eslint/type-utils@8.60.1 || 8.64.0"
+  - "@typescript-eslint/types@8.60.1 || 8.64.0"
+  - "@typescript-eslint/typescript-estree@8.60.1 || 8.64.0"
+  - "@typescript-eslint/utils@8.60.1 || 8.64.0"
+  - "@typescript-eslint/visitor-keys@8.60.1 || 8.64.0"
+  - "@vue/language-core@3.3.0 || 3.3.1 || 3.3.6 || 3.3.7"
   - concurrently@10.0.3
   - date-fns@4.2.1
   - echarts@6.1.0
@@ -49,9 +49,32 @@ minimumReleaseAgeExclude:
   - swiper@12.2.0
   - synckit@0.11.13
   - tsx@4.22.2 || 4.22.3
-  - typescript-eslint@8.60.1
+  - typescript-eslint@8.60.1 || 8.64.0
   - vue-eslint-parser@10.4.1
-  - vue-tsc@3.3.0 || 3.3.1 || 3.3.6
-  - vuetify@4.1.0
+  - vue-tsc@3.3.0 || 3.3.1 || 3.3.6 || 3.3.7
+  - vuetify@4.1.0 || 4.1.5
   - prettier@3.9.4
   - vite@8.1.2
+  - "@typescript/typescript-aix-ppc64@7.0.2"
+  - "@typescript/typescript-darwin-arm64@7.0.2"
+  - "@typescript/typescript-darwin-x64@7.0.2"
+  - "@typescript/typescript-freebsd-arm64@7.0.2"
+  - "@typescript/typescript-freebsd-x64@7.0.2"
+  - "@typescript/typescript-linux-arm64@7.0.2"
+  - "@typescript/typescript-linux-arm@7.0.2"
+  - "@typescript/typescript-linux-loong64@7.0.2"
+  - "@typescript/typescript-linux-mips64el@7.0.2"
+  - "@typescript/typescript-linux-ppc64@7.0.2"
+  - "@typescript/typescript-linux-riscv64@7.0.2"
+  - "@typescript/typescript-linux-s390x@7.0.2"
+  - "@typescript/typescript-linux-x64@7.0.2"
+  - "@typescript/typescript-netbsd-arm64@7.0.2"
+  - "@typescript/typescript-netbsd-x64@7.0.2"
+  - "@typescript/typescript-openbsd-arm64@7.0.2"
+  - "@typescript/typescript-openbsd-x64@7.0.2"
+  - "@typescript/typescript-sunos-x64@7.0.2"
+  - "@typescript/typescript-win32-arm64@7.0.2"
+  - "@typescript/typescript-win32-x64@7.0.2"
+  - typescript@7.0.2
+  - yaml-eslint-parser@2.1.0
+  - "@tauri-apps/plugin-log@2.9.0"

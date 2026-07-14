@@ -48,6 +48,7 @@
       "Id": 316,
       "Name": "永夜之禽",
       "Description": "奥兹的存在时间延长2秒。此外，奥兹会协同当前场上自己的角色一起攻击，造成菲谢尔30%攻击力的<color=#FFACFFFF>雷元素伤害</color>。",
+      "SpecialDescription": "奥兹的存在时间延长2秒。此外，奥兹会协同当前场上自己的角色一起攻击，造成菲谢尔30%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n奥兹进行协同攻击后，<color=#FFD780FF>魔女的前夜礼·宵世幻奏</color>中提升攻击力与元素精通的效果提高100%，持续10秒。",
       "Icon": "UI_Talent_S_Fischl_04"
     }
   ],

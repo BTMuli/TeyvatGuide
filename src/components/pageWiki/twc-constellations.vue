@@ -4,8 +4,8 @@
       <v-tab
         v-for="(item, index) in props.data"
         :key="index"
-        :value="item.Name"
         :title="item.Name"
+        :value="item.Name"
         class="twc-constellation-tab"
         density="compact"
       >
@@ -15,17 +15,22 @@
     </v-tabs>
     <v-window v-model="tab">
       <v-window-item
-        :value="item.Name"
         v-for="(item, index) in props.data"
         :key="index"
+        :value="item.Name"
         class="twc-constellation-desc"
       >
-        <span v-html="parseHtmlText(item.Description)"></span>
+        <div class="twc-constellation-normal">
+          <span v-html="parseHtmlText(item.Description)"></span>
+        </div>
+        <div v-if="item.SpecialDescription" class="twc-constellation-spec">
+          <span v-html="parseHtmlText(item.SpecialDescription)" />
+        </div>
       </v-window-item>
     </v-window>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { onMounted, ref, watch } from "vue";
 
@@ -69,9 +74,21 @@ watch(() => props.data, loadData);
 }
 
 .twc-constellation-desc {
+  display: flex;
+}
+
+.twc-constellation-normal {
+  width: 100%;
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
+  white-space: pre-wrap;
+}
+
+.twc-constellation-spec {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
   white-space: pre-wrap;
 }
 </style>

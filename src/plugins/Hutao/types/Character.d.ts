@@ -1,12 +1,12 @@
 /**
  * 角色类型定义
- * @since Beta v0.4.5
+ * @since Beta v0.11.2
  */
 
 declare namespace TGApp.Plugins.Hutao.Character {
   /**
    * 元数据 - 胡桃 - 技能
-   * @since Beta v0.3.8
+   * @since Beta v0.11.2
    * @remarks RawHutaoItem.SkillDepot.Skill
    */
   type RhisdSkill = {
@@ -25,6 +25,8 @@ declare namespace TGApp.Plugins.Hutao.Character {
     Name: string;
     /** 技能描述 */
     Description: string;
+    /** 加强后的描述 */
+    SpecialDescription?: string;
     /** 技能图标 */
     Icon: string;
   };
@@ -43,7 +45,7 @@ declare namespace TGApp.Plugins.Hutao.Character {
 
   /**
    * 元数据 - 胡桃 - 技能天赋
-   * @since Beta v0.3.8
+   * @since Beta v0.11.2
    * @remarks RawHutaoItem.SkillDepot.Talents
    */
   type RhisdTalent = {
@@ -53,6 +55,8 @@ declare namespace TGApp.Plugins.Hutao.Character {
     Name: string;
     /** 天赋描述 */
     Description: string;
+    /** 加强后的描述 */
+    SpecialDescription?: string;
     /** 天赋图标 */
     Icon: string;
   };

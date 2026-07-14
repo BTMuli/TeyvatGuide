@@ -43,6 +43,7 @@
       "Id": 246,
       "Name": "北斗祓幽孽",
       "Description": "<color=#FFD780FF>斫雷</color>持续期间，周围敌人的<color=#FFACFFFF>雷元素抗性</color>降低15%。",
+      "SpecialDescription": "<color=#FFD780FF>斫雷</color>持续期间，周围敌人的<color=#FFACFFFF>雷元素抗性</color>降低15%。\n\n<color=#FFD780FF>辉映·星超导</color>：斫雷持续期间，附近敌人的<color=#99FFFFFF>冰元素抗性</color>还会降低15%，且当前场上角色元素精通提升200点。",
       "Icon": "UI_Talent_S_Beidou_04"
     }
   ],

@@ -11,12 +11,14 @@
       "Id": 221,
       "Name": "弦发的苍风",
       "Description": "<color=#FFD780FF>瞄准射击</color>会额外发射两枚分裂箭，分别造成原本33%的伤害。",
+      "SpecialDescription": "<color=#FFD780FF>瞄准射击</color>会额外发射两枚分裂箭，分别造成原本33%的伤害。\n此外，<color=#FFD780FF>飓风箭</color>也会额外发射两枚能追踪敌人的箭矢，分别造成原本20%的伤害，该效果每0.25秒至多触发一次。",
       "Icon": "UI_Talent_S_Venti_01"
     },
     {
       "Id": 222,
       "Name": "眷恋的泠风",
       "Description": "<color=#FFD780FF>高天之歌</color>会使敌人的<color=#80FFD7FF>风元素抗性</color>与物理抗性降低12%，持续10秒。\n被<color=#FFD780FF>高天之歌</color>击飞的敌人在落地前，<color=#80FFD7FF>风元素抗性</color>与物理抗性额外降低12%。",
+      "SpecialDescription": "<color=#FFD780FF>高天之歌</color>会使敌人的<color=#80FFD7FF>风元素抗性</color>与物理抗性降低24%，持续10秒。\n此外，施放元素爆发<color=#FFD780FF>风神之诗</color>后，温迪将获得<color=#FFD780FF>风起之时</color>效果，并刷新元素战技<color=#FFD780FF>高天之歌</color>的冷却时间；<color=#FFD780FF>飓风箭</color>命中敌人后，也会有25%概率使温迪获得<color=#FFD780FF>风起之时</color>效果。\n\n<color=#FFD780FF>风起之时</color>\n点按施放元素战技<color=#FFD780FF>高天之歌</color>时，将造成原本300%的伤害。该效果持续15秒，并将在温迪点按施放元素战技<color=#FFD780FF>高天之歌</color>后移除。",
       "Icon": "UI_Talent_S_Venti_02"
     },
     {
@@ -30,6 +32,7 @@
       "Id": 224,
       "Name": "自由的凛风",
       "Description": "温迪获取元素晶球或元素微粒后，获得25%<color=#80FFD7FF>风元素伤害加成</color>，持续10秒。",
+      "SpecialDescription": "温迪施放元素战技<color=#FFD780FF>高天之歌</color>或元素爆发<color=#FFD780FF>风神之诗</color>后，温迪与队伍中自己的当前场上其他角色获得25%<color=#80FFD7FF>风元素伤害加成</color>，持续10秒。",
       "Icon": "UI_Talent_S_Venti_03"
     },
     {
@@ -43,6 +46,7 @@
       "Id": 226,
       "Name": "抗争的暴风",
       "Description": "受<color=#FFD780FF>风神之诗</color>伤害的敌人，<color=#80FFD7FF>风元素抗性</color>降低20%；\n若产生了元素转化，则使转换的元素抗性也降低20%。",
+      "SpecialDescription": "受<color=#FFD780FF>风神之诗</color>伤害的敌人，<color=#80FFD7FF>风元素抗性</color>降低20%；\n若产生了元素转化，则使转换的元素抗性也降低20%。\n此外，温迪对这些敌人造成的伤害，还会获得100%暴击伤害加成。",
       "Icon": "UI_Talent_S_Venti_04"
     }
   ],
@@ -65,6 +69,7 @@
       "Id": 10221,
       "Name": "神代射术",
       "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多六段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，眷顾天地的风会在箭矢上持续积聚。聚满了风之力的箭矢会造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
+      "SpecialDescription": "<color=#FFD780FF>普通攻击</color>\n进行至多六段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，眷顾天地的风会在箭矢上持续积聚。聚满了风之力的箭矢会造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。\n\n<color=#FFD780FF>魔导·秘仪</color>\n元素爆发<color=#FFD780FF>风神之诗</color>创造的暴风之眼存在期间，温迪将获得额外的强化效果：\n·温迪的普通攻击将转为发射能穿透敌人的<color=#FFD780FF>飓风箭</color>，对路径上的敌人造成更高的<color=#80FFD7FF>风元素伤害</color>。\n·温迪的普通攻击命中敌人时，将使暴风之眼的持续时间延长1秒，冷却时间延长0.5秒；该效果每0.1秒至多触发一次，每次施放元素爆发<color=#FFD780FF>风神之诗</color>后至多触发2次。",
       "Icon": "Skill_A_02"
     },
     {
