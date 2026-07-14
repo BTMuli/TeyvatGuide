@@ -56,16 +56,35 @@
         </v-btn>
       </div>
     </template>
+    <template #extension>
+      <div class="pbr-nav-extension">
+        <span class="pbr-load-count">
+          已显示 <strong>{{ visibleRelics.length }}</strong> / {{ relicShow.length }}
+        </span>
+        <v-progress-linear
+          :color="hasMoreRelics ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"
+          :model-value="relicShow.length ? (visibleRelics.length / relicShow.length) * 100 : 0"
+          :rounded="true"
+          bg-color="var(--tgc-od-white)"
+          class="pbr-load-progress"
+          height="4"
+        />
+        <span class="pbr-load-hint">
+          {{ hasMoreRelics ? "继续滚动加载" : relicShow.length ? "已全部显示" : "暂无数据" }}
+        </span>
+      </div>
+    </template>
   </v-app-bar>
   <div class="pbr-container">
-    <template v-for="relic in relicShow" :key="relic.guid">
+    <template v-for="relic in visibleRelics" :key="relic.guid">
       <PbRelicItem
+        :detail="showDetail"
         :relic
         :selected="relic.guid === curRelic?.guid"
-        :detail="showDetail"
         @select="handleSelect"
       />
     </template>
+    <div v-if="hasMoreRelics" ref="loadMoreRef" class="pbr-load-trigger" />
   </div>
   <PbRelicDetail v-if="curRelic" v-model:show="showDetail" :cur="curRelic" />
   <PbRelicFilter v-model="showFilter" @filter="handleFilter" />
@@ -79,7 +98,16 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  triggerRef,
+  watch,
+} from "vue";
 import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
 import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
 import PbRelicFilter, { type RelicFilterValue } from "@comp/pageBag/pb-relic-filter.vue";
@@ -108,11 +136,25 @@ const curRelic = shallowRef<TGApp.Sqlite.UserBag.RelicTable>();
 const relicList = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 const relicShow = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 const isFilterInitialized = ref<boolean>(false);
+const RELIC_RENDER_SIZE: Readonly<number> = 100;
+const renderedCount = ref<number>(RELIC_RENDER_SIZE);
+const loadMoreRef = shallowRef<HTMLElement>();
+let loadMoreObserver: IntersectionObserver | undefined;
+
+const visibleRelics = computed<Array<TGApp.Sqlite.UserBag.RelicTable>>(() =>
+  relicShow.value.slice(0, renderedCount.value),
+);
+const hasMoreRelics = computed<boolean>(() => renderedCount.value < relicShow.value.length);
 
 onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
   await reloadUid();
   await showLoading.end();
+  initLoadMoreObserver();
+});
+
+onBeforeUnmount(() => {
+  loadMoreObserver?.disconnect();
 });
 
 watch(
@@ -146,6 +188,7 @@ function handleFilter(value: RelicFilterValue): void {
   relicShow.value = filterRelics(relicList.value);
   triggerRef(relicShow);
   curIdx.value = 0;
+  resetRenderedRelics();
   if (relicShow.value.length === 0) {
     showSnackbar.warn("未找到符合条件的圣遗物!");
   } else {
@@ -230,6 +273,7 @@ async function loadRelicList(uid: number): Promise<void> {
   relicList.value = sortRelics(dList);
   relicShow.value = relicList.value;
   curIdx.value = 0;
+  resetRenderedRelics();
   await showLoading.end();
 }
 
@@ -241,6 +285,7 @@ function searchRelic(): void {
       return;
     }
     relicShow.value = selectData;
+    resetRenderedRelics();
     showSnackbar.success("已重置!");
     return;
   }
@@ -258,6 +303,7 @@ function searchRelic(): void {
     return;
   }
   relicShow.value = selectData;
+  resetRenderedRelics();
   showSnackbar.success(`找到${selectData.length}条符合条件的圣遗物`);
 }
 
@@ -304,6 +350,34 @@ async function deleteUid(): Promise<void> {
   await TSUserBagRelic.delUid(curUid.value);
   await reloadUid();
   showSnackbar.success(`已删除对应存档，即将刷新`);
+}
+
+function resetRenderedRelics(): void {
+  renderedCount.value = Math.min(RELIC_RENDER_SIZE, relicShow.value.length);
+  nextTick(() => {
+    observeLoadMore();
+  });
+}
+
+function loadMoreRelics(): void {
+  if (!hasMoreRelics.value) return;
+  renderedCount.value = Math.min(renderedCount.value + RELIC_RENDER_SIZE, relicShow.value.length);
+}
+
+function initLoadMoreObserver(): void {
+  loadMoreObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) loadMoreRelics();
+    },
+    { rootMargin: "360px" },
+  );
+  observeLoadMore();
+}
+
+function observeLoadMore(): void {
+  if (!loadMoreObserver || !loadMoreRef.value) return;
+  loadMoreObserver.disconnect();
+  loadMoreObserver.observe(loadMoreRef.value);
 }
 
 function handleSelect(relic: TGApp.Sqlite.UserBag.RelicTable): void {
@@ -359,5 +433,43 @@ function handleSelect(relic: TGApp.Sqlite.UserBag.RelicTable): void {
   width: 100%;
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+}
+
+.pbr-nav-extension {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 12px;
+  gap: 12px;
+}
+
+.pbr-load-count,
+.pbr-load-hint {
+  flex: none;
+  white-space: nowrap;
+}
+
+.pbr-load-count strong {
+  color: rgb(var(--v-theme-primary));
+  font-size: 14px;
+}
+
+.pbr-load-progress {
+  min-width: 80px;
+  flex: 1;
+}
+
+.pbr-load-hint {
+  color: var(--common-text-secondary);
+}
+
+.pbr-load-trigger {
+  width: 100%;
+  height: 1px;
+  grid-column: 1 / -1;
 }
 </style>
