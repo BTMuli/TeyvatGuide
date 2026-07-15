@@ -57,6 +57,18 @@
                 </v-icon>
               </template>
             </v-list-item>
+            <v-list-item
+              :link="true"
+              class="side-item-menu"
+              href="/user/cultivation"
+              title="养成计算"
+            >
+              <template #prepend>
+                <v-icon class="side-icon-menu" color="var(--tgc-od-orange)" size="20">
+                  mdi-calculator-variant-outline
+                </v-icon>
+              </template>
+            </v-list-item>
             <v-list-item :link="true" class="side-item-menu" href="/bag/material" title="材料">
               <template #prepend>
                 <img alt="abyss" class="side-icon-menu" src="/icon/material/223.webp" />
@@ -388,7 +400,7 @@ const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppS
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
 
-const isDevEnv = proEnv.TAURI_ENV_DEBUG;
+const isDevEnv = import.meta.env.DEV;
 const showFollow = ref<boolean>();
 const showLoginQr = ref<boolean>(false);
 const isTryLogin = ref<boolean>(false);

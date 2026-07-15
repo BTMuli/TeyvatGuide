@@ -1,6 +1,6 @@
 /**
  * user 路由模块
- * @since Beta v0.9.6
+ * @since Beta v0.11.2
  */
 
 import type { RouteRecordRaw } from "vue-router";
@@ -45,6 +45,11 @@ const userRoutes = (<const>[
     path: "/user/scripts",
     name: "实用脚本",
     component: async () => await import("@/pages/User/Scripts.vue"),
+  },
+  {
+    path: "/user/cultivation",
+    name: "养成计算",
+    component: async () => await import("@/pages/User/Cultivation.vue"),
   },
 ]) satisfies Array<RouteRecordRaw>;
 
