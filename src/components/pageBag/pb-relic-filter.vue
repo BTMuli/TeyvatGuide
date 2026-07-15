@@ -2,17 +2,18 @@
 <template>
   <TOverlay v-model="visible">
     <div class="pbrf-container">
-      <div class="pbrf-tabs">
-        <v-btn
-          v-for="tab in tabs"
-          :key="tab.key"
-          :active="activeTab === tab.key"
-          activeColor="blue"
-          @click="activeTab = tab.key"
-        >
+      <v-btn-toggle
+        v-model="activeTab"
+        :divided="false"
+        :mandatory="true"
+        class="pbrf-tabs"
+        color="var(--tgc-od-blue)"
+        variant="outlined"
+      >
+        <v-btn v-for="tab in tabs" :key="tab.key" :value="tab.key" size="small">
           {{ tab.label }}
         </v-btn>
-      </div>
+      </v-btn-toggle>
       <div class="pbrf-content">
         <!-- 基础筛选 -->
         <div v-show="activeTab === 'basic'" class="pbrf-section">
@@ -169,7 +170,7 @@
         </div>
       </div>
       <div class="pbrf-submit">
-        <v-btn variant="tonal" @click="resetFilter">重置</v-btn>
+        <v-btn variant="tonal" @click="resetFilter">重置选项</v-btn>
         <v-btn @click="confirmSelect">确定</v-btn>
       </div>
     </div>
@@ -318,7 +319,6 @@ function resetFilter(): void {
   selectedStatus.value = [];
   selectedGrade.value = [];
   subPropMatchCount.value = 0;
-  confirmSelect();
 }
 
 function confirmSelect(): void {
@@ -358,10 +358,7 @@ function confirmSelect(): void {
 }
 
 .pbrf-tabs {
-  display: flex;
-  width: 100%;
-  font-family: var(--font-title);
-  gap: 8px;
+  height: 36px;
 }
 
 .pbrf-content {
