@@ -50,6 +50,13 @@
             </v-list-item>
           </template>
           <v-list :nav="true" class="side-list-menu sub" density="compact">
+            <v-list-item :link="true" class="side-item-menu" title="导入" @click="tryImportBag()">
+              <template #prepend>
+                <v-icon class="side-icon-menu" color="var(--tgc-od-orange)" size="20">
+                  mdi-import
+                </v-icon>
+              </template>
+            </v-list-item>
             <v-list-item :link="true" class="side-item-menu" href="/bag/material" title="材料">
               <template #prepend>
                 <img alt="abyss" class="side-icon-menu" src="/icon/material/223.webp" />
@@ -363,6 +370,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists, readDir } from "@tauri-apps/plugin-fs";
 import mhyClient from "@utils/TGClient.js";
+import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -437,6 +445,10 @@ async function trySwitchGameAccount(ac: TGApp.Sqlite.Account.Game): Promise<void
 
 async function switchTheme(): Promise<void> {
   await event.emit("readTheme", theme.value === "default" ? "dark" : "default");
+}
+
+async function tryImportBag(): Promise<void> {
+  await tryCallYae(gameDir.value, account.value.gameUid || undefined);
 }
 
 async function openClient(func: string): Promise<void> {
