@@ -1,12 +1,12 @@
 /**
  * 角色相关类型定义文件
- * @since Beta v0.9.1
+ * @since Beta v0.11.2
  */
 
 declare namespace TGApp.App.Character {
   /**
    * Wiki 页简略信息
-   * @since Beta v0.9.1
+   * @since Beta v0.11.2
    */
   type WikiBriefInfo = {
     /** 角色 ID */
@@ -19,6 +19,8 @@ declare namespace TGApp.App.Character {
     title: string;
     /** 角色地区 */
     area: string;
+    /** 队伍强化 */
+    team: Array<number>;
     /** 角色生日 [月, 日] */
     birthday: Array<number>;
     /** 角色星级 */

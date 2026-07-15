@@ -19,7 +19,7 @@
         <slot :selected="isAllSelected" name="all">All</slot>
       </div>
     </v-chip>
-    <v-chip-group v-model="selected" filter multiple>
+    <v-chip-group class="uav-scb-group" v-model="selected" filter multiple>
       <!-- Options -->
       <v-chip
         v-for="item in props.items"
@@ -150,6 +150,12 @@ async function toggleAll(): Promise<void> {
     transition: transform var(--anim-duration) var(--anim-ease);
     will-change: transform;
   }
+}
+
+.uav-scb-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .uav-scb-item {

@@ -210,8 +210,9 @@ const selectOpts = ref<UavSelectModel>({
   star: [],
   level: [],
   weapon: [],
-  area: [],
   element: [],
+  area: [],
+  team: [],
 });
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 
@@ -308,8 +309,9 @@ function resetList(): void {
     star: [],
     level: [],
     weapon: [],
-    area: [],
     element: [],
+    team: [],
+    area: [],
   };
   selectedList.value = getOrderedList(roleList.value);
   showSnackbar.success("已重置筛选条件");
@@ -578,6 +580,10 @@ function handleSelect(val: UavSelectModel): void {
       );
       if (val.costume.includes("true")) return hasCostume;
       if (val.costume.includes("false")) return !hasCostume;
+    }
+    if (val.team.length > 0) {
+      if (val.team.length === 3) return true;
+      return info?.team.some((t) => val.team.includes(t.toString()));
     }
     return true;
   });

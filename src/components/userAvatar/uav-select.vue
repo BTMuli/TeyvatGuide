@@ -2,46 +2,66 @@
 <template>
   <v-bottom-sheet v-model="visible">
     <div class="uav-select-container">
-      <div class="uav-select-item">
-        <div class="uav-select-title">衣装</div>
-        <div class="uav-select-props">
-          <UavSelectChips v-model:selected="costumeSelected" :items="costumeOpts" size="small" />
+      <div class="uav-select-main">
+        <div class="uav-select-left">
+          <div class="uav-select-item">
+            <div class="uav-select-title">衣装</div>
+            <div class="uav-select-props">
+              <UavSelectChips
+                v-model:selected="costumeSelected"
+                :items="costumeOpts"
+                size="small"
+              />
+            </div>
+          </div>
+          <div class="uav-select-item">
+            <div class="uav-select-title">好感</div>
+            <div class="uav-select-props">
+              <UavSelectChips v-model:selected="fetterSelected" :items="fetterOpts" size="small" />
+            </div>
+          </div>
+          <div class="uav-select-item">
+            <div class="uav-select-title">星级</div>
+            <div class="uav-select-props">
+              <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small" />
+            </div>
+          </div>
+          <div class="uav-select-item">
+            <div class="uav-select-title">等级</div>
+            <div class="uav-select-props">
+              <UavSelectChips v-model:selected="levelSelected" :items="levelOpts" size="small" />
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="uav-select-item">
-        <div class="uav-select-title">好感</div>
-        <div class="uav-select-props">
-          <UavSelectChips v-model:selected="fetterSelected" :items="fetterOpts" size="small" />
-        </div>
-      </div>
-      <div class="uav-select-item">
-        <div class="uav-select-title">星级</div>
-        <div class="uav-select-props">
-          <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small" />
-        </div>
-      </div>
-      <div class="uav-select-item">
-        <div class="uav-select-title">等级</div>
-        <div class="uav-select-props">
-          <UavSelectChips v-model:selected="levelSelected" :items="levelOpts" size="small" />
-        </div>
-      </div>
-      <div class="uav-select-item">
-        <div class="uav-select-title">武器</div>
-        <div class="uav-select-props weapon">
-          <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small" />
-        </div>
-      </div>
-      <div class="uav-select-item">
-        <div class="uav-select-title">元素</div>
-        <div class="uav-select-props">
-          <UavSelectChips v-model:selected="elementSelected" :items="elementOpts" size="small" />
-        </div>
-      </div>
-      <div class="uav-select-item">
-        <div class="uav-select-title">阵营</div>
-        <div class="uav-select-props">
-          <UavSelectChips v-model:selected="areaSelected" :items="areaOpts" size="small" />
+        <div class="uav-select-right">
+          <div class="uav-select-item">
+            <div class="uav-select-title">武器</div>
+            <div class="uav-select-props weapon">
+              <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small" />
+            </div>
+          </div>
+          <div class="uav-select-item">
+            <div class="uav-select-title">元素</div>
+            <div class="uav-select-props">
+              <UavSelectChips
+                v-model:selected="elementSelected"
+                :items="elementOpts"
+                size="small"
+              />
+            </div>
+          </div>
+          <div class="uav-select-item">
+            <div class="uav-select-title">强化</div>
+            <div class="uav-select-props">
+              <UavSelectChips v-model:selected="teamSelected" :items="teamOpts" size="small" />
+            </div>
+          </div>
+          <div class="uav-select-item">
+            <div class="uav-select-title">阵营</div>
+            <div class="uav-select-props">
+              <UavSelectChips v-model:selected="areaSelected" :items="areaOpts" size="small" />
+            </div>
+          </div>
         </div>
       </div>
       <div class="uav-select-acts">
@@ -73,6 +93,8 @@ export type UavSelectModel = {
   weapon: Array<string>;
   /** 元素 */
   element: Array<string>;
+  /** 强化 */
+  team: Array<string>;
   /** 地区 */
   area: Array<string>;
 };
@@ -101,6 +123,11 @@ const weaponOpts: Array<UavSelectChipsItem> = ["单手剑", "双手剑", "弓", 
 const elementOpts: Array<UavSelectChipsItem> = ["冰", "岩", "水", "火", "草", "雷", "风"].map(
   (i) => ({ label: i, value: i, title: `${i}元素`, icon: `/icon/element/${i}元素.webp` }),
 );
+const teamOpts: Array<UavSelectChipsItem> = [
+  { label: "无", value: "0", title: "无" },
+  { label: "魔导", value: "1", title: "魔导" },
+  { label: "月兆", value: "2", title: "月兆" },
+];
 const areaOpts: Array<UavSelectChipsItem> = [
   "未知",
   "蒙德",
@@ -126,10 +153,11 @@ const starSelected = ref<Array<string>>([]);
 const levelSelected = ref<Array<string>>([]);
 const weaponSelected = ref<Array<string>>([]);
 const elementSelected = ref<Array<string>>([]);
+const teamSelected = ref<Array<string>>([]);
 const areaSelected = ref<Array<string>>([]);
 
 const model = defineModel<UavSelectModel>({
-  default: { costume: [], fetter: [], star: [], weapon: [], area: [], element: [] },
+  default: { costume: [], fetter: [], star: [], weapon: [], element: [], team: [], area: [] },
 });
 const visible = defineModel<boolean>("show");
 
@@ -142,8 +170,9 @@ watch(
       starSelected.value = model.value.star;
       levelSelected.value = model.value.level;
       weaponSelected.value = model.value.weapon;
-      areaSelected.value = model.value.area;
       elementSelected.value = model.value.element;
+      teamSelected.value = model.value.team;
+      areaSelected.value = model.value.area;
     }
   },
 );
@@ -160,6 +189,7 @@ function onConfirm(): void {
     level: levelSelected.value,
     weapon: weaponSelected.value,
     element: elementSelected.value,
+    team: teamSelected.value,
     area: areaSelected.value,
   };
   emits("select", model.value);
@@ -180,12 +210,30 @@ function onConfirm(): void {
   align-items: center;
   justify-content: center;
   padding: 8px 16px;
-  border-radius: 16px;
   backdrop-filter: blur(4px);
   background: var(--common-shadow-t-4);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
   box-shadow: 0 -4px 8px var(--common-shadow-2);
 
   --webkit-backdrop-filter: blur(4px);
+}
+
+.uav-select-main {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.uav-select-left,
+.uav-select-right {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .uav-select-item {
@@ -200,6 +248,7 @@ function onConfirm(): void {
 .uav-select-title {
   color: var(--common-text-title);
   text-shadow: 0 0 4px var(--common-shadow-2);
+  white-space: nowrap;
 }
 
 .uav-select-props.weapon:deep(img) {

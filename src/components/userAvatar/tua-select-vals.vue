@@ -51,6 +51,15 @@
         />
       </div>
       <div
+        v-if="props.selectOpts.team.length > 0 && props.selectOpts.team.length < FULL_TEAM"
+        class="tua-svs-item"
+      >
+        <span>强化：</span>
+        <span v-for="(team, idx) in props.selectOpts.team" :key="idx">{{
+          getTeamLabel(team)
+        }}</span>
+      </div>
+      <div
         v-if="props.selectOpts.area.length > 0 && props.selectOpts.area.length < FULL_AREA"
         class="tua-svs-item"
       >
@@ -102,6 +111,7 @@ type TuaSelectValsProps = {
 
 const FULL_WEAPON: Readonly<number> = 5;
 const FULL_ELEMENT: Readonly<number> = 7;
+const FULL_TEAM: Readonly<number> = 3;
 const FULL_AREA: Readonly<number> = 14;
 
 const props = defineProps<TuaSelectValsProps>();
@@ -123,6 +133,19 @@ function getStarLabel(star: string): string {
 function getLevelLabel(level: string): string {
   if (level === "true") return "≥70";
   return "<70";
+}
+
+function getTeamLabel(team: string): string {
+  switch (team) {
+    case "0":
+      return "无";
+    case "1":
+      return "魔导";
+    case "2":
+      return "月兆";
+    default:
+      return team;
+  }
 }
 </script>
 <style lang="scss" scoped>
