@@ -132,17 +132,15 @@ const areaOpts: Array<UavSelectChipsItem> = [
   "未知",
   "蒙德",
   "璃月",
-  "主角",
-  "愚人众",
   "稻妻",
-  "游侠",
   "须弥",
   "枫丹",
   "纳塔",
   "至冬",
-  "寰宇劫灭",
   "挪德卡莱",
-  "璃月港",
+  "愚人众",
+  "魔女会",
+  "其他",
 ].map((i) => ({ label: i, value: i, title: i }));
 
 const emits = defineEmits<UavSelectEmits>();
