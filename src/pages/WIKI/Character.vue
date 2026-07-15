@@ -56,6 +56,7 @@ const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   name: "",
   title: "",
   area: "",
+  team: [],
   birthday: [0, 0],
   star: 0,
   element: "",
@@ -97,6 +98,7 @@ function handleSelect(val: SelectedCValue): void {
     if (val.star.length > 0 && !val.star.includes(item.star % 100)) return false;
     if (val.weapon.length > 0 && !val.weapon.includes(item.weapon)) return false;
     if (val.elements.length > 0 && !val.elements.includes(item.element)) return false;
+    if (val.team.length > 0 && !val.team.some((team) => item.team.includes(team))) return false;
     return !(val.area.length > 0 && !val.area.includes(item.area));
   });
   if (filterC.length === 0) {

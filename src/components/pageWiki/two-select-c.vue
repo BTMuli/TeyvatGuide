@@ -50,6 +50,19 @@
         </v-item-group>
       </div>
       <div class="two-sc-item">
+        <div class="two-sc-title">强化</div>
+        <v-item-group v-model="selectedTeam" class="two-sc-select" multiple>
+          <div v-for="item in selectTeamList" :key="item.value">
+            <v-item v-slot="{ isSelected, toggle }" :value="item.value">
+              <v-btn :active="isSelected" activeColor="blue" @click="toggle">
+                <v-icon>{{ isSelected ? "mdi-check" : "mdi-checkbox-blank-outline" }}</v-icon>
+                <span>{{ item.label }}</span>
+              </v-btn>
+            </v-item>
+          </div>
+        </v-item-group>
+      </div>
+      <div class="two-sc-item">
         <div class="two-sc-title">阵营</div>
         <v-item-group v-model="selectedArea" class="two-sc-select" multiple>
           <div v-for="(item, index) in selectAreaList" :key="index">
@@ -78,6 +91,7 @@ export type SelectedCValue = {
   star: Array<number>;
   weapon: Array<string>;
   elements: Array<string>;
+  team: Array<number>;
   area: Array<string>;
 };
 type TwoSelectCEmits = (e: "select-c", v: SelectedCValue) => void;
@@ -86,6 +100,11 @@ const emits = defineEmits<TwoSelectCEmits>();
 const selectStarList = [4, 5];
 const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
 const selectElementList = ["冰", "岩", "水", "火", "草", "雷", "风"];
+const selectTeamList = [
+  { label: "无", value: 0 },
+  { label: "魔导", value: 1 },
+  { label: "月兆", value: 2 },
+];
 const selectAreaList = [
   "未知",
   "蒙德",
@@ -104,11 +123,13 @@ const selectAreaList = [
 const selectedStar = ref<Array<number>>([]);
 const selectedWeapon = ref<Array<string>>([]);
 const selectedElements = ref<Array<string>>([]);
+const selectedTeam = ref<Array<number>>([]);
 const selectedArea = ref<Array<string>>([]);
 const oldVal = shallowRef<SelectedCValue>({
   star: selectedStar.value,
   weapon: selectedWeapon.value,
   elements: selectedElements.value,
+  team: selectedTeam.value,
   area: selectedArea.value,
 });
 const visible = defineModel<boolean>();
@@ -122,6 +143,7 @@ watch(
         isNotFilter(selectedStar.value, selectStarList) &&
         isNotFilter(selectedWeapon.value, selectWeaponList) &&
         isNotFilter(selectedElements.value, selectElementList) &&
+        isNotFilter(selectedTeam.value, selectTeamList) &&
         isNotFilter(selectedArea.value, selectAreaList)
       ) {
         showSnackbar.warn("无需重置");
@@ -131,11 +153,13 @@ watch(
       selectedStar.value = [];
       selectedWeapon.value = [];
       selectedElements.value = [];
+      selectedTeam.value = [];
       selectedArea.value = [];
       oldVal.value = {
         star: selectedStar.value,
         weapon: selectedWeapon.value,
         elements: selectedElements.value,
+        team: selectedTeam.value,
         area: selectedArea.value,
       };
       resetModel.value = false;
@@ -152,11 +176,12 @@ watch(
       selectedWeapon.value = oldVal.value.weapon;
       selectedArea.value = oldVal.value.area;
       selectedElements.value = oldVal.value.elements;
+      selectedTeam.value = oldVal.value.team;
     }
   },
 );
 
-function isNotFilter<T>(list: Array<T>, data: Array<T>): boolean {
+function isNotFilter(list: ReadonlyArray<unknown>, data: ReadonlyArray<unknown>): boolean {
   return list.length === 0 || list.length === data.length;
 }
 
@@ -165,6 +190,7 @@ function confirmSelect() {
     star: selectedStar.value,
     weapon: selectedWeapon.value,
     elements: selectedElements.value,
+    team: selectedTeam.value,
     area: selectedArea.value,
   };
   emits("select-c", value);
