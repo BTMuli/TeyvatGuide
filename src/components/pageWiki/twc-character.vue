@@ -29,7 +29,9 @@
           </div>
           <div class="twc-big-item">
             <span>所属</span>
-            <span>{{ data.brief.camp }}</span>
+            <span>
+              {{ data.area === data.brief.camp ? data.area : `${data.area}·${data.brief.camp}` }}
+            </span>
           </div>
           <div
             class="twc-big-item active"
