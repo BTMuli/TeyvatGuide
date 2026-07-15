@@ -106,7 +106,6 @@ const selectTeamList = [
   { label: "月兆", value: 2 },
 ];
 const selectAreaList = [
-  "未知",
   "蒙德",
   "璃月",
   "稻妻",

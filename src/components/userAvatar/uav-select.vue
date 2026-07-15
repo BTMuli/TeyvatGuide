@@ -129,7 +129,6 @@ const teamOpts: Array<UavSelectChipsItem> = [
   { label: "月兆", value: "2", title: "月兆" },
 ];
 const areaOpts: Array<UavSelectChipsItem> = [
-  "未知",
   "蒙德",
   "璃月",
   "稻妻",
