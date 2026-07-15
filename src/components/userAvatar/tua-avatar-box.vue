@@ -56,8 +56,8 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
-import useUserStore from "@store/user.js";
 import { getRcStar, getZhElement } from "@utils/toolFunc.js";
+import wikiUtils from "@utils/wikiUtils.js";
 import { computed } from "vue";
 
 import TuaRelicBox from "./tua-relic-box.vue";
@@ -69,7 +69,6 @@ type AvatarRelics = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 type TuaAvatarBoxProps = { role: TGApp.Sqlite.Character.TableTrans };
 
 const props = defineProps<TuaAvatarBoxProps>();
-const userStore = useUserStore();
 
 const avatarIcon = computed<string>(() => {
   const costume = getCostume();
@@ -151,10 +150,10 @@ function getWeaponTitle(): string {
   const title: Array<string> = [];
   title.push(`${weapon.type_name} - ${weapon.name}`);
   title.push(`${weapon.rarity}星 精炼${weapon.affix_level} Lv.${weapon.level}`);
-  const propMain = userStore.getProp(weapon.main_property.property_type);
+  const propMain = wikiUtils.getProp(weapon.main_property.property_type);
   title.push(`${propMain !== false ? propMain.name : "未知属性"} - ${weapon.main_property.final}`);
   if (weapon.sub_property !== undefined && weapon.sub_property !== null) {
-    const propSub = userStore.getProp(weapon.sub_property.property_type);
+    const propSub = wikiUtils.getProp(weapon.sub_property.property_type);
     title.push(`${propSub !== false ? propSub.name : "未知属性"} - ${weapon.sub_property.final}`);
   }
   return title.join("\n");

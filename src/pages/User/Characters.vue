@@ -186,7 +186,7 @@ const modeList: Readonly<Array<TabItem>> = [
   { label: "卡片视图（详细）", value: "dev" },
 ];
 
-const { cookie, account, propMap } = storeToRefs(useUserStore());
+const { cookie, account } = storeToRefs(useUserStore());
 
 const loadData = ref<boolean>(false);
 const loadShare = ref<boolean>(false);
@@ -490,7 +490,6 @@ async function refresh(): Promise<void> {
     loadData.value = false;
     return;
   }
-  propMap.value = detailResp.data.property_map;
   await showLoading.update("正在保存角色数据");
   await TSUserAvatar.saveAvatars(rfAccount.gameUid, detailResp.data.list);
   await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);

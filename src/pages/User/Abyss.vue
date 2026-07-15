@@ -149,7 +149,7 @@ import TGHttps from "@utils/TGHttps.js";
 const router = useRouter();
 const hutaoStore = useHutaoStore();
 
-const { account, cookie, propMap } = storeToRefs(useUserStore());
+const { account, cookie } = storeToRefs(useUserStore());
 const { userName } = storeToRefs(hutaoStore);
 const userTab = ref<number>(0);
 const version = ref<string>();
@@ -513,7 +513,6 @@ async function refreshAvatars(
     await TGLogger.Error(`[Abyss][refreshAvatars] ${e}`);
     return false;
   }
-  propMap.value = detailResp.data.property_map;
   await showLoading.update("正在保存角色数据");
   await TSUserAvatar.saveAvatars(ac.gameUid, detailResp.data.list);
   return true;

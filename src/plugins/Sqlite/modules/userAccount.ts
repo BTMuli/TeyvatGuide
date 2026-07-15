@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.9.6
+ * @since Beta v0.11.2
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -430,15 +430,24 @@ async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<vo
 }
 
 /**
- * 删除游戏账户数据
- * @since Beta v0.6.0
+ * 删除米社账号凭据及游戏账号绑定关系
+ *
+ * 仅删除 UserAccount 与 GameAccount，不删除以 gameUid 为键保存的战绩、角色、背包等数据。
+ * @since Beta v0.11.2
  * @param uid - 米社UID
  * @returns 无返回值
  */
 async function deleteAccount(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();
-  await db.execute("DELETE FROM GameAccount WHERE uid = ?;", [uid]);
-  await db.execute("DELETE FROM UserAccount WHERE uid = ?;", [uid]);
+  try {
+    await db.execute("BEGIN IMMEDIATE;");
+    await db.execute("DELETE FROM GameAccount WHERE uid = ?;", [uid]);
+    await db.execute("DELETE FROM UserAccount WHERE uid = ?;", [uid]);
+    await db.execute("COMMIT;");
+  } catch (e) {
+    await db.execute("ROLLBACK;");
+    throw e;
+  }
 }
 
 const TSUserAccount = {

@@ -43,7 +43,8 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray, showFeedback } =
   storeToRefs(useAppStore());
-const { uid, briefInfo, account, cookie } = storeToRefs(useUserStore());
+const userStore = useUserStore();
+const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
 
 const isMain = ref<boolean>(false);
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
@@ -393,14 +394,15 @@ async function checkUserLoad(): Promise<void> {
   if (typeof userDirGet === "undefined") await TGSqlite.saveAppData("userDir", userDir.value);
   else if (userDirGet !== userDir.value) userDir.value = userDirGet;
   await mkdir(userDir.value, { recursive: true });
+  if (!isLogin.value) return;
   // 检测用户数据
   const uidDB = await TSUserAccount.account.getAllUid();
-  if (uidDB.length === 0 && isLogin.value) {
+  if (uidDB.length === 0) {
     showSnackbar.warn("未检测到可用UID，请重新登录！");
     isLogin.value = false;
+    await userStore.logout();
     return;
   }
-  if (!isLogin.value) isLogin.value = true;
   // 然后获取最近的UID
   if (uid.value === undefined || !uidDB.includes(uid.value)) {
     uid.value = uidDB[0];

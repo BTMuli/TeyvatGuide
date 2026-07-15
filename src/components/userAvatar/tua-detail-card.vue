@@ -78,8 +78,8 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
-import useUserStore from "@store/user.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import wikiUtils from "@utils/wikiUtils.js";
 import { computed, ref } from "vue";
 
 import TuaDcConstellations from "./tua-dc-constellations.vue";
@@ -96,7 +96,6 @@ type TuaDetailCardProps = {
 };
 
 const props = defineProps<TuaDetailCardProps>();
-const userStore = useUserStore();
 
 const fullIcon = computed<string>(() => {
   if (props.costume) return `/WIKI/costume/${props.costume.id}_full.webp`;
@@ -112,7 +111,7 @@ const relicList = computed<RelicList>(() => {
   ];
 });
 const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
-  props.avatar.propSelected.map((item) => userStore.getProp(item.property_type)),
+  props.avatar.propSelected.map((item) => wikiUtils.getProp(item.property_type)),
 );
 
 const bg = computed<string>(() => {

@@ -60,7 +60,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
-import useUserStore from "@store/user.js";
+import wikiUtils from "@utils/wikiUtils.js";
 import { computed } from "vue";
 
 type TuaDcRelicProps = {
@@ -70,15 +70,14 @@ type TuaDcRelicProps = {
 };
 
 const props = defineProps<TuaDcRelicProps>();
-const userStore = useUserStore();
 
 const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   if (props.modelValue === false) return false;
-  return userStore.getProp(props.modelValue.main_property.property_type);
+  return wikiUtils.getProp(props.modelValue.main_property.property_type);
 });
 const propSubs = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() => {
   if (props.modelValue === false) return [];
-  return props.modelValue.sub_property_list.map((item) => userStore.getProp(item.property_type));
+  return props.modelValue.sub_property_list.map((item) => wikiUtils.getProp(item.property_type));
 });
 
 function getRelicPos(): string {

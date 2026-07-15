@@ -268,6 +268,13 @@
                 <img alt="genshin" class="side-icon-menu" src="/icon/material/220120.webp" />
               </template>
             </v-list-item>
+            <v-list-item v-if="isLogin" class="side-item-menu" title="登出" @click="tryLogout()">
+              <template #prepend>
+                <v-icon class="side-icon-menu" color="var(--tgc-od-red)" size="20">
+                  mdi-logout
+                </v-icon>
+              </template>
+            </v-list-item>
           </v-list>
         </v-menu>
         <!-- 添加账号 -->
@@ -449,6 +456,35 @@ async function switchTheme(): Promise<void> {
 
 async function tryImportBag(): Promise<void> {
   await tryCallYae(gameDir.value, account.value.gameUid || undefined);
+}
+
+async function tryLogout(): Promise<void> {
+  const logoutCheck = await showDialog.check(
+    "确认退出米社账号？",
+    "将清除该米社账号的 Cookie 及游戏账号绑定；\n以游戏 UID 保存的战绩等数据会保留",
+  );
+  if (!logoutCheck) {
+    showSnackbar.cancel("已取消退出");
+    return;
+  }
+  const clientWindow = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
+  if (clientWindow !== null) {
+    try {
+      await clientWindow.destroy();
+    } catch (e) {
+      await TGLogger.Warn(`[sidebar][tryLogout] 关闭米社窗口失败：${e}`);
+    }
+  }
+  const logoutUid = uid.value;
+  const hasFallbackAccount = await userStore.logout();
+  isLogin.value = hasFallbackAccount;
+  if (hasFallbackAccount) await loadAllGameAc();
+  else allGameAc.value = [];
+  const switchHint = hasFallbackAccount ? `，已切换至${briefInfo.value.nickname}` : "";
+  showSnackbar.success(`已退出米社账号${switchHint}`);
+  await TGLogger.Info(
+    `[sidebar][tryLogout] 已退出米社账号${logoutUid ? `-${logoutUid}` : ""}${switchHint}`,
+  );
 }
 
 async function openClient(func: string): Promise<void> {

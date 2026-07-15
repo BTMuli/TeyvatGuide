@@ -134,8 +134,9 @@ import TGHttps from "@utils/TGHttps.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef } from "vue";
 
+const userStore = useUserStore();
 const { isLogin } = storeToRefs(useAppStore());
-const { uid, briefInfo, cookie, account } = storeToRefs(useUserStore());
+const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 
 const showLoginQr = ref<boolean>(false);
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);
@@ -441,6 +442,7 @@ async function loadAccount(ac: string): Promise<void> {
     return;
   }
   account.value = gameAccount;
+  isLogin.value = true;
   showSnackbar.success(`成功切换到用户${uid.value}`);
 }
 
@@ -697,19 +699,29 @@ async function addByCookie(): Promise<void> {
 }
 
 async function clearUser(user: TGApp.App.Account.User): Promise<void> {
-  if (user.uid === uid.value) {
-    showSnackbar.warn("当前登录用户不许删除！");
-    return;
-  }
-  const delCheck = await showDialog.check("确认删除用户吗？", "将删除账号及其游戏账号数据");
+  const isCurrent = user.uid === uid.value;
+  const delCheck = await showDialog.check(
+    isCurrent ? "确认退出当前米社账号？" : "确认删除米社账号？",
+    "将清除该米社账号的 Cookie 及游戏账号绑定；\n以游戏 UID 保存的战绩等数据会保留",
+  );
   if (!delCheck) {
-    showSnackbar.cancel("已取消删除用户数据");
+    showSnackbar.cancel(isCurrent ? "已取消退出" : "已取消删除米社账号");
     return;
   }
-  await showLoading.start("正在删除用户数据", `正在删除用户${user.uid}`);
-  await TSUserAccount.account.deleteAccount(user.uid);
+  await showLoading.start("正在清除米社账号", `正在清除米社账号${user.uid}`);
+  const hasFallbackAccount = await userStore.removeAccount(user.uid);
+  accounts.value = accounts.value.filter((accountItem) => accountItem.uid !== user.uid);
+  if (isCurrent) {
+    isLogin.value = hasFallbackAccount;
+    gameAccounts.value = hasFallbackAccount
+      ? (await TSUserAccount.game.getAccount(uid.value!)).filter(
+          (item) => item.gameBiz === "hk4e_cn",
+        )
+      : [];
+  }
   await showLoading.end();
-  showSnackbar.success("成功删除用户!");
+  const switchHint = isCurrent && hasFallbackAccount ? `，已切换至${briefInfo.value.nickname}` : "";
+  showSnackbar.success(`${isCurrent ? "已退出米社账号" : "已删除米社账号"}${switchHint}`);
 }
 </script>
 <style lang="css" scoped>

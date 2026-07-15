@@ -19,12 +19,11 @@
   </div>
 </template>
 <script lang="ts" setup>
-import useUserStore from "@store/user.js";
+import wikiUtils from "@utils/wikiUtils.js";
 
 type TuaRelicBoxProps = { modelValue: TGApp.Game.Avatar.Relic | false; position: number };
 
 const props = defineProps<TuaRelicBoxProps>();
-const userStore = useUserStore();
 
 function getRelicPosName(): string {
   switch (props.position) {
@@ -47,13 +46,13 @@ function getRelicTitle(): string {
   const posName = getRelicPosName();
   if (props.modelValue === false) return `${posName}：未装备`;
   const relicProps: Array<string> = [];
-  const mainProp = userStore.getProp(props.modelValue.main_property.property_type);
+  const mainProp = wikiUtils.getProp(props.modelValue.main_property.property_type);
   relicProps.push(
     `主词条：${mainProp === false ? "未知属性" : mainProp.name} ${props.modelValue.main_property.value}`,
   );
   relicProps.push("副词条：");
   for (const relicProp of props.modelValue.sub_property_list) {
-    const subProp = userStore.getProp(relicProp.property_type);
+    const subProp = wikiUtils.getProp(relicProp.property_type);
     relicProps.push(
       `  ${subProp === false ? "未知属性" : subProp.name} ${relicProp.value}(+${relicProp.times})`,
     );

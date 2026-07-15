@@ -1,9 +1,19 @@
 /**
  * Wiki相关辅助函数（武器、圣遗物）
- * @since Beta v0.11.0
+ * @since Beta v0.11.2
  */
 
 import { AppPropMapData, wrMainLv, wrMainProp, wrSub, wwCurve, wwPromote } from "@/data/index.js";
+
+/**
+ * 获取角色属性定义
+ * @since 0.11.2 Beta
+ * @param prop - 属性类型
+ * @returns 属性定义
+ */
+function getProp(prop: number): TGApp.Game.Avatar.PropMapItem | false {
+  return AppPropMapData[prop] ?? false;
+}
 
 /**
  * 获取武器升级倍率
@@ -139,6 +149,7 @@ function parseSubProps(list: Array<number>): Array<TGApp.App.Relic.SubPropInfo> 
 }
 
 const wikiUtils = {
+  getProp,
   weapon: getWeaponStats,
   propFmt: formatProp,
   relic: {

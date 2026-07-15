@@ -42,8 +42,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import useUserStore from "@store/user.js";
 import { app } from "@tauri-apps/api";
+import wikiUtils from "@utils/wikiUtils.js";
 import { computed, onMounted, ref } from "vue";
 
 type TuaDcWeaponProps = {
@@ -53,7 +53,6 @@ type TuaDcWeaponProps = {
 };
 
 const props = defineProps<TuaDcWeaponProps>();
-const userStore = useUserStore();
 const version = ref<string>();
 
 onMounted(async () => {
@@ -61,11 +60,11 @@ onMounted(async () => {
 });
 
 const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
-  return userStore.getProp(props.modelValue.main_property.property_type);
+  return wikiUtils.getProp(props.modelValue.main_property.property_type);
 });
 const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   if (props.modelValue.sub_property === undefined) return false;
-  return userStore.getProp(props.modelValue.sub_property.property_type);
+  return wikiUtils.getProp(props.modelValue.sub_property.property_type);
 });
 </script>
 <style lang="css" scoped>
