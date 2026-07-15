@@ -106,6 +106,10 @@ async function toggleAll(): Promise<void> {
   align-items: center;
   justify-content: flex-start;
   column-gap: 8px;
+
+  :deep(.v-chip--variant-elevated) {
+    box-shadow: 1px 1px 4px var(--common-shadow-4);
+  }
 }
 
 .uav-scb-all {
@@ -116,6 +120,9 @@ async function toggleAll(): Promise<void> {
 
   display: inline-flex;
   align-items: center;
+  backdrop-filter: blur(4px);
+
+  --webkit-backdrop-filter: blur(4px);
 
   .icon-wrap {
     display: inline-flex;
@@ -149,6 +156,9 @@ async function toggleAll(): Promise<void> {
   @include github-styles.github-tag-dark-gen(#548af7);
 
   position: relative;
+  backdrop-filter: blur(4px);
+
+  --webkit-backdrop-filter: blur(4px);
 
   &.selected {
     @include github-styles.github-tag-dark-gen(#fb7299);

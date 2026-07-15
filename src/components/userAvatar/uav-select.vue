@@ -167,6 +167,8 @@ function onConfirm(): void {
 }
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .uav-select-container {
   position: absolute;
   z-index: 1;
@@ -177,9 +179,13 @@ function onConfirm(): void {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  border-radius: 4px;
-  background: var(--app-page-bg);
+  padding: 8px 16px;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-t-4);
+  box-shadow: 0 -4px 8px var(--common-shadow-2);
+
+  --webkit-backdrop-filter: blur(4px);
 }
 
 .uav-select-item {
@@ -188,8 +194,12 @@ function onConfirm(): void {
   width: 100%;
   align-items: center;
   justify-content: flex-start;
-  color: var(--common-text-title);
   column-gap: 8px;
+}
+
+.uav-select-title {
+  color: var(--common-text-title);
+  text-shadow: 0 0 4px var(--common-shadow-2);
 }
 
 .uav-select-props.weapon:deep(img) {
@@ -205,12 +215,19 @@ function onConfirm(): void {
   display: flex;
   align-items: center;
   margin-top: 8px;
-  column-gap: 8px;
+  column-gap: 12px;
 }
 
 .uav-act-btn {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
+  @include github-styles.github-tag-dark-gen(#41b883);
+
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow: 1px 1px 4px var(--common-shadow-4);
   font-family: var(--font-text);
+}
+
+.uav-act-btn:last-child {
+  @include github-styles.github-tag-dark-gen(#fb7299);
 }
 </style>
