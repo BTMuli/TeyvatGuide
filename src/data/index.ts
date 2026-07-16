@@ -1,6 +1,6 @@
 /**
  * 数据文件入口
- * @since Beta v0.11.0
+ * @since Beta v0.11.2
  */
 
 import type { Schema } from "ajv";
@@ -69,6 +69,7 @@ const avatarFiles = import.meta.glob("./WIKI/character/*.json");
 
 /**
  * 传入角色id，获取对应character/id.json的内容，如果没有则返回false
+ * @since Beta v0.11.2
  * @param id - 角色id
  * @returns 角色数据或false
  */
@@ -80,7 +81,7 @@ export async function getWikiCharacterById(
   try {
     const data = await avatarFiles[key]();
     if (data && typeof data === "object" && "default" in data) {
-      console.log(data.default);
+      // console.log(data.default);
       return <TGApp.App.Character.WikiItem>data.default;
     } else {
       console.warn(`角色 ${id} 数据未找到或格式不正确`);
