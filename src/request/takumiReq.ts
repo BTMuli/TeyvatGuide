@@ -151,9 +151,76 @@ async function getObcHomePosition(): Promise<TGApp.BBS.Obc.PositionResp> {
   return resp.data;
 }
 
+/**
+ * 批量计算角色养成材料
+ * @since Beta v0.11.1
+ * @param cookie - 用户 Cookie
+ * @param params - 养成计算参数
+ * @returns 养成计算响应数据
+ */
+async function batchCompute(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.Game.Calculate.Params,
+): Promise<TGApp.Game.Calculate.Resp> {
+  const ck = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltoken: cookie.ltoken,
+    ltuid: cookie.ltuid,
+  };
+  const body = JSON.stringify(params);
+  const baseHeaders = getRequestHeader(ck, "POST", body);
+  const headers = {
+    "Content-Type": "application/json",
+    cookie: baseHeaders.cookie,
+    referer: baseHeaders.referer,
+    "user-agent": baseHeaders["user-agent"],
+    "x-rpc-device_fp": baseHeaders["x-rpc-device_fp"],
+  };
+  const resp = await TGHttps.post<TGApp.Game.Calculate.Resp>(
+    `${taBu}event/e20200928calculate/v3/batch_compute`,
+    { headers, body },
+  );
+  return resp.data;
+}
+
+/**
+ * 同步用户角色列表
+ * @since Beta v0.11.2
+ * @param cookie - 用户 Cookie
+ * @param params - 同步角色列表参数
+ * @returns 同步角色列表响应数据
+ */
+async function syncAvatarList(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.Game.Calculate.SyncAvatarParams,
+): Promise<TGApp.Game.Calculate.SyncAvatarResp> {
+  const ck = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltoken: cookie.ltoken,
+    ltuid: cookie.ltuid,
+  };
+  const body = JSON.stringify(params);
+  const baseHeaders = getRequestHeader(ck, "POST", body);
+  const headers = {
+    "Content-Type": "application/json",
+    cookie: baseHeaders.cookie,
+    referer: baseHeaders.referer,
+    "user-agent": baseHeaders["user-agent"],
+    "x-rpc-device_fp": baseHeaders["x-rpc-device_fp"],
+  };
+  const resp = await TGHttps.post<TGApp.Game.Calculate.SyncAvatarResp>(
+    `${taBu}event/e20200928calculate/v1/sync/avatar/list`,
+    { headers, body },
+  );
+  return resp.data;
+}
+
 const takumiReq = {
   auth: { actionTicket: getActionTicketBySToken },
   bind: { authKey: genAuthKey, authKey2: genAuthKey2, gameRoles: getUserGameRolesByCookie },
+  calculate: { avatar: { sync: syncAvatarList }, batch: batchCompute },
   game: { stoken: getSTokenByGameToken },
   obc: { gacha: getObcGachaPool, position: getObcHomePosition },
 };
