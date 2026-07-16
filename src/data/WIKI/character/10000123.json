@@ -61,53 +61,60 @@
   "name": "杜林",
   "skills": [
     {
-      "GroupId": 12331,
-      "Id": 11231,
-      "Name": "芒焰之翼斩",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，向前方进行一次斩击。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_01"
+      "group": 12331,
+      "id": 11231,
+      "name": "芒焰之翼斩",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，向前方进行一次斩击。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12332,
-      "Id": 11232,
-      "Name": "二元式·聚分熔炼",
-      "Description": "将灵魂与愿望的质料纯化，进行{LINK#N11230001}<color=#FFD780FF>精质转变</color>{/LINK}。期间，杜林的元素战技<color=#FFD780FF>二元式·聚分熔炼</color>将会被替换为特殊的元素战技<color=#FFD780FF>转变·白化之是</color>，普通攻击<color=#FFD780FF>芒焰之翼斩</color>将会被替换为特殊的元素战技<color=#FFD780FF>转变·黑度之否</color>。\n\n<color=#FFD780FF>转变·白化之是</color>\n对附近的敌人造成一次<color=#FF9999FF>火元素范围伤害</color>，解除精质转变，并进入<color=#FFD780FF>白化之是</color>状态，持续30秒。\n\n<color=#FFD780FF>转变·黑度之否</color>\n对前方的敌人连续造成三次<color=#FF9999FF>火元素伤害</color>，解除精质转变，并进入<color=#FFD780FF>黑度之否</color>状态，持续30秒。\n\n处于战斗状态下时，杜林进入<color=#FFD780FF>白化之是</color>或<color=#FFD780FF>黑度之否</color>状态时，还会为杜林恢复一定的元素能量，每6秒至多通过这种方式恢复一次元素能量。",
-      "Icon": "Skill_S_Durin_01"
+      "group": 12332,
+      "id": 11232,
+      "name": "二元式·聚分熔炼",
+      "desc": "将灵魂与愿望的质料纯化，进行{LINK#N11230001}<color=#FFD780FF>精质转变</color>{/LINK}。期间，杜林的元素战技<color=#FFD780FF>二元式·聚分熔炼</color>将会被替换为特殊的元素战技<color=#FFD780FF>转变·白化之是</color>，普通攻击<color=#FFD780FF>芒焰之翼斩</color>将会被替换为特殊的元素战技<color=#FFD780FF>转变·黑度之否</color>。\n\n<color=#FFD780FF>转变·白化之是</color>\n对附近的敌人造成一次<color=#FF9999FF>火元素范围伤害</color>，解除精质转变，并进入<color=#FFD780FF>白化之是</color>状态，持续30秒。\n\n<color=#FFD780FF>转变·黑度之否</color>\n对前方的敌人连续造成三次<color=#FF9999FF>火元素伤害</color>，解除精质转变，并进入<color=#FFD780FF>黑度之否</color>状态，持续30秒。\n\n处于战斗状态下时，杜林进入<color=#FFD780FF>白化之是</color>或<color=#FFD780FF>黑度之否</color>状态时，还会为杜林恢复一定的元素能量，每6秒至多通过这种方式恢复一次元素能量。",
+      "icon": "Skill_S_Durin_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12339,
-      "Id": 11235,
-      "Name": "白化法·如光流变",
-      "Description": "以不同的方式解放「兽」的力量。依据杜林的{LINK#N11230001}<color=#FFD780FF>精质转变</color>{/LINK}状态，杜林可以施放不同的元素爆发。\n\n<color=#FFD780FF>白化法·如光流变</color>\n若杜林处于<color=#FFD780FF>白化之是</color>状态，将施放元素爆发<color=#FFD780FF>白化法·如光流变</color>，对前方的敌人造成三次<color=#FF9999FF>火元素范围伤害</color>，并将自身的力量以<color=#FFD780FF>「白焰之龙」</color>的形态显现。「白焰之龙」将跟随当前场上角色，并间歇性攻击周围的敌人，造成<color=#FF9999FF>火元素范围伤害</color>，该伤害视为元素爆发伤害。\n\n<color=#FFD780FF>黑度法·如星阴燃</color>\n若杜林处于<color=#FFD780FF>黑度之否</color>状态，将转为施放元素爆发<color=#FFD780FF>黑度法·如星阴燃</color>，对前方的敌人造成三次<color=#FF9999FF>火元素范围伤害</color>，并将自身的力量以<color=#FFD780FF>「黑蚀之龙」</color>的形态显现。「黑蚀之龙」将跟随当前场上角色，并间歇性对周围一名敌人发起攻击，造成<color=#FF9999FF>火元素伤害</color>，该伤害视为元素爆发伤害。\n\n此外，若杜林不处于精质转变的特殊状态，将施放元素爆发<color=#FFD780FF>白化法·如光流变</color>。",
-      "Icon": "Skill_E_Durin_01"
+      "group": 12339,
+      "id": 11235,
+      "name": "白化法·如光流变",
+      "desc": "以不同的方式解放「兽」的力量。依据杜林的{LINK#N11230001}<color=#FFD780FF>精质转变</color>{/LINK}状态，杜林可以施放不同的元素爆发。\n\n<color=#FFD780FF>白化法·如光流变</color>\n若杜林处于<color=#FFD780FF>白化之是</color>状态，将施放元素爆发<color=#FFD780FF>白化法·如光流变</color>，对前方的敌人造成三次<color=#FF9999FF>火元素范围伤害</color>，并将自身的力量以<color=#FFD780FF>「白焰之龙」</color>的形态显现。「白焰之龙」将跟随当前场上角色，并间歇性攻击周围的敌人，造成<color=#FF9999FF>火元素范围伤害</color>，该伤害视为元素爆发伤害。\n\n<color=#FFD780FF>黑度法·如星阴燃</color>\n若杜林处于<color=#FFD780FF>黑度之否</color>状态，将转为施放元素爆发<color=#FFD780FF>黑度法·如星阴燃</color>，对前方的敌人造成三次<color=#FF9999FF>火元素范围伤害</color>，并将自身的力量以<color=#FFD780FF>「黑蚀之龙」</color>的形态显现。「黑蚀之龙」将跟随当前场上角色，并间歇性对周围一名敌人发起攻击，造成<color=#FF9999FF>火元素伤害</color>，该伤害视为元素爆发伤害。\n\n此外，若杜林不处于精质转变的特殊状态，将施放元素爆发<color=#FFD780FF>白化法·如光流变</color>。",
+      "icon": "Skill_E_Durin_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12351,
-      "Id": 1235101,
-      "Name": "魔女的前夜礼·升华赞歌",
-      "Description": "完成<color=#FFD780FF>魔女的课业·此世之题</color>后，杜林将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n除持续时间外，突破天赋{LINK#P1232101}<color=#FFD780FF>「光灵遵神数显现」</color>{/LINK}中的所有效果提升75%。",
-      "Icon": "UI_Talent_S_Durin_03"
+      "group": 12351,
+      "id": 1235101,
+      "name": "魔女的前夜礼·升华赞歌",
+      "desc": "完成<color=#FFD780FF>魔女的课业·此世之题</color>后，杜林将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n除持续时间外，突破天赋{LINK#P1232101}<color=#FFD780FF>「光灵遵神数显现」</color>{/LINK}中的所有效果提升75%。",
+      "icon": "UI_Talent_S_Durin_03",
+      "maxLv": 1
     },
     {
-      "GroupId": 12321,
-      "Id": 1232101,
-      "Name": "光灵遵神数显现",
-      "Description": "依据杜林施放元素爆发显现的力量形态，分别产生不同的强化效果。若杜林的力量显现为：\n\n<color=#FFD780FF>白焰之龙</color>\n队伍中附近的角色对敌人触发燃烧、超载、火元素扩散、火元素结晶反应后，或对处于燃烧状态下的敌人造成<color=#FF9999FF>火元素伤害</color>或<color=#99FF88FF>草元素伤害</color>时，该敌人的<color=#FF9999FF>火元素抗性</color>与参与反应的对应元素抗性降低20%，持续6秒。\n\n<color=#FFD780FF>黑蚀之龙</color>\n杜林触发的蒸发反应造成的伤害提升40%，融化反应造成的伤害提升40%。",
-      "Icon": "UI_Talent_S_Durin_01"
+      "group": 12321,
+      "id": 1232101,
+      "name": "光灵遵神数显现",
+      "desc": "依据杜林施放元素爆发显现的力量形态，分别产生不同的强化效果。若杜林的力量显现为：\n\n<color=#FFD780FF>白焰之龙</color>\n队伍中附近的角色对敌人触发燃烧、超载、火元素扩散、火元素结晶反应后，或对处于燃烧状态下的敌人造成<color=#FF9999FF>火元素伤害</color>或<color=#99FF88FF>草元素伤害</color>时，该敌人的<color=#FF9999FF>火元素抗性</color>与参与反应的对应元素抗性降低20%，持续6秒。\n\n<color=#FFD780FF>黑蚀之龙</color>\n杜林触发的蒸发反应造成的伤害提升40%，融化反应造成的伤害提升40%。",
+      "icon": "UI_Talent_S_Durin_01",
+      "maxLv": 1
     },
     {
-      "GroupId": 12322,
-      "Id": 1232201,
-      "Name": "混沌如黑夜构成",
-      "Description": "施放元素爆发后的20秒内，杜林将获得「肇象熔炼」效果：持续期间，杜林将获得10层「肇象」，<color=#FFD780FF>白焰之龙</color>与<color=#FFD780FF>黑蚀之龙</color>的间歇性攻击造成伤害时，将消耗1层「肇象」，提升造成的伤害，每100点攻击力都将额外造成相当于原本3%的伤害，至多通过这种方式额外造成相当于原本75%的伤害。一次<color=#FFD780FF>白焰之龙</color>与<color=#FFD780FF>黑蚀之龙</color>同时命中多名敌人时，只会消耗一层「肇象」。\n再次施放元素爆发时，「肇象」的层数将会刷新。",
-      "Icon": "UI_Talent_S_Durin_02"
+      "group": 12322,
+      "id": 1232201,
+      "name": "混沌如黑夜构成",
+      "desc": "施放元素爆发后的20秒内，杜林将获得「肇象熔炼」效果：持续期间，杜林将获得10层「肇象」，<color=#FFD780FF>白焰之龙</color>与<color=#FFD780FF>黑蚀之龙</color>的间歇性攻击造成伤害时，将消耗1层「肇象」，提升造成的伤害，每100点攻击力都将额外造成相当于原本3%的伤害，至多通过这种方式额外造成相当于原本75%的伤害。一次<color=#FFD780FF>白焰之龙</color>与<color=#FFD780FF>黑蚀之龙</color>同时命中多名敌人时，只会消耗一层「肇象」。\n再次施放元素爆发时，「肇象」的层数将会刷新。",
+      "icon": "UI_Talent_S_Durin_02",
+      "maxLv": 1
     },
     {
-      "GroupId": 12323,
-      "Id": 1232301,
-      "Name": "地涌的回音",
-      "Description": "在蒙德执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
-      "Icon": "UI_Talent_S_Durin_07"
+      "group": 12323,
+      "id": 1232301,
+      "name": "地涌的回音",
+      "desc": "在蒙德执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
+      "icon": "UI_Talent_S_Durin_07",
+      "maxLv": 1
     }
   ],
   "star": 5,

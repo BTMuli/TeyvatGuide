@@ -61,53 +61,60 @@
   "name": "菲林斯",
   "skills": [
     {
-      "GroupId": 12031,
-      "Id": 11201,
-      "Name": "扈圣魔枪",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续枪击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，进行向前的投枪攻击。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_03"
+      "group": 12031,
+      "id": 11201,
+      "name": "扈圣魔枪",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续枪击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，进行向前的投枪攻击。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_03",
+      "maxLv": 10
     },
     {
-      "GroupId": 12032,
-      "Id": 11202,
-      "Name": "古律·孤灯遗秘",
-      "Description": "菲林斯唤出提灯中古老的力量，切换至<color=#FFD780FF>幽焰显迹</color>模式。该模式具有以下特性：\n·菲林斯的普通攻击与重击将转为造成无法被附魔覆盖的<color=#FFACFFFF>雷元素伤害</color>，无法进行下落攻击；\n·提升菲林斯的抗打断能力；\n·元素战技<color=#FFD780FF>古律·孤灯遗秘</color>将会被替换为特殊的元素战技<color=#FFD780FF>北国枪阵</color>。\n\n<color=#FFD780FF>北国枪阵</color>\n菲林斯在前方唤出枪阵，造成<color=#FFACFFFF>雷元素范围伤害</color>，并在接下来6秒内，使菲林斯的元素爆发<color=#FFD780FF>旧仪·夜客致访</color>替换为特殊的元素爆发{LINK#N11200001}<color=#FFD780FF>雷霆交响</color>{/LINK}。\n<color=#FFD780FF>北国枪阵</color>的基础冷却时间为6秒，该冷却时间不会受到其他效果影响。",
-      "Icon": "Skill_S_Flins_01"
+      "group": 12032,
+      "id": 11202,
+      "name": "古律·孤灯遗秘",
+      "desc": "菲林斯唤出提灯中古老的力量，切换至<color=#FFD780FF>幽焰显迹</color>模式。该模式具有以下特性：\n·菲林斯的普通攻击与重击将转为造成无法被附魔覆盖的<color=#FFACFFFF>雷元素伤害</color>，无法进行下落攻击；\n·提升菲林斯的抗打断能力；\n·元素战技<color=#FFD780FF>古律·孤灯遗秘</color>将会被替换为特殊的元素战技<color=#FFD780FF>北国枪阵</color>。\n\n<color=#FFD780FF>北国枪阵</color>\n菲林斯在前方唤出枪阵，造成<color=#FFACFFFF>雷元素范围伤害</color>，并在接下来6秒内，使菲林斯的元素爆发<color=#FFD780FF>旧仪·夜客致访</color>替换为特殊的元素爆发{LINK#N11200001}<color=#FFD780FF>雷霆交响</color>{/LINK}。\n<color=#FFD780FF>北国枪阵</color>的基础冷却时间为6秒，该冷却时间不会受到其他效果影响。",
+      "icon": "Skill_S_Flins_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12039,
-      "Id": 11205,
-      "Name": "旧仪·夜客致访",
-      "Description": "菲林斯解放提灯中真正的力量，造成<color=#FFACFFFF>雷元素范围伤害</color>，并在短暂间隔后，分别造成2次中间段、以及一次最终段的视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n<color=#FFD780FF>月兆·满辉</color>：技能获得强化：若附近存在雷暴云，还会额外造成2次中间段的视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n\n施放特殊元素战技<color=#FFD780FF>北国枪阵</color>后6秒内，菲林斯的元素爆发<color=#FFD780FF>旧仪·夜客致访</color>将会被替换为特殊的元素爆发<color=#FFD780FF>雷霆交响</color>。\n\n<color=#FFD780FF>雷霆交响</color>\n消耗更少的元素能量便可以施放的特殊元素爆发。菲林斯造成一次视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n<color=#FFD780FF>月兆·满辉</color>：技能获得强化：若附近存在雷暴云，还会额外造成一次视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。",
-      "Icon": "Skill_E_Flins_01"
+      "group": 12039,
+      "id": 11205,
+      "name": "旧仪·夜客致访",
+      "desc": "菲林斯解放提灯中真正的力量，造成<color=#FFACFFFF>雷元素范围伤害</color>，并在短暂间隔后，分别造成2次中间段、以及一次最终段的视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n<color=#FFD780FF>月兆·满辉</color>：技能获得强化：若附近存在雷暴云，还会额外造成2次中间段的视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n\n施放特殊元素战技<color=#FFD780FF>北国枪阵</color>后6秒内，菲林斯的元素爆发<color=#FFD780FF>旧仪·夜客致访</color>将会被替换为特殊的元素爆发<color=#FFD780FF>雷霆交响</color>。\n\n<color=#FFD780FF>雷霆交响</color>\n消耗更少的元素能量便可以施放的特殊元素爆发。菲林斯造成一次视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。\n<color=#FFD780FF>月兆·满辉</color>：技能获得强化：若附近存在雷暴云，还会额外造成一次视为月感电反应伤害的<color=#FFACFFFF>雷元素范围伤害</color>。",
+      "icon": "Skill_E_Flins_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12021,
-      "Id": 1202101,
-      "Name": "寒冬的交响",
-      "Description": "依据队伍的<color=#FFD780FF>月兆</color>，菲林斯将获得对应的强化效果。\n\n<color=#FFD780FF>月兆·满辉</color>：菲林斯触发的月感电反应造成的伤害提升20%。",
-      "Icon": "UI_Talent_S_Flins_05"
+      "group": 12021,
+      "id": 1202101,
+      "name": "寒冬的交响",
+      "desc": "依据队伍的<color=#FFD780FF>月兆</color>，菲林斯将获得对应的强化效果。\n\n<color=#FFD780FF>月兆·满辉</color>：菲林斯触发的月感电反应造成的伤害提升20%。",
+      "icon": "UI_Talent_S_Flins_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 12022,
-      "Id": 1202201,
-      "Name": "幽焰的呢喃",
-      "Description": "菲林斯的元素精通提升，提升值相当于菲林斯的攻击力的8%。通过这种方式，至多使菲林斯的元素精通提升160点。",
-      "Icon": "UI_Talent_S_Flins_06"
+      "group": 12022,
+      "id": 1202201,
+      "name": "幽焰的呢喃",
+      "desc": "菲林斯的元素精通提升，提升值相当于菲林斯的攻击力的8%。通过这种方式，至多使菲林斯的元素精通提升160点。",
+      "icon": "UI_Talent_S_Flins_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 12023,
-      "Id": 1202301,
-      "Name": "月兆祝赐·旧世潜藏",
-      "Description": "队伍中的角色触发感电反应时，将转为触发月感电反应，且基于菲林斯的攻击力，提升月感电反应的基础伤害：每100点攻击力都将提升0.7%基础伤害，至多通过这种方式提升14%伤害。\n\n此外，菲林斯在队伍中时，队伍的<color=#FFD780FF>月兆</color>将会上升一级。",
-      "Icon": "UI_Talent_S_Flins_07"
+      "group": 12023,
+      "id": 1202301,
+      "name": "月兆祝赐·旧世潜藏",
+      "desc": "队伍中的角色触发感电反应时，将转为触发月感电反应，且基于菲林斯的攻击力，提升月感电反应的基础伤害：每100点攻击力都将提升0.7%基础伤害，至多通过这种方式提升14%伤害。\n\n此外，菲林斯在队伍中时，队伍的<color=#FFD780FF>月兆</color>将会上升一级。",
+      "icon": "UI_Talent_S_Flins_07",
+      "maxLv": 1
     },
     {
-      "GroupId": 12025,
-      "Id": 1202501,
-      "Name": "掌灯暗行",
-      "Description": "在小地图上显示周围的<color=#FFD780FF>挪德卡莱区域特产</color>的位置。\n此外，菲林斯似乎能听懂狂猎的低语…",
-      "Icon": "UI_Talent_S_Flins_08"
+      "group": 12025,
+      "id": 1202501,
+      "name": "掌灯暗行",
+      "desc": "在小地图上显示周围的<color=#FFD780FF>挪德卡莱区域特产</color>的位置。\n此外，菲林斯似乎能听懂狂猎的低语…",
+      "icon": "UI_Talent_S_Flins_08",
+      "maxLv": 1
     }
   ],
   "star": 5,

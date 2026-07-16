@@ -21,10 +21,10 @@
         class="twc-skill-desc"
       >
         <div class="twc-skill-normal">
-          <span v-html="parseHtmlText(data[index].Description)"></span>
+          <span v-html="parseHtmlText(data[index].desc)"></span>
         </div>
-        <div v-if="data[index].SpecialDescription" class="twc-skill-special">
-          <span v-html="parseHtmlText(data[index].SpecialDescription)"></span>
+        <div v-if="data[index].descSp" class="twc-skill-special">
+          <span v-html="parseHtmlText(data[index].descSp)"></span>
         </div>
       </v-window-item>
     </v-window>
@@ -44,7 +44,7 @@ const tabValues = shallowRef<Array<TabItem>>([]);
 function loadData(): void {
   tabValues.value = [];
   const tmpData: Array<TabItem> = [];
-  props.data.map((i) => tmpData.push({ name: i.Name, icon: i.Icon }));
+  props.data.map((i) => tmpData.push({ name: i.name, icon: i.icon }));
   tabValues.value = tmpData;
   tab.value = tabValues.value[0].name;
 }
@@ -53,7 +53,7 @@ onMounted(() => loadData());
 
 watch(() => props.data, loadData);
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .twc-skills-box {
   display: flex;
   flex-direction: column;

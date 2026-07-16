@@ -61,46 +61,52 @@
   "name": "刻晴",
   "skills": [
     {
-      "GroupId": 4231,
-      "Id": 10421,
-      "Name": "云来剑法",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_01"
+      "group": 4231,
+      "id": 10421,
+      "name": "云来剑法",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 4232,
-      "Id": 10422,
-      "Name": "星斗归位",
-      "Description": "迅速投出雷楔，以疾雷之势歼敌。\n雷楔命中时会对小范围内的敌人造成<color=#FFACFFFF>雷元素伤害</color>，并在命中的位置留下雷楔标记。\n\n<color=#FFD780FF>长按</color>\n长按以调整雷楔标记投掷的方向。\n通过长按投出的雷楔，可以悬浮在空中，并使刻晴再次施放星斗归位时跨越地形。\n\n<color=#FFD780FF>雷楔</color>\n在雷楔的持续期间内，刻晴再次施放星斗归位或施展重击时，会清除雷楔标记并造成不同的效果：\n·再次施放星斗归位时，瞬移到标记处进行一次斩击，造成<color=#FFACFFFF>雷元素范围伤害</color>。瞬移至长按投掷的雷楔处时，可以跨越地形障碍；\n·施展重击时，在标记处引发雷暴连斩，造成数次<color=#FFACFFFF>雷元素范围伤害</color>。\n\n<i>「人像是蛾子，总奔着名叫神仙的火光而去。但是我这光是自己点的。」</i>",
-      "Icon": "Skill_S_Keqing_01"
+      "group": 4232,
+      "id": 10422,
+      "name": "星斗归位",
+      "desc": "迅速投出雷楔，以疾雷之势歼敌。\n雷楔命中时会对小范围内的敌人造成<color=#FFACFFFF>雷元素伤害</color>，并在命中的位置留下雷楔标记。\n\n<color=#FFD780FF>长按</color>\n长按以调整雷楔标记投掷的方向。\n通过长按投出的雷楔，可以悬浮在空中，并使刻晴再次施放星斗归位时跨越地形。\n\n<color=#FFD780FF>雷楔</color>\n在雷楔的持续期间内，刻晴再次施放星斗归位或施展重击时，会清除雷楔标记并造成不同的效果：\n·再次施放星斗归位时，瞬移到标记处进行一次斩击，造成<color=#FFACFFFF>雷元素范围伤害</color>。瞬移至长按投掷的雷楔处时，可以跨越地形障碍；\n·施展重击时，在标记处引发雷暴连斩，造成数次<color=#FFACFFFF>雷元素范围伤害</color>。\n\n<i>「人像是蛾子，总奔着名叫神仙的火光而去。但是我这光是自己点的。」</i>",
+      "icon": "Skill_S_Keqing_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 4239,
-      "Id": 10425,
-      "Name": "天街巡游",
-      "Description": "爆发雷电的力量，造成范围<color=#FFACFFFF>雷元素伤害</color>。\n随后隐入剑影中，对周围的敌人进行如同迅雷霆霓般疾速的连斩，造成多段<color=#FFACFFFF>雷元素伤害</color>，并在最后一击时造成高额<color=#FFACFFFF>雷元素范围伤害</color>。\n\n<i>刻晴自己剑术中最为迅捷的一招，可将诸星斩落。</i>",
-      "Icon": "Skill_E_Keqing_01"
+      "group": 4239,
+      "id": 10425,
+      "name": "天街巡游",
+      "desc": "爆发雷电的力量，造成范围<color=#FFACFFFF>雷元素伤害</color>。\n随后隐入剑影中，对周围的敌人进行如同迅雷霆霓般疾速的连斩，造成多段<color=#FFACFFFF>雷元素伤害</color>，并在最后一击时造成高额<color=#FFACFFFF>雷元素范围伤害</color>。\n\n<i>刻晴自己剑术中最为迅捷的一招，可将诸星斩落。</i>",
+      "icon": "Skill_E_Keqing_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 4221,
-      "Id": 422101,
-      "Name": "抵天雷罚",
-      "Description": "雷楔存在期间再次施放<color=#FFD780FF>星斗归位</color>后的5秒内，刻晴获得<color=#FFACFFFF>雷元素附魔</color>。",
-      "Icon": "UI_Talent_S_Keqing_05"
+      "group": 4221,
+      "id": 422101,
+      "name": "抵天雷罚",
+      "desc": "雷楔存在期间再次施放<color=#FFD780FF>星斗归位</color>后的5秒内，刻晴获得<color=#FFACFFFF>雷元素附魔</color>。",
+      "icon": "UI_Talent_S_Keqing_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 4222,
-      "Id": 422201,
-      "Name": "玉衡之贵",
-      "Description": "施放<color=#FFD780FF>天街巡游</color>时，刻晴的暴击率提升15%，元素充能效率提升15%，持续8秒。",
-      "Icon": "UI_Talent_S_Keqing_06"
+      "group": 4222,
+      "id": 422201,
+      "name": "玉衡之贵",
+      "desc": "施放<color=#FFD780FF>天街巡游</color>时，刻晴的暴击率提升15%，元素充能效率提升15%，持续8秒。",
+      "icon": "UI_Talent_S_Keqing_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 4223,
-      "Id": 422301,
-      "Name": "总务土地",
-      "Description": "在璃月执行探索派遣任务时，消耗的时间缩短25%。",
-      "Icon": "UI_Talent_Expedition_Liyue"
+      "group": 4223,
+      "id": 422301,
+      "name": "总务土地",
+      "desc": "在璃月执行探索派遣任务时，消耗的时间缩短25%。",
+      "icon": "UI_Talent_Expedition_Liyue",
+      "maxLv": 1
     }
   ],
   "star": 5,

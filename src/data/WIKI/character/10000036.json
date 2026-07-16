@@ -61,46 +61,52 @@
   "name": "重云",
   "skills": [
     {
-      "GroupId": 3631,
-      "Id": 10401,
-      "Name": "灭邪四式",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的连续挥砍。\n\n<color=#FFD780FF>重击</color>\n持续消耗体力，旋转大剑攻击周围的敌人。\n停止旋转时，会进行一次格外有力的挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_04"
+      "group": 3631,
+      "id": 10401,
+      "name": "灭邪四式",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的连续挥砍。\n\n<color=#FFD780FF>重击</color>\n持续消耗体力，旋转大剑攻击周围的敌人。\n停止旋转时，会进行一次格外有力的挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_04",
+      "maxLv": 10
     },
     {
-      "GroupId": 3632,
-      "Id": 10402,
-      "Name": "灵刃·重华叠霜",
-      "Description": "重云挥动巨剑猛击地面，在前方圆形范围内引发冰爆，并对敌人造成<color=#99FFFFFF>冰元素伤害</color>。\n短暂延迟后，冰爆引发的寒气汇聚成重华叠霜领域，其中的单手剑、大剑、长柄武器角色获得<color=#99FFFFFF>冰元素附魔</color>。\n\n<i>「琳琅振响，十方静默。江河不动，重云凝霜。如法开坛，诸邪退散。」</i>",
-      "Icon": "Skill_S_Chongyun_01"
+      "group": 3632,
+      "id": 10402,
+      "name": "灵刃·重华叠霜",
+      "desc": "重云挥动巨剑猛击地面，在前方圆形范围内引发冰爆，并对敌人造成<color=#99FFFFFF>冰元素伤害</color>。\n短暂延迟后，冰爆引发的寒气汇聚成重华叠霜领域，其中的单手剑、大剑、长柄武器角色获得<color=#99FFFFFF>冰元素附魔</color>。\n\n<i>「琳琅振响，十方静默。江河不动，重云凝霜。如法开坛，诸邪退散。」</i>",
+      "icon": "Skill_S_Chongyun_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 3639,
-      "Id": 10403,
-      "Name": "灵刃·云开星落",
-      "Description": "重云结印，在前方半空中连续召唤出三柄巨大灵刃，短时间内依次落向地面并爆裂。\n灵刃爆裂时，会造成<color=#99FFFFFF>冰元素范围伤害</color>，并击飞敌人。\n\n<i>「卓剑天地动，冰凌霜寒生。如律令！」</i>",
-      "Icon": "Skill_E_Chongyun_01"
+      "group": 3639,
+      "id": 10403,
+      "name": "灵刃·云开星落",
+      "desc": "重云结印，在前方半空中连续召唤出三柄巨大灵刃，短时间内依次落向地面并爆裂。\n灵刃爆裂时，会造成<color=#99FFFFFF>冰元素范围伤害</color>，并击飞敌人。\n\n<i>「卓剑天地动，冰凌霜寒生。如律令！」</i>",
+      "icon": "Skill_E_Chongyun_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 3621,
-      "Id": 362101,
-      "Name": "吐纳真定",
-      "Description": "处在<color=#FFD780FF>灵刃·重华叠霜</color>领域内的单手剑、双手剑、长柄武器角色，普通攻击的攻击速度提升8%。",
-      "Icon": "UI_Talent_S_Chongyun_05"
+      "group": 3621,
+      "id": 362101,
+      "name": "吐纳真定",
+      "desc": "处在<color=#FFD780FF>灵刃·重华叠霜</color>领域内的单手剑、双手剑、长柄武器角色，普通攻击的攻击速度提升8%。",
+      "icon": "UI_Talent_S_Chongyun_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 3622,
-      "Id": 362201,
-      "Name": "追冰剑诀",
-      "Description": "<color=#FFD780FF>灵刃·重华叠霜</color>领域消失时，会唤出一柄灵刃自动攻击附近的敌人，造成相当于灵刃·重华叠霜技能伤害100%的<color=#99FFFFFF>冰元素范围伤害</color>。被击中的敌人<color=#99FFFFFF>冰元素抗性</color>降低10%，持续8秒。",
-      "Icon": "UI_Talent_S_Chongyun_06"
+      "group": 3622,
+      "id": 362201,
+      "name": "追冰剑诀",
+      "desc": "<color=#FFD780FF>灵刃·重华叠霜</color>领域消失时，会唤出一柄灵刃自动攻击附近的敌人，造成相当于灵刃·重华叠霜技能伤害100%的<color=#99FFFFFF>冰元素范围伤害</color>。被击中的敌人<color=#99FFFFFF>冰元素抗性</color>降低10%，持续8秒。",
+      "icon": "UI_Talent_S_Chongyun_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 3623,
-      "Id": 362301,
-      "Name": "云游山海",
-      "Description": "在璃月执行探索派遣任务时，消耗的时间缩短25%。",
-      "Icon": "UI_Talent_Expedition_Liyue"
+      "group": 3623,
+      "id": 362301,
+      "name": "云游山海",
+      "desc": "在璃月执行探索派遣任务时，消耗的时间缩短25%。",
+      "icon": "UI_Talent_Expedition_Liyue",
+      "maxLv": 1
     }
   ],
   "star": 4,

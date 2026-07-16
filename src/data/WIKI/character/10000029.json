@@ -65,53 +65,60 @@
   "name": "可莉",
   "skills": [
     {
-      "GroupId": 2931,
-      "Id": 10291,
-      "Name": "砰砰",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n投掷在碰撞后会爆炸的好东西！进行至多三段的炸弹攻击，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，短暂咏唱后，轰击敌人，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚烈焰的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#FF9999FF>火元素范围伤害</color>。",
-      "Icon": "Skill_A_Catalyst_MD"
+      "group": 2931,
+      "id": 10291,
+      "name": "砰砰",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n投掷在碰撞后会爆炸的好东西！进行至多三段的炸弹攻击，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，短暂咏唱后，轰击敌人，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚烈焰的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#FF9999FF>火元素范围伤害</color>。",
+      "icon": "Skill_A_Catalyst_MD",
+      "maxLv": 10
     },
     {
-      "GroupId": 2932,
-      "Id": 10292,
-      "Name": "蹦蹦炸弹",
-      "Description": "投出带来无限快乐的蹦蹦炸弹！\n蹦蹦炸弹会连续弹跳三次，每次弹跳都会引发爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n第三次弹跳后，将分裂成许多诡雷。\n诡雷会在接触到敌人或一段时间后爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n初始拥有2次可使用次数。\n\n<i>蹦蹦是可莉的「好朋友」…可莉总是忍不住向人介绍他们。</i>",
-      "Icon": "Skill_S_Klee_01"
+      "group": 2932,
+      "id": 10292,
+      "name": "蹦蹦炸弹",
+      "desc": "投出带来无限快乐的蹦蹦炸弹！\n蹦蹦炸弹会连续弹跳三次，每次弹跳都会引发爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n第三次弹跳后，将分裂成许多诡雷。\n诡雷会在接触到敌人或一段时间后爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n初始拥有2次可使用次数。\n\n<i>蹦蹦是可莉的「好朋友」…可莉总是忍不住向人介绍他们。</i>",
+      "icon": "Skill_S_Klee_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2939,
-      "Id": 10295,
-      "Name": "轰轰火花",
-      "Description": "可莉火力全开！在技能持续时间内，不停召唤轰轰火花攻击附近的敌人，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>骑士团的人相信，可莉从来不被自己的炸弹所伤，一定有幸运星眷顾着她吧…</i>",
-      "Icon": "Skill_E_Klee_01"
+      "group": 2939,
+      "id": 10295,
+      "name": "轰轰火花",
+      "desc": "可莉火力全开！在技能持续时间内，不停召唤轰轰火花攻击附近的敌人，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>骑士团的人相信，可莉从来不被自己的炸弹所伤，一定有幸运星眷顾着她吧…</i>",
+      "icon": "Skill_E_Klee_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2951,
-      "Id": 295101,
-      "Name": "魔女的前夜礼·火花魔法",
-      "Description": "完成<color=#FFD780FF>魔女的课业·火花叶之题</color>后，可莉将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n可莉的普通攻击、元素战技或元素爆发造成伤害时，会获得一枚「轰轰勋章」，持续20秒，每种类别的攻击至多通过这种方式使可莉获得一枚「轰轰勋章」，通过不同类别的攻击获得的「轰轰勋章」独立存在。当可莉拥有1/2/3枚「轰轰勋章」时，特殊重击「嘭嘭轰击」将会造成原本115%/130%/150%的伤害。",
-      "Icon": "UI_Talent_S_Klee_07"
+      "group": 2951,
+      "id": 295101,
+      "name": "魔女的前夜礼·火花魔法",
+      "desc": "完成<color=#FFD780FF>魔女的课业·火花叶之题</color>后，可莉将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n可莉的普通攻击、元素战技或元素爆发造成伤害时，会获得一枚「轰轰勋章」，持续20秒，每种类别的攻击至多通过这种方式使可莉获得一枚「轰轰勋章」，通过不同类别的攻击获得的「轰轰勋章」独立存在。当可莉拥有1/2/3枚「轰轰勋章」时，特殊重击「嘭嘭轰击」将会造成原本115%/130%/150%的伤害。",
+      "icon": "UI_Talent_S_Klee_07",
+      "maxLv": 1
     },
     {
-      "GroupId": 2921,
-      "Id": 292101,
-      "Name": "砰砰礼物",
-      "Description": "<color=#FFD780FF>蹦蹦炸弹</color>与普通攻击造成伤害时，有50%的几率赋予可莉一朵爆裂火花。\n施放重击时将消耗爆裂火花，使本次重击不消耗体力，造成的伤害提升50%。",
-      "Icon": "UI_Talent_S_Klee_05"
+      "group": 2921,
+      "id": 292101,
+      "name": "砰砰礼物",
+      "desc": "<color=#FFD780FF>蹦蹦炸弹</color>与普通攻击造成伤害时，有50%的几率赋予可莉一朵爆裂火花。\n施放重击时将消耗爆裂火花，使本次重击不消耗体力，造成的伤害提升50%。",
+      "icon": "UI_Talent_S_Klee_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 2922,
-      "Id": 292201,
-      "Name": "火花无限",
-      "Description": "可莉的重击造成暴击后，为队伍中所有角色恢复2点元素能量。",
-      "Icon": "UI_Talent_S_Klee_06"
+      "group": 2922,
+      "id": 292201,
+      "name": "火花无限",
+      "desc": "可莉的重击造成暴击后，为队伍中所有角色恢复2点元素能量。",
+      "icon": "UI_Talent_S_Klee_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 2923,
-      "Id": 292301,
-      "Name": "全是宝藏",
-      "Description": "在小地图上显示周围的<color=#FFD780FF>蒙德区域特产</color>的位置。",
-      "Icon": "UI_Talent_Collect_Local_Mengde"
+      "group": 2923,
+      "id": 292301,
+      "name": "全是宝藏",
+      "desc": "在小地图上显示周围的<color=#FFD780FF>蒙德区域特产</color>的位置。",
+      "icon": "UI_Talent_Collect_Local_Mengde",
+      "maxLv": 1
     }
   ],
   "star": 5,

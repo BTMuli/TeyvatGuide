@@ -61,53 +61,60 @@
   "name": "爱诺",
   "skills": [
     {
-      "GroupId": 12131,
-      "Id": 11211,
-      "Name": "敲打修理法",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多三段的连续攻击。\n\n<color=#FFD780FF>重击</color>\n持续消耗体力，旋转大剑攻击周围的敌人。\n停止旋转时，会进行一次格外有力的挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_04"
+      "group": 12131,
+      "id": 11211,
+      "name": "敲打修理法",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多三段的连续攻击。\n\n<color=#FFD780FF>重击</color>\n持续消耗体力，旋转大剑攻击周围的敌人。\n停止旋转时，会进行一次格外有力的挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_04",
+      "maxLv": 10
     },
     {
-      "GroupId": 12132,
-      "Id": 11212,
-      "Name": "妙思捕手",
-      "Description": "向前方投出<color=#FFD780FF>「妙思捕手」</color>，造成<color=#80C0FFFF>水元素伤害</color>，同时将自己牵引至前方，并在移动结束时对身边的敌人造成<color=#80C0FFFF>水元素范围伤害</color>。\n长按时将以不同的方式施放。\n\n<color=#FFD780FF>长按</color>\n进入瞄准状态，以调整投出「妙思捕手」的方向。",
-      "Icon": "Skill_S_Aino_01"
+      "group": 12132,
+      "id": 11212,
+      "name": "妙思捕手",
+      "desc": "向前方投出<color=#FFD780FF>「妙思捕手」</color>，造成<color=#80C0FFFF>水元素伤害</color>，同时将自己牵引至前方，并在移动结束时对身边的敌人造成<color=#80C0FFFF>水元素范围伤害</color>。\n长按时将以不同的方式施放。\n\n<color=#FFD780FF>长按</color>\n进入瞄准状态，以调整投出「妙思捕手」的方向。",
+      "icon": "Skill_S_Aino_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12139,
-      "Id": 11215,
-      "Name": "精密水冷仪",
-      "Description": "抛出特制的超级喷水机关<color=#FFD780FF>「冷静一下鸭」</color>，展开<color=#FFD780FF>对点水冷域</color>。\n持续期间，「冷静一下鸭」会间歇性对附近的敌人发射水弹，造成<color=#80C0FFFF>水元素伤害</color>。",
-      "Icon": "Skill_E_Aino_01"
+      "group": 12139,
+      "id": 11215,
+      "name": "精密水冷仪",
+      "desc": "抛出特制的超级喷水机关<color=#FFD780FF>「冷静一下鸭」</color>，展开<color=#FFD780FF>对点水冷域</color>。\n持续期间，「冷静一下鸭」会间歇性对附近的敌人发射水弹，造成<color=#80C0FFFF>水元素伤害</color>。",
+      "icon": "Skill_E_Aino_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 12121,
-      "Id": 1212101,
-      "Name": "模块式高效运作",
-      "Description": "依据队伍的<color=#FFD780FF>月兆</color>，爱诺将获得对应的强化效果。\n\n<color=#FFD780FF>月兆·满辉</color>：元素爆发<color=#FFD780FF>{LINK#S11215}精密水冷仪{/LINK}</color>将获得强化：<color=#FFD780FF>「冷静一下鸭」</color>将以更短的间隔发射水弹，造成范围更大的<color=#80C0FFFF>水元素范围伤害</color>。",
-      "Icon": "UI_Talent_S_Aino_05"
+      "group": 12121,
+      "id": 1212101,
+      "name": "模块式高效运作",
+      "desc": "依据队伍的<color=#FFD780FF>月兆</color>，爱诺将获得对应的强化效果。\n\n<color=#FFD780FF>月兆·满辉</color>：元素爆发<color=#FFD780FF>{LINK#S11215}精密水冷仪{/LINK}</color>将获得强化：<color=#FFD780FF>「冷静一下鸭」</color>将以更短的间隔发射水弹，造成范围更大的<color=#80C0FFFF>水元素范围伤害</color>。",
+      "icon": "UI_Talent_S_Aino_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 12122,
-      "Id": 1212201,
-      "Name": "结构化功率提升",
-      "Description": "爱诺元素爆发造成的伤害提升，提升值基于爱诺的元素精通的50%。",
-      "Icon": "UI_Talent_S_Aino_06"
+      "group": 12122,
+      "id": 1212201,
+      "name": "结构化功率提升",
+      "desc": "爱诺元素爆发造成的伤害提升，提升值基于爱诺的元素精通的50%。",
+      "icon": "UI_Talent_S_Aino_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 12123,
-      "Id": 1212301,
-      "Name": "月兆祝赐·力极演算",
-      "Description": "爱诺在队伍中时，队伍的<color=#FFD780FF>月兆</color>将会上升一级。",
-      "Icon": "UI_Talent_S_Aino_07"
+      "group": 12123,
+      "id": 1212301,
+      "name": "月兆祝赐·力极演算",
+      "desc": "爱诺在队伍中时，队伍的<color=#FFD780FF>月兆</color>将会上升一级。",
+      "icon": "UI_Talent_S_Aino_07",
+      "maxLv": 1
     },
     {
-      "GroupId": 12125,
-      "Id": 1212501,
-      "Name": "小型识别侦测器",
-      "Description": "在小地图上显示周围的<color=#FFD780FF>挪德卡莱区域特产</color>的位置。\n此外，爱诺似乎可以通过某种途径来改变「冷静一下鸭」的外观…",
-      "Icon": "UI_Talent_S_Aino_08"
+      "group": 12125,
+      "id": 1212501,
+      "name": "小型识别侦测器",
+      "desc": "在小地图上显示周围的<color=#FFD780FF>挪德卡莱区域特产</color>的位置。\n此外，爱诺似乎可以通过某种途径来改变「冷静一下鸭」的外观…",
+      "icon": "UI_Talent_S_Aino_08",
+      "maxLv": 1
     }
   ],
   "star": 4,

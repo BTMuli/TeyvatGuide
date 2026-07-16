@@ -62,53 +62,60 @@
   "name": "迪奥娜",
   "skills": [
     {
-      "GroupId": 3931,
-      "Id": 10391,
-      "Name": "猎人射术",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，冰霜散发的寒气会凭附在箭矢上。聚满了寒气的箭矢会造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
-      "Icon": "Skill_A_02"
+      "group": 3931,
+      "id": 10391,
+      "name": "猎人射术",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，冰霜散发的寒气会凭附在箭矢上。聚满了寒气的箭矢会造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
+      "icon": "Skill_A_02",
+      "maxLv": 10
     },
     {
-      "GroupId": 3932,
-      "Id": 10392,
-      "Name": "猫爪冻冻",
-      "Description": "发射冻冻猫猫爪，对敌人造成<color=#99FFFFFF>冰元素伤害</color>，并在命中时形成护盾。\n护盾的伤害吸收量受益于迪奥娜的生命值上限，持续时间基于命中的冻冻猫猫爪数目。\n\n<color=#FFD780FF>点按</color>\n快速发射二枚冻冻猫猫爪。\n\n<color=#FFD780FF>长按</color>\n迅速后撤，并发射五枚冻冻猫猫爪。\n通过长按产生的护盾获得75%伤害吸收量加成。\n\n护盾对<color=#99FFFFFF>冰元素伤害</color>有250%的吸收效果，并会在形成时，为当前角色施加短暂的<color=#99FFFFFF>冰元素附着</color>。\n\n<i>一开始，酒里加多少冰也伤害不了酒鬼。直到迪奥娜有了神之眼，然后就有了这些冻得人太阳穴疼的冰。好评！</i>",
-      "Icon": "Skill_S_Diona_01"
+      "group": 3932,
+      "id": 10392,
+      "name": "猫爪冻冻",
+      "desc": "发射冻冻猫猫爪，对敌人造成<color=#99FFFFFF>冰元素伤害</color>，并在命中时形成护盾。\n护盾的伤害吸收量受益于迪奥娜的生命值上限，持续时间基于命中的冻冻猫猫爪数目。\n\n<color=#FFD780FF>点按</color>\n快速发射二枚冻冻猫猫爪。\n\n<color=#FFD780FF>长按</color>\n迅速后撤，并发射五枚冻冻猫猫爪。\n通过长按产生的护盾获得75%伤害吸收量加成。\n\n护盾对<color=#99FFFFFF>冰元素伤害</color>有250%的吸收效果，并会在形成时，为当前角色施加短暂的<color=#99FFFFFF>冰元素附着</color>。\n\n<i>一开始，酒里加多少冰也伤害不了酒鬼。直到迪奥娜有了神之眼，然后就有了这些冻得人太阳穴疼的冰。好评！</i>",
+      "icon": "Skill_S_Diona_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 3939,
-      "Id": 10395,
-      "Name": "最烈特调",
-      "Description": "抛出特别调制的冰酿烈调，造成<color=#99FFFFFF>冰元素范围伤害</color>，并产生冰气酒雾领域。\n\n<color=#FFD780FF>冰气酒雾领域</color>\n·对其中的敌人持续造成<color=#99FFFFFF>冰元素伤害</color>；\n·为其中的角色持续恢复生命值。\n\n<i>迪奥娜自己都觉得不人道的恐怖配方。前味恐怖，推荐留给敌人；后劲清冽，可惜只能用鼻子和皮肤享用。</i>",
-      "Icon": "Skill_E_Diona_01"
+      "group": 3939,
+      "id": 10395,
+      "name": "最烈特调",
+      "desc": "抛出特别调制的冰酿烈调，造成<color=#99FFFFFF>冰元素范围伤害</color>，并产生冰气酒雾领域。\n\n<color=#FFD780FF>冰气酒雾领域</color>\n·对其中的敌人持续造成<color=#99FFFFFF>冰元素伤害</color>；\n·为其中的角色持续恢复生命值。\n\n<i>迪奥娜自己都觉得不人道的恐怖配方。前味恐怖，推荐留给敌人；后劲清冽，可惜只能用鼻子和皮肤享用。</i>",
+      "icon": "Skill_E_Diona_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 3951,
-      "Id": 395101,
-      "Name": "珍选秘藏",
-      "Description": "施放元素战技<color=#FFD780FF>猫爪冻冻</color>后的20秒内，队伍中的角色触发超导、星超导反应时，迪奥娜还会协同发射3枚<color=#FFD780FF>冻冻猫猫爪</color>；通过这种方式发射的<color=#FFD780FF>冻冻猫猫爪</color>无法产生元素微粒，在命中敌人时也无法产生护盾。该效果每3.5秒至多触发一次。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时，迪奥娜将会进入<color=#FFD780FF>辉映·星超导</color>状态。",
-      "Icon": "UI_Talent_S_Diona_08"
+      "group": 3951,
+      "id": 395101,
+      "name": "珍选秘藏",
+      "desc": "施放元素战技<color=#FFD780FF>猫爪冻冻</color>后的20秒内，队伍中的角色触发超导、星超导反应时，迪奥娜还会协同发射3枚<color=#FFD780FF>冻冻猫猫爪</color>；通过这种方式发射的<color=#FFD780FF>冻冻猫猫爪</color>无法产生元素微粒，在命中敌人时也无法产生护盾。该效果每3.5秒至多触发一次。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时，迪奥娜将会进入<color=#FFD780FF>辉映·星超导</color>状态。",
+      "icon": "UI_Talent_S_Diona_08",
+      "maxLv": 1
     },
     {
-      "GroupId": 3921,
-      "Id": 392101,
-      "Name": "猫尾隐藏菜单",
-      "Description": "处于<color=#FFD780FF>猫爪冻冻</color>的护盾保护下的角色，移动速度提升10%，体力消耗降低10%。",
-      "Icon": "UI_Talent_S_Diona_05"
+      "group": 3921,
+      "id": 392101,
+      "name": "猫尾隐藏菜单",
+      "desc": "处于<color=#FFD780FF>猫爪冻冻</color>的护盾保护下的角色，移动速度提升10%，体力消耗降低10%。",
+      "icon": "UI_Talent_S_Diona_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 3922,
-      "Id": 392201,
-      "Name": "滑稽百出的醉相",
-      "Description": "敌人进入<color=#FFD780FF>最烈特调</color>的领域后的15秒内，攻击力降低10%。",
-      "Icon": "UI_Talent_S_Diona_06"
+      "group": 3922,
+      "id": 392201,
+      "name": "滑稽百出的醉相",
+      "desc": "敌人进入<color=#FFD780FF>最烈特调</color>的领域后的15秒内，攻击力降低10%。",
+      "icon": "UI_Talent_S_Diona_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 3923,
-      "Id": 392301,
-      "Name": "附赠的下酒菜",
-      "Description": "完美烹饪恢复类食物时，有12%概率获得2倍产出。",
-      "Icon": "UI_Talent_Cook_Heal"
+      "group": 3923,
+      "id": 392301,
+      "name": "附赠的下酒菜",
+      "desc": "完美烹饪恢复类食物时，有12%概率获得2倍产出。",
+      "icon": "UI_Talent_Cook_Heal",
+      "maxLv": 1
     }
   ],
   "star": 4,

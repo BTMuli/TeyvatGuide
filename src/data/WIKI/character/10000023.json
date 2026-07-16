@@ -61,46 +61,52 @@
   "name": "香菱",
   "skills": [
     {
-      "GroupId": 2331,
-      "Id": 10231,
-      "Name": "白案功夫",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续枪击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，向前方突进，对路径上的敌人造成伤害。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_03"
+      "group": 2331,
+      "id": 10231,
+      "name": "白案功夫",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续枪击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，向前方突进，对路径上的敌人造成伤害。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_03",
+      "maxLv": 10
     },
     {
-      "GroupId": 2332,
-      "Id": 10232,
-      "Name": "锅巴出击",
-      "Description": "唤出喷火的锅巴，存在期间内，不断对敌人喷火，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>锅巴喜欢吃火辣的食物。但锅巴承受不了如此火辣的食物。</i>",
-      "Icon": "Skill_S_Xiangling_01"
+      "group": 2332,
+      "id": 10232,
+      "name": "锅巴出击",
+      "desc": "唤出喷火的锅巴，存在期间内，不断对敌人喷火，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>锅巴喜欢吃火辣的食物。但锅巴承受不了如此火辣的食物。</i>",
+      "icon": "Skill_S_Xiangling_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2339,
-      "Id": 10235,
-      "Name": "旋火轮",
-      "Description": "以控制火候与枪术的精湛技巧，甩出围绕自己快速旋转的旋火轮。\n存在期间内，旋火轮会跟随角色运动，对路径上的敌人造成<color=#FF9999FF>火元素伤害</color>。\n\n<i>火力永远不够。远远不够。</i>",
-      "Icon": "Skill_E_Xiangling_01"
+      "group": 2339,
+      "id": 10235,
+      "name": "旋火轮",
+      "desc": "以控制火候与枪术的精湛技巧，甩出围绕自己快速旋转的旋火轮。\n存在期间内，旋火轮会跟随角色运动，对路径上的敌人造成<color=#FF9999FF>火元素伤害</color>。\n\n<i>火力永远不够。远远不够。</i>",
+      "icon": "Skill_E_Xiangling_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2321,
-      "Id": 232101,
-      "Name": "交叉火力",
-      "Description": "锅巴的喷火距离提高20%。",
-      "Icon": "UI_Talent_S_Xiangling_05"
+      "group": 2321,
+      "id": 232101,
+      "name": "交叉火力",
+      "desc": "锅巴的喷火距离提高20%。",
+      "icon": "UI_Talent_S_Xiangling_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 2322,
-      "Id": 232201,
-      "Name": "绝云朝天椒",
-      "Description": "<color=#FFD780FF>锅巴出击</color>效果结束时，锅巴会在消失的位置留下辣椒。拾取辣椒会提高10%攻击力，持续10秒。",
-      "Icon": "UI_Talent_S_Xiangling_06"
+      "group": 2322,
+      "id": 232201,
+      "name": "绝云朝天椒",
+      "desc": "<color=#FFD780FF>锅巴出击</color>效果结束时，锅巴会在消失的位置留下辣椒。拾取辣椒会提高10%攻击力，持续10秒。",
+      "icon": "UI_Talent_S_Xiangling_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 2323,
-      "Id": 232301,
-      "Name": "万民堂大厨",
-      "Description": "完美烹饪攻击类食物时，有12%概率获得2倍产出。",
-      "Icon": "UI_Talent_Cook_Attack"
+      "group": 2323,
+      "id": 232301,
+      "name": "万民堂大厨",
+      "desc": "完美烹饪攻击类食物时，有12%概率获得2倍产出。",
+      "icon": "UI_Talent_Cook_Attack",
+      "maxLv": 1
     }
   ],
   "star": 4,

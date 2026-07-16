@@ -61,46 +61,52 @@
   "name": "枫原万叶",
   "skills": [
     {
-      "GroupId": 4731,
-      "Id": 10471,
-      "Name": "我流剑术",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。若这次下落攻击经由千早振施放，则会转为施放下落攻击·乱岚拨止。\n\n<color=#FFD780FF>下落攻击·乱岚拨止</color>\n通过元素战技·千早振施放的下落攻击，造成的伤害将转化为<color=#80FFD7FF>风元素伤害</color>，并在落地时施展秘剑产生小型的风穴，牵引附近的物体与敌人。",
-      "Icon": "Skill_A_01"
+      "group": 4731,
+      "id": 10471,
+      "name": "我流剑术",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。若这次下落攻击经由千早振施放，则会转为施放下落攻击·乱岚拨止。\n\n<color=#FFD780FF>下落攻击·乱岚拨止</color>\n通过元素战技·千早振施放的下落攻击，造成的伤害将转化为<color=#80FFD7FF>风元素伤害</color>，并在落地时施展秘剑产生小型的风穴，牵引附近的物体与敌人。",
+      "icon": "Skill_A_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 4732,
-      "Id": 10472,
-      "Name": "千早振",
-      "Description": "施展如同冲风般激昂的秘剑，将敌人与物体牵引至所在位置，击飞范围内的敌人，造成<color=#80FFD7FF>风元素伤害</color>，并借由喷薄的气流如登泷般腾空而起。\n枫原万叶因元素战技·千早振而升空后的10秒内并持续处于空中时，若进行下落攻击，则会施展格外强劲的下落攻击·乱岚拨止。\n\n<color=#FFD780FF>点按</color>\n可以在空中施放。\n\n<color=#FFD780FF>长按</color>\n积蓄力量后施展，相对于点按，在更大的范围内造成更高的<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击·乱岚拨止</color>\n通过元素战技·千早振施放的下落攻击，造成的伤害将转化为<color=#80FFD7FF>风元素伤害</color>，并在落地时施展秘剑产生小型的风穴，牵引附近的物体与敌人。\n乱岚拨止造成的伤害视为下落攻击伤害。\n\n<i>「枫袖起悲风，神代万世人百年，秋山落唐红。」</i>",
-      "Icon": "Skill_S_Kazuha_01"
+      "group": 4732,
+      "id": 10472,
+      "name": "千早振",
+      "desc": "施展如同冲风般激昂的秘剑，将敌人与物体牵引至所在位置，击飞范围内的敌人，造成<color=#80FFD7FF>风元素伤害</color>，并借由喷薄的气流如登泷般腾空而起。\n枫原万叶因元素战技·千早振而升空后的10秒内并持续处于空中时，若进行下落攻击，则会施展格外强劲的下落攻击·乱岚拨止。\n\n<color=#FFD780FF>点按</color>\n可以在空中施放。\n\n<color=#FFD780FF>长按</color>\n积蓄力量后施展，相对于点按，在更大的范围内造成更高的<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击·乱岚拨止</color>\n通过元素战技·千早振施放的下落攻击，造成的伤害将转化为<color=#80FFD7FF>风元素伤害</color>，并在落地时施展秘剑产生小型的风穴，牵引附近的物体与敌人。\n乱岚拨止造成的伤害视为下落攻击伤害。\n\n<i>「枫袖起悲风，神代万世人百年，秋山落唐红。」</i>",
+      "icon": "Skill_S_Kazuha_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 4739,
-      "Id": 10475,
-      "Name": "万叶之一刀",
-      "Description": "施展我流的奥义，斩出初岚般的一刀，造成<color=#80FFD7FF>风元素范围伤害</color>。\n刀风会留下名为「流风秋野」的领域，对其中的敌人造成间歇的<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>元素转化</color>\n若流风秋野在持续期间接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会获得对应元素属性，额外造成该元素附加伤害。\n这种转化在技能持续期间仅会发生一次。\n\n<i>「须臾照见万世长，一叶便知天下秋。我欲凭切枫一闪，做万世之问叩——」</i>",
-      "Icon": "Skill_E_Kazuha_01"
+      "group": 4739,
+      "id": 10475,
+      "name": "万叶之一刀",
+      "desc": "施展我流的奥义，斩出初岚般的一刀，造成<color=#80FFD7FF>风元素范围伤害</color>。\n刀风会留下名为「流风秋野」的领域，对其中的敌人造成间歇的<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>元素转化</color>\n若流风秋野在持续期间接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会获得对应元素属性，额外造成该元素附加伤害。\n这种转化在技能持续期间仅会发生一次。\n\n<i>「须臾照见万世长，一叶便知天下秋。我欲凭切枫一闪，做万世之问叩——」</i>",
+      "icon": "Skill_E_Kazuha_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 4721,
-      "Id": 472101,
-      "Name": "相闻之剑法",
-      "Description": "<color=#FFD780FF>千早振</color>在施放时，如果接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会使这次<color=#FFD780FF>千早振</color>的下落攻击·乱岚拨止，发生元素转化，将附加200%攻击力的对应元素伤害，该伤害视为下落攻击伤害。每次<color=#FFD780FF>千早振</color>的技能效果中，元素转化仅会发生一次。",
-      "Icon": "UI_Talent_S_Kazuha_05"
+      "group": 4721,
+      "id": 472101,
+      "name": "相闻之剑法",
+      "desc": "<color=#FFD780FF>千早振</color>在施放时，如果接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会使这次<color=#FFD780FF>千早振</color>的下落攻击·乱岚拨止，发生元素转化，将附加200%攻击力的对应元素伤害，该伤害视为下落攻击伤害。每次<color=#FFD780FF>千早振</color>的技能效果中，元素转化仅会发生一次。",
+      "icon": "UI_Talent_S_Kazuha_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 4722,
-      "Id": 472201,
-      "Name": "风物之诗咏",
-      "Description": "枫原万叶触发扩散反应后，枫原万叶的每点元素精通，会为队伍中所有角色提供0.04%对应元素伤害加成，持续8秒。通过这种方式获得的不同元素伤害加成可以共存。",
-      "Icon": "UI_Talent_S_Kazuha_06"
+      "group": 4722,
+      "id": 472201,
+      "name": "风物之诗咏",
+      "desc": "枫原万叶触发扩散反应后，枫原万叶的每点元素精通，会为队伍中所有角色提供0.04%对应元素伤害加成，持续8秒。通过这种方式获得的不同元素伤害加成可以共存。",
+      "icon": "UI_Talent_S_Kazuha_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 4723,
-      "Id": 472301,
-      "Name": "松风霞立",
-      "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
-      "Icon": "UI_Talent_Explosion_Sprint"
+      "group": 4723,
+      "id": 472301,
+      "name": "松风霞立",
+      "desc": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
+      "icon": "UI_Talent_Explosion_Sprint",
+      "maxLv": 1
     }
   ],
   "star": 5,

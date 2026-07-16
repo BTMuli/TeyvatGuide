@@ -61,46 +61,52 @@
   "name": "安柏",
   "skills": [
     {
-      "GroupId": 2131,
-      "Id": 10041,
-      "Name": "神射手",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，烈焰会在箭矢上持续积聚。聚满了烈焰的箭矢会造成<color=#FF9999FF>火元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
-      "Icon": "Skill_A_02"
+      "group": 2131,
+      "id": 10041,
+      "name": "神射手",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，烈焰会在箭矢上持续积聚。聚满了烈焰的箭矢会造成<color=#FF9999FF>火元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
+      "icon": "Skill_A_02",
+      "maxLv": 10
     },
     {
-      "GroupId": 2132,
-      "Id": 10032,
-      "Name": "爆弹玩偶",
-      "Description": "请可靠的兔兔伯爵上阵。\n\n<color=#FFD780FF>兔兔伯爵</color>\n·持续嘲讽周围的敌人，吸引火力；\n·耐久度按比例继承安柏的生命值上限；\n·被摧毁或持续时间结束时，会发生剧烈的爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>长按</color>\n调整投掷方向。\n投掷距离随长按时间增加。\n\n<i>兔兔伯爵有着悠久的家系。但从兔兔八百九十三世开始，安柏就停止计数了。</i>",
-      "Icon": "Skill_S_Ambor_01"
+      "group": 2132,
+      "id": 10032,
+      "name": "爆弹玩偶",
+      "desc": "请可靠的兔兔伯爵上阵。\n\n<color=#FFD780FF>兔兔伯爵</color>\n·持续嘲讽周围的敌人，吸引火力；\n·耐久度按比例继承安柏的生命值上限；\n·被摧毁或持续时间结束时，会发生剧烈的爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>长按</color>\n调整投掷方向。\n投掷距离随长按时间增加。\n\n<i>兔兔伯爵有着悠久的家系。但从兔兔八百九十三世开始，安柏就停止计数了。</i>",
+      "icon": "Skill_S_Ambor_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2139,
-      "Id": 10017,
-      "Name": "箭雨",
-      "Description": "射出火焰箭雨，持续造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>满心热诚的安柏真的很热。</i>",
-      "Icon": "Skill_E_Ambor"
+      "group": 2139,
+      "id": 10017,
+      "name": "箭雨",
+      "desc": "射出火焰箭雨，持续造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>满心热诚的安柏真的很热。</i>",
+      "icon": "Skill_E_Ambor",
+      "maxLv": 10
     },
     {
-      "GroupId": 2121,
-      "Id": 212101,
-      "Name": "百发百中！",
-      "Description": "<color=#FFD780FF>箭雨</color>的暴击率提高10%，影响范围扩大30%。",
-      "Icon": "UI_Talent_S_Ambor_05"
+      "group": 2121,
+      "id": 212101,
+      "name": "百发百中！",
+      "desc": "<color=#FFD780FF>箭雨</color>的暴击率提高10%，影响范围扩大30%。",
+      "icon": "UI_Talent_S_Ambor_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 2122,
-      "Id": 212201,
-      "Name": "压制射击",
-      "Description": "瞄准射击命中弱点时，攻击力提高15%，持续10秒。",
-      "Icon": "UI_Talent_S_Ambor_06"
+      "group": 2122,
+      "id": 212201,
+      "name": "压制射击",
+      "desc": "瞄准射击命中弱点时，攻击力提高15%，持续10秒。",
+      "icon": "UI_Talent_S_Ambor_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 2123,
-      "Id": 212301,
-      "Name": "飞行冠军",
-      "Description": "队伍中自己的角色滑翔消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
-      "Icon": "UI_Talent_Explosion_Glide"
+      "group": 2123,
+      "id": 212301,
+      "name": "飞行冠军",
+      "desc": "队伍中自己的角色滑翔消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
+      "icon": "UI_Talent_Explosion_Glide",
+      "maxLv": 1
     }
   ],
   "star": 4,

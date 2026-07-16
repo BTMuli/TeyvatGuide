@@ -61,53 +61,60 @@
   "name": "珊瑚宫心海",
   "skills": [
     {
-      "GroupId": 5431,
-      "Id": 10541,
-      "Name": "水有常形",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n以水元素幻造成的游鱼进行至多三段的攻击，造成<color=#80C0FFFF>水元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，短暂咏唱后，造成<color=#80C0FFFF>水元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚水元素的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#80C0FFFF>水元素范围伤害</color>。",
-      "Icon": "Skill_A_Catalyst_MD"
+      "group": 5431,
+      "id": 10541,
+      "name": "水有常形",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n以水元素幻造成的游鱼进行至多三段的攻击，造成<color=#80C0FFFF>水元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，短暂咏唱后，造成<color=#80C0FFFF>水元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚水元素的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#80C0FFFF>水元素范围伤害</color>。",
+      "icon": "Skill_A_Catalyst_MD",
+      "maxLv": 10
     },
     {
-      "GroupId": 5432,
-      "Id": 10542,
-      "Name": "海月之誓",
-      "Description": "召唤能够治愈同伴的幻造水之生命「化海月」。\n施放的瞬间，为珊瑚宫心海施加<color=#80C0FFFF>潮湿</color>状态。\n\n<color=#FFD780FF>化海月</color>\n每隔一段时间，对周围的敌人造成<color=#80C0FFFF>水元素伤害</color>，并为周围的当前场上角色恢复生命值，回复量受益于珊瑚宫心海的生命值上限。\n\n<i>为了保持完美的工作状态，心海需要及时补充自己的「能量」。</i>",
-      "Icon": "Skill_S_Kokomi_01"
+      "group": 5432,
+      "id": 10542,
+      "name": "海月之誓",
+      "desc": "召唤能够治愈同伴的幻造水之生命「化海月」。\n施放的瞬间，为珊瑚宫心海施加<color=#80C0FFFF>潮湿</color>状态。\n\n<color=#FFD780FF>化海月</color>\n每隔一段时间，对周围的敌人造成<color=#80C0FFFF>水元素伤害</color>，并为周围的当前场上角色恢复生命值，回复量受益于珊瑚宫心海的生命值上限。\n\n<i>为了保持完美的工作状态，心海需要及时补充自己的「能量」。</i>",
+      "icon": "Skill_S_Kokomi_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 5439,
-      "Id": 10545,
-      "Name": "海人化羽",
-      "Description": "请降海祇的力量，对周围的敌人造成<color=#80C0FFFF>水元素伤害</color>，并披上珊瑚宫之水汇聚而成的「仪来羽衣」。\n\n<color=#FFD780FF>仪来羽衣</color>\n·增加珊瑚宫心海的普通攻击，重击以及元素战技的「化海月」造成的伤害，增加值基于珊瑚宫心海的生命值上限；\n·普通攻击和重击命中敌人时，为队伍中附近的所有角色恢复生命值，回复量受益于珊瑚宫心海的生命值上限；\n·提升珊瑚宫心海的抗打断能力，并使她能在水面上移动。\n\n效果将在珊瑚宫心海退场时解除。\n\n<i>萦绕在周身的清光化为羽衣，辉映着珊瑚宫大人的堂堂之姿。</i>",
-      "Icon": "Skill_E_Kokomi_01"
+      "group": 5439,
+      "id": 10545,
+      "name": "海人化羽",
+      "desc": "请降海祇的力量，对周围的敌人造成<color=#80C0FFFF>水元素伤害</color>，并披上珊瑚宫之水汇聚而成的「仪来羽衣」。\n\n<color=#FFD780FF>仪来羽衣</color>\n·增加珊瑚宫心海的普通攻击，重击以及元素战技的「化海月」造成的伤害，增加值基于珊瑚宫心海的生命值上限；\n·普通攻击和重击命中敌人时，为队伍中附近的所有角色恢复生命值，回复量受益于珊瑚宫心海的生命值上限；\n·提升珊瑚宫心海的抗打断能力，并使她能在水面上移动。\n\n效果将在珊瑚宫心海退场时解除。\n\n<i>萦绕在周身的清光化为羽衣，辉映着珊瑚宫大人的堂堂之姿。</i>",
+      "icon": "Skill_E_Kokomi_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 5421,
-      "Id": 542101,
-      "Name": "匣中玉栉",
-      "Description": "施放<color=#FFD780FF>海人化羽</color>时，若场上有珊瑚宫心海自己的化海月，则重置化海月的存在时间。",
-      "Icon": "UI_Talent_S_Kokomi_05"
+      "group": 5421,
+      "id": 542101,
+      "name": "匣中玉栉",
+      "desc": "施放<color=#FFD780FF>海人化羽</color>时，若场上有珊瑚宫心海自己的化海月，则重置化海月的存在时间。",
+      "icon": "UI_Talent_S_Kokomi_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 5422,
-      "Id": 542201,
-      "Name": "真珠御呗",
-      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海的普通攻击与重击基于生命值上限造成的伤害获得额外提升，提升程度相当于她的治疗加成的15%。",
-      "Icon": "UI_Talent_S_Kokomi_06"
+      "group": 5422,
+      "id": 542201,
+      "name": "真珠御呗",
+      "desc": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海的普通攻击与重击基于生命值上限造成的伤害获得额外提升，提升程度相当于她的治疗加成的15%。",
+      "icon": "UI_Talent_S_Kokomi_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 5423,
-      "Id": 542301,
-      "Name": "海祇姬君",
-      "Description": "队伍中自己的角色游泳消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
-      "Icon": "UI_Talent_Explosion_Swim"
+      "group": 5423,
+      "id": 542301,
+      "name": "海祇姬君",
+      "desc": "队伍中自己的角色游泳消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
+      "icon": "UI_Talent_Explosion_Swim",
+      "maxLv": 1
     },
     {
-      "GroupId": 5425,
-      "Id": 542501,
-      "Name": "庙算无遗",
-      "Description": "珊瑚宫心海的治疗加成提升25%，暴击率降低100%。",
-      "Icon": "UI_Talent_S_Kokomi_07"
+      "group": 5425,
+      "id": 542501,
+      "name": "庙算无遗",
+      "desc": "珊瑚宫心海的治疗加成提升25%，暴击率降低100%。",
+      "icon": "UI_Talent_S_Kokomi_07",
+      "maxLv": 1
     }
   ],
   "star": 5,

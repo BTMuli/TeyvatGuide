@@ -61,46 +61,52 @@
   "name": "凝光",
   "skills": [
     {
-      "GroupId": 2731,
-      "Id": 10271,
-      "Name": "千金掷",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n发射宝石，造成<color=#FFE699FF>岩元素伤害</color>。\n命中时，赋予凝光一枚星璇。\n\n<color=#FFD780FF>重击</color>\n消耗体力，发射一颗巨型宝石，造成<color=#FFE699FF>岩元素伤害</color>。\n若凝光拥有星璇，施放重击时会将所有星璇一同发射，造成额外的伤害。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚晶岩的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#FFE699FF>岩元素范围伤害</color>。",
-      "Icon": "Skill_A_Catalyst_MD"
+      "group": 2731,
+      "id": 10271,
+      "name": "千金掷",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n发射宝石，造成<color=#FFE699FF>岩元素伤害</color>。\n命中时，赋予凝光一枚星璇。\n\n<color=#FFD780FF>重击</color>\n消耗体力，发射一颗巨型宝石，造成<color=#FFE699FF>岩元素伤害</color>。\n若凝光拥有星璇，施放重击时会将所有星璇一同发射，造成额外的伤害。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚晶岩的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#FFE699FF>岩元素范围伤害</color>。",
+      "icon": "Skill_A_Catalyst_MD",
+      "maxLv": 10
     },
     {
-      "GroupId": 2732,
-      "Id": 10272,
-      "Name": "璇玑屏",
-      "Description": "借由黄金、黑曜岩与强者的余裕，构建出坚固的璇玑屏，并造成<color=#FFE699FF>岩元素范围伤害</color>。\n\n<color=#FFD780FF>璇玑屏</color>\n·阻挡敌人发射的投射物；\n·耐久度按比例继承凝光的生命值上限。\n\n璇玑屏被视为<color=#FFE699FF>岩元素创造物</color>，可以阻挡部分攻击，不可攀爬。同时只能存在一个。\n\n<i>星罗棋布，璇玑合屏。</i>",
-      "Icon": "Skill_S_Ningguang_01"
+      "group": 2732,
+      "id": 10272,
+      "name": "璇玑屏",
+      "desc": "借由黄金、黑曜岩与强者的余裕，构建出坚固的璇玑屏，并造成<color=#FFE699FF>岩元素范围伤害</color>。\n\n<color=#FFD780FF>璇玑屏</color>\n·阻挡敌人发射的投射物；\n·耐久度按比例继承凝光的生命值上限。\n\n璇玑屏被视为<color=#FFE699FF>岩元素创造物</color>，可以阻挡部分攻击，不可攀爬。同时只能存在一个。\n\n<i>星罗棋布，璇玑合屏。</i>",
+      "icon": "Skill_S_Ningguang_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2739,
-      "Id": 10274,
-      "Name": "天权崩玉",
-      "Description": "凝光在身边凝聚诸多宝石，散之一瞬，自动索敌打击附近的敌人，造成大量<color=#FFE699FF>岩元素伤害</color>。\n施放天权崩玉时，如果附近有璇玑屏存在，璇玑屏将发射额外的宝石飞弹协同攻击。\n\n<i>星散玉崩，尽灭群丑。</i>",
-      "Icon": "Skill_E_Ningguang_01"
+      "group": 2739,
+      "id": 10274,
+      "name": "天权崩玉",
+      "desc": "凝光在身边凝聚诸多宝石，散之一瞬，自动索敌打击附近的敌人，造成大量<color=#FFE699FF>岩元素伤害</color>。\n施放天权崩玉时，如果附近有璇玑屏存在，璇玑屏将发射额外的宝石飞弹协同攻击。\n\n<i>星散玉崩，尽灭群丑。</i>",
+      "icon": "Skill_E_Ningguang_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2721,
-      "Id": 272101,
-      "Name": "星移势转",
-      "Description": "拥有星璇时，凝光的重击不会消耗体力。",
-      "Icon": "UI_Talent_S_Ningguang_02"
+      "group": 2721,
+      "id": 272101,
+      "name": "星移势转",
+      "desc": "拥有星璇时，凝光的重击不会消耗体力。",
+      "icon": "UI_Talent_S_Ningguang_02",
+      "maxLv": 1
     },
     {
-      "GroupId": 2722,
-      "Id": 272201,
-      "Name": "储之千日，用之一刻",
-      "Description": "穿过<color=#FFD780FF>璇玑屏</color>的角色会获得12%<color=#FFE699FF>岩元素伤害加成</color>，持续10秒。",
-      "Icon": "UI_Talent_S_Ningguang_06"
+      "group": 2722,
+      "id": 272201,
+      "name": "储之千日，用之一刻",
+      "desc": "穿过<color=#FFD780FF>璇玑屏</color>的角色会获得12%<color=#FFE699FF>岩元素伤害加成</color>，持续10秒。",
+      "icon": "UI_Talent_S_Ningguang_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 2723,
-      "Id": 272301,
-      "Name": "奇石珠宝录",
-      "Description": "在小地图上显示周围能产出<color=#FFD780FF>锻造用矿石的矿脉</color>位置。",
-      "Icon": "UI_Talent_Collect_Ore"
+      "group": 2723,
+      "id": 272301,
+      "name": "奇石珠宝录",
+      "desc": "在小地图上显示周围能产出<color=#FFD780FF>锻造用矿石的矿脉</color>位置。",
+      "icon": "UI_Talent_Collect_Ore",
+      "maxLv": 1
     }
   ],
   "star": 4,

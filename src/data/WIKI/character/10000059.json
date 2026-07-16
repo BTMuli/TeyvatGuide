@@ -61,46 +61,52 @@
   "name": "鹿野院平藏",
   "skills": [
     {
-      "GroupId": 5931,
-      "Id": 10591,
-      "Name": "不动流格斗术",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n以强风加持的招式与敌人格斗，进行至多五段的攻击，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，使出扬尘踢，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚强风的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#80FFD7FF>风元素范围伤害</color>。",
-      "Icon": "Skill_A_Catalyst_MD"
+      "group": 5931,
+      "id": 10591,
+      "name": "不动流格斗术",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n以强风加持的招式与敌人格斗，进行至多五段的攻击，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，使出扬尘踢，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚强风的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#80FFD7FF>风元素范围伤害</color>。",
+      "icon": "Skill_A_Catalyst_MD",
+      "maxLv": 10
     },
     {
-      "GroupId": 5932,
-      "Id": 10592,
-      "Name": "勠心拳",
-      "Description": "<color=#FFD780FF>点按</color>\n驱使疾风，向前打出勠心拳，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>长按</color>\n积蓄力量，以施展更为强大的拳势。蓄力期间，将持续获得能提升勠心拳威力的「变格」效果；松开技能或蓄力结束时，会向前打出勠心拳，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>变格</color>\n提升下一次勠心拳造成的伤害，至多叠加4层。\n拥有4层「变格」时，将产生「正论」效果，使下一次勠心拳造成的伤害将进一步提高，并拥有更大的影响范围。\n\n<i>看似只是简单的蓄力冲拳，但是包含了平藏想要令罪人们乖乖认罪忏悔的心意。</i>",
-      "Icon": "Skill_S_Heizo_01"
+      "group": 5932,
+      "id": 10592,
+      "name": "勠心拳",
+      "desc": "<color=#FFD780FF>点按</color>\n驱使疾风，向前打出勠心拳，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>长按</color>\n积蓄力量，以施展更为强大的拳势。蓄力期间，将持续获得能提升勠心拳威力的「变格」效果；松开技能或蓄力结束时，会向前打出勠心拳，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>变格</color>\n提升下一次勠心拳造成的伤害，至多叠加4层。\n拥有4层「变格」时，将产生「正论」效果，使下一次勠心拳造成的伤害将进一步提高，并拥有更大的影响范围。\n\n<i>看似只是简单的蓄力冲拳，但是包含了平藏想要令罪人们乖乖认罪忏悔的心意。</i>",
+      "icon": "Skill_S_Heizo_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 5939,
-      "Id": 10595,
-      "Name": "聚风蹴",
-      "Description": "腾跃至空中，向敌人踢出不动流·真空弹。不动流·真空弹将在命中时炸裂，产生缉拿风穴，牵引附近的物体与敌人，造成<color=#80FFD7FF>风元素范围伤害</color>。\n不动流·真空弹命中处于<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>附着下的敌人时，会为这些敌人施加「聚风真眼」效果，该效果会在片刻后爆发消失，并造成对应元素属性的范围伤害。\n不动流·真空弹至多对4名命中的敌人施加「聚风真眼」；敌人无法同时处于多种元素属性的「聚风真眼」状态下。\n\n<i>将风元素聚集一处并踢出的独特招式，往往能在罪人暴露、四处逃窜之时，稳当踢中其后背。</i>",
-      "Icon": "Skill_E_Heizo_01"
+      "group": 5939,
+      "id": 10595,
+      "name": "聚风蹴",
+      "desc": "腾跃至空中，向敌人踢出不动流·真空弹。不动流·真空弹将在命中时炸裂，产生缉拿风穴，牵引附近的物体与敌人，造成<color=#80FFD7FF>风元素范围伤害</color>。\n不动流·真空弹命中处于<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>附着下的敌人时，会为这些敌人施加「聚风真眼」效果，该效果会在片刻后爆发消失，并造成对应元素属性的范围伤害。\n不动流·真空弹至多对4名命中的敌人施加「聚风真眼」；敌人无法同时处于多种元素属性的「聚风真眼」状态下。\n\n<i>将风元素聚集一处并踢出的独特招式，往往能在罪人暴露、四处逃窜之时，稳当踢中其后背。</i>",
+      "icon": "Skill_E_Heizo_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 5921,
-      "Id": 592101,
-      "Name": "反论稽古",
-      "Description": "鹿野院平藏在场上触发扩散反应时，将获得1层<color=#FFD780FF>勠心拳</color>的「变格」效果，该效果每0.1秒至多触发一次。",
-      "Icon": "UI_Talent_S_Heizo_05"
+      "group": 5921,
+      "id": 592101,
+      "name": "反论稽古",
+      "desc": "鹿野院平藏在场上触发扩散反应时，将获得1层<color=#FFD780FF>勠心拳</color>的「变格」效果，该效果每0.1秒至多触发一次。",
+      "icon": "UI_Talent_S_Heizo_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 5922,
-      "Id": 592201,
-      "Name": "因由勘破",
-      "Description": "<color=#FFD780FF>勠心拳</color>命中敌人后，队伍中所有角色（不包括鹿野院平藏自己）的元素精通提升80点，持续10秒。",
-      "Icon": "UI_Talent_S_Heizo_06"
+      "group": 5922,
+      "id": 592201,
+      "name": "因由勘破",
+      "desc": "<color=#FFD780FF>勠心拳</color>命中敌人后，队伍中所有角色（不包括鹿野院平藏自己）的元素精通提升80点，持续10秒。",
+      "icon": "UI_Talent_S_Heizo_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 5923,
-      "Id": 592301,
-      "Name": "在罪之先",
-      "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
-      "Icon": "UI_Talent_Explosion_Sprint"
+      "group": 5923,
+      "id": 592301,
+      "name": "在罪之先",
+      "desc": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
+      "icon": "UI_Talent_Explosion_Sprint",
+      "maxLv": 1
     }
   ],
   "star": 4,

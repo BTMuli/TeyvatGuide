@@ -61,46 +61,52 @@
   "name": "凯亚",
   "skills": [
     {
-      "GroupId": 1531,
-      "Id": 10073,
-      "Name": "仪典剑术",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_01"
+      "group": 1531,
+      "id": 10073,
+      "name": "仪典剑术",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 1532,
-      "Id": 10074,
-      "Name": "霜袭",
-      "Description": "瞬间放出急冻的寒气，对前方的敌人造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<i>看上去如此亲切的凯亚，是谁也无法融化的坚冰。</i>",
-      "Icon": "Skill_S_Kaeya_01"
+      "group": 1532,
+      "id": 10074,
+      "name": "霜袭",
+      "desc": "瞬间放出急冻的寒气，对前方的敌人造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<i>看上去如此亲切的凯亚，是谁也无法融化的坚冰。</i>",
+      "icon": "Skill_S_Kaeya_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 1539,
-      "Id": 10075,
-      "Name": "凛冽轮舞",
-      "Description": "凝聚空气中的寒霜，召唤3枚围绕自身旋转的寒冰之棱。\n存在期间内，寒冰之棱会跟随角色运动，对路径上的敌人造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<i>亲切的笑容、和善的话语，和潜藏在这两者之下的毫不留情的冰霜，都是凯亚的武器。</i>",
-      "Icon": "Skill_E_Kaeya_01"
+      "group": 1539,
+      "id": 10075,
+      "name": "凛冽轮舞",
+      "desc": "凝聚空气中的寒霜，召唤3枚围绕自身旋转的寒冰之棱。\n存在期间内，寒冰之棱会跟随角色运动，对路径上的敌人造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<i>亲切的笑容、和善的话语，和潜藏在这两者之下的毫不留情的冰霜，都是凯亚的武器。</i>",
+      "icon": "Skill_E_Kaeya_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 1521,
-      "Id": 152101,
-      "Name": "冷血之剑",
-      "Description": "<color=#FFD780FF>霜袭</color>每击中一个单位，便为凯亚恢复等同于攻击力15%的生命值。",
-      "Icon": "UI_Talent_S_Kaeya_05"
+      "group": 1521,
+      "id": 152101,
+      "name": "冷血之剑",
+      "desc": "<color=#FFD780FF>霜袭</color>每击中一个单位，便为凯亚恢复等同于攻击力15%的生命值。",
+      "icon": "UI_Talent_S_Kaeya_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 1522,
-      "Id": 152201,
-      "Name": "冰渊之心",
-      "Description": "<color=#FFD780FF>霜袭</color>使敌人<color=#99FFFFFF>冻结</color>时，被冻结的敌人会掉落额外的元素微粒。\n一次霜袭至多因此产生2个额外元素微粒。",
-      "Icon": "UI_Talent_S_Kaeya_06"
+      "group": 1522,
+      "id": 152201,
+      "name": "冰渊之心",
+      "desc": "<color=#FFD780FF>霜袭</color>使敌人<color=#99FFFFFF>冻结</color>时，被冻结的敌人会掉落额外的元素微粒。\n一次霜袭至多因此产生2个额外元素微粒。",
+      "icon": "UI_Talent_S_Kaeya_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 1523,
-      "Id": 152301,
-      "Name": "隐藏的实力",
-      "Description": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
-      "Icon": "UI_Talent_Explosion_Sprint"
+      "group": 1523,
+      "id": 152301,
+      "name": "隐藏的实力",
+      "desc": "队伍中自己的角色冲刺消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
+      "icon": "UI_Talent_Explosion_Sprint",
+      "maxLv": 1
     }
   ],
   "star": 4,

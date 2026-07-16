@@ -62,53 +62,60 @@
   "name": "北斗",
   "skills": [
     {
-      "GroupId": 2431,
-      "Id": 10241,
-      "Name": "征涛",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续挥砍。\n\n<color=#FFD780FF>重击</color>\n持续消耗体力，快速进行连续的斩击。\n重击结束时，会进行一次格外有力的挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
-      "Icon": "Skill_A_04"
+      "group": 2431,
+      "id": 10241,
+      "name": "征涛",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续挥砍。\n\n<color=#FFD780FF>重击</color>\n持续消耗体力，快速进行连续的斩击。\n重击结束时，会进行一次格外有力的挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
+      "icon": "Skill_A_04",
+      "maxLv": 10
     },
     {
-      "GroupId": 2432,
-      "Id": 10242,
-      "Name": "捉浪",
-      "Description": "没有什么好担心的。如果有人敢对她或她的人出手，那就以雷电与大剑十倍奉还。\n\n<color=#FFD780FF>点按</color>\n积聚雷之力，猛烈向前挥舞大剑，造成<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>长按</color>\n举起武器形成护盾，伤害吸收量受益于北斗的生命值上限。\n松开技能或持续时间结束时，会挥舞大剑释放积攒的力量进行攻击，造成<color=#FFACFFFF>雷元素伤害</color>。依据技能期间受到攻击的次数，提高释放时造成的伤害。触发2次达到最高伤害加成。\n护盾具有如下效果：\n·对<color=#FFACFFFF>雷元素伤害</color>有250%的吸收效果；\n·施放的瞬间，为北斗施加<color=#FFACFFFF>雷元素附着</color>。\n\n<i>渺渺征船，追电捉浪。</i>",
-      "Icon": "Skill_S_Beidou_01"
+      "group": 2432,
+      "id": 10242,
+      "name": "捉浪",
+      "desc": "没有什么好担心的。如果有人敢对她或她的人出手，那就以雷电与大剑十倍奉还。\n\n<color=#FFD780FF>点按</color>\n积聚雷之力，猛烈向前挥舞大剑，造成<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>长按</color>\n举起武器形成护盾，伤害吸收量受益于北斗的生命值上限。\n松开技能或持续时间结束时，会挥舞大剑释放积攒的力量进行攻击，造成<color=#FFACFFFF>雷元素伤害</color>。依据技能期间受到攻击的次数，提高释放时造成的伤害。触发2次达到最高伤害加成。\n护盾具有如下效果：\n·对<color=#FFACFFFF>雷元素伤害</color>有250%的吸收效果；\n·施放的瞬间，为北斗施加<color=#FFACFFFF>雷元素附着</color>。\n\n<i>渺渺征船，追电捉浪。</i>",
+      "icon": "Skill_S_Beidou_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2439,
-      "Id": 10245,
-      "Name": "斫雷",
-      "Description": "重忆斩灭海山巨兽之战，唤起巨兽与雷电的力量，创造环绕自身的雷兽之盾，并对周围的敌人造成<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>雷兽之盾</color>\n·普通攻击与重击命中时，释放雷电之力，引来1道能在敌人之间跃动的闪雷，造成<color=#FFACFFFF>雷元素伤害</color>；\n·提高角色的抗打断能力，并降低受到的伤害。\n\n每秒至多触发1道闪雷。\n\n<i>赫赫雷来，斫灭海山。</i>",
-      "Icon": "Skill_E_Beidou_01"
+      "group": 2439,
+      "id": 10245,
+      "name": "斫雷",
+      "desc": "重忆斩灭海山巨兽之战，唤起巨兽与雷电的力量，创造环绕自身的雷兽之盾，并对周围的敌人造成<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>雷兽之盾</color>\n·普通攻击与重击命中时，释放雷电之力，引来1道能在敌人之间跃动的闪雷，造成<color=#FFACFFFF>雷元素伤害</color>；\n·提高角色的抗打断能力，并降低受到的伤害。\n\n每秒至多触发1道闪雷。\n\n<i>赫赫雷来，斫灭海山。</i>",
+      "icon": "Skill_E_Beidou_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 2424,
-      "Id": 242401,
-      "Name": "引路明星",
-      "Description": "长按施放元素战技<color=#FFD780FF>捉浪</color>时，即便不受到攻击，每0.8秒也会主动积攒一层力量，提高释放时造成的伤害。\n此外，长按施放<color=#FFD780FF>捉浪</color>命中敌人时，还会依据积攒的力量，获得额外的增益效果：每积攒一层力量，都会使其元素战技的冷却时间减少4秒，并为自身恢复8点元素能量，该效果每15秒至多触发一次。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时，北斗将会进入<color=#FFD780FF>辉映·星超导</color>状态。",
-      "Icon": "UI_Talent_S_Beidou_08"
+      "group": 2424,
+      "id": 242401,
+      "name": "引路明星",
+      "desc": "长按施放元素战技<color=#FFD780FF>捉浪</color>时，即便不受到攻击，每0.8秒也会主动积攒一层力量，提高释放时造成的伤害。\n此外，长按施放<color=#FFD780FF>捉浪</color>命中敌人时，还会依据积攒的力量，获得额外的增益效果：每积攒一层力量，都会使其元素战技的冷却时间减少4秒，并为自身恢复8点元素能量，该效果每15秒至多触发一次。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时，北斗将会进入<color=#FFD780FF>辉映·星超导</color>状态。",
+      "icon": "UI_Talent_S_Beidou_08",
+      "maxLv": 1
     },
     {
-      "GroupId": 2421,
-      "Id": 242101,
-      "Name": "遍宇灵光",
-      "Description": "在被攻击瞬间施放的<color=#FFD780FF>捉浪</color>反击，拥有最高伤害加成。",
-      "Icon": "UI_Talent_S_Beidou_05"
+      "group": 2421,
+      "id": 242101,
+      "name": "遍宇灵光",
+      "desc": "在被攻击瞬间施放的<color=#FFD780FF>捉浪</color>反击，拥有最高伤害加成。",
+      "icon": "UI_Talent_S_Beidou_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 2422,
-      "Id": 242201,
-      "Name": "霹雳连霄",
-      "Description": "施放拥有最高伤害加成的<color=#FFD780FF>捉浪</color>后的10秒内，获得如下效果：\n·普通攻击与重击造成的伤害提高15%，攻击速度提高15%；\n·大幅减少重击需要的准备时间。",
-      "Icon": "UI_Talent_S_Beidou_06"
+      "group": 2422,
+      "id": 242201,
+      "name": "霹雳连霄",
+      "desc": "施放拥有最高伤害加成的<color=#FFD780FF>捉浪</color>后的10秒内，获得如下效果：\n·普通攻击与重击造成的伤害提高15%，攻击速度提高15%；\n·大幅减少重击需要的准备时间。",
+      "icon": "UI_Talent_S_Beidou_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 2423,
-      "Id": 242301,
-      "Name": "拥涛踏潮",
-      "Description": "队伍中自己的角色游泳消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
-      "Icon": "UI_Talent_Explosion_Swim"
+      "group": 2423,
+      "id": 242301,
+      "name": "拥涛踏潮",
+      "desc": "队伍中自己的角色游泳消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
+      "icon": "UI_Talent_Explosion_Swim",
+      "maxLv": 1
     }
   ],
   "star": 4,

@@ -57,13 +57,33 @@ declare namespace TGApp.App.Character {
 
   /**
    * Wiki 页详细信息-角色技能
-   * @since Beta v0.3.8
+   * @since Beta v0.11.2
    */
-  type WikiSkill = Omit<TGApp.Plugins.Hutao.Character.RhisdSkill, "Proud">;
+  type WikiSkill = {
+    /** 技能组 ID。 */
+    group: number;
+    /** 技能 ID。 */
+    id: number;
+    /** 技能名称。 */
+    name: string;
+    /** 技能描述。 */
+    desc: string;
+    /** 加强后的特殊描述 */
+    descSp?: string;
+    /** 技能图标资源名称。 */
+    icon: string;
+    /**
+     * 技能等级上限。
+     *
+     * @remarks
+     * 元数据中 `Proud.Parameters` 仅有一项时为 `1`，否则为 `10`。
+     */
+    maxLv: number;
+  };
 
   /**
    * 详细数据
-   * @since Beta v0.9.1
+   * @since Beta v0.11.2
    */
   type WikiItem = {
     /** 角色ID */

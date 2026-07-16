@@ -61,46 +61,52 @@
   "name": "甘雨",
   "skills": [
     {
-      "GroupId": 3731,
-      "Id": 10371,
-      "Name": "流天射术",
-      "Description": "<color=#FFD780FF>普通攻击</color>\n进行至多六段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，冰寒之气会在箭矢上持续积聚，并随攻击发射出去。根据蓄力时间长短，能造成不同的效果：\n·一段蓄力：射出附有寒气的箭矢，造成<color=#99FFFFFF>冰元素伤害</color>；\n·二段蓄力：发射霜华矢，造成<color=#99FFFFFF>冰元素伤害</color>；命中后霜华绽发，再次造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
-      "Icon": "Skill_A_02"
+      "group": 3731,
+      "id": 10371,
+      "name": "流天射术",
+      "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多六段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，冰寒之气会在箭矢上持续积聚，并随攻击发射出去。根据蓄力时间长短，能造成不同的效果：\n·一段蓄力：射出附有寒气的箭矢，造成<color=#99FFFFFF>冰元素伤害</color>；\n·二段蓄力：发射霜华矢，造成<color=#99FFFFFF>冰元素伤害</color>；命中后霜华绽发，再次造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
+      "icon": "Skill_A_02",
+      "maxLv": 10
     },
     {
-      "GroupId": 3732,
-      "Id": 10372,
-      "Name": "山泽麟迹",
-      "Description": "甘雨留下一朵冰莲并迅速后退，远离一切魑魅魍魉，造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<color=#FFD780FF>冰莲</color>\n·持续嘲讽周围的敌人，吸引敌人攻击；\n·耐久度按比例继承甘雨的生命值上限；\n·被摧毁或持续时间结束时，会剧烈地绽放，造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<i>「你说你看到我了？那应该是错觉吧。那个时间我应该在加班才对。」</i>",
-      "Icon": "Skill_S_Ganyu_01"
+      "group": 3732,
+      "id": 10372,
+      "name": "山泽麟迹",
+      "desc": "甘雨留下一朵冰莲并迅速后退，远离一切魑魅魍魉，造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<color=#FFD780FF>冰莲</color>\n·持续嘲讽周围的敌人，吸引敌人攻击；\n·耐久度按比例继承甘雨的生命值上限；\n·被摧毁或持续时间结束时，会剧烈地绽放，造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<i>「你说你看到我了？那应该是错觉吧。那个时间我应该在加班才对。」</i>",
+      "icon": "Skill_S_Ganyu_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 3739,
-      "Id": 10373,
-      "Name": "降众天华",
-      "Description": "凝聚大气中的霜雪，召唤退魔的冰灵珠。\n存在期间内，冰灵珠会持续降下冰棱，攻击范围内的敌人，造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<i>甘雨当然可以降下清甜之雨。但是对于邪魔外道，这些都会变成寒苦之雪。</i>",
-      "Icon": "Skill_E_Ganyu_01"
+      "group": 3739,
+      "id": 10373,
+      "name": "降众天华",
+      "desc": "凝聚大气中的霜雪，召唤退魔的冰灵珠。\n存在期间内，冰灵珠会持续降下冰棱，攻击范围内的敌人，造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<i>甘雨当然可以降下清甜之雨。但是对于邪魔外道，这些都会变成寒苦之雪。</i>",
+      "icon": "Skill_E_Ganyu_01",
+      "maxLv": 10
     },
     {
-      "GroupId": 3721,
-      "Id": 372101,
-      "Name": "唯此一心",
-      "Description": "霜华矢发射后的5秒内，会使接下来的发射的霜华矢与这些霜华矢引发的霜华绽发的暴击率提高20%。",
-      "Icon": "UI_Talent_S_Ganyu_05"
+      "group": 3721,
+      "id": 372101,
+      "name": "唯此一心",
+      "desc": "霜华矢发射后的5秒内，会使接下来的发射的霜华矢与这些霜华矢引发的霜华绽发的暴击率提高20%。",
+      "icon": "UI_Talent_S_Ganyu_05",
+      "maxLv": 1
     },
     {
-      "GroupId": 3722,
-      "Id": 372201,
-      "Name": "天地交泰",
-      "Description": "<color=#FFD780FF>降众天华</color>领域内的队伍中当前场上角色获得20%<color=#99FFFFFF>冰元素伤害加成</color>。",
-      "Icon": "UI_Talent_S_Ganyu_06"
+      "group": 3722,
+      "id": 372201,
+      "name": "天地交泰",
+      "desc": "<color=#FFD780FF>降众天华</color>领域内的队伍中当前场上角色获得20%<color=#99FFFFFF>冰元素伤害加成</color>。",
+      "icon": "UI_Talent_S_Ganyu_06",
+      "maxLv": 1
     },
     {
-      "GroupId": 3723,
-      "Id": 372301,
-      "Name": "藏弓待用",
-      "Description": "锻造弓类武器时，返还15%消耗的矿石。",
-      "Icon": "UI_Talent_Forge_Bow"
+      "group": 3723,
+      "id": 372301,
+      "name": "藏弓待用",
+      "desc": "锻造弓类武器时，返还15%消耗的矿石。",
+      "icon": "UI_Talent_Forge_Bow",
+      "maxLv": 1
     }
   ],
   "star": 5,
