@@ -7,7 +7,10 @@
           Material {{ props.data.id }} | Render By TeyvatGuide v{{ version }}
         </div>
         <div class="twom-top">
-          <img :src="`/icon/material/${props.data.id}.webp`" alt="icon" class="twom-left" />
+          <div class="twom-icon">
+            <img :src="`/icon/bg/${props.data.star}-BGC.webp`" alt="bg" class="bg" />
+            <img :src="`/icon/material/${props.data.id}.webp`" alt="icon" class="icon" />
+          </div>
           <div class="twom-name" @click="shareMaterial()">{{ props.data.name }}</div>
           <div class="twom-type">{{ props.data.type }}</div>
         </div>
@@ -25,7 +28,7 @@
     </div>
   </TOverlay>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
@@ -54,23 +57,24 @@ async function shareMaterial(): Promise<void> {
   await generateShareImg(fileName, element, 1.2, true);
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .twom-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 10px;
+  column-gap: 12px;
 }
 
 .twom-box {
   position: relative;
   display: flex;
   width: 800px;
-  max-height: 600px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
   flex-direction: column;
   padding: 10px;
   border-radius: 10px;
-  background: var(--box-bg-1);
+  background: var(--app-page-bg);
   overflow-y: auto;
   row-gap: 10px;
 }
@@ -99,15 +103,27 @@ async function shareMaterial(): Promise<void> {
   column-gap: 10px;
 }
 
-.twom-left {
-  overflow: hidden;
+.twom-icon {
+  position: relative;
+  display: flex;
   width: 60px;
-  border-radius: 50%;
-  aspect-ratio: 1;
-  background-image: v-bind("'url(/icon/bg/' + props.data.star + '-BGC.webp)'");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  height: 60px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  .bg {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+  }
+
+  .icon {
+    position: relative;
+    width: 56px;
+    height: 56px;
+  }
 }
 
 .twom-name {
@@ -127,16 +143,16 @@ async function shareMaterial(): Promise<void> {
 .twom-bottom {
   display: flex;
   flex-direction: column;
-  row-gap: 10px;
+  row-gap: 8px;
 }
 
 .twom-desc,
 .twom-source,
 .twom-convert {
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
 }
 
 .twom-desc {
