@@ -392,7 +392,6 @@ function parseAnnoTable(table: HTMLElement): TGApp.BBS.SctPost.Base {
                 delete cellChild.attributes;
               }
               const cellSpan = document.createElement("span");
-              // @ts-expect-error No overload matches this call
               render(h(TpText, { data: cellChild }), cellSpan);
               span.appendChild(cellSpan);
             }
