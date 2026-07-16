@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Use $typescript-standards to write or review TypeScript code for this repository."
+  display_name: "TypeScript 规范"
+  short_description: "按照仓库现行 ESLint、类型、常量枚举和 TSDoc 规范编写 TypeScript"

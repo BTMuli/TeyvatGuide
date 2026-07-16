@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Use $teyvat-guide to implement this change in the TeyvatGuide repository."
+  display_name: "TeyvatGuide 开发"
+  short_description: "基于当前技术栈、仓库结构和验证约定实施并审查 TeyvatGuide 代码变更"

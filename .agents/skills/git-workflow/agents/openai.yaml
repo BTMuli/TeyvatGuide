@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Use $git-workflow to review my changes and prepare project-compliant commits."
+  display_name: "Git 工作流"
+  short_description: "按项目规范检查变更、拆分原子提交并生成中文 Gitmoji 提交信息"
