@@ -139,14 +139,17 @@
             <div
               :class="{
                 'is-unavailable': !atAscensionLevel,
-                'is-readonly': atAscensionLevel && selectedWeapon?.fromBag,
+                'is-readonly':
+                  atAscensionLevel && (selectedWeapon?.fromBag || currentAscensionReadonly),
               }"
               class="ucw-ascension-state"
             >
               <v-checkbox
                 :disabled="!atAscensionLevel"
                 :model-value="currentAscended"
-                :readonly="atAscensionLevel && selectedWeapon?.fromBag"
+                :readonly="
+                  atAscensionLevel && (selectedWeapon?.fromBag || currentAscensionReadonly)
+                "
                 color="var(--tgc-od-blue)"
                 density="compact"
                 hide-details
@@ -155,6 +158,10 @@
               />
               <span class="ucw-ascension-hint">
                 <template v-if="!atAscensionLevel">当前等级不是突破临界等级</template>
+                <template v-else-if="currentAscensionReadonly">
+                  <v-icon size="10">mdi-lock-outline</v-icon>
+                  接口按同步等级计算，只读
+                </template>
                 <template v-else-if="selectedWeapon?.fromBag">
                   <v-icon size="10">mdi-lock-outline</v-icon>
                   状态来自背包数据，只读
@@ -236,6 +243,7 @@ type UcWeaponPanelProps = {
   atAscensionLevel: boolean;
   targetAtAscensionLevel: boolean;
   hasBagData: boolean;
+  currentAscensionReadonly: boolean;
 };
 
 const props = defineProps<UcWeaponPanelProps>();
@@ -293,7 +301,9 @@ function clearWeapon(): void {
 }
 
 function updateCurrentAscended(value: boolean | null): void {
-  if (!props.selectedWeapon?.fromBag) ascended.value = value === true;
+  if (!props.selectedWeapon?.fromBag && !props.currentAscensionReadonly) {
+    ascended.value = value === true;
+  }
 }
 
 function formatTargetStat(type: number, fallback: number): string {

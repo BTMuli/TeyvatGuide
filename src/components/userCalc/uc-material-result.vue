@@ -11,7 +11,7 @@
       >
         {{ missingKinds > 0 ? `${missingKinds} 种不足` : "材料充足" }}
       </v-chip>
-      <div class="ucm-crafting-options">
+      <div v-if="showCraftingOptions" class="ucm-crafting-options">
         <div class="ucm-crafting-control">
           <v-switch
             v-model="allowCrafting"
@@ -36,7 +36,12 @@
       </div>
     </div>
 
-    <template v-if="materials.length > 0">
+    <div v-if="loading" class="ucm-empty">
+      <v-progress-circular color="var(--tgc-od-orange)" indeterminate size="48" />
+      <span>正在通过接口计算养成材料</span>
+    </div>
+
+    <template v-else-if="materials.length > 0">
       <div class="ucm-list">
         <UcMaterialItem
           v-for="material in materials"
@@ -60,7 +65,7 @@
 
     <div v-else class="ucm-empty">
       <v-icon size="48">mdi-package-variant-closed-check</v-icon>
-      <span>请选择角色或武器，并设置培养目标</span>
+      <span>{{ emptyText }}</span>
     </div>
   </div>
   <UcMaterialDetail
@@ -87,9 +92,16 @@ type UcMaterialResultProps = {
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
   missingKinds: number;
   uid: number;
+  loading?: boolean;
+  showCraftingOptions?: boolean;
+  emptyText?: string;
 };
 
-const props = defineProps<UcMaterialResultProps>();
+const props = withDefaults(defineProps<UcMaterialResultProps>(), {
+  loading: false,
+  showCraftingOptions: true,
+  emptyText: "请选择角色或武器，并设置培养目标",
+});
 const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
 const useDust = defineModel<boolean>("useDust", { required: true });
 const materialOverlayVisible = ref<boolean>(false);

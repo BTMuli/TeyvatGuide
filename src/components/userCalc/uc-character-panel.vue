@@ -15,19 +15,19 @@
         >
           <template #activator="{ props: menuProps }">
             <v-btn
-              :title="selectedRole ? `切换角色：${selectedRole.avatar.name}` : '选择角色'"
+              :title="selectedCharacter ? `切换角色：${selectedCharacter.name}` : '选择角色'"
               class="ucc-select-trigger"
               icon
               v-bind="menuProps"
               variant="tonal"
             >
               <UcItemIcon
-                v-if="selectedRole"
-                :alt="selectedRole.avatar.name"
-                :icon="`/WIKI/character/${selectedRole.cid}.webp`"
-                :primary-badge="`/icon/element/${elementName}元素.webp`"
+                v-if="selectedCharacter"
+                :alt="selectedCharacter.name"
+                :icon="selectedCharacter.icon"
+                :primary-badge="`/icon/element/${selectedCharacter.element}元素.webp`"
                 :size="40"
-                :star="characterStar"
+                :star="selectedCharacter.star"
                 circular
               />
               <v-icon v-else>mdi-account-plus-outline</v-icon>
@@ -63,34 +63,36 @@
             </div>
           </v-card>
         </v-menu>
-        <span v-if="selectedRole" class="ucc-selected-label">{{ selectedRole.avatar.name }}</span>
-        <v-chip v-if="selectedRole" color="var(--tgc-od-blue)" size="small" variant="tonal">
-          Lv.{{ selectedRole.avatar.level }} → {{ targetLevel }}
+        <span v-if="selectedCharacter" class="ucc-selected-label">
+          {{ selectedCharacter.name }}
+        </span>
+        <v-chip v-if="selectedCharacter" color="var(--tgc-od-blue)" size="small" variant="tonal">
+          Lv.{{ selectedCharacter.level }} → {{ targetLevel }}
         </v-chip>
       </div>
     </v-card-title>
 
     <v-card-text class="ucc-form">
       <div class="ucc-object-config">
-        <div v-if="selectedRole" class="ucc-selected">
+        <div v-if="selectedCharacter" class="ucc-selected">
           <UcItemIcon
-            :alt="selectedRole.avatar.name"
-            :icon="`/WIKI/character/${selectedRole.cid}.webp`"
-            :primary-badge="`/icon/element/${elementName}元素.webp`"
-            :star="characterStar"
+            :alt="selectedCharacter.name"
+            :icon="selectedCharacter.icon"
+            :primary-badge="`/icon/element/${selectedCharacter.element}元素.webp`"
+            :star="selectedCharacter.star"
             :size="80"
           />
           <div class="ucc-selected-info">
-            <span class="ucc-name">{{ selectedRole.avatar.name }}</span>
+            <span class="ucc-name">{{ selectedCharacter.name }}</span>
             <div class="ucc-tags">
-              <span>Lv.{{ selectedRole.avatar.level }}</span>
-              <span>{{ characterStar }}★</span>
-              <span>{{ elementName }}元素</span>
+              <span>Lv.{{ selectedCharacter.level }}</span>
+              <span>{{ selectedCharacter.star }}★</span>
+              <span>{{ selectedCharacter.element }}元素</span>
               <span>{{ weaponType }}</span>
             </div>
             <div class="ucc-tags secondary">
-              <span>命座 {{ selectedRole.avatar.actived_constellation_num }}</span>
-              <span>好感 {{ selectedRole.avatar.fetter }}</span>
+              <span>命座 {{ selectedCharacter.constellation }}</span>
+              <span>好感 {{ selectedCharacter.fetter }}</span>
             </div>
           </div>
         </div>
@@ -103,7 +105,9 @@
           <div :class="{ 'is-unavailable': levelUnavailable }" class="ucc-slider-field">
             <div class="ucc-slider-label">
               <span>目标等级</span>
-              <span class="ucc-slider-value">{{ selectedRole ? `Lv.${targetLevel}` : "--" }}</span>
+              <span class="ucc-slider-value">
+                {{ selectedCharacter ? `Lv.${targetLevel}` : "--" }}
+              </span>
             </div>
             <UcLevelSlider
               v-model="targetLevel"
@@ -113,17 +117,29 @@
             />
           </div>
           <div class="ucc-ascension-options">
-            <div :class="{ 'is-unavailable': !atAscensionLevel }" class="ucc-ascension-state">
+            <div
+              :class="{
+                'is-unavailable': !atAscensionLevel,
+                'is-readonly': atAscensionLevel && currentAscensionReadonly,
+              }"
+              class="ucc-ascension-state"
+            >
               <v-checkbox
                 v-model="ascended"
                 :disabled="!atAscensionLevel"
+                :readonly="atAscensionLevel && currentAscensionReadonly"
                 color="var(--tgc-od-blue)"
                 density="compact"
                 hide-details
                 label="当前等级已突破"
               />
               <span class="ucc-ascension-hint">
-                {{ atAscensionLevel ? "未勾选会计入本次突破材料" : "当前等级不是突破临界等级" }}
+                <template v-if="!atAscensionLevel">当前等级不是突破临界等级</template>
+                <template v-else-if="currentAscensionReadonly">
+                  <v-icon size="10">mdi-lock-outline</v-icon>
+                  状态来自同步接口，只读
+                </template>
+                <template v-else>未勾选会计入本次突破材料</template>
               </span>
             </div>
             <div
@@ -154,15 +170,15 @@
         <div class="ucc-talent-list">
           <div
             v-for="(skill, index) in skills"
-            :key="skill.skill_id"
-            :class="{ 'is-unavailable': Math.min(skill.level, 10) >= 10 }"
+            :key="skill.id"
+            :class="{ 'is-unavailable': skill.level >= skill.maxLevel }"
             class="ucc-talent"
           >
             <div class="ucc-talent-meta">
               <img :alt="skill.name" :src="skill.icon" />
               <div class="ucc-talent-info">
                 <span :title="skill.name" class="ucc-talent-name">{{ skill.name }}</span>
-                <span>当前 Lv.{{ Math.min(skill.level, 10) }}</span>
+                <span>当前 Lv.{{ skill.level }}</span>
               </div>
             </div>
             <div class="ucc-slider-label talent">
@@ -170,9 +186,9 @@
               <span class="ucc-slider-value">Lv.{{ talentTargetLevels[index] }}</span>
             </div>
             <UcLevelSlider
-              :current="Math.min(skill.level, 10)"
-              :disabled="Math.min(skill.level, 10) >= 10"
-              :max="10"
+              :current="skill.level"
+              :disabled="skill.level >= skill.maxLevel"
+              :max="skill.maxLevel"
               :model-value="talentTargetLevels[index]"
               @update:model-value="updateTalent(index, $event)"
             />
@@ -187,16 +203,16 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
-import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import { computed, ref } from "vue";
 
 type UcCharacterPanelProps = {
   options: Array<TGApp.App.UserCalc.CharacterOption>;
-  selectedRole?: TGApp.Sqlite.Character.TableTrans;
+  selectedCharacter?: TGApp.App.UserCalc.CharacterOption;
   weaponType: string;
   levelOptions: Array<number>;
-  skills: Array<TGApp.Game.Avatar.Skill>;
+  skills: Array<TGApp.App.UserCalc.SkillOption>;
   atAscensionLevel: boolean;
+  currentAscensionReadonly: boolean;
   targetAtAscensionLevel: boolean;
 };
 
@@ -211,22 +227,10 @@ const targetAscended = defineModel<boolean>("targetAscended", { required: true }
 const showSelector = ref<boolean>(false);
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
-const currentLevel = computed<number>(() => props.selectedRole?.avatar.level ?? 1);
+const currentLevel = computed<number>(() => props.selectedCharacter?.level ?? 1);
 const levelUnavailable = computed<boolean>(
-  () => !props.selectedRole || currentLevel.value >= levelMax.value,
+  () => !props.selectedCharacter || currentLevel.value >= levelMax.value,
 );
-const elementName = computed<string>(() => getZhElement(props.selectedRole?.avatar.element ?? ""));
-const characterStar = computed<number>(() =>
-  props.selectedRole ? getRcStar(props.selectedRole.cid, props.selectedRole.avatar.rarity) : 1,
-);
-
-function getOptionElement(option: TGApp.App.UserCalc.CharacterOption): string {
-  return getZhElement(option.role.avatar.element);
-}
-
-function getOptionStar(option: TGApp.App.UserCalc.CharacterOption): number {
-  return getRcStar(option.value, option.role.avatar.rarity);
-}
 
 function selectCharacter(value: number): void {
   selectedId.value = value;
@@ -240,23 +244,24 @@ function clearCharacter(): void {
 
 function getCharacterBoxData(option: TGApp.App.UserCalc.CharacterOption): TItemBoxData {
   return {
-    bg: `/icon/bg/${getOptionStar(option)}-Star.webp`,
-    icon: `/WIKI/character/${option.value}.webp`,
+    bg: `/icon/bg/${option.star}-Star.webp`,
+    icon: option.icon,
     size: "80px",
     height: "80px",
     display: "inner",
     clickable: true,
-    lt: `/icon/element/${getOptionElement(option)}元素.webp`,
+    lt: `/icon/element/${option.element}元素.webp`,
     ltSize: "16px",
     innerHeight: 20,
     innerIcon: `/icon/weapon/${option.weaponType}.webp`,
-    innerText: option.role.avatar.name,
+    innerText: option.name,
   };
 }
 
 function updateTalent(index: number, value: number): void {
-  const currentTalentLevel = Math.min(props.skills[index]?.level ?? 1, 10);
-  const nextLevel = Math.max(currentTalentLevel, Math.min(value, 10));
+  const skill = props.skills[index];
+  const currentTalentLevel = skill?.level ?? 1;
+  const nextLevel = Math.max(currentTalentLevel, Math.min(value, skill?.maxLevel ?? 10));
   talentTargetLevels.value = talentTargetLevels.value.map((level, currentIndex) =>
     currentIndex === index ? nextLevel : level,
   );
@@ -487,6 +492,11 @@ function updateTalent(index: number, value: number): void {
   &.is-unavailable {
     border-left-color: var(--common-shadow-2);
     opacity: 0.38;
+  }
+
+  &.is-readonly {
+    border-left-color: var(--tgc-od-orange);
+    opacity: 0.68;
   }
 
   &.target {

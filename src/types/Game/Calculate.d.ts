@@ -11,6 +11,8 @@ declare namespace TGApp.Game.Calculate {
   type Params = {
     /** 待计算项目列表 */
     items: Array<ParamsItem>;
+    /** 请求语言 */
+    lang: string;
     /** 游戏服务器 */
     region: TGApp.Game.Base.ServerTypeEnum;
     /** 游戏 UID */
@@ -170,8 +172,8 @@ declare namespace TGApp.Game.Calculate {
     element_attr_id: number;
     /** 技能等级目标列表 */
     skill_list: Array<SkillTarget>;
-    /** 武器等级目标 */
-    weapon: WeaponTarget;
+    /** 武器等级目标，未选择武器时为 null */
+    weapon: WeaponTarget | null;
     /** 是否同步用户背包数据 */
     from_user_sync: boolean;
     /** 角色当前突破等级 */
@@ -198,6 +200,16 @@ declare namespace TGApp.Game.Calculate {
   type WeaponTarget = {
     /** 武器 ID */
     id: number;
+    /** 武器名称 */
+    name: string;
+    /** 武器图标 */
+    icon: string;
+    /** 武器类型 ID */
+    weapon_cat_id: number;
+    /** 武器稀有度 */
+    weapon_level: number;
+    /** 武器最高等级 */
+    max_level: number;
     /** 当前等级 */
     level_current: number;
     /** 目标等级 */

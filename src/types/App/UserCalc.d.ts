@@ -16,10 +16,39 @@ declare namespace TGApp.App.UserCalc {
     title: string;
     /** 角色 ID */
     value: number;
-    /** 用户存档中的角色数据 */
-    role: TGApp.Sqlite.Character.TableTrans;
+    /** 角色名称 */
+    name: string;
+    /** 角色图标 */
+    icon: string;
+    /** 角色元素名称 */
+    element: string;
+    /** 角色星级 */
+    star: number;
+    /** 当前等级 */
+    level: number;
+    /** 已激活命座数 */
+    constellation: number;
+    /** 好感等级 */
+    fetter: number;
     /** 角色使用的武器类型 */
     weaponType: string;
+  };
+
+  /**
+   * 可培养技能选项
+   * @since Beta v0.11.2
+   */
+  type SkillOption = {
+    /** 技能 ID */
+    id: number;
+    /** 技能名称 */
+    name: string;
+    /** 技能图标 */
+    icon: string;
+    /** 当前等级 */
+    level: number;
+    /** 最高等级 */
+    maxLevel: number;
   };
 
   /**

@@ -169,13 +169,10 @@ async function batchCompute(
     ltuid: cookie.ltuid,
   };
   const body = JSON.stringify(params);
-  const baseHeaders = getRequestHeader(ck, "POST", body);
   const headers = {
+    ...getRequestHeader(ck, "POST", body),
     "Content-Type": "application/json",
-    cookie: baseHeaders.cookie,
-    referer: baseHeaders.referer,
-    "user-agent": baseHeaders["user-agent"],
-    "x-rpc-device_fp": baseHeaders["x-rpc-device_fp"],
+    "x-rpc-cal_type": "0",
   };
   const resp = await TGHttps.post<TGApp.Game.Calculate.Resp>(
     `${taBu}event/e20200928calculate/v3/batch_compute`,
@@ -202,13 +199,9 @@ async function syncAvatarList(
     ltuid: cookie.ltuid,
   };
   const body = JSON.stringify(params);
-  const baseHeaders = getRequestHeader(ck, "POST", body);
   const headers = {
+    ...getRequestHeader(ck, "POST", body),
     "Content-Type": "application/json",
-    cookie: baseHeaders.cookie,
-    referer: baseHeaders.referer,
-    "user-agent": baseHeaders["user-agent"],
-    "x-rpc-device_fp": baseHeaders["x-rpc-device_fp"],
   };
   const resp = await TGHttps.post<TGApp.Game.Calculate.SyncAvatarResp>(
     `${taBu}event/e20200928calculate/v1/sync/avatar/list`,
