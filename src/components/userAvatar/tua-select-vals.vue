@@ -63,7 +63,7 @@
         v-if="props.selectOpts.area.length > 0 && props.selectOpts.area.length < FULL_AREA"
         class="tua-svs-item"
       >
-        <span>地区：</span>
+        <span>阵营：</span>
         <span v-for="(area, idx) in props.selectOpts.area" :key="idx">{{ area }}</span>
       </div>
     </div>
@@ -181,7 +181,7 @@ function getTeamLabel(team: string): string {
   position: relative;
   display: flex;
   height: 20px;
-  align-items: center;
+  place-items: center stretch;
   justify-content: center;
   padding: 0 8px;
   border-radius: 12px;

@@ -208,7 +208,7 @@ function onConfirm(): void {
   justify-content: center;
   padding: 8px 16px;
   backdrop-filter: blur(4px);
-  background: var(--common-shadow-t-4);
+  background: #00000066;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -4px 8px var(--common-shadow-2);
@@ -221,13 +221,17 @@ function onConfirm(): void {
   display: flex;
   width: 100%;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
+  column-gap: 24px;
+}
+
+.uav-select-left {
+  width: 360px;
 }
 
 .uav-select-left,
 .uav-select-right {
   display: flex;
-  width: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -243,17 +247,9 @@ function onConfirm(): void {
 }
 
 .uav-select-title {
-  color: var(--common-text-title);
+  color: var(--tgc-white-1);
   text-shadow: 0 0 4px var(--common-shadow-2);
   white-space: nowrap;
-}
-
-.uav-select-props.weapon:deep(img) {
-  filter: invert(0.75);
-}
-
-.dark .uav-select-props.weapon:deep(img) {
-  filter: unset;
 }
 
 .uav-select-acts {
