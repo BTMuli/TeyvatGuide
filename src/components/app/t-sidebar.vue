@@ -50,7 +50,13 @@
             </v-list-item>
           </template>
           <v-list :nav="true" class="side-list-menu sub" density="compact">
-            <v-list-item :link="true" class="side-item-menu" title="导入" @click="tryImportBag()">
+            <v-list-item
+              v-if="isWindows"
+              :link="true"
+              class="side-item-menu"
+              title="导入"
+              @click="tryImportBag()"
+            >
               <template #prepend>
                 <v-icon class="side-icon-menu" color="var(--tgc-od-orange)" size="20">
                   mdi-import
@@ -74,12 +80,24 @@
                 <img alt="abyss" class="side-icon-menu" src="/icon/material/223.webp" />
               </template>
             </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/bag/weapon" title="武器">
+            <v-list-item
+              v-if="isWindows"
+              :link="true"
+              class="side-item-menu"
+              href="/bag/weapon"
+              title="武器"
+            >
               <template #prepend>
                 <img alt="combat" class="side-icon-menu" src="/WIKI/weapon/14522.webp" />
               </template>
             </v-list-item>
-            <v-list-item :link="true" class="side-item-menu" href="/bag/relic" title="圣遗物">
+            <v-list-item
+              v-if="isWindows"
+              :link="true"
+              class="side-item-menu"
+              href="/bag/relic"
+              title="圣遗物"
+            >
               <template #prepend>
                 <img
                   alt="challenge"
@@ -388,6 +406,7 @@ import { event, path, webviewWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { exists, readDir } from "@tauri-apps/plugin-fs";
+import { platform } from "@tauri-apps/plugin-os";
 import mhyClient from "@utils/TGClient.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
@@ -401,6 +420,7 @@ const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
 
 const isDevEnv = import.meta.env.DEV;
+const isWindows = platform() === "windows";
 const showFollow = ref<boolean>();
 const showLoginQr = ref<boolean>(false);
 const isTryLogin = ref<boolean>(false);
