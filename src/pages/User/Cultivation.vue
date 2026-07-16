@@ -65,7 +65,14 @@
         />
       </div>
 
-      <UcMaterialResult :materials="resultMaterials" :missing-kinds="missingKinds" />
+      <UcMaterialResult
+        v-model:allow-crafting="allowCrafting"
+        v-model:use-dust="useDust"
+        :bag-materials="bagMaterialDetails"
+        :materials="resultMaterials"
+        :missing-kinds="missingKinds"
+        :uid="currentUid ?? 0"
+      />
     </template>
   </div>
 </template>
@@ -78,7 +85,7 @@ import useUserStore from "@store/user.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
-import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
+import userCalc, { type CraftableMaterial, type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -100,11 +107,14 @@ const weaponAscended = ref<boolean>(false);
 const avatarTargetAscended = ref<boolean>(false);
 const weaponTargetAscended = ref<boolean>(false);
 const useBagWeaponSource = ref<boolean>(true);
+const allowCrafting = ref<boolean>(true);
+const useDust = ref<boolean>(false);
 
 const uidList = shallowRef<Array<number>>([]);
 const roles = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const weapons = shallowRef<Array<TGApp.App.UserCalc.WeaponOption>>([]);
 const bagMaterials = shallowRef<Map<number, number>>(new Map());
+const bagMaterialDetails = shallowRef<Map<number, TGApp.Sqlite.UserBag.MaterialTable>>(new Map());
 const avatarWiki = shallowRef<TGApp.App.Character.WikiItem | false>(false);
 
 const characterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
@@ -215,11 +225,36 @@ const requiredMaterials = computed<Array<CultivationMaterial>>(() => {
   }
   return userCalc.merge(...groups);
 });
+const craftableMaterials = computed<Map<number, CraftableMaterial>>(() => {
+  if (!allowCrafting.value) return new Map();
+  return userCalc.craft(
+    requiredMaterials.value,
+    bagMaterials.value,
+    WikiMaterialData,
+    useDust.value,
+  );
+});
 const resultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   requiredMaterials.value
     .map((required) => {
       const info = WikiMaterialData.find((material) => material.id === required.id);
       const owned = bagMaterials.value.get(required.id) ?? 0;
+      const crafting = craftableMaterials.value.get(required.id);
+      const craftable = crafting?.count ?? 0;
+      const available = owned + craftable;
+      const craftingCosts: Array<TGApp.App.UserCalc.CraftingCost> = (crafting?.consumed ?? [])
+        .map((cost) => {
+          const costInfo = WikiMaterialData.find((material) => material.id === cost.id);
+          return {
+            id: cost.id,
+            name: costInfo?.name ?? `材料 ${cost.id}`,
+            type: costInfo?.type ?? "未知类型",
+            star: costInfo?.star ?? 1,
+            count: cost.count,
+            owned: bagMaterials.value.get(cost.id) ?? 0,
+          };
+        })
+        .sort((a, b) => b.star - a.star || a.id - b.id);
       return {
         id: required.id,
         name: info?.name ?? `材料 ${required.id}`,
@@ -227,8 +262,10 @@ const resultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
         star: info?.star ?? 1,
         required: required.count,
         owned,
-        missing: Math.max(required.count - owned, 0),
-        progress: required.count === 0 ? 100 : Math.min((owned / required.count) * 100, 100),
+        craftable,
+        craftingCosts,
+        missing: Math.max(required.count - available, 0),
+        progress: required.count === 0 ? 100 : Math.min((available / required.count) * 100, 100),
       };
     })
     .sort((a, b) => b.missing - a.missing || b.star - a.star || a.id - b.id),
@@ -325,6 +362,7 @@ async function loadUidData(uid: number): Promise<void> {
         a.avatar.level - b.avatar.level || b.avatar.rarity - a.avatar.rarity || a.cid - b.cid,
     );
   bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
+  bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
   weapons.value = buildWeaponOptions(weaponData, roles.value);
   useBagWeaponSource.value = weapons.value.some((weapon) => weapon.fromBag);
   selectedWeaponKey.value = null;

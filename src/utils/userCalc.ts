@@ -12,13 +12,35 @@ export type CultivationMaterial = {
   count: number;
 };
 
+/**
+ * 单项材料的可合成结果
+ * @since Beta v0.11.2
+ */
+export type CraftableMaterial = {
+  /** 可用于补足需求的合成数量 */
+  count: number;
+  /** 合成方案实际消耗的背包材料 */
+  consumed: Array<CultivationMaterial>;
+};
+
 /** 材料 ID 偏移量与需求数量 */
 type OffsetCount = readonly [offset: number, count: number];
+
+/** 材料合成计算上下文 */
+type CraftingContext = {
+  /** 可用于合成的剩余背包材料 */
+  inventory: Map<number, number>;
+  /** 材料 Wiki 索引 */
+  materials: ReadonlyMap<number, TGApp.App.Material.WikiItem>;
+  /** 是否允许使用含嬗变之尘的配方 */
+  useDust: boolean;
+};
 
 const MORA_ID = 202;
 const HEROES_WIT_ID = 104003;
 const MYSTIC_ENHANCEMENT_ORE_ID = 104013;
 const CROWN_OF_INSIGHT_ID = 104319;
+const DUST_OF_AZOTH_ID = 104201;
 
 const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
 const AVATAR_ASCENSION_MORA = <const>[20000, 40000, 60000, 80000, 100000, 120000];
@@ -453,6 +475,131 @@ export function mergeCultivationMaterials(
   return toList(items);
 }
 
+/**
+ * 尝试消耗指定数量的材料，不足部分递归使用 Wiki 配方合成。
+ *
+ * @param id - 待消耗材料 ID
+ * @param count - 待消耗数量
+ * @param context - 当前合成上下文
+ * @param visiting - 当前递归链上的材料 ID
+ */
+function consumeCraftingMaterial(
+  id: number,
+  count: number,
+  context: CraftingContext,
+  visiting: ReadonlySet<number>,
+): CraftingContext | undefined {
+  const nextContext: CraftingContext = {
+    ...context,
+    inventory: new Map(context.inventory),
+  };
+  const owned = Math.min(nextContext.inventory.get(id) ?? 0, count);
+  nextContext.inventory.set(id, (nextContext.inventory.get(id) ?? 0) - owned);
+
+  let remaining = count - owned;
+  while (remaining > 0) {
+    const craftedContext = tryCraftMaterial(id, nextContext, visiting);
+    if (!craftedContext) return undefined;
+    nextContext.inventory = craftedContext.inventory;
+    remaining--;
+  }
+  return nextContext;
+}
+
+/** 尝试使用任意一条 Wiki 配方合成一个指定材料。 */
+function tryCraftMaterial(
+  id: number,
+  context: CraftingContext,
+  visiting: ReadonlySet<number>,
+): CraftingContext | undefined {
+  if (visiting.has(id)) return undefined;
+  const material = context.materials.get(id);
+  if (!material) return undefined;
+  const nextVisiting = new Set(visiting).add(id);
+
+  for (const recipe of material.convert) {
+    if (
+      !context.useDust &&
+      recipe.source.some((source) => Number(source.id) === DUST_OF_AZOTH_ID)
+    ) {
+      continue;
+    }
+    let recipeContext: CraftingContext | undefined = {
+      ...context,
+      inventory: new Map(context.inventory),
+    };
+    for (const source of recipe.source) {
+      const sourceId = Number(source.id);
+      if (!Number.isInteger(sourceId) || source.count <= 0) {
+        recipeContext = undefined;
+        break;
+      }
+      recipeContext = consumeCraftingMaterial(sourceId, source.count, recipeContext, nextVisiting);
+      if (!recipeContext) break;
+    }
+    if (recipeContext && recipe.source.length > 0) return recipeContext;
+  }
+  return undefined;
+}
+
+/**
+ * 根据背包余量与材料 Wiki 配方计算各项需求可通过合成补足的数量。
+ *
+ * @remarks 已直接满足材料需求的持有量会被优先保留，剩余材料按星级从高到低分配，
+ * 同一份背包材料不会被重复计入多项合成结果。
+ * @param requirements - 材料需求列表
+ * @param inventory - 背包材料数量
+ * @param materials - 材料 Wiki 数据
+ * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @returns 各需求材料可通过合成补足的数量及实际消耗
+ * @since Beta v0.11.2
+ */
+export function calculateCraftableMaterials(
+  requirements: ReadonlyArray<CultivationMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  useDust = false,
+): Map<number, CraftableMaterial> {
+  const requiredCounts = new Map<number, number>();
+  for (const requirement of requirements) add(requiredCounts, requirement.id, requirement.count);
+
+  const context: CraftingContext = {
+    inventory: new Map(inventory),
+    materials: new Map(materials.map((material) => <const>[material.id, material])),
+    useDust,
+  };
+  for (const [id, required] of requiredCounts) {
+    const owned = context.inventory.get(id) ?? 0;
+    context.inventory.set(id, Math.max(owned - required, 0));
+  }
+
+  const craftable = new Map<number, CraftableMaterial>();
+  const pending = Array.from(requiredCounts, ([id, required]) => ({
+    id,
+    count: Math.max(required - (inventory.get(id) ?? 0), 0),
+    star: context.materials.get(id)?.star ?? 0,
+  })).sort((a, b) => b.star - a.star || a.id - b.id);
+
+  for (const item of pending) {
+    const inventoryBefore = new Map(context.inventory);
+    let count = 0;
+    while (count < item.count) {
+      const craftedContext = tryCraftMaterial(item.id, context, new Set());
+      if (!craftedContext) break;
+      context.inventory = craftedContext.inventory;
+      count++;
+    }
+    if (count > 0) {
+      const consumed = Array.from(inventoryBefore, ([id, before]) => ({
+        id,
+        count: before - (context.inventory.get(id) ?? 0),
+      })).filter((material) => material.count > 0);
+      craftable.set(item.id, { count, consumed });
+    }
+  }
+  return craftable;
+}
+
 /** 根据武器星级获取等级上限。 */
 export function getWeaponMaxLevel(star: number): number {
   return star <= 2 ? 70 : 90;
@@ -461,6 +608,7 @@ export function getWeaponMaxLevel(star: number): number {
 /** 用户养成计算工具。 */
 const userCalc = {
   avatar: calculateAvatarMaterials,
+  craft: calculateCraftableMaterials,
   weapon: calculateWeaponMaterials,
   merge: mergeCultivationMaterials,
   weaponMaxLevel: getWeaponMaxLevel,

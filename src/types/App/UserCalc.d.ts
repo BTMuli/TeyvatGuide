@@ -4,9 +4,15 @@
  */
 
 declare namespace TGApp.App.UserCalc {
-  /** 角色选择项 */
+  /**
+   * 角色选择项
+   * @since Beta v0.11.2
+   */
   type CharacterOption = {
-    /** 选择器中显示的角色标题 */
+    /**
+     * 选择器中显示的角色标题
+     * @since Beta v0.11.2
+     */
     title: string;
     /** 角色 ID */
     value: number;
@@ -16,7 +22,10 @@ declare namespace TGApp.App.UserCalc {
     weaponType: string;
   };
 
-  /** 武器选择项 */
+  /**
+   * 武器选择项
+   * @since Beta v0.11.2
+   */
   type WeaponOption = {
     /** 用于区分背包武器和默认武器的唯一键 */
     key: string;
@@ -38,7 +47,29 @@ declare namespace TGApp.App.UserCalc {
     guid?: string;
   };
 
-  /** 材料需求计算结果 */
+  /**
+   * 合成方案实际消耗的背包材料
+   * @since Beta v0.11.2
+   */
+  type CraftingCost = {
+    /** 材料 ID */
+    id: number;
+    /** 材料名称 */
+    name: string;
+    /** 材料类型 */
+    type: string;
+    /** 材料星级 */
+    star: number;
+    /** 合成消耗数量 */
+    count: number;
+    /** 背包持有数量 */
+    owned: number;
+  };
+
+  /**
+   * 材料需求计算结果
+   * @since Beta v0.11.2
+   */
   type ResultMaterial = {
     /** 材料 ID */
     id: number;
@@ -52,9 +83,13 @@ declare namespace TGApp.App.UserCalc {
     required: number;
     /** 已持有数量 */
     owned: number;
+    /** 可通过合成补足的数量 */
+    craftable: number;
+    /** 合成补足方案实际消耗的背包材料 */
+    craftingCosts: Array<CraftingCost>;
     /** 缺少数量 */
     missing: number;
-    /** 持有进度，取值范围为 0 到 100 */
+    /** 持有与可合成数量的合计进度，取值范围为 0 到 100 */
     progress: number;
   };
 }

@@ -1,6 +1,15 @@
 <!-- 养成计算-材料需求项 -->
 <template>
-  <div :class="{ missing: material.missing > 0 }" class="ucmi-item">
+  <div
+    :class="{ missing: material.missing > 0 }"
+    class="ucmi-item"
+    role="button"
+    tabindex="0"
+    title="查看材料详情"
+    @click="emits('select')"
+    @keydown.enter="emits('select')"
+    @keydown.space.prevent="emits('select')"
+  >
     <div class="ucmi-icon">
       <img :src="`/icon/bg/${material.star}-Star.webp`" alt="background" />
       <img :src="`/icon/material/${material.id}.webp`" :alt="material.name" />
@@ -13,7 +22,13 @@
           :title="formatFullCount(material.missing)"
           class="ucmi-status"
         >
-          {{ material.missing > 0 ? `缺少 ${formatCount(material.missing)}` : "已满足" }}
+          {{
+            material.missing > 0
+              ? `缺少 ${formatCount(material.missing)}`
+              : material.craftable > 0
+                ? "合成后满足"
+                : "已满足"
+          }}
         </span>
       </div>
       <span class="ucmi-type">{{ material.type }}</span>
@@ -23,6 +38,13 @@
         </span>
         <span :title="formatFullCount(material.owned)" class="owned">
           持有 {{ formatCount(material.owned) }}
+        </span>
+        <span
+          v-if="material.craftable > 0"
+          :title="formatFullCount(material.craftable)"
+          class="craftable"
+        >
+          可合成 {{ formatCount(material.craftable) }}
         </span>
       </div>
       <v-progress-linear
@@ -39,8 +61,10 @@
 type UcMaterialItemProps = {
   material: TGApp.App.UserCalc.ResultMaterial;
 };
+type UcMaterialItemEmits = (e: "select") => void;
 
 defineProps<UcMaterialItemProps>();
+const emits = defineEmits<UcMaterialItemEmits>();
 
 function formatCount(count: number): string {
   const units = [
@@ -67,6 +91,12 @@ function formatFullCount(count: number): string {
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--common-shadow-t-1);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-blue);
+    outline-offset: 2px;
+  }
 
   &.missing {
     border-color: var(--tgc-od-red);
@@ -156,6 +186,10 @@ function formatFullCount(count: number): string {
 
   .owned {
     color: var(--tgc-od-blue);
+  }
+
+  .craftable {
+    color: var(--tgc-od-green);
   }
 }
 </style>
