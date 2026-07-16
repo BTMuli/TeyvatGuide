@@ -26,10 +26,9 @@
 
 <script lang="ts" setup>
 import UcMaterialItem from "@comp/userCalc/uc-material-item.vue";
-import type { UserCalcResultMaterial } from "@comp/userCalc/uc-types.js";
 
 type UcMaterialResultProps = {
-  materials: Array<UserCalcResultMaterial>;
+  materials: Array<TGApp.App.UserCalc.ResultMaterial>;
   missingKinds: number;
 };
 

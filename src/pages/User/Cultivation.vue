@@ -40,17 +40,20 @@
           v-model:ascended="avatarAscended"
           v-model:selected-id="selectedCharacterId"
           v-model:talent-target-levels="talentTargetLevels"
+          v-model:target-ascended="avatarTargetAscended"
           v-model:target-level="avatarTargetLevel"
           :at-ascension-level="avatarAtAscensionLevel"
           :level-options="avatarLevelOptions"
           :options="characterOptions"
           :selected-role="selectedRole"
           :skills="mainSkills"
+          :target-at-ascension-level="avatarTargetAtAscensionLevel"
           :weapon-type="selectedRoleWeaponType"
         />
         <UcWeaponPanel
           v-model:ascended="weaponAscended"
           v-model:selected-key="selectedWeaponKey"
+          v-model:target-ascended="weaponTargetAscended"
           v-model:target-level="weaponTargetLevel"
           v-model:use-bag-source="useBagWeaponSource"
           :at-ascension-level="weaponAtAscensionLevel"
@@ -58,6 +61,7 @@
           :level-options="weaponLevelOptions"
           :options="weaponOptions"
           :selected-weapon="selectedWeapon"
+          :target-at-ascension-level="weaponTargetAtAscensionLevel"
         />
       </div>
 
@@ -73,13 +77,8 @@ import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useUserStore from "@store/user.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
-import type {
-  UserCalcCharacterOption,
-  UserCalcResultMaterial,
-  UserCalcWeaponOption,
-} from "@comp/userCalc/uc-types.js";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
-import cultivationUtils, { type CultivationMaterial } from "@utils/cultivationUtils.js";
+import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -98,19 +97,27 @@ const talentTargetLevels = ref<Array<number>>([10, 10, 10]);
 const weaponTargetLevel = ref<number>(90);
 const avatarAscended = ref<boolean>(false);
 const weaponAscended = ref<boolean>(false);
+const avatarTargetAscended = ref<boolean>(false);
+const weaponTargetAscended = ref<boolean>(false);
 const useBagWeaponSource = ref<boolean>(true);
 
 const uidList = shallowRef<Array<number>>([]);
 const roles = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
-const weapons = shallowRef<Array<UserCalcWeaponOption>>([]);
+const weapons = shallowRef<Array<TGApp.App.UserCalc.WeaponOption>>([]);
 const bagMaterials = shallowRef<Map<number, number>>(new Map());
 const avatarWiki = shallowRef<TGApp.App.Character.WikiItem | false>(false);
 
-const characterOptions = computed<Array<UserCalcCharacterOption>>(() =>
-  roles.value.map((role) => ({
-    title: `${role.avatar.name} · Lv.${role.avatar.level}`,
-    value: role.cid,
-  })),
+const characterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
+  roles.value.map((role) => {
+    const weaponType =
+      wwWeapon.find((weapon) => weapon.id === role.weapon.id)?.weapon ?? "未知武器";
+    return {
+      title: `${role.avatar.name} · Lv.${role.avatar.level}`,
+      value: role.cid,
+      role,
+      weaponType,
+    };
+  }),
 );
 const selectedRole = computed<TGApp.Sqlite.Character.TableTrans | undefined>(() =>
   roles.value.find((role) => role.cid === selectedCharacterId.value),
@@ -122,39 +129,50 @@ const selectedRoleWeaponType = computed<string>(() => {
   );
 });
 const hasBagWeaponData = computed<boolean>(() => weapons.value.some((weapon) => weapon.fromBag));
-const weaponOptions = computed<Array<UserCalcWeaponOption>>(() => {
+const weaponOptions = computed<Array<TGApp.App.UserCalc.WeaponOption>>(() => {
   const useBag = hasBagWeaponData.value && useBagWeaponSource.value;
   return weapons.value.filter((weapon) => {
     if (weapon.fromBag !== useBag) return false;
     return !selectedRoleWeaponType.value || weapon.wiki.weapon === selectedRoleWeaponType.value;
   });
 });
-const selectedWeapon = computed<UserCalcWeaponOption | undefined>(() =>
+const selectedWeapon = computed<TGApp.App.UserCalc.WeaponOption | undefined>(() =>
   weaponOptions.value.find((weapon) => weapon.key === selectedWeaponKey.value),
 );
-const mainSkills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
-  (selectedRole.value?.skills ?? [])
-    .filter((skill) => skill.skill_type === 1 && skill.is_unlock)
-    .slice(0, 3),
-);
+const mainSkills = computed<Array<TGApp.Game.Avatar.Skill>>(() => {
+  const roleSkills = selectedRole.value?.skills ?? [];
+  if (!avatarWiki.value) {
+    return roleSkills.filter((skill) => skill.skill_type === 1 && skill.is_unlock).slice(0, 3);
+  }
+  const levelableSkillIds = new Set(
+    avatarWiki.value.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
+  );
+  return roleSkills.filter((skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id));
+});
 const avatarLevelOptions = computed<Array<number>>(() => {
   if (!selectedRole.value) return [];
   return createLevelOptions(90);
 });
 const weaponLevelOptions = computed<Array<number>>(() => {
   if (!selectedWeapon.value) return [];
-  return createLevelOptions(cultivationUtils.weaponMaxLevel(selectedWeapon.value.wiki.star));
+  return createLevelOptions(userCalc.weaponMaxLevel(selectedWeapon.value.wiki.star));
 });
 const avatarAtAscensionLevel = computed<boolean>(() =>
-  cultivationUtils.isAscensionLevel(selectedRole.value?.avatar.level ?? 0),
+  userCalc.isAscensionLevel(selectedRole.value?.avatar.level ?? 0),
 );
 const weaponAtAscensionLevel = computed<boolean>(() =>
-  cultivationUtils.isAscensionLevel(selectedWeapon.value?.level ?? 0),
+  userCalc.isAscensionLevel(selectedWeapon.value?.level ?? 0),
+);
+const avatarTargetAtAscensionLevel = computed<boolean>(() =>
+  userCalc.isAscensionLevel(avatarTargetLevel.value),
+);
+const weaponTargetAtAscensionLevel = computed<boolean>(() =>
+  userCalc.isAscensionLevel(weaponTargetLevel.value),
 );
 const avatarCurrentPromoteLevel = computed<number>(() => {
   if (!selectedRole.value) return 0;
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>selectedRole.value.avatar;
-  return cultivationUtils.resolvePromoteLevel(
+  return userCalc.resolvePromoteLevel(
     avatar.level,
     avatar.promote_level,
     avatarAtAscensionLevel.value ? avatarAscended.value : undefined,
@@ -163,7 +181,7 @@ const avatarCurrentPromoteLevel = computed<number>(() => {
 const weaponCurrentPromoteLevel = computed<number>(() => {
   if (!selectedWeapon.value) return 0;
   if (selectedWeapon.value.fromBag) return selectedWeapon.value.promoteLevel;
-  return cultivationUtils.resolvePromoteLevel(
+  return userCalc.resolvePromoteLevel(
     selectedWeapon.value.level,
     selectedWeapon.value.promoteLevel,
     weaponAtAscensionLevel.value ? weaponAscended.value : undefined,
@@ -174,28 +192,30 @@ const requiredMaterials = computed<Array<CultivationMaterial>>(() => {
   const groups: Array<Array<CultivationMaterial>> = [];
   if (selectedRole.value && avatarWiki.value) {
     groups.push(
-      cultivationUtils.avatar(
+      userCalc.avatar(
         selectedRole.value,
         avatarWiki.value,
         avatarTargetLevel.value,
         talentTargetLevels.value,
         avatarCurrentPromoteLevel.value,
+        avatarTargetAscended.value,
       ),
     );
   }
   if (selectedWeapon.value) {
     groups.push(
-      cultivationUtils.weapon(
+      userCalc.weapon(
         selectedWeapon.value.wiki,
         selectedWeapon.value.level,
         weaponCurrentPromoteLevel.value,
         weaponTargetLevel.value,
+        weaponTargetAscended.value,
       ),
     );
   }
-  return cultivationUtils.merge(...groups);
+  return userCalc.merge(...groups);
 });
-const resultMaterials = computed<Array<UserCalcResultMaterial>>(() =>
+const resultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   requiredMaterials.value
     .map((required) => {
       const info = WikiMaterialData.find((material) => material.id === required.id);
@@ -226,20 +246,33 @@ watch(selectedRole, async (role) => {
   if (!role) return;
   const characterId = role.cid;
   avatarTargetLevel.value = 90;
+  avatarTargetAscended.value = false;
   talentTargetLevels.value = mainSkills.value.map(() => 10);
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
-  avatarAscended.value = cultivationUtils.isAscendedAtThreshold(avatar.level, avatar.promote_level);
+  avatarAscended.value = userCalc.isAscendedAtThreshold(avatar.level, avatar.promote_level);
   selectPreferredWeapon();
   const wiki = await getWikiCharacterById(characterId);
-  if (selectedCharacterId.value === characterId) avatarWiki.value = wiki;
+  if (selectedCharacterId.value === characterId) {
+    avatarWiki.value = wiki;
+    talentTargetLevels.value = mainSkills.value.map(() => 10);
+  }
 });
 
 watch(weaponOptions, () => selectPreferredWeapon());
 
+watch(avatarTargetLevel, () => {
+  avatarTargetAscended.value = false;
+});
+
+watch(weaponTargetLevel, () => {
+  weaponTargetAscended.value = false;
+});
+
 watch(selectedWeapon, (weapon) => {
   if (!weapon) return;
-  weaponTargetLevel.value = cultivationUtils.weaponMaxLevel(weapon.wiki.star);
-  weaponAscended.value = cultivationUtils.isAscendedAtThreshold(weapon.level, weapon.promoteLevel);
+  weaponTargetLevel.value = userCalc.weaponMaxLevel(weapon.wiki.star);
+  weaponTargetAscended.value = false;
+  weaponAscended.value = userCalc.isAscendedAtThreshold(weapon.level, weapon.promoteLevel);
 });
 
 onMounted(reload);
@@ -303,8 +336,8 @@ async function loadUidData(uid: number): Promise<void> {
 function buildWeaponOptions(
   bagWeapons: Array<TGApp.Sqlite.UserBag.WeaponTable>,
   roleData: Array<TGApp.Sqlite.Character.TableTrans>,
-): Array<UserCalcWeaponOption> {
-  const result: Array<UserCalcWeaponOption> = [];
+): Array<TGApp.App.UserCalc.WeaponOption> {
+  const result: Array<TGApp.App.UserCalc.WeaponOption> = [];
   for (const bagWeapon of bagWeapons) {
     const wiki = wwWeapon.find((weapon) => weapon.id === bagWeapon.id);
     if (!wiki) continue;
@@ -314,7 +347,10 @@ function buildWeaponOptions(
       title: `${wiki.name} · Lv.${bagWeapon.info.level}`,
       wiki,
       level: bagWeapon.info.level,
-      promoteLevel: bagWeapon.info.promote_level,
+      promoteLevel: userCalc.resolveBagWeaponPromoteLevel(
+        bagWeapon.info.level,
+        bagWeapon.info.promote_level,
+      ),
       affixLevel: Math.max(0, ...affixValues) + 1,
       fromBag: true,
       locked: bagWeapon.info.is_locked,

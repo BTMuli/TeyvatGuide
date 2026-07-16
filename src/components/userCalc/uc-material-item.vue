@@ -18,10 +18,12 @@
       </div>
       <span class="ucmi-type">{{ material.type }}</span>
       <div class="ucmi-counts">
-        <span :title="formatFullCount(material.required)">
+        <span :title="formatFullCount(material.required)" class="required">
           需要 {{ formatCount(material.required) }}
         </span>
-        <span :title="formatFullCount(material.owned)">持有 {{ formatCount(material.owned) }}</span>
+        <span :title="formatFullCount(material.owned)" class="owned">
+          持有 {{ formatCount(material.owned) }}
+        </span>
       </div>
       <v-progress-linear
         :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
@@ -34,10 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { UserCalcResultMaterial } from "@comp/userCalc/uc-types.js";
-
 type UcMaterialItemProps = {
-  material: UserCalcResultMaterial;
+  material: TGApp.App.UserCalc.ResultMaterial;
 };
 
 defineProps<UcMaterialItemProps>();
@@ -60,14 +60,13 @@ function formatFullCount(count: number): string {
 
 <style lang="scss" scoped>
 .ucmi-item {
-  display: grid;
+  display: flex;
   overflow: hidden;
   min-width: 0;
   align-items: stretch;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--common-shadow-t-1);
-  grid-template-columns: 80px minmax(0, 1fr);
 
   &.missing {
     border-color: var(--tgc-od-red);
@@ -77,8 +76,9 @@ function formatFullCount(count: number): string {
 .ucmi-icon {
   position: relative;
   overflow: hidden;
-  min-height: 80px;
+  min-width: 80px;
   align-self: stretch;
+  aspect-ratio: 1;
   background: var(--common-shadow-t-2);
 
   img {
@@ -100,6 +100,7 @@ function formatFullCount(count: number): string {
 .ucmi-info {
   display: flex;
   min-width: 0;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
   padding: 8px;
@@ -123,7 +124,7 @@ function formatFullCount(count: number): string {
 
 .ucmi-status {
   flex-shrink: 0;
-  color: var(--common-text-sub);
+  color: var(--tgc-od-green);
   font-size: 12px;
 
   &.lack {
@@ -134,6 +135,7 @@ function formatFullCount(count: number): string {
 .ucmi-type {
   color: var(--common-text-sub);
   font-size: 12px;
+  opacity: 0.56;
   overflow-wrap: anywhere;
 }
 
@@ -146,6 +148,14 @@ function formatFullCount(count: number): string {
 
   span {
     white-space: nowrap;
+  }
+
+  .required {
+    color: var(--tgc-od-orange);
+  }
+
+  .owned {
+    color: var(--tgc-od-blue);
   }
 }
 </style>

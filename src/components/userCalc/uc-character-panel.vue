@@ -6,40 +6,80 @@
         <v-icon>mdi-account-star-outline</v-icon>
         角色养成
       </span>
-      <v-chip v-if="selectedRole" color="var(--tgc-od-blue)" size="small" variant="tonal">
-        Lv.{{ selectedRole.avatar.level }} → {{ targetLevel }}
-      </v-chip>
+      <div class="ucc-title-actions">
+        <v-menu
+          v-model="showSelector"
+          :close-on-content-click="false"
+          location="bottom end"
+          offset="8"
+        >
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              :title="selectedRole ? `切换角色：${selectedRole.avatar.name}` : '选择角色'"
+              class="ucc-select-trigger"
+              icon
+              v-bind="menuProps"
+              variant="tonal"
+            >
+              <UcItemIcon
+                v-if="selectedRole"
+                :alt="selectedRole.avatar.name"
+                :icon="`/WIKI/character/${selectedRole.cid}.webp`"
+                :primary-badge="`/icon/element/${elementName}元素.webp`"
+                :size="40"
+                :star="characterStar"
+                circular
+              />
+              <v-icon v-else>mdi-account-plus-outline</v-icon>
+            </v-btn>
+          </template>
+          <v-card class="ucc-picker" variant="outlined">
+            <div class="ucc-picker-header">
+              <span class="ucc-picker-title">选择角色</span>
+              <v-btn
+                :disabled="selectedId === null"
+                class="ucc-picker-clear"
+                color="var(--tgc-od-red)"
+                prepend-icon="mdi-close-circle-outline"
+                size="small"
+                variant="tonal"
+                @click="clearCharacter"
+              >
+                清空
+              </v-btn>
+            </div>
+            <div class="ucc-picker-grid">
+              <button
+                v-for="option in options"
+                :key="option.value"
+                :class="{ selected: option.value === selectedId }"
+                :title="option.title"
+                class="ucc-picker-item"
+                type="button"
+                @click="selectCharacter(option.value)"
+              >
+                <TItemBox :model-value="getCharacterBoxData(option)" />
+              </button>
+            </div>
+          </v-card>
+        </v-menu>
+        <span v-if="selectedRole" class="ucc-selected-label">{{ selectedRole.avatar.name }}</span>
+        <v-chip v-if="selectedRole" color="var(--tgc-od-blue)" size="small" variant="tonal">
+          Lv.{{ selectedRole.avatar.level }} → {{ targetLevel }}
+        </v-chip>
+      </div>
     </v-card-title>
 
     <v-card-text class="ucc-form">
-      <v-select
-        v-model="selectedId"
-        :items="options"
-        clearable
-        density="compact"
-        hide-details
-        item-title="title"
-        item-value="value"
-        label="选择角色"
-        variant="outlined"
-      />
-
       <div class="ucc-object-config">
         <div v-if="selectedRole" class="ucc-selected">
-          <div class="ucc-item-box">
-            <img :src="`/icon/bg/${characterStar}-Star.webp`" alt="background" class="bg" />
-            <img
-              :alt="selectedRole.avatar.name"
-              :src="`/WIKI/character/${selectedRole.cid}.webp`"
-              class="icon"
-            />
-            <img
-              :alt="`${elementName}元素`"
-              :src="`/icon/element/${elementName}元素.webp`"
-              class="badge element"
-            />
-            <img :alt="weaponType" :src="`/icon/weapon/${weaponType}.webp`" class="badge weapon" />
-          </div>
+          <UcItemIcon
+            :alt="selectedRole.avatar.name"
+            :icon="`/WIKI/character/${selectedRole.cid}.webp`"
+            :primary-badge="`/icon/element/${elementName}元素.webp`"
+            :star="characterStar"
+            :size="80"
+          />
           <div class="ucc-selected-info">
             <span class="ucc-name">{{ selectedRole.avatar.name }}</span>
             <div class="ucc-tags">
@@ -65,33 +105,43 @@
               <span>目标等级</span>
               <span class="ucc-slider-value">{{ selectedRole ? `Lv.${targetLevel}` : "--" }}</span>
             </div>
-            <v-slider
+            <UcLevelSlider
+              v-model="targetLevel"
+              :current="currentLevel"
               :disabled="levelUnavailable"
               :max="levelMax"
-              :min="1"
-              :model-value="targetLevel"
-              class="ucc-slider-control"
-              color="var(--tgc-od-blue)"
-              density="compact"
-              hide-details
-              step="1"
-              thumb-label
-              track-color="var(--common-shadow-2)"
-              @update:model-value="updateTargetLevel"
             />
           </div>
-          <div :class="{ 'is-unavailable': !atAscensionLevel }" class="ucc-ascension-state">
-            <v-checkbox
-              v-model="ascended"
-              :disabled="!atAscensionLevel"
-              color="var(--tgc-od-blue)"
-              density="compact"
-              hide-details
-              label="当前等级已突破"
-            />
-            <span class="ucc-ascension-hint">
-              {{ atAscensionLevel ? "未勾选会计入本次突破材料" : "当前等级不是突破临界等级" }}
-            </span>
+          <div class="ucc-ascension-options">
+            <div :class="{ 'is-unavailable': !atAscensionLevel }" class="ucc-ascension-state">
+              <v-checkbox
+                v-model="ascended"
+                :disabled="!atAscensionLevel"
+                color="var(--tgc-od-blue)"
+                density="compact"
+                hide-details
+                label="当前等级已突破"
+              />
+              <span class="ucc-ascension-hint">
+                {{ atAscensionLevel ? "未勾选会计入本次突破材料" : "当前等级不是突破临界等级" }}
+              </span>
+            </div>
+            <div
+              :class="{ 'is-unavailable': !targetAtAscensionLevel }"
+              class="ucc-ascension-state target"
+            >
+              <v-checkbox
+                v-model="targetAscended"
+                :disabled="!targetAtAscensionLevel"
+                color="var(--tgc-od-green)"
+                density="compact"
+                hide-details
+                label="目标已突破"
+              />
+              <span class="ucc-ascension-hint">
+                {{ targetAtAscensionLevel ? "计入目标突破" : "非临界等级" }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -119,18 +169,11 @@
               <span>目标</span>
               <span class="ucc-slider-value">Lv.{{ talentTargetLevels[index] }}</span>
             </div>
-            <v-slider
+            <UcLevelSlider
+              :current="Math.min(skill.level, 10)"
               :disabled="Math.min(skill.level, 10) >= 10"
               :max="10"
-              :min="1"
               :model-value="talentTargetLevels[index]"
-              class="ucc-slider-control"
-              color="var(--tgc-od-blue)"
-              density="compact"
-              hide-details
-              step="1"
-              thumb-label
-              track-color="var(--common-shadow-2)"
               @update:model-value="updateTalent(index, $event)"
             />
           </div>
@@ -141,17 +184,20 @@
 </template>
 
 <script lang="ts" setup>
-import type { UserCalcCharacterOption } from "@comp/userCalc/uc-types.js";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
 import { getRcStar, getZhElement } from "@utils/toolFunc.js";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 type UcCharacterPanelProps = {
-  options: Array<UserCalcCharacterOption>;
+  options: Array<TGApp.App.UserCalc.CharacterOption>;
   selectedRole?: TGApp.Sqlite.Character.TableTrans;
   weaponType: string;
   levelOptions: Array<number>;
   skills: Array<TGApp.Game.Avatar.Skill>;
   atAscensionLevel: boolean;
+  targetAtAscensionLevel: boolean;
 };
 
 const props = defineProps<UcCharacterPanelProps>();
@@ -160,6 +206,9 @@ const selectedId = defineModel<number | null>("selectedId", { required: true });
 const targetLevel = defineModel<number>("targetLevel", { required: true });
 const talentTargetLevels = defineModel<Array<number>>("talentTargetLevels", { required: true });
 const ascended = defineModel<boolean>("ascended", { required: true });
+const targetAscended = defineModel<boolean>("targetAscended", { required: true });
+
+const showSelector = ref<boolean>(false);
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
 const currentLevel = computed<number>(() => props.selectedRole?.avatar.level ?? 1);
@@ -171,8 +220,38 @@ const characterStar = computed<number>(() =>
   props.selectedRole ? getRcStar(props.selectedRole.cid, props.selectedRole.avatar.rarity) : 1,
 );
 
-function updateTargetLevel(value: number): void {
-  targetLevel.value = Math.max(currentLevel.value, Math.min(value, levelMax.value));
+function getOptionElement(option: TGApp.App.UserCalc.CharacterOption): string {
+  return getZhElement(option.role.avatar.element);
+}
+
+function getOptionStar(option: TGApp.App.UserCalc.CharacterOption): number {
+  return getRcStar(option.value, option.role.avatar.rarity);
+}
+
+function selectCharacter(value: number): void {
+  selectedId.value = value;
+  showSelector.value = false;
+}
+
+function clearCharacter(): void {
+  selectedId.value = null;
+  showSelector.value = false;
+}
+
+function getCharacterBoxData(option: TGApp.App.UserCalc.CharacterOption): TItemBoxData {
+  return {
+    bg: `/icon/bg/${getOptionStar(option)}-Star.webp`,
+    icon: `/WIKI/character/${option.value}.webp`,
+    size: "80px",
+    height: "80px",
+    display: "inner",
+    clickable: true,
+    lt: `/icon/element/${getOptionElement(option)}元素.webp`,
+    ltSize: "16px",
+    innerHeight: 20,
+    innerIcon: `/icon/weapon/${option.weaponType}.webp`,
+    innerText: option.role.avatar.name,
+  };
 }
 
 function updateTalent(index: number, value: number): void {
@@ -186,7 +265,9 @@ function updateTalent(index: number, value: number): void {
 
 <style lang="scss" scoped>
 .ucc-panel {
+  display: flex;
   height: 100%;
+  flex-direction: column;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--common-shadow-1);
@@ -194,6 +275,7 @@ function updateTalent(index: number, value: number): void {
 
 .ucc-title,
 .ucc-heading,
+.ucc-title-actions,
 .ucc-section-title {
   display: flex;
   align-items: center;
@@ -204,6 +286,7 @@ function updateTalent(index: number, value: number): void {
   padding: 8px 12px;
   font-family: var(--font-title);
   font-size: 16px;
+  gap: 8px;
 }
 
 .ucc-heading,
@@ -211,27 +294,101 @@ function updateTalent(index: number, value: number): void {
   gap: 8px;
 }
 
+.ucc-title-actions {
+  min-width: 0;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ucc-select-trigger {
+  overflow: hidden;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.ucc-selected-label {
+  overflow: hidden;
+  max-width: 120px;
+  color: var(--common-text-title);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ucc-picker {
+  width: min(366px, calc(100vw - 32px));
+  max-height: 360px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-1);
+  box-shadow: 0 4px 8px var(--common-shadow-2);
+  overflow-y: auto;
+}
+
+.ucc-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.ucc-picker-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 14px;
+}
+
+.ucc-picker-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, 80px);
+}
+
+.ucc-picker-item {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: unset;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+
+  &:hover,
+  &.selected {
+    opacity: 1;
+  }
+}
+
 .ucc-form {
   display: flex;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
-  padding: 0 12px 12px;
+  padding: 8px 12px;
   gap: 8px;
 }
 
 .ucc-object-config {
   display: grid;
+  height: 100px;
   align-items: stretch;
   gap: 8px;
-  grid-template-columns: minmax(0, 1.15fr) minmax(176px, 0.85fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .ucc-selected {
   display: flex;
-  min-height: 88px;
+  height: 100%;
   align-items: center;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--common-shadow-t-2);
   gap: 8px;
 
@@ -241,50 +398,6 @@ function updateTalent(index: number, value: number): void {
     color: var(--common-text-sub);
     font-size: 12px;
     opacity: 0.5;
-  }
-}
-
-.ucc-item-box {
-  position: relative;
-  overflow: hidden;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
-  border-radius: 4px;
-
-  .bg,
-  .icon {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-  }
-
-  .bg {
-    object-fit: cover;
-  }
-
-  .icon {
-    object-fit: cover;
-  }
-
-  .badge {
-    position: absolute;
-    z-index: 2;
-    width: 20px;
-    height: 20px;
-    filter: drop-shadow(0 0 4px #00000099);
-    object-fit: contain;
-
-    &.element {
-      top: 4px;
-      left: 4px;
-    }
-
-    &.weapon {
-      right: 4px;
-      bottom: 4px;
-    }
   }
 }
 
@@ -317,11 +430,12 @@ function updateTalent(index: number, value: number): void {
 }
 
 .ucc-level-config {
+  position: relative;
   display: flex;
   min-width: 0;
+  height: 100%;
   flex-direction: column;
-  justify-content: center;
-  gap: 4px;
+  justify-content: space-between;
 }
 
 .ucc-slider-field {
@@ -333,11 +447,6 @@ function updateTalent(index: number, value: number): void {
   &.is-unavailable {
     opacity: 0.38;
   }
-}
-
-.ucc-slider-control {
-  width: calc(100% - 16px);
-  margin: 0 8px;
 }
 
 .ucc-slider-label {
@@ -358,6 +467,12 @@ function updateTalent(index: number, value: number): void {
   font-weight: 400;
 }
 
+.ucc-ascension-options {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .ucc-ascension-state {
   display: flex;
   flex-direction: column;
@@ -372,6 +487,14 @@ function updateTalent(index: number, value: number): void {
   &.is-unavailable {
     border-left-color: var(--common-shadow-2);
     opacity: 0.38;
+  }
+
+  &.target {
+    border-left-color: var(--tgc-od-green);
+  }
+
+  &.target.is-unavailable {
+    border-left-color: var(--common-shadow-2);
   }
 }
 
@@ -405,8 +528,10 @@ function updateTalent(index: number, value: number): void {
   min-width: 0;
   flex-direction: column;
   padding: 8px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
-  background: var(--common-shadow-t-1);
+  background: var(--common-shadow-t-2);
+  box-shadow: 0 4px 8px var(--common-shadow-1);
   gap: 4px;
   transition: opacity 0.2s ease;
 
@@ -446,7 +571,15 @@ function updateTalent(index: number, value: number): void {
 }
 
 @media (width <= 520px) {
+  .ucc-title {
+    flex-wrap: wrap;
+  }
+
   .ucc-object-config {
+    grid-template-columns: 1fr;
+  }
+
+  .ucc-ascension-options {
     grid-template-columns: 1fr;
   }
 

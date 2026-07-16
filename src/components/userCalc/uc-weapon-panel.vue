@@ -2,22 +2,84 @@
 <template>
   <v-card class="ucw-panel" variant="outlined">
     <v-card-title class="ucw-title">
-      <span class="ucw-heading">
-        <v-icon>mdi-sword</v-icon>
-        武器养成
-      </span>
-      <div class="ucw-title-actions">
+      <div class="ucw-title-main">
+        <span class="ucw-heading">
+          <v-icon>mdi-sword</v-icon>
+          武器养成
+        </span>
         <div v-if="hasBagData" class="ucw-source-control">
           <v-switch
             v-model="useBagSource"
-            :title="useBagSource ? '当前使用背包数据' : '当前使用角色装备数据'"
+            :title="useBagSource ? '数据源-背包' : '数据源-角色'"
             class="ucw-source-switch"
             color="var(--tgc-od-blue)"
             density="compact"
             hide-details
           />
-          <span>{{ useBagSource ? "背包数据" : "角色装备" }}</span>
+          <span>{{ useBagSource ? "数据源-背包" : "数据源-角色" }}</span>
         </div>
+      </div>
+      <div class="ucw-title-actions">
+        <v-menu
+          v-model="showSelector"
+          :close-on-content-click="false"
+          location="bottom end"
+          offset="8"
+        >
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              :title="selectedWeapon ? `切换武器：${selectedWeapon.wiki.name}` : '选择武器'"
+              class="ucw-select-trigger"
+              icon
+              v-bind="menuProps"
+              variant="tonal"
+            >
+              <UcItemIcon
+                v-if="selectedWeapon"
+                :alt="selectedWeapon.wiki.name"
+                :icon="`/WIKI/weapon/${selectedWeapon.wiki.id}.webp`"
+                :primary-badge="`/icon/weapon/${selectedWeapon.wiki.weapon}.webp`"
+                :size="40"
+                :star="selectedWeapon.wiki.star"
+                circular
+              />
+              <v-icon v-else>mdi-sword-cross</v-icon>
+            </v-btn>
+          </template>
+          <v-card class="ucw-picker" variant="outlined">
+            <div class="ucw-picker-header">
+              <span class="ucw-picker-title">选择武器</span>
+              <v-btn
+                :disabled="selectedKey === null"
+                class="ucw-picker-clear"
+                color="var(--tgc-od-red)"
+                prepend-icon="mdi-close-circle-outline"
+                size="small"
+                variant="tonal"
+                @click="clearWeapon"
+              >
+                清空
+              </v-btn>
+            </div>
+            <div v-if="options.length > 0" class="ucw-picker-grid">
+              <button
+                v-for="option in options"
+                :key="option.key"
+                :class="{ selected: option.key === selectedKey }"
+                :title="option.title"
+                class="ucw-picker-item"
+                type="button"
+                @click="selectWeapon(option.key)"
+              >
+                <TItemBox :model-value="getWeaponBoxData(option)" />
+              </button>
+            </div>
+            <div v-else class="ucw-picker-empty">当前来源没有符合角色武器类型的数据</div>
+          </v-card>
+        </v-menu>
+        <span v-if="selectedWeapon" class="ucw-selected-label">
+          {{ selectedWeapon.wiki.name }}
+        </span>
         <v-chip v-if="selectedWeapon" color="var(--tgc-od-blue)" size="small" variant="tonal">
           Lv.{{ selectedWeapon.level }} → {{ targetLevel }}
         </v-chip>
@@ -25,38 +87,15 @@
     </v-card-title>
 
     <v-card-text class="ucw-form">
-      <v-select
-        v-model="selectedKey"
-        :items="options"
-        clearable
-        density="compact"
-        hide-details
-        item-title="title"
-        item-value="key"
-        label="选择武器"
-        no-data-text="当前来源没有符合角色武器类型的数据"
-        variant="outlined"
-      />
-
       <div class="ucw-object-config">
         <div v-if="selectedWeapon" class="ucw-selected">
-          <div class="ucw-item-box">
-            <img
-              :src="`/icon/bg/${selectedWeapon.wiki.star}-Star.webp`"
-              alt="background"
-              class="bg"
-            />
-            <img
-              :src="`/WIKI/weapon/${selectedWeapon.wiki.id}.webp`"
-              :alt="selectedWeapon.wiki.name"
-              class="icon"
-            />
-            <img
-              :src="`/icon/weapon/${selectedWeapon.wiki.weapon}.webp`"
-              :alt="selectedWeapon.wiki.weapon"
-              class="badge"
-            />
-          </div>
+          <UcItemIcon
+            :alt="selectedWeapon.wiki.name"
+            :icon="`/WIKI/weapon/${selectedWeapon.wiki.id}.webp`"
+            :primary-badge="`/icon/weapon/${selectedWeapon.wiki.weapon}.webp`"
+            :size="80"
+            :star="selectedWeapon.wiki.star"
+          />
           <div class="ucw-selected-info">
             <span class="ucw-name">{{ selectedWeapon.wiki.name }}</span>
             <div class="ucw-tags">
@@ -71,10 +110,10 @@
                 已锁定
               </span>
             </div>
+            <span v-if="selectedWeapon.fromBag" :title="selectedWeapon.guid" class="ucw-guid">
+              GUID {{ selectedWeapon.guid }}
+            </span>
           </div>
-          <span v-if="selectedWeapon.fromBag" :title="selectedWeapon.guid" class="ucw-guid">
-            GUID {{ selectedWeapon.guid }}
-          </span>
         </div>
         <div v-else class="ucw-selected empty">
           <v-icon size="32">mdi-sword-cross</v-icon>
@@ -85,65 +124,117 @@
           <div :class="{ 'is-unavailable': levelUnavailable }" class="ucw-slider-field">
             <div class="ucw-slider-label">
               <span>目标等级</span>
-              <span class="ucw-slider-value">{{
-                selectedWeapon ? `Lv.${targetLevel}` : "--"
-              }}</span>
+              <span class="ucw-slider-value">
+                {{ selectedWeapon ? `Lv.${targetLevel}` : "--" }}
+              </span>
             </div>
-            <v-slider
+            <UcLevelSlider
+              v-model="targetLevel"
+              :current="currentLevel"
               :disabled="levelUnavailable"
               :max="levelMax"
-              :min="1"
-              :model-value="targetLevel"
-              class="ucw-slider-control"
-              color="var(--tgc-od-blue)"
-              density="compact"
-              hide-details
-              step="1"
-              thumb-label
-              track-color="var(--common-shadow-2)"
-              @update:model-value="updateTargetLevel"
             />
           </div>
-          <div
-            :class="{
-              'is-unavailable': !atAscensionLevel,
-              'is-readonly': atAscensionLevel && selectedWeapon?.fromBag,
-            }"
-            class="ucw-ascension-state"
-          >
-            <v-checkbox
-              v-model="ascended"
-              :disabled="!atAscensionLevel"
-              :readonly="atAscensionLevel && selectedWeapon?.fromBag"
-              color="var(--tgc-od-blue)"
-              density="compact"
-              hide-details
-              label="当前等级已突破"
-            />
-            <span class="ucw-ascension-hint">
-              <template v-if="!atAscensionLevel">当前等级不是突破临界等级</template>
-              <template v-else-if="selectedWeapon?.fromBag">
-                <v-icon size="10">mdi-lock-outline</v-icon>
-                状态来自背包数据，仅供查看
-              </template>
-              <template v-else>未勾选会计入本次突破材料</template>
-            </span>
+          <div class="ucw-ascension-options">
+            <div
+              :class="{
+                'is-unavailable': !atAscensionLevel,
+                'is-readonly': atAscensionLevel && selectedWeapon?.fromBag,
+              }"
+              class="ucw-ascension-state"
+            >
+              <v-checkbox
+                :disabled="!atAscensionLevel"
+                :model-value="currentAscended"
+                :readonly="atAscensionLevel && selectedWeapon?.fromBag"
+                color="var(--tgc-od-blue)"
+                density="compact"
+                hide-details
+                label="当前等级已突破"
+                @update:model-value="updateCurrentAscended"
+              />
+              <span class="ucw-ascension-hint">
+                <template v-if="!atAscensionLevel">当前等级不是突破临界等级</template>
+                <template v-else-if="selectedWeapon?.fromBag">
+                  <v-icon size="10">mdi-lock-outline</v-icon>
+                  状态来自背包数据，只读
+                </template>
+                <template v-else>未勾选会计入本次突破材料</template>
+              </span>
+            </div>
+            <div
+              :class="{ 'is-unavailable': !targetAtAscensionLevel }"
+              class="ucw-ascension-state target"
+            >
+              <v-checkbox
+                v-model="targetAscended"
+                :disabled="!targetAtAscensionLevel"
+                color="var(--tgc-od-green)"
+                density="compact"
+                hide-details
+                label="目标已突破"
+              />
+              <span class="ucw-ascension-hint">
+                {{ targetAtAscensionLevel ? "计入目标突破" : "非临界等级" }}
+              </span>
+            </div>
           </div>
         </div>
+      </div>
+
+      <div v-if="selectedWeapon" class="ucw-growth">
+        <div class="ucw-growth-title">
+          <span>
+            <v-icon size="16">mdi-chart-line</v-icon>
+            属性变化
+          </span>
+          <span>突破阶段 {{ selectedWeapon.promoteLevel }} → {{ targetPromoteLevel }}</span>
+        </div>
+        <div class="ucw-stat-list">
+          <div v-for="stat in currentStats" :key="stat.type" class="ucw-stat">
+            <img v-if="stat.info.icon" :alt="stat.info.name" :src="stat.info.icon" />
+            <div class="ucw-stat-info">
+              <span>{{ stat.info.name }}</span>
+              <div>
+                <span>{{ wikiUtils.propFmt(stat.type, stat.val) }}</span>
+                <v-icon size="14">mdi-arrow-right</v-icon>
+                <span>{{ formatTargetStat(stat.type, stat.val) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="ucw-stat summary">
+            <v-icon size="24">mdi-sword-cross</v-icon>
+            <div class="ucw-stat-info">
+              <span>养成信息</span>
+              <div>
+                <span>精炼 {{ selectedWeapon.affixLevel }}</span>
+                <span>{{ selectedWeapon.fromBag ? "背包存档" : "角色装备" }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p v-if="selectedWeapon.wiki.description" class="ucw-description">
+          {{ selectedWeapon.wiki.description }}
+        </p>
       </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script lang="ts" setup>
-import type { UserCalcWeaponOption } from "@comp/userCalc/uc-types.js";
-import { computed } from "vue";
+import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
+import userCalc from "@utils/userCalc.js";
+import wikiUtils from "@utils/wikiUtils.js";
+import { computed, ref } from "vue";
 
 type UcWeaponPanelProps = {
-  options: Array<UserCalcWeaponOption>;
-  selectedWeapon?: UserCalcWeaponOption;
+  options: Array<TGApp.App.UserCalc.WeaponOption>;
+  selectedWeapon?: TGApp.App.UserCalc.WeaponOption;
   levelOptions: Array<number>;
   atAscensionLevel: boolean;
+  targetAtAscensionLevel: boolean;
   hasBagData: boolean;
 };
 
@@ -152,28 +243,92 @@ const props = defineProps<UcWeaponPanelProps>();
 const selectedKey = defineModel<string | null>("selectedKey", { required: true });
 const targetLevel = defineModel<number>("targetLevel", { required: true });
 const ascended = defineModel<boolean>("ascended", { required: true });
+const targetAscended = defineModel<boolean>("targetAscended", { required: true });
 const useBagSource = defineModel<boolean>("useBagSource", { required: true });
+
+const showSelector = ref<boolean>(false);
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
 const currentLevel = computed<number>(() => props.selectedWeapon?.level ?? 1);
 const levelUnavailable = computed<boolean>(
   () => !props.selectedWeapon || currentLevel.value >= levelMax.value,
 );
+const currentAscended = computed<boolean>(() => {
+  if (!props.selectedWeapon?.fromBag) return ascended.value;
+  return userCalc.isAscendedAtThreshold(
+    props.selectedWeapon.level,
+    props.selectedWeapon.promoteLevel,
+  );
+});
+const targetPromoteLevel = computed<number>(() => {
+  if (!props.selectedWeapon) return 0;
+  const resolved = userCalc.resolvePromoteLevel(
+    targetLevel.value,
+    undefined,
+    props.targetAtAscensionLevel ? targetAscended.value : undefined,
+  );
+  return Math.max(props.selectedWeapon.promoteLevel, resolved);
+});
+const currentStats = computed(() => {
+  if (!props.selectedWeapon) return [];
+  return wikiUtils.weapon(
+    props.selectedWeapon.wiki,
+    props.selectedWeapon.level,
+    props.selectedWeapon.promoteLevel,
+  );
+});
+const targetStats = computed(() => {
+  if (!props.selectedWeapon) return [];
+  return wikiUtils.weapon(props.selectedWeapon.wiki, targetLevel.value, targetPromoteLevel.value);
+});
 
-function updateTargetLevel(value: number): void {
-  targetLevel.value = Math.max(currentLevel.value, Math.min(value, levelMax.value));
+function selectWeapon(key: string): void {
+  selectedKey.value = key;
+  showSelector.value = false;
+}
+
+function clearWeapon(): void {
+  selectedKey.value = null;
+  showSelector.value = false;
+}
+
+function updateCurrentAscended(value: boolean | null): void {
+  if (!props.selectedWeapon?.fromBag) ascended.value = value === true;
+}
+
+function formatTargetStat(type: number, fallback: number): string {
+  const stat = targetStats.value.find((item) => item.type === type);
+  return wikiUtils.propFmt(type, stat?.val ?? fallback);
+}
+
+function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData {
+  return {
+    bg: `/icon/bg/${option.wiki.star}-Star.webp`,
+    icon: `/WIKI/weapon/${option.wiki.id}.webp`,
+    size: "80px",
+    height: "80px",
+    display: "inner",
+    clickable: true,
+    lt: `/icon/weapon/${option.wiki.weapon}.webp`,
+    ltSize: "16px",
+    innerHeight: 20,
+    innerText: option.wiki.name,
+  };
 }
 </script>
 
 <style lang="scss" scoped>
 .ucw-panel {
+  display: flex;
   height: 100%;
+  flex-direction: column;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   box-shadow: 0 4px 8px var(--common-shadow-1);
 }
 
 .ucw-title,
+.ucw-title-main,
 .ucw-heading,
 .ucw-title-actions {
   display: flex;
@@ -193,7 +348,13 @@ function updateTargetLevel(value: number): void {
   gap: 8px;
 }
 
+.ucw-title-main {
+  min-width: 0;
+  gap: 12px;
+}
+
 .ucw-title-actions {
+  min-width: 0;
   justify-content: flex-end;
   gap: 8px;
 }
@@ -203,8 +364,7 @@ function updateTargetLevel(value: number): void {
   align-items: center;
   color: var(--common-text-sub);
   font-family: var(--font-text);
-  font-size: 11px;
-  gap: 8px;
+  font-size: 14px;
   white-space: nowrap;
 }
 
@@ -216,26 +376,101 @@ function updateTargetLevel(value: number): void {
   transform-origin: center;
 }
 
+.ucw-select-trigger {
+  overflow: hidden;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.ucw-selected-label {
+  overflow: hidden;
+  max-width: 120px;
+  color: var(--common-text-title);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ucw-picker {
+  width: min(366px, calc(100vw - 32px));
+  max-height: 360px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-1);
+  box-shadow: 0 4px 8px var(--common-shadow-2);
+  overflow-y: auto;
+}
+
+.ucw-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.ucw-picker-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 14px;
+}
+
+.ucw-picker-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, 80px);
+}
+
+.ucw-picker-item {
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: unset;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 0.2s ease;
+
+  &:hover,
+  &.selected {
+    border-color: var(--tgc-od-blue);
+    opacity: 1;
+  }
+}
+
+.ucw-picker-empty {
+  padding: 24px 8px;
+  color: var(--common-text-sub);
+  font-size: 12px;
+  text-align: center;
+}
+
 .ucw-form {
   display: flex;
+  min-height: 0;
+  flex: 1;
   flex-direction: column;
-  padding: 0 12px 12px;
+  padding: 8px 12px;
   gap: 8px;
 }
 
 .ucw-object-config {
   display: grid;
+  height: 100px;
   align-items: stretch;
   gap: 8px;
-  grid-template-columns: minmax(0, 1.15fr) minmax(176px, 0.85fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .ucw-selected {
-  position: relative;
   display: flex;
-  min-height: 88px;
+  height: 100%;
   align-items: center;
-  padding: 8px 8px 20px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--common-shadow-t-2);
@@ -251,45 +486,11 @@ function updateTargetLevel(value: number): void {
   }
 }
 
-.ucw-item-box {
-  position: relative;
-  overflow: hidden;
-  width: 72px;
-  height: 72px;
-  flex-shrink: 0;
-  border-radius: 4px;
-
-  .bg,
-  .icon {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-  }
-
-  .bg {
-    object-fit: cover;
-  }
-
-  .icon {
-    object-fit: cover;
-  }
-
-  .badge {
-    position: absolute;
-    z-index: 2;
-    top: 4px;
-    left: 4px;
-    width: 20px;
-    height: 20px;
-    filter: drop-shadow(0 0 4px #00000099);
-    object-fit: contain;
-  }
-}
-
 .ucw-selected-info {
   display: flex;
   min-width: 0;
+  height: 100%;
+  flex: 1;
   flex-direction: column;
   gap: 4px;
 }
@@ -315,11 +516,10 @@ function updateTargetLevel(value: number): void {
 }
 
 .ucw-guid {
-  position: absolute;
-  right: 8px;
-  bottom: 4px;
   overflow: hidden;
-  max-width: calc(100% - 16px);
+  max-width: 100%;
+  align-self: flex-end;
+  margin-top: auto;
   color: var(--common-text-sub);
   font-size: 10px;
   text-overflow: ellipsis;
@@ -329,8 +529,9 @@ function updateTargetLevel(value: number): void {
 .ucw-level-config {
   display: flex;
   min-width: 0;
+  height: 100%;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   gap: 4px;
 }
 
@@ -345,11 +546,6 @@ function updateTargetLevel(value: number): void {
   }
 }
 
-.ucw-slider-control {
-  width: calc(100% - 16px);
-  margin: 0 8px;
-}
-
 .ucw-slider-label {
   display: flex;
   align-items: center;
@@ -362,6 +558,12 @@ function updateTargetLevel(value: number): void {
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-weight: 400;
+}
+
+.ucw-ascension-options {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .ucw-ascension-state {
@@ -384,6 +586,14 @@ function updateTargetLevel(value: number): void {
     border-left-color: var(--tgc-od-orange);
     opacity: 0.68;
   }
+
+  &.target {
+    border-left-color: var(--tgc-od-green);
+  }
+
+  &.target.is-unavailable {
+    border-left-color: var(--common-shadow-2);
+  }
 }
 
 .ucw-ascension-hint {
@@ -392,12 +602,112 @@ function updateTargetLevel(value: number): void {
   font-size: 10px;
 }
 
+.ucw-growth {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--common-shadow-t-1);
+  gap: 8px;
+}
+
+.ucw-growth-title,
+.ucw-growth-title > span,
+.ucw-stat,
+.ucw-stat-info > div {
+  display: flex;
+  align-items: center;
+}
+
+.ucw-growth-title {
+  justify-content: space-between;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 14px;
+  gap: 8px;
+
+  > span {
+    gap: 4px;
+  }
+
+  > span:last-child {
+    color: var(--common-text-sub);
+    font-family: var(--font-text);
+    font-size: 11px;
+  }
+}
+
+.ucw-stat-list {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.ucw-stat {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  gap: 8px;
+
+  > img {
+    width: 24px;
+    height: 24px;
+    filter: invert(0.55);
+    object-fit: contain;
+
+    .dark & {
+      filter: unset;
+    }
+  }
+
+  &.summary > .v-icon {
+    color: var(--tgc-od-orange);
+  }
+}
+
+.ucw-stat-info {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  color: var(--common-text-sub);
+  font-size: 11px;
+
+  > div {
+    flex-wrap: wrap;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  > div > span:last-child {
+    color: var(--tgc-od-green);
+  }
+}
+
+.ucw-description {
+  margin: auto 0 0;
+  color: var(--common-text-sub);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 @media (width <= 520px) {
   .ucw-title {
     flex-wrap: wrap;
   }
 
   .ucw-object-config {
+    grid-template-columns: 1fr;
+  }
+
+  .ucw-ascension-options {
     grid-template-columns: 1fr;
   }
 }

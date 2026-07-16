@@ -4,11 +4,15 @@
  * @since Beta v0.11.2
  */
 
+/** 单项养成材料需求 */
 export type CultivationMaterial = {
+  /** 材料 ID */
   id: number;
+  /** 所需数量 */
   count: number;
 };
 
+/** 材料 ID 偏移量与需求数量 */
 type OffsetCount = readonly [offset: number, count: number];
 
 const MORA_ID = 202;
@@ -252,41 +256,66 @@ const WEAPON_LEVEL_EXP: Readonly<Record<number, ReadonlyArray<number>>> = {
   ],
 };
 
+/** 将材料数量累加到需求表中。 */
 function add(items: Map<number, number>, id: number, count: number): void {
   if (count <= 0) return;
   items.set(id, (items.get(id) ?? 0) + count);
 }
 
+/** 计算从当前等级提升至目标等级所需的总经验。 */
 function sumExperience(data: ReadonlyArray<number>, current: number, target: number): number {
   if (current < 1 || current >= target || target >= data.length) return 0;
   return data.slice(current, target).reduce((sum, value) => sum + value, 0);
 }
 
+/** 获取等级区间内需要完成的突破阶段索引。 */
 function requiredAscensionIndices(
   currentLevel: number,
   targetLevel: number,
   currentPromoteLevel: number,
+  targetAscendedAtThreshold: boolean,
 ): Array<number> {
   let lower = Math.max(0, currentPromoteLevel);
   while (lower < ASCENSION_LEVELS.length && ASCENSION_LEVELS[lower] < currentLevel) lower++;
   let upper = 0;
-  while (upper < ASCENSION_LEVELS.length && ASCENSION_LEVELS[upper] <= targetLevel) upper++;
+  while (upper < ASCENSION_LEVELS.length && ASCENSION_LEVELS[upper] < targetLevel) upper++;
+  if (targetAscendedAtThreshold && ASCENSION_LEVELS[upper] === targetLevel) upper++;
   return lower >= upper ? [] : Array.from({ length: upper - lower }, (_, index) => lower + index);
 }
 
+/** 根据角色等级推断已完成的突破次数。 */
 function inferAvatarPromoteLevel(level: number): number {
   return ASCENSION_LEVELS.filter((ascensionLevel) => ascensionLevel < level).length;
 }
 
+/** 判断等级是否为突破临界等级。 */
 export function isAscensionLevel(level: number): boolean {
   return ASCENSION_LEVELS.some((ascensionLevel) => ascensionLevel === level);
 }
 
+/** 判断对象是否已完成当前临界等级的突破。 */
 export function isAscendedAtThreshold(level: number, promoteLevel?: number): boolean {
   const thresholdIndex = ASCENSION_LEVELS.findIndex((ascensionLevel) => ascensionLevel === level);
   return thresholdIndex !== -1 && (promoteLevel ?? 0) > thresholdIndex;
 }
 
+/**
+ * 将背包导入数据在突破临界等级上的阶段索引转换为计算使用的已完成突破数。
+ * 背包快照在恰好处于临界等级时使用当前突破项索引，而养成计算使用已完成项数量。
+ */
+export function resolveBagWeaponPromoteLevel(level: number, storedPromoteLevel: number): number {
+  const thresholdIndex = ASCENSION_LEVELS.findIndex((ascensionLevel) => ascensionLevel === level);
+  if (thresholdIndex !== -1 && storedPromoteLevel === thresholdIndex) return storedPromoteLevel + 1;
+  return storedPromoteLevel;
+}
+
+/**
+ * 解析计算使用的已完成突破次数。
+ *
+ * @param level - 当前或目标等级
+ * @param storedPromoteLevel - 存档中的突破阶段
+ * @param ascendedAtThreshold - 位于临界等级时是否已突破
+ */
 export function resolvePromoteLevel(
   level: number,
   storedPromoteLevel?: number,
@@ -299,16 +328,28 @@ export function resolvePromoteLevel(
   return storedPromoteLevel ?? inferAvatarPromoteLevel(level);
 }
 
+/** 将材料需求表转换为材料列表。 */
 function toList(items: Map<number, number>): Array<CultivationMaterial> {
   return Array.from(items, ([id, count]) => ({ id, count }));
 }
 
+/**
+ * 计算角色等级、突破及天赋升级所需的材料。
+ *
+ * @param role - 用户存档中的角色数据
+ * @param wiki - 角色 Wiki 数据
+ * @param targetLevel - 目标等级
+ * @param targetTalentLevels - 可升级天赋的目标等级
+ * @param currentPromoteLevel - 已完成的突破次数
+ * @param targetAscendedAtThreshold - 到达目标临界等级后是否继续突破
+ */
 export function calculateAvatarMaterials(
   role: TGApp.Sqlite.Character.TableTrans,
   wiki: TGApp.App.Character.WikiItem,
   targetLevel: number,
   targetTalentLevels: ReadonlyArray<number>,
   currentPromoteLevel?: number,
+  targetAscendedAtThreshold = false,
 ): Array<CultivationMaterial> {
   const items = new Map<number, number>();
   const currentLevel = role.avatar.level;
@@ -322,6 +363,7 @@ export function calculateAvatarMaterials(
     currentLevel,
     targetLevel,
     currentPromoteLevel ?? resolvePromoteLevel(currentLevel, avatarWithPromote.promote_level),
+    targetAscendedAtThreshold,
   );
   for (const index of ascensions) {
     const gem = AVATAR_GEM_COUNTS[index];
@@ -333,9 +375,12 @@ export function calculateAvatarMaterials(
     add(items, wiki.materials[3].id - monster[0], monster[1]);
   }
 
-  const skills = role.skills
-    .filter((skill) => skill.skill_type === 1 && skill.is_unlock)
-    .slice(0, 3);
+  const levelableSkillIds = new Set(
+    wiki.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
+  );
+  const skills = role.skills.filter(
+    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
+  );
   for (const [skillIndex, skill] of skills.entries()) {
     const currentTalentLevel = Math.min(skill.level, 10);
     const targetTalentLevel = Math.max(
@@ -355,11 +400,21 @@ export function calculateAvatarMaterials(
   return toList(items);
 }
 
+/**
+ * 计算武器等级与突破所需的材料。
+ *
+ * @param weapon - 武器 Wiki 数据
+ * @param currentLevel - 当前等级
+ * @param currentPromoteLevel - 已完成的突破次数
+ * @param targetLevel - 目标等级
+ * @param targetAscendedAtThreshold - 到达目标临界等级后是否继续突破
+ */
 export function calculateWeaponMaterials(
   weapon: TGApp.App.Weapon.WikiItem,
   currentLevel: number,
   currentPromoteLevel: number,
   targetLevel: number,
+  targetAscendedAtThreshold = false,
 ): Array<CultivationMaterial> {
   const items = new Map<number, number>();
   const experience = WEAPON_LEVEL_EXP[weapon.star];
@@ -369,7 +424,12 @@ export function calculateWeaponMaterials(
   add(items, MYSTIC_ENHANCEMENT_ORE_ID, oreCount);
   add(items, MORA_ID, oreCount * 1000);
 
-  const ascensions = requiredAscensionIndices(currentLevel, targetLevel, currentPromoteLevel);
+  const ascensions = requiredAscensionIndices(
+    currentLevel,
+    targetLevel,
+    currentPromoteLevel,
+    targetAscendedAtThreshold,
+  );
   for (const index of ascensions) {
     const weaponMaterial = WEAPON_MATERIAL_COUNTS[weapon.star][index];
     const monsterA = WEAPON_MONSTER_A_COUNTS[weapon.star][index];
@@ -382,6 +442,7 @@ export function calculateWeaponMaterials(
   return toList(items);
 }
 
+/** 合并多组养成材料需求。 */
 export function mergeCultivationMaterials(
   ...groups: Array<ReadonlyArray<CultivationMaterial>>
 ): Array<CultivationMaterial> {
@@ -392,18 +453,21 @@ export function mergeCultivationMaterials(
   return toList(items);
 }
 
+/** 根据武器星级获取等级上限。 */
 export function getWeaponMaxLevel(star: number): number {
   return star <= 2 ? 70 : 90;
 }
 
-const cultivationUtils = {
+/** 用户养成计算工具。 */
+const userCalc = {
   avatar: calculateAvatarMaterials,
   weapon: calculateWeaponMaterials,
   merge: mergeCultivationMaterials,
   weaponMaxLevel: getWeaponMaxLevel,
   isAscensionLevel,
   isAscendedAtThreshold,
+  resolveBagWeaponPromoteLevel,
   resolvePromoteLevel,
 };
 
-export default cultivationUtils;
+export default userCalc;
