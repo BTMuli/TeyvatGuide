@@ -67,16 +67,6 @@
         </v-btn>
       </v-card>
 
-      <v-alert
-        v-if="isTraveler"
-        density="compact"
-        icon="mdi-information-outline"
-        type="info"
-        variant="tonal"
-      >
-        旅行者不同元素形态的天赋材料不同，仅支持通过接口计算。
-      </v-alert>
-
       <div class="cultivation-config">
         <UcCharacterPanel
           v-model:ascended="avatarAscended"
