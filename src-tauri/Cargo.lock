@@ -20,6 +20,7 @@ dependencies = [
  "sentry",
  "serde",
  "serde_json",
+ "sqlx",
  "tauri",
  "tauri-build",
  "tauri-plugin-cli",

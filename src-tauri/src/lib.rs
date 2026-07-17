@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.9.1
+//! @since Beta v0.11.2
 
 mod client;
 mod commands;
@@ -13,8 +13,8 @@ mod yae;
 
 use crate::client::create_mhy_client;
 use crate::commands::{
-  create_window, execute_js, get_dir_size, hide_main_window, init_app, is_in_admin, is_msix,
-  is_process_running, launch_game, quit_app, read_text_scale,
+  create_window, execute_js, execute_sql_transaction, get_dir_size, hide_main_window, init_app,
+  is_in_admin, is_msix, is_process_running, launch_game, quit_app, read_text_scale,
 };
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
@@ -102,6 +102,7 @@ pub fn run() {
       init_app,
       create_window,
       execute_js,
+      execute_sql_transaction,
       get_dir_size,
       create_mhy_client,
       is_in_admin,

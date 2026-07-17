@@ -1,14 +1,20 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.11.0
+ * @since Beta v0.11.2
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import { app } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 import Database from "@tauri-apps/plugin-sql";
 import TGLogger from "@utils/TGLogger.js";
 
 import initDataSql from "./sql/initData.js";
+
+type SqlStatement = {
+  query: string;
+  values?: Array<unknown>;
+};
 
 class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
@@ -47,6 +53,17 @@ class Sqlite {
   public async getDB(): Promise<Database> {
     if (this.db === null) this.db = await Database.load(this.dbPath);
     return this.db;
+  }
+
+  /**
+   * 在同一数据库连接中执行事务语句
+   * @since Beta v0.11.1
+   * @param statements - 按顺序执行的 SQL 语句
+   * @returns 无返回值
+   */
+  public async executeTransaction(statements: ReadonlyArray<SqlStatement>): Promise<void> {
+    await this.getDB();
+    await invoke("execute_sql_transaction", { db: this.dbPath, statements });
   }
 
   /**

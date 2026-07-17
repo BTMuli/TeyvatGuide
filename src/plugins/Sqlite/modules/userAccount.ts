@@ -131,7 +131,7 @@ async function updateAllAccountCk(): Promise<void> {
 
 /**
  * 更新用户Cookie
- * @since Beta v0.9.5
+ * @since Beta v0.11.2
  * @param data - 用户信息
  * @returns 是否更新成功
  */
@@ -203,19 +203,16 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
   }
   const updated = timestampToDate(new Date().getTime());
   await showLoading.update("正在写入数据库");
-  const db = await TGSqlite.getDB();
   try {
-    await db.execute("PRAGMA busy_timeout = 5000;");
-    await db.execute("BEGIN IMMEDIATE;");
-    await db.execute(
-      "UPDATE UserAccount SET cookie = $1, brief = $2, updated = $3 WHERE uid = $4;",
-      [JSON.stringify(ck), JSON.stringify(briefInfo), updated, data.uid],
-    );
-    await db.execute("COMMIT;");
+    await TGSqlite.executeTransaction([
+      {
+        query: "UPDATE UserAccount SET cookie = $1, brief = $2, updated = $3 WHERE uid = $4;",
+        values: [JSON.stringify(ck), JSON.stringify(briefInfo), updated, data.uid],
+      },
+    ]);
     return true;
   } catch (innerErr) {
     console.error(innerErr);
-    await db.execute("ROLLBACK;");
     return false;
   }
 }
@@ -438,16 +435,10 @@ async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<vo
  * @returns 无返回值
  */
 async function deleteAccount(uid: string): Promise<void> {
-  const db = await TGSqlite.getDB();
-  try {
-    await db.execute("BEGIN IMMEDIATE;");
-    await db.execute("DELETE FROM GameAccount WHERE uid = ?;", [uid]);
-    await db.execute("DELETE FROM UserAccount WHERE uid = ?;", [uid]);
-    await db.execute("COMMIT;");
-  } catch (e) {
-    await db.execute("ROLLBACK;");
-    throw e;
-  }
+  await TGSqlite.executeTransaction([
+    { query: "DELETE FROM GameAccount WHERE uid = $1;", values: [uid] },
+    { query: "DELETE FROM UserAccount WHERE uid = $1;", values: [uid] },
+  ]);
 }
 
 const TSUserAccount = {

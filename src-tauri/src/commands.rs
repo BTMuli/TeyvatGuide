@@ -1,12 +1,82 @@
 // 命令模块，负责处理命令
-// @since Beta v0.9.1
+// @since Beta v0.11.2
 
 use crate::utils;
+use serde::Deserialize;
+use serde_json::Value;
+use sqlx::Acquire;
 use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
+use tauri_plugin_sql::{DbInstances, DbPool};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
 
 // 放一个常数，用来判断应用是否初始化
 static mut APP_INITIALIZED: bool = false;
+
+#[derive(Deserialize)]
+pub struct SqlStatement {
+  query: String,
+  #[serde(default)]
+  values: Vec<Value>,
+}
+
+/// 在同一 SQLite 连接中执行一组 SQL 语句。
+#[tauri::command]
+pub async fn execute_sql_transaction(
+  db_instances: tauri::State<'_, DbInstances>,
+  db: String,
+  statements: Vec<SqlStatement>,
+) -> Result<(), String> {
+  let pool = {
+    let instances = db_instances.0.read().await;
+    match instances.get(&db) {
+      Some(DbPool::Sqlite(pool)) => pool.clone(),
+      #[allow(unreachable_patterns)]
+      Some(_) => return Err("仅支持 SQLite 事务".to_string()),
+      None => return Err(format!("数据库尚未加载：{db}")),
+    }
+  };
+
+  let mut connection = pool.acquire().await.map_err(|error| error.to_string())?;
+  sqlx::query("PRAGMA busy_timeout = 5000;")
+    .execute(&mut *connection)
+    .await
+    .map_err(|error| error.to_string())?;
+  let mut transaction = connection.begin().await.map_err(|error| error.to_string())?;
+
+  let execute_result: Result<(), String> = async {
+    for statement in statements {
+      let mut query = sqlx::query(&statement.query);
+      for value in statement.values {
+        query = match value {
+          Value::Null => query.bind(None::<String>),
+          Value::Bool(value) => query.bind(value),
+          Value::Number(value) => {
+            if let Some(value) = value.as_i64() {
+              query.bind(value)
+            } else if let Some(value) = value.as_u64() {
+              query.bind(i64::try_from(value).map_err(|error| error.to_string())?)
+            } else {
+              query.bind(value.as_f64().ok_or_else(|| "无法解析 SQL 数字参数".to_string())?)
+            }
+          }
+          Value::String(value) => query.bind(value),
+          Value::Array(_) | Value::Object(_) => {
+            return Err("SQL 参数仅支持空值、布尔值、数字与字符串".to_string());
+          }
+        };
+      }
+      query.execute(&mut *transaction).await.map_err(|error| error.to_string())?;
+    }
+    Ok(())
+  }
+  .await;
+
+  if let Err(error) = execute_result {
+    let _ = transaction.rollback().await;
+    return Err(error);
+  }
+  transaction.commit().await.map_err(|error| error.to_string())
+}
 
 // 初始化应用
 #[tauri::command]
