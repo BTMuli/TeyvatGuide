@@ -1,9 +1,8 @@
 /**
  * 用户祈愿模块
- * @since Beta v0.10.2
+ * @since Beta v0.11.2
  */
 
-import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -15,7 +14,7 @@ import TGSqlite from "../index.js";
 
 /**
  * 批量插入祈愿数据
- * @since Beta v0.10.1
+ * @since Beta v0.11.2
  * @param db - 数据库
  * @param uid - 用户UID
  * @param data - 祈愿数据
@@ -29,32 +28,12 @@ async function insertGachaList(
   size: number,
   cnt: Ref<number>,
 ): Promise<void> {
-  await db.execute("PRAGMA busy_timeout = 5000;");
   for (let i = 0; i < data.length; i += size) {
-    await db.execute("BEGIN IMMEDIATE;");
-    try {
-      const batch = data.slice(i, i + size);
-      let batchSql = "";
-      const batchParams = [];
-      for (const item of batch) {
+    const batch = data.slice(i, i + size);
+    const batchParams: Array<string | number | null> = [];
+    const valueSql = batch
+      .map((item, itemIndex) => {
         const updateTime = timestampToDate(Date.now());
-        batchSql += `
-            INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
-                                     name, type, rank, id, uigfType, updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id)
-                DO UPDATE
-                SET uid=?,
-                    gachaType=?,
-                    itemId=?,
-                    count=?,
-                    time=?,
-                    name=?,
-                    type=?,
-                    rank=?,
-                    uigfType=?,
-                    updated=?;
-        `;
         batchParams.push(
           uid,
           item.gacha_type,
@@ -67,31 +46,30 @@ async function insertGachaList(
           item.id,
           item.uigf_gacha_type,
           updateTime,
-          // update 部分
-          uid,
-          item.gacha_type,
-          item.item_id ?? null,
-          item.count ?? 1,
-          item.time,
-          item.name,
-          item.item_type ?? null,
-          item.rank_type ?? null,
-          item.uigf_gacha_type,
-          updateTime,
         );
-        cnt.value++;
-      }
-      await db.execute(batchSql, batchParams);
-      await db.execute("COMMIT;");
-    } catch (e) {
-      await db.execute("ROLLBACK;");
-      const msg = String(e);
-      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED|database is locked/i.test(msg)) {
-        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
-        return;
-      }
-      throw e;
-    }
+        const paramOffset = itemIndex * 11;
+        return `(${Array.from({ length: 11 }, (_, index) => `$${paramOffset + index + 1}`).join(", ")})`;
+      })
+      .join(",\n");
+    // plugin-sql 后端使用连接池，单条 UPSERT 可避免跨 execute 的事务状态错位。
+    await db.execute(
+      `INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
+                                name, type, rank, id, uigfType, updated)
+       VALUES ${valueSql}
+       ON CONFLICT(id) DO UPDATE SET
+         uid = excluded.uid,
+         gachaType = excluded.gachaType,
+         itemId = excluded.itemId,
+         count = excluded.count,
+         time = excluded.time,
+         name = excluded.name,
+         type = excluded.type,
+         rank = excluded.rank,
+         uigfType = excluded.uigfType,
+         updated = excluded.updated;`,
+      batchParams,
+    );
+    cnt.value += batch.length;
   }
 }
 

@@ -1,9 +1,8 @@
 /**
  * 千星奇域祈愿模块
- * @since Beta v0.10.1
+ * @since Beta v0.11.2
  */
 
-import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import TGSqlite from "@Sql/index.js";
 import Database from "@tauri-apps/plugin-sql";
@@ -14,7 +13,7 @@ import { AppGachaBData } from "@/data/index.js";
 
 /**
  * 批量插入颂愿数据
- * @since Beta v0.10.1
+ * @since Beta v0.11.2
  * @param db - 数据库
  * @param uid - 用户UID
  * @param data - 祈愿数据
@@ -28,33 +27,13 @@ async function insertGachaBList(
   size: number,
   cnt?: Ref<number>,
 ): Promise<void> {
-  await db.execute("PRAGMA busy_timeout = 5000;");
   for (let i = 0; i < data.length; i += size) {
-    await db.execute("BEGIN IMMEDIATE;");
-    try {
-      const batch = data.slice(i, i + size);
-      let batchSql = "";
-      const batchParams = [];
-      for (const item of batch) {
+    const batch = data.slice(i, i + size);
+    const batchParams: Array<string> = [];
+    const valueSql = batch
+      .map((item, itemIndex) => {
         const updateTime = timestampToDate(Date.now());
         const gachaType = item.op_gacha_type === "1000" ? "1000" : "2000";
-        batchSql += `
-            INSERT INTO GachaBRecords(id, uid, scheduleId, gachaType, opGachaType, time,
-                                      itemId, name, type, rank, updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(id)
-                DO UPDATE
-                SET uid=?,
-                    scheduleId=?,
-                    gachaType=?,
-                    opGachaType=?,
-                    time=?,
-                    itemId=?,
-                    name=?,
-                    type=?,
-                    rank=?,
-                    updated=?;
-        `;
         batchParams.push(
           item.id,
           uid,
@@ -67,31 +46,30 @@ async function insertGachaBList(
           item.item_type,
           item.rank_type,
           updateTime,
-          // update 部分
-          uid,
-          item.schedule_id,
-          gachaType,
-          item.op_gacha_type,
-          item.time,
-          item.item_id,
-          item.item_name,
-          item.item_type,
-          item.rank_type,
-          updateTime,
         );
-        if (cnt) cnt.value++;
-      }
-      await db.execute(batchSql, batchParams);
-      await db.execute("COMMIT;");
-    } catch (e) {
-      await db.execute("ROLLBACK;");
-      const msg = String(e);
-      if (/BUSY|LOCKED|SQLITE_BUSY|SQLITE_LOCKED|database is locked/i.test(msg)) {
-        await showDialog.check(`数据库锁定`, `请刷新页面(F5)后重试操作`);
-        return;
-      }
-      throw e;
-    }
+        const paramOffset = itemIndex * 11;
+        return `(${Array.from({ length: 11 }, (_, index) => `$${paramOffset + index + 1}`).join(", ")})`;
+      })
+      .join(",\n");
+    // plugin-sql 后端使用连接池，单条 UPSERT 可避免跨 execute 的事务状态错位。
+    await db.execute(
+      `INSERT INTO GachaBRecords(id, uid, scheduleId, gachaType, opGachaType, time,
+                                 itemId, name, type, rank, updated)
+       VALUES ${valueSql}
+       ON CONFLICT(id) DO UPDATE SET
+         uid = excluded.uid,
+         scheduleId = excluded.scheduleId,
+         gachaType = excluded.gachaType,
+         opGachaType = excluded.opGachaType,
+         time = excluded.time,
+         itemId = excluded.itemId,
+         name = excluded.name,
+         type = excluded.type,
+         rank = excluded.rank,
+         updated = excluded.updated;`,
+      batchParams,
+    );
+    if (cnt) cnt.value += batch.length;
   }
 }
 
