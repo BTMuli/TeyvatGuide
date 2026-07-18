@@ -22,6 +22,7 @@
     <UcMaterialResult
       v-model:allow-crafting="allowCrafting"
       v-model:use-dust="useDust"
+      v-model:use-solvent="useSolvent"
       :bag-materials="bagMaterials"
       :empty-text="emptyText"
       :materials="filteredMaterials"
@@ -51,6 +52,7 @@ type UcPlanMaterialResultProps = {
 const props = defineProps<UcPlanMaterialResultProps>();
 const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
 const useDust = defineModel<boolean>("useDust", { required: true });
+const useSolvent = defineModel<boolean>("useSolvent", { required: true });
 const filter = ref<MaterialFilter>("all");
 
 const filteredMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {

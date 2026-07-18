@@ -35,6 +35,11 @@
         <span v-if="entry.targetState.talents.length > 0" class="ucptc-talents">
           天赋目标 {{ entry.targetState.talents.map((talent) => talent.level).join(" / ") }}
         </span>
+        <div v-if="entry.allowCrafting" class="ucptc-options">
+          <v-chip color="var(--tgc-od-green)" size="x-small" variant="tonal">允许合成</v-chip>
+          <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
+          <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用溶媒</v-chip>
+        </div>
         <div class="ucptc-progress-row">
           <v-progress-linear
             :color="fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
@@ -142,7 +147,6 @@ import { computed, ref } from "vue";
 import { WikiMaterialData } from "@/data/index.js";
 
 type UcPlanTargetCardProps = {
-  allowCrafting: boolean;
   canMoveDown: boolean;
   canMoveUp: boolean;
   entry: TGApp.Sqlite.Cultivation.EntryWithItems;
@@ -187,10 +191,7 @@ const displayMaterials = computed<Array<TargetMaterialView>>(() =>
     .map((item) => {
       const result = materialResultMap.value.get(item.materialId);
       const ratio = result?.required
-        ? Math.min(
-            (result.owned + (props.allowCrafting ? result.craftable : 0)) / result.required,
-            1,
-          )
+        ? Math.min((result.owned + result.craftable) / result.required, 1)
         : 0;
       const progress = ratio * 100;
       return {
@@ -249,6 +250,7 @@ function formatCount(count: number): string {
 }
 
 .ucptc-name-row,
+.ucptc-options,
 .ucptc-progress-row,
 .ucptc-actions,
 .ucptc-action-end,
@@ -260,6 +262,11 @@ function formatCount(count: number): string {
 .ucptc-name-row {
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.ucptc-options {
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .ucptc-name {

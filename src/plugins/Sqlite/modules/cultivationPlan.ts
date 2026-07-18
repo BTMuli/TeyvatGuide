@@ -21,8 +21,11 @@ function parseProject(raw: TGApp.Sqlite.Cultivation.ProjectRaw): TGApp.Sqlite.Cu
 function parseEntry(raw: TGApp.Sqlite.Cultivation.EntryRaw): TGApp.Sqlite.Cultivation.Entry {
   return {
     ...raw,
+    allowCrafting: Boolean(raw.allowCrafting),
     currentState: <TGApp.Sqlite.Cultivation.EntryState>JSON.parse(raw.currentState),
     targetState: <TGApp.Sqlite.Cultivation.EntryState>JSON.parse(raw.targetState),
+    useDust: Boolean(raw.useDust),
+    useSolvent: Boolean(raw.useSolvent),
   };
 }
 
@@ -247,6 +250,7 @@ async function removeProject(project: TGApp.Sqlite.Cultivation.Project): Promise
 async function getEntries(
   projectId: string,
 ): Promise<Array<TGApp.Sqlite.Cultivation.EntryWithItems>> {
+  await TGSqlite.updateCultivationEntry();
   const db = await TGSqlite.getDB();
   const [entryRows, items] = await Promise.all([
     db.select<Array<TGApp.Sqlite.Cultivation.EntryRaw>>(
@@ -282,6 +286,7 @@ async function saveEntries(
   projectId: string,
   inputs: Array<TGApp.Sqlite.Cultivation.SaveEntryInput>,
 ): Promise<void> {
+  await TGSqlite.updateCultivationEntry();
   const validInputs = inputs.filter((input) => input.items.some((item) => item.required > 0));
   if (validInputs.length === 0) throw new Error("当前目标无需养成材料");
 
@@ -311,14 +316,18 @@ async function saveEntries(
         statements.push({
           query: `UPDATE CultivationEntry SET
                     name = $1, icon = $2, star = $3, currentState = $4, targetState = $5,
-                    status = 'active', updated = $6
-                  WHERE id = $7;`,
+                    allowCrafting = $6, useDust = $7, useSolvent = $8,
+                    status = 'active', updated = $9
+                  WHERE id = $10;`,
           values: [
             input.name,
             input.icon,
             input.star,
             JSON.stringify(input.currentState),
             JSON.stringify(input.targetState),
+            Number(input.allowCrafting),
+            Number(input.useDust),
+            Number(input.useSolvent),
             now,
             entryId,
           ],
@@ -327,8 +336,12 @@ async function saveEntries(
         statements.push({
           query: `INSERT INTO CultivationEntry(
                     id, projectId, type, itemId, instanceKey, name, icon, star,
-                    currentState, targetState, status, sortOrder, created, updated
-                  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active', $11, $12, $12);`,
+                    currentState, targetState, status, sortOrder,
+                    allowCrafting, useDust, useSolvent, created, updated
+                  ) VALUES (
+                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active', $11,
+                    $12, $13, $14, $15, $15
+                  );`,
           values: [
             entryId,
             projectId,
@@ -341,6 +354,9 @@ async function saveEntries(
             JSON.stringify(input.currentState),
             JSON.stringify(input.targetState),
             nextOrder++,
+            Number(input.allowCrafting),
+            Number(input.useDust),
+            Number(input.useSolvent),
             now,
           ],
         });

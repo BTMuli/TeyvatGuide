@@ -45,11 +45,10 @@
         :key="entry.id"
         :can-move-down="canMoveEntry(entry, 1)"
         :can-move-up="canMoveEntry(entry, -1)"
-        :allow-crafting
         :entry
         :fulfilled="isEntryFulfilled(entry)"
         :has-today-material="hasTodayMaterial(entry)"
-        :materials
+        :materials="entryMaterialResults.get(entry.id) ?? []"
         :priority="entryPriority(entry)"
         :progress="entryProgress(entry)"
         @edit="emits('edit', $event)"
@@ -71,12 +70,15 @@ import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import { computed, ref } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
-import { getServerDay, isMaterialAvailableToday } from "@utils/cultivationPlan.js";
+import {
+  buildCultivationResults,
+  getServerDay,
+  isMaterialAvailableToday,
+} from "@utils/cultivationPlan.js";
 
 type UcPlanTargetListProps = {
-  allowCrafting: boolean;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
-  materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  inventory: ReadonlyMap<number, number>;
   projectName: string;
   timezone: number;
   uid: number;
@@ -103,8 +105,21 @@ const activeCount = computed<number>(
 const completedCount = computed<number>(
   () => props.entries.filter((entry) => entry.status === "completed").length,
 );
-const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
-  () => new Map(props.materials.map((material) => [material.id, material])),
+const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
+  () =>
+    new Map(
+      props.entries.map((entry) => [
+        entry.id,
+        buildCultivationResults(
+          entry.items.map((item) => ({ id: item.materialId, count: item.required })),
+          props.inventory,
+          WikiMaterialData,
+          entry.allowCrafting,
+          entry.useDust,
+          entry.useSolvent,
+        ),
+      ]),
+    ),
 );
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort((a, b) => entrySortRank(a) - entrySortRank(b)),
@@ -126,16 +141,18 @@ function entryTypeLabel(type: TGApp.Sqlite.Cultivation.EntryType): string {
 
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 100;
-  const required = entry.items.reduce((total, item) => total + item.required, 0);
-  if (required === 0) return 100;
-  const prepared = entry.items.reduce((total, item) => {
-    const material = materialResultMap.value.get(item.materialId);
+  if (entry.items.length === 0) return 100;
+  const materialResultMap = new Map(
+    (entryMaterialResults.value.get(entry.id) ?? []).map((material) => [material.id, material]),
+  );
+  const progress = entry.items.reduce((total, item) => {
+    const material = materialResultMap.get(item.materialId);
     if (!material || material.required <= 0) return total;
-    const available = material.owned + (props.allowCrafting ? material.craftable : 0);
+    const available = material.owned + material.craftable;
     const ratio = Math.min(available / material.required, 1);
-    return total + item.required * ratio;
+    return total + ratio;
   }, 0);
-  return Math.min((prepared / required) * 100, 100);
+  return Math.min((progress / entry.items.length) * 100, 100);
 }
 
 function isEntryFulfilled(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean {

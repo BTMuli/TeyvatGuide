@@ -41,6 +41,7 @@ class Sqlite {
     "UserBagRelic",
   ];
   private db: Database | null = null;
+  private cultivationEntrySchemaUpdate: Promise<void> | null = null;
   private static instance: Sqlite | null = null;
 
   static getInstance(): Sqlite {
@@ -170,6 +171,7 @@ class Sqlite {
     for (const item of sqlD) await db.execute(item);
     // 检测是否存在字段
     await this.updateAbyss();
+    await this.updateCultivationEntry();
     if (upt !== undefined) {
       await this.saveAppData("dataUpdated", upt);
     }
@@ -188,6 +190,48 @@ class Sqlite {
       await TGLogger.Error(JSON.stringify(e));
       const sql = "ALTER TABLE SpiralAbyss ADD skippedFloor TEXT DEFAULT ''";
       await db.execute(sql);
+    }
+  }
+
+  /**
+   * 更新养成目标合成配置字段
+   * @since Beta v0.11.2
+   * @returns 无返回值
+   */
+  public async updateCultivationEntry(): Promise<void> {
+    if (this.cultivationEntrySchemaUpdate === null) {
+      this.cultivationEntrySchemaUpdate = this.ensureCultivationEntrySchema();
+    }
+    try {
+      await this.cultivationEntrySchemaUpdate;
+    } catch (error) {
+      this.cultivationEntrySchemaUpdate = null;
+      throw error;
+    }
+  }
+
+  private async ensureCultivationEntrySchema(): Promise<void> {
+    const db = await this.getDB();
+    const columns = await db.select<Array<{ name: string }>>(
+      "PRAGMA table_info(CultivationEntry);",
+    );
+    const columnNames = new Set(columns.map((column) => column.name));
+    const additions = <const>[
+      {
+        name: "allowCrafting",
+        sql: "ALTER TABLE CultivationEntry ADD allowCrafting BOOLEAN NOT NULL DEFAULT true;",
+      },
+      {
+        name: "useDust",
+        sql: "ALTER TABLE CultivationEntry ADD useDust BOOLEAN NOT NULL DEFAULT false;",
+      },
+      {
+        name: "useSolvent",
+        sql: "ALTER TABLE CultivationEntry ADD useSolvent BOOLEAN NOT NULL DEFAULT false;",
+      },
+    ];
+    for (const addition of additions) {
+      if (!columnNames.has(addition.name)) await db.execute(addition.sql);
     }
   }
 

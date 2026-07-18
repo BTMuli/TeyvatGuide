@@ -33,6 +33,16 @@
           />
           <span>使用嬗变之尘</span>
         </div>
+        <div class="ucm-crafting-control">
+          <v-checkbox-btn
+            v-model="useSolvent"
+            :disabled="!allowCrafting"
+            color="var(--tgc-od-green)"
+            density="compact"
+            title="允许使用含异梦溶媒的转换配方"
+          />
+          <span>使用异梦溶媒</span>
+        </div>
       </div>
     </div>
 
@@ -107,6 +117,7 @@ const props = withDefaults(defineProps<UcMaterialResultProps>(), {
 });
 const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
 const useDust = defineModel<boolean>("useDust", { required: true });
+const useSolvent = defineModel<boolean>("useSolvent", { required: true });
 const materialOverlayVisible = ref<boolean>(false);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();

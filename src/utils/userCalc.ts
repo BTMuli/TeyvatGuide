@@ -34,6 +34,8 @@ type CraftingContext = {
   materials: ReadonlyMap<number, TGApp.App.Material.WikiItem>;
   /** 是否允许使用含嬗变之尘的配方 */
   useDust: boolean;
+  /** 是否允许使用含异梦溶媒的配方 */
+  useSolvent: boolean;
 };
 
 const MORA_ID = 202;
@@ -41,6 +43,7 @@ const HEROES_WIT_ID = 104003;
 const MYSTIC_ENHANCEMENT_ORE_ID = 104013;
 const CROWN_OF_INSIGHT_ID = 104319;
 const DUST_OF_AZOTH_ID = 104201;
+const DREAM_SOLVENT_ID = 113021;
 const CONSTELLATION_TALENT_BONUS = 3;
 
 const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
@@ -585,6 +588,12 @@ function tryCraftMaterial(
     ) {
       continue;
     }
+    if (
+      !context.useSolvent &&
+      recipe.source.some((source) => Number(source.id) === DREAM_SOLVENT_ID)
+    ) {
+      continue;
+    }
     let recipeContext: CraftingContext | undefined = {
       ...context,
       inventory: new Map(context.inventory),
@@ -612,6 +621,7 @@ function tryCraftMaterial(
  * @param inventory - 背包材料数量
  * @param materials - 材料 Wiki 数据
  * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @param useSolvent - 是否允许使用含异梦溶媒的配方
  * @returns 各需求材料可通过合成补足的数量及实际消耗
  * @since Beta v0.11.2
  */
@@ -620,6 +630,7 @@ export function calculateCraftableMaterials(
   inventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   useDust = false,
+  useSolvent = false,
 ): Map<number, CraftableMaterial> {
   const requiredCounts = new Map<number, number>();
   for (const requirement of requirements) add(requiredCounts, requirement.id, requirement.count);
@@ -628,6 +639,7 @@ export function calculateCraftableMaterials(
     inventory: new Map(inventory),
     materials: new Map(materials.map((material) => <const>[material.id, material])),
     useDust,
+    useSolvent,
   };
   for (const [id, required] of requiredCounts) {
     const owned = context.inventory.get(id) ?? 0;

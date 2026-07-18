@@ -29,6 +29,7 @@ export function aggregateEntryMaterials(
  * @param materials - 材料 Wiki 数据
  * @param allowCrafting - 是否允许合成
  * @param useDust - 是否允许使用嬗变之尘
+ * @param useSolvent - 是否允许使用异梦溶媒
  * @returns 材料完成情况
  */
 export function buildCultivationResults(
@@ -37,9 +38,10 @@ export function buildCultivationResults(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   allowCrafting: boolean,
   useDust: boolean,
+  useSolvent: boolean,
 ): Array<TGApp.App.UserCalc.ResultMaterial> {
   const craftableMaterials: Map<number, CraftableMaterial> = allowCrafting
-    ? userCalc.craft(requirements, inventory, materials, useDust)
+    ? userCalc.craft(requirements, inventory, materials, useDust, useSolvent)
     : new Map();
   return requirements
     .map((required) => {

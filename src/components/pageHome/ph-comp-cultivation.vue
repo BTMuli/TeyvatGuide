@@ -140,6 +140,7 @@ onMounted(async () => {
       WikiMaterialData,
       true,
       false,
+      false,
     );
   } finally {
     emits("entries-loaded", entries.value);

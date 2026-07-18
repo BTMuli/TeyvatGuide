@@ -10,6 +10,19 @@ declare namespace TGApp.Sqlite.Cultivation {
   /** 养成目标状态 */
   type EntryStatus = "active" | "completed";
 
+  /**
+   * 养成计划合成配置
+   * @since Beta v0.11.2
+   */
+  type CraftingOptions = {
+    /** 是否允许合成材料 */
+    allowCrafting: boolean;
+    /** 是否允许使用嬗变之尘 */
+    useDust: boolean;
+    /** 是否允许使用异梦溶媒 */
+    useSolvent: boolean;
+  };
+
   /** 天赋等级状态 */
   type TalentState = {
     /** 天赋 ID */
@@ -82,6 +95,12 @@ declare namespace TGApp.Sqlite.Cultivation {
     status: EntryStatus;
     /** 排序值 */
     sortOrder: number;
+    /** 是否允许合成材料 */
+    allowCrafting: 0 | 1;
+    /** 是否允许使用嬗变之尘 */
+    useDust: 0 | 1;
+    /** 是否允许使用异梦溶媒 */
+    useSolvent: 0 | 1;
     /** 创建时间 */
     created: string;
     /** 更新时间 */
@@ -89,12 +108,16 @@ declare namespace TGApp.Sqlite.Cultivation {
   };
 
   /** 养成目标记录 */
-  type Entry = Omit<EntryRaw, "currentState" | "targetState"> & {
-    /** 当前状态 */
-    currentState: EntryState;
-    /** 目标状态 */
-    targetState: EntryState;
-  };
+  type Entry = Omit<
+    EntryRaw,
+    "allowCrafting" | "currentState" | "targetState" | "useDust" | "useSolvent"
+  > &
+    CraftingOptions & {
+      /** 当前状态 */
+      currentState: EntryState;
+      /** 目标状态 */
+      targetState: EntryState;
+    };
 
   /** 目标材料记录 */
   type Item = {
@@ -113,7 +136,7 @@ declare namespace TGApp.Sqlite.Cultivation {
   };
 
   /** 保存养成目标的输入数据 */
-  type SaveEntryInput = {
+  type SaveEntryInput = CraftingOptions & {
     /** 目标类型 */
     type: EntryType;
     /** 角色或武器 ID */

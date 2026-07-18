@@ -29,6 +29,9 @@ create table if not exists CultivationEntry
     targetState  text    not null,
     status       text    not null default 'active' check (status in ('active', 'completed')),
     sortOrder    integer not null default 0,
+    allowCrafting boolean not null default true,
+    useDust       boolean not null default false,
+    useSolvent    boolean not null default false,
     created      text    not null,
     updated      text    not null,
     unique (projectId, type, itemId, instanceKey)

@@ -447,6 +447,7 @@ async function createBatchPlanInput(
   );
   if (materials.length === 0) return undefined;
   return {
+    allowCrafting: true,
     type: "avatar",
     itemId: role.cid,
     instanceKey: "",
@@ -477,6 +478,8 @@ async function createBatchPlanInput(
       materialId: material.id,
       required: material.count,
     })),
+    useDust: false,
+    useSolvent: false,
   };
 }
 
@@ -504,6 +507,7 @@ function createBatchWeaponPlanInput(
   );
   if (materials.length === 0) return undefined;
   return {
+    allowCrafting: true,
     type: "weapon",
     itemId: weapon.id,
     instanceKey: `role-${role.cid}-${weapon.id}`,
@@ -530,6 +534,8 @@ function createBatchWeaponPlanInput(
       materialId: material.id,
       required: material.count,
     })),
+    useDust: false,
+    useSolvent: false,
   };
 }
 

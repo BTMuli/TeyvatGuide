@@ -132,9 +132,8 @@
       <v-window v-model="viewTab" class="cultivation-tab-window">
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
-            :allow-crafting="planAllowCrafting"
             :entries="planEntries"
-            :materials="planResultMaterials"
+            :inventory="bagMaterials"
             :project-name="currentProject?.name ?? ''"
             :timezone="currentProject?.timezone ?? currentTimezone"
             :uid="currentUid ?? 0"
@@ -150,6 +149,7 @@
           <UcPlanMaterialResult
             v-model:allow-crafting="planAllowCrafting"
             v-model:use-dust="planUseDust"
+            v-model:use-solvent="planUseSolvent"
             :bag-materials="bagMaterialDetails"
             :materials="planResultMaterials"
             :timezone="currentProject?.timezone ?? currentTimezone"
@@ -252,6 +252,7 @@
           <UcMaterialResult
             v-model:allow-crafting="allowCrafting"
             v-model:use-dust="useDust"
+            v-model:use-solvent="useSolvent"
             :bag-materials="resultBagMaterialDetails"
             :empty-text="resultEmptyText"
             :loading="apiLoading"
@@ -337,8 +338,10 @@ const weaponTargetAscended = ref<boolean>(false);
 const useBagWeaponSource = ref<boolean>(true);
 const allowCrafting = ref<boolean>(true);
 const useDust = ref<boolean>(false);
+const useSolvent = ref<boolean>(false);
 const planAllowCrafting = ref<boolean>(true);
 const planUseDust = ref<boolean>(false);
+const planUseSolvent = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
 const projects = shallowRef<Array<TGApp.Sqlite.Cultivation.Project>>([]);
 const planEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
@@ -618,6 +621,7 @@ const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
     WikiMaterialData,
     allowCrafting.value,
     useDust.value,
+    useSolvent.value,
   ),
 );
 const planRequiredMaterials = computed<Array<CultivationMaterial>>(() =>
@@ -630,6 +634,7 @@ const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>((
     WikiMaterialData,
     planAllowCrafting.value,
     planUseDust.value,
+    planUseSolvent.value,
   ),
 );
 const planMissingKinds = computed<number>(
@@ -1229,6 +1234,7 @@ function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
     level: talentTargetLevels.value[index] ?? skill.level,
   }));
   return {
+    allowCrafting: allowCrafting.value,
     type: "avatar",
     itemId: character.value,
     instanceKey: "",
@@ -1255,6 +1261,8 @@ function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
       materialId: material.id,
       required: material.count,
     })),
+    useDust: useDust.value,
+    useSolvent: useSolvent.value,
   };
 }
 
@@ -1266,6 +1274,7 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
     : weaponRequiredMaterials.value;
   if (requirements.length === 0) return undefined;
   return {
+    allowCrafting: allowCrafting.value,
     type: "weapon",
     itemId: weapon.wiki.id,
     instanceKey: weapon.guid ?? (weapon.key.startsWith("role-") ? weapon.key : ""),
@@ -1290,6 +1299,8 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
       materialId: material.id,
       required: material.count,
     })),
+    useDust: useDust.value,
+    useSolvent: useSolvent.value,
   };
 }
 
@@ -1329,6 +1340,9 @@ async function saveToPlan(): Promise<void> {
 
 function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
   editingEntry.value = entry;
+  allowCrafting.value = entry.allowCrafting;
+  useDust.value = entry.useDust;
+  useSolvent.value = entry.useSolvent;
   viewTab.value = "calculator";
   if (entry.type === "avatar") {
     selectedCharacterId.value = entry.itemId;
