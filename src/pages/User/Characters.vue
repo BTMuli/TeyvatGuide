@@ -21,6 +21,25 @@
           刷新
         </v-btn>
         <v-btn
+          :color="batchMode ? 'var(--tgc-od-orange)' : undefined"
+          class="uc-top-btn"
+          prepend-icon="mdi-playlist-plus"
+          variant="elevated"
+          @click="toggleBatchMode"
+        >
+          {{ batchMode ? "取消批量" : "批量养成" }}
+        </v-btn>
+        <v-btn
+          v-if="batchMode"
+          :disabled="batchSelectedIds.size === 0"
+          class="uc-top-btn"
+          prepend-icon="mdi-target"
+          variant="elevated"
+          @click="showBatchTarget = true"
+        >
+          设置目标（{{ batchSelectedIds.size }}）
+        </v-btn>
+        <v-btn
           v-model:loading="loadShare"
           :disabled="enableShare"
           class="uc-top-btn"
@@ -130,12 +149,22 @@
     </div>
     <div class="uc-divider" />
     <div v-if="!isEmpty" class="uc-grid">
-      <TuaAvatarBox
-        v-for="(role, index) in selectedList"
-        :key="index"
-        :role
-        @click="selectRole(role)"
-      />
+      <div
+        v-for="role in selectedList"
+        :key="role.cid"
+        :class="{ selected: batchSelectedIds.has(role.cid) }"
+        class="uc-avatar-select"
+        @click="handleRoleClick(role)"
+      >
+        <TuaAvatarBox :role />
+        <v-checkbox-btn
+          v-if="batchMode"
+          :model-value="batchSelectedIds.has(role.cid)"
+          class="uc-avatar-check"
+          color="var(--tgc-od-orange)"
+          @click.stop="toggleBatchRole(role.cid)"
+        />
+      </div>
     </div>
     <div v-else class="uc-empty">
       <img alt="empty" src="/UI/app/empty.webp" />
@@ -152,17 +181,26 @@
     @to-avatar="selectRole"
   />
   <UavSelect v-model:show="showSelect" :model-value="selectOpts" @select="handleSelect" />
+  <UavBatchTarget
+    v-model:show="showBatchTarget"
+    :loading="batchSaving"
+    :model-value="batchTarget"
+    :selected-count="batchSelectedIds.size"
+    @confirm="saveBatchToPlan"
+  />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
+import UavBatchTarget from "@comp/userAvatar/uav-batch-target.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
 import TuaSelectVals from "@comp/userAvatar/tua-select-vals.vue";
 import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import recordReq from "@req/recordReq.js";
+import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
@@ -171,14 +209,28 @@ import { getRfAc } from "@utils/acUtils.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
+import userCalc from "@utils/userCalc.js";
+import { getUidServerTimezone } from "@utils/cultivationPlan.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
-import { AppCharacterData } from "@/data/index.js";
+import { AppCharacterData, getWikiCharacterById, wwWeapon } from "@/data/index.js";
 import TGHttps from "@utils/TGHttps.js";
 
 type TabItem = { label: string; value: string };
 type OverviewItem = { element: string; cnt: number; label: string };
+type BatchTarget = {
+  level: number;
+  talentLevel: number;
+  ascended: boolean;
+  weapon: {
+    enabled: boolean;
+    level: number;
+    ascended: boolean;
+  };
+};
+
+const BATCH_EXCLUDED_CHARACTER_IDS = new Set([10000005, 10000007, 10000117, 10000118]);
 
 const modeList: Readonly<Array<TabItem>> = [
   { label: "经典视图", value: "classic" },
@@ -191,12 +243,22 @@ const { cookie, account } = storeToRefs(useUserStore());
 const loadData = ref<boolean>(false);
 const loadShare = ref<boolean>(false);
 const loadDel = ref<boolean>(false);
+const batchMode = ref<boolean>(false);
+const batchSaving = ref<boolean>(false);
+const batchTarget = ref<BatchTarget>({
+  level: 80,
+  talentLevel: 8,
+  ascended: true,
+  weapon: { enabled: false, level: 90, ascended: false },
+});
+const batchSelectedIds = ref<Set<number>>(new Set());
 
 const version = ref<string>();
 const isEmpty = ref<boolean>(true);
 const showOverlay = ref<boolean>(false);
 const selectIndex = ref<number>(0);
 const showSelect = ref<boolean>(false);
+const showBatchTarget = ref<boolean>(false);
 const showMode = ref<"classic" | "card" | "dev">("dev");
 const uidCur = ref<string>();
 
@@ -223,7 +285,7 @@ const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 
 const enableShare = computed<boolean>(
-  () => showOverlay.value || showSelect.value || loadData.value,
+  () => showOverlay.value || showSelect.value || showBatchTarget.value || loadData.value,
 );
 const isSelected = computed<boolean>(() => selectedList.value.length !== roleList.value.length);
 
@@ -323,6 +385,190 @@ function resetList(): void {
   }
 }
 
+function toggleBatchMode(): void {
+  batchMode.value = !batchMode.value;
+  showBatchTarget.value = false;
+  batchSelectedIds.value = new Set();
+}
+
+function toggleBatchRole(characterId: number): void {
+  const next = new Set(batchSelectedIds.value);
+  if (next.has(characterId)) next.delete(characterId);
+  else next.add(characterId);
+  batchSelectedIds.value = next;
+}
+
+function handleRoleClick(role: TGApp.Sqlite.Character.TableTrans): void {
+  if (batchMode.value) {
+    toggleBatchRole(role.cid);
+    return;
+  }
+  selectRole(role);
+}
+
+async function createBatchPlanInput(
+  role: TGApp.Sqlite.Character.TableTrans,
+  target: BatchTarget,
+): Promise<TGApp.Sqlite.Cultivation.SaveEntryInput | undefined> {
+  if (BATCH_EXCLUDED_CHARACTER_IDS.has(role.cid)) return undefined;
+  const wiki = await getWikiCharacterById(role.cid);
+  if (!wiki) return undefined;
+  const levelableSkillIds = new Set(
+    wiki.skills.filter((skill) => skill.maxLv > 1).map((skill) => skill.id),
+  );
+  const skills = role.skills.filter(
+    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
+  );
+  const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
+  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
+  const currentTalentLevels = userCalc.correctTalentLevels(
+    skills.map((skill) => skill.level),
+    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
+    avatar.actived_constellation_num,
+  );
+  const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
+  const currentAscended = userCalc.isAscendedAtThreshold(avatar.level, currentPromoteLevel);
+  const targetLevel = Math.max(avatar.level, target.level);
+  const targetAscended =
+    (targetLevel === avatar.level && currentAscended) ||
+    (targetLevel === target.level && target.ascended);
+  const targetTalents = skills.map((skill, index) => ({
+    id: skill.skill_id,
+    name: skill.name,
+    level: Math.max(Math.min(currentTalentLevels[index] ?? skill.level, 10), target.talentLevel),
+  }));
+  const materials = userCalc.avatar(
+    role,
+    wiki,
+    targetLevel,
+    targetTalents.map((talent) => talent.level),
+    currentPromoteLevel,
+    targetAscended,
+  );
+  if (materials.length === 0) return undefined;
+  return {
+    type: "avatar",
+    itemId: role.cid,
+    instanceKey: "",
+    name: avatar.name,
+    icon: `/WIKI/character/${role.cid}.webp`,
+    star: wiki.star,
+    currentState: {
+      level: avatar.level,
+      promoteLevel: currentPromoteLevel,
+      ascended: currentAscended,
+      talents: skills.map((skill, index) => ({
+        id: skill.skill_id,
+        name: skill.name,
+        level: Math.min(currentTalentLevels[index] ?? skill.level, 10),
+      })),
+    },
+    targetState: {
+      level: targetLevel,
+      promoteLevel: userCalc.resolvePromoteLevel(
+        targetLevel,
+        undefined,
+        userCalc.isAscensionLevel(targetLevel) ? targetAscended : undefined,
+      ),
+      ascended: targetAscended,
+      talents: targetTalents,
+    },
+    items: materials.map((material) => ({
+      materialId: material.id,
+      required: material.count,
+    })),
+  };
+}
+
+function createBatchWeaponPlanInput(
+  role: TGApp.Sqlite.Character.TableTrans,
+  target: BatchTarget,
+): TGApp.Sqlite.Cultivation.SaveEntryInput | undefined {
+  const weapon = role.weapon;
+  const wiki = wwWeapon.find((item) => item.id === weapon.id);
+  if (!wiki) return undefined;
+  const currentPromoteLevel = weapon.promote_level;
+  const currentAscended = userCalc.isAscendedAtThreshold(weapon.level, currentPromoteLevel);
+  const weaponMaxLevel = userCalc.weaponMaxLevel(wiki.star);
+  const configuredTargetLevel = Math.min(target.weapon.level, weaponMaxLevel);
+  const targetLevel = Math.max(weapon.level, configuredTargetLevel);
+  const targetAscended =
+    (targetLevel === weapon.level && currentAscended) ||
+    (targetLevel === target.weapon.level && target.weapon.ascended);
+  const materials = userCalc.weapon(
+    wiki,
+    weapon.level,
+    currentPromoteLevel,
+    targetLevel,
+    targetAscended,
+  );
+  if (materials.length === 0) return undefined;
+  return {
+    type: "weapon",
+    itemId: weapon.id,
+    instanceKey: `role-${role.cid}-${weapon.id}`,
+    name: weapon.name,
+    icon: `/WIKI/weapon/${weapon.id}.webp`,
+    star: wiki.star,
+    currentState: {
+      level: weapon.level,
+      promoteLevel: currentPromoteLevel,
+      ascended: currentAscended,
+      talents: [],
+    },
+    targetState: {
+      level: targetLevel,
+      promoteLevel: userCalc.resolvePromoteLevel(
+        targetLevel,
+        undefined,
+        userCalc.isAscensionLevel(targetLevel) ? targetAscended : undefined,
+      ),
+      ascended: targetAscended,
+      talents: [],
+    },
+    items: materials.map((material) => ({
+      materialId: material.id,
+      required: material.count,
+    })),
+  };
+}
+
+async function saveBatchToPlan(target: BatchTarget): Promise<void> {
+  if (!uidCur.value || batchSelectedIds.value.size === 0 || batchSaving.value) return;
+  const uid = Number(uidCur.value);
+  batchTarget.value = target;
+  batchSaving.value = true;
+  try {
+    const rolesToSave = roleList.value.filter((role) => batchSelectedIds.value.has(role.cid));
+    const avatarInputs = (
+      await Promise.all(rolesToSave.map(async (role) => await createBatchPlanInput(role, target)))
+    ).filter((input): input is TGApp.Sqlite.Cultivation.SaveEntryInput => input !== undefined);
+    const weaponInputs = target.weapon.enabled
+      ? rolesToSave
+          .map((role) => createBatchWeaponPlanInput(role, target))
+          .filter((input): input is TGApp.Sqlite.Cultivation.SaveEntryInput => input !== undefined)
+      : [];
+    const inputs = [...avatarInputs, ...weaponInputs];
+    if (inputs.length === 0) {
+      showSnackbar.warn("所选角色与武器已达到养成目标，或暂不支持加入计划");
+      return;
+    }
+    const project = await TSCultivationPlan.ensureCurrentProject(uid, getUidServerTimezone(uid));
+    await TSCultivationPlan.saveEntries(project.id, inputs);
+    const savedTargets: Array<string> = [];
+    if (avatarInputs.length > 0) savedTargets.push(`${avatarInputs.length} 个角色`);
+    if (weaponInputs.length > 0) savedTargets.push(`${weaponInputs.length} 件武器`);
+    showSnackbar.success(`已将 ${savedTargets.join("、")}加入“${project.name}”`);
+    showBatchTarget.value = false;
+    batchMode.value = false;
+    batchSelectedIds.value = new Set();
+  } catch (error) {
+    showSnackbar.error(`批量加入养成计划失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    batchSaving.value = false;
+  }
+}
+
 function getOrderedList(
   data: Array<TGApp.Sqlite.Character.TableTrans>,
 ): Array<TGApp.Sqlite.Character.TableTrans> {
@@ -373,6 +619,10 @@ function getElementCnt(element: string): number {
 }
 
 async function hideAllOverlay(): Promise<void> {
+  if (showBatchTarget.value) {
+    showBatchTarget.value = false;
+    await new Promise<void>((resolve) => setTimeout(resolve, 500));
+  }
   if (showSelect.value) {
     showSelect.value = false;
     await new Promise<void>((resolve) => setTimeout(resolve, 500));
@@ -769,6 +1019,28 @@ function handleSwitch(next: boolean): void {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(210px, 0.2fr));
+}
+
+.uc-avatar-select {
+  position: relative;
+  min-width: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+
+  &.selected {
+    border-color: var(--tgc-od-orange);
+    box-shadow: 0 0 8px var(--common-shadow-2);
+  }
+}
+
+.uc-avatar-check {
+  position: absolute;
+  z-index: 2;
+  top: 4px;
+  right: 4px;
+  border-radius: 50%;
+  background: var(--box-bg-1);
 }
 
 .uc-empty {

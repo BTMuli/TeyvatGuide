@@ -1267,7 +1267,7 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
   return {
     type: "weapon",
     itemId: weapon.wiki.id,
-    instanceKey: weapon.guid ?? "",
+    instanceKey: weapon.guid ?? (weapon.key.startsWith("role-") ? weapon.key : ""),
     name: weapon.wiki.name,
     icon: `/WIKI/weapon/${weapon.wiki.id}.webp`,
     star: weapon.wiki.star,
@@ -1337,7 +1337,9 @@ function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
   const weapon = weaponOptions.value.find(
     (option) =>
       option.wiki.id === entry.itemId &&
-      (entry.instanceKey.length === 0 || option.guid === entry.instanceKey),
+      (entry.instanceKey.length === 0 ||
+        option.guid === entry.instanceKey ||
+        option.key === entry.instanceKey),
   );
   if (weapon) {
     selectedWeaponKey.value = weapon.key;
@@ -1480,7 +1482,9 @@ function createWeaponRefreshInput(
     (option) =>
       !option.key.startsWith("wiki-") &&
       option.wiki.id === entry.itemId &&
-      (entry.instanceKey.length === 0 || option.guid === entry.instanceKey),
+      (entry.instanceKey.length === 0 ||
+        option.guid === entry.instanceKey ||
+        option.key === entry.instanceKey),
   );
   if (!weapon) return undefined;
   const requirements = userCalc.weapon(
