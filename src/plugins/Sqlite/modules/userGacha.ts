@@ -6,7 +6,6 @@
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TGLogger from "@utils/TGLogger.js";
-import Database from "@tauri-apps/plugin-sql";
 import { getUtc8Time, getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 import { ref, type Ref } from "vue";
 
@@ -15,19 +14,21 @@ import TGSqlite from "../index.js";
 /**
  * 批量插入祈愿数据
  * @since Beta v0.11.2
- * @param db - 数据库
  * @param uid - 用户UID
  * @param data - 祈愿数据
  * @param size - batchSize
  * @param cnt - cntRef
  */
 async function insertGachaList(
-  db: Database,
   uid: string,
   data: Array<TGApp.Plugins.UIGF.GachaItem>,
   size: number,
   cnt: Ref<number>,
 ): Promise<void> {
+  const statements: Array<{
+    query: string;
+    values: Array<string | number | null>;
+  }> = [];
   for (let i = 0; i < data.length; i += size) {
     const batch = data.slice(i, i + size);
     const batchParams: Array<string | number | null> = [];
@@ -51,26 +52,27 @@ async function insertGachaList(
         return `(${Array.from({ length: 11 }, (_, index) => `$${paramOffset + index + 1}`).join(", ")})`;
       })
       .join(",\n");
-    // plugin-sql 后端使用连接池，单条 UPSERT 可避免跨 execute 的事务状态错位。
-    await db.execute(
-      `INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
-                                name, type, rank, id, uigfType, updated)
-       VALUES ${valueSql}
-       ON CONFLICT(id) DO UPDATE SET
-         uid = excluded.uid,
-         gachaType = excluded.gachaType,
-         itemId = excluded.itemId,
-         count = excluded.count,
-         time = excluded.time,
-         name = excluded.name,
-         type = excluded.type,
-         rank = excluded.rank,
-         uigfType = excluded.uigfType,
-         updated = excluded.updated;`,
-      batchParams,
-    );
-    cnt.value += batch.length;
+    statements.push({
+      query: `INSERT INTO GachaRecords(uid, gachaType, itemId, count, time,
+                                      name, type, rank, id, uigfType, updated)
+              VALUES ${valueSql}
+              ON CONFLICT(id) DO UPDATE SET
+                uid = excluded.uid,
+                gachaType = excluded.gachaType,
+                itemId = excluded.itemId,
+                count = excluded.count,
+                time = excluded.time,
+                name = excluded.name,
+                type = excluded.type,
+                rank = excluded.rank,
+                uigfType = excluded.uigfType,
+                updated = excluded.updated;`,
+      values: batchParams,
+    });
   }
+  if (statements.length === 0) return;
+  await TGSqlite.executeTransaction(statements);
+  cnt.value += data.length;
 }
 
 /**
@@ -274,7 +276,6 @@ async function mergeUIGF(
   data: Array<TGApp.Plugins.UIGF.GachaItem>,
   showProgress: boolean = false,
 ): Promise<void> {
-  const db = await TGSqlite.getDB();
   const len = data.length;
   const cnt = ref<number>(0);
   let timer: NodeJS.Timeout | null = null;
@@ -291,7 +292,7 @@ async function mergeUIGF(
   }
   try {
     const transformed = data.map((g) => transGacha(g));
-    await insertGachaList(db, uid, transformed, 100, cnt);
+    await insertGachaList(uid, transformed, 100, cnt);
   } catch (e) {
     await TGLogger.Error(`[UserGacha][mergeUIGF] 合并祈愿数据异常`);
     await TGLogger.Error(`[UserGacha][mergeUIGF] UID: ${uid}, 数据量: ${data.length}`);
@@ -316,7 +317,6 @@ async function mergeUIGF4(
   data: TGApp.Plugins.UIGF.GachaHk4e,
   showProgress: boolean = false,
 ): Promise<void> {
-  const db = await TGSqlite.getDB();
   const len = data.list.length;
   const cnt = ref<number>(0);
   let timer: NodeJS.Timeout | null = null;
@@ -333,7 +333,7 @@ async function mergeUIGF4(
   }
   const uid = data.uid.toString();
   const transformed = data.list.map((g) => transGacha(g, data.timezone));
-  await insertGachaList(db, uid, transformed, 100, cnt);
+  await insertGachaList(uid, transformed, 100, cnt);
   if (timer) {
     clearInterval(timer);
     await showLoading.update(`[100%] 完成`, { timeout: 0 });
