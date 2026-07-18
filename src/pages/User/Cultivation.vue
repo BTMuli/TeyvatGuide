@@ -228,7 +228,7 @@
               :level-options="avatarLevelOptions"
               :options="characterOptions"
               :selected-character="selectedCharacter"
-              :skills="mainSkills"
+              :skills="displaySkills"
               :target-at-ascension-level="avatarTargetAtAscensionLevel"
               :weapon-type="selectedRoleWeaponType"
             />
@@ -518,10 +518,30 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
     id: skill.skill_id,
     name: skill.name,
     icon: skill.icon,
-    level: Math.min(skill.level, 10),
+    level: skill.level,
     maxLevel: 10,
   }));
 });
+const talentLucLevels = computed<Array<number | null>>(() => {
+  if (!avatarWiki.value) return mainSkills.value.map(() => null);
+  const wikiSkillMap = new Map(avatarWiki.value.skills.map((skill) => [skill.id, skill]));
+  return mainSkills.value.map((skill) => wikiSkillMap.get(skill.id)?.luc ?? null);
+});
+const currentTalentLevels = computed<Array<number>>(() => {
+  const levels = mainSkills.value.map((skill) => skill.level);
+  if (useApiCalculation.value) return levels;
+  return userCalc.correctTalentLevels(
+    levels,
+    talentLucLevels.value,
+    selectedCharacter.value?.constellation ?? 0,
+  );
+});
+const displaySkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() =>
+  mainSkills.value.map((skill, index) => ({
+    ...skill,
+    level: currentTalentLevels.value[index] ?? skill.level,
+  })),
+);
 const avatarLevelOptions = computed<Array<number>>(() => {
   if (!selectedCharacter.value) return [];
   return createLevelOptions(selectedSyncAvatar.value?.max_level ?? 90);
@@ -567,23 +587,13 @@ const weaponCurrentPromoteLevel = computed<number>(() => {
 
 const avatarRequiredMaterials = computed<Array<CultivationMaterial>>(() => {
   if (!selectedCharacter.value || !avatarWiki.value) return [];
-  if (!selectedRole.value) {
-    return userCalc.avatarFromState(
-      avatarWiki.value,
-      selectedCharacter.value.level,
-      avatarCurrentPromoteLevel.value,
-      mainSkills.value.map((skill) => skill.level),
-      avatarTargetLevel.value,
-      talentTargetLevels.value,
-      avatarTargetAscended.value,
-    );
-  }
-  return userCalc.avatar(
-    selectedRole.value,
+  return userCalc.avatarFromState(
     avatarWiki.value,
+    selectedCharacter.value.level,
+    avatarCurrentPromoteLevel.value,
+    currentTalentLevels.value,
     avatarTargetLevel.value,
     talentTargetLevels.value,
-    avatarCurrentPromoteLevel.value,
     avatarTargetAscended.value,
   );
 });
@@ -841,6 +851,7 @@ function createApiParams(): TGApp.Game.Calculate.Params | undefined {
       talentTargetLevels.value[index] ?? skill.level,
     ]),
   );
+  const currentTalentLevelMap = new Map(mainSkills.value.map((skill) => [skill.id, skill.level]));
   const weapon: TGApp.Game.Calculate.WeaponTarget | null = selectedWeapon.value
     ? {
         ...avatar.weapon,
@@ -856,7 +867,10 @@ function createApiParams(): TGApp.Game.Calculate.Params | undefined {
         avatar_level_target: avatarTargetLevel.value,
         element_attr_id: avatar.element_attr_id,
         skill_list: avatar.skill_list.map((skill) => {
-          const levelCurrent = Math.max(skill.level_current, 1);
+          const levelCurrent = Math.max(
+            currentTalentLevelMap.get(skill.id) ?? skill.level_current,
+            1,
+          );
           return {
             id: skill.group_id,
             level_current: levelCurrent,
@@ -1203,10 +1217,10 @@ function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
     ? apiAvatarRequirements.value
     : avatarRequiredMaterials.value;
   if (requirements.length === 0) return undefined;
-  const currentTalents = mainSkills.value.map((skill) => ({
+  const currentTalents = mainSkills.value.map((skill, index) => ({
     id: skill.id,
     name: skill.name,
-    level: skill.level,
+    level: currentTalentLevels.value[index] ?? skill.level,
   }));
   const targetTalents = mainSkills.value.map((skill, index) => ({
     id: skill.id,
@@ -1340,7 +1354,8 @@ function applyAvatarEditingState(): void {
   avatarTargetAscended.value = entry.targetState.ascended;
   const targetMap = new Map(entry.targetState.talents.map((talent) => [talent.id, talent.level]));
   talentTargetLevels.value = mainSkills.value.map(
-    (skill) => targetMap.get(skill.id) ?? Math.max(skill.level, 1),
+    (skill, index) =>
+      targetMap.get(skill.id) ?? Math.max(currentTalentLevels.value[index] ?? skill.level, 1),
   );
 }
 
@@ -1412,20 +1427,29 @@ async function createAvatarRefreshInput(
   const skills = role.skills.filter(
     (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
   );
+  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
+  const currentTalentLevels = userCalc.correctTalentLevels(
+    skills.map((skill) => skill.level),
+    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
+    role.avatar.actived_constellation_num,
+  );
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
   const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
   const targetTalentMap = new Map(
     entry.targetState.talents.map((talent) => [talent.id, talent.level]),
   );
   const targetTalentLevels = skills.map(
-    (skill) => targetTalentMap.get(skill.skill_id) ?? Math.min(skill.level, 10),
+    (skill, index) =>
+      targetTalentMap.get(skill.skill_id) ??
+      Math.min(currentTalentLevels[index] ?? skill.level, 10),
   );
-  const requirements = userCalc.avatar(
-    role,
+  const requirements = userCalc.avatarFromState(
     wiki,
+    avatar.level,
+    currentPromoteLevel,
+    currentTalentLevels,
     entry.targetState.level,
     targetTalentLevels,
-    currentPromoteLevel,
     entry.targetState.ascended,
   );
   return {
@@ -1434,10 +1458,10 @@ async function createAvatarRefreshInput(
       avatar.level,
       currentPromoteLevel,
       userCalc.isAscendedAtThreshold(avatar.level, currentPromoteLevel),
-      skills.map((skill) => ({
+      skills.map((skill, index) => ({
         id: skill.skill_id,
         name: skill.name,
-        level: Math.min(skill.level, 10),
+        level: Math.min(currentTalentLevels[index] ?? skill.level, 10),
       })),
     ),
     status: entry.status === "completed" || requirements.length === 0 ? "completed" : "active",

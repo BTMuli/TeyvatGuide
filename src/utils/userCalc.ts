@@ -41,6 +41,7 @@ const HEROES_WIT_ID = 104003;
 const MYSTIC_ENHANCEMENT_ORE_ID = 104013;
 const CROWN_OF_INSIGHT_ID = 104319;
 const DUST_OF_AZOTH_ID = 104201;
+const CONSTELLATION_TALENT_BONUS = 3;
 
 const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
 const AVATAR_ASCENSION_MORA = <const>[20000, 40000, 60000, 80000, 100000, 120000];
@@ -89,6 +90,28 @@ const TALENT_MONSTER_COUNTS: ReadonlyArray<OffsetCount> = [
   [0, 9],
   [0, 12],
 ];
+
+/**
+ * 根据技能 luc 与角色命座移除天赋等级加成。
+ *
+ * @param levels - 技能显示等级
+ * @param lucLevels - 各技能获得等级加成所需的命座层数
+ * @param constellation - 角色当前命座层数
+ * @returns 校正后的实际培养等级
+ * @since Beta v0.11.2
+ */
+export function applyTalentLevelCorrections(
+  levels: ReadonlyArray<number>,
+  lucLevels: ReadonlyArray<number | null>,
+  constellation: number,
+): Array<number> {
+  return levels.map((level, index) => {
+    const luc = lucLevels[index];
+    return luc !== null && luc !== undefined && constellation >= luc
+      ? Math.max(level - CONSTELLATION_TALENT_BONUS, 1)
+      : level;
+  });
+}
 
 const WEAPON_ASCENSION_MORA: Readonly<Record<number, ReadonlyArray<number>>> = {
   1: [0, 5000, 5000, 10000, 0, 0],
@@ -443,11 +466,17 @@ export function calculateAvatarMaterials(
   const skills = role.skills.filter(
     (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
   );
+  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
+  const currentTalentLevels = applyTalentLevelCorrections(
+    skills.map((skill) => skill.level),
+    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
+    role.avatar.actived_constellation_num,
+  );
   return calculateAvatarMaterialsFromState(
     wiki,
     currentLevel,
     currentPromoteLevel ?? resolvePromoteLevel(currentLevel, avatarWithPromote.promote_level),
-    skills.map((skill) => skill.level),
+    currentTalentLevels,
     targetLevel,
     targetTalentLevels,
     targetAscendedAtThreshold,
@@ -648,6 +677,7 @@ const userCalc = {
   isAscensionLevel,
   isAscendedAtThreshold,
   resolveBagWeaponPromoteLevel,
+  correctTalentLevels: applyTalentLevelCorrections,
   resolvePromoteLevel,
 };
 
