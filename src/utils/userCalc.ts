@@ -356,6 +356,68 @@ function toList(items: Map<number, number>): Array<CultivationMaterial> {
 }
 
 /**
+ * 根据角色当前状态计算等级、突破及天赋升级材料。
+ * @since Beta v0.11.2
+ * @param wiki - 角色 Wiki 数据
+ * @param currentLevel - 当前等级
+ * @param currentPromoteLevel - 已完成的突破次数
+ * @param currentTalentLevels - 当前可升级天赋等级
+ * @param targetLevel - 目标等级
+ * @param targetTalentLevels - 目标天赋等级
+ * @param targetAscendedAtThreshold - 到达目标临界等级后是否继续突破
+ * @returns 材料需求
+ */
+export function calculateAvatarMaterialsFromState(
+  wiki: TGApp.App.Character.WikiItem,
+  currentLevel: number,
+  currentPromoteLevel: number,
+  currentTalentLevels: ReadonlyArray<number>,
+  targetLevel: number,
+  targetTalentLevels: ReadonlyArray<number>,
+  targetAscendedAtThreshold = false,
+): Array<CultivationMaterial> {
+  const items = new Map<number, number>();
+  const levelExp = sumExperience(AVATAR_LEVEL_EXP, currentLevel, targetLevel);
+  const expBookCount = Math.ceil(levelExp / 20000);
+  add(items, HEROES_WIT_ID, expBookCount);
+  add(items, MORA_ID, expBookCount * 4000);
+
+  const ascensions = requiredAscensionIndices(
+    currentLevel,
+    targetLevel,
+    currentPromoteLevel,
+    targetAscendedAtThreshold,
+  );
+  for (const index of ascensions) {
+    const gem = AVATAR_GEM_COUNTS[index];
+    const monster = AVATAR_MONSTER_COUNTS[index];
+    add(items, MORA_ID, AVATAR_ASCENSION_MORA[index]);
+    add(items, wiki.materials[0].id - 3 + gem[0], gem[1]);
+    add(items, wiki.materials[1].id, AVATAR_BOSS_COUNTS[index]);
+    add(items, wiki.materials[2].id, AVATAR_SPECIALTY_COUNTS[index]);
+    add(items, wiki.materials[3].id - monster[0], monster[1]);
+  }
+
+  for (const [skillIndex, currentLevelValue] of currentTalentLevels.entries()) {
+    const currentTalentLevel = Math.min(currentLevelValue, 10);
+    const targetTalentLevel = Math.max(
+      currentTalentLevel,
+      Math.min(targetTalentLevels[skillIndex] ?? currentTalentLevel, 10),
+    );
+    for (let index = currentTalentLevel; index < targetTalentLevel; index++) {
+      const book = TALENT_BOOK_COUNTS[index];
+      const monster = TALENT_MONSTER_COUNTS[index];
+      add(items, MORA_ID, TALENT_MORA[index]);
+      add(items, wiki.materials[4].id - book[0], book[1]);
+      add(items, wiki.materials[3].id - monster[0], monster[1]);
+      add(items, wiki.materials[5].id, WEEKLY_BOSS_COUNTS[index]);
+      if (index === 9) add(items, CROWN_OF_INSIGHT_ID, 1);
+    }
+  }
+  return toList(items);
+}
+
+/**
  * 计算角色等级、突破及天赋升级所需的材料。
  *
  * @param role - 用户存档中的角色数据
@@ -373,53 +435,23 @@ export function calculateAvatarMaterials(
   currentPromoteLevel?: number,
   targetAscendedAtThreshold = false,
 ): Array<CultivationMaterial> {
-  const items = new Map<number, number>();
   const currentLevel = role.avatar.level;
   const avatarWithPromote = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
-  const levelExp = sumExperience(AVATAR_LEVEL_EXP, currentLevel, targetLevel);
-  const expBookCount = Math.ceil(levelExp / 20000);
-  add(items, HEROES_WIT_ID, expBookCount);
-  add(items, MORA_ID, expBookCount * 4000);
-
-  const ascensions = requiredAscensionIndices(
-    currentLevel,
-    targetLevel,
-    currentPromoteLevel ?? resolvePromoteLevel(currentLevel, avatarWithPromote.promote_level),
-    targetAscendedAtThreshold,
-  );
-  for (const index of ascensions) {
-    const gem = AVATAR_GEM_COUNTS[index];
-    const monster = AVATAR_MONSTER_COUNTS[index];
-    add(items, MORA_ID, AVATAR_ASCENSION_MORA[index]);
-    add(items, wiki.materials[0].id - 3 + gem[0], gem[1]);
-    add(items, wiki.materials[1].id, AVATAR_BOSS_COUNTS[index]);
-    add(items, wiki.materials[2].id, AVATAR_SPECIALTY_COUNTS[index]);
-    add(items, wiki.materials[3].id - monster[0], monster[1]);
-  }
-
   const levelableSkillIds = new Set(
     wiki.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
   );
   const skills = role.skills.filter(
     (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
   );
-  for (const [skillIndex, skill] of skills.entries()) {
-    const currentTalentLevel = Math.min(skill.level, 10);
-    const targetTalentLevel = Math.max(
-      currentTalentLevel,
-      Math.min(targetTalentLevels[skillIndex] ?? currentTalentLevel, 10),
-    );
-    for (let index = currentTalentLevel; index < targetTalentLevel; index++) {
-      const book = TALENT_BOOK_COUNTS[index];
-      const monster = TALENT_MONSTER_COUNTS[index];
-      add(items, MORA_ID, TALENT_MORA[index]);
-      add(items, wiki.materials[4].id - book[0], book[1]);
-      add(items, wiki.materials[3].id - monster[0], monster[1]);
-      add(items, wiki.materials[5].id, WEEKLY_BOSS_COUNTS[index]);
-      if (index === 9) add(items, CROWN_OF_INSIGHT_ID, 1);
-    }
-  }
-  return toList(items);
+  return calculateAvatarMaterialsFromState(
+    wiki,
+    currentLevel,
+    currentPromoteLevel ?? resolvePromoteLevel(currentLevel, avatarWithPromote.promote_level),
+    skills.map((skill) => skill.level),
+    targetLevel,
+    targetTalentLevels,
+    targetAscendedAtThreshold,
+  );
 }
 
 /**
@@ -608,6 +640,7 @@ export function getWeaponMaxLevel(star: number): number {
 /** 用户养成计算工具。 */
 const userCalc = {
   avatar: calculateAvatarMaterials,
+  avatarFromState: calculateAvatarMaterialsFromState,
   craft: calculateCraftableMaterials,
   weapon: calculateWeaponMaterials,
   merge: mergeCultivationMaterials,

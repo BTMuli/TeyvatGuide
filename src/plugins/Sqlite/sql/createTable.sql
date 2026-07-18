@@ -1,5 +1,50 @@
 -- sqlite数据库创建表语句
--- @since Beta v0.10.5
+-- @since Beta v0.11.2
+
+-- @brief 创建养成计划表
+create table if not exists CultivationProject
+(
+    id       text    not null primary key,
+    uid      integer not null,
+    name     text    not null,
+    isChosen boolean default false,
+    timezone integer default 8,
+    created  text    not null,
+    updated  text    not null,
+    unique (uid, name)
+);
+
+-- @brief 创建养成目标表
+create table if not exists CultivationEntry
+(
+    id           text    not null primary key,
+    projectId    text    not null,
+    type         text    not null check (type in ('avatar', 'weapon')),
+    itemId       integer not null,
+    instanceKey  text    not null default '',
+    name         text    not null,
+    icon         text    not null,
+    star         integer not null,
+    currentState text    not null,
+    targetState  text    not null,
+    status       text    not null default 'active' check (status in ('active', 'completed')),
+    sortOrder    integer not null default 0,
+    created      text    not null,
+    updated      text    not null,
+    unique (projectId, type, itemId, instanceKey)
+);
+
+-- @brief 创建养成目标材料表
+create table if not exists CultivationItem
+(
+    entryId    text    not null,
+    materialId integer not null,
+    required   integer not null default 0,
+    primary key (entryId, materialId)
+);
+
+create index if not exists CultivationProjectUidIndex on CultivationProject (uid);
+create index if not exists CultivationEntryProjectIndex on CultivationEntry (projectId);
 
 -- @brief 创建背包物品材料表
 create table if not exists UserBagMaterial

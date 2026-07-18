@@ -47,6 +47,7 @@
           v-for="material in materials"
           :key="material.id"
           :material="material"
+          :weaken-ready
           @select="openMaterialInfo(material)"
         />
       </div>
@@ -95,12 +96,14 @@ type UcMaterialResultProps = {
   loading?: boolean;
   showCraftingOptions?: boolean;
   emptyText?: string;
+  weakenReady?: boolean;
 };
 
 const props = withDefaults(defineProps<UcMaterialResultProps>(), {
   loading: false,
   showCraftingOptions: true,
   emptyText: "请选择角色或武器，并设置培养目标",
+  weakenReady: false,
 });
 const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
 const useDust = defineModel<boolean>("useDust", { required: true });

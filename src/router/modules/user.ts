@@ -48,7 +48,7 @@ const userRoutes = (<const>[
   },
   {
     path: "/user/cultivation",
-    name: "养成计算",
+    name: "养成计划",
     component: async () => await import("@/pages/User/Cultivation.vue"),
   },
 ]) satisfies Array<RouteRecordRaw>;

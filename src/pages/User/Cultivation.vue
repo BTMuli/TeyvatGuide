@@ -1,29 +1,124 @@
-<!-- 养成计算 -->
+<!-- 养成计划 -->
 <template>
-  <v-app-bar>
+  <v-app-bar :extension-height="uidList.length > 0 ? 68 : 0">
     <template #prepend>
       <div class="cultivation-title">
         <v-icon color="var(--tgc-od-orange)">mdi-calculator-variant-outline</v-icon>
-        <span>养成计算</span>
+        <span>养成计划</span>
+        <v-btn-toggle
+          v-if="uidList.length > 0"
+          v-model="viewTab"
+          class="cultivation-view-toggle"
+          color="var(--tgc-od-orange)"
+          density="compact"
+          mandatory
+          rounded="lg"
+          variant="tonal"
+        >
+          <v-btn prepend-icon="mdi-format-list-checks" value="targets">目标</v-btn>
+          <v-btn prepend-icon="mdi-package-variant" value="materials">材料</v-btn>
+          <v-btn prepend-icon="mdi-calculator-variant-outline" value="calculator">计算</v-btn>
+        </v-btn-toggle>
       </div>
     </template>
     <template #append>
-      <v-select
-        v-model="currentUid"
-        :hide-details="true"
-        :items="uidList"
-        density="compact"
-        label="数据 UID"
-        variant="outlined"
-        width="190"
-      />
-      <v-btn
-        :loading="loading || apiLoading"
-        icon="mdi-refresh"
-        title="重新加载"
-        variant="text"
-        @click="reload"
-      />
+      <div class="cultivation-nav-actions">
+        <v-select
+          v-model="currentUid"
+          :hide-details="true"
+          :items="uidList"
+          class="cultivation-nav-select uid-select"
+          density="compact"
+          label="数据 UID"
+          variant="outlined"
+        />
+        <v-select
+          v-if="currentUid !== undefined"
+          v-model="currentProjectId"
+          :hide-details="true"
+          :items="projectOptions"
+          class="cultivation-nav-select project-select"
+          density="compact"
+          item-title="title"
+          item-value="value"
+          label="当前计划"
+          variant="outlined"
+        />
+        <v-btn
+          :loading="loading || apiLoading || planLoading"
+          icon="mdi-refresh"
+          title="重新加载"
+          variant="tonal"
+          @click="reload"
+        />
+      </div>
+    </template>
+    <template #extension>
+      <div v-if="uidList.length > 0" class="cultivation-plan-toolbar">
+        <div class="cultivation-plan-summary">
+          <div class="cultivation-plan-heading">
+            <v-icon color="var(--tgc-od-orange)">mdi-clipboard-text-outline</v-icon>
+            <div>
+              <span>{{ currentProject?.name ?? "尚未创建计划" }}</span>
+              <small>
+                {{ activePlanEntryCount }} 个进行中 · {{ completedPlanEntryCount }} 个已完成
+              </small>
+            </div>
+          </div>
+          <v-chip size="small" variant="tonal">
+            {{ inventoryUpdatedLabel }}
+          </v-chip>
+          <v-chip
+            :color="planMissingKinds > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
+            size="small"
+            variant="tonal"
+          >
+            {{ planMissingKinds > 0 ? `${planMissingKinds} 种材料不足` : "材料已满足" }}
+          </v-chip>
+        </div>
+        <div class="cultivation-plan-actions">
+          <v-btn
+            v-if="isWindows"
+            prepend-icon="mdi-bag-personal-outline"
+            size="small"
+            variant="tonal"
+            @click="importInventory"
+          >
+            导入背包
+          </v-btn>
+          <v-btn
+            :disabled="!currentProject || planEntries.length === 0"
+            prepend-icon="mdi-account-sync-outline"
+            size="small"
+            variant="tonal"
+            @click="refreshPlanEntries"
+          >
+            刷新目标
+          </v-btn>
+          <v-btn prepend-icon="mdi-plus" size="small" variant="tonal" @click="createPlan">
+            新建
+          </v-btn>
+          <v-btn
+            :disabled="!currentProject"
+            prepend-icon="mdi-pencil-outline"
+            size="small"
+            variant="tonal"
+            @click="renamePlan"
+          >
+            重命名
+          </v-btn>
+          <v-btn
+            :disabled="!currentProject"
+            color="var(--tgc-od-red)"
+            prepend-icon="mdi-delete-outline"
+            size="small"
+            variant="tonal"
+            @click="removePlan"
+          >
+            删除
+          </v-btn>
+        </div>
+      </div>
     </template>
   </v-app-bar>
 
@@ -34,105 +129,178 @@
     </div>
 
     <template v-else>
-      <v-card class="cultivation-mode" variant="outlined">
-        <div class="cultivation-mode-main">
-          <div class="cultivation-mode-title">
-            <v-icon color="var(--tgc-od-orange)" size="20">mdi-calculator-variant-outline</v-icon>
-            <span>计算方式</span>
-          </div>
-          <v-btn-toggle
-            v-if="isWindows"
-            v-model="calculationMode"
-            color="var(--tgc-od-orange)"
+      <v-window v-model="viewTab" class="cultivation-tab-window">
+        <v-window-item class="cultivation-tab-content" value="targets">
+          <UcPlanTargetList
+            :entries="planEntries"
+            :materials="planResultMaterials"
+            :project-name="currentProject?.name ?? ''"
+            :timezone="currentProject?.timezone ?? currentTimezone"
+            :uid="currentUid ?? 0"
+            @add="viewTab = 'calculator'"
+            @edit="editPlanEntry"
+            @remove="removePlanEntry"
+            @reorder="updatePlanEntryOrder"
+            @status="updatePlanEntryStatus"
+          />
+        </v-window-item>
+
+        <v-window-item class="cultivation-tab-content" value="materials">
+          <UcPlanMaterialResult
+            v-model:allow-crafting="planAllowCrafting"
+            v-model:use-dust="planUseDust"
+            :bag-materials="bagMaterialDetails"
+            :materials="planResultMaterials"
+            :timezone="currentProject?.timezone ?? currentTimezone"
+            :uid="currentUid ?? 0"
+          />
+        </v-window-item>
+
+        <v-window-item class="cultivation-tab-content" value="calculator">
+          <v-card class="cultivation-mode" variant="outlined">
+            <div class="cultivation-mode-main">
+              <div class="cultivation-mode-title">
+                <v-icon color="var(--tgc-od-orange)" size="20"
+                  >mdi-calculator-variant-outline</v-icon
+                >
+                <span>计算方式</span>
+              </div>
+              <v-btn-toggle
+                v-if="isWindows"
+                v-model="calculationMode"
+                color="var(--tgc-od-orange)"
+                density="compact"
+                mandatory
+                variant="outlined"
+              >
+                <v-btn :disabled="isTraveler" value="local">本地计算</v-btn>
+                <v-btn value="api">接口计算</v-btn>
+              </v-btn-toggle>
+              <v-chip v-else color="var(--tgc-od-orange)" variant="tonal">接口计算</v-chip>
+              <span class="cultivation-mode-hint">{{ calculationHint }}</span>
+            </div>
+            <div class="cultivation-mode-actions">
+              <v-btn
+                v-if="useApiCalculation"
+                :disabled="!canApiCalculate"
+                :loading="apiLoading"
+                color="var(--tgc-od-orange)"
+                prepend-icon="mdi-check-circle-outline"
+                variant="tonal"
+                @click="calculateWithApi"
+              >
+                确认计算
+              </v-btn>
+              <v-btn
+                :disabled="!canSaveToPlan"
+                :loading="planLoading"
+                color="var(--tgc-od-orange)"
+                prepend-icon="mdi-content-save-outline"
+                variant="flat"
+                @click="saveToPlan"
+              >
+                {{ editingEntry ? "更新计划目标" : "保存到计划" }}
+              </v-btn>
+            </div>
+          </v-card>
+
+          <v-alert
+            v-if="editingEntry"
+            closable
+            color="var(--tgc-od-blue)"
             density="compact"
-            mandatory
-            variant="outlined"
+            type="info"
+            variant="tonal"
+            @click:close="editingEntry = undefined"
           >
-            <v-btn :disabled="isTraveler" value="local">本地计算</v-btn>
-            <v-btn value="api">接口计算</v-btn>
-          </v-btn-toggle>
-          <v-chip v-else color="var(--tgc-od-orange)" variant="tonal">接口计算</v-chip>
-          <span class="cultivation-mode-hint">{{ calculationHint }}</span>
-        </div>
-        <v-btn
-          v-if="useApiCalculation"
-          :disabled="!canApiCalculate"
-          :loading="apiLoading"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-check-circle-outline"
-          variant="flat"
-          @click="calculateWithApi"
-        >
-          确认计算
-        </v-btn>
-      </v-card>
+            正在编辑“{{ editingEntry.name }}”，保存后将更新计划中的同一目标。
+          </v-alert>
 
-      <div class="cultivation-config">
-        <UcCharacterPanel
-          v-model:ascended="avatarAscended"
-          v-model:selected-id="selectedCharacterId"
-          v-model:talent-target-levels="talentTargetLevels"
-          v-model:target-ascended="avatarTargetAscended"
-          v-model:target-level="avatarTargetLevel"
-          :at-ascension-level="avatarAtAscensionLevel"
-          :current-ascension-readonly="useApiCalculation"
-          :level-options="avatarLevelOptions"
-          :options="characterOptions"
-          :selected-character="selectedCharacter"
-          :skills="mainSkills"
-          :target-at-ascension-level="avatarTargetAtAscensionLevel"
-          :weapon-type="selectedRoleWeaponType"
-        />
-        <UcWeaponPanel
-          v-model:ascended="weaponAscended"
-          v-model:selected-key="selectedWeaponKey"
-          v-model:target-ascended="weaponTargetAscended"
-          v-model:target-level="weaponTargetLevel"
-          v-model:use-bag-source="useBagWeaponSource"
-          :at-ascension-level="weaponAtAscensionLevel"
-          :current-ascension-readonly="useApiCalculation"
-          :has-bag-data="hasBagWeaponData"
-          :level-options="weaponLevelOptions"
-          :options="weaponOptions"
-          :selected-weapon="selectedWeapon"
-          :target-at-ascension-level="weaponTargetAtAscensionLevel"
-        />
-      </div>
+          <div class="cultivation-config">
+            <UcCharacterPanel
+              v-model:ascended="avatarAscended"
+              v-model:selected-id="selectedCharacterId"
+              v-model:talent-target-levels="talentTargetLevels"
+              v-model:target-ascended="avatarTargetAscended"
+              v-model:target-level="avatarTargetLevel"
+              :at-ascension-level="avatarAtAscensionLevel"
+              :current-ascension-readonly="useApiCalculation"
+              :level-options="avatarLevelOptions"
+              :options="characterOptions"
+              :selected-character="selectedCharacter"
+              :skills="mainSkills"
+              :target-at-ascension-level="avatarTargetAtAscensionLevel"
+              :weapon-type="selectedRoleWeaponType"
+            />
+            <UcWeaponPanel
+              v-model:ascended="weaponAscended"
+              v-model:selected-key="selectedWeaponKey"
+              v-model:target-ascended="weaponTargetAscended"
+              v-model:target-level="weaponTargetLevel"
+              v-model:use-bag-source="useBagWeaponSource"
+              :at-ascension-level="weaponAtAscensionLevel"
+              :current-ascension-readonly="useApiCalculation"
+              :has-bag-data="hasBagWeaponData"
+              :level-options="weaponLevelOptions"
+              :options="weaponOptions"
+              :selected-weapon="selectedWeapon"
+              :target-at-ascension-level="weaponTargetAtAscensionLevel"
+            />
+          </div>
 
-      <UcMaterialResult
-        v-model:allow-crafting="allowCrafting"
-        v-model:use-dust="useDust"
-        :bag-materials="resultBagMaterialDetails"
-        :empty-text="resultEmptyText"
-        :loading="apiLoading"
-        :materials="displayResultMaterials"
-        :missing-kinds="missingKinds"
-        :show-crafting-options="!useApiCalculation"
-        :uid="currentUid ?? 0"
-      />
+          <UcMaterialResult
+            v-model:allow-crafting="allowCrafting"
+            v-model:use-dust="useDust"
+            :bag-materials="resultBagMaterialDetails"
+            :empty-text="resultEmptyText"
+            :loading="apiLoading"
+            :materials="displayResultMaterials"
+            :missing-kinds="missingKinds"
+            :show-crafting-options="!useApiCalculation"
+            :uid="currentUid ?? 0"
+          />
+        </v-window-item>
+      </v-window>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import showDialog from "@comp/func/dialog.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
+import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import gameEnum from "@enum/game.js";
 import takumiReq from "@req/takumiReq.js";
+import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
+import UcPlanMaterialResult from "@comp/userCalc/uc-plan-material-result.vue";
+import UcPlanTargetList from "@comp/userCalc/uc-plan-target-list.vue";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
 import { platform } from "@tauri-apps/plugin-os";
 import TGHttps from "@utils/TGHttps.js";
+import { tryCallYae } from "@utils/TGGame.js";
+import {
+  aggregateEntryMaterials,
+  buildCultivationResults,
+  getUidServerTimezone,
+} from "@utils/cultivationPlan.js";
 import { getRcStar, getZhElement } from "@utils/toolFunc.js";
-import userCalc, { type CraftableMaterial, type CultivationMaterial } from "@utils/userCalc.js";
+import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-import { getWikiCharacterById, WikiMaterialData, wwWeapon } from "@/data/index.js";
+import {
+  AppCharacterData,
+  getWikiCharacterById,
+  WikiMaterialData,
+  wwWeapon,
+} from "@/data/index.js";
 
 const EXCLUDED_CHARACTER_IDS = new Set([10000117, 10000118]);
 const TRAVELER_IDS = new Set([10000005, 10000007]);
@@ -140,15 +308,22 @@ const EMPTY_BAG_MATERIAL_DETAILS: ReadonlyMap<number, TGApp.Sqlite.UserBag.Mater
   new Map();
 
 type CalculationMode = "local" | "api";
+type CultivationViewTab = "calculator" | "materials" | "targets";
 
 const { account, cookie } = storeToRefs(useUserStore());
+const { gameDir } = storeToRefs(useAppStore());
+const route = useRoute();
+const router = useRouter();
 
 const isWindows = platform() === "windows";
 const loading = ref<boolean>(false);
 const apiLoading = ref<boolean>(false);
+const planLoading = ref<boolean>(false);
 const apiCalculated = ref<boolean>(false);
 const calculationMode = ref<CalculationMode>(isWindows ? "local" : "api");
+const viewTab = ref<CultivationViewTab>("targets");
 const currentUid = ref<number>();
+const currentProjectId = ref<string | null>(null);
 const selectedCharacterId = ref<number | null>(null);
 const selectedWeaponKey = ref<string | null>(null);
 const avatarTargetLevel = ref<number>(90);
@@ -161,8 +336,11 @@ const weaponTargetAscended = ref<boolean>(false);
 const useBagWeaponSource = ref<boolean>(true);
 const allowCrafting = ref<boolean>(true);
 const useDust = ref<boolean>(false);
-
+const planAllowCrafting = ref<boolean>(true);
+const planUseDust = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
+const projects = shallowRef<Array<TGApp.Sqlite.Cultivation.Project>>([]);
+const planEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const roles = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const weapons = shallowRef<Array<TGApp.App.UserCalc.WeaponOption>>([]);
 const bagMaterials = shallowRef<Map<number, number>>(new Map());
@@ -170,13 +348,38 @@ const bagMaterialDetails = shallowRef<Map<number, TGApp.Sqlite.UserBag.MaterialT
 const avatarWiki = shallowRef<TGApp.App.Character.WikiItem | false>(false);
 const syncAvatars = shallowRef<Array<TGApp.Game.Calculate.SyncAvatar>>([]);
 const apiResultMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
+const apiAvatarRequirements = shallowRef<Array<CultivationMaterial>>([]);
+const apiWeaponRequirements = shallowRef<Array<CultivationMaterial>>([]);
+const editingEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
+const pendingWikiCharacterId = ref<number | null>(null);
 let apiResultVersion = 0;
 let dataLoadVersion = 0;
 let settingUid = false;
+let settingProject = false;
 
 const useApiCalculation = computed<boolean>(() => !isWindows || calculationMode.value === "api");
-const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
-  roles.value.map((role) => {
+const currentTimezone = computed<number>(() => getUidServerTimezone(currentUid.value ?? 0));
+const currentProject = computed<TGApp.Sqlite.Cultivation.Project | undefined>(() =>
+  projects.value.find((project) => project.id === currentProjectId.value),
+);
+const projectOptions = computed<Array<{ title: string; value: string }>>(() =>
+  projects.value.map((project) => ({ title: project.name, value: project.id })),
+);
+const activePlanEntryCount = computed<number>(
+  () => planEntries.value.filter((entry) => entry.status === "active").length,
+);
+const completedPlanEntryCount = computed<number>(
+  () => planEntries.value.filter((entry) => entry.status === "completed").length,
+);
+const inventoryUpdatedLabel = computed<string>(() => {
+  const updated = Array.from(bagMaterialDetails.value.values())
+    .map((material) => material.updated)
+    .filter((value) => value.length > 0)
+    .sort((a, b) => b.localeCompare(a))[0];
+  return updated ? `背包更新于 ${updated}` : "暂无背包更新时间";
+});
+const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
+  const options = roles.value.map((role) => {
     const weaponType =
       wwWeapon.find((weapon) => weapon.id === role.weapon.id)?.weapon ?? "未知武器";
     return {
@@ -191,8 +394,27 @@ const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>
       fetter: role.avatar.fetter,
       weaponType,
     };
-  }),
-);
+  });
+  const pendingId = pendingWikiCharacterId.value;
+  if (pendingId !== null && !options.some((option) => option.value === pendingId)) {
+    const wiki = AppCharacterData.find((character) => character.id === pendingId);
+    if (wiki) {
+      options.unshift({
+        title: `${wiki.name} · Lv.1（规划）`,
+        value: wiki.id,
+        name: wiki.name,
+        icon: `/WIKI/character/${wiki.id}.webp`,
+        element: wiki.element,
+        star: wiki.star % 100,
+        level: 1,
+        constellation: 0,
+        fetter: 0,
+        weaponType: wiki.weapon,
+      });
+    }
+  }
+  return options;
+});
 const syncCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
   syncAvatars.value.map((avatar) => ({
     title: `${avatar.name} · Lv.${avatar.level_current}`,
@@ -272,6 +494,17 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
       }));
   }
   const roleSkills = selectedRole.value?.skills ?? [];
+  if (!selectedRole.value && avatarWiki.value) {
+    return avatarWiki.value.skills
+      .filter((skill) => skill.maxLv > 1)
+      .map((skill) => ({
+        id: skill.id,
+        name: skill.name,
+        icon: skill.icon,
+        level: 1,
+        maxLevel: skill.maxLv,
+      }));
+  }
   let skills: Array<TGApp.Game.Avatar.Skill>;
   if (!avatarWiki.value) {
     skills = roleSkills.filter((skill) => skill.skill_type === 1 && skill.is_unlock).slice(0, 3);
@@ -314,7 +547,7 @@ const weaponTargetAtAscensionLevel = computed<boolean>(() =>
 );
 const avatarCurrentPromoteLevel = computed<number>(() => {
   if (selectedSyncAvatar.value) return selectedSyncAvatar.value.promote_level;
-  if (!selectedRole.value) return 0;
+  if (!selectedRole.value) return userCalc.resolvePromoteLevel(selectedCharacter.value?.level ?? 1);
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>selectedRole.value.avatar;
   return userCalc.resolvePromoteLevel(
     avatar.level,
@@ -332,78 +565,75 @@ const weaponCurrentPromoteLevel = computed<number>(() => {
   );
 });
 
-const requiredMaterials = computed<Array<CultivationMaterial>>(() => {
-  const groups: Array<Array<CultivationMaterial>> = [];
-  if (selectedRole.value && avatarWiki.value) {
-    groups.push(
-      userCalc.avatar(
-        selectedRole.value,
-        avatarWiki.value,
-        avatarTargetLevel.value,
-        talentTargetLevels.value,
-        avatarCurrentPromoteLevel.value,
-        avatarTargetAscended.value,
-      ),
+const avatarRequiredMaterials = computed<Array<CultivationMaterial>>(() => {
+  if (!selectedCharacter.value || !avatarWiki.value) return [];
+  if (!selectedRole.value) {
+    return userCalc.avatarFromState(
+      avatarWiki.value,
+      selectedCharacter.value.level,
+      avatarCurrentPromoteLevel.value,
+      mainSkills.value.map((skill) => skill.level),
+      avatarTargetLevel.value,
+      talentTargetLevels.value,
+      avatarTargetAscended.value,
     );
   }
-  if (selectedWeapon.value) {
-    groups.push(
-      userCalc.weapon(
-        selectedWeapon.value.wiki,
-        selectedWeapon.value.level,
-        weaponCurrentPromoteLevel.value,
-        weaponTargetLevel.value,
-        weaponTargetAscended.value,
-      ),
-    );
-  }
-  return userCalc.merge(...groups);
+  return userCalc.avatar(
+    selectedRole.value,
+    avatarWiki.value,
+    avatarTargetLevel.value,
+    talentTargetLevels.value,
+    avatarCurrentPromoteLevel.value,
+    avatarTargetAscended.value,
+  );
 });
-const craftableMaterials = computed<Map<number, CraftableMaterial>>(() => {
-  if (!allowCrafting.value) return new Map();
-  return userCalc.craft(
+const weaponRequiredMaterials = computed<Array<CultivationMaterial>>(() => {
+  if (!selectedWeapon.value) return [];
+  return userCalc.weapon(
+    selectedWeapon.value.wiki,
+    selectedWeapon.value.level,
+    weaponCurrentPromoteLevel.value,
+    weaponTargetLevel.value,
+    weaponTargetAscended.value,
+  );
+});
+const requiredMaterials = computed<Array<CultivationMaterial>>(() =>
+  userCalc.merge(avatarRequiredMaterials.value, weaponRequiredMaterials.value),
+);
+const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
+  buildCultivationResults(
     requiredMaterials.value,
     bagMaterials.value,
     WikiMaterialData,
+    allowCrafting.value,
     useDust.value,
-  );
-});
-const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  requiredMaterials.value
-    .map((required) => {
-      const info = WikiMaterialData.find((material) => material.id === required.id);
-      const owned = bagMaterials.value.get(required.id) ?? 0;
-      const crafting = craftableMaterials.value.get(required.id);
-      const craftable = crafting?.count ?? 0;
-      const available = owned + craftable;
-      const craftingCosts: Array<TGApp.App.UserCalc.CraftingCost> = (crafting?.consumed ?? [])
-        .map((cost) => {
-          const costInfo = WikiMaterialData.find((material) => material.id === cost.id);
-          return {
-            id: cost.id,
-            name: costInfo?.name ?? `材料 ${cost.id}`,
-            type: costInfo?.type ?? "未知类型",
-            star: costInfo?.star ?? 1,
-            count: cost.count,
-            owned: bagMaterials.value.get(cost.id) ?? 0,
-          };
-        })
-        .sort((a, b) => b.star - a.star || a.id - b.id);
-      return {
-        id: required.id,
-        name: info?.name ?? `材料 ${required.id}`,
-        type: info?.type ?? "未知类型",
-        star: info?.star ?? 1,
-        required: required.count,
-        owned,
-        craftable,
-        craftingCosts,
-        missing: Math.max(required.count - available, 0),
-        progress: required.count === 0 ? 100 : Math.min((available / required.count) * 100, 100),
-      };
-    })
-    .sort((a, b) => b.missing - a.missing || b.star - a.star || a.id - b.id),
+  ),
 );
+const planRequiredMaterials = computed<Array<CultivationMaterial>>(() =>
+  aggregateEntryMaterials(planEntries.value),
+);
+const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
+  buildCultivationResults(
+    planRequiredMaterials.value,
+    bagMaterials.value,
+    WikiMaterialData,
+    planAllowCrafting.value,
+    planUseDust.value,
+  ),
+);
+const planMissingKinds = computed<number>(
+  () => planResultMaterials.value.filter((material) => material.missing > 0).length,
+);
+const canSaveToPlan = computed<boolean>(() => {
+  if (planLoading.value) return false;
+  if (useApiCalculation.value) {
+    return (
+      apiCalculated.value &&
+      (apiAvatarRequirements.value.length > 0 || apiWeaponRequirements.value.length > 0)
+    );
+  }
+  return avatarRequiredMaterials.value.length > 0 || weaponRequiredMaterials.value.length > 0;
+});
 const displayResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   useApiCalculation.value ? apiResultMaterials.value : localResultMaterials.value,
 );
@@ -429,6 +659,16 @@ watch(
   { flush: "sync" },
 );
 
+watch(
+  currentProjectId,
+  async (projectId) => {
+    if (settingProject || projectId === null || currentUid.value === undefined) return;
+    await TSCultivationPlan.chooseProject(currentUid.value, projectId);
+    await loadProjects(currentUid.value, projectId);
+  },
+  { flush: "sync" },
+);
+
 watch(selectedCharacter, async (character) => {
   avatarWiki.value = false;
   if (!character) return;
@@ -443,6 +683,7 @@ watch(selectedCharacter, async (character) => {
       selectedSyncAvatar.value.promote_level,
     );
     selectPreferredWeapon();
+    applyAvatarEditingState();
     return;
   }
   const role = selectedRole.value;
@@ -454,6 +695,7 @@ watch(selectedCharacter, async (character) => {
   if (!useApiCalculation.value && selectedCharacterId.value === characterId) {
     avatarWiki.value = wiki;
     talentTargetLevels.value = mainSkills.value.map((skill) => skill.maxLevel);
+    applyAvatarEditingState();
   }
 });
 
@@ -493,9 +735,37 @@ watch(selectedWeapon, (weapon) => {
   weaponTargetLevel.value = userCalc.weaponMaxLevel(weapon.wiki.star);
   weaponTargetAscended.value = false;
   weaponAscended.value = userCalc.isAscendedAtThreshold(weapon.level, weapon.promoteLevel);
+  applyWeaponEditingState();
 });
 
-onMounted(reload);
+onMounted(async () => {
+  await reload();
+  await applyRouteTarget();
+});
+
+async function applyRouteTarget(): Promise<void> {
+  const targetType = typeof route.query.targetType === "string" ? route.query.targetType : "";
+  const targetId = Number(route.query.targetId);
+  if (!Number.isInteger(targetId) || targetId <= 0) return;
+  viewTab.value = "calculator";
+  if (targetType === "avatar") {
+    pendingWikiCharacterId.value = targetId;
+    selectedCharacterId.value = targetId;
+    await nextTick();
+    if (!selectedCharacter.value) {
+      showSnackbar.warn("接口模式仅支持存档中已有的角色，请切换到本地计算后再试");
+    }
+  } else if (targetType === "weapon") {
+    useBagWeaponSource.value = false;
+    await nextTick();
+    selectedWeaponKey.value =
+      weaponOptions.value.find((weapon) => weapon.wiki.id === targetId)?.key ?? null;
+    if (!selectedWeaponKey.value) {
+      showSnackbar.warn("接口模式仅支持当前角色装备的武器，请切换到本地计算后再试");
+    }
+  }
+  await router.replace({ path: route.path, query: {} });
+}
 
 function createLevelOptions(max: number): Array<number> {
   return Array.from({ length: max }, (_, index) => index + 1);
@@ -517,6 +787,8 @@ function clearApiResult(): void {
   apiResultVersion += 1;
   apiCalculated.value = false;
   apiResultMaterials.value = [];
+  apiAvatarRequirements.value = [];
+  apiWeaponRequirements.value = [];
 }
 
 function getElementNameByAttrId(elementAttrId: number): string {
@@ -653,7 +925,21 @@ async function calculateWithApi(): Promise<void> {
       showSnackbar.error(`[${response.retcode}] ${response.message}`);
       return;
     }
+    const itemResult = response.data.items[0];
+    apiAvatarRequirements.value = itemResult
+      ? userCalc.merge(
+          toCultivationMaterials(itemResult.avatar_consume),
+          toCultivationMaterials(itemResult.avatar_skill_consume),
+        )
+      : [];
+    apiWeaponRequirements.value = itemResult
+      ? toCultivationMaterials(itemResult.weapon_consume)
+      : [];
     apiResultMaterials.value = convertApiResult(response.data);
+    if (response.data.has_user_info) {
+      await syncApiInventory(response.data.available_material);
+    }
+    if (requestVersion !== apiResultVersion) return;
     apiCalculated.value = true;
     showSnackbar.success("养成材料计算完成");
   } catch (error) {
@@ -669,8 +955,10 @@ async function reload(): Promise<void> {
   loading.value = true;
   try {
     const loginUid = Number(account.value.gameUid);
+    const planUids = await TSCultivationPlan.getAllUid();
     if (useApiCalculation.value) {
-      uidList.value = cookie.value && Number.isInteger(loginUid) && loginUid > 0 ? [loginUid] : [];
+      const loginUids = Number.isInteger(loginUid) && loginUid > 0 ? [loginUid] : [];
+      uidList.value = Array.from(new Set([...loginUids, ...planUids])).sort((a, b) => a - b);
     } else {
       const [avatarUids, materialUids, weaponUids] = await Promise.all([
         TSUserAvatar.getAllUid(),
@@ -678,7 +966,7 @@ async function reload(): Promise<void> {
         TSUserBagWeapon.getAllUid(),
       ]);
       uidList.value = Array.from(
-        new Set([...avatarUids.map(Number), ...materialUids, ...weaponUids]),
+        new Set([...avatarUids.map(Number), ...materialUids, ...weaponUids, ...planUids]),
       ).sort((a, b) => a - b);
     }
     const nextUid = uidList.value.includes(loginUid) ? loginUid : uidList.value[0];
@@ -686,6 +974,11 @@ async function reload(): Promise<void> {
     currentUid.value = nextUid;
     settingUid = false;
     if (nextUid !== undefined) await loadUidData(nextUid);
+    else {
+      projects.value = [];
+      planEntries.value = [];
+      currentProjectId.value = null;
+    }
   } finally {
     loading.value = false;
   }
@@ -697,9 +990,11 @@ async function loadUidData(uid: number): Promise<void> {
   try {
     if (useApiCalculation.value) {
       await loadSyncAvatarData(uid, requestVersion);
+      await loadInventoryData(uid, requestVersion);
     } else {
       await loadLocalData(uid, requestVersion);
     }
+    if (requestVersion === dataLoadVersion) await loadProjects(uid);
   } finally {
     if (requestVersion === dataLoadVersion) loading.value = false;
   }
@@ -774,6 +1069,456 @@ async function loadLocalData(uid: number, requestVersion: number): Promise<void>
   if (selectedCharacterId.value === null) selectPreferredWeapon();
 }
 
+async function loadInventoryData(uid: number, requestVersion: number): Promise<void> {
+  const materialData = await TSUserBagMaterial.getMaterial(uid);
+  if (requestVersion !== dataLoadVersion) return;
+  bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
+  bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
+}
+
+async function loadProjects(uid: number, preferredProjectId?: string): Promise<void> {
+  planLoading.value = true;
+  try {
+    const nextProjects = await TSCultivationPlan.getProjects(uid);
+    const nextProject =
+      nextProjects.find((project) => project.id === preferredProjectId) ??
+      nextProjects.find((project) => project.isChosen) ??
+      nextProjects[0];
+    settingProject = true;
+    projects.value = nextProjects;
+    currentProjectId.value = nextProject?.id ?? null;
+    settingProject = false;
+    planEntries.value = nextProject ? await TSCultivationPlan.getEntries(nextProject.id) : [];
+  } catch (error) {
+    showSnackbar.error(`加载养成计划失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function importInventory(): Promise<void> {
+  const uid = currentUid.value;
+  if (uid === undefined) return;
+  planLoading.value = true;
+  try {
+    await tryCallYae(gameDir.value, String(uid));
+    await loadInventoryData(uid, dataLoadVersion);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function createPlan(): Promise<void> {
+  const uid = currentUid.value;
+  if (uid === undefined) return;
+  const name = await showDialog.input("新建养成计划", "请输入计划名称", "当前养成");
+  if (typeof name !== "string" || name.trim().length === 0) return;
+  planLoading.value = true;
+  try {
+    const project = await TSCultivationPlan.createProject(uid, name, currentTimezone.value);
+    await loadProjects(uid, project.id);
+    showSnackbar.success(`已创建养成计划“${project.name}”`);
+  } catch (error) {
+    const message = TGHttps.getErrMsg(error);
+    showSnackbar.error(message.includes("UNIQUE") ? "当前 UID 已存在同名计划" : message);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function renamePlan(): Promise<void> {
+  const project = currentProject.value;
+  if (!project) return;
+  const name = await showDialog.input("重命名养成计划", "请输入新的计划名称", project.name);
+  if (typeof name !== "string" || name.trim().length === 0 || name.trim() === project.name) return;
+  planLoading.value = true;
+  try {
+    await TSCultivationPlan.renameProject(project.id, name);
+    await loadProjects(project.uid, project.id);
+    showSnackbar.success("养成计划已重命名");
+  } catch (error) {
+    const message = TGHttps.getErrMsg(error);
+    showSnackbar.error(message.includes("UNIQUE") ? "当前 UID 已存在同名计划" : message);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function removePlan(): Promise<void> {
+  const project = currentProject.value;
+  if (!project) return;
+  const confirmed = await showDialog.check(
+    `删除养成计划“${project.name}”？`,
+    "计划中的全部目标会被删除，背包数据不会受影响。",
+  );
+  if (!confirmed) return;
+  planLoading.value = true;
+  try {
+    await TSCultivationPlan.removeProject(project);
+    await loadProjects(project.uid);
+    showSnackbar.success("养成计划已删除");
+  } catch (error) {
+    showSnackbar.error(`删除养成计划失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+function toCultivationMaterials(
+  materials: ReadonlyArray<TGApp.Game.Calculate.Material>,
+): Array<CultivationMaterial> {
+  return materials
+    .filter((material) => material.num > 0)
+    .map((material) => ({ id: material.id, count: material.num }));
+}
+
+async function syncApiInventory(
+  availableMaterials: ReadonlyArray<TGApp.Game.Calculate.Material>,
+): Promise<void> {
+  const uid = currentUid.value;
+  if (uid === undefined) return;
+  const existingMaterials = await TSUserBagMaterial.getMaterial(uid);
+  const existingMap = new Map(existingMaterials.map((material) => [material.id, material]));
+  for (const material of availableMaterials) {
+    const existing = existingMap.get(material.id);
+    if (existing?.count === material.num) continue;
+    await TSUserBagMaterial.insertMaterial(uid, material.id, material.num, existing?.records ?? []);
+  }
+  await loadInventoryData(uid, dataLoadVersion);
+}
+
+function createEntryState(
+  level: number,
+  promoteLevel: number,
+  ascended: boolean,
+  talents: Array<TGApp.Sqlite.Cultivation.TalentState> = [],
+): TGApp.Sqlite.Cultivation.EntryState {
+  return { level, promoteLevel, ascended, talents };
+}
+
+function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | undefined {
+  const character = selectedCharacter.value;
+  if (!character) return undefined;
+  const requirements = useApiCalculation.value
+    ? apiAvatarRequirements.value
+    : avatarRequiredMaterials.value;
+  if (requirements.length === 0) return undefined;
+  const currentTalents = mainSkills.value.map((skill) => ({
+    id: skill.id,
+    name: skill.name,
+    level: skill.level,
+  }));
+  const targetTalents = mainSkills.value.map((skill, index) => ({
+    id: skill.id,
+    name: skill.name,
+    level: talentTargetLevels.value[index] ?? skill.level,
+  }));
+  return {
+    type: "avatar",
+    itemId: character.value,
+    instanceKey: "",
+    name: character.name,
+    icon: character.icon,
+    star: character.star,
+    currentState: createEntryState(
+      character.level,
+      avatarCurrentPromoteLevel.value,
+      avatarAscended.value,
+      currentTalents,
+    ),
+    targetState: createEntryState(
+      avatarTargetLevel.value,
+      userCalc.resolvePromoteLevel(
+        avatarTargetLevel.value,
+        undefined,
+        avatarTargetAtAscensionLevel.value ? avatarTargetAscended.value : undefined,
+      ),
+      avatarTargetAscended.value,
+      targetTalents,
+    ),
+    items: requirements.map((material) => ({
+      materialId: material.id,
+      required: material.count,
+    })),
+  };
+}
+
+function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | undefined {
+  const weapon = selectedWeapon.value;
+  if (!weapon) return undefined;
+  const requirements = useApiCalculation.value
+    ? apiWeaponRequirements.value
+    : weaponRequiredMaterials.value;
+  if (requirements.length === 0) return undefined;
+  return {
+    type: "weapon",
+    itemId: weapon.wiki.id,
+    instanceKey: weapon.guid ?? "",
+    name: weapon.wiki.name,
+    icon: `/WIKI/weapon/${weapon.wiki.id}.webp`,
+    star: weapon.wiki.star,
+    currentState: createEntryState(
+      weapon.level,
+      weaponCurrentPromoteLevel.value,
+      weaponAscended.value,
+    ),
+    targetState: createEntryState(
+      weaponTargetLevel.value,
+      userCalc.resolvePromoteLevel(
+        weaponTargetLevel.value,
+        undefined,
+        weaponTargetAtAscensionLevel.value ? weaponTargetAscended.value : undefined,
+      ),
+      weaponTargetAscended.value,
+    ),
+    items: requirements.map((material) => ({
+      materialId: material.id,
+      required: material.count,
+    })),
+  };
+}
+
+async function saveToPlan(): Promise<void> {
+  const uid = currentUid.value;
+  if (uid === undefined || !canSaveToPlan.value) return;
+  const inputs: Array<TGApp.Sqlite.Cultivation.SaveEntryInput> = [];
+  const avatarInput = createAvatarPlanInput();
+  const weaponInput = createWeaponPlanInput();
+  if ((!editingEntry.value || editingEntry.value.type === "avatar") && avatarInput) {
+    inputs.push(avatarInput);
+  }
+  if ((!editingEntry.value || editingEntry.value.type === "weapon") && weaponInput) {
+    inputs.push(weaponInput);
+  }
+  if (inputs.length === 0) {
+    showSnackbar.warn("当前选择没有可保存的养成材料");
+    return;
+  }
+
+  planLoading.value = true;
+  try {
+    const project =
+      currentProject.value ??
+      (await TSCultivationPlan.ensureCurrentProject(uid, currentTimezone.value));
+    await TSCultivationPlan.saveEntries(project.id, inputs);
+    editingEntry.value = undefined;
+    await loadProjects(uid, project.id);
+    viewTab.value = "targets";
+    showSnackbar.success(`已保存到养成计划“${project.name}”`);
+  } catch (error) {
+    showSnackbar.error(`保存养成目标失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
+  editingEntry.value = entry;
+  viewTab.value = "calculator";
+  if (entry.type === "avatar") {
+    selectedCharacterId.value = entry.itemId;
+    applyAvatarEditingState();
+    return;
+  }
+  const weapon = weaponOptions.value.find(
+    (option) =>
+      option.wiki.id === entry.itemId &&
+      (entry.instanceKey.length === 0 || option.guid === entry.instanceKey),
+  );
+  if (weapon) {
+    selectedWeaponKey.value = weapon.key;
+    applyWeaponEditingState();
+  } else {
+    showSnackbar.warn("当前数据源中未找到该武器，请重新选择后更新目标");
+  }
+}
+
+function applyAvatarEditingState(): void {
+  const entry = editingEntry.value;
+  if (!entry || entry.type !== "avatar" || entry.itemId !== selectedCharacterId.value) return;
+  avatarTargetLevel.value = entry.targetState.level;
+  avatarTargetAscended.value = entry.targetState.ascended;
+  const targetMap = new Map(entry.targetState.talents.map((talent) => [talent.id, talent.level]));
+  talentTargetLevels.value = mainSkills.value.map(
+    (skill) => targetMap.get(skill.id) ?? Math.max(skill.level, 1),
+  );
+}
+
+function applyWeaponEditingState(): void {
+  const entry = editingEntry.value;
+  if (!entry || entry.type !== "weapon" || entry.itemId !== selectedWeapon.value?.wiki.id) return;
+  weaponTargetLevel.value = entry.targetState.level;
+  weaponTargetAscended.value = entry.targetState.ascended;
+}
+
+async function updatePlanEntryStatus(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  status: TGApp.Sqlite.Cultivation.EntryStatus,
+): Promise<void> {
+  planLoading.value = true;
+  try {
+    await TSCultivationPlan.updateEntryStatus(entry.id, status);
+    if (currentProject.value) {
+      planEntries.value = await TSCultivationPlan.getEntries(currentProject.value.id);
+    }
+    showSnackbar.success(status === "completed" ? "目标已标记完成" : "目标已恢复");
+  } catch (error) {
+    showSnackbar.error(`更新目标状态失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function removePlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Promise<void> {
+  const confirmed = await showDialog.check(`删除目标“${entry.name}”？`, "删除后无法恢复。");
+  if (!confirmed) return;
+  planLoading.value = true;
+  try {
+    await TSCultivationPlan.removeEntry(entry.id);
+    if (currentProject.value) {
+      planEntries.value = await TSCultivationPlan.getEntries(currentProject.value.id);
+    }
+    showSnackbar.success("养成目标已删除");
+  } catch (error) {
+    showSnackbar.error(`删除养成目标失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function updatePlanEntryOrder(entryIds: Array<string>): Promise<void> {
+  const project = currentProject.value;
+  if (!project) return;
+  planLoading.value = true;
+  try {
+    await TSCultivationPlan.updateEntryOrder(project.id, entryIds);
+    planEntries.value = await TSCultivationPlan.getEntries(project.id);
+  } catch (error) {
+    showSnackbar.error(`更新目标优先级失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
+async function createAvatarRefreshInput(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  role: TGApp.Sqlite.Character.TableTrans,
+): Promise<TGApp.Sqlite.Cultivation.RefreshEntryInput | undefined> {
+  const wiki = await getWikiCharacterById(entry.itemId);
+  if (!wiki) return undefined;
+  const levelableSkillIds = new Set(
+    wiki.skills.filter((skill) => skill.maxLv > 1).map((skill) => skill.id),
+  );
+  const skills = role.skills.filter(
+    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
+  );
+  const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
+  const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
+  const targetTalentMap = new Map(
+    entry.targetState.talents.map((talent) => [talent.id, talent.level]),
+  );
+  const targetTalentLevels = skills.map(
+    (skill) => targetTalentMap.get(skill.skill_id) ?? Math.min(skill.level, 10),
+  );
+  const requirements = userCalc.avatar(
+    role,
+    wiki,
+    entry.targetState.level,
+    targetTalentLevels,
+    currentPromoteLevel,
+    entry.targetState.ascended,
+  );
+  return {
+    entryId: entry.id,
+    currentState: createEntryState(
+      avatar.level,
+      currentPromoteLevel,
+      userCalc.isAscendedAtThreshold(avatar.level, currentPromoteLevel),
+      skills.map((skill) => ({
+        id: skill.skill_id,
+        name: skill.name,
+        level: Math.min(skill.level, 10),
+      })),
+    ),
+    status: entry.status === "completed" || requirements.length === 0 ? "completed" : "active",
+    items: requirements.map((material) => ({
+      materialId: material.id,
+      required: material.count,
+    })),
+  };
+}
+
+function createWeaponRefreshInput(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  options: ReadonlyArray<TGApp.App.UserCalc.WeaponOption>,
+): TGApp.Sqlite.Cultivation.RefreshEntryInput | undefined {
+  const weapon = options.find(
+    (option) =>
+      !option.key.startsWith("wiki-") &&
+      option.wiki.id === entry.itemId &&
+      (entry.instanceKey.length === 0 || option.guid === entry.instanceKey),
+  );
+  if (!weapon) return undefined;
+  const requirements = userCalc.weapon(
+    weapon.wiki,
+    weapon.level,
+    weapon.promoteLevel,
+    entry.targetState.level,
+    entry.targetState.ascended,
+  );
+  return {
+    entryId: entry.id,
+    currentState: createEntryState(
+      weapon.level,
+      weapon.promoteLevel,
+      userCalc.isAscendedAtThreshold(weapon.level, weapon.promoteLevel),
+    ),
+    status: entry.status === "completed" || requirements.length === 0 ? "completed" : "active",
+    items: requirements.map((material) => ({
+      materialId: material.id,
+      required: material.count,
+    })),
+  };
+}
+
+async function refreshPlanEntries(): Promise<void> {
+  const project = currentProject.value;
+  if (!project) return;
+  planLoading.value = true;
+  try {
+    const [roleData, weaponData] = await Promise.all([
+      TSUserAvatar.getAvatars(project.uid),
+      TSUserBagWeapon.getWeapon(project.uid),
+    ]);
+    const roleMap = new Map(roleData.map((role) => [role.cid, role]));
+    const weaponOptionsForRefresh = buildWeaponOptions(weaponData, roleData);
+    const inputs: Array<TGApp.Sqlite.Cultivation.RefreshEntryInput> = [];
+    for (const entry of planEntries.value) {
+      const input =
+        entry.type === "avatar"
+          ? await (async () => {
+              const role = roleMap.get(entry.itemId);
+              return role ? await createAvatarRefreshInput(entry, role) : undefined;
+            })()
+          : createWeaponRefreshInput(entry, weaponOptionsForRefresh);
+      if (input) inputs.push(input);
+    }
+    if (inputs.length === 0) {
+      showSnackbar.warn("最新存档中未找到可刷新的计划目标");
+      return;
+    }
+    await TSCultivationPlan.refreshEntries(project.id, inputs);
+    planEntries.value = await TSCultivationPlan.getEntries(project.id);
+    showSnackbar.success(
+      `已刷新 ${inputs.length} 个目标${inputs.length < planEntries.value.length ? "，其余目标缺少最新存档" : ""}`,
+    );
+  } catch (error) {
+    showSnackbar.error(`刷新计划目标失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    planLoading.value = false;
+  }
+}
+
 function buildSyncWeaponOption(
   avatar: TGApp.Game.Calculate.SyncAvatar | undefined,
 ): TGApp.App.UserCalc.WeaponOption | undefined {
@@ -832,6 +1577,22 @@ function buildWeaponOptions(
       locked: false,
     });
   }
+  const existingWikiIds = new Set(
+    result.filter((weapon) => !weapon.fromBag).map((weapon) => weapon.wiki.id),
+  );
+  for (const wiki of wwWeapon) {
+    if (existingWikiIds.has(wiki.id)) continue;
+    result.push({
+      key: `wiki-${wiki.id}`,
+      title: `${wiki.name} · Lv.1（规划）`,
+      wiki,
+      level: 1,
+      promoteLevel: 0,
+      affixLevel: 1,
+      fromBag: false,
+      locked: false,
+    });
+  }
   return result.sort(
     (a, b) =>
       b.wiki.star - a.wiki.star || b.level - a.level || a.wiki.name.localeCompare(b.wiki.name),
@@ -849,6 +1610,34 @@ function buildWeaponOptions(
   gap: 8px;
 }
 
+.cultivation-view-toggle {
+  margin-left: 8px;
+
+  :deep(.v-btn) {
+    min-width: 76px;
+    font-family: var(--font-title);
+  }
+}
+
+.cultivation-nav-actions {
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+  gap: 8px;
+}
+
+.cultivation-nav-select {
+  flex: none;
+
+  &.uid-select {
+    width: 180px;
+  }
+
+  &.project-select {
+    width: 220px;
+  }
+}
+
 .cultivation-page {
   display: flex;
   min-height: 100%;
@@ -862,6 +1651,70 @@ function buildWeaponOptions(
   align-items: stretch;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cultivation-plan-toolbar,
+.cultivation-plan-summary,
+.cultivation-plan-heading,
+.cultivation-plan-heading > div,
+.cultivation-plan-actions,
+.cultivation-mode-actions {
+  display: flex;
+  align-items: center;
+}
+
+.cultivation-plan-toolbar {
+  width: 100%;
+  height: 100%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--common-shadow-1);
+  gap: 16px;
+  overflow-x: auto;
+}
+
+.cultivation-plan-summary {
+  min-width: 0;
+  flex: 1 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cultivation-plan-heading {
+  gap: 8px;
+}
+
+.cultivation-plan-heading > div {
+  flex-direction: column;
+  align-items: flex-start;
+
+  span {
+    font-family: var(--font-title);
+  }
+
+  small {
+    color: var(--common-text-sub);
+  }
+}
+
+.cultivation-plan-actions,
+.cultivation-mode-actions {
+  gap: 8px;
+}
+
+.cultivation-plan-actions {
+  flex: none;
+}
+
+.cultivation-tab-window {
+  width: 100%;
+}
+
+.cultivation-tab-content.v-window-item--active {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .cultivation-mode {
@@ -902,6 +1755,10 @@ function buildWeaponOptions(
 }
 
 @media (width <= 900px) {
+  .cultivation-plan-summary {
+    display: none;
+  }
+
   .cultivation-config {
     grid-template-columns: 1fr;
   }
@@ -915,6 +1772,18 @@ function buildWeaponOptions(
   .cultivation-mode {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .cultivation-plan-actions {
+    width: 100%;
+  }
+
+  .cultivation-plan-actions {
+    justify-content: flex-start;
+  }
+
+  .cultivation-mode-actions {
+    justify-content: flex-end;
   }
 }
 </style>

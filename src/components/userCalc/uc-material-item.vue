@@ -1,7 +1,7 @@
 <!-- 养成计算-材料需求项 -->
 <template>
   <div
-    :class="{ missing: material.missing > 0 }"
+    :class="{ missing: material.missing > 0, ready: weakenReady && material.missing === 0 }"
     class="ucmi-item"
     role="button"
     tabindex="0"
@@ -60,10 +60,11 @@
 <script lang="ts" setup>
 type UcMaterialItemProps = {
   material: TGApp.App.UserCalc.ResultMaterial;
+  weakenReady?: boolean;
 };
 type UcMaterialItemEmits = (e: "select") => void;
 
-defineProps<UcMaterialItemProps>();
+withDefaults(defineProps<UcMaterialItemProps>(), { weakenReady: false });
 const emits = defineEmits<UcMaterialItemEmits>();
 
 function formatCount(count: number): string {
@@ -92,6 +93,7 @@ function formatFullCount(count: number): string {
   border-radius: 8px;
   background: var(--common-shadow-t-1);
   cursor: pointer;
+  transition: opacity 160ms ease;
 
   &:focus-visible {
     outline: 2px solid var(--tgc-od-blue);
@@ -100,6 +102,10 @@ function formatFullCount(count: number): string {
 
   &.missing {
     border-color: var(--tgc-od-red);
+  }
+
+  &.ready {
+    opacity: 0.56;
   }
 }
 

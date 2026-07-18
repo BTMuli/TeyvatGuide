@@ -67,7 +67,7 @@
               :link="true"
               class="side-item-menu"
               href="/user/cultivation"
-              title="养成计算"
+              title="养成计划"
             >
               <template #prepend>
                 <v-icon class="side-icon-menu" color="var(--tgc-od-orange)" size="20">

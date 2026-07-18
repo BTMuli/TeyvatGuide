@@ -21,6 +21,9 @@ class Sqlite {
   private readonly tables: Readonly<Array<string>> = [
     "Achievements",
     "AppData",
+    "CultivationEntry",
+    "CultivationItem",
+    "CultivationProject",
     "GachaRecords",
     "GachaBRecords",
     "GameAccount",
