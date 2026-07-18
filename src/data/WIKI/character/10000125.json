@@ -66,7 +66,8 @@
       "name": "月露泼降",
       "desc": "<color=#FFD780FF>普通攻击</color>\n唤起月光的潮汐，进行至多三段的攻击，造成<color=#80C0FFFF>水元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，短暂咏唱后，造成<color=#80C0FFFF>水元素范围伤害</color>。\n若拥有至少1枚{LINK#N11190008}<color=#FFD780FF>草露</color>{/LINK}，哥伦比娅施放的重击将会被替换为特殊的、不消耗体力的重击<color=#FFD780FF>月露涤荡</color>：消耗一枚草露，对前方的敌人造成3次<color=#99FF88FF>草元素范围伤害</color>，该伤害视为月绽放反应伤害。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#80C0FFFF>水元素范围伤害</color>。",
       "icon": "Skill_A_Catalyst_MD",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 12532,
@@ -74,7 +75,8 @@
       "name": "万古潮汐",
       "desc": "唤起月海的潮汐，造成<color=#80C0FFFF>水元素范围伤害</color>，并唤出{LINK#N11250001}<color=#FFD780FF>引力涟漪</color>{/LINK}。\n<color=#FFD780FF>引力涟漪</color>将跟随场上角色，并持续对周围的敌人造成<color=#80C0FFFF>水元素范围伤害</color>。<color=#FFD780FF>引力涟漪</color>存在期间，队伍中附近的角色触发月曜反应或造成月曜反应伤害时，将会为哥伦比娅积攒特殊的<color=#FFD780FF>引力值</color>，积攒至上限时，将会依据为哥伦比娅积攒最多<color=#FFD780FF>引力值</color>的月曜反应的类型，对敌人造成不同类型的伤害。\n<color=#FFD780FF>月兆·满辉</color>：<color=#FFD780FF>引力涟漪</color>会造成范围更大的<color=#80C0FFFF>水元素范围伤害</color>。",
       "icon": "Skill_S_Columbina_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 12539,
@@ -82,7 +84,8 @@
       "name": "她的乡愁",
       "desc": "以无秽的新月之名连接山与海，将身边的大地短暂变换为{LINK#N11250002}<color=#FFD780FF>月之领域</color>{/LINK}，并造成<color=#80C0FFFF>水元素范围伤害</color>。",
       "icon": "Skill_E_Columbina_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 12521,
@@ -90,7 +93,8 @@
       "name": "月亮诱发的疯狂",
       "desc": "触发{LINK#N11250001}<color=#FFD780FF>引力干涉</color>{/LINK}时，哥伦比娅将获得月诱效果，使自身的暴击率提升5%，持续10秒。该效果至多叠加3层。",
       "icon": "UI_Talent_S_Columbina_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12522,
@@ -98,7 +102,8 @@
       "name": "新月自己的法则",
       "desc": "处于{LINK#N11250002}<color=#FFD780FF>月之领域</color>{/LINK}中的角色触发月曜反应时，将分别获得以下效果：\n·<color=#FFD780FF>月感电反应</color>：雷暴云对符合条件的目标进行雷击时，有33%概率额外进行一次雷击；\n·<color=#FFD780FF>月绽放反应</color>：触发月绽放反应时，将为队伍提供一枚特殊的{LINK#N11250003}<color=#FFD780FF>山月草露</color>{/LINK}，每18秒至多通过这种方式为队伍提供3枚山月草露；\n·<color=#FFD780FF>月结晶反应</color>：触发月笼谐奏时，每枚月笼有33%概率额外进行一次攻击。",
       "icon": "UI_Talent_S_Columbina_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12523,
@@ -106,7 +111,8 @@
       "name": "月兆祝赐·借汝月光",
       "desc": "队伍中的角色触发感电/绽放/水元素结晶反应时，将转为触发月感电/月绽放/月结晶反应，且基于哥伦比娅的生命值上限，提升队伍中角色造成的月曜反应的基础伤害：每1000点生命值上限都将提升0.2%月曜反应的基础伤害，至多通过这种方式提升7%伤害。\n\n此外，哥伦比娅在队伍中时，队伍的<color=#FFD780FF>月兆</color>将会上升一级。",
       "icon": "UI_Talent_S_Columbina_07",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12525,
@@ -114,7 +120,8 @@
       "name": "月的守望",
       "desc": "处于挪德卡莱或霜月区域时，队伍中自己的角色倒下时，哥伦比娅将复苏该角色，并为其恢复生命值，恢复值基于哥伦比娅的好感等级，该效果每100秒至多触发一次。该效果在秘境、征讨领域、深境螺旋中无效。\n此外，对受到月矩力影响的部分小动物，哥伦比娅似乎有着特殊的亲和力…",
       "icon": "UI_Talent_S_Columbina_08",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 5,

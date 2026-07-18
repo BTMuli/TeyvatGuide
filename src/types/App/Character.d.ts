@@ -79,6 +79,13 @@ declare namespace TGApp.App.Character {
      * 元数据中 `Proud.Parameters` 仅有一项时为 `1`，否则为 `10`。
      */
     maxLv: number;
+    /**
+     * 技能等级提高 3 级所需的命之座层数。
+     *
+     * @remarks
+     * 没有对应命之座加成时为 `null`。
+     */
+    luc: number | null;
   };
 
   /**

@@ -66,7 +66,8 @@
       "name": "神里流·倾",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，在居合中放出连续的剑风。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
       "icon": "Skill_A_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 232,
@@ -74,7 +75,8 @@
       "name": "神里流·冰华",
       "desc": "唤起盛开的冰之华，击飞身边的敌人并造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<i>「晴云胧月夜，妄执如雾，心野凄迷恋羁旅。」</i>",
       "icon": "Skill_S_Ayaka_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 233,
@@ -82,7 +84,8 @@
       "name": "神里流·霰步",
       "desc": "<color=#FFD780FF>替代冲刺</color>\n隐入碎冰，以消耗体力为代价，化为激流快速移动。\n\n在霰步状态下，神里绫华可以在水面上高速移动。\n结束霰步现身时，将产生如下效果：\n·释放寒冰的力量，对周围的敌人施加<color=#99FFFFFF>冰元素附着</color>；\n·将寒气凝聚在剑上，使神里绫华在短时间内获得<color=#99FFFFFF>冰元素附魔</color>。\n\n<i>「滴雫濡羽瞬消无，白鹭踏水何可怨？」</i>",
       "icon": "Skill_S_Ayaka_02",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 239,
@@ -90,7 +93,8 @@
       "name": "神里流·霜灭",
       "desc": "以倾奇之姿汇聚寒霜，放出持续行进的霜见雪关扉。\n\n<color=#FFD780FF>霜见雪关扉</color>\n·以刀锋般尖锐的霜风持续切割触及的敌人，造成<color=#99FFFFFF>冰元素伤害</color>；\n·持续时间结束时绽放，造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<i>「吹雪濡鹭时，积思若霜，胸底思重焉哀怜。」</i>",
       "icon": "Skill_E_Ayaka",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 221,
@@ -98,7 +102,8 @@
       "name": "天罪国罪镇词",
       "desc": "施放<color=#FFD780FF>神里流·冰华</color>后的6秒内，神里绫华的普通攻击与重击造成的伤害提升30%。",
       "icon": "UI_Talent_S_Ayaka_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 222,
@@ -106,7 +111,8 @@
       "name": "寒天宣命祝词",
       "desc": "<color=#FFD780FF>神里流·霰步</color>结束时释放的寒冰命中了敌人时，神里绫华将获得如下效果：\n·恢复10点体力；\n·获得18%<color=#99FFFFFF>冰元素伤害加成</color>，持续10秒。",
       "icon": "UI_Talent_S_Ayaka_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 223,
@@ -114,7 +120,8 @@
       "name": "鉴查心得",
       "desc": "合成武器突破素材时，有10%概率获得2倍产出。",
       "icon": "UI_Talent_Combine_Weapon_Double",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 5,

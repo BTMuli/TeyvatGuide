@@ -66,7 +66,8 @@
       "name": "西风剑术·流光之舞",
       "desc": "<color=#FFD780FF>普通攻击</color>\n仿拟古代骑士的战舞，双持大剑进行至多五段的连续攻击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，向前方突进后，进行一次格外有力的双剑挥砍。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
       "icon": "Skill_A_04",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 12832,
@@ -74,7 +75,8 @@
       "name": "烈风终坠",
       "desc": "以绝对的力量，呈现西风剑术的真髓，依据点按、长按，以不同的方式产生效果。\n\n<color=#FFD780FF>点按</color>\n向前方腾跃而起并顺势劈斩，造成<color=#80FFD7FF>风元素范围伤害</color>，并切换至{LINK#N11280001}<color=#FFD780FF>狂飙突进</color>{/LINK}模式。\n处于<color=#FFD780FF>狂飙突进</color>模式下时，法尔伽的普通攻击与重击造成的伤害提高，无法进行下落攻击，且进行普通攻击与重击时，将根据队伍中角色的元素类型，使双持的大剑分别造成无法被附魔覆盖的对应元素伤害。\n此外，处于<color=#FFD780FF>狂飙突进</color>模式下时，若队伍中存在<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>角色，法尔伽的元素战技<color=#FFD780FF>烈风终坠</color>将会被替换为特殊的元素战技{LINK#N11280002}<color=#FFD780FF>四风将起</color>{/LINK}，造成对应元素伤害与<color=#80FFD7FF>风元素伤害</color>；此外，法尔伽还可以消耗特殊元素战技<color=#FFD780FF>四风将起</color>的可使用次数，进行不消耗体力的特殊重击<color=#FFD780FF>苍噬</color>，造成对应元素伤害与<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>长按</color>\n进行蓄力后，向前方腾跃而起，蓄力时间会提升腾跃距离。",
       "icon": "Skill_S_Varka_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 12839,
@@ -82,7 +84,8 @@
       "name": "我即朔风",
       "desc": "以最强的北风骑士之名，向前方挥出强力的二连斩，造成两次<color=#80FFD7FF>风元素伤害</color>。\n若队伍中存在<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>角色，则第一次斩击将会按照上述元素类型的优先级，转为造成对应元素伤害。",
       "icon": "Skill_E_Varka_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 12851,
@@ -90,7 +93,8 @@
       "name": "魔女的前夜礼·重光临晨",
       "desc": "完成<color=#FFD780FF>魔女的课业·无题之题</color>后，法尔伽将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n特殊元素战技{LINK#N11280002}<color=#FFD780FF>四风将起</color>{/LINK}获得强化：法尔伽在{LINK#N11280001}<color=#FFD780FF>狂飙突进</color>{/LINK}模式下的普通攻击命中敌人时，<color=#FFD780FF>四风将起</color>的冷却时间将会转为缩短1秒。",
       "icon": "UI_Talent_S_Varka_08",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12821,
@@ -98,7 +102,8 @@
       "name": "晓风的行军",
       "desc": "队伍中存在<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>角色时，按照上述元素类型的优先级，基于法尔伽的攻击力，每1000点攻击力都将使法尔伽获得10%<color=#80FFD7FF>风元素伤害加成</color>与对应元素伤害加成（上述元素类型中，至多有一种元素类型可以通过这种方式获得伤害加成），至多通过这种方式获得25%。\n\n此外，如果队伍中存在至少2名<color=#80FFD7FF>风元素</color>角色，或存在至少2名元素类型相同的<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>角色，法尔伽在{LINK#N11280001}<color=#FFD780FF>狂飙突进</color>{/LINK}模式下进行的普通攻击、重击、特殊重击<color=#FFD780FF>苍噬</color>与施放的特殊元素战技{LINK#N11280002}<color=#FFD780FF>四风将起</color>{/LINK}将造成原本140%的伤害；若队伍中同时存在至少2名<color=#80FFD7FF>风元素</color>角色与至少2名元素类型相同的<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>角色，则会使上述效果提升至220%。",
       "icon": "UI_Talent_S_Varka_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12822,
@@ -106,7 +111,8 @@
       "name": "风帜的先引",
       "desc": "队伍中附近的角色触发扩散反应时，法尔伽将获得一层<color=#FFD780FF>「苍牙之誓」</color>，使法尔伽的普通攻击、重击、特殊重击<color=#FFD780FF>苍噬</color>与施放的特殊元素战技{LINK#N11280002}<color=#FFD780FF>四风将起</color>{/LINK}造成的伤害提升7.5%。该效果持续8秒，至多叠加4层，每名角色每1秒至多通过这种方式使法尔伽获得一层<color=#FFD780FF>「苍牙之誓」</color>。",
       "icon": "UI_Talent_S_Varka_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12823,
@@ -114,7 +120,8 @@
       "name": "归风的凯歌",
       "desc": "队伍中每有一名蒙德角色，通过长按施放的元素战技<color=#FFD780FF>烈风终坠</color>的冷却时间就会缩短5%。\n该效果在秘境、征讨领域、深境螺旋中无效。",
       "icon": "UI_Talent_S_Varka_07",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 5,

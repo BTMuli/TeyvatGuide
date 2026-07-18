@@ -66,7 +66,8 @@
       "name": "后厨手艺",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多三段的连续枪击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，进行上挑攻击。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
       "icon": "Skill_A_03",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 11232,
@@ -74,7 +75,8 @@
       "name": "低温烹饪",
       "desc": "敬请见证「料理」的真意！依据点按、长按，以不同的方式展现枫丹引以为傲的厨艺。\n\n<color=#FFD780FF>点按</color>\n以「低温冷藏」模式启动全频谱多重任务厨艺机关，对周围的敌人造成<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<color=#FFD780FF>厨艺机关·低温冷藏模式</color>\n将跟随当前场上角色，并将间歇性对附近的敌人发射「冻霜芭菲」，造成<color=#99FFFFFF>冰元素伤害</color>。\n\n<color=#FFD780FF>始基力：荒性</color>\n每隔一段时间，爱可菲以「低温冷藏」模式启动厨艺机关时，将唤出流涌之刃，造成具有荒性的<color=#99FFFFFF>冰元素范围伤害</color>。\n\n<color=#FFD780FF>长按</color>\n以{LINK#N11120002}<color=#FFD780FF>即兴烹饪模式</color>{/LINK}启动全频谱多重任务厨艺机关。",
       "icon": "Skill_S_Escoffier_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 11239,
@@ -82,7 +84,8 @@
       "name": "花刀技法",
       "desc": "展现极致的刀工，造成<color=#99FFFFFF>冰元素范围伤害</color>，并为队伍中附近的所有角色恢复生命值，回复量受益于爱可菲的攻击力。",
       "icon": "Skill_E_Escoffier_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 11221,
@@ -90,7 +93,8 @@
       "name": "美食胜过良药",
       "desc": "施放元素爆发<color=#FFD780FF>{LINK#S11125}花刀技法{/LINK}</color>后，爱可菲将获得「康复食疗」效果，持续9秒：每1秒为附近的当前场上角色恢复生命值，回复值受益于爱可菲自己攻击力的138.24%。",
       "icon": "UI_Talent_S_Escoffier_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 11222,
@@ -98,7 +102,8 @@
       "name": "灵感浸入调味",
       "desc": "当队伍中存在1/2/3/4名<color=#80C0FFFF>水元素</color>或<color=#99FFFFFF>冰元素</color>角色时，爱可菲的元素战技<color=#FFD780FF>{LINK#S11122}低温烹饪{/LINK}</color>或元素爆发<color=#FFD780FF>{LINK#S11125}花刀技法{/LINK}</color>命中敌人时，将使该敌人的<color=#80C0FFFF>水元素抗性</color>与<color=#99FFFFFF>冰元素抗性</color>降低5%/10%/15%/55%，持续12秒。",
       "icon": "UI_Talent_S_Escoffier_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 11223,
@@ -106,7 +111,8 @@
       "name": "时时刻刻的即兴料理",
       "desc": "#长按施放元素战技<color=#FFD780FF>{LINK#S11122}低温烹饪{/LINK}</color>时，将以「即兴烹饪」模式启动全频谱多重任务厨艺机关。\n\n<color=#FFD780FF>厨艺机关·即兴烹饪模式</color>\n·在场上放置厨艺机关。厨艺机关可以吸收元素攻击。吸收的元素能量达到临界值时，将使爱可菲事先放入其中的食材转化为美食。\n·爱可菲需要时间采购新的食材，每周只能通过这种方式制作一定数量的料理。制作料理的次数每周一凌晨4点重置。{TIMEZONE}",
       "icon": "UI_Talent_S_Escoffier_08",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 5,

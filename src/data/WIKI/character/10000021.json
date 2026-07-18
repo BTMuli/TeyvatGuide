@@ -66,7 +66,8 @@
       "name": "神射手",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，烈焰会在箭矢上持续积聚。聚满了烈焰的箭矢会造成<color=#FF9999FF>火元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
       "icon": "Skill_A_02",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 2132,
@@ -74,7 +75,8 @@
       "name": "爆弹玩偶",
       "desc": "请可靠的兔兔伯爵上阵。\n\n<color=#FFD780FF>兔兔伯爵</color>\n·持续嘲讽周围的敌人，吸引火力；\n·耐久度按比例继承安柏的生命值上限；\n·被摧毁或持续时间结束时，会发生剧烈的爆炸，造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<color=#FFD780FF>长按</color>\n调整投掷方向。\n投掷距离随长按时间增加。\n\n<i>兔兔伯爵有着悠久的家系。但从兔兔八百九十三世开始，安柏就停止计数了。</i>",
       "icon": "Skill_S_Ambor_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 2139,
@@ -82,7 +84,8 @@
       "name": "箭雨",
       "desc": "射出火焰箭雨，持续造成<color=#FF9999FF>火元素范围伤害</color>。\n\n<i>满心热诚的安柏真的很热。</i>",
       "icon": "Skill_E_Ambor",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 2121,
@@ -90,7 +93,8 @@
       "name": "百发百中！",
       "desc": "<color=#FFD780FF>箭雨</color>的暴击率提高10%，影响范围扩大30%。",
       "icon": "UI_Talent_S_Ambor_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 2122,
@@ -98,7 +102,8 @@
       "name": "压制射击",
       "desc": "瞄准射击命中弱点时，攻击力提高15%，持续10秒。",
       "icon": "UI_Talent_S_Ambor_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 2123,
@@ -106,7 +111,8 @@
       "name": "飞行冠军",
       "desc": "队伍中自己的角色滑翔消耗的体力降低20%。\n无法与效果完全相同的固有天赋叠加。",
       "icon": "UI_Talent_Explosion_Glide",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 4,

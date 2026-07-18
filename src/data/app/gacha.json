@@ -3460,5 +3460,41 @@
     "postId": "76308874",
     "up5List": [12516, 14517],
     "up4List": [11401, 12405, 13401, 14403, 15403]
+  },
+  {
+    "name": "伴月同眠",
+    "version": "6.7",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/07/07/c8fb39c62c6a8ec60faab54c67e5f025_4328241174560449438_transformed.jpg",
+    "from": "2026-07-21T18:00:00+08:00",
+    "to": "2026-08-11T14:59:00+08:00",
+    "type": 301,
+    "postId": "76723989",
+    "up5List": [10000125],
+    "up4List": [10000124, 10000105, 10000097]
+  },
+  {
+    "name": "影寂天下人",
+    "version": "6.7",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/07/07/5e7a7348730900c4b4cf210f5c061693_2349137515764696348_transformed.jpg",
+    "from": "2026-07-21T18:00:00+08:00",
+    "to": "2026-08-11T14:59:00+08:00",
+    "type": 400,
+    "postId": "76723988",
+    "up5List": [10000052],
+    "up4List": [10000124, 10000105, 10000097]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "6.7",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/07/07/d5fdbf8997d440f25848244365596855_6259960005832090377_transformed.jpg",
+    "from": "2026-07-21T18:00:00+08:00",
+    "to": "2026-08-11T14:59:00+08:00",
+    "type": 302,
+    "postId": "76723985",
+    "up5List": [14522, 13509],
+    "up4List": [14430, 11403, 12402, 13407, 15401]
   }
 ]

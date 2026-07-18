@@ -66,7 +66,8 @@
       "name": "古华剑法",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多五段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
       "icon": "Skill_A_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 2532,
@@ -74,7 +75,8 @@
       "name": "古华剑·画雨笼山",
       "desc": "使出连续两段的剑技，对前方的敌人造成<color=#80C0FFFF>水元素伤害</color>。同时，生成最大数量的雨帘剑围绕在当前场上自己的角色身边。\n具有如下特性：\n·角色受到伤害时会破碎，降低受到的伤害；\n·提高角色的抗打断能力。\n行秋<color=#80C0FFFF>水元素伤害加成</color>的20%将转换为雨帘剑的额外伤害减免。\n\n最多通过这种方式获得24%额外伤害减免。\n初始雨帘剑的最大数量为3柄。\n施放的瞬间，为角色施加<color=#80C0FFFF>潮湿</color>状态。\n\n<i>「蛟龙易斩，雨线难画」。</i>",
       "icon": "Skill_S_Xingqiu_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 2539,
@@ -82,7 +84,8 @@
       "name": "古华剑·裁雨留虹",
       "desc": "展开虹剑势，驾御幻影剑雨战斗，并生成最大数量的雨帘剑。\n\n<color=#FFD780FF>虹剑势</color>\n·当前场上自己的角色进行普通攻击时，会产生剑雨连携攻击，造成<color=#80C0FFFF>水元素伤害</color>；\n·雨帘剑的数量将始终维持在最大数量。\n\n<i>「裁雨法」不传绝学，古华镇派秘诀之一。</i>",
       "icon": "Skill_E_Xingqiu_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 2521,
@@ -90,7 +93,8 @@
       "name": "生水要诀",
       "desc": "雨帘剑受击破碎时或持续时间结束时，基于行秋最大生命值的6%，恢复当前角色的生命值。",
       "icon": "UI_Talent_S_Xingqiu_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 2522,
@@ -98,7 +102,8 @@
       "name": "虚实工笔",
       "desc": "行秋获得20%<color=#80C0FFFF>水元素伤害加成</color>。",
       "icon": "UI_Talent_S_Xingqiu_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 2523,
@@ -106,7 +111,8 @@
       "name": "灵光乍现",
       "desc": "合成角色天赋素材时，有25%概率返还部分合成材料。",
       "icon": "UI_Talent_Combine_Talent",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 4,

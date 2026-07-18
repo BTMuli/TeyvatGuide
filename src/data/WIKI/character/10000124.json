@@ -66,7 +66,8 @@
       "name": "见机行矢",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多三段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，强风会在箭矢上持续积聚。聚满了强风之力的箭矢会造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，攻击下落路径上的敌人，在落地时造成范围伤害。",
       "icon": "Skill_A_02",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 12432,
@@ -74,7 +75,8 @@
       "name": "奇策·财富分配方案",
       "desc": "雅珂达向敌人突进，并在触及敌人时进入「掠影追袭」状态。处于该状态下时，雅珂达将持续快速移动；若附近的敌人处于<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>附着下，雅珂达还会偷偷将随身携带的{LINK#N11240001}<color=#FFD780FF>呼噜噜秘藏瓶</color>{/LINK}转换成对应的元素属性，并持续进行装填。持续时间结束或再次施放时，雅珂达将会清空<color=#FFD780FF>呼噜噜秘藏瓶</color>，并对附近的敌人造成一次<color=#80FFD7FF>风元素伤害</color>；<color=#FFD780FF>呼噜噜秘藏瓶</color>装满时，雅珂达也会清空<color=#FFD780FF>呼噜噜秘藏瓶</color>，退出掠影追袭状态，并对附近的敌人造成一次伤害更高的<color=#80FFD7FF>风元素伤害</color>。\n如果雅珂达的突进没有触及敌人，雅珂达会在原地投掷下一枚烟雾弹，对身边的敌人造成一次<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>月兆·满辉</color>：<color=#FFD780FF>呼噜噜秘藏瓶</color>装满时，雅珂达不会立刻清空<color=#FFD780FF>呼噜噜秘藏瓶</color>，而是会在接下来的一段时间内，持续消耗瓶中装填的元素，并间歇性向附近的敌人发射<color=#FFD780FF>软绒绒猫猫球</color>，造成<color=#FFD780FF>呼噜噜秘藏瓶</color>对应元素类型的伤害。<color=#FFD780FF>软绒绒猫猫球</color>命中敌人时，还会为雅珂达恢复2点元素能量，该效果每3.5秒至多触发一次。\n\n<i>世上分配财富的方式很多，但对挪德卡莱的宝藏猎人与盗宝团而言，效率最高的分配方式从来都只有一种。</i>",
       "icon": "Skill_S_Jahoda_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 12439,
@@ -82,7 +84,8 @@
       "name": "秘器·猎人的七道具",
       "desc": "压箱底的秘藏只能在这里用掉啦！雅珂达取出两枚{LINK#N11240002}<color=#FFD780FF>猫型家用互助协调器</color>{/LINK}，并对附近的敌人造成一次<color=#80FFD7FF>风元素伤害</color>。\n\n<i>「所谓互助协调嘛，就是你掏出摩拉互助，我们负责协调。怎么样，很合理吧？」</i>",
       "icon": "Skill_E_Jahoda_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 12421,
@@ -90,7 +93,8 @@
       "name": "索酬的巧计",
       "desc": "当队伍中存在至少1名元素类型为<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>或<color=#99FFFFFF>冰元素</color>的角色时，将依据对应元素类型的角色数量，使元素爆发<color=#FFD780FF>秘器·猎人的七道具</color>中的{LINK#N11240002}<color=#FFD780FF>猫型家用互助协调器</color>{/LINK}获得强化。\n雅珂达会偷偷记录队伍中上述元素类型的角色。在这些角色中，若角色数量最多的元素类型为：\n·<color=#FF9999FF>火元素</color>：<color=#FFD780FF>猫型家用互助协调器</color>造成原本130%的伤害；\n·<color=#80C0FFFF>水元素</color>：<color=#FFD780FF>猫型家用互助协调器</color>造成原本120%的治疗量；\n·<color=#FFACFFFF>雷元素</color>：<color=#FFD780FF>猫型家用互助协调器</color>的数量增加一个；\n·<color=#99FFFFFF>冰元素</color>：<color=#FFD780FF>猫型家用互助协调器</color>的攻击间隔减少10%。\n\n若上述元素类型的角色数量相同，则按照<color=#FF9999FF>火元素</color>、<color=#80C0FFFF>水元素</color>、<color=#FFACFFFF>雷元素</color>、<color=#99FFFFFF>冰元素</color>的顺序进行记录。初始至多只有一种元素类型对应的效果生效。",
       "icon": "UI_Talent_S_Jahoda_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12422,
@@ -98,7 +102,8 @@
       "name": "蜜莓的嘉赏",
       "desc": "元素爆发<color=#FFD780FF>秘器·猎人的七道具</color>中的{LINK#N11240002}<color=#FFD780FF>猫型家用互助协调器</color>{/LINK}对队伍中自己的当前场上角色触发治疗时，若受到治疗的角色生命值高于70%，则该角色的元素精通提升100点，持续6秒。",
       "icon": "UI_Talent_S_Jahoda_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12423,
@@ -106,7 +111,8 @@
       "name": "月兆祝赐·檐上趱行",
       "desc": "雅珂达在队伍中时，队伍的<color=#FFD780FF>月兆</color>将会上升一级。",
       "icon": "UI_Talent_S_Jahoda_07",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 12425,
@@ -114,7 +120,8 @@
       "name": "暗巷的黠慧",
       "desc": "在挪德卡莱执行探索派遣任务时，消耗的时间缩短25%。",
       "icon": "UI_Talent_S_Jahoda_08",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 4,

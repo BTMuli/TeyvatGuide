@@ -67,7 +67,8 @@
       "name": "简式风灵作成",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的风灵攻击，造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，短暂咏唱后，造成<color=#80FFD7FF>风元素范围伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n凝聚风灵的力量，从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成<color=#80FFD7FF>风元素范围伤害</color>。",
       "icon": "Skill_A_Catalyst_MD",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 4332,
@@ -75,7 +76,8 @@
       "name": "风灵作成·陆叁零捌",
       "desc": "召唤出小型风灵，将敌人与物体牵引至风灵所在位置，击飞范围内的敌人，并造成<color=#80FFD7FF>风元素伤害</color>。\n\n<i>说来很不好意思，虽然术式里诞生的元素生命迅速就消散了，但是在冒险里真的很好用。失败的实验也会诞生实用技术。</i>",
       "icon": "Skill_S_Sucrose_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 4339,
@@ -83,7 +85,8 @@
       "name": "禁·风灵作成·柒伍同构贰型",
       "desc": "砂糖抛出不稳定的烧瓶，生成大型风灵。\n存在期间，大型风灵会持续牵引附近的敌人与物体，击飞附近的敌人，并造成<color=#80FFD7FF>风元素伤害</color>。\n\n<color=#FFD780FF>元素转化</color>\n若风灵在技能持续期间接触了<color=#80C0FFFF>水元素</color>/<color=#FF9999FF>火元素</color>/<color=#99FFFFFF>冰元素</color>/<color=#FFACFFFF>雷元素</color>，则会获得对应元素属性，额外造成该元素的附加伤害。\n元素转化在技能持续期间仅会发生一次。\n\n<i>砂糖也曾经想给每一个不稳态无相之风取名字。但是其世系迅速超过了兔兔伯爵的八百九十三世。</i>",
       "icon": "Skill_E_Sucrose_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 4351,
@@ -91,7 +94,8 @@
       "name": "魔女的前夜礼·七循之理",
       "desc": "完成<color=#FFD780FF>魔女的课业·仙境花之题</color>后，砂糖将成为<color=#FFD780FF>魔导</color>角色。队伍中编入至少2名魔导角色时，将获得<color=#FFD780FF>魔导·秘仪</color>效果，使魔导角色获得强化。\n\n<color=#FFD780FF>魔导·秘仪</color>\n·召唤小型风灵后的15秒内，队伍中附近的角色的普通攻击、重击、下落攻击、元素战技和元素爆发造成的伤害提升5.71428%。\n·召唤大型风灵后的20秒内，队伍中附近的魔导角色的普通攻击、重击、下落攻击、元素战技和元素爆发造成的伤害提升7.14285%。",
       "icon": "UI_Talent_S_Sucrose_07",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 4321,
@@ -99,7 +103,8 @@
       "name": "触媒置换术",
       "desc": "砂糖触发扩散反应时，使队伍中所有对应元素类型的角色（不包括砂糖自己）元素精通提升50，持续8秒。",
       "icon": "UI_Talent_S_Sucrose_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 4322,
@@ -107,7 +112,8 @@
       "name": "小小的慧风",
       "desc": "<color=#FFD780FF>风灵作成·陆叁零捌</color>或<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>命中敌人时，基于砂糖元素精通的20%，为队伍中所有角色（不包括砂糖自己）提供元素精通加成，持续8秒。",
       "icon": "UI_Talent_S_Sucrose_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 4323,
@@ -115,7 +121,8 @@
       "name": "不稳定发现",
       "desc": "合成角色与武器培养素材时，有10%概率获得2倍产出。",
       "icon": "UI_Talent_Combine_Material",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 4,

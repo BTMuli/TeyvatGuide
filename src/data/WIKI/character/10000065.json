@@ -66,7 +66,8 @@
       "name": "忍流飞刃斩",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的连续剑击。\n\n<color=#FFD780FF>重击</color>\n消耗一定体力，瞬间向前方挥出两剑。\n\n<color=#FFD780FF>下落攻击</color>\n从空中下坠冲击地面，攻击下落路径上的敌人，并在落地时造成范围伤害。",
       "icon": "Skill_A_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 6532,
@@ -74,7 +75,8 @@
       "name": "越祓雷草之轮",
       "desc": "编结越祓草轮，消耗一部分生命值，对周围的敌人造成<color=#FFACFFFF>雷元素伤害</color>。\n\n<color=#FFD780FF>越祓草轮</color>\n将跟随当前场上角色。每1.5秒，对周围的敌人造成<color=#FFACFFFF>雷元素伤害</color>，并为范围内的当前场上角色恢复生命值，回复量受益于久岐忍的生命值上限。\n\n施放该技能所消耗的生命值，至多使久岐忍的生命值降低至20%。\n\n<i>鸣草结环，系于腰际，以驱邪祟。</i>",
       "icon": "Skill_S_Shinobu_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 6539,
@@ -82,7 +84,8 @@
       "name": "御咏鸣神刈山祭",
       "desc": "将退邪之刃刺入地面，在前方创造清净邪物的结界，基于久岐忍的生命值上限，对其中的敌人持续造成<color=#FFACFFFF>雷元素伤害</color>。\n施放时，若久岐忍的生命值低于或等于50%，结界的持续时间将会延长。\n\n<i>原本是用于割除杂草，祈祷来年丰收的祭祷之术，忍在结束巫女生涯后，也并未将此忘记。</i>",
       "icon": "Skill_E_Shinobu_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 6521,
@@ -90,7 +93,8 @@
       "name": "破笼之志",
       "desc": "久岐忍的生命值不高于50%时，治疗加成提升15%。",
       "icon": "UI_Talent_S_Shinobu_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 6522,
@@ -98,7 +102,8 @@
       "name": "安心之所",
       "desc": "基于久岐忍的元素精通，<color=#FFD780FF>越祓雷草之轮</color>获得以下提升：\n·治疗量提升值：元素精通的75%；\n·伤害提升值：元素精通的25%。",
       "icon": "UI_Talent_S_Shinobu_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 6523,
@@ -106,7 +111,8 @@
       "name": "久时的祝祷",
       "desc": "在稻妻执行时长为20小时的探索派遣任务时，获得的奖励增加25%。",
       "icon": "UI_Talent_S_Shinobu_07",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 4,

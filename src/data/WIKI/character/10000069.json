@@ -66,7 +66,8 @@
       "name": "藏蕴破障",
       "desc": "<color=#FFD780FF>普通攻击</color>\n进行至多四段的连续弓箭射击。\n\n<color=#FFD780FF>重击</color>\n进行伤害更高、更为精准的<color=#FFD780FF>瞄准射击</color>。\n瞄准时，草木的力量会在箭矢上持续积聚，并随攻击发射出去。根据蓄力时间长短，能造成不同的效果：\n·一段蓄力：射出附有草元素的箭矢，造成<color=#99FF88FF>草元素伤害</color>；\n·二段蓄力：发射花筥箭，造成<color=#99FF88FF>草元素伤害</color>。命中后，将产生4枚会自行追踪附近敌人的藏蕴花矢，能够造成<color=#99FF88FF>草元素伤害</color>。\n\n<color=#FFD780FF>下落攻击</color>\n从空中射出箭雨，并迅速下坠冲击地面，在落地时造成范围伤害。",
       "icon": "Skill_A_02",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": null
     },
     {
       "group": 6932,
@@ -74,7 +75,8 @@
       "name": "识果种雷",
       "desc": "提纳里向前投掷识种心雷，造成<color=#99FF88FF>草元素范围伤害</color>，并产生识蕴领域，神秘的幻象会持续嘲讽其中的敌人，吸引火力。\n此外，提纳里将获得「通塞识」效果，使其花筥箭所需的蓄力时间减少2.4秒，该效果将在持续时间结束或提纳里发射3次花筥箭后消失。\n\n<i>「种子若在土壤之外枯萎死去，死去时仍是一粒。若它归壤于故土，就将结出千万粒来。」</i>",
       "icon": "Skill_S_Tighnari_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 5
     },
     {
       "group": 6939,
@@ -82,7 +84,8 @@
       "name": "造生缠藤箭",
       "desc": "汇聚一切种子的力量，发射6枚能追踪敌人的缠藤箭，造成<color=#99FF88FF>草元素伤害</color>。\n缠藤箭在命中后，将会产生次级缠藤箭，追踪附近的敌人，并在命中时造成<color=#99FF88FF>草元素伤害</color>。\n\n<i>「别想这么轻易摆脱，藤蔓之后再生藤蔓，如果不能彻底清理干净，后果可是很麻烦的。」</i>",
       "icon": "Skill_E_Tighnari_01",
-      "maxLv": 10
+      "maxLv": 10,
+      "luc": 3
     },
     {
       "group": 6921,
@@ -90,7 +93,8 @@
       "name": "眼识殊明",
       "desc": "提纳里发射<color=#FFD780FF>花筥箭</color>后，元素精通提升50点，持续4秒。",
       "icon": "UI_Talent_S_Tighnari_05",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 6922,
@@ -98,7 +102,8 @@
       "name": "诸叶辨通",
       "desc": "提纳里的每点元素精通，都会使其重击与<color=#FFD780FF>造生缠藤箭</color>造成的伤害提升0.06%。\n通过这种方式，至多使上述攻击造成的伤害提升60%。",
       "icon": "UI_Talent_S_Tighnari_06",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     },
     {
       "group": 6923,
@@ -106,7 +111,8 @@
       "name": "闳览博物",
       "desc": "在小地图上显示周围的<color=#FFD780FF>须弥区域特产</color>的位置。",
       "icon": "UI_Talent_S_Tighnari_07",
-      "maxLv": 1
+      "maxLv": 1,
+      "luc": null
     }
   ],
   "star": 5,
