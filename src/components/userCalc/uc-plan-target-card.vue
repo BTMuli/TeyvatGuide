@@ -142,6 +142,7 @@ import { computed, ref } from "vue";
 import { WikiMaterialData } from "@/data/index.js";
 
 type UcPlanTargetCardProps = {
+  allowCrafting: boolean;
   canMoveDown: boolean;
   canMoveUp: boolean;
   entry: TGApp.Sqlite.Cultivation.EntryWithItems;
@@ -186,7 +187,10 @@ const displayMaterials = computed<Array<TargetMaterialView>>(() =>
     .map((item) => {
       const result = materialResultMap.value.get(item.materialId);
       const ratio = result?.required
-        ? Math.min((result.owned + result.craftable) / result.required, 1)
+        ? Math.min(
+            (result.owned + (props.allowCrafting ? result.craftable : 0)) / result.required,
+            1,
+          )
         : 0;
       const progress = ratio * 100;
       return {

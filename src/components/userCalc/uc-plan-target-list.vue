@@ -45,6 +45,7 @@
         :key="entry.id"
         :can-move-down="canMoveEntry(entry, 1)"
         :can-move-up="canMoveEntry(entry, -1)"
+        :allow-crafting
         :entry
         :fulfilled="isEntryFulfilled(entry)"
         :has-today-material="hasTodayMaterial(entry)"
@@ -73,6 +74,7 @@ import { WikiMaterialData } from "@/data/index.js";
 import { getServerDay, isMaterialAvailableToday } from "@utils/cultivationPlan.js";
 
 type UcPlanTargetListProps = {
+  allowCrafting: boolean;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   materials: Array<TGApp.App.UserCalc.ResultMaterial>;
   projectName: string;
@@ -129,7 +131,8 @@ function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   const prepared = entry.items.reduce((total, item) => {
     const material = materialResultMap.value.get(item.materialId);
     if (!material || material.required <= 0) return total;
-    const ratio = Math.min((material.owned + material.craftable) / material.required, 1);
+    const available = material.owned + (props.allowCrafting ? material.craftable : 0);
+    const ratio = Math.min(available / material.required, 1);
     return total + item.required * ratio;
   }, 0);
   return Math.min((prepared / required) * 100, 100);

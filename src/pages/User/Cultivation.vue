@@ -132,6 +132,7 @@
       <v-window v-model="viewTab" class="cultivation-tab-window">
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
+            :allow-crafting="planAllowCrafting"
             :entries="planEntries"
             :materials="planResultMaterials"
             :project-name="currentProject?.name ?? ''"
