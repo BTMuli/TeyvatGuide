@@ -21,6 +21,7 @@ class Sqlite {
   private readonly tables: Readonly<Array<string>> = [
     "Achievements",
     "AppData",
+    "CultivationApiResult",
     "CultivationEntry",
     "CultivationItem",
     "CultivationProject",
@@ -194,7 +195,7 @@ class Sqlite {
   }
 
   /**
-   * 更新养成目标合成配置字段
+   * 更新养成目标配置字段与接口计算结果表
    * @since Beta v0.11.2
    * @returns 无返回值
    */
@@ -212,11 +213,26 @@ class Sqlite {
 
   private async ensureCultivationEntrySchema(): Promise<void> {
     const db = await this.getDB();
+    await db.execute(`CREATE TABLE IF NOT EXISTS CultivationApiResult (
+      projectId TEXT NOT NULL,
+      avatarEntryId TEXT NOT NULL DEFAULT '',
+      weaponEntryId TEXT NOT NULL DEFAULT '',
+      result TEXT NOT NULL,
+      updated TEXT NOT NULL,
+      PRIMARY KEY (projectId, avatarEntryId, weaponEntryId)
+    );`);
+    await db.execute(
+      "CREATE INDEX IF NOT EXISTS CultivationApiResultProjectIndex ON CultivationApiResult (projectId);",
+    );
     const columns = await db.select<Array<{ name: string }>>(
       "PRAGMA table_info(CultivationEntry);",
     );
     const columnNames = new Set(columns.map((column) => column.name));
     const additions = <const>[
+      {
+        name: "calculationMode",
+        sql: `ALTER TABLE CultivationEntry ADD calculationMode TEXT NOT NULL DEFAULT 'bag';`,
+      },
       {
         name: "allowCrafting",
         sql: "ALTER TABLE CultivationEntry ADD allowCrafting BOOLEAN NOT NULL DEFAULT true;",

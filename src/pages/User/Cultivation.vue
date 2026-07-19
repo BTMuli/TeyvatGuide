@@ -49,7 +49,7 @@
           icon="mdi-refresh"
           title="重新加载"
           variant="tonal"
-          @click="reload"
+          @click="reload()"
         />
       </div>
     </template>
@@ -133,7 +133,7 @@
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
             :entries="planEntries"
-            :inventory="bagMaterials"
+            :inventory="planInventory"
             :project-name="currentProject?.name ?? ''"
             :timezone="currentProject?.timezone ?? currentTimezone"
             :uid="currentUid ?? 0"
@@ -150,7 +150,7 @@
             v-model:allow-crafting="planAllowCrafting"
             v-model:use-dust="planUseDust"
             v-model:use-solvent="planUseSolvent"
-            :bag-materials="bagMaterialDetails"
+            :bag-materials="planBagMaterialDetails"
             :materials="planResultMaterials"
             :timezone="currentProject?.timezone ?? currentTimezone"
             :uid="currentUid ?? 0"
@@ -174,7 +174,7 @@
                 mandatory
                 variant="outlined"
               >
-                <v-btn :disabled="isTraveler" value="local">本地计算</v-btn>
+                <v-btn :disabled="isTraveler || !hasBagDataSource" value="bag">背包计算</v-btn>
                 <v-btn value="api">接口计算</v-btn>
               </v-btn-toggle>
               <v-chip v-else color="var(--tgc-od-orange)" variant="tonal">接口计算</v-chip>
@@ -271,6 +271,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import showDialog from "@comp/func/dialog.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
@@ -286,9 +287,11 @@ import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
 import { platform } from "@tauri-apps/plugin-os";
 import TGHttps from "@utils/TGHttps.js";
 import { tryCallYae } from "@utils/TGGame.js";
+import { getRfAc } from "@utils/acUtils.js";
 import {
   aggregateEntryMaterials,
   buildCultivationResults,
+  getCalculateInventory,
   getUidServerTimezone,
 } from "@utils/cultivationPlan.js";
 import { getRcStar, getZhElement } from "@utils/toolFunc.js";
@@ -309,8 +312,13 @@ const TRAVELER_IDS = new Set([10000005, 10000007]);
 const EMPTY_BAG_MATERIAL_DETAILS: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable> =
   new Map();
 
-type CalculationMode = "local" | "api";
+type CalculationMode = TGApp.Sqlite.Cultivation.CalculationMode;
 type CultivationViewTab = "calculator" | "materials" | "targets";
+type ApiRefreshTarget = {
+  avatar: TGApp.Game.Calculate.SyncAvatar;
+  avatarEntry?: TGApp.Sqlite.Cultivation.EntryWithItems;
+  weaponEntry?: TGApp.Sqlite.Cultivation.EntryWithItems;
+};
 
 const { account, cookie } = storeToRefs(useUserStore());
 const { gameDir } = storeToRefs(useAppStore());
@@ -322,7 +330,7 @@ const loading = ref<boolean>(false);
 const apiLoading = ref<boolean>(false);
 const planLoading = ref<boolean>(false);
 const apiCalculated = ref<boolean>(false);
-const calculationMode = ref<CalculationMode>(isWindows ? "local" : "api");
+const calculationMode = ref<CalculationMode>(isWindows ? "bag" : "api");
 const viewTab = ref<CultivationViewTab>("targets");
 const currentUid = ref<number>();
 const currentProjectId = ref<string | null>(null);
@@ -349,19 +357,27 @@ const roles = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const weapons = shallowRef<Array<TGApp.App.UserCalc.WeaponOption>>([]);
 const bagMaterials = shallowRef<Map<number, number>>(new Map());
 const bagMaterialDetails = shallowRef<Map<number, TGApp.Sqlite.UserBag.MaterialTable>>(new Map());
+const bagSourceUids = shallowRef<Set<number>>(new Set());
 const avatarWiki = shallowRef<TGApp.App.Character.WikiItem | false>(false);
 const syncAvatars = shallowRef<Array<TGApp.Game.Calculate.SyncAvatar>>([]);
 const apiResultMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
 const apiAvatarRequirements = shallowRef<Array<CultivationMaterial>>([]);
 const apiWeaponRequirements = shallowRef<Array<CultivationMaterial>>([]);
+const apiCalculationResult = shallowRef<TGApp.Game.Calculate.Result>();
 const editingEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
 const pendingWikiCharacterId = ref<number | null>(null);
 let apiResultVersion = 0;
 let dataLoadVersion = 0;
+let settingCalculationMode = false;
 let settingUid = false;
 let settingProject = false;
 
-const useApiCalculation = computed<boolean>(() => !isWindows || calculationMode.value === "api");
+const hasBagDataSource = computed<boolean>(
+  () => currentUid.value === undefined || bagSourceUids.value.has(currentUid.value),
+);
+const useApiCalculation = computed<boolean>(
+  () => !isWindows || !hasBagDataSource.value || calculationMode.value === "api",
+);
 const currentTimezone = computed<number>(() => getUidServerTimezone(currentUid.value ?? 0));
 const currentProject = computed<TGApp.Sqlite.Cultivation.Project | undefined>(() =>
   projects.value.find((project) => project.id === currentProjectId.value),
@@ -376,11 +392,22 @@ const completedPlanEntryCount = computed<number>(
   () => planEntries.value.filter((entry) => entry.status === "completed").length,
 );
 const inventoryUpdatedLabel = computed<string>(() => {
-  const updated = Array.from(bagMaterialDetails.value.values())
-    .map((material) => material.updated)
+  const apiUpdated = planEntries.value
+    .filter((entry) => entry.calculationMode === "api")
+    .map((entry) => entry.apiResult?.updated ?? "");
+  const updated = [
+    ...Array.from(bagMaterialDetails.value.values()).map((material) => material.updated),
+    ...apiUpdated,
+  ]
     .filter((value) => value.length > 0)
     .sort((a, b) => b.localeCompare(a))[0];
-  return updated ? `背包更新于 ${updated}` : "暂无背包更新时间";
+  if (!updated) return hasBagDataSource.value ? "暂无背包更新时间" : "暂无接口数据更新时间";
+  const source = apiUpdated.some((value) => value.length > 0)
+    ? hasBagDataSource.value
+      ? "数据"
+      : "接口数据"
+    : "背包";
+  return `${source}更新于 ${updated}`;
 });
 const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
   const options = roles.value.map((role) => {
@@ -451,15 +478,12 @@ const selectedSyncAvatar = computed<TGApp.Game.Calculate.SyncAvatar | undefined>
 );
 const isTraveler = computed<boolean>(() => TRAVELER_IDS.has(selectedCharacter.value?.value ?? 0));
 const canApiCalculate = computed<boolean>(
-  () =>
-    !apiLoading.value &&
-    selectedSyncAvatar.value !== undefined &&
-    cookie.value !== undefined &&
-    currentUid.value === Number(account.value.gameUid),
+  () => !apiLoading.value && selectedSyncAvatar.value !== undefined,
 );
 const calculationHint = computed<string>(() => {
   if (isTraveler.value) return "已为旅行者强制使用接口计算";
   if (!isWindows) return "当前平台不支持读取游戏背包，材料将由米游社接口计算";
+  if (!hasBagDataSource.value) return "当前 UID 没有背包存档，数据将由米游社接口同步并计算";
   if (calculationMode.value === "api") return "设置目标后点击确认，届时才会请求接口";
   return "根据本地 Wiki 与背包存档实时计算";
 });
@@ -627,10 +651,37 @@ const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
 const planRequiredMaterials = computed<Array<CultivationMaterial>>(() =>
   aggregateEntryMaterials(planEntries.value),
 );
+const planInventory = computed<Map<number, number>>(() => {
+  const inventory = new Map(bagMaterials.value);
+  for (const entry of planEntries.value) {
+    if (entry.calculationMode !== "api" || !entry.apiResult) continue;
+    for (const [materialId, count] of getCalculateInventory(entry.apiResult.result)) {
+      inventory.set(materialId, count);
+    }
+  }
+  return inventory;
+});
+const planBagMaterialDetails = computed<Map<number, TGApp.Sqlite.UserBag.MaterialTable>>(() => {
+  const details = new Map(bagMaterialDetails.value);
+  const uid = currentUid.value ?? 0;
+  for (const entry of planEntries.value) {
+    if (entry.calculationMode !== "api" || !entry.apiResult) continue;
+    for (const [materialId, count] of getCalculateInventory(entry.apiResult.result)) {
+      details.set(materialId, {
+        uid,
+        id: materialId,
+        count,
+        records: [],
+        updated: entry.apiResult.updated,
+      });
+    }
+  }
+  return details;
+});
 const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   buildCultivationResults(
     planRequiredMaterials.value,
-    bagMaterials.value,
+    planInventory.value,
     WikiMaterialData,
     planAllowCrafting.value,
     planUseDust.value,
@@ -664,13 +715,34 @@ const resultEmptyText = computed<string>(() => {
   if (apiCalculated.value) return "当前养成目标无需额外材料";
   return canApiCalculate.value
     ? "设置养成目标后，点击确认计算"
-    : "接口计算仅支持当前登录的游戏 UID，请先选择角色并确认账号";
+    : "请先选择角色，并确认该 UID 已保存可用的账号与 CK";
 });
 
 watch(
   currentUid,
   async (uid) => {
-    if (!settingUid && uid !== undefined) await loadUidData(uid);
+    if (settingUid || uid === undefined) return;
+    ensureCalculationMode(uid);
+    await loadUidData(uid);
+  },
+  { flush: "sync" },
+);
+
+watch(
+  () => account.value.gameUid,
+  async (gameUid) => {
+    const uid = Number(gameUid);
+    if (!Number.isInteger(uid) || uid <= 0 || currentUid.value === uid) return;
+    await reload(uid);
+  },
+  { flush: "sync" },
+);
+
+watch(
+  calculationMode,
+  async () => {
+    if (settingCalculationMode || loading.value || currentUid.value === undefined) return;
+    await loadUidData(currentUid.value);
   },
   { flush: "sync" },
 );
@@ -718,8 +790,6 @@ watch(selectedCharacter, async (character) => {
 watch(isTraveler, (traveler) => {
   if (traveler) calculationMode.value = "api";
 });
-
-watch(useApiCalculation, reload);
 
 watch(
   [
@@ -805,6 +875,14 @@ function clearApiResult(): void {
   apiResultMaterials.value = [];
   apiAvatarRequirements.value = [];
   apiWeaponRequirements.value = [];
+  apiCalculationResult.value = undefined;
+}
+
+function ensureCalculationMode(uid: number): void {
+  if (!isWindows || bagSourceUids.value.has(uid) || calculationMode.value === "api") return;
+  settingCalculationMode = true;
+  calculationMode.value = "api";
+  settingCalculationMode = false;
 }
 
 function getElementNameByAttrId(elementAttrId: number): string {
@@ -845,11 +923,12 @@ function getWeaponTypeByCategory(weaponCategoryId: number): string {
   }
 }
 
-function createApiParams(): TGApp.Game.Calculate.Params | undefined {
+function createApiParams(
+  refreshAccount: TGApp.Sqlite.Account.Game,
+): TGApp.Game.Calculate.Params | undefined {
   const avatar = selectedSyncAvatar.value;
-  const uid = currentUid.value;
-  const region = gameEnum.serverList.find((server) => server === account.value.region);
-  if (!avatar || uid === undefined || !region) return undefined;
+  const region = gameEnum.serverList.find((server) => server === refreshAccount.region);
+  if (!avatar || !region) return undefined;
 
   const talentTargets = new Map(
     mainSkills.value.map((skill, index) => [
@@ -890,20 +969,18 @@ function createApiParams(): TGApp.Game.Calculate.Params | undefined {
     ],
     lang: "zh-cn",
     region,
-    uid: String(uid),
+    uid: refreshAccount.gameUid,
   };
 }
 
 function convertApiResult(
   result: TGApp.Game.Calculate.Result,
 ): Array<TGApp.App.UserCalc.ResultMaterial> {
-  const available = new Map(
-    result.available_material.map((material) => [material.id, material.num]),
-  );
+  const available = getCalculateInventory(result);
   return result.overall_consume
     .map((material) => {
       const wiki = WikiMaterialData.find((item) => item.id === material.id);
-      const owned = available.get(material.id) ?? Math.max(material.num - material.lack_num, 0);
+      const owned = available.get(material.id) ?? 0;
       return {
         id: material.id,
         name: wiki?.name ?? material.name,
@@ -924,12 +1001,11 @@ function convertApiResult(
 }
 
 async function calculateWithApi(): Promise<void> {
-  if (apiLoading.value || !cookie.value) return;
-  if (currentUid.value !== Number(account.value.gameUid)) {
-    showSnackbar.warn("接口计算仅支持当前登录的游戏 UID");
-    return;
-  }
-  const params = createApiParams();
+  const uid = currentUid.value;
+  if (apiLoading.value || uid === undefined) return;
+  const refreshAccount = await resolveApiAccount(uid, "Cultivation.calculateWithApi");
+  if (!refreshAccount) return;
+  const params = createApiParams(refreshAccount.account);
   if (!params) {
     showSnackbar.warn("请先选择角色、武器并设置养成目标");
     return;
@@ -939,7 +1015,7 @@ async function calculateWithApi(): Promise<void> {
   const requestVersion = apiResultVersion;
   apiLoading.value = true;
   try {
-    const response = await takumiReq.calculate.batch(cookie.value, params);
+    const response = await takumiReq.calculate.batch(refreshAccount.cookie, params);
     if (requestVersion !== apiResultVersion) return;
     if (response.retcode !== 0) {
       showSnackbar.error(`[${response.retcode}] ${response.message}`);
@@ -956,9 +1032,7 @@ async function calculateWithApi(): Promise<void> {
       ? toCultivationMaterials(itemResult.weapon_consume)
       : [];
     apiResultMaterials.value = convertApiResult(response.data);
-    if (response.data.has_user_info) {
-      await syncApiInventory(response.data.available_material);
-    }
+    apiCalculationResult.value = response.data;
     if (requestVersion !== apiResultVersion) return;
     apiCalculated.value = true;
     showSnackbar.success("养成材料计算完成");
@@ -971,30 +1045,51 @@ async function calculateWithApi(): Promise<void> {
   }
 }
 
-async function reload(): Promise<void> {
+async function reload(preferredUid?: number): Promise<void> {
   loading.value = true;
   try {
     const loginUid = Number(account.value.gameUid);
-    const planUids = await TSCultivationPlan.getAllUid();
-    if (useApiCalculation.value) {
-      const loginUids = Number.isInteger(loginUid) && loginUid > 0 ? [loginUid] : [];
-      uidList.value = Array.from(new Set([...loginUids, ...planUids])).sort((a, b) => a - b);
-    } else {
-      const [avatarUids, materialUids, weaponUids] = await Promise.all([
-        TSUserAvatar.getAllUid(),
-        TSUserBagMaterial.getAllUid(),
-        TSUserBagWeapon.getAllUid(),
-      ]);
-      uidList.value = Array.from(
-        new Set([...avatarUids.map(Number), ...materialUids, ...weaponUids, ...planUids]),
-      ).sort((a, b) => a - b);
-    }
-    const nextUid = uidList.value.includes(loginUid) ? loginUid : uidList.value[0];
+    const [planUids, avatarUids, materialUids, weaponUids, savedAccounts] = await Promise.all([
+      TSCultivationPlan.getAllUid(),
+      TSUserAvatar.getAllUid(),
+      TSUserBagMaterial.getAllUid(),
+      TSUserBagWeapon.getAllUid(),
+      TSUserAccount.account.getAllAccount(),
+    ]);
+    const savedGameAccounts = (
+      await Promise.all(
+        savedAccounts.map((savedAccount) => TSUserAccount.game.getAccount(savedAccount.uid)),
+      )
+    ).flat();
+    const savedGameUids = savedGameAccounts
+      .filter((gameAccount) => gameAccount.gameBiz === "hk4e_cn")
+      .map((gameAccount) => Number(gameAccount.gameUid))
+      .filter((uid) => Number.isInteger(uid) && uid > 0);
+    const loginUids = Number.isInteger(loginUid) && loginUid > 0 ? [loginUid] : [];
+    bagSourceUids.value = new Set([...materialUids, ...weaponUids]);
+    uidList.value = Array.from(
+      new Set([
+        ...loginUids,
+        ...savedGameUids,
+        ...avatarUids.map(Number),
+        ...materialUids,
+        ...weaponUids,
+        ...planUids,
+      ]),
+    ).sort((a, b) => a - b);
+    const nextUid =
+      preferredUid !== undefined && uidList.value.includes(preferredUid)
+        ? preferredUid
+        : uidList.value.includes(loginUid)
+          ? loginUid
+          : uidList.value[0];
     settingUid = true;
     currentUid.value = nextUid;
     settingUid = false;
-    if (nextUid !== undefined) await loadUidData(nextUid);
-    else {
+    if (nextUid !== undefined) {
+      ensureCalculationMode(nextUid);
+      await loadUidData(nextUid);
+    } else {
       projects.value = [];
       planEntries.value = [];
       currentProjectId.value = null;
@@ -1021,36 +1116,16 @@ async function loadUidData(uid: number): Promise<void> {
 }
 
 async function loadSyncAvatarData(uid: number, requestVersion: number): Promise<void> {
-  const currentCookie = cookie.value;
-  const region = gameEnum.serverList.find((server) => server === account.value.region);
-  if (!currentCookie || uid !== Number(account.value.gameUid) || !region) {
-    syncAvatars.value = [];
-    selectedCharacterId.value = null;
-    selectedWeaponKey.value = null;
-    return;
-  }
   try {
-    const response = await takumiReq.calculate.avatar.sync(currentCookie, {
-      element_attr_ids: [],
-      lang: "zh-cn",
-      page: 1,
-      region,
-      size: 200,
-      uid: String(uid),
-      weapon_cat_ids: [],
-    });
-    if (requestVersion !== dataLoadVersion || !useApiCalculation.value) return;
-    if (response.retcode !== 0) {
-      syncAvatars.value = [];
-      selectedCharacterId.value = null;
-      selectedWeaponKey.value = null;
-      showSnackbar.error(`[${response.retcode}] ${response.message}`);
+    const refreshAccount = await resolveApiAccount(uid, "Cultivation.loadSyncAvatarData");
+    if (!refreshAccount) {
+      clearSyncAvatarData(requestVersion);
       return;
     }
+    const avatars = await requestSyncAvatars(refreshAccount);
+    if (requestVersion !== dataLoadVersion || !useApiCalculation.value) return;
     const previousCharacterId = selectedCharacterId.value;
-    syncAvatars.value = response.data.list.filter(
-      (avatar) => !EXCLUDED_CHARACTER_IDS.has(avatar.id),
-    );
+    syncAvatars.value = avatars;
     selectedWeaponKey.value = null;
     selectedCharacterId.value = syncAvatars.value.some(
       (avatar) => avatar.id === previousCharacterId,
@@ -1065,6 +1140,44 @@ async function loadSyncAvatarData(uid: number, requestVersion: number): Promise<
     selectedWeaponKey.value = null;
     showSnackbar.error(`同步角色数据失败：${TGHttps.getErrMsg(error)}`);
   }
+}
+
+function clearSyncAvatarData(requestVersion: number): void {
+  if (requestVersion !== dataLoadVersion) return;
+  syncAvatars.value = [];
+  selectedCharacterId.value = null;
+  selectedWeaponKey.value = null;
+}
+
+async function resolveApiAccount(
+  uid: number,
+  logPrefix: string,
+): Promise<TGApp.App.Account.RfAc | null> {
+  const refreshAccount = await getRfAc(String(uid), account.value, cookie.value, logPrefix);
+  if (!refreshAccount) return null;
+  if (Number(refreshAccount.account.gameUid) !== uid) {
+    showSnackbar.warn(`未找到 UID ${uid} 对应的账号与 CK，已取消接口计算`);
+    return null;
+  }
+  return refreshAccount;
+}
+
+async function requestSyncAvatars(
+  refreshAccount: TGApp.App.Account.RfAc,
+): Promise<Array<TGApp.Game.Calculate.SyncAvatar>> {
+  const region = gameEnum.serverList.find((server) => server === refreshAccount.account.region);
+  if (!region) throw new Error(`不支持的游戏服务器：${refreshAccount.account.region}`);
+  const response = await takumiReq.calculate.avatar.sync(refreshAccount.cookie, {
+    element_attr_ids: [],
+    lang: "zh-cn",
+    page: 1,
+    region,
+    size: 200,
+    uid: refreshAccount.account.gameUid,
+    weapon_cat_ids: [],
+  });
+  if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+  return response.data.list.filter((avatar) => !EXCLUDED_CHARACTER_IDS.has(avatar.id));
 }
 
 async function loadLocalData(uid: number, requestVersion: number): Promise<void> {
@@ -1192,21 +1305,6 @@ function toCultivationMaterials(
     .map((material) => ({ id: material.id, count: material.num }));
 }
 
-async function syncApiInventory(
-  availableMaterials: ReadonlyArray<TGApp.Game.Calculate.Material>,
-): Promise<void> {
-  const uid = currentUid.value;
-  if (uid === undefined) return;
-  const existingMaterials = await TSUserBagMaterial.getMaterial(uid);
-  const existingMap = new Map(existingMaterials.map((material) => [material.id, material]));
-  for (const material of availableMaterials) {
-    const existing = existingMap.get(material.id);
-    if (existing?.count === material.num) continue;
-    await TSUserBagMaterial.insertMaterial(uid, material.id, material.num, existing?.records ?? []);
-  }
-  await loadInventoryData(uid, dataLoadVersion);
-}
-
 function createEntryState(
   level: number,
   promoteLevel: number,
@@ -1235,6 +1333,7 @@ function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
   }));
   return {
     allowCrafting: allowCrafting.value,
+    calculationMode: calculationMode.value,
     type: "avatar",
     itemId: character.value,
     instanceKey: "",
@@ -1275,9 +1374,10 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
   if (requirements.length === 0) return undefined;
   return {
     allowCrafting: allowCrafting.value,
+    calculationMode: calculationMode.value,
     type: "weapon",
     itemId: weapon.wiki.id,
-    instanceKey: weapon.guid ?? (weapon.key.startsWith("role-") ? weapon.key : ""),
+    instanceKey: weapon.guid ?? (weapon.key.startsWith("wiki-") ? "" : weapon.key),
     name: weapon.wiki.name,
     icon: `/WIKI/weapon/${weapon.wiki.id}.webp`,
     star: weapon.wiki.star,
@@ -1326,7 +1426,11 @@ async function saveToPlan(): Promise<void> {
     const project =
       currentProject.value ??
       (await TSCultivationPlan.ensureCurrentProject(uid, currentTimezone.value));
-    await TSCultivationPlan.saveEntries(project.id, inputs);
+    await TSCultivationPlan.saveEntries(
+      project.id,
+      inputs,
+      useApiCalculation.value ? apiCalculationResult.value : undefined,
+    );
     editingEntry.value = undefined;
     await loadProjects(uid, project.id);
     viewTab.value = "targets";
@@ -1340,6 +1444,7 @@ async function saveToPlan(): Promise<void> {
 
 function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
   editingEntry.value = entry;
+  calculationMode.value = entry.calculationMode;
   allowCrafting.value = entry.allowCrafting;
   useDust.value = entry.useDust;
   useSolvent.value = entry.useSolvent;
@@ -1354,7 +1459,8 @@ function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
       option.wiki.id === entry.itemId &&
       (entry.instanceKey.length === 0 ||
         option.guid === entry.instanceKey ||
-        option.key === entry.instanceKey),
+        option.key === entry.instanceKey ||
+        option.key === entry.instanceKey.replace(/^sync-/, "role-")),
   );
   if (weapon) {
     selectedWeaponKey.value = weapon.key;
@@ -1528,38 +1634,227 @@ async function refreshPlanEntries(): Promise<void> {
   const project = currentProject.value;
   if (!project) return;
   planLoading.value = true;
+  let refreshedCount = 0;
   try {
-    const [roleData, weaponData] = await Promise.all([
-      TSUserAvatar.getAvatars(project.uid),
-      TSUserBagWeapon.getWeapon(project.uid),
-    ]);
+    const localEntries = planEntries.value.filter((entry) => entry.calculationMode === "bag");
+    const apiEntries = planEntries.value.filter((entry) => entry.calculationMode === "api");
+    const [roleData, materialData, weaponData] =
+      localEntries.length > 0
+        ? await Promise.all([
+            TSUserAvatar.getAvatars(project.uid),
+            TSUserBagMaterial.getMaterial(project.uid),
+            TSUserBagWeapon.getWeapon(project.uid),
+          ])
+        : [[], [], []];
+    if (currentUid.value === project.uid && localEntries.length > 0) {
+      bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
+      bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
+    }
     const roleMap = new Map(roleData.map((role) => [role.cid, role]));
     const weaponOptionsForRefresh = buildWeaponOptions(weaponData, roleData);
-    const inputs: Array<TGApp.Sqlite.Cultivation.RefreshEntryInput> = [];
-    for (const entry of planEntries.value) {
-      const input =
-        entry.type === "avatar"
-          ? await (async () => {
-              const role = roleMap.get(entry.itemId);
-              return role ? await createAvatarRefreshInput(entry, role) : undefined;
-            })()
-          : createWeaponRefreshInput(entry, weaponOptionsForRefresh);
-      if (input) inputs.push(input);
+    const apiAccount =
+      apiEntries.length > 0
+        ? await resolveApiAccount(project.uid, "Cultivation.refreshPlanEntries")
+        : null;
+    const syncAvatarData = apiAccount ? await requestSyncAvatars(apiAccount) : [];
+    const apiTargets = createApiRefreshTargets(apiEntries, syncAvatarData);
+    const apiTargetMap = new Map<string, ApiRefreshTarget>();
+    for (const target of apiTargets) {
+      if (target.avatarEntry) apiTargetMap.set(target.avatarEntry.id, target);
+      if (target.weaponEntry) apiTargetMap.set(target.weaponEntry.id, target);
     }
-    if (inputs.length === 0) {
+
+    const processedEntryIds = new Set<string>();
+    for (const entry of planEntries.value) {
+      if (processedEntryIds.has(entry.id)) continue;
+      if (entry.calculationMode === "bag") {
+        const input =
+          entry.type === "avatar"
+            ? await (async () => {
+                const role = roleMap.get(entry.itemId);
+                return role ? await createAvatarRefreshInput(entry, role) : undefined;
+              })()
+            : createWeaponRefreshInput(entry, weaponOptionsForRefresh);
+        processedEntryIds.add(entry.id);
+        if (!input) continue;
+        await TSCultivationPlan.refreshEntries(project.id, [input]);
+        refreshedCount += 1;
+        continue;
+      }
+
+      const target = apiTargetMap.get(entry.id);
+      processedEntryIds.add(entry.id);
+      if (!target) continue;
+      if (target.avatarEntry) processedEntryIds.add(target.avatarEntry.id);
+      if (target.weaponEntry) processedEntryIds.add(target.weaponEntry.id);
+      if (!apiAccount) continue;
+      const response = await calculateApiRefreshTarget(apiAccount, target);
+      const itemResult = response.items[0];
+      if (!itemResult) continue;
+      const inputs = createApiRefreshInputsFromResult(target, itemResult);
+      await TSCultivationPlan.refreshEntries(project.id, inputs, {
+        avatarEntryId: target.avatarEntry?.id ?? "",
+        weaponEntryId: target.weaponEntry?.id ?? "",
+        result: response,
+      });
+      refreshedCount += inputs.length;
+    }
+
+    if (refreshedCount === 0) {
       showSnackbar.warn("最新存档中未找到可刷新的计划目标");
       return;
     }
-    await TSCultivationPlan.refreshEntries(project.id, inputs);
     planEntries.value = await TSCultivationPlan.getEntries(project.id);
     showSnackbar.success(
-      `已刷新 ${inputs.length} 个目标${inputs.length < planEntries.value.length ? "，其余目标缺少最新存档" : ""}`,
+      `已刷新 ${refreshedCount} 个目标${refreshedCount < planEntries.value.length ? "，其余目标缺少最新数据或对应 CK" : ""}`,
     );
   } catch (error) {
+    planEntries.value = await TSCultivationPlan.getEntries(project.id);
     showSnackbar.error(`刷新计划目标失败：${TGHttps.getErrMsg(error)}`);
   } finally {
     planLoading.value = false;
   }
+}
+
+async function calculateApiRefreshTarget(
+  refreshAccount: TGApp.App.Account.RfAc,
+  target: ApiRefreshTarget,
+): Promise<TGApp.Game.Calculate.Result> {
+  const region = gameEnum.serverList.find((server) => server === refreshAccount.account.region);
+  if (!region) throw new Error(`不支持的游戏服务器：${refreshAccount.account.region}`);
+  const response = await takumiReq.calculate.batch(refreshAccount.cookie, {
+    items: [createApiRefreshParams(target)],
+    lang: "zh-cn",
+    region,
+    uid: refreshAccount.account.gameUid,
+  });
+  if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+  return response.data;
+}
+
+function createApiRefreshTargets(
+  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  avatars: ReadonlyArray<TGApp.Game.Calculate.SyncAvatar>,
+): Array<ApiRefreshTarget> {
+  const targets: Array<ApiRefreshTarget> = [];
+  const processedEntryIds = new Set<string>();
+  for (const entry of entries) {
+    if (processedEntryIds.has(entry.id)) continue;
+    const storedResult = entry.apiResult;
+    const avatarEntry = storedResult?.avatarEntryId
+      ? entries.find((item) => item.id === storedResult.avatarEntryId)
+      : entry.type === "avatar"
+        ? entry
+        : entries.find(
+            (item) => item.type === "avatar" && item.itemId === getSyncAvatarId(entry.instanceKey),
+          );
+    const weaponEntry = storedResult?.weaponEntryId
+      ? entries.find((item) => item.id === storedResult.weaponEntryId)
+      : entry.type === "weapon"
+        ? entry
+        : entries.find(
+            (item) =>
+              item.type === "weapon" && getSyncAvatarId(item.instanceKey) === avatarEntry?.itemId,
+          );
+    const avatarId = avatarEntry?.itemId ?? getSyncAvatarId(weaponEntry?.instanceKey ?? "");
+    const avatar = avatars.find((item) => item.id === avatarId);
+    if (!avatar) continue;
+    const matchedWeaponEntry = weaponEntry?.itemId === avatar.weapon.id ? weaponEntry : undefined;
+    if (!avatarEntry && !matchedWeaponEntry) continue;
+    if (avatarEntry) processedEntryIds.add(avatarEntry.id);
+    if (matchedWeaponEntry) processedEntryIds.add(matchedWeaponEntry.id);
+    targets.push({ avatar, avatarEntry, weaponEntry: matchedWeaponEntry });
+  }
+  return targets;
+}
+
+function getSyncAvatarId(instanceKey: string): number | undefined {
+  const avatarId = Number(/^sync-(\d+)-/.exec(instanceKey)?.[1]);
+  return Number.isInteger(avatarId) ? avatarId : undefined;
+}
+
+function createApiRefreshParams(target: ApiRefreshTarget): TGApp.Game.Calculate.ParamsItem {
+  const { avatar, avatarEntry, weaponEntry } = target;
+  const talentTargets = new Map(
+    avatarEntry?.targetState.talents.map((talent) => [talent.id, talent.level]) ?? [],
+  );
+  const skillList = avatar.skill_list.map((skill) => ({
+    id: skill.group_id,
+    level_current: Math.max(skill.level_current, 1),
+    level_target: Math.max(
+      talentTargets.get(skill.id) ?? skill.level_current,
+      skill.level_current,
+      1,
+    ),
+  }));
+  return {
+    avatar_id: avatar.id,
+    avatar_level_current: avatar.level_current,
+    avatar_level_target: Math.max(avatarEntry?.targetState.level ?? 0, avatar.level_current),
+    element_attr_id: avatar.element_attr_id,
+    skill_list: skillList,
+    weapon: weaponEntry
+      ? {
+          ...avatar.weapon,
+          level_target: Math.max(weaponEntry.targetState.level, avatar.weapon.level_current),
+        }
+      : null,
+    from_user_sync: true,
+    avatar_promote_level: avatar.promote_level,
+  };
+}
+
+function createApiRefreshInputsFromResult(
+  target: ApiRefreshTarget,
+  result: TGApp.Game.Calculate.ItemResult,
+): Array<TGApp.Sqlite.Cultivation.RefreshEntryInput> {
+  const inputs: Array<TGApp.Sqlite.Cultivation.RefreshEntryInput> = [];
+  if (target.avatarEntry) {
+    const requirements = userCalc.merge(
+      toCultivationMaterials(result.avatar_consume),
+      toCultivationMaterials(result.avatar_skill_consume),
+    );
+    inputs.push({
+      entryId: target.avatarEntry.id,
+      currentState: createEntryState(
+        target.avatar.level_current,
+        target.avatar.promote_level,
+        userCalc.isAscendedAtThreshold(target.avatar.level_current, target.avatar.promote_level),
+        target.avatar.skill_list
+          .filter((skill) => skill.max_level > 1)
+          .map((skill) => ({ id: skill.id, name: skill.name, level: skill.level_current })),
+      ),
+      status:
+        target.avatarEntry.status === "completed" || requirements.length === 0
+          ? "completed"
+          : "active",
+      items: requirements.map((material) => ({
+        materialId: material.id,
+        required: material.count,
+      })),
+    });
+  }
+  if (target.weaponEntry) {
+    const requirements = toCultivationMaterials(result.weapon_consume);
+    const promoteLevel = userCalc.resolvePromoteLevel(target.avatar.weapon.level_current);
+    inputs.push({
+      entryId: target.weaponEntry.id,
+      currentState: createEntryState(
+        target.avatar.weapon.level_current,
+        promoteLevel,
+        userCalc.isAscendedAtThreshold(target.avatar.weapon.level_current, promoteLevel),
+      ),
+      status:
+        target.weaponEntry.status === "completed" || requirements.length === 0
+          ? "completed"
+          : "active",
+      items: requirements.map((material) => ({
+        materialId: material.id,
+        required: material.count,
+      })),
+    });
+  }
+  return inputs;
 }
 
 function buildSyncWeaponOption(

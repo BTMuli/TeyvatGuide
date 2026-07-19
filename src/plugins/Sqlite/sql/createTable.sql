@@ -29,6 +29,7 @@ create table if not exists CultivationEntry
     targetState  text    not null,
     status       text    not null default 'active' check (status in ('active', 'completed')),
     sortOrder    integer not null default 0,
+    calculationMode text not null default 'bag' check (calculationMode in ('bag', 'api')),
     allowCrafting boolean not null default true,
     useDust       boolean not null default false,
     useSolvent    boolean not null default false,
@@ -46,8 +47,20 @@ create table if not exists CultivationItem
     primary key (entryId, materialId)
 );
 
+-- @brief 创建养成目标接口计算结果表
+create table if not exists CultivationApiResult
+(
+    projectId    text not null,
+    avatarEntryId text not null default '',
+    weaponEntryId text not null default '',
+    result       text not null,
+    updated      text not null,
+    primary key (projectId, avatarEntryId, weaponEntryId)
+);
+
 create index if not exists CultivationProjectUidIndex on CultivationProject (uid);
 create index if not exists CultivationEntryProjectIndex on CultivationEntry (projectId);
+create index if not exists CultivationApiResultProjectIndex on CultivationApiResult (projectId);
 
 -- @brief 创建背包物品材料表
 create table if not exists UserBagMaterial

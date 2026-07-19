@@ -448,6 +448,7 @@ async function createBatchPlanInput(
   if (materials.length === 0) return undefined;
   return {
     allowCrafting: true,
+    calculationMode: "bag",
     type: "avatar",
     itemId: role.cid,
     instanceKey: "",
@@ -508,6 +509,7 @@ function createBatchWeaponPlanInput(
   if (materials.length === 0) return undefined;
   return {
     allowCrafting: true,
+    calculationMode: "bag",
     type: "weapon",
     itemId: weapon.id,
     instanceKey: `role-${role.cid}-${weapon.id}`,

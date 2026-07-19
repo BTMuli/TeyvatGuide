@@ -72,6 +72,7 @@ import { computed, ref } from "vue";
 import { WikiMaterialData } from "@/data/index.js";
 import {
   buildCultivationResults,
+  getCalculateInventory,
   getServerDay,
   isMaterialAvailableToday,
 } from "@utils/cultivationPlan.js";
@@ -112,7 +113,7 @@ const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.Resul
         entry.id,
         buildCultivationResults(
           entry.items.map((item) => ({ id: item.materialId, count: item.required })),
-          props.inventory,
+          getEntryInventory(entry),
           WikiMaterialData,
           entry.allowCrafting,
           entry.useDust,
@@ -121,6 +122,13 @@ const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.Resul
       ]),
     ),
 );
+
+function getEntryInventory(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): ReadonlyMap<number, number> {
+  if (entry.calculationMode !== "api" || !entry.apiResult) return props.inventory;
+  return getCalculateInventory(entry.apiResult.result);
+}
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort((a, b) => entrySortRank(a) - entrySortRank(b)),
 );

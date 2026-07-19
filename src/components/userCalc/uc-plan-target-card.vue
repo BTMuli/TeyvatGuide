@@ -35,8 +35,18 @@
         <span v-if="entry.targetState.talents.length > 0" class="ucptc-talents">
           天赋目标 {{ entry.targetState.talents.map((talent) => talent.level).join(" / ") }}
         </span>
-        <div v-if="entry.allowCrafting" class="ucptc-options">
-          <v-chip color="var(--tgc-od-green)" size="x-small" variant="tonal">允许合成</v-chip>
+        <div class="ucptc-options">
+          <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
+            {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
+          </v-chip>
+          <v-chip
+            v-if="entry.allowCrafting"
+            color="var(--tgc-od-green)"
+            size="x-small"
+            variant="tonal"
+          >
+            允许合成
+          </v-chip>
           <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
           <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用溶媒</v-chip>
         </div>

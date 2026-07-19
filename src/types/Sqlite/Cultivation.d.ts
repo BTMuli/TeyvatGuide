@@ -4,6 +4,12 @@
  */
 
 declare namespace TGApp.Sqlite.Cultivation {
+  /**
+   * 养成目标计算方式
+   * @since Beta v0.11.2
+   */
+  type CalculationMode = "bag" | "api";
+
   /** 养成目标类型 */
   type EntryType = "avatar" | "weapon";
 
@@ -95,6 +101,8 @@ declare namespace TGApp.Sqlite.Cultivation {
     status: EntryStatus;
     /** 排序值 */
     sortOrder: number;
+    /** 计算方式 */
+    calculationMode: CalculationMode;
     /** 是否允许合成材料 */
     allowCrafting: 0 | 1;
     /** 是否允许使用嬗变之尘 */
@@ -133,10 +141,49 @@ declare namespace TGApp.Sqlite.Cultivation {
   type EntryWithItems = Entry & {
     /** 目标材料列表 */
     items: Array<Item>;
+    /** 所属接口计算组结果 */
+    apiResult?: ApiResult;
+  };
+
+  /**
+   * 接口计算结果数据库原始记录
+   * @since Beta v0.11.2
+   */
+  type ApiResultRaw = {
+    /** 所属计划 ID */
+    projectId: string;
+    /** 同组角色目标 ID，无角色时为空字符串 */
+    avatarEntryId: string;
+    /** 同组武器目标 ID，无武器时为空字符串 */
+    weaponEntryId: string;
+    /** 接口计算结果 JSON */
+    result: string;
+    /** 更新时间 */
+    updated: string;
+  };
+
+  /**
+   * 接口计算结果记录
+   * @since Beta v0.11.2
+   */
+  type ApiResult = Omit<ApiResultRaw, "result"> & {
+    /** 接口计算结果 */
+    result: TGApp.Game.Calculate.Result;
+  };
+
+  /**
+   * 保存接口计算结果的输入数据
+   * @since Beta v0.11.2
+   */
+  type SaveApiResultInput = Pick<ApiResultRaw, "avatarEntryId" | "weaponEntryId"> & {
+    /** 接口计算结果 */
+    result: TGApp.Game.Calculate.Result;
   };
 
   /** 保存养成目标的输入数据 */
   type SaveEntryInput = CraftingOptions & {
+    /** 计算方式 */
+    calculationMode: CalculationMode;
     /** 目标类型 */
     type: EntryType;
     /** 角色或武器 ID */

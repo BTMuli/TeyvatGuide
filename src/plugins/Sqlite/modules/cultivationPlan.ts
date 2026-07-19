@@ -29,6 +29,15 @@ function parseEntry(raw: TGApp.Sqlite.Cultivation.EntryRaw): TGApp.Sqlite.Cultiv
   };
 }
 
+function parseApiResult(
+  raw: TGApp.Sqlite.Cultivation.ApiResultRaw,
+): TGApp.Sqlite.Cultivation.ApiResult {
+  return {
+    ...raw,
+    result: <TGApp.Game.Calculate.Result>JSON.parse(raw.result),
+  };
+}
+
 /**
  * 获取已有养成计划的全部 UID
  * @since Beta v0.11.2
@@ -60,6 +69,38 @@ async function withTransaction(
   } finally {
     releaseTransaction();
   }
+}
+
+function pushDetachApiResultStatements(statements: Array<SqlStatement>, entryId: string): void {
+  statements.push(
+    {
+      query: `INSERT INTO CultivationApiResult(
+                projectId, avatarEntryId, weaponEntryId, result, updated
+              )
+              SELECT projectId, '', weaponEntryId, result, updated
+              FROM CultivationApiResult
+              WHERE avatarEntryId = $1 AND weaponEntryId <> ''
+              ON CONFLICT(projectId, avatarEntryId, weaponEntryId) DO UPDATE SET
+                result = excluded.result, updated = excluded.updated;`,
+      values: [entryId],
+    },
+    {
+      query: `INSERT INTO CultivationApiResult(
+                projectId, avatarEntryId, weaponEntryId, result, updated
+              )
+              SELECT projectId, avatarEntryId, '', result, updated
+              FROM CultivationApiResult
+              WHERE weaponEntryId = $1 AND avatarEntryId <> ''
+              ON CONFLICT(projectId, avatarEntryId, weaponEntryId) DO UPDATE SET
+                result = excluded.result, updated = excluded.updated;`,
+      values: [entryId],
+    },
+    {
+      query: `DELETE FROM CultivationApiResult
+              WHERE avatarEntryId = $1 OR weaponEntryId = $1;`,
+      values: [entryId],
+    },
+  );
 }
 
 /**
@@ -211,6 +252,7 @@ async function renameProject(projectId: string, name: string): Promise<void> {
  * @param project - 待删除计划
  */
 async function removeProject(project: TGApp.Sqlite.Cultivation.Project): Promise<void> {
+  await TGSqlite.updateCultivationEntry();
   await withTransaction(async (db, statements) => {
     const remaining = await db.select<Array<{ id: string }>>(
       `SELECT id FROM CultivationProject
@@ -220,6 +262,10 @@ async function removeProject(project: TGApp.Sqlite.Cultivation.Project): Promise
       [project.uid, project.id],
     );
     statements.push(
+      {
+        query: "DELETE FROM CultivationApiResult WHERE projectId = $1;",
+        values: [project.id],
+      },
       {
         query: `DELETE FROM CultivationItem
                 WHERE entryId IN (SELECT id FROM CultivationEntry WHERE projectId = $1);`,
@@ -252,7 +298,7 @@ async function getEntries(
 ): Promise<Array<TGApp.Sqlite.Cultivation.EntryWithItems>> {
   await TGSqlite.updateCultivationEntry();
   const db = await TGSqlite.getDB();
-  const [entryRows, items] = await Promise.all([
+  const [entryRows, items, apiResultRows] = await Promise.all([
     db.select<Array<TGApp.Sqlite.Cultivation.EntryRaw>>(
       `SELECT * FROM CultivationEntry
        WHERE projectId = $1
@@ -266,6 +312,12 @@ async function getEntries(
        ORDER BY item.materialId ASC;`,
       [projectId],
     ),
+    db.select<Array<TGApp.Sqlite.Cultivation.ApiResultRaw>>(
+      `SELECT * FROM CultivationApiResult
+       WHERE projectId = $1
+       ORDER BY updated DESC;`,
+      [projectId],
+    ),
   ]);
   const itemMap = new Map<string, Array<TGApp.Sqlite.Cultivation.Item>>();
   for (const item of items) {
@@ -273,7 +325,21 @@ async function getEntries(
     entryItems.push(item);
     itemMap.set(item.entryId, entryItems);
   }
-  return entryRows.map((row) => ({ ...parseEntry(row), items: itemMap.get(row.id) ?? [] }));
+  const apiResultMap = new Map<string, TGApp.Sqlite.Cultivation.ApiResult>();
+  for (const raw of apiResultRows) {
+    const result = parseApiResult(raw);
+    if (result.avatarEntryId && !apiResultMap.has(result.avatarEntryId)) {
+      apiResultMap.set(result.avatarEntryId, result);
+    }
+    if (result.weaponEntryId && !apiResultMap.has(result.weaponEntryId)) {
+      apiResultMap.set(result.weaponEntryId, result);
+    }
+  }
+  return entryRows.map((row) => ({
+    ...parseEntry(row),
+    items: itemMap.get(row.id) ?? [],
+    apiResult: apiResultMap.get(row.id),
+  }));
 }
 
 /**
@@ -281,14 +347,19 @@ async function getEntries(
  * @since Beta v0.11.2
  * @param projectId - 计划 ID
  * @param inputs - 目标输入列表
+ * @param apiResult - 同次接口计算结果
  */
 async function saveEntries(
   projectId: string,
   inputs: Array<TGApp.Sqlite.Cultivation.SaveEntryInput>,
+  apiResult?: TGApp.Game.Calculate.Result,
 ): Promise<void> {
   await TGSqlite.updateCultivationEntry();
   const validInputs = inputs.filter((input) => input.items.some((item) => item.required > 0));
   if (validInputs.length === 0) throw new Error("当前目标无需养成材料");
+  if (validInputs.some((input) => input.calculationMode === "api") && !apiResult) {
+    throw new Error("接口计算目标缺少计算结果");
+  }
 
   await withTransaction(async (db, statements) => {
     const maxOrderRows = await db.select<Array<{ value: number }>>(
@@ -298,6 +369,7 @@ async function saveEntries(
     let nextOrder = (maxOrderRows[0]?.value ?? -1) + 1;
     const now = new Date().toISOString();
     const entryIdMap = new Map<string, string>();
+    const savedEntryIds = new Map<TGApp.Sqlite.Cultivation.SaveEntryInput, string>();
 
     for (const input of validInputs) {
       const entryKey = `${input.type}:${input.itemId}:${input.instanceKey}`;
@@ -312,19 +384,21 @@ async function saveEntries(
           : [];
       const entryId = knownEntryId ?? existed[0]?.id ?? crypto.randomUUID();
       entryIdMap.set(entryKey, entryId);
+      savedEntryIds.set(input, entryId);
       if (knownEntryId !== undefined || existed[0]) {
         statements.push({
           query: `UPDATE CultivationEntry SET
                     name = $1, icon = $2, star = $3, currentState = $4, targetState = $5,
-                    allowCrafting = $6, useDust = $7, useSolvent = $8,
-                    status = 'active', updated = $9
-                  WHERE id = $10;`,
+                    calculationMode = $6, allowCrafting = $7, useDust = $8, useSolvent = $9,
+                    status = 'active', updated = $10
+                  WHERE id = $11;`,
           values: [
             input.name,
             input.icon,
             input.star,
             JSON.stringify(input.currentState),
             JSON.stringify(input.targetState),
+            input.calculationMode,
             Number(input.allowCrafting),
             Number(input.useDust),
             Number(input.useSolvent),
@@ -337,10 +411,10 @@ async function saveEntries(
           query: `INSERT INTO CultivationEntry(
                     id, projectId, type, itemId, instanceKey, name, icon, star,
                     currentState, targetState, status, sortOrder,
-                    allowCrafting, useDust, useSolvent, created, updated
+                    calculationMode, allowCrafting, useDust, useSolvent, created, updated
                   ) VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active', $11,
-                    $12, $13, $14, $15, $15
+                    $12, $13, $14, $15, $16, $16
                   );`,
           values: [
             entryId,
@@ -354,6 +428,7 @@ async function saveEntries(
             JSON.stringify(input.currentState),
             JSON.stringify(input.targetState),
             nextOrder++,
+            input.calculationMode,
             Number(input.allowCrafting),
             Number(input.useDust),
             Number(input.useSolvent),
@@ -362,6 +437,7 @@ async function saveEntries(
         });
       }
 
+      pushDetachApiResultStatements(statements, entryId);
       statements.push({
         query: "DELETE FROM CultivationItem WHERE entryId = $1;",
         values: [entryId],
@@ -372,6 +448,23 @@ async function saveEntries(
           query: `INSERT INTO CultivationItem(entryId, materialId, required)
                   VALUES ($1, $2, $3);`,
           values: [entryId, item.materialId, item.required],
+        });
+      }
+    }
+    if (apiResult) {
+      const apiInputs = validInputs.filter((input) => input.calculationMode === "api");
+      const avatarInput = apiInputs.find((input) => input.type === "avatar");
+      const weaponInput = apiInputs.find((input) => input.type === "weapon");
+      const avatarEntryId = avatarInput ? (savedEntryIds.get(avatarInput) ?? "") : "";
+      const weaponEntryId = weaponInput ? (savedEntryIds.get(weaponInput) ?? "") : "";
+      if (avatarEntryId || weaponEntryId) {
+        statements.push({
+          query: `INSERT INTO CultivationApiResult(
+                    projectId, avatarEntryId, weaponEntryId, result, updated
+                  ) VALUES ($1, $2, $3, $4, $5)
+                  ON CONFLICT(projectId, avatarEntryId, weaponEntryId) DO UPDATE SET
+                    result = $4, updated = $5;`,
+          values: [projectId, avatarEntryId, weaponEntryId, JSON.stringify(apiResult), now],
         });
       }
     }
@@ -410,15 +503,19 @@ async function updateEntryOrder(projectId: string, entryIds: ReadonlyArray<strin
  * @since Beta v0.11.2
  * @param projectId - 计划 ID
  * @param inputs - 刷新输入列表
+ * @param apiResult - 刷新后的接口计算结果
  */
 async function refreshEntries(
   projectId: string,
   inputs: ReadonlyArray<TGApp.Sqlite.Cultivation.RefreshEntryInput>,
+  apiResult?: TGApp.Sqlite.Cultivation.SaveApiResultInput,
 ): Promise<void> {
   if (inputs.length === 0) return;
+  await TGSqlite.updateCultivationEntry();
   const now = new Date().toISOString();
   await withTransaction(async (_db, statements) => {
     for (const input of inputs) {
+      pushDetachApiResultStatements(statements, input.entryId);
       statements.push(
         {
           query: `UPDATE CultivationEntry SET currentState = $1, status = $2, updated = $3
@@ -444,6 +541,22 @@ async function refreshEntries(
           values: [input.entryId, item.materialId, item.required, projectId],
         });
       }
+    }
+    if (apiResult) {
+      statements.push({
+        query: `INSERT INTO CultivationApiResult(
+                  projectId, avatarEntryId, weaponEntryId, result, updated
+                ) VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT(projectId, avatarEntryId, weaponEntryId) DO UPDATE SET
+                  result = $4, updated = $5;`,
+        values: [
+          projectId,
+          apiResult.avatarEntryId,
+          apiResult.weaponEntryId,
+          JSON.stringify(apiResult.result),
+          now,
+        ],
+      });
     }
     statements.push({
       query: "UPDATE CultivationProject SET updated = $1 WHERE id = $2;",
@@ -484,11 +597,13 @@ async function updateEntryStatus(
  * @param entryId - 目标 ID
  */
 async function removeEntry(entryId: string): Promise<void> {
+  await TGSqlite.updateCultivationEntry();
   await withTransaction(async (db, statements) => {
     const projects = await db.select<Array<{ projectId: string }>>(
       "SELECT projectId FROM CultivationEntry WHERE id = $1;",
       [entryId],
     );
+    pushDetachApiResultStatements(statements, entryId);
     statements.push(
       { query: "DELETE FROM CultivationItem WHERE entryId = $1;", values: [entryId] },
       { query: "DELETE FROM CultivationEntry WHERE id = $1;", values: [entryId] },
