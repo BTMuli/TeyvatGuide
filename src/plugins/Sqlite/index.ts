@@ -249,6 +249,11 @@ class Sqlite {
     for (const addition of additions) {
       if (!columnNames.has(addition.name)) await db.execute(addition.sql);
     }
+    await db.execute(
+      `UPDATE CultivationEntry
+       SET calculationMode = 'bag'
+       WHERE calculationMode IS NULL OR calculationMode NOT IN ('bag', 'api');`,
+    );
   }
 
   /**

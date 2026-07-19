@@ -22,6 +22,7 @@ function parseEntry(raw: TGApp.Sqlite.Cultivation.EntryRaw): TGApp.Sqlite.Cultiv
   return {
     ...raw,
     allowCrafting: Boolean(raw.allowCrafting),
+    calculationMode: raw.calculationMode === "api" ? "api" : "bag",
     currentState: <TGApp.Sqlite.Cultivation.EntryState>JSON.parse(raw.currentState),
     targetState: <TGApp.Sqlite.Cultivation.EntryState>JSON.parse(raw.targetState),
     useDust: Boolean(raw.useDust),

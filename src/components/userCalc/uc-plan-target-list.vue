@@ -259,6 +259,7 @@ function emitStatus(
 
 .ucpt-header-actions {
   justify-content: flex-end;
+  color: var(--box-text-1);
 }
 
 .ucpt-title {

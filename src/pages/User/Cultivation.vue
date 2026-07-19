@@ -741,7 +741,7 @@ watch(
 watch(
   calculationMode,
   async () => {
-    if (settingCalculationMode || loading.value || currentUid.value === undefined) return;
+    if (settingCalculationMode || currentUid.value === undefined) return;
     await loadUidData(currentUid.value);
   },
   { flush: "sync" },
@@ -1116,6 +1116,7 @@ async function loadUidData(uid: number): Promise<void> {
 }
 
 async function loadSyncAvatarData(uid: number, requestVersion: number): Promise<void> {
+  const previousCharacterId = selectedCharacterId.value;
   try {
     const refreshAccount = await resolveApiAccount(uid, "Cultivation.loadSyncAvatarData");
     if (!refreshAccount) {
@@ -1124,7 +1125,6 @@ async function loadSyncAvatarData(uid: number, requestVersion: number): Promise<
     }
     const avatars = await requestSyncAvatars(refreshAccount);
     if (requestVersion !== dataLoadVersion || !useApiCalculation.value) return;
-    const previousCharacterId = selectedCharacterId.value;
     syncAvatars.value = avatars;
     selectedWeaponKey.value = null;
     selectedCharacterId.value = syncAvatars.value.some(
@@ -1181,6 +1181,7 @@ async function requestSyncAvatars(
 }
 
 async function loadLocalData(uid: number, requestVersion: number): Promise<void> {
+  const previousCharacterId = selectedCharacterId.value;
   const [roleData, materialData, weaponData] = await Promise.all([
     TSUserAvatar.getAvatars(uid),
     TSUserBagMaterial.getMaterial(uid),
@@ -1198,7 +1199,9 @@ async function loadLocalData(uid: number, requestVersion: number): Promise<void>
   weapons.value = buildWeaponOptions(weaponData, roles.value);
   useBagWeaponSource.value = weapons.value.some((weapon) => weapon.fromBag);
   selectedWeaponKey.value = null;
-  selectedCharacterId.value = roles.value[0]?.cid ?? null;
+  selectedCharacterId.value = roles.value.some((role) => role.cid === previousCharacterId)
+    ? previousCharacterId
+    : (roles.value[0]?.cid ?? null);
   if (selectedCharacterId.value === null) selectPreferredWeapon();
 }
 
@@ -1442,13 +1445,20 @@ async function saveToPlan(): Promise<void> {
   }
 }
 
-function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
+async function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Promise<void> {
   editingEntry.value = entry;
-  calculationMode.value = entry.calculationMode;
   allowCrafting.value = entry.allowCrafting;
   useDust.value = entry.useDust;
   useSolvent.value = entry.useSolvent;
   viewTab.value = "calculator";
+  await nextTick();
+  const preferredCharacterId =
+    entry.type === "avatar" ? entry.itemId : getEntryWeaponAvatarId(entry.instanceKey);
+  if (preferredCharacterId !== undefined) selectedCharacterId.value = preferredCharacterId;
+  const editingCalculationMode: CalculationMode = entry.calculationMode === "api" ? "api" : "bag";
+  await switchEditingCalculationMode(editingCalculationMode);
+  if (editingEntry.value?.id !== entry.id) return;
+  await nextTick();
   if (entry.type === "avatar") {
     selectedCharacterId.value = entry.itemId;
     applyAvatarEditingState();
@@ -1468,6 +1478,25 @@ function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
   } else {
     showSnackbar.warn("当前数据源中未找到该武器，请重新选择后更新目标");
   }
+}
+
+async function switchEditingCalculationMode(mode: CalculationMode): Promise<void> {
+  if (calculationMode.value !== mode) {
+    settingCalculationMode = true;
+    calculationMode.value = mode;
+    settingCalculationMode = false;
+    const uid = currentUid.value;
+    if (uid !== undefined) await loadUidData(uid);
+  }
+  await nextTick();
+  settingCalculationMode = true;
+  calculationMode.value = mode;
+  settingCalculationMode = false;
+}
+
+function getEntryWeaponAvatarId(instanceKey: string): number | undefined {
+  const avatarId = Number(/^(?:role|sync)-(\d+)-/.exec(instanceKey)?.[1]);
+  return Number.isInteger(avatarId) ? avatarId : undefined;
 }
 
 function applyAvatarEditingState(): void {
@@ -1996,6 +2025,7 @@ function buildWeaponOptions(
 .cultivation-mode-actions {
   display: flex;
   align-items: center;
+  color: var(--box-text-1);
 }
 
 .cultivation-plan-toolbar {
