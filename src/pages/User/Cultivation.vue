@@ -1595,10 +1595,7 @@ function buildWeaponOptions(
       title: `${wiki.name} · Lv.${bagWeapon.info.level}`,
       wiki,
       level: bagWeapon.info.level,
-      promoteLevel: userCalc.resolveBagWeaponPromoteLevel(
-        bagWeapon.info.level,
-        bagWeapon.info.promote_level,
-      ),
+      promoteLevel: bagWeapon.info.promote_level,
       affixLevel: Math.max(0, ...affixValues) + 1,
       fromBag: true,
       locked: bagWeapon.info.is_locked,

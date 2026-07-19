@@ -170,7 +170,7 @@ declare namespace TGApp.Plugins.Yae {
     level: number;
     /** 经验 */
     exp: number;
-    /** 精炼等级 */
+    /** 已完成突破次数 */
     promote_level: number;
     /** 未知Map */
     affix_map: Record<string, number>;

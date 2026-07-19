@@ -348,16 +348,6 @@ export function isAscendedAtThreshold(level: number, promoteLevel?: number): boo
 }
 
 /**
- * 将背包导入数据在突破临界等级上的阶段索引转换为计算使用的已完成突破数。
- * 背包快照在恰好处于临界等级时使用当前突破项索引，而养成计算使用已完成项数量。
- */
-export function resolveBagWeaponPromoteLevel(level: number, storedPromoteLevel: number): number {
-  const thresholdIndex = ASCENSION_LEVELS.findIndex((ascensionLevel) => ascensionLevel === level);
-  if (thresholdIndex !== -1 && storedPromoteLevel === thresholdIndex) return storedPromoteLevel + 1;
-  return storedPromoteLevel;
-}
-
-/**
  * 解析计算使用的已完成突破次数。
  *
  * @param level - 当前或目标等级
@@ -688,7 +678,6 @@ const userCalc = {
   weaponMaxLevel: getWeaponMaxLevel,
   isAscensionLevel,
   isAscendedAtThreshold,
-  resolveBagWeaponPromoteLevel,
   correctTalentLevels: applyTalentLevelCorrections,
   resolvePromoteLevel,
 };
