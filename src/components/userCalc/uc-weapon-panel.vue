@@ -28,7 +28,14 @@
         >
           <template #activator="{ props: menuProps }">
             <v-btn
-              :title="selectedWeapon ? `切换武器：${selectedWeapon.wiki.name}` : '选择武器'"
+              :disabled="selectionReadonly"
+              :title="
+                selectionReadonly
+                  ? '编辑武器养成目标时不可切换武器'
+                  : selectedWeapon
+                    ? `切换武器：${selectedWeapon.wiki.name}`
+                    : '选择武器'
+              "
               class="ucw-select-trigger"
               icon
               v-bind="menuProps"
@@ -244,6 +251,7 @@ type UcWeaponPanelProps = {
   targetAtAscensionLevel: boolean;
   hasBagData: boolean;
   currentAscensionReadonly: boolean;
+  selectionReadonly: boolean;
 };
 
 const props = defineProps<UcWeaponPanelProps>();
@@ -291,11 +299,13 @@ const targetStats = computed(() => {
 });
 
 function selectWeapon(key: string): void {
+  if (props.selectionReadonly) return;
   selectedKey.value = key;
   showSelector.value = false;
 }
 
 function clearWeapon(): void {
+  if (props.selectionReadonly) return;
   selectedKey.value = null;
   showSelector.value = false;
 }

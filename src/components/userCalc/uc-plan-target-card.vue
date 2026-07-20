@@ -1,7 +1,11 @@
 <!-- 养成计划-目标卡片 -->
 <template>
   <v-card
-    :class="{ completed: entry.status === 'completed', fulfilled }"
+    :class="{
+      completed: entry.status === 'completed',
+      fulfilled,
+      today: entry.status === 'active' && !fulfilled && hasTodayMaterial,
+    }"
     class="ucptc-card"
     variant="outlined"
   >
@@ -190,8 +194,8 @@ type TargetMaterialView = {
 
 const statusLabel = computed<string>(() => {
   if (props.entry.status === "completed") return "已完成";
-  if (props.fulfilled) return "材料已满足";
-  return props.entry.type === "avatar" ? "角色" : "武器";
+  if (props.fulfilled) return "已满足";
+  return "进行中";
 });
 const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
   () => new Map(props.materials.map((material) => [material.id, material])),
@@ -233,10 +237,22 @@ function formatCount(count: number): string {
 .ucptc-card {
   border-color: var(--common-shadow-1);
   background: var(--box-bg-1);
-  transition: opacity 160ms ease;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
 
-  &.fulfilled {
-    opacity: 0.62;
+  &.today {
+    border-color: var(--tgc-od-orange);
+    background:
+      linear-gradient(
+        to right,
+        color-mix(in srgb, var(--tgc-od-orange) 16%, transparent),
+        transparent 68%
+      ),
+      var(--box-bg-1);
+    box-shadow: inset 3px 0 color-mix(in srgb, var(--tgc-od-orange) 75%, transparent);
   }
 
   &.completed {

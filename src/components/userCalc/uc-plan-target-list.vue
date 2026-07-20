@@ -4,9 +4,11 @@
     <div class="ucpt-header">
       <div>
         <span class="ucpt-title">{{ projectName || "养成目标" }}</span>
-        <span class="ucpt-subtitle"
-          >UID {{ uid }} · {{ activeCount }} 个进行中 · {{ completedCount }} 个已完成</span
-        >
+        <div class="ucpt-statuses" aria-label="养成目标状态计数">
+          <span class="active">进行中 {{ activeCount }}</span>
+          <span class="fulfilled">已满足 {{ fulfilledCount }}</span>
+          <span class="completed">已完成 {{ completedCount }}</span>
+        </div>
       </div>
     </div>
 
@@ -74,12 +76,6 @@ type UcPlanTargetListEmits = {
 const props = defineProps<UcPlanTargetListProps>();
 const emits = defineEmits<UcPlanTargetListEmits>();
 
-const activeCount = computed<number>(
-  () => props.entries.filter((entry) => entry.status === "active").length,
-);
-const completedCount = computed<number>(
-  () => props.entries.filter((entry) => entry.status === "completed").length,
-);
 const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
   () =>
     new Map(
@@ -104,7 +100,7 @@ function getEntryInventory(
   return getCalculateInventory(entry.apiResult.result);
 }
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
-  [...props.entries].sort((a, b) => entrySortRank(a) - entrySortRank(b)),
+  [...props.entries].sort(compareEntries),
 );
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 100;
@@ -126,6 +122,18 @@ function isEntryFulfilled(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boole
   return entry.status === "completed" || entryProgress(entry) >= 100;
 }
 
+const activeCount = computed<number>(
+  () =>
+    props.entries.filter((entry) => entry.status === "active" && !isEntryFulfilled(entry)).length,
+);
+const fulfilledCount = computed<number>(
+  () =>
+    props.entries.filter((entry) => entry.status === "active" && isEntryFulfilled(entry)).length,
+);
+const completedCount = computed<number>(
+  () => props.entries.filter((entry) => entry.status === "completed").length,
+);
+
 function entrySortRank(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 2;
   return isEntryFulfilled(entry) ? 1 : 0;
@@ -138,18 +146,35 @@ function hasTodayMaterial(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boole
   );
 }
 
+function compareEntries(
+  a: TGApp.Sqlite.Cultivation.EntryWithItems,
+  b: TGApp.Sqlite.Cultivation.EntryWithItems,
+): number {
+  const aRank = entrySortRank(a);
+  const rankDiff = aRank - entrySortRank(b);
+  if (rankDiff !== 0) return rankDiff;
+  if (aRank === 0) {
+    const availabilityDiff = Number(hasTodayMaterial(b)) - Number(hasTodayMaterial(a));
+    if (availabilityDiff !== 0) return availabilityDiff;
+  }
+  return a.sortOrder - b.sortOrder;
+}
+
+function getPriorityEntries(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): Array<TGApp.Sqlite.Cultivation.EntryWithItems> {
+  const rank = entrySortRank(entry);
+  return props.entries
+    .filter((item) => entrySortRank(item) === rank)
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
 function entryPriority(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
-  return (
-    sortedEntries.value
-      .filter((item) => entrySortRank(item) === entrySortRank(entry))
-      .findIndex((item) => item.id === entry.id) + 1
-  );
+  return getPriorityEntries(entry).findIndex((item) => item.id === entry.id) + 1;
 }
 
 function canMoveEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems, offset: number): boolean {
-  const entries = sortedEntries.value.filter(
-    (item) => entrySortRank(item) === entrySortRank(entry),
-  );
+  const entries = getPriorityEntries(entry);
   const currentIndex = entries.findIndex((item) => item.id === entry.id);
   const nextIndex = currentIndex + offset;
   return currentIndex >= 0 && nextIndex >= 0 && nextIndex < entries.length;
@@ -163,10 +188,10 @@ function emitOrder(entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>): voi
 }
 
 function moveEntry(entryId: string, offset: number): void {
-  const entry = sortedEntries.value.find((item) => item.id === entryId);
+  const entry = props.entries.find((item) => item.id === entryId);
   if (!entry) return;
   const rank = entrySortRank(entry);
-  const entries = sortedEntries.value.filter((item) => entrySortRank(item) === rank);
+  const entries = getPriorityEntries(entry);
   const currentIndex = entries.findIndex((entry) => entry.id === entryId);
   const nextIndex = currentIndex + offset;
   if (currentIndex < 0 || nextIndex < 0 || nextIndex >= entries.length) return;
@@ -174,9 +199,9 @@ function moveEntry(entryId: string, offset: number): void {
   entries.splice(nextIndex, 0, movedEntry);
   let groupIndex = 0;
   emitOrder(
-    sortedEntries.value.map((item) =>
-      entrySortRank(item) === rank ? (entries[groupIndex++] ?? item) : item,
-    ),
+    [...props.entries]
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((item) => (entrySortRank(item) === rank ? (entries[groupIndex++] ?? item) : item)),
   );
 }
 
@@ -218,6 +243,30 @@ function emitStatus(
 .ucpt-subtitle {
   color: var(--common-text-sub);
   font-size: 12px;
+}
+
+.ucpt-statuses {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  gap: 8px;
+
+  span {
+    padding-left: 8px;
+    border-left: 3px solid var(--common-shadow-2);
+  }
+
+  .active {
+    border-left-color: var(--tgc-od-orange);
+  }
+
+  .fulfilled {
+    border-left-color: var(--tgc-od-green);
+  }
+
+  .completed {
+    color: var(--common-text-sub);
+  }
 }
 
 .ucpt-empty {

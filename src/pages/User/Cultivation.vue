@@ -54,12 +54,7 @@
         <div class="cultivation-plan-summary">
           <div class="cultivation-plan-heading">
             <v-icon color="var(--tgc-od-orange)">mdi-clipboard-text-outline</v-icon>
-            <div>
-              <span>{{ currentProject?.name ?? "尚未创建计划" }}</span>
-              <small>
-                {{ activePlanEntryCount }} 个进行中 · {{ completedPlanEntryCount }} 个已完成
-              </small>
-            </div>
+            <span>{{ currentProject?.name ?? "尚未创建计划" }}</span>
           </div>
           <v-chip size="small" variant="tonal">
             {{ inventoryUpdatedLabel }}
@@ -220,6 +215,7 @@
               :current-ascension-readonly="useApiCalculation"
               :level-options="avatarLevelOptions"
               :options="characterOptions"
+              :selection-readonly="editingEntry?.type === 'avatar'"
               :selected-character="selectedCharacter"
               :skills="displaySkills"
               :target-at-ascension-level="avatarTargetAtAscensionLevel"
@@ -236,6 +232,7 @@
               :has-bag-data="hasBagWeaponData"
               :level-options="weaponLevelOptions"
               :options="weaponOptions"
+              :selection-readonly="editingEntry?.type === 'weapon'"
               :selected-weapon="selectedWeapon"
               :target-at-ascension-level="weaponTargetAtAscensionLevel"
             />
@@ -285,7 +282,7 @@ import {
   getCalculateInventory,
   getUidServerTimezone,
 } from "@utils/cultivationPlan.js";
-import { getRcStar, getZhElement } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
@@ -373,12 +370,6 @@ const currentProject = computed<TGApp.Sqlite.Cultivation.Project | undefined>(()
 const projectOptions = computed<Array<{ title: string; value: string }>>(() =>
   projects.value.map((project) => ({ title: project.name, value: project.id })),
 );
-const activePlanEntryCount = computed<number>(
-  () => planEntries.value.filter((entry) => entry.status === "active").length,
-);
-const completedPlanEntryCount = computed<number>(
-  () => planEntries.value.filter((entry) => entry.status === "completed").length,
-);
 const inventoryUpdatedLabel = computed<string>(() => {
   const apiUpdated = planEntries.value
     .filter((entry) => entry.calculationMode === "api")
@@ -395,8 +386,13 @@ const inventoryUpdatedLabel = computed<string>(() => {
       ? "数据"
       : "接口数据"
     : "背包";
-  return `${source}更新于 ${updated}`;
+  return `${source}更新于 ${formatUpdated(updated)}`;
 });
+
+function formatUpdated(value: string): string {
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? value : timestampToDate(timestamp);
+}
 const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
   const options = roles.value.map((role) => {
     const weaponType =
@@ -1991,7 +1987,6 @@ function buildWeaponOptions(
 .cultivation-plan-toolbar,
 .cultivation-plan-summary,
 .cultivation-plan-heading,
-.cultivation-plan-heading > div,
 .cultivation-plan-actions,
 .cultivation-mode-actions {
   display: flex;
@@ -2021,17 +2016,8 @@ function buildWeaponOptions(
   gap: 8px;
 }
 
-.cultivation-plan-heading > div {
-  flex-direction: column;
-  align-items: flex-start;
-
-  span {
-    font-family: var(--font-title);
-  }
-
-  small {
-    color: var(--common-text-sub);
-  }
+.cultivation-plan-heading > span {
+  font-family: var(--font-title);
 }
 
 .cultivation-plan-actions,

@@ -114,7 +114,9 @@ export function isMaterialAvailableToday(
 ): boolean {
   const material = materials.find((item) => item.id === materialId);
   const scheduledSources =
-    material?.source.filter((source) => (source.days?.length ?? 0) > 0) ?? [];
+    material?.source.filter(
+      (source) => source.type === "domain" && (source.days?.length ?? 0) > 0,
+    ) ?? [];
   if (serverDay === 0) return scheduledSources.length > 0;
   return scheduledSources.some((source) => source.days?.includes(serverDay) === true);
 }

@@ -15,7 +15,14 @@
         >
           <template #activator="{ props: menuProps }">
             <v-btn
-              :title="selectedCharacter ? `切换角色：${selectedCharacter.name}` : '选择角色'"
+              :disabled="selectionReadonly"
+              :title="
+                selectionReadonly
+                  ? '编辑角色养成目标时不可切换角色'
+                  : selectedCharacter
+                    ? `切换角色：${selectedCharacter.name}`
+                    : '选择角色'
+              "
               class="ucc-select-trigger"
               icon
               v-bind="menuProps"
@@ -213,6 +220,7 @@ type UcCharacterPanelProps = {
   skills: Array<TGApp.App.UserCalc.SkillOption>;
   atAscensionLevel: boolean;
   currentAscensionReadonly: boolean;
+  selectionReadonly: boolean;
   targetAtAscensionLevel: boolean;
 };
 
@@ -233,11 +241,13 @@ const levelUnavailable = computed<boolean>(
 );
 
 function selectCharacter(value: number): void {
+  if (props.selectionReadonly) return;
   selectedId.value = value;
   showSelector.value = false;
 }
 
 function clearCharacter(): void {
+  if (props.selectionReadonly) return;
   selectedId.value = null;
   showSelector.value = false;
 }
