@@ -45,6 +45,9 @@ const CROWN_OF_INSIGHT_ID = 104319;
 const DUST_OF_AZOTH_ID = 104201;
 const DREAM_SOLVENT_ID = 113021;
 const CONSTELLATION_TALENT_BONUS = 3;
+const TARTAGLIA_ID = 10000033;
+const TARTAGLIA_NORMAL_ATTACK_ID = 10331;
+const TARTAGLIA_MASTER_OF_WEAPONRY_ID = 332301;
 
 const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
 const AVATAR_ASCENSION_MORA = <const>[20000, 40000, 60000, 80000, 100000, 120000];
@@ -114,6 +117,43 @@ export function applyTalentLevelCorrections(
       ? Math.max(level - CONSTELLATION_TALENT_BONUS, 1)
       : level;
   });
+}
+
+/**
+ * 获取战绩角色用于背包计算的实际培养天赋等级。
+ *
+ * @param role - 用户战绩中的角色数据
+ * @param wiki - 角色 Wiki 数据
+ * @returns 校正后的实际培养等级
+ * @since Beta v0.11.2
+ */
+export function getRecordTalentLevels(
+  role: TGApp.Sqlite.Character.TableTrans,
+  wiki: TGApp.App.Character.WikiItem,
+): Array<number> {
+  const levelableSkillIds = new Set(
+    wiki.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
+  );
+  const skills = role.skills.filter(
+    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
+  );
+  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
+  const levels = applyTalentLevelCorrections(
+    skills.map((skill) => skill.level),
+    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
+    role.avatar.actived_constellation_num,
+  );
+  const isMasterOfWeaponryUnlocked = role.skills.some(
+    (skill) => skill.skill_id === TARTAGLIA_MASTER_OF_WEAPONRY_ID && skill.is_unlock,
+  );
+  if (role.cid !== TARTAGLIA_ID || !isMasterOfWeaponryUnlocked) return levels;
+  const normalAttackIndex = skills.findIndex(
+    (skill) => skill.skill_id === TARTAGLIA_NORMAL_ATTACK_ID,
+  );
+  if (normalAttackIndex !== -1) {
+    levels[normalAttackIndex] = levels[normalAttackIndex] - 1;
+  }
+  return levels;
 }
 
 const WEAPON_ASCENSION_MORA: Readonly<Record<number, ReadonlyArray<number>>> = {
@@ -453,18 +493,7 @@ export function calculateAvatarMaterials(
 ): Array<CultivationMaterial> {
   const currentLevel = role.avatar.level;
   const avatarWithPromote = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
-  const levelableSkillIds = new Set(
-    wiki.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
-  );
-  const skills = role.skills.filter(
-    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
-  );
-  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
-  const currentTalentLevels = applyTalentLevelCorrections(
-    skills.map((skill) => skill.level),
-    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
-    role.avatar.actived_constellation_num,
-  );
+  const currentTalentLevels = getRecordTalentLevels(role, wiki);
   return calculateAvatarMaterialsFromState(
     wiki,
     currentLevel,
@@ -679,6 +708,7 @@ const userCalc = {
   isAscensionLevel,
   isAscendedAtThreshold,
   correctTalentLevels: applyTalentLevelCorrections,
+  recordTalentLevels: getRecordTalentLevels,
   resolvePromoteLevel,
 };
 

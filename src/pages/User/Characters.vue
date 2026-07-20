@@ -420,12 +420,7 @@ async function createBatchPlanInput(
     (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
   );
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
-  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
-  const currentTalentLevels = userCalc.correctTalentLevels(
-    skills.map((skill) => skill.level),
-    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
-    avatar.actived_constellation_num,
-  );
+  const currentTalentLevels = userCalc.recordTalentLevels(role, wiki);
   const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
   const currentAscended = userCalc.isAscendedAtThreshold(avatar.level, currentPromoteLevel);
   const targetLevel = Math.max(avatar.level, target.level);

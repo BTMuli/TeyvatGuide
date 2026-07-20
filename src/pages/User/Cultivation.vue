@@ -558,11 +558,14 @@ const talentLucLevels = computed<Array<number | null>>(() => {
 const currentTalentLevels = computed<Array<number>>(() => {
   const levels = mainSkills.value.map((skill) => skill.level);
   if (useApiCalculation.value) return levels;
-  return userCalc.correctTalentLevels(
-    levels,
-    talentLucLevels.value,
-    selectedCharacter.value?.constellation ?? 0,
-  );
+  if (!selectedRole.value || !avatarWiki.value) {
+    return userCalc.correctTalentLevels(
+      levels,
+      talentLucLevels.value,
+      selectedCharacter.value?.constellation ?? 0,
+    );
+  }
+  return userCalc.recordTalentLevels(selectedRole.value, avatarWiki.value);
 });
 const displaySkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() =>
   mainSkills.value.map((skill, index) => ({
@@ -1579,12 +1582,7 @@ async function createAvatarRefreshInput(
   const skills = role.skills.filter(
     (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
   );
-  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
-  const currentTalentLevels = userCalc.correctTalentLevels(
-    skills.map((skill) => skill.level),
-    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
-    role.avatar.actived_constellation_num,
-  );
+  const currentTalentLevels = userCalc.recordTalentLevels(role, wiki);
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
   const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
   const targetTalentMap = new Map(
