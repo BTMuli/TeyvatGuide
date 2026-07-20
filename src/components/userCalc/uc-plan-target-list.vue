@@ -8,27 +8,6 @@
           >UID {{ uid }} · {{ activeCount }} 个进行中 · {{ completedCount }} 个已完成</span
         >
       </div>
-      <div class="ucpt-header-actions">
-        <v-text-field
-          v-model="search"
-          :hide-details="true"
-          clearable
-          density="compact"
-          label="搜索目标或材料"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          width="230"
-        />
-        <v-btn
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-plus"
-          size="small"
-          variant="flat"
-          @click="emits('add')"
-        >
-          添加目标
-        </v-btn>
-      </div>
     </div>
 
     <div v-if="entries.length === 0" class="ucpt-empty">
@@ -39,9 +18,9 @@
       </v-btn>
     </div>
 
-    <div v-else-if="filteredEntries.length > 0" class="ucpt-grid">
+    <div v-else class="ucpt-grid">
       <UcPlanTargetCard
-        v-for="entry in filteredEntries"
+        v-for="entry in sortedEntries"
         :key="entry.id"
         :can-move-down="canMoveEntry(entry, 1)"
         :can-move-up="canMoveEntry(entry, -1)"
@@ -57,17 +36,13 @@
         @status="emitStatus"
       />
     </div>
-    <div v-else class="ucpt-empty compact">
-      <v-icon size="40">mdi-magnify-close</v-icon>
-      <span>没有符合搜索条件的目标</span>
-    </div>
     <div class="ucpt-footer">养成计划 · Render by TeyvatGuide</div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 import {
@@ -98,7 +73,6 @@ type UcPlanTargetListEmits = {
 
 const props = defineProps<UcPlanTargetListProps>();
 const emits = defineEmits<UcPlanTargetListEmits>();
-const search = ref<string>("");
 
 const activeCount = computed<number>(
   () => props.entries.filter((entry) => entry.status === "active").length,
@@ -132,21 +106,6 @@ function getEntryInventory(
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort((a, b) => entrySortRank(a) - entrySortRank(b)),
 );
-const filteredEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() => {
-  const keyword = search.value.trim().toLocaleLowerCase();
-  if (keyword.length === 0) return sortedEntries.value;
-  return sortedEntries.value.filter((entry) => {
-    const materialNames = entry.items.map((item) => materialName(item.materialId)).join(" ");
-    return `${entry.name} ${entryTypeLabel(entry.type)} ${materialNames}`
-      .toLocaleLowerCase()
-      .includes(keyword);
-  });
-});
-
-function entryTypeLabel(type: TGApp.Sqlite.Cultivation.EntryType): string {
-  return type === "avatar" ? "角色" : "武器";
-}
-
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 100;
   if (entry.items.length === 0) return 100;
@@ -176,12 +135,6 @@ function hasTodayMaterial(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boole
   const serverDay = getServerDay(props.timezone);
   return entry.items.some((item) =>
     isMaterialAvailableToday(item.materialId, serverDay, WikiMaterialData),
-  );
-}
-
-function materialName(materialId: number): string {
-  return (
-    WikiMaterialData.find((material) => material.id === materialId)?.name ?? `材料 ${materialId}`
   );
 }
 
@@ -257,11 +210,6 @@ function emitStatus(
   gap: 8px;
 }
 
-.ucpt-header-actions {
-  justify-content: flex-end;
-  color: var(--box-text-1);
-}
-
 .ucpt-title {
   font-family: var(--font-title);
   font-size: 18px;
@@ -282,10 +230,6 @@ function emitStatus(
   border-radius: 8px;
   color: var(--common-text-sub);
   gap: 12px;
-
-  &.compact {
-    min-height: 160px;
-  }
 }
 
 .ucpt-grid {
@@ -311,16 +255,6 @@ function emitStatus(
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
-  }
-
-  .ucpt-header-actions {
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-
-    :deep(.v-input) {
-      flex: 1;
-    }
   }
 }
 </style>

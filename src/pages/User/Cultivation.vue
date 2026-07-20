@@ -5,20 +5,16 @@
       <div class="cultivation-title">
         <v-icon color="var(--tgc-od-orange)">mdi-calculator-variant-outline</v-icon>
         <span>养成计划</span>
-        <v-btn-toggle
+        <v-btn
           v-if="uidList.length > 0"
-          v-model="viewTab"
-          class="cultivation-view-toggle"
           color="var(--tgc-od-orange)"
-          density="compact"
-          mandatory
-          rounded="lg"
+          prepend-icon="mdi-plus"
+          size="small"
           variant="tonal"
+          @click="startAddingTarget"
         >
-          <v-btn prepend-icon="mdi-format-list-checks" value="targets">目标</v-btn>
-          <v-btn prepend-icon="mdi-package-variant" value="materials">材料</v-btn>
-          <v-btn prepend-icon="mdi-calculator-variant-outline" value="calculator">计算</v-btn>
-        </v-btn-toggle>
+          添加目标
+        </v-btn>
       </div>
     </template>
     <template #append>
@@ -129,7 +125,12 @@
     </div>
 
     <template v-else>
-      <v-window v-model="viewTab" class="cultivation-tab-window">
+      <v-window
+        v-model="viewTab"
+        :show-arrows="false"
+        :touch="false"
+        class="cultivation-tab-window"
+      >
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
             :entries="planEntries"
@@ -137,23 +138,11 @@
             :project-name="currentProject?.name ?? ''"
             :timezone="currentProject?.timezone ?? currentTimezone"
             :uid="currentUid ?? 0"
-            @add="viewTab = 'calculator'"
+            @add="startAddingTarget"
             @edit="editPlanEntry"
             @remove="removePlanEntry"
             @reorder="updatePlanEntryOrder"
             @status="updatePlanEntryStatus"
-          />
-        </v-window-item>
-
-        <v-window-item class="cultivation-tab-content" value="materials">
-          <UcPlanMaterialResult
-            v-model:allow-crafting="planAllowCrafting"
-            v-model:use-dust="planUseDust"
-            v-model:use-solvent="planUseSolvent"
-            :bag-materials="planBagMaterialDetails"
-            :materials="planResultMaterials"
-            :timezone="currentProject?.timezone ?? currentTimezone"
-            :uid="currentUid ?? 0"
           />
         </v-window-item>
 
@@ -192,6 +181,9 @@
               >
                 确认计算
               </v-btn>
+              <v-btn prepend-icon="mdi-close" variant="tonal" @click="cancelEditing">
+                取消编辑
+              </v-btn>
               <v-btn
                 :disabled="!canSaveToPlan"
                 :loading="planLoading"
@@ -212,7 +204,7 @@
             density="compact"
             type="info"
             variant="tonal"
-            @click:close="editingEntry = undefined"
+            @click:close="cancelEditing"
           >
             正在编辑“{{ editingEntry.name }}”，保存后将更新计划中的同一目标。
           </v-alert>
@@ -281,7 +273,6 @@ import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
-import UcPlanMaterialResult from "@comp/userCalc/uc-plan-material-result.vue";
 import UcPlanTargetList from "@comp/userCalc/uc-plan-target-list.vue";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
 import { platform } from "@tauri-apps/plugin-os";
@@ -313,7 +304,7 @@ const EMPTY_BAG_MATERIAL_DETAILS: ReadonlyMap<number, TGApp.Sqlite.UserBag.Mater
   new Map();
 
 type CalculationMode = TGApp.Sqlite.Cultivation.CalculationMode;
-type CultivationViewTab = "calculator" | "materials" | "targets";
+type CultivationViewTab = "calculator" | "targets";
 type ApiRefreshTarget = {
   avatar: TGApp.Game.Calculate.SyncAvatar;
   avatarEntry?: TGApp.Sqlite.Cultivation.EntryWithItems;
@@ -347,9 +338,6 @@ const useBagWeaponSource = ref<boolean>(true);
 const allowCrafting = ref<boolean>(true);
 const useDust = ref<boolean>(false);
 const useSolvent = ref<boolean>(false);
-const planAllowCrafting = ref<boolean>(true);
-const planUseDust = ref<boolean>(false);
-const planUseSolvent = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
 const projects = shallowRef<Array<TGApp.Sqlite.Cultivation.Project>>([]);
 const planEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
@@ -664,31 +652,14 @@ const planInventory = computed<Map<number, number>>(() => {
   }
   return inventory;
 });
-const planBagMaterialDetails = computed<Map<number, TGApp.Sqlite.UserBag.MaterialTable>>(() => {
-  const details = new Map(bagMaterialDetails.value);
-  const uid = currentUid.value ?? 0;
-  for (const entry of planEntries.value) {
-    if (entry.calculationMode !== "api" || !entry.apiResult) continue;
-    for (const [materialId, count] of getCalculateInventory(entry.apiResult.result)) {
-      details.set(materialId, {
-        uid,
-        id: materialId,
-        count,
-        records: [],
-        updated: entry.apiResult.updated,
-      });
-    }
-  }
-  return details;
-});
 const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   buildCultivationResults(
     planRequiredMaterials.value,
     planInventory.value,
     WikiMaterialData,
-    planAllowCrafting.value,
-    planUseDust.value,
-    planUseSolvent.value,
+    true,
+    false,
+    false,
   ),
 );
 const planMissingKinds = computed<number>(
@@ -836,6 +807,7 @@ async function applyRouteTarget(): Promise<void> {
   const targetType = typeof route.query.targetType === "string" ? route.query.targetType : "";
   const targetId = Number(route.query.targetId);
   if (!Number.isInteger(targetId) || targetId <= 0) return;
+  editingEntry.value = undefined;
   viewTab.value = "calculator";
   if (targetType === "avatar") {
     pendingWikiCharacterId.value = targetId;
@@ -1448,6 +1420,16 @@ async function saveToPlan(): Promise<void> {
   }
 }
 
+function startAddingTarget(): void {
+  editingEntry.value = undefined;
+  viewTab.value = "calculator";
+}
+
+function cancelEditing(): void {
+  editingEntry.value = undefined;
+  viewTab.value = "targets";
+}
+
 async function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Promise<void> {
   editingEntry.value = entry;
   allowCrafting.value = entry.allowCrafting;
@@ -1970,15 +1952,6 @@ function buildWeaponOptions(
   font-family: var(--font-title);
   font-size: 18px;
   gap: 8px;
-}
-
-.cultivation-view-toggle {
-  margin-left: 8px;
-
-  :deep(.v-btn) {
-    min-width: 76px;
-    font-family: var(--font-title);
-  }
 }
 
 .cultivation-nav-actions {
