@@ -25,7 +25,17 @@
         </div>
       </div>
       <div v-if="activeEntries.length > 0" class="phc-targets">
-        <div v-for="entry in activeEntries.slice(0, 5)" :key="entry.id" class="phc-target">
+        <div
+          v-for="entry in activeEntries.slice(0, 5)"
+          :key="entry.id"
+          class="phc-target"
+          role="button"
+          tabindex="0"
+          title="查看养成目标"
+          @click="emits('target-click', entry)"
+          @keydown.enter.prevent="emits('target-click', entry)"
+          @keydown.space.prevent="emits('target-click', entry)"
+        >
           <div class="phc-target-icon">
             <img :alt="entry.name" :src="entry.icon" />
           </div>
@@ -87,8 +97,14 @@ import { useRouter } from "vue-router";
 import { WikiMaterialData } from "@/data/index.js";
 
 type PhCompCultivationEmits = {
-  (event: "entries-loaded", entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>): void;
+  (
+    event: "data-loaded",
+    project: TGApp.Sqlite.Cultivation.Project | undefined,
+    entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
+    materials: Array<TGApp.App.UserCalc.ResultMaterial>,
+  ): void;
   (event: "success"): void;
+  (event: "target-click", entry: TGApp.Sqlite.Cultivation.EntryWithItems): void;
 };
 
 const emits = defineEmits<PhCompCultivationEmits>();
@@ -143,7 +159,7 @@ onMounted(async () => {
       false,
     );
   } finally {
-    emits("entries-loaded", entries.value);
+    emits("data-loaded", project.value, entries.value, resultMaterials.value);
     emits("success");
   }
 });
@@ -248,10 +264,16 @@ function getMissingMaterials(
   border: 1px solid color-mix(in srgb, var(--tgc-od-blue) 30%, var(--common-shadow-1));
   border-radius: 8px;
   background: color-mix(in srgb, var(--tgc-od-blue) 8%, var(--box-bg-1));
+  cursor: pointer;
   gap: 10px;
 
+  &:focus-visible,
   &:hover {
     border-color: var(--tgc-od-orange);
+  }
+
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--tgc-od-orange) 45%, transparent);
   }
 }
 

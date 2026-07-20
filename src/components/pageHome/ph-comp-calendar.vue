@@ -59,20 +59,30 @@
       </div>
       <PhCompCultivation
         v-show="!showCalendar"
-        @entries-loaded="handleCultivationEntries"
+        @data-loaded="handleCultivationData"
         @success="handleCultivationSuccess"
+        @target-click="selectCultivationEntry"
       />
     </template>
   </THomeCard>
-  <ToCalendar v-model="showItem" :item="selectedItem" />
+  <ToCalendar v-if="selectedItem" v-model="showItem" :item="selectedItem" />
+  <PhCalendarCultivationOverlay
+    v-if="selectedItem"
+    v-model="showCultivationItem"
+    :entries="selectedCultivationEntries"
+    :item="selectedItem"
+    :materials="cultivationMaterials"
+    :project="cultivationProject"
+  />
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 
 import TCalendarBirth from "./ph-calendar-birth.vue";
 import ToCalendar from "./ph-calendar-overlay.vue";
+import PhCalendarCultivationOverlay from "./ph-calendar-cultivation-overlay.vue";
 import THomeCard from "./ph-comp-card.vue";
 import PhCompCultivation from "./ph-comp-cultivation.vue";
 
@@ -99,9 +109,13 @@ const btnNow = ref<number>(0);
 const dateNow = ref<string>("");
 const page = ref<number>(1);
 const showItem = ref<boolean>(false);
+const showCultivationItem = ref<boolean>(false);
 const showCalendar = ref<boolean>(true);
 const selectedType = ref<"character" | "weapon">("character");
+const cultivationProject = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const cultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
+const cultivationMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
+const selectedCultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const gridCols = ref<number>(8);
 let resizeObserver: ResizeObserver | null = null;
 let calendarReady = false;
@@ -127,7 +141,7 @@ const renderItems = computed<Array<TGApp.App.Calendar.Item>>(() => {
   const currentPage = Math.min(page.value, length.value);
   return calendarTotal.value.slice((currentPage - 1) * visible.value, currentPage * visible.value);
 });
-const selectedItem = shallowRef<TGApp.App.Calendar.Item>(renderItems.value[0]);
+const selectedItem = shallowRef<TGApp.App.Calendar.Item>();
 const gridStyle = computed<Record<string, string>>(() => ({
   gridTemplateColumns: `repeat(${gridCols.value}, ${ITEM_SIZE}px)`,
 }));
@@ -173,9 +187,36 @@ function switchDay(day: number): void {
   page.value = 1;
 }
 
-function selectItem(item: TGApp.App.Calendar.Item): void {
+async function selectItem(item: TGApp.App.Calendar.Item): Promise<void> {
+  const entries = getCultivationEntries(item);
+  if (entries.length > 0) {
+    await openCultivationItem(item, entries);
+    return;
+  }
   selectedItem.value = item;
+  await nextTick();
   showItem.value = true;
+}
+
+async function selectCultivationEntry(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): Promise<void> {
+  const itemType = entry.type === "avatar" ? "character" : "weapon";
+  const item = AppCalendarData.find(
+    (calendarItem) => calendarItem.itemType === itemType && calendarItem.id === entry.itemId,
+  );
+  if (!item) return;
+  await openCultivationItem(item, [entry]);
+}
+
+async function openCultivationItem(
+  item: TGApp.App.Calendar.Item,
+  entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
+): Promise<void> {
+  selectedItem.value = item;
+  selectedCultivationEntries.value = entries;
+  await nextTick();
+  showCultivationItem.value = true;
 }
 
 function handleCultivationSuccess(): void {
@@ -183,13 +224,28 @@ function handleCultivationSuccess(): void {
   emitSuccessWhenReady();
 }
 
-function handleCultivationEntries(entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>): void {
+function handleCultivationData(
+  project: TGApp.Sqlite.Cultivation.Project | undefined,
+  entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  materials: Array<TGApp.App.UserCalc.ResultMaterial>,
+): void {
+  cultivationProject.value = project;
   cultivationEntries.value = entries;
+  cultivationMaterials.value = materials;
 }
 
 function isCultivationTarget(item: TGApp.App.Calendar.Item): boolean {
   const entryType = item.itemType === "character" ? "avatar" : "weapon";
   return cultivationTargetKeys.value.has(`${entryType}:${item.id}`);
+}
+
+function getCultivationEntries(
+  item: TGApp.App.Calendar.Item,
+): Array<TGApp.Sqlite.Cultivation.EntryWithItems> {
+  const entryType = item.itemType === "character" ? "avatar" : "weapon";
+  return cultivationEntries.value.filter(
+    (entry) => entry.status === "active" && entry.type === entryType && entry.itemId === item.id,
+  );
 }
 
 function emitSuccessWhenReady(): void {
