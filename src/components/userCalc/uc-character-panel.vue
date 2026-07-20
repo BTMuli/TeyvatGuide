@@ -38,36 +38,58 @@
                 circular
               />
               <v-icon v-else>mdi-account-plus-outline</v-icon>
+              <span v-if="selectedCharacter" class="ucc-select-hint">
+                <v-icon size="11">mdi-swap-horizontal</v-icon>
+              </span>
+              <v-tooltip activator="parent" location="bottom">
+                {{ selectionReadonly ? "编辑目标时不可切换角色" : "点击切换角色" }}
+              </v-tooltip>
             </v-btn>
           </template>
           <v-card class="ucc-picker" variant="outlined">
             <div class="ucc-picker-header">
               <span class="ucc-picker-title">选择角色</span>
-              <v-btn
-                :disabled="selectedId === null"
-                class="ucc-picker-clear"
-                color="var(--tgc-od-red)"
-                prepend-icon="mdi-close-circle-outline"
-                size="small"
-                variant="tonal"
-                @click="clearCharacter"
-              >
-                清空
-              </v-btn>
+              <div class="ucc-picker-actions">
+                <v-text-field
+                  v-model="searchKeyword"
+                  aria-label="搜索角色名称"
+                  class="ucc-picker-search"
+                  clearable
+                  density="compact"
+                  hide-details
+                  placeholder="搜索名称"
+                  prepend-inner-icon="mdi-magnify"
+                  variant="outlined"
+                />
+                <v-btn
+                  :disabled="selectedId === null"
+                  class="ucc-picker-clear"
+                  color="var(--tgc-od-red)"
+                  icon="mdi-close-circle-outline"
+                  size="small"
+                  title="清空角色选择"
+                  variant="tonal"
+                  @click="clearCharacter"
+                />
+              </div>
             </div>
-            <div class="ucc-picker-grid">
-              <button
-                v-for="option in options"
+            <div v-if="filteredOptions.length > 0" class="ucc-picker-list">
+              <UcPickerListItem
+                v-for="option in filteredOptions"
                 :key="option.value"
-                :class="{ selected: option.value === selectedId }"
+                :details="getCharacterDetails(option)"
+                :icon="option.icon"
+                :name="option.name"
+                :owned="option.owned"
+                :primary-badge="`/icon/element/${option.element}元素.webp`"
+                :secondary="getCharacterSecondaryDetails(option)"
+                :selected="option.value === selectedId"
+                :star="option.star"
                 :title="option.title"
-                class="ucc-picker-item"
-                type="button"
-                @click="selectCharacter(option.value)"
-              >
-                <TItemBox :model-value="getCharacterBoxData(option)" />
-              </button>
+                @select="selectCharacter(option.value)"
+              />
             </div>
+            <div v-else class="ucc-picker-empty">未找到名称匹配的角色</div>
           </v-card>
         </v-menu>
         <span v-if="selectedCharacter" class="ucc-selected-label">
@@ -93,11 +115,11 @@
             <span class="ucc-name">{{ selectedCharacter.name }}</span>
             <div class="ucc-tags">
               <span>Lv.{{ currentLevel }}</span>
-              <span>{{ selectedCharacter.star }}★</span>
+              <span>{{ selectedCharacter.star % 100 }}★</span>
               <span>{{ selectedCharacter.element }}元素</span>
               <span>{{ weaponType }}</span>
             </div>
-            <div class="ucc-tags secondary">
+            <div v-if="selectedCharacter.owned" class="ucc-tags secondary">
               <span>命座 {{ selectedCharacter.constellation }}</span>
               <span>好感 {{ selectedCharacter.fetter }}</span>
             </div>
@@ -202,10 +224,10 @@
 </template>
 
 <script lang="ts" setup>
-import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
-import { computed, ref } from "vue";
+import UcPickerListItem from "@comp/userCalc/uc-picker-list-item.vue";
+import { computed, ref, watch } from "vue";
 
 type UcCharacterPanelProps = {
   options: Array<TGApp.App.UserCalc.CharacterOption>;
@@ -231,8 +253,14 @@ const ascended = defineModel<boolean>("ascended", { required: true });
 const targetAscended = defineModel<boolean>("targetAscended", { required: true });
 
 const showSelector = ref<boolean>(false);
+const searchKeyword = ref<string>("");
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
+const filteredOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
+  const keyword = searchKeyword.value.trim().toLocaleLowerCase();
+  if (!keyword) return props.options;
+  return props.options.filter((option) => option.name.toLocaleLowerCase().includes(keyword));
+});
 const levelUnavailable = computed<boolean>(
   () =>
     !props.selectedCharacter ||
@@ -251,21 +279,18 @@ function clearCharacter(): void {
   showSelector.value = false;
 }
 
-function getCharacterBoxData(option: TGApp.App.UserCalc.CharacterOption): TItemBoxData {
-  return {
-    bg: `/icon/bg/${option.star}-Star.webp`,
-    icon: option.icon,
-    size: "80px",
-    height: "80px",
-    display: "inner",
-    clickable: true,
-    lt: `/icon/element/${option.element}元素.webp`,
-    ltSize: "16px",
-    innerHeight: 20,
-    innerIcon: `/icon/weapon/${option.weaponType}.webp`,
-    innerText: option.name,
-  };
+function getCharacterDetails(option: TGApp.App.UserCalc.CharacterOption): Array<string> {
+  if (!option.owned) return [`Lv.${option.level}`];
+  return [`Lv.${option.level}`, `${option.constellation} 命`, `好感 ${option.fetter}`];
 }
+
+function getCharacterSecondaryDetails(option: TGApp.App.UserCalc.CharacterOption): Array<string> {
+  return [`${option.star % 100}★`, `${option.element}元素`, option.weaponType];
+}
+
+watch(showSelector, (visible) => {
+  if (!visible) searchKeyword.value = "";
+});
 
 function updateTalent(index: number, value: number): void {
   const skill = props.skills[index];
@@ -329,12 +354,28 @@ function updateCurrentTalent(index: number, value: number | null): void {
 }
 
 .ucc-select-trigger {
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
   width: 40px;
   min-width: 40px;
   height: 40px;
   padding: 0;
   border-radius: 50%;
+}
+
+.ucc-select-hint {
+  position: absolute;
+  z-index: 2;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tgc-od-blue);
+  color: var(--btn-text);
 }
 
 .ucc-selected-label {
@@ -347,13 +388,15 @@ function updateCurrentTalent(index: number, value: number | null): void {
 }
 
 .ucc-picker {
-  width: min(366px, calc(100vw - 32px));
-  max-height: 360px;
+  display: flex;
+  overflow: hidden;
+  width: min(430px, calc(100vw - 32px));
+  max-height: 420px;
+  flex-direction: column;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
   background: var(--box-bg-1);
   box-shadow: 0 4px 8px var(--common-shadow-2);
-  overflow-y: auto;
 }
 
 .ucc-picker-header {
@@ -365,32 +408,39 @@ function updateCurrentTalent(index: number, value: number | null): void {
 }
 
 .ucc-picker-title {
+  flex: none;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 14px;
 }
 
-.ucc-picker-grid {
-  display: grid;
+.ucc-picker-actions {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, 80px);
 }
 
-.ucc-picker-item {
-  width: 80px;
-  height: 80px;
-  padding: 0;
-  border: unset;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  opacity: 0.72;
-  transition: opacity 0.2s ease;
+.ucc-picker-search {
+  max-width: 190px;
+}
 
-  &:hover,
-  &.selected {
-    opacity: 1;
-  }
+.ucc-picker-list {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  padding-right: 2px;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.ucc-picker-empty {
+  padding: 24px 8px;
+  color: var(--common-text-sub);
+  font-size: 12px;
+  text-align: center;
 }
 
 .ucc-form {
@@ -588,6 +638,19 @@ function updateCurrentTalent(index: number, value: number | null): void {
 @media (width <= 520px) {
   .ucc-title {
     flex-wrap: wrap;
+  }
+
+  .ucc-picker-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ucc-picker-actions {
+    justify-content: stretch;
+  }
+
+  .ucc-picker-search {
+    max-width: none;
   }
 
   .ucc-object-config {

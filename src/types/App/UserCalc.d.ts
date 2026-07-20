@@ -26,6 +26,8 @@ declare namespace TGApp.App.UserCalc {
     star: number;
     /** 当前等级 */
     level: number;
+    /** 是否已拥有该角色 */
+    owned: boolean;
     /** 已激活命座数 */
     constellation: number;
     /** 好感等级 */

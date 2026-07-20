@@ -51,37 +51,60 @@
                 circular
               />
               <v-icon v-else>mdi-sword-cross</v-icon>
+              <span v-if="selectedWeapon" class="ucw-select-hint">
+                <v-icon size="11">mdi-swap-horizontal</v-icon>
+              </span>
+              <v-tooltip activator="parent" location="bottom">
+                {{ selectionReadonly ? "编辑目标时不可切换武器" : "点击切换武器" }}
+              </v-tooltip>
             </v-btn>
           </template>
           <v-card class="ucw-picker" variant="outlined">
             <div class="ucw-picker-header">
               <span class="ucw-picker-title">选择武器</span>
-              <v-btn
-                :disabled="selectedKey === null"
-                class="ucw-picker-clear"
-                color="var(--tgc-od-red)"
-                prepend-icon="mdi-close-circle-outline"
-                size="small"
-                variant="tonal"
-                @click="clearWeapon"
-              >
-                清空
-              </v-btn>
+              <div class="ucw-picker-actions">
+                <v-text-field
+                  v-model="searchKeyword"
+                  aria-label="搜索武器名称"
+                  class="ucw-picker-search"
+                  clearable
+                  density="compact"
+                  hide-details
+                  placeholder="搜索名称"
+                  prepend-inner-icon="mdi-magnify"
+                  variant="outlined"
+                />
+                <v-btn
+                  :disabled="selectedKey === null"
+                  class="ucw-picker-clear"
+                  color="var(--tgc-od-red)"
+                  icon="mdi-close-circle-outline"
+                  size="small"
+                  title="清空武器选择"
+                  variant="tonal"
+                  @click="clearWeapon"
+                />
+              </div>
             </div>
-            <div v-if="options.length > 0" class="ucw-picker-grid">
-              <button
-                v-for="option in options"
+            <div v-if="filteredOptions.length > 0" class="ucw-picker-list">
+              <UcPickerListItem
+                v-for="option in filteredOptions"
                 :key="option.key"
-                :class="{ selected: option.key === selectedKey }"
+                :details="getWeaponDetails(option)"
+                :icon="option.icon"
+                :name="option.wiki.name"
+                :owned="option.source !== 'catalog'"
+                :primary-badge="`/icon/weapon/${option.wiki.weapon}.webp`"
+                :secondary="getWeaponSecondaryDetails(option)"
+                :selected="option.key === selectedKey"
+                :star="option.wiki.star"
                 :title="option.title"
-                class="ucw-picker-item"
-                type="button"
-                @click="selectWeapon(option.key)"
-              >
-                <TItemBox :model-value="getWeaponBoxData(option)" />
-              </button>
+                @select="selectWeapon(option.key)"
+              />
             </div>
-            <div v-else class="ucw-picker-empty">当前来源没有符合角色武器类型的数据</div>
+            <div v-else class="ucw-picker-empty">
+              {{ searchKeyword ? "未找到名称匹配的武器" : "当前来源没有符合角色武器类型的数据" }}
+            </div>
           </v-card>
         </v-menu>
         <span v-if="selectedWeapon" class="ucw-selected-label">
@@ -109,7 +132,9 @@
               <span>Lv.{{ currentLevel }}</span>
               <span>{{ selectedWeapon.wiki.star }}★</span>
               <span>{{ selectedWeapon.wiki.weapon }}</span>
-              <span>精炼 {{ selectedWeapon.affixLevel }}</span>
+              <span v-if="selectedWeapon.source !== 'catalog'">
+                精炼 {{ selectedWeapon.affixLevel }}
+              </span>
             </div>
             <div v-if="selectedWeapon.locked" class="ucw-tags secondary">
               <span>
@@ -211,7 +236,7 @@
               </div>
             </div>
           </div>
-          <div class="ucw-stat summary">
+          <div v-if="selectedWeapon.source !== 'catalog'" class="ucw-stat summary">
             <v-icon size="24">mdi-sword-cross</v-icon>
             <div class="ucw-stat-info">
               <span>养成信息</span>
@@ -231,12 +256,12 @@
 </template>
 
 <script lang="ts" setup>
-import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
+import UcPickerListItem from "@comp/userCalc/uc-picker-list-item.vue";
 import userCalc from "@utils/userCalc.js";
 import wikiUtils from "@utils/wikiUtils.js";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 type UcWeaponPanelProps = {
   options: Array<TGApp.App.UserCalc.WeaponOption>;
@@ -261,8 +286,14 @@ const targetAscended = defineModel<boolean>("targetAscended", { required: true }
 const useBagSource = defineModel<boolean>("useBagSource", { required: true });
 
 const showSelector = ref<boolean>(false);
+const searchKeyword = ref<string>("");
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
+const filteredOptions = computed<Array<TGApp.App.UserCalc.WeaponOption>>(() => {
+  const keyword = searchKeyword.value.trim().toLocaleLowerCase();
+  if (!keyword) return props.options;
+  return props.options.filter((option) => option.wiki.name.toLocaleLowerCase().includes(keyword));
+});
 const levelUnavailable = computed<boolean>(
   () =>
     !props.selectedWeapon || (!props.currentStateEditable && currentLevel.value >= levelMax.value),
@@ -319,24 +350,28 @@ function getWeaponSourceLabel(source: TGApp.App.UserCalc.WeaponOption["source"])
     case "equipped":
       return "角色装备";
     case "catalog":
-      return "未拥有规划";
+      return "未拥有";
   }
 }
 
-function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData {
-  return {
-    bg: `/icon/bg/${option.wiki.star}-Star.webp`,
-    icon: option.icon,
-    size: "80px",
-    height: "80px",
-    display: "inner",
-    clickable: true,
-    lt: `/icon/weapon/${option.wiki.weapon}.webp`,
-    ltSize: "16px",
-    innerHeight: 20,
-    innerText: option.wiki.name,
-  };
+function getWeaponDetails(option: TGApp.App.UserCalc.WeaponOption): Array<string> {
+  const details = [`Lv.${option.level}`];
+  if (option.source !== "catalog") details.push(`精炼 ${option.affixLevel}`);
+  details.push(`${option.wiki.star}★`);
+  return details;
 }
+
+function getWeaponSecondaryDetails(option: TGApp.App.UserCalc.WeaponOption): Array<string> {
+  const details = [option.wiki.weapon];
+  if (option.source !== "catalog") details.push(getWeaponSourceLabel(option.source));
+  if (option.locked) details.push("已锁定");
+  if (option.guid) details.push(`GUID ${option.guid}`);
+  return details;
+}
+
+watch(showSelector, (visible) => {
+  if (!visible) searchKeyword.value = "";
+});
 </script>
 
 <style lang="scss" scoped>
@@ -399,12 +434,28 @@ function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData
 }
 
 .ucw-select-trigger {
-  overflow: hidden;
+  position: relative;
+  overflow: visible;
   width: 40px;
   min-width: 40px;
   height: 40px;
   padding: 0;
   border-radius: 50%;
+}
+
+.ucw-select-hint {
+  position: absolute;
+  z-index: 2;
+  right: -2px;
+  bottom: -2px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tgc-od-blue);
+  color: var(--btn-text);
 }
 
 .ucw-selected-label {
@@ -417,13 +468,15 @@ function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData
 }
 
 .ucw-picker {
-  width: min(366px, calc(100vw - 32px));
-  max-height: 360px;
+  display: flex;
+  overflow: hidden;
+  width: min(430px, calc(100vw - 32px));
+  max-height: 420px;
+  flex-direction: column;
   padding: 8px;
   border: 1px solid var(--common-shadow-1);
   background: var(--box-bg-1);
   box-shadow: 0 4px 8px var(--common-shadow-2);
-  overflow-y: auto;
 }
 
 .ucw-picker-header {
@@ -435,33 +488,32 @@ function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData
 }
 
 .ucw-picker-title {
+  flex: none;
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 14px;
 }
 
-.ucw-picker-grid {
-  display: grid;
+.ucw-picker-actions {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, 80px);
 }
 
-.ucw-picker-item {
-  width: 80px;
-  height: 80px;
-  padding: 0;
-  border: unset;
-  border-radius: 4px;
-  background: transparent;
-  cursor: pointer;
-  opacity: 0.72;
-  transition: opacity 0.2s ease;
+.ucw-picker-search {
+  max-width: 190px;
+}
 
-  &:hover,
-  &.selected {
-    border-color: var(--tgc-od-blue);
-    opacity: 1;
-  }
+.ucw-picker-list {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  padding-right: 2px;
+  gap: 6px;
+  overflow-y: auto;
 }
 
 .ucw-picker-empty {
@@ -709,6 +761,19 @@ function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData
 @media (width <= 520px) {
   .ucw-title {
     flex-wrap: wrap;
+  }
+
+  .ucw-picker-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ucw-picker-actions {
+    justify-content: stretch;
+  }
+
+  .ucw-picker-search {
+    max-width: none;
   }
 
   .ucw-object-config {

@@ -63,8 +63,8 @@ export function buildCultivationResults(
   const craftableMaterials: Map<number, CraftableMaterial> = allowCrafting
     ? userCalc.craft(requirements, inventory, materials, useDust, useSolvent)
     : new Map();
-  return requirements
-    .map((required) => {
+  return sortCultivationResults(
+    requirements.map((required) => {
       const info = materials.find((material) => material.id === required.id);
       const owned = inventory.get(required.id) ?? 0;
       const crafting = craftableMaterials.get(required.id);
@@ -95,8 +95,59 @@ export function buildCultivationResults(
         missing: Math.max(required.count - available, 0),
         progress: required.count === 0 ? 100 : Math.min((available / required.count) * 100, 100),
       };
-    })
-    .sort((a, b) => b.missing - a.missing || b.star - a.star || a.id - b.id);
+    }),
+    materials,
+  );
+}
+
+/**
+ * 按养成用途及完成状态排列材料结果。
+ * @since Beta v0.11.2
+ * @param results - 材料完成情况
+ * @param materials - 材料 Wiki 数据
+ * @returns 排序后的材料完成情况
+ */
+export function sortCultivationResults(
+  results: ReadonlyArray<TGApp.App.UserCalc.ResultMaterial>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): Array<TGApp.App.UserCalc.ResultMaterial> {
+  const materialMap = new Map(materials.map((material) => [material.id, material]));
+  return [...results].sort((a, b) => {
+    const categoryOrder =
+      getMaterialCategoryOrder(a, materialMap.get(a.id)) -
+      getMaterialCategoryOrder(b, materialMap.get(b.id));
+    return (
+      categoryOrder ||
+      Number(a.missing > 0) - Number(b.missing > 0) ||
+      b.star - a.star ||
+      a.id - b.id
+    );
+  });
+}
+
+/** 获取养成材料类别顺序。 */
+function getMaterialCategoryOrder(
+  material: TGApp.App.UserCalc.ResultMaterial,
+  wiki?: TGApp.App.Material.WikiItem,
+): number {
+  if (material.id === 202 || material.name === "摩拉") return 0;
+  if (material.type === "角色经验素材") return 1;
+  if (
+    material.type === "角色天赋素材" ||
+    wiki?.source.some((source) => source.name.includes("挑战奖励")) === true
+  ) {
+    return 4;
+  }
+  if (material.type === "武器强化素材" || material.type === "武器突破素材") return 3;
+  if (
+    material.type === "角色突破素材" ||
+    material.type === "角色培养素材" ||
+    material.type === "角色与武器培养素材" ||
+    material.type.endsWith("区域特产")
+  ) {
+    return 2;
+  }
+  return 5;
 }
 
 /**

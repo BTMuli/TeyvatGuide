@@ -288,6 +288,7 @@ import {
   buildCultivationResults,
   getCalculateInventory,
   getUidServerTimezone,
+  sortCultivationResults,
 } from "@utils/cultivationPlan.js";
 import { getRcStar, getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
@@ -297,6 +298,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import {
   AppCharacterData,
+  AppWeaponData,
   getWikiCharacterById,
   WikiMaterialData,
   wwWeapon,
@@ -304,6 +306,21 @@ import {
 
 const EXCLUDED_CHARACTER_IDS = new Set([10000117, 10000118]);
 const TRAVELER_IDS = new Set([10000005, 10000007]);
+const CHARACTER_WIKI_ORDER = new Map(
+  [...AppCharacterData]
+    .sort(
+      (a, b) =>
+        (b.star % 100) - (a.star % 100) ||
+        new Date(b.release).getTime() - new Date(a.release).getTime() ||
+        b.id - a.id,
+    )
+    .map((character, index) => [character.id, index]),
+);
+const WEAPON_WIKI_ORDER = new Map(
+  [...AppWeaponData]
+    .sort((a, b) => b.star - a.star || a.weapon.localeCompare(b.weapon) || b.id - a.id)
+    .map((weapon, index) => [weapon.id, index]),
+);
 const EMPTY_BAG_MATERIAL_DETAILS: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable> =
   new Map();
 
@@ -419,13 +436,14 @@ const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>
     return role
       ? createLocalCharacterOption(role)
       : {
-          title: `${character.name} · Lv.1（规划）`,
+          title: `${character.name} · 未拥有`,
           value: character.id,
           name: character.name,
           icon: `/WIKI/character/${character.id}.webp`,
           element: character.element,
           star: character.star % 100,
           level: 1,
+          owned: false,
           constellation: 0,
           fetter: 0,
           weaponType: character.weapon,
@@ -436,11 +454,7 @@ const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>
       options.push(createLocalCharacterOption(role));
     }
   }
-  return options.sort((a, b) => {
-    const aOwned = roleMap.has(a.value);
-    const bOwned = roleMap.has(b.value);
-    return Number(bOwned) - Number(aOwned) || b.star - a.star || a.name.localeCompare(b.name);
-  });
+  return options.sort(compareCharacterOptions);
 });
 const apiAvatarCatalog = computed<Array<TGApp.Game.Calculate.AvatarListItem>>(() => {
   const catalogMap = new Map<number, TGApp.Game.Calculate.AvatarListItem>();
@@ -456,15 +470,14 @@ const apiCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(
   const options = apiAvatarCatalog.value.map((avatar) => {
     const synced = findSyncedAvatar(avatar, syncAvatars.value);
     return {
-      title: synced
-        ? `${avatar.name} · Lv.${synced.level_current}`
-        : `${avatar.name} · Lv.1（规划）`,
+      title: synced ? `${avatar.name} · Lv.${synced.level_current}` : `${avatar.name} · 未拥有`,
       value: avatar.id,
       name: avatar.name,
       icon: avatar.icon,
       element: getElementNameByAttrId(avatar.element_attr_id),
       star: avatar.avatar_level,
       level: synced?.level_current ?? 1,
+      owned: synced !== undefined,
       constellation: synced?.constellation_num ?? 0,
       fetter: synced?.fetter_level ?? 0,
       weaponType: getWeaponTypeByCategory(avatar.weapon_cat_id),
@@ -474,11 +487,7 @@ const apiCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(
     if (options.some((option) => option.value === avatar.id)) continue;
     options.push(createSyncCharacterOption(avatar));
   }
-  return options.sort((a, b) => {
-    const aOwned = syncAvatars.value.some((avatar) => avatar.id === a.value);
-    const bOwned = syncAvatars.value.some((avatar) => avatar.id === b.value);
-    return Number(bOwned) - Number(aOwned) || b.star - a.star || a.name.localeCompare(b.name);
-  });
+  return options.sort(compareCharacterOptions);
 });
 const characterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
   useApiCalculation.value ? apiCharacterOptions.value : localCharacterOptions.value,
@@ -1163,8 +1172,8 @@ function convertApiResult(
   result: TGApp.Game.Calculate.Result,
 ): Array<TGApp.App.UserCalc.ResultMaterial> {
   const available = getCalculateInventory(result);
-  return result.overall_consume
-    .map((material) => {
+  return sortCultivationResults(
+    result.overall_consume.map((material) => {
       const wiki = WikiMaterialData.find((item) => item.id === material.id);
       const owned = available.get(material.id) ?? 0;
       return {
@@ -1182,8 +1191,9 @@ function convertApiResult(
             ? 100
             : Math.min(((material.num - material.lack_num) / material.num) * 100, 100),
       };
-    })
-    .sort((a, b) => b.missing - a.missing || b.star - a.star || a.id - b.id);
+    }),
+    WikiMaterialData,
+  );
 }
 
 async function calculateWithApi(): Promise<void> {
@@ -2156,6 +2166,7 @@ function createLocalCharacterOption(
     element: getZhElement(role.avatar.element),
     star: getRcStar(role.cid, role.avatar.rarity),
     level: role.avatar.level,
+    owned: true,
     constellation: role.avatar.actived_constellation_num,
     fetter: role.avatar.fetter,
     weaponType,
@@ -2173,6 +2184,7 @@ function createSyncCharacterOption(
     element: getElementNameByAttrId(avatar.element_attr_id),
     star: avatar.avatar_level,
     level: avatar.level_current,
+    owned: true,
     constellation: avatar.constellation_num,
     fetter: avatar.fetter_level,
     weaponType: getWeaponTypeByCategory(avatar.weapon_cat_id),
@@ -2209,7 +2221,7 @@ function buildApiWeaponOptions(
     if (equippedWeaponIds.has(weapon.id)) continue;
     result.push({
       key: `api-${weapon.id}`,
-      title: `${weapon.name} · Lv.1（规划）`,
+      title: `${weapon.name} · 未拥有`,
       icon: weapon.icon,
       wiki: createApiWeaponWiki(weapon),
       level: 1,
@@ -2221,13 +2233,7 @@ function buildApiWeaponOptions(
       api: weapon,
     });
   }
-  return result.sort(
-    (a, b) =>
-      Number(b.source === "equipped") - Number(a.source === "equipped") ||
-      b.wiki.star - a.wiki.star ||
-      b.level - a.level ||
-      a.wiki.name.localeCompare(b.wiki.name),
-  );
+  return result.sort(compareWeaponOptions);
 }
 
 function createApiWeaponWiki(
@@ -2290,7 +2296,7 @@ function buildWeaponOptions(
   for (const wiki of wwWeapon) {
     result.push({
       key: `wiki-${wiki.id}`,
-      title: `${wiki.name} · Lv.1（规划）`,
+      title: `${wiki.name} · 未拥有`,
       icon: `/WIKI/weapon/${wiki.id}.webp`,
       wiki,
       level: 1,
@@ -2301,9 +2307,36 @@ function buildWeaponOptions(
       source: "catalog",
     });
   }
-  return result.sort(
-    (a, b) =>
-      b.wiki.star - a.wiki.star || b.level - a.level || a.wiki.name.localeCompare(b.wiki.name),
+  return result.sort(compareWeaponOptions);
+}
+
+function compareCharacterOptions(
+  a: TGApp.App.UserCalc.CharacterOption,
+  b: TGApp.App.UserCalc.CharacterOption,
+): number {
+  return (
+    Number(b.owned) - Number(a.owned) ||
+    (b.star % 100) - (a.star % 100) ||
+    a.level - b.level ||
+    b.constellation - a.constellation ||
+    (CHARACTER_WIKI_ORDER.get(a.value) ?? Number.MAX_SAFE_INTEGER) -
+      (CHARACTER_WIKI_ORDER.get(b.value) ?? Number.MAX_SAFE_INTEGER) ||
+    a.value - b.value
+  );
+}
+
+function compareWeaponOptions(
+  a: TGApp.App.UserCalc.WeaponOption,
+  b: TGApp.App.UserCalc.WeaponOption,
+): number {
+  return (
+    Number(b.source !== "catalog") - Number(a.source !== "catalog") ||
+    b.wiki.star - a.wiki.star ||
+    a.level - b.level ||
+    b.affixLevel - a.affixLevel ||
+    (WEAPON_WIKI_ORDER.get(a.wiki.id) ?? Number.MAX_SAFE_INTEGER) -
+      (WEAPON_WIKI_ORDER.get(b.wiki.id) ?? Number.MAX_SAFE_INTEGER) ||
+    a.key.localeCompare(b.key)
   );
 }
 </script>
