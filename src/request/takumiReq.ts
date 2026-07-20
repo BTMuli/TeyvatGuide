@@ -152,7 +152,7 @@ async function getObcHomePosition(): Promise<TGApp.BBS.Obc.PositionResp> {
 }
 
 /**
- * 批量计算角色养成材料
+ * 批量计算角色或武器养成材料
  * @since Beta v0.11.1
  * @param cookie - 用户 Cookie
  * @param params - 养成计算参数
@@ -176,6 +176,64 @@ async function batchCompute(
   };
   const resp = await TGHttps.post<TGApp.Game.Calculate.Resp>(
     `${taBu}event/e20200928calculate/v3/batch_compute`,
+    { headers, body },
+  );
+  return resp.data;
+}
+
+/**
+ * 获取全部可养成角色
+ * @since Beta v0.11.1
+ * @param cookie - 用户 Cookie
+ * @param params - 角色列表参数
+ * @returns 角色列表响应数据
+ */
+async function getAvatarList(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.Game.Calculate.AvatarListParams,
+): Promise<TGApp.Game.Calculate.AvatarListResp> {
+  const ck = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltoken: cookie.ltoken,
+    ltuid: cookie.ltuid,
+  };
+  const body = JSON.stringify(params);
+  const headers = {
+    ...getRequestHeader(ck, "POST", body),
+    "Content-Type": "application/json",
+  };
+  const resp = await TGHttps.post<TGApp.Game.Calculate.AvatarListResp>(
+    `${taBu}event/e20200928calculate/v1/avatar/list`,
+    { headers, body },
+  );
+  return resp.data;
+}
+
+/**
+ * 获取全部可养成武器
+ * @since Beta v0.11.1
+ * @param cookie - 用户 Cookie
+ * @param params - 武器列表参数
+ * @returns 武器列表响应数据
+ */
+async function getWeaponList(
+  cookie: TGApp.App.Account.Cookie,
+  params: TGApp.Game.Calculate.WeaponListParams,
+): Promise<TGApp.Game.Calculate.WeaponListResp> {
+  const ck = {
+    account_id: cookie.account_id,
+    cookie_token: cookie.cookie_token,
+    ltoken: cookie.ltoken,
+    ltuid: cookie.ltuid,
+  };
+  const body = JSON.stringify(params);
+  const headers = {
+    ...getRequestHeader(ck, "POST", body),
+    "Content-Type": "application/json",
+  };
+  const resp = await TGHttps.post<TGApp.Game.Calculate.WeaponListResp>(
+    `${taBu}event/e20200928calculate/v1/weapon/list`,
     { headers, body },
   );
   return resp.data;
@@ -213,7 +271,11 @@ async function syncAvatarList(
 const takumiReq = {
   auth: { actionTicket: getActionTicketBySToken },
   bind: { authKey: genAuthKey, authKey2: genAuthKey2, gameRoles: getUserGameRolesByCookie },
-  calculate: { avatar: { sync: syncAvatarList }, batch: batchCompute },
+  calculate: {
+    avatar: { list: getAvatarList, sync: syncAvatarList },
+    batch: batchCompute,
+    weapon: { list: getWeaponList },
+  },
   game: { stoken: getSTokenByGameToken },
   obc: { gacha: getObcGachaPool, position: getObcHomePosition },
 };

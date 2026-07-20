@@ -74,7 +74,7 @@
           {{ selectedCharacter.name }}
         </span>
         <v-chip v-if="selectedCharacter" color="var(--tgc-od-blue)" size="small" variant="tonal">
-          Lv.{{ selectedCharacter.level }} → {{ targetLevel }}
+          Lv.{{ currentLevel }} → {{ targetLevel }}
         </v-chip>
       </div>
     </v-card-title>
@@ -92,7 +92,7 @@
           <div class="ucc-selected-info">
             <span class="ucc-name">{{ selectedCharacter.name }}</span>
             <div class="ucc-tags">
-              <span>Lv.{{ selectedCharacter.level }}</span>
+              <span>Lv.{{ currentLevel }}</span>
               <span>{{ selectedCharacter.star }}★</span>
               <span>{{ selectedCharacter.element }}元素</span>
               <span>{{ weaponType }}</span>
@@ -110,15 +110,10 @@
 
         <div class="ucc-level-config">
           <div :class="{ 'is-unavailable': levelUnavailable }" class="ucc-slider-field">
-            <div class="ucc-slider-label">
-              <span>目标等级</span>
-              <span class="ucc-slider-value">
-                {{ selectedCharacter ? `Lv.${targetLevel}` : "--" }}
-              </span>
-            </div>
             <UcLevelSlider
               v-model="targetLevel"
-              :current="currentLevel"
+              v-model:current="currentLevel"
+              :current-editable="currentStateEditable"
               :disabled="levelUnavailable"
               :max="levelMax"
             />
@@ -178,25 +173,25 @@
           <div
             v-for="(skill, index) in skills"
             :key="skill.id"
-            :class="{ 'is-unavailable': skill.level >= skill.maxLevel }"
+            :class="{
+              'is-unavailable': !currentStateEditable && skill.level >= skill.maxLevel,
+            }"
             class="ucc-talent"
           >
             <div class="ucc-talent-meta">
               <img :alt="skill.name" :src="skill.icon" />
               <div class="ucc-talent-info">
                 <span :title="skill.name" class="ucc-talent-name">{{ skill.name }}</span>
-                <span>当前 Lv.{{ skill.level }}</span>
+                <span>{{ currentStateEditable ? "起始" : "当前" }} Lv.{{ skill.level }}</span>
               </div>
             </div>
-            <div class="ucc-slider-label talent">
-              <span>目标</span>
-              <span class="ucc-slider-value">Lv.{{ talentTargetLevels[index] }}</span>
-            </div>
             <UcLevelSlider
-              :current="skill.level"
-              :disabled="skill.level >= skill.maxLevel"
+              :current="currentTalentLevels[index] ?? skill.level"
+              :current-editable="currentStateEditable"
+              :disabled="!currentStateEditable && skill.level >= skill.maxLevel"
               :max="skill.maxLevel"
               :model-value="talentTargetLevels[index]"
+              @update:current="updateCurrentTalent(index, $event)"
               @update:model-value="updateTalent(index, $event)"
             />
           </div>
@@ -220,6 +215,7 @@ type UcCharacterPanelProps = {
   skills: Array<TGApp.App.UserCalc.SkillOption>;
   atAscensionLevel: boolean;
   currentAscensionReadonly: boolean;
+  currentStateEditable: boolean;
   selectionReadonly: boolean;
   targetAtAscensionLevel: boolean;
 };
@@ -227,7 +223,9 @@ type UcCharacterPanelProps = {
 const props = defineProps<UcCharacterPanelProps>();
 
 const selectedId = defineModel<number | null>("selectedId", { required: true });
+const currentLevel = defineModel<number>("currentLevel", { required: true });
 const targetLevel = defineModel<number>("targetLevel", { required: true });
+const currentTalentLevels = defineModel<Array<number>>("talentCurrentLevels", { required: true });
 const talentTargetLevels = defineModel<Array<number>>("talentTargetLevels", { required: true });
 const ascended = defineModel<boolean>("ascended", { required: true });
 const targetAscended = defineModel<boolean>("targetAscended", { required: true });
@@ -235,9 +233,10 @@ const targetAscended = defineModel<boolean>("targetAscended", { required: true }
 const showSelector = ref<boolean>(false);
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
-const currentLevel = computed<number>(() => props.selectedCharacter?.level ?? 1);
 const levelUnavailable = computed<boolean>(
-  () => !props.selectedCharacter || currentLevel.value >= levelMax.value,
+  () =>
+    !props.selectedCharacter ||
+    (!props.currentStateEditable && currentLevel.value >= levelMax.value),
 );
 
 function selectCharacter(value: number): void {
@@ -274,6 +273,20 @@ function updateTalent(index: number, value: number): void {
   const nextLevel = Math.max(currentTalentLevel, Math.min(value, skill?.maxLevel ?? 10));
   talentTargetLevels.value = talentTargetLevels.value.map((level, currentIndex) =>
     currentIndex === index ? nextLevel : level,
+  );
+}
+
+function updateCurrentTalent(index: number, value: number | null): void {
+  const skill = props.skills[index];
+  if (!props.currentStateEditable || !skill || value === null) return;
+  const nextLevel = Math.min(Math.max(value, 1), skill.maxLevel);
+  currentTalentLevels.value = props.skills.map((currentSkill, currentIndex) =>
+    currentIndex === index
+      ? nextLevel
+      : (currentTalentLevels.value[currentIndex] ?? currentSkill.level),
+  );
+  talentTargetLevels.value = talentTargetLevels.value.map((level, currentIndex) =>
+    currentIndex === index ? Math.max(level, nextLevel) : level,
   );
 }
 </script>
@@ -454,7 +467,7 @@ function updateTalent(index: number, value: number): void {
 }
 
 .ucc-slider-field {
-  padding: 4px 8px 0;
+  padding: 0 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   transition: opacity 0.2s ease;
@@ -462,24 +475,6 @@ function updateTalent(index: number, value: number): void {
   &.is-unavailable {
     opacity: 0.38;
   }
-}
-
-.ucc-slider-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--common-text-sub);
-  font-size: 12px;
-
-  &.talent {
-    padding: 0 4px;
-  }
-}
-
-.ucc-slider-value {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-weight: 400;
 }
 
 .ucc-ascension-options {

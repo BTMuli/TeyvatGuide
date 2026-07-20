@@ -60,6 +60,8 @@ declare namespace TGApp.App.UserCalc {
     key: string;
     /** 选择器中显示的武器标题 */
     title: string;
+    /** 武器显示图标 */
+    icon: string;
     /** 武器 Wiki 数据 */
     wiki: TGApp.App.Weapon.WikiItem;
     /** 当前等级 */
@@ -72,6 +74,10 @@ declare namespace TGApp.App.UserCalc {
     fromBag: boolean;
     /** 是否已锁定 */
     locked: boolean;
+    /** 武器数据来源 */
+    source: "bag" | "catalog" | "equipped";
+    /** 接口武器目录信息 */
+    api?: TGApp.Game.Calculate.WeaponListItem;
     /** 背包武器 GUID */
     guid?: string;
   };

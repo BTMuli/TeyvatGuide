@@ -206,7 +206,7 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
   display: grid;
   align-items: stretch;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(252px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 .ucm-cost-summary {

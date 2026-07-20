@@ -207,12 +207,15 @@
           <div class="cultivation-config">
             <UcCharacterPanel
               v-model:ascended="avatarAscended"
+              v-model:current-level="avatarCurrentLevel"
               v-model:selected-id="selectedCharacterId"
+              v-model:talent-current-levels="talentCurrentLevels"
               v-model:talent-target-levels="talentTargetLevels"
               v-model:target-ascended="avatarTargetAscended"
               v-model:target-level="avatarTargetLevel"
               :at-ascension-level="avatarAtAscensionLevel"
-              :current-ascension-readonly="useApiCalculation"
+              :current-ascension-readonly="useApiCalculation && !avatarCurrentStateEditable"
+              :current-state-editable="avatarCurrentStateEditable"
               :level-options="avatarLevelOptions"
               :options="characterOptions"
               :selection-readonly="editingEntry?.type === 'avatar'"
@@ -223,12 +226,15 @@
             />
             <UcWeaponPanel
               v-model:ascended="weaponAscended"
+              v-model:current-level="weaponCurrentLevel"
               v-model:selected-key="selectedWeaponKey"
               v-model:target-ascended="weaponTargetAscended"
               v-model:target-level="weaponTargetLevel"
               v-model:use-bag-source="useBagWeaponSource"
               :at-ascension-level="weaponAtAscensionLevel"
-              :current-ascension-readonly="useApiCalculation"
+              :current-ascension-readonly="useApiCalculation && !weaponCurrentStateEditable"
+              :current-promote-level="weaponCurrentPromoteLevel"
+              :current-state-editable="weaponCurrentStateEditable"
               :has-bag-data="hasBagWeaponData"
               :level-options="weaponLevelOptions"
               :options="weaponOptions"
@@ -264,6 +270,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
+import TSUserRecord from "@Sqlm/userRecord.js";
 import gameEnum from "@enum/game.js";
 import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
@@ -324,8 +331,11 @@ const currentUid = ref<number>();
 const currentProjectId = ref<string | null>(null);
 const selectedCharacterId = ref<number | null>(null);
 const selectedWeaponKey = ref<string | null>(null);
+const avatarCurrentLevel = ref<number>(1);
 const avatarTargetLevel = ref<number>(90);
+const talentCurrentLevels = ref<Array<number>>([]);
 const talentTargetLevels = ref<Array<number>>([10, 10, 10]);
+const weaponCurrentLevel = ref<number>(1);
 const weaponTargetLevel = ref<number>(90);
 const avatarAscended = ref<boolean>(false);
 const weaponAscended = ref<boolean>(false);
@@ -340,6 +350,9 @@ const projects = shallowRef<Array<TGApp.Sqlite.Cultivation.Project>>([]);
 const planEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const roles = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const weapons = shallowRef<Array<TGApp.App.UserCalc.WeaponOption>>([]);
+const apiAvatars = shallowRef<Array<TGApp.Game.Calculate.AvatarListItem>>([]);
+const apiWeapons = shallowRef<Array<TGApp.Game.Calculate.WeaponListItem>>([]);
+const recordAvatars = shallowRef<Array<TGApp.Sqlite.Record.Avatar>>([]);
 const bagMaterials = shallowRef<Map<number, number>>(new Map());
 const bagMaterialDetails = shallowRef<Map<number, TGApp.Sqlite.UserBag.MaterialTable>>(new Map());
 const bagSourceUids = shallowRef<Set<number>>(new Set());
@@ -350,7 +363,6 @@ const apiAvatarRequirements = shallowRef<Array<CultivationMaterial>>([]);
 const apiWeaponRequirements = shallowRef<Array<CultivationMaterial>>([]);
 const apiCalculationResult = shallowRef<TGApp.Game.Calculate.Result>();
 const editingEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
-const pendingWikiCharacterId = ref<number | null>(null);
 let apiResultVersion = 0;
 let dataLoadVersion = 0;
 let settingCalculationMode = false;
@@ -394,58 +406,82 @@ function formatUpdated(value: string): string {
   return Number.isNaN(timestamp) ? value : timestampToDate(timestamp);
 }
 const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
-  const options = roles.value.map((role) => {
-    const weaponType =
-      wwWeapon.find((weapon) => weapon.id === role.weapon.id)?.weapon ?? "未知武器";
-    return {
-      title: `${role.avatar.name} · Lv.${role.avatar.level}`,
-      value: role.cid,
-      name: role.avatar.name,
-      icon: `/WIKI/character/${role.cid}.webp`,
-      element: getZhElement(role.avatar.element),
-      star: getRcStar(role.cid, role.avatar.rarity),
-      level: role.avatar.level,
-      constellation: role.avatar.actived_constellation_num,
-      fetter: role.avatar.fetter,
-      weaponType,
-    };
+  const roleMap = new Map(roles.value.map((role) => [role.cid, role]));
+  const characterCatalog = Array.from(
+    new Map(
+      AppCharacterData.filter((character) => !EXCLUDED_CHARACTER_IDS.has(character.id)).map(
+        (character) => [character.id, character],
+      ),
+    ).values(),
+  );
+  const options = characterCatalog.map((character) => {
+    const role = roleMap.get(character.id);
+    return role
+      ? createLocalCharacterOption(role)
+      : {
+          title: `${character.name} · Lv.1（规划）`,
+          value: character.id,
+          name: character.name,
+          icon: `/WIKI/character/${character.id}.webp`,
+          element: character.element,
+          star: character.star % 100,
+          level: 1,
+          constellation: 0,
+          fetter: 0,
+          weaponType: character.weapon,
+        };
   });
-  const pendingId = pendingWikiCharacterId.value;
-  if (pendingId !== null && !options.some((option) => option.value === pendingId)) {
-    const wiki = AppCharacterData.find((character) => character.id === pendingId);
-    if (wiki) {
-      options.unshift({
-        title: `${wiki.name} · Lv.1（规划）`,
-        value: wiki.id,
-        name: wiki.name,
-        icon: `/WIKI/character/${wiki.id}.webp`,
-        element: wiki.element,
-        star: wiki.star % 100,
-        level: 1,
-        constellation: 0,
-        fetter: 0,
-        weaponType: wiki.weapon,
-      });
+  for (const role of roles.value) {
+    if (!options.some((option) => option.value === role.cid)) {
+      options.push(createLocalCharacterOption(role));
     }
   }
-  return options;
+  return options.sort((a, b) => {
+    const aOwned = roleMap.has(a.value);
+    const bOwned = roleMap.has(b.value);
+    return Number(bOwned) - Number(aOwned) || b.star - a.star || a.name.localeCompare(b.name);
+  });
 });
-const syncCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
-  syncAvatars.value.map((avatar) => ({
-    title: `${avatar.name} · Lv.${avatar.level_current}`,
-    value: avatar.id,
-    name: avatar.name,
-    icon: avatar.icon,
-    element: getElementNameByAttrId(avatar.element_attr_id),
-    star: avatar.avatar_level,
-    level: avatar.level_current,
-    constellation: avatar.constellation_num,
-    fetter: avatar.fetter_level,
-    weaponType: getWeaponTypeByCategory(avatar.weapon_cat_id),
-  })),
-);
+const apiAvatarCatalog = computed<Array<TGApp.Game.Calculate.AvatarListItem>>(() => {
+  const catalogMap = new Map<number, TGApp.Game.Calculate.AvatarListItem>();
+  for (const avatar of apiAvatars.value) {
+    if (TRAVELER_IDS.has(avatar.id) || catalogMap.has(avatar.id)) continue;
+    catalogMap.set(avatar.id, avatar);
+  }
+  const traveler = findCurrentTraveler(apiAvatars.value, recordAvatars.value, syncAvatars.value);
+  if (traveler) catalogMap.set(traveler.id, traveler);
+  return Array.from(catalogMap.values());
+});
+const apiCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
+  const options = apiAvatarCatalog.value.map((avatar) => {
+    const synced = findSyncedAvatar(avatar, syncAvatars.value);
+    return {
+      title: synced
+        ? `${avatar.name} · Lv.${synced.level_current}`
+        : `${avatar.name} · Lv.1（规划）`,
+      value: avatar.id,
+      name: avatar.name,
+      icon: avatar.icon,
+      element: getElementNameByAttrId(avatar.element_attr_id),
+      star: avatar.avatar_level,
+      level: synced?.level_current ?? 1,
+      constellation: synced?.constellation_num ?? 0,
+      fetter: synced?.fetter_level ?? 0,
+      weaponType: getWeaponTypeByCategory(avatar.weapon_cat_id),
+    };
+  });
+  for (const avatar of syncAvatars.value) {
+    if (options.some((option) => option.value === avatar.id)) continue;
+    options.push(createSyncCharacterOption(avatar));
+  }
+  return options.sort((a, b) => {
+    const aOwned = syncAvatars.value.some((avatar) => avatar.id === a.value);
+    const bOwned = syncAvatars.value.some((avatar) => avatar.id === b.value);
+    return Number(bOwned) - Number(aOwned) || b.star - a.star || a.name.localeCompare(b.name);
+  });
+});
 const characterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() =>
-  useApiCalculation.value ? syncCharacterOptions.value : localCharacterOptions.value,
+  useApiCalculation.value ? apiCharacterOptions.value : localCharacterOptions.value,
 );
 const selectedCharacter = computed<TGApp.App.UserCalc.CharacterOption | undefined>(() =>
   characterOptions.value.find((option) => option.value === selectedCharacterId.value),
@@ -455,15 +491,25 @@ const selectedRole = computed<TGApp.Sqlite.Character.TableTrans | undefined>(() 
     ? undefined
     : roles.value.find((role) => role.cid === selectedCharacterId.value),
 );
-const selectedSyncAvatar = computed<TGApp.Game.Calculate.SyncAvatar | undefined>(() =>
+const selectedApiAvatar = computed<TGApp.Game.Calculate.AvatarListItem | undefined>(() =>
   useApiCalculation.value
-    ? syncAvatars.value.find((avatar) => avatar.id === selectedCharacterId.value)
+    ? apiAvatarCatalog.value.find((avatar) => avatar.id === selectedCharacterId.value)
     : undefined,
 );
-const isTraveler = computed<boolean>(() => TRAVELER_IDS.has(selectedCharacter.value?.value ?? 0));
-const canApiCalculate = computed<boolean>(
-  () => !apiLoading.value && selectedSyncAvatar.value !== undefined,
+const selectedSyncAvatar = computed<TGApp.Game.Calculate.SyncAvatar | undefined>(() =>
+  useApiCalculation.value
+    ? selectedApiAvatar.value
+      ? findSyncedAvatar(selectedApiAvatar.value, syncAvatars.value)
+      : syncAvatars.value.find((avatar) => avatar.id === selectedCharacterId.value)
+    : undefined,
 );
+const avatarCurrentStateEditable = computed<boolean>(
+  () =>
+    selectedCharacter.value !== undefined &&
+    selectedRole.value === undefined &&
+    selectedSyncAvatar.value === undefined,
+);
+const isTraveler = computed<boolean>(() => TRAVELER_IDS.has(selectedCharacter.value?.value ?? 0));
 const calculationHint = computed<string>(() => {
   if (isTraveler.value) return "已为旅行者强制使用接口计算";
   if (!isWindows) return "当前平台不支持读取游戏背包，材料将由米游社接口计算";
@@ -474,24 +520,39 @@ const calculationHint = computed<string>(() => {
 const selectedRoleWeaponType = computed<string>(() => {
   return selectedCharacter.value?.weaponType ?? "";
 });
-const syncWeaponOption = computed<TGApp.App.UserCalc.WeaponOption | undefined>(() =>
-  buildSyncWeaponOption(selectedSyncAvatar.value),
-);
 const hasBagWeaponData = computed<boolean>(
-  () => !useApiCalculation.value && weapons.value.some((weapon) => weapon.fromBag),
+  () => !useApiCalculation.value && weapons.value.some((weapon) => weapon.source === "bag"),
 );
 const weaponOptions = computed<Array<TGApp.App.UserCalc.WeaponOption>>(() => {
   if (useApiCalculation.value) {
-    return syncWeaponOption.value ? [syncWeaponOption.value] : [];
+    return buildApiWeaponOptions(apiWeapons.value, syncAvatars.value).filter(
+      (weapon) =>
+        !selectedRoleWeaponType.value || weapon.wiki.weapon === selectedRoleWeaponType.value,
+    );
   }
-  const useBag = hasBagWeaponData.value && useBagWeaponSource.value;
-  return weapons.value.filter((weapon) => {
-    if (weapon.fromBag !== useBag) return false;
-    return !selectedRoleWeaponType.value || weapon.wiki.weapon === selectedRoleWeaponType.value;
-  });
+  const selectedSource = hasBagWeaponData.value && useBagWeaponSource.value ? "bag" : "equipped";
+  const sourceWeaponIds = new Set(
+    weapons.value
+      .filter((weapon) => weapon.source === selectedSource)
+      .map((weapon) => weapon.wiki.id),
+  );
+  return weapons.value.filter(
+    (weapon) =>
+      (weapon.source === selectedSource ||
+        (weapon.source === "catalog" && !sourceWeaponIds.has(weapon.wiki.id))) &&
+      (!selectedRoleWeaponType.value || weapon.wiki.weapon === selectedRoleWeaponType.value),
+  );
 });
 const selectedWeapon = computed<TGApp.App.UserCalc.WeaponOption | undefined>(() =>
   weaponOptions.value.find((weapon) => weapon.key === selectedWeaponKey.value),
+);
+const weaponCurrentStateEditable = computed<boolean>(
+  () => selectedWeapon.value?.source === "catalog",
+);
+const canApiCalculate = computed<boolean>(
+  () =>
+    !apiLoading.value &&
+    (selectedApiAvatar.value !== undefined || selectedWeapon.value !== undefined),
 );
 const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
   if (selectedSyncAvatar.value) {
@@ -505,6 +566,17 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
         maxLevel: skill.max_level,
       }));
   }
+  if (selectedApiAvatar.value) {
+    return selectedApiAvatar.value.skill_list
+      .filter((skill) => skill.max_level > 1)
+      .map((skill) => ({
+        id: skill.id,
+        name: skill.name,
+        icon: skill.icon,
+        level: 1,
+        maxLevel: skill.max_level,
+      }));
+  }
   const roleSkills = selectedRole.value?.skills ?? [];
   if (!selectedRole.value && avatarWiki.value) {
     return avatarWiki.value.skills
@@ -512,7 +584,7 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
       .map((skill) => ({
         id: skill.id,
         name: skill.name,
-        icon: skill.icon,
+        icon: `/icon/talents/${skill.icon}.webp`,
         level: 1,
         maxLevel: skill.maxLv,
       }));
@@ -540,6 +612,9 @@ const talentLucLevels = computed<Array<number | null>>(() => {
   return mainSkills.value.map((skill) => wikiSkillMap.get(skill.id)?.luc ?? null);
 });
 const currentTalentLevels = computed<Array<number>>(() => {
+  if (avatarCurrentStateEditable.value) {
+    return mainSkills.value.map((skill, index) => talentCurrentLevels.value[index] ?? skill.level);
+  }
   const levels = mainSkills.value.map((skill) => skill.level);
   if (useApiCalculation.value) return levels;
   if (!selectedRole.value || !avatarWiki.value) {
@@ -559,20 +634,21 @@ const displaySkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() =>
 );
 const avatarLevelOptions = computed<Array<number>>(() => {
   if (!selectedCharacter.value) return [];
-  return createLevelOptions(selectedSyncAvatar.value?.max_level ?? 90);
+  return createLevelOptions(
+    selectedSyncAvatar.value?.max_level ?? selectedApiAvatar.value?.max_level ?? 90,
+  );
 });
 const weaponLevelOptions = computed<Array<number>>(() => {
-  if (selectedSyncAvatar.value) {
-    return createLevelOptions(selectedSyncAvatar.value.weapon.max_level);
-  }
   if (!selectedWeapon.value) return [];
-  return createLevelOptions(userCalc.weaponMaxLevel(selectedWeapon.value.wiki.star));
+  return createLevelOptions(
+    selectedWeapon.value.api?.max_level ?? userCalc.weaponMaxLevel(selectedWeapon.value.wiki.star),
+  );
 });
 const avatarAtAscensionLevel = computed<boolean>(() =>
-  userCalc.isAscensionLevel(selectedCharacter.value?.level ?? 0),
+  userCalc.isAscensionLevel(avatarCurrentLevel.value),
 );
 const weaponAtAscensionLevel = computed<boolean>(() =>
-  userCalc.isAscensionLevel(selectedWeapon.value?.level ?? 0),
+  userCalc.isAscensionLevel(weaponCurrentLevel.value),
 );
 const avatarTargetAtAscensionLevel = computed<boolean>(() =>
   userCalc.isAscensionLevel(avatarTargetLevel.value),
@@ -582,7 +658,13 @@ const weaponTargetAtAscensionLevel = computed<boolean>(() =>
 );
 const avatarCurrentPromoteLevel = computed<number>(() => {
   if (selectedSyncAvatar.value) return selectedSyncAvatar.value.promote_level;
-  if (!selectedRole.value) return userCalc.resolvePromoteLevel(selectedCharacter.value?.level ?? 1);
+  if (!selectedRole.value) {
+    return userCalc.resolvePromoteLevel(
+      avatarCurrentLevel.value,
+      undefined,
+      avatarAtAscensionLevel.value ? avatarAscended.value : undefined,
+    );
+  }
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>selectedRole.value.avatar;
   return userCalc.resolvePromoteLevel(
     avatar.level,
@@ -594,7 +676,7 @@ const weaponCurrentPromoteLevel = computed<number>(() => {
   if (!selectedWeapon.value) return 0;
   if (selectedWeapon.value.fromBag) return selectedWeapon.value.promoteLevel;
   return userCalc.resolvePromoteLevel(
-    selectedWeapon.value.level,
+    weaponCurrentLevel.value,
     selectedWeapon.value.promoteLevel,
     weaponAtAscensionLevel.value ? weaponAscended.value : undefined,
   );
@@ -604,7 +686,7 @@ const avatarRequiredMaterials = computed<Array<CultivationMaterial>>(() => {
   if (!selectedCharacter.value || !avatarWiki.value) return [];
   return userCalc.avatarFromState(
     avatarWiki.value,
-    selectedCharacter.value.level,
+    avatarCurrentLevel.value,
     avatarCurrentPromoteLevel.value,
     currentTalentLevels.value,
     avatarTargetLevel.value,
@@ -616,7 +698,7 @@ const weaponRequiredMaterials = computed<Array<CultivationMaterial>>(() => {
   if (!selectedWeapon.value) return [];
   return userCalc.weapon(
     selectedWeapon.value.wiki,
-    selectedWeapon.value.level,
+    weaponCurrentLevel.value,
     weaponCurrentPromoteLevel.value,
     weaponTargetLevel.value,
     weaponTargetAscended.value,
@@ -685,7 +767,7 @@ const resultEmptyText = computed<string>(() => {
   if (apiCalculated.value) return "当前养成目标无需额外材料";
   return canApiCalculate.value
     ? "设置养成目标后，点击确认计算"
-    : "请先选择角色，并确认该 UID 已保存可用的账号与 CK";
+    : "请选择角色或武器，并确认该 UID 已保存可用的账号与 CK";
 });
 
 watch(
@@ -731,8 +813,11 @@ watch(selectedCharacter, async (character) => {
   avatarWiki.value = false;
   if (!character) return;
   const characterId = character.value;
-  avatarTargetLevel.value = selectedSyncAvatar.value?.max_level ?? 90;
+  avatarCurrentLevel.value = character.level;
+  avatarTargetLevel.value =
+    selectedSyncAvatar.value?.max_level ?? selectedApiAvatar.value?.max_level ?? 90;
   avatarTargetAscended.value = false;
+  talentCurrentLevels.value = mainSkills.value.map((skill) => skill.level);
   talentTargetLevels.value = mainSkills.value.map((skill) => skill.maxLevel);
   if (selectedSyncAvatar.value) {
     weaponTargetLevel.value = selectedSyncAvatar.value.weapon.max_level;
@@ -745,13 +830,21 @@ watch(selectedCharacter, async (character) => {
     return;
   }
   const role = selectedRole.value;
-  if (!role) return;
-  const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
-  avatarAscended.value = userCalc.isAscendedAtThreshold(avatar.level, avatar.promote_level);
+  if (role) {
+    const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
+    avatarAscended.value = userCalc.isAscendedAtThreshold(avatar.level, avatar.promote_level);
+  } else {
+    avatarAscended.value = false;
+  }
   selectPreferredWeapon();
+  if (useApiCalculation.value) {
+    applyAvatarEditingState();
+    return;
+  }
   const wiki = await getWikiCharacterById(characterId);
   if (!useApiCalculation.value && selectedCharacterId.value === characterId) {
     avatarWiki.value = wiki;
+    talentCurrentLevels.value = mainSkills.value.map((skill) => skill.level);
     talentTargetLevels.value = mainSkills.value.map((skill) => skill.maxLevel);
     applyAvatarEditingState();
   }
@@ -766,11 +859,14 @@ watch(
     currentUid,
     selectedCharacterId,
     selectedWeaponKey,
+    avatarCurrentLevel,
     avatarTargetLevel,
+    weaponCurrentLevel,
     weaponTargetLevel,
     avatarTargetAscended,
     weaponTargetAscended,
     calculationMode,
+    () => talentCurrentLevels.value.join(","),
     () => talentTargetLevels.value.join(","),
   ],
   clearApiResult,
@@ -782,12 +878,33 @@ watch(avatarTargetLevel, () => {
   avatarTargetAscended.value = false;
 });
 
+watch(
+  avatarCurrentLevel,
+  (level) => {
+    if (!avatarCurrentStateEditable.value) return;
+    avatarTargetLevel.value = Math.max(avatarTargetLevel.value, level);
+    avatarAscended.value = false;
+  },
+  { flush: "sync" },
+);
+
 watch(weaponTargetLevel, () => {
   weaponTargetAscended.value = false;
 });
 
+watch(
+  weaponCurrentLevel,
+  (level) => {
+    if (!weaponCurrentStateEditable.value) return;
+    weaponTargetLevel.value = Math.max(weaponTargetLevel.value, level);
+    weaponAscended.value = false;
+  },
+  { flush: "sync" },
+);
+
 watch(selectedWeapon, (weapon) => {
   if (!weapon) return;
+  weaponCurrentLevel.value = weapon.level;
   weaponTargetLevel.value = userCalc.weaponMaxLevel(weapon.wiki.star);
   weaponTargetAscended.value = false;
   weaponAscended.value = userCalc.isAscendedAtThreshold(weapon.level, weapon.promoteLevel);
@@ -806,19 +923,19 @@ async function applyRouteTarget(): Promise<void> {
   editingEntry.value = undefined;
   viewTab.value = "calculator";
   if (targetType === "avatar") {
-    pendingWikiCharacterId.value = targetId;
     selectedCharacterId.value = targetId;
     await nextTick();
     if (!selectedCharacter.value) {
-      showSnackbar.warn("接口模式仅支持存档中已有的角色，请切换到本地计算后再试");
+      showSnackbar.warn("当前数据源中未找到该角色");
     }
   } else if (targetType === "weapon") {
+    selectedCharacterId.value = null;
     useBagWeaponSource.value = false;
     await nextTick();
     selectedWeaponKey.value =
       weaponOptions.value.find((weapon) => weapon.wiki.id === targetId)?.key ?? null;
     if (!selectedWeaponKey.value) {
-      showSnackbar.warn("接口模式仅支持当前角色装备的武器，请切换到本地计算后再试");
+      showSnackbar.warn("当前数据源中未找到该武器");
     }
   }
   await router.replace({ path: route.path, query: {} });
@@ -837,7 +954,9 @@ function selectPreferredWeapon(): void {
   if (options.some((weapon) => weapon.key === selectedWeaponKey.value)) return;
   const roleWeaponId = selectedSyncAvatar.value?.weapon.id ?? selectedRole.value?.weapon.id;
   selectedWeaponKey.value =
-    options.find((weapon) => weapon.wiki.id === roleWeaponId)?.key ?? options[0].key;
+    roleWeaponId === undefined
+      ? null
+      : (options.find((weapon) => weapon.wiki.id === roleWeaponId)?.key ?? null);
 }
 
 function clearApiResult(): void {
@@ -877,6 +996,40 @@ function getElementNameByAttrId(elementAttrId: number): string {
   }
 }
 
+function findCurrentTraveler(
+  catalog: ReadonlyArray<TGApp.Game.Calculate.AvatarListItem>,
+  records: ReadonlyArray<TGApp.Sqlite.Record.Avatar>,
+  syncedAvatars: ReadonlyArray<TGApp.Game.Calculate.SyncAvatar>,
+): TGApp.Game.Calculate.AvatarListItem | undefined {
+  const record = records.find((avatar) => TRAVELER_IDS.has(avatar.id));
+  if (record) {
+    const recordElement = getZhElement(record.element);
+    const normalizedElement = recordElement === "未知" ? record.element : recordElement;
+    const matched = catalog.find(
+      (avatar) =>
+        avatar.id === record.id &&
+        getElementNameByAttrId(avatar.element_attr_id) === normalizedElement,
+    );
+    if (matched) return matched;
+  }
+  const synced = syncedAvatars.find((avatar) => TRAVELER_IDS.has(avatar.id));
+  if (!synced) return undefined;
+  return catalog.find(
+    (avatar) => avatar.id === synced.id && avatar.element_attr_id === synced.element_attr_id,
+  );
+}
+
+function findSyncedAvatar(
+  catalogAvatar: TGApp.Game.Calculate.AvatarListItem,
+  syncedAvatars: ReadonlyArray<TGApp.Game.Calculate.SyncAvatar>,
+): TGApp.Game.Calculate.SyncAvatar | undefined {
+  return syncedAvatars.find(
+    (avatar) =>
+      avatar.id === catalogAvatar.id &&
+      (!TRAVELER_IDS.has(avatar.id) || avatar.element_attr_id === catalogAvatar.element_attr_id),
+  );
+}
+
 function getWeaponTypeByCategory(weaponCategoryId: number): string {
   switch (weaponCategoryId) {
     case 1:
@@ -894,12 +1047,46 @@ function getWeaponTypeByCategory(weaponCategoryId: number): string {
   }
 }
 
+function getWeaponCategoryByType(weaponType: string): number {
+  switch (weaponType) {
+    case "单手剑":
+      return 1;
+    case "法器":
+      return 10;
+    case "双手剑":
+      return 11;
+    case "弓":
+      return 12;
+    case "长柄武器":
+      return 13;
+    default:
+      return 0;
+  }
+}
+
 function createApiParams(
   refreshAccount: TGApp.Sqlite.Account.Game,
 ): TGApp.Game.Calculate.Params | undefined {
-  const avatar = selectedSyncAvatar.value;
   const region = gameEnum.serverList.find((server) => server === refreshAccount.region);
-  if (!avatar || !region) return undefined;
+  if (!region) return undefined;
+
+  const avatar = selectedApiAvatar.value ?? selectedSyncAvatar.value;
+  const weaponOption = selectedWeapon.value;
+  if (!avatar && !weaponOption) return undefined;
+
+  if (!avatar && weaponOption) {
+    return {
+      items: [
+        {
+          weapon: createApiWeaponTarget(weaponOption, weaponTargetLevel.value, false),
+        },
+      ],
+      lang: "zh-cn",
+      region,
+      uid: refreshAccount.gameUid,
+    };
+  }
+  if (!avatar || !selectedCharacter.value) return undefined;
 
   const talentTargets = new Map(
     mainSkills.value.map((skill, index) => [
@@ -907,24 +1094,29 @@ function createApiParams(
       talentTargetLevels.value[index] ?? skill.level,
     ]),
   );
-  const currentTalentLevelMap = new Map(mainSkills.value.map((skill) => [skill.id, skill.level]));
-  const weapon: TGApp.Game.Calculate.WeaponTarget | null = selectedWeapon.value
-    ? {
-        ...avatar.weapon,
-        level_target: weaponTargetLevel.value,
-      }
+  const currentTalentLevelMap = new Map(
+    mainSkills.value.map((skill, index) => [
+      skill.id,
+      currentTalentLevels.value[index] ?? skill.level,
+    ]),
+  );
+  const weapon: TGApp.Game.Calculate.WeaponTarget | null = weaponOption
+    ? createApiWeaponTarget(weaponOption, weaponTargetLevel.value, true)
     : null;
+  const syncedSkillMap = new Map(
+    selectedSyncAvatar.value?.skill_list.map((skill) => [skill.id, skill]) ?? [],
+  );
 
   return {
     items: [
       {
         avatar_id: avatar.id,
-        avatar_level_current: avatar.level_current,
+        avatar_level_current: avatarCurrentLevel.value,
         avatar_level_target: avatarTargetLevel.value,
         element_attr_id: avatar.element_attr_id,
         skill_list: avatar.skill_list.map((skill) => {
           const levelCurrent = Math.max(
-            currentTalentLevelMap.get(skill.id) ?? skill.level_current,
+            currentTalentLevelMap.get(skill.id) ?? syncedSkillMap.get(skill.id)?.level_current ?? 1,
             1,
           );
           return {
@@ -934,13 +1126,36 @@ function createApiParams(
           };
         }),
         weapon,
-        from_user_sync: true,
-        avatar_promote_level: avatar.promote_level,
+        from_user_sync: selectedSyncAvatar.value !== undefined,
+        ...(selectedSyncAvatar.value
+          ? { avatar_promote_level: selectedSyncAvatar.value.promote_level }
+          : {}),
       },
     ],
     lang: "zh-cn",
     region,
     uid: refreshAccount.gameUid,
+  };
+}
+
+function createApiWeaponTarget(
+  weapon: TGApp.App.UserCalc.WeaponOption,
+  levelTarget: number,
+  includeDetails: boolean,
+): TGApp.Game.Calculate.WeaponTarget {
+  const target: TGApp.Game.Calculate.WeaponTarget = {
+    id: weapon.wiki.id,
+    level_current: weaponCurrentLevel.value,
+    level_target: levelTarget,
+    name: weapon.wiki.name,
+  };
+  if (!includeDetails) return target;
+  return {
+    ...target,
+    icon: weapon.icon,
+    max_level: weapon.api?.max_level ?? userCalc.weaponMaxLevel(weapon.wiki.star),
+    weapon_cat_id: weapon.api?.weapon_cat_id ?? getWeaponCategoryByType(weapon.wiki.weapon),
+    weapon_level: weapon.api?.weapon_level ?? weapon.wiki.star,
   };
 }
 
@@ -1075,7 +1290,7 @@ async function loadUidData(uid: number): Promise<void> {
   loading.value = true;
   try {
     if (useApiCalculation.value) {
-      await loadSyncAvatarData(uid, requestVersion);
+      await loadApiData(uid, requestVersion);
       await loadInventoryData(uid, requestVersion);
     } else {
       await loadLocalData(uid, requestVersion);
@@ -1086,35 +1301,49 @@ async function loadUidData(uid: number): Promise<void> {
   }
 }
 
-async function loadSyncAvatarData(uid: number, requestVersion: number): Promise<void> {
+async function loadApiData(uid: number, requestVersion: number): Promise<void> {
   const previousCharacterId = selectedCharacterId.value;
   try {
     const refreshAccount = await resolveApiAccount(uid, "Cultivation.loadSyncAvatarData");
     if (!refreshAccount) {
-      clearSyncAvatarData(requestVersion);
+      clearApiData(requestVersion);
       return;
     }
-    const avatars = await requestSyncAvatars(refreshAccount);
+    const [avatars, avatarCatalog, weaponCatalog, record] = await Promise.all([
+      requestSyncAvatars(refreshAccount),
+      requestAllAvatars(refreshAccount),
+      requestAllWeapons(refreshAccount),
+      TSUserRecord.getRecord(uid),
+    ]);
     if (requestVersion !== dataLoadVersion || !useApiCalculation.value) return;
+    recordAvatars.value = record ? record.avatars : [];
     syncAvatars.value = avatars;
+    apiAvatars.value = avatarCatalog;
+    apiWeapons.value = weaponCatalog;
     selectedWeaponKey.value = null;
-    selectedCharacterId.value = syncAvatars.value.some(
-      (avatar) => avatar.id === previousCharacterId,
+    selectedCharacterId.value = apiCharacterOptions.value.some(
+      (avatar) => avatar.value === previousCharacterId,
     )
       ? previousCharacterId
-      : (syncAvatars.value[0]?.id ?? null);
+      : (apiCharacterOptions.value[0]?.value ?? null);
     if (selectedCharacterId.value === null) selectPreferredWeapon();
   } catch (error) {
     if (requestVersion !== dataLoadVersion) return;
+    recordAvatars.value = [];
+    apiAvatars.value = [];
+    apiWeapons.value = [];
     syncAvatars.value = [];
     selectedCharacterId.value = null;
     selectedWeaponKey.value = null;
-    showSnackbar.error(`同步角色数据失败：${TGHttps.getErrMsg(error)}`);
+    showSnackbar.error(`加载接口养成数据失败：${TGHttps.getErrMsg(error)}`);
   }
 }
 
-function clearSyncAvatarData(requestVersion: number): void {
+function clearApiData(requestVersion: number): void {
   if (requestVersion !== dataLoadVersion) return;
+  recordAvatars.value = [];
+  apiAvatars.value = [];
+  apiWeapons.value = [];
   syncAvatars.value = [];
   selectedCharacterId.value = null;
   selectedWeaponKey.value = null;
@@ -1151,6 +1380,35 @@ async function requestSyncAvatars(
   return response.data.list.filter((avatar) => !EXCLUDED_CHARACTER_IDS.has(avatar.id));
 }
 
+async function requestAllAvatars(
+  refreshAccount: TGApp.App.Account.RfAc,
+): Promise<Array<TGApp.Game.Calculate.AvatarListItem>> {
+  const response = await takumiReq.calculate.avatar.list(refreshAccount.cookie, {
+    element_attr_ids: [],
+    is_all: true,
+    lang: "zh-cn",
+    page: 1,
+    size: 200,
+    weapon_cat_ids: [],
+  });
+  if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+  return response.data.list.filter((avatar) => !EXCLUDED_CHARACTER_IDS.has(avatar.id));
+}
+
+async function requestAllWeapons(
+  refreshAccount: TGApp.App.Account.RfAc,
+): Promise<Array<TGApp.Game.Calculate.WeaponListItem>> {
+  const response = await takumiReq.calculate.weapon.list(refreshAccount.cookie, {
+    lang: "zh-cn",
+    page: 1,
+    size: 1000,
+    weapon_cat_ids: [],
+    weapon_levels: [],
+  });
+  if (response.retcode !== 0) throw new Error(`[${response.retcode}] ${response.message}`);
+  return response.data.list;
+}
+
 async function loadLocalData(uid: number, requestVersion: number): Promise<void> {
   const previousCharacterId = selectedCharacterId.value;
   const [roleData, materialData, weaponData] = await Promise.all([
@@ -1170,9 +1428,11 @@ async function loadLocalData(uid: number, requestVersion: number): Promise<void>
   weapons.value = buildWeaponOptions(weaponData, roles.value);
   useBagWeaponSource.value = weapons.value.some((weapon) => weapon.fromBag);
   selectedWeaponKey.value = null;
-  selectedCharacterId.value = roles.value.some((role) => role.cid === previousCharacterId)
+  selectedCharacterId.value = localCharacterOptions.value.some(
+    (character) => character.value === previousCharacterId,
+  )
     ? previousCharacterId
-    : (roles.value[0]?.cid ?? null);
+    : (localCharacterOptions.value[0]?.value ?? null);
   if (selectedCharacterId.value === null) selectPreferredWeapon();
 }
 
@@ -1315,7 +1575,7 @@ function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
     icon: character.icon,
     star: character.star,
     currentState: createEntryState(
-      character.level,
+      avatarCurrentLevel.value,
       avatarCurrentPromoteLevel.value,
       avatarAscended.value,
       currentTalents,
@@ -1351,12 +1611,15 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
     calculationMode: calculationMode.value,
     type: "weapon",
     itemId: weapon.wiki.id,
-    instanceKey: weapon.guid ?? (weapon.key.startsWith("wiki-") ? "" : weapon.key),
+    instanceKey:
+      editingEntry.value?.type === "weapon"
+        ? editingEntry.value.instanceKey
+        : (weapon.guid ?? (weapon.source === "catalog" ? "" : weapon.key)),
     name: weapon.wiki.name,
-    icon: `/WIKI/weapon/${weapon.wiki.id}.webp`,
+    icon: weapon.icon,
     star: weapon.wiki.star,
     currentState: createEntryState(
-      weapon.level,
+      weaponCurrentLevel.value,
       weaponCurrentPromoteLevel.value,
       weaponAscended.value,
     ),
@@ -1439,6 +1702,9 @@ async function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Pr
   const editingCalculationMode: CalculationMode = entry.calculationMode === "api" ? "api" : "bag";
   await switchEditingCalculationMode(editingCalculationMode);
   if (editingEntry.value?.id !== entry.id) return;
+  if (entry.type === "weapon" && preferredCharacterId === undefined) {
+    selectedCharacterId.value = null;
+  }
   await nextTick();
   if (entry.type === "avatar") {
     selectedCharacterId.value = entry.itemId;
@@ -1483,6 +1749,16 @@ function getEntryWeaponAvatarId(instanceKey: string): number | undefined {
 function applyAvatarEditingState(): void {
   const entry = editingEntry.value;
   if (!entry || entry.type !== "avatar" || entry.itemId !== selectedCharacterId.value) return;
+  if (avatarCurrentStateEditable.value) {
+    avatarCurrentLevel.value = entry.currentState.level;
+    avatarAscended.value = entry.currentState.ascended;
+    const currentMap = new Map(
+      entry.currentState.talents.map((talent) => [talent.id, talent.level]),
+    );
+    talentCurrentLevels.value = mainSkills.value.map(
+      (skill) => currentMap.get(skill.id) ?? skill.level,
+    );
+  }
   avatarTargetLevel.value = entry.targetState.level;
   avatarTargetAscended.value = entry.targetState.ascended;
   const targetMap = new Map(entry.targetState.talents.map((talent) => [talent.id, talent.level]));
@@ -1495,6 +1771,10 @@ function applyAvatarEditingState(): void {
 function applyWeaponEditingState(): void {
   const entry = editingEntry.value;
   if (!entry || entry.type !== "weapon" || entry.itemId !== selectedWeapon.value?.wiki.id) return;
+  if (weaponCurrentStateEditable.value) {
+    weaponCurrentLevel.value = entry.currentState.level;
+    weaponAscended.value = entry.currentState.ascended;
+  }
   weaponTargetLevel.value = entry.targetState.level;
   weaponTargetAscended.value = entry.targetState.ascended;
 }
@@ -1762,7 +2042,9 @@ function createApiRefreshTargets(
               item.type === "weapon" && getSyncAvatarId(item.instanceKey) === avatarEntry?.itemId,
           );
     const avatarId = avatarEntry?.itemId ?? getSyncAvatarId(weaponEntry?.instanceKey ?? "");
-    const avatar = avatars.find((item) => item.id === avatarId);
+    const avatar =
+      avatars.find((item) => item.id === avatarId) ??
+      (weaponEntry ? avatars.find((item) => item.weapon.id === weaponEntry.itemId) : undefined);
     if (!avatar) continue;
     const matchedWeaponEntry = weaponEntry?.itemId === avatar.weapon.id ? weaponEntry : undefined;
     if (!avatarEntry && !matchedWeaponEntry) continue;
@@ -1862,22 +2144,106 @@ function createApiRefreshInputsFromResult(
   return inputs;
 }
 
-function buildSyncWeaponOption(
-  avatar: TGApp.Game.Calculate.SyncAvatar | undefined,
-): TGApp.App.UserCalc.WeaponOption | undefined {
-  if (!avatar) return undefined;
-  const weapon = avatar.weapon;
-  const wiki = wwWeapon.find((item) => item.id === weapon.id);
-  if (!wiki) return undefined;
+function createLocalCharacterOption(
+  role: TGApp.Sqlite.Character.TableTrans,
+): TGApp.App.UserCalc.CharacterOption {
+  const weaponType = wwWeapon.find((weapon) => weapon.id === role.weapon.id)?.weapon ?? "未知武器";
   return {
-    key: `sync-${avatar.id}-${weapon.id}`,
-    title: `${weapon.name} · Lv.${weapon.level_current}`,
-    wiki,
-    level: weapon.level_current,
-    promoteLevel: userCalc.resolvePromoteLevel(weapon.level_current),
-    affixLevel: 1,
-    fromBag: false,
-    locked: false,
+    title: `${role.avatar.name} · Lv.${role.avatar.level}`,
+    value: role.cid,
+    name: role.avatar.name,
+    icon: `/WIKI/character/${role.cid}.webp`,
+    element: getZhElement(role.avatar.element),
+    star: getRcStar(role.cid, role.avatar.rarity),
+    level: role.avatar.level,
+    constellation: role.avatar.actived_constellation_num,
+    fetter: role.avatar.fetter,
+    weaponType,
+  };
+}
+
+function createSyncCharacterOption(
+  avatar: TGApp.Game.Calculate.SyncAvatar,
+): TGApp.App.UserCalc.CharacterOption {
+  return {
+    title: `${avatar.name} · Lv.${avatar.level_current}`,
+    value: avatar.id,
+    name: avatar.name,
+    icon: avatar.icon,
+    element: getElementNameByAttrId(avatar.element_attr_id),
+    star: avatar.avatar_level,
+    level: avatar.level_current,
+    constellation: avatar.constellation_num,
+    fetter: avatar.fetter_level,
+    weaponType: getWeaponTypeByCategory(avatar.weapon_cat_id),
+  };
+}
+
+function buildApiWeaponOptions(
+  catalog: ReadonlyArray<TGApp.Game.Calculate.WeaponListItem>,
+  avatars: ReadonlyArray<TGApp.Game.Calculate.SyncAvatar>,
+): Array<TGApp.App.UserCalc.WeaponOption> {
+  const result: Array<TGApp.App.UserCalc.WeaponOption> = [];
+  const catalogMap = new Map(catalog.map((weapon) => [weapon.id, weapon]));
+  const equippedWeaponIds = new Set<number>();
+  for (const avatar of avatars) {
+    const weapon = avatar.weapon;
+    const api = catalogMap.get(weapon.id);
+    const wiki = createApiWeaponWiki(api ?? weapon);
+    equippedWeaponIds.add(weapon.id);
+    result.push({
+      key: `sync-${avatar.id}-${weapon.id}`,
+      title: `${weapon.name} · Lv.${weapon.level_current}`,
+      icon: weapon.icon,
+      wiki,
+      level: weapon.level_current,
+      promoteLevel: userCalc.resolvePromoteLevel(weapon.level_current),
+      affixLevel: 1,
+      fromBag: false,
+      locked: false,
+      source: "equipped",
+      api,
+    });
+  }
+  for (const weapon of catalog) {
+    if (equippedWeaponIds.has(weapon.id)) continue;
+    result.push({
+      key: `api-${weapon.id}`,
+      title: `${weapon.name} · Lv.1（规划）`,
+      icon: weapon.icon,
+      wiki: createApiWeaponWiki(weapon),
+      level: 1,
+      promoteLevel: 0,
+      affixLevel: 1,
+      fromBag: false,
+      locked: false,
+      source: "catalog",
+      api: weapon,
+    });
+  }
+  return result.sort(
+    (a, b) =>
+      Number(b.source === "equipped") - Number(a.source === "equipped") ||
+      b.wiki.star - a.wiki.star ||
+      b.level - a.level ||
+      a.wiki.name.localeCompare(b.wiki.name),
+  );
+}
+
+function createApiWeaponWiki(
+  weapon: TGApp.Game.Calculate.WeaponListItem | TGApp.Game.Calculate.SyncAvatarWeapon,
+): TGApp.App.Weapon.WikiItem {
+  const local = wwWeapon.find((item) => item.id === weapon.id);
+  if (local) return local;
+  return {
+    id: weapon.id,
+    name: weapon.name,
+    description: "",
+    star: weapon.weapon_level,
+    weapon: getWeaponTypeByCategory(weapon.weapon_cat_id),
+    materials: [],
+    curves: [],
+    story: [],
   };
 }
 
@@ -1893,12 +2259,14 @@ function buildWeaponOptions(
     result.push({
       key: `bag-${bagWeapon.guid}`,
       title: `${wiki.name} · Lv.${bagWeapon.info.level}`,
+      icon: `/WIKI/weapon/${wiki.id}.webp`,
       wiki,
       level: bagWeapon.info.level,
       promoteLevel: bagWeapon.info.promote_level,
       affixLevel: Math.max(0, ...affixValues) + 1,
       fromBag: true,
       locked: bagWeapon.info.is_locked,
+      source: "bag",
       guid: bagWeapon.guid,
     });
   }
@@ -1909,28 +2277,28 @@ function buildWeaponOptions(
     result.push({
       key: `role-${role.cid}-${roleWeapon.id}`,
       title: `${wiki.name} · Lv.${roleWeapon.level}`,
+      icon: `/WIKI/weapon/${wiki.id}.webp`,
       wiki,
       level: roleWeapon.level,
       promoteLevel: roleWeapon.promote_level,
       affixLevel: roleWeapon.affix_level,
       fromBag: false,
       locked: false,
+      source: "equipped",
     });
   }
-  const existingWikiIds = new Set(
-    result.filter((weapon) => !weapon.fromBag).map((weapon) => weapon.wiki.id),
-  );
   for (const wiki of wwWeapon) {
-    if (existingWikiIds.has(wiki.id)) continue;
     result.push({
       key: `wiki-${wiki.id}`,
       title: `${wiki.name} · Lv.1（规划）`,
+      icon: `/WIKI/weapon/${wiki.id}.webp`,
       wiki,
       level: 1,
       promoteLevel: 0,
       affixLevel: 1,
       fromBag: false,
       locked: false,
+      source: "catalog",
     });
   }
   return result.sort(

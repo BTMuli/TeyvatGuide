@@ -44,7 +44,7 @@
               <UcItemIcon
                 v-if="selectedWeapon"
                 :alt="selectedWeapon.wiki.name"
-                :icon="`/WIKI/weapon/${selectedWeapon.wiki.id}.webp`"
+                :icon="selectedWeapon.icon"
                 :primary-badge="`/icon/weapon/${selectedWeapon.wiki.weapon}.webp`"
                 :size="40"
                 :star="selectedWeapon.wiki.star"
@@ -88,7 +88,7 @@
           {{ selectedWeapon.wiki.name }}
         </span>
         <v-chip v-if="selectedWeapon" color="var(--tgc-od-blue)" size="small" variant="tonal">
-          Lv.{{ selectedWeapon.level }} → {{ targetLevel }}
+          Lv.{{ currentLevel }} → {{ targetLevel }}
         </v-chip>
       </div>
     </v-card-title>
@@ -98,7 +98,7 @@
         <div v-if="selectedWeapon" class="ucw-selected">
           <UcItemIcon
             :alt="selectedWeapon.wiki.name"
-            :icon="`/WIKI/weapon/${selectedWeapon.wiki.id}.webp`"
+            :icon="selectedWeapon.icon"
             :primary-badge="`/icon/weapon/${selectedWeapon.wiki.weapon}.webp`"
             :size="80"
             :star="selectedWeapon.wiki.star"
@@ -106,7 +106,7 @@
           <div class="ucw-selected-info">
             <span class="ucw-name">{{ selectedWeapon.wiki.name }}</span>
             <div class="ucw-tags">
-              <span>Lv.{{ selectedWeapon.level }}</span>
+              <span>Lv.{{ currentLevel }}</span>
               <span>{{ selectedWeapon.wiki.star }}★</span>
               <span>{{ selectedWeapon.wiki.weapon }}</span>
               <span>精炼 {{ selectedWeapon.affixLevel }}</span>
@@ -129,15 +129,10 @@
 
         <div class="ucw-level-config">
           <div :class="{ 'is-unavailable': levelUnavailable }" class="ucw-slider-field">
-            <div class="ucw-slider-label">
-              <span>目标等级</span>
-              <span class="ucw-slider-value">
-                {{ selectedWeapon ? `Lv.${targetLevel}` : "--" }}
-              </span>
-            </div>
             <UcLevelSlider
               v-model="targetLevel"
-              :current="currentLevel"
+              v-model:current="currentLevel"
+              :current-editable="currentStateEditable"
               :disabled="levelUnavailable"
               :max="levelMax"
             />
@@ -202,7 +197,7 @@
             <v-icon size="16">mdi-chart-line</v-icon>
             属性变化
           </span>
-          <span>突破阶段 {{ selectedWeapon.promoteLevel }} → {{ targetPromoteLevel }}</span>
+          <span>突破阶段 {{ currentPromoteLevel }} → {{ targetPromoteLevel }}</span>
         </div>
         <div class="ucw-stat-list">
           <div v-for="stat in currentStats" :key="stat.type" class="ucw-stat">
@@ -222,7 +217,7 @@
               <span>养成信息</span>
               <div>
                 <span>精炼 {{ selectedWeapon.affixLevel }}</span>
-                <span>{{ selectedWeapon.fromBag ? "背包存档" : "角色装备" }}</span>
+                <span>{{ getWeaponSourceLabel(selectedWeapon.source) }}</span>
               </div>
             </div>
           </div>
@@ -251,12 +246,15 @@ type UcWeaponPanelProps = {
   targetAtAscensionLevel: boolean;
   hasBagData: boolean;
   currentAscensionReadonly: boolean;
+  currentPromoteLevel: number;
+  currentStateEditable: boolean;
   selectionReadonly: boolean;
 };
 
 const props = defineProps<UcWeaponPanelProps>();
 
 const selectedKey = defineModel<string | null>("selectedKey", { required: true });
+const currentLevel = defineModel<number>("currentLevel", { required: true });
 const targetLevel = defineModel<number>("targetLevel", { required: true });
 const ascended = defineModel<boolean>("ascended", { required: true });
 const targetAscended = defineModel<boolean>("targetAscended", { required: true });
@@ -265,16 +263,13 @@ const useBagSource = defineModel<boolean>("useBagSource", { required: true });
 const showSelector = ref<boolean>(false);
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
-const currentLevel = computed<number>(() => props.selectedWeapon?.level ?? 1);
 const levelUnavailable = computed<boolean>(
-  () => !props.selectedWeapon || currentLevel.value >= levelMax.value,
+  () =>
+    !props.selectedWeapon || (!props.currentStateEditable && currentLevel.value >= levelMax.value),
 );
 const currentAscended = computed<boolean>(() => {
-  if (!props.selectedWeapon?.fromBag) return ascended.value;
-  return userCalc.isAscendedAtThreshold(
-    props.selectedWeapon.level,
-    props.selectedWeapon.promoteLevel,
-  );
+  if (!props.selectedWeapon?.fromBag || props.currentStateEditable) return ascended.value;
+  return userCalc.isAscendedAtThreshold(currentLevel.value, props.currentPromoteLevel);
 });
 const targetPromoteLevel = computed<number>(() => {
   if (!props.selectedWeapon) return 0;
@@ -283,15 +278,11 @@ const targetPromoteLevel = computed<number>(() => {
     undefined,
     props.targetAtAscensionLevel ? targetAscended.value : undefined,
   );
-  return Math.max(props.selectedWeapon.promoteLevel, resolved);
+  return Math.max(props.currentPromoteLevel, resolved);
 });
 const currentStats = computed(() => {
   if (!props.selectedWeapon) return [];
-  return wikiUtils.weapon(
-    props.selectedWeapon.wiki,
-    props.selectedWeapon.level,
-    props.selectedWeapon.promoteLevel,
-  );
+  return wikiUtils.weapon(props.selectedWeapon.wiki, currentLevel.value, props.currentPromoteLevel);
 });
 const targetStats = computed(() => {
   if (!props.selectedWeapon) return [];
@@ -321,10 +312,21 @@ function formatTargetStat(type: number, fallback: number): string {
   return wikiUtils.propFmt(type, stat?.val ?? fallback);
 }
 
+function getWeaponSourceLabel(source: TGApp.App.UserCalc.WeaponOption["source"]): string {
+  switch (source) {
+    case "bag":
+      return "背包存档";
+    case "equipped":
+      return "角色装备";
+    case "catalog":
+      return "未拥有规划";
+  }
+}
+
 function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData {
   return {
     bg: `/icon/bg/${option.wiki.star}-Star.webp`,
-    icon: `/WIKI/weapon/${option.wiki.id}.webp`,
+    icon: option.icon,
     size: "80px",
     height: "80px",
     display: "inner",
@@ -556,7 +558,7 @@ function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData
 }
 
 .ucw-slider-field {
-  padding: 4px 8px 0;
+  padding: 0 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   transition: opacity 0.2s ease;
@@ -564,20 +566,6 @@ function getWeaponBoxData(option: TGApp.App.UserCalc.WeaponOption): TItemBoxData
   &.is-unavailable {
     opacity: 0.38;
   }
-}
-
-.ucw-slider-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--common-text-sub);
-  font-size: 12px;
-}
-
-.ucw-slider-value {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-weight: 400;
 }
 
 .ucw-ascension-options {

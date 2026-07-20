@@ -20,6 +20,147 @@ declare namespace TGApp.Game.Calculate {
   };
 
   /**
+   * 全部角色列表请求参数
+   * @since Beta v0.11.1
+   */
+  type AvatarListParams = {
+    /** 元素属性 ID 筛选列表 */
+    element_attr_ids: Array<number>;
+    /** 是否返回全部角色 */
+    is_all: boolean;
+    /** 返回数据语言 */
+    lang: string;
+    /** 页码 */
+    page: number;
+    /** 每页数量 */
+    size: number;
+    /** 武器类型 ID 筛选列表 */
+    weapon_cat_ids: Array<number>;
+  };
+
+  /**
+   * 全部武器列表请求参数
+   * @since Beta v0.11.1
+   */
+  type WeaponListParams = {
+    /** 返回数据语言 */
+    lang: string;
+    /** 页码 */
+    page: number;
+    /** 每页数量 */
+    size: number;
+    /** 武器类型 ID 筛选列表 */
+    weapon_cat_ids: Array<number>;
+    /** 武器稀有度筛选列表 */
+    weapon_levels: Array<number>;
+  };
+
+  /**
+   * 全部角色列表响应
+   * @since Beta v0.11.1
+   */
+  type AvatarListResp = TGApp.BBS.Response.BaseWithData<AvatarListResult>;
+
+  /**
+   * 全部角色列表结果
+   * @since Beta v0.11.1
+   */
+  type AvatarListResult = {
+    /** 角色列表 */
+    list: Array<AvatarListItem>;
+    /** 角色总数 */
+    total: number;
+  };
+
+  /**
+   * 全部角色列表项
+   * @since Beta v0.11.1
+   */
+  type AvatarListItem = {
+    /** 角色 ID */
+    id: number;
+    /** 角色名称 */
+    name: string;
+    /** 角色图标 */
+    icon: string;
+    /** 角色使用的武器类型 ID */
+    weapon_cat_id: number;
+    /** 角色稀有度 */
+    avatar_level: number;
+    /** 元素属性 ID */
+    element_attr_id: number;
+    /** 最高等级 */
+    max_level: number;
+    /** 技能列表 */
+    skill_list: Array<AvatarListSkill>;
+    /** 角色 Wiki 地址 */
+    wiki_url: string;
+    /** 推荐武器 Wiki 地址 */
+    wiki_recommend_weapon_url: string;
+  };
+
+  /**
+   * 全部角色技能列表项
+   * @since Beta v0.11.1
+   */
+  type AvatarListSkill = {
+    /** 技能 ID */
+    id: number;
+    /** 技能组 ID */
+    group_id: number;
+    /** 技能名称 */
+    name: string;
+    /** 技能图标 */
+    icon: string;
+    /** 技能最高等级 */
+    max_level: number;
+    /** 是否为固有天赋 */
+    is_proud: boolean;
+    /** 技能位置名称 */
+    pos_name: string;
+  };
+
+  /**
+   * 全部武器列表响应
+   * @since Beta v0.11.1
+   */
+  type WeaponListResp = TGApp.BBS.Response.BaseWithData<WeaponListResult>;
+
+  /**
+   * 全部武器列表结果
+   * @since Beta v0.11.1
+   */
+  type WeaponListResult = {
+    /** 武器列表 */
+    list: Array<WeaponListItem>;
+    /** 武器总数 */
+    total: number;
+  };
+
+  /**
+   * 全部武器列表项
+   * @since Beta v0.11.1
+   */
+  type WeaponListItem = {
+    /** 武器 ID */
+    id: number;
+    /** 武器名称 */
+    name: string;
+    /** 武器图标 */
+    icon: string;
+    /** 武器类型 ID */
+    weapon_cat_id: number;
+    /** 武器稀有度 */
+    weapon_level: number;
+    /** 最高等级 */
+    max_level: number;
+    /** 是否为推荐武器 */
+    is_recommend: boolean;
+    /** 武器 Wiki 地址 */
+    wiki_url: string;
+  };
+
+  /**
    * 同步角色列表请求参数
    * @since Beta v0.11.2
    */
@@ -161,7 +302,13 @@ declare namespace TGApp.Game.Calculate {
    * 待计算项目
    * @since Beta v0.11.2
    */
-  type ParamsItem = {
+  type ParamsItem = AvatarParamsItem | WeaponParamsItem;
+
+  /**
+   * 待计算角色项目
+   * @since Beta v0.11.1
+   */
+  type AvatarParamsItem = {
     /** 角色 ID */
     avatar_id: number;
     /** 角色当前等级 */
@@ -177,7 +324,16 @@ declare namespace TGApp.Game.Calculate {
     /** 是否同步用户背包数据 */
     from_user_sync: boolean;
     /** 角色当前突破等级 */
-    avatar_promote_level: number;
+    avatar_promote_level?: number;
+  };
+
+  /**
+   * 待计算纯武器项目
+   * @since Beta v0.11.1
+   */
+  type WeaponParamsItem = {
+    /** 武器等级目标 */
+    weapon: WeaponTarget;
   };
 
   /**
@@ -203,13 +359,13 @@ declare namespace TGApp.Game.Calculate {
     /** 武器名称 */
     name: string;
     /** 武器图标 */
-    icon: string;
+    icon?: string;
     /** 武器类型 ID */
-    weapon_cat_id: number;
+    weapon_cat_id?: number;
     /** 武器稀有度 */
-    weapon_level: number;
+    weapon_level?: number;
     /** 武器最高等级 */
-    max_level: number;
+    max_level?: number;
     /** 当前等级 */
     level_current: number;
     /** 目标等级 */
