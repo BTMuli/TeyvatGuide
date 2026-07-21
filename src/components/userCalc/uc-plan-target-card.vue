@@ -36,9 +36,17 @@
         <span class="ucptc-level">
           Lv.{{ entry.currentState.level }} → Lv.{{ entry.targetState.level }}
         </span>
-        <span v-if="entry.targetState.talents.length > 0" class="ucptc-talents">
-          天赋目标 {{ entry.targetState.talents.map((talent) => talent.level).join(" / ") }}
-        </span>
+        <div v-if="talentLevels.length > 0" class="ucptc-talents">
+          <span>天赋</span>
+          <span
+            v-for="talent in talentLevels"
+            :key="talent.id"
+            :title="talent.name"
+            class="ucptc-talent"
+          >
+            {{ talent.label }}：{{ talent.currentLevel }} → {{ talent.targetLevel }}
+          </span>
+        </div>
         <div class="ucptc-options">
           <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
             {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
@@ -79,7 +87,7 @@
         <template v-if="entry.status === 'active' && !fulfilled">
           <v-btn
             :disabled="!canMoveUp"
-            icon="mdi-arrow-up"
+            icon="mdi-arrow-left"
             size="small"
             title="提高优先级"
             variant="text"
@@ -87,7 +95,7 @@
           />
           <v-btn
             :disabled="!canMoveDown"
-            icon="mdi-arrow-down"
+            icon="mdi-arrow-right"
             size="small"
             title="降低优先级"
             variant="text"
@@ -95,8 +103,8 @@
           />
         </template>
         <v-btn
-          :title="entry.status === 'completed' ? '恢复目标' : '标记完成'"
           :icon="entry.status === 'completed' ? 'mdi-restore' : 'mdi-check-circle-outline'"
+          :title="entry.status === 'completed' ? '恢复目标' : '标记完成'"
           size="small"
           variant="text"
           @click="emits('status', entry, entry.status === 'completed' ? 'active' : 'completed')"
@@ -192,10 +200,35 @@ type TargetMaterialView = {
   progress: number;
 };
 
+type TalentLevelView = {
+  currentLevel: number;
+  id: number;
+  label: string;
+  name: string;
+  targetLevel: number;
+};
+
+const TALENT_LABELS = <const>["A", "E", "Q"];
+
 const statusLabel = computed<string>(() => {
   if (props.entry.status === "completed") return "已完成";
   if (props.fulfilled) return "已满足";
   return "进行中";
+});
+const talentLevels = computed<Array<TalentLevelView>>(() => {
+  const currentLevelMap = new Map(
+    props.entry.currentState.talents.map((talent) => [talent.id, talent.level]),
+  );
+  const currentLevelByName = new Map(
+    props.entry.currentState.talents.map((talent) => [talent.name, talent.level]),
+  );
+  return props.entry.targetState.talents.map((talent, index) => ({
+    currentLevel: currentLevelMap.get(talent.id) ?? currentLevelByName.get(talent.name) ?? 1,
+    id: talent.id,
+    label: TALENT_LABELS[index] ?? String(index + 1),
+    name: talent.name,
+    targetLevel: talent.level,
+  }));
 });
 const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
   () => new Map(props.materials.map((material) => [material.id, material])),
@@ -235,6 +268,11 @@ function formatCount(count: number): string {
 
 <style lang="scss" scoped>
 .ucptc-card {
+  display: flex;
+  overflow: hidden;
+  height: calc(100% - 2px);
+  min-height: 0;
+  flex-direction: column;
   border-color: var(--common-shadow-1);
   background: var(--box-bg-1);
   transition:
@@ -311,6 +349,18 @@ function formatCount(count: number): string {
   font-size: 12px;
 }
 
+.ucptc-talents {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.ucptc-talent {
+  color: var(--common-text-title);
+  white-space: nowrap;
+}
+
 .ucptc-progress-row {
   gap: 8px;
 
@@ -327,14 +377,20 @@ function formatCount(count: number): string {
 
 .ucptc-materials {
   display: grid;
+  min-height: 0;
+  flex: 1;
+  align-content: start;
   padding: 8px 12px 12px;
   border-top: 1px solid var(--common-shadow-1);
   gap: 6px;
+  grid-auto-rows: minmax(44px, min-content);
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  overflow-y: auto;
 }
 
 .ucptc-material {
   min-width: 0;
+  align-items: center;
   padding: 4px 8px;
   border-radius: 6px;
   background: var(--common-shadow-t-1);

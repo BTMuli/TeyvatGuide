@@ -23,6 +23,25 @@ export type CraftableMaterial = {
   consumed: Array<CultivationMaterial>;
 };
 
+/**
+ * 战绩技能与本地 Wiki 技能的对应关系。
+ * @since Beta v0.11.2
+ */
+export type RecordTalentSkill = {
+  /** 战绩接口返回的技能。 */
+  recordSkill: TGApp.Game.Avatar.Skill;
+  /** 通过技能名称匹配到的本地 Wiki 技能。 */
+  wikiSkill: TGApp.App.Character.WikiSkill;
+};
+
+/** 可按名称匹配到 Wiki 的技能等级。 */
+export type NamedTalentLevel = {
+  /** 技能名称。 */
+  name: string;
+  /** 战绩接口返回的显示等级。 */
+  level: number;
+};
+
 /** 材料 ID 偏移量与需求数量 */
 type OffsetCount = readonly [offset: number, count: number];
 
@@ -47,7 +66,7 @@ const DREAM_SOLVENT_ID = 113021;
 const CONSTELLATION_TALENT_BONUS = 3;
 const TARTAGLIA_ID = 10000033;
 const TARTAGLIA_NORMAL_ATTACK_ID = 10331;
-const TARTAGLIA_MASTER_OF_WEAPONRY_ID = 332301;
+const TARTAGLIA_MASTER_OF_WEAPONRY_NAME = "诸武精通";
 
 const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
 const AVATAR_ASCENSION_MORA = <const>[20000, 40000, 60000, 80000, 100000, 120000];
@@ -120,6 +139,57 @@ export function applyTalentLevelCorrections(
 }
 
 /**
+ * 获取战绩角色的可培养技能，并按本地 Wiki 的 A/E/Q 顺序返回。
+ *
+ * @remarks 战绩技能与本地 Wiki 技能通过名称匹配，不依赖两侧的技能 ID。
+ * @param role - 用户战绩中的角色数据
+ * @param wiki - 角色 Wiki 数据
+ * @returns 战绩技能与 Wiki 技能的对应关系
+ * @since Beta v0.11.2
+ */
+export function getRecordTalentSkills(
+  role: TGApp.Sqlite.Character.TableTrans,
+  wiki: TGApp.App.Character.WikiItem,
+): Array<RecordTalentSkill> {
+  const recordSkillMap = new Map(
+    role.skills.filter((skill) => skill.is_unlock).map((skill) => [skill.name, skill]),
+  );
+  const talentSkills: Array<RecordTalentSkill> = [];
+  for (const wikiSkill of wiki.skills) {
+    if (wikiSkill.maxLv === 1) continue;
+    const recordSkill = recordSkillMap.get(wikiSkill.name);
+    if (recordSkill) talentSkills.push({ recordSkill, wikiSkill });
+  }
+  return talentSkills;
+}
+
+/**
+ * 按技能名称移除命座天赋等级加成。
+ *
+ * @remarks 技能对应关系只使用名称，不依赖战绩技能 ID、技能组 ID 或数组顺序。
+ * @param constellation - 角色当前命座层数
+ * @param skills - 战绩接口返回的技能等级
+ * @param wiki - 角色 Wiki 数据
+ * @returns 与传入技能顺序一致的实际培养等级
+ * @since Beta v0.11.2
+ */
+export function getCorrectedNamedTalentLevels(
+  constellation: number,
+  skills: ReadonlyArray<NamedTalentLevel>,
+  wiki: TGApp.App.Character.WikiItem,
+): Array<number> {
+  const wikiSkillMap = new Map(
+    wiki.skills.filter((skill) => skill.maxLv > 1).map((skill) => [skill.name, skill]),
+  );
+  const matchedWikiSkills = skills.map((skill) => wikiSkillMap.get(skill.name));
+  return applyTalentLevelCorrections(
+    skills.map((skill) => skill.level),
+    matchedWikiSkills.map((skill) => skill?.luc ?? null),
+    constellation,
+  );
+}
+
+/**
  * 获取战绩角色用于背包计算的实际培养天赋等级。
  *
  * @param role - 用户战绩中的角色数据
@@ -131,27 +201,21 @@ export function getRecordTalentLevels(
   role: TGApp.Sqlite.Character.TableTrans,
   wiki: TGApp.App.Character.WikiItem,
 ): Array<number> {
-  const levelableSkillIds = new Set(
-    wiki.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
-  );
-  const skills = role.skills.filter(
-    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
-  );
-  const wikiSkillMap = new Map(wiki.skills.map((skill) => [skill.id, skill]));
-  const levels = applyTalentLevelCorrections(
-    skills.map((skill) => skill.level),
-    skills.map((skill) => wikiSkillMap.get(skill.skill_id)?.luc ?? null),
+  const skills = getRecordTalentSkills(role, wiki);
+  const levels = getCorrectedNamedTalentLevels(
     role.avatar.actived_constellation_num,
+    skills.map(({ recordSkill }) => ({ name: recordSkill.name, level: recordSkill.level })),
+    wiki,
   );
   const isMasterOfWeaponryUnlocked = role.skills.some(
-    (skill) => skill.skill_id === TARTAGLIA_MASTER_OF_WEAPONRY_ID && skill.is_unlock,
+    (skill) => skill.name === TARTAGLIA_MASTER_OF_WEAPONRY_NAME && skill.is_unlock,
   );
   if (role.cid !== TARTAGLIA_ID || !isMasterOfWeaponryUnlocked) return levels;
   const normalAttackIndex = skills.findIndex(
-    (skill) => skill.skill_id === TARTAGLIA_NORMAL_ATTACK_ID,
+    ({ wikiSkill }) => wikiSkill.id === TARTAGLIA_NORMAL_ATTACK_ID,
   );
   if (normalAttackIndex !== -1) {
-    levels[normalAttackIndex] = levels[normalAttackIndex] - 1;
+    levels[normalAttackIndex] = Math.max(levels[normalAttackIndex] - 1, 1);
   }
   return levels;
 }
@@ -708,7 +772,9 @@ const userCalc = {
   isAscensionLevel,
   isAscendedAtThreshold,
   correctTalentLevels: applyTalentLevelCorrections,
+  correctedNamedTalentLevels: getCorrectedNamedTalentLevels,
   recordTalentLevels: getRecordTalentLevels,
+  recordTalentSkills: getRecordTalentSkills,
   resolvePromoteLevel,
 };
 

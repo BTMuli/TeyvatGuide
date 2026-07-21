@@ -413,12 +413,7 @@ async function createBatchPlanInput(
   if (BATCH_EXCLUDED_CHARACTER_IDS.has(role.cid)) return undefined;
   const wiki = await getWikiCharacterById(role.cid);
   if (!wiki) return undefined;
-  const levelableSkillIds = new Set(
-    wiki.skills.filter((skill) => skill.maxLv > 1).map((skill) => skill.id),
-  );
-  const skills = role.skills.filter(
-    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
-  );
+  const talentSkills = userCalc.recordTalentSkills(role, wiki);
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
   const currentTalentLevels = userCalc.recordTalentLevels(role, wiki);
   const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
@@ -427,10 +422,13 @@ async function createBatchPlanInput(
   const targetAscended =
     (targetLevel === avatar.level && currentAscended) ||
     (targetLevel === target.level && target.ascended);
-  const targetTalents = skills.map((skill, index) => ({
-    id: skill.skill_id,
-    name: skill.name,
-    level: Math.max(Math.min(currentTalentLevels[index] ?? skill.level, 10), target.talentLevel),
+  const targetTalents = talentSkills.map(({ recordSkill, wikiSkill }, index) => ({
+    id: wikiSkill.id,
+    name: recordSkill.name,
+    level: Math.max(
+      Math.min(currentTalentLevels[index] ?? recordSkill.level, 10),
+      target.talentLevel,
+    ),
   }));
   const materials = userCalc.avatar(
     role,
@@ -454,10 +452,10 @@ async function createBatchPlanInput(
       level: avatar.level,
       promoteLevel: currentPromoteLevel,
       ascended: currentAscended,
-      talents: skills.map((skill, index) => ({
-        id: skill.skill_id,
-        name: skill.name,
-        level: Math.min(currentTalentLevels[index] ?? skill.level, 10),
+      talents: talentSkills.map(({ recordSkill, wikiSkill }, index) => ({
+        id: wikiSkill.id,
+        name: recordSkill.name,
+        level: Math.min(currentTalentLevels[index] ?? recordSkill.level, 10),
       })),
     },
     targetState: {

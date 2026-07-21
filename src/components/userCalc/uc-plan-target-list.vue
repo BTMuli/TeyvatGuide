@@ -4,7 +4,16 @@
     <div class="ucpt-header">
       <div>
         <span class="ucpt-title">{{ projectName || "养成目标" }}</span>
-        <div class="ucpt-statuses" aria-label="养成目标状态计数">
+        <v-btn
+          color="var(--tgc-od-orange)"
+          prepend-icon="mdi-plus"
+          size="small"
+          variant="tonal"
+          @click="emits('add')"
+        >
+          添加目标
+        </v-btn>
+        <div aria-label="养成目标状态计数" class="ucpt-statuses">
           <span class="active">进行中 {{ activeCount }}</span>
           <span class="fulfilled">已满足 {{ fulfilledCount }}</span>
           <span class="completed">已完成 {{ completedCount }}</span>
@@ -20,30 +29,42 @@
       </v-btn>
     </div>
 
-    <div v-else class="ucpt-grid">
-      <UcPlanTargetCard
-        v-for="entry in sortedEntries"
-        :key="entry.id"
-        :can-move-down="canMoveEntry(entry, 1)"
-        :can-move-up="canMoveEntry(entry, -1)"
-        :entry
-        :fulfilled="isEntryFulfilled(entry)"
-        :has-today-material="hasTodayMaterial(entry)"
-        :materials="entryMaterialResults.get(entry.id) ?? []"
-        :priority="entryPriority(entry)"
-        :progress="entryProgress(entry)"
-        @edit="emits('edit', $event)"
-        @move="moveEntry"
-        @remove="emits('remove', $event)"
-        @status="emitStatus"
-      />
-    </div>
-    <div class="ucpt-footer">养成计划 · Render by TeyvatGuide</div>
+    <Swiper
+      v-else
+      :modules="swiperModules"
+      :navigation="true"
+      :slides-per-view="'auto'"
+      :space-between="12"
+      :watch-overflow="true"
+      class="ucpt-swiper"
+    >
+      <SwiperSlide v-for="entry in sortedEntries" :key="entry.id" class="ucpt-slide">
+        <UcPlanTargetCard
+          :can-move-down="canMoveEntry(entry, 1)"
+          :can-move-up="canMoveEntry(entry, -1)"
+          :entry
+          :fulfilled="isEntryFulfilled(entry)"
+          :has-today-material="hasTodayMaterial(entry)"
+          :materials="entryMaterialResults.get(entry.id) ?? []"
+          :priority="entryPriority(entry)"
+          :progress="entryProgress(entry)"
+          @edit="emits('edit', $event)"
+          @move="moveEntry"
+          @remove="emits('remove', $event)"
+          @status="emitStatus"
+        />
+      </SwiperSlide>
+    </Swiper>
   </div>
 </template>
 
 <script lang="ts" setup>
+import "swiper/css";
+import "swiper/css/navigation";
+
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
+import { A11y, Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/vue";
 import { computed } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -75,6 +96,7 @@ type UcPlanTargetListEmits = {
 
 const props = defineProps<UcPlanTargetListProps>();
 const emits = defineEmits<UcPlanTargetListEmits>();
+const swiperModules = [A11y, Navigation];
 
 const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
   () =>
@@ -99,9 +121,11 @@ function getEntryInventory(
   if (entry.calculationMode !== "api" || !entry.apiResult) return props.inventory;
   return getCalculateInventory(entry.apiResult.result);
 }
+
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort(compareEntries),
 );
+
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 100;
   if (entry.items.length === 0) return 100;
@@ -215,7 +239,10 @@ function emitStatus(
 
 <style lang="scss" scoped>
 .ucpt-box {
+  position: relative;
   display: flex;
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
   gap: 12px;
 }
@@ -281,29 +308,75 @@ function emitStatus(
   gap: 12px;
 }
 
-.ucpt-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+.ucpt-swiper {
+  --swiper-navigation-color: var(--tgc-od-orange);
+  --swiper-navigation-size: 14px;
+
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+
+  :deep(.swiper-button-prev),
+  :deep(.swiper-button-next) {
+    z-index: 4;
+    width: 32px;
+    height: 32px;
+    box-sizing: border-box;
+    padding: 6px;
+    border: 1px solid var(--common-shadow-2);
+    border-radius: 999px;
+    margin-top: -16px;
+    background: color-mix(in srgb, var(--tgc-od-orange) 8%, var(--box-bg-1));
+    box-shadow: 0 3px 10px var(--common-shadow-2);
+    opacity: 0.9;
+    transition:
+      border-color 160ms ease,
+      background-color 160ms ease,
+      box-shadow 160ms ease,
+      opacity 160ms ease,
+      transform 160ms ease;
+
+    &:hover {
+      border-color: var(--tgc-od-orange);
+      background: color-mix(in srgb, var(--tgc-od-orange) 18%, var(--box-bg-1));
+      box-shadow: 0 4px 14px var(--common-shadow-2);
+      opacity: 1;
+      transform: scale(1.06);
+    }
+
+    &:active {
+      transform: scale(0.94);
+    }
+
+    &.swiper-button-disabled {
+      opacity: 0.18;
+    }
+  }
+
+  :deep(.swiper-button-prev) {
+    left: 3px;
+  }
+
+  :deep(.swiper-button-next) {
+    right: 3px;
+  }
 }
 
-.ucpt-footer {
-  position: relative;
-  z-index: -1;
-  color: var(--common-text-sub);
-  font-size: 12px;
-  text-align: right;
+.ucpt-slide {
+  width: min(420px, calc(100vw - 112px));
+  height: 100%;
 }
 
 @media (width <= 600px) {
-  .ucpt-grid {
-    grid-template-columns: 1fr;
-  }
-
   .ucpt-header > div {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
+  }
+
+  .ucpt-slide {
+    width: calc(100vw - 96px);
   }
 }
 </style>

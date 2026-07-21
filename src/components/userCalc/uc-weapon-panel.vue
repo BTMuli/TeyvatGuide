@@ -286,11 +286,13 @@ const targetAscended = defineModel<boolean>("targetAscended", { required: true }
 const useBagSource = defineModel<boolean>("useBagSource", { required: true });
 
 const showSelector = ref<boolean>(false);
-const searchKeyword = ref<string>("");
+const searchKeyword = ref<string | null>("");
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
 const filteredOptions = computed<Array<TGApp.App.UserCalc.WeaponOption>>(() => {
-  const keyword = searchKeyword.value.trim().toLocaleLowerCase();
+  const keyword = (searchKeyword.value === null ? "" : searchKeyword.value)
+    .trim()
+    .toLocaleLowerCase();
   if (!keyword) return props.options;
   return props.options.filter((option) => option.wiki.name.toLocaleLowerCase().includes(keyword));
 });
@@ -505,6 +507,23 @@ watch(showSelector, (visible) => {
 
 .ucw-picker-search {
   max-width: 190px;
+  color: var(--app-page-content);
+
+  :deep(.v-field__input) {
+    caret-color: var(--tgc-od-blue);
+    color: var(--app-page-content);
+  }
+
+  :deep(.v-field__input::placeholder) {
+    color: var(--app-page-content);
+    opacity: 0.64;
+  }
+
+  :deep(.v-field__prepend-inner > .v-icon),
+  :deep(.v-field__clearable > .v-icon) {
+    color: var(--app-page-content);
+    opacity: 0.8;
+  }
 }
 
 .ucw-picker-list {

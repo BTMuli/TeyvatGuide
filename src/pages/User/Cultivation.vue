@@ -5,16 +5,6 @@
       <div class="cultivation-title">
         <v-icon color="var(--tgc-od-orange)">mdi-calculator-variant-outline</v-icon>
         <span>养成计划</span>
-        <v-btn
-          v-if="uidList.length > 0"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-plus"
-          size="small"
-          variant="tonal"
-          @click="startAddingTarget"
-        >
-          添加目标
-        </v-btn>
       </div>
     </template>
     <template #append>
@@ -146,8 +136,8 @@
             <div class="cultivation-mode-main">
               <div class="cultivation-mode-title">
                 <v-icon color="var(--tgc-od-orange)" size="20"
-                  >mdi-calculator-variant-outline</v-icon
-                >
+                  >mdi-calculator-variant-outline
+                </v-icon>
                 <span>计算方式</span>
               </div>
               <v-btn-toggle
@@ -194,6 +184,7 @@
 
           <v-alert
             v-if="editingEntry"
+            class="cultivation-alert"
             closable
             color="var(--tgc-od-blue)"
             density="compact"
@@ -218,8 +209,8 @@
               :current-state-editable="avatarCurrentStateEditable"
               :level-options="avatarLevelOptions"
               :options="characterOptions"
-              :selection-readonly="editingEntry?.type === 'avatar'"
               :selected-character="selectedCharacter"
+              :selection-readonly="editingEntry?.type === 'avatar'"
               :skills="displaySkills"
               :target-at-ascension-level="avatarTargetAtAscensionLevel"
               :weapon-type="selectedRoleWeaponType"
@@ -238,8 +229,8 @@
               :has-bag-data="hasBagWeaponData"
               :level-options="weaponLevelOptions"
               :options="weaponOptions"
-              :selection-readonly="editingEntry?.type === 'weapon'"
               :selected-weapon="selectedWeapon"
+              :selection-readonly="editingEntry?.type === 'weapon'"
               :target-at-ascension-level="weaponTargetAtAscensionLevel"
             />
           </div>
@@ -422,6 +413,7 @@ function formatUpdated(value: string): string {
   const timestamp = Date.parse(value);
   return Number.isNaN(timestamp) ? value : timestampToDate(timestamp);
 }
+
 const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
   const roleMap = new Map(roles.value.map((role) => [role.cid, role]));
   const characterCatalog = Array.from(
@@ -598,27 +590,27 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
         maxLevel: skill.maxLv,
       }));
   }
-  let skills: Array<TGApp.Game.Avatar.Skill>;
   if (!avatarWiki.value) {
-    skills = roleSkills.filter((skill) => skill.skill_type === 1 && skill.is_unlock).slice(0, 3);
-  } else {
-    const levelableSkillIds = new Set(
-      avatarWiki.value.skills.filter((skill) => skill.maxLv !== 1).map((skill) => skill.id),
-    );
-    skills = roleSkills.filter((skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id));
+    return roleSkills
+      .filter((skill) => skill.skill_type === 1 && skill.is_unlock)
+      .slice(0, 3)
+      .map((skill) => ({
+        id: skill.skill_id,
+        name: skill.name,
+        icon: skill.icon,
+        level: skill.level,
+        maxLevel: 10,
+      }));
   }
-  return skills.map((skill) => ({
-    id: skill.skill_id,
-    name: skill.name,
-    icon: skill.icon,
-    level: skill.level,
-    maxLevel: 10,
-  }));
-});
-const talentLucLevels = computed<Array<number | null>>(() => {
-  if (!avatarWiki.value) return mainSkills.value.map(() => null);
-  const wikiSkillMap = new Map(avatarWiki.value.skills.map((skill) => [skill.id, skill]));
-  return mainSkills.value.map((skill) => wikiSkillMap.get(skill.id)?.luc ?? null);
+  return userCalc
+    .recordTalentSkills(selectedRole.value, avatarWiki.value)
+    .map(({ recordSkill, wikiSkill }) => ({
+      id: wikiSkill.id,
+      name: recordSkill.name,
+      icon: recordSkill.icon,
+      level: recordSkill.level,
+      maxLevel: wikiSkill.maxLv,
+    }));
 });
 const currentTalentLevels = computed<Array<number>>(() => {
   if (avatarCurrentStateEditable.value) {
@@ -626,14 +618,13 @@ const currentTalentLevels = computed<Array<number>>(() => {
   }
   const levels = mainSkills.value.map((skill) => skill.level);
   if (useApiCalculation.value) return levels;
-  if (!selectedRole.value || !avatarWiki.value) {
-    return userCalc.correctTalentLevels(
-      levels,
-      talentLucLevels.value,
-      selectedCharacter.value?.constellation ?? 0,
-    );
-  }
-  return userCalc.recordTalentLevels(selectedRole.value, avatarWiki.value);
+  if (!avatarWiki.value) return levels;
+  if (selectedRole.value) return userCalc.recordTalentLevels(selectedRole.value, avatarWiki.value);
+  return userCalc.correctedNamedTalentLevels(
+    selectedCharacter.value?.constellation ?? 0,
+    mainSkills.value,
+    avatarWiki.value,
+  );
 });
 const displaySkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() =>
   mainSkills.value.map((skill, index) => ({
@@ -835,25 +826,20 @@ watch(selectedCharacter, async (character) => {
       selectedSyncAvatar.value.promote_level,
     );
     selectPreferredWeapon();
-    applyAvatarEditingState();
-    return;
-  }
-  const role = selectedRole.value;
-  if (role) {
-    const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
-    avatarAscended.value = userCalc.isAscendedAtThreshold(avatar.level, avatar.promote_level);
   } else {
-    avatarAscended.value = false;
-  }
-  selectPreferredWeapon();
-  if (useApiCalculation.value) {
-    applyAvatarEditingState();
-    return;
+    const role = selectedRole.value;
+    if (role) {
+      const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
+      avatarAscended.value = userCalc.isAscendedAtThreshold(avatar.level, avatar.promote_level);
+    } else {
+      avatarAscended.value = false;
+    }
+    selectPreferredWeapon();
   }
   const wiki = await getWikiCharacterById(characterId);
-  if (!useApiCalculation.value && selectedCharacterId.value === characterId) {
+  if (selectedCharacterId.value === characterId) {
     avatarWiki.value = wiki;
-    talentCurrentLevels.value = mainSkills.value.map((skill) => skill.level);
+    talentCurrentLevels.value = currentTalentLevels.value;
     talentTargetLevels.value = mainSkills.value.map((skill) => skill.maxLevel);
     applyAvatarEditingState();
   }
@@ -1762,19 +1748,26 @@ function applyAvatarEditingState(): void {
   if (avatarCurrentStateEditable.value) {
     avatarCurrentLevel.value = entry.currentState.level;
     avatarAscended.value = entry.currentState.ascended;
-    const currentMap = new Map(
-      entry.currentState.talents.map((talent) => [talent.id, talent.level]),
-    );
     talentCurrentLevels.value = mainSkills.value.map(
-      (skill) => currentMap.get(skill.id) ?? skill.level,
+      (skill) => getSavedTalentLevel(entry.currentState.talents, skill) ?? skill.level,
     );
   }
   avatarTargetLevel.value = entry.targetState.level;
   avatarTargetAscended.value = entry.targetState.ascended;
-  const targetMap = new Map(entry.targetState.talents.map((talent) => [talent.id, talent.level]));
   talentTargetLevels.value = mainSkills.value.map(
     (skill, index) =>
-      targetMap.get(skill.id) ?? Math.max(currentTalentLevels.value[index] ?? skill.level, 1),
+      getSavedTalentLevel(entry.targetState.talents, skill) ??
+      Math.max(currentTalentLevels.value[index] ?? skill.level, 1),
+  );
+}
+
+function getSavedTalentLevel(
+  talents: ReadonlyArray<TGApp.Sqlite.Cultivation.TalentState>,
+  skill: TGApp.App.UserCalc.SkillOption,
+): number | undefined {
+  return (
+    talents.find((talent) => talent.id === skill.id)?.level ??
+    talents.find((talent) => talent.name === skill.name)?.level
   );
 }
 
@@ -1844,22 +1837,21 @@ async function createAvatarRefreshInput(
 ): Promise<TGApp.Sqlite.Cultivation.RefreshEntryInput | undefined> {
   const wiki = await getWikiCharacterById(entry.itemId);
   if (!wiki) return undefined;
-  const levelableSkillIds = new Set(
-    wiki.skills.filter((skill) => skill.maxLv > 1).map((skill) => skill.id),
-  );
-  const skills = role.skills.filter(
-    (skill) => skill.is_unlock && levelableSkillIds.has(skill.skill_id),
-  );
+  const talentSkills = userCalc.recordTalentSkills(role, wiki);
   const currentTalentLevels = userCalc.recordTalentLevels(role, wiki);
   const avatar = <TGApp.Game.Avatar.Avatar & { promote_level?: number }>role.avatar;
   const currentPromoteLevel = userCalc.resolvePromoteLevel(avatar.level, avatar.promote_level);
   const targetTalentMap = new Map(
     entry.targetState.talents.map((talent) => [talent.id, talent.level]),
   );
-  const targetTalentLevels = skills.map(
-    (skill, index) =>
-      targetTalentMap.get(skill.skill_id) ??
-      Math.min(currentTalentLevels[index] ?? skill.level, 10),
+  const targetTalentNameMap = new Map(
+    entry.targetState.talents.map((talent) => [talent.name, talent.level]),
+  );
+  const targetTalentLevels = talentSkills.map(
+    ({ recordSkill, wikiSkill }, index) =>
+      targetTalentMap.get(wikiSkill.id) ??
+      targetTalentNameMap.get(recordSkill.name) ??
+      Math.min(currentTalentLevels[index] ?? recordSkill.level, 10),
   );
   const requirements = userCalc.avatarFromState(
     wiki,
@@ -1876,10 +1868,10 @@ async function createAvatarRefreshInput(
       avatar.level,
       currentPromoteLevel,
       userCalc.isAscendedAtThreshold(avatar.level, currentPromoteLevel),
-      skills.map((skill, index) => ({
-        id: skill.skill_id,
-        name: skill.name,
-        level: Math.min(currentTalentLevels[index] ?? skill.level, 10),
+      talentSkills.map(({ recordSkill, wikiSkill }, index) => ({
+        id: wikiSkill.id,
+        name: recordSkill.name,
+        level: Math.min(currentTalentLevels[index] ?? recordSkill.level, 10),
       })),
     ),
     status: entry.status === "completed" || requirements.length === 0 ? "completed" : "active",
@@ -2372,9 +2364,12 @@ function compareWeaponOptions(
 
 .cultivation-page {
   display: flex;
-  min-height: 100%;
+  overflow: hidden;
+  width: 100%;
+  height: calc(100dvh - var(--v-layout-top) - var(--v-layout-bottom) - 32px);
+  min-height: 0;
+  box-sizing: border-box;
   flex-direction: column;
-  padding: 12px;
   gap: 12px;
 }
 
@@ -2431,17 +2426,29 @@ function compareWeaponOptions(
 }
 
 .cultivation-tab-window {
+  overflow: hidden;
   width: 100%;
+  min-height: 0;
+  flex: 1;
+
+  :deep(.v-window__container) {
+    height: 100%;
+  }
 }
 
 .cultivation-tab-content.v-window-item--active {
   display: flex;
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
+  padding-right: 4px;
   gap: 12px;
+  overflow-y: auto;
 }
 
 .cultivation-mode {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   padding: 12px;
@@ -2467,6 +2474,12 @@ function compareWeaponOptions(
   font-size: 13px;
 }
 
+.cultivation-alert {
+  position: relative;
+  height: 80px;
+  flex-shrink: 0;
+}
+
 .cultivation-empty {
   display: flex;
   min-height: 320px;
@@ -2488,10 +2501,6 @@ function compareWeaponOptions(
 }
 
 @media (width <= 600px) {
-  .cultivation-page {
-    padding: 8px;
-  }
-
   .cultivation-mode {
     flex-direction: column;
     align-items: stretch;

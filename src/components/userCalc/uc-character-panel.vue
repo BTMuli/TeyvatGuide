@@ -53,8 +53,11 @@
                 <v-text-field
                   v-model="searchKeyword"
                   aria-label="搜索角色名称"
+                  base-color="var(--app-page-content)"
+                  bg-color="var(--box-bg-1)"
                   class="ucc-picker-search"
                   clearable
+                  color="var(--tgc-od-blue)"
                   density="compact"
                   hide-details
                   placeholder="搜索名称"
@@ -108,8 +111,8 @@
             :alt="selectedCharacter.name"
             :icon="selectedCharacter.icon"
             :primary-badge="`/icon/element/${selectedCharacter.element}元素.webp`"
-            :star="selectedCharacter.star"
             :size="80"
+            :star="selectedCharacter.star"
           />
           <div class="ucc-selected-info">
             <span class="ucc-name">{{ selectedCharacter.name }}</span>
@@ -253,11 +256,13 @@ const ascended = defineModel<boolean>("ascended", { required: true });
 const targetAscended = defineModel<boolean>("targetAscended", { required: true });
 
 const showSelector = ref<boolean>(false);
-const searchKeyword = ref<string>("");
+const searchKeyword = ref<string | null>("");
 
 const levelMax = computed<number>(() => props.levelOptions.at(-1) ?? 90);
 const filteredOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {
-  const keyword = searchKeyword.value.trim().toLocaleLowerCase();
+  const keyword = (searchKeyword.value === null ? "" : searchKeyword.value)
+    .trim()
+    .toLocaleLowerCase();
   if (!keyword) return props.options;
   return props.options.filter((option) => option.name.toLocaleLowerCase().includes(keyword));
 });
@@ -425,6 +430,23 @@ function updateCurrentTalent(index: number, value: number | null): void {
 
 .ucc-picker-search {
   max-width: 190px;
+  color: var(--app-page-content);
+
+  :deep(.v-field__input) {
+    caret-color: var(--tgc-od-blue);
+    color: var(--app-page-content);
+  }
+
+  :deep(.v-field__input::placeholder) {
+    color: var(--app-page-content);
+    opacity: 0.64;
+  }
+
+  :deep(.v-field__prepend-inner > .v-icon),
+  :deep(.v-field__clearable > .v-icon) {
+    color: var(--app-page-content);
+    opacity: 0.8;
+  }
 }
 
 .ucc-picker-list {
@@ -596,7 +618,6 @@ function updateCurrentTalent(index: number, value: number | null): void {
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--common-shadow-t-2);
-  box-shadow: 0 4px 8px var(--common-shadow-1);
   gap: 4px;
   transition: opacity 0.2s ease;
 

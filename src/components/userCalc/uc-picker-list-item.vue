@@ -78,8 +78,6 @@ const emit = defineEmits<{
 
   &.selected {
     border-color: var(--tgc-od-blue);
-    background: var(--common-shadow-t-1);
-    box-shadow: inset 3px 0 var(--tgc-od-blue);
   }
 }
 
@@ -142,7 +140,9 @@ const emit = defineEmits<{
 
   &.secondary {
     color: var(--common-text-sub);
-    font-size: 11px;
+    font-size: 10px;
+    line-height: 1.25;
+    opacity: 0.72;
   }
 }
 
