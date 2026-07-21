@@ -5,7 +5,7 @@
       <div>
         <span class="ucpt-title">{{ projectName || "养成目标" }}</span>
         <v-btn
-          color="var(--tgc-od-orange)"
+          color="var(--tgc-od-red)"
           prepend-icon="mdi-plus"
           size="small"
           variant="tonal"

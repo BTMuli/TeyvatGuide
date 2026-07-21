@@ -2,12 +2,27 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-07-01
-Update: 2026-07-03
+Update: 2026-07-21
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-07-01 05:22:05`
 >
-> 更新于 `2026-07-03 12:47:35`
+> 更新于 `2026-07-21 18:52:09`
+
+## [0.11.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.2) (2026-07-21)
+
+- 🍱 角色WIKI更新技能加强描述
+- 🍱 更新下半卡池数据
+- ✨ 新增养成计算页面 [`#246`](https://github.com/BTMuli/TeyvatGuide/issues/246)
+- ✨ 首页素材日历新增养成计算切换
+- ✨ 角色列表新增批量养成
+- 🐛 事务处理相关Sql执行采用自定义命令，确保在同一连接，修复祈愿增量刷新异常
+- ⚡️ 背包圣遗物分块懒加载
+- 💄 优化角色筛选底部浮窗UI，新增强化体系筛选（魔导/月兆）
+- 🚸 简化地区筛选 [`#253`](https://github.com/BTMuli/TeyvatGuide/issues/253)
+- 🚸 侧边栏添加背包导入触发
+- 🚸 支持删除当前已登录账号
+- 💄 macOS下隐藏导入&武器&圣遗物入口
 
 ## [0.11.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.1) (2026-07-03)
 

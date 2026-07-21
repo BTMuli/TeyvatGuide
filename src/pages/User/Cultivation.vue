@@ -2477,6 +2477,7 @@ function compareWeaponOptions(
 .cultivation-alert {
   position: relative;
   height: 80px;
+  min-height: 80px;
   flex-shrink: 0;
 }
 

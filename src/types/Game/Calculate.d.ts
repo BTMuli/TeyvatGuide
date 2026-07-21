@@ -21,7 +21,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部角色列表请求参数
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type AvatarListParams = {
     /** 元素属性 ID 筛选列表 */
@@ -40,7 +40,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部武器列表请求参数
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type WeaponListParams = {
     /** 返回数据语言 */
@@ -57,13 +57,13 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部角色列表响应
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type AvatarListResp = TGApp.BBS.Response.BaseWithData<AvatarListResult>;
 
   /**
    * 全部角色列表结果
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type AvatarListResult = {
     /** 角色列表 */
@@ -74,7 +74,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部角色列表项
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type AvatarListItem = {
     /** 角色 ID */
@@ -101,7 +101,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部角色技能列表项
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type AvatarListSkill = {
     /** 技能 ID */
@@ -122,13 +122,13 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部武器列表响应
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type WeaponListResp = TGApp.BBS.Response.BaseWithData<WeaponListResult>;
 
   /**
    * 全部武器列表结果
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type WeaponListResult = {
     /** 武器列表 */
@@ -139,7 +139,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 全部武器列表项
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type WeaponListItem = {
     /** 武器 ID */
@@ -306,7 +306,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 待计算角色项目
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type AvatarParamsItem = {
     /** 角色 ID */
@@ -329,7 +329,7 @@ declare namespace TGApp.Game.Calculate {
 
   /**
    * 待计算纯武器项目
-   * @since Beta v0.11.1
+   * @since Beta v0.11.2
    */
   type WeaponParamsItem = {
     /** 武器等级目标 */
