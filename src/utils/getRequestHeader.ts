@@ -1,11 +1,13 @@
 /**
  * 获取请求头
- * @since Beta v0.7.6
+ * @since Beta v0.11.3
  */
 
 import Md5 from "js-md5";
 
-import TGBbs, { type SaltKey } from "./TGBbs.js";
+import bbsEnum from "@enum/bbs.js";
+
+import TGBbs from "./TGBbs.js";
 import { getDeviceInfo, getRandomString } from "./toolFunc.js";
 
 /**
@@ -28,7 +30,12 @@ function getRandomNumber(min: number, max: number): number {
  * @param isSign - 是否为签名
  * @returns ds
  */
-function getDS(method: string, data: string, saltType: SaltKey, isSign: boolean): string {
+function getDS(
+  method: string,
+  data: string,
+  saltType: TGApp.BBS.Auth.SaltKeyEnum,
+  isSign: boolean,
+): string {
   const salt = TGBbs.salt[saltType];
   const time = Math.floor(Date.now() / 1000).toString();
   let random = getRandomNumber(100000, 200000).toString();
@@ -87,7 +94,7 @@ export function getRequestHeader(
   cookie: Record<string, string>,
   method: string,
   data: Record<string, string | number | boolean | Array<string>> | string,
-  saltType: SaltKey = "X4",
+  saltType: TGApp.BBS.Auth.SaltKeyEnum = bbsEnum.saltKey.X4,
   isSign: boolean = false,
 ): Record<string, string> {
   return {
@@ -112,15 +119,20 @@ export function getRequestHeader(
  * @param query - query
  * @returns DS
  */
-export function getDS4JS(saltType: SaltKey, dsType: 1, body?: never, query?: never): string;
 export function getDS4JS(
-  saltType: SaltKey,
+  saltType: TGApp.BBS.Auth.SaltKeyEnum,
+  dsType: 1,
+  body?: never,
+  query?: never,
+): string;
+export function getDS4JS(
+  saltType: TGApp.BBS.Auth.SaltKeyEnum,
   dsType: 2,
   body?: Record<string, string | number> | string,
   query?: Record<string, string | number> | string,
 ): string;
 export function getDS4JS(
-  saltType: SaltKey,
+  saltType: TGApp.BBS.Auth.SaltKeyEnum,
   dsType: 1 | 2,
   body?: Record<string, string | number> | string,
   query?: Record<string, string | number> | string,

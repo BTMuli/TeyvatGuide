@@ -1,9 +1,27 @@
 /**
  * BBS 认证相关类型定义
- * @since Beta v0.10.1
+ * @since Beta v0.11.3
  */
 
 declare namespace TGApp.BBS.Auth {
+  /**
+   * Salt 键
+   * @since Beta v0.11.3
+   */
+  const SaltKey = <const>{
+    K2: "K2",
+    LK2: "LK2",
+    X4: "X4",
+    X6: "X6",
+    PROD: "PROD",
+  };
+
+  /**
+   * Salt 键枚举
+   * @since Beta v0.11.3
+   */
+  type SaltKeyEnum = (typeof SaltKey)[keyof typeof SaltKey];
+
   /**
    * ActionTicket 数据
    * @since Beta v0.10.1

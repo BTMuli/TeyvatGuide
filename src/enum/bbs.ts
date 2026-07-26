@@ -1,7 +1,20 @@
 /**
  * 米游社相关枚举
- * @since Beta v0.9.9
+ * @since Beta v0.11.3
  */
+
+/**
+ * Salt 键枚举
+ * @since Beta v0.11.3
+ * @see TGApp.BBS.Auth.SaltKey
+ */
+const BbsSaltKeyEnum: typeof TGApp.BBS.Auth.SaltKey = {
+  K2: "K2",
+  LK2: "LK2",
+  X4: "X4",
+  X6: "X6",
+  PROD: "PROD",
+};
 
 /**
  * 用户头像类型
@@ -176,6 +189,8 @@ function getReplyOrderTypeDesc(replyType: TGApp.BBS.Reply.ReplyOrderTypeEnum): s
 
 /** 米游社相关枚举 */
 const bbsEnum = {
+  /** Salt 键 */
+  saltKey: BbsSaltKeyEnum,
   /** 用户信息相关枚举 */
   user: {
     avatarExtType: AvatarExtTypeEnum,

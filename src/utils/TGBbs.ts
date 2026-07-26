@@ -3,11 +3,7 @@
  * @since Beta v0.11.3
  */
 
-/**
- * salt 类型
- * @since Beta v0.11.3
- */
-export type SaltKey = "K2" | "LK2" | "X4" | "X6" | "PROD";
+import bbsEnum from "@enum/bbs.js";
 
 const BBS_VERSION: Readonly<string> = "2.111.0";
 const BBS_UA_MOBILE: Readonly<string> = `Mozilla/5.0 (Linux; Android 12) Mobile miHoYoBBS/${BBS_VERSION}`;
@@ -18,12 +14,12 @@ const BBS_UA_PC: Readonly<string> = `Mozilla/5.0 (Windows NT 10.0; Win64; x64) m
  * @since Beta v0.11.3
  * @remarks 2.111.0
  */
-const BBS_SALT: Readonly<Record<SaltKey, string>> = {
-  K2: "b7c29e6ed1f40ee65b10f1285f081232",
-  LK2: "ce8dd6509bf20296fceb94793c8c10bd",
-  X4: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
-  X6: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
-  PROD: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
+const BBS_SALT: Readonly<Record<TGApp.BBS.Auth.SaltKeyEnum, string>> = {
+  [bbsEnum.saltKey.K2]: "b7c29e6ed1f40ee65b10f1285f081232",
+  [bbsEnum.saltKey.LK2]: "ce8dd6509bf20296fceb94793c8c10bd",
+  [bbsEnum.saltKey.X4]: "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs",
+  [bbsEnum.saltKey.X6]: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
+  [bbsEnum.saltKey.PROD]: "t0qEgfub6cvueAPgR5m9aQWWVciEer7v",
 };
 
 const TGBbs = { version: BBS_VERSION, ua: BBS_UA_MOBILE, uap: BBS_UA_PC, salt: BBS_SALT };
