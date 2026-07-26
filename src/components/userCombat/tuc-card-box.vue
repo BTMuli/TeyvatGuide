@@ -31,9 +31,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { nextTick, onUnmounted, ref, watch } from "vue";
-
 import { parseHtmlText } from "@utils/toolFunc.js";
+import { nextTick, onUnmounted, ref, watch } from "vue";
 
 type TucCardBoxProps = {
   modelValue: Array<TGApp.Game.Combat.Card>;

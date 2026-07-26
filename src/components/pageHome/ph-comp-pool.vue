@@ -49,22 +49,21 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PhPoolCard from "@comp/pageHome/ph-pool-card.vue";
 import PhPoolUser from "@comp/pageHome/ph-pool-user.vue";
+import gameEnum from "@enum/game.js";
 import miscReq from "@req/miscReq.js";
 import recordReq from "@req/recordReq.js";
+import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
 import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
-import takumiReq from "@req/takumiReq.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { storeToRefs } from "pinia";
 import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
-
-import gameEnum from "@enum/game.js";
 
 type TPoolEmits = (e: "success") => void;
 

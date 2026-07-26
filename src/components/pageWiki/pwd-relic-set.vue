@@ -51,6 +51,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, shallowRef, watch } from "vue";
+
 import { wrRelic } from "@/data/index.js";
 
 type PwdRelicSetProps = { set: TGApp.App.Relic.SetItem };

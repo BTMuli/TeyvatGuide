@@ -108,6 +108,7 @@
 import gameEnum from "@enum/game.js";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { str2timeStr } from "@utils/toolFunc.js";
 import {
   computed,
   nextTick,
@@ -123,7 +124,6 @@ import GroDataLine, { type GroDataLineProps } from "./gro-data-line.vue";
 import GroResetCard from "./gro-reset-card.vue";
 
 import { AppGachaData } from "@/data/index.js";
-import { str2timeStr } from "@utils/toolFunc.js";
 
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";

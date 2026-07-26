@@ -9,6 +9,7 @@ import postcssPresetEnv from "postcss-preset-env";
 import { defineConfig } from "vite";
 import VueDevtools from "vite-plugin-vue-devtools";
 import vuetify from "vite-plugin-vuetify";
+
 import pkgJson from "./package.json" with { type: "json" };
 
 const host = process.env.TAURI_DEV_HOST;

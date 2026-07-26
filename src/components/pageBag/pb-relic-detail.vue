@@ -51,9 +51,10 @@
   </v-navigation-drawer>
 </template>
 <script lang="ts" setup>
-import { shallowRef, watch } from "vue";
-import { wrRelic, wrSet } from "@/data/index.js";
 import wikiUtils from "@utils/wikiUtils.js";
+import { shallowRef, watch } from "vue";
+
+import { wrRelic, wrSet } from "@/data/index.js";
 
 type PbRelicDetailProps = { cur: TGApp.Sqlite.UserBag.RelicTable };
 

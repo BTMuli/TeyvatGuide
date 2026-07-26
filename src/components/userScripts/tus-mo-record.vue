@@ -62,13 +62,13 @@
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
-import bbsReq from "@req/bbsReq.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
-import TGLogger from "@utils/TGLogger.js";
+import bbsReq from "@req/bbsReq.js";
 import TGHttps from "@utils/TGHttps.js";
-import { ref, shallowRef, useTemplateRef, watch } from "vue";
+import TGLogger from "@utils/TGLogger.js";
 import { getNearTime, timestampToDate } from "@utils/toolFunc.js";
+import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
 /** 组件参数 */
 type TusMoRecordProps = {

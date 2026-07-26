@@ -89,6 +89,8 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
 import {
@@ -104,8 +106,6 @@ import {
 } from "vue";
 
 import type { TpImage } from "./tp-image.vue";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
 
 type TpoImageProps = { image: TpImage };
 type VpoiSize = { width: number; height: number };

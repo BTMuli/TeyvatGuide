@@ -168,6 +168,7 @@ import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { str2timeStr, timeStr2str } from "@utils/toolFunc.js";
 import { exportUigfData } from "@utils/UIGF.js";
@@ -177,7 +178,6 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { AppCalendarData } from "@/data/index.js";
-import TGHttps from "@utils/TGHttps.js";
 
 const router = useRouter();
 const hutaoStore = useHutaoStore();

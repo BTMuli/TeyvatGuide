@@ -49,11 +49,10 @@
 <script lang="ts" setup>
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
 import { getWikiBrief, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-
-import gameEnum from "@enum/game.js";
 
 type PhPoolUserProps = { pool: TGApp.Game.ActCalendar.ActPool };
 type AvatarItem = {

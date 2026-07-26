@@ -52,16 +52,17 @@
   </div>
 </template>
 <script lang="ts" setup>
-import PhDailyNoteExpedition from "./ph-daily-note-expedition.vue";
-import PhDailyNoteResin from "./ph-daily-note-resin.vue";
-import PhDailyNoteCoin from "./ph-daily-note-coin.vue";
-import PhDailyNoteTransformer from "./ph-daily-note-transformer.vue";
-import PhDailyNoteTask from "./ph-daily-note-task.vue";
-import PhDailyNoteQuest from "./ph-daily-note-quest.vue";
-import PhDailyNoteBoss from "./ph-daily-note-boss.vue";
-import PhDailyNoteWeekAct from "./ph-daily-note-week-act.vue";
-import { computed } from "vue";
 import dnEnum from "@enum/dailyNote.js";
+import { computed } from "vue";
+
+import PhDailyNoteBoss from "./ph-daily-note-boss.vue";
+import PhDailyNoteCoin from "./ph-daily-note-coin.vue";
+import PhDailyNoteExpedition from "./ph-daily-note-expedition.vue";
+import PhDailyNoteQuest from "./ph-daily-note-quest.vue";
+import PhDailyNoteResin from "./ph-daily-note-resin.vue";
+import PhDailyNoteTask from "./ph-daily-note-task.vue";
+import PhDailyNoteTransformer from "./ph-daily-note-transformer.vue";
+import PhDailyNoteWeekAct from "./ph-daily-note-week-act.vue";
 
 type PhDailyNoteItemProps = {
   account: TGApp.Sqlite.Account.Game;

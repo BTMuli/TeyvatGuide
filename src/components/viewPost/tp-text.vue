@@ -33,10 +33,10 @@ import bbsReq from "@req/bbsReq.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { isColorSimilar } from "@utils/colorFunc.js";
 import { parseLink, parsePost } from "@utils/linkParser.js";
-import { decodeRegExp } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, StyleValue, toRaw, useTemplateRef } from "vue";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { decodeRegExp } from "@utils/toolFunc.js";
+import { onMounted, ref, shallowRef, StyleValue, toRaw, useTemplateRef } from "vue";
 
 export type TpText = {
   insert: string;

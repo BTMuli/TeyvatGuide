@@ -64,12 +64,12 @@ import { usePageReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, reactive, type Ref, ref, shallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
-import TGHttps from "@utils/TGHttps.js";
 
 type PostData = Record<TGApp.BBS.Post.NewsTypeEnum, Ref<Array<TGApp.BBS.Post.FullData>>>;
 type RawItem = { isLast: boolean; name: string; lastId: number };

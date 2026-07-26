@@ -79,6 +79,7 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useHomeStore from "@store/home.js";
+import useHutaoStore from "@store/hutao.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -87,7 +88,6 @@ import TGLogger from "@utils/TGLogger.js";
 import { compareVersions } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { defineComponent, onMounted, ref, shallowRef, watch } from "vue";
-import useHutaoStore from "@store/hutao.js";
 
 /**
  * 单文件组件类型

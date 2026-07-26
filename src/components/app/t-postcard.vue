@@ -146,8 +146,10 @@
   </div>
 </template>
 <script lang="ts" setup>
+import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import TpAvatar from "@comp/viewPost/tp-avatar.vue";
+import TpTitle from "@comp/viewPost/tp-title.vue";
 import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import useBBSStore from "@store/bbs.js";
 import { emit } from "@tauri-apps/api/event";
@@ -158,8 +160,6 @@ import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import TMiImg from "@comp/app/t-mi-img.vue";
-import TpTitle from "@comp/viewPost/tp-title.vue";
 
 /** 帖子卡片参数 */
 type TPostCardProps = {

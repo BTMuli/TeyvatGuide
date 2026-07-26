@@ -19,12 +19,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { wrSet } from "@/data/index.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import PwRelicSetItem from "@comp/pageWiki/pw-relic-set-item.vue";
+import PwdRelicSet from "@comp/pageWiki/pwd-relic-set.vue";
 import { shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import PwdRelicSet from "@comp/pageWiki/pwd-relic-set.vue";
-import showSnackbar from "@comp/func/snackbar.js";
+
+import { wrSet } from "@/data/index.js";
 
 const appRsData = wrSet.sort((a, b) => b.maxStar - a.maxStar || b.id - a.id);
 

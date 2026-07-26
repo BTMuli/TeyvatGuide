@@ -23,17 +23,17 @@
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { saveBufferFile, saveImgBlob } from "@utils/TGShare.js";
 import { getVideoDuration } from "@utils/toolFunc.js";
 import Artplayer, { type Option } from "artplayer";
 import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";
-import TGHttps from "@utils/TGHttps.js";
-import showSnackbar from "@comp/func/snackbar.js";
-import TGLogger from "@utils/TGLogger.js";
 
 type TpVod = {
   insert: {

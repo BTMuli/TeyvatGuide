@@ -3,8 +3,8 @@
  * @since Beta v0.10.1
  */
 import TGHttps from "@utils/TGHttps.js";
-import md5 from "js-md5";
 import TGLogger from "@utils/TGLogger.js";
+import md5 from "js-md5";
 
 export const BILI_HEADER: Readonly<Record<string, string>> = {
   cookie: "",

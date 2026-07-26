@@ -14,9 +14,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-
 import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteTransformerProps = {
   trans: TGApp.Game.DailyNote.TransformerData;

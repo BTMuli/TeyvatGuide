@@ -36,11 +36,11 @@
 <script lang="ts" setup>
 import Bili from "@Bili/index.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { saveImgBlob } from "@utils/TGShare.js";
 import { getVideoDuration, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
 
 type TpVideo = { insert: { video: string } };
 type TpVideoProps = { data: TpVideo };

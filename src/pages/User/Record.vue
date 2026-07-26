@@ -85,11 +85,11 @@ import TSUserRecord from "@Sqlm/userRecord.js";
 import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { getRfAc } from "@utils/acUtils.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
-import TGHttps from "@utils/TGHttps.js";
 
 const userStore = useUserStore();
 const { account, cookie } = storeToRefs(userStore);

@@ -63,17 +63,17 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
-import { A11y, Navigation } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/vue";
-import { computed } from "vue";
-
-import { WikiMaterialData } from "@/data/index.js";
 import {
   buildCultivationResults,
   getCalculateInventory,
   getServerDay,
   isMaterialAvailableToday,
 } from "@utils/cultivationPlan.js";
+import { A11y, Navigation } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { computed } from "vue";
+
+import { WikiMaterialData } from "@/data/index.js";
 
 type UcPlanTargetListProps = {
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;

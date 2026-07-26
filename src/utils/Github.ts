@@ -3,8 +3,9 @@
  * @since Beta v0.10.0
  */
 
-import TGHttps from "./TGHttps.js";
 import showSnackbar from "@comp/func/snackbar.js";
+
+import TGHttps from "./TGHttps.js";
 import TGLogger from "./TGLogger.js";
 
 /**

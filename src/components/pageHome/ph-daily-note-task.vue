@@ -26,9 +26,10 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
-import PhDnTr from "./ph-dn-tr.vue";
 import PhDnAr from "@comp/pageHome/ph-dn-ar.vue";
+import { computed } from "vue";
+
+import PhDnTr from "./ph-dn-tr.vue";
 
 type PhDailyNoteTaskProps = {
   task?: TGApp.Game.DailyNote.DailyTask;

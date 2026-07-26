@@ -3,11 +3,12 @@
  * @since Beta v0.11.0
  */
 
-import { wrMap } from "@/data/index.js";
 import { timestampToDate } from "@utils/toolFunc.js";
+import wikiUtils from "@utils/wikiUtils.js";
 
 import TGSqlite from "../index.js";
-import wikiUtils from "@utils/wikiUtils.js";
+
+import { wrMap } from "@/data/index.js";
 
 /**
  * 插入或更新圣遗物数据

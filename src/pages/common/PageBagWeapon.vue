@@ -76,6 +76,9 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
+import PbWeaponFilter, { type WeaponFilterValue } from "@comp/pageBag/pb-weapon-filter.vue";
+import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
@@ -84,9 +87,6 @@ import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, triggerRef, watch } from "vue";
 
 import { wwWeapon } from "@/data/index.js";
-import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
-import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
-import PbWeaponFilter, { type WeaponFilterValue } from "@comp/pageBag/pb-weapon-filter.vue";
 
 /** 武器信息 */
 export type WeaponInfo = {

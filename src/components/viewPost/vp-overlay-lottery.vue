@@ -42,11 +42,11 @@ import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import painterReq from "@req/painterReq.js";
 import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { stamp2LastTime } from "@utils/toolFunc.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
 
 type TpoLotteryProps = { lottery: string | undefined };
 type RenderCard = {

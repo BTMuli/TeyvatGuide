@@ -23,9 +23,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed, shallowRef, watch } from "vue";
-
 import { getOdStarColor } from "@utils/colorFunc.js";
+import { computed, shallowRef, watch } from "vue";
 
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
 

@@ -32,11 +32,9 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { onMounted, onUnmounted, ref, watch } from "vue";
-
-import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
-
 import dnEnum from "@enum/dailyNote.js";
+import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteExpeditionProps = {
   expedition: TGApp.Game.DailyNote.Expedition;

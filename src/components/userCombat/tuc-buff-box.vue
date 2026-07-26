@@ -68,10 +68,9 @@
 </template>
 <script lang="ts" setup>
 import useAppStore from "@store/app.js";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onUnmounted, ref, watch } from "vue";
-
-import { parseHtmlText } from "@utils/toolFunc.js";
 
 type TucBuffBoxProps = {
   modelValue: TGApp.Game.Combat.SplendourBuff;

@@ -13,8 +13,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
 import { getOdStarColor } from "@utils/colorFunc.js";
+import { computed } from "vue";
 
 type PwRelicSetItemProps = {
   set: TGApp.App.Relic.SetItem;

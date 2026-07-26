@@ -31,10 +31,10 @@ import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import painterReq from "@req/painterReq.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { storeToRefs } from "pinia";
-import { ref, shallowRef, useTemplateRef, watch } from "vue";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { storeToRefs } from "pinia";
+import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
 const { cookie } = storeToRefs(useUserStore());
 

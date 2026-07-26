@@ -93,6 +93,9 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
+import PbRelicFilter, { type RelicFilterValue } from "@comp/pageBag/pb-relic-filter.vue";
+import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
@@ -108,9 +111,6 @@ import {
   triggerRef,
   watch,
 } from "vue";
-import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
-import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
-import PbRelicFilter, { type RelicFilterValue } from "@comp/pageBag/pb-relic-filter.vue";
 
 const { gameDir, isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());

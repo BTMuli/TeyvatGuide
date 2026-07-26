@@ -3,9 +3,8 @@
  * @since Beta v0.11.3
  */
 
-import Md5 from "js-md5";
-
 import bbsEnum from "@enum/bbs.js";
+import Md5 from "js-md5";
 
 import TGBbs from "./TGBbs.js";
 import { getDeviceInfo, getRandomString } from "./toolFunc.js";

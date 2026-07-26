@@ -3,8 +3,9 @@
  * @since Beta v0.10.0
  */
 
-import { BILI_HEADER, getWrid } from "../utils.js";
 import TGHttps from "@utils/TGHttps.js";
+
+import { BILI_HEADER, getWrid } from "../utils.js";
 
 /**
  * 获取视频基本信息

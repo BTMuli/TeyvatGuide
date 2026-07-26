@@ -5,12 +5,12 @@
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { parse } from "ini";
 import { invoke } from "@tauri-apps/api/core";
 import { documentDir, resourceDir, sep } from "@tauri-apps/api/path";
 import { copyFile, exists, mkdir, readDir, readTextFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
+import { parse } from "ini";
 
 // YAE支持的游戏版本
 export const YAE_GAME_VER: Readonly<string> = "6.7.0";

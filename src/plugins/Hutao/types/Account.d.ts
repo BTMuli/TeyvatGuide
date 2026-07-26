@@ -107,20 +107,14 @@ declare namespace TGApp.Plugins.Hutao.Account {
    * - 若需要重置用户名，请分别提交旧邮箱与新邮箱两次请求以获取成对验证码。
    */
   type VerifyParams =
-    | ResetPwdCodeParam
-    | ResetUserNameCodeParam
-    | ResetUserNameNewCodeParam
-    | CancelRegCodeParam;
+    ResetPwdCodeParam | ResetUserNameCodeParam | ResetUserNameNewCodeParam | CancelRegCodeParam;
 
   /**
    * Verify接口Flag值
    * @since Beta v0.9.1
    */
   type VerifyFlags =
-    | "IsResetPassword"
-    | "IsResetUserName"
-    | "IsResetUserNameNew"
-    | "IsCancelRegistration";
+    "IsResetPassword" | "IsResetUserName" | "IsResetUserNameNew" | "IsCancelRegistration";
 
   /**
    * Verify Flag 生成

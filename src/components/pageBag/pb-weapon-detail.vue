@@ -42,10 +42,9 @@
   </v-navigation-drawer>
 </template>
 <script lang="ts" setup>
-import { computed } from "vue";
-
-import wikiUtils from "@utils/wikiUtils.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
+import wikiUtils from "@utils/wikiUtils.js";
+import { computed } from "vue";
 
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
 

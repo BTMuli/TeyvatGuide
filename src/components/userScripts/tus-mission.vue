@@ -51,12 +51,12 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TusMoRecord from "@comp/userScripts/tus-mo-record.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";
-import { ref, shallowRef, useTemplateRef, watch } from "vue";
-import TGHttps from "@utils/TGHttps.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
+import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
 /** 用于渲染的任务项 */
 type ParseMission = {

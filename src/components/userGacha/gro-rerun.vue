@@ -59,11 +59,13 @@
 
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import GroRerunCell from "./gro-rerun-cell.vue";
-import { AppGachaData } from "@/data/index.js";
-import { getWikiBrief } from "@utils/toolFunc.js";
 import gameEnum from "@enum/game.js";
+import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed, onMounted, ref } from "vue";
+
+import GroRerunCell from "./gro-rerun-cell.vue";
+
+import { AppGachaData } from "@/data/index.js";
 
 /** 分类选项 */
 const Category = <const>{

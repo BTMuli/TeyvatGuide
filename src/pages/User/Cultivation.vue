@@ -255,25 +255,23 @@
 </template>
 
 <script lang="ts" setup>
-import showSnackbar from "@comp/func/snackbar.js";
 import showDialog from "@comp/func/dialog.js";
-import TSUserAvatar from "@Sqlm/userAvatar.js";
-import TSUserAccount from "@Sqlm/userAccount.js";
-import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
-import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
-import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
-import TSUserRecord from "@Sqlm/userRecord.js";
-import gameEnum from "@enum/game.js";
-import takumiReq from "@req/takumiReq.js";
-import useAppStore from "@store/app.js";
-import useUserStore from "@store/user.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
 import UcPlanTargetList from "@comp/userCalc/uc-plan-target-list.vue";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
+import gameEnum from "@enum/game.js";
+import takumiReq from "@req/takumiReq.js";
+import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
+import TSUserAccount from "@Sqlm/userAccount.js";
+import TSUserAvatar from "@Sqlm/userAvatar.js";
+import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
+import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
+import TSUserRecord from "@Sqlm/userRecord.js";
+import useAppStore from "@store/app.js";
+import useUserStore from "@store/user.js";
 import { platform } from "@tauri-apps/plugin-os";
-import TGHttps from "@utils/TGHttps.js";
-import { tryCallYae } from "@utils/TGGame.js";
 import { getRfAc } from "@utils/acUtils.js";
 import {
   aggregateEntryMaterials,
@@ -282,6 +280,8 @@ import {
   getUidServerTimezone,
   sortCultivationResults,
 } from "@utils/cultivationPlan.js";
+import { tryCallYae } from "@utils/TGGame.js";
+import TGHttps from "@utils/TGHttps.js";
 import { getRcStar, getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";

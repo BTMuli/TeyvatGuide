@@ -61,11 +61,11 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
 import { parseBirthGal, parseBirthSrc } from "@utils/birthParser.js";
+import TGHttps from "@utils/TGHttps.js";
+import TGLogger from "@utils/TGLogger.js";
 import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
 import { bytesToSize } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
 
 type ToArcBirthProps = { data?: TGApp.Archive.Birth.DrawItem; choice: boolean };
 

@@ -13,6 +13,7 @@ import gacha from "./app/gacha.json" with { type: "json" };
 import gachaB from "./app/gachaB.json" with { type: "json" };
 import hyperlink from "./app/hyperlink.json" with { type: "json" };
 import nameCards from "./app/namecard.json" with { type: "json" };
+import propMap from "./app/propMap.json" with { type: "json" };
 import weapon from "./app/weapon.json" with { type: "json" };
 import arcBirCalendar from "./archive/birth_calendar.json" with { type: "json" };
 import arcBirDraw from "./archive/birth_draw.json" with { type: "json" };
@@ -20,7 +21,6 @@ import arcBirRole from "./archive/birth_role.json" with { type: "json" };
 import schemaUiaf from "./schema/uiaf-schema.json" with { type: "json" };
 import schemaUigf from "./schema/uigf-schema.json" with { type: "json" };
 import schemaUigf4 from "./schema/uigf4-schema.json" with { type: "json" };
-import propMap from "./app/propMap.json" with { type: "json" };
 import wikiMaterial from "./WIKI/material.json" with { type: "json" };
 import wikiRelicMainLv from "./WIKI/relic/MainLv.json" with { type: "json" };
 import wikiRelicMainProp from "./WIKI/relic/MainProp.json" with { type: "json" };
@@ -28,9 +28,9 @@ import wikiRelic from "./WIKI/relic/Relic.json" with { type: "json" };
 import wikiRelicMap from "./WIKI/relic/RelicMap.json" with { type: "json" };
 import wikiRelicSet from "./WIKI/relic/RelicSet.json" with { type: "json" };
 import wikiRelicSubProp from "./WIKI/relic/SubProp.json" with { type: "json" };
-import wikiWeapon from "./WIKI/weapon/weapon.json" with { type: "json" };
-import wikiWeaponPromote from "./WIKI/weapon/promote.json" with { type: "json" };
 import wikiWeaponCurve from "./WIKI/weapon/curve.json" with { type: "json" };
+import wikiWeaponPromote from "./WIKI/weapon/promote.json" with { type: "json" };
+import wikiWeapon from "./WIKI/weapon/weapon.json" with { type: "json" };
 
 // App
 export const AppAchievementsData: Array<TGApp.App.Achievement.Item> = achievements;
