@@ -1,13 +1,16 @@
 //! Yae 背包信息的 Protobuf 定义&解析
-//! @since Beta v0.11.0
+//! @since Beta v0.11.3
 #![cfg(target_os = "windows")]
 
-use prost::DecodeError;
 use prost::encoding::{WireType, decode_key, decode_varint};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 use std::collections::HashMap;
-use std::io::{Cursor, Read, Seek};
+use std::io::{Cursor, Error, ErrorKind, Read, Seek};
+
+fn invalid_data(message: &'static str) -> Error {
+  Error::new(ErrorKind::InvalidData, message)
+}
 
 /// StoreType enum
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, ::prost::Enumeration)]
@@ -351,7 +354,7 @@ pub struct ItemData {
 
 /// 解析顶层 bytes，返回 ItemData 列表（低级解析）
 /// 说明：现在解析 guid（tag=2），kind 为字符串，info 为 ItemInfo
-pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
+pub fn parse_store_list(bytes: &[u8]) -> std::io::Result<Vec<ItemData>> {
   let mut cursor = Cursor::new(bytes);
   let mut out: Vec<ItemData> = Vec::new();
 
@@ -380,7 +383,7 @@ pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
       }
       _ => {
         // 未知 wire type，返回错误
-        return Err(DecodeError::new("unknown wire type at top level"));
+        return Err(invalid_data("unknown wire type at top level"));
       }
     }
   }
@@ -390,7 +393,7 @@ pub fn parse_store_list(bytes: &[u8]) -> Result<Vec<ItemData>, DecodeError> {
 
 /// 解析单个 Item 子消息（buf 为该子消息的完整 bytes）
 /// 现在解析 guid（tag=2），并将 guid 传入 Equip 解析以写入导出数据
-fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
+fn parse_item_from_buf(buf: &[u8]) -> std::io::Result<ItemData> {
   let mut inner = Cursor::new(buf);
 
   // 默认值
@@ -413,7 +416,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
       (5, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
         let mut mbuf = vec![0u8; len];
-        inner.read_exact(&mut mbuf).map_err(|_| DecodeError::new("read material buf failed"))?;
+        inner.read_exact(&mut mbuf).map_err(|_| invalid_data("read material buf failed"))?;
 
         if let Ok(cnt) = parse_material_from_buf(&mbuf) {
           kind_str = "material".to_string();
@@ -424,7 +427,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
       (6, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
         let mut eb = vec![0u8; len];
-        inner.read_exact(&mut eb).map_err(|_| DecodeError::new("read equip buf failed"))?;
+        inner.read_exact(&mut eb).map_err(|_| invalid_data("read equip buf failed"))?;
         if let Ok(item_info) = parse_equip_from_buf(&eb, guid.clone()) {
           match &item_info {
             ItemInfo::Reliquary { .. } => kind_str = "reliquary".to_string(),
@@ -438,7 +441,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
       (7, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
         let mut fb = vec![0u8; len];
-        inner.read_exact(&mut fb).map_err(|_| DecodeError::new("read furniture buf failed"))?;
+        inner.read_exact(&mut fb).map_err(|_| invalid_data("read furniture buf failed"))?;
         if let Ok(cnt) = parse_furniture_from_buf(&fb) {
           kind_str = "furniture".to_string();
           info = ItemInfo::Furniture { count: cnt };
@@ -448,9 +451,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
       (8, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
         let mut bb = vec![0u8; len];
-        inner
-          .read_exact(&mut bb)
-          .map_err(|_| DecodeError::new("read beyond_material buf failed"))?;
+        inner.read_exact(&mut bb).map_err(|_| invalid_data("read beyond_material buf failed"))?;
         if let Ok((count, delete_info)) = parse_beyond_material_from_buf(&bb) {
           kind_str = "beyond_material".to_string();
           info = ItemInfo::BeyondMaterial { count, delete_info };
@@ -460,7 +461,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
       (9, WireType::LengthDelimited) => {
         let len = decode_varint(&mut inner)? as usize;
         let mut fb2 = vec![0u8; len];
-        inner.read_exact(&mut fb2).map_err(|_| DecodeError::new("read facility buf failed"))?;
+        inner.read_exact(&mut fb2).map_err(|_| invalid_data("read facility buf failed"))?;
         if let Ok(cnt) = parse_facility_from_buf(&fb2) {
           kind_str = "facility".to_string();
           info = ItemInfo::Facility { count: cnt }; // 你可以改成自己的结构体
@@ -484,7 +485,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
         let mut tmp = [0u8; 4];
         inner.read_exact(&mut tmp).ok();
       }
-      _ => return Err(DecodeError::new("unknown wire type in item")),
+      _ => return Err(invalid_data("unknown wire type in item")),
     }
   }
 
@@ -492,7 +493,7 @@ fn parse_item_from_buf(buf: &[u8]) -> Result<ItemData, DecodeError> {
 }
 
 /// 解析 Material 子消息，返回 count（uint32）
-fn parse_material_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
+fn parse_material_from_buf(buf: &[u8]) -> std::io::Result<u32> {
   let mut cur = Cursor::new(buf);
   while let Ok((tag, wire_type)) = decode_key(&mut cur) {
     if tag == 1 && wire_type == WireType::Varint {
@@ -505,27 +506,27 @@ fn parse_material_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
         }
         WireType::SixtyFourBit => {
           let mut tmp = [0u8; 8];
-          cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+          cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
         }
         WireType::LengthDelimited => {
           let len = decode_varint(&mut cur)? as usize;
           cur
             .seek(std::io::SeekFrom::Current(len as i64))
-            .map_err(|_| DecodeError::new("skip failed"))?;
+            .map_err(|_| invalid_data("skip failed"))?;
         }
         WireType::ThirtyTwoBit => {
           let mut tmp = [0u8; 4];
-          cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+          cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
         }
-        _ => return Err(DecodeError::new("unknown wire type in material")),
+        _ => return Err(invalid_data("unknown wire type in material")),
       }
     }
   }
-  Err(DecodeError::new("material count not found"))
+  Err(invalid_data("material count not found"))
 }
 
 /// 解析 Furniture 子消息，返回 count（uint32）
-fn parse_furniture_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
+fn parse_furniture_from_buf(buf: &[u8]) -> std::io::Result<u32> {
   let mut cur = Cursor::new(buf);
   while let Ok((tag, wire_type)) = decode_key(&mut cur) {
     if tag == 1 && wire_type == WireType::Varint {
@@ -538,23 +539,23 @@ fn parse_furniture_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
         }
         WireType::SixtyFourBit => {
           let mut tmp = [0u8; 8];
-          cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+          cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
         }
         WireType::LengthDelimited => {
           let len = decode_varint(&mut cur)? as usize;
           cur
             .seek(std::io::SeekFrom::Current(len as i64))
-            .map_err(|_| DecodeError::new("skip failed"))?;
+            .map_err(|_| invalid_data("skip failed"))?;
         }
         WireType::ThirtyTwoBit => {
           let mut tmp = [0u8; 4];
-          cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+          cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
         }
-        _ => return Err(DecodeError::new("unknown wire type in furniture")),
+        _ => return Err(invalid_data("unknown wire type in furniture")),
       }
     }
   }
-  Err(DecodeError::new("furniture count not found"))
+  Err(invalid_data("furniture count not found"))
 }
 
 /// 简单的 Reliquary 结构用于解析
@@ -568,7 +569,7 @@ struct ReliquaryTmp {
 }
 
 /// 解析 Reliquary 子消息
-fn parse_reliquary_from_buf(buf: &[u8]) -> Result<ReliquaryTmp, DecodeError> {
+fn parse_reliquary_from_buf(buf: &[u8]) -> std::io::Result<ReliquaryTmp> {
   let mut cur = Cursor::new(buf);
   let mut r = ReliquaryTmp {
     level: 0,
@@ -588,7 +589,7 @@ fn parse_reliquary_from_buf(buf: &[u8]) -> Result<ReliquaryTmp, DecodeError> {
       (5, WireType::LengthDelimited) => {
         let len = decode_varint(&mut cur)? as usize;
         let mut packed = vec![0u8; len];
-        cur.read_exact(&mut packed).map_err(|_| DecodeError::new("read append_prop failed"))?;
+        cur.read_exact(&mut packed).map_err(|_| invalid_data("read append_prop failed"))?;
 
         let mut pcur = Cursor::new(&packed);
         while let Ok(v) = decode_varint(&mut pcur) {
@@ -601,19 +602,19 @@ fn parse_reliquary_from_buf(buf: &[u8]) -> Result<ReliquaryTmp, DecodeError> {
       }
       (_, WireType::SixtyFourBit) => {
         let mut tmp = [0u8; 8];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+        cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
       }
       (_, WireType::LengthDelimited) => {
         let len = decode_varint(&mut cur)? as usize;
         cur
           .seek(std::io::SeekFrom::Current(len as i64))
-          .map_err(|_| DecodeError::new("skip failed"))?;
+          .map_err(|_| invalid_data("skip failed"))?;
       }
       (_, WireType::ThirtyTwoBit) => {
         let mut tmp = [0u8; 4];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+        cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
       }
-      _ => return Err(DecodeError::new("unknown wire type in reliquary")),
+      _ => return Err(invalid_data("unknown wire type in reliquary")),
     }
   }
 
@@ -630,7 +631,7 @@ struct WeaponTmp {
 }
 
 /// 解析 Weapon 子消息（只解析常用字段）
-fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
+fn parse_weapon_from_buf(buf: &[u8]) -> std::io::Result<WeaponTmp> {
   let mut cur = Cursor::new(buf);
   let mut w = WeaponTmp {
     level: 0,
@@ -649,7 +650,7 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
         // affix_map: map<uint32,uint32> 底层是 repeated entry message（length-delimited）
         let len = decode_varint(&mut cur)? as usize;
         let mut mb = vec![0u8; len];
-        cur.read_exact(&mut mb).map_err(|_| DecodeError::new("read affix_map entry failed"))?;
+        cur.read_exact(&mut mb).map_err(|_| invalid_data("read affix_map entry failed"))?;
         // 解析 entry: key(tag=1,varint), value(tag=2,varint)
         let mut ecur = Cursor::new(&mb);
         let mut key: Option<u32> = None;
@@ -665,7 +666,7 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
               let l = decode_varint(&mut ecur)? as usize;
               ecur
                 .seek(std::io::SeekFrom::Current(l as i64))
-                .map_err(|_| DecodeError::new("skip failed"))?;
+                .map_err(|_| invalid_data("skip failed"))?;
             }
             _ => {
               let _ = decode_varint(&mut ecur)?;
@@ -682,19 +683,19 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
       }
       (_, WireType::SixtyFourBit) => {
         let mut tmp = [0u8; 8];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+        cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
       }
       (_, WireType::LengthDelimited) => {
         let len = decode_varint(&mut cur)? as usize;
         cur
           .seek(std::io::SeekFrom::Current(len as i64))
-          .map_err(|_| DecodeError::new("skip failed"))?;
+          .map_err(|_| invalid_data("skip failed"))?;
       }
       (_, WireType::ThirtyTwoBit) => {
         let mut tmp = [0u8; 4];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+        cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
       }
-      _ => return Err(DecodeError::new("unknown wire type in weapon")),
+      _ => return Err(invalid_data("unknown wire type in weapon")),
     }
   }
 
@@ -702,7 +703,7 @@ fn parse_weapon_from_buf(buf: &[u8]) -> Result<WeaponTmp, DecodeError> {
 }
 
 /// 解析 Facility 子消息，返回 ItemInfo
-fn parse_facility_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
+fn parse_facility_from_buf(buf: &[u8]) -> std::io::Result<u32> {
   let mut cur = Cursor::new(buf);
   let mut count: u32 = 0;
 
@@ -736,7 +737,7 @@ fn parse_facility_from_buf(buf: &[u8]) -> Result<u32, DecodeError> {
 }
 
 /// 解析 BeyondMaterial 的 Unk6600Lndfmpdofel
-fn parse_unk6600_delete_info(buf: &[u8]) -> Result<HashMap<u32, u32>, DecodeError> {
+fn parse_unk6600_delete_info(buf: &[u8]) -> std::io::Result<HashMap<u32, u32>> {
   let mut cur = Cursor::new(buf);
   let mut map_out: HashMap<u32, u32> = HashMap::new();
 
@@ -748,7 +749,7 @@ fn parse_unk6600_delete_info(buf: &[u8]) -> Result<HashMap<u32, u32>, DecodeErro
         let mut entry_buf = vec![0u8; len];
         cur
           .read_exact(&mut entry_buf)
-          .map_err(|_| DecodeError::new("read delete_time_num_map entry failed"))?;
+          .map_err(|_| invalid_data("read delete_time_num_map entry failed"))?;
 
         // 解析 map entry: key(tag=1), value(tag=2)
         let mut ecur = Cursor::new(&entry_buf);
@@ -811,9 +812,7 @@ fn parse_unk6600_delete_info(buf: &[u8]) -> Result<HashMap<u32, u32>, DecodeErro
 }
 
 /// 解析 BeyondMaterial 子消息，返回 ItemInfo
-fn parse_beyond_material_from_buf(
-  buf: &[u8],
-) -> Result<(u32, Option<HashMap<u32, u32>>), DecodeError> {
+fn parse_beyond_material_from_buf(buf: &[u8]) -> std::io::Result<(u32, Option<HashMap<u32, u32>>)> {
   let mut cur = Cursor::new(buf);
 
   let mut count: u32 = 0;
@@ -832,7 +831,7 @@ fn parse_beyond_material_from_buf(
         let mut dbuf = vec![0u8; len];
         cur
           .read_exact(&mut dbuf)
-          .map_err(|_| DecodeError::new("read beyond_material.delete_info failed"))?;
+          .map_err(|_| invalid_data("read beyond_material.delete_info failed"))?;
 
         delete_info = Some(parse_unk6600_delete_info(&dbuf)?);
       }
@@ -863,7 +862,7 @@ fn parse_beyond_material_from_buf(
 /// 解析 Equip 子消息，返回 ItemInfo（包含 is_locked: Option<bool> 和 guid）
 /// 将原先返回 (ItemKind, is_locked) 的逻辑合并到 ItemInfo 中
 /// 现在接收 guid 参数并把它写入 Reliquary/Weapon 变体
-fn parse_equip_from_buf(buf: &[u8], guid: String) -> Result<ItemInfo, DecodeError> {
+fn parse_equip_from_buf(buf: &[u8], guid: String) -> std::io::Result<ItemInfo> {
   let mut cur = Cursor::new(buf);
   let mut is_locked: Option<bool> = None;
   let mut info: ItemInfo = ItemInfo::Unknown;
@@ -874,7 +873,7 @@ fn parse_equip_from_buf(buf: &[u8], guid: String) -> Result<ItemInfo, DecodeErro
       (1, WireType::LengthDelimited) => {
         let len = decode_varint(&mut cur)? as usize;
         let mut rb = vec![0u8; len];
-        cur.read_exact(&mut rb).map_err(|_| DecodeError::new("read reliquary buf failed"))?;
+        cur.read_exact(&mut rb).map_err(|_| invalid_data("read reliquary buf failed"))?;
         if let Ok(r) = parse_reliquary_from_buf(&rb) {
           info = ItemInfo::Reliquary {
             level: r.level,
@@ -892,7 +891,7 @@ fn parse_equip_from_buf(buf: &[u8], guid: String) -> Result<ItemInfo, DecodeErro
       (2, WireType::LengthDelimited) => {
         let len = decode_varint(&mut cur)? as usize;
         let mut wb = vec![0u8; len];
-        cur.read_exact(&mut wb).map_err(|_| DecodeError::new("read weapon buf failed"))?;
+        cur.read_exact(&mut wb).map_err(|_| invalid_data("read weapon buf failed"))?;
         if let Ok(w) = parse_weapon_from_buf(&wb) {
           info = ItemInfo::Weapon {
             level: w.level,
@@ -916,19 +915,19 @@ fn parse_equip_from_buf(buf: &[u8], guid: String) -> Result<ItemInfo, DecodeErro
       }
       (_, WireType::SixtyFourBit) => {
         let mut tmp = [0u8; 8];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+        cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
       }
       (_, WireType::LengthDelimited) => {
         let len = decode_varint(&mut cur)? as usize;
         cur
           .seek(std::io::SeekFrom::Current(len as i64))
-          .map_err(|_| DecodeError::new("skip failed"))?;
+          .map_err(|_| invalid_data("skip failed"))?;
       }
       (_, WireType::ThirtyTwoBit) => {
         let mut tmp = [0u8; 4];
-        cur.read_exact(&mut tmp).map_err(|_| DecodeError::new("skip failed"))?;
+        cur.read_exact(&mut tmp).map_err(|_| invalid_data("skip failed"))?;
       }
-      _ => return Err(DecodeError::new("unknown wire type in equip")),
+      _ => return Err(invalid_data("unknown wire type in equip")),
     }
   }
 

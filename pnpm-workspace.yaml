@@ -1,4 +1,5 @@
 allowBuilds:
+  '@parcel/watcher': false
   "@sentry/cli": false
   esbuild: false
 minimumReleaseAgeExclude:

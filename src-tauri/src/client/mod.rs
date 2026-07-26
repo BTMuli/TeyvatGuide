@@ -1,5 +1,5 @@
 //! 客户端模块，负责操作米游社客户端
-//! @since Beta v0.11.0
+//! @since Beta v0.11.3
 
 mod menu;
 mod utils;
@@ -7,7 +7,7 @@ mod utils;
 use tauri::{AppHandle, Manager, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;
 
-static BBS_VERSION: &'static str = "2.109.0";
+static BBS_VERSION: &'static str = "2.111.0";
 
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) {
