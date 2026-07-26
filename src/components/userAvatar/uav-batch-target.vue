@@ -19,14 +19,20 @@
               <span>角色目标等级</span>
               <span class="uabt-value">Lv.{{ targetLevel }}</span>
             </div>
-            <UcLevelSlider v-model="targetLevel" :current="1" :max="90" />
+            <UcLevelSlider
+              :current="1"
+              :max="90"
+              :model-value="targetLevel"
+              @update:model-value="updateTargetLevel"
+            />
             <v-checkbox
-              v-model="targetAscended"
               :disabled="!targetAtAscensionLevel"
+              :model-value="targetAscended"
               color="var(--tgc-od-green)"
               density="compact"
               hide-details
               label="到达目标等级后完成突破"
+              @update:model-value="updateTargetAscended"
             />
             <span class="uabt-hint">
               {{
@@ -40,7 +46,12 @@
               <span>技能目标等级</span>
               <span class="uabt-value">Lv.{{ talentLevel }}</span>
             </div>
-            <UcLevelSlider v-model="talentLevel" :current="1" :max="10" />
+            <UcLevelSlider
+              v-model="talentLevel"
+              :current="1"
+              :limit-max="talentLevelMax"
+              :max="10"
+            />
             <span class="uabt-hint">统一应用于普通攻击、元素战技与元素爆发</span>
           </div>
 
@@ -144,6 +155,9 @@ const weaponTargetAscended = ref<boolean>(false);
 const targetAtAscensionLevel = computed<boolean>(() =>
   userCalc.isAscensionLevel(targetLevel.value),
 );
+const talentLevelMax = computed<number>(() =>
+  userCalc.avatarTalentMaxLevel(targetLevel.value, targetAscended.value),
+);
 const weaponTargetAtAscensionLevel = computed<boolean>(() =>
   userCalc.isAscensionLevel(weaponTargetLevel.value),
 );
@@ -153,7 +167,10 @@ watch(
   (value) => {
     if (!value) return;
     targetLevel.value = props.modelValue.level;
-    talentLevel.value = props.modelValue.talentLevel;
+    talentLevel.value = Math.min(
+      props.modelValue.talentLevel,
+      userCalc.avatarTalentMaxLevel(props.modelValue.level, props.modelValue.ascended),
+    );
     targetAscended.value = props.modelValue.ascended;
     includeWeapon.value = props.modelValue.weapon.enabled;
     weaponTargetLevel.value = props.modelValue.weapon.level;
@@ -173,10 +190,22 @@ function cancel(): void {
   visible.value = false;
 }
 
+function updateTargetLevel(value: number): void {
+  targetLevel.value = value;
+  targetAscended.value = false;
+  talentLevel.value = userCalc.avatarTalentMaxLevel(value);
+}
+
+function updateTargetAscended(value: boolean | null): void {
+  const nextAscended = value === true;
+  targetAscended.value = nextAscended;
+  talentLevel.value = userCalc.avatarTalentMaxLevel(targetLevel.value, nextAscended);
+}
+
 function confirm(): void {
   emits("confirm", {
     level: targetLevel.value,
-    talentLevel: talentLevel.value,
+    talentLevel: Math.min(talentLevel.value, talentLevelMax.value),
     ascended: targetAtAscensionLevel.value && targetAscended.value,
     weapon: {
       enabled: includeWeapon.value,

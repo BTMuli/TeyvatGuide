@@ -26,6 +26,8 @@
         :class="{
           current: level <= current,
           target: level > current && level <= model,
+          remaining: level > model && level <= reachableMax,
+          unavailable: level > reachableMax,
         }"
         class="ucls-chunk"
       />
@@ -69,6 +71,7 @@ type UcLevelSliderProps = {
   currentEditable?: boolean;
   min?: number;
   max: number;
+  limitMax?: number;
   disabled?: boolean;
 };
 
@@ -81,17 +84,20 @@ const emit = defineEmits<{ "update:current": [value: number] }>();
 
 const model = defineModel<number>({ required: true });
 
+const reachableMax = computed<number>(() =>
+  Math.min(props.max, Math.max(props.min, props.current, props.limitMax ?? props.max)),
+);
 const trackLevels = computed<Array<number>>(() =>
   Array.from({ length: Math.max(props.max - props.min, 0) }, (_, index) => props.min + index + 1),
 );
 
 function updateValue(value: number): void {
-  model.value = Math.max(props.current, Math.min(value, props.max));
+  model.value = Math.max(props.current, Math.min(value, reachableMax.value));
 }
 
 function updateRange(value: [number, number]): void {
-  const nextCurrent = Math.min(Math.max(value[0], props.min), props.max);
-  const nextTarget = Math.min(Math.max(value[1], nextCurrent), props.max);
+  const nextCurrent = Math.min(Math.max(value[0], props.min), reachableMax.value);
+  const nextTarget = Math.min(Math.max(value[1], nextCurrent), reachableMax.value);
   emit("update:current", nextCurrent);
   model.value = nextTarget;
 }
@@ -209,6 +215,14 @@ function getMarkerPosition(value: number): string {
 
   &.target {
     background: var(--tgc-od-green);
+  }
+
+  &.remaining {
+    background: var(--tgc-od-white);
+  }
+
+  &.unavailable {
+    background: var(--tgc-od-red);
   }
 }
 

@@ -159,7 +159,8 @@
               v-model:current="currentLevel"
               :current-editable="currentStateEditable"
               :disabled="levelUnavailable"
-              :max="levelMax"
+              :limit-max="levelMax"
+              :max="90"
             />
           </div>
           <div class="ucw-ascension-options">

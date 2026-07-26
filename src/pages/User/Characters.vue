@@ -422,12 +422,16 @@ async function createBatchPlanInput(
   const targetAscended =
     (targetLevel === avatar.level && currentAscended) ||
     (targetLevel === target.level && target.ascended);
+  const targetTalentLevel = Math.min(
+    target.talentLevel,
+    userCalc.avatarTalentMaxLevel(targetLevel, targetAscended),
+  );
   const targetTalents = talentSkills.map(({ recordSkill, wikiSkill }, index) => ({
     id: wikiSkill.id,
     name: recordSkill.name,
     level: Math.max(
       Math.min(currentTalentLevels[index] ?? recordSkill.level, 10),
-      target.talentLevel,
+      targetTalentLevel,
     ),
   }));
   const materials = userCalc.avatar(

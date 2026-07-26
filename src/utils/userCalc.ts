@@ -69,6 +69,14 @@ const TARTAGLIA_NORMAL_ATTACK_ID = 10331;
 const TARTAGLIA_MASTER_OF_WEAPONRY_NAME = "诸武精通";
 
 const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
+const AVATAR_TALENT_LEVEL_CAPS = <const>[
+  [40, 1],
+  [50, 2],
+  [60, 4],
+  [70, 6],
+  [80, 8],
+  [90, 10],
+];
 const AVATAR_ASCENSION_MORA = <const>[20000, 40000, 60000, 80000, 100000, 120000];
 const AVATAR_BOSS_COUNTS = <const>[0, 2, 4, 8, 12, 20];
 const AVATAR_SPECIALTY_COUNTS = <const>[3, 10, 20, 30, 45, 60];
@@ -445,6 +453,23 @@ export function isAscensionLevel(level: number): boolean {
   return ASCENSION_LEVELS.some((ascensionLevel) => ascensionLevel === level);
 }
 
+/**
+ * 根据角色等级获取可培养天赋的等级上限。
+ * @param level - 角色等级
+ * @param ascendedAtThreshold - 位于临界等级时是否已完成突破
+ * @since Beta v0.11.2
+ */
+export function getAvatarTalentMaxLevel(level: number, ascendedAtThreshold = false): number {
+  const capIndex = AVATAR_TALENT_LEVEL_CAPS.findIndex(([maxLevel]) => level <= maxLevel);
+  if (capIndex === -1) return 10;
+  const [maxLevel] = AVATAR_TALENT_LEVEL_CAPS[capIndex];
+  const targetIndex =
+    ascendedAtThreshold && level === maxLevel
+      ? Math.min(capIndex + 1, AVATAR_TALENT_LEVEL_CAPS.length - 1)
+      : capIndex;
+  return AVATAR_TALENT_LEVEL_CAPS[targetIndex][1];
+}
+
 /** 判断对象是否已完成当前临界等级的突破。 */
 export function isAscendedAtThreshold(level: number, promoteLevel?: number): boolean {
   const thresholdIndex = ASCENSION_LEVELS.findIndex((ascensionLevel) => ascensionLevel === level);
@@ -769,6 +794,7 @@ const userCalc = {
   weapon: calculateWeaponMaterials,
   merge: mergeCultivationMaterials,
   weaponMaxLevel: getWeaponMaxLevel,
+  avatarTalentMaxLevel: getAvatarTalentMaxLevel,
   isAscensionLevel,
   isAscendedAtThreshold,
   correctTalentLevels: applyTalentLevelCorrections,

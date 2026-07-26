@@ -136,11 +136,13 @@
         <div class="ucc-level-config">
           <div :class="{ 'is-unavailable': levelUnavailable }" class="ucc-slider-field">
             <UcLevelSlider
-              v-model="targetLevel"
               v-model:current="currentLevel"
               :current-editable="currentStateEditable"
               :disabled="levelUnavailable"
-              :max="levelMax"
+              :limit-max="levelMax"
+              :max="90"
+              :model-value="targetLevel"
+              @update:model-value="updateTargetLevel"
             />
           </div>
           <div class="ucc-ascension-options">
@@ -174,12 +176,13 @@
               class="ucc-ascension-state target"
             >
               <v-checkbox
-                v-model="targetAscended"
                 :disabled="!targetAtAscensionLevel"
+                :model-value="targetAscended"
                 color="var(--tgc-od-green)"
                 density="compact"
                 hide-details
                 label="目标已突破"
+                @update:model-value="updateTargetAscended"
               />
               <span class="ucc-ascension-hint">
                 {{ targetAtAscensionLevel ? "计入目标突破" : "非临界等级" }}
@@ -199,7 +202,8 @@
             v-for="(skill, index) in skills"
             :key="skill.id"
             :class="{
-              'is-unavailable': !currentStateEditable && skill.level >= skill.maxLevel,
+              'is-unavailable':
+                !currentStateEditable && skill.level >= getSkillTargetMaxLevel(skill),
             }"
             class="ucc-talent"
           >
@@ -213,8 +217,9 @@
             <UcLevelSlider
               :current="currentTalentLevels[index] ?? skill.level"
               :current-editable="currentStateEditable"
-              :disabled="!currentStateEditable && skill.level >= skill.maxLevel"
-              :max="skill.maxLevel"
+              :disabled="!currentStateEditable && skill.level >= getSkillTargetMaxLevel(skill)"
+              :limit-max="getSkillTargetMaxLevel(skill)"
+              :max="10"
               :model-value="talentTargetLevels[index]"
               @update:current="updateCurrentTalent(index, $event)"
               @update:model-value="updateTalent(index, $event)"
@@ -230,6 +235,7 @@
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
 import UcPickerListItem from "@comp/userCalc/uc-picker-list-item.vue";
+import userCalc from "@utils/userCalc.js";
 import { computed, ref, watch } from "vue";
 
 type UcCharacterPanelProps = {
@@ -238,6 +244,7 @@ type UcCharacterPanelProps = {
   weaponType: string;
   levelOptions: Array<number>;
   skills: Array<TGApp.App.UserCalc.SkillOption>;
+  talentLevelMax: number;
   atAscensionLevel: boolean;
   currentAscensionReadonly: boolean;
   currentStateEditable: boolean;
@@ -297,10 +304,32 @@ watch(showSelector, (visible) => {
   if (!visible) searchKeyword.value = "";
 });
 
+function updateTargetLevel(value: number): void {
+  targetLevel.value = value;
+  targetAscended.value = false;
+  syncTalentTargets(userCalc.avatarTalentMaxLevel(value));
+}
+
+function updateTargetAscended(value: boolean | null): void {
+  const nextAscended = value === true;
+  targetAscended.value = nextAscended;
+  syncTalentTargets(userCalc.avatarTalentMaxLevel(targetLevel.value, nextAscended));
+}
+
+function syncTalentTargets(maxLevel: number): void {
+  talentTargetLevels.value = props.skills.map((skill, index) => {
+    const currentLevel = currentTalentLevels.value[index] ?? skill.level;
+    return Math.max(currentLevel, Math.min(skill.maxLevel, maxLevel));
+  });
+}
+
 function updateTalent(index: number, value: number): void {
   const skill = props.skills[index];
   const currentTalentLevel = skill?.level ?? 1;
-  const nextLevel = Math.max(currentTalentLevel, Math.min(value, skill?.maxLevel ?? 10));
+  const nextLevel = Math.max(
+    currentTalentLevel,
+    Math.min(value, skill ? getSkillTargetMaxLevel(skill) : props.talentLevelMax),
+  );
   talentTargetLevels.value = talentTargetLevels.value.map((level, currentIndex) =>
     currentIndex === index ? nextLevel : level,
   );
@@ -309,7 +338,7 @@ function updateTalent(index: number, value: number): void {
 function updateCurrentTalent(index: number, value: number | null): void {
   const skill = props.skills[index];
   if (!props.currentStateEditable || !skill || value === null) return;
-  const nextLevel = Math.min(Math.max(value, 1), skill.maxLevel);
+  const nextLevel = Math.min(Math.max(value, 1), getSkillTargetMaxLevel(skill));
   currentTalentLevels.value = props.skills.map((currentSkill, currentIndex) =>
     currentIndex === index
       ? nextLevel
@@ -318,6 +347,10 @@ function updateCurrentTalent(index: number, value: number | null): void {
   talentTargetLevels.value = talentTargetLevels.value.map((level, currentIndex) =>
     currentIndex === index ? Math.max(level, nextLevel) : level,
   );
+}
+
+function getSkillTargetMaxLevel(skill: TGApp.App.UserCalc.SkillOption): number {
+  return Math.max(skill.level, Math.min(skill.maxLevel, props.talentLevelMax));
 }
 </script>
 

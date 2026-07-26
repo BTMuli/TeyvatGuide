@@ -212,6 +212,7 @@
               :selected-character="selectedCharacter"
               :selection-readonly="editingEntry?.type === 'avatar'"
               :skills="displaySkills"
+              :talent-level-max="avatarTalentLevelMax"
               :target-at-ascension-level="avatarTargetAtAscensionLevel"
               :weapon-type="selectedRoleWeaponType"
             />
@@ -548,7 +549,7 @@ const selectedWeapon = computed<TGApp.App.UserCalc.WeaponOption | undefined>(() 
   weaponOptions.value.find((weapon) => weapon.key === selectedWeaponKey.value),
 );
 const weaponCurrentStateEditable = computed<boolean>(
-  () => selectedWeapon.value?.source === "catalog",
+  () => selectedWeapon.value !== undefined && selectedWeapon.value.source !== "bag",
 );
 const canApiCalculate = computed<boolean>(
   () =>
@@ -638,6 +639,9 @@ const avatarLevelOptions = computed<Array<number>>(() => {
     selectedSyncAvatar.value?.max_level ?? selectedApiAvatar.value?.max_level ?? 90,
   );
 });
+const avatarTalentLevelMax = computed<number>(() =>
+  userCalc.avatarTalentMaxLevel(avatarTargetLevel.value, avatarTargetAscended.value),
+);
 const weaponLevelOptions = computed<Array<number>>(() => {
   if (!selectedWeapon.value) return [];
   return createLevelOptions(
@@ -677,7 +681,7 @@ const weaponCurrentPromoteLevel = computed<number>(() => {
   if (selectedWeapon.value.fromBag) return selectedWeapon.value.promoteLevel;
   return userCalc.resolvePromoteLevel(
     weaponCurrentLevel.value,
-    selectedWeapon.value.promoteLevel,
+    undefined,
     weaponAtAscensionLevel.value ? weaponAscended.value : undefined,
   );
 });
@@ -869,8 +873,19 @@ watch(
 
 watch(weaponOptions, () => selectPreferredWeapon());
 
-watch(avatarTargetLevel, () => {
-  avatarTargetAscended.value = false;
+watch(avatarTargetAtAscensionLevel, (atAscensionLevel) => {
+  if (!atAscensionLevel) avatarTargetAscended.value = false;
+});
+
+watch(mainSkills, () => {
+  talentTargetLevels.value = mainSkills.value.map((skill, index) => {
+    const currentLevel = currentTalentLevels.value[index] ?? skill.level;
+    const targetLevel = talentTargetLevels.value[index] ?? currentLevel;
+    return Math.max(
+      currentLevel,
+      Math.min(targetLevel, skill.maxLevel, avatarTalentLevelMax.value),
+    );
+  });
 });
 
 watch(
