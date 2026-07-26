@@ -16,8 +16,6 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import "https://static.geetest.com/static/js/gt.0.4.9.js";
-import "https://static.geetest.com/v4/gt4.js";
 import { ref, useTemplateRef, watch } from "vue";
 
 const show = ref<boolean>(false);
