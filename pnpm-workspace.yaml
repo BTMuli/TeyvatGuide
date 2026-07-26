@@ -2,6 +2,7 @@ allowBuilds:
   '@parcel/watcher': false
   "@sentry/cli": false
   esbuild: false
+  unrs-resolver: false
 minimumReleaseAgeExclude:
   - "@oxlint/binding-android-arm-eabi@1.68.0 || 1.72.0"
   - "@oxlint/binding-android-arm64@1.68.0 || 1.72.0"

@@ -46,5 +46,5 @@ type GameServerEnum = (typeof GameServer)[keyof typeof GameServer];
 ## 导入
 
 - 优先使用 `tsconfig.json`/`vite.config.ts` 中已有别名，跨目录不要堆叠深层 `../../`。
-- 当前 `import/order` 暂未启用；保持邻近文件分组和排序，不以“修复顺序”为由制造无关 diff。
+- 导入分组和排序遵循 `import-x/order`；不要在任务范围外手动制造无关 diff。
 - NodeNext 项目内导入沿用现有 `.js` 扩展名写法。

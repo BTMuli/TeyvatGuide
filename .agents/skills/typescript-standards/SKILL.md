@@ -13,6 +13,5 @@ description: Write and review TypeScript and Vue code using TeyvatGuide's ESLint
 4. Do not add native TypeScript `enum`. Read [enum patterns](references/enum.md) when adding a value set or mapping
    declaration-space values to runtime objects.
 5. Read [TSDoc conventions](references/tsdoc.md) when adding or changing exported declarations.
-6. Preserve NodeNext `.js` import extensions and the local import grouping. Current `import/order` is disabled, so
-   avoid unrelated reordering.
+6. Preserve NodeNext `.js` import extensions and follow the grouping enforced by `import-x/order`.
 7. Validate with `pnpm lint-vue` and `pnpm lint:code`; add `pnpm lint:style` when Vue styles change.

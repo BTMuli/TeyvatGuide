@@ -1,8 +1,8 @@
 /**
  * Vue & Typescript 文件的 Eslint 配置
- * @since Beta v0.9.9
+ * @since Beta v0.11.3
  */
-import pluginImport from "eslint-plugin-import";
+import pluginImportX from "eslint-plugin-import-x";
 import pluginPrettier from "eslint-plugin-prettier";
 import pluginVue from "eslint-plugin-vue";
 import pluginTsDoc from "eslint-plugin-tsdoc";
@@ -19,15 +19,14 @@ const tsConfigRules = {
   "@typescript-eslint/no-unused-expressions": ["error", { allowShortCircuit: false }],
   "@typescript-eslint/array-type": ["error", { default: "generic" }],
   "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-  // TODO: 等后续 eslint-plugin-import 适配 ESLint 10 后再启用
-  // "import/order": [
-  //   "error",
-  //   {
-  //     groups: ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
-  //     "newlines-between": "always",
-  //     alphabetize: { order: "asc", caseInsensitive: true },
-  //   },
-  // ],
+  "import-x/order": [
+    "error",
+    {
+      groups: ["builtin", "external", "internal", "parent", "sibling", "index", "unknown"],
+      "newlines-between": "always",
+      alphabetize: { order: "asc", caseInsensitive: true },
+    },
+  ],
   "prettier/prettier": "error",
 };
 
@@ -35,7 +34,7 @@ const tsConfig = {
   files: ["*.ts", "*.d.ts", "src/**/*.ts", "src/**/*.d.ts"],
   plugins: {
     typescript: eslintTs,
-    import: pluginImport,
+    "import-x": pluginImportX,
     prettier: pluginPrettier,
     tsdoc: pluginTsDoc,
   },
@@ -51,7 +50,7 @@ const tsConfig = {
 
 const vueConfig = {
   files: ["src/**/*.vue", "src/App.vue"],
-  plugins: { vue: pluginVue, import: pluginImport, prettier: pluginPrettier },
+  plugins: { vue: pluginVue, "import-x": pluginImportX, prettier: pluginPrettier },
   languageOptions: {
     globals: {
       ...globals.browser,
