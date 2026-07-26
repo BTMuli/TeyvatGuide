@@ -68,9 +68,13 @@ watch(
 
 onMounted(async () => {
   await displayBox(props);
-  loadingEl.value?.addEventListener("contextmenu", (e) => e.preventDefault());
+  loadingEl.value?.addEventListener("contextmenu", preventContextMenu);
 });
-onUnmounted(() => loadingEl.value?.removeEventListener("contextmenu", (e) => e.preventDefault()));
+onUnmounted(() => loadingEl.value?.removeEventListener("contextmenu", preventContextMenu));
+
+function preventContextMenu(event: MouseEvent): void {
+  event.preventDefault();
+}
 
 async function getRandomEmoji(): Promise<void> {
   if (localEmojis.value.length === 0) {
