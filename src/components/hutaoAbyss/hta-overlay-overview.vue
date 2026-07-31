@@ -1,16 +1,23 @@
 <template>
-  <TOverlay v-model="visible">
-    <div class="hta-oo-box">
+  <div ref="shareEl" class="hta-oo-box">
+    <div class="hta-oob-header">
+      <div class="hta-oob-heading">
+        <v-icon icon="mdi-chart-box-outline" />
+        <span>数据概况</span>
+      </div>
       <v-btn
         :loading="loadShare"
         class="hta-oob-share"
-        @click="share()"
         data-html2canvas-ignore
-        variant="flat"
         icon="mdi-share-variant"
-        size="24px"
+        size="28"
+        title="分享数据概况"
+        variant="text"
+        @click="share()"
       />
-      <div class="hta-oob-title">数据收集统计</div>
+    </div>
+    <div class="hta-oob-section">
+      <div class="hta-oob-title">数据收集</div>
       <HtaOverviewLine
         label="当期深渊ID"
         :cur="props.data.cur.ScheduleId"
@@ -22,7 +29,9 @@
         :cur="props.data.cur.RecordTotal"
         :last="props.data.last.RecordTotal"
       />
-      <div class="hta-oob-title">深渊数据统计</div>
+    </div>
+    <div class="hta-oob-section">
+      <div class="hta-oob-title">深渊统计</div>
       <HtaOverviewLine
         label="总计深渊记录"
         :cur="props.data.cur.SpiralAbyssTotal"
@@ -48,12 +57,14 @@
         :cur="props.data.cur.SpiralAbyssBattleTotal / props.data.cur.SpiralAbyssTotal"
         :last="props.data.last.SpiralAbyssBattleTotal / props.data.last.SpiralAbyssTotal"
       />
-      <div class="hta-oob-extra">更新于 {{ timestampToDate(props.data.cur.Timestamp) }}</div>
     </div>
-  </TOverlay>
+    <div class="hta-oob-extra">
+      <v-icon icon="mdi-clock-outline" size="14" />
+      <span>更新于 {{ timestampToDate(props.data.cur.Timestamp) }}</span>
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
@@ -61,69 +72,86 @@ import { ref } from "vue";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
 
-import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
-
-type HtaOverlayOverviewProps = { data: AbyssDataItem<TGApp.Plugins.Hutao.Abyss.OverviewData> };
+type HtaOverlayOverviewProps = {
+  data: TGApp.Plugins.Hutao.Abyss.PeriodData<TGApp.Plugins.Hutao.Abyss.OverviewData>;
+};
 
 const props = defineProps<HtaOverlayOverviewProps>();
-const visible = defineModel<boolean>();
 const loadShare = ref<boolean>(false);
-
-console.log(props.data);
+const shareEl = ref<HTMLElement>();
 
 async function share(): Promise<void> {
   loadShare.value = true;
-  const shareEl = document.querySelector<HTMLElement>(".hta-oo-box");
-  if (shareEl === null) {
+  if (shareEl.value === undefined) {
     showSnackbar.warn("分享失败");
     loadShare.value = false;
     return;
   }
   const fileName = `深渊数据统计_${timestampToDate(props.data.cur.Timestamp)}.png`;
-  await generateShareImg(fileName, shareEl, 2);
+  await generateShareImg(fileName, shareEl.value, 2);
   loadShare.value = false;
 }
 </script>
 <style lang="css" scoped>
 .hta-oo-box {
-  position: relative;
   display: flex;
-  width: 300px;
+  width: 340px;
+  box-sizing: border-box;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
   background: var(--box-bg-1);
-  row-gap: 8px;
+  box-shadow: 0 8px 24px var(--common-shadow-4);
+  row-gap: 10px;
+}
+
+.hta-oob-header {
+  display: flex;
+  height: 32px;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-2);
+}
+
+.hta-oob-heading {
+  display: flex;
+  align-items: center;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: normal;
+  gap: 6px;
 }
 
 .hta-oob-share {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: var(--box-bg-2);
   color: var(--box-text-2);
-  font-size: 8px;
+}
+
+.hta-oob-section {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--box-bg-2);
+  row-gap: 6px;
 }
 
 .hta-oob-title {
   width: 100%;
-  border-bottom: 1px solid var(--common-shadow-4);
   color: var(--common-text-title);
   font-family: var(--font-title);
-  font-size: 20px;
+  font-size: 16px;
+  font-weight: normal;
 }
 
 .hta-oob-extra {
-  position: absolute;
-  z-index: -1;
-  right: 4px;
-  bottom: 4px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  color: var(--box-text-4);
   font-size: 12px;
+  gap: 4px;
 }
 </style>

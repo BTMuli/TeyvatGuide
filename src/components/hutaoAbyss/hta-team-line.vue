@@ -60,20 +60,21 @@ function getBoxData(id: number): TItemBoxData {
 .hta-tl-box {
   position: relative;
   display: flex;
-  width: calc(100% - 20px);
+  width: 100%;
+  min-height: 100px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
-  margin-bottom: 8px;
+  padding: 8px;
+  gap: 12px;
 }
 
 .hta-tl-item {
   display: grid;
-  padding: 8px;
+  padding: 6px;
   border-radius: 4px;
-  margin-left: 8px;
   background: var(--box-bg-2);
-  column-gap: 8px;
+  gap: 6px;
   grid-template-columns: repeat(4, 1fr);
 }
 
@@ -83,5 +84,7 @@ function getBoxData(id: number): TItemBoxData {
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
+  font-weight: normal;
+  white-space: nowrap;
 }
 </style>

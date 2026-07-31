@@ -185,11 +185,6 @@
             </v-list-item>
           </template>
           <v-list :nav="true" class="side-list-menu sub" density="compact">
-            <v-list-item :link="true" class="side-item-menu" href="/wiki/abyss" title="深渊统计">
-              <template #prepend>
-                <img alt="abyssIcon" class="side-icon-menu" src="/platforms/other/hutao.webp" />
-              </template>
-            </v-list-item>
             <v-list-item
               :link="true"
               class="side-item-menu"

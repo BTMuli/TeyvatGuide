@@ -1,6 +1,12 @@
 <!-- 角色持有率表格 -->
 <template>
-  <v-data-table :headers="headers" :items="holdData" fixed-header height="calc(100vh - 160px)">
+  <v-data-table
+    :headers="headers"
+    :items="holdData"
+    class="hta-th-table"
+    fixed-header
+    height="100%"
+  >
     <template v-slot:item="{ item }">
       <tr class="hta-th-tr">
         <td class="hta-th-icon">
@@ -37,22 +43,22 @@
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
-import { onMounted, shallowRef } from "vue";
+import { computed, shallowRef } from "vue";
 import { DataTableHeader } from "vuetify/lib/components/VDataTable/types.js";
 
 import { AppCharacterData } from "@/data/index.js";
-import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
 
-type HtaTabHoldProps = { data: AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>> };
+type HtaTabHoldProps = {
+  data: TGApp.Plugins.Hutao.Abyss.PeriodData<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>;
+};
 type HtaTabHoldConstellation = { Item: number; RateCur: number; RateLast: number };
 type HtaTabHoldData = {
   AvatarId: number;
-  HoldingRate: AbyssDataItem<number>;
+  HoldingRate: TGApp.Plugins.Hutao.Abyss.PeriodData<number>;
   Constellations: Array<HtaTabHoldConstellation>;
 };
 
 const props = defineProps<HtaTabHoldProps>();
-const holdData = shallowRef<Array<HtaTabHoldData>>([]);
 const headers = shallowRef<Array<DataTableHeader>>([
   { title: "角色", align: "center", key: "role", sortable: true, value: (v) => v.AvatarId },
   {
@@ -112,31 +118,33 @@ const headers = shallowRef<Array<DataTableHeader>>([
     value: (v) => v.Constellations[6].RateCur,
   },
 ]);
-
-onMounted(() => {
-  const tmpData: Array<HtaTabHoldData> = [];
-  for (const avatar of props.data.cur) {
-    const avatarLast = props.data.last.find((a) => a.AvatarId === avatar.AvatarId);
-    if (!avatarLast) continue;
-    const Rate: AbyssDataItem<number> = {
-      cur: avatar.HoldingRate,
-      last: avatarLast?.HoldingRate ?? 0,
-    };
-    const Constellations: Array<HtaTabHoldConstellation> = [];
-    for (const constellation of avatar.Constellations) {
-      const constellationLast = avatarLast?.Constellations.find(
-        (c) => c.Item === constellation.Item,
+const holdData = computed<Array<HtaTabHoldData>>(() => {
+  const avatarIds = new Set<number>([
+    ...props.data.cur.map((item) => item.AvatarId),
+    ...props.data.last.map((item) => item.AvatarId),
+  ]);
+  return [...avatarIds]
+    .map((avatarId) => {
+      const current = props.data.cur.find((item) => item.AvatarId === avatarId);
+      const previous = props.data.last.find((item) => item.AvatarId === avatarId);
+      const Constellations: Array<HtaTabHoldConstellation> = Array.from(
+        { length: 7 },
+        (_, item) => ({
+          Item: item,
+          RateCur: current?.Constellations.find((rate) => rate.Item === item)?.Rate ?? 0,
+          RateLast: previous?.Constellations.find((rate) => rate.Item === item)?.Rate ?? 0,
+        }),
       );
-      if (!constellationLast) continue;
-      Constellations.push({
-        Item: constellation.Item,
-        RateCur: constellation.Rate,
-        RateLast: constellationLast.Rate,
-      });
-    }
-    tmpData.push({ AvatarId: avatar.AvatarId, HoldingRate: Rate, Constellations: Constellations });
-  }
-  holdData.value = tmpData;
+      return {
+        AvatarId: avatarId,
+        HoldingRate: {
+          cur: current?.HoldingRate ?? 0,
+          last: previous?.HoldingRate ?? 0,
+        },
+        Constellations,
+      };
+    })
+    .sort((a, b) => b.HoldingRate.cur - a.HoldingRate.cur);
 });
 
 function getRateStr(cur: number, last: number): string {
@@ -184,6 +192,14 @@ function getBoxData(id: number): TItemBoxData {
 }
 </script>
 <style lang="css" scoped>
+.hta-th-table {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  background: var(--box-bg-1);
+}
+
 .hta-th-tr {
   height: 100px;
   text-align: center;

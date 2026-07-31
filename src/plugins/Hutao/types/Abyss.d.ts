@@ -1,9 +1,15 @@
 /**
  * 深境螺旋
- * @since Beta v0.9.9
+ * @since Beta v0.11.3
  */
 
 declare namespace TGApp.Plugins.Hutao.Abyss {
+  /**
+   * 深渊统计的当期与上期数据
+   * @since Beta v0.11.3
+   */
+  type PeriodData<T> = { cur: T; last: T };
+
   /**
    * 导入数据结构
    * @since Beta v0.9.9

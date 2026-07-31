@@ -1,119 +1,110 @@
 <template>
-  <div class="hta-tt-box">
-    <v-tabs v-model="tab" class="hta-tt-tab" direction="vertical">
-      <v-tab :value="10">第10层</v-tab>
-      <v-tab :value="11">第11层</v-tab>
-      <v-tab :value="12">第12层</v-tab>
-    </v-tabs>
-    <v-window v-model="tab" class="hta-tt-window">
-      <v-window-item v-for="selectItem in select" :key="selectItem.Floor" :value="selectItem.Floor">
-        <div class="hta-tt-flex">
-          <div class="hta-tuf-box">
-            <div class="hta-tuf-title">上半</div>
-            <v-virtual-scroll :items="selectItem.Up" class="hta-tuf-item" item-height="100">
-              <template #default="{ item }">
-                <HtaTeamLine :model-value="item" />
-              </template>
-            </v-virtual-scroll>
-            <span v-if="selectItem.Up.length === 0">暂无数据</span>
-          </div>
-          <div class="hta-tuf-box">
-            <div class="hta-tuf-title">下半</div>
-            <v-virtual-scroll :items="selectItem.Down" class="hta-tuf-item" item-height="100">
-              <template #default="{ item }">
-                <HtaTeamLine :model-value="item" />
-              </template>
-            </v-virtual-scroll>
-            <span v-if="selectItem.Down.length === 0">暂无数据</span>
-          </div>
-        </div>
-      </v-window-item>
-    </v-window>
+  <div v-if="selectedData" class="hta-tt-box">
+    <div class="hta-tuf-box">
+      <div class="hta-tuf-title">上半</div>
+      <div v-if="selectedData.Up.length > 0" class="hta-tuf-item">
+        <HtaTeamLine
+          v-for="(item, index) in selectedData.Up"
+          :key="`${item.Item}-${index}`"
+          :model-value="item"
+        />
+      </div>
+      <span v-if="selectedData.Up.length === 0" class="hta-tt-empty">暂无数据</span>
+    </div>
+    <div class="hta-tuf-box">
+      <div class="hta-tuf-title">下半</div>
+      <div v-if="selectedData.Down.length > 0" class="hta-tuf-item">
+        <HtaTeamLine
+          v-for="(item, index) in selectedData.Down"
+          :key="`${item.Item}-${index}`"
+          :model-value="item"
+        />
+      </div>
+      <span v-if="selectedData.Down.length === 0" class="hta-tt-empty">暂无数据</span>
+    </div>
   </div>
+  <div v-else class="hta-tt-empty">暂无数据</div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, shallowRef } from "vue";
+import { computed } from "vue";
 
 import HtaTeamLine from "./hta-team-line.vue";
 
-type HtaTabTeamProps = { modelValue: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination> };
+type HtaTabTeamProps = {
+  modelValue: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>;
+  floor?: number;
+};
 const props = defineProps<HtaTabTeamProps>();
 
-const tab = ref<number>(10);
-const select = shallowRef<Array<TGApp.Plugins.Hutao.Abyss.TeamCombination>>([]);
-
-onMounted(async () => {
-  const tempData: Array<TGApp.Plugins.Hutao.Abyss.TeamCombination> = [];
-  for (const item of props.modelValue) {
-    item.Up.sort((a, b) => b.Rate - a.Rate);
-    item.Down.sort((a, b) => b.Rate - a.Rate);
-    tempData.push(item);
-  }
-  select.value = tempData;
+const selectedData = computed<TGApp.Plugins.Hutao.Abyss.TeamCombination | undefined>(() => {
+  const data = props.modelValue.find((item) => item.Floor === props.floor);
+  if (data === undefined) return undefined;
+  return {
+    ...data,
+    Up: [...data.Up].sort((a, b) => b.Rate - a.Rate),
+    Down: [...data.Down].sort((a, b) => b.Rate - a.Rate),
+  };
 });
 </script>
 <style lang="css" scoped>
 .hta-tt-box {
   display: flex;
-  height: 100%;
-  column-gap: 10px;
-}
-
-.hta-tt-tab {
-  height: 100%;
-  color: var(--box-text-4);
-}
-
-.hta-tt-window {
-  overflow: auto;
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  overflow-x: hidden;
-}
-
-.hta-tt-flex {
-  position: relative;
-  display: flex;
-  overflow: auto;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 10px;
-  column-gap: 10px;
+  min-height: 0;
+  box-sizing: border-box;
+  align-items: stretch;
+  padding: 12px;
+  column-gap: 12px;
 }
 
 .hta-tuf-box {
   display: flex;
-  overflow: hidden auto;
+  overflow: hidden;
   width: 100%;
-  max-height: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 5px;
-  row-gap: 10px;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--box-bg-2);
+  row-gap: 8px;
 }
 
 .hta-tuf-title {
   width: 100%;
+  flex-shrink: 0;
   font-family: var(--font-title);
   font-size: 18px;
+  font-weight: normal;
   text-align: left;
 }
 
 .hta-tuf-item {
   position: relative;
   width: 100%;
-  max-height: calc(100vh - 160px);
-  border-radius: 5px;
+  min-height: 0;
+  flex: 1;
+  border-radius: 4px;
   background: var(--box-bg-1);
+  overflow-y: auto;
 }
 
-/* stylelint-disable selector-class-pattern */
+.hta-tt-empty {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-4);
+}
 
-:deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
+:deep(.hta-tl-box + .hta-tl-box) {
   border-top: 1px solid var(--common-shadow-1);
-  margin-top: 8px;
 }
-
-/* stylelint-enable selector-class-pattern */
 </style>

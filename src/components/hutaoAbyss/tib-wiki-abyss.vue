@@ -66,6 +66,7 @@ onMounted(() => {
       nameCard: "",
       release: "",
       star: 5,
+      team: [],
       title: "",
       weapon: "单手剑",
     };
@@ -82,13 +83,15 @@ function getDiffStr(): string {
 <style lang="css" scoped>
 .twa-container {
   display: flex;
+  overflow: hidden;
   height: 60px;
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-start;
   border: 1px solid var(--common-shadow-2);
   border-radius: 5px;
   background: var(--box-bg-1);
-  column-gap: 5px;
+  column-gap: 8px;
 }
 
 .twa-info {
@@ -96,18 +99,21 @@ function getDiffStr(): string {
   height: 100%;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: center;
   color: var(--box-text-4);
   font-size: 12px;
+  row-gap: 1px;
 
   :first-child {
     font-family: var(--font-title);
     font-size: 15px;
+    font-weight: normal;
   }
 
   :last-child {
     color: var(--tgc-od-blue);
     font-family: var(--font-title);
+    font-weight: normal;
 
     &.up {
       color: var(--tgc-od-red);

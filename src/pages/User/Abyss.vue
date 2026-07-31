@@ -54,7 +54,7 @@
     </template>
     <template #extension>
       <div class="uat-extension">
-        <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="toWiki()">
+        <v-btn :rounded="true" class="ua-btn" variant="elevated" @click="showStat = true">
           <img alt="wiki" src="/platforms/other/hutao.webp" />
           <span>统计数据</span>
         </v-btn>
@@ -119,6 +119,7 @@
       </div>
     </v-window>
   </div>
+  <TuaOvStat v-model="showStat" />
 </template>
 <script lang="ts" setup>
 import TSubLine from "@comp/app/t-subline.vue";
@@ -126,6 +127,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaDetail from "@comp/userAbyss/tua-detail.vue";
+import TuaOvStat from "@comp/userAbyss/tua-ov-stat.vue";
 import TuaOverview from "@comp/userAbyss/tua-overview.vue";
 import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
@@ -156,6 +158,7 @@ const version = ref<string>();
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localAbyss = shallowRef<Array<TGApp.Sqlite.Abyss.TableTrans>>([]);
+const showStat = ref<boolean>(false);
 
 onMounted(async () => {
   await showLoading.start("正在加载深渊数据");
@@ -197,10 +200,6 @@ async function toCombat(): Promise<void> {
 
 async function toChallenge(): Promise<void> {
   await router.push({ name: "幽境危战" });
-}
-
-async function toWiki(): Promise<void> {
-  await router.push({ name: "深渊数据库" });
 }
 
 async function tryLoginHutao(): Promise<void> {

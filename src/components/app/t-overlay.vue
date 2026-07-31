@@ -16,6 +16,8 @@ type TolProps = {
   blurVal?: string;
   /** 点击外部关闭 */
   outerClose?: boolean;
+  /** 浮窗顶部偏移 */
+  topOffset?: string;
   /** zIndex */
   zIndex?: number;
 };
@@ -23,6 +25,7 @@ type TolProps = {
 const props = withDefaults(defineProps<TolProps>(), {
   blurVal: "20px",
   outerClose: true,
+  topOffset: "0px",
   zIndex: 100,
 });
 
@@ -95,12 +98,12 @@ function toClick(): void {
 .tolo-box {
   position: fixed;
   z-index: v-bind(zIndex); /* stylelint-disable-line value-keyword-case */
-  top: 0;
+  top: v-bind(topOffset); /* stylelint-disable-line value-keyword-case */
   left: 0;
   display: flex;
   overflow: hidden;
   width: 100%;
-  height: 100%;
+  height: calc(100% - v-bind(topOffset)); /* stylelint-disable-line value-keyword-case */
   align-items: center;
   justify-content: center;
   border-radius: 8px;

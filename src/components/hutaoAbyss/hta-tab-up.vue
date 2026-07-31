@@ -1,80 +1,82 @@
 <template>
-  <div class="hta-tu-box">
-    <v-tabs v-model="tab" direction="vertical" class="hta-tu-tab">
-      <v-tab :value="11">第11层</v-tab>
-      <v-tab :value="12">第12层</v-tab>
-    </v-tabs>
-    <v-window v-model="tab" class="hta-tu-window">
-      <v-window-item v-for="selectItem in select" :key="selectItem.Floor" :value="selectItem.Floor">
-        <div class="hta-tu-grid">
-          <TibWikiAbyss
-            v-for="(item, index) in selectItem.Ranks"
-            :key="index"
-            :cur="item.cur.Rate"
-            :last="item.last.Rate"
-            :role="item.cur.Item"
-          />
-        </div>
-        <div v-if="selectItem.Ranks.length === 0">暂无数据</div>
-      </v-window-item>
-    </v-window>
+  <div v-if="selectedData" class="hta-tu-box">
+    <TibWikiAbyss
+      v-for="item in selectedData.Ranks"
+      :key="item.cur.Item"
+      :cur="item.cur.Rate"
+      :last="item.last.Rate"
+      :role="item.cur.Item"
+    />
   </div>
+  <div v-else class="hta-tu-empty">暂无数据</div>
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, shallowRef } from "vue";
+import { computed } from "vue";
 
 import TibWikiAbyss from "./tib-wiki-abyss.vue";
 
-import type { AbyssDataItem } from "@/pages/WIKI/Abyss.vue";
-
-type HtaTabUpProps = { data: AbyssDataItem<Array<TGApp.Plugins.Hutao.Abyss.AvatarUse>> };
-type HtaTabUpData = { Floor: number; Ranks: Array<AbyssDataItem<TGApp.Plugins.Hutao.Base.Rate>> };
+type HtaTabUpProps = {
+  data: TGApp.Plugins.Hutao.Abyss.PeriodData<Array<TGApp.Plugins.Hutao.Abyss.AvatarUp>>;
+  floor?: number;
+};
+type HtaTabUpData = {
+  Floor: number;
+  Ranks: Array<TGApp.Plugins.Hutao.Abyss.PeriodData<TGApp.Plugins.Hutao.Base.Rate>>;
+};
 
 const props = defineProps<HtaTabUpProps>();
-const tab = ref<number>(11);
-const select = shallowRef<Array<HtaTabUpData>>([]);
-
-onMounted(async () => {
-  const tmpData: Array<HtaTabUpData> = [];
-  for (const floor of props.data.cur) {
-    const floorLast = props.data.last.find((f) => f.Floor === floor.Floor);
-    const floorRank: HtaTabUpData = { Floor: floor.Floor, Ranks: [] };
-    floor.Ranks.sort((a, b) => b.Rate - a.Rate);
-    for (const rank of floor.Ranks) {
-      const rankLast = floorLast?.Ranks.find((r) => r.Item === rank.Item);
-      floorRank.Ranks.push({ cur: rank, last: rankLast ?? { Item: rank.Item, Rate: 0 } });
-    }
-    tmpData.push(floorRank);
-  }
-  select.value = tmpData;
+const select = computed<Array<HtaTabUpData>>(() => {
+  const floors = new Set<number>([
+    ...props.data.cur.map((item) => item.Floor),
+    ...props.data.last.map((item) => item.Floor),
+  ]);
+  return [...floors].map((floor) => {
+    const current = props.data.cur.find((item) => item.Floor === floor);
+    const previous = props.data.last.find((item) => item.Floor === floor);
+    const avatarIds = new Set<number>([
+      ...(current?.Ranks.map((item) => item.Item) ?? []),
+      ...(previous?.Ranks.map((item) => item.Item) ?? []),
+    ]);
+    const ranks = [...avatarIds]
+      .map((avatarId) => ({
+        cur: current?.Ranks.find((item) => item.Item === avatarId) ?? {
+          Item: avatarId,
+          Rate: 0,
+        },
+        last: previous?.Ranks.find((item) => item.Item === avatarId) ?? {
+          Item: avatarId,
+          Rate: 0,
+        },
+      }))
+      .sort((a, b) => b.cur.Rate - a.cur.Rate);
+    return { Floor: floor, Ranks: ranks };
+  });
 });
+const selectedData = computed<HtaTabUpData | undefined>(() =>
+  select.value.find((item) => item.Floor === props.floor),
+);
 </script>
 <style lang="scss" scoped>
 .hta-tu-box {
-  display: flex;
-  height: 100%;
-  column-gap: 10px;
-}
-
-.hta-tu-tab {
-  height: 100%;
-  color: var(--box-text-4);
-}
-
-.hta-tu-window {
-  width: 100%;
-  height: 100%;
-}
-
-.hta-tu-grid {
   display: grid;
-  overflow: auto;
   width: 100%;
-  max-height: calc(100vh - 100px);
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  align-content: start;
+  align-items: center;
+  padding: 12px;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  overflow-y: auto;
+}
+
+.hta-tu-empty {
+  display: flex;
+  width: 100%;
+  height: 100%;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 0.2fr));
+  color: var(--box-text-4);
 }
 </style>
