@@ -34,10 +34,13 @@ type GameServerEnum = (typeof GameServer)[keyof typeof GameServer];
 - Vue 单文件组件保持仓库顺序：`<template>`、`<script lang="ts" setup>`、`<style lang="scss" scoped>`
   （按需省略属性或 style 块）。
 - 组件在脚本中用 PascalCase；样式遵循 Stylelint，不手工绕过现有规则。
+- 使用 `font-family: var(--font-title)` 的文本必须同时声明 `font-weight: normal`。
 
 ## 类型与注释位置
 
 - 全局领域声明放在 `src/types/<Domain>/*.d.ts`，沿用现有 `TGApp` namespace 组织。
+- 类型应放入对应领域的 `.d.ts`，或就近拆分在实际使用它的 `.vue`/`.ts` 文件中；不要为类型单独
+  新建 `types.ts`。
 - 运行时枚举常量放在 `src/enum/*.ts` 或所属插件的既有目录。
 - 新增的导出类型、函数和常量按邻近代码添加 TSDoc，包含 `@since Beta v<package.json version>`。
 - 修改已有声明时不要无条件重写历史 `@since`；只有仓库当前约定要求记录本次契约版本时才更新
