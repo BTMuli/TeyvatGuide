@@ -77,9 +77,12 @@
         </div>
         <div v-if="targetMaterials.length > 0" class="phco-materials">
           <div v-for="material in targetMaterials" :key="material.id" class="phco-material">
-            <div class="phco-material-icon">
-              <img :alt="material.name" :src="`/icon/material/${material.id}.webp`" />
-            </div>
+            <UcItemIcon
+              :alt="material.name"
+              :icon="`/icon/material/${material.id}.webp`"
+              :size="42"
+              :star="material.star"
+            />
             <div class="phco-material-info">
               <strong>{{ material.name }}</strong>
               <span class="phco-material-required">
@@ -331,24 +334,10 @@ async function openPlan(): Promise<void> {
 .phco-material {
   min-width: 0;
   padding: 8px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
   background: var(--common-shadow-t-1);
   gap: 8px;
-}
-
-.phco-material-icon {
-  overflow: hidden;
-  width: 42px;
-  height: 42px;
-  flex: none;
-  border-radius: 6px;
-  background: var(--common-shadow-1);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
 }
 
 .phco-material-info {

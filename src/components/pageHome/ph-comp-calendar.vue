@@ -344,7 +344,7 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
 }
 
 .tc-calendar-item {
-  border-radius: 6px;
+  border-radius: 4px;
 
   &.planned {
     box-shadow: 0 0 8px color-mix(in srgb, var(--tgc-od-orange) 45%, transparent);
