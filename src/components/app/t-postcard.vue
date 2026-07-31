@@ -12,7 +12,7 @@
       <img v-else alt="cover" src="/UI/post/defaultCover.webp" />
       <div v-if="card.status" class="tpc-act">
         <div class="tpc-status">{{ card.status?.label }}</div>
-        <div class="tpc-time">
+        <div :class="imgCnt > 1 ? 'tpc-time--with-images' : ''" class="tpc-time">
           <v-icon>mdi-clock-time-four-outline</v-icon>
           <span>{{ card.subtitle }}</span>
         </div>
@@ -26,13 +26,9 @@
         <img v-if="card.forum.icon !== ''" :alt="card.forum.name" :src="card.forum.icon" />
         <span>{{ card.forum.name }}</span>
       </div>
-      <div
-        v-else-if="props.post.post.images.length > 1"
-        :title="`图片数：${props.post.post.images.length}`"
-        class="tpc-image-cnt"
-      >
+      <div v-else-if="imgCnt > 1" :title="`图片数：${imgCnt}`" class="tpc-image-cnt">
         <v-icon size="10">mdi-folder-multiple-image</v-icon>
-        <span>{{ props.post.post.images.length }}</span>
+        <span>{{ imgCnt }}</span>
       </div>
       <div v-if="!(selectMode && !listMode)" class="tpc-info-id" @click="shareCard()">
         <span>{{ props.post.post.post_id }}</span>
@@ -50,7 +46,7 @@
     </div>
     <div class="tpc-body">
       <div :title="card.title" class="tpc-title" @click="shareCard()">
-        <TpTitle :text="card.title" :single-line="listMode" />
+        <TpTitle :single-line="listMode" :text="card.title" />
       </div>
       <div v-if="card.user !== null" class="tpc-mid">
         <TpAvatar :data="card.user" position="left" @click="onUserClick()" />
@@ -227,6 +223,7 @@ const forumBg = computed<string>(() =>
   str2Color(`${card.value?.forum?.id}${card.value?.forum?.icon}${card.value?.forum?.name}`, -60),
 );
 const idBg = computed<string>(() => str2Color(`${props.post.post.post_id}`, 0));
+const imgCnt = computed<number>(() => props.post.post.images.length);
 
 const visibleTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
   if (!props.listMode || !card.value) return card.value?.topics ?? [];
@@ -875,6 +872,10 @@ function onUserClick(): void {
   color: var(--tgc-white-1);
   gap: 4px;
   opacity: 0.8;
+
+  &--with-images {
+    margin-right: 40px;
+  }
 }
 
 .tpc-info-id {
