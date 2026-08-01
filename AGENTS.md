@@ -14,6 +14,8 @@
   `.agents/skills/typescript-standards/SKILL.md`。
 - SQLite：读取 `.agents/rules/sqlite-rules.md`。
 - 项目结构、命令或跨前后端开发：使用 `.agents/skills/teyvat-guide/SKILL.md`。
+- Tauri 桌面 UI 预览、截图、交互或 IPC 调试：使用
+  `.agents/skills/tauri-mcp-cli/SKILL.md`，通过 debug 应用验证，不以纯浏览器预览替代。
 - Git 提交：仅在用户要求提交时使用 `.agents/skills/git-workflow/SKILL.md`，并遵循
   `.agents/rules/git-commit-rules.md`。
 
@@ -23,6 +25,7 @@
 - TypeScript/Vue/配置代码：`pnpm lint:code`
 - Vue/SCSS/CSS 样式：`pnpm lint:style`
 - Rust 格式：在 `src-tauri` 下运行 `cargo fmt --check`
+- Tauri 桌面 UI：按 `.agents/skills/tauri-mcp-cli/SKILL.md` 连接窗口并完成截图与交互检查
 - 跨范围或交付前完整检查：`pnpm lint`
 
 根据改动范围选择最小充分验证；若无法运行，说明未验证项和原因。

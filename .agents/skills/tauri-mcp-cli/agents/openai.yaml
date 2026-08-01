@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tauri MCP UI Preview"
+  short_description: "Preview and inspect TeyvatGuide desktop UI"
+  default_prompt: "Use $tauri-mcp-cli to launch and inspect the TeyvatGuide desktop UI."

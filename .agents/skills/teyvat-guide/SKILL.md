@@ -13,7 +13,9 @@ description: Implement and review changes in the TeyvatGuide Vue, TypeScript, Vu
 4. For database work, read `../../rules/sqlite-rules.md` and preserve transaction/error-handling behavior.
 5. For Rust/Tauri work, follow the patterns in `src-tauri/src`, keep platform-specific behavior guarded, and format
    with Rustfmt.
-6. Make the smallest coherent change and avoid unrelated cleanup, bulk data rewrites, or generated artifacts.
-7. Run validation proportional to the change and report anything not run.
+6. For desktop UI preview, screenshots, WebView interaction, or IPC debugging, use
+   `../tauri-mcp-cli/SKILL.md` and target the debug app rather than the installed release app.
+7. Make the smallest coherent change and avoid unrelated cleanup, bulk data rewrites, or generated artifacts.
+8. Run validation proportional to the change and report anything not run.
 
 Do not create a Git commit unless the user explicitly requests one. If requested, use `../git-workflow/SKILL.md`.
