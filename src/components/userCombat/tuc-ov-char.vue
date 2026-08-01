@@ -1,6 +1,6 @@
 <!-- 绘想游迹浮窗 -->
 <template>
-  <TOverlay v-model="visible">
+  <TOverlay v-model="visible" topOffset="112px">
     <div v-if="props.data" :class="{ share: isShare }" class="tuc-ovc-box">
       <div class="tuc-ovc-top">
         <div class="tuc-ovc-title" @click="share()">

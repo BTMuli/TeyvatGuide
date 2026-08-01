@@ -1,6 +1,6 @@
 <!-- 剧诗统计浮窗 -->
 <template>
-  <TOverlay v-model="visible">
+  <TOverlay v-model="visible" topOffset="112px">
     <div v-if="data" :class="{ share: isShare }" class="tuc-ovs-box">
       <div class="tuc-ovs-top">
         <span class="tuc-ovs-title" @click="share()"> 真境剧诗统计-第{{ data.ScheduleId }}期 </span>

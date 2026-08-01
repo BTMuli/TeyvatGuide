@@ -1,6 +1,6 @@
 <!-- 月谕圣牌浮窗 -->
 <template>
-  <TOverlay v-model="visible">
+  <TOverlay v-model="visible" topOffset="112px">
     <div v-if="data" :class="{ share: isShare }" class="tuc-ovt-box">
       <div class="tuc-ovt-top">
         <div class="tuc-ovt-title" @click="share()">月谕圣牌</div>
