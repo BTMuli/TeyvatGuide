@@ -29,6 +29,7 @@
     "http:allow-fetch",
     "log:default",
     "log:allow-log",
+    "mcp-bridge:default",
     "opener:default",
     "sql:default",
     "sql:allow-execute",

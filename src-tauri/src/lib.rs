@@ -65,6 +65,11 @@ pub fn run() {
   // 正常应用实例：加载单例插件，防止多实例
   let mut builder = tauri::Builder::default();
 
+  #[cfg(debug_assertions)]
+  {
+    builder = builder.plugin(tauri_plugin_mcp_bridge::init());
+  }
+
   // 只有在正常/管理员实例下才加载单例插件；看门狗不加载
   builder = builder.plugin(tauri_plugin_single_instance::init(move |app, argv, _cwd| {
     if let Err(e) = app.emit("active_deep_link", argv) {

@@ -33,6 +33,7 @@
     "log:allow-log",
     "machine-uid:default",
     "machine-uid:allow-get-machine-uid",
+    "mcp-bridge:default",
     "notification:default",
     "opener:default",
     "process:default",
