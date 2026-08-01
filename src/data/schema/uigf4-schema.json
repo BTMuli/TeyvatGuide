@@ -181,7 +181,7 @@
                 "gacha_type": {
                   "type": "string",
                   "description": "卡池类型",
-                  "enum": ["1", "2", "11", "12"]
+                  "enum": ["1", "2", "11", "12", "21", "22"]
                 },
                 "item_id": {
                   "type": "string",
