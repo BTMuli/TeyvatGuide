@@ -1,5 +1,5 @@
 <template>
-  <div ref="shareEl" class="hta-oo-box">
+  <div ref="shareRef" class="hta-oo-box">
     <div class="hta-oob-header">
       <div class="hta-oob-heading">
         <v-icon icon="mdi-chart-box-outline" />
@@ -19,43 +19,43 @@
     <div class="hta-oob-section">
       <div class="hta-oob-title">数据收集</div>
       <HtaOverviewLine
-        label="当期深渊ID"
         :cur="props.data.cur.ScheduleId"
         :last="props.data.last.ScheduleId"
         :show-diff="false"
+        label="当期深渊ID"
       />
       <HtaOverviewLine
-        label="上传记录总数"
         :cur="props.data.cur.RecordTotal"
         :last="props.data.last.RecordTotal"
+        label="上传记录总数"
       />
     </div>
     <div class="hta-oob-section">
       <div class="hta-oob-title">深渊统计</div>
       <HtaOverviewLine
-        label="总计深渊记录"
         :cur="props.data.cur.SpiralAbyssTotal"
         :last="props.data.last.SpiralAbyssTotal"
+        label="总计深渊记录"
       />
       <HtaOverviewLine
-        label="通关深渊记录"
         :cur="props.data.cur.SpiralAbyssPassed"
         :last="props.data.last.SpiralAbyssPassed"
+        label="通关深渊记录"
       />
       <HtaOverviewLine
-        label="满星深渊记录"
         :cur="props.data.cur.SpiralAbyssFullStar"
         :last="props.data.last.SpiralAbyssFullStar"
+        label="满星深渊记录"
       />
       <HtaOverviewLine
-        label="平均获取渊星"
         :cur="props.data.cur.SpiralAbyssStarTotal / props.data.cur.SpiralAbyssTotal"
         :last="props.data.last.SpiralAbyssStarTotal / props.data.last.SpiralAbyssTotal"
+        label="平均获取渊星"
       />
       <HtaOverviewLine
-        label="平均战斗次数"
         :cur="props.data.cur.SpiralAbyssBattleTotal / props.data.cur.SpiralAbyssTotal"
         :last="props.data.last.SpiralAbyssBattleTotal / props.data.last.SpiralAbyssTotal"
+        label="平均战斗次数"
       />
     </div>
     <div class="hta-oob-extra">
@@ -68,7 +68,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { ref } from "vue";
+import { ref, useTemplateRef } from "vue";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
 
@@ -78,11 +78,11 @@ type HtaOverlayOverviewProps = {
 
 const props = defineProps<HtaOverlayOverviewProps>();
 const loadShare = ref<boolean>(false);
-const shareEl = ref<HTMLElement>();
+const shareEl = useTemplateRef<HTMLElement>("shareRef");
 
 async function share(): Promise<void> {
   loadShare.value = true;
-  if (shareEl.value === undefined) {
+  if (shareEl.value === null) {
     showSnackbar.warn("分享失败");
     loadShare.value = false;
     return;
