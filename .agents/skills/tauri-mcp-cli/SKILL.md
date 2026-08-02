@@ -1,12 +1,19 @@
 ---
 name: tauri-mcp-cli
-description: Preview, inspect, and interact with the TeyvatGuide Tauri v2 desktop UI through the tauri-mcp CLI. Use for UI implementation or review, desktop-only behavior, WebView screenshots, DOM/style inspection, IPC debugging, and interaction checks that a plain Vite browser preview cannot represent.
+description: Use only when the user explicitly requests tauri-mcp screenshot recognition of the TeyvatGuide Tauri v2 desktop UI. Otherwise do not proactively start or call the tauri-mcp bridge.
 ---
 
 # TeyvatGuide Tauri MCP Preview
 
-Use the repository's debug-only MCP bridge and the globally installed `tauri-mcp` command. Prefer this workflow for
-desktop UI validation; do not substitute a browser preview when the running Tauri window is available.
+Use the repository's debug-only MCP bridge and the globally installed `tauri-mcp` command only when the user
+explicitly requests tauri-mcp screenshot recognition; otherwise do not proactively start or call MCP.
+
+## Usage principles
+
+- Use the bridge only when the user explicitly requests tauri-mcp screenshot recognition; do not proactively start
+  or call MCP otherwise.
+- Before starting anything, check whether a debug instance is already running and reuse it; start a new dev process
+  only when none is running.
 
 ## Project constants
 
@@ -22,16 +29,17 @@ session even when it has the same executable name.
 ## Preview workflow
 
 1. Inspect `src-tauri/tauri.conf.json`, `src-tauri/src/lib.rs`, and the target UI before starting.
-2. Check the driver and daemon:
+2. Check for an already-running debug instance, the driver, and the daemon:
 
    ```powershell
    tauri-mcp daemon status
    tauri-mcp driver-session status --json
    ```
 
-3. If no debug app is running, start `pnpm tauri dev --exit-on-panic` as a hidden background process. Redirect stdout
-   and stderr to explicit files under `$env:TEMP`, retain the returned process ID, and report build progress when it
-   takes longer than one turn.
+3. If an existing session reports `connected: true` or a `pnpm tauri dev` debug process is still alive, reuse it
+   directly and skip starting a new one. Only when no debug app is running, start `pnpm tauri dev --exit-on-panic`
+   as a hidden background process. Redirect stdout and stderr to explicit files under `$env:TEMP`, retain the
+   returned process ID, and report build progress when it takes longer than one turn.
 4. Start and verify the session. `driver-session start` alone is insufficient; require `connected: true` and a
    non-null identifier from `status`:
 

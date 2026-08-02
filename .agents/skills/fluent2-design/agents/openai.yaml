@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Use $fluent2-design to apply the Fluent 2 design language to this UI change."
+  display_name: "Fluent 2 设计规范"
+  short_description: "按 Fluent 2 视觉语言指导 TeyvatGuide 的颜色、排版、间距、圆角与组件风格"
