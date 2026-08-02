@@ -39,7 +39,7 @@
         location="bottom start"
       >
         <template #activator="{ props: menuProps }">
-          <div class="tuc-buff-item" v-bind="menuProps">
+          <div class="tuc-buff-item" :class="{ 'is-lv0': buff.level === 0 }" v-bind="menuProps">
             <div class="tuc-buff-summary">
               <div :title="`${buff.name} Lv.${buff.level}`" class="tuc-buff-icon">
                 <img :alt="buff.name" :src="buff.icon" />
@@ -56,13 +56,16 @@
             <small>Lv. {{ buff.level }}</small>
           </div>
           <div class="tuc-buff-detail">
-            <div v-for="(effect, eIdx) in buff.level_effect" :key="eIdx" class="tuc-effect-item">
-              <div class="tuc-effect-title">
-                <img :src="effect.icon" alt="icon" />
-                <span v-html="parseHtmlText(effect.name)" />
+            <template v-if="hasBuffEffect(buff)">
+              <div v-for="(effect, eIdx) in buff.level_effect" :key="eIdx" class="tuc-effect-item">
+                <div class="tuc-effect-title">
+                  <img :src="effect.icon" alt="icon" />
+                  <span v-html="parseHtmlText(effect.name)" />
+                </div>
+                <span class="tuc-effect-desc" v-html="getEffectDesc(effect.desc)" />
               </div>
-              <span class="tuc-effect-desc" v-html="getEffectDesc(effect.desc)" />
-            </div>
+            </template>
+            <span v-else class="tuc-buff-empty">暂无祝福效果</span>
           </div>
         </div>
       </v-menu>
@@ -92,6 +95,10 @@ function getBuffDesc(desc: string): string {
 
 function getEffectDesc(desc: string): string {
   return parseHtmlText(desc.replaceAll("；", "；\n")).replaceAll("\n<br />", "<br />");
+}
+
+function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
+  return buff.level_effect.some((effect) => effect.desc.trim() !== "");
 }
 </script>
 <style lang="css" scoped>
@@ -179,6 +186,16 @@ function getEffectDesc(desc: string): string {
     border-color: var(--tgc-od-orange);
     box-shadow: 0 3px 8px var(--common-shadow-2);
     transform: translateY(-2px);
+  }
+}
+
+.tuc-buff-item.is-lv0 {
+  opacity: 0.4;
+
+  &:hover {
+    border-color: var(--common-shadow-1);
+    box-shadow: none;
+    transform: none;
   }
 }
 
@@ -335,7 +352,8 @@ function getEffectDesc(desc: string): string {
 }
 
 .tuc-buff-popover .tuc-effect-desc,
-.tuc-buff-popover .tuc-buff-total {
+.tuc-buff-popover .tuc-buff-total,
+.tuc-buff-popover .tuc-buff-empty {
   color: var(--box-text-2);
   font-size: 12px;
   line-height: 1.6;
