@@ -220,7 +220,6 @@ import useHomeStore from "@store/home.js";
 import { core, event } from "@tauri-apps/api";
 import { emit } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
-import { remove } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
@@ -464,13 +463,13 @@ async function confirmDelCache(): Promise<void> {
     return;
   }
   await showLoading.start("正在清除缓存");
-  for (const dir of CacheDir) {
-    try {
-      await showLoading.update(dir);
-      await remove(dir, { recursive: true });
-    } catch (e) {
-      await TGLogger.Error(`[Config][confirmDelCache] 清除缓存失败 ${dir} ${e}`);
-    }
+  try {
+    await core.invoke("clear_app_cache");
+  } catch (e) {
+    await TGLogger.Error(`[Config][confirmDelCache] 清除缓存失败 ${CacheDir.join(", ")} ${e}`);
+    showSnackbar.error(`${e}`);
+    await showLoading.end();
+    return;
   }
   await showLoading.end();
   await TGLogger.Info("[Config][confirmDelCache] 缓存清除完成");

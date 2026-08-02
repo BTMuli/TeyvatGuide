@@ -1,5 +1,5 @@
 // 命令模块，负责处理命令
-// @since Beta v0.11.2
+// @since Beta v0.11.3
 
 use crate::utils;
 use serde::Deserialize;
@@ -139,6 +139,97 @@ pub async fn get_dir_size(path: String) -> u64 {
     }
   }
   size
+}
+
+/// 清除应用内嵌 WebView 的磁盘缓存。
+#[tauri::command]
+pub async fn clear_app_cache(app_handle: AppHandle) -> Result<(), String> {
+  #[cfg(target_os = "windows")]
+  {
+    return clear_platform_cache(app_handle).await;
+  }
+
+  #[cfg(not(target_os = "windows"))]
+  {
+    clear_platform_cache(app_handle)
+  }
+}
+
+/// Windows：通过 WebView2 官方接口清除磁盘缓存。
+/// 运行中的 WebView 进程会占用缓存文件，直接删除目录会报“文件占用”，故改用 ClearBrowsingData。
+#[cfg(target_os = "windows")]
+async fn clear_platform_cache(app_handle: AppHandle) -> Result<(), String> {
+  use std::time::Duration;
+  use webview2_com::ClearBrowsingDataCompletedHandler;
+  use webview2_com::Microsoft::Web::WebView2::Win32::{
+    COREWEBVIEW2_BROWSING_DATA_KINDS_CACHE_STORAGE, COREWEBVIEW2_BROWSING_DATA_KINDS_DISK_CACHE,
+    ICoreWebView2_13, ICoreWebView2Profile2,
+  };
+  use windows_core::Interface;
+
+  // 主窗口与子窗口共享同一 WebView2 用户数据目录，清除任一窗口的 Profile 即可。
+  let window = app_handle
+    .get_webview_window("TeyvatGuide")
+    .or_else(|| app_handle.get_webview_window("mhy_client"))
+    .ok_or_else(|| "未找到可用的 WebView 窗口，无法清除缓存".to_string())?;
+
+  let (tx, rx) = std::sync::mpsc::channel::<Result<(), String>>();
+  let tx_handler = tx.clone();
+
+  window
+    .with_webview(move |webview| {
+      let initiated: Result<(), String> = (|| -> webview2_com::Result<()> {
+        unsafe {
+          let controller = webview.controller();
+          let core_webview = controller.CoreWebView2()?;
+          let profile = core_webview.cast::<ICoreWebView2_13>()?.Profile()?;
+          let profile2 = profile.cast::<ICoreWebView2Profile2>()?;
+          let handler = ClearBrowsingDataCompletedHandler::create(Box::new(move |result| {
+            let _ = tx_handler.send(result.map_err(|error| error.to_string()));
+            Ok(())
+          }));
+          profile2.ClearBrowsingData(
+            COREWEBVIEW2_BROWSING_DATA_KINDS_CACHE_STORAGE
+              | COREWEBVIEW2_BROWSING_DATA_KINDS_DISK_CACHE,
+            &handler,
+          )?;
+          Ok(())
+        }
+      })()
+      .map_err(|error: webview2_com::Error| error.to_string());
+
+      if let Err(error) = initiated {
+        let _ = tx.send(Err(error));
+      }
+    })
+    .map_err(|error| error.to_string())?;
+
+  tauri::async_runtime::spawn_blocking(move || {
+    rx.recv_timeout(Duration::from_secs(15)).unwrap_or_else(|error| {
+      log::warn!("[clear_app_cache] 等待 WebView2 清除缓存完成回调失败：{error:?}");
+      Ok(())
+    })
+  })
+  .await
+  .map_err(|error| error.to_string())?
+}
+
+/// macOS：直接删除 WebKit 缓存目录。
+#[cfg(target_os = "macos")]
+fn clear_platform_cache(app_handle: AppHandle) -> Result<(), String> {
+  let app_cache_dir = app_handle.path().app_cache_dir().map_err(|error| error.to_string())?;
+  let cache_dir = app_cache_dir.join("WebKit");
+  if cache_dir.exists() {
+    std::fs::remove_dir_all(&cache_dir)
+      .map_err(|error| format!("清除缓存目录 {} 失败：{error}", cache_dir.display()))?;
+  }
+  Ok(())
+}
+
+/// 其它平台暂不支持清除 WebView 缓存。
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
+fn clear_platform_cache(_app_handle: AppHandle) -> Result<(), String> {
+  Err("当前平台不支持清除 WebView 缓存".to_string())
 }
 
 // 判断是否是管理员权限

@@ -57,6 +57,10 @@ features = [
     "Win32_Storage_Packaging_Appx",
     "Win32_System_WindowsProgramming",
 ]
+[target.'cfg(windows)'.dependencies.windows-core]
+version = "0.61.2"
+[target.'cfg(windows)'.dependencies.webview2-com]
+version = "0.38.2"
 
 # cli 插件
 [dependencies.tauri-plugin-cli]

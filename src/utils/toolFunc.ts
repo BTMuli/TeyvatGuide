@@ -150,7 +150,6 @@ export async function getCacheDir(): Promise<Array<string> | false> {
   const cacheDir = await path.appCacheDir();
   const osType = type().toLowerCase();
   if (osType === "windows") {
-    // TODO: 会报错显示占用
     const cache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Cache`;
     const codeCache = `${cacheDir}${path.sep()}EBWebview${path.sep()}Default${path.sep()}Code Cache`;
     return [cache, codeCache];
