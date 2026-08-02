@@ -261,9 +261,9 @@ function getMissingMaterials(
   min-width: 0;
   align-items: center;
   padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--tgc-od-blue) 30%, var(--common-shadow-1));
+  border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--tgc-od-blue) 8%, var(--box-bg-1));
+  background: var(--box-bg-1);
   cursor: pointer;
   gap: 10px;
 
@@ -273,7 +273,7 @@ function getMissingMaterials(
   }
 
   &:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--tgc-od-orange) 45%, transparent);
+    outline: 2px solid var(--tgc-od-orange);
   }
 }
 
@@ -354,7 +354,7 @@ function getMissingMaterials(
   align-items: center;
   padding: 8px 10px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--tgc-od-orange) 10%, transparent);
+  background: var(--common-shadow-t-1);
   color: var(--tgc-od-orange);
   gap: 8px;
 

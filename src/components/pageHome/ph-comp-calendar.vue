@@ -45,7 +45,7 @@
         </div>
         <div ref="contentRef" class="tc-content">
           <TCalendarBirth />
-          <div class="calendar-grid" :style="gridStyle">
+          <div :style="gridStyle" class="calendar-grid">
             <div
               v-for="item in renderItems"
               :key="item.id"
@@ -59,8 +59,8 @@
       </div>
       <PhCompCultivation
         v-show="!showCalendar"
-        @data-loaded="handleCultivationData"
         @success="handleCultivationSuccess"
+        @data-loaded="handleCultivationData"
         @target-click="selectCultivationEntry"
       />
     </template>
@@ -290,6 +290,10 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+
+  :deep(.v-btn-group) {
+    color: var(--common-text-title);
+  }
 }
 
 .tc-mode-switch {
@@ -347,7 +351,7 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
   border-radius: 4px;
 
   &.planned {
-    box-shadow: 0 0 8px color-mix(in srgb, var(--tgc-od-orange) 45%, transparent);
+    box-shadow: 0 0 8px var(--common-shadow-2);
     outline: 2px solid var(--tgc-od-orange);
   }
 }
