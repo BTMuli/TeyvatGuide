@@ -44,20 +44,19 @@ const props = defineProps<TucAeBoxProps>();
 
 function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   const findAvatar = getWikiBrief(item.avatar_id);
-  let innerText = gameEnum.combat.avatarTypeDesc(item.avatar_type);
   let findWeapon;
   if (findAvatar) {
     findWeapon = findAvatar.weapon;
-    if (innerText === "") innerText = findAvatar.name;
   }
+  const avatarType = gameEnum.combat.avatarTypeDesc(item.avatar_type).replace("角色", "");
   return {
     bg: `/icon/bg/${getRcStar(item.avatar_id, item.rarity)}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "80px",
     icon: `/WIKI/character/${item.avatar_id}.webp`,
-    innerHeight: innerText === "" ? 0 : 20,
-    innerText: innerText,
+    innerHeight: 20,
+    innerText: findAvatar ? findAvatar.name : item.name,
     lt:
       item.element === "None"
         ? findWeapon
@@ -65,9 +64,9 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
           : ""
         : `/icon/element/${getZhElement(item.element)}元素.webp`,
     ltSize: "20px",
-    innerBlur: "5px",
-    rt: "",
-    rtSize: "",
+    innerBlur: "4px",
+    rt: avatarType,
+    rtSize: avatarType === "" ? "" : "20px",
     size: "80px",
   };
 }
@@ -80,11 +79,11 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   box-sizing: border-box;
   align-items: stretch;
   justify-content: space-between;
-  padding: 8px;
+  padding: 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-2);
-  row-gap: 8px;
+  gap: 16px;
 }
 
 .tuc-avatars {
@@ -108,6 +107,18 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   margin: 0 auto;
   gap: 8px;
   grid-template-columns: repeat(4, 80px);
+
+  :deep(.tib-box) {
+    filter: drop-shadow(0 2px 3px var(--common-shadow-1));
+  }
+
+  :deep(.tib-rt) {
+    width: auto;
+    min-width: 32px;
+    padding: 0 4px;
+    background: var(--tgc-od-red);
+    font-size: 12px;
+  }
 }
 
 .tuc-enemies {
@@ -117,6 +128,8 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  padding-left: 16px;
+  border-left: 1px solid var(--common-shadow-1);
   row-gap: 4px;
 }
 
@@ -136,9 +149,11 @@ function getAvatarBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 20px 4px 4px;
+  padding: 4px 16px 4px 4px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 40px;
   background: var(--box-bg-3);
+  box-shadow: 0 2px 4px var(--common-shadow-1);
   column-gap: 4px;
 }
 

@@ -72,13 +72,6 @@
             <img alt="char" src="/UI/combat/tarotDefault.webp" />
             <span>月谕圣牌</span>
           </v-btn>
-          <v-switch
-            v-model="simpleMode"
-            class="uc-switch"
-            color="var(--tgc-od-orange)"
-            hide-details
-            label="简略模式"
-          />
         </div>
         <div class="uct-extension-right">
           <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
@@ -136,7 +129,6 @@
               :id="item.id"
               :key="idx"
               :round="round"
-              :simpleMode
               :uid="item.uid"
             />
           </div>
@@ -193,7 +185,6 @@ const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
 
-const simpleMode = ref<boolean>(false);
 const showStat = ref<boolean>(false);
 const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();
 const showChar = ref<boolean>(false);
@@ -588,8 +579,7 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
-  padding-right: 16px;
-  padding-left: 16px;
+  padding: 4px 16px 8px;
   margin-bottom: 4px;
 }
 
@@ -641,12 +631,14 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   align-items: flex-start;
   justify-content: center;
   border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-1);
+  box-shadow: 0 2px 8px var(--common-shadow-1);
 }
 
 .uc-tabs-box {
   max-height: 100%;
+  padding-top: 8px;
   overflow-y: auto;
 }
 
@@ -654,10 +646,10 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   overflow: hidden;
   width: 100%;
   height: 100%;
-  padding: 8px;
+  padding: 12px;
   background: var(--app-page-bg);
-  border-bottom-right-radius: 4px;
-  border-top-right-radius: 4px;
+  border-bottom-right-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .uc-window-item {
@@ -669,7 +661,7 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
 .ucw-i-ref {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .ucw-top {
@@ -720,7 +712,7 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  row-gap: 8px;
+  row-gap: 12px;
 }
 
 .ucm-empty {
@@ -737,9 +729,5 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   font-family: var(--font-title);
   font-size: 1.5rem;
   row-gap: 12px;
-}
-
-.uc-switch {
-  margin-left: 8px;
 }
 </style>

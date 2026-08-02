@@ -15,23 +15,21 @@ const props = defineProps<TucAvatarsProps>();
 
 function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   const findAvatar = getWikiBrief(item.avatar_id);
-  let innerText = gameEnum.combat.avatarTypeDesc(item.avatar_type);
   let findWeapon;
   if (findAvatar) {
     findWeapon = findAvatar.weapon;
-    if (innerText === "") innerText = findAvatar.name;
   } else if (item.name === "旅行者") {
     findWeapon = "单手剑";
-    innerText = item.name;
   }
+  const avatarType = gameEnum.combat.avatarTypeDesc(item.avatar_type).replace("角色", "");
   return {
     bg: `/icon/bg/${getRcStar(item.avatar_id, item.rarity)}-BGC.webp`,
     clickable: false,
     display: "inner",
     height: "80px",
     icon: `/WIKI/character/${item.avatar_id}.webp`,
-    innerHeight: innerText === "" ? 0 : 20,
-    innerText: innerText,
+    innerHeight: 20,
+    innerText: findAvatar ? findAvatar.name : item.name,
     lt:
       item.element === "None"
         ? findWeapon
@@ -40,8 +38,8 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
         : `/icon/element/${getZhElement(item.element)}元素.webp`,
     ltSize: "20px",
     innerBlur: "5px",
-    rt: "",
-    rtSize: "",
+    rt: avatarType,
+    rtSize: avatarType === "" ? "" : "20px",
     size: "80px",
   };
 }
@@ -52,13 +50,25 @@ function getItemBox(item: TGApp.Game.Combat.Avatar): TItemBoxData {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
-  gap: 4px;
+  gap: 8px;
 
   &.grid {
     display: grid;
     width: 100%;
-    gap: 4px;
+    gap: 8px;
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  :deep(.tib-box) {
+    filter: drop-shadow(0 2px 3px var(--common-shadow-1));
+  }
+
+  :deep(.tib-rt) {
+    width: auto;
+    min-width: 32px;
+    padding: 0 5px;
+    background: var(--tgc-od-red);
+    font-size: 12px;
   }
 }
 </style>

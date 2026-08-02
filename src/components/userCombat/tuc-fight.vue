@@ -55,6 +55,7 @@ function getBox2(item: TGApp.Game.Combat.AvatarMini): TItemBoxData {
     icon: `/WIKI/character/${item.avatar_id}.webp`,
     innerText: findI ? findI.name : "",
     innerHeight: findI ? 20 : 0,
+    innerBlur: "5px",
     lt: "",
     ltSize: "0",
     size: "60px",

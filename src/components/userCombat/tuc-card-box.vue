@@ -1,108 +1,44 @@
 <!-- 剧诗，神秘收获 -->
 <template>
-  <div
-    v-if="props.modelValue.length > 0"
-    ref="containerRef"
-    :class="['tuc-card-box', { 'simple-mode': props.simpleMode }]"
-  >
+  <div v-if="props.modelValue.length > 0" class="tuc-card-box">
     <div class="tuc-card-title">
-      <span>神秘收获</span>
-      <span>{{ props.modelValue.length }}</span>
+      <span class="tuc-card-title-label">神秘收获</span>
+      <span class="tuc-card-title-count">{{ props.modelValue.length }} 项</span>
     </div>
-    <div :class="{ 'simple-mode': props.simpleMode }" class="tuc-card-list">
-      <div
+    <div class="tuc-card-list">
+      <v-menu
         v-for="card in props.modelValue"
         :key="card.id"
-        :data-key="card.id"
-        class="tuc-card-item"
+        :close-on-content-click="false"
+        location="bottom end"
       >
-        <div class="tuc-card-summary">
-          <div :title="props.simpleMode ? card.name : undefined" class="tuc-ci-icon">
-            <img :src="card.icon" alt="icon" />
+        <template #activator="{ props: menuProps }">
+          <div class="tuc-card-item" v-bind="menuProps">
+            <div class="tuc-card-summary">
+              <div :title="card.name" class="tuc-ci-icon">
+                <img :src="card.icon" alt="icon" />
+              </div>
+              <span class="tuc-card-name">{{ card.name }}</span>
+            </div>
           </div>
-          <span v-if="props.simpleMode" class="tuc-card-name">{{ card.name }}</span>
-        </div>
-        <div v-show="!props.simpleMode" class="tuc-ci-info">
-          <div class="tuc-ci-title">{{ card.name }}</div>
+        </template>
+        <div class="tuc-card-popover">
+          <div class="tuc-card-popover-title">
+            <img :src="card.icon" alt="icon" />
+            <span>{{ card.name }}</span>
+          </div>
           <div class="tuc-ci-desc" v-html="parseHtmlText(card.desc)" />
         </div>
-      </div>
+      </v-menu>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { nextTick, onUnmounted, ref, watch } from "vue";
 
-type TucCardBoxProps = {
-  modelValue: Array<TGApp.Game.Combat.Card>;
-  simpleMode?: boolean;
-};
+type TucCardBoxProps = { modelValue: Array<TGApp.Game.Combat.Card> };
 
 const props = defineProps<TucCardBoxProps>();
-
-const containerRef = ref<HTMLDivElement>();
-let animationFrameId: number | null = null;
-
-watch(
-  () => props.simpleMode,
-  async (newVal, oldVal) => {
-    if (oldVal === undefined || !containerRef.value) return;
-
-    if (animationFrameId !== null) {
-      cancelAnimationFrame(animationFrameId);
-      animationFrameId = null;
-    }
-
-    const items = containerRef.value.querySelectorAll<HTMLDivElement>(".tuc-card-item");
-
-    const firstRects = new Map<number, DOMRect>();
-    items.forEach((el) => {
-      const key = el.dataset.key;
-      if (key) {
-        firstRects.set(Number(key), el.getBoundingClientRect());
-      }
-    });
-
-    await nextTick();
-
-    const animations: Array<{ el: HTMLDivElement }> = [];
-
-    items.forEach((el) => {
-      const key = el.dataset.key;
-      if (!key) return;
-
-      const firstRect = firstRects.get(Number(key));
-      if (!firstRect) return;
-
-      const lastRect = el.getBoundingClientRect();
-      const deltaX = firstRect.left - lastRect.left;
-      const deltaY = firstRect.top - lastRect.top;
-
-      if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
-        el.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-        el.style.transition = "none";
-        animations.push({ el });
-      }
-    });
-
-    if (animations.length > 0) {
-      animationFrameId = requestAnimationFrame(() => {
-        animations.forEach(({ el }) => {
-          el.style.transition = "transform 0.3s ease";
-          el.style.transform = "";
-        });
-        animationFrameId = null;
-      });
-    }
-  },
-);
-
-onUnmounted(() => {
-  if (animationFrameId !== null) {
-    cancelAnimationFrame(animationFrameId);
-  }
-});
 </script>
 <style lang="scss" scoped>
 .tuc-card-box {
@@ -110,14 +46,15 @@ onUnmounted(() => {
   display: flex;
   overflow: hidden;
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   flex: 1;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  padding: 8px;
+  padding: 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-2);
   row-gap: 8px;
 }
@@ -125,28 +62,44 @@ onUnmounted(() => {
 .tuc-card-title {
   position: relative;
   display: flex;
+  width: 100%;
+  min-height: 28px;
   align-items: center;
-  justify-content: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-1);
   color: var(--box-text-2);
-  column-gap: 4px;
   font-family: var(--font-title);
+  font-weight: normal;
+  gap: 8px;
 
-  span:last-child {
-    color: var(--tgc-od-orange);
+  &::before {
+    width: 4px;
+    height: 18px;
+    border-radius: 2px;
+    background: var(--tgc-od-orange);
+    content: "";
   }
+}
+
+.tuc-card-title-label {
+  color: var(--common-text-title);
+  font-size: 16px;
+}
+
+.tuc-card-title-count {
+  padding: 2px 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 12px;
+  margin-left: auto;
+  background: var(--box-bg-3);
+  color: var(--tgc-od-orange);
+  font-size: 12px;
 }
 
 .tuc-card-list {
   position: relative;
   display: flex;
   width: 100%;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  row-gap: 8px;
-}
-
-.tuc-card-list.simple-mode {
   flex-flow: row wrap;
   align-items: flex-start;
   justify-content: flex-start;
@@ -156,15 +109,23 @@ onUnmounted(() => {
 .tuc-card-item {
   position: relative;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
-  column-gap: 8px;
-}
-
-.tuc-card-list.simple-mode .tuc-card-item {
   flex-direction: column;
   align-items: center;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-3);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover {
+    border-color: var(--tgc-od-orange);
+    box-shadow: 0 3px 8px var(--common-shadow-2);
+    transform: translateY(-2px);
+  }
 }
 
 .tuc-card-summary {
@@ -182,7 +143,7 @@ onUnmounted(() => {
   height: 60px;
   flex-shrink: 0;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: var(--box-bg-3);
   cursor: default;
 }
@@ -194,20 +155,13 @@ onUnmounted(() => {
   object-fit: cover;
 }
 
-.dark .tuc-ci-icon img {
-  filter: unset;
-}
-
 .tuc-card-name {
   color: var(--common-text-title);
   font-family: var(--font-title);
   font-size: 12px;
+  font-weight: normal;
   text-align: center;
-}
-
-.tuc-ci-title {
-  position: relative;
-  font-family: var(--font-title);
+  white-space: nowrap;
 }
 
 .tuc-ci-desc {
@@ -215,5 +169,51 @@ onUnmounted(() => {
   flex-shrink: 0;
   font-size: 12px;
   word-break: break-all;
+}
+
+.tuc-card-popover {
+  display: flex;
+  width: min(380px, calc(100vw - 48px));
+  max-height: min(420px, calc(100vh - 160px));
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  box-shadow: 0 8px 24px var(--common-shadow-4);
+  gap: 12px;
+  overflow-y: auto;
+
+  .tuc-ci-desc {
+    color: var(--box-text-2);
+    line-height: 1.6;
+  }
+}
+
+.tuc-card-popover-title {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-1);
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-weight: normal;
+  gap: 8px;
+
+  img {
+    width: 36px;
+    height: 36px;
+    filter: invert(1);
+    object-fit: contain;
+  }
+}
+
+.dark .tuc-card-popover-title img {
+  filter: unset;
+}
+
+.dark .tuc-ci-icon img {
+  filter: unset;
 }
 </style>

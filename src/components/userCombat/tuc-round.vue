@@ -19,9 +19,8 @@
       <TucBuffBox
         :class="props.round.choice_cards.length === 0 ? 'fill' : ''"
         :model-value="props.round.splendour_buff"
-        :simple-mode="props.simpleMode"
       />
-      <TucCardBox :model-value="props.round.choice_cards" :simple-mode="props.simpleMode" />
+      <TucCardBox :model-value="props.round.choice_cards" />
     </div>
   </div>
 </template>
@@ -39,7 +38,6 @@ type TucRoundProps = {
   round: TGApp.Game.Combat.RoundData;
   uid: string;
   id: number;
-  simpleMode?: boolean;
 };
 const props = defineProps<TucRoundProps>();
 const showInfo = ref<boolean>(false);
@@ -69,19 +67,23 @@ async function shareRound(): Promise<void> {
   height: fit-content;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
-  border-radius: 4px;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
   background: var(--box-bg-1);
-  row-gap: 8px;
+  box-shadow: 0 2px 6px var(--common-shadow-1);
+  row-gap: 12px;
 }
 
 .tucr-title {
   position: relative;
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin-right: auto;
-  column-gap: 4px;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-1);
+  column-gap: 6px;
   cursor: pointer;
 
   img {
@@ -100,6 +102,8 @@ async function shareRound(): Promise<void> {
   }
 
   .sub {
+    margin-left: auto;
+    font-size: 12px;
     opacity: 0.8;
   }
 }
@@ -119,7 +123,7 @@ async function shareRound(): Promise<void> {
   max-width: 100%;
   align-items: stretch;
   justify-content: flex-start;
-  column-gap: 8px;
+  column-gap: 12px;
 
   .fill {
     width: 100%;
