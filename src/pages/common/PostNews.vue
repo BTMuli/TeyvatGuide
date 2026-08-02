@@ -51,7 +51,7 @@
     </v-window-item>
   </v-window>
   <ToChannel v-model="showList" :gid="gid" />
-  <VpOverlaySearch v-model="showSearch" :gid="Number(gid)" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="Number(gid)" :keyword="search" topOffset="64px" />
 </template>
 <script lang="ts" setup>
 import TPostCard from "@comp/app/t-postcard.vue";

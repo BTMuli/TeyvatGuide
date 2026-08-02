@@ -1,6 +1,6 @@
-<!-- 搜索悬浮层 -->
+﻿<!-- 搜索悬浮层 -->
 <template>
-  <TOverlay v-model="visible">
+  <TOverlay v-model="visible" :topOffset>
     <div class="tops-box">
       <div class="tops-top">查找：{{ search }}</div>
       <div class="tops-act">
@@ -67,7 +67,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
-type ToPostSearchProps = { gid: number; keyword?: string };
+type ToPostSearchProps = { gid: number; keyword?: string; topOffset?: string };
 type SortSelect<T extends number = number> = { text: string; value: T };
 
 // 简单封装选项

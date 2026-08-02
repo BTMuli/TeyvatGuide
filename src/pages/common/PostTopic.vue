@@ -48,9 +48,9 @@
         :disabled="isReq"
         :item-value="(item) => item"
         :items="getGameList(topicInfo?.game_info_list)"
+        :label="gidLabel"
         class="post-switch-item"
         item-title="name"
-        :label="gidLabel"
         variant="outlined"
       >
         <template #selection="{ item }">
@@ -82,10 +82,10 @@
         v-model="curSortType"
         :disabled="isReq"
         :items="sortList"
+        :label="sortLabel"
         class="post-switch-item"
         item-title="text"
         item-value="value"
-        :label="sortLabel"
         variant="outlined"
       />
       <v-text-field
@@ -116,7 +116,7 @@
       <TPostCard :listMode="!postGridMode" :post @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" topOffset="112px" />
   <VpOverlayUser v-model="showUser" :gid="disGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>

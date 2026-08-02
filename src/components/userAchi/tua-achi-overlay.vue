@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible" blur-val="5px">
+  <TOverlay v-model="visible" blur-val="5px" topOffset="112px">
     <div v-if="props.data" class="tua-ao-container">
       <slot name="left"></slot>
       <div class="tua-ao-box">

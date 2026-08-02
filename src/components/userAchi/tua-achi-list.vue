@@ -27,7 +27,7 @@
         </div>
       </template>
     </TuaAchiOverlay>
-    <VpOverlaySearch v-model="showSearch" :gid="2" :keyword="searchWd" />
+    <VpOverlaySearch topOffset="112px" v-model="showSearch" :gid="2" :keyword="searchWd" />
   </div>
 </template>
 <script lang="ts" setup>

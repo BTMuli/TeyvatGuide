@@ -129,7 +129,7 @@
       <TPostCard :listMode="!postGridMode" :post @onUserClick="handleUserClick" />
     </div>
   </div>
-  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" />
+  <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" topOffset="112px" />
   <VpOverlayUser v-model="showUser" :gid="disGid" :uid="curUid" />
 </template>
 <script lang="ts" setup>
