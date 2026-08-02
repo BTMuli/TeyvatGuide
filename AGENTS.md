@@ -19,6 +19,13 @@
 - Git 提交：仅在用户要求提交时使用 `.agents/skills/git-workflow/SKILL.md`，并遵循
   `.agents/rules/git-commit-rules.md`。
 
+## 分享截图
+
+- 凡是会由 `html2canvas` 捕获并生成分享截图的 DOM，其样式不得使用 `color-mix()`，也不得复用
+  内部包含 `color-mix()` 的现有 SCSS 封装。
+- 获取分享 DOM 时，只使用原生 `querySelector` 或 Vue 的 `useTemplateRef`；不得使用已过时的 `ref`
+  绑定模板元素。
+
 ## 基本验证
 
 - TypeScript/Vue 类型：`pnpm lint-vue`
