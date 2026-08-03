@@ -3,7 +3,7 @@
   <TPinWin />
   <TPostWidth />
   <VpBtnCollect :data="postData" :model-value="postId" />
-  <TShareBtn :title="`Post_${postId}`" selector=".tp-post-body" />
+  <TShareBtn :scale="postViewWide ? 1.5 : 2" :title="shareTitle" selector=".tp-post-body" />
   <VpBtnReply v-if="postData" :gid="postData.post.game_id" :post-id="postData.post.post_id" />
   <div v-if="postData" class="tp-post-body">
     <div class="tp-post-info">
@@ -207,6 +207,9 @@ const showUser = ref<boolean>(false);
 const renderPost = shallowRef<Array<TGApp.BBS.SctPost.Base>>([]);
 const postData = shallowRef<TGApp.BBS.Post.FullData>();
 const viewWidth = computed<string>(() => (postViewWide.value ? "800px" : "400px"));
+const shareTitle = computed<string>(() =>
+  postViewWide.value ? `Post_${postId}` : `Post_Thin_${postId}`,
+);
 
 // eslint-disable-next-line no-undef
 let shareTimer: NodeJS.Timeout | null = null;

@@ -11,7 +11,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 
-type TShareBtnProps = { selector: string; title: string };
+type TShareBtnProps = { selector: string; title: string; scale?: number };
 const props = defineProps<TShareBtnProps>();
 
 async function shareContent(): Promise<void> {
@@ -27,7 +27,7 @@ async function shareContent(): Promise<void> {
     if (item.open) item.setAttribute("details-open", "");
     else item.open = true;
   });
-  await generateShareImg(props.title, shareDom);
+  await generateShareImg(props.title, shareDom, props.scale);
   shareDom.querySelectorAll("details").forEach((item) => {
     if (item.hasAttribute("details-open")) item.removeAttribute("details-open");
     else item.open = false;
