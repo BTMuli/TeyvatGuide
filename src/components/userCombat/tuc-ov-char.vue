@@ -1,7 +1,7 @@
 <!-- 绘想游迹浮窗 -->
 <template>
   <TOverlay v-model="visible" topOffset="112px">
-    <div v-if="props.data" :class="{ share: isShare }" class="tuc-ovc-box">
+    <div v-if="props.data" class="tuc-ovc-box">
       <div class="tuc-ovc-top">
         <div class="tuc-ovc-title" @click="share()">
           <img alt="char" src="/UI/combat/charMaster.webp" />
@@ -56,10 +56,10 @@ async function share(): Promise<void> {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `绘想游迹_${props.uid}_${new Date().getTime()}.png`;
+  const fileName = `绘想游迹_${props.uid}_${new Date().getTime()}`;
   await showLoading.start("正在生成分享图", fileName);
   isShare.value = true;
-  await generateShareImg(fileName, element, 1.2, true);
+  await generateShareImg(fileName, element, 1.2);
   isShare.value = false;
   await showLoading.end();
 }
@@ -69,7 +69,6 @@ async function share(): Promise<void> {
   position: relative;
   display: flex;
   width: 800px;
-  max-height: 600px;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -78,14 +77,6 @@ async function share(): Promise<void> {
   border-radius: 8px;
   background: var(--app-page-bg);
   gap: 8px;
-
-  &.share {
-    overflow-y: auto;
-
-    .tuc-ovc-list {
-      overflow-y: unset;
-    }
-  }
 }
 
 .tuc-ovc-top {
