@@ -80,14 +80,19 @@ const chartHeight = computed<string>(() => {
  */
 async function getCalendarOptions(): Promise<EChartsOption> {
   const records = await TSUserGacha.record.time(props.uid, props.gachaType);
-  // 获取最大长度
-  const maxLen = Math.max(...Object.values(records).map((v) => v.length));
-  // 获取年份
-  const yearsSet = new Set(Object.keys(records).map((v) => v.split("-")[0]));
+  // 只保留 yyyy-MM-dd 形式的日期键，避免脏时间（如 "NaN-NaN-NaN"）进入日历坐标系
+  const validDate = /^\d{4}-\d{2}-\d{2}$/;
+  const validKeys = Object.keys(records).filter((key) => validDate.test(key));
+  // 获取年份，只保留四位数字年份，避免 ECharts calendar range 非法导致渲染崩溃
+  const years = Array.from(new Set(validKeys.map((key) => key.split("-")[0]))).filter((year) =>
+    /^\d{4}$/.test(year),
+  );
+  // 获取最大长度，空数据时为 0
+  const maxLen = validKeys.reduce((max, key) => Math.max(max, records[key].length), 0);
 
   function getYearData(year: string): Array<[string, number]> {
     const res: Array<[string, number]> = [];
-    for (const key in records) {
+    for (const key of validKeys) {
       if (key.startsWith(year)) res.push([key, records[key].length]);
     }
     return res;
@@ -126,13 +131,13 @@ async function getCalendarOptions(): Promise<EChartsOption> {
       left: "center",
       top: "top",
     },
-    calendar: Array.from(yearsSet).map((year, index) => ({
+    calendar: years.map((year, index) => ({
       range: year,
       cellSize: ["auto", 15],
       top: 150 * index + 80,
       right: 12,
     })),
-    series: Array.from(yearsSet).map((year, index) => ({
+    series: years.map((year, index) => ({
       type: "heatmap",
       coordinateSystem: "calendar",
       calendarIndex: index,
