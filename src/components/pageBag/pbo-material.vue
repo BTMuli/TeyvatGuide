@@ -219,7 +219,6 @@ async function tryDelete(): Promise<void> {
   display: flex;
   max-height: 176px;
   flex-direction: column;
-  padding-right: 4px;
   gap: 4px;
   overflow-y: auto;
 }

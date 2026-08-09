@@ -25,7 +25,12 @@
       </div>
     </template>
   </THomeCard>
-  <PboMaterial v-model="showMaterial" :data="curMaterial" :uid="Number(account.gameUid)" />
+  <PboMaterial
+    v-model="showMaterial"
+    topOffset="64px"
+    :data="curMaterial"
+    :uid="Number(account.gameUid)"
+  />
   <ToCalendar v-model="showCalendar" :item="curItemC" />
 </template>
 <script lang="ts" setup>
