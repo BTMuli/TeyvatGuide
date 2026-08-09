@@ -18,4 +18,10 @@ description: Implement and review changes in the TeyvatGuide Vue, TypeScript, Vu
 7. Make the smallest coherent change and avoid unrelated cleanup, bulk data rewrites, or generated artifacts.
 8. Run validation proportional to the change and report anything not run.
 
+## Implementation plans
+
+- When an implementation plan is needed, create it as a Markdown file under the repository's `docs/` directory.
+- Treat implementation plans as local working artifacts: never stage or commit them. If a commit is requested, stage
+  only the implementation changes and verify that the plan remains outside the commit.
+
 Do not create a Git commit unless the user explicitly requests one. If requested, use `../git-workflow/SKILL.md`.
