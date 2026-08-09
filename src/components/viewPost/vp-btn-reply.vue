@@ -54,8 +54,8 @@
         </div>
         <v-list class="tpr-reply-list" @scroll="handleListScroll">
           <VpReplyItem
-            v-for="(item, index) in reply"
-            :key="index"
+            v-for="item in reply"
+            :key="item.reply.reply_id"
             :modelValue="item"
             :pinId
             mode="main"

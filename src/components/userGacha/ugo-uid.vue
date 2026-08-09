@@ -26,8 +26,8 @@
       </div>
       <v-item-group v-model="selectedData" class="ugo-content" multiple>
         <v-item
-          v-for="(item, index) in data"
-          :key="index"
+          v-for="item in data"
+          :key="`${item.uid}-${item.isUgc}`"
           v-slot="{ isSelected, toggle }"
           :value="item"
         >

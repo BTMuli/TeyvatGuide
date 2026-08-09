@@ -125,9 +125,9 @@
           <TucAvatars :detail="false" :model-value="item.detail.backup_avatars" />
           <div class="ucw-rounds">
             <TucRound
-              v-for="(round, idx) in item.detail.rounds_data"
+              v-for="round in item.detail.rounds_data"
               :id="item.id"
-              :key="idx"
+              :key="round.round_id"
               :round
               :uid="item.uid"
             />

@@ -14,7 +14,7 @@
     <template #default>
       <div v-show="!isUserPool">
         <div v-if="obcPools.length < 3" class="pool-grid">
-          <PhPoolCard v-for="(pool, idx) in obcPools" :key="idx" :pool />
+          <PhPoolCard v-for="pool in obcPools" :key="pool.id" :pool />
         </div>
         <Swiper
           v-else
@@ -27,14 +27,14 @@
           :space-between="12"
           class="pool-swiper"
         >
-          <SwiperSlide v-for="(pool, idx) in obcPools" :key="idx">
+          <SwiperSlide v-for="pool in obcPools" :key="pool.id">
             <PhPoolCard :pool />
           </SwiperSlide>
         </Swiper>
       </div>
       <div v-show="isUserPool">
         <div class="pool-list">
-          <PhPoolUser v-for="(pool, idx) in userPools" :key="idx" :pool />
+          <PhPoolUser v-for="pool in userPools" :key="pool.pool_id" :pool />
         </div>
       </div>
     </template>

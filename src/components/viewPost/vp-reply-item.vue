@@ -60,8 +60,8 @@
               @scroll="handleSubScroll"
             >
               <VpReplyItem
-                v-for="(reply, index) in subReplies"
-                :key="index"
+                v-for="reply in subReplies"
+                :key="reply.reply.reply_id"
                 :modelValue="reply"
                 mode="sub"
               />

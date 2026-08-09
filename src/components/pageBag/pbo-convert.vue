@@ -2,7 +2,7 @@
 <template>
   <div class="pboc-container">
     <v-icon>mdi-all-inclusive</v-icon>
-    <PboConvertMaterial v-for="(material, index) in convertSources" :key="index" :material />
+    <PboConvertMaterial v-for="material in convertSources" :key="material.id" :material />
   </div>
 </template>
 <script lang="ts" setup>

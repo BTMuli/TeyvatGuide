@@ -5,8 +5,8 @@
       <div class="tuc-ae-title">上场角色</div>
       <div class="tuc-ae-grid">
         <TItembox
-          v-for="(avatar, idx) in props.avatars"
-          :key="idx"
+          v-for="avatar in props.avatars"
+          :key="avatar.avatar_id"
           :model-value="getAvatarBox(avatar)"
         />
       </div>

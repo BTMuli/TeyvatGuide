@@ -12,7 +12,7 @@
         </div>
         <TPostcard
           v-for="(post, index) in postList"
-          :key="index"
+          :key="post.post.post_id"
           :class="{ selected: index === props.collection.cur - 1 }"
           :post
           class="tpoc-item"
