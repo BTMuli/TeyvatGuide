@@ -355,13 +355,14 @@ async function setSentryUser(): Promise<void> {
 }
 
 async function checkAppLoad(): Promise<void> {
-  let checkDB = false;
+  let checkDB: boolean;
   try {
     checkDB = await TGSqlite.check();
   } catch (error) {
     if (error instanceof Error) {
       await TGLogger.Error(`[App][checkAppLoad] ${error.name}: ${error.message}`);
     } else console.error(error);
+    throw error;
   }
   if (!checkDB) {
     // @ts-expect-error import.meta

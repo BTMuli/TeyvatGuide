@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.11.2
+ * @since Beta v0.11.3
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -9,12 +9,48 @@ import { invoke } from "@tauri-apps/api/core";
 import Database from "@tauri-apps/plugin-sql";
 import TGLogger from "@utils/TGLogger.js";
 
+import createTable from "./sql/createTable.sql?raw";
 import initDataSql from "./sql/initData.js";
 
 type SqlStatement = {
   query: string;
   values?: Array<unknown>;
 };
+
+type TableColumn = {
+  name: string;
+  notnull: number;
+  pk: number;
+};
+
+const CoreSchemaMigrations = <const>["GameAccount.v2", "HardChallenge.v2"];
+const CoreSchemaVersion = "2026.08.p0.2";
+
+const GameAccountLegacyTable = "GameAccount_legacy_v0_11_2";
+const LegacyTablesForReset = <const>[GameAccountLegacyTable];
+const GameAccountColumns = <const>[
+  "uid",
+  "gameBiz",
+  "gameUid",
+  "isChosen",
+  "isOfficial",
+  "level",
+  "nickname",
+  "region",
+  "regionName",
+  "updated",
+];
+const HardChallengeColumns = <const>[
+  "uid",
+  "id",
+  "startTime",
+  "endTime",
+  "name",
+  "single",
+  "mp",
+  "blings",
+  "updated",
+];
 
 class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
@@ -42,6 +78,7 @@ class Sqlite {
     "UserBagRelic",
   ];
   private db: Database | null = null;
+  private coreSchemaUpdate: Promise<void> | null = null;
   private cultivationEntrySchemaUpdate: Promise<void> | null = null;
   private static instance: Sqlite | null = null;
 
@@ -52,43 +89,209 @@ class Sqlite {
 
   /**
    * 获取数据库实例
-   * @since Beta v0.3.3
+   * @since Beta v0.11.3
    * @returns 数据库实例
    */
   public async getDB(): Promise<Database> {
+    const db = await this.getRawDB();
+    await this.ensureCoreSchema();
+    return db;
+  }
+
+  private async getRawDB(): Promise<Database> {
     if (this.db === null) this.db = await Database.load(this.dbPath);
     return this.db;
   }
 
   /**
+   * 在任意数据库消费者运行前校验并迁移核心表结构。
+   * @since Beta v0.11.3
+   * @returns 无返回值
+   */
+  private async ensureCoreSchema(): Promise<void> {
+    if (this.coreSchemaUpdate === null) this.coreSchemaUpdate = this.migrateCoreSchema();
+    try {
+      await this.coreSchemaUpdate;
+    } catch (error) {
+      this.coreSchemaUpdate = null;
+      throw error;
+    }
+  }
+
+  private async migrateCoreSchema(): Promise<void> {
+    const db = await this.getRawDB();
+    try {
+      // 首次初始化仍由现有建表清单负责；既有表会在下方逐项迁移。
+      await db.execute(createTable);
+      for (const migration of CoreSchemaMigrations) {
+        if (migration === "GameAccount.v2") await this.migrateGameAccountSchema();
+        else await this.migrateHardChallengeSchema();
+      }
+      await db.execute(
+        `INSERT INTO AppData (key, value, updated)
+         VALUES ($1, $2, datetime('now', 'localtime'))
+         ON CONFLICT(key) DO UPDATE SET
+           value = $2,
+           updated = datetime('now', 'localtime')
+         WHERE AppData.value IS NOT $2;`,
+        ["coreSchemaVersion", CoreSchemaVersion],
+      );
+    } catch (error) {
+      const log = {
+        scope: "Sqlite.coreSchema",
+        migrations: CoreSchemaMigrations,
+        message: error instanceof Error ? error.message : String(error),
+      };
+      await TGLogger.Error(JSON.stringify(log));
+      showSnackbar.error(
+        "数据库结构迁移失败。请备份数据库后重新启动应用，问题持续时请联系支持。",
+        6000,
+      );
+      throw error;
+    }
+  }
+
+  private async getTableColumns(tableName: string): Promise<Array<TableColumn>> {
+    const db = await this.getRawDB();
+    return await db.select<Array<TableColumn>>(`PRAGMA table_info(${tableName});`);
+  }
+
+  private async migrateGameAccountSchema(): Promise<void> {
+    const db = await this.getRawDB();
+    const columns = await this.getTableColumns("GameAccount");
+    const columnMap = new Map(columns.map((column) => [column.name, column]));
+    const hasExpectedColumns = GameAccountColumns.every((name) => columnMap.has(name));
+    const hasExpectedPrimaryKey = ["uid", "gameBiz", "gameUid"].every(
+      (name, index) => columnMap.get(name)?.pk === index + 1,
+    );
+    const identityColumnsAreRequired = ["uid", "gameBiz", "gameUid"].every(
+      (name) => (columnMap.get(name)?.notnull ?? 0) !== 0,
+    );
+    if (hasExpectedColumns && hasExpectedPrimaryKey && identityColumnsAreRequired) return;
+
+    const selectValues = GameAccountColumns.map((name) =>
+      columnMap.has(name) ? `"${name}"` : `NULL AS "${name}"`,
+    ).join(", ");
+    const hasIdentityColumns = ["uid", "gameBiz", "gameUid"].every((name) => columnMap.has(name));
+    const quarantineCountQuery = hasIdentityColumns
+      ? `SELECT COUNT(*) AS count
+         FROM GameAccount
+         WHERE uid IS NULL OR trim(uid) = ''
+            OR gameBiz IS NULL OR trim(gameBiz) = ''
+            OR gameUid IS NULL OR trim(gameUid) = '';`
+      : "SELECT COUNT(*) AS count FROM GameAccount;";
+    const quarantineCountResult = await db.select<Array<{ count: number }>>(quarantineCountQuery);
+    const quarantineCount = quarantineCountResult[0]?.count ?? 0;
+    const insertStatement = hasIdentityColumns
+      ? `INSERT INTO GameAccount (${GameAccountColumns.join(", ")})
+         SELECT ${selectValues}
+         FROM ${GameAccountLegacyTable}
+         WHERE uid IS NOT NULL AND trim(uid) <> ''
+           AND gameBiz IS NOT NULL AND trim(gameBiz) <> ''
+           AND gameUid IS NOT NULL AND trim(gameUid) <> '';`
+      : undefined;
+    const createStatement = `CREATE TABLE GameAccount (
+      uid TEXT NOT NULL,
+      gameBiz TEXT NOT NULL,
+      gameUid TEXT NOT NULL,
+      isChosen BOOLEAN,
+      isOfficial BOOLEAN,
+      level INTEGER,
+      nickname TEXT,
+      region TEXT,
+      regionName TEXT,
+      updated TEXT,
+      PRIMARY KEY (uid, gameBiz, gameUid)
+    );`;
+    const statements: Array<SqlStatement> = [
+      { query: `ALTER TABLE GameAccount RENAME TO ${GameAccountLegacyTable};` },
+      { query: createStatement },
+    ];
+    if (insertStatement !== undefined) statements.push({ query: insertStatement });
+    await this.executeRawTransaction(statements);
+    await TGLogger.Warn(
+      JSON.stringify({
+        scope: "Sqlite.GameAccountMigration",
+        legacyTable: GameAccountLegacyTable,
+        copiedIdentities: hasIdentityColumns,
+      }),
+    );
+    if (quarantineCount > 0) {
+      showSnackbar.warn(
+        `有 ${quarantineCount} 条旧游戏账号关系无法确认归属，已安全保留。请重新拉取/刷新账号关系。`,
+        6000,
+      );
+    }
+  }
+
+  private async migrateHardChallengeSchema(): Promise<void> {
+    const columns = await this.getTableColumns("HardChallenge");
+    const columnNames = new Set(columns.map((column) => column.name));
+    const additions = <const>[
+      { name: "single", sql: "ALTER TABLE HardChallenge ADD single TEXT;" },
+      { name: "mp", sql: "ALTER TABLE HardChallenge ADD mp TEXT;" },
+      { name: "blings", sql: "ALTER TABLE HardChallenge ADD blings TEXT;" },
+    ];
+    const statements = additions
+      .filter((addition) => !columnNames.has(addition.name))
+      .map<SqlStatement>((addition) => ({ query: addition.sql }));
+    if (statements.length > 0) await this.executeRawTransaction(statements);
+  }
+
+  /**
    * 在同一数据库连接中执行事务语句
-   * @since Beta v0.11.1
+   * @since Beta v0.11.3
    * @param statements - 按顺序执行的 SQL 语句
    * @returns 无返回值
    */
   public async executeTransaction(statements: ReadonlyArray<SqlStatement>): Promise<void> {
     await this.getDB();
+    await this.executeRawTransaction(statements);
+  }
+
+  private async executeRawTransaction(statements: ReadonlyArray<SqlStatement>): Promise<void> {
+    await this.getRawDB();
     await invoke("execute_sql_transaction", { db: this.dbPath, statements });
   }
 
   /**
    * 检测是否需要创建数据库
-   * @since Beta v0.6.1
+   * @since Beta v0.11.3
    * @returns 是否需要创建数据库
    */
   public async check(): Promise<boolean> {
     try {
       const db = await this.getDB();
-      let isVerified = false;
       const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
       const res: Array<{ name: string }> = await db.select(sqlT);
-      if (this.tables.every((item) => res.map((i) => i.name).includes(item))) {
-        isVerified = true;
-      }
-      return isVerified;
+      if (!this.tables.every((item) => res.map((i) => i.name).includes(item))) return false;
+      const [gameAccountColumns, hardChallengeColumns] = await Promise.all([
+        this.getTableColumns("GameAccount"),
+        this.getTableColumns("HardChallenge"),
+      ]);
+      const gameAccountMap = new Map(gameAccountColumns.map((column) => [column.name, column]));
+      const gameAccountIsValid =
+        GameAccountColumns.every((name) => gameAccountMap.has(name)) &&
+        ["uid", "gameBiz", "gameUid"].every(
+          (name, index) => gameAccountMap.get(name)?.pk === index + 1,
+        ) &&
+        ["uid", "gameBiz", "gameUid"].every(
+          (name) => (gameAccountMap.get(name)?.notnull ?? 0) !== 0,
+        );
+      const hardChallengeMap = new Map(hardChallengeColumns.map((column) => [column.name, column]));
+      const hardChallengeIsValid =
+        HardChallengeColumns.every((name) => hardChallengeMap.has(name)) &&
+        hardChallengeMap.get("uid")?.pk === 1 &&
+        hardChallengeMap.get("id")?.pk === 2;
+      if (!gameAccountIsValid || !hardChallengeIsValid) return false;
+      const appVersion = await db.select<Array<{ key: string }>>(
+        "SELECT key FROM AppData WHERE key = $1;",
+        ["appVersion"],
+      );
+      return appVersion.length > 0;
     } catch (e) {
       await TGLogger.Error(JSON.stringify(e));
-      return false;
+      throw e;
     }
   }
 
@@ -258,7 +461,7 @@ class Sqlite {
 
   /**
    * 重置数据库
-   * @since Beta v0.9.5
+   * @since Beta v0.11.3
    * @returns 无返回值
    */
   public async reset(): Promise<void> {
@@ -271,13 +474,19 @@ class Sqlite {
         // 立即获取写锁，减少中途被抢占的概率
         await db.execute("BEGIN IMMEDIATE;");
         try {
-          for (const item of this.tables) {
-            await db.execute("DROP TABLE IF EXISTS $1", [item]);
+          // 表名只来自受控白名单，SQLite 不支持以绑定参数传入标识符。
+          for (const tableName of [...this.tables, ...LegacyTablesForReset]) {
+            await db.execute(`DROP TABLE IF EXISTS "${tableName}";`);
           }
           await db.execute("COMMIT;");
         } catch (innerErr) {
           console.error(innerErr);
-          await db.execute("ROLLBACK;");
+          try {
+            await db.execute("ROLLBACK;");
+          } catch (rollbackError) {
+            console.error(rollbackError);
+          }
+          throw innerErr;
         }
         await this.initDB();
         return;
@@ -291,6 +500,7 @@ class Sqlite {
         }
         console.error(err);
         showSnackbar.error("数据库重置失败，请退出应用后手动删除数据库文件");
+        throw err;
       }
     }
   }

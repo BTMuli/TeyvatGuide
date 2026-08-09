@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.11.2
+ * @since Beta v0.11.3
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -296,14 +296,14 @@ function copyCookie(cookie: TGApp.App.Account.Cookie): string {
 
 /**
  * 获取指定用户账号
- * @since Beta v0.9.0
+ * @since Beta v0.11.3
  * @param uid - 用户UID
  * @returns 用户账号
  */
 async function getGameAccount(uid: string): Promise<Array<TGApp.Sqlite.Account.Game>> {
   const db = await TGSqlite.getDB();
   return await db.select<Array<TGApp.Sqlite.Account.Game>>(
-    "SELECT * FROM GameAccount WHERE uid = ? ORDER BY gameBiz, gameUid;",
+    "SELECT * FROM GameAccount WHERE uid = $1 ORDER BY gameBiz, gameUid;",
     [uid],
   );
 }
@@ -330,21 +330,23 @@ async function getGameAccountByGid(
 
 /**
  * 切换到指定游戏账号
- * @since Beta v0.6.0
+ * @since Beta v0.11.3
  * @param uid - 米社UID
  * @param gameUid - 游戏UID
  * @returns 无返回值
  */
 async function switchGameAccount(uid: string, gameUid: string): Promise<void> {
-  const db = await TGSqlite.getDB();
-  await db.execute("UPDATE GameAccount SET isChosen = 0,updated=? WHERE uid = ?;", [
-    timestampToDate(new Date().getTime()),
-    uid,
-  ]);
-  await db.execute("UPDATE GameAccount SET isChosen=1,updated=? WHERE uid = ? AND gameUid = ?;", [
-    timestampToDate(new Date().getTime()),
-    uid,
-    gameUid,
+  await TGSqlite.getDB();
+  const updated = timestampToDate(new Date().getTime());
+  await TGSqlite.executeTransaction([
+    {
+      query: "UPDATE GameAccount SET isChosen = 0, updated = $1 WHERE uid = $2;",
+      values: [updated, uid],
+    },
+    {
+      query: "UPDATE GameAccount SET isChosen = 1, updated = $1 WHERE uid = $2 AND gameUid = $3;",
+      values: [updated, uid, gameUid],
+    },
   ]);
 }
 
@@ -366,7 +368,7 @@ async function getCurGameAccount(uid: string): Promise<TGApp.Sqlite.Account.Game
 
 /**
  * 保存游戏账户数据
- * @since Beta v0.9.6
+ * @since Beta v0.11.3
  * @param uid - 米社UID
  * @param accounts - 账户数据
  * @returns 无返回值
@@ -385,7 +387,7 @@ async function saveGameAccount(
           INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial,
                                   level, nickname, region, regionName, updated)
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-          ON CONFLICT(uid, gameUid, gameBiz)
+          ON CONFLICT(uid, gameBiz, gameUid)
               DO UPDATE
               SET isChosen   = $4,
                   isOfficial = $5,
@@ -413,13 +415,13 @@ async function saveGameAccount(
 
 /**
  * 删除指定游戏账户
- * @since Beta v0.7.2
+ * @since Beta v0.11.3
  * @param account - 游戏账户
  * @returns 无返回值
  */
 async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<void> {
   const db = await TGSqlite.getDB();
-  await db.execute("DELETE FROM GameAccount WHERE uid = ? AND gameUid = ? AND gameBiz = ?;", [
+  await db.execute("DELETE FROM GameAccount WHERE uid = $1 AND gameUid = $2 AND gameBiz = $3;", [
     account.uid,
     account.gameUid,
     account.gameBiz,
@@ -430,11 +432,12 @@ async function deleteGameAccount(account: TGApp.Sqlite.Account.Game): Promise<vo
  * 删除米社账号凭据及游戏账号绑定关系
  *
  * 仅删除 UserAccount 与 GameAccount，不删除以 gameUid 为键保存的战绩、角色、背包等数据。
- * @since Beta v0.11.2
+ * @since Beta v0.11.3
  * @param uid - 米社UID
  * @returns 无返回值
  */
 async function deleteAccount(uid: string): Promise<void> {
+  await TGSqlite.getDB();
   await TGSqlite.executeTransaction([
     { query: "DELETE FROM GameAccount WHERE uid = $1;", values: [uid] },
     { query: "DELETE FROM UserAccount WHERE uid = $1;", values: [uid] },

@@ -1,42 +1,42 @@
 /**
  * 幽境危战类型定义文件
- * @since Beta v0.8.0
+ * @since Beta v0.11.3
  */
 
 declare namespace TGApp.Sqlite.Challenge {
   /**
    * 幽静危战表数据
-   * @since Beta v0.8.0
+   * @since Beta v0.11.3
    * @remarks HardChallenge 表
    */
   type TableRaw = {
     /** 用户UID */
-    uid: string;
+    uid: string | null;
     /** 数据 ID */
-    id: number;
+    id: number | null;
     /** 开始时间 */
-    startTime: string;
+    startTime: string | null;
     /** 结束时间 */
-    endTime: string;
+    endTime: string | null;
     /** 挑战名称 */
-    name: string;
+    name: string | null;
     /**
      * 单人挑战数据
      * @remarks 序列化，反序列化后是 {@link TGApp.Game.Challenge.Challenge} 类型
      */
-    single: string;
+    single?: string | null;
     /**
      * 联机挑战数据
      * @remarks 序列化，反序列化后是 {@link TGApp.Game.Challenge.Challenge} 类型
      */
-    mp: string;
+    mp?: string | null;
     /**
      * 赋光数据
      * @remarks 序列化，反序列化后是 {@link TGApp.Game.Challenge.ChallengeBlings} 类型
      */
-    blings: string;
+    blings?: string | null;
     /** 更新时间 */
-    updated: string;
+    updated: string | null;
   };
 
   /**

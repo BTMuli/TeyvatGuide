@@ -1,5 +1,5 @@
 -- sqlite数据库创建表语句
--- @since Beta v0.11.2
+-- @since Beta v0.11.3
 
 -- @brief 创建养成计划表
 create table if not exists CultivationProject
@@ -133,9 +133,9 @@ create table if not exists UserAccount
 -- @brief 创建游戏账号数据表
 create table if not exists GameAccount
 (
-    uid        text,
-    gameBiz    text,
-    gameUid    text,
+    uid        text not null,
+    gameBiz    text not null,
+    gameUid    text not null,
     isChosen   boolean,
     isOfficial boolean,
     level      integer,
