@@ -1,0 +1,13 @@
+interface:
+  display_name: "Sentry MCP 诊断"
+  short_description: "通过 Sentry MCP 排查 TeyvatGuide 错误、事件与版本回归"
+  default_prompt: "Use $sentry-mcp to investigate this TeyvatGuide error with Sentry evidence."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "sentry"
+      description: "Sentry MCP server for issues, events, traces, and releases"
+
+policy:
+  allow_implicit_invocation: true

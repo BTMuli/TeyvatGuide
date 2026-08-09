@@ -13,6 +13,8 @@
 - TypeScript、Vue 或类型声明：读取 `.agents/rules/typescript-rules.md`；需要完整模式时使用
   `.agents/skills/typescript-standards/SKILL.md`。
 - SQLite：读取 `.agents/rules/sqlite-rules.md`。
+- Sentry 错误、事件、堆栈、版本回归或线上修复验证：使用
+  `.agents/skills/sentry-mcp/SKILL.md`，默认只读查询；变更 issue 状态或项目配置前须取得明确授权。
 - 项目结构、命令或跨前后端开发：使用 `.agents/skills/teyvat-guide/SKILL.md`。
 - Tauri 桌面 UI：除非用户明确要求 tauri-mcp 截图识别，否则不主动使用 MCP；
   需要调用时遵循 `.agents/skills/tauri-mcp-cli/SKILL.md`，并优先复用已在运行的 debug 实例。
