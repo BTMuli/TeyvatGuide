@@ -97,7 +97,7 @@ const gameAccounts = ref<Array<TGApp.Sqlite.Account.Game>>([]);
 const dailyNoteAccounts = ref<Array<DailyNoteAccount>>([]);
 const signAccounts = ref<Array<SignAccount>>([]);
 
-const currentGameUid = computed(() => account.value?.gameUid || "");
+const currentGameUid = computed<string>(() => account.value?.gameUid || "");
 
 /**
  * 构建验证用的签名 Cookie
@@ -154,7 +154,7 @@ async function fetchDailyNoteWithCaptcha(
   return retryResp.data;
 }
 
-const sortedDailyNoteAccounts = computed(() => {
+const sortedDailyNoteAccounts = computed<Array<DailyNoteAccount>>(() => {
   if (!currentGameUid.value) return dailyNoteAccounts.value;
   return [...dailyNoteAccounts.value].sort((a, b) => {
     const aIsCurrent = a.account.gameUid === currentGameUid.value;
@@ -165,7 +165,7 @@ const sortedDailyNoteAccounts = computed(() => {
   });
 });
 
-const sortedSignAccounts = computed(() => {
+const sortedSignAccounts = computed<Array<SignAccount>>(() => {
   return [...signAccounts.value].sort((a, b) => {
     const aIsGenshin = a.account.gameBiz === "hk4e_cn";
     const bIsGenshin = b.account.gameBiz === "hk4e_cn";

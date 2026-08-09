@@ -46,7 +46,7 @@ export type UgoHutaoMode = "download" | "upload" | "delete";
 type UgoHutaoDuUid = { uid: string; cnt: number };
 
 type UgoHutaoDuProps = { mode: UgoHutaoMode };
-type UgoHutaoDuEmits = (e: "selected", v: Array<string>, m: UgoHutaoMode) => void;
+type UgoHutaoDuEmits = { selected: [uids: Array<string>, mode: UgoHutaoMode] };
 
 const visible = defineModel<boolean>();
 const emits = defineEmits<UgoHutaoDuEmits>();

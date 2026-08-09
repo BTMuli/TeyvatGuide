@@ -125,7 +125,7 @@ export type WeaponFilterValue = {
   locked: boolean | null;
 };
 
-type PbWeaponFilterEmits = (e: "filter", v: WeaponFilterValue) => void;
+type PbWeaponFilterEmits = { filter: [v: WeaponFilterValue] };
 
 const emits = defineEmits<PbWeaponFilterEmits>();
 

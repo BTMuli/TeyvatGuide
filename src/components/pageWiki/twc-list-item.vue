@@ -76,7 +76,7 @@ const extraCostumes = computed<Array<TGApp.App.Character.Costume>>(() => {
 });
 
 function triggerClick(event: KeyboardEvent): void {
-  (<HTMLElement>event.currentTarget).click();
+  if (event.currentTarget instanceof HTMLElement) event.currentTarget.click();
 }
 </script>
 <style lang="scss" scoped>

@@ -314,11 +314,11 @@ const targetPromoteLevel = computed<number>(() => {
   );
   return Math.max(props.currentPromoteLevel, resolved);
 });
-const currentStats = computed(() => {
+const currentStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   if (!props.selectedWeapon) return [];
   return wikiUtils.weapon(props.selectedWeapon.wiki, currentLevel.value, props.currentPromoteLevel);
 });
-const targetStats = computed(() => {
+const targetStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   if (!props.selectedWeapon) return [];
   return wikiUtils.weapon(props.selectedWeapon.wiki, targetLevel.value, targetPromoteLevel.value);
 });

@@ -40,7 +40,7 @@ import { ref, toRaw, watch } from "vue";
 import { AppAchievementSeriesData } from "@/data/index.js";
 
 type TuaAchiProps = { modelValue: TGApp.App.Achievement.RenderItem };
-type TuaAchiEmits = (e: "select-achi", data: TGApp.App.Achievement.RenderItem) => void;
+type TuaAchiEmits = { "select-achi": [data: TGApp.App.Achievement.RenderItem] };
 
 const props = defineProps<TuaAchiProps>();
 const emits = defineEmits<TuaAchiEmits>();

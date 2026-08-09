@@ -194,7 +194,7 @@ export type RelicFilterValue = {
   grade: Array<string>;
 };
 
-type PbRelicFilterEmits = (e: "filter", v: RelicFilterValue) => void;
+type PbRelicFilterEmits = { filter: [v: RelicFilterValue] };
 
 const emits = defineEmits<PbRelicFilterEmits>();
 

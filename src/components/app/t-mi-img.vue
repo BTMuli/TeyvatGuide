@@ -18,7 +18,7 @@ type TMiImgProps = {
   ori?: boolean;
   size?: number;
 };
-type TMiImgEmits = (e: "click") => void;
+type TMiImgEmits = { click: [] };
 const props = withDefaults(defineProps<TMiImgProps>(), { size: 25 });
 const emits = defineEmits<TMiImgEmits>();
 

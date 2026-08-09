@@ -28,7 +28,7 @@ type DucDetailOltProps =
 
 const props = defineProps<DucDetailOltProps>();
 
-const icon = computed(() => {
+const icon = computed<string>(() => {
   if (props.mode === "weapon" || !props.costume) return `/WIKI/${props.mode}/${props.data.id}.webp`;
   return `/WIKI/costume/${props.costume.id}.webp`;
 });

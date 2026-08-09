@@ -40,9 +40,7 @@ type Props = {
   currentUid: string;
 };
 
-type Emits = {
-  (e: "switch-user", uid: string): void;
-};
+type Emits = { "switch-user": [uid: string] };
 
 const props = defineProps<Props>();
 const emits = defineEmits<Emits>();

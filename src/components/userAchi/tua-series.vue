@@ -49,7 +49,7 @@ type TuaSeriesProps = {
   /** 是否隐藏已完成 */
   hideFin: boolean;
 };
-type TuaSeriesEmits = (e: "selected", v: number) => void;
+type TuaSeriesEmits = { selected: [v: number] };
 
 let achiListener: UnlistenFn | null = null;
 const props = defineProps<TuaSeriesProps>();

@@ -154,7 +154,16 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 /** 帖子卡片参数 */
@@ -167,8 +176,8 @@ type TPostCardProps = {
   listMode?: boolean;
 };
 type TPostCardEmits = {
-  (e: "onSelected", v: string): void;
-  (e: "onUserClick", u: TGApp.BBS.Post.User, g: number): void;
+  "onSelected": [v: string];
+  "onUserClick": [u: TGApp.BBS.Post.User, g: number];
 };
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
@@ -205,7 +214,7 @@ const emits = defineEmits<TPostCardEmits>();
 
 const isSelected = ref<boolean>(false);
 const card = shallowRef<RenderCard>();
-const tagsContainerEl = ref<HTMLElement | null>(null);
+const tagsContainerEl = useTemplateRef<HTMLElement>("tagsContainerEl");
 const showTagsMenu = ref<boolean>(false);
 const visibleTopicCount = ref<number>(Infinity);
 const tagsReady = ref<boolean>(false);
@@ -260,9 +269,8 @@ function toggleTagsMenu(): void {
 }
 
 function closeTagsMenuHandler(e: Event): void {
-  if (e.type === "click") {
-    const target = <HTMLElement>e.target;
-    if (target.closest(".tpc-tags-more") || target.closest(".tpc-tags-popup")) return;
+  if (e.type === "click" && e.target instanceof HTMLElement) {
+    if (e.target.closest(".tpc-tags-more") || e.target.closest(".tpc-tags-popup")) return;
   }
   showTagsMenu.value = false;
 }

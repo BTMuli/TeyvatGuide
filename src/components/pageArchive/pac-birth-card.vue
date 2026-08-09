@@ -32,7 +32,7 @@ type PacBirthCardProps = {
   /**是否为空 */
   isAether: boolean;
 };
-type PacBirthCardEmits = (e: "open") => void;
+type PacBirthCardEmits = { open: [] };
 const props = defineProps<PacBirthCardProps>();
 const emits = defineEmits<PacBirthCardEmits>();
 

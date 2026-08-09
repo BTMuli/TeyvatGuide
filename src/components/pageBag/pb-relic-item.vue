@@ -41,7 +41,7 @@ type PbRelicItemProps = {
   relic: TGApp.Sqlite.UserBag.RelicTable;
 };
 
-type PbRelicItemEmits = (e: "select", v: TGApp.Sqlite.UserBag.RelicTable) => void;
+type PbRelicItemEmits = { select: [v: TGApp.Sqlite.UserBag.RelicTable] };
 
 const props = defineProps<PbRelicItemProps>();
 const emits = defineEmits<PbRelicItemEmits>();

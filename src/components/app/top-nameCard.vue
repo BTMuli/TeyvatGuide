@@ -26,7 +26,7 @@
 import TwnTypeTag from "@comp/pageWiki/twn-type-tag.vue";
 
 type TopNameCardProps = { data: TGApp.App.NameCard.Item; finish?: boolean };
-type TopNameCardEmits = (e: "selected", v: TGApp.App.NameCard.Item) => void;
+type TopNameCardEmits = { selected: [v: TGApp.App.NameCard.Item] };
 
 const props = withDefaults(defineProps<TopNameCardProps>(), { finish: true });
 const emit = defineEmits<TopNameCardEmits>();

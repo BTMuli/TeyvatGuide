@@ -34,9 +34,7 @@ type Props = {
   isClickable?: boolean; // Explicitly control if this cell is clickable
 };
 
-type Emits = {
-  (e: "click"): void;
-};
+type Emits = { click: [] };
 
 const props = withDefaults(defineProps<Props>(), {
   isExtra: false,
@@ -44,18 +42,20 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const emits = defineEmits<Emits>();
 
-const STATE_CLASS_MAP: Record<RewardStateEnum, string> = {
+type RewardStateClass = "state-normal" | "state-signed" | "state-next-reward" | "state-missed";
+
+const STATE_CLASS_MAP: Record<RewardStateEnum, RewardStateClass> = {
   [RewardState.NORMAL]: "state-normal",
   [RewardState.SIGNED]: "state-signed",
   [RewardState.NEXT_REWARD]: "state-next-reward",
   [RewardState.MISSED]: "state-missed",
 };
 
-const stateClass = computed(() => {
+const stateClass = computed<RewardStateClass>(() => {
   return STATE_CLASS_MAP[props.state];
 });
 
-const isClickableComputed = computed(() => {
+const isClickableComputed = computed<boolean>(() => {
   // If isClickable prop is explicitly provided, use it
   if (props.isClickable !== undefined) {
     return props.isClickable;

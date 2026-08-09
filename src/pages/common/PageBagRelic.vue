@@ -109,6 +109,7 @@ import {
   ref,
   shallowRef,
   triggerRef,
+  useTemplateRef,
   watch,
 } from "vue";
 
@@ -138,7 +139,7 @@ const relicShow = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 const isFilterInitialized = ref<boolean>(false);
 const RELIC_RENDER_SIZE: Readonly<number> = 100;
 const renderedCount = ref<number>(RELIC_RENDER_SIZE);
-const loadMoreRef = shallowRef<HTMLElement>();
+const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
 let loadMoreObserver: IntersectionObserver | undefined;
 
 const visibleRelics = computed<Array<TGApp.Sqlite.UserBag.RelicTable>>(() =>

@@ -37,7 +37,7 @@ const props = defineProps<TucOvTarotProps>();
 const isShare = ref<boolean>(false);
 const version = ref<string>("");
 const finish = computed<number>(() => props.data?.curr_num ?? 0);
-const total = computed(() => props.data?.total_num ?? 22);
+const total = computed<number>(() => props.data?.total_num ?? 22);
 
 onMounted(async () => {
   version.value = await getVersion();

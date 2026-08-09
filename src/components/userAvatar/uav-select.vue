@@ -99,7 +99,7 @@ export type UavSelectModel = {
   area: Array<string>;
 };
 
-type UavSelectEmits = (e: "select", v: UavSelectModel) => void;
+type UavSelectEmits = { select: [v: UavSelectModel] };
 
 const costumeOpts: Array<UavSelectChipsItem> = [
   { label: "有", value: "true", title: "有衣装" },

@@ -33,7 +33,7 @@ import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-se
 import { ref, shallowRef, watch } from "vue";
 
 export type SelectedWValue = { star: Array<number>; weapon: Array<string> };
-type TwoSelectWEmits = (e: "select-w", value: SelectedWValue) => void;
+type TwoSelectWEmits = { "select-w": [value: SelectedWValue] };
 
 const emits = defineEmits<TwoSelectWEmits>();
 const starOpts: Array<UavSelectChipsItem> = [4, 5].map((i) => ({

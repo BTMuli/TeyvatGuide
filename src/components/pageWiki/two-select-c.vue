@@ -72,7 +72,7 @@ export type SelectedCValue = {
   team: Array<number>;
   area: Array<string>;
 };
-type TwoSelectCEmits = (e: "select-c", v: SelectedCValue) => void;
+type TwoSelectCEmits = { "select-c": [v: SelectedCValue] };
 
 const emits = defineEmits<TwoSelectCEmits>();
 const costumeOpts: Array<UavSelectChipsItem> = [

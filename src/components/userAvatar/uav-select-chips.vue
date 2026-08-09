@@ -65,6 +65,10 @@ type UavSelectChipsProps = {
 const props = withDefaults(defineProps<UavSelectChipsProps>(), { size: "default" });
 
 const selected = defineModel<Array<string>>("selected", { default: [] });
+
+defineSlots<{
+  all(props: { selected: boolean }): unknown;
+}>();
 const isAllSelected = computed<boolean>(() => {
   if (!props.items || props.items.length === 0) return false;
   return props.items.every((i) => selected.value.includes(i.value.toString()));

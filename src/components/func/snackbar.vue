@@ -18,7 +18,7 @@ import { SnackbarParams } from "./snackbar.js";
 const props = defineProps<SnackbarParams>();
 const data = shallowRef<SnackbarParams>(props);
 const show = ref<boolean>(false);
-const bgColor = computed(() => data.value.color);
+const bgColor = computed<string>(() => data.value.color);
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | undefined = undefined;

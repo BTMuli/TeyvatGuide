@@ -113,15 +113,15 @@ onMounted(async () => {
 
 function handleEmojiClick(e: Event, segment: EmojiSegment): void {
   if (!segment.emojiUrl) return;
-  const target = <HTMLImageElement>e.target;
-  target.src = segment.emojiUrl;
-  target.style.cursor = "unset";
+  if (!(e.target instanceof HTMLImageElement)) return;
+  e.target.src = segment.emojiUrl;
+  e.target.style.cursor = "unset";
 }
 
 function handleEmojiError(e: Event): void {
-  const target = <HTMLImageElement>e.target;
-  target.style.cursor = "pointer";
-  target.title = `点击重新加载: ${target.alt}`;
+  if (!(e.target instanceof HTMLImageElement)) return;
+  e.target.style.cursor = "pointer";
+  e.target.title = `点击重新加载: ${e.target.alt}`;
 }
 </script>
 <style lang="scss" scoped>

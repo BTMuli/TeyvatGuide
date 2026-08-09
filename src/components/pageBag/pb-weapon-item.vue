@@ -36,7 +36,7 @@ type PbWeaponItemProps = {
   detail: boolean;
 };
 
-type PbWeaponItemEmits = (e: "select", v: WeaponInfo) => void;
+type PbWeaponItemEmits = { select: [v: WeaponInfo] };
 
 const props = defineProps<PbWeaponItemProps>();
 const emits = defineEmits<PbWeaponItemEmits>();

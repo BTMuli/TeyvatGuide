@@ -29,7 +29,7 @@ import TSUserCollection from "@Sqlm/userCollect.js";
 import { ref, shallowRef, watch } from "vue";
 
 type ToPostCollectProps = { post: Array<string> };
-type ToPostCollectEmits = (e: "submit") => void;
+type ToPostCollectEmits = { submit: [] };
 
 const props = defineProps<ToPostCollectProps>();
 const emits = defineEmits<ToPostCollectEmits>();

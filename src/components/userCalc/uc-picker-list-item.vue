@@ -40,10 +40,7 @@ type UcPickerListItemProps = {
   secondary?: Array<string>;
 };
 
-withDefaults(defineProps<UcPickerListItemProps>(), {
-  primaryBadge: undefined,
-  secondary: () => [],
-});
+const { secondary = [] } = defineProps<UcPickerListItemProps>();
 
 const emit = defineEmits<{
   select: [];

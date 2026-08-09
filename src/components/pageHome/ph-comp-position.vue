@@ -54,7 +54,7 @@ import THomeCard from "./ph-comp-card.vue";
 import { AppCalendarData, WikiMaterialData } from "@/data/index.js";
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
-type TPositionEmits = (e: "success") => void;
+type TPositionEmits = { success: [] };
 
 const { isLogin } = storeToRefs(useAppStore());
 const { cookie, account } = storeToRefs(useUserStore());

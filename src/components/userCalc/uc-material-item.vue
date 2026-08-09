@@ -62,9 +62,9 @@ type UcMaterialItemProps = {
   material: TGApp.App.UserCalc.ResultMaterial;
   weakenReady?: boolean;
 };
-type UcMaterialItemEmits = (e: "select") => void;
+type UcMaterialItemEmits = { select: [] };
 
-withDefaults(defineProps<UcMaterialItemProps>(), { weakenReady: false });
+const { weakenReady = false } = defineProps<UcMaterialItemProps>();
 const emits = defineEmits<UcMaterialItemEmits>();
 
 function formatCount(count: number): string {

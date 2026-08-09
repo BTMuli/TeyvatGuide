@@ -70,7 +70,7 @@ function parseAffixDesc(): string {
   return parseHtmlText(props.cur.info.affix.Descriptions[descIndex].Description);
 }
 
-const weaponStats = computed(() => {
+const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   const level = props.cur.tb.info.level;
   const promoteLevel = props.cur.tb.info.promote_level;
   return wikiUtils.weapon(props.cur.info, level, promoteLevel);

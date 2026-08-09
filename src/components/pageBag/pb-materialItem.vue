@@ -31,7 +31,7 @@ type PbMaterialItemProps = {
   cur?: MaterialInfo;
 };
 /** 组件事件 */
-type PbMaterialItemEmits = (e: "select", v: MaterialInfo) => void;
+type PbMaterialItemEmits = { select: [v: MaterialInfo] };
 
 const props = defineProps<PbMaterialItemProps>();
 const emits = defineEmits<PbMaterialItemEmits>();

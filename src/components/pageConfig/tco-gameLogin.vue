@@ -33,7 +33,7 @@ import { generateShareImg } from "@utils/TGShare.js";
 import QrcodeVue from "qrcode.vue";
 import { onUnmounted, ref, watch } from "vue";
 
-type ToGameLoginEmits = (e: "success", data: TGApp.App.Account.Cookie) => void;
+type ToGameLoginEmits = { success: [data: TGApp.App.Account.Cookie] };
 
 // eslint-disable-next-line no-undef
 let cycleTimer: NodeJS.Timeout | null = null;

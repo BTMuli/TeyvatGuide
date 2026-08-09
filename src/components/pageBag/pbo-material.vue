@@ -83,7 +83,7 @@ type PboMaterialProps = {
   topOffset?: string;
   uid: number;
 };
-type PboMaterialEmits = (e: "updateDB", v: MaterialInfo) => void;
+type PboMaterialEmits = { updateDB: [v: MaterialInfo] };
 
 const props = withDefaults(defineProps<PboMaterialProps>(), {
   cmh: "600px",

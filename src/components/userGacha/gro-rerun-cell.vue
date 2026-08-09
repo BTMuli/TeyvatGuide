@@ -75,13 +75,13 @@ function fmtMD(dateStr: string): string {
 
 // ========== 计算属性 ==========
 
-const hasUp = computed(() =>
+const hasUp = computed<boolean>(() =>
   props.versionGroup.allPools.some(
     (p) => p.up5List.includes(props.itemId) || p.up4List.includes(props.itemId),
   ),
 );
 
-const isMix = computed(() =>
+const isMix = computed<boolean>(() =>
   props.versionGroup.allPools.some(
     (p) =>
       (p.up5List.includes(props.itemId) || p.up4List.includes(props.itemId)) &&
@@ -89,7 +89,7 @@ const isMix = computed(() =>
   ),
 );
 
-const tag = computed(() => {
+const tag = computed<string>(() => {
   for (const p of props.versionGroup.allPools) {
     if (p.up5List.includes(props.itemId)) return "UP";
     if (p.up4List.includes(props.itemId)) return "4★";
@@ -98,7 +98,7 @@ const tag = computed(() => {
 });
 
 /** 最早开始日期 */
-const dateStart = computed(() => {
+const dateStart = computed<string>(() => {
   let result = "";
   let earliest = Infinity;
   for (const p of props.versionGroup.allPools) {
@@ -114,7 +114,7 @@ const dateStart = computed(() => {
 });
 
 /** 交界日期（仅跨上下半时显示） */
-const dateMid = computed(() => {
+const dateMid = computed<string>(() => {
   const { firstPools, secondPools } = props.versionGroup;
   if (firstPools.length === 0 || secondPools.length === 0) return "";
   const inFirst = firstPools.some(
@@ -132,7 +132,7 @@ const dateMid = computed(() => {
 });
 
 /** 中心点日期：上半显示结束日期，下半显示开始日期 */
-const dateCenter = computed(() => {
+const dateCenter = computed<string>(() => {
   if (hasLeft.value && !hasRight.value) {
     // 仅上半：取上半卡池的最晚结束时间
     let latest = -Infinity;
@@ -168,7 +168,7 @@ const dateCenter = computed(() => {
 });
 
 /** 最晚结束日期 */
-const dateEnd = computed(() => {
+const dateEnd = computed<string>(() => {
   let result = "";
   let latest = -Infinity;
   for (const p of props.versionGroup.allPools) {
@@ -184,29 +184,29 @@ const dateEnd = computed(() => {
 });
 
 /** 上半五星UP */
-const hlFirst5 = computed(() =>
+const hlFirst5 = computed<boolean>(() =>
   props.versionGroup.firstPools.some((p) => p.up5List.includes(props.itemId)),
 );
 
 /** 上半四星UP */
-const hlFirst4 = computed(() =>
+const hlFirst4 = computed<boolean>(() =>
   props.versionGroup.firstPools.some((p) => p.up4List.includes(props.itemId)),
 );
 
 /** 下半五星UP */
-const hlSecond5 = computed(() =>
+const hlSecond5 = computed<boolean>(() =>
   props.versionGroup.secondPools.some((p) => p.up5List.includes(props.itemId)),
 );
 
 /** 下半四星UP */
-const hlSecond4 = computed(() =>
+const hlSecond4 = computed<boolean>(() =>
   props.versionGroup.secondPools.some((p) => p.up4List.includes(props.itemId)),
 );
 
 /** 上半是否有UP（任意星级） */
-const hasLeft = computed(() => hlFirst5.value || hlFirst4.value);
+const hasLeft = computed<boolean>(() => hlFirst5.value || hlFirst4.value);
 /** 下半是否有UP（任意星级） */
-const hasRight = computed(() => hlSecond5.value || hlSecond4.value);
+const hasRight = computed<boolean>(() => hlSecond5.value || hlSecond4.value);
 </script>
 
 <style lang="scss" scoped>

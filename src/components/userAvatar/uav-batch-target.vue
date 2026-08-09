@@ -131,15 +131,16 @@ type UavBatchTargetProps = {
   loading: boolean;
 };
 
-type UavBatchTargetEmits = (
-  e: "confirm",
-  value: {
-    level: number;
-    talentLevel: number;
-    ascended: boolean;
-    weapon: { enabled: boolean; level: number; ascended: boolean };
-  },
-) => void;
+type UavBatchTargetEmits = {
+  confirm: [
+    value: {
+      level: number;
+      talentLevel: number;
+      ascended: boolean;
+      weapon: { enabled: boolean; level: number; ascended: boolean };
+    },
+  ];
+};
 
 const props = defineProps<UavBatchTargetProps>();
 const emits = defineEmits<UavBatchTargetEmits>();

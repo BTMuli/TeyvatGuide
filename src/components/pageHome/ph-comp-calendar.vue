@@ -72,7 +72,16 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { computed, nextTick, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import TCalendarBirth from "./ph-calendar-birth.vue";
 import PhCalendarCultivationOverlay from "./ph-calendar-cultivation-overlay.vue";
@@ -83,7 +92,7 @@ import PhCompCultivation from "./ph-comp-cultivation.vue";
 import { AppCalendarData } from "@/data/index.js";
 
 type BtnItem = { week: 1 | 2 | 3 | 4 | 5 | 6 | 7; text: string };
-type TCalendarEmits = (e: "success") => void;
+type TCalendarEmits = { success: [] };
 const btnText: Array<BtnItem> = [
   { week: 7, text: "周日" },
   { week: 1, text: "周一" },
@@ -97,7 +106,7 @@ const emits = defineEmits<TCalendarEmits>();
 const ITEM_SIZE = 100;
 const GAP_SIZE = 8;
 
-const contentRef = ref<HTMLDivElement | null>(null);
+const contentRef = useTemplateRef<HTMLDivElement>("contentRef");
 const weekNow = ref<number>(0);
 const btnNow = ref<number>(0);
 const dateNow = ref<string>("");

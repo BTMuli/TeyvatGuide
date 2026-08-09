@@ -128,7 +128,7 @@ import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCompPositionUserProps = { pos: TGApp.Game.ActCalendar.ActItem };
-type PhCompPositionUserEmits = (e: "clickM", cur: TGApp.Game.ActCalendar.ActReward) => void;
+type PhCompPositionUserEmits = { clickM: [cur: TGApp.Game.ActCalendar.ActReward] };
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
