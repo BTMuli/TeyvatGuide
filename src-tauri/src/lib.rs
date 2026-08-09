@@ -13,9 +13,9 @@ mod yae;
 
 use crate::client::create_mhy_client;
 use crate::commands::{
-  clear_app_cache, create_window, execute_js, execute_sql_transaction, get_dir_size,
-  hide_main_window, init_app, is_in_admin, is_msix, is_process_running, launch_game, quit_app,
-  read_text_scale,
+  clear_app_cache, create_window, destroy_window, destroy_window_by_label, execute_js,
+  execute_sql_transaction, get_dir_size, hide_main_window, init_app, is_in_admin, is_msix,
+  is_process_running, launch_game, quit_app, read_text_scale,
 };
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
@@ -31,8 +31,14 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
         // 主窗口：发送事件让前端根据配置决定是隐藏还是退出
         let _ = app.emit("main-window-close-requested", ());
       } else {
-        // 子窗口：直接销毁
-        app.destroy().unwrap();
+        // 子窗口：异步销毁，避免在事件循环内等待 destroy 完成而重入死锁。
+        let app_handle = app.app_handle().clone();
+        let label = app.label().to_string();
+        tauri::async_runtime::spawn(async move {
+          if let Err(error) = destroy_window_by_label(&app_handle, &label).await {
+            log::warn!("[window] 销毁窗口 {label} 失败：{error}");
+          }
+        });
       }
     }
     _ => {}
@@ -107,6 +113,7 @@ pub fn run() {
     .invoke_handler(generate_handler![
       init_app,
       create_window,
+      destroy_window,
       execute_js,
       execute_sql_transaction,
       get_dir_size,

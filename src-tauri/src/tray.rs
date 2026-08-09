@@ -1,5 +1,5 @@
 // 系统托盘模块，负责创建和管理系统托盘图标
-// @since Beta v0.9.1
+// @since Beta v0.11.3
 
 use tauri::image::Image;
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
@@ -47,12 +47,13 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         show_main_window(app);
       }
       "quit" => {
-        for label in crate::SUB_WINDOW_LABELS.iter() {
-          if let Some(sub) = app.get_webview_window(label) {
-            let _ = sub.destroy();
+        let app_handle = app.clone();
+        tauri::async_runtime::spawn(async move {
+          if let Err(error) = crate::commands::destroy_sub_windows(app_handle.clone()).await {
+            log::warn!("[tray] 销毁子窗口失败：{error}");
           }
-        }
-        app.exit(0);
+          app_handle.exit(0);
+        });
       }
       _ => {}
     })

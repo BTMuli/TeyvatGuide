@@ -5,12 +5,89 @@ use crate::utils;
 use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Acquire;
-use tauri::{AppHandle, Emitter, Manager, WebviewWindowBuilder};
+use std::{
+  collections::HashMap,
+  sync::{Arc, LazyLock, Mutex, Weak},
+  time::Duration,
+};
+use tauri::{AppHandle, Emitter, Manager, Runtime, WebviewWindowBuilder};
 use tauri_plugin_sql::{DbInstances, DbPool};
 use tauri_utils::config::{WebviewUrl, WindowConfig};
 
 // 放一个常数，用来判断应用是否初始化
 static mut APP_INITIALIZED: bool = false;
+
+/// 为每个窗口 label 提供独立的短生命周期互斥锁。
+///
+/// `Weak` 让不再被使用的 label 自动释放，避免不受信任的 label 参数永久占用全局表。
+static WINDOW_LABEL_LOCKS: LazyLock<Mutex<HashMap<String, Weak<tauri::async_runtime::Mutex<()>>>>> =
+  LazyLock::new(|| Mutex::new(HashMap::new()));
+
+pub async fn with_window_label_lock<T>(
+  label: &str,
+  operation: impl FnOnce() -> Result<T, String>,
+) -> Result<T, String> {
+  let lock = get_window_label_lock(label);
+  let _guard = lock.lock().await;
+  operation()
+}
+
+fn get_window_label_lock(label: &str) -> Arc<tauri::async_runtime::Mutex<()>> {
+  {
+    let mut locks = WINDOW_LABEL_LOCKS.lock().unwrap_or_else(|error| error.into_inner());
+    locks.retain(|_, lock| lock.strong_count() > 0);
+    match locks.get(label).and_then(Weak::upgrade) {
+      Some(lock) => lock,
+      None => {
+        let lock = Arc::new(tauri::async_runtime::Mutex::new(()));
+        locks.insert(label.to_string(), Arc::downgrade(&lock));
+        lock
+      }
+    }
+  }
+}
+
+pub async fn destroy_window_by_label<R: Runtime>(
+  app_handle: &AppHandle<R>,
+  label: &str,
+) -> Result<(), String> {
+  let lock = get_window_label_lock(label);
+  let _guard = lock.lock().await;
+
+  let Some(window) = app_handle.get_webview_window(label) else {
+    return Ok(());
+  };
+  window.destroy().map_err(|error| error.to_string())?;
+
+  let app_handle = app_handle.clone();
+  let label = label.to_string();
+  tauri::async_runtime::spawn_blocking(move || {
+    for _ in 0..500 {
+      if app_handle.get_webview_window(&label).is_none() {
+        return Ok(());
+      }
+      std::thread::sleep(Duration::from_millis(10));
+    }
+
+    Err(format!("等待窗口 {label} 销毁超时"))
+  })
+  .await
+  .map_err(|error| error.to_string())?
+}
+
+pub async fn destroy_sub_windows<R: Runtime>(app_handle: AppHandle<R>) -> Result<(), String> {
+  let mut tasks = Vec::with_capacity(crate::SUB_WINDOW_LABELS.len());
+  for label in crate::SUB_WINDOW_LABELS {
+    let app_handle = app_handle.clone();
+    tasks.push(tauri::async_runtime::spawn(async move {
+      destroy_window_by_label(&app_handle, label).await
+    }));
+  }
+  for task in tasks {
+    task.await.map_err(|error| error.to_string())??;
+  }
+  Ok(())
+}
 
 #[derive(Deserialize)]
 pub struct SqlStatement {
@@ -99,31 +176,54 @@ pub async fn create_window(
   label: String,
   url: String,
   option: WindowConfig,
-) {
-  let window_find = app_handle.get_webview_window(&label);
-  if window_find.is_some() {
-    window_find.unwrap().destroy().unwrap();
-    return;
-  }
-  let url_parse = WebviewUrl::App(url.parse().unwrap());
-  WebviewWindowBuilder::new(&app_handle, &label, url_parse)
-    .inner_size(option.width, option.height)
-    .resizable(option.resizable)
-    .visible(option.visible)
-    .title(option.title)
-    .center()
-    .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
-    .build()
-    .unwrap();
+) -> Result<(), String> {
+  with_window_label_lock(&label, || {
+    if let Some(window) = app_handle.get_webview_window(&label) {
+      let current_url = window.url().map_err(|error| error.to_string())?;
+      let target_url = current_url.join(&url).map_err(|error| format!("窗口链接无效：{error}"))?;
+      window.navigate(target_url).map_err(|error| error.to_string())?;
+      window
+        .set_size(tauri::Size::Logical(tauri::LogicalSize::new(option.width, option.height)))
+        .map_err(|error| error.to_string())?;
+      window.set_resizable(option.resizable).map_err(|error| error.to_string())?;
+      window.set_title(&option.title).map_err(|error| error.to_string())?;
+      if option.visible {
+        window.show().map_err(|error| error.to_string())?;
+        window.set_focus().map_err(|error| error.to_string())?;
+      } else {
+        window.hide().map_err(|error| error.to_string())?;
+      }
+      return window.center().map_err(|error| error.to_string());
+    }
+
+    WebviewWindowBuilder::new(&app_handle, &label, WebviewUrl::App(url.into()))
+      .inner_size(option.width, option.height)
+      .resizable(option.resizable)
+      .visible(option.visible)
+      .title(option.title)
+      .center()
+      .additional_browser_args("--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required")
+      .build()
+      .map(|_| ())
+      .map_err(|error| error.to_string())
+  })
+  .await
+}
+
+#[tauri::command]
+pub async fn destroy_window(app_handle: AppHandle, label: String) -> Result<(), String> {
+  destroy_window_by_label(&app_handle, &label).await
 }
 
 // 执行 js
 #[tauri::command]
-pub async fn execute_js(app_handle: AppHandle, label: String, js: String) {
-  let window = app_handle.get_webview_window(&label);
-  if window.is_some() {
-    window.unwrap().eval(js).unwrap();
-  }
+pub async fn execute_js(app_handle: AppHandle, label: String, js: String) -> Result<(), String> {
+  with_window_label_lock(&label, || {
+    let window =
+      app_handle.get_webview_window(&label).ok_or_else(|| format!("未找到窗口：{label}"))?;
+    window.eval(js).map_err(|error| error.to_string())
+  })
+  .await
 }
 
 // 获取目录大小
@@ -273,30 +373,24 @@ pub fn is_in_admin() -> bool {
 
 // 隐藏主窗口到托盘
 #[tauri::command]
-pub async fn hide_main_window(app_handle: AppHandle) {
+pub async fn hide_main_window(app_handle: AppHandle) -> Result<(), String> {
   // 关闭所有子窗口
-  for label in crate::SUB_WINDOW_LABELS.iter() {
-    if let Some(sub) = app_handle.get_webview_window(label) {
-      let _ = sub.destroy();
-    }
-  }
+  destroy_sub_windows(app_handle.clone()).await?;
   // 隐藏主窗口
   if let Some(window) = app_handle.get_webview_window("TeyvatGuide") {
-    let _ = window.hide();
+    window.hide().map_err(|error| error.to_string())?;
   }
+  Ok(())
 }
 
 // 退出应用
 #[tauri::command]
-pub async fn quit_app(app_handle: AppHandle) {
+pub async fn quit_app(app_handle: AppHandle) -> Result<(), String> {
   // 关闭所有子窗口
-  for label in crate::SUB_WINDOW_LABELS.iter() {
-    if let Some(sub) = app_handle.get_webview_window(label) {
-      let _ = sub.destroy();
-    }
-  }
+  destroy_sub_windows(app_handle.clone()).await?;
   // 退出应用
   app_handle.exit(0);
+  Ok(())
 }
 
 /// 获取当前系统的文本缩放比例（TextScaleFactor）

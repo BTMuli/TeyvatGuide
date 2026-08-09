@@ -1,40 +1,45 @@
 //! @file src/client/menu.rs
 //! @desc 客户端菜单模块，负责操作米游社客户端菜单
-//! @since Beta v0.7.6
+//! @since Beta v0.11.3
 
 use crate::client::utils;
 use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, SubmenuBuilder};
 use tauri::{AppHandle, LogicalSize, Manager, Size, Window, Wry};
-use tauri_utils::config::WebviewUrl;
 use url::Url;
 
-pub fn get_mhy_client_url(func: String) -> WebviewUrl {
-  let mut url_res: Url = "https://bbs.mihoyo.com/ys/".parse().unwrap();
-  if func == "sign_in" {
-    url_res = "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?act_id=e202009291139501"
-      .parse()
-      .unwrap();
-  } else if func == "game_record" {
-    url_res =
-            "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen".parse().unwrap();
-  } else if func == "birthday" {
-    url_res = "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?activity_id=20220301153521"
-            .parse()
-            .unwrap();
-  }
-  WebviewUrl::External(url_res)
+pub fn get_mhy_client_url(func: &str) -> Result<Url, String> {
+  let url = match func {
+    "sign_in" => {
+      "https://webstatic.mihoyo.com/bbs/event/signin-ys/index.html?act_id=e202009291139501"
+    }
+    "game_record" => {
+      "https://webstatic.mihoyo.com/app/community-game-records/index.html?bbs_presentation_style=fullscreen"
+    }
+    "birthday" => {
+      "https://webstatic.mihoyo.com/ys/event/e20220303-birthday/index.html?activity_id=20220301153521"
+    }
+    _ => "https://bbs.mihoyo.com/ys/",
+  };
+
+  url.parse().map_err(|error| format!("米游社链接无效：{error}"))
 }
 
 // 创建子菜单-工具
-fn create_utils_menu(app: AppHandle) -> Submenu<Wry> {
-  let retry_bridge_submenu = MenuItemBuilder::with_id("retry", "重试桥接").build(&app).unwrap();
-  let mock_touch_submenu = MenuItemBuilder::with_id("mock_touch", "模拟触摸").build(&app).unwrap();
-  let remove_overlay_submenu =
-    MenuItemBuilder::with_id("remove_overlay", "移除遮罩").build(&app).unwrap();
-  let rotate_window_submenu =
-    MenuItemBuilder::with_id("rotate_window", "旋转窗口").build(&app).unwrap();
-  let open_with_webview_submenu =
-    MenuItemBuilder::with_id("open_with_webview", "外部打开").build(&app).unwrap();
+fn create_utils_menu(app: AppHandle) -> Result<Submenu<Wry>, String> {
+  let retry_bridge_submenu =
+    MenuItemBuilder::with_id("retry", "重试桥接").build(&app).map_err(|error| error.to_string())?;
+  let mock_touch_submenu = MenuItemBuilder::with_id("mock_touch", "模拟触摸")
+    .build(&app)
+    .map_err(|error| error.to_string())?;
+  let remove_overlay_submenu = MenuItemBuilder::with_id("remove_overlay", "移除遮罩")
+    .build(&app)
+    .map_err(|error| error.to_string())?;
+  let rotate_window_submenu = MenuItemBuilder::with_id("rotate_window", "旋转窗口")
+    .build(&app)
+    .map_err(|error| error.to_string())?;
+  let open_with_webview_submenu = MenuItemBuilder::with_id("open_with_webview", "外部打开")
+    .build(&app)
+    .map_err(|error| error.to_string())?;
   let utils_menu = SubmenuBuilder::new(&app, "工具")
     .item(&retry_bridge_submenu)
     .item(&mock_touch_submenu)
@@ -42,23 +47,28 @@ fn create_utils_menu(app: AppHandle) -> Submenu<Wry> {
     .item(&rotate_window_submenu)
     .item(&open_with_webview_submenu)
     .build()
-    .expect("failed to create utils_menu");
-  utils_menu
+    .map_err(|error| error.to_string())?;
+  Ok(utils_menu)
 }
 
 // 创建米游社客户端菜单
-pub fn create_mhy_menu(app: AppHandle) -> Menu<Wry> {
-  let top_menu = MenuItemBuilder::with_id("top", "置顶").build(&app).unwrap();
-  let cancel_top_menu = MenuItemBuilder::with_id("cancel_top", "取消置顶").build(&app).unwrap();
-  let open_post_menu = MenuItemBuilder::with_id("open_post", "打开帖子").build(&app).unwrap();
-  let utils_menu = create_utils_menu(app.clone());
+pub fn create_mhy_menu(app: AppHandle) -> Result<Menu<Wry>, String> {
+  let top_menu =
+    MenuItemBuilder::with_id("top", "置顶").build(&app).map_err(|error| error.to_string())?;
+  let cancel_top_menu = MenuItemBuilder::with_id("cancel_top", "取消置顶")
+    .build(&app)
+    .map_err(|error| error.to_string())?;
+  let open_post_menu = MenuItemBuilder::with_id("open_post", "打开帖子")
+    .build(&app)
+    .map_err(|error| error.to_string())?;
+  let utils_menu = create_utils_menu(app.clone())?;
   MenuBuilder::new(&app)
     .item(&top_menu)
     .item(&cancel_top_menu)
     .item(&open_post_menu)
     .item(&utils_menu)
     .build()
-    .expect("failed to create mhy_menu")
+    .map_err(|error| error.to_string())
 }
 
 // 菜单栏事件处理
@@ -179,27 +189,32 @@ fn handle_menu_remove_overlay(app_handle: &Window) {
 
 // 处理旋转窗口菜单
 fn handle_menu_rotate_window(app_handle: &Window) {
-  let window_get = app_handle.get_webview_window("mhy_client");
-  if window_get == None {
+  let Some(window) = app_handle.get_webview_window("mhy_client") else {
+    return;
+  };
+  // 获取窗口宽高比
+  let cur_size = match window.inner_size() {
+    Ok(size) => size,
+    Err(error) => {
+      log::warn!("[mhy_client] 获取窗口尺寸失败：{error}");
+      return;
+    }
+  };
+  let trans_size = if cur_size.width > cur_size.height {
+    utils::get_window_size_for_window(&window, 400.0, 800.0)
+  } else {
+    utils::get_window_size_for_window(&window, 1280.0, 720.0)
+  };
+  if let Err(error) = window.set_size(Size::Logical(LogicalSize::new(trans_size.0, trans_size.1))) {
+    log::warn!("[mhy_client] 旋转窗口失败：{error}");
     return;
   }
-  let window = window_get.unwrap();
-  // 获取窗口宽高比
-  let cur_size = window.inner_size().ok().unwrap();
-  let monitor = window.primary_monitor().ok().unwrap().unwrap();
-  if cur_size.width > cur_size.height {
-    let trans_size = utils::get_window_size2(monitor, 400.0, 800.0);
-    window
-      .set_size(Size::Logical(LogicalSize { width: trans_size.0, height: trans_size.1 }))
-      .unwrap();
-  } else {
-    let trans_size = utils::get_window_size2(monitor, 1280.0, 720.0);
-    window
-      .set_size(Size::Logical(LogicalSize { width: trans_size.0, height: trans_size.1 }))
-      .unwrap();
+  if let Err(error) = window.center() {
+    log::warn!("[mhy_client] 居中窗口失败：{error}");
   }
-  window.center().unwrap();
-  window.set_focus().unwrap();
+  if let Err(error) = window.set_focus() {
+    log::warn!("[mhy_client] 聚焦窗口失败：{error}");
+  }
 }
 
 // 处理使用 WebView 打开菜单

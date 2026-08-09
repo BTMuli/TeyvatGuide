@@ -1,11 +1,10 @@
 /**
  * 窗口创建相关工具函数
- * @since Beta v0.10.2
+ * @since Beta v0.11.3
  */
 
-import type { RenderCard } from "@comp/app/t-postcard.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { core, webviewWindow, window as TauriWindow } from "@tauri-apps/api";
+import { core, webviewWindow } from "@tauri-apps/api";
 import { invoke } from "@tauri-apps/api/core";
 import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
 import { currentMonitor, WindowOptions } from "@tauri-apps/api/window";
@@ -13,9 +12,70 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 import TGLogger from "./TGLogger.js";
 
+type TGWindowRequest = {
+  url: string;
+  title: string;
+  width: number;
+  height: number;
+  resizable: boolean;
+  visible: boolean;
+};
+
+type TGWindowTask = {
+  request: TGWindowRequest;
+  promise: Promise<void>;
+  settled: boolean;
+};
+
+type PostInfo = { postId: string; title?: string };
+
+const windowTasks = new Map<string, TGWindowTask>();
+
+function isSameWindowRequest(first: TGWindowRequest, second: TGWindowRequest): boolean {
+  return (
+    first.url === second.url &&
+    first.title === second.title &&
+    first.width === second.width &&
+    first.height === second.height &&
+    first.resizable === second.resizable &&
+    first.visible === second.visible
+  );
+}
+
+function getPostId(value: unknown): string | null {
+  if (typeof value === "number") {
+    return Number.isSafeInteger(value) && value > 0 ? value.toString() : null;
+  }
+  if (typeof value !== "string") return null;
+  const postId = value.trim();
+  if (!/^[1-9]\d*$/.test(postId)) return null;
+  return Number.isSafeInteger(Number(postId)) ? postId : null;
+}
+
+function getPostInfo(item: unknown): PostInfo | null {
+  const postId = getPostId(item);
+  if (postId !== null) return { postId };
+  if (typeof item !== "object" || item === null || !("postId" in item)) return null;
+  const objectPostId = getPostId(item.postId);
+  if (objectPostId === null) return null;
+  const title = "title" in item && typeof item.title === "string" ? item.title : undefined;
+  return { postId: objectPostId, title };
+}
+
+async function openTGWindow(label: string, request: TGWindowRequest): Promise<void> {
+  const windowOpt: WindowOptions = {
+    title: request.title,
+    width: request.width,
+    height: request.height,
+    resizable: request.resizable,
+    visible: request.visible,
+  };
+  await core.invoke<void>("create_window", { label, url: request.url, option: windowOpt });
+}
+
 /**
  * 创建TG窗口
- * @since Beta v0.5.0
+ * @since Beta v0.11.3
  * @param url - 窗口地址
  * @param label - 窗口标签
  * @param title - 窗口标题
@@ -25,7 +85,7 @@ import TGLogger from "./TGLogger.js";
  * @param visible - 是否可见
  * @returns 无返回值
  */
-export async function createTGWindow(
+export function createTGWindow(
   url: string,
   label: string,
   title: string,
@@ -34,36 +94,55 @@ export async function createTGWindow(
   resizable: boolean,
   visible: boolean = true,
 ): Promise<void> {
-  const windowOpt: WindowOptions = {
-    title,
-    width,
-    height,
-    resizable,
-    visible,
-  };
-  const window = await TauriWindow.Window.getByLabel(label);
-  if (window !== null) await window.destroy();
-  await core.invoke("create_window", { label, url, option: windowOpt });
+  const request: TGWindowRequest = { url, title, width, height, resizable, visible };
+  const previousTask = windowTasks.get(label);
+  if (
+    previousTask !== undefined &&
+    !previousTask.settled &&
+    isSameWindowRequest(previousTask.request, request)
+  ) {
+    return previousTask.promise;
+  }
+
+  const previousPromise = previousTask?.promise;
+  const promise = (
+    previousPromise === undefined ? Promise.resolve() : previousPromise.catch(() => undefined)
+  ).then(async () => openTGWindow(label, request));
+  const task: TGWindowTask = { request, promise, settled: false };
+  windowTasks.set(label, task);
+  void promise.then(
+    () => {
+      task.settled = true;
+      if (windowTasks.get(label) === task) windowTasks.delete(label);
+    },
+    () => {
+      task.settled = true;
+      if (windowTasks.get(label) === task) windowTasks.delete(label);
+    },
+  );
+  return promise;
 }
 
 /**
  * 打开帖子
- * @since Beta v0.4.2
+ * @since Beta v0.11.3
  * @param item - 帖子内容或ID
  * @param title - 帖子标题
  * @returns 无返回值
  */
-export async function createPost(
-  item: RenderCard | string | number,
-  title?: string,
-): Promise<void> {
-  let postId: string, postTitle: string;
-  if (typeof item === "string" || typeof item === "number") {
-    postId = item.toString();
+export async function createPost(item: unknown, title?: string): Promise<void> {
+  const postInfo = getPostInfo(item);
+  if (postInfo === null) {
+    showSnackbar.warn("帖子 ID 无效");
+    await TGLogger.Warn("[createPost] 无效的帖子参数");
+    return;
+  }
+  const { postId } = postInfo;
+  let postTitle: string;
+  if (postInfo.title === undefined) {
     postTitle = title ? `Post_${postId} ${title}` : `Post_${postId}`;
   } else {
-    postId = item.postId.toString();
-    postTitle = `Post_${postId} ${item.title}`;
+    postTitle = `Post_${postId} ${postInfo.title}`;
   }
   const postPath = `/post_detail/${postId}`;
   await createTGWindow(postPath, "Sub_window", postTitle, 960, 720, false, false);

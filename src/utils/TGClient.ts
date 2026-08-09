@@ -1,6 +1,6 @@
 /**
  * 负责米游社客户端的 callback 处理
- * @since Beta v0.10.1
+ * @since Beta v0.11.3
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -25,11 +25,14 @@ import { getDeviceInfo } from "./toolFunc.js";
 
 class Client {
   private listener: UnlistenFn | undefined;
+  private openQueue: Promise<void> = Promise.resolve();
+  private pendingOpen: { func: string; url: string } | undefined;
   private route: Array<string> = [];
 
   private constructor() {
     this.route = [];
     this.listener = undefined;
+    this.pendingOpen = undefined;
   }
 
   private static instance: Client | null = null;
@@ -408,40 +411,65 @@ class Client {
 
   /**
    * 打开米游社客户端
-   * @since Beta v0.5.5
+   * @since Beta v0.11.3
    * @param func - 方法名
    * @param url - url
    * @returns 无返回值
    */
   async open(func: string, url?: string): Promise<void> {
-    if (url === undefined) url = this.getUrl(func);
-    this.route = [url];
+    const targetUrl = url ?? this.getUrl(func);
+    this.pendingOpen = { func, url: targetUrl };
+    const currentOpen = this.openQueue
+      .catch(() => undefined)
+      .then(async () => {
+        const pendingOpen = this.pendingOpen;
+        if (pendingOpen === undefined) return;
+        this.pendingOpen = undefined;
+        await this.openClient(pendingOpen.func, pendingOpen.url);
+      });
+    this.openQueue = currentOpen;
+    return currentOpen;
+  }
+
+  /**
+   * 串行创建米游社客户端窗口
+   * @since Beta v0.11.3
+   * @param func - 功能名
+   * @param url - 客户端地址
+   * @returns 无返回值
+   */
+  private async openClient(func: string, url: string): Promise<void> {
     await TGLogger.Info(`[TGClient][open][${func}] ${url}`);
-    const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
-    if (windowFind !== null) {
-      try {
-        await windowFind.destroy();
-      } catch (e) {
-        showSnackbar.error(`[TGClient][open] ${e}`);
-        await TGLogger.Error(`[TGClient][open] ${e}`);
-      }
+    try {
+      await core.invoke<void>("create_mhy_client", { func, url });
+      this.route = [url];
+      await this.loadJSBridge();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      showSnackbar.error(`打开米游社失败，请关闭后重试：${message}`, 5000);
+      await TGLogger.Error(`[TGClient][open][${func}] 打开米游社失败：${message}`);
+      throw error;
     }
-    await core.invoke("create_mhy_client", { func, url });
-    await this.loadJSBridge();
   }
 
   /* JSBridge 回调处理 */
   /**
    * 关闭米游社客户端的页面
-   * @since Beta v0.5.0
+   * @since Beta v0.11.3
    * @param arg - 请求参数
    * @returns 无返回值
    */
   async closePage(arg: TGApp.Plugins.JSBridge.NullArg): Promise<void> {
     this.route.pop();
     if (this.route.length === 0) {
-      const windowFind = await webviewWindow.WebviewWindow.getByLabel("mhy_client");
-      if (windowFind != null) await windowFind.destroy();
+      const closeTask = this.openQueue
+        .catch(() => undefined)
+        .then(async () => {
+          await core.invoke<void>("destroy_window", { label: "mhy_client" });
+          this.route = [];
+        });
+      this.openQueue = closeTask;
+      await closeTask;
       return;
     }
     const url = this.route[this.route.length - 1];
