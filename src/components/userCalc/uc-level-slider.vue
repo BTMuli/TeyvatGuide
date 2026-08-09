@@ -1,7 +1,12 @@
 <!-- 养成计算-分段等级滑条 -->
 <template>
-  <div :style="{ '--ucls-chunk-count': trackLevels.length }" class="ucls-shell">
+  <div
+    :class="{ compact, single }"
+    :style="{ '--ucls-chunk-count': trackLevels.length }"
+    class="ucls-shell"
+  >
     <span
+      v-if="!single"
       :class="{
         editable: currentEditable,
         'at-start': current <= min,
@@ -13,19 +18,20 @@
       {{ currentEditable ? "起始" : "当前" }} Lv.{{ current }}
     </span>
     <span
-      :class="{ 'at-start': model <= min, 'at-end': model >= max }"
+      :class="{ 'at-start': model <= min, 'at-end': model >= max, single }"
       :style="{ '--ucls-marker-position': getMarkerPosition(model) }"
       class="ucls-marker target"
     >
-      目标 Lv.{{ model }}
+      {{ single ? "等级" : "目标" }} Lv.{{ model }}
     </span>
     <div class="ucls-track" aria-hidden="true">
       <span
         v-for="level in trackLevels"
         :key="level"
         :class="{
-          current: level <= current,
-          target: level > current && level <= model,
+          single: single && level <= model,
+          current: !single && level <= current,
+          target: !single && level > current && level <= model,
           remaining: level > model && level <= reachableMax,
           unavailable: level > reachableMax,
         }"
@@ -33,7 +39,7 @@
       />
     </div>
     <v-range-slider
-      v-if="currentEditable"
+      v-if="currentEditable && !single"
       :disabled="disabled"
       :max="max"
       :min="min"
@@ -52,9 +58,9 @@
       :max="max"
       :min="min"
       :model-value="model"
-      aria-label="目标等级"
+      :aria-label="single ? '等级' : '目标等级'"
+      :color="single ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"
       class="ucls-control"
-      color="var(--tgc-od-green)"
       density="compact"
       hide-details
       step="1"
@@ -73,12 +79,16 @@ type UcLevelSliderProps = {
   max: number;
   limitMax?: number;
   disabled?: boolean;
+  compact?: boolean;
+  single?: boolean;
 };
 
 const props = withDefaults(defineProps<UcLevelSliderProps>(), {
   currentEditable: false,
   min: 1,
   disabled: false,
+  compact: false,
+  single: false,
 });
 const emit = defineEmits<{ "update:current": [value: number] }>();
 
@@ -92,7 +102,8 @@ const trackLevels = computed<Array<number>>(() =>
 );
 
 function updateValue(value: number): void {
-  model.value = Math.max(props.current, Math.min(value, reachableMax.value));
+  const lowerBound = props.single ? props.min : props.current;
+  model.value = Math.max(lowerBound, Math.min(value, reachableMax.value));
 }
 
 function updateRange(value: [number, number]): void {
@@ -112,12 +123,20 @@ function getMarkerPosition(value: number): string {
 
 <style lang="scss" scoped>
 .ucls-shell {
+  --ucls-marker-gap: 8px;
+
   position: relative;
   display: flex;
   width: calc(100% - 16px);
   height: 54px;
   align-items: center;
   margin: 0 8px;
+
+  &.compact {
+    --ucls-marker-gap: 4px;
+
+    height: 42px;
+  }
 }
 
 .ucls-marker {
@@ -179,12 +198,20 @@ function getMarkerPosition(value: number): string {
   }
 
   &.target {
-    bottom: calc(50% + 8px);
+    bottom: calc(50% + var(--ucls-marker-gap));
     color: var(--tgc-od-green);
 
     &::after {
       top: 100%;
       border-top: 4px solid var(--tgc-od-green);
+    }
+
+    &.single {
+      color: var(--tgc-od-blue);
+
+      &::after {
+        border-top-color: var(--tgc-od-blue);
+      }
     }
   }
 }
@@ -210,6 +237,10 @@ function getMarkerPosition(value: number): string {
   border-radius: 1px;
 
   &.current {
+    background: var(--tgc-od-blue);
+  }
+
+  &.single {
     background: var(--tgc-od-blue);
   }
 

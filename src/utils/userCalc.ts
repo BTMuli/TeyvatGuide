@@ -68,7 +68,11 @@ const TARTAGLIA_ID = 10000033;
 const TARTAGLIA_NORMAL_ATTACK_ID = 10331;
 const TARTAGLIA_MASTER_OF_WEAPONRY_NAME = "诸武精通";
 
-const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
+/**
+ * 角色与武器的突破临界等级。
+ * @since Beta v0.11.2
+ */
+export const ASCENSION_LEVELS = <const>[20, 40, 50, 60, 70, 80];
 const AVATAR_TALENT_LEVEL_CAPS = <const>[
   [40, 1],
   [50, 2],
