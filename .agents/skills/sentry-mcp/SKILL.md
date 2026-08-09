@@ -25,7 +25,8 @@ or silently fall back to that plugin when the user asks for Sentry MCP.
 1. Check whether Sentry MCP tools are available in the active thread. If they are available, use them directly and
    skip CLI setup.
 2. If tools are missing, inspect the persistent registration with `codex mcp get sentry` or `codex mcp list`. Do not
-   use `codex plugin list` as proof that MCP is registered.
+   use `codex plugin list` as proof that MCP is registered. `codex mcp list --json` reports `auth_status: "o_auth"`
+   for the OAuth flow and no bearer-token env var.
 3. If `sentry` is not registered and the user explicitly asked to install or repair it, run:
 
    ```powershell
@@ -35,7 +36,8 @@ or silently fall back to that plugin when the user asks for Sentry MCP.
    Otherwise report the missing registration and provide the command without changing global configuration.
 
 4. Authenticate interactively with `codex mcp login sentry`. Let the user complete the Sentry authorization in the
-   browser; never handle or print their credentials.
+   browser; never handle or print their credentials. A successful login persists the OAuth token outside the
+   repository (on Windows: `C:\Users\<user>\.codex\secrets\mcp_oauth.age`); do not copy, commit, or expose that file.
 5. Verify that `codex mcp get sentry` reports `enabled: true`, the exact URL above, and
    `transport: streamable_http`. A configured OAuth transport alone does not prove that tools were injected into the
    current thread.
@@ -43,6 +45,34 @@ or silently fall back to that plugin when the user asks for Sentry MCP.
    and are not hot-added to an already-running thread.
 7. If a new thread still lacks tools, capture the exact `codex mcp get sentry`, login, startup, or tool-call error.
    Re-authenticate only for an authentication error; do not repeatedly remove and re-add a valid configuration.
+   First check the "Startup timing and benign errors" section below: a missing tool list on the first turn is often
+   a timing issue, not a broken registration.
+
+## Startup timing and benign errors
+
+Remote OAuth MCP servers connect asynchronously when a thread starts. Codex resolves the first turn's tool list
+within about a second or two, so `sentry` is frequently still connecting at that point. Expected symptoms:
+
+- The thread has no `mcp__sentry__*` tools on the first turn. Local logs record
+  `codex_mcp::connection_manager::tool_catalog ... mcp.runtime.resolve_for_step: omitting pending optional MCP server
+  server_name=sentry`. This is not an authentication failure: wait a few seconds or continue in a later turn, then
+  re-check. Do not trigger a new OAuth login just because the first turn lacks tools.
+- Codex logs `Failed to list resources for MCP server 'sentry': Mcp error: -32601: Method not found` (and the
+  resource-templates variant) on healthy connections. Sentry MCP 0.37.0 advertises `resources: None`; only
+  `tools/list` and tool calls work. Treat these warnings as benign, not as a failed start, and never re-authenticate
+  or re-register because of them.
+
+A connection actually succeeded when the local Codex log DB (`C:\Users\bt-mu\.codex\logs_2.sqlite`, table `logs`)
+contains an `rmcp::service` row like:
+
+```
+new{server_name=sentry}:start_server_task{server_name=sentry}:initialize:serve_inner:
+  Service initialized as client peer_info=Some(... "Sentry MCP" ...)
+```
+
+Run `codex doctor` for a health summary of config and MCP registration. The OAuth token used by this flow is separate
+from `SENTRY_AUTH_TOKEN`; the latter belongs only to the curated `sentry@openai-curated` REST plugin and is never
+needed for the MCP server.
 
 ## Project constants
 
@@ -80,6 +110,10 @@ The Vue and Rust clients report to the same Sentry project. The Rust release is 
   changes in stack, release, environment, or affected users.
 - **Symptom supplied:** Search by stable exception text or feature terms within a bounded window, group candidate
   issues, and inspect only the best matches.
+- **MCP tools missing or "startup failed":** Do not assume the registration or OAuth broke. Check `codex mcp get
+  sentry` for the expected registration, then distinguish three cases in local logs: first-turn omission while the
+  server is pending, benign `-32601` resource-listing warnings, and a real transport/auth error (HTTP 401/403,
+  connection refused, token exchange failure). Only the last case justifies running `codex mcp login sentry` again.
 - **Suspected release regression:** Compare the affected release with the preceding stable release over comparable
   time windows and traffic context. Check commit tags before attributing the regression.
 - **Fix verification:** Look only at releases newer than the fix and check both recurrence and last-seen time. Treat
@@ -93,6 +127,7 @@ The Vue and Rust clients report to the same Sentry project. The Rust release is 
 - Do not resolve, ignore, assign, merge, or delete issues; create alerts; trigger automated analysis; alter project
   settings; or send test events unless the user explicitly requests that specific action.
 - Never expose OAuth credentials, `SENTRY_AUTH_TOKEN`, or other secrets. Do not add credentials to repository files.
+- Never ask the user to paste a token into chat; prefer `codex mcp login sentry` for the MCP flow.
 - Do not silently substitute the curated REST plugin when MCP is unavailable. Use it only when the user explicitly
   requests that fallback and has configured its token locally.
 - If the MCP connection is unavailable or lacks authorization, report the exact missing capability. Continue with
