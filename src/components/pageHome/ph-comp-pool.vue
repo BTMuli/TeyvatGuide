@@ -65,7 +65,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
-type TPoolEmits = (e: "success") => void;
+type TPoolEmits = { success: [] };
 
 const { isLogin } = storeToRefs(useAppStore());
 const { cookie, account } = storeToRefs(useUserStore());
