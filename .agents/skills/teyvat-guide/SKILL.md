@@ -18,6 +18,19 @@ description: Implement and review changes in the TeyvatGuide Vue, TypeScript, Vu
 7. Make the smallest coherent change and avoid unrelated cleanup, bulk data rewrites, or generated artifacts.
 8. Run validation proportional to the change and report anything not run.
 
+## Editing while the dev server is running
+
+9. Never rewrite a `.vue` file twice in quick succession while `pnpm dev` is running (for example
+   `apply_patch` followed immediately by `prettier --write`, or formatting several `.vue` files in
+   one pass). This races sass-embedded on Windows: every `.vue` style submodule then fails with
+   `[plugin:vite:css] [sass] Tried writing to closed dispatcher` (HTTP 500) until the dev server is
+   restarted.
+10. If that error appears, first compile the `<style>` block standalone with `sass-embedded`. A
+    success proves the file itself is fine and the running dev server just needs a restart; do not
+    "fix" the file. While the dev server is up, prefer one atomic write per file that already keeps
+    the repo's CRLF endings, and verify a style submodule via the dev server URL
+    (`http://localhost:4000/src/...` — see `vite.config.ts`) after touching styles.
+
 ## Implementation plans
 
 - When an implementation plan is needed, create it as a Markdown file under the repository's `docs/` directory.
