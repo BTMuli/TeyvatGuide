@@ -2,7 +2,9 @@
 <template>
   <div class="ph-pool-user-card">
     <div class="ph-pool-header">
-      <div class="ph-pool-type">{{ props.pool.pool_name }}</div>
+      <div class="ph-pool-type" title="查看卡池详情" @click="openPoolOverlay()">
+        {{ props.pool.pool_name }}
+      </div>
       <div class="ph-pool-stat">
         <span v-if="restTs > durationTs">未开始</span>
         <span v-else-if="restTs > 0">{{ stamp2LastTime(restTs) }}</span>
@@ -45,14 +47,27 @@
       </template>
     </div>
   </div>
+  <PhPoolItemOverlay
+    v-if="detail"
+    v-model="detailShow"
+    :item="detail.item"
+    :items="poolItems"
+    :pool="detail.pool"
+    :pool-item-ids="detail.poolItemIds"
+    @switch-item="handleSwitchItem"
+  />
 </template>
 <script lang="ts" setup>
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import { getWikiBrief, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
-import { computed, onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { computed, nextTick, onMounted, ref, shallowRef } from "vue";
+
+import PhPoolItemOverlay, {
+  type PhPoolItemOverlayItem,
+  type PhPoolItemOverlayPool,
+} from "./ph-pool-item-overlay.vue";
 
 type PhPoolUserProps = { pool: TGApp.Game.ActCalendar.ActPool };
 type AvatarItem = {
@@ -63,17 +78,22 @@ type WeaponItem = {
   weapon: TGApp.Game.ActCalendar.ActPoolWeapon;
   info?: TGApp.App.Weapon.WikiBriefInfo;
 };
+type PhPoolDetail = {
+  item?: PhPoolItemOverlayItem;
+  pool: PhPoolItemOverlayPool;
+  poolItemIds: Array<number>;
+};
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
-
-const router = useRouter();
 
 const props = defineProps<PhPoolUserProps>();
 
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
+const detail = shallowRef<PhPoolDetail>();
+const detailShow = ref<boolean>(false);
 const avatarItems = computed<Array<AvatarItem>>(() =>
   props.pool.avatars.map((av) => {
     const info = getAvatarInfo(av.id);
@@ -86,6 +106,36 @@ const weaponItems = computed<Array<WeaponItem>>(() =>
     return { weapon: wp, info };
   }),
 );
+const poolItemIds = computed<Array<number>>(() => [
+  ...props.pool.avatars.map((avatar) => avatar.id),
+  ...props.pool.weapon.map((weapon) => weapon.id),
+]);
+const poolItems = computed<Array<PhPoolItemOverlayItem>>(() => {
+  const list: Array<PhPoolItemOverlayItem> = [];
+  for (const item of avatarItems.value) {
+    if (item.info !== undefined) {
+      list.push({
+        id: item.avatar.id,
+        name: item.avatar.name,
+        star: item.avatar.rarity,
+        isCharacter: true,
+        icon: item.avatar.icon,
+      });
+    }
+  }
+  for (const item of weaponItems.value) {
+    if (item.info !== undefined) {
+      list.push({
+        id: item.weapon.id,
+        name: item.weapon.name,
+        star: item.weapon.rarity,
+        isCharacter: false,
+        icon: item.weapon.icon,
+      });
+    }
+  }
+  return list;
+});
 const percent = computed<number>(() => {
   if (restTs.value > durationTs.value) return 100;
   if (durationTs.value === 0) return 0;
@@ -126,20 +176,76 @@ function handlePosition(): void {
 
 async function toAvatar(avatar: TGApp.Game.ActCalendar.ActPoolAvatar): Promise<void> {
   const info = getAvatarInfo(avatar.id);
-  if (!info) {
-    showSnackbar.warn(`${avatar.name} 角色图鉴暂未收录`);
+  if (info) {
+    await openDetailOverlay({
+      id: avatar.id,
+      name: avatar.name,
+      star: avatar.rarity,
+      isCharacter: true,
+      icon: avatar.icon,
+    });
     return;
   }
-  await router.push({ name: "角色图鉴", params: { id: avatar.id } });
+  showSnackbar.warn(`${avatar.name} 角色图鉴暂未收录`);
 }
 
 async function toWeapon(weapon: TGApp.Game.ActCalendar.ActPoolWeapon): Promise<void> {
   const info = getWeaponInfo(weapon.id);
-  if (!info) {
-    showSnackbar.warn(`${weapon.name} 武器图鉴暂未收录`);
+  if (info) {
+    await openDetailOverlay({
+      id: weapon.id,
+      name: weapon.name,
+      star: weapon.rarity,
+      isCharacter: false,
+      icon: weapon.icon,
+    });
     return;
   }
-  await router.push({ name: "武器图鉴", params: { id: weapon.id } });
+  showSnackbar.warn(`${weapon.name} 武器图鉴暂未收录`);
+}
+
+/**
+ * 打开卡池详情浮窗
+ * @since Beta v0.11.2
+ */
+async function openPoolOverlay(): Promise<void> {
+  detail.value = {
+    pool: {
+      name: props.pool.pool_name,
+      type: props.pool.pool_type,
+      from: timestampToDate(Number(props.pool.start_timestamp) * 1000),
+      to: timestampToDate(Number(props.pool.end_timestamp) * 1000),
+    },
+    poolItemIds: poolItemIds.value,
+  };
+  await nextTick();
+  detailShow.value = true;
+}
+
+/**
+ * 切换当前UP物品
+ * @since Beta v0.11.2
+ * @param item - 目标物品
+ */
+function handleSwitchItem(item: PhPoolItemOverlayItem): void {
+  const current = detail.value;
+  if (current === undefined) return;
+  detail.value = { ...current, item };
+}
+
+async function openDetailOverlay(item: PhPoolItemOverlayItem): Promise<void> {
+  detail.value = {
+    item,
+    pool: {
+      name: props.pool.pool_name,
+      type: props.pool.pool_type,
+      from: timestampToDate(Number(props.pool.start_timestamp) * 1000),
+      to: timestampToDate(Number(props.pool.end_timestamp) * 1000),
+    },
+    poolItemIds: poolItemIds.value,
+  };
+  await nextTick();
+  detailShow.value = true;
 }
 
 function getAvatarInfo(id: number): TGApp.App.Character.WikiBriefInfo | undefined {
@@ -213,8 +319,13 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
 }
 
 .ph-pool-type {
+  cursor: pointer;
   font-family: var(--font-title);
   font-size: 14px;
+
+  &:hover {
+    color: var(--tgc-yellow-2);
+  }
 }
 
 .ph-pool-stat {

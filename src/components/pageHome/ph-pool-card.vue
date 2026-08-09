@@ -1,5 +1,8 @@
 <template>
   <div class="ph-pool-card">
+    <div class="ph-pool-title" :title="props.pool.title" @click="openPoolOverlay()">
+      {{ props.pool.title }}
+    </div>
     <div class="ph-pool-cover" @click="toPool()">
       <img v-if="cover" :src="cover" alt="cover" />
       <img v-else alt="empty" class="empty" src="/UI/app/empty.webp" />
@@ -64,6 +67,15 @@
       </div>
     </div>
   </div>
+  <PhPoolItemOverlay
+    v-if="detail"
+    v-model="detailShow"
+    :item="detail.item"
+    :items="poolItems"
+    :pool="detail.pool"
+    :pool-item-ids="detail.poolItemIds"
+    @switch-item="handleSwitchItem"
+  />
 </template>
 <script lang="ts" setup>
 import "swiper/css";
@@ -74,6 +86,7 @@ import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useHomeStore from "@store/home.js";
+import { str2Color } from "@utils/colorFunc.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost, createTGWindow } from "@utils/TGWindow.js";
@@ -81,19 +94,27 @@ import { stamp2LastTime } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { computed, onMounted, ref, shallowRef } from "vue";
-import { useRouter } from "vue-router";
+import { computed, nextTick, onMounted, ref, shallowRef } from "vue";
+
+import PhPoolItemOverlay, {
+  type PhPoolItemOverlayItem,
+  type PhPoolItemOverlayPool,
+} from "./ph-pool-item-overlay.vue";
 
 import { AppCharacterData } from "@/data/index.js";
 
 type PhPoolCardProps = { pool: TGApp.BBS.Obc.GachaItem };
 type PhPoolAvatar = TGApp.BBS.Obc.GachaPool & { info?: TGApp.App.Character.WikiBriefInfo };
+type PhPoolDetail = {
+  item?: PhPoolItemOverlayItem;
+  pool: PhPoolItemOverlayPool;
+  poolItemIds?: Array<number>;
+};
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
 
 const swiperModules = [Autoplay, A11y];
-const router = useRouter();
 const { poolCover } = storeToRefs(useHomeStore());
 
 const props = defineProps<PhPoolCardProps>();
@@ -103,9 +124,29 @@ const endTs = ref<number>(0);
 const restTs = ref<number>(0);
 const durationTs = ref<number>(0);
 const avatars = shallowRef<Array<PhPoolAvatar>>([]);
+const detail = shallowRef<PhPoolDetail>();
+const detailShow = ref<boolean>(false);
+const poolTitleBg = computed<string>(() =>
+  str2Color(`${props.pool.title}${props.pool.activity_url}`, 0),
+);
 const percent = computed<number>(() => {
   if (restTs.value > durationTs.value) return 100;
   return (restTs.value * 100) / durationTs.value;
+});
+const poolItems = computed<Array<PhPoolItemOverlayItem>>(() => {
+  const list: Array<PhPoolItemOverlayItem> = [];
+  for (const avatar of avatars.value) {
+    if (avatar.info !== undefined) {
+      list.push({
+        id: avatar.info.id,
+        name: avatar.info.name,
+        star: avatar.info.star,
+        isCharacter: true,
+        icon: `/WIKI/character/${avatar.info.id}.webp`,
+      });
+    }
+  }
+  return list;
 });
 
 onMounted(async () => {
@@ -113,14 +154,10 @@ onMounted(async () => {
   const avTmp: Array<PhPoolAvatar> = [];
   for (const av of props.pool.pool) {
     const contentId = av.url.match(/(?<=content\/)\d+/)?.[0];
-    if (contentId) {
-      const infoFind = AppCharacterData.find((a) => a.contentId.toString() === contentId);
-      if (infoFind) {
-        avTmp.push({ ...av, info: infoFind });
-        continue;
-      }
-    }
-    avTmp.push(av);
+    const infoFind = contentId
+      ? AppCharacterData.find((a) => a.contentId.toString() === contentId)
+      : undefined;
+    avTmp.push({ ...av, info: infoFind });
   }
   avatars.value = avTmp;
   endTs.value = new Date(props.pool.end_time).getTime();
@@ -177,7 +214,7 @@ function handlePosition(): void {
 
 async function toAvatar(avatar: PhPoolAvatar): Promise<void> {
   if (avatar.info !== undefined) {
-    await router.push({ name: "角色图鉴", params: { id: avatar.info.id } });
+    await openDetailOverlay(avatar.info);
     return;
   }
   const url = avatar.url;
@@ -186,6 +223,70 @@ async function toAvatar(avatar: PhPoolAvatar): Promise<void> {
     return;
   }
   await createTGWindow(url, "Sub_window", `Pool_${props.pool.title}`, 1200, 800, true, true);
+}
+
+async function openDetailOverlay(info: TGApp.App.Character.WikiBriefInfo): Promise<void> {
+  detail.value = {
+    item: {
+      id: info.id,
+      name: info.name,
+      star: info.star,
+      isCharacter: true,
+      icon: `/WIKI/character/${info.id}.webp`,
+    },
+    pool: {
+      name: props.pool.title,
+      from: props.pool.start_time,
+      to: props.pool.end_time,
+      postId: getPostId(props.pool.activity_url),
+    },
+    poolItemIds: getPoolItemIds(),
+  };
+  await nextTick();
+  detailShow.value = true;
+}
+
+/**
+ * 打开卡池详情浮窗
+ * @since Beta v0.11.2
+ */
+async function openPoolOverlay(): Promise<void> {
+  detail.value = {
+    pool: {
+      name: props.pool.title,
+      from: props.pool.start_time,
+      to: props.pool.end_time,
+      postId: getPostId(props.pool.activity_url),
+    },
+    poolItemIds: getPoolItemIds(),
+  };
+  await nextTick();
+  detailShow.value = true;
+}
+
+/**
+ * 切换当前UP物品
+ * @since Beta v0.11.2
+ * @param item - 目标物品
+ */
+function handleSwitchItem(item: PhPoolItemOverlayItem): void {
+  const current = detail.value;
+  if (current === undefined) return;
+  detail.value = { ...current, item };
+}
+
+function getPoolItemIds(): Array<number> {
+  const ids: Array<number> = [];
+  for (const avatar of avatars.value) {
+    if (avatar.info !== undefined) ids.push(avatar.info.id);
+  }
+  return ids;
+}
+
+function getPostId(url: string): string | undefined {
+  const postId = Number(url.split("/").pop());
+  if (isNaN(postId)) return undefined;
+  return postId.toString();
 }
 
 function getBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
@@ -221,6 +322,32 @@ async function toPool(): Promise<void> {
   border-radius: 4px;
   aspect-ratio: 69 / 32;
   box-shadow: 0 2px 4px var(--common-shadow-2);
+}
+
+.ph-pool-title {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  display: flex;
+  overflow: hidden;
+  max-width: 60%;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: v-bind(poolTitleBg); /* stylelint-disable-line value-keyword-case */
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
+  box-shadow: -2px -2px 8px var(--tgc-dark-1);
+  color: var(--tgc-white-1);
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  text-shadow: 0 0 4px var(--tgc-dark-1);
+  white-space: nowrap;
 }
 
 .ph-pool-icon {
