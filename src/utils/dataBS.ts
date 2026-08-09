@@ -1,6 +1,6 @@
 /**
  * 用户数据的备份、恢复、迁移
- * @since Beta v0.9.5
+ * @since Beta v0.11.3
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -43,15 +43,15 @@ export async function backUpUserData(dir: string): Promise<void> {
 
 /**
  * 恢复用户数据
- * @since Beta v0.9.5
+ * @since Beta v0.11.3
  * @param dir - 备份目录路径
  * @returns 无返回值
  */
-export async function restoreUserData(dir: string): Promise<void> {
+export async function restoreUserData(dir: string): Promise<boolean> {
   let errNum = 0;
   if (!(await exists(dir))) {
     showSnackbar.error("备份目录不存在");
-    return;
+    return false;
   }
   await showLoading.update("正在恢复成就数据");
   const restoreAchi = await TSUserAchi.restoreUiaf(dir);
@@ -91,7 +91,8 @@ export async function restoreUserData(dir: string): Promise<void> {
   }
   if (errNum !== 0) {
     showSnackbar.error(`数据恢复失败，失败数:${errNum}`);
-    return;
+    return false;
   }
   showSnackbar.success("数据恢复成功");
+  return true;
 }

@@ -262,14 +262,23 @@ async function handleImportOuter(app: string): Promise<void> {
     return;
   }
   await showLoading.start("正在导入数据", "正在读取剪贴板");
-  const clipboard = await window.navigator.clipboard.readText();
-  await showLoading.update("正在验证数据");
-  const check = await verifyUiafDataClipboard(clipboard);
-  if (!check) {
-    await showLoading.end();
+  let clipboard: string;
+  try {
+    clipboard = await window.navigator.clipboard.readText();
+    await showLoading.update("正在验证数据");
+    const check = await verifyUiafDataClipboard(clipboard);
+    if (!check) return;
+  } catch (error) {
+    if (isClipboardAccessDenied(error)) {
+      showSnackbar.warn("无法读取剪贴板，请授予权限并保持窗口聚焦后重试");
+      return;
+    }
+    await TGLogger.Error(`[Achievements][handleImportOuter] 读取剪贴板失败 ${error}`);
+    showSnackbar.error("读取剪贴板失败，请稍后重试");
     return;
+  } finally {
+    await showLoading.end();
   }
-  await showLoading.end();
   let uidInput = await showDialog.input("请输入存档UID", "UID:", uidCur.value.toString());
   if (uidInput === false) {
     showSnackbar.cancel("已取消存档导入");
@@ -282,13 +291,24 @@ async function handleImportOuter(app: string): Promise<void> {
   }
   const data: TGApp.Plugins.UIAF.Data = JSON.parse(clipboard);
   await showLoading.start("正在导入数据", `存档UID：${uidInput}`);
-  await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
-  await showLoading.end();
+  try {
+    await TSUserAchi.mergeUiaf(data.list, Number(uidInput));
+  } catch (error) {
+    await TGLogger.Error(`[Achievements][handleImportOuter] 导入失败 ${error}`);
+    showSnackbar.error("导入失败，请稍后重试");
+    return;
+  } finally {
+    await showLoading.end();
+  }
   showSnackbar.success("导入成功，即将刷新页面");
   await TGLogger.Info("[Achievements][handleImportOuter] 导入成功");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
   await router.push("/achievements");
   window.location.reload();
+}
+
+function isClipboardAccessDenied(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "NotAllowedError";
 }
 
 async function createUid(): Promise<void> {

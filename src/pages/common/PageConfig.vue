@@ -251,6 +251,43 @@ const cacheSize = ref<number>(0);
 
 const showImgQuality = ref<boolean>(false);
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return `${error}`;
+}
+
+function isDirectorySelectionCancelled(error: unknown): boolean {
+  return getErrorMessage(error).toLowerCase().includes("os error 1223");
+}
+
+async function selectDirectory(
+  defaultPath: string,
+  operation: "confirmBackup" | "confirmRestore",
+): Promise<string | null> {
+  try {
+    const dir = await open({
+      directory: true,
+      defaultPath,
+      multiple: false,
+    });
+    if (dir === null) {
+      showSnackbar.cancel("已取消目录选择");
+      await TGLogger.Info(`[Config][${operation}] 已取消目录选择`);
+      return null;
+    }
+    return dir;
+  } catch (error) {
+    if (isDirectorySelectionCancelled(error)) {
+      showSnackbar.cancel("已取消目录选择");
+      await TGLogger.Info(`[Config][${operation}] 已取消目录选择`);
+      return null;
+    }
+    await TGLogger.Error(`[Config][${operation}] 打开目录选择失败 ${getErrorMessage(error)}`);
+    showSnackbar.error("打开目录选择失败，请稍后重试");
+    return null;
+  }
+}
+
 onMounted(async () => {
   await showLoading.start("正在加载设置页面", "正在获取缓存大小");
   await TGLogger.Info("[Config] 打开设置页面");
@@ -282,21 +319,21 @@ async function confirmBackup(): Promise<void> {
   }
   let saveDir = userDir.value;
   if (!bcCheck) {
-    const dir: string | null = await open({
-      directory: true,
-      defaultPath: saveDir,
-      multiple: false,
-    });
-    if (dir === null) {
-      showSnackbar.error("路径不能为空!");
-      return;
-    }
-    await TGLogger.Info(`[Config][confirmBackup] 选择备份路径 ${dir.toString()}`);
+    const dir = await selectDirectory(saveDir, "confirmBackup");
+    if (dir === null) return;
+    await TGLogger.Info(`[Config][confirmBackup] 选择备份路径 ${dir}`);
     saveDir = dir;
   } else await TGLogger.Info(`[Config][confirmBackup] 备份到默认路径 ${saveDir}`);
   await showLoading.start("正在备份数据");
-  await backUpUserData(saveDir);
-  await showLoading.end();
+  try {
+    await backUpUserData(saveDir);
+  } catch (error) {
+    await TGLogger.Error(`[Config][confirmBackup] 备份失败 ${getErrorMessage(error)}`);
+    showSnackbar.error("备份失败，请检查目录后重试");
+    return;
+  } finally {
+    await showLoading.end();
+  }
   showSnackbar.success("数据已备份!");
   await TGLogger.Info("[Config][confirmBackup] 备份完成");
 }
@@ -314,21 +351,22 @@ async function confirmRestore(): Promise<void> {
   }
   let saveDir = userDir.value;
   if (!rsCheck) {
-    const dir: string | null = await open({
-      directory: true,
-      defaultPath: saveDir,
-      multiple: false,
-    });
-    if (dir === null) {
-      showSnackbar.error("路径不能为空!");
-      return;
-    }
-    await TGLogger.Info(`[Config][confirmRestore] 选择恢复路径 ${dir.toString()}`);
+    const dir = await selectDirectory(saveDir, "confirmRestore");
+    if (dir === null) return;
+    await TGLogger.Info(`[Config][confirmRestore] 选择恢复路径 ${dir}`);
     saveDir = dir;
   } else await TGLogger.Info(`[Config][confirmRestore] 恢复到默认路径 ${saveDir}`);
   await showLoading.start("正在恢复数据");
-  await restoreUserData(saveDir);
-  await showLoading.end();
+  try {
+    const restored = await restoreUserData(saveDir);
+    if (!restored) return;
+  } catch (error) {
+    await TGLogger.Error(`[Config][confirmRestore] 恢复失败 ${getErrorMessage(error)}`);
+    showSnackbar.error("恢复失败，请检查备份目录后重试");
+    return;
+  } finally {
+    await showLoading.end();
+  }
   showSnackbar.success("数据已恢复!");
   await TGLogger.Info("[Config][confirmRestore] 恢复完成");
 }
@@ -525,8 +563,14 @@ async function confirmResetDB(title?: string): Promise<void> {
     return;
   }
   await showLoading.start("正在重置数据库");
-  await TGSqlite.reset();
-  await showLoading.end();
+  try {
+    await TGSqlite.reset();
+  } catch (error) {
+    await TGLogger.Error(`[Config][confirmResetDB] 重置失败 ${getErrorMessage(error)}`);
+    return;
+  } finally {
+    await showLoading.end();
+  }
   await TGLogger.Info("[Config][confirmResetDB] 数据库重置完成");
   showSnackbar.success("数据库已重置!即将刷新页面");
   await new Promise<void>((resolve) => setTimeout(resolve, 1500));
