@@ -149,7 +149,6 @@ const emits = defineEmits<TwgCatalogEmits>();
   overflow: hidden auto;
   width: 100%;
   min-height: 0;
-  padding-right: 8px;
   gap: 8px;
   grid-auto-rows: max-content;
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));

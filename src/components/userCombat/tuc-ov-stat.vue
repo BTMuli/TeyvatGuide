@@ -140,7 +140,6 @@ async function share(): Promise<void> {
 .tuc-ovs-content {
   display: grid;
   width: 100%;
-  padding-right: 8px;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   overflow-y: auto;

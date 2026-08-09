@@ -551,7 +551,6 @@ async function tryReadChallenge(): Promise<void> {
 
 .ucb-window-item {
   height: 100%;
-  padding-right: 8px;
   overflow-y: auto;
 }
 

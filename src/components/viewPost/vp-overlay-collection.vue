@@ -143,7 +143,6 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
   max-height: 400px;
   box-sizing: border-box;
   flex-direction: column;
-  padding-right: 8px;
   overflow-y: auto;
   row-gap: 12px;
 }

@@ -409,7 +409,6 @@ async function toYae(): Promise<void> {
   box-sizing: border-box;
   flex-direction: column;
   flex-shrink: 0;
-  padding-right: 8px;
   overflow-y: auto;
   row-gap: 8px;
 }

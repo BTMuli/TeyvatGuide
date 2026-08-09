@@ -598,7 +598,6 @@ async function switchFeedback(): Promise<void> {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding-right: 8px;
   overflow-y: auto;
   row-gap: 8px;
 }

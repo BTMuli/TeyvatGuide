@@ -173,9 +173,7 @@ async function toWiki(): Promise<void> {
   min-height: 0;
   flex: 1;
   flex-direction: column;
-  padding-right: 8px;
   gap: 8px;
-  scrollbar-gutter: stable;
 }
 
 .tww-brief {

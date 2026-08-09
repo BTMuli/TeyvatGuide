@@ -146,7 +146,6 @@ defineExpose({ displayBox });
 
 .hyperlink-desc {
   position: relative;
-  padding-right: 8px;
   overflow-y: auto;
   white-space: pre-wrap;
 }

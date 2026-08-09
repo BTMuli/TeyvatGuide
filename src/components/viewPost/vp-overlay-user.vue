@@ -331,7 +331,6 @@ async function loadPosts(): Promise<void> {
   height: 100%;
   box-sizing: border-box;
   flex-direction: column;
-  padding-right: 8px;
   padding-bottom: 8px;
   overflow-y: auto;
   row-gap: 10px;

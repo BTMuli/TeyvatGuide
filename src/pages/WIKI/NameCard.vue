@@ -194,8 +194,6 @@ function searchNameCard(): void {
   row-gap: 10px;
 
   .v-scroll {
-    padding-right: 8px;
-
     .item {
       margin-bottom: 8px;
     }

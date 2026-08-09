@@ -82,7 +82,6 @@ function switchR(set: TGApp.App.Relic.SetItem): void {
   display: grid;
   overflow: hidden auto;
   width: 100%;
-  padding-right: 8px;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
 }

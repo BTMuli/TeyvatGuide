@@ -620,7 +620,6 @@ async function refreshAvatars(
 .ua-window-item {
   height: 100%;
   box-sizing: border-box;
-  padding-right: 8px;
   overflow-y: auto;
 }
 
