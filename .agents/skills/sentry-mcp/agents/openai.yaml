@@ -1,15 +1,14 @@
-interface:
-  display_name: "Sentry MCP 诊断"
-  short_description: "连接并调试 Sentry MCP，排查 TeyvatGuide 线上错误与版本回归"
-  default_prompt: "Use $sentry-mcp to verify the official remote MCP connection and investigate this TeyvatGuide error."
-
 dependencies:
   tools:
-    - type: "mcp"
-      value: "sentry"
-      description: "Official remote Sentry MCP server for issues, events, traces, and releases"
+    - description: "Official remote Sentry MCP server for issues, events, traces, and releases"
       transport: "streamable_http"
+      type: "mcp"
       url: "https://mcp.sentry.dev/mcp"
+      value: "sentry"
 
+interface:
+  default_prompt: "Use $sentry-mcp to verify the official remote MCP connection and investigate this TeyvatGuide error."
+  display_name: "Sentry MCP 诊断"
+  short_description: "连接并调试 Sentry MCP，排查 TeyvatGuide 线上错误与版本回归"
 policy:
   allow_implicit_invocation: true
