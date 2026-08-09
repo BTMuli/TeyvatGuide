@@ -1,6 +1,6 @@
 <!-- 名片详情浮窗 -->
 <template>
-  <TOverlay v-if="props.data" v-model="visible">
+  <TOverlay v-if="props.data" v-model="visible" :topOffset>
     <div class="ton-container">
       <slot name="left"></slot>
       <div class="ton-box">
@@ -41,9 +41,9 @@ import { onMounted, ref } from "vue";
 
 import TOverlay from "./t-overlay.vue";
 
-type ToNameCardProps = { data?: TGApp.App.NameCard.Item };
+type ToNameCardProps = { data?: TGApp.App.NameCard.Item; topOffset?: string };
 
-const props = defineProps<ToNameCardProps>();
+const props = withDefaults(defineProps<ToNameCardProps>(), { topOffset: "0px" });
 const visible = defineModel<boolean>();
 const loading = ref<boolean>(false);
 const version = ref<string>("");

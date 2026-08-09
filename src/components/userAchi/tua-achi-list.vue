@@ -8,7 +8,7 @@
         <TuaAchi :modelValue="item" @select-achi="selectAchi" />
       </template>
     </v-virtual-scroll>
-    <ToNameCard v-if="ncData" v-model="showNc" :data="ncData" />
+    <ToNameCard v-if="ncData" v-model="showNc" :data="ncData" topOffset="112px" />
     <TuaAchiOverlay
       v-if="selectedAchi"
       v-model="showOverlay"

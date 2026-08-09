@@ -6,25 +6,30 @@
           <v-icon size="32">mdi-credit-card-outline</v-icon>
           <span>名片图鉴</span>
         </div>
-        <v-select
+        <v-btn-toggle
           v-model="selectType"
-          :clearable="true"
-          :hide-details="true"
-          :items="namecardTypes"
+          :mandatory="true"
+          aria-label="切换名片类别"
+          class="wnc-type-toggle"
+          color="var(--tgc-od-orange)"
           density="compact"
-          item-title="type"
-          label="名片类别"
           variant="outlined"
-          width="250px"
         >
-          <template #item="{ props, item }">
-            <v-list-item v-bind="props">
-              <template #append>
-                <v-chip>{{ item.number }}</v-chip>
-              </template>
-            </v-list-item>
-          </template>
-        </v-select>
+          <v-btn :value="null" size="small" title="显示全部名片">
+            全部
+            <span class="wnc-type-count">{{ AppNameCardsData.length }}</span>
+          </v-btn>
+          <v-btn
+            v-for="item in namecardTypes"
+            :key="item.type"
+            :title="`显示${item.type}类名片`"
+            :value="item.type"
+            size="small"
+          >
+            {{ item.type }}
+            <span class="wnc-type-count">{{ item.number }}</span>
+          </v-btn>
+        </v-btn-toggle>
       </div>
     </template>
     <template #append>
@@ -50,16 +55,26 @@
       </template>
     </v-virtual-scroll>
   </div>
-  <ToNameCard v-model="visible" :data="curNameCard">
+  <ToNameCard v-model="visible" :data="curNameCard" topOffset="64px">
     <template #left>
-      <div class="card-arrow left" @click="switchCard(false)">
-        <img alt="right" src="@/assets/icons/arrow-right.svg" />
-      </div>
+      <v-btn
+        aria-label="上一张名片"
+        class="card-arrow"
+        icon="mdi-chevron-left"
+        title="上一张名片"
+        variant="flat"
+        @click="switchCard(false)"
+      />
     </template>
     <template #right>
-      <div class="card-arrow" @click="switchCard(true)">
-        <img alt="right" src="@/assets/icons/arrow-right.svg" />
-      </div>
+      <v-btn
+        aria-label="下一张名片"
+        class="card-arrow"
+        icon="mdi-chevron-right"
+        title="下一张名片"
+        variant="flat"
+        @click="switchCard(true)"
+      />
     </template>
   </ToNameCard>
 </template>
@@ -181,8 +196,21 @@ function searchNameCard(): void {
 
 .wnc-top-append {
   position: relative;
-  width: 600px;
+  width: clamp(240px, 32vw, 600px);
   margin-right: 16px;
+}
+
+.wnc-type-toggle {
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.wnc-type-count {
+  margin-left: 4px;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
 }
 
 .tw-nc-list {
@@ -201,25 +229,12 @@ function searchNameCard(): void {
 }
 
 .card-arrow {
-  position: relative;
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.dark .card-arrow {
-  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
-}
-
-.card-arrow img {
-  width: 100%;
-  height: 100%;
-}
-
-.card-arrow.left img {
-  transform: rotate(180deg);
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
 }
 </style>
