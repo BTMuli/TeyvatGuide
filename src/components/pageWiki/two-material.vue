@@ -1,5 +1,5 @@
 <template>
-  <TOverlay v-model="visible">
+  <TOverlay v-model="visible" :topOffset>
     <div v-if="props.data" class="twom-container">
       <slot name="left" />
       <article class="twom-box">
@@ -13,7 +13,7 @@
             />
           </div>
           <div class="twom-identity">
-            <div class="twom-eyebrow">养成物品</div>
+            <div class="twom-eyebrow">{{ props.eyebrow }}</div>
             <h2>{{ props.data.name }}</h2>
             <div class="twom-meta">
               <span class="twom-type">{{ props.data.type }}</span>
@@ -22,6 +22,7 @@
                 {{ props.data.star }} 星
               </span>
               <span>ID {{ props.data.id }}</span>
+              <slot name="meta" />
             </div>
           </div>
           <div class="twom-actions" data-html2canvas-ignore="true">
@@ -43,7 +44,7 @@
             />
           </div>
         </header>
-        <main class="twom-content">
+        <main class="twom-content" :style="{ maxHeight: props.cmh }">
           <section class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-text-box-outline</v-icon>
@@ -72,12 +73,17 @@
               <span>{{ props.data.convert.length }} 种配方</span>
             </header>
             <div class="twom-convert">
-              <TwoConvert v-for="item in props.data.convert" :key="item.id" :data="item" />
+              <slot name="convert">
+                <TwoConvert v-for="item in props.data.convert" :key="item.id" :data="item" />
+              </slot>
             </div>
           </section>
+          <slot name="after-content" />
         </main>
         <footer class="twom-share">
-          Material {{ props.data.id }} · Rendered by TeyvatGuide v{{ version }}
+          {{ props.shareCaption ?? `Material ${props.data.id}` }} · Rendered by TeyvatGuide v{{
+            version
+          }}
         </footer>
       </article>
       <slot name="right" />
@@ -95,9 +101,22 @@ import { onMounted, ref } from "vue";
 import TwoConvert from "./two-convert.vue";
 import TwoSource from "./two-source.vue";
 
-type TwoMaterialProps = { data: TGApp.App.Material.WikiItem };
+type TwoMaterialProps = {
+  cmh?: string;
+  data: TGApp.App.Material.WikiItem;
+  eyebrow?: string;
+  shareCaption?: string;
+  shareFileName?: string;
+  shareScale?: number;
+  topOffset?: string;
+};
 
-const props = defineProps<TwoMaterialProps>();
+const props = withDefaults(defineProps<TwoMaterialProps>(), {
+  eyebrow: "养成物品",
+  cmh: "600px",
+  shareScale: 1.2,
+  topOffset: "0px",
+});
 const visible = defineModel<boolean>();
 const version = ref<string>();
 
@@ -109,8 +128,22 @@ async function shareMaterial(): Promise<void> {
     showSnackbar.error("未获取到分享内容");
     return;
   }
-  const fileName = `material_${props.data.id}`;
-  await generateShareImg(fileName, element, 1.2, true);
+  const content = element.querySelector<HTMLElement>(".twom-content");
+  const contentMaxHeight = content?.style.maxHeight;
+  const contentOverflowY = content?.style.overflowY;
+  if (content !== null) {
+    content.style.maxHeight = "none";
+    content.style.overflowY = "visible";
+  }
+  const fileName = props.shareFileName ?? `material_${props.data.id}`;
+  try {
+    await generateShareImg(fileName, element, props.shareScale, true);
+  } finally {
+    if (content !== null) {
+      content.style.maxHeight = contentMaxHeight ?? "";
+      content.style.overflowY = contentOverflowY ?? "";
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

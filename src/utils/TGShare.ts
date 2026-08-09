@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.10.0
+ * @since Beta v0.11.3
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -105,7 +105,7 @@ function getShareImgBgColor(): string {
 
 /**
  * 生成分享截图
- * @since Beta v0.9.0
+ * @since Beta v0.11.3
  * @param fileName - 文件名
  * @param element - 元素
  * @param scale - 缩放比例
@@ -144,8 +144,9 @@ export async function generateShareImg(
     await TGLogger.Error(`[generateShareImg][${fileName}] 生成分享截图失败 ${e}`);
     showSnackbar.error(`生成分享截图失败: ${e}`);
     return;
+  } finally {
+    if (scrollable) element.style.maxHeight = maxHeight;
   }
-  if (scrollable) element.style.maxHeight = maxHeight;
   const bf = new Uint8Array(
     atob(canvasData.toDataURL("image/png").split(",")[1])
       .split("")

@@ -99,17 +99,28 @@
     v-model="showOverlay"
     :data="curMaterial"
     :uid="curUid"
+    topOffset="112px"
     @updateDB="handleUpdate"
   >
     <template #left>
-      <div class="card-arrow" @click="switchMaterial(false)">
-        <img alt="right" src="@/assets/icons/arrow-right.svg" />
-      </div>
+      <v-btn
+        aria-label="上一个背包物品"
+        class="card-arrow"
+        icon="mdi-chevron-left"
+        title="上一个背包物品"
+        variant="flat"
+        @click="switchMaterial(false)"
+      />
     </template>
     <template #right>
-      <div class="card-arrow" @click="switchMaterial(true)">
-        <img alt="right" src="@/assets/icons/arrow-right.svg" />
-      </div>
+      <v-btn
+        aria-label="下一个背包物品"
+        class="card-arrow"
+        icon="mdi-chevron-right"
+        title="下一个背包物品"
+        variant="flat"
+        @click="switchMaterial(true)"
+      />
     </template>
   </PboMaterial>
 </template>
@@ -474,25 +485,12 @@ function switchMaterial(isNext: boolean): void {
 }
 
 .card-arrow {
-  position: relative;
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  img {
-    width: 30px;
-    aspect-ratio: 1;
-  }
-
-  &:first-child {
-    transform: rotate(180deg);
-  }
-}
-
-.dark .card-arrow {
-  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
 }
 </style>

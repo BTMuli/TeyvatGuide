@@ -7,15 +7,16 @@
     <div class="twoc-recipe">
       <template v-for="(item, index) in props.data.source" :key="item.id">
         <span v-if="index > 0" class="twoc-separator">+</span>
-        <div class="twoc-box">
+        <div :class="`star${item.star}`" :title="item.name" class="twoc-box">
           <div class="twoc-left">
-            <img :src="`/icon/bg/${item.star}-BGC.webp`" alt="" class="bg" />
+            <img :src="`/icon/bg/${item.star}-Star.webp`" alt="" class="bg" />
             <img :alt="item.name" :src="`/icon/material/${item.id}.webp`" class="icon" />
           </div>
           <div class="twoc-right">
-            <span>{{ item.name }}</span>
-            <span>×{{ item.count }}</span>
+            <span class="twoc-title">{{ item.name }}</span>
+            <span class="twoc-count">×{{ item.count }}</span>
           </div>
+          <div class="twoc-extra">{{ item.type }}·{{ item.id }}</div>
         </div>
       </template>
     </div>
@@ -63,64 +64,105 @@ const props = defineProps<TwoConvertProps>();
 }
 
 .twoc-box {
+  position: relative;
   display: flex;
   overflow: hidden;
-  min-width: 140px;
+  min-width: 200px;
+  height: 48px;
   align-items: center;
-  border: 1px solid var(--common-shadow-1);
+  justify-content: flex-start;
+  padding-right: 4px;
+  border: 1px solid transparent;
   border-radius: 4px;
-  background: var(--app-page-bg);
+  column-gap: 4px;
 }
 
 .twoc-left {
   position: relative;
-  display: flex;
-  overflow: hidden;
-  width: 40px;
-  height: 40px;
+  height: 100%;
   flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
+  aspect-ratio: 1;
 
-  .bg {
+  .bg,
+  .icon {
     position: absolute;
-    z-index: 1;
     top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-  }
-
-  .icon {
-    position: relative;
-    z-index: 2;
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
   }
 }
 
 .twoc-right {
+  position: relative;
   display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
+  overflow: hidden;
+  max-width: 100%;
+  align-items: flex-end;
+  justify-content: center;
   color: var(--box-text-2);
+  column-gap: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: break-all;
+}
+
+.twoc-title {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+
+.twoc-count {
+  flex-shrink: 0;
+  color: var(--tgc-od-red);
+  font-family: var(--font-title);
   font-size: 12px;
-  gap: 8px;
-  line-height: 16px;
+  font-weight: normal;
+}
 
-  span:first-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.twoc-extra {
+  position: absolute;
+  z-index: 1;
+  right: 2px;
+  bottom: 0;
+  color: var(--twoc-extra-color);
+  font-size: 8px;
+  font-style: italic;
+  opacity: 0.8;
+}
 
-  span:last-child {
-    flex-shrink: 0;
-    color: var(--box-text-4);
-  }
+.star1 {
+  --twoc-extra-color: var(--tgc-od-white);
+
+  border-color: #abb2bf33;
+  background: #abb2bf26;
+}
+
+.star2 {
+  --twoc-extra-color: var(--tgc-od-green);
+
+  border-color: #98c37933;
+  background: #98c37926;
+}
+
+.star3 {
+  --twoc-extra-color: var(--tgc-od-blue);
+
+  border-color: #61afef33;
+  background: #61afef26;
+}
+
+.star4 {
+  --twoc-extra-color: var(--tgc-od-purple);
+
+  border-color: #c678dd33;
+  background: #c678dd26;
+}
+
+.star5 {
+  --twoc-extra-color: var(--tgc-od-orange);
+
+  border-color: #d19a6633;
+  background: #d19a6626;
 }
 </style>
