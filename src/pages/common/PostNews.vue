@@ -118,6 +118,7 @@ watch(
 async function firstLoad(refresh: boolean = false): Promise<void> {
   if (loading.value) return;
   loading.value = true;
+  const requestGid = gid;
   let key: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NOTICE;
   if (bbsEnum.post.newsTypeList.includes(recentNewsType.value)) key = recentNewsType.value;
   if (rawData[key].lastId !== 0) {
@@ -133,7 +134,11 @@ async function firstLoad(refresh: boolean = false): Promise<void> {
   await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
   let getResp: TGApp.BBS.Post.NewsResp | undefined;
   try {
-    getResp = await painterReq.news(gid, key);
+    getResp = await painterReq.news(requestGid, key);
+    if (requestGid !== gid) {
+      loading.value = false;
+      return;
+    }
     if (getResp.retcode !== 0) {
       showSnackbar.error(`[${getResp.retcode}] ${getResp.message}`);
       await TGLogger.Warn(`[PostNews][firstLoad] 获取咨讯异常`);
@@ -179,6 +184,7 @@ function handleList(): void {
 async function loadMore(): Promise<void> {
   if (loading.value) return;
   loading.value = true;
+  const requestGid = gid;
   let key: TGApp.BBS.Post.NewsTypeEnum = bbsEnum.post.newsType.NOTICE;
   if (bbsEnum.post.newsTypeList.includes(recentNewsType.value)) key = recentNewsType.value;
   if (rawData[key].isLast) {
@@ -193,7 +199,11 @@ async function loadMore(): Promise<void> {
   await showLoading.start(`正在获取${label.value}${rawData[key].name}数据`);
   let getResp: TGApp.BBS.Post.NewsResp | undefined;
   try {
-    getResp = await painterReq.news(gid, key, pageSize, rawData[key].lastId);
+    getResp = await painterReq.news(requestGid, key, pageSize, rawData[key].lastId);
+    if (requestGid !== gid) {
+      loading.value = false;
+      return;
+    }
     if (getResp.retcode !== 0) {
       showSnackbar.error(`[${getResp.retcode}] ${getResp.message}`);
       await TGLogger.Warn(`[PostNews][loadMore] 获取咨讯异常`);

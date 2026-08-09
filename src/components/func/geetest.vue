@@ -16,7 +16,7 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { ref, useTemplateRef, watch } from "vue";
+import { onWatcherCleanup, ref, useTemplateRef, watch } from "vue";
 
 const show = ref<boolean>(false);
 const showOuter = ref<boolean>(false);
@@ -27,15 +27,23 @@ const geetestEl = useTemplateRef<HTMLDivElement>("geetestRef");
 watch(
   () => show.value,
   async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined = undefined;
+    onWatcherCleanup(() => {
+      if (timer !== undefined) clearTimeout(timer);
+    });
+    const delay = (ms: number): Promise<void> =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, ms);
+      });
     if (show.value) {
       showOuter.value = true;
-      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+      await delay(100);
       showInner.value = true;
       return;
     }
-    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    await delay(100);
     showInner.value = false;
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    await delay(300);
     showOuter.value = false;
   },
 );

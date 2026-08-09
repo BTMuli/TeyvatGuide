@@ -9,7 +9,7 @@
   </transition>
 </template>
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { onWatcherCleanup, ref, watch } from "vue";
 
 type TolProps = {
   /** 背景 blur */
@@ -36,14 +36,22 @@ const showToli = ref<boolean>(false);
 watch(
   () => model.value,
   async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined = undefined;
+    onWatcherCleanup(() => {
+      if (timer !== undefined) clearTimeout(timer);
+    });
+    const delay = (ms: number): Promise<void> =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, ms);
+      });
     if (model.value) {
       showTolo.value = true;
       showToli.value = true;
       return;
     }
-    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    await delay(100);
     showToli.value = false;
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    await delay(300);
     showTolo.value = false;
   },
 );

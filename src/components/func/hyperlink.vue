@@ -18,7 +18,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { onMounted, onWatcherCleanup, ref, shallowRef, useTemplateRef, watch } from "vue";
 
 import type { HyperLinkParams } from "./hyperlink.js";
 
@@ -33,15 +33,23 @@ const hyperLinkEl = useTemplateRef<HTMLDivElement>("hyperlinkRef");
 watch(
   () => show.value,
   async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined = undefined;
+    onWatcherCleanup(() => {
+      if (timer !== undefined) clearTimeout(timer);
+    });
+    const delay = (ms: number): Promise<void> =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, ms);
+      });
     if (show.value) {
       showOuter.value = true;
-      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+      await delay(100);
       showInner.value = true;
       return;
     }
-    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    await delay(100);
     showInner.value = false;
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    await delay(300);
     showOuter.value = false;
   },
 );

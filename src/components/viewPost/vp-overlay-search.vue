@@ -98,6 +98,7 @@ const isLast = ref<boolean>(false);
 const load = ref<boolean>(false);
 const sortType = ref<TGApp.BBS.Post.SearchSortTypeEnum>(bbsEnum.post.searchSortType.HOT);
 const results = shallowRef<Array<TGApp.BBS.Post.FullData>>([]);
+let searchVersion = 0;
 const label = computed<string>(() => {
   const gameFind = gameList.value.find((v) => v.id.toString() === gameId.value);
   if (gameFind === undefined) return "未知分区";
@@ -166,7 +167,8 @@ watch(
 );
 
 async function searchPosts(): Promise<void> {
-  if (load.value || !search.value) return;
+  if (!search.value) return;
+  const requestVersion = ++searchVersion;
   load.value = true;
   if (!props.gid) {
     showSnackbar.warn("参数错误");
@@ -186,6 +188,7 @@ async function searchPosts(): Promise<void> {
   let res: TGApp.BBS.Post.SearchResp | undefined;
   try {
     res = await postReq.search(gameId.value, search.value, lastId.value, sortType.value);
+    if (requestVersion !== searchVersion) return;
     if (res.retcode !== 0) {
       showSnackbar.error(`搜索失败：[${res.retcode}] ${res.message}`);
       await TGLogger.Warn(`[VpOverlaySearch] 搜索失败：[${res.retcode}] ${res.message}`);
@@ -194,12 +197,14 @@ async function searchPosts(): Promise<void> {
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
+    if (requestVersion !== searchVersion) return;
     showSnackbar.error(`搜索失败：${errMsg}`);
     await TGLogger.Error(`[VpOverlaySearch] 搜索异常`);
     await TGLogger.Error(`[VpOverlaySearch] ${e}`);
     load.value = false;
     return;
   }
+  if (requestVersion !== searchVersion) return;
   if (lastId.value === "") results.value = res.data.posts;
   else results.value = results.value.concat(res.data.posts);
   lastId.value = res.data.last_id;

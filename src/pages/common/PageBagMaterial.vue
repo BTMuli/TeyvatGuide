@@ -193,6 +193,7 @@ const materialTypes = shallowRef<Array<MaterialType>>([]);
 const curMaterial = shallowRef<MaterialInfo>();
 const materialList = shallowRef<Array<MaterialInfo>>([]);
 const materialShow = shallowRef<Array<MaterialInfo>>([]);
+let materialLoadVersion = 0;
 
 onMounted(async () => {
   await showLoading.start("正在获取存档列表...");
@@ -203,8 +204,9 @@ onMounted(async () => {
 watch(
   () => curUid.value,
   async () => {
+    const requestVersion = ++materialLoadVersion;
     if (showOverlay.value) showOverlay.value = false;
-    await loadMaterialList(curUid.value);
+    await loadMaterialList(curUid.value, requestVersion);
   },
 );
 watch(
@@ -263,15 +265,17 @@ function sortMaterials(data: Array<MaterialInfo>): Array<MaterialInfo> {
  * @param {number} uid 存档UID
  * @returns {Promise<void>}
  */
-async function loadMaterialList(uid: number): Promise<void> {
+async function loadMaterialList(uid: number, requestVersion: number): Promise<void> {
   if (showOverlay.value) showOverlay.value = false;
   await showLoading.start(`正在加载 ${uid} 的材料数据`);
+  if (requestVersion !== materialLoadVersion) return;
   // 初始化
   materialTypes.value = [];
   materialShow.value = [];
   materialList.value = [];
   selectType.value = null;
   const dList = await TSUserBagMaterial.getMaterial(uid);
+  if (requestVersion !== materialLoadVersion) return;
   const mList = [];
   const tList: Array<MaterialType> = [];
   for (const material of dList) {

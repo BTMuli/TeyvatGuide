@@ -125,6 +125,7 @@ const showOverview = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
 const tab = shallowRef<AbyssTab>("use");
 const floor = ref<number>(12);
+const loadingTypes = new Set<AbyssTab>();
 const overview =
   shallowRef<TGApp.Plugins.Hutao.Abyss.PeriodData<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
 const abyssData: AbyssData = reactive({
@@ -187,10 +188,12 @@ watch(
   async (show) => {
     if (!show || abyssData.use !== null || isLoading.value) return;
     isLoading.value = true;
+    loadingTypes.add("use");
     try {
       await getOverview();
       await getUseData();
     } finally {
+      loadingTypes.delete("use");
       isLoading.value = false;
       await showLoading.end();
     }
@@ -207,22 +210,27 @@ watch(floorList, (list) => {
 });
 
 async function refreshData(type: AbyssTab): Promise<void> {
-  if (abyssData[type] !== null) return;
-  switch (type) {
-    case "use":
-      await getUseData();
-      break;
-    case "up":
-      await getUpData();
-      break;
-    case "team":
-      await getTeamData();
-      break;
-    case "hold":
-      await getHoldData();
-      break;
+  if (abyssData[type] !== null || loadingTypes.has(type)) return;
+  loadingTypes.add(type);
+  try {
+    switch (type) {
+      case "use":
+        await getUseData();
+        break;
+      case "up":
+        await getUpData();
+        break;
+      case "team":
+        await getTeamData();
+        break;
+      case "hold":
+        await getHoldData();
+        break;
+    }
+  } finally {
+    loadingTypes.delete(type);
+    await showLoading.end();
   }
-  await showLoading.end();
 }
 
 async function getOverview(): Promise<void> {

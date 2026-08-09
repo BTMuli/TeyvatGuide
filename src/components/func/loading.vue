@@ -30,7 +30,15 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import TGHttps from "@utils/TGHttps.js";
-import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import {
+  onMounted,
+  onUnmounted,
+  onWatcherCleanup,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import { LoadingParams } from "./loading.js";
 
@@ -53,15 +61,23 @@ const loadingEl = useTemplateRef<HTMLDivElement>("LoadingRef");
 watch(
   () => showBox.value,
   async () => {
+    let timer: ReturnType<typeof setTimeout> | undefined = undefined;
+    onWatcherCleanup(() => {
+      if (timer !== undefined) clearTimeout(timer);
+    });
+    const delay = (ms: number): Promise<void> =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, ms);
+      });
     if (showBox.value) {
       showOuter.value = true;
-      await new Promise<void>((resolve) => setTimeout(resolve, 100));
+      await delay(100);
       showInner.value = true;
       return;
     }
-    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    await delay(100);
     showInner.value = false;
-    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    await delay(300);
     showOuter.value = false;
   },
 );
