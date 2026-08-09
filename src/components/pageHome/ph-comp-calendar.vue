@@ -59,18 +59,40 @@
       />
     </template>
   </THomeCard>
-  <ToCalendar v-if="selectedItem" v-model="showItem" :item="selectedItem" src="素材日历" />
-  <PhCalendarCultivationOverlay
+  <ToCalendar
     v-if="selectedItem"
-    v-model="showCultivationItem"
-    :entries="selectedCultivationEntries"
+    v-model="showItem"
     :item="selectedItem"
+    :entries="selectedCultivationEntries"
     :materials="cultivationMaterials"
     :project="cultivationProject"
-  />
+    src="素材日历"
+  >
+    <template #left>
+      <v-btn
+        aria-label="上一个素材"
+        class="card-arrow"
+        icon="mdi-chevron-left"
+        title="上一个素材"
+        variant="flat"
+        @click="switchCalendarItem(false)"
+      />
+    </template>
+    <template #right>
+      <v-btn
+        aria-label="下一个素材"
+        class="card-arrow"
+        icon="mdi-chevron-right"
+        title="下一个素材"
+        variant="flat"
+        @click="switchCalendarItem(true)"
+      />
+    </template>
+  </ToCalendar>
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import {
   computed,
@@ -84,7 +106,6 @@ import {
 } from "vue";
 
 import TCalendarBirth from "./ph-calendar-birth.vue";
-import PhCalendarCultivationOverlay from "./ph-calendar-cultivation-overlay.vue";
 import ToCalendar from "./ph-calendar-overlay.vue";
 import THomeCard from "./ph-comp-card.vue";
 import PhCompCultivation from "./ph-comp-cultivation.vue";
@@ -112,7 +133,6 @@ const btnNow = ref<number>(0);
 const dateNow = ref<string>("");
 const page = ref<number>(1);
 const showItem = ref<boolean>(false);
-const showCultivationItem = ref<boolean>(false);
 const showCalendar = ref<boolean>(true);
 const selectedType = ref<"character" | "weapon">("character");
 const cultivationProject = shallowRef<TGApp.Sqlite.Cultivation.Project>();
@@ -148,6 +168,12 @@ const selectedItem = shallowRef<TGApp.App.Calendar.Item>();
 const gridStyle = computed<Record<string, string>>(() => ({
   gridTemplateColumns: `repeat(${gridCols.value}, ${ITEM_SIZE}px)`,
 }));
+const switchItems = computed<Array<TGApp.App.Calendar.Item>>(() => {
+  const current = selectedItem.value;
+  if (current === undefined) return calendarTotal.value;
+  if (calendarTotal.value.some((item) => item.id === current.id)) return calendarTotal.value;
+  return AppCalendarData.filter((item) => item.itemType === current.itemType);
+});
 
 watch(visible, () => {
   page.value = 1;
@@ -190,15 +216,35 @@ function switchDay(day: number): void {
   page.value = 1;
 }
 
-async function selectItem(item: TGApp.App.Calendar.Item): Promise<void> {
-  const entries = getCultivationEntries(item);
-  if (entries.length > 0) {
-    await openCultivationItem(item, entries);
+function switchCalendarItem(isNext: boolean): void {
+  const current = selectedItem.value;
+  if (current === undefined) return;
+  const currentIndex = switchItems.value.findIndex((item) => item.id === current.id);
+  if (currentIndex === -1) return;
+  const nextIndex = currentIndex + (isNext ? 1 : -1);
+  if (nextIndex < 0) {
+    showSnackbar.warn("已经是第一个了");
     return;
   }
-  selectedItem.value = item;
-  await nextTick();
-  showItem.value = true;
+  if (nextIndex >= switchItems.value.length) {
+    showSnackbar.warn("已经是最后一个了");
+    return;
+  }
+  const nextItem = switchItems.value[nextIndex];
+  const entries = getCultivationEntries(nextItem);
+  selectedItem.value = nextItem;
+  selectedCultivationEntries.value = entries;
+  syncCalendarPage(nextItem);
+}
+
+function syncCalendarPage(item: TGApp.App.Calendar.Item): void {
+  const itemIndex = calendarTotal.value.findIndex((calendarItem) => calendarItem.id === item.id);
+  if (itemIndex === -1) return;
+  page.value = Math.min(Math.max(1, Math.floor(itemIndex / visible.value) + 1), length.value);
+}
+
+async function selectItem(item: TGApp.App.Calendar.Item): Promise<void> {
+  await openCalendarItem(item, getCultivationEntries(item));
 }
 
 async function selectCultivationEntry(
@@ -209,17 +255,17 @@ async function selectCultivationEntry(
     (calendarItem) => calendarItem.itemType === itemType && calendarItem.id === entry.itemId,
   );
   if (!item) return;
-  await openCultivationItem(item, [entry]);
+  await openCalendarItem(item, [entry]);
 }
 
-async function openCultivationItem(
+async function openCalendarItem(
   item: TGApp.App.Calendar.Item,
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
 ): Promise<void> {
   selectedItem.value = item;
   selectedCultivationEntries.value = entries;
   await nextTick();
-  showCultivationItem.value = true;
+  showItem.value = true;
 }
 
 function handleCultivationSuccess(): void {
@@ -357,5 +403,15 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
     box-shadow: 0 0 8px var(--common-shadow-2);
     outline: 2px solid var(--tgc-od-orange);
   }
+}
+
+.card-arrow {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
 }
 </style>
