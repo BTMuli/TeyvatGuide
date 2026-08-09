@@ -1,5 +1,5 @@
 // 主模块，用于启动应用
-// @since Beta v0.9.2
+// @since Beta v0.11.3
 
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -18,11 +18,7 @@ fn enable_dpi_v2() {
 fn main() {
   let _guard = sentry::init((
     "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",
-    sentry::ClientOptions {
-      release: sentry::release_name!().into(),
-      send_default_pii: true,
-      ..Default::default()
-    },
+    sentry::ClientOptions::new().maybe_release(sentry::release_name!()).send_default_pii(true),
   ));
   #[cfg(target_os = "windows")]
   enable_dpi_v2();
