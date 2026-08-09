@@ -1,15 +1,17 @@
 <template>
   <TwgCatalog
-    :count="cardsInfo.length"
+    v-model:search="searchKeyword"
+    :count="visibleCards.length"
     icon="mdi-account-search"
+    search-placeholder="搜索角色名称"
     title="角色图鉴"
     unit="位角色"
     @filter="showSelect = true"
-    @reset="resetSelect = true"
+    @reset="resetCatalog"
   >
     <template #list>
       <TwcListItem
-        v-for="item in cardsInfo"
+        v-for="item in visibleCards"
         :key="item.id"
         v-model:cur-item="curItem"
         :data="item"
@@ -29,7 +31,7 @@ import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwgCatalog from "@comp/pageWiki/twg-catalog.vue";
 import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
 import { toObcPage } from "@utils/TGWindow.js";
-import { ref, shallowRef, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { AppCharacterData } from "@/data/index.js";
@@ -46,7 +48,13 @@ const route = useRoute();
 const router = useRouter();
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
+const searchKeyword = ref<string | null>("");
 const cardsInfo = shallowRef<Array<TGApp.App.Character.WikiBriefInfo>>(appCData);
+const visibleCards = computed<Array<TGApp.App.Character.WikiBriefInfo>>(() => {
+  const keyword = searchKeyword.value?.trim().toLocaleLowerCase() ?? "";
+  if (keyword.length === 0) return cardsInfo.value;
+  return cardsInfo.value.filter((item) => item.name.toLocaleLowerCase().includes(keyword));
+});
 const curItem = shallowRef<TGApp.App.Character.WikiBriefInfo>({
   costumes: [],
   id: 0,
@@ -107,6 +115,13 @@ function handleSelect(val: SelectedCValue): void {
   }
   showSnackbar.success(`筛选出符合条件的角色 ${filterC.length} 个`);
   cardsInfo.value = filterC;
+}
+
+function resetCatalog(): void {
+  const hasFilter = cardsInfo.value !== appCData;
+  searchKeyword.value = "";
+  cardsInfo.value = appCData;
+  if (hasFilter) resetSelect.value = true;
 }
 
 async function switchC(item: TGApp.App.Character.WikiBriefInfo): Promise<void> {

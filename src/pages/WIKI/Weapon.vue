@@ -1,15 +1,17 @@
 <template>
   <TwgCatalog
-    :count="cardsInfo.length"
+    v-model:search="searchKeyword"
+    :count="visibleCards.length"
     icon="mdi-sword-cross"
+    search-placeholder="搜索武器名称"
     title="武器图鉴"
     unit="件武器"
     @filter="showSelect = true"
-    @reset="resetSelect = true"
+    @reset="resetCatalog"
   >
     <template #list>
       <TwcListItem
-        v-for="item in cardsInfo"
+        v-for="item in visibleCards"
         :key="item.id"
         v-model:cur-item="curItem"
         :data="item"
@@ -29,7 +31,7 @@ import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
 import TwgCatalog from "@comp/pageWiki/twg-catalog.vue";
 import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
 import { toObcPage } from "@utils/TGWindow.js";
-import { ref, shallowRef, watch } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 import { AppWeaponData } from "@/data/index.js";
@@ -44,7 +46,13 @@ const route = useRoute();
 const router = useRouter();
 const showSelect = ref<boolean>(false);
 const resetSelect = ref<boolean>(false);
+const searchKeyword = ref<string | null>("");
 const cardsInfo = shallowRef<Array<TGApp.App.Weapon.WikiBriefInfo>>(appWData);
+const visibleCards = computed<Array<TGApp.App.Weapon.WikiBriefInfo>>(() => {
+  const keyword = searchKeyword.value?.trim().toLocaleLowerCase() ?? "";
+  if (keyword.length === 0) return cardsInfo.value;
+  return cardsInfo.value.filter((item) => item.name.toLocaleLowerCase().includes(keyword));
+});
 const curItem = shallowRef<TGApp.App.Weapon.WikiBriefInfo>({
   id: 0,
   contentId: 0,
@@ -99,6 +107,13 @@ function handleSelectW(val: SelectedWValue): void {
   }
   showSnackbar.success(`找到 ${filterW.length} 件符合条件的武器`);
   cardsInfo.value = filterW;
+}
+
+function resetCatalog(): void {
+  const hasFilter = cardsInfo.value !== appWData;
+  searchKeyword.value = "";
+  cardsInfo.value = appWData;
+  if (hasFilter) resetSelect.value = true;
 }
 
 async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {

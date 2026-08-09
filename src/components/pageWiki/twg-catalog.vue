@@ -11,6 +11,18 @@
           <span class="twg-count">{{ props.count }} {{ props.unit }}</span>
         </div>
         <div class="twg-actions">
+          <v-text-field
+            :model-value="props.search"
+            :placeholder="props.searchPlaceholder"
+            aria-label="按名称搜索"
+            class="twg-search"
+            clearable
+            density="compact"
+            hide-details
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            @update:model-value="updateSearch"
+          />
           <v-btn
             class="twg-filter-btn"
             density="comfortable"
@@ -32,7 +44,11 @@
         </div>
       </header>
       <div class="twg-list">
-        <slot name="list" />
+        <div v-if="props.count === 0" class="twg-empty">
+          <v-icon icon="mdi-text-search" size="24" />
+          <span>未找到名称匹配的内容</span>
+        </div>
+        <slot v-else name="list" />
       </div>
     </aside>
     <main class="twg-detail">
@@ -46,14 +62,24 @@ type TwgCatalogProps = {
   icon: string;
   title: string;
   unit: string;
+  search?: string | null;
+  searchPlaceholder?: string;
 };
 type TwgCatalogEmits = {
   filter: [];
   reset: [];
+  "update:search": [value: string | null];
 };
 
-const props = defineProps<TwgCatalogProps>();
+const props = withDefaults(defineProps<TwgCatalogProps>(), {
+  search: "",
+  searchPlaceholder: "搜索名称",
+});
 const emits = defineEmits<TwgCatalogEmits>();
+
+function updateSearch(value: string | null): void {
+  emits("update:search", value);
+}
 </script>
 <style lang="scss" scoped>
 .twg-shell {
@@ -123,9 +149,21 @@ const emits = defineEmits<TwgCatalogEmits>();
 
 .twg-actions {
   display: flex;
+  min-width: 0;
   flex-shrink: 0;
   align-items: center;
   column-gap: 4px;
+}
+
+.twg-search {
+  width: 148px;
+  flex: 0 1 148px;
+
+  :deep(.v-field) {
+    border-radius: 4px;
+    color: var(--box-text-2);
+    font-size: 12px;
+  }
 }
 
 .twg-filter-btn,
@@ -154,6 +192,19 @@ const emits = defineEmits<TwgCatalogEmits>();
   grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
 }
 
+.twg-empty {
+  display: flex;
+  min-height: 120px;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--common-shadow-1);
+  border-radius: 8px;
+  color: var(--box-text-4);
+  font-size: 13px;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
 .twg-detail {
   position: relative;
   width: 100%;
@@ -165,5 +216,28 @@ const emits = defineEmits<TwgCatalogEmits>();
   background: var(--app-page-bg);
   box-shadow: 0 2px 8px var(--common-shadow-t-2);
   overflow-y: auto;
+}
+
+@media (width <= 1100px) {
+  .twg-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .twg-heading {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .twg-actions {
+    width: 100%;
+  }
+
+  .twg-search {
+    width: auto;
+    flex: 1;
+  }
 }
 </style>
