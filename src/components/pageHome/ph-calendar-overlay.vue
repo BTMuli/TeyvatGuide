@@ -1,6 +1,6 @@
 <!-- 首页素材日历-普通条目浮窗 -->
 <template>
-  <TOverlay v-model="visible" blur-val="8px">
+  <TOverlay v-model="visible" blurVal="8px" topOffset="64px">
     <section class="phmo-panel">
       <header class="phmo-header">
         <UcItemIcon :alt="item.name" :icon="itemIcon" :size="84" :star="item.star" />
@@ -8,8 +8,8 @@
           <div class="phmo-title-row">
             <h2>{{ item.name }}</h2>
             <v-chip color="var(--tgc-od-orange)" size="small" variant="tonal">
-              <v-icon start size="15">mdi-calendar-today</v-icon>
-              素材日历
+              <v-icon size="15" start>mdi-calendar-today</v-icon>
+              {{ src }}
             </v-chip>
           </div>
           <div class="phmo-attributes">
@@ -26,7 +26,11 @@
               {{ item.element }}元素
             </span>
             <span>
-              <img :alt="item.weapon" :src="`/icon/weapon/${item.weapon}.webp`" />
+              <img
+                :alt="item.weapon"
+                :src="`/icon/weapon/${item.weapon}.webp`"
+                class="icon-filter"
+              />
               {{ item.weapon }}
             </span>
           </div>
@@ -53,8 +57,8 @@
               :key="day.value"
               :color="day.isToday ? 'var(--tgc-od-orange)' : undefined"
               :prepend-icon="day.isToday ? 'mdi-calendar-check-outline' : undefined"
-              size="small"
               :variant="day.isToday ? 'tonal' : 'outlined'"
+              size="small"
             >
               {{ day.label }}
             </v-chip>
@@ -69,8 +73,11 @@
             </div>
             <span>共 {{ item.materials.length }} 种</span>
           </div>
-          <div class="phmo-materials">
-            <article v-for="material in item.materials" :key="material.id" class="phmo-material">
+          <div
+            :class="{ 'phmo-materials--weapon': item.itemType === 'weapon' }"
+            class="phmo-materials"
+          >
+            <article v-for="material in sortedMaterials" :key="material.id" class="phmo-material">
               <UcItemIcon
                 :alt="material.name"
                 :icon="`/icon/material/${material.id}.webp`"
@@ -102,7 +109,6 @@
     </section>
   </TOverlay>
 </template>
-
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
@@ -110,10 +116,16 @@ import { toObcPage } from "@utils/TGWindow.js";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 
-type PhCalendarOverlayProps = { item: TGApp.App.Calendar.Item };
+type PhCalendarOverlayProps = {
+  item: TGApp.App.Calendar.Item;
+  /** 来源组件标签 */
+  src?: string;
+};
 type DropDayLabel = { isToday: boolean; label: string; value: number };
 
-const props = defineProps<PhCalendarOverlayProps>();
+const props = withDefaults(defineProps<PhCalendarOverlayProps>(), {
+  src: "素材日历",
+});
 const visible = defineModel<boolean>({ default: false });
 const router = useRouter();
 
@@ -140,6 +152,9 @@ const itemRarityLabel = computed<string>(() =>
 const materialSectionTitle = computed<string>(() =>
   props.item.itemType === "character" ? "天赋培养材料" : "武器突破材料",
 );
+const sortedMaterials = computed<Array<TGApp.App.Calendar.Material>>(() =>
+  [...props.item.materials].sort((a, b) => b.star - a.star),
+);
 const dropDayLabels = computed<Array<DropDayLabel>>(() =>
   props.item.dropDays.map((day) => ({
     isToday: day === today,
@@ -163,7 +178,7 @@ async function openObcDetail(): Promise<void> {
 .phmo-panel {
   display: flex;
   width: min(680px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
+  max-height: calc(100% - 32px);
   flex-direction: column;
   border: 1px solid var(--common-shadow-1);
   border-radius: 12px;
@@ -227,6 +242,10 @@ async function openObcDetail(): Promise<void> {
     width: 17px;
     height: 17px;
     object-fit: contain;
+
+    &.icon-filter {
+      filter: var(--icon-filter);
+    }
   }
 }
 
@@ -238,6 +257,7 @@ async function openObcDetail(): Promise<void> {
   img {
     width: 20px;
     height: 20px;
+    filter: var(--icon-filter);
     object-fit: contain;
   }
 }
@@ -284,6 +304,10 @@ async function openObcDetail(): Promise<void> {
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+
+  &.phmo-materials--weapon {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .phmo-material {

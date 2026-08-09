@@ -31,7 +31,7 @@
     :data="curMaterial"
     :uid="Number(account.gameUid)"
   />
-  <ToCalendar v-model="showCalendar" :item="curItemC" />
+  <ToCalendar v-model="showCalendar" :item="curItemC" src="近期活动" />
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";

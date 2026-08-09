@@ -59,7 +59,7 @@
       />
     </template>
   </THomeCard>
-  <ToCalendar v-if="selectedItem" v-model="showItem" :item="selectedItem" />
+  <ToCalendar v-if="selectedItem" v-model="showItem" :item="selectedItem" src="素材日历" />
   <PhCalendarCultivationOverlay
     v-if="selectedItem"
     v-model="showCultivationItem"

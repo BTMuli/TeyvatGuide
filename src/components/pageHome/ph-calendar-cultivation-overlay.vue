@@ -1,6 +1,6 @@
 <!-- 首页素材日历-养成目标浮窗 -->
 <template>
-  <TOverlay v-model="visible" blur-val="8px">
+  <TOverlay v-model="visible" blurVal="8px" topOffset="64px">
     <section class="phco-panel">
       <header class="phco-header">
         <UcItemIcon :alt="item.name" :icon="itemIcon" :size="84" :star="item.star" />
@@ -188,7 +188,7 @@ async function openPlan(): Promise<void> {
 .phco-panel {
   display: flex;
   width: min(720px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
+  max-height: calc(100% - 32px);
   flex-direction: column;
   border: 1px solid var(--common-shadow-1);
   border-radius: 12px;
@@ -255,6 +255,7 @@ async function openPlan(): Promise<void> {
 .phco-source img {
   width: 20px;
   height: 20px;
+  filter: var(--icon-filter);
   object-fit: contain;
 }
 
@@ -350,6 +351,7 @@ async function openPlan(): Promise<void> {
     overflow: hidden;
     font-family: var(--font-title);
     font-size: 13px;
+    font-weight: normal;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
