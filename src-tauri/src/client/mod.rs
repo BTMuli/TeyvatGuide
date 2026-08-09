@@ -9,7 +9,7 @@ use tauri::{AppHandle, LogicalSize, Manager, Size, WebviewWindowBuilder};
 use tauri_utils::config::WebviewUrl;
 use url::Url;
 
-static BBS_VERSION: &'static str = "2.111.0";
+static BBS_VERSION: &'static str = "2.112.0";
 
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) -> Result<(), String> {
