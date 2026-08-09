@@ -85,6 +85,19 @@ function handleClick(): void {
 }
 </script>
 <style lang="scss" scoped>
+.reward-icon {
+  position: relative;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.extra .reward-icon {
+  width: 32px;
+  height: 32px;
+}
+
 .sign-reward-cell {
   position: relative;
   display: flex;
@@ -150,32 +163,6 @@ function handleClick(): void {
   }
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 12px rgb(59 130 246 / 60%);
-    transform: scale(1);
-  }
-
-  50% {
-    box-shadow: 0 0 20px rgb(59 130 246 / 90%);
-    transform: scale(1.02);
-  }
-}
-
-.reward-icon {
-  position: relative;
-  z-index: 1;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.extra .reward-icon {
-  width: 32px;
-  height: 32px;
-}
-
 .reward-count {
   position: absolute;
   z-index: 0;
@@ -214,5 +201,18 @@ function handleClick(): void {
   color: var(--tgc-od-orange);
   font-family: var(--font-title);
   opacity: 0.4;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgb(59 130 246 / 60%);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgb(59 130 246 / 90%);
+    transform: scale(1.02);
+  }
 }
 </style>

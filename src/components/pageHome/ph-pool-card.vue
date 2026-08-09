@@ -223,6 +223,19 @@ async function toPool(): Promise<void> {
   box-shadow: 0 2px 4px var(--common-shadow-2);
 }
 
+.ph-pool-icon {
+  width: 60px;
+  height: 60px;
+
+  img {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
 .ph-pool-cover {
   position: relative;
   display: flex;
@@ -234,6 +247,12 @@ async function toPool(): Promise<void> {
   border-radius: 4px;
   cursor: pointer;
 
+  img {
+    width: 100%;
+    border-radius: 4px;
+    transition: all 0.5s;
+  }
+
   .empty {
     width: 64px;
     height: 64px;
@@ -242,12 +261,6 @@ async function toPool(): Promise<void> {
       width: 100%;
       height: 100%;
     }
-  }
-
-  img {
-    width: 100%;
-    border-radius: 4px;
-    transition: all 0.5s;
   }
 
   &:hover {
@@ -291,19 +304,6 @@ async function toPool(): Promise<void> {
 
   &::-webkit-scrollbar-thumb {
     background: var(--common-shadow-t-4);
-  }
-}
-
-.ph-pool-icon {
-  width: 60px;
-  height: 60px;
-
-  img {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    border-radius: 4px;
-    cursor: pointer;
   }
 }
 

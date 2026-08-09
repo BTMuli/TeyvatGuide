@@ -627,7 +627,7 @@ async function onDownload(): Promise<void> {
   border: 1px solid var(--tgc-od-white);
   border-radius: 4px;
   background-color: var(--common-shadow-2);
-  color: white;
+  color: #ffffffff;
   gap: 4px;
 }
 
@@ -643,7 +643,7 @@ async function onDownload(): Promise<void> {
   padding: 8px 16px;
   border-radius: 4px;
   background: rgb(0 0 0 / 70%);
-  color: #ffffff;
+  color: #ffffffff;
   font-size: 18px;
   font-weight: bold;
   pointer-events: none;

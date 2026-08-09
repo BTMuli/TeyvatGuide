@@ -59,6 +59,16 @@ async function share(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
+.tuc-ovt-list {
+  position: relative;
+  display: grid;
+  width: 100%;
+  padding-right: 4px;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  overflow-y: auto;
+}
+
 .tuc-ovt-box {
   position: relative;
   display: flex;
@@ -103,16 +113,6 @@ async function share(): Promise<void> {
   align-items: center;
   justify-content: center;
   column-gap: 8px;
-}
-
-.tuc-ovt-list {
-  position: relative;
-  display: grid;
-  width: 100%;
-  padding-right: 4px;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  overflow-y: auto;
 }
 
 .tuc-ovt-share {

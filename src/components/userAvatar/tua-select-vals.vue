@@ -181,13 +181,19 @@ function getTeamLabel(team: string): string {
   position: relative;
   display: flex;
   height: 20px;
-  place-items: center stretch;
   justify-content: center;
   padding: 0 8px;
   border-radius: 12px;
   column-gap: 4px;
   font-size: 12px;
   line-height: 20px;
+  place-items: center stretch;
+
+  img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
 
   &.pass {
     @include github-styles.github-tag-dark-gen(#98c379);
@@ -201,12 +207,6 @@ function getTeamLabel(team: string): string {
     img {
       filter: invert(0.5);
     }
-  }
-
-  img {
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
   }
 
   & + .tua-svs-item {

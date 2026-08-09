@@ -129,8 +129,12 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
   align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
-  border-radius: 4px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 12px;
   background-color: var(--box-bg-1);
+  box-shadow:
+    0 8px 24px #0000003d,
+    0 2px 8px #00000024;
   row-gap: 8px;
 }
 

@@ -235,7 +235,7 @@ function hasBuffEffect(buff: TGApp.Game.Combat.Buff): boolean {
   border-radius: 10px;
   background-color: var(--tgc-od-orange);
   box-shadow: 0 2px 4px var(--common-shadow-2);
-  color: white;
+  color: #ffffffff;
   font-size: 9px;
   font-weight: bold;
   line-height: 14px;

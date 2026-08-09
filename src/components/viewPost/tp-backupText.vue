@@ -52,7 +52,7 @@ console.log("tpBackupText", props.data.insert.backup_text, toRaw(props.data));
   width: fit-content;
   align-items: center;
   justify-content: center;
-  color: #00c3ff;
+  color: #00c3ffff;
   column-gap: 2px;
   cursor: pointer;
 

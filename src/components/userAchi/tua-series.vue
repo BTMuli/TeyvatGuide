@@ -98,6 +98,52 @@ function selectSeries(): void {
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
+.tuas-reward {
+  position: absolute;
+  z-index: 0;
+  top: -1px;
+  right: -2px;
+  height: 62px;
+
+  img {
+    height: 100%;
+    filter: grayscale(1);
+    object-fit: contain;
+    opacity: 0.3;
+    transition: filter 0.5s ease-in-out;
+
+    &.finish {
+      filter: unset;
+    }
+  }
+}
+
+.tuas-icon {
+  position: relative;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 5px;
+  border-radius: 50%;
+  background: var(--tgc-dark-7);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+  }
+}
+
 .tuas-card {
   @include github-styles.github-card;
 
@@ -159,52 +205,6 @@ function selectSeries(): void {
   font-family: var(--font-title);
   font-size: 10px;
   text-align: center;
-}
-
-.tuas-reward {
-  position: absolute;
-  z-index: 0;
-  top: -1px;
-  right: -2px;
-  height: 62px;
-
-  img {
-    height: 100%;
-    filter: grayscale(1);
-    object-fit: contain;
-    opacity: 0.3;
-    transition: filter 0.5s ease-in-out;
-
-    &.finish {
-      filter: unset;
-    }
-  }
-}
-
-.tuas-icon {
-  position: relative;
-  z-index: 1;
-  width: 40px;
-  height: 40px;
-  box-sizing: border-box;
-  flex-shrink: 0;
-  padding: 5px;
-  border-radius: 50%;
-  background: var(--tgc-dark-7);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .progress {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 40px;
-    height: 40px;
-  }
 }
 
 .tuas-content {

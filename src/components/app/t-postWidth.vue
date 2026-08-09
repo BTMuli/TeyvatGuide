@@ -62,19 +62,7 @@ function switchPostWidth(): void {
   }
 }
 
-@keyframes width-pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.15);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
+/* stylelint-disable no-descending-specificity */
 
 .dark .tpw2-box {
   border: 1px solid var(--common-shadow-1);
@@ -89,6 +77,8 @@ function switchPostWidth(): void {
   }
 }
 
+/* stylelint-enable no-descending-specificity */
+
 .tpw2-btn {
   position: relative;
   z-index: 1;
@@ -97,5 +87,19 @@ function switchPostWidth(): void {
   height: 20px;
   align-items: center;
   justify-content: center;
+}
+
+@keyframes width-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 </style>

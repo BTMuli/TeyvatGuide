@@ -58,6 +58,24 @@ const idColor = computed<string>(() => getOdStarColor(props.info.star));
 
 $pb-mi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
 
+.pb-mi-cnt {
+  @include github-styles.github-tag-dark-gen($pb-mi-base);
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  box-sizing: border-box;
+  padding-right: 4px;
+  padding-left: 12px;
+  border-top: unset;
+  border-right: unset;
+  border-bottom-left-radius: 12px;
+  font-family: var(--font-title);
+  font-size: 10px;
+  line-height: 12px;
+  text-align: center;
+}
+
 .pb-mi-box {
   position: relative;
   display: flex;
@@ -118,23 +136,5 @@ $pb-mi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   font-size: 8px;
   font-style: italic;
   opacity: 0.8;
-}
-
-.pb-mi-cnt {
-  @include github-styles.github-tag-dark-gen($pb-mi-base);
-
-  position: absolute;
-  top: 0;
-  right: 0;
-  box-sizing: border-box;
-  padding-right: 4px;
-  padding-left: 12px;
-  border-top: unset;
-  border-right: unset;
-  border-bottom-left-radius: 12px;
-  font-family: var(--font-title);
-  font-size: 10px;
-  line-height: 12px;
-  text-align: center;
 }
 </style>

@@ -92,6 +92,14 @@ async function share(): Promise<void> {
 }
 </script>
 <style lang="css" scoped>
+.tuc-ovs-content {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  overflow-y: auto;
+}
+
 .tuc-ovs-box {
   position: relative;
   display: flex;
@@ -135,13 +143,5 @@ async function share(): Promise<void> {
   font-size: 12px;
   opacity: 0.8;
   white-space: pre;
-}
-
-.tuc-ovs-content {
-  display: grid;
-  width: 100%;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  overflow-y: auto;
 }
 </style>

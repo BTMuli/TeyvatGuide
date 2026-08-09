@@ -106,6 +106,63 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   row-gap: 12px;
 }
 
+.best-dps-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: linear-gradient(to right, var(--box-bg-3), var(--box-bg-1));
+  color: var(--box-text-2);
+  column-gap: 4px;
+  font-family: var(--font-title);
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    transform: translateY(-4px);
+  }
+
+  span {
+    font-size: 14px;
+
+    &:last-child {
+      color: var(--tgc-yellow-1);
+    }
+  }
+}
+
+.dark .best-dps-item {
+  background: linear-gradient(to right, var(--box-bg-2) 100px, var(--box-bg-1));
+}
+
+.right-desc {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  row-gap: 12px;
+
+  span {
+    color: var(--box-text-1);
+    font-size: 12px;
+    text-align: left;
+    text-shadow:
+      1px 1px 0 var(--box-bg-2),
+      -1px -1px 0 var(--box-bg-2),
+      1px -1px 0 var(--box-bg-2),
+      -1px 1px 0 var(--box-bg-2);
+
+    :deep(span) {
+      font-weight: bold;
+    }
+  }
+}
+
 .top-title {
   position: relative;
   z-index: 1;
@@ -176,63 +233,6 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   align-items: center;
   justify-content: center;
   column-gap: 16px;
-}
-
-.best-dps-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-  background: linear-gradient(to right, var(--box-bg-3), var(--box-bg-1));
-  color: var(--box-text-2);
-  column-gap: 4px;
-  font-family: var(--font-title);
-
-  img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-    transform: translateY(-4px);
-  }
-
-  span {
-    font-size: 14px;
-
-    &:last-child {
-      color: var(--tgc-yellow-1);
-    }
-  }
-}
-
-.dark .best-dps-item {
-  background: linear-gradient(to right, var(--box-bg-2) 100px, var(--box-bg-1));
-}
-
-.right-desc {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  row-gap: 12px;
-
-  span {
-    color: var(--box-text-1);
-    font-size: 12px;
-    text-align: left;
-    text-shadow:
-      1px 1px 0 var(--box-bg-2),
-      -1px -1px 0 var(--box-bg-2),
-      1px -1px 0 var(--box-bg-2),
-      -1px 1px 0 var(--box-bg-2);
-
-    :deep(span) {
-      font-weight: bold;
-    }
-  }
 }
 
 .monster-icon {

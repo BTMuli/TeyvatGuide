@@ -106,10 +106,6 @@ async function switchCollect(): Promise<void> {
     color: var(--btn-text);
   }
 
-  &:hover:not(.active) {
-    background: var(--common-shadow-1);
-  }
-
   &:hover {
     box-shadow: 2px 4px 12px var(--common-shadow-4);
     transform: scale(1.15);
@@ -118,7 +114,13 @@ async function switchCollect(): Promise<void> {
   &:active {
     transform: scale(0.95);
   }
+
+  &:hover:not(.active) {
+    background: var(--common-shadow-1);
+  }
 }
+
+/* stylelint-disable no-descending-specificity */
 
 .dark .tbc-box {
   border: 1px solid var(--common-shadow-1);
@@ -132,6 +134,8 @@ async function switchCollect(): Promise<void> {
     }
   }
 }
+
+/* stylelint-enable no-descending-specificity */
 
 .tbc-btn {
   position: relative;

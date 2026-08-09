@@ -187,6 +187,8 @@ function updateFormattedTime(): void {
     overflow: hidden;
     text-overflow: ellipsis;
 
+    /* stylelint-disable no-descending-specificity */
+
     &.clickable {
       cursor: pointer;
 
@@ -194,6 +196,8 @@ function updateFormattedTime(): void {
         font-style: italic;
       }
     }
+
+    /* stylelint-enable no-descending-specificity */
   }
 }
 </style>

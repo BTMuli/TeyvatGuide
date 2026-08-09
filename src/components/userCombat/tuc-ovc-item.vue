@@ -25,6 +25,15 @@ type TucOvcItemProps = { item: TGApp.Game.Combat.CharMaster };
 const props = defineProps<TucOvcItemProps>();
 </script>
 <style lang="scss" scoped>
+.tuc-ovci-icon {
+  position: absolute;
+  z-index: 2;
+  top: 3%;
+  left: 0;
+  width: 100%;
+  border-radius: 50%;
+}
+
 .tuc-ovci-box {
   position: relative;
   display: flex;
@@ -51,15 +60,6 @@ const props = defineProps<TucOvcItemProps>();
   left: 0;
   width: 100%;
   height: 100%;
-}
-
-.tuc-ovci-icon {
-  position: absolute;
-  z-index: 2;
-  top: 3%;
-  left: 0;
-  width: 100%;
-  border-radius: 50%;
 }
 
 .tuc-ovci-front {
@@ -92,7 +92,7 @@ const props = defineProps<TucOvcItemProps>();
 .tuc-ovci-title {
   position: relative;
   z-index: 4;
-  color: #a67754;
+  color: #a67754ff;
   font-family: var(--font-title);
   font-size: 14px;
 }

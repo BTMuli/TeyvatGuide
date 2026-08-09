@@ -230,6 +230,76 @@ const hasRight = computed<boolean>(() => hlSecond5.value || hlSecond4.value);
   align-items: stretch;
 }
 
+/* 独立中点圆点（直接子元素） */
+
+.gro-cell-timeline > .gro-cell-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  align-self: center;
+  border-radius: 50%;
+  background: var(--common-shadow-1);
+  opacity: 0.35;
+
+  &.dot-hl-5 {
+    background: #d75050;
+    box-shadow: 0 0 3px rgb(215 80 80 / 50%);
+    opacity: 1;
+  }
+
+  &.dot-hl-4 {
+    background: #8080e6;
+    box-shadow: 0 0 3px rgb(128 128 230 / 40%);
+    opacity: 1;
+  }
+}
+
+/* 段内圆点和连线 */
+
+.gro-cell-seg .gro-cell-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--common-shadow-1);
+  opacity: 0.35;
+}
+
+/* 中点列内的圆点 */
+
+.gro-cell-timeline > .gro-cell-col > .gro-cell-dot {
+  display: block;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--common-shadow-1);
+  opacity: 0.35;
+
+  &.dot-hl-5 {
+    background: #d75050;
+    box-shadow: 0 0 3px rgb(215 80 80 / 50%);
+    opacity: 1;
+  }
+
+  &.dot-hl-4 {
+    background: #8080e6;
+    box-shadow: 0 0 3px rgb(128 128 230 / 40%);
+    opacity: 1;
+  }
+}
+
+.gro-cell-line {
+  min-width: 8px;
+  height: 2px;
+  flex: 1;
+  border-radius: 1px;
+  background: var(--common-shadow-1);
+  opacity: 0.2;
+}
+
 /* 段位：相对定位容器，UP和日期绝对定位于段内，内容横向排列 */
 
 .gro-cell-seg {
@@ -295,81 +365,11 @@ const hasRight = computed<boolean>(() => hlSecond5.value || hlSecond4.value);
   border-radius: 3px;
   margin-left: 2px;
   background: #e6a23c;
-  color: #ffffff;
+  color: #ffffffff;
   font-size: 8px;
   font-weight: 600;
   line-height: 1.4;
   vertical-align: middle;
-}
-
-/* 独立中点圆点（直接子元素） */
-
-.gro-cell-timeline > .gro-cell-dot {
-  display: block;
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  align-self: center;
-  border-radius: 50%;
-  background: var(--common-shadow-1);
-  opacity: 0.35;
-
-  &.dot-hl-5 {
-    background: #d75050;
-    box-shadow: 0 0 3px rgb(215 80 80 / 50%);
-    opacity: 1;
-  }
-
-  &.dot-hl-4 {
-    background: #8080e6;
-    box-shadow: 0 0 3px rgb(128 128 230 / 40%);
-    opacity: 1;
-  }
-}
-
-/* 中点列内的圆点 */
-
-.gro-cell-timeline > .gro-cell-col > .gro-cell-dot {
-  display: block;
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--common-shadow-1);
-  opacity: 0.35;
-
-  &.dot-hl-5 {
-    background: #d75050;
-    box-shadow: 0 0 3px rgb(215 80 80 / 50%);
-    opacity: 1;
-  }
-
-  &.dot-hl-4 {
-    background: #8080e6;
-    box-shadow: 0 0 3px rgb(128 128 230 / 40%);
-    opacity: 1;
-  }
-}
-
-/* 段内圆点和连线 */
-
-.gro-cell-seg .gro-cell-dot {
-  display: block;
-  width: 6px;
-  height: 6px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--common-shadow-1);
-  opacity: 0.35;
-}
-
-.gro-cell-line {
-  min-width: 8px;
-  height: 2px;
-  flex: 1;
-  border-radius: 1px;
-  background: var(--common-shadow-1);
-  opacity: 0.2;
 }
 
 /* 圆点+日期垂直列：圆点居中对齐，日期绝对定位到下方 */

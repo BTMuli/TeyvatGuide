@@ -379,14 +379,14 @@ async function tryExecAllAccounts(): Promise<void> {
   row-gap: 8px;
 }
 
-.run-all-btn + .run-all-btn {
-  margin-left: 8px;
-}
-
 .run-all-btn,
 .us-test-btn {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
+}
+
+.run-all-btn + .run-all-btn {
+  margin-left: 8px;
 }
 
 .us-test-btn {

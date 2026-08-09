@@ -185,6 +185,8 @@ function stopTimer(): void {
     overflow: hidden;
     text-overflow: ellipsis;
 
+    /* stylelint-disable no-descending-specificity */
+
     &.clickable {
       cursor: pointer;
 
@@ -192,6 +194,8 @@ function stopTimer(): void {
         font-style: italic;
       }
     }
+
+    /* stylelint-enable no-descending-specificity */
   }
 }
 </style>

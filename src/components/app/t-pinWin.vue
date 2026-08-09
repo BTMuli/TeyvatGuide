@@ -66,19 +66,7 @@ async function switchPin(): Promise<void> {
   }
 }
 
-@keyframes pin-pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.15);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
+/* stylelint-disable no-descending-specificity */
 
 .dark .tpw-box {
   border: 1px solid var(--common-shadow-1);
@@ -93,6 +81,8 @@ async function switchPin(): Promise<void> {
   }
 }
 
+/* stylelint-enable no-descending-specificity */
+
 .tpw-btn {
   position: relative;
   z-index: 1;
@@ -102,5 +92,19 @@ async function switchPin(): Promise<void> {
   align-items: center;
   justify-content: center;
   rotate: 30deg;
+}
+
+@keyframes pin-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 </style>
