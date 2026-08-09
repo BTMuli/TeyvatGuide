@@ -12,6 +12,7 @@
 
 - TypeScript、Vue 或类型声明：读取 `.agents/rules/typescript-rules.md`；需要完整模式时使用
   `.agents/skills/typescript-standards/SKILL.md`。
+- Vue 组件、组合式 API 或 Vue 现代化改造：使用 `.agents/skills/vue3-standards/SKILL.md`。
 - SQLite：读取 `.agents/rules/sqlite-rules.md`。
 - Sentry 错误、事件、堆栈、版本回归或线上修复验证：使用
   `.agents/skills/sentry-mcp/SKILL.md`，默认只读查询；变更 issue 状态或项目配置前须取得明确授权。

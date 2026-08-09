@@ -1,0 +1,4 @@
+interface:
+  default_prompt: "Use $vue3-standards to implement or modernize this Vue 3 component."
+  display_name: "Vue 3 现代开发规范"
+  short_description: "使用 Vue 3.5、TypeScript 与现代 SFC 写法开发组件"
