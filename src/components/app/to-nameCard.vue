@@ -1,6 +1,6 @@
 <!-- 名片详情浮窗 -->
 <template>
-  <TOverlay v-if="props.data" v-model="visible" :topOffset>
+  <TOverlay v-if="props.data" v-model="visible" :top-offset>
     <div class="ton-container">
       <slot name="left"></slot>
       <div class="ton-box">
@@ -15,7 +15,9 @@
           <span>{{ parseNameCard(props.data.desc) }}</span>
           <span>获取途径：{{ props.data.source }}</span>
         </div>
-        <TwnTypeTag :type="props.data.type" class="ton-type" />
+        <div :class="getNameCardTypeClass(props.data.type)" class="ton-type">
+          {{ props.data.type }}
+        </div>
         <div class="ton-sign">ID:{{ props.data.id }} | TeyvatGuide v{{ version }}</div>
         <v-btn
           :loading="loading"
@@ -34,7 +36,6 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import TwnTypeTag from "@comp/pageWiki/twn-type-tag.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/TGShare.js";
 import { onMounted, ref } from "vue";
@@ -51,6 +52,23 @@ const version = ref<string>("");
 onMounted(async () => {
   version.value = await getVersion();
 });
+
+function getNameCardTypeClass(type: string): string {
+  switch (type) {
+    case "成就":
+      return "achi";
+    case "好感":
+      return "fetter";
+    case "活动":
+      return "act";
+    case "纪行":
+      return "journey";
+    case "声望":
+      return "pop";
+    default:
+      return "default";
+  }
+}
 
 function parseNameCard(desc: string): string {
   let array = [];
@@ -153,7 +171,7 @@ async function shareNameCard(): Promise<void> {
   loading.value = false;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .ton-container {
   position: relative;
   display: flex;
@@ -165,16 +183,20 @@ async function shareNameCard(): Promise<void> {
 .ton-box {
   position: relative;
   overflow: hidden;
-  width: 800px;
-  height: 400px;
-  border-radius: 4px;
+  width: min(840px, calc(100vw - 160px));
+  border: 1px solid #d1d1d1ff;
+  border-radius: 12px;
+  aspect-ratio: 21 / 10;
+  box-shadow:
+    0 8px 24px #0000003d,
+    0 2px 8px #00000024;
 }
 
 .ton-bg {
   position: absolute;
   width: 100%;
   height: 100%;
-  border-radius: 4px;
+  border-radius: 12px;
 }
 
 .ton-content {
@@ -189,7 +211,7 @@ async function shareNameCard(): Promise<void> {
   align-items: flex-start;
   justify-content: flex-end;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 12px;
   backdrop-filter: blur(5px);
   background: #00000040;
   color: var(--tgc-white-1);
@@ -197,6 +219,7 @@ async function shareNameCard(): Promise<void> {
   :first-child {
     font-family: var(--font-title);
     font-size: 20px;
+    font-weight: normal;
     text-shadow: 0 0 5px #000000cc;
   }
 
@@ -212,6 +235,13 @@ async function shareNameCard(): Promise<void> {
   }
 }
 
+.dark .ton-box {
+  border-color: #666666ff;
+  box-shadow:
+    0 8px 24px #0000007a,
+    0 2px 8px #00000052;
+}
+
 .dark .ton-content {
   background: #00000080;
 }
@@ -220,7 +250,45 @@ async function shareNameCard(): Promise<void> {
   position: absolute;
   top: 10px;
   left: 10px;
+  padding: 0 4px;
+  border-radius: 4px;
   font-size: 14px;
+
+  &.achi {
+    border: 1px solid #4db6ac4d;
+    background: #4db6ac2e;
+    color: #4db6acff;
+  }
+
+  &.fetter {
+    border: 1px solid #ba68c84d;
+    background: #ba68c82e;
+    color: #ba68c8ff;
+  }
+
+  &.act {
+    border: 1px solid #81c7844d;
+    background: #81c7842e;
+    color: #81c784ff;
+  }
+
+  &.journey {
+    border: 1px solid #64b5f64d;
+    background: #64b5f62e;
+    color: #64b5f6ff;
+  }
+
+  &.pop {
+    border: 1px solid #e573734d;
+    background: #e573732e;
+    color: #e57373ff;
+  }
+
+  &.default {
+    border: 1px solid #ffb74d4d;
+    background: #ffb74d2e;
+    color: #ffb74dff;
+  }
 }
 
 .ton-sign {
@@ -238,5 +306,13 @@ async function shareNameCard(): Promise<void> {
   border: 1px solid var(--tgc-white-1);
   border-radius: 4px;
   color: var(--tgc-white-1);
+}
+
+@media (width <= 720px) {
+  .ton-box {
+    width: calc(100vw - 112px);
+    min-height: min(440px, calc(100vh - 32px));
+    aspect-ratio: auto;
+  }
 }
 </style>
