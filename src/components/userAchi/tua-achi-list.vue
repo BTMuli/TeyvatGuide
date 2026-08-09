@@ -46,17 +46,12 @@ import { AppAchievementSeriesData, AppNameCardsData } from "@/data/index.js";
 type TuaAchiListProps = {
   uid: number;
   hideFin: boolean;
-  series?: number;
   search?: string;
-  isSearch: boolean;
-};
-type TuaAchiListEmits = {
-  (e: "update:series", v: number): void;
-  (e: "update:isSearch", v: boolean): false;
 };
 
 const props = defineProps<TuaAchiListProps>();
-const emits = defineEmits<TuaAchiListEmits>();
+const series = defineModel<number>("series", { required: true });
+const isSearch = defineModel<boolean>("isSearch", { required: true });
 
 const nameCard = ref<string>();
 const showNc = ref<boolean>(false);
@@ -76,8 +71,8 @@ const renderAchi = computed<Array<TGApp.App.Achievement.RenderItem>>(() => {
 
 onMounted(async () => await loadAchi());
 
-watch(() => [props.search, props.isSearch], searchAchi);
-watch(() => [props.series, props.uid], loadAchi);
+watch(() => [props.search, isSearch.value], searchAchi);
+watch(() => [series.value, props.uid], loadAchi);
 
 function handleSearch(kw: string): void {
   searchWd.value = kw;
@@ -85,16 +80,16 @@ function handleSearch(kw: string): void {
 }
 
 async function searchAchi(): Promise<void> {
-  if (!props.isSearch) return;
+  if (!isSearch.value) return;
   if (!props.search) {
-    achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
+    achievements.value = await TSUserAchi.getAchievements(props.uid, series.value);
     showSnackbar.success("已重置");
-    emits("update:isSearch", false);
+    isSearch.value = false;
     return;
   }
   if (props.search === "") {
     showSnackbar.warn("请输入搜索内容");
-    emits("update:isSearch", false);
+    isSearch.value = false;
     return;
   }
   const searchRes = await TSUserAchi.searchAchi(props.uid, props.search);
@@ -104,18 +99,18 @@ async function searchAchi(): Promise<void> {
     ncData.value = undefined;
     achievements.value = searchRes;
     showSnackbar.success(`成功获取${achievements.value.length}条成就`);
-    emits("update:series", -1);
+    series.value = -1;
     await nextTick();
   } else {
     showSnackbar.warn("未搜索到相关成就");
   }
-  emits("update:isSearch", false);
+  isSearch.value = false;
 }
 
 async function loadAchi(): Promise<void> {
-  if (props.isSearch) return;
-  achievements.value = await TSUserAchi.getAchievements(props.uid, props.series);
-  const ov = await TSUserAchi.getOverview(props.uid, props.series);
+  if (isSearch.value) return;
+  achievements.value = await TSUserAchi.getAchievements(props.uid, series.value);
+  const ov = await TSUserAchi.getOverview(props.uid, series.value);
   isFinish.value = ov.fin === ov.total;
   if (!selectedAchi.value && achievements.value.length > 0) {
     selectedAchi.value = achievements.value[0];
@@ -123,7 +118,7 @@ async function loadAchi(): Promise<void> {
     const index = achievements.value.findIndex((a) => a.id === selectedAchi.value!.id);
     if (index === -1) selectedAchi.value = achievements.value[0];
   }
-  const seriesFind = AppAchievementSeriesData.find((s) => s.id === props.series);
+  const seriesFind = AppAchievementSeriesData.find((s) => s.id === series.value);
   if (!seriesFind || seriesFind.card === "") {
     nameCard.value = undefined;
     ncData.value = undefined;
@@ -142,7 +137,7 @@ function selectAchi(data: TGApp.App.Achievement.RenderItem): void {
 }
 
 function selectSeries(data: number): void {
-  emits("update:series", data);
+  series.value = data;
 }
 
 function switchAchiInfo(next: boolean): void {

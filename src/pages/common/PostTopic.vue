@@ -113,7 +113,7 @@
   </v-app-bar>
   <div :class="{ grid: postGridMode }" class="post-topic-grid">
     <div v-for="post in posts" :key="post.post.post_id">
-      <TPostCard :listMode="!postGridMode" :post @onUserClick="handleUserClick" />
+      <TPostCard :listMode="!postGridMode" :post @user-click="handleUserClick" />
     </div>
   </div>
   <VpOverlaySearch v-model="showSearch" :gid="disGid" :keyword="search" topOffset="112px" />

@@ -62,12 +62,12 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, reactive, type Ref, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, reactive, ref, shallowRef, type ShallowRef, watch } from "vue";
 import { useRoute } from "vue-router";
 
-type PostData = Record<TGApp.BBS.Post.NewsTypeEnum, Ref<Array<TGApp.BBS.Post.FullData>>>;
+type PostData = Record<TGApp.BBS.Post.NewsTypeEnum, Array<TGApp.BBS.Post.FullData>>;
 type RawItem = { isLast: boolean; name: string; lastId: number };
-type RawData = Record<TGApp.BBS.Post.NewsTypeEnum, Ref<RawItem>>;
+type RawData = Record<TGApp.BBS.Post.NewsTypeEnum, RawItem>;
 
 const { recentNewsType } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
@@ -85,15 +85,15 @@ const showList = ref<boolean>(false);
 const showSearch = ref<boolean>(false);
 const search = ref<string>("");
 
-const postData = reactive<PostData>(
-  <PostData>(
+const postData: PostData = reactive(
+  <Record<TGApp.BBS.Post.NewsTypeEnum, ShallowRef<Array<TGApp.BBS.Post.FullData>>>>(
     Object.fromEntries(
       bbsEnum.post.newsTypeList.map((v) => [v, shallowRef<Array<TGApp.BBS.Post.FullData>>([])]),
     )
   ),
 );
-const rawData = reactive<RawData>(
-  <RawData>Object.fromEntries(
+const rawData: RawData = reactive(
+  <Record<TGApp.BBS.Post.NewsTypeEnum, ShallowRef<RawItem>>>Object.fromEntries(
     bbsEnum.post.newsTypeList.map((type) => [
       type,
       shallowRef<RawItem>({

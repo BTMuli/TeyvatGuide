@@ -100,7 +100,7 @@
     :data="curMaterial"
     :uid="curUid"
     topOffset="112px"
-    @updateDB="handleUpdate"
+    @update-db="handleUpdate"
   >
     <template #left>
       <v-btn

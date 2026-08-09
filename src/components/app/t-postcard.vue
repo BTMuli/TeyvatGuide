@@ -176,8 +176,8 @@ type TPostCardProps = {
   listMode?: boolean;
 };
 type TPostCardEmits = {
-  "onSelected": [v: string];
-  "onUserClick": [u: TGApp.BBS.Post.User, g: number];
+  selected: [v: string];
+  userClick: [u: TGApp.BBS.Post.User, g: number];
 };
 type RenderForum = { name: string; icon: string; id: number };
 type RenderStatus = { stat: number; label: string; color: string };
@@ -402,7 +402,7 @@ watch(showTagsMenu, (val) => {
 
 function trySelect(): void {
   if (props.selectMode) {
-    emits("onSelected", props.post.post.post_id);
+    emits("selected", props.post.post.post_id);
     isSelected.value = !isSelected.value;
   }
 }
@@ -521,7 +521,7 @@ async function toForum(forum: RenderForum): Promise<void> {
 function onUserClick(): void {
   if (props.selectMode) return;
   if (!card.value || card.value.user === null) return;
-  emits("onUserClick", card.value.user, props.post.post.game_id);
+  emits("userClick", card.value.user, props.post.post.game_id);
 }
 </script>
 <style lang="scss" scoped>

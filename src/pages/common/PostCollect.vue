@@ -123,8 +123,8 @@
         :list-mode="!postGridMode"
         :post
         :select-mode="selectedMode"
-        @onSelected="handleSelected"
-        @onUserClick="handleUserClick"
+        @selected="handleSelected"
+        @user-click="handleUserClick"
       />
     </div>
   </div>

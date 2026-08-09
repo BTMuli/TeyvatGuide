@@ -16,7 +16,7 @@
           :class="{ selected: index === props.collection.cur - 1 }"
           :post
           class="tpoc-item"
-          @onUserClick="toUserProfile"
+          @user-click="toUserProfile"
         />
       </div>
     </div>

@@ -12,7 +12,7 @@
         </div>
         <div class="twg-actions">
           <v-text-field
-            :model-value="props.search"
+            v-model="search"
             :placeholder="props.searchPlaceholder"
             aria-label="按名称搜索"
             class="twg-search"
@@ -21,7 +21,6 @@
             hide-details
             prepend-inner-icon="mdi-magnify"
             variant="outlined"
-            @update:model-value="updateSearch"
           />
           <v-btn
             class="twg-filter-btn"
@@ -62,24 +61,18 @@ type TwgCatalogProps = {
   icon: string;
   title: string;
   unit: string;
-  search?: string | null;
   searchPlaceholder?: string;
 };
 type TwgCatalogEmits = {
   filter: [];
   reset: [];
-  "update:search": [value: string | null];
 };
 
 const props = withDefaults(defineProps<TwgCatalogProps>(), {
-  search: "",
   searchPlaceholder: "搜索名称",
 });
 const emits = defineEmits<TwgCatalogEmits>();
-
-function updateSearch(value: string | null): void {
-  emits("update:search", value);
-}
+const search = defineModel<string | null>("search", { required: true });
 </script>
 <style lang="scss" scoped>
 .twg-shell {

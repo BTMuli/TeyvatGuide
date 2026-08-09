@@ -46,7 +46,7 @@
           :listMode="!gridMode"
           :post
           class="tops-item"
-          @onUserClick="toUserProfile"
+          @user-click="toUserProfile"
         />
       </div>
     </div>

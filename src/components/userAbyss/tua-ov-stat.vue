@@ -99,7 +99,7 @@ import hutao from "@Hutao/index.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { computed, reactive, ref, type ShallowRef, shallowRef, watch } from "vue";
+import { computed, reactive, ref, shallowRef, watch } from "vue";
 
 type AbyssTab = "use" | "up" | "team" | "hold";
 type AbyssList = Array<{ label: string; value: AbyssTab; icon: string }>;
@@ -112,7 +112,7 @@ type AbyssDataItemType<T extends AbyssTab> = T extends "use"
       : T extends "hold"
         ? TGApp.Plugins.Hutao.Abyss.PeriodData<Array<TGApp.Plugins.Hutao.Abyss.AvatarHold>>
         : null;
-type AbyssData = { [key in AbyssTab]: ShallowRef<AbyssDataItemType<key> | null> };
+type AbyssData = { [key in AbyssTab]: AbyssDataItemType<key> | null };
 
 const abyssList: Readonly<AbyssList> = [
   { label: "角色使用", value: "use", icon: "mdi-chart-donut" },
@@ -127,7 +127,7 @@ const tab = shallowRef<AbyssTab>("use");
 const floor = ref<number>(12);
 const overview =
   shallowRef<TGApp.Plugins.Hutao.Abyss.PeriodData<TGApp.Plugins.Hutao.Abyss.OverviewData>>();
-const abyssData = reactive<AbyssData>({
+const abyssData: AbyssData = reactive({
   use: shallowRef<AbyssDataItemType<"use"> | null>(null),
   up: shallowRef<AbyssDataItemType<"up"> | null>(null),
   team: shallowRef<AbyssDataItemType<"team"> | null>(null),

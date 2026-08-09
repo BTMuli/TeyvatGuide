@@ -83,7 +83,7 @@ type PboMaterialProps = {
   topOffset?: string;
   uid: number;
 };
-type PboMaterialEmits = { updateDB: [v: MaterialInfo] };
+type PboMaterialEmits = { updateDb: [v: MaterialInfo] };
 
 const props = withDefaults(defineProps<PboMaterialProps>(), {
   cmh: "600px",
@@ -139,7 +139,7 @@ async function tryEdit(): Promise<void> {
     true,
   );
   await refreshDb();
-  emits("updateDB", { info: props.data.info, tb: dbInfo.value });
+  emits("updateDb", { info: props.data.info, tb: dbInfo.value });
   showSnackbar.success("成功更新记录");
 }
 
@@ -162,7 +162,7 @@ async function tryDelete(): Promise<void> {
   );
   await TSUserBagMaterial.deleteRecord(props.uid, dbInfo.value.id, dbInfo.value.count);
   await refreshDb();
-  emits("updateDB", { info: props.data.info, tb: dbInfo.value });
+  emits("updateDb", { info: props.data.info, tb: dbInfo.value });
   showSnackbar.success("成功删除记录");
 }
 </script>

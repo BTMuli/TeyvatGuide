@@ -73,7 +73,6 @@
 import { computed } from "vue";
 
 type UcLevelSliderProps = {
-  current: number;
   currentEditable?: boolean;
   min?: number;
   max: number;
@@ -90,26 +89,26 @@ const props = withDefaults(defineProps<UcLevelSliderProps>(), {
   compact: false,
   single: false,
 });
-const emit = defineEmits<{ "update:current": [value: number] }>();
 
+const current = defineModel<number>("current", { required: true });
 const model = defineModel<number>({ required: true });
 
 const reachableMax = computed<number>(() =>
-  Math.min(props.max, Math.max(props.min, props.current, props.limitMax ?? props.max)),
+  Math.min(props.max, Math.max(props.min, current.value, props.limitMax ?? props.max)),
 );
 const trackLevels = computed<Array<number>>(() =>
   Array.from({ length: Math.max(props.max - props.min, 0) }, (_, index) => props.min + index + 1),
 );
 
 function updateValue(value: number): void {
-  const lowerBound = props.single ? props.min : props.current;
+  const lowerBound = props.single ? props.min : current.value;
   model.value = Math.max(lowerBound, Math.min(value, reachableMax.value));
 }
 
 function updateRange(value: [number, number]): void {
   const nextCurrent = Math.min(Math.max(value[0], props.min), reachableMax.value);
   const nextTarget = Math.min(Math.max(value[1], nextCurrent), reachableMax.value);
-  emit("update:current", nextCurrent);
+  current.value = nextCurrent;
   model.value = nextTarget;
 }
 

@@ -17,7 +17,7 @@
           :key="post.post.post_id"
           :post
           class="vp-of-list-item"
-          @onUserClick="toUserProfile"
+          @user-click="toUserProfile"
         />
       </div>
     </div>
