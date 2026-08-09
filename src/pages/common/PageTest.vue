@@ -18,7 +18,7 @@
       <v-btn class="test-btn" @click="test()">测试</v-btn>
     </div>
     <div style="height: 400px">
-      <gro-rerun />
+      <GroRerun />
     </div>
   </div>
   <VpReplyDebug v-model="showReply" />

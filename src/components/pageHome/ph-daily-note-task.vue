@@ -18,7 +18,7 @@
       <div class="pdb-task-content">
         <PhDnTr v-for="(reward, i) in props.task?.task_rewards" :key="i" :reward />
         <template v-if="attendanceVisible">
-          <PhDnAr v-for="(reward, i) in props.task?.attendance_rewards" :key="i" :reward="reward" />
+          <PhDnAr v-for="(reward, i) in props.task?.attendance_rewards" :key="i" :reward />
         </template>
       </div>
     </div>

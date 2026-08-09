@@ -6,7 +6,7 @@
       key="all"
       :aria-pressed="isAllSelected"
       :class="{ selected: isAllSelected }"
-      :size="props.size"
+      :size
       class="uav-scb-all"
       title="全部"
       variant="elevated"
@@ -23,7 +23,7 @@
         :key="item.value"
         :aria-pressed="selected.includes(item.value)"
         :class="selected.includes(item.value) ? 'selected' : ''"
-        :size="props.size"
+        :size
         :title="item.title"
         :value="item.value"
         class="uav-scb-item"

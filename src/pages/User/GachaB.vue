@@ -77,10 +77,10 @@
     </v-tabs>
     <v-window v-model="tab" class="gb-window">
       <v-window-item class="gb-window-item" value="overview">
-        <gbr-overview v-model="gachaListCur" />
+        <GbrOverview v-model="gachaListCur" />
       </v-window-item>
       <v-window-item class="gb-window-item" value="table">
-        <gbr-table v-model="gachaListCur" />
+        <GbrTable v-model="gachaListCur" />
       </v-window-item>
     </v-window>
   </div>

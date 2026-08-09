@@ -30,7 +30,7 @@
               :class="{ selected: item.uid === curAccount?.uid }"
               class="us-select-item"
               v-bind="props"
-              @click="() => (curAccount = item)"
+              @click="curAccount = item"
             >
               <img :src="item.brief.avatar" alt="icon" />
               <div class="us-si-content">

@@ -23,15 +23,15 @@
         <!-- 日常 -->
         <div class="dni-row col-4">
           <PhDailyNoteResin
-            :current-resin="props.data.current_resin"
-            :max-resin="props.data.max_resin"
-            :recovery-time="props.data.resin_recovery_time"
+            :currentResin="props.data.current_resin"
+            :maxResin="props.data.max_resin"
+            :recoveryTime="props.data.resin_recovery_time"
           />
           <PhDailyNoteTask :task="props.data.daily_task" />
           <PhDailyNoteCoin
-            :current-coin="props.data.current_home_coin"
-            :max-coin="props.data.max_home_coin"
-            :recovery-time="props.data.home_coin_recovery_time"
+            :currentCoin="props.data.current_home_coin"
+            :maxCoin="props.data.max_home_coin"
+            :recoveryTime="props.data.home_coin_recovery_time"
           />
           <PhDailyNoteWeekAct :wap="props.data.week_active_progress" />
         </div>
@@ -40,8 +40,8 @@
           <PhDailyNoteQuest :quest="props.data.archon_quest_progress" />
           <PhDailyNoteTransformer :trans="props.data.transformer" />
           <PhDailyNoteBoss
-            :remain-resin-discount-num="props.data.remain_resin_discount_num"
-            :resin-discount-num-limit="props.data.resin_discount_num_limit"
+            :remainResinDiscountNum="props.data.remain_resin_discount_num"
+            :resinDiscountNumLimit="props.data.resin_discount_num_limit"
           />
         </div>
       </div>

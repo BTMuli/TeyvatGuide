@@ -97,7 +97,7 @@
           </v-btn>
           <v-btn
             :disabled="selectedCount === 0"
-            :loading="loading"
+            :loading
             color="var(--tgc-od-green)"
             prepend-icon="mdi-content-save-check-outline"
             variant="tonal"

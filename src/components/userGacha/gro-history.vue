@@ -13,7 +13,7 @@
         :value="item.tab"
         class="gro-pools"
       >
-        <UgHisCard v-for="pool in item.value" :key="pool.order" :pool="pool" :uid="props.uid" />
+        <UgHisCard v-for="pool in item.value" :key="pool.order" :pool :uid />
       </v-window-item>
     </v-window>
   </div>
@@ -28,7 +28,7 @@ import { AppGachaData } from "@/data/index.js";
 type GroHistoryMap = { tab: string; value: Array<TGApp.App.Gacha.PoolItem> };
 type GroHistoryProps = { uid?: string };
 
-const props = defineProps<GroHistoryProps>();
+defineProps<GroHistoryProps>();
 
 const historyTab = ref<string>("");
 const tabList = shallowRef<Array<GroHistoryMap>>([]);

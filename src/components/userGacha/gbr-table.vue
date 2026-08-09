@@ -1,12 +1,6 @@
 <!-- 颂愿数据表格 -->
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="props.modelValue"
-    class="gbr-t-box"
-    fixed-footer
-    fixed-header
-  >
+  <v-data-table :headers :items="props.modelValue" class="gbr-t-box" fixed-footer fixed-header>
     <template v-slot:item="{ item }">
       <tr class="gbr-t-tr">
         <td>{{ item.time }}</td>

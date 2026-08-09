@@ -8,7 +8,7 @@
       </div>
       <div class="tog-divider" />
       <div class="tog-mid">
-        <qrcode-vue
+        <QrcodeVue
           v-if="codeUrl"
           :background="'var(--tgc-white-1)'"
           :foreground="'var(--tgc-dark-7)'"

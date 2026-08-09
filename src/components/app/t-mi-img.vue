@@ -1,14 +1,7 @@
 <template>
-  <img
-    v-if="localUrl"
-    :alt="props.alt"
-    :class="props.class"
-    :src="localUrl"
-    :title="props.title"
-    @click="emits('click')"
-  />
+  <img v-if="localUrl" :alt :class="props.class" :src="localUrl" :title @click="emits('click')" />
   <div v-else class="progress">
-    <v-progress-circular :size="props.size" color="blue" indeterminate />
+    <v-progress-circular :size color="blue" indeterminate />
   </div>
 </template>
 <script lang="ts" setup>

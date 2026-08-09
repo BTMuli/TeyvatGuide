@@ -17,7 +17,7 @@
           thumb-color="var(--tgc-od-red)"
           thumb-label="always"
           @end="handleSliderEnd"
-          @start="() => (clickOuter = false)"
+          @start="clickOuter = false"
         />
         <v-number-input
           v-model="quality"

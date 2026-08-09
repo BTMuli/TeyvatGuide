@@ -1,12 +1,6 @@
 <!-- todo 优化，增加筛选功能 -->
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="props.modelValue"
-    fixed-header
-    fixed-footer
-    class="ua-gt-box"
-  >
+  <v-data-table :headers :items="props.modelValue" fixed-header fixed-footer class="ua-gt-box">
     <template v-slot:item="{ item }">
       <tr class="ua-gt-tr">
         <td>{{ item.time }}</td>

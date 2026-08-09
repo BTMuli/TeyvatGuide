@@ -4,9 +4,9 @@
     v-model="visible"
     :data="props.data.info"
     eyebrow="背包物品"
-    :share-caption="shareCaption"
-    :share-file-name="shareFileName"
-    :share-scale="shareScale"
+    :shareCaption
+    :shareFileName
+    :shareScale
     :cmh
     :topOffset
   >
@@ -23,12 +23,7 @@
       </span>
     </template>
     <template #convert>
-      <PboConvert
-        v-for="item in props.data.info.convert"
-        :key="item.id"
-        :data="item"
-        :uid="props.uid"
-      />
+      <PboConvert v-for="item in props.data.info.convert" :key="item.id" :data="item" :uid />
     </template>
     <template #after-content>
       <section v-if="showRecord" class="pbom-record-panel">

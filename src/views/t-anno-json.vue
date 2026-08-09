@@ -9,7 +9,7 @@
         </template>
         <template #text>
           <div class="taj-box">
-            <vue-json-pretty
+            <VueJsonPretty
               :collapsed-on-click-brackets="true"
               :data="JSON.parse(JSON.stringify(jsonList))"
               :deep="2"
@@ -30,7 +30,7 @@
         </template>
         <template #text>
           <div class="taj-box">
-            <vue-json-pretty
+            <VueJsonPretty
               :collapsed-on-click-brackets="true"
               :data="JSON.parse(JSON.stringify(jsonContent))"
               :deep="2"
@@ -51,7 +51,7 @@
         </template>
         <template #text>
           <div class="taj-box">
-            <vue-json-pretty
+            <VueJsonPretty
               :collapsed-on-click-brackets="true"
               :data="JSON.parse(JSON.stringify(parsedJson))"
               :deep="2"

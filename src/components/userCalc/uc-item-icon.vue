@@ -2,8 +2,8 @@
 <template>
   <div :class="{ circular }" :style="iconStyle" class="uci-box">
     <img :src="`/icon/bg/${star}-Star.webp`" alt="background" class="uci-bg" />
-    <img :alt="alt" :src="icon" class="uci-icon" />
-    <img v-if="primaryBadge" :alt="alt" :src="primaryBadge" class="uci-badge primary" />
+    <img :alt :src="icon" class="uci-icon" />
+    <img v-if="primaryBadge" :alt :src="primaryBadge" class="uci-badge primary" />
   </div>
 </template>
 

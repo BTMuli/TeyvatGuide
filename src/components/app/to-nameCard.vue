@@ -20,7 +20,7 @@
         </div>
         <div class="ton-sign">ID:{{ props.data.id }} | TeyvatGuide v{{ version }}</div>
         <v-btn
-          :loading="loading"
+          :loading
           class="ton-share"
           data-html2canvas-ignore
           variant="outlined"

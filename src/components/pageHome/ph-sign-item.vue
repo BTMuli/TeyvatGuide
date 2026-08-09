@@ -41,7 +41,7 @@
           :key="`extra-${idx}`"
           :day-number="idx + 1"
           :is-extra="true"
-          :reward="reward"
+          :reward
           :state="getExtraRewardState(idx)"
           @click="handleExtraRewardCellClick(idx)"
         />
@@ -54,7 +54,7 @@
         :key="ridx"
         :day-number="ridx + 1"
         :is-clickable="getRewardClickable(ridx)"
-        :reward="reward"
+        :reward
         :state="getRewardState(ridx)"
         @click="handleRewardCellClick(ridx)"
       />

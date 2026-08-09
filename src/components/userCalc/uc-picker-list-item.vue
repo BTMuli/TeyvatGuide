@@ -3,12 +3,12 @@
   <button
     :aria-pressed="selected"
     :class="{ selected }"
-    :title="title"
+    :title
     class="ucpli-item"
     type="button"
     @click="emit('select')"
   >
-    <UcItemIcon :alt="name" :icon="icon" :primary-badge="primaryBadge" :size="56" :star="star" />
+    <UcItemIcon :alt="name" :icon="icon" :primaryBadge :size="56" :star="star" />
     <span class="ucpli-content">
       <span class="ucpli-heading">
         <span class="ucpli-name">{{ name }}</span>

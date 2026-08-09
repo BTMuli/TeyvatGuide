@@ -1,6 +1,6 @@
 <template>
   <div class="ddo-lt-box">
-    <div :title="title" class="ddo-ltb-icon">
+    <div :title class="ddo-ltb-icon">
       <TItemBox :model-value="boxData" />
     </div>
     <div class="ddo-ltb-info">

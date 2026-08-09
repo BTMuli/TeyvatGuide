@@ -21,7 +21,7 @@
         <v-progress-circular v-else color="var(--tgc-od-orange)" indeterminate size="28" />
       </template>
     </TGameNavItem>
-    <ToLivecode v-model="showOverlay" :actId="actId" :data="codeData" :gid />
+    <ToLivecode v-model="showOverlay" :actId :data="codeData" :gid />
   </div>
 </template>
 <script lang="ts" setup>

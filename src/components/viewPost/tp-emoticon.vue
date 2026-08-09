@@ -19,7 +19,7 @@
     v-model:bgColor="bgColor"
     v-model:link="localUrl"
     :format="fmt"
-    :image="image"
+    :image
     :ori="true"
   />
 </template>

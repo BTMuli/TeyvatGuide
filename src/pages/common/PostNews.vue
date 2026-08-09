@@ -26,13 +26,7 @@
         @click:append-inner="searchPost()"
       />
       <div class="pn-nav-btns">
-        <v-btn
-          :loading="loading"
-          class="pn-nav-btn"
-          size="small"
-          variant="elevated"
-          @click="firstLoad(true)"
-        >
+        <v-btn :loading class="pn-nav-btn" size="small" variant="elevated" @click="firstLoad(true)">
           <v-icon>mdi-refresh</v-icon>
         </v-btn>
         <v-btn class="pn-nav-btn" size="small" variant="elevated" @click="handleList()">
@@ -42,7 +36,7 @@
     </div>
   </v-app-bar>
   <v-window v-model="recentNewsType">
-    <v-window-item v-for="(value, index) in bbsEnum.post.newsTypeList" :key="index" :value="value">
+    <v-window-item v-for="(value, index) in bbsEnum.post.newsTypeList" :key="index" :value>
       <div class="pn-grid">
         <div v-for="post in postData[value]" :key="post.post.post_id">
           <TPostCard :post />
@@ -50,7 +44,7 @@
       </div>
     </v-window-item>
   </v-window>
-  <ToChannel v-model="showList" :gid="gid" />
+  <ToChannel v-model="showList" :gid />
   <VpOverlaySearch v-model="showSearch" :gid="Number(gid)" :keyword="search" topOffset="64px" />
 </template>
 <script lang="ts" setup>

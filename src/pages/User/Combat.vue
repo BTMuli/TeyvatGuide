@@ -128,7 +128,7 @@
               v-for="(round, idx) in item.detail.rounds_data"
               :id="item.id"
               :key="idx"
-              :round="round"
+              :round
               :uid="item.uid"
             />
           </div>

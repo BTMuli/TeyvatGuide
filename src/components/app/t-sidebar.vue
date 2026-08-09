@@ -1,6 +1,6 @@
 <!-- 应用侧边栏 -->
 <template>
-  <v-navigation-drawer :permanent="true" :rail="rail" :width="160" class="tsb-box">
+  <v-navigation-drawer :permanent="true" :rail :width="160" class="tsb-box">
     <v-list :nav="true" class="side-list" density="compact">
       <v-list-item
         :append-icon="!rail ? 'mdi-chevron-left' : undefined"
@@ -332,7 +332,7 @@
           :disabled="isTryLogin"
           :open-on-click="true"
           location="end"
-          @update:model-value="(v) => (v ? loadAllGameAc() : {})"
+          @update:model-value="handleGameAccountToggle"
         >
           <template #activator="{ props }">
             <v-list-item :title.attr="'切换账号'" prepend-icon="mdi-account-switch" v-bind="props">
@@ -374,7 +374,7 @@
       </div>
     </v-list>
   </v-navigation-drawer>
-  <vp-overlay-follow v-model="showFollow" />
+  <VpOverlayFollow v-model="showFollow" />
   <ToGameLogin v-model="showLoginQr" @success="tryGetTokens" />
 </template>
 <script lang="ts" setup>
@@ -418,6 +418,10 @@ const rail = computed<boolean>({
   get: () => sidebar.value.collapse,
   set: (v) => (sidebar.value.collapse = v),
 });
+
+function handleGameAccountToggle(value: boolean): void {
+  if (value) void loadAllGameAc();
+}
 const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   if (briefInfo.value && briefInfo.value.nickname) return briefInfo.value;
   return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/UI/nav/lumine.webp" };

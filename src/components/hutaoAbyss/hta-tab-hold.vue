@@ -1,12 +1,6 @@
 <!-- 角色持有率表格 -->
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="holdData"
-    class="hta-th-table"
-    fixed-header
-    height="100%"
-  >
+  <v-data-table :headers :items="holdData" class="hta-th-table" fixed-header height="100%">
     <template v-slot:item="{ item }">
       <tr class="hta-th-tr">
         <td class="hta-th-icon">

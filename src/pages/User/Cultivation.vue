@@ -198,18 +198,18 @@
           <div class="cultivation-config">
             <UcCharacterPanel
               v-model:ascended="avatarAscended"
-              v-model:current-level="avatarCurrentLevel"
-              v-model:selected-id="selectedCharacterId"
-              v-model:talent-current-levels="talentCurrentLevels"
-              v-model:talent-target-levels="talentTargetLevels"
-              v-model:target-ascended="avatarTargetAscended"
-              v-model:target-level="avatarTargetLevel"
+              v-model:currentLevel="avatarCurrentLevel"
+              v-model:selectedId="selectedCharacterId"
+              v-model:talentCurrentLevels="talentCurrentLevels"
+              v-model:talentTargetLevels="talentTargetLevels"
+              v-model:targetAscended="avatarTargetAscended"
+              v-model:targetLevel="avatarTargetLevel"
               :at-ascension-level="avatarAtAscensionLevel"
               :current-ascension-readonly="useApiCalculation && !avatarCurrentStateEditable"
               :current-state-editable="avatarCurrentStateEditable"
               :level-options="avatarLevelOptions"
               :options="characterOptions"
-              :selected-character="selectedCharacter"
+              :selectedCharacter
               :selection-readonly="editingEntry?.type === 'avatar'"
               :skills="displaySkills"
               :talent-level-max="avatarTalentLevelMax"
@@ -218,11 +218,11 @@
             />
             <UcWeaponPanel
               v-model:ascended="weaponAscended"
-              v-model:current-level="weaponCurrentLevel"
-              v-model:selected-key="selectedWeaponKey"
-              v-model:target-ascended="weaponTargetAscended"
-              v-model:target-level="weaponTargetLevel"
-              v-model:use-bag-source="useBagWeaponSource"
+              v-model:currentLevel="weaponCurrentLevel"
+              v-model:selectedKey="selectedWeaponKey"
+              v-model:targetAscended="weaponTargetAscended"
+              v-model:targetLevel="weaponTargetLevel"
+              v-model:useBagSource="useBagWeaponSource"
               :at-ascension-level="weaponAtAscensionLevel"
               :current-ascension-readonly="useApiCalculation && !weaponCurrentStateEditable"
               :current-promote-level="weaponCurrentPromoteLevel"
@@ -230,21 +230,21 @@
               :has-bag-data="hasBagWeaponData"
               :level-options="weaponLevelOptions"
               :options="weaponOptions"
-              :selected-weapon="selectedWeapon"
+              :selectedWeapon
               :selection-readonly="editingEntry?.type === 'weapon'"
               :target-at-ascension-level="weaponTargetAtAscensionLevel"
             />
           </div>
 
           <UcMaterialResult
-            v-model:allow-crafting="allowCrafting"
-            v-model:use-dust="useDust"
-            v-model:use-solvent="useSolvent"
+            v-model:allowCrafting="allowCrafting"
+            v-model:useDust="useDust"
+            v-model:useSolvent="useSolvent"
             :bag-materials="resultBagMaterialDetails"
             :empty-text="resultEmptyText"
             :loading="apiLoading"
             :materials="displayResultMaterials"
-            :missing-kinds="missingKinds"
+            :missingKinds
             :show-crafting-options="!useApiCalculation"
             :uid="currentUid ?? 0"
           />

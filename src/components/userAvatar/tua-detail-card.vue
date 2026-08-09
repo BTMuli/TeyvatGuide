@@ -5,7 +5,7 @@
       <img :src="fullIcon" alt="avatar" />
     </div>
     <v-btn
-      :loading="loading"
+      :loading
       class="tua-dc-share"
       data-html2canvas-ignore
       prepend-icon="mdi-share-variant"

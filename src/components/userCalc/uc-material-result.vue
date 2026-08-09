@@ -56,7 +56,7 @@
         <UcMaterialItem
           v-for="material in materials"
           :key="material.id"
-          :material="material"
+          :material
           :weaken-ready
           @select="openMaterialInfo(material)"
         />

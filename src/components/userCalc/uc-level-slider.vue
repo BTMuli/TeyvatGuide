@@ -40,9 +40,9 @@
     </div>
     <v-range-slider
       v-if="currentEditable && !single"
-      :disabled="disabled"
-      :max="max"
-      :min="min"
+      :disabled
+      :max
+      :min
       :model-value="[current, model]"
       aria-label="起始与目标等级"
       class="ucls-control range"
@@ -54,9 +54,9 @@
     />
     <v-slider
       v-else
-      :disabled="disabled"
-      :max="max"
-      :min="min"
+      :disabled
+      :max
+      :min
       :model-value="model"
       :aria-label="single ? '等级' : '目标等级'"
       :color="single ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"

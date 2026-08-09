@@ -93,7 +93,7 @@
             :title.attr="getSortDesc(isLevelUp)"
             class="uc-top-btn"
             variant="elevated"
-            @click="() => (isLevelUp = toggleSort(isLevelUp))"
+            @click="isLevelUp = toggleSort(isLevelUp)"
           >
             等级
           </v-btn>
@@ -102,7 +102,7 @@
             :title.attr="getSortDesc(isFetterUp)"
             class="uc-top-btn"
             variant="elevated"
-            @click="() => (isFetterUp = toggleSort(isFetterUp))"
+            @click="isFetterUp = toggleSort(isFetterUp)"
           >
             好感
           </v-btn>
@@ -111,7 +111,7 @@
             :title.attr="getSortDesc(isConstUp)"
             class="uc-top-btn"
             variant="elevated"
-            @click="() => (isConstUp = toggleSort(isConstUp))"
+            @click="isConstUp = toggleSort(isConstUp)"
           >
             命座
           </v-btn>

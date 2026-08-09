@@ -57,7 +57,7 @@
             :class="{ selected: item.value === selectedForum?.value }"
             class="select-item sub"
             v-bind="props"
-            @click="() => (selectedForum = item)"
+            @click="selectedForum = item"
           >
             <img :alt="item.text" :src="item.icon" class="icon" />
             <span>{{ item.text }}</span>

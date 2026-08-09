@@ -12,7 +12,7 @@
             <span class="tpj-box-copy" @click="copyContent(jsonData)" title="复制全部内容到剪贴板">
               <v-icon small>mdi-content-copy</v-icon>
             </span>
-            <vue-json-pretty
+            <VueJsonPretty
               :data="JSON.parse(JSON.stringify(jsonData))"
               :show-icon="true"
               :show-length="true"
@@ -36,7 +36,7 @@
             <span class="tpj-box-copy" @click="copyContent(parseData)" title="复制全部内容到剪贴板">
               <v-icon small>mdi-content-copy</v-icon>
             </span>
-            <vue-json-pretty
+            <VueJsonPretty
               :data="parseData"
               :show-icon="true"
               :show-length="true"

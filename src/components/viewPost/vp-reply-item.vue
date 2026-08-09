@@ -69,7 +69,7 @@
                 <v-chip color="blue" label>没有更多了</v-chip>
               </div>
               <div v-else class="tpr-list-item">
-                <v-btn :loading="loading" color="blue" @click="loadSub()">加载更多</v-btn>
+                <v-btn :loading color="blue" @click="loadSub()">加载更多</v-btn>
               </div>
             </v-list>
           </v-menu>

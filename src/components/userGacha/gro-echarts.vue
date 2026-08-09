@@ -15,9 +15,9 @@
       />
     </div>
     <div class="gro-chart-container">
-      <gro-chart-overview v-if="curChartType === 'overview'" :uid="uid" />
-      <gro-chart-calendar v-if="curChartType === 'calendar'" :uid="uid" :gacha-type="gachaType" />
-      <gro-chart-stackbar v-if="curChartType === 'stackBar'" :uid="uid" :gacha-type="gachaType" />
+      <GroChartOverview v-if="curChartType === 'overview'" :uid="uid" />
+      <GroChartCalendar v-if="curChartType === 'calendar'" :uid="uid" :gachaType />
+      <GroChartStackbar v-if="curChartType === 'stackBar'" :uid="uid" :gachaType />
     </div>
   </div>
 </template>

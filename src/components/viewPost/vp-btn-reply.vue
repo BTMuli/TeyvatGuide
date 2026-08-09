@@ -12,7 +12,7 @@
     >
       <template #activator="{ props }">
         <v-btn
-          :loading="loading"
+          :loading
           class="tpr-btn"
           size="36"
           v-bind="props"
@@ -57,14 +57,14 @@
             v-for="(item, index) in reply"
             :key="index"
             :modelValue="item"
-            :pinId="pinId"
+            :pinId
             mode="main"
           />
           <div v-if="isLast" class="tpr-list-item">
             <v-chip color="blue" label>没有更多了</v-chip>
           </div>
           <div v-else class="tpr-list-item">
-            <v-btn :loading="loading" color="blue" @click="loadReply()">加载更多</v-btn>
+            <v-btn :loading color="blue" @click="loadReply()">加载更多</v-btn>
           </div>
         </v-list>
       </div>

@@ -9,7 +9,7 @@
         <div class="vo-oft-right">已加载：{{ posts.length }}条</div>
       </div>
       <div class="vo-of-actions">
-        <v-btn :loading="loading" class="vo-of-btn" @click="loadMore(true)">刷新</v-btn>
+        <v-btn :loading class="vo-of-btn" @click="loadMore(true)">刷新</v-btn>
       </div>
       <div ref="listRef" class="vp-of-list">
         <TPostcard

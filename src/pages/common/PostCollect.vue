@@ -109,7 +109,7 @@
         </div>
         <v-pagination
           v-model="page"
-          :length="length"
+          :length
           :total-visible="view"
           size="small"
           variant="elevated"

@@ -13,7 +13,7 @@
       <TwcListItem
         v-for="item in visibleCards"
         :key="item.id"
-        v-model:cur-item="curItem"
+        v-model:curItem="curItem"
         :data="item"
         mode="character"
         @click="switchC(item)"

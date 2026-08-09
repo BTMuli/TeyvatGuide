@@ -129,19 +129,19 @@
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item class="gacha-window-item" value="overview">
-        <gro-overview v-model="gachaListCur" />
+        <GroOverview v-model="gachaListCur" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="echarts">
-        <gro-echarts v-if="uidCur" :uid="uidCur" />
+        <GroEcharts v-if="uidCur" :uid="uidCur" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="table">
-        <gro-table v-model="gachaListCur" />
+        <GroTable v-model="gachaListCur" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="rerun">
-        <gro-rerun />
+        <GroRerun />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="history">
-        <gro-history :uid="uidCur" />
+        <GroHistory :uid="uidCur" />
       </v-window-item>
     </v-window>
   </div>

@@ -34,13 +34,7 @@
               <v-btn prepend-icon="mdi-account-outline" value="character">角色</v-btn>
               <v-btn prepend-icon="mdi-sword" value="weapon">武器</v-btn>
             </v-btn-toggle>
-            <v-pagination
-              v-model="page"
-              :length="length"
-              :total-visible="5"
-              class="tc-page"
-              size="small"
-            />
+            <v-pagination v-model="page" :length :total-visible="5" class="tc-page" size="small" />
           </div>
         </div>
         <div ref="contentRef" class="tc-content">

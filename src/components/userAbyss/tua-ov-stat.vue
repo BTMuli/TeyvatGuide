@@ -62,16 +62,16 @@
         <HtaTabUse
           v-if="tab === 'use' && hasTabData && abyssData.use"
           :data="abyssData.use"
-          :floor="floor"
+          :floor
         />
         <HtaTabUp
           v-else-if="tab === 'up' && hasTabData && abyssData.up"
           :data="abyssData.up"
-          :floor="floor"
+          :floor
         />
         <HtaTabTeam
           v-else-if="tab === 'team' && hasTabData && abyssData.team"
-          :floor="floor"
+          :floor
           :model-value="abyssData.team"
         />
         <HtaTabHold
