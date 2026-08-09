@@ -461,16 +461,19 @@ async function loadMore(): Promise<void> {
   isReq.value = false;
 }
 
-function searchPost(): void {
-  if (search.value === "") {
+async function searchPost(): Promise<void> {
+  const searchText = typeof search.value === "string" ? search.value.trim() : "";
+  if (searchText === "") {
     showSnackbar.warn("请输入搜索内容");
     return;
   }
-  const numCheck = Number(search.value);
-  if (isNaN(numCheck) || numCheck % 1 !== 0) {
-    if (showUser.value) showUser.value = false;
-    showSearch.value = true;
-  } else createPost(search.value);
+  const postId = Number(searchText);
+  if (Number.isSafeInteger(postId) && postId > 0) {
+    await createPost(searchText);
+    return;
+  }
+  if (showUser.value) showUser.value = false;
+  showSearch.value = true;
 }
 
 function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {

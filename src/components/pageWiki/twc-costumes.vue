@@ -44,7 +44,7 @@
 </template>
 <script lang="ts" setup>
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 
 type TwcConstellationProps = { costumes: Array<TGApp.App.Character.Costume> };
 
@@ -53,15 +53,15 @@ const tab = ref<number>(0);
 
 async function loadData(): Promise<void> {
   await nextTick();
-  tab.value = props.costumes[0].id;
+  const [costume] = props.costumes;
+  if (!costume) {
+    tab.value = 0;
+    return;
+  }
+  tab.value = costume.id;
 }
 
-onMounted(async () => await loadData());
-
-watch(
-  () => props.costumes,
-  async () => await loadData(),
-);
+watch(() => props.costumes, loadData, { immediate: true });
 </script>
 <style lang="scss" scoped>
 .twc-costumes-box {

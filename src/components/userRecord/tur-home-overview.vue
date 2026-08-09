@@ -2,29 +2,35 @@
 <template>
   <div class="tur-ho-container">
     <div class="tur-hoc-overview">
-      <div v-if="overview" class="tur-hoco-item">
-        <img :src="overview.comfortIcon" alt="icon" />
-        <span>{{ overview.comfortName }}</span>
-      </div>
-      <div class="tur-hoco-item">
-        <span>{{ props.homes.length }}</span>
-        <span>解锁洞天</span>
-      </div>
-      <div class="tur-hoco-item">
-        <span>{{ overview.level ?? 0 }}</span>
-        <span>信任等阶</span>
-      </div>
-      <div class="tur-hoco-item">
-        <span>{{ overview.comfort ?? 0 }}</span>
-        <span>最高洞天仙力</span>
-      </div>
-      <div class="tur-hoco-item">
-        <span>{{ overview.furniture ?? 0 }}</span>
-        <span>获得摆设数</span>
-      </div>
-      <div class="tur-hoco-item">
-        <span>{{ overview.visit ?? 0 }}</span>
-        <span>历史访客数</span>
+      <template v-if="overview">
+        <div class="tur-hoco-item">
+          <img :src="overview.comfortIcon" alt="icon" />
+          <span>{{ overview.comfortName }}</span>
+        </div>
+        <div class="tur-hoco-item">
+          <span>{{ props.homes.length }}</span>
+          <span>解锁洞天</span>
+        </div>
+        <div class="tur-hoco-item">
+          <span>{{ overview.level }}</span>
+          <span>信任等阶</span>
+        </div>
+        <div class="tur-hoco-item">
+          <span>{{ overview.comfort }}</span>
+          <span>最高洞天仙力</span>
+        </div>
+        <div class="tur-hoco-item">
+          <span>{{ overview.furniture }}</span>
+          <span>获得摆设数</span>
+        </div>
+        <div class="tur-hoco-item">
+          <span>{{ overview.visit }}</span>
+          <span>历史访客数</span>
+        </div>
+      </template>
+      <div v-else class="tur-hoco-item">
+        <span>0</span>
+        <span>暂未解锁洞天</span>
       </div>
     </div>
     <div v-if="props.homes.length > 0" class="tur-hoc-list">
@@ -45,7 +51,7 @@ import TurHomeItem from "./tur-home-item.vue";
 type TurHomeOverviewProps = { homes: Array<TGApp.Sqlite.Record.Home> };
 
 const props = defineProps<TurHomeOverviewProps>();
-const overview = computed<TGApp.Sqlite.Record.Home>(() => props.homes[0] ?? undefined);
+const overview = computed<TGApp.Sqlite.Record.Home | undefined>(() => props.homes[0]);
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
