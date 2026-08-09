@@ -58,13 +58,16 @@ watch(
 watch(
   () => visible.value,
   async () => {
-    if (visible.value) await loadMore();
+    if (visible.value) await loadMore(true);
   },
 );
 
 async function loadMore(refresh: boolean = false): Promise<void> {
   if (loading.value) return;
-  if (refresh) offset.value = undefined;
+  if (refresh) {
+    offset.value = undefined;
+    isLast.value = false;
+  }
   if (!cookie.value) {
     showSnackbar.warn("请登录后再试");
     visible.value = false;

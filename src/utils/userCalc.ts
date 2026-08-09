@@ -1,7 +1,7 @@
 /**
  * 离线养成材料计算
  * @remarks 计算规则参考 Snap.Hutao Service/Cultivation/Offline
- * @since Beta v0.11.2
+ * @since Beta v0.11.3
  */
 
 /** 单项养成材料需求 */

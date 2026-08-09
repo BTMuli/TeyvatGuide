@@ -66,6 +66,7 @@
       <TopNameCard v-if="nameCard" :data="nameCard" @selected="showNc = !showNc" />
       <PwMaterialList :data="data.materials" />
     </div>
+    <v-divider />
     <div ref="scrollArea" class="twc-scroll">
       <!-- 衣装 -->
       <section class="twc-detail-section">
@@ -248,7 +249,7 @@ async function toBirth(date: string): Promise<void> {
   min-height: 0;
   flex-direction: column;
   margin: 0 auto;
-  row-gap: 12px;
+  row-gap: 8px;
 }
 
 .twc-summary {
