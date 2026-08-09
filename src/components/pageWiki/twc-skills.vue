@@ -57,9 +57,10 @@ watch(() => props.data, loadData);
 .twc-skills-box {
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 8px;
+  gap: 8px;
 }
 
 .twc-skill-tab {
@@ -88,6 +89,7 @@ watch(() => props.data, loadData);
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-1);
+  line-height: 20px;
   white-space: pre-wrap;
 }
 
@@ -95,6 +97,7 @@ watch(() => props.data, loadData);
   padding: 8px;
   border-radius: 4px;
   background: var(--box-bg-2);
+  line-height: 20px;
   white-space: pre-wrap;
 }
 </style>

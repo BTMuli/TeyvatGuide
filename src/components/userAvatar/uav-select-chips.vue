@@ -4,40 +4,37 @@
     <!-- ALL -->
     <v-chip
       key="all"
+      :aria-pressed="isAllSelected"
+      :class="{ selected: isAllSelected }"
       :size="props.size"
       class="uav-scb-all"
       title="全部"
       variant="elevated"
       @click.stop="toggleAll"
     >
-      <template #prepend>
-        <div :class="{ active: isAllSelected }" class="icon-wrap">
-          <v-icon color="var(--tgc-od-green)">mdi-check</v-icon>
-        </div>
-      </template>
-      <div :class="{ shifted: isAllSelected }" class="all-label">
+      <div class="uav-scb-inner">
         <slot :selected="isAllSelected" name="all">All</slot>
       </div>
     </v-chip>
-    <v-chip-group class="uav-scb-group" v-model="selected" filter multiple>
+    <v-chip-group v-model="selected" class="uav-scb-group" multiple>
       <!-- Options -->
       <v-chip
         v-for="item in props.items"
         :key="item.value"
+        :aria-pressed="selected.includes(item.value)"
         :class="selected.includes(item.value) ? 'selected' : ''"
         :size="props.size"
         :title="item.title"
         :value="item.value"
         class="uav-scb-item"
-        filter
         variant="elevated"
       >
-        <template #filter>
-          <v-icon color="var(--tgc-od-red)">mdi-check</v-icon>
-        </template>
         <div class="uav-scb-inner">
           <TMiImg v-if="item.icon" :src="item.icon" alt="icon" />
           <span>{{ item.label }}</span>
+        </div>
+        <div v-if="selected.includes(item.value)" class="uav-scb-selected">
+          <v-icon color="var(--tgc-od-red)">mdi-check-circle</v-icon>
         </div>
       </v-chip>
     </v-chip-group>
@@ -108,15 +105,12 @@ async function toggleAll(): Promise<void> {
   column-gap: 8px;
 
   :deep(.v-chip--variant-elevated) {
-    box-shadow: 1px 1px 4px var(--common-shadow-4);
+    box-shadow: none;
   }
 }
 
 .uav-scb-all {
   @include github-styles.github-tag-dark-gen(#41b883);
-
-  --icon-size: 16px;
-  --icon-gap: 2px;
 
   display: inline-flex;
   align-items: center;
@@ -124,37 +118,15 @@ async function toggleAll(): Promise<void> {
 
   --webkit-backdrop-filter: blur(4px);
 
-  .icon-wrap {
-    display: inline-flex;
-    overflow: hidden;
-    width: 0;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0;
-    opacity: 0;
-    transition:
-      width 0.3s ease-in-out,
-      opacity 0.3s ease-in-out,
-      margin-right 0.3s ease-in-out;
-
-    &.active {
-      width: var(--icon-size);
-      margin-right: var(--icon-gap);
-      opacity: 1;
-    }
-  }
-
-  .all-label {
-    display: inline-block;
-    transform: translateX(0);
-    transition: transform var(--anim-duration) var(--anim-ease);
-    will-change: transform;
+  &.selected {
+    @include github-styles.github-tag-dark-gen(#ffb74d);
   }
 }
 
 .uav-scb-group {
   display: flex;
   flex-wrap: wrap;
+  padding: 0;
   gap: 8px;
 }
 
@@ -182,5 +154,11 @@ async function toggleAll(): Promise<void> {
     position: relative;
     height: v-bind(iconHeight); /* stylelint-disable-line value-keyword-case */
   }
+}
+
+.uav-scb-selected {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
 }
 </style>

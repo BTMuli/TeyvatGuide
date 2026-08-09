@@ -1,30 +1,86 @@
 <template>
   <TOverlay v-model="visible">
     <div v-if="props.data" class="twom-container">
-      <slot name="left"></slot>
-      <div class="twom-box">
-        <div class="twom-share">
-          Material {{ props.data.id }} | Render By TeyvatGuide v{{ version }}
-        </div>
-        <div class="twom-top">
+      <slot name="left" />
+      <article class="twom-box">
+        <header class="twom-header">
           <div class="twom-icon">
-            <img :src="`/icon/bg/${props.data.star}-BGC.webp`" alt="bg" class="bg" />
-            <img :src="`/icon/material/${props.data.id}.webp`" alt="icon" class="icon" />
+            <img :src="`/icon/bg/${props.data.star}-BGC.webp`" alt="" class="bg" />
+            <img
+              :alt="props.data.name"
+              :src="`/icon/material/${props.data.id}.webp`"
+              class="icon"
+            />
           </div>
-          <div class="twom-name" @click="shareMaterial()">{{ props.data.name }}</div>
-          <div class="twom-type">{{ props.data.type }}</div>
-        </div>
-        <div class="twom-bottom">
-          <div class="twom-desc" v-html="parseHtmlText(props.data.description)" />
-          <div class="twom-source" v-if="props.data.source.length > 0">
-            <TwoSource :data="item" v-for="(item, index) in props.data.source" :key="index" />
+          <div class="twom-identity">
+            <div class="twom-eyebrow">养成物品</div>
+            <h2>{{ props.data.name }}</h2>
+            <div class="twom-meta">
+              <span class="twom-type">{{ props.data.type }}</span>
+              <span>
+                <v-icon size="14">mdi-star</v-icon>
+                {{ props.data.star }} 星
+              </span>
+              <span>ID {{ props.data.id }}</span>
+            </div>
           </div>
-          <div class="twom-convert" v-if="props.data.convert.length > 0">
-            <TwoConvert :data="item" v-for="(item, index) in props.data.convert" :key="index" />
+          <div class="twom-actions" data-html2canvas-ignore="true">
+            <v-btn
+              aria-label="保存物品分享图"
+              density="comfortable"
+              icon="mdi-share-variant"
+              title="保存物品分享图"
+              variant="text"
+              @click="shareMaterial"
+            />
+            <v-btn
+              aria-label="关闭物品详情"
+              density="comfortable"
+              icon="mdi-close"
+              title="关闭物品详情"
+              variant="text"
+              @click="visible = false"
+            />
           </div>
-        </div>
-      </div>
-      <slot name="right"></slot>
+        </header>
+        <main class="twom-content">
+          <section class="twom-panel">
+            <header class="twom-panel-title">
+              <v-icon size="18">mdi-text-box-outline</v-icon>
+              <h3>物品描述</h3>
+            </header>
+            <div class="twom-desc" v-html="parseHtmlText(props.data.description)" />
+          </section>
+          <section v-if="props.data.source.length > 0" class="twom-panel">
+            <header class="twom-panel-title">
+              <v-icon size="18">mdi-map-marker-path</v-icon>
+              <h3>获取来源</h3>
+              <span>{{ props.data.source.length }} 项</span>
+            </header>
+            <div class="twom-source">
+              <TwoSource
+                v-for="(item, index) in props.data.source"
+                :key="`${item.type}-${item.name}-${index}`"
+                :data="item"
+              />
+            </div>
+          </section>
+          <section v-if="props.data.convert.length > 0" class="twom-panel">
+            <header class="twom-panel-title">
+              <v-icon size="18">mdi-transit-connection-variant</v-icon>
+              <h3>合成转换</h3>
+              <span>{{ props.data.convert.length }} 种配方</span>
+            </header>
+            <div class="twom-convert">
+              <TwoConvert v-for="item in props.data.convert" :key="item.id" :data="item" />
+            </div>
+          </section>
+        </main>
+        <footer class="twom-share">
+          Material {{ props.data.id }} · Rendered by TeyvatGuide v{{ version }}
+        </footer>
+      </article>
+      <slot name="right" />
     </div>
   </TOverlay>
 </template>
@@ -62,118 +118,179 @@ async function shareMaterial(): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 12px;
+  gap: 16px;
 }
 
 .twom-box {
   position: relative;
   display: flex;
-  width: 800px;
-  max-width: calc(100vw - 32px);
-  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  width: 760px;
+  max-width: calc(100vw - 160px);
+  max-height: calc(100vh - 64px);
   flex-direction: column;
-  padding: 10px;
-  border-radius: 10px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
   background: var(--app-page-bg);
-  overflow-y: auto;
-  row-gap: 10px;
+  box-shadow: 0 8px 24px var(--common-shadow-t-4);
 }
 
-.twom-share {
-  position: absolute;
-  z-index: -1;
-  top: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
-
-.twom-top {
-  position: relative;
+.twom-header {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 10px;
+  padding: 16px;
   border-bottom: 1px solid var(--common-shadow-1);
-  background-position: center;
-  background-size: cover;
-  column-gap: 10px;
+  background: var(--dialog-header-bg);
+  gap: 12px;
 }
 
 .twom-icon {
   position: relative;
   display: flex;
-  width: 60px;
-  height: 60px;
+  width: 72px;
+  height: 72px;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
 
   .bg {
     position: absolute;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
+    width: 72px;
+    height: 72px;
+    border-radius: 8px;
   }
 
   .icon {
     position: relative;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
   }
 }
 
-.twom-name {
-  color: var(--common-text-title);
-  cursor: pointer;
-  font-family: var(--font-title);
-  font-size: 30px;
+.twom-identity {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+
+  h2 {
+    overflow: hidden;
+    margin: 0;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 28px;
+    font-weight: normal;
+    line-height: 36px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.twom-eyebrow {
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.twom-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--box-text-4);
+  font-size: 12px;
+  gap: 4px 12px;
+  line-height: 16px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    column-gap: 2px;
+  }
 }
 
 .twom-type {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  opacity: 0.8;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--box-bg-3);
+  color: var(--box-text-2);
 }
 
-.twom-bottom {
+.twom-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  column-gap: 4px;
+}
+
+.twom-content {
   display: flex;
   flex-direction: column;
-  row-gap: 8px;
+  padding: 16px;
+  gap: 12px;
+  overflow-y: auto;
 }
 
-.twom-desc,
-.twom-source,
-.twom-convert {
-  padding: 8px;
-  border-radius: 4px;
+.twom-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
   background: var(--box-bg-1);
-  color: var(--box-text-1);
+  gap: 8px;
+}
+
+.twom-panel-title {
+  display: flex;
+  align-items: center;
+  color: var(--common-text-title);
+  gap: 8px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+  }
+
+  > span {
+    margin-left: auto;
+    color: var(--box-text-4);
+    font-size: 12px;
+    line-height: 16px;
+  }
 }
 
 .twom-desc {
-  font-size: 16px;
+  color: var(--box-text-2);
+  font-size: 14px;
+  line-height: 20px;
   white-space: pre-wrap;
   word-break: break-all;
 }
 
 .twom-source {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  font-size: 16px;
-  row-gap: 5px;
-  white-space: pre-wrap;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .twom-convert {
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  row-gap: 5px;
+  gap: 8px;
+}
+
+.twom-share {
+  padding: 8px 16px;
+  border-top: 1px solid var(--common-shadow-1);
+  background: var(--dialog-footer-bg);
+  color: var(--box-text-4);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
 }
 </style>

@@ -1,15 +1,23 @@
 <template>
   <div class="twoc-container">
-    <v-icon>mdi-all-inclusive</v-icon>
-    <div class="twoc-box" v-for="(item, index) in props.data.source" :key="index">
-      <div class="twoc-left">
-        <img :src="`/icon/bg/${item.star}-BGC.webp`" alt="icon" class="bg" />
-        <img :src="`/icon/material/${item.id}.webp`" alt="icon" class="icon" />
-      </div>
-      <div class="twoc-right">
-        <span>{{ item.name }}</span>
-        <span>{{ item.count }}</span>
-      </div>
+    <div class="twoc-marker">
+      <v-icon size="18">mdi-all-inclusive</v-icon>
+      <span>转换配方</span>
+    </div>
+    <div class="twoc-recipe">
+      <template v-for="(item, index) in props.data.source" :key="item.id">
+        <span v-if="index > 0" class="twoc-separator">+</span>
+        <div class="twoc-box">
+          <div class="twoc-left">
+            <img :src="`/icon/bg/${item.star}-BGC.webp`" alt="" class="bg" />
+            <img :alt="item.name" :src="`/icon/material/${item.id}.webp`" class="icon" />
+          </div>
+          <div class="twoc-right">
+            <span>{{ item.name }}</span>
+            <span>×{{ item.count }}</span>
+          </div>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -18,34 +26,61 @@ type TwoConvertProps = { data: TGApp.App.Material.Convert };
 
 const props = defineProps<TwoConvertProps>();
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .twoc-container {
   display: flex;
   width: 100%;
-  height: 100%;
+  min-width: 0;
   align-items: center;
-  justify-content: flex-start;
-  border-radius: 5px;
-  column-gap: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-3);
+  gap: 12px;
+}
+
+.twoc-marker {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-4);
+  column-gap: 4px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.twoc-recipe {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.twoc-separator {
+  color: var(--box-text-4);
+  font-size: 16px;
 }
 
 .twoc-box {
   display: flex;
-  border-radius: 5px;
-  background: var(--box-bg-3);
-  color: var(--box-text-4);
-  column-gap: 5px;
+  overflow: hidden;
+  min-width: 140px;
+  align-items: center;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--app-page-bg);
 }
 
 .twoc-left {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 5px;
 
   .bg {
     position: absolute;
@@ -59,16 +94,33 @@ const props = defineProps<TwoConvertProps>();
   .icon {
     position: relative;
     z-index: 2;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
   }
 }
 
 .twoc-right {
   display: flex;
+  min-width: 0;
+  flex: 1;
   align-items: center;
-  justify-content: flex-start;
-  padding-right: 10px;
-  column-gap: 15px;
+  justify-content: space-between;
+  padding: 0 8px;
+  color: var(--box-text-2);
+  font-size: 12px;
+  gap: 8px;
+  line-height: 16px;
+
+  span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span:last-child {
+    flex-shrink: 0;
+    color: var(--box-text-4);
+  }
 }
 </style>

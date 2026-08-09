@@ -14,47 +14,75 @@
             @click="toWiki()"
           />
         </div>
-        <v-rating
-          v-if="data.affix"
-          v-model="select"
-          :length="selectItems.length"
-          :size="24"
-          class="tww-brief-rating"
-          dense
-        />
+        <div class="tww-brief-meta">
+          <span>{{ data.weapon }}</span>
+          <span>{{ data.star }} 星武器</span>
+        </div>
         <div class="tww-brief-desc">{{ data.description }}</div>
       </div>
     </div>
     <PwMaterialList :data="data.materials" />
-    <v-expansion-panels v-if="data.affix" class="tww-affix">
-      <v-expansion-panel expand-icon="mdi-menu-down">
-        <template #title>
-          <span class="tww-text-title">{{ data.affix.Name }}-精炼 {{ select }}</span>
-        </template>
-        <template #text>
-          <span
-            class="tww-text-content"
-            v-html="parseHtmlText(data.affix.Descriptions[select - 1].Description)"
-          />
-        </template>
-      </v-expansion-panel>
-    </v-expansion-panels>
-    <v-expansion-panels class="tww-story">
-      <v-expansion-panel
-        v-for="(story, index) in data.story"
-        :key="index"
-        expand-icon="mdi-menu-down"
-      >
-        <template #title>
-          <span class="tww-text-title">
-            {{ data.story.length > 1 ? `故事 ${index + 1}` : "故事" }}
-          </span>
-        </template>
-        <template #text>
-          <span class="tww-text-content">{{ parseHtmlText(story) }}</span>
-        </template>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <section v-if="data.affix" class="tww-section">
+      <header class="tww-section-header">
+        <div class="tww-section-heading">
+          <span>武器效果</span>
+          <h2>{{ data.affix.Name }}</h2>
+        </div>
+        <div class="tww-refinement">
+          <span>精炼 {{ select }}</span>
+          <v-btn-toggle
+            v-model="select"
+            aria-label="选择精炼等级"
+            class="tww-refinement-toggle"
+            density="compact"
+            mandatory
+          >
+            <v-btn
+              v-for="(_, index) in selectItems"
+              :key="index"
+              :value="index + 1"
+              class="tww-refinement-btn"
+              size="x-small"
+              variant="text"
+            >
+              R{{ index + 1 }}
+            </v-btn>
+          </v-btn-toggle>
+        </div>
+      </header>
+      <div
+        class="tww-text-content"
+        v-html="parseHtmlText(data.affix.Descriptions[select - 1].Description)"
+      />
+    </section>
+    <section class="tww-section">
+      <header class="tww-section-header">
+        <div class="tww-section-heading">
+          <span>背景资料</span>
+          <h2>故事</h2>
+        </div>
+        <v-tabs
+          v-if="data.story.length > 1"
+          v-model="storyTab"
+          class="tww-story-tabs"
+          density="compact"
+        >
+          <v-tab v-for="(_, index) in data.story" :key="index" :value="index">
+            故事 {{ index + 1 }}
+          </v-tab>
+        </v-tabs>
+      </header>
+      <v-window v-model="storyTab" :transition="false">
+        <v-window-item
+          v-for="(story, index) in data.story"
+          :key="index"
+          :value="index"
+          class="tww-text-content"
+        >
+          {{ parseHtmlText(story) }}
+        </v-window-item>
+      </v-window>
+    </section>
   </div>
 </template>
 <script lang="ts" setup>
@@ -76,16 +104,17 @@ const data = shallowRef<TGApp.App.Weapon.WikiItem>();
 const box = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${data.value?.star}-Star.webp`,
   icon: `/WIKI/weapon/${data.value?.id}.webp`,
-  size: "128px",
-  height: "128px",
+  size: "100px",
+  height: "100px",
   display: "inner",
   lt: `/icon/weapon/${data.value?.weapon}.webp`,
-  ltSize: "40px",
+  ltSize: "25px",
   innerHeight: 0,
   innerText: "",
   clickable: false,
 }));
 const select = ref<number>(1);
+const storyTab = ref<number>(0);
 const selectItems = shallowRef<Array<number>>([]);
 
 function loadData(): void {
@@ -95,6 +124,8 @@ function loadData(): void {
     return;
   }
   data.value = res;
+  select.value = 1;
+  storyTab.value = 0;
   showSnackbar.success(`成功获取武器 ${props.item.name} 的 Wiki 数据`);
   if (data.value?.affix === undefined) return;
   selectItems.value = data.value?.affix.Descriptions.map((item) => item.Level) ?? [];
@@ -113,27 +144,29 @@ async function toWiki(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-:deep(.v-expansion-panel-title) {
-  background: var(--common-shadow-1);
-}
-
 .tww-box {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
-  row-gap: 10px;
+  row-gap: 8px;
 }
 
 .tww-brief {
   display: flex;
   align-items: flex-start;
-  column-gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  column-gap: 12px;
 }
 
 .tww-brief-info {
   display: flex;
+  min-height: 100px;
+  flex: 1;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 4px;
 }
 
 .tww-brief-title {
@@ -154,28 +187,98 @@ async function toWiki(): Promise<void> {
   }
 }
 
-.tww-brief-rating {
-  color: var(--common-text-title);
+.tww-brief-meta {
+  display: flex;
+  color: var(--box-text-4);
+  column-gap: 12px;
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .tww-brief-desc {
-  display: flex;
-  align-items: flex-end;
-  opacity: 0.8;
+  color: var(--box-text-2);
+  font-size: 14px;
+  line-height: 20px;
 }
 
-.tww-story {
+.tww-section {
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  gap: 8px;
 }
 
-.tww-text-title {
-  font-weight: bold;
+.tww-section-header {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  gap: 12px;
+}
+
+.tww-section-heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+
+  > span {
+    color: var(--box-text-4);
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  h2 {
+    overflow: hidden;
+    margin: 0;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 22px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.tww-refinement {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  column-gap: 8px;
+  font-size: 12px;
+}
+
+.tww-refinement-toggle {
+  height: 28px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+}
+
+.tww-refinement-btn {
+  min-width: 32px;
+  color: var(--box-text-2);
+
+  &.v-btn--active {
+    background: var(--tgc-btn-1);
+    color: var(--btn-text);
+  }
+}
+
+.tww-story-tabs {
+  min-width: 0;
 }
 
 .tww-text-content {
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
   font-size: 14px;
+  line-height: 20px;
   white-space: pre-wrap;
   word-break: break-all;
 }

@@ -1,9 +1,16 @@
 <!-- 角色/武器WIKI侧边栏项 -->
 <template>
-  <div :class="props.curItem.id === props.data.id ? 'selected' : ''" class="twc-li-box">
+  <div
+    :class="props.curItem.id === props.data.id ? 'selected' : ''"
+    class="twc-li-box"
+    role="button"
+    tabindex="0"
+    @keydown.enter.self="triggerClick"
+    @keydown.space.self.prevent="triggerClick"
+  >
     <div class="twc-li-left">
-      <img :src="`/icon/bg/${props.data.star}-Star.webp`" alt="bg" class="bg" />
-      <img :src="`/WIKI/${props.mode}/${props.data.id}.webp`" alt="icon" class="icon" />
+      <img :src="`/icon/bg/${props.data.star}-Star.webp`" alt="" class="bg" />
+      <img :alt="props.data.name" :src="`/WIKI/${props.mode}/${props.data.id}.webp`" class="icon" />
     </div>
     <div :title="props.data.name" class="twc-li-right">{{ props.data.name }}</div>
     <div
@@ -15,16 +22,16 @@
     <div class="twc-li-icons">
       <template v-if="props.mode === 'character' && props.data.element !== ''">
         <img
+          :alt="props.data.element"
           :src="`/icon/element/${props.data.element}元素.webp`"
           :title="`${props.data.element}元素`"
-          alt="element"
           class="element"
         />
       </template>
       <img
+        :alt="props.data.weapon"
         :src="`/icon/weapon/${props.data.weapon}.webp`"
         :title="props.data.weapon"
-        alt="weapon"
         class="weapon"
       />
     </div>
@@ -46,14 +53,18 @@ type TwcListItemWeapon = {
   data: TGApp.App.Weapon.WikiBriefInfo;
   curItem: TGApp.App.Weapon.WikiBriefInfo;
 };
-type TwcListItemProps = (TwcListItemAvatar | TwcListItemWeapon) & {
-  width?: number;
-};
+type TwcListItemProps = TwcListItemAvatar | TwcListItemWeapon;
 
 const props = defineProps<TwcListItemProps>();
 const idColor = computed<string>(() => getOdStarColor(props.data.star));
+
+function triggerClick(event: KeyboardEvent): void {
+  (<HTMLElement>event.currentTarget).click();
+}
 </script>
 <style lang="scss" scoped>
+$twc-li-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
+
 .twc-li-box {
   position: relative;
   display: flex;
@@ -66,13 +77,27 @@ const idColor = computed<string>(() => getOdStarColor(props.data.star));
   cursor: pointer;
   gap: 4px;
 
+  &:hover {
+    border-color: var(--common-shadow-2);
+    background: var(--box-bg-4);
+    box-shadow: 0 1px 4px var(--common-shadow-t-2);
+  }
+
   &.selected {
+    border-color: var(--common-shadow-2);
     background: var(--box-bg-2);
+    box-shadow: 0 1px 4px var(--common-shadow-t-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $twc-li-base;
+    outline-offset: 1px;
   }
 }
 
 .twc-li-left {
   position: relative;
+  overflow: hidden;
   height: 100%;
   flex-shrink: 0;
   aspect-ratio: 1;
@@ -83,18 +108,10 @@ const idColor = computed<string>(() => getOdStarColor(props.data.star));
   .icon {
     position: absolute;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    border-bottom-left-radius: 4px;
-    border-top-left-radius: 4px;
-
-    img {
-      width: 100%;
-      height: 100%;
-      border-bottom-left-radius: 4px;
-      border-top-left-radius: 4px;
-      object-fit: cover;
-    }
+    object-fit: cover;
   }
 
   .bg {
@@ -121,7 +138,7 @@ const idColor = computed<string>(() => getOdStarColor(props.data.star));
   right: 2px;
   bottom: 0;
   color: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
-  font-size: 6px;
+  font-size: 8px;
   font-style: italic;
   opacity: 0.8;
 }
@@ -134,10 +151,11 @@ const idColor = computed<string>(() => getOdStarColor(props.data.star));
   display: flex;
   align-items: center;
   justify-content: center;
+  column-gap: 2px;
 
   img {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 
   .weapon {

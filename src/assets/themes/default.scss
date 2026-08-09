@@ -1,6 +1,6 @@
 /**
  * 主题样式文件-默认（浅色）主题
- * @since v0.9.7
+ * @since v0.11.3
  */
 
 /* default(light) theme */
@@ -49,4 +49,10 @@ html.default {
 
   /* common text color */
   --common-text-title: var(--tgc-dark-8); /* title */
+
+  --icon-filter: brightness(0.35);
+
+  /** 浮窗 */
+  --dialog-header-bg: #f6efe7ff;
+  --dialog-footer-bg: #f9f6f2ff;
 }

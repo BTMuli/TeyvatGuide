@@ -1,27 +1,24 @@
-<!-- TODO: UI一致性 -->
 <template>
-  <div class="wc-box">
-    <div class="wc-left">
-      <div class="wc-select">
-        <v-btn class="wc-btn" @click="showSelect = true">筛选角色</v-btn>
-        <v-btn class="wc-btn" @click="resetSelect = true">重置筛选</v-btn>
-      </div>
-      <div class="wc-list">
-        <TwcListItem
-          v-for="(item, index) in cardsInfo"
-          :key="index"
-          v-model:cur-item="curItem"
-          :data="item"
-          :width="160"
-          mode="character"
-          @click="switchC(item)"
-        />
-      </div>
-    </div>
-    <div class="wc-detail">
-      <TwcCharacter :item="curItem" />
-    </div>
-  </div>
+  <TwgCatalog
+    :count="cardsInfo.length"
+    icon="mdi-account-search"
+    title="角色图鉴"
+    unit="位角色"
+    @filter="showSelect = true"
+    @reset="resetSelect = true"
+  >
+    <template #list>
+      <TwcListItem
+        v-for="item in cardsInfo"
+        :key="item.id"
+        v-model:cur-item="curItem"
+        :data="item"
+        mode="character"
+        @click="switchC(item)"
+      />
+    </template>
+    <TwcCharacter :item="curItem" />
+  </TwgCatalog>
   <TwoSelectC v-model="showSelect" v-model:reset="resetSelect" @select-c="handleSelect" />
 </template>
 <script lang="ts" setup>
@@ -29,6 +26,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwcCharacter from "@comp/pageWiki/twc-character.vue";
 import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
+import TwgCatalog from "@comp/pageWiki/twg-catalog.vue";
 import TwoSelectC, { type SelectedCValue } from "@comp/pageWiki/two-select-c.vue";
 import { toObcPage } from "@utils/TGWindow.js";
 import { ref, shallowRef, watch } from "vue";
@@ -138,58 +136,3 @@ async function toOuter(item?: TGApp.App.Character.WikiBriefInfo): Promise<void> 
   await toObcPage(item.contentId);
 }
 </script>
-<style lang="scss" scoped>
-.wc-box {
-  position: relative;
-  display: flex;
-  max-height: calc(100vh - 32px);
-  column-gap: 8px;
-}
-
-.wc-left {
-  position: relative;
-  display: flex;
-  flex: 3;
-  flex-direction: column;
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.wc-select {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-}
-
-.wc-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-}
-
-.wc-list {
-  position: relative;
-  display: grid;
-  overflow: hidden auto;
-  width: 100%;
-  padding-right: 8px;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
-}
-
-.wc-detail {
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-  flex: 5;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: 0 0 4px var(--common-shadow-2);
-  overflow-y: auto;
-}
-</style>

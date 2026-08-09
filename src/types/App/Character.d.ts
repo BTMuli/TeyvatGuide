@@ -1,6 +1,6 @@
 /**
  * 角色相关类型定义文件
- * @since Beta v0.11.2
+ * @since Beta v0.11.3
  */
 
 declare namespace TGApp.App.Character {
@@ -89,6 +89,22 @@ declare namespace TGApp.App.Character {
   };
 
   /**
+   * Wiki 页详细信息-角色闲聊分组
+   * @since Beta v0.11.3
+   */
+  type WikiTalkGroup = {
+    /** 闲聊分组名称 */
+    group: string;
+    /** 闲聊内容列表 */
+    list: Array<{
+      /** 闲聊标题 */
+      title: string;
+      /** 闲聊内容 */
+      talk: string;
+    }>;
+  };
+
+  /**
    * 详细数据
    * @since Beta v0.11.2
    */
@@ -138,7 +154,7 @@ declare namespace TGApp.App.Character {
     /** 角色命座信息 */
     constellation: Array<TGApp.Plugins.Hutao.Character.RhisdTalent>;
     /** 角色闲聊 */
-    talks: Array<TGApp.Plugins.Hutao.Character.RhiFetter>;
+    talks: Array<WikiTalkGroup>;
     /** 角色故事 */
     stories: Array<TGApp.Plugins.Hutao.Character.RhiFetter>;
   };

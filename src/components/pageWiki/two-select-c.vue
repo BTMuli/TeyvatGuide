@@ -1,90 +1,59 @@
 <!-- 角色筛选 -->
 <template>
-  <TOverlay v-model="visible">
-    <div class="two-sc-container">
-      <div class="two-sc-item">
-        <div class="two-sc-title">星级</div>
-        <v-item-group v-model="selectedStar" class="two-sc-select" multiple>
-          <div v-for="(item, index) in selectStarList" :key="index">
-            <v-item v-slot="{ isSelected, toggle }" :value="item">
-              <v-btn :active="isSelected" activeColor="blue" @click="toggle">
-                <v-icon>{{ isSelected ? "mdi-star" : "mdi-star-outline" }}</v-icon>
-                <span>{{ item }}星</span>
-              </v-btn>
-            </v-item>
-          </div>
-        </v-item-group>
-      </div>
-      <div class="two-sc-item">
-        <div class="two-sc-title">武器</div>
-        <v-item-group v-model="selectedWeapon" class="two-sc-select" multiple>
-          <div v-for="(item, index) in selectWeaponList" :key="index">
-            <v-item v-slot="{ isSelected, toggle }" :value="item">
-              <v-btn :active="isSelected" activeColor="blue" @click="toggle">
-                <img
-                  :alt="`${item}`"
-                  :src="`/icon/weapon/${item}.webp`"
-                  class="two-sci-icon weapon"
-                />
-                <span>{{ item }}</span>
-              </v-btn>
-            </v-item>
-          </div>
-        </v-item-group>
-      </div>
-      <div class="two-sc-item">
-        <div class="two-sc-title">元素</div>
-        <v-item-group v-model="selectedElements" class="two-sc-select" multiple>
-          <div v-for="(item, index) in selectElementList" :key="index">
-            <v-item v-slot="{ isSelected, toggle }" :value="item">
-              <v-btn :active="isSelected" activeColor="blue" class="element-btn" @click="toggle">
-                <img
-                  :alt="`${item}元素`"
-                  :src="`/icon/element/${item}元素.webp`"
-                  class="two-sci-icon"
-                />
-                <span>{{ item }}元素</span>
-              </v-btn>
-            </v-item>
-          </div>
-        </v-item-group>
-      </div>
-      <div class="two-sc-item">
-        <div class="two-sc-title">强化</div>
-        <v-item-group v-model="selectedTeam" class="two-sc-select" multiple>
-          <div v-for="item in selectTeamList" :key="item.value">
-            <v-item v-slot="{ isSelected, toggle }" :value="item.value">
-              <v-btn :active="isSelected" activeColor="blue" @click="toggle">
-                <v-icon>{{ isSelected ? "mdi-check" : "mdi-checkbox-blank-outline" }}</v-icon>
-                <span>{{ item.label }}</span>
-              </v-btn>
-            </v-item>
-          </div>
-        </v-item-group>
-      </div>
-      <div class="two-sc-item">
-        <div class="two-sc-title">阵营</div>
-        <v-item-group v-model="selectedArea" class="two-sc-select" multiple>
-          <div v-for="(item, index) in selectAreaList" :key="index">
-            <v-item v-slot="{ isSelected, toggle }" :value="item">
-              <v-btn :active="isSelected" activeColor="blue" @click="toggle">
-                <v-icon>{{ isSelected ? "mdi-check" : "mdi-checkbox-blank-outline" }}</v-icon>
-                <span>{{ item }}</span>
-              </v-btn>
-            </v-item>
-          </div>
-        </v-item-group>
-      </div>
-      <div class="tow-sc-submit">
-        <v-btn variant="tonal" @click="visible = false">取消</v-btn>
-        <v-btn @click="confirmSelect">确定</v-btn>
-      </div>
+  <TwfFilterShell
+    v-model="visible"
+    description="按角色属性组合筛选，可同时选择多个条件"
+    title="筛选角色"
+    @confirm="confirmSelect"
+  >
+    <div class="twf-grid">
+      <section class="twf-group">
+        <div class="twf-group-title">星级</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="selectedStar" :items="starOpts" size="small">
+            <template #all>全部</template>
+          </UavSelectChips>
+        </div>
+      </section>
+      <section class="twf-group">
+        <div class="twf-group-title">特殊强化</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="selectedTeam" :items="teamOpts" size="small">
+            <template #all>全部</template>
+          </UavSelectChips>
+        </div>
+      </section>
+      <section class="twf-group twf-group-weapon twf-group-wide">
+        <div class="twf-group-title">武器类型</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="selectedWeapon" :items="weaponOpts" size="small">
+            <template #all>全部</template>
+          </UavSelectChips>
+        </div>
+      </section>
+      <section class="twf-group twf-group-wide">
+        <div class="twf-group-title">元素</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="selectedElements" :items="elementOpts" size="small">
+            <template #all>全部</template>
+          </UavSelectChips>
+        </div>
+      </section>
+      <section class="twf-group twf-group-wide">
+        <div class="twf-group-title">所属地区或阵营</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="selectedArea" :items="areaOpts" size="small">
+            <template #all>全部</template>
+          </UavSelectChips>
+        </div>
+      </section>
     </div>
-  </TOverlay>
+  </TwfFilterShell>
 </template>
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import TwfFilterShell from "@comp/pageWiki/twf-filter-shell.vue";
+import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-select-chips.vue";
 import { ref, shallowRef, watch } from "vue";
 
 export type SelectedCValue = {
@@ -97,15 +66,33 @@ export type SelectedCValue = {
 type TwoSelectCEmits = (e: "select-c", v: SelectedCValue) => void;
 
 const emits = defineEmits<TwoSelectCEmits>();
-const selectStarList = [4, 5];
-const selectWeaponList = ["单手剑", "双手剑", "弓", "法器", "长柄武器"];
-const selectElementList = ["冰", "岩", "水", "火", "草", "雷", "风"];
-const selectTeamList = [
-  { label: "无", value: 0 },
-  { label: "魔导", value: 1 },
-  { label: "月兆", value: 2 },
+const starOpts: Array<UavSelectChipsItem> = [4, 5].map((i) => ({
+  label: `${i}星`,
+  value: i.toString(),
+  title: `${i}星`,
+}));
+const weaponOpts: Array<UavSelectChipsItem> = ["单手剑", "双手剑", "弓", "法器", "长柄武器"].map(
+  (i) => ({
+    label: i,
+    value: i,
+    title: i,
+    icon: `/icon/weapon/${i}.webp`,
+  }),
+);
+const elementOpts: Array<UavSelectChipsItem> = ["冰", "岩", "水", "火", "草", "雷", "风"].map(
+  (i) => ({
+    label: `${i}元素`,
+    value: i,
+    title: `${i}元素`,
+    icon: `/icon/element/${i}元素.webp`,
+  }),
+);
+const teamOpts: Array<UavSelectChipsItem> = [
+  { label: "无", value: "0", title: "无特殊强化" },
+  { label: "魔导", value: "1", title: "魔导强化" },
+  { label: "月兆", value: "2", title: "月兆强化" },
 ];
-const selectAreaList = [
+const areaOpts: Array<UavSelectChipsItem> = [
   "蒙德",
   "璃月",
   "稻妻",
@@ -117,19 +104,19 @@ const selectAreaList = [
   "愚人众",
   "魔女会",
   "其他",
-];
+].map((i) => ({ label: i, value: i, title: i }));
 
-const selectedStar = ref<Array<number>>([]);
+const selectedStar = ref<Array<string>>([]);
 const selectedWeapon = ref<Array<string>>([]);
 const selectedElements = ref<Array<string>>([]);
-const selectedTeam = ref<Array<number>>([]);
+const selectedTeam = ref<Array<string>>([]);
 const selectedArea = ref<Array<string>>([]);
 const oldVal = shallowRef<SelectedCValue>({
-  star: selectedStar.value,
-  weapon: selectedWeapon.value,
-  elements: selectedElements.value,
-  team: selectedTeam.value,
-  area: selectedArea.value,
+  star: [],
+  weapon: [],
+  elements: [],
+  team: [],
+  area: [],
 });
 const visible = defineModel<boolean>();
 const resetModel = defineModel<boolean>("reset");
@@ -139,11 +126,11 @@ watch(
   () => {
     if (resetModel.value) {
       if (
-        isNotFilter(selectedStar.value, selectStarList) &&
-        isNotFilter(selectedWeapon.value, selectWeaponList) &&
-        isNotFilter(selectedElements.value, selectElementList) &&
-        isNotFilter(selectedTeam.value, selectTeamList) &&
-        isNotFilter(selectedArea.value, selectAreaList)
+        isNotFilter(selectedStar.value, starOpts) &&
+        isNotFilter(selectedWeapon.value, weaponOpts) &&
+        isNotFilter(selectedElements.value, elementOpts) &&
+        isNotFilter(selectedTeam.value, teamOpts) &&
+        isNotFilter(selectedArea.value, areaOpts)
       ) {
         showSnackbar.warn("无需重置");
         resetModel.value = false;
@@ -154,13 +141,7 @@ watch(
       selectedElements.value = [];
       selectedTeam.value = [];
       selectedArea.value = [];
-      oldVal.value = {
-        star: selectedStar.value,
-        weapon: selectedWeapon.value,
-        elements: selectedElements.value,
-        team: selectedTeam.value,
-        area: selectedArea.value,
-      };
+      oldVal.value = { star: [], weapon: [], elements: [], team: [], area: [] };
       resetModel.value = false;
       showSnackbar.success("已重置");
     }
@@ -171,25 +152,28 @@ watch(
   () => visible.value,
   () => {
     if (visible.value) {
-      selectedStar.value = oldVal.value.star;
+      selectedStar.value = oldVal.value.star.map(String);
       selectedWeapon.value = oldVal.value.weapon;
       selectedArea.value = oldVal.value.area;
       selectedElements.value = oldVal.value.elements;
-      selectedTeam.value = oldVal.value.team;
+      selectedTeam.value = oldVal.value.team.map(String);
     }
   },
 );
 
-function isNotFilter(list: ReadonlyArray<unknown>, data: ReadonlyArray<unknown>): boolean {
+function isNotFilter(
+  list: ReadonlyArray<string>,
+  data: ReadonlyArray<UavSelectChipsItem>,
+): boolean {
   return list.length === 0 || list.length === data.length;
 }
 
-function confirmSelect() {
+function confirmSelect(): void {
   const value: SelectedCValue = {
-    star: selectedStar.value,
+    star: selectedStar.value.map(Number),
     weapon: selectedWeapon.value,
     elements: selectedElements.value,
-    team: selectedTeam.value,
+    team: selectedTeam.value.map(Number),
     area: selectedArea.value,
   };
   emits("select-c", value);
@@ -197,55 +181,3 @@ function confirmSelect() {
   visible.value = false;
 }
 </script>
-<style lang="css" scoped>
-.two-sc-container {
-  display: flex;
-  width: 400px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 10px;
-  border-radius: 10px;
-  background-color: var(--box-bg-1);
-  gap: 10px;
-}
-
-.two-sc-item {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  column-gap: 10px;
-}
-
-.two-sc-title {
-  font-size: 20px;
-  font-weight: bold;
-  word-break: keep-all;
-}
-
-.two-sc-select {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.dark .two-sci-icon.weapon {
-  filter: none;
-}
-
-.two-sci-icon {
-  width: 30px;
-  height: 30px;
-  margin-right: 5px;
-
-  &.weapon {
-    filter: invert(0.5);
-  }
-}
-
-.tow-sc-submit {
-  display: flex;
-  margin-left: auto;
-  gap: 10px;
-}
-</style>

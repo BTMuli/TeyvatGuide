@@ -67,46 +67,61 @@
     <TwcCostumes :costumes />
     <TwcSkills :data="data.skills" />
     <TwcConstellations :data="data.constellation" />
-    <v-expansion-panels class="twc-text-item">
-      <v-expansion-panel>
-        <template #title><span class="twc-text-title">资料</span></template>
-        <template #text>
-          <v-expansion-panels variant="popout">
-            <v-expansion-panel
-              v-for="(item, index) in data?.talks"
-              :key="index"
-              expand-icon="mdi-menu-down"
-            >
-              <template #title>
-                <span class="twc-text-item-title">{{ item.Title }}</span>
-              </template>
-              <template #text>
-                <span class="twc-text-item-content" v-html="parseHtmlText(item.Context)" />
-              </template>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </template>
-      </v-expansion-panel>
-      <v-expansion-panel>
-        <template #title><span class="twc-text-title">故事</span></template>
-        <template #text>
-          <v-expansion-panels variant="popout">
-            <v-expansion-panel
-              v-for="(item, index) in data.stories"
-              :key="index"
-              expand-icon="mdi-menu-down"
-            >
-              <template #title>
-                <span class="twc-text-item-title">{{ item.Title }}</span>
-              </template>
-              <template #text>
-                <span class="twc-text-item-content">{{ item.Context }}</span>
-              </template>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </template>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <div class="twc-text-box">
+      <div class="twc-text-top">
+        <div class="twc-text-title">资料</div>
+        <v-tabs v-model="talksTab" class="twc-text-tabs" density="compact">
+          <v-tab
+            v-for="(item, index) in data?.talks"
+            :key="index"
+            :value="index"
+            class="twc-text-tab"
+          >
+            {{ item.group }}
+          </v-tab>
+        </v-tabs>
+      </div>
+      <v-window v-model="talksTab" :transition="false" class="twc-text-window">
+        <v-window-item
+          v-for="(item, index) in data?.talks"
+          :key="index"
+          :value="index"
+          class="twc-text-window-item"
+        >
+          <div v-for="(talk, talkIndex) in item.list" :key="talkIndex" class="twc-text-talk">
+            <div class="twc-text-talk-title">{{ talk.title }}</div>
+            <div class="twc-text-talk-content">
+              <span v-html="parseHtmlText(talk.talk)" />
+            </div>
+          </div>
+        </v-window-item>
+      </v-window>
+    </div>
+    <div class="twc-text-box">
+      <div class="twc-text-top">
+        <div class="twc-text-title">故事</div>
+        <v-tabs v-model="storiesTab" class="twc-text-tabs" density="compact">
+          <v-tab
+            v-for="(item, index) in data?.stories"
+            :key="index"
+            :value="index"
+            class="twc-text-tab"
+          >
+            {{ item.Title }}
+          </v-tab>
+        </v-tabs>
+      </div>
+      <v-window v-model="storiesTab" :transition="false" class="twc-text-window">
+        <v-window-item
+          v-for="(item, index) in data?.stories"
+          :key="index"
+          :value="index"
+          class="twc-text-content"
+        >
+          <span>{{ item.Context }}</span>
+        </v-window-item>
+      </v-window>
+    </div>
     <ToNameCard v-if="hasNc" v-model="showNc" :data="nameCard" />
   </div>
 </template>
@@ -140,16 +155,18 @@ const costumes = shallowRef<Array<TGApp.App.Character.Costume>>([]);
 const box = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${data.value?.star ?? 5}-Star.webp`,
   icon: `/WIKI/character/${data.value?.id ?? 10000005}.webp`,
-  size: "128px",
-  height: "128px",
+  size: "100px",
+  height: "100px",
   display: "inner",
   lt: `/icon/element/${data.value?.element ?? "风"}元素.webp`,
-  ltSize: "30px",
-  innerHeight: 30,
+  ltSize: "25px",
+  innerText: "",
   innerIcon: `/icon/weapon/${data.value?.weapon}.webp`,
-  innerText: data.value?.name ?? "旅行者",
   clickable: false,
 }));
+
+const talksTab = ref<number>(0);
+const storiesTab = ref<number>(0);
 
 onMounted(() => loadData());
 
@@ -162,6 +179,8 @@ async function loadData(): Promise<void> {
     return;
   }
   data.value = res;
+  talksTab.value = 0;
+  storiesTab.value = 0;
   const appC = AppCharacterData.find((i) => i.name === data.value?.name);
   if (appC !== undefined) {
     hasNc.value = true;
@@ -185,10 +204,6 @@ async function toBirth(date: string): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-:deep(.v-expansion-panel-title) {
-  background: var(--common-shadow-1);
-}
-
 .twc-box {
   display: flex;
   flex-direction: column;
@@ -199,15 +214,21 @@ async function toBirth(date: string): Promise<void> {
 .twc-brief {
   display: flex;
   align-items: flex-start;
-  column-gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  column-gap: 12px;
 }
 
 .twc-brief-info {
   position: relative;
   display: flex;
   width: 100%;
+  min-height: 100px;
   flex-direction: column;
   justify-content: space-between;
+  gap: 4px;
 }
 
 .twc-bi-top {
@@ -251,12 +272,12 @@ async function toBirth(date: string): Promise<void> {
   display: flex;
   width: 100%;
   flex-wrap: wrap;
-  column-gap: 16px;
+  gap: 4px 16px;
 }
 
 .twc-big-item {
   display: flex;
-  column-gap: 5px;
+  column-gap: 4px;
 }
 
 .twc-big-item.active {
@@ -267,24 +288,72 @@ async function toBirth(date: string): Promise<void> {
   font-weight: bold;
 }
 
-.twc-text-title {
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 18px;
-}
-
-.twc-text-item {
+.twc-text-box {
   display: flex;
   flex-direction: column;
-  row-gap: 5px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  gap: 8px;
 }
 
-.twc-text-item-title {
-  font-weight: bold;
+.twc-text-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-.twc-text-item-content {
+.twc-text-title {
+  padding: 0 4px;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 22px;
+  white-space: pre;
+}
+
+.twc-text-window {
+  min-height: 0;
+}
+
+.twc-text-window-item {
+  display: flex;
+  max-height: 360px;
+  flex-direction: column;
+  padding-right: 4px;
+  overflow-y: auto;
+  row-gap: 8px;
+}
+
+.twc-text-talk {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  row-gap: 4px;
+}
+
+.twc-text-talk-title {
+  font-family: var(--font-title);
   font-size: 14px;
+}
+
+.twc-text-talk-content {
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.twc-text-content {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  font-size: 14px;
+  line-height: 20px;
   white-space: pre-wrap;
   word-break: break-all;
 }

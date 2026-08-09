@@ -55,9 +55,10 @@ watch(
 .twc-costumes-box {
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  padding: 8px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
+  border-radius: 8px;
+  gap: 8px;
 }
 
 .twc-costume-tab {
@@ -81,6 +82,7 @@ watch(
   border-radius: 4px;
   background: var(--box-bg-1);
   column-gap: 8px;
+  line-height: 20px;
   white-space: pre-wrap;
 }
 

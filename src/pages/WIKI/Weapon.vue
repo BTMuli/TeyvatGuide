@@ -1,26 +1,24 @@
-<!-- 武器Wiki TODO: UI一致性 -->
 <template>
-  <div class="ww-box">
-    <div class="ww-left">
-      <div class="ww-select">
-        <v-btn class="ww-btn" @click="showSelect = true">筛选武器</v-btn>
-        <v-btn class="ww-btn" @click="resetSelect = true">重置筛选</v-btn>
-      </div>
-      <div class="ww-list">
-        <TwcListItem
-          v-for="(item, index) in cardsInfo"
-          :key="index"
-          v-model:cur-item="curItem"
-          :data="item"
-          mode="weapon"
-          @click="switchW(item)"
-        />
-      </div>
-    </div>
-    <div class="ww-detail">
-      <TwcWeapon :item="curItem" @error="toOuter(curItem)" />
-    </div>
-  </div>
+  <TwgCatalog
+    :count="cardsInfo.length"
+    icon="mdi-sword-cross"
+    title="武器图鉴"
+    unit="件武器"
+    @filter="showSelect = true"
+    @reset="resetSelect = true"
+  >
+    <template #list>
+      <TwcListItem
+        v-for="item in cardsInfo"
+        :key="item.id"
+        v-model:cur-item="curItem"
+        :data="item"
+        mode="weapon"
+        @click="switchW(item)"
+      />
+    </template>
+    <TwcWeapon :item="curItem" @error="toOuter(curItem)" />
+  </TwgCatalog>
   <TwoSelectW v-model="showSelect" v-model:reset="resetSelect" @select-w="handleSelectW" />
 </template>
 <script lang="ts" setup>
@@ -28,6 +26,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwcListItem from "@comp/pageWiki/twc-list-item.vue";
 import TwcWeapon from "@comp/pageWiki/twc-weapon.vue";
+import TwgCatalog from "@comp/pageWiki/twg-catalog.vue";
 import TwoSelectW, { type SelectedWValue } from "@comp/pageWiki/two-select-w.vue";
 import { toObcPage } from "@utils/TGWindow.js";
 import { ref, shallowRef, watch } from "vue";
@@ -88,7 +87,7 @@ function switchW(item: TGApp.App.Weapon.WikiBriefInfo): void {
   router.replace({ params: { id: item.id.toString() } });
 }
 
-function handleSelectW(val: SelectedWValue) {
+function handleSelectW(val: SelectedWValue): void {
   showSelect.value = false;
   const filterW = AppWeaponData.filter((item) => {
     if (val.star.length > 0 && !val.star.includes(item.star)) return false;
@@ -116,58 +115,3 @@ async function toOuter(item?: TGApp.App.Weapon.WikiBriefInfo): Promise<void> {
   await toObcPage(item.contentId);
 }
 </script>
-<style lang="scss" scoped>
-.ww-box {
-  position: relative;
-  display: flex;
-  max-height: calc(100vh - 32px);
-  column-gap: 8px;
-}
-
-.ww-left {
-  position: relative;
-  display: flex;
-  flex: 3;
-  flex-direction: column;
-  flex-shrink: 0;
-  gap: 8px;
-}
-
-.ww-select {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-}
-
-.ww-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-}
-
-.ww-list {
-  position: relative;
-  display: grid;
-  overflow: hidden auto;
-  width: 100%;
-  padding-right: 8px;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
-}
-
-.ww-detail {
-  position: relative;
-  width: 100%;
-  box-sizing: border-box;
-  flex: 5;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: 0 0 4px var(--common-shadow-2);
-  overflow-y: auto;
-}
-</style>
