@@ -1,7 +1,7 @@
 <!-- 首页素材日历-普通条目浮窗 -->
 <template>
   <TOverlay v-model="visible" blurVal="8px" topOffset="64px">
-    <section class="phmo-panel">
+    <section ref="panelRef" class="phmo-panel">
       <header class="phmo-header">
         <UcItemIcon :alt="item.name" :icon="itemIcon" :size="84" :star="item.star" />
         <div class="phmo-heading">
@@ -39,7 +39,24 @@
             <span>{{ item.source.area }} · {{ item.source.name }}</span>
           </div>
         </div>
-        <v-btn icon="mdi-close" title="关闭" variant="text" @click="visible = false" />
+        <div class="phmo-actions" data-html2canvas-ignore="true">
+          <v-btn
+            aria-label="保存素材日历分享图"
+            density="comfortable"
+            icon="mdi-share-variant"
+            title="保存素材日历分享图"
+            variant="text"
+            @click="shareCalendar"
+          />
+          <v-btn
+            aria-label="关闭素材日历详情"
+            density="comfortable"
+            icon="mdi-close"
+            title="关闭"
+            variant="text"
+            @click="visible = false"
+          />
+        </div>
       </header>
 
       <div class="phmo-content">
@@ -93,7 +110,7 @@
         </section>
       </div>
 
-      <footer class="phmo-footer">
+      <footer ref="footerRef" class="phmo-footer" data-html2canvas-ignore="true">
         <v-btn prepend-icon="mdi-open-in-new" variant="text" @click="openObcDetail">
           观测枢资料
         </v-btn>
@@ -106,14 +123,21 @@
           {{ itemTypeLabel }}详情
         </v-btn>
       </footer>
+
+      <footer class="phmo-share">
+        {{ shareCaption }} · Rendered by TeyvatGuide v{{ version }}
+      </footer>
     </section>
   </TOverlay>
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import { getVersion } from "@tauri-apps/api/app";
+import { generateShareImg } from "@utils/TGShare.js";
 import { toObcPage } from "@utils/TGWindow.js";
-import { computed } from "vue";
+import { computed, onMounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCalendarOverlayProps = {
@@ -128,6 +152,9 @@ const props = withDefaults(defineProps<PhCalendarOverlayProps>(), {
 });
 const visible = defineModel<boolean>({ default: false });
 const router = useRouter();
+const panelRef = useTemplateRef<HTMLElement>("panelRef");
+const footerRef = useTemplateRef<HTMLElement>("footerRef");
+const version = ref<string>();
 
 const dayLabels: Record<number, string> = {
   1: "周一",
@@ -152,6 +179,9 @@ const itemRarityLabel = computed<string>(() =>
 const materialSectionTitle = computed<string>(() =>
   props.item.itemType === "character" ? "天赋培养材料" : "武器突破材料",
 );
+const shareCaption = computed<string>(
+  () => `${props.item.name} · ${itemTypeLabel.value} · ${props.src}`,
+);
 const sortedMaterials = computed<Array<TGApp.App.Calendar.Material>>(() =>
   [...props.item.materials].sort((a, b) => b.star - a.star),
 );
@@ -162,6 +192,32 @@ const dropDayLabels = computed<Array<DropDayLabel>>(() =>
     value: day,
   })),
 );
+
+onMounted(async () => {
+  version.value = await getVersion();
+});
+
+async function shareCalendar(): Promise<void> {
+  const element = panelRef.value;
+  if (element === null) {
+    showSnackbar.error("未获取到分享内容");
+    return;
+  }
+  const maxHeight = element.style.maxHeight;
+  const overflowY = element.style.overflowY;
+  element.style.maxHeight = "none";
+  element.style.overflowY = "visible";
+  const footer = footerRef.value;
+  const footerDisplay = footer?.style.display;
+  if (footer !== null) footer.style.display = "none";
+  try {
+    await generateShareImg(`素材日历_${props.item.name}`, element, 1.5);
+  } finally {
+    element.style.maxHeight = maxHeight;
+    element.style.overflowY = overflowY;
+    if (footer !== null) footer.style.display = footerDisplay;
+  }
+}
 
 async function openDetail(): Promise<void> {
   visible.value = false;
@@ -177,6 +233,7 @@ async function openObcDetail(): Promise<void> {
 <style lang="scss" scoped>
 .phmo-panel {
   display: flex;
+  overflow: hidden;
   width: min(680px, calc(100vw - 32px));
   max-height: calc(100% - 32px);
   flex-direction: column;
@@ -184,7 +241,6 @@ async function openObcDetail(): Promise<void> {
   border-radius: 12px;
   background: var(--app-page-bg);
   box-shadow: 0 18px 48px #00000066;
-  overflow-y: auto;
 }
 
 .phmo-header,
@@ -201,10 +257,18 @@ async function openObcDetail(): Promise<void> {
   align-items: center;
 }
 
+.phmo-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  gap: 4px;
+}
+
 .phmo-header {
   padding: 16px;
   border-bottom: 1px solid var(--common-shadow-1);
-  background: color-mix(in srgb, var(--tgc-od-orange) 8%, var(--box-bg-1));
+  background: var(--dialog-header-bg);
   gap: 14px;
 }
 
@@ -345,6 +409,16 @@ async function openObcDetail(): Promise<void> {
   padding: 10px 16px;
   border-top: 1px solid var(--common-shadow-1);
   gap: 8px;
+}
+
+.phmo-share {
+  padding: 8px 16px;
+  border-top: 1px solid var(--common-shadow-1);
+  background: var(--dialog-footer-bg);
+  color: var(--box-text-4);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
 }
 
 @media (width <= 600px) {

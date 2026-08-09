@@ -1,7 +1,7 @@
 <!-- 首页素材日历-养成目标浮窗 -->
 <template>
   <TOverlay v-model="visible" blurVal="8px" topOffset="64px">
-    <section class="phco-panel">
+    <section ref="panelRef" class="phco-panel">
       <header class="phco-header">
         <UcItemIcon :alt="item.name" :icon="itemIcon" :size="84" :star="item.star" />
         <div class="phco-heading">
@@ -22,7 +22,24 @@
             <span>{{ item.source.area }} · {{ item.source.name }}</span>
           </div>
         </div>
-        <v-btn icon="mdi-close" title="关闭" variant="text" @click="visible = false" />
+        <div class="phco-actions" data-html2canvas-ignore="true">
+          <v-btn
+            aria-label="保存养成目标分享图"
+            density="comfortable"
+            icon="mdi-share-variant"
+            title="保存养成目标分享图"
+            variant="text"
+            @click="shareCultivation"
+          />
+          <v-btn
+            aria-label="关闭养成目标详情"
+            density="comfortable"
+            icon="mdi-close"
+            title="关闭"
+            variant="text"
+            @click="visible = false"
+          />
+        </div>
       </header>
 
       <div class="phco-entries">
@@ -108,7 +125,7 @@
         </div>
       </div>
 
-      <footer class="phco-footer">
+      <footer ref="footerRef" class="phco-footer">
         <v-btn prepend-icon="mdi-book-open-page-variant-outline" variant="text" @click="openDetail">
           {{ item.itemType === "character" ? "角色详情" : "武器详情" }}
         </v-btn>
@@ -121,14 +138,21 @@
           查看养成计划
         </v-btn>
       </footer>
+
+      <footer class="phco-share">
+        {{ shareCaption }} · Rendered by TeyvatGuide v{{ version }}
+      </footer>
     </section>
   </TOverlay>
 </template>
 
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
+import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
-import { computed } from "vue";
+import { getVersion } from "@tauri-apps/api/app";
+import { generateShareImg } from "@utils/TGShare.js";
+import { computed, onMounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCalendarCultivationOverlayProps = {
@@ -146,6 +170,9 @@ type TargetMaterial = TGApp.App.Calendar.Material & {
 const props = defineProps<PhCalendarCultivationOverlayProps>();
 const visible = defineModel<boolean>({ default: false });
 const router = useRouter();
+const panelRef = useTemplateRef<HTMLElement>("panelRef");
+const footerRef = useTemplateRef<HTMLElement>("footerRef");
+const version = ref<string>();
 
 const itemIcon = computed<string>(() => `/WIKI/${props.item.itemType}/${props.item.id}.webp`);
 const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
@@ -168,9 +195,36 @@ const targetMaterials = computed<Array<TargetMaterial>>(() =>
     })
     .filter((material) => material.targetRequired > 0),
 );
+const shareCaption = computed<string>(() => `${props.item.name} · 养成目标`);
 
 function formatCount(count: number): string {
   return count.toLocaleString("zh-CN");
+}
+
+onMounted(async () => {
+  version.value = await getVersion();
+});
+
+async function shareCultivation(): Promise<void> {
+  const element = panelRef.value;
+  if (element === null) {
+    showSnackbar.error("未获取到分享内容");
+    return;
+  }
+  const maxHeight = element.style.maxHeight;
+  const overflowY = element.style.overflowY;
+  element.style.maxHeight = "none";
+  element.style.overflowY = "visible";
+  const footer = footerRef.value;
+  const footerDisplay = footer?.style.display;
+  if (footer !== null) footer.style.display = "none";
+  try {
+    await generateShareImg(`养成目标_${props.item.name}`, element, 1.5);
+  } finally {
+    element.style.maxHeight = maxHeight;
+    element.style.overflowY = overflowY;
+    if (footer !== null) footer.style.display = footerDisplay;
+  }
 }
 
 async function openDetail(): Promise<void> {
@@ -187,6 +241,7 @@ async function openPlan(): Promise<void> {
 <style lang="scss" scoped>
 .phco-panel {
   display: flex;
+  overflow: hidden;
   width: min(720px, calc(100vw - 32px));
   max-height: calc(100% - 32px);
   flex-direction: column;
@@ -194,7 +249,6 @@ async function openPlan(): Promise<void> {
   border-radius: 12px;
   background: var(--app-page-bg);
   box-shadow: 0 18px 48px #00000066;
-  overflow-y: auto;
 }
 
 .phco-header,
@@ -213,10 +267,18 @@ async function openPlan(): Promise<void> {
   align-items: center;
 }
 
+.phco-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  gap: 4px;
+}
+
 .phco-header {
   padding: 16px;
   border-bottom: 1px solid var(--common-shadow-1);
-  background: color-mix(in srgb, var(--tgc-od-orange) 8%, var(--box-bg-1));
+  background: var(--dialog-header-bg);
   gap: 14px;
 }
 
@@ -378,6 +440,16 @@ async function openPlan(): Promise<void> {
   padding: 10px 16px;
   border-top: 1px solid var(--common-shadow-1);
   gap: 8px;
+}
+
+.phco-share {
+  padding: 8px 16px;
+  border-top: 1px solid var(--common-shadow-1);
+  background: var(--dialog-footer-bg);
+  color: var(--box-text-4);
+  font-size: 10px;
+  line-height: 14px;
+  text-align: center;
 }
 
 @media (width <= 600px) {
