@@ -21,7 +21,7 @@
           <v-list-item
             v-for="ac in gameAccounts"
             :key="ac.gameUid"
-            @click="useUserStore().switchGameAccount(ac.gameUid)"
+            @click="handleSwitchGameAccount(ac.gameUid)"
           >
             <v-list-item-title>{{ ac.nickname }}</v-list-item-title>
             <v-list-item-subtitle> {{ ac.gameUid }}({{ ac.regionName }})</v-list-item-subtitle>
@@ -137,6 +137,10 @@ import { computed, ref, shallowRef } from "vue";
 const userStore = useUserStore();
 const { isLogin } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
+
+async function handleSwitchGameAccount(gameUid: string): Promise<void> {
+  await userStore.switchGameAccount(gameUid);
+}
 
 const showLoginQr = ref<boolean>(false);
 const accounts = shallowRef<Array<TGApp.App.Account.User>>([]);

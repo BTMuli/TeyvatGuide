@@ -4,7 +4,7 @@
     <div class="duc-doc-bgc" />
     <!-- 左上角色跟武器 -->
     <div class="duc-doc-lt">
-      <DucDetailOlt :costume="props.costume" :data="props.avatar.avatar" mode="character" />
+      <DucDetailOlt :costume :data="props.avatar.avatar" mode="character" />
       <DucDetailOlt :data="props.avatar.weapon" mode="weapon" />
       <div class="duc-relic">
         <DucDetailRelic
@@ -15,13 +15,7 @@
         />
       </div>
     </div>
-    <v-btn
-      :loading="loading"
-      class="duc-doc-btn"
-      data-html2canvas-ignore
-      variant="outlined"
-      @click="share"
-    >
+    <v-btn :loading class="duc-doc-btn" data-html2canvas-ignore variant="outlined" @click="share">
       <v-icon>mdi-share-variant</v-icon>
       <span>分享</span>
     </v-btn>
