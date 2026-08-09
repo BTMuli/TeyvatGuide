@@ -1,16 +1,15 @@
 <template>
   <div class="twc-skills-box">
-    <v-tabs v-model="tab">
+    <v-tabs v-model="tab" class="twc-detail-tabs twc-icon-tabs" density="compact" show-arrows>
       <v-tab
         v-for="(item, index) in tabValues"
         :key="index"
+        :aria-label="item.name"
         :title="item.name"
         :value="item.name"
         class="twc-skill-tab"
-        density="compact"
       >
-        <img :src="`/icon/talents/${item.icon}.webp`" alt="icon" />
-        <span v-if="tab === item.name">{{ item.name }}</span>
+        <img :src="`/icon/talents/${item.icon}.webp`" alt="" />
       </v-tab>
     </v-tabs>
     <v-window v-model="tab">
@@ -32,13 +31,13 @@
 </template>
 <script lang="ts" setup>
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, shallowRef, watch } from "vue";
 
 type TwcSkillsProps = { data: Array<TGApp.App.Character.WikiSkill> };
 type TabItem = { name: string; icon: string };
 
 const props = defineProps<TwcSkillsProps>();
-const tab = ref<string>();
+const tab = defineModel<string>("selected");
 const tabValues = shallowRef<Array<TabItem>>([]);
 
 function loadData(): void {
@@ -57,9 +56,6 @@ watch(() => props.data, loadData);
 .twc-skills-box {
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
   gap: 8px;
 }
 
@@ -67,37 +63,30 @@ watch(() => props.data, loadData);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .twc-skill-tab img {
-  width: 30px;
-  height: 30px;
-  filter: brightness(0.25);
-}
-
-.dark .twc-skill-tab img {
-  filter: brightness(0.75);
+  width: 24px;
+  height: 24px;
+  filter: var(--icon-filter);
 }
 
 .twc-skill-desc {
   display: flex;
+  font-size: 14px;
 }
 
 .twc-skill-normal {
   width: 100%;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--box-bg-1);
-  line-height: 20px;
   white-space: pre-wrap;
 }
 
 .twc-skill-special {
   padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-2);
-  line-height: 20px;
+  margin-left: 4px;
+  background: var(--box-bg-3);
   white-space: pre-wrap;
 }
 </style>

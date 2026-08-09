@@ -126,6 +126,10 @@ const titleId = useId();
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  :deep(.twf-grid-3) {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
   :deep(.twf-group) {
     display: flex;
     min-width: 0;

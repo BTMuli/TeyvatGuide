@@ -1,126 +1,152 @@
 <!-- 角色WIKI详情 -->
 <template>
   <div v-if="data !== undefined" class="twc-box">
-    <div class="twc-brief">
-      <TItembox :model-value="box" />
-      <div class="twc-brief-info">
-        <div class="twc-bi-top">
-          <div class="twc-bi-title">
-            <span>{{ data.name }}</span>
-            <span>{{ data.title }}</span>
-            <img
-              v-if="props.item.contentId !== 0"
-              alt="observer"
-              src="/platforms/mhy/observer.webp"
-              title="前往观测枢"
-              @click="toWiki()"
-            />
+    <div class="twc-summary">
+      <div class="twc-brief">
+        <TItembox :model-value="box" />
+        <div class="twc-brief-info">
+          <div class="twc-bi-top">
+            <div class="twc-bi-title">
+              <span>{{ data.name }}</span>
+              <span>{{ data.title }}</span>
+              <img
+                v-if="props.item.contentId !== 0"
+                alt="observer"
+                src="/platforms/mhy/observer.webp"
+                title="前往观测枢"
+                @click="toWiki()"
+              />
+            </div>
+            <div class="twc-bi-desc">{{ data.description }}</div>
           </div>
-          <div class="twc-bi-desc">{{ data.description }}</div>
-        </div>
-        <div class="twc-bi-grid">
-          <div class="twc-big-item">
-            <span>{{ data.elePrefix }}</span>
-            <span>{{ data.element }}</span>
+          <div class="twc-bi-grid">
+            <div class="twc-big-item">
+              <span>{{ data.elePrefix }}</span>
+              <span>{{ data.element }}</span>
+            </div>
+            <div class="twc-big-item">
+              <span>命之座</span>
+              <span>{{ data.brief.constellation }}</span>
+            </div>
+            <div class="twc-big-item">
+              <span>所属</span>
+              <span>
+                {{ data.area === data.brief.camp ? data.area : `${data.area}·${data.brief.camp}` }}
+              </span>
+            </div>
+            <div
+              class="twc-big-item active"
+              title="点击查看生日画片"
+              @click="toBirth(data.brief.birth)"
+            >
+              <span>生日</span>
+              <span>{{ data.brief.birth }}</span>
+            </div>
           </div>
-          <div class="twc-big-item">
-            <span>命之座</span>
-            <span>{{ data.brief.constellation }}</span>
-          </div>
-          <div class="twc-big-item">
-            <span>所属</span>
-            <span>
-              {{ data.area === data.brief.camp ? data.area : `${data.area}·${data.brief.camp}` }}
-            </span>
-          </div>
-          <div
-            class="twc-big-item active"
-            title="点击查看生日画片"
-            @click="toBirth(data.brief.birth)"
-          >
-            <span>生日</span>
-            <span>{{ data.brief.birth }}</span>
-          </div>
-        </div>
-        <div class="twc-bi-grid">
-          <div class="twc-big-item">
-            <span>汉语CV</span>
-            <span>{{ data.brief.cv.cn }}</span>
-          </div>
-          <div class="twc-big-item">
-            <span>日语CV</span>
-            <span>{{ data.brief.cv.jp }}</span>
-          </div>
-          <div class="twc-big-item">
-            <span>英语CV</span>
-            <span>{{ data.brief.cv.en }}</span>
-          </div>
-          <div class="twc-big-item">
-            <span>韩语CV</span>
-            <span>{{ data.brief.cv.kr }}</span>
+          <div class="twc-bi-grid">
+            <div class="twc-big-item">
+              <span>汉语CV</span>
+              <span>{{ data.brief.cv.cn }}</span>
+            </div>
+            <div class="twc-big-item">
+              <span>日语CV</span>
+              <span>{{ data.brief.cv.jp }}</span>
+            </div>
+            <div class="twc-big-item">
+              <span>英语CV</span>
+              <span>{{ data.brief.cv.en }}</span>
+            </div>
+            <div class="twc-big-item">
+              <span>韩语CV</span>
+              <span>{{ data.brief.cv.kr }}</span>
+            </div>
           </div>
         </div>
       </div>
+      <TopNameCard v-if="nameCard" :data="nameCard" @selected="showNc = !showNc" />
+      <PwMaterialList :data="data.materials" />
     </div>
-    <TopNameCard v-if="nameCard" :data="nameCard" @selected="showNc = !showNc" />
-    <PwMaterialList :data="data.materials" />
-    <TwcCostumes :costumes />
-    <TwcSkills :data="data.skills" />
-    <TwcConstellations :data="data.constellation" />
-    <div class="twc-text-box">
-      <div class="twc-text-top">
-        <div class="twc-text-title">资料</div>
-        <v-tabs v-model="talksTab" class="twc-text-tabs" density="compact">
-          <v-tab
-            v-for="(item, index) in data?.talks"
-            :key="index"
-            :value="index"
-            class="twc-text-tab"
-          >
+    <div ref="scrollArea" class="twc-scroll">
+      <!-- 衣装 -->
+      <section class="twc-detail-section">
+        <header class="twc-section-header">
+          <h2>衣装</h2>
+        </header>
+        <TwcCostumes :costumes />
+      </section>
+      <!-- 天赋 -->
+      <section class="twc-detail-section">
+        <header class="twc-section-header">
+          <h2>天赋</h2>
+          <div v-if="currentTalent" class="twc-section-current">
+            <img
+              :src="`/icon/constellations/${currentTalent.Icon}.webp`"
+              alt=""
+              aria-hidden="true"
+            />
+            <span>{{ currentTalent.Name }}</span>
+          </div>
+        </header>
+        <TwcConstellations v-model:selected="selectedTalent" :data="data.constellation" />
+      </section>
+      <!-- 技能 -->
+      <section class="twc-detail-section">
+        <header class="twc-section-header">
+          <h2>技能</h2>
+          <div v-if="currentSkill" class="twc-section-current">
+            <img :src="`/icon/talents/${currentSkill.icon}.webp`" alt="" aria-hidden="true" />
+            <span>{{ currentSkill.name }}</span>
+          </div>
+        </header>
+        <TwcSkills v-model:selected="selectedSkill" :data="data.skills" />
+      </section>
+      <!-- 资料 -->
+      <section class="twc-detail-section">
+        <header class="twc-section-header">
+          <h2>资料</h2>
+        </header>
+        <v-tabs v-model="talksTab" class="twc-detail-tabs" density="compact" show-arrows>
+          <v-tab v-for="(item, index) in data.talks" :key="index" :value="index">
             {{ item.group }}
           </v-tab>
         </v-tabs>
-      </div>
-      <v-window v-model="talksTab" :transition="false" class="twc-text-window">
-        <v-window-item
-          v-for="(item, index) in data?.talks"
-          :key="index"
-          :value="index"
-          class="twc-text-window-item"
-        >
-          <div v-for="(talk, talkIndex) in item.list" :key="talkIndex" class="twc-text-talk">
-            <div class="twc-text-talk-title">{{ talk.title }}</div>
-            <div class="twc-text-talk-content">
-              <span v-html="parseHtmlText(talk.talk)" />
-            </div>
-          </div>
-        </v-window-item>
-      </v-window>
-    </div>
-    <div class="twc-text-box">
-      <div class="twc-text-top">
-        <div class="twc-text-title">故事</div>
-        <v-tabs v-model="storiesTab" class="twc-text-tabs" density="compact">
-          <v-tab
-            v-for="(item, index) in data?.stories"
+        <v-window v-model="talksTab" :transition="false" class="twc-text-window">
+          <v-window-item
+            v-for="(item, index) in data.talks"
             :key="index"
             :value="index"
-            class="twc-text-tab"
+            class="twc-text-window-item"
           >
+            <div v-for="(talk, talkIndex) in item.list" :key="talkIndex" class="twc-text-talk">
+              <div class="twc-text-talk-title">{{ talk.title }}</div>
+              <div class="twc-text-talk-content">
+                <span v-html="parseHtmlText(talk.talk)" />
+              </div>
+            </div>
+          </v-window-item>
+        </v-window>
+      </section>
+      <!-- 故事 -->
+      <section class="twc-detail-section">
+        <header class="twc-section-header">
+          <h2>故事</h2>
+        </header>
+        <v-tabs v-model="storiesTab" class="twc-detail-tabs" density="compact" show-arrows>
+          <v-tab v-for="(item, index) in data.stories" :key="index" :value="index">
             {{ item.Title }}
           </v-tab>
         </v-tabs>
-      </div>
-      <v-window v-model="storiesTab" :transition="false" class="twc-text-window">
-        <v-window-item
-          v-for="(item, index) in data?.stories"
-          :key="index"
-          :value="index"
-          class="twc-text-content"
-        >
-          <span>{{ item.Context }}</span>
-        </v-window-item>
-      </v-window>
+        <v-window v-model="storiesTab" :transition="false" class="twc-text-window">
+          <v-window-item
+            v-for="(item, index) in data.stories"
+            :key="index"
+            :value="index"
+            class="twc-text-content"
+          >
+            <span>{{ item.Context }}</span>
+          </v-window-item>
+        </v-window>
+      </section>
     </div>
     <ToNameCard v-if="hasNc" v-model="showNc" :data="nameCard" />
   </div>
@@ -133,7 +159,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TwcCostumes from "@comp/pageWiki/twc-costumes.vue";
 import { toObcPage } from "@utils/TGWindow.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import PwMaterialList from "./pw-material-list.vue";
@@ -155,8 +181,8 @@ const costumes = shallowRef<Array<TGApp.App.Character.Costume>>([]);
 const box = computed<TItemBoxData>(() => ({
   bg: `/icon/bg/${data.value?.star ?? 5}-Star.webp`,
   icon: `/WIKI/character/${data.value?.id ?? 10000005}.webp`,
-  size: "100px",
-  height: "100px",
+  size: "120px",
+  height: "120px",
   display: "inner",
   lt: `/icon/element/${data.value?.element ?? "风"}元素.webp`,
   ltSize: "25px",
@@ -167,6 +193,15 @@ const box = computed<TItemBoxData>(() => ({
 
 const talksTab = ref<number>(0);
 const storiesTab = ref<number>(0);
+const selectedTalent = ref<string>("");
+const selectedSkill = ref<string>("");
+const scrollArea = useTemplateRef<HTMLDivElement>("scrollArea");
+const currentTalent = computed<TGApp.Plugins.Hutao.Character.RhisdTalent | undefined>(() =>
+  data.value?.constellation.find((item) => item.Name === selectedTalent.value),
+);
+const currentSkill = computed<TGApp.App.Character.WikiSkill | undefined>(() =>
+  data.value?.skills.find((item) => item.name === selectedSkill.value),
+);
 
 onMounted(() => loadData());
 
@@ -187,6 +222,8 @@ async function loadData(): Promise<void> {
     nameCard.value = AppNameCardsData.find((i) => i.name === appC.nameCard);
     costumes.value = appC.costumes.sort((a, b) => a.id - b.id);
   } else hasNc.value = false;
+  await nextTick();
+  scrollArea.value?.scrollTo({ top: 0 });
   showSnackbar.success(`成功获取角色 ${props.item.name} 的 Wiki 数据`);
 }
 
@@ -206,9 +243,30 @@ async function toBirth(date: string): Promise<void> {
 <style lang="scss" scoped>
 .twc-box {
   display: flex;
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
   flex-direction: column;
   margin: 0 auto;
-  row-gap: 8px;
+  row-gap: 12px;
+}
+
+.twc-summary {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.twc-scroll {
+  display: flex;
+  overflow: hidden auto;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  padding-right: 8px;
+  gap: 8px;
+  scrollbar-gutter: stable;
 }
 
 .twc-brief {
@@ -288,30 +346,77 @@ async function toBirth(date: string): Promise<void> {
   font-weight: bold;
 }
 
-.twc-text-box {
+.twc-detail-section {
   display: flex;
   flex-direction: column;
-  padding: 8px;
+  flex-shrink: 0;
+  padding: 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
+  background: var(--box-bg-1);
   gap: 8px;
 }
 
-.twc-text-top {
-  position: relative;
+.twc-section-header {
   display: flex;
+  min-height: 24px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 22px;
+  }
 }
 
-.twc-text-title {
-  padding: 0 4px;
-  color: var(--common-text-title);
+.twc-section-current {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  column-gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+
+  img {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    filter: var(--icon-filter);
+    object-fit: contain;
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+:deep(.twc-detail-tabs) {
+  width: 100%;
+  min-width: 0;
+  border-bottom: 1px solid var(--common-shadow-1);
+}
+
+:deep(.twc-detail-tabs .v-tab) {
+  min-width: 64px;
+  padding: 0 12px;
   font-family: var(--font-title);
-  font-size: 16px;
+  font-size: 12px;
   font-weight: normal;
-  line-height: 22px;
-  white-space: pre;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:deep(.twc-icon-tabs .v-tab) {
+  min-width: 40px;
+  padding: 0 8px;
 }
 
 .twc-text-window {
@@ -320,19 +425,14 @@ async function toBirth(date: string): Promise<void> {
 
 .twc-text-window-item {
   display: flex;
-  max-height: 360px;
   flex-direction: column;
   padding-right: 4px;
-  overflow-y: auto;
   row-gap: 8px;
 }
 
 .twc-text-talk {
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--box-bg-1);
   row-gap: 4px;
 }
 
@@ -349,9 +449,6 @@ async function toBirth(date: string): Promise<void> {
 }
 
 .twc-text-content {
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--box-bg-1);
   font-size: 14px;
   line-height: 20px;
   white-space: pre-wrap;

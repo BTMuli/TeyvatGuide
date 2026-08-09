@@ -93,6 +93,8 @@ watch(
 function handleSelect(val: SelectedCValue): void {
   showSelect.value = false;
   const filterC = AppCharacterData.filter((item) => {
+    const hasExtraCostume = item.costumes.some((costume) => !costume.isDefault);
+    if (val.costume.length === 1 && !val.costume.includes(hasExtraCostume.toString())) return false;
     if (val.star.length > 0 && !val.star.includes(item.star % 100)) return false;
     if (val.weapon.length > 0 && !val.weapon.includes(item.weapon)) return false;
     if (val.elements.length > 0 && !val.elements.includes(item.element)) return false;

@@ -6,11 +6,19 @@
     title="筛选角色"
     @confirm="confirmSelect"
   >
-    <div class="twf-grid">
+    <div class="twf-grid twf-grid-3">
       <section class="twf-group">
         <div class="twf-group-title">星级</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedStar" :items="starOpts" size="small">
+            <template #all>全部</template>
+          </UavSelectChips>
+        </div>
+      </section>
+      <section class="twf-group">
+        <div class="twf-group-title">衣装</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="selectedCostume" :items="costumeOpts" size="small">
             <template #all>全部</template>
           </UavSelectChips>
         </div>
@@ -57,6 +65,7 @@ import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-se
 import { ref, shallowRef, watch } from "vue";
 
 export type SelectedCValue = {
+  costume: Array<string>;
   star: Array<number>;
   weapon: Array<string>;
   elements: Array<string>;
@@ -66,6 +75,10 @@ export type SelectedCValue = {
 type TwoSelectCEmits = (e: "select-c", v: SelectedCValue) => void;
 
 const emits = defineEmits<TwoSelectCEmits>();
+const costumeOpts: Array<UavSelectChipsItem> = [
+  { label: "有", value: "true", title: "有额外衣装" },
+  { label: "无", value: "false", title: "无额外衣装" },
+];
 const starOpts: Array<UavSelectChipsItem> = [4, 5].map((i) => ({
   label: `${i}星`,
   value: i.toString(),
@@ -106,12 +119,14 @@ const areaOpts: Array<UavSelectChipsItem> = [
   "其他",
 ].map((i) => ({ label: i, value: i, title: i }));
 
+const selectedCostume = ref<Array<string>>([]);
 const selectedStar = ref<Array<string>>([]);
 const selectedWeapon = ref<Array<string>>([]);
 const selectedElements = ref<Array<string>>([]);
 const selectedTeam = ref<Array<string>>([]);
 const selectedArea = ref<Array<string>>([]);
 const oldVal = shallowRef<SelectedCValue>({
+  costume: [],
   star: [],
   weapon: [],
   elements: [],
@@ -126,6 +141,7 @@ watch(
   () => {
     if (resetModel.value) {
       if (
+        isNotFilter(selectedCostume.value, costumeOpts) &&
         isNotFilter(selectedStar.value, starOpts) &&
         isNotFilter(selectedWeapon.value, weaponOpts) &&
         isNotFilter(selectedElements.value, elementOpts) &&
@@ -136,12 +152,13 @@ watch(
         resetModel.value = false;
         return;
       }
+      selectedCostume.value = [];
       selectedStar.value = [];
       selectedWeapon.value = [];
       selectedElements.value = [];
       selectedTeam.value = [];
       selectedArea.value = [];
-      oldVal.value = { star: [], weapon: [], elements: [], team: [], area: [] };
+      oldVal.value = { costume: [], star: [], weapon: [], elements: [], team: [], area: [] };
       resetModel.value = false;
       showSnackbar.success("已重置");
     }
@@ -152,6 +169,7 @@ watch(
   () => visible.value,
   () => {
     if (visible.value) {
+      selectedCostume.value = oldVal.value.costume;
       selectedStar.value = oldVal.value.star.map(String);
       selectedWeapon.value = oldVal.value.weapon;
       selectedArea.value = oldVal.value.area;
@@ -170,6 +188,7 @@ function isNotFilter(
 
 function confirmSelect(): void {
   const value: SelectedCValue = {
+    costume: selectedCostume.value,
     star: selectedStar.value.map(Number),
     weapon: selectedWeapon.value,
     elements: selectedElements.value,

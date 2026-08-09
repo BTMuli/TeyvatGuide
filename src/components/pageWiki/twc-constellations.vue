@@ -1,16 +1,15 @@
 <template>
   <div class="twc-constellations-box">
-    <v-tabs v-model="tab">
+    <v-tabs v-model="tab" class="twc-detail-tabs twc-icon-tabs" density="compact" show-arrows>
       <v-tab
         v-for="(item, index) in props.data"
         :key="index"
+        :aria-label="item.Name"
         :title="item.Name"
         :value="item.Name"
         class="twc-constellation-tab"
-        density="compact"
       >
-        <img :src="`/icon/constellations/${item.Icon}.webp`" alt="icon" />
-        <span v-if="tab === item.Name">{{ item.Name }}</span>
+        <img :src="`/icon/constellations/${item.Icon}.webp`" alt="" />
       </v-tab>
     </v-tabs>
     <v-window v-model="tab">
@@ -32,12 +31,12 @@
 </template>
 <script lang="ts" setup>
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, watch } from "vue";
 
 type TwcConstellationProps = { data: Array<TGApp.Plugins.Hutao.Character.RhisdTalent> };
 
 const props = defineProps<TwcConstellationProps>();
-const tab = ref<string>();
+const tab = defineModel<string>("selected");
 
 function loadData(): void {
   tab.value = props.data[0].Name;
@@ -51,9 +50,6 @@ watch(() => props.data, loadData);
 .twc-constellations-box {
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
   gap: 8px;
 }
 
@@ -61,37 +57,30 @@ watch(() => props.data, loadData);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  font-weight: normal;
 }
 
 .twc-constellation-tab img {
-  width: 30px;
-  height: 30px;
-  filter: brightness(0.25);
-}
-
-.dark .twc-constellation-tab img {
-  filter: brightness(0.75);
+  width: 24px;
+  height: 24px;
+  filter: var(--icon-filter);
 }
 
 .twc-constellation-desc {
   display: flex;
+  font-size: 14px;
 }
 
 .twc-constellation-normal {
   width: 100%;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--box-bg-1);
-  line-height: 20px;
   white-space: pre-wrap;
 }
 
 .twc-constellation-spec {
   padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-2);
-  line-height: 20px;
+  margin-left: 4px;
+  background: var(--box-bg-3);
   white-space: pre-wrap;
 }
 </style>
