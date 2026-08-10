@@ -1,10 +1,16 @@
 /**
  * 应用请求客户端封装
- * @since Beta v0.10.0
+ * @since Beta v0.11.3
  */
 
+import useAppStore from "@store/app.js";
 import { type ClientOptions, fetch } from "@tauri-apps/plugin-http";
 import TGLogger from "@utils/TGLogger.js";
+
+/** 直连配置：显式代理存在时 reqwest 不再跟随系统代理，noProxy "*" 使代理永不生效 */
+const DIRECT_PROXY: ClientOptions["proxy"] = {
+  all: { url: "http://127.0.0.1:1", noProxy: "*" },
+};
 
 /**
  * 构建 URL 查询字符串
@@ -83,6 +89,9 @@ async function request<T>(
   if (config.body !== undefined) {
     fetchOptions.body = typeof config.body === "string" ? config.body : JSON.stringify(config.body);
   }
+
+  // 直连模式：未开启“使用系统代理”时绕过系统代理
+  if (!useAppStore().useProxy) fetchOptions.proxy = DIRECT_PROXY;
 
   // 调试日志
   console.debug(`[TGHttps] ${method} ${finalUrl}`);
@@ -192,7 +201,9 @@ const TGHttps = {
   async buffer(url: string): Promise<ArrayBuffer> {
     console.debug(`[TGHttps] Fetch Buffer: ${url}`);
     try {
-      const rawResponse = await fetch(url);
+      const fetchOptions: RequestInit & ClientOptions = {};
+      if (!useAppStore().useProxy) fetchOptions.proxy = DIRECT_PROXY;
+      const rawResponse = await fetch(url, fetchOptions);
       if (!rawResponse.ok) {
         const errorText = await rawResponse.text().catch(() => "Unknown error");
         throw createHttpError(`HTTP Error: ${rawResponse.status} ${rawResponse.statusText}`, {

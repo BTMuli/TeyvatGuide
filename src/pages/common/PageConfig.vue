@@ -148,6 +148,27 @@
           </template>
         </v-list-item>
         <v-list-item
+          subtitle="关闭时请求直连，不经过系统代理；商店版开启后需解除回环限制"
+          title="使用系统代理"
+          @click="switchUseProxy()"
+        >
+          <template #prepend>
+            <div class="config-icon">
+              <v-icon>mdi-lan-connect</v-icon>
+            </div>
+          </template>
+          <template #append>
+            <v-switch
+              :inset="true"
+              :label="useProxy ? '开启' : '关闭'"
+              :model-value="useProxy"
+              :readonly="true"
+              class="config-switch"
+              color="#FAC51E"
+            />
+          </template>
+        </v-list-item>
+        <v-list-item
           subtitle="右下反馈按钮显隐，页面刷新后生效"
           title="用户反馈"
           @click="switchFeedback()"
@@ -240,6 +261,7 @@ const {
   incognito,
   closeToTray,
   showFeedback,
+  useProxy,
 } = storeToRefs(appStore);
 const homeStore = useHomeStore();
 
@@ -614,6 +636,25 @@ async function switchIncognito(): Promise<void> {
     return;
   }
   showSnackbar.success("已关闭无痕浏览!");
+}
+
+async function switchUseProxy(): Promise<void> {
+  useProxy.value = !useProxy.value;
+  if (!useProxy.value) {
+    showSnackbar.success("已切换为直连模式");
+    return;
+  }
+  const isMsix = await core.invoke<boolean>("is_msix");
+  if (isMsix) {
+    await showDialog.checkF({
+      title: "商店版需解除回环限制",
+      text:
+        "开启系统代理后，Windows 会拦截商店版访问本地代理端口，可能导致登录报错 -100。\n" +
+        "请以管理员身份运行（或使用代理软件的 Enable Loopback Exemption）：\n" +
+        "CheckNetIsolation.exe LoopbackExempt -a -n=<PackageFamilyName>",
+    });
+  }
+  showSnackbar.success("已开启使用系统代理");
 }
 
 async function switchFeedback(): Promise<void> {

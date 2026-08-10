@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.10.5
+ * @since Beta v0.11.3
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -69,6 +69,8 @@ const useAppStore = defineStore(
     const closeToTray = ref<boolean>(false);
     /** 展示反馈按钮 */
     const showFeedback = ref<boolean>(true);
+    /** 是否跟随系统代理；关闭时所有请求直连 */
+    const useProxy = ref<boolean>(false);
     /**
      * 上次检测更新时间
      * @remarks LastUpdateCheckTimeStamp
@@ -99,6 +101,7 @@ const useAppStore = defineStore(
       cancelLike.value = true;
       closeToTray.value = false;
       showFeedback.value = true;
+      useProxy.value = false;
       lastUcts.value = 0;
       initDevice();
     }
@@ -159,6 +162,7 @@ const useAppStore = defineStore(
       cancelLike,
       closeToTray,
       showFeedback,
+      useProxy,
       lastUcts,
       init,
       changeTheme,
@@ -190,6 +194,7 @@ const useAppStore = defineStore(
           "cancelLike",
           "closeToTray",
           "showFeedback",
+          "useProxy",
           "lastUcts",
         ],
       },
