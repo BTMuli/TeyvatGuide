@@ -3,6 +3,8 @@
 
 mod client;
 mod commands;
+#[cfg(target_os = "windows")]
+mod loopback;
 mod plugins;
 mod tray;
 mod utils;
@@ -129,7 +131,9 @@ pub fn run() {
       #[cfg(target_os = "windows")]
       yae::call_yae_dll,
       #[cfg(target_os = "windows")]
-      watchdog::run_with_admin
+      watchdog::run_with_admin,
+      #[cfg(target_os = "windows")]
+      loopback::enable_loopback_exemption
     ])
     .run(generate_context!())
     .expect("error while running tauri application");

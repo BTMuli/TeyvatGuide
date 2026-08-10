@@ -646,13 +646,43 @@ async function switchUseProxy(): Promise<void> {
   }
   const isMsix = await core.invoke<boolean>("is_msix");
   if (isMsix) {
-    await showDialog.checkF({
-      title: "商店版需解除回环限制",
-      text:
-        "开启系统代理后，Windows 会拦截商店版访问本地代理端口，可能导致登录报错 -100。\n" +
-        "请以管理员身份运行（或使用代理软件的 Enable Loopback Exemption）：\n" +
-        "CheckNetIsolation.exe LoopbackExempt -a -n=<PackageFamilyName>",
-    });
+    try {
+      const resp = await core.invoke<TGApp.App.Command.LoopbackExemptResp>(
+        "enable_loopback_exemption",
+      );
+      if (resp.success) {
+        showSnackbar.success(resp.message);
+      } else {
+        const copy = await showDialog.checkF({
+          title: "解除回环限制失败",
+          text:
+            `${resp.message}\n` +
+            "请以管理员身份执行（或使用代理软件的 Enable Loopback Exemption）：\n" +
+            resp.command,
+          confirmLabel: "复制命令",
+        });
+        if (copy) {
+          try {
+            await navigator.clipboard.writeText(resp.command);
+            showSnackbar.success("命令已复制到剪贴板");
+          } catch (error) {
+            const errMsg = error instanceof Error ? error.message : String(error);
+            await TGLogger.Error(`[Config][switchUseProxy] 复制命令失败：${errMsg}`);
+            showSnackbar.error("复制失败，请稍后重试");
+          }
+        }
+      }
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      await TGLogger.Error(`[Config][switchUseProxy] 回环豁免命令异常：${errMsg}`);
+      await showDialog.checkF({
+        title: "解除回环限制失败",
+        text:
+          "未能获取回环豁免信息，商店版开启代理后可能出现登录报错 -100。\n" +
+          "请以管理员身份手动执行：\n" +
+          `CheckNetIsolation.exe LoopbackExempt -a -n=<PackageFamilyName>\n${errMsg}`,
+      });
+    }
   }
   showSnackbar.success("已开启使用系统代理");
 }
