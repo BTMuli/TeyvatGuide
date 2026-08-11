@@ -3,58 +3,10 @@
   <v-app-bar>
     <template #prepend>
       <div class="twm-top-prepend">
-        <div class="title">
+        <div class="twm-tp-title">
           <img alt="icon" src="/UI/nav/wikiGCG.webp" />
           <span>材料图鉴</span>
         </div>
-      </div>
-    </template>
-    <template #append>
-      <div class="twm-top-append">
-        <v-text-field
-          v-model="search"
-          :clearable="true"
-          :hide-details="true"
-          append-inner-icon="mdi-magnify"
-          class="twm-search-input"
-          density="compact"
-          label="搜索"
-          variant="outlined"
-          @keydown.enter="searchMaterial()"
-          @click:append-inner="searchMaterial()"
-        />
-        <v-checkbox
-          v-model="searchAll"
-          :hide-details="true"
-          class="twm-search-all"
-          density="compact"
-          label="搜索全部"
-        />
-      </div>
-    </template>
-    <template #extension>
-      <div class="twm-nav-extension">
-        <v-tabs
-          v-model="selectType"
-          align-tabs="start"
-          class="twm-tabs"
-          density="compact"
-          show-arrows
-        >
-          <v-tab v-if="searchAll" title="全部材料" :value="ALL_MATERIAL_TYPE">
-            全部
-            <span class="twm-tab-count">{{ allMaterialCount }}</span>
-          </v-tab>
-          <v-tab
-            v-for="item in materialTypes"
-            :key="item.cType"
-            :title="item.cType"
-            :value="item.cType"
-          >
-            {{ item.cType }}
-            <span class="twm-tab-count">{{ item.number }}</span>
-          </v-tab>
-        </v-tabs>
         <div class="twm-load-status">
           <span class="twm-load-count">
             已显示 <strong>{{ visibleMaterials.length }}</strong> / {{ sortMaterialsData.length }}
@@ -82,6 +34,52 @@
           </span>
         </div>
       </div>
+    </template>
+    <template #append>
+      <div class="twm-top-append">
+        <v-text-field
+          v-model="search"
+          :clearable="true"
+          :hide-details="true"
+          append-inner-icon="mdi-magnify"
+          class="twm-search-input"
+          density="compact"
+          label="搜索"
+          variant="outlined"
+          @keydown.enter="searchMaterial()"
+          @click:append-inner="searchMaterial()"
+        />
+        <v-checkbox
+          v-model="searchAll"
+          :hide-details="true"
+          class="twm-search-all"
+          density="compact"
+          label="搜索全部"
+        />
+      </div>
+    </template>
+    <template #extension>
+      <v-tabs
+        v-model="selectType"
+        align-tabs="start"
+        class="twm-tabs"
+        density="compact"
+        show-arrows
+      >
+        <v-tab v-if="searchAll" :value="ALL_MATERIAL_TYPE" title="全部材料">
+          全部
+          <span class="twm-tab-count">{{ allMaterialCount }}</span>
+        </v-tab>
+        <v-tab
+          v-for="item in materialTypes"
+          :key="item.cType"
+          :title="item.cType"
+          :value="item.cType"
+        >
+          {{ item.cType }}
+          <span class="twm-tab-count">{{ item.number }}</span>
+        </v-tab>
+      </v-tabs>
     </template>
   </v-app-bar>
   <div class="twm-box">
@@ -298,6 +296,8 @@ function observeLoadMore(): void {
 }
 </script>
 <style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
 .twm-top-prepend {
   position: relative;
   display: flex;
@@ -305,22 +305,23 @@ function observeLoadMore(): void {
   justify-content: flex-start;
   margin-left: 16px;
   column-gap: 16px;
+}
 
-  .title {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--common-text-title);
-    column-gap: 4px;
-    font-family: var(--font-title);
-    font-size: 20px;
+.twm-tp-title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--common-text-title);
+  column-gap: 4px;
+  font-family: var(--font-title);
+  font-size: 20px;
+  white-space: nowrap;
 
-    img {
-      width: 32px;
-      height: 32px;
-      object-fit: cover;
-    }
+  img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
   }
 }
 
@@ -342,27 +343,29 @@ function observeLoadMore(): void {
   flex: none;
 }
 
-.twm-nav-extension {
-  display: flex;
+.twm-tabs {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  align-items: center;
   padding: 0 16px;
-  gap: 16px;
-}
-
-.twm-tabs {
-  min-width: 0;
-  flex: 1;
   color: var(--common-text-title);
   font-family: var(--font-title);
 }
 
 .twm-tab-count {
-  margin-left: 4px;
-  color: var(--common-text-secondary);
-  font-size: 12px;
+  @include github-styles.github-tag-dark-gen(#e06c75);
+
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border-radius: 16px;
+  margin-bottom: 8px;
+  margin-left: 2px;
+  font-family: var(--font-text);
+  font-size: 10px;
+  line-height: 12px;
 }
 
 .twm-load-status {
