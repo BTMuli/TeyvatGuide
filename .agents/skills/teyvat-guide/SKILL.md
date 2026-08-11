@@ -30,10 +30,10 @@ description: Implement and review changes in the TeyvatGuide Vue, TypeScript, Vu
 ## Editing while the dev server is running
 
 12. Never rewrite a `.vue` file twice in quick succession while `pnpm dev` is running (for example
-   `apply_patch` followed immediately by `prettier --write`, or formatting several `.vue` files in
-   one pass). This races sass-embedded on Windows: every `.vue` style submodule then fails with
-   `[plugin:vite:css] [sass] Tried writing to closed dispatcher` (HTTP 500) until the dev server is
-   restarted.
+    `apply_patch` followed immediately by `prettier --write`, or formatting several `.vue` files in
+    one pass). This races sass-embedded on Windows: every `.vue` style submodule then fails with
+    `[plugin:vite:css] [sass] Tried writing to closed dispatcher` (HTTP 500) until the dev server is
+    restarted.
 13. If that error appears, first compile the `<style>` block standalone with `sass-embedded`. A
     success proves the file itself is fine and the running dev server just needs a restart; do not
     "fix" the file. While the dev server is up, prefer one atomic write per file that already keeps

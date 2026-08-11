@@ -55,7 +55,7 @@ within about a second or two, so `sentry` is frequently still connecting at that
 
 - The thread has no `mcp__sentry__*` tools on the first turn. Local logs record
   `codex_mcp::connection_manager::tool_catalog ... mcp.runtime.resolve_for_step: omitting pending optional MCP server
-  server_name=sentry`. This is not an authentication failure: wait a few seconds or continue in a later turn, then
+server_name=sentry`. This is not an authentication failure: wait a few seconds or continue in a later turn, then
   re-check. Do not trigger a new OAuth login just because the first turn lacks tools.
 - Codex logs `Failed to list resources for MCP server 'sentry': Mcp error: -32601: Method not found` (and the
   resource-templates variant) on healthy connections. Sentry MCP 0.37.0 advertises `resources: None`; only
@@ -111,7 +111,7 @@ The Vue and Rust clients report to the same Sentry project. The Rust release is 
 - **Symptom supplied:** Search by stable exception text or feature terms within a bounded window, group candidate
   issues, and inspect only the best matches.
 - **MCP tools missing or "startup failed":** Do not assume the registration or OAuth broke. Check `codex mcp get
-  sentry` for the expected registration, then distinguish three cases in local logs: first-turn omission while the
+sentry` for the expected registration, then distinguish three cases in local logs: first-turn omission while the
   server is pending, benign `-32601` resource-listing warnings, and a real transport/auth error (HTTP 401/403,
   connection refused, token exchange failure). Only the last case justifies running `codex mcp login sentry` again.
 - **Suspected release regression:** Compare the affected release with the preceding stable release over comparable
