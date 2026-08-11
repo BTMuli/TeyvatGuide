@@ -4,7 +4,6 @@
   "title": "烦恼刈除",
   "description": "干练可靠的「荒泷派」的副手——特别注明：干练可靠形容的不是「荒泷派」而是副手。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "荒泷派",
     "constellation": "烦恼刈座",
@@ -22,6 +21,46 @@
     { "id": 112055, "name": "浮游晶化核", "star": 3 },
     { "id": 104325, "name": "「风雅」的哲学", "star": 4 },
     { "id": 113033, "name": "祸神之禊泪", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 651,
+      "Name": "割舍怜悯之心",
+      "Description": "<color=#FFD780FF>御咏鸣神刈山祭</color>的影响范围提升50%。",
+      "Icon": "UI_Talent_S_Shinobu_01"
+    },
+    {
+      "Id": 652,
+      "Name": "割舍侥幸之心",
+      "Description": "<color=#FFD780FF>越祓草轮</color>的持续时间延长3秒。",
+      "Icon": "UI_Talent_S_Shinobu_02"
+    },
+    {
+      "Id": 653,
+      "Name": "割舍痛苦之心",
+      "Description": "<color=#FFD780FF>越祓雷草之轮</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Shinobu_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 654,
+      "Name": "割舍封闭之心",
+      "Description": "处于久岐忍自己的<color=#FFD780FF>越祓草轮</color>状态下的角色，在普通攻击、重击或下落攻击命中敌人时，雷草标将落在敌人所在的位置，基于久岐忍生命值上限的9.7%，造成<color=#FFACFFFF>雷元素范围伤害</color>。\n该效果每5秒至多触发一次。",
+      "Icon": "UI_Talent_S_Shinobu_03"
+    },
+    {
+      "Id": 655,
+      "Name": "割舍逢迎之心",
+      "Description": "<color=#FFD780FF>御咏鸣神刈山祭</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Shinobu_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 656,
+      "Name": "割舍软弱之心",
+      "Description": "久岐忍承受足以使她倒下的伤害时，此次伤害不会使她倒下，这个效果在久岐忍生命值为1时会自动触发，该效果每60秒只能触发一次。\n久岐忍生命值降至25%以下时，会提升自身150点精通，持续15秒，该效果每60秒只能触发一次。",
+      "Icon": "UI_Talent_S_Shinobu_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_S_Shinobu_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 651,
-      "Name": "割舍怜悯之心",
-      "Description": "<color=#FFD780FF>御咏鸣神刈山祭</color>的影响范围提升50%。",
-      "Icon": "UI_Talent_S_Shinobu_01"
-    },
-    {
-      "Id": 652,
-      "Name": "割舍侥幸之心",
-      "Description": "<color=#FFD780FF>越祓草轮</color>的持续时间延长3秒。",
-      "Icon": "UI_Talent_S_Shinobu_02"
-    },
-    {
-      "Id": 653,
-      "Name": "割舍痛苦之心",
-      "Description": "<color=#FFD780FF>越祓雷草之轮</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Shinobu_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 654,
-      "Name": "割舍封闭之心",
-      "Description": "处于久岐忍自己的<color=#FFD780FF>越祓草轮</color>状态下的角色，在普通攻击、重击或下落攻击命中敌人时，雷草标将落在敌人所在的位置，基于久岐忍生命值上限的9.7%，造成<color=#FFACFFFF>雷元素范围伤害</color>。\n该效果每5秒至多触发一次。",
-      "Icon": "UI_Talent_S_Shinobu_03"
-    },
-    {
-      "Id": 655,
-      "Name": "割舍逢迎之心",
-      "Description": "<color=#FFD780FF>御咏鸣神刈山祭</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Shinobu_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 656,
-      "Name": "割舍软弱之心",
-      "Description": "久岐忍承受足以使她倒下的伤害时，此次伤害不会使她倒下，这个效果在久岐忍生命值为1时会自动触发，该效果每60秒只能触发一次。\n久岐忍生命值降至25%以下时，会提升自身150点精通，持续15秒，该效果每60秒只能触发一次。",
-      "Icon": "UI_Talent_S_Shinobu_04"
     }
   ],
   "talks": [
@@ -361,5 +360,6 @@
       "Title": "神之眼",
       "Context": "离开神社那天，久岐忍将担任「巫女」时的所有物事都留在屋里，一切从简，只带了极少的行李。\n所以，在她背起行囊的刹那就已察觉到重量有异——这个包里，不是应该只有毛巾吗？\n伸手掏了一会儿，竟从包里摸出来一枚熠熠生辉的「神之眼」。光彩之美，看得一旁的姐姐久岐幸赞叹不已。\n说来讽刺，本应侍奉神明的巫女，却因逃离神社而获得神之眼的垂青。\n这正是久岐忍拿到的第一份「证明」，来自于神，证予自由。\n本打算阻止她的姐姐阿幸，也在见识这一场面之后改变了心意，甚至答应帮她摆平父母那边。\n…因此，「眼狩令」期间，久岐忍主动上缴了自己的神之眼。\n一来是不想让天领奉行里的熟人难做，二来对久岐忍而言，神之眼不过是自己那大堆证书、证明中的一个普通成员。\n人活一世，遇到的大部分事情无需「神之眼」也能处理。至于那些真正棘手的难题，可不是能靠「神之眼」轻易打发的。\n比如，怎么消除世代累积的成见，怎么追寻真正无羁的自由。\n又比如，怎么劝阻满地打滚吵闹不停说要去把她的神之眼一并赢回来的「荒泷派」一众。"
     }
-  ]
+  ],
+  "team": [0]
 }

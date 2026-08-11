@@ -4,7 +4,6 @@
   "title": "空月归乡",
   "description": "于挪德卡莱诞生的「月之少女」，亦是归乡的空月。",
   "area": "挪德卡莱",
-  "team": [2],
   "brief": {
     "camp": "银月之庭",
     "constellation": "御月鸽座",
@@ -22,6 +21,46 @@
     { "id": 112004, "name": "史莱姆原浆", "star": 3 },
     { "id": 104358, "name": "「月光」的哲学", "star": 4 },
     { "id": 113081, "name": "贤医的假面", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 1251,
+      "Name": "遍照花海，隐入群山",
+      "Description": "施放元素战技<color=#FFD780FF>万古潮汐</color>时，还会立刻触发一次等同于{LINK#N11250001}<color=#FFD780FF>引力干涉</color>{/LINK}的效果，该效果每15秒至多触发一次。\n<color=#FFD780FF>月兆·满辉</color> \n触发引力干涉时，若为哥伦比娅积攒最多引力值的月曜反应类型为：\n·<color=#FFD780FF>月感电反应</color>：为队伍中自己的当前场上角色恢复6点元素能量；\n·<color=#FFD780FF>月绽放反应</color>：提升队伍中自己的当前场上角色的抗打断能力，持续8秒；\n·<color=#FFD780FF>月结晶反应</color>：唤出<color=#FFD780FF>雨海护盾</color>，伤害吸收量受益于哥伦比娅生命值上限的12%，对<color=#80C0FFFF>水元素伤害</color>有250%的吸收效果，持续8秒。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
+      "Icon": "UI_Talent_S_Columbina_01"
+    },
+    {
+      "Id": 1252,
+      "Name": "为夜增辉，与君遥伴",
+      "Description": "{LINK#N11250001}<color=#FFD780FF>引力值</color>{/LINK}的积攒速度提升34%。\n触发<color=#FFD780FF>引力干涉</color>时，哥伦比娅将获得<color=#FFD780FF>皎辉</color>效果，生命值上限提升40%，持续8秒。\n<color=#FFD780FF>月兆·满辉</color> ：\n<color=#FFD780FF>皎辉</color>效果持续期间，若本次触发<color=#FFD780FF>引力干涉</color>时，为哥伦比娅积攒最多引力值的月曜反应类型为：\n·<color=#FFD780FF>月感电反应</color>：队伍中自己的当前场上角色攻击力提升，提升值相当于哥伦比娅生命值上限的1%；\n·<color=#FFD780FF>月绽放反应</color>：队伍中自己的当前场上角色元素精通提升，提升值相当于哥伦比娅生命值上限的0.35%；\n·<color=#FFD780FF>月结晶反应</color>：队伍中自己的当前场上角色防御力提升，提升值相当于哥伦比娅生命值上限的1%。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}7%。",
+      "Icon": "UI_Talent_S_Columbina_02"
+    },
+    {
+      "Id": 1253,
+      "Name": "柔光凝露，梦湖起波",
+      "Description": "元素战技<color=#FFD780FF>{LINK#S11252}万古潮汐{/LINK}</color>的技能等级提高3级。\n至多提升至15级。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
+      "Icon": "UI_Talent_U_Columbina_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 1254,
+      "Name": "花岚云翳，山岩树影",
+      "Description": "触发{LINK#N11250001}<color=#FFD780FF>引力干涉</color>{/LINK}时，还会为哥伦比娅恢复4点元素能量；\n此外，依据为哥伦比娅积攒最多<color=#FFD780FF>引力值</color>的月曜反应类型，若为月感电/月绽放/月结晶反应，则本次引力干涉造成的月曜反应伤害提升，提升值分别相当于哥伦比娅生命值上限的12.5%/2.5%/12.5%。上述效果每15秒至多触发一次。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
+      "Icon": "UI_Talent_S_Columbina_03"
+    },
+    {
+      "Id": 1255,
+      "Name": "万籁俱寂，唯闻君唱",
+      "Description": "元素爆发<color=#FFD780FF>{LINK#S11255}她的乡愁{/LINK}</color>的技能等级提高3级。\n至多提升至15级。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
+      "Icon": "UI_Talent_U_Columbina_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 1256,
+      "Name": "夜昏且暗，且随月光",
+      "Description": "处于{LINK#N11250002}<color=#FFD780FF>月之领域</color>{/LINK}中的所有角色触发月曜反应后的8秒内，依据参与反应的元素类型，使队伍中的所有角色造成的对应元素类型伤害的暴击伤害提升80%。同种元素类型的暴击伤害提升效果无法叠加。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}7%。",
+      "Icon": "UI_Talent_S_Columbina_04"
+    }
   ],
   "skills": [
     {
@@ -86,46 +125,6 @@
       "icon": "UI_Talent_S_Columbina_08",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 1251,
-      "Name": "遍照花海，隐入群山",
-      "Description": "施放元素战技<color=#FFD780FF>万古潮汐</color>时，还会立刻触发一次等同于{LINK#N11250001}<color=#FFD780FF>引力干涉</color>{/LINK}的效果，该效果每15秒至多触发一次。\n<color=#FFD780FF>月兆·满辉</color> \n触发引力干涉时，若为哥伦比娅积攒最多引力值的月曜反应类型为：\n·<color=#FFD780FF>月感电反应</color>：为队伍中自己的当前场上角色恢复6点元素能量；\n·<color=#FFD780FF>月绽放反应</color>：提升队伍中自己的当前场上角色的抗打断能力，持续8秒；\n·<color=#FFD780FF>月结晶反应</color>：唤出<color=#FFD780FF>雨海护盾</color>，伤害吸收量受益于哥伦比娅生命值上限的12%，对<color=#80C0FFFF>水元素伤害</color>有250%的吸收效果，持续8秒。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
-      "Icon": "UI_Talent_S_Columbina_01"
-    },
-    {
-      "Id": 1252,
-      "Name": "为夜增辉，与君遥伴",
-      "Description": "{LINK#N11250001}<color=#FFD780FF>引力值</color>{/LINK}的积攒速度提升34%。\n触发<color=#FFD780FF>引力干涉</color>时，哥伦比娅将获得<color=#FFD780FF>皎辉</color>效果，生命值上限提升40%，持续8秒。\n<color=#FFD780FF>月兆·满辉</color> ：\n<color=#FFD780FF>皎辉</color>效果持续期间，若本次触发<color=#FFD780FF>引力干涉</color>时，为哥伦比娅积攒最多引力值的月曜反应类型为：\n·<color=#FFD780FF>月感电反应</color>：队伍中自己的当前场上角色攻击力提升，提升值相当于哥伦比娅生命值上限的1%；\n·<color=#FFD780FF>月绽放反应</color>：队伍中自己的当前场上角色元素精通提升，提升值相当于哥伦比娅生命值上限的0.35%；\n·<color=#FFD780FF>月结晶反应</color>：队伍中自己的当前场上角色防御力提升，提升值相当于哥伦比娅生命值上限的1%。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}7%。",
-      "Icon": "UI_Talent_S_Columbina_02"
-    },
-    {
-      "Id": 1253,
-      "Name": "柔光凝露，梦湖起波",
-      "Description": "元素战技<color=#FFD780FF>{LINK#S11252}万古潮汐{/LINK}</color>的技能等级提高3级。\n至多提升至15级。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
-      "Icon": "UI_Talent_U_Columbina_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 1254,
-      "Name": "花岚云翳，山岩树影",
-      "Description": "触发{LINK#N11250001}<color=#FFD780FF>引力干涉</color>{/LINK}时，还会为哥伦比娅恢复4点元素能量；\n此外，依据为哥伦比娅积攒最多<color=#FFD780FF>引力值</color>的月曜反应类型，若为月感电/月绽放/月结晶反应，则本次引力干涉造成的月曜反应伤害提升，提升值分别相当于哥伦比娅生命值上限的12.5%/2.5%/12.5%。上述效果每15秒至多触发一次。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
-      "Icon": "UI_Talent_S_Columbina_03"
-    },
-    {
-      "Id": 1255,
-      "Name": "万籁俱寂，唯闻君唱",
-      "Description": "元素爆发<color=#FFD780FF>{LINK#S11255}她的乡愁{/LINK}</color>的技能等级提高3级。\n至多提升至15级。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}1.5%。",
-      "Icon": "UI_Talent_U_Columbina_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 1256,
-      "Name": "夜昏且暗，且随月光",
-      "Description": "处于{LINK#N11250002}<color=#FFD780FF>月之领域</color>{/LINK}中的所有角色触发月曜反应后的8秒内，依据参与反应的元素类型，使队伍中的所有角色造成的对应元素类型伤害的暴击伤害提升80%。同种元素类型的暴击伤害提升效果无法叠加。\n\n队伍中附近的所有角色造成的月曜反应伤害{LINK#N11190007}<color=#FFD780FF>擢升</color>{/LINK}7%。",
-      "Icon": "UI_Talent_S_Columbina_04"
     }
   ],
   "talks": [
@@ -416,5 +415,6 @@
       "Title": "三相月临",
       "Context": "在获得「三月的权能」之后，哥伦比娅自然也会产生一些疑问——\n这个权能真的什么都能做到吗？我该用它去做什么呢？\n她感觉到，自己想做的事，三月的力量几乎都能够满足。在月亮与提瓦特之间自由行动、更加省力地转移自己和其他物体、让花朵盛放得更加艳丽、果实更加饱满…\n自然，她尝试过唤醒桑多涅。可这却属于三月的权能未能为她做到的事情之一…\n其他的，她或是不想做，或是觉得自己不该去做。\n她喜欢的是这个世界，这个家如今的样子。单纯因为自己能做到，就按自己的喜好肆意更改这个家的样貌和规则，她觉得这样的做法是不对的。不论出发点的好坏，这种做法会让她觉得自己和「博士」没什么不同。\n她视这个世界为「家」，而非她自己的所有物。这其中有很大区别。\n所以她献出了自己的一部分力量，让它继续如从前一样，守护这片美丽的家园。而她留给自己的那部分，只需足够她能同从前一样，与朋友们愉快地生活，在必要的时候守护她所珍视的东西就可以了。\n这时的哥伦比娅，突然理解了三位姐姐们当初的选择。比起「支配」，她们更多也只是想「守护」这个月下的世界罢了。\n该说自己不愧是她们的妹妹吗？甜蜜的一致性。\n简直就像是某种遗传，或说月神的「家训」一般。\n想到这里，哥伦比娅心中浮出一股暖意。她似乎又寻到了某种自己曾经渴望的东西。\n家人间的联系与传承。"
     }
-  ]
+  ],
+  "team": [2]
 }

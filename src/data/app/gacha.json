@@ -3496,5 +3496,41 @@
     "postId": "76723985",
     "up5List": [14522, 13509],
     "up4List": [14430, 11403, 12402, 13407, 15401]
+  },
+  {
+    "name": "冰绡鹄影",
+    "version": "7.0",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/08/05/4162840e0955f9c39dce2bfd6959509a_5472030932343604302_transformed.jpg",
+    "from": "2026-08-12T06:00:00+08:00",
+    "to": "2026-09-01T17:59:00+08:00",
+    "type": 301,
+    "postId": "77322269",
+    "up5List": [10000150],
+    "up4List": [10000148, 10000043, 10000083]
+  },
+  {
+    "name": "炉边烬影",
+    "version": "7.0",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/08/04/63006e3c4f92fb7fa4986657a23f1210_7782385828351251329_transformed.jpg",
+    "from": "2026-08-12T06:00:00+08:00",
+    "to": "2026-09-01T17:59:00+08:00",
+    "type": 400,
+    "postId": "77322273",
+    "up5List": [10000096],
+    "up4List": [10000148, 10000043, 10000083]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "7.0",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/08/04/d5e3aec4eeecbaaaeea500ea682b7a7b_2648436946302119594_transformed.jpg",
+    "from": "2026-08-12T06:00:00+08:00",
+    "to": "2026-09-01T17:59:00+08:00",
+    "type": 302,
+    "postId": "77322275",
+    "up5List": [11520, 13512],
+    "up4List": [11401, 12402, 13401, 14403, 15405]
   }
 ]

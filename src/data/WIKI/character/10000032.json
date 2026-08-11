@@ -4,7 +4,6 @@
   "title": "命运试金石",
   "description": "蒙德的冒险家少年，拥有与他的善良毫不相称的霉运。",
   "area": "蒙德",
-  "team": [0],
   "brief": {
     "camp": "冒险家协会",
     "constellation": "险路座",
@@ -22,6 +21,46 @@
     { "id": 112037, "name": "攫金鸦印", "star": 3 },
     { "id": 104306, "name": "「抗争」的哲学", "star": 4 },
     { "id": 113003, "name": "东风之翎", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 321,
+      "Name": "冒险憧憬",
+      "Description": "<color=#FFD780FF>美妙旅程</color>的攻击力提升效果不再有生命值限制，数值上追加班尼特基础攻击力的20%。",
+      "Icon": "UI_Talent_S_Bennett_01"
+    },
+    {
+      "Id": 322,
+      "Name": "踏破绝境",
+      "Description": "班尼特的生命值低于70%时，元素充能效率提高30%。",
+      "Icon": "UI_Talent_S_Bennett_02"
+    },
+    {
+      "Id": 323,
+      "Name": "火热激情",
+      "Description": "<color=#FFD780FF>热情过载</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Bennett_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 324,
+      "Name": "热情不灭",
+      "Description": "施放一段蓄力的<color=#FFD780FF>热情过载</color>时，在技能第二段攻击中进行普通攻击，可以施放额外的追击。\n追击的伤害等同于第二段攻击的135%。",
+      "Icon": "UI_Talent_S_Bennett_03"
+    },
+    {
+      "Id": 325,
+      "Name": "开拓的心魂",
+      "Description": "<color=#FFD780FF>美妙旅程</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Bennett_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 326,
+      "Name": "烈火与勇气",
+      "Description": "处在<color=#FFD780FF>美妙旅程</color>领域内的队伍中当前场上单手剑、双手剑、长柄武器角色获得15%<color=#FF9999FF>火元素伤害加成</color>，并获得<color=#FF9999FF>火元素附魔</color>。",
+      "Icon": "UI_Talent_S_Bennett_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Expedition_Mengde",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 321,
-      "Name": "冒险憧憬",
-      "Description": "<color=#FFD780FF>美妙旅程</color>的攻击力提升效果不再有生命值限制，数值上追加班尼特基础攻击力的20%。",
-      "Icon": "UI_Talent_S_Bennett_01"
-    },
-    {
-      "Id": 322,
-      "Name": "踏破绝境",
-      "Description": "班尼特的生命值低于70%时，元素充能效率提高30%。",
-      "Icon": "UI_Talent_S_Bennett_02"
-    },
-    {
-      "Id": 323,
-      "Name": "火热激情",
-      "Description": "<color=#FFD780FF>热情过载</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Bennett_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 324,
-      "Name": "热情不灭",
-      "Description": "施放一段蓄力的<color=#FFD780FF>热情过载</color>时，在技能第二段攻击中进行普通攻击，可以施放额外的追击。\n追击的伤害等同于第二段攻击的135%。",
-      "Icon": "UI_Talent_S_Bennett_03"
-    },
-    {
-      "Id": 325,
-      "Name": "开拓的心魂",
-      "Description": "<color=#FFD780FF>美妙旅程</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Bennett_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 326,
-      "Name": "烈火与勇气",
-      "Description": "处在<color=#FFD780FF>美妙旅程</color>领域内的队伍中当前场上单手剑、双手剑、长柄武器角色获得15%<color=#FF9999FF>火元素伤害加成</color>，并获得<color=#FF9999FF>火元素附魔</color>。",
-      "Icon": "UI_Talent_S_Bennett_04"
     }
   ],
   "talks": [
@@ -373,5 +372,6 @@
       "Title": "神之眼",
       "Context": "没有什么可以阻止班尼特的冒险热情。\n他想要像「老爹」们一样，不断地探索、挑战、挥洒热血，在冒险路上慢慢老去。\n可是这一次，班尼特遇上了真正的危机。\n正如当年老人所遇的那样，是一处令人无比绝望的险境。\n「这出血量…不妙了呀。」\n可班尼特没有停下脚步，「没有回去的道理。」他这样想着。\n不知为何，他觉得过去所经受的一切不幸折磨，都是为了突破这一刻的险境。\n但在地狱一般的旅途最后，等在终点的却是——空无一物。\n「一无所获也是冒险的…一部分嘛，别…在意…」\n紧绷的神经稍一懈怠，班尼特的意识便被累累伤痕夺去，倒在地上。\n再度醒来时，他发觉伤口似乎被某种神奇的火焰灼烧过，止住了流血，又感觉不到疼痛。\n一颗温热的宝珠在他掌心跳动，伴随着胸中只属于冒险家的心跳节拍。\n那并非世界的仁慈，也绝非命运的怜悯，而是真正配得上他如火般意志的「终点的宝藏」。"
     }
-  ]
+  ],
+  "team": [0]
 }

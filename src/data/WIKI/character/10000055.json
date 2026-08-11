@@ -4,7 +4,6 @@
   "title": "戎犬锵锵",
   "description": "海祇岛军的大将，深受部下信赖。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "海祇岛",
     "constellation": "柴犬座",
@@ -22,6 +21,46 @@
     { "id": 112055, "name": "浮游晶化核", "star": 3 },
     { "id": 104328, "name": "「天光」的哲学", "star": 4 },
     { "id": 113025, "name": "熔毁之刻", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 551,
+      "Name": "犬奔·疾如风",
+      "Description": "处于五郎自己的<color=#FFD780FF>大将旗指物</color>或<color=#FFD780FF>大将威仪</color>领域中的当前场上角色（除了五郎自己）对敌人造成岩元素伤害后，五郎自己的<color=#FFD780FF>犬坂吠吠方圆阵</color>冷却时间减少2秒。\n该效果每10秒至多触发一次。",
+      "Icon": "UI_Talent_S_Gorou_01"
+    },
+    {
+      "Id": 552,
+      "Name": "犬坐·稳如钟",
+      "Description": "在<color=#FFD780FF>大将威仪</color>的持续期间，附近的当前场上角色获取结晶反应产生的晶片或触发月结晶反应后，五郎自己的大将威仪的持续时间延长1秒。\n该效果每0.1秒至多触发一次，至多通过这种方式延长3秒持续时间。",
+      "Icon": "UI_Talent_S_Gorou_02"
+    },
+    {
+      "Id": 553,
+      "Name": "犬爪·势如火",
+      "Description": "<color=#FFD780FF>犬坂吠吠方圆阵</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Gorou_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 554,
+      "Name": "犬舐·温如水",
+      "Description": "<color=#FFD780FF>大将威仪</color>在具有「难破」或「摧碎」的效果时，每1.5秒，为领域内的当前场上角色恢复生命值，回复量相当于五郎自己防御力的50%。",
+      "Icon": "UI_Talent_S_Gorou_03"
+    },
+    {
+      "Id": 555,
+      "Name": "犬突·动如雷",
+      "Description": "<color=#FFD780FF>兽牙逐突形胜战法</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Gorou_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 556,
+      "Name": "犬勇·忠如山",
+      "Description": "施放<color=#FFD780FF>犬坂吠吠方圆阵</color>或<color=#FFD780FF>兽牙逐突形胜战法</color>后的12秒内，依据施放时的领域等级，提高附近的队伍中所有角色<color=#FFE699FF>岩元素伤害</color>的暴击伤害：\n·「坚牢」：提高10%；\n·「难破」：提高20%；\n·「摧碎」：提高40%。\n\n该效果无法叠加，以后生效的为准。",
+      "Icon": "UI_Talent_S_Gorou_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_S_Gorou_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 551,
-      "Name": "犬奔·疾如风",
-      "Description": "处于五郎自己的<color=#FFD780FF>大将旗指物</color>或<color=#FFD780FF>大将威仪</color>领域中的当前场上角色（除了五郎自己）对敌人造成岩元素伤害后，五郎自己的<color=#FFD780FF>犬坂吠吠方圆阵</color>冷却时间减少2秒。\n该效果每10秒至多触发一次。",
-      "Icon": "UI_Talent_S_Gorou_01"
-    },
-    {
-      "Id": 552,
-      "Name": "犬坐·稳如钟",
-      "Description": "在<color=#FFD780FF>大将威仪</color>的持续期间，附近的当前场上角色获取结晶反应产生的晶片或触发月结晶反应后，五郎自己的大将威仪的持续时间延长1秒。\n该效果每0.1秒至多触发一次，至多通过这种方式延长3秒持续时间。",
-      "Icon": "UI_Talent_S_Gorou_02"
-    },
-    {
-      "Id": 553,
-      "Name": "犬爪·势如火",
-      "Description": "<color=#FFD780FF>犬坂吠吠方圆阵</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Gorou_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 554,
-      "Name": "犬舐·温如水",
-      "Description": "<color=#FFD780FF>大将威仪</color>在具有「难破」或「摧碎」的效果时，每1.5秒，为领域内的当前场上角色恢复生命值，回复量相当于五郎自己防御力的50%。",
-      "Icon": "UI_Talent_S_Gorou_03"
-    },
-    {
-      "Id": 555,
-      "Name": "犬突·动如雷",
-      "Description": "<color=#FFD780FF>兽牙逐突形胜战法</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Gorou_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 556,
-      "Name": "犬勇·忠如山",
-      "Description": "施放<color=#FFD780FF>犬坂吠吠方圆阵</color>或<color=#FFD780FF>兽牙逐突形胜战法</color>后的12秒内，依据施放时的领域等级，提高附近的队伍中所有角色<color=#FFE699FF>岩元素伤害</color>的暴击伤害：\n·「坚牢」：提高10%；\n·「难破」：提高20%；\n·「摧碎」：提高40%。\n\n该效果无法叠加，以后生效的为准。",
-      "Icon": "UI_Talent_S_Gorou_04"
     }
   ],
   "talks": [
@@ -380,5 +379,6 @@
       "Title": "神之眼",
       "Context": "曾经很长一段时间里，五郎将战局失利一事完全归咎于自己。\n「再变强一些，说不定就能扭转战局。」\n带着这样的想法，五郎日夜训练弓术，试图靠个人力量带领同伴取得胜利。\n但到战场上磨砺一段时间后，五郎亲眼见到强大的战士落单被生擒，陷入劣势的弱小士兵却依靠团结作战击溃敌军。\n那时五郎才意识到，个人力量在战场上是有极限的。\n提升实力固然重要，更重要的却是让将士们齐心配合，并肩向前。\n一支队伍只有做到集体强大，才能在战场上无往不利。\n意识到这一点的五郎不再追求极致的弓术，而是把精力投给身边人，关注同伴各方面状态，帮助大家一起进步。\n——现在想来，这或许也是五郎获得神之眼的契机。"
     }
-  ]
+  ],
+  "team": [0]
 }

@@ -4,7 +4,6 @@
   "title": "红叶逐荒波",
   "description": "来自稻妻的浪人武士，如今栖身于璃月船队「南十字」中。性情温和而洒脱，心中埋藏着许多往事。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "南十字船队",
     "constellation": "枫红座",
@@ -22,6 +21,46 @@
     { "id": 112037, "name": "攫金鸦印", "star": 3 },
     { "id": 104315, "name": "「勤劳」的哲学", "star": 4 },
     { "id": 113019, "name": "鎏金之鳞", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 471,
+      "Name": "千山红遍",
+      "Description": "<color=#FFD780FF>千早振</color>的冷却时间减少10%。\n施放<color=#FFD780FF>万叶之一刀</color>时，重置<color=#FFD780FF>千早振</color>的冷却时间。",
+      "Icon": "UI_Talent_S_Kazuha_01"
+    },
+    {
+      "Id": 472,
+      "Name": "山岚残芯",
+      "Description": "<color=#FFD780FF>万叶之一刀</color>的流风秋野具有以下效果：\n·持续期间内，枫原万叶自己的元素精通提升200点；\n·其中的场上角色的元素精通提升200点。\n\n该命之座提供的元素精通提升效果无法叠加。",
+      "Icon": "UI_Talent_S_Kazuha_02"
+    },
+    {
+      "Id": 473,
+      "Name": "枫袖奇谭",
+      "Description": "<color=#FFD780FF>千早振</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Kazuha_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 474,
+      "Name": "大空幻法",
+      "Description": "当枫原万叶的元素能量低于45点时，具有如下效果：\n·点按、长按施放<color=#FFD780FF>千早振</color>时，将分别为枫原万叶恢复3、4点元素能量；\n·处于滑翔状态下时，每秒为枫原万叶恢复2点元素能量。",
+      "Icon": "UI_Talent_S_Kazuha_03"
+    },
+    {
+      "Id": 475,
+      "Name": "万世之集",
+      "Description": "<color=#FFD780FF>万叶之一刀</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Kazuha_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 476,
+      "Name": "血赤叶红",
+      "Description": "枫原万叶施放<color=#FFD780FF>千早振</color>或<color=#FFD780FF>万叶之一刀</color>后的5秒内，获得<color=#80FFD7FF>风元素附魔</color>，并且枫原万叶的每点元素精通，都会使他的普通攻击、重击、下落攻击造成的伤害提高0.2%。",
+      "Icon": "UI_Talent_S_Kazuha_04"
+    }
   ],
   "skills": [
     {
@@ -64,7 +103,7 @@
       "group": 4722,
       "id": 472201,
       "name": "风物之诗咏",
-      "desc": "枫原万叶触发扩散反应后，枫原万叶的每点元素精通，会为队伍中所有角色提供0.04%对应元素伤害加成，持续8秒。通过这种方式获得的不同元素伤害加成可以共存。",
+      "desc": "枫原万叶触发扩散或星扩散反应后，枫原万叶的每点元素精通，会为队伍中所有角色提供0.04%对应元素伤害加成，持续8秒。通过这种方式获得的不同元素伤害加成可以共存。",
       "icon": "UI_Talent_S_Kazuha_06",
       "maxLv": 1,
       "luc": null
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Explosion_Sprint",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 471,
-      "Name": "千山红遍",
-      "Description": "<color=#FFD780FF>千早振</color>的冷却时间减少10%。\n施放<color=#FFD780FF>万叶之一刀</color>时，重置<color=#FFD780FF>千早振</color>的冷却时间。",
-      "Icon": "UI_Talent_S_Kazuha_01"
-    },
-    {
-      "Id": 472,
-      "Name": "山岚残芯",
-      "Description": "<color=#FFD780FF>万叶之一刀</color>的流风秋野具有以下效果：\n·持续期间内，枫原万叶自己的元素精通提升200点；\n·其中的场上角色的元素精通提升200点。\n\n该命之座提供的元素精通提升效果无法叠加。",
-      "Icon": "UI_Talent_S_Kazuha_02"
-    },
-    {
-      "Id": 473,
-      "Name": "枫袖奇谭",
-      "Description": "<color=#FFD780FF>千早振</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Kazuha_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 474,
-      "Name": "大空幻法",
-      "Description": "当枫原万叶的元素能量低于45点时，具有如下效果：\n·点按、长按施放<color=#FFD780FF>千早振</color>时，将分别为枫原万叶恢复3、4点元素能量；\n·处于滑翔状态下时，每秒为枫原万叶恢复2点元素能量。",
-      "Icon": "UI_Talent_S_Kazuha_03"
-    },
-    {
-      "Id": 475,
-      "Name": "万世之集",
-      "Description": "<color=#FFD780FF>万叶之一刀</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Kazuha_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 476,
-      "Name": "血赤叶红",
-      "Description": "枫原万叶施放<color=#FFD780FF>千早振</color>或<color=#FFD780FF>万叶之一刀</color>后的5秒内，获得<color=#80FFD7FF>风元素附魔</color>，并且枫原万叶的每点元素精通，都会使他的普通攻击、重击、下落攻击造成的伤害提高0.2%。",
-      "Icon": "UI_Talent_S_Kazuha_04"
     }
   ],
   "talks": [
@@ -367,5 +366,6 @@
       "Title": "神之眼",
       "Context": "清晨山崖间纱雾蒙蒙，小径上，正在行路的，唯有万叶一人。\n此时万籁俱寂，既不见一羽之振，又不闻一虫之鸣。\n就连涛涛海浪似乎也已眠去，仅剩风声幽响，万叶伸出舌头。空气中的味道阴郁沉闷。\n他知道，天要下雨了。\n万叶抬头眺望，视线尽头，有一缕炊烟，几间茅屋。那么今晚的宿处应该有着落了。\n他告诉茅屋的主人，大雨将至。主人起初将信将疑，但刚至晌午，瓢泼大雨忽然簌簌而下。\n主人便衷心佩服起这个旅人来，殷勤供上膳宿。\n夜晚窗外依旧潇然，万叶拥着被子，卧听雨打秋叶，不由得发起呆来。\n自从枫原家家财散尽，少爷万叶踏上旅程，他已走过数座岛屿，知道旅人行路的诸多难处。\n从稻妻的一座岛到另一座岛，通常需要渡海。万叶孤身旅行，乘一叶小舟在海上缓慢前行时，若遭遇逆风或雷暴，路途将愈发艰险…\n不过，这一路以天地为屋宇，万灵为诗友，亦有无穷趣味。\n心至「空」处，天地万物皆为「空」；\n心中「净」澈，万物天地皆为「净」。\n手中有刀，心中有道，他便能一路歌咏前行，再多崎岖也无畏惧。\n如此重整心情的他，带着满足沉沉睡去。\n翌日，万叶被鸟鸣唤醒时，怀中多出了一枚莹亮的神之眼。"
     }
-  ]
+  ],
+  "team": [0]
 }

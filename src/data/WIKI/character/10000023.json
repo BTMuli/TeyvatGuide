@@ -4,7 +4,6 @@
   "title": "万民百味",
   "description": "来自璃月，名声在外的少女厨师，对料理之道极具热情，拿手麻辣菜肴堪称一绝。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "万民堂",
     "constellation": "长杓座",
@@ -22,6 +21,46 @@
     { "id": 112004, "name": "史莱姆原浆", "star": 3 },
     { "id": 104315, "name": "「勤劳」的哲学", "star": 4 },
     { "id": 113004, "name": "东风之爪", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 231,
+      "Name": "外酥里嫩",
+      "Description": "受到锅巴攻击的敌人，<color=#FF9999FF>火元素抗性</color>降低15%，持续6秒。",
+      "Icon": "UI_Talent_S_Xiangling_01"
+    },
+    {
+      "Id": 232,
+      "Name": "大火宽油",
+      "Description": "普通攻击的最后一击会对敌人施加持续2秒的内爆效果，持续时间结束时会发生爆炸，造成75%攻击力的<color=#FF9999FF>火元素范围伤害</color>。",
+      "Icon": "UI_Talent_S_Xiangling_02"
+    },
+    {
+      "Id": 233,
+      "Name": "武火急烹",
+      "Description": "<color=#FFD780FF>旋火轮</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xiangling_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 234,
+      "Name": "文火慢煨",
+      "Description": "<color=#FFD780FF>旋火轮</color>的持续时间延长40%。",
+      "Icon": "UI_Talent_S_Xiangling_03"
+    },
+    {
+      "Id": 235,
+      "Name": "锅巴凶猛",
+      "Description": "<color=#FFD780FF>锅巴出击</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xiangling_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 236,
+      "Name": "大龙卷旋火轮",
+      "Description": "<color=#FFD780FF>旋火轮</color>持续期间，队伍中所有角色获得15%<color=#FF9999FF>火元素伤害加成</color>。",
+      "Icon": "UI_Talent_S_Xiangling_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Cook_Attack",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 231,
-      "Name": "外酥里嫩",
-      "Description": "受到锅巴攻击的敌人，<color=#FF9999FF>火元素抗性</color>降低15%，持续6秒。",
-      "Icon": "UI_Talent_S_Xiangling_01"
-    },
-    {
-      "Id": 232,
-      "Name": "大火宽油",
-      "Description": "普通攻击的最后一击会对敌人施加持续2秒的内爆效果，持续时间结束时会发生爆炸，造成75%攻击力的<color=#FF9999FF>火元素范围伤害</color>。",
-      "Icon": "UI_Talent_S_Xiangling_02"
-    },
-    {
-      "Id": 233,
-      "Name": "武火急烹",
-      "Description": "<color=#FFD780FF>旋火轮</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xiangling_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 234,
-      "Name": "文火慢煨",
-      "Description": "<color=#FFD780FF>旋火轮</color>的持续时间延长40%。",
-      "Icon": "UI_Talent_S_Xiangling_03"
-    },
-    {
-      "Id": 235,
-      "Name": "锅巴凶猛",
-      "Description": "<color=#FFD780FF>锅巴出击</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xiangling_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 236,
-      "Name": "大龙卷旋火轮",
-      "Description": "<color=#FFD780FF>旋火轮</color>持续期间，队伍中所有角色获得15%<color=#FF9999FF>火元素伤害加成</color>。",
-      "Icon": "UI_Talent_S_Xiangling_04"
     }
   ],
   "talks": [
@@ -383,5 +382,6 @@
       "Title": "神之眼",
       "Context": "「不管使用怎样的食材，都要做出超级好吃的菜肴。」\n秉承着这样的信念，香菱得到了「神之眼」的认可。她全心全意、毫无保留地坚持这一理想。即使做出堪称「恐怖」的料理，她不断尝试搭配的心也不会动摇。\n「唔…这道清心花炒蜥蜴的确有点难吃，那蜥蜴以后还是岩烤好了。」\n「史莱姆炒饭也一般般，下次用史莱姆滑野蘑菇试试。」\n就算身边朋友都受不了这「魔神大乱斗」般的口感，旁敲侧击劝说她放弃，香菱仍不断思考，怎样才能把这些「特殊食材」变成美味。\n在单纯而又执着的香菱心中，只要没有毒副作用，「食材」便不分高下。\n她的「神之眼」正是证明——这是连神都认可的事啊。"
     }
-  ]
+  ],
+  "team": [0]
 }

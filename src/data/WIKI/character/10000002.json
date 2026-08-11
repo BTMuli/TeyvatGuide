@@ -4,7 +4,6 @@
   "title": "白鹭霜华",
   "description": "稻妻「社奉行」神里家的大小姐。端庄而文雅，聪慧又坚韧。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "社奉行",
     "constellation": "雪鹤座",
@@ -22,6 +21,46 @@
     { "id": 112046, "name": "名刀镡", "star": 3 },
     { "id": 104325, "name": "「风雅」的哲学", "star": 4 },
     { "id": 113018, "name": "血玉之枝", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 21,
+      "Name": "霜杀墨染樱",
+      "Description": "神里绫华的普通攻击或重击对敌人造成<color=#99FFFFFF>冰元素伤害</color>时，有50%的几率使<color=#FFD780FF>神里流·冰华</color>的冷却时间缩减0.3秒。该效果每0.1秒只能触发一次。",
+      "Icon": "UI_Talent_S_Ayaka_01"
+    },
+    {
+      "Id": 22,
+      "Name": "三重雪关扉",
+      "Description": "施放<color=#FFD780FF>神里流·霜灭</color>时，会额外释放两股规模较小的霜见雪关扉，各自能造成原本20%的伤害。",
+      "Icon": "UI_Talent_S_Ayaka_02"
+    },
+    {
+      "Id": 23,
+      "Name": "花白锦画纸吹雪",
+      "Description": "<color=#FFD780FF>神里流·霜灭</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Ayaka_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 24,
+      "Name": "盈缺流返",
+      "Description": "敌人受到<color=#FFD780FF>神里流·霜灭</color>的霜见雪关扉造成的伤害后，防御力降低30%，持续6秒。",
+      "Icon": "UI_Talent_S_Ayaka_03"
+    },
+    {
+      "Id": 25,
+      "Name": "花云钟入月",
+      "Description": "<color=#FFD780FF>神里流·冰华</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Ayaka_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 26,
+      "Name": "间水月",
+      "Description": "每过10秒，神里绫华会获得「薄冰舞踏」，使重击造成的伤害提高298%。薄冰舞踏效果将在重击命中敌人的0.5秒后清除，并重新开始计算时间。",
+      "Icon": "UI_Talent_S_Ayaka_04"
+    }
   ],
   "skills": [
     {
@@ -86,46 +125,6 @@
       "icon": "UI_Talent_Combine_Weapon_Double",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 21,
-      "Name": "霜杀墨染樱",
-      "Description": "神里绫华的普通攻击或重击对敌人造成<color=#99FFFFFF>冰元素伤害</color>时，有50%的几率使<color=#FFD780FF>神里流·冰华</color>的冷却时间缩减0.3秒。该效果每0.1秒只能触发一次。",
-      "Icon": "UI_Talent_S_Ayaka_01"
-    },
-    {
-      "Id": 22,
-      "Name": "三重雪关扉",
-      "Description": "施放<color=#FFD780FF>神里流·霜灭</color>时，会额外释放两股规模较小的霜见雪关扉，各自能造成原本20%的伤害。",
-      "Icon": "UI_Talent_S_Ayaka_02"
-    },
-    {
-      "Id": 23,
-      "Name": "花白锦画纸吹雪",
-      "Description": "<color=#FFD780FF>神里流·霜灭</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Ayaka_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 24,
-      "Name": "盈缺流返",
-      "Description": "敌人受到<color=#FFD780FF>神里流·霜灭</color>的霜见雪关扉造成的伤害后，防御力降低30%，持续6秒。",
-      "Icon": "UI_Talent_S_Ayaka_03"
-    },
-    {
-      "Id": 25,
-      "Name": "花云钟入月",
-      "Description": "<color=#FFD780FF>神里流·冰华</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Ayaka_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 26,
-      "Name": "间水月",
-      "Description": "每过10秒，神里绫华会获得「薄冰舞踏」，使重击造成的伤害提高298%。薄冰舞踏效果将在重击命中敌人的0.5秒后清除，并重新开始计算时间。",
-      "Icon": "UI_Talent_S_Ayaka_04"
     }
   ],
   "talks": [
@@ -386,5 +385,6 @@
       "Title": "神之眼",
       "Context": "好些年前，家中发生重大变故，重担落到了兄长绫人肩上。那时，绫华还不是如今这副成熟能干的模样。\n她本是爱玩的孩子，并不懂得家族责任，更缺乏应对种种人物的手腕与经验。\n但看着病床上的母亲与劳碌的兄长，绫华意识到：她非得成长起来不可。\n于是她决定，首先拾起荒废许久的剑术与诗歌——这是身为贵族的基础修养，若能掌握此二者，她便算是面上过得去的神里家千金了，能代替兄长出席一些祭典之类的场合，为他分忧。\n事实证明，绫华并非天赋异禀，也曾为诗歌背不下来、写字不够风雅、剑术毫无章法之类的事而苦恼。\n她从未动摇过——一遍背不下来的诗就背五十遍，一遍写不好的字就练五十遍，一遍使不好的剑术就使五十遍。\n「千般锤磨，素振亦无人可当。」——这是母亲告诉她的话。\n母亲离世后，她不再是从前那个小绫华。如今的她，是神里绫华，将军御下三家之一，社奉行神里家的大小姐。\n剑术训练成为了日常生活的一环，从开始那日延续至今，从未间断。\n不知第多少天，绫华终于能做到一击退敌。霎时，道场内冰花凝结，道场正中，她的刀尖上挂着一枚如冰棱般璀璨的「神之眼」。\n千般锤磨，素振亦无人可当，就连神明也为之动容。"
     }
-  ]
+  ],
+  "team": [0]
 }

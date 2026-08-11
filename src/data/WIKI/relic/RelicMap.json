@@ -3604,6 +3604,146 @@
     "icon": "UI_RelicIcon_15046_5",
     "pos": 3
   },
+  "23841": {
+    "set": 15047,
+    "star": 5,
+    "name": "饮尽你的血泪",
+    "icon": "UI_RelicIcon_15047_1",
+    "pos": 4
+  },
+  "23842": {
+    "set": 15047,
+    "star": 5,
+    "name": "铭记你的功勋",
+    "icon": "UI_RelicIcon_15047_2",
+    "pos": 2
+  },
+  "23843": {
+    "set": 15047,
+    "star": 5,
+    "name": "缅怀你的信仰",
+    "icon": "UI_RelicIcon_15047_3",
+    "pos": 5
+  },
+  "23844": {
+    "set": 15047,
+    "star": 5,
+    "name": "感谢你的奉献",
+    "icon": "UI_RelicIcon_15047_4",
+    "pos": 1
+  },
+  "23845": {
+    "set": 15047,
+    "star": 5,
+    "name": "授予你的年华",
+    "icon": "UI_RelicIcon_15047_5",
+    "pos": 3
+  },
+  "23846": {
+    "set": 15047,
+    "star": 5,
+    "name": "饮尽你的血泪",
+    "icon": "UI_RelicIcon_15047_1",
+    "pos": 4
+  },
+  "23847": {
+    "set": 15047,
+    "star": 4,
+    "name": "铭记你的功勋",
+    "icon": "UI_RelicIcon_15047_2",
+    "pos": 2
+  },
+  "23848": {
+    "set": 15047,
+    "star": 5,
+    "name": "缅怀你的信仰",
+    "icon": "UI_RelicIcon_15047_3",
+    "pos": 5
+  },
+  "23849": {
+    "set": 15047,
+    "star": 4,
+    "name": "感谢你的奉献",
+    "icon": "UI_RelicIcon_15047_4",
+    "pos": 1
+  },
+  "23850": {
+    "set": 15047,
+    "star": 5,
+    "name": "授予你的年华",
+    "icon": "UI_RelicIcon_15047_5",
+    "pos": 3
+  },
+  "23851": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的雅量",
+    "icon": "UI_RelicIcon_15048_1",
+    "pos": 4
+  },
+  "23852": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的观测",
+    "icon": "UI_RelicIcon_15048_2",
+    "pos": 2
+  },
+  "23853": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "23854": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的揣度",
+    "icon": "UI_RelicIcon_15048_4",
+    "pos": 1
+  },
+  "23855": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的计算",
+    "icon": "UI_RelicIcon_15048_5",
+    "pos": 3
+  },
+  "23856": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的雅量",
+    "icon": "UI_RelicIcon_15048_1",
+    "pos": 4
+  },
+  "23857": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的观测",
+    "icon": "UI_RelicIcon_15048_2",
+    "pos": 2
+  },
+  "23858": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "23859": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "23860": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的计算",
+    "icon": "UI_RelicIcon_15048_5",
+    "pos": 3
+  },
   "24101": {
     "set": 15001,
     "star": 5,
@@ -8152,6 +8292,286 @@
     "star": 5,
     "name": "止于宏伟梦醒的时刻",
     "icon": "UI_RelicIcon_15046_5",
+    "pos": 3
+  },
+  "47412": {
+    "set": 15047,
+    "star": 4,
+    "name": "饮尽你的血泪",
+    "icon": "UI_RelicIcon_15047_1",
+    "pos": 4
+  },
+  "47413": {
+    "set": 15047,
+    "star": 4,
+    "name": "饮尽你的血泪",
+    "icon": "UI_RelicIcon_15047_1",
+    "pos": 4
+  },
+  "47422": {
+    "set": 15047,
+    "star": 4,
+    "name": "铭记你的功勋",
+    "icon": "UI_RelicIcon_15047_2",
+    "pos": 2
+  },
+  "47423": {
+    "set": 15047,
+    "star": 4,
+    "name": "铭记你的功勋",
+    "icon": "UI_RelicIcon_15047_2",
+    "pos": 2
+  },
+  "47432": {
+    "set": 15047,
+    "star": 4,
+    "name": "缅怀你的信仰",
+    "icon": "UI_RelicIcon_15047_3",
+    "pos": 5
+  },
+  "47433": {
+    "set": 15047,
+    "star": 4,
+    "name": "缅怀你的信仰",
+    "icon": "UI_RelicIcon_15047_3",
+    "pos": 5
+  },
+  "47442": {
+    "set": 15047,
+    "star": 4,
+    "name": "感谢你的奉献",
+    "icon": "UI_RelicIcon_15047_4",
+    "pos": 1
+  },
+  "47443": {
+    "set": 15047,
+    "star": 4,
+    "name": "感谢你的奉献",
+    "icon": "UI_RelicIcon_15047_4",
+    "pos": 1
+  },
+  "47452": {
+    "set": 15047,
+    "star": 4,
+    "name": "授予你的年华",
+    "icon": "UI_RelicIcon_15047_5",
+    "pos": 3
+  },
+  "47453": {
+    "set": 15047,
+    "star": 4,
+    "name": "授予你的年华",
+    "icon": "UI_RelicIcon_15047_5",
+    "pos": 3
+  },
+  "47513": {
+    "set": 15047,
+    "star": 5,
+    "name": "饮尽你的血泪",
+    "icon": "UI_RelicIcon_15047_1",
+    "pos": 4
+  },
+  "47514": {
+    "set": 15047,
+    "star": 5,
+    "name": "饮尽你的血泪",
+    "icon": "UI_RelicIcon_15047_1",
+    "pos": 4
+  },
+  "47523": {
+    "set": 15047,
+    "star": 5,
+    "name": "铭记你的功勋",
+    "icon": "UI_RelicIcon_15047_2",
+    "pos": 2
+  },
+  "47524": {
+    "set": 15047,
+    "star": 5,
+    "name": "铭记你的功勋",
+    "icon": "UI_RelicIcon_15047_2",
+    "pos": 2
+  },
+  "47533": {
+    "set": 15047,
+    "star": 5,
+    "name": "缅怀你的信仰",
+    "icon": "UI_RelicIcon_15047_3",
+    "pos": 5
+  },
+  "47534": {
+    "set": 15047,
+    "star": 5,
+    "name": "缅怀你的信仰",
+    "icon": "UI_RelicIcon_15047_3",
+    "pos": 5
+  },
+  "47543": {
+    "set": 15047,
+    "star": 5,
+    "name": "感谢你的奉献",
+    "icon": "UI_RelicIcon_15047_4",
+    "pos": 1
+  },
+  "47544": {
+    "set": 15047,
+    "star": 5,
+    "name": "感谢你的奉献",
+    "icon": "UI_RelicIcon_15047_4",
+    "pos": 1
+  },
+  "47553": {
+    "set": 15047,
+    "star": 5,
+    "name": "授予你的年华",
+    "icon": "UI_RelicIcon_15047_5",
+    "pos": 3
+  },
+  "47554": {
+    "set": 15047,
+    "star": 5,
+    "name": "授予你的年华",
+    "icon": "UI_RelicIcon_15047_5",
+    "pos": 3
+  },
+  "48412": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的雅量",
+    "icon": "UI_RelicIcon_15048_1",
+    "pos": 4
+  },
+  "48413": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的雅量",
+    "icon": "UI_RelicIcon_15048_1",
+    "pos": 4
+  },
+  "48422": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的观测",
+    "icon": "UI_RelicIcon_15048_2",
+    "pos": 2
+  },
+  "48423": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的观测",
+    "icon": "UI_RelicIcon_15048_2",
+    "pos": 2
+  },
+  "48432": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "48433": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "48442": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的揣度",
+    "icon": "UI_RelicIcon_15048_4",
+    "pos": 1
+  },
+  "48443": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的揣度",
+    "icon": "UI_RelicIcon_15048_4",
+    "pos": 1
+  },
+  "48452": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的计算",
+    "icon": "UI_RelicIcon_15048_5",
+    "pos": 3
+  },
+  "48453": {
+    "set": 15048,
+    "star": 4,
+    "name": "熔铸者的计算",
+    "icon": "UI_RelicIcon_15048_5",
+    "pos": 3
+  },
+  "48513": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的雅量",
+    "icon": "UI_RelicIcon_15048_1",
+    "pos": 4
+  },
+  "48514": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的雅量",
+    "icon": "UI_RelicIcon_15048_1",
+    "pos": 4
+  },
+  "48523": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的观测",
+    "icon": "UI_RelicIcon_15048_2",
+    "pos": 2
+  },
+  "48524": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的观测",
+    "icon": "UI_RelicIcon_15048_2",
+    "pos": 2
+  },
+  "48533": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "48534": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的继志",
+    "icon": "UI_RelicIcon_15048_3",
+    "pos": 5
+  },
+  "48543": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的揣度",
+    "icon": "UI_RelicIcon_15048_4",
+    "pos": 1
+  },
+  "48544": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的揣度",
+    "icon": "UI_RelicIcon_15048_4",
+    "pos": 1
+  },
+  "48553": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的计算",
+    "icon": "UI_RelicIcon_15048_5",
+    "pos": 3
+  },
+  "48554": {
+    "set": 15048,
+    "star": 5,
+    "name": "熔铸者的计算",
+    "icon": "UI_RelicIcon_15048_5",
     "pos": 3
   },
   "51310": {

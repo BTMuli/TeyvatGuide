@@ -4,7 +4,6 @@
   "title": "未授勋之花",
   "description": "「西风骑士团」的可靠女仆，梦想有一天能成为正式的骑士。",
   "area": "蒙德",
-  "team": [0],
   "brief": {
     "camp": "西风骑士团",
     "constellation": "心护座",
@@ -22,6 +21,46 @@
     { "id": 112007, "name": "不祥的面具", "star": 3 },
     { "id": 104306, "name": "「抗争」的哲学", "star": 4 },
     { "id": 113004, "name": "东风之爪", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 341,
+      "Name": "支援就交给我吧",
+      "Description": "同时处于<color=#FFD780FF>大扫除</color>与<color=#FFD780FF>护心铠</color>状态时，护心铠的生命值回复效果触发几率提升至100%。",
+      "Icon": "UI_Talent_S_Noel_01"
+    },
+    {
+      "Id": 342,
+      "Name": "旋风女仆",
+      "Description": "诺艾尔的重击的体力消耗降低20%，伤害提升15%。",
+      "Icon": "UI_Talent_S_Noel_02"
+    },
+    {
+      "Id": 343,
+      "Name": "女仆不会受伤",
+      "Description": "<color=#FFD780FF>护心铠</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Noel_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 344,
+      "Name": "之后会扫干净的",
+      "Description": "<color=#FFD780FF>护心铠</color>在效果结束时，或因伤害破碎时，会对周围的敌人造成400%攻击力的<color=#FFE699FF>岩元素伤害</color>。",
+      "Icon": "UI_Talent_S_Noel_03"
+    },
+    {
+      "Id": 345,
+      "Name": "骑士团扫除专家",
+      "Description": "<color=#FFD780FF>大扫除</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Noel_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 346,
+      "Name": "要一尘不染才行",
+      "Description": "<color=#FFD780FF>大扫除</color>额外提高诺艾尔防御力50%的攻击力；\n此外，在技能持续时间内，每打倒1个敌人，其持续时间将延长1秒，最多不会超过10秒。",
+      "Icon": "UI_Talent_S_Noel_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Cook_Defense",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 341,
-      "Name": "支援就交给我吧",
-      "Description": "同时处于<color=#FFD780FF>大扫除</color>与<color=#FFD780FF>护心铠</color>状态时，护心铠的生命值回复效果触发几率提升至100%。",
-      "Icon": "UI_Talent_S_Noel_01"
-    },
-    {
-      "Id": 342,
-      "Name": "旋风女仆",
-      "Description": "诺艾尔的重击的体力消耗降低20%，伤害提升15%。",
-      "Icon": "UI_Talent_S_Noel_02"
-    },
-    {
-      "Id": 343,
-      "Name": "女仆不会受伤",
-      "Description": "<color=#FFD780FF>护心铠</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Noel_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 344,
-      "Name": "之后会扫干净的",
-      "Description": "<color=#FFD780FF>护心铠</color>在效果结束时，或因伤害破碎时，会对周围的敌人造成400%攻击力的<color=#FFE699FF>岩元素伤害</color>。",
-      "Icon": "UI_Talent_S_Noel_03"
-    },
-    {
-      "Id": 345,
-      "Name": "骑士团扫除专家",
-      "Description": "<color=#FFD780FF>大扫除</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Noel_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 346,
-      "Name": "要一尘不染才行",
-      "Description": "<color=#FFD780FF>大扫除</color>额外提高诺艾尔防御力50%的攻击力；\n此外，在技能持续时间内，每打倒1个敌人，其持续时间将延长1秒，最多不会超过10秒。",
-      "Icon": "UI_Talent_S_Noel_04"
     }
   ],
   "talks": [
@@ -402,5 +401,6 @@
       "Title": "神之眼",
       "Context": "诺艾尔曾经过早地想要实现梦想。数年之前，在第七次明知会失败的选拔落选后，她有些心灰意冷。\n苦心学习的礼仪、剑术、言辞…这些都是徒劳吗？她记得每一位正式骑士的优秀之处，但谁会记得她这个失败者的努力？\n她从未停止过对西风骑士的向往，只是身体的疲倦让她没能像往常一样立刻站起。这很危险，就像在寒冷的冰原上日夜兼程，开始出现困意了。\n此时，骑士团大门突然打开，原来是刚刚负责骑士选拔的代理团长琴走了出来。\n诺艾尔尚未想好用怎样的表情面对她，就已不由自主地行了一个标准骑士礼。\n她马上意识到自己的唐突。她不知道一个落选者摆出这种动作，会让琴产生怎样的想法。\n不过，就在她无地自容、想要赶快逃跑的时候，琴停下脚步，向她回以同样的骑士礼。\n诺艾尔愣了愣，局促地笑了起来。样子有些笨拙，却又很单纯。\n这天是诺艾尔难以忘怀的幸运日。她获得了两份极为重要的认可，一份来自琴，另一份，则来自神。\n原来她的努力，还是会被记住的。\n那天之后，手握「神之眼」的她越发坚信自己终有一日能穿上那副甲胄，变得温柔可靠，以及，真正的无处不在。"
     }
-  ]
+  ],
+  "team": [0]
 }

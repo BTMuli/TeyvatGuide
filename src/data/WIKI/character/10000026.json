@@ -4,7 +4,6 @@
   "title": "护法夜叉",
   "description": "守护璃月的仙人，「夜叉」。美号「降魔大圣」，妙称「护法夜叉大将」。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "璃月仙人",
     "constellation": "金翅鹏王座",
@@ -22,6 +21,46 @@
     { "id": 112004, "name": "史莱姆原浆", "star": 3 },
     { "id": 104312, "name": "「繁荣」的哲学", "star": 4 },
     { "id": 113015, "name": "武炼之魂·孤影", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 261,
+      "Name": "坏劫·毁坏三界",
+      "Description": "<color=#FFD780FF>风轮两立</color>的可使用次数增加1次。",
+      "Icon": "UI_Talent_S_Xiao_01"
+    },
+    {
+      "Id": 262,
+      "Name": "空劫·虚空华开敷变",
+      "Description": "处于队伍后台时，魈自己的元素充能效率提高25%。",
+      "Icon": "UI_Talent_S_Xiao_02"
+    },
+    {
+      "Id": 263,
+      "Name": "降魔·忿怒显相",
+      "Description": "<color=#FFD780FF>风轮两立</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xiao_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 264,
+      "Name": "神通·诸苦灭尽",
+      "Description": "魈的生命值低于50%时，获得100%防御力提升。",
+      "Icon": "UI_Talent_S_Xiao_03"
+    },
+    {
+      "Id": 265,
+      "Name": "成劫·无明增长",
+      "Description": "<color=#FFD780FF>靖妖傩舞</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xiao_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 266,
+      "Name": "降魔·护法夜叉",
+      "Description": "在<color=#FFD780FF>靖妖傩舞</color>状态下，下落攻击命中至少2个敌人时，<color=#FFD780FF>风轮两立</color>立刻获得1次可使用次数，并且在接下来1秒内，可以无视冷却时间施放风轮两立。",
+      "Icon": "UI_Talent_S_Xiao_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Explosion_Climb",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 261,
-      "Name": "坏劫·毁坏三界",
-      "Description": "<color=#FFD780FF>风轮两立</color>的可使用次数增加1次。",
-      "Icon": "UI_Talent_S_Xiao_01"
-    },
-    {
-      "Id": 262,
-      "Name": "空劫·虚空华开敷变",
-      "Description": "处于队伍后台时，魈自己的元素充能效率提高25%。",
-      "Icon": "UI_Talent_S_Xiao_02"
-    },
-    {
-      "Id": 263,
-      "Name": "降魔·忿怒显相",
-      "Description": "<color=#FFD780FF>风轮两立</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xiao_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 264,
-      "Name": "神通·诸苦灭尽",
-      "Description": "魈的生命值低于50%时，获得100%防御力提升。",
-      "Icon": "UI_Talent_S_Xiao_03"
-    },
-    {
-      "Id": 265,
-      "Name": "成劫·无明增长",
-      "Description": "<color=#FFD780FF>靖妖傩舞</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xiao_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 266,
-      "Name": "降魔·护法夜叉",
-      "Description": "在<color=#FFD780FF>靖妖傩舞</color>状态下，下落攻击命中至少2个敌人时，<color=#FFD780FF>风轮两立</color>立刻获得1次可使用次数，并且在接下来1秒内，可以无视冷却时间施放风轮两立。",
-      "Icon": "UI_Talent_S_Xiao_04"
     }
   ],
   "talks": [
@@ -354,5 +353,6 @@
       "Title": "神之眼",
       "Context": "仙人全称是「三眼五显仙人」。「三眼」所指，正是天生双目之外的「神之眼」。\n那么仙人获眼与世人被天空岛垂青，究竟是否遵循着同种道理？\n魈已记不清得到神之眼的时刻了。对人类来说，这理应是终身难忘的瞬间；对他而言，却只是日后无穷战斗的开始。\n真正令魈难忘的，则是另一种时刻。\n人世节日多为庆典，只是鲜少有人记得节日背后的故事。\n这些日子，大多是吃人怪物被圣众降服之日。人们模仿其作为，举行驱逐妖怪的仪式以纪念英雄事迹，如此习俗，逐渐演变为欢庆的节日。\n璃月各地遭摩拉克斯镇压的魔神，在半梦半醒之间，偶尔会爆发出规模异常的怨憎与残渣。其中，以海灯节之夜的爆发最为巨大。\n魈受命进行「靖妖傩舞」，于海灯节当晚彻夜厮杀。因此，他尤为厌恶海灯节。\n魈并不觉得战斗艰险。因他的努力，璃月港最终保住了平安。人们点起海灯，赐福的灯光照亮夜空与近海。\n如此时刻，魈心中也有一股特别的情感随之升起。\n寂寞？安心？抑或是，对未来的恐惧？\n少年身姿的仙人扪心自问，却得不出答案。"
     }
-  ]
+  ],
+  "team": [0]
 }

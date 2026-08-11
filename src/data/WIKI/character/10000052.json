@@ -4,7 +4,6 @@
   "title": "一心净土",
   "description": "其身为御建鸣神主尊大御所大人，许稻妻人民以亘古不变之「永恒」。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "稻妻城",
     "constellation": "天下人座",
@@ -22,6 +21,46 @@
     { "id": 112046, "name": "名刀镡", "star": 3 },
     { "id": 104328, "name": "「天光」的哲学", "star": 4 },
     { "id": 113025, "name": "熔毁之刻", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 521,
+      "Name": "恶曜卜词",
+      "Description": "<color=#FFD780FF>诸愿百眼之轮</color>能更加迅速地积攒愿力。元素类型为<color=#FFACFFFF>雷元素</color>的角色施放元素爆发后，积攒的愿力提升80%；其他元素类型的角色施放元素爆发后，积攒的愿力提升20%。",
+      "Icon": "UI_Talent_S_Shougun_01"
+    },
+    {
+      "Id": 522,
+      "Name": "斩铁断金",
+      "Description": "<color=#FFD780FF>奥义·梦想真说</color>的梦想一刀与梦想一心状态下的雷电将军的攻击将无视敌人60%的防御力。",
+      "Icon": "UI_Talent_S_Shougun_03"
+    },
+    {
+      "Id": 523,
+      "Name": "真影旧事",
+      "Description": "<color=#FFD780FF>奥义·梦想真说</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Shougun_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 524,
+      "Name": "誓奉常道",
+      "Description": "<color=#FFD780FF>奥义·梦想真说</color>施加的<color=#FFD780FF>梦想一心</color>状态结束后，附近的队伍中所有角色（不包括雷电将军自己）的攻击力提升30%，持续10秒。",
+      "Icon": "UI_Talent_S_Shougun_02"
+    },
+    {
+      "Id": 525,
+      "Name": "凶将显形",
+      "Description": "<color=#FFD780FF>神变·恶曜开眼</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Shougun_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 526,
+      "Name": "负愿前行",
+      "Description": "处于<color=#FFD780FF>奥义·梦想真说</color>施加的<color=#FFD780FF>梦想一心</color>状态下时，雷电将军的元素爆发伤害命中敌人时，使附近的队伍中所有角色（不包括雷电将军自己）元素爆发的冷却时间缩短1秒。\n该效果每1秒至多触发一次，在持续期间内至多触发5次。",
+      "Icon": "UI_Talent_S_Shougun_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_S_Shougun_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 521,
-      "Name": "恶曜卜词",
-      "Description": "<color=#FFD780FF>诸愿百眼之轮</color>能更加迅速地积攒愿力。元素类型为<color=#FFACFFFF>雷元素</color>的角色施放元素爆发后，积攒的愿力提升80%；其他元素类型的角色施放元素爆发后，积攒的愿力提升20%。",
-      "Icon": "UI_Talent_S_Shougun_01"
-    },
-    {
-      "Id": 522,
-      "Name": "斩铁断金",
-      "Description": "<color=#FFD780FF>奥义·梦想真说</color>的梦想一刀与梦想一心状态下的雷电将军的攻击将无视敌人60%的防御力。",
-      "Icon": "UI_Talent_S_Shougun_03"
-    },
-    {
-      "Id": 523,
-      "Name": "真影旧事",
-      "Description": "<color=#FFD780FF>奥义·梦想真说</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Shougun_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 524,
-      "Name": "誓奉常道",
-      "Description": "<color=#FFD780FF>奥义·梦想真说</color>施加的<color=#FFD780FF>梦想一心</color>状态结束后，附近的队伍中所有角色（不包括雷电将军自己）的攻击力提升30%，持续10秒。",
-      "Icon": "UI_Talent_S_Shougun_02"
-    },
-    {
-      "Id": 525,
-      "Name": "凶将显形",
-      "Description": "<color=#FFD780FF>神变·恶曜开眼</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Shougun_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 526,
-      "Name": "负愿前行",
-      "Description": "处于<color=#FFD780FF>奥义·梦想真说</color>施加的<color=#FFD780FF>梦想一心</color>状态下时，雷电将军的元素爆发伤害命中敌人时，使附近的队伍中所有角色（不包括雷电将军自己）元素爆发的冷却时间缩短1秒。\n该效果每1秒至多触发一次，在持续期间内至多触发5次。",
-      "Icon": "UI_Talent_S_Shougun_04"
     }
   ],
   "talks": [
@@ -404,5 +403,6 @@
       "Title": "神之心",
       "Context": "长居「一心净土」之前，影曾为如何安置神之心而感到困扰。\n影不再需要神之心了，但如此重要的东西绝不能随意处置。本想将它改造成供能装置，可她的技术不知为何无法对神之心生效。\n她想到了一个人。狡黠聪慧的八重神子，虽说性格不是那么可靠，但从各方面来说，都是影最好的选择。\n听到这一要求，八重神子忍不住打趣道：「你就不担心我转手把这东西卖掉吗？」\n「你明白神之心的价值。就算要卖，也得找到价值与它相配的交易品才行。那绝非易事。」\n以八重神子这般性格，就算卖掉神之心也没什么奇怪。但她向来不愿吃亏也是事实。\n旧友之间自有默契。八重神子领会影的意思，便笑着接过了那枚贵重的神之心。\n「这话可是你说的。不准反悔哦。」"
     }
-  ]
+  ],
+  "team": [0]
 }

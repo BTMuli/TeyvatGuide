@@ -4,7 +4,6 @@
   "title": "少年春衫薄",
   "description": "经常能在书摊看到的少年人。手执长剑，胸中常怀侠义之心。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "飞云商会",
     "constellation": "锦织座",
@@ -22,6 +21,46 @@
     { "id": 112007, "name": "不祥的面具", "star": 3 },
     { "id": 104318, "name": "「黄金」的哲学", "star": 4 },
     { "id": 113006, "name": "北风之尾", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 251,
+      "Name": "重帘留香",
+      "Description": "雨帘剑的最大数量增加1柄。",
+      "Icon": "UI_Talent_S_Xingqiu_01"
+    },
+    {
+      "Id": 252,
+      "Name": "天青现虹",
+      "Description": "<color=#FFD780FF>古华剑·裁雨留虹</color>的持续时间延长3秒；\n此外，受到剑雨攻击的敌人，<color=#80C0FFFF>水元素抗性</color>降低15%，持续4秒。",
+      "Icon": "UI_Talent_S_Xingqiu_02"
+    },
+    {
+      "Id": 253,
+      "Name": "织诗成锦",
+      "Description": "<color=#FFD780FF>古华剑·裁雨留虹</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xingqiu_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 254,
+      "Name": "孤舟斩蛟",
+      "Description": "在<color=#FFD780FF>古华剑·裁雨留虹</color>效果持续期间，<color=#FFD780FF>古华剑·画雨笼山</color>造成的伤害提升50%。",
+      "Icon": "UI_Talent_S_Xingqiu_03"
+    },
+    {
+      "Id": 255,
+      "Name": "雨深闭门",
+      "Description": "<color=#FFD780FF>古华剑·画雨笼山</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xingqiu_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 256,
+      "Name": "万文集此",
+      "Description": "<color=#FFD780FF>古华剑·裁雨留虹</color>每发动2次剑雨攻击，就大幅增强下一次剑雨攻击，并在命中敌人时为行秋恢复3点元素能量。",
+      "Icon": "UI_Talent_S_Xingqiu_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Combine_Talent",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 251,
-      "Name": "重帘留香",
-      "Description": "雨帘剑的最大数量增加1柄。",
-      "Icon": "UI_Talent_S_Xingqiu_01"
-    },
-    {
-      "Id": 252,
-      "Name": "天青现虹",
-      "Description": "<color=#FFD780FF>古华剑·裁雨留虹</color>的持续时间延长3秒；\n此外，受到剑雨攻击的敌人，<color=#80C0FFFF>水元素抗性</color>降低15%，持续4秒。",
-      "Icon": "UI_Talent_S_Xingqiu_02"
-    },
-    {
-      "Id": 253,
-      "Name": "织诗成锦",
-      "Description": "<color=#FFD780FF>古华剑·裁雨留虹</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xingqiu_01",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 254,
-      "Name": "孤舟斩蛟",
-      "Description": "在<color=#FFD780FF>古华剑·裁雨留虹</color>效果持续期间，<color=#FFD780FF>古华剑·画雨笼山</color>造成的伤害提升50%。",
-      "Icon": "UI_Talent_S_Xingqiu_03"
-    },
-    {
-      "Id": 255,
-      "Name": "雨深闭门",
-      "Description": "<color=#FFD780FF>古华剑·画雨笼山</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xingqiu_02",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 256,
-      "Name": "万文集此",
-      "Description": "<color=#FFD780FF>古华剑·裁雨留虹</color>每发动2次剑雨攻击，就大幅增强下一次剑雨攻击，并在命中敌人时为行秋恢复3点元素能量。",
-      "Icon": "UI_Talent_S_Xingqiu_04"
     }
   ],
   "talks": [
@@ -404,5 +403,6 @@
       "Title": "神之眼",
       "Context": "数百年来，武学门派「古华派」式微。辉煌时期，「古华派」曾以枪剑闻名璃月。相传，其有三大镇派秘术——枪法「刺明法」、剑法「裁雨法」，以及枪剑双绝的「生克法」。此三绝之术随代代传承不断精进，时光推移，三绝技巧渐臻化境，威力却不断削弱，导致古华派势力低迷，人心流散…三绝更是如尘埃中的宝库，静候一位继承者。\n多年后，尘封的古华派等来了行秋。数百年间，唯有他一人仅仅花费四年便悟出了传古承今的「武理」。\n古华枪剑讲究「如臂使指」，在璃月诸派武术中，这是相当常见的意识。而依行秋之见，枪与剑的运用，其根本是对于「神之眼」的运用。武人应将「神之眼」视为身体的延伸，枪与剑则又是「神之眼」的延伸。即是说：枪术与剑术的本质，乃是瞳术。\n行秋参悟此道，挥毫写就武理歌诀一篇。古华派宗主观之落泪，当即宣布：「并非行秋需要古华派，而是古华派需要行秋。」自此，这篇歌诀被供奉在古华派重地「王山厅」，不许弟子瞻仰，外人更是无从得见。\n以下为歌诀全文：\n我習古華久，深秘我已悉。古華槍劍長浮鏽，今日溶洗與爾知。\n古華之劍華，若雨若飄華。飄華人可擷，雨線人難畫。古華之槍華，灼灼兮燈華。燈華易脆散，複聚如燃霞。\n如燃霞，三尺光，何輝煌。人謂使劍如使指，我言劍光是目光。\n游離物外無重量，裁雨者雨，刺明者明。動如龍蛇捉不住，青眼為劍，側目為槍。\n——其实，歌诀内容本应对所有弟子公开，封存真迹的原因只是字实在太丑了。"
     }
-  ]
+  ],
+  "team": [0]
 }

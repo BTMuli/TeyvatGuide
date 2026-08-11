@@ -4,7 +4,6 @@
   "title": "真珠之智",
   "description": "海祇岛的「现人神巫女」，统管海祇岛各项事宜的少女。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "海祇岛",
     "constellation": "眠龙座",
@@ -22,6 +21,46 @@
     { "id": 112055, "name": "浮游晶化核", "star": 3 },
     { "id": 104322, "name": "「浮世」的哲学", "star": 4 },
     { "id": 113026, "name": "狱火之蝶", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 541,
+      "Name": "决水于溪",
+      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海普通攻击的最后一击会额外释放一只游鱼，造成相当于珊瑚宫心海生命值上限30%的<color=#80C0FFFF>水元素伤害</color>。\n该伤害不被视为普通攻击伤害。",
+      "Icon": "UI_Talent_S_Kokomi_01"
+    },
+    {
+      "Id": 542,
+      "Name": "波起云海",
+      "Description": "基于珊瑚宫心海的生命值上限，珊瑚宫心海对生命值低于或等于50%的角色，通过以下途径进行治疗的回复量获得提升：\n·<color=#FFD780FF>海月之誓</color>的化海月：生命值上限的4.5%\n·<color=#FFD780FF>海人化羽</color>的普通攻击与重击：生命值上限的0.6%。",
+      "Icon": "UI_Talent_S_Kokomi_02"
+    },
+    {
+      "Id": 543,
+      "Name": "海渚月舟",
+      "Description": "<color=#FFD780FF>海人化羽</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Kokomi_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 544,
+      "Name": "月摄千川",
+      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海普通攻击的攻击速度提升10%，并会在普通攻击命中敌人时，恢复0.8点元素能量。\n该效果每0.2秒至多触发一次。",
+      "Icon": "UI_Talent_S_Kokomi_03"
+    },
+    {
+      "Id": 545,
+      "Name": "百川集海",
+      "Description": "<color=#FFD780FF>海月之誓</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Kokomi_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 546,
+      "Name": "珊瑚一心",
+      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海的普通攻击和重击对生命值高于或等于80%的角色进行治疗时，将获得40%<color=#80C0FFFF>水元素伤害加成</color>，持续4秒。",
+      "Icon": "UI_Talent_S_Kokomi_04"
+    }
   ],
   "skills": [
     {
@@ -86,46 +125,6 @@
       "icon": "UI_Talent_S_Kokomi_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 541,
-      "Name": "决水于溪",
-      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海普通攻击的最后一击会额外释放一只游鱼，造成相当于珊瑚宫心海生命值上限30%的<color=#80C0FFFF>水元素伤害</color>。\n该伤害不被视为普通攻击伤害。",
-      "Icon": "UI_Talent_S_Kokomi_01"
-    },
-    {
-      "Id": 542,
-      "Name": "波起云海",
-      "Description": "基于珊瑚宫心海的生命值上限，珊瑚宫心海对生命值低于或等于50%的角色，通过以下途径进行治疗的回复量获得提升：\n·<color=#FFD780FF>海月之誓</color>的化海月：生命值上限的4.5%\n·<color=#FFD780FF>海人化羽</color>的普通攻击与重击：生命值上限的0.6%。",
-      "Icon": "UI_Talent_S_Kokomi_02"
-    },
-    {
-      "Id": 543,
-      "Name": "海渚月舟",
-      "Description": "<color=#FFD780FF>海人化羽</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Kokomi_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 544,
-      "Name": "月摄千川",
-      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海普通攻击的攻击速度提升10%，并会在普通攻击命中敌人时，恢复0.8点元素能量。\n该效果每0.2秒至多触发一次。",
-      "Icon": "UI_Talent_S_Kokomi_03"
-    },
-    {
-      "Id": 545,
-      "Name": "百川集海",
-      "Description": "<color=#FFD780FF>海月之誓</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Kokomi_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 546,
-      "Name": "珊瑚一心",
-      "Description": "处于<color=#FFD780FF>海人化羽</color>的仪来羽衣状态下时，珊瑚宫心海的普通攻击和重击对生命值高于或等于80%的角色进行治疗时，将获得40%<color=#80C0FFFF>水元素伤害加成</color>，持续4秒。",
-      "Icon": "UI_Talent_S_Kokomi_04"
     }
   ],
   "talks": [
@@ -375,5 +374,6 @@
       "Title": "神之眼",
       "Context": "拥有强烈意志的领袖，会将身边的人带向一个明确的方向。\n心海却没有这种想法。她尊重民众的意志，希望每个人都能追逐不同的愿望。\n就如同辽阔的海洋，能容纳无数生灵，也能包容那些生灵的愿望。\n眼狩令到来的时候，民众心中的愤怒化作反抗的呐喊，心海便带领他们扬起了反抗的旗帜。\n而战争结束之后，和平与安稳成了民心所向，心海便又将自己的精力放在了政务与经济上。\n这份努力，究竟是源于现人神的意志，还是心海自身的责任感…亦或是二者都有？\n作为现人神巫女，心海自然也有着自己的神之眼。自那日在珊瑚宫外俯瞰海祇岛起，她的愿望就从未变过——\n「守护海祇岛的一切，让这里的每一个人，都能幸福快乐地活下去。」"
     }
-  ]
+  ],
+  "team": [0]
 }

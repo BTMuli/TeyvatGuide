@@ -4,7 +4,6 @@
   "title": "雪融有踪",
   "description": "驱邪世家的年轻方士，为压制自身的「纯阳之体」费尽心机。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "天衡方士",
     "constellation": "乾坤锋座",
@@ -22,6 +21,46 @@
     { "id": 112007, "name": "不祥的面具", "star": 3 },
     { "id": 104315, "name": "「勤劳」的哲学", "star": 4 },
     { "id": 113005, "name": "东风的吐息", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 361,
+      "Name": "释凌咏冰",
+      "Description": "普通攻击的最后一击会向前方释放三道冰之刃，每道冰之刃对沿途的敌人造成重云50%攻击力的<color=#99FFFFFF>冰元素伤害</color>。",
+      "Icon": "UI_Talent_S_Chongyun_01"
+    },
+    {
+      "Id": 362,
+      "Name": "周天运转",
+      "Description": "在<color=#FFD780FF>灵刃·重华叠霜</color>领域内施放的元素战技与元素爆发的冷却时间减少15%。",
+      "Icon": "UI_Talent_S_Chongyun_02"
+    },
+    {
+      "Id": 363,
+      "Name": "云尽光生",
+      "Description": "<color=#FFD780FF>灵刃·云开星落</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Chongyun_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 364,
+      "Name": "浮云霜天",
+      "Description": "重云的所有攻击命中受到<color=#99FFFFFF>冰元素</color>影响的敌人时，自身将恢复1点元素能量。\n该效果每2秒最多触发一次。",
+      "Icon": "UI_Talent_S_Chongyun_03"
+    },
+    {
+      "Id": 365,
+      "Name": "真道正理",
+      "Description": "<color=#FFD780FF>灵刃·重华叠霜</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Chongyun_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 366,
+      "Name": "四灵捧圣",
+      "Description": "<color=#FFD780FF>灵刃·云开星落</color>对生命值百分比低于重云的敌人造成伤害时，伤害提升15%；\n此外，施放时，会召唤一柄额外的灵刃。",
+      "Icon": "UI_Talent_S_Chongyun_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Expedition_Liyue",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 361,
-      "Name": "释凌咏冰",
-      "Description": "普通攻击的最后一击会向前方释放三道冰之刃，每道冰之刃对沿途的敌人造成重云50%攻击力的<color=#99FFFFFF>冰元素伤害</color>。",
-      "Icon": "UI_Talent_S_Chongyun_01"
-    },
-    {
-      "Id": 362,
-      "Name": "周天运转",
-      "Description": "在<color=#FFD780FF>灵刃·重华叠霜</color>领域内施放的元素战技与元素爆发的冷却时间减少15%。",
-      "Icon": "UI_Talent_S_Chongyun_02"
-    },
-    {
-      "Id": 363,
-      "Name": "云尽光生",
-      "Description": "<color=#FFD780FF>灵刃·云开星落</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Chongyun_01",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 364,
-      "Name": "浮云霜天",
-      "Description": "重云的所有攻击命中受到<color=#99FFFFFF>冰元素</color>影响的敌人时，自身将恢复1点元素能量。\n该效果每2秒最多触发一次。",
-      "Icon": "UI_Talent_S_Chongyun_03"
-    },
-    {
-      "Id": 365,
-      "Name": "真道正理",
-      "Description": "<color=#FFD780FF>灵刃·重华叠霜</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Chongyun_02",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 366,
-      "Name": "四灵捧圣",
-      "Description": "<color=#FFD780FF>灵刃·云开星落</color>对生命值百分比低于重云的敌人造成伤害时，伤害提升15%；\n此外，施放时，会召唤一柄额外的灵刃。",
-      "Icon": "UI_Talent_S_Chongyun_04"
     }
   ],
   "talks": [
@@ -370,5 +369,6 @@
       "Title": "神之眼",
       "Context": "「我看其他方士又是舞剑又是贴符的，你在这儿坐了一会儿就说事毕，还想让我付钱？糊弄谁呢！」\n初任方士时，重云屡受质疑。\n一大难题就此压在他头上：比起屋里「有妖邪」，「没有妖邪」难证明得多。\n与任何一位舞剑驭符的方士相比，他都更像是一个江湖骗子。\n空有一身本领却无处施展，被迫忍受委托人的质疑，由于害怕阳气暴走，还要努力压制热血辩驳的冲动…\n到最后，来向他道歉的人也没有几个。\n可就算如此，重云也不愿随波逐流，用装模作样的法事掩盖真正的驱邪方式。\n哪怕受到体质干扰，重云也从未有过放弃的念头。\n总有一天，他会成为璃月首屈一指的驱邪师，还要驾驭住这纯阳之体，让全天下妖邪消失殆尽。\n或许是这份惊人的斗志受到了神的肯定——重云得到的「神之眼」，竟是与「火」相对的「冰」。\n至于这「神之眼」是回应他哪个想法而降临，就不得而知了。"
     }
-  ]
+  ],
+  "team": [0]
 }

@@ -4,7 +4,6 @@
   "title": "狼少年",
   "description": "住在蒙德地区奔狼领，远离城市与人群，和狼一同生活的少年。直觉锐利，身姿迅捷。",
   "area": "蒙德",
-  "team": [1],
   "brief": {
     "camp": "奔狼领",
     "constellation": "小狼座",
@@ -22,6 +21,47 @@
     { "id": 112007, "name": "不祥的面具", "star": 3 },
     { "id": 104306, "name": "「抗争」的哲学", "star": 4 },
     { "id": 113004, "name": "东风之爪", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 201,
+      "Name": "狼性",
+      "Description": "雷泽获取元素晶球或元素微粒后的8秒内，造成的伤害提高10%。",
+      "Icon": "UI_Talent_S_Razor_01"
+    },
+    {
+      "Id": 202,
+      "Name": "压制",
+      "Description": "雷泽攻击生命值低于30%的敌人时，暴击率提高10%。",
+      "Icon": "UI_Talent_S_Razor_02"
+    },
+    {
+      "Id": 203,
+      "Name": "兽魂",
+      "Description": "<color=#FFD780FF>雷牙</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Razor_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 204,
+      "Name": "撕咬",
+      "Description": "<color=#FFD780FF>利爪与苍雷</color>点按时，会使命中的敌人防御力降低15%，持续7秒。",
+      "Icon": "UI_Talent_S_Razor_03"
+    },
+    {
+      "Id": 205,
+      "Name": "利爪",
+      "Description": "<color=#FFD780FF>利爪与苍雷</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Razor_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 206,
+      "Name": "天狼",
+      "Description": "每10秒，雷泽的大剑将自动充能，使下一次普通攻击引发落雷，造成100%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n不处于<color=#FFD780FF>雷牙</color>状态下时，若落雷击中敌人，会为雷泽积攒一个<color=#FFD780FF>利爪与苍雷</color>的雷之印。",
+      "SpecialDescription": "每10秒，雷泽的大剑将自动充能，使下一次普通攻击引发落雷，造成100%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n不处于<color=#FFD780FF>雷牙</color>状态下时，若落雷击中敌人，会为雷泽积攒三个元素战技<color=#FFD780FF>利爪与苍雷</color>中的雷之印。\n此外，雷泽通过元素战技<color=#FFD780FF>利爪与苍雷</color>积攒雷之印时，会改为为雷泽积攒三个雷之印。\n消耗雷之印后的15秒内，雷泽的暴击率提升10%，暴击伤害提升50%。",
+      "Icon": "UI_Talent_S_Razor_04"
+    }
   ],
   "skills": [
     {
@@ -86,47 +126,6 @@
       "icon": "UI_Talent_Explosion_Sprint",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 201,
-      "Name": "狼性",
-      "Description": "雷泽获取元素晶球或元素微粒后的8秒内，造成的伤害提高10%。",
-      "Icon": "UI_Talent_S_Razor_01"
-    },
-    {
-      "Id": 202,
-      "Name": "压制",
-      "Description": "雷泽攻击生命值低于30%的敌人时，暴击率提高10%。",
-      "Icon": "UI_Talent_S_Razor_02"
-    },
-    {
-      "Id": 203,
-      "Name": "兽魂",
-      "Description": "<color=#FFD780FF>雷牙</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Razor_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 204,
-      "Name": "撕咬",
-      "Description": "<color=#FFD780FF>利爪与苍雷</color>点按时，会使命中的敌人防御力降低15%，持续7秒。",
-      "Icon": "UI_Talent_S_Razor_03"
-    },
-    {
-      "Id": 205,
-      "Name": "利爪",
-      "Description": "<color=#FFD780FF>利爪与苍雷</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Razor_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 206,
-      "Name": "天狼",
-      "Description": "每10秒，雷泽的大剑将自动充能，使下一次普通攻击引发落雷，造成100%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n不处于<color=#FFD780FF>雷牙</color>状态下时，若落雷击中敌人，会为雷泽积攒一个<color=#FFD780FF>利爪与苍雷</color>的雷之印。",
-      "SpecialDescription": "每10秒，雷泽的大剑将自动充能，使下一次普通攻击引发落雷，造成100%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n不处于<color=#FFD780FF>雷牙</color>状态下时，若落雷击中敌人，会为雷泽积攒三个元素战技<color=#FFD780FF>利爪与苍雷</color>中的雷之印。\n此外，雷泽通过元素战技<color=#FFD780FF>利爪与苍雷</color>积攒雷之印时，会改为为雷泽积攒三个雷之印。\n消耗雷之印后的15秒内，雷泽的暴击率提升10%，暴击伤害提升50%。",
-      "Icon": "UI_Talent_S_Razor_04"
     }
   ],
   "talks": [
@@ -301,5 +300,6 @@
       "Title": "神之眼",
       "Context": "获得「神之眼」的经过，是雷泽为数不多的，不愿想起的记忆。\n那个雷雨天，一个深渊法师从背后偷袭并带走了雷泽。前来营救他的狼群朝深渊法师发起了无畏的攻击，然而，却被法术尽数击倒在地。\n眼看同伴被残害，无能为力的雷泽如同困兽一般痛苦咆哮起来。\n——「卢皮卡」。\n暴怒的雷电在他身上缠绕，过量的元素力在他体内奔流。\n他想保护，他想复仇。\n他挣脱锁链，举起武器。\n深渊法师被无序的狂暴雷电击溃，但这次倒下的那些同伴，已经来不及保护了。\n……\n尽管获得了「神之眼」，那时的雷泽还不知道该如何驾驭这种力量。很久以后的某一天，他遇到了蔷薇魔女丽莎，开始向她学习人类的知识。\n「不想再让任何同伴受伤了。」\n雷泽使用「神之眼」的技巧日渐熟练。他暗暗下了决心：要变强，变得比谁都强。\n危险来临时，他必将保护他的「卢皮卡」。"
     }
-  ]
+  ],
+  "team": [1]
 }

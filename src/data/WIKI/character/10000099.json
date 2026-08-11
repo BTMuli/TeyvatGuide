@@ -4,7 +4,6 @@
   "title": "千缕之踪",
   "description": "枫丹香水设计师，将秘密藏于瓶中之人。",
   "area": "枫丹",
-  "team": [0],
   "brief": {
     "camp": "枫丹廷",
     "constellation": "香氛瓶座",
@@ -22,6 +21,46 @@
     { "id": 112085, "name": "奇械机芯齿轮", "star": 3 },
     { "id": 104346, "name": "「秩序」的哲学", "star": 4 },
     { "id": 113061, "name": "丝织之羽", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 991,
+      "Name": "淡香浸析",
+      "Description": "<color=#FFD780FF>撷萃调香</color>与突破天赋「余薰」的清露香氛造成的伤害提升20%，后者需要解锁突破天赋「余薰」。\n此外，队伍中附近的角色对敌人触发燃烧反应或对处于燃烧状态下的敌人造成<color=#99FF88FF>草元素伤害</color>时，会额外生成一枚<color=#FFD780FF>香韵</color>。此效果每2.9秒至多触发一次。",
+      "Icon": "UI_Talent_S_Emilie_01"
+    },
+    {
+      "Id": 992,
+      "Name": "湖光顶调",
+      "Description": "<color=#FFD780FF>撷萃调香</color>、<color=#FFD780FF>香氛演绎</color>或突破天赋「余薰」的清露香氛（需解锁该突破天赋）命中敌人时，该敌人的<color=#99FF88FF>草元素抗性</color>降低30%，持续10秒。",
+      "Icon": "UI_Talent_S_Emilie_02"
+    },
+    {
+      "Id": 993,
+      "Name": "郁馥臻萃",
+      "Description": "<color=#FFD780FF>撷萃调香</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Emilie_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 994,
+      "Name": "柔灯心韵",
+      "Description": "<color=#FFD780FF>香氛演绎</color>的持续时间延长2秒，且每名敌人被香露选为目标的间隔降低0.3秒。",
+      "Icon": "UI_Talent_S_Emilie_03"
+    },
+    {
+      "Id": 995,
+      "Name": "纯露凝芳",
+      "Description": "<color=#FFD780FF>香氛演绎</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Emilie_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 996,
+      "Name": "茉洁香迹",
+      "Description": "施放<color=#FFD780FF>撷萃调香</color>或<color=#FFD780FF>香氛演绎</color>时，艾梅莉埃将获得「香迹留驻」，持续5秒。\n持续期间，艾梅莉埃进行普通攻击或重击后，将会产生一枚香韵，且艾梅莉埃的普通攻击与重击将转为无法被附魔覆盖的<color=#99FF88FF>草元素伤害</color>，并提升造成的伤害，提升值相当于艾梅莉埃攻击力的300%。\n\n「香迹留驻」效果将在通过这种方式产生4枚香韵或持续时间结束时解除。每12秒至多获得一次「香迹留驻」效果。",
+      "Icon": "UI_Talent_S_Emilie_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_S_Emilie_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 991,
-      "Name": "淡香浸析",
-      "Description": "<color=#FFD780FF>撷萃调香</color>与突破天赋「余薰」的清露香氛造成的伤害提升20%，后者需要解锁突破天赋「余薰」。\n此外，队伍中附近的角色对敌人触发燃烧反应或对处于燃烧状态下的敌人造成<color=#99FF88FF>草元素伤害</color>时，会额外生成一枚<color=#FFD780FF>香韵</color>。此效果每2.9秒至多触发一次。",
-      "Icon": "UI_Talent_S_Emilie_01"
-    },
-    {
-      "Id": 992,
-      "Name": "湖光顶调",
-      "Description": "<color=#FFD780FF>撷萃调香</color>、<color=#FFD780FF>香氛演绎</color>或突破天赋「余薰」的清露香氛（需解锁该突破天赋）命中敌人时，该敌人的<color=#99FF88FF>草元素抗性</color>降低30%，持续10秒。",
-      "Icon": "UI_Talent_S_Emilie_02"
-    },
-    {
-      "Id": 993,
-      "Name": "郁馥臻萃",
-      "Description": "<color=#FFD780FF>撷萃调香</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Emilie_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 994,
-      "Name": "柔灯心韵",
-      "Description": "<color=#FFD780FF>香氛演绎</color>的持续时间延长2秒，且每名敌人被香露选为目标的间隔降低0.3秒。",
-      "Icon": "UI_Talent_S_Emilie_03"
-    },
-    {
-      "Id": 995,
-      "Name": "纯露凝芳",
-      "Description": "<color=#FFD780FF>香氛演绎</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Emilie_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 996,
-      "Name": "茉洁香迹",
-      "Description": "施放<color=#FFD780FF>撷萃调香</color>或<color=#FFD780FF>香氛演绎</color>时，艾梅莉埃将获得「香迹留驻」，持续5秒。\n持续期间，艾梅莉埃进行普通攻击或重击后，将会产生一枚香韵，且艾梅莉埃的普通攻击与重击将转为无法被附魔覆盖的<color=#99FF88FF>草元素伤害</color>，并提升造成的伤害，提升值相当于艾梅莉埃攻击力的300%。\n\n「香迹留驻」效果将在通过这种方式产生4枚香韵或持续时间结束时解除。每12秒至多获得一次「香迹留驻」效果。",
-      "Icon": "UI_Talent_S_Emilie_04"
     }
   ],
   "talks": [
@@ -372,5 +371,6 @@
       "Title": "神之眼",
       "Context": "艾梅莉埃常在结案后接到清理委托，等她抵达时，现场往往只有官方的值守人员，留她得以安静地完成工作。\n而有时，现场并没有那么安静。\n她来到事发地点，见到神情茫然的受害者亲属在警戒线外徘徊。那是一位年轻的女士，眼神空洞，似乎并不知道自己要做什么，只是不愿离去。\n这其实并不影响艾梅莉埃的工作。她可以像往常一样，出示文件，走进现场，完成清理。这是她唯一的职责所在，按部就班即可。\n但她犹豫了。她和值守的警官打了声招呼，走向那个迷茫的人。\n在接下来的数小时中，她静静坐在那人的身边，听对方慢慢讲述自己和已故亲人的故事。艾梅莉埃并没有做出过多回应，只是握着对方的手，耐心地等她磕磕绊绊地讲完，等她那些不安与焦虑的情绪和语言一起倾吐而出，最终只剩下寂静的悲伤。\n悲伤难以避免，她能做的也只有这么多了。\n因为耽搁了不少时间，这次工作结束得很晚。在收拾工具和药剂的时候，窗外投进来的光线已经不太明了，反而愈发衬托出那颗神之眼的明亮。\n自那次起，她不再给自己的工作时间设限，总是预留充分的空闲。如果有人需要听众，那她随时可以坐到对方身旁。"
     }
-  ]
+  ],
+  "team": [0]
 }

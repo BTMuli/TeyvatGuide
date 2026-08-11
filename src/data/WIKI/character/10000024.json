@@ -4,7 +4,6 @@
   "title": "无冕的龙王",
   "description": "武装船队「南十字」的首领，豪快的大姐头。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "南十字船队",
     "constellation": "南天海山座",
@@ -22,6 +21,47 @@
     { "id": 112037, "name": "攫金鸦印", "star": 3 },
     { "id": 104318, "name": "「黄金」的哲学", "star": 4 },
     { "id": 113005, "name": "东风的吐息", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 241,
+      "Name": "鱼龙沉四方",
+      "Description": "施放<color=#FFD780FF>斫雷</color>时：\n生成一个伤害吸收量等于生命值上限16%的护盾，持续15秒。\n该护盾对<color=#FFACFFFF>雷元素伤害</color>有250%的吸收效果。",
+      "Icon": "UI_Talent_S_Beidou_02"
+    },
+    {
+      "Id": 242,
+      "Name": "赫赫雷涌起",
+      "Description": "<color=#FFD780FF>斫雷</color>的闪雷能额外弹跳2个敌人。",
+      "Icon": "UI_Talent_S_Beidou_01"
+    },
+    {
+      "Id": 243,
+      "Name": "潮奔蓦引电",
+      "Description": "<color=#FFD780FF>捉浪</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Beidou_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 244,
+      "Name": "牵星觅乡岸",
+      "Description": "受到攻击后的10秒内，北斗的普通攻击附带20%额外<color=#FFACFFFF>雷元素伤害</color>。",
+      "Icon": "UI_Talent_S_Beidou_03"
+    },
+    {
+      "Id": 245,
+      "Name": "踏浪霞连阶",
+      "Description": "<color=#FFD780FF>斫雷</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Beidou_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 246,
+      "Name": "北斗祓幽孽",
+      "Description": "<color=#FFD780FF>斫雷</color>持续期间，周围敌人的<color=#FFACFFFF>雷元素抗性</color>降低15%。",
+      "SpecialDescription": "<color=#FFD780FF>斫雷</color>持续期间，周围敌人的<color=#FFACFFFF>雷元素抗性</color>降低15%。\n\n<color=#FFD780FF>辉映·星超导</color>：斫雷持续期间，附近敌人的<color=#99FFFFFF>冰元素抗性</color>还会降低15%，且当前场上角色元素精通提升200点。",
+      "Icon": "UI_Talent_S_Beidou_04"
+    }
   ],
   "skills": [
     {
@@ -86,47 +126,6 @@
       "icon": "UI_Talent_Explosion_Swim",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 241,
-      "Name": "鱼龙沉四方",
-      "Description": "施放<color=#FFD780FF>斫雷</color>时：\n生成一个伤害吸收量等于生命值上限16%的护盾，持续15秒。\n该护盾对<color=#FFACFFFF>雷元素伤害</color>有250%的吸收效果。",
-      "Icon": "UI_Talent_S_Beidou_02"
-    },
-    {
-      "Id": 242,
-      "Name": "赫赫雷涌起",
-      "Description": "<color=#FFD780FF>斫雷</color>的闪雷能额外弹跳2个敌人。",
-      "Icon": "UI_Talent_S_Beidou_01"
-    },
-    {
-      "Id": 243,
-      "Name": "潮奔蓦引电",
-      "Description": "<color=#FFD780FF>捉浪</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Beidou_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 244,
-      "Name": "牵星觅乡岸",
-      "Description": "受到攻击后的10秒内，北斗的普通攻击附带20%额外<color=#FFACFFFF>雷元素伤害</color>。",
-      "Icon": "UI_Talent_S_Beidou_03"
-    },
-    {
-      "Id": 245,
-      "Name": "踏浪霞连阶",
-      "Description": "<color=#FFD780FF>斫雷</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Beidou_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 246,
-      "Name": "北斗祓幽孽",
-      "Description": "<color=#FFD780FF>斫雷</color>持续期间，周围敌人的<color=#FFACFFFF>雷元素抗性</color>降低15%。",
-      "SpecialDescription": "<color=#FFD780FF>斫雷</color>持续期间，周围敌人的<color=#FFACFFFF>雷元素抗性</color>降低15%。\n\n<color=#FFD780FF>辉映·星超导</color>：斫雷持续期间，附近敌人的<color=#99FFFFFF>冰元素抗性</color>还会降低15%，且当前场上角色元素精通提升200点。",
-      "Icon": "UI_Talent_S_Beidou_04"
     }
   ],
   "talks": [
@@ -381,5 +380,6 @@
       "Title": "神之眼",
       "Context": "璃月与稻妻中流传着一句短语：「鳍化冥海，尾点远山」。渔人从岸上学来这句，翻来覆去地唱。曲子越传越远，成为脍炙人口的渔歌。每到海上起雾，渔民们的小船隐没在白雾里，歌声遥遥传来：鳍化冥海，尾点远山…\n这首歌便是北斗的摇篮曲。岩王帝君神剑斩海怪，璃月人将之传为美谈。年幼的北斗爱听神话，睡觉也想着：总有一天得见见这条大鱼。\n今天，她却用另一种心情唱起这首歌。全船海员跟着哼唱，扬帆起航。\n海山就在海中。它既像鱼也像龙，庞大如噩梦，力大如神灵，轻轻一击便能掀起数十米高的巨浪。\n在海上搏命的人，总会与海山相遇。北斗从九岁就想见它，盼着能将它的头颅一刀斩下。\n她曾多次挑战海山，均以失败告终。今天却不同，北斗背上最好的大剑，带上最通水性的水手，直奔海山而去。\n短兵相接，一战惊雷。这场战斗持续了整整四天。船队携带大炮、渔枪，辅以弓箭和绳索，全力牵制海山。北斗与四足被缚的海山缠斗数个时辰，直至天黑也没能分出胜负。\n夜晚是海山最危险的时刻。人们提防着海山的进犯，整夜不敢入睡。北斗站在船头，聆听风声。\n一击，只要一击。她在寒风中一动不动地等待。\n不知过去多久，粒米未进、滴水未沾的北斗精准捕捉到太阳升起刹那，海中传来的浪花声。\n这一击，破云斩月，如山如海，将鱼龙的头颅彻底砍断！\n伴随漫天惊雷，一道紫电自半空降下，凝聚在浴血的北斗面前。\n屠龙者北斗的「神之眼」自天上而来，有着雷电般夺目的紫光，是龙血也无法匹敌的宝珠。这颗神玉，只应赠给山与海的征服者。"
     }
-  ]
+  ],
+  "team": [0]
 }

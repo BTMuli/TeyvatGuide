@@ -4,7 +4,6 @@
   "title": "「异界的救世主」",
   "description": "曾经是流放者，如今则是无比机敏的猎手。随时准备着为了正当之事而挽弓放箭。",
   "area": "游侠",
-  "team": [0],
   "brief": {
     "camp": "游侠",
     "constellation": "诺拉勇者座",
@@ -22,6 +21,44 @@
     { "id": 112055, "name": "浮游晶化核", "star": 3 },
     { "id": 104303, "name": "「自由」的哲学", "star": 4 },
     { "id": 113025, "name": "熔毁之刻", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 621,
+      "Name": "异界之星",
+      "Description": "点亮此人一方星空之刻尚未到来。",
+      "Icon": "UI_Talent_S_Aloy_Lock"
+    },
+    {
+      "Id": 622,
+      "Name": "异界之星",
+      "Description": "点亮此人一方星空之刻尚未到来。",
+      "Icon": "UI_Talent_S_Aloy_Lock"
+    },
+    {
+      "Id": 623,
+      "Name": "异界之星",
+      "Description": "点亮此人一方星空之刻尚未到来。",
+      "Icon": "UI_Talent_S_Aloy_Lock"
+    },
+    {
+      "Id": 624,
+      "Name": "异界之星",
+      "Description": "点亮此人一方星空之刻尚未到来。",
+      "Icon": "UI_Talent_S_Aloy_Lock"
+    },
+    {
+      "Id": 625,
+      "Name": "异界之星",
+      "Description": "点亮此人一方星空之刻尚未到来。",
+      "Icon": "UI_Talent_S_Aloy_Lock"
+    },
+    {
+      "Id": 626,
+      "Name": "异界之星",
+      "Description": "点亮此人一方星空之刻尚未到来。",
+      "Icon": "UI_Talent_S_Aloy_Lock"
+    }
   ],
   "skills": [
     {
@@ -77,44 +114,6 @@
       "icon": "UI_Talent_S_Aloy_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 621,
-      "Name": "异界之星",
-      "Description": "点亮此人一方星空之刻尚未到来。",
-      "Icon": "UI_Talent_S_Aloy_Lock"
-    },
-    {
-      "Id": 622,
-      "Name": "异界之星",
-      "Description": "点亮此人一方星空之刻尚未到来。",
-      "Icon": "UI_Talent_S_Aloy_Lock"
-    },
-    {
-      "Id": 623,
-      "Name": "异界之星",
-      "Description": "点亮此人一方星空之刻尚未到来。",
-      "Icon": "UI_Talent_S_Aloy_Lock"
-    },
-    {
-      "Id": 624,
-      "Name": "异界之星",
-      "Description": "点亮此人一方星空之刻尚未到来。",
-      "Icon": "UI_Talent_S_Aloy_Lock"
-    },
-    {
-      "Id": 625,
-      "Name": "异界之星",
-      "Description": "点亮此人一方星空之刻尚未到来。",
-      "Icon": "UI_Talent_S_Aloy_Lock"
-    },
-    {
-      "Id": 626,
-      "Name": "异界之星",
-      "Description": "点亮此人一方星空之刻尚未到来。",
-      "Icon": "UI_Talent_S_Aloy_Lock"
     }
   ],
   "talks": [
@@ -297,5 +296,6 @@
       "Title": "故事5",
       "Context": "击败「哈迪斯」后，埃洛伊开始了新的旅程：追寻远古的技术，净化「哈迪斯」所践踏蹂躏的大地。\n在漫漫旅途中，她走遍了每一处自己能踏足的「旧世遗迹」，搜寻「先祖」的失落秘密。\n在某一间破败的古代实验室中，她发现了过去从未见过的事物：一座闪闪发光的传送门。靠近时，一股强大的力量包围了她，如窥向镜中般她从中见到了自己的形象，产生了宛如同时身处两处空间的奇异感觉。\n在一阵闪光后，埃洛伊所知的「世界」从她的面前彻底消失不见，她来到了另一个奇异而美丽、亟待探索的新世界。"
     }
-  ]
+  ],
+  "team": [0]
 }

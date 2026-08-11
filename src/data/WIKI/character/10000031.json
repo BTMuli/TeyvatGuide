@@ -4,7 +4,6 @@
   "title": "断罪皇女！！",
   "description": "自称「断罪之皇女」，与名为奥兹的漆黑夜鸦同行的神秘少女。",
   "area": "蒙德",
-  "team": [1],
   "brief": {
     "camp": "冒险家协会",
     "constellation": "幻鸦座",
@@ -27,6 +26,47 @@
     { "id": 112013, "name": "历战的箭簇", "star": 3 },
     { "id": 104309, "name": "「诗文」的哲学", "star": 4 },
     { "id": 113008, "name": "北风的魂匣", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 311,
+      "Name": "幽邃鸦眼",
+      "Description": "奥兹不在战场上时，也会透过鸦眼守望菲谢尔。在菲谢尔对敌人进行普通攻击时，奥兹会通过鸦眼协同攻击，造成22%攻击力的伤害。",
+      "Icon": "UI_Talent_S_Fischl_01"
+    },
+    {
+      "Id": 312,
+      "Name": "圣裁影羽",
+      "Description": "施放<color=#FFD780FF>夜巡影翼</color>时，能额外造成200%攻击力的伤害，并使影响范围扩大50%。",
+      "Icon": "UI_Talent_S_Fischl_02"
+    },
+    {
+      "Id": 313,
+      "Name": "渊色黑翼",
+      "Description": "<color=#FFD780FF>夜巡影翼</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Fischl_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 314,
+      "Name": "皇女幻绮谭",
+      "Description": "施放<color=#FFD780FF>至夜幻现</color>时，会对周围的敌人造成222%攻击力的<color=#FFACFFFF>雷元素伤害</color>；\n技能效果结束时，会为菲谢尔恢复20%生命值。",
+      "Icon": "UI_Talent_S_Fischl_03"
+    },
+    {
+      "Id": 315,
+      "Name": "至夜默示录",
+      "Description": "<color=#FFD780FF>至夜幻现</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Fischl_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 316,
+      "Name": "永夜之禽",
+      "Description": "奥兹的存在时间延长2秒。此外，奥兹会协同当前场上自己的角色一起攻击，造成菲谢尔30%攻击力的<color=#FFACFFFF>雷元素伤害</color>。",
+      "SpecialDescription": "奥兹的存在时间延长2秒。此外，奥兹会协同当前场上自己的角色一起攻击，造成菲谢尔30%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n奥兹进行协同攻击后，<color=#FFD780FF>魔女的前夜礼·宵世幻奏</color>中提升攻击力与元素精通的效果提高100%，持续10秒。",
+      "Icon": "UI_Talent_S_Fischl_04"
+    }
   ],
   "skills": [
     {
@@ -91,47 +131,6 @@
       "icon": "UI_Talent_Expedition_Mengde",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 311,
-      "Name": "幽邃鸦眼",
-      "Description": "奥兹不在战场上时，也会透过鸦眼守望菲谢尔。在菲谢尔对敌人进行普通攻击时，奥兹会通过鸦眼协同攻击，造成22%攻击力的伤害。",
-      "Icon": "UI_Talent_S_Fischl_01"
-    },
-    {
-      "Id": 312,
-      "Name": "圣裁影羽",
-      "Description": "施放<color=#FFD780FF>夜巡影翼</color>时，能额外造成200%攻击力的伤害，并使影响范围扩大50%。",
-      "Icon": "UI_Talent_S_Fischl_02"
-    },
-    {
-      "Id": 313,
-      "Name": "渊色黑翼",
-      "Description": "<color=#FFD780FF>夜巡影翼</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Fischl_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 314,
-      "Name": "皇女幻绮谭",
-      "Description": "施放<color=#FFD780FF>至夜幻现</color>时，会对周围的敌人造成222%攻击力的<color=#FFACFFFF>雷元素伤害</color>；\n技能效果结束时，会为菲谢尔恢复20%生命值。",
-      "Icon": "UI_Talent_S_Fischl_03"
-    },
-    {
-      "Id": 315,
-      "Name": "至夜默示录",
-      "Description": "<color=#FFD780FF>至夜幻现</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Fischl_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 316,
-      "Name": "永夜之禽",
-      "Description": "奥兹的存在时间延长2秒。此外，奥兹会协同当前场上自己的角色一起攻击，造成菲谢尔30%攻击力的<color=#FFACFFFF>雷元素伤害</color>。",
-      "SpecialDescription": "奥兹的存在时间延长2秒。此外，奥兹会协同当前场上自己的角色一起攻击，造成菲谢尔30%攻击力的<color=#FFACFFFF>雷元素伤害</color>。\n奥兹进行协同攻击后，<color=#FFD780FF>魔女的前夜礼·宵世幻奏</color>中提升攻击力与元素精通的效果提高100%，持续10秒。",
-      "Icon": "UI_Talent_S_Fischl_04"
     }
   ],
   "talks": [
@@ -410,5 +409,6 @@
       "Title": "神之眼",
       "Context": "那么，奥兹究竟是不是仅仅存在于菲谢尔潜意识中的「幻想朋友」？\n这就要从皇族的王器「渊色的幽邃秘珠」——也就是菲谢尔的「神之眼」说起了。\n她的愿望被承认时，乌鸦奥兹与「神之眼」一同出现在她眼前。\n当晚吃饭时，奥兹和菲谢尔父母相谈甚欢：\n「幽夜的帝皇与皇后啊，请恕我夜之王僭越了。但是您家的豆子太好吃了。」\n「那就多吃点吧，小██十四岁以来第一次交到了能带回家吃饭的好朋友。太可贵了。」\n「你、你们在说什么！我…本皇女才不需要同一般人为伴！」\n——就是这样。\n从结果上来看，断罪的父皇与母后，都能见到奥兹，并且认为奥兹就是皇女的第一个朋友。\n而「受累世厄运诅咒的探险家」、「异世界的来访者」，以及「奇怪的小精灵外貌的应急食品」…\n他们成为皇女的新朋友，则是更久以后的事情了。"
     }
-  ]
+  ],
+  "team": [1]
 }

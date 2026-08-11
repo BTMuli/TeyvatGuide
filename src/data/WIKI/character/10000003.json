@@ -4,7 +4,6 @@
   "title": "蒲公英骑士",
   "description": "正直严谨的蒲公英骑士，蒙德西风骑士团的代理团长。",
   "area": "蒙德",
-  "team": [0],
   "brief": {
     "camp": "西风骑士团",
     "constellation": "幼狮座",
@@ -22,6 +21,46 @@
     { "id": 112007, "name": "不祥的面具", "star": 3 },
     { "id": 104306, "name": "「抗争」的哲学", "star": 4 },
     { "id": 113003, "name": "东风之翎", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 31,
+      "Name": "流转剑脊的暴风",
+      "Description": "<color=#FFD780FF>风压剑</color>长按超过1秒后，提升牵引速度，并使造成的伤害提升40%。",
+      "Icon": "UI_Talent_S_Qin_01"
+    },
+    {
+      "Id": 32,
+      "Name": "守护众人的坚盾",
+      "Description": "琴获得元素晶球或元素微粒时，队伍中所有角色获得15%攻击速度和15%移动速度提升，持续15秒。",
+      "Icon": "UI_Talent_S_Qin_02"
+    },
+    {
+      "Id": 33,
+      "Name": "西风吹拂之时",
+      "Description": "<color=#FFD780FF>蒲公英之风</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Qin_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 34,
+      "Name": "蒲公英的国土",
+      "Description": "在<color=#FFD780FF>蒲公英之风</color>的领域内，所有敌人的<color=#80FFD7FF>风元素抗性</color>下降40%。",
+      "Icon": "UI_Talent_S_Qin_03"
+    },
+    {
+      "Id": 35,
+      "Name": "须臾一瞬的烈风",
+      "Description": "<color=#FFD780FF>风压剑</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Qin_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 36,
+      "Name": "恩眷万民的狮牙",
+      "Description": "在<color=#FFD780FF>蒲公英之风</color>的领域内，角色受到的伤害降低35%。\n离开领域后，这个效果会在承受3次攻击或10秒后消失。",
+      "Icon": "UI_Talent_S_Qin_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Cook_Heal",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 31,
-      "Name": "流转剑脊的暴风",
-      "Description": "<color=#FFD780FF>风压剑</color>长按超过1秒后，提升牵引速度，并使造成的伤害提升40%。",
-      "Icon": "UI_Talent_S_Qin_01"
-    },
-    {
-      "Id": 32,
-      "Name": "守护众人的坚盾",
-      "Description": "琴获得元素晶球或元素微粒时，队伍中所有角色获得15%攻击速度和15%移动速度提升，持续15秒。",
-      "Icon": "UI_Talent_S_Qin_02"
-    },
-    {
-      "Id": 33,
-      "Name": "西风吹拂之时",
-      "Description": "<color=#FFD780FF>蒲公英之风</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Qin_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 34,
-      "Name": "蒲公英的国土",
-      "Description": "在<color=#FFD780FF>蒲公英之风</color>的领域内，所有敌人的<color=#80FFD7FF>风元素抗性</color>下降40%。",
-      "Icon": "UI_Talent_S_Qin_03"
-    },
-    {
-      "Id": 35,
-      "Name": "须臾一瞬的烈风",
-      "Description": "<color=#FFD780FF>风压剑</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Qin_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 36,
-      "Name": "恩眷万民的狮牙",
-      "Description": "在<color=#FFD780FF>蒲公英之风</color>的领域内，角色受到的伤害降低35%。\n离开领域后，这个效果会在承受3次攻击或10秒后消失。",
-      "Icon": "UI_Talent_S_Qin_04"
     }
   ],
   "talks": [
@@ -372,5 +371,6 @@
       "Title": "神之眼",
       "Context": "单论实力，琴早已是蒙德城数一数二的剑士。但在琴心中，比起成为一把能够刺穿腐朽与黑暗的利剑，她更愿意做守护歌声与自由的坚盾。\n「维护」向来比「破坏」更难。\n从小队队长晋升为副团长时，出现在琴面前的就是巨大的挑战。外有愚人众施加的邦交压力，内有叛徒——前任督察长的同党。想在如此形势下重振旗鼓开拓局面，并非易事。\n但琴独自扛住了来自外界的压力，引领一众骑士粉碎深渊教团的诸多阴谋，重新为西风骑士团树立威望。\n琴永远不会忘记得到「神之眼」的那一刻。感受着掌间升起的微风，顷刻间，四周沉寂下来，空间化作黑白，唯有古恩希尔德家族古老而严厉的家训浮现在她脑海之中。\n「永护蒙德。」"
     }
-  ]
+  ],
+  "team": [0]
 }

@@ -4,7 +4,6 @@
   "title": "智明无邪",
   "description": "活跃在璃月港的知名律法咨询师，混有仙兽血脉的精明少女。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "烟绯律法咨询事务所",
     "constellation": "法兽座",
@@ -22,6 +21,46 @@
     { "id": 112037, "name": "攫金鸦印", "star": 3 },
     { "id": 104318, "name": "「黄金」的哲学", "star": 4 },
     { "id": 113018, "name": "血玉之枝", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 481,
+      "Name": "占理不饶人",
+      "Description": "烟绯进行重击时，每持有一枚丹火印，都会提高烟绯在咏唱期间的抗打断能力，并额外降低本次重击10%的体力消耗。",
+      "Icon": "UI_Talent_S_Feiyan_01"
+    },
+    {
+      "Id": 482,
+      "Name": "最终解释权",
+      "Description": "烟绯的重击对于生命值低于50%的敌人，暴击率提高20%。",
+      "Icon": "UI_Talent_S_Feiyan_02"
+    },
+    {
+      "Id": 483,
+      "Name": "真火炼宝印",
+      "Description": "<color=#FFD780FF>丹书立约</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Feiyan_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 484,
+      "Name": "丹书金铁券",
+      "Description": "施放<color=#FFD780FF>凭此结契</color>时：\n生成一个伤害吸收量等于生命值上限45%的护盾，持续15秒。\n该护盾对<color=#FF9999FF>火元素伤害</color>有250%的吸收效果。",
+      "Icon": "UI_Talent_S_Feiyan_03"
+    },
+    {
+      "Id": 485,
+      "Name": "遵法切结书",
+      "Description": "<color=#FFD780FF>凭此结契</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Feiyan_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 486,
+      "Name": "是额外条款",
+      "Description": "烟绯持有的丹火印最大数量增加一枚。",
+      "Icon": "UI_Talent_S_Feiyan_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Collect_Local_Liyue",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 481,
-      "Name": "占理不饶人",
-      "Description": "烟绯进行重击时，每持有一枚丹火印，都会提高烟绯在咏唱期间的抗打断能力，并额外降低本次重击10%的体力消耗。",
-      "Icon": "UI_Talent_S_Feiyan_01"
-    },
-    {
-      "Id": 482,
-      "Name": "最终解释权",
-      "Description": "烟绯的重击对于生命值低于50%的敌人，暴击率提高20%。",
-      "Icon": "UI_Talent_S_Feiyan_02"
-    },
-    {
-      "Id": 483,
-      "Name": "真火炼宝印",
-      "Description": "<color=#FFD780FF>丹书立约</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Feiyan_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 484,
-      "Name": "丹书金铁券",
-      "Description": "施放<color=#FFD780FF>凭此结契</color>时：\n生成一个伤害吸收量等于生命值上限45%的护盾，持续15秒。\n该护盾对<color=#FF9999FF>火元素伤害</color>有250%的吸收效果。",
-      "Icon": "UI_Talent_S_Feiyan_03"
-    },
-    {
-      "Id": 485,
-      "Name": "遵法切结书",
-      "Description": "<color=#FFD780FF>凭此结契</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Feiyan_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 486,
-      "Name": "是额外条款",
-      "Description": "烟绯持有的丹火印最大数量增加一枚。",
-      "Icon": "UI_Talent_S_Feiyan_04"
     }
   ],
   "talks": [
@@ -388,5 +387,6 @@
       "Title": "神之眼",
       "Context": "烟绯的父亲是仙兽，母亲则是普通的商人。降生在和平时期的烟绯并未与岩王帝君签订契约，只与父母约定「要快乐地生活」。\n她是璃月港头牌法典解读专家，自然也会利用法典存在的疏漏，有时是为了自己，有时是为了他人。\n种种迹象表明，烟绯并不是一个循规蹈矩的人，她并不希望被规则束缚。\n可她在追求自身快乐的同时也在让璃月变得更好，会利用法典的疏漏却不会以此作恶。\n「天权」凝光每年对法典进行查漏补缺时，会大量参考烟绯的所作所为，仿佛烟绯就是璃月法典的问题质检员。\n从某种程度来说，烟绯在以最小的代价，让规则变得更加完善…这也是她从未因利用法典漏洞获罪的原因。\n烟绯信奉的是「没有规矩不成方圆」，而她期望的则是「随心所欲不逾矩」。\n璃月的仙人与凡人，都在用自己的方式守护着璃月。\n所以烟绯也拥有神之眼——而且她的神之眼，与她信奉的「规则」等价。"
     }
-  ]
+  ],
+  "team": [0]
 }

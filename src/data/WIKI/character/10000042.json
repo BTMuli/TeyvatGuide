@@ -4,7 +4,6 @@
   "title": "霆霓快雨",
   "description": "璃月七星之一，玉衡星。对「帝君一言而决的璃月」颇有微词——但实际上，神挺欣赏她这样的人。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "璃月七星",
     "constellation": "金紫定垂座",
@@ -22,6 +21,46 @@
     { "id": 112040, "name": "原素花蜜", "star": 3 },
     { "id": 104312, "name": "「繁荣」的哲学", "star": 4 },
     { "id": 113007, "name": "北风之环", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 421,
+      "Name": "雷厉",
+      "Description": "雷楔存在期间再次施放<color=#FFD780FF>星斗归位</color>时，在刻晴消失与出现的位置造成50%攻击力的<color=#FFACFFFF>雷元素范围伤害</color>。",
+      "Icon": "UI_Talent_S_Keqing_01"
+    },
+    {
+      "Id": 422,
+      "Name": "苛捐",
+      "Description": "刻晴普通攻击与重击命中受到<color=#FFACFFFF>雷元素</color>影响的敌人时，有50%几率产生一个元素微粒。\n该效果每5秒只能触发一次。",
+      "Icon": "UI_Talent_S_Keqing_02"
+    },
+    {
+      "Id": 423,
+      "Name": "登楼",
+      "Description": "<color=#FFD780FF>天街巡游</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Keqing_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 424,
+      "Name": "调律",
+      "Description": "刻晴触发<color=#FFACFFFF>雷元素相关反应</color>后的10秒内，攻击力提升25%。",
+      "Icon": "UI_Talent_S_Keqing_03"
+    },
+    {
+      "Id": 425,
+      "Name": "移灯",
+      "Description": "<color=#FFD780FF>星斗归位</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Keqing_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 426,
+      "Name": "廉贞",
+      "Description": "进行普通攻击、重击、施放元素战技或元素爆发时，刻晴获得6%<color=#FFACFFFF>雷元素伤害加成</color>，持续8秒。\n由普通攻击、重击、元素战技或元素爆发引起的效果分别独立存在。",
+      "Icon": "UI_Talent_S_Keqing_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Expedition_Liyue",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 421,
-      "Name": "雷厉",
-      "Description": "雷楔存在期间再次施放<color=#FFD780FF>星斗归位</color>时，在刻晴消失与出现的位置造成50%攻击力的<color=#FFACFFFF>雷元素范围伤害</color>。",
-      "Icon": "UI_Talent_S_Keqing_01"
-    },
-    {
-      "Id": 422,
-      "Name": "苛捐",
-      "Description": "刻晴普通攻击与重击命中受到<color=#FFACFFFF>雷元素</color>影响的敌人时，有50%几率产生一个元素微粒。\n该效果每5秒只能触发一次。",
-      "Icon": "UI_Talent_S_Keqing_02"
-    },
-    {
-      "Id": 423,
-      "Name": "登楼",
-      "Description": "<color=#FFD780FF>天街巡游</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Keqing_01",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 424,
-      "Name": "调律",
-      "Description": "刻晴触发<color=#FFACFFFF>雷元素相关反应</color>后的10秒内，攻击力提升25%。",
-      "Icon": "UI_Talent_S_Keqing_03"
-    },
-    {
-      "Id": 425,
-      "Name": "移灯",
-      "Description": "<color=#FFD780FF>星斗归位</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Keqing_02",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 426,
-      "Name": "廉贞",
-      "Description": "进行普通攻击、重击、施放元素战技或元素爆发时，刻晴获得6%<color=#FFACFFFF>雷元素伤害加成</color>，持续8秒。\n由普通攻击、重击、元素战技或元素爆发引起的效果分别独立存在。",
-      "Icon": "UI_Talent_S_Keqing_04"
     }
   ],
   "talks": [
@@ -426,5 +425,6 @@
       "Title": "神之眼",
       "Context": "在不敬重「神之眼」这件事上，刻晴恐怕也是独一无二。\n刻晴深知，她的一切成就分明是靠自身努力所得，落在旁人眼里，反倒成了「神之眼」的功劳。\n她不得不认为，这枚紫色晶体夺走了本属于她的骄傲，是神给予她的挑衅与侮辱。\n为了破坏「神之眼」，她尝试了无数办法：以大火焚烧三天三夜，用装满石头的矿车碾过，或是直接从群玉阁扔出去。\n可惜，上述这些均以失败告终。\n刻晴无计可施，但也不想它落于贼人之手，最终还是勉强接受了这枚属于她的「神之眼」。\n岁月流转，刻晴逐渐认可了「神之眼」。她意识到这件物品并未被神之意识寄宿，还在许多事上提供了实用帮助，因而决定活用这股力量。\n「比力量来源更重要的，是力量的驱使者。」\n无论曾经如何看待「神之眼」，如今这份力量已是刻晴不可缺少的一部分了。\n幸好当年没有破坏掉，不然，她一定会后悔莫及——谁让她是实用主义者呢？"
     }
-  ]
+  ],
+  "team": [0]
 }

@@ -4,7 +4,6 @@
   "title": "无害甜度",
   "description": "对万物充满好奇的炼金术士，「生物炼金」学派的研究者。",
   "area": "蒙德",
-  "team": [1],
   "brief": {
     "camp": "西风骑士团",
     "constellation": "烧瓶座",
@@ -22,6 +21,47 @@
     { "id": 112040, "name": "原素花蜜", "star": 3 },
     { "id": 104303, "name": "「自由」的哲学", "star": 4 },
     { "id": 113008, "name": "北风的魂匣", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 431,
+      "Name": "堆叠真空域",
+      "Description": "<color=#FFD780FF>风灵作成·陆叁零捌</color>的可使用次数增加1次。",
+      "Icon": "UI_Talent_S_Sucrose_01"
+    },
+    {
+      "Id": 432,
+      "Name": "不羁型贝特",
+      "Description": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>的技能持续时间延长2秒。",
+      "Icon": "UI_Talent_S_Sucrose_02"
+    },
+    {
+      "Id": 433,
+      "Name": "零失误少女",
+      "Description": "<color=#FFD780FF>风灵作成·陆叁零捌</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Sucrose_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 434,
+      "Name": "炼金的偏执",
+      "Description": "砂糖的普通攻击或者重击累计命中敌人7次，<color=#FFD780FF>风灵作成·陆叁零捌</color>的冷却时间就会随机减少1-7秒。\n每0.1秒至多计数一次。",
+      "Icon": "UI_Talent_S_Sucrose_03"
+    },
+    {
+      "Id": 435,
+      "Name": "认真普通瓶",
+      "Description": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Sucrose_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 436,
+      "Name": "混元熵增论",
+      "Description": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>如果发生了元素转化，则使队伍中所有角色在技能持续时间内获得20%的对应元素伤害加成。",
+      "SpecialDescription": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>如果发生了元素转化，则使队伍中所有角色在技能持续时间内获得20%的对应元素伤害加成，并使队伍中附近的魔导角色额外获得8.57142%的对应元素伤害加成。",
+      "Icon": "UI_Talent_S_Sucrose_04"
+    }
   ],
   "skills": [
     {
@@ -64,7 +104,7 @@
       "group": 4321,
       "id": 432101,
       "name": "触媒置换术",
-      "desc": "砂糖触发扩散反应时，使队伍中所有对应元素类型的角色（不包括砂糖自己）元素精通提升50，持续8秒。",
+      "desc": "砂糖触发扩散、星扩散反应时，使队伍中所有对应元素类型的角色（不包括砂糖自己）元素精通提升50，持续8秒。",
       "icon": "UI_Talent_S_Sucrose_05",
       "maxLv": 1,
       "luc": null
@@ -86,47 +126,6 @@
       "icon": "UI_Talent_Combine_Material",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 431,
-      "Name": "堆叠真空域",
-      "Description": "<color=#FFD780FF>风灵作成·陆叁零捌</color>的可使用次数增加1次。",
-      "Icon": "UI_Talent_S_Sucrose_01"
-    },
-    {
-      "Id": 432,
-      "Name": "不羁型贝特",
-      "Description": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>的技能持续时间延长2秒。",
-      "Icon": "UI_Talent_S_Sucrose_02"
-    },
-    {
-      "Id": 433,
-      "Name": "零失误少女",
-      "Description": "<color=#FFD780FF>风灵作成·陆叁零捌</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Sucrose_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 434,
-      "Name": "炼金的偏执",
-      "Description": "砂糖的普通攻击或者重击累计命中敌人7次，<color=#FFD780FF>风灵作成·陆叁零捌</color>的冷却时间就会随机减少1-7秒。\n每0.1秒至多计数一次。",
-      "Icon": "UI_Talent_S_Sucrose_03"
-    },
-    {
-      "Id": 435,
-      "Name": "认真普通瓶",
-      "Description": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Sucrose_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 436,
-      "Name": "混元熵增论",
-      "Description": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>如果发生了元素转化，则使队伍中所有角色在技能持续时间内获得20%的对应元素伤害加成。",
-      "SpecialDescription": "<color=#FFD780FF>禁·风灵作成·柒伍同构贰型</color>如果发生了元素转化，则使队伍中所有角色在技能持续时间内获得20%的对应元素伤害加成，并使队伍中附近的魔导角色额外获得8.57142%的对应元素伤害加成。",
-      "Icon": "UI_Talent_S_Sucrose_04"
     }
   ],
   "talks": [
@@ -404,5 +403,6 @@
       "Title": "神之眼",
       "Context": "砂糖与「神之眼」邂逅于某个极为寻常的午后。\n当时，她正将精心调制的绿色炼金溶液倒进大锅，开始第一百五十九次蒲公英籽熬煮加工实验。\n大锅突然爆沸，屋内瞬间充满蒸汽。砂糖急忙跑到锅边查看新变化带来的结果，激动到双手都被锅沿烫伤。\n很遗憾，蒲公英籽依然是焦黑一片。不过，黑粒中央静静躺着一枚新生的「神之眼」。\n砂糖思索片刻，并没有倒掉溶液捞起「神之眼」，而是重新烧火，继续熬煮。\n她想知道蒲公英籽和「神之眼」还能产生什么样的反应。\n可惜，在又熬煮了三个小时之后，本次试验仍以失败告终。\n但砂糖收获巨大——「神之眼」提供的元素力，成为了她「生物炼金」路上至关重要的工具。"
     }
-  ]
+  ],
+  "team": [1]
 }

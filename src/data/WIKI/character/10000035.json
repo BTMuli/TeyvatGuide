@@ -4,7 +4,6 @@
   "title": "冻冻回魂夜",
   "description": "药庐「不卜庐」的采药姑娘兼学徒，面色苍白如纸的不死之人。话很少，也没有什么表情。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "不卜庐",
     "constellation": "三清铃座",
@@ -22,6 +21,50 @@
     { "id": 112010, "name": "禁咒绘卷", "star": 3 },
     { "id": 104312, "name": "「繁荣」的哲学", "star": 4 },
     { "id": 113006, "name": "北风之尾", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 351,
+      "Name": "寒苦回向",
+      "Description": "寒病鬼差命中被度厄真符标记的敌人时，为七七恢复2点元素能量。",
+      "SpecialDescription": "寒病鬼差命中被度厄真符标记的敌人时，为七七恢复2点元素能量。\n{LINK#N11500004}<color=#FFD780FF>辉映·星烁</color>{/LINK}：寒病鬼差的攻击与协同攻击命中敌人时，还会为七七恢复6点元素能量，该效果每6秒至多触发一次。",
+      "Icon": "UI_Talent_S_Qiqi_01"
+    },
+    {
+      "Id": 352,
+      "Name": "冰寒蚀骨",
+      "Description": "对受到<color=#99FFFFFF>冰元素</color>影响的敌人，七七的普通攻击与重击造成的伤害提升15%。",
+      "SpecialDescription": "对受到<color=#99FFFFFF>冰元素</color>影响的敌人，七七的普通攻击与重击造成的伤害提升15%。\n{LINK#N11500004}<color=#FFD780FF>辉映·星烁</color>{/LINK}：七七的攻击力提升50%。",
+      "Icon": "UI_Talent_S_Qiqi_02"
+    },
+    {
+      "Id": 353,
+      "Name": "升天宝诰",
+      "Description": "<color=#FFD780FF>仙法·救苦度厄</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Qiqi_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 354,
+      "Name": "天威压众",
+      "Description": "被度厄真符标记的目标，攻击力下降20%。",
+      "SpecialDescription": "被度厄真符标记的目标，攻击力下降20%。\n此外，触发度厄真符的治疗效果时，还会额外为附近生命值比例最低的角色恢复一次生命值，回复量相当于七七攻击力的180%。",
+      "Icon": "UI_Talent_S_Qiqi_03"
+    },
+    {
+      "Id": 355,
+      "Name": "红莲开绽",
+      "Description": "<color=#FFD780FF>仙法·寒病鬼差</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Qiqi_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 356,
+      "Name": "起死回骸",
+      "Description": "施放<color=#FFD780FF>仙法·救苦度厄</color>时，复苏附近队伍中所有倒下的角色，并将其生命值恢复至50%。\n该效果每15分钟只能触发一次。",
+      "SpecialDescription": "施放<color=#FFD780FF>仙法·救苦度厄</color>时，复苏附近队伍中所有倒下的角色，并将其生命值恢复至50%。\n该效果每15分钟只能触发一次。\n此外，施放<color=#FFD780FF>仙法·救苦度厄</color>后，七七还会获得4层<color=#FFD780FF>洞玄</color>；除七七外的队伍中自己的当前场上角色通过天赋与技能直接造成星超导或星扩散反应伤害时，将消耗1层<color=#FFD780FF>洞玄</color>，提升造成的伤害，提升值相当于七七攻击力的600%。<color=#FFD780FF>洞玄</color>至多持续12秒，施放<color=#FFD780FF>仙法·救苦度厄</color>时刷新层数。",
+      "Icon": "UI_Talent_S_Qiqi_04"
+    }
   ],
   "skills": [
     {
@@ -57,7 +100,7 @@
       "group": 3551,
       "id": 355101,
       "name": "七宝奉真",
-      "desc": "元素战技<color=#FFD780FF>仙法·寒病鬼差</color>的冷却时间缩短至15秒。\n<color=#FFD780FF>辉映·星超导</color>：寒病鬼差持续期间，队伍中自己的角色造成的超导、星超导反应伤害提升50%。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时，七七将会进入<color=#FFD780FF>辉映·星超导</color>状态。",
+      "desc": "元素战技<color=#FFD780FF>仙法·寒病鬼差</color>的冷却时间缩短至15秒。\n<color=#FFD780FF>辉映·星烁</color>：寒病鬼差持续期间，队伍中自己的角色造成的对应反应的伤害提高：\n<color=#FFD780FF>辉映·星超导</color>：超导、星超导反应伤害提升50%。\n<color=#FFD780FF>辉映·星扩散</color>：冰元素扩散、星扩散反应伤害提升50%。\n此外，处于{LINK#N11330003}<color=#FFD780FF>极星辉域</color>{/LINK}中时/队伍中的角色在附近触发星扩散反应后的8秒内，七七将分别进入<color=#FFD780FF>辉映·星超导</color>/<color=#FFD780FF>辉映·星扩散</color>状态。",
       "icon": "UI_Talent_S_Qiqi_08",
       "maxLv": 1,
       "luc": null
@@ -88,50 +131,6 @@
       "icon": "UI_Talent_Collect_Local_Liyue",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 351,
-      "Name": "寒苦回向",
-      "Description": "寒病鬼差命中被度厄真符标记的敌人时，为七七恢复2点元素能量。",
-      "SpecialDescription": "寒病鬼差命中被度厄真符标记的敌人时，为七七恢复2点元素能量。\n <color=#FFD780FF>辉映·星超导</color>：寒病鬼差的攻击与协同攻击命中敌人时，还会为七七恢复6点元素能量，该效果每6秒至多触发一次。",
-      "Icon": "UI_Talent_S_Qiqi_01"
-    },
-    {
-      "Id": 352,
-      "Name": "冰寒蚀骨",
-      "Description": "对受到<color=#99FFFFFF>冰元素</color>影响的敌人，七七的普通攻击与重击造成的伤害提升15%。",
-      "SpecialDescription": "对受到<color=#99FFFFFF>冰元素</color>影响的敌人，七七的普通攻击与重击造成的伤害提升15%。\n<color=#FFD780FF>辉映·星超导</color>：七七的攻击力提升50%。",
-      "Icon": "UI_Talent_S_Qiqi_02"
-    },
-    {
-      "Id": 353,
-      "Name": "升天宝诰",
-      "Description": "<color=#FFD780FF>仙法·救苦度厄</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Qiqi_01",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 354,
-      "Name": "天威压众",
-      "Description": "被度厄真符标记的目标，攻击力下降20%。",
-      "SpecialDescription": "被度厄真符标记的目标，攻击力下降20%。\n此外，触发度厄真符的治疗效果时，还会额外为附近生命值比例最低的角色恢复一次生命值，回复量相当于七七攻击力的180%。",
-      "Icon": "UI_Talent_S_Qiqi_03"
-    },
-    {
-      "Id": 355,
-      "Name": "红莲开绽",
-      "Description": "<color=#FFD780FF>仙法·寒病鬼差</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Qiqi_02",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 356,
-      "Name": "起死回骸",
-      "Description": "施放<color=#FFD780FF>仙法·救苦度厄</color>时，复苏附近队伍中所有倒下的角色，并将其生命值恢复至50%。\n该效果每15分钟只能触发一次。",
-      "SpecialDescription": "施放<color=#FFD780FF>仙法·救苦度厄</color>时，复苏附近队伍中所有倒下的角色，并将其生命值恢复至50%。\n该效果每15分钟只能触发一次。\n此外，施放<color=#FFD780FF>仙法·救苦度厄</color>后，七七还会获得4层<color=#FFD780FF>洞玄</color>；除七七外的队伍中自己的当前场上角色造成星超导反应伤害时，将消耗1层<color=#FFD780FF>洞玄</color>，提升造成的伤害，提升值相当于七七攻击力的600%。<color=#FFD780FF>洞玄</color>至多持续12秒，施放<color=#FFD780FF>仙法·救苦度厄</color>时刷新层数。",
-      "Icon": "UI_Talent_S_Qiqi_04"
     }
   ],
   "talks": [
@@ -316,5 +315,6 @@
       "Title": "神之眼",
       "Context": "七七的「神之眼」，是在生前最后一刻获得的。\n想要停住岁月，想要回到好好活着的时候。\n对死亡的恐惧、对生存的渴望、与对亲人的思念…所有这一切，凝聚成了「冰」的图案。\n「如果时间能停留在过去，该有多好…」\n如此想着，泪珠从垂死的女孩眼角滑落，滴在陡然出现的「神之眼」上。\n「三眼五显仙人」们认同了它作为「三眼」的正统性——人对逝去岁月的渴望，亦是一种守护之志。"
     }
-  ]
+  ],
+  "team": [0]
 }

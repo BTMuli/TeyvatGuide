@@ -4,7 +4,6 @@
   "title": "燥热旋律",
   "description": "璃月港唯一的摇滚乐手，以音乐和热情歌颂着对「成见」的反抗。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "「红弦」",
     "constellation": "红檀四弦座",
@@ -22,6 +21,46 @@
     { "id": 112037, "name": "攫金鸦印", "star": 3 },
     { "id": 104318, "name": "「黄金」的哲学", "star": 4 },
     { "id": 113013, "name": "吞天之鲸·只角", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 441,
+      "Name": "绝命的加速",
+      "Description": "辛焱造成暴击后的5秒内，普通攻击和重击的攻击速度提升12%。\n该效果每5秒只能触发一次。",
+      "Icon": "UI_Talent_S_Xinyan_01"
+    },
+    {
+      "Id": 442,
+      "Name": "开场即兴段",
+      "Description": "<color=#FFD780FF>叛逆刮弦</color>造成的物理伤害暴击率提升100%，并会在施放时形成三级护盾·舞遍节拍。",
+      "Icon": "UI_Talent_S_Xinyan_02"
+    },
+    {
+      "Id": 443,
+      "Name": "摭分的指法",
+      "Description": "<color=#FFD780FF>热情拂扫</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xinyan_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 444,
+      "Name": "节奏的传染",
+      "Description": "<color=#FFD780FF>热情拂扫</color>的挥舞伤害，会使敌人的物理抗性降低15%，持续12秒。",
+      "Icon": "UI_Talent_S_Xinyan_03"
+    },
+    {
+      "Id": 445,
+      "Name": "返场的高呼",
+      "Description": "<color=#FFD780FF>叛逆刮弦</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Xinyan_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 446,
+      "Name": "地狱里摇摆",
+      "Description": "辛焱的重击的体力消耗降低30%；此外，进行重击时，将基于防御力的50%获得攻击力加成。",
+      "Icon": "UI_Talent_S_Xinyan_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Cook_Defense",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 441,
-      "Name": "绝命的加速",
-      "Description": "辛焱造成暴击后的5秒内，普通攻击和重击的攻击速度提升12%。\n该效果每5秒只能触发一次。",
-      "Icon": "UI_Talent_S_Xinyan_01"
-    },
-    {
-      "Id": 442,
-      "Name": "开场即兴段",
-      "Description": "<color=#FFD780FF>叛逆刮弦</color>造成的物理伤害暴击率提升100%，并会在施放时形成三级护盾·舞遍节拍。",
-      "Icon": "UI_Talent_S_Xinyan_02"
-    },
-    {
-      "Id": 443,
-      "Name": "摭分的指法",
-      "Description": "<color=#FFD780FF>热情拂扫</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xinyan_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 444,
-      "Name": "节奏的传染",
-      "Description": "<color=#FFD780FF>热情拂扫</color>的挥舞伤害，会使敌人的物理抗性降低15%，持续12秒。",
-      "Icon": "UI_Talent_S_Xinyan_03"
-    },
-    {
-      "Id": 445,
-      "Name": "返场的高呼",
-      "Description": "<color=#FFD780FF>叛逆刮弦</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Xinyan_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 446,
-      "Name": "地狱里摇摆",
-      "Description": "辛焱的重击的体力消耗降低30%；此外，进行重击时，将基于防御力的50%获得攻击力加成。",
-      "Icon": "UI_Talent_S_Xinyan_04"
     }
   ],
   "talks": [
@@ -372,5 +371,6 @@
       "Title": "神之眼",
       "Context": "辛焱是个与璃月港格格不入的人，直到她邂逅「摇滚」的那一天，她才找到了真正的归宿。\n但她所生存的地方没有摇滚的土壤，想让这里的人接受她的音乐，必须足够引人注目。\n她沉醉于音乐的世界，寻找可以震撼人心的方法，她弹坏了很多把乐器，双手都磨出了茧，结果还是不尽如人意。\n「这么吵的东西，谁爱听啊。」\n屡屡遭到这等恶评，让辛焱产生了放弃的念头。\n她坐在天衡山上，俯瞰夜晚的璃月港。火光虽然点亮了街道，却点不亮她眼中这座商业都市的「摇滚魂」。\n她也想过远走高飞，去一个懂得欣赏摇滚的地方。但在她看来这是一种逃避，与摇滚天生的反抗精神背道而驰。\n——她不仅要留下来，还要成为真正能照亮璃月港的「火」。\n她开始尝试用火焰去震撼人心，往音乐中加入火花与爆炸。\n可对普通人来说，要控制火焰谈何容易？\n训练的时候，她不知道多少次烫伤了手指，炸飞了乐器。但她仍然坚持在天衡山上练习，每天如此。\n或许是神灵也很期待，某种全新的音乐形式席卷尘世七国吧…\n滚烫火热的「神之眼」，成为了画龙点睛的最后一笔。\n辛焱跑下山去，在璃月港举行了她的第一次摇滚音乐会。\n火花与爆炸为她打着节拍，她的音乐之路，由此开始。"
     }
-  ]
+  ],
+  "team": [0]
 }

@@ -4,7 +4,6 @@
   "title": "孤辰茕怀",
   "description": "气质出尘的仙家子弟。隐修在璃月群山之间，个性也如仙人般淡漠疏离。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "留云借风真君洞天",
     "constellation": "愁疏座",
@@ -22,6 +21,46 @@
     { "id": 112040, "name": "原素花蜜", "star": 3 },
     { "id": 104312, "name": "「繁荣」的哲学", "star": 4 },
     { "id": 113026, "name": "狱火之蝶", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 631,
+      "Name": "心斋",
+      "Description": "<color=#FFD780FF>仰灵威召将役咒</color>的可使用次数增加1次。",
+      "Icon": "UI_Talent_S_Shenhe_02"
+    },
+    {
+      "Id": 632,
+      "Name": "定蒙",
+      "Description": "<color=#FFD780FF>神女遣灵真诀</color>的持续时间延长6秒。领域中的当前场上角色，<color=#99FFFFFF>冰元素伤害</color>的暴击伤害提高15%。",
+      "Icon": "UI_Talent_S_Shenhe_01"
+    },
+    {
+      "Id": 633,
+      "Name": "潜虚",
+      "Description": "<color=#FFD780FF>仰灵威召将役咒</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Shenhe_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 634,
+      "Name": "洞观",
+      "Description": "处于申鹤自己施加的<color=#FFD780FF>「冰翎」</color>状态下的角色，触发「冰翎」的伤害增加时，申鹤将获得一层「霜霄诀」：\n·申鹤施放<color=#FFD780FF>仰灵威召将役咒</color>时，将清除所有「霜霄诀」，并根据清除的层数，每层使本次仰灵威召将役咒造成的伤害提高5%；\n·该效果至多叠加50次，持续60秒。",
+      "Icon": "UI_Talent_S_Shenhe_03"
+    },
+    {
+      "Id": 635,
+      "Name": "化神",
+      "Description": "<color=#FFD780FF>神女遣灵真诀</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Shenhe_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 636,
+      "Name": "忘玄",
+      "Description": "角色通过普通攻击伤害与重击伤害触发<color=#FFD780FF>「冰翎」</color>的效果时，将不再会减少「冰翎」的生效次数。",
+      "Icon": "UI_Talent_S_Shenhe_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Expedition_Liyue",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 631,
-      "Name": "心斋",
-      "Description": "<color=#FFD780FF>仰灵威召将役咒</color>的可使用次数增加1次。",
-      "Icon": "UI_Talent_S_Shenhe_02"
-    },
-    {
-      "Id": 632,
-      "Name": "定蒙",
-      "Description": "<color=#FFD780FF>神女遣灵真诀</color>的持续时间延长6秒。领域中的当前场上角色，<color=#99FFFFFF>冰元素伤害</color>的暴击伤害提高15%。",
-      "Icon": "UI_Talent_S_Shenhe_01"
-    },
-    {
-      "Id": 633,
-      "Name": "潜虚",
-      "Description": "<color=#FFD780FF>仰灵威召将役咒</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Shenhe_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 634,
-      "Name": "洞观",
-      "Description": "处于申鹤自己施加的<color=#FFD780FF>「冰翎」</color>状态下的角色，触发「冰翎」的伤害增加时，申鹤将获得一层「霜霄诀」：\n·申鹤施放<color=#FFD780FF>仰灵威召将役咒</color>时，将清除所有「霜霄诀」，并根据清除的层数，每层使本次仰灵威召将役咒造成的伤害提高5%；\n·该效果至多叠加50次，持续60秒。",
-      "Icon": "UI_Talent_S_Shenhe_03"
-    },
-    {
-      "Id": 635,
-      "Name": "化神",
-      "Description": "<color=#FFD780FF>神女遣灵真诀</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Shenhe_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 636,
-      "Name": "忘玄",
-      "Description": "角色通过普通攻击伤害与重击伤害触发<color=#FFD780FF>「冰翎」</color>的效果时，将不再会减少「冰翎」的生效次数。",
-      "Icon": "UI_Talent_S_Shenhe_04"
     }
   ],
   "talks": [
@@ -379,5 +378,6 @@
       "Title": "神之眼",
       "Context": "鲜少有人知道，当年在山洞中，被父亲当成祭品的年幼少女如何能凭一己之力与魔物对抗数天数夜。\n申鹤虽然生在驱邪世家，却没能从失心疯魔的父亲那里学到半点除魔咒法。\n与每一个天真的同龄人一样，她也从未独自面对过生活的凶险。\n但在昏黑的山洞里，在那个失去了父母庇护、遭到血亲背叛的绝境里，申鹤蜕变了。\n如削月筑阳真君的卦象所示，沉眠在申鹤命中的凶煞、血性与不屈，都在那一刻齐齐爆发出来。\n那些力量犹如目不能视的盾，无法看清的剑，武装起了女孩娇弱的身躯。\n它们赐给她力量，为她安上獠牙，准许她向面前的低贱魔物发起攻击，誓要将它撕碎，来证明她才是黑暗中最暴戾的邪恶。\n接连数日，搏命的战斗一直没有休止。猎人与猎物不停调换身份，势均力敌的局面久未破除…\n生死攸关的时刻，神明将目光投向了不凡的女孩。\n一颗晶亮的事物落到申鹤的手中。天平完全倒向申鹤，胜负终定。\n剔透莹亮的冰之光芒刺破黑暗，如同霞光，预示着未来的路。\n从前，它指引申鹤走出苦难的命运，未来，它也将指引申鹤重返尘世。"
     }
-  ]
+  ],
+  "team": [0]
 }

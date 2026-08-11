@@ -4,7 +4,6 @@
   "title": "遵生合和",
   "description": "药庐「不卜庐」的主人，随身悬着名为「长生」的白蛇。精于药石，深于城府。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "不卜庐",
     "constellation": "悬壶座",
@@ -27,6 +26,46 @@
     { "id": 112061, "name": "孢囊晶尘", "star": 3 },
     { "id": 104318, "name": "「黄金」的哲学", "star": 4 },
     { "id": 113046, "name": "生长天地之蕨草", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 821,
+      "Name": "呿吟至微",
+      "Description": "<color=#FFD780FF>太素诊要</color>的可使用次数增加1次。",
+      "Icon": "UI_Talent_S_Baizhuer_01"
+    },
+    {
+      "Id": 822,
+      "Name": "动静精明",
+      "Description": "队伍中自己的当前场上角色在攻击命中附近的敌人时，白术将释放游丝徵灵·切。\n游丝徵灵·切将在进行至多1次攻击后返回，造成白术攻击力250%的<color=#99FF88FF>草元素伤害</color>与<color=#FFD780FF>太素诊要</color>游丝徵灵的20%回复量。\n通过这种方式造成的伤害视为元素战技伤害。\n每5秒至多触发一次。",
+      "Icon": "UI_Talent_S_Baizhuer_02"
+    },
+    {
+      "Id": 823,
+      "Name": "八正定气",
+      "Description": "<color=#FFD780FF>愈气全形论</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Baizhuer_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 824,
+      "Name": "法古观冥",
+      "Description": "施放<color=#FFD780FF>愈气全形论</color>之后的15秒内，队伍中附近的所有角色元素精通提升80点。",
+      "Icon": "UI_Talent_S_Baizhuer_03"
+    },
+    {
+      "Id": 825,
+      "Name": "盈虚藏象",
+      "Description": "<color=#FFD780FF>太素诊要</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Baizhuer_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 826,
+      "Name": "真邪合离",
+      "Description": "<color=#FFD780FF>愈气全形论</color>的灵气脉造成的伤害提高，提升值相当于白术生命值上限的8%。\n此外，<color=#FFD780FF>游丝徵灵</color>或游丝徵灵·切在命中敌人时，有100%概率产生<color=#FFD780FF>愈气全形论</color>的无郤气护盾，该效果每个游丝徵灵或游丝徵灵·切只能触发一次。",
+      "Icon": "UI_Talent_S_Baizhuer_04"
+    }
   ],
   "skills": [
     {
@@ -82,46 +121,6 @@
       "icon": "UI_Talent_S_Baizhuer_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 821,
-      "Name": "呿吟至微",
-      "Description": "<color=#FFD780FF>太素诊要</color>的可使用次数增加1次。",
-      "Icon": "UI_Talent_S_Baizhuer_01"
-    },
-    {
-      "Id": 822,
-      "Name": "动静精明",
-      "Description": "队伍中自己的当前场上角色在攻击命中附近的敌人时，白术将释放游丝徵灵·切。\n游丝徵灵·切将在进行至多1次攻击后返回，造成白术攻击力250%的<color=#99FF88FF>草元素伤害</color>与<color=#FFD780FF>太素诊要</color>游丝徵灵的20%回复量。\n通过这种方式造成的伤害视为元素战技伤害。\n每5秒至多触发一次。",
-      "Icon": "UI_Talent_S_Baizhuer_02"
-    },
-    {
-      "Id": 823,
-      "Name": "八正定气",
-      "Description": "<color=#FFD780FF>愈气全形论</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Baizhuer_01",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 824,
-      "Name": "法古观冥",
-      "Description": "施放<color=#FFD780FF>愈气全形论</color>之后的15秒内，队伍中附近的所有角色元素精通提升80点。",
-      "Icon": "UI_Talent_S_Baizhuer_03"
-    },
-    {
-      "Id": 825,
-      "Name": "盈虚藏象",
-      "Description": "<color=#FFD780FF>太素诊要</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Baizhuer_02",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 826,
-      "Name": "真邪合离",
-      "Description": "<color=#FFD780FF>愈气全形论</color>的灵气脉造成的伤害提高，提升值相当于白术生命值上限的8%。\n此外，<color=#FFD780FF>游丝徵灵</color>或游丝徵灵·切在命中敌人时，有100%概率产生<color=#FFD780FF>愈气全形论</color>的无郤气护盾，该效果每个游丝徵灵或游丝徵灵·切只能触发一次。",
-      "Icon": "UI_Talent_S_Baizhuer_04"
     }
   ],
   "talks": [
@@ -394,5 +393,6 @@
       "Title": "神之眼",
       "Context": "白术尚且年幼时，故乡遭遇了一场疫疠。\n幸好师父行医至此，疫疠没有进一步蔓延。\n然而在此之前逝去的生命，却已没有奇迹可以挽救。失去父母的白术从此跟随师父学医。\n世上疑难杂症颇多，师父似乎总有办法医治。那些年白术跟着师父学习，从师父身上学懂了一个道理：病魔虽险，凭借人智也终能克服。\n…直到师父因契约累下一身病患，再也支撑不住。\n这一年白术已经学有所成，面对堪比枯枝缠绕的复杂病情依旧无可奈何。\n这世上最无解的病症——死亡，终于也降临于恩师之身。\n凡人这一生，真的无法摆脱生老病死吗？\n幼时愈发模糊的记忆，是父母带血的咳声；眼前逐渐清晰的景象，是师父冰凉的墓碑。\n在师父墓前，长生一如既往俏皮的话语中，也夹杂了一分难以察觉的怅然。\n「这份契约，不知还要再传多少人。」\n白术已不想看着珍视的生命再次于眼前逝去了。\n「——不，我会成为最后一任契约者。」\n再度睁眼时，他的眼睛已镀上金色的光辉，仿佛一团不熄的烛火。\n此刻首先映入他竖瞳的，是一枚「神之眼」。萤火一般，悄然出现在墓碑上。\n仿佛神明的视线，见证了一切；又如师父的目光，温柔的期许。"
     }
-  ]
+  ],
+  "team": [0]
 }

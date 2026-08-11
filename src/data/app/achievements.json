@@ -4651,6 +4651,246 @@
     "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
+    "id": 80504,
+    "series": 69,
+    "order": 463,
+    "name": "大地勘探·朔雪覆降之国·其一",
+    "description": "点亮至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰的地图。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80505,
+    "series": 69,
+    "order": 464,
+    "name": "凌越冰封的雪境·其一",
+    "description": "解锁至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰所有传送锚点。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80506,
+    "series": 69,
+    "order": 465,
+    "name": "圣龛巡礼·朔雪覆降之国·其一",
+    "description": "解除至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰所有地灵龛的封印。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80507,
+    "series": 69,
+    "order": 466,
+    "name": "苍明如冰",
+    "description": "将至冬的七天神像供奉至满级。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80508,
+    "series": 69,
+    "order": 467,
+    "name": "影域馈赐·朔雪覆降之国·其一",
+    "description": "解除至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰所有影域遗物宝库的封印。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80509,
+    "series": 69,
+    "order": 468,
+    "name": "霜原引路人·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰追随3个仙灵，并点亮仙灵之庭。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80510,
+    "series": 69,
+    "order": 469,
+    "name": "霜原引路人·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰追随5个仙灵，并点亮仙灵之庭。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80511,
+    "series": 69,
+    "order": 470,
+    "name": "霜原引路人·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰追随10个仙灵，并点亮仙灵之庭。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80512,
+    "series": 69,
+    "order": 471,
+    "name": "寒冬的寻宝者·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰开启65个宝箱。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80513,
+    "series": 69,
+    "order": 472,
+    "name": "寒冬的寻宝者·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰开启130个宝箱。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80514,
+    "series": 69,
+    "order": 473,
+    "name": "寒冬的寻宝者·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰开启260个宝箱。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80515,
+    "series": 69,
+    "order": 474,
+    "name": "寒冬的冒险家·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰完成6个大世界限时挑战。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80516,
+    "series": 69,
+    "order": 475,
+    "name": "寒冬的冒险家·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰完成12个大世界限时挑战。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80517,
+    "series": 69,
+    "order": 476,
+    "name": "寒冬的冒险家·其一",
+    "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰完成24个大世界限时挑战。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80518,
+    "series": 69,
+    "order": 477,
+    "name": "爱的阶梯",
+    "description": "完成「爱憎的赫斯珀利德斯」。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80519,
+    "series": 69,
+    "order": 478,
+    "name": "为永恒幸福而相聚",
+    "description": "完成「在生命的寓所」。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80520,
+    "series": 69,
+    "order": 479,
+    "name": "千万种爱，或喻一声叹息",
+    "description": "成功阻止「原初之人」将世界转变为无爱亦无忧的庭院。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80521,
+    "series": 69,
+    "order": 480,
+    "name": "壳中歌者的诞生",
+    "description": "提升「聚所·汐歌洞窟」的共建等级至满级。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80522,
+    "series": 69,
+    "order": 481,
+    "name": "于清醒的世界狩猎价值",
+    "description": "提升「聚所·巡猎者木屋」的共建等级至满级。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80523,
+    "series": 69,
+    "order": 482,
+    "name": "赞美被选中者",
+    "description": "提升「聚所·科洛列夫茨基剧院」的共建等级至满级。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80525,
+    "series": 71,
+    "order": 484,
+    "name": "冰风的镇魂曲",
+    "description": "掌握「冰」的元素力。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80526,
+    "series": 71,
+    "order": 485,
+    "name": "当歌声撕裂黑夜",
+    "description": "集齐全套《极星舞剧集》。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80528,
+    "series": 71,
+    "order": 487,
+    "name": "亡者们的故事",
+    "description": "集齐全套《至冬国通史》。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 80529,
+    "series": 69,
+    "order": 488,
+    "name": "睁开被逸夜合拢的眼睛",
+    "description": "完成「曙光车站」的振兴。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 81000,
     "series": 0,
     "order": 1000,
@@ -4904,8 +5144,8 @@
     "id": 81032,
     "series": 0,
     "order": 1033,
-    "name": "QUEST FAILED",
-    "description": "跟丢了悬赏目标…",
+    "name": "QUEST FAILED  OR …",
+    "description": "在「讨伐悬赏」中跟丢了悬赏目标，或再也不用进行「讨伐悬赏」…",
     "reward": 5,
     "version": "1.1",
     "trigger": { "type": "HUNTING_FAIL_NUM" }
@@ -11497,6 +11737,266 @@
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
+    "id": 81700,
+    "series": 0,
+    "order": 1700,
+    "name": "停一停吧，你是如此美丽",
+    "description": "为白桦与雪葬之宫的美景驻足了片刻。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81701,
+    "series": 0,
+    "order": 1701,
+    "name": "明日之国的超越者",
+    "description": "集齐某人遗留在白冕宫中的遗物。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81702,
+    "series": 0,
+    "order": 1702,
+    "name": "复利效应",
+    "description": "把雪球滚到最大。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81703,
+    "series": 0,
+    "order": 1703,
+    "name": "新婚的钟声",
+    "description": "将不再循环的钟声敲响。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81704,
+    "series": 0,
+    "order": 1704,
+    "name": "为谁而鸣",
+    "description": "让不受束缚的钟声再度响起。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81705,
+    "series": 0,
+    "order": 1705,
+    "name": "火柴中的幻象",
+    "description": "令不安者终受慰藉。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81706,
+    "series": 0,
+    "order": 1706,
+    "name": "极限与展示",
+    "description": "或许作品拥有名字，只不过是为了寻得另一重共鸣。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81707,
+    "series": 0,
+    "order": 1707,
+    "name": "极度空间",
+    "description": "第一次戴上「灰眸」。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81708,
+    "series": 0,
+    "order": 1708,
+    "name": "雪、晶矿和速度",
+    "description": "令老旧的列车焕然一新。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81709,
+    "series": 0,
+    "order": 1709,
+    "name": "穿过虚饰的殿堂",
+    "description": "集齐赫斯珀利德斯之馆的所有画作，并开启其后的秘藏。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81710,
+    "series": 0,
+    "order": 1710,
+    "name": "为一切未来之你",
+    "description": "即使那样的你尚未来到。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81711,
+    "series": 0,
+    "order": 1711,
+    "name": "因为宫殿在那里",
+    "description": "登上至冬宫的最高处。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81712,
+    "series": 0,
+    "order": 1712,
+    "name": "冬日最后的玫瑰",
+    "description": "…而飞蛾终是泯于焚火。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81714,
+    "series": 0,
+    "order": 1714,
+    "name": "比冷笑话要冷",
+    "description": "在与纳塔人的「耐寒比赛」中赢得了对方。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81715,
+    "series": 0,
+    "order": 1715,
+    "name": "呀吼！",
+    "description": "帮助霜精「村长」抵御兽怪的入侵。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81716,
+    "series": 0,
+    "order": 1716,
+    "name": "高桌之上还有高桌",
+    "description": "但谁还记得「高桌」是「矮灵」建立的呢…",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81717,
+    "series": 0,
+    "order": 1717,
+    "name": "冰山沉没，且不再浮起",
+    "description": "见证巨大雪精的结局。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81718,
+    "series": 0,
+    "order": 1718,
+    "name": "「樱桃园卖掉了」",
+    "description": "见证冰上木屋的倒悬、停滞与最终沉没。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81720,
+    "series": 0,
+    "order": 1720,
+    "name": "已为您成功规划路线",
+    "description": "使用连索机关完成一次长达30米的水平位移。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81721,
+    "series": 0,
+    "order": 1721,
+    "name": "就像灵感一样",
+    "description": "发射的雪球在未落地时就开始消散。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81722,
+    "series": 0,
+    "order": 1722,
+    "name": "此路不通",
+    "description": "成功截停滚动的雪球。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81724,
+    "series": 0,
+    "order": 1724,
+    "name": "坚韧的膝盖",
+    "description": "保持滑铲状态长达20秒。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81728,
+    "series": 0,
+    "order": 1728,
+    "name": "昔日的承诺",
+    "description": "那时，炉灰区没有王，各人任意而行…",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81729,
+    "series": 0,
+    "order": 1729,
+    "name": "科斯基，方案",
+    "description": "帮助纳塔人，令她的浮燃鸟伙伴冷静下来。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81730,
+    "series": 0,
+    "order": 1730,
+    "name": "如我的想象顺我目光凝固",
+    "description": "靠近灯塔上，少女的幽影凝结成的雕像。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 81731,
+    "series": 0,
+    "order": 1731,
+    "name": "戴醉之身",
+    "description": "你永远可以叫醒一个真醉的人。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 82001,
     "series": 7,
     "order": 2001,
@@ -14435,6 +14935,26 @@
     "reward": 5,
     "version": "6.6",
     "trigger": { "type": "COMBAT_CONFIG_COMMON" }
+  },
+  {
+    "id": 82310,
+    "series": 0,
+    "order": 2310,
+    "name": "等一下…就是现在！",
+    "description": "在不灭衍生造物处于「命耀之姿」状态时，通过击破复生护盾，打断其攻击。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 82311,
+    "series": 0,
+    "order": 2311,
+    "name": "「骏狮坠落」",
+    "description": "在嵌合翼骏狮处于「驱风」状态时，通过击破全部的风球，将其击落。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
   },
   {
     "id": 84000,
@@ -17492,6 +18012,86 @@
     }
   },
   {
+    "id": 84391,
+    "series": 0,
+    "order": 5166,
+    "name": "暴雪轰鸣的开幕",
+    "description": "驾驶列车冲破至冬的风雪。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84392,
+    "series": 0,
+    "order": 5167,
+    "name": "苍星的神秘剧",
+    "description": "从冰洞中取得了「星锋剑」。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84393,
+    "series": 0,
+    "order": 5168,
+    "name": "狂风呼啸",
+    "description": "接受伙伴的邀请加入「呼啸社」。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84394,
+    "series": 0,
+    "order": 5169,
+    "name": "无神怜爱的雪国",
+    "description": "完成「无神怜爱的雪国」。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84395,
+    "series": 0,
+    "order": 5170,
+    "name": "爱或遗憾的圆舞",
+    "description": "观看了「寻灵」的试演。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84396,
+    "series": 0,
+    "order": 5171,
+    "name": "闭环之外",
+    "description": "见证米提亚主动踏入暴风雪。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84397,
+    "series": 0,
+    "order": 5172,
+    "name": "「命运」的三种死亡",
+    "description": "从「死后世界」中幸存下来。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 84398,
+    "series": 0,
+    "order": 5173,
+    "name": "死魂灵的夜曲",
+    "description": "完成「死魂灵的夜曲」。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 84501,
     "series": 10,
     "order": 4026,
@@ -18592,6 +19192,16 @@
     "trigger": { "type": "QUEST_GLOBAL_VAR_EQUAL" }
   },
   {
+    "id": 84584,
+    "series": 0,
+    "order": 4108,
+    "name": "翔舞翱天的黑雪鹄",
+    "description": "我行雪鹄未曾行过的事，我梦雪鹄未曾有过的梦。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
     "id": 85000,
     "series": 0,
     "order": 5000,
@@ -19234,5 +19844,245 @@
     "reward": 10,
     "version": "6.0",
     "trigger": { "type": "MP_KILL_MONSTER_ID_NUM" }
+  },
+  {
+    "id": 86059,
+    "series": 70,
+    "order": 9056,
+    "name": "冻原的修复师",
+    "description": "在至冬冻土清剿一个大型影域。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86062,
+    "series": 70,
+    "order": 9059,
+    "name": "我们影域里见",
+    "description": "完成一次「绝境攻炼」的挑战。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86063,
+    "series": 70,
+    "order": 9060,
+    "name": "「影域老司机」",
+    "description": "将「影域解析等级」提升至满级。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86066,
+    "series": 70,
+    "order": 9063,
+    "name": "绝境的击坠王",
+    "description": "获得9枚攻炼武勋。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86067,
+    "series": 70,
+    "order": 9064,
+    "name": "冻原的枪匠·其一",
+    "description": "为1把枪械安装1个配件。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86068,
+    "series": 70,
+    "order": 9065,
+    "name": "冻原的枪匠·其二",
+    "description": "为1把枪械安装2个配件。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86069,
+    "series": 70,
+    "order": 9066,
+    "name": "冻原的枪匠·其三",
+    "description": "为1把枪械安装4个配件。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86071,
+    "series": 70,
+    "order": 9068,
+    "name": "搭枪卡",
+    "description": "为「莎塔娜娅的苍银」、「瓦尔萨格的日轮」与「阿夏梅兹的千光」均安装4个配件。",
+    "reward": 20,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86072,
+    "series": 70,
+    "order": 9069,
+    "name": "午时已…",
+    "description": "在30秒内连续命中敌人弱点部位5次。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86073,
+    "series": 70,
+    "order": 9070,
+    "name": "跟我的伙计们打个招呼吧！",
+    "description": "在30秒内使用榴弹发射器触发5次元素反应。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86074,
+    "series": 70,
+    "order": 9071,
+    "name": "滑铲瞄准根本就是天方夜谭",
+    "description": "在滑铲状态下累计击败20名敌人。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86075,
+    "series": 70,
+    "order": 9072,
+    "name": "链接着所有人的神圣光矛",
+    "description": "获得突击步枪：「莎塔娜娅的苍银」。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86076,
+    "series": 70,
+    "order": 9073,
+    "name": "百般武艺，此乃榴弹发射器！",
+    "description": "获得榴弹发射器：「瓦尔萨格的日轮」。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86077,
+    "series": 70,
+    "order": 9074,
+    "name": "警告，闪电灾厄正在生成…",
+    "description": "获得突击步枪：「阿夏梅兹的千光」",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86078,
+    "series": 70,
+    "order": 9075,
+    "name": "500克的爱",
+    "description": "获得榴晶。",
+    "reward": 5,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86079,
+    "series": 72,
+    "order": 9076,
+    "name": "此在的沉沦",
+    "description": "与其他玩家一同战胜霜夜巡天灵主。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86080,
+    "series": 72,
+    "order": 9077,
+    "name": "二十六，击穿了",
+    "description": "与其他玩家一同战胜超重型陆巡舰·机动战垒。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86081,
+    "series": 72,
+    "order": 9078,
+    "name": "你不当讲！",
+    "description": "与其他玩家一同战胜深黯魇语之主。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86082,
+    "series": 72,
+    "order": 9079,
+    "name": "破邪显正",
+    "description": "与其他玩家一同战胜「博士」。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86083,
+    "series": 72,
+    "order": 9080,
+    "name": "你都守护了什么",
+    "description": "与其他玩家一同战胜蕴光月守宫。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86084,
+    "series": 72,
+    "order": 9081,
+    "name": "「我若磨我闪亮的刀…」",
+    "description": "与其他玩家一同战胜守望者·堕天。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86085,
+    "series": 72,
+    "order": 9082,
+    "name": "独生无明",
+    "description": "与其他玩家一同战胜多托雷。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86086,
+    "series": 72,
+    "order": 9083,
+    "name": "不灭已斩",
+    "description": "与其他玩家一同战胜不灭衍生造物。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
+  },
+  {
+    "id": 86087,
+    "series": 72,
+    "order": 9084,
+    "name": "生生有息",
+    "description": "与其他玩家一同战胜嵌合翼骏狮。",
+    "reward": 10,
+    "version": "7.0",
+    "trigger": { "type": "Unknown" }
   }
 ]

@@ -4,7 +4,6 @@
   "title": "浮世笑百姿",
   "description": "鸣神大社的宫司大人，兼任「八重堂」总编。艳丽动人的外表下藏着令人意想不到的聪慧与狡黠。",
   "area": "稻妻",
-  "team": [0],
   "brief": {
     "camp": "鸣神大社",
     "constellation": "仙狐座",
@@ -22,6 +21,50 @@
     { "id": 112046, "name": "名刀镡", "star": 3 },
     { "id": 104328, "name": "「天光」的哲学", "star": 4 },
     { "id": 113034, "name": "万劫之真意", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 581,
+      "Name": "野狐供真篇",
+      "Description": "<color=#FFD780FF>大密法·天狐显真</color>每引发一次天狐霆雷，都会为八重神子自己恢复8点元素能量。",
+      "SpecialDescription": "<color=#FFD780FF>大密法·天狐显真</color>每引发一次天狐霆雷，都会为八重神子自己恢复8点元素能量；八重神子触发超导/星超导反应或造成星超导反应伤害后，队伍中附近角色获得50%雷元素伤害加成和星超导伤害加成，持续10秒，重复触发刷新持续时间。",
+      "Icon": "UI_Talent_S_Yae_01"
+    },
+    {
+      "Id": 582,
+      "Name": "望月吼哕声",
+      "Description": "<color=#FFD780FF>杀生樱</color>创造时的初始位阶提升至贰阶，位阶上限提升至肆阶，攻击范围提升60%。",
+      "SpecialDescription": "<color=#FFD780FF>杀生樱</color>创造时的初始位阶提升至贰阶，位阶上限提升至肆阶，攻击范围提升60%；此外，杀生樱在场时，还会根据杀生樱的位阶，使八重神子与队伍中自己的当前场上角色的元素精通提升60/90/120/200点。",
+      "Icon": "UI_Talent_S_Yae_02"
+    },
+    {
+      "Id": 583,
+      "Name": "七段妙变化",
+      "Description": "<color=#FFD780FF>野干役咒·杀生樱</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Yae_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 584,
+      "Name": "绯樱引雷章",
+      "Description": "<color=#FFD780FF>杀生樱</color>的落雷命中敌人后，队伍中附近的所有角色获得20%<color=#FFACFFFF>雷元素伤害加成</color>，持续5秒。",
+      "SpecialDescription": "<color=#FFD780FF>杀生樱</color>的落雷命中敌人后，队伍中附近的所有角色获得20%<color=#FFACFFFF>雷元素伤害加成</color>，持续5秒，并为八重神子回复8点元素能量，上述恢复元素能量的效果每5秒最多触发一次；此外，八重神子的元素爆发伤害提升100%。",
+      "Icon": "UI_Talent_S_Yae_03"
+    },
+    {
+      "Id": 585,
+      "Name": "暴恶嗤笑面",
+      "Description": "<color=#FFD780FF>大密法·天狐显真</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Yae_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 586,
+      "Name": "大杀生咒禁",
+      "Description": "<color=#FFD780FF>杀生樱</color>在攻击时无视敌人60%的防御力。",
+      "SpecialDescription": "<color=#FFD780FF>杀生樱</color>在攻击时无视敌人60%的防御力，八重神子造成的星超导反应伤害的暴击伤害提升200%。",
+      "Icon": "UI_Talent_S_Yae_04"
+    }
   ],
   "skills": [
     {
@@ -87,50 +130,6 @@
       "icon": "UI_Talent_S_Yae_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 581,
-      "Name": "野狐供真篇",
-      "Description": "<color=#FFD780FF>大密法·天狐显真</color>每引发一次天狐霆雷，都会为八重神子自己恢复8点元素能量。",
-      "SpecialDescription": "<color=#FFD780FF>大密法·天狐显真</color>每引发一次天狐霆雷，都会为八重神子自己恢复8点元素能量；八重神子触发超导/星超导反应或造成星超导反应伤害后，队伍中附近角色获得50%雷元素伤害加成和星超导伤害加成，持续10秒，重复触发刷新持续时间。",
-      "Icon": "UI_Talent_S_Yae_01"
-    },
-    {
-      "Id": 582,
-      "Name": "望月吼哕声",
-      "Description": "<color=#FFD780FF>杀生樱</color>创造时的初始位阶提升至贰阶，位阶上限提升至肆阶，攻击范围提升60%。",
-      "SpecialDescription": "<color=#FFD780FF>杀生樱</color>创造时的初始位阶提升至贰阶，位阶上限提升至肆阶，攻击范围提升60%；此外，杀生樱在场时，还会根据杀生樱的位阶，使八重神子与队伍中自己的当前场上角色的元素精通提升60/90/120/200点。",
-      "Icon": "UI_Talent_S_Yae_02"
-    },
-    {
-      "Id": 583,
-      "Name": "七段妙变化",
-      "Description": "<color=#FFD780FF>野干役咒·杀生樱</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Yae_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 584,
-      "Name": "绯樱引雷章",
-      "Description": "<color=#FFD780FF>杀生樱</color>的落雷命中敌人后，队伍中附近的所有角色获得20%<color=#FFACFFFF>雷元素伤害加成</color>，持续5秒。",
-      "SpecialDescription": "<color=#FFD780FF>杀生樱</color>的落雷命中敌人后，队伍中附近的所有角色获得20%<color=#FFACFFFF>雷元素伤害加成</color>，持续5秒，并为八重神子回复8点元素能量，上述恢复元素能量的效果每5秒最多触发一次；此外，八重神子的元素爆发伤害提升100%。",
-      "Icon": "UI_Talent_S_Yae_03"
-    },
-    {
-      "Id": 585,
-      "Name": "暴恶嗤笑面",
-      "Description": "<color=#FFD780FF>大密法·天狐显真</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Yae_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 586,
-      "Name": "大杀生咒禁",
-      "Description": "<color=#FFD780FF>杀生樱</color>在攻击时无视敌人60%的防御力。",
-      "SpecialDescription": "<color=#FFD780FF>杀生樱</color>在攻击时无视敌人60%的防御力，八重神子造成的星超导反应伤害的暴击伤害提升200%。",
-      "Icon": "UI_Talent_S_Yae_04"
     }
   ],
   "talks": [
@@ -418,5 +417,6 @@
       "Title": "神之眼",
       "Context": "「那是一场惊天动地的斗法，敌人划开海潮，踏空而来，连天地都为之色变！\n宫司大人手持御币，庄严肃穆，缓步踏上影向山巅。\n众巫女随侍在侧，口宣密咒，霎时间重云蔽日，雷声沉响！」\n「……」\n「大战旷日持久，纵是宫司也有些恍惚。敌人趁此不备，一记重击袭来！\n就在这时，一道雷光如天陨流星，直坠宫司面前——竟是一枚闪闪发光的神之眼！\n宫司大人一把抓住，抖擞精神大显神威…」\n「停停停！你这说的全都是假的吧？」\n「哦？那要不换一个，那天我在花见坂来了一场酣畅淋漓的『拉面对决』…」\n「怎么会有人因为吃拉面拿到神之眼啊？！」\n「不也挺有趣的么？毕竟你们想听的，无非就是这样那样的『故事』吧？」\n面对旅者的好奇，八重神子露出促狭而莫测的微笑。\n「何况就算我如实相告：『我的神之眼只是件装装样子的首饰』你会信吗，小家伙？」"
     }
-  ]
+  ],
+  "team": [0]
 }

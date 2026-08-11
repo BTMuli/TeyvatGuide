@@ -4,7 +4,6 @@
   "title": "红毹婵娟",
   "description": "集剧作与演唱能力于一身的璃月戏曲名角。风格自成一派，雅致柔美，恰如其人。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "云翰社",
     "constellation": "虹章座",
@@ -27,6 +26,46 @@
     { "id": 112007, "name": "不祥的面具", "star": 3 },
     { "id": 104315, "name": "「勤劳」的哲学", "star": 4 },
     { "id": 113027, "name": "灰烬之心", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 641,
+      "Name": "飞身趟马",
+      "Description": "<color=#FFD780FF>旋云开相</color>的冷却时间减少18%。",
+      "Icon": "UI_Talent_S_Yunjin_01"
+    },
+    {
+      "Id": 642,
+      "Name": "诸般切末",
+      "Description": "施放<color=#FFD780FF>破嶂见旌仪</color>后，附近队伍中所有角色普通攻击造成的伤害提升15%，持续12秒。",
+      "Icon": "UI_Talent_S_Yunjin_02"
+    },
+    {
+      "Id": 643,
+      "Name": "牙纛探海",
+      "Description": "<color=#FFD780FF>破嶂见旌仪</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Yunjin_01",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 644,
+      "Name": "昇堂吊云",
+      "Description": "云堇触发结晶、月结晶反应后，防御力提升20%，持续12秒。",
+      "Icon": "UI_Talent_S_Yunjin_03"
+    },
+    {
+      "Id": 645,
+      "Name": "翘楚名坤",
+      "Description": "<color=#FFD780FF>旋云开相</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Yunjin_02",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 646,
+      "Name": "庄谐并举",
+      "Description": "处于<color=#FFD780FF>「飞云旗阵」</color>状态下的角色，普通攻击的攻击速度提升12%。",
+      "Icon": "UI_Talent_S_Yunjin_04"
+    }
   ],
   "skills": [
     {
@@ -82,46 +121,6 @@
       "icon": "UI_Talent_S_Yunjin_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 641,
-      "Name": "飞身趟马",
-      "Description": "<color=#FFD780FF>旋云开相</color>的冷却时间减少18%。",
-      "Icon": "UI_Talent_S_Yunjin_01"
-    },
-    {
-      "Id": 642,
-      "Name": "诸般切末",
-      "Description": "施放<color=#FFD780FF>破嶂见旌仪</color>后，附近队伍中所有角色普通攻击造成的伤害提升15%，持续12秒。",
-      "Icon": "UI_Talent_S_Yunjin_02"
-    },
-    {
-      "Id": 643,
-      "Name": "牙纛探海",
-      "Description": "<color=#FFD780FF>破嶂见旌仪</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Yunjin_01",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 644,
-      "Name": "昇堂吊云",
-      "Description": "云堇触发结晶、月结晶反应后，防御力提升20%，持续12秒。",
-      "Icon": "UI_Talent_S_Yunjin_03"
-    },
-    {
-      "Id": 645,
-      "Name": "翘楚名坤",
-      "Description": "<color=#FFD780FF>旋云开相</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Yunjin_02",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 646,
-      "Name": "庄谐并举",
-      "Description": "处于<color=#FFD780FF>「飞云旗阵」</color>状态下的角色，普通攻击的攻击速度提升12%。",
-      "Icon": "UI_Talent_S_Yunjin_04"
     }
   ],
   "talks": [
@@ -365,5 +364,6 @@
       "Title": "神之眼",
       "Context": "云堇初登台不久，经过大大小小几十场戏的磨砺，本就聪颖的她很快掌握了舞台表演的要旨。\n只要云堇亮相，绝对能赢来满堂喝彩。可这样唱得多了，反而觉得，这些不是自己想要的戏。\n台上开演，每到矛盾激烈时就高声开嗓，每到形势陷入低谷时就放低声，慢慢吟出唱词。\n久而久之，对她而言，各类戏中角色都有着相似的面孔。\n起调，摆一套漂亮身段，再亮一亮她的好嗓音，《神女劈观》中的神女和《连心珠》中的渔家小妹似乎也没什么分别。\n观众或许能够接受，云堇却不甘于此。难道仅仅凭借演唱的技巧，仅仅依靠美丽的身姿，就能够讲述动人的故事吗？\n带她走出瓶颈的，恰是《走雪》这出戏。\n那是一出独角戏，演的是雪中的一段艰难跋涉。云堇第一次唱《走雪》时，天空中也飘着细雪。\n戏中人在雪中迷失路途，茫然无措之余不禁哀叹起来。恍惚间，戏中的风雪与现实中的风雪交叠，茫然了许久的云堇也化作了迷途的旅人。\n没错，正是这种感觉。她不仅是她自己，也是她表演过的千千万万个角色。\n她务必像戏中人一样呼吸、生活，她的心情也随戏中人一颦一笑而牵动。\n这千千万万个角色的生命轨迹交织，造就一个有情世界，这才是她想要的戏，她想讲述的故事。\n在今天，云堇已经不记得自己顿悟后是如何回到后台的，她只记得，等到她终于得空脱去戏服时，她的袖中竟多了一枚神之眼。"
     }
-  ]
+  ],
+  "team": [0]
 }

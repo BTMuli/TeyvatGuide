@@ -4,7 +4,6 @@
   "title": "尘世闲游",
   "description": "被「往生堂」请来的神秘客人，知识渊博，对各种事物都颇有见地。",
   "area": "璃月",
-  "team": [0],
   "brief": {
     "camp": "璃月港",
     "constellation": "岩王帝君座",
@@ -22,6 +21,46 @@
     { "id": 112004, "name": "史莱姆原浆", "star": 3 },
     { "id": 104318, "name": "「黄金」的哲学", "star": 4 },
     { "id": 113013, "name": "吞天之鲸·只角", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 301,
+      "Name": "岩者，六合引之为骨",
+      "Description": "<color=#FFD780FF>地心</color>创造的岩脊至多可以同时存在2个。",
+      "Icon": "UI_Talent_S_Zhongli_01"
+    },
+    {
+      "Id": 302,
+      "Name": "石者，八荒韫玉而明",
+      "Description": "<color=#FFD780FF>天星</color>陨落时，会为附近的当前场上角色赋予玉璋护盾。",
+      "Icon": "UI_Talent_S_Zhongli_02"
+    },
+    {
+      "Id": 303,
+      "Name": "圭璋，暝仍不移其晖",
+      "Description": "<color=#FFD780FF>地心</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Zhongli_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 304,
+      "Name": "黄琮，破而不夺其坚",
+      "Description": "<color=#FFD780FF>天星</color>的影响范围扩大20%。\n此外，天星的石化效果持续时间延长2秒。",
+      "Icon": "UI_Talent_S_Zhongli_03"
+    },
+    {
+      "Id": 305,
+      "Name": "苍璧，驱之长昭天理",
+      "Description": "<color=#FFD780FF>天星</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Zhongli_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 306,
+      "Name": "金玉，礼予天地四方",
+      "Description": "玉璋护盾受到伤害时，将为当前角色恢复生命值，回复量为伤害的40%。\n单次回复量不超过当前角色最大生命值的8%。",
+      "Icon": "UI_Talent_S_Zhongli_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_Forge_Pole",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 301,
-      "Name": "岩者，六合引之为骨",
-      "Description": "<color=#FFD780FF>地心</color>创造的岩脊至多可以同时存在2个。",
-      "Icon": "UI_Talent_S_Zhongli_01"
-    },
-    {
-      "Id": 302,
-      "Name": "石者，八荒韫玉而明",
-      "Description": "<color=#FFD780FF>天星</color>陨落时，会为附近的当前场上角色赋予玉璋护盾。",
-      "Icon": "UI_Talent_S_Zhongli_02"
-    },
-    {
-      "Id": 303,
-      "Name": "圭璋，暝仍不移其晖",
-      "Description": "<color=#FFD780FF>地心</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Zhongli_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 304,
-      "Name": "黄琮，破而不夺其坚",
-      "Description": "<color=#FFD780FF>天星</color>的影响范围扩大20%。\n此外，天星的石化效果持续时间延长2秒。",
-      "Icon": "UI_Talent_S_Zhongli_03"
-    },
-    {
-      "Id": 305,
-      "Name": "苍璧，驱之长昭天理",
-      "Description": "<color=#FFD780FF>天星</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Zhongli_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 306,
-      "Name": "金玉，礼予天地四方",
-      "Description": "玉璋护盾受到伤害时，将为当前角色恢复生命值，回复量为伤害的40%。\n单次回复量不超过当前角色最大生命值的8%。",
-      "Icon": "UI_Talent_S_Zhongli_04"
     }
   ],
   "talks": [
@@ -401,5 +400,6 @@
       "Title": "神之心",
       "Context": "璃月港这场由钟离自导自演的「送仙」典仪筹备完毕后，「愚人众」执行官「女士」出现在他面前。\n按照事先签订的「契约」，她前来取走岩神摩拉克斯的「神之心」。\n当着旅行者与两位「愚人众」执行官的面，钟离坦率说出了自己与「冰之神」达成交易一事。\n依他本人所说，这是在最后的时刻，所订立的「终结一切契约的契约」。\n可无论怎么看，岩之神在这场交易中付出的代价实在太多，连守护璃月港的神力都将失去…\n就算是人与人之间，交易的铁则也是「等价交换」。\n对千百年来签下千百「契约」的岩神而言，如此重要的契约，必定是有利可图才会考虑吧。\n现在，岩之神已将自己的「神之心」作为代价送出。\n冰之神究竟是押上何种筹码，才使交易的天平达到了平衡呢？"
     }
-  ]
+  ],
+  "team": [0]
 }

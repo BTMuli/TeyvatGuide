@@ -4,7 +4,6 @@
   "title": "「公子」",
   "description": "愚人众执行官第十一位，「公子」，其战绩威名远扬。",
   "area": "愚人众",
-  "team": [0],
   "brief": {
     "camp": "愚人众",
     "constellation": "鲸天座",
@@ -22,6 +21,46 @@
     { "id": 112034, "name": "尉官的徽记", "star": 3 },
     { "id": 104303, "name": "「自由」的哲学", "star": 4 },
     { "id": 113014, "name": "魔王之刃·残片", "star": 5 }
+  ],
+  "constellation": [
+    {
+      "Id": 331,
+      "Name": "魔王武装·遏浪",
+      "Description": "<color=#FFD780FF>魔王武装·狂澜</color>的冷却时间降低20%。",
+      "Icon": "UI_Talent_S_Tartaglia_01"
+    },
+    {
+      "Id": 332,
+      "Name": "魔王武装·暗流",
+      "Description": "处于断流效果影响下的敌人被击败时，为达达利亚恢复4点元素能量。",
+      "Icon": "UI_Talent_S_Tartaglia_02"
+    },
+    {
+      "Id": 333,
+      "Name": "深渊之灾·纷争涡源",
+      "Description": "<color=#FFD780FF>魔王武装·狂澜</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Tartaglia_01",
+      "ExtraLevel": { "Index": 2, "Level": 3 }
+    },
+    {
+      "Id": 334,
+      "Name": "深渊之灾·凝水盛放",
+      "Description": "每4秒，场上存在达达利亚自身施加的断流效果时，若达达利亚当前处于<color=#FFD780FF>魔王武装·狂澜</color>的近战状态，则触发断流·斩；否则，触发断流·闪。\n通过此命之座触发的断流·斩与断流·闪不受这两种断流各自的触发间隔限制，也不会影响其触发间隔。",
+      "Icon": "UI_Talent_S_Tartaglia_05"
+    },
+    {
+      "Id": 335,
+      "Name": "极恶技·斩水斩雨",
+      "Description": "<color=#FFD780FF>极恶技·尽灭闪</color>的技能等级提高3级。\n至多提升至15级。",
+      "Icon": "UI_Talent_U_Tartaglia_02",
+      "ExtraLevel": { "Index": 9, "Level": 3 }
+    },
+    {
+      "Id": 336,
+      "Name": "极恶技·天使灭尽",
+      "Description": "在近战状态下施放<color=#FFD780FF>极恶技·尽灭闪</color>时，清除<color=#FFD780FF>魔王武装·狂澜</color>的冷却时间。\n该效果会在回到远程状态后触发。",
+      "Icon": "UI_Talent_S_Tartaglia_04"
+    }
   ],
   "skills": [
     {
@@ -77,46 +116,6 @@
       "icon": "UI_Talent_S_Tartaglia_07",
       "maxLv": 1,
       "luc": null
-    }
-  ],
-  "constellation": [
-    {
-      "Id": 331,
-      "Name": "魔王武装·遏浪",
-      "Description": "<color=#FFD780FF>魔王武装·狂澜</color>的冷却时间降低20%。",
-      "Icon": "UI_Talent_S_Tartaglia_01"
-    },
-    {
-      "Id": 332,
-      "Name": "魔王武装·暗流",
-      "Description": "处于断流效果影响下的敌人被击败时，为达达利亚恢复4点元素能量。",
-      "Icon": "UI_Talent_S_Tartaglia_02"
-    },
-    {
-      "Id": 333,
-      "Name": "深渊之灾·纷争涡源",
-      "Description": "<color=#FFD780FF>魔王武装·狂澜</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Tartaglia_01",
-      "ExtraLevel": { "Index": 2, "Level": 3 }
-    },
-    {
-      "Id": 334,
-      "Name": "深渊之灾·凝水盛放",
-      "Description": "每4秒，场上存在达达利亚自身施加的断流效果时，若达达利亚当前处于<color=#FFD780FF>魔王武装·狂澜</color>的近战状态，则触发断流·斩；否则，触发断流·闪。\n通过此命之座触发的断流·斩与断流·闪不受这两种断流各自的触发间隔限制，也不会影响其触发间隔。",
-      "Icon": "UI_Talent_S_Tartaglia_05"
-    },
-    {
-      "Id": 335,
-      "Name": "极恶技·斩水斩雨",
-      "Description": "<color=#FFD780FF>极恶技·尽灭闪</color>的技能等级提高3级。\n至多提升至15级。",
-      "Icon": "UI_Talent_U_Tartaglia_02",
-      "ExtraLevel": { "Index": 9, "Level": 3 }
-    },
-    {
-      "Id": 336,
-      "Name": "极恶技·天使灭尽",
-      "Description": "在近战状态下施放<color=#FFD780FF>极恶技·尽灭闪</color>时，清除<color=#FFD780FF>魔王武装·狂澜</color>的冷却时间。\n该效果会在回到远程状态后触发。",
-      "Icon": "UI_Talent_S_Tartaglia_04"
     }
   ],
   "talks": [
@@ -409,5 +408,6 @@
       "Title": "邪眼",
       "Context": "达达利亚的「邪眼」是旧日荣誉的勋章，也是现有力量的证明。\n他仍清晰地记得自己获授邪眼成为愚人众执行官的那一天。\n在冷酷庄严的神明「冰之女皇」面前，愚人众最初的执行官「丑角」亲手为他佩上这枚徽章。\n那是讨伐可怖魔兽的奖赏，也是无数次战斗的纪念。\n但达达利亚并不为此喜悦，因为这是战士应得的荣誉；\n他也懒得理会新「同僚」微妙的神情，他人的指摘和腹诽于他毫无意义。\n唯独对高座上的女皇，新成为「公子」的少年心中满怀敬意。\n不仅因为她为他开辟了更加广阔的战场，赐予了更多战斗的理由，更是因为她睥睨他的神情——\n冷酷而纯粹，傲慢却锋利。\n她不仅是高高在上的冰之神，也是一位真正的战士。\n就这样，获授邪眼的「公子」，向至冬国惟一的女皇献上了效忠的誓言。"
     }
-  ]
+  ],
+  "team": [0]
 }
