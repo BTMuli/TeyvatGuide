@@ -2,7 +2,7 @@
 <template>
   <div class="tsl-box">
     <slot name="icon">
-      <img alt="right" class="tsl-icon" src="@/assets/icons/arrow-right.svg" />
+      <v-icon aria-hidden="true" class="tsl-icon" icon="mdi-chevron-right" />
     </slot>
     <slot></slot>
   </div>
@@ -26,10 +26,6 @@
   height: 24px;
   box-sizing: border-box;
   padding: 2px;
-  filter: invert(0.75);
-}
-
-.dark .tsl-icon {
-  filter: none;
+  color: var(--box-text-2);
 }
 </style>

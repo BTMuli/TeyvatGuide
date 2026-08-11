@@ -32,9 +32,14 @@
         </v-tabs>
       </div>
       <div class="tdo-card-container">
-        <div class="tdo-box-arrow" @click="handleClick('left')">
-          <img alt="left" src="@/assets/icons/arrow-right.svg" />
-        </div>
+        <v-btn
+          aria-label="上一个角色"
+          class="tdo-box-arrow"
+          icon="mdi-chevron-left"
+          title="上一个角色"
+          variant="flat"
+          @click="handleClick('left')"
+        />
         <v-window v-model="modeTab" class="tdo-box-container">
           <v-window-item value="classic">
             <TucDetailOld :model-value="avatar" />
@@ -46,9 +51,14 @@
             <TuaDetailCard :avatar :costume />
           </v-window-item>
         </v-window>
-        <div class="tdo-box-arrow" @click="handleClick('right')">
-          <img alt="right" src="@/assets/icons/arrow-right.svg" />
-        </div>
+        <v-btn
+          aria-label="下一个角色"
+          class="tdo-box-arrow"
+          icon="mdi-chevron-right"
+          title="下一个角色"
+          variant="flat"
+          @click="handleClick('right')"
+        />
       </div>
     </div>
   </TOverlay>
@@ -168,26 +178,13 @@ function getCostume(): TGApp.App.Character.Costume | false {
 }
 
 .tdo-box-arrow {
-  position: relative;
-  display: flex;
-  width: 30px;
-  height: 30px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  img {
-    width: 100%;
-    height: 100%;
-  }
-
-  &:first-child {
-    transform: rotate(180deg);
-  }
-}
-
-.dark .tdo-box-arrow {
-  filter: invert(11%) sepia(73%) saturate(11%) hue-rotate(139deg) brightness(97%) contrast(81%);
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
 }
 
 .tdo-box-container {
