@@ -1,6 +1,6 @@
 /**
  * 数据文件入口
- * @since Beta v0.11.2
+ * @since Beta v0.11.3
  */
 
 import type { Schema } from "ajv";
@@ -21,7 +21,8 @@ import arcBirRole from "./archive/birth_role.json" with { type: "json" };
 import schemaUiaf from "./schema/uiaf-schema.json" with { type: "json" };
 import schemaUigf from "./schema/uigf-schema.json" with { type: "json" };
 import schemaUigf4 from "./schema/uigf4-schema.json" with { type: "json" };
-import wikiMaterial from "./WIKI/material.json" with { type: "json" };
+import wikiFood from "./WIKI/material/food.json" with { type: "json" };
+import wikiMaterial from "./WIKI/material/material.json" with { type: "json" };
 import wikiRelicMainLv from "./WIKI/relic/MainLv.json" with { type: "json" };
 import wikiRelicMainProp from "./WIKI/relic/MainProp.json" with { type: "json" };
 import wikiRelic from "./WIKI/relic/Relic.json" with { type: "json" };
@@ -52,6 +53,11 @@ export const ArcBirDraw: Array<TGApp.Archive.Birth.DrawItem> = arcBirDraw;
 export const ArcBirRole: Array<TGApp.Archive.Birth.RoleItem> = arcBirRole;
 // Wiki
 export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial;
+/**
+ * WIKI 料理数据
+ * @since Beta v0.11.3
+ */
+export const WikiFoodData: Array<TGApp.App.Material.WikiFood> = wikiFood;
 export const WikiHyperLinkData: TGApp.App.HyperLink.AppHyperLink = hyperlink;
 // 武器数据
 export const wwWeapon: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
@@ -64,6 +70,20 @@ export const wrRelic: TGApp.App.Relic.RawRelic = wikiRelic;
 export const wrMap: TGApp.App.Relic.RelicMap = wikiRelicMap;
 export const wrSet: TGApp.App.Relic.RawSet = wikiRelicSet;
 export const wrSub: TGApp.App.Relic.SubProp = wikiRelicSubProp;
+
+const wikiFoodMap: ReadonlyMap<number, TGApp.App.Material.WikiFood> = new Map(
+  WikiFoodData.map((food): [number, TGApp.App.Material.WikiFood] => [food.id, food]),
+);
+
+/**
+ * 根据 ID 获取 WIKI 料理数据
+ * @since Beta v0.11.3
+ * @param id - 料理 ID
+ * @returns 料理数据；未找到时为 undefined
+ */
+export function getWikiFoodById(id: number): TGApp.App.Material.WikiFood | undefined {
+  return wikiFoodMap.get(id);
+}
 
 const avatarFiles = import.meta.glob("./WIKI/character/*.json");
 

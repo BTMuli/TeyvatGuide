@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" :topOffset>
     <div v-if="props.data" class="twom-container">
       <slot name="left" />
-      <article class="twom-box">
+      <article ref="shareTarget" class="twom-box">
         <header class="twom-header">
           <div class="twom-icon">
             <img :src="`/icon/bg/${props.data.star}-BGC.webp`" alt="" class="bg" />
@@ -43,7 +43,7 @@
             />
           </div>
         </header>
-        <main :style="{ maxHeight: props.cmh }" class="twom-content">
+        <main ref="contentTarget" :style="{ maxHeight: props.cmh }" class="twom-content">
           <section class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-text-box-outline</v-icon>
@@ -51,6 +51,7 @@
             </header>
             <div class="twom-desc" v-html="parseHtmlText(props.data.description)" />
           </section>
+          <TwoFoodDetail v-if="foodData" :food="foodData" />
           <section v-if="props.data.source.length > 0" class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-map-marker-path</v-icon>
@@ -95,10 +96,13 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref, useTemplateRef } from "vue";
 
 import TwoConvert from "./two-convert.vue";
+import TwoFoodDetail from "./two-food-detail.vue";
 import TwoSource from "./two-source.vue";
+
+import { getWikiFoodById } from "@/data/index.js";
 
 type TwoMaterialProps = {
   cmh?: string;
@@ -118,16 +122,21 @@ const props = withDefaults(defineProps<TwoMaterialProps>(), {
 });
 const visible = defineModel<boolean>();
 const version = ref<string>();
+const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
+const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
+const foodData = computed<TGApp.App.Material.WikiFood | undefined>(
+  () => getWikiFoodById(props.data.id) || undefined,
+);
 
 onMounted(async () => (version.value = await getVersion()));
 
 async function shareMaterial(): Promise<void> {
-  const element = document.querySelector<HTMLElement>(".twom-box");
+  const element = shareTarget.value;
   if (element === null) {
     showSnackbar.error("未获取到分享内容");
     return;
   }
-  const content = element.querySelector<HTMLElement>(".twom-content");
+  const content = contentTarget.value;
   const contentMaxHeight = content?.style.maxHeight;
   const contentOverflowY = content?.style.overflowY;
   if (content !== null) {
@@ -157,7 +166,7 @@ async function shareMaterial(): Promise<void> {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: 760px;
+  width: 720px;
   max-width: calc(100vw - 160px);
   max-height: calc(100vh - 64px);
   flex-direction: column;

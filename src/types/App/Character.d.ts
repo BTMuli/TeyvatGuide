@@ -105,6 +105,30 @@ declare namespace TGApp.App.Character {
   };
 
   /**
+   * WIKI 料理条目
+   * @since Beta v0.11.3
+   */
+  type WikiFoodItem = {
+    /** 料理 ID */
+    id: number;
+    /** 料理名称 */
+    name: string;
+    /** 料理星级 */
+    star: number;
+  };
+
+  /**
+   * WIKI 角色特色料理
+   * @since Beta v0.11.3
+   */
+  type WikiFood = {
+    /** 原料理 */
+    origin: WikiFoodItem;
+    /** 特殊料理 */
+    special: WikiFoodItem;
+  };
+
+  /**
    * 详细数据
    * @since Beta v0.11.2
    */
@@ -149,6 +173,8 @@ declare namespace TGApp.App.Character {
     weapon: string;
     /** 角色养成材料 */
     materials: Array<TGApp.App.Calendar.Material>;
+    /** 角色特色料理 */
+    food?: WikiFood;
     /** 角色技能信息 */
     skills: Array<WikiSkill>;
     /** 角色命座信息 */

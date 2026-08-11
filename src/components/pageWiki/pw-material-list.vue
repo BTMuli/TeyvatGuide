@@ -3,12 +3,16 @@
   <div class="pw-ml-box">
     <PwMaterialItem
       v-for="(material, index) in materialList"
-      :key="index"
+      :key="material.id"
       :material
+      role="button"
+      tabindex="0"
       @click="checkData(material, index)"
+      @keydown.enter.prevent="checkData(material, index)"
+      @keydown.space.prevent="checkData(material, index)"
     />
   </div>
-  <TwoMaterial v-model="showOverlay" :data="curData">
+  <TwoMaterial v-if="curData" v-model="showOverlay" :data="curData">
     <template #left>
       <v-btn
         aria-label="上一个养成物品"
@@ -33,7 +37,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { ref, shallowRef, watch } from "vue";
+import { nextTick, ref, shallowRef, watch } from "vue";
 
 import PwMaterialItem from "./pw-material-item.vue";
 import TwoMaterial from "./two-material.vue";
@@ -46,19 +50,16 @@ const props = defineProps<TwcMaterialsProp>();
 const showOverlay = ref<boolean>(false);
 const curIndex = ref<number>(0);
 const materialList = shallowRef<Array<TGApp.App.Material.WikiItem>>(loadData());
-const curData = shallowRef<TGApp.App.Material.WikiItem>({
-  id: 0,
-  name: "",
-  description: "",
-  type: "",
-  star: 0,
-  source: [],
-  convert: [],
-});
+const curData = shallowRef<TGApp.App.Material.WikiItem | undefined>();
 
 watch(
   () => props.data,
-  () => (materialList.value = loadData()),
+  () => {
+    materialList.value = loadData();
+    curData.value = undefined;
+    curIndex.value = 0;
+    showOverlay.value = false;
+  },
 );
 
 function loadData(): Array<TGApp.App.Material.WikiItem> {
@@ -74,12 +75,14 @@ function checkData(item: TGApp.App.Material.WikiItem, index: number): void {
   if (showOverlay.value) showOverlay.value = false;
   curData.value = item;
   curIndex.value = index;
-  showOverlay.value = true;
+  void nextTick(() => {
+    if (curData.value?.id === item.id) showOverlay.value = true;
+  });
 }
 
 function switchMaterial(isNext: boolean): void {
   if (isNext) {
-    if (curIndex.value === props.data.length - 1) {
+    if (curIndex.value === materialList.value.length - 1) {
       showSnackbar.warn("已经是最后一个材料了");
       return;
     }
@@ -91,15 +94,7 @@ function switchMaterial(isNext: boolean): void {
     }
     curIndex.value--;
   }
-  const curItem = props.data[curIndex.value];
-  const material = WikiMaterialData.find((m) => m.id === curItem.id);
-  if (material) {
-    curData.value = material;
-    return;
-  }
-  showSnackbar.warn(`材料 ${curItem.name} 暂无详细信息`);
-  if (isNext) curIndex.value--;
-  else curIndex.value++;
+  curData.value = materialList.value[curIndex.value];
 }
 </script>
 <style lang="css" scoped>

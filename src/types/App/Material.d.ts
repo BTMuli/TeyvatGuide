@@ -28,6 +28,36 @@ declare namespace TGApp.App.Material {
   };
 
   /**
+   * WIKI 料理食材
+   * @since Beta v0.11.3
+   */
+  type WikiFoodInput = {
+    /** 食材 ID */
+    id: number;
+    /** 食材名称 */
+    name: string;
+    /** 食材图标 */
+    icon: string;
+    /** 所需数量 */
+    count: number;
+  };
+
+  /**
+   * WIKI 料理信息
+   * @since Beta v0.11.3
+   */
+  type WikiFood = {
+    /** 料理 ID */
+    id: number;
+    /** 料理效果 */
+    effect: Array<string>;
+    /** 料理效果图标 */
+    effectIcon?: string;
+    /** 料理食材 */
+    input: Array<WikiFoodInput>;
+  };
+
+  /**
    * 材料来源
    * @since Beta v0.4.4
    */

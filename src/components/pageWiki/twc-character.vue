@@ -101,24 +101,31 @@
         </header>
         <TwcSkills v-model:selected="selectedSkill" :data="data.skills" />
       </section>
+      <!-- 料理 -->
+      <section v-if="data.food" class="twc-detail-section">
+        <header class="twc-section-header">
+          <h2>料理</h2>
+        </header>
+        <TwcFood :food="data.food" />
+      </section>
       <!-- 资料 -->
       <section class="twc-detail-section">
         <header class="twc-section-header">
           <h2>资料</h2>
         </header>
         <v-tabs v-model="talksTab" class="twc-detail-tabs" density="compact" show-arrows>
-          <v-tab v-for="(item, index) in data.talks" :key="index" :value="index">
+          <v-tab v-for="(item, index) in data.talks" :key="item.group" :value="index">
             {{ item.group }}
           </v-tab>
         </v-tabs>
         <v-window v-model="talksTab" :transition="false" class="twc-text-window">
           <v-window-item
             v-for="(item, index) in data.talks"
-            :key="index"
+            :key="item.group"
             :value="index"
             class="twc-text-window-item"
           >
-            <div v-for="(talk, talkIndex) in item.list" :key="talkIndex" class="twc-text-talk">
+            <div v-for="talk in item.list" :key="talk.title" class="twc-text-talk">
               <div class="twc-text-talk-title">{{ talk.title }}</div>
               <div class="twc-text-talk-content">
                 <span v-html="parseHtmlText(talk.talk)" />
@@ -140,7 +147,7 @@
         <v-window v-model="storiesTab" :transition="false" class="twc-text-window">
           <v-window-item
             v-for="(item, index) in data.stories"
-            :key="index"
+            :key="item.Title"
             :value="index"
             class="twc-text-content"
           >
@@ -165,6 +172,7 @@ import { useRouter } from "vue-router";
 
 import PwMaterialList from "./pw-material-list.vue";
 import TwcConstellations from "./twc-constellations.vue";
+import TwcFood from "./twc-food.vue";
 import TwcSkills from "./twc-skills.vue";
 
 import { AppCharacterData, AppNameCardsData, getWikiCharacterById } from "@/data/index.js";
@@ -197,6 +205,7 @@ const storiesTab = ref<number>(0);
 const selectedTalent = ref<string>("");
 const selectedSkill = ref<string>("");
 const scrollArea = useTemplateRef<HTMLDivElement>("scrollArea");
+let loadId = 0;
 const currentTalent = computed<TGApp.Plugins.Hutao.Character.RhisdTalent | undefined>(() =>
   data.value?.constellation.find((item) => item.Name === selectedTalent.value),
 );
@@ -204,28 +213,46 @@ const currentSkill = computed<TGApp.App.Character.WikiSkill | undefined>(() =>
   data.value?.skills.find((item) => item.name === selectedSkill.value),
 );
 
-onMounted(() => loadData());
+onMounted(() => void loadData());
 
-watch(() => props.item, loadData);
+watch(
+  () => props.item,
+  () => void loadData(),
+);
 
 async function loadData(): Promise<void> {
-  const res = await getWikiCharacterById(props.item.id);
+  const currentLoadId = ++loadId;
+  const { id, name } = props.item;
+  resetDetailState();
+  const res = await getWikiCharacterById(id);
+  if (currentLoadId !== loadId) return;
   if (!res) {
-    showSnackbar.warn(`未获取到角色 ${props.item.name} 的 Wiki 数据`);
+    showSnackbar.warn(`未获取到角色 ${name} 的 Wiki 数据`);
     return;
   }
   data.value = res;
+  const appC = AppCharacterData.find((i) => i.name === res.name);
+  if (appC !== undefined) {
+    nameCard.value = AppNameCardsData.find((i) => i.name === appC.nameCard);
+    hasNc.value = nameCard.value !== undefined;
+    costumes.value = [...appC.costumes].sort((a, b) => a.id - b.id);
+  }
+  await nextTick();
+  if (currentLoadId !== loadId) return;
+  scrollArea.value?.scrollTo({ top: 0 });
+  showSnackbar.success(`成功获取角色 ${name} 的 Wiki 数据`);
+}
+
+function resetDetailState(): void {
+  data.value = undefined;
+  hasNc.value = false;
+  showNc.value = false;
+  nameCard.value = undefined;
+  costumes.value = [];
   talksTab.value = 0;
   storiesTab.value = 0;
-  const appC = AppCharacterData.find((i) => i.name === data.value?.name);
-  if (appC !== undefined) {
-    hasNc.value = true;
-    nameCard.value = AppNameCardsData.find((i) => i.name === appC.nameCard);
-    costumes.value = appC.costumes.sort((a, b) => a.id - b.id);
-  } else hasNc.value = false;
-  await nextTick();
-  scrollArea.value?.scrollTo({ top: 0 });
-  showSnackbar.success(`成功获取角色 ${props.item.name} 的 Wiki 数据`);
+  selectedTalent.value = "";
+  selectedSkill.value = "";
 }
 
 async function toWiki(): Promise<void> {
