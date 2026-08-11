@@ -1,12 +1,12 @@
 /**
  * 应用素材日历相关类型定义文件
- * @since Beta v0.9.1
+ * @since Beta v0.11.3
  */
 
 declare namespace TGApp.App.Material {
   /**
    * WIKI信息
-   * @since Beta v0.4.2
+   * @since Beta v0.11.3
    */
   type WikiItem = {
     /** 材料ID */
@@ -17,6 +17,8 @@ declare namespace TGApp.App.Material {
     description: string;
     /** 材料类型 */
     type: string;
+    /** 自定义材料归并分类 */
+    cType: string;
     /** 材料星级 */
     star: number;
     /** 材料来源 */
