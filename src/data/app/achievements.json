@@ -4658,7 +4658,7 @@
     "description": "点亮至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰的地图。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_AREA" }
   },
   {
     "id": 80505,
@@ -4668,7 +4668,7 @@
     "description": "解锁至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰所有传送锚点。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_TRANS_POINT" }
   },
   {
     "id": 80506,
@@ -4678,7 +4678,7 @@
     "description": "解除至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰所有地灵龛的封印。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "UNLOCK_GATE_TEMPLE" }
   },
   {
     "id": 80507,
@@ -4688,7 +4688,7 @@
     "description": "将至冬的七天神像供奉至满级。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "CITY_LEVEL_UP" }
   },
   {
     "id": 80508,
@@ -4698,7 +4698,7 @@
     "description": "解除至冬区域中，永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰所有影域遗物宝库的封印。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80509,
@@ -4708,7 +4708,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰追随3个仙灵，并点亮仙灵之庭。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80510,
@@ -4718,7 +4718,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰追随5个仙灵，并点亮仙灵之庭。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80511,
@@ -4728,7 +4728,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰追随10个仙灵，并点亮仙灵之庭。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80512,
@@ -4738,7 +4738,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰开启65个宝箱。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80513,
@@ -4748,7 +4748,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰开启130个宝箱。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80514,
@@ -4758,7 +4758,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰开启260个宝箱。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OPEN_WORLD_CHEST" }
   },
   {
     "id": 80515,
@@ -4768,7 +4768,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰完成6个大世界限时挑战。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80516,
@@ -4778,7 +4778,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰完成12个大世界限时挑战。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80517,
@@ -4788,7 +4788,7 @@
     "description": "在永凝冻土、古兽冰原、焰羽谷、白桦雪葬地、霜殛寒峰完成24个大世界限时挑战。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 80518,
@@ -4798,7 +4798,10 @@
     "description": "完成「爱憎的赫斯珀利德斯」。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77107, "name": "暮色苍茫，晚钟敲响", "type": "世界任务" }]
+    }
   },
   {
     "id": 80519,
@@ -4808,7 +4811,10 @@
     "description": "完成「在生命的寓所」。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77112, "name": "安慰者的合唱", "type": "世界任务" }]
+    }
   },
   {
     "id": 80520,
@@ -4818,7 +4824,10 @@
     "description": "成功阻止「原初之人」将世界转变为无爱亦无忧的庭院。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77160, "name": "曾为灵魂的木舟", "type": "世界任务" }]
+    }
   },
   {
     "id": 80521,
@@ -4828,7 +4837,7 @@
     "description": "提升「聚所·汐歌洞窟」的共建等级至满级。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 80522,
@@ -4838,7 +4847,7 @@
     "description": "提升「聚所·巡猎者木屋」的共建等级至满级。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 80523,
@@ -4848,7 +4857,7 @@
     "description": "提升「聚所·科洛列夫茨基剧院」的共建等级至满级。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 80525,
@@ -4858,7 +4867,7 @@
     "description": "掌握「冰」的元素力。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "ELEMENT_TYPE_CHANGE" }
   },
   {
     "id": 80526,
@@ -4868,7 +4877,7 @@
     "description": "集齐全套《极星舞剧集》。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80528,
@@ -4878,7 +4887,7 @@
     "description": "集齐全套《至冬国通史》。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COLLECT_SET_OF_READINGS" }
   },
   {
     "id": 80529,
@@ -4888,7 +4897,10 @@
     "description": "完成「曙光车站」的振兴。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77656, "name": "雪后曙光", "type": "世界任务" }]
+    }
   },
   {
     "id": 81000,
@@ -11744,7 +11756,7 @@
     "description": "为白桦与雪葬之宫的美景驻足了片刻。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81701,
@@ -11754,7 +11766,7 @@
     "description": "集齐某人遗留在白冕宫中的遗物。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81702,
@@ -11764,7 +11776,7 @@
     "description": "把雪球滚到最大。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 81703,
@@ -11774,7 +11786,7 @@
     "description": "将不再循环的钟声敲响。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81704,
@@ -11784,7 +11796,7 @@
     "description": "让不受束缚的钟声再度响起。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81705,
@@ -11794,7 +11806,7 @@
     "description": "令不安者终受慰藉。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81706,
@@ -11804,7 +11816,7 @@
     "description": "或许作品拥有名字，只不过是为了寻得另一重共鸣。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81707,
@@ -11814,7 +11826,10 @@
     "description": "第一次戴上「灰眸」。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7011, "name": "逆风向苦寒之北", "type": "魔神任务" }]
+    }
   },
   {
     "id": 81708,
@@ -11824,7 +11839,10 @@
     "description": "令老旧的列车焕然一新。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7012, "name": "沉寂之地的枪声", "type": "魔神任务" }]
+    }
   },
   {
     "id": 81709,
@@ -11834,7 +11852,7 @@
     "description": "集齐赫斯珀利德斯之馆的所有画作，并开启其后的秘藏。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81710,
@@ -11844,7 +11862,7 @@
     "description": "即使那样的你尚未来到。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81711,
@@ -11854,7 +11872,7 @@
     "description": "登上至冬宫的最高处。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81712,
@@ -11864,7 +11882,7 @@
     "description": "…而飞蛾终是泯于焚火。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81714,
@@ -11874,7 +11892,7 @@
     "description": "在与纳塔人的「耐寒比赛」中赢得了对方。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "FINISH_QUEST_AND" }
   },
   {
     "id": 81715,
@@ -11884,7 +11902,10 @@
     "description": "帮助霜精「村长」抵御兽怪的入侵。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77125, "name": "小小霜精大大烦恼", "type": "世界任务" }]
+    }
   },
   {
     "id": 81716,
@@ -11894,7 +11915,10 @@
     "description": "但谁还记得「高桌」是「矮灵」建立的呢…",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77143, "name": "无仁义的争执", "type": "世界任务" }]
+    }
   },
   {
     "id": 81717,
@@ -11904,7 +11928,10 @@
     "description": "见证巨大雪精的结局。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77132, "name": "为她所颂轻柔之歌", "type": "世界任务" }]
+    }
   },
   {
     "id": 81718,
@@ -11914,7 +11941,10 @@
     "description": "见证冰上木屋的倒悬、停滞与最终沉没。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_PARENT_QUEST_AND",
+      "task": [{ "questId": 77211, "name": "在回环的宁静中", "type": "世界任务" }]
+    }
   },
   {
     "id": 81720,
@@ -11924,7 +11954,7 @@
     "description": "使用连索机关完成一次长达30米的水平位移。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 81721,
@@ -11934,7 +11964,7 @@
     "description": "发射的雪球在未落地时就开始消散。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 81722,
@@ -11944,7 +11974,7 @@
     "description": "成功截停滚动的雪球。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 81724,
@@ -11954,7 +11984,7 @@
     "description": "保持滑铲状态长达20秒。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 81728,
@@ -11964,7 +11994,7 @@
     "description": "那时，炉灰区没有王，各人任意而行…",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81729,
@@ -11974,7 +12004,7 @@
     "description": "帮助纳塔人，令她的浮燃鸟伙伴冷静下来。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "FINISH_QUEST_AND" }
   },
   {
     "id": 81730,
@@ -11984,7 +12014,7 @@
     "description": "靠近灯塔上，少女的幽影凝结成的雕像。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 81731,
@@ -11994,7 +12024,7 @@
     "description": "你永远可以叫醒一个真醉的人。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "QUEST_GLOBAL_VAR_EQUAL" }
   },
   {
     "id": 82001,
@@ -14944,7 +14974,7 @@
     "description": "在不灭衍生造物处于「命耀之姿」状态时，通过击破复生护盾，打断其攻击。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 82311,
@@ -14954,7 +14984,7 @@
     "description": "在嵌合翼骏狮处于「驱风」状态时，通过击破全部的风球，将其击落。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 84000,
@@ -18019,7 +18049,10 @@
     "description": "驾驶列车冲破至冬的风雪。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7011, "name": "逆风向苦寒之北", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84392,
@@ -18029,7 +18062,10 @@
     "description": "从冰洞中取得了「星锋剑」。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7013, "name": "冰原上的伟业", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84393,
@@ -18039,7 +18075,10 @@
     "description": "接受伙伴的邀请加入「呼啸社」。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7014, "name": "唯沉默不受眷顾", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84394,
@@ -18049,7 +18088,10 @@
     "description": "完成「无神怜爱的雪国」。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7014, "name": "唯沉默不受眷顾", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84395,
@@ -18059,7 +18101,10 @@
     "description": "观看了「寻灵」的试演。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7005, "name": "白幕降下", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84396,
@@ -18069,7 +18114,10 @@
     "description": "见证米提亚主动踏入暴风雪。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7008, "name": "死魂灵的夜曲", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84397,
@@ -18079,7 +18127,10 @@
     "description": "从「死后世界」中幸存下来。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7009, "name": "槲寄生", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84398,
@@ -18089,7 +18140,10 @@
     "description": "完成「死魂灵的夜曲」。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": {
+      "type": "FINISH_QUEST_AND",
+      "task": [{ "questId": 7009, "name": "槲寄生", "type": "魔神任务" }]
+    }
   },
   {
     "id": 84501,
@@ -19199,7 +19253,7 @@
     "description": "我行雪鹄未曾行过的事，我梦雪鹄未曾有过的梦。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "QUEST_GLOBAL_VAR_EQUAL" }
   },
   {
     "id": 85000,
@@ -19853,7 +19907,7 @@
     "description": "在至冬冻土清剿一个大型影域。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 86062,
@@ -19863,7 +19917,7 @@
     "description": "完成一次「绝境攻炼」的挑战。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "GROUP_NOTIFY" }
   },
   {
     "id": 86063,
@@ -19873,7 +19927,7 @@
     "description": "将「影域解析等级」提升至满级。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OFFERING_LEVEL" }
   },
   {
     "id": 86066,
@@ -19883,7 +19937,7 @@
     "description": "获得9枚攻炼武勋。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "TPS_MERCENARIES_MEDAL_NUM_REACH" }
   },
   {
     "id": 86067,
@@ -19893,7 +19947,7 @@
     "description": "为1把枪械安装1个配件。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "ANY_TPS_WEAPON_ACCESSORY_NUM_REACH" }
   },
   {
     "id": 86068,
@@ -19903,7 +19957,7 @@
     "description": "为1把枪械安装2个配件。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "ANY_TPS_WEAPON_ACCESSORY_NUM_REACH" }
   },
   {
     "id": 86069,
@@ -19913,7 +19967,7 @@
     "description": "为1把枪械安装4个配件。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "ANY_TPS_WEAPON_ACCESSORY_NUM_REACH" }
   },
   {
     "id": 86071,
@@ -19923,7 +19977,7 @@
     "description": "为「莎塔娜娅的苍银」、「瓦尔萨格的日轮」与「阿夏梅兹的千光」均安装4个配件。",
     "reward": 20,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "TPS_WEAPON_ACCESSORY_NUM_REACH" }
   },
   {
     "id": 86072,
@@ -19933,7 +19987,7 @@
     "description": "在30秒内连续命中敌人弱点部位5次。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 86073,
@@ -19943,7 +19997,7 @@
     "description": "在30秒内使用榴弹发射器触发5次元素反应。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 86074,
@@ -19953,7 +20007,7 @@
     "description": "在滑铲状态下累计击败20名敌人。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "COMBAT_CONFIG_COMMON" }
   },
   {
     "id": 86075,
@@ -19963,7 +20017,7 @@
     "description": "获得突击步枪：「莎塔娜娅的苍银」。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OBTAIN_ITEM_NUM" }
   },
   {
     "id": 86076,
@@ -19973,7 +20027,7 @@
     "description": "获得榴弹发射器：「瓦尔萨格的日轮」。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OBTAIN_ITEM_NUM" }
   },
   {
     "id": 86077,
@@ -19983,7 +20037,7 @@
     "description": "获得突击步枪：「阿夏梅兹的千光」",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OBTAIN_ITEM_NUM" }
   },
   {
     "id": 86078,
@@ -19993,7 +20047,7 @@
     "description": "获得榴晶。",
     "reward": 5,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "OBTAIN_ITEM_NUM" }
   },
   {
     "id": 86079,
@@ -20003,7 +20057,7 @@
     "description": "与其他玩家一同战胜霜夜巡天灵主。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86080,
@@ -20013,7 +20067,7 @@
     "description": "与其他玩家一同战胜超重型陆巡舰·机动战垒。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86081,
@@ -20023,7 +20077,7 @@
     "description": "与其他玩家一同战胜深黯魇语之主。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86082,
@@ -20033,7 +20087,7 @@
     "description": "与其他玩家一同战胜「博士」。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86083,
@@ -20043,7 +20097,7 @@
     "description": "与其他玩家一同战胜蕴光月守宫。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86084,
@@ -20053,7 +20107,7 @@
     "description": "与其他玩家一同战胜守望者·堕天。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86085,
@@ -20063,7 +20117,7 @@
     "description": "与其他玩家一同战胜多托雷。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86086,
@@ -20073,7 +20127,7 @@
     "description": "与其他玩家一同战胜不灭衍生造物。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   },
   {
     "id": 86087,
@@ -20083,6 +20137,6 @@
     "description": "与其他玩家一同战胜嵌合翼骏狮。",
     "reward": 10,
     "version": "7.0",
-    "trigger": { "type": "Unknown" }
+    "trigger": { "type": "MP_KILL_MONSTER_NUM" }
   }
 ]
