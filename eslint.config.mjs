@@ -1,6 +1,6 @@
 /**
  * ESLint 配置文件
- * @since Beta v0.9.3
+ * @since Beta v0.11.3
  */
 import { defineConfig } from "eslint/config";
 import eslintPluginJsonc from "eslint-plugin-jsonc";
@@ -26,6 +26,7 @@ export default defineConfig([
       "src-tauri/target",
       "pnpm-lock.yaml",
       "src/data/**/*.json",
+      "!src/data/WIKI/character/**/*.json",
       "src-tauri/tauri.conf.json",
       "src-tauri/**/*.json",
       "node_modules",
