@@ -21,13 +21,7 @@
       <v-icon aria-hidden="true" size="18">mdi-chevron-right</v-icon>
     </button>
   </div>
-  <TwoMaterial
-    v-if="selectedFood"
-    v-model="showDetail"
-    :data="selectedFood"
-    eyebrow="角色料理"
-    :share-file-name="shareFileName"
-  >
+  <TwoMaterial v-if="selectedFood" v-model="showDetail" :data="selectedFood" eyebrow="角色料理">
     <template #left>
       <v-btn
         aria-label="上一道料理"
@@ -56,7 +50,7 @@ import { computed, nextTick, ref, shallowRef, watch } from "vue";
 
 import TwoMaterial from "./two-material.vue";
 
-import { WikiMaterialData, getWikiFoodById } from "@/data/index.js";
+import { getWikiFoodById, getWikiFoodRecipeById, getWikiMaterialById } from "@/data/index.js";
 
 type TwcFoodProps = { food: TGApp.App.Character.WikiFood };
 type FoodItem = {
@@ -69,26 +63,28 @@ const props = defineProps<TwcFoodProps>();
 const showDetail = ref<boolean>(false);
 const selectedIndex = ref<number>(0);
 const selectedFood = shallowRef<TGApp.App.Material.WikiItem>();
-const shareFileName = computed<string | undefined>(() =>
-  selectedFood.value === undefined ? undefined : `food_${selectedFood.value.id}`,
-);
 const foodItems = computed<Array<FoodItem>>(() => {
-  const items: Array<FoodItem> = [];
-  const foodTypes: Array<{
-    food: TGApp.App.Character.WikiFoodItem;
-    label: string;
-    type: FoodItem["type"];
-  }> = [
-    { type: "origin", label: "原料理", food: props.food.origin },
-    { type: "special", label: "特色料理", food: props.food.special },
-  ];
-  for (const item of foodTypes) {
-    const material = WikiMaterialData.find((data) => data.id === item.food.id);
-    if (material !== undefined && getWikiFoodById(item.food.id) !== undefined) {
-      items.push({ label: item.label, material, type: item.type });
-    }
+  const recipe = getWikiFoodRecipeById(props.food.recipeId);
+  if (recipe === undefined) {
+    console.warn(`角色料理配方组 ${props.food.recipeId} 未找到`);
+    return [];
   }
-  return items;
+  const origin = resolveFoodItem(recipe.variants.normal, "原料理", "origin");
+  const special = recipe.variants.special.find((item) => item.foodId === props.food.special.id);
+  if (
+    origin === undefined ||
+    origin.material.id !== props.food.origin.id ||
+    special === undefined
+  ) {
+    console.warn(`角色料理配方组 ${props.food.recipeId} 与原料理或特色料理不匹配`);
+    return [];
+  }
+  const specialItem = resolveFoodItem(special.foodId, "特色料理", "special");
+  if (specialItem === undefined || specialItem.material.id !== props.food.special.id) {
+    console.warn(`角色特色料理 ${props.food.special.id} 未找到有效材料或料理数据`);
+    return [];
+  }
+  return [origin, specialItem];
 });
 
 watch(
@@ -120,6 +116,16 @@ function switchFood(isNext: boolean): void {
   const nextFood = foodItems.value[nextIndex];
   if (nextFood === undefined) return;
   showFoodDetail(nextFood.material, nextIndex);
+}
+
+function resolveFoodItem(
+  foodId: number | undefined,
+  label: string,
+  type: FoodItem["type"],
+): FoodItem | undefined {
+  if (foodId === undefined || getWikiFoodById(foodId) === undefined) return undefined;
+  const material = getWikiMaterialById(foodId);
+  return material === undefined ? undefined : { label, material, type };
 }
 </script>
 <style lang="scss" scoped>

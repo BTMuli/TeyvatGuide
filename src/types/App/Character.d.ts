@@ -122,6 +122,8 @@ declare namespace TGApp.App.Character {
    * @since Beta v0.11.3
    */
   type WikiFood = {
+    /** 对应食谱 ID */
+    recipeId: number;
     /** 原料理 */
     origin: WikiFoodItem;
     /** 特殊料理 */

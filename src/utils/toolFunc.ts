@@ -238,6 +238,39 @@ export function parseHtmlText(desc: string): string {
 }
 
 /**
+ * 解析书籍正文中的游戏内部标记
+ * @since Beta v0.11.3
+ * @param story - 书籍正文
+ * @returns 解析后的 HTML 文本
+ */
+export function parseBookText(story: string): string {
+  const titleReg = /<title\b[^>]*\bname\s*=\s*(?:"([^"]*)"|'([^']*)'|([^/>]*?))\s*\/>/gi;
+  const regionReg = /<region\b[^>]*\/>/gi;
+  const imageReg = /<image\b[^>]*\/>/gi;
+  const centerReg = /<center>([\s\S]*?)<\/center>/gi;
+
+  return parseHtmlText(
+    story
+      .replace(titleReg, (_match, doubleQuotedTitle, singleQuotedTitle, bareTitle) => {
+        const title = doubleQuotedTitle ?? singleQuotedTitle ?? (bareTitle ?? "").trim();
+        return title.length > 0 ? `<h4>${title}</h4>` : "";
+      })
+      .replace(regionReg, "")
+      .replace(imageReg, escapeHtmlText)
+      .replace(centerReg, '<p class="twbd-center">$1</p>'),
+  );
+}
+
+function escapeHtmlText(text: string): string {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+/**
  * 根据英文element获取中文
  * @since Beta v0.5.3
  * @param element - 英文element

@@ -43,6 +43,12 @@ declare namespace TGApp.App.Material {
   };
 
   /**
+   * WIKI 料理品质类型
+   * @since Beta v0.11.3
+   */
+  type WikiFoodKind = "strange" | "normal" | "delicious" | "special";
+
+  /**
    * WIKI 料理信息
    * @since Beta v0.11.3
    */
@@ -53,8 +59,68 @@ declare namespace TGApp.App.Material {
     effect: Array<string>;
     /** 料理效果图标 */
     effectIcon?: string;
+    /** 对应食谱 ID */
+    recipeId?: number;
+    /** 料理品质 */
+    kind?: WikiFoodKind;
+  };
+
+  /**
+   * WIKI 料理食谱信息
+   * @since Beta v0.11.3
+   */
+  type WikiFoodRecipe = {
+    /** 食谱 ID */
+    id: number;
     /** 料理食材 */
     input: Array<WikiFoodInput>;
+    /** 料理变体 */
+    variants: WikiFoodRecipeVariants;
+  };
+
+  /**
+   * WIKI 料理食谱变体
+   * @since Beta v0.11.3
+   */
+  type WikiFoodRecipeVariants = {
+    /** 角色特殊料理 */
+    special: Array<WikiFoodRecipeSpecial>;
+    /** 奇怪的料理 ID */
+    strange?: number;
+    /** 普通料理 ID */
+    normal?: number;
+    /** 美味的料理 ID */
+    delicious?: number;
+  };
+
+  /**
+   * WIKI 角色特殊料理
+   * @since Beta v0.11.3
+   */
+  type WikiFoodRecipeSpecial = {
+    /** 角色 ID */
+    characterId: number;
+    /** 特殊料理 ID */
+    foodId: number;
+  };
+
+  /**
+   * WIKI 书籍信息
+   * @since Beta v0.11.3
+   */
+  type WikiBook = {
+    /** 书籍 ID */
+    id: number;
+    /** 书籍名称 */
+    name: string;
+    /** 所属书籍名称，用于标识同一书籍的不同卷 */
+    vol?: string;
+    /** 书籍简介 */
+    description: string;
+    /** 故事 ID */
+    storyId: string;
+    /** 书籍内容 */
+    story: string;
   };
 
   /**

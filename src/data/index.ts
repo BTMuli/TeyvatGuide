@@ -21,7 +21,9 @@ import arcBirRole from "./archive/birth_role.json" with { type: "json" };
 import schemaUiaf from "./schema/uiaf-schema.json" with { type: "json" };
 import schemaUigf from "./schema/uigf-schema.json" with { type: "json" };
 import schemaUigf4 from "./schema/uigf4-schema.json" with { type: "json" };
+import wikiBook from "./WIKI/material/books.json" with { type: "json" };
 import wikiFood from "./WIKI/material/food.json" with { type: "json" };
+import wikiFoodRecipe from "./WIKI/material/foodRecipe.json" with { type: "json" };
 import wikiMaterial from "./WIKI/material/material.json" with { type: "json" };
 import wikiRelicMainLv from "./WIKI/relic/MainLv.json" with { type: "json" };
 import wikiRelicMainProp from "./WIKI/relic/MainProp.json" with { type: "json" };
@@ -57,7 +59,19 @@ export const WikiMaterialData: Array<TGApp.App.Material.WikiItem> = wikiMaterial
  * WIKI 料理数据
  * @since Beta v0.11.3
  */
-export const WikiFoodData: Array<TGApp.App.Material.WikiFood> = wikiFood;
+export const WikiFoodData: Array<TGApp.App.Material.WikiFood> = <
+  Array<TGApp.App.Material.WikiFood>
+>wikiFood;
+/**
+ * WIKI 料理食谱数据
+ * @since Beta v0.11.2
+ */
+export const WikiFoodRecipeData: Array<TGApp.App.Material.WikiFoodRecipe> = wikiFoodRecipe;
+/**
+ * WIKI 书籍数据
+ * @since Beta v0.11.2
+ */
+export const WikiBookData: Array<TGApp.App.Material.WikiBook> = wikiBook;
 export const WikiHyperLinkData: TGApp.App.HyperLink.AppHyperLink = hyperlink;
 // 武器数据
 export const wwWeapon: Array<TGApp.App.Weapon.WikiItem> = wikiWeapon;
@@ -71,9 +85,50 @@ export const wrMap: TGApp.App.Relic.RelicMap = wikiRelicMap;
 export const wrSet: TGApp.App.Relic.RawSet = wikiRelicSet;
 export const wrSub: TGApp.App.Relic.SubProp = wikiRelicSubProp;
 
+const wikiMaterialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem> = new Map(
+  WikiMaterialData.map((material): [number, TGApp.App.Material.WikiItem] => [
+    material.id,
+    material,
+  ]),
+);
 const wikiFoodMap: ReadonlyMap<number, TGApp.App.Material.WikiFood> = new Map(
   WikiFoodData.map((food): [number, TGApp.App.Material.WikiFood] => [food.id, food]),
 );
+const wikiFoodRecipeMap: ReadonlyMap<number, TGApp.App.Material.WikiFoodRecipe> = new Map(
+  WikiFoodRecipeData.map((recipe): [number, TGApp.App.Material.WikiFoodRecipe] => [
+    recipe.id,
+    recipe,
+  ]),
+);
+const wikiBookMap: ReadonlyMap<number, TGApp.App.Material.WikiBook> = new Map(
+  WikiBookData.map((book): [number, TGApp.App.Material.WikiBook] => [book.id, book]),
+);
+const wikiFoodRecipeByFoodIdMap: ReadonlyMap<number, TGApp.App.Material.WikiFoodRecipe> = (() => {
+  const map = new Map<number, TGApp.App.Material.WikiFoodRecipe>();
+  for (const recipe of WikiFoodRecipeData) {
+    const { variants } = recipe;
+    const foodIds = [
+      variants.strange,
+      variants.normal,
+      variants.delicious,
+      ...variants.special.map((special) => special.foodId),
+    ];
+    for (const foodId of foodIds) {
+      if (foodId !== undefined) map.set(foodId, recipe);
+    }
+  }
+  return map;
+})();
+
+/**
+ * 根据 ID 获取 WIKI 材料数据
+ * @since Beta v0.11.2
+ * @param id - 材料 ID
+ * @returns 材料数据；未找到时为 undefined
+ */
+export function getWikiMaterialById(id: number): TGApp.App.Material.WikiItem | undefined {
+  return wikiMaterialMap.get(id);
+}
 
 /**
  * 根据 ID 获取 WIKI 料理数据
@@ -83,6 +138,41 @@ const wikiFoodMap: ReadonlyMap<number, TGApp.App.Material.WikiFood> = new Map(
  */
 export function getWikiFoodById(id: number): TGApp.App.Material.WikiFood | undefined {
   return wikiFoodMap.get(id);
+}
+
+/**
+ * 根据 ID 获取 WIKI 料理食谱数据
+ * @since Beta v0.11.2
+ * @param id - 食谱 ID
+ * @returns 食谱数据；未找到时为 undefined
+ */
+export function getWikiFoodRecipeById(id: number): TGApp.App.Material.WikiFoodRecipe | undefined {
+  return wikiFoodRecipeMap.get(id);
+}
+
+/**
+ * 根据料理 ID 获取对应的 WIKI 料理食谱数据
+ * @since Beta v0.11.2
+ * @param id - 料理 ID
+ * @returns 食谱数据；未找到或索引不一致时为 undefined
+ */
+export function getWikiFoodRecipeByFoodId(
+  id: number,
+): TGApp.App.Material.WikiFoodRecipe | undefined {
+  const food = getWikiFoodById(id);
+  if (food?.recipeId === undefined) return undefined;
+  const recipe = wikiFoodRecipeByFoodIdMap.get(id);
+  return recipe?.id === food.recipeId ? recipe : undefined;
+}
+
+/**
+ * 根据 ID 获取 WIKI 书籍数据
+ * @since Beta v0.11.2
+ * @param id - 书籍 ID
+ * @returns 书籍数据；未找到时为 undefined
+ */
+export function getWikiBookById(id: number): TGApp.App.Material.WikiBook | undefined {
+  return wikiBookMap.get(id);
 }
 
 const avatarFiles = import.meta.glob("./WIKI/character/*.json");

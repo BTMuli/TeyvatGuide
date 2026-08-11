@@ -107,6 +107,10 @@
     </template>
   </v-app-bar>
   <div class="pbm-container">
+    <div v-if="materialShow.length === 0" class="pbm-empty">
+      <v-icon size="48">mdi-package-variant-closed</v-icon>
+      <span>暂无材料数据</span>
+    </div>
     <template v-for="material in visibleMaterials" :key="material.info.id">
       <PbMaterialItem
         :cur="curMaterial"
@@ -153,7 +157,10 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PbMaterialItem from "@comp/pageBag/pb-materialItem.vue";
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
-import TSUserBagMaterial, { getBagTypeOrder, SKIP_BAG_TYPES } from "@Sqlm/userBagMaterial.js";
+import TSUserBagMaterial, {
+  getBagTypeOrder,
+  isTrackableBagMaterial,
+} from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
@@ -170,7 +177,7 @@ import {
   watch,
 } from "vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { WikiBookData, WikiMaterialData } from "@/data/index.js";
 
 /**
  * 材料排序类型枚举
@@ -222,7 +229,7 @@ const selectType = ref<string>(DEFAULT_MATERIAL_TYPE);
 const lastMaterialType = ref<string>(DEFAULT_MATERIAL_TYPE);
 const search = ref<string>();
 const searchAll = ref<boolean>(false);
-const hideZero = ref<boolean>(false);
+const hideZero = ref<boolean>(true);
 const showOverlay = ref<boolean>(false);
 const curIdx = ref<number>(0);
 const curSort = ref<MaterialSortType | null>(null);
@@ -310,7 +317,7 @@ function getSelectMaterials(): Array<MaterialInfo> {
       ? materialList.value
       : materialList.value.filter((i) => i.info.cType === selectType.value);
   return data.filter(
-    (item) => !SKIP_BAG_TYPES.includes(item.info.type) && (!hideZero.value || item.tb.count !== 0),
+    (item) => isTrackableBagMaterial(item.info) && (!hideZero.value || item.tb.count !== 0),
   );
 }
 
@@ -318,9 +325,11 @@ function sortMaterials(data: Array<MaterialInfo>): Array<MaterialInfo> {
   if (curSort.value === null) {
     return data.sort(
       (a, b) =>
-        getBagTypeOrder(a.info.type) - getBagTypeOrder(b.info.type) ||
-        a.info.type.localeCompare(b.info.type) ||
+        Number(a.tb.count === 0) - Number(b.tb.count === 0) ||
         b.info.star - a.info.star ||
+        getBagTypeOrder(a.info.type) - getBagTypeOrder(b.info.type) ||
+        compareBookMaterials(a, b) ||
+        a.info.type.localeCompare(b.info.type) ||
         a.info.id - b.info.id,
     );
   }
@@ -362,7 +371,7 @@ async function loadMaterialList(uid: number, requestVersion: number): Promise<vo
   const tList: Array<MaterialType> = [];
   for (const material of dList) {
     const info = getItemInfo(material.id);
-    if (info === false || SKIP_BAG_TYPES.includes(info.type)) continue;
+    if (info === false || !isTrackableBagMaterial(info)) continue;
     mList.push({ tb: material, info: info });
     const findT = tList.findIndex((i) => i.cType === info.cType);
     if (findT === -1) tList.push({ cType: info.cType });
@@ -382,6 +391,25 @@ function compareMaterialTypes(a: string, b: string): number {
 
 function getMaterialTypeOrder(type: string): number {
   return type === DEFAULT_MATERIAL_TYPE ? 0 : 1;
+}
+
+function compareBookMaterials(a: MaterialInfo, b: MaterialInfo): number {
+  const aIsBook = a.info.cType === "书籍";
+  const bIsBook = b.info.cType === "书籍";
+  if (!aIsBook || !bIsBook) return 0;
+  const aBook = WikiBookData.find((book) => book.id === a.info.id);
+  const bBook = WikiBookData.find((book) => book.id === b.info.id);
+  if (aBook === undefined || bBook === undefined) return 0;
+  return getBookGroupFirstId(aBook.vol, aBook.id) - getBookGroupFirstId(bBook.vol, bBook.id);
+}
+
+function getBookGroupFirstId(vol: string | undefined, fallbackId: number): number {
+  if (vol === undefined || vol.length === 0) return fallbackId;
+  return (
+    WikiBookData.filter((book) => book.vol === vol)
+      .map((book) => book.id)
+      .sort((a, b) => a - b)[0] ?? fallbackId
+  );
 }
 
 /**
@@ -619,6 +647,17 @@ function switchMaterial(isNext: boolean): void {
   width: 100%;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.pbm-empty {
+  display: flex;
+  min-height: 180px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--box-text-4);
+  gap: 8px;
+  grid-column: 1 / -1;
 }
 
 .pbm-load-trigger {

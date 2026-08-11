@@ -68,7 +68,7 @@
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
-import TSUserBagMaterial, { SKIP_BAG_TYPES } from "@Sqlm/userBagMaterial.js";
+import TSUserBagMaterial, { isTrackableBagMaterial } from "@Sqlm/userBagMaterial.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, shallowRef, watch } from "vue";
@@ -91,7 +91,7 @@ const props = withDefaults(defineProps<PboMaterialProps>(), {
 });
 const emits = defineEmits<PboMaterialEmits>();
 const visible = defineModel<boolean>();
-const showRecord = computed<boolean>(() => !SKIP_BAG_TYPES.includes(props.data.info.type));
+const showRecord = computed<boolean>(() => isTrackableBagMaterial(props.data.info));
 const dbInfo = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.data.tb);
 const shareCaption = computed<string>(() => `Material ${props.data.info.id} · UID ${props.uid}`);
 const shareFileName = computed<string>(

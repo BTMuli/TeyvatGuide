@@ -93,12 +93,22 @@ export function getBagTypeOrder(type: string): number {
 }
 
 /**
+ * 判断材料是否可在背包中记录
+ * @since Beta v0.11.3
+ * @param material - WIKI 材料信息
+ * @returns 是否可记录
+ */
+export function isTrackableBagMaterial(material: TGApp.App.Material.WikiItem): boolean {
+  return !SKIP_BAG_TYPES.includes(material.type);
+}
+
+/**
  * 获取有效材料ID
- * @since Beta v0.9.0
+ * @since Beta v0.11.3
  * @returns ID列表
  */
 function getValidMIds(): Array<number> {
-  const filter = WikiMaterialData.filter((m) => !SKIP_BAG_TYPES.includes(m.type));
+  const filter = WikiMaterialData.filter(isTrackableBagMaterial);
   return filter.map((f) => f.id);
 }
 

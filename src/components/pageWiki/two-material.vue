@@ -1,27 +1,28 @@
 <template>
   <TOverlay v-model="visible" :topOffset>
-    <div v-if="props.data" class="twom-container">
+    <div v-if="activeMaterial" class="twom-container">
       <slot name="left" />
       <article ref="shareTarget" class="twom-box">
         <header class="twom-header">
           <div class="twom-icon">
-            <img :src="`/icon/bg/${props.data.star}-BGC.webp`" alt="" class="bg" />
+            <img :src="`/icon/bg/${activeMaterial.star}-BGC.webp`" alt="" class="bg" />
             <img
-              :alt="props.data.name"
-              :src="`/icon/material/${props.data.id}.webp`"
+              :alt="activeMaterial.name"
+              :src="`/icon/material/${activeMaterial.id}.webp`"
               class="icon"
             />
           </div>
           <div class="twom-identity">
-            <h2>{{ props.data.name }}</h2>
+            <h2>{{ activeMaterial.name }}</h2>
             <div class="twom-meta">
-              <span class="twom-type">{{ props.data.type }}</span>
+              <span class="twom-type">{{ activeMaterial.type }}</span>
+              <span v-if="bookVol" class="twom-book-vol">{{ bookVol }}</span>
               <span>
                 <v-icon size="14">mdi-star</v-icon>
-                {{ props.data.star }} 星
+                {{ activeMaterial.star }} 星
               </span>
-              <span>ID {{ props.data.id }}</span>
-              <slot name="meta" />
+              <span>ID {{ activeMaterial.id }}</span>
+              <slot v-if="isSourceMaterial" name="meta" />
             </div>
           </div>
           <div class="twom-actions" data-html2canvas-ignore="true">
@@ -44,45 +45,63 @@
           </div>
         </header>
         <main ref="contentTarget" :style="{ maxHeight: props.cmh }" class="twom-content">
-          <section class="twom-panel">
+          <section v-if="activeMaterial.description.trim().length > 0" class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-text-box-outline</v-icon>
               <h3>物品描述</h3>
             </header>
-            <div class="twom-desc" v-html="parseHtmlText(props.data.description)" />
+            <div class="twom-desc" v-html="parseHtmlText(activeMaterial.description)" />
           </section>
-          <TwoFoodDetail v-if="foodData" :food="foodData" />
-          <section v-if="props.data.source.length > 0" class="twom-panel">
+          <TwoFoodDetail
+            v-if="foodData"
+            :food="foodData"
+            :recipe="foodRecipe"
+            @select-food="selectFoodVariant"
+          />
+          <TwoBookDetail v-if="bookData" :book="bookData" />
+          <section v-if="activeMaterial.source.length > 0" class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-map-marker-path</v-icon>
               <h3>获取来源</h3>
-              <span>{{ props.data.source.length }} 项</span>
+              <span>{{ activeMaterial.source.length }} 项</span>
             </header>
             <div class="twom-source">
               <TwoSource
-                v-for="(item, index) in props.data.source"
+                v-for="(item, index) in activeMaterial.source"
                 :key="`${item.type}-${item.name}-${index}`"
                 :data="item"
               />
             </div>
           </section>
-          <section v-if="props.data.convert.length > 0" class="twom-panel">
+          <section v-if="activeMaterial.convert.length > 0" class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-transit-connection-variant</v-icon>
               <h3>合成转换</h3>
-              <span>{{ props.data.convert.length }} 种配方</span>
+              <span>{{ activeMaterial.convert.length }} 种配方</span>
             </header>
             <div class="twom-convert">
-              <slot name="convert">
-                <TwoConvert v-for="item in props.data.convert" :key="item.id" :data="item" />
-              </slot>
+              <template v-if="isSourceMaterial">
+                <slot name="convert">
+                  <TwoConvert v-for="item in activeMaterial.convert" :key="item.id" :data="item" />
+                </slot>
+              </template>
+              <template v-else>
+                <TwoConvert v-for="item in activeMaterial.convert" :key="item.id" :data="item" />
+              </template>
             </div>
           </section>
-          <slot name="after-content" />
+          <slot v-if="isSourceMaterial" name="after-content" />
         </main>
         <footer class="twom-share">
           <span>{{ eyebrow ?? "材料" }}</span>
-          <span> · {{ props.shareCaption ?? `Material ${props.data.id}` }}</span>
+          <span>
+            ·
+            {{
+              isSourceMaterial && props.shareCaption
+                ? props.shareCaption
+                : `Material ${activeMaterial.id}`
+            }}
+          </span>
           <span> · Rendered by TeyvatGuide v{{ version }}</span>
         </footer>
       </article>
@@ -96,13 +115,19 @@ import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { computed, onMounted, ref, useTemplateRef } from "vue";
+import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
+import TwoBookDetail from "./two-book-detail.vue";
 import TwoConvert from "./two-convert.vue";
 import TwoFoodDetail from "./two-food-detail.vue";
 import TwoSource from "./two-source.vue";
 
-import { getWikiFoodById } from "@/data/index.js";
+import {
+  getWikiBookById,
+  getWikiFoodById,
+  getWikiFoodRecipeByFoodId,
+  getWikiMaterialById,
+} from "@/data/index.js";
 
 type TwoMaterialProps = {
   cmh?: string;
@@ -122,13 +147,41 @@ const props = withDefaults(defineProps<TwoMaterialProps>(), {
 });
 const visible = defineModel<boolean>();
 const version = ref<string>();
+const activeMaterial = shallowRef<TGApp.App.Material.WikiItem>(props.data);
 const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
 const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
-const foodData = computed<TGApp.App.Material.WikiFood | undefined>(
-  () => getWikiFoodById(props.data.id) || undefined,
+const foodData = computed<TGApp.App.Material.WikiFood | undefined>(() =>
+  getWikiFoodById(activeMaterial.value.id),
 );
+const foodRecipe = computed<TGApp.App.Material.WikiFoodRecipe | undefined>(() =>
+  getWikiFoodRecipeByFoodId(activeMaterial.value.id),
+);
+const bookData = computed<TGApp.App.Material.WikiBook | undefined>(() =>
+  getWikiBookById(activeMaterial.value.id),
+);
+const bookVol = computed<string | undefined>(() => bookData.value?.vol);
+const isSourceMaterial = computed<boolean>(() => activeMaterial.value.id === props.data.id);
 
 onMounted(async () => (version.value = await getVersion()));
+
+watch(
+  () => props.data,
+  (data) => {
+    activeMaterial.value = data;
+  },
+);
+watch(visible, (isVisible) => {
+  if (isVisible) activeMaterial.value = props.data;
+});
+
+function selectFoodVariant(foodId: number): void {
+  const material = getWikiMaterialById(foodId);
+  if (material === undefined) {
+    console.warn(`料理变体 ${foodId} 未找到对应材料`);
+    return;
+  }
+  activeMaterial.value = material;
+}
 
 async function shareMaterial(): Promise<void> {
   const element = shareTarget.value;
@@ -143,7 +196,11 @@ async function shareMaterial(): Promise<void> {
     content.style.maxHeight = "none";
     content.style.overflowY = "visible";
   }
-  const fileName = props.shareFileName ?? `material_${props.data.id}`;
+  const sourceFileName = isSourceMaterial.value ? props.shareFileName : undefined;
+  const fileName =
+    foodData.value === undefined
+      ? (sourceFileName ?? `material_${activeMaterial.value.id}`)
+      : `food_${activeMaterial.value.id}`;
   try {
     await generateShareImg(fileName, element, props.shareScale, true);
   } finally {
@@ -245,12 +302,20 @@ async function shareMaterial(): Promise<void> {
   }
 }
 
-.twom-type {
+.twom-type,
+.twom-book-vol {
   padding: 2px 6px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-2);
+}
+
+.twom-type {
   color: var(--tgc-od-blue);
+}
+
+.twom-book-vol {
+  color: var(--box-text-2);
 }
 
 .twom-actions {
@@ -328,5 +393,15 @@ async function shareMaterial(): Promise<void> {
   font-size: 10px;
   line-height: 14px;
   text-align: center;
+}
+
+@media (width <= 720px) {
+  .twom-container {
+    gap: 8px;
+  }
+
+  .twom-box {
+    max-width: calc(100vw - 24px);
+  }
 }
 </style>
