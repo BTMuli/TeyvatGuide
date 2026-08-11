@@ -1,6 +1,6 @@
 /**
  * JSON 文件的 ESLint 配置
- * @since Beta v0.9.6
+ * @since Beta v0.11.3
  */
 
 import pluginJsonc from "eslint-plugin-jsonc";
@@ -85,6 +85,7 @@ const characterJsonConfig = {
           "materials",
           "constellation",
           "skills",
+          "food",
           "talks",
           "stories",
           "team",
