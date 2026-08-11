@@ -113,7 +113,7 @@ const props = defineProps<PbMaterialItemProps>();
   text-align: center;
 }
 
-@for $i from 1 through 5 {
+@for $i from 0 through 5 {
   .star#{$i} {
     $pbo-cm-base: utils.get-od-star-color($i);
 
