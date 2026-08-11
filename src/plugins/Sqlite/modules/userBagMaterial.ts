@@ -1,6 +1,6 @@
 /**
  * 用户背包材料模块
- * @since Beta v0.9.1
+ * @since Beta v0.11.3
  */
 import { timestampToDate } from "@utils/toolFunc.js";
 
@@ -8,32 +8,50 @@ import TGSqlite from "../index.js";
 
 import { WikiMaterialData } from "@/data/index.js";
 
-export const SKIP_BAG_TYPES: ReadonlyArray<string> = [
-  "系统开放",
-  "好感成长",
-  "风之翼",
-  /**TODO:数据获取*/
-  "挑战结算道具",
-];
-export const BAG_TYPE_LIST: ReadonlyArray<string> = [
+export const SKIP_BAG_TYPES: ReadonlyArray<string> = ["角色成长", "系统开放", "好感成长"];
+
+/**
+ * 默认材料页签下的材料类型排序
+ * @since Beta v0.11.3
+ */
+export const BAG_DEFAULT_ORDER = <const>[
   "高级兑换券",
   "普通兑换券",
   "限定祈愿道具",
   "祈愿道具",
   "稀有货币",
   "通用货币",
-  "任务道具",
   "七国徽印",
-  "冒险道具",
-  "消耗品",
   "角色经验素材",
   "武器强化素材",
   "锻造用矿石",
+  "药剂",
+  "角色成长",
+  "系统开放",
+  "好感成长",
+  "挑战结算道具",
+  "传说任务解锁道具",
+  "徽印",
+  "圣遗物强化素材",
+];
+
+/**
+ * 角色与武器培养素材页签下的材料类型排序
+ * @since Beta v0.11.3
+ */
+export const BAG_CW_ORDER = <const>[
   "角色天赋素材",
   "角色突破素材",
   "武器突破素材",
   "角色培养素材",
   "角色与武器培养素材",
+];
+
+/**
+ * 区域特产页签下的材料类型排序
+ * @since Beta v0.11.3
+ */
+export const BAG_AREAM_ORDER = <const>[
   "蒙德区域特产",
   "璃月区域特产",
   "稻妻区域特产",
@@ -41,11 +59,38 @@ export const BAG_TYPE_LIST: ReadonlyArray<string> = [
   "枫丹区域特产",
   "纳塔区域特产",
   "挪德卡莱区域特产",
+  "至冬区域特产",
+];
+
+const BAG_OTHER_ORDER = <const>[
+  "贵重物品",
+  "冒险道具",
+  "任务道具",
+  "圣物匣",
   "食材",
+  "食物",
   "素材",
-  "药剂",
+  "消耗品",
   "小道具",
 ];
+const BAG_TYPE_ORDER: ReadonlyArray<string> = [
+  ...BAG_DEFAULT_ORDER,
+  ...BAG_CW_ORDER,
+  ...BAG_AREAM_ORDER,
+  ...BAG_OTHER_ORDER,
+];
+const YAE_PROP_MATERIAL_IDS: ReadonlySet<number> = new Set([201, 202, 203, 204, 206, 207]);
+
+/**
+ * 获取材料类型排序序号
+ * @since Beta v0.11.3
+ * @param type - 材料类型
+ * @returns 排序序号
+ */
+export function getBagTypeOrder(type: string): number {
+  const index = BAG_TYPE_ORDER.indexOf(type);
+  return index === -1 ? BAG_TYPE_ORDER.length : index;
+}
 
 /**
  * 获取有效材料ID
@@ -196,8 +241,10 @@ async function getMaterial(
       [uid],
     );
   }
-  const list = res.map(parseMaterial);
-  const ids = new Set<number>(getValidMIds());
+  const validIds = new Set<number>(getValidMIds());
+  const list = res.map(parseMaterial).filter((item) => validIds.has(item.id));
+  if (id !== undefined) return list;
+  const ids = new Set<number>(validIds);
   for (const item of list) if (ids.has(item.id)) ids.delete(item.id);
   for (const item of ids) list.push({ uid: uid, id: item, count: 0, records: [], updated: "" });
   return list;
@@ -205,7 +252,7 @@ async function getMaterial(
 
 /**
  * 保存Yae获取的材料数据
- * @since Beta v0.9.0
+ * @since Beta v0.11.3
  * @param uid - 存档UID
  * @param list - 材料数据
  * @returns 无返回值
@@ -216,13 +263,9 @@ async function saveYaeData(
 ): Promise<number> {
   let skip = 0;
   const ids = new Set<number>(getValidMIds());
-  // 移除货币数据
-  ids.delete(201);
-  ids.delete(202);
-  ids.delete(203);
-  ids.delete(204);
-  const newList = list;
-  for (const item of list) if (ids.has(item.item_id)) ids.delete(item.item_id);
+  for (const id of YAE_PROP_MATERIAL_IDS) ids.delete(id);
+  const newList = list.filter((item) => ids.has(item.item_id));
+  for (const item of newList) if (ids.has(item.item_id)) ids.delete(item.item_id);
   // 处理0数据
   for (const item of ids.values()) {
     newList.push({ item_id: item, kind: "material", info: { count: 0 } });

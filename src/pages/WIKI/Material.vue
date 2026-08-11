@@ -92,7 +92,13 @@
     />
     <div v-if="hasMoreMaterials" ref="loadMoreRef" class="twm-load-trigger" />
   </div>
-  <TwoMaterial v-if="curMaterial" v-model="visible" :data="curMaterial" topOffset="112px">
+  <TwoMaterial
+    v-if="curMaterial"
+    v-model="visible"
+    :data="curMaterial"
+    eyebrow="材料图鉴"
+    topOffset="112px"
+  >
     <template #left>
       <v-btn
         aria-label="上一个材料"
@@ -119,6 +125,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import PwMaterialItem from "@comp/pageWiki/pw-material-item.vue";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
+import { getBagTypeOrder } from "@Sqlm/userBagMaterial.js";
 import {
   computed,
   nextTick,
@@ -211,7 +218,7 @@ function getSelectMaterials(): Array<TGApp.App.Material.WikiItem> {
 
 function sortData(data: Array<TGApp.App.Material.WikiItem>): void {
   sortMaterialsData.value = [...data].sort(
-    (a, b) => compareMaterialTypes(a.cType, b.cType) || b.star - a.star || a.id - b.id,
+    (a, b) => getBagTypeOrder(a.type) - getBagTypeOrder(b.type) || b.star - a.star || a.id - b.id,
   );
   curIndex.value = 0;
   curMaterial.value = sortMaterialsData.value[curIndex.value];

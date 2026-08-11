@@ -14,10 +14,37 @@
           variant="outlined"
           width="200px"
         />
+        <v-select
+          v-model="curSort"
+          :clearable="true"
+          :hide-details="true"
+          :items="sortList"
+          class="pbm-sort-select"
+          density="compact"
+          item-title="text"
+          item-value="value"
+          label="排序"
+          variant="outlined"
+          width="160px"
+        />
       </div>
     </template>
     <template #append>
       <div class="pbm-nav-append">
+        <v-checkbox
+          v-model="searchAll"
+          :hide-details="true"
+          class="pbm-search-all"
+          density="compact"
+          label="搜索全部"
+        />
+        <v-checkbox
+          v-model="hideZero"
+          :hide-details="true"
+          class="pbm-hide-zero"
+          density="compact"
+          label="隐藏0数据"
+        />
         <div class="pbm-nav-search">
           <v-text-field
             v-model="search"
@@ -32,60 +59,55 @@
           />
         </div>
         <v-btn
-          class="pbm-ne-btn"
-          prepend-icon="mdi-import"
+          aria-label="导入材料"
+          class="pbm-icon-btn"
+          icon="mdi-import"
           title="通过Yae导入（请确保导入前游戏未启动）"
           variant="elevated"
           @click="tryImportMaterial()"
-        >
-          导入
-        </v-btn>
-        <v-btn class="pbm-ne-btn" prepend-icon="mdi-plus" variant="elevated" @click="createUid()">
-          新建存档
-        </v-btn>
-        <v-btn class="pbm-ne-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteUid()">
-          删除存档
-        </v-btn>
+        />
+        <v-btn
+          aria-label="新建存档"
+          class="pbm-icon-btn"
+          icon="mdi-plus"
+          title="新建存档"
+          variant="elevated"
+          @click="createUid()"
+        />
+        <v-btn
+          aria-label="删除存档"
+          class="pbm-icon-btn"
+          icon="mdi-delete"
+          title="删除存档"
+          variant="elevated"
+          @click="deleteUid()"
+        />
       </div>
     </template>
     <template #extension>
       <div class="pbm-nav-extension">
-        <v-select
+        <v-tabs
           v-model="selectType"
-          :clearable="true"
-          :hide-details="true"
-          :items="materialTypes"
+          align-tabs="start"
+          class="pbm-tabs"
           density="compact"
-          item-title="type"
-          label="材料类别"
-          variant="outlined"
-          width="250px"
+          show-arrows
         >
-          <template #item="{ props, item }">
-            <v-list-item v-bind="props">
-              <template #append>
-                <v-chip>{{ item.number }}</v-chip>
-              </template>
-            </v-list-item>
-          </template>
-        </v-select>
-        <v-select
-          v-model="curSort"
-          :clearable="true"
-          :hide-details="true"
-          :items="sortList"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          label="排序"
-          variant="outlined"
-          width="160px"
-        />
+          <v-tab v-if="searchAll" :value="ALL_MATERIAL_TYPE" title="全部材料"> 全部 </v-tab>
+          <v-tab
+            v-for="item in materialTypes"
+            :key="item.cType"
+            :title="item.cType"
+            :value="item.cType"
+          >
+            {{ item.cType }}
+          </v-tab>
+        </v-tabs>
       </div>
     </template>
   </v-app-bar>
   <div class="pbm-container">
-    <template v-for="material in materialShow" :key="material.info.id">
+    <template v-for="material in visibleMaterials" :key="material.info.id">
       <PbMaterialItem
         :cur="curMaterial"
         :info="material.info"
@@ -93,6 +115,7 @@
         @select="handleSelect"
       />
     </template>
+    <div v-if="hasMoreMaterials" ref="loadMoreRef" class="pbm-load-trigger" />
   </div>
   <PboMaterial
     v-if="curMaterial"
@@ -130,12 +153,22 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PbMaterialItem from "@comp/pageBag/pb-materialItem.vue";
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
-import TSUserBagMaterial, { BAG_TYPE_LIST } from "@Sqlm/userBagMaterial.js";
+import TSUserBagMaterial, { getBagTypeOrder, SKIP_BAG_TYPES } from "@Sqlm/userBagMaterial.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  triggerRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -153,10 +186,8 @@ enum MaterialSortType {
 
 /** 材料类型 */
 type MaterialType = {
-  /** 类型 */
-  type: string;
-  /** 计数 */
-  number: number;
+  /** 归并类型 */
+  cType: string;
 };
 /** 材料排序 */
 type MaterialSort = {
@@ -182,9 +213,16 @@ const sortList: Array<MaterialSort> = [
   { text: "最少数量", value: MaterialSortType.MinCount },
 ];
 
+const ALL_MATERIAL_TYPE = "all";
+const DEFAULT_MATERIAL_TYPE = "默认";
+const MATERIAL_RENDER_SIZE: Readonly<number> = 100;
+
 const curUid = ref<number>(0);
-const selectType = ref<string | null>(null);
+const selectType = ref<string>(DEFAULT_MATERIAL_TYPE);
+const lastMaterialType = ref<string>(DEFAULT_MATERIAL_TYPE);
 const search = ref<string>();
+const searchAll = ref<boolean>(false);
+const hideZero = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const curIdx = ref<number>(0);
 const curSort = ref<MaterialSortType | null>(null);
@@ -193,12 +231,25 @@ const materialTypes = shallowRef<Array<MaterialType>>([]);
 const curMaterial = shallowRef<MaterialInfo>();
 const materialList = shallowRef<Array<MaterialInfo>>([]);
 const materialShow = shallowRef<Array<MaterialInfo>>([]);
+const renderedCount = ref<number>(MATERIAL_RENDER_SIZE);
+const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
 let materialLoadVersion = 0;
+let loadMoreObserver: IntersectionObserver | undefined;
+
+const visibleMaterials = computed<Array<MaterialInfo>>(() =>
+  materialShow.value.slice(0, renderedCount.value),
+);
+const hasMoreMaterials = computed<boolean>(() => renderedCount.value < materialShow.value.length);
 
 onMounted(async () => {
+  initLoadMoreObserver();
   await showLoading.start("正在获取存档列表...");
   await reloadUid();
   await showLoading.end();
+});
+
+onBeforeUnmount(() => {
+  loadMoreObserver?.disconnect();
 });
 
 watch(
@@ -210,12 +261,30 @@ watch(
   },
 );
 watch(
-  () => [selectType.value, curSort.value],
-  async () => {
+  () => selectType.value,
+  (type) => {
+    if (type !== ALL_MATERIAL_TYPE) {
+      lastMaterialType.value = type;
+      if (searchAll.value) searchAll.value = false;
+    }
+  },
+);
+watch(
+  () => searchAll.value,
+  (isSearchAll) => {
+    if (isSearchAll) {
+      if (selectType.value !== ALL_MATERIAL_TYPE) lastMaterialType.value = selectType.value;
+      selectType.value = ALL_MATERIAL_TYPE;
+    } else if (selectType.value === ALL_MATERIAL_TYPE) {
+      selectType.value = lastMaterialType.value;
+    }
+  },
+);
+watch(
+  () => [selectType.value, curSort.value, hideZero.value],
+  () => {
     if (showOverlay.value) showOverlay.value = false;
-    const renderMaterials = getSelectMaterials();
-    materialShow.value = sortMaterials(renderMaterials);
-    triggerRef(materialShow);
+    updateMaterialShow();
     curIdx.value = 0;
   },
 );
@@ -236,15 +305,20 @@ async function reloadUid(): Promise<void> {
  * @return {Array<MaterialInfo>}
  */
 function getSelectMaterials(): Array<MaterialInfo> {
-  if (!selectType.value) return materialList.value;
-  return materialList.value.filter((i) => i.info.type === selectType.value);
+  const data =
+    selectType.value === ALL_MATERIAL_TYPE
+      ? materialList.value
+      : materialList.value.filter((i) => i.info.cType === selectType.value);
+  return data.filter(
+    (item) => !SKIP_BAG_TYPES.includes(item.info.type) && (!hideZero.value || item.tb.count !== 0),
+  );
 }
 
 function sortMaterials(data: Array<MaterialInfo>): Array<MaterialInfo> {
   if (curSort.value === null) {
     return data.sort(
       (a, b) =>
-        BAG_TYPE_LIST.indexOf(a.info.type) - BAG_TYPE_LIST.indexOf(b.info.type) ||
+        getBagTypeOrder(a.info.type) - getBagTypeOrder(b.info.type) ||
         a.info.type.localeCompare(b.info.type) ||
         b.info.star - a.info.star ||
         a.info.id - b.info.id,
@@ -260,6 +334,12 @@ function sortMaterials(data: Array<MaterialInfo>): Array<MaterialInfo> {
   }
 }
 
+function updateMaterialShow(data: Array<MaterialInfo> = getSelectMaterials()): void {
+  materialShow.value = sortMaterials(data);
+  triggerRef(materialShow);
+  resetRenderedMaterials();
+}
+
 /**
  * 加载存档数据
  * @param {number} uid 存档UID
@@ -273,32 +353,35 @@ async function loadMaterialList(uid: number, requestVersion: number): Promise<vo
   materialTypes.value = [];
   materialShow.value = [];
   materialList.value = [];
-  selectType.value = null;
+  searchAll.value = false;
+  lastMaterialType.value = DEFAULT_MATERIAL_TYPE;
+  selectType.value = DEFAULT_MATERIAL_TYPE;
   const dList = await TSUserBagMaterial.getMaterial(uid);
   if (requestVersion !== materialLoadVersion) return;
   const mList = [];
   const tList: Array<MaterialType> = [];
   for (const material of dList) {
     const info = getItemInfo(material.id);
-    if (info === false) continue;
+    if (info === false || SKIP_BAG_TYPES.includes(info.type)) continue;
     mList.push({ tb: material, info: info });
-    const findT = tList.findIndex((i) => i.type === info.type);
-    if (findT !== -1) {
-      tList[findT].number += material.count;
-    } else {
-      tList.push({ type: info.type, number: material.count });
-    }
+    const findT = tList.findIndex((i) => i.cType === info.cType);
+    if (findT === -1) tList.push({ cType: info.cType });
   }
-  tList.sort(
-    (a, b) =>
-      BAG_TYPE_LIST.indexOf(a.type) - BAG_TYPE_LIST.indexOf(b.type) || a.type.localeCompare(b.type),
-  );
-  materialList.value = sortMaterials(mList);
-  materialShow.value = materialList.value;
-  materialTypes.value = tList;
+  tList.sort((a, b) => compareMaterialTypes(a.cType, b.cType));
   curSort.value = null;
+  materialList.value = mList;
+  materialTypes.value = tList;
+  updateMaterialShow();
   curIdx.value = 0;
   await showLoading.end();
+}
+
+function compareMaterialTypes(a: string, b: string): number {
+  return getMaterialTypeOrder(a) - getMaterialTypeOrder(b) || a.localeCompare(b);
+}
+
+function getMaterialTypeOrder(type: string): number {
+  return type === DEFAULT_MATERIAL_TYPE ? 0 : 1;
 }
 
 /**
@@ -319,7 +402,7 @@ function searchMaterial(): void {
       showSnackbar.warn("请输入搜索内容!");
       return;
     }
-    materialShow.value = selectData;
+    updateMaterialShow(selectData);
     showSnackbar.success("已重置!");
     return;
   }
@@ -341,8 +424,37 @@ function searchMaterial(): void {
     showSnackbar.warn("未找到符合条件的材料!");
     return;
   }
-  materialShow.value = selectData;
+  updateMaterialShow(selectData);
   showSnackbar.success(`找到${selectData.length}条符合条件的材料`);
+}
+
+function resetRenderedMaterials(): void {
+  renderedCount.value = Math.min(MATERIAL_RENDER_SIZE, materialShow.value.length);
+  nextTick(() => observeLoadMore());
+}
+
+function loadMoreMaterials(): void {
+  if (!hasMoreMaterials.value) return;
+  renderedCount.value = Math.min(
+    renderedCount.value + MATERIAL_RENDER_SIZE,
+    materialShow.value.length,
+  );
+}
+
+function initLoadMoreObserver(): void {
+  loadMoreObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) loadMoreMaterials();
+    },
+    { rootMargin: "360px" },
+  );
+  observeLoadMore();
+}
+
+function observeLoadMore(): void {
+  if (!loadMoreObserver || !loadMoreRef.value) return;
+  loadMoreObserver.disconnect();
+  loadMoreObserver.observe(loadMoreRef.value);
 }
 
 function handleUpdate(info: MaterialInfo): void {
@@ -457,27 +569,48 @@ function switchMaterial(isNext: boolean): void {
 .pbm-nav-append {
   position: relative;
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: center;
   margin-right: 12px;
   column-gap: 8px;
 }
 
-.pbm-ne-btn {
+.pbm-search-all,
+.pbm-hide-zero {
+  flex: none;
+}
+
+.pbm-icon-btn {
+  width: 40px;
   height: 40px;
+  flex-shrink: 0;
   background: var(--tgc-btn-1);
   color: var(--btn-text);
-  font-family: var(--font-title);
 }
 
 .pbm-nav-extension {
   position: relative;
   display: flex;
+  width: 100%;
+  min-width: 0;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   margin-bottom: 4px;
   margin-left: 16px;
   column-gap: 8px;
+}
+
+.pbm-tabs {
+  min-width: 0;
+  flex: 1;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-weight: normal;
+}
+
+.pbm-sort-select {
+  flex: 0 0 160px;
 }
 
 .pbm-container {
@@ -486,6 +619,12 @@ function switchMaterial(isNext: boolean): void {
   width: 100%;
   gap: 8px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.pbm-load-trigger {
+  width: 100%;
+  height: 1px;
+  grid-column: 1 / -1;
 }
 
 .card-arrow {
