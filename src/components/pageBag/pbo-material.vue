@@ -2,13 +2,13 @@
 <template>
   <TwoMaterial
     v-model="visible"
+    :cmh
     :data="props.data.info"
-    eyebrow="背包物品"
     :shareCaption
     :shareFileName
     :shareScale
-    :cmh
     :topOffset
+    eyebrow="背包物品"
   >
     <template #left>
       <slot name="left" />
@@ -171,9 +171,10 @@ async function tryDelete(): Promise<void> {
   display: flex;
   align-items: center;
   padding: 2px 6px;
-  border-radius: 2px;
-  background: var(--box-bg-3);
-  color: var(--box-text-2);
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-red);
   column-gap: 4px;
 }
 

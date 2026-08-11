@@ -13,7 +13,6 @@
             />
           </div>
           <div class="twom-identity">
-            <div class="twom-eyebrow">{{ props.eyebrow }}</div>
             <h2>{{ props.data.name }}</h2>
             <div class="twom-meta">
               <span class="twom-type">{{ props.data.type }}</span>
@@ -44,7 +43,7 @@
             />
           </div>
         </header>
-        <main class="twom-content" :style="{ maxHeight: props.cmh }">
+        <main :style="{ maxHeight: props.cmh }" class="twom-content">
           <section class="twom-panel">
             <header class="twom-panel-title">
               <v-icon size="18">mdi-text-box-outline</v-icon>
@@ -81,9 +80,9 @@
           <slot name="after-content" />
         </main>
         <footer class="twom-share">
-          {{ props.shareCaption ?? `Material ${props.data.id}` }} · Rendered by TeyvatGuide v{{
-            version
-          }}
+          <span>{{ eyebrow ?? "材料" }}</span>
+          <span> · {{ props.shareCaption ?? `Material ${props.data.id}` }}</span>
+          <span> · Rendered by TeyvatGuide v{{ version }}</span>
         </footer>
       </article>
       <slot name="right" />
@@ -221,12 +220,6 @@ async function shareMaterial(): Promise<void> {
   }
 }
 
-.twom-eyebrow {
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-}
-
 .twom-meta {
   display: flex;
   flex-wrap: wrap;
@@ -245,9 +238,10 @@ async function shareMaterial(): Promise<void> {
 
 .twom-type {
   padding: 2px 6px;
-  border-radius: 2px;
-  background: var(--box-bg-3);
-  color: var(--box-text-2);
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-blue);
 }
 
 .twom-actions {
