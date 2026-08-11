@@ -7,7 +7,7 @@
     </div>
     <!-- 卡池信息 -->
     <div class="ug-hisc-info">
-      <div class="ug-hisci-title">
+      <div class="ug-hisci-title" title="查看卡池详情" @click="openPoolOverlay()">
         <span>{{ props.pool.name }}</span>
         <span class="ug-hisci-tag">{{ props.pool.order === 1 ? "上半" : "下半" }}</span>
         <span class="ug-hisci-tag">{{ getType(props.pool.type) }}</span>
@@ -19,7 +19,7 @@
           v-for="i in props.pool.up5List"
           :key="i"
           :model-value="getBox(i)"
-          @click="toWiki(i)"
+          @click="openItemOverlay(i)"
         />
       </div>
       <div class="ug-hisci-sub">Up 四星</div>
@@ -28,7 +28,7 @@
           v-for="i in props.pool.up4List"
           :key="i"
           :model-value="getBox(i)"
-          @click="toWiki(i)"
+          @click="openItemOverlay(i)"
         />
       </div>
     </div>
@@ -46,17 +46,29 @@
       </div>
     </div>
   </div>
+  <PhPoolItemOverlay
+    v-if="detail"
+    v-model="detailShow"
+    :item="detail.item"
+    :items="poolItems"
+    :pool="detail.pool"
+    :pool-item-ids="detail.poolItemIds"
+    @switch-item="handleSwitchItem"
+  />
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import PhPoolItemOverlay, {
+  type PhPoolItemOverlayItem,
+  type PhPoolItemOverlayPool,
+} from "@comp/pageHome/ph-pool-item-overlay.vue";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
-import { shallowRef, watch } from "vue";
-import { useRouter } from "vue-router";
+import { computed, nextTick, ref, shallowRef, watch } from "vue";
 
 type UgHisCardProps = {
   /** 卡池信息 */
@@ -76,8 +88,15 @@ type UgcHisCardBox = {
   /** 数量 */
   cnt: number;
 };
+type UgHisDetail = {
+  /** 当前UP物品 */
+  item?: PhPoolItemOverlayItem;
+  /** 当前卡池 */
+  pool: PhPoolItemOverlayPool;
+  /** 卡池内物品ID列表 */
+  poolItemIds: Array<number>;
+};
 
-const router = useRouter();
 const props = defineProps<UgHisCardProps>();
 
 const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
@@ -88,6 +107,14 @@ const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
 ];
 const gachaRecords = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const gachaBoxes = shallowRef<Array<UgcHisCardBox>>([]);
+const detail = shallowRef<UgHisDetail>();
+const detailShow = ref<boolean>(false);
+const poolItemIds = computed<Array<number>>(() => [...props.pool.up5List, ...props.pool.up4List]);
+const poolItems = computed<Array<PhPoolItemOverlayItem>>(() =>
+  poolItemIds.value
+    .map((id) => getOverlayItem(id))
+    .filter((item): item is PhPoolItemOverlayItem => item !== undefined),
+);
 
 watch(
   () => props.uid,
@@ -123,17 +150,49 @@ function isPoolGachaType(x: string): x is TGApp.App.Gacha.PoolGachaType {
   return (<ReadonlyArray<string>>gachaTypeList).includes(x);
 }
 
-async function toWiki(id: number): Promise<void> {
-  const find = getWikiBrief(id);
-  if (!find) {
+async function openItemOverlay(id: number): Promise<void> {
+  const item = getOverlayItem(id);
+  if (item === undefined) {
     showSnackbar.warn("未找到对应角色或武器");
     return;
   }
-  if ("element" in find) {
-    await router.push({ name: "角色图鉴", params: { id: id.toString() } });
-    return;
-  }
-  await router.push({ name: "武器图鉴", params: { id: id.toString() } });
+  detail.value = { item, pool: getOverlayPool(), poolItemIds: poolItemIds.value };
+  await nextTick();
+  detailShow.value = true;
+}
+
+async function openPoolOverlay(): Promise<void> {
+  detail.value = { pool: getOverlayPool(), poolItemIds: poolItemIds.value };
+  await nextTick();
+  detailShow.value = true;
+}
+
+function handleSwitchItem(item: PhPoolItemOverlayItem): void {
+  const current = detail.value;
+  if (current === undefined) return;
+  detail.value = { ...current, item };
+}
+
+function getOverlayPool(): PhPoolItemOverlayPool {
+  return {
+    name: props.pool.name,
+    type: props.pool.type,
+    from: props.pool.from,
+    to: props.pool.to,
+    postId: props.pool.postId,
+  };
+}
+
+function getOverlayItem(id: number): PhPoolItemOverlayItem | undefined {
+  const find = getWikiBrief(id);
+  if (find === false) return undefined;
+  return {
+    id: find.id,
+    name: find.name,
+    star: find.star,
+    isCharacter: "element" in find,
+    icon: "element" in find ? `/WIKI/character/${find.id}.webp` : `/WIKI/weapon/${find.id}.webp`,
+  };
 }
 
 function getType(type: number): string {
@@ -184,7 +243,7 @@ function getBox(id: number): TItemBoxData {
       size: "80px",
       height: "80px",
       display: "inner",
-      clickable: false,
+      clickable: true,
       lt: `/icon/element/${bFind.element}元素.webp`,
       ltSize: "20px",
       innerHeight: 20,
@@ -322,6 +381,14 @@ function getBox2(item: UgcHisCardBox): TItemBoxData {
   font-family: var(--font-title);
   font-size: 20px;
   gap: 4px;
+}
+
+.ug-hisci-title {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--tgc-yellow-2);
+  }
 }
 
 .ug-hisci-tag {
