@@ -137,7 +137,7 @@ import {
   watch,
 } from "vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { WikiBookData, WikiMaterialData } from "@/data/index.js";
 
 type MaterialType = { cType: string; number: number };
 
@@ -218,11 +218,38 @@ function getSelectMaterials(): Array<TGApp.App.Material.WikiItem> {
 
 function sortData(data: Array<TGApp.App.Material.WikiItem>): void {
   sortMaterialsData.value = [...data].sort(
-    (a, b) => getBagTypeOrder(a.type) - getBagTypeOrder(b.type) || b.star - a.star || a.id - b.id,
+    (a, b) =>
+      b.star - a.star ||
+      getBagTypeOrder(a.type) - getBagTypeOrder(b.type) ||
+      compareBookMaterials(a, b) ||
+      a.type.localeCompare(b.type) ||
+      a.id - b.id,
   );
   curIndex.value = 0;
   curMaterial.value = sortMaterialsData.value[curIndex.value];
   resetRenderedMaterials();
+}
+
+function compareBookMaterials(
+  a: TGApp.App.Material.WikiItem,
+  b: TGApp.App.Material.WikiItem,
+): number {
+  const aIsBook = a.cType === "书籍";
+  const bIsBook = b.cType === "书籍";
+  if (!aIsBook || !bIsBook) return 0;
+  const aBook = WikiBookData.find((book) => book.id === a.id);
+  const bBook = WikiBookData.find((book) => book.id === b.id);
+  if (aBook === undefined || bBook === undefined) return 0;
+  return getBookGroupFirstId(aBook.vol, aBook.id) - getBookGroupFirstId(bBook.vol, bBook.id);
+}
+
+function getBookGroupFirstId(vol: string | undefined, fallbackId: number): number {
+  if (vol === undefined || vol.length === 0) return fallbackId;
+  return (
+    WikiBookData.filter((book) => book.vol === vol)
+      .map((book) => book.id)
+      .sort((a, b) => a - b)[0] ?? fallbackId
+  );
 }
 
 function compareMaterialTypes(a: string, b: string): number {
