@@ -116,6 +116,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108226,
+      "name": "薄荷果冻",
+      "star": 1
+    },
+    "special": {
+      "id": 108339,
+      "name": "饱腹感凝胶",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

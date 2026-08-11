@@ -131,6 +131,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108577,
+      "name": "香烤肋排",
+      "star": 2
+    },
+    "special": {
+      "id": 108604,
+      "name": "秘烤肋排",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

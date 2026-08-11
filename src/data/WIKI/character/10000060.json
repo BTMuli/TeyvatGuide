@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108195,
+      "name": "清炒虾仁",
+      "star": 3
+    },
+    "special": {
+      "id": 108389,
+      "name": "沾露虾仁",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

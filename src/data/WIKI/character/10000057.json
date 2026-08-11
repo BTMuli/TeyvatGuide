@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108292,
+      "name": "什锦炒面",
+      "star": 2
+    },
+    "special": {
+      "id": 108364,
+      "name": "强者之道",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

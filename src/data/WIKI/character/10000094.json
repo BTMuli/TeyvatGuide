@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108331,
+      "name": "日落鲷鱼烧",
+      "star": 3
+    },
+    "special": {
+      "id": 108668,
+      "name": "「时装秀」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

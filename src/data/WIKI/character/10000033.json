@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108050,
+      "name": "嘟嘟莲海鲜羹",
+      "star": 3
+    },
+    "special": {
+      "id": 108175,
+      "name": "极致一钓",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

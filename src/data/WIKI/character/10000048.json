@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108177,
+      "name": "蟹黄豆腐",
+      "star": 2
+    },
+    "special": {
+      "id": 108244,
+      "name": "「自有方圆」",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

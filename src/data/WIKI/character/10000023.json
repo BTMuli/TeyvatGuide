@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108075,
+      "name": "水煮黑背鲈",
+      "star": 3
+    },
+    "special": {
+      "id": 108135,
+      "name": "万民堂水煮鱼",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -131,6 +131,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108791,
+      "name": "钱汤馒头",
+      "star": 3
+    },
+    "special": {
+      "id": 108793,
+      "name": "「一梦治愈」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

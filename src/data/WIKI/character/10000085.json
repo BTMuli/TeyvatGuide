@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108552,
+      "name": "白淞鲜汤",
+      "star": 3
+    },
+    "special": {
+      "id": 108563,
+      "name": "「海鸟的驻足」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

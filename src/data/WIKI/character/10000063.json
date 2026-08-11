@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108370,
+      "name": "龙须面",
+      "star": 3
+    },
+    "special": {
+      "id": 108372,
+      "name": "连心面",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

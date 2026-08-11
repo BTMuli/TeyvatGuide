@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108534,
+      "name": "花果三重奏",
+      "star": 3
+    },
+    "special": {
+      "id": 108976,
+      "name": "「茶会多重奏」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

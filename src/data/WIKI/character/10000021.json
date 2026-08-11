@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108008,
+      "name": "烤肉排",
+      "star": 1
+    },
+    "special": {
+      "id": 108010,
+      "name": "侦察骑士烤肉！",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108716,
+      "name": "薄荷酱烤鱼",
+      "star": 1
+    },
+    "special": {
+      "id": 108838,
+      "name": "「暗渊之获」",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

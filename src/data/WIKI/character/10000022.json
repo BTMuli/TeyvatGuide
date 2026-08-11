@@ -132,6 +132,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108111,
+      "name": "风神杂烩菜",
+      "star": 3
+    },
+    "special": {
+      "id": 108113,
+      "name": "真·风神杂烩菜",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

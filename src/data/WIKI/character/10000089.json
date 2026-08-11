@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108606,
+      "name": "致水神",
+      "star": 3
+    },
+    "special": {
+      "id": 108611,
+      "name": "「普茹斯蒂司」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 132011,
+      "name": "至冬烤串",
+      "star": 3
+    },
+    "special": {
+      "id": 132016,
+      "name": "「弹无虚发」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

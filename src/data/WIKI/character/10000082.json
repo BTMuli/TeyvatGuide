@@ -123,6 +123,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108507,
+      "name": "琼玉果汤",
+      "star": 3
+    },
+    "special": {
+      "id": 108510,
+      "name": "清热降火汤",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

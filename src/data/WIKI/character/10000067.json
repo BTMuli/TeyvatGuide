@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108407,
+      "name": "口袋饼",
+      "star": 3
+    },
+    "special": {
+      "id": 108437,
+      "name": "憧憬",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108504,
+      "name": "脆饼珐提",
+      "star": 2
+    },
+    "special": {
+      "id": 108509,
+      "name": "悉心一作",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

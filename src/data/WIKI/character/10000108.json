@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108782,
+      "name": "清心花饼",
+      "star": 2
+    },
+    "special": {
+      "id": 108788,
+      "name": "玉剪着花",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

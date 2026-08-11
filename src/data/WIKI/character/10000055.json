@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108262,
+      "name": "兽骨拉面",
+      "star": 3
+    },
+    "special": {
+      "id": 108365,
+      "name": "常胜传说",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108153,
+      "name": "腌笃鲜",
+      "star": 3
+    },
+    "special": {
+      "id": 108173,
+      "name": "文火慢炖腌笃鲜",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

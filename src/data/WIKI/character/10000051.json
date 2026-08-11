@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108165,
+      "name": "月亮派",
+      "star": 4
+    },
+    "special": {
+      "id": 108245,
+      "name": "骇浪派",
+      "star": 4
+    }
+  },
   "talks": [
     {
       "group": "问候",

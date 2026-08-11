@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108392,
+      "name": "黄油鸡",
+      "star": 3
+    },
+    "special": {
+      "id": 108438,
+      "name": "摩拉急速来",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

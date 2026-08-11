@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108081,
+      "name": "杏仁豆腐",
+      "star": 2
+    },
+    "special": {
+      "id": 108137,
+      "name": "「美梦」",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

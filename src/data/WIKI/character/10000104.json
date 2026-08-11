@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108762,
+      "name": "山与海与天空",
+      "star": 3
+    },
+    "special": {
+      "id": 108777,
+      "name": "歇止一刻",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

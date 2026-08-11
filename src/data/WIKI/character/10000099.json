@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108681,
+      "name": "奶油炖鸡",
+      "star": 3
+    },
+    "special": {
+      "id": 108683,
+      "name": "香馥繁味",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

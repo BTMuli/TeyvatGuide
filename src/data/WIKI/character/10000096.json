@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108540,
+      "name": "生肉塔塔",
+      "star": 3
+    },
+    "special": {
+      "id": 108674,
+      "name": "炉火的往迹",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

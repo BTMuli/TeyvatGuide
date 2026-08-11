@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108325,
+      "name": "鸟蛋寿司",
+      "star": 1
+    },
+    "special": {
+      "id": 108340,
+      "name": "「奇策」",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

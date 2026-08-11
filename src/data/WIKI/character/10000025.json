@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108105,
+      "name": "水晶虾",
+      "star": 2
+    },
+    "special": {
+      "id": 108136,
+      "name": "江湖百味",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

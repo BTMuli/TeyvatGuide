@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108941,
+      "name": "蔬菜罐罐汤",
+      "star": 3
+    },
+    "special": {
+      "id": 108951,
+      "name": "夜守暖汤",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

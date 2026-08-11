@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108395,
+      "name": "烤肉卷",
+      "star": 2
+    },
+    "special": {
+      "id": 108679,
+      "name": "烤肉香香香卷",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

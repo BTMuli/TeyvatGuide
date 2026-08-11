@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108382,
+      "name": "炸肉排三明治",
+      "star": 2
+    },
+    "special": {
+      "id": 108390,
+      "name": "唯一的真相",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

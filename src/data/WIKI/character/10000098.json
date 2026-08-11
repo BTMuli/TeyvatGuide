@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108676,
+      "name": "桔香鸭胸肉",
+      "star": 2
+    },
+    "special": {
+      "id": 108678,
+      "name": "「猎获」",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

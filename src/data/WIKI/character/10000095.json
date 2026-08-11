@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108671,
+      "name": "泡泡舒芙蕾",
+      "star": 3
+    },
+    "special": {
+      "id": 108673,
+      "name": "膳食均衡餐",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -140,6 +140,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108029,
+      "name": "满足沙拉",
+      "star": 2
+    },
+    "special": {
+      "id": 108114,
+      "name": "至高的智慧（生活）",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

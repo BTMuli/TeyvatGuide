@@ -131,6 +131,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108002,
+      "name": "渔人吐司",
+      "star": 2
+    },
+    "special": {
+      "id": 108115,
+      "name": "鱼香吐司",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

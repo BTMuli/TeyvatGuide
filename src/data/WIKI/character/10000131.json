@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108968,
+      "name": "肉末酿豆腐",
+      "star": 3
+    },
+    "special": {
+      "id": 108974,
+      "name": "「镂金的宝箱」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

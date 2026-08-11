@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108328,
+      "name": "蛋包饭",
+      "star": 3
+    },
+    "special": {
+      "id": 108388,
+      "name": "蛋包饭圆舞曲",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

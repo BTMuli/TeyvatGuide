@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108404,
+      "name": "杂菇荟萃",
+      "star": 2
+    },
+    "special": {
+      "id": 108436,
+      "name": "巡林官精选",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

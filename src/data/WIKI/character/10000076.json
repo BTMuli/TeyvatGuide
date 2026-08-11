@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108449,
+      "name": "椰炭饼",
+      "star": 3
+    },
+    "special": {
+      "id": 108478,
+      "name": "古法秘制椰炭饼",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

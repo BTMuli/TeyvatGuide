@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108935,
+      "name": "香炸春卷",
+      "star": 3
+    },
+    "special": {
+      "id": 108949,
+      "name": "炸春鲜",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

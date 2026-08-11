@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108268,
+      "name": "干烧香鱼",
+      "star": 1
+    },
+    "special": {
+      "id": 108301,
+      "name": "雨奇晴好",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

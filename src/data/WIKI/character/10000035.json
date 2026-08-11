@@ -133,6 +133,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108132,
+      "name": "来来菜",
+      "star": 3
+    },
+    "special": {
+      "id": 108140,
+      "name": "没有未来菜",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108189,
+      "name": "素鲍鱼",
+      "star": 2
+    },
+    "special": {
+      "id": 108200,
+      "name": "幽幽大行军",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108859,
+      "name": "今日收获",
+      "star": 3
+    },
+    "special": {
+      "id": 108892,
+      "name": "林间低语",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108614,
+      "name": "圈圈圆圆",
+      "star": 3
+    },
+    "special": {
+      "id": 108619,
+      "name": "罪恶·非必要处理型",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

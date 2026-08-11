@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108807,
+      "name": "酪烤菇菇串",
+      "star": 2
+    },
+    "special": {
+      "id": 108810,
+      "name": "菇菇山脉（单人份）",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

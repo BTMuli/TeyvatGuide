@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108012,
+      "name": "野菇鸡肉串",
+      "star": 1
+    },
+    "special": {
+      "id": 108014,
+      "name": "果香串烤",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

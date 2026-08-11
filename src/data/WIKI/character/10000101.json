@@ -132,6 +132,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108743,
+      "name": "火焰炖肉",
+      "star": 3
+    },
+    "special": {
+      "id": 108745,
+      "name": "猎龙者的犒赏",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

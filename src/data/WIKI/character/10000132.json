@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108877,
+      "name": "转盘特调",
+      "star": 3
+    },
+    "special": {
+      "id": 108973,
+      "name": "转转特调",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

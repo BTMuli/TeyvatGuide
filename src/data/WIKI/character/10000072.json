@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108461,
+      "name": "阿如拌饭",
+      "star": 2
+    },
+    "special": {
+      "id": 108468,
+      "name": "关怀备至",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

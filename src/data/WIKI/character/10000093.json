@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108643,
+      "name": "红烧肉圆",
+      "star": 3
+    },
+    "special": {
+      "id": 108663,
+      "name": "四喜圆满",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108737,
+      "name": "粒果片片",
+      "star": 2
+    },
+    "special": {
+      "id": 108747,
+      "name": "齐齐整整",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

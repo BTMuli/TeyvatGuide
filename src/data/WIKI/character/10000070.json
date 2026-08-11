@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108458,
+      "name": "帕蒂沙兰布丁",
+      "star": 3
+    },
+    "special": {
+      "id": 108466,
+      "name": "婆娑一舞",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

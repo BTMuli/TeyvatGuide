@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108617,
+      "name": "缤纷马卡龙",
+      "star": 3
+    },
+    "special": {
+      "id": 108620,
+      "name": "「选你喜欢的！」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

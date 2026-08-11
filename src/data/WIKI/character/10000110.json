@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108713,
+      "name": "多彩之森",
+      "star": 2
+    },
+    "special": {
+      "id": 108809,
+      "name": "金牌健康餐",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

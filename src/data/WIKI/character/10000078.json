@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108481,
+      "name": "萨布兹炖肉",
+      "star": 3
+    },
+    "special": {
+      "id": 108486,
+      "name": "「理想情况」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

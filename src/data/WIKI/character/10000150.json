@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 132014,
+      "name": "雪原上的雪球花",
+      "star": 3
+    },
+    "special": {
+      "id": 132017,
+      "name": "「湖畔边的雪鹄」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

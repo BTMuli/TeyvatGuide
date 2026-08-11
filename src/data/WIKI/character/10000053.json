@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108256,
+      "name": "饭团",
+      "star": 2
+    },
+    "special": {
+      "id": 108303,
+      "name": "头晕回避术・改",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "动作",

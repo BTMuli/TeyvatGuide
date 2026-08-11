@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108722,
+      "name": "酸汁腌鱼",
+      "star": 2
+    },
+    "special": {
+      "id": 108776,
+      "name": "蜜汁腌鱼",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

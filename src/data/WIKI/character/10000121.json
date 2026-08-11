@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108868,
+      "name": "夏槲蛋糕",
+      "star": 3
+    },
+    "special": {
+      "id": 108898,
+      "name": "嘎吱嘎吱甜甜杯",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

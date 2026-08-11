@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108202,
+      "name": "四方和平",
+      "star": 3
+    },
+    "special": {
+      "id": 108213,
+      "name": "盛世太平",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

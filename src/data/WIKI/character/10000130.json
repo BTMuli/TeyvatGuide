@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108910,
+      "name": "白灵果派",
+      "star": 3
+    },
+    "special": {
+      "id": 108965,
+      "name": "「树荫下的虹彩」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

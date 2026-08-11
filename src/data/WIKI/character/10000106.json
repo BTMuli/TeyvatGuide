@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108779,
+      "name": "炎岩之颂",
+      "star": 3
+    },
+    "special": {
+      "id": 108787,
+      "name": "「簇火赞歌」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

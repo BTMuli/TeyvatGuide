@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108005,
+      "name": "提瓦特煎蛋",
+      "star": 1
+    },
+    "special": {
+      "id": 108116,
+      "name": "提瓦特焦蛋",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

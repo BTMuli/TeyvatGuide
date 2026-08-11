@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108740,
+      "name": "炸虾豆球",
+      "star": 3
+    },
+    "special": {
+      "id": 108746,
+      "name": "好运传递",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108056,
+      "name": "「堆高高」",
+      "star": 3
+    },
+    "special": {
+      "id": 108058,
+      "name": "「蒙德往事」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

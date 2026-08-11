@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108283,
+      "name": "绯樱饼",
+      "star": 3
+    },
+    "special": {
+      "id": 108300,
+      "name": "「红炉一点雪」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

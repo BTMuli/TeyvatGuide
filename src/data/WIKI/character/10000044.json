@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108084,
+      "name": "香嫩椒椒鸡",
+      "star": 2
+    },
+    "special": {
+      "id": 108174,
+      "name": "摇·滚·鸡！",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

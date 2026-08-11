@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108168,
+      "name": "冒险家蛋堡",
+      "star": 3
+    },
+    "special": {
+      "id": 108502,
+      "name": "测绘员蛋堡",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

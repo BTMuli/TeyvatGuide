@@ -132,6 +132,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108758,
+      "name": "苦水",
+      "star": 3
+    },
+    "special": {
+      "id": 108821,
+      "name": "「情感支持」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

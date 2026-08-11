@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108719,
+      "name": "塔塔可",
+      "star": 3
+    },
+    "special": {
+      "id": 108789,
+      "name": "「独门秘法」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

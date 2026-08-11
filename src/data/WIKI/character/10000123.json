@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108171,
+      "name": "北地苹果焖肉",
+      "star": 3
+    },
+    "special": {
+      "id": 108924,
+      "name": "苹果焖肉（初试版）",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

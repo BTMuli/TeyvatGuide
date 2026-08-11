@@ -123,6 +123,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108120,
+      "name": "莲子禽蛋羹",
+      "star": 2
+    },
+    "special": {
+      "id": 108373,
+      "name": "云遮玉",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

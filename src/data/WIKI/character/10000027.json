@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108093,
+      "name": "摩拉肉",
+      "star": 1
+    },
+    "special": {
+      "id": 108139,
+      "name": "乾坤摩拉肉",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108142,
+      "name": "山珍热卤面",
+      "star": 2
+    },
+    "special": {
+      "id": 108144,
+      "name": "山珍凉卤面",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

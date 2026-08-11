@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108455,
+      "name": "枣椰蜜糖",
+      "star": 3
+    },
+    "special": {
+      "id": 108474,
+      "name": "哈瓦玛玛兹",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

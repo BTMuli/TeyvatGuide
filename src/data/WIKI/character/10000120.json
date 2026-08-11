@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108862,
+      "name": "烟熏鱼排",
+      "star": 1
+    },
+    "special": {
+      "id": 108895,
+      "name": "长夜燃火",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

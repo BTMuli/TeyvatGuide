@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108265,
+      "name": "鸟蛋烧",
+      "star": 1
+    },
+    "special": {
+      "id": 108341,
+      "name": "永恒的信仰",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

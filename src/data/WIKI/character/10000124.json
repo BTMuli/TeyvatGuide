@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108871,
+      "name": "双果卷",
+      "star": 3
+    },
+    "special": {
+      "id": 108921,
+      "name": "「课后作业」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

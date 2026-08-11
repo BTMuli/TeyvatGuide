@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108493,
+      "name": "镀金锅",
+      "star": 3
+    },
+    "special": {
+      "id": 108501,
+      "name": "炽金之锅",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

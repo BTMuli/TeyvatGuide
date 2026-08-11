@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108129,
+      "name": "轻策农家菜",
+      "star": 3
+    },
+    "special": {
+      "id": 108487,
+      "name": "轻策家常菜",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

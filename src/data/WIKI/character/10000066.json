@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108298,
+      "name": "绯樱天妇罗",
+      "star": 3
+    },
+    "special": {
+      "id": 108387,
+      "name": "「静寂闲雅」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

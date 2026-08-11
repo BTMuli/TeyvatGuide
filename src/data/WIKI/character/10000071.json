@@ -132,6 +132,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108419,
+      "name": "米圆塔",
+      "star": 3
+    },
+    "special": {
+      "id": 108467,
+      "name": "决斗之魂",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

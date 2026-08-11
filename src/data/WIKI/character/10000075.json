@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108356,
+      "name": "鳗肉茶泡饭",
+      "star": 3
+    },
+    "special": {
+      "id": 108479,
+      "name": "真味茶泡饭",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108038,
+      "name": "白汁时蔬烩肉",
+      "star": 2
+    },
+    "special": {
+      "id": 108040,
+      "name": "辣味时蔬烩肉",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

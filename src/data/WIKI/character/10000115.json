@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108223,
+      "name": "鲜虾脆薯盏",
+      "star": 3
+    },
+    "special": {
+      "id": 108839,
+      "name": "「欢夜畅谈」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

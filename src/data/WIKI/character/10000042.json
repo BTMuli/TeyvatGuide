@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108108,
+      "name": "烤吃虎鱼",
+      "star": 1
+    },
+    "special": {
+      "id": 108145,
+      "name": "绝境求生烤鱼",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

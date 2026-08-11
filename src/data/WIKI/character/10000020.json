@@ -128,6 +128,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108046,
+      "name": "蒙德土豆饼",
+      "star": 3
+    },
+    "special": {
+      "id": 108048,
+      "name": "爪爪土豆饼",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

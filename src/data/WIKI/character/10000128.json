@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108035,
+      "name": "北地烟熏鸡",
+      "star": 2
+    },
+    "special": {
+      "id": 108958,
+      "name": "「酣畅」",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

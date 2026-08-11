@@ -127,6 +127,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108856,
+      "name": "白灵蛋卷",
+      "star": 3
+    },
+    "special": {
+      "id": 108889,
+      "name": "「轰雷电光斩！」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

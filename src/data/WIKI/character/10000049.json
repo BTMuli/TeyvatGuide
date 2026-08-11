@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108253,
+      "name": "三彩团子",
+      "star": 3
+    },
+    "special": {
+      "id": 108302,
+      "name": "夏祭游鱼",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "动作",

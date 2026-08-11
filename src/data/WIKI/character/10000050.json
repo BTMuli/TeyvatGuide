@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108277,
+      "name": "味噌汤",
+      "star": 1
+    },
+    "special": {
+      "id": 108354,
+      "name": "「暖意」",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

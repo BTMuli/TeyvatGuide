@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108646,
+      "name": "蜜汁叉烧",
+      "star": 1
+    },
+    "special": {
+      "id": 108664,
+      "name": "得闲饮茶",
+      "star": 1
+    }
+  },
   "talks": [
     {
       "group": "问候",

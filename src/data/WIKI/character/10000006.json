@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108016,
+      "name": "火火肉酱面",
+      "star": 2
+    },
+    "special": {
+      "id": 108018,
+      "name": "魔法肉酱面",
+      "star": 2
+    }
+  },
   "talks": [
     {
       "group": "问候",

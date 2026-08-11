@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108561,
+      "name": "晶螺糕",
+      "star": 3
+    },
+    "special": {
+      "id": 108565,
+      "name": "午后闲茶",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

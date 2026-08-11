@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108558,
+      "name": "果果软糖",
+      "star": 3
+    },
+    "special": {
+      "id": 108564,
+      "name": "方块戏法",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

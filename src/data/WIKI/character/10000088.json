@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108525,
+      "name": "炸鱼薯条",
+      "star": 3
+    },
+    "special": {
+      "id": 108612,
+      "name": "独家秘闻・美食专栏",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108319,
+      "name": "活力喵饭",
+      "star": 3
+    },
+    "special": {
+      "id": 108511,
+      "name": "朝气盒饭",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",

@@ -118,6 +118,18 @@
       "luc": null
     }
   ],
+  "food": {
+    "origin": {
+      "id": 108592,
+      "name": "百味一缕",
+      "star": 3
+    },
+    "special": {
+      "id": 108603,
+      "name": "「缥雨一滴」",
+      "star": 3
+    }
+  },
   "talks": [
     {
       "group": "问候",
