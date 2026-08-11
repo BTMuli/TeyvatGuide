@@ -265,7 +265,7 @@
               @click="openClient('daily_note')"
             >
               <template #prepend>
-                <img alt="daily_note" class="side-icon-menu" src="/icon/material/210.webp" />
+                <img alt="daily_note" class="side-icon-menu" src="/icon/material/106.webp" />
               </template>
             </v-list-item>
             <v-list-item :link="true" class="side-item-menu" href="/collection" title="收藏">
