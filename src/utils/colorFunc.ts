@@ -1,13 +1,13 @@
 /**
  * 颜色相关处理
- * @since Beta v0.9.1
+ * @since Beta v0.11.3
  */
 import { colord } from "colord";
 import { score } from "wcag-color";
 
 /**
  * 根据传入星级获取对应颜色
- * @since Beta v0.9.0
+ * @since Beta v0.11.3
  * @param star - 星级
  * @returns 颜色变量字符串
  */
@@ -22,6 +22,8 @@ export function getOdStarColor(star: number): string {
     case 2:
       return "var(--tgc-od-green)";
     case 1:
+      return "var(--tgc-od-white)";
+    case 0:
       return "var(--tgc-od-white)";
     default:
       return "var(--tgc-od-red)";
