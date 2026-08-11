@@ -105,7 +105,6 @@ pub fn handle_config_write(file: &mut File) {
 
 pub fn handle_rva_write(file: &mut File) {
   for key in [
-    "doCmd",
     "updateNormalProp",
     "newString",
     "findGameObject",
