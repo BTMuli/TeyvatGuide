@@ -291,8 +291,8 @@ async function shareMaterial(): Promise<void> {
   flex-wrap: wrap;
   align-items: center;
   color: var(--box-text-4);
+  gap: 8px 4px;
   font-size: 12px;
-  gap: 4px 12px;
   line-height: 16px;
 
   span {

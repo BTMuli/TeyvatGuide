@@ -1,24 +1,22 @@
 <template>
   <div class="twoc-container">
-    <div class="twoc-marker">
-      <v-icon size="18">mdi-all-inclusive</v-icon>
-      <span>转换配方</span>
-    </div>
-    <div class="twoc-recipe">
-      <template v-for="(item, index) in props.data.source" :key="item.id">
-        <span v-if="index > 0" class="twoc-separator">+</span>
-        <div :class="`star${item.star}`" :title="item.name" class="twoc-box">
-          <div class="twoc-left">
-            <img :src="`/icon/bg/${item.star}-Star.webp`" alt="" class="bg" />
-            <img :alt="item.name" :src="`/icon/material/${item.id}.webp`" class="icon" />
-          </div>
-          <div class="twoc-right">
-            <span class="twoc-title">{{ item.name }}</span>
-            <span class="twoc-count">×{{ item.count }}</span>
-          </div>
-          <div class="twoc-extra">{{ item.type }}·{{ item.id }}</div>
-        </div>
-      </template>
+    <v-icon>mdi-all-inclusive</v-icon>
+    <div
+      v-for="item in props.data.source"
+      :key="item.id"
+      :class="`star${item.star}`"
+      :title="item.name"
+      class="twoc-box"
+    >
+      <div class="twoc-left">
+        <img :src="`/icon/bg/${item.star}-Star.webp`" alt="" class="bg" />
+        <img :alt="item.name" :src="`/icon/material/${item.id}.webp`" class="icon" />
+      </div>
+      <div class="twoc-right">
+        <span class="twoc-title">{{ item.name }}</span>
+        <span class="twoc-count">×{{ item.count }}</span>
+      </div>
+      <div class="twoc-extra">{{ item.type }}·{{ item.id }}</div>
     </div>
   </div>
 </template>
@@ -29,38 +27,13 @@ const props = defineProps<TwoConvertProps>();
 </script>
 <style lang="scss" scoped>
 .twoc-container {
+  position: relative;
   display: flex;
   width: 100%;
   min-width: 0;
   align-items: center;
-  padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-3);
-  gap: 12px;
-}
-
-.twoc-marker {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  color: var(--box-text-4);
-  column-gap: 4px;
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.twoc-recipe {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.twoc-separator {
-  color: var(--box-text-4);
-  font-size: 16px;
+  column-gap: 8px;
 }
 
 .twoc-box {
@@ -107,9 +80,7 @@ const props = defineProps<TwoConvertProps>();
 }
 
 .twoc-title {
-  overflow: hidden;
   font-size: 14px;
-  text-overflow: ellipsis;
 }
 
 .twoc-count {
