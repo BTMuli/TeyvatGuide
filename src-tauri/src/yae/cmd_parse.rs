@@ -1,5 +1,5 @@
 //! Yae 命令解析处理
-//! @since Beta v0.10.4
+//! @since Beta v0.11.3
 
 use crate::yae::pt_ac::parse_achi_list;
 use crate::yae::pt_store::parse_store_list;
@@ -144,12 +144,12 @@ pub fn handle_prop_list(
   let v7 = prop_map.get(&10042).copied().unwrap_or(0.0);
   let v8 = prop_map.get(&10043).copied().unwrap_or(0.0);
   new_data.insert(204, v7 - v8);
-  // 206 = 10053
-  // let v9 = prop_map.get(&10053).copied().unwrap_or(0.0);
-  // new_data.insert(206, v9);
-  // 207 = 10058
-  // let va = prop_map.get(&10058).copied().unwrap_or(0.0);
-  // new_data.insert(207, va);
+  // 206 = 10053 玩具勋章
+  let v9 = prop_map.get(&10053).copied().unwrap_or(0.0);
+  new_data.insert(206, v9);
+  // 207 = 10058 千音币
+  let va = prop_map.get(&10058).copied().unwrap_or(0.0);
+  new_data.insert(207, va);
   // 转成 JSON 输出
   let json = serde_json::to_string_pretty(&new_data).unwrap();
   let payload = serde_json::json!({ "type": "prop", "data": json, "uid": uid });
