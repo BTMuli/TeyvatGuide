@@ -239,14 +239,13 @@ const displayMaterials = computed<Array<TargetMaterialView>>(() =>
   props.entry.items
     .map((item) => {
       const result = materialResultMap.value.get(item.materialId);
-      const ratio = result?.required
-        ? Math.min((result.owned + result.craftable) / result.required, 1)
-        : 0;
+      const prepared = result ? Math.min(result.owned + result.craftable, item.required) : 0;
+      const ratio = item.required > 0 ? prepared / item.required : 0;
       const progress = ratio * 100;
       return {
         fulfilled: progress >= 100,
         item,
-        prepared: Math.floor(item.required * ratio),
+        prepared,
         progress,
       };
     })
