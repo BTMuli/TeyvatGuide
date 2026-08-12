@@ -78,6 +78,7 @@ import PboConvert from "./pbo-convert.vue";
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
 type PboMaterialProps = {
+  /** 内容最大高度 */
   cmh?: string;
   data: MaterialInfo;
   topOffset?: string;

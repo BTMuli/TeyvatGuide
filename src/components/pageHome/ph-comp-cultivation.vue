@@ -6,7 +6,17 @@
         <div v-if="todayMaterials.length > 0" class="phc-today">
           <v-icon size="18">mdi-calendar-today</v-icon>
           <strong>今日可刷</strong>
-          <span>{{ todayMaterials.map((material) => material.name).join("、") }}</span>
+          <div class="phc-today-materials">
+            <div v-for="material in todayMaterials" :key="material.id" class="phc-today-material">
+              <UcItemIcon
+                :alt="material.name"
+                :icon="`/icon/material/${material.id}.webp`"
+                :size="28"
+                :star="material.star"
+              />
+              <strong class="phc-today-material-name">{{ material.name }}</strong>
+            </div>
+          </div>
         </div>
         <div class="phc-actions">
           <div class="phc-stats">
@@ -25,45 +35,15 @@
         </div>
       </div>
       <div v-if="activeEntries.length > 0" class="phc-targets">
-        <div
-          v-for="entry in activeEntries.slice(0, 5)"
+        <PhCompCultivationTarget
+          v-for="entry in activeEntries"
           :key="entry.id"
-          class="phc-target"
-          role="button"
-          tabindex="0"
-          title="查看养成目标"
-          @click="emits('target-click', entry)"
-          @keydown.enter.prevent="emits('target-click', entry)"
-          @keydown.space.prevent="emits('target-click', entry)"
-        >
-          <div class="phc-target-icon">
-            <img :alt="entry.name" :src="entry.icon" />
-          </div>
-          <div class="phc-target-info">
-            <span>{{ entry.name }}</span>
-            <small>
-              Lv.{{ entry.currentState.level }}
-              <v-icon size="12">mdi-arrow-right</v-icon>
-              Lv.{{ entry.targetState.level }}
-            </small>
-          </div>
-          <div
-            v-if="getMissingMaterials(entry).length > 0"
-            class="phc-target-materials"
-            title="缺失材料"
-          >
-            <img
-              v-for="material in getMissingMaterials(entry).slice(0, 4)"
-              :key="material.id"
-              :alt="material.name"
-              :src="`/icon/material/${material.id}.webp`"
-              :title="`${material.name}：缺少 ${material.missing.toLocaleString('zh-CN')}`"
-            />
-            <span v-if="getMissingMaterials(entry).length > 4">
-              +{{ getMissingMaterials(entry).length - 4 }}
-            </span>
-          </div>
-        </div>
+          :entry
+          :has-today-material="hasTodayMaterial(entry)"
+          :missing-materials="getMissingMaterials(entry)"
+          :uid="project.uid"
+          @target-click="emits('target-click', $event)"
+        />
       </div>
       <div v-else class="phc-empty compact">
         <v-icon size="32">mdi-check-circle-outline</v-icon>
@@ -81,12 +61,15 @@
 </template>
 
 <script lang="ts" setup>
+import PhCompCultivationTarget from "@comp/pageHome/ph-comp-cultivation-target.vue";
+import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useUserStore from "@store/user.js";
 import {
   aggregateEntryMaterials,
   buildCultivationResults,
+  getCalculateInventory,
   getServerDay,
   isMaterialAvailableToday,
 } from "@utils/cultivationPlan.js";
@@ -102,6 +85,7 @@ type PhCompCultivationEmits = {
     project: TGApp.Sqlite.Cultivation.Project | undefined,
     entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
     materials: Array<TGApp.App.UserCalc.ResultMaterial>,
+    displayEntries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
   ): void;
   (event: "success"): void;
   (event: "target-click", entry: TGApp.Sqlite.Cultivation.EntryWithItems): void;
@@ -113,19 +97,27 @@ const { account } = storeToRefs(useUserStore());
 const project = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const entries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const resultMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
+const inventory = shallowRef<ReadonlyMap<number, number>>(new Map());
 
-const activeEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
-  entries.value.filter((entry) => entry.status === "active"),
-);
 const missingKinds = computed<number>(
   () => resultMaterials.value.filter((material) => material.missing > 0).length,
 );
-const missingMaterialMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
+const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
   () =>
     new Map(
-      resultMaterials.value
-        .filter((material) => material.missing > 0)
-        .map((material) => [material.id, material]),
+      entries.value.map((entry) => [
+        entry.id,
+        buildCultivationResults(
+          entry.items.map((item) => ({ id: item.materialId, count: item.required })),
+          entry.calculationMode === "api" && entry.apiResult
+            ? getCalculateInventory(entry.apiResult.result)
+            : inventory.value,
+          WikiMaterialData,
+          entry.allowCrafting,
+          entry.useDust,
+          entry.useSolvent,
+        ),
+      ]),
     ),
 );
 const todayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
@@ -136,6 +128,9 @@ const todayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => 
       material.missing > 0 && isMaterialAvailableToday(material.id, serverDay, WikiMaterialData),
   );
 });
+const activeEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
+  entries.value.filter((entry) => entry.status === "active").sort(compareEntries),
+);
 
 onMounted(async () => {
   try {
@@ -150,16 +145,17 @@ onMounted(async () => {
       TSUserBagMaterial.getMaterial(project.value.uid),
     ]);
     entries.value = entryData;
+    inventory.value = new Map(bagData.map((material) => [material.id, material.count]));
     resultMaterials.value = buildCultivationResults(
       aggregateEntryMaterials(entryData),
-      new Map(bagData.map((material) => [material.id, material.count])),
+      inventory.value,
       WikiMaterialData,
       true,
       false,
       false,
     );
   } finally {
-    emits("data-loaded", project.value, entries.value, resultMaterials.value);
+    emits("data-loaded", project.value, entries.value, resultMaterials.value, activeEntries.value);
     emits("success");
   }
 });
@@ -171,9 +167,35 @@ async function openPlan(): Promise<void> {
 function getMissingMaterials(
   entry: TGApp.Sqlite.Cultivation.EntryWithItems,
 ): Array<TGApp.App.UserCalc.ResultMaterial> {
-  return entry.items
-    .map((item) => missingMaterialMap.value.get(item.materialId))
-    .filter((material): material is TGApp.App.UserCalc.ResultMaterial => material !== undefined);
+  return (entryMaterialResults.value.get(entry.id) ?? []).filter(
+    (material) => material.missing > 0,
+  );
+}
+
+function hasTodayMaterial(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean {
+  if (!project.value) return false;
+  const serverDay = getServerDay(project.value.timezone);
+  return entry.items.some(
+    (item) =>
+      (entryMaterialResults.value.get(entry.id)?.find((material) => material.id === item.materialId)
+        ?.missing ?? 0) > 0 &&
+      isMaterialAvailableToday(item.materialId, serverDay, WikiMaterialData),
+  );
+}
+
+function compareEntries(
+  a: TGApp.Sqlite.Cultivation.EntryWithItems,
+  b: TGApp.Sqlite.Cultivation.EntryWithItems,
+): number {
+  const aFulfilled = getMissingMaterials(a).length === 0;
+  const bFulfilled = getMissingMaterials(b).length === 0;
+  const fulfilledDiff = Number(aFulfilled) - Number(bFulfilled);
+  if (fulfilledDiff !== 0) return fulfilledDiff;
+  if (!aFulfilled) {
+    const todayDiff = Number(hasTodayMaterial(b)) - Number(hasTodayMaterial(a));
+    if (todayDiff !== 0) return todayDiff;
+  }
+  return a.sortOrder - b.sortOrder;
 }
 </script>
 
@@ -183,8 +205,6 @@ function getMissingMaterials(
 .phc-actions,
 .phc-stats,
 .phc-stat,
-.phc-target,
-.phc-target-info,
 .phc-today {
   display: flex;
 }
@@ -200,8 +220,7 @@ function getMissingMaterials(
 }
 
 .phc-box,
-.phc-stat,
-.phc-target-info {
+.phc-stat {
   flex-direction: column;
 }
 
@@ -254,84 +273,42 @@ function getMissingMaterials(
 .phc-targets {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.phc-target {
+.phc-today {
   min-width: 0;
+  flex: 1;
   align-items: center;
   padding: 8px 10px;
-  border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
-  background: var(--box-bg-1);
-  cursor: pointer;
-  gap: 10px;
-
-  &:focus-visible,
-  &:hover {
-    border-color: var(--tgc-od-orange);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-orange);
-  }
+  background: var(--common-shadow-t-1);
+  color: var(--tgc-od-orange);
+  gap: 8px;
 }
 
-.phc-target-materials {
+.phc-today-materials,
+.phc-today-material {
   display: flex;
-  min-width: 0;
-  flex: none;
   align-items: center;
-  margin-left: auto;
-  gap: 3px;
-
-  img {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--common-shadow-t-2);
-    object-fit: contain;
-  }
-
-  span {
-    color: var(--tgc-od-red);
-    font-family: var(--font-title);
-    font-size: 12px;
-  }
 }
 
-.phc-target-icon {
-  display: grid;
-  overflow: hidden;
-  width: 44px;
-  height: 44px;
-  flex: none;
-  border-radius: 8px;
-  background: var(--common-shadow-1);
-  place-items: center;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-}
-
-.phc-target-info {
+.phc-today-materials {
   min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-  > span {
-    overflow: hidden;
-    font-family: var(--font-title);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.phc-today-material {
+  gap: 4px;
+}
 
-  small {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-  }
+.phc-today-material-name {
+  color: var(--app-page-content);
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: normal;
+  white-space: nowrap;
 }
 
 .phc-empty {
@@ -348,25 +325,6 @@ function getMissingMaterials(
   }
 }
 
-.phc-today {
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--common-shadow-t-1);
-  color: var(--tgc-od-orange);
-  gap: 8px;
-
-  span {
-    overflow: hidden;
-    color: var(--app-page-content);
-    font-size: 13px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
 @media (width <= 600px) {
   .phc-overview {
     flex-direction: column;
@@ -380,6 +338,16 @@ function getMissingMaterials(
 
   .phc-stat {
     align-items: flex-start;
+  }
+
+  .phc-targets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 420px) {
+  .phc-targets {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

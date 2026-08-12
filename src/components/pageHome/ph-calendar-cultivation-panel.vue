@@ -34,8 +34,12 @@
           </span>
         </div>
         <div class="phco-source">
-          <img :alt="item.source.area" :src="`/icon/nation/${item.source.area}.webp`" />
-          <span>{{ item.source.area }} · {{ item.source.name }}</span>
+          <img
+            v-if="item.source.area"
+            :alt="item.source.area"
+            :src="`/icon/nation/${item.source.area}.webp`"
+          />
+          <span>{{ item.source.area ? `${item.source.area} · ` : "" }}{{ item.source.name }}</span>
         </div>
       </div>
       <div class="phco-actions" data-html2canvas-ignore="true">
@@ -61,26 +65,26 @@
     <div class="phco-entries">
       <article v-for="(entry, index) in entries" :key="entry.id" class="phco-entry">
         <div class="phco-entry-top">
-          <div class="phco-options">
-            <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
-              {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
-            </v-chip>
-            <v-chip
-              v-if="entry.allowCrafting"
-              color="var(--tgc-od-green)"
-              size="x-small"
-              variant="tonal"
-            >
-              允许合成
-            </v-chip>
-            <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
-            <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用异梦溶媒</v-chip>
-          </div>
           <div class="phco-entry-level">
             <span class="phco-entry-label">目标 {{ index + 1 }}</span>
             <strong>Lv.{{ entry.currentState.level }}</strong>
             <v-icon size="16">mdi-arrow-right</v-icon>
             <strong>Lv.{{ entry.targetState.level }}</strong>
+            <div class="phco-options">
+              <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
+                {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
+              </v-chip>
+              <v-chip
+                v-if="entry.allowCrafting"
+                color="var(--tgc-od-green)"
+                size="x-small"
+                variant="tonal"
+              >
+                允许合成
+              </v-chip>
+              <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
+              <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用异梦溶媒</v-chip>
+            </div>
           </div>
           <v-chip size="x-small" variant="outlined">优先 {{ entry.sortOrder + 1 }}</v-chip>
         </div>
@@ -106,15 +110,38 @@
         <div>
           <v-icon color="var(--tgc-od-orange)" size="18">mdi-calendar-today</v-icon>
           <strong>当日副本材料</strong>
+          <div
+            v-if="!isTraveler && materialDropDays.length > 0"
+            aria-label="材料可刷时间"
+            class="phco-material-days"
+          >
+            <v-chip
+              v-for="day in materialDropDays"
+              :key="day.value"
+              :color="day.isToday ? 'var(--tgc-od-orange)' : undefined"
+              :prepend-icon="day.isToday ? 'mdi-calendar-check-outline' : undefined"
+              :variant="day.isToday ? 'tonal' : 'outlined'"
+              size="small"
+            >
+              {{ day.label }}
+            </v-chip>
+          </div>
         </div>
-        <span class="phco-section-hint"> 目标需求为当前角色/武器合计，缺口为整个计划统计 </span>
+        <div class="phco-section-meta">
+          <span class="phco-section-hint">目标需求为当前角色/武器合计，缺口为整个计划统计</span>
+        </div>
       </div>
       <div
         v-if="targetMaterials.length > 0"
         :class="{ 'phco-materials--weapon': item.itemType === 'weapon' }"
         class="phco-materials"
       >
-        <article v-for="material in targetMaterials" :key="material.id" class="phco-material">
+        <article
+          v-for="material in targetMaterials"
+          :key="material.id"
+          :class="{ 'phco-material--today': material.isToday }"
+          class="phco-material"
+        >
           <UcItemIcon
             :alt="material.name"
             :icon="`/icon/material/${material.id}.webp`"
@@ -170,6 +197,9 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { computed, onMounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
+import { WikiMaterialData } from "@/data/index.js";
+import { getServerDay, isMaterialAvailableToday } from "@/utils/cultivationPlan.js";
+
 type PhCalendarCultivationPanelProps = {
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   item: TGApp.App.Calendar.Item;
@@ -180,7 +210,19 @@ type PhCalendarCultivationPanelEmits = { close: [] };
 
 type TargetMaterial = TGApp.App.Calendar.Material & {
   currentOwned: number;
+  isToday: boolean;
   targetRequired: number;
+};
+type DropDayLabel = { isToday: boolean; label: string; value: number };
+
+const dayLabels: Record<number, string> = {
+  1: "周一",
+  2: "周二",
+  3: "周三",
+  4: "周四",
+  5: "周五",
+  6: "周六",
+  7: "周日",
 };
 
 const props = defineProps<PhCalendarCultivationPanelProps>();
@@ -200,6 +242,10 @@ const itemTypeLabel = computed<string>(() =>
 const itemRarityLabel = computed<string>(() =>
   props.item.star === 105 ? "特殊五星" : `${props.item.star} 星`,
 );
+const isTraveler = computed<boolean>(
+  () => props.item.id === 10000005 || props.item.id === 10000007,
+);
+const serverDay = computed<number>(() => getServerDay(props.project?.timezone ?? 8));
 const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
   () => new Map(props.materials.map((material) => [material.id, material])),
 );
@@ -216,12 +262,34 @@ const targetMaterials = computed<Array<TargetMaterial>>(() =>
       return {
         ...material,
         currentOwned,
+        isToday:
+          isTraveler.value &&
+          isMaterialAvailableToday(material.id, serverDay.value, WikiMaterialData),
         targetRequired,
       };
     })
-    .filter((material) => material.targetRequired > 0)
+    .filter((material) => {
+      if (material.targetRequired <= 0) return false;
+      if (!isTraveler.value) return true;
+      return materialResultMap.value.get(material.id)?.type === "角色天赋素材";
+    })
     .sort((a, b) => b.star - a.star),
 );
+const materialDropDays = computed<Array<DropDayLabel>>(() => {
+  if (isTraveler.value) return [];
+  const days = new Set<number>();
+  if (props.item.dropDays.length > 0) {
+    for (const day of props.item.dropDays) days.add(day === 0 ? 7 : day);
+  }
+  const currentDay = serverDay.value || 7;
+  return [...days]
+    .sort((a, b) => a - b)
+    .map((day) => ({
+      isToday: day === currentDay,
+      label: dayLabels[day] ?? `周${day}`,
+      value: day,
+    }));
+});
 const shareCaption = computed<string>(() => `${props.item.name} · 养成目标`);
 
 function formatCount(count: number): string {
@@ -437,6 +505,21 @@ async function openPlan(): Promise<void> {
     gap: 6px;
   }
 
+  .phco-section-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .phco-material-days {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+
   .phco-section-hint {
     color: var(--common-text-sub);
     font-size: 12px;
@@ -447,7 +530,7 @@ async function openPlan(): Promise<void> {
 .phco-materials {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
 
   &.phco-materials--weapon {
     grid-template-columns: repeat(2, 1fr);
@@ -461,6 +544,12 @@ async function openPlan(): Promise<void> {
   border-radius: 8px;
   background: var(--common-shadow-t-1);
   gap: 8px;
+
+  &.phco-material--today {
+    border-color: var(--tgc-od-orange);
+    background: var(--common-shadow-t-1);
+    box-shadow: inset 3px 0 var(--tgc-od-orange);
+  }
 }
 
 .phco-material-info {
@@ -523,6 +612,10 @@ async function openPlan(): Promise<void> {
 
     .phco-section-hint {
       text-align: left;
+    }
+
+    .phco-section-meta {
+      justify-content: flex-start;
     }
   }
 }

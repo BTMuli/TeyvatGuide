@@ -110,10 +110,14 @@ import ToCalendar from "./ph-calendar-overlay.vue";
 import THomeCard from "./ph-comp-card.vue";
 import PhCompCultivation from "./ph-comp-cultivation.vue";
 
-import { AppCalendarData } from "@/data/index.js";
+import { AppCalendarData, WikiMaterialData } from "@/data/index.js";
 
 type BtnItem = { week: 1 | 2 | 3 | 4 | 5 | 6 | 7; text: string };
 type TCalendarEmits = { success: [] };
+type CultivationNavigationItem = {
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems;
+  item: TGApp.App.Calendar.Item;
+};
 const btnText: Array<BtnItem> = [
   { week: 7, text: "周日" },
   { week: 1, text: "周一" },
@@ -137,6 +141,7 @@ const showCalendar = ref<boolean>(true);
 const selectedType = ref<"character" | "weapon">("character");
 const cultivationProject = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const cultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
+const cultivationDisplayEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const cultivationMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
 const selectedCultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const gridCols = ref<number>(8);
@@ -165,10 +170,23 @@ const renderItems = computed<Array<TGApp.App.Calendar.Item>>(() => {
   return calendarTotal.value.slice((currentPage - 1) * visible.value, currentPage * visible.value);
 });
 const selectedItem = shallowRef<TGApp.App.Calendar.Item>();
+const selectedCultivationEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
 const gridStyle = computed<Record<string, string>>(() => ({
   gridTemplateColumns: `repeat(${gridCols.value}, ${ITEM_SIZE}px)`,
 }));
+const activeCultivationItems = computed<Array<CultivationNavigationItem>>(() =>
+  cultivationDisplayEntries.value
+    .filter((entry) => entry.status === "active")
+    .map((entry) => {
+      const item = getCalendarItem(entry);
+      return item ? { entry, item } : undefined;
+    })
+    .filter((item): item is CultivationNavigationItem => item !== undefined),
+);
 const switchItems = computed<Array<TGApp.App.Calendar.Item>>(() => {
+  if (selectedCultivationEntry.value !== undefined) {
+    return activeCultivationItems.value.map(({ item }) => item);
+  }
   const current = selectedItem.value;
   if (current === undefined) return calendarTotal.value;
   if (calendarTotal.value.some((item) => item.id === current.id)) return calendarTotal.value;
@@ -219,7 +237,11 @@ function switchDay(day: number): void {
 function switchCalendarItem(isNext: boolean): void {
   const current = selectedItem.value;
   if (current === undefined) return;
-  const currentIndex = switchItems.value.findIndex((item) => item.id === current.id);
+  const selectedEntry = selectedCultivationEntry.value;
+  const cultivationNavigation = selectedEntry !== undefined;
+  const currentIndex = cultivationNavigation
+    ? activeCultivationItems.value.findIndex(({ entry }) => entry.id === selectedEntry.id)
+    : switchItems.value.findIndex((item) => item.id === current.id);
   if (currentIndex === -1) return;
   const nextIndex = currentIndex + (isNext ? 1 : -1);
   if (nextIndex < 0) {
@@ -230,10 +252,15 @@ function switchCalendarItem(isNext: boolean): void {
     showSnackbar.warn("已经是最后一个了");
     return;
   }
-  const nextItem = switchItems.value[nextIndex];
-  const entries = getCultivationEntries(nextItem);
+  const nextCultivation = cultivationNavigation
+    ? activeCultivationItems.value[nextIndex]
+    : undefined;
+  const nextItem = nextCultivation?.item ?? switchItems.value[nextIndex];
+  if (nextItem === undefined) return;
+  const entries = nextCultivation ? [nextCultivation.entry] : getCultivationEntries(nextItem);
   selectedItem.value = nextItem;
   selectedCultivationEntries.value = entries;
+  selectedCultivationEntry.value = nextCultivation?.entry;
   syncCalendarPage(nextItem);
 }
 
@@ -252,19 +279,22 @@ async function selectCultivationEntry(
   entry: TGApp.Sqlite.Cultivation.EntryWithItems,
 ): Promise<void> {
   const itemType = entry.type === "avatar" ? "character" : "weapon";
-  const item = AppCalendarData.find(
-    (calendarItem) => calendarItem.itemType === itemType && calendarItem.id === entry.itemId,
-  );
+  const item =
+    AppCalendarData.find(
+      (calendarItem) => calendarItem.itemType === itemType && calendarItem.id === entry.itemId,
+    ) ?? getCalendarItem(entry);
   if (!item) return;
-  await openCalendarItem(item, [entry]);
+  await openCalendarItem(item, [entry], entry);
 }
 
 async function openCalendarItem(
   item: TGApp.App.Calendar.Item,
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  cultivationEntry?: TGApp.Sqlite.Cultivation.EntryWithItems,
 ): Promise<void> {
   selectedItem.value = item;
   selectedCultivationEntries.value = entries;
+  selectedCultivationEntry.value = cultivationEntry;
   await nextTick();
   showItem.value = true;
 }
@@ -278,9 +308,11 @@ function handleCultivationData(
   project: TGApp.Sqlite.Cultivation.Project | undefined,
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
   materials: Array<TGApp.App.UserCalc.ResultMaterial>,
+  displayEntries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
 ): void {
   cultivationProject.value = project;
   cultivationEntries.value = entries;
+  cultivationDisplayEntries.value = displayEntries;
   cultivationMaterials.value = materials;
 }
 
@@ -296,6 +328,35 @@ function getCultivationEntries(
   return cultivationEntries.value.filter(
     (entry) => entry.status === "active" && entry.type === entryType && entry.itemId === item.id,
   );
+}
+
+function getCalendarItem(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): TGApp.App.Calendar.Item | undefined {
+  const itemType = entry.type === "avatar" ? "character" : "weapon";
+  const item = AppCalendarData.find(
+    (calendarItem) => calendarItem.itemType === itemType && calendarItem.id === entry.itemId,
+  );
+  if (item) return item;
+  if (entry.type !== "avatar") return undefined;
+  if (entry.itemId !== 10000005 && entry.itemId !== 10000007) return undefined;
+  const element = /[·](.+)$/.exec(entry.name)?.[1];
+  const materials = entry.items
+    .map((itemEntry) => WikiMaterialData.find((material) => material.id === itemEntry.materialId))
+    .filter((material): material is TGApp.App.Material.WikiItem => material !== undefined)
+    .map((material) => ({ id: material.id, name: material.name, star: material.star }));
+  return {
+    id: entry.itemId,
+    contentId: 0,
+    dropDays: [],
+    name: entry.name,
+    itemType,
+    star: entry.star,
+    weapon: "单手剑",
+    element,
+    materials,
+    source: { index: 0, area: "", name: "养成计划" },
+  };
 }
 
 function emitSuccessWhenReady(): void {
