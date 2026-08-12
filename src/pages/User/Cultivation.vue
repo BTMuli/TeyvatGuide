@@ -270,12 +270,14 @@
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
 import UcPlanTargetList from "@comp/userCalc/uc-plan-target-list.vue";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
 import gameEnum from "@enum/game.js";
+import recordReq from "@req/recordReq.js";
 import takumiReq from "@req/takumiReq.js";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
@@ -336,6 +338,10 @@ type ApiRefreshTarget = {
   avatar: TGApp.Game.Calculate.SyncAvatar;
   avatarEntry?: TGApp.Sqlite.Cultivation.EntryWithItems;
   weaponEntry?: TGApp.Sqlite.Cultivation.EntryWithItems;
+};
+type LocalAvatarRefreshResult = {
+  roles: Array<TGApp.Sqlite.Character.TableTrans>;
+  refreshedIds: ReadonlySet<number>;
 };
 
 const { account, cookie } = storeToRefs(useUserStore());
@@ -1961,33 +1967,96 @@ function createWeaponRefreshInput(
   };
 }
 
+async function refreshLocalAvatarData(
+  uid: number,
+  avatarEntries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  refreshAccount: TGApp.App.Account.RfAc | null,
+): Promise<LocalAvatarRefreshResult> {
+  const targetIds = new Set(avatarEntries.map((entry) => entry.itemId));
+  if (!refreshAccount) {
+    await showLoading.update("未找到可用 CK，读取本地角色数据");
+    const cachedRoles = await TSUserAvatar.getAvatars(uid);
+    return {
+      roles: cachedRoles,
+      refreshedIds: new Set(cachedRoles.map((role) => role.cid).filter((id) => targetIds.has(id))),
+    };
+  }
+
+  const { account: gameAccount, cookie: gameCookie } = refreshAccount;
+  await showLoading.update("正在刷新首页数据");
+  const indexResponse = await recordReq.index(gameCookie, gameAccount, 1);
+  if (indexResponse.retcode !== 0) {
+    throw new Error(`[${indexResponse.retcode}] ${indexResponse.message}`);
+  }
+  await TSUserRecord.saveRecord(uid, indexResponse.data);
+
+  await showLoading.update("正在获取角色列表");
+  const listResponse = await recordReq.character.list(gameCookie, gameAccount);
+  if (listResponse.retcode !== 0) {
+    throw new Error(`[${listResponse.retcode}] ${listResponse.message}`);
+  }
+  const refreshedIds = new Set(
+    listResponse.data.list.map((avatar) => avatar.id).filter((avatarId) => targetIds.has(avatarId)),
+  );
+  if (refreshedIds.size === 0) {
+    await showLoading.update("计划中的角色均未在最新角色列表中找到");
+    return { roles: await TSUserAvatar.getAvatars(uid), refreshedIds };
+  }
+
+  await showLoading.update(`正在获取 ${refreshedIds.size} 个计划角色详情`);
+  const detailResponse = await recordReq.character.detail(
+    gameCookie,
+    gameAccount,
+    Array.from(refreshedIds, (avatarId) => avatarId.toString()),
+  );
+  if (detailResponse.retcode !== 0) {
+    throw new Error(`[${detailResponse.retcode}] ${detailResponse.message}`);
+  }
+  await showLoading.update("正在保存计划角色详情");
+  await TSUserAvatar.saveAvatars(String(uid), detailResponse.data.list);
+  return { roles: await TSUserAvatar.getAvatars(uid), refreshedIds };
+}
+
 async function refreshPlanEntries(): Promise<void> {
   const project = currentProject.value;
   if (!project) return;
   planLoading.value = true;
   let refreshedCount = 0;
   try {
+    await showLoading.start(`正在刷新养成计划“${project.name}”`, `UID：${project.uid}`);
     const localEntries = planEntries.value.filter((entry) => entry.calculationMode === "bag");
+    const localAvatarEntries = localEntries.filter((entry) => entry.type === "avatar");
     const apiEntries = planEntries.value.filter((entry) => entry.calculationMode === "api");
-    const [roleData, materialData, weaponData] =
-      localEntries.length > 0
-        ? await Promise.all([
-            TSUserAvatar.getAvatars(project.uid),
-            TSUserBagMaterial.getMaterial(project.uid),
-            TSUserBagWeapon.getWeapon(project.uid),
-          ])
-        : [[], [], []];
+    const refreshAccount =
+      localAvatarEntries.length > 0 || apiEntries.length > 0
+        ? await resolveApiAccount(project.uid, "Cultivation.refreshPlanEntries")
+        : null;
+    const localAvatarData =
+      localAvatarEntries.length > 0
+        ? await refreshLocalAvatarData(project.uid, localAvatarEntries, refreshAccount)
+        : undefined;
+    const roleData =
+      localAvatarData?.roles ??
+      (localEntries.some((entry) => entry.type === "weapon")
+        ? await TSUserAvatar.getAvatars(project.uid)
+        : []);
+    let materialData: Array<TGApp.Sqlite.UserBag.MaterialTable> = [];
+    let weaponData: Array<TGApp.Sqlite.UserBag.WeaponTable> = [];
+    if (localEntries.length > 0) {
+      await showLoading.update("正在读取本地背包材料");
+      [materialData, weaponData] = await Promise.all([
+        TSUserBagMaterial.getMaterial(project.uid),
+        TSUserBagWeapon.getWeapon(project.uid),
+      ]);
+    }
     if (currentUid.value === project.uid && localEntries.length > 0) {
       bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
       bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
     }
     const roleMap = new Map(roleData.map((role) => [role.cid, role]));
     const weaponOptionsForRefresh = buildWeaponOptions(weaponData, roleData);
-    const apiAccount =
-      apiEntries.length > 0
-        ? await resolveApiAccount(project.uid, "Cultivation.refreshPlanEntries")
-        : null;
-    const syncAvatarData = apiAccount ? await requestSyncAvatars(apiAccount) : [];
+    await showLoading.update("正在准备养成目标刷新数据");
+    const syncAvatarData = refreshAccount ? await requestSyncAvatars(refreshAccount) : [];
     const apiTargets = createApiRefreshTargets(apiEntries, syncAvatarData);
     const apiTargetMap = new Map<string, ApiRefreshTarget>();
     for (const target of apiTargets) {
@@ -1996,21 +2065,29 @@ async function refreshPlanEntries(): Promise<void> {
     }
 
     const processedEntryIds = new Set<string>();
+    const localRefreshInputs: Array<TGApp.Sqlite.Cultivation.RefreshEntryInput> = [];
     for (const entry of planEntries.value) {
       if (processedEntryIds.has(entry.id)) continue;
       if (entry.calculationMode === "bag") {
         const input =
           entry.type === "avatar"
             ? await (async () => {
-                const role = roleMap.get(entry.itemId);
+                const role = localAvatarData?.refreshedIds.has(entry.itemId)
+                  ? roleMap.get(entry.itemId)
+                  : undefined;
                 return role ? await createAvatarRefreshInput(entry, role) : undefined;
               })()
             : createWeaponRefreshInput(entry, weaponOptionsForRefresh);
         processedEntryIds.add(entry.id);
-        if (!input) continue;
-        await TSCultivationPlan.refreshEntries(project.id, [input]);
-        refreshedCount += 1;
+        if (input) localRefreshInputs.push(input);
         continue;
+      }
+
+      if (localRefreshInputs.length > 0) {
+        await showLoading.update(`正在保存 ${localRefreshInputs.length} 个本地目标`);
+        await TSCultivationPlan.refreshEntries(project.id, localRefreshInputs);
+        refreshedCount += localRefreshInputs.length;
+        localRefreshInputs.length = 0;
       }
 
       const target = apiTargetMap.get(entry.id);
@@ -2018,8 +2095,9 @@ async function refreshPlanEntries(): Promise<void> {
       if (!target) continue;
       if (target.avatarEntry) processedEntryIds.add(target.avatarEntry.id);
       if (target.weaponEntry) processedEntryIds.add(target.weaponEntry.id);
-      if (!apiAccount) continue;
-      const response = await calculateApiRefreshTarget(apiAccount, target);
+      if (!refreshAccount) continue;
+      await showLoading.update(`正在计算接口目标：${entry.name}`);
+      const response = await calculateApiRefreshTarget(refreshAccount, target);
       const itemResult = response.items[0];
       if (!itemResult) continue;
       const inputs = createApiRefreshInputsFromResult(target, itemResult);
@@ -2030,11 +2108,17 @@ async function refreshPlanEntries(): Promise<void> {
       });
       refreshedCount += inputs.length;
     }
+    if (localRefreshInputs.length > 0) {
+      await showLoading.update(`正在保存 ${localRefreshInputs.length} 个本地目标`);
+      await TSCultivationPlan.refreshEntries(project.id, localRefreshInputs);
+      refreshedCount += localRefreshInputs.length;
+    }
 
     if (refreshedCount === 0) {
       showSnackbar.warn("最新存档中未找到可刷新的计划目标");
       return;
     }
+    await showLoading.update("正在重新加载养成计划数据");
     planEntries.value = await TSCultivationPlan.getEntries(project.id);
     showSnackbar.success(
       `已刷新 ${refreshedCount} 个目标${refreshedCount < planEntries.value.length ? "，其余目标缺少最新数据或对应 CK" : ""}`,
@@ -2043,6 +2127,7 @@ async function refreshPlanEntries(): Promise<void> {
     planEntries.value = await TSCultivationPlan.getEntries(project.id);
     showSnackbar.error(`刷新计划目标失败：${TGHttps.getErrMsg(error)}`);
   } finally {
+    await showLoading.end();
     planLoading.value = false;
   }
 }
