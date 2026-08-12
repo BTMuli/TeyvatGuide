@@ -270,7 +270,7 @@ async function getMaterial(
 async function saveYaeData(
   uid: number,
   list: Array<TGApp.Plugins.Yae.BagItemMaterial>,
-): Promise<number> {
+): Promise<{ total: number; skip: number }> {
   let skip = 0;
   const ids = new Set<number>(getValidMIds());
   for (const id of YAE_PROP_MATERIAL_IDS) ids.delete(id);
@@ -294,7 +294,7 @@ async function saveYaeData(
     }
     await insertMaterial(uid, item.item_id, item.info.count, local.records);
   }
-  return skip;
+  return { total: newList.length, skip: skip };
 }
 
 /**

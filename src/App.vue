@@ -252,9 +252,12 @@ async function loadYaeBagMaterial(
   uid: string,
   list: Array<TGApp.Plugins.Yae.BagItemMaterial>,
 ): Promise<void> {
-  const skip = await TSUserBagMaterial.saveYaeData(Number(uid), list);
-  await TGLogger.Info(`[App][loadYaeBagMaterial] UID:${uid}, Skip:${skip}, Total:${list.length}`);
-  showSnackbar.success(`成功导入材料 ${list.length - skip} 条，跳过 ${skip} 条`);
+  const result = await TSUserBagMaterial.saveYaeData(Number(uid), list);
+  const changed = result.total - result.skip;
+  await TGLogger.Info(
+    `[App][loadYaeBagMaterial] UID:${uid}, Changed:${changed}, Skip:${result.skip}, Total:${result.total}`,
+  );
+  showSnackbar.success(`成功导入材料 ${changed} 条，跳过 ${result.skip} 条`);
 }
 
 /**
