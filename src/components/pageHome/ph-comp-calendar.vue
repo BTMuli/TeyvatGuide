@@ -244,7 +244,8 @@ function syncCalendarPage(item: TGApp.App.Calendar.Item): void {
 }
 
 async function selectItem(item: TGApp.App.Calendar.Item): Promise<void> {
-  await openCalendarItem(item, getCultivationEntries(item));
+  const entries = isCultivationTarget(item) ? getCultivationEntries(item) : [];
+  await openCalendarItem(item, entries);
 }
 
 async function selectCultivationEntry(

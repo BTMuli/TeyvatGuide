@@ -7,14 +7,31 @@
         <div class="phco-title-row">
           <h2>{{ item.name }}</h2>
           <v-chip color="var(--tgc-od-orange)" size="small" variant="tonal">
-            <v-icon start size="15">mdi-star</v-icon>
+            <v-icon size="15" start>mdi-star</v-icon>
             养成目标
           </v-chip>
+          <v-chip v-if="project" size="small" variant="tonal">
+            <v-icon size="15" start>mdi-clipboard-text-outline</v-icon>
+            {{ project.name }} · UID {{ project.uid }}
+          </v-chip>
         </div>
-        <div v-if="project" class="phco-project">
-          <v-icon size="16">mdi-clipboard-text-outline</v-icon>
-          <span class="phco-project-name">{{ project.name }}</span>
-          <span class="phco-project-uid">UID {{ project.uid }}</span>
+        <div class="phco-attributes">
+          <span>
+            <v-icon size="16">{{ itemTypeIcon }}</v-icon>
+            {{ itemTypeLabel }}
+          </span>
+          <span>
+            <v-icon color="var(--tgc-od-orange)" size="16">mdi-star</v-icon>
+            {{ itemRarityLabel }}
+          </span>
+          <span v-if="item.element">
+            <img :alt="`${item.element}元素`" :src="`/icon/element/${item.element}元素.webp`" />
+            {{ item.element }}元素
+          </span>
+          <span>
+            <img :alt="item.weapon" :src="`/icon/weapon/${item.weapon}.webp`" class="icon-filter" />
+            {{ item.weapon }}
+          </span>
         </div>
         <div class="phco-source">
           <img :alt="item.source.area" :src="`/icon/nation/${item.source.area}.webp`" />
@@ -44,7 +61,22 @@
     <div class="phco-entries">
       <article v-for="(entry, index) in entries" :key="entry.id" class="phco-entry">
         <div class="phco-entry-top">
-          <div>
+          <div class="phco-options">
+            <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
+              {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
+            </v-chip>
+            <v-chip
+              v-if="entry.allowCrafting"
+              color="var(--tgc-od-green)"
+              size="x-small"
+              variant="tonal"
+            >
+              允许合成
+            </v-chip>
+            <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
+            <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用异梦溶媒</v-chip>
+          </div>
+          <div class="phco-entry-level">
             <span class="phco-entry-label">目标 {{ index + 1 }}</span>
             <strong>Lv.{{ entry.currentState.level }}</strong>
             <v-icon size="16">mdi-arrow-right</v-icon>
@@ -61,24 +93,10 @@
             size="x-small"
             variant="tonal"
           >
-            {{ talent.name }} Lv.{{ talent.level }}
+            {{ talent.name }} Lv.{{ talent.level }}（当前 Lv.{{
+              getCurrentTalentLevel(entry, talent)
+            }}）
           </v-chip>
-        </div>
-
-        <div class="phco-options">
-          <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
-            {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
-          </v-chip>
-          <v-chip
-            v-if="entry.allowCrafting"
-            color="var(--tgc-od-green)"
-            size="x-small"
-            variant="tonal"
-          >
-            允许合成
-          </v-chip>
-          <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
-          <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用异梦溶媒</v-chip>
         </div>
       </article>
     </div>
@@ -91,8 +109,12 @@
         </div>
         <span class="phco-section-hint"> 目标需求为当前角色/武器合计，缺口为整个计划统计 </span>
       </div>
-      <div v-if="targetMaterials.length > 0" class="phco-materials">
-        <div v-for="material in targetMaterials" :key="material.id" class="phco-material">
+      <div
+        v-if="targetMaterials.length > 0"
+        :class="{ 'phco-materials--weapon': item.itemType === 'weapon' }"
+        class="phco-materials"
+      >
+        <article v-for="material in targetMaterials" :key="material.id" class="phco-material">
           <UcItemIcon
             :alt="material.name"
             :icon="`/icon/material/${material.id}.webp`"
@@ -101,20 +123,20 @@
           />
           <div class="phco-material-info">
             <strong>{{ material.name }}</strong>
-            <span class="phco-material-required">
-              目标需 {{ formatCount(material.targetRequired) }}
-            </span>
+            <span class="phco-material-rarity">{{ material.star }} 星素材</span>
           </div>
           <v-chip
-            :color="material.planMissing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
+            :color="
+              material.currentOwned < material.targetRequired
+                ? 'var(--tgc-od-red)'
+                : 'var(--tgc-od-green)'
+            "
             size="small"
             variant="tonal"
           >
-            {{
-              material.planMissing > 0 ? `计划缺 ${formatCount(material.planMissing)}` : "计划已备"
-            }}
+            {{ formatCount(material.currentOwned) }}/{{ formatCount(material.targetRequired) }}
           </v-chip>
-        </div>
+        </article>
       </div>
       <div v-else class="phco-material-empty">
         <v-icon size="24">mdi-check-circle-outline</v-icon>
@@ -157,7 +179,7 @@ type PhCalendarCultivationPanelProps = {
 type PhCalendarCultivationPanelEmits = { close: [] };
 
 type TargetMaterial = TGApp.App.Calendar.Material & {
-  planMissing: number;
+  currentOwned: number;
   targetRequired: number;
 };
 
@@ -169,6 +191,15 @@ const footerRef = useTemplateRef<HTMLElement>("footerRef");
 const version = ref<string>();
 
 const itemIcon = computed<string>(() => `/WIKI/${props.item.itemType}/${props.item.id}.webp`);
+const itemTypeIcon = computed<string>(() =>
+  props.item.itemType === "character" ? "mdi-account-outline" : "mdi-sword",
+);
+const itemTypeLabel = computed<string>(() =>
+  props.item.itemType === "character" ? "角色" : "武器",
+);
+const itemRarityLabel = computed<string>(() =>
+  props.item.star === 105 ? "特殊五星" : `${props.item.star} 星`,
+);
 const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
   () => new Map(props.materials.map((material) => [material.id, material])),
 );
@@ -181,18 +212,31 @@ const targetMaterials = computed<Array<TargetMaterial>>(() =>
           (entry.items.find((entryItem) => entryItem.materialId === material.id)?.required ?? 0),
         0,
       );
+      const currentOwned = materialResultMap.value.get(material.id)?.owned ?? 0;
       return {
         ...material,
-        planMissing: materialResultMap.value.get(material.id)?.missing ?? 0,
+        currentOwned,
         targetRequired,
       };
     })
-    .filter((material) => material.targetRequired > 0),
+    .filter((material) => material.targetRequired > 0)
+    .sort((a, b) => b.star - a.star),
 );
 const shareCaption = computed<string>(() => `${props.item.name} · 养成目标`);
 
 function formatCount(count: number): string {
   return count.toLocaleString("zh-CN");
+}
+
+function getCurrentTalentLevel(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  talent: TGApp.Sqlite.Cultivation.TalentState,
+): number {
+  return (
+    entry.currentState.talents.find((item) => item.id === talent.id)?.level ??
+    entry.currentState.talents.find((item) => item.name === talent.name)?.level ??
+    1
+  );
 }
 
 onMounted(async () => {
@@ -210,14 +254,14 @@ async function shareCultivation(): Promise<void> {
   element.style.maxHeight = "none";
   element.style.overflowY = "visible";
   const footer = footerRef.value;
-  const footerDisplay = footer?.style.display;
+  const footerDisplay = footer?.style.display ?? "";
   if (footer !== null) footer.style.display = "none";
   try {
     await generateShareImg(`养成目标_${props.item.name}`, element, 1.5);
   } finally {
     element.style.maxHeight = maxHeight;
     element.style.overflowY = overflowY;
-    if (footer !== null) footer.style.display = footerDisplay;
+    if (footer !== null) footer!.style!.display = footerDisplay;
   }
 }
 
@@ -247,10 +291,11 @@ async function openPlan(): Promise<void> {
 
 .phco-header,
 .phco-title-row,
-.phco-project,
+.phco-attributes,
+.phco-attributes > span,
 .phco-source,
 .phco-entry-top,
-.phco-entry-top > div,
+.phco-entry-level,
 .phco-talents,
 .phco-options,
 .phco-section-title,
@@ -296,16 +341,28 @@ async function openPlan(): Promise<void> {
   }
 }
 
-.phco-project,
+.phco-attributes {
+  flex-wrap: wrap;
+  color: var(--common-text-sub);
+  font-size: 13px;
+  gap: 10px;
+
+  > span {
+    gap: 4px;
+  }
+
+  img {
+    width: 18px;
+    height: 18px;
+    filter: var(--icon-filter);
+    object-fit: contain;
+  }
+}
+
 .phco-source {
   color: var(--common-text-sub);
   font-size: 13px;
   gap: 6px;
-}
-
-.phco-project-uid {
-  padding-left: 6px;
-  border-left: 1px solid var(--common-shadow-1);
 }
 
 .phco-source img {
@@ -336,7 +393,8 @@ async function openPlan(): Promise<void> {
   justify-content: space-between;
   gap: 8px;
 
-  > div {
+  .phco-entry-level {
+    flex-shrink: 0;
     gap: 5px;
   }
 
@@ -358,6 +416,10 @@ async function openPlan(): Promise<void> {
 .phco-options {
   flex-wrap: wrap;
   gap: 4px;
+}
+
+.phco-options {
+  min-width: 0;
 }
 
 .phco-material-section {
@@ -385,7 +447,11 @@ async function openPlan(): Promise<void> {
 .phco-materials {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+
+  &.phco-materials--weapon {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .phco-material {
@@ -412,7 +478,7 @@ async function openPlan(): Promise<void> {
     white-space: nowrap;
   }
 
-  .phco-material-required {
+  .phco-material-rarity {
     color: var(--common-text-sub);
     font-size: 12px;
   }
