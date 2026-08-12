@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-08-09
+Update: 2026-08-12
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-08-09 15:47:24`
+> 更新于 `2026-08-12 10:57:11`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -23,13 +23,13 @@ Update: 2026-08-09
 
 # Teyvat Guide
 
-基于 Tauri 的原神工具应用，支持 Windows 和 macOS 平台。
+基于 Tauri 2 的原神工具应用，支持 Windows 和 macOS 平台。
 
-Game Tool for Genshin Impact player, supports Windows and macOS.
+Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows and macOS.
 
 ## 下载 / Download
 
-> 程序已经通过微软商店审核，可以直接在商店下载。
+> Windows 版本已经通过微软商店审核，可以直接在商店下载。
 
 <a href="https://apps.microsoft.com/store/detail/9NLBNNNBNSJN?launch=true&cid=BTMuli&mode=mini">
 	<img src="https://get.microsoft.com/images/zh-cn%20dark.svg" alt="download"/>
@@ -48,14 +48,15 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 ## 功能 / Features
 
 - 免登陆功能：
-  - [x] 限时祈愿、近期活动、素材日历
+  - [x] 限时祈愿、近期活动、素材日历及养成目标
+  - [x] 限时祈愿卡池与 UP 物品详情查看、分享
   - [x] 游戏内公告&活动获取
   - [x] 米游社官方帖获取（支持通过 ID 获取）
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 米游社话题帖子获取（通过话题点击跳转）
   - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入 & 自动导入（内置Yae）
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.2）
-  - [x] 背包物品获取，包括材料&武器&圣遗物（内置YAE）
+  - [x] 背包物品获取，包括材料&武器&圣遗物（内置 Yae）
   - [x] 留影叙佳期画片查看
   - [x] 帖子收藏
   - [x] 帖子评论查看&分享
@@ -67,10 +68,10 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 近期活动（首页组件）
   - [x] 游戏签到（首页组件）
   - [x] 实时便笺（首页组件）
-  - [x] 养成计划
+  - [x] 养成计划与材料缺口统计
   - [x] 原神战绩
   - [x] 角色详情
-  - [x] 高难挑战（深境螺旋/真境剧诗/幽境危战）
+  - [x] 高难挑战与统计（深境螺旋/真境剧诗/幽境危战）
   - [x] 祈愿数据获取（近一年）
   - [x] 千星奇域颂愿数据获取（近一年）
   - [x] 用户收藏帖子获取
@@ -79,13 +80,17 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
   - [x] 一键完成游戏签到
 
 - Wiki 功能：
-  - [x] 角色图鉴
-  - [x] 武器图鉴
+  - [x] 角色图鉴（支持名称搜索）
+  - [x] 武器图鉴（支持名称搜索、等级属性预览）
   - [x] 名片图鉴
-  - [x] 材料图鉴
+  - [x] 材料图鉴（支持分类筛选、排序和过滤）
+  - [x] 圣遗物套装图鉴
+  - [x] 食物、食谱和书籍数据查看
 
 - 应用功能：
   - [x] 浅色/深色主题切换
+  - [x] 系统代理配置（支持商店版回环限制处理）
+  - [x] 数据备份、恢复与缓存管理
   - [x] 米游社 JSBridge
   - [x] 终端命令行调用
   - [x] 支持胡桃云
@@ -106,7 +111,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - Changelog: [CHANGELOG](./CHANGELOG.md)
 - 资源来源：[项目资源说明](docs/项目资源说明.md)
 - UIAF：[UIAF v1.1](docs/standards/UIAF.md)
-- UIGF：[UIGF v3.0](docs/standards/UIGF3.md)，[UIGF v4.0](docs/standards/UIGF.md)
+- UIGF：[UIGF v3.0](docs/standards/UIGF3.md)，[UIGF v4.2](docs/standards/UIGF.md)
 - [macOS 平台门禁属性导致应用无法打开应用的修复指引](docs/macos-gatekeeper/README.md)
 - [如何导入胡桃数据库](https://app.btmuli.ink/docs/TeyvatGuide/import-hutao-db.html)
 
@@ -120,8 +125,12 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 - [Tauri](https://github.com/tauri-apps/tauri)
 - [Vue3](https://github.com/vuejs/core)
+- [TypeScript](https://github.com/microsoft/TypeScript)
 - [Vite](https://github.com/vitejs/vite)
 - [Vuetify](https://github.com/vuetifyjs/vuetify)
+- [Pinia](https://github.com/vuejs/pinia)
+- [SQLite](https://www.sqlite.org/)
+- [Rust](https://www.rust-lang.org/)
 
 ## 第三方组件 / Plugins
 
@@ -147,7 +156,7 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 
 - [UIGF Organization](https://github.com/UIGF-org)
 - ~~[Snap.Hutao](https://github.com/DGP-Studio/Snap.Hutao)~~
-- [StarWard](https://github.com/Scighost/Starward)
+- [Starward](https://github.com/Scighost/Starward)
 - [xunkong](https://github.com/xunkong/xunkong)
 - [gs-helper](https://github.com/vikiboss/gs-helper)
 - [paimon-moe](https://github.com/MadeBaruna/paimon-moe)
@@ -156,5 +165,3 @@ Game Tool for Genshin Impact player, supports Windows and macOS.
 - [MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)
 - [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
 - [Yae](https://github.com/HolographicHat/Yae)
-
-[![Star History Chart](https://api.star-history.com/svg?repos=BTMuli/TeyvatGuide&type=Timeline)](https://star-history.com/#BTMuli/TeyvatGuide&Timeline)

@@ -2,12 +2,32 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-07-01
-Update: 2026-07-21
+Update: 2026-08-12
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-07-01 05:22:05`
 >
-> 更新于 `2026-07-21 18:52:09`
+> 更新于 `2026-08-12 10:57:16`
+
+## [0.11.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.3) (2026-08-12)
+
+- 🍱 更新7.0版本游戏资源
+- 🍱 更新角色材料、食物、书籍、食谱和任务道具数据
+- ✨ 首页新增限时祈愿卡池与UP物品详情浮窗，支持从过往祈愿触发限时祈愿浮窗
+- ✨ 素材日历浮窗支持左右切换、统一浮窗展示并新增分享截图功能
+- ✨ 重构角色/武器图鉴UI
+- ✨ 真境剧诗页面UI改版
+- ✨ 材料图鉴新增自定义分类筛选、排序和过滤，优化材料展示
+- ✨ 养成计算完善天赋技能调整范围 [`#254`](https://github.com/BTMuli/TeyvatGuide/issues/254)
+- ✨ 新增使用系统代理开关，商店版开启代理时自动解除回环限制，失败时可复制命令 [`#193`](https://github.com/BTMuli/TeyvatGuide/issues/193)
+- ♻️ 深渊统计迁移至深境螺旋浮窗
+- 🐛 修复极验SDK异步加载失败导致的应用渲染异常
+- 🐛 修复缓存清除失败
+- 🐛 修复祈愿日历图表因脏时间导致的渲染崩溃
+- 🐛 修复部分Sentry反馈Issue
+- 🚸 优化材料排序与加载状态交互
+- 🚸 调整帖子窗口不同宽度下的分享图scale倍率
+- 🚸 侧边栏关注浮窗显示时自动刷新内容
 
 ## [0.11.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.2) (2026-07-21)
 
