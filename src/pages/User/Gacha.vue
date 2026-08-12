@@ -181,6 +181,8 @@ import { useRouter } from "vue-router";
 
 import { AppCalendarData } from "@/data/index.js";
 
+const GACHA_REQUEST_MAX_RETRIES = 3;
+
 const router = useRouter();
 const hutaoStore = useHutaoStore();
 
@@ -596,12 +598,12 @@ async function executeRefresh(force: boolean): Promise<void> {
   authkey.value = authkeyRes.data.authkey;
   await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 成功获取 authkey`);
   const results: Array<TGApp.App.Gacha.GachaRefRes> = [];
-  results.push(await refreshGachaPool(rfAccount, "100", "新手祈愿", force));
-  results.push(await refreshGachaPool(rfAccount, "200", "常驻祈愿", force));
-  results.push(await refreshGachaPool(rfAccount, "301", "角色祈愿", force));
-  results.push(await refreshGachaPool(rfAccount, "400", "角色祈愿2", force));
-  results.push(await refreshGachaPool(rfAccount, "302", "武器祈愿", force));
-  results.push(await refreshGachaPool(rfAccount, "500", "集录祈愿", force));
+  results.push(await refreshGachaPoolSafely(rfAccount, "100", "新手祈愿", force));
+  results.push(await refreshGachaPoolSafely(rfAccount, "200", "常驻祈愿", force));
+  results.push(await refreshGachaPoolSafely(rfAccount, "301", "角色祈愿", force));
+  results.push(await refreshGachaPoolSafely(rfAccount, "400", "角色祈愿2", force));
+  results.push(await refreshGachaPoolSafely(rfAccount, "302", "武器祈愿", force));
+  results.push(await refreshGachaPoolSafely(rfAccount, "500", "集录祈愿", force));
   const failedResults = results.filter((result) => !result.success);
   await TGLogger.Info(
     `[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据完成，失败 ${failedResults.length} 个卡池`,
@@ -614,6 +616,25 @@ async function executeRefresh(force: boolean): Promise<void> {
     );
   } else {
     showSnackbar.success("祈愿数据刷新完成");
+  }
+}
+
+async function refreshGachaPoolSafely(
+  ac: TGApp.Sqlite.Account.Game,
+  type: string,
+  label: string,
+  force: boolean,
+): Promise<TGApp.App.Gacha.GachaRefRes> {
+  try {
+    return await refreshGachaPool(ac, type, label, force);
+  } catch (e) {
+    const errMsg = TGHttps.getErrMsg(e);
+    showSnackbar.error(`[${label}] 刷新祈愿数据失败：${errMsg}`);
+    await TGLogger.Error(
+      `[Gacha][${ac.gameUid}][refreshGachaPool] 刷新${label}数据异常：${errMsg}`,
+    );
+    await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] ${e}`);
+    return { success: false, label };
   }
 }
 
@@ -633,17 +654,26 @@ async function refreshGachaPool(
   while (true) {
     page++;
     let gachaRes: TGApp.Game.Gacha.GachaLogResp | undefined;
-    try {
-      gachaRes = await hk4eReq.gacha(authkey.value, type, reqId);
-      if (gachaRes.retcode !== 0) {
-        showSnackbar.error(`[${type}][${gachaRes.retcode}] ${gachaRes.message}`);
-        await TGLogger.Warn(
-          `[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败：[${gachaRes.retcode}] ${gachaRes.message}`,
-        );
-        return { success: false, label };
+    let requestError: unknown;
+    for (let retryCount = 0; retryCount <= GACHA_REQUEST_MAX_RETRIES; retryCount++) {
+      try {
+        const response = await hk4eReq.gacha(authkey.value, type, reqId);
+        if (response.retcode === 0) {
+          gachaRes = response;
+          break;
+        }
+        requestError = new Error(`[${response.retcode}] ${response.message}`);
+      } catch (e) {
+        requestError = e;
       }
-    } catch (e) {
-      const errMsg = TGHttps.getErrMsg(e);
+      if (retryCount < GACHA_REQUEST_MAX_RETRIES) {
+        await showLoading.update(
+          `[${label}] 第${page}页请求失败，正在重试（${retryCount + 1}/${GACHA_REQUEST_MAX_RETRIES}）`,
+        );
+      }
+    }
+    if (!gachaRes) {
+      const errMsg = TGHttps.getErrMsg(requestError);
       showSnackbar.error(`[${type}] 获取祈愿数据失败：${errMsg}`);
       await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据异常：${errMsg}`);
       return { success: false, label };
