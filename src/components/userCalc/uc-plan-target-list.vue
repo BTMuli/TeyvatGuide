@@ -79,7 +79,6 @@ import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import {
   buildCultivationResults,
-  getCalculateInventory,
   getServerDay,
   isMaterialAvailableToday,
 } from "@utils/cultivationPlan.js";
@@ -123,7 +122,7 @@ const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.Resul
         entry.id,
         buildCultivationResults(
           entry.items.map((item) => ({ id: item.materialId, count: item.required })),
-          getEntryInventory(entry),
+          props.inventory,
           WikiMaterialData,
           entry.allowCrafting,
           entry.useDust,
@@ -132,13 +131,6 @@ const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.Resul
       ]),
     ),
 );
-
-function getEntryInventory(
-  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
-): ReadonlyMap<number, number> {
-  if (entry.calculationMode !== "api" || !entry.apiResult) return props.inventory;
-  return getCalculateInventory(entry.apiResult.result);
-}
 
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort(compareEntries),

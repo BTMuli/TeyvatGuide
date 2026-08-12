@@ -1,6 +1,6 @@
 /**
  * 养成计划材料聚合工具
- * @since Beta v0.11.4
+ * @since Beta v0.11.5
  */
 
 import userCalc, { type CraftableMaterial, type CultivationMaterial } from "@utils/userCalc.js";
@@ -39,6 +39,41 @@ export function getCalculateInventory(result: TGApp.Game.Calculate.Result): Map<
     inventory.set(material.id, inferredCount);
   }
   return inventory;
+}
+
+/**
+ * 将比背包记录更新的接口库存下界合并到计划库存。
+ *
+ * 每种材料只采用最新接口快照；接口在材料充足时最多返回本次需求量，因此仅提高库存下界。接口
+ * 确认不足的数据会先回写背包，写入时间会使更早的接口快照失效。
+ * @since Beta v0.11.5
+ * @param inventory - 本地背包材料
+ * @param bagMaterials - 本地背包材料记录
+ * @param entries - 养成目标列表
+ * @returns 合并后的材料 ID 与可用数量映射
+ */
+export function mergePlanInventory(
+  inventory: ReadonlyMap<number, number>,
+  bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>,
+  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
+): Map<number, number> {
+  const merged = new Map(inventory);
+  const latestApiInventory = new Map<number, { count: number; updated: string }>();
+  for (const entry of entries) {
+    if (entry.calculationMode !== "api" || !entry.apiResult) continue;
+    for (const [materialId, count] of getCalculateInventory(entry.apiResult.result)) {
+      const current = latestApiInventory.get(materialId);
+      if (current && Date.parse(current.updated) >= Date.parse(entry.apiResult.updated)) continue;
+      latestApiInventory.set(materialId, { count, updated: entry.apiResult.updated });
+    }
+  }
+  for (const [materialId, apiInventory] of latestApiInventory) {
+    const bagUpdated = bagMaterials.get(materialId)?.updated ?? "";
+    if (bagUpdated.length > 0 && Date.parse(bagUpdated) >= Date.parse(apiInventory.updated))
+      continue;
+    merged.set(materialId, Math.max(merged.get(materialId) ?? 0, apiInventory.count));
+  }
+  return merged;
 }
 
 /**

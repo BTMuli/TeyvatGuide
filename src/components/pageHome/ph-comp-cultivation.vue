@@ -69,9 +69,9 @@ import useUserStore from "@store/user.js";
 import {
   aggregateEntryMaterials,
   buildCultivationResults,
-  getCalculateInventory,
   getServerDay,
   isMaterialAvailableToday,
+  mergePlanInventory,
 } from "@utils/cultivationPlan.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, shallowRef } from "vue";
@@ -98,6 +98,10 @@ const project = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const entries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const resultMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
 const inventory = shallowRef<ReadonlyMap<number, number>>(new Map());
+const bagMaterials = shallowRef<ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>>(new Map());
+const planInventory = computed<ReadonlyMap<number, number>>(() =>
+  mergePlanInventory(inventory.value, bagMaterials.value, entries.value),
+);
 
 const missingKinds = computed<number>(
   () => resultMaterials.value.filter((material) => material.missing > 0).length,
@@ -109,9 +113,7 @@ const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.Resul
         entry.id,
         buildCultivationResults(
           entry.items.map((item) => ({ id: item.materialId, count: item.required })),
-          entry.calculationMode === "api" && entry.apiResult
-            ? getCalculateInventory(entry.apiResult.result)
-            : inventory.value,
+          planInventory.value,
           WikiMaterialData,
           entry.allowCrafting,
           entry.useDust,
@@ -145,10 +147,11 @@ onMounted(async () => {
       TSUserBagMaterial.getMaterial(project.value.uid),
     ]);
     entries.value = entryData;
+    bagMaterials.value = new Map(bagData.map((material) => [material.id, material]));
     inventory.value = new Map(bagData.map((material) => [material.id, material.count]));
     resultMaterials.value = buildCultivationResults(
       aggregateEntryMaterials(entryData),
-      inventory.value,
+      planInventory.value,
       WikiMaterialData,
       true,
       false,

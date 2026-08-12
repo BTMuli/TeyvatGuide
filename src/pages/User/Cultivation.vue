@@ -294,6 +294,7 @@ import {
   buildCultivationResults,
   getCalculateInventory,
   getUidServerTimezone,
+  mergePlanInventory,
   sortCultivationResults,
 } from "@utils/cultivationPlan.js";
 import { tryCallYae } from "@utils/TGGame.js";
@@ -744,16 +745,9 @@ const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
 const planRequiredMaterials = computed<Array<CultivationMaterial>>(() =>
   aggregateEntryMaterials(planEntries.value),
 );
-const planInventory = computed<Map<number, number>>(() => {
-  const inventory = new Map(bagMaterials.value);
-  for (const entry of planEntries.value) {
-    if (entry.calculationMode !== "api" || !entry.apiResult) continue;
-    for (const [materialId, count] of getCalculateInventory(entry.apiResult.result)) {
-      inventory.set(materialId, count);
-    }
-  }
-  return inventory;
-});
+const planInventory = computed<Map<number, number>>(() =>
+  mergePlanInventory(bagMaterials.value, bagMaterialDetails.value, planEntries.value),
+);
 const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   buildCultivationResults(
     planRequiredMaterials.value,
@@ -1263,6 +1257,9 @@ async function calculateWithApi(): Promise<void> {
     apiWeaponRequirements.value = itemResult
       ? toCultivationMaterials(itemResult.weapon_consume)
       : [];
+    const changedMaterials = await saveCalculateInventory(uid, response.data);
+    if (requestVersion !== apiResultVersion) return;
+    if (changedMaterials > 0) await loadInventoryData(uid, dataLoadVersion);
     apiResultMaterials.value = convertApiResult(response.data);
     apiCalculationResult.value = response.data;
     if (requestVersion !== apiResultVersion) return;
@@ -1487,6 +1484,13 @@ async function loadInventoryData(uid: number, requestVersion: number): Promise<v
   if (requestVersion !== dataLoadVersion) return;
   bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
   bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
+}
+
+async function saveCalculateInventory(
+  uid: number,
+  result: TGApp.Game.Calculate.Result,
+): Promise<number> {
+  return await TSUserBagMaterial.saveCalculateData(uid, result);
 }
 
 async function loadProjects(uid: number, preferredProjectId?: string): Promise<void> {
@@ -2022,6 +2026,7 @@ async function refreshPlanEntries(): Promise<void> {
   if (!project) return;
   planLoading.value = true;
   let refreshedCount = 0;
+  let changedMaterials = 0;
   try {
     await showLoading.start(`正在刷新养成计划“${project.name}”`, `UID：${project.uid}`);
     const localEntries = planEntries.value.filter((entry) => entry.calculationMode === "bag");
@@ -2098,6 +2103,7 @@ async function refreshPlanEntries(): Promise<void> {
       if (!refreshAccount) continue;
       await showLoading.update(`正在计算接口目标：${entry.name}`);
       const response = await calculateApiRefreshTarget(refreshAccount, target);
+      changedMaterials += await saveCalculateInventory(project.uid, response);
       const itemResult = response.items[0];
       if (!itemResult) continue;
       const inputs = createApiRefreshInputsFromResult(target, itemResult);
@@ -2112,6 +2118,11 @@ async function refreshPlanEntries(): Promise<void> {
       await showLoading.update(`正在保存 ${localRefreshInputs.length} 个本地目标`);
       await TSCultivationPlan.refreshEntries(project.id, localRefreshInputs);
       refreshedCount += localRefreshInputs.length;
+    }
+
+    if (changedMaterials > 0 && currentUid.value === project.uid) {
+      await showLoading.update(`正在更新 ${changedMaterials} 条背包材料`);
+      await loadInventoryData(project.uid, dataLoadVersion);
     }
 
     if (refreshedCount === 0) {
