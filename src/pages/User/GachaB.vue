@@ -20,6 +20,7 @@
       <div class="gb-top-btns">
         <v-btn
           class="gb-top-btn"
+          :disabled="isRefreshing"
           prepend-icon="mdi-refresh"
           variant="elevated"
           @click="confirmRefresh(false)"
@@ -28,6 +29,7 @@
         </v-btn>
         <v-btn
           class="gb-top-btn"
+          :disabled="isRefreshing"
           prepend-icon="mdi-refresh"
           variant="elevated"
           @click="confirmRefresh(true)"
@@ -121,6 +123,7 @@ const uidCur = ref<string>();
 const tab = ref<string>("overview");
 const uidList = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.GachaB>>([]);
+const isRefreshing = ref<boolean>(false);
 
 onMounted(async () => {
   await TGLogger.Info("[UserGachaB][onMounted] 进入千星奇域页面");
@@ -171,6 +174,17 @@ async function reloadUid(uid?: string): Promise<void> {
  * @return {Promise<void>} void
  */
 async function confirmRefresh(force: boolean): Promise<void> {
+  if (isRefreshing.value) return;
+  isRefreshing.value = true;
+  try {
+    await executeRefresh(force);
+  } finally {
+    isRefreshing.value = false;
+    await showLoading.end();
+  }
+}
+
+async function executeRefresh(force: boolean): Promise<void> {
   let rfAccount = account.value;
   let rfCk = cookie.value;
   if (!uidCur.value) {
@@ -230,16 +244,26 @@ async function confirmRefresh(force: boolean): Promise<void> {
   }
   authkey.value = authkeyRes.data.authkey;
   await TGLogger.Info(`[GachaB][${rfAccount.gameUid}] 成功获取 authkey`);
-  await refreshGachaPool(rfAccount, "1000", "常驻颂愿", force);
-  await refreshGachaPool(rfAccount, "2000", "活动颂愿", force);
+  const results: Array<TGApp.App.Gacha.GachaRefRes> = [];
+  results.push(await refreshGachaPool(rfAccount, "1000", "常驻颂愿", force));
+  results.push(await refreshGachaPool(rfAccount, "2000", "活动颂愿", force));
   // await refreshGachaPool(rfAccount, "20011", "活动颂愿·男", force);
   // await refreshGachaPool(rfAccount, "20012", "活动颂愿·男2", force);
   // await refreshGachaPool(rfAccount, "20021", "活动颂愿·女", force);
   // await refreshGachaPool(rfAccount, "20022", "活动颂愿·女2", force);
-  await TGLogger.Info(`[UserGacha][${account.value.gameUid}] 刷新祈愿数据完成`);
+  const failedResults = results.filter((result) => !result.success);
+  await TGLogger.Info(
+    `[UserGachaB][${account.value.gameUid}] 刷新祈愿数据完成，失败 ${failedResults.length} 个卡池`,
+  );
   await reloadUid(uidCur.value);
   await loadGachaBList();
-  await showLoading.end();
+  if (failedResults.length > 0) {
+    showSnackbar.warn(
+      `颂愿数据已部分刷新，${failedResults.map((result) => result.label).join("、")}失败`,
+    );
+  } else {
+    showSnackbar.success("颂愿数据刷新完成");
+  }
 }
 
 /**
@@ -255,7 +279,7 @@ async function refreshGachaPool(
   gachaType: string,
   gachaName: string,
   force: boolean,
-): Promise<void> {
+): Promise<TGApp.App.Gacha.GachaRefRes> {
   let endId = "0";
   let reqId = "0";
   let page = 0;
@@ -274,18 +298,23 @@ async function refreshGachaPool(
           `[GachaB][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败：[${gachaRes.retcode}] ${gachaRes.message}`,
         );
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-        break;
+        return { success: false, label: gachaName };
       }
     } catch (e) {
       const errMsg = TGHttps.getErrMsg(e);
       showSnackbar.error(`[${gachaType}] 获取祈愿数据失败：${errMsg}`);
       await TGLogger.Error(`[GachaB][${ac.gameUid}][refreshGachaPool] 获取祈愿数据异常：${errMsg}`);
       await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-      break;
+      return { success: false, label: gachaName };
     }
-    console.log(gachaRes);
+    if (!gachaRes.data || !Array.isArray(gachaRes.data.list)) {
+      const errMsg = "响应数据缺少颂愿列表";
+      showSnackbar.error(`[${gachaType}] ${errMsg}`);
+      await TGLogger.Error(`[GachaB][${ac.gameUid}][refreshGachaPool] ${errMsg}`);
+      return { success: false, label: gachaName };
+    }
     const gachaList = gachaRes.data.list;
-    if (gachaList.length === 0) break;
+    if (gachaList.length === 0) return { success: true, label: gachaName };
     const uigfList: Array<TGApp.Plugins.UIGF.GachaItemB> = [];
     if (force) await showLoading.update(`[${gachaName}] 第${page}页，${gachaList.length}条`);
     for (const item of gachaList) {
@@ -304,8 +333,19 @@ async function refreshGachaPool(
       };
       uigfList.push(tempItem);
     }
-    await TSUserGachaB.insertGachaList(ac.gameUid, uigfList);
-    if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) break;
+    try {
+      await TSUserGachaB.insertGachaList(ac.gameUid, uigfList);
+    } catch (e) {
+      const errMsg = TGHttps.getErrMsg(e);
+      showSnackbar.error(`[${gachaName}] 保存颂愿数据失败：${errMsg}`);
+      await TGLogger.Error(
+        `[GachaB][${ac.gameUid}][refreshGachaPool] 保存${gachaName}数据异常：${errMsg}`,
+      );
+      return { success: false, label: gachaName };
+    }
+    if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) {
+      return { success: true, label: gachaName };
+    }
     reqId = gachaList[gachaList.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   }

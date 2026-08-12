@@ -1,6 +1,6 @@
 /**
  * Hk4eApi 请求模块
- * @since Beta v0.10.3
+ * @since Beta v0.11.4
  */
 
 import gameEnum from "@enum/game.js";
@@ -11,6 +11,36 @@ const AnnoApi: Readonly<string> = "https://hk4e-ann-api.mihoyo.com/common/hk4e_c
 const AnnoApiGlobal: Readonly<string> =
   "https://sg-hk4e-api.hoyoverse.com/common/hk4e_global/announcement/api";
 const SdkApi: Readonly<string> = "https://hk4e-sdk.mihoyo.com/hk4e_cn/";
+const GachaRequestInterval: Readonly<number> = 1000;
+
+let lastGachaRequestAt = 0;
+let gachaRequestQueue: Promise<void> = Promise.resolve();
+
+/**
+ * 按接口要求串行执行祈愿请求
+ * @since Beta v0.11.4
+ * @param request - 请求函数
+ * @returns 请求结果
+ */
+async function runGachaRequest<T>(request: () => Promise<T>): Promise<T> {
+  const previousRequest = gachaRequestQueue;
+  let release: (() => void) | undefined;
+  gachaRequestQueue = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await previousRequest;
+
+  const waitTime = GachaRequestInterval - (Date.now() - lastGachaRequestAt);
+  if (waitTime > 0) {
+    await new Promise<void>((resolve) => setTimeout(resolve, waitTime));
+  }
+  lastGachaRequestAt = Date.now();
+  try {
+    return await request();
+  } finally {
+    if (release) release();
+  }
+}
 
 /**
  * 判断是否为国内服务器
@@ -98,7 +128,7 @@ async function getAnnoDetail(
 
 /**
  * 获取抽卡记录
- * @since Beta v0.10.1
+ * @since Beta v0.11.4
  * @param authKey - authKey
  * @param gachaType - 抽卡类型
  * @param endId - 结束 id，默认为 0
@@ -119,16 +149,19 @@ async function getGachaLog(
     size: "20",
     end_id: endId,
   };
-  const resp = await TGHttps.get<TGApp.Game.Gacha.GachaLogResp>(
-    "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog",
-    { query: params },
+  const resp = await runGachaRequest(
+    async () =>
+      await TGHttps.get<TGApp.Game.Gacha.GachaLogResp>(
+        "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getGachaLog",
+        { query: params },
+      ),
   );
   return resp.data;
 }
 
 /**
  * 获取千星奇域抽卡记录
- * @since Beta v0.10.1
+ * @since Beta v0.11.4
  * @param authKey - authKey
  * @param gachaType - 抽卡类型
  * @param endId - 结束 id，默认为 0
@@ -149,9 +182,12 @@ async function getBeyondGachaLog(
     size: "5",
     end_id: endId,
   };
-  const resp = await TGHttps.get<TGApp.Game.Gacha.GachaBLogResp>(
-    "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getBeyondGachaLog",
-    { query: params },
+  const resp = await runGachaRequest(
+    async () =>
+      await TGHttps.get<TGApp.Game.Gacha.GachaBLogResp>(
+        "https://public-operation-hk4e.mihoyo.com/gacha_info/api/getBeyondGachaLog",
+        { query: params },
+      ),
   );
   return resp.data;
 }

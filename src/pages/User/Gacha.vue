@@ -60,6 +60,7 @@
       <div class="gacha-top-btns">
         <v-btn
           class="gacha-top-btn"
+          :disabled="isRefreshing"
           prepend-icon="mdi-refresh"
           variant="elevated"
           @click="confirmRefresh(false)"
@@ -68,6 +69,7 @@
         </v-btn>
         <v-btn
           class="gacha-top-btn"
+          :disabled="isRefreshing"
           prepend-icon="mdi-refresh"
           variant="elevated"
           @click="confirmRefresh(true)"
@@ -198,6 +200,7 @@ const htMode = ref<UgoHutaoMode>("download");
 const uidList = shallowRef<Array<string>>([]);
 const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const yattaData = shallowRef<Array<TGApp.Plugins.Yatta.ConvertData>>([]);
+const isRefreshing = ref<boolean>(false);
 
 onMounted(async () => {
   await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
@@ -523,6 +526,17 @@ async function reloadUid(uid?: string): Promise<void> {
 
 // 刷新按钮点击事件
 async function confirmRefresh(force: boolean): Promise<void> {
+  if (isRefreshing.value) return;
+  isRefreshing.value = true;
+  try {
+    await executeRefresh(force);
+  } finally {
+    isRefreshing.value = false;
+    await showLoading.end();
+  }
+}
+
+async function executeRefresh(force: boolean): Promise<void> {
   let rfAccount = account.value;
   let rfCk = cookie.value;
   if (!uidCur.value) {
@@ -581,16 +595,26 @@ async function confirmRefresh(force: boolean): Promise<void> {
   }
   authkey.value = authkeyRes.data.authkey;
   await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 成功获取 authkey`);
-  await refreshGachaPool(rfAccount, "100", "新手祈愿", force);
-  await refreshGachaPool(rfAccount, "200", "常驻祈愿", force);
-  await refreshGachaPool(rfAccount, "301", "角色祈愿", force);
-  await refreshGachaPool(rfAccount, "400", "角色祈愿2", force);
-  await refreshGachaPool(rfAccount, "302", "武器祈愿", force);
-  await refreshGachaPool(rfAccount, "500", "集录祈愿", force);
-  await TGLogger.Info(`[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据完成`);
+  const results: Array<TGApp.App.Gacha.GachaRefRes> = [];
+  results.push(await refreshGachaPool(rfAccount, "100", "新手祈愿", force));
+  results.push(await refreshGachaPool(rfAccount, "200", "常驻祈愿", force));
+  results.push(await refreshGachaPool(rfAccount, "301", "角色祈愿", force));
+  results.push(await refreshGachaPool(rfAccount, "400", "角色祈愿2", force));
+  results.push(await refreshGachaPool(rfAccount, "302", "武器祈愿", force));
+  results.push(await refreshGachaPool(rfAccount, "500", "集录祈愿", force));
+  const failedResults = results.filter((result) => !result.success);
+  await TGLogger.Info(
+    `[Gacha][${rfAccount.gameUid}][confirmRefresh] 刷新祈愿数据完成，失败 ${failedResults.length} 个卡池`,
+  );
   await reloadUid(uidCur.value);
   await loadGachaList();
-  await showLoading.end();
+  if (failedResults.length > 0) {
+    showSnackbar.warn(
+      `祈愿数据已部分刷新，${failedResults.map((result) => result.label).join("、")}失败`,
+    );
+  } else {
+    showSnackbar.success("祈愿数据刷新完成");
+  }
 }
 
 // 刷新单个池子
@@ -599,7 +623,7 @@ async function refreshGachaPool(
   type: string,
   label: string,
   force: boolean = false,
-): Promise<void> {
+): Promise<TGApp.App.Gacha.GachaRefRes> {
   let endId = "0";
   let reqId = "0";
   let gachaDataMap: Record<string, Array<string>> | undefined = undefined;
@@ -616,15 +640,19 @@ async function refreshGachaPool(
         await TGLogger.Warn(
           `[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据失败：[${gachaRes.retcode}] ${gachaRes.message}`,
         );
-        await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-        break;
+        return { success: false, label };
       }
     } catch (e) {
       const errMsg = TGHttps.getErrMsg(e);
       showSnackbar.error(`[${type}] 获取祈愿数据失败：${errMsg}`);
       await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] 获取祈愿数据异常：${errMsg}`);
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-      break;
+      return { success: false, label };
+    }
+    if (!gachaRes.data || !Array.isArray(gachaRes.data.list)) {
+      const errMsg = "响应数据缺少祈愿列表";
+      showSnackbar.error(`[${type}] ${errMsg}`);
+      await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] ${errMsg}`);
+      return { success: false, label };
     }
     const gachaList = gachaRes.data.list;
     if (gachaList.length === 0) {
@@ -634,7 +662,7 @@ async function refreshGachaPool(
           await TSUserGacha.cleanGachaRecords(ac.gameUid, type, gachaDataMap);
         }
       }
-      break;
+      return { success: true, label };
     }
     const uigfList: Array<TGApp.Plugins.UIGF.GachaItem> = [];
     if (force) await showLoading.update(`[${label}] 第${page}页，${gachaList.length}条`);
@@ -684,9 +712,11 @@ async function refreshGachaPool(
         `[Gacha][${ac.gameUid}][refreshGachaPool] 保存${label}数据异常：${errMsg}`,
       );
       await TGLogger.Error(`[Gacha][${ac.gameUid}][refreshGachaPool] ${e}`);
-      break;
+      return { success: false, label };
     }
-    if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) break;
+    if (!force && gachaList.some((i) => i.id.toString() === endId.toString())) {
+      return { success: true, label };
+    }
     reqId = gachaList[gachaList.length - 1].id.toString();
     if (force) await new Promise<void>((resolve) => setTimeout(resolve, 1000));
   }

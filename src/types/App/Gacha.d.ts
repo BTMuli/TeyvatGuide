@@ -1,6 +1,6 @@
 /**
  * 本应用的祈愿相关类型定义
- * @since Beta v0.8.9
+ * @since Beta v0.11.4
  */
 
 declare namespace TGApp.App.Gacha {
@@ -55,5 +55,16 @@ declare namespace TGApp.App.Gacha {
     rank: number;
     /** 类型 */
     type: string;
+  };
+
+  /**
+   * 祈愿数据刷新结果
+   * @since Beta v0.11.4
+   */
+  type GachaRefRes = {
+    /** 是否刷新成功 */
+    success: boolean;
+    /** 卡池名称 */
+    label: string;
   };
 }
