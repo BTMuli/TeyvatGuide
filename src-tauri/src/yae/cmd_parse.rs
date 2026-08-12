@@ -104,6 +104,7 @@ pub fn handle_config_write(file: &mut File) {
 }
 
 pub fn handle_rva_write(file: &mut File) {
+  let _ = file.write_all(&0x12345678_u32.to_le_bytes());
   for key in [
     "updateNormalProp",
     "newString",
