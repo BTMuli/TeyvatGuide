@@ -1,13 +1,13 @@
 <!-- 书籍正文 -->
 <template>
-  <section v-if="props.book.story.length > 0" class="twbd-panel" data-html2canvas-ignore="true">
+  <section v-if="props.book.story.length > 0" class="twbd-panel">
     <header class="twbd-title">
       <v-icon size="18">mdi-book-open-page-variant-outline</v-icon>
       <h3>书籍正文</h3>
     </header>
     <div class="twbd-story" v-html="storyHtml" />
   </section>
-  <div v-else class="twbd-empty" data-html2canvas-ignore="true">
+  <div v-else class="twbd-empty">
     <v-icon size="16">mdi-book-alert-outline</v-icon>
     <span>暂无正文</span>
   </div>
