@@ -141,8 +141,8 @@ async function openMaterial(materialId: number): Promise<void> {
 
   &.today {
     border-color: var(--tgc-od-orange);
+    border-left-width: 3px;
     background: var(--common-shadow-t-1);
-    box-shadow: inset 3px 0 var(--tgc-od-orange);
   }
 
   &:focus-visible,

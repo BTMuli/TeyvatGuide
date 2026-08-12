@@ -547,8 +547,8 @@ async function openPlan(): Promise<void> {
 
   &.phco-material--today {
     border-color: var(--tgc-od-orange);
+    border-left-width: 3px;
     background: var(--common-shadow-t-1);
-    box-shadow: inset 3px 0 var(--tgc-od-orange);
   }
 }
 
