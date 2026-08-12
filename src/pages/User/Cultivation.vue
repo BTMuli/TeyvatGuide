@@ -5,6 +5,9 @@
       <div class="cultivation-title">
         <v-icon color="var(--tgc-od-orange)">mdi-calculator-variant-outline</v-icon>
         <span>养成计划</span>
+        <v-btn prepend-icon="mdi-plus" size="small" variant="tonal" @click="createPlan">
+          新建计划
+        </v-btn>
       </div>
     </template>
     <template #append>
@@ -56,6 +59,11 @@
           >
             {{ planMissingKinds > 0 ? `${planMissingKinds} 种材料不足` : "材料已满足" }}
           </v-chip>
+          <div aria-label="养成目标状态计数" class="cultivation-plan-statuses">
+            <span class="active">进行中 {{ planEntryCounts.active }}</span>
+            <span class="fulfilled">已满足 {{ planEntryCounts.fulfilled }}</span>
+            <span class="completed">已完成 {{ planEntryCounts.completed }}</span>
+          </div>
         </div>
         <div class="cultivation-plan-actions">
           <v-btn
@@ -76,8 +84,14 @@
           >
             刷新目标
           </v-btn>
-          <v-btn prepend-icon="mdi-plus" size="small" variant="tonal" @click="createPlan">
-            新建
+          <v-btn
+            color="var(--tgc-od-red)"
+            prepend-icon="mdi-plus"
+            size="small"
+            variant="tonal"
+            @click="startAddingTarget"
+          >
+            添加目标
           </v-btn>
           <v-btn
             :disabled="!currentProject"
@@ -118,9 +132,9 @@
       >
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
+            :bag-materials="bagMaterialDetails"
             :entries="planEntries"
             :inventory="planInventory"
-            :project-name="currentProject?.name ?? ''"
             :timezone="currentProject?.timezone ?? currentTimezone"
             :uid="currentUid ?? 0"
             @add="startAddingTarget"
@@ -747,6 +761,22 @@ const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>((
 const planMissingKinds = computed<number>(
   () => planResultMaterials.value.filter((material) => material.missing > 0).length,
 );
+const planEntryCounts = computed<{
+  active: number;
+  completed: number;
+  fulfilled: number;
+}>(() => {
+  const materialMap = new Map(planResultMaterials.value.map((material) => [material.id, material]));
+  const fulfilled = (entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean =>
+    entry.items.every((item) => (materialMap.get(item.materialId)?.missing ?? 0) <= 0);
+  return {
+    active: planEntries.value.filter((entry) => entry.status === "active" && !fulfilled(entry))
+      .length,
+    completed: planEntries.value.filter((entry) => entry.status === "completed").length,
+    fulfilled: planEntries.value.filter((entry) => entry.status === "active" && fulfilled(entry))
+      .length,
+  };
+});
 const canSaveToPlan = computed<boolean>(() => {
   if (planLoading.value) return false;
   if (useApiCalculation.value) {
@@ -1193,7 +1223,6 @@ function convertApiResult(
             : Math.min(((material.num - material.lack_num) / material.num) * 100, 100),
       };
     }),
-    WikiMaterialData,
   );
 }
 
@@ -2354,7 +2383,7 @@ function compareWeaponOptions(
   align-items: center;
   padding-left: 12px;
   font-family: var(--font-title);
-  font-size: 18px;
+  font-size: 20px;
   gap: 8px;
 }
 
@@ -2429,6 +2458,34 @@ function compareWeaponOptions(
 
 .cultivation-plan-heading > span {
   font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.cultivation-plan-statuses {
+  display: flex;
+  align-items: center;
+  color: var(--common-text-sub);
+  font-size: 12px;
+  gap: 8px;
+
+  span {
+    padding-left: 8px;
+    border-left: 3px solid var(--common-shadow-2);
+  }
+
+  .active {
+    border-left-color: var(--tgc-od-orange);
+  }
+
+  .fulfilled {
+    border-left-color: var(--tgc-od-green);
+  }
+}
+
+.cultivation-title :deep(.v-btn) {
+  font-family: var(--font-text);
+  font-size: 13px;
 }
 
 .cultivation-plan-actions,
@@ -2507,10 +2564,6 @@ function compareWeaponOptions(
 }
 
 @media (width <= 900px) {
-  .cultivation-plan-summary {
-    display: none;
-  }
-
   .cultivation-config {
     grid-template-columns: 1fr;
   }

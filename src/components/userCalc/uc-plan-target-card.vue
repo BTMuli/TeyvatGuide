@@ -75,14 +75,6 @@
     </div>
 
     <div class="ucptc-actions">
-      <v-btn
-        :prepend-icon="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-        size="small"
-        variant="text"
-        @click="expanded = !expanded"
-      >
-        {{ expanded ? "收起材料" : `查看 ${entry.items.length} 种材料` }}
-      </v-btn>
       <div class="ucptc-action-end">
         <template v-if="entry.status === 'active' && !fulfilled">
           <v-btn
@@ -127,44 +119,50 @@
       </div>
     </div>
 
-    <v-expand-transition>
-      <div v-if="expanded" class="ucptc-materials">
-        <div
-          v-for="material in displayMaterials"
-          :key="material.item.materialId"
-          :class="{ fulfilled: material.fulfilled }"
-          class="ucptc-material"
-        >
+    <div class="ucptc-materials">
+      <div
+        v-for="material in displayMaterials"
+        :key="material.item.materialId"
+        :class="{ fulfilled: material.fulfilled }"
+        class="ucptc-material"
+        role="button"
+        tabindex="0"
+        @pointerdown.stop
+        @pointerup.stop="selectMaterial(material.item.materialId)"
+        @keydown.enter.stop="selectMaterial(material.item.materialId)"
+        @keydown.space.prevent.stop="selectMaterial(material.item.materialId)"
+      >
+        <div class="ucptc-material-icon">
+          <img :src="materialBackground(material.item.materialId)" alt="" class="background" />
           <img
             :alt="materialName(material.item.materialId)"
             :src="materialIcon(material.item.materialId)"
+            class="icon"
           />
-          <div class="ucptc-material-info">
-            <div>
-              <span class="ucptc-material-name">
-                {{ materialName(material.item.materialId) }}
-              </span>
-              <span
-                >{{ formatCount(material.prepared) }} /
-                {{ formatCount(material.item.required) }}</span
-              >
-            </div>
-            <v-progress-linear
-              :color="material.fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
-              :model-value="material.progress"
-              height="4"
-              rounded
-            />
+        </div>
+        <div class="ucptc-material-info">
+          <div>
+            <span class="ucptc-material-name">{{ materialName(material.item.materialId) }}</span>
+            <span
+              >{{ formatCount(material.prepared) }} /
+              {{ formatCount(material.item.required) }}</span
+            >
           </div>
+          <v-progress-linear
+            :color="material.fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
+            :model-value="material.progress"
+            height="4"
+            rounded
+          />
         </div>
       </div>
-    </v-expand-transition>
+    </div>
   </v-card>
 </template>
 
 <script lang="ts" setup>
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -181,6 +179,7 @@ type UcPlanTargetCardProps = {
 
 type UcPlanTargetCardEmits = {
   edit: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
+  material: [materialId: number];
   move: [entryId: string, offset: number];
   remove: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
   status: [
@@ -191,7 +190,10 @@ type UcPlanTargetCardEmits = {
 
 const props = defineProps<UcPlanTargetCardProps>();
 const emits = defineEmits<UcPlanTargetCardEmits>();
-const expanded = ref<boolean>(true);
+
+function selectMaterial(materialId: number): void {
+  emits("material", materialId);
+}
 
 type TargetMaterialView = {
   fulfilled: boolean;
@@ -259,6 +261,11 @@ function materialName(materialId: number): string {
 
 function materialIcon(materialId: number): string {
   return `/icon/material/${materialId}.webp`;
+}
+
+function materialBackground(materialId: number): string {
+  const star = WikiMaterialData.find((material) => material.id === materialId)?.star ?? 1;
+  return `/icon/bg/${star}-Star.webp`;
 }
 
 function formatCount(count: number): string {
@@ -370,7 +377,7 @@ function formatCount(count: number): string {
 }
 
 .ucptc-actions {
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 4px 8px;
   border-top: 1px solid var(--common-shadow-1);
 }
@@ -394,6 +401,7 @@ function formatCount(count: number): string {
   padding: 4px 8px;
   border-radius: 6px;
   background: var(--common-shadow-t-1);
+  cursor: pointer;
   gap: 6px;
   transition: opacity 160ms ease;
 
@@ -401,10 +409,30 @@ function formatCount(count: number): string {
     opacity: 0.52;
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-blue);
+    outline-offset: 2px;
+  }
+}
+
+.ucptc-material-icon {
+  position: relative;
+  overflow: hidden;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 4px;
+
   img {
-    width: 28px;
-    height: 28px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
     object-fit: contain;
+  }
+
+  .background {
+    object-fit: cover;
   }
 }
 

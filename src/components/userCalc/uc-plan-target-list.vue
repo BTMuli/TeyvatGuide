@@ -1,26 +1,6 @@
 <!-- 养成计划-目标列表 -->
 <template>
   <div class="ucpt-box">
-    <div class="ucpt-header">
-      <div>
-        <span class="ucpt-title">{{ projectName || "养成目标" }}</span>
-        <v-btn
-          color="var(--tgc-od-red)"
-          prepend-icon="mdi-plus"
-          size="small"
-          variant="tonal"
-          @click="emits('add')"
-        >
-          添加目标
-        </v-btn>
-        <div aria-label="养成目标状态计数" class="ucpt-statuses">
-          <span class="active">进行中 {{ activeCount }}</span>
-          <span class="fulfilled">已满足 {{ fulfilledCount }}</span>
-          <span class="completed">已完成 {{ completedCount }}</span>
-        </div>
-      </div>
-    </div>
-
     <div v-if="entries.length === 0" class="ucpt-empty">
       <v-icon size="56">mdi-clipboard-text-outline</v-icon>
       <span>当前计划还没有养成目标</span>
@@ -33,6 +13,8 @@
       v-else
       :modules="swiperModules"
       :navigation="true"
+      :prevent-clicks="false"
+      :prevent-clicks-propagation="false"
       :slides-per-view="'auto'"
       :space-between="12"
       :watch-overflow="true"
@@ -49,6 +31,7 @@
           :priority="entryPriority(entry)"
           :progress="entryProgress(entry)"
           @edit="emits('edit', $event)"
+          @material="openMaterial"
           @move="moveEntry"
           @remove="emits('remove', $event)"
           @status="emitStatus"
@@ -56,12 +39,43 @@
       </SwiperSlide>
     </Swiper>
   </div>
+  <PboMaterial
+    v-if="currentMaterial"
+    v-model="materialOverlayVisible"
+    :data="currentMaterial"
+    :uid
+    topOffset="132px"
+  >
+    <template #left>
+      <v-btn
+        :disabled="currentMaterialIndex === 0"
+        aria-label="上一个养成材料"
+        class="card-arrow"
+        icon="mdi-chevron-left"
+        title="上一个养成材料"
+        variant="flat"
+        @click="switchMaterial(false)"
+      />
+    </template>
+    <template #right>
+      <v-btn
+        :disabled="currentMaterialIndex === planMaterials.length - 1"
+        aria-label="下一个养成材料"
+        class="card-arrow"
+        icon="mdi-chevron-right"
+        title="下一个养成材料"
+        variant="flat"
+        @click="switchMaterial(true)"
+      />
+    </template>
+  </PboMaterial>
 </template>
 
 <script lang="ts" setup>
 import "swiper/css";
 import "swiper/css/navigation";
 
+import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import {
   buildCultivationResults,
@@ -71,14 +85,15 @@ import {
 } from "@utils/cultivationPlan.js";
 import { A11y, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { computed } from "vue";
+import { computed, nextTick, ref, shallowRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
+import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
 type UcPlanTargetListProps = {
+  bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   inventory: ReadonlyMap<number, number>;
-  projectName: string;
   timezone: number;
   uid: number;
 };
@@ -97,6 +112,9 @@ type UcPlanTargetListEmits = {
 const props = defineProps<UcPlanTargetListProps>();
 const emits = defineEmits<UcPlanTargetListEmits>();
 const swiperModules = [A11y, Navigation];
+const materialOverlayVisible = ref<boolean>(false);
+const currentMaterial = shallowRef<MaterialInfo>();
+const currentMaterialIndex = ref<number>(0);
 
 const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
   () =>
@@ -125,6 +143,19 @@ function getEntryInventory(
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort(compareEntries),
 );
+const planMaterials = computed<Array<MaterialInfo>>(() => {
+  const materialIds = new Set<number>();
+  for (const entry of sortedEntries.value) {
+    for (const item of entry.items) materialIds.add(item.materialId);
+  }
+  return Array.from(materialIds)
+    .map((materialId) => {
+      const info = WikiMaterialData.find((material) => material.id === materialId);
+      if (info === undefined) return undefined;
+      return { info, tb: getBagMaterial(materialId) };
+    })
+    .filter((material): material is MaterialInfo => material !== undefined);
+});
 
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 100;
@@ -145,18 +176,6 @@ function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
 function isEntryFulfilled(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean {
   return entry.status === "completed" || entryProgress(entry) >= 100;
 }
-
-const activeCount = computed<number>(
-  () =>
-    props.entries.filter((entry) => entry.status === "active" && !isEntryFulfilled(entry)).length,
-);
-const fulfilledCount = computed<number>(
-  () =>
-    props.entries.filter((entry) => entry.status === "active" && isEntryFulfilled(entry)).length,
-);
-const completedCount = computed<number>(
-  () => props.entries.filter((entry) => entry.status === "completed").length,
-);
 
 function entrySortRank(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 2;
@@ -235,6 +254,35 @@ function emitStatus(
 ): void {
   emits("status", entry, status);
 }
+
+function getBagMaterial(materialId: number): TGApp.Sqlite.UserBag.MaterialTable {
+  return (
+    props.bagMaterials.get(materialId) ?? {
+      count: props.inventory.get(materialId) ?? 0,
+      id: materialId,
+      records: [],
+      uid: props.uid,
+      updated: "",
+    }
+  );
+}
+
+async function openMaterial(materialId: number): Promise<void> {
+  const index = planMaterials.value.findIndex((material) => material.info.id === materialId);
+  if (index < 0) return;
+  materialOverlayVisible.value = false;
+  currentMaterialIndex.value = index;
+  currentMaterial.value = planMaterials.value[index];
+  await nextTick();
+  if (currentMaterial.value?.info.id === materialId) materialOverlayVisible.value = true;
+}
+
+function switchMaterial(isNext: boolean): void {
+  const nextIndex = currentMaterialIndex.value + (isNext ? 1 : -1);
+  if (nextIndex < 0 || nextIndex >= planMaterials.value.length) return;
+  currentMaterialIndex.value = nextIndex;
+  currentMaterial.value = planMaterials.value[nextIndex];
+}
 </script>
 
 <style lang="scss" scoped>
@@ -245,55 +293,6 @@ function emitStatus(
   min-height: 0;
   flex-direction: column;
   gap: 12px;
-}
-
-.ucpt-header,
-.ucpt-header > div {
-  display: flex;
-  align-items: center;
-}
-
-.ucpt-header {
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ucpt-header > div {
-  gap: 8px;
-}
-
-.ucpt-title {
-  font-family: var(--font-title);
-  font-size: 18px;
-}
-
-.ucpt-subtitle {
-  color: var(--common-text-sub);
-  font-size: 12px;
-}
-
-.ucpt-statuses {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  gap: 8px;
-
-  span {
-    padding-left: 8px;
-    border-left: 3px solid var(--common-shadow-2);
-  }
-
-  .active {
-    border-left-color: var(--tgc-od-orange);
-  }
-
-  .fulfilled {
-    border-left-color: var(--tgc-od-green);
-  }
-
-  .completed {
-    color: var(--common-text-sub);
-  }
 }
 
 .ucpt-empty {
@@ -310,7 +309,6 @@ function emitStatus(
 
 .ucpt-swiper {
   --swiper-navigation-color: var(--tgc-od-orange);
-  --swiper-navigation-size: 14px;
 
   width: 100%;
   height: 100%;
@@ -320,28 +318,21 @@ function emitStatus(
   :deep(.swiper-button-prev),
   :deep(.swiper-button-next) {
     z-index: 4;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     box-sizing: border-box;
-    padding: 6px;
+    padding: 10px;
     border: 1px solid var(--common-shadow-2);
-    border-radius: 999px;
-    margin-top: -16px;
-    background: color-mix(in srgb, var(--tgc-od-orange) 8%, var(--box-bg-1));
-    box-shadow: 0 3px 10px var(--common-shadow-2);
-    opacity: 0.9;
-    transition:
-      border-color 160ms ease,
-      background-color 160ms ease,
-      box-shadow 160ms ease,
-      opacity 160ms ease,
-      transform 160ms ease;
+    border-radius: 8px;
+    margin-top: -20px;
+    background: var(--box-bg-1);
+    box-shadow: 0 0 4px var(--common-shadow-4);
+    color: var(--box-text-2);
+    opacity: 1;
 
     &:hover {
-      border-color: var(--tgc-od-orange);
-      background: color-mix(in srgb, var(--tgc-od-orange) 18%, var(--box-bg-1));
-      box-shadow: 0 4px 14px var(--common-shadow-2);
-      opacity: 1;
+      border-color: var(--common-shadow-2);
+      background: var(--box-bg-2);
       transform: scale(1.06);
     }
 
@@ -350,7 +341,7 @@ function emitStatus(
     }
 
     &.swiper-button-disabled {
-      opacity: 0.18;
+      opacity: 0.38;
     }
   }
 
@@ -368,13 +359,17 @@ function emitStatus(
   height: 100%;
 }
 
-@media (width <= 600px) {
-  .ucpt-header > div {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
+.card-arrow {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
+}
 
+@media (width <= 600px) {
   .ucpt-slide {
     width: calc(100vw - 96px);
   }
