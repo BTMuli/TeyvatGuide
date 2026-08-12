@@ -2,12 +2,22 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-07-01
-Update: 2026-08-12
+Update: 2026-08-13
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-07-01 05:22:05`
 >
-> 更新于 `2026-08-12 10:57:16`
+> 更新于 `2026-08-13 01:17:23`
+
+## [0.11.4](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.4) (2026-08-13)
+
+- 🐛 修复背包导入底部显示计数异常
+- 🐛 修复幽境危战页面加载异常
+- 🐛 修复增量刷新导致的数据缺失
+- 💄 优化首页素材日历&养成计划组件UI&交互
+- 💄 优化养成计划页面UI&交互
+- ⏪️ 回退养成计划缺失材料排序逻辑
+- 💄 回退养成计划缺失材料排序逻辑
 
 ## [0.11.3](https://github.com/BTMuli/TeyvatGuide/releases/v0.11.3) (2026-08-12)
 
