@@ -1,6 +1,6 @@
 /**
  * 幽境危战
- * @since Beta v0.9.9
+ * @since Beta v0.11.4
  */
 
 declare namespace TGApp.Game.Challenge {
@@ -135,11 +135,11 @@ declare namespace TGApp.Game.Challenge {
 
   /**
    * 挑战数据
-   * @since Beta v0.8.0
+   * @since Beta v0.11.4
    */
   type Challenge = {
     /** 最佳数据 */
-    best: ChallengeBest;
+    best: ChallengeBest | null;
     /** 挑战列表 */
     challenge: Array<ChallengeData>;
     /** 是否有数据 */

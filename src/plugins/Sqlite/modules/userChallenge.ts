@@ -1,6 +1,6 @@
 /**
  * 幽境危战模块
- * @since Beta v0.11.3
+ * @since Beta v0.11.4
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -114,14 +114,17 @@ function isChallengeData(value: unknown): boolean {
 }
 
 function isChallenge(value: unknown): value is TGApp.Game.Challenge.Challenge {
-  if (!isRecord(value) || !isRecord(value.best) || !Array.isArray(value.challenge)) return false;
+  if (!isRecord(value) || !Array.isArray(value.challenge)) return false;
   if (typeof value.has_data !== "boolean") return false;
-  if (
-    typeof value.best.difficulty !== "number" ||
-    typeof value.best.second !== "number" ||
-    typeof value.best.icon !== "string"
-  ) {
-    return false;
+  if (value.best !== null) {
+    if (
+      !isRecord(value.best) ||
+      typeof value.best.difficulty !== "number" ||
+      typeof value.best.second !== "number" ||
+      typeof value.best.icon !== "string"
+    ) {
+      return false;
+    }
   }
   return value.challenge.every(isChallengeData);
 }
