@@ -1,6 +1,6 @@
 /**
  * 原神战绩数据转换
- * @since Beta v0.10.0
+ * @since Beta v0.11.3
  */
 
 import gameEnum from "@enum/game.js";
@@ -114,7 +114,7 @@ function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar
 
 /**
  * 转换统计信息
- * @since Beta v0.9.9
+ * @since Beta v0.11.3
  * @param data - 统计信息
  * @returns 转换后的统计信息
  */
@@ -133,6 +133,7 @@ function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
     hydroCulus: data.hydroculus_number,
     pyroCulus: data.pyroculus_number,
     moonCulus: data.moonoculus_number,
+    iceCulus: data.iceculus_number,
     sprialAbyss: data.spiral_abyss,
     combatRole: data.role_combat.is_unlock ? `第 ${data.role_combat.max_round_id} 幕` : "未解锁",
     hardChallenge: data.hard_challenge.is_unlock

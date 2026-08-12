@@ -11,12 +11,12 @@ type TurWorldGridProps = { worlds: Array<TGApp.Sqlite.Record.WorldExplore> };
 
 defineProps<TurWorldGridProps>();
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tur-wg-box {
   position: relative;
   display: grid;
   width: 100%;
   gap: 8px;
-  grid-template-columns: repeat(3, 0.34fr);
+  grid-template-columns: repeat(4, 0.25fr);
 }
 </style>

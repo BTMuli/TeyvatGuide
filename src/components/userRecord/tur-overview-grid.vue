@@ -1,26 +1,11 @@
 <template>
   <div v-if="!modelValue">暂无数据</div>
   <div v-else>
-    <div class="tur-og-box grid4">
+    <div class="tur-og-box grid5">
       <TurOverviewSub
         :text="modelValue.activeDays"
         icon="/UI/nav/userRecord.webp"
         title="活跃天数"
-      />
-      <TurOverviewSub
-        :text="modelValue.sprialAbyss"
-        icon="/UI/nav/userAbyss.webp"
-        title="深境螺旋"
-      />
-      <TurOverviewSub
-        :text="modelValue.combatRole"
-        icon="/UI/nav/userCombat.webp"
-        title="幻想真境剧诗"
-      />
-      <TurOverviewSub
-        :text="modelValue.hardChallenge"
-        icon="/UI/nav/userChallenge.webp"
-        title="幽境危战"
       />
       <TurOverviewSub
         :text="modelValue.avatarNumber"
@@ -47,15 +32,32 @@
         icon="/icon/material/220005.webp"
         title="解锁传送点"
       />
+    </div>
+    <div class="tur-og-box grid4">
       <TurOverviewSub
         :text="modelValue.domainNumber"
         icon="/UI/nav/userAbyssLab.webp"
         title="解锁秘境"
       />
       <TurOverviewSub
-        :text="modelValue.moonCulus"
-        icon="/icon/material/107030.webp"
-        title="月神瞳"
+        :text="modelValue.sprialAbyss"
+        icon="/UI/nav/userAbyss.webp"
+        title="深境螺旋"
+      />
+      <TurOverviewSub
+        :text="modelValue.combatRole"
+        icon="/UI/nav/userCombat.webp"
+        title="幻想真境剧诗"
+      />
+      <TurOverviewSub
+        :text="modelValue.hardChallenge"
+        icon="/UI/nav/userChallenge.webp"
+        title="幽境危战"
+      />
+      <TurOverviewSub
+        :text="modelValue.iceCulus"
+        icon="/icon/material/107035.webp"
+        title="冰神瞳"
       />
       <TurOverviewSub
         :text="modelValue.anemoCulus"
@@ -86,6 +88,11 @@
         :text="modelValue.pyroCulus"
         icon="/icon/material/107028.webp"
         title="火神瞳"
+      />
+      <TurOverviewSub
+        :text="modelValue.moonCulus"
+        icon="/icon/material/107030.webp"
+        title="月神瞳"
       />
     </div>
     <div class="tur-og-box grid5">

@@ -110,7 +110,7 @@ declare namespace TGApp.Sqlite.Record {
 
   /**
    * 统计信息
-   * @since Beta v0.8.1
+   * @since Beta v0.11.3
    */
   type Stats = {
     /** 活跃天数 */
@@ -139,6 +139,8 @@ declare namespace TGApp.Sqlite.Record {
     pyroCulus: number;
     /** 月神瞳数 */
     moonCulus: number;
+    /** 冰神瞳数 */
+    iceCulus: number;
     /** 深渊 */
     sprialAbyss: string;
     /** 剧诗 */

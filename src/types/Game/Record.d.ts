@@ -1,6 +1,6 @@
 /**
  * 原神战绩相关类型定义文件
- * @since Beta v0.10.0
+ * @since Beta v0.11.3
  */
 
 declare namespace TGApp.Game.Record {
@@ -87,7 +87,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 统计信息类型
-   * @since Beta v0.8.1
+   * @since Beta v0.11.3
    */
   type Stats = {
     /** 成就数量 */
@@ -127,6 +127,8 @@ declare namespace TGApp.Game.Record {
     hard_challenge: ChallengeStats;
     /** 水神瞳数量 */
     hydroculus_number: number;
+    /** 冰神瞳数量 */
+    iceculus_number: number;
     /** 豪华宝箱数量 */
     luxurious_chest_number: number;
     /** 奇馈宝箱数量 */
