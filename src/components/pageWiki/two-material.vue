@@ -142,7 +142,7 @@ type TwoMaterialProps = {
 const props = withDefaults(defineProps<TwoMaterialProps>(), {
   eyebrow: "养成物品",
   cmh: "600px",
-  shareScale: 1.2,
+  shareScale: 1.5,
   topOffset: "0px",
 });
 const visible = defineModel<boolean>();
@@ -291,8 +291,8 @@ async function shareMaterial(): Promise<void> {
   flex-wrap: wrap;
   align-items: center;
   color: var(--box-text-4);
-  gap: 8px 4px;
   font-size: 12px;
+  gap: 8px 4px;
   line-height: 16px;
 
   span {
