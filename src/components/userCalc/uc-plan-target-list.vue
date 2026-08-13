@@ -77,11 +77,7 @@ import "swiper/css/navigation";
 
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
-import {
-  buildCultivationResults,
-  getServerDay,
-  isMaterialAvailableToday,
-} from "@utils/cultivationPlan.js";
+import { getServerDay, isMaterialAvailableToday } from "@utils/cultivationPlan.js";
 import { A11y, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { computed, nextTick, ref, shallowRef } from "vue";
@@ -91,6 +87,7 @@ import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
 
 type UcPlanTargetListProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
+  entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   inventory: ReadonlyMap<number, number>;
   timezone: number;
@@ -115,22 +112,9 @@ const materialOverlayVisible = ref<boolean>(false);
 const currentMaterial = shallowRef<MaterialInfo>();
 const currentMaterialIndex = ref<number>(0);
 
-const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
-  () =>
-    new Map(
-      props.entries.map((entry) => [
-        entry.id,
-        buildCultivationResults(
-          entry.items.map((item) => ({ id: item.materialId, count: item.required })),
-          props.inventory,
-          WikiMaterialData,
-          entry.allowCrafting,
-          entry.useDust,
-          entry.useSolvent,
-        ),
-      ]),
-    ),
-);
+const entryMaterialResults = computed<
+  ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>
+>(() => props.entryMaterials);
 
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort(compareEntries),
@@ -192,24 +176,32 @@ function compareEntries(
     const availabilityDiff = Number(hasTodayMaterial(b)) - Number(hasTodayMaterial(a));
     if (availabilityDiff !== 0) return availabilityDiff;
   }
-  return a.sortOrder - b.sortOrder;
+  return comparePersistentEntries(a, b);
 }
 
-function getPriorityEntries(
-  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
-): Array<TGApp.Sqlite.Cultivation.EntryWithItems> {
-  const rank = entrySortRank(entry);
-  return props.entries
-    .filter((item) => entrySortRank(item) === rank)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+function comparePersistentEntries(
+  a: TGApp.Sqlite.Cultivation.EntryWithItems,
+  b: TGApp.Sqlite.Cultivation.EntryWithItems,
+): number {
+  const sortOrderDiff = a.sortOrder - b.sortOrder;
+  if (sortOrderDiff !== 0) return sortOrderDiff;
+  const createdDiff = a.created.localeCompare(b.created);
+  if (createdDiff !== 0) return createdDiff;
+  return a.id.localeCompare(b.id);
+}
+
+function getActiveEntries(): Array<TGApp.Sqlite.Cultivation.EntryWithItems> {
+  return props.entries.filter((entry) => entry.status === "active").sort(comparePersistentEntries);
 }
 
 function entryPriority(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
-  return getPriorityEntries(entry).findIndex((item) => item.id === entry.id) + 1;
+  if (entry.status !== "active") return 0;
+  return getActiveEntries().findIndex((item) => item.id === entry.id) + 1;
 }
 
 function canMoveEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems, offset: number): boolean {
-  const entries = getPriorityEntries(entry);
+  if (entry.status !== "active") return false;
+  const entries = getActiveEntries();
   const currentIndex = entries.findIndex((item) => item.id === entry.id);
   const nextIndex = currentIndex + offset;
   return currentIndex >= 0 && nextIndex >= 0 && nextIndex < entries.length;
@@ -224,19 +216,18 @@ function emitOrder(entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>): voi
 
 function moveEntry(entryId: string, offset: number): void {
   const entry = props.entries.find((item) => item.id === entryId);
-  if (!entry) return;
-  const rank = entrySortRank(entry);
-  const entries = getPriorityEntries(entry);
+  if (!entry || entry.status !== "active") return;
+  const entries = getActiveEntries();
   const currentIndex = entries.findIndex((entry) => entry.id === entryId);
   const nextIndex = currentIndex + offset;
   if (currentIndex < 0 || nextIndex < 0 || nextIndex >= entries.length) return;
   const [movedEntry] = entries.splice(currentIndex, 1);
   entries.splice(nextIndex, 0, movedEntry);
-  let groupIndex = 0;
+  let activeIndex = 0;
   emitOrder(
     [...props.entries]
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map((item) => (entrySortRank(item) === rank ? (entries[groupIndex++] ?? item) : item)),
+      .sort(comparePersistentEntries)
+      .map((item) => (item.status === "active" ? (entries[activeIndex++] ?? item) : item)),
   );
 }
 

@@ -14,7 +14,7 @@
       <div class="ucptc-info">
         <div class="ucptc-name-row">
           <span class="ucptc-name">{{ entry.name }}</span>
-          <v-chip v-if="entry.status === 'active' && !fulfilled" size="x-small" variant="outlined">
+          <v-chip v-if="entry.status === 'active'" size="x-small" variant="outlined">
             优先 {{ priority }}
           </v-chip>
           <v-chip
@@ -76,7 +76,7 @@
 
     <div class="ucptc-actions">
       <div class="ucptc-action-end">
-        <template v-if="entry.status === 'active' && !fulfilled">
+        <template v-if="entry.status === 'active'">
           <v-btn
             :disabled="!canMoveUp"
             icon="mdi-arrow-left"

@@ -3,7 +3,192 @@
  * @since Beta v0.11.5
  */
 
-import userCalc, { type CraftableMaterial, type CultivationMaterial } from "@utils/userCalc.js";
+import type { CraftableMaterial, CultivationMaterial } from "@utils/userCalc.js";
+import userCalc, { calculateCraftingAllocation } from "@utils/userCalc.js";
+
+/**
+ * 养成计划的材料分配结果。
+ * @since Beta v0.11.5
+ */
+export type PlanMaterialAllocation = {
+  /** 按目标 ID 保存的实际材料分配结果 */
+  entries: Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
+  /** 所有活动目标的汇总材料结果 */
+  materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  /** 分配完成后尚未使用的背包材料 */
+  remainingInventory: Map<number, number>;
+};
+
+/**
+ * 将单个目标的重复材料需求合并。
+ * @since Beta v0.11.5
+ */
+function aggregateRequirements(
+  items: ReadonlyArray<TGApp.Sqlite.Cultivation.Item>,
+): Map<number, number> {
+  const requirements = new Map<number, number>();
+  for (const item of items) {
+    const required = Math.max(item.required, 0);
+    requirements.set(item.materialId, (requirements.get(item.materialId) ?? 0) + required);
+  }
+  return requirements;
+}
+
+/**
+ * 根据材料 Wiki 数据构建合成消耗展示项。
+ * @since Beta v0.11.5
+ */
+function buildCraftingCosts(
+  crafting: CraftableMaterial | undefined,
+  inventory: ReadonlyMap<number, number>,
+  materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem>,
+): Array<TGApp.App.UserCalc.CraftingCost> {
+  return (crafting?.consumed ?? [])
+    .map((cost) => {
+      const material = materialMap.get(cost.id);
+      return {
+        id: cost.id,
+        name: material?.name ?? `材料 ${cost.id}`,
+        type: material?.type ?? "未知类型",
+        star: material?.star ?? 1,
+        count: cost.count,
+        owned: inventory.get(cost.id) ?? 0,
+      };
+    })
+    .sort((a, b) => b.star - a.star || a.id - b.id);
+}
+
+/**
+ * 按目标优先级分配计划库存并汇总材料完成情况。
+ * @since Beta v0.11.5
+ * @param entries - 养成目标列表
+ * @param inventory - 计划可用背包材料
+ * @param materials - 材料 Wiki 数据
+ * @returns 各目标、计划汇总及剩余库存的分配结果
+ */
+export function allocatePlanMaterials(
+  entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): PlanMaterialAllocation {
+  const materialMap = new Map(materials.map((material) => <const>[material.id, material]));
+  let remainingInventory = new Map(inventory);
+  const allocatedEntries = new Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>();
+
+  const activeEntries = entries
+    .filter((entry) => entry.status === "active")
+    .sort(
+      (a, b) =>
+        a.sortOrder - b.sortOrder || a.created.localeCompare(b.created) || a.id.localeCompare(b.id),
+    );
+
+  for (const entry of activeEntries) {
+    const requirements = aggregateRequirements(entry.items);
+    const ownedMaterials = new Map<number, number>();
+    for (const [materialId, required] of requirements) {
+      const owned = Math.min(Math.max(remainingInventory.get(materialId) ?? 0, 0), required);
+      ownedMaterials.set(materialId, owned);
+      remainingInventory.set(materialId, (remainingInventory.get(materialId) ?? 0) - owned);
+    }
+
+    const unmetRequirements = Array.from(requirements, ([id, required]) => ({
+      id,
+      count: required - (ownedMaterials.get(id) ?? 0),
+    }));
+    const inventoryBeforeCrafting = remainingInventory;
+    const craftingAllocation = entry.allowCrafting
+      ? calculateCraftingAllocation(
+          unmetRequirements,
+          inventoryBeforeCrafting,
+          materials,
+          entry.useDust,
+          entry.useSolvent,
+        )
+      : undefined;
+    if (craftingAllocation) remainingInventory = craftingAllocation.remainingInventory;
+
+    const entryMaterials = Array.from(requirements, ([id, required]) => {
+      const material = materialMap.get(id);
+      const owned = ownedMaterials.get(id) ?? 0;
+      const crafting = craftingAllocation?.materials.get(id);
+      const craftable = crafting?.count ?? 0;
+      const available = owned + craftable;
+      return {
+        id,
+        name: material?.name ?? `材料 ${id}`,
+        type: material?.type ?? "未知类型",
+        star: material?.star ?? 1,
+        required,
+        owned,
+        craftable,
+        craftingCosts: buildCraftingCosts(crafting, inventoryBeforeCrafting, materialMap),
+        missing: Math.max(required - available, 0),
+        progress: required === 0 ? 100 : Math.min((available / required) * 100, 100),
+      };
+    });
+    allocatedEntries.set(entry.id, sortCultivationResults(entryMaterials));
+  }
+
+  const aggregate = new Map<
+    number,
+    {
+      required: number;
+      owned: number;
+      craftable: number;
+      craftingCosts: Map<number, number>;
+    }
+  >();
+  for (const entryMaterials of allocatedEntries.values()) {
+    for (const result of entryMaterials) {
+      const current = aggregate.get(result.id) ?? {
+        required: 0,
+        owned: 0,
+        craftable: 0,
+        craftingCosts: new Map<number, number>(),
+      };
+      current.required += result.required;
+      current.owned += result.owned;
+      current.craftable += result.craftable;
+      for (const cost of result.craftingCosts) {
+        current.craftingCosts.set(cost.id, (current.craftingCosts.get(cost.id) ?? 0) + cost.count);
+      }
+      aggregate.set(result.id, current);
+    }
+  }
+
+  const resultMaterials = Array.from(aggregate, ([id, result]) => {
+    const material = materialMap.get(id);
+    const available = result.owned + result.craftable;
+    return {
+      id,
+      name: material?.name ?? `材料 ${id}`,
+      type: material?.type ?? "未知类型",
+      star: material?.star ?? 1,
+      required: result.required,
+      owned: result.owned,
+      craftable: result.craftable,
+      craftingCosts: Array.from(result.craftingCosts, ([costId, count]) => {
+        const cost = materialMap.get(costId);
+        return {
+          id: costId,
+          name: cost?.name ?? `材料 ${costId}`,
+          type: cost?.type ?? "未知类型",
+          star: cost?.star ?? 1,
+          count,
+          owned: inventory.get(costId) ?? 0,
+        };
+      }).sort((a, b) => b.star - a.star || a.id - b.id),
+      missing: Math.max(result.required - available, 0),
+      progress: result.required === 0 ? 100 : Math.min((available / result.required) * 100, 100),
+    };
+  });
+
+  return {
+    entries: allocatedEntries,
+    materials: sortCultivationResults(resultMaterials),
+    remainingInventory,
+  };
+}
 
 /**
  * 汇总活动养成目标的材料需求

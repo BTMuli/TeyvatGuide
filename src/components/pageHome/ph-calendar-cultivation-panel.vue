@@ -86,7 +86,7 @@
               <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用异梦溶媒</v-chip>
             </div>
           </div>
-          <v-chip size="x-small" variant="outlined">优先 {{ entry.sortOrder + 1 }}</v-chip>
+          <v-chip size="x-small" variant="outlined">优先 {{ entryPriority(entry) }}</v-chip>
         </div>
 
         <div v-if="entry.targetState.talents.length > 0" class="phco-talents">
@@ -128,7 +128,7 @@
           </div>
         </div>
         <div class="phco-section-meta">
-          <span class="phco-section-hint">目标需求为当前角色/武器合计，缺口为整个计划统计</span>
+          <span class="phco-section-hint">已准备数量按当前目标的优先分配结果统计（含可合成）</span>
         </div>
       </div>
       <div
@@ -154,14 +154,14 @@
           </div>
           <v-chip
             :color="
-              material.currentOwned < material.targetRequired
+              material.prepared < material.targetRequired
                 ? 'var(--tgc-od-red)'
                 : 'var(--tgc-od-green)'
             "
             size="small"
             variant="tonal"
           >
-            {{ formatCount(material.currentOwned) }}/{{ formatCount(material.targetRequired) }}
+            {{ formatCount(material.prepared) }}/{{ formatCount(material.targetRequired) }}
           </v-chip>
         </article>
       </div>
@@ -202,17 +202,19 @@ import { getServerDay, isMaterialAvailableToday } from "@/utils/cultivationPlan.
 
 type PhCalendarCultivationPanelProps = {
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
+  entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
   item: TGApp.App.Calendar.Item;
-  materials: Array<TGApp.App.UserCalc.ResultMaterial>;
+  planEntries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   project?: TGApp.Sqlite.Cultivation.Project;
 };
 type PhCalendarCultivationPanelEmits = { close: [] };
 
 type TargetMaterial = TGApp.App.Calendar.Material & {
-  currentOwned: number;
   isToday: boolean;
+  prepared: number;
   targetRequired: number;
 };
+type SelectedMaterialAllocation = { prepared: number; type: string };
 type DropDayLabel = { isToday: boolean; label: string; value: number };
 
 const dayLabels: Record<number, string> = {
@@ -246,8 +248,27 @@ const isTraveler = computed<boolean>(
   () => props.item.id === 10000005 || props.item.id === 10000007,
 );
 const serverDay = computed<number>(() => getServerDay(props.project?.timezone ?? 8));
-const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
-  () => new Map(props.materials.map((material) => [material.id, material])),
+const selectedMaterialAllocations = computed<Map<number, SelectedMaterialAllocation>>(() => {
+  const allocations = new Map<number, SelectedMaterialAllocation>();
+  for (const entry of props.entries) {
+    for (const material of props.entryMaterials.get(entry.id) ?? []) {
+      const current = allocations.get(material.id);
+      allocations.set(material.id, {
+        prepared: (current?.prepared ?? 0) + material.owned + material.craftable,
+        type: material.type,
+      });
+    }
+  }
+  return allocations;
+});
+const entryPriorities = computed<Map<string, number>>(
+  () =>
+    new Map(
+      props.planEntries
+        .filter((entry) => entry.status === "active")
+        .sort(comparePersistentEntries)
+        .map((entry, index) => [entry.id, index + 1]),
+    ),
 );
 const targetMaterials = computed<Array<TargetMaterial>>(() =>
   props.item.materials
@@ -255,23 +276,24 @@ const targetMaterials = computed<Array<TargetMaterial>>(() =>
       const targetRequired = props.entries.reduce(
         (total, entry) =>
           total +
-          (entry.items.find((entryItem) => entryItem.materialId === material.id)?.required ?? 0),
+          entry.items
+            .filter((entryItem) => entryItem.materialId === material.id)
+            .reduce((sum, entryItem) => sum + entryItem.required, 0),
         0,
       );
-      const currentOwned = materialResultMap.value.get(material.id)?.owned ?? 0;
       return {
         ...material,
-        currentOwned,
         isToday:
           isTraveler.value &&
           isMaterialAvailableToday(material.id, serverDay.value, WikiMaterialData),
+        prepared: selectedMaterialAllocations.value.get(material.id)?.prepared ?? 0,
         targetRequired,
       };
     })
     .filter((material) => {
       if (material.targetRequired <= 0) return false;
       if (!isTraveler.value) return true;
-      return materialResultMap.value.get(material.id)?.type === "角色天赋素材";
+      return selectedMaterialAllocations.value.get(material.id)?.type === "角色天赋素材";
     })
     .sort((a, b) => b.star - a.star),
 );
@@ -294,6 +316,19 @@ const shareCaption = computed<string>(() => `${props.item.name} · 养成目标`
 
 function formatCount(count: number): string {
   return count.toLocaleString("zh-CN");
+}
+
+function comparePersistentEntries(
+  a: TGApp.Sqlite.Cultivation.EntryWithItems,
+  b: TGApp.Sqlite.Cultivation.EntryWithItems,
+): number {
+  return (
+    a.sortOrder - b.sortOrder || a.created.localeCompare(b.created) || a.id.localeCompare(b.id)
+  );
+}
+
+function entryPriority(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
+  return entryPriorities.value.get(entry.id) ?? 0;
 }
 
 function getCurrentTalentLevel(

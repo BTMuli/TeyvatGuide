@@ -24,6 +24,17 @@ export type CraftableMaterial = {
 };
 
 /**
+ * 材料合成后的分配结果
+ * @since Beta v0.11.4
+ */
+export type CraftingAllocation = {
+  /** 各需求材料可通过合成补足的数量及实际消耗 */
+  materials: Map<number, CraftableMaterial>;
+  /** 预留直接需求并扣除合成消耗后的剩余背包材料 */
+  remainingInventory: Map<number, number>;
+};
+
+/**
  * 战绩技能与本地 Wiki 技能的对应关系。
  * @since Beta v0.11.2
  */
@@ -725,7 +736,7 @@ function tryCraftMaterial(
 }
 
 /**
- * 根据背包余量与材料 Wiki 配方计算各项需求可通过合成补足的数量。
+ * 根据背包余量与材料 Wiki 配方计算合成分配结果。
  *
  * @remarks 已直接满足材料需求的持有量会被优先保留，剩余材料按星级从高到低分配，
  * 同一份背包材料不会被重复计入多项合成结果。
@@ -734,16 +745,16 @@ function tryCraftMaterial(
  * @param materials - 材料 Wiki 数据
  * @param useDust - 是否允许使用含嬗变之尘的配方
  * @param useSolvent - 是否允许使用含异梦溶媒的配方
- * @returns 各需求材料可通过合成补足的数量及实际消耗
- * @since Beta v0.11.2
+ * @returns 各需求材料的合成结果及扣除预留和合成消耗后的库存
+ * @since Beta v0.11.4
  */
-export function calculateCraftableMaterials(
+export function calculateCraftingAllocation(
   requirements: ReadonlyArray<CultivationMaterial>,
   inventory: ReadonlyMap<number, number>,
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
   useDust = false,
   useSolvent = false,
-): Map<number, CraftableMaterial> {
+): CraftingAllocation {
   const requiredCounts = new Map<number, number>();
   for (const requirement of requirements) add(requiredCounts, requirement.id, requirement.count);
 
@@ -782,7 +793,34 @@ export function calculateCraftableMaterials(
       craftable.set(item.id, { count, consumed });
     }
   }
-  return craftable;
+  return {
+    materials: craftable,
+    remainingInventory: context.inventory,
+  };
+}
+
+/**
+ * 根据背包余量与材料 Wiki 配方计算各项需求可通过合成补足的数量。
+ *
+ * @remarks 已直接满足材料需求的持有量会被优先保留，剩余材料按星级从高到低分配，
+ * 同一份背包材料不会被重复计入多项合成结果。
+ * @param requirements - 材料需求列表
+ * @param inventory - 背包材料数量
+ * @param materials - 材料 Wiki 数据
+ * @param useDust - 是否允许使用含嬗变之尘的配方
+ * @param useSolvent - 是否允许使用含异梦溶媒的配方
+ * @returns 各需求材料可通过合成补足的数量及实际消耗
+ * @since Beta v0.11.2
+ */
+export function calculateCraftableMaterials(
+  requirements: ReadonlyArray<CultivationMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+  useDust = false,
+  useSolvent = false,
+): Map<number, CraftableMaterial> {
+  return calculateCraftingAllocation(requirements, inventory, materials, useDust, useSolvent)
+    .materials;
 }
 
 /** 根据武器星级获取等级上限。 */

@@ -133,6 +133,7 @@
         <v-window-item class="cultivation-tab-content" value="targets">
           <UcPlanTargetList
             :bag-materials="bagMaterialDetails"
+            :entry-materials="planAllocation.entries"
             :entries="planEntries"
             :inventory="planInventory"
             :timezone="currentProject?.timezone ?? currentTimezone"
@@ -290,7 +291,7 @@ import useUserStore from "@store/user.js";
 import { platform } from "@tauri-apps/plugin-os";
 import { getRfAc } from "@utils/acUtils.js";
 import {
-  aggregateEntryMaterials,
+  allocatePlanMaterials,
   buildCultivationResults,
   getCalculateInventory,
   getUidServerTimezone,
@@ -742,21 +743,14 @@ const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
     useSolvent.value,
   ),
 );
-const planRequiredMaterials = computed<Array<CultivationMaterial>>(() =>
-  aggregateEntryMaterials(planEntries.value),
-);
 const planInventory = computed<Map<number, number>>(() =>
   mergePlanInventory(bagMaterials.value, bagMaterialDetails.value, planEntries.value),
 );
-const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  buildCultivationResults(
-    planRequiredMaterials.value,
-    planInventory.value,
-    WikiMaterialData,
-    true,
-    false,
-    false,
-  ),
+const planAllocation = computed(() =>
+  allocatePlanMaterials(planEntries.value, planInventory.value, WikiMaterialData),
+);
+const planResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
+  () => planAllocation.value.materials,
 );
 const planMissingKinds = computed<number>(
   () => planResultMaterials.value.filter((material) => material.missing > 0).length,
@@ -766,9 +760,8 @@ const planEntryCounts = computed<{
   completed: number;
   fulfilled: number;
 }>(() => {
-  const materialMap = new Map(planResultMaterials.value.map((material) => [material.id, material]));
   const fulfilled = (entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean =>
-    entry.items.every((item) => (materialMap.get(item.materialId)?.missing ?? 0) <= 0);
+    (planAllocation.value.entries.get(entry.id) ?? []).every((material) => material.missing <= 0);
   return {
     active: planEntries.value.filter((entry) => entry.status === "active" && !fulfilled(entry))
       .length,

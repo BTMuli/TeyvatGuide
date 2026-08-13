@@ -6,8 +6,9 @@
       <PhCalendarCultivationPanel
         v-if="showCultivation"
         :entries="entries"
+        :entry-materials="entryMaterials"
         :item="item"
-        :materials="materials"
+        :plan-entries="planEntries"
         :project="project"
         @close="visible = false"
       />
@@ -29,8 +30,10 @@ type PhCalendarOverlayProps = {
   src?: string;
   /** 养成目标条目（非空时显示养成目标内容） */
   entries?: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
-  /** 养成计划材料 */
-  materials?: Array<TGApp.App.UserCalc.ResultMaterial>;
+  /** 按目标 ID 保存的计划材料分配结果 */
+  entryMaterials?: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
+  /** 用于计算持久优先级的完整计划目标 */
+  planEntries?: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   /** 养成计划 */
   project?: TGApp.Sqlite.Cultivation.Project;
 };
@@ -38,7 +41,8 @@ type PhCalendarOverlayProps = {
 const props = withDefaults(defineProps<PhCalendarOverlayProps>(), {
   src: "素材日历",
   entries: () => [],
-  materials: () => [],
+  entryMaterials: () => new Map(),
+  planEntries: () => [],
 });
 const visible = defineModel<boolean>({ default: false });
 const showCultivation = computed<boolean>(() => props.entries.length > 0);

@@ -67,8 +67,7 @@ import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useUserStore from "@store/user.js";
 import {
-  aggregateEntryMaterials,
-  buildCultivationResults,
+  allocatePlanMaterials,
   getServerDay,
   isMaterialAvailableToday,
   mergePlanInventory,
@@ -84,8 +83,8 @@ type PhCompCultivationEmits = {
     event: "data-loaded",
     project: TGApp.Sqlite.Cultivation.Project | undefined,
     entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
-    materials: Array<TGApp.App.UserCalc.ResultMaterial>,
     displayEntries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
+    entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>,
   ): void;
   (event: "success"): void;
   (event: "target-click", entry: TGApp.Sqlite.Cultivation.EntryWithItems): void;
@@ -96,31 +95,23 @@ const router = useRouter();
 const { account } = storeToRefs(useUserStore());
 const project = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const entries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
-const resultMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
 const inventory = shallowRef<ReadonlyMap<number, number>>(new Map());
 const bagMaterials = shallowRef<ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>>(new Map());
 const planInventory = computed<ReadonlyMap<number, number>>(() =>
   mergePlanInventory(inventory.value, bagMaterials.value, entries.value),
+);
+const allocation = computed(() =>
+  allocatePlanMaterials(entries.value, planInventory.value, WikiMaterialData),
+);
+const resultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
+  () => allocation.value.materials,
 );
 
 const missingKinds = computed<number>(
   () => resultMaterials.value.filter((material) => material.missing > 0).length,
 );
 const entryMaterialResults = computed<Map<string, Array<TGApp.App.UserCalc.ResultMaterial>>>(
-  () =>
-    new Map(
-      entries.value.map((entry) => [
-        entry.id,
-        buildCultivationResults(
-          entry.items.map((item) => ({ id: item.materialId, count: item.required })),
-          planInventory.value,
-          WikiMaterialData,
-          entry.allowCrafting,
-          entry.useDust,
-          entry.useSolvent,
-        ),
-      ]),
-    ),
+  () => allocation.value.entries,
 );
 const todayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
   if (!project.value) return [];
@@ -149,16 +140,14 @@ onMounted(async () => {
     entries.value = entryData;
     bagMaterials.value = new Map(bagData.map((material) => [material.id, material]));
     inventory.value = new Map(bagData.map((material) => [material.id, material.count]));
-    resultMaterials.value = buildCultivationResults(
-      aggregateEntryMaterials(entryData),
-      planInventory.value,
-      WikiMaterialData,
-      true,
-      false,
-      false,
-    );
   } finally {
-    emits("data-loaded", project.value, entries.value, resultMaterials.value, activeEntries.value);
+    emits(
+      "data-loaded",
+      project.value,
+      entries.value,
+      activeEntries.value,
+      entryMaterialResults.value,
+    );
     emits("success");
   }
 });

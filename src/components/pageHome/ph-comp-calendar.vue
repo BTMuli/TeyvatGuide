@@ -64,7 +64,8 @@
     v-model="showItem"
     :item="selectedItem"
     :entries="selectedCultivationEntries"
-    :materials="cultivationMaterials"
+    :entry-materials="cultivationEntryMaterials"
+    :plan-entries="cultivationEntries"
     :project="cultivationProject"
     src="素材日历"
   >
@@ -142,7 +143,9 @@ const selectedType = ref<"character" | "weapon">("character");
 const cultivationProject = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const cultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const cultivationDisplayEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
-const cultivationMaterials = shallowRef<Array<TGApp.App.UserCalc.ResultMaterial>>([]);
+const cultivationEntryMaterials = shallowRef<
+  ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>
+>(new Map());
 const selectedCultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);
 const gridCols = ref<number>(8);
 let resizeObserver: ResizeObserver | null = null;
@@ -307,13 +310,13 @@ function handleCultivationSuccess(): void {
 function handleCultivationData(
   project: TGApp.Sqlite.Cultivation.Project | undefined,
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
-  materials: Array<TGApp.App.UserCalc.ResultMaterial>,
   displayEntries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>,
+  entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>,
 ): void {
   cultivationProject.value = project;
   cultivationEntries.value = entries;
   cultivationDisplayEntries.value = displayEntries;
-  cultivationMaterials.value = materials;
+  cultivationEntryMaterials.value = entryMaterials;
 }
 
 function isCultivationTarget(item: TGApp.App.Calendar.Item): boolean {
