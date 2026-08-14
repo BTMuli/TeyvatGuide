@@ -1,8 +1,11 @@
 <!-- 养成计算-材料需求 -->
 <template>
   <div class="ucm-result">
-    <div class="ucm-header">
-      <span class="ucm-heading">材料需求</span>
+    <header class="ucm-header">
+      <div class="ucm-heading">
+        <v-icon color="var(--tgc-od-orange)" size="18">mdi-clipboard-list-outline</v-icon>
+        <span>材料需求</span>
+      </div>
       <v-chip size="small" variant="tonal">{{ materials.length }} 种材料</v-chip>
       <v-chip
         :color="missingKinds > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
@@ -44,25 +47,66 @@
           <span>使用异梦溶媒</span>
         </div>
       </div>
-    </div>
+    </header>
 
-    <div v-if="loading" class="ucm-empty">
+    <section v-if="loading" class="ucm-empty ucm-section">
       <v-progress-circular color="var(--tgc-od-orange)" indeterminate size="48" />
       <span>正在通过接口计算养成材料</span>
-    </div>
+    </section>
 
     <template v-else-if="materials.length > 0">
-      <div class="ucm-list">
-        <UcMaterialItem
-          v-for="material in materials"
-          :key="material.id"
-          :material
-          :weaken-ready
-          @select="openMaterialInfo(material)"
-        />
-      </div>
+      <section class="ucm-section">
+        <div class="ucm-list">
+          <article
+            v-for="(material, index) in materials"
+            :key="material.id"
+            :class="{
+              missing: material.missing > 0,
+              ready: weakenReady && material.missing === 0,
+            }"
+            class="ucm-material"
+            role="button"
+            tabindex="0"
+            title="查看材料详情"
+            @click="openMaterialInfo(material, index)"
+            @keydown.enter="openMaterialInfo(material, index)"
+            @keydown.space.prevent="openMaterialInfo(material, index)"
+          >
+            <div class="ucm-material-icon">
+              <img :src="`/icon/bg/${material.star}-Star.webp`" alt="background" />
+              <img :src="`/icon/material/${material.id}.webp`" :alt="material.name" />
+            </div>
+            <div class="ucm-material-info">
+              <div class="ucm-material-heading">
+                <strong>{{ material.name }}</strong>
+                <span
+                  :class="{ complete: material.missing === 0 }"
+                  :title="getMaterialCountTitle(material)"
+                  class="ucm-material-count"
+                >
+                  <span class="owned">{{ formatCount(material.owned) }}</span>
+                  <span v-if="material.craftable > 0" class="craftable">
+                    ({{ formatCount(material.craftable) }})
+                  </span>
+                  <span>/{{ formatCount(material.required) }}</span>
+                </span>
+              </div>
+              <div class="ucm-material-meta">{{ material.type }}</div>
+              <v-progress-linear
+                :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
+                :model-value="material.progress"
+                height="3"
+                rounded
+              />
+            </div>
+          </article>
+        </div>
+      </section>
 
-      <div v-if="allowCrafting && craftingCosts.length > 0" class="ucm-cost-summary">
+      <section
+        v-if="allowCrafting && craftingCosts.length > 0"
+        class="ucm-cost-summary ucm-section"
+      >
         <div class="ucm-cost-header">
           <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
           <span>合成消耗</span>
@@ -71,29 +115,51 @@
         <div class="ucm-cost-list">
           <PboConvertMaterial v-for="cost in craftingCosts" :key="cost.id" :material="cost" />
         </div>
-      </div>
+      </section>
     </template>
 
-    <div v-else class="ucm-empty">
+    <section v-else class="ucm-empty ucm-section">
       <v-icon size="48">mdi-package-variant-closed-check</v-icon>
       <span>{{ emptyText }}</span>
-    </div>
+    </section>
   </div>
   <UcMaterialDetail
     v-if="currentMaterial && currentWiki"
     v-model="materialOverlayVisible"
     :bag="bagMaterials.get(currentMaterial.id)"
     :material="currentMaterial"
+    topOffset="132px"
     :uid
     :wiki="currentWiki"
-  />
+  >
+    <template #left>
+      <v-btn
+        aria-label="上一个养成材料"
+        class="ucm-card-arrow"
+        icon="mdi-chevron-left"
+        title="上一个养成材料"
+        variant="flat"
+        @click="switchMaterial(false)"
+      />
+    </template>
+    <template #right>
+      <v-btn
+        aria-label="下一个养成材料"
+        class="ucm-card-arrow"
+        icon="mdi-chevron-right"
+        title="下一个养成材料"
+        variant="flat"
+        @click="switchMaterial(true)"
+      />
+    </template>
+  </UcMaterialDetail>
 </template>
 
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import PboConvertMaterial from "@comp/pageBag/pbo-convert-material.vue";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
-import UcMaterialItem from "@comp/userCalc/uc-material-item.vue";
 import { computed, nextTick, ref, shallowRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -119,6 +185,7 @@ const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
 const useDust = defineModel<boolean>("useDust", { required: true });
 const useSolvent = defineModel<boolean>("useSolvent", { required: true });
 const materialOverlayVisible = ref<boolean>(false);
+const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
 const craftingCosts = computed<Array<PboConvertSource>>(() => {
@@ -142,39 +209,82 @@ const craftingCosts = computed<Array<PboConvertSource>>(() => {
     }));
 });
 
-async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Promise<void> {
+async function openMaterialInfo(
+  material: TGApp.App.UserCalc.ResultMaterial,
+  index: number,
+): Promise<void> {
   const wiki = WikiMaterialData.find((item) => item.id === material.id);
   if (!wiki) return;
   materialOverlayVisible.value = false;
+  currentMaterialIndex.value = index;
   currentMaterial.value = material;
   currentWiki.value = wiki;
   await nextTick();
   materialOverlayVisible.value = true;
 }
+
+function switchMaterial(isNext: boolean): void {
+  const nextIndex = currentMaterialIndex.value + (isNext ? 1 : -1);
+  if (nextIndex < 0) {
+    showSnackbar.warn("已经是第一个养成材料了");
+    return;
+  }
+  if (nextIndex >= props.materials.length) {
+    showSnackbar.warn("已经是最后一个养成材料了");
+    return;
+  }
+  const material = props.materials[nextIndex];
+  const wiki = WikiMaterialData.find((item) => item.id === material?.id);
+  if (!material || !wiki) return;
+  currentMaterialIndex.value = nextIndex;
+  currentMaterial.value = material;
+  currentWiki.value = wiki;
+}
+
+function formatCount(count: number): string {
+  return count.toLocaleString("zh-CN");
+}
+
+function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): string {
+  const crafting = material.craftable > 0 ? `，可合成 ${formatCount(material.craftable)}` : "";
+  return `持有 ${formatCount(material.owned)}${crafting}，总需 ${formatCount(material.required)}`;
+}
 </script>
 
 <style lang="scss" scoped>
 .ucm-result {
+  display: flex;
   width: 100%;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-1);
-  box-shadow: 0 4px 8px var(--common-shadow-1);
+  flex-direction: column;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--app-page-bg);
+  gap: 10px;
 }
 
 .ucm-header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--common-shadow-1);
   gap: 8px;
 }
 
 .ucm-heading {
+  display: flex;
+  align-items: center;
   font-family: var(--font-title);
   font-size: 16px;
-  font-weight: 400;
+  font-weight: normal;
+  gap: 4px;
+}
+
+.ucm-section {
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
 }
 
 .ucm-crafting-options {
@@ -204,17 +314,127 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
 
 .ucm-list {
   display: grid;
-  align-items: stretch;
+  align-content: start;
+  gap: 6px;
+  grid-auto-rows: 58px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ucm-material {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--common-shadow-t-1);
+  cursor: pointer;
+  transition: opacity 160ms ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-blue);
+    outline-offset: -2px;
+  }
+
+  &.missing {
+    border-color: var(--tgc-od-red);
+  }
+
+  &.ready {
+    opacity: 0.56;
+  }
+}
+
+.ucm-material-icon {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  background: var(--common-shadow-t-2);
+
+  img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+  }
+
+  img:first-child {
+    object-fit: cover;
+  }
+
+  img:last-child {
+    object-fit: contain;
+  }
+}
+
+.ucm-material-info {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5px 8px;
+  gap: 3px;
+}
+
+.ucm-material-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+
+  > strong {
+    overflow: hidden;
+    font-family: var(--font-title);
+    font-size: 13px;
+    font-weight: normal;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.ucm-material-count {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: baseline;
+  color: var(--tgc-od-red);
+  font-size: 11px;
+
+  .owned {
+    color: var(--tgc-od-blue);
+  }
+
+  .craftable {
+    color: var(--tgc-od-green);
+  }
+
+  &.complete {
+    color: var(--tgc-od-green);
+  }
+}
+
+.ucm-material-meta {
+  overflow: hidden;
+  color: var(--common-text-sub);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ucm-card-arrow {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
 }
 
 .ucm-cost-summary {
   display: flex;
   flex-direction: column;
-  padding-top: 12px;
-  border-top: 1px solid var(--common-shadow-1);
-  margin-top: 12px;
   gap: 8px;
 }
 
@@ -222,13 +442,14 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
   display: flex;
   align-items: center;
   font-family: var(--font-title);
+  font-weight: normal;
   gap: 6px;
 }
 
 .ucm-cost-list {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .ucm-empty {
@@ -244,6 +465,7 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
 @media (width <= 600px) {
   .ucm-result {
     padding: 8px;
+    gap: 8px;
   }
 
   .ucm-list {

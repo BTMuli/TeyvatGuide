@@ -67,6 +67,15 @@
         </div>
         <div class="cultivation-plan-actions">
           <v-btn
+            :disabled="!currentProject"
+            prepend-icon="mdi-chart-box-outline"
+            size="small"
+            variant="tonal"
+            @click="summaryVisible = true"
+          >
+            查看汇总
+          </v-btn>
+          <v-btn
             v-if="isWindows"
             prepend-icon="mdi-bag-personal-outline"
             size="small"
@@ -267,6 +276,17 @@
       </v-window>
     </template>
   </div>
+
+  <UcPlanSummaryOverlay
+    v-if="currentProject"
+    v-model="summaryVisible"
+    :bag-materials="bagMaterialDetails"
+    :inventory-updated-label="inventoryUpdatedLabel"
+    :materials="planResultMaterials"
+    :project="currentProject"
+    :target-counts="planEntryCounts"
+    :uid="currentUid ?? 0"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -275,6 +295,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcCharacterPanel from "@comp/userCalc/uc-character-panel.vue";
 import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
+import UcPlanSummaryOverlay from "@comp/userCalc/uc-plan-summary-overlay.vue";
 import UcPlanTargetList from "@comp/userCalc/uc-plan-target-list.vue";
 import UcWeaponPanel from "@comp/userCalc/uc-weapon-panel.vue";
 import gameEnum from "@enum/game.js";
@@ -355,6 +376,7 @@ const isWindows = platform() === "windows";
 const loading = ref<boolean>(false);
 const apiLoading = ref<boolean>(false);
 const planLoading = ref<boolean>(false);
+const summaryVisible = ref<boolean>(false);
 const apiCalculated = ref<boolean>(false);
 const calculationMode = ref<CalculationMode>(isWindows ? "bag" : "api");
 const viewTab = ref<CultivationViewTab>("targets");
@@ -801,6 +823,7 @@ watch(
   currentUid,
   async (uid) => {
     if (settingUid || uid === undefined) return;
+    summaryVisible.value = false;
     ensureCalculationMode(uid);
     await loadUidData(uid);
   },

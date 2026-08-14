@@ -160,9 +160,17 @@ function entrySortRank(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
 
 function hasTodayMaterial(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean {
   const serverDay = getServerDay(props.timezone);
-  return entry.items.some((item) =>
-    isMaterialAvailableToday(item.materialId, serverDay, WikiMaterialData),
+  const materialResultMap = new Map(
+    (entryMaterialResults.value.get(entry.id) ?? []).map((material) => [material.id, material]),
   );
+  return entry.items.some((item) => {
+    const material = materialResultMap.get(item.materialId);
+    return (
+      material !== undefined &&
+      material.missing > 0 &&
+      isMaterialAvailableToday(item.materialId, serverDay, WikiMaterialData)
+    );
+  });
 }
 
 function compareEntries(
