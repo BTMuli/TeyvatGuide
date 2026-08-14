@@ -165,3 +165,5 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
 - [MihoyoBBSTools](https://github.com/Womsxd/MihoyoBBSTools)
 - [nonebot-plugin-mystool](https://github.com/Ljzd-PRO/nonebot-plugin-mystool)
 - [Yae](https://github.com/HolographicHat/Yae)
+
+[![Star History Chart](https://star-history.dera.page/svg?repos=BTMuli/TeyvatGuide&type=Timeline)](https://star-history.dera.page/#BTMuli/TeyvatGuide&Timeline)
