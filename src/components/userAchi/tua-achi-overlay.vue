@@ -3,55 +3,112 @@
     <div v-if="props.data" class="tua-ao-container">
       <slot name="left"></slot>
       <div class="tua-ao-box">
-        <div class="tua-ao-top">
-          <span class="tua-ao-click" title="查询" @click="searchDirect(props.data.name)">
-            {{ props.data.name }}
-          </span>
-          <span class="tua-ao-click" title="分享" @click="share()">
-            {{ props.data.description }}
-          </span>
-        </div>
-        <div class="tua-ao-mid">
-          <div class="tua-ao-mid-title">
-            <span>所属系列：</span>
-            <span class="tua-ao-click" @click="emits('select-series', props.data.series)">
-              {{
-                AppAchievementSeriesData.find((s) => s.id === props.data?.series)?.name ?? "未知"
+        <img :src="achievementCard" alt="" aria-hidden="true" class="tua-ao-bg" />
+
+        <header class="tua-ao-header">
+          <button
+            class="tua-ao-series"
+            title="查看所属系列"
+            type="button"
+            @click="emits('select-series', props.data.series)"
+          >
+            <img :src="achievementSeriesIcon" alt="" aria-hidden="true" />
+            <span>{{ achievementSeriesName }}</span>
+          </button>
+          <div class="tua-ao-title-main">
+            <h2 class="tua-ao-title">{{ props.data.name }}</h2>
+            <span class="tua-ao-version">v{{ props.data.version }}</span>
+          </div>
+        </header>
+
+        <section aria-labelledby="achi-condition-title" class="tua-ao-panel tua-ao-conditions">
+          <div class="tua-ao-section-heading">
+            <h3 id="achi-condition-title">达成条件</h3>
+            <span :title="props.data.trigger.type">{{ triggerTypeLabel }}</span>
+          </div>
+          <p class="tua-ao-condition-text">{{ props.data.description }}</p>
+          <div v-if="groupedTriggerTasks.length > 0" class="tua-ao-task-grid">
+            <button
+              v-for="item in groupedTriggerTasks"
+              :key="item.key"
+              :title="`查询任务：${item.name}`"
+              class="tua-ao-task"
+              type="button"
+              @click="searchDirect(item.name)"
+            >
+              <v-icon size="16">mdi-alert-decagram-outline</v-icon>
+              <span class="tua-ao-task-content">
+                <span class="tua-ao-task-name">{{ item.name }}</span>
+                <span class="tua-ao-task-meta">
+                  {{ item.type }}<b v-if="item.count > 1"> ×{{ item.count }}</b>
+                </span>
+              </span>
+            </button>
+          </div>
+          <div class="tua-ao-condition-reward">
+            <span>达成奖励</span>
+            <span class="tua-ao-condition-reward-value">
+              <span>{{ props.data.reward }}</span>
+              <img alt="原石" src="/icon/material/201.webp" />
+            </span>
+          </div>
+        </section>
+
+        <section aria-labelledby="achi-record-title" class="tua-ao-panel tua-ao-record">
+          <div class="tua-ao-section-heading">
+            <h3 id="achi-record-title">成就记录</h3>
+          </div>
+          <dl class="tua-ao-record-list">
+            <div>
+              <dt>完成状态</dt>
+              <dd :class="{ 'is-completed': props.data.isCompleted }">
+                <v-icon size="16">
+                  {{ props.data.isCompleted ? "mdi-check-circle" : "mdi-progress-clock" }}
+                </v-icon>
+                {{ props.data.isCompleted ? "已完成" : "未完成" }}
+              </dd>
+            </div>
+            <div>
+              <dt>完成时间</dt>
+              <dd>{{ props.data.isCompleted ? props.data.completedTime || "未记录" : "—" }}</dd>
+            </div>
+            <div>
+              <dt>当前进度</dt>
+              <dd>{{ props.data.progress > 0 ? props.data.progress : "—" }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="tua-ao-footer">
+          <div class="tua-ao-metadata">
+            <span>
+              ID {{ props.data.id }} UID {{ props.data.uid }} | TeyvatGuide v{{
+                appVersion ?? "..."
               }}
             </span>
           </div>
-          <div class="tua-ao-mid-title">
-            <span>原石奖励：</span>
-            <span>{{ props.data.reward }}</span>
-            <img alt="原石" src="/icon/material/201.webp" />
+          <div class="tua-ao-actions" data-html2canvas-ignore>
+            <v-btn
+              class="tua-ao-action tua-ao-action-query"
+              size="small"
+              variant="text"
+              @click="searchDirect(props.data.name)"
+            >
+              <v-icon>mdi-magnify</v-icon>
+              <span>查询攻略</span>
+            </v-btn>
+            <v-btn
+              :loading
+              class="tua-ao-action tua-ao-action-share"
+              size="small"
+              variant="text"
+              @click="share"
+            >
+              <v-icon>mdi-share-variant</v-icon>
+              <span>分享</span>
+            </v-btn>
           </div>
-          <div class="tua-ao-mid-title">
-            <span>触发方式：</span>
-            <span>{{ parseTriggerType() }}</span>
-          </div>
-          <div v-for="item in props.data.trigger.task" :key="item.questId" class="tua-ao-mid-item">
-            <v-icon size="16">mdi-alert-decagram</v-icon>
-            <span class="tua-ao-click" @click="searchDirect(item.name)">{{ item.name }}</span>
-            <span>（{{ item.type }}）</span>
-          </div>
-        </div>
-        <div class="tua-ao-bottom">
-          <div class="tua-ao-bottom-title">
-            <span>是否完成：</span>
-            <span>{{ props.data.isCompleted ? "是" : "否" }}</span>
-          </div>
-          <div v-if="props.data.isCompleted" class="tua-ao-bottom-title">
-            <span>完成时间：</span>
-            <span>{{ props.data.completedTime }}</span>
-          </div>
-          <div v-if="props.data.progress > 0" class="tua-ao-bottom-title">
-            <span>当前进度：</span>
-            <span>{{ props.data.progress }}</span>
-          </div>
-        </div>
-        <div class="tua-ao-extra">
-          <span>ID：{{ props.data.id }}</span>
-        </div>
+        </footer>
       </div>
       <slot name="right"></slot>
     </div>
@@ -60,20 +117,60 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
+import { computed, onMounted, ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
 
 type ToAchiInfoProps = { data: TGApp.App.Achievement.RenderItem };
 type ToAchiInfoEmits = {
-  (e: "select-series", v: number): void;
-  (e: "search", v: string): void;
+  "select-series": [seriesId: number];
+  search: [word: string];
+};
+type GroupedTriggerTask = TGApp.App.Achievement.TriggerTask & {
+  count: number;
+  key: string;
 };
 
 const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
-const visible = defineModel<boolean>();
+const visible = defineModel<boolean>({ required: true });
+const loading = ref<boolean>(false);
+const appVersion = ref<string>();
+const achievementSeries = computed<TGApp.App.Achievement.Series | undefined>(() =>
+  AppAchievementSeriesData.find((series) => series.id === props.data.series),
+);
+const achievementSeriesName = computed<string>(() => achievementSeries.value?.name ?? "未知系列");
+const achievementSeriesIcon = computed<string>(() => {
+  const icon = achievementSeries.value?.icon ?? "UI_AchievementIcon_O001";
+  return `/icon/achievement/${icon}.webp`;
+});
+const achievementCard = computed<string>(() => {
+  const card = achievementSeries.value?.card;
+  const cardName = card === undefined || card === "" ? "原神·印象" : card;
+  return `/WIKI/nameCard/profile/${cardName}.webp`;
+});
+const groupedTriggerTasks = computed<Array<GroupedTriggerTask>>(() => {
+  const taskMap = new Map<string, GroupedTriggerTask>();
+  for (const task of props.data.trigger.task ?? []) {
+    const key = `${task.questId}:${task.name}:${task.type}`;
+    const groupedTask = taskMap.get(key);
+    if (groupedTask !== undefined) {
+      groupedTask.count += 1;
+      continue;
+    }
+    taskMap.set(key, { ...task, count: 1, key });
+  }
+  return Array.from(taskMap.values());
+});
+const triggerTypeLabel = computed<string>(() => {
+  if (groupedTriggerTasks.value.length === 0) return props.data.trigger.type;
+  return parseTriggerType(props.data.trigger.type);
+});
+
+onMounted(async () => (appVersion.value = await getVersion()));
 
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);
@@ -87,11 +184,16 @@ async function share(): Promise<void> {
     return;
   }
   const fileName = `【成就详情】【${props.data.id}】-${props.data.name}`;
-  await generateShareImg(fileName, achiBox);
+  loading.value = true;
+  try {
+    await generateShareImg(fileName, achiBox);
+  } finally {
+    loading.value = false;
+  }
 }
 
-function parseTriggerType(): string {
-  switch (props.data.trigger.type) {
+function parseTriggerType(triggerType: string): string {
+  switch (triggerType) {
     case "FINISH_QUEST_AND":
     case "FINISH_PARENT_QUEST_AND":
       return "完成以下所有任务";
@@ -99,103 +201,442 @@ function parseTriggerType(): string {
     case "FINISH_PARENT_QUEST_OR":
       return "完成以下任意任务";
     default:
-      return props.data.trigger.type;
+      return triggerType;
   }
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
+$achi-action-query-bg: #115ea32e;
+$achi-action-query-bg-hover: #115ea342;
+$achi-action-query-border: #115ea34d;
+$achi-action-query-text: #115ea3ff;
+$achi-action-share-bg: #7a3e8e2e;
+$achi-action-share-bg-hover: #7a3e8e42;
+$achi-action-share-border: #7a3e8e4d;
+$achi-action-share-text: #7a3e8eff;
+$achi-action-query-bg-dark: #479ef52e;
+$achi-action-query-bg-hover-dark: #479ef542;
+$achi-action-query-border-dark: #479ef54d;
+$achi-action-query-text-dark: #479ef5ff;
+$achi-action-share-bg-dark: #c678dd2e;
+$achi-action-share-bg-hover-dark: #c678dd42;
+$achi-action-share-border-dark: #c678dd4d;
+$achi-action-share-text-dark: #c678ddff;
+
+@media (prefers-reduced-motion: reduce) {
+  .tua-ao-task,
+  .tua-ao-series {
+    transition: none;
+  }
+}
+
 .tua-ao-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  column-gap: 8px;
+  column-gap: 12px;
 }
 
 .tua-ao-box {
   position: relative;
-  display: flex;
+  display: grid;
   overflow: hidden;
-  width: 600px;
-  flex-direction: column;
-  align-items: flex-start;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--box-bg-1);
+  width: 840px;
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
+  aspect-ratio: 21 / 10;
+  background: var(--app-page-bg);
+  box-shadow:
+    0 8px 24px var(--common-shadow-4),
+    0 2px 8px var(--common-shadow-2);
+  color: var(--box-text-1);
+  gap: 12px 16px;
+  grid-template:
+    "header header" 64px
+    "conditions record" minmax(0, 1fr)
+    "footer footer" 36px / minmax(0, 1fr) 248px;
+  isolation: isolate;
+}
+
+.tua-ao-box::after {
+  position: absolute;
+  z-index: 1;
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-t-4);
+  content: "";
+  inset: 0;
+  pointer-events: none;
+}
+
+.tua-ao-box > :not(.tua-ao-bg) {
+  position: relative;
+  z-index: 2;
+}
+
+.tua-ao-bg {
+  position: absolute;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  inset: 0;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.tua-ao-header {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  align-items: center;
+  grid-area: header;
+  grid-template-areas:
+    "series"
+    "title";
+  grid-template-columns: minmax(0, 1fr);
   row-gap: 4px;
 }
 
-.tua-ao-top {
+.tua-ao-series {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--box-text-2);
+  column-gap: 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  grid-area: series;
+  justify-self: start;
+  line-height: 16px;
+  text-shadow: 0 1px 4px var(--common-shadow-t-8);
+}
+
+.tua-ao-series:hover {
+  color: var(--common-text-title);
+  text-decoration: underline;
+}
+
+.tua-ao-series:focus-visible {
+  outline: 2px solid var(--tgc-yellow-1);
+  outline-offset: 2px;
+}
+
+.tua-ao-series img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.tua-ao-title-main {
   display: flex;
-  width: 100%;
-  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  align-items: flex-start;
+  column-gap: 8px;
+  grid-area: title;
+}
+
+.tua-ao-title {
+  overflow: hidden;
+  margin: 0;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 24px;
+  font-weight: normal;
+  line-height: 32px;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px var(--common-shadow-t-8);
+  white-space: nowrap;
+}
+
+.tua-ao-version {
+  height: 20px;
+  flex-shrink: 0;
+  padding: 2px 6px;
+  border: 1px solid var(--tgc-od-orange);
+  border-radius: 4px;
+  background: #d19a6630;
+  color: var(--tgc-od-orange);
+  font-family: var(--font-title);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.tua-ao-condition-text {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 8px 0 0;
+  -webkit-box-orient: vertical;
+  color: var(--box-text-1);
+  font-size: 14px;
+  -webkit-line-clamp: 2;
+  line-height: 20px;
+}
+
+.tua-ao-panel {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--common-shadow-t-4);
+}
+
+.tua-ao-conditions {
+  align-self: start;
+  grid-area: conditions;
+}
+
+.tua-ao-record {
+  align-self: start;
+  grid-area: record;
+}
+
+.tua-ao-section-heading {
+  display: flex;
+  height: 22px;
   align-items: center;
   justify-content: space-between;
-
-  :first-child {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 20px;
-  }
-
-  :last-child {
-    font-size: 14px;
-    font-style: italic;
-    opacity: 0.8;
-  }
+  column-gap: 8px;
 }
 
-.tua-ao-bottom-title {
-  font-size: 18px;
-}
-
-.tua-ao-bottom-title :first-child {
+.tua-ao-section-heading h3 {
+  margin: 0;
+  color: var(--common-text-title);
   font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 22px;
 }
 
-.tua-ao-mid-title {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-
-  :first-child {
-    font-family: var(--font-title);
-    font-size: 18px;
-  }
-
-  :not(:first-child) {
-    color: var(--tgc-od-orange);
-  }
-
-  img {
-    width: 24px;
-    height: 24px;
-  }
-}
-
-.tua-ao-mid-item {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 16px;
-  column-gap: 4px;
-  font-size: 14px;
-
-  :first-child {
-    color: var(--box-text-5);
-  }
-}
-
-.tua-ao-extra {
-  position: absolute;
-  right: 4px;
-  bottom: 0;
-  color: var(--tgc-od-white);
+.tua-ao-section-heading > span {
+  overflow: hidden;
+  color: var(--box-text-4);
   font-size: 12px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.tua-ao-click {
+.tua-ao-task-grid {
+  display: grid;
+  margin-top: 8px;
+  gap: 4px 8px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.tua-ao-task {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  height: 40px;
+  align-items: center;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--box-text-1);
+  column-gap: 8px;
   cursor: pointer;
-  text-align: center;
+  font: inherit;
+  text-align: left;
+}
+
+.tua-ao-task:hover {
+  background: var(--box-bg-4);
+}
+
+.tua-ao-task:focus-visible {
+  outline: 2px solid var(--tgc-yellow-1);
+  outline-offset: 2px;
+}
+
+.tua-ao-task > .v-icon {
+  flex-shrink: 0;
+  color: var(--box-text-5);
+}
+
+.tua-ao-task-content {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.tua-ao-task-name,
+.tua-ao-task-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tua-ao-task-name {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tua-ao-task-meta {
+  color: var(--box-text-4);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.tua-ao-task-meta b {
+  color: var(--tgc-yellow-3);
+  font-weight: 600;
+}
+
+.tua-ao-condition-reward {
+  display: flex;
+  height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  margin-top: 8px;
+  background: var(--common-shadow-t-2);
+  color: var(--box-text-4);
+  column-gap: 12px;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.tua-ao-condition-reward-value {
+  display: inline-flex;
+  align-items: center;
+  color: var(--common-text-title);
+  column-gap: 4px;
+  font-weight: 600;
+}
+
+.tua-ao-condition-reward-value img {
+  width: 18px;
+  height: 18px;
+}
+
+.tua-ao-record-list {
+  display: grid;
+  margin: 8px 0 0;
+  row-gap: 8px;
+}
+
+.tua-ao-record-list > div {
+  display: grid;
+  align-items: center;
+  column-gap: 8px;
+  grid-template-columns: 72px minmax(0, 1fr);
+}
+
+.tua-ao-record-list dt,
+.tua-ao-record-list dd {
+  margin: 0;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.tua-ao-record-list dt {
+  color: var(--box-text-4);
+}
+
+.tua-ao-record-list dd {
+  display: inline-flex;
+  overflow: hidden;
+  align-items: center;
+  color: var(--box-text-1);
+  column-gap: 4px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tua-ao-record-list dd.is-completed {
+  color: var(--tgc-yellow-3);
+  font-weight: 600;
+}
+
+.tua-ao-footer {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 16px;
+  grid-area: footer;
+}
+
+.tua-ao-metadata {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  column-gap: 12px;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tua-ao-metadata > span {
+  flex-shrink: 0;
+}
+
+.tua-ao-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.tua-ao-action.v-btn {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid;
+  border-radius: 4px;
+}
+
+.tua-ao-action-query {
+  border-color: $achi-action-query-border;
+  background: $achi-action-query-bg;
+  color: $achi-action-query-text;
+
+  .dark & {
+    border-color: $achi-action-query-border-dark;
+    background: $achi-action-query-bg-dark;
+    color: $achi-action-query-text-dark;
+  }
+}
+
+.tua-ao-action-query:hover {
+  background: $achi-action-query-bg-hover;
+
+  .dark & {
+    background: $achi-action-query-bg-hover-dark;
+  }
+}
+
+.tua-ao-action-share {
+  border-color: $achi-action-share-border;
+  background: $achi-action-share-bg;
+  color: $achi-action-share-text;
+
+  .dark & {
+    border-color: $achi-action-share-border-dark;
+    background: $achi-action-share-bg-dark;
+    color: $achi-action-share-text-dark;
+  }
+}
+
+.tua-ao-action-share:hover {
+  background: $achi-action-share-bg-hover;
+
+  .dark & {
+    background: $achi-action-share-bg-hover-dark;
+  }
 }
 </style>
