@@ -2015,25 +2015,30 @@ async function refreshLocalAvatarData(
   if (listResponse.retcode !== 0) {
     throw new Error(`[${listResponse.retcode}] ${listResponse.message}`);
   }
-  const refreshedIds = new Set(
-    listResponse.data.list.map((avatar) => avatar.id).filter((avatarId) => targetIds.has(avatarId)),
-  );
-  if (refreshedIds.size === 0) {
-    await showLoading.update("计划中的角色均未在最新角色列表中找到");
-    return { roles: await TSUserAvatar.getAvatars(uid), refreshedIds };
+  const visibleAvatarIds = [
+    ...indexResponse.data.avatars.map((avatar) => avatar.id),
+    ...listResponse.data.list.map((avatar) => avatar.id),
+  ];
+  const requestedIds = new Set(visibleAvatarIds.filter((avatarId) => targetIds.has(avatarId)));
+  if (requestedIds.size === 0) {
+    await showLoading.update("计划中的角色均未在首页或角色列表中找到");
+    return { roles: await TSUserAvatar.getAvatars(uid), refreshedIds: requestedIds };
   }
 
-  await showLoading.update(`正在获取 ${refreshedIds.size} 个计划角色详情`);
+  await showLoading.update(`正在获取 ${requestedIds.size} 个计划角色详情`);
   const detailResponse = await recordReq.character.detail(
     gameCookie,
     gameAccount,
-    Array.from(refreshedIds, (avatarId) => avatarId.toString()),
+    Array.from(requestedIds, (avatarId) => avatarId.toString()),
   );
   if (detailResponse.retcode !== 0) {
     throw new Error(`[${detailResponse.retcode}] ${detailResponse.message}`);
   }
   await showLoading.update("正在保存计划角色详情");
   await TSUserAvatar.saveAvatars(String(uid), detailResponse.data.list);
+  const refreshedIds = new Set(
+    detailResponse.data.list.map((avatar) => avatar.base.id).filter((id) => targetIds.has(id)),
+  );
   return { roles: await TSUserAvatar.getAvatars(uid), refreshedIds };
 }
 
