@@ -1,19 +1,21 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  */
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import { invoke } from "@tauri-apps/api/core";
 import { documentDir, resourceDir, sep } from "@tauri-apps/api/path";
-import { copyFile, exists, mkdir, readDir, readTextFile } from "@tauri-apps/plugin-fs";
+import { copyFile, exists, mkdir, readDir, readTextFile, stat } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import TGLogger from "@utils/TGLogger.js";
 import { parse } from "ini";
 
 // YAE支持的游戏版本
 export const YAE_GAME_VER: Readonly<string> = "7.0.0";
+// v0.11.3 发版时间，该版本更新了 dll 版本
+const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-12");
 
 /**
  * 验证游戏格式
@@ -82,14 +84,17 @@ export async function isRunInAdmin(): Promise<boolean> {
 
 /**
  * 尝试移动dll
- * @since Beta v0.9.4
+ * @since Beta v0.11.5
  * @returns 是否存在 YaeAchievementLib.dll
  */
 export async function tryCopyYae(): Promise<boolean> {
   const targetDir = `${await documentDir()}${sep()}TeyvatGuide`;
   const targetPath = `${targetDir}${sep()}YaeAchievementLib.dll`;
   const check = await exists(targetPath);
-  if (check) return true;
+  if (check) {
+    const dllModifiedTime = (await stat(targetPath)).mtime?.getTime();
+    if (dllModifiedTime !== undefined && dllModifiedTime >= YAE_DLL_UPDATE_TIME) return true;
+  }
   await mkdir(targetDir, { recursive: true });
   const srcDllPath = `${await resourceDir()}${sep()}resources${sep()}YaeAchievementLib.dll`;
   await copyFile(srcDllPath, targetPath);

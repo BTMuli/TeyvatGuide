@@ -47,6 +47,7 @@
     { "identifier": "fs:allow-read-dir", "allow": [{ "path": "**" }] },
     { "identifier": "fs:allow-read-text-file", "allow": [{ "path": "**" }] },
     { "identifier": "fs:allow-read-text-file-lines", "allow": [{ "path": "**" }] },
+    { "identifier": "fs:allow-stat", "allow": [{ "path": "**" }] },
     { "identifier": "fs:allow-remove", "allow": [{ "path": "**" }] },
     { "identifier": "fs:allow-copy-file", "allow": [{ "path": "**" }] },
     { "identifier": "fs:allow-write-file", "allow": [{ "path": "**" }] },
