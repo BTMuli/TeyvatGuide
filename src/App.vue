@@ -28,11 +28,11 @@ import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { app, core, event, webviewWindow } from "@tauri-apps/api";
+import { app, core, event, path, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
-import { mkdir } from "@tauri-apps/plugin-fs";
+import { BaseDirectory, mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import TGLogger from "@utils/TGLogger.js";
 import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
@@ -395,9 +395,14 @@ async function checkUserLoad(): Promise<void> {
   // 检测用户数据目录
   const appData = await TGSqlite.getAppData();
   const userDirGet = appData.find((item) => item.key === "userDir")?.value;
+  const defaultUserDir = `${await path.appLocalDataDir()}${path.sep()}userData`;
   if (typeof userDirGet === "undefined") await TGSqlite.saveAppData("userDir", userDir.value);
   else if (userDirGet !== userDir.value) userDir.value = userDirGet;
-  await mkdir(userDir.value, { recursive: true });
+  if (userDir.value === defaultUserDir) {
+    await mkdir("userData", { baseDir: BaseDirectory.AppLocalData, recursive: true });
+  } else {
+    await mkdir(userDir.value, { recursive: true });
+  }
   if (!isLogin.value) return;
   // 检测用户数据
   const uidDB = await TSUserAccount.account.getAllUid();
