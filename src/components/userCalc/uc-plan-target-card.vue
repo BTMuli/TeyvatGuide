@@ -75,26 +75,55 @@
     </div>
 
     <div class="ucptc-actions">
-      <div class="ucptc-action-end">
-        <template v-if="entry.status === 'active'">
-          <v-btn
-            :disabled="!canMoveUp"
-            icon="mdi-arrow-left"
-            size="small"
-            title="提高优先级"
-            variant="text"
-            @click="emits('move', entry.id, -1)"
-          />
-          <v-btn
-            :disabled="!canMoveDown"
-            icon="mdi-arrow-right"
-            size="small"
-            title="降低优先级"
-            variant="text"
-            @click="emits('move', entry.id, 1)"
-          />
-        </template>
+      <div v-if="entry.status === 'active'" class="ucptc-action-priority">
         <v-btn
+          :disabled="!canMoveUp"
+          aria-label="置顶养成目标"
+          icon="mdi-page-first"
+          size="small"
+          title="置顶"
+          variant="text"
+          @click="emits('move', entry.id, 'top')"
+        />
+        <v-btn
+          :disabled="!canMoveUp"
+          aria-label="提高养成目标优先级"
+          icon="mdi-arrow-left"
+          size="small"
+          title="提高优先级"
+          variant="text"
+          @click="emits('move', entry.id, -1)"
+        />
+        <v-btn
+          :disabled="!canMoveDown"
+          aria-label="降低养成目标优先级"
+          icon="mdi-arrow-right"
+          size="small"
+          title="降低优先级"
+          variant="text"
+          @click="emits('move', entry.id, 1)"
+        />
+        <v-btn
+          :disabled="!canMoveDown"
+          aria-label="置底养成目标"
+          icon="mdi-page-last"
+          size="small"
+          title="置底"
+          variant="text"
+          @click="emits('move', entry.id, 'bottom')"
+        />
+      </div>
+      <div class="ucptc-action-end">
+        <v-btn
+          aria-label="查看养成目标汇总"
+          icon="mdi-chart-box-outline"
+          size="small"
+          title="查看汇总"
+          variant="text"
+          @click="emits('summary', entry)"
+        />
+        <v-btn
+          :aria-label="entry.status === 'completed' ? '恢复养成目标' : '标记养成目标完成'"
           :icon="entry.status === 'completed' ? 'mdi-restore' : 'mdi-check-circle-outline'"
           :title="entry.status === 'completed' ? '恢复目标' : '标记完成'"
           size="small"
@@ -102,6 +131,7 @@
           @click="emits('status', entry, entry.status === 'completed' ? 'active' : 'completed')"
         />
         <v-btn
+          aria-label="编辑养成目标"
           icon="mdi-pencil-outline"
           size="small"
           title="编辑目标"
@@ -109,6 +139,7 @@
           @click="emits('edit', entry)"
         />
         <v-btn
+          aria-label="删除养成目标"
           color="var(--tgc-od-red)"
           icon="mdi-delete-outline"
           size="small"
@@ -180,8 +211,9 @@ type UcPlanTargetCardProps = {
 type UcPlanTargetCardEmits = {
   edit: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
   material: [materialId: number];
-  move: [entryId: string, offset: number];
+  move: [entryId: string, position: -1 | 1 | "bottom" | "top"];
   remove: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
+  summary: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
   status: [
     entry: TGApp.Sqlite.Cultivation.EntryWithItems,
     status: TGApp.Sqlite.Cultivation.EntryStatus,
@@ -323,6 +355,7 @@ function formatCount(count: number): string {
 .ucptc-options,
 .ucptc-progress-row,
 .ucptc-actions,
+.ucptc-action-priority,
 .ucptc-action-end,
 .ucptc-material {
   display: flex;
@@ -376,9 +409,19 @@ function formatCount(count: number): string {
 }
 
 .ucptc-actions {
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 4px 8px;
   border-top: 1px solid var(--common-shadow-1);
+  gap: 4px;
+}
+
+.ucptc-action-priority,
+.ucptc-action-end {
+  min-width: 0;
+}
+
+.ucptc-action-end {
+  margin-left: auto;
 }
 
 .ucptc-materials {

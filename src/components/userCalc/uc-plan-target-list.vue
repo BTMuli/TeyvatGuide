@@ -35,6 +35,7 @@
           @move="moveEntry"
           @remove="emits('remove', $event)"
           @status="emitStatus"
+          @summary="openSummary"
         />
       </SwiperSlide>
     </Swiper>
@@ -69,6 +70,16 @@
       />
     </template>
   </PboMaterial>
+  <UcPlanTargetSummaryOverlay
+    v-if="currentSummaryEntry"
+    v-model="summaryOverlayVisible"
+    :bag-materials
+    :entry="currentSummaryEntry"
+    :entries="sortedEntries"
+    :materials="entryMaterialResults.get(currentSummaryEntry.id) ?? []"
+    :uid
+    @select="selectSummaryEntry"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -77,6 +88,7 @@ import "swiper/css/navigation";
 
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
+import UcPlanTargetSummaryOverlay from "@comp/userCalc/uc-plan-target-summary-overlay.vue";
 import { getServerDay, isMaterialAvailableToday } from "@utils/cultivationPlan.js";
 import { A11y, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
@@ -109,7 +121,9 @@ const props = defineProps<UcPlanTargetListProps>();
 const emits = defineEmits<UcPlanTargetListEmits>();
 const swiperModules = [A11y, Navigation];
 const materialOverlayVisible = ref<boolean>(false);
+const summaryOverlayVisible = ref<boolean>(false);
 const currentMaterial = shallowRef<MaterialInfo>();
+const currentSummaryEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
 const currentMaterialIndex = ref<number>(0);
 
 const entryMaterialResults = computed<
@@ -222,12 +236,13 @@ function emitOrder(entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>): voi
   );
 }
 
-function moveEntry(entryId: string, offset: number): void {
+function moveEntry(entryId: string, position: -1 | 1 | "bottom" | "top"): void {
   const entry = props.entries.find((item) => item.id === entryId);
   if (!entry || entry.status !== "active") return;
   const entries = getActiveEntries();
   const currentIndex = entries.findIndex((entry) => entry.id === entryId);
-  const nextIndex = currentIndex + offset;
+  const nextIndex =
+    position === "top" ? 0 : position === "bottom" ? entries.length - 1 : currentIndex + position;
   if (currentIndex < 0 || nextIndex < 0 || nextIndex >= entries.length) return;
   const [movedEntry] = entries.splice(currentIndex, 1);
   entries.splice(nextIndex, 0, movedEntry);
@@ -237,6 +252,17 @@ function moveEntry(entryId: string, offset: number): void {
       .sort(comparePersistentEntries)
       .map((item) => (item.status === "active" ? (entries[activeIndex++] ?? item) : item)),
   );
+}
+
+async function openSummary(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Promise<void> {
+  summaryOverlayVisible.value = false;
+  currentSummaryEntry.value = entry;
+  await nextTick();
+  if (currentSummaryEntry.value.id === entry.id) summaryOverlayVisible.value = true;
+}
+
+function selectSummaryEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
+  currentSummaryEntry.value = entry;
 }
 
 function emitStatus(
