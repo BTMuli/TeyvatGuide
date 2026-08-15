@@ -117,7 +117,7 @@
         </main>
 
         <footer class="ucmd-footer">
-          <span>养成材料详情</span>
+          <span>{{ footerContext ? `${footerContext} · 养成材料详情` : "养成材料详情" }}</span>
           <span> · {{ wiki.name }} · ID {{ wiki.id }} · UID {{ uid }}</span>
           <span> · Rendered by TeyvatGuide v{{ version }}</span>
         </footer>
@@ -142,6 +142,7 @@ import { computed, onMounted, ref, useTemplateRef } from "vue";
 
 type UcMaterialDetailProps = {
   bag?: TGApp.Sqlite.UserBag.MaterialTable;
+  footerContext?: string;
   material: TGApp.App.UserCalc.ResultMaterial;
   topOffset?: string;
   uid: number;

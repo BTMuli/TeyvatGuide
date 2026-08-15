@@ -12,6 +12,7 @@
         @click="selectEntry(false)"
       />
       <article
+        ref="shareTarget"
         aria-labelledby="cultivation-target-summary-title"
         aria-modal="true"
         class="ucpts-panel"
@@ -32,17 +33,28 @@
               </div>
             </div>
           </div>
-          <v-btn
-            aria-label="关闭养成目标汇总"
-            density="comfortable"
-            icon="mdi-close"
-            title="关闭"
-            variant="text"
-            @click="visible = false"
-          />
+          <div class="ucpts-actions" data-html2canvas-ignore="true">
+            <v-btn
+              :loading="shareLoading"
+              aria-label="保存养成目标汇总分享图"
+              density="comfortable"
+              icon="mdi-share-variant"
+              title="保存养成目标汇总分享图"
+              variant="text"
+              @click="shareSummary"
+            />
+            <v-btn
+              aria-label="关闭养成目标汇总"
+              density="comfortable"
+              icon="mdi-close"
+              title="关闭"
+              variant="text"
+              @click="visible = false"
+            />
+          </div>
         </header>
 
-        <main class="ucpts-content">
+        <main ref="contentTarget" class="ucpts-content">
           <section class="ucpts-overview">
             <div class="ucpts-overview-heading">
               <div>
@@ -138,7 +150,7 @@
 
         <footer class="ucpts-footer">
           <span>养成目标汇总</span>
-          <span> · {{ entry.name }} · {{ currentPosition }} / {{ entries.length }}</span>
+          <span> · {{ entry.name }} · 第 {{ currentPosition }} / {{ entries.length }} 项</span>
           <span> · UID {{ uid }}</span>
           <span> · Rendered by TeyvatGuide v{{ version }}</span>
         </footer>
@@ -159,6 +171,7 @@
     v-if="currentMaterial && currentWiki"
     v-model="materialOverlayVisible"
     :bag="bagMaterials.get(currentMaterial.id)"
+    :footerContext="`${entry.name}养成目标`"
     :material="currentMaterial"
     topOffset="132px"
     :uid
@@ -168,10 +181,14 @@
 
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
+import showLoading from "@comp/func/loading.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import { getVersion } from "@tauri-apps/api/app";
-import { computed, nextTick, onMounted, ref, shallowRef } from "vue";
+import TGLogger from "@utils/TGLogger.js";
+import { generateShareImg } from "@utils/TGShare.js";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -201,9 +218,12 @@ const props = defineProps<UcPlanTargetSummaryOverlayProps>();
 const emits = defineEmits<UcPlanTargetSummaryOverlayEmits>();
 const visible = defineModel<boolean>({ required: true });
 const version = ref<string>();
+const shareLoading = ref<boolean>(false);
 const materialOverlayVisible = ref<boolean>(false);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
+const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
+const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
 
 const currentIndex = computed<number>(() =>
   props.entries.findIndex((entry) => entry.id === props.entry.id),
@@ -298,6 +318,31 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
 function formatCount(count: number): string {
   return count.toLocaleString("zh-CN");
 }
+
+async function shareSummary(): Promise<void> {
+  const panel = shareTarget.value;
+  const content = contentTarget.value;
+  if (panel === null || content === null) {
+    showSnackbar.error("未获取到养成目标汇总内容");
+    return;
+  }
+
+  const contentMaxHeight = content.style.maxHeight;
+  const contentOverflowY = content.style.overflowY;
+  shareLoading.value = true;
+  await showLoading.start("正在生成分享图片", props.entry.name);
+  await TGLogger.Info(`[CultivationTargetSummary][share][${props.entry.id}] 开始生成目标汇总图片`);
+  content.style.maxHeight = "none";
+  content.style.overflowY = "visible";
+  try {
+    await generateShareImg(`养成目标汇总_${props.entry.name}_${props.uid}`, panel, 1.5, true);
+  } finally {
+    content.style.maxHeight = contentMaxHeight;
+    content.style.overflowY = contentOverflowY;
+    await showLoading.end();
+    shareLoading.value = false;
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -346,6 +391,14 @@ function formatCount(count: number): string {
   min-width: 0;
   flex: 1;
   gap: 12px;
+}
+
+.ucpts-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--box-text-2);
+  gap: 4px;
 }
 
 .ucpts-identity {
@@ -464,7 +517,11 @@ function formatCount(count: number): string {
     }
 
     strong {
+      display: flex;
       overflow: hidden;
+      align-items: center;
+      justify-content: flex-start;
+      column-gap: 8px;
       font-size: 13px;
       font-weight: 600;
       text-overflow: ellipsis;
