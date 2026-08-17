@@ -679,8 +679,10 @@ const displaySkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() =>
 );
 const avatarLevelOptions = computed<Array<number>>(() => {
   if (!selectedCharacter.value) return [];
-  return createLevelOptions(
-    selectedSyncAvatar.value?.max_level ?? selectedApiAvatar.value?.max_level ?? 90,
+  return userCalc.avatarLevelOptions(
+    useApiCalculation.value
+      ? (selectedSyncAvatar.value?.max_level ?? selectedApiAvatar.value?.max_level ?? 90)
+      : 100,
   );
 });
 const avatarTalentLevelMax = computed<number>(() =>
@@ -864,8 +866,7 @@ watch(selectedCharacter, async (character) => {
   if (!character) return;
   const characterId = character.value;
   avatarCurrentLevel.value = character.level;
-  avatarTargetLevel.value =
-    selectedSyncAvatar.value?.max_level ?? selectedApiAvatar.value?.max_level ?? 90;
+  avatarTargetLevel.value = avatarLevelOptions.value.at(-1) ?? 90;
   avatarTargetAscended.value = false;
   talentCurrentLevels.value = mainSkills.value.map((skill) => skill.level);
   talentTargetLevels.value = mainSkills.value.map((skill) => skill.maxLevel);

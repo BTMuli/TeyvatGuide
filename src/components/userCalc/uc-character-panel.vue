@@ -139,8 +139,9 @@
               v-model:current="currentLevel"
               :current-editable="currentStateEditable"
               :disabled="levelUnavailable"
+              :levels="levelOptions"
               :limit-max="levelMax"
-              :max="90"
+              :max="levelMax"
               :model-value="targetLevel"
               @update:model-value="updateTargetLevel"
             />

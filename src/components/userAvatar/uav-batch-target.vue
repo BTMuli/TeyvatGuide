@@ -21,7 +21,8 @@
             </div>
             <UcLevelSlider
               :current="1"
-              :max="90"
+              :levels="avatarLevelOptions"
+              :max="100"
               :model-value="targetLevel"
               @update:model-value="updateTargetLevel"
             />
@@ -152,6 +153,7 @@ const targetAscended = ref<boolean>(true);
 const includeWeapon = ref<boolean>(false);
 const weaponTargetLevel = ref<number>(90);
 const weaponTargetAscended = ref<boolean>(false);
+const avatarLevelOptions = userCalc.avatarLevelOptions();
 
 const targetAtAscensionLevel = computed<boolean>(() =>
   userCalc.isAscensionLevel(targetLevel.value),

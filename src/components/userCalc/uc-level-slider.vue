@@ -30,10 +30,10 @@
         :key="level"
         :class="{
           single: single && level <= model,
-          current: !single && level <= current,
-          target: !single && level > current && level <= model,
-          remaining: level > model && level <= reachableMax,
-          unavailable: level > reachableMax,
+          current: isLevelAvailable(level) && !single && level <= current,
+          target: isLevelAvailable(level) && !single && level > current && level <= model,
+          remaining: isLevelAvailable(level) && level > model && level <= reachableMax,
+          unavailable: !isLevelAvailable(level) || level > reachableMax,
         }"
         class="ucls-chunk"
       />
@@ -80,6 +80,7 @@ type UcLevelSliderProps = {
   disabled?: boolean;
   compact?: boolean;
   single?: boolean;
+  levels?: Array<number>;
 };
 
 const props = withDefaults(defineProps<UcLevelSliderProps>(), {
@@ -96,20 +97,39 @@ const model = defineModel<number>({ required: true });
 const reachableMax = computed<number>(() =>
   Math.min(props.max, Math.max(props.min, current.value, props.limitMax ?? props.max)),
 );
+const availableLevelSet = computed<ReadonlySet<number> | undefined>(() =>
+  props.levels ? new Set(props.levels) : undefined,
+);
 const trackLevels = computed<Array<number>>(() =>
   Array.from({ length: Math.max(props.max - props.min, 0) }, (_, index) => props.min + index + 1),
 );
 
 function updateValue(value: number): void {
   const lowerBound = props.single ? props.min : current.value;
-  model.value = Math.max(lowerBound, Math.min(value, reachableMax.value));
+  model.value = normalizeLevel(value, lowerBound);
 }
 
 function updateRange(value: [number, number]): void {
-  const nextCurrent = Math.min(Math.max(value[0], props.min), reachableMax.value);
-  const nextTarget = Math.min(Math.max(value[1], nextCurrent), reachableMax.value);
+  const nextCurrent = normalizeLevel(value[0], props.min);
+  const nextTarget = normalizeLevel(value[1], nextCurrent);
   current.value = nextCurrent;
   model.value = nextTarget;
+}
+
+function isLevelAvailable(level: number): boolean {
+  return availableLevelSet.value?.has(level) ?? true;
+}
+
+function normalizeLevel(value: number, lowerBound: number): number {
+  const clamped = Math.max(lowerBound, Math.min(value, reachableMax.value));
+  if (!props.levels) return clamped;
+  const candidates = props.levels.filter(
+    (level) => level >= lowerBound && level <= reachableMax.value,
+  );
+  return candidates.reduce(
+    (closest, level) => (Math.abs(level - clamped) < Math.abs(closest - clamped) ? level : closest),
+    candidates[0] ?? lowerBound,
+  );
 }
 
 function getMarkerPosition(value: number): string {

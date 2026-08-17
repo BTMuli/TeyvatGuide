@@ -71,6 +71,7 @@ type CraftingContext = {
 const MORA_ID = 202;
 const HEROES_WIT_ID = 104003;
 const MYSTIC_ENHANCEMENT_ORE_ID = 104013;
+const MASTERLESS_STELLA_FORTUNA_ID = 104300;
 const CROWN_OF_INSIGHT_ID = 104319;
 const DUST_OF_AZOTH_ID = 104201;
 const DREAM_SOLVENT_ID = 113021;
@@ -78,6 +79,11 @@ const CONSTELLATION_TALENT_BONUS = 3;
 const TARTAGLIA_ID = 10000033;
 const TARTAGLIA_NORMAL_ATTACK_ID = 10331;
 const TARTAGLIA_MASTER_OF_WEAPONRY_NAME = "诸武精通";
+const AVATAR_REGULAR_MAX_LEVEL = 90;
+const AVATAR_LIMIT_BREAK_COSTS: ReadonlyArray<readonly [level: number, count: number]> = [
+  [95, 1],
+  [100, 2],
+];
 
 /**
  * 角色与武器的突破临界等级。
@@ -443,6 +449,22 @@ function sumExperience(data: ReadonlyArray<number>, current: number, target: num
   return data.slice(current, target).reduce((sum, value) => sum + value, 0);
 }
 
+/**
+ * 获取可选的角色等级。
+ *
+ * @param maxLevel - 角色等级上限
+ * @returns 1 至 90 级及不超过上限的特殊突破等级
+ * @since Beta v0.11.4
+ */
+export function getAvatarLevelOptions(maxLevel = 100): Array<number> {
+  const regularMaxLevel = Math.min(Math.max(Math.floor(maxLevel), 1), AVATAR_REGULAR_MAX_LEVEL);
+  const regularLevels = Array.from({ length: regularMaxLevel }, (_, index) => index + 1);
+  const limitBreakLevels = AVATAR_LIMIT_BREAK_COSTS.map(([level]) => level).filter(
+    (level) => level <= maxLevel,
+  );
+  return [...regularLevels, ...limitBreakLevels];
+}
+
 /** 获取等级区间内需要完成的突破阶段索引。 */
 function requiredAscensionIndices(
   currentLevel: number,
@@ -537,10 +559,19 @@ export function calculateAvatarMaterialsFromState(
   targetAscendedAtThreshold = false,
 ): Array<CultivationMaterial> {
   const items = new Map<number, number>();
-  const levelExp = sumExperience(AVATAR_LEVEL_EXP, currentLevel, targetLevel);
+  const levelExp = sumExperience(
+    AVATAR_LEVEL_EXP,
+    currentLevel,
+    Math.min(targetLevel, AVATAR_REGULAR_MAX_LEVEL),
+  );
   const expBookCount = Math.ceil(levelExp / 20000);
   add(items, HEROES_WIT_ID, expBookCount);
   add(items, MORA_ID, expBookCount * 4000);
+  for (const [level, count] of AVATAR_LIMIT_BREAK_COSTS) {
+    if (currentLevel < level && targetLevel >= level) {
+      add(items, MASTERLESS_STELLA_FORTUNA_ID, count);
+    }
+  }
 
   const ascensions = requiredAscensionIndices(
     currentLevel,
@@ -832,6 +863,7 @@ export function getWeaponMaxLevel(star: number): number {
 const userCalc = {
   avatar: calculateAvatarMaterials,
   avatarFromState: calculateAvatarMaterialsFromState,
+  avatarLevelOptions: getAvatarLevelOptions,
   craft: calculateCraftableMaterials,
   weapon: calculateWeaponMaterials,
   merge: mergeCultivationMaterials,
