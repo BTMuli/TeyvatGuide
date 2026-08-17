@@ -1,21 +1,30 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
+import mdiWoff2Url from "@mdi/font/fonts/materialdesignicons-webfont.woff2?url";
 import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { sep } from "@tauri-apps/api/path";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeFile } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
+import { snapdom } from "@zumer/snapdom";
 import html2canvas from "html2canvas";
+import { domToBlob } from "modern-screenshot";
+import workerUrl from "modern-screenshot/worker?url";
 import { storeToRefs } from "pinia";
 
 import TGHttps from "./TGHttps.js";
 import TGLogger from "./TGLogger.js";
 import { bytesToSize } from "./toolFunc.js";
+
+import fontGenshinLightUrl from "@/assets/fonts/HYWenHei-55W.ttf?url";
+import fontJetbrainsBoldUrl from "@/assets/fonts/JetBrainsMono-Bold.ttf?url";
+import fontJetbrainsUrl from "@/assets/fonts/JetBrainsMono-Regular.ttf?url";
+import fontGenshinUrl from "@/assets/fonts/zh-cn.ttf?url";
 
 /**
  * 保存图片-canvas
@@ -104,8 +113,1131 @@ function getShareImgBgColor(): string {
 }
 
 /**
+ * 过滤分享图中需忽略的节点（兼容 data-html2canvas-ignore）
+ * @since Beta v0.11.5
+ * @param node - DOM 节点
+ * @returns 是否纳入截图
+ */
+function shareIgnoreFilter(node: Node): boolean {
+  if (!(node instanceof Element)) return true;
+  return !node.hasAttribute("data-html2canvas-ignore");
+}
+
+/** MDI 图标字体族名 */
+const MDI_FONT_FAMILY = "Material Design Icons";
+
+type ShareFontSpec = {
+  /** 字体族 */
+  family: string;
+  /** Vite 资源 URL */
+  url: string;
+  /** \@font-face format */
+  format: string;
+};
+
+/** 分享图需要显式嵌入的字体（与 assets/fonts、--font-text/--font-title 对齐） */
+const SHARE_FONT_SPECS: ReadonlyArray<ShareFontSpec> = [
+  { family: "Genshin", url: fontGenshinUrl, format: "truetype" },
+  { family: "Genshin-Light", url: fontGenshinLightUrl, format: "truetype" },
+  { family: "JetBrians mono", url: fontJetbrainsUrl, format: "truetype" },
+  { family: "JetBrians mono Bold", url: fontJetbrainsBoldUrl, format: "truetype" },
+  { family: MDI_FONT_FAMILY, url: mdiWoff2Url, format: "woff2" },
+];
+
+/** 缓存的分享字体 \@font-face CSS（data URL） */
+let shareFontFaceCss: string | undefined;
+
+/**
+ * Blob 转 data URL
+ * @since Beta v0.11.5
+ * @param blob - Blob
+ * @returns data URL
+ */
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+      reject(new Error("FileReader 未返回字符串"));
+    };
+    reader.onerror = () => {
+      reject(reader.error ?? new Error("FileReader 读取失败"));
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * 拉取并缓存分享用字体（正文字体 + MDI），转为 data URL \@font-face
+ * @since Beta v0.11.5
+ * @returns \@font-face CSS；全部失败时为 undefined
+ */
+async function ensureShareFontEmbed(): Promise<string | undefined> {
+  if (shareFontFaceCss !== undefined) return shareFontFaceCss;
+
+  const cssParts: Array<string> = [];
+
+  for (const spec of SHARE_FONT_SPECS) {
+    try {
+      const res = await fetch(spec.url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const dataUrl = await blobToDataUrl(blob);
+      cssParts.push(
+        [
+          `@font-face{`,
+          `font-family:"${spec.family}";`,
+          `font-style:normal;`,
+          `font-weight:normal;`,
+          `font-display:block;`,
+          `src:url("${dataUrl}") format("${spec.format}");`,
+          `}`,
+        ].join(""),
+      );
+      await TGLogger.Info(
+        `[TGShare][ensureShareFontEmbed] 已嵌入 ${spec.family} ${bytesToSize(blob.size)}`,
+      );
+    } catch (e) {
+      await TGLogger.Warn(`[TGShare][ensureShareFontEmbed] ${spec.family} 失败: ${e}`);
+    }
+  }
+
+  if (cssParts.length === 0) {
+    await TGLogger.Warn(`[TGShare][ensureShareFontEmbed] 未嵌入任何分享字体`);
+    return undefined;
+  }
+
+  shareFontFaceCss = cssParts.join("\n");
+  return shareFontFaceCss;
+}
+
+/**
+ * 临时让图标节点自身声明 MDI 字体族（foreignObject 路线才能收集到该字体）
+ * @since Beta v0.11.5
+ * @param root - 截图根节点
+ * @returns 还原函数
+ */
+function patchShareIconFonts(root: HTMLElement): () => void {
+  const patched: Array<{ el: HTMLElement; fontFamily: string }> = [];
+  const icons = root.querySelectorAll<HTMLElement>(".mdi, .v-icon");
+  for (const el of Array.from(icons)) {
+    patched.push({ el, fontFamily: el.style.fontFamily });
+    el.style.fontFamily = `"${MDI_FONT_FAMILY}"`;
+  }
+  return () => {
+    for (const item of patched) {
+      item.el.style.fontFamily = item.fontFamily;
+    }
+  };
+}
+
+/**
+ * 解析伪元素 content 为实际字形字符串
+ * @since Beta v0.11.5
+ * @param content - getComputedStyle(...).content
+ * @returns 字形；无法解析时为空串
+ */
+function parsePseudoContentGlyph(content: string): string {
+  if (content === "" || content === "none" || content === "normal") return "";
+  if (/^["']/.test(content)) {
+    return content.slice(1, -1);
+  }
+  const escapes = content.match(/\\[0-9A-Fa-f]{1,6}/g);
+  if (escapes === null) return "";
+  let glyph = "";
+  for (const token of escapes) {
+    const code = Number.parseInt(token.slice(1), 16);
+    if (Number.isNaN(code)) continue;
+    glyph += String.fromCodePoint(code);
+  }
+  return glyph;
+}
+
+/**
+ * 将单字形（含代理对）栅格化为 data URL
+ * @since Beta v0.11.5
+ * @param glyph - 图标字形
+ * @param family - 字体族
+ * @param fontSize - 字号 px
+ * @param color - 填充色
+ * @param fontWeight - 字重
+ * @returns data URL 与像素尺寸
+ */
+async function rasterizeIconGlyph(
+  glyph: string,
+  family: string,
+  fontSize: number,
+  color: string,
+  fontWeight: string,
+): Promise<{ dataUrl: string; width: number; height: number }> {
+  const cleanFamily =
+    family
+      .replace(/^["']+|["']+$/g, "")
+      .split(",")[0]
+      ?.trim() || MDI_FONT_FAMILY;
+  try {
+    await document.fonts.load(`${fontWeight} ${fontSize}px "${cleanFamily}"`);
+    await document.fonts.ready;
+  } catch {
+    // 字体未就绪时仍尝试绘制
+  }
+  const probe = document.createElement("span");
+  probe.setAttribute("data-tg-share-internal", "1");
+  probe.textContent = glyph;
+  probe.style.cssText = [
+    "position:absolute",
+    "visibility:hidden",
+    "left:-99999px",
+    "white-space:nowrap",
+    "margin:0",
+    "padding:0",
+    "line-height:1",
+    `font-family:"${cleanFamily}"`,
+    `font-weight:${fontWeight}`,
+    `font-size:${fontSize}px`,
+    `color:${color}`,
+  ].join(";");
+  document.body.appendChild(probe);
+  const rect = probe.getBoundingClientRect();
+  const width = Math.max(1, Math.ceil(rect.width));
+  const height = Math.max(1, Math.ceil(rect.height));
+  document.body.removeChild(probe);
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.ceil(width * dpr));
+  canvas.height = Math.max(1, Math.ceil(height * dpr));
+  const ctx = canvas.getContext("2d");
+  if (ctx === null) {
+    return { dataUrl: "", width, height };
+  }
+  ctx.scale(dpr, dpr);
+  ctx.font = `${fontWeight} ${fontSize}px "${cleanFamily}"`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = color;
+  ctx.fillText(glyph, 0, 0);
+  return { dataUrl: canvas.toDataURL("image/png"), width, height };
+}
+
+/**
+ * 截图前将 MDI / v-icon 的 ::before 字形烘焙为 img
+ *
+ * snapdom 把 “Material Design Icons” 识别为 icon 字体后会跳过 \@font-face 嵌入，
+ * 且仅在 content 的 JS string.length === 1 时栅格化；MDI 码点在 BMP 外（代理对 length===2）
+ * 会被落成空伪元素，导致图标空白。
+ *
+ * @since Beta v0.11.5
+ * @param root - 截图根节点
+ * @returns 还原函数
+ */
+async function bakeShareMdiIcons(root: HTMLElement): Promise<() => void> {
+  const icons = root.querySelectorAll<HTMLElement>(".mdi, .v-icon");
+  if (icons.length === 0) return () => {};
+
+  const styleEl = document.createElement("style");
+  styleEl.setAttribute("data-tg-share-mdi-style", "1");
+  styleEl.textContent =
+    "[data-tg-share-mdi-baked]::before,[data-tg-share-mdi-baked]::after{" +
+    "content:none!important;display:none!important}";
+  document.head.appendChild(styleEl);
+
+  const restores: Array<() => void> = [
+    () => {
+      styleEl.remove();
+    },
+  ];
+
+  for (const el of Array.from(icons)) {
+    if (el.closest("[data-html2canvas-ignore]") !== null) continue;
+    const before = getComputedStyle(el, "::before");
+    const glyph = parsePseudoContentGlyph(before.content);
+    if (glyph === "" || [...glyph].length === 0) continue;
+
+    const fontSize =
+      Number.parseInt(before.fontSize, 10) ||
+      Number.parseInt(getComputedStyle(el).fontSize, 10) ||
+      24;
+    const fill =
+      before.getPropertyValue("-webkit-text-fill-color")?.trim() ||
+      before.color ||
+      getComputedStyle(el).color ||
+      "#000";
+    const color =
+      fill === "" ||
+      /^transparent$/i.test(fill) ||
+      /rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/i.test(fill) ||
+      fill.toLowerCase() === "currentcolor"
+        ? getComputedStyle(el).color || "#000"
+        : fill;
+    const family = before.fontFamily || MDI_FONT_FAMILY;
+    const weight =
+      before.fontWeight && before.fontWeight !== "normal" ? before.fontWeight : "normal";
+
+    const { dataUrl, width, height } = await rasterizeIconGlyph(
+      glyph,
+      family,
+      fontSize,
+      color,
+      weight,
+    );
+    if (dataUrl === "") continue;
+
+    const img = document.createElement("img");
+    img.setAttribute("data-tg-share-mdi", "1");
+    img.alt = "";
+    img.src = dataUrl;
+    const aspect = height > 0 ? width / height : 1;
+    img.style.cssText = [
+      `height:${fontSize}px`,
+      `width:${Math.max(1, Math.round(aspect * fontSize))}px`,
+      "object-fit:contain",
+      "display:block",
+      "flex-shrink:0",
+    ].join(";");
+
+    el.setAttribute("data-tg-share-mdi-baked", "1");
+    el.appendChild(img);
+    restores.push(() => {
+      img.remove();
+      el.removeAttribute("data-tg-share-mdi-baked");
+    });
+  }
+
+  return () => {
+    for (let i = restores.length - 1; i >= 0; i -= 1) {
+      restores[i]();
+    }
+  };
+}
+
+/**
+ * 将分享字体 CSS 注入到截图 SVG / clone 根节点
+ * @since Beta v0.11.5
+ * @param css - \@font-face CSS
+ * @returns modern-screenshot 回调
+ */
+function createShareFontInjectors(css: string | undefined): {
+  onCloneNode: (cloned: Node) => void;
+  onCreateForeignObjectSvg: (svg: SVGSVGElement) => void;
+} {
+  return {
+    onCloneNode: (cloned) => {
+      if (css === undefined || !(cloned instanceof HTMLElement)) return;
+      if (cloned.dataset.tgShareFont === "1") return;
+      cloned.dataset.tgShareFont = "1";
+      const styleEl = cloned.ownerDocument.createElement("style");
+      styleEl.textContent = css;
+      cloned.insertBefore(styleEl, cloned.firstChild);
+    },
+    onCreateForeignObjectSvg: (svg) => {
+      if (css === undefined) return;
+      const styleEl = svg.querySelector("style");
+      if (styleEl !== null) {
+        styleEl.appendChild(document.createTextNode(`\n${css}\n`));
+        return;
+      }
+      const created = document.createElementNS("http://www.w3.org/2000/svg", "style");
+      created.textContent = css;
+      svg.insertBefore(created, svg.firstChild);
+    },
+  };
+}
+
+/**
+ * 解析 backdrop-filter 中的 blur 像素值
+ * @since Beta v0.11.5
+ * @param value - computed backdrop-filter
+ * @returns blur 像素；无法解析时为 0
+ */
+function parseBackdropBlurPx(value: string): number {
+  const matched = /blur\(\s*([\d.]+)\s*px\s*\)/i.exec(value);
+  if (matched === null) return 0;
+  return Number(matched[1]);
+}
+
+/**
+ * 解析 border-radius 为画布像素半径
+ * @since Beta v0.11.5
+ * @param value - computed border-radius
+ * @param width - 元素宽
+ * @param height - 元素高
+ * @returns 四角半径（px）
+ */
+function parseBorderRadiusPx(
+  value: string,
+  width: number,
+  height: number,
+): { tl: number; tr: number; br: number; bl: number } {
+  const parts = value
+    .split(" ")
+    .map((p) => p.trim())
+    .filter((p) => p !== "");
+  const toPx = (token: string): number => {
+    if (token.endsWith("%")) {
+      const pct = Number(token.slice(0, -1));
+      if (Number.isNaN(pct)) return 0;
+      return (Math.min(width, height) * pct) / 100;
+    }
+    return Number.parseFloat(token) || 0;
+  };
+  if (parts.length === 0) return { tl: 0, tr: 0, br: 0, bl: 0 };
+  if (parts.length === 1) {
+    const r = toPx(parts[0]);
+    return { tl: r, tr: r, br: r, bl: r };
+  }
+  if (parts.length === 2) {
+    const a = toPx(parts[0]);
+    const b = toPx(parts[1]);
+    return { tl: a, tr: b, br: a, bl: b };
+  }
+  if (parts.length === 3) {
+    return { tl: toPx(parts[0]), tr: toPx(parts[1]), br: toPx(parts[2]), bl: toPx(parts[1]) };
+  }
+  return {
+    tl: toPx(parts[0]),
+    tr: toPx(parts[1]),
+    br: toPx(parts[2]),
+    bl: toPx(parts[3]),
+  };
+}
+
+/**
+ * Blob 转 HTMLImageElement
+ * @since Beta v0.11.5
+ * @param blob - 图片 Blob
+ * @returns 图片元素与可释放 URL
+ */
+async function blobToImage(blob: Blob): Promise<{ img: HTMLImageElement; url: string }> {
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.decoding = "sync";
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve();
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("backdrop 快照解码失败"));
+    };
+    img.src = url;
+  });
+  return { img, url };
+}
+
+type ShareBoxRect = { left: number; top: number; width: number; height: number };
+type ShareCornerRadius = { tl: number; tr: number; br: number; bl: number };
+type SharePseudoKind = "::before" | "::after";
+
+/**
+ * 伪元素是否生成了可布局盒子
+ * @since Beta v0.11.5
+ * @param style - getComputedStyle(..., "::before"| "::after")
+ * @returns 是否存在盒子
+ */
+function hasGeneratedPseudoBox(style: CSSStyleDeclaration): boolean {
+  if (style.display === "none") return false;
+  const content = style.content;
+  return content !== "none" && content !== "normal";
+}
+
+/**
+ * 读取节点上 backdrop-filter 的 blur 像素
+ * @since Beta v0.11.5
+ * @param style - computed style
+ * @returns blur 像素；无毛玻璃时为 0
+ */
+function readBackdropBlurPx(style: CSSStyleDeclaration): number {
+  const backdrop = style.backdropFilter;
+  const webkitBackdrop = style.getPropertyValue("-webkit-backdrop-filter");
+  const filterValue = backdrop !== "none" && backdrop !== "" ? backdrop : webkitBackdrop;
+  return parseBackdropBlurPx(filterValue);
+}
+
+/**
+ * 解析 CSS 长度（px / %）
+ * @since Beta v0.11.5
+ * @param value - 声明值
+ * @param base - 百分比基准
+ * @returns 像素；auto / 无法解析时为 undefined
+ */
+function parseCssLengthPx(value: string, base: number): number | undefined {
+  const token = value.trim();
+  if (token === "" || token === "auto") return undefined;
+  if (token.endsWith("%")) {
+    const pct = Number.parseFloat(token);
+    if (Number.isNaN(pct)) return undefined;
+    return (base * pct) / 100;
+  }
+  const px = Number.parseFloat(token);
+  if (Number.isNaN(px)) return undefined;
+  return px;
+}
+
+/**
+ * 估算伪元素相对视口的盒子（absolute / fixed 按 containing block）
+ * @since Beta v0.11.5
+ * @param host - 宿主元素
+ * @param pseudoStyle - 伪元素 computed style
+ * @returns 视口坐标盒子；无效时为 undefined
+ */
+function resolvePseudoBoxRect(
+  host: HTMLElement,
+  pseudoStyle: CSSStyleDeclaration,
+): ShareBoxRect | undefined {
+  const hostRect = host.getBoundingClientRect();
+  const hostCs = getComputedStyle(host);
+  const borderLeft = Number.parseFloat(hostCs.borderLeftWidth) || 0;
+  const borderTop = Number.parseFloat(hostCs.borderTopWidth) || 0;
+  const borderRight = Number.parseFloat(hostCs.borderRightWidth) || 0;
+  const borderBottom = Number.parseFloat(hostCs.borderBottomWidth) || 0;
+  const position = pseudoStyle.position;
+
+  let cbLeft = hostRect.left;
+  let cbTop = hostRect.top;
+  let cbWidth = hostRect.width;
+  let cbHeight = hostRect.height;
+  if (position === "absolute") {
+    cbLeft = hostRect.left + borderLeft;
+    cbTop = hostRect.top + borderTop;
+    cbWidth = Math.max(0, hostRect.width - borderLeft - borderRight);
+    cbHeight = Math.max(0, hostRect.height - borderTop - borderBottom);
+  } else if (position === "fixed") {
+    cbLeft = 0;
+    cbTop = 0;
+    cbWidth = window.innerWidth;
+    cbHeight = window.innerHeight;
+  }
+
+  const top = parseCssLengthPx(pseudoStyle.top, cbHeight);
+  const right = parseCssLengthPx(pseudoStyle.right, cbWidth);
+  const bottom = parseCssLengthPx(pseudoStyle.bottom, cbHeight);
+  const left = parseCssLengthPx(pseudoStyle.left, cbWidth);
+  let width = parseCssLengthPx(pseudoStyle.width, cbWidth);
+  let height = parseCssLengthPx(pseudoStyle.height, cbHeight);
+
+  if (width === undefined) {
+    if (left !== undefined && right !== undefined) width = Math.max(0, cbWidth - left - right);
+    else width = cbWidth;
+  }
+  if (height === undefined) {
+    if (top !== undefined && bottom !== undefined) height = Math.max(0, cbHeight - top - bottom);
+    else height = cbHeight;
+  }
+  if (width <= 0 || height <= 0) return undefined;
+
+  let x = cbLeft;
+  let y = cbTop;
+  if (left !== undefined) x = cbLeft + left;
+  else if (right !== undefined) x = cbLeft + cbWidth - right - width;
+  if (top !== undefined) y = cbTop + top;
+  else if (bottom !== undefined) y = cbTop + cbHeight - bottom - height;
+
+  return { left: x, top: y, width, height };
+}
+
+/**
+ * 收集叠在伪元素之上、快照时应隐藏的宿主子节点
+ * @since Beta v0.11.5
+ * @param host - 伪元素宿主
+ * @param pseudoStyle - 伪元素 computed style
+ * @returns 需临时隐藏的子元素
+ */
+function collectChildrenAbovePseudo(
+  host: HTMLElement,
+  pseudoStyle: CSSStyleDeclaration,
+): Array<HTMLElement> {
+  const parsedZ = Number.parseInt(pseudoStyle.zIndex, 10);
+  const pseudoZ = Number.isNaN(parsedZ) ? 0 : parsedZ;
+  const above: Array<HTMLElement> = [];
+  for (const child of Array.from(host.children)) {
+    if (!(child instanceof HTMLElement)) continue;
+    const childZ = Number.parseInt(getComputedStyle(child).zIndex, 10);
+    if (Number.isNaN(childZ) || childZ <= pseudoZ) continue;
+    above.push(child);
+  }
+  return above;
+}
+
+/**
+ * 将毛玻璃区域绘制为圆角 PNG data URL
+ * @since Beta v0.11.5
+ * @param snapshot - 隐藏毛玻璃后的根节点快照
+ * @param rootRect - 根节点视口矩形
+ * @param box - 毛玻璃视口矩形
+ * @param radius - 圆角（CSS px）
+ * @param blurPx - blur（CSS px）
+ * @param tint - 半透明底色
+ * @returns data URL；失败时为 undefined
+ */
+function renderBakedBackdropDataUrl(
+  snapshot: HTMLImageElement,
+  rootRect: DOMRect,
+  box: ShareBoxRect,
+  radius: ShareCornerRadius,
+  blurPx: number,
+  tint: string,
+): string | undefined {
+  const scaleX = snapshot.naturalWidth / rootRect.width;
+  const scaleY = snapshot.naturalHeight / rootRect.height;
+  const sw = Math.max(1, Math.round(box.width * scaleX));
+  const sh = Math.max(1, Math.round(box.height * scaleY));
+  const sx = (box.left - rootRect.left) * scaleX;
+  const sy = (box.top - rootRect.top) * scaleY;
+  const blurDraw = blurPx * scaleX;
+  const pad = Math.ceil(blurDraw * 2);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = sw;
+  canvas.height = sh;
+  const ctx = canvas.getContext("2d");
+  if (ctx === null) return undefined;
+
+  const tl = radius.tl * scaleX;
+  const tr = radius.tr * scaleX;
+  const br = radius.br * scaleX;
+  const bl = radius.bl * scaleX;
+  ctx.beginPath();
+  ctx.moveTo(tl, 0);
+  ctx.lineTo(sw - tr, 0);
+  ctx.quadraticCurveTo(sw, 0, sw, tr);
+  ctx.lineTo(sw, sh - br);
+  ctx.quadraticCurveTo(sw, sh, sw - br, sh);
+  ctx.lineTo(bl, sh);
+  ctx.quadraticCurveTo(0, sh, 0, sh - bl);
+  ctx.lineTo(0, tl);
+  ctx.quadraticCurveTo(0, 0, tl, 0);
+  ctx.closePath();
+  ctx.clip();
+
+  ctx.filter = `blur(${blurDraw}px)`;
+  ctx.drawImage(
+    snapshot,
+    sx - pad,
+    sy - pad,
+    sw + pad * 2,
+    sh + pad * 2,
+    -pad,
+    -pad,
+    sw + pad * 2,
+    sh + pad * 2,
+  );
+  ctx.filter = "none";
+  if (tint !== "" && tint !== "rgba(0, 0, 0, 0)" && tint !== "transparent") {
+    ctx.fillStyle = tint;
+    ctx.fillRect(0, 0, sw, sh);
+  }
+  return canvas.toDataURL("image/png");
+}
+
+/**
+ * 快速路径：去掉 backdrop-filter，保留原半透明底色（alpha 底色 foreignObject 可截；勿加深以免发黑）
+ * @since Beta v0.11.5
+ * @param root - 截图根节点
+ * @returns 还原函数
+ */
+function flattenShareBackdropFilters(root: HTMLElement): () => void {
+  type FlatPatch = {
+    el: HTMLElement;
+    backdropFilter: string;
+    webkitBackdropFilter: string;
+  };
+  const patches: Array<FlatPatch> = [];
+  const nodes = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+  for (const el of nodes) {
+    if (el === root) continue;
+    const style = getComputedStyle(el);
+    const blurPx = readBackdropBlurPx(style);
+    if (blurPx <= 0) continue;
+    patches.push({
+      el,
+      backdropFilter: el.style.backdropFilter,
+      webkitBackdropFilter: el.style.getPropertyValue("-webkit-backdrop-filter"),
+    });
+    el.style.backdropFilter = "none";
+    el.style.setProperty("-webkit-backdrop-filter", "none");
+  }
+  return () => {
+    for (const item of patches) {
+      item.el.style.backdropFilter = item.backdropFilter;
+      if (item.webkitBackdropFilter === "") {
+        item.el.style.removeProperty("-webkit-backdrop-filter");
+      } else {
+        item.el.style.setProperty("-webkit-backdrop-filter", item.webkitBackdropFilter);
+      }
+    }
+  };
+}
+
+/** 毛玻璃节点超过该阈值时改用 flatten，避免角色列表等大图二次全量截图 */
+const SHARE_BACKDROP_BAKE_MAX = 24;
+
+type ShareBackdropMode = boolean | "auto";
+
+/**
+ * 按策略准备毛玻璃：少量整页烘焙，大量按卡片局部烘焙；仅 mode===false 时 flatten
+ * @since Beta v0.11.5
+ * @param root - 截图根节点
+ * @param mode - true 强制烘焙 / false 强制 flatten / auto 按数量选全局或局部烘焙
+ * @returns 还原函数
+ */
+async function prepareShareBackdrops(
+  root: HTMLElement,
+  mode: ShareBackdropMode = "auto",
+): Promise<() => void> {
+  if (mode === false) {
+    return flattenShareBackdropFilters(root);
+  }
+
+  let elementCount = 0;
+  let pseudoCount = 0;
+  const nodes = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+  for (const el of nodes) {
+    if (el !== root && readBackdropBlurPx(getComputedStyle(el)) > 0) elementCount += 1;
+    for (const pseudo of <const>["::before", "::after"]) {
+      const style = getComputedStyle(el, pseudo);
+      if (!hasGeneratedPseudoBox(style)) continue;
+      if (readBackdropBlurPx(style) > 0) pseudoCount += 1;
+    }
+  }
+  const count = elementCount + pseudoCount;
+  if (count === 0) return () => {};
+
+  const useLocal = pseudoCount === 0 && elementCount > SHARE_BACKDROP_BAKE_MAX;
+  if (useLocal) {
+    await TGLogger.Info(
+      `[TGShare][prepareShareBackdrops] 毛玻璃元素 ${elementCount} 处，改用局部烘焙`,
+    );
+    return await bakeShareBackdropFiltersLocal(root);
+  }
+  return await bakeShareBackdropFilters(root);
+}
+
+type ShareBackdropElementPatch = {
+  el: HTMLElement;
+  backdropFilter: string;
+  webkitBackdropFilter: string;
+  background: string;
+  backgroundImage: string;
+  backgroundSize: string;
+  backgroundColor: string;
+  visibility: string;
+};
+
+type ShareBackdropElementTarget = {
+  el: HTMLElement;
+  blurPx: number;
+  radius: ShareCornerRadius;
+  tint: string;
+};
+
+/**
+ * 有限并发执行异步任务
+ * @since Beta v0.11.5
+ */
+async function runPool(
+  count: number,
+  concurrency: number,
+  worker: (index: number) => Promise<void>,
+): Promise<void> {
+  let next = 0;
+  const runners = Array.from({ length: Math.min(concurrency, count) }, async () => {
+    while (next < count) {
+      const index = next;
+      next += 1;
+      await worker(index);
+    }
+  });
+  await Promise.all(runners);
+}
+
+/**
+ * 将烘焙结果写回真实毛玻璃节点
+ * @since Beta v0.11.5
+ */
+function applyBakedElementBackdrop(el: HTMLElement, dataUrl: string): void {
+  el.style.backdropFilter = "none";
+  el.style.setProperty("-webkit-backdrop-filter", "none");
+  el.style.backgroundColor = "transparent";
+  el.style.backgroundImage = `url("${dataUrl}")`;
+  el.style.backgroundSize = "100% 100%";
+}
+
+/**
+ * 还原毛玻璃节点样式
+ * @since Beta v0.11.5
+ */
+function restoreBakedElementPatches(patches: Array<ShareBackdropElementPatch>): void {
+  for (const item of patches) {
+    item.el.style.backdropFilter = item.backdropFilter;
+    if (item.webkitBackdropFilter === "") {
+      item.el.style.removeProperty("-webkit-backdrop-filter");
+    } else {
+      item.el.style.setProperty("-webkit-backdrop-filter", item.webkitBackdropFilter);
+    }
+    item.el.style.background = item.background;
+    item.el.style.backgroundImage = item.backgroundImage;
+    item.el.style.backgroundSize = item.backgroundSize;
+    item.el.style.backgroundColor = item.backgroundColor;
+    item.el.style.visibility = item.visibility;
+  }
+}
+
+/**
+ * 收集根下真实节点毛玻璃目标
+ * @since Beta v0.11.5
+ */
+function collectBackdropElementTargets(root: HTMLElement): Array<ShareBackdropElementTarget> {
+  const targets: Array<ShareBackdropElementTarget> = [];
+  const nodes = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+  for (const el of nodes) {
+    if (el === root) continue;
+    const style = getComputedStyle(el);
+    const blurPx = readBackdropBlurPx(style);
+    if (blurPx <= 0) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    targets.push({
+      el,
+      blurPx,
+      radius: parseBorderRadiusPx(style.borderRadius, rect.width, rect.height),
+      tint: style.backgroundColor,
+    });
+  }
+  return targets;
+}
+
+/**
+ * 大列表局部烘焙：对每个毛玻璃节点，只截其父容器（如名片中段），有限并发
+ * @since Beta v0.11.5
+ * @param root - 截图根（仅用于收集目标）
+ * @returns 还原函数
+ */
+async function bakeShareBackdropFiltersLocal(root: HTMLElement): Promise<() => void> {
+  const targets = collectBackdropElementTargets(root);
+  if (targets.length === 0) return () => {};
+
+  const patches: Array<ShareBackdropElementPatch> = targets.map(({ el }) => ({
+    el,
+    backdropFilter: el.style.backdropFilter,
+    webkitBackdropFilter: el.style.getPropertyValue("-webkit-backdrop-filter"),
+    background: el.style.background,
+    backgroundImage: el.style.backgroundImage,
+    backgroundSize: el.style.backgroundSize,
+    backgroundColor: el.style.backgroundColor,
+    visibility: el.style.visibility,
+  }));
+
+  await runPool(targets.length, 4, async (index) => {
+    const target = targets[index];
+    const host = target.el.parentElement;
+    if (host === null) return;
+
+    const prevVis = target.el.style.visibility;
+    target.el.style.visibility = "hidden";
+    let snapshotUrl: string | undefined;
+    try {
+      const hostRect = host.getBoundingClientRect();
+      const elRect = target.el.getBoundingClientRect();
+      if (hostRect.width <= 0 || hostRect.height <= 0 || elRect.width <= 0 || elRect.height <= 0) {
+        return;
+      }
+      const blob = await domToBlob(host, {
+        scale: 1,
+        backgroundColor: null,
+        filter: shareIgnoreFilter,
+        timeout: 30000,
+        font: false,
+        workerUrl,
+        workerNumber: 1,
+      });
+      const loaded = await blobToImage(blob);
+      snapshotUrl = loaded.url;
+      const dataUrl = renderBakedBackdropDataUrl(
+        loaded.img,
+        hostRect,
+        {
+          left: elRect.left,
+          top: elRect.top,
+          width: elRect.width,
+          height: elRect.height,
+        },
+        target.radius,
+        target.blurPx,
+        target.tint,
+      );
+      if (dataUrl !== undefined) applyBakedElementBackdrop(target.el, dataUrl);
+    } catch (e) {
+      await TGLogger.Warn(`[TGShare][bakeShareBackdropFiltersLocal] 局部烘焙失败: ${e}`);
+    } finally {
+      target.el.style.visibility = prevVis;
+      if (snapshotUrl !== undefined) URL.revokeObjectURL(snapshotUrl);
+    }
+  });
+
+  return () => {
+    restoreBakedElementPatches(patches);
+  };
+}
+
+/**
+ * 将毛玻璃烘焙为圆角背景图（foreignObject 无法正确裁切 backdrop-filter）
+ * 同时处理真实节点与 ::before / ::after 伪元素。
+ * @since Beta v0.11.5
+ * @param root - 截图根节点
+ * @returns 还原函数
+ */
+async function bakeShareBackdropFilters(root: HTMLElement): Promise<() => void> {
+  type ElementPatch = {
+    el: HTMLElement;
+    backdropFilter: string;
+    webkitBackdropFilter: string;
+    background: string;
+    backgroundImage: string;
+    backgroundSize: string;
+    backgroundColor: string;
+    visibility: string;
+  };
+
+  type VisibilityPatch = { el: HTMLElement; visibility: string };
+
+  type ElementTarget = {
+    kind: "element";
+    el: HTMLElement;
+    blurPx: number;
+    radius: ShareCornerRadius;
+    tint: string;
+  };
+
+  type PseudoTarget = {
+    kind: "pseudo";
+    el: HTMLElement;
+    pseudo: SharePseudoKind;
+    attr: string;
+    box: ShareBoxRect;
+    blurPx: number;
+    radius: ShareCornerRadius;
+    tint: string;
+  };
+
+  type BackdropTarget = ElementTarget | PseudoTarget;
+
+  const targets: Array<BackdropTarget> = [];
+  const nodes = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+  for (const el of nodes) {
+    if (el !== root) {
+      const style = getComputedStyle(el);
+      const blurPx = readBackdropBlurPx(style);
+      if (blurPx > 0) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          targets.push({
+            kind: "element",
+            el,
+            blurPx,
+            radius: parseBorderRadiusPx(style.borderRadius, rect.width, rect.height),
+            tint: style.backgroundColor,
+          });
+        }
+      }
+    }
+
+    for (const pseudo of <const>["::before", "::after"]) {
+      const style = getComputedStyle(el, pseudo);
+      if (!hasGeneratedPseudoBox(style)) continue;
+      const blurPx = readBackdropBlurPx(style);
+      if (blurPx <= 0) continue;
+      const box = resolvePseudoBoxRect(el, style);
+      if (box === undefined) continue;
+      targets.push({
+        kind: "pseudo",
+        el,
+        pseudo,
+        attr: pseudo === "::before" ? "data-tg-share-bd-before" : "data-tg-share-bd-after",
+        box,
+        blurPx,
+        radius: parseBorderRadiusPx(style.borderRadius, box.width, box.height),
+        tint: style.backgroundColor,
+      });
+    }
+  }
+  if (targets.length === 0) return () => {};
+
+  const elementTargets = targets.filter((t): t is ElementTarget => t.kind === "element");
+  const pseudoTargets = targets.filter((t): t is PseudoTarget => t.kind === "pseudo");
+
+  const elementPatches: Array<ElementPatch> = elementTargets.map(({ el }) => ({
+    el,
+    backdropFilter: el.style.backdropFilter,
+    webkitBackdropFilter: el.style.getPropertyValue("-webkit-backdrop-filter"),
+    background: el.style.background,
+    backgroundImage: el.style.backgroundImage,
+    backgroundSize: el.style.backgroundSize,
+    backgroundColor: el.style.backgroundColor,
+    visibility: el.style.visibility,
+  }));
+
+  const abovePatches: Array<VisibilityPatch> = [];
+  const aboveSeen = new Set<HTMLElement>();
+  for (const target of pseudoTargets) {
+    const pseudoStyle = getComputedStyle(target.el, target.pseudo);
+    for (const child of collectChildrenAbovePseudo(target.el, pseudoStyle)) {
+      if (aboveSeen.has(child)) continue;
+      aboveSeen.add(child);
+      abovePatches.push({ el: child, visibility: child.style.visibility });
+    }
+  }
+
+  let styleEl: HTMLStyleElement | undefined;
+  if (pseudoTargets.length > 0) {
+    styleEl = document.createElement("style");
+    styleEl.setAttribute("data-tg-share-bd-style", "1");
+    styleEl.textContent = pseudoTargets
+      .map((t) => `[${t.attr}]${t.pseudo}{visibility:hidden!important}`)
+      .join("");
+    document.head.appendChild(styleEl);
+    for (const target of pseudoTargets) {
+      target.el.setAttribute(target.attr, "1");
+    }
+  }
+
+  for (const item of elementPatches) {
+    item.el.style.visibility = "hidden";
+  }
+  for (const item of abovePatches) {
+    item.el.style.visibility = "hidden";
+  }
+
+  const restoreVisibility = (): void => {
+    for (const item of elementPatches) {
+      item.el.style.visibility = item.visibility;
+    }
+    for (const item of abovePatches) {
+      item.el.style.visibility = item.visibility;
+    }
+  };
+
+  const cleanupPseudoMarks = (): void => {
+    styleEl?.remove();
+    for (const target of pseudoTargets) {
+      target.el.removeAttribute(target.attr);
+    }
+  };
+
+  let snapshot: HTMLImageElement;
+  let snapshotUrl: string | undefined;
+  try {
+    const scale =
+      targets.length > SHARE_BACKDROP_BAKE_MAX ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+    const blob = await domToBlob(root, {
+      scale,
+      backgroundColor: null,
+      filter: shareIgnoreFilter,
+      timeout: 60000,
+      // 烘焙快照只需像素，跳过字体嵌入以加速
+      font: false,
+      workerUrl,
+      workerNumber: 1,
+    });
+    const loaded = await blobToImage(blob);
+    snapshot = loaded.img;
+    snapshotUrl = loaded.url;
+  } catch (e) {
+    restoreVisibility();
+    cleanupPseudoMarks();
+    await TGLogger.Warn(`[TGShare][bakeShareBackdropFilters] 背景快照失败: ${e}`);
+    return () => {};
+  }
+
+  restoreVisibility();
+
+  const rootRect = root.getBoundingClientRect();
+  const bakedPseudoRules: Array<string> = [];
+
+  for (const target of targets) {
+    let box: ShareBoxRect;
+    if (target.kind === "element") {
+      const rect = target.el.getBoundingClientRect();
+      box = { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+    } else {
+      box = target.box;
+    }
+    const dataUrl = renderBakedBackdropDataUrl(
+      snapshot,
+      rootRect,
+      box,
+      target.radius,
+      target.blurPx,
+      target.tint,
+    );
+    if (dataUrl === undefined) continue;
+
+    if (target.kind === "element") {
+      applyBakedElementBackdrop(target.el, dataUrl);
+      continue;
+    }
+
+    bakedPseudoRules.push(
+      `[${target.attr}]${target.pseudo}{` +
+        `-webkit-backdrop-filter:none!important;` +
+        `backdrop-filter:none!important;` +
+        `background-color:transparent!important;` +
+        `background-image:url("${dataUrl}")!important;` +
+        `background-size:100% 100%!important;` +
+        `}`,
+    );
+  }
+
+  if (styleEl !== undefined) {
+    styleEl.textContent = bakedPseudoRules.join("");
+  }
+  if (snapshotUrl !== undefined) URL.revokeObjectURL(snapshotUrl);
+
+  return () => {
+    restoreBakedElementPatches(elementPatches);
+    cleanupPseudoMarks();
+  };
+}
+
+/**
+ * 处理分享图 Buffer：按设置写入文件或复制到剪贴板
+ * @since Beta v0.11.5
+ * @param tag - 日志标签
+ * @param fileName - 文件名
+ * @param buffer - 图片数据
+ * @returns 无返回值
+ */
+async function handleShareBuffer(
+  tag: string,
+  fileName: string,
+  buffer: ArrayBuffer,
+): Promise<void> {
+  const size = buffer.byteLength;
+  const sizeStr = bytesToSize(size);
+  await TGLogger.Info(`[${tag}][${fileName}] 图像大小为 ${sizeStr}`);
+  const { shareDefaultFile } = storeToRefs(useAppStore());
+  if (shareDefaultFile.value === 0) {
+    await saveBufferFile(buffer, fileName);
+    return;
+  }
+  if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1024 * 1024) {
+    await saveBufferFile(buffer, fileName);
+    return;
+  }
+  try {
+    await copyToClipboard(buffer);
+    showSnackbar.success(`已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`);
+    await TGLogger.Info(`[${tag}][${fileName}] 已将图像复制到剪贴板`);
+  } catch (e) {
+    await TGLogger.Error(`[${tag}][${fileName}] 复制到剪贴板失败 ${e}`);
+    await saveBufferFile(buffer, fileName);
+  }
+}
+
+/**
  * 生成分享截图
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  * @param fileName - 文件名
  * @param element - 元素
  * @param scale - 缩放比例
@@ -152,26 +1284,272 @@ export async function generateShareImg(
       .split("")
       .map((item) => item.charCodeAt(0)),
   );
-  const size = bf.length;
-  const sizeStr = bytesToSize(size);
-  await TGLogger.Info(`[generateShareImg][${fileName}] 图像大小为 ${sizeStr}`);
-  const { shareDefaultFile } = storeToRefs(useAppStore());
-  if (shareDefaultFile.value === 0) {
-    await saveBufferFile(bf.buffer, fileName);
-    return;
-  }
-  if (typeof shareDefaultFile.value === "number" && size > shareDefaultFile.value * 1024 * 1024) {
-    await saveBufferFile(bf.buffer, fileName);
-    return;
-  }
+  await handleShareBuffer("generateShareImg", fileName, bf.buffer);
+}
+
+/**
+ * modern 截图可选参数
+ * @since Beta v0.11.5
+ */
+export type ShareModernOptions = {
+  /** 毛玻璃：true 烘焙 / false flatten / auto 少量烘焙、过多 flatten。默认 auto */
+  bakeBackdrop?: ShareBackdropMode;
+};
+
+/**
+ * 生成分享截图（modern-screenshot）
+ * @since Beta v0.11.5
+ * @param fileName - 文件名
+ * @param element - 元素
+ * @param scale - 缩放比例
+ * @param scrollable - 是否可滚动，一般为上下滚动
+ * @param options - 可选优化项
+ * @returns 无返回值
+ */
+export async function gsiModernScreenshot(
+  fileName: string,
+  element: HTMLElement,
+  scale: number = 1.5,
+  scrollable: boolean = false,
+  options?: ShareModernOptions,
+): Promise<void> {
+  let blob: Blob;
   try {
-    await copyToClipboard(bf.buffer);
-    showSnackbar.success(`已将 ${fileName} 复制到剪贴板，大小为 ${sizeStr}`);
-    await TGLogger.Info(`[generateShareImg][${fileName}] 已将图像复制到剪贴板`);
+    blob = await captureModernBlob(element, scale, scrollable, undefined, options);
   } catch (e) {
-    await TGLogger.Error(`[generateShareImg][${fileName}] 复制到剪贴板失败 ${e}`);
-    await saveBufferFile(bf.buffer, fileName);
+    await TGLogger.Error(`[gsiModernScreenshot][${fileName}] 生成分享截图失败 ${e}`);
+    showSnackbar.error(`生成分享截图失败: ${e}`);
+    return;
   }
+  await handleShareBuffer("gsiModernScreenshot", fileName, await blob.arrayBuffer());
+}
+
+/**
+ * 生成分享截图（snapdom）
+ * @since Beta v0.11.5
+ * @param fileName - 文件名
+ * @param element - 元素
+ * @param scale - 缩放比例
+ * @param scrollable - 是否可滚动，一般为上下滚动
+ * @returns 无返回值
+ */
+export async function gsiSnapdom(
+  fileName: string,
+  element: HTMLElement,
+  scale: number = 1.5,
+  scrollable: boolean = false,
+): Promise<void> {
+  let blob: Blob;
+  try {
+    blob = await captureSnapBlob(element, scale, scrollable);
+  } catch (e) {
+    await TGLogger.Error(`[gsiSnapdom][${fileName}] 生成分享截图失败 ${e}`);
+    showSnackbar.error(`生成分享截图失败: ${e}`);
+    return;
+  }
+  await handleShareBuffer("gsiSnapdom", fileName, await blob.arrayBuffer());
+}
+
+type ShareColdBenchResult = {
+  /** modern 截图层耗时（不含保存） */
+  modernMs: number;
+  /** snap 截图层耗时（不含保存） */
+  snapMs: number;
+  /** modern 输出字节数 */
+  modernBytes: number;
+  /** snap 输出字节数 */
+  snapBytes: number;
+};
+
+/**
+ * 清空可重置的分享截图缓存（模块级字体 CSS；snap 侧用 cache:'disabled'）
+ * @since Beta v0.11.5
+ */
+function resetShareCaptureCaches(): void {
+  shareFontFaceCss = undefined;
+}
+
+/**
+ * 为冷启动测速给字体 URL 加防缓存参数
+ * @since Beta v0.11.5
+ * @param url - 原始 URL
+ * @param nonce - 防缓存随机串
+ * @returns 带 query 的 URL
+ */
+function bustShareFontUrl(url: string, nonce: string): string {
+  const abs = new URL(url, window.location.href);
+  abs.searchParams.set("tgShareCold", nonce);
+  return abs.href;
+}
+
+/**
+ * 仅生成 modern-screenshot Blob（不含保存/剪贴板）
+ * @since Beta v0.11.5
+ */
+async function captureModernBlob(
+  element: HTMLElement,
+  scale: number,
+  scrollable: boolean,
+  fontUrlBust?: string,
+  options?: ShareModernOptions,
+): Promise<Blob> {
+  const maxHeight = element.style?.maxHeight;
+  if (scrollable) element.style.maxHeight = "100%";
+
+  let shareCss: string | undefined;
+  if (fontUrlBust !== undefined) {
+    // 冷启动：不走模块缓存，强制重新 fetch 字体
+    const prev = shareFontFaceCss;
+    shareFontFaceCss = undefined;
+    const specs = SHARE_FONT_SPECS.map((spec) => ({
+      ...spec,
+      url: bustShareFontUrl(spec.url, fontUrlBust),
+    }));
+    const cssParts: Array<string> = [];
+    for (const spec of specs) {
+      try {
+        const res = await fetch(spec.url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const dataUrl = await blobToDataUrl(blob);
+        cssParts.push(
+          [
+            `@font-face{`,
+            `font-family:"${spec.family}";`,
+            `font-style:normal;`,
+            `font-weight:normal;`,
+            `font-display:block;`,
+            `src:url("${dataUrl}") format("${spec.format}");`,
+            `}`,
+          ].join(""),
+        );
+      } catch (e) {
+        await TGLogger.Warn(`[TGShare][captureModernBlob][cold] ${spec.family} 失败: ${e}`);
+      }
+    }
+    shareCss = cssParts.length > 0 ? cssParts.join("\n") : undefined;
+    shareFontFaceCss = prev;
+  } else {
+    shareCss = await ensureShareFontEmbed();
+    if (shareCss === undefined) {
+      showSnackbar.warn("分享字体嵌入失败，文本样式可能异常");
+    }
+  }
+
+  const restoreIconFonts = patchShareIconFonts(element);
+  const restoreBackdrop = await prepareShareBackdrops(element, options?.bakeBackdrop ?? "auto");
+  const injectors = createShareFontInjectors(shareCss);
+  try {
+    return await domToBlob(element, {
+      backgroundColor: getShareImgBgColor(),
+      scale,
+      timeout: 120000,
+      ...(scrollable ? { height: element.scrollHeight } : {}),
+      filter: shareIgnoreFilter,
+      // 已注入分享字体时跳过页面字体扫描，大列表可明显加速
+      ...(shareCss !== undefined ? { font: { cssText: shareCss } } : {}),
+      workerUrl,
+      workerNumber: 1,
+      features: {
+        restoreScrollPosition: scrollable,
+      },
+      onCloneNode: injectors.onCloneNode,
+      onCreateForeignObjectSvg: injectors.onCreateForeignObjectSvg,
+    });
+  } finally {
+    restoreBackdrop();
+    restoreIconFonts();
+    if (scrollable) element.style.maxHeight = maxHeight;
+  }
+}
+
+/**
+ * 仅生成 snapdom Blob（不含保存/剪贴板）
+ * @since Beta v0.11.5
+ */
+async function captureSnapBlob(
+  element: HTMLElement,
+  scale: number,
+  scrollable: boolean,
+  opts?: { fontUrlBust?: string; cacheDisabled?: boolean },
+): Promise<Blob> {
+  const maxHeight = element.style?.maxHeight;
+  if (scrollable) element.style.maxHeight = "100%";
+  const restoreMdi = await bakeShareMdiIcons(element);
+  const bust = opts?.fontUrlBust;
+  try {
+    return await snapdom.toBlob(element, {
+      type: "png",
+      backgroundColor: getShareImgBgColor(),
+      scale,
+      dpr: 1,
+      ...(scrollable ? { height: element.scrollHeight } : {}),
+      exclude: ["[data-html2canvas-ignore]"],
+      excludeMode: "remove",
+      embedFonts: true,
+      localFonts: SHARE_FONT_SPECS.filter((spec) => spec.family !== MDI_FONT_FAMILY).map(
+        (spec) => ({
+          family: spec.family,
+          src:
+            bust !== undefined
+              ? bustShareFontUrl(spec.url, bust)
+              : new URL(spec.url, window.location.href).href,
+          weight: "normal",
+          style: "normal",
+        }),
+      ),
+      reconcile: true,
+      compress: false,
+      outerShadows: true,
+      ...(opts?.cacheDisabled === true ? { cache: <const>"disabled" } : {}),
+    });
+  } finally {
+    restoreMdi();
+    if (scrollable) element.style.maxHeight = maxHeight;
+  }
+}
+
+/**
+ * 冷启动对比 modern / snap（仅截图层，不含保存；各自独立清缓存 + 字体 URL 防缓存）
+ * @since Beta v0.11.5
+ * @param element - 截图根节点
+ * @param scale - 缩放
+ * @returns 两侧耗时与体积
+ */
+export async function benchShareColdStart(
+  element: HTMLElement,
+  scale: number = 1.5,
+): Promise<ShareColdBenchResult> {
+  resetShareCaptureCaches();
+  const modernNonce = `m-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const modernStart = performance.now();
+  const modernBlob = await captureModernBlob(element, scale, false, modernNonce);
+  const modernMs = Math.round(performance.now() - modernStart);
+
+  resetShareCaptureCaches();
+  // 让出一帧，避免两趟 bake 紧挨着互相影响布局测量
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+
+  const snapNonce = `s-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const snapStart = performance.now();
+  const snapBlob = await captureSnapBlob(element, scale, false, {
+    fontUrlBust: snapNonce,
+    cacheDisabled: true,
+  });
+  const snapMs = Math.round(performance.now() - snapStart);
+
+  const result: ShareColdBenchResult = {
+    modernMs,
+    snapMs,
+    modernBytes: modernBlob.size,
+    snapBytes: snapBlob.size,
+  };
+  await TGLogger.Info(
+    `[TGShare][benchShareColdStart] modern ${result.modernMs}ms / ${bytesToSize(result.modernBytes)} · snap ${result.snapMs}ms / ${bytesToSize(result.snapBytes)}`,
+  );
+  return result;
 }
 
 /**
@@ -195,3 +1573,18 @@ export async function copyToClipboard(buffer: ArrayBuffer): Promise<void> {
   await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
   URL.revokeObjectURL(url);
 }
+
+/**
+ * 分享截图入口
+ * @since Beta v0.11.5
+ */
+const TGShare = <const>{
+  /** modern-screenshot */
+  modern: gsiModernScreenshot,
+  /** snapdom */
+  snap: gsiSnapdom,
+  /** 冷启动对比（不含保存） */
+  benchCold: benchShareColdStart,
+};
+
+export default TGShare;

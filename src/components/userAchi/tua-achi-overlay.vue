@@ -119,7 +119,7 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { computed, onMounted, ref } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
@@ -184,10 +184,13 @@ async function share(): Promise<void> {
     return;
   }
   const fileName = `【成就详情】【${props.data.id}】-${props.data.name}`;
+  const prevBoxShadow = achiBox.style.boxShadow;
+  achiBox.style.boxShadow = "none";
   loading.value = true;
   try {
-    await generateShareImg(fileName, achiBox);
+    await TGShare.modern(fileName, achiBox, 2.5);
   } finally {
+    achiBox.style.boxShadow = prevBoxShadow;
     loading.value = false;
   }
 }

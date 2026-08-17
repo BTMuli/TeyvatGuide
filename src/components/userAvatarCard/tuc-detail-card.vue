@@ -37,7 +37,7 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import { app } from "@tauri-apps/api";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { computed, onMounted, ref, watch } from "vue";
 
 import DucDetailOlb from "./duc-detail-olb.vue";
@@ -87,7 +87,7 @@ async function share(): Promise<void> {
   }
   const fileName = `【角色详情】-${props.avatar.avatar.name}`;
   loading.value = true;
-  await generateShareImg(fileName, detailBox);
+  await TGShare.modern(fileName, detailBox, 2.5);
   loading.value = false;
 }
 </script>

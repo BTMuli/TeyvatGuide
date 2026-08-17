@@ -38,8 +38,8 @@ const props = defineProps<DucDetailOlbProps>();
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: #00000066;
 }
 
@@ -53,8 +53,8 @@ const props = defineProps<DucDetailOlbProps>();
   justify-content: center;
   padding: 3px;
   border-radius: 50%;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background-color: #00000066;
 }
 

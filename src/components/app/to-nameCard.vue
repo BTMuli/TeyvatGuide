@@ -37,7 +37,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import { getVersion } from "@tauri-apps/api/app";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { onMounted, ref } from "vue";
 
 import TOverlay from "./t-overlay.vue";
@@ -167,7 +167,7 @@ async function shareNameCard(): Promise<void> {
   }
   const fileName = `【${props.data?.type}名片】-${props.data?.name}`;
   loading.value = true;
-  await generateShareImg(fileName, nameCardBox);
+  await TGShare.modern(fileName, nameCardBox, 2.5);
   loading.value = false;
 }
 </script>
@@ -212,7 +212,8 @@ async function shareNameCard(): Promise<void> {
   justify-content: flex-end;
   padding: 8px;
   border-radius: 12px;
-  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: #00000040;
   color: var(--tgc-white-1);
 

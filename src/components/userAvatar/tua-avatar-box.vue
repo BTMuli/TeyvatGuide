@@ -224,8 +224,8 @@ function getCostume(): TGApp.App.Character.Costume | false {
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: #00000066;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
@@ -278,8 +278,6 @@ function getCostume(): TGApp.App.Character.Costume | false {
   justify-content: center;
   border-radius: 4px;
   aspect-ratio: 21/10;
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
   background: var(--box-bg-3);
   filter: grayscale(1);
   transition: filter 0.5s ease-in-out;

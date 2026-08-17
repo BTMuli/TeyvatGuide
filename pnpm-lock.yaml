@@ -62,6 +62,9 @@ importers:
       '@tauri-apps/plugin-sql':
         specifier: ^2.4.0
         version: 2.4.0
+      '@zumer/snapdom':
+        specifier: ^2.24.1
+        version: 2.24.1
       ajv:
         specifier: ^8.20.0
         version: 8.20.0
@@ -89,6 +92,9 @@ importers:
       jsencrypt:
         specifier: ^3.5.4
         version: 3.5.4
+      modern-screenshot:
+        specifier: ^4.7.0
+        version: 4.7.0
       pinia:
         specifier: ^4.0.3
         version: 4.0.3(@typescript/typescript6@6.0.2)(@vue/devtools-api@8.2.1)(vue@3.5.41(@typescript/typescript6@6.0.2))
@@ -2123,6 +2129,9 @@ packages:
       vue: ^3.0.0
       vuetify: '>=3'
 
+  '@zumer/snapdom@2.24.1':
+    resolution: {integrity: sha512-COYwb8hczQeevjyOSsTVT4P7CtKYtitXirmMbe/q4bkkULZdMHFFqmNDrlzeWPi5XBmk8+/ZBkNPWV/NX9LqtA==}
+
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
     peerDependencies:
@@ -3314,6 +3323,9 @@ packages:
 
   mlly@1.8.2:
     resolution: {integrity: sha512-d+ObxMQFmbt10sretNDytwt85VrbkhhUA/JBGm1MPaWJ65Cl4wOgLaB1NYvJSZ0Ef03MMEU/0xpPMXUIQ29UfA==}
+
+  modern-screenshot@4.7.0:
+    resolution: {integrity: sha512-9YxN+ddPSMMlhylOv25VHzXrl9u67QRxoh7+SEewGtgUw7t6hHTrjptSDJUSne9oG4Xk/h2cwG15nIt4Hc9ujg==}
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -4638,10 +4650,10 @@ snapshots:
       '@babel/helper-compilation-targets': 7.29.7
       '@babel/helper-module-transforms': 7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
       '@babel/helpers': 7.29.7
-      '@babel/parser': 7.29.7
+      '@babel/parser': 7.29.8
       '@babel/template': 7.29.7
       '@babel/traverse': 7.29.7(supports-color@10.2.2)
-      '@babel/types': 7.29.7
+      '@babel/types': 7.29.8
       '@jridgewell/remapping': 2.3.5
       convert-source-map: 2.0.0
       debug: 4.4.3(supports-color@10.2.2)
@@ -4653,8 +4665,8 @@ snapshots:
 
   '@babel/generator@7.29.7':
     dependencies:
-      '@babel/parser': 7.29.7
-      '@babel/types': 7.29.7
+      '@babel/parser': 7.29.8
+      '@babel/types': 7.29.8
       '@jridgewell/gen-mapping': 0.3.13
       '@jridgewell/trace-mapping': 0.3.31
       jsesc: 3.1.0
@@ -4705,7 +4717,7 @@ snapshots:
   '@babel/helper-module-imports@7.29.7(supports-color@10.2.2)':
     dependencies:
       '@babel/traverse': 7.29.7(supports-color@10.2.2)
-      '@babel/types': 7.29.7
+      '@babel/types': 7.29.8
     transitivePeerDependencies:
       - supports-color
 
@@ -4753,7 +4765,7 @@ snapshots:
   '@babel/helpers@7.29.7':
     dependencies:
       '@babel/template': 7.29.7
-      '@babel/types': 7.29.7
+      '@babel/types': 7.29.8
 
   '@babel/parser@7.29.7':
     dependencies:
@@ -4815,17 +4827,17 @@ snapshots:
   '@babel/template@7.29.7':
     dependencies:
       '@babel/code-frame': 7.29.7
-      '@babel/parser': 7.29.7
-      '@babel/types': 7.29.7
+      '@babel/parser': 7.29.8
+      '@babel/types': 7.29.8
 
   '@babel/traverse@7.29.7(supports-color@10.2.2)':
     dependencies:
       '@babel/code-frame': 7.29.7
       '@babel/generator': 7.29.7
       '@babel/helper-globals': 7.29.7
-      '@babel/parser': 7.29.7
+      '@babel/parser': 7.29.8
       '@babel/template': 7.29.7
-      '@babel/types': 7.29.7
+      '@babel/types': 7.29.8
       debug: 4.4.3(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
@@ -6297,6 +6309,8 @@ snapshots:
       vue: 3.5.41(@typescript/typescript6@6.0.2)
       vuetify: 4.1.8(@typescript/typescript6@6.0.2)(vite-plugin-vuetify@2.1.3)(vue@3.5.41(@typescript/typescript6@6.0.2))
 
+  '@zumer/snapdom@2.24.1': {}
+
   acorn-jsx@5.3.2(acorn@8.17.0):
     dependencies:
       acorn: 8.17.0
@@ -7605,6 +7619,8 @@ snapshots:
       pathe: 2.0.3
       pkg-types: 1.3.1
       ufo: 1.6.4
+
+  modern-screenshot@4.7.0: {}
 
   mrmime@2.0.1: {}
 

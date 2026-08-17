@@ -122,7 +122,7 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { parseHtmlText, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
@@ -214,7 +214,7 @@ function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {
 
 async function sharePos(): Promise<void> {
   if (!posEl.value) return;
-  await generateShareImg(`活动-${props.pos.name}.png`, posEl.value, 2);
+  await TGShare.modern(`活动-${props.pos.name}.png`, posEl.value, 2.5);
 }
 </script>
 <style lang="scss" scoped>
@@ -362,8 +362,8 @@ async function sharePos(): Promise<void> {
     left: 0;
     width: 100%;
     box-sizing: border-box;
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
     background: #00000080;
     color: var(--tgc-white-1);
     font-family: var(--font-title);

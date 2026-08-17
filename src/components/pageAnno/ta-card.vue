@@ -26,7 +26,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import useAppStore from "@store/app.js";
 import { str2Color } from "@utils/colorFunc.js";
 import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { createTGWindow } from "@utils/TGWindow.js";
 import { decodeRegExp } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
@@ -40,8 +40,10 @@ const props = defineProps<TaCardProps>();
 const timeStr = ref<string>("");
 
 const annoTag = computed<string>(() => getTag());
-const idColor = computed<string>(() => str2Color(`${props.anno.ann_id}`, 0));
-const tagColor = computed<string>(() => str2Color(`${props.anno.tag_icon}${annoTag.value}`, 40));
+const idColor = computed<string>(() => toFrostBg(str2Color(`${props.anno.ann_id}`, 0)));
+const tagColor = computed<string>(() =>
+  toFrostBg(str2Color(`${props.anno.tag_icon}${annoTag.value}`, 40)),
+);
 
 onMounted(() => refreshAnnoTime());
 
@@ -51,6 +53,11 @@ watch(
     if (newVal.ann_id !== oldVal.ann_id) refreshAnnoTime();
   },
 );
+
+/** 实色转半透明毛玻璃底色 */
+function toFrostBg(rgb: string): string {
+  return rgb.replace(/^rgb\((.+)\)$/, "rgba($1, 0.45)");
+}
 
 function getTag(): string {
   switch (props.anno.tag_label) {
@@ -87,7 +94,7 @@ async function shareAnno(): Promise<void> {
     showSnackbar.error("分享失败，未找到分享元素");
     return;
   }
-  await generateShareImg(fileName, element, 2.5);
+  await TGShare.modern(fileName, element, 2.5);
 }
 
 async function refreshAnnoTime(): Promise<void> {
@@ -237,11 +244,15 @@ function getAnnoTime(content: string): string | false {
   top: 0;
   right: 0;
   display: flex;
+  overflow: hidden;
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: v-bind(tagColor); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 6px;
+  border-top-right-radius: 6px;
   box-shadow: 0 0 10px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   text-shadow: 0 0 4px var(--tgc-dark-1);
@@ -258,11 +269,15 @@ function getAnnoTime(content: string): string | false {
   top: 0;
   left: 0;
   display: flex;
+  overflow: hidden;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   border-bottom-right-radius: 4px;
+  border-top-left-radius: 6px;
   box-shadow: 0 0 8px var(--tgc-dark-1);
   color: var(--tgc-white-1);
   font-size: 12px;

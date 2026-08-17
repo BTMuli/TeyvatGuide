@@ -32,6 +32,7 @@ const props = defineProps<TuaDcConstellationsProps>();
 .tua-dcc-item {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 40px;
   height: 40px;
   align-items: center;
@@ -39,8 +40,8 @@ const props = defineProps<TuaDcConstellationsProps>();
   padding: 2px;
   border: 1px solid #ffffff33;
   border-radius: 50%;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: #00000033;
 }
 

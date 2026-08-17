@@ -138,8 +138,8 @@ function getPropSubStyle(
   padding: 5px;
   border: 1px solid #ffffff33;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: #00000033;
   color: var(--tgc-white-1);
   font-size: 12px;
@@ -283,13 +283,18 @@ function getPropSubStyle(
 }
 
 .tua-prop-time {
+  display: inline-flex;
   width: 14px;
   height: 14px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #ffffff33;
   border-radius: 4px;
   background: #00000033;
   font-size: 10px;
-  line-height: 14px;
+  line-height: 1;
   text-align: center;
   text-shadow: 0 0 5px #00000080;
 }

@@ -78,7 +78,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed, ref } from "vue";
 
@@ -128,8 +128,11 @@ async function share(): Promise<void> {
   }
   const fileName = `【角色详情】${props.avatar.avatar.name}`;
   loading.value = true;
-  await generateShareImg(fileName, shareBox);
-  loading.value = false;
+  try {
+    await TGShare.modern(fileName, shareBox, 2.5);
+  } finally {
+    loading.value = false;
+  }
 }
 </script>
 <style lang="css" scoped>
@@ -149,8 +152,8 @@ async function share(): Promise<void> {
   left: 5px;
   border: 1px solid #ffffff33;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   color: var(--tgc-white-1);
 }
 
@@ -184,8 +187,8 @@ async function share(): Promise<void> {
   padding: 5px;
   border: 1px solid #ffffff33;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: #00000033;
   gap: 0;
 }

@@ -42,8 +42,8 @@ const props = defineProps<TuaDcTalentsProps>();
   padding: 2px;
   border: 1px solid #ffffff33;
   border-radius: 50%;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: #00000033;
 }
 
@@ -80,8 +80,8 @@ const props = defineProps<TuaDcTalentsProps>();
   justify-content: center;
   padding-top: 1px;
   border-radius: 4px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: #00000080;
   color: var(--tgc-white-1);
   font-size: 8px;

@@ -150,7 +150,7 @@ import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import useBBSStore from "@store/bbs.js";
 import { emit } from "@tauri-apps/api/event";
 import { str2Color } from "@utils/colorFunc.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
@@ -502,7 +502,7 @@ async function shareCard(): Promise<void> {
     return;
   }
   const fileName = `PostCard_${card.value.postId}`;
-  await generateShareImg(fileName, shareDom, 2.5);
+  await TGShare.modern(fileName, shareDom, 2.5);
 }
 
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
@@ -725,8 +725,8 @@ function onUserClick(): void {
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: v-bind(forumBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 4px;
   border-top-right-radius: 4px;
@@ -896,8 +896,8 @@ function onUserClick(): void {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: v-bind(idBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-right-radius: 4px;
   border-top-left-radius: 4px;

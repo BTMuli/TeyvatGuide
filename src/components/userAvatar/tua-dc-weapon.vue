@@ -76,8 +76,8 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   padding: 5px;
   border: 1px solid #ffffff33;
   border-radius: 5px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   background: #00000033;
   color: var(--tgc-white-1);
   font-size: 12px;

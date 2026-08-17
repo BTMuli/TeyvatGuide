@@ -212,7 +212,7 @@ import { getRfAc } from "@utils/acUtils.js";
 import { getUidServerTimezone } from "@utils/cultivationPlan.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
@@ -801,10 +801,10 @@ async function share(): Promise<void> {
     showSnackbar.error("未找到角色列表");
     return;
   }
-  const fileName = `角色列表_${uidCur.value}.png`;
+  const fileName = `角色列表_${uidCur.value}`;
   await showLoading.start("正在生成图片", fileName);
   loadShare.value = true;
-  await generateShareImg(fileName, rolesBox);
+  await TGShare.modern(fileName, rolesBox, 1, false, { bakeBackdrop: true });
   loadShare.value = false;
   await showLoading.end();
   await TGLogger.Info(`[Character][share][${uidCur.value}] 生成分享图片成功`);

@@ -16,7 +16,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import { onMounted, onWatcherCleanup, ref, shallowRef, useTemplateRef, watch } from "vue";
 
@@ -71,7 +71,7 @@ async function shareHyperLink(): Promise<void> {
     return;
   }
   const fileName = `Hyperlink_${props.id}_${props.name}`;
-  await generateShareImg(fileName, hyperLinkEl.value);
+  await TGShare.modern(fileName, hyperLinkEl.value, 2.5);
 }
 
 defineExpose({ displayBox });
@@ -123,8 +123,8 @@ defineExpose({ displayBox });
   height: 100%;
   align-items: center;
   justify-content: center;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .hyperlink-box {
