@@ -1,5 +1,5 @@
 <template>
-  <div class="tua-relic-box" :title="getRelicTitle()">
+  <div class="tua-relic-box" :title="relicTitle">
     <div class="tua-relic-bg">
       <img
         :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`"
@@ -20,10 +20,29 @@
 </template>
 <script lang="ts" setup>
 import wikiUtils from "@utils/wikiUtils.js";
+import { computed } from "vue";
 
 type TuaRelicBoxProps = { modelValue: TGApp.Game.Avatar.Relic | false; position: number };
 
 const props = defineProps<TuaRelicBoxProps>();
+
+const relicTitle = computed<string>(() => {
+  const posName = getRelicPosName();
+  if (props.modelValue === false) return `${posName}：未装备`;
+  const relicProps: Array<string> = [];
+  const mainProp = wikiUtils.getProp(props.modelValue.main_property.property_type);
+  relicProps.push(
+    `主词条：${mainProp === false ? "未知属性" : mainProp.name} ${props.modelValue.main_property.value}`,
+  );
+  relicProps.push("副词条：");
+  for (const relicProp of props.modelValue.sub_property_list) {
+    const subProp = wikiUtils.getProp(relicProp.property_type);
+    relicProps.push(
+      `  ${subProp === false ? "未知属性" : subProp.name} ${relicProp.value}(+${relicProp.times})`,
+    );
+  }
+  return `${posName}：\n${props.modelValue.name} Lv.${props.modelValue.level}\n${relicProps.join("\n")}`;
+});
 
 function getRelicPosName(): string {
   switch (props.position) {
@@ -40,24 +59,6 @@ function getRelicPosName(): string {
     default:
       return "未知";
   }
-}
-
-function getRelicTitle(): string {
-  const posName = getRelicPosName();
-  if (props.modelValue === false) return `${posName}：未装备`;
-  const relicProps: Array<string> = [];
-  const mainProp = wikiUtils.getProp(props.modelValue.main_property.property_type);
-  relicProps.push(
-    `主词条：${mainProp === false ? "未知属性" : mainProp.name} ${props.modelValue.main_property.value}`,
-  );
-  relicProps.push("副词条：");
-  for (const relicProp of props.modelValue.sub_property_list) {
-    const subProp = wikiUtils.getProp(relicProp.property_type);
-    relicProps.push(
-      `  ${subProp === false ? "未知属性" : subProp.name} ${relicProp.value}(+${relicProp.times})`,
-    );
-  }
-  return `${posName}：\n${props.modelValue.name} Lv.${props.modelValue.level}\n${relicProps.join("\n")}`;
 }
 </script>
 <style lang="css" scoped>

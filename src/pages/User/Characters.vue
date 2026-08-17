@@ -77,14 +77,15 @@
             width="200px"
           />
           <v-select
-            v-model="uidCur"
             :hide-details="true"
             :items="uidList"
+            :model-value="uidCur"
             class="uc-select-btn"
             density="compact"
             label="当前UID"
             variant="outlined"
             width="200px"
+            @update:model-value="handleUidChange"
           />
         </div>
         <div class="uc-sort">
@@ -125,21 +126,21 @@
       <span>|</span>
       <span>TeyvatGuide v{{ version }}</span>
       <span>|</span>
-      <span>更新于 {{ getUpdateTime() }}</span>
+      <span>更新于 {{ updateTimeText }}</span>
     </div>
     <div class="uc-box-top">
       <div class="uc-box-title">
         <TurRoleInfo v-if="roleRecord && uidCur" :role="roleRecord" :uid="uidCur" />
         <span v-else class="uc-box-uid">UID：{{ uidCur }}</span>
         <span
-          v-for="(item, index) in roleOverview"
-          :key="index"
+          v-for="item in roleOverview"
+          :key="item.element"
           :title="`${item.label}：${item.cnt}`"
           class="uc-ov-item"
         >
           <img :src="`/icon/element/${item.label}.webp`" alt="element" />
           <template v-if="isSelected">
-            <span>{{ getElementCnt(item.element) }}</span>
+            <span>{{ selectedElementCnt.get(item.element) ?? 0 }}</span>
             <span class="uc-ov-cnt">/{{ item.cnt }}</span>
           </template>
           <span v-else>{{ item.cnt }}</span>
@@ -152,6 +153,7 @@
       <div
         v-for="role in selectedList"
         :key="role.cid"
+        v-memo="[role, batchMode, batchSelectedIds.has(role.cid)]"
         :class="{ selected: batchSelectedIds.has(role.cid) }"
         class="uc-avatar-select"
         @click="handleRoleClick(role)"
@@ -200,6 +202,7 @@ import UavBatchTarget from "@comp/userAvatar/uav-batch-target.vue";
 import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import recordReq from "@req/recordReq.js";
+import { transUserRecord } from "@Sql/utils/transUserRecord.js";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
@@ -213,7 +216,7 @@ import { generateShareImg } from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, triggerRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppCharacterData, getWikiCharacterById, wwWeapon } from "@/data/index.js";
 
@@ -231,6 +234,7 @@ type BatchTarget = {
 };
 
 const BATCH_EXCLUDED_CHARACTER_IDS = new Set([10000005, 10000007, 10000117, 10000118]);
+const appCharacterMap = new Map(AppCharacterData.map((item) => [item.id, item]));
 
 const modeList: Readonly<Array<TabItem>> = [
   { label: "经典视图", value: "classic" },
@@ -284,18 +288,38 @@ const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
 
+let loadRoleSeq = 0;
+
 const enableShare = computed<boolean>(
   () => showOverlay.value || showSelect.value || showBatchTarget.value || loadData.value,
 );
 const isSelected = computed<boolean>(() => selectedList.value.length !== roleList.value.length);
+const updateTimeText = computed<string>(() => {
+  if (roleList.value.length === 0) return "";
+  let lastUpdateTime = 0;
+  for (const role of roleList.value) {
+    const updateTime = new Date(role.updated).getTime();
+    if (updateTime > lastUpdateTime) lastUpdateTime = updateTime;
+  }
+  return timestampToDate(lastUpdateTime);
+});
+const selectedElementCnt = computed<Map<string, number>>(() => {
+  const counts = new Map<string, number>();
+  for (const role of selectedList.value) {
+    counts.set(role.avatar.element, (counts.get(role.avatar.element) ?? 0) + 1);
+  }
+  return counts;
+});
 
 onMounted(async () => {
   await showLoading.start("正在获取角色数据");
   await TGLogger.Info("[Character][onMounted] 进入角色页面");
-  version.value = await getVersion();
-  await showLoading.update("正在加载UID列表");
+  const versionPromise = getVersion();
+  await showLoading.update("正在加载角色数据", { timeout: 0 });
   await loadUid();
+  version.value = await versionPromise;
   loadData.value = false;
+  await nextTick();
   await showLoading.end();
 });
 
@@ -315,7 +339,6 @@ watch(
     }
   },
 );
-watch(() => uidCur.value, loadRole);
 watch(
   () => account.value,
   async () => await loadUid(),
@@ -324,7 +347,6 @@ watch(
   () => [isLevelUp.value, isFetterUp.value, isConstUp.value],
   () => {
     selectedList.value = getOrderedList(selectedList.value);
-    triggerRef(selectedList);
   },
 );
 
@@ -577,7 +599,7 @@ async function saveBatchToPlan(target: BatchTarget): Promise<void> {
 function getOrderedList(
   data: Array<TGApp.Sqlite.Character.TableTrans>,
 ): Array<TGApp.Sqlite.Character.TableTrans> {
-  return data.sort((a, b) => {
+  return [...data].sort((a, b) => {
     if (a.avatar.actived_constellation_num !== b.avatar.actived_constellation_num) {
       if (isConstUp.value === true) {
         return a.avatar.actived_constellation_num - b.avatar.actived_constellation_num;
@@ -588,7 +610,7 @@ function getOrderedList(
     if (a.avatar.fetter !== b.avatar.fetter) {
       if (isFetterUp.value === true) {
         return a.avatar.fetter - b.avatar.fetter;
-      } else if (isConstUp.value === false) {
+      } else if (isFetterUp.value === false) {
         return b.avatar.fetter - a.avatar.fetter;
       }
     }
@@ -606,21 +628,13 @@ function getOrderedList(
 }
 
 function getOverview(data: Array<TGApp.Sqlite.Character.TableTrans>): Array<OverviewItem> {
-  const overview: Array<OverviewItem> = [];
+  const counts = new Map<string, number>();
   for (const role of data) {
-    const element = role.avatar.element;
-    const index = overview.findIndex((item) => item.element === element);
-    if (index === -1) {
-      overview.push({ element, cnt: 1, label: `${getZhElement(element)}元素` });
-    } else {
-      overview[index].cnt += 1;
-    }
+    counts.set(role.avatar.element, (counts.get(role.avatar.element) ?? 0) + 1);
   }
-  return overview.sort((a, b) => b.cnt - a.cnt);
-}
-
-function getElementCnt(element: string): number {
-  return selectedList.value.filter((i) => i.avatar.element === element).length;
+  return [...counts.entries()]
+    .map(([element, cnt]) => ({ element, cnt, label: `${getZhElement(element)}元素` }))
+    .sort((a, b) => b.cnt - a.cnt);
 }
 
 async function hideAllOverlay(): Promise<void> {
@@ -638,35 +652,74 @@ async function hideAllOverlay(): Promise<void> {
   }
 }
 
-async function loadUid(uid?: string): Promise<void> {
+function applyLoadedRoles(
+  roleData: Array<TGApp.Sqlite.Character.TableTrans>,
+  record: TGApp.Sqlite.Record.Role | undefined,
+): void {
+  const ordered = getOrderedList(roleData);
+  roleRecord.value = record;
+  roleList.value = ordered;
+  roleOverview.value = getOverview(ordered);
+  selectedList.value = ordered;
+  isEmpty.value = ordered.length === 0;
+  if (ordered.length === 0) {
+    dataVal.value = undefined;
+    return;
+  }
+  const currentId = dataVal.value?.cid;
+  const currentIndex =
+    currentId === undefined ? -1 : ordered.findIndex((role) => role.cid === currentId);
+  if (currentIndex >= 0) {
+    selectIndex.value = currentIndex;
+    dataVal.value = ordered[currentIndex];
+    return;
+  }
+  const nextIndex = Math.min(Math.max(selectIndex.value, 0), ordered.length - 1);
+  selectIndex.value = nextIndex;
+  dataVal.value = ordered[nextIndex];
+}
+
+async function loadUid(): Promise<void> {
   await hideAllOverlay();
   uidList.value = await TSUserAvatar.getAllUid();
   if (uidList.value.length === 0) uidList.value = [account.value.gameUid];
   if (uidList.value.includes(account.value.gameUid)) {
-    if (uid === undefined) uidCur.value = account.value.gameUid;
+    uidCur.value = account.value.gameUid;
   } else {
     uidList.value = [account.value.gameUid, ...uidList.value];
-    if (uid === undefined) uidCur.value = uidList.value[0];
+    uidCur.value = uidList.value[0];
+  }
+  await loadRole();
+}
+
+async function handleUidChange(uid: unknown): Promise<void> {
+  if (typeof uid !== "string" || uid === uidCur.value) return;
+  uidCur.value = uid;
+  await hideAllOverlay();
+  await showLoading.start("正在加载角色数据");
+  try {
+    await loadRole();
+    await nextTick();
+  } finally {
+    await showLoading.end();
   }
 }
 
 async function loadRole(): Promise<void> {
-  if (!uidCur.value) {
+  const seq = ++loadRoleSeq;
+  const uid = uidCur.value;
+  if (!uid) {
     isEmpty.value = true;
     return;
   }
-  roleList.value = [];
-  const roleData = await TSUserAvatar.getAvatars(Number(uidCur.value));
-  const gameRole = await TSUserRecord.getRecord(Number(uidCur.value));
-  if (gameRole === false) roleRecord.value = undefined;
-  else roleRecord.value = gameRole.role;
-  roleList.value = getOrderedList(roleData);
-  roleOverview.value = getOverview(roleData);
-  selectedList.value = roleList.value;
-  dataVal.value = roleData[selectIndex.value];
-  isEmpty.value = roleList.value.length === 0;
-  await TGLogger.Info(`[Character][loadRole][${uidCur.value}] 成功加载角色数据`);
-  await TGLogger.Info(`[Character][loadRole][${uidCur.value}] 共获取到${roleData.length}个角色`);
+  const [roleData, gameRole] = await Promise.all([
+    TSUserAvatar.getAvatars(Number(uid)),
+    TSUserRecord.getRecord(Number(uid)),
+  ]);
+  if (seq !== loadRoleSeq || uidCur.value !== uid) return;
+  applyLoadedRoles(roleData, gameRole === false ? undefined : gameRole.role);
+  await TGLogger.Info(`[Character][loadRole][${uid}] 成功加载角色数据`);
+  await TGLogger.Info(`[Character][loadRole][${uid}] 共获取到${roleData.length}个角色`);
   showSnackbar.success(`成功加载${roleData.length}个角色`);
 }
 
@@ -676,86 +729,66 @@ async function refresh(): Promise<void> {
   const { account: rfAccount, cookie: rfCk } = refreshData;
   await hideAllOverlay();
   await TGLogger.Info(`[Character][refresh][${rfAccount.gameUid}] 正在更新角色数据`);
-  await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
   loadData.value = true;
-  await showLoading.update("正在刷新首页数据");
-  let indexResp: TGApp.Game.Record.Resp | undefined;
   try {
-    indexResp = await recordReq.index(rfCk!, rfAccount, 1);
+    await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
+    await showLoading.update("正在获取首页与角色列表", { timeout: 0 });
+    const [indexResp, listResp] = await Promise.all([
+      recordReq.index(rfCk!, rfAccount, 1),
+      recordReq.character.list(rfCk!, rfAccount),
+    ]);
     if (indexResp.retcode !== 0) {
-      await showLoading.end();
       showSnackbar.error(`[${indexResp.retcode}] ${indexResp.message}`);
       await TGLogger.Warn(`[Characters][refresh] ${indexResp.retcode}-${indexResp.message}`);
-      loadData.value = false;
       return;
     }
-  } catch (e) {
-    await showLoading.end();
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取战绩数据异常: ${errMsg}`);
-    await TGLogger.Error(`[Characters][refresh] 获取战绩异常`);
-    await TGLogger.Error(`[Characters][refresh] ${e}`);
-    loadData.value = false;
-    return;
-  }
-  await showLoading.update("正在获取角色列表");
-  let listResp: TGApp.Game.Avatar.ListResp | undefined;
-  try {
-    listResp = await recordReq.character.list(rfCk!, rfAccount);
     if (listResp.retcode !== 0) {
       showSnackbar.error(`[${listResp.retcode}] ${listResp.message}`);
       await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表失败`);
       await TGLogger.Warn(
         `[Character][refresh][${rfAccount.gameUid}] ${listResp.retcode} ${listResp.message}`,
       );
-      await showLoading.end();
-      loadData.value = false;
       return;
     }
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取角色列表异常: ${errMsg}`);
-    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表异常`);
-    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] ${e}`);
-    await showLoading.end();
-    loadData.value = false;
-    return;
-  }
-  const idList = listResp.data.list.map((i) => i.id.toString());
-  await showLoading.update(`共${idList.length}个角色，正在获取角色详情`);
-  let detailResp: TGApp.Game.Avatar.DetailResp | undefined;
-  try {
-    detailResp = await recordReq.character.detail(rfCk!, rfAccount, idList);
-    if (detailResp.retcode !== 0) {
-      showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
-      await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色数据失败`);
-      await TGLogger.Warn(
-        `[Character][refresh][${rfAccount.gameUid}] ${detailResp.retcode} ${detailResp.message}`,
-      );
-      await showLoading.end();
-      loadData.value = false;
-      return;
+    const idList = listResp.data.list.map((item) => item.id.toString());
+    await showLoading.update(`共${idList.length}个角色，正在获取角色详情`);
+    let details: Array<TGApp.Game.Avatar.AvatarDetail> = [];
+    if (idList.length > 0) {
+      const detailResp = await recordReq.character.detail(rfCk!, rfAccount, idList);
+      if (detailResp.retcode !== 0) {
+        showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
+        await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色数据失败`);
+        await TGLogger.Warn(
+          `[Character][refresh][${rfAccount.gameUid}] ${detailResp.retcode} ${detailResp.message}`,
+        );
+        return;
+      }
+      details = detailResp.data.list;
     }
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取角色详情异常: ${errMsg}`);
-    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 获取角色详情异常`);
-    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] ${e}`);
+    await showLoading.update("正在保存角色数据", { timeout: 0 });
+    const uid = Number(rfAccount.gameUid);
+    const savedRoles = await TSUserAvatar.saveAvatars(rfAccount.gameUid, details);
+    await TSUserRecord.saveRecord(uid, indexResp.data);
+    await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
+    await TGLogger.Info(
+      `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${details.length}个角色`,
+    );
+    if (!uidList.value.includes(rfAccount.gameUid)) {
+      uidList.value = [...uidList.value, rfAccount.gameUid];
+    }
+    uidCur.value = rfAccount.gameUid;
+    applyLoadedRoles(savedRoles, transUserRecord(uid, indexResp.data).role);
+    showSnackbar.success(`成功加载${savedRoles.length}个角色`);
+    await nextTick();
+  } catch (error) {
+    const errMsg = TGHttps.getErrMsg(error);
+    showSnackbar.error(`刷新角色数据异常: ${errMsg}`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] 刷新角色数据异常`);
+    await TGLogger.Error(`[Character][refresh][${rfAccount.gameUid}] ${error}`);
+  } finally {
     await showLoading.end();
     loadData.value = false;
-    return;
   }
-  await showLoading.update("正在保存角色数据");
-  await TSUserAvatar.saveAvatars(rfAccount.gameUid, detailResp.data.list);
-  await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
-  await TGLogger.Info(
-    `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${detailResp.data.list.length}个角色`,
-  );
-  await showLoading.update("正在加载角色数据");
-  await loadUid(uidCur.value);
-  await loadRole();
-  await showLoading.end();
-  loadData.value = false;
 }
 
 async function share(): Promise<void> {
@@ -791,17 +824,6 @@ async function deleteUid(): Promise<void> {
   await TSUserAvatar.deleteUid(uidCur.value);
   showSnackbar.success(`成功删除${uidCur.value}的角色数据`);
   await loadUid();
-  await loadRole();
-}
-
-function getUpdateTime(): string {
-  if (roleList.value.length === 0) return "";
-  let lastUpdateTime = 0;
-  for (const role of roleList.value) {
-    const updateTime = new Date(role.updated).getTime();
-    if (updateTime > lastUpdateTime) lastUpdateTime = updateTime;
-  }
-  return timestampToDate(lastUpdateTime);
 }
 
 function selectRole(role: TGApp.Sqlite.Character.TableTrans): void {
@@ -813,7 +835,7 @@ function selectRole(role: TGApp.Sqlite.Character.TableTrans): void {
 function handleSelect(val: UavSelectModel): void {
   selectOpts.value = val;
   const filterC = roleList.value.filter((role) => {
-    const info = AppCharacterData.find((i) => i.id === role.cid);
+    const info = appCharacterMap.get(role.cid);
     if (val.star.length > 0 && !val.star.includes(role.avatar.rarity.toString())) return false;
     if (val.level.length > 0) {
       if (!val.level.includes("true") && role.avatar.level >= 70) return false;

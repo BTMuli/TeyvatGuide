@@ -1,6 +1,6 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.10.2
+ * @since Beta v0.11.5
  */
 
 import gameEnum from "@enum/game.js";
@@ -9,16 +9,26 @@ import TGHttps from "@utils/TGHttps.js";
 
 const trgAbu: Readonly<string> =
   "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/";
+const CHARACTER_DETAIL_CHUNK_SIZE: Readonly<number> = 40;
+const CHARACTER_DETAIL_CONCURRENCY: Readonly<number> = 2;
+
+function splitChunks<T>(items: Array<T>, size: number): Array<Array<T>> {
+  const chunks: Array<Array<T>> = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
 
 /**
- * 获取角色详情
- * @since Beta v0.10.1
+ * 请求单批角色详情
+ * @since Beta v0.11.5
  * @param cookie - Cookie
- * @param user -  用户
+ * @param user - 用户
  * @param avatarIds - 角色 id 列表
  * @returns 角色详情响应数据
  */
-async function characterDetail(
+async function requestCharacterDetail(
   cookie: TGApp.App.Account.Cookie,
   user: TGApp.Sqlite.Account.Game,
   avatarIds: Array<string>,
@@ -30,6 +40,46 @@ async function characterDetail(
     body: JSON.stringify(data),
   });
   return resp.data;
+}
+
+/**
+ * 获取角色详情
+ * @since Beta v0.11.5
+ * @param cookie - Cookie
+ * @param user -  用户
+ * @param avatarIds - 角色 id 列表
+ * @returns 角色详情响应数据
+ * @remarks 角色较多时分批并发请求，避免单次超大响应拖慢刷新
+ */
+async function characterDetail(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+  avatarIds: Array<string>,
+): Promise<TGApp.Game.Avatar.DetailResp> {
+  if (avatarIds.length <= CHARACTER_DETAIL_CHUNK_SIZE) {
+    return await requestCharacterDetail(cookie, user, avatarIds);
+  }
+  const chunks = splitChunks(avatarIds, CHARACTER_DETAIL_CHUNK_SIZE);
+  const responses: Array<TGApp.Game.Avatar.DetailResp> = [];
+  for (let index = 0; index < chunks.length; index += CHARACTER_DETAIL_CONCURRENCY) {
+    const group = chunks.slice(index, index + CHARACTER_DETAIL_CONCURRENCY);
+    const groupResponses = await Promise.all(
+      group.map(async (chunk) => await requestCharacterDetail(cookie, user, chunk)),
+    );
+    const failed = groupResponses.find((resp) => resp.retcode !== 0);
+    if (failed !== undefined) return failed;
+    responses.push(...groupResponses);
+  }
+  const [first] = responses;
+  if (first === undefined) return await requestCharacterDetail(cookie, user, avatarIds);
+  return {
+    retcode: 0,
+    message: first.message,
+    data: {
+      ...first.data,
+      list: responses.flatMap((resp) => resp.data.list),
+    },
+  };
 }
 
 /**

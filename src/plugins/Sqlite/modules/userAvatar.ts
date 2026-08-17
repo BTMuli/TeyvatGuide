@@ -1,6 +1,6 @@
 /**
  * 用户角色模块
- * @since Beta v0.6.0
+ * @since Beta v0.11.5
  */
 
 import { timestampToDate } from "@utils/toolFunc.js";
@@ -9,48 +9,114 @@ import TGSqlite from "../index.js";
 
 import { AppCharacterData } from "@/data/index.js";
 
+type SqlStatement = {
+  query: string;
+  values: Array<string | number>;
+};
+
+const avatarNameCardMap = new Map<number, string>(
+  AppCharacterData.map((character) => [character.id, character.nameCard]),
+);
+
 /**
- * 获取角色插入Sql
- * @since Beta v0.6.0
+ * 将角色详情转换为本地角色数据
+ * @since Beta v0.11.5
+ * @param uid - 用户 UID
+ * @param data - 角色详情
+ * @param updated - 更新时间
+ * @returns 本地角色数据
+ */
+function transAvatar(
+  uid: number,
+  data: TGApp.Game.Avatar.AvatarDetail,
+  updated: string,
+): TGApp.Sqlite.Character.TableTrans {
+  return {
+    uid,
+    cid: data.base.id,
+    avatar: data.base,
+    weapon: data.weapon,
+    relics: data.relics,
+    constellations: data.constellations,
+    costumes: data.costumes,
+    skills: data.skills,
+    propSelected: data.selected_properties,
+    propBase: <string>(<unknown>data.base_properties),
+    propExtra: data.extra_properties,
+    propRecommend: data.recommend_relic_property,
+    updated,
+  };
+}
+
+/**
+ * 解析数据库角色行
+ * @since Beta v0.11.5
+ * @param data - 数据库原始行
+ * @returns 本地角色数据
+ */
+function parseAvatar(data: TGApp.Sqlite.Character.TableRaw): TGApp.Sqlite.Character.TableTrans {
+  return {
+    uid: data.uid,
+    cid: data.cid,
+    avatar: JSON.parse(data.avatar),
+    weapon: JSON.parse(data.weapon),
+    relics: JSON.parse(data.relics),
+    constellations: JSON.parse(data.constellations),
+    costumes: JSON.parse(data.costumes),
+    skills: JSON.parse(data.skills),
+    propSelected: JSON.parse(data.propSelected),
+    propBase: JSON.parse(data.propBase),
+    propExtra: JSON.parse(data.propExtra),
+    propRecommend: JSON.parse(data.propRecommend),
+    updated: data.updated,
+  };
+}
+
+/**
+ * 获取角色插入语句
+ * @since Beta v0.11.5
  * @param uid - 用户UID
  * @param data - 角色数据
+ * @param updated - 更新时间
  * @returns sql
  */
-function getInsertSql(uid: string, data: TGApp.Game.Avatar.AvatarDetail): string {
-  const role: TGApp.Sqlite.Character.TableRaw = {
-    uid: Number(uid),
-    cid: data.base.id,
-    avatar: JSON.stringify(data.base),
-    weapon: JSON.stringify(data.weapon),
-    relics: JSON.stringify(data.relics),
-    constellations: JSON.stringify(data.constellations),
-    costumes: JSON.stringify(data.costumes),
-    skills: JSON.stringify(data.skills),
-    propSelected: JSON.stringify(data.selected_properties),
-    propBase: JSON.stringify(data.base_properties),
-    propExtra: JSON.stringify(data.extra_properties),
-    propRecommend: JSON.stringify(data.recommend_relic_property),
-    updated: timestampToDate(new Date().getTime()),
-  };
-  return `
-      INSERT INTO UserCharacters (uid, cid, avatar, weapon, relics, constellations, costumes, skills,
+function getInsertSql(
+  uid: string,
+  data: TGApp.Game.Avatar.AvatarDetail,
+  updated: string,
+): SqlStatement {
+  return {
+    query: `INSERT INTO UserCharacters (uid, cid, avatar, weapon, relics, constellations, costumes, skills,
                                   propSelected, propBase, propExtra, propRecommend, updated)
-      VALUES (${uid}, ${role.cid}, '${role.avatar}', '${role.weapon}', '${role.relics}', '${role.constellations}',
-              '${role.costumes}', '${role.skills}', '${role.propSelected}', '${role.propBase}', '${role.propExtra}',
-              '${role.propRecommend}', '${role.updated}')
-      ON CONFLICT(uid, cid) DO UPDATE
-          SET avatar         = '${role.avatar}',
-              weapon         = '${role.weapon}',
-              relics         = '${role.relics}',
-              constellations = '${role.constellations}',
-              costumes       = '${role.costumes}',
-              skills         = '${role.skills}',
-              propSelected   = '${role.propSelected}',
-              propBase       = '${role.propBase}',
-              propExtra      = '${role.propExtra}',
-              propRecommend  = '${role.propRecommend}',
-              updated        = '${role.updated}';
-  `;
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            ON CONFLICT(uid, cid) DO UPDATE SET
+                avatar         = $3,
+                weapon         = $4,
+                relics         = $5,
+                constellations = $6,
+                costumes       = $7,
+                skills         = $8,
+                propSelected   = $9,
+                propBase       = $10,
+                propExtra      = $11,
+                propRecommend  = $12,
+                updated        = $13;`,
+    values: [
+      Number(uid),
+      data.base.id,
+      JSON.stringify(data.base),
+      JSON.stringify(data.weapon),
+      JSON.stringify(data.relics),
+      JSON.stringify(data.constellations),
+      JSON.stringify(data.costumes),
+      JSON.stringify(data.skills),
+      JSON.stringify(data.selected_properties),
+      JSON.stringify(data.base_properties),
+      JSON.stringify(data.extra_properties),
+      JSON.stringify(data.recommend_relic_property),
+      updated,
+    ],
+  };
 }
 
 /**
@@ -67,69 +133,57 @@ async function getAllUid(): Promise<Array<string>> {
 
 /**
  * 获取用户角色数据
- * @since Beta v0.5.3
+ * @since Beta v0.11.5
  * @param uid - 用户 uid
  * @returns 用户角色数据
  */
 async function getAvatars(uid: number): Promise<Array<TGApp.Sqlite.Character.TableTrans>> {
   const db = await TGSqlite.getDB();
   type resType = Array<TGApp.Sqlite.Character.TableRaw>;
-  const res = await db.select<resType>("SELECT * FROM UserCharacters WHERE uid = ?;", [uid]);
-  return res.map((i) => {
-    return {
-      uid: i.uid,
-      cid: i.cid,
-      avatar: JSON.parse(i.avatar),
-      weapon: JSON.parse(i.weapon),
-      relics: JSON.parse(i.relics),
-      constellations: JSON.parse(i.constellations),
-      costumes: JSON.parse(i.costumes),
-      skills: JSON.parse(i.skills),
-      propSelected: JSON.parse(i.propSelected),
-      propBase: JSON.parse(i.propBase),
-      propExtra: JSON.parse(i.propExtra),
-      propRecommend: JSON.parse(i.propRecommend),
-      updated: i.updated,
-    };
-  });
+  const res = await db.select<resType>("SELECT * FROM UserCharacters WHERE uid = $1;", [uid]);
+  return res.map(parseAvatar);
 }
 
 /**
  * 保存用户角色数据
- * @since Beta v0.6.0
+ * @since Beta v0.11.5
  * @param uid - 用户 uid
  * @param data - 角色数据
- * @returns 无返回值
+ * @returns 保存后的本地角色数据
  */
 async function saveAvatars(
   uid: string,
   data: Array<TGApp.Game.Avatar.AvatarDetail>,
-): Promise<void> {
-  const db = await TGSqlite.getDB();
-  for (const role of data) await db.execute(getInsertSql(uid, role));
+): Promise<Array<TGApp.Sqlite.Character.TableTrans>> {
+  const updated = timestampToDate(new Date().getTime());
+  const uidNum = Number(uid);
+  if (data.length > 0) {
+    await TGSqlite.executeTransaction(data.map((role) => getInsertSql(uid, role, updated)));
+  }
+  return data.map((role) => transAvatar(uidNum, role, updated));
 }
 
 /**
  * 获取角色名片
- * @since Beta v0.6.0
+ * @since Beta v0.11.5
  * @param id - 角色 id
  * @returns 名片
  */
 function getAvatarCard(id: number): string {
-  const find = AppCharacterData.find((c) => c.id === id);
-  if (find === undefined || find.nameCard === "") return "原神·印象";
-  return find.nameCard;
+  const nameCard = avatarNameCardMap.get(id);
+  if (nameCard === undefined || nameCard === "") return "原神·印象";
+  return nameCard;
 }
 
 /**
  * 删除指定UID的数据
- * @since Beta v0.6.0
+ * @since Beta v0.11.5
  * @param uid - 游戏UID
  * @returns 无返回值
  */
 async function deleteUid(uid: string): Promise<void> {
   const db = await TGSqlite.getDB();
-  await db.execute("DELETE FROM UserCharacters WHERE uid = ?;", [uid]);
+  await db.execute("DELETE FROM UserCharacters WHERE uid = $1;", [uid]);
 }
 
 const TSUserAvatar = {

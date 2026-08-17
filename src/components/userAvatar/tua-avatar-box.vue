@@ -5,7 +5,7 @@
       <TItemBox v-model="avatarBox" />
       <div class="tua-abt-right">
         <div class="tua-abt-rt">
-          <TItemBox v-model="weaponBox" :title="getWeaponTitle()" />
+          <TItemBox v-model="weaponBox" :title="weaponTitle" />
           <div class="tua-abt-rtr">
             <TuaRelicBox :model-value="relicsBox[0]" :position="1" />
             <TuaRelicBox :model-value="relicsBox[1]" :position="2" />
@@ -68,13 +68,17 @@ type fixedLenArr<T, N extends number> = [T, ...Array<T>] & { length: N };
 type AvatarRelics = fixedLenArr<TGApp.Game.Avatar.Relic | false, 5>;
 type TuaAvatarBoxProps = { role: TGApp.Sqlite.Character.TableTrans };
 
+const calendarIdSet = new Set(AppCalendarData.map((item) => item.id));
+const characterById = new Map(AppCharacterData.map((item) => [item.id, item]));
+
 const props = defineProps<TuaAvatarBoxProps>();
 
 const avatarIcon = computed<string>(() => {
   const costume = getCostume();
   if (costume) return `/WIKI/costume/${costume.id}.webp`;
-  const findA = AppCalendarData.find((a) => a.id === props.role.avatar.id);
-  if (findA) return `/WIKI/character/${props.role.avatar.id}.webp`;
+  if (calendarIdSet.has(props.role.avatar.id)) {
+    return `/WIKI/character/${props.role.avatar.id}.webp`;
+  }
   return props.role.avatar.icon;
 });
 const avatarBox = computed<TItemBoxData>(() => ({
@@ -92,9 +96,9 @@ const avatarBox = computed<TItemBoxData>(() => ({
   clickable: true,
 }));
 const weaponBox = computed<TItemBoxData>(() => {
-  let icon = props.role.weapon.icon;
-  const findW = AppCalendarData.find((w) => w.id === props.role.weapon.id);
-  if (findW) icon = `/WIKI/weapon/${props.role.weapon.id}.webp`;
+  const icon = calendarIdSet.has(props.role.weapon.id)
+    ? `/WIKI/weapon/${props.role.weapon.id}.webp`
+    : props.role.weapon.icon;
   return {
     size: "65px",
     height: "65px",
@@ -132,20 +136,7 @@ const nameCard = computed<string>(() => {
   const cardFind = TSUserAvatar.getAvatarCard(props.role.avatar.id);
   return `/WIKI/nameCard/profile/${cardFind}.webp`;
 });
-
-function getCostume(): TGApp.App.Character.Costume | false {
-  if (props.role.costumes.length === 0) return false;
-  const findC = AppCharacterData.find((i) => i.id === props.role.cid);
-  if (!findC) return false;
-  let res: TGApp.App.Character.Costume | false = false;
-  for (const costume of props.role.costumes) {
-    const findCostume = findC.costumes.find((i) => i.id === costume.id);
-    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
-  }
-  return res;
-}
-
-function getWeaponTitle(): string {
+const weaponTitle = computed<string>(() => {
   const weapon = props.role.weapon;
   const title: Array<string> = [];
   title.push(`${weapon.type_name} - ${weapon.name}`);
@@ -157,6 +148,17 @@ function getWeaponTitle(): string {
     title.push(`${propSub !== false ? propSub.name : "未知属性"} - ${weapon.sub_property.final}`);
   }
   return title.join("\n");
+});
+
+function getCostume(): TGApp.App.Character.Costume | false {
+  if (props.role.costumes.length === 0) return false;
+  const findC = characterById.get(props.role.cid);
+  if (!findC) return false;
+  for (const costume of props.role.costumes) {
+    const findCostume = findC.costumes.find((i) => i.id === costume.id);
+    if (findCostume !== undefined && !findCostume.isDefault) return findCostume;
+  }
+  return false;
 }
 </script>
 <style lang="scss" scoped>
