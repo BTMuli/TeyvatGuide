@@ -1,6 +1,6 @@
 /**
  * 用户养成计划数据库模块
- * @since Beta v0.11.2
+ * @since Beta v0.11.5
  */
 
 import type Database from "@tauri-apps/plugin-sql";
@@ -477,6 +477,51 @@ async function saveEntries(
 }
 
 /**
+ * 批量更新养成目标的计算方式与合成配置
+ * @since Beta v0.11.5
+ * @param projectId - 计划 ID
+ * @param entryIds - 目标 ID
+ * @param config - 计算方式与合成配置
+ */
+async function updateEntriesCalculationConfig(
+  projectId: string,
+  entryIds: ReadonlyArray<string>,
+  config: TGApp.Sqlite.Cultivation.CraftingOptions & {
+    calculationMode: TGApp.Sqlite.Cultivation.CalculationMode;
+  },
+): Promise<void> {
+  if (entryIds.length === 0) return;
+  await TGSqlite.updateCultivationEntry();
+  const now = new Date().toISOString();
+  await withTransaction(async (_db, statements) => {
+    for (const entryId of entryIds) {
+      if (config.calculationMode !== "api") {
+        pushDetachApiResultStatements(statements, entryId);
+      }
+      statements.push({
+        query: `UPDATE CultivationEntry SET
+                  calculationMode = $1, allowCrafting = $2, useDust = $3, useSolvent = $4,
+                  updated = $5
+                WHERE id = $6 AND projectId = $7;`,
+        values: [
+          config.calculationMode,
+          Number(config.allowCrafting),
+          Number(config.useDust),
+          Number(config.useSolvent),
+          now,
+          entryId,
+          projectId,
+        ],
+      });
+    }
+    statements.push({
+      query: "UPDATE CultivationProject SET updated = $1 WHERE id = $2;",
+      values: [now, projectId],
+    });
+  });
+}
+
+/**
  * 按给定顺序更新计划目标优先级
  * @since Beta v0.11.2
  * @param projectId - 计划 ID
@@ -630,6 +675,7 @@ const TSCultivationPlan = {
   removeProject,
   getEntries,
   saveEntries,
+  updateEntriesCalculationConfig,
   updateEntryOrder,
   refreshEntries,
   updateEntryStatus,

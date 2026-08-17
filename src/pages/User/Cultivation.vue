@@ -228,7 +228,7 @@
               :level-options="avatarLevelOptions"
               :options="characterOptions"
               :selectedCharacter
-              :selection-readonly="editingEntry?.type === 'avatar'"
+              :selection-readonly="characterSelectionReadonly"
               :skills="displaySkills"
               :talent-level-max="avatarTalentLevelMax"
               :target-at-ascension-level="avatarTargetAtAscensionLevel"
@@ -249,7 +249,7 @@
               :level-options="weaponLevelOptions"
               :options="weaponOptions"
               :selectedWeapon
-              :selection-readonly="editingEntry?.type === 'weapon'"
+              :selection-readonly="weaponSelectionReadonly"
               :target-at-ascension-level="weaponTargetAtAscensionLevel"
             />
           </div>
@@ -423,6 +423,15 @@ const useApiCalculation = computed<boolean>(
   () => !isWindows || !hasBagDataSource.value || calculationMode.value === "api",
 );
 const isTargetEditor = computed<boolean>(() => viewTab.value === "calculator");
+const editingPairedEntry = computed<TGApp.Sqlite.Cultivation.EntryWithItems | undefined>(() =>
+  editingEntry.value ? getPairedPlanEntry(editingEntry.value) : undefined,
+);
+const characterSelectionReadonly = computed<boolean>(
+  () => editingEntry.value?.type === "avatar" || editingPairedEntry.value?.type === "avatar",
+);
+const weaponSelectionReadonly = computed<boolean>(
+  () => editingEntry.value?.type === "weapon" || editingPairedEntry.value?.type === "weapon",
+);
 const editorTargetName = computed<string>(() => {
   if (editingEntry.value) return editingEntry.value.name;
   const targetNames: Array<string> = [];
@@ -1009,6 +1018,15 @@ function createLevelOptions(max: number): Array<number> {
   return Array.from({ length: max }, (_, index) => index + 1);
 }
 
+function restoreCharacterSelection(
+  previousCharacterId: number | null,
+  options: ReadonlyArray<TGApp.App.UserCalc.CharacterOption>,
+): number | null {
+  if (options.some((option) => option.value === previousCharacterId)) return previousCharacterId;
+  if (editingEntry.value !== undefined) return previousCharacterId;
+  return options[0]?.value ?? null;
+}
+
 function selectPreferredWeapon(): void {
   const options = weaponOptions.value;
   if (options.length === 0) {
@@ -1388,11 +1406,10 @@ async function loadApiData(uid: number, requestVersion: number): Promise<void> {
     apiAvatars.value = avatarCatalog;
     apiWeapons.value = weaponCatalog;
     selectedWeaponKey.value = null;
-    selectedCharacterId.value = apiCharacterOptions.value.some(
-      (avatar) => avatar.value === previousCharacterId,
-    )
-      ? previousCharacterId
-      : (apiCharacterOptions.value[0]?.value ?? null);
+    selectedCharacterId.value = restoreCharacterSelection(
+      previousCharacterId,
+      apiCharacterOptions.value,
+    );
     if (selectedCharacterId.value === null) selectPreferredWeapon();
   } catch (error) {
     if (requestVersion !== dataLoadVersion) return;
@@ -1495,11 +1512,10 @@ async function loadLocalData(uid: number, requestVersion: number): Promise<void>
   weapons.value = buildWeaponOptions(weaponData, roles.value);
   useBagWeaponSource.value = weapons.value.some((weapon) => weapon.fromBag);
   selectedWeaponKey.value = null;
-  selectedCharacterId.value = localCharacterOptions.value.some(
-    (character) => character.value === previousCharacterId,
-  )
-    ? previousCharacterId
-    : (localCharacterOptions.value[0]?.value ?? null);
+  selectedCharacterId.value = restoreCharacterSelection(
+    previousCharacterId,
+    localCharacterOptions.value,
+  );
   if (selectedCharacterId.value === null) selectPreferredWeapon();
 }
 
@@ -1685,10 +1701,7 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
     calculationMode: calculationMode.value,
     type: "weapon",
     itemId: weapon.wiki.id,
-    instanceKey:
-      editingEntry.value?.type === "weapon"
-        ? editingEntry.value.instanceKey
-        : (weapon.guid ?? (weapon.source === "catalog" ? "" : weapon.key)),
+    instanceKey: resolveWeaponInstanceKey(weapon),
     name: weapon.wiki.name,
     icon: weapon.icon,
     star: weapon.wiki.star,
@@ -1715,19 +1728,146 @@ function createWeaponPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
   };
 }
 
+function resolveWeaponInstanceKey(weapon: TGApp.App.UserCalc.WeaponOption): string {
+  if (editingEntry.value?.type === "weapon") return editingEntry.value.instanceKey;
+  const paired =
+    editingEntry.value?.type === "avatar" ? getPairedPlanEntry(editingEntry.value) : undefined;
+  if (paired?.type === "weapon" && paired.itemId === weapon.wiki.id) return paired.instanceKey;
+  return weapon.guid ?? (weapon.source === "catalog" ? "" : weapon.key);
+}
+
+function getPairedPlanEntry(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): TGApp.Sqlite.Cultivation.EntryWithItems | undefined {
+  const stored = entry.apiResult;
+  if (!stored?.avatarEntryId || !stored.weaponEntryId) return undefined;
+  const partnerId = entry.type === "avatar" ? stored.weaponEntryId : stored.avatarEntryId;
+  const partner = planEntries.value.find((item) => item.id === partnerId);
+  if (partner && partner.id !== entry.id) return partner;
+  return undefined;
+}
+
+function isSameWeaponEntry(
+  input: TGApp.Sqlite.Cultivation.SaveEntryInput,
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): boolean {
+  if (input.type !== "weapon" || entry.type !== "weapon" || input.itemId !== entry.itemId) {
+    return false;
+  }
+  if (entry.instanceKey.length === 0 || input.instanceKey === entry.instanceKey) return true;
+  return (
+    input.instanceKey === entry.instanceKey.replace(/^sync-/, "role-") ||
+    entry.instanceKey === input.instanceKey.replace(/^sync-/, "role-")
+  );
+}
+
+function createPairedEntrySyncInput(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): TGApp.Sqlite.Cultivation.SaveEntryInput | undefined {
+  if (!entry.items.some((item) => item.required > 0)) return undefined;
+  return {
+    allowCrafting: allowCrafting.value,
+    calculationMode: calculationMode.value,
+    type: entry.type,
+    itemId: entry.itemId,
+    instanceKey: entry.instanceKey,
+    name: entry.name,
+    icon: entry.icon,
+    star: entry.star,
+    currentState: entry.currentState,
+    targetState: entry.targetState,
+    items: entry.items.map((item) => ({
+      materialId: item.materialId,
+      required: item.required,
+    })),
+    useDust: useDust.value,
+    useSolvent: useSolvent.value,
+  };
+}
+
+function collectPlanSaveInputs(
+  avatarInput: TGApp.Sqlite.Cultivation.SaveEntryInput | undefined,
+  weaponInput: TGApp.Sqlite.Cultivation.SaveEntryInput | undefined,
+): Array<TGApp.Sqlite.Cultivation.SaveEntryInput> {
+  const inputs: Array<TGApp.Sqlite.Cultivation.SaveEntryInput> = [];
+  const editing = editingEntry.value;
+  const paired = editing ? getPairedPlanEntry(editing) : undefined;
+  if (!editing) {
+    if (avatarInput) inputs.push(avatarInput);
+    if (weaponInput) inputs.push(weaponInput);
+    return inputs;
+  }
+  if (editing.type === "avatar") {
+    if (avatarInput) inputs.push(avatarInput);
+    else {
+      const syncedSelf = createPairedEntrySyncInput(editing);
+      if (syncedSelf) inputs.push(syncedSelf);
+    }
+    if (weaponInput && findExistingWeaponEntry(weaponInput)) {
+      inputs.push(weaponInput);
+      return inputs;
+    }
+    if (paired?.type !== "weapon") return inputs;
+    const synced = createPairedEntrySyncInput(paired);
+    if (synced) inputs.push(synced);
+    return inputs;
+  }
+  if (weaponInput) inputs.push(weaponInput);
+  else {
+    const syncedSelf = createPairedEntrySyncInput(editing);
+    if (syncedSelf) inputs.push(syncedSelf);
+  }
+  if (avatarInput && findExistingAvatarEntry(avatarInput.itemId)) {
+    inputs.push(avatarInput);
+    return inputs;
+  }
+  if (paired?.type !== "avatar") return inputs;
+  const synced = createPairedEntrySyncInput(paired);
+  if (synced) inputs.push(synced);
+  return inputs;
+}
+
+function findExistingAvatarEntry(
+  itemId: number,
+): TGApp.Sqlite.Cultivation.EntryWithItems | undefined {
+  return planEntries.value.find((item) => item.type === "avatar" && item.itemId === itemId);
+}
+
+function findExistingWeaponEntry(
+  input: TGApp.Sqlite.Cultivation.SaveEntryInput,
+): TGApp.Sqlite.Cultivation.EntryWithItems | undefined {
+  return planEntries.value.find((item) => isSameWeaponEntry(input, item));
+}
+
+function inputMatchesEntry(
+  input: TGApp.Sqlite.Cultivation.SaveEntryInput,
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): boolean {
+  if (input.type !== entry.type || input.itemId !== entry.itemId) return false;
+  if (entry.type === "avatar") return true;
+  return isSameWeaponEntry(input, entry);
+}
+
+function collectUnsavedPairEntryIds(
+  inputs: ReadonlyArray<TGApp.Sqlite.Cultivation.SaveEntryInput>,
+): Array<string> {
+  const editing = editingEntry.value;
+  if (!editing) return [];
+  const paired = getPairedPlanEntry(editing);
+  const unsaved: Array<string> = [];
+  if (!inputs.some((input) => inputMatchesEntry(input, editing))) unsaved.push(editing.id);
+  if (paired && !inputs.some((input) => inputMatchesEntry(input, paired))) {
+    unsaved.push(paired.id);
+  }
+  return unsaved;
+}
+
 async function saveToPlan(): Promise<void> {
   const uid = currentUid.value;
   if (uid === undefined || !canSaveToPlan.value) return;
-  const inputs: Array<TGApp.Sqlite.Cultivation.SaveEntryInput> = [];
-  const avatarInput = createAvatarPlanInput();
-  const weaponInput = createWeaponPlanInput();
-  if ((!editingEntry.value || editingEntry.value.type === "avatar") && avatarInput) {
-    inputs.push(avatarInput);
-  }
-  if ((!editingEntry.value || editingEntry.value.type === "weapon") && weaponInput) {
-    inputs.push(weaponInput);
-  }
-  if (inputs.length === 0) {
+  const inputs = collectPlanSaveInputs(createAvatarPlanInput(), createWeaponPlanInput());
+  const unsavedPairIds = collectUnsavedPairEntryIds(inputs);
+  if (inputs.length === 0 && unsavedPairIds.length === 0) {
     showSnackbar.warn("当前选择没有可保存的养成材料");
     return;
   }
@@ -1737,11 +1877,21 @@ async function saveToPlan(): Promise<void> {
     const project =
       currentProject.value ??
       (await TSCultivationPlan.ensureCurrentProject(uid, currentTimezone.value));
-    await TSCultivationPlan.saveEntries(
-      project.id,
-      inputs,
-      useApiCalculation.value ? apiCalculationResult.value : undefined,
-    );
+    if (inputs.length > 0) {
+      await TSCultivationPlan.saveEntries(
+        project.id,
+        inputs,
+        useApiCalculation.value ? apiCalculationResult.value : undefined,
+      );
+    }
+    if (unsavedPairIds.length > 0) {
+      await TSCultivationPlan.updateEntriesCalculationConfig(project.id, unsavedPairIds, {
+        allowCrafting: allowCrafting.value,
+        calculationMode: calculationMode.value,
+        useDust: useDust.value,
+        useSolvent: useSolvent.value,
+      });
+    }
     editingEntry.value = undefined;
     await loadProjects(uid, project.id);
     viewTab.value = "targets";
@@ -1770,35 +1920,41 @@ async function editPlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Pr
   useSolvent.value = entry.useSolvent;
   viewTab.value = "calculator";
   await nextTick();
-  const preferredCharacterId =
-    entry.type === "avatar" ? entry.itemId : getEntryWeaponAvatarId(entry.instanceKey);
-  if (preferredCharacterId !== undefined) selectedCharacterId.value = preferredCharacterId;
+  const paired = getPairedPlanEntry(entry);
+  if (entry.type === "avatar") {
+    selectedCharacterId.value = entry.itemId;
+  } else if (paired?.type === "avatar") {
+    selectedCharacterId.value = paired.itemId;
+  } else {
+    selectedCharacterId.value = null;
+  }
   const editingCalculationMode: CalculationMode = entry.calculationMode === "api" ? "api" : "bag";
   await switchEditingCalculationMode(editingCalculationMode);
   if (editingEntry.value?.id !== entry.id) return;
-  if (entry.type === "weapon" && preferredCharacterId === undefined) {
+  if (entry.type === "weapon" && paired === undefined) {
     selectedCharacterId.value = null;
   }
   await nextTick();
   if (entry.type === "avatar") {
     selectedCharacterId.value = entry.itemId;
     applyAvatarEditingState();
+    const pairedWeapon = paired?.type === "weapon" ? paired : undefined;
+    if (!pairedWeapon) return;
+    const weapon = findWeaponOption(pairedWeapon);
+    if (weapon) {
+      selectedWeaponKey.value = weapon.key;
+      applyWeaponEntryState(pairedWeapon);
+    }
     return;
   }
-  const weapon = weaponOptions.value.find(
-    (option) =>
-      option.wiki.id === entry.itemId &&
-      (entry.instanceKey.length === 0 ||
-        option.guid === entry.instanceKey ||
-        option.key === entry.instanceKey ||
-        option.key === entry.instanceKey.replace(/^sync-/, "role-")),
-  );
+  const weapon = findWeaponOption(entry);
   if (weapon) {
     selectedWeaponKey.value = weapon.key;
     applyWeaponEditingState();
   } else {
     showSnackbar.warn("当前数据源中未找到该武器，请重新选择后更新目标");
   }
+  if (paired?.type === "avatar") applyAvatarEntryState(paired);
 }
 
 async function switchEditingCalculationMode(mode: CalculationMode): Promise<void> {
@@ -1815,14 +1971,21 @@ async function switchEditingCalculationMode(mode: CalculationMode): Promise<void
   settingCalculationMode = false;
 }
 
-function getEntryWeaponAvatarId(instanceKey: string): number | undefined {
-  const avatarId = Number(/^(?:role|sync)-(\d+)-/.exec(instanceKey)?.[1]);
-  return Number.isInteger(avatarId) ? avatarId : undefined;
+function findWeaponOption(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): TGApp.App.UserCalc.WeaponOption | undefined {
+  return weaponOptions.value.find(
+    (option) =>
+      option.wiki.id === entry.itemId &&
+      (entry.instanceKey.length === 0 ||
+        option.guid === entry.instanceKey ||
+        option.key === entry.instanceKey ||
+        option.key === entry.instanceKey.replace(/^sync-/, "role-")),
+  );
 }
 
-function applyAvatarEditingState(): void {
-  const entry = editingEntry.value;
-  if (!entry || entry.type !== "avatar" || entry.itemId !== selectedCharacterId.value) return;
+function applyAvatarEntryState(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
+  if (entry.type !== "avatar" || entry.itemId !== selectedCharacterId.value) return;
   if (avatarCurrentStateEditable.value) {
     avatarCurrentLevel.value = entry.currentState.level;
     avatarAscended.value = entry.currentState.ascended;
@@ -1839,6 +2002,17 @@ function applyAvatarEditingState(): void {
   );
 }
 
+function applyAvatarEditingState(): void {
+  const entry = editingEntry.value;
+  if (!entry) return;
+  if (entry.type === "avatar") {
+    applyAvatarEntryState(entry);
+    return;
+  }
+  const paired = getPairedPlanEntry(entry);
+  if (paired?.type === "avatar") applyAvatarEntryState(paired);
+}
+
 function getSavedTalentLevel(
   talents: ReadonlyArray<TGApp.Sqlite.Cultivation.TalentState>,
   skill: TGApp.App.UserCalc.SkillOption,
@@ -1849,15 +2023,25 @@ function getSavedTalentLevel(
   );
 }
 
-function applyWeaponEditingState(): void {
-  const entry = editingEntry.value;
-  if (!entry || entry.type !== "weapon" || entry.itemId !== selectedWeapon.value?.wiki.id) return;
+function applyWeaponEntryState(entry: TGApp.Sqlite.Cultivation.EntryWithItems): void {
+  if (entry.type !== "weapon" || entry.itemId !== selectedWeapon.value?.wiki.id) return;
   if (weaponCurrentStateEditable.value) {
     weaponCurrentLevel.value = entry.currentState.level;
     weaponAscended.value = entry.currentState.ascended;
   }
   weaponTargetLevel.value = entry.targetState.level;
   weaponTargetAscended.value = entry.targetState.ascended;
+}
+
+function applyWeaponEditingState(): void {
+  const entry = editingEntry.value;
+  if (!entry) return;
+  if (entry.type === "weapon") {
+    applyWeaponEntryState(entry);
+    return;
+  }
+  const paired = getPairedPlanEntry(entry);
+  if (paired?.type === "weapon") applyWeaponEntryState(paired);
 }
 
 async function updatePlanEntryStatus(
