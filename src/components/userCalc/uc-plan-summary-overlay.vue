@@ -1,127 +1,116 @@
 <!-- 养成计划-计划汇总浮窗 -->
 <template>
-  <TOverlay v-model="visible" topOffset="132px">
-    <div class="ucps-container">
-      <article
-        ref="shareTarget"
-        aria-labelledby="cultivation-summary-title"
-        aria-modal="true"
-        class="ucps-panel"
-        role="dialog"
-      >
-        <header class="ucps-header">
-          <div class="ucps-heading">
-            <div class="ucps-heading-icon">
-              <v-icon size="36">mdi-clipboard-text-outline</v-icon>
-            </div>
-            <div class="ucps-identity">
-              <h2 id="cultivation-summary-title">{{ project.name }}</h2>
-              <div class="ucps-meta">
-                <span class="ucps-meta-tag">养成计划汇总</span>
-                <span>{{ inventoryUpdatedLabel }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="ucps-actions" data-html2canvas-ignore="true">
-            <v-btn
-              :loading="shareLoading"
-              aria-label="保存养成计划汇总分享图"
-              density="comfortable"
-              icon="mdi-share-variant"
-              title="保存养成计划汇总分享图"
-              variant="text"
-              @click="shareSummary"
-            />
-            <v-btn
-              aria-label="关闭计划汇总"
-              density="comfortable"
-              icon="mdi-close"
-              title="关闭"
-              variant="text"
-              @click="visible = false"
-            />
-          </div>
-        </header>
+  <TopOverlay
+    ref="overlayPanel"
+    v-model="visible"
+    :shareCaption="shareCaption"
+    titleId="cultivation-summary-title"
+    topOffset="132px"
+  >
+    <template #header>
+      <div class="ucps-heading-icon">
+        <v-icon size="36">mdi-clipboard-text-outline</v-icon>
+      </div>
+      <div class="ucps-identity">
+        <h2 id="cultivation-summary-title">{{ project.name }}</h2>
+        <div class="ucps-meta">
+          <span class="ucps-meta-tag">养成计划汇总</span>
+          <span class="ucps-meta-tag ucps-meta-tag--muted">{{ inventoryUpdatedLabel }}</span>
+        </div>
+      </div>
+    </template>
 
-        <main ref="contentTarget" class="ucps-content">
-          <section class="ucps-overview">
-            <div class="ucps-progress-copy">
-              <div>
-                <span class="ucps-overview-label">计划进度</span>
-                <strong>{{ planStateLabel }}</strong>
-              </div>
-              <span>{{ completedTargetCount }} / {{ totalTargetCount }} 项就绪</span>
-            </div>
-            <v-progress-linear
-              :color="missingKinds > 0 ? 'var(--tgc-od-orange)' : 'var(--tgc-od-green)'"
-              :model-value="targetProgress"
-              height="6"
-              rounded
-            />
-            <div aria-label="计划统计" class="ucps-stats">
-              <div class="ucps-stat active">
-                <span>进行中</span>
-                <strong>{{ targetCounts.active }}</strong>
-              </div>
-              <div class="ucps-stat fulfilled">
-                <span>材料已满足</span>
-                <strong>{{ targetCounts.fulfilled }}</strong>
-              </div>
-              <div class="ucps-stat completed">
-                <span>已完成</span>
-                <strong>{{ targetCounts.completed }}</strong>
-              </div>
-              <div class="ucps-stat materials">
-                <span>材料种类</span>
-                <strong>{{ materials.length }}</strong>
-              </div>
-            </div>
-          </section>
+    <template #actions>
+      <v-btn
+        :loading="shareLoading"
+        aria-label="保存养成计划汇总分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存养成计划汇总分享图"
+        variant="text"
+        @click="shareSummary"
+      />
+      <v-btn
+        aria-label="关闭计划汇总"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
 
-          <section class="ucps-materials">
-            <div class="ucps-section-header">
-              <div>
-                <v-icon size="18">mdi-package-variant-closed</v-icon>
-                <h3>材料汇总</h3>
-                <span class="ucps-section-hint">按目标优先级分配当前背包库存</span>
-              </div>
-              <v-chip
-                :color="missingKinds > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
-                size="small"
-                variant="tonal"
-              >
-                {{ missingKinds > 0 ? `${missingKinds} 种材料不足` : "材料已满足" }}
-              </v-chip>
-            </div>
+    <section class="ucps-overview">
+      <div class="ucps-progress-copy">
+        <div>
+          <span class="ucps-overview-label">计划进度</span>
+          <strong>{{ planStateLabel }}</strong>
+        </div>
+        <span>{{ completedTargetCount }} / {{ totalTargetCount }} 项就绪</span>
+      </div>
+      <v-progress-linear
+        :color="missingKinds > 0 ? 'var(--tgc-od-orange)' : 'var(--tgc-od-green)'"
+        :model-value="targetProgress"
+        height="6"
+        rounded
+      />
+      <div aria-label="计划统计" class="ucps-stats">
+        <div class="ucps-stat active">
+          <span>进行中</span>
+          <strong>{{ targetCounts.active }}</strong>
+        </div>
+        <div class="ucps-stat fulfilled">
+          <span>材料已满足</span>
+          <strong>{{ targetCounts.fulfilled }}</strong>
+        </div>
+        <div class="ucps-stat completed">
+          <span>已完成</span>
+          <strong>{{ targetCounts.completed }}</strong>
+        </div>
+        <div class="ucps-stat materials">
+          <span>材料种类</span>
+          <strong>{{ materials.length }}</strong>
+        </div>
+      </div>
+    </section>
 
-            <div v-if="materials.length > 0" class="ucps-material-list">
-              <UcMaterialReq
-                v-for="material in materials"
-                :key="material.id"
-                :material
-                @select="openMaterialInfo(material)"
-              />
-            </div>
-            <div v-else class="ucps-empty">
-              <v-icon size="48">mdi-package-variant-closed-check</v-icon>
-              <span>{{ emptyText }}</span>
-            </div>
-          </section>
-        </main>
+    <section class="ucps-materials">
+      <div class="ucps-section-header">
+        <div>
+          <v-icon size="18">mdi-package-variant-closed</v-icon>
+          <h3>材料汇总</h3>
+          <span class="ucps-section-hint">按目标优先级分配当前背包库存</span>
+        </div>
+        <v-chip
+          :color="missingKinds > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
+          size="small"
+          variant="tonal"
+        >
+          {{ missingKinds > 0 ? `${missingKinds} 种材料不足` : "材料已满足" }}
+        </v-chip>
+      </div>
 
-        <footer class="ucps-footer">
-          <span>养成计划汇总</span>
-          <span> · {{ project.name }} · UID {{ uid }}</span>
-          <span> · Rendered by TeyvatGuide v{{ version }}</span>
-        </footer>
-      </article>
-    </div>
-  </TOverlay>
+      <div v-if="materials.length > 0" class="ucps-material-list">
+        <UcMaterialReq
+          v-for="material in materials"
+          :key="material.id"
+          :material
+          @select="openMaterialInfo(material)"
+        />
+      </div>
+      <div v-else class="ucps-empty">
+        <v-icon size="48">mdi-package-variant-closed-check</v-icon>
+        <span>{{ emptyText }}</span>
+      </div>
+    </section>
+  </TopOverlay>
 
   <UcMaterialDetail
     v-if="currentMaterial && currentWiki"
     v-model="materialOverlayVisible"
     :bag="bagMaterials.get(currentMaterial.id)"
+    footerContext="养成计划汇总"
+    :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
     topOffset="132px"
     :uid
@@ -130,15 +119,14 @@
 </template>
 
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from "vue";
+import { computed, nextTick, ref, shallowRef, useTemplateRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -159,14 +147,16 @@ type UcPlanSummaryOverlayProps = {
 
 const props = defineProps<UcPlanSummaryOverlayProps>();
 const visible = defineModel<boolean>({ required: true });
-const version = ref<string>();
 const shareLoading = ref<boolean>(false);
 const materialOverlayVisible = ref<boolean>(false);
+const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
-const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
-const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
+const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 
+const shareCaption = computed<string>(
+  () => `养成计划汇总 · ${props.project.name} · UID ${props.uid}`,
+);
 const totalTargetCount = computed<number>(
   () => props.targetCounts.active + props.targetCounts.fulfilled + props.targetCounts.completed,
 );
@@ -189,12 +179,12 @@ const emptyText = computed<string>(() =>
   totalTargetCount.value === 0 ? "添加养成目标后即可查看材料汇总" : "当前计划没有待收集材料",
 );
 
-onMounted(async () => (version.value = await getVersion()));
-
 async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Promise<void> {
   const wiki = WikiMaterialData.find((item) => item.id === material.id);
   if (!wiki) return;
+  const index = props.materials.findIndex((item) => item.id === material.id);
   materialOverlayVisible.value = false;
+  currentMaterialIndex.value = index >= 0 ? index : 0;
   currentMaterial.value = material;
   currentWiki.value = wiki;
   await nextTick();
@@ -202,8 +192,8 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
 }
 
 async function shareSummary(): Promise<void> {
-  const panel = shareTarget.value;
-  const content = contentTarget.value;
+  const panel = overlayPanel.value?.panel ?? null;
+  const content = overlayPanel.value?.content ?? null;
   if (panel === null || content === null) {
     showSnackbar.error("未获取到计划汇总内容");
     return;
@@ -228,52 +218,6 @@ async function shareSummary(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.ucps-container {
-  display: flex;
-  max-height: calc(100% - 32px);
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.ucps-panel {
-  position: relative;
-  display: flex;
-  overflow: hidden;
-  width: 800px;
-  max-width: calc(100vw - 160px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 8px 24px var(--common-shadow-t-4);
-}
-
-.ucps-header {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--dialog-header-bg);
-  gap: 12px;
-}
-
-.ucps-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  color: var(--box-text-2);
-  gap: 4px;
-}
-
-.ucps-heading {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: center;
-  gap: 12px;
-}
-
 .ucps-heading-icon {
   display: grid;
   width: 72px;
@@ -323,21 +267,15 @@ async function shareSummary(): Promise<void> {
   color: var(--tgc-od-orange);
 }
 
+.ucps-meta-tag--muted {
+  color: var(--box-text-2);
+}
+
 .ucps-overview-label,
 .ucps-section-hint {
   color: var(--common-text-sub);
   font-size: 12px;
   line-height: 16px;
-}
-
-.ucps-content {
-  display: flex;
-  min-height: 0;
-  max-height: 480px;
-  flex-direction: column;
-  padding: 16px;
-  gap: 12px;
-  overflow-y: auto;
 }
 
 .ucps-overview {
@@ -472,25 +410,7 @@ async function shareSummary(): Promise<void> {
   gap: 8px;
 }
 
-.ucps-footer {
-  padding: 8px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  color: var(--box-text-4);
-  font-size: 10px;
-  line-height: 14px;
-  text-align: center;
-}
-
 @media (width <= 720px) {
-  .ucps-container {
-    gap: 8px;
-  }
-
-  .ucps-panel {
-    max-width: calc(100vw - 24px);
-  }
-
   .ucps-stats,
   .ucps-material-list {
     grid-template-columns: 1fr;

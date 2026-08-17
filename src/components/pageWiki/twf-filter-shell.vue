@@ -1,47 +1,46 @@
 <!-- 图鉴筛选统一浮窗 -->
 <template>
-  <TOverlay v-model="visible">
-    <section :aria-labelledby="titleId" aria-modal="true" class="twf-shell" role="dialog">
-      <header class="twf-header">
-        <div class="twf-header-icon">
-          <v-icon size="22">mdi-tune-variant</v-icon>
-        </div>
-        <div class="twf-heading">
-          <h2 :id="titleId">{{ props.title }}</h2>
-          <p>{{ props.description }}</p>
-        </div>
-        <v-btn
-          aria-label="关闭筛选"
-          class="twf-close"
-          density="comfortable"
-          icon="mdi-close"
-          title="关闭筛选"
-          variant="text"
-          @click="visible = false"
-        />
-      </header>
-      <div class="twf-content">
-        <slot />
+  <TopOverlay
+    v-model="visible"
+    closeAriaLabel="关闭筛选"
+    contentMaxHeight="none"
+    panelMaxHeight="calc(100vh - 64px)"
+    panelWidth="min(720px, calc(100vw - 64px))"
+    :showShare="false"
+    :titleId
+  >
+    <template #header>
+      <div class="twf-header-icon">
+        <v-icon size="22">mdi-tune-variant</v-icon>
       </div>
-      <footer class="twf-footer">
-        <span>未选择或全选均表示不限</span>
-        <div class="twf-actions">
-          <v-btn class="twf-cancel" variant="text" @click="visible = false">取消</v-btn>
-          <v-btn
-            class="twf-confirm"
-            prepend-icon="mdi-check"
-            variant="flat"
-            @click="emits('confirm')"
-          >
-            应用筛选
-          </v-btn>
-        </div>
-      </footer>
-    </section>
-  </TOverlay>
+      <div class="twf-heading">
+        <h2 :id="titleId">{{ props.title }}</h2>
+        <p>{{ props.description }}</p>
+      </div>
+    </template>
+
+    <div class="twf-content">
+      <slot />
+    </div>
+
+    <template #footer>
+      <span class="twf-footer-hint">未选择或全选均表示不限</span>
+      <div class="twf-actions">
+        <v-btn class="twf-cancel" variant="text" @click="visible = false">取消</v-btn>
+        <v-btn
+          class="twf-confirm"
+          prepend-icon="mdi-check"
+          variant="flat"
+          @click="emits('confirm')"
+        >
+          应用筛选
+        </v-btn>
+      </div>
+    </template>
+  </TopOverlay>
 </template>
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import { useId } from "vue";
 
 type TwfFilterShellProps = {
@@ -56,27 +55,6 @@ const visible = defineModel<boolean>({ default: false });
 const titleId = useId();
 </script>
 <style lang="scss" scoped>
-.twf-shell {
-  display: flex;
-  overflow: hidden;
-  width: min(720px, calc(100vw - 64px));
-  max-height: calc(100vh - 64px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 8px 24px var(--common-shadow-t-4);
-}
-
-.twf-header {
-  display: flex;
-  align-items: center;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--dialog-header-bg);
-  gap: 12px;
-}
-
 .twf-header-icon {
   display: flex;
   width: 40px;
@@ -110,16 +88,7 @@ const titleId = useId();
   }
 }
 
-.twf-close {
-  flex-shrink: 0;
-  border-radius: 4px;
-  color: var(--box-text-2);
-}
-
 .twf-content {
-  padding: 16px;
-  overflow-y: auto;
-
   :deep(.twf-grid) {
     display: grid;
     gap: 12px;
@@ -206,21 +175,11 @@ const titleId = useId();
   }
 }
 
-.twf-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  gap: 16px;
-
-  > span {
-    color: var(--box-text-4);
-    font-size: 12px;
-    line-height: 16px;
-    opacity: 0.72;
-  }
+.twf-footer-hint {
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+  opacity: 0.72;
 }
 
 .twf-actions {

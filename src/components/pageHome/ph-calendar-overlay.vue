@@ -1,7 +1,7 @@
 <!-- 首页素材日历浮窗 -->
 <template>
   <TOverlay v-model="visible" blurVal="8px" topOffset="64px">
-    <div class="phmo-container">
+    <div class="phcal-container">
       <slot name="left" />
       <PhCalendarCultivationPanel
         v-if="showCultivation"
@@ -10,6 +10,7 @@
         :item="item"
         :plan-entries="planEntries"
         :project="project"
+        :src="src"
         @close="visible = false"
       />
       <PhCalendarPanel v-else :item="item" :src="src" @close="visible = false" />
@@ -46,13 +47,24 @@ const props = withDefaults(defineProps<PhCalendarOverlayProps>(), {
 });
 const visible = defineModel<boolean>({ default: false });
 const showCultivation = computed<boolean>(() => props.entries.length > 0);
+
+defineSlots<{
+  left?: () => unknown;
+  right?: () => unknown;
+}>();
 </script>
 <style lang="scss" scoped>
-.phmo-container {
-  position: relative;
+.phcal-container {
   display: flex;
+  max-height: calc(100% - 32px);
   align-items: center;
   justify-content: center;
-  column-gap: 8px;
+  gap: 16px;
+}
+
+@media (width <= 720px) {
+  .phcal-container {
+    gap: 8px;
+  }
 }
 </style>

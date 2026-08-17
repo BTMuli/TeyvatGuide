@@ -8,7 +8,7 @@
     :shareFileName
     :shareScale
     :topOffset
-    eyebrow="背包物品"
+    :eyebrow
   >
     <template #left>
       <slot name="left" />
@@ -81,6 +81,8 @@ type PboMaterialProps = {
   /** 内容最大高度 */
   cmh?: string;
   data: MaterialInfo;
+  /** 分享署名眉标 */
+  eyebrow?: string;
   topOffset?: string;
   uid: number;
 };
@@ -88,6 +90,7 @@ type PboMaterialEmits = { updateDb: [v: MaterialInfo] };
 
 const props = withDefaults(defineProps<PboMaterialProps>(), {
   cmh: "600px",
+  eyebrow: "背包物品",
   topOffset: "0px",
 });
 const emits = defineEmits<PboMaterialEmits>();

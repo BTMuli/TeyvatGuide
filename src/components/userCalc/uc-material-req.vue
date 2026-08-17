@@ -1,17 +1,21 @@
 <!-- 养成计算-材料需求项 -->
 <template>
   <article
+    :aria-disabled="interactive ? undefined : true"
     :class="{
-      missing: material.missing > 0,
-      ready: weakenReady && material.missing === 0,
+      highlight,
+      missing: showMetrics && material.missing > 0,
+      ready: showMetrics && weakenReady && material.missing === 0,
+      simple: !showMetrics,
+      static: !interactive,
     }"
     class="ucmr-item"
-    role="button"
-    tabindex="0"
-    title="查看材料详情"
-    @click="emits('select')"
-    @keydown.enter="emits('select')"
-    @keydown.space.prevent="emits('select')"
+    :role="interactive ? 'button' : undefined"
+    :tabindex="interactive ? 0 : undefined"
+    :title="interactive ? '查看材料详情' : undefined"
+    @click="onSelect"
+    @keydown.enter="onSelect"
+    @keydown.space.prevent="onSelect"
   >
     <div class="ucmr-icon">
       <img :src="`/icon/bg/${material.star}-Star.webp`" alt="background" />
@@ -22,6 +26,7 @@
         <div class="ucmr-heading">
           <strong>{{ material.name }}</strong>
           <UcMaterialCount
+            v-if="showMetrics"
             class="ucmr-count"
             :complete="material.missing === 0"
             :craftable="material.craftable"
@@ -32,6 +37,7 @@
         <div class="ucmr-meta">{{ material.type }}</div>
       </div>
       <v-progress-linear
+        v-if="showMetrics"
         :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
         :model-value="material.progress"
         height="3"
@@ -45,14 +51,30 @@
 import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 
 type UcMaterialReqProps = {
+  /** 强调高亮（如当日可刷）：左侧加粗描边 */
+  highlight?: boolean;
+  /** 是否可点击打开详情；日历等只读场景传 false */
+  interactive?: boolean;
   material: TGApp.App.UserCalc.ResultMaterial;
+  /** 是否展示持有/需求计数与进度条；日历普通条目可关 */
+  showMetrics?: boolean;
   weakenReady?: boolean;
 };
 
 type UcMaterialReqEmits = { select: [] };
 
-const { weakenReady = false } = defineProps<UcMaterialReqProps>();
+const {
+  highlight = false,
+  interactive = true,
+  showMetrics = true,
+  weakenReady = false,
+} = defineProps<UcMaterialReqProps>();
 const emits = defineEmits<UcMaterialReqEmits>();
+
+function onSelect(): void {
+  if (!interactive) return;
+  emits("select");
+}
 </script>
 
 <style lang="scss" scoped>
@@ -74,10 +96,20 @@ const emits = defineEmits<UcMaterialReqEmits>();
 
   &.missing {
     border-color: var(--tgc-od-red);
+    border-left-width: 3px;
+  }
+
+  &.highlight {
+    border-color: var(--tgc-od-orange);
+    border-left-width: 3px;
   }
 
   &.ready {
     opacity: 0.56;
+  }
+
+  &.static {
+    cursor: default;
   }
 }
 
@@ -112,6 +144,10 @@ const emits = defineEmits<UcMaterialReqEmits>();
   justify-content: space-between;
   padding: 5px 8px;
   gap: 0;
+}
+
+.ucmr-item.simple .ucmr-info {
+  justify-content: center;
 }
 
 .ucmr-text {

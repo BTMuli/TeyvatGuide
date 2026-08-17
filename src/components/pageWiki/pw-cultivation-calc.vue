@@ -1,215 +1,208 @@
 <!-- 图鉴详情-养成计算 -->
 <template>
-  <TOverlay v-model="visible">
-    <article
-      ref="shareTarget"
-      aria-labelledby="wiki-cultivation-title"
-      aria-modal="true"
-      class="pwcc-panel"
-      role="dialog"
-    >
-      <header class="pwcc-header">
-        <UcItemIcon
-          :alt="wikiName"
-          :icon="wikiIcon"
-          :primary-badge="wikiBadge"
-          :size="64"
-          :star="wikiStar"
-        />
-        <div class="pwcc-identity">
-          <div class="pwcc-title-row">
-            <h2 id="wiki-cultivation-title">{{ wikiName }}</h2>
-            <div v-if="hasBagData && allowCrafting" class="pwcc-crafting-tags">
-              <v-chip color="var(--tgc-od-green)" size="small" variant="tonal">允许合成</v-chip>
-              <v-chip v-if="useDust" color="var(--tgc-od-green)" size="small" variant="tonal">
-                使用嬗变之尘
-              </v-chip>
-              <v-chip v-if="useSolvent" color="var(--tgc-od-green)" size="small" variant="tonal">
-                使用溶媒
-              </v-chip>
-            </div>
-          </div>
-          <div class="pwcc-meta">
-            <span>{{ inPlan ? "当前计划目标" : "养成计算" }}</span>
-            <span>Lv.{{ currentLevel }} → Lv.{{ targetLevel }}</span>
-            <span v-if="isCharacter">{{ character?.element }}元素 · {{ character?.weapon }}</span>
-            <span v-else>{{ weapon?.weapon }} · {{ wikiStar }} 星</span>
+  <TopOverlay
+    ref="overlayPanel"
+    v-model="visible"
+    titleId="wiki-cultivation-title"
+    :shareCaption="shareCaption"
+    panelMaxHeight="calc(100vh - 64px)"
+    contentMaxHeight="none"
+    panelWidth="800px"
+    closeAriaLabel="关闭养成计算"
+    shareAriaLabel="保存养成计算分享图"
+    :showShare="false"
+  >
+    <template #header>
+      <UcItemIcon
+        :alt="wikiName"
+        :icon="wikiIcon"
+        :primary-badge="wikiBadge"
+        :size="64"
+        :star="wikiStar"
+      />
+      <div class="pwcc-identity">
+        <div class="pwcc-title-row">
+          <h2 id="wiki-cultivation-title">{{ wikiName }}</h2>
+          <div v-if="hasBagData && allowCrafting" class="pwcc-crafting-tags">
+            <v-chip color="var(--tgc-od-green)" size="small" variant="tonal">允许合成</v-chip>
+            <v-chip v-if="useDust" color="var(--tgc-od-green)" size="small" variant="tonal">
+              使用嬗变之尘
+            </v-chip>
+            <v-chip v-if="useSolvent" color="var(--tgc-od-green)" size="small" variant="tonal">
+              使用溶媒
+            </v-chip>
           </div>
         </div>
-        <div class="pwcc-actions" data-html2canvas-ignore="true">
+        <div class="pwcc-meta">
+          <span>{{ inPlan ? "当前计划目标" : "养成计算" }}</span>
+          <span>Lv.{{ currentLevel }} → Lv.{{ targetLevel }}</span>
+          <span v-if="isCharacter">{{ character?.element }}元素 · {{ character?.weapon }}</span>
+          <span v-else>{{ weapon?.weapon }} · {{ wikiStar }} 星</span>
+        </div>
+      </div>
+    </template>
+
+    <template #actions>
+      <v-btn
+        :loading="shareLoading"
+        aria-label="保存养成计算分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存养成计算分享图"
+        variant="text"
+        @click="shareCalc"
+      />
+      <v-btn
+        aria-label="关闭养成计算"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
+
+    <section class="pwcc-block">
+      <header class="pwcc-block-header">
+        <div class="pwcc-section-title">
+          <v-icon size="18">mdi-arrow-up-bold-circle-outline</v-icon>
+          <span>等级目标</span>
+        </div>
+        <v-btn-toggle
+          :model-value="targetAtAscensionLevel ? targetLevel : undefined"
+          aria-label="快速选择突破临界等级"
+          class="pwcc-level-nodes"
+          data-html2canvas-ignore="true"
+          density="compact"
+          mandatory
+          @update:model-value="selectTargetAscensionLevel"
+        >
           <v-btn
-            :loading="shareLoading"
-            aria-label="保存养成计算分享图"
-            density="comfortable"
-            icon="mdi-share-variant"
-            title="保存养成计算分享图"
+            v-for="option in ascensionLevelOptions"
+            :key="option"
+            :title="`跳转至 ${option} 级突破节点`"
+            :value="option"
+            size="x-small"
             variant="text"
-            @click="shareCalc"
-          />
-          <v-btn
-            aria-label="关闭养成计算"
-            density="comfortable"
-            icon="mdi-close"
-            title="关闭"
-            variant="text"
-            @click="visible = false"
-          />
+          >
+            {{ option }}
+          </v-btn>
+        </v-btn-toggle>
+      </header>
+      <div class="pwcc-block-body pwcc-level">
+        <UcLevelSlider
+          v-model="targetLevel"
+          v-model:current="currentLevel"
+          current-editable
+          :levels="levelOptions"
+          :max="levelMax"
+          @update:model-value="updateTargetLevel"
+        />
+        <div class="pwcc-ascension">
+          <div :class="{ 'is-unavailable': !currentAtAscensionLevel }" class="pwcc-ascension-state">
+            <v-checkbox
+              v-model="currentAscended"
+              :disabled="!currentAtAscensionLevel"
+              color="var(--tgc-od-blue)"
+              density="compact"
+              hide-details
+              label="当前等级已突破"
+            />
+            <span>{{
+              currentAtAscensionLevel ? "未勾选会计入本次突破材料" : "当前等级不是突破临界等级"
+            }}</span>
+          </div>
+          <div
+            :class="{ 'is-unavailable': !targetAtAscensionLevel }"
+            class="pwcc-ascension-state target"
+          >
+            <v-checkbox
+              :disabled="!targetAtAscensionLevel"
+              :model-value="targetAscended"
+              color="var(--tgc-od-green)"
+              density="compact"
+              hide-details
+              label="目标已突破"
+              @update:model-value="updateTargetAscended"
+            />
+            <span>{{ targetAtAscensionLevel ? "计入目标突破" : "非临界等级" }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section v-if="skills.length > 0" class="pwcc-block">
+      <header class="pwcc-block-header">
+        <div class="pwcc-section-title">
+          <v-icon size="18">mdi-star-four-points-outline</v-icon>
+          <span>天赋目标</span>
         </div>
       </header>
-
-      <main ref="contentTarget" class="pwcc-content">
-        <section class="pwcc-block">
-          <header class="pwcc-block-header">
-            <div class="pwcc-section-title">
-              <v-icon size="18">mdi-arrow-up-bold-circle-outline</v-icon>
-              <span>等级目标</span>
+      <div class="pwcc-block-body">
+        <div class="pwcc-talent-list">
+          <div v-for="(skill, index) in skills" :key="skill.id" class="pwcc-talent">
+            <div class="pwcc-talent-meta">
+              <img :alt="skill.name" :src="skill.icon" />
+              <div class="pwcc-talent-info">
+                <span :title="skill.name" class="pwcc-talent-name">{{ skill.name }}</span>
+                <span class="pwcc-talent-level">
+                  起始 Lv.{{ talentCurrentLevels[index] ?? skill.level }}
+                </span>
+              </div>
             </div>
-            <v-btn-toggle
-              :model-value="targetAtAscensionLevel ? targetLevel : undefined"
-              aria-label="快速选择突破临界等级"
-              class="pwcc-level-nodes"
-              data-html2canvas-ignore="true"
-              density="compact"
-              mandatory
-              @update:model-value="selectTargetAscensionLevel"
-            >
-              <v-btn
-                v-for="option in ascensionLevelOptions"
-                :key="option"
-                :title="`跳转至 ${option} 级突破节点`"
-                :value="option"
-                size="x-small"
-                variant="text"
-              >
-                {{ option }}
-              </v-btn>
-            </v-btn-toggle>
-          </header>
-          <div class="pwcc-block-body pwcc-level">
             <UcLevelSlider
-              v-model="targetLevel"
-              v-model:current="currentLevel"
+              :current="talentCurrentLevels[index] ?? skill.level"
               current-editable
-              :levels="levelOptions"
-              :max="levelMax"
-              @update:model-value="updateTargetLevel"
+              :limit-max="getSkillTargetMaxLevel(skill)"
+              :max="10"
+              :model-value="talentTargetLevels[index]"
+              @update:current="updateCurrentTalent(index, $event)"
+              @update:model-value="updateTalent(index, $event)"
             />
-            <div class="pwcc-ascension">
-              <div
-                :class="{ 'is-unavailable': !currentAtAscensionLevel }"
-                class="pwcc-ascension-state"
-              >
-                <v-checkbox
-                  v-model="currentAscended"
-                  :disabled="!currentAtAscensionLevel"
-                  color="var(--tgc-od-blue)"
-                  density="compact"
-                  hide-details
-                  label="当前等级已突破"
-                />
-                <span>{{
-                  currentAtAscensionLevel ? "未勾选会计入本次突破材料" : "当前等级不是突破临界等级"
-                }}</span>
-              </div>
-              <div
-                :class="{ 'is-unavailable': !targetAtAscensionLevel }"
-                class="pwcc-ascension-state target"
-              >
-                <v-checkbox
-                  :disabled="!targetAtAscensionLevel"
-                  :model-value="targetAscended"
-                  color="var(--tgc-od-green)"
-                  density="compact"
-                  hide-details
-                  label="目标已突破"
-                  @update:model-value="updateTargetAscended"
-                />
-                <span>{{ targetAtAscensionLevel ? "计入目标突破" : "非临界等级" }}</span>
-              </div>
-            </div>
           </div>
-        </section>
-
-        <section v-if="skills.length > 0" class="pwcc-block">
-          <header class="pwcc-block-header">
-            <div class="pwcc-section-title">
-              <v-icon size="18">mdi-star-four-points-outline</v-icon>
-              <span>天赋目标</span>
-            </div>
-          </header>
-          <div class="pwcc-block-body">
-            <div class="pwcc-talent-list">
-              <div v-for="(skill, index) in skills" :key="skill.id" class="pwcc-talent">
-                <div class="pwcc-talent-meta">
-                  <img :alt="skill.name" :src="skill.icon" />
-                  <div class="pwcc-talent-info">
-                    <span :title="skill.name" class="pwcc-talent-name">{{ skill.name }}</span>
-                    <span class="pwcc-talent-level">
-                      起始 Lv.{{ talentCurrentLevels[index] ?? skill.level }}
-                    </span>
-                  </div>
-                </div>
-                <UcLevelSlider
-                  :current="talentCurrentLevels[index] ?? skill.level"
-                  current-editable
-                  :limit-max="getSkillTargetMaxLevel(skill)"
-                  :max="10"
-                  :model-value="talentTargetLevels[index]"
-                  @update:current="updateCurrentTalent(index, $event)"
-                  @update:model-value="updateTalent(index, $event)"
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <UcMaterialResult
-          v-model:allowCrafting="allowCrafting"
-          v-model:useDust="useDust"
-          v-model:useSolvent="useSolvent"
-          :bag-materials="bagMaterialDetails"
-          :empty-text="emptyText"
-          :materials="displayMaterials"
-          :missingKinds
-          :show-crafting-options="hasBagData"
-          topOffset="0px"
-          :uid="currentUid"
-        />
-      </main>
-
-      <div class="pwcc-toolbar" data-html2canvas-ignore="true">
-        <v-btn
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-calculator-variant-outline"
-          variant="tonal"
-          @click="openPlan"
-        >
-          前往养成计划
-        </v-btn>
-        <v-btn
-          :disabled="!canAddToPlan"
-          :loading="planSaving"
-          :title="addToPlanTitle"
-          color="var(--tgc-od-green)"
-          prepend-icon="mdi-content-save-check-outline"
-          variant="tonal"
-          @click="addToPlan"
-        >
-          {{ inPlan ? "更新当前养成计划" : "添加到当前养成计划" }}
-        </v-btn>
+        </div>
       </div>
-      <footer class="pwcc-footer">
-        <span>养成计算</span>
-        <span> · {{ wikiName }}</span>
-        <span v-if="currentUid > 0"> · UID {{ currentUid }}</span>
-        <span> · Rendered by TeyvatGuide v{{ version }}</span>
-      </footer>
-    </article>
-  </TOverlay>
+    </section>
+
+    <UcMaterialResult
+      v-model:allowCrafting="allowCrafting"
+      v-model:useDust="useDust"
+      v-model:useSolvent="useSolvent"
+      :bag-materials="bagMaterialDetails"
+      :empty-text="emptyText"
+      :materials="displayMaterials"
+      :missingKinds
+      :show-crafting-options="hasBagData"
+      topOffset="0px"
+      :uid="currentUid"
+    />
+
+    <template #toolbar>
+      <v-btn
+        color="var(--tgc-od-orange)"
+        prepend-icon="mdi-calculator-variant-outline"
+        variant="tonal"
+        @click="openPlan"
+      >
+        前往养成计划
+      </v-btn>
+      <v-btn
+        :disabled="!canAddToPlan"
+        :loading="planSaving"
+        :title="addToPlanTitle"
+        color="var(--tgc-od-green)"
+        prepend-icon="mdi-content-save-check-outline"
+        variant="tonal"
+        @click="addToPlan"
+      >
+        {{ inPlan ? "更新当前养成计划" : "添加到当前养成计划" }}
+      </v-btn>
+    </template>
+  </TopOverlay>
 </template>
 
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
@@ -218,7 +211,6 @@ import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import useUserStore from "@store/user.js";
-import { getVersion } from "@tauri-apps/api/app";
 import { buildCultivationResults, getUidServerTimezone } from "@utils/cultivationPlan.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -226,7 +218,7 @@ import { generateShareImg } from "@utils/TGShare.js";
 import userCalc, { ASCENSION_LEVELS } from "@utils/userCalc.js";
 import type { CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -269,9 +261,7 @@ const bagMaterialDetails = shallowRef<ReadonlyMap<number, TGApp.Sqlite.UserBag.M
 const shareLoading = ref<boolean>(false);
 const planSaving = ref<boolean>(false);
 const applyingPlan = ref<boolean>(false);
-const version = ref<string>();
-const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
-const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
+const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 const planEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
 let planLoadId = 0;
 
@@ -294,6 +284,10 @@ const wikiId = computed<number>(() => character.value?.id ?? weapon.value?.id ??
 const currentUid = computed<number>(() => {
   const uid = Number(account.value.gameUid);
   return Number.isInteger(uid) && uid > 0 ? uid : 0;
+});
+const shareCaption = computed<string>(() => {
+  const base = `养成计算 · ${wikiName.value}`;
+  return currentUid.value > 0 ? `${base} · UID ${currentUid.value}` : base;
 });
 const hasBagData = computed<boolean>(
   () => currentUid.value > 0 && bagMaterialDetails.value.size > 0,
@@ -427,10 +421,6 @@ watch(currentAtAscensionLevel, (atAscensionLevel) => {
 watch(targetAtAscensionLevel, (atAscensionLevel) => {
   if (applyingPlan.value || atAscensionLevel) return;
   targetAscended.value = false;
-});
-
-onMounted(async () => {
-  version.value = await getVersion();
 });
 
 function resetState(): void {
@@ -595,8 +585,8 @@ function updateCurrentTalent(index: number, value: number | null): void {
 }
 
 async function shareCalc(): Promise<void> {
-  const panel = shareTarget.value;
-  const content = contentTarget.value;
+  const panel = overlayPanel.value?.panel ?? null;
+  const content = overlayPanel.value?.content ?? null;
   if (panel === null || content === null) {
     showSnackbar.error("未获取到养成计算内容");
     return;
@@ -715,40 +705,15 @@ async function openPlan(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.pwcc-panel {
-  display: flex;
-  overflow: hidden;
-  width: 800px;
-  max-width: calc(100vw - 160px);
-  max-height: calc(100vh - 64px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 8px 24px var(--common-shadow-t-4);
-}
-
-.pwcc-header,
 .pwcc-identity,
 .pwcc-title-row,
 .pwcc-crafting-tags,
 .pwcc-meta,
-.pwcc-actions,
 .pwcc-block-header,
 .pwcc-section-title,
-.pwcc-talent-meta,
-.pwcc-toolbar {
+.pwcc-talent-meta {
   display: flex;
   align-items: center;
-}
-
-.pwcc-header {
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--dialog-header-bg);
-  border-top-left-radius: 12px;
-  border-top-right-radius: 12px;
-  gap: 12px;
 }
 
 .pwcc-identity {
@@ -791,20 +756,6 @@ async function openPlan(): Promise<void> {
   font-size: 12px;
   gap: 2px 12px;
   line-height: 16px;
-}
-
-.pwcc-actions {
-  flex-shrink: 0;
-}
-
-.pwcc-content {
-  display: flex;
-  overflow: hidden auto;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-  padding: 12px 16px 16px;
-  gap: 12px;
 }
 
 .pwcc-block,
@@ -952,53 +903,32 @@ async function openPlan(): Promise<void> {
   font-size: 12px;
 }
 
-.pwcc-toolbar {
-  justify-content: flex-end;
-  padding: 12px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 8px;
-}
-
-.pwcc-footer {
-  padding: 8px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  color: var(--box-text-4);
-  font-size: 10px;
-  line-height: 14px;
-  text-align: center;
-}
-
-.pwcc-content :deep(.ucm-result) {
+:deep(.ucm-result) {
   margin-bottom: 0;
   box-shadow: none;
 }
 
-.pwcc-content :deep(.ucm-list),
-.pwcc-content :deep(.ucm-cost-list) {
+:deep(.ucm-list),
+:deep(.ucm-cost-list) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 @media (width <= 720px) {
-  .pwcc-panel {
-    max-width: calc(100vw - 32px);
-  }
-
   .pwcc-ascension,
   .pwcc-talent-list {
     grid-template-columns: 1fr;
   }
 }
 
-.pwcc-panel.is-sharing {
-  .pwcc-actions,
-  .pwcc-toolbar,
+:deep(.tolp-panel.is-sharing) {
+  .tolp-actions,
+  .tolp-toolbar,
   .pwcc-level-nodes {
     display: none;
   }
 
-  :deep(.ucls-control),
-  :deep(.ucm-crafting-options) {
+  .ucls-control,
+  .ucm-crafting-options {
     display: none;
   }
 }

@@ -27,11 +27,58 @@
   </THomeCard>
   <PboMaterial
     v-model="showMaterial"
+    eyebrow="近期活动"
     topOffset="64px"
     :data="curMaterial"
     :uid="Number(account.gameUid)"
-  />
-  <ToCalendar v-model="showCalendar" :item="curItemC" src="近期活动" />
+  >
+    <template v-if="canSwitchReward" #left>
+      <v-btn
+        :disabled="!canSwitchPrev"
+        aria-label="上一个奖励"
+        class="tp-reward-arrow"
+        icon="mdi-chevron-left"
+        title="上一个奖励"
+        variant="flat"
+        @click="switchReward(false)"
+      />
+    </template>
+    <template v-if="canSwitchReward" #right>
+      <v-btn
+        :disabled="!canSwitchNext"
+        aria-label="下一个奖励"
+        class="tp-reward-arrow"
+        icon="mdi-chevron-right"
+        title="下一个奖励"
+        variant="flat"
+        @click="switchReward(true)"
+      />
+    </template>
+  </PboMaterial>
+  <ToCalendar v-model="showCalendar" :item="curItemC" src="近期活动">
+    <template v-if="canSwitchReward" #left>
+      <v-btn
+        :disabled="!canSwitchPrev"
+        aria-label="上一个奖励"
+        class="tp-reward-arrow"
+        icon="mdi-chevron-left"
+        title="上一个奖励"
+        variant="flat"
+        @click="switchReward(false)"
+      />
+    </template>
+    <template v-if="canSwitchReward" #right>
+      <v-btn
+        :disabled="!canSwitchNext"
+        aria-label="下一个奖励"
+        class="tp-reward-arrow"
+        icon="mdi-chevron-right"
+        title="下一个奖励"
+        variant="flat"
+        @click="switchReward(true)"
+      />
+    </template>
+  </ToCalendar>
 </template>
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
@@ -52,7 +99,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
@@ -72,11 +119,17 @@ const isRefreshing = ref<boolean>(false);
 const isUserPos = ref<boolean>(isLogin.value);
 const showMaterial = ref<boolean>(false);
 const showCalendar = ref<boolean>(false);
+const rewardIndex = ref<number>(0);
 const curMaterial = shallowRef<MaterialInfo>(genEmptyMaterial(WikiMaterialData[0]));
-const curTypeC = ref<"character" | "weapon">("character");
 const curItemC = shallowRef<TGApp.App.Calendar.Item>(AppCalendarData[0]);
+const rewardList = shallowRef<Array<TGApp.Game.ActCalendar.ActReward>>([]);
 const obsPos = shallowRef<Array<TGApp.BBS.Obc.PositionItem>>([]);
 const userPos = shallowRef<Array<TGApp.Game.ActCalendar.ActItem>>([]);
+const canSwitchPrev = computed<boolean>(() => findOpenableRewardIndex(rewardIndex.value, -1) >= 0);
+const canSwitchNext = computed<boolean>(() => findOpenableRewardIndex(rewardIndex.value, 1) >= 0);
+const canSwitchReward = computed<boolean>(
+  () => rewardList.value.filter(canOpenRewardOverlay).length > 1,
+);
 
 watch(
   () => isUserPos.value,
@@ -272,26 +325,72 @@ async function loadMaterial(material: TGApp.App.Material.WikiItem): Promise<Mate
   return res;
 }
 
-async function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): Promise<void> {
-  const findM = WikiMaterialData.find((i) => i.id === cur.item_id);
+function canOpenRewardOverlay(reward: TGApp.Game.ActCalendar.ActReward): boolean {
+  return (
+    WikiMaterialData.some((item) => item.id === reward.item_id) ||
+    AppCalendarData.some((item) => item.id === reward.item_id)
+  );
+}
+
+/**
+ * 从当前位置沿方向查找下一个可打开浮窗的奖励
+ * @param fromIndex - 当前索引
+ * @param step - 方向，1 下一个 / -1 上一个
+ */
+function findOpenableRewardIndex(fromIndex: number, step: 1 | -1): number {
+  let index = fromIndex + step;
+  while (index >= 0 && index < rewardList.value.length) {
+    const reward = rewardList.value[index];
+    if (reward !== undefined && canOpenRewardOverlay(reward)) return index;
+    index += step;
+  }
+  return -1;
+}
+
+async function openRewardOverlay(cur: TGApp.Game.ActCalendar.ActReward): Promise<boolean> {
+  const findM = WikiMaterialData.find((item) => item.id === cur.item_id);
   if (findM) {
+    showCalendar.value = false;
     curMaterial.value = await loadMaterial(findM);
     showMaterial.value = true;
-    return;
+    return true;
   }
-  // 尝试查找角色&武器
-  const findC = AppCalendarData.find((i) => i.id === cur.item_id);
+  const findC = AppCalendarData.find((item) => item.id === cur.item_id);
   if (findC) {
-    curTypeC.value = findC.itemType === "weapon" ? "weapon" : "character";
+    showMaterial.value = false;
     curItemC.value = findC;
     showCalendar.value = true;
-    return;
+    return true;
   }
+  return false;
+}
+
+async function handleMaterial(
+  cur: TGApp.Game.ActCalendar.ActReward,
+  list: Array<TGApp.Game.ActCalendar.ActReward>,
+): Promise<void> {
+  rewardList.value = list;
+  const currentIndex = list.findIndex((item) => item.item_id === cur.item_id);
+  rewardIndex.value = currentIndex >= 0 ? currentIndex : 0;
+  const opened = await openRewardOverlay(cur);
+  if (opened) return;
   if (cur.wiki_url === "") {
     showSnackbar.warn("未检测到跳转链接");
     return;
   }
   await openUrl(cur.wiki_url);
+}
+
+async function switchReward(isNext: boolean): Promise<void> {
+  const nextIndex = findOpenableRewardIndex(rewardIndex.value, isNext ? 1 : -1);
+  if (nextIndex < 0) {
+    showSnackbar.warn(isNext ? "已经是最后一个奖励了" : "已经是第一个奖励了");
+    return;
+  }
+  const reward = rewardList.value[nextIndex];
+  if (reward === undefined) return;
+  rewardIndex.value = nextIndex;
+  await openRewardOverlay(reward);
 }
 </script>
 <style lang="scss" scoped>
@@ -316,5 +415,15 @@ async function handleMaterial(cur: TGApp.Game.ActCalendar.ActReward): Promise<vo
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(calc(400px), 0.5fr));
+}
+
+.tp-reward-arrow {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-2);
 }
 </style>

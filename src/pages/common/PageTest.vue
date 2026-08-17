@@ -23,90 +23,15 @@
   </div>
   <VpReplyDebug v-model="showReply" />
 
-  <!-- 养成材料组件对照（合并审计用，mock 数据） -->
+  <!-- 养成浮层对照（mock 数据） -->
   <section class="material-gallery">
     <header class="gallery-header">
-      <h2>养成材料组件对照</h2>
+      <h2>养成浮层对照</h2>
       <p>
-        审计相关组件并排展示，数据为本地 mock（真实 Wiki ID，便于图标加载）。侧边栏「测试页面」或
+        审计相关浮层；数据为本地 mock（真实 Wiki ID，便于图标加载）。侧边栏「测试页面」或
         <code>/test</code> 可进入。
       </p>
     </header>
-
-    <article class="gallery-section">
-      <h3>已复用 · UcMaterialCount</h3>
-      <p class="gallery-hint">数量文案组件，多处共享；建议保留。</p>
-      <div class="gallery-row">
-        <div class="gallery-card">
-          <span class="gallery-label">默认</span>
-          <UcMaterialCount :complete="false" :craftable="12" :current="48" :required="120" />
-        </div>
-        <div class="gallery-card">
-          <span class="gallery-label">compact + 已满足</span>
-          <UcMaterialCount
-            :complete="true"
-            :craftable="0"
-            :current="9999"
-            :required="2000"
-            compact
-          />
-        </div>
-      </div>
-    </article>
-
-    <article class="gallery-section">
-      <h3>材料需求项 · UcMaterialReq</h3>
-      <p class="gallery-hint">
-        从 Result 抽出；已接到 Result / 计划汇总 / 目标汇总 / PlanTargetCard。
-      </p>
-      <div class="gallery-item-list">
-        <UcMaterialReq
-          v-for="material in mockMaterials"
-          :key="`req-${material.id}`"
-          :material
-          weakenReady
-          @select="openDetail(material)"
-        />
-      </div>
-    </article>
-
-    <article class="gallery-section">
-      <h3>UcMaterialResult</h3>
-      <p class="gallery-hint">列表行已改为 UcMaterialReq；合成消耗使用 TMaterialStarChip。</p>
-      <UcMaterialResult
-        v-model:allowCrafting="allowCrafting"
-        v-model:useDust="useDust"
-        v-model:useSolvent="useSolvent"
-        :bagMaterials="bagMaterials"
-        :materials="mockMaterials"
-        :missingKinds
-        :uid="mockUid"
-        emptyText="mock 空态不会出现"
-        topOffset="132px"
-        weakenReady
-      />
-    </article>
-
-    <article class="gallery-section">
-      <h3>UcPlanTargetCard</h3>
-      <p class="gallery-hint">卡片内材料行已改用统一需求项（default 样式）。</p>
-      <UcPlanTargetCard
-        :canMoveDown="true"
-        :canMoveUp="false"
-        :entry="mockEntry"
-        :fulfilled="false"
-        :hasTodayMaterial="true"
-        :materials="mockMaterials"
-        :priority="1"
-        :progress="42"
-        @edit="noop"
-        @material="onCardMaterial"
-        @move="noop"
-        @remove="noop"
-        @status="noop"
-        @summary="planTargetVisible = true"
-      />
-    </article>
 
     <article class="gallery-section">
       <h3>浮层 · Detail / 计划汇总 / 目标汇总</h3>
@@ -157,15 +82,87 @@
     :uid="mockUid"
     @select="noop"
   />
+
+  <!-- 通用浮窗壳样板 -->
+  <section class="material-gallery">
+    <header class="gallery-header">
+      <h2>TopOverlay</h2>
+      <p>
+        <code>app/top-overlay</code> = TOverlay + <code>t-overlay-panel</code>（header / content /
+        footer / share）。
+      </p>
+    </header>
+    <article class="gallery-section">
+      <div class="btn-list">
+        <v-btn color="var(--tgc-od-purple)" variant="tonal" @click="panelDemoVisible = true">
+          打开 TopOverlay
+        </v-btn>
+      </div>
+    </article>
+  </section>
+
+  <TopOverlay
+    v-model="panelDemoVisible"
+    closeAriaLabel="关闭浮窗面板样板"
+    shareCaption="浮窗面板样板 · 测试页"
+    shareAriaLabel="保存浮窗面板样板分享图"
+    shareTitle="浮窗面板样板_PageTest"
+    titleId="tolp-demo-title"
+    topOffset="132px"
+  >
+    <template #header>
+      <div class="tolp-demo-icon">
+        <v-icon size="36">mdi-layers-outline</v-icon>
+      </div>
+      <div class="tolp-demo-identity">
+        <h2 id="tolp-demo-title">浮窗面板样板</h2>
+        <div class="tolp-demo-meta">
+          <span class="tolp-demo-tag">TopOverlay</span>
+          <span>header · content · footer · share</span>
+        </div>
+      </div>
+    </template>
+
+    <section class="tolp-demo-block">
+      <header class="tolp-demo-block-title">
+        <v-icon size="18">mdi-information-outline</v-icon>
+        <h3>用途</h3>
+      </header>
+      <p>遮罩在 top-overlay；面板布局在 t-overlay-panel。footer 放操作底栏，share 放署名。</p>
+    </section>
+    <section class="tolp-demo-block">
+      <header class="tolp-demo-block-title">
+        <v-icon size="18">mdi-view-dashboard-outline</v-icon>
+        <h3>Slots</h3>
+      </header>
+      <ul>
+        <li><code>header</code> — 身份区（图标 + 标题）</li>
+        <li><code>default</code> — 可滚动内容</li>
+        <li><code>footer</code> — 操作底栏（筛选确认等）</li>
+        <li><code>share</code> — 署名区（可覆盖默认文案）</li>
+        <li>
+          <code>actions</code> / <code>toolbar</code> / <code>left</code> / <code>right</code>
+        </li>
+      </ul>
+    </section>
+
+    <template #toolbar>
+      <v-btn
+        color="var(--tgc-od-orange)"
+        size="small"
+        variant="tonal"
+        @click="panelDemoVisible = false"
+      >
+        确认关闭
+      </v-btn>
+    </template>
+  </TopOverlay>
 </template>
 <script lang="ts" setup>
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
-import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import UcMaterialResult from "@comp/userCalc/uc-material-result.vue";
 import UcPlanSummaryOverlay from "@comp/userCalc/uc-plan-summary-overlay.vue";
-import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import UcPlanTargetSummaryOverlay from "@comp/userCalc/uc-plan-target-summary-overlay.vue";
 import GroRerun from "@comp/userGacha/gro-rerun.vue";
 import VpReplyDebug from "@comp/viewPost/vp-reply-debug.vue";
@@ -184,12 +181,10 @@ const mockUid = 100000001;
 const showReply = ref<boolean>(false);
 const { account, cookie } = storeToRefs(useUserStore());
 
-const allowCrafting = ref<boolean>(true);
-const useDust = ref<boolean>(false);
-const useSolvent = ref<boolean>(false);
 const detailVisible = ref<boolean>(false);
 const planSummaryVisible = ref<boolean>(false);
 const planTargetVisible = ref<boolean>(false);
+const panelDemoVisible = ref<boolean>(false);
 const detailMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const detailWiki = shallowRef<TGApp.App.Material.WikiItem>();
 
@@ -242,10 +237,6 @@ const mockMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() => {
     ]),
   ];
 });
-
-const missingKinds = computed<number>(
-  () => mockMaterials.value.filter((material) => material.missing > 0).length,
-);
 
 const mockProject = computed<TGApp.Sqlite.Cultivation.Project>(() => ({
   id: "mock-project",
@@ -364,11 +355,6 @@ async function openDetail(material: TGApp.App.UserCalc.ResultMaterial | undefine
 
 async function openFirstDetail(): Promise<void> {
   await openDetail(mockMaterials.value[0]);
-}
-
-function onCardMaterial(materialId: number): void {
-  const material = mockMaterials.value.find((item) => item.id === materialId);
-  void openDetail(material);
 }
 
 function testReply(): void {
@@ -507,31 +493,93 @@ async function test() {
   line-height: 1.5;
 }
 
-.gallery-row {
+.tolp-demo-icon {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
-
-.gallery-card {
-  display: flex;
-  flex-direction: column;
-  padding: 10px;
-  border: 1px solid var(--common-shadow-1);
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
   border-radius: 8px;
-  background: var(--common-shadow-t-1);
-  gap: 8px;
+  background: var(--common-shadow-t-2);
+  color: var(--tgc-od-purple);
+  place-items: center;
 }
 
-.gallery-label {
+.tolp-demo-identity {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+
+  h2 {
+    overflow: hidden;
+    margin: 0;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 28px;
+    font-weight: normal;
+    line-height: 36px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.tolp-demo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   color: var(--box-text-4);
   font-size: 12px;
-  font-weight: 600;
+  gap: 8px;
+  line-height: 16px;
 }
 
-.gallery-item-list {
+.tolp-demo-tag {
+  padding: 2px 6px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-purple);
+}
+
+.tolp-demo-block {
   display: flex;
   flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  color: var(--box-text-1);
   gap: 8px;
+
+  p,
+  ul {
+    margin: 0;
+    color: var(--box-text-2);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  ul {
+    padding-left: 1.2em;
+  }
+
+  code {
+    font-size: 12px;
+  }
+}
+
+.tolp-demo-block-title {
+  display: flex;
+  align-items: center;
+  color: var(--common-text-title);
+  gap: 8px;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+  }
 }
 </style>

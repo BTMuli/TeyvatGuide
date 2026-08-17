@@ -99,6 +99,8 @@
     v-if="currentMaterial && currentWiki"
     v-model="materialOverlayVisible"
     :bag="bagMaterials.get(currentMaterial.id)"
+    footerContext="养成计划"
+    :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
     :topOffset
     :uid
@@ -273,7 +275,6 @@ function switchMaterial(isNext: boolean): void {
   display: grid;
   align-content: start;
   gap: 8px;
-  grid-auto-rows: 58px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 

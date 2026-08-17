@@ -1,148 +1,152 @@
 <!-- 养成计算-材料需求详情 -->
 <template>
-  <TOverlay v-model="visible" :topOffset="props.topOffset">
-    <div class="ucmd-container">
+  <TopOverlay
+    ref="overlayPanel"
+    v-model="visible"
+    contentMaxHeight="480px"
+    :shareCaption="shareCaption"
+    :topOffset="props.topOffset"
+  >
+    <template #left>
       <slot name="left" />
-      <article ref="shareTarget" class="ucmd-panel">
-        <header class="ucmd-header">
-          <div class="ucmd-icon">
-            <img :src="`/icon/bg/${wiki.star}-BGC.webp`" alt="" class="bg" />
-            <img :src="`/icon/material/${wiki.id}.webp`" :alt="wiki.name" class="icon" />
-          </div>
-          <div class="ucmd-identity">
-            <h2>{{ wiki.name }}</h2>
-            <div class="ucmd-meta">
-              <span class="ucmd-meta-tag">养成材料详情</span>
-              <span>{{ wiki.type }}</span>
-              <span>{{ wiki.star }} 星</span>
-              <span>ID {{ wiki.id }}</span>
-              <span
-                :title="bag?.updated ? `背包数据更新于 ${bag.updated}` : '暂无背包更新时间'"
-                class="ucmd-owned"
-              >
-                <v-icon size="14">mdi-package-variant-closed</v-icon>
-                持有 {{ bag?.count ?? material.owned }}
-              </span>
-            </div>
-          </div>
-          <div class="ucmd-actions" data-html2canvas-ignore="true">
-            <v-btn
-              :loading="shareLoading"
-              aria-label="保存养成材料详情分享图"
-              density="comfortable"
-              icon="mdi-share-variant"
-              title="保存养成材料详情分享图"
-              variant="text"
-              @click="shareMaterial"
-            />
-            <v-btn
-              aria-label="关闭养成材料详情"
-              density="comfortable"
-              icon="mdi-close"
-              title="关闭"
-              variant="text"
-              @click="visible = false"
-            />
-          </div>
-        </header>
+    </template>
 
-        <main ref="contentTarget" class="ucmd-content">
-          <section class="ucmd-section">
-            <header class="ucmd-section-title">
-              <v-icon color="var(--tgc-od-orange)" size="18"> mdi-clipboard-list-outline </v-icon>
-              <h3>需求信息</h3>
-            </header>
-            <div class="ucmd-stats">
-              <div class="ucmd-stat progress">
-                <span>
-                  {{ material.craftable > 0 ? "当前量（可合成量）/需求总量" : "当前量/需求总量" }}
-                </span>
-                <UcMaterialCount
-                  :complete="material.missing === 0"
-                  :craftable="material.craftable"
-                  :current="material.owned"
-                  :required="material.required"
-                />
-              </div>
-            </div>
-            <v-progress-linear
-              :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
-              :model-value="material.progress"
-              height="6"
-              rounded
-            />
-          </section>
+    <template #header>
+      <div class="ucmd-icon">
+        <img :src="`/icon/bg/${wiki.star}-BGC.webp`" alt="" class="bg" />
+        <img :src="`/icon/material/${wiki.id}.webp`" :alt="wiki.name" class="icon" />
+      </div>
+      <div class="ucmd-identity">
+        <h2>{{ wiki.name }}</h2>
+        <div class="ucmd-meta">
+          <span class="ucmd-meta-tag">养成材料详情</span>
+          <span class="ucmd-meta-chip">{{ wiki.type }}</span>
+          <span class="ucmd-meta-chip">
+            <v-icon size="12">mdi-star</v-icon>
+            {{ wiki.star }} 星
+          </span>
+          <span
+            :title="bag?.updated ? `背包数据更新于 ${bag.updated}` : '暂无背包更新时间'"
+            class="ucmd-owned"
+          >
+            <v-icon size="14">mdi-package-variant-closed</v-icon>
+            持有 {{ bag?.count ?? material.owned }}
+          </span>
+        </div>
+      </div>
+    </template>
 
-          <section v-if="wiki.description.trim().length > 0" class="ucmd-section">
-            <header class="ucmd-section-title">
-              <v-icon size="18">mdi-text-box-outline</v-icon>
-              <h3>材料描述</h3>
-            </header>
-            <div class="ucmd-desc" v-html="parseHtmlText(wiki.description)" />
-          </section>
+    <template #actions>
+      <v-btn
+        :loading="shareLoading"
+        aria-label="保存养成材料详情分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存养成材料详情分享图"
+        variant="text"
+        @click="shareMaterial"
+      />
+      <v-btn
+        aria-label="关闭养成材料详情"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
 
-          <section v-if="wiki.source.length > 0" class="ucmd-section">
-            <header class="ucmd-section-title">
-              <v-icon size="18">mdi-map-marker-path</v-icon>
-              <h3>获取来源</h3>
-              <span>{{ wiki.source.length }} 项</span>
-            </header>
-            <div class="ucmd-source">
-              <TwoSource v-for="(item, index) in wiki.source" :key="index" :data="item" />
-            </div>
-          </section>
+    <section class="ucmd-section">
+      <header class="ucmd-section-title">
+        <v-icon color="var(--tgc-od-orange)" size="18"> mdi-clipboard-list-outline </v-icon>
+        <h3>需求信息</h3>
+      </header>
+      <div class="ucmd-stats">
+        <div class="ucmd-stat progress">
+          <span>
+            {{ material.craftable > 0 ? "当前量（可合成量）/需求总量" : "当前量/需求总量" }}
+          </span>
+          <UcMaterialCount
+            :complete="material.missing === 0"
+            :craftable="material.craftable"
+            :current="material.owned"
+            :required="material.required"
+          />
+        </div>
+      </div>
+      <v-progress-linear
+        :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
+        :model-value="material.progress"
+        height="6"
+        rounded
+      />
+    </section>
 
-          <section v-if="wiki.convert.length > 0" class="ucmd-section">
-            <header class="ucmd-section-title">
-              <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
-              <h3>合成消耗</h3>
-              <span v-if="material.craftable > 0">可合成 {{ material.craftable }} 个</span>
-            </header>
-            <div v-if="costMaterials.length > 0" class="ucmd-costs">
-              <TMaterialStarChip
-                v-for="cost in costMaterials"
-                :key="cost.id"
-                :id="cost.id"
-                mode="convert"
-                :name="cost.name"
-                :owned="cost.local"
-                :required="cost.count"
-                :star="cost.star"
-                :type="cost.type"
-              />
-            </div>
-            <span v-else class="ucmd-no-cost">当前计算未使用合成材料</span>
-          </section>
-        </main>
+    <section v-if="wiki.description.trim().length > 0" class="ucmd-section">
+      <header class="ucmd-section-title">
+        <v-icon size="18">mdi-text-box-outline</v-icon>
+        <h3>材料描述</h3>
+      </header>
+      <div class="ucmd-desc" v-html="parseHtmlText(wiki.description)" />
+    </section>
 
-        <footer class="ucmd-footer">
-          <span>{{ footerContext ? `${footerContext} · 养成材料详情` : "养成材料详情" }}</span>
-          <span> · {{ wiki.name }} · ID {{ wiki.id }} · UID {{ uid }}</span>
-          <span> · Rendered by TeyvatGuide v{{ version }}</span>
-        </footer>
-      </article>
+    <section v-if="wiki.source.length > 0" class="ucmd-section">
+      <header class="ucmd-section-title">
+        <v-icon size="18">mdi-map-marker-path</v-icon>
+        <h3>获取来源</h3>
+        <span>{{ wiki.source.length }} 项</span>
+      </header>
+      <div class="ucmd-source">
+        <TwoSource v-for="(item, index) in wiki.source" :key="index" :data="item" />
+      </div>
+    </section>
+
+    <section v-if="wiki.convert.length > 0" class="ucmd-section">
+      <header class="ucmd-section-title">
+        <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
+        <h3>合成消耗</h3>
+        <span v-if="material.craftable > 0">可合成 {{ material.craftable }} 个</span>
+      </header>
+      <div v-if="costMaterials.length > 0" class="ucmd-costs">
+        <TMaterialStarChip
+          v-for="cost in costMaterials"
+          :key="cost.id"
+          :id="cost.id"
+          mode="convert"
+          :name="cost.name"
+          :owned="cost.local"
+          :required="cost.count"
+          :star="cost.star"
+          :type="cost.type"
+        />
+      </div>
+      <span v-else class="ucmd-no-cost">当前计算未使用合成材料</span>
+    </section>
+
+    <template #right>
       <slot name="right" />
-    </div>
-  </TOverlay>
+    </template>
+  </TopOverlay>
 </template>
 
 <script lang="ts" setup>
 import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
 import TwoSource from "@comp/pageWiki/two-source.vue";
 import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
-import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { computed, onMounted, ref, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 
 type UcMaterialDetailProps = {
   bag?: TGApp.Sqlite.UserBag.MaterialTable;
   footerContext?: string;
+  /** 材料在列表中的序号（从 1 开始），写入分享署名 */
+  idx?: number;
   material: TGApp.App.UserCalc.ResultMaterial;
   topOffset?: string;
   uid: number;
@@ -153,10 +157,8 @@ const props = withDefaults(defineProps<UcMaterialDetailProps>(), {
   topOffset: "0px",
 });
 const visible = defineModel<boolean>({ required: true });
-const version = ref<string>();
 const shareLoading = ref<boolean>(false);
-const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
-const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
+const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 const costMaterials = computed<Array<PboConvertSource>>(() =>
   props.material.craftingCosts.map((cost) => ({
     id: String(cost.id),
@@ -167,12 +169,18 @@ const costMaterials = computed<Array<PboConvertSource>>(() =>
     local: cost.owned,
   })),
 );
-
-onMounted(async () => (version.value = await getVersion()));
+const shareCaption = computed<string>(() => {
+  const parts: Array<string> = [
+    props.footerContext ? `${props.footerContext} · 养成材料详情` : "养成材料详情",
+  ];
+  if (props.idx !== undefined) parts.push(`#${props.idx}`);
+  parts.push(props.wiki.name, `UID ${props.uid}`);
+  return parts.join(" · ");
+});
 
 async function shareMaterial(): Promise<void> {
-  const panel = shareTarget.value;
-  const content = contentTarget.value;
+  const panel = overlayPanel.value?.panel ?? null;
+  const content = overlayPanel.value?.content ?? null;
   if (panel === null || content === null) {
     showSnackbar.error("未获取到养成材料详情");
     return;
@@ -194,39 +202,14 @@ async function shareMaterial(): Promise<void> {
     shareLoading.value = false;
   }
 }
+
+defineSlots<{
+  left?: () => unknown;
+  right?: () => unknown;
+}>();
 </script>
 
 <style lang="scss" scoped>
-.ucmd-container {
-  display: flex;
-  max-height: calc(100% - 32px);
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.ucmd-panel {
-  position: relative;
-  display: flex;
-  overflow: hidden;
-  width: 800px;
-  max-width: calc(100vw - 160px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 8px 24px var(--common-shadow-t-4);
-}
-
-.ucmd-header {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--dialog-header-bg);
-  gap: 12px;
-}
-
 .ucmd-icon {
   position: relative;
   display: flex;
@@ -281,41 +264,29 @@ async function shareMaterial(): Promise<void> {
   line-height: 16px;
 }
 
-.ucmd-meta-tag {
+.ucmd-meta-tag,
+.ucmd-meta-chip,
+.ucmd-owned {
+  display: inline-flex;
+  align-items: center;
   padding: 2px 6px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-2);
+  column-gap: 2px;
+}
+
+.ucmd-meta-tag {
   color: var(--tgc-od-orange);
 }
 
+.ucmd-meta-chip {
+  color: var(--box-text-2);
+}
+
 .ucmd-owned {
-  display: flex;
-  align-items: center;
-  padding: 2px 6px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-2);
   color: var(--tgc-od-red);
   column-gap: 4px;
-}
-
-.ucmd-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  color: var(--box-text-2);
-  gap: 4px;
-}
-
-.ucmd-content {
-  display: flex;
-  min-height: 0;
-  max-height: 480px;
-  flex-direction: column;
-  padding: 16px;
-  gap: 12px;
-  overflow-y: auto;
 }
 
 .ucmd-section {
@@ -402,21 +373,7 @@ async function shareMaterial(): Promise<void> {
   color: var(--common-text-sub);
 }
 
-.ucmd-footer {
-  padding: 8px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  color: var(--box-text-4);
-  font-size: 10px;
-  line-height: 14px;
-  text-align: center;
-}
-
 @media (width <= 720px) {
-  .ucmd-panel {
-    max-width: calc(100vw - 112px);
-  }
-
   .ucmd-identity h2 {
     font-size: 22px;
     line-height: 32px;

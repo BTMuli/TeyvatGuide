@@ -128,7 +128,9 @@ import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 type PhCompPositionUserProps = { pos: TGApp.Game.ActCalendar.ActItem };
-type PhCompPositionUserEmits = { clickM: [cur: TGApp.Game.ActCalendar.ActReward] };
+type PhCompPositionUserEmits = {
+  clickM: [cur: TGApp.Game.ActCalendar.ActReward, list: Array<TGApp.Game.ActCalendar.ActReward>];
+};
 
 // eslint-disable-next-line no-undef
 let timer: NodeJS.Timeout | null = null;
@@ -200,7 +202,7 @@ async function toAbyss(): Promise<void> {
 }
 
 function showMaterial(reward: TGApp.Game.ActCalendar.ActReward): void {
-  emits("clickM", reward);
+  emits("clickM", reward, props.pos.reward_list);
 }
 
 function getCombatStat(detail: TGApp.Game.ActCalendar.ActRoleCombat): string {

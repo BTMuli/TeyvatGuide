@@ -49,11 +49,14 @@ watch(
       showToli.value = true;
       return;
     }
+    // 初始即为关闭时无需走离场动画，避免无谓延迟
+    if (!showTolo.value && !showToli.value) return;
     await delay(100);
     showToli.value = false;
     await delay(300);
     showTolo.value = false;
   },
+  { immediate: true },
 );
 
 function toClick(): void {

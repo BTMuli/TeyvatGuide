@@ -1,7 +1,13 @@
 <!-- 首页素材日历-养成目标内容 -->
 <template>
-  <section ref="panelRef" class="phco-panel">
-    <header class="phco-header">
+  <TOverlayPanel
+    ref="panelRef"
+    contentMaxHeight="none"
+    panelMaxHeight="calc(100% - 32px)"
+    panelWidth="min(720px, calc(100vw - 160px))"
+    :shareCaption
+  >
+    <template #header>
       <UcItemIcon :alt="item.name" :icon="itemIcon" :size="84" :star="item.star" />
       <div class="phco-heading">
         <div class="phco-title-row">
@@ -42,25 +48,26 @@
           <span>{{ item.source.area ? `${item.source.area} · ` : "" }}{{ item.source.name }}</span>
         </div>
       </div>
-      <div class="phco-actions" data-html2canvas-ignore="true">
-        <v-btn
-          aria-label="保存养成目标分享图"
-          density="comfortable"
-          icon="mdi-share-variant"
-          title="保存养成目标分享图"
-          variant="text"
-          @click="shareCultivation"
-        />
-        <v-btn
-          aria-label="关闭养成目标详情"
-          density="comfortable"
-          icon="mdi-close"
-          title="关闭"
-          variant="text"
-          @click="emits('close')"
-        />
-      </div>
-    </header>
+    </template>
+
+    <template #actions>
+      <v-btn
+        aria-label="保存养成目标分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存养成目标分享图"
+        variant="text"
+        @click="shareCultivation"
+      />
+      <v-btn
+        aria-label="关闭养成目标详情"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭"
+        variant="text"
+        @click="emits('close')"
+      />
+    </template>
 
     <div class="phco-entries">
       <article v-for="(entry, index) in entries" :key="entry.id" class="phco-entry">
@@ -136,39 +143,13 @@
         :class="{ 'phco-materials--weapon': item.itemType === 'weapon' }"
         class="phco-materials"
       >
-        <article
-          v-for="material in targetMaterials"
-          :key="material.id"
-          :class="{ 'phco-material--today': material.isToday }"
-          class="phco-material"
-        >
-          <UcItemIcon
-            :alt="material.name"
-            :icon="`/icon/material/${material.id}.webp`"
-            :size="42"
-            :star="material.star"
-          />
-          <div class="phco-material-info">
-            <strong>{{ material.name }}</strong>
-            <span class="phco-material-rarity">{{ material.star }} 星素材</span>
-          </div>
-          <v-chip
-            :color="
-              material.current + material.craftable < material.targetRequired
-                ? 'var(--tgc-od-red)'
-                : 'var(--tgc-od-green)'
-            "
-            size="small"
-            variant="tonal"
-          >
-            <UcMaterialCount
-              :complete="material.current + material.craftable >= material.targetRequired"
-              :craftable="material.craftable"
-              :current="material.current"
-              :required="material.targetRequired"
-            />
-          </v-chip>
-        </article>
+        <UcMaterialReq
+          v-for="row in targetMaterials"
+          :key="row.material.id"
+          :highlight="row.isToday"
+          :interactive="false"
+          :material="row.material"
+        />
       </div>
       <div v-else class="phco-material-empty">
         <v-icon size="24">mdi-check-circle-outline</v-icon>
@@ -176,50 +157,49 @@
       </div>
     </div>
 
-    <footer ref="footerRef" class="phco-footer">
-      <v-btn prepend-icon="mdi-book-open-page-variant-outline" variant="text" @click="openDetail">
-        {{ item.itemType === "character" ? "角色详情" : "武器详情" }}
-      </v-btn>
-      <v-btn
-        color="var(--tgc-od-orange)"
-        prepend-icon="mdi-clipboard-text-outline"
-        variant="tonal"
-        @click="openPlan"
-      >
-        查看养成计划
-      </v-btn>
-    </footer>
-
-    <footer class="phco-share">{{ shareCaption }} · Rendered by TeyvatGuide v{{ version }}</footer>
-  </section>
+    <template #footer>
+      <div class="phco-footer-actions">
+        <v-btn prepend-icon="mdi-book-open-page-variant-outline" variant="text" @click="openDetail">
+          {{ item.itemType === "character" ? "角色详情" : "武器详情" }}
+        </v-btn>
+        <v-btn
+          color="var(--tgc-od-orange)"
+          prepend-icon="mdi-clipboard-text-outline"
+          variant="tonal"
+          @click="openPlan"
+        >
+          查看养成计划
+        </v-btn>
+      </div>
+    </template>
+  </TOverlayPanel>
 </template>
 
 <script lang="ts" setup>
+import TOverlayPanel from "@comp/app/t-overlay-panel.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
-import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
-import { getVersion } from "@tauri-apps/api/app";
+import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { generateShareImg } from "@utils/TGShare.js";
-import { computed, onMounted, ref, useTemplateRef } from "vue";
+import { computed, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
 import { WikiMaterialData } from "@/data/index.js";
 import { getServerDay, isMaterialAvailableToday } from "@/utils/cultivationPlan.js";
 
 type PhCalendarCultivationPanelProps = {
+  /** 来源组件标签 */
+  src?: string;
   entries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   entryMaterials: ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>;
   item: TGApp.App.Calendar.Item;
   planEntries: Array<TGApp.Sqlite.Cultivation.EntryWithItems>;
   project?: TGApp.Sqlite.Cultivation.Project;
 };
-type PhCalendarCultivationPanelEmits = { close: [] };
 
-type TargetMaterial = TGApp.App.Calendar.Material & {
-  craftable: number;
-  current: number;
+type DisplayMaterial = {
   isToday: boolean;
-  targetRequired: number;
+  material: TGApp.App.UserCalc.ResultMaterial;
 };
 type SelectedMaterialAllocation = { craftable: number; current: number; type: string };
 
@@ -233,12 +213,12 @@ const dayLabels: Record<number, string> = {
   7: "周日",
 };
 
-const props = defineProps<PhCalendarCultivationPanelProps>();
-const emits = defineEmits<PhCalendarCultivationPanelEmits>();
+const emits = defineEmits<{ close: [] }>();
+const props = withDefaults(defineProps<PhCalendarCultivationPanelProps>(), {
+  src: "素材日历",
+});
 const router = useRouter();
-const panelRef = useTemplateRef<HTMLElement>("panelRef");
-const footerRef = useTemplateRef<HTMLElement>("footerRef");
-const version = ref<string>();
+const panelRef = useTemplateRef<InstanceType<typeof TOverlayPanel>>("panelRef");
 
 const itemIcon = computed<string>(() => `/WIKI/${props.item.itemType}/${props.item.id}.webp`);
 const itemTypeIcon = computed<string>(() =>
@@ -277,33 +257,46 @@ const entryPriorities = computed<Map<string, number>>(
         .map((entry, index) => [entry.id, index + 1]),
     ),
 );
-const targetMaterials = computed<Array<TargetMaterial>>(() =>
+const targetMaterials = computed<Array<DisplayMaterial>>(() =>
   props.item.materials
-    .map((material) => {
-      const targetRequired = props.entries.reduce(
+    .map((calendarMaterial) => {
+      const allocation = selectedMaterialAllocations.value.get(calendarMaterial.id);
+      const required = props.entries.reduce(
         (total, entry) =>
           total +
           entry.items
-            .filter((entryItem) => entryItem.materialId === material.id)
+            .filter((entryItem) => entryItem.materialId === calendarMaterial.id)
             .reduce((sum, entryItem) => sum + entryItem.required, 0),
         0,
       );
+      const owned = allocation?.current ?? 0;
+      const craftable = allocation?.craftable ?? 0;
+      const available = owned + craftable;
+      const wiki = WikiMaterialData.find((item) => item.id === calendarMaterial.id);
       return {
-        ...material,
-        craftable: selectedMaterialAllocations.value.get(material.id)?.craftable ?? 0,
-        current: selectedMaterialAllocations.value.get(material.id)?.current ?? 0,
         isToday:
           isTraveler.value &&
-          isMaterialAvailableToday(material.id, serverDay.value, WikiMaterialData),
-        targetRequired,
+          isMaterialAvailableToday(calendarMaterial.id, serverDay.value, WikiMaterialData),
+        material: {
+          id: calendarMaterial.id,
+          name: calendarMaterial.name,
+          type: allocation?.type ?? wiki?.type ?? "素材",
+          star: calendarMaterial.star,
+          required,
+          owned,
+          craftable,
+          craftingCosts: [],
+          missing: Math.max(required - available, 0),
+          progress: required === 0 ? 100 : Math.min((available / required) * 100, 100),
+        },
       };
     })
-    .filter((material) => {
-      if (material.targetRequired <= 0) return false;
+    .filter((row) => {
+      if (row.material.required <= 0) return false;
       if (!isTraveler.value) return true;
-      return selectedMaterialAllocations.value.get(material.id)?.type === "角色天赋素材";
+      return selectedMaterialAllocations.value.get(row.material.id)?.type === "角色天赋素材";
     })
-    .sort((a, b) => b.star - a.star),
+    .sort((a, b) => b.material.star - a.material.star),
 );
 const materialDropDays = computed<Array<TGApp.App.Calendar.DropDayLabel>>(() => {
   if (isTraveler.value) return [];
@@ -320,7 +313,7 @@ const materialDropDays = computed<Array<TGApp.App.Calendar.DropDayLabel>>(() => 
       value: day,
     }));
 });
-const shareCaption = computed<string>(() => `${props.item.name} · 养成目标`);
+const shareCaption = computed<string>(() => `${props.src} · 养成目标 · ${props.item.name}`);
 
 function comparePersistentEntries(
   a: TGApp.Sqlite.Cultivation.EntryWithItems,
@@ -346,12 +339,8 @@ function getCurrentTalentLevel(
   );
 }
 
-onMounted(async () => {
-  version.value = await getVersion();
-});
-
 async function shareCultivation(): Promise<void> {
-  const element = panelRef.value;
+  const element = panelRef.value?.panel ?? null;
   if (element === null) {
     showSnackbar.error("未获取到分享内容");
     return;
@@ -360,15 +349,11 @@ async function shareCultivation(): Promise<void> {
   const overflowY = element.style.overflowY;
   element.style.maxHeight = "none";
   element.style.overflowY = "visible";
-  const footer = footerRef.value;
-  const footerDisplay = footer?.style.display ?? "";
-  if (footer !== null) footer.style.display = "none";
   try {
     await generateShareImg(`养成目标_${props.item.name}`, element, 1.5);
   } finally {
     element.style.maxHeight = maxHeight;
     element.style.overflowY = overflowY;
-    if (footer !== null) footer!.style!.display = footerDisplay;
   }
 }
 
@@ -384,19 +369,6 @@ async function openPlan(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.phco-panel {
-  display: flex;
-  overflow: hidden;
-  width: min(720px, calc(100vw - 160px));
-  max-height: calc(100% - 32px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 18px 48px #00000066;
-}
-
-.phco-header,
 .phco-title-row,
 .phco-attributes,
 .phco-attributes > span,
@@ -406,26 +378,9 @@ async function openPlan(): Promise<void> {
 .phco-talents,
 .phco-options,
 .phco-section-title,
-.phco-section-title > div,
-.phco-material,
-.phco-footer {
+.phco-section-title > div {
   display: flex;
   align-items: center;
-}
-
-.phco-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  color: var(--box-text-2);
-  gap: 4px;
-}
-
-.phco-header {
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--dialog-header-bg);
-  gap: 14px;
 }
 
 .phco-heading {
@@ -444,7 +399,7 @@ async function openPlan(): Promise<void> {
     margin: 0;
     font-family: var(--font-title);
     font-size: 22px;
-    font-weight: 500;
+    font-weight: normal;
   }
 }
 
@@ -481,7 +436,6 @@ async function openPlan(): Promise<void> {
 
 .phco-entries {
   display: grid;
-  padding: 14px 16px 0;
   gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
@@ -509,6 +463,7 @@ async function openPlan(): Promise<void> {
     color: var(--tgc-od-orange);
     font-family: var(--font-title);
     font-size: 16px;
+    font-weight: normal;
   }
 }
 
@@ -532,7 +487,6 @@ async function openPlan(): Promise<void> {
 .phco-material-section {
   display: flex;
   flex-direction: column;
-  padding: 14px 16px 16px;
   gap: 10px;
 }
 
@@ -576,42 +530,6 @@ async function openPlan(): Promise<void> {
   }
 }
 
-.phco-material {
-  min-width: 0;
-  padding: 8px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--common-shadow-t-1);
-  gap: 8px;
-
-  &.phco-material--today {
-    border-color: var(--tgc-od-orange);
-    border-left-width: 3px;
-    background: var(--common-shadow-t-1);
-  }
-}
-
-.phco-material-info {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-
-  strong {
-    overflow: hidden;
-    font-family: var(--font-title);
-    font-size: 13px;
-    font-weight: normal;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .phco-material-rarity {
-    color: var(--common-text-sub);
-    font-size: 12px;
-  }
-}
-
 .phco-material-empty {
   display: flex;
   min-height: 64px;
@@ -623,28 +541,14 @@ async function openPlan(): Promise<void> {
   gap: 8px;
 }
 
-.phco-footer {
+.phco-footer-actions {
+  display: flex;
+  flex: 1;
   justify-content: flex-end;
-  padding: 10px 16px;
-  border-top: 1px solid var(--common-shadow-1);
   gap: 8px;
 }
 
-.phco-share {
-  padding: 8px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  color: var(--box-text-4);
-  font-size: 10px;
-  line-height: 14px;
-  text-align: center;
-}
-
 @media (width <= 600px) {
-  .phco-header {
-    align-items: flex-start;
-  }
-
   .phco-section-title {
     flex-direction: column;
     align-items: flex-start;

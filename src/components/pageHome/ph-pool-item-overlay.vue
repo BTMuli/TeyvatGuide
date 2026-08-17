@@ -1,7 +1,16 @@
 <!-- 首页限时祈愿-卡池/UP物品详情浮窗 -->
 <template>
-  <TOverlay v-model="visible" blurVal="8px" topOffset="64px">
-    <div class="phio-container">
+  <TopOverlay
+    ref="overlayPanel"
+    v-model="visible"
+    blurVal="8px"
+    contentMaxHeight="none"
+    :shareCaption="shareCaption"
+    panelMaxHeight="calc(100% - 32px)"
+    panelWidth="min(720px, calc(100vw - 32px))"
+    topOffset="64px"
+  >
+    <template #left>
       <v-btn
         v-if="showSwitch"
         aria-label="上一个UP物品"
@@ -11,265 +20,266 @@
         variant="flat"
         @click="switchItem(false)"
       />
-      <section ref="panelRef" class="phio-panel">
-        <header class="phio-header">
-          <TItemBox v-if="itemBox !== undefined" :model-value="itemBox" />
-          <TMiImg
-            v-else-if="poolBanner"
-            :ori="true"
-            :src="poolBanner"
-            alt="banner"
-            class="phio-banner"
-          />
-          <div class="phio-heading">
-            <div class="phio-title-row">
-              <h2>{{ headingTitle }}</h2>
-              <template v-if="itemMode">
-                <v-chip color="var(--tgc-od-orange)" size="small" variant="tonal">
-                  {{ rarityLabel }}
-                </v-chip>
-                <v-chip color="var(--tgc-od-purple)" size="small" variant="tonal">
-                  {{ itemTypeLabel }}
-                </v-chip>
-                <v-chip color="var(--tgc-od-red)" size="small" variant="tonal">
-                  UP {{ upCount }} 次
-                </v-chip>
-              </template>
-              <template v-else>
-                <v-chip color="var(--tgc-od-orange)" size="small" variant="tonal">
-                  {{ poolVersionLabel }}
-                </v-chip>
-                <v-chip color="var(--tgc-od-purple)" size="small" variant="tonal">
-                  {{ currentPoolTypeLabel }}
-                </v-chip>
-              </template>
-            </div>
-            <div class="phio-subtitle">
-              <template v-if="itemMode">
-                <span class="phio-subtitle-group">
-                  <v-icon color="var(--tgc-od-orange)" size="16">mdi-gift-outline</v-icon>
-                  <span>{{ currentPoolName }}</span>
-                </span>
-              </template>
-              <span class="phio-subtitle-group">
-                <v-icon color="var(--tgc-od-orange)" size="16">mdi-calendar-clock-outline</v-icon>
-                <span>{{ poolTimeRange }}</span>
-              </span>
-            </div>
-          </div>
-          <div class="phio-actions" data-html2canvas-ignore="true">
-            <v-btn
-              v-if="pool.postId"
-              icon="mdi-open-in-new"
-              title="查看帖子"
-              variant="text"
-              @click="openPost"
-            />
-            <v-btn
-              v-if="itemMode"
-              :title="itemTypeLabel + '详情'"
-              icon="mdi-book-open-page-variant-outline"
-              variant="text"
-              @click="openWiki"
-            />
-            <v-btn
-              aria-label="保存祈愿分享图"
-              density="comfortable"
-              icon="mdi-share-variant"
-              title="保存祈愿分享图"
-              variant="text"
-              @click="shareOverlay"
-            />
-            <v-btn icon="mdi-close" title="关闭" variant="text" @click="visible = false" />
-          </div>
-        </header>
+    </template>
 
-        <div ref="contentRef" class="phio-content">
-          <!-- 抽数统计 -->
-          <section class="phio-section">
-            <div class="phio-section-title">
-              <div>
-                <v-icon color="var(--tgc-od-orange)" size="18">mdi-chart-box-outline</v-icon>
-                <strong>抽数统计{{ account.gameUid ? ` · UID ${account.gameUid}` : "" }}</strong>
-              </div>
-              <span v-if="statsLoading">正在加载祈愿数据...</span>
-            </div>
-            <div v-if="showEmptyStats" class="phio-empty phio-empty--stats">
-              {{ statsEmptyText }}
-            </div>
-            <div v-else :class="{ 'phio-stats--item': itemMode }" class="phio-stats">
-              <template v-if="itemMode">
-                <div class="phio-stat">
-                  <span class="phio-stat-label">当期抽数</span>
-                  <span class="phio-stat-value">{{ totalPulls }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">当期命中数</span>
-                  <span class="phio-stat-value">{{ itemPoolPulls }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">总抽数</span>
-                  <span class="phio-stat-value">{{ historyPullsTotal }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">总命中数</span>
-                  <span class="phio-stat-value">{{ historyHitsTotal }}</span>
-                </div>
-              </template>
-              <template v-else>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">总抽数</span>
-                  <span class="phio-stat-value">{{ totalPulls }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">五星</span>
-                  <span class="phio-stat-value">{{ star5Pulls }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">四星</span>
-                  <span class="phio-stat-value">{{ star4Pulls }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">三星</span>
-                  <span class="phio-stat-value">{{ star3Pulls }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">五星平均</span>
-                  <span class="phio-stat-value">{{ star5Avg }}</span>
-                </div>
-                <div class="phio-stat">
-                  <span class="phio-stat-label">四星平均</span>
-                  <span class="phio-stat-value">{{ star4Avg }}</span>
-                </div>
-              </template>
-            </div>
-          </section>
-
-          <!-- 卡池信息（卡池模式） -->
-          <section v-if="!itemMode" class="phio-section">
-            <div class="phio-section-title">
-              <div>
-                <v-icon color="var(--tgc-od-orange)" size="18">mdi-information-outline</v-icon>
-                <strong>卡池信息</strong>
-              </div>
-              <span>UP 五星 {{ pool5List.length }} · UP 四星 {{ pool4List.length }}</span>
-            </div>
-            <div v-if="pool5List.length > 0 || pool4List.length > 0" class="phio-up-list">
-              <div v-if="pool5List.length > 0" class="phio-up-group phio-up-group--5">
-                <span class="phio-icon-list">
-                  <img
-                    v-for="item in pool5List"
-                    :key="item.id"
-                    :src="item.icon"
-                    :title="item.name"
-                    alt="icon"
-                  />
-                </span>
-              </div>
-              <div v-if="pool4List.length > 0" class="phio-up-group phio-up-group--4">
-                <span class="phio-icon-list">
-                  <img
-                    v-for="item in pool4List"
-                    :key="item.id"
-                    :src="item.icon"
-                    :title="item.name"
-                    alt="icon"
-                  />
-                </span>
-              </div>
-            </div>
-            <div v-else class="phio-empty">未匹配到 gacha.json 中的卡池数据</div>
-          </section>
-
-          <!-- UP历史：物品模式展示该物品UP期数，卡池模式展示同名卡池历次UP -->
-          <section class="phio-section">
-            <div class="phio-section-title">
-              <div>
-                <v-icon color="var(--tgc-od-orange)" size="18">mdi-history</v-icon>
-                <strong>UP 历史</strong>
-              </div>
-              <span>{{ itemMode ? `共 ${upCount} 期` : `共 ${poolHistory.length} 期` }}</span>
-            </div>
-            <div v-if="itemMode && upCount > 0" class="phio-meta">
-              <span>首次 UP：{{ firstUpTime }}</span>
-              <span>最近 UP：{{ lastUpTime }}</span>
-            </div>
-            <div v-if="historyRows.length === 0" class="phio-empty">未找到 UP 记录</div>
-            <div v-else ref="tableWrapRef" class="phio-table-wrap">
-              <table class="phio-table">
-                <thead>
-                  <tr class="phio-table-head">
-                    <th>版本</th>
-                    <th class="phio-table-left">卡池名称</th>
-                    <th class="phio-table-left">类型</th>
-                    <th>期数</th>
-                    <template v-if="itemMode">
-                      <th v-if="!showEmptyStats" class="phio-table-right">抽数</th>
-                      <th v-if="!showEmptyStats" class="phio-table-right">命中</th>
-                    </template>
-                    <template v-else>
-                      <th>UP 五星</th>
-                      <th v-if="!isMixUpPool">UP 四星</th>
-                      <th v-if="!showEmptyStats" class="phio-table-right">抽数</th>
-                    </template>
-                    <th>时间</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="row in historyRows"
-                    :key="poolKey(row.pool)"
-                    :class="{ current: isCurrentPool(row.pool) }"
-                    class="phio-table-row"
-                  >
-                    <td class="phio-table-center">{{ row.pool.version }}</td>
-                    <td class="phio-table-name">{{ row.pool.name }}</td>
-                    <td class="phio-table-type">{{ getPoolTypeLabel(row.pool.type) }}</td>
-                    <td class="phio-table-center">{{ row.pool.order === 1 ? "上半" : "下半" }}</td>
-                    <template v-if="itemMode">
-                      <td v-if="!showEmptyStats" class="phio-table-num">{{ row.pulls }}</td>
-                      <td v-if="!showEmptyStats" class="phio-table-num">{{ row.hits }}</td>
-                    </template>
-                    <template v-else>
-                      <td class="phio-table-center phio-table-up phio-table-up--5">
-                        <span class="phio-icon-list">
-                          <img
-                            v-for="item in row.up5List"
-                            :key="item.id"
-                            :src="item.icon"
-                            :title="item.name"
-                            alt="icon"
-                          />
-                        </span>
-                      </td>
-                      <td
-                        v-if="!isMixUpPool"
-                        class="phio-table-center phio-table-up phio-table-up--4"
-                      >
-                        <span class="phio-icon-list">
-                          <img
-                            v-for="item in row.up4List"
-                            :key="item.id"
-                            :src="item.icon"
-                            :title="item.name"
-                            alt="icon"
-                          />
-                        </span>
-                      </td>
-                      <td v-if="!showEmptyStats" class="phio-table-num">{{ row.pulls }}</td>
-                    </template>
-                    <td class="phio-table-center phio-table-time">{{ getPoolTime(row.pool) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
+    <template #header>
+      <TItemBox v-if="itemBox !== undefined" :model-value="itemBox" />
+      <TMiImg
+        v-else-if="poolBanner"
+        :ori="true"
+        :src="poolBanner"
+        alt="banner"
+        class="phio-banner"
+      />
+      <div class="phio-heading">
+        <div class="phio-title-row">
+          <h2>{{ headingTitle }}</h2>
+          <template v-if="itemMode">
+            <v-chip color="var(--tgc-od-orange)" size="small" variant="tonal">
+              {{ rarityLabel }}
+            </v-chip>
+            <v-chip color="var(--tgc-od-purple)" size="small" variant="tonal">
+              {{ itemTypeLabel }}
+            </v-chip>
+            <v-chip color="var(--tgc-od-red)" size="small" variant="tonal">
+              UP {{ upCount }} 次
+            </v-chip>
+          </template>
+          <template v-else>
+            <v-chip color="var(--tgc-od-orange)" size="small" variant="tonal">
+              {{ poolVersionLabel }}
+            </v-chip>
+            <v-chip color="var(--tgc-od-purple)" size="small" variant="tonal">
+              {{ currentPoolTypeLabel }}
+            </v-chip>
+          </template>
         </div>
+        <div class="phio-subtitle">
+          <template v-if="itemMode">
+            <span class="phio-subtitle-group">
+              <v-icon color="var(--tgc-od-orange)" size="16">mdi-gift-outline</v-icon>
+              <span>{{ currentPoolName }}</span>
+            </span>
+          </template>
+          <span class="phio-subtitle-group">
+            <v-icon color="var(--tgc-od-orange)" size="16">mdi-calendar-clock-outline</v-icon>
+            <span>{{ poolTimeRange }}</span>
+          </span>
+        </div>
+      </div>
+    </template>
 
-        <footer class="phio-share">
-          {{ shareCaption }} · Rendered by TeyvatGuide v{{ version }}
-        </footer>
-      </section>
+    <template #actions>
+      <v-btn
+        v-if="pool.postId"
+        icon="mdi-open-in-new"
+        title="查看帖子"
+        variant="text"
+        @click="openPost"
+      />
+      <v-btn
+        v-if="itemMode"
+        :title="itemTypeLabel + '详情'"
+        icon="mdi-book-open-page-variant-outline"
+        variant="text"
+        @click="openWiki"
+      />
+      <v-btn
+        aria-label="保存祈愿分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存祈愿分享图"
+        variant="text"
+        @click="shareOverlay"
+      />
+      <v-btn
+        aria-label="关闭"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
+
+    <!-- 抽数统计 -->
+    <section class="phio-section">
+      <div class="phio-section-title">
+        <div>
+          <v-icon color="var(--tgc-od-orange)" size="18">mdi-chart-box-outline</v-icon>
+          <strong>抽数统计{{ account.gameUid ? ` · UID ${account.gameUid}` : "" }}</strong>
+        </div>
+        <span v-if="statsLoading">正在加载祈愿数据...</span>
+      </div>
+      <div v-if="showEmptyStats" class="phio-empty phio-empty--stats">
+        {{ statsEmptyText }}
+      </div>
+      <div v-else :class="{ 'phio-stats--item': itemMode }" class="phio-stats">
+        <template v-if="itemMode">
+          <div class="phio-stat">
+            <span class="phio-stat-label">当期抽数</span>
+            <span class="phio-stat-value">{{ totalPulls }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">当期命中数</span>
+            <span class="phio-stat-value">{{ itemPoolPulls }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">总抽数</span>
+            <span class="phio-stat-value">{{ historyPullsTotal }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">总命中数</span>
+            <span class="phio-stat-value">{{ historyHitsTotal }}</span>
+          </div>
+        </template>
+        <template v-else>
+          <div class="phio-stat">
+            <span class="phio-stat-label">总抽数</span>
+            <span class="phio-stat-value">{{ totalPulls }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">五星</span>
+            <span class="phio-stat-value">{{ star5Pulls }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">四星</span>
+            <span class="phio-stat-value">{{ star4Pulls }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">三星</span>
+            <span class="phio-stat-value">{{ star3Pulls }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">五星平均</span>
+            <span class="phio-stat-value">{{ star5Avg }}</span>
+          </div>
+          <div class="phio-stat">
+            <span class="phio-stat-label">四星平均</span>
+            <span class="phio-stat-value">{{ star4Avg }}</span>
+          </div>
+        </template>
+      </div>
+    </section>
+
+    <!-- 卡池信息（卡池模式） -->
+    <section v-if="!itemMode" class="phio-section">
+      <div class="phio-section-title">
+        <div>
+          <v-icon color="var(--tgc-od-orange)" size="18">mdi-information-outline</v-icon>
+          <strong>卡池信息</strong>
+        </div>
+        <span>UP 五星 {{ pool5List.length }} · UP 四星 {{ pool4List.length }}</span>
+      </div>
+      <div v-if="pool5List.length > 0 || pool4List.length > 0" class="phio-up-list">
+        <div v-if="pool5List.length > 0" class="phio-up-group phio-up-group--5">
+          <span class="phio-icon-list">
+            <img
+              v-for="item in pool5List"
+              :key="item.id"
+              :src="item.icon"
+              :title="item.name"
+              alt="icon"
+            />
+          </span>
+        </div>
+        <div v-if="pool4List.length > 0" class="phio-up-group phio-up-group--4">
+          <span class="phio-icon-list">
+            <img
+              v-for="item in pool4List"
+              :key="item.id"
+              :src="item.icon"
+              :title="item.name"
+              alt="icon"
+            />
+          </span>
+        </div>
+      </div>
+      <div v-else class="phio-empty">未匹配到 gacha.json 中的卡池数据</div>
+    </section>
+
+    <!-- UP历史：物品模式展示该物品UP期数，卡池模式展示同名卡池历次UP -->
+    <section class="phio-section">
+      <div class="phio-section-title">
+        <div>
+          <v-icon color="var(--tgc-od-orange)" size="18">mdi-history</v-icon>
+          <strong>UP 历史</strong>
+        </div>
+        <span>{{ itemMode ? `共 ${upCount} 期` : `共 ${poolHistory.length} 期` }}</span>
+      </div>
+      <div v-if="itemMode && upCount > 0" class="phio-meta">
+        <span>首次 UP：{{ firstUpTime }}</span>
+        <span>最近 UP：{{ lastUpTime }}</span>
+      </div>
+      <div v-if="historyRows.length === 0" class="phio-empty">未找到 UP 记录</div>
+      <div v-else ref="tableWrapRef" class="phio-table-wrap">
+        <table class="phio-table">
+          <thead>
+            <tr class="phio-table-head">
+              <th>版本</th>
+              <th class="phio-table-left">卡池名称</th>
+              <th class="phio-table-left">类型</th>
+              <th>期数</th>
+              <template v-if="itemMode">
+                <th v-if="!showEmptyStats" class="phio-table-right">抽数</th>
+                <th v-if="!showEmptyStats" class="phio-table-right">命中</th>
+              </template>
+              <template v-else>
+                <th>UP 五星</th>
+                <th v-if="!isMixUpPool">UP 四星</th>
+                <th v-if="!showEmptyStats" class="phio-table-right">抽数</th>
+              </template>
+              <th>时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in historyRows"
+              :key="poolKey(row.pool)"
+              :class="{ current: isCurrentPool(row.pool) }"
+              class="phio-table-row"
+            >
+              <td class="phio-table-center">{{ row.pool.version }}</td>
+              <td class="phio-table-name">{{ row.pool.name }}</td>
+              <td class="phio-table-type">{{ getPoolTypeLabel(row.pool.type) }}</td>
+              <td class="phio-table-center">{{ row.pool.order === 1 ? "上半" : "下半" }}</td>
+              <template v-if="itemMode">
+                <td v-if="!showEmptyStats" class="phio-table-num">{{ row.pulls }}</td>
+                <td v-if="!showEmptyStats" class="phio-table-num">{{ row.hits }}</td>
+              </template>
+              <template v-else>
+                <td class="phio-table-center phio-table-up phio-table-up--5">
+                  <span class="phio-icon-list">
+                    <img
+                      v-for="item in row.up5List"
+                      :key="item.id"
+                      :src="item.icon"
+                      :title="item.name"
+                      alt="icon"
+                    />
+                  </span>
+                </td>
+                <td v-if="!isMixUpPool" class="phio-table-center phio-table-up phio-table-up--4">
+                  <span class="phio-icon-list">
+                    <img
+                      v-for="item in row.up4List"
+                      :key="item.id"
+                      :src="item.icon"
+                      :title="item.name"
+                      alt="icon"
+                    />
+                  </span>
+                </td>
+                <td v-if="!showEmptyStats" class="phio-table-num">{{ row.pulls }}</td>
+              </template>
+              <td class="phio-table-center phio-table-time">{{ getPoolTime(row.pool) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <template #right>
       <v-btn
         v-if="showSwitch"
         aria-label="下一个UP物品"
@@ -279,24 +289,23 @@
         variant="flat"
         @click="switchItem(true)"
       />
-    </div>
-  </TOverlay>
+    </template>
+  </TopOverlay>
 </template>
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useUserStore from "@store/user.js";
-import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
+import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 import { AppGachaData } from "@/data/index.js";
@@ -387,10 +396,8 @@ const emits = defineEmits<{ switchItem: [item: PhPoolItemOverlayItem] }>();
 const visible = defineModel<boolean>({ default: false });
 const router = useRouter();
 const { account } = storeToRefs(useUserStore());
-const panelRef = useTemplateRef<HTMLElement>("panelRef");
-const contentRef = useTemplateRef<HTMLElement>("contentRef");
+const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 const tableWrapRef = useTemplateRef<HTMLElement>("tableWrapRef");
-const version = ref<string>();
 
 const statsLoading = ref<boolean>(false);
 const poolRecords = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
@@ -505,10 +512,6 @@ const shareCaption = computed<string>(() => {
   return `${headingTitle.value} · ${typeLabel} · 限时祈愿`;
 });
 
-onMounted(async () => {
-  version.value = await getVersion();
-});
-
 watch(
   () => visible.value,
   async () => {
@@ -543,12 +546,12 @@ async function loadStats(): Promise<void> {
  * @since Beta v0.11.2
  */
 async function shareOverlay(): Promise<void> {
-  const element = panelRef.value;
+  const element = overlayPanel.value?.panel ?? null;
   if (element === null) {
     showSnackbar.error("未获取到分享内容");
     return;
   }
-  const content = contentRef.value;
+  const content = overlayPanel.value?.content ?? null;
   const table = tableWrapRef.value;
   const maxHeight = element.style.maxHeight;
   const overflowY = element.style.overflowY;
@@ -845,19 +848,6 @@ async function openPost(): Promise<void> {
 }
 </script>
 <style lang="scss" scoped>
-.phio-panel {
-  display: flex;
-  overflow: hidden;
-  width: min(720px, calc(100vw - 32px));
-  max-height: calc(100% - 32px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 18px 48px #00000066;
-}
-
-.phio-header,
 .phio-title-row,
 .phio-subtitle,
 .phio-section-title,
@@ -865,14 +855,6 @@ async function openPost(): Promise<void> {
 .phio-meta {
   display: flex;
   align-items: center;
-}
-
-.phio-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 8px;
 }
 
 .phio-arrow {
@@ -883,14 +865,6 @@ async function openPost(): Promise<void> {
   border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--box-text-2);
-}
-
-.phio-header {
-  flex-shrink: 0;
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--box-bg-1);
-  gap: 14px;
 }
 
 .phio-banner {
@@ -922,7 +896,7 @@ async function openPost(): Promise<void> {
     margin: 0;
     font-family: var(--font-title);
     font-size: 22px;
-    font-weight: 500;
+    font-weight: normal;
   }
 }
 
@@ -937,22 +911,6 @@ async function openPost(): Promise<void> {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-}
-
-.phio-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.phio-content {
-  display: flex;
-  min-height: 0;
-  flex: 1 1 auto;
-  flex-direction: column;
-  padding: 14px 16px 16px;
-  gap: 16px;
-  overflow-y: auto;
 }
 
 .phio-section {
@@ -1049,7 +1007,7 @@ async function openPost(): Promise<void> {
 .phio-stat-value {
   font-family: var(--font-title);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: normal;
 }
 
 .phio-stats--item {
@@ -1163,22 +1121,7 @@ async function openPost(): Promise<void> {
   }
 }
 
-.phio-share {
-  flex-shrink: 0;
-  padding: 8px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  color: var(--box-text-4);
-  font-size: 10px;
-  line-height: 14px;
-  text-align: center;
-}
-
 @media (width <= 600px) {
-  .phio-header {
-    align-items: flex-start;
-  }
-
   .phio-section-title {
     flex-direction: column;
     align-items: flex-start;

@@ -1,7 +1,13 @@
 <!-- 养成计划-单个目标汇总浮窗 -->
 <template>
-  <TOverlay v-model="visible" topOffset="132px">
-    <div class="ucpts-container">
+  <TopOverlay
+    ref="overlayPanel"
+    v-model="visible"
+    :shareCaption="shareCaption"
+    titleId="cultivation-target-summary-title"
+    topOffset="132px"
+  >
+    <template #left>
       <v-btn
         :disabled="!canSelectPrevious"
         aria-label="上一个养成目标"
@@ -11,114 +17,102 @@
         variant="flat"
         @click="selectEntry(false)"
       />
-      <article
-        ref="shareTarget"
-        aria-labelledby="cultivation-target-summary-title"
-        aria-modal="true"
-        class="ucpts-panel"
-        role="dialog"
-      >
-        <header class="ucpts-header">
-          <div class="ucpts-heading">
-            <UcItemIcon :alt="entry.name" :icon="entry.icon" :size="64" :star="entry.star" />
-            <div class="ucpts-identity">
-              <div class="ucpts-name-row">
-                <h2 id="cultivation-target-summary-title">{{ entry.name }}</h2>
-                <v-chip :color="statusColor" size="small" variant="tonal">{{ statusLabel }}</v-chip>
-              </div>
-              <div class="ucpts-meta">
-                <span>{{ entry.type === "avatar" ? "角色" : "武器" }}养成目标</span>
-                <span>{{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}</span>
-              </div>
-            </div>
-          </div>
-          <div class="ucpts-actions" data-html2canvas-ignore="true">
-            <v-btn
-              :loading="shareLoading"
-              aria-label="保存养成目标汇总分享图"
-              density="comfortable"
-              icon="mdi-share-variant"
-              title="保存养成目标汇总分享图"
-              variant="text"
-              @click="shareSummary"
-            />
-            <v-btn
-              aria-label="关闭养成目标汇总"
-              density="comfortable"
-              icon="mdi-close"
-              title="关闭"
-              variant="text"
-              @click="visible = false"
-            />
-          </div>
-        </header>
+    </template>
 
-        <main ref="contentTarget" class="ucpts-content">
-          <section class="ucpts-overview">
-            <div class="ucpts-overview-heading">
-              <div>
-                <span class="ucpts-section-label">目标进度</span>
-                <strong>{{ progressLabel }}</strong>
-              </div>
-              <span>{{ progress.toFixed(0) }}%</span>
-            </div>
-            <v-progress-linear :color="progressColor" :model-value="progress" height="6" rounded />
-            <div class="ucpts-target-states">
-              <div>
-                <span>等级</span>
-                <strong>
-                  Lv.{{ entry.currentState.level }} → Lv.{{ entry.targetState.level }}
-                </strong>
-              </div>
-              <div v-if="talentLevels.length > 0">
-                <span>天赋</span>
-                <strong>
-                  <span v-for="talent in talentLevels" :key="talent.id" :title="talent.name">
-                    {{ talent.label }} {{ talent.currentLevel }}→{{ talent.targetLevel }}
-                  </span>
-                </strong>
-              </div>
-              <div>
-                <span>材料</span>
-                <strong>{{ materials.length }} 种 · {{ missingKinds }} 种不足</strong>
-              </div>
-            </div>
-          </section>
+    <template #header>
+      <UcItemIcon :alt="entry.name" :icon="entry.icon" :size="64" :star="entry.star" />
+      <div class="ucpts-identity">
+        <div class="ucpts-name-row">
+          <h2 id="cultivation-target-summary-title">{{ entry.name }}</h2>
+          <v-chip :color="statusColor" size="small" variant="tonal">{{ statusLabel }}</v-chip>
+        </div>
+        <div class="ucpts-meta">
+          <span class="ucpts-meta-tag">
+            {{ entry.type === "avatar" ? "角色" : "武器" }}养成目标
+          </span>
+          <span class="ucpts-meta-tag ucpts-meta-tag--muted">
+            {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
+          </span>
+        </div>
+      </div>
+    </template>
 
-          <section class="ucpts-materials">
-            <div class="ucpts-section-heading">
-              <div>
-                <v-icon size="18">mdi-package-variant-closed</v-icon>
-                <h3>材料需求</h3>
-                <span class="ucpts-section-label">已按当前目标优先级分配背包库存</span>
-              </div>
-              <v-chip :color="progressColor" size="small" variant="tonal">
-                {{ materialStateLabel }}
-              </v-chip>
-            </div>
+    <template #actions>
+      <v-btn
+        :loading="shareLoading"
+        aria-label="保存养成目标汇总分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存养成目标汇总分享图"
+        variant="text"
+        @click="shareSummary"
+      />
+      <v-btn
+        aria-label="关闭养成目标汇总"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
 
-            <div v-if="displayMaterials.length > 0" class="ucpts-material-list">
-              <UcMaterialReq
-                v-for="material in displayMaterials"
-                :key="material.id"
-                :material
-                @select="openMaterialInfo(material)"
-              />
-            </div>
-            <div v-else class="ucpts-empty">
-              <v-icon size="48">mdi-package-variant-closed-check</v-icon>
-              <span>{{ emptyText }}</span>
-            </div>
-          </section>
-        </main>
+    <section class="ucpts-overview">
+      <div class="ucpts-overview-heading">
+        <div>
+          <span class="ucpts-section-label">目标进度</span>
+          <strong>{{ progressLabel }}</strong>
+        </div>
+        <span>{{ progress.toFixed(0) }}%</span>
+      </div>
+      <v-progress-linear :color="progressColor" :model-value="progress" height="6" rounded />
+      <div class="ucpts-target-states">
+        <div>
+          <span>等级</span>
+          <strong>Lv.{{ entry.currentState.level }} → Lv.{{ entry.targetState.level }}</strong>
+        </div>
+        <div v-if="talentLevels.length > 0">
+          <span>天赋</span>
+          <strong>
+            <span v-for="talent in talentLevels" :key="talent.id" :title="talent.name">
+              {{ talent.label }} {{ talent.currentLevel }}→{{ talent.targetLevel }}
+            </span>
+          </strong>
+        </div>
+        <div>
+          <span>材料</span>
+          <strong>{{ materials.length }} 种 · {{ missingKinds }} 种不足</strong>
+        </div>
+      </div>
+    </section>
 
-        <footer class="ucpts-footer">
-          <span>养成目标汇总</span>
-          <span> · {{ entry.name }} · 第 {{ currentPosition }} / {{ entries.length }} 项</span>
-          <span> · UID {{ uid }}</span>
-          <span> · Rendered by TeyvatGuide v{{ version }}</span>
-        </footer>
-      </article>
+    <section class="ucpts-materials">
+      <div class="ucpts-section-heading">
+        <div>
+          <v-icon size="18">mdi-package-variant-closed</v-icon>
+          <h3>材料需求</h3>
+          <span class="ucpts-section-label">已按当前目标优先级分配背包库存</span>
+        </div>
+        <v-chip :color="progressColor" size="small" variant="tonal">
+          {{ materialStateLabel }}
+        </v-chip>
+      </div>
+
+      <div v-if="displayMaterials.length > 0" class="ucpts-material-list">
+        <UcMaterialReq
+          v-for="material in displayMaterials"
+          :key="material.id"
+          :material
+          @select="openMaterialInfo(material)"
+        />
+      </div>
+      <div v-else class="ucpts-empty">
+        <v-icon size="48">mdi-package-variant-closed-check</v-icon>
+        <span>{{ emptyText }}</span>
+      </div>
+    </section>
+
+    <template #right>
       <v-btn
         :disabled="!canSelectNext"
         aria-label="下一个养成目标"
@@ -128,14 +122,15 @@
         variant="flat"
         @click="selectEntry(true)"
       />
-    </div>
-  </TOverlay>
+    </template>
+  </TopOverlay>
 
   <UcMaterialDetail
     v-if="currentMaterial && currentWiki"
     v-model="materialOverlayVisible"
     :bag="bagMaterials.get(currentMaterial.id)"
     :footerContext="`${entry.name}养成目标`"
+    :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
     topOffset="132px"
     :uid
@@ -144,16 +139,15 @@
 </template>
 
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
-import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from "vue";
+import { computed, nextTick, ref, shallowRef, useTemplateRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
 
@@ -174,14 +168,17 @@ const TALENT_LABELS = <const>["A", "E", "Q"];
 const props = defineProps<UcPlanTargetSummaryOverlayProps>();
 const emits = defineEmits<UcPlanTargetSummaryOverlayEmits>();
 const visible = defineModel<boolean>({ required: true });
-const version = ref<string>();
 const shareLoading = ref<boolean>(false);
 const materialOverlayVisible = ref<boolean>(false);
+const currentMaterialIndex = ref<number>(0);
 const currentMaterial = shallowRef<TGApp.App.UserCalc.ResultMaterial>();
 const currentWiki = shallowRef<TGApp.App.Material.WikiItem>();
-const shareTarget = useTemplateRef<HTMLElement>("shareTarget");
-const contentTarget = useTemplateRef<HTMLElement>("contentTarget");
+const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 
+const shareCaption = computed<string>(
+  () =>
+    `养成目标汇总 · ${props.entry.name} · 第 ${currentPosition.value} / ${props.entries.length} 项 · UID ${props.uid}`,
+);
 const currentIndex = computed<number>(() =>
   props.entries.findIndex((entry) => entry.id === props.entry.id),
 );
@@ -253,8 +250,6 @@ const talentLevels = computed<Array<TGApp.App.UserCalc.TalentLevelView>>(() => {
   }));
 });
 
-onMounted(async () => (version.value = await getVersion()));
-
 function selectEntry(isNext: boolean): void {
   const nextIndex = currentIndex.value + (isNext ? 1 : -1);
   const entry = props.entries[nextIndex];
@@ -265,7 +260,9 @@ function selectEntry(isNext: boolean): void {
 async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Promise<void> {
   const wiki = WikiMaterialData.find((item) => item.id === material.id);
   if (!wiki) return;
+  const index = displayMaterials.value.findIndex((item) => item.id === material.id);
   materialOverlayVisible.value = false;
+  currentMaterialIndex.value = index >= 0 ? index : 0;
   currentMaterial.value = material;
   currentWiki.value = wiki;
   await nextTick();
@@ -273,8 +270,8 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
 }
 
 async function shareSummary(): Promise<void> {
-  const panel = shareTarget.value;
-  const content = contentTarget.value;
+  const panel = overlayPanel.value?.panel ?? null;
+  const content = overlayPanel.value?.content ?? null;
   if (panel === null || content === null) {
     showSnackbar.error("未获取到养成目标汇总内容");
     return;
@@ -299,28 +296,6 @@ async function shareSummary(): Promise<void> {
 </script>
 
 <style lang="scss" scoped>
-.ucpts-container {
-  display: flex;
-  max-height: calc(100% - 32px);
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.ucpts-panel {
-  display: flex;
-  overflow: hidden;
-  width: 800px;
-  max-width: calc(100vw - 160px);
-  flex-direction: column;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 12px;
-  background: var(--app-page-bg);
-  box-shadow: 0 8px 24px var(--common-shadow-t-4);
-}
-
-.ucpts-header,
-.ucpts-heading,
 .ucpts-name-row,
 .ucpts-meta,
 .ucpts-overview-heading,
@@ -328,28 +303,6 @@ async function shareSummary(): Promise<void> {
 .ucpts-section-heading > div {
   display: flex;
   align-items: center;
-}
-
-.ucpts-header {
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid var(--common-shadow-1);
-  background: var(--dialog-header-bg);
-  gap: 12px;
-}
-
-.ucpts-heading {
-  min-width: 0;
-  flex: 1;
-  gap: 12px;
-}
-
-.ucpts-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  color: var(--box-text-2);
-  gap: 4px;
 }
 
 .ucpts-identity {
@@ -386,14 +339,20 @@ async function shareSummary(): Promise<void> {
   gap: 8px;
 }
 
-.ucpts-content {
-  display: flex;
-  min-height: 0;
-  max-height: 520px;
-  flex-direction: column;
-  padding: 16px;
-  gap: 12px;
-  overflow-y: auto;
+.ucpts-meta-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-orange);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.ucpts-meta-tag--muted {
+  color: var(--box-text-2);
 }
 
 .ucpts-overview,
@@ -514,16 +473,6 @@ async function shareSummary(): Promise<void> {
   gap: 8px;
 }
 
-.ucpts-footer {
-  padding: 8px 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  background: var(--dialog-footer-bg);
-  color: var(--box-text-4);
-  font-size: 10px;
-  line-height: 14px;
-  text-align: center;
-}
-
 .ucpts-card-arrow {
   width: 40px;
   height: 40px;
@@ -535,14 +484,6 @@ async function shareSummary(): Promise<void> {
 }
 
 @media (width <= 720px) {
-  .ucpts-container {
-    gap: 8px;
-  }
-
-  .ucpts-panel {
-    max-width: calc(100vw - 112px);
-  }
-
   .ucpts-target-states,
   .ucpts-material-list {
     grid-template-columns: 1fr;
