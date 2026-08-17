@@ -13,90 +13,104 @@
           label="游戏UID"
           variant="outlined"
         />
-        <v-locale-provider :messages class="gacha-top-period-locale" locale="zhHans">
-          <v-date-input
-            v-model="periodDates"
-            v-model:menu="periodMenu"
-            :display-format="formatGachaPeriodDate"
-            :hide-actions="false"
-            :hide-details="true"
+        <div class="gacha-top-period">
+          <GroPeriodDates
+            :end="periodRange.end"
             :label="periodLabel"
-            :menu-props="periodMenuProps"
-            :picker-props="periodPickerProps"
-            class="gacha-top-period"
-            clearable
-            density="compact"
-            first-day-of-week="1"
-            hide-header
-            multiple="range"
-            prepend-icon=""
-            prepend-inner-icon="mdi-calendar-range"
-            variant="outlined"
-            weekday-format="narrow"
+            :start="periodRange.start"
+            @clear="clearPeriod"
+            @commit="commitPeriodDates"
+            @open-calendar="togglePeriodCalendar"
+          />
+          <v-menu
+            v-model="periodMenu"
+            :close-on-content-click="false"
+            :open-on-click="false"
+            :open-on-focus="false"
+            activator="parent"
+            location="bottom start"
+            offset="12"
           >
-            <template #day="{ props: dayProps, item }">
-              <v-btn v-bind="dayProps" :title="getVersionDayTitle(item.isoDate)">
-                {{ item.localized }}
-              </v-btn>
-              <span
-                v-if="getVersionColor(item.isoDate)"
-                :class="{
-                  start: isVersionStartDay(item.isoDate),
-                  end: isVersionEndDay(item.isoDate),
-                }"
-                :style="{ background: getVersionColor(item.isoDate) }"
-                class="gacha-top-cal-bar"
-              />
-              <span
-                v-if="!item.isAdjacent && isVersionStartDay(item.isoDate)"
-                :style="{ color: getVersionColor(item.isoDate) }"
-                class="gacha-top-cal-ver"
-              >
-                {{ getVersionStartLabel(item.isoDate) }}
-              </span>
-            </template>
-            <template #actions="{ save, cancel }">
-              <div class="gacha-top-cal-footer">
-                <div class="gacha-top-cal-legend">
-                  <button
-                    v-for="item in visibleVersionLegend"
-                    :key="item.key"
-                    :class="{ active: isVersionPeriodSelected(item) }"
-                    :title="item.title"
-                    class="gacha-top-cal-legend-item"
-                    type="button"
-                    @click="selectVersionPeriod(item)"
-                  >
-                    <span :style="{ background: item.color }" class="gacha-top-cal-swatch" />
-                    {{ item.label }}
-                  </button>
-                  <span v-if="visibleVersionLegend.length === 0" class="gacha-top-cal-legend-empty">
-                    此月无版本卡池
-                  </span>
-                </div>
-                <div class="gacha-top-cal-actions">
-                  <v-btn
-                    class="gacha-top-cal-now"
-                    density="comfortable"
-                    variant="text"
-                    @click="jumpToToday"
-                  >
-                    现在
-                  </v-btn>
-                  <v-btn density="comfortable" variant="text" @click="cancel">取消</v-btn>
-                  <v-btn
-                    color="var(--tgc-od-blue)"
-                    density="comfortable"
-                    variant="text"
-                    @click="save"
-                  >
-                    确定
-                  </v-btn>
+            <v-locale-provider :messages locale="zhHans">
+              <div class="gacha-top-cal">
+                <v-date-picker
+                  v-model="pickerDraft"
+                  v-bind="periodPickerProps"
+                  first-day-of-week="1"
+                  hide-header
+                  multiple="range"
+                  show-adjacent-months
+                  weekday-format="narrow"
+                >
+                  <template #day="{ props: dayProps, item }">
+                    <v-btn v-bind="dayProps" :title="getVersionDayTitle(item.isoDate)">
+                      {{ item.localized }}
+                    </v-btn>
+                    <span
+                      v-if="getVersionColor(item.isoDate)"
+                      :class="{
+                        start: isVersionStartDay(item.isoDate),
+                        end: isVersionEndDay(item.isoDate),
+                      }"
+                      :style="{ background: getVersionColor(item.isoDate) }"
+                      class="gacha-top-cal-bar"
+                    />
+                    <span
+                      v-if="!item.isAdjacent && isVersionStartDay(item.isoDate)"
+                      :style="{ color: getVersionColor(item.isoDate) }"
+                      class="gacha-top-cal-ver"
+                    >
+                      {{ getVersionStartLabel(item.isoDate) }}
+                    </span>
+                  </template>
+                </v-date-picker>
+                <div class="gacha-top-cal-footer">
+                  <div class="gacha-top-cal-legend">
+                    <button
+                      v-for="item in visibleVersionLegend"
+                      :key="item.key"
+                      :class="{ active: isVersionPeriodSelected(item) }"
+                      :title="item.title"
+                      class="gacha-top-cal-legend-item"
+                      type="button"
+                      @click="previewVersionPeriod(item)"
+                    >
+                      <span :style="{ background: item.color }" class="gacha-top-cal-swatch" />
+                      {{ item.label }}
+                    </button>
+                    <span
+                      v-if="visibleVersionLegend.length === 0"
+                      class="gacha-top-cal-legend-empty"
+                    >
+                      此月无版本卡池
+                    </span>
+                  </div>
+                  <div class="gacha-top-cal-actions">
+                    <v-btn
+                      class="gacha-top-cal-now"
+                      density="comfortable"
+                      variant="text"
+                      @click="jumpToToday"
+                    >
+                      现在
+                    </v-btn>
+                    <v-btn density="comfortable" variant="text" @click="cancelPeriodCalendar">
+                      取消
+                    </v-btn>
+                    <v-btn
+                      color="var(--tgc-od-blue)"
+                      density="comfortable"
+                      variant="text"
+                      @click="savePeriodCalendar"
+                    >
+                      确定
+                    </v-btn>
+                  </div>
                 </div>
               </div>
-            </template>
-          </v-date-input>
-        </v-locale-provider>
+            </v-locale-provider>
+          </v-menu>
+        </div>
         <img
           alt="byd"
           class="gacha-top-byd"
@@ -254,6 +268,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import GroEcharts from "@comp/userGacha/gro-echarts.vue";
 import GroHistory from "@comp/userGacha/gro-history.vue";
 import GroOverview from "@comp/userGacha/gro-overview.vue";
+import GroPeriodDates from "@comp/userGacha/gro-period-dates.vue";
 import GroRerun from "@comp/userGacha/gro-rerun.vue";
 import GroTable from "@comp/userGacha/gro-table.vue";
 import UgoHutaoDu, { type UgoHutaoMode } from "@comp/userGacha/ugo-hutao-du.vue";
@@ -270,7 +285,6 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import {
   filterGachaDisplayList,
   formatGachaInclusiveEnd,
-  formatGachaPeriodDate,
   GACHA_VERSION_RANGES,
   getGachaVersionRangeByIso,
   getVisibleGachaVersionLegend,
@@ -293,12 +307,10 @@ import { AppCalendarData } from "@/data/index.js";
 
 type GachaPeriodPickerProps = {
   bgColor: string;
-  class: string;
   color: string;
   elevation: number;
   month: number;
   rounded: string;
-  style: { boxShadow: string };
   width: number;
   year: number;
   "onUpdate:month": (value: unknown) => void;
@@ -331,11 +343,12 @@ const isRefreshing = ref<boolean>(false);
 const versionFilter = ref<string | null>(null);
 const periodDates = ref<Array<Date> | null>(null);
 const periodMenu = ref<boolean>(false);
+const pickerDraft = ref<Array<Date>>([]);
+const pickerDraftVersion = ref<string | null>(null);
 const today = new Date();
 const pickerMonth = ref<number>(today.getMonth());
 const pickerYear = ref<number>(today.getFullYear());
 const messages = { zhHans };
-const periodMenuProps = { offset: 12 };
 const periodRange = computed(() => normalizeGachaPeriodDates(periodDates.value));
 const periodLabel = computed<string>(() => {
   if (versionFilter.value === null || versionFilter.value === "") return "时间";
@@ -346,12 +359,10 @@ const gachaListView = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
 );
 const periodPickerProps = computed<GachaPeriodPickerProps>(() => ({
   bgColor: "var(--box-bg-1)",
-  class: "gacha-top-cal-picker",
   color: "var(--tgc-od-blue)",
   elevation: 0,
   month: pickerMonth.value,
-  rounded: "12",
-  style: { boxShadow: "0 8px 24px var(--common-shadow-4)" },
+  rounded: "0",
   width: 360,
   year: pickerYear.value,
   "onUpdate:month": onPickerMonth,
@@ -378,11 +389,24 @@ watch(
 );
 watch(periodMenu, (open) => {
   if (!open) return;
+  pickerDraftVersion.value = versionFilter.value;
+  pickerDraft.value = periodDates.value === null ? [] : [...periodDates.value];
   syncPickerToAnchor();
 });
-watch(periodDates, () => {
-  syncVersionFilterWithPeriod();
-});
+watch(
+  periodDates,
+  () => {
+    syncVersionFilterWithPeriod();
+  },
+  { flush: "sync" },
+);
+watch(
+  pickerDraft,
+  () => {
+    syncDraftVersionWithPicker();
+  },
+  { flush: "sync" },
+);
 
 function onPickerMonth(value: unknown): void {
   const month = Number(value);
@@ -435,21 +459,65 @@ function getVersionDayTitle(isoDate: string): string {
 }
 
 function isVersionPeriodSelected(item: GachaVersionLegendItem): boolean {
+  const draftRange = normalizeGachaPeriodDates(pickerDraft.value);
   return (
-    versionFilter.value === item.label &&
-    periodRange.value.start === item.startDay &&
-    periodRange.value.end === formatGachaInclusiveEnd(item.endDay)
+    pickerDraftVersion.value === item.label &&
+    draftRange.start === item.startDay &&
+    draftRange.end === formatGachaInclusiveEnd(item.endDay)
   );
 }
 
-function selectVersionPeriod(item: GachaVersionLegendItem): void {
+function previewVersionPeriod(item: GachaVersionLegendItem): void {
   const start = parseGachaIsoDate(item.startDay);
   const end = parseGachaIsoDate(formatGachaInclusiveEnd(item.endDay));
   if (start === undefined || end === undefined) return;
-  versionFilter.value = item.label;
-  periodDates.value = [start, end];
+  pickerDraftVersion.value = item.label;
+  pickerDraft.value = [start, end];
   pickerYear.value = start.getFullYear();
   pickerMonth.value = start.getMonth();
+}
+
+function togglePeriodCalendar(): void {
+  periodMenu.value = !periodMenu.value;
+}
+
+function cancelPeriodCalendar(): void {
+  periodMenu.value = false;
+}
+
+function savePeriodCalendar(): void {
+  periodDates.value = pickerDraft.value.length === 0 ? null : [...pickerDraft.value];
+  versionFilter.value = pickerDraftVersion.value;
+  periodMenu.value = false;
+  syncVersionFilterWithPeriod();
+}
+
+function clearPeriod(): void {
+  versionFilter.value = null;
+  periodDates.value = null;
+}
+
+function commitPeriodDates(start: string, end: string): void {
+  const startDate = parseGachaIsoDate(start);
+  const endDate = parseGachaIsoDate(end);
+  if (startDate === undefined || endDate === undefined) return;
+  periodDates.value = [startDate, endDate];
+  pickerYear.value = startDate.getFullYear();
+  pickerMonth.value = startDate.getMonth();
+}
+
+function syncDraftVersionWithPicker(): void {
+  if (pickerDraftVersion.value === null || pickerDraftVersion.value === "") return;
+  const range = GACHA_VERSION_RANGES.find((item) => item.version === pickerDraftVersion.value);
+  if (range === undefined) {
+    pickerDraftVersion.value = null;
+    return;
+  }
+  const draftRange = normalizeGachaPeriodDates(pickerDraft.value);
+  const end = formatGachaInclusiveEnd(range.endDay);
+  if (draftRange.start !== range.startDay || draftRange.end !== end) {
+    pickerDraftVersion.value = null;
+  }
 }
 
 function syncVersionFilterWithPeriod(): void {
@@ -1223,13 +1291,16 @@ async function checkData(): Promise<void> {
   column-gap: 8px;
 }
 
-.gacha-top-period-locale {
-  display: contents;
+.gacha-top-period {
+  width: 256px;
+  flex: 0 0 auto;
 }
 
-.gacha-top-period {
-  width: 340px;
-  flex: 0 0 auto;
+.gacha-top-cal {
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--box-bg-1);
+  box-shadow: 0 8px 24px var(--common-shadow-4);
 }
 
 .gacha-top-cal-bar {
