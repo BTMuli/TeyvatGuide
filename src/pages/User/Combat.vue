@@ -74,7 +74,10 @@
           </v-btn>
         </div>
         <div class="uct-extension-right">
-          <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
+          <div class="uct-hutao-account" title="胡桃云" @click="tryLoginHutao()">
+            <img alt="hutao" src="/platforms/other/hutao.webp" />
+            <span>{{ userName ?? "登录胡桃云" }}</span>
+          </div>
           <v-btn
             class="uc-btn"
             prepend-icon="mdi-cloud-upload"
@@ -597,10 +600,21 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   align-items: center;
   justify-content: center;
   column-gap: 8px;
+}
 
-  span {
-    color: var(--tgc-od-red);
-    cursor: pointer;
+.uct-hutao-account {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-red);
+  column-gap: 4px;
+  cursor: pointer;
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
   }
 }
 

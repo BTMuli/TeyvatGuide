@@ -25,7 +25,10 @@
     <template #append>
       <div class="gacha-top-append">
         <div class="gacha-hutao-box">
-          <span @click="tryLoginHutao()">{{ userName ?? "登录胡桃云" }}</span>
+          <div class="gacha-hutao-account" title="胡桃云" @click="tryLoginHutao()">
+            <img alt="hutao" src="/platforms/other/hutao.webp" />
+            <span>{{ userName ?? "登录胡桃云" }}</span>
+          </div>
           <v-btn
             :disabled="!isLoginHutao"
             class="gacha-top-btn"
@@ -953,10 +956,21 @@ async function checkData(): Promise<void> {
   align-items: center;
   justify-content: center;
   column-gap: 8px;
+}
 
-  span {
-    color: var(--tgc-od-red);
-    cursor: pointer;
+.gacha-hutao-account {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tgc-od-red);
+  column-gap: 4px;
+  cursor: pointer;
+
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
   }
 }
 
