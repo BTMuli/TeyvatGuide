@@ -17,36 +17,15 @@
     <div class="ucmi-info">
       <div class="ucmi-name-row">
         <span class="ucmi-name">{{ material.name }}</span>
-        <span
-          :class="{ lack: material.missing > 0 }"
-          :title="formatFullCount(material.missing)"
-          class="ucmi-status"
-        >
-          {{
-            material.missing > 0
-              ? `缺少 ${formatCount(material.missing)}`
-              : material.craftable > 0
-                ? "合成后满足"
-                : "已满足"
-          }}
-        </span>
       </div>
       <span class="ucmi-type">{{ material.type }}</span>
-      <div class="ucmi-counts">
-        <span :title="formatFullCount(material.required)" class="required">
-          需要 {{ formatCount(material.required) }}
-        </span>
-        <span :title="formatFullCount(material.owned)" class="owned">
-          持有 {{ formatCount(material.owned) }}
-        </span>
-        <span
-          v-if="material.craftable > 0"
-          :title="formatFullCount(material.craftable)"
-          class="craftable"
-        >
-          可合成 {{ formatCount(material.craftable) }}
-        </span>
-      </div>
+      <UcMaterialCount
+        :complete="material.missing === 0"
+        :craftable="material.craftable"
+        :current="material.owned"
+        :required="material.required"
+        compact
+      />
       <v-progress-linear
         :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
         :model-value="material.progress"
@@ -58,6 +37,8 @@
 </template>
 
 <script lang="ts" setup>
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
+
 type UcMaterialItemProps = {
   material: TGApp.App.UserCalc.ResultMaterial;
   weakenReady?: boolean;
@@ -66,21 +47,6 @@ type UcMaterialItemEmits = { select: [] };
 
 const { weakenReady = false } = defineProps<UcMaterialItemProps>();
 const emits = defineEmits<UcMaterialItemEmits>();
-
-function formatCount(count: number): string {
-  const units = [
-    { base: 1_000_000_000, suffix: "B" },
-    { base: 1_000_000, suffix: "M" },
-    { base: 1_000, suffix: "k" },
-  ];
-  const unit = units.find((item) => count >= item.base);
-  if (!unit) return formatFullCount(count);
-  return `${(count / unit.base).toFixed(1).replace(/\.0$/, "")}${unit.suffix}`;
-}
-
-function formatFullCount(count: number): string {
-  return count.toLocaleString("zh-CN");
-}
 </script>
 
 <style lang="scss" scoped>
@@ -158,16 +124,6 @@ function formatFullCount(count: number): string {
   overflow-wrap: anywhere;
 }
 
-.ucmi-status {
-  flex-shrink: 0;
-  color: var(--tgc-od-green);
-  font-size: 12px;
-
-  &.lack {
-    color: var(--tgc-od-red);
-  }
-}
-
 .ucmi-type {
   color: var(--common-text-sub);
   font-size: 12px;
@@ -175,27 +131,7 @@ function formatFullCount(count: number): string {
   overflow-wrap: anywhere;
 }
 
-.ucmi-counts {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+.ucmc-count {
   font-size: 12px;
-  gap: 4px 8px;
-
-  span {
-    white-space: nowrap;
-  }
-
-  .required {
-    color: var(--tgc-od-orange);
-  }
-
-  .owned {
-    color: var(--tgc-od-blue);
-  }
-
-  .craftable {
-    color: var(--tgc-od-green);
-  }
 }
 </style>

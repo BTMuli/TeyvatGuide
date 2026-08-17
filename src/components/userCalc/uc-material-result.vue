@@ -1,7 +1,7 @@
 <!-- 养成计算-材料需求 -->
 <template>
-  <div class="ucm-result">
-    <header class="ucm-header">
+  <v-card class="ucm-result" variant="outlined">
+    <v-card-title class="ucm-header">
       <div class="ucm-heading">
         <v-icon color="var(--tgc-od-orange)" size="18">mdi-clipboard-list-outline</v-icon>
         <span>材料需求</span>
@@ -47,7 +47,7 @@
           <span>使用异梦溶媒</span>
         </div>
       </div>
-    </header>
+    </v-card-title>
 
     <section v-if="loading" class="ucm-empty ucm-section">
       <v-progress-circular color="var(--tgc-od-orange)" indeterminate size="48" />
@@ -79,17 +79,13 @@
             <div class="ucm-material-info">
               <div class="ucm-material-heading">
                 <strong>{{ material.name }}</strong>
-                <span
-                  :class="{ complete: material.missing === 0 }"
-                  :title="getMaterialCountTitle(material)"
+                <UcMaterialCount
                   class="ucm-material-count"
-                >
-                  <span class="owned">{{ formatCount(material.owned) }}</span>
-                  <span v-if="material.craftable > 0" class="craftable">
-                    ({{ formatCount(material.craftable) }})
-                  </span>
-                  <span>/{{ formatCount(material.required) }}</span>
-                </span>
+                  :complete="material.missing === 0"
+                  :craftable="material.craftable"
+                  :current="material.owned"
+                  :required="material.required"
+                />
               </div>
               <div class="ucm-material-meta">{{ material.type }}</div>
               <v-progress-linear
@@ -122,7 +118,7 @@
       <v-icon size="48">mdi-package-variant-closed-check</v-icon>
       <span>{{ emptyText }}</span>
     </section>
-  </div>
+  </v-card>
   <UcMaterialDetail
     v-if="currentMaterial && currentWiki"
     v-model="materialOverlayVisible"
@@ -154,11 +150,11 @@
     </template>
   </UcMaterialDetail>
 </template>
-
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import PboConvertMaterial from "@comp/pageBag/pbo-convert-material.vue";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import { computed, nextTick, ref, shallowRef } from "vue";
 
@@ -240,26 +236,17 @@ function switchMaterial(isNext: boolean): void {
   currentMaterial.value = material;
   currentWiki.value = wiki;
 }
-
-function formatCount(count: number): string {
-  return count.toLocaleString("zh-CN");
-}
-
-function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): string {
-  const crafting = material.craftable > 0 ? `，可合成 ${formatCount(material.craftable)}` : "";
-  return `持有 ${formatCount(material.owned)}${crafting}，总需 ${formatCount(material.required)}`;
-}
 </script>
-
 <style lang="scss" scoped>
 .ucm-result {
   display: flex;
   width: 100%;
   flex-direction: column;
-  padding: 10px;
-  border-radius: 10px;
-  background: var(--app-page-bg);
-  gap: 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  box-shadow: 0 0 8px var(--common-shadow-1);
 }
 
 .ucm-header {
@@ -282,7 +269,6 @@ function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): str
 
 .ucm-section {
   padding: 8px;
-  border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
 }
@@ -395,23 +381,7 @@ function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): str
 }
 
 .ucm-material-count {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: baseline;
-  color: var(--tgc-od-red);
   font-size: 11px;
-
-  .owned {
-    color: var(--tgc-od-blue);
-  }
-
-  .craftable {
-    color: var(--tgc-od-green);
-  }
-
-  &.complete {
-    color: var(--tgc-od-green);
-  }
 }
 
 .ucm-material-meta {
@@ -435,6 +405,7 @@ function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): str
 .ucm-cost-summary {
   display: flex;
   flex-direction: column;
+  border-top: 1px solid var(--common-shadow-1);
   gap: 8px;
 }
 
@@ -463,11 +434,6 @@ function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): str
 }
 
 @media (width <= 600px) {
-  .ucm-result {
-    padding: 8px;
-    gap: 8px;
-  }
-
   .ucm-list {
     grid-template-columns: 1fr;
   }

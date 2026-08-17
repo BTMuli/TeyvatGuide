@@ -28,7 +28,6 @@
               </div>
               <div class="ucpts-meta">
                 <span>{{ entry.type === "avatar" ? "角色" : "武器" }}养成目标</span>
-                <span>UID {{ uid }}</span>
                 <span>{{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}</span>
               </div>
             </div>
@@ -118,20 +117,14 @@
                 <div class="ucpts-material-info">
                   <div class="ucpts-material-heading">
                     <strong>{{ material.name }}</strong>
-                    <span
-                      :class="{ complete: material.missing === 0 }"
-                      class="ucpts-material-missing"
-                    >
-                      缺 {{ formatCount(material.missing) }}
-                    </span>
                   </div>
-                  <div class="ucpts-material-counts">
-                    <span>需求 {{ formatCount(material.required) }}</span>
-                    <span>已有 {{ formatCount(material.owned) }}</span>
-                    <span v-if="material.craftable > 0">
-                      可合成 {{ formatCount(material.craftable) }}
-                    </span>
-                  </div>
+                  <UcMaterialCount
+                    class="ucpts-material-count"
+                    :complete="material.missing === 0"
+                    :craftable="material.craftable"
+                    :current="material.owned"
+                    :required="material.required"
+                  />
                   <v-progress-linear
                     :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
                     :model-value="material.progress"
@@ -184,6 +177,7 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
@@ -315,10 +309,6 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
   materialOverlayVisible.value = true;
 }
 
-function formatCount(count: number): string {
-  return count.toLocaleString("zh-CN");
-}
-
 async function shareSummary(): Promise<void> {
   const panel = shareTarget.value;
   const content = contentTarget.value;
@@ -374,7 +364,7 @@ async function shareSummary(): Promise<void> {
 .ucpts-section-heading,
 .ucpts-section-heading > div,
 .ucpts-material-heading,
-.ucpts-material-counts {
+.ucpts-material-count {
   display: flex;
   align-items: center;
 }
@@ -425,7 +415,7 @@ async function shareSummary(): Promise<void> {
 
 .ucpts-meta,
 .ucpts-section-label,
-.ucpts-material-counts {
+.ucpts-material-count {
   color: var(--common-text-sub);
   font-size: 12px;
   line-height: 16px;
@@ -615,21 +605,6 @@ async function shareSummary(): Promise<void> {
   justify-content: center;
   padding: 6px 8px;
   gap: 4px;
-}
-
-.ucpts-material-missing {
-  flex-shrink: 0;
-  color: var(--tgc-od-red);
-  font-size: 12px;
-
-  &.complete {
-    color: var(--tgc-od-green);
-  }
-}
-
-.ucpts-material-counts {
-  flex-wrap: wrap;
-  gap: 6px;
 }
 
 .ucpts-empty {

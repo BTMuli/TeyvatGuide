@@ -18,7 +18,6 @@
               <h2 id="cultivation-summary-title">{{ project.name }}</h2>
               <div class="ucps-meta">
                 <span class="ucps-meta-tag">养成计划汇总</span>
-                <span>UID {{ uid }}</span>
                 <span>{{ inventoryUpdatedLabel }}</span>
               </div>
             </div>
@@ -115,17 +114,13 @@
                 <div class="ucps-material-info">
                   <div class="ucps-material-heading">
                     <strong>{{ material.name }}</strong>
-                    <span
-                      :class="{ complete: material.missing === 0 }"
-                      :title="getMaterialCountTitle(material)"
+                    <UcMaterialCount
                       class="ucps-material-count"
-                    >
-                      <span class="owned">{{ formatCount(material.owned) }}</span>
-                      <span v-if="material.craftable > 0" class="craftable">
-                        ({{ formatCount(material.craftable) }})
-                      </span>
-                      <span>/{{ formatCount(material.required) }}</span>
-                    </span>
+                      :complete="material.missing === 0"
+                      :craftable="material.craftable"
+                      :current="material.owned"
+                      :required="material.required"
+                    />
                   </div>
                   <div class="ucps-material-meta">
                     <span>{{ material.type }}</span>
@@ -170,6 +165,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
@@ -235,15 +231,6 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
   currentWiki.value = wiki;
   await nextTick();
   materialOverlayVisible.value = true;
-}
-
-function formatCount(count: number): string {
-  return count.toLocaleString("zh-CN");
-}
-
-function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): string {
-  const crafting = material.craftable > 0 ? `，可合成 ${formatCount(material.craftable)}` : "";
-  return `持有 ${formatCount(material.owned)}${crafting}，总需 ${formatCount(material.required)}`;
 }
 
 async function shareSummary(): Promise<void> {
@@ -580,23 +567,7 @@ async function shareSummary(): Promise<void> {
 }
 
 .ucps-material-count {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: baseline;
-  color: var(--tgc-od-red);
   font-size: 11px;
-
-  .owned {
-    color: var(--tgc-od-blue);
-  }
-
-  .craftable {
-    color: var(--tgc-od-green);
-  }
-
-  &.complete {
-    color: var(--tgc-od-green);
-  }
 }
 
 .ucps-material-meta {

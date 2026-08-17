@@ -128,7 +128,7 @@
           </div>
         </div>
         <div class="phco-section-meta">
-          <span class="phco-section-hint">已准备数量按当前目标的优先分配结果统计（含可合成）</span>
+          <span class="phco-section-hint">当前量与可合成量按目标优先级分配结果统计</span>
         </div>
       </div>
       <div
@@ -154,14 +154,19 @@
           </div>
           <v-chip
             :color="
-              material.prepared < material.targetRequired
+              material.current + material.craftable < material.targetRequired
                 ? 'var(--tgc-od-red)'
                 : 'var(--tgc-od-green)'
             "
             size="small"
             variant="tonal"
           >
-            {{ formatCount(material.prepared) }}/{{ formatCount(material.targetRequired) }}
+            <UcMaterialCount
+              :complete="material.current + material.craftable >= material.targetRequired"
+              :craftable="material.craftable"
+              :current="material.current"
+              :required="material.targetRequired"
+            />
           </v-chip>
         </article>
       </div>
@@ -192,6 +197,7 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import { generateShareImg } from "@utils/TGShare.js";
 import { computed, onMounted, ref, useTemplateRef } from "vue";
@@ -210,11 +216,12 @@ type PhCalendarCultivationPanelProps = {
 type PhCalendarCultivationPanelEmits = { close: [] };
 
 type TargetMaterial = TGApp.App.Calendar.Material & {
+  craftable: number;
+  current: number;
   isToday: boolean;
-  prepared: number;
   targetRequired: number;
 };
-type SelectedMaterialAllocation = { prepared: number; type: string };
+type SelectedMaterialAllocation = { craftable: number; current: number; type: string };
 type DropDayLabel = { isToday: boolean; label: string; value: number };
 
 const dayLabels: Record<number, string> = {
@@ -254,7 +261,8 @@ const selectedMaterialAllocations = computed<Map<number, SelectedMaterialAllocat
     for (const material of props.entryMaterials.get(entry.id) ?? []) {
       const current = allocations.get(material.id);
       allocations.set(material.id, {
-        prepared: (current?.prepared ?? 0) + material.owned + material.craftable,
+        craftable: (current?.craftable ?? 0) + material.craftable,
+        current: (current?.current ?? 0) + material.owned,
         type: material.type,
       });
     }
@@ -283,10 +291,11 @@ const targetMaterials = computed<Array<TargetMaterial>>(() =>
       );
       return {
         ...material,
+        craftable: selectedMaterialAllocations.value.get(material.id)?.craftable ?? 0,
+        current: selectedMaterialAllocations.value.get(material.id)?.current ?? 0,
         isToday:
           isTraveler.value &&
           isMaterialAvailableToday(material.id, serverDay.value, WikiMaterialData),
-        prepared: selectedMaterialAllocations.value.get(material.id)?.prepared ?? 0,
         targetRequired,
       };
     })
@@ -313,10 +322,6 @@ const materialDropDays = computed<Array<DropDayLabel>>(() => {
     }));
 });
 const shareCaption = computed<string>(() => `${props.item.name} · 养成目标`);
-
-function formatCount(count: number): string {
-  return count.toLocaleString("zh-CN");
-}
 
 function comparePersistentEntries(
   a: TGApp.Sqlite.Cultivation.EntryWithItems,

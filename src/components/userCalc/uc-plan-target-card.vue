@@ -174,10 +174,12 @@
         <div class="ucptc-material-info">
           <div>
             <span class="ucptc-material-name">{{ materialName(material.item.materialId) }}</span>
-            <span
-              >{{ formatCount(material.prepared) }} /
-              {{ formatCount(material.item.required) }}</span
-            >
+            <UcMaterialCount
+              :complete="material.fulfilled"
+              :craftable="material.craftable"
+              :current="material.current"
+              :required="material.item.required"
+            />
           </div>
           <v-progress-linear
             :color="material.fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
@@ -193,6 +195,7 @@
 
 <script lang="ts" setup>
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import { computed } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -228,9 +231,10 @@ function selectMaterial(materialId: number): void {
 }
 
 type TargetMaterialView = {
+  craftable: number;
+  current: number;
   fulfilled: boolean;
   item: TGApp.Sqlite.Cultivation.Item;
-  prepared: number;
   progress: number;
 };
 
@@ -271,13 +275,16 @@ const displayMaterials = computed<Array<TargetMaterialView>>(() =>
   props.entry.items
     .map((item) => {
       const result = materialResultMap.value.get(item.materialId);
-      const prepared = result ? Math.min(result.owned + result.craftable, item.required) : 0;
+      const current = result?.owned ?? 0;
+      const craftable = result?.craftable ?? 0;
+      const prepared = Math.min(current + craftable, item.required);
       const ratio = item.required > 0 ? prepared / item.required : 0;
       const progress = ratio * 100;
       return {
+        craftable,
+        current,
         fulfilled: progress >= 100,
         item,
-        prepared,
         progress,
       };
     })
@@ -297,10 +304,6 @@ function materialIcon(materialId: number): string {
 function materialBackground(materialId: number): string {
   const star = WikiMaterialData.find((material) => material.id === materialId)?.star ?? 1;
   return `/icon/bg/${star}-Star.webp`;
-}
-
-function formatCount(count: number): string {
-  return count.toLocaleString("zh-CN");
 }
 </script>
 

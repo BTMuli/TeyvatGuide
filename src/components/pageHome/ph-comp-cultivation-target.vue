@@ -27,7 +27,7 @@
         Lv.{{ entry.targetState.level }}
       </small>
     </div>
-    <div v-if="sortedMissingMaterials.length > 0" class="phct-materials" title="缺失材料">
+    <div v-if="sortedMissingMaterials.length > 0" class="phct-materials" title="材料需求">
       <UcItemIcon
         v-for="material in sortedMissingMaterials.slice(0, 4)"
         :key="material.id"
@@ -35,7 +35,7 @@
         :icon="`/icon/material/${material.id}.webp`"
         :size="32"
         :star="material.star"
-        :title="`${material.name}：缺少 ${material.missing.toLocaleString('zh-CN')}`"
+        :title="getMaterialCountTitle(material)"
         class="phct-material"
         circular
         @click.stop="openMaterial(material.id)"
@@ -93,6 +93,14 @@ const entryBadge = computed<string | undefined>(() => {
   const weapon = AppWeaponData.find((item) => item.id === props.entry.itemId);
   return weapon ? `/icon/weapon/${weapon.weapon}.webp` : undefined;
 });
+
+function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): string {
+  const current = material.owned.toLocaleString("zh-CN");
+  const craftable =
+    material.craftable > 0 ? `（${material.craftable.toLocaleString("zh-CN")}）` : "";
+  const required = material.required.toLocaleString("zh-CN");
+  return `${material.name}：${current}${craftable}/${required}`;
+}
 
 async function openMaterial(materialId: number): Promise<void> {
   const info = WikiMaterialData.find((material) => material.id === materialId);

@@ -15,7 +15,14 @@
               <span class="ucmd-meta-tag">养成材料详情</span>
               <span>{{ wiki.type }}</span>
               <span>{{ wiki.star }} 星</span>
-              <span>ID {{ wiki.id }} · UID {{ uid }}</span>
+              <span>ID {{ wiki.id }}</span>
+              <span
+                :title="bag?.updated ? `背包数据更新于 ${bag.updated}` : '暂无背包更新时间'"
+                class="ucmd-owned"
+              >
+                <v-icon size="14">mdi-package-variant-closed</v-icon>
+                持有 {{ bag?.count ?? material.owned }}
+              </span>
             </div>
           </div>
           <div class="ucmd-actions" data-html2canvas-ignore="true">
@@ -44,24 +51,18 @@
             <header class="ucmd-section-title">
               <v-icon color="var(--tgc-od-orange)" size="18"> mdi-clipboard-list-outline </v-icon>
               <h3>需求信息</h3>
-              <span>{{ material.missing > 0 ? `仍缺少 ${material.missing}` : "材料已满足" }}</span>
             </header>
-            <div :class="{ 'has-crafting': material.craftable > 0 }" class="ucmd-stats">
-              <div class="ucmd-stat required">
-                <span>需要</span>
-                <strong>{{ material.required }}</strong>
-              </div>
-              <div class="ucmd-stat owned">
-                <span>持有</span>
-                <strong>{{ material.owned }}</strong>
-              </div>
-              <div v-if="material.craftable > 0" class="ucmd-stat craftable">
-                <span>可合成</span>
-                <strong>{{ material.craftable }}</strong>
-              </div>
-              <div class="ucmd-stat missing">
-                <span>仍缺少</span>
-                <strong>{{ material.missing }}</strong>
+            <div class="ucmd-stats">
+              <div class="ucmd-stat progress">
+                <span>
+                  {{ material.craftable > 0 ? "当前量（可合成量）/需求总量" : "当前量/需求总量" }}
+                </span>
+                <UcMaterialCount
+                  :complete="material.missing === 0"
+                  :craftable="material.craftable"
+                  :current="material.owned"
+                  :required="material.required"
+                />
               </div>
             </div>
             <v-progress-linear
@@ -70,18 +71,6 @@
               height="6"
               rounded
             />
-          </section>
-
-          <section class="ucmd-section">
-            <header class="ucmd-section-title">
-              <v-icon color="var(--tgc-od-blue)" size="18">mdi-bag-personal-outline</v-icon>
-              <h3>背包持有</h3>
-              <span>{{ bag?.updated ? `更新于 ${bag.updated}` : "暂无更新时间" }}</span>
-            </header>
-            <div class="ucmd-bag-owned">
-              <span>当前数量</span>
-              <strong class="ucmd-bag-count">{{ bag?.count ?? material.owned }}</strong>
-            </div>
           </section>
 
           <section v-if="wiki.description.trim().length > 0" class="ucmd-section">
@@ -107,7 +96,7 @@
             <header class="ucmd-section-title">
               <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
               <h3>合成消耗</h3>
-              <span>可合成 {{ material.craftable }} 个</span>
+              <span v-if="material.craftable > 0">可合成 {{ material.craftable }} 个</span>
             </header>
             <div v-if="costMaterials.length > 0" class="ucmd-costs">
               <PboConvertMaterial v-for="cost in costMaterials" :key="cost.id" :material="cost" />
@@ -134,6 +123,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PboConvertMaterial from "@comp/pageBag/pbo-convert-material.vue";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
 import TwoSource from "@comp/pageWiki/two-source.vue";
+import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
@@ -289,6 +279,17 @@ async function shareMaterial(): Promise<void> {
   color: var(--tgc-od-orange);
 }
 
+.ucmd-owned {
+  display: flex;
+  align-items: center;
+  padding: 2px 6px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-red);
+  column-gap: 4px;
+}
+
 .ucmd-actions {
   display: flex;
   flex-shrink: 0;
@@ -342,11 +343,7 @@ async function shareMaterial(): Promise<void> {
 .ucmd-stats {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  &.has-crafting {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .ucmd-stat {
@@ -369,37 +366,6 @@ async function shareMaterial(): Promise<void> {
     font-weight: normal;
     text-overflow: ellipsis;
   }
-
-  &.required strong {
-    color: var(--tgc-od-orange);
-  }
-
-  &.owned strong {
-    color: var(--tgc-od-blue);
-  }
-
-  &.craftable strong {
-    color: var(--tgc-od-green);
-  }
-
-  &.missing strong {
-    color: var(--tgc-od-red);
-  }
-}
-
-.ucmd-bag-owned {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--common-shadow-t-1);
-}
-
-.ucmd-bag-count {
-  color: var(--tgc-od-blue);
-  font-family: var(--font-title);
-  font-weight: normal;
 }
 
 .ucmd-desc {
@@ -439,11 +405,6 @@ async function shareMaterial(): Promise<void> {
 @media (width <= 720px) {
   .ucmd-panel {
     max-width: calc(100vw - 112px);
-  }
-
-  .ucmd-stats,
-  .ucmd-stats.has-crafting {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .ucmd-identity h2 {
