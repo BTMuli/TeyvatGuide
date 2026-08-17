@@ -5,7 +5,13 @@
       <div class="cultivation-title">
         <v-icon color="var(--tgc-od-orange)">mdi-calculator-variant-outline</v-icon>
         <span>养成计划</span>
-        <v-btn prepend-icon="mdi-plus" size="small" variant="tonal" @click="createPlan">
+        <v-btn
+          :disabled="isTargetEditor"
+          prepend-icon="mdi-plus"
+          size="small"
+          variant="tonal"
+          @click="createPlan"
+        >
           新建计划
         </v-btn>
       </div>
@@ -14,6 +20,7 @@
       <div class="cultivation-nav-actions">
         <v-select
           v-model="currentUid"
+          :disabled="isTargetEditor"
           :hide-details="true"
           :items="uidList"
           class="cultivation-nav-select uid-select"
@@ -24,6 +31,7 @@
         <v-select
           v-if="currentUid !== undefined"
           v-model="currentProjectId"
+          :disabled="isTargetEditor"
           :hide-details="true"
           :items="projectOptions"
           class="cultivation-nav-select project-select"
@@ -33,17 +41,66 @@
           label="当前计划"
           variant="outlined"
         />
-        <v-btn
-          :loading="loading || apiLoading || planLoading"
-          icon="mdi-refresh"
-          title="重新加载"
-          variant="tonal"
-          @click="reload()"
-        />
       </div>
     </template>
     <template #extension>
-      <div v-if="uidList.length > 0" class="cultivation-plan-toolbar">
+      <div v-if="uidList.length > 0 && isTargetEditor" class="cultivation-editor-toolbar">
+        <div class="cultivation-editor-main">
+          <div class="cultivation-editor-heading">
+            <v-icon
+              :icon="editingEntry ? 'mdi-pencil-outline' : 'mdi-plus-circle-outline'"
+              color="var(--tgc-od-orange)"
+              size="20"
+            />
+            <span>{{ editorTargetName }}</span>
+          </div>
+          <v-btn-toggle
+            v-model="calculationMode"
+            color="var(--tgc-od-orange)"
+            density="compact"
+            mandatory
+            variant="outlined"
+          >
+            <v-btn
+              :disabled="!isWindows || isTraveler || !hasBagDataSource"
+              :title="bagCalculationTitle"
+              value="bag"
+            >
+              背包计算
+            </v-btn>
+            <v-btn :title="apiCalculationTitle" value="api">接口计算</v-btn>
+          </v-btn-toggle>
+        </div>
+        <div class="cultivation-mode-actions">
+          <v-btn
+            v-if="useApiCalculation"
+            :disabled="!canApiCalculate"
+            :loading="apiLoading"
+            color="var(--tgc-od-orange)"
+            prepend-icon="mdi-check-circle-outline"
+            size="small"
+            variant="tonal"
+            @click="calculateWithApi"
+          >
+            确认计算
+          </v-btn>
+          <v-btn prepend-icon="mdi-close" size="small" variant="tonal" @click="cancelEditing">
+            取消编辑
+          </v-btn>
+          <v-btn
+            :disabled="!canSaveToPlan"
+            :loading="planLoading"
+            color="var(--tgc-od-orange)"
+            prepend-icon="mdi-content-save-outline"
+            size="small"
+            variant="flat"
+            @click="saveToPlan"
+          >
+            {{ editingEntry ? "更新计划目标" : "保存到计划" }}
+          </v-btn>
+        </div>
+      </div>
+      <div v-else-if="uidList.length > 0" class="cultivation-plan-toolbar">
         <div class="cultivation-plan-summary">
           <div class="cultivation-plan-heading">
             <v-icon color="var(--tgc-od-orange)">mdi-clipboard-text-outline</v-icon>
@@ -156,69 +213,6 @@
         </v-window-item>
 
         <v-window-item class="cultivation-tab-content" value="calculator">
-          <v-card class="cultivation-mode" variant="outlined">
-            <div class="cultivation-mode-main">
-              <div class="cultivation-mode-title">
-                <v-icon color="var(--tgc-od-orange)" size="20"
-                  >mdi-calculator-variant-outline
-                </v-icon>
-                <span>计算方式</span>
-              </div>
-              <v-btn-toggle
-                v-if="isWindows"
-                v-model="calculationMode"
-                color="var(--tgc-od-orange)"
-                density="compact"
-                mandatory
-                variant="outlined"
-              >
-                <v-btn :disabled="isTraveler || !hasBagDataSource" value="bag">背包计算</v-btn>
-                <v-btn value="api">接口计算</v-btn>
-              </v-btn-toggle>
-              <v-chip v-else color="var(--tgc-od-orange)" variant="tonal">接口计算</v-chip>
-              <span class="cultivation-mode-hint">{{ calculationHint }}</span>
-            </div>
-            <div class="cultivation-mode-actions">
-              <v-btn
-                v-if="useApiCalculation"
-                :disabled="!canApiCalculate"
-                :loading="apiLoading"
-                color="var(--tgc-od-orange)"
-                prepend-icon="mdi-check-circle-outline"
-                variant="tonal"
-                @click="calculateWithApi"
-              >
-                确认计算
-              </v-btn>
-              <v-btn prepend-icon="mdi-close" variant="tonal" @click="cancelEditing">
-                取消编辑
-              </v-btn>
-              <v-btn
-                :disabled="!canSaveToPlan"
-                :loading="planLoading"
-                color="var(--tgc-od-orange)"
-                prepend-icon="mdi-content-save-outline"
-                variant="flat"
-                @click="saveToPlan"
-              >
-                {{ editingEntry ? "更新计划目标" : "保存到计划" }}
-              </v-btn>
-            </div>
-          </v-card>
-
-          <v-alert
-            v-if="editingEntry"
-            class="cultivation-alert"
-            closable
-            color="var(--tgc-od-blue)"
-            density="compact"
-            type="info"
-            variant="tonal"
-            @click:close="cancelEditing"
-          >
-            正在编辑“{{ editingEntry.name }}”，保存后将更新计划中的同一目标。
-          </v-alert>
-
           <div class="cultivation-config">
             <UcCharacterPanel
               v-model:ascended="avatarAscended"
@@ -428,6 +422,14 @@ const hasBagDataSource = computed<boolean>(
 const useApiCalculation = computed<boolean>(
   () => !isWindows || !hasBagDataSource.value || calculationMode.value === "api",
 );
+const isTargetEditor = computed<boolean>(() => viewTab.value === "calculator");
+const editorTargetName = computed<string>(() => {
+  if (editingEntry.value) return editingEntry.value.name;
+  const targetNames: Array<string> = [];
+  if (selectedCharacter.value) targetNames.push(selectedCharacter.value.name);
+  if (selectedWeapon.value) targetNames.push(selectedWeapon.value.wiki.name);
+  return targetNames.length > 0 ? targetNames.join("、") : "请选择养成目标";
+});
 const currentTimezone = computed<number>(() => getUidServerTimezone(currentUid.value ?? 0));
 const currentProject = computed<TGApp.Sqlite.Cultivation.Project | undefined>(() =>
   projects.value.find((project) => project.id === currentProjectId.value),
@@ -556,12 +558,17 @@ const avatarCurrentStateEditable = computed<boolean>(
     selectedSyncAvatar.value === undefined,
 );
 const isTraveler = computed<boolean>(() => TRAVELER_IDS.has(selectedCharacter.value?.value ?? 0));
-const calculationHint = computed<string>(() => {
-  if (isTraveler.value) return "已为旅行者强制使用接口计算";
+const bagCalculationTitle = computed<string>(() => {
+  if (isTraveler.value) return "旅行者仅支持接口计算";
+  if (!isWindows) return "当前平台不支持读取游戏背包";
+  if (!hasBagDataSource.value) return "当前 UID 没有背包存档";
+  return "根据本地 Wiki 与背包存档实时计算";
+});
+const apiCalculationTitle = computed<string>(() => {
+  if (isTraveler.value) return "旅行者将通过米游社接口计算材料";
   if (!isWindows) return "当前平台不支持读取游戏背包，材料将由米游社接口计算";
   if (!hasBagDataSource.value) return "当前 UID 没有背包存档，数据将由米游社接口同步并计算";
-  if (calculationMode.value === "api") return "设置目标后点击确认，届时才会请求接口";
-  return "根据本地 Wiki 与背包存档实时计算";
+  return "设置目标后点击确认计算，届时才会请求接口";
 });
 const selectedRoleWeaponType = computed<string>(() => {
   return selectedCharacter.value?.weaponType ?? "";
@@ -2543,8 +2550,11 @@ function compareWeaponOptions(
 }
 
 .cultivation-plan-toolbar,
+.cultivation-editor-toolbar,
 .cultivation-plan-summary,
 .cultivation-plan-heading,
+.cultivation-editor-main,
+.cultivation-editor-heading,
 .cultivation-plan-actions,
 .cultivation-mode-actions {
   display: flex;
@@ -2552,7 +2562,8 @@ function compareWeaponOptions(
   color: var(--box-text-1);
 }
 
-.cultivation-plan-toolbar {
+.cultivation-plan-toolbar,
+.cultivation-editor-toolbar {
   width: 100%;
   height: 100%;
   flex-wrap: nowrap;
@@ -2561,6 +2572,22 @@ function compareWeaponOptions(
   border-top: 1px solid var(--common-shadow-1);
   gap: 16px;
   overflow-x: auto;
+}
+
+.cultivation-editor-main {
+  min-width: 0;
+  flex: 1 0 auto;
+  gap: 12px;
+}
+
+.cultivation-editor-heading {
+  gap: 8px;
+}
+
+.cultivation-editor-heading > span {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: normal;
 }
 
 .cultivation-plan-summary {
@@ -2636,41 +2663,6 @@ function compareWeaponOptions(
   overflow-y: auto;
 }
 
-.cultivation-mode {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  gap: 12px;
-}
-
-.cultivation-mode-main {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.cultivation-mode-title {
-  display: flex;
-  align-items: center;
-  font-family: var(--font-title);
-  gap: 6px;
-}
-
-.cultivation-mode-hint {
-  color: var(--common-text-sub);
-  font-size: 13px;
-}
-
-.cultivation-alert {
-  position: relative;
-  height: 80px;
-  min-height: 80px;
-  flex-shrink: 0;
-}
-
 .cultivation-empty {
   display: flex;
   min-height: 320px;
@@ -2688,11 +2680,6 @@ function compareWeaponOptions(
 }
 
 @media (width <= 600px) {
-  .cultivation-mode {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .cultivation-plan-actions {
     width: 100%;
   }
