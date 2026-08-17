@@ -2,22 +2,22 @@
   <div class="gro-chart">
     <div class="gro-chart-options">
       <v-select
-        class="gro-chart-select"
         v-model="curChartType"
+        :hide-details="true"
         :items="chartTypes"
+        class="gro-chart-select"
+        density="compact"
         item-title="label"
         item-value="value"
         label="选择图表"
-        density="compact"
-        outlined
-        hide-details
+        variant="outlined"
         width="200px"
       />
     </div>
     <div class="gro-chart-container">
-      <GroChartOverview v-if="curChartType === 'overview'" :uid="uid" />
-      <GroChartCalendar v-if="curChartType === 'calendar'" :uid="uid" :gachaType />
-      <GroChartStackbar v-if="curChartType === 'stackBar'" :uid="uid" :gachaType />
+      <GroChartOverview v-if="curChartType === 'overview'" :records :uid />
+      <GroChartCalendar v-if="curChartType === 'calendar'" :gachaType :records :uid />
+      <GroChartStackbar v-if="curChartType === 'stackBar'" :gachaType :records :uid />
     </div>
   </div>
 </template>
@@ -27,7 +27,11 @@ import GroChartOverview from "@comp/userGacha/gro-chart-overview.vue";
 import GroChartStackbar from "@comp/userGacha/gro-chart-stackbar.vue";
 import { ref } from "vue";
 
-type GachaOverviewEchartsProps = { uid: string; gachaType?: string };
+type GachaOverviewEchartsProps = {
+  uid: string;
+  gachaType?: string;
+  records: Array<TGApp.Sqlite.Gacha.Gacha>;
+};
 type ChartsType = "overview" | "calendar" | "stackBar";
 type SelectType<T> = { label: string; value: T };
 
@@ -65,9 +69,7 @@ const curChartType = ref<ChartsType>("overview");
 }
 
 .gro-chart-select {
-  width: 150px;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
+  flex: none;
 }
 
 .gro-chart-container {

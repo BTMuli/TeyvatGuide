@@ -10,7 +10,6 @@
   />
 </template>
 <script lang="ts" setup>
-import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
 import { saveImgFile } from "@utils/TGShare.js";
 import type { PieSeriesOption } from "echarts/charts.js";
@@ -29,7 +28,7 @@ import {
   ToolboxComponent,
   TooltipComponent,
 } from "echarts/components.js";
-import type { ComposeOption, EChartsType } from "echarts/core.js";
+import type { ComposeOption } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
@@ -49,7 +48,10 @@ use([
   TooltipComponent,
 ]);
 
-type GachaChartOverviewProps = { uid: string };
+type GachaChartOverviewProps = {
+  uid: string;
+  records: Array<TGApp.Sqlite.Gacha.Gacha>;
+};
 
 type EChartsOption = ComposeOption<
   | TitleComponentOption
@@ -71,8 +73,8 @@ const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
  * @description 获取整体祈愿图表配置
  * @returns {EChartsOption}
  */
-async function getOverviewOptions(): Promise<EChartsOption> {
-  const records = await TSUserGacha.record.all(props.uid);
+function getOverviewOptions(): EChartsOption {
+  const records = props.records;
   const data: EChartsOption = {
     title: [
       { text: ">> 祈愿系统大数据分析 <<", left: "center", top: "5%" },
@@ -94,7 +96,7 @@ async function getOverviewOptions(): Promise<EChartsOption> {
           icon: "M12 4v12m-4-4l4 4 4-4",
           onclick: async () => {
             if (!chartEl.value) return;
-            const chart: EChartsType = chartEl.value.chart;
+            const chart = chartEl.value.chart;
             if (!chart) return;
             const dataUrl = chart.getDataURL({
               pixelRatio: 2,
@@ -225,19 +227,18 @@ async function getOverviewOptions(): Promise<EChartsOption> {
   return data;
 }
 
-async function loadChartData(): Promise<void> {
-  chartOptions.value = await getOverviewOptions();
+function loadChartData(): void {
+  chartOptions.value = getOverviewOptions();
 }
 
-onMounted(async () => {
-  await loadChartData();
+onMounted(() => {
+  loadChartData();
 });
 
-// 监听 uid 变化，重新加载数据
 watch(
-  () => props.uid,
-  async () => {
-    await loadChartData();
+  () => <const>[props.uid, props.records],
+  () => {
+    loadChartData();
   },
 );
 </script>

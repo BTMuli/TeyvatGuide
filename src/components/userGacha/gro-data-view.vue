@@ -4,17 +4,15 @@
     <div ref="headerRef" class="gro-dv-header">
       <div class="gro-dvt-title">
         <span class="gro-dvt-name">{{ title }}</span>
-        <div v-if="props.dataType !== 'new'" class="gro-dvt-pity">
-          <GroResetCard :count="reset5count - 1" :gacha="props.dataType" compute="5" />
-          <GroResetCard :count="reset4count - 1" :gacha="props.dataType" compute="4" />
+        <div v-if="dataType !== 'new'" class="gro-dvt-pity">
+          <GroResetCard :count="reset5count - 1" :gacha="dataType" compute="5" />
+          <GroResetCard :count="reset4count - 1" :gacha="dataType" compute="4" />
         </div>
-        <span class="gro-dvt-count">{{ props.dataVal.length }}</span>
+        <span class="gro-dvt-count">{{ dataVal.length }}</span>
       </div>
       <div class="gro-dvt-subtitle">
-        <span v-show="props.dataVal.length === 0">暂无数据</span>
-        <span v-show="props.dataVal.length !== 0" :title="dateRangeLabel">{{
-          dateRangeLabel
-        }}</span>
+        <span v-show="dataVal.length === 0">暂无数据</span>
+        <span v-show="dataVal.length !== 0" :title="dateRangeLabel">{{ dateRangeLabel }}</span>
       </div>
       <!-- 4星相关数据 -->
       <div :class="{ 'has-up': isUpPool }" class="gro-mid-list">
@@ -28,7 +26,7 @@
           <span class="gro-ml-badge">UP</span>
         </div>
         <div class="gro-ml-card" title="四星总数">
-          <span class="gro-ml-value">{{ star4List.length }}</span>
+          <span class="gro-ml-value">{{ star4CalcList.length }}</span>
           <span class="gro-ml-badge">总</span>
         </div>
       </div>
@@ -44,12 +42,12 @@
           <span class="gro-ml-badge">UP</span>
         </div>
         <div class="gro-ml-card" title="五星总数">
-          <span class="gro-ml-value">{{ star5List.length }}</span>
+          <span class="gro-ml-value">{{ star5CalcList.length }}</span>
           <span class="gro-ml-badge">总</span>
         </div>
       </div>
       <!-- 进度条拼接 -->
-      <div v-if="props.dataVal.length > 0" class="gro-mid-progress">
+      <div v-if="dataVal.length > 0" class="gro-mid-progress">
         <div v-if="pg3 !== '0'" :style="{ width: pg3 }" class="s3" />
         <div v-if="pg4 !== '0'" :style="{ width: pg4 }" class="s4" />
         <div v-if="pg5 !== '0'" :style="{ width: pg5 }" class="s5" />
@@ -94,6 +92,7 @@
 import gameEnum from "@enum/game.js";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { matchGachaDisplayScope } from "@utils/gachaVersion.js";
 import { str2timeStr } from "@utils/toolFunc.js";
 import {
   computed,
@@ -114,9 +113,18 @@ import { AppGachaData } from "@/data/index.js";
 type GachaDataViewProps = {
   dataType: "new" | "avatar" | "weapon" | "normal" | "mix";
   dataVal: Array<TGApp.Sqlite.Gacha.Gacha>;
+  versionFilter?: string | null;
+  periodStart?: string;
+  periodEnd?: string;
 };
 
-const props = defineProps<GachaDataViewProps>();
+const {
+  dataType,
+  dataVal,
+  versionFilter = null,
+  periodStart = "",
+  periodEnd = "",
+} = defineProps<GachaDataViewProps>();
 let resizeListener: UnlistenFn | null = null;
 
 // Template refs for dynamic height calculation
@@ -132,8 +140,10 @@ const loading = ref<boolean>(true); // 是否加载完
 const title = ref<string>(""); // 卡片标题
 const startDate = ref<string>(""); // 最早的时间
 const endDate = ref<string>(""); // 最晚的时间
-const star5List = shallowRef<Array<GroDataLineProps>>([]); // 5星物品数据
-const star4List = shallowRef<Array<GroDataLineProps>>([]); // 4星物品数据
+const star5CalcList = shallowRef<Array<GroDataLineProps>>([]); // 5星全量（计算用）
+const star4CalcList = shallowRef<Array<GroDataLineProps>>([]); // 4星全量（计算用）
+const star5List = shallowRef<Array<GroDataLineProps>>([]); // 5星物品数据（展示）
+const star4List = shallowRef<Array<GroDataLineProps>>([]); // 4星物品数据（展示）
 const reset5count = ref<number>(1); // 5星垫抽数量
 const reset4count = ref<number>(1); // 4星垫抽数量
 const star3count = ref<number>(0); // 3星物品数量
@@ -145,8 +155,9 @@ const tab = ref<string>("5"); // tab
 const pg3 = computed<string>(() => getPg("3"));
 const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
-const isUpPool = computed<boolean>(() => props.dataType !== "new" && props.dataType !== "normal");
+const isUpPool = computed<boolean>(() => dataType !== "new" && dataType !== "normal");
 const dateRangeLabel = computed<string>(() => `${startDate.value} ~ ${endDate.value}`);
+const displayPeriod = computed(() => ({ start: periodStart, end: periodEnd }));
 
 // Calculate dynamic heights
 function calculateHeights(): void {
@@ -180,36 +191,50 @@ onUnmounted(() => {
 });
 // 监听数据变化
 watch(
-  () => props.dataVal,
+  () => dataVal,
   async () => {
-    star5List.value = [];
-    star4List.value = [];
-    reset5count.value = 1;
-    reset4count.value = 1;
-    star3count.value = 1;
-    startDate.value = "";
-    endDate.value = "";
-    star5avg.value = "";
-    star5UpAvg.value = "";
-    star4avg.value = "";
-    star4UpAvg.value = "";
-    tab.value = "5";
+    resetViewState();
     loadData();
     await nextTick();
     calculateHeights();
   },
 );
 watch(
-  () => [props.dataVal, props.dataType],
+  () => <const>[versionFilter, periodStart, periodEnd],
+  async () => {
+    applyDisplayFilter();
+    await nextTick();
+    calculateHeights();
+  },
+);
+watch(
+  () => [dataVal, dataType],
   async () => {
     await nextTick();
     calculateHeights();
   },
 );
 
+function resetViewState(): void {
+  star5CalcList.value = [];
+  star4CalcList.value = [];
+  star5List.value = [];
+  star4List.value = [];
+  reset5count.value = 1;
+  reset4count.value = 1;
+  star3count.value = 1;
+  startDate.value = "";
+  endDate.value = "";
+  star5avg.value = "";
+  star5UpAvg.value = "";
+  star4avg.value = "";
+  star4UpAvg.value = "";
+  tab.value = "5";
+}
+
 function loadData(): void {
   title.value = getTitle();
-  const tempData = props.dataVal;
+  const tempData = dataVal;
   const temp5Data: Array<GroDataLineProps> = [];
   const temp4Data: Array<GroDataLineProps> = [];
   // 按照 id 升序
@@ -234,30 +259,40 @@ function loadData(): void {
         reset5count.value = 1;
       }
     });
-  star5List.value = temp5Data.reverse();
-  star4List.value = temp4Data.reverse();
+  star5CalcList.value = temp5Data.reverse();
+  star4CalcList.value = temp4Data.reverse();
   star5avg.value = getStar5Avg();
   star5UpAvg.value = getStar5UpAvg();
   star4avg.value = getStar4Avg();
   star4UpAvg.value = getStar4UpAvg();
+  applyDisplayFilter();
+}
+
+function applyDisplayFilter(): void {
+  star5List.value = star5CalcList.value.filter((item) =>
+    matchGachaDisplayScope(item.data, versionFilter, displayPeriod.value),
+  );
+  star4List.value = star4CalcList.value.filter((item) =>
+    matchGachaDisplayScope(item.data, versionFilter, displayPeriod.value),
+  );
 }
 
 // 获取标题
 function getTitle(): string {
-  if (props.dataType === "new") return "新手祈愿";
-  if (props.dataType === "avatar") return "角色祈愿";
-  if (props.dataType === "weapon") return "武器祈愿";
-  if (props.dataType === "normal") return "常驻祈愿";
-  if (props.dataType === "mix") return "集录祈愿";
+  if (dataType === "new") return "新手祈愿";
+  if (dataType === "avatar") return "角色祈愿";
+  if (dataType === "weapon") return "武器祈愿";
+  if (dataType === "normal") return "常驻祈愿";
+  if (dataType === "mix") return "集录祈愿";
   return "";
 }
 
 // 获取5星平均抽数
 function getStar5Avg(): string {
-  const resetList = star5List.value.map((item) => item.count);
+  const resetList = star5CalcList.value.map((item) => item.count);
   if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
-  return (total / star5List.value.length).toFixed(2);
+  return (total / star5CalcList.value.length).toFixed(2);
 }
 
 /**
@@ -295,28 +330,28 @@ function checkIsUp(item: TGApp.Sqlite.Gacha.Gacha): boolean | undefined {
 // 获取5星UP平均抽数
 function getStar5UpAvg(): string {
   // 新手池和常驻池不显示UP平均
-  if (props.dataType === "new" || props.dataType === "normal") return "";
-  const upList = star5List.value.filter((item) => item.isUp === true);
+  if (dataType === "new" || dataType === "normal") return "";
+  const upList = star5CalcList.value.filter((item) => item.isUp === true);
   if (upList.length === 0) return "0";
-  const total = star5List.value.reduce((a, b) => a + b.count, 0);
+  const total = star5CalcList.value.reduce((a, b) => a + b.count, 0);
   return (total / upList.length).toFixed(2);
 }
 
 // 获取4星平均抽数
 function getStar4Avg(): string {
-  const resetList = star4List.value.map((item) => item.count);
+  const resetList = star4CalcList.value.map((item) => item.count);
   if (resetList.length === 0) return "0";
   const total = resetList.reduce((a, b) => a + b);
-  return (total / star4List.value.length).toFixed(2);
+  return (total / star4CalcList.value.length).toFixed(2);
 }
 
 // 获取4星UP平均抽数
 function getStar4UpAvg(): string {
   // 新手池和常驻池不显示UP平均
-  if (props.dataType === "new" || props.dataType === "normal") return "";
-  const upList = star4List.value.filter((item) => item.isUp === true);
+  if (dataType === "new" || dataType === "normal") return "";
+  const upList = star4CalcList.value.filter((item) => item.isUp === true);
   if (upList.length === 0) return "0";
-  const total = star4List.value.reduce((a, b) => a + b.count, 0);
+  const total = star4CalcList.value.reduce((a, b) => a + b.count, 0);
   return (total / upList.length).toFixed(2);
 }
 
@@ -324,8 +359,8 @@ function getStar4UpAvg(): string {
 function getPg(star: "5" | "4" | "3"): string {
   let progress: number;
   // 开根号
-  const sq5 = Math.sqrt(star5List.value.length);
-  const sq4 = Math.sqrt(star4List.value.length);
+  const sq5 = Math.sqrt(star5CalcList.value.length);
+  const sq4 = Math.sqrt(star4CalcList.value.length);
   const sq3 = Math.sqrt(star3count.value);
   const total = sq5 + sq4 + sq3;
   if (star === "5") {

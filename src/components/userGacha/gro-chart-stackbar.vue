@@ -11,7 +11,6 @@
   />
 </template>
 <script lang="ts" setup>
-import TSUserGacha from "@Sqlm/userGacha.js";
 import useAppStore from "@store/app.js";
 import { saveImgFile } from "@utils/TGShare.js";
 import type { BarSeriesOption } from "echarts/charts.js";
@@ -30,7 +29,7 @@ import {
   ToolboxComponent,
   TooltipComponent,
 } from "echarts/components.js";
-import type { ComposeOption, EChartsType } from "echarts/core.js";
+import type { ComposeOption } from "echarts/core.js";
 import { use } from "echarts/core.js";
 import { LabelLayout } from "echarts/features.js";
 import { CanvasRenderer } from "echarts/renderers.js";
@@ -49,7 +48,11 @@ use([
   TooltipComponent,
 ]);
 
-type GachaChartStackBarProps = { uid: string; gachaType?: string };
+type GachaChartStackBarProps = {
+  uid: string;
+  gachaType?: string;
+  records: Array<TGApp.Sqlite.Gacha.Gacha>;
+};
 
 type EChartsOption = ComposeOption<
   | BarSeriesOption
@@ -67,12 +70,26 @@ const chartOptions = shallowRef<EChartsOption>({});
 const echartsTheme = computed<"dark" | "light">(() => (theme.value === "dark" ? "dark" : "light"));
 const chartEl = useTemplateRef<InstanceType<typeof VChart>>("chartRef");
 
+function groupRecordsByDate(
+  records: Array<TGApp.Sqlite.Gacha.Gacha>,
+): Record<string, Array<TGApp.Sqlite.Gacha.Gacha>> {
+  const map: Record<string, Array<TGApp.Sqlite.Gacha.Gacha>> = {};
+  const sorted = [...records].sort((a, b) => a.time.localeCompare(b.time));
+  for (const item of sorted) {
+    if (props.gachaType !== undefined && item.gachaType !== props.gachaType) continue;
+    const key = item.time.split(" ")[0];
+    if (!map[key]) map[key] = [];
+    map[key].push(item);
+  }
+  return map;
+}
+
 /**
  * @description 堆叠柱状图
  * @returns {EChartsOption}
  */
-async function getStackBarOptions(): Promise<EChartsOption> {
-  const records = await TSUserGacha.record.time(props.uid, props.gachaType);
+function getStackBarOptions(): EChartsOption {
+  const records = groupRecordsByDate(props.records);
   const dataCount = Object.keys(records).length;
   const xAxis = {
     type: <const>"category",
@@ -139,7 +156,7 @@ async function getStackBarOptions(): Promise<EChartsOption> {
           icon: "M12 4v12m-4-4l4 4 4-4",
           onclick: async () => {
             if (!chartEl.value) return;
-            const chart: EChartsType = chartEl.value.chart;
+            const chart = chartEl.value.chart;
             if (!chart) return;
             const dataUrl = chart.getDataURL({
               pixelRatio: 2,
@@ -160,19 +177,18 @@ async function getStackBarOptions(): Promise<EChartsOption> {
   };
 }
 
-async function loadChartData(): Promise<void> {
-  chartOptions.value = await getStackBarOptions();
+function loadChartData(): void {
+  chartOptions.value = getStackBarOptions();
 }
 
-onMounted(async () => {
-  await loadChartData();
+onMounted(() => {
+  loadChartData();
 });
 
-// 监听 uid 和 gachaType 变化，重新加载数据
 watch(
-  () => [props.uid, props.gachaType],
-  async () => {
-    await loadChartData();
+  () => <const>[props.uid, props.gachaType, props.records],
+  () => {
+    loadChartData();
   },
 );
 </script>

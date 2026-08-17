@@ -75,6 +75,10 @@ type UgHisCardProps = {
   pool: TGApp.App.Gacha.PoolItem;
   /** UID */
   uid?: string;
+  /** 展示筛选：时期开始 yyyy-MM-dd */
+  periodStart?: string;
+  /** 展示筛选：时期结束 yyyy-MM-dd */
+  periodEnd?: string;
 };
 type UgcHisCardBox = {
   /** 星级 */
@@ -105,7 +109,16 @@ const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
   gameEnum.gachaType.WeaponUp,
   gameEnum.gachaType.MixUp,
 ];
-const gachaRecords = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
+const gachaRecordsRaw = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
+const gachaRecords = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() => {
+  const startBound = props.periodStart ? `${props.periodStart} 00:00:00` : "";
+  const endBound = props.periodEnd ? `${props.periodEnd} 23:59:59` : "";
+  return gachaRecordsRaw.value.filter((item) => {
+    if (startBound !== "" && item.time < startBound) return false;
+    if (endBound !== "" && item.time > endBound) return false;
+    return true;
+  });
+});
 const gachaBoxes = shallowRef<Array<UgcHisCardBox>>([]);
 const detail = shallowRef<UgHisDetail>();
 const detailShow = ref<boolean>(false);
@@ -121,10 +134,17 @@ watch(
   async () => await loadRecords(),
   { immediate: true },
 );
+watch(gachaRecords, () => {
+  rebuildBoxes();
+});
 
 async function loadRecords(): Promise<void> {
-  if (!props.uid) gachaRecords.value = [];
-  else gachaRecords.value = await TSUserGacha.record.pool(props.pool, props.uid);
+  if (!props.uid) gachaRecordsRaw.value = [];
+  else gachaRecordsRaw.value = await TSUserGacha.record.pool(props.pool, props.uid);
+  rebuildBoxes();
+}
+
+function rebuildBoxes(): void {
   gachaBoxes.value = [];
   const tmpBoxes: Record<string, UgcHisCardBox> = {};
   for (const r of gachaRecords.value) {

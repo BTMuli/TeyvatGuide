@@ -13,6 +13,90 @@
           label="游戏UID"
           variant="outlined"
         />
+        <v-locale-provider :messages class="gacha-top-period-locale" locale="zhHans">
+          <v-date-input
+            v-model="periodDates"
+            v-model:menu="periodMenu"
+            :display-format="formatGachaPeriodDate"
+            :hide-actions="false"
+            :hide-details="true"
+            :label="periodLabel"
+            :menu-props="periodMenuProps"
+            :picker-props="periodPickerProps"
+            class="gacha-top-period"
+            clearable
+            density="compact"
+            first-day-of-week="1"
+            hide-header
+            multiple="range"
+            prepend-icon=""
+            prepend-inner-icon="mdi-calendar-range"
+            variant="outlined"
+            weekday-format="narrow"
+          >
+            <template #day="{ props: dayProps, item }">
+              <v-btn v-bind="dayProps" :title="getVersionDayTitle(item.isoDate)">
+                {{ item.localized }}
+              </v-btn>
+              <span
+                v-if="getVersionColor(item.isoDate)"
+                :class="{
+                  start: isVersionStartDay(item.isoDate),
+                  end: isVersionEndDay(item.isoDate),
+                }"
+                :style="{ background: getVersionColor(item.isoDate) }"
+                class="gacha-top-cal-bar"
+              />
+              <span
+                v-if="!item.isAdjacent && isVersionStartDay(item.isoDate)"
+                :style="{ color: getVersionColor(item.isoDate) }"
+                class="gacha-top-cal-ver"
+              >
+                {{ getVersionStartLabel(item.isoDate) }}
+              </span>
+            </template>
+            <template #actions="{ save, cancel }">
+              <div class="gacha-top-cal-footer">
+                <div class="gacha-top-cal-legend">
+                  <button
+                    v-for="item in visibleVersionLegend"
+                    :key="item.key"
+                    :class="{ active: isVersionPeriodSelected(item) }"
+                    :title="item.title"
+                    class="gacha-top-cal-legend-item"
+                    type="button"
+                    @click="selectVersionPeriod(item)"
+                  >
+                    <span :style="{ background: item.color }" class="gacha-top-cal-swatch" />
+                    {{ item.label }}
+                  </button>
+                  <span v-if="visibleVersionLegend.length === 0" class="gacha-top-cal-legend-empty">
+                    此月无版本卡池
+                  </span>
+                </div>
+                <div class="gacha-top-cal-actions">
+                  <v-btn
+                    class="gacha-top-cal-now"
+                    density="comfortable"
+                    variant="text"
+                    @click="jumpToToday"
+                  >
+                    现在
+                  </v-btn>
+                  <v-btn density="comfortable" variant="text" @click="cancel">取消</v-btn>
+                  <v-btn
+                    color="var(--tgc-od-blue)"
+                    density="comfortable"
+                    variant="text"
+                    @click="save"
+                  >
+                    确定
+                  </v-btn>
+                </div>
+              </div>
+            </template>
+          </v-date-input>
+        </v-locale-provider>
         <img
           alt="byd"
           class="gacha-top-byd"
@@ -134,19 +218,29 @@
     </v-tabs>
     <v-window v-model="tab" class="gacha-window">
       <v-window-item class="gacha-window-item" value="overview">
-        <GroOverview v-model="gachaListCur" />
+        <GroOverview
+          v-model="gachaListCur"
+          :periodEnd="periodRange.end"
+          :periodStart="periodRange.start"
+          :versionFilter
+        />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="echarts">
-        <GroEcharts v-if="uidCur" :uid="uidCur" />
+        <GroEcharts v-if="uidCur" :records="gachaListView" :uid="uidCur" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="table">
-        <GroTable v-model="gachaListCur" />
+        <GroTable v-model="gachaListView" />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="rerun">
         <GroRerun />
       </v-window-item>
       <v-window-item class="gacha-window-item" value="history">
-        <GroHistory :uid="uidCur" />
+        <GroHistory
+          :periodEnd="periodRange.end"
+          :periodStart="periodRange.start"
+          :uid="uidCur"
+          :versionFilter
+        />
       </v-window-item>
     </v-window>
   </div>
@@ -173,16 +267,43 @@ import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import {
+  filterGachaDisplayList,
+  formatGachaInclusiveEnd,
+  formatGachaPeriodDate,
+  GACHA_VERSION_RANGES,
+  getGachaVersionRangeByIso,
+  getVisibleGachaVersionLegend,
+  normalizeGachaPeriodDates,
+  parseGachaIsoDate,
+  shiftGachaIsoDate,
+  type GachaVersionLegendItem,
+} from "@utils/gachaVersion.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { str2timeStr, timeStr2str } from "@utils/toolFunc.js";
 import { exportUigfData } from "@utils/UIGF.js";
 import fetchYattaJson from "@utils/Yatta.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
+import { zhHans } from "vuetify/locale";
 
 import { AppCalendarData } from "@/data/index.js";
+
+type GachaPeriodPickerProps = {
+  bgColor: string;
+  class: string;
+  color: string;
+  elevation: number;
+  month: number;
+  rounded: string;
+  style: { boxShadow: string };
+  width: number;
+  year: number;
+  "onUpdate:month": (value: unknown) => void;
+  "onUpdate:year": (value: unknown) => void;
+};
 
 const GACHA_REQUEST_MAX_RETRIES = 3;
 
@@ -207,6 +328,39 @@ const gachaListCur = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const yattaData = shallowRef<Array<TGApp.Plugins.Yatta.ConvertData>>([]);
 const isRefreshing = ref<boolean>(false);
 
+const versionFilter = ref<string | null>(null);
+const periodDates = ref<Array<Date> | null>(null);
+const periodMenu = ref<boolean>(false);
+const today = new Date();
+const pickerMonth = ref<number>(today.getMonth());
+const pickerYear = ref<number>(today.getFullYear());
+const messages = { zhHans };
+const periodMenuProps = { offset: 12 };
+const periodRange = computed(() => normalizeGachaPeriodDates(periodDates.value));
+const periodLabel = computed<string>(() => {
+  if (versionFilter.value === null || versionFilter.value === "") return "时间";
+  return `时间-${versionFilter.value}`;
+});
+const gachaListView = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
+  filterGachaDisplayList(gachaListCur.value, versionFilter.value, periodRange.value),
+);
+const periodPickerProps = computed<GachaPeriodPickerProps>(() => ({
+  bgColor: "var(--box-bg-1)",
+  class: "gacha-top-cal-picker",
+  color: "var(--tgc-od-blue)",
+  elevation: 0,
+  month: pickerMonth.value,
+  rounded: "12",
+  style: { boxShadow: "0 8px 24px var(--common-shadow-4)" },
+  width: 360,
+  year: pickerYear.value,
+  "onUpdate:month": onPickerMonth,
+  "onUpdate:year": onPickerYear,
+}));
+const visibleVersionLegend = computed<Array<GachaVersionLegendItem>>(() =>
+  getVisibleGachaVersionLegend(pickerYear.value, pickerMonth.value),
+);
+
 onMounted(async () => {
   await showLoading.start("正在加载祈愿数据", "正在获取祈愿 UID 列表");
   await TGLogger.Info("[UserGacha][onMounted] 进入角色祈愿页面");
@@ -222,6 +376,94 @@ watch(
   () => account.value,
   async () => await reloadUid(),
 );
+watch(periodMenu, (open) => {
+  if (!open) return;
+  syncPickerToAnchor();
+});
+watch(periodDates, () => {
+  syncVersionFilterWithPeriod();
+});
+
+function onPickerMonth(value: unknown): void {
+  const month = Number(value);
+  if (!Number.isInteger(month) || month < 0 || month > 11) return;
+  pickerMonth.value = month;
+}
+
+function onPickerYear(value: unknown): void {
+  const year = Number(value);
+  if (!Number.isInteger(year)) return;
+  pickerYear.value = year;
+}
+
+function syncPickerToAnchor(): void {
+  const anchor = periodDates.value?.[0] ?? new Date();
+  pickerYear.value = anchor.getFullYear();
+  pickerMonth.value = anchor.getMonth();
+}
+
+function jumpToToday(): void {
+  const now = new Date();
+  pickerYear.value = now.getFullYear();
+  pickerMonth.value = now.getMonth();
+}
+
+function getVersionColor(isoDate: string): string {
+  return getGachaVersionRangeByIso(isoDate)?.color ?? "";
+}
+
+function getVersionStartLabel(isoDate: string): string {
+  const range = getGachaVersionRangeByIso(isoDate);
+  if (range === undefined || range.startDay !== isoDate) return "";
+  return range.version;
+}
+
+function isVersionStartDay(isoDate: string): boolean {
+  return getGachaVersionRangeByIso(isoDate)?.startDay === isoDate;
+}
+
+function isVersionEndDay(isoDate: string): boolean {
+  const range = getGachaVersionRangeByIso(isoDate);
+  if (range === undefined) return false;
+  return shiftGachaIsoDate(isoDate, 1) === range.endDay;
+}
+
+function getVersionDayTitle(isoDate: string): string {
+  const range = getGachaVersionRangeByIso(isoDate);
+  if (range === undefined) return "";
+  return `${range.version}  ${range.startDay} ~ ${formatGachaInclusiveEnd(range.endDay)}`;
+}
+
+function isVersionPeriodSelected(item: GachaVersionLegendItem): boolean {
+  return (
+    versionFilter.value === item.label &&
+    periodRange.value.start === item.startDay &&
+    periodRange.value.end === formatGachaInclusiveEnd(item.endDay)
+  );
+}
+
+function selectVersionPeriod(item: GachaVersionLegendItem): void {
+  const start = parseGachaIsoDate(item.startDay);
+  const end = parseGachaIsoDate(formatGachaInclusiveEnd(item.endDay));
+  if (start === undefined || end === undefined) return;
+  versionFilter.value = item.label;
+  periodDates.value = [start, end];
+  pickerYear.value = start.getFullYear();
+  pickerMonth.value = start.getMonth();
+}
+
+function syncVersionFilterWithPeriod(): void {
+  if (versionFilter.value === null || versionFilter.value === "") return;
+  const range = GACHA_VERSION_RANGES.find((item) => item.version === versionFilter.value);
+  if (range === undefined) {
+    versionFilter.value = null;
+    return;
+  }
+  const end = formatGachaInclusiveEnd(range.endDay);
+  if (periodRange.value.start !== range.startDay || periodRange.value.end !== end) {
+    versionFilter.value = null;
+  }
+}
 
 async function toBeyond(): Promise<void> {
   await router.push({ name: "颂愿记录" });
@@ -979,6 +1221,119 @@ async function checkData(): Promise<void> {
   margin-bottom: 4px;
   margin-left: 16px;
   column-gap: 8px;
+}
+
+.gacha-top-period-locale {
+  display: contents;
+}
+
+.gacha-top-period {
+  width: 340px;
+  flex: 0 0 auto;
+}
+
+.gacha-top-cal-bar {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 4px;
+  left: 0;
+  height: 4px;
+  border-radius: 0;
+  pointer-events: none;
+
+  &.start {
+    left: 4px;
+    border-bottom-left-radius: 2px;
+    border-top-left-radius: 2px;
+  }
+
+  &.end {
+    right: 4px;
+    border-bottom-right-radius: 2px;
+    border-top-right-radius: 2px;
+  }
+}
+
+.gacha-top-cal-ver {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  width: 100%;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  line-height: 12px;
+  pointer-events: none;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gacha-top-cal-footer {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 0 8px 8px;
+  gap: 8px;
+}
+
+.gacha-top-cal-legend {
+  display: flex;
+  min-height: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0 4px;
+  gap: 8px;
+}
+
+.gacha-top-cal-legend-item {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--box-text-4);
+  column-gap: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--app-page-content);
+  }
+
+  &.active {
+    color: var(--common-text-title);
+  }
+}
+
+.gacha-top-cal-swatch {
+  display: block;
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+.gacha-top-cal-legend-empty {
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.gacha-top-cal-actions {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.gacha-top-cal-now {
+  margin-right: auto;
 }
 
 .gacha-top-btn {

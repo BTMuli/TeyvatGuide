@@ -11,19 +11,37 @@
     class="gro-o-swiper"
   >
     <SwiperSlide>
-      <GroDataView :data-val="normalData" data-type="normal" />
+      <GroDataView
+        :data-val="normalData"
+        :periodEnd
+        :periodStart
+        :versionFilter
+        data-type="normal"
+      />
     </SwiperSlide>
     <SwiperSlide>
-      <GroDataView :data-val="avatarData" data-type="avatar" />
+      <GroDataView
+        :data-val="avatarData"
+        :periodEnd
+        :periodStart
+        :versionFilter
+        data-type="avatar"
+      />
     </SwiperSlide>
     <SwiperSlide>
-      <GroDataView :data-val="weaponData" data-type="weapon" />
+      <GroDataView
+        :data-val="weaponData"
+        :periodEnd
+        :periodStart
+        :versionFilter
+        data-type="weapon"
+      />
     </SwiperSlide>
     <SwiperSlide v-if="mixData.length !== 0">
-      <GroDataView :data-val="mixData" data-type="mix" />
+      <GroDataView :data-val="mixData" :periodEnd :periodStart :versionFilter data-type="mix" />
     </SwiperSlide>
     <SwiperSlide v-if="newData.length !== 0">
-      <GroDataView :data-val="newData" data-type="new" />
+      <GroDataView :data-val="newData" :periodEnd :periodStart :versionFilter data-type="new" />
     </SwiperSlide>
   </Swiper>
 </template>
@@ -37,25 +55,35 @@ import { computed } from "vue";
 
 import GroDataView from "./gro-data-view.vue";
 
-type GachaOverviewProps = { modelValue: Array<TGApp.Sqlite.Gacha.Gacha> };
+type GachaOverviewProps = {
+  modelValue: Array<TGApp.Sqlite.Gacha.Gacha>;
+  versionFilter?: string | null;
+  periodStart?: string;
+  periodEnd?: string;
+};
 
-const props = defineProps<GachaOverviewProps>();
+const {
+  modelValue,
+  versionFilter = null,
+  periodStart = "",
+  periodEnd = "",
+} = defineProps<GachaOverviewProps>();
 const swiperModules = [Autoplay, A11y, Pagination];
 
 const newData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
-  props.modelValue.filter((item) => item.uigfType === "100"),
+  modelValue.filter((item) => item.uigfType === "100"),
 );
 const normalData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
-  props.modelValue.filter((item) => item.uigfType === "200"),
+  modelValue.filter((item) => item.uigfType === "200"),
 );
 const avatarData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
-  props.modelValue.filter((item) => item.uigfType === "301"),
+  modelValue.filter((item) => item.uigfType === "301"),
 );
 const weaponData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
-  props.modelValue.filter((item) => item.uigfType === "302"),
+  modelValue.filter((item) => item.uigfType === "302"),
 );
 const mixData = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() =>
-  props.modelValue.filter((item) => item.uigfType === "500"),
+  modelValue.filter((item) => item.uigfType === "500"),
 );
 </script>
 <style lang="scss" scoped>
