@@ -223,7 +223,7 @@ async function shareMaterial(): Promise<void> {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: 720px;
+  width: 800px;
   max-width: calc(100vw - 160px);
   max-height: calc(100vh - 64px);
   flex-direction: column;

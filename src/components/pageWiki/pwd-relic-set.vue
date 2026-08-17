@@ -193,6 +193,7 @@ function loadPosInfo(): void {
 }
 
 .pwd-rsp-story {
+  font-size: 14px;
   white-space: pre-wrap;
 }
 </style>
