@@ -3,63 +3,49 @@
   <div ref="groDvBoxRef" class="gro-dv-container">
     <div ref="headerRef" class="gro-dv-header">
       <div class="gro-dvt-title">
-        <span>{{ title }}</span>
-        <GroResetCard
-          v-if="props.dataType !== 'new'"
-          :count="reset5count - 1"
-          :gacha="props.dataType"
-          compute="5"
-        />
-        <GroResetCard
-          v-if="props.dataType !== 'new'"
-          :count="reset4count - 1"
-          :gacha="props.dataType"
-          compute="4"
-        />
-        <span>{{ props.dataVal.length }}</span>
+        <span class="gro-dvt-name">{{ title }}</span>
+        <div v-if="props.dataType !== 'new'" class="gro-dvt-pity">
+          <GroResetCard :count="reset5count - 1" :gacha="props.dataType" compute="5" />
+          <GroResetCard :count="reset4count - 1" :gacha="props.dataType" compute="4" />
+        </div>
+        <span class="gro-dvt-count">{{ props.dataVal.length }}</span>
       </div>
       <div class="gro-dvt-subtitle">
         <span v-show="props.dataVal.length === 0">暂无数据</span>
-        <span v-show="props.dataVal.length !== 0">{{ startDate }} ~ {{ endDate }}</span>
+        <span v-show="props.dataVal.length !== 0" :title="dateRangeLabel">{{
+          dateRangeLabel
+        }}</span>
       </div>
       <!-- 4星相关数据 -->
       <div :class="{ 'has-up': isUpPool }" class="gro-mid-list">
         <div class="gro-ml-title s4">★★★★</div>
-        <div class="gro-ml-card">
-          <span>垫</span>
-          <span>{{ reset4count - 1 }}</span>
+        <div class="gro-ml-card" title="平均抽数">
+          <span class="gro-ml-value">{{ star4avg }}</span>
+          <span class="gro-ml-badge">均</span>
         </div>
-        <div class="gro-ml-card">
-          <span>均</span>
-          <span>{{ star4avg }}</span>
+        <div v-if="star4UpAvg !== ''" class="gro-ml-card" :title="`UP 平均 ${star4UpAvg}`">
+          <span class="gro-ml-value">{{ star4UpAvg }}</span>
+          <span class="gro-ml-badge">UP</span>
         </div>
-        <div v-if="star4UpAvg !== ''" class="gro-ml-card">
-          <span>UP</span>
-          <span>{{ star4UpAvg }}</span>
-        </div>
-        <div class="gro-ml-card">
-          <span>总</span>
-          <span>{{ star4List.length }}</span>
+        <div class="gro-ml-card" title="四星总数">
+          <span class="gro-ml-value">{{ star4List.length }}</span>
+          <span class="gro-ml-badge">总</span>
         </div>
       </div>
       <!-- 5星相关数据 -->
       <div :class="{ 'has-up': star5UpAvg !== '' }" class="gro-mid-list">
         <div class="gro-ml-title s5">★★★★★</div>
-        <div class="gro-ml-card">
-          <span>垫</span>
-          <span>{{ reset5count - 1 }}</span>
+        <div class="gro-ml-card" title="平均抽数">
+          <span class="gro-ml-value">{{ star5avg }}</span>
+          <span class="gro-ml-badge">均</span>
         </div>
-        <div class="gro-ml-card">
-          <span>均</span>
-          <span>{{ star5avg }}</span>
+        <div v-if="star5UpAvg !== ''" class="gro-ml-card" :title="`UP 平均 ${star5UpAvg}`">
+          <span class="gro-ml-value">{{ star5UpAvg }}</span>
+          <span class="gro-ml-badge">UP</span>
         </div>
-        <div v-if="star5UpAvg !== ''" class="gro-ml-card">
-          <span>UP</span>
-          <span>{{ star5UpAvg }}</span>
-        </div>
-        <div class="gro-ml-card">
-          <span>总</span>
-          <span>{{ star5List.length }}</span>
+        <div class="gro-ml-card" title="五星总数">
+          <span class="gro-ml-value">{{ star5List.length }}</span>
+          <span class="gro-ml-badge">总</span>
         </div>
       </div>
       <!-- 进度条拼接 -->
@@ -160,6 +146,7 @@ const pg3 = computed<string>(() => getPg("3"));
 const pg4 = computed<string>(() => getPg("4"));
 const pg5 = computed<string>(() => getPg("5"));
 const isUpPool = computed<boolean>(() => props.dataType !== "new" && props.dataType !== "normal");
+const dateRangeLabel = computed<string>(() => `${startDate.value} ~ ${endDate.value}`);
 
 // Calculate dynamic heights
 function calculateHeights(): void {
@@ -368,37 +355,58 @@ function getPg(star: "5" | "4" | "3"): string {
 
 .gro-dvt-title {
   display: flex;
+  overflow: hidden;
   width: 100%;
+  min-width: 0;
   align-items: center;
   justify-content: flex-start;
   color: var(--common-text-title);
   column-gap: 8px;
   font-family: var(--font-title);
   font-size: 18px;
+  font-weight: normal;
 
-  :last-child {
+  .gro-dvt-name {
+    flex-shrink: 0;
+  }
+
+  .gro-dvt-pity {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 auto;
+    column-gap: 4px;
+    grid-template-columns: 5fr 3fr;
+  }
+
+  .gro-dvt-count {
+    flex-shrink: 0;
     margin-left: auto;
   }
 }
 
 .gro-dvt-subtitle {
+  overflow: hidden;
   width: 100%;
+  min-width: 0;
   font-family: var(--font-text);
   font-size: 12px;
+  line-height: 16px;
   opacity: 0.6;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gro-mid-list {
   display: grid;
+  min-width: 0;
   margin-top: 4px;
-  margin-bottom: 4px;
   color: var(--box-text-7);
   column-gap: 4px;
-  font-size: 14px;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  font-size: 12px;
+  grid-template-columns: auto repeat(2, minmax(0, 1fr));
 
   &.has-up {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: auto repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -407,7 +415,12 @@ function getPg(star: "5" | "4" | "3"): string {
   width: 100%;
   align-items: center;
   justify-content: center;
+  padding: 0 2px;
   font-family: var(--font-title);
+  font-size: 11px;
+  font-weight: normal;
+  letter-spacing: 1px;
+  white-space: nowrap;
 
   &.s4 {
     color: var(--tgc-od-purple);
@@ -421,17 +434,47 @@ function getPg(star: "5" | "4" | "3"): string {
 .gro-ml-card {
   position: relative;
   display: flex;
+  overflow: hidden;
+  min-width: 0;
   box-sizing: border-box;
   align-items: center;
-  justify-content: flex-start;
-  padding: 0 8px;
+  justify-content: center;
+  padding: 2px 4px;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--app-page-bg);
-  column-gap: 4px;
 
   &.reset {
     cursor: pointer;
   }
+}
+
+.gro-ml-value {
+  overflow: hidden;
+  max-width: 100%;
+  color: var(--box-text-7);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gro-ml-badge {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 0;
+  padding: 0 3px;
+  border-radius: 4px 0;
+  border-top: 1px solid var(--common-shadow-1);
+  border-left: 1px solid var(--common-shadow-1);
+  background: var(--box-bg-3);
+  color: var(--box-text-4);
+  font-size: 9px;
+  line-height: 12px;
+  pointer-events: none;
 }
 
 .gro-mid-progress {
@@ -443,6 +486,7 @@ function getPg(star: "5" | "4" | "3"): string {
   align-items: center;
   justify-content: flex-start;
   border-radius: 4px;
+  margin-top: 4px;
   background: var(--box-bg-2);
 
   div {

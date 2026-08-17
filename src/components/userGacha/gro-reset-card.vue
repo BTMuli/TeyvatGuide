@@ -1,9 +1,9 @@
 <!-- 垫数卡片 -->
 <template>
-  <div class="gro-rc-box">
+  <div :title="`${props.compute}星已垫`" class="gro-rc-box">
     <div class="gro-rc-progress" />
-    <span>距上个{{ props.compute }}星</span>
-    <span>{{ props.count }}</span>
+    <span class="gro-rc-value">{{ props.count }}</span>
+    <span class="gro-rc-badge">垫</span>
   </div>
 </template>
 <script lang="ts" setup>
@@ -37,19 +37,44 @@ const width = computed<string>(() => {
   position: relative;
   display: flex;
   overflow: hidden;
+  width: 100%;
+  min-width: 0;
   height: 28px;
   align-items: center;
   justify-content: center;
-  padding: 8px 4px;
+  padding: 2px 4px;
   border: 1px solid v-bind(color);
   border-radius: 4px;
   color: v-bind(color);
-  column-gap: 8px;
-  font-size: 14px;
+}
 
-  span {
-    z-index: 1;
-  }
+.gro-rc-value {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gro-rc-badge {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 0;
+  padding: 0 3px;
+  border-radius: 4px 0;
+  border-top: 1px solid v-bind(color);
+  border-left: 1px solid v-bind(color);
+  background: var(--box-bg-3);
+  color: var(--box-text-4);
+  font-size: 9px;
+  line-height: 12px;
+  pointer-events: none;
 }
 
 .gro-rc-progress {
