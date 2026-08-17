@@ -9,13 +9,26 @@
             <div class="twc-bi-title">
               <span>{{ data.name }}</span>
               <span>{{ data.title }}</span>
-              <img
-                v-if="props.item.contentId !== 0"
-                alt="observer"
-                src="/platforms/mhy/observer.webp"
-                title="前往观测枢"
-                @click="toWiki()"
-              />
+              <div class="twc-bi-title-actions">
+                <img
+                  v-if="props.item.contentId !== 0"
+                  alt="前往观测枢"
+                  src="/platforms/mhy/observer.webp"
+                  title="前往观测枢"
+                  @click="toWiki()"
+                />
+                <v-btn
+                  :class="{ planned: inPlan }"
+                  :icon="inPlan ? 'mdi-clipboard-check-outline' : 'mdi-calculator-variant-outline'"
+                  :title="inPlan ? '编辑养成计划目标' : '养成计算'"
+                  aria-label="养成计算"
+                  class="twc-bi-calc"
+                  density="compact"
+                  size="x-small"
+                  variant="text"
+                  @click="showCalc = true"
+                />
+              </div>
             </div>
             <div class="twc-bi-desc">{{ data.description }}</div>
           </div>
@@ -157,6 +170,7 @@
       </section>
     </div>
     <ToNameCard v-if="hasNc" v-model="showNc" :data="nameCard" />
+    <PwCultivationCalc v-model="showCalc" v-model:inPlan="inPlan" :character="data" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -170,6 +184,7 @@ import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
+import PwCultivationCalc from "./pw-cultivation-calc.vue";
 import PwMaterialList from "./pw-material-list.vue";
 import TwcConstellations from "./twc-constellations.vue";
 import TwcFood from "./twc-food.vue";
@@ -184,6 +199,8 @@ const router = useRouter();
 
 const hasNc = ref<boolean>(false);
 const showNc = ref<boolean>(false);
+const showCalc = ref<boolean>(false);
+const inPlan = ref<boolean>(false);
 const nameCard = shallowRef<TGApp.App.NameCard.Item>();
 const data = shallowRef<TGApp.App.Character.WikiItem>();
 const costumes = shallowRef<Array<TGApp.App.Character.Costume>>([]);
@@ -253,6 +270,8 @@ function resetDetailState(): void {
   storiesTab.value = 0;
   selectedTalent.value = "";
   selectedSkill.value = "";
+  showCalc.value = false;
+  inPlan.value = false;
 }
 
 async function toWiki(): Promise<void> {
@@ -340,8 +359,22 @@ async function toBirth(date: string): Promise<void> {
   }
 }
 
-.twc-bi-title :last-child {
-  cursor: pointer;
+.twc-bi-title-actions {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
+}
+
+.twc-bi-calc {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--tgc-od-orange);
+
+  &.planned {
+    color: var(--tgc-od-green);
+  }
 }
 
 .twc-bi-desc {

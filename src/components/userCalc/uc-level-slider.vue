@@ -47,6 +47,7 @@
       aria-label="起始与目标等级"
       class="ucls-control range"
       color="var(--tgc-od-green)"
+      data-html2canvas-ignore="true"
       density="compact"
       hide-details
       step="1"
@@ -61,6 +62,7 @@
       :aria-label="single ? '等级' : '目标等级'"
       :color="single ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"
       class="ucls-control"
+      data-html2canvas-ignore="true"
       density="compact"
       hide-details
       step="1"

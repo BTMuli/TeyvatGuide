@@ -14,14 +14,12 @@
       >
         {{ missingKinds > 0 ? `${missingKinds} 种不足` : "材料充足" }}
       </v-chip>
-      <div v-if="showCraftingOptions" class="ucm-crafting-options">
+      <div v-if="showCraftingOptions" class="ucm-crafting-options" data-html2canvas-ignore="true">
         <div class="ucm-crafting-control">
-          <v-switch
+          <v-checkbox-btn
             v-model="allowCrafting"
-            class="ucm-crafting-switch"
             color="var(--tgc-od-green)"
             density="compact"
-            hide-details
             title="允许使用背包材料按 Wiki 配方合成"
           />
           <span>允许合成</span>
@@ -44,7 +42,7 @@
             density="compact"
             title="允许使用含异梦溶媒的转换配方"
           />
-          <span>使用异梦溶媒</span>
+          <span>使用溶媒</span>
         </div>
       </div>
     </v-card-title>
@@ -124,7 +122,7 @@
     v-model="materialOverlayVisible"
     :bag="bagMaterials.get(currentMaterial.id)"
     :material="currentMaterial"
-    topOffset="132px"
+    :topOffset
     :uid
     :wiki="currentWiki"
   >
@@ -168,6 +166,7 @@ type UcMaterialResultProps = {
   loading?: boolean;
   showCraftingOptions?: boolean;
   emptyText?: string;
+  topOffset?: string;
   weakenReady?: boolean;
 };
 
@@ -175,6 +174,7 @@ const props = withDefaults(defineProps<UcMaterialResultProps>(), {
   loading: false,
   showCraftingOptions: true,
   emptyText: "请选择角色或武器，并设置培养目标",
+  topOffset: "132px",
   weakenReady: false,
 });
 const allowCrafting = defineModel<boolean>("allowCrafting", { required: true });
@@ -261,6 +261,7 @@ function switchMaterial(isNext: boolean): void {
 .ucm-heading {
   display: flex;
   align-items: center;
+  color: var(--box-text-4);
   font-family: var(--font-title);
   font-size: 16px;
   font-weight: normal;
@@ -284,18 +285,10 @@ function switchMaterial(isNext: boolean): void {
 .ucm-crafting-control {
   display: flex;
   align-items: center;
-  color: var(--common-text-sub);
+  color: var(--box-text-4);
   font-size: 13px;
   gap: 4px;
   white-space: nowrap;
-}
-
-.ucm-crafting-switch {
-  width: 36px;
-  flex: 0 0 36px;
-  margin: 0;
-  transform: scale(0.75);
-  transform-origin: center;
 }
 
 .ucm-list {
@@ -372,6 +365,7 @@ function switchMaterial(isNext: boolean): void {
 
   > strong {
     overflow: hidden;
+    color: var(--box-text-4);
     font-family: var(--font-title);
     font-size: 13px;
     font-weight: normal;
@@ -386,8 +380,9 @@ function switchMaterial(isNext: boolean): void {
 
 .ucm-material-meta {
   overflow: hidden;
-  color: var(--common-text-sub);
+  color: var(--box-text-4);
   font-size: 10px;
+  opacity: 0.72;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

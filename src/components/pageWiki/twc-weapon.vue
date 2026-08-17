@@ -11,10 +11,21 @@
                 <span>{{ data.name }}</span>
                 <img
                   v-if="props.item.contentId !== 0"
-                  alt="observer"
+                  alt="前往观测枢"
                   src="/platforms/mhy/observer.webp"
                   title="前往观测枢"
                   @click="toWiki()"
+                />
+                <v-btn
+                  :class="{ planned: inPlan }"
+                  :icon="inPlan ? 'mdi-clipboard-check-outline' : 'mdi-calculator-variant-outline'"
+                  :title="inPlan ? '编辑养成计划目标' : '养成计算'"
+                  aria-label="养成计算"
+                  class="tww-brief-calc"
+                  density="compact"
+                  size="x-small"
+                  variant="text"
+                  @click="showCalc = true"
                 />
               </div>
               <div class="tww-quick-switches">
@@ -128,6 +139,7 @@
         </v-window>
       </section>
     </div>
+    <PwCultivationCalc v-model="showCalc" v-model:inPlan="inPlan" :weapon="data" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -145,6 +157,7 @@ import {
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
 
+import PwCultivationCalc from "./pw-cultivation-calc.vue";
 import PwMaterialList from "./pw-material-list.vue";
 
 import { wwWeapon } from "@/data/index.js";
@@ -169,6 +182,8 @@ const box = computed<TItemBoxData>(() => ({
 const select = ref<number>(1);
 const storyTab = ref<number>(0);
 const level = ref<number>(90);
+const showCalc = ref<boolean>(false);
+const inPlan = ref<boolean>(false);
 const selectItems = shallowRef<Array<number>>([]);
 const scrollArea = useTemplateRef<HTMLDivElement>("scrollArea");
 const maxLevel = computed<number>(() => getWeaponMaxLevel(data.value?.star ?? 5));
@@ -196,6 +211,8 @@ const afterWeaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() =>
 );
 
 async function loadData(): Promise<void> {
+  showCalc.value = false;
+  inPlan.value = false;
   const res = wwWeapon.find((item) => item.id === props.item.id);
   if (res === undefined) {
     showSnackbar.warn(`未获取到武器 ${props.item.name} 的 Wiki 数据`);
@@ -444,6 +461,18 @@ async function toWiki(): Promise<void> {
     height: 20px;
     cursor: pointer;
     object-fit: contain;
+  }
+}
+
+.tww-brief-calc {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--tgc-od-orange);
+
+  &.planned {
+    color: var(--tgc-od-green);
   }
 }
 

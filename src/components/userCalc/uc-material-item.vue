@@ -119,13 +119,14 @@ const emits = defineEmits<UcMaterialItemEmits>();
 
 .ucmi-name {
   min-width: 0;
+  color: var(--box-text-4);
   font-family: var(--font-title);
   font-weight: 400;
   overflow-wrap: anywhere;
 }
 
 .ucmi-type {
-  color: var(--common-text-sub);
+  color: var(--box-text-4);
   font-size: 12px;
   opacity: 0.56;
   overflow-wrap: anywhere;

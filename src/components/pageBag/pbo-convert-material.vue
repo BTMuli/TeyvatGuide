@@ -27,7 +27,6 @@ const props = defineProps<PbMaterialItemProps>();
 </script>
 <style lang="scss" scoped>
 @use "@styles/utils.scss" as utils;
-@use "@styles/github.styles.scss" as github-styles;
 
 .pbo-cm-box {
   position: relative;
@@ -125,10 +124,11 @@ const props = defineProps<PbMaterialItemProps>();
     }
 
     .pbo-cm-local {
-      @include github-styles.github-tag-dark-gen($pbo-cm-base);
-
+      border: 1px solid rgba($pbo-cm-base, 0.3);
       border-top: unset;
       border-right: unset;
+      background: rgba($pbo-cm-base, 0.18);
+      color: $pbo-cm-base;
     }
   }
 }
