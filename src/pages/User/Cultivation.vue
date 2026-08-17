@@ -2200,7 +2200,6 @@ async function refreshLocalAvatarData(
   if (indexResponse.retcode !== 0) {
     throw new Error(`[${indexResponse.retcode}] ${indexResponse.message}`);
   }
-  await TSUserRecord.saveRecord(uid, indexResponse.data);
 
   await showLoading.update("正在获取角色列表");
   const listResponse = await recordReq.character.list(gameCookie, gameAccount);

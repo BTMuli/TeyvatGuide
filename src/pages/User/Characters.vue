@@ -768,7 +768,6 @@ async function refresh(): Promise<void> {
     await showLoading.update("正在保存角色数据", { timeout: 0 });
     const uid = Number(rfAccount.gameUid);
     const savedRoles = await TSUserAvatar.saveAvatars(rfAccount.gameUid, details);
-    await TSUserRecord.saveRecord(uid, indexResp.data);
     await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
     await TGLogger.Info(
       `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${details.length}个角色`,

@@ -104,10 +104,10 @@ async function characterList(
 
 /**
  * 获取首页信息
- * @since Beta v0.10.1
+ * @since Beta v0.11.5
  * @param cookie - Cookie
  * @param user - 用户
- * @param listType - 列表类型
+ * @param listType - 列表类型。`0` 为战绩展示列表，可写入 UserRecord；`1` 为完整角色列表，仅供内存使用，不得回写数据库
  * @returns 首页响应数据
  */
 async function index(

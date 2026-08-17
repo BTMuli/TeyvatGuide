@@ -1,6 +1,6 @@
 /**
  * 用户战绩模块
- * @since Beta v0.9.1
+ * @since Beta v0.11.5
  */
 
 import { timestampToDate } from "@utils/toolFunc.js";
@@ -101,10 +101,11 @@ async function getRecord(uid: number): Promise<TGApp.Sqlite.Record.TableTrans | 
 
 /**
  * 保存战绩数据
- * @since Beta v0.6.0
+ * @since Beta v0.11.5
  * @param uid - 游戏UID
  * @param data - 战绩数据
  * @returns 无返回值
+ * @remarks 仅写入 `avatar_list_type=0` 的首页数据；完整角色列表不得回写
  */
 async function saveRecord(uid: number, data: TGApp.Game.Record.FullData): Promise<void> {
   const db = await TGSqlite.getDB();
