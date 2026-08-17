@@ -238,14 +238,6 @@ type TargetMaterialView = {
   progress: number;
 };
 
-type TalentLevelView = {
-  currentLevel: number;
-  id: number;
-  label: string;
-  name: string;
-  targetLevel: number;
-};
-
 const TALENT_LABELS = <const>["A", "E", "Q"];
 
 const statusLabel = computed<string>(() => {
@@ -253,7 +245,7 @@ const statusLabel = computed<string>(() => {
   if (props.fulfilled) return "已满足";
   return "进行中";
 });
-const talentLevels = computed<Array<TalentLevelView>>(() => {
+const talentLevels = computed<Array<TGApp.App.UserCalc.TalentLevelView>>(() => {
   const currentLevelMap = new Map(
     props.entry.currentState.talents.map((talent) => [talent.id, talent.level]),
   );

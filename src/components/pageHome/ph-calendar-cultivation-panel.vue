@@ -222,7 +222,6 @@ type TargetMaterial = TGApp.App.Calendar.Material & {
   targetRequired: number;
 };
 type SelectedMaterialAllocation = { craftable: number; current: number; type: string };
-type DropDayLabel = { isToday: boolean; label: string; value: number };
 
 const dayLabels: Record<number, string> = {
   1: "周一",
@@ -306,7 +305,7 @@ const targetMaterials = computed<Array<TargetMaterial>>(() =>
     })
     .sort((a, b) => b.star - a.star),
 );
-const materialDropDays = computed<Array<DropDayLabel>>(() => {
+const materialDropDays = computed<Array<TGApp.App.Calendar.DropDayLabel>>(() => {
   if (isTraveler.value) return [];
   const days = new Set<number>();
   if (props.item.dropDays.length > 0) {

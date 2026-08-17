@@ -137,7 +137,6 @@ type PhCalendarPanelProps = {
   src?: string;
 };
 type PhCalendarPanelEmits = { close: [] };
-type DropDayLabel = { isToday: boolean; label: string; value: number };
 
 const props = withDefaults(defineProps<PhCalendarPanelProps>(), {
   src: "素材日历",
@@ -177,7 +176,7 @@ const shareCaption = computed<string>(
 const sortedMaterials = computed<Array<TGApp.App.Calendar.Material>>(() =>
   [...props.item.materials].sort((a, b) => b.star - a.star),
 );
-const dropDayLabels = computed<Array<DropDayLabel>>(() =>
+const dropDayLabels = computed<Array<TGApp.App.Calendar.DropDayLabel>>(() =>
   props.item.dropDays.map((day) => ({
     isToday: day === today,
     label: dayLabels[day] ?? `周${day}`,

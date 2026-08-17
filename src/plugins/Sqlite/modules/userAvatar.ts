@@ -9,11 +9,6 @@ import TGSqlite from "../index.js";
 
 import { AppCharacterData } from "@/data/index.js";
 
-type SqlStatement = {
-  query: string;
-  values: Array<string | number>;
-};
-
 const avatarNameCardMap = new Map<number, string>(
   AppCharacterData.map((character) => [character.id, character.nameCard]),
 );
@@ -84,7 +79,7 @@ function getInsertSql(
   uid: string,
   data: TGApp.Game.Avatar.AvatarDetail,
   updated: string,
-): SqlStatement {
+): TGApp.App.Sqlite.SqlStatement {
   return {
     query: `INSERT INTO UserCharacters (uid, cid, avatar, weapon, relics, constellations, costumes, skills,
                                   propSelected, propBase, propExtra, propRecommend, updated)

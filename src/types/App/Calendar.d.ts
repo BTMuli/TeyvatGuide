@@ -79,4 +79,17 @@ declare namespace TGApp.App.Calendar {
     /** 来源名称 */
     name: string;
   };
+
+  /**
+   * 掉落日标签
+   * @since Beta v0.11.5
+   */
+  type DropDayLabel = {
+    /** 是否为今天 */
+    isToday: boolean;
+    /** 展示文案 */
+    label: string;
+    /** 星期值（1-7） */
+    value: number;
+  };
 }

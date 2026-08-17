@@ -129,4 +129,21 @@ declare namespace TGApp.App.UserCalc {
     /** 持有与可合成数量的合计进度，取值范围为 0 到 100 */
     progress: number;
   };
+
+  /**
+   * 天赋等级展示项
+   * @since Beta v0.11.5
+   */
+  type TalentLevelView = {
+    /** 当前等级 */
+    currentLevel: number;
+    /** 天赋 ID */
+    id: number;
+    /** 展示标签（如 A/E/Q） */
+    label: string;
+    /** 天赋名称 */
+    name: string;
+    /** 目标等级 */
+    targetLevel: number;
+  };
 }

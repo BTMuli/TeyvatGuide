@@ -11,11 +11,6 @@ import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
-type SqlStatement = {
-  query: string;
-  values: Array<string | number>;
-};
-
 type JsonValidation<T> =
   { ok: true; value: T } | { field: ChallengeJsonField; ok: false; reason: string };
 
@@ -302,7 +297,10 @@ function parseBackupChallenge(value: unknown): TGApp.Sqlite.Challenge.TableTrans
  * @param uid - 用户UID
  * @returns SQL 语句与参数
  */
-function getInsertSql(data: TGApp.Sqlite.Challenge.TableTrans, uid?: string): SqlStatement {
+function getInsertSql(
+  data: TGApp.Sqlite.Challenge.TableTrans,
+  uid?: string,
+): TGApp.App.Sqlite.SqlStatement {
   const parsed = parseRawChallenge({
     ...data,
     uid: uid ?? data.uid,

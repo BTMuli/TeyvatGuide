@@ -7,11 +7,6 @@ import type Database from "@tauri-apps/plugin-sql";
 
 import TGSqlite from "../index.js";
 
-type SqlStatement = {
-  query: string;
-  values?: Array<unknown>;
-};
-
 let transactionQueue: Promise<void> = Promise.resolve();
 
 function parseProject(raw: TGApp.Sqlite.Cultivation.ProjectRaw): TGApp.Sqlite.Cultivation.Project {
@@ -53,7 +48,7 @@ async function getAllUid(): Promise<Array<number>> {
 }
 
 async function withTransaction(
-  operation: (db: Database, statements: Array<SqlStatement>) => Promise<void>,
+  operation: (db: Database, statements: Array<TGApp.App.Sqlite.SqlStatement>) => Promise<void>,
 ): Promise<void> {
   const previousTransaction = transactionQueue;
   let releaseTransaction: () => void = () => undefined;
@@ -64,7 +59,7 @@ async function withTransaction(
 
   try {
     const db = await TGSqlite.getDB();
-    const statements: Array<SqlStatement> = [];
+    const statements: Array<TGApp.App.Sqlite.SqlStatement> = [];
     await operation(db, statements);
     await TGSqlite.executeTransaction(statements);
   } finally {
@@ -72,7 +67,10 @@ async function withTransaction(
   }
 }
 
-function pushDetachApiResultStatements(statements: Array<SqlStatement>, entryId: string): void {
+function pushDetachApiResultStatements(
+  statements: Array<TGApp.App.Sqlite.SqlStatement>,
+  entryId: string,
+): void {
   statements.push(
     {
       query: `INSERT INTO CultivationApiResult(

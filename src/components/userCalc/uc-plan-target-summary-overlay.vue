@@ -198,14 +198,6 @@ type UcPlanTargetSummaryOverlayEmits = {
   select: [entry: TGApp.Sqlite.Cultivation.EntryWithItems];
 };
 
-type TalentLevelView = {
-  currentLevel: number;
-  id: number;
-  label: string;
-  name: string;
-  targetLevel: number;
-};
-
 const TALENT_LABELS = <const>["A", "E", "Q"];
 
 const props = defineProps<UcPlanTargetSummaryOverlayProps>();
@@ -274,7 +266,7 @@ const emptyText = computed<string>(() => {
   if (props.entry.items.length === 0) return "此目标无需额外材料";
   return "暂未加载到该目标的材料分配结果";
 });
-const talentLevels = computed<Array<TalentLevelView>>(() => {
+const talentLevels = computed<Array<TGApp.App.UserCalc.TalentLevelView>>(() => {
   const currentLevelMap = new Map(
     props.entry.currentState.talents.map((talent) => [talent.id, talent.level]),
   );

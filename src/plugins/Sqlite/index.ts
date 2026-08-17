@@ -12,11 +12,6 @@ import TGLogger from "@utils/TGLogger.js";
 import createTable from "./sql/createTable.sql?raw";
 import initDataSql from "./sql/initData.js";
 
-type SqlStatement = {
-  query: string;
-  values?: Array<unknown>;
-};
-
 type TableColumn = {
   name: string;
   notnull: number;
@@ -203,7 +198,7 @@ class Sqlite {
       updated TEXT,
       PRIMARY KEY (uid, gameBiz, gameUid)
     );`;
-    const statements: Array<SqlStatement> = [
+    const statements: Array<TGApp.App.Sqlite.SqlStatement> = [
       { query: `ALTER TABLE GameAccount RENAME TO ${GameAccountLegacyTable};` },
       { query: createStatement },
     ];
@@ -234,7 +229,7 @@ class Sqlite {
     ];
     const statements = additions
       .filter((addition) => !columnNames.has(addition.name))
-      .map<SqlStatement>((addition) => ({ query: addition.sql }));
+      .map<TGApp.App.Sqlite.SqlStatement>((addition) => ({ query: addition.sql }));
     if (statements.length > 0) await this.executeRawTransaction(statements);
   }
 
@@ -244,12 +239,16 @@ class Sqlite {
    * @param statements - 按顺序执行的 SQL 语句
    * @returns 无返回值
    */
-  public async executeTransaction(statements: ReadonlyArray<SqlStatement>): Promise<void> {
+  public async executeTransaction(
+    statements: ReadonlyArray<TGApp.App.Sqlite.SqlStatement>,
+  ): Promise<void> {
     await this.getDB();
     await this.executeRawTransaction(statements);
   }
 
-  private async executeRawTransaction(statements: ReadonlyArray<SqlStatement>): Promise<void> {
+  private async executeRawTransaction(
+    statements: ReadonlyArray<TGApp.App.Sqlite.SqlStatement>,
+  ): Promise<void> {
     await this.getRawDB();
     await invoke("execute_sql_transaction", { db: this.dbPath, statements });
   }
