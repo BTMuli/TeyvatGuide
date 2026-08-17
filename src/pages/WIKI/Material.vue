@@ -83,11 +83,15 @@
     </template>
   </v-app-bar>
   <div class="twm-box">
-    <PwMaterialItem
+    <TMaterialStarChip
       v-for="material in visibleMaterials"
       :key="material.id"
-      :material
       class="twm-item"
+      mode="wiki"
+      :id="material.id"
+      :name="material.name"
+      :star="material.star"
+      :type="material.type"
       @click="toMaterial(material)"
     />
     <div v-if="hasMoreMaterials" ref="loadMoreRef" class="twm-load-trigger" />
@@ -122,8 +126,8 @@
   </TwoMaterial>
 </template>
 <script lang="ts" setup>
+import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import PwMaterialItem from "@comp/pageWiki/pw-material-item.vue";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import { getBagTypeOrder } from "@Sqlm/userBagMaterial.js";
 import {
@@ -435,7 +439,7 @@ function observeLoadMore(): void {
 
 .twm-box {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   grid-template-columns: repeat(auto-fill, minmax(200px, 0.25fr));
 }
 

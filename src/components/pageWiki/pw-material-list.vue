@@ -1,12 +1,16 @@
 <!-- 角色/武器材料列表 -->
 <template>
   <div class="pw-ml-box">
-    <PwMaterialItem
+    <TMaterialStarChip
       v-for="(material, index) in materialList"
       :key="material.id"
-      :material
+      mode="wiki"
+      :id="material.id"
+      :name="material.name"
       role="button"
+      :star="material.star"
       tabindex="0"
+      :type="material.type"
       @click="checkData(material, index)"
       @keydown.enter.prevent="checkData(material, index)"
       @keydown.space.prevent="checkData(material, index)"
@@ -36,10 +40,10 @@
   </TwoMaterial>
 </template>
 <script lang="ts" setup>
+import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { nextTick, ref, shallowRef, watch } from "vue";
 
-import PwMaterialItem from "./pw-material-item.vue";
 import TwoMaterial from "./two-material.vue";
 
 import { WikiMaterialData } from "@/data/index.js";

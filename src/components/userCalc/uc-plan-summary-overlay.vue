@@ -95,44 +95,12 @@
             </div>
 
             <div v-if="materials.length > 0" class="ucps-material-list">
-              <article
+              <UcMaterialReq
                 v-for="material in materials"
                 :key="material.id"
-                :class="{ missing: material.missing > 0 }"
-                class="ucps-material"
-                role="button"
-                tabindex="0"
-                title="查看材料详情"
-                @click="openMaterialInfo(material)"
-                @keydown.enter="openMaterialInfo(material)"
-                @keydown.space.prevent="openMaterialInfo(material)"
-              >
-                <div class="ucps-material-icon">
-                  <img :src="`/icon/bg/${material.star}-Star.webp`" alt="background" />
-                  <img :src="`/icon/material/${material.id}.webp`" :alt="material.name" />
-                </div>
-                <div class="ucps-material-info">
-                  <div class="ucps-material-heading">
-                    <strong>{{ material.name }}</strong>
-                    <UcMaterialCount
-                      class="ucps-material-count"
-                      :complete="material.missing === 0"
-                      :craftable="material.craftable"
-                      :current="material.owned"
-                      :required="material.required"
-                    />
-                  </div>
-                  <div class="ucps-material-meta">
-                    <span>{{ material.type }}</span>
-                  </div>
-                  <v-progress-linear
-                    :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
-                    :model-value="material.progress"
-                    height="3"
-                    rounded
-                  />
-                </div>
-              </article>
+                :material
+                @select="openMaterialInfo(material)"
+              />
             </div>
             <div v-else class="ucps-empty">
               <v-icon size="48">mdi-package-variant-closed-check</v-icon>
@@ -165,8 +133,8 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
+import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
@@ -322,7 +290,7 @@ async function shareSummary(): Promise<void> {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 
   h2 {
     overflow: hidden;
@@ -392,7 +360,7 @@ async function shareSummary(): Promise<void> {
   div {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   strong {
@@ -488,102 +456,9 @@ async function shareSummary(): Promise<void> {
 .ucps-material-list {
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: 8px;
   grid-auto-rows: 58px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.ucps-material {
-  display: flex;
-  overflow: hidden;
-  min-width: 0;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--common-shadow-t-1);
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: -2px;
-  }
-
-  &.missing {
-    border-color: var(--tgc-od-red);
-  }
-}
-
-.ucps-material-icon {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  flex: 0 0 56px;
-  background: var(--common-shadow-t-2);
-
-  img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-  }
-
-  img:first-child {
-    object-fit: cover;
-  }
-
-  img:last-child {
-    object-fit: contain;
-  }
-}
-
-.ucps-material-info {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  padding: 5px 8px;
-  gap: 3px;
-}
-
-.ucps-material-heading,
-.ucps-material-meta {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-}
-
-.ucps-material-heading {
-  justify-content: space-between;
-  gap: 8px;
-
-  strong {
-    overflow: hidden;
-    font-family: var(--font-title);
-    font-size: 13px;
-    font-weight: normal;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.ucps-material-count {
-  font-size: 11px;
-}
-
-.ucps-material-meta {
-  color: var(--common-text-sub);
-  font-size: 10px;
-  gap: 6px;
-
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  span:first-child {
-    flex: 1;
-  }
 }
 
 .ucps-empty {

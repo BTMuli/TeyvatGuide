@@ -99,7 +99,17 @@
               <span v-if="material.craftable > 0">可合成 {{ material.craftable }} 个</span>
             </header>
             <div v-if="costMaterials.length > 0" class="ucmd-costs">
-              <PboConvertMaterial v-for="cost in costMaterials" :key="cost.id" :material="cost" />
+              <TMaterialStarChip
+                v-for="cost in costMaterials"
+                :key="cost.id"
+                :id="cost.id"
+                mode="convert"
+                :name="cost.name"
+                :owned="cost.local"
+                :required="cost.count"
+                :star="cost.star"
+                :type="cost.type"
+              />
             </div>
             <span v-else class="ucmd-no-cost">当前计算未使用合成材料</span>
           </section>
@@ -117,10 +127,10 @@
 </template>
 
 <script lang="ts" setup>
+import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PboConvertMaterial from "@comp/pageBag/pbo-convert-material.vue";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
 import TwoSource from "@comp/pageWiki/two-source.vue";
 import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
@@ -246,7 +256,7 @@ async function shareMaterial(): Promise<void> {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 
   h2 {
     overflow: hidden;

@@ -151,51 +151,21 @@
     </div>
 
     <div class="ucptc-materials">
-      <div
+      <UcMaterialReq
         v-for="material in displayMaterials"
-        :key="material.item.materialId"
-        :class="{ fulfilled: material.fulfilled }"
-        class="ucptc-material"
-        role="button"
-        tabindex="0"
+        :key="material.id"
+        :material
+        weakenReady
         @pointerdown.stop
-        @pointerup.stop="selectMaterial(material.item.materialId)"
-        @keydown.enter.stop="selectMaterial(material.item.materialId)"
-        @keydown.space.prevent.stop="selectMaterial(material.item.materialId)"
-      >
-        <div class="ucptc-material-icon">
-          <img :src="materialBackground(material.item.materialId)" alt="" class="background" />
-          <img
-            :alt="materialName(material.item.materialId)"
-            :src="materialIcon(material.item.materialId)"
-            class="icon"
-          />
-        </div>
-        <div class="ucptc-material-info">
-          <div>
-            <span class="ucptc-material-name">{{ materialName(material.item.materialId) }}</span>
-            <UcMaterialCount
-              :complete="material.fulfilled"
-              :craftable="material.craftable"
-              :current="material.current"
-              :required="material.item.required"
-            />
-          </div>
-          <v-progress-linear
-            :color="material.fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
-            :model-value="material.progress"
-            height="4"
-            rounded
-          />
-        </div>
-      </div>
+        @select="selectMaterial(material.id)"
+      />
     </div>
   </v-card>
 </template>
 
 <script lang="ts" setup>
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
-import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
+import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { computed } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -230,14 +200,6 @@ function selectMaterial(materialId: number): void {
   emits("material", materialId);
 }
 
-type TargetMaterialView = {
-  craftable: number;
-  current: number;
-  fulfilled: boolean;
-  item: TGApp.Sqlite.Cultivation.Item;
-  progress: number;
-};
-
 const TALENT_LABELS = <const>["A", "E", "Q"];
 
 const statusLabel = computed<string>(() => {
@@ -263,40 +225,37 @@ const talentLevels = computed<Array<TGApp.App.UserCalc.TalentLevelView>>(() => {
 const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
   () => new Map(props.materials.map((material) => [material.id, material])),
 );
-const displayMaterials = computed<Array<TargetMaterialView>>(() =>
+const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
   props.entry.items
     .map((item) => {
       const result = materialResultMap.value.get(item.materialId);
-      const current = result?.owned ?? 0;
-      const craftable = result?.craftable ?? 0;
-      const prepared = Math.min(current + craftable, item.required);
-      const ratio = item.required > 0 ? prepared / item.required : 0;
-      const progress = ratio * 100;
+      if (result) {
+        return {
+          ...result,
+          required: item.required,
+          missing: Math.max(item.required - (result.owned + result.craftable), 0),
+          progress:
+            item.required > 0
+              ? Math.min(((result.owned + result.craftable) / item.required) * 100, 100)
+              : 100,
+        };
+      }
+      const wiki = WikiMaterialData.find((material) => material.id === item.materialId);
       return {
-        craftable,
-        current,
-        fulfilled: progress >= 100,
-        item,
-        progress,
+        id: item.materialId,
+        name: wiki?.name ?? `材料 ${item.materialId}`,
+        type: wiki?.type ?? "未知类型",
+        star: wiki?.star ?? 1,
+        required: item.required,
+        owned: 0,
+        craftable: 0,
+        craftingCosts: [],
+        missing: item.required,
+        progress: 0,
       };
     })
-    .sort((a, b) => Number(a.fulfilled) - Number(b.fulfilled)),
+    .sort((a, b) => Number(a.missing === 0) - Number(b.missing === 0)),
 );
-
-function materialName(materialId: number): string {
-  return (
-    WikiMaterialData.find((material) => material.id === materialId)?.name ?? `材料 ${materialId}`
-  );
-}
-
-function materialIcon(materialId: number): string {
-  return `/icon/material/${materialId}.webp`;
-}
-
-function materialBackground(materialId: number): string {
-  const star = WikiMaterialData.find((material) => material.id === materialId)?.star ?? 1;
-  return `/icon/bg/${star}-Star.webp`;
-}
 </script>
 
 <style lang="scss" scoped>
@@ -351,15 +310,14 @@ function materialBackground(materialId: number): string {
 .ucptc-progress-row,
 .ucptc-actions,
 .ucptc-action-priority,
-.ucptc-action-end,
-.ucptc-material {
+.ucptc-action-end {
   display: flex;
   align-items: center;
 }
 
 .ucptc-name-row {
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .ucptc-options {
@@ -370,6 +328,7 @@ function materialBackground(materialId: number): string {
 .ucptc-name {
   font-family: var(--font-title);
   font-size: 16px;
+  font-weight: normal;
 }
 
 .ucptc-level {
@@ -377,7 +336,6 @@ function materialBackground(materialId: number): string {
 }
 
 .ucptc-talents,
-.ucptc-material,
 .ucptc-progress-row span {
   color: var(--common-text-sub);
   font-size: 12px;
@@ -420,78 +378,18 @@ function materialBackground(materialId: number): string {
 }
 
 .ucptc-materials {
-  display: grid;
+  display: flex;
   min-height: 0;
   flex: 1;
-  align-content: start;
-  padding: 8px 12px 12px;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 6px;
-  grid-auto-rows: minmax(44px, min-content);
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  overflow-y: auto;
-}
-
-.ucptc-material {
-  min-width: 0;
-  align-items: center;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--common-shadow-t-1);
-  cursor: pointer;
-  gap: 6px;
-  transition: opacity 160ms ease;
-
-  &.fulfilled {
-    opacity: 0.52;
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: 2px;
-  }
-}
-
-.ucptc-material-icon {
-  position: relative;
-  overflow: hidden;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: 4px;
-
-  img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-    object-fit: contain;
-  }
-
-  .background {
-    object-fit: cover;
-  }
-}
-
-.ucptc-material-info {
-  display: flex;
-  min-width: 0;
-  flex: 1;
   flex-direction: column;
-  gap: 4px;
+  align-items: stretch;
+  padding: 8px;
+  border-top: 1px solid var(--common-shadow-1);
+  gap: 8px;
+  overflow-x: auto;
 
-  > div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+  > :deep(.ucmr-item) {
+    flex-shrink: 0;
   }
-}
-
-.ucptc-material-name {
-  overflow: hidden;
-  flex: 1;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 </style>

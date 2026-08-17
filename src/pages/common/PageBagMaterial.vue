@@ -112,11 +112,14 @@
       <span>暂无材料数据</span>
     </div>
     <template v-for="material in visibleMaterials" :key="material.info.id">
-      <PbMaterialItem
-        :cur="curMaterial"
-        :info="material.info"
-        :tb="material.tb"
-        @select="handleSelect"
+      <TMaterialStarChip
+        mode="bag"
+        :id="material.info.id"
+        :name="material.info.name"
+        :owned="bagOwnedCount(material)"
+        :star="material.info.star"
+        :type="material.info.type"
+        @click="handleSelect(material)"
       />
     </template>
     <div v-if="hasMoreMaterials" ref="loadMoreRef" class="pbm-load-trigger" />
@@ -152,10 +155,10 @@
   </PboMaterial>
 </template>
 <script lang="ts" setup>
+import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PbMaterialItem from "@comp/pageBag/pb-materialItem.vue";
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import TSUserBagMaterial, {
   getBagTypeOrder,
@@ -491,6 +494,11 @@ function handleUpdate(info: MaterialInfo): void {
     Object.assign(find, info);
     curMaterial.value = info;
   }
+}
+
+function bagOwnedCount(material: MaterialInfo): number {
+  if (curMaterial.value?.info.id === material.info.id) return curMaterial.value.tb.count;
+  return material.tb.count;
 }
 
 async function tryImportMaterial(): Promise<void> {

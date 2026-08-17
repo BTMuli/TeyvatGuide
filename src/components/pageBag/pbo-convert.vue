@@ -2,14 +2,23 @@
 <template>
   <div class="pboc-container">
     <v-icon>mdi-all-inclusive</v-icon>
-    <PboConvertMaterial v-for="material in convertSources" :key="material.id" :material />
+    <TMaterialStarChip
+      v-for="material in convertSources"
+      :key="material.id"
+      :id="material.id"
+      mode="convert"
+      :name="material.name"
+      :owned="material.local"
+      :required="material.count"
+      :star="material.star"
+      :type="material.type"
+    />
   </div>
 </template>
 <script lang="ts" setup>
+import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import { shallowRef, watch } from "vue";
-
-import PboConvertMaterial from "./pbo-convert-material.vue";
 
 /** 组件参数 */
 type PboConvertProps = {

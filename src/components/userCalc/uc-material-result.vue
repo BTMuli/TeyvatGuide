@@ -55,45 +55,13 @@
     <template v-else-if="materials.length > 0">
       <section class="ucm-section">
         <div class="ucm-list">
-          <article
+          <UcMaterialReq
             v-for="(material, index) in materials"
             :key="material.id"
-            :class="{
-              missing: material.missing > 0,
-              ready: weakenReady && material.missing === 0,
-            }"
-            class="ucm-material"
-            role="button"
-            tabindex="0"
-            title="查看材料详情"
-            @click="openMaterialInfo(material, index)"
-            @keydown.enter="openMaterialInfo(material, index)"
-            @keydown.space.prevent="openMaterialInfo(material, index)"
-          >
-            <div class="ucm-material-icon">
-              <img :src="`/icon/bg/${material.star}-Star.webp`" alt="background" />
-              <img :src="`/icon/material/${material.id}.webp`" :alt="material.name" />
-            </div>
-            <div class="ucm-material-info">
-              <div class="ucm-material-heading">
-                <strong>{{ material.name }}</strong>
-                <UcMaterialCount
-                  class="ucm-material-count"
-                  :complete="material.missing === 0"
-                  :craftable="material.craftable"
-                  :current="material.owned"
-                  :required="material.required"
-                />
-              </div>
-              <div class="ucm-material-meta">{{ material.type }}</div>
-              <v-progress-linear
-                :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
-                :model-value="material.progress"
-                height="3"
-                rounded
-              />
-            </div>
-          </article>
+            :material
+            :weakenReady
+            @select="openMaterialInfo(material, index)"
+          />
         </div>
       </section>
 
@@ -107,7 +75,17 @@
           <v-chip size="small" variant="tonal">{{ craftingCosts.length }} 种材料</v-chip>
         </div>
         <div class="ucm-cost-list">
-          <PboConvertMaterial v-for="cost in craftingCosts" :key="cost.id" :material="cost" />
+          <TMaterialStarChip
+            v-for="cost in craftingCosts"
+            :key="cost.id"
+            :id="cost.id"
+            mode="convert"
+            :name="cost.name"
+            :owned="cost.local"
+            :required="cost.count"
+            :star="cost.star"
+            :type="cost.type"
+          />
         </div>
       </section>
     </template>
@@ -149,11 +127,11 @@
   </UcMaterialDetail>
 </template>
 <script lang="ts" setup>
+import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import PboConvertMaterial from "@comp/pageBag/pbo-convert-material.vue";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
-import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
+import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { computed, nextTick, ref, shallowRef } from "vue";
 
 import { WikiMaterialData } from "@/data/index.js";
@@ -294,97 +272,9 @@ function switchMaterial(isNext: boolean): void {
 .ucm-list {
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: 8px;
   grid-auto-rows: 58px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.ucm-material {
-  display: flex;
-  overflow: hidden;
-  min-width: 0;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--common-shadow-t-1);
-  cursor: pointer;
-  transition: opacity 160ms ease;
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: -2px;
-  }
-
-  &.missing {
-    border-color: var(--tgc-od-red);
-  }
-
-  &.ready {
-    opacity: 0.56;
-  }
-}
-
-.ucm-material-icon {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  flex: 0 0 56px;
-  background: var(--common-shadow-t-2);
-
-  img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    inset: 0;
-  }
-
-  img:first-child {
-    object-fit: cover;
-  }
-
-  img:last-child {
-    object-fit: contain;
-  }
-}
-
-.ucm-material-info {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  padding: 5px 8px;
-  gap: 3px;
-}
-
-.ucm-material-heading {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-
-  > strong {
-    overflow: hidden;
-    color: var(--box-text-4);
-    font-family: var(--font-title);
-    font-size: 13px;
-    font-weight: normal;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.ucm-material-count {
-  font-size: 11px;
-}
-
-.ucm-material-meta {
-  overflow: hidden;
-  color: var(--box-text-4);
-  font-size: 10px;
-  opacity: 0.72;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .ucm-card-arrow {
@@ -409,7 +299,7 @@ function switchMaterial(isNext: boolean): void {
   align-items: center;
   font-family: var(--font-title);
   font-weight: normal;
-  gap: 6px;
+  gap: 8px;
 }
 
 .ucm-cost-list {
