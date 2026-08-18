@@ -31,7 +31,7 @@
           :priority="entryPriority(entry)"
           :progress="entryProgress(entry)"
           @edit="emits('edit', $event)"
-          @material="openMaterial"
+          @material="(materialId) => openMaterial(entry, materialId)"
           @move="moveEntry"
           @remove="emits('remove', $event)"
           @status="emitStatus"
@@ -44,6 +44,8 @@
     v-if="currentMaterial"
     v-model="materialOverlayVisible"
     :data="currentMaterial"
+    eyebrow="养成材料"
+    :shareCaption="materialShareCaption"
     :uid
     topOffset="132px"
   >
@@ -60,7 +62,7 @@
     </template>
     <template #right>
       <v-btn
-        :disabled="currentMaterialIndex === planMaterials.length - 1"
+        :disabled="currentMaterialIndex === overlayMaterials.length - 1"
         aria-label="下一个养成材料"
         class="card-arrow"
         icon="mdi-chevron-right"
@@ -123,6 +125,7 @@ const swiperModules = [A11y, Navigation];
 const materialOverlayVisible = ref<boolean>(false);
 const summaryOverlayVisible = ref<boolean>(false);
 const currentMaterial = shallowRef<MaterialInfo>();
+const overlayMaterials = shallowRef<Array<MaterialInfo>>([]);
 const currentSummaryEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
 const currentMaterialIndex = ref<number>(0);
 
@@ -133,18 +136,10 @@ const entryMaterialResults = computed<
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort(compareEntries),
 );
-const planMaterials = computed<Array<MaterialInfo>>(() => {
-  const materialIds = new Set<number>();
-  for (const entry of sortedEntries.value) {
-    for (const item of entry.items) materialIds.add(item.materialId);
-  }
-  return Array.from(materialIds)
-    .map((materialId) => {
-      const info = WikiMaterialData.find((material) => material.id === materialId);
-      if (info === undefined) return undefined;
-      return { info, tb: getBagMaterial(materialId) };
-    })
-    .filter((material): material is MaterialInfo => material !== undefined);
+const materialShareCaption = computed<string>(() => {
+  const material = currentMaterial.value;
+  if (!material) return "";
+  return `${material.info.name} · 第 ${currentMaterialIndex.value + 1} / ${overlayMaterials.value.length} 项 · UID ${props.uid}`;
 });
 
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
@@ -284,21 +279,46 @@ function getBagMaterial(materialId: number): TGApp.Sqlite.UserBag.MaterialTable 
   );
 }
 
-async function openMaterial(materialId: number): Promise<void> {
-  const index = planMaterials.value.findIndex((material) => material.info.id === materialId);
+/** 与目标卡片 displayMaterials 同序：按 entry.items，缺料优先 */
+function buildEntryMaterials(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Array<MaterialInfo> {
+  const materialResultMap = new Map(
+    (entryMaterialResults.value.get(entry.id) ?? []).map((material) => [material.id, material]),
+  );
+  return entry.items
+    .map((item) => {
+      const info = WikiMaterialData.find((material) => material.id === item.materialId);
+      if (info === undefined) return undefined;
+      const result = materialResultMap.get(item.materialId);
+      const owned = result?.owned ?? 0;
+      const craftable = result?.craftable ?? 0;
+      const missing = Math.max(item.required - (owned + craftable), 0);
+      return { info, tb: getBagMaterial(item.materialId), missing };
+    })
+    .filter((material): material is MaterialInfo & { missing: number } => material !== undefined)
+    .sort((a, b) => Number(a.missing === 0) - Number(b.missing === 0))
+    .map(({ info, tb }) => ({ info, tb }));
+}
+
+async function openMaterial(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  materialId: number,
+): Promise<void> {
+  const materials = buildEntryMaterials(entry);
+  const index = materials.findIndex((material) => material.info.id === materialId);
   if (index < 0) return;
   materialOverlayVisible.value = false;
+  overlayMaterials.value = materials;
   currentMaterialIndex.value = index;
-  currentMaterial.value = planMaterials.value[index];
+  currentMaterial.value = materials[index];
   await nextTick();
   if (currentMaterial.value?.info.id === materialId) materialOverlayVisible.value = true;
 }
 
 function switchMaterial(isNext: boolean): void {
   const nextIndex = currentMaterialIndex.value + (isNext ? 1 : -1);
-  if (nextIndex < 0 || nextIndex >= planMaterials.value.length) return;
+  if (nextIndex < 0 || nextIndex >= overlayMaterials.value.length) return;
   currentMaterialIndex.value = nextIndex;
-  currentMaterial.value = planMaterials.value[nextIndex];
+  currentMaterial.value = overlayMaterials.value[nextIndex];
 }
 </script>
 

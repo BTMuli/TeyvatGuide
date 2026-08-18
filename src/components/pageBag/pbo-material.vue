@@ -16,6 +16,9 @@
     <template #right>
       <slot name="right" />
     </template>
+    <template v-if="slots.footer" #footer>
+      <slot name="footer" />
+    </template>
     <template #meta>
       <span v-if="showRecord" class="pbom-count">
         <v-icon size="14">mdi-package-variant-closed</v-icon>
@@ -71,7 +74,7 @@ import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import TSUserBagMaterial, { isTrackableBagMaterial } from "@Sqlm/userBagMaterial.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
-import { computed, shallowRef, watch } from "vue";
+import { computed, shallowRef, useSlots, watch } from "vue";
 
 import PboConvert from "./pbo-convert.vue";
 
@@ -83,6 +86,8 @@ type PboMaterialProps = {
   data: MaterialInfo;
   /** 分享署名眉标 */
   eyebrow?: string;
+  /** 覆盖默认分享署名（不含 eyebrow 前缀） */
+  shareCaption?: string;
   topOffset?: string;
   uid: number;
 };
@@ -95,9 +100,18 @@ const props = withDefaults(defineProps<PboMaterialProps>(), {
 });
 const emits = defineEmits<PboMaterialEmits>();
 const visible = defineModel<boolean>();
+const slots = useSlots();
 const showRecord = computed<boolean>(() => isTrackableBagMaterial(props.data.info));
 const dbInfo = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.data.tb);
-const shareCaption = computed<string>(() => `Material ${props.data.info.id} · UID ${props.uid}`);
+
+defineSlots<{
+  footer?: () => unknown;
+  left?: () => unknown;
+  right?: () => unknown;
+}>();
+const shareCaption = computed<string>(
+  () => props.shareCaption ?? `Material ${props.data.info.id} · UID ${props.uid}`,
+);
 const shareFileName = computed<string>(
   () => `materialBag_${props.data.info.id}_${dbInfo.value.count}`,
 );

@@ -148,6 +148,8 @@ type UcMaterialDetailProps = {
   /** 材料在列表中的序号（从 1 开始），写入分享署名 */
   idx?: number;
   material: TGApp.App.UserCalc.ResultMaterial;
+  /** 列表总数；与 idx 同时传入时署名写「第 x / y 项」 */
+  total?: number;
   topOffset?: string;
   uid: number;
   wiki: TGApp.App.Material.WikiItem;
@@ -173,7 +175,11 @@ const shareCaption = computed<string>(() => {
   const parts: Array<string> = [
     props.footerContext ? `${props.footerContext} · 养成材料详情` : "养成材料详情",
   ];
-  if (props.idx !== undefined) parts.push(`#${props.idx}`);
+  if (props.idx !== undefined && props.total !== undefined) {
+    parts.push(`第 ${props.idx} / ${props.total} 项`);
+  } else if (props.idx !== undefined) {
+    parts.push(`#${props.idx}`);
+  }
   parts.push(props.wiki.name, `UID ${props.uid}`);
   return parts.join(" · ");
 });

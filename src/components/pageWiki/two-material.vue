@@ -101,6 +101,10 @@
     </section>
     <slot v-if="isSourceMaterial" name="after-content" />
 
+    <template v-if="slots.footer" #footer>
+      <slot name="footer" />
+    </template>
+
     <template #right>
       <slot name="right" />
     </template>
@@ -111,7 +115,7 @@ import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
-import { computed, shallowRef, useTemplateRef, watch } from "vue";
+import { computed, shallowRef, useSlots, useTemplateRef, watch } from "vue";
 
 import TwoBookDetail from "./two-book-detail.vue";
 import TwoConvert from "./two-convert.vue";
@@ -142,6 +146,7 @@ const props = withDefaults(defineProps<TwoMaterialProps>(), {
   topOffset: "0px",
 });
 const visible = defineModel<boolean>();
+const slots = useSlots();
 const activeMaterial = shallowRef<TGApp.App.Material.WikiItem>(props.data);
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
 const foodData = computed<TGApp.App.Material.WikiFood | undefined>(() =>
@@ -214,6 +219,7 @@ async function shareMaterial(): Promise<void> {
 defineSlots<{
   "after-content"?: () => unknown;
   convert?: () => unknown;
+  footer?: () => unknown;
   left?: () => unknown;
   meta?: () => unknown;
   right?: () => unknown;

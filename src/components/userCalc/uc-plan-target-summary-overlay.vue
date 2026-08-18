@@ -132,10 +132,34 @@
     :footerContext="`${entry.name}养成目标`"
     :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
+    :total="displayMaterials.length"
     topOffset="132px"
     :uid
     :wiki="currentWiki"
-  />
+  >
+    <template #left>
+      <v-btn
+        :disabled="currentMaterialIndex === 0"
+        aria-label="上一个养成材料"
+        class="ucpts-card-arrow"
+        icon="mdi-chevron-left"
+        title="上一个养成材料"
+        variant="flat"
+        @click="switchMaterial(false)"
+      />
+    </template>
+    <template #right>
+      <v-btn
+        :disabled="currentMaterialIndex >= displayMaterials.length - 1"
+        aria-label="下一个养成材料"
+        class="ucpts-card-arrow"
+        icon="mdi-chevron-right"
+        title="下一个养成材料"
+        variant="flat"
+        @click="switchMaterial(true)"
+      />
+    </template>
+  </UcMaterialDetail>
 </template>
 
 <script lang="ts" setup>
@@ -267,6 +291,17 @@ async function openMaterialInfo(material: TGApp.App.UserCalc.ResultMaterial): Pr
   currentWiki.value = wiki;
   await nextTick();
   materialOverlayVisible.value = true;
+}
+
+function switchMaterial(isNext: boolean): void {
+  const nextIndex = currentMaterialIndex.value + (isNext ? 1 : -1);
+  if (nextIndex < 0 || nextIndex >= displayMaterials.value.length) return;
+  const material = displayMaterials.value[nextIndex];
+  const wiki = WikiMaterialData.find((item) => item.id === material?.id);
+  if (!material || !wiki) return;
+  currentMaterialIndex.value = nextIndex;
+  currentMaterial.value = material;
+  currentWiki.value = wiki;
 }
 
 async function shareSummary(): Promise<void> {

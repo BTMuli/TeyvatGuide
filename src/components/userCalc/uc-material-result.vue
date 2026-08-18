@@ -102,6 +102,7 @@
     footerContext="养成计划"
     :idx="currentMaterialIndex + 1"
     :material="currentMaterial"
+    :total="materials.length"
     :topOffset
     :uid
     :wiki="currentWiki"
