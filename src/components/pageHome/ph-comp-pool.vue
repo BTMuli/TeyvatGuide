@@ -1,6 +1,6 @@
 <!-- 首页限时祈愿组件 -->
 <template>
-  <THomeCard :append="isLogin" title="限时祈愿">
+  <THomeCard :append="isLogin" modernShare title="限时祈愿">
     <template #title>
       <span>限时祈愿</span>
       <v-icon class="tp-refresh" size="small" title="刷新" @click.stop="handleRefresh()">
@@ -295,7 +295,7 @@ function filterPools(
 .pool-list {
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(calc(300px), 0.5fr));
+  grid-template-columns: repeat(auto-fill, minmax(calc(400px), 0.5fr));
 }
 
 .pool-swiper {

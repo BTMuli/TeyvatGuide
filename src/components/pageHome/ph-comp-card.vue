@@ -1,18 +1,20 @@
 <template>
-  <div ref="thcRef" class="thc-container">
-    <div class="thc-title" title="点击生成分享" @click="share()">
-      <slot name="title">{{ props.title }}</slot>
-    </div>
-    <div v-if="append" class="thc-append">
-      <slot name="title-append" />
-    </div>
-    <div class="thc-box">
-      <slot name="default" />
+  <div ref="thcRef" class="thc-share">
+    <div class="thc-container">
+      <div class="thc-title" title="点击生成分享" @click="share()">
+        <slot name="title">{{ props.title }}</slot>
+      </div>
+      <div v-if="append" class="thc-append">
+        <slot name="title-append" />
+      </div>
+      <div class="thc-box">
+        <slot name="default" />
+      </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare, { generateShareImg } from "@utils/TGShare.js";
 import { useTemplateRef } from "vue";
 
 /** 首页组件参数 */
@@ -21,6 +23,8 @@ type PhCompCardProps = {
   title?: string;
   /** 是否显示append */
   append?: boolean;
+  /** 使用 TGShare.modern 截图 */
+  modernShare?: boolean;
 };
 
 const props = defineProps<PhCompCardProps>();
@@ -29,11 +33,21 @@ const thcEl = useTemplateRef<HTMLDivElement>("thcRef");
 
 async function share(): Promise<void> {
   if (!thcEl.value) return;
-  await generateShareImg(`HomeComp_${props.title}`, thcEl.value);
+  const fileName = `HomeComp_${props.title}`;
+  if (props.modernShare) {
+    await TGShare.modern(fileName, thcEl.value);
+    return;
+  }
+  await generateShareImg(fileName, thcEl.value);
 }
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
+
+.thc-share {
+  padding-top: 16px;
+  margin-top: 8px;
+}
 
 .thc-container {
   @include github-styles.github-card;
@@ -43,7 +57,6 @@ async function share(): Promise<void> {
   box-sizing: border-box;
   padding: 24px 8px 8px;
   border-radius: 4px;
-  margin-top: 24px;
 }
 
 .dark .thc-container {

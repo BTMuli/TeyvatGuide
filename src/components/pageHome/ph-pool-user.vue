@@ -1,9 +1,20 @@
 <!-- 限时祈愿卡片组件（用户模式） -->
 <template>
-  <div class="ph-pool-user-card">
+  <div ref="poolRef" class="ph-pool-user-card">
     <div class="ph-pool-header">
-      <div class="ph-pool-type" title="查看卡池详情" @click="openPoolOverlay()">
-        {{ props.pool.pool_name }}
+      <div class="ph-pool-title">
+        <div class="ph-pool-type" title="查看卡池详情" @click="openPoolOverlay()">
+          {{ props.pool.pool_name }}
+        </div>
+        <v-icon
+          class="ph-pool-share"
+          data-html2canvas-ignore
+          size="12"
+          title="分享卡池"
+          @click.stop="sharePool()"
+        >
+          mdi-share-variant
+        </v-icon>
       </div>
       <div class="ph-pool-stat">
         <span v-if="restTs > durationTs">未开始</span>
@@ -15,7 +26,7 @@
       <v-icon color="var(--tgc-od-orange)" size="12">mdi-calendar-clock</v-icon>
       <span>{{ startTime }} ~ {{ endTime }}</span>
     </div>
-    <v-progress-linear :reverse="true" :color="typeBg" :model-value="percent" :rounded="true" />
+    <v-progress-linear :color="typeBg" :model-value="percent" :reverse="true" :rounded="true" />
     <div class="ph-pool-rewards">
       <template v-for="item in avatarItems" :key="`av-${item.avatar.id}`">
         <div
@@ -23,11 +34,7 @@
           class="ph-pool-reward"
           @click="toAvatar(item.avatar)"
         >
-          <TItemBox
-            v-if="item.info"
-            :model-value="getAvatarBox(item.info)"
-            :title="item.info.name"
-          />
+          <TItemBox v-if="item.info" :model-value="getBox(item.info)" :title="item.info.name" />
           <img v-else :src="item.avatar.icon" alt="icon" class="icon" />
         </div>
       </template>
@@ -37,11 +44,7 @@
           class="ph-pool-reward"
           @click="toWeapon(item.weapon)"
         >
-          <TItemBox
-            v-if="item.info"
-            :model-value="getWeaponBox(item.info)"
-            :title="item.info.name"
-          />
+          <TItemBox v-if="item.info" :model-value="getBox(item.info)" :title="item.info.name" />
           <img v-else :src="item.weapon.icon" alt="icon" class="icon" />
         </div>
       </template>
@@ -61,8 +64,9 @@
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
+import TGShare from "@utils/TGShare.js";
 import { getWikiBrief, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
-import { computed, nextTick, onMounted, ref, shallowRef } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 
 import PhPoolItemOverlay, {
   type PhPoolItemOverlayItem,
@@ -88,6 +92,7 @@ type PhPoolDetail = {
 let timer: NodeJS.Timeout | null = null;
 
 const props = defineProps<PhPoolUserProps>();
+const poolEl = useTemplateRef<HTMLDivElement>("poolRef");
 
 const endTs = ref<number>(0);
 const restTs = ref<number>(0);
@@ -205,6 +210,15 @@ async function toWeapon(weapon: TGApp.Game.ActCalendar.ActPoolWeapon): Promise<v
 }
 
 /**
+ * 分享当前卡池
+ * @since Beta v0.11.4
+ */
+async function sharePool(): Promise<void> {
+  if (!poolEl.value) return;
+  await TGShare.modern(`限时祈愿_${props.pool.pool_name}`, poolEl.value, 2.5);
+}
+
+/**
  * 打开卡池详情浮窗
  * @since Beta v0.11.2
  */
@@ -262,33 +276,22 @@ function getWeaponInfo(id: number): TGApp.App.Weapon.WikiBriefInfo | undefined {
   return undefined;
 }
 
-function getAvatarBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
+function getBox(
+  info: TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo,
+): TItemBoxData {
+  const isCharacter = "element" in info;
   return {
     bg: `/icon/bg/${info.star}-Star.webp`,
-    icon: `/WIKI/character/${info.id}.webp`,
-    size: "64px",
-    height: "64px",
+    icon: `/WIKI/${isCharacter ? "character" : "weapon"}/${info.id}.webp`,
+    size: "80px",
+    height: "80px",
     display: "inner",
     clickable: true,
-    lt: `/icon/element/${info.element}元素.webp`,
-    ltSize: "12px",
-    innerHeight: 14,
-    innerIcon: `/icon/weapon/${info.weapon}.webp`,
-    innerText: info.name,
-  };
-}
-
-function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
-  return {
-    bg: `/icon/bg/${info.star}-Star.webp`,
-    icon: `/WIKI/weapon/${info.id}.webp`,
-    size: "64px",
-    height: "64px",
-    display: "inner",
-    clickable: true,
-    lt: `/icon/weapon/${info.weapon}.webp`,
-    ltSize: "12px",
-    innerHeight: 14,
+    lt: isCharacter ? `/icon/element/${info.element}元素.webp` : `/icon/weapon/${info.weapon}.webp`,
+    ltSize: "20px",
+    innerHeight: 24,
+    innerBlur: "4px",
+    innerIcon: isCharacter ? `/icon/weapon/${info.weapon}.webp` : undefined,
     innerText: info.name,
   };
 }
@@ -318,10 +321,28 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
   column-gap: 8px;
 }
 
+.ph-pool-title {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  column-gap: 4px;
+}
+
 .ph-pool-type {
   cursor: pointer;
   font-family: var(--font-title);
   font-size: 14px;
+
+  &:hover {
+    color: var(--tgc-yellow-2);
+  }
+}
+
+.ph-pool-share {
+  flex-shrink: 0;
+  color: var(--tgc-od-white);
+  cursor: pointer;
 
   &:hover {
     color: var(--tgc-yellow-2);
@@ -357,7 +378,7 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
 .ph-pool-rewards {
   position: relative;
   display: flex;
-  max-height: 140px;
+  max-height: 168px;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
@@ -369,8 +390,8 @@ function getWeaponBox(info: TGApp.App.Weapon.WikiBriefInfo): TItemBoxData {
   position: relative;
   display: flex;
   overflow: hidden;
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   box-sizing: border-box;
   align-items: center;
   justify-content: center;

@@ -1,6 +1,6 @@
 <!-- 首页近期活动组件 -->
 <template>
-  <THomeCard :append="isLogin" title="近期活动">
+  <THomeCard :append="isLogin" modernShare title="近期活动">
     <template #title>
       <span>近期活动</span>
       <v-icon class="tp-refresh" size="small" title="刷新" @click.stop="handleRefresh()">
