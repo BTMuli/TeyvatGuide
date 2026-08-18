@@ -4,6 +4,26 @@
       <div class="tua-dcw-left">
         <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" alt="star" />
         <img :src="`/WIKI/weapon/${props.modelValue.id}.webp`" alt="weapon" />
+        <v-menu
+          :close-on-content-click="false"
+          :z-index="2400"
+          activator="parent"
+          location="end"
+          offset="8"
+          open-on-click
+        >
+          <div class="tua-dcw-menu">
+            <div class="tua-dcw-menu-title">
+              <img :src="`/WIKI/weapon/${props.modelValue.id}.webp`" alt="weapon" />
+              <span>{{ props.modelValue.name }}</span>
+              <small>
+                Lv.{{ props.modelValue.level }} · 精炼{{ props.modelValue.affix_level }}
+              </small>
+            </div>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div class="tua-dcw-menu-desc" v-html="toHtml(props.modelValue.desc)" />
+          </div>
+        </v-menu>
       </div>
       <div class="tua-dcw-right">
         <span class="tua-dcw-title">{{ props.modelValue.name }}</span>
@@ -43,6 +63,7 @@
 </template>
 <script lang="ts" setup>
 import { app } from "@tauri-apps/api";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed, onMounted, ref } from "vue";
 
@@ -66,6 +87,11 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   if (props.modelValue.sub_property === undefined) return false;
   return wikiUtils.getProp(props.modelValue.sub_property.property_type);
 });
+
+function toHtml(desc: string): string {
+  if (desc.trim() === "") return "暂无说明";
+  return parseHtmlText(desc);
+}
 </script>
 <style lang="css" scoped>
 .tua-dcw-box {
@@ -174,6 +200,7 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   img {
     width: 36px;
@@ -181,7 +208,7 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
     border-radius: 5px;
   }
 
-  img:last-child {
+  img:last-of-type {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -208,5 +235,57 @@ const propSub = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   margin-left: auto;
   font-size: 9px;
   opacity: 0.8;
+}
+
+.tua-dcw-menu {
+  display: flex;
+  width: min(360px, calc(100vw - 48px));
+  max-height: min(420px, calc(100vh - 160px));
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
+  background: var(--box-bg-1);
+  box-shadow: 0 8px 24px var(--common-shadow-4);
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.tua-dcw-menu-title {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-1);
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-weight: normal;
+  gap: 8px;
+
+  img {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  span {
+    min-width: 0;
+    flex: 1;
+  }
+
+  small {
+    flex-shrink: 0;
+    color: var(--box-text-2);
+    font-size: 12px;
+    opacity: 0.85;
+  }
+}
+
+.tua-dcw-menu-desc {
+  color: var(--box-text-2);
+  font-size: 12px;
+  line-height: 1.6;
+  word-break: break-all;
 }
 </style>

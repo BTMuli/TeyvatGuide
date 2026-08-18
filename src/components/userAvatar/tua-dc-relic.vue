@@ -1,22 +1,43 @@
 <template>
   <div class="tua-dcr-box">
     <div class="tua-dcr-main">
-      <div class="tua-dcr-left">
+      <div v-if="props.modelValue !== false" class="tua-dcr-left">
         <div class="tua-dcr-bg">
-          <img
-            :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`"
-            v-if="props.modelValue !== false"
-            :alt="`relic${props.pos}`"
-          />
+          <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" :alt="`relic${props.pos}`" />
         </div>
         <div class="tua-dcr-icon">
-          <img
-            :src="`/icon/relic/${props.pos}.webp`"
-            :alt="`relic${props.pos}`"
-            v-if="props.modelValue === false"
-            class="empty"
-          />
-          <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" v-else />
+          <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" />
+        </div>
+        <v-menu
+          :close-on-content-click="false"
+          :z-index="2400"
+          activator="parent"
+          location="top"
+          offset="8"
+          open-on-click
+        >
+          <div class="tua-dcr-menu">
+            <div class="tua-dcr-menu-title">
+              <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" />
+              <span>{{ props.modelValue.name }}</span>
+              <small>Lv.{{ props.modelValue.level }} · {{ getRelicPos() }}</small>
+            </div>
+            <div class="tua-dcr-menu-set">{{ props.modelValue.set.name }}</div>
+            <div
+              v-for="affix in props.modelValue.set.affixes"
+              :key="affix.activation_number"
+              class="tua-dcr-menu-affix"
+            >
+              <span class="tua-dcr-menu-n">{{ affix.activation_number }}件套</span>
+              <span>{{ affix.effect }}</span>
+            </div>
+          </div>
+        </v-menu>
+      </div>
+      <div v-else class="tua-dcr-left">
+        <div class="tua-dcr-bg" />
+        <div class="tua-dcr-icon">
+          <img :src="`/icon/relic/${props.pos}.webp`" :alt="`relic${props.pos}`" class="empty" />
         </div>
       </div>
       <div class="tua-dcr-right">
@@ -163,6 +184,7 @@ function getPropSubStyle(
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+  cursor: pointer;
 }
 
 .tua-dcr-bg {
@@ -297,5 +319,70 @@ function getPropSubStyle(
   line-height: 1;
   text-align: center;
   text-shadow: 0 0 5px #00000080;
+}
+
+.tua-dcr-menu {
+  display: flex;
+  width: min(360px, calc(100vw - 48px));
+  max-height: min(420px, calc(100vh - 160px));
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 12px;
+  background: var(--box-bg-1);
+  box-shadow: 0 8px 24px var(--common-shadow-4);
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.tua-dcr-menu-title {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--common-shadow-1);
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-weight: normal;
+  gap: 8px;
+
+  img {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  span {
+    min-width: 0;
+    flex: 1;
+  }
+
+  small {
+    flex-shrink: 0;
+    color: var(--box-text-2);
+    font-size: 12px;
+    opacity: 0.85;
+  }
+}
+
+.tua-dcr-menu-set {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.tua-dcr-menu-affix {
+  display: flex;
+  flex-direction: column;
+  color: var(--box-text-2);
+  font-size: 12px;
+  gap: 4px;
+  line-height: 1.6;
+}
+
+.tua-dcr-menu-n {
+  color: var(--tgc-od-orange);
 }
 </style>

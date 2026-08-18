@@ -4,15 +4,17 @@
       <div class="tdo-avatars-container">
         <v-tabs
           v-model="avatarTab"
+          class="tdo-avatar-tabs"
           center-active
           density="compact"
-          slider-color="var(--tgc-od-white)"
+          hide-slider
         >
           <v-tab
             v-for="avatar in avatars"
             :key="avatar.avatar.id"
             :title="avatar.avatar.name"
             :value="avatar.avatar.id"
+            min-width="40"
             @click="emits('toAvatar', avatar)"
           >
             <div
@@ -40,17 +42,9 @@
           variant="flat"
           @click="handleClick('left')"
         />
-        <v-window v-model="modeTab" class="tdo-box-container">
-          <v-window-item value="classic">
-            <TucDetailOld :model-value="avatar" />
-          </v-window-item>
-          <v-window-item value="card">
-            <TucDetailCard :avatar :costume />
-          </v-window-item>
-          <v-window-item value="dev">
-            <TuaDetailCard :avatar :costume />
-          </v-window-item>
-        </v-window>
+        <div class="tdo-box-container">
+          <TuaDetailCard :avatar :costume />
+        </div>
         <v-btn
           aria-label="下一个角色"
           class="tdo-box-arrow"
@@ -65,8 +59,6 @@
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
-import TucDetailCard from "@comp/userAvatarCard/tuc-detail-card.vue";
-import TucDetailOld from "@comp/userAvatarOld/tuc-detail-old.vue";
 import { computed, ref, watch } from "vue";
 
 import TuaDetailCard from "./tua-detail-card.vue";
@@ -85,22 +77,9 @@ type TuaDetailOverlayEmits = {
 const props = defineProps<TuaDetailOverlayProps>();
 const emits = defineEmits<TuaDetailOverlayEmits>();
 const visible = defineModel<boolean>();
-const modeTab = defineModel<"classic" | "card" | "dev">("mode");
 const avatarTab = ref<number>();
 
 const costume = computed<TGApp.App.Character.Costume | false>(() => getCostume());
-const avatarsWidth = computed<string>(() => {
-  switch (modeTab.value) {
-    case "classic":
-      return "500px";
-    case "card":
-      return "800px";
-    case "dev":
-      return "800px";
-    default:
-      return "100px";
-  }
-});
 
 watch(
   () => props.avatar,
@@ -138,10 +117,15 @@ function getCostume(): TGApp.App.Character.Costume | false {
 
 .tdo-avatars-container {
   position: relative;
-  width: v-bind(avatarsWidth); /* stylelint-disable-line value-keyword-case */
+  width: 800px;
 }
 
 /* stylelint-disable selector-class-pattern */
+
+.tdo-avatars-container :deep(.tdo-avatar-tabs .v-tab) {
+  min-width: 40px;
+  padding-inline: 4px;
+}
 
 .tdo-avatars-container :deep(.v-slide-group__next),
 .tdo-avatars-container :deep(.v-slide-group__prev) {
@@ -156,9 +140,12 @@ function getCostume(): TGApp.App.Character.Costume | false {
   border-radius: 50%;
   background-color: transparent;
   cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
 
   &.selected {
     background-color: var(--tgc-od-white);
+    opacity: 1;
   }
 
   img {
@@ -189,6 +176,5 @@ function getCostume(): TGApp.App.Character.Costume | false {
 
 .tdo-box-container {
   position: relative;
-  transition: all 1s ease-in-out;
 }
 </style>

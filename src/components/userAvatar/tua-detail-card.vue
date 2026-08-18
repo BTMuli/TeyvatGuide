@@ -1,4 +1,4 @@
-<!-- 卡片视图（详细） -->
+<!-- 角色详情卡片 -->
 <template>
   <div class="tua-dc-container">
     <img :src="bg" alt="bg" class="tua-dc-bg" />

@@ -65,18 +65,6 @@
       <div class="uc-extension">
         <div class="uc-select">
           <v-select
-            v-model="showMode"
-            :hide-details="true"
-            :items="modeList"
-            class="uc-select-btn"
-            density="compact"
-            item-title="label"
-            item-value="value"
-            label="详情浮窗视图模式"
-            variant="outlined"
-            width="200px"
-          />
-          <v-select
             :hide-details="true"
             :items="uidList"
             :model-value="uidCur"
@@ -176,7 +164,6 @@
   <TuaDetailOverlay
     v-if="dataVal"
     v-model="showOverlay"
-    v-model:mode="showMode"
     :avatar="dataVal"
     :avatars="selectedList"
     @to-next="handleSwitch"
@@ -220,7 +207,6 @@ import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppCharacterData, getWikiCharacterById, wwWeapon } from "@/data/index.js";
 
-type TabItem = { label: string; value: string };
 type OverviewItem = { element: string; cnt: number; label: string };
 type BatchTarget = {
   level: number;
@@ -235,12 +221,6 @@ type BatchTarget = {
 
 const BATCH_EXCLUDED_CHARACTER_IDS = new Set([10000005, 10000007, 10000117, 10000118]);
 const appCharacterMap = new Map(AppCharacterData.map((item) => [item.id, item]));
-
-const modeList: Readonly<Array<TabItem>> = [
-  { label: "经典视图", value: "classic" },
-  { label: "卡片视图（简略）", value: "card" },
-  { label: "卡片视图（详细）", value: "dev" },
-];
 
 const { cookie, account } = storeToRefs(useUserStore());
 
@@ -263,7 +243,6 @@ const showOverlay = ref<boolean>(false);
 const selectIndex = ref<number>(0);
 const showSelect = ref<boolean>(false);
 const showBatchTarget = ref<boolean>(false);
-const showMode = ref<"classic" | "card" | "dev">("dev");
 const uidCur = ref<string>();
 
 // 排序
@@ -323,22 +302,6 @@ onMounted(async () => {
   await showLoading.end();
 });
 
-watch(
-  () => showMode.value,
-  () => {
-    switch (showMode.value) {
-      case "classic":
-        showSnackbar.success("已切换至经典视图");
-        break;
-      case "card":
-        showSnackbar.success("已切换至卡片视图（简略）");
-        break;
-      case "dev":
-        showSnackbar.success("已切换至卡片视图（详细）");
-        break;
-    }
-  },
-);
 watch(
   () => account.value,
   async () => await loadUid(),
