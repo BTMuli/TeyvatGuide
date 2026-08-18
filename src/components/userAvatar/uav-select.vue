@@ -162,14 +162,14 @@ watch(
   () => visible.value,
   () => {
     if (visible.value) {
-      costumeSelected.value = model.value.costume;
-      fetterSelected.value = model.value.fetter;
-      starSelected.value = model.value.star;
-      levelSelected.value = model.value.level;
-      weaponSelected.value = model.value.weapon;
-      elementSelected.value = model.value.element;
-      teamSelected.value = model.value.team;
-      areaSelected.value = model.value.area;
+      costumeSelected.value = [...model.value.costume];
+      fetterSelected.value = [...model.value.fetter];
+      starSelected.value = [...model.value.star];
+      levelSelected.value = [...model.value.level];
+      weaponSelected.value = [...model.value.weapon];
+      elementSelected.value = [...model.value.element];
+      teamSelected.value = [...model.value.team];
+      areaSelected.value = [...model.value.area];
     }
   },
 );
@@ -179,17 +179,16 @@ function onCancel(): void {
 }
 
 function onConfirm(): void {
-  model.value = {
-    costume: costumeSelected.value,
-    fetter: fetterSelected.value,
-    star: starSelected.value,
-    level: levelSelected.value,
-    weapon: weaponSelected.value,
-    element: elementSelected.value,
-    team: teamSelected.value,
-    area: areaSelected.value,
-  };
-  emits("select", model.value);
+  emits("select", {
+    costume: [...costumeSelected.value],
+    fetter: [...fetterSelected.value],
+    star: [...starSelected.value],
+    level: [...levelSelected.value],
+    weapon: [...weaponSelected.value],
+    element: [...elementSelected.value],
+    team: [...teamSelected.value],
+    area: [...areaSelected.value],
+  });
   visible.value = false;
 }
 </script>

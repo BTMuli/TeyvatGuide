@@ -20,22 +20,22 @@
     </div>
     <div class="tua-abl-mid">
       <div :class="{ ori: isFetterMax }" class="tua-abl-bg">
-        <img :src="nameCard" alt="nameCard" />
+        <img :src="nameCard" alt="nameCard" decoding="async" loading="lazy" />
       </div>
-      <div class="tua-abl-skills">
+      <div :class="{ triple: skills.length === 3 }" class="tua-abl-skills">
         <div
           v-for="skill in skills"
           :key="skill.skill_id"
           :title="`${skill.name} Lv.${skill.level}`"
           class="tua-abl-skill"
         >
-          <img :src="skill.icon" alt="skill" />
+          <img :src="skill.icon" alt="skill" decoding="async" loading="lazy" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
       <div class="tua-abl-bottom">
         <div :title="`好感度：${props.role.avatar.fetter}`" class="tua-abl-fetter">
-          <img alt="fetter" src="/icon/material/105.webp" />
+          <img alt="fetter" decoding="async" loading="lazy" src="/icon/material/105.webp" />
           <span>{{ props.role.avatar.fetter }}</span>
         </div>
         <div class="tua-abl-costume">
@@ -169,6 +169,9 @@ function getCostume(): TGApp.App.Character.Costume | false {
 
   position: relative;
   display: flex;
+  width: 100%;
+  max-width: 280px;
+  box-sizing: border-box;
   flex-direction: column;
   padding: 4px;
   border-radius: 4px;
@@ -231,7 +234,8 @@ function getCostume(): TGApp.App.Character.Costume | false {
   border-bottom-right-radius: 4px;
   color: var(--tgc-white-1);
   column-gap: 4px;
-  font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: normal;
 }
 
 .tua-abl-fetter {
@@ -254,6 +258,7 @@ function getCostume(): TGApp.App.Character.Costume | false {
 
 .tua-abl-level {
   font-size: 12px;
+  font-weight: normal;
 }
 
 .tua-abl-mid {
@@ -261,6 +266,7 @@ function getCostume(): TGApp.App.Character.Costume | false {
   display: flex;
   overflow: hidden;
   width: 100%;
+  min-width: 210px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
@@ -302,13 +308,18 @@ function getCostume(): TGApp.App.Character.Costume | false {
   display: flex;
   width: 100%;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
   padding: 4px;
+  column-gap: 8px;
+
+  &.triple {
+    column-gap: 16px;
+  }
 }
 
 .tua-abl-skill {
   display: flex;
-  width: 48px;
+  width: 40px;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
@@ -323,22 +334,25 @@ function getCostume(): TGApp.App.Character.Costume | false {
     align-items: center;
     justify-content: center;
     padding: 5px;
-    border: 1px solid var(--box-bg-4);
     border-radius: 50%;
-    background: var(--tgc-dark-7);
-    opacity: 0.8;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    background: #00000033;
   }
 
   :last-child {
     display: flex;
-    width: 48px;
+    width: 40px;
+    box-sizing: border-box;
     align-items: center;
     justify-content: center;
     border-radius: 5px;
-    background: var(--box-bg-4);
-    color: var(--box-text-4);
-    font-family: var(--font-title);
-    font-size: 12px;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    background: #00000033;
+    color: #ffffffff;
+    font-size: 10px;
+    font-weight: normal;
   }
 }
 </style>

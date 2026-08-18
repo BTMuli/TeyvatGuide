@@ -65,6 +65,18 @@
       <div class="uc-extension">
         <div class="uc-select">
           <v-select
+            v-model="cardLayout"
+            :hide-details="true"
+            :items="layoutList"
+            class="uc-select-btn"
+            density="compact"
+            item-title="label"
+            item-value="value"
+            label="角色卡片布局"
+            variant="outlined"
+            width="200px"
+          />
+          <v-select
             :hide-details="true"
             :items="uidList"
             :model-value="uidCur"
@@ -108,7 +120,7 @@
       </div>
     </template>
   </v-app-bar>
-  <div class="uc-box">
+  <div ref="rolesBox" :class="{ 'uc-box--sharing': loadShare }" class="uc-box">
     <div class="uc-box-info">
       <span>角色详情</span>
       <span>|</span>
@@ -137,24 +149,32 @@
       <TuaSelectVals :isConstUp :isFetterUp :isLevelUp :isSelected :selectOpts />
     </div>
     <div class="uc-divider" />
-    <div v-if="!isEmpty" class="uc-grid">
+    <div
+      v-if="!isEmpty"
+      :class="{ 'uc-grid--card': cardLayout === 'card' }"
+      :style="cardGridStyle"
+      class="uc-grid"
+    >
       <div
-        v-for="role in selectedList"
+        v-for="role in displayList"
         :key="role.cid"
-        v-memo="[role, batchMode, batchSelectedIds.has(role.cid)]"
+        v-memo="[role, batchMode, batchSelectedIds.has(role.cid), cardLayout]"
         :class="{ selected: batchSelectedIds.has(role.cid) }"
         class="uc-avatar-select"
         @click="handleRoleClick(role)"
       >
-        <TuaAvatarBox :role />
+        <TuaAvatarCard v-if="cardLayout === 'card'" :role />
+        <TuaAvatarBox v-else :role />
         <v-checkbox-btn
           v-if="batchMode"
           :model-value="batchSelectedIds.has(role.cid)"
           class="uc-avatar-check"
           color="var(--tgc-od-orange)"
+          density="compact"
           @click.stop="toggleBatchRole(role.cid)"
         />
       </div>
+      <div v-if="hasMoreRoles" ref="loadMoreRef" class="uc-load-trigger" />
     </div>
     <div v-else class="uc-empty">
       <img alt="empty" src="/UI/app/empty.webp" />
@@ -183,6 +203,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaAvatarBox from "@comp/userAvatar/tua-avatar-box.vue";
+import TuaAvatarCard from "@comp/userAvatar/tua-avatar-card.vue";
 import TuaDetailOverlay from "@comp/userAvatar/tua-detail-overlay.vue";
 import TuaSelectVals from "@comp/userAvatar/tua-select-vals.vue";
 import UavBatchTarget from "@comp/userAvatar/uav-batch-target.vue";
@@ -203,7 +224,16 @@ import TGShare from "@utils/TGShare.js";
 import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  shallowRef,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import { AppCharacterData, getWikiCharacterById, wwWeapon } from "@/data/index.js";
 
@@ -220,7 +250,29 @@ type BatchTarget = {
 };
 
 const BATCH_EXCLUDED_CHARACTER_IDS = new Set([10000005, 10000007, 10000117, 10000118]);
+const CHAR_RENDER_SIZE: Readonly<number> = 12;
+const CARD_COL_WIDTH: Readonly<number> = 220;
+const CARD_MAX_WIDTH: Readonly<number> = 280;
+const CARD_MIN_GAP: Readonly<number> = 8;
+const CARD_LAYOUT_KEY = "userAvatarCardLayout";
+const AvatarCardLayout = <const>{
+  Classic: "classic",
+  Card: "card",
+};
+type AvatarCardLayoutEnum = (typeof AvatarCardLayout)[keyof typeof AvatarCardLayout];
+type LayoutItem = { label: string; value: AvatarCardLayoutEnum };
+const layoutList: Readonly<Array<LayoutItem>> = [
+  { label: "经典视图", value: AvatarCardLayout.Classic },
+  { label: "新版卡片", value: AvatarCardLayout.Card },
+];
 const appCharacterMap = new Map(AppCharacterData.map((item) => [item.id, item]));
+
+function readCardLayout(): AvatarCardLayoutEnum {
+  if (localStorage.getItem(CARD_LAYOUT_KEY) === AvatarCardLayout.Card) {
+    return AvatarCardLayout.Card;
+  }
+  return AvatarCardLayout.Classic;
+}
 
 const { cookie, account } = storeToRefs(useUserStore());
 
@@ -244,6 +296,7 @@ const selectIndex = ref<number>(0);
 const showSelect = ref<boolean>(false);
 const showBatchTarget = ref<boolean>(false);
 const uidCur = ref<string>();
+const cardLayout = ref<AvatarCardLayoutEnum>(readCardLayout());
 
 // 排序
 const isLevelUp = ref<boolean | null>(null);
@@ -260,6 +313,16 @@ const selectOpts = ref<UavSelectModel>({
   team: [],
 });
 const selectedList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
+const renderedCount = ref<number>(0);
+const rolesBox = useTemplateRef<HTMLElement>("rolesBox");
+const loadMoreRef = useTemplateRef<HTMLElement>("loadMoreRef");
+const cardColumnGap = ref<number>(CARD_MIN_GAP);
+const cardColumnWidth = ref<number>(CARD_COL_WIDTH);
+const cardColumns = ref<number>(1);
+let loadMoreObserver: IntersectionObserver | undefined;
+let cardGridObserver: ResizeObserver | undefined;
+let cardGridWidth = 0;
+let loadingMoreRoles = false;
 
 const uidList = shallowRef<Array<string>>([]);
 const roleRecord = shallowRef<TGApp.Sqlite.Record.Role | undefined>();
@@ -289,6 +352,15 @@ const selectedElementCnt = computed<Map<string, number>>(() => {
   }
   return counts;
 });
+const displayList = computed<Array<TGApp.Sqlite.Character.TableTrans>>(() =>
+  selectedList.value.slice(0, renderedCount.value),
+);
+const hasMoreRoles = computed<boolean>(() => renderedCount.value < selectedList.value.length);
+const cardGridStyle = computed<Record<string, string>>(() => ({
+  "--uc-card-column-gap": `${cardColumnGap.value}px`,
+  "--uc-card-col-width": `${cardColumnWidth.value}px`,
+  "--uc-card-columns": String(cardColumns.value),
+}));
 
 onMounted(async () => {
   await showLoading.start("正在获取角色数据");
@@ -298,8 +370,15 @@ onMounted(async () => {
   await loadUid();
   version.value = await versionPromise;
   loadData.value = false;
+  initLoadMoreObserver();
   await nextTick();
+  observeCardGrid();
   await showLoading.end();
+});
+
+onBeforeUnmount(() => {
+  loadMoreObserver?.disconnect();
+  cardGridObserver?.disconnect();
 });
 
 watch(
@@ -310,7 +389,16 @@ watch(
   () => [isLevelUp.value, isFetterUp.value, isConstUp.value],
   () => {
     selectedList.value = getOrderedList(selectedList.value);
+    clampRenderedRoles();
   },
+);
+watch(cardLayout, (value) => {
+  localStorage.setItem(CARD_LAYOUT_KEY, value);
+  updateCardColumnGap();
+});
+watch(
+  () => displayList.value.length,
+  () => updateCardColumnGap(),
 );
 
 function toggleSort(value: boolean | null): boolean | null {
@@ -346,6 +434,113 @@ function getSortDesc(value: boolean | null): string {
   }
 }
 
+type CardGridMetrics = { columns: number; colWidth: number; gap: number };
+
+function getCardGridMetrics(width: number, itemCount: number): CardGridMetrics {
+  return getStretchGridMetrics(width, itemCount, CARD_MIN_GAP);
+}
+
+function getStretchGridMetrics(width: number, itemCount: number, minGap: number): CardGridMetrics {
+  const columns = Math.max(1, Math.floor((width + minGap) / (CARD_COL_WIDTH + minGap)));
+  if (columns <= 1) {
+    return { columns: 1, colWidth: Math.min(CARD_MAX_WIDTH, width), gap: minGap };
+  }
+  if (itemCount < columns) return { columns, colWidth: CARD_COL_WIDTH, gap: minGap };
+  const stretched = Math.floor((width - (columns - 1) * minGap) / columns);
+  if (stretched <= CARD_MAX_WIDTH) {
+    return { columns, colWidth: Math.max(CARD_COL_WIDTH, stretched), gap: minGap };
+  }
+  return {
+    columns,
+    colWidth: CARD_MAX_WIDTH,
+    gap: Math.floor((width - columns * CARD_MAX_WIDTH) / (columns - 1)),
+  };
+}
+
+function updateCardColumnGap(): void {
+  if (cardGridWidth <= 0) return;
+  const next = getCardGridMetrics(cardGridWidth, displayList.value.length);
+  if (next.gap !== cardColumnGap.value) cardColumnGap.value = next.gap;
+  if (next.colWidth !== cardColumnWidth.value) cardColumnWidth.value = next.colWidth;
+  if (next.columns !== cardColumns.value) cardColumns.value = next.columns;
+}
+
+function observeCardGrid(): void {
+  cardGridObserver?.disconnect();
+  cardGridObserver = undefined;
+  const box = rolesBox.value;
+  if (!box) return;
+  cardGridObserver = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (!entry) return;
+    const width = Math.floor(entry.contentRect.width);
+    if (width === cardGridWidth) return;
+    cardGridWidth = width;
+    updateCardColumnGap();
+  });
+  cardGridObserver.observe(box);
+}
+
+function resetRenderedRoles(): void {
+  loadingMoreRoles = false;
+  renderedCount.value = Math.min(CHAR_RENDER_SIZE, selectedList.value.length);
+  nextTick(() => observeLoadMore());
+}
+
+function clampRenderedRoles(): void {
+  renderedCount.value = Math.min(renderedCount.value, selectedList.value.length);
+  nextTick(() => observeLoadMore());
+}
+
+async function loadMoreRoles(): Promise<void> {
+  if (!hasMoreRoles.value || loadingMoreRoles) return;
+  loadingMoreRoles = true;
+  loadMoreObserver?.disconnect();
+  renderedCount.value = Math.min(renderedCount.value + CHAR_RENDER_SIZE, selectedList.value.length);
+  await nextTick();
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+  loadingMoreRoles = false;
+  observeLoadMore();
+}
+
+function initLoadMoreObserver(): void {
+  loadMoreObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) void loadMoreRoles();
+    },
+    { rootMargin: "180px" },
+  );
+  observeLoadMore();
+}
+
+function observeLoadMore(): void {
+  if (!loadMoreObserver || !loadMoreRef.value || loadingMoreRoles) return;
+  loadMoreObserver.disconnect();
+  if (!hasMoreRoles.value) return;
+  loadMoreObserver.observe(loadMoreRef.value);
+}
+
+async function waitForCardImages(root: HTMLElement): Promise<void> {
+  const pending = Array.from(root.querySelectorAll("img")).filter((img) => !img.complete);
+  if (pending.length === 0) return;
+  await Promise.race([
+    Promise.all(
+      pending.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            img.addEventListener("load", () => resolve(), { once: true });
+            img.addEventListener("error", () => resolve(), { once: true });
+          }),
+      ),
+    ),
+    new Promise<void>((resolve) => {
+      window.setTimeout(resolve, 8000);
+    }),
+  ]);
+}
+
 function resetList(): void {
   isLevelUp.value = null;
   isFetterUp.value = null;
@@ -361,6 +556,7 @@ function resetList(): void {
     area: [],
   };
   selectedList.value = getOrderedList(roleList.value);
+  resetRenderedRoles();
   showSnackbar.success("已重置筛选条件");
   if (!dataVal.value) return;
   selectIndex.value = selectedList.value.indexOf(dataVal.value);
@@ -625,6 +821,7 @@ function applyLoadedRoles(
   roleOverview.value = getOverview(ordered);
   selectedList.value = ordered;
   isEmpty.value = ordered.length === 0;
+  resetRenderedRoles();
   if (ordered.length === 0) {
     dataVal.value = undefined;
     return;
@@ -759,18 +956,38 @@ async function share(): Promise<void> {
     return;
   }
   await TGLogger.Info(`[Character][share][${uidCur.value}] 正在生成分享图片`);
-  const rolesBox = document.querySelector<HTMLElement>(".uc-box");
-  if (rolesBox === null) {
+  const box = rolesBox.value;
+  if (!box) {
     showSnackbar.error("未找到角色列表");
     return;
   }
+  if (selectedList.value.length > CHAR_RENDER_SIZE) {
+    const confirmed = await showDialog.check(
+      "角色较多",
+      `将渲染 ${selectedList.value.length} 个角色生成分享图，可能较慢，是否继续？`,
+    );
+    if (!confirmed) {
+      showSnackbar.cancel("已取消分享");
+      return;
+    }
+  }
   const fileName = `角色列表_${uidCur.value}`;
+  const prevCount = renderedCount.value;
   await showLoading.start("正在生成图片", fileName);
   loadShare.value = true;
-  await TGShare.modern(fileName, rolesBox, 1, false, { bakeBackdrop: true });
-  loadShare.value = false;
-  await showLoading.end();
-  await TGLogger.Info(`[Character][share][${uidCur.value}] 生成分享图片成功`);
+  renderedCount.value = selectedList.value.length;
+  await nextTick();
+  await waitForCardImages(box);
+  try {
+    await TGShare.modern(fileName, box, 1, false, { bakeBackdrop: true });
+    await TGLogger.Info(`[Character][share][${uidCur.value}] 生成分享图片成功`);
+  } finally {
+    loadShare.value = false;
+    renderedCount.value = prevCount;
+    await nextTick();
+    observeLoadMore();
+    await showLoading.end();
+  }
 }
 
 async function deleteUid(): Promise<void> {
@@ -795,7 +1012,6 @@ function selectRole(role: TGApp.Sqlite.Character.TableTrans): void {
 }
 
 function handleSelect(val: UavSelectModel): void {
-  selectOpts.value = val;
   const filterC = roleList.value.filter((role) => {
     const info = appCharacterMap.get(role.cid);
     if (val.star.length > 0 && !val.star.includes(role.avatar.rarity.toString())) return false;
@@ -829,8 +1045,10 @@ function handleSelect(val: UavSelectModel): void {
     showSnackbar.warn("未找到符合条件的角色");
     return;
   }
+  selectOpts.value = val;
   showSnackbar.success(`筛选出符合条件的角色 ${filterC.length} 个`);
   selectedList.value = getOrderedList(filterC);
+  resetRenderedRoles();
   if (!dataVal.value) return;
   if (!selectedList.value.includes(dataVal.value)) {
     dataVal.value = selectedList.value[0];
@@ -1006,30 +1224,61 @@ function handleSwitch(next: boolean): void {
 
 .uc-grid {
   display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 0.2fr));
+  justify-content: start;
+  gap: 8px var(--uc-card-column-gap, 8px);
+  grid-template-columns: repeat(var(--uc-card-columns, 1), var(--uc-card-col-width, 220px));
 }
 
 .uc-avatar-select {
   position: relative;
+  width: 100%;
   min-width: 0;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  contain-intrinsic-size: auto 230px;
+  content-visibility: auto;
   cursor: pointer;
 
   &.selected {
-    border-color: var(--tgc-od-orange);
-    box-shadow: 0 0 8px var(--common-shadow-2);
+    :deep(.tua-ab-box),
+    :deep(.tua-ac) {
+      border-color: var(--tgc-od-orange);
+    }
   }
+}
+
+.uc-grid--card .uc-avatar-select {
+  contain-intrinsic-size: auto 270px;
+}
+
+.uc-box--sharing .uc-avatar-select {
+  content-visibility: visible;
+}
+
+.uc-load-trigger {
+  width: 100%;
+  height: 1px;
+  grid-column: 1 / -1;
 }
 
 .uc-avatar-check {
   position: absolute;
   z-index: 2;
-  top: 4px;
-  right: 4px;
-  border-radius: 50%;
+  top: 1px;
+  left: 1px;
+  border-radius: 4px;
   background: var(--box-bg-1);
+  box-shadow: 2px 2px 4px var(--common-shadow-2);
+
+  :deep(.v-selection-control) {
+    --v-selection-control-size: 20px;
+  }
+
+  :deep(.v-selection-control__input) {
+    border-radius: 4px;
+  }
+
+  :deep(.v-icon) {
+    font-size: 16px;
+  }
 }
 
 .uc-empty {

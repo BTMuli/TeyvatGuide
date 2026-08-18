@@ -1,32 +1,48 @@
 <template>
-  <div class="tua-relic-box" :title="relicTitle">
+  <div class="tua-relic-box" :title="hoverTitle" @mouseenter="ensureTitle">
     <div class="tua-relic-bg">
       <img
-        :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`"
         v-if="props.modelValue !== false"
         :alt="`relic${props.position}`"
+        decoding="async"
+        loading="lazy"
+        :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`"
       />
     </div>
     <div class="tua-relic-icon">
       <img
-        :src="`/icon/relic/${props.position}.webp`"
-        :alt="`relic${props.position}`"
         v-if="props.modelValue === false"
+        :alt="`relic${props.position}`"
         class="empty"
+        decoding="async"
+        loading="lazy"
+        :src="`/icon/relic/${props.position}.webp`"
       />
-      <img :src="props.modelValue.icon" :alt="props.modelValue.name" v-else />
+      <img
+        v-else
+        :alt="props.modelValue.name"
+        decoding="async"
+        loading="lazy"
+        :src="props.modelValue.icon"
+      />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import wikiUtils from "@utils/wikiUtils.js";
-import { computed } from "vue";
+import { ref } from "vue";
 
 type TuaRelicBoxProps = { modelValue: TGApp.Game.Avatar.Relic | false; position: number };
 
 const props = defineProps<TuaRelicBoxProps>();
+const hoverTitle = ref<string>("");
 
-const relicTitle = computed<string>(() => {
+function ensureTitle(): void {
+  if (hoverTitle.value !== "") return;
+  hoverTitle.value = buildRelicTitle();
+}
+
+function buildRelicTitle(): string {
   const posName = getRelicPosName();
   if (props.modelValue === false) return `${posName}：未装备`;
   const relicProps: Array<string> = [];
@@ -42,7 +58,7 @@ const relicTitle = computed<string>(() => {
     );
   }
   return `${posName}：\n${props.modelValue.name} Lv.${props.modelValue.level}\n${relicProps.join("\n")}`;
-});
+}
 
 function getRelicPosName(): string {
   switch (props.position) {
@@ -84,7 +100,9 @@ function getRelicPosName(): string {
   }
 
   .empty {
-    padding: 2px;
+    width: 60%;
+    height: 60%;
+    padding: 0;
   }
 }
 
