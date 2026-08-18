@@ -1,14 +1,18 @@
 <template>
   <div class="tib-box">
     <div class="tib-bg">
-      <slot name="bg"><img :src="props.modelValue.bg" alt="bg" /></slot>
+      <slot name="bg">
+        <img :src="props.modelValue.bg" alt="bg" decoding="async" loading="lazy" />
+      </slot>
     </div>
     <div class="tib-icon">
-      <slot name="icon"><img :src="props.modelValue.icon" alt="icon" /></slot>
+      <slot name="icon">
+        <img :src="props.modelValue.icon" alt="icon" decoding="async" loading="lazy" />
+      </slot>
     </div>
     <div class="tib-cover">
       <div v-show="props.modelValue.lt !== ''" class="tib-lt">
-        <img :src="props.modelValue.lt" alt="lt" />
+        <img :src="props.modelValue.lt" alt="lt" decoding="async" loading="lazy" />
       </div>
       <div v-show="props.modelValue.rt" class="tib-rt">{{ props.modelValue.rt }}</div>
       <div class="tib-inner">
@@ -17,6 +21,8 @@
             v-show="props.modelValue.innerIcon"
             :src="props.modelValue.innerIcon"
             alt="inner-icon"
+            decoding="async"
+            loading="lazy"
           />
         </slot>
         <slot name="inner-text">
@@ -32,6 +38,8 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { computed } from "vue";
+
 export type TItemBoxData = {
   bg: string;
   icon: string;
@@ -53,6 +61,11 @@ export type TItemBoxData = {
 type TItemBoxProps = { modelValue: TItemBoxData };
 
 const props = defineProps<TItemBoxProps>();
+const innerBackdropFilter = computed<string>(() => {
+  const blur = props.modelValue.innerBlur;
+  if (blur === undefined || blur === "" || blur === "0") return "none";
+  return `blur(${blur})`;
+});
 </script>
 <style lang="scss" scoped>
 .tib-box {
@@ -155,8 +168,8 @@ const props = defineProps<TItemBoxProps>();
   align-items: stretch;
   justify-content: center;
   border-radius: 0 0 4px 4px;
-  -webkit-backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
-  backdrop-filter: blur(v-bind("props.modelValue.innerBlur ?? 0"));
+  -webkit-backdrop-filter: v-bind("innerBackdropFilter");
+  backdrop-filter: v-bind("innerBackdropFilter");
   background: #14141480;
   color: var(--tgc-white-1);
   font-family: var(--font-title);
