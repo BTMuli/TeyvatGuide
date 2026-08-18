@@ -29,7 +29,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import { getVersion } from "@tauri-apps/api/app";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { computed, onMounted, ref } from "vue";
 
 import TucOvcItem from "./tuc-ovc-item.vue";
@@ -59,7 +59,7 @@ async function share(): Promise<void> {
   const fileName = `绘想游迹_${props.uid}_${new Date().getTime()}`;
   await showLoading.start("正在生成分享图", fileName);
   isShare.value = true;
-  await generateShareImg(fileName, element, 1.2);
+  await TGShare.modern(fileName, element, 1.2);
   isShare.value = false;
   await showLoading.end();
 }

@@ -52,16 +52,16 @@
       <TurRoleInfo :role="recordData.role" :uid="uidCur ?? 0" />
       <span class="sign">TeyvatGuide v{{ version }} | {{ recordData.updated }}</span>
     </div>
-    <PhCompCard title="数据总览">
+    <PhCompCard modernShare title="数据总览">
       <TurOverviewGrid :model-value="recordData.stats" />
     </PhCompCard>
-    <PhCompCard title="角色信息">
+    <PhCompCard modernShare title="角色信息">
       <TurAvatarGrid :model-value="recordData.avatars" />
     </PhCompCard>
-    <PhCompCard title="世界探索">
+    <PhCompCard modernShare title="世界探索">
       <TurWorldGrid :worlds="recordData.worldExplore" />
     </PhCompCard>
-    <PhCompCard title="尘歌壶">
+    <PhCompCard modernShare title="尘歌壶">
       <TurHomeOverview :homes="recordData.homes" />
     </PhCompCard>
   </div>
@@ -87,7 +87,7 @@ import { getVersion } from "@tauri-apps/api/app";
 import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
@@ -196,7 +196,7 @@ async function shareRecord(): Promise<void> {
   }
   const fileName = `【原神战绩】-${uidCur.value}.png`;
   await showLoading.start("正在生成图片", fileName);
-  await generateShareImg(fileName, recordBox);
+  await TGShare.modern(fileName, recordBox);
   await showLoading.end();
   await TGLogger.Info(`[UserRecord][shareRecord][${uidCur.value}] 生成分享图片成功`);
 }

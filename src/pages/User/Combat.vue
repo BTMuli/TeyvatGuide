@@ -171,7 +171,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -417,7 +417,7 @@ async function shareCombat(): Promise<void> {
     return;
   }
   await showLoading.start("正在生成图片", fileName);
-  await generateShareImg(fileName, shareDom, 2.0);
+  await TGShare.modern(fileName, shareDom, 2.0);
   await showLoading.end();
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
 }

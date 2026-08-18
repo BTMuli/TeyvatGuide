@@ -26,7 +26,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucOvtItem from "@comp/userCombat/tuc-ovt-item.vue";
 import { getVersion } from "@tauri-apps/api/app";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { computed, nextTick, onMounted, ref } from "vue";
 
 type TucOvTarotProps = { data: TGApp.Game.Combat.TarotState | undefined; uid: string | undefined };
@@ -53,7 +53,7 @@ async function share(): Promise<void> {
   await showLoading.start("正在生成分享图", fileName);
   isShare.value = true;
   await nextTick();
-  await generateShareImg(fileName, element, 1.2, true);
+  await TGShare.modern(fileName, element, 1.2, true);
   isShare.value = false;
   await showLoading.end();
 }

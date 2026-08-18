@@ -20,7 +20,7 @@ import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, ref } from "vue";
 
@@ -86,7 +86,7 @@ async function share(): Promise<void> {
   const fileName = `真境剧诗统计_${new Date().getTime()}.png`;
   await showLoading.start("正在生成分享图", fileName);
   isShare.value = true;
-  await generateShareImg(fileName, element, 1.2, true);
+  await TGShare.modern(fileName, element, 1.2, true);
   isShare.value = false;
   await showLoading.end();
 }

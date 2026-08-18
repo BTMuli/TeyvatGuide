@@ -26,7 +26,7 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
@@ -55,7 +55,7 @@ async function shareRound(): Promise<void> {
   showInfo.value = true;
   await nextTick();
   const fileName = `真境剧诗_第${props.round.round_id}幕`;
-  await generateShareImg(fileName, tucrRef.value);
+  await TGShare.modern(fileName, tucrRef.value);
   showInfo.value = false;
 }
 </script>
