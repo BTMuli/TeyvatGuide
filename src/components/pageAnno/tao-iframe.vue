@@ -3,7 +3,7 @@
   <TOverlay v-model="visible">
     <div class="tao-iframe-box">
       <!-- TODO:加载完成后修改样式 -->
-      <iframe :src="link" class="tao-iframe" />
+      <iframe ref="annoIframe" :src="link" class="tao-iframe" @load="handleIframeLoad" />
     </div>
   </TOverlay>
 </template>
@@ -13,10 +13,15 @@ import showSnackbar from "@comp/func/snackbar.js";
 import takumiReq from "@req/takumiReq.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
+import { event } from "@tauri-apps/api";
+import type { Event, UnlistenFn } from "@tauri-apps/api/event";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { parseLink, parsePost } from "@utils/linkParser.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
+import { createPost } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 
 const { lang } = storeToRefs(useAppStore());
 const { cookie, account } = storeToRefs(useUserStore());
@@ -24,8 +29,23 @@ const visible = defineModel<boolean>();
 
 const authkey = ref<string>("");
 const link = ref<string>("");
+const closeArmed = ref<boolean>(false);
+const annoIframe = useTemplateRef<HTMLIFrameElement>("annoIframe");
+let uniwebviewListener: UnlistenFn | null = null;
 
-onMounted(async () => await refreshUrl());
+onMounted(async () => {
+  window.addEventListener("blur", handleWindowBlur);
+  uniwebviewListener = await event.listen<string>("uniwebview_scheme", handleUniwebviewScheme);
+  await refreshUrl();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("blur", handleWindowBlur);
+  if (uniwebviewListener !== null) {
+    uniwebviewListener();
+    uniwebviewListener = null;
+  }
+});
 
 watch(
   () => lang.value,
@@ -34,6 +54,110 @@ watch(
     await refreshUrl();
   },
 );
+
+watch(
+  () => visible.value,
+  () => {
+    closeArmed.value = false;
+  },
+);
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function armCloseIfIframeFocused(): void {
+  if (visible.value !== true) return;
+  const iframe = annoIframe.value;
+  if (iframe === null || iframe === undefined) return;
+  if (document.activeElement === iframe) closeArmed.value = true;
+}
+
+function handleWindowBlur(): void {
+  window.requestAnimationFrame(() => {
+    armCloseIfIframeFocused();
+  });
+}
+
+function handleIframeLoad(): void {
+  closeArmed.value = false;
+}
+
+function getUniwebviewHost(url: string): string {
+  try {
+    return new URL(url).host.toLowerCase();
+  } catch {
+    const match = /^uniwebview:\/\/([^/?#]+)/i.exec(url.trim());
+    if (match === null) return "";
+    return match[1].toLowerCase();
+  }
+}
+
+function isUniwebviewClose(url: string): boolean {
+  const host = getUniwebviewHost(url);
+  return host === "remove_close" || host === "close";
+}
+
+function isUniwebviewOpen(url: string): boolean {
+  const host = getUniwebviewHost(url);
+  return host === "open_url" || host === "load_url";
+}
+
+async function openParsedLink(link: string): Promise<void> {
+  const isPost = await parsePost(link);
+  if (isPost !== false) {
+    await createPost(isPost);
+    await TGLogger.Info(`[TaoIframe] 打开帖子：${isPost}`);
+    return;
+  }
+  const res = await parseLink(link);
+  if (res === true) {
+    await TGLogger.Info(`[TaoIframe] 已处理链接：${link}`);
+    return;
+  }
+  if (res === false) {
+    showSnackbar.error(`未知链接:${link}`, 3000);
+    await TGLogger.Warn(`[TaoIframe] 未知链接：${link}`);
+    return;
+  }
+  if (res === "post") {
+    const postId = await parsePost(link);
+    if (postId !== false) await createPost(postId);
+    return;
+  }
+  await openUrl(res);
+  await TGLogger.Info(`[TaoIframe] 打开链接：${res}`);
+}
+
+async function handleUniwebviewScheme(e: Event<string>): Promise<void> {
+  const url = e.payload;
+  if (isUniwebviewClose(url)) {
+    armCloseIfIframeFocused();
+    if (closeArmed.value !== true) {
+      await delay(0);
+      armCloseIfIframeFocused();
+    }
+    if (uniwebviewListener === null) return;
+    if (visible.value !== true || closeArmed.value !== true) {
+      await TGLogger.Info(`[TaoIframe] 忽略公告自动关闭：${url}`);
+      return;
+    }
+    await TGLogger.Info(`[TaoIframe] 关闭游戏内公告：${url}`);
+    visible.value = false;
+    return;
+  }
+  if (isUniwebviewOpen(url)) {
+    if (visible.value !== true) {
+      await TGLogger.Info(`[TaoIframe] 忽略未显示时的 uniwebview 打开：${url}`);
+      return;
+    }
+    await openParsedLink(url);
+    return;
+  }
+  await TGLogger.Info(`[TaoIframe] 忽略 uniwebview：${url}`);
+}
 
 async function refreshUrl(): Promise<void> {
   const res = await getUrl();

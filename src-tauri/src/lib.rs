@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.11.3
+//! @since Beta v0.11.5
 
 mod client;
 mod commands;
@@ -106,6 +106,8 @@ pub fn run() {
       let _window = _app.get_webview_window("TeyvatGuide");
       #[cfg(target_os = "windows")]
       plugins::text_scale::init(_app.handle().clone());
+      #[cfg(target_os = "windows")]
+      plugins::uniwebview::init(_app.handle());
       #[cfg(debug_assertions)]
       if _window.is_some() {
         _window.unwrap().open_devtools();

@@ -1,6 +1,6 @@
 /**
  * 处理链接
- * @since Beta v0.9.1
+ * @since Beta v0.11.5
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -11,14 +11,31 @@ import TGClient from "./TGClient.js";
 import { createPost } from "./TGWindow.js";
 
 /**
+ * 从 uniwebview://open_url 或 uniwebview://load_url 取出目标链接
+ * @since Beta v0.11.5
+ * @param url - uniwebview 链接
+ * @returns 目标链接
+ */
+function getUniwebviewTargetUrl(url: URL): string | undefined {
+  if (url.protocol !== "uniwebview:") return undefined;
+  const host = url.hostname.toLowerCase();
+  if (host !== "open_url" && host !== "load_url") return undefined;
+  const inner = url.searchParams.get("url");
+  if (inner === null || inner.trim() === "") return undefined;
+  return inner;
+}
+
+/**
  * 处理帖子链接
- * @since Beta v0.6.9
+ * @since Beta v0.11.5
  * @param link - 链接
  * @returns 处理情况，或者转换后的链接
  */
 export async function parsePost(link: string): Promise<false | string> {
   const url = new URL(link);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
+    const uniOpen = getUniwebviewTargetUrl(url);
+    if (uniOpen !== undefined) return await parsePost(uniOpen);
     if (url.protocol === "mihoyobbs:") {
       if (url.hostname === "article") {
         const postId = url.pathname.split("/").pop();
@@ -53,7 +70,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * 处理链接
- * @since Beta v0.9.1
+ * @since Beta v0.11.5
  * @param link - 链接
  * @param useInner - 是否采用内置 JSBridge 打开
  * @returns 处理情况，或者转换后的链接
@@ -64,6 +81,8 @@ export async function parseLink(
 ): Promise<boolean | string> {
   const url = new URL(link);
   if (url.protocol !== "https:" && url.protocol !== "http:") {
+    const uniOpen = getUniwebviewTargetUrl(url);
+    if (uniOpen !== undefined) return await parseLink(uniOpen, useInner);
     if (url.protocol === "mihoyobbs:") {
       if (url.hostname === "article") {
         const postId = url.pathname.split("/").pop();
