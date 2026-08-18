@@ -1,6 +1,7 @@
 <!-- 卡片视图（详细） -->
 <template>
   <div class="tua-dc-container">
+    <img :src="bg" alt="bg" class="tua-dc-bg" />
     <div class="tua-dc-avatar">
       <img :src="fullIcon" alt="avatar" />
     </div>
@@ -116,7 +117,7 @@ const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
 
 const bg = computed<string>(() => {
   const card = TSUserAvatar.getAvatarCard(props.avatar.cid);
-  return `url("/WIKI/nameCard/profile/${card}.webp")`;
+  return `/WIKI/nameCard/profile/${card}.webp`;
 });
 const loading = ref<boolean>(false);
 
@@ -135,15 +136,24 @@ async function share(): Promise<void> {
   }
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tua-dc-container {
   position: relative;
   overflow: hidden;
   width: 800px;
   border-radius: 5px;
   aspect-ratio: 21 / 10;
-  background: v-bind(bg);
-  background-size: cover;
+  background: var(--box-bg-1);
+}
+
+.tua-dc-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
 }
 
 .tua-dc-share {
