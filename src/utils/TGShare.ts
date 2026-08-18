@@ -146,6 +146,10 @@ const SHARE_FONT_SPECS: ReadonlyArray<ShareFontSpec> = [
 
 /** 缓存的分享字体 \@font-face CSS（data URL） */
 let shareFontFaceCss: string | undefined;
+/** 进行中的字体嵌入，避免并发重复拉取 */
+let shareFontEmbedTask: Promise<string | undefined> | undefined;
+/** SVG foreignObject 字体是否已预热（避免首次截图文字空白） */
+let shareSvgFontsWarmed = false;
 
 /**
  * Blob 转 data URL
@@ -171,16 +175,31 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
 }
 
 /**
- * 拉取并缓存分享用字体（正文字体 + MDI），转为 data URL \@font-face
+ * 等待指定毫秒
  * @since Beta v0.11.5
+ * @param ms - 毫秒
+ * @returns 无返回值
+ */
+function waitShareMs(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+/**
+ * 构建 \@font-face CSS，并用 FontFace 解码进 document.fonts
+ * @since Beta v0.11.5
+ * @param specs - 字体列表
+ * @param logTag - 日志标签
  * @returns \@font-face CSS；全部失败时为 undefined
  */
-async function ensureShareFontEmbed(): Promise<string | undefined> {
-  if (shareFontFaceCss !== undefined) return shareFontFaceCss;
-
+async function embedShareFontSpecs(
+  specs: ReadonlyArray<ShareFontSpec>,
+  logTag: string,
+): Promise<string | undefined> {
   const cssParts: Array<string> = [];
 
-  for (const spec of SHARE_FONT_SPECS) {
+  for (const spec of specs) {
     try {
       const res = await fetch(spec.url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -197,21 +216,142 @@ async function ensureShareFontEmbed(): Promise<string | undefined> {
           `}`,
         ].join(""),
       );
-      await TGLogger.Info(
-        `[TGShare][ensureShareFontEmbed] 已嵌入 ${spec.family} ${bytesToSize(blob.size)}`,
-      );
+      try {
+        const face = new FontFace(spec.family, `url("${dataUrl}")`, {
+          style: "normal",
+          weight: "normal",
+          display: "block",
+        });
+        await face.load();
+        document.fonts.add(face);
+        await document.fonts.load(`normal 16px "${spec.family}"`, "字UID Aa1");
+      } catch (e) {
+        await TGLogger.Warn(`${logTag} FontFace ${spec.family} 失败: ${e}`);
+      }
+      await TGLogger.Info(`${logTag} 已嵌入 ${spec.family} ${bytesToSize(blob.size)}`);
     } catch (e) {
-      await TGLogger.Warn(`[TGShare][ensureShareFontEmbed] ${spec.family} 失败: ${e}`);
+      await TGLogger.Warn(`${logTag} ${spec.family} 失败: ${e}`);
     }
   }
 
   if (cssParts.length === 0) {
-    await TGLogger.Warn(`[TGShare][ensureShareFontEmbed] 未嵌入任何分享字体`);
+    await TGLogger.Warn(`${logTag} 未嵌入任何分享字体`);
     return undefined;
   }
 
-  shareFontFaceCss = cssParts.join("\n");
-  return shareFontFaceCss;
+  try {
+    await document.fonts.ready;
+  } catch {
+    // 字体就绪检测失败时仍继续
+  }
+  return cssParts.join("\n");
+}
+
+/**
+ * 拉取并缓存分享用字体（正文字体 + MDI），转为 data URL \@font-face
+ * @since Beta v0.11.5
+ * @returns \@font-face CSS；全部失败时为 undefined
+ */
+async function ensureShareFontEmbed(): Promise<string | undefined> {
+  if (shareFontFaceCss !== undefined) return shareFontFaceCss;
+  if (shareFontEmbedTask !== undefined) return await shareFontEmbedTask;
+  shareFontEmbedTask = embedShareFontSpecs(SHARE_FONT_SPECS, "[TGShare][ensureShareFontEmbed]");
+  try {
+    shareFontFaceCss = await shareFontEmbedTask;
+    return shareFontFaceCss;
+  } finally {
+    shareFontEmbedTask = undefined;
+  }
+}
+
+/**
+ * 加载图片并尝试 decode
+ * @since Beta v0.11.5
+ * @param url - 图片 URL
+ * @returns 图片元素
+ */
+async function loadShareWarmupImage(url: string): Promise<HTMLImageElement> {
+  const img = new Image();
+  img.decoding = "sync";
+  await new Promise<void>((resolve) => {
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = url;
+  });
+  try {
+    await img.decode();
+  } catch {
+    // 解码失败仍尝试绘制
+  }
+  return img;
+}
+
+/**
+ * 判断图片是否画出浅色像素（预热 SVG 白字是否已出现）
+ * @since Beta v0.11.5
+ * @param img - 图片
+ * @returns 是否已有文字墨迹
+ */
+function shareWarmupImageHasInk(img: HTMLImageElement): boolean {
+  if (img.naturalWidth <= 0 || img.naturalHeight <= 0) return false;
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext("2d");
+  if (ctx === null) return false;
+  try {
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    for (let i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 32) continue;
+      if (data[i] > 40 || data[i + 1] > 40 || data[i + 2] > 40) return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
+/**
+ * 预热 SVG foreignObject 内的 \@font-face。
+ * Chromium 把 SVG 当 Image 绘制时，onload 早于字体解码；font-display:block
+ * 会让首次截图文字空白，第二次才命中字体缓存。
+ * @since Beta v0.11.5
+ * @param css - \@font-face CSS
+ * @returns 无返回值
+ */
+async function warmupShareSvgFonts(css: string): Promise<void> {
+  if (shareSvgFontsWarmed) return;
+
+  const spans = SHARE_FONT_SPECS.map(
+    (spec) =>
+      `<span style="font-family:'${spec.family}';font-size:24px;color:#ffffff">字Aa1</span>`,
+  ).join("");
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="36">` +
+    `<foreignObject width="100%" height="100%">` +
+    `<div xmlns="http://www.w3.org/1999/xhtml" style="background:#000000;display:flex">` +
+    `<style>${css}</style>${spans}</div></foreignObject></svg>`;
+  const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+  const deadline = Date.now() + 4000;
+
+  while (Date.now() < deadline) {
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = await loadShareWarmupImage(url);
+      if (shareWarmupImageHasInk(img)) {
+        shareSvgFontsWarmed = true;
+        await TGLogger.Info(`[TGShare][warmupShareSvgFonts] SVG 字体已就绪`);
+        return;
+      }
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+    await waitShareMs(80);
+  }
+
+  shareSvgFontsWarmed = true;
+  await TGLogger.Warn(`[TGShare][warmupShareSvgFonts] 预热超时，继续截图`);
 }
 
 /**
@@ -1367,6 +1507,8 @@ type ShareColdBenchResult = {
  */
 function resetShareCaptureCaches(): void {
   shareFontFaceCss = undefined;
+  shareFontEmbedTask = undefined;
+  shareSvgFontsWarmed = false;
 }
 
 /**
@@ -1401,39 +1543,21 @@ async function captureModernBlob(
     // 冷启动：不走模块缓存，强制重新 fetch 字体
     const prev = shareFontFaceCss;
     shareFontFaceCss = undefined;
+    shareSvgFontsWarmed = false;
     const specs = SHARE_FONT_SPECS.map((spec) => ({
       ...spec,
       url: bustShareFontUrl(spec.url, fontUrlBust),
     }));
-    const cssParts: Array<string> = [];
-    for (const spec of specs) {
-      try {
-        const res = await fetch(spec.url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        const dataUrl = await blobToDataUrl(blob);
-        cssParts.push(
-          [
-            `@font-face{`,
-            `font-family:"${spec.family}";`,
-            `font-style:normal;`,
-            `font-weight:normal;`,
-            `font-display:block;`,
-            `src:url("${dataUrl}") format("${spec.format}");`,
-            `}`,
-          ].join(""),
-        );
-      } catch (e) {
-        await TGLogger.Warn(`[TGShare][captureModernBlob][cold] ${spec.family} 失败: ${e}`);
-      }
-    }
-    shareCss = cssParts.length > 0 ? cssParts.join("\n") : undefined;
+    shareCss = await embedShareFontSpecs(specs, "[TGShare][captureModernBlob][cold]");
     shareFontFaceCss = prev;
   } else {
     shareCss = await ensureShareFontEmbed();
     if (shareCss === undefined) {
       showSnackbar.warn("分享字体嵌入失败，文本样式可能异常");
     }
+  }
+  if (shareCss !== undefined) {
+    await warmupShareSvgFonts(shareCss);
   }
 
   const restoreIconFonts = patchShareIconFonts(element);
