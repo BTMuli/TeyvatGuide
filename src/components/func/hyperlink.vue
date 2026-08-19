@@ -156,6 +156,12 @@ defineExpose({ displayBox });
   position: relative;
   overflow-y: auto;
   white-space: pre-wrap;
+
+  span {
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
+  }
 }
 
 .hyperlink-id {

@@ -184,7 +184,10 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 
   &-desc {
     font-size: 14px;
-    text-shadow: 0 0 2px var(--common-shadow-4);
+
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
   }
 }
 

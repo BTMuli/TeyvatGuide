@@ -1,9 +1,5 @@
 <template>
-  <span
-    style="cursor: pointer"
-    @click="showOverlay()"
-    v-html="parseHtmlText(decodeURIComponent(props.content))"
-  />
+  <span @click="showOverlay()" v-html="parseHtmlText(decodeURIComponent(props.content))" />
 </template>
 <script lang="ts" setup>
 import showHyperLink from "@comp/func/hyperlink.js";
@@ -31,3 +27,9 @@ async function showOverlay() {
   await showHyperLink({ ...info.value, id: props.link });
 }
 </script>
+<style lang="scss">
+t-link {
+  cursor: pointer;
+  filter: var(--gs-filter);
+}
+</style>

@@ -566,6 +566,10 @@ async function toWiki(): Promise<void> {
   font-size: 14px;
   white-space: pre-wrap;
   word-break: break-all;
+
+  :deep(span) {
+    filter: var(--gs-filter);
+  }
 }
 
 @media (width <= 980px) {

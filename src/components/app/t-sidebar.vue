@@ -1039,5 +1039,9 @@ async function tryLaunchGame(): Promise<void> {
   height: 20px;
   border-radius: 5px;
   margin-right: 10px;
+
+  &[alt="relicIcon"] {
+    filter: var(--icon-filter);
+  }
 }
 </style>

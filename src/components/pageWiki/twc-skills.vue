@@ -80,6 +80,12 @@ watch(() => props.data, loadData);
 .twc-skill-normal {
   width: 100%;
   white-space: pre-wrap;
+
+  span {
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
+  }
 }
 
 .twc-skill-special {
@@ -88,5 +94,11 @@ watch(() => props.data, loadData);
   margin-left: 4px;
   background: var(--box-bg-3);
   white-space: pre-wrap;
+
+  span {
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
+  }
 }
 </style>

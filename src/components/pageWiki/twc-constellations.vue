@@ -46,7 +46,7 @@ onMounted(() => loadData());
 
 watch(() => props.data, loadData);
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .twc-constellations-box {
   display: flex;
   flex-direction: column;
@@ -74,6 +74,12 @@ watch(() => props.data, loadData);
 .twc-constellation-normal {
   width: 100%;
   white-space: pre-wrap;
+
+  span {
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
+  }
 }
 
 .twc-constellation-spec {
@@ -82,5 +88,11 @@ watch(() => props.data, loadData);
   margin-left: 4px;
   background: var(--box-bg-3);
   white-space: pre-wrap;
+
+  span {
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
+  }
 }
 </style>
