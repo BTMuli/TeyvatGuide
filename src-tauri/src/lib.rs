@@ -21,9 +21,9 @@ use crate::commands::{
   is_process_running, quit_app, read_text_scale,
 };
 use crate::game::commands::{
-  game_installation_inspect, game_installation_list, game_launch, game_package_cancel,
-  game_package_plan, game_package_recover, game_package_snapshot, game_package_start,
-  game_package_task_list,
+  game_installation_inspect, game_installation_list, game_launch, game_package_apply,
+  game_package_cancel, game_package_plan, game_package_recover, game_package_snapshot,
+  game_package_start, game_package_task_list,
 };
 use crate::game::package::GamePackageManager;
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
@@ -142,6 +142,8 @@ pub fn run() {
       game_package_plan,
       #[cfg(target_os = "windows")]
       game_package_start,
+      #[cfg(target_os = "windows")]
+      game_package_apply,
       #[cfg(target_os = "windows")]
       game_package_cancel,
       #[cfg(target_os = "windows")]

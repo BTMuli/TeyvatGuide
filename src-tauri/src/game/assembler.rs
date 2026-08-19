@@ -403,6 +403,7 @@ mod tests {
       downloads,
       assets,
       delete_files: Vec::new(),
+      inventory: Vec::new(),
       created_at: "2026-01-01T00:00:00Z".to_string(),
     }
   }
@@ -432,6 +433,7 @@ mod tests {
     PlanAsset {
       name: name.to_string(),
       action: PlanAssetAction::Add,
+      source: None,
       size: bytes.len() as u64,
       md5: md5(bytes),
       chunks,

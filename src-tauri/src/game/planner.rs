@@ -22,8 +22,9 @@ use std::{
 use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
-const PLAN_SCHEMA_VERSION: u32 = 3;
-const LEGACY_PLAN_SCHEMA_VERSION: u32 = 2;
+const PLAN_SCHEMA_VERSION: u32 = 4;
+const LEGACY_PLAN_SCHEMA_VERSION_V3: u32 = 3;
+const LEGACY_PLAN_SCHEMA_VERSION_V2: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
 
@@ -43,7 +44,18 @@ pub(crate) struct PersistedPlan {
   pub(crate) downloads: Vec<PlanDownload>,
   pub(crate) assets: Vec<PlanAsset>,
   pub(crate) delete_files: Vec<PlanDelete>,
+  #[serde(default)]
+  pub(crate) inventory: Vec<PlanFile>,
   pub(crate) created_at: String,
+}
+
+/// The complete target manifest file inventory used to verify a finished update.
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PlanFile {
+  pub(crate) name: String,
+  pub(crate) size: u64,
+  pub(crate) md5: String,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
@@ -88,10 +100,19 @@ pub(crate) enum PayloadEncoding {
 pub(crate) struct PlanAsset {
   pub(crate) name: String,
   pub(crate) action: PlanAssetAction,
+  #[serde(default)]
+  pub(crate) source: Option<PlanSource>,
   pub(crate) size: u64,
   pub(crate) md5: String,
   pub(crate) chunks: Vec<PlanChunk>,
   pub(crate) patch: Option<PlanPatch>,
+}
+
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PlanSource {
+  pub(crate) size: u64,
+  pub(crate) md5: String,
 }
 
 #[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
@@ -145,6 +166,7 @@ struct PlanParts {
   downloads: Vec<PlanDownload>,
   assets: Vec<PlanAsset>,
   delete_files: Vec<PlanDelete>,
+  inventory: Vec<PlanFile>,
 }
 
 /// 请求远端清单，优先选择 patch，并将完整计划原子写入应用数据目录。
@@ -263,6 +285,7 @@ pub async fn create_and_persist_plan(
     downloads: parts.downloads,
     assets: parts.assets,
     delete_files: parts.delete_files,
+    inventory: parts.inventory,
     created_at: Utc::now().to_rfc3339(),
   };
   persist_plan(&task_root, &plan_id, &plan)?;
@@ -315,15 +338,75 @@ pub(crate) async fn hydrate_and_validate_plan(
     }
   };
   if fresh.manifest_digest != plan.manifest_digest
-    || fresh.assets != plan.assets
+    || !assets_match(&fresh.assets, &plan.assets, plan.schema_version != PLAN_SCHEMA_VERSION)
     || fresh.delete_files != plan.delete_files
     || !downloads_match(&fresh.downloads, &plan.downloads)
+    || !(fresh.inventory == plan.inventory
+      || (matches!(
+        plan.schema_version,
+        LEGACY_PLAN_SCHEMA_VERSION_V2 | LEGACY_PLAN_SCHEMA_VERSION_V3
+      ) && plan.inventory.is_empty()))
   {
     return Err("远端资源清单已变化，请重新评估".to_string());
   }
   plan.schema_version = PLAN_SCHEMA_VERSION;
   plan.downloads = fresh.downloads;
+  plan.assets = fresh.assets;
+  plan.inventory = fresh.inventory;
   Ok(plan)
+}
+
+/// 重新请求已发布的 main 分支，并为 ReadyToApply 消费补齐完整目标清单。
+pub(crate) async fn hydrate_and_validate_apply_plan(
+  installation: &GameInstallation,
+  branches: &GameBranches,
+  mut plan: PersistedPlan,
+) -> Result<PersistedPlan, String> {
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  if plan.installation_id != installation.id
+    || plan.source_scheme != scheme
+    || plan.target_scheme != scheme
+    || installation.version.as_deref() != Some(plan.source_tag.as_str())
+  {
+    return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
+  }
+  if plan.strategy != PackagePlanStrategy::ManifestDiff {
+    return Err("当前只能应用 manifest-diff 资源计划".to_string());
+  }
+  if branches.main.tag != plan.target_tag {
+    return Err("预下载目标尚未成为正式版本，暂时不能应用".to_string());
+  }
+  let client = create_http_client()?;
+  let fresh = build_manifest_plan(
+    &client,
+    &branches.main.with_tag(&plan.source_tag),
+    &branches.main,
+    &installation.audio_languages,
+  )
+  .await?;
+  if fresh.manifest_digest != plan.manifest_digest
+    || !assets_match(&fresh.assets, &plan.assets, plan.schema_version != PLAN_SCHEMA_VERSION)
+    || fresh.delete_files != plan.delete_files
+    || !downloads_match(&fresh.downloads, &plan.downloads)
+    || !(fresh.inventory == plan.inventory
+      || (matches!(
+        plan.schema_version,
+        LEGACY_PLAN_SCHEMA_VERSION_V2 | LEGACY_PLAN_SCHEMA_VERSION_V3
+      ) && plan.inventory.is_empty()))
+  {
+    return Err("正式版本资源清单与预下载计划不一致，请重新评估".to_string());
+  }
+  plan.schema_version = PLAN_SCHEMA_VERSION;
+  plan.downloads = fresh.downloads;
+  plan.assets = fresh.assets;
+  plan.inventory = fresh.inventory;
+  Ok(plan)
+}
+
+/// 将已重新验证并补齐的计划覆盖持久化，供断电恢复离线读取。
+pub(crate) fn persist_validated_plan(task_root: &Path, plan: &PersistedPlan) -> Result<(), String> {
+  validate_persisted_plan(plan, &plan.plan_id)?;
+  persist_plan(task_root, &plan.plan_id, plan)
 }
 
 fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
@@ -338,6 +421,19 @@ fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
         && (left.encoding == right.encoding || right.encoding == PayloadEncoding::LegacyUnspecified)
         && left.range_start == right.range_start
         && left.range_length == right.range_length
+    })
+}
+
+fn assets_match(left: &[PlanAsset], right: &[PlanAsset], allow_missing_source: bool) -> bool {
+  left.len() == right.len()
+    && left.iter().zip(right).all(|(left, right)| {
+      left.name == right.name
+        && left.action == right.action
+        && (left.source == right.source || (allow_missing_source && right.source.is_none()))
+        && left.size == right.size
+        && left.md5.eq_ignore_ascii_case(&right.md5)
+        && left.chunks == right.chunks
+        && left.patch == right.patch
     })
 }
 
@@ -357,6 +453,7 @@ async fn build_manifest_plan(
 fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<PlanParts, String> {
   let source_assets = collect_assets(&source)?;
   let target_assets = collect_assets(&target)?;
+  let inventory = collect_inventory(&target_assets)?;
   let source_chunks = collect_reusable_chunks(&source_assets)?;
   let mut downloads = HashMap::<String, PlanDownload>::new();
   let mut assets = Vec::new();
@@ -419,8 +516,17 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
       });
     }
     assets.push(PlanAsset {
-      name,
+      name: name.clone(),
       action,
+      source: source_assets
+        .get(&name)
+        .map(|asset| {
+          Ok::<PlanSource, String>(PlanSource {
+            size: nonnegative_u64(asset.asset_size, "源资源大小")?,
+            md5: asset.asset_hash_md5.clone(),
+          })
+        })
+        .transpose()?,
       size: nonnegative_u64(target_asset.asset_size, "资源大小")?,
       md5: target_asset.asset_hash_md5.clone(),
       chunks,
@@ -448,6 +554,7 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
     downloads,
     assets,
     delete_files,
+    inventory,
   })
 }
 
@@ -496,6 +603,8 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
         } else {
           PlanAssetAction::Modify
         },
+        source: (patch.original_size > 0)
+          .then(|| PlanSource { size: patch.original_size, md5: patch.original_md5.clone() }),
         size: nonnegative_u64(file.file_size, "patch 目标资源大小")?,
         md5: file.file_hash.clone(),
         chunks: Vec::new(),
@@ -536,6 +645,7 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
     downloads,
     assets,
     delete_files,
+    inventory: Vec::new(),
   })
 }
 
@@ -549,7 +659,24 @@ fn collect_assets(build: &DecodedBuild) -> Result<HashMap<String, &Asset>, Strin
       }
     }
   }
+  validate_managed_paths(assets.keys().map(String::as_str))?;
   Ok(assets)
+}
+
+fn collect_inventory(assets: &HashMap<String, &Asset>) -> Result<Vec<PlanFile>, String> {
+  let mut inventory = assets
+    .iter()
+    .map(|(name, asset)| {
+      Ok(PlanFile {
+        name: name.clone(),
+        size: nonnegative_u64(asset.asset_size, "目标资源大小")?,
+        md5: asset.asset_hash_md5.clone(),
+      })
+    })
+    .collect::<Result<Vec<_>, String>>()?;
+  inventory.sort_by(|left, right| left.name.cmp(&right.name));
+  validate_inventory(&inventory)?;
+  Ok(inventory)
 }
 
 fn collect_category_downloads(
@@ -723,8 +850,10 @@ pub(crate) fn load_persisted_plan(
 }
 
 fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
-  if !matches!(plan.schema_version, PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION)
-    || plan.plan_id != plan_id
+  if !matches!(
+    plan.schema_version,
+    PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V3 | LEGACY_PLAN_SCHEMA_VERSION_V2
+  ) || plan.plan_id != plan_id
   {
     return Err("游戏资源计划版本或身份不匹配".to_string());
   }
@@ -744,8 +873,10 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   let mut cache_keys = std::collections::HashSet::with_capacity(plan.downloads.len());
   for download in &plan.downloads {
     let encoding_valid = match plan.schema_version {
-      PLAN_SCHEMA_VERSION => download.encoding != PayloadEncoding::LegacyUnspecified,
-      LEGACY_PLAN_SCHEMA_VERSION => download.encoding == PayloadEncoding::LegacyUnspecified,
+      PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V3 => {
+        download.encoding != PayloadEncoding::LegacyUnspecified
+      }
+      LEGACY_PLAN_SCHEMA_VERSION_V2 => download.encoding == PayloadEncoding::LegacyUnspecified,
       _ => false,
     };
     let hash_valid = match download.hash_kind {
@@ -787,7 +918,13 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
 }
 
 fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
-  if plan.assets.len() > 500_000 || plan.delete_files.len() > 500_000 {
+  if plan.assets.len() > 500_000
+    || plan.delete_files.len() > 500_000
+    || plan.inventory.len() > 500_000
+    || (plan.schema_version == PLAN_SCHEMA_VERSION
+      && plan.strategy == PackagePlanStrategy::ManifestDiff
+      && plan.inventory.is_empty())
+  {
     return Err("游戏资源计划文件条目数超过安全上限".to_string());
   }
   let downloads =
@@ -795,9 +932,15 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   let mut asset_names = std::collections::HashSet::with_capacity(plan.assets.len());
   let mut chunk_count = 0_usize;
   for asset in &plan.assets {
-    if normalize_manifest_path(&asset.name)? != asset.name
-      || !asset_names.insert(asset.name.as_str())
+    let source_valid = match (asset.action, &asset.source) {
+      (PlanAssetAction::Add, None) => true,
+      (PlanAssetAction::Modify, Some(source)) => is_md5(&source.md5),
+      (PlanAssetAction::Modify, None) => plan.schema_version != PLAN_SCHEMA_VERSION,
+      (PlanAssetAction::Add, Some(_)) => false,
+    };
+    if !asset_names.insert(asset.name.as_str())
       || !is_md5(&asset.md5)
+      || !source_valid
       || (plan.strategy == PackagePlanStrategy::ManifestDiff && asset.patch.is_some())
       || (plan.strategy == PackagePlanStrategy::Patch && asset.patch.is_none())
     {
@@ -822,7 +965,9 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
         return Err("游戏资源计划包含无效 chunk 条目".to_string());
       }
       if let Some(reuse) = &chunk.reuse {
-        normalize_manifest_path(&reuse.asset_name)?;
+        if normalize_manifest_path(&reuse.asset_name)? != reuse.asset_name {
+          return Err("reuse chunk path is not normalized".to_string());
+        }
         reuse
           .source_offset
           .checked_add(chunk.decompressed_size)
@@ -846,12 +991,64 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   }
   let mut delete_names = std::collections::HashSet::with_capacity(plan.delete_files.len());
   for deleted in &plan.delete_files {
-    if normalize_manifest_path(&deleted.name)? != deleted.name
-      || !delete_names.insert(deleted.name.as_str())
+    if !delete_names.insert(deleted.name.as_str())
       || asset_names.contains(deleted.name.as_str())
       || !is_md5(&deleted.md5)
     {
       return Err("游戏资源计划包含无效删除条目".to_string());
+    }
+  }
+  validate_managed_paths(
+    plan
+      .assets
+      .iter()
+      .map(|asset| asset.name.as_str())
+      .chain(plan.delete_files.iter().map(|deleted| deleted.name.as_str())),
+  )?;
+  validate_inventory(&plan.inventory)?;
+  let inventory =
+    plan.inventory.iter().map(|file| (file.name.as_str(), file)).collect::<HashMap<_, _>>();
+  if plan.schema_version == PLAN_SCHEMA_VERSION
+    && plan.strategy == PackagePlanStrategy::ManifestDiff
+    && plan.assets.iter().any(|asset| {
+      inventory
+        .get(asset.name.as_str())
+        .is_none_or(|file| file.size != asset.size || !file.md5.eq_ignore_ascii_case(&asset.md5))
+    })
+  {
+    return Err("plan inventory does not match changed assets".to_string());
+  }
+  Ok(())
+}
+
+fn validate_inventory(inventory: &[PlanFile]) -> Result<(), String> {
+  if inventory.iter().any(|file| !is_md5(&file.md5))
+    || inventory.windows(2).any(|files| files[0].name >= files[1].name)
+  {
+    return Err("plan contains an invalid target file inventory".to_string());
+  }
+  validate_managed_paths(inventory.iter().map(|file| file.name.as_str()))
+}
+
+fn validate_managed_paths<'a>(paths: impl IntoIterator<Item = &'a str>) -> Result<(), String> {
+  let mut normalized_paths = Vec::new();
+  for path in paths {
+    if normalize_manifest_path(path)? != path {
+      return Err("plan contains an unnormalized managed path".to_string());
+    }
+    let case_folded = path.to_lowercase();
+    if case_folded == "config.ini"
+      || case_folded == ".teyvatguide-update"
+      || case_folded.starts_with(".teyvatguide-update/")
+    {
+      return Err("plan contains a reserved managed path".to_string());
+    }
+    normalized_paths.push(case_folded);
+  }
+  normalized_paths.sort_unstable();
+  for paths in normalized_paths.windows(2) {
+    if paths[0] == paths[1] || paths[1].starts_with(&format!("{}/", paths[0])) {
+      return Err("plan contains conflicting managed paths".to_string());
     }
   }
   Ok(())
@@ -871,6 +1068,11 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
   }
   let target = directory.join("plan.json");
   let temporary = directory.join("plan.json.tmp");
+  match fs::remove_file(&temporary) {
+    Ok(()) => {}
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+    Err(error) => return Err(format!("清理旧游戏资源计划临时文件失败：{error}")),
+  }
   let mut file = OpenOptions::new()
     .create_new(true)
     .write(true)
@@ -881,9 +1083,35 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
     .and_then(|()| file.sync_all())
     .map_err(|error| format!("写入游戏资源计划失败：{error}"))?;
   drop(file);
-  fs::rename(&temporary, &target).map_err(|error| format!("提交游戏资源计划失败：{error}"))?;
+  atomic_replace_plan(&temporary, &target)?;
   sync_directory(&directory)?;
   Ok(())
+}
+
+#[cfg(target_os = "windows")]
+fn atomic_replace_plan(source: &Path, target: &Path) -> Result<(), String> {
+  use std::os::windows::ffi::OsStrExt;
+  use windows_sys::Win32::Storage::FileSystem::{
+    MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH, MoveFileExW,
+  };
+  let source = source.as_os_str().encode_wide().chain([0]).collect::<Vec<_>>();
+  let target = target.as_os_str().encode_wide().chain([0]).collect::<Vec<_>>();
+  let result = unsafe {
+    MoveFileExW(
+      source.as_ptr(),
+      target.as_ptr(),
+      MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+    )
+  };
+  if result == 0 {
+    return Err(format!("提交游戏资源计划失败：{}", std::io::Error::last_os_error()));
+  }
+  Ok(())
+}
+
+#[cfg(not(target_os = "windows"))]
+fn atomic_replace_plan(source: &Path, target: &Path) -> Result<(), String> {
+  fs::rename(source, target).map_err(|error| format!("提交游戏资源计划失败：{error}"))
 }
 
 fn sync_directory(directory: &Path) -> Result<(), String> {
@@ -925,12 +1153,13 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    PayloadEncoding, assets_equal, build_manifest_diff, build_patch_plan, digest_parts,
-    load_persisted_plan,
+    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanFile, assets_equal,
+    build_manifest_diff, build_patch_plan, digest_parts, load_persisted_plan,
+    validate_persisted_plan,
   };
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
-    model::{PackagePlanStrategy, SchemeId},
+    model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
     sophon::{
       Asset, AssetChunk, DecodedBuild, DecodedManifest, DownloadInfo, ManifestProto,
       get_decoded_patch_build,
@@ -974,6 +1203,26 @@ mod tests {
         chunk_download: download_info(),
         data: ManifestProto { assets },
       }],
+    }
+  }
+
+  fn persisted_manifest_plan(plan_id: String, inventory: Vec<PlanFile>) -> PersistedPlan {
+    PersistedPlan {
+      schema_version: PLAN_SCHEMA_VERSION,
+      plan_id,
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Main,
+      source_tag: "1.0.0".to_string(),
+      target_tag: "2.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory,
+      created_at: "2026-08-19T00:00:00Z".to_string(),
     }
   }
 
@@ -1062,6 +1311,52 @@ mod tests {
   }
 
   #[test]
+  fn reads_v3_plan_without_inventory() {
+    let plan_id = uuid::Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-plan-v3-{plan_id}"));
+    let directory = root.join("tasks").join(&plan_id);
+    std::fs::create_dir_all(&directory).unwrap();
+    std::fs::write(
+      directory.join("plan.json"),
+      serde_json::json!({
+        "schemaVersion": 3,
+        "planId": plan_id,
+        "installationId": "installation",
+        "sourceScheme": "cn_official",
+        "targetScheme": "cn_official",
+        "target": "pre_download",
+        "sourceTag": "1.0.0",
+        "targetTag": "2.0.0",
+        "manifestDigest": "a".repeat(64),
+        "strategy": "manifest_diff",
+        "downloads": [
+          {
+            "id": "0123456789abcdef",
+            "cacheKey": "0123456789abcdef",
+            "hashKind": "xx_hash64",
+            "expectedHash": "0123456789abcdef",
+            "compressedSize": 8,
+            "decompressedSize": 10,
+            "encoding": "zstd",
+            "rangeStart": null,
+            "rangeLength": null
+          }
+        ],
+        "assets": [],
+        "deleteFiles": [],
+        "createdAt": "2026-08-19T00:00:00Z"
+      })
+      .to_string(),
+    )
+    .unwrap();
+    let plan = load_persisted_plan(&root, &plan_id).unwrap();
+    assert_eq!(plan.schema_version, 3);
+    assert!(plan.inventory.is_empty());
+    assert_eq!(plan.downloads[0].encoding, PayloadEncoding::Zstd);
+    std::fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
   fn manifest_diff_is_stable_and_deduplicates_reused_chunks() {
     let hash_a = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     let hash_b = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
@@ -1088,7 +1383,77 @@ mod tests {
     assert_eq!(plan.downloads[0].encoding, PayloadEncoding::Zstd);
     assert_eq!(plan.assets.len(), 2);
     assert_eq!(plan.delete_files.len(), 1);
+    assert_eq!(
+      plan.inventory.iter().map(|file| file.name.as_str()).collect::<Vec<_>>(),
+      vec!["modify.bin", "reuse.bin", "same.bin"],
+    );
     assert_eq!(plan.assets.iter().filter(|asset| asset.chunks[0].reuse.is_some()).count(), 1);
+  }
+
+  #[test]
+  fn manifest_diff_rejects_conflicting_or_reserved_target_paths() {
+    let hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    let cases = [
+      vec![
+        asset("file.bin", hash, "1111111111111111", hash),
+        asset("FILE.bin", hash, "2222222222222222", hash),
+      ],
+      vec![
+        asset("file", hash, "1111111111111111", hash),
+        asset("file/chunk.bin", hash, "2222222222222222", hash),
+      ],
+      vec![asset(".teyvatguide-update/state", hash, "1111111111111111", hash)],
+      vec![asset("config.ini", hash, "1111111111111111", hash)],
+    ];
+    for target_assets in cases {
+      assert!(
+        build_manifest_diff(build("1.0.0", Vec::new()), build("2.0.0", target_assets)).is_err()
+      );
+    }
+  }
+
+  #[test]
+  fn persisted_inventory_rejects_tampering() {
+    let hash = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    let cases = [
+      vec![
+        PlanFile { name: "FILE.bin".to_string(), size: 1, md5: hash.to_string() },
+        PlanFile { name: "file.bin".to_string(), size: 1, md5: hash.to_string() },
+      ],
+      vec![
+        PlanFile { name: "file".to_string(), size: 1, md5: hash.to_string() },
+        PlanFile { name: "file/chunk.bin".to_string(), size: 1, md5: hash.to_string() },
+      ],
+      vec![PlanFile {
+        name: ".teyvatguide-update/state".to_string(),
+        size: 1,
+        md5: hash.to_string(),
+      }],
+      vec![PlanFile { name: "config.ini".to_string(), size: 1, md5: hash.to_string() }],
+    ];
+    for inventory in cases {
+      let plan_id = uuid::Uuid::new_v4().to_string();
+      assert!(
+        validate_persisted_plan(&persisted_manifest_plan(plan_id.clone(), inventory), &plan_id)
+          .is_err()
+      );
+    }
+    let plan_id = uuid::Uuid::new_v4().to_string();
+    assert!(
+      validate_persisted_plan(&persisted_manifest_plan(plan_id.clone(), Vec::new()), &plan_id)
+        .is_err()
+    );
+    let plan_id = uuid::Uuid::new_v4().to_string();
+    assert!(
+      validate_persisted_plan(
+        &persisted_manifest_plan(
+          plan_id.clone(),
+          vec![PlanFile { name: "file.bin".to_string(), size: 1, md5: "invalid".to_string() }],
+        ),
+        &plan_id,
+      )
+      .is_err()
+    );
   }
 
   #[test]

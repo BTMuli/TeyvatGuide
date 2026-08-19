@@ -3,6 +3,7 @@
 
 use super::{
   model::{PackageTaskState, PackageTaskSummary, SchemeId},
+  path_guard::normalize_manifest_path,
   planner::PersistedPlan,
 };
 use chrono::Utc;
@@ -14,13 +15,61 @@ use std::{
 };
 use uuid::Uuid;
 
-const JOURNAL_SCHEMA_VERSION: u32 = 1;
+pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 2;
+const LEGACY_JOURNAL_SCHEMA_VERSION: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum CommitStepKind {
+  Add,
+  Modify,
+  Delete,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum CommitStepPhase {
+  BackupPending,
+  BackedUp,
+  InstallPending,
+  Installed,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum ConfigCommitPhase {
+  Prepared,
+  ReplacePending,
+  Replaced,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ActiveCommitStep {
+  pub(crate) index: usize,
+  pub(crate) kind: CommitStepKind,
+  pub(crate) phase: CommitStepPhase,
+  pub(crate) relative_path: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ApplyJournal {
+  pub(crate) plan_sha256: String,
+  pub(crate) steps_digest: String,
+  pub(crate) step_count: usize,
+  pub(crate) cursor: usize,
+  pub(crate) active_step: Option<ActiveCommitStep>,
+  pub(crate) config_original_sha256: String,
+  pub(crate) config_target_sha256: String,
+  pub(crate) config_phase: ConfigCommitPhase,
+}
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct TaskJournal {
-  schema_version: u32,
+  pub(crate) schema_version: u32,
   pub(crate) revision: u64,
   pub(crate) task_id: String,
   pub(crate) plan_id: String,
@@ -43,6 +92,8 @@ pub(crate) struct TaskJournal {
   pub(crate) bytes_per_second: u64,
   pub(crate) eta_seconds: Option<u64>,
   pub(crate) error_message: Option<String>,
+  #[serde(default)]
+  pub(crate) apply: Option<ApplyJournal>,
   pub(crate) created_at: String,
   pub(crate) updated_at: String,
 }
@@ -74,6 +125,7 @@ impl TaskJournal {
       bytes_per_second: 0,
       eta_seconds: None,
       error_message: None,
+      apply: None,
       created_at: now.clone(),
       updated_at: now,
     }
@@ -213,7 +265,7 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
 }
 
 fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
-  if journal.schema_version != JOURNAL_SCHEMA_VERSION
+  if !matches!(journal.schema_version, JOURNAL_SCHEMA_VERSION | LEGACY_JOURNAL_SCHEMA_VERSION)
     || Uuid::parse_str(&journal.task_id).is_err()
     || journal.task_id != journal.plan_id
     || journal.installation_id.is_empty()
@@ -243,6 +295,28 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
       || !completed.insert(cache_key.as_str())
   }) {
     return Err("游戏资源任务日志包含无效缓存对象".to_string());
+  }
+  if journal.schema_version == LEGACY_JOURNAL_SCHEMA_VERSION && journal.apply.is_some() {
+    return Err("旧版游戏资源任务日志不能包含提交状态".to_string());
+  }
+  if let Some(apply) = &journal.apply {
+    let hashes_valid = [
+      &apply.plan_sha256,
+      &apply.steps_digest,
+      &apply.config_original_sha256,
+      &apply.config_target_sha256,
+    ]
+    .into_iter()
+    .all(|value| value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit()));
+    let active_valid = apply.active_step.as_ref().is_none_or(|step| {
+      step.index < apply.step_count
+        && step.index == apply.cursor
+        && normalize_manifest_path(&step.relative_path)
+          .is_ok_and(|value| value == step.relative_path)
+    });
+    if !hashes_valid || apply.step_count == 0 || apply.cursor > apply.step_count || !active_valid {
+      return Err("游戏资源任务日志包含无效提交状态".to_string());
+    }
   }
   Ok(())
 }
@@ -322,6 +396,7 @@ mod tests {
       bytes_per_second: 0,
       eta_seconds: None,
       error_message: None,
+      apply: None,
       created_at: now.clone(),
       updated_at: now,
     }

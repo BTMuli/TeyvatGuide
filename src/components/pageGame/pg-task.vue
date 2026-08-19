@@ -35,14 +35,14 @@
       />
       <v-alert
         v-else-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
-        text="检测到上次未完成的下载。继续时会重新校验缓存，只补下缺失或损坏的对象。"
+        text="检测到上次未完成的资源任务。继续或回滚时会先调和提交日志与实际文件状态。"
         density="compact"
         type="warning"
         variant="tonal"
       />
       <v-alert
         v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
-        text="全部下载对象已通过 hash 复验。应用更新将在 Phase 3 提供。"
+        text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
         density="compact"
         type="success"
         variant="tonal"
@@ -62,6 +62,16 @@
         开始下载
       </v-btn>
       <v-btn
+        v-if="task?.state === gameEnum.package.taskState.READY_TO_APPLY"
+        :loading="actionPending"
+        prepend-icon="mdi-check-circle-outline"
+        size="small"
+        variant="tonal"
+        @click="emit('applyRequested')"
+      >
+        应用更新
+      </v-btn>
+      <v-btn
         v-if="active && task !== null"
         :loading="actionPending"
         prepend-icon="mdi-stop-circle-outline"
@@ -79,7 +89,7 @@
           variant="tonal"
           @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
         >
-          校验并继续
+          安全恢复
         </v-btn>
         <v-btn
           :disabled="task.state === gameEnum.package.taskState.READY_TO_APPLY"
@@ -117,6 +127,7 @@ type Props = {
 const { plan, task, actionPending } = defineProps<Props>();
 const emit = defineEmits<{
   startRequested: [];
+  applyRequested: [];
   cancelRequested: [];
   recoverRequested: [action: TGApp.Game.Package.RecoveryActionEnum];
 }>();
@@ -124,7 +135,12 @@ const emit = defineEmits<{
 const active = computed<boolean>(() => {
   return (
     task?.state === gameEnum.package.taskState.QUEUED ||
-    task?.state === gameEnum.package.taskState.DOWNLOADING
+    task?.state === gameEnum.package.taskState.DOWNLOADING ||
+    task?.state === gameEnum.package.taskState.ASSEMBLING ||
+    task?.state === gameEnum.package.taskState.COMMIT_PREPARED ||
+    task?.state === gameEnum.package.taskState.COMMITTING ||
+    task?.state === gameEnum.package.taskState.VERIFYING ||
+    task?.state === gameEnum.package.taskState.ROLLING_BACK
   );
 });
 const recoverable = computed<boolean>(() => {
@@ -148,10 +164,13 @@ const progressPercent = computed<number>(() => {
 const stateColor = computed<string>(() => {
   switch (task?.state) {
     case gameEnum.package.taskState.READY_TO_APPLY:
+    case gameEnum.package.taskState.COMPLETED:
       return "success";
     case gameEnum.package.taskState.FAILED:
       return "error";
     case gameEnum.package.taskState.RECOVERY_REQUIRED:
+    case gameEnum.package.taskState.ROLLING_BACK:
+    case gameEnum.package.taskState.CANCELED:
       return "warning";
     default:
       return "primary";

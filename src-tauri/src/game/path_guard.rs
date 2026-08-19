@@ -46,6 +46,15 @@ pub(crate) fn resolve_existing_manifest_file(
   root: &Path,
   relative_path: &str,
 ) -> Result<PathBuf, String> {
+  resolve_optional_manifest_file(root, relative_path)?
+    .ok_or_else(|| "manifest 资源路径不存在".to_string())
+}
+
+/// 在受信根目录下解析一个可选的普通 manifest 文件，缺失时不创建任何目录。
+pub(crate) fn resolve_optional_manifest_file(
+  root: &Path,
+  relative_path: &str,
+) -> Result<Option<PathBuf>, String> {
   let normalized = normalize_manifest_path(relative_path)?;
   validate_directory(root)?;
   let mut current = root.to_path_buf();
@@ -55,8 +64,11 @@ pub(crate) fn resolve_existing_manifest_file(
       return Err("manifest 资源路径包含越界段".to_string());
     };
     current.push(segment);
-    let metadata = fs::symlink_metadata(&current)
-      .map_err(|error| format!("读取 manifest 资源路径失败：{error}"))?;
+    let metadata = match fs::symlink_metadata(&current) {
+      Ok(metadata) => metadata,
+      Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+      Err(error) => return Err(format!("读取 manifest 资源路径失败：{error}")),
+    };
     reject_link_or_reparse(&metadata)?;
     if index + 1 == components.len() {
       if !metadata.is_file() {
@@ -66,7 +78,7 @@ pub(crate) fn resolve_existing_manifest_file(
       return Err("manifest 资源父路径不是目录".to_string());
     }
   }
-  Ok(current)
+  Ok(Some(current))
 }
 
 /// 在受信根目录下逐级创建安全父目录，并返回尚未写入的 manifest 文件路径。

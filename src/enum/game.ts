@@ -67,6 +67,12 @@ const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
   QUEUED: "queued",
   DOWNLOADING: "downloading",
   READY_TO_APPLY: "ready_to_apply",
+  ASSEMBLING: "assembling",
+  COMMIT_PREPARED: "commit_prepared",
+  COMMITTING: "committing",
+  VERIFYING: "verifying",
+  ROLLING_BACK: "rolling_back",
+  COMPLETED: "completed",
   RECOVERY_REQUIRED: "recovery_required",
   FAILED: "failed",
   CANCELED: "canceled",
@@ -96,6 +102,18 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
       return "正在下载";
     case GamePackageTaskStateEnum.READY_TO_APPLY:
       return "预下载完成";
+    case GamePackageTaskStateEnum.ASSEMBLING:
+      return "正在组装";
+    case GamePackageTaskStateEnum.COMMIT_PREPARED:
+      return "等待提交";
+    case GamePackageTaskStateEnum.COMMITTING:
+      return "正在提交";
+    case GamePackageTaskStateEnum.VERIFYING:
+      return "正在验证";
+    case GamePackageTaskStateEnum.ROLLING_BACK:
+      return "正在回滚";
+    case GamePackageTaskStateEnum.COMPLETED:
+      return "已完成";
     case GamePackageTaskStateEnum.RECOVERY_REQUIRED:
       return "等待恢复";
     case GamePackageTaskStateEnum.FAILED:

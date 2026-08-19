@@ -127,6 +127,7 @@
       :actionPending="taskActionPending"
       :plan
       :task="currentTask"
+      @apply-requested="handleApplyRequested"
       @cancel-requested="handleCancelRequested"
       @recover-requested="handleRecoverRequested"
       @start-requested="handleStartRequested"
@@ -164,7 +165,12 @@ const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
 const taskActive = computed<boolean>(() => {
   return (
     currentTask.value?.state === gameEnum.package.taskState.QUEUED ||
-    currentTask.value?.state === gameEnum.package.taskState.DOWNLOADING
+    currentTask.value?.state === gameEnum.package.taskState.DOWNLOADING ||
+    currentTask.value?.state === gameEnum.package.taskState.ASSEMBLING ||
+    currentTask.value?.state === gameEnum.package.taskState.COMMIT_PREPARED ||
+    currentTask.value?.state === gameEnum.package.taskState.COMMITTING ||
+    currentTask.value?.state === gameEnum.package.taskState.VERIFYING ||
+    currentTask.value?.state === gameEnum.package.taskState.ROLLING_BACK
   );
 });
 const taskActionPending = computed<boolean>(() => {
@@ -242,6 +248,24 @@ async function handleStartRequested(): Promise<void> {
   }
 }
 
+async function handleApplyRequested(): Promise<void> {
+  const task = currentTask.value;
+  if (task?.state !== gameEnum.package.taskState.READY_TO_APPLY) return;
+  const confirmed = await showDialog.checkF({
+    title: "应用游戏更新？",
+    text: "应用会修改游戏文件。请先完全退出游戏，游戏运行时无法应用更新。",
+    confirmLabel: "应用更新",
+  });
+  if (confirmed !== true) return;
+  try {
+    const updatedTask = await taskStore.applyTask(task.taskId);
+    showSnackbar.success("已开始应用游戏更新");
+    if (updatedTask.state === gameEnum.package.taskState.COMPLETED) await refreshSnapshot();
+  } catch (error) {
+    showSnackbar.error(`应用游戏更新失败：${error}`);
+  }
+}
+
 async function handleCancelRequested(): Promise<void> {
   const task = currentTask.value;
   if (task === null || !taskActive.value) return;
@@ -266,11 +290,11 @@ async function handleRecoverRequested(
   if (task === null || taskActive.value) return;
   const rollback = action === gameEnum.package.recoveryAction.ROLLBACK;
   const confirmed = await showDialog.checkF({
-    title: rollback ? "放弃资源任务？" : "继续资源下载？",
+    title: rollback ? "回滚资源任务？" : "安全恢复资源任务？",
     text: rollback
-      ? "只会清理该任务的未完成临时文件，不会删除其他任务可复用的已校验缓存。"
-      : "继续前会重新校验缓存和远端清单，只补下缺失或损坏的对象。",
-    confirmLabel: rollback ? "放弃任务" : "校验并继续",
+      ? "若任务已进入文件提交，会先恢复备份；已校验的共享下载缓存不会删除。"
+      : "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。",
+    confirmLabel: rollback ? "安全回滚" : "开始恢复",
   });
   if (confirmed !== true) return;
   try {
@@ -285,6 +309,15 @@ watch(
   () => [installation.id, installation.version],
   () => void refreshSnapshot(),
   { immediate: true },
+);
+
+watch(
+  () => [currentTask.value?.taskId, currentTask.value?.state],
+  ([taskId, state]) => {
+    if (taskId !== undefined && state === gameEnum.package.taskState.COMPLETED) {
+      void refreshSnapshot();
+    }
+  },
 );
 </script>
 

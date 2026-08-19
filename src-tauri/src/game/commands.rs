@@ -4,13 +4,16 @@
 use super::{
   hoyoplay::{create_http_client, create_snapshot, get_game_branches},
   installation::{derive_installation_id, inspect_executable},
-  launch,
+  journal, launch,
   model::{
     GameInstallation, InstallationStatus, PackagePlanSummary, PackagePlanTarget,
     PackageRecoveryAction, PackageSnapshot, PackageTaskOptions, PackageTaskSummary, SchemeId,
   },
   package::GamePackageManager,
-  planner::{create_and_persist_plan, hydrate_and_validate_plan, load_persisted_plan},
+  planner::{
+    create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_plan,
+    load_persisted_plan, persist_validated_plan,
+  },
 };
 use chrono::Utc;
 use sqlx::Row;
@@ -107,9 +110,17 @@ pub async fn game_installation_list(
 pub async fn game_launch(
   app_handle: AppHandle,
   db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
   installation_id: String,
   ticket: Option<String>,
 ) -> Result<(), String> {
+  let _reservation = manager.reserve_installation(&installation_id)?;
+  if journal::list(&game_task_root(&app_handle)?, Some(&installation_id))?
+    .iter()
+    .any(|task| task.state.requires_recovery())
+  {
+    return Err("该游戏安装存在进行中或等待恢复的资源提交，暂时不能启动".to_string());
+  }
   let pool = sqlite_pool(&db_instances).await?;
   let executable_path = sqlx::query_scalar::<_, String>(
     "SELECT executablePath FROM GameInstallation WHERE id = ? LIMIT 1",
@@ -193,6 +204,26 @@ pub async fn game_package_start(
   manager.start(app_handle, task_root, plan, options.unwrap_or_default(), false)
 }
 
+/// 消费 ReadyToApply 预下载，并在完整目标清单验证后最后提交版本号。
+#[tauri::command]
+pub async fn game_package_apply(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let plan = load_persisted_plan(&task_root, &task_id)?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
+  persist_validated_plan(&task_root, &plan)?;
+  manager.apply(app_handle, task_root, installation.root_path.into(), plan)
+}
+
 /// 在下一个下载安全边界请求取消资源任务。
 #[tauri::command]
 pub fn game_package_cancel(
@@ -212,7 +243,7 @@ pub async fn game_package_task_list(
   manager.list(&game_task_root(&app_handle)?, installation_id.as_deref()).await
 }
 
-/// 恢复中断下载，或回滚 Phase 2 仅拥有的任务私有临时文件。
+/// 恢复中断的下载/提交，或安全回滚任务拥有的临时文件与游戏备份。
 #[tauri::command]
 pub async fn game_package_recover(
   app_handle: AppHandle,
@@ -222,6 +253,30 @@ pub async fn game_package_recover(
   action: PackageRecoveryAction,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
+  let journal_value = journal::load(&journal::journal_path(&task_root, &task_id))?;
+  if journal_value.state.requires_recovery() {
+    let plan = load_persisted_plan(&task_root, &task_id)?;
+    let pool = sqlite_pool(&db_instances).await?;
+    let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+    let retry = matches!(action, PackageRecoveryAction::Resume);
+    let rolled_back = manager.rollback_apply(
+      &app_handle,
+      &task_root,
+      Path::new(&installation.root_path),
+      &plan,
+      retry,
+    )?;
+    if !retry {
+      return Ok(rolled_back);
+    }
+    let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+    let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    let client = create_http_client()?;
+    let branches = get_game_branches(&client, scheme).await?;
+    let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
+    persist_validated_plan(&task_root, &plan)?;
+    return manager.apply(app_handle, task_root, installation.root_path.into(), plan);
+  }
   match action {
     PackageRecoveryAction::Resume => {
       let plan = load_persisted_plan(&task_root, &task_id)?;

@@ -6,6 +6,7 @@
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import {
+  applyGamePackageTask,
   cancelGamePackageTask,
   listGamePackageTasks,
   recoverGamePackageTask,
@@ -73,6 +74,17 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  async function applyTask(taskId: string): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(taskId, true);
+    try {
+      const task = await applyGamePackageTask(taskId);
+      mergeTask(task);
+      return task;
+    } finally {
+      setPending(taskId, false);
+    }
+  }
+
   async function recoverTask(
     taskId: string,
     action: TGApp.Game.Package.RecoveryActionEnum,
@@ -124,6 +136,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     pendingActions,
     hydrateTasks,
     startTask,
+    applyTask,
     cancelTask,
     recoverTask,
     startListening,

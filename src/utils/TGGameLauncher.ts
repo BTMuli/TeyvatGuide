@@ -85,6 +85,18 @@ export async function startGamePackageTask(
 }
 
 /**
+ * 应用已完成下载并复验的游戏资源任务。
+ * @since Beta v0.11.5
+ * @param taskId - 资源任务 ID
+ * @returns 应用开始后的任务投影
+ */
+export async function applyGamePackageTask(
+  taskId: string,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_apply", { taskId });
+}
+
+/**
  * 请求在安全边界取消游戏资源任务。
  * @since Beta v0.11.5
  * @param taskId - 资源任务 ID

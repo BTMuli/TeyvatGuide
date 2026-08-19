@@ -117,6 +117,12 @@ pub enum PackageTaskState {
   Queued,
   Downloading,
   ReadyToApply,
+  Assembling,
+  CommitPrepared,
+  Committing,
+  Verifying,
+  RollingBack,
+  Completed,
   RecoveryRequired,
   Failed,
   Canceled,
@@ -125,7 +131,28 @@ pub enum PackageTaskState {
 impl PackageTaskState {
   /// 判断任务是否仍可能持有安装级运行互斥。
   pub fn is_active(self) -> bool {
-    matches!(self, Self::Queued | Self::Downloading)
+    matches!(
+      self,
+      Self::Queued
+        | Self::Downloading
+        | Self::Assembling
+        | Self::Committing
+        | Self::Verifying
+        | Self::RollingBack
+    )
+  }
+
+  /// 判断应用重启后是否必须先恢复任务，才能再次启动游戏。
+  pub fn requires_recovery(self) -> bool {
+    matches!(
+      self,
+      Self::Assembling
+        | Self::CommitPrepared
+        | Self::Committing
+        | Self::Verifying
+        | Self::RollingBack
+        | Self::RecoveryRequired
+    )
   }
 }
 

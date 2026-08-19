@@ -2,6 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
+  committer,
   downloader::{RateLimiter, download_object, prepare_cache_root},
   hoyoplay::create_http_client,
   journal::{self, TaskJournal},
@@ -46,7 +47,7 @@ struct ActiveTask {
   journal: Arc<AsyncMutex<TaskJournal>>,
 }
 
-struct TaskReservation {
+pub(crate) struct TaskReservation {
   active: Arc<Mutex<ActiveTasks>>,
   installation_id: String,
   task_id: String,
@@ -147,6 +148,9 @@ impl GamePackageManager {
     }
 
     let mut journal = journal::load_or_create(&task_root, &plan)?;
+    if journal.state.requires_recovery() {
+      return Err("检测到未完成的资源提交，请先执行恢复".to_string());
+    }
     if !recovering && journal.state.is_active() && journal.revision > 1 {
       return Err("检测到未完成的资源任务，请使用恢复操作继续".to_string());
     }
@@ -203,6 +207,93 @@ impl GamePackageManager {
     Ok(())
   }
 
+  pub(crate) fn apply(
+    &self,
+    app_handle: AppHandle,
+    task_root: PathBuf,
+    game_root: PathBuf,
+    plan: PersistedPlan,
+  ) -> Result<PackageTaskSummary, String> {
+    if plan.strategy != PackagePlanStrategy::ManifestDiff || plan.inventory.is_empty() {
+      return Err("当前只能应用包含完整目标清单的 manifest-diff 计划".to_string());
+    }
+    let mut reservation =
+      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+    if is_game_running() {
+      return Err("游戏仍在运行，无法应用资源更新".to_string());
+    }
+    let journal_value = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?;
+    if journal_value.state != PackageTaskState::ReadyToApply {
+      return Err("资源任务尚未完成预下载，不能应用更新".to_string());
+    }
+
+    let summary = journal_value.summary();
+    let canceled = Arc::new(AtomicBool::new(false));
+    let shared_journal = Arc::new(AsyncMutex::new(journal_value));
+    let task = ActiveTask {
+      installation_id: plan.installation_id.clone(),
+      canceled: Arc::clone(&canceled),
+      journal: Arc::clone(&shared_journal),
+    };
+    {
+      let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      active.by_task.insert(plan.plan_id.clone(), task);
+    }
+    reservation.retain();
+    let active = Arc::clone(&self.active);
+    let finished_task_id = plan.plan_id.clone();
+    let worker_journal = Arc::clone(&shared_journal);
+    tauri::async_runtime::spawn(async move {
+      let worker_app_handle = app_handle.clone();
+      let result = tauri::async_runtime::spawn_blocking(move || {
+        let mut journal_value = worker_journal.blocking_lock().clone();
+        let snapshot = Arc::clone(&worker_journal);
+        let emit = |journal: &TaskJournal| {
+          *snapshot.blocking_lock() = journal.clone();
+          let summary = journal.summary();
+          emit_state(&worker_app_handle, &summary);
+          emit_progress(&worker_app_handle, &summary);
+        };
+        committer::execute_apply(&plan, &game_root, &task_root, &mut journal_value, &canceled, emit)
+      })
+      .await;
+      match result {
+        Ok(Ok(())) => {}
+        Ok(Err(error)) => log::warn!("[game-package] 应用资源任务失败：{error}"),
+        Err(error) => log::error!("[game-package] 应用资源任务异常退出：{error}"),
+      }
+      finish_task(&active, &finished_task_id);
+    });
+    Ok(summary)
+  }
+
+  pub(crate) fn rollback_apply(
+    &self,
+    app_handle: &AppHandle,
+    task_root: &Path,
+    game_root: &Path,
+    plan: &PersistedPlan,
+    retry: bool,
+  ) -> Result<PackageTaskSummary, String> {
+    let _reservation =
+      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+    if is_game_running() {
+      return Err("游戏仍在运行，无法恢复资源提交".to_string());
+    }
+    let mut journal_value = journal::load(&journal::journal_path(task_root, &plan.plan_id))?;
+    committer::rollback_apply(plan, game_root, task_root, &mut journal_value, retry, |journal| {
+      emit_state(app_handle, &journal.summary());
+    })?;
+    Ok(journal_value.summary())
+  }
+
+  pub(crate) fn reserve_installation(
+    &self,
+    installation_id: &str,
+  ) -> Result<TaskReservation, String> {
+    TaskReservation::acquire(Arc::clone(&self.active), installation_id, "game-launch")
+  }
+
   pub(crate) async fn list(
     &self,
     task_root: &Path,
@@ -212,7 +303,7 @@ impl GamePackageManager {
       .into_iter()
       .map(|journal| {
         let mut summary = journal.summary();
-        if summary.state.is_active() {
+        if summary.state.requires_recovery() {
           summary.state = PackageTaskState::RecoveryRequired;
         }
         (summary.task_id.clone(), summary)
@@ -426,7 +517,7 @@ fn emit_progress(app_handle: &AppHandle, summary: &PackageTaskSummary) {
 }
 
 #[cfg(target_os = "windows")]
-fn is_game_running() -> bool {
+pub(crate) fn is_game_running() -> bool {
   use windows_sys::Win32::{
     Foundation::{CloseHandle, INVALID_HANDLE_VALUE},
     System::Diagnostics::ToolHelp::{
@@ -461,6 +552,6 @@ fn is_game_running() -> bool {
 }
 
 #[cfg(not(target_os = "windows"))]
-fn is_game_running() -> bool {
+pub(crate) fn is_game_running() -> bool {
   false
 }
