@@ -20,7 +20,10 @@ use crate::commands::{
   execute_sql_transaction, get_dir_size, hide_main_window, init_app, is_in_admin, is_msix,
   is_process_running, quit_app, read_text_scale,
 };
-use crate::game::commands::{game_installation_inspect, game_installation_list, game_launch};
+use crate::game::commands::{
+  game_installation_inspect, game_installation_list, game_launch, game_package_plan,
+  game_package_snapshot,
+};
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
 // 子窗口 label 的数组
@@ -132,6 +135,8 @@ pub fn run() {
       game_installation_inspect,
       game_installation_list,
       game_launch,
+      game_package_snapshot,
+      game_package_plan,
       is_msix,
       is_process_running,
       #[cfg(target_os = "windows")]

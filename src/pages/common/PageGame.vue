@@ -90,6 +90,10 @@
           type="warning"
           variant="tonal"
         />
+        <PgVersion
+          v-if="installation.status === gameEnum.installation.status.KNOWN"
+          :installation
+        />
       </article>
     </section>
   </div>
@@ -97,6 +101,7 @@
 
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import PgVersion from "@comp/pageGame/pg-version.vue";
 import gameEnum from "@enum/game.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import { open } from "@tauri-apps/plugin-dialog";

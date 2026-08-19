@@ -2,7 +2,11 @@
 //! @since Beta v0.11.5
 
 pub mod commands;
+mod hoyoplay;
 mod installation;
 mod launch;
 mod model;
+mod path_guard;
+mod planner;
 mod scheme;
+mod sophon;

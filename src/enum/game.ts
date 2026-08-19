@@ -39,6 +39,41 @@ const GameInstallationStatusEnum: typeof TGApp.Game.Installation.Status = {
 };
 
 /**
+ * 游戏资源计划目标枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Package.PlanTargetEnum
+ */
+const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
+  MAIN: "main",
+  PRE_DOWNLOAD: "pre_download",
+};
+
+/**
+ * 游戏资源计划策略枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Package.PlanStrategyEnum
+ */
+const GamePackagePlanStrategyEnum: typeof TGApp.Game.Package.PlanStrategy = {
+  PATCH: "patch",
+  MANIFEST_DIFF: "manifest_diff",
+};
+
+/**
+ * 获取游戏资源计划策略描述。
+ * @since Beta v0.11.5
+ * @param strategy - 计划差异策略
+ * @returns 策略描述
+ */
+function getGamePackagePlanStrategyDesc(strategy: TGApp.Game.Package.PlanStrategyEnum): string {
+  switch (strategy) {
+    case GamePackagePlanStrategyEnum.PATCH:
+      return "官方差分包";
+    case GamePackagePlanStrategyEnum.MANIFEST_DIFF:
+      return "资源清单差异";
+  }
+}
+
+/**
  * 获取游戏安装方案描述。
  * @since Beta v0.11.5
  * @param scheme - 游戏安装方案
@@ -321,6 +356,11 @@ const gameEnum = {
     scheme: GameInstallationSchemeEnum,
     schemeDesc: getGameInstallationSchemeDesc,
     status: GameInstallationStatusEnum,
+  },
+  package: {
+    planTarget: GamePackagePlanTargetEnum,
+    planStrategy: GamePackagePlanStrategyEnum,
+    planStrategyDesc: getGamePackagePlanStrategyDesc,
   },
   actCalendar: {
     actType: ActCalendarTypeEnum,

@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 /// TeyvatGuide 支持的国服客户端方案。
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum SchemeId {
   CnOfficial,
@@ -49,4 +49,62 @@ pub struct GameInstallation {
   pub audio_languages: Vec<String>,
   pub is_chosen: bool,
   pub last_seen: String,
+}
+
+/// 可用于生成包计划的目标分支。
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PackagePlanTarget {
+  Main,
+  PreDownload,
+}
+
+/// 一个不含分支密码和下载地址的远端版本投影。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RemoteVersionSnapshot {
+  pub tag: String,
+  pub diff_tags: Vec<String>,
+}
+
+/// 本地安装与 HoyoPlay 远端版本的只读快照。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageSnapshot {
+  pub installation_id: String,
+  pub local_version: Option<String>,
+  pub main: RemoteVersionSnapshot,
+  pub pre_download: Option<RemoteVersionSnapshot>,
+  pub update_available: bool,
+  pub pre_download_available: bool,
+}
+
+/// 计划选择的差异来源。
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PackagePlanStrategy {
+  Patch,
+  ManifestDiff,
+}
+
+/// 已持久化不可变计划的安全摘要。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackagePlanSummary {
+  pub plan_id: String,
+  pub installation_id: String,
+  pub source_tag: String,
+  pub target_tag: String,
+  pub manifest_digest: String,
+  pub strategy: PackagePlanStrategy,
+  pub download_bytes: u64,
+  pub install_bytes: u64,
+  pub cache_hit_bytes: u64,
+  pub required_free_bytes: u64,
+  pub available_free_bytes: u64,
+  pub has_sufficient_space: bool,
+  pub download_count: usize,
+  pub add_count: usize,
+  pub modify_count: usize,
+  pub delete_count: usize,
 }

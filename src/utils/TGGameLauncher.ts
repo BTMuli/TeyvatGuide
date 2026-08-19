@@ -40,3 +40,32 @@ export async function launchGameInstallation(
 ): Promise<void> {
   await invoke("game_launch", { installationId, ticket });
 }
+
+/**
+ * 获取已登记安装的本地与远端版本快照。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ * @returns 不含分支密码和下载地址的版本快照
+ */
+export async function getGamePackageSnapshot(
+  installationId: string,
+): Promise<TGApp.Game.Package.Snapshot> {
+  return await invoke<TGApp.Game.Package.Snapshot>("game_package_snapshot", { installationId });
+}
+
+/**
+ * 生成并持久化不可变的游戏资源计划。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ * @param target - 主分支或预下载分支
+ * @returns 不含内部下载地址的计划摘要
+ */
+export async function createGamePackagePlan(
+  installationId: string,
+  target: TGApp.Game.Package.PlanTargetEnum,
+): Promise<TGApp.Game.Package.PlanSummary> {
+  return await invoke<TGApp.Game.Package.PlanSummary>("game_package_plan", {
+    installationId,
+    target,
+  });
+}

@@ -2,14 +2,19 @@
 //! @since Beta v0.11.5
 
 use super::{
+  hoyoplay::{create_http_client, create_snapshot, get_game_branches},
   installation::{derive_installation_id, inspect_executable},
   launch,
-  model::{GameInstallation, InstallationStatus, SchemeId},
+  model::{
+    GameInstallation, InstallationStatus, PackagePlanSummary, PackagePlanTarget, PackageSnapshot,
+    SchemeId,
+  },
+  planner::create_and_persist_plan,
 };
 use chrono::Utc;
 use sqlx::Row;
 use std::path::Path;
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
 
@@ -132,6 +137,66 @@ pub async fn game_launch(
     .await
     .map_err(|error| error.to_string())?;
   Ok(())
+}
+
+/// 返回本地、主分支和预下载分支的只读版本快照。
+#[tauri::command]
+pub async fn game_package_snapshot(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+) -> Result<PackageSnapshot, String> {
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  Ok(create_snapshot(installation.id, installation.version, &branches))
+}
+
+/// 生成 patch 优先、manifest diff 回退的不可变资源计划。
+#[tauri::command]
+pub async fn game_package_plan(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+  target: PackagePlanTarget,
+) -> Result<PackagePlanSummary, String> {
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let app_data_dir =
+    app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  create_and_persist_plan(&installation, &branches, target, &app_data_dir).await
+}
+
+/// 仅通过数据库中的安装 ID 解析路径，并重新验证磁盘身份与渠道状态。
+async fn load_trusted_installation(
+  app_handle: &AppHandle,
+  pool: &sqlx::SqlitePool,
+  installation_id: &str,
+) -> Result<GameInstallation, String> {
+  let executable_path = sqlx::query_scalar::<_, String>(
+    "SELECT executablePath FROM GameInstallation WHERE id = ? LIMIT 1",
+  )
+  .bind(installation_id)
+  .fetch_optional(pool)
+  .await
+  .map_err(|error| error.to_string())?
+  .ok_or_else(|| "未找到已登记的游戏安装".to_string())?;
+  let machine_uid = read_machine_uid(app_handle)?;
+  let installation = inspect_executable(&executable_path, &machine_uid)?;
+  if installation.id != installation_id
+    || installation_id != derive_installation_id(&executable_path, &machine_uid)
+  {
+    return Err("游戏安装身份校验失败，请重新登记安装".to_string());
+  }
+  if installation.status != InstallationStatus::Known {
+    return Err(installation.status_message);
+  }
+  Ok(installation)
 }
 
 /// 读取当前设备的稳定标识，用于派生仅在本机有效的安装 ID。
