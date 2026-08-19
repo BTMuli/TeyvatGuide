@@ -7,6 +7,7 @@ use super::{
   sophon::payload_url,
 };
 use futures_util::TryStreamExt;
+use md5::{Digest as Md5Digest, Md5};
 use reqwest::header::{CONTENT_LENGTH, CONTENT_RANGE, RANGE};
 use std::{
   collections::HashMap,
@@ -179,6 +180,7 @@ async fn download_once(
   let mut stream = response.bytes_stream();
   let mut bytes = 0_u64;
   let mut xxhasher = Xxh64::new(0);
+  let mut md5hasher = <Md5 as Md5Digest>::new();
   while let Some(chunk) =
     stream.try_next().await.map_err(|error| network_error("读取游戏资源", &error))?
   {
@@ -195,7 +197,10 @@ async fn download_once(
     file.write_all(&chunk).await.map_err(|error| format!("写入资源下载临时文件失败：{error}"))?;
     match download.hash_kind {
       PlanDownloadHashKind::XxHash64 => xxhasher.update(&chunk),
-      PlanDownloadHashKind::UnsupportedPatchRange => {}
+      PlanDownloadHashKind::Md5 => md5hasher.update(&chunk),
+      PlanDownloadHashKind::UnsupportedPatchRange => {
+        return Err("当前阶段不支持校验 patch Range".to_string());
+      }
     }
   }
   if bytes != download.compressed_size {
@@ -203,6 +208,7 @@ async fn download_once(
   }
   let actual_hash = match download.hash_kind {
     PlanDownloadHashKind::XxHash64 => format!("{:016x}", xxhasher.digest()),
+    PlanDownloadHashKind::Md5 => format!("{:x}", md5hasher.finalize()),
     PlanDownloadHashKind::UnsupportedPatchRange => {
       return Err("当前阶段不支持校验 patch Range".to_string());
     }

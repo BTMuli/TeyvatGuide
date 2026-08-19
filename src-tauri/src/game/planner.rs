@@ -11,6 +11,7 @@ use super::{
   },
 };
 use chrono::Utc;
+use md5::Md5;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
@@ -77,10 +78,11 @@ pub(crate) struct PlanDownload {
   pub(crate) range_length: Option<u64>,
 }
 
-#[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum PlanDownloadHashKind {
   XxHash64,
+  Md5,
   UnsupportedPatchRange,
 }
 
@@ -545,7 +547,7 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
 
 fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanParts, String> {
   let manifest_digest = patch_manifest_digest(&build);
-  let mut downloads = HashMap::<(String, u64, u64), PlanDownload>::new();
+  let mut downloads = HashMap::<String, PlanDownload>::new();
   let mut assets = Vec::new();
   let mut delete_files = HashMap::<String, PlanDelete>::new();
   for manifest in &build.manifests {
@@ -560,26 +562,29 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
         continue;
       };
       let patch = plan_patch(info)?;
-      let key = (patch.id.clone(), patch.range_start, patch.range_length);
       let candidate = PlanDownload {
         id: patch.id.clone(),
-        cache_key: patch_range_cache_key(&patch),
-        hash_kind: PlanDownloadHashKind::UnsupportedPatchRange,
-        expected_hash: String::new(),
-        compressed_size: patch.range_length,
-        decompressed_size: patch.range_length,
+        cache_key: patch_container_cache_key(&patch),
+        hash_kind: PlanDownloadHashKind::Md5,
+        expected_hash: patch.patch_md5.clone(),
+        compressed_size: patch.patch_file_size,
+        decompressed_size: patch.patch_file_size,
         encoding: PayloadEncoding::Raw,
         url_prefix: manifest.diff_download.url_prefix.clone(),
         url_suffix: manifest.diff_download.url_suffix.clone(),
-        range_start: Some(patch.range_start),
-        range_length: Some(patch.range_length),
+        range_start: None,
+        range_length: None,
       };
-      if let Some(existing) = downloads.get(&key) {
-        if existing.compressed_size != candidate.compressed_size {
-          return Err("相同 patch Range 对应了冲突的下载元数据".to_string());
+      if let Some(existing) = downloads.get(&patch.id) {
+        if existing.compressed_size != candidate.compressed_size
+          || !existing.expected_hash.eq_ignore_ascii_case(&candidate.expected_hash)
+          || existing.url_prefix != candidate.url_prefix
+          || existing.url_suffix != candidate.url_suffix
+        {
+          return Err("相同 patch 容器对应了冲突的下载元数据".to_string());
         }
       } else {
-        downloads.insert(key, candidate);
+        downloads.insert(patch.id.clone(), candidate);
       }
       assets.push(PlanAsset {
         name,
@@ -620,8 +625,7 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
   }
   assets.sort_by(|left, right| left.name.cmp(&right.name));
   let mut downloads = downloads.into_values().collect::<Vec<_>>();
-  downloads
-    .sort_by(|left, right| (&left.id, left.range_start).cmp(&(&right.id, right.range_start)));
+  downloads.sort_by(|left, right| left.id.cmp(&right.id));
   let mut delete_files = delete_files.into_values().collect::<Vec<_>>();
   delete_files.sort_by(|left, right| left.name.cmp(&right.name));
   Ok(PlanParts {
@@ -819,13 +823,14 @@ fn plan_patch(info: &PatchInfo) -> Result<PlanPatch, String> {
   })
 }
 
-fn patch_range_cache_key(patch: &PlanPatch) -> String {
+fn patch_container_cache_key(patch: &PlanPatch) -> String {
   let mut hasher = Sha256::new();
   hasher.update(patch.id.as_bytes());
   hasher.update([0]);
-  hasher.update(patch.range_start.to_le_bytes());
-  hasher.update(patch.range_length.to_le_bytes());
-  format!("{:x}.range", hasher.finalize())
+  hasher.update(patch.patch_file_size.to_le_bytes());
+  hasher.update([0]);
+  hasher.update(patch.patch_md5.as_bytes());
+  format!("{:x}.patch", hasher.finalize())
 }
 
 fn manifest_digest(build: &DecodedBuild) -> String {
@@ -897,6 +902,7 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
   };
   let mut reader = BufReader::new(file);
   let mut xxhasher = Xxh64::new(0);
+  let mut md5hasher = Md5::new();
   let mut buffer = [0_u8; 128 * 1024];
   loop {
     let Ok(read) = reader.read(&mut buffer) else {
@@ -907,12 +913,16 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
     }
     match download.hash_kind {
       PlanDownloadHashKind::XxHash64 => xxhasher.update(&buffer[..read]),
+      PlanDownloadHashKind::Md5 => md5hasher.update(&buffer[..read]),
       PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
     }
   }
   match download.hash_kind {
     PlanDownloadHashKind::XxHash64 => {
       format!("{:016x}", xxhasher.digest()).eq_ignore_ascii_case(&download.expected_hash)
+    }
+    PlanDownloadHashKind::Md5 => {
+      format!("{:x}", md5hasher.finalize()).eq_ignore_ascii_case(&download.expected_hash)
     }
     PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
   }
@@ -972,10 +982,13 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
       PlanDownloadHashKind::XxHash64 => chunk_xxhash64(&download.id).is_some_and(|expected| {
         format!("{expected:016x}").eq_ignore_ascii_case(&download.expected_hash)
       }),
+      PlanDownloadHashKind::Md5 => is_md5(&download.expected_hash),
       PlanDownloadHashKind::UnsupportedPatchRange => download.expected_hash.is_empty(),
     };
     let range_valid = match (download.range_start, download.range_length) {
-      (None, None) => download.hash_kind == PlanDownloadHashKind::XxHash64,
+      (None, None) => {
+        matches!(download.hash_kind, PlanDownloadHashKind::XxHash64 | PlanDownloadHashKind::Md5)
+      }
       (Some(_), Some(length)) => {
         download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange
           && length == download.compressed_size
@@ -1076,6 +1089,20 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
     ranges.sort_unstable();
     if ranges.windows(2).any(|pair| pair[0].1 > pair[1].0) {
       return Err("游戏资源计划包含重叠 chunk".to_string());
+    }
+    if let Some(patch) = &asset.patch {
+      let download = downloads
+        .get(patch.id.as_str())
+        .ok_or_else(|| "游戏资源计划 patch 缺少下载对象".to_string())?;
+      if download.hash_kind != PlanDownloadHashKind::Md5
+        || download.compressed_size != patch.patch_file_size
+        || download.decompressed_size != patch.patch_file_size
+        || !download.expected_hash.eq_ignore_ascii_case(&patch.patch_md5)
+        || download.range_start.is_some()
+        || download.range_length.is_some()
+      {
+        return Err("游戏资源计划 patch 与下载对象不一致".to_string());
+      }
     }
   }
   let mut delete_names = std::collections::HashSet::with_capacity(plan.delete_files.len());
@@ -1242,15 +1269,16 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanFile, assets_equal,
-    build_manifest_diff, build_patch_plan, digest_parts, load_persisted_plan,
-    validate_persisted_plan,
+    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanDownloadHashKind, PlanFile,
+    assets_equal, build_manifest_diff, build_patch_plan, cached_chunk_matches, digest_parts,
+    load_persisted_plan, validate_persisted_plan,
   };
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
     sophon::{
-      Asset, AssetChunk, DecodedBuild, DecodedManifest, DownloadInfo, ManifestProto,
+      Asset, AssetChunk, DecodedBuild, DecodedManifest, DecodedPatchBuild, DecodedPatchManifest,
+      DownloadInfo, ManifestProto, PatchFile, PatchInfo, PatchManifestProto, PatchesEntry,
       get_decoded_patch_build,
     },
   };
@@ -1545,6 +1573,158 @@ mod tests {
     );
   }
 
+  fn patch_hash(byte: u8) -> String {
+    format!("{byte:x}").repeat(32)
+  }
+
+  fn patch_info(
+    id: &str,
+    size: i64,
+    hash: &str,
+    start: i64,
+    length: i64,
+    original_size: i64,
+    original_hash: &str,
+  ) -> PatchInfo {
+    PatchInfo {
+      id: id.to_string(),
+      tag: "2.0.0".to_string(),
+      build_id: "build".to_string(),
+      patch_file_size: size,
+      patches_file_hash: hash.to_string(),
+      patch_start_offset: start,
+      patch_length: length,
+      original_file_name: if original_size == 0 { String::new() } else { "modify.bin".to_string() },
+      original_file_size: original_size,
+      original_file_hash: original_hash.to_string(),
+    }
+  }
+
+  fn patch_file(name: &str, size: i64, hash: &str, info: PatchInfo) -> PatchFile {
+    PatchFile {
+      file_name: name.to_string(),
+      file_size: size,
+      file_hash: hash.to_string(),
+      patches_entries: vec![PatchesEntry { key: "1.0.0".to_string(), patch_info: Some(info) }],
+    }
+  }
+
+  fn patch_build(files: Vec<PatchFile>) -> DecodedPatchBuild {
+    DecodedPatchBuild {
+      tag: "2.0.0".to_string(),
+      manifests: vec![DecodedPatchManifest {
+        matching_field: "game".to_string(),
+        manifest_id: "manifest-patch".to_string(),
+        manifest_checksum: "0123456789abcdef0123456789abcdef".to_string(),
+        diff_download: download_info(),
+        data: PatchManifestProto { file_datas: files, delete_files_entries: Vec::new() },
+      }],
+    }
+  }
+
+  #[test]
+  fn patch_plan_deduplicates_shared_containers_and_uses_md5() {
+    let hash = patch_hash(0xa);
+    let original = patch_hash(0xb);
+    let added = patch_hash(0xc);
+    let parts = build_patch_plan(
+      patch_build(vec![
+        patch_file(
+          "modify.bin",
+          8,
+          &original,
+          patch_info("game.patch", 64, &hash, 0, 16, 4, &patch_hash(0xd)),
+        ),
+        patch_file("new.bin", 4, &added, patch_info("game.patch", 64, &hash, 16, 8, 0, "")),
+      ]),
+      "1.0.0",
+    )
+    .unwrap();
+    assert_eq!(parts.strategy, PackagePlanStrategy::Patch);
+    assert_eq!(parts.downloads.len(), 1);
+    assert_eq!(parts.assets.len(), 2);
+    let download = &parts.downloads[0];
+    assert_eq!(download.id, "game.patch");
+    assert_eq!(download.hash_kind, PlanDownloadHashKind::Md5);
+    assert_eq!(download.expected_hash, hash);
+    assert_eq!(download.compressed_size, 64);
+    assert!(download.range_start.is_none());
+    assert!(download.range_length.is_none());
+    assert!(download.cache_key.ends_with(".patch"));
+    let plan_id = uuid::Uuid::new_v4().to_string();
+    let plan = PersistedPlan {
+      schema_version: PLAN_SCHEMA_VERSION,
+      plan_id: plan_id.clone(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Main,
+      source_tag: "1.0.0".to_string(),
+      target_tag: "2.0.0".to_string(),
+      manifest_digest: parts.manifest_digest.clone(),
+      strategy: parts.strategy,
+      downloads: parts.downloads.clone(),
+      assets: parts.assets,
+      delete_files: parts.delete_files,
+      inventory: Vec::new(),
+      created_at: "2026-08-19T00:00:00Z".to_string(),
+    };
+    assert!(validate_persisted_plan(&plan, &plan_id).is_ok());
+  }
+
+  #[test]
+  fn patch_plan_rejects_conflicting_container_metadata() {
+    let result = build_patch_plan(
+      patch_build(vec![
+        patch_file(
+          "a.bin",
+          4,
+          &patch_hash(0xa),
+          patch_info("game.patch", 64, &patch_hash(0xb), 0, 8, 0, ""),
+        ),
+        patch_file(
+          "b.bin",
+          4,
+          &patch_hash(0xc),
+          patch_info("game.patch", 32, &patch_hash(0xd), 0, 8, 0, ""),
+        ),
+      ]),
+      "1.0.0",
+    );
+    assert!(result.is_err());
+  }
+
+  #[test]
+  fn cached_patch_container_matches_md5() {
+    let bytes = b"patch-container";
+    let digest = {
+      use md5::Digest;
+      let mut hasher = md5::Md5::new();
+      hasher.update(bytes);
+      format!("{:x}", hasher.finalize())
+    };
+    let cache =
+      std::env::temp_dir().join(format!("teyvat-guide-patch-cache-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&cache).unwrap();
+    let cache_key = format!("{digest}.patch");
+    std::fs::write(cache.join(&cache_key), bytes).unwrap();
+    let download = super::PlanDownload {
+      id: "game.patch".to_string(),
+      cache_key,
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: digest,
+      compressed_size: bytes.len() as u64,
+      decompressed_size: bytes.len() as u64,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: "https://example.com/patch".to_string(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    };
+    assert!(cached_chunk_matches(&cache, &download));
+    let _ = std::fs::remove_dir_all(&cache);
+  }
+
   #[test]
   #[ignore = "只读访问官方 HoyoPlay/Sophon，用于 patch 计划协议冒烟验证"]
   fn plans_current_official_patch_manifest() {
@@ -1557,6 +1737,11 @@ mod tests {
       assert_eq!(plan.strategy, PackagePlanStrategy::Patch);
       assert!(!plan.assets.is_empty());
       assert!(!plan.downloads.is_empty());
+      assert!(plan.downloads.iter().all(|download| {
+        download.hash_kind == PlanDownloadHashKind::Md5
+          && download.range_start.is_none()
+          && download.expected_hash.len() == 32
+      }));
     });
   }
 }
