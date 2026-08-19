@@ -148,4 +148,35 @@ declare namespace TGApp.Game.Package {
     errorMessage: string | null;
     updatedAt: string;
   };
+
+  /** 同资源家族渠道转换的只读计划摘要。 */
+  type SwitchSummary = {
+    planId: string;
+    installationId: string;
+    sourceScheme: TGApp.Game.Installation.SchemeEnum;
+    targetScheme: TGApp.Game.Installation.SchemeEnum;
+    sourceChannel: number;
+    sourceSubChannel: number;
+    targetChannel: number;
+    targetSubChannel: number;
+    sdkRequired: boolean;
+    sdkVersion: string | null;
+    downloadBytes: number;
+    installBytes: number;
+    cacheHitBytes: number;
+    deleteCount: number;
+    deleteFiles: Array<string>;
+    requiredFreeBytes: number;
+    availableFreeBytes: number;
+    hasSufficientSpace: boolean;
+  };
+
+  /** 应用数据目录中游戏资源缓存的占用摘要；不含计划与校验会话。 */
+  type CacheSummary = {
+    chunkBytes: number;
+    chunkCount: number;
+    sdkBytes: number;
+    sdkCount: number;
+    totalBytes: number;
+  };
 }

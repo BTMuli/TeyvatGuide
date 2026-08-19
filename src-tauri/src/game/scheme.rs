@@ -31,10 +31,53 @@ pub fn resolve_scheme(channel: u32, sub_channel: u32) -> Option<SchemeId> {
   }
 }
 
+/// 返回写入目标渠道时应使用的规范 channel / sub_channel。
+pub fn canonical_channel(scheme: SchemeId) -> (u32, u32) {
+  match scheme {
+    SchemeId::CnOfficial => (1, 1),
+    SchemeId::CnBilibili => (14, 0),
+  }
+}
+
+/// 返回同资源家族内可转换的另一国服渠道。
+pub fn opposite_scheme(scheme: SchemeId) -> SchemeId {
+  match scheme {
+    SchemeId::CnOfficial => SchemeId::CnBilibili,
+    SchemeId::CnBilibili => SchemeId::CnOfficial,
+  }
+}
+
 /// 判断渠道 SDK 的存在状态是否符合官服无 SDK、哔哩哔哩服有 SDK 的规则。
 pub fn sdk_is_consistent(scheme: SchemeId, has_channel_sdk: bool) -> bool {
   match scheme {
     SchemeId::CnOfficial => !has_channel_sdk,
     SchemeId::CnBilibili => has_channel_sdk,
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{canonical_channel, opposite_scheme, resolve_scheme, sdk_is_consistent};
+  use crate::game::model::SchemeId;
+
+  #[test]
+  fn canonical_pairs_are_supported() {
+    let (channel, sub_channel) = canonical_channel(SchemeId::CnOfficial);
+    assert_eq!(resolve_scheme(channel, sub_channel), Some(SchemeId::CnOfficial));
+    let (channel, sub_channel) = canonical_channel(SchemeId::CnBilibili);
+    assert_eq!(resolve_scheme(channel, sub_channel), Some(SchemeId::CnBilibili));
+  }
+
+  #[test]
+  fn opposite_scheme_stays_in_family() {
+    assert_eq!(opposite_scheme(SchemeId::CnOfficial), SchemeId::CnBilibili);
+    assert_eq!(opposite_scheme(SchemeId::CnBilibili), SchemeId::CnOfficial);
+  }
+
+  #[test]
+  fn official_must_not_keep_channel_sdk() {
+    assert!(sdk_is_consistent(SchemeId::CnOfficial, false));
+    assert!(!sdk_is_consistent(SchemeId::CnOfficial, true));
+    assert!(sdk_is_consistent(SchemeId::CnBilibili, true));
   }
 }

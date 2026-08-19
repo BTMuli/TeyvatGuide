@@ -242,3 +242,38 @@ pub enum PackageRecoveryAction {
   Resume,
   Rollback,
 }
+
+/// 同资源家族渠道转换的只读计划摘要；不含 SDK 下载地址。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageSwitchSummary {
+  pub plan_id: String,
+  pub installation_id: String,
+  pub source_scheme: SchemeId,
+  pub target_scheme: SchemeId,
+  pub source_channel: u32,
+  pub source_sub_channel: u32,
+  pub target_channel: u32,
+  pub target_sub_channel: u32,
+  pub sdk_required: bool,
+  pub sdk_version: Option<String>,
+  pub download_bytes: u64,
+  pub install_bytes: u64,
+  pub cache_hit_bytes: u64,
+  pub delete_count: usize,
+  pub delete_files: Vec<String>,
+  pub required_free_bytes: u64,
+  pub available_free_bytes: u64,
+  pub has_sufficient_space: bool,
+}
+
+/// 应用数据目录中游戏资源缓存的占用摘要；不含 switch/verify/tasks 会话。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageCacheSummary {
+  pub chunk_bytes: u64,
+  pub chunk_count: usize,
+  pub sdk_bytes: u64,
+  pub sdk_count: usize,
+  pub total_bytes: u64,
+}

@@ -71,6 +71,38 @@ export async function createGamePackagePlan(
 }
 
 /**
+ * 评估官服与 B 服之间的同资源家族渠道转换；不会修改游戏目录。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ * @returns 不含 SDK 下载地址的换服计划摘要
+ */
+export async function createGamePackageSwitchPlan(
+  installationId: string,
+): Promise<TGApp.Game.Package.SwitchSummary> {
+  return await invoke<TGApp.Game.Package.SwitchSummary>("game_package_switch_plan", {
+    installationId,
+  });
+}
+
+/**
+ * 读取应用数据目录中的资源分片与渠道 SDK 缓存占用。
+ * @since Beta v0.11.5
+ * @returns 缓存占用摘要
+ */
+export async function getGamePackageCacheStatus(): Promise<TGApp.Game.Package.CacheSummary> {
+  return await invoke<TGApp.Game.Package.CacheSummary>("game_package_cache_status");
+}
+
+/**
+ * 清理资源分片与渠道 SDK 缓存；当前仅开放入口，不会删除文件。
+ * @since Beta v0.11.5
+ * @returns 清理后的缓存占用摘要
+ */
+export async function clearGamePackageCache(): Promise<TGApp.Game.Package.CacheSummary> {
+  return await invoke<TGApp.Game.Package.CacheSummary>("game_package_cache_clear");
+}
+
+/**
  * 启动或恢复安装完整性校验；扫描在后台继续，刷新页面后可重连进度。
  * @since Beta v0.11.5
  * @param installationId - 已登记安装 ID

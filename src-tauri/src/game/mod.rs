@@ -2,6 +2,7 @@
 //! @since Beta v0.11.5
 
 mod assembler;
+mod cache;
 pub mod commands;
 mod committer;
 mod downloader;
@@ -17,4 +18,5 @@ mod path_guard;
 mod planner;
 mod scheme;
 mod sophon;
+mod switch;
 mod verify;

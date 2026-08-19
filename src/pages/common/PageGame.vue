@@ -94,13 +94,17 @@
           v-if="installation.status === gameEnum.installation.status.KNOWN"
           :installation
         />
+        <PgScheme v-if="installation.status === gameEnum.installation.status.KNOWN" :installation />
       </article>
     </section>
+    <PgCache v-if="isWindows && !loading" />
   </div>
 </template>
 
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import PgCache from "@comp/pageGame/pg-cache.vue";
+import PgScheme from "@comp/pageGame/pg-scheme.vue";
 import PgVersion from "@comp/pageGame/pg-version.vue";
 import gameEnum from "@enum/game.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";

@@ -2,19 +2,21 @@
 //! @since Beta v0.11.5
 
 use super::{
+  cache,
   hoyoplay::{create_http_client, create_snapshot, get_game_branches},
   installation::{derive_installation_id, inspect_executable},
   journal, launch,
   model::{
-    GameInstallation, InstallationStatus, PackagePlanSummary, PackagePlanTarget,
-    PackageRecoveryAction, PackageSnapshot, PackageTaskOptions, PackageTaskSummary,
-    PackageVerifySummary, SchemeId,
+    GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanSummary,
+    PackagePlanTarget, PackageRecoveryAction, PackageSnapshot, PackageSwitchSummary,
+    PackageTaskOptions, PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::GamePackageManager,
   planner::{
     create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_plan,
     hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
   },
+  switch::create_and_persist_switch_plan,
 };
 use chrono::Utc;
 use sqlx::Row;
@@ -183,6 +185,34 @@ pub async fn game_package_plan(
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
   create_and_persist_plan(&installation, &branches, target, &app_data_dir).await
+}
+
+/// 评估官服与 B 服之间的同资源家族渠道转换；只生成计划，不修改游戏目录。
+#[tauri::command]
+pub async fn game_package_switch_plan(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+) -> Result<PackageSwitchSummary, String> {
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let task_root = game_task_root(&app_handle)?;
+  create_and_persist_switch_plan(&installation, &branches, &task_root).await
+}
+
+/// 统计应用数据目录中的资源分片与渠道 SDK 缓存占用。
+#[tauri::command]
+pub fn game_package_cache_status(app_handle: AppHandle) -> Result<PackageCacheSummary, String> {
+  cache::status(&game_task_root(&app_handle)?)
+}
+
+/// 清理资源分片与渠道 SDK 缓存；当前仅开放入口，不会删除文件。
+#[tauri::command]
+pub fn game_package_cache_clear(app_handle: AppHandle) -> Result<PackageCacheSummary, String> {
+  cache::clear(&game_task_root(&app_handle)?)
 }
 
 /// 启动或恢复安装完整性校验；扫描在后台继续，页面刷新后可重连进度。
