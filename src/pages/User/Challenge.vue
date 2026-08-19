@@ -28,6 +28,10 @@
     <template #append>
       <div class="ucp-top-append">
         <div class="act-list">
+          <v-btn class="ucp-btn" variant="elevated" @click="showPopOverlay = true">
+            <img alt="赋光之人" src="/icon/challenge/buff.webp" />
+            <span>赋光之人</span>
+          </v-btn>
           <v-btn
             :disabled="localChallenge.length === 0 || isRefresh"
             class="ucp-btn"
@@ -66,34 +70,6 @@
         </div>
       </div>
     </template>
-    <template #extension>
-      <div class="ucp-top-extension">
-        <div class="pop-list">
-          <v-btn
-            :disabled="reqPop"
-            :loading="reqPop"
-            class="pop-btn"
-            icon="mdi-refresh"
-            size="36"
-            @click="refreshPopList"
-          />
-          <TucPopItem v-for="avatar in popList" :key="avatar.avatar_id" :avatar />
-        </div>
-        <v-select
-          v-model="server"
-          :disabled="reqPop"
-          :hide-details="true"
-          :items="serverList"
-          class="uct-extension-select"
-          density="compact"
-          item-title="text"
-          item-value="value"
-          label="赋光之人服务器"
-          variant="outlined"
-          width="200px"
-        />
-      </div>
-    </template>
   </v-app-bar>
   <div class="user-challenge-box">
     <v-tabs
@@ -105,8 +81,20 @@
     >
       <v-tab v-for="item in localChallenge" :key="item.id" :value="item.id">
         <div class="ucb-tab">
-          <span>{{ item.name }}</span>
-          <span>{{ item.startTime.slice(0, 10) }} ~ {{ item.endTime.slice(0, 10) }}</span>
+          <div class="ucb-tab-head">
+            <span class="ucb-tab-name">{{ item.name }}</span>
+            <div
+              v-if="tabRecords[item.id]"
+              :title="tabRecords[item.id]?.title"
+              class="ucb-tab-record"
+            >
+              <img :alt="tabRecords[item.id]?.title" :src="tabRecords[item.id]?.src" />
+              <span>{{ tabRecords[item.id]?.second }}s</span>
+            </div>
+          </div>
+          <span class="ucb-tab-time">
+            {{ item.startTime.slice(0, 10) }} ~ {{ item.endTime.slice(0, 10) }}
+          </span>
         </div>
       </v-tab>
     </v-tabs>
@@ -121,12 +109,12 @@
           <div class="ucw-top">
             <div class="ucw-title">
               <span>{{ item.name }}</span>
-              <span>{{ item.startTime }} ~ {{ item.endTime }}</span>
-              <span>更新于 {{ item.updated }}</span>
+              <div class="ucw-times">
+                <span>{{ item.startTime }} ~ {{ item.endTime }}</span>
+                <span>更新于 {{ item.updated }}</span>
+              </div>
             </div>
-            <div class="ucw-share">
-              幽境危战 | UID-{{ item.uid }} | Render by TeyvatGuide v{{ version }}
-            </div>
+            <div class="ucw-share">幽境危战 | UID-{{ item.uid }} | TeyvatGuide v{{ version }}</div>
           </div>
           <TucBlings v-if="item.blings.length > 0" :data="item.blings" />
           <TucOverview :data="item.single" title="单人模式" />
@@ -139,6 +127,12 @@
       </div>
     </v-window>
   </div>
+  <TucPopOverlay
+    v-model="showPopOverlay"
+    :periodName="currentPeriod?.name"
+    :periodRange
+    :uid="uidCur"
+  />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -146,7 +140,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucBlings from "@comp/userChallenge/tuc-blings.vue";
 import TucOverview from "@comp/userChallenge/tuc-overview.vue";
-import TucPopItem from "@comp/userChallenge/tuc-pop-item.vue";
+import TucPopOverlay from "@comp/userChallenge/tuc-pop-overlay.vue";
 import gameEnum from "@enum/game.js";
 import Hutao from "@Hutao/index.js";
 import recordReq from "@req/recordReq.js";
@@ -159,16 +153,16 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { getRfAc } from "@utils/acUtils.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { generateShareImg } from "@utils/TGShare.js";
+import TGShare from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
-type SelectItem<T = string> = { text: string; value: T };
-const serverList: ReadonlyArray<SelectItem<TGApp.Game.Base.ServerTypeEnum>> = [
-  gameEnum.server.CN_GF01,
-  gameEnum.server.CN_QD01,
-].map((i) => ({ text: gameEnum.serverDesc(i), value: i }));
+type TabRecordView = {
+  second: number;
+  src: string;
+  title: string;
+};
 
 const router = useRouter();
 const { account, cookie } = storeToRefs(useUserStore());
@@ -177,13 +171,32 @@ const version = ref<string>();
 
 const userTab = ref<number>(0);
 const isRefresh = ref<boolean>(false);
+const showPopOverlay = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localChallenge = shallowRef<Array<TGApp.Sqlite.Challenge.TableTrans>>([]);
-
-const server = ref<TGApp.Game.Base.ServerTypeEnum>(gameEnum.server.CN_GF01);
-const reqPop = ref<boolean>(false);
-const popList = shallowRef<Array<TGApp.Game.Challenge.PopularityItem>>([]);
+const currentPeriod = computed<TGApp.Sqlite.Challenge.TableTrans | undefined>(() => {
+  const now = Date.now();
+  const ongoing = localChallenge.value.find((item) => {
+    const start = Date.parse(item.startTime);
+    const end = Date.parse(item.endTime);
+    return !Number.isNaN(start) && !Number.isNaN(end) && now >= start && now <= end;
+  });
+  return ongoing ?? localChallenge.value[0];
+});
+const periodRange = computed<string | undefined>(() => {
+  const item = currentPeriod.value;
+  if (!item) return undefined;
+  return `${item.startTime.slice(0, 10)} ~ ${item.endTime.slice(0, 10)}`;
+});
+const tabRecords = computed<Partial<Record<number, TabRecordView>>>(() => {
+  const result: Partial<Record<number, TabRecordView>> = {};
+  for (const item of localChallenge.value) {
+    const record = getTabRecord(item);
+    if (record !== undefined) result[item.id] = record;
+  }
+  return result;
+});
 
 onMounted(async () => {
   await showLoading.start("正在加载危战数据");
@@ -191,23 +204,26 @@ onMounted(async () => {
   await TGLogger.Info("[UserCombat][onMounted] 打开幽境危战页面");
   await showLoading.update("正在获取UID列表");
   await reloadUid();
+  await loadChallenge();
   isRefresh.value = false;
-  if (uidCur.value?.startsWith("5")) server.value = gameEnum.server.CN_QD01;
-  await refreshPopList(false);
+  await showLoading.end();
 });
 
-watch(
-  () => server.value,
-  async () => {
-    const name = gameEnum.serverDesc(server.value);
-    await TGLogger.Info(`[UserChallenge][watch][server] 切换服务器: ${name}`);
-    await refreshPopList();
-  },
-);
 watch(
   () => uidCur.value,
   async () => await loadChallenge(),
 );
+
+function getTabRecord(item: TGApp.Sqlite.Challenge.TableTrans): TabRecordView | undefined {
+  const best = item.single.best ?? item.mp.best;
+  if (best === null) return undefined;
+  const mode = item.single.best !== null ? "单人" : "联机";
+  return {
+    second: best.second,
+    src: `/icon/challenge/UI_LeyLineChallenge_Medal_${best.difficulty}.webp`,
+    title: `${mode} · ${gameEnum.challenge.diffDesc(best.difficulty)}`,
+  };
+}
 
 async function reloadUid(uid?: string): Promise<void> {
   uidList.value = await TSUserChallenge.getAllUid();
@@ -244,7 +260,7 @@ async function shareChallenge(): Promise<void> {
     return;
   }
   await showLoading.start("正在生成分享图片", fileName);
-  await generateShareImg(fileName, shareDom);
+  await TGShare.modern(fileName, shareDom, 2.0, false, { bakeBackdrop: true, ppx: 16 });
   await showLoading.end();
   await TGLogger.Info(`[UserChallenge][shareChallenge][${userTab.value}] 成功生成分享图片`);
 }
@@ -321,44 +337,6 @@ async function deleteChallenge(): Promise<void> {
   await reloadUid();
   await loadChallenge();
   await showLoading.end();
-}
-
-async function refreshPopList(hint: boolean = true): Promise<void> {
-  if (reqPop.value) return;
-  reqPop.value = true;
-  if (hint) {
-    await showLoading.start(
-      "正在加载赋光之人列表",
-      `服务器： ${gameEnum.serverDesc(server.value)}`,
-    );
-  }
-  let resp: TGApp.Game.Challenge.PopularityResp | undefined;
-  try {
-    resp = await recordReq.challenge.pop(server.value);
-    if (resp.retcode !== 0) {
-      reqPop.value = false;
-      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-      await TGLogger.Warn(
-        `[UserChallenge][RefreshPopList] Error: ${resp.retcode} - ${resp.message}`,
-      );
-      await showLoading.end();
-      return;
-    }
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    reqPop.value = false;
-    showSnackbar.error(`获取赋光之人列表失败：${errMsg}`);
-    await TGLogger.Error(`[UserChallenge][RefreshPopList] 获取赋光之人列表异常`);
-    await TGLogger.Error(`[UserChallenge][RefreshPopList] ${e}`);
-    await showLoading.end();
-    return;
-  }
-  popList.value = resp.data.avatar_list;
-  await showLoading.end();
-  reqPop.value = false;
-  showSnackbar.success(
-    `已刷新 ${gameEnum.serverDesc(server.value)} 的 ${popList.value.length} 位赋光之人`,
-  );
 }
 
 /** 尝试读取胡桃工具箱导出的危战数据 */
@@ -464,51 +442,22 @@ async function tryReadChallenge(): Promise<void> {
   margin-right: 12px;
 }
 
-.ucp-top-extension {
-  position: relative;
-  display: flex;
-  width: 100%;
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  margin-bottom: 4px;
-}
-
-.uct-extension-select {
-  position: relative;
-  max-width: 200px;
-}
-
 .act-list {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-}
 
-.pop-list {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 4px;
-}
-
-.pop-btn {
-  background: var(--tgc-btn-1);
-  color: var(--btn-text);
-  font-family: var(--font-title);
-}
-
-.dark .pop-btn {
-  border: 1px solid var(--common-shadow-2);
+  .ucp-btn img {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .user-challenge-box {
   display: flex;
-  height: calc(100vh - 144px);
+  height: calc(100vh - 100px);
   align-items: flex-start;
   justify-content: center;
   border: 1px solid var(--common-shadow-2);
@@ -530,12 +479,45 @@ async function tryReadChallenge(): Promise<void> {
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  row-gap: 2px;
 
-  span {
-    &:last-child {
-      font-size: 10px;
-      opacity: 0.6;
+  .ucb-tab-head {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    column-gap: 4px;
+  }
+
+  .ucb-tab-name {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ucb-tab-record {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    column-gap: 4px;
+
+    img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
     }
+
+    span {
+      color: var(--tgc-yellow-1);
+      font-family: var(--font-title);
+      font-size: 12px;
+      font-weight: normal;
+    }
+  }
+
+  .ucb-tab-time {
+    font-size: 10px;
+    opacity: 0.6;
   }
 }
 
@@ -586,14 +568,21 @@ async function tryReadChallenge(): Promise<void> {
 .ucw-title {
   display: flex;
   flex-direction: column;
-  column-gap: 4px;
   font-size: 12px;
+  row-gap: 4px;
 
-  :first-child {
+  > :first-child {
     color: var(--common-text-title);
     font-family: var(--font-title);
     font-size: 20px;
+    font-weight: normal;
   }
+}
+
+.ucw-times {
+  display: flex;
+  align-items: center;
+  column-gap: 12px;
 }
 
 .ucw-share {
