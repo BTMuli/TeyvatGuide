@@ -21,9 +21,11 @@ use crate::commands::{
   is_process_running, quit_app, read_text_scale,
 };
 use crate::game::commands::{
-  game_installation_inspect, game_installation_list, game_launch, game_package_plan,
-  game_package_snapshot,
+  game_installation_inspect, game_installation_list, game_launch, game_package_cancel,
+  game_package_plan, game_package_recover, game_package_snapshot, game_package_start,
+  game_package_task_list,
 };
+use crate::game::package::GamePackageManager;
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
 // 子窗口 label 的数组
@@ -91,6 +93,7 @@ pub fn run() {
     }
   }));
   builder
+    .manage(GamePackageManager::new())
     .on_window_event(move |app, event| window_event_handler(app, event))
     .plugin(tauri_plugin_notification::init())
     .plugin(tauri_plugin_deep_link::init())
@@ -137,6 +140,14 @@ pub fn run() {
       game_launch,
       game_package_snapshot,
       game_package_plan,
+      #[cfg(target_os = "windows")]
+      game_package_start,
+      #[cfg(target_os = "windows")]
+      game_package_cancel,
+      #[cfg(target_os = "windows")]
+      game_package_recover,
+      #[cfg(target_os = "windows")]
+      game_package_task_list,
       is_msix,
       is_process_running,
       #[cfg(target_os = "windows")]

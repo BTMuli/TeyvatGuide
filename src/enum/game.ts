@@ -59,6 +59,53 @@ const GamePackagePlanStrategyEnum: typeof TGApp.Game.Package.PlanStrategy = {
 };
 
 /**
+ * 游戏资源任务状态枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Package.TaskStateEnum
+ */
+const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
+  QUEUED: "queued",
+  DOWNLOADING: "downloading",
+  READY_TO_APPLY: "ready_to_apply",
+  RECOVERY_REQUIRED: "recovery_required",
+  FAILED: "failed",
+  CANCELED: "canceled",
+};
+
+/**
+ * 游戏资源任务恢复动作枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Package.RecoveryActionEnum
+ */
+const GamePackageRecoveryActionEnum: typeof TGApp.Game.Package.RecoveryAction = {
+  RESUME: "resume",
+  ROLLBACK: "rollback",
+};
+
+/**
+ * 获取游戏资源任务状态描述。
+ * @since Beta v0.11.5
+ * @param state - 资源任务状态
+ * @returns 状态描述
+ */
+function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): string {
+  switch (state) {
+    case GamePackageTaskStateEnum.QUEUED:
+      return "等待开始";
+    case GamePackageTaskStateEnum.DOWNLOADING:
+      return "正在下载";
+    case GamePackageTaskStateEnum.READY_TO_APPLY:
+      return "预下载完成";
+    case GamePackageTaskStateEnum.RECOVERY_REQUIRED:
+      return "等待恢复";
+    case GamePackageTaskStateEnum.FAILED:
+      return "下载失败";
+    case GamePackageTaskStateEnum.CANCELED:
+      return "已取消";
+  }
+}
+
+/**
  * 获取游戏资源计划策略描述。
  * @since Beta v0.11.5
  * @param strategy - 计划差异策略
@@ -361,6 +408,9 @@ const gameEnum = {
     planTarget: GamePackagePlanTargetEnum,
     planStrategy: GamePackagePlanStrategyEnum,
     planStrategyDesc: getGamePackagePlanStrategyDesc,
+    recoveryAction: GamePackageRecoveryActionEnum,
+    taskState: GamePackageTaskStateEnum,
+    taskStateDesc: getGamePackageTaskStateDesc,
   },
   actCalendar: {
     actType: ActCalendarTypeEnum,

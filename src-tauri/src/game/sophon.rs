@@ -398,30 +398,42 @@ async fn read_limited_bytes(
 }
 
 fn download_url(download: &DownloadInfo, id: &str) -> Result<Url, String> {
+  payload_url(&download.url_prefix, &download.url_suffix, id)
+}
+
+/// 从已验证 manifest 的下载字段重建当前资源 URL，不向前端或日志暴露结果。
+pub(crate) fn payload_url(url_prefix: &str, url_suffix: &str, id: &str) -> Result<Url, String> {
   if id.is_empty()
     || id.len() > 256
     || !id.bytes().all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_'))
-    || download.url_suffix.len() > 16 * 1024
-    || download.url_suffix.contains('#')
+    || url_suffix.len() > 16 * 1024
+    || url_suffix.contains('#')
   {
     return Err("Sophon 下载地址字段无效".to_string());
   }
-  let mut base =
-    Url::parse(&download.url_prefix).map_err(|error| format!("Sophon 下载地址无效：{error}"))?;
+  let mut base = Url::parse(url_prefix).map_err(|error| format!("Sophon 下载地址无效：{error}"))?;
   if base.scheme() != "https"
     || base.host_str().is_none()
     || !base.username().is_empty()
     || base.password().is_some()
+    || !base.host_str().is_some_and(is_official_download_host)
   {
-    return Err("Sophon 下载地址必须是无凭据的 HTTPS URL".to_string());
+    return Err("Sophon 下载地址必须是受信任官方域名上的无凭据 HTTPS URL".to_string());
   }
   {
     let mut segments =
       base.path_segments_mut().map_err(|_| "Sophon 下载地址不能作为基础路径".to_string())?;
     segments.pop_if_empty().push(id);
   }
-  base.set_query((!download.url_suffix.is_empty()).then_some(&download.url_suffix));
+  base.set_query((!url_suffix.is_empty()).then_some(url_suffix));
   Ok(base)
+}
+
+fn is_official_download_host(host: &str) -> bool {
+  let host = host.to_ascii_lowercase();
+  ["mihoyo.com", "hoyoverse.com", "hyoverse.com", "yuanshen.com"]
+    .iter()
+    .any(|suffix| host == *suffix || host.ends_with(&format!(".{suffix}")))
 }
 
 fn validate_manifest_download(download: &DownloadInfo) -> Result<(), String> {
@@ -614,7 +626,7 @@ where
 
 #[cfg(test)]
 mod tests {
-  use super::{Asset, AssetChunk, ManifestProto, validate_manifest};
+  use super::{Asset, AssetChunk, ManifestProto, payload_url, validate_manifest};
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
     model::SchemeId,
@@ -639,6 +651,19 @@ mod tests {
       }],
     };
     assert!(validate_manifest(&manifest).is_err());
+  }
+
+  #[test]
+  fn rejects_untrusted_payload_host() {
+    assert!(payload_url("https://example.com/chunks", "", "0123456789abcdef").is_err());
+    assert!(
+      payload_url(
+        "https://autopatchcn.yuanshen.com/chunks",
+        "signature=redacted",
+        "0123456789abcdef",
+      )
+      .is_ok()
+    );
   }
 
   #[test]

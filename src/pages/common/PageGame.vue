@@ -104,12 +104,14 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PgVersion from "@comp/pageGame/pg-version.vue";
 import gameEnum from "@enum/game.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";
+import useGameLauncherStore from "@store/gameLauncher.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { platform } from "@tauri-apps/plugin-os";
 import { inspectGameInstallation, listGameInstallations } from "@utils/TGGameLauncher.js";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const isWindows = platform() === "windows";
+const taskStore = useGameLauncherStore();
 const loading = ref<boolean>(false);
 const registering = ref<boolean>(false);
 const installations = ref<Array<TGApp.Game.Installation.Item>>([]);
@@ -198,7 +200,18 @@ async function registerInstallation(): Promise<void> {
   }
 }
 
-onMounted(loadInstallations);
+async function initializePage(): Promise<void> {
+  if (!isWindows) return;
+  try {
+    await taskStore.startListening();
+    await Promise.all([loadInstallations(), taskStore.hydrateTasks()]);
+  } catch (error) {
+    showSnackbar.error(`读取游戏资源任务失败：${error}`);
+  }
+}
+
+onMounted(initializePage);
+onUnmounted(taskStore.stopListening);
 </script>
 
 <style lang="scss" scoped>

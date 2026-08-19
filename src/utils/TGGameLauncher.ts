@@ -69,3 +69,54 @@ export async function createGamePackagePlan(
     target,
   });
 }
+
+/**
+ * 按不可变计划启动游戏资源下载任务。
+ * @since Beta v0.11.5
+ * @param planId - 已持久化计划 ID
+ * @param options - 可选并发与带宽限制
+ * @returns 当前任务投影
+ */
+export async function startGamePackageTask(
+  planId: string,
+  options?: TGApp.Game.Package.TaskOptions,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_start", { planId, options });
+}
+
+/**
+ * 请求在安全边界取消游戏资源任务。
+ * @since Beta v0.11.5
+ * @param taskId - 资源任务 ID
+ */
+export async function cancelGamePackageTask(taskId: string): Promise<void> {
+  await invoke("game_package_cancel", { taskId });
+}
+
+/**
+ * 读取 journal 中的资源任务投影。
+ * @since Beta v0.11.5
+ * @param installationId - 可选安装 ID 过滤
+ * @returns 任务投影列表
+ */
+export async function listGamePackageTasks(
+  installationId?: string,
+): Promise<Array<TGApp.Game.Package.TaskSummary>> {
+  return await invoke<Array<TGApp.Game.Package.TaskSummary>>("game_package_task_list", {
+    installationId,
+  });
+}
+
+/**
+ * 恢复中断下载或回滚任务私有临时文件。
+ * @since Beta v0.11.5
+ * @param taskId - 资源任务 ID
+ * @param action - 恢复动作
+ * @returns 更新后的任务投影
+ */
+export async function recoverGamePackageTask(
+  taskId: string,
+  action: TGApp.Game.Package.RecoveryActionEnum,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_recover", { taskId, action });
+}

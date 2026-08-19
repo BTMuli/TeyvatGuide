@@ -2,10 +2,13 @@
 //! @since Beta v0.11.5
 
 pub mod commands;
+mod downloader;
 mod hoyoplay;
 mod installation;
+mod journal;
 mod launch;
 mod model;
+pub(crate) mod package;
 mod path_guard;
 mod planner;
 mod scheme;

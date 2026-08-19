@@ -80,7 +80,7 @@ pub struct PackageSnapshot {
 }
 
 /// 计划选择的差异来源。
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PackagePlanStrategy {
   Patch,
@@ -93,6 +93,7 @@ pub enum PackagePlanStrategy {
 pub struct PackagePlanSummary {
   pub plan_id: String,
   pub installation_id: String,
+  pub target: PackagePlanTarget,
   pub source_tag: String,
   pub target_tag: String,
   pub manifest_digest: String,
@@ -107,4 +108,63 @@ pub struct PackagePlanSummary {
   pub add_count: usize,
   pub modify_count: usize,
   pub delete_count: usize,
+}
+
+/// 游戏资源长任务的持久化状态。
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PackageTaskState {
+  Queued,
+  Downloading,
+  ReadyToApply,
+  RecoveryRequired,
+  Failed,
+  Canceled,
+}
+
+impl PackageTaskState {
+  /// 判断任务是否仍可能持有安装级运行互斥。
+  pub fn is_active(self) -> bool {
+    matches!(self, Self::Queued | Self::Downloading)
+  }
+}
+
+/// 前端可重新查询的资源任务安全投影。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageTaskSummary {
+  pub revision: u64,
+  pub task_id: String,
+  pub plan_id: String,
+  pub installation_id: String,
+  pub target: PackagePlanTarget,
+  pub source_tag: String,
+  pub target_tag: String,
+  pub manifest_digest: String,
+  pub state: PackageTaskState,
+  pub downloaded_bytes: u64,
+  pub total_bytes: u64,
+  pub completed_count: usize,
+  pub total_count: usize,
+  pub current_file: Option<String>,
+  pub bytes_per_second: u64,
+  pub eta_seconds: Option<u64>,
+  pub error_message: Option<String>,
+  pub updated_at: String,
+}
+
+/// 启动资源任务时允许覆盖的安全下载参数。
+#[derive(Clone, Copy, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageTaskOptions {
+  pub concurrency: Option<usize>,
+  pub max_bytes_per_second: Option<u64>,
+}
+
+/// 中断任务的恢复动作。
+#[derive(Clone, Copy, Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PackageRecoveryAction {
+  Resume,
+  Rollback,
 }

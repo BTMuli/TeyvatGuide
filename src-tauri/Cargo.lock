@@ -43,6 +43,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-sql",
  "tauri-utils",
+ "tokio",
  "url",
  "uuid",
  "walkdir",

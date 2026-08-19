@@ -6,10 +6,11 @@ use super::{
   installation::{derive_installation_id, inspect_executable},
   launch,
   model::{
-    GameInstallation, InstallationStatus, PackagePlanSummary, PackagePlanTarget, PackageSnapshot,
-    SchemeId,
+    GameInstallation, InstallationStatus, PackagePlanSummary, PackagePlanTarget,
+    PackageRecoveryAction, PackageSnapshot, PackageTaskOptions, PackageTaskSummary, SchemeId,
   },
-  planner::create_and_persist_plan,
+  package::GamePackageManager,
+  planner::{create_and_persist_plan, hydrate_and_validate_plan, load_persisted_plan},
 };
 use chrono::Utc;
 use sqlx::Row;
@@ -172,6 +173,71 @@ pub async fn game_package_plan(
   create_and_persist_plan(&installation, &branches, target, &app_data_dir).await
 }
 
+/// 按不可变计划启动只写应用缓存的可恢复资源下载任务。
+#[tauri::command]
+pub async fn game_package_start(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  plan_id: String,
+  options: Option<PackageTaskOptions>,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let plan = load_persisted_plan(&task_root, &plan_id)?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
+  manager.start(app_handle, task_root, plan, options.unwrap_or_default(), false)
+}
+
+/// 在下一个下载安全边界请求取消资源任务。
+#[tauri::command]
+pub fn game_package_cancel(
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+) -> Result<(), String> {
+  manager.cancel(&task_id)
+}
+
+/// 从 journal 重新读取当前资源任务，供页面重新挂载恢复投影。
+#[tauri::command]
+pub async fn game_package_task_list(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  installation_id: Option<String>,
+) -> Result<Vec<PackageTaskSummary>, String> {
+  manager.list(&game_task_root(&app_handle)?, installation_id.as_deref()).await
+}
+
+/// 恢复中断下载，或回滚 Phase 2 仅拥有的任务私有临时文件。
+#[tauri::command]
+pub async fn game_package_recover(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+  action: PackageRecoveryAction,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  match action {
+    PackageRecoveryAction::Resume => {
+      let plan = load_persisted_plan(&task_root, &task_id)?;
+      let pool = sqlite_pool(&db_instances).await?;
+      let installation =
+        load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+      let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+      let client = create_http_client()?;
+      let branches = get_game_branches(&client, scheme).await?;
+      let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
+      manager.start(app_handle, task_root, plan, PackageTaskOptions::default(), true)
+    }
+    PackageRecoveryAction::Rollback => manager.rollback_download(&task_root, &task_id),
+  }
+}
+
 /// 仅通过数据库中的安装 ID 解析路径，并重新验证磁盘身份与渠道状态。
 async fn load_trusted_installation(
   app_handle: &AppHandle,
@@ -197,6 +263,14 @@ async fn load_trusted_installation(
     return Err(installation.status_message);
   }
   Ok(installation)
+}
+
+fn game_task_root(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
+  app_handle
+    .path()
+    .app_data_dir()
+    .map(|path| path.join("game-tasks"))
+    .map_err(|error| format!("读取应用数据目录失败：{error}"))
 }
 
 /// 读取当前设备的稳定标识，用于派生仅在本机有效的安装 ID。

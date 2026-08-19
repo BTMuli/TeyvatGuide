@@ -11,7 +11,7 @@ use super::{
   },
 };
 use chrono::Utc;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
   collections::HashMap,
@@ -22,44 +22,56 @@ use std::{
 use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
-const PLAN_SCHEMA_VERSION: u32 = 1;
+const PLAN_SCHEMA_VERSION: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
 
-#[derive(Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PersistedPlan {
-  schema_version: u32,
-  plan_id: String,
-  installation_id: String,
-  source_scheme: SchemeId,
-  target_scheme: SchemeId,
-  target: PackagePlanTarget,
-  source_tag: String,
-  target_tag: String,
-  manifest_digest: String,
-  strategy: PackagePlanStrategy,
-  downloads: Vec<PlanDownload>,
-  assets: Vec<PlanAsset>,
-  delete_files: Vec<PlanDelete>,
-  created_at: String,
+pub(crate) struct PersistedPlan {
+  pub(crate) schema_version: u32,
+  pub(crate) plan_id: String,
+  pub(crate) installation_id: String,
+  pub(crate) source_scheme: SchemeId,
+  pub(crate) target_scheme: SchemeId,
+  pub(crate) target: PackagePlanTarget,
+  pub(crate) source_tag: String,
+  pub(crate) target_tag: String,
+  pub(crate) manifest_digest: String,
+  pub(crate) strategy: PackagePlanStrategy,
+  pub(crate) downloads: Vec<PlanDownload>,
+  pub(crate) assets: Vec<PlanAsset>,
+  pub(crate) delete_files: Vec<PlanDelete>,
+  pub(crate) created_at: String,
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PlanDownload {
-  id: String,
-  compressed_size: u64,
-  decompressed_size: u64,
-  url_prefix: String,
-  url_suffix: String,
-  range_start: Option<u64>,
-  range_length: Option<u64>,
+pub(crate) struct PlanDownload {
+  pub(crate) id: String,
+  pub(crate) cache_key: String,
+  pub(crate) hash_kind: PlanDownloadHashKind,
+  pub(crate) expected_hash: String,
+  pub(crate) compressed_size: u64,
+  pub(crate) decompressed_size: u64,
+  #[serde(default, skip_serializing)]
+  pub(crate) url_prefix: String,
+  #[serde(default, skip_serializing)]
+  pub(crate) url_suffix: String,
+  pub(crate) range_start: Option<u64>,
+  pub(crate) range_length: Option<u64>,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum PlanDownloadHashKind {
+  XxHash64,
+  UnsupportedPatchRange,
+}
+
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PlanAsset {
+pub(crate) struct PlanAsset {
   name: String,
   action: PlanAssetAction,
   size: u64,
@@ -68,14 +80,14 @@ struct PlanAsset {
   patch: Option<PlanPatch>,
 }
 
-#[derive(Clone, Copy, Serialize)]
+#[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 enum PlanAssetAction {
   Add,
   Modify,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct PlanChunk {
   id: String,
@@ -86,14 +98,14 @@ struct PlanChunk {
   reuse: Option<PlanReuse>,
 }
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct PlanReuse {
   asset_name: String,
   source_offset: u64,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct PlanPatch {
   id: String,
@@ -106,8 +118,8 @@ struct PlanPatch {
   original_md5: String,
 }
 
-#[derive(Serialize)]
-struct PlanDelete {
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+pub(crate) struct PlanDelete {
   name: String,
   size: u64,
   md5: String,
@@ -145,7 +157,15 @@ pub async fn create_and_persist_plan(
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
 
-  let parts = if target_branch.diff_tags.iter().any(|tag| tag == source_tag) {
+  let parts = if target == PackagePlanTarget::PreDownload {
+    build_manifest_plan(
+      &client,
+      &branches.main.with_tag(source_tag),
+      target_branch,
+      &installation.audio_languages,
+    )
+    .await?
+  } else if target_branch.diff_tags.iter().any(|tag| tag == source_tag) {
     match get_decoded_patch_build(&client, target_branch, source_tag, &installation.audio_languages)
       .await
     {
@@ -191,6 +211,7 @@ pub async fn create_and_persist_plan(
   let summary = PackagePlanSummary {
     plan_id: plan_id.clone(),
     installation_id: installation.id.clone(),
+    target,
     source_tag: source_tag.to_string(),
     target_tag: target_branch.tag.clone(),
     manifest_digest: parts.manifest_digest.clone(),
@@ -232,6 +253,76 @@ pub async fn create_and_persist_plan(
   };
   persist_plan(&task_root, &plan_id, &plan)?;
   Ok(summary)
+}
+
+/// 重新请求当前远端清单，核对计划摘要并补回不会持久化的签名下载字段。
+pub(crate) async fn hydrate_and_validate_plan(
+  installation: &GameInstallation,
+  branches: &GameBranches,
+  mut plan: PersistedPlan,
+) -> Result<PersistedPlan, String> {
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  if plan.installation_id != installation.id
+    || plan.source_scheme != scheme
+    || plan.target_scheme != scheme
+    || installation.version.as_deref() != Some(plan.source_tag.as_str())
+  {
+    return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
+  }
+  let target_branch = match plan.target {
+    PackagePlanTarget::Main => &branches.main,
+    PackagePlanTarget::PreDownload => {
+      branches.pre_download.as_ref().ok_or_else(|| "预下载分支已不可用，请重新评估".to_string())?
+    }
+  };
+  if target_branch.tag != plan.target_tag {
+    return Err("资源计划目标版本已变化，请重新评估".to_string());
+  }
+  let client = create_http_client()?;
+  let fresh = match plan.strategy {
+    PackagePlanStrategy::Patch => {
+      let build = get_decoded_patch_build(
+        &client,
+        target_branch,
+        &plan.source_tag,
+        &installation.audio_languages,
+      )
+      .await?;
+      build_patch_plan(build, &plan.source_tag)?
+    }
+    PackagePlanStrategy::ManifestDiff => {
+      build_manifest_plan(
+        &client,
+        &branches.main.with_tag(&plan.source_tag),
+        target_branch,
+        &installation.audio_languages,
+      )
+      .await?
+    }
+  };
+  if fresh.manifest_digest != plan.manifest_digest
+    || fresh.assets != plan.assets
+    || fresh.delete_files != plan.delete_files
+    || !downloads_match(&fresh.downloads, &plan.downloads)
+  {
+    return Err("远端资源清单已变化，请重新评估".to_string());
+  }
+  plan.downloads = fresh.downloads;
+  Ok(plan)
+}
+
+fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
+  left.len() == right.len()
+    && left.iter().zip(right).all(|(left, right)| {
+      left.id == right.id
+        && left.cache_key == right.cache_key
+        && left.hash_kind == right.hash_kind
+        && left.expected_hash.eq_ignore_ascii_case(&right.expected_hash)
+        && left.compressed_size == right.compressed_size
+        && left.decompressed_size == right.decompressed_size
+        && left.range_start == right.range_start
+        && left.range_length == right.range_length
+    })
 }
 
 async fn build_manifest_plan(
@@ -280,6 +371,9 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
       if reuse.is_none() {
         let candidate = PlanDownload {
           id: chunk.chunk_name.clone(),
+          cache_key: chunk.chunk_name.clone(),
+          hash_kind: PlanDownloadHashKind::XxHash64,
+          expected_hash: format!("{:016x}", chunk_xxhash64(&chunk.chunk_name).unwrap_or_default()),
           compressed_size,
           decompressed_size,
           url_prefix: download.url_prefix.clone(),
@@ -357,15 +451,25 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
       };
       let patch = plan_patch(info)?;
       let key = (patch.id.clone(), patch.range_start, patch.range_length);
-      downloads.entry(key).or_insert_with(|| PlanDownload {
+      let candidate = PlanDownload {
         id: patch.id.clone(),
+        cache_key: patch_range_cache_key(&patch),
+        hash_kind: PlanDownloadHashKind::UnsupportedPatchRange,
+        expected_hash: String::new(),
         compressed_size: patch.range_length,
         decompressed_size: patch.range_length,
         url_prefix: manifest.diff_download.url_prefix.clone(),
         url_suffix: manifest.diff_download.url_suffix.clone(),
         range_start: Some(patch.range_start),
         range_length: Some(patch.range_length),
-      });
+      };
+      if let Some(existing) = downloads.get(&key) {
+        if existing.compressed_size != candidate.compressed_size {
+          return Err("相同 patch Range 对应了冲突的下载元数据".to_string());
+        }
+      } else {
+        downloads.insert(key, candidate);
+      }
       assets.push(PlanAsset {
         name,
         action: if patch.original_size == 0 {
@@ -480,6 +584,15 @@ fn plan_patch(info: &PatchInfo) -> Result<PlanPatch, String> {
   })
 }
 
+fn patch_range_cache_key(patch: &PlanPatch) -> String {
+  let mut hasher = Sha256::new();
+  hasher.update(patch.id.as_bytes());
+  hasher.update([0]);
+  hasher.update(patch.range_start.to_le_bytes());
+  hasher.update(patch.range_length.to_le_bytes());
+  format!("{:x}.range", hasher.finalize())
+}
+
 fn manifest_digest(build: &DecodedBuild) -> String {
   let mut entries = build
     .manifests
@@ -517,18 +630,16 @@ fn digest_parts(tag: &str, entries: &[String]) -> String {
 fn calculate_cache_hits(cache_root: &Path, downloads: &[PlanDownload]) -> u64 {
   downloads
     .iter()
-    .filter(|download| download.range_start.is_none())
     .filter(|download| cached_chunk_matches(cache_root, download))
     .map(|download| download.compressed_size)
     .sum()
 }
 
-fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
-  let expected = match chunk_xxhash64(&download.id) {
-    Some(value) => value,
-    None => return false,
-  };
-  let path = cache_root.join(&download.id);
+pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
+  if download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange {
+    return false;
+  }
+  let path = cache_root.join(&download.cache_key);
   if !fs::metadata(&path).is_ok_and(|metadata| metadata.len() == download.compressed_size) {
     return false;
   }
@@ -536,7 +647,7 @@ fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
     return false;
   };
   let mut reader = BufReader::new(file);
-  let mut hasher = Xxh64::new(0);
+  let mut xxhasher = Xxh64::new(0);
   let mut buffer = [0_u8; 128 * 1024];
   loop {
     let Ok(read) = reader.read(&mut buffer) else {
@@ -545,9 +656,89 @@ fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
     if read == 0 {
       break;
     }
-    hasher.update(&buffer[..read]);
+    match download.hash_kind {
+      PlanDownloadHashKind::XxHash64 => xxhasher.update(&buffer[..read]),
+      PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
+    }
   }
-  hasher.digest() == expected
+  match download.hash_kind {
+    PlanDownloadHashKind::XxHash64 => {
+      format!("{:016x}", xxhasher.digest()).eq_ignore_ascii_case(&download.expected_hash)
+    }
+    PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
+  }
+}
+
+/// 从应用数据目录读取并严格校验一个已持久化计划。
+pub(crate) fn load_persisted_plan(
+  task_root: &Path,
+  plan_id: &str,
+) -> Result<PersistedPlan, String> {
+  if Uuid::parse_str(plan_id).is_err() {
+    return Err("游戏资源计划 ID 无效".to_string());
+  }
+  let path = task_root.join("tasks").join(plan_id).join("plan.json");
+  let metadata = fs::metadata(&path).map_err(|error| format!("读取游戏资源计划失败：{error}"))?;
+  if metadata.len() == 0 || metadata.len() > MAX_PLAN_BYTES as u64 {
+    return Err("游戏资源计划大小无效".to_string());
+  }
+  let bytes = fs::read(path).map_err(|error| format!("读取游戏资源计划失败：{error}"))?;
+  let plan: PersistedPlan =
+    serde_json::from_slice(&bytes).map_err(|error| format!("解析游戏资源计划失败：{error}"))?;
+  validate_persisted_plan(&plan, plan_id)?;
+  Ok(plan)
+}
+
+fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
+  if plan.schema_version != PLAN_SCHEMA_VERSION || plan.plan_id != plan_id {
+    return Err("游戏资源计划版本或身份不匹配".to_string());
+  }
+  if plan.installation_id.is_empty()
+    || plan.source_tag.is_empty()
+    || plan.source_tag.len() > 128
+    || plan.source_tag.chars().any(char::is_control)
+    || plan.target_tag.is_empty()
+    || plan.target_tag.len() > 128
+    || plan.target_tag.chars().any(char::is_control)
+    || plan.manifest_digest.len() != 64
+    || !plan.manifest_digest.bytes().all(|byte| byte.is_ascii_hexdigit())
+    || plan.downloads.len() > 5_000_000
+  {
+    return Err("游戏资源计划字段无效".to_string());
+  }
+  let mut cache_keys = std::collections::HashSet::with_capacity(plan.downloads.len());
+  for download in &plan.downloads {
+    let hash_valid = match download.hash_kind {
+      PlanDownloadHashKind::XxHash64 => chunk_xxhash64(&download.id).is_some_and(|expected| {
+        format!("{expected:016x}").eq_ignore_ascii_case(&download.expected_hash)
+      }),
+      PlanDownloadHashKind::UnsupportedPatchRange => download.expected_hash.is_empty(),
+    };
+    let range_valid = match (download.range_start, download.range_length) {
+      (None, None) => download.hash_kind == PlanDownloadHashKind::XxHash64,
+      (Some(_), Some(length)) => {
+        download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange
+          && length == download.compressed_size
+          && length > 0
+      }
+      _ => false,
+    };
+    if download.id.is_empty()
+      || download.cache_key.is_empty()
+      || download.cache_key.len() > 256
+      || !download
+        .cache_key
+        .bytes()
+        .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.'))
+      || download.compressed_size == 0
+      || !hash_valid
+      || !range_valid
+      || !cache_keys.insert(download.cache_key.as_str())
+    {
+      return Err("游戏资源计划下载条目无效".to_string());
+    }
+  }
+  Ok(())
 }
 
 fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result<(), String> {
@@ -674,6 +865,26 @@ mod tests {
   fn manifest_digest_is_stable_for_ordered_inputs() {
     let entries = vec!["game:a:b".to_string(), "zh-cn:c:d".to_string()];
     assert_eq!(digest_parts("7.0.0", &entries), digest_parts("7.0.0", &entries));
+  }
+
+  #[test]
+  fn persisted_download_omits_signed_url_fields() {
+    let download = super::PlanDownload {
+      id: "0123456789abcdef".to_string(),
+      cache_key: "0123456789abcdef".to_string(),
+      hash_kind: super::PlanDownloadHashKind::XxHash64,
+      expected_hash: "0123456789abcdef".to_string(),
+      compressed_size: 8,
+      decompressed_size: 10,
+      url_prefix: "https://example.yuanshen.com/chunks".to_string(),
+      url_suffix: "signature=secret".to_string(),
+      range_start: None,
+      range_length: None,
+    };
+    let value = serde_json::to_value(download).unwrap();
+    assert!(value.get("urlPrefix").is_none());
+    assert!(value.get("urlSuffix").is_none());
+    assert!(!value.to_string().contains("secret"));
   }
 
   #[test]

@@ -1,0 +1,243 @@
+<template>
+  <section v-if="plan !== null || task !== null" class="task-panel" aria-label="资源下载任务">
+    <div class="task-heading">
+      <div>
+        <span>资源任务</span>
+        <strong v-if="task !== null"> {{ task.sourceTag }} → {{ task.targetTag }} </strong>
+        <strong v-else-if="plan !== null">等待开始 {{ plan.targetTag }}</strong>
+      </div>
+      <v-chip v-if="task !== null" :color="stateColor" size="small" variant="tonal">
+        {{ gameEnum.package.taskStateDesc(task.state) }}
+      </v-chip>
+    </div>
+
+    <template v-if="task !== null">
+      <v-progress-linear
+        :indeterminate="task.totalBytes === 0 && active"
+        :model-value="progressPercent"
+        color="primary"
+        height="8"
+        rounded
+      />
+      <div class="task-facts" aria-live="polite">
+        <span>{{ formatBytes(task.downloadedBytes) }} / {{ formatBytes(task.totalBytes) }}</span>
+        <span>{{ task.completedCount }} / {{ task.totalCount }} 个对象</span>
+        <span v-if="task.bytesPerSecond > 0">{{ formatBytes(task.bytesPerSecond) }}/s</span>
+        <span v-if="task.etaSeconds !== null">预计 {{ formatDuration(task.etaSeconds) }}</span>
+      </div>
+      <p v-if="task.currentFile !== null" class="task-current">当前：{{ task.currentFile }}</p>
+      <v-alert
+        v-if="task.errorMessage !== null"
+        :text="task.errorMessage"
+        density="compact"
+        type="error"
+        variant="tonal"
+      />
+      <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
+        text="检测到上次未完成的下载。继续时会重新校验缓存，只补下缺失或损坏的对象。"
+        density="compact"
+        type="warning"
+        variant="tonal"
+      />
+      <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+        text="全部下载对象已通过 hash 复验。应用更新将在 Phase 3 提供。"
+        density="compact"
+        type="success"
+        variant="tonal"
+      />
+    </template>
+
+    <div class="task-actions">
+      <v-btn
+        v-if="canStart"
+        :disabled="plan === null || !plan.hasSufficientSpace"
+        :loading="actionPending"
+        prepend-icon="mdi-download"
+        size="small"
+        variant="tonal"
+        @click="emit('startRequested')"
+      >
+        开始下载
+      </v-btn>
+      <v-btn
+        v-if="active && task !== null"
+        :loading="actionPending"
+        prepend-icon="mdi-stop-circle-outline"
+        size="small"
+        variant="outlined"
+        @click="emit('cancelRequested')"
+      >
+        请求取消
+      </v-btn>
+      <template v-if="recoverable && task !== null">
+        <v-btn
+          :loading="actionPending"
+          prepend-icon="mdi-backup-restore"
+          size="small"
+          variant="tonal"
+          @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
+        >
+          校验并继续
+        </v-btn>
+        <v-btn
+          :disabled="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+          :loading="actionPending"
+          size="small"
+          variant="text"
+          @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
+        >
+          放弃任务
+        </v-btn>
+      </template>
+    </div>
+    <p v-if="plan !== null && !plan.hasSufficientSpace" class="task-note">
+      当前评估的磁盘空间不足，不能开始下载。
+    </p>
+    <p
+      v-else-if="plan?.target === gameEnum.package.planTarget.MAIN && task === null"
+      class="task-note"
+    >
+      正式更新的下载、组装和提交将在 Phase 3 开放。
+    </p>
+  </section>
+</template>
+
+<script lang="ts" setup>
+import gameEnum from "@enum/game.js";
+import { computed } from "vue";
+
+type Props = {
+  plan: TGApp.Game.Package.PlanSummary | null;
+  task: TGApp.Game.Package.TaskSummary | null;
+  actionPending: boolean;
+};
+
+const { plan, task, actionPending } = defineProps<Props>();
+const emit = defineEmits<{
+  startRequested: [];
+  cancelRequested: [];
+  recoverRequested: [action: TGApp.Game.Package.RecoveryActionEnum];
+}>();
+
+const active = computed<boolean>(() => {
+  return (
+    task?.state === gameEnum.package.taskState.QUEUED ||
+    task?.state === gameEnum.package.taskState.DOWNLOADING
+  );
+});
+const recoverable = computed<boolean>(() => {
+  return (
+    task?.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
+    task?.state === gameEnum.package.taskState.FAILED ||
+    task?.state === gameEnum.package.taskState.CANCELED
+  );
+});
+const canStart = computed<boolean>(() => {
+  if (plan === null || plan.target !== gameEnum.package.planTarget.PRE_DOWNLOAD || active.value) {
+    return false;
+  }
+  if (task === null) return true;
+  return task.planId !== plan.planId;
+});
+const progressPercent = computed<number>(() => {
+  if (task === null || task.totalBytes === 0) return 0;
+  return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
+});
+const stateColor = computed<string>(() => {
+  switch (task?.state) {
+    case gameEnum.package.taskState.READY_TO_APPLY:
+      return "success";
+    case gameEnum.package.taskState.FAILED:
+      return "error";
+    case gameEnum.package.taskState.RECOVERY_REQUIRED:
+      return "warning";
+    default:
+      return "primary";
+  }
+});
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KiB", "MiB", "GiB", "TiB"];
+  let value = bytes / 1024;
+  let unit = units[0];
+  for (const candidate of units.slice(1)) {
+    if (value < 1024) break;
+    value /= 1024;
+    unit = candidate;
+  }
+  return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds} 秒`;
+  const minutes = Math.ceil(seconds / 60);
+  if (minutes < 60) return `${minutes} 分钟`;
+  return `${Math.ceil(minutes / 60)} 小时`;
+}
+</script>
+
+<style lang="scss" scoped>
+.task-panel {
+  display: grid;
+  padding: 16px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-4);
+  gap: 12px;
+}
+
+.task-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  span,
+  strong {
+    display: block;
+  }
+
+  span {
+    color: var(--box-text-2);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  strong {
+    color: var(--common-text-title);
+    font-size: 16px;
+    line-height: 22px;
+  }
+}
+
+.task-facts,
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.task-facts,
+.task-current,
+.task-note {
+  color: var(--box-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.task-current,
+.task-note {
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-note {
+  color: var(--tgc-red-2);
+}
+</style>

@@ -6,7 +6,7 @@
         <p>只读检查官方分支；评估不会修改游戏目录。</p>
       </div>
       <v-btn
-        :disabled="planningTarget !== null"
+        :disabled="planningTarget !== null || taskActive"
         :loading="loading"
         aria-label="刷新远端版本"
         icon="mdi-refresh"
@@ -53,7 +53,7 @@
         </span>
         <v-btn
           v-if="snapshot.updateAvailable"
-          :disabled="planningTarget !== null"
+          :disabled="planningTarget !== null || taskActive"
           :loading="planningTarget === gameEnum.package.planTarget.MAIN"
           prepend-icon="mdi-file-tree-outline"
           size="small"
@@ -64,7 +64,7 @@
         </v-btn>
         <v-btn
           v-if="snapshot.preDownloadAvailable"
-          :disabled="planningTarget !== null"
+          :disabled="planningTarget !== null || taskActive"
           :loading="planningTarget === gameEnum.package.planTarget.PRE_DOWNLOAD"
           prepend-icon="mdi-cloud-download-outline"
           size="small"
@@ -121,27 +121,59 @@
           </dd>
         </div>
       </dl>
-      <p>本阶段只保存计划，尚未开始下载。</p>
+      <p>下载只写入应用缓存；不会在此阶段修改游戏目录。</p>
     </div>
+    <PgTask
+      :actionPending="taskActionPending"
+      :plan
+      :task="currentTask"
+      @cancel-requested="handleCancelRequested"
+      @recover-requested="handleRecoverRequested"
+      @start-requested="handleStartRequested"
+    />
   </section>
 </template>
 
 <script lang="ts" setup>
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
+import PgTask from "@comp/pageGame/pg-task.vue";
 import gameEnum from "@enum/game.js";
+import useGameLauncherStore from "@store/gameLauncher.js";
 import { createGamePackagePlan, getGamePackageSnapshot } from "@utils/TGGameLauncher.js";
-import { ref, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, ref, watch } from "vue";
 
 type Props = {
   installation: TGApp.Game.Installation.Item;
 };
 
 const { installation } = defineProps<Props>();
+const taskStore = useGameLauncherStore();
+const { pendingActions, tasksByInstallation } = storeToRefs(taskStore);
 const snapshot = ref<TGApp.Game.Package.Snapshot | null>(null);
 const plan = ref<TGApp.Game.Package.PlanSummary | null>(null);
 const loading = ref<boolean>(false);
 const planningTarget = ref<TGApp.Game.Package.PlanTargetEnum | null>(null);
 const errorMessage = ref<string | null>(null);
 let requestSequence = 0;
+
+const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
+  return tasksByInstallation.value[installation.id] ?? null;
+});
+const taskActive = computed<boolean>(() => {
+  return (
+    currentTask.value?.state === gameEnum.package.taskState.QUEUED ||
+    currentTask.value?.state === gameEnum.package.taskState.DOWNLOADING
+  );
+});
+const taskActionPending = computed<boolean>(() => {
+  const taskId = currentTask.value?.taskId;
+  return (
+    pendingActions.value[installation.id] === true ||
+    (taskId !== undefined && pendingActions.value[taskId] === true)
+  );
+});
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -189,6 +221,63 @@ async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<vo
     errorMessage.value = `生成资源计划失败：${error}`;
   } finally {
     planningTarget.value = null;
+  }
+}
+
+async function handleStartRequested(): Promise<void> {
+  if (plan.value === null || taskActive.value) return;
+  const confirmed = await showDialog.checkF({
+    title: "开始资源下载？",
+    text: `目标版本 ${plan.value.targetTag}，还需下载 ${formatBytes(
+      plan.value.downloadBytes - plan.value.cacheHitBytes,
+    )}。下载只写入应用缓存。`,
+    confirmLabel: "开始下载",
+  });
+  if (confirmed !== true) return;
+  try {
+    await taskStore.startTask(plan.value);
+    showSnackbar.success("资源下载任务已开始");
+  } catch (error) {
+    showSnackbar.error(`启动资源下载失败：${error}`);
+  }
+}
+
+async function handleCancelRequested(): Promise<void> {
+  const task = currentTask.value;
+  if (task === null || !taskActive.value) return;
+  const confirmed = await showDialog.checkF({
+    title: "取消资源下载？",
+    text: "已校验完成的共享缓存会保留，当前下载对象会在安全边界停止。",
+    confirmLabel: "请求取消",
+  });
+  if (confirmed !== true) return;
+  try {
+    await taskStore.cancelTask(task.taskId);
+    showSnackbar.info("已请求取消，请等待当前下载对象停止");
+  } catch (error) {
+    showSnackbar.error(`取消资源下载失败：${error}`);
+  }
+}
+
+async function handleRecoverRequested(
+  action: TGApp.Game.Package.RecoveryActionEnum,
+): Promise<void> {
+  const task = currentTask.value;
+  if (task === null || taskActive.value) return;
+  const rollback = action === gameEnum.package.recoveryAction.ROLLBACK;
+  const confirmed = await showDialog.checkF({
+    title: rollback ? "放弃资源任务？" : "继续资源下载？",
+    text: rollback
+      ? "只会清理该任务的未完成临时文件，不会删除其他任务可复用的已校验缓存。"
+      : "继续前会重新校验缓存和远端清单，只补下缺失或损坏的对象。",
+    confirmLabel: rollback ? "放弃任务" : "校验并继续",
+  });
+  if (confirmed !== true) return;
+  try {
+    await taskStore.recoverTask(task.taskId, action);
+    showSnackbar.success(rollback ? "资源任务已放弃" : "资源下载已恢复");
+  } catch (error) {
+    showSnackbar.error(`${rollback ? "放弃" : "恢复"}资源任务失败：${error}`);
   }
 }
 
