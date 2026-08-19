@@ -71,7 +71,7 @@ import gameEnum from "@enum/game.js";
 import TGSqlite from "@Sql/index.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import useAppStore from "@store/app.js";
-import { path } from "@tauri-apps/api";
+import { core, path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir, remove } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
@@ -223,13 +223,10 @@ async function confirmCGD(): Promise<void> {
   showSnackbar.success(oriEmpty ? "成功设置游戏目录" : "成功修改游戏目录");
 }
 
-// 判断是否超过一周
-function isOverWeek(date: string): boolean {
-  const nowTs = Date.now();
-  const checkTs = new Date(date).getTime();
-  const weekTs = 7 * 24 * 60 * 60 * 1000;
-  return nowTs - checkTs >= weekTs;
-}
+type ClearAppLogsResult = {
+  removed: number;
+  failed: number;
+};
 
 async function confirmCLD(): Promise<void> {
   const delCheck = await showDialog.check("确认清理日志文件吗？", "将保留一周内的日志文件");
@@ -237,28 +234,28 @@ async function confirmCLD(): Promise<void> {
     showSnackbar.cancel("已取消清理");
     return;
   }
-  const files = await readDir(logDir.value);
-  const delFiles = files.filter((file) => {
-    // yyyy-mm-dd.log
-    const reg = /(\d{4}-\d{2}-\d{2}\.log)/;
-    const match = file.name.match(reg);
-    if (!Array.isArray(match) || match.length < 1) return false;
-    const date = match[1].replace(".log", "");
-    return isOverWeek(date);
-  });
-  if (delFiles.length < 1) {
-    showSnackbar.warn("无需清理!");
-    return;
-  }
   await showLoading.start("正在清理日志文件...");
-  for (const file of delFiles) {
-    await showLoading.update(`正在清理 ${file.name}`);
-    const filePath = `${logDir.value}${path.sep()}${file.name}`;
-    await remove(filePath);
+  try {
+    const result = await core.invoke<ClearAppLogsResult>("clear_app_logs");
+    if (result.removed === 0 && result.failed === 0) {
+      showSnackbar.warn("无需清理!");
+      return;
+    }
+    if (result.removed === 0) {
+      showSnackbar.error("清理日志文件失败");
+      return;
+    }
+    if (result.failed > 0) {
+      showSnackbar.warn(`已清理 ${result.removed} 个日志文件，${result.failed} 个未能删除`);
+      return;
+    }
+    showSnackbar.success(`已清理 ${result.removed} 个日志文件!`);
+  } catch (error) {
+    showSnackbar.error(`清理日志失败：${error}`);
+    await TGLogger.Error(`[TcDataDir] 清理日志失败：${error}`);
+  } finally {
+    await showLoading.end();
   }
-  await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-  await showLoading.end();
-  showSnackbar.success(`已清理 ${delFiles.length} 个日志文件!`);
 }
 
 function copyPath(type: "db" | "user" | "log" | "game"): void {

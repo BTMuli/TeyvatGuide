@@ -2,7 +2,7 @@
 // @since Beta v0.11.3
 
 use crate::utils;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::Acquire;
 use std::{
@@ -326,6 +326,56 @@ fn clear_platform_cache(app_handle: AppHandle) -> Result<(), String> {
   Ok(())
 }
 
+/// 清理超过一周的按日切割日志；当前正在写入的文件不会被选中。
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClearAppLogsResult {
+  pub removed: u32,
+  pub failed: u32,
+}
+
+#[tauri::command]
+pub fn clear_app_logs(app_handle: AppHandle) -> Result<ClearAppLogsResult, String> {
+  let log_dir =
+    app_handle.path().app_log_dir().map_err(|error| format!("读取日志目录失败：{error}"))?;
+  if !log_dir.exists() {
+    return Ok(ClearAppLogsResult { removed: 0, failed: 0 });
+  }
+  let today = chrono::Local::now().date_naive();
+  let entries =
+    std::fs::read_dir(&log_dir).map_err(|error| format!("读取日志目录失败：{error}"))?;
+  let mut removed = 0_u32;
+  let mut failed = 0_u32;
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取日志项失败：{error}"))?;
+    let path = entry.path();
+    let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+      continue;
+    };
+    if !is_expired_daily_log(name, today) {
+      continue;
+    }
+    match std::fs::remove_file(&path) {
+      Ok(()) => removed += 1,
+      Err(error) => {
+        log::warn!("[clear_app_logs] 删除 {name} 失败：{error}");
+        failed += 1;
+      }
+    }
+  }
+  Ok(ClearAppLogsResult { removed, failed })
+}
+
+fn is_expired_daily_log(name: &str, today: chrono::NaiveDate) -> bool {
+  let Some(stem) = name.strip_suffix(".log") else {
+    return false;
+  };
+  let Ok(date) = chrono::NaiveDate::parse_from_str(stem, "%Y-%m-%d") else {
+    return false;
+  };
+  today.signed_duration_since(date) >= chrono::TimeDelta::days(7)
+}
+
 /// 其它平台暂不支持清除 WebView 缓存。
 #[cfg(not(any(target_os = "windows", target_os = "macos")))]
 fn clear_platform_cache(_app_handle: AppHandle) -> Result<(), String> {
@@ -478,5 +528,20 @@ pub fn is_process_running(process_name: String) -> bool {
       CloseHandle(snapshot);
       false
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::is_expired_daily_log;
+  use chrono::NaiveDate;
+
+  #[test]
+  fn expired_daily_log_keeps_recent_files() {
+    let today = NaiveDate::from_ymd_opt(2026, 8, 20).unwrap();
+    assert!(!is_expired_daily_log("2026-08-20.log", today));
+    assert!(!is_expired_daily_log("2026-08-14.log", today));
+    assert!(is_expired_daily_log("2026-08-13.log", today));
+    assert!(!is_expired_daily_log("readme.txt", today));
   }
 }

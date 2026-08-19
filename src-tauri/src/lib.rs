@@ -16,9 +16,9 @@ mod yae;
 
 use crate::client::create_mhy_client;
 use crate::commands::{
-  clear_app_cache, create_window, destroy_window, destroy_window_by_label, execute_js,
-  execute_sql_transaction, get_dir_size, hide_main_window, init_app, is_in_admin, is_msix,
-  is_process_running, quit_app, read_text_scale,
+  clear_app_cache, clear_app_logs, create_window, destroy_window, destroy_window_by_label,
+  execute_js, execute_sql_transaction, get_dir_size, hide_main_window, init_app, is_in_admin,
+  is_msix, is_process_running, quit_app, read_text_scale,
 };
 use crate::game::commands::{
   game_installation_inspect, game_installation_list, game_launch, game_package_apply,
@@ -132,6 +132,7 @@ pub fn run() {
       execute_sql_transaction,
       get_dir_size,
       clear_app_cache,
+      clear_app_logs,
       create_mhy_client,
       is_in_admin,
       hide_main_window,
