@@ -882,7 +882,10 @@ watch(selectedCharacter, async (character) => {
   if (!character) return;
   const characterId = character.value;
   avatarCurrentLevel.value = character.level;
-  avatarTargetLevel.value = avatarLevelOptions.value.at(-1) ?? 90;
+  avatarTargetLevel.value = Math.min(
+    avatarLevelOptions.value.at(-1) ?? 90,
+    Math.max(90, character.level),
+  );
   avatarTargetAscended.value = false;
   talentCurrentLevels.value = mainSkills.value.map((skill) => skill.level);
   talentTargetLevels.value = mainSkills.value.map((skill) => skill.maxLevel);
