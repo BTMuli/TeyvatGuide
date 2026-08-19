@@ -6,6 +6,8 @@ pub mod commands;
 mod committer;
 mod downloader;
 mod hoyoplay;
+#[cfg(windows)]
+mod hpatch;
 mod installation;
 mod journal;
 mod launch;

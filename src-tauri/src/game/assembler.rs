@@ -158,8 +158,7 @@ fn assemble_patch_asset(
       }
       copy_container_range(cache_root, download, patch, &partial, canceled)?;
     } else {
-      let _ = game_root;
-      return Err(format!("修改型 patch 需要 HDiffPatch 引擎，当前尚未接入：{}", asset.name));
+      apply_hdiff_patch(asset, patch, download, game_root, cache_root, &partial, canceled)?;
     }
     finalize_staging_file(&partial, &output, asset, canceled)
   })();
@@ -205,6 +204,67 @@ fn copy_container_range(
     remaining -= read as u64;
   }
   target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
+}
+
+fn apply_hdiff_patch(
+  asset: &PlanAsset,
+  patch: &PlanPatch,
+  download: &super::planner::PlanDownload,
+  game_root: &Path,
+  cache_root: &Path,
+  output: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  #[cfg(not(windows))]
+  {
+    let _ = (asset, patch, download, game_root, cache_root, output, canceled);
+    return Err(format!("修改型 patch 仅支持 Windows：{}", asset.name));
+  }
+  #[cfg(windows)]
+  {
+    check_canceled(canceled)?;
+    if patch.original_size == 0 || patch.original_md5.len() != 32 {
+      return Err(format!("修改型 patch 原文件元数据无效：{}", asset.name));
+    }
+    let source_path = resolve_existing_manifest_file(game_root, &asset.name)
+      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", asset.name))?;
+    let source_len = fs::metadata(&source_path)
+      .map_err(|error| format!("读取修改型 patch 原文件失败：{}：{error}", asset.name))?
+      .len();
+    if source_len != patch.original_size {
+      return Err(format!("修改型 patch 原文件长度校验失败：{}", asset.name));
+    }
+    let mut source = File::open(&source_path)
+      .map_err(|error| format!("打开修改型 patch 原文件失败：{}：{error}", asset.name))?;
+    let actual_md5 = hash_exact_file(&mut source, patch.original_size, canceled)?;
+    if !actual_md5.eq_ignore_ascii_case(&patch.original_md5) {
+      return Err(format!("修改型 patch 原文件 MD5 校验失败：{}", asset.name));
+    }
+    source
+      .seek(SeekFrom::Start(0))
+      .map_err(|error| format!("定位修改型 patch 原文件失败：{}：{error}", asset.name))?;
+    let container = File::open(cache_root.join(&download.cache_key))
+      .map_err(|error| format!("打开差分容器失败：{}：{error}", patch.id))?;
+    let target = OpenOptions::new()
+      .create_new(true)
+      .read(true)
+      .write(true)
+      .open(output)
+      .map_err(|error| format!("创建 patch 临时文件失败：{error}"))?;
+    target
+      .set_len(asset.size)
+      .map_err(|error| format!("设置 patch 临时文件长度失败：{}：{error}", asset.name))?;
+    super::hpatch::patch_zstd(
+      &source,
+      patch.original_size,
+      &container,
+      patch.range_start,
+      patch.range_length,
+      &target,
+      asset.size,
+    )?;
+    target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
+  }
 }
 
 fn finalize_staging_file(
@@ -850,14 +910,36 @@ mod tests {
     assert_eq!(fs::read(task_root.join("tasks/assembler-test/staging/new.bin")).unwrap(), payload);
   }
 
-  #[test]
-  fn rejects_modify_patch_until_hdiff_engine_is_available() {
-    let root = TempRoot::new();
-    let task_root = root.task_root();
-    let container = b"not-a-real-hdiff";
-    let digest = md5(container);
+  fn modify_old_bytes() -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(4096);
+    bytes.extend((0..2048).map(|index| b'A' + (index % 26) as u8));
+    bytes.extend((0..2048).map(|index| b'a' + (index % 26) as u8));
+    bytes
+  }
+
+  fn modify_new_bytes() -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(69632);
+    bytes.extend((0..2048).map(|index| b'A' + (index % 26) as u8));
+    bytes.extend(std::iter::repeat(b'X').take(65536));
+    bytes.extend((0..2048).map(|index| b'a' + (index % 26) as u8));
+    bytes
+  }
+
+  fn modify_patch_plan(
+    task_root: &Path,
+    old_bytes: &[u8],
+    new_bytes: &[u8],
+    original_md5: String,
+  ) -> PersistedPlan {
+    let prefix = b"HEAD";
+    let suffix = b"TAIL";
+    let hdiff = include_bytes!("../../native/hpatch/testdata/modify.hdiff");
+    let mut container = prefix.to_vec();
+    container.extend_from_slice(hdiff);
+    container.extend_from_slice(suffix);
+    let digest = md5(&container);
     let cache_key = format!("{digest}.patch");
-    write_cache(&task_root, &cache_key, container);
+    write_cache(task_root, &cache_key, &container);
     let download = PlanDownload {
       id: "game.patch".to_string(),
       cache_key,
@@ -874,26 +956,75 @@ mod tests {
     let asset = PlanAsset {
       name: "modify.bin".to_string(),
       action: PlanAssetAction::Modify,
-      source: None,
-      size: 8,
-      md5: md5(b"patched!"),
+      source: Some(crate::game::planner::PlanSource {
+        size: old_bytes.len() as u64,
+        md5: original_md5.clone(),
+      }),
+      size: new_bytes.len() as u64,
+      md5: md5(new_bytes),
       chunks: Vec::new(),
       patch: Some(PlanPatch {
         id: "game.patch".to_string(),
         patch_file_size: container.len() as u64,
         patch_md5: digest,
-        range_start: 0,
-        range_length: container.len() as u64,
+        range_start: prefix.len() as u64,
+        range_length: hdiff.len() as u64,
         original_name: "modify.bin".to_string(),
-        original_size: 8,
-        original_md5: md5(b"original"),
+        original_size: old_bytes.len() as u64,
+        original_md5,
       }),
     };
     let mut plan = plan(vec![download], vec![asset]);
     plan.strategy = PackagePlanStrategy::Patch;
+    plan
+  }
+
+  #[test]
+  fn rejects_modify_patch_when_original_file_missing() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let old_bytes = modify_old_bytes();
+    let new_bytes = modify_new_bytes();
+    let plan = modify_patch_plan(&task_root, &old_bytes, &new_bytes, md5(&old_bytes));
     let error =
       assemble_plan(&plan, &root.game_root(), &task_root, &AtomicBool::new(false)).unwrap_err();
-    assert!(error.contains("HDiffPatch"));
+    assert!(error.contains("原文件"));
     assert!(!task_root.join("tasks/assembler-test/staging/modify.bin").exists());
+  }
+
+  #[test]
+  fn rejects_modify_patch_when_original_md5_mismatch() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let game_root = root.game_root();
+    let old_bytes = modify_old_bytes();
+    let new_bytes = modify_new_bytes();
+    fs::create_dir_all(&game_root).unwrap();
+    fs::write(game_root.join("modify.bin"), b"not-the-original-asset").unwrap();
+    let plan = modify_patch_plan(&task_root, &old_bytes, &new_bytes, md5(&old_bytes));
+    let error = assemble_plan(&plan, &game_root, &task_root, &AtomicBool::new(false)).unwrap_err();
+    assert!(error.contains("原文件"));
+    assert_eq!(fs::read(game_root.join("modify.bin")).unwrap(), b"not-the-original-asset");
+    assert!(!task_root.join("tasks/assembler-test/staging/modify.bin").exists());
+  }
+
+  #[test]
+  fn applies_zstd_hdiff_patch_into_staging() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let game_root = root.game_root();
+    let old_bytes = modify_old_bytes();
+    let new_bytes = modify_new_bytes();
+    fs::create_dir_all(&game_root).unwrap();
+    fs::write(game_root.join("modify.bin"), &old_bytes).unwrap();
+    let plan = modify_patch_plan(&task_root, &old_bytes, &new_bytes, md5(&old_bytes));
+    let summary = assemble_plan(&plan, &game_root, &task_root, &AtomicBool::new(false)).unwrap();
+    assert_eq!(summary.asset_count, 1);
+    assert_eq!(summary.assembled_bytes, new_bytes.len() as u64);
+    assert_eq!(
+      fs::read(task_root.join("tasks/assembler-test/staging/modify.bin")).unwrap(),
+      new_bytes
+    );
+    assert_eq!(fs::read(game_root.join("modify.bin")).unwrap(), old_bytes);
   }
 }

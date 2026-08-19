@@ -21,6 +21,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 strip = "none"
 
 [build-dependencies]
+cc = "1"
 tauri-build = { version = "2.6.3", features = [] }
 
 [dependencies]
@@ -49,6 +50,7 @@ walkdir = "2.5.0"
 widestring = "1.2.1"
 xxhash-rust = { version = "0.8.15", features = ["xxh64"] }
 zstd = "0.13.3"
+zstd-sys = { version = "2.0.16", default-features = false }
 
 [target.'cfg(windows)'.dependencies.winreg]
 version = "0.55.0"
