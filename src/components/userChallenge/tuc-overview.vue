@@ -3,14 +3,14 @@
   <div class="tuc-overview-comp">
     <div class="toc-top-title">
       <div class="title">{{ props.title }}{{ props.data.has_data ? "" : " (无数据) " }}</div>
-      <div class="append" v-if="props.data.best">
+      <div v-if="props.data.best" class="append">
         <span>最佳记录</span>
-        <span>{{ props.data.best.second }}s</span>
         <img
-          :title="gameEnum.challenge.diffDesc(props.data.best.difficulty)"
           :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.data.best.difficulty}.webp`"
+          :title="gameEnum.challenge.diffDesc(props.data.best.difficulty)"
           alt="medal"
         />
+        <span>{{ props.data.best.second }}s</span>
       </div>
     </div>
     <TucChallengeItem
@@ -56,21 +56,21 @@ const props = defineProps<TucOverviewProps>();
     display: flex;
     align-items: center;
     color: var(--box-text-2);
-    gap: 4px;
 
     span {
       font-size: 14px;
 
-      &:nth-child(2) {
+      &:last-child {
         color: var(--tgc-yellow-1);
         font-family: var(--font-title);
         font-size: 16px;
+        font-weight: normal;
       }
     }
 
     img {
-      width: 32px;
-      height: 32px;
+      width: 24px;
+      height: 24px;
       object-fit: contain;
     }
   }

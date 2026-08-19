@@ -11,7 +11,7 @@
       </div>
     </div>
     <div class="main-box">
-      <div class="left-info">
+      <div ref="leftInfo" class="left-info">
         <div class="team-box">
           <TItemBox
             v-for="(avatar, idx) in props.data.teams"
@@ -20,23 +20,33 @@
           />
         </div>
         <div class="best-dps">
-          <div v-for="(avatar, idx) in props.data.best_avatar" :key="idx" class="best-dps-item">
-            <TMiImg :size="24" :alt="`${avatar.avatar_id}`" :ori="true" :src="avatar.side_icon" />
-            <span>{{ avatar.type === 1 ? "最强一击" : "最高总伤害" }}</span>
-            <span>{{ avatar.dps }}</span>
+          <div v-for="avatar in props.data.best_avatar" :key="avatar.type" class="best-dps-item">
+            <TMiImg
+              :alt="`${avatar.avatar_id}`"
+              :ori="true"
+              :size="40"
+              :src="avatar.side_icon"
+              class="best-dps-avatar"
+            />
+            <div class="best-dps-meta">
+              <span class="best-dps-label">
+                {{ avatar.type === 1 ? "最强一击" : "最高总伤害" }}
+              </span>
+              <span class="best-dps-value">{{ avatar.dps }}</span>
+            </div>
           </div>
         </div>
       </div>
-      <div class="right-desc">
+      <div ref="rightDesc" class="right-desc">
         <span
           v-for="(desc, idx) in props.data.monster.desc"
           :key="idx"
           v-html="parseHtmlText(desc)"
         />
       </div>
-    </div>
-    <div class="monster-icon">
-      <TMiImg :alt="props.data.name" :ori="true" :src="props.data.monster.icon" />
+      <div class="monster-icon">
+        <TMiImg :alt="props.data.name" :ori="true" :src="props.data.monster.icon" />
+      </div>
     </div>
   </div>
 </template>
@@ -44,6 +54,7 @@
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TMiImg from "@comp/app/t-mi-img.vue";
 import { getRcStar, getZhElement, parseHtmlText } from "@utils/toolFunc.js";
+import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 
 import TucMonsterTag from "./tuc-monster-tag.vue";
 
@@ -52,6 +63,41 @@ import { AppCharacterData } from "@/data/index.js";
 type TucChallengeItemProps = { data: TGApp.Game.Challenge.ChallengeData };
 
 const props = defineProps<TucChallengeItemProps>();
+const leftInfo = useTemplateRef<HTMLElement>("leftInfo");
+const rightDesc = useTemplateRef<HTMLElement>("rightDesc");
+const monsterMaxPx = ref<number>(0);
+const monsterSize = computed<string>(() => {
+  if (monsterMaxPx.value <= 0) return "auto";
+  return `${monsterMaxPx.value}px`;
+});
+
+let monsterSizeObs: ResizeObserver | undefined;
+
+function readBlockHeight(el: HTMLElement | null): number {
+  if (el === null) return 0;
+  return Math.floor(el.getBoundingClientRect().height);
+}
+
+function updateMonsterMax(): void {
+  const leftH = readBlockHeight(leftInfo.value);
+  const descH = readBlockHeight(rightDesc.value);
+  if (leftH === 0 && descH === 0) return;
+  let next = descH;
+  if (leftH > 0 && descH > 0) next = Math.max(leftH, descH);
+  else if (leftH > 0) next = leftH;
+  monsterMaxPx.value = next;
+}
+
+onMounted(() => {
+  monsterSizeObs = new ResizeObserver(() => updateMonsterMax());
+  if (leftInfo.value !== null) monsterSizeObs.observe(leftInfo.value);
+  if (rightDesc.value !== null) monsterSizeObs.observe(rightDesc.value);
+  updateMonsterMax();
+});
+
+onUnmounted(() => {
+  monsterSizeObs?.disconnect();
+});
 
 function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   const find = AppCharacterData.find((i) => i.id === avatar.avatar_id);
@@ -68,7 +114,8 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
       height: "80px",
       display: "inner",
       innerText: avatar.name,
-      innerHeight: 20,
+      innerHeight: 24,
+      innerBlur: "4px",
     };
   }
   return {
@@ -83,7 +130,8 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
     height: "80px",
     display: "inner",
     innerText: find.name,
-    innerHeight: 20,
+    innerHeight: 24,
+    innerBlur: "4px",
     innerIcon: `/icon/weapon/${find.weapon}.webp`,
   };
 }
@@ -92,6 +140,7 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
 .tuc-challenge-item-comp {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -103,62 +152,83 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
-  row-gap: 12px;
+  row-gap: 8px;
+}
+
+.best-dps {
+  position: relative;
+  display: flex;
+  width: 100%;
+  gap: 20px;
 }
 
 .best-dps-item {
   position: relative;
   display: flex;
+  height: fit-content;
   align-items: center;
-  justify-content: center;
-  border-radius: 20px;
-  background: linear-gradient(to right, var(--box-bg-3), var(--box-bg-1));
-  color: var(--box-text-2);
-  column-gap: 4px;
-  font-family: var(--font-title);
-
-  img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-    transform: translateY(-4px);
-  }
-
-  span {
-    font-size: 14px;
-
-    &:last-child {
-      color: var(--tgc-yellow-1);
-    }
-  }
+  border-radius: 20px 8px 8px 20px;
+  background: linear-gradient(to right, var(--common-shadow-1) 0, var(--box-bg-1) 100%);
 }
 
-.dark .best-dps-item {
-  background: linear-gradient(to right, var(--box-bg-2) 100px, var(--box-bg-1));
+.best-dps-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  object-fit: contain;
+  transform: translateY(-4px);
+}
+
+.best-dps-meta {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.best-dps-label {
+  overflow: hidden;
+  max-width: 100%;
+  height: 12px;
+  color: var(--tgc-od-white);
+  font-family: var(--font-text);
+  font-size: 10px;
+  line-height: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.best-dps-value {
+  height: 16px;
+  color: var(--tgc-od-red);
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 20px;
 }
 
 .right-desc {
   position: relative;
   z-index: 1;
   display: flex;
-  height: 100%;
+  min-width: 0;
+  height: fit-content;
+  flex: 1;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  row-gap: 12px;
+  justify-content: flex-start;
+  row-gap: 8px;
 
   span {
     color: var(--box-text-1);
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 1.2;
     text-align: left;
-    text-shadow:
-      1px 1px 0 var(--box-bg-2),
-      -1px -1px 0 var(--box-bg-2),
-      1px -1px 0 var(--box-bg-2),
-      -1px 1px 0 var(--box-bg-2);
 
     :deep(span) {
-      font-weight: bold;
+      filter: var(--gs-filter);
     }
   }
 }
@@ -201,20 +271,22 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   position: relative;
   display: flex;
   width: 100%;
+  min-width: 0;
   min-height: 120px;
   align-items: flex-start;
   justify-content: flex-start;
-  column-gap: 16px;
+  column-gap: 8px;
 }
 
 .left-info {
   position: relative;
   display: flex;
-  height: 100%;
+  height: fit-content;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: flex-start;
-  justify-content: space-between;
-  row-gap: 16px;
+  justify-content: flex-start;
+  row-gap: 8px;
 }
 
 .team-box {
@@ -227,25 +299,19 @@ function getTeamBox(avatar: TGApp.Game.Challenge.ChallengeTeam): TItemBoxData {
   gap: 8px;
 }
 
-.best-dps {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 16px;
-}
-
 .monster-icon {
-  position: absolute;
+  position: relative;
   z-index: 0;
-  right: 0;
-  bottom: -20px;
-  height: 100%;
+  width: v-bind("monsterSize");
+  height: v-bind("monsterSize");
+  flex-shrink: 0;
   opacity: 0.75;
 
   img {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    left: -8px;
+    width: calc(100% + 20px);
+    height: calc(100% + 20px);
     object-fit: contain;
   }
 }
