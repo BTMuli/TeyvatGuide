@@ -67,7 +67,9 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
 import TGSqlite from "@Sql/index.js";
+import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import useAppStore from "@store/app.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
@@ -75,24 +77,27 @@ import { readDir, remove } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import { platform } from "@tauri-apps/plugin-os";
 import { backUpUserData } from "@utils/dataBS.js";
-import { tryReadGameVer } from "@utils/TGGame.js";
+import { inspectGameInstallation, listGameInstallations } from "@utils/TGGameLauncher.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 
 const { dbPath, logDir, userDir, gameDir } = storeToRefs(useAppStore());
-const gameVer = ref<string>();
-
-watch(
-  () => gameDir.value,
-  async () => {
-    const gv = await tryReadGameVer(gameDir.value);
-    if (gv) gameVer.value = gv;
-  },
-  { immediate: true },
-);
+const gameVer = ref<string | null>();
 
 onMounted(async () => {
+  if (platform() === "windows") {
+    try {
+      const installations = await listGameInstallations();
+      const current = installations.find((item) => item.isChosen) ?? installations[0];
+      if (current) {
+        gameDir.value = current.rootPath;
+        gameVer.value = current.version;
+      }
+    } catch (error) {
+      await TGLogger.Warn(`[TcDataDir] 读取游戏安装失败：${error}`);
+    }
+  }
   const logDirGet = await path.appLogDir();
   const dbPathGet = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
   let message = "";
@@ -171,7 +176,7 @@ async function confirmCGD(): Promise<void> {
   const oriEmpty = gameDir.value === "未设置";
   const editCheck = await showDialog.check(
     oriEmpty ? "确认设置游戏目录？" : "确认修改游戏目录？",
-    oriEmpty ? "请选择 YuanShen.exe 所在目录" : `当前：${gameDir.value}`,
+    oriEmpty ? "请选择国服 YuanShen.exe" : `当前：${gameDir.value}`,
   );
   if (!editCheck) {
     showSnackbar.cancel(oriEmpty ? "已取消设置" : "已取消修改");
@@ -186,7 +191,7 @@ async function confirmCGD(): Promise<void> {
     return;
   }
   if (!file.toLowerCase().endsWith("yuanshen.exe")) {
-    showSnackbar.warn("请选中游戏本体(YuanShen.exe)");
+    showSnackbar.warn("仅支持国服游戏本体 YuanShen.exe");
     return;
   }
   if (
@@ -196,7 +201,25 @@ async function confirmCGD(): Promise<void> {
     showSnackbar.warn("路径未修改！");
     return;
   }
-  gameDir.value = file.substring(0, file.lastIndexOf(path.sep()));
+  let installation: TGApp.Game.Installation.Item;
+  try {
+    installation = await inspectGameInstallation(file);
+    if (installation.status === gameEnum.installation.status.UNSUPPORTED) {
+      showSnackbar.warn(installation.statusMessage);
+      return;
+    }
+    await TSGameInstallation.save(installation);
+  } catch (error) {
+    showSnackbar.error(`登记游戏安装失败：${error}`);
+    await TGLogger.Error(`[TcDataDir] 登记游戏安装失败：${error}`);
+    return;
+  }
+  gameDir.value = installation.rootPath;
+  gameVer.value = installation.version;
+  if (installation.status === gameEnum.installation.status.INCONSISTENT) {
+    showSnackbar.warn(`已登记安装，但暂不可启动：${installation.statusMessage}`);
+    return;
+  }
   showSnackbar.success(oriEmpty ? "成功设置游戏目录" : "成功修改游戏目录");
 }
 

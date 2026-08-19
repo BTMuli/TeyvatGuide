@@ -3,6 +3,7 @@
 
 mod client;
 mod commands;
+mod game;
 #[cfg(target_os = "windows")]
 mod loopback;
 mod plugins;
@@ -17,8 +18,9 @@ use crate::client::create_mhy_client;
 use crate::commands::{
   clear_app_cache, create_window, destroy_window, destroy_window_by_label, execute_js,
   execute_sql_transaction, get_dir_size, hide_main_window, init_app, is_in_admin, is_msix,
-  is_process_running, launch_game, quit_app, read_text_scale,
+  is_process_running, quit_app, read_text_scale,
 };
+use crate::game::commands::{game_installation_inspect, game_installation_list, game_launch};
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
 
 // 子窗口 label 的数组
@@ -127,7 +129,9 @@ pub fn run() {
       hide_main_window,
       quit_app,
       read_text_scale,
-      launch_game,
+      game_installation_inspect,
+      game_installation_list,
+      game_launch,
       is_msix,
       is_process_running,
       #[cfg(target_os = "windows")]

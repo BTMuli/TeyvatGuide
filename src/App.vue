@@ -34,6 +34,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
 import { BaseDirectory, mkdir } from "@tauri-apps/plugin-fs";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { migrateLegacyGameInstallation } from "@utils/TGGame.js";
 import TGLogger from "@utils/TGLogger.js";
 import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -41,8 +42,17 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const { theme, needResize, deviceInfo, isLogin, userDir, buildTime, closeToTray, showFeedback } =
-  storeToRefs(useAppStore());
+const {
+  theme,
+  needResize,
+  deviceInfo,
+  isLogin,
+  userDir,
+  gameDir,
+  buildTime,
+  closeToTray,
+  showFeedback,
+} = storeToRefs(useAppStore());
 const userStore = useUserStore();
 const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
 
@@ -334,6 +344,7 @@ async function listenOnInit(): Promise<void> {
   await event.listen<void>("initApp", async () => {
     await setSentryUser();
     await checkAppLoad();
+    await migrateLegacyGameInstallation(gameDir.value);
     await checkDeviceFp();
     try {
       await checkUserLoad();

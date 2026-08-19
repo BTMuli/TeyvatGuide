@@ -1,6 +1,6 @@
 /**
  * 游戏相关枚举
- * @since Beta v0.10.2
+ * @since Beta v0.11.5
  */
 
 /**
@@ -16,6 +16,44 @@ const GameServerEnum: typeof TGApp.Game.Base.ServerType = {
   OS_ASIA: "os_asia",
   OS_CHT: "os_cht",
 };
+
+/**
+ * 游戏安装方案枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Installation.SchemeEnum
+ */
+const GameInstallationSchemeEnum: typeof TGApp.Game.Installation.Scheme = {
+  CN_OFFICIAL: "cn_official",
+  CN_BILIBILI: "cn_bilibili",
+};
+
+/**
+ * 游戏安装检测状态枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Installation.StatusEnum
+ */
+const GameInstallationStatusEnum: typeof TGApp.Game.Installation.Status = {
+  KNOWN: "known",
+  UNSUPPORTED: "unsupported",
+  INCONSISTENT: "inconsistent",
+};
+
+/**
+ * 获取游戏安装方案描述。
+ * @since Beta v0.11.5
+ * @param scheme - 游戏安装方案
+ * @returns 方案描述
+ */
+function getGameInstallationSchemeDesc(scheme: TGApp.Game.Installation.SchemeEnum | null): string {
+  switch (scheme) {
+    case GameInstallationSchemeEnum.CN_OFFICIAL:
+      return "国服官服";
+    case GameInstallationSchemeEnum.CN_BILIBILI:
+      return "国服 B 服";
+    default:
+      return "未知渠道";
+  }
+}
 
 /**
  * 服务器类型只读列表
@@ -279,6 +317,11 @@ const CombatCharMasterStatEnum: typeof TGApp.Game.Combat.CharMasterStat = {
 
 /** 游戏相关枚举 */
 const gameEnum = {
+  installation: {
+    scheme: GameInstallationSchemeEnum,
+    schemeDesc: getGameInstallationSchemeDesc,
+    status: GameInstallationStatusEnum,
+  },
   actCalendar: {
     actType: ActCalendarTypeEnum,
     poolStatus: ActCalendarPoolStatusEnum,

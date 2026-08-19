@@ -146,6 +146,22 @@ create table if not exists GameAccount
     primary key (uid, gameBiz, gameUid)
 );
 
+-- @brief 创建游戏安装档案表
+create table if not exists GameInstallation
+(
+    id              text    not null primary key,
+    executablePath  text    not null unique,
+    rootPath        text    not null,
+    preferredScheme text,
+    audioLanguages  text    not null default '[]',
+    isChosen        boolean not null default false,
+    lastSeen        text    not null
+);
+
+create unique index if not exists GameInstallationChosenIndex
+    on GameInstallation (isChosen)
+    where isChosen = 1;
+
 -- @brief 创建深渊数据表
 create table if not exists SpiralAbyss
 (

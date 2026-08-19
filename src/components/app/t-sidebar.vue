@@ -39,6 +39,12 @@
             <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
           </template>
         </v-list-item>
+        <v-list-item v-if="isWindows" :link="true" :title.attr="'游戏安装'" href="/game">
+          <template #title>游戏安装</template>
+          <template #prepend>
+            <v-icon class="side-icon">mdi-gamepad-variant-outline</v-icon>
+          </template>
+        </v-list-item>
         <!-- 背包物品，包括材料&武器&圣遗物 -->
         <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
           <template #activator="{ props }">
@@ -287,7 +293,7 @@
               v-if="canLaunch"
               class="side-item-menu"
               title="启动"
-              @click="tryLaunchGame()"
+              @click="handleLaunchGame()"
             >
               <template #prepend>
                 <img alt="genshin" class="side-icon-menu" src="/icon/material/220120.webp" />
@@ -390,13 +396,11 @@ import takumiReq from "@req/takumiReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { event, path, webviewWindow } from "@tauri-apps/api";
-import { invoke } from "@tauri-apps/api/core";
+import { event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
-import { exists, readDir } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import mhyClient from "@utils/TGClient.js";
-import { tryCallYae } from "@utils/TGGame.js";
+import { tryCallYae, tryLaunchGame } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -428,9 +432,7 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
 });
 const themeTitle = computed<string>(() => (theme.value === "default" ? "深色模式" : "浅色模式"));
 const canLaunch = computed<boolean>(() => {
-  if (!isLogin.value) return false;
-  if (!gameDir.value || gameDir.value === "未设置") return false;
-  return account.value.isOfficial === 1;
+  return isWindows;
 });
 
 onMounted(async () => {
@@ -914,54 +916,8 @@ async function addByCookie(): Promise<void> {
 /**
  * 尝试启动游戏
  */
-async function tryLaunchGame(): Promise<void> {
-  if (!uid.value || !cookie.value) {
-    showSnackbar.warn("请先登录！");
-    return;
-  }
-  if (gameDir.value === "未设置") {
-    showSnackbar.warn("请前往设置页面设置游戏安装目录");
-    return;
-  }
-  if (!(await exists(gameDir.value))) {
-    showSnackbar.warn("游戏目录不存在，请检查设置");
-    await TGLogger.Warn(`[sidebar][tryLaunchGame] 游戏目录不存在: ${gameDir.value}`);
-    return;
-  }
-  const dirRead = await readDir(gameDir.value);
-  const find = dirRead.find((i) => i.isFile && i.name.toLowerCase() === "yuanshen.exe");
-  if (!find) {
-    showSnackbar.warn("未检测到原神本体应用！");
-    return;
-  }
-  const gamePath = `${gameDir.value}${path.sep()}${find.name}`;
-  let ticket: string;
-  try {
-    const resp = await passportReq.authTicket(account.value, cookie.value);
-    if (resp.retcode !== 0) {
-      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-      await TGLogger.Warn(
-        `[sidebar][tryLaunchGame] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
-      );
-      await TGLogger.Warn(`[sidebar][tryLaunchGame] ${resp.retcode}: ${resp.message}`);
-      return;
-    }
-    ticket = resp.data.ticket;
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取authTicket失败：${errMsg}`);
-    await TGLogger.Error(
-      `[sidebar][tryLaunchGame] 获取authTicket异常，当前用户：${account.value.uid}-${account.value.gameUid}`,
-    );
-    await TGLogger.Error(`[sidebar][tryLaunchGame] ${errMsg}`);
-    return;
-  }
-  showSnackbar.success(`成功获取ticket，正在启动应用...`);
-  try {
-    await invoke("launch_game", { path: gamePath, ticket });
-  } catch (error) {
-    showSnackbar.error(`${error}`);
-  }
+async function handleLaunchGame(): Promise<void> {
+  await tryLaunchGame(account.value, cookie.value);
 }
 </script>
 <style lang="scss" scoped>

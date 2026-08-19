@@ -1,87 +1,50 @@
 <template>
   <div class="tgb-box">
     <div class="tgb-top">
-      <div class="tgb-title">✨原神，启动！</div>
-      <v-btn icon="mdi-rocket" size="small" variant="outlined" @click="tryPlayGame()" />
+      <div class="tgb-title">游戏安装</div>
+      <div class="tgb-actions">
+        <v-btn href="/game" icon="mdi-arrow-right" size="small" variant="text" />
+        <v-btn icon="mdi-rocket" size="small" variant="outlined" @click="tryPlayGame()" />
+      </div>
     </div>
-    <v-list-item v-if="account.uid">
+    <v-list-item v-if="installation">
       <v-list-item-title class="tgb-name">
-        {{ account.nickname }}({{ account.regionName }})
+        {{ gameEnum.installation.schemeDesc(installation.schemeId) }}
       </v-list-item-title>
-      <v-list-item-subtitle>{{ account.gameUid }} Lv.{{ account.level }}</v-list-item-subtitle>
+      <v-list-item-subtitle>
+        v{{ installation.version ?? "未知" }} · {{ installation.statusMessage }}
+      </v-list-item-subtitle>
+      <v-list-item-subtitle class="tgb-path">{{ installation.rootPath }}</v-list-item-subtitle>
     </v-list-item>
     <v-list-item v-else>
-      <v-list-item-title>未登录，请先登录!</v-list-item-title>
+      <v-list-item-title>尚未登记游戏安装</v-list-item-title>
+      <v-list-item-subtitle>前往设置选择 YuanShen.exe</v-list-item-subtitle>
     </v-list-item>
   </div>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
-import passportReq from "@req/passportReq.js";
-import useAppStore from "@store/app.js";
+import gameEnum from "@enum/game.js";
 import useUserStore from "@store/user.js";
-import { path } from "@tauri-apps/api";
-import { invoke } from "@tauri-apps/api/core";
-import { exists, readDir } from "@tauri-apps/plugin-fs";
-import TGHttps from "@utils/TGHttps.js";
-import TGLogger from "@utils/TGLogger.js";
+import { tryLaunchGame } from "@utils/TGGame.js";
+import { listGameInstallations } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
 
-const { gameDir } = storeToRefs(useAppStore());
-const { account, uid, cookie } = storeToRefs(useUserStore());
+const { account, cookie } = storeToRefs(useUserStore());
+const installation = ref<TGApp.Game.Installation.Item>();
+
+onMounted(async () => {
+  try {
+    const installations = await listGameInstallations();
+    installation.value = installations.find((item) => item.isChosen) ?? installations[0];
+  } catch (error) {
+    showSnackbar.error(`读取游戏安装失败：${error}`);
+  }
+});
 
 async function tryPlayGame(): Promise<void> {
-  if (!uid.value || !cookie.value) {
-    showSnackbar.warn("请先登录！");
-    return;
-  }
-  if (account.value.isOfficial === 0) {
-    showSnackbar.warn("仅支持官服用户启动！");
-    return;
-  }
-  if (gameDir.value === "未设置") {
-    showSnackbar.warn("未设置游戏安装目录！");
-    return;
-  }
-  if (!(await exists(gameDir.value))) {
-    showSnackbar.warn("游戏目录不存在，请检查设置");
-    await TGLogger.Warn(`[config][gameBadge] 游戏目录不存在: ${gameDir.value}`);
-    return;
-  }
-  const dirRead = await readDir(gameDir.value);
-  const find = dirRead.find((i) => i.isFile && i.name.toLowerCase() === "yuanshen.exe");
-  if (!find) {
-    showSnackbar.warn("未检测到原神本体应用！");
-    return;
-  }
-  const gamePath = `${gameDir.value}${path.sep()}${find.name}`;
-  let ticket: string;
-  try {
-    const resp = await passportReq.authTicket(account.value, cookie.value);
-    if (resp.retcode !== 0) {
-      showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
-      await TGLogger.Warn(
-        `[config][gameBadge] 尝试获取authTicket失败，当前用户：${account.value.uid}-${account.value.gameUid}`,
-      );
-      await TGLogger.Warn(`[config][gameBadge] ${resp.retcode}: ${resp.message}`);
-      return;
-    }
-    ticket = resp.data.ticket;
-  } catch (e) {
-    const errMsg = TGHttps.getErrMsg(e);
-    showSnackbar.error(`获取authTicket失败：${errMsg}`);
-    await TGLogger.Error(
-      `[config][gameBadge] 获取authTicket异常，当前用户：${account.value.uid}-${account.value.gameUid}`,
-    );
-    await TGLogger.Error(`[config][gameBadge] ${errMsg}`);
-    return;
-  }
-  showSnackbar.success(`成功获取ticket，正在启动应用...`);
-  try {
-    await invoke("launch_game", { path: gamePath, ticket });
-  } catch (error) {
-    showSnackbar.error(`${error}`);
-  }
+  await tryLaunchGame(account.value, cookie.value);
 }
 </script>
 <style lang="css" scoped>
@@ -108,6 +71,11 @@ async function tryPlayGame(): Promise<void> {
   justify-content: space-between;
 }
 
+.tgb-actions {
+  display: flex;
+  gap: 4px;
+}
+
 .tgb-title {
   display: flex;
   align-items: center;
@@ -119,5 +87,11 @@ async function tryPlayGame(): Promise<void> {
 
 .tgb-name {
   font-family: var(--font-title);
+}
+
+.tgb-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

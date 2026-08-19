@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -19,7 +19,7 @@ type TableColumn = {
 };
 
 const CoreSchemaMigrations = <const>["GameAccount.v2", "HardChallenge.v2"];
-const CoreSchemaVersion = "2026.08.p0.2";
+const CoreSchemaVersion = "2026.08.p0.3";
 
 const GameAccountLegacyTable = "GameAccount_legacy_v0_11_2";
 const LegacyTablesForReset = <const>[GameAccountLegacyTable];
@@ -59,6 +59,7 @@ class Sqlite {
     "GachaRecords",
     "GachaBRecords",
     "GameAccount",
+    "GameInstallation",
     "HardChallenge",
     "RoleCombat",
     "SpiralAbyss",

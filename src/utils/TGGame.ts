@@ -5,10 +5,19 @@
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
+import passportReq from "@req/passportReq.js";
+import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import { invoke } from "@tauri-apps/api/core";
 import { documentDir, resourceDir, sep } from "@tauri-apps/api/path";
 import { copyFile, exists, mkdir, readDir, readTextFile, stat } from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
+import {
+  inspectGameInstallation,
+  launchGameInstallation,
+  listGameInstallations,
+} from "@utils/TGGameLauncher.js";
+import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { parse } from "ini";
 
@@ -16,6 +25,96 @@ import { parse } from "ini";
 export const YAE_GAME_VER: Readonly<string> = "7.0.0";
 // v0.11.3 发版时间，该版本更新了 dll 版本
 const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-12");
+
+/**
+ * 从旧 gameDir 设置迁移当前游戏安装。
+ * @since Beta v0.11.5
+ * @param gameDir - 旧版游戏目录
+ * @returns 是否已存在或成功迁移安装
+ */
+export async function migrateLegacyGameInstallation(gameDir: string): Promise<boolean> {
+  if (!gameDir || gameDir === "未设置") return false;
+  try {
+    const installations = await listGameInstallations();
+    if (installations.length > 0) return true;
+    const installation = await inspectGameInstallation(`${gameDir}${sep()}YuanShen.exe`);
+    if (installation.status === gameEnum.installation.status.UNSUPPORTED) {
+      await TGLogger.Warn(`[TGGame][migrateLegacyGameInstallation] ${installation.statusMessage}`);
+      return false;
+    }
+    await TSGameInstallation.save(installation);
+    await TGLogger.Info(
+      `[TGGame][migrateLegacyGameInstallation] 已迁移旧游戏目录：${installation.status}`,
+    );
+    return true;
+  } catch (error) {
+    await TGLogger.Warn(`[TGGame][migrateLegacyGameInstallation] 迁移失败：${error}`);
+    return false;
+  }
+}
+
+/**
+ * 启动当前登记的游戏安装。
+ * @since Beta v0.11.5
+ * @param account - 当前米游社游戏账号
+ * @param cookie - 当前米游社 Cookie
+ */
+export async function tryLaunchGame(
+  account?: TGApp.Sqlite.Account.Game,
+  cookie?: TGApp.App.Account.Cookie,
+): Promise<void> {
+  let installations: Array<TGApp.Game.Installation.Item>;
+  try {
+    installations = await listGameInstallations();
+  } catch (error) {
+    showSnackbar.error(`读取游戏安装失败：${error}`);
+    return;
+  }
+  const installation = installations.find((item) => item.isChosen) ?? installations[0];
+  if (!installation) {
+    showSnackbar.warn("请先在设置页面登记游戏安装");
+    return;
+  }
+  if (installation.status !== gameEnum.installation.status.KNOWN) {
+    showSnackbar.warn(installation.statusMessage);
+    return;
+  }
+
+  let ticket: string | undefined;
+  if (installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
+    if (!account?.uid || !cookie) {
+      showSnackbar.warn("启动国服官服前请先登录米游社");
+      return;
+    }
+    if (account.isOfficial !== 1) {
+      showSnackbar.warn("当前米游社账号不是官服账号");
+      return;
+    }
+    try {
+      const response = await passportReq.authTicket(account, cookie);
+      if (response.retcode !== 0) {
+        showSnackbar.error(`[${response.retcode}] ${response.message}`);
+        await TGLogger.Warn(
+          `[TGGame][tryLaunchGame] 获取官服 ticket 失败：${response.retcode}-${response.message}`,
+        );
+        return;
+      }
+      ticket = response.data.ticket;
+    } catch (error) {
+      const message = TGHttps.getErrMsg(error);
+      showSnackbar.error(`获取 authTicket 失败：${message}`);
+      await TGLogger.Error(`[TGGame][tryLaunchGame] 获取官服 ticket 异常：${message}`);
+      return;
+    }
+  }
+
+  try {
+    await launchGameInstallation(installation.id, ticket);
+    showSnackbar.success(`正在启动${gameEnum.installation.schemeDesc(installation.schemeId)}`);
+  } catch (error) {
+    showSnackbar.error(`启动游戏失败：${error}`);
+  }
+}
 
 /**
  * 验证游戏格式

@@ -1,6 +1,6 @@
 /**
  * 主路由模块
- * @since Beta v0.11.0
+ * @since Beta v0.11.5
  */
 import type { RouteRecordRaw } from "vue-router";
 
@@ -64,6 +64,11 @@ const mainRoutes = (<const>[
     path: "/config",
     name: "设置",
     component: async () => await import("@/pages/common/PageConfig.vue"),
+  },
+  {
+    path: "/game",
+    name: "游戏安装",
+    component: async () => await import("@/pages/common/PageGame.vue"),
   },
 ]) satisfies Array<RouteRecordRaw>;
 
