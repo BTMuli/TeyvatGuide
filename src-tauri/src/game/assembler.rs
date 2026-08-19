@@ -7,7 +7,9 @@ use super::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file,
   },
-  planner::{PayloadEncoding, PersistedPlan, PlanAsset, PlanChunk, cached_chunk_matches},
+  planner::{
+    PayloadEncoding, PersistedPlan, PlanAsset, PlanChunk, PlanPatch, cached_chunk_matches,
+  },
 };
 use md5::{Digest, Md5};
 use std::{
@@ -27,10 +29,25 @@ pub(crate) struct AssemblySummary {
   pub(crate) assembled_bytes: u64,
 }
 
-/// 将一个已 hydrate 的 manifest-diff 计划组装到任务私有 staging 目录。
+/// 将一个已 hydrate 的计划组装到任务私有 staging 目录。
 ///
 /// 此函数绝不会写入 `game_root`；它只将经过校验的完整资源原子提交至
 /// `<task_root>/tasks/<plan_id>/staging`。调用方应在提交阶段之外使用该目录。
+pub(crate) fn assemble_plan(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<AssemblySummary, String> {
+  match plan.strategy {
+    PackagePlanStrategy::ManifestDiff => {
+      assemble_manifest_plan(plan, game_root, task_root, canceled)
+    }
+    PackagePlanStrategy::Patch => assemble_patch_plan(plan, game_root, task_root, canceled),
+  }
+}
+
+/// 将一个已 hydrate 的 manifest-diff 计划组装到任务私有 staging 目录。
 pub(crate) fn assemble_manifest_plan(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -66,6 +83,154 @@ pub(crate) fn assemble_manifest_plan(
       .ok_or_else(|| "组装资源总大小溢出".to_string())?;
   }
   Ok(summary)
+}
+
+fn assemble_patch_plan(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<AssemblySummary, String> {
+  if plan.strategy != PackagePlanStrategy::Patch {
+    return Err("当前差分组装器只支持 patch 资源计划".to_string());
+  }
+  check_canceled(canceled)?;
+  if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
+    return Err("资源计划缺少载荷编码；请重新验证远端清单".to_string());
+  }
+  let cache_root = task_root.join("cache").join("chunks");
+  let staging_root =
+    prepare_guarded_manifest_directory(task_root, &format!("tasks/{}/staging", plan.plan_id))?;
+  let downloads = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  let mut summary = AssemblySummary::default();
+  for asset in &plan.assets {
+    check_canceled(canceled)?;
+    let patch =
+      asset.patch.as_ref().ok_or_else(|| format!("patch 资源缺少差分元数据：{}", asset.name))?;
+    let download = downloads
+      .get(patch.id.as_str())
+      .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
+    assemble_patch_asset(asset, patch, download, game_root, &cache_root, &staging_root, canceled)?;
+    summary.asset_count += 1;
+    summary.assembled_bytes = summary
+      .assembled_bytes
+      .checked_add(asset.size)
+      .ok_or_else(|| "组装资源总大小溢出".to_string())?;
+  }
+  Ok(summary)
+}
+
+fn assemble_patch_asset(
+  asset: &PlanAsset,
+  patch: &PlanPatch,
+  download: &super::planner::PlanDownload,
+  game_root: &Path,
+  cache_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  if !asset.chunks.is_empty() {
+    return Err(format!("patch 资源不能包含 chunk：{}", asset.name));
+  }
+  if patch.range_length == 0
+    || patch
+      .range_start
+      .checked_add(patch.range_length)
+      .is_none_or(|end| end > download.compressed_size)
+  {
+    return Err(format!("patch 范围超出差分容器：{}", asset.name));
+  }
+  if !cached_chunk_matches(cache_root, download) {
+    return Err(format!("差分容器完整性复验失败：{}", patch.id));
+  }
+  let output = prepare_manifest_output_file(staging_root, &asset.name)?;
+  let partial = partial_path(&output)?;
+  remove_stale_partial(&partial)?;
+  remove_stale_output(&output)?;
+  let result = (|| {
+    if patch.original_name.is_empty() {
+      if patch.range_length != asset.size {
+        return Err(format!("新增 patch 范围与目标大小不一致：{}", asset.name));
+      }
+      copy_container_range(cache_root, download, patch, &partial, canceled)?;
+    } else {
+      let _ = game_root;
+      return Err(format!("修改型 patch 需要 HDiffPatch 引擎，当前尚未接入：{}", asset.name));
+    }
+    finalize_staging_file(&partial, &output, asset, canceled)
+  })();
+  if result.is_err() {
+    let _ = fs::remove_file(&partial);
+  }
+  result
+}
+
+fn copy_container_range(
+  cache_root: &Path,
+  download: &super::planner::PlanDownload,
+  patch: &PlanPatch,
+  output: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  let container = cache_root.join(&download.cache_key);
+  let mut source =
+    File::open(&container).map_err(|error| format!("打开差分容器失败：{}：{error}", patch.id))?;
+  source
+    .seek(SeekFrom::Start(patch.range_start))
+    .map_err(|error| format!("定位差分范围失败：{}：{error}", patch.id))?;
+  let mut target = OpenOptions::new()
+    .create_new(true)
+    .write(true)
+    .open(output)
+    .map_err(|error| format!("创建 patch 临时文件失败：{error}"))?;
+  let mut remaining = patch.range_length;
+  let mut buffer = [0_u8; COPY_BUFFER_SIZE];
+  while remaining > 0 {
+    check_canceled(canceled)?;
+    let maximum = usize::try_from(remaining.min(buffer.len() as u64))
+      .map_err(|_| format!("patch 范围无法表示：{}", patch.id))?;
+    let read = source
+      .read(&mut buffer[..maximum])
+      .map_err(|error| format!("读取差分范围失败：{}：{error}", patch.id))?;
+    if read == 0 {
+      return Err(format!("差分范围小于计划长度：{}", patch.id));
+    }
+    target
+      .write_all(&buffer[..read])
+      .map_err(|error| format!("写入 patch 临时文件失败：{error}"))?;
+    remaining -= read as u64;
+  }
+  target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
+}
+
+fn finalize_staging_file(
+  partial: &Path,
+  output: &Path,
+  asset: &PlanAsset,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  let mut file = OpenOptions::new()
+    .read(true)
+    .open(partial)
+    .map_err(|error| format!("打开资源临时文件失败：{}：{error}", asset.name))?;
+  let output_size = file
+    .metadata()
+    .map_err(|error| format!("读取资源临时文件长度失败：{}：{error}", asset.name))?
+    .len();
+  if output_size != asset.size {
+    return Err(format!("资源长度校验失败：{}", asset.name));
+  }
+  let actual_asset_md5 = hash_exact_file(&mut file, asset.size, canceled)?;
+  if !actual_asset_md5.eq_ignore_ascii_case(&asset.md5) {
+    return Err(format!("资源 MD5 校验失败：{}", asset.name));
+  }
+  drop(file);
+  fs::rename(partial, output)
+    .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
 fn validate_asset_layout<'a>(
@@ -339,12 +504,12 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{assemble_manifest_plan, partial_path};
+  use super::{assemble_manifest_plan, assemble_plan, partial_path};
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
     planner::{
       PayloadEncoding, PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDownload,
-      PlanDownloadHashKind, PlanReuse,
+      PlanDownloadHashKind, PlanPatch, PlanReuse,
     },
   };
   use md5::{Digest, Md5};
@@ -630,5 +795,105 @@ mod tests {
 
     assert!(assemble_manifest_plan(&plan, &root.game_root(), &task_root, &canceled).is_err());
     assert!(!task_root.join("tasks/assembler-test/staging").exists());
+  }
+
+  #[test]
+  fn copies_patch_container_range_for_add_assets() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let prefix = b"HEAD";
+    let payload = b"brand-new-asset";
+    let suffix = b"TAIL";
+    let mut container = prefix.to_vec();
+    container.extend_from_slice(payload);
+    container.extend_from_slice(suffix);
+    let digest = md5(&container);
+    let cache_key = format!("{digest}.patch");
+    write_cache(&task_root, &cache_key, &container);
+    let download = PlanDownload {
+      id: "game.patch".to_string(),
+      cache_key,
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: digest.clone(),
+      compressed_size: container.len() as u64,
+      decompressed_size: container.len() as u64,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: "https://example.com/patch".to_string(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    };
+    let asset = PlanAsset {
+      name: "new.bin".to_string(),
+      action: PlanAssetAction::Add,
+      source: None,
+      size: payload.len() as u64,
+      md5: md5(payload),
+      chunks: Vec::new(),
+      patch: Some(PlanPatch {
+        id: "game.patch".to_string(),
+        patch_file_size: container.len() as u64,
+        patch_md5: digest,
+        range_start: prefix.len() as u64,
+        range_length: payload.len() as u64,
+        original_name: String::new(),
+        original_size: 0,
+        original_md5: String::new(),
+      }),
+    };
+    let mut plan = plan(vec![download], vec![asset]);
+    plan.strategy = PackagePlanStrategy::Patch;
+    let summary =
+      assemble_plan(&plan, &root.game_root(), &task_root, &AtomicBool::new(false)).unwrap();
+    assert_eq!(summary.asset_count, 1);
+    assert_eq!(summary.assembled_bytes, payload.len() as u64);
+    assert_eq!(fs::read(task_root.join("tasks/assembler-test/staging/new.bin")).unwrap(), payload);
+  }
+
+  #[test]
+  fn rejects_modify_patch_until_hdiff_engine_is_available() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let container = b"not-a-real-hdiff";
+    let digest = md5(container);
+    let cache_key = format!("{digest}.patch");
+    write_cache(&task_root, &cache_key, container);
+    let download = PlanDownload {
+      id: "game.patch".to_string(),
+      cache_key,
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: digest.clone(),
+      compressed_size: container.len() as u64,
+      decompressed_size: container.len() as u64,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: "https://example.com/patch".to_string(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    };
+    let asset = PlanAsset {
+      name: "modify.bin".to_string(),
+      action: PlanAssetAction::Modify,
+      source: None,
+      size: 8,
+      md5: md5(b"patched!"),
+      chunks: Vec::new(),
+      patch: Some(PlanPatch {
+        id: "game.patch".to_string(),
+        patch_file_size: container.len() as u64,
+        patch_md5: digest,
+        range_start: 0,
+        range_length: container.len() as u64,
+        original_name: "modify.bin".to_string(),
+        original_size: 8,
+        original_md5: md5(b"original"),
+      }),
+    };
+    let mut plan = plan(vec![download], vec![asset]);
+    plan.strategy = PackagePlanStrategy::Patch;
+    let error =
+      assemble_plan(&plan, &root.game_root(), &task_root, &AtomicBool::new(false)).unwrap_err();
+    assert!(error.contains("HDiffPatch"));
+    assert!(!task_root.join("tasks/assembler-test/staging/modify.bin").exists());
   }
 }
