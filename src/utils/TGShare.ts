@@ -1434,6 +1434,11 @@ export async function generateShareImg(
 export type ShareModernOptions = {
   /** 毛玻璃：true 烘焙 / false flatten / auto 少量烘焙、过多 flatten。默认 auto */
   bakeBackdrop?: ShareBackdropMode;
+  /**
+   * 外层画布边距（逻辑像素）。只加在截图容器上，不改被截节点的 padding。
+   * @since Beta v0.11.5
+   */
+  ppx?: number;
 };
 
 /**
@@ -1456,12 +1461,46 @@ export async function gsiModernScreenshot(
   let blob: Blob;
   try {
     blob = await captureModernBlob(element, scale, scrollable, undefined, options);
+    const paddingPx = options?.ppx ?? 0;
+    if (paddingPx > 0) blob = await frameShareBlob(blob, paddingPx, scale);
   } catch (e) {
     await TGLogger.Error(`[gsiModernScreenshot][${fileName}] 生成分享截图失败 ${e}`);
     showSnackbar.error(`生成分享截图失败: ${e}`);
     return;
   }
   await handleShareBuffer("gsiModernScreenshot", fileName, await blob.arrayBuffer());
+}
+
+/**
+ * 在截图外围铺边距背景，相当于把渲染内容放进新容器，不改动原节点样式
+ * @since Beta v0.11.5
+ * @param blob - 原始截图
+ * @param paddingPx - 逻辑像素边距
+ * @param scale - 截图缩放
+ * @returns 带边距背景的截图
+ */
+async function frameShareBlob(blob: Blob, paddingPx: number, scale: number): Promise<Blob> {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await loadShareWarmupImage(url);
+    if (img.naturalWidth <= 0 || img.naturalHeight <= 0) return blob;
+    const pad = Math.round(paddingPx * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth + pad * 2;
+    canvas.height = img.naturalHeight + pad * 2;
+    const ctx = canvas.getContext("2d");
+    if (ctx === null) return blob;
+    ctx.fillStyle = getShareImgBgColor();
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, pad, pad);
+    const framed = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((next) => resolve(next), "image/png");
+    });
+    if (framed === null) return blob;
+    return framed;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 /**
