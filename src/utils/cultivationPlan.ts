@@ -58,8 +58,81 @@ function buildCraftingCosts(
     .sort((a, b) => b.star - a.star || a.id - b.id);
 }
 
+type EntryMaterialAllocation = {
+  remainingInventory: Map<number, number>;
+  results: Array<TGApp.App.UserCalc.ResultMaterial>;
+};
+
+/**
+ * 按单个目标的需求从指定库存中分配材料。
+ * @since Beta v0.11.5
+ * @param entry - 养成目标
+ * @param inventory - 可用于该目标的背包材料
+ * @param materialMap - 材料 Wiki 映射
+ * @param materials - 材料 Wiki 数据
+ * @returns 该目标的材料结果及分配后剩余库存
+ */
+function allocateEntryMaterials(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  inventory: ReadonlyMap<number, number>,
+  materialMap: ReadonlyMap<number, TGApp.App.Material.WikiItem>,
+  materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
+): EntryMaterialAllocation {
+  const remainingInventory = new Map(inventory);
+  const requirements = aggregateRequirements(entry.items);
+  const ownedMaterials = new Map<number, number>();
+  for (const [materialId, required] of requirements) {
+    const owned = Math.min(Math.max(remainingInventory.get(materialId) ?? 0, 0), required);
+    ownedMaterials.set(materialId, owned);
+    remainingInventory.set(materialId, (remainingInventory.get(materialId) ?? 0) - owned);
+  }
+
+  const unmetRequirements = Array.from(requirements, ([id, required]) => ({
+    id,
+    count: required - (ownedMaterials.get(id) ?? 0),
+  }));
+  const inventoryBeforeCrafting = remainingInventory;
+  const craftingAllocation = entry.allowCrafting
+    ? calculateCraftingAllocation(
+        unmetRequirements,
+        inventoryBeforeCrafting,
+        materials,
+        entry.useDust,
+        entry.useSolvent,
+      )
+    : undefined;
+  const afterCrafting = craftingAllocation?.remainingInventory ?? remainingInventory;
+
+  const entryMaterials = Array.from(requirements, ([id, required]) => {
+    const material = materialMap.get(id);
+    const owned = ownedMaterials.get(id) ?? 0;
+    const crafting = craftingAllocation?.materials.get(id);
+    const craftable = crafting?.count ?? 0;
+    const available = owned + craftable;
+    return {
+      id,
+      name: material?.name ?? `材料 ${id}`,
+      type: material?.type ?? "未知类型",
+      star: material?.star ?? 1,
+      required,
+      owned,
+      craftable,
+      craftingCosts: buildCraftingCosts(crafting, inventoryBeforeCrafting, materialMap),
+      missing: Math.max(required - available, 0),
+      progress: required === 0 ? 100 : Math.min((available / required) * 100, 100),
+    };
+  });
+
+  return {
+    remainingInventory: afterCrafting,
+    results: sortCultivationResults(entryMaterials),
+  };
+}
+
 /**
  * 按目标优先级分配计划库存并汇总材料完成情况。
+ *
+ * 已完成目标仍生成展示用材料列表，但不占用进行中目标的库存，也不计入计划汇总。
  * @since Beta v0.11.5
  * @param entries - 养成目标列表
  * @param inventory - 计划可用背包材料
@@ -83,50 +156,17 @@ export function allocatePlanMaterials(
     );
 
   for (const entry of activeEntries) {
-    const requirements = aggregateRequirements(entry.items);
-    const ownedMaterials = new Map<number, number>();
-    for (const [materialId, required] of requirements) {
-      const owned = Math.min(Math.max(remainingInventory.get(materialId) ?? 0, 0), required);
-      ownedMaterials.set(materialId, owned);
-      remainingInventory.set(materialId, (remainingInventory.get(materialId) ?? 0) - owned);
-    }
+    const allocated = allocateEntryMaterials(entry, remainingInventory, materialMap, materials);
+    remainingInventory = allocated.remainingInventory;
+    allocatedEntries.set(entry.id, allocated.results);
+  }
 
-    const unmetRequirements = Array.from(requirements, ([id, required]) => ({
-      id,
-      count: required - (ownedMaterials.get(id) ?? 0),
-    }));
-    const inventoryBeforeCrafting = remainingInventory;
-    const craftingAllocation = entry.allowCrafting
-      ? calculateCraftingAllocation(
-          unmetRequirements,
-          inventoryBeforeCrafting,
-          materials,
-          entry.useDust,
-          entry.useSolvent,
-        )
-      : undefined;
-    if (craftingAllocation) remainingInventory = craftingAllocation.remainingInventory;
-
-    const entryMaterials = Array.from(requirements, ([id, required]) => {
-      const material = materialMap.get(id);
-      const owned = ownedMaterials.get(id) ?? 0;
-      const crafting = craftingAllocation?.materials.get(id);
-      const craftable = crafting?.count ?? 0;
-      const available = owned + craftable;
-      return {
-        id,
-        name: material?.name ?? `材料 ${id}`,
-        type: material?.type ?? "未知类型",
-        star: material?.star ?? 1,
-        required,
-        owned,
-        craftable,
-        craftingCosts: buildCraftingCosts(crafting, inventoryBeforeCrafting, materialMap),
-        missing: Math.max(required - available, 0),
-        progress: required === 0 ? 100 : Math.min((available / required) * 100, 100),
-      };
-    });
-    allocatedEntries.set(entry.id, sortCultivationResults(entryMaterials));
+  for (const entry of entries) {
+    if (entry.status !== "completed") continue;
+    allocatedEntries.set(
+      entry.id,
+      allocateEntryMaterials(entry, inventory, materialMap, materials).results,
+    );
   }
 
   const aggregate = new Map<
@@ -138,8 +178,8 @@ export function allocatePlanMaterials(
       craftingCosts: Map<number, number>;
     }
   >();
-  for (const entryMaterials of allocatedEntries.values()) {
-    for (const result of entryMaterials) {
+  for (const entry of activeEntries) {
+    for (const result of allocatedEntries.get(entry.id) ?? []) {
       const current = aggregate.get(result.id) ?? {
         required: 0,
         owned: 0,

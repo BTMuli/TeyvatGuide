@@ -81,7 +81,7 @@
         </div>
         <div>
           <span>材料</span>
-          <strong>{{ materials.length }} 种 · {{ missingKinds }} 种不足</strong>
+          <strong>{{ displayMaterials.length }} 种 · {{ missingKinds }} 种不足</strong>
         </div>
       </div>
     </section>
@@ -211,19 +211,50 @@ const canSelectPrevious = computed<boolean>(() => currentIndex.value > 0);
 const canSelectNext = computed<boolean>(
   () => currentIndex.value >= 0 && currentIndex.value < props.entries.length - 1,
 );
+const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
+  () => new Map(props.materials.map((material) => [material.id, material])),
+);
 const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  [...props.materials].sort(
-    (a, b) => Number(b.missing > 0) - Number(a.missing > 0) || b.star - a.star || a.id - b.id,
-  ),
+  props.entry.items
+    .map((item) => {
+      const result = materialResultMap.value.get(item.materialId);
+      if (result) {
+        return {
+          ...result,
+          required: item.required,
+          missing: Math.max(item.required - (result.owned + result.craftable), 0),
+          progress:
+            item.required > 0
+              ? Math.min(((result.owned + result.craftable) / item.required) * 100, 100)
+              : 100,
+        };
+      }
+      const wiki = WikiMaterialData.find((material) => material.id === item.materialId);
+      return {
+        id: item.materialId,
+        name: wiki?.name ?? `材料 ${item.materialId}`,
+        type: wiki?.type ?? "未知类型",
+        star: wiki?.star ?? 1,
+        required: item.required,
+        owned: 0,
+        craftable: 0,
+        craftingCosts: [],
+        missing: item.required,
+        progress: 0,
+      };
+    })
+    .sort(
+      (a, b) => Number(b.missing > 0) - Number(a.missing > 0) || b.star - a.star || a.id - b.id,
+    ),
 );
 const missingKinds = computed<number>(
-  () => props.materials.filter((material) => material.missing > 0).length,
+  () => displayMaterials.value.filter((material) => material.missing > 0).length,
 );
 const progress = computed<number>(() => {
   if (props.entry.status === "completed" || props.entry.items.length === 0) return 100;
-  if (props.materials.length === 0) return 0;
-  const total = props.materials.reduce((sum, material) => sum + material.progress, 0);
-  return Math.min(total / props.materials.length, 100);
+  if (displayMaterials.value.length === 0) return 0;
+  const total = displayMaterials.value.reduce((sum, material) => sum + material.progress, 0);
+  return Math.min(total / displayMaterials.value.length, 100);
 });
 const waitingForMaterials = computed<boolean>(
   () =>
@@ -240,21 +271,22 @@ const statusColor = computed<string>(() => {
   return missingKinds.value === 0 ? "var(--tgc-od-green)" : "var(--tgc-od-orange)";
 });
 const progressColor = computed<string>(() => {
+  if (props.entry.status === "completed") return "var(--tgc-od-blue)";
   if (waitingForMaterials.value) return "var(--tgc-od-blue)";
   return missingKinds.value === 0 ? "var(--tgc-od-green)" : "var(--tgc-od-orange)";
 });
 const progressLabel = computed<string>(() => {
   if (props.entry.status === "completed") return "目标已完成";
   if (props.entry.items.length === 0) return "无需材料";
-  if (props.materials.length === 0) return "等待材料数据";
+  if (waitingForMaterials.value) return "等待材料数据";
   return missingKinds.value === 0 ? "材料已备齐" : `仍缺 ${missingKinds.value} 种材料`;
 });
 const materialStateLabel = computed<string>(() => {
+  if (props.entry.status === "completed") return "目标已完成";
   if (waitingForMaterials.value) return "等待材料数据";
   return missingKinds.value > 0 ? `缺少 ${missingKinds.value} 种材料` : "材料已满足";
 });
 const emptyText = computed<string>(() => {
-  if (props.entry.status === "completed") return "此目标已完成，无需继续收集材料";
   if (props.entry.items.length === 0) return "此目标无需额外材料";
   return "暂未加载到该目标的材料分配结果";
 });
