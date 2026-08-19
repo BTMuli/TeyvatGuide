@@ -169,7 +169,7 @@ struct PlanParts {
   inventory: Vec<PlanFile>,
 }
 
-/// 请求远端清单，优先选择 patch，并将完整计划原子写入应用数据目录。
+/// 请求远端清单，生成可执行的 manifest-diff 计划并原子写入应用数据目录。
 pub async fn create_and_persist_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -192,40 +192,21 @@ pub async fn create_and_persist_plan(
   }
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
-
-  let parts = if target == PackagePlanTarget::PreDownload {
-    build_manifest_plan(
-      &client,
-      &branches.main.with_tag(source_tag),
-      target_branch,
-      &installation.audio_languages,
-    )
-    .await?
-  } else if target_branch.diff_tags.iter().any(|tag| tag == source_tag) {
-    match get_decoded_patch_build(&client, target_branch, source_tag, &installation.audio_languages)
-      .await
-    {
-      Ok(build) => build_patch_plan(build, source_tag)?,
-      Err(error) => {
-        log::warn!("[game-package] patch 计划不可用，回退 manifest diff：{error}");
-        build_manifest_plan(
-          &client,
-          &branches.main.with_tag(source_tag),
-          target_branch,
-          &installation.audio_languages,
-        )
-        .await?
-      }
-    }
-  } else {
-    build_manifest_plan(
-      &client,
-      &branches.main.with_tag(source_tag),
-      target_branch,
-      &installation.audio_languages,
-    )
-    .await?
-  };
+  if target == PackagePlanTarget::Main
+    && target_branch.diff_tags.iter().any(|tag| tag == source_tag)
+  {
+    log::info!(
+      "[game-package] 正式更新 {source_tag} → {} 暂用 manifest-diff 执行；patch 消费待 HDiffPatch 引擎落地",
+      target_branch.tag
+    );
+  }
+  let parts = build_manifest_plan(
+    &client,
+    &branches.main.with_tag(source_tag),
+    target_branch,
+    &installation.audio_languages,
+  )
+  .await?;
 
   let task_root = app_data_dir.join("game-tasks");
   let cache_root = task_root.join("cache/chunks");
@@ -374,7 +355,10 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     return Err("当前只能应用 manifest-diff 资源计划".to_string());
   }
   if branches.main.tag != plan.target_tag {
-    return Err("预下载目标尚未成为正式版本，暂时不能应用".to_string());
+    return Err(match plan.target {
+      PackagePlanTarget::PreDownload => "预下载目标尚未成为正式版本，暂时不能应用".to_string(),
+      PackagePlanTarget::Main => "正式版本已变化，请重新评估".to_string(),
+    });
   }
   let client = create_http_client()?;
   let fresh = build_manifest_plan(
@@ -394,7 +378,7 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
         LEGACY_PLAN_SCHEMA_VERSION_V2 | LEGACY_PLAN_SCHEMA_VERSION_V3
       ) && plan.inventory.is_empty()))
   {
-    return Err("正式版本资源清单与预下载计划不一致，请重新评估".to_string());
+    return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
   }
   plan.schema_version = PLAN_SCHEMA_VERSION;
   plan.downloads = fresh.downloads;

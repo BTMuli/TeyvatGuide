@@ -166,7 +166,7 @@ pub async fn game_package_snapshot(
   Ok(create_snapshot(installation.id, installation.version, &branches))
 }
 
-/// 生成 patch 优先、manifest diff 回退的不可变资源计划。
+/// 生成可执行的 manifest-diff 不可变资源计划；patch 策略仍可读取既有计划，但不能作为新的执行入口。
 #[tauri::command]
 pub async fn game_package_plan(
   app_handle: AppHandle,
@@ -184,7 +184,7 @@ pub async fn game_package_plan(
   create_and_persist_plan(&installation, &branches, target, &app_data_dir).await
 }
 
-/// 按不可变计划启动只写应用缓存的可恢复资源下载任务。
+/// 按不可变计划启动只写应用缓存的可恢复资源下载任务；支持正式更新与预下载。
 #[tauri::command]
 pub async fn game_package_start(
   app_handle: AppHandle,
@@ -204,7 +204,7 @@ pub async fn game_package_start(
   manager.start(app_handle, task_root, plan, options.unwrap_or_default(), false)
 }
 
-/// 消费 ReadyToApply 预下载，并在完整目标清单验证后最后提交版本号。
+/// 消费 ReadyToApply 的正式更新或已转正预下载，完整校验后最后提交版本号。
 #[tauri::command]
 pub async fn game_package_apply(
   app_handle: AppHandle,

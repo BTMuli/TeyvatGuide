@@ -301,7 +301,8 @@ async function handleRecoverRequested(
   let text = "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。";
   let confirmLabel = "开始恢复";
   if (abandonReady) {
-    title = "放弃预下载任务？";
+    const predownload = task.target === gameEnum.package.planTarget.PRE_DOWNLOAD;
+    title = predownload ? "放弃预下载任务？" : "放弃资源任务？";
     text = "放弃不会修改游戏目录，也不会删除已校验的共享缓存。之后可以重新评估并下载。";
     confirmLabel = "放弃任务";
   } else if (rollback) {

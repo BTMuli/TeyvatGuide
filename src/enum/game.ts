@@ -101,7 +101,7 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
     case GamePackageTaskStateEnum.DOWNLOADING:
       return "正在下载";
     case GamePackageTaskStateEnum.READY_TO_APPLY:
-      return "预下载完成";
+      return "下载完成";
     case GamePackageTaskStateEnum.ASSEMBLING:
       return "正在组装";
     case GamePackageTaskStateEnum.COMMIT_PREPARED:

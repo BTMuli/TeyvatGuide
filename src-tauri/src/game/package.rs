@@ -1,4 +1,4 @@
-//! 可恢复预下载任务编排、安装互斥、取消与事件投影。
+//! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
 //! @since Beta v0.11.5
 
 use super::{
@@ -6,10 +6,7 @@ use super::{
   downloader::{RateLimiter, download_object, prepare_cache_root},
   hoyoplay::create_http_client,
   journal::{self, TaskJournal},
-  model::{
-    PackagePlanStrategy, PackagePlanTarget, PackageTaskOptions, PackageTaskState,
-    PackageTaskSummary,
-  },
+  model::{PackagePlanStrategy, PackageTaskOptions, PackageTaskState, PackageTaskSummary},
   planner::{PersistedPlan, cached_chunk_matches},
 };
 use futures_util::{StreamExt, stream};
@@ -115,10 +112,8 @@ impl GamePackageManager {
     if is_game_running() {
       return Err("游戏仍在运行，无法开始资源任务".to_string());
     }
-    if plan.target != PackagePlanTarget::PreDownload
-      || plan.strategy != PackagePlanStrategy::ManifestDiff
-    {
-      return Err("当前仅允许启动可逐块校验的预下载计划".to_string());
+    if plan.strategy != PackagePlanStrategy::ManifestDiff {
+      return Err("当前仅允许启动可逐块校验的 manifest-diff 计划".to_string());
     }
     let concurrency = options.concurrency.unwrap_or(DEFAULT_CONCURRENCY);
     if !(1..=MAX_CONCURRENCY).contains(&concurrency) {
@@ -155,7 +150,7 @@ impl GamePackageManager {
       return Err("检测到未完成的资源任务，请使用恢复操作继续".to_string());
     }
     if recovering && journal.state == PackageTaskState::ReadyToApply {
-      return Err("资源任务已经完成预下载".to_string());
+      return Err("资源任务已经完成下载".to_string());
     }
     rebuild_completed_cache(&mut journal, &plan, &cache_root);
     journal.state = PackageTaskState::Queued;
@@ -224,7 +219,7 @@ impl GamePackageManager {
     }
     let journal_value = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?;
     if journal_value.state != PackageTaskState::ReadyToApply {
-      return Err("资源任务尚未完成预下载，不能应用更新".to_string());
+      return Err("资源任务尚未完成下载，不能应用更新".to_string());
     }
 
     let summary = journal_value.summary();

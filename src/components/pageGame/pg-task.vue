@@ -48,10 +48,20 @@
         variant="tonal"
       />
       <v-alert
-        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+        v-else-if="
+          task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+          task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+        "
         text="预下载已完成。目标版本成为正式版本后即可应用更新。"
         density="compact"
         type="info"
+        variant="tonal"
+      />
+      <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+        text="下载已完成，但当前正式版本与任务目标不一致，请重新评估。"
+        density="compact"
+        type="warning"
         variant="tonal"
       />
     </template>
@@ -112,10 +122,10 @@
       当前评估的磁盘空间不足，不能开始下载。
     </p>
     <p
-      v-else-if="plan?.target === gameEnum.package.planTarget.MAIN && task === null"
+      v-else-if="plan?.strategy === gameEnum.package.planStrategy.PATCH && task === null"
       class="task-note"
     >
-      正式更新暂不支持直接下载。请先完成对应预下载；目标版本发布为正式版本后再应用。
+      差分补丁计划暂不能直接执行。请重新评估以生成可逐块校验的清单差异计划。
     </p>
   </section>
 </template>
@@ -151,7 +161,11 @@ const readyToApply = computed<boolean>(() => {
 const canApply = computed<boolean>(() => readyToApply.value && targetPublished);
 const canAbandon = computed<boolean>(() => recoverable.value || readyToApply.value);
 const canStart = computed<boolean>(() => {
-  if (plan === null || plan.target !== gameEnum.package.planTarget.PRE_DOWNLOAD || active.value) {
+  if (
+    plan === null ||
+    plan.strategy !== gameEnum.package.planStrategy.MANIFEST_DIFF ||
+    active.value
+  ) {
     return false;
   }
   if (task === null || task.planId !== plan.planId) return true;

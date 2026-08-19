@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  model::{PackageTaskState, PackageTaskSummary, SchemeId},
+  model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
   path_guard::normalize_manifest_path,
   planner::PersistedPlan,
 };
@@ -77,7 +77,7 @@ pub(crate) struct TaskJournal {
   pub(crate) operation: String,
   pub(crate) source_scheme: SchemeId,
   pub(crate) target_scheme: SchemeId,
-  pub(crate) target: super::model::PackagePlanTarget,
+  pub(crate) target: PackagePlanTarget,
   pub(crate) source_tag: String,
   pub(crate) target_tag: String,
   pub(crate) manifest_digest: String,
@@ -107,7 +107,7 @@ impl TaskJournal {
       task_id: plan.plan_id.clone(),
       plan_id: plan.plan_id.clone(),
       installation_id: plan.installation_id.clone(),
-      operation: "predownload".to_string(),
+      operation: operation_for_target(plan.target).to_string(),
       source_scheme: plan.source_scheme,
       target_scheme: plan.target_scheme,
       target: plan.target,
@@ -255,6 +255,8 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
     || journal.installation_id != plan.installation_id
     || journal.source_scheme != plan.source_scheme
     || journal.target_scheme != plan.target_scheme
+    || journal.target != plan.target
+    || journal.operation != operation_for_target(plan.target)
     || journal.source_tag != plan.source_tag
     || journal.target_tag != plan.target_tag
     || journal.manifest_digest != plan.manifest_digest
@@ -269,7 +271,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || Uuid::parse_str(&journal.task_id).is_err()
     || journal.task_id != journal.plan_id
     || journal.installation_id.is_empty()
-    || journal.operation != "predownload"
+    || journal.operation != operation_for_target(journal.target)
     || journal.source_tag.is_empty()
     || journal.source_tag.len() > 128
     || journal.target_tag.is_empty()
@@ -346,6 +348,13 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子提交任务日志失败：{error}"))
+}
+
+fn operation_for_target(target: PackagePlanTarget) -> &'static str {
+  match target {
+    PackagePlanTarget::Main => "update",
+    PackagePlanTarget::PreDownload => "predownload",
+  }
 }
 
 fn sync_directory(directory: &Path) -> Result<(), String> {
@@ -436,5 +445,30 @@ mod tests {
     .unwrap();
     assert!(load(&path).is_err());
     fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn accepts_update_operation_for_main_target() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-update-{task_id}"));
+    let mut value = journal(&task_id);
+    value.operation = "update".to_string();
+    value.target = PackagePlanTarget::Main;
+    persist(&root, &value).unwrap();
+    let loaded = load(&root.join("tasks").join(&task_id).join("journal.json")).unwrap();
+    assert_eq!(loaded.operation, "update");
+    assert_eq!(loaded.target, PackagePlanTarget::Main);
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn rejects_mismatched_operation_and_target() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-mismatch-{task_id}"));
+    let mut value = journal(&task_id);
+    value.operation = "update".to_string();
+    value.target = PackagePlanTarget::PreDownload;
+    assert!(persist(&root, &value).is_err());
+    let _ = fs::remove_dir_all(root);
   }
 }

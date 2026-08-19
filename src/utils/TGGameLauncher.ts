@@ -71,7 +71,7 @@ export async function createGamePackagePlan(
 }
 
 /**
- * 按不可变计划启动游戏资源下载任务。
+ * 按不可变计划启动游戏资源下载任务；正式更新与预下载均只写入应用缓存。
  * @since Beta v0.11.5
  * @param planId - 已持久化计划 ID
  * @param options - 可选并发与带宽限制
@@ -85,7 +85,7 @@ export async function startGamePackageTask(
 }
 
 /**
- * 应用已完成下载并复验的游戏资源任务。
+ * 应用已完成下载并复验的游戏资源任务；正式更新可立即应用，预下载需目标已转正。
  * @since Beta v0.11.5
  * @param taskId - 资源任务 ID
  * @returns 应用开始后的任务投影

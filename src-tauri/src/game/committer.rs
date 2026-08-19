@@ -56,7 +56,7 @@ where
     return Err("资源计划缺少完整目标文件清单，请重新评估".to_string());
   }
   if journal.state != PackageTaskState::ReadyToApply {
-    return Err("资源任务尚未完成预下载，不能应用更新".to_string());
+    return Err("资源任务尚未完成下载，不能应用更新".to_string());
   }
   let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
