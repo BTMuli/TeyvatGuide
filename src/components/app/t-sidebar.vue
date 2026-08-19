@@ -39,7 +39,12 @@
             <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
           </template>
         </v-list-item>
-        <v-list-item v-if="isWindows" :link="true" :title.attr="'游戏安装'" href="/game">
+        <v-list-item
+          v-if="isWindows && isDevEnv"
+          :link="true"
+          :title.attr="'游戏安装'"
+          href="/game"
+        >
           <template #title>游戏安装</template>
           <template #prepend>
             <v-icon class="side-icon">mdi-gamepad-variant-outline</v-icon>

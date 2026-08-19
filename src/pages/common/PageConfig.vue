@@ -217,7 +217,6 @@
     <div class="config-right">
       <TcAppBadge />
       <TcUserBadge />
-      <TcGameBadge v-if="platform() === 'windows'" />
       <TcHutaoBadge />
     </div>
   </div>
@@ -229,7 +228,6 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TcAppBadge from "@comp/pageConfig/tc-appBadge.vue";
 import TcDataDir from "@comp/pageConfig/tc-dataDir.vue";
-import TcGameBadge from "@comp/pageConfig/tc-gameBadge.vue";
 import TcHutaoBadge from "@comp/pageConfig/tc-hutaoBadge.vue";
 import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
