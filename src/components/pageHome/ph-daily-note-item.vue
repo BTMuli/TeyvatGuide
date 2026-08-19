@@ -1,17 +1,25 @@
 <!-- 实时便笺单项 -->
 <template>
-  <div :class="{ 'dni-current': cur }" class="dni-container">
+  <div ref="dniRef" :class="{ 'dni-current': cur }" class="dni-container">
     <div class="dni-header">
       <div class="dni-header-title">
         <span>{{ props.account.nickname }}</span>
-        <v-icon
-          :size="16"
-          color="var(--tgc-od-orange)"
-          data-html2canvas-ignore
-          icon="mdi-refresh"
-          variant="elevated"
-          @click="handleRefresh"
-        />
+        <span class="dni-header-acts" data-html2canvas-ignore>
+          <v-icon
+            :size="16"
+            color="var(--tgc-od-orange)"
+            icon="mdi-share-variant"
+            variant="elevated"
+            @click="handleShare"
+          />
+          <v-icon
+            :size="16"
+            color="var(--tgc-od-orange)"
+            icon="mdi-refresh"
+            variant="elevated"
+            @click="handleRefresh"
+          />
+        </span>
       </div>
       <div class="dni-header-append">
         <span>{{ props.account.gameUid }}</span>
@@ -53,7 +61,8 @@
 </template>
 <script lang="ts" setup>
 import dnEnum from "@enum/dailyNote.js";
-import { computed } from "vue";
+import TGShare from "@utils/TGShare.js";
+import { computed, useTemplateRef } from "vue";
 
 import PhDailyNoteBoss from "./ph-daily-note-boss.vue";
 import PhDailyNoteCoin from "./ph-daily-note-coin.vue";
@@ -78,6 +87,7 @@ const emits = defineEmits<TDailyNoteItemEmits>();
 const props = withDefaults(defineProps<PhDailyNoteItemProps>(), {
   cur: false,
 });
+const dniEl = useTemplateRef<HTMLDivElement>("dniRef");
 const expeditions = computed<Array<TGApp.Game.DailyNote.Expedition>>(() => {
   if (!props.data) return [];
   let res: Array<TGApp.Game.DailyNote.Expedition> = [];
@@ -96,6 +106,11 @@ const expeditions = computed<Array<TGApp.Game.DailyNote.Expedition>>(() => {
 
 function handleRefresh(): void {
   emits("refresh");
+}
+
+async function handleShare(): Promise<void> {
+  if (!dniEl.value) return;
+  await TGShare.modern(`便笺-${props.account.nickname}-${props.account.gameUid}`, dniEl.value, 2.5);
 }
 </script>
 <style lang="scss" scoped>
@@ -130,9 +145,16 @@ function handleRefresh(): void {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   column-gap: 4px;
   font-family: var(--font-title);
+  font-weight: normal;
+}
+
+.dni-header-acts {
+  display: flex;
+  align-items: center;
+  column-gap: 4px;
 }
 
 .dni-header-append {

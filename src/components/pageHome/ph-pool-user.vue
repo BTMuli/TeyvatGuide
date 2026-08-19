@@ -16,15 +16,18 @@
           mdi-share-variant
         </v-icon>
       </div>
-      <div class="ph-pool-stat">
-        <span v-if="restTs > durationTs">未开始</span>
-        <span v-else-if="restTs > 0">{{ stamp2LastTime(restTs) }}</span>
-        <span v-else>已结束</span>
-      </div>
     </div>
     <div class="ph-pool-duration">
-      <v-icon color="var(--tgc-od-orange)" size="12">mdi-calendar-clock</v-icon>
-      <span>{{ startTime }} ~ {{ endTime }}</span>
+      <template v-if="restTs > durationTs">
+        <span>未开始</span>
+      </template>
+      <template v-else>
+        <span v-if="restTs > 0" data-html2canvas-ignore title="剩余时间">
+          {{ stamp2LastTime(restTs) }}
+        </span>
+        <span v-else>已结束</span>
+        <span title="卡池时间">{{ startTime }} ~ {{ endTime }}</span>
+      </template>
     </div>
     <v-progress-linear :color="typeBg" :model-value="percent" :reverse="true" :rounded="true" />
     <div class="ph-pool-rewards">
@@ -349,29 +352,18 @@ function getBox(
   }
 }
 
-.ph-pool-stat {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 8px;
-  border-radius: 4px;
-  color: var(--tgc-white-1);
-  font-size: 11px;
-  text-shadow: 0 0 4px var(--tgc-dark-1);
-}
-
 .ph-pool-duration {
-  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: flex-start;
   color: var(--box-text-2);
   column-gap: 4px;
   font-size: 12px;
+  user-select: none;
 
   span:last-child {
     font-size: 10px;
-    opacity: 0.7;
+    opacity: 0.6;
   }
 }
 

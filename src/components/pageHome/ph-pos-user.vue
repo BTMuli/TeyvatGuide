@@ -7,7 +7,16 @@
           mdi-checkbox-marked-circle-outline
         </v-icon>
         <v-icon v-else color="var(--tgc-od-white)" title="未完成">mdi-circle</v-icon>
-        <span title="点击分享" @click="sharePos()">{{ props.pos.name }}</span>
+        <span>{{ props.pos.name }}</span>
+        <v-icon
+          class="share"
+          data-html2canvas-ignore
+          size="12"
+          title="分享活动"
+          @click.stop="sharePos()"
+        >
+          mdi-share-variant
+        </v-icon>
       </div>
       <div class="subtitle">
         <!-- 处理幽境危战 -->
@@ -245,13 +254,21 @@ async function sharePos(): Promise<void> {
   .title {
     position: relative;
     display: flex;
+    min-width: 0;
     align-items: center;
     justify-content: flex-start;
     column-gap: 4px;
     font-family: var(--font-title);
+    font-weight: normal;
 
-    span {
+    .share {
+      flex-shrink: 0;
+      color: var(--tgc-od-white);
       cursor: pointer;
+
+      &:hover {
+        color: var(--tgc-yellow-2);
+      }
     }
   }
 
@@ -272,25 +289,23 @@ async function sharePos(): Promise<void> {
       column-gap: 4px;
       cursor: pointer;
       user-select: none;
+    }
 
-      img {
-        width: 24px;
-        height: 24px;
-        padding: 2px;
-        border-radius: 50%;
-        background: #2c313c;
-        cursor: pointer;
-      }
+    .challenge-append img,
+    .abyss-append img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .abyss-append img {
+      filter: var(--icon-filter);
     }
 
     .challenge-sub {
       position: relative;
       display: flex;
       align-items: center;
-
-      img {
-        background: unset;
-      }
     }
   }
 }
