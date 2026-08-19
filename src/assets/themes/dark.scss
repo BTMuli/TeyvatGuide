@@ -1,6 +1,6 @@
 /**
  * 主题样式文件-深色主题
- * @since v0.11.3
+ * @since v0.11.5
  */
 
 /* dark mode */
@@ -50,6 +50,7 @@ html.dark {
   /* text */
   --common-text-title: var(--tgc-yellow-2); /* title，米色 */
   --icon-filter: none;
+  --gs-filter: none;
 
   /** 浮窗 */
   --dialog-header-bg: #2f2e30ff;
