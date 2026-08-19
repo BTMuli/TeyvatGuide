@@ -18,18 +18,31 @@
         >
           <div class="tua-dcr-menu">
             <div class="tua-dcr-menu-title">
-              <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" />
+              <div class="tua-dcr-menu-icon">
+                <div class="tua-dcr-bg">
+                  <img
+                    :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`"
+                    :alt="`relic${props.pos}`"
+                  />
+                </div>
+                <div class="tua-dcr-icon">
+                  <TMiImg :ori="true" :src="props.modelValue.icon" :alt="props.modelValue.name" />
+                </div>
+              </div>
               <span>{{ props.modelValue.name }}</span>
               <small>Lv.{{ props.modelValue.level }} · {{ getRelicPos() }}</small>
             </div>
-            <div class="tua-dcr-menu-set">{{ props.modelValue.set.name }}</div>
-            <div
-              v-for="affix in props.modelValue.set.affixes"
-              :key="affix.activation_number"
-              class="tua-dcr-menu-affix"
-            >
-              <span class="tua-dcr-menu-n">{{ affix.activation_number }}件套</span>
-              <span>{{ affix.effect }}</span>
+            <div class="tua-dcr-menu-body">
+              <div class="tua-dcr-menu-set">{{ props.modelValue.set.name }}</div>
+              <div
+                v-for="affix in props.modelValue.set.affixes"
+                :key="affix.activation_number"
+                class="tua-dcr-menu-affix"
+              >
+                <span class="tua-dcr-menu-n">{{ affix.activation_number }}件套</span>
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <span v-html="parseHtmlText(affix.effect)" />
+              </div>
             </div>
           </div>
         </v-menu>
@@ -81,6 +94,7 @@
 </template>
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed } from "vue";
 
@@ -176,7 +190,8 @@ function getPropSubStyle(
   column-gap: 5px;
 }
 
-.tua-dcr-left {
+.tua-dcr-left,
+.tua-dcr-menu-icon {
   position: relative;
   display: flex;
   width: 36px;
@@ -184,6 +199,9 @@ function getPropSubStyle(
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+}
+
+.tua-dcr-left {
   cursor: pointer;
 }
 
@@ -323,6 +341,7 @@ function getPropSubStyle(
 
 .tua-dcr-menu {
   display: flex;
+  overflow: hidden;
   width: min(360px, calc(100vw - 48px));
   max-height: min(420px, calc(100vh - 160px));
   box-sizing: border-box;
@@ -333,11 +352,11 @@ function getPropSubStyle(
   background: var(--box-bg-1);
   box-shadow: 0 8px 24px var(--common-shadow-4);
   gap: 12px;
-  overflow-y: auto;
 }
 
 .tua-dcr-menu-title {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--common-shadow-1);
@@ -346,11 +365,8 @@ function getPropSubStyle(
   font-weight: normal;
   gap: 8px;
 
-  img {
-    width: 36px;
-    height: 36px;
+  .tua-dcr-menu-icon {
     flex-shrink: 0;
-    object-fit: contain;
   }
 
   span {
@@ -364,6 +380,15 @@ function getPropSubStyle(
     font-size: 12px;
     opacity: 0.85;
   }
+}
+
+.tua-dcr-menu-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
 }
 
 .tua-dcr-menu-set {
@@ -380,6 +405,12 @@ function getPropSubStyle(
   font-size: 12px;
   gap: 4px;
   line-height: 1.6;
+
+  > span:not(.tua-dcr-menu-n) {
+    :deep(span) {
+      filter: var(--gs-filter);
+    }
+  }
 }
 
 .tua-dcr-menu-n {

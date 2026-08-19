@@ -15,15 +15,27 @@
       >
         <div class="tua-dcc-menu">
           <div class="tua-dcc-menu-title">
-            <TMiImg :ori="true" :src="constellation.icon" alt="constellation" />
+            <div class="tua-dcc-item">
+              <TMiImg
+                :ori="true"
+                :src="constellation.icon"
+                alt="constellation"
+                class="tua-dcc-icon"
+              />
+              <div v-if="!constellation.is_actived" class="tua-dcc-lock">
+                <v-icon size="10px" color="var(--tgc-od-white)">mdi-lock</v-icon>
+              </div>
+            </div>
             <span>{{ constellation.name }}</span>
             <small>第{{ constellation.pos }}层</small>
           </div>
-          <div class="tua-dcc-menu-row">
-            <span>{{ constellation.is_actived ? "已激活" : "未激活" }}</span>
+          <div class="tua-dcc-menu-body">
+            <div class="tua-dcc-menu-row">
+              <span>{{ constellation.is_actived ? "已激活" : "未激活" }}</span>
+            </div>
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div class="tua-dcc-menu-desc" v-html="toHtml(constellation.effect)" />
           </div>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="tua-dcc-menu-desc" v-html="toHtml(constellation.effect)" />
         </div>
       </v-menu>
     </div>
@@ -89,6 +101,7 @@ function toHtml(desc: string): string {
 
 .tua-dcc-menu {
   display: flex;
+  overflow: hidden;
   width: min(360px, calc(100vw - 48px));
   max-height: min(420px, calc(100vh - 160px));
   box-sizing: border-box;
@@ -99,11 +112,11 @@ function toHtml(desc: string): string {
   background: var(--box-bg-1);
   box-shadow: 0 8px 24px var(--common-shadow-4);
   gap: 12px;
-  overflow-y: auto;
 }
 
 .tua-dcc-menu-title {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--common-shadow-1);
@@ -112,11 +125,9 @@ function toHtml(desc: string): string {
   font-weight: normal;
   gap: 8px;
 
-  img {
-    width: 36px;
-    height: 36px;
+  .tua-dcc-item {
     flex-shrink: 0;
-    object-fit: contain;
+    cursor: default;
   }
 
   span {
@@ -130,6 +141,15 @@ function toHtml(desc: string): string {
     font-size: 12px;
     opacity: 0.85;
   }
+}
+
+.tua-dcc-menu-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
 }
 
 .tua-dcc-menu-row {
@@ -146,5 +166,9 @@ function toHtml(desc: string): string {
   font-size: 12px;
   line-height: 1.6;
   word-break: break-all;
+
+  :deep(span) {
+    filter: var(--gs-filter);
+  }
 }
 </style>

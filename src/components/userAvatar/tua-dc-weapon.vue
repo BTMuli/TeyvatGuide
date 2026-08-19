@@ -14,14 +14,19 @@
         >
           <div class="tua-dcw-menu">
             <div class="tua-dcw-menu-title">
-              <img :src="`/WIKI/weapon/${props.modelValue.id}.webp`" alt="weapon" />
+              <div class="tua-dcw-menu-icon">
+                <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" alt="star" />
+                <img :src="`/WIKI/weapon/${props.modelValue.id}.webp`" alt="weapon" />
+              </div>
               <span>{{ props.modelValue.name }}</span>
               <small>
                 Lv.{{ props.modelValue.level }} · 精炼{{ props.modelValue.affix_level }}
               </small>
             </div>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <div class="tua-dcw-menu-desc" v-html="toHtml(props.modelValue.desc)" />
+            <div class="tua-dcw-menu-body">
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <div class="tua-dcw-menu-desc" v-html="toHtml(props.modelValue.desc)" />
+            </div>
           </div>
         </v-menu>
       </div>
@@ -195,12 +200,12 @@ function toHtml(desc: string): string {
   }
 }
 
-.tua-dcw-left {
+.tua-dcw-left,
+.tua-dcw-menu-icon {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 
   img {
     width: 36px;
@@ -215,6 +220,10 @@ function toHtml(desc: string): string {
     width: 100%;
     height: 100%;
   }
+}
+
+.tua-dcw-left {
+  cursor: pointer;
 }
 
 .tua-dcw-share {
@@ -239,6 +248,7 @@ function toHtml(desc: string): string {
 
 .tua-dcw-menu {
   display: flex;
+  overflow: hidden;
   width: min(360px, calc(100vw - 48px));
   max-height: min(420px, calc(100vh - 160px));
   box-sizing: border-box;
@@ -249,11 +259,11 @@ function toHtml(desc: string): string {
   background: var(--box-bg-1);
   box-shadow: 0 8px 24px var(--common-shadow-4);
   gap: 12px;
-  overflow-y: auto;
 }
 
 .tua-dcw-menu-title {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--common-shadow-1);
@@ -262,11 +272,8 @@ function toHtml(desc: string): string {
   font-weight: normal;
   gap: 8px;
 
-  img {
-    width: 36px;
-    height: 36px;
+  .tua-dcw-menu-icon {
     flex-shrink: 0;
-    object-fit: contain;
   }
 
   span {
@@ -282,10 +289,22 @@ function toHtml(desc: string): string {
   }
 }
 
+.tua-dcw-menu-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
 .tua-dcw-menu-desc {
   color: var(--box-text-2);
   font-size: 12px;
   line-height: 1.6;
   word-break: break-all;
+
+  :deep(span) {
+    filter: var(--gs-filter);
+  }
 }
 </style>

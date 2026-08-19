@@ -18,19 +18,26 @@
       >
         <div class="tua-dct-menu">
           <div class="tua-dct-menu-title">
-            <TMiImg :ori="true" :src="skill.icon" alt="talent" />
+            <div class="tua-dct-item">
+              <TMiImg :ori="true" :src="skill.icon" alt="talent" class="tua-dct-icon" />
+              <div v-if="!skill.is_unlock" class="tua-dct-lock">
+                <v-icon size="10px" color="var(--tgc-od-white)">mdi-lock</v-icon>
+              </div>
+            </div>
             <span>{{ skill.name }}</span>
             <small>Lv.{{ skill.level === 0 ? 1 : skill.level }}</small>
           </div>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="tua-dct-menu-desc" v-html="toHtml(skill.desc)" />
-          <div
-            v-for="(affix, index) in skill.skill_affix_list"
-            :key="index"
-            class="tua-dct-menu-row"
-          >
-            <span>{{ affix.name }}</span>
-            <span>{{ affix.value }}</span>
+          <div class="tua-dct-menu-body">
+            <!-- eslint-disable-next-line vue/no-v-html -->
+            <div class="tua-dct-menu-desc" v-html="toHtml(skill.desc)" />
+            <div
+              v-for="(affix, index) in skill.skill_affix_list"
+              :key="index"
+              class="tua-dct-menu-row"
+            >
+              <span>{{ affix.name }}</span>
+              <span>{{ affix.value }}</span>
+            </div>
           </div>
         </div>
       </v-menu>
@@ -118,6 +125,7 @@ function toHtml(desc: string): string {
 
 .tua-dct-menu {
   display: flex;
+  overflow: hidden;
   width: min(360px, calc(100vw - 48px));
   max-height: min(420px, calc(100vh - 160px));
   box-sizing: border-box;
@@ -128,11 +136,11 @@ function toHtml(desc: string): string {
   background: var(--box-bg-1);
   box-shadow: 0 8px 24px var(--common-shadow-4);
   gap: 12px;
-  overflow-y: auto;
 }
 
 .tua-dct-menu-title {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--common-shadow-1);
@@ -141,11 +149,9 @@ function toHtml(desc: string): string {
   font-weight: normal;
   gap: 8px;
 
-  img {
-    width: 36px;
-    height: 36px;
+  .tua-dct-item {
     flex-shrink: 0;
-    object-fit: contain;
+    cursor: default;
   }
 
   span {
@@ -161,11 +167,24 @@ function toHtml(desc: string): string {
   }
 }
 
+.tua-dct-menu-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
 .tua-dct-menu-desc {
   color: var(--box-text-2);
   font-size: 12px;
   line-height: 1.6;
   word-break: break-all;
+
+  :deep(span) {
+    filter: var(--gs-filter);
+  }
 }
 
 .tua-dct-menu-row {
