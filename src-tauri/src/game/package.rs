@@ -118,7 +118,7 @@ impl GamePackageManager {
     if plan.target != PackagePlanTarget::PreDownload
       || plan.strategy != PackagePlanStrategy::ManifestDiff
     {
-      return Err("Phase 2 仅允许启动可逐块校验的预下载计划".to_string());
+      return Err("当前仅允许启动可逐块校验的预下载计划".to_string());
     }
     let concurrency = options.concurrency.unwrap_or(DEFAULT_CONCURRENCY);
     if !(1..=MAX_CONCURRENCY).contains(&concurrency) {
@@ -337,8 +337,11 @@ impl GamePackageManager {
     }
     let path = journal::journal_path(task_root, task_id);
     let mut journal = journal::load(&path)?;
-    if journal.state == PackageTaskState::ReadyToApply {
-      return Err("预下载已完成，当前阶段不能回滚共享缓存".to_string());
+    if journal.state == PackageTaskState::Completed {
+      return Err("资源任务已经完成".to_string());
+    }
+    if journal.state.requires_recovery() {
+      return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
     cleanup_task_partials(&task_root.join("cache/chunks"), task_id)?;
     journal.state = PackageTaskState::Canceled;

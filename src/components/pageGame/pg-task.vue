@@ -41,10 +41,17 @@
         variant="tonal"
       />
       <v-alert
-        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
         text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
         density="compact"
         type="success"
+        variant="tonal"
+      />
+      <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+        text="预下载已完成。目标版本成为正式版本后即可应用更新。"
+        density="compact"
+        type="info"
         variant="tonal"
       />
     </template>
@@ -62,7 +69,7 @@
         开始下载
       </v-btn>
       <v-btn
-        v-if="task?.state === gameEnum.package.taskState.READY_TO_APPLY"
+        v-if="canApply"
         :loading="actionPending"
         prepend-icon="mdi-check-circle-outline"
         size="small"
@@ -81,26 +88,25 @@
       >
         请求取消
       </v-btn>
-      <template v-if="recoverable && task !== null">
-        <v-btn
-          :loading="actionPending"
-          prepend-icon="mdi-backup-restore"
-          size="small"
-          variant="tonal"
-          @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
-        >
-          安全恢复
-        </v-btn>
-        <v-btn
-          :disabled="task.state === gameEnum.package.taskState.READY_TO_APPLY"
-          :loading="actionPending"
-          size="small"
-          variant="text"
-          @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
-        >
-          放弃任务
-        </v-btn>
-      </template>
+      <v-btn
+        v-if="recoverable && task !== null"
+        :loading="actionPending"
+        prepend-icon="mdi-backup-restore"
+        size="small"
+        variant="tonal"
+        @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
+      >
+        安全恢复
+      </v-btn>
+      <v-btn
+        v-if="canAbandon && task !== null"
+        :loading="actionPending"
+        size="small"
+        variant="text"
+        @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
+      >
+        放弃任务
+      </v-btn>
     </div>
     <p v-if="plan !== null && !plan.hasSufficientSpace" class="task-note">
       当前评估的磁盘空间不足，不能开始下载。
@@ -109,7 +115,7 @@
       v-else-if="plan?.target === gameEnum.package.planTarget.MAIN && task === null"
       class="task-note"
     >
-      正式更新的下载、组装和提交将在 Phase 3 开放。
+      正式更新暂不支持直接下载。请先完成对应预下载；目标版本发布为正式版本后再应用。
     </p>
   </section>
 </template>
@@ -122,9 +128,10 @@ type Props = {
   plan: TGApp.Game.Package.PlanSummary | null;
   task: TGApp.Game.Package.TaskSummary | null;
   actionPending: boolean;
+  targetPublished: boolean;
 };
 
-const { plan, task, actionPending } = defineProps<Props>();
+const { plan, task, actionPending, targetPublished } = defineProps<Props>();
 const emit = defineEmits<{
   startRequested: [];
   applyRequested: [];
@@ -133,29 +140,25 @@ const emit = defineEmits<{
 }>();
 
 const active = computed<boolean>(() => {
-  return (
-    task?.state === gameEnum.package.taskState.QUEUED ||
-    task?.state === gameEnum.package.taskState.DOWNLOADING ||
-    task?.state === gameEnum.package.taskState.ASSEMBLING ||
-    task?.state === gameEnum.package.taskState.COMMIT_PREPARED ||
-    task?.state === gameEnum.package.taskState.COMMITTING ||
-    task?.state === gameEnum.package.taskState.VERIFYING ||
-    task?.state === gameEnum.package.taskState.ROLLING_BACK
-  );
+  return task !== null && gameEnum.package.taskActive(task.state);
 });
 const recoverable = computed<boolean>(() => {
-  return (
-    task?.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
-    task?.state === gameEnum.package.taskState.FAILED ||
-    task?.state === gameEnum.package.taskState.CANCELED
-  );
+  return task !== null && gameEnum.package.taskRecoverable(task.state);
 });
+const readyToApply = computed<boolean>(() => {
+  return task?.state === gameEnum.package.taskState.READY_TO_APPLY;
+});
+const canApply = computed<boolean>(() => readyToApply.value && targetPublished);
+const canAbandon = computed<boolean>(() => recoverable.value || readyToApply.value);
 const canStart = computed<boolean>(() => {
   if (plan === null || plan.target !== gameEnum.package.planTarget.PRE_DOWNLOAD || active.value) {
     return false;
   }
-  if (task === null) return true;
-  return task.planId !== plan.planId;
+  if (task === null || task.planId !== plan.planId) return true;
+  return (
+    task.state === gameEnum.package.taskState.CANCELED ||
+    task.state === gameEnum.package.taskState.FAILED
+  );
 });
 const progressPercent = computed<number>(() => {
   if (task === null || task.totalBytes === 0) return 0;

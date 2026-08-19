@@ -72,6 +72,7 @@ where
 
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
+  journal.current_file = Some("组装资源文件".to_string());
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
     assemble_manifest_plan(plan, game_root, task_root, canceled)?;
@@ -79,18 +80,21 @@ where
     prepare_transaction(plan, game_root, task_root, journal)?;
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
+    journal.current_file = Some("准备提交事务".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     check_canceled(canceled)?;
     journal.state = PackageTaskState::Committing;
     persist_and_emit(task_root, journal, &emit)?;
     commit_resources(plan, game_root, journal, task_root, canceled, &emit)?;
     journal.state = PackageTaskState::Verifying;
+    journal.current_file = Some("校验目标清单".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     verify_inventory(plan, game_root, canceled)?;
     commit_version(plan, game_root, task_root, journal, &emit)?;
     verify_inventory(plan, game_root, canceled)?;
     journal.state = PackageTaskState::Completed;
     journal.error_message = None;
+    journal.current_file = None;
     persist_and_emit(task_root, journal, &emit)
   })();
 
@@ -573,6 +577,7 @@ fn set_active_step(
   step: &CommitStep,
   phase: CommitStepPhase,
 ) {
+  journal.current_file = Some(step.name.clone());
   if let Some(apply) = &mut journal.apply {
     apply.active_step =
       Some(ActiveCommitStep { index, kind: step.kind, phase, relative_path: step.name.clone() });
@@ -935,6 +940,7 @@ mod tests {
     )
     .unwrap();
     assert_eq!(journal.state, PackageTaskState::Completed);
+    assert_eq!(journal.current_file, None);
     assert!(root.game().join("new.bin").is_file());
     assert_eq!(fs::read(root.game().join("modify.bin")).unwrap(), b"");
     assert!(!root.game().join("delete.bin").exists());

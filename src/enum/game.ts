@@ -117,10 +117,54 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
     case GamePackageTaskStateEnum.RECOVERY_REQUIRED:
       return "等待恢复";
     case GamePackageTaskStateEnum.FAILED:
-      return "下载失败";
+      return "任务失败";
     case GamePackageTaskStateEnum.CANCELED:
       return "已取消";
   }
+}
+
+/**
+ * 判断资源任务是否仍在运行。
+ * @since Beta v0.11.5
+ * @param state - 资源任务状态
+ * @returns 是否占用安装级运行互斥
+ */
+function isGamePackageTaskActive(state: TGApp.Game.Package.TaskStateEnum): boolean {
+  return (
+    state === GamePackageTaskStateEnum.QUEUED ||
+    state === GamePackageTaskStateEnum.DOWNLOADING ||
+    isGamePackageTaskApplying(state)
+  );
+}
+
+/**
+ * 判断资源任务是否已进入组装或提交阶段。
+ * @since Beta v0.11.5
+ * @param state - 资源任务状态
+ * @returns 是否正在改写游戏目录或准备提交
+ */
+function isGamePackageTaskApplying(state: TGApp.Game.Package.TaskStateEnum): boolean {
+  return (
+    state === GamePackageTaskStateEnum.ASSEMBLING ||
+    state === GamePackageTaskStateEnum.COMMIT_PREPARED ||
+    state === GamePackageTaskStateEnum.COMMITTING ||
+    state === GamePackageTaskStateEnum.VERIFYING ||
+    state === GamePackageTaskStateEnum.ROLLING_BACK
+  );
+}
+
+/**
+ * 判断中断任务是否应展示恢复入口。
+ * @since Beta v0.11.5
+ * @param state - 资源任务状态
+ * @returns 是否可安全恢复或回滚
+ */
+function isGamePackageTaskRecoverable(state: TGApp.Game.Package.TaskStateEnum): boolean {
+  return (
+    state === GamePackageTaskStateEnum.RECOVERY_REQUIRED ||
+    state === GamePackageTaskStateEnum.FAILED ||
+    state === GamePackageTaskStateEnum.CANCELED
+  );
 }
 
 /**
@@ -429,6 +473,9 @@ const gameEnum = {
     recoveryAction: GamePackageRecoveryActionEnum,
     taskState: GamePackageTaskStateEnum,
     taskStateDesc: getGamePackageTaskStateDesc,
+    taskActive: isGamePackageTaskActive,
+    taskApplying: isGamePackageTaskApplying,
+    taskRecoverable: isGamePackageTaskRecoverable,
   },
   actCalendar: {
     actType: ActCalendarTypeEnum,

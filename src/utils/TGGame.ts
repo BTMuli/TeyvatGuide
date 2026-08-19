@@ -72,7 +72,7 @@ export async function tryLaunchGame(
   }
   const installation = installations.find((item) => item.isChosen) ?? installations[0];
   if (!installation) {
-    showSnackbar.warn("请先在设置页面登记游戏安装");
+    showSnackbar.warn("请先在游戏安装页面登记游戏安装");
     return;
   }
   if (installation.status !== gameEnum.installation.status.KNOWN) {

@@ -126,6 +126,7 @@
     <PgTask
       :actionPending="taskActionPending"
       :plan
+      :targetPublished
       :task="currentTask"
       @apply-requested="handleApplyRequested"
       @cancel-requested="handleCancelRequested"
@@ -162,16 +163,15 @@ let requestSequence = 0;
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   return tasksByInstallation.value[installation.id] ?? null;
 });
-const taskActive = computed<boolean>(() => {
+const targetPublished = computed<boolean>(() => {
   return (
-    currentTask.value?.state === gameEnum.package.taskState.QUEUED ||
-    currentTask.value?.state === gameEnum.package.taskState.DOWNLOADING ||
-    currentTask.value?.state === gameEnum.package.taskState.ASSEMBLING ||
-    currentTask.value?.state === gameEnum.package.taskState.COMMIT_PREPARED ||
-    currentTask.value?.state === gameEnum.package.taskState.COMMITTING ||
-    currentTask.value?.state === gameEnum.package.taskState.VERIFYING ||
-    currentTask.value?.state === gameEnum.package.taskState.ROLLING_BACK
+    currentTask.value !== null &&
+    snapshot.value !== null &&
+    snapshot.value.main.tag === currentTask.value.targetTag
   );
+});
+const taskActive = computed<boolean>(() => {
+  return currentTask.value !== null && gameEnum.package.taskActive(currentTask.value.state);
 });
 const taskActionPending = computed<boolean>(() => {
   const taskId = currentTask.value?.taskId;
@@ -250,7 +250,7 @@ async function handleStartRequested(): Promise<void> {
 
 async function handleApplyRequested(): Promise<void> {
   const task = currentTask.value;
-  if (task?.state !== gameEnum.package.taskState.READY_TO_APPLY) return;
+  if (task?.state !== gameEnum.package.taskState.READY_TO_APPLY || !targetPublished.value) return;
   const confirmed = await showDialog.checkF({
     title: "应用游戏更新？",
     text: "应用会修改游戏文件。请先完全退出游戏，游戏运行时无法应用更新。",
@@ -269,17 +269,24 @@ async function handleApplyRequested(): Promise<void> {
 async function handleCancelRequested(): Promise<void> {
   const task = currentTask.value;
   if (task === null || !taskActive.value) return;
+  const applying = gameEnum.package.taskApplying(task.state);
   const confirmed = await showDialog.checkF({
-    title: "取消资源下载？",
-    text: "已校验完成的共享缓存会保留，当前下载对象会在安全边界停止。",
+    title: applying ? "取消资源提交？" : "取消资源下载？",
+    text: applying
+      ? "会在当前安全检查点停止，并尝试把游戏文件回滚到提交前的状态。已校验的共享下载缓存会保留。若回滚无法证明安全，需要先恢复后才能启动游戏。"
+      : "已校验完成的共享缓存会保留，当前下载对象会在安全边界停止。",
     confirmLabel: "请求取消",
   });
   if (confirmed !== true) return;
   try {
     await taskStore.cancelTask(task.taskId);
-    showSnackbar.info("已请求取消，请等待当前下载对象停止");
+    if (applying) {
+      showSnackbar.info("已请求取消，请等待提交回滚到安全状态");
+    } else {
+      showSnackbar.info("已请求取消，请等待当前下载对象停止");
+    }
   } catch (error) {
-    showSnackbar.error(`取消资源下载失败：${error}`);
+    showSnackbar.error(`${applying ? "取消资源提交" : "取消资源下载"}失败：${error}`);
   }
 }
 
@@ -289,17 +296,24 @@ async function handleRecoverRequested(
   const task = currentTask.value;
   if (task === null || taskActive.value) return;
   const rollback = action === gameEnum.package.recoveryAction.ROLLBACK;
-  const confirmed = await showDialog.checkF({
-    title: rollback ? "回滚资源任务？" : "安全恢复资源任务？",
-    text: rollback
-      ? "若任务已进入文件提交，会先恢复备份；已校验的共享下载缓存不会删除。"
-      : "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。",
-    confirmLabel: rollback ? "安全回滚" : "开始恢复",
-  });
+  const abandonReady = rollback && task.state === gameEnum.package.taskState.READY_TO_APPLY;
+  let title = "安全恢复资源任务？";
+  let text = "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。";
+  let confirmLabel = "开始恢复";
+  if (abandonReady) {
+    title = "放弃预下载任务？";
+    text = "放弃不会修改游戏目录，也不会删除已校验的共享缓存。之后可以重新评估并下载。";
+    confirmLabel = "放弃任务";
+  } else if (rollback) {
+    title = "回滚资源任务？";
+    text = "若任务已进入文件提交，会先恢复备份；已校验的共享下载缓存不会删除。";
+    confirmLabel = "安全回滚";
+  }
+  const confirmed = await showDialog.checkF({ title, text, confirmLabel });
   if (confirmed !== true) return;
   try {
     await taskStore.recoverTask(task.taskId, action);
-    showSnackbar.success(rollback ? "资源任务已放弃" : "资源下载已恢复");
+    showSnackbar.success(rollback ? "资源任务已放弃" : "已开始恢复资源任务");
   } catch (error) {
     showSnackbar.error(`${rollback ? "放弃" : "恢复"}资源任务失败：${error}`);
   }
