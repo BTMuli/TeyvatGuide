@@ -71,6 +71,7 @@ const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
   COMMIT_PREPARED: "commit_prepared",
   COMMITTING: "committing",
   VERIFYING: "verifying",
+  REPAIR_REQUIRED: "repair_required",
   ROLLING_BACK: "rolling_back",
   COMPLETED: "completed",
   RECOVERY_REQUIRED: "recovery_required",
@@ -110,6 +111,8 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
       return "正在提交";
     case GamePackageTaskStateEnum.VERIFYING:
       return "正在验证";
+    case GamePackageTaskStateEnum.REPAIR_REQUIRED:
+      return "等待修复";
     case GamePackageTaskStateEnum.ROLLING_BACK:
       return "正在回滚";
     case GamePackageTaskStateEnum.COMPLETED:

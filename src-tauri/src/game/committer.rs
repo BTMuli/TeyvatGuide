@@ -5,14 +5,14 @@ use super::{
   assembler::assemble_manifest_plan,
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
-    TaskJournal,
+    RepairJournal, TaskJournal,
   },
   model::{PackagePlanStrategy, PackageTaskState},
   path_guard::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file, resolve_optional_manifest_file,
   },
-  planner::{PersistedPlan, PlanAssetAction},
+  planner::{PersistedPlan, PlanAssetAction, PlanFile},
 };
 use md5::{Digest as Md5Digest, Md5};
 use sha2::Sha256;
@@ -26,6 +26,20 @@ use std::{
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
 const TRANSACTION_DIRECTORY: &str = ".teyvatguide-update";
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+
+/// 提交结果：完整完成，或资源已提交但仍需修复未变化文件。
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum ApplyOutcome {
+  Completed,
+  RepairNeeded,
+}
+
+#[derive(Clone)]
+struct InventoryIssue {
+  name: String,
+  message: String,
+  repairable: bool,
+}
 
 #[derive(Clone)]
 struct CommitStep {
@@ -45,7 +59,7 @@ pub(crate) fn execute_apply<F>(
   journal: &mut TaskJournal,
   canceled: &AtomicBool,
   emit: F,
-) -> Result<(), String>
+) -> Result<ApplyOutcome, String>
 where
   F: Fn(&TaskJournal),
 {
@@ -89,26 +103,128 @@ where
     journal.state = PackageTaskState::Verifying;
     journal.current_file = Some("校验目标清单".to_string());
     persist_and_emit(task_root, journal, &emit)?;
-    verify_inventory(plan, game_root, canceled)?;
+    let issues = inspect_inventory(plan, game_root, canceled)?;
+    if let Some(error) = commit_integrity_error(plan, &issues) {
+      return Err(error);
+    }
+    let repair_files = repairable_files(plan, &issues);
+    if !repair_files.is_empty() {
+      journal.repair = Some(RepairJournal { files: repair_files.clone(), apply: None });
+      journal.state = PackageTaskState::RepairRequired;
+      journal.error_message = Some(format!(
+        "完整清单发现 {} 个未变化文件缺失或损坏，需修复后才能提交版本",
+        repair_files.len()
+      ));
+      journal.current_file = None;
+      persist_and_emit(task_root, journal, &emit)?;
+      return Ok(ApplyOutcome::RepairNeeded);
+    }
     commit_version(plan, game_root, task_root, journal, &emit)?;
     verify_inventory(plan, game_root, canceled)?;
     journal.state = PackageTaskState::Completed;
     journal.error_message = None;
     journal.current_file = None;
-    persist_and_emit(task_root, journal, &emit)
+    persist_and_emit(task_root, journal, &emit)?;
+    Ok(ApplyOutcome::Completed)
   })();
 
+  match result {
+    Ok(ApplyOutcome::Completed) => {
+      cleanup_known_transaction_files(plan, game_root, task_root);
+      Ok(ApplyOutcome::Completed)
+    }
+    Ok(ApplyOutcome::RepairNeeded) => Ok(ApplyOutcome::RepairNeeded),
+    Err(error) => {
+      let canceled = canceled.load(Ordering::Acquire);
+      finish_failed_apply(plan, game_root, task_root, journal, canceled, error, &emit)
+        .map(|()| ApplyOutcome::Completed)
+    }
+  }
+}
+
+/// 下载并提交未变化文件的修复子计划，完整清单通过后再写入版本号。
+pub(crate) fn execute_repair<F>(
+  plan: &PersistedPlan,
+  repair_plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  canceled: &AtomicBool,
+  emit: F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  if journal.state != PackageTaskState::RepairRequired {
+    return Err("资源任务当前不需要修复".to_string());
+  }
+  if journal.apply.is_none() {
+    return Err("资源任务缺少已提交的更新日志，不能继续修复".to_string());
+  }
+  if repair_plan.plan_id != plan.plan_id
+    || repair_plan.assets.iter().any(|asset| asset.action != PlanAssetAction::Repair)
+    || !repair_plan.delete_files.is_empty()
+  {
+    return Err("修复计划与当前资源任务不匹配".to_string());
+  }
+  let incoming_bytes = repair_plan.assets.iter().try_fold(0_u64, |total, asset| {
+    total.checked_add(asset.size).ok_or_else(|| "修复空间需求溢出".to_string())
+  })?;
+  let required = incoming_bytes
+    .checked_add(SAFETY_MARGIN_BYTES)
+    .ok_or_else(|| "修复空间需求溢出".to_string())?;
+  let available = fs2::available_space(game_root)
+    .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
+  if available < required {
+    return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
+  }
+
+  journal.state = PackageTaskState::Assembling;
+  journal.error_message = None;
+  journal.current_file = Some("组装修复文件".to_string());
+  persist_and_emit(task_root, journal, &emit)?;
+  let result = (|| {
+    assemble_manifest_plan(repair_plan, game_root, task_root, canceled)?;
+    check_canceled(canceled)?;
+    prepare_repair_transaction(plan, repair_plan, game_root, task_root, journal)?;
+    ensure_game_stopped()?;
+    journal.state = PackageTaskState::Committing;
+    persist_and_emit(task_root, journal, &emit)?;
+    commit_repair_resources(repair_plan, game_root, journal, task_root, canceled, &emit)?;
+    journal.state = PackageTaskState::Verifying;
+    journal.current_file = Some("校验目标清单".to_string());
+    persist_and_emit(task_root, journal, &emit)?;
+    verify_inventory(plan, game_root, canceled)?;
+    commit_version(plan, game_root, task_root, journal, &emit)?;
+    verify_inventory(plan, game_root, canceled)?;
+    journal.repair = None;
+    journal.state = PackageTaskState::Completed;
+    journal.error_message = None;
+    journal.current_file = None;
+    persist_and_emit(task_root, journal, &emit)
+  })();
   if let Err(error) = result {
     let canceled = canceled.load(Ordering::Acquire);
-    return finish_failed_apply(plan, game_root, task_root, journal, canceled, error, &emit);
+    return finish_failed_repair(
+      plan,
+      repair_plan,
+      game_root,
+      task_root,
+      journal,
+      canceled,
+      error,
+      &emit,
+    );
   }
   cleanup_known_transaction_files(plan, game_root, task_root);
+  cleanup_repair_files(repair_plan, game_root, task_root);
   Ok(())
 }
 
 /// 回滚一个尚未完成的提交；无法证明安全状态时保留备份并进入 RecoveryRequired。
 pub(crate) fn rollback_apply<F>(
   plan: &PersistedPlan,
+  repair_plan: Option<&PersistedPlan>,
   game_root: &Path,
   task_root: &Path,
   journal: &mut TaskJournal,
@@ -118,6 +234,10 @@ pub(crate) fn rollback_apply<F>(
 where
   F: Fn(&TaskJournal),
 {
+  if journal.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
+    let repair_plan = repair_plan.ok_or_else(|| "修复提交尚未回滚，缺少修复计划".to_string())?;
+    revert_incomplete_repair(repair_plan, game_root, task_root, journal)?;
+  }
   if journal.apply.is_some() {
     journal.state = PackageTaskState::RollingBack;
     persist_and_emit(task_root, journal, &emit)?;
@@ -128,11 +248,244 @@ where
       return Err(error);
     }
   }
+  cleanup_repair_files(plan, game_root, task_root);
   cleanup_known_transaction_files(plan, game_root, task_root);
   journal.apply = None;
+  journal.repair = None;
   journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
   journal.error_message = None;
   persist_and_emit(task_root, journal, &emit)
+}
+
+fn prepare_repair_transaction(
+  original: &PersistedPlan,
+  repair_plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+) -> Result<(), String> {
+  let steps = repair_steps(repair_plan);
+  if steps.is_empty() {
+    return Err("修复计划没有可提交的资源".to_string());
+  }
+  let original_apply = apply(journal)?.clone();
+  let incoming_root = transaction_subdirectory(game_root, &original.plan_id, "repair-incoming")?;
+  let backup_root = transaction_subdirectory(game_root, &original.plan_id, "repair-backup")?;
+  let staging_root = task_root.join("tasks").join(&repair_plan.plan_id).join("staging");
+  for step in &steps {
+    if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
+      return Err(format!("修复备份目录包含未恢复文件：{}", step.name));
+    }
+    let source = resolve_existing_manifest_file(&staging_root, &step.name)?;
+    let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
+    copy_verified(&source, &incoming, step.size, &step.md5)?;
+  }
+  let repair = journal.repair.as_mut().ok_or_else(|| "资源任务缺少修复清单".to_string())?;
+  repair.apply = Some(ApplyJournal {
+    plan_sha256: plan_sha256(repair_plan)?,
+    steps_digest: steps_digest(&steps),
+    step_count: steps.len(),
+    cursor: 0,
+    active_step: None,
+    config_original_sha256: original_apply.config_original_sha256,
+    config_target_sha256: original_apply.config_target_sha256,
+    config_phase: ConfigCommitPhase::Prepared,
+  });
+  Ok(())
+}
+
+fn commit_repair_resources<F>(
+  repair_plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let steps = repair_steps(repair_plan);
+  let incoming_root = transaction_subdirectory(game_root, &repair_plan.plan_id, "repair-incoming")?;
+  let backup_root = transaction_subdirectory(game_root, &repair_plan.plan_id, "repair-backup")?;
+  let start = repair_apply(journal)?.cursor;
+  for (index, step) in steps.iter().enumerate().skip(start) {
+    check_canceled(canceled)?;
+    let target = prepare_manifest_output_file(game_root, &step.name)?;
+    let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
+    let backup = prepare_manifest_output_file(&backup_root, &step.name)?;
+    if resolve_optional_manifest_file(game_root, &step.name)?.is_some() {
+      ensure_game_stopped()?;
+      if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
+        return Err(format!("修复备份目标已存在：{}", step.name));
+      }
+      set_repair_active_step(journal, index, step, CommitStepPhase::BackupPending);
+      persist_and_emit(task_root, journal, emit)?;
+      ensure_game_stopped()?;
+      fs::rename(&target, &backup)
+        .map_err(|error| format!("备份待修复资源失败：{}：{error}", step.name))?;
+      set_repair_active_step(journal, index, step, CommitStepPhase::BackedUp);
+      persist_and_emit(task_root, journal, emit)?;
+    }
+    ensure_game_stopped()?;
+    let incoming_path = resolve_existing_manifest_file(&incoming_root, &step.name)?;
+    if !file_matches(&incoming_path, step.size, &step.md5)? {
+      return Err(format!("修复 incoming 资源在提交前校验失败：{}", step.name));
+    }
+    if resolve_optional_manifest_file(game_root, &step.name)?.is_some() {
+      return Err(format!("待修复资源目标在提交前意外存在：{}", step.name));
+    }
+    set_repair_active_step(journal, index, step, CommitStepPhase::InstallPending);
+    persist_and_emit(task_root, journal, emit)?;
+    ensure_game_stopped()?;
+    fs::rename(&incoming, &target)
+      .map_err(|error| format!("提交修复资源失败：{}：{error}", step.name))?;
+    set_repair_active_step(journal, index, step, CommitStepPhase::Installed);
+    persist_and_emit(task_root, journal, emit)?;
+    let apply = repair_apply_mut(journal)?;
+    apply.cursor = index + 1;
+    apply.active_step = None;
+    persist_and_emit(task_root, journal, emit)?;
+  }
+  Ok(())
+}
+
+fn finish_failed_repair<F>(
+  plan: &PersistedPlan,
+  repair_plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  canceled: bool,
+  error: String,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let _ = plan;
+  if journal.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
+    journal.state = PackageTaskState::RollingBack;
+    journal.error_message = Some(error.clone());
+    let _ = persist_and_emit(task_root, journal, emit);
+    if let Err(rollback_error) = rollback_repair(repair_plan, game_root, journal) {
+      let combined = format!("{error}；修复回滚失败：{rollback_error}");
+      journal.state = PackageTaskState::RecoveryRequired;
+      journal.error_message = Some(combined.clone());
+      let _ = persist_and_emit(task_root, journal, emit);
+      return Err(combined);
+    }
+  }
+  cleanup_repair_files(repair_plan, game_root, task_root);
+  if let Some(repair) = journal.repair.as_mut() {
+    repair.apply = None;
+  }
+  journal.state = PackageTaskState::RepairRequired;
+  journal.error_message = (!canceled).then_some(error.clone());
+  let _ = persist_and_emit(task_root, journal, emit);
+  Err(if canceled { "应用更新已取消".to_string() } else { error })
+}
+
+pub(crate) fn revert_incomplete_repair(
+  repair_plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+) -> Result<(), String> {
+  if journal.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
+    if let Err(error) = rollback_repair(repair_plan, game_root, journal) {
+      journal.state = PackageTaskState::RecoveryRequired;
+      journal.error_message = Some(error.clone());
+      journal.touch();
+      let _ = journal::persist(task_root, journal);
+      return Err(error);
+    }
+  }
+  cleanup_repair_files(repair_plan, game_root, task_root);
+  if let Some(repair) = journal.repair.as_mut() {
+    repair.apply = None;
+  }
+  journal.state = PackageTaskState::RepairRequired;
+  journal.error_message = None;
+  journal.current_file = None;
+  journal.touch();
+  journal::persist(task_root, journal)
+}
+
+fn rollback_repair(
+  repair_plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &TaskJournal,
+) -> Result<(), String> {
+  let steps = repair_steps(repair_plan);
+  let apply = repair_apply(journal)?;
+  if apply.steps_digest != steps_digest(&steps) || apply.step_count != steps.len() {
+    return Err("修复提交日志与资源步骤不匹配".to_string());
+  }
+  if apply.plan_sha256 != plan_sha256(repair_plan)? {
+    return Err("修复提交日志与修复计划不匹配".to_string());
+  }
+  let incoming_root = transaction_subdirectory(game_root, &repair_plan.plan_id, "repair-incoming")?;
+  let backup_root = transaction_subdirectory(game_root, &repair_plan.plan_id, "repair-backup")?;
+  for step in steps.iter().rev() {
+    let target = resolve_optional_manifest_file(game_root, &step.name)?;
+    let incoming = resolve_optional_manifest_file(&incoming_root, &step.name)?;
+    let backup = resolve_optional_manifest_file(&backup_root, &step.name)?;
+    match backup {
+      Some(backup) => {
+        if let Some(incoming_file) = &incoming {
+          if !file_matches(incoming_file, step.size, &step.md5)? {
+            return Err(format!("修复 incoming 完整性校验失败：{}", step.name));
+          }
+        }
+        if let Some(target) = target {
+          if !file_matches(&target, step.size, &step.md5)? || incoming.is_some() {
+            return Err(format!("修复资源处于未知状态：{}", step.name));
+          }
+          let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
+          ensure_game_stopped()?;
+          fs::rename(target, incoming)
+            .map_err(|error| format!("移出修复资源失败：{}：{error}", step.name))?;
+        }
+        let target = prepare_manifest_output_file(game_root, &step.name)?;
+        ensure_game_stopped()?;
+        fs::rename(backup, target)
+          .map_err(|error| format!("恢复待修复资源失败：{}：{error}", step.name))?;
+      }
+      None => match target {
+        Some(path) if file_matches(&path, step.size, &step.md5)? && incoming.is_none() => {
+          let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
+          ensure_game_stopped()?;
+          fs::rename(path, incoming)
+            .map_err(|error| format!("回滚修复新增资源失败：{}：{error}", step.name))?;
+        }
+        Some(_) => return Err(format!("修复资源处于未知状态：{}", step.name)),
+        None => {
+          if let Some(incoming) = incoming {
+            if !file_matches(&incoming, step.size, &step.md5)? {
+              return Err(format!("修复 incoming 完整性校验失败：{}", step.name));
+            }
+          }
+        }
+      },
+    }
+  }
+  Ok(())
+}
+
+fn repair_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
+  plan
+    .assets
+    .iter()
+    .map(|asset| CommitStep {
+      kind: CommitStepKind::Repair,
+      name: asset.name.clone(),
+      source_size: None,
+      source_md5: None,
+      size: asset.size,
+      md5: asset.md5.clone(),
+    })
+    .collect()
 }
 
 fn prepare_transaction(
@@ -201,6 +554,7 @@ fn preflight_targets(steps: &[CommitStep], game_root: &Path) -> Result<(), Strin
           return Err(format!("待删除资源与计划源文件不一致：{}", step.name));
         }
       }
+      CommitStepKind::Repair => {}
       _ => {}
     }
   }
@@ -310,21 +664,74 @@ fn verify_inventory(
   game_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<(), String> {
+  let issues = inspect_inventory(plan, game_root, canceled)?;
+  issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
+}
+
+fn inspect_inventory(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<Vec<InventoryIssue>, String> {
+  let mut issues = Vec::new();
+  let changed = changed_names(plan);
   for file in &plan.inventory {
     check_canceled(canceled)?;
-    let path = resolve_existing_manifest_file(game_root, &file.name)
-      .map_err(|error| format!("目标清单文件缺失：{}：{error}", file.name))?;
-    if !file_matches(&path, file.size, &file.md5)? {
-      return Err(format!("目标清单文件校验失败：{}", file.name));
+    match resolve_optional_manifest_file(game_root, &file.name)? {
+      None => issues.push(InventoryIssue {
+        name: file.name.clone(),
+        message: format!("目标清单文件缺失：{}", file.name),
+        repairable: !changed.contains(&file.name),
+      }),
+      Some(path) => {
+        if !file_matches(&path, file.size, &file.md5)? {
+          issues.push(InventoryIssue {
+            name: file.name.clone(),
+            message: format!("目标清单文件校验失败：{}", file.name),
+            repairable: !changed.contains(&file.name),
+          });
+        }
+      }
     }
   }
   for deleted in &plan.delete_files {
     check_canceled(canceled)?;
     if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
-      return Err(format!("目标版本应删除的文件仍然存在：{}", deleted.name));
+      issues.push(InventoryIssue {
+        name: deleted.name.clone(),
+        message: format!("目标版本应删除的文件仍然存在：{}", deleted.name),
+        repairable: false,
+      });
     }
   }
-  Ok(())
+  Ok(issues)
+}
+
+fn changed_names(plan: &PersistedPlan) -> std::collections::HashSet<String> {
+  plan
+    .assets
+    .iter()
+    .map(|asset| asset.name.clone())
+    .chain(plan.delete_files.iter().map(|file| file.name.clone()))
+    .collect()
+}
+
+fn commit_integrity_error(plan: &PersistedPlan, issues: &[InventoryIssue]) -> Option<String> {
+  let _ = plan;
+  issues.iter().find(|issue| !issue.repairable).map(|issue| issue.message.clone())
+}
+
+fn repairable_files(plan: &PersistedPlan, issues: &[InventoryIssue]) -> Vec<PlanFile> {
+  let inventory = plan
+    .inventory
+    .iter()
+    .map(|file| (file.name.as_str(), file))
+    .collect::<std::collections::HashMap<_, _>>();
+  issues
+    .iter()
+    .filter(|issue| issue.repairable)
+    .filter_map(|issue| inventory.get(issue.name.as_str()).cloned().cloned())
+    .collect()
 }
 
 fn finish_failed_apply<F>(
@@ -462,6 +869,7 @@ fn rollback_transaction(
           _ => return Err(format!("删除资源处于未知状态：{}", step.name)),
         }
       }
+      CommitStepKind::Repair => {}
     }
   }
   Ok(())
@@ -506,6 +914,7 @@ fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
       kind: match asset.action {
         PlanAssetAction::Add => CommitStepKind::Add,
         PlanAssetAction::Modify => CommitStepKind::Modify,
+        PlanAssetAction::Repair => CommitStepKind::Repair,
       },
       name: asset.name.clone(),
       source_size: asset.source.as_ref().map(|source| source.size),
@@ -532,6 +941,7 @@ fn steps_digest(steps: &[CommitStep]) -> String {
       CommitStepKind::Add => 1,
       CommitStepKind::Modify => 2,
       CommitStepKind::Delete => 3,
+      CommitStepKind::Repair => 4,
     }]);
     hasher.update(step.name.as_bytes());
     hasher.update([0]);
@@ -569,6 +979,35 @@ fn validate_plan_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result
 fn plan_sha256(plan: &PersistedPlan) -> Result<String, String> {
   let bytes = serde_json::to_vec(plan).map_err(|error| format!("序列化资源计划失败：{error}"))?;
   Ok(sha256_bytes(&bytes))
+}
+
+fn set_repair_active_step(
+  journal: &mut TaskJournal,
+  index: usize,
+  step: &CommitStep,
+  phase: CommitStepPhase,
+) {
+  journal.current_file = Some(step.name.clone());
+  if let Some(apply) = journal.repair.as_mut().and_then(|repair| repair.apply.as_mut()) {
+    apply.active_step =
+      Some(ActiveCommitStep { index, kind: step.kind, phase, relative_path: step.name.clone() });
+  }
+}
+
+fn repair_apply(journal: &TaskJournal) -> Result<&ApplyJournal, String> {
+  journal
+    .repair
+    .as_ref()
+    .and_then(|repair| repair.apply.as_ref())
+    .ok_or_else(|| "资源任务缺少修复提交日志".to_string())
+}
+
+fn repair_apply_mut(journal: &mut TaskJournal) -> Result<&mut ApplyJournal, String> {
+  journal
+    .repair
+    .as_mut()
+    .and_then(|repair| repair.apply.as_mut())
+    .ok_or_else(|| "资源任务缺少修复提交日志".to_string())
 }
 
 fn set_active_step(
@@ -777,6 +1216,30 @@ fn cleanup_known_transaction_files(plan: &PersistedPlan, game_root: &Path, task_
   }
 }
 
+fn cleanup_repair_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
+  let Ok(incoming_root) = transaction_subdirectory(game_root, &plan.plan_id, "repair-incoming")
+  else {
+    return;
+  };
+  let Ok(backup_root) = transaction_subdirectory(game_root, &plan.plan_id, "repair-backup") else {
+    return;
+  };
+  for file in journal_repair_names(plan, task_root) {
+    for root in [&incoming_root, &backup_root] {
+      if let Ok(path) = prepare_manifest_output_file(root, &file) {
+        let _ = remove_optional_file(&path);
+        if let Ok(partial) = sibling_with_suffix(&path, ".part") {
+          let _ = remove_optional_file(&partial);
+        }
+      }
+    }
+  }
+}
+
+fn journal_repair_names(plan: &PersistedPlan, _task_root: &Path) -> Vec<String> {
+  plan.inventory.iter().map(|file| file.name.clone()).collect()
+}
+
 fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) { Err("应用更新已取消".to_string()) } else { Ok(()) }
 }
@@ -818,18 +1281,22 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    atomic_replace, commit_resources, execute_apply, patch_game_version, prepare_transaction,
-    rollback_apply, transaction_subdirectory,
+    ApplyOutcome, atomic_replace, commit_resources, execute_apply, execute_repair,
+    patch_game_version, prepare_transaction, rollback_apply, transaction_subdirectory,
   };
   use crate::game::{
     assembler::assemble_manifest_plan,
     journal::{ActiveCommitStep, CommitStepKind, CommitStepPhase, ConfigCommitPhase, TaskJournal},
     model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState, SchemeId},
-    planner::{PersistedPlan, PlanAsset, PlanAssetAction, PlanDelete, PlanFile, PlanSource},
+    planner::{
+      PayloadEncoding, PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDelete,
+      PlanDownload, PlanDownloadHashKind, PlanFile, PlanSource,
+    },
   };
   use md5::{Digest, Md5};
   use std::{fs, path::PathBuf, sync::atomic::AtomicBool};
   use uuid::Uuid;
+  use xxhash_rust::xxh64::xxh64;
 
   struct TempRoot(PathBuf);
 
@@ -861,9 +1328,9 @@ mod tests {
     format!("{:x}", hasher.finalize())
   }
 
-  fn plan(task_id: &str, bad_inventory: bool) -> PersistedPlan {
+  fn plan(task_id: &str) -> PersistedPlan {
     let empty_md5 = md5(b"");
-    let keep_md5 = if bad_inventory { "f".repeat(32) } else { md5(b"keep") };
+    let keep_md5 = md5(b"keep");
     PersistedPlan {
       schema_version: 4,
       plan_id: task_id.to_string(),
@@ -927,7 +1394,7 @@ mod tests {
   fn applies_resources_and_updates_version_last() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     execute_apply(
@@ -949,10 +1416,39 @@ mod tests {
   }
 
   #[test]
-  fn full_inventory_failure_rolls_back_all_resource_kinds() {
+  fn unchanged_inventory_failure_keeps_committed_resources() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), true);
+    fs::write(root.game().join("keep.bin"), b"xxxx").unwrap();
+    let plan = plan(&Uuid::new_v4().to_string());
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::ReadyToApply;
+    assert_eq!(
+      execute_apply(
+        &plan,
+        &root.game(),
+        &root.tasks(),
+        &mut journal,
+        &AtomicBool::new(false),
+        |_| {},
+      )
+      .unwrap(),
+      ApplyOutcome::RepairNeeded
+    );
+    assert_eq!(journal.state, PackageTaskState::RepairRequired);
+    assert!(root.game().join("new.bin").is_file());
+    assert_eq!(fs::read(root.game().join("modify.bin")).unwrap(), b"");
+    assert!(!root.game().join("delete.bin").exists());
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("game_version=1.0.0"));
+  }
+
+  #[test]
+  fn committed_inventory_failure_rolls_back_all_resource_kinds() {
+    let root = TempRoot::new();
+    prepare(&root);
+    let mut plan = plan(&Uuid::new_v4().to_string());
+    plan.inventory[1].md5 = "f".repeat(32);
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assert!(
@@ -975,11 +1471,108 @@ mod tests {
   }
 
   #[test]
+  fn repairs_unchanged_file_then_commits_version() {
+    let root = TempRoot::new();
+    prepare(&root);
+    fs::write(root.game().join("keep.bin"), b"xxxx").unwrap();
+    let plan = plan(&Uuid::new_v4().to_string());
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::ReadyToApply;
+    execute_apply(
+      &plan,
+      &root.game(),
+      &root.tasks(),
+      &mut journal,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    let bytes = b"keep";
+    let cache_key = "keep.chunk";
+    let cache = root.tasks().join("cache/chunks");
+    fs::create_dir_all(&cache).unwrap();
+    fs::write(cache.join(cache_key), bytes).unwrap();
+    let mut repair_plan = plan.clone();
+    repair_plan.downloads = vec![PlanDownload {
+      id: cache_key.to_string(),
+      cache_key: cache_key.to_string(),
+      hash_kind: PlanDownloadHashKind::XxHash64,
+      expected_hash: format!("{:016x}", xxh64(bytes, 0)),
+      compressed_size: 4,
+      decompressed_size: 4,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: String::new(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    }];
+    repair_plan.assets = vec![PlanAsset {
+      name: "keep.bin".to_string(),
+      action: PlanAssetAction::Repair,
+      source: None,
+      size: 4,
+      md5: md5(bytes),
+      chunks: vec![PlanChunk {
+        id: cache_key.to_string(),
+        decompressed_md5: md5(bytes),
+        target_offset: 0,
+        compressed_size: 4,
+        decompressed_size: 4,
+        reuse: None,
+      }],
+      patch: None,
+    }];
+    repair_plan.delete_files = Vec::new();
+    execute_repair(
+      &plan,
+      &repair_plan,
+      &root.game(),
+      &root.tasks(),
+      &mut journal,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    assert_eq!(journal.state, PackageTaskState::Completed);
+    assert_eq!(fs::read(root.game().join("keep.bin")).unwrap(), b"keep");
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("game_version=2.0.0"));
+  }
+
+  #[test]
+  fn abandon_after_repair_required_rolls_back_committed_resources() {
+    let root = TempRoot::new();
+    prepare(&root);
+    fs::write(root.game().join("keep.bin"), b"xxxx").unwrap();
+    let plan = plan(&Uuid::new_v4().to_string());
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::ReadyToApply;
+    execute_apply(
+      &plan,
+      &root.game(),
+      &root.tasks(),
+      &mut journal,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {}).unwrap();
+    assert_eq!(journal.state, PackageTaskState::Canceled);
+    assert!(journal.repair.is_none());
+    assert!(!root.game().join("new.bin").exists());
+    assert_eq!(fs::read(root.game().join("modify.bin")).unwrap(), b"original");
+    assert_eq!(fs::read(root.game().join("delete.bin")).unwrap(), b"delete");
+    assert_eq!(fs::read(root.game().join("keep.bin")).unwrap(), b"xxxx");
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("game_version=1.0.0"));
+  }
+
+  #[test]
   fn rejects_modified_source_before_any_game_mutation() {
     let root = TempRoot::new();
     prepare(&root);
     fs::write(root.game().join("modify.bin"), b"external").unwrap();
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assert!(
@@ -1002,7 +1595,7 @@ mod tests {
   fn recovery_reconciles_rename_after_backup_intent() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assemble_manifest_plan(&plan, &root.game(), &root.tasks(), &AtomicBool::new(false)).unwrap();
@@ -1017,7 +1610,7 @@ mod tests {
     let backup =
       transaction_subdirectory(&root.game(), &plan.plan_id, "backup").unwrap().join("modify.bin");
     fs::rename(root.game().join("modify.bin"), backup).unwrap();
-    rollback_apply(&plan, &root.game(), &root.tasks(), &mut journal, false, |_| {}).unwrap();
+    rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {}).unwrap();
     assert_eq!(journal.state, PackageTaskState::Canceled);
     assert_eq!(fs::read(root.game().join("modify.bin")).unwrap(), b"original");
   }
@@ -1026,7 +1619,7 @@ mod tests {
   fn recovery_preserves_corrupted_backup_for_manual_attention() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assemble_manifest_plan(&plan, &root.game(), &root.tasks(), &AtomicBool::new(false)).unwrap();
@@ -1037,7 +1630,8 @@ mod tests {
     fs::rename(root.game().join("modify.bin"), &backup).unwrap();
     fs::write(&backup, b"corrupt").unwrap();
     assert!(
-      rollback_apply(&plan, &root.game(), &root.tasks(), &mut journal, false, |_| {}).is_err()
+      rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {})
+        .is_err()
     );
     assert_eq!(journal.state, PackageTaskState::RecoveryRequired);
     assert_eq!(fs::read(backup).unwrap(), b"corrupt");
@@ -1048,7 +1642,7 @@ mod tests {
   fn recovery_rejects_corrupted_already_restored_resource() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assemble_manifest_plan(&plan, &root.game(), &root.tasks(), &AtomicBool::new(false)).unwrap();
@@ -1057,7 +1651,8 @@ mod tests {
     fs::write(root.game().join("modify.bin"), b"unknown").unwrap();
 
     assert!(
-      rollback_apply(&plan, &root.game(), &root.tasks(), &mut journal, false, |_| {}).is_err()
+      rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {})
+        .is_err()
     );
     assert_eq!(journal.state, PackageTaskState::RecoveryRequired);
     assert_eq!(fs::read(root.game().join("modify.bin")).unwrap(), b"unknown");
@@ -1070,7 +1665,7 @@ mod tests {
   fn recovery_restores_config_replaced_after_write_ahead_intent() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assemble_manifest_plan(&plan, &root.game(), &root.tasks(), &AtomicBool::new(false)).unwrap();
@@ -1088,7 +1683,7 @@ mod tests {
     journal.apply.as_mut().unwrap().config_phase = ConfigCommitPhase::ReplacePending;
     let config_root = transaction_subdirectory(&root.game(), &plan.plan_id, "config").unwrap();
     atomic_replace(&config_root.join("target"), &root.game().join("config.ini")).unwrap();
-    rollback_apply(&plan, &root.game(), &root.tasks(), &mut journal, false, |_| {}).unwrap();
+    rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {}).unwrap();
     assert_eq!(fs::read(root.game().join("modify.bin")).unwrap(), b"original");
     assert_eq!(fs::read(root.game().join("delete.bin")).unwrap(), b"delete");
     assert!(!root.game().join("new.bin").exists());
@@ -1100,7 +1695,7 @@ mod tests {
   fn recovery_never_restores_unverified_config_backup() {
     let root = TempRoot::new();
     prepare(&root);
-    let plan = plan(&Uuid::new_v4().to_string(), false);
+    let plan = plan(&Uuid::new_v4().to_string());
     let mut journal = TaskJournal::from_plan(&plan);
     journal.state = PackageTaskState::ReadyToApply;
     assemble_manifest_plan(&plan, &root.game(), &root.tasks(), &AtomicBool::new(false)).unwrap();
@@ -1110,7 +1705,8 @@ mod tests {
     atomic_replace(&config_root.join("target"), &root.game().join("config.ini")).unwrap();
     fs::write(config_root.join("original"), b"corrupt").unwrap();
     assert!(
-      rollback_apply(&plan, &root.game(), &root.tasks(), &mut journal, false, |_| {}).is_err()
+      rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {})
+        .is_err()
     );
     assert_eq!(journal.state, PackageTaskState::RecoveryRequired);
     let config = fs::read_to_string(root.game().join("config.ini")).unwrap();

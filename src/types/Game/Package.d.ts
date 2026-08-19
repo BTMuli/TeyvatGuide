@@ -68,6 +68,7 @@ declare namespace TGApp.Game.Package {
     COMMIT_PREPARED: "commit_prepared",
     COMMITTING: "committing",
     VERIFYING: "verifying",
+    REPAIR_REQUIRED: "repair_required",
     ROLLING_BACK: "rolling_back",
     COMPLETED: "completed",
     RECOVERY_REQUIRED: "recovery_required",

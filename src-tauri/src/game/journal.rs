@@ -25,6 +25,7 @@ pub(crate) enum CommitStepKind {
   Add,
   Modify,
   Delete,
+  Repair,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -66,6 +67,14 @@ pub(crate) struct ApplyJournal {
   pub(crate) config_phase: ConfigCommitPhase,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct RepairJournal {
+  pub(crate) files: Vec<super::planner::PlanFile>,
+  #[serde(default)]
+  pub(crate) apply: Option<ApplyJournal>,
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct TaskJournal {
@@ -94,6 +103,8 @@ pub(crate) struct TaskJournal {
   pub(crate) error_message: Option<String>,
   #[serde(default)]
   pub(crate) apply: Option<ApplyJournal>,
+  #[serde(default)]
+  pub(crate) repair: Option<RepairJournal>,
   pub(crate) created_at: String,
   pub(crate) updated_at: String,
 }
@@ -126,6 +137,7 @@ impl TaskJournal {
       eta_seconds: None,
       error_message: None,
       apply: None,
+      repair: None,
       created_at: now.clone(),
       updated_at: now,
     }
@@ -298,27 +310,51 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
   }) {
     return Err("游戏资源任务日志包含无效缓存对象".to_string());
   }
-  if journal.schema_version == LEGACY_JOURNAL_SCHEMA_VERSION && journal.apply.is_some() {
+  if journal.schema_version == LEGACY_JOURNAL_SCHEMA_VERSION
+    && (journal.apply.is_some() || journal.repair.is_some())
+  {
     return Err("旧版游戏资源任务日志不能包含提交状态".to_string());
   }
   if let Some(apply) = &journal.apply {
-    let hashes_valid = [
-      &apply.plan_sha256,
-      &apply.steps_digest,
-      &apply.config_original_sha256,
-      &apply.config_target_sha256,
-    ]
-    .into_iter()
-    .all(|value| value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit()));
-    let active_valid = apply.active_step.as_ref().is_none_or(|step| {
-      step.index < apply.step_count
-        && step.index == apply.cursor
-        && normalize_manifest_path(&step.relative_path)
-          .is_ok_and(|value| value == step.relative_path)
-    });
-    if !hashes_valid || apply.step_count == 0 || apply.cursor > apply.step_count || !active_valid {
-      return Err("游戏资源任务日志包含无效提交状态".to_string());
+    validate_apply_journal(apply)?;
+  }
+  if let Some(repair) = &journal.repair {
+    if repair.files.is_empty() || repair.files.len() > 500_000 {
+      return Err("游戏资源任务日志包含无效修复清单".to_string());
     }
+    let mut names = std::collections::HashSet::with_capacity(repair.files.len());
+    if repair.files.iter().any(|file| {
+      file.name.is_empty()
+        || !names.insert(file.name.as_str())
+        || normalize_manifest_path(&file.name).is_err()
+        || file.md5.len() != 32
+        || !file.md5.bytes().all(|byte| byte.is_ascii_hexdigit())
+    }) {
+      return Err("游戏资源任务日志包含无效修复清单".to_string());
+    }
+    if let Some(apply) = &repair.apply {
+      validate_apply_journal(apply)?;
+    }
+  }
+  Ok(())
+}
+
+fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
+  let hashes_valid = [
+    &apply.plan_sha256,
+    &apply.steps_digest,
+    &apply.config_original_sha256,
+    &apply.config_target_sha256,
+  ]
+  .into_iter()
+  .all(|value| value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit()));
+  let active_valid = apply.active_step.as_ref().is_none_or(|step| {
+    step.index < apply.step_count
+      && step.index == apply.cursor
+      && normalize_manifest_path(&step.relative_path).is_ok_and(|value| value == step.relative_path)
+  });
+  if !hashes_valid || apply.step_count == 0 || apply.cursor > apply.step_count || !active_valid {
+    return Err("游戏资源任务日志包含无效提交状态".to_string());
   }
   Ok(())
 }
@@ -406,6 +442,7 @@ mod tests {
       eta_seconds: None,
       error_message: None,
       apply: None,
+      repair: None,
       created_at: now.clone(),
       updated_at: now,
     }

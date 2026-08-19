@@ -4,10 +4,12 @@
 use super::{
   committer,
   downloader::{RateLimiter, download_object, prepare_cache_root},
-  hoyoplay::create_http_client,
+  hoyoplay::{create_http_client, get_game_branches},
   journal::{self, TaskJournal},
-  model::{PackagePlanStrategy, PackageTaskOptions, PackageTaskState, PackageTaskSummary},
-  planner::{PersistedPlan, cached_chunk_matches},
+  model::{
+    GameInstallation, PackagePlanStrategy, PackageTaskOptions, PackageTaskState, PackageTaskSummary,
+  },
+  planner::{PersistedPlan, cached_chunk_matches, hydrate_and_validate_repair_plan},
 };
 use futures_util::{StreamExt, stream};
 use std::{
@@ -143,7 +145,7 @@ impl GamePackageManager {
     }
 
     let mut journal = journal::load_or_create(&task_root, &plan)?;
-    if journal.state.requires_recovery() {
+    if journal.state.blocks_launch() {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
     if !recovering && journal.state.is_active() && journal.revision > 1 {
@@ -206,7 +208,7 @@ impl GamePackageManager {
     &self,
     app_handle: AppHandle,
     task_root: PathBuf,
-    game_root: PathBuf,
+    installation: GameInstallation,
     plan: PersistedPlan,
   ) -> Result<PackageTaskSummary, String> {
     if plan.strategy != PackagePlanStrategy::ManifestDiff || plan.inventory.is_empty() {
@@ -218,10 +220,21 @@ impl GamePackageManager {
       return Err("游戏仍在运行，无法应用资源更新".to_string());
     }
     let journal_value = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?;
-    if journal_value.state != PackageTaskState::ReadyToApply {
-      return Err("资源任务尚未完成下载，不能应用更新".to_string());
+    let can_apply = journal_value.state == PackageTaskState::ReadyToApply;
+    let can_repair = journal_value.repair.is_some()
+      && matches!(
+        journal_value.state,
+        PackageTaskState::RepairRequired
+          | PackageTaskState::Assembling
+          | PackageTaskState::Committing
+          | PackageTaskState::Verifying
+          | PackageTaskState::RollingBack
+      );
+    if !can_apply && !can_repair {
+      return Err("资源任务当前不能应用或修复".to_string());
     }
-
+    let should_execute_apply = can_apply;
+    let game_root = PathBuf::from(&installation.root_path);
     let summary = journal_value.summary();
     let canceled = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal_value));
@@ -240,22 +253,63 @@ impl GamePackageManager {
     let worker_journal = Arc::clone(&shared_journal);
     tauri::async_runtime::spawn(async move {
       let worker_app_handle = app_handle.clone();
-      let result = tauri::async_runtime::spawn_blocking(move || {
-        let mut journal_value = worker_journal.blocking_lock().clone();
-        let snapshot = Arc::clone(&worker_journal);
-        let emit = |journal: &TaskJournal| {
-          *snapshot.blocking_lock() = journal.clone();
-          let summary = journal.summary();
-          emit_state(&worker_app_handle, &summary);
-          emit_progress(&worker_app_handle, &summary);
-        };
-        committer::execute_apply(&plan, &game_root, &task_root, &mut journal_value, &canceled, emit)
-      })
-      .await;
-      match result {
-        Ok(Ok(())) => {}
-        Ok(Err(error)) => log::warn!("[game-package] 应用资源任务失败：{error}"),
-        Err(error) => log::error!("[game-package] 应用资源任务异常退出：{error}"),
+      let canceled_flag = Arc::clone(&canceled);
+      let snapshot = Arc::clone(&worker_journal);
+      if should_execute_apply {
+        let apply_plan = plan.clone();
+        let apply_game_root = game_root.clone();
+        let apply_task_root = task_root.clone();
+        let apply_canceled = Arc::clone(&canceled_flag);
+        let apply_snapshot = Arc::clone(&snapshot);
+        let apply_handle = worker_app_handle.clone();
+        let result = tauri::async_runtime::spawn_blocking(move || {
+          let mut journal_value = apply_snapshot.blocking_lock().clone();
+          let emit = |journal: &TaskJournal| {
+            *apply_snapshot.blocking_lock() = journal.clone();
+            let summary = journal.summary();
+            emit_state(&apply_handle, &summary);
+            emit_progress(&apply_handle, &summary);
+          };
+          committer::execute_apply(
+            &apply_plan,
+            &apply_game_root,
+            &apply_task_root,
+            &mut journal_value,
+            &apply_canceled,
+            emit,
+          )
+        })
+        .await;
+        match result {
+          Ok(Ok(committer::ApplyOutcome::Completed)) => {
+            finish_task(&active, &finished_task_id);
+            return;
+          }
+          Ok(Ok(committer::ApplyOutcome::RepairNeeded)) => {}
+          Ok(Err(error)) => {
+            log::warn!("[game-package] 应用资源任务失败：{error}");
+            finish_task(&active, &finished_task_id);
+            return;
+          }
+          Err(error) => {
+            log::error!("[game-package] 应用资源任务异常退出：{error}");
+            finish_task(&active, &finished_task_id);
+            return;
+          }
+        }
+      }
+      if let Err(error) = continue_repair(
+        worker_app_handle,
+        task_root,
+        game_root,
+        installation,
+        plan,
+        snapshot,
+        canceled_flag,
+      )
+      .await
+      {
+        log::warn!("[game-package] 修复资源任务失败：{error}");
       }
       finish_task(&active, &finished_task_id);
     });
@@ -268,6 +322,7 @@ impl GamePackageManager {
     task_root: &Path,
     game_root: &Path,
     plan: &PersistedPlan,
+    repair_plan: Option<&PersistedPlan>,
     retry: bool,
   ) -> Result<PackageTaskSummary, String> {
     let _reservation =
@@ -276,9 +331,17 @@ impl GamePackageManager {
       return Err("游戏仍在运行，无法恢复资源提交".to_string());
     }
     let mut journal_value = journal::load(&journal::journal_path(task_root, &plan.plan_id))?;
-    committer::rollback_apply(plan, game_root, task_root, &mut journal_value, retry, |journal| {
-      emit_state(app_handle, &journal.summary());
-    })?;
+    committer::rollback_apply(
+      plan,
+      repair_plan,
+      game_root,
+      task_root,
+      &mut journal_value,
+      retry,
+      |journal| {
+        emit_state(app_handle, &journal.summary());
+      },
+    )?;
     Ok(journal_value.summary())
   }
 
@@ -335,7 +398,7 @@ impl GamePackageManager {
     if journal.state == PackageTaskState::Completed {
       return Err("资源任务已经完成".to_string());
     }
-    if journal.state.requires_recovery() {
+    if journal.state.blocks_launch() {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
     cleanup_task_partials(&task_root.join("cache/chunks"), task_id)?;
@@ -346,6 +409,168 @@ impl GamePackageManager {
     journal::persist(task_root, &journal)?;
     Ok(journal.summary())
   }
+}
+
+async fn continue_repair(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  game_root: PathBuf,
+  installation: GameInstallation,
+  plan: PersistedPlan,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+) -> Result<(), String> {
+  let files = {
+    let journal_value = journal.lock().await;
+    let can_continue = journal_value.repair.is_some()
+      && matches!(
+        journal_value.state,
+        PackageTaskState::RepairRequired
+          | PackageTaskState::Assembling
+          | PackageTaskState::Committing
+          | PackageTaskState::Verifying
+          | PackageTaskState::RollingBack
+      );
+    if !can_continue {
+      return Ok(());
+    }
+    journal_value.repair.as_ref().ok_or_else(|| "资源任务缺少修复清单".to_string())?.files.clone()
+  };
+  {
+    let mut journal_value = journal.lock().await;
+    journal_value.state = PackageTaskState::Assembling;
+    journal_value.current_file = Some("准备修复资源".to_string());
+    journal_value.error_message = None;
+    journal_value.touch();
+    journal::persist(&task_root, &journal_value)?;
+    emit_state(&app_handle, &journal_value.summary());
+  }
+  let result = run_repair(
+    app_handle.clone(),
+    task_root.clone(),
+    game_root,
+    installation,
+    plan,
+    journal.clone(),
+    canceled,
+    files,
+  )
+  .await;
+  if let Err(error) = &result {
+    let mut journal_value = journal.lock().await;
+    let incomplete_repair =
+      journal_value.repair.as_ref().is_some_and(|repair| repair.apply.is_some());
+    if journal_value.state != PackageTaskState::Completed
+      && journal_value.state != PackageTaskState::RecoveryRequired
+      && !incomplete_repair
+    {
+      journal_value.state = PackageTaskState::RepairRequired;
+      journal_value.error_message = Some(error.clone());
+      journal_value.current_file = None;
+      journal_value.touch();
+      if journal::persist(&task_root, &journal_value).is_ok() {
+        emit_state(&app_handle, &journal_value.summary());
+      }
+    }
+  }
+  result
+}
+
+async fn run_repair(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  game_root: PathBuf,
+  installation: GameInstallation,
+  plan: PersistedPlan,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  files: Vec<super::planner::PlanFile>,
+) -> Result<(), String> {
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let repair_plan =
+    hydrate_and_validate_repair_plan(&installation, &branches, plan.clone(), &files).await?;
+  {
+    let mut journal_value = journal.lock().await;
+    if journal_value.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
+      committer::revert_incomplete_repair(
+        &repair_plan,
+        &game_root,
+        &task_root,
+        &mut journal_value,
+      )?;
+      emit_state(&app_handle, &journal_value.summary());
+    }
+    journal_value.state = PackageTaskState::RepairRequired;
+    journal_value.touch();
+    journal::persist(&task_root, &journal_value)?;
+  }
+  let cache_root = prepare_cache_root(&task_root)?;
+  let pending = repair_plan
+    .downloads
+    .iter()
+    .filter(|download| !cached_chunk_matches(&cache_root, download))
+    .cloned()
+    .collect::<Vec<_>>();
+  if !pending.is_empty() {
+    {
+      let mut journal_value = journal.lock().await;
+      journal_value.state = PackageTaskState::Assembling;
+      journal_value.current_file = Some("下载修复资源".to_string());
+      journal_value.touch();
+      journal::persist(&task_root, &journal_value)?;
+      emit_state(&app_handle, &journal_value.summary());
+    }
+    let limiter = Arc::new(RateLimiter::new(None));
+    let downloads = stream::iter(pending.into_iter().map(|download| {
+      let cache_root = cache_root.clone();
+      let task_id = repair_plan.plan_id.clone();
+      let canceled = Arc::clone(&canceled);
+      let limiter = Arc::clone(&limiter);
+      let client = client.clone();
+      async move {
+        download_object(&client, &cache_root, &download, &task_id, &canceled, &limiter).await
+      }
+    }))
+    .buffer_unordered(DEFAULT_CONCURRENCY);
+    futures_util::pin_mut!(downloads);
+    while let Some(result) = downloads.next().await {
+      result?;
+      if canceled.load(Ordering::Acquire) {
+        return Err("应用更新已取消".to_string());
+      }
+    }
+  }
+  {
+    let mut journal_value = journal.lock().await;
+    journal_value.state = PackageTaskState::RepairRequired;
+    journal_value.current_file = None;
+    journal_value.touch();
+    journal::persist(&task_root, &journal_value)?;
+  }
+  let repair_handle = app_handle.clone();
+  let repair_snapshot = Arc::clone(&journal);
+  tauri::async_runtime::spawn_blocking(move || {
+    let mut journal_value = repair_snapshot.blocking_lock().clone();
+    let emit = |journal: &TaskJournal| {
+      *repair_snapshot.blocking_lock() = journal.clone();
+      let summary = journal.summary();
+      emit_state(&repair_handle, &summary);
+      emit_progress(&repair_handle, &summary);
+    };
+    committer::execute_repair(
+      &plan,
+      &repair_plan,
+      &game_root,
+      &task_root,
+      &mut journal_value,
+      &canceled,
+      emit,
+    )
+  })
+  .await
+  .map_err(|error| format!("修复资源任务异常退出：{error}"))?
 }
 
 fn finish_task(active: &Mutex<ActiveTasks>, task_id: &str) {

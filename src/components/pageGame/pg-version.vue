@@ -250,19 +250,28 @@ async function handleStartRequested(): Promise<void> {
 
 async function handleApplyRequested(): Promise<void> {
   const task = currentTask.value;
-  if (task?.state !== gameEnum.package.taskState.READY_TO_APPLY || !targetPublished.value) return;
+  const repairing = task?.state === gameEnum.package.taskState.REPAIR_REQUIRED;
+  if (task === null) return;
+  if (
+    !repairing &&
+    (task.state !== gameEnum.package.taskState.READY_TO_APPLY || !targetPublished.value)
+  ) {
+    return;
+  }
   const confirmed = await showDialog.checkF({
-    title: "应用游戏更新？",
-    text: "应用会修改游戏文件。请先完全退出游戏，游戏运行时无法应用更新。",
-    confirmLabel: "应用更新",
+    title: repairing ? "修复未变化文件？" : "应用游戏更新？",
+    text: repairing
+      ? "会下载并替换缺失或损坏的未变化文件，全部通过后再写入版本号。请先完全退出游戏，游戏运行时无法修复。"
+      : "应用会修改游戏文件。请先完全退出游戏，游戏运行时无法应用更新。",
+    confirmLabel: repairing ? "修复并完成" : "应用更新",
   });
   if (confirmed !== true) return;
   try {
     const updatedTask = await taskStore.applyTask(task.taskId);
-    showSnackbar.success("已开始应用游戏更新");
+    showSnackbar.success(repairing ? "已开始修复未变化文件" : "已开始应用游戏更新");
     if (updatedTask.state === gameEnum.package.taskState.COMPLETED) await refreshSnapshot();
   } catch (error) {
-    showSnackbar.error(`应用游戏更新失败：${error}`);
+    showSnackbar.error(`${repairing ? "修复未变化文件" : "应用游戏更新"}失败：${error}`);
   }
 }
 
@@ -297,10 +306,16 @@ async function handleRecoverRequested(
   if (task === null || taskActive.value) return;
   const rollback = action === gameEnum.package.recoveryAction.ROLLBACK;
   const abandonReady = rollback && task.state === gameEnum.package.taskState.READY_TO_APPLY;
+  const abandonRepair = rollback && task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
   let title = "安全恢复资源任务？";
   let text = "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。";
   let confirmLabel = "开始恢复";
-  if (abandonReady) {
+  if (abandonRepair) {
+    title = "放弃更新并回滚？";
+    text =
+      "已提交的新增、修改和删除会回滚到源版本。未完成的修复会先还原；已经修好的未变化文件会保留。已校验缓存不会删除。";
+    confirmLabel = "放弃并回滚";
+  } else if (abandonReady) {
     const predownload = task.target === gameEnum.package.planTarget.PRE_DOWNLOAD;
     title = predownload ? "放弃预下载任务？" : "放弃资源任务？";
     text = "放弃不会修改游戏目录，也不会删除已校验的共享缓存。之后可以重新评估并下载。";

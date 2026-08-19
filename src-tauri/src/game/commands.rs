@@ -12,7 +12,7 @@ use super::{
   package::GamePackageManager,
   planner::{
     create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_plan,
-    load_persisted_plan, persist_validated_plan,
+    hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
   },
 };
 use chrono::Utc;
@@ -117,7 +117,7 @@ pub async fn game_launch(
   let _reservation = manager.reserve_installation(&installation_id)?;
   if journal::list(&game_task_root(&app_handle)?, Some(&installation_id))?
     .iter()
-    .any(|task| task.state.requires_recovery())
+    .any(|task| task.state.blocks_launch())
   {
     return Err("该游戏安装存在进行中或等待恢复的资源提交，暂时不能启动".to_string());
   }
@@ -221,7 +221,7 @@ pub async fn game_package_apply(
   let branches = get_game_branches(&client, scheme).await?;
   let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
   persist_validated_plan(&task_root, &plan)?;
-  manager.apply(app_handle, task_root, installation.root_path.into(), plan)
+  manager.apply(app_handle, task_root, installation, plan)
 }
 
 /// 在下一个下载安全边界请求取消资源任务。
@@ -254,6 +254,45 @@ pub async fn game_package_recover(
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   let journal_value = journal::load(&journal::journal_path(&task_root, &task_id))?;
+  if journal_value.repair.is_some() {
+    let plan = load_persisted_plan(&task_root, &task_id)?;
+    let pool = sqlite_pool(&db_instances).await?;
+    let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+    if matches!(action, PackageRecoveryAction::Rollback) {
+      let repair_plan =
+        if journal_value.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
+          let files = journal_value
+            .repair
+            .as_ref()
+            .ok_or_else(|| "资源任务缺少修复清单".to_string())?
+            .files
+            .clone();
+          let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+          let client = create_http_client()?;
+          let branches = get_game_branches(&client, scheme).await?;
+          Some(
+            hydrate_and_validate_repair_plan(&installation, &branches, plan.clone(), &files)
+              .await?,
+          )
+        } else {
+          None
+        };
+      return manager.rollback_apply(
+        &app_handle,
+        &task_root,
+        Path::new(&installation.root_path),
+        &plan,
+        repair_plan.as_ref(),
+        false,
+      );
+    }
+    let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    let client = create_http_client()?;
+    let branches = get_game_branches(&client, scheme).await?;
+    let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
+    persist_validated_plan(&task_root, &plan)?;
+    return manager.apply(app_handle, task_root, installation, plan);
+  }
   if journal_value.state.requires_recovery() {
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
@@ -264,6 +303,7 @@ pub async fn game_package_recover(
       &task_root,
       Path::new(&installation.root_path),
       &plan,
+      None,
       retry,
     )?;
     if !retry {
@@ -275,7 +315,7 @@ pub async fn game_package_recover(
     let branches = get_game_branches(&client, scheme).await?;
     let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
     persist_validated_plan(&task_root, &plan)?;
-    return manager.apply(app_handle, task_root, installation.root_path.into(), plan);
+    return manager.apply(app_handle, task_root, installation, plan);
   }
   match action {
     PackageRecoveryAction::Resume => {

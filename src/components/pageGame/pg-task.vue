@@ -41,6 +41,13 @@
         variant="tonal"
       />
       <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED"
+        text="更新文件已提交，但仍有未变化文件缺失或损坏。修复这些文件后才会写入版本号；放弃任务会回滚本次更新。"
+        density="compact"
+        type="warning"
+        variant="tonal"
+      />
+      <v-alert
         v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
         text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
         density="compact"
@@ -81,12 +88,12 @@
       <v-btn
         v-if="canApply"
         :loading="actionPending"
-        prepend-icon="mdi-check-circle-outline"
+        :prepend-icon="repairRequired ? 'mdi-wrench-outline' : 'mdi-check-circle-outline'"
         size="small"
         variant="tonal"
         @click="emit('applyRequested')"
       >
-        应用更新
+        {{ repairRequired ? "修复并完成" : "应用更新" }}
       </v-btn>
       <v-btn
         v-if="active && task !== null"
@@ -158,8 +165,15 @@ const recoverable = computed<boolean>(() => {
 const readyToApply = computed<boolean>(() => {
   return task?.state === gameEnum.package.taskState.READY_TO_APPLY;
 });
-const canApply = computed<boolean>(() => readyToApply.value && targetPublished);
-const canAbandon = computed<boolean>(() => recoverable.value || readyToApply.value);
+const repairRequired = computed<boolean>(() => {
+  return task?.state === gameEnum.package.taskState.REPAIR_REQUIRED;
+});
+const canApply = computed<boolean>(() => {
+  return (readyToApply.value && targetPublished) || repairRequired.value;
+});
+const canAbandon = computed<boolean>(() => {
+  return recoverable.value || readyToApply.value || repairRequired.value;
+});
 const canStart = computed<boolean>(() => {
   if (
     plan === null ||
@@ -186,6 +200,7 @@ const stateColor = computed<string>(() => {
     case gameEnum.package.taskState.FAILED:
       return "error";
     case gameEnum.package.taskState.RECOVERY_REQUIRED:
+    case gameEnum.package.taskState.REPAIR_REQUIRED:
     case gameEnum.package.taskState.ROLLING_BACK:
     case gameEnum.package.taskState.CANCELED:
       return "warning";

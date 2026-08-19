@@ -121,6 +121,7 @@ pub enum PackageTaskState {
   CommitPrepared,
   Committing,
   Verifying,
+  RepairRequired,
   RollingBack,
   Completed,
   RecoveryRequired,
@@ -153,6 +154,11 @@ impl PackageTaskState {
         | Self::RollingBack
         | Self::RecoveryRequired
     )
+  }
+
+  /// 判断未完成提交或待修复状态是否应阻止启动游戏。
+  pub fn blocks_launch(self) -> bool {
+    self.requires_recovery() || self == Self::RepairRequired
   }
 }
 

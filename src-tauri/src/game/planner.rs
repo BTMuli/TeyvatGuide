@@ -50,7 +50,7 @@ pub(crate) struct PersistedPlan {
 }
 
 /// The complete target manifest file inventory used to verify a finished update.
-#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct PlanFile {
   pub(crate) name: String,
@@ -120,6 +120,7 @@ pub(crate) struct PlanSource {
 pub(crate) enum PlanAssetAction {
   Add,
   Modify,
+  Repair,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
@@ -243,7 +244,7 @@ pub async fn create_and_persist_plan(
     add_count: parts
       .assets
       .iter()
-      .filter(|asset| matches!(asset.action, PlanAssetAction::Add))
+      .filter(|asset| matches!(asset.action, PlanAssetAction::Add | PlanAssetAction::Repair))
       .count(),
     modify_count: parts
       .assets
@@ -393,6 +394,46 @@ pub(crate) fn persist_validated_plan(task_root: &Path, plan: &PersistedPlan) -> 
   persist_plan(task_root, &plan.plan_id, plan)
 }
 
+/// 按缺失/损坏文件重新请求当前 main 清单，生成只含 Repair 资产的可执行计划。
+pub(crate) async fn hydrate_and_validate_repair_plan(
+  installation: &GameInstallation,
+  branches: &GameBranches,
+  plan: PersistedPlan,
+  files: &[PlanFile],
+) -> Result<PersistedPlan, String> {
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  if plan.installation_id != installation.id
+    || plan.source_scheme != scheme
+    || plan.target_scheme != scheme
+    || installation.version.as_deref() != Some(plan.source_tag.as_str())
+  {
+    return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
+  }
+  if plan.strategy != PackagePlanStrategy::ManifestDiff {
+    return Err("当前只能修复 manifest-diff 资源计划".to_string());
+  }
+  if branches.main.tag != plan.target_tag {
+    return Err("正式版本已变化，请重新评估".to_string());
+  }
+  let client = create_http_client()?;
+  let target = get_decoded_build(&client, &branches.main, &installation.audio_languages).await?;
+  overlay_repair_parts(plan, build_repair_parts(target, files)?)
+}
+
+fn overlay_repair_parts(
+  mut plan: PersistedPlan,
+  parts: PlanParts,
+) -> Result<PersistedPlan, String> {
+  if parts.manifest_digest != plan.manifest_digest || parts.inventory != plan.inventory {
+    return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
+  }
+  plan.downloads = parts.downloads;
+  plan.assets = parts.assets;
+  plan.delete_files = Vec::new();
+  validate_persisted_plan(&plan, &plan.plan_id)?;
+  Ok(plan)
+}
+
 fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
   left.len() == right.len()
     && left.iter().zip(right).all(|(left, right)| {
@@ -458,64 +499,24 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
     };
     let download =
       target_downloads.get(&name).ok_or_else(|| format!("目标资源缺少 chunk 下载信息：{name}"))?;
-    let mut chunks = Vec::with_capacity(target_asset.asset_chunks.len());
-    for chunk in &target_asset.asset_chunks {
-      let compressed_size = positive_u64(chunk.chunk_size, "chunk 压缩大小")?;
-      let decompressed_size = positive_u64(chunk.chunk_size_decompressed, "chunk 解压大小")?;
-      let target_offset = nonnegative_u64(chunk.chunk_on_file_offset, "chunk 目标偏移")?;
-      let reuse_key = (chunk.chunk_decompressed_hash_md5.clone(), decompressed_size);
-      let reuse = source_chunks.get(&reuse_key).cloned();
-      if reuse.is_none() {
-        let candidate = PlanDownload {
-          id: chunk.chunk_name.clone(),
-          cache_key: chunk.chunk_name.clone(),
-          hash_kind: PlanDownloadHashKind::XxHash64,
-          expected_hash: format!("{:016x}", chunk_xxhash64(&chunk.chunk_name).unwrap_or_default()),
-          compressed_size,
-          decompressed_size,
-          encoding: payload_encoding(download.compression)?,
-          url_prefix: download.url_prefix.clone(),
-          url_suffix: download.url_suffix.clone(),
-          range_start: None,
-          range_length: None,
-        };
-        if let Some(existing) = downloads.get(&candidate.id) {
-          if existing.compressed_size != candidate.compressed_size
-            || existing.decompressed_size != candidate.decompressed_size
-            || existing.encoding != candidate.encoding
-          {
-            return Err("相同 chunk hash 对应了冲突的大小或编码".to_string());
-          }
-        } else {
-          downloads.insert(candidate.id.clone(), candidate);
-        }
-      }
-      chunks.push(PlanChunk {
-        id: chunk.chunk_name.clone(),
-        decompressed_md5: chunk.chunk_decompressed_hash_md5.clone(),
-        target_offset,
-        compressed_size,
-        decompressed_size,
-        reuse,
-      });
-    }
-    assets.push(PlanAsset {
-      name: name.clone(),
-      action,
-      source: source_assets
-        .get(&name)
-        .map(|asset| {
-          Ok::<PlanSource, String>(PlanSource {
-            size: nonnegative_u64(asset.asset_size, "源资源大小")?,
-            md5: asset.asset_hash_md5.clone(),
-          })
+    let source = source_assets
+      .get(&name)
+      .map(|asset| {
+        Ok::<PlanSource, String>(PlanSource {
+          size: nonnegative_u64(asset.asset_size, "源资源大小")?,
+          md5: asset.asset_hash_md5.clone(),
         })
-        .transpose()?,
-      size: nonnegative_u64(target_asset.asset_size, "资源大小")?,
-      md5: target_asset.asset_hash_md5.clone(),
-      chunks,
-      patch: None,
-    });
+      })
+      .transpose()?;
+    assets.push(plan_target_asset(
+      name,
+      target_asset,
+      action,
+      source,
+      download,
+      &source_chunks,
+      &mut downloads,
+    )?);
   }
   let mut delete_files = source_assets
     .iter()
@@ -630,6 +631,110 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
     assets,
     delete_files,
     inventory: Vec::new(),
+  })
+}
+
+fn build_repair_parts(target: DecodedBuild, files: &[PlanFile]) -> Result<PlanParts, String> {
+  if files.is_empty() {
+    return Err("没有需要修复的资源文件".to_string());
+  }
+  let target_assets = collect_assets(&target)?;
+  let inventory = collect_inventory(&target_assets)?;
+  let target_downloads = collect_category_downloads(&target)?;
+  let mut downloads = HashMap::<String, PlanDownload>::new();
+  let mut assets = Vec::new();
+  for file in files {
+    let target_asset = target_assets
+      .get(&file.name)
+      .ok_or_else(|| format!("修复目标不在正式清单中：{}", file.name))?;
+    let size = nonnegative_u64(target_asset.asset_size, "资源大小")?;
+    if size != file.size || !target_asset.asset_hash_md5.eq_ignore_ascii_case(&file.md5) {
+      return Err(format!("修复目标元数据与清单不一致：{}", file.name));
+    }
+    let download = target_downloads
+      .get(&file.name)
+      .ok_or_else(|| format!("目标资源缺少 chunk 下载信息：{}", file.name))?;
+    assets.push(plan_target_asset(
+      file.name.clone(),
+      target_asset,
+      PlanAssetAction::Repair,
+      None,
+      download,
+      &HashMap::new(),
+      &mut downloads,
+    )?);
+  }
+  assets.sort_by(|left, right| left.name.cmp(&right.name));
+  let mut downloads = downloads.into_values().collect::<Vec<_>>();
+  downloads.sort_by(|left, right| left.id.cmp(&right.id));
+  Ok(PlanParts {
+    strategy: PackagePlanStrategy::ManifestDiff,
+    manifest_digest: manifest_digest(&target),
+    downloads,
+    assets,
+    delete_files: Vec::new(),
+    inventory,
+  })
+}
+
+fn plan_target_asset(
+  name: String,
+  target_asset: &Asset,
+  action: PlanAssetAction,
+  source: Option<PlanSource>,
+  download: &DownloadInfo,
+  source_chunks: &HashMap<(String, u64), PlanReuse>,
+  downloads: &mut HashMap<String, PlanDownload>,
+) -> Result<PlanAsset, String> {
+  let mut chunks = Vec::with_capacity(target_asset.asset_chunks.len());
+  for chunk in &target_asset.asset_chunks {
+    let compressed_size = positive_u64(chunk.chunk_size, "chunk 压缩大小")?;
+    let decompressed_size = positive_u64(chunk.chunk_size_decompressed, "chunk 解压大小")?;
+    let target_offset = nonnegative_u64(chunk.chunk_on_file_offset, "chunk 目标偏移")?;
+    let reuse_key = (chunk.chunk_decompressed_hash_md5.clone(), decompressed_size);
+    let reuse = source_chunks.get(&reuse_key).cloned();
+    if reuse.is_none() {
+      let candidate = PlanDownload {
+        id: chunk.chunk_name.clone(),
+        cache_key: chunk.chunk_name.clone(),
+        hash_kind: PlanDownloadHashKind::XxHash64,
+        expected_hash: format!("{:016x}", chunk_xxhash64(&chunk.chunk_name).unwrap_or_default()),
+        compressed_size,
+        decompressed_size,
+        encoding: payload_encoding(download.compression)?,
+        url_prefix: download.url_prefix.clone(),
+        url_suffix: download.url_suffix.clone(),
+        range_start: None,
+        range_length: None,
+      };
+      if let Some(existing) = downloads.get(&candidate.id) {
+        if existing.compressed_size != candidate.compressed_size
+          || existing.decompressed_size != candidate.decompressed_size
+          || existing.encoding != candidate.encoding
+        {
+          return Err("相同 chunk hash 对应了冲突的大小或编码".to_string());
+        }
+      } else {
+        downloads.insert(candidate.id.clone(), candidate);
+      }
+    }
+    chunks.push(PlanChunk {
+      id: chunk.chunk_name.clone(),
+      decompressed_md5: chunk.chunk_decompressed_hash_md5.clone(),
+      target_offset,
+      compressed_size,
+      decompressed_size,
+      reuse,
+    });
+  }
+  Ok(PlanAsset {
+    name,
+    action,
+    source,
+    size: nonnegative_u64(target_asset.asset_size, "资源大小")?,
+    md5: target_asset.asset_hash_md5.clone(),
+    chunks,
+    patch: None,
   })
 }
 
@@ -917,10 +1022,10 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   let mut chunk_count = 0_usize;
   for asset in &plan.assets {
     let source_valid = match (asset.action, &asset.source) {
-      (PlanAssetAction::Add, None) => true,
+      (PlanAssetAction::Add, None) | (PlanAssetAction::Repair, None) => true,
       (PlanAssetAction::Modify, Some(source)) => is_md5(&source.md5),
       (PlanAssetAction::Modify, None) => plan.schema_version != PLAN_SCHEMA_VERSION,
-      (PlanAssetAction::Add, Some(_)) => false,
+      (PlanAssetAction::Add, Some(_)) | (PlanAssetAction::Repair, Some(_)) => false,
     };
     if !asset_names.insert(asset.name.as_str())
       || !is_md5(&asset.md5)
