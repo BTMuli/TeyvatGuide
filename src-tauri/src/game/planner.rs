@@ -22,7 +22,8 @@ use std::{
 use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
-const PLAN_SCHEMA_VERSION: u32 = 2;
+const PLAN_SCHEMA_VERSION: u32 = 3;
+const LEGACY_PLAN_SCHEMA_VERSION: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
 
@@ -54,6 +55,8 @@ pub(crate) struct PlanDownload {
   pub(crate) expected_hash: String,
   pub(crate) compressed_size: u64,
   pub(crate) decompressed_size: u64,
+  #[serde(default)]
+  pub(crate) encoding: PayloadEncoding,
   #[serde(default, skip_serializing)]
   pub(crate) url_prefix: String,
   #[serde(default, skip_serializing)]
@@ -69,60 +72,71 @@ pub(crate) enum PlanDownloadHashKind {
   UnsupportedPatchRange,
 }
 
+/// 下载对象写入目标资源前采用的载荷编码。
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub(crate) enum PayloadEncoding {
+  Raw,
+  Zstd,
+  /// v2 计划未保存编码；仅允许在重新请求远端清单前短暂存在。
+  #[default]
+  LegacyUnspecified,
+}
+
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct PlanAsset {
-  name: String,
-  action: PlanAssetAction,
-  size: u64,
-  md5: String,
-  chunks: Vec<PlanChunk>,
-  patch: Option<PlanPatch>,
+  pub(crate) name: String,
+  pub(crate) action: PlanAssetAction,
+  pub(crate) size: u64,
+  pub(crate) md5: String,
+  pub(crate) chunks: Vec<PlanChunk>,
+  pub(crate) patch: Option<PlanPatch>,
 }
 
 #[derive(Clone, Copy, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
-enum PlanAssetAction {
+pub(crate) enum PlanAssetAction {
   Add,
   Modify,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PlanChunk {
-  id: String,
-  decompressed_md5: String,
-  target_offset: u64,
-  compressed_size: u64,
-  decompressed_size: u64,
-  reuse: Option<PlanReuse>,
+pub(crate) struct PlanChunk {
+  pub(crate) id: String,
+  pub(crate) decompressed_md5: String,
+  pub(crate) target_offset: u64,
+  pub(crate) compressed_size: u64,
+  pub(crate) decompressed_size: u64,
+  pub(crate) reuse: Option<PlanReuse>,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PlanReuse {
-  asset_name: String,
-  source_offset: u64,
+pub(crate) struct PlanReuse {
+  pub(crate) asset_name: String,
+  pub(crate) source_offset: u64,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct PlanPatch {
-  id: String,
-  patch_file_size: u64,
-  patch_md5: String,
-  range_start: u64,
-  range_length: u64,
-  original_name: String,
-  original_size: u64,
-  original_md5: String,
+pub(crate) struct PlanPatch {
+  pub(crate) id: String,
+  pub(crate) patch_file_size: u64,
+  pub(crate) patch_md5: String,
+  pub(crate) range_start: u64,
+  pub(crate) range_length: u64,
+  pub(crate) original_name: String,
+  pub(crate) original_size: u64,
+  pub(crate) original_md5: String,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
 pub(crate) struct PlanDelete {
-  name: String,
-  size: u64,
-  md5: String,
+  pub(crate) name: String,
+  pub(crate) size: u64,
+  pub(crate) md5: String,
 }
 
 struct PlanParts {
@@ -307,6 +321,7 @@ pub(crate) async fn hydrate_and_validate_plan(
   {
     return Err("远端资源清单已变化，请重新评估".to_string());
   }
+  plan.schema_version = PLAN_SCHEMA_VERSION;
   plan.downloads = fresh.downloads;
   Ok(plan)
 }
@@ -320,6 +335,7 @@ fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
         && left.expected_hash.eq_ignore_ascii_case(&right.expected_hash)
         && left.compressed_size == right.compressed_size
         && left.decompressed_size == right.decompressed_size
+        && (left.encoding == right.encoding || right.encoding == PayloadEncoding::LegacyUnspecified)
         && left.range_start == right.range_start
         && left.range_length == right.range_length
     })
@@ -376,6 +392,7 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
           expected_hash: format!("{:016x}", chunk_xxhash64(&chunk.chunk_name).unwrap_or_default()),
           compressed_size,
           decompressed_size,
+          encoding: payload_encoding(download.compression)?,
           url_prefix: download.url_prefix.clone(),
           url_suffix: download.url_suffix.clone(),
           range_start: None,
@@ -384,8 +401,9 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
         if let Some(existing) = downloads.get(&candidate.id) {
           if existing.compressed_size != candidate.compressed_size
             || existing.decompressed_size != candidate.decompressed_size
+            || existing.encoding != candidate.encoding
           {
-            return Err("相同 chunk hash 对应了冲突的大小".to_string());
+            return Err("相同 chunk hash 对应了冲突的大小或编码".to_string());
           }
         } else {
           downloads.insert(candidate.id.clone(), candidate);
@@ -458,6 +476,7 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
         expected_hash: String::new(),
         compressed_size: patch.range_length,
         decompressed_size: patch.range_length,
+        encoding: PayloadEncoding::Raw,
         url_prefix: manifest.diff_download.url_prefix.clone(),
         url_suffix: manifest.diff_download.url_suffix.clone(),
         range_start: Some(patch.range_start),
@@ -640,8 +659,22 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
     return false;
   }
   let path = cache_root.join(&download.cache_key);
-  if !fs::metadata(&path).is_ok_and(|metadata| metadata.len() == download.compressed_size) {
+  let Ok(metadata) = fs::symlink_metadata(&path) else {
     return false;
+  };
+  if metadata.file_type().is_symlink()
+    || !metadata.is_file()
+    || metadata.len() != download.compressed_size
+  {
+    return false;
+  }
+  #[cfg(target_os = "windows")]
+  {
+    use std::os::windows::fs::MetadataExt;
+    use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
+    if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+      return false;
+    }
   }
   let Ok(file) = File::open(path) else {
     return false;
@@ -690,7 +723,9 @@ pub(crate) fn load_persisted_plan(
 }
 
 fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
-  if plan.schema_version != PLAN_SCHEMA_VERSION || plan.plan_id != plan_id {
+  if !matches!(plan.schema_version, PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION)
+    || plan.plan_id != plan_id
+  {
     return Err("游戏资源计划版本或身份不匹配".to_string());
   }
   if plan.installation_id.is_empty()
@@ -708,6 +743,11 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   }
   let mut cache_keys = std::collections::HashSet::with_capacity(plan.downloads.len());
   for download in &plan.downloads {
+    let encoding_valid = match plan.schema_version {
+      PLAN_SCHEMA_VERSION => download.encoding != PayloadEncoding::LegacyUnspecified,
+      LEGACY_PLAN_SCHEMA_VERSION => download.encoding == PayloadEncoding::LegacyUnspecified,
+      _ => false,
+    };
     let hash_valid = match download.hash_kind {
       PlanDownloadHashKind::XxHash64 => chunk_xxhash64(&download.id).is_some_and(|expected| {
         format!("{expected:016x}").eq_ignore_ascii_case(&download.expected_hash)
@@ -731,6 +771,10 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
         .bytes()
         .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.'))
       || download.compressed_size == 0
+      || download.decompressed_size == 0
+      || !encoding_valid
+      || (download.encoding == PayloadEncoding::Raw
+        && download.compressed_size != download.decompressed_size)
       || !hash_valid
       || !range_valid
       || !cache_keys.insert(download.cache_key.as_str())
@@ -738,7 +782,83 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
       return Err("游戏资源计划下载条目无效".to_string());
     }
   }
+  validate_plan_assets(plan)?;
   Ok(())
+}
+
+fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
+  if plan.assets.len() > 500_000 || plan.delete_files.len() > 500_000 {
+    return Err("游戏资源计划文件条目数超过安全上限".to_string());
+  }
+  let downloads =
+    plan.downloads.iter().map(|item| (item.id.as_str(), item)).collect::<HashMap<_, _>>();
+  let mut asset_names = std::collections::HashSet::with_capacity(plan.assets.len());
+  let mut chunk_count = 0_usize;
+  for asset in &plan.assets {
+    if normalize_manifest_path(&asset.name)? != asset.name
+      || !asset_names.insert(asset.name.as_str())
+      || !is_md5(&asset.md5)
+      || (plan.strategy == PackagePlanStrategy::ManifestDiff && asset.patch.is_some())
+      || (plan.strategy == PackagePlanStrategy::Patch && asset.patch.is_none())
+    {
+      return Err("游戏资源计划包含无效资源条目".to_string());
+    }
+    chunk_count = chunk_count.saturating_add(asset.chunks.len());
+    if chunk_count > 5_000_000 {
+      return Err("游戏资源计划 chunk 数量超过安全上限".to_string());
+    }
+    let mut ranges = Vec::with_capacity(asset.chunks.len());
+    for chunk in &asset.chunks {
+      let end = chunk
+        .target_offset
+        .checked_add(chunk.decompressed_size)
+        .ok_or_else(|| "游戏资源计划 chunk 范围溢出".to_string())?;
+      if chunk.id.is_empty()
+        || !is_md5(&chunk.decompressed_md5)
+        || chunk.compressed_size == 0
+        || chunk.decompressed_size == 0
+        || end > asset.size
+      {
+        return Err("游戏资源计划包含无效 chunk 条目".to_string());
+      }
+      if let Some(reuse) = &chunk.reuse {
+        normalize_manifest_path(&reuse.asset_name)?;
+        reuse
+          .source_offset
+          .checked_add(chunk.decompressed_size)
+          .ok_or_else(|| "游戏资源计划复用 chunk 范围溢出".to_string())?;
+      } else {
+        let download = downloads
+          .get(chunk.id.as_str())
+          .ok_or_else(|| "游戏资源计划 chunk 缺少下载对象".to_string())?;
+        if download.compressed_size != chunk.compressed_size
+          || download.decompressed_size != chunk.decompressed_size
+        {
+          return Err("游戏资源计划 chunk 与下载对象大小不一致".to_string());
+        }
+      }
+      ranges.push((chunk.target_offset, end));
+    }
+    ranges.sort_unstable();
+    if ranges.windows(2).any(|pair| pair[0].1 > pair[1].0) {
+      return Err("游戏资源计划包含重叠 chunk".to_string());
+    }
+  }
+  let mut delete_names = std::collections::HashSet::with_capacity(plan.delete_files.len());
+  for deleted in &plan.delete_files {
+    if normalize_manifest_path(&deleted.name)? != deleted.name
+      || !delete_names.insert(deleted.name.as_str())
+      || asset_names.contains(deleted.name.as_str())
+      || !is_md5(&deleted.md5)
+    {
+      return Err("游戏资源计划包含无效删除条目".to_string());
+    }
+  }
+  Ok(())
+}
+
+fn is_md5(value: &str) -> bool {
+  value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
 fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result<(), String> {
@@ -794,9 +914,20 @@ fn nonnegative_u64(value: i64, field: &str) -> Result<u64, String> {
   Ok(value as u64)
 }
 
+fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
+  match compression {
+    0 => Ok(PayloadEncoding::Raw),
+    1 => Ok(PayloadEncoding::Zstd),
+    _ => Err(format!("Sophon 资源载荷使用了不支持的压缩方式：{compression}")),
+  }
+}
+
 #[cfg(test)]
 mod tests {
-  use super::{assets_equal, build_manifest_diff, build_patch_plan, digest_parts};
+  use super::{
+    PayloadEncoding, assets_equal, build_manifest_diff, build_patch_plan, digest_parts,
+    load_persisted_plan,
+  };
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
     model::{PackagePlanStrategy, SchemeId},
@@ -876,6 +1007,7 @@ mod tests {
       expected_hash: "0123456789abcdef".to_string(),
       compressed_size: 8,
       decompressed_size: 10,
+      encoding: super::PayloadEncoding::Zstd,
       url_prefix: "https://example.yuanshen.com/chunks".to_string(),
       url_suffix: "signature=secret".to_string(),
       range_start: None,
@@ -885,6 +1017,48 @@ mod tests {
     assert!(value.get("urlPrefix").is_none());
     assert!(value.get("urlSuffix").is_none());
     assert!(!value.to_string().contains("secret"));
+  }
+
+  #[test]
+  fn reads_v2_plan_with_unspecified_payload_encoding() {
+    let plan_id = uuid::Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-plan-v2-{plan_id}"));
+    let directory = root.join("tasks").join(&plan_id);
+    std::fs::create_dir_all(&directory).unwrap();
+    std::fs::write(
+      directory.join("plan.json"),
+      serde_json::json!({
+        "schemaVersion": 2,
+        "planId": plan_id,
+        "installationId": "installation",
+        "sourceScheme": "cn_official",
+        "targetScheme": "cn_official",
+        "target": "pre_download",
+        "sourceTag": "1.0.0",
+        "targetTag": "2.0.0",
+        "manifestDigest": "a".repeat(64),
+        "strategy": "manifest_diff",
+        "downloads": [{
+          "id": "0123456789abcdef",
+          "cacheKey": "0123456789abcdef",
+          "hashKind": "xx_hash64",
+          "expectedHash": "0123456789abcdef",
+          "compressedSize": 8,
+          "decompressedSize": 10,
+          "rangeStart": null,
+          "rangeLength": null
+        }],
+        "assets": [],
+        "deleteFiles": [],
+        "createdAt": "2026-08-19T00:00:00Z"
+      })
+      .to_string(),
+    )
+    .unwrap();
+    let plan = load_persisted_plan(&root, &plan_id).unwrap();
+    assert_eq!(plan.schema_version, 2);
+    assert_eq!(plan.downloads[0].encoding, PayloadEncoding::LegacyUnspecified);
+    std::fs::remove_dir_all(root).unwrap();
   }
 
   #[test]
@@ -911,6 +1085,7 @@ mod tests {
     let plan = build_manifest_diff(source, target).unwrap();
     assert_eq!(plan.strategy, PackagePlanStrategy::ManifestDiff);
     assert_eq!(plan.downloads.len(), 1);
+    assert_eq!(plan.downloads[0].encoding, PayloadEncoding::Zstd);
     assert_eq!(plan.assets.len(), 2);
     assert_eq!(plan.delete_files.len(), 1);
     assert_eq!(plan.assets.iter().filter(|asset| asset.chunks[0].reuse.is_some()).count(), 1);

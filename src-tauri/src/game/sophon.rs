@@ -133,7 +133,7 @@ pub struct FileInfo {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DownloadInfo {
   encryption: u32,
-  compression: u32,
+  pub(crate) compression: u32,
   password: String,
   pub url_prefix: String,
   pub url_suffix: String,
@@ -475,6 +475,7 @@ fn validate_manifest(manifest: &ManifestProto) -> Result<(), String> {
     if chunk_count > MAX_CHUNKS {
       return Err("Sophon manifest chunk 数量超过安全上限".to_string());
     }
+    let mut ranges = Vec::with_capacity(asset.asset_chunks.len());
     for chunk in &asset.asset_chunks {
       if chunk_xxhash64(&chunk.chunk_name).is_none() {
         return Err(format!("Sophon chunk 名称格式无效：长度 {}", chunk.chunk_name.len()));
@@ -506,6 +507,11 @@ fn validate_manifest(manifest: &ManifestProto) -> Result<(), String> {
       if end > asset.asset_size {
         return Err("Sophon chunk 超出所属资源范围".to_string());
       }
+      ranges.push((chunk.chunk_on_file_offset, end));
+    }
+    ranges.sort_unstable();
+    if ranges.windows(2).any(|pair| pair[0].1 > pair[1].0) {
+      return Err("Sophon manifest 包含重叠 chunk".to_string());
     }
   }
   Ok(())
@@ -647,6 +653,35 @@ mod tests {
         }],
         asset_type: 0,
         asset_size: 10,
+        asset_hash_md5: "0123456789abcdef0123456789abcdef".to_string(),
+      }],
+    };
+    assert!(validate_manifest(&manifest).is_err());
+  }
+
+  #[test]
+  fn rejects_overlapping_chunks() {
+    let manifest = ManifestProto {
+      assets: vec![Asset {
+        asset_name: "YuanShen_Data/file.bin".to_string(),
+        asset_chunks: vec![
+          AssetChunk {
+            chunk_name: "0123456789abcdef".to_string(),
+            chunk_decompressed_hash_md5: "0123456789abcdef0123456789abcdef".to_string(),
+            chunk_on_file_offset: 0,
+            chunk_size: 8,
+            chunk_size_decompressed: 8,
+          },
+          AssetChunk {
+            chunk_name: "fedcba9876543210".to_string(),
+            chunk_decompressed_hash_md5: "fedcba9876543210fedcba9876543210".to_string(),
+            chunk_on_file_offset: 4,
+            chunk_size: 8,
+            chunk_size_decompressed: 8,
+          },
+        ],
+        asset_type: 0,
+        asset_size: 12,
         asset_hash_md5: "0123456789abcdef0123456789abcdef".to_string(),
       }],
     };

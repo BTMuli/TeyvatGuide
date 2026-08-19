@@ -299,7 +299,7 @@ fn remove_partial(path: &Path) {
 #[cfg(test)]
 mod tests {
   use super::validate_content_range;
-  use crate::game::planner::{PlanDownload, PlanDownloadHashKind};
+  use crate::game::planner::{PayloadEncoding, PlanDownload, PlanDownloadHashKind};
   use reqwest::header::HeaderValue;
 
   fn range_download() -> PlanDownload {
@@ -310,6 +310,7 @@ mod tests {
       expected_hash: String::new(),
       compressed_size: 8,
       decompressed_size: 8,
+      encoding: PayloadEncoding::Raw,
       url_prefix: "https://example.yuanshen.com/patch".to_string(),
       url_suffix: String::new(),
       range_start: Some(10),
