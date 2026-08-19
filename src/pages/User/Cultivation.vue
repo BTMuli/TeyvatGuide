@@ -1380,7 +1380,10 @@ async function loadUidData(uid: number): Promise<void> {
     } else {
       await loadLocalData(uid, requestVersion);
     }
-    if (requestVersion === dataLoadVersion) await loadProjects(uid);
+    if (requestVersion === dataLoadVersion) {
+      await loadProjects(uid);
+      await syncBagWeaponPlanEntries(uid, requestVersion);
+    }
   } finally {
     if (requestVersion === dataLoadVersion) loading.value = false;
   }
@@ -1559,7 +1562,9 @@ async function importInventory(): Promise<void> {
   planLoading.value = true;
   try {
     await tryCallYae(gameDir.value, String(uid));
-    await loadInventoryData(uid, dataLoadVersion);
+    if (useApiCalculation.value) await loadInventoryData(uid, dataLoadVersion);
+    else await loadLocalData(uid, dataLoadVersion);
+    await syncBagWeaponPlanEntries(uid);
   } finally {
     planLoading.value = false;
   }
@@ -2142,6 +2147,61 @@ async function createAvatarRefreshInput(
       required: material.count,
     })),
   };
+}
+
+function findBagWeaponForEntry(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+  bagWeapons: ReadonlyArray<TGApp.Sqlite.UserBag.WeaponTable>,
+): TGApp.Sqlite.UserBag.WeaponTable | undefined {
+  const matches = bagWeapons.filter((weapon) => weapon.id === entry.itemId);
+  if (matches.length === 0) return undefined;
+  if (entry.instanceKey.length === 0) return matches[0];
+  return matches.find(
+    (weapon) => weapon.guid === entry.instanceKey || `bag-${weapon.guid}` === entry.instanceKey,
+  );
+}
+
+function isBagWeaponNewerThanEntry(
+  bagWeapon: TGApp.Sqlite.UserBag.WeaponTable,
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): boolean {
+  const bagTime = Date.parse(bagWeapon.updated);
+  const entryTime = Date.parse(entry.updated);
+  if (Number.isNaN(bagTime) || Number.isNaN(entryTime)) return true;
+  return bagTime > entryTime;
+}
+
+async function syncBagWeaponPlanEntries(uid: number, requestVersion?: number): Promise<void> {
+  const project = currentProject.value;
+  if (!project || project.uid !== uid) return;
+  const weaponEntries = planEntries.value.filter(
+    (entry) => entry.type === "weapon" && entry.calculationMode === "bag",
+  );
+  if (weaponEntries.length === 0) return;
+  const [weaponData, roleData] = await Promise.all([
+    TSUserBagWeapon.getWeapon(uid),
+    roles.value.length > 0 ? Promise.resolve([...roles.value]) : TSUserAvatar.getAvatars(uid),
+  ]);
+  if (requestVersion !== undefined && requestVersion !== dataLoadVersion) return;
+  const options = buildWeaponOptions(weaponData, roleData);
+  const inputs: Array<TGApp.Sqlite.Cultivation.RefreshEntryInput> = [];
+  for (const entry of weaponEntries) {
+    const bagWeapon = findBagWeaponForEntry(entry, weaponData);
+    if (bagWeapon === undefined || !isBagWeaponNewerThanEntry(bagWeapon, entry)) continue;
+    if (
+      entry.currentState.level === bagWeapon.info.level &&
+      entry.currentState.promoteLevel === bagWeapon.info.promote_level
+    ) {
+      continue;
+    }
+    const input = createWeaponRefreshInput(entry, options);
+    if (input) inputs.push(input);
+  }
+  if (inputs.length === 0) return;
+  await TSCultivationPlan.refreshEntries(project.id, inputs);
+  if (requestVersion !== undefined && requestVersion !== dataLoadVersion) return;
+  if (currentProject.value?.id !== project.id) return;
+  planEntries.value = await TSCultivationPlan.getEntries(project.id);
 }
 
 function createWeaponRefreshInput(
