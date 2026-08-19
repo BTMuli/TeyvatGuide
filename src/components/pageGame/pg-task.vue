@@ -128,12 +128,6 @@
     <p v-if="plan !== null && !plan.hasSufficientSpace" class="task-note">
       当前评估的磁盘空间不足，不能开始下载。
     </p>
-    <p
-      v-else-if="plan?.strategy === gameEnum.package.planStrategy.PATCH && task === null"
-      class="task-note"
-    >
-      差分补丁计划暂不能直接执行。请重新评估以生成可逐块校验的清单差异计划。
-    </p>
   </section>
 </template>
 
@@ -177,7 +171,8 @@ const canAbandon = computed<boolean>(() => {
 const canStart = computed<boolean>(() => {
   if (
     plan === null ||
-    plan.strategy !== gameEnum.package.planStrategy.MANIFEST_DIFF ||
+    (plan.strategy !== gameEnum.package.planStrategy.MANIFEST_DIFF &&
+      plan.strategy !== gameEnum.package.planStrategy.PATCH) ||
     active.value
   ) {
     return false;

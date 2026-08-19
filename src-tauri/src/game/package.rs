@@ -114,8 +114,10 @@ impl GamePackageManager {
     if is_game_running() {
       return Err("游戏仍在运行，无法开始资源任务".to_string());
     }
-    if plan.strategy != PackagePlanStrategy::ManifestDiff {
-      return Err("当前仅允许启动可逐块校验的 manifest-diff 计划".to_string());
+    if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
+      || plan.inventory.is_empty()
+    {
+      return Err("当前只能启动包含完整目标清单的资源计划".to_string());
     }
     let concurrency = options.concurrency.unwrap_or(DEFAULT_CONCURRENCY);
     if !(1..=MAX_CONCURRENCY).contains(&concurrency) {
@@ -211,8 +213,10 @@ impl GamePackageManager {
     installation: GameInstallation,
     plan: PersistedPlan,
   ) -> Result<PackageTaskSummary, String> {
-    if plan.strategy != PackagePlanStrategy::ManifestDiff || plan.inventory.is_empty() {
-      return Err("当前只能应用包含完整目标清单的 manifest-diff 计划".to_string());
+    if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
+      || plan.inventory.is_empty()
+    {
+      return Err("当前只能应用包含完整目标清单的资源计划".to_string());
     }
     let mut reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;

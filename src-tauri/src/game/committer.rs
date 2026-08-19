@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  assembler::assemble_manifest_plan,
+  assembler::{assemble_manifest_plan, assemble_plan},
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
@@ -51,7 +51,7 @@ struct CommitStep {
   md5: String,
 }
 
-/// 组装、提交并验证一个 ReadyToApply manifest-diff 任务。
+/// 组装、提交并验证一个 ReadyToApply 任务。
 pub(crate) fn execute_apply<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -63,8 +63,8 @@ pub(crate) fn execute_apply<F>(
 where
   F: Fn(&TaskJournal),
 {
-  if plan.strategy != PackagePlanStrategy::ManifestDiff {
-    return Err("当前提交器只支持 manifest-diff 资源计划".to_string());
+  if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch) {
+    return Err("当前提交器只支持 manifest-diff 或 patch 资源计划".to_string());
   }
   if plan.inventory.is_empty() {
     return Err("资源计划缺少完整目标文件清单，请重新评估".to_string());
@@ -89,7 +89,7 @@ where
   journal.current_file = Some("组装资源文件".to_string());
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
-    assemble_manifest_plan(plan, game_root, task_root, canceled)?;
+    assemble_plan(plan, game_root, task_root, canceled)?;
     check_canceled(canceled)?;
     prepare_transaction(plan, game_root, task_root, journal)?;
     ensure_game_stopped()?;

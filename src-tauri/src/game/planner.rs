@@ -172,7 +172,7 @@ struct PlanParts {
   inventory: Vec<PlanFile>,
 }
 
-/// 请求远端清单，生成可执行的 manifest-diff 计划并原子写入应用数据目录。
+/// 请求远端清单，生成可执行的 patch 或 manifest-diff 计划并原子写入应用数据目录。
 pub async fn create_and_persist_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -195,18 +195,11 @@ pub async fn create_and_persist_plan(
   }
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
-  if target == PackagePlanTarget::Main
-    && target_branch.diff_tags.iter().any(|tag| tag == source_tag)
-  {
-    log::info!(
-      "[game-package] 正式更新 {source_tag} → {} 暂用 manifest-diff 执行；patch 消费待 HDiffPatch 引擎落地",
-      target_branch.tag
-    );
-  }
-  let parts = build_manifest_plan(
+  let parts = build_executable_plan(
     &client,
-    &branches.main.with_tag(source_tag),
+    branches,
     target_branch,
+    source_tag,
     &installation.audio_languages,
   )
   .await?;
@@ -354,8 +347,8 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
   {
     return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
   }
-  if plan.strategy != PackagePlanStrategy::ManifestDiff {
-    return Err("当前只能应用 manifest-diff 资源计划".to_string());
+  if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch) {
+    return Err("当前只能应用包含完整目标清单的资源计划".to_string());
   }
   if branches.main.tag != plan.target_tag {
     return Err(match plan.target {
@@ -364,13 +357,27 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     });
   }
   let client = create_http_client()?;
-  let fresh = build_manifest_plan(
-    &client,
-    &branches.main.with_tag(&plan.source_tag),
-    &branches.main,
-    &installation.audio_languages,
-  )
-  .await?;
+  let fresh = match plan.strategy {
+    PackagePlanStrategy::Patch => {
+      let build = get_decoded_patch_build(
+        &client,
+        &branches.main,
+        &plan.source_tag,
+        &installation.audio_languages,
+      )
+      .await?;
+      build_patch_plan(build, &plan.source_tag)?
+    }
+    PackagePlanStrategy::ManifestDiff => {
+      build_manifest_plan(
+        &client,
+        &branches.main.with_tag(&plan.source_tag),
+        &branches.main,
+        &installation.audio_languages,
+      )
+      .await?
+    }
+  };
   if fresh.manifest_digest != plan.manifest_digest
     || !assets_match(&fresh.assets, &plan.assets, plan.schema_version != PLAN_SCHEMA_VERSION)
     || fresh.delete_files != plan.delete_files
@@ -411,8 +418,8 @@ pub(crate) async fn hydrate_and_validate_repair_plan(
   {
     return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
   }
-  if plan.strategy != PackagePlanStrategy::ManifestDiff {
-    return Err("当前只能修复 manifest-diff 资源计划".to_string());
+  if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch) {
+    return Err("当前只能修复已提交的资源计划".to_string());
   }
   if branches.main.tag != plan.target_tag {
     return Err("正式版本已变化，请重新评估".to_string());
@@ -426,12 +433,18 @@ fn overlay_repair_parts(
   mut plan: PersistedPlan,
   parts: PlanParts,
 ) -> Result<PersistedPlan, String> {
-  if parts.manifest_digest != plan.manifest_digest || parts.inventory != plan.inventory {
+  if parts.inventory != plan.inventory {
+    return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
+  }
+  if plan.strategy == PackagePlanStrategy::ManifestDiff
+    && parts.manifest_digest != plan.manifest_digest
+  {
     return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
   }
   plan.downloads = parts.downloads;
   plan.assets = parts.assets;
   plan.delete_files = Vec::new();
+  plan.strategy = PackagePlanStrategy::ManifestDiff;
   validate_persisted_plan(&plan, &plan.plan_id)?;
   Ok(plan)
 }
@@ -462,6 +475,43 @@ fn assets_match(left: &[PlanAsset], right: &[PlanAsset], allow_missing_source: b
         && left.chunks == right.chunks
         && left.patch == right.patch
     })
+}
+
+async fn build_executable_plan(
+  client: &reqwest::Client,
+  branches: &GameBranches,
+  target_branch: &super::hoyoplay::BranchDescriptor,
+  source_tag: &str,
+  audio_languages: &[String],
+) -> Result<PlanParts, String> {
+  if target_branch.diff_tags.iter().any(|tag| tag == source_tag) {
+    match get_decoded_patch_build(client, target_branch, source_tag, audio_languages)
+      .await
+      .and_then(|build| build_patch_plan(build, source_tag))
+    {
+      Ok(parts)
+        if !parts.inventory.is_empty()
+          && (!parts.assets.is_empty() || !parts.delete_files.is_empty()) =>
+      {
+        log::info!("[game-package] {source_tag} → {} 使用 patch 计划", target_branch.tag);
+        return Ok(parts);
+      }
+      Ok(_) => {
+        log::warn!(
+          "[game-package] {source_tag} → {} 的 patch 计划缺少可执行变更，回退 manifest-diff",
+          target_branch.tag
+        );
+      }
+      Err(error) => {
+        log::warn!(
+          "[game-package] {source_tag} → {} 的 patch 计划失败，回退 manifest-diff：{error}",
+          target_branch.tag
+        );
+      }
+    }
+  }
+  build_manifest_plan(client, &branches.main.with_tag(source_tag), target_branch, audio_languages)
+    .await
 }
 
 async fn build_manifest_plan(
@@ -547,6 +597,7 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
 
 fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanParts, String> {
   let manifest_digest = patch_manifest_digest(&build);
+  let inventory = collect_patch_inventory(&build)?;
   let mut downloads = HashMap::<String, PlanDownload>::new();
   let mut assets = Vec::new();
   let mut delete_files = HashMap::<String, PlanDelete>::new();
@@ -634,7 +685,7 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
     downloads,
     assets,
     delete_files,
-    inventory: Vec::new(),
+    inventory,
   })
 }
 
@@ -767,6 +818,30 @@ fn collect_inventory(assets: &HashMap<String, &Asset>) -> Result<Vec<PlanFile>, 
       })
     })
     .collect::<Result<Vec<_>, String>>()?;
+  inventory.sort_by(|left, right| left.name.cmp(&right.name));
+  validate_inventory(&inventory)?;
+  Ok(inventory)
+}
+
+fn collect_patch_inventory(build: &DecodedPatchBuild) -> Result<Vec<PlanFile>, String> {
+  let mut files = HashMap::<String, PlanFile>::new();
+  for manifest in &build.manifests {
+    for file in &manifest.data.file_datas {
+      let name = normalize_manifest_path(&file.file_name)?;
+      let candidate = PlanFile {
+        name: name.clone(),
+        size: nonnegative_u64(file.file_size, "patch 目标资源大小")?,
+        md5: file.file_hash.clone(),
+      };
+      if let Some(existing) = files.get(&name)
+        && (existing.size != candidate.size || !existing.md5.eq_ignore_ascii_case(&candidate.md5))
+      {
+        return Err(format!("patch 目标清单元数据冲突：{name}"));
+      }
+      files.insert(name, candidate);
+    }
+  }
+  let mut inventory = files.into_values().collect::<Vec<_>>();
   inventory.sort_by(|left, right| left.name.cmp(&right.name));
   validate_inventory(&inventory)?;
   Ok(inventory)
@@ -1024,7 +1099,7 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
     || plan.delete_files.len() > 500_000
     || plan.inventory.len() > 500_000
     || (plan.schema_version == PLAN_SCHEMA_VERSION
-      && plan.strategy == PackagePlanStrategy::ManifestDiff
+      && matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
       && plan.inventory.is_empty())
   {
     return Err("游戏资源计划文件条目数超过安全上限".to_string());
@@ -1125,7 +1200,7 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   let inventory =
     plan.inventory.iter().map(|file| (file.name.as_str(), file)).collect::<HashMap<_, _>>();
   if plan.schema_version == PLAN_SCHEMA_VERSION
-    && plan.strategy == PackagePlanStrategy::ManifestDiff
+    && matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
     && plan.assets.iter().any(|asset| {
       inventory
         .get(asset.name.as_str())
@@ -1269,9 +1344,9 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanDownloadHashKind, PlanFile,
+    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanDownloadHashKind, PlanFile, PlanParts,
     assets_equal, build_manifest_diff, build_patch_plan, cached_chunk_matches, digest_parts,
-    load_persisted_plan, validate_persisted_plan,
+    load_persisted_plan, overlay_repair_parts, validate_persisted_plan,
   };
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
@@ -1636,6 +1711,12 @@ mod tests {
           patch_info("game.patch", 64, &hash, 0, 16, 4, &patch_hash(0xd)),
         ),
         patch_file("new.bin", 4, &added, patch_info("game.patch", 64, &hash, 16, 8, 0, "")),
+        PatchFile {
+          file_name: "keep.bin".to_string(),
+          file_size: 2,
+          file_hash: patch_hash(0xe),
+          patches_entries: Vec::new(),
+        },
       ]),
       "1.0.0",
     )
@@ -1643,6 +1724,10 @@ mod tests {
     assert_eq!(parts.strategy, PackagePlanStrategy::Patch);
     assert_eq!(parts.downloads.len(), 1);
     assert_eq!(parts.assets.len(), 2);
+    assert_eq!(parts.inventory.len(), 3);
+    assert_eq!(parts.inventory[0].name, "keep.bin");
+    assert_eq!(parts.inventory[1].name, "modify.bin");
+    assert_eq!(parts.inventory[2].name, "new.bin");
     let download = &parts.downloads[0];
     assert_eq!(download.id, "game.patch");
     assert_eq!(download.hash_kind, PlanDownloadHashKind::Md5);
@@ -1666,10 +1751,57 @@ mod tests {
       downloads: parts.downloads.clone(),
       assets: parts.assets,
       delete_files: parts.delete_files,
-      inventory: Vec::new(),
+      inventory: parts.inventory.clone(),
       created_at: "2026-08-19T00:00:00Z".to_string(),
     };
     assert!(validate_persisted_plan(&plan, &plan_id).is_ok());
+  }
+
+  #[test]
+  fn overlay_repair_accepts_patch_plan_when_inventory_matches() {
+    let hash = patch_hash(0xa);
+    let parts = build_patch_plan(
+      patch_build(vec![patch_file(
+        "new.bin",
+        4,
+        &patch_hash(0xc),
+        patch_info("game.patch", 64, &hash, 16, 8, 0, ""),
+      )]),
+      "1.0.0",
+    )
+    .unwrap();
+    let plan_id = uuid::Uuid::new_v4().to_string();
+    let plan = PersistedPlan {
+      schema_version: PLAN_SCHEMA_VERSION,
+      plan_id: plan_id.clone(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Main,
+      source_tag: "1.0.0".to_string(),
+      target_tag: "2.0.0".to_string(),
+      manifest_digest: parts.manifest_digest.clone(),
+      strategy: parts.strategy,
+      downloads: parts.downloads,
+      assets: parts.assets,
+      delete_files: parts.delete_files,
+      inventory: parts.inventory.clone(),
+      created_at: "2026-08-19T00:00:00Z".to_string(),
+    };
+    let overlay = overlay_repair_parts(
+      plan,
+      PlanParts {
+        strategy: PackagePlanStrategy::ManifestDiff,
+        manifest_digest: "f".repeat(64),
+        downloads: Vec::new(),
+        assets: Vec::new(),
+        delete_files: Vec::new(),
+        inventory: parts.inventory,
+      },
+    )
+    .unwrap();
+    assert_eq!(overlay.strategy, PackagePlanStrategy::ManifestDiff);
+    assert!(overlay.assets.is_empty());
   }
 
   #[test]
