@@ -88,7 +88,7 @@ pub enum PackagePlanStrategy {
 }
 
 /// 已持久化不可变计划的安全摘要。
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PackagePlanSummary {
   pub plan_id: String,
@@ -108,6 +108,47 @@ pub struct PackagePlanSummary {
   pub add_count: usize,
   pub modify_count: usize,
   pub delete_count: usize,
+}
+
+/// 安装完整性校验任务状态。
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PackageVerifyState {
+  Scanning,
+  Completed,
+  Failed,
+  Canceled,
+}
+
+impl PackageVerifyState {
+  /// 判断校验是否仍在扫描本地文件。
+  pub fn is_active(self) -> bool {
+    matches!(self, Self::Scanning)
+  }
+}
+
+/// 安装完整性校验进度与结果；不健康完成时附带可执行的修复计划。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageVerifySummary {
+  pub session_id: String,
+  pub installation_id: String,
+  pub version: String,
+  pub state: PackageVerifyState,
+  pub healthy: Option<bool>,
+  pub issue_count: usize,
+  pub plan: Option<PackagePlanSummary>,
+  pub total_files: usize,
+  pub completed_files: usize,
+  pub total_bytes: u64,
+  pub hashed_bytes: u64,
+  pub current_file: Option<String>,
+  pub bytes_per_second: u64,
+  pub eta_seconds: Option<u64>,
+  pub elapsed_ms: u64,
+  pub total_elapsed_ms: u64,
+  pub error_message: Option<String>,
+  pub updated_at: String,
 }
 
 /// 游戏资源长任务的持久化状态。

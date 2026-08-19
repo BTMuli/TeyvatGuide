@@ -49,6 +49,47 @@ const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
 };
 
 /**
+ * 游戏资源完整性校验状态枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Package.VerifyStateEnum
+ */
+const GamePackageVerifyStateEnum: typeof TGApp.Game.Package.VerifyState = {
+  SCANNING: "scanning",
+  COMPLETED: "completed",
+  FAILED: "failed",
+  CANCELED: "canceled",
+};
+
+/**
+ * 获取完整性校验状态描述。
+ * @since Beta v0.11.5
+ * @param state - 校验状态
+ * @returns 状态描述
+ */
+function getGamePackageVerifyStateDesc(state: TGApp.Game.Package.VerifyStateEnum): string {
+  switch (state) {
+    case GamePackageVerifyStateEnum.SCANNING:
+      return "正在校验";
+    case GamePackageVerifyStateEnum.COMPLETED:
+      return "校验完成";
+    case GamePackageVerifyStateEnum.FAILED:
+      return "校验失败";
+    case GamePackageVerifyStateEnum.CANCELED:
+      return "已取消";
+  }
+}
+
+/**
+ * 判断完整性校验是否仍在扫描。
+ * @since Beta v0.11.5
+ * @param state - 校验状态
+ * @returns 是否占用扫描任务
+ */
+function isGamePackageVerifyActive(state: TGApp.Game.Package.VerifyStateEnum): boolean {
+  return state === GamePackageVerifyStateEnum.SCANNING;
+}
+
+/**
  * 游戏资源计划策略枚举。
  * @since Beta v0.11.5
  * @see TGApp.Game.Package.PlanStrategyEnum
@@ -473,6 +514,9 @@ const gameEnum = {
     planTarget: GamePackagePlanTargetEnum,
     planStrategy: GamePackagePlanStrategyEnum,
     planStrategyDesc: getGamePackagePlanStrategyDesc,
+    verifyState: GamePackageVerifyStateEnum,
+    verifyStateDesc: getGamePackageVerifyStateDesc,
+    verifyActive: isGamePackageVerifyActive,
     recoveryAction: GamePackageRecoveryActionEnum,
     taskState: GamePackageTaskStateEnum,
     taskStateDesc: getGamePackageTaskStateDesc,

@@ -3,7 +3,10 @@
     <div class="task-heading">
       <div>
         <span>资源任务</span>
-        <strong v-if="task !== null"> {{ task.sourceTag }} → {{ task.targetTag }} </strong>
+        <strong v-if="task !== null && task.sourceTag === task.targetTag">
+          修复 {{ task.targetTag }}
+        </strong>
+        <strong v-else-if="task !== null"> {{ task.sourceTag }} → {{ task.targetTag }} </strong>
         <strong v-else-if="plan !== null">等待开始 {{ plan.targetTag }}</strong>
       </div>
       <v-chip v-if="task !== null" :color="stateColor" size="small" variant="tonal">
@@ -15,7 +18,7 @@
       <v-progress-linear
         :indeterminate="task.totalBytes === 0 && active"
         :model-value="progressPercent"
-        color="primary"
+        color="var(--tgc-od-orange)"
         height="8"
         rounded
       />
@@ -41,10 +44,24 @@
         variant="tonal"
       />
       <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED && integrityRepair"
+        text="仍有文件缺失或损坏。继续修复后完成；不会改写版本号。放弃任务会恢复本次替换前的文件。"
+        density="compact"
+        type="warning"
+        variant="tonal"
+      />
+      <v-alert
         v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED"
         text="更新文件已提交，但仍有未变化文件缺失或损坏。修复这些文件后才会写入版本号；放弃任务会回滚本次更新。"
         density="compact"
         type="warning"
+        variant="tonal"
+      />
+      <v-alert
+        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && integrityRepair"
+        text="全部下载对象已通过 hash 复验。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
+        density="compact"
+        type="success"
         variant="tonal"
       />
       <v-alert
@@ -88,12 +105,14 @@
       <v-btn
         v-if="canApply"
         :loading="actionPending"
-        :prepend-icon="repairRequired ? 'mdi-wrench-outline' : 'mdi-check-circle-outline'"
+        :prepend-icon="
+          repairRequired || integrityRepair ? 'mdi-wrench-outline' : 'mdi-check-circle-outline'
+        "
         size="small"
         variant="tonal"
         @click="emit('applyRequested')"
       >
-        {{ repairRequired ? "修复并完成" : "应用更新" }}
+        {{ applyActionLabel }}
       </v-btn>
       <v-btn
         v-if="active && task !== null"
@@ -162,8 +181,16 @@ const readyToApply = computed<boolean>(() => {
 const repairRequired = computed<boolean>(() => {
   return task?.state === gameEnum.package.taskState.REPAIR_REQUIRED;
 });
+const integrityRepair = computed<boolean>(() => {
+  return task !== null && task.sourceTag === task.targetTag;
+});
 const canApply = computed<boolean>(() => {
   return (readyToApply.value && targetPublished) || repairRequired.value;
+});
+const applyActionLabel = computed<string>(() => {
+  if (repairRequired.value) return "修复并完成";
+  if (integrityRepair.value) return "应用修复";
+  return "应用更新";
 });
 const canAbandon = computed<boolean>(() => {
   return recoverable.value || readyToApply.value || repairRequired.value;
@@ -200,7 +227,7 @@ const stateColor = computed<string>(() => {
     case gameEnum.package.taskState.CANCELED:
       return "warning";
     default:
-      return "primary";
+      return "var(--tgc-od-orange)";
   }
 });
 

@@ -7,9 +7,11 @@ use super::{
   hoyoplay::{create_http_client, get_game_branches},
   journal::{self, TaskJournal},
   model::{
-    GameInstallation, PackagePlanStrategy, PackageTaskOptions, PackageTaskState, PackageTaskSummary,
+    GameInstallation, PackagePlanStrategy, PackageTaskOptions, PackageTaskState,
+    PackageTaskSummary, PackageVerifySummary,
   },
   planner::{PersistedPlan, cached_chunk_matches, hydrate_and_validate_repair_plan},
+  verify::{self, VerifyRuntime},
 };
 use futures_util::{StreamExt, stream};
 use std::{
@@ -32,6 +34,7 @@ const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
 pub(crate) struct GamePackageManager {
   active: Arc<Mutex<ActiveTasks>>,
+  verify: Arc<VerifyRuntime>,
 }
 
 struct ActiveTasks {
@@ -100,6 +103,7 @@ impl GamePackageManager {
         by_task: HashMap::new(),
         by_installation: HashMap::new(),
       })),
+      verify: Arc::new(VerifyRuntime::new()),
     }
   }
 
@@ -113,6 +117,9 @@ impl GamePackageManager {
   ) -> Result<PackageTaskSummary, String> {
     if is_game_running() {
       return Err("游戏仍在运行，无法开始资源任务".to_string());
+    }
+    if self.verify.is_running(&plan.installation_id)? {
+      return Err("该游戏安装正在校验完整性，请等待完成或取消后再开始资源任务".to_string());
     }
     if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
       || plan.inventory.is_empty()
@@ -217,6 +224,9 @@ impl GamePackageManager {
       || plan.inventory.is_empty()
     {
       return Err("当前只能应用包含完整目标清单的资源计划".to_string());
+    }
+    if self.verify.is_running(&installation.id)? {
+      return Err("该游戏安装正在校验完整性，请等待完成或取消后再应用更新".to_string());
     }
     let mut reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
@@ -347,6 +357,34 @@ impl GamePackageManager {
       },
     )?;
     Ok(journal_value.summary())
+  }
+
+  pub(crate) fn start_verify(
+    &self,
+    app_handle: AppHandle,
+    task_root: PathBuf,
+    installation: GameInstallation,
+    branches: super::hoyoplay::GameBranches,
+  ) -> Result<PackageVerifySummary, String> {
+    {
+      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      if active.by_installation.contains_key(&installation.id) {
+        return Err("该游戏安装已有资源任务正在运行".to_string());
+      }
+    }
+    verify::start_verify(&self.verify, app_handle, task_root, installation, branches)
+  }
+
+  pub(crate) fn verify_status(
+    &self,
+    task_root: &Path,
+    installation_id: &str,
+  ) -> Result<Option<PackageVerifySummary>, String> {
+    self.verify.status(task_root, installation_id)
+  }
+
+  pub(crate) fn cancel_verify(&self, installation_id: &str) -> Result<(), String> {
+    self.verify.cancel(installation_id)
   }
 
   pub(crate) fn reserve_installation(

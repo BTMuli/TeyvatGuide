@@ -71,6 +71,41 @@ export async function createGamePackagePlan(
 }
 
 /**
+ * 启动或恢复安装完整性校验；扫描在后台继续，刷新页面后可重连进度。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ * @returns 当前校验进度
+ */
+export async function verifyGamePackage(
+  installationId: string,
+): Promise<TGApp.Game.Package.VerifySummary> {
+  return await invoke<TGApp.Game.Package.VerifySummary>("game_package_verify", { installationId });
+}
+
+/**
+ * 读取已持久化或正在运行的完整性校验进度。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ * @returns 校验进度；从未校验时为空
+ */
+export async function getGamePackageVerifyStatus(
+  installationId: string,
+): Promise<TGApp.Game.Package.VerifySummary | null> {
+  return await invoke<TGApp.Game.Package.VerifySummary | null>("game_package_verify_status", {
+    installationId,
+  });
+}
+
+/**
+ * 请求停止正在运行的完整性校验。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ */
+export async function cancelGamePackageVerify(installationId: string): Promise<void> {
+  await invoke("game_package_verify_cancel", { installationId });
+}
+
+/**
  * 按不可变计划启动游戏资源下载任务；正式更新与预下载均只写入应用缓存。
  * @since Beta v0.11.5
  * @param planId - 已持久化计划 ID

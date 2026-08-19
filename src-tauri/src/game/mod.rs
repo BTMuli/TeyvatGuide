@@ -17,3 +17,4 @@ mod path_guard;
 mod planner;
 mod scheme;
 mod sophon;
+mod verify;

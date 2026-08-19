@@ -3,20 +3,25 @@
  * @since Beta v0.11.5
  */
 
+import gameEnum from "@enum/game.js";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import {
   applyGamePackageTask,
   cancelGamePackageTask,
+  cancelGamePackageVerify,
+  getGamePackageVerifyStatus,
   listGamePackageTasks,
   recoverGamePackageTask,
   startGamePackageTask,
+  verifyGamePackage,
 } from "@utils/TGGameLauncher.js";
 import { defineStore } from "pinia";
 import { shallowRef } from "vue";
 
 const useGameLauncherStore = defineStore("gameLauncher", () => {
   const tasksByInstallation = shallowRef<Record<string, TGApp.Game.Package.TaskSummary>>({});
+  const verifyByInstallation = shallowRef<Record<string, TGApp.Game.Package.VerifySummary>>({});
   const pendingActions = shallowRef<Record<string, boolean>>({});
   let unlisteners: Array<UnlistenFn> = [];
   let listenerPromise: Promise<void> | null = null;
@@ -47,9 +52,57 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     pendingActions.value = next;
   }
 
+  function mergeVerify(summary: TGApp.Game.Package.VerifySummary): void {
+    const current = verifyByInstallation.value[summary.installationId];
+    if (
+      current !== undefined &&
+      current.sessionId === summary.sessionId &&
+      current.hashedBytes > summary.hashedBytes &&
+      current.state === summary.state
+    ) {
+      return;
+    }
+    verifyByInstallation.value = {
+      ...verifyByInstallation.value,
+      [summary.installationId]: summary,
+    };
+  }
+
   async function hydrateTasks(installationId?: string): Promise<void> {
     const tasks = await listGamePackageTasks(installationId);
     for (const task of tasks) mergeTask(task);
+  }
+
+  async function hydrateVerify(installationId: string): Promise<void> {
+    const status = await getGamePackageVerifyStatus(installationId);
+    if (status === null) return;
+    mergeVerify(status);
+    if (status.state !== gameEnum.package.verifyState.SCANNING) return;
+    try {
+      mergeVerify(await verifyGamePackage(installationId));
+    } catch {
+      // 保留磁盘快照；若安装正被资源任务占用，后台扫描无法立刻恢复。
+    }
+  }
+
+  async function startVerify(installationId: string): Promise<TGApp.Game.Package.VerifySummary> {
+    setPending(`verify:${installationId}`, true);
+    try {
+      const summary = await verifyGamePackage(installationId);
+      mergeVerify(summary);
+      return summary;
+    } finally {
+      setPending(`verify:${installationId}`, false);
+    }
+  }
+
+  async function cancelVerify(installationId: string): Promise<void> {
+    setPending(`verify:${installationId}`, true);
+    try {
+      await cancelGamePackageVerify(installationId);
+    } finally {
+      setPending(`verify:${installationId}`, false);
+    }
   }
 
   async function startTask(
@@ -111,6 +164,9 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
         listen<TGApp.Game.Package.TaskSummary>("game-package://progress", (event) => {
           mergeTask(event.payload);
         }),
+        listen<TGApp.Game.Package.VerifySummary>("game-package://verify", (event) => {
+          mergeVerify(event.payload);
+        }),
       ]);
       if (generation !== listenerGeneration) {
         for (const unlisten of created) unlisten();
@@ -133,11 +189,15 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
 
   return {
     tasksByInstallation,
+    verifyByInstallation,
     pendingActions,
     hydrateTasks,
+    hydrateVerify,
     startTask,
+    startVerify,
     applyTask,
     cancelTask,
+    cancelVerify,
     recoverTask,
     startListening,
     stopListening,

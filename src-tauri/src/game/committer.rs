@@ -515,7 +515,11 @@ fn prepare_transaction(
   let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
   let original =
     fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
-  let target = patch_game_version(&original, &plan.target_tag)?;
+  let target = if plan.source_tag == plan.target_tag {
+    original.clone()
+  } else {
+    patch_game_version(&original, &plan.target_tag)?
+  };
   write_verified_bytes(&config_root.join("original"), &original)?;
   write_verified_bytes(&config_root.join("target"), &target)?;
   journal.schema_version = journal::JOURNAL_SCHEMA_VERSION;
@@ -582,10 +586,15 @@ where
     let target = prepare_manifest_output_file(game_root, &step.name)?;
     let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
     let backup = prepare_manifest_output_file(&backup_root, &step.name)?;
-    if step.kind != CommitStepKind::Add {
+    let backup_existing = match step.kind {
+      CommitStepKind::Add => false,
+      CommitStepKind::Repair => resolve_optional_manifest_file(game_root, &step.name)?.is_some(),
+      CommitStepKind::Modify | CommitStepKind::Delete => true,
+    };
+    if backup_existing {
       ensure_game_stopped()?;
       let current = resolve_existing_manifest_file(game_root, &step.name)?;
-      if !source_file_matches(&current, step)? {
+      if step.kind != CommitStepKind::Repair && !source_file_matches(&current, step)? {
         return Err(format!("游戏资源在提交前发生变化：{}", step.name));
       }
       if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
@@ -638,6 +647,11 @@ where
   let current = fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
   if sha256_bytes(&current) != apply(journal)?.config_original_sha256 {
     return Err("config.ini 在提交期间发生变化，拒绝更新版本".to_string());
+  }
+  if apply(journal)?.config_original_sha256 == apply(journal)?.config_target_sha256 {
+    apply_mut(journal)?.config_phase = ConfigCommitPhase::Replaced;
+    persist_and_emit(task_root, journal, emit)?;
+    return Ok(());
   }
   ensure_game_stopped()?;
   apply_mut(journal)?.config_phase = ConfigCommitPhase::ReplacePending;
@@ -869,7 +883,44 @@ fn rollback_transaction(
           _ => return Err(format!("删除资源处于未知状态：{}", step.name)),
         }
       }
-      CommitStepKind::Repair => {}
+      CommitStepKind::Repair => match backup {
+        Some(backup) => {
+          if let Some(incoming_file) = &incoming {
+            if !file_matches(incoming_file, step.size, &step.md5)? {
+              return Err(format!("修复资源 incoming 完整性校验失败：{}", step.name));
+            }
+          }
+          if let Some(target) = target {
+            if !file_matches(&target, step.size, &step.md5)? || incoming.is_some() {
+              return Err(format!("修复资源处于未知状态：{}", step.name));
+            }
+            let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
+            ensure_game_stopped()?;
+            fs::rename(target, incoming)
+              .map_err(|error| format!("移出修复资源失败：{}：{error}", step.name))?;
+          }
+          let target = prepare_manifest_output_file(game_root, &step.name)?;
+          ensure_game_stopped()?;
+          fs::rename(backup, target)
+            .map_err(|error| format!("恢复待修复资源失败：{}：{error}", step.name))?;
+        }
+        None => match target {
+          Some(path) if file_matches(&path, step.size, &step.md5)? && incoming.is_none() => {
+            let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
+            ensure_game_stopped()?;
+            fs::rename(path, incoming)
+              .map_err(|error| format!("回滚修复新增资源失败：{}：{error}", step.name))?;
+          }
+          Some(_) => return Err(format!("修复资源处于未知状态：{}", step.name)),
+          None => {
+            if let Some(incoming) = incoming {
+              if !file_matches(&incoming, step.size, &step.md5)? {
+                return Err(format!("修复资源 incoming 完整性校验失败：{}", step.name));
+              }
+            }
+          }
+        },
+      },
     }
   }
   Ok(())
@@ -1723,5 +1774,144 @@ mod tests {
       b"\xef\xbb\xbf[general]\r\nchannel=1\r\ngame_version = 2.0.0\r\n[other]\r\nvalue=1\r\n"
     );
     assert!(patch_game_version(b"[general]\ngame_version=1\ngame_version=2\n", "3").is_err());
+  }
+
+  fn integrity_plan(task_id: &str, bytes: &[u8]) -> PersistedPlan {
+    let digest = md5(bytes);
+    let cache_key = "keep.chunk";
+    PersistedPlan {
+      schema_version: 4,
+      plan_id: task_id.to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Main,
+      source_tag: "1.0.0".to_string(),
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads: vec![PlanDownload {
+        id: cache_key.to_string(),
+        cache_key: cache_key.to_string(),
+        hash_kind: PlanDownloadHashKind::XxHash64,
+        expected_hash: format!("{:016x}", xxh64(bytes, 0)),
+        compressed_size: bytes.len() as u64,
+        decompressed_size: bytes.len() as u64,
+        encoding: PayloadEncoding::Raw,
+        url_prefix: String::new(),
+        url_suffix: String::new(),
+        range_start: None,
+        range_length: None,
+      }],
+      assets: vec![PlanAsset {
+        name: "keep.bin".to_string(),
+        action: PlanAssetAction::Repair,
+        source: None,
+        size: bytes.len() as u64,
+        md5: digest.clone(),
+        chunks: vec![PlanChunk {
+          id: cache_key.to_string(),
+          decompressed_md5: digest.clone(),
+          target_offset: 0,
+          compressed_size: bytes.len() as u64,
+          decompressed_size: bytes.len() as u64,
+          reuse: None,
+        }],
+        patch: None,
+      }],
+      delete_files: Vec::new(),
+      inventory: vec![PlanFile {
+        name: "keep.bin".to_string(),
+        size: bytes.len() as u64,
+        md5: digest,
+      }],
+      created_at: "2026-08-19T00:00:00Z".to_string(),
+    }
+  }
+
+  fn seed_integrity_cache(root: &TempRoot, bytes: &[u8]) {
+    let cache = root.tasks().join("cache/chunks");
+    fs::create_dir_all(&cache).unwrap();
+    fs::write(cache.join("keep.chunk"), bytes).unwrap();
+  }
+
+  #[test]
+  fn integrity_repair_replaces_corrupt_file_without_rewriting_version() {
+    let root = TempRoot::new();
+    prepare(&root);
+    fs::write(root.game().join("keep.bin"), b"xxxx").unwrap();
+    let bytes = b"keep";
+    seed_integrity_cache(&root, bytes);
+    let plan = integrity_plan(&Uuid::new_v4().to_string(), bytes);
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::ReadyToApply;
+    execute_apply(
+      &plan,
+      &root.game(),
+      &root.tasks(),
+      &mut journal,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    assert_eq!(journal.state, PackageTaskState::Completed);
+    assert_eq!(fs::read(root.game().join("keep.bin")).unwrap(), b"keep");
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("game_version=1.0.0"));
+    assert!(!config.contains("game_version=2.0.0"));
+  }
+
+  #[test]
+  fn integrity_repair_restores_missing_file_without_rewriting_version() {
+    let root = TempRoot::new();
+    prepare(&root);
+    fs::remove_file(root.game().join("keep.bin")).unwrap();
+    let bytes = b"keep";
+    seed_integrity_cache(&root, bytes);
+    let plan = integrity_plan(&Uuid::new_v4().to_string(), bytes);
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::ReadyToApply;
+    execute_apply(
+      &plan,
+      &root.game(),
+      &root.tasks(),
+      &mut journal,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    assert_eq!(journal.state, PackageTaskState::Completed);
+    assert_eq!(fs::read(root.game().join("keep.bin")).unwrap(), b"keep");
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("game_version=1.0.0"));
+  }
+
+  #[test]
+  fn integrity_repair_rollback_restores_corrupt_original() {
+    let root = TempRoot::new();
+    prepare(&root);
+    fs::write(root.game().join("keep.bin"), b"xxxx").unwrap();
+    let bytes = b"keep";
+    seed_integrity_cache(&root, bytes);
+    let plan = integrity_plan(&Uuid::new_v4().to_string(), bytes);
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::ReadyToApply;
+    assemble_manifest_plan(&plan, &root.game(), &root.tasks(), &AtomicBool::new(false)).unwrap();
+    prepare_transaction(&plan, &root.game(), &root.tasks(), &mut journal).unwrap();
+    journal.state = PackageTaskState::Committing;
+    let backup =
+      transaction_subdirectory(&root.game(), &plan.plan_id, "backup").unwrap().join("keep.bin");
+    fs::rename(root.game().join("keep.bin"), &backup).unwrap();
+    journal.apply.as_mut().unwrap().active_step = Some(ActiveCommitStep {
+      index: 0,
+      kind: CommitStepKind::Repair,
+      phase: CommitStepPhase::BackedUp,
+      relative_path: "keep.bin".to_string(),
+    });
+    rollback_apply(&plan, None, &root.game(), &root.tasks(), &mut journal, false, |_| {}).unwrap();
+    assert_eq!(journal.state, PackageTaskState::Canceled);
+    assert_eq!(fs::read(root.game().join("keep.bin")).unwrap(), b"xxxx");
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("game_version=1.0.0"));
   }
 }

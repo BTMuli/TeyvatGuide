@@ -59,6 +59,39 @@ declare namespace TGApp.Game.Package {
     deleteCount: number;
   };
 
+  /** 安装完整性校验任务状态。 */
+  const VerifyState = <const>{
+    SCANNING: "scanning",
+    COMPLETED: "completed",
+    FAILED: "failed",
+    CANCELED: "canceled",
+  };
+
+  /** 完整性校验任务状态值。 */
+  type VerifyStateEnum = (typeof VerifyState)[keyof typeof VerifyState];
+
+  /** 安装完整性校验进度与结果；不健康完成时附带可执行的修复计划。 */
+  type VerifySummary = {
+    sessionId: string;
+    installationId: string;
+    version: string;
+    state: VerifyStateEnum;
+    healthy: boolean | null;
+    issueCount: number;
+    plan: PlanSummary | null;
+    totalFiles: number;
+    completedFiles: number;
+    totalBytes: number;
+    hashedBytes: number;
+    currentFile: string | null;
+    bytesPerSecond: number;
+    etaSeconds: number | null;
+    elapsedMs: number;
+    totalElapsedMs: number;
+    errorMessage: string | null;
+    updatedAt: string;
+  };
+
   /** 可恢复资源任务状态。 */
   const TaskState = <const>{
     QUEUED: "queued",

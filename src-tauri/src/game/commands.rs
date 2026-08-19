@@ -7,7 +7,8 @@ use super::{
   journal, launch,
   model::{
     GameInstallation, InstallationStatus, PackagePlanSummary, PackagePlanTarget,
-    PackageRecoveryAction, PackageSnapshot, PackageTaskOptions, PackageTaskSummary, SchemeId,
+    PackageRecoveryAction, PackageSnapshot, PackageTaskOptions, PackageTaskSummary,
+    PackageVerifySummary, SchemeId,
   },
   package::GamePackageManager,
   planner::{
@@ -182,6 +183,42 @@ pub async fn game_package_plan(
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
   create_and_persist_plan(&installation, &branches, target, &app_data_dir).await
+}
+
+/// 启动或恢复安装完整性校验；扫描在后台继续，页面刷新后可重连进度。
+#[tauri::command]
+pub async fn game_package_verify(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  installation_id: String,
+) -> Result<PackageVerifySummary, String> {
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let task_root = game_task_root(&app_handle)?;
+  manager.start_verify(app_handle, task_root, installation, branches)
+}
+
+/// 读取已持久化或正在运行的完整性校验进度。
+#[tauri::command]
+pub async fn game_package_verify_status(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  installation_id: String,
+) -> Result<Option<PackageVerifySummary>, String> {
+  manager.verify_status(&game_task_root(&app_handle)?, &installation_id)
+}
+
+/// 请求停止正在运行的完整性校验；已完成的文件进度会保留。
+#[tauri::command]
+pub fn game_package_verify_cancel(
+  manager: tauri::State<'_, GamePackageManager>,
+  installation_id: String,
+) -> Result<(), String> {
+  manager.cancel_verify(&installation_id)
 }
 
 /// 按不可变计划启动只写应用缓存的可恢复资源下载任务；支持正式更新与预下载。
