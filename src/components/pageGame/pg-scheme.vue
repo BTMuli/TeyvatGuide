@@ -1,7 +1,6 @@
 <template>
   <div class="scheme-body">
     <slot
-      name="channel"
       :blockingTask
       :canAbandon
       :canConvert
@@ -13,11 +12,11 @@
       :recoverSwitch
       :targetScheme
       :taskActive
+      name="channel"
     />
 
     <PgProgress
       v-if="switchPanelVisible"
-      ariaLabel="换服进度"
       :caption="schemeCaption"
       :currentFile="visibleTask?.currentFile ?? null"
       :errorMessage="visibleTask?.errorMessage ?? null"
@@ -26,6 +25,7 @@
       :percent="progressPercent"
       :showBar="converting || visibleTask !== null"
       :tone="schemeTone"
+      ariaLabel="换服进度"
     >
       <template #actions>
         <v-btn
@@ -99,7 +99,7 @@ const targetScheme = computed<TGApp.Game.Installation.SchemeEnum>(() => {
 const convertLabel = computed<string>(() => {
   return `转换为${gameEnum.installation.schemeDesc(targetScheme.value)}`;
 });
-const switchConfirmTitle = computed<string>(() => {
+const switchConfirmText = computed<string>(() => {
   const from =
     installation.schemeId === gameEnum.installation.scheme.CN_BILIBILI ? "渠道服（B服）" : "国服";
   const to =
@@ -222,7 +222,8 @@ function formatBytes(bytes: number): string {
 async function convertScheme(): Promise<void> {
   if (converting.value || !canConvert.value || verifyBusy.value) return;
   const confirmed = await showDialog.checkF({
-    title: switchConfirmTitle.value,
+    title: "确认转换服务器?",
+    text: switchConfirmText.value,
     confirmLabel: "开始换服",
   });
   if (confirmed !== true) return;
