@@ -285,6 +285,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import {
   filterGachaDisplayList,
   formatGachaInclusiveEnd,
+  formatGachaVersionPeriodTime,
   GACHA_VERSION_RANGES,
   getGachaVersionRangeByIso,
   getVisibleGachaVersionLegend,
@@ -455,7 +456,7 @@ function isVersionEndDay(isoDate: string): boolean {
 function getVersionDayTitle(isoDate: string): string {
   const range = getGachaVersionRangeByIso(isoDate);
   if (range === undefined) return "";
-  return `${range.version}  ${range.startDay} ~ ${formatGachaInclusiveEnd(range.endDay)}`;
+  return `${range.version}  ${formatGachaVersionPeriodTime(range)}`;
 }
 
 function isVersionPeriodSelected(item: GachaVersionLegendItem): boolean {

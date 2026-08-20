@@ -7,8 +7,14 @@ import { compareVersions } from "@utils/toolFunc.js";
 
 import { AppGachaData } from "@/data/index.js";
 
-/** 版本/时期筛选的“全部”哨兵�?*/
+/** 版本/时期筛选的“全部”哨兵值 */
 export const GACHA_FILTER_ALL = "all";
+
+/** 游戏日开始时刻 */
+export const GACHA_GAME_DAY_START = "04:00:00";
+
+/** 游戏日结束时刻 */
+export const GACHA_GAME_DAY_END = "03:59:59";
 
 const VERSION_COLORS: Array<string> = [
   "var(--tgc-od-blue)",
@@ -104,6 +110,38 @@ export function formatGachaInclusiveEnd(endDay: string): string {
 }
 
 /**
+ * 将时期开始日转为筛选下界
+ * @since Beta v0.11.4
+ * @param isoDate - yyyy-MM-dd
+ * @returns yyyy-MM-dd 04:00:00
+ */
+export function toGachaPeriodStartBound(isoDate: string): string {
+  return `${isoDate} ${GACHA_GAME_DAY_START}`;
+}
+
+/**
+ * 将时期结束日转为筛选上界（含次日 03:59:59）
+ * @since Beta v0.11.4
+ * @param isoDate - yyyy-MM-dd
+ * @returns 次日 03:59:59
+ */
+export function toGachaPeriodEndBound(isoDate: string): string {
+  return `${shiftGachaIsoDate(isoDate, 1)} ${GACHA_GAME_DAY_END}`;
+}
+
+/**
+ * 格式化版本时期的实际时间窗口
+ * @since Beta v0.11.4
+ * @param range - 版本区间
+ * @returns 如 2026-07-01 04:00:00 ~ 2026-08-12 03:59:59
+ */
+export function formatGachaVersionPeriodTime(range: GachaVersionRange): string {
+  const start = toGachaPeriodStartBound(range.startDay);
+  if (range.endDay.startsWith("9999")) return `${start} ~ 至今`;
+  return `${start} ~ ${range.endDay} ${GACHA_GAME_DAY_END}`;
+}
+
+/**
  * 构建版本时间区间（按卡池元数据合并）
  * @since Beta v0.11.5
  * @returns 版本区间列表（按开始时间升序）
@@ -122,14 +160,17 @@ function buildVersionRanges(): Array<GachaVersionRange> {
     if (to > existing.to) existing.to = to;
   }
   const ranges = [...rangeMap.entries()]
-    .map(([version, range]) => ({
-      version,
-      from: range.from,
-      to: range.to,
-      startDay: range.from.slice(0, 10),
-      endDay: "9999-12-31",
-      color: VERSION_COLORS[0],
-    }))
+    .map(([version, range]) => {
+      const startDay = range.from.slice(0, 10);
+      return {
+        version,
+        from: toGachaPeriodStartBound(startDay),
+        to: range.to,
+        startDay,
+        endDay: "9999-12-31",
+        color: VERSION_COLORS[0],
+      };
+    })
     .sort((a, b) => a.from.localeCompare(b.from));
   for (let i = 0; i < ranges.length; i++) {
     ranges[i].color = VERSION_COLORS[i % VERSION_COLORS.length];
@@ -225,8 +266,8 @@ export function matchGachaDisplayScope(
   ) {
     return false;
   }
-  const startBound = period.start === "" ? "" : `${period.start} 00:00:00`;
-  const endBound = period.end === "" ? "" : `${period.end} 23:59:59`;
+  const startBound = period.start === "" ? "" : toGachaPeriodStartBound(period.start);
+  const endBound = period.end === "" ? "" : toGachaPeriodEndBound(period.end);
   if (startBound !== "" && item.time < startBound) return false;
   if (endBound !== "" && item.time > endBound) return false;
   return true;
@@ -276,7 +317,7 @@ export function getVisibleGachaVersionLegend(
       key: `version-${range.version}`,
       label: range.version,
       color: range.color,
-      title: `${range.version}  ${range.startDay} ~ ${formatGachaInclusiveEnd(range.endDay)}`,
+      title: `${range.version}  ${formatGachaVersionPeriodTime(range)}`,
       startDay: range.startDay,
       endDay: range.endDay,
     }),

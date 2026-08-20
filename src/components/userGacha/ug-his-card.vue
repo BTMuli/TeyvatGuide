@@ -66,6 +66,7 @@ import PhPoolItemOverlay, {
 } from "@comp/pageHome/ph-pool-item-overlay.vue";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
+import { toGachaPeriodEndBound, toGachaPeriodStartBound } from "@utils/gachaVersion.js";
 import { createPost } from "@utils/TGWindow.js";
 import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
 import { computed, nextTick, ref, shallowRef, watch } from "vue";
@@ -111,8 +112,8 @@ const gachaTypeList: ReadonlyArray<TGApp.App.Gacha.PoolGachaType> = [
 ];
 const gachaRecordsRaw = shallowRef<Array<TGApp.Sqlite.Gacha.Gacha>>([]);
 const gachaRecords = computed<Array<TGApp.Sqlite.Gacha.Gacha>>(() => {
-  const startBound = props.periodStart ? `${props.periodStart} 00:00:00` : "";
-  const endBound = props.periodEnd ? `${props.periodEnd} 23:59:59` : "";
+  const startBound = props.periodStart ? toGachaPeriodStartBound(props.periodStart) : "";
+  const endBound = props.periodEnd ? toGachaPeriodEndBound(props.periodEnd) : "";
   return gachaRecordsRaw.value.filter((item) => {
     if (startBound !== "" && item.time < startBound) return false;
     if (endBound !== "" && item.time > endBound) return false;
