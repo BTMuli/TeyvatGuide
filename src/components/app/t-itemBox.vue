@@ -2,33 +2,30 @@
   <div class="tib-box">
     <div class="tib-bg">
       <slot name="bg">
-        <img :src="props.modelValue.bg" alt="bg" decoding="async" loading="lazy" />
+        <img :src="props.modelValue.bg" alt="bg" decoding="async" />
       </slot>
     </div>
     <div class="tib-icon">
       <slot name="icon">
-        <img :src="props.modelValue.icon" alt="icon" decoding="async" loading="lazy" />
+        <img :src="props.modelValue.icon" alt="icon" decoding="async" />
       </slot>
     </div>
-    <div class="tib-cover">
-      <div v-show="props.modelValue.lt !== ''" class="tib-lt">
-        <img :src="props.modelValue.lt" alt="lt" decoding="async" loading="lazy" />
-      </div>
-      <div v-show="props.modelValue.rt" class="tib-rt">{{ props.modelValue.rt }}</div>
-      <div class="tib-inner">
-        <slot name="inner-icon">
-          <img
-            v-show="props.modelValue.innerIcon"
-            :src="props.modelValue.innerIcon"
-            alt="inner-icon"
-            decoding="async"
-            loading="lazy"
-          />
-        </slot>
-        <slot name="inner-text">
-          <span :title="props.modelValue.innerText">{{ props.modelValue.innerText }}</span>
-        </slot>
-      </div>
+    <div v-show="props.modelValue.lt !== ''" class="tib-lt">
+      <img :src="props.modelValue.lt" alt="lt" decoding="async" />
+    </div>
+    <div v-show="props.modelValue.rt" class="tib-rt">{{ props.modelValue.rt }}</div>
+    <div class="tib-inner">
+      <slot name="inner-icon">
+        <img
+          v-show="props.modelValue.innerIcon"
+          :src="props.modelValue.innerIcon"
+          alt="inner-icon"
+          decoding="async"
+        />
+      </slot>
+      <slot name="inner-text">
+        <span :title="props.modelValue.innerText">{{ props.modelValue.innerText }}</span>
+      </slot>
     </div>
     <div v-if="props.modelValue.display === 'outer'" class="tib-outer">
       <slot name="outer-text">
@@ -66,13 +63,34 @@ const innerBackdropFilter = computed<string>(() => {
   if (blur === undefined || blur === "" || blur === "0") return "none";
   return `blur(${blur})`;
 });
+const innerTop = computed<string>(() => {
+  const innerH = props.modelValue.innerHeight ?? 0;
+  return `calc(${props.modelValue.size} - ${innerH}px)`;
+});
+const ltInset = computed<string>(() => `calc(${props.modelValue.size} * 0.03)`);
 </script>
 <style lang="scss" scoped>
 .tib-box {
   position: relative;
   width: v-bind("props.modelValue.size");
   height: v-bind("props.modelValue.height");
+  background-color: transparent;
   cursor: v-bind('props.modelValue.clickable ? "pointer" : "default"');
+}
+
+.tib-bg,
+.tib-icon {
+  overflow: hidden;
+  width: v-bind("props.modelValue.size");
+  height: v-bind("props.modelValue.size");
+  border-radius: 4px;
+  background-color: transparent;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .tib-bg {
@@ -80,57 +98,24 @@ const innerBackdropFilter = computed<string>(() => {
   z-index: 0;
   top: 0;
   left: 0;
-  overflow: hidden;
-  width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.size");
-  border-radius: 4px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
 }
 
 .tib-icon {
   position: relative;
   z-index: 1;
-  overflow: hidden;
-  width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.size");
-  border-radius: 4px;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.tib-cover {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  display: flex;
-  overflow: hidden;
-  width: v-bind("props.modelValue.size");
-  height: v-bind("props.modelValue.size");
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
 }
 
 .tib-lt {
   position: absolute;
-  top: 3%;
-  left: 3%;
+  z-index: 2;
+  top: v-bind("ltInset");
+  left: v-bind("ltInset");
   display: flex;
   width: v-bind("props.modelValue.ltSize");
   height: v-bind("props.modelValue.ltSize");
   align-items: center;
   justify-content: center;
+  background-color: transparent;
 
   img {
     width: 100%;
@@ -141,6 +126,7 @@ const innerBackdropFilter = computed<string>(() => {
 
 .tib-rt {
   position: absolute;
+  z-index: 2;
   top: 0;
   right: 0;
   display: flex;
@@ -157,14 +143,13 @@ const innerBackdropFilter = computed<string>(() => {
 
 .tib-inner {
   position: absolute;
-  bottom: 0;
+  z-index: 2;
+  top: v-bind("innerTop");
   left: 0;
   display: flex;
   overflow: hidden;
-  width: 100%;
+  width: v-bind("props.modelValue.size");
   height: v-bind("`${props.modelValue.innerHeight ?? 0}px`");
-  flex-grow: 1;
-  flex-shrink: 0;
   align-items: stretch;
   justify-content: center;
   border-radius: 0 0 4px 4px;
