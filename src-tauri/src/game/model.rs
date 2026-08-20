@@ -57,6 +57,7 @@ pub struct GameInstallation {
 pub enum PackagePlanTarget {
   Main,
   PreDownload,
+  Switch,
 }
 
 /// 一个不含分支密码和下载地址的远端版本投影。

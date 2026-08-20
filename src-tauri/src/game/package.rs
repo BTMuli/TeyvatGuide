@@ -11,11 +11,12 @@ use super::{
     PackageTaskSummary, PackageVerifySummary,
   },
   planner::{PersistedPlan, cached_chunk_matches, hydrate_and_validate_repair_plan},
+  switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
 };
 use futures_util::{StreamExt, stream};
 use std::{
-  collections::HashMap,
+  collections::{HashMap, HashSet},
   fs,
   path::{Path, PathBuf},
   sync::{
@@ -206,11 +207,143 @@ impl GamePackageManager {
     Ok(summary)
   }
 
-  pub(crate) fn cancel(&self, task_id: &str) -> Result<(), String> {
+  pub(crate) fn has_running_tasks(&self) -> Result<bool, String> {
     let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-    let task = active.by_task.get(task_id).ok_or_else(|| "任务当前未在运行".to_string())?;
-    task.canceled.store(true, Ordering::Release);
+    Ok(!active.by_task.is_empty())
+  }
+
+  pub(crate) fn start_switch(
+    &self,
+    app_handle: AppHandle,
+    task_root: PathBuf,
+    installation: GameInstallation,
+    plan: PersistedSwitchPlan,
+    recovering: bool,
+  ) -> Result<PackageTaskSummary, String> {
+    if is_game_running() {
+      return Err("游戏仍在运行，无法开始换服".to_string());
+    }
+    if self.verify.is_running(plan.installation_id())? {
+      return Err("该游戏安装正在校验完整性，请等待完成或取消后再换服".to_string());
+    }
+    if journal::has_incomplete_tasks(&task_root, Some(plan.installation_id()))? {
+      let incomplete = journal::list(&task_root, Some(plan.installation_id()))?;
+      if incomplete.iter().any(|journal| {
+        journal.plan_id != plan.plan_id()
+          && !matches!(
+            journal.state,
+            PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+          )
+      }) {
+        return Err("该游戏安装已有未完成的资源任务，暂时不能换服".to_string());
+      }
+    }
+    let mut reservation =
+      TaskReservation::acquire(Arc::clone(&self.active), plan.installation_id(), plan.plan_id())?;
+    let mut journal = switch::load_or_create_switch_journal(&task_root, &plan)?;
+    if journal.state.blocks_launch() && !recovering {
+      return Err("检测到未完成的换服提交，请先执行恢复".to_string());
+    }
+    if !recovering && journal.state.is_active() && journal.revision > 1 {
+      return Err("检测到未完成的换服任务，请使用恢复操作继续".to_string());
+    }
+    journal.state = PackageTaskState::Queued;
+    journal.error_message = None;
+    journal.current_file = None;
+    journal.touch();
+    journal::persist(&task_root, &journal)?;
+    let canceled = Arc::new(AtomicBool::new(false));
+    let shared_journal = Arc::new(AsyncMutex::new(journal));
+    let task = ActiveTask {
+      installation_id: plan.installation_id().to_string(),
+      canceled: Arc::clone(&canceled),
+      journal: Arc::clone(&shared_journal),
+    };
+    {
+      let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      active.by_task.insert(plan.plan_id().to_string(), task);
+    }
+    reservation.retain();
+    let summary = journal::load(&journal::journal_path(&task_root, plan.plan_id()))?.summary();
+    emit_state(&app_handle, &summary);
+    let active = Arc::clone(&self.active);
+    let finished_task_id = summary.task_id.clone();
+    tauri::async_runtime::spawn(async move {
+      run_switch(app_handle, task_root, installation, plan, shared_journal, canceled).await;
+      finish_task(&active, &finished_task_id);
+    });
+    Ok(summary)
+  }
+
+  pub(crate) fn rollback_switch(
+    &self,
+    app_handle: &AppHandle,
+    task_root: &Path,
+    game_root: &Path,
+    request: &committer::SwitchApplyRequest,
+    retry: bool,
+  ) -> Result<PackageTaskSummary, String> {
+    let journal_value = journal::load(&journal::journal_path(task_root, &request.plan_id))?;
+    let _reservation = TaskReservation::acquire(
+      Arc::clone(&self.active),
+      &journal_value.installation_id,
+      &request.plan_id,
+    )?;
+    if is_game_running() {
+      return Err("游戏仍在运行，无法恢复换服提交".to_string());
+    }
+    let mut journal_value = journal_value;
+    committer::rollback_switch(
+      request,
+      game_root,
+      task_root,
+      &mut journal_value,
+      retry,
+      |journal| {
+        emit_state(app_handle, &journal.summary());
+      },
+    )?;
+    Ok(journal_value.summary())
+  }
+
+  pub(crate) fn cancel(
+    &self,
+    app_handle: &AppHandle,
+    task_root: &Path,
+    task_id: &str,
+  ) -> Result<(), String> {
+    if let Some(summary) = self.request_or_reap_cancel(task_root, task_id)? {
+      emit_state(app_handle, &summary);
+    }
     Ok(())
+  }
+
+  fn request_or_reap_cancel(
+    &self,
+    task_root: &Path,
+    task_id: &str,
+  ) -> Result<Option<PackageTaskSummary>, String> {
+    {
+      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      if let Some(task) = active.by_task.get(task_id) {
+        task.canceled.store(true, Ordering::Release);
+        return Ok(None);
+      }
+      if active.by_installation.values().any(|id| id == task_id) {
+        return Ok(None);
+      }
+    }
+    let journal = journal::load(&journal::journal_path(task_root, task_id))?;
+    if matches!(
+      journal.state,
+      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+    ) {
+      return Ok(Some(journal.summary()));
+    }
+    if journal.state.blocks_launch() {
+      return Err("检测到未完成的资源提交，请先执行恢复".to_string());
+    }
+    Ok(Some(self.rollback_download(task_root, task_id)?))
   }
 
   pub(crate) fn apply(
@@ -399,16 +532,29 @@ impl GamePackageManager {
     task_root: &Path,
     installation_id: Option<&str>,
   ) -> Result<Vec<PackageTaskSummary>, String> {
-    let mut summaries = journal::list(task_root, installation_id)?
-      .into_iter()
-      .map(|journal| {
-        let mut summary = journal.summary();
-        if summary.state.requires_recovery() {
-          summary.state = PackageTaskState::RecoveryRequired;
-        }
-        (summary.task_id.clone(), summary)
-      })
-      .collect::<HashMap<_, _>>();
+    let live_ids = {
+      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
+      ids.extend(active.by_installation.values().cloned());
+      ids
+    };
+    let mut summaries = HashMap::new();
+    for mut journal in journal::list(task_root, installation_id)? {
+      if matches!(journal.state, PackageTaskState::Queued | PackageTaskState::Downloading)
+        && !live_ids.contains(&journal.task_id)
+      {
+        journal.state = PackageTaskState::Failed;
+        journal.error_message = Some("资源任务已中断，请恢复或放弃".to_string());
+        journal.current_file = None;
+        journal.touch();
+        journal::persist(task_root, &journal)?;
+      }
+      let mut summary = journal.summary();
+      if summary.state.requires_recovery() {
+        summary.state = PackageTaskState::RecoveryRequired;
+      }
+      summaries.insert(summary.task_id.clone(), summary);
+    }
     let active = {
       let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       active.by_task.values().cloned().collect::<Vec<_>>()
@@ -444,6 +590,7 @@ impl GamePackageManager {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
     cleanup_task_partials(&task_root.join("cache/chunks"), task_id)?;
+    cleanup_task_partials(&task_root.join("cache/sdks"), task_id)?;
     journal.state = PackageTaskState::Canceled;
     journal.error_message = None;
     journal.current_file = None;
@@ -615,6 +762,104 @@ async fn run_repair(
   .map_err(|error| format!("修复资源任务异常退出：{error}"))?
 }
 
+async fn run_switch(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  installation: GameInstallation,
+  plan: PersistedSwitchPlan,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+) {
+  let fail = |journal: &Arc<AsyncMutex<TaskJournal>>, error: String, canceled_flag: bool| {
+    if let Ok(mut journal_value) = journal.try_lock() {
+      persist_terminal_journal(&task_root, &mut journal_value, error, canceled_flag, &app_handle);
+    }
+  };
+  let client = match create_http_client() {
+    Ok(client) => client,
+    Err(error) => {
+      fail(&journal, error, false);
+      return;
+    }
+  };
+  {
+    let mut journal_value = journal.lock().await;
+    journal_value.state = PackageTaskState::Downloading;
+    journal_value.current_file = Some("下载渠道 SDK".to_string());
+    journal_value.touch();
+    if let Err(error) = journal::persist(&task_root, &journal_value) {
+      persist_terminal_journal(&task_root, &mut journal_value, error, false, &app_handle);
+      return;
+    }
+    emit_state(&app_handle, &journal_value.summary());
+  }
+  let request = {
+    let mut journal_value = journal.lock().await;
+    match switch::prepare_switch_commit(
+      &client,
+      &installation,
+      &plan,
+      &task_root,
+      &mut journal_value,
+      &canceled,
+    )
+    .await
+    {
+      Ok(request) => {
+        journal_value.state = PackageTaskState::ReadyToApply;
+        journal_value.current_file = Some("渠道文件已就绪".to_string());
+        journal_value.touch();
+        if let Err(error) = journal::persist(&task_root, &journal_value) {
+          persist_terminal_journal(&task_root, &mut journal_value, error, false, &app_handle);
+          return;
+        }
+        emit_state(&app_handle, &journal_value.summary());
+        request
+      }
+      Err(error) => {
+        let canceled_flag = canceled.load(Ordering::Acquire) || error.contains("已取消");
+        cleanup_task_partials(&task_root.join("cache/sdks"), plan.plan_id()).ok();
+        journal_value.state =
+          if canceled_flag { PackageTaskState::Canceled } else { PackageTaskState::Failed };
+        journal_value.error_message = (!canceled_flag).then_some(error);
+        journal_value.current_file = None;
+        journal_value.touch();
+        let _ = journal::persist(&task_root, &journal_value);
+        emit_state(&app_handle, &journal_value.summary());
+        return;
+      }
+    }
+  };
+  let game_root = PathBuf::from(&installation.root_path);
+  let apply_journal = Arc::clone(&journal);
+  let apply_handle = app_handle.clone();
+  let apply_task_root = task_root.clone();
+  let apply_canceled = Arc::clone(&canceled);
+  let result = tauri::async_runtime::spawn_blocking(move || {
+    let mut journal_value = apply_journal.blocking_lock().clone();
+    let emit = |journal: &TaskJournal| {
+      *apply_journal.blocking_lock() = journal.clone();
+      let summary = journal.summary();
+      emit_state(&apply_handle, &summary);
+      emit_progress(&apply_handle, &summary);
+    };
+    committer::execute_switch(
+      &request,
+      &game_root,
+      &apply_task_root,
+      &mut journal_value,
+      &apply_canceled,
+      emit,
+    )
+  })
+  .await;
+  match result {
+    Ok(Ok(())) => {}
+    Ok(Err(error)) => log::warn!("[game-package] 换服失败：{error}"),
+    Err(error) => log::error!("[game-package] 换服任务异常退出：{error}"),
+  }
+}
+
 fn finish_task(active: &Mutex<ActiveTasks>, task_id: &str) {
   let Ok(mut active) = active.lock() else {
     return;
@@ -640,10 +885,7 @@ async fn run_task(
     journal_value.state = PackageTaskState::Downloading;
     journal_value.touch();
     if let Err(error) = journal::persist(task_root, &journal_value) {
-      journal_value.state = PackageTaskState::Failed;
-      journal_value.error_message = Some(error);
-      journal_value.touch();
-      emit_state(&app_handle, &journal_value.summary());
+      persist_terminal_journal(task_root, &mut journal_value, error, false, &app_handle);
       return;
     }
     emit_state(&app_handle, &journal_value.summary());
@@ -731,9 +973,8 @@ async fn run_task(
   }
   journal_value.touch();
   if let Err(error) = journal::persist(task_root, &journal_value) {
-    journal_value.state = PackageTaskState::Failed;
-    journal_value.error_message = Some(error);
-    journal_value.touch();
+    persist_terminal_journal(task_root, &mut journal_value, error, false, &app_handle);
+    return;
   }
   emit_progress(&app_handle, &journal_value.summary());
   emit_state(&app_handle, &journal_value.summary());
@@ -769,6 +1010,21 @@ fn cleanup_task_partials(cache_root: &Path, task_id: &str) -> Result<(), String>
   Ok(())
 }
 
+fn persist_terminal_journal(
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  error: String,
+  canceled: bool,
+  app_handle: &AppHandle,
+) {
+  journal.state = if canceled { PackageTaskState::Canceled } else { PackageTaskState::Failed };
+  journal.error_message = (!canceled).then_some(error);
+  journal.current_file = None;
+  journal.touch();
+  let _ = journal::persist(task_root, journal);
+  emit_state(app_handle, &journal.summary());
+}
+
 fn emit_state(app_handle: &AppHandle, summary: &PackageTaskSummary) {
   if let Err(error) = app_handle.emit("game-package://state", summary) {
     log::warn!("[game-package] 发送任务状态事件失败：{error}");
@@ -782,7 +1038,49 @@ fn emit_progress(app_handle: &AppHandle, summary: &PackageTaskSummary) {
 }
 
 #[cfg(target_os = "windows")]
+const GAME_PROCESS_NAME: &str = "YuanShen.exe";
+
+#[cfg(target_os = "windows")]
 pub(crate) fn is_game_running() -> bool {
+  yuan_shen_process_ids().map(|ids| !ids.is_empty()).unwrap_or(true)
+}
+
+#[cfg(not(target_os = "windows"))]
+pub(crate) fn is_game_running() -> bool {
+  false
+}
+
+/// 结束国服客户端进程；未在运行时直接成功。
+pub(crate) fn stop_game() -> Result<(), String> {
+  #[cfg(not(target_os = "windows"))]
+  {
+    Ok(())
+  }
+  #[cfg(target_os = "windows")]
+  {
+    let ids = yuan_shen_process_ids()?;
+    if ids.is_empty() {
+      return Ok(());
+    }
+    for pid in ids {
+      terminate_pid(pid)?;
+    }
+    let deadline = Instant::now() + Duration::from_secs(15);
+    loop {
+      let remaining = yuan_shen_process_ids()?;
+      if remaining.is_empty() {
+        return Ok(());
+      }
+      if Instant::now() >= deadline {
+        return Err("游戏未在时限内退出，请手动关闭后再换服".to_string());
+      }
+      std::thread::sleep(Duration::from_millis(200));
+    }
+  }
+}
+
+#[cfg(target_os = "windows")]
+fn yuan_shen_process_ids() -> Result<Vec<u32>, String> {
   use windows_sys::Win32::{
     Foundation::{CloseHandle, INVALID_HANDLE_VALUE},
     System::Diagnostics::ToolHelp::{
@@ -793,18 +1091,19 @@ pub(crate) fn is_game_running() -> bool {
   unsafe {
     let snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if snapshot == INVALID_HANDLE_VALUE {
-      return true;
+      return Err(format!("枚举游戏进程失败：{}", std::io::Error::last_os_error()));
     }
     let mut entry: PROCESSENTRY32W = std::mem::zeroed();
     entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
+    let mut ids = Vec::new();
     if Process32FirstW(snapshot, &mut entry) != 0 {
       loop {
         let length =
           entry.szExeFile.iter().position(|value| *value == 0).unwrap_or(entry.szExeFile.len());
-        if String::from_utf16_lossy(&entry.szExeFile[..length]).eq_ignore_ascii_case("YuanShen.exe")
+        if String::from_utf16_lossy(&entry.szExeFile[..length])
+          .eq_ignore_ascii_case(GAME_PROCESS_NAME)
         {
-          CloseHandle(snapshot);
-          return true;
+          ids.push(entry.th32ProcessID);
         }
         if Process32NextW(snapshot, &mut entry) == 0 {
           break;
@@ -812,11 +1111,167 @@ pub(crate) fn is_game_running() -> bool {
       }
     }
     CloseHandle(snapshot);
+    Ok(ids)
   }
-  false
 }
 
-#[cfg(not(target_os = "windows"))]
-pub(crate) fn is_game_running() -> bool {
-  false
+#[cfg(target_os = "windows")]
+fn terminate_pid(pid: u32) -> Result<(), String> {
+  use windows_sys::Win32::{
+    Foundation::CloseHandle,
+    System::Threading::{OpenProcess, PROCESS_TERMINATE, TerminateProcess},
+  };
+  if pid == 0 {
+    return Ok(());
+  }
+  unsafe {
+    let handle = OpenProcess(PROCESS_TERMINATE, 0, pid);
+    if handle.is_null() {
+      return Err(format!("结束游戏进程失败：{}", std::io::Error::last_os_error()));
+    }
+    let ok = TerminateProcess(handle, 1);
+    CloseHandle(handle);
+    if ok == 0 {
+      return Err(format!("结束游戏进程失败：{}", std::io::Error::last_os_error()));
+    }
+  }
+  Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{ActiveTask, GamePackageManager};
+  use crate::game::{
+    journal::{self, TaskJournal},
+    model::{PackageTaskState, SchemeId},
+  };
+  use std::{
+    fs,
+    path::PathBuf,
+    sync::{
+      Arc,
+      atomic::{AtomicBool, Ordering},
+    },
+  };
+  use tokio::sync::Mutex as AsyncMutex;
+  use uuid::Uuid;
+
+  struct TempRoot(PathBuf);
+
+  impl TempRoot {
+    fn new() -> Self {
+      let path = std::env::temp_dir().join(format!("teyvat-guide-package-{}", Uuid::new_v4()));
+      fs::create_dir_all(&path).unwrap();
+      Self(path)
+    }
+  }
+
+  impl Drop for TempRoot {
+    fn drop(&mut self) {
+      let _ = fs::remove_dir_all(&self.0);
+    }
+  }
+
+  fn switch_journal(task_id: &str) -> TaskJournal {
+    TaskJournal::from_switch(
+      task_id.to_string(),
+      "installation".to_string(),
+      SchemeId::CnOfficial,
+      SchemeId::CnBilibili,
+      "a".repeat(64),
+      0,
+      0,
+    )
+  }
+
+  #[test]
+  fn cancel_reaps_orphaned_downloading_switch_journal() {
+    let root = TempRoot::new();
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let mut journal = switch_journal(&task_id);
+    journal.state = PackageTaskState::Downloading;
+    journal::persist(&root.0, &journal).unwrap();
+    let summary = manager.request_or_reap_cancel(&root.0, &task_id).unwrap().unwrap();
+    assert_eq!(summary.state, PackageTaskState::Canceled);
+    let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
+    assert_eq!(loaded.state, PackageTaskState::Canceled);
+  }
+
+  #[test]
+  fn cancel_live_task_only_sets_flag() {
+    let root = TempRoot::new();
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let mut journal = switch_journal(&task_id);
+    journal.state = PackageTaskState::Downloading;
+    journal::persist(&root.0, &journal).unwrap();
+    let canceled = Arc::new(AtomicBool::new(false));
+    {
+      let mut active = manager.active.lock().unwrap();
+      active.by_task.insert(
+        task_id.clone(),
+        ActiveTask {
+          installation_id: "installation".to_string(),
+          canceled: Arc::clone(&canceled),
+          journal: Arc::new(AsyncMutex::new(journal)),
+        },
+      );
+    }
+    assert!(manager.request_or_reap_cancel(&root.0, &task_id).unwrap().is_none());
+    assert!(canceled.load(Ordering::Acquire));
+    let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
+    assert_eq!(loaded.state, PackageTaskState::Downloading);
+  }
+
+  #[test]
+  fn list_persists_orphaned_downloading_as_failed() {
+    let root = TempRoot::new();
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let mut journal = switch_journal(&task_id);
+    journal.state = PackageTaskState::Downloading;
+    journal::persist(&root.0, &journal).unwrap();
+    let listed = tauri::async_runtime::block_on(manager.list(&root.0, None)).unwrap();
+    assert_eq!(listed.len(), 1);
+    assert_eq!(listed[0].state, PackageTaskState::Failed);
+    assert_eq!(listed[0].error_message.as_deref(), Some("资源任务已中断，请恢复或放弃"));
+    let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
+    assert_eq!(loaded.state, PackageTaskState::Failed);
+  }
+
+  #[test]
+  fn list_keeps_ready_to_apply_without_worker() {
+    let root = TempRoot::new();
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let mut journal = switch_journal(&task_id);
+    journal.state = PackageTaskState::ReadyToApply;
+    journal::persist(&root.0, &journal).unwrap();
+    let listed = tauri::async_runtime::block_on(manager.list(&root.0, None)).unwrap();
+    assert_eq!(listed[0].state, PackageTaskState::ReadyToApply);
+    let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
+    assert_eq!(loaded.state, PackageTaskState::ReadyToApply);
+  }
+
+  #[test]
+  fn cancel_terminal_journal_is_idempotent() {
+    let root = TempRoot::new();
+    let manager = GamePackageManager::new();
+    let task_id = Uuid::new_v4().to_string();
+    let mut journal = switch_journal(&task_id);
+    journal.state = PackageTaskState::Failed;
+    journal.error_message = Some("先前失败".to_string());
+    journal::persist(&root.0, &journal).unwrap();
+    let summary = manager.request_or_reap_cancel(&root.0, &task_id).unwrap().unwrap();
+    assert_eq!(summary.state, PackageTaskState::Failed);
+    let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
+    assert_eq!(loaded.state, PackageTaskState::Failed);
+    assert_eq!(loaded.error_message.as_deref(), Some("先前失败"));
+  }
+
+  #[test]
+  fn stop_game_succeeds_when_client_is_not_running() {
+    super::stop_game().unwrap();
+  }
 }

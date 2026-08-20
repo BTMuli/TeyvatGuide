@@ -94,7 +94,11 @@
           v-if="installation.status === gameEnum.installation.status.KNOWN"
           :installation
         />
-        <PgScheme v-if="installation.status === gameEnum.installation.status.KNOWN" :installation />
+        <PgScheme
+          v-if="installation.status === gameEnum.installation.status.KNOWN"
+          :installation
+          @switched="loadInstallations"
+        />
       </article>
     </section>
     <PgCache v-if="isWindows && !loading" />

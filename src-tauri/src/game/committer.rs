@@ -51,6 +51,33 @@ struct CommitStep {
   md5: String,
 }
 
+struct FileCommitPlan {
+  plan_id: String,
+  digest: String,
+  steps: Vec<CommitStep>,
+}
+
+/// 换服提交所需的已校验文件步骤；不含完整游戏 inventory。
+#[derive(Clone, Debug)]
+pub(crate) struct SwitchFileStep {
+  pub kind: CommitStepKind,
+  pub name: String,
+  pub size: u64,
+  pub md5: String,
+  pub source_size: Option<u64>,
+  pub source_md5: Option<String>,
+}
+
+/// 换服写前日志绑定的不可变提交请求。
+#[derive(Clone, Debug)]
+pub(crate) struct SwitchApplyRequest {
+  pub plan_id: String,
+  pub digest: String,
+  pub target_channel: u32,
+  pub target_sub_channel: u32,
+  pub files: Vec<SwitchFileStep>,
+}
+
 /// 组装、提交并验证一个 ReadyToApply 任务。
 pub(crate) fn execute_apply<F>(
   plan: &PersistedPlan,
@@ -241,7 +268,8 @@ where
   if journal.apply.is_some() {
     journal.state = PackageTaskState::RollingBack;
     persist_and_emit(task_root, journal, &emit)?;
-    if let Err(error) = rollback_transaction(plan, game_root, journal) {
+    if let Err(error) = rollback_file_transaction(&file_commit_from_plan(plan)?, game_root, journal)
+    {
       journal.state = PackageTaskState::RecoveryRequired;
       journal.error_message = Some(error.clone());
       let _ = persist_and_emit(task_root, journal, &emit);
@@ -252,6 +280,111 @@ where
   cleanup_known_transaction_files(plan, game_root, task_root);
   journal.apply = None;
   journal.repair = None;
+  journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
+  journal.error_message = None;
+  persist_and_emit(task_root, journal, &emit)
+}
+
+/// 提交渠道 SDK 与废弃文件，最后才写入 channel/sub_channel，不改 game_version。
+pub(crate) fn execute_switch<F>(
+  request: &SwitchApplyRequest,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  canceled: &AtomicBool,
+  emit: F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  if journal.state != PackageTaskState::ReadyToApply {
+    return Err("换服资源尚未准备完成，不能提交".to_string());
+  }
+  let commit = file_commit_from_switch(request);
+  let incoming_bytes = commit.steps.iter().try_fold(0_u64, |total, step| {
+    if step.kind == CommitStepKind::Delete {
+      return Ok(total);
+    }
+    total.checked_add(step.size).ok_or_else(|| "换服提交空间需求溢出".to_string())
+  })?;
+  let required = incoming_bytes
+    .checked_add(SAFETY_MARGIN_BYTES)
+    .ok_or_else(|| "换服提交空间需求溢出".to_string())?;
+  let available = fs2::available_space(game_root)
+    .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
+  if available < required {
+    return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
+  }
+
+  journal.state = PackageTaskState::Assembling;
+  journal.error_message = None;
+  journal.current_file = Some("准备渠道文件".to_string());
+  persist_and_emit(task_root, journal, &emit)?;
+  let result = (|| {
+    let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
+    let original =
+      fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
+    let target = patch_channel(&original, request.target_channel, request.target_sub_channel)?;
+    prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal)?;
+    ensure_game_stopped()?;
+    journal.state = PackageTaskState::CommitPrepared;
+    journal.current_file = Some("准备提交事务".to_string());
+    persist_and_emit(task_root, journal, &emit)?;
+    check_canceled(canceled)?;
+    journal.state = PackageTaskState::Committing;
+    persist_and_emit(task_root, journal, &emit)?;
+    commit_file_resources(&commit, game_root, journal, task_root, canceled, &emit)?;
+    journal.state = PackageTaskState::Verifying;
+    journal.current_file = Some("校验渠道文件".to_string());
+    persist_and_emit(task_root, journal, &emit)?;
+    verify_switch_files(&commit, game_root, canceled)?;
+    commit_config(&commit.plan_id, game_root, task_root, journal, &emit)?;
+    verify_switch_files(&commit, game_root, canceled)?;
+    verify_switch_config(game_root, request.target_channel, request.target_sub_channel, &original)?;
+    journal.state = PackageTaskState::Completed;
+    journal.error_message = None;
+    journal.current_file = None;
+    persist_and_emit(task_root, journal, &emit)?;
+    Ok(())
+  })();
+
+  match result {
+    Ok(()) => {
+      cleanup_file_transaction(&commit, game_root, task_root);
+      Ok(())
+    }
+    Err(error) => {
+      let canceled = canceled.load(Ordering::Acquire);
+      finish_failed_switch(&commit, game_root, task_root, journal, canceled, error, &emit)
+    }
+  }
+}
+
+/// 回滚未完成的换服提交；无法证明安全时进入 RecoveryRequired。
+pub(crate) fn rollback_switch<F>(
+  request: &SwitchApplyRequest,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  retry: bool,
+  emit: F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let commit = file_commit_from_switch(request);
+  if journal.apply.is_some() {
+    journal.state = PackageTaskState::RollingBack;
+    persist_and_emit(task_root, journal, &emit)?;
+    if let Err(error) = rollback_file_transaction(&commit, game_root, journal) {
+      journal.state = PackageTaskState::RecoveryRequired;
+      journal.error_message = Some(error.clone());
+      let _ = persist_and_emit(task_root, journal, &emit);
+      return Err(error);
+    }
+  }
+  cleanup_file_transaction(&commit, game_root, task_root);
+  journal.apply = None;
   journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
   journal.error_message = None;
   persist_and_emit(task_root, journal, &emit)
@@ -494,12 +627,31 @@ fn prepare_transaction(
   task_root: &Path,
   journal: &mut TaskJournal,
 ) -> Result<(), String> {
-  let steps = commit_steps(plan);
-  preflight_targets(&steps, game_root)?;
-  let incoming_root = transaction_subdirectory(game_root, &plan.plan_id, "incoming")?;
-  let backup_root = transaction_subdirectory(game_root, &plan.plan_id, "backup")?;
-  let staging_root = task_root.join("tasks").join(&plan.plan_id).join("staging");
-  for step in &steps {
+  let commit = file_commit_from_plan(plan)?;
+  let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
+  let original =
+    fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
+  let target = if plan.source_tag == plan.target_tag {
+    original.clone()
+  } else {
+    patch_game_version(&original, &plan.target_tag)?
+  };
+  prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal)
+}
+
+fn prepare_file_transaction(
+  commit: &FileCommitPlan,
+  original: &[u8],
+  target: &[u8],
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+) -> Result<(), String> {
+  preflight_targets(&commit.steps, game_root)?;
+  let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
+  let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
+  let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
+  for step in &commit.steps {
     if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
       return Err(format!("提交备份目录包含未恢复文件：{}", step.name));
     }
@@ -511,26 +663,18 @@ fn prepare_transaction(
     copy_verified(&source, &incoming, step.size, &step.md5)?;
   }
 
-  let config_root = transaction_subdirectory(game_root, &plan.plan_id, "config")?;
-  let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
-  let original =
-    fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
-  let target = if plan.source_tag == plan.target_tag {
-    original.clone()
-  } else {
-    patch_game_version(&original, &plan.target_tag)?
-  };
-  write_verified_bytes(&config_root.join("original"), &original)?;
-  write_verified_bytes(&config_root.join("target"), &target)?;
+  let config_root = transaction_subdirectory(game_root, &commit.plan_id, "config")?;
+  write_verified_bytes(&config_root.join("original"), original)?;
+  write_verified_bytes(&config_root.join("target"), target)?;
   journal.schema_version = journal::JOURNAL_SCHEMA_VERSION;
   journal.apply = Some(ApplyJournal {
-    plan_sha256: plan_sha256(plan)?,
-    steps_digest: steps_digest(&steps),
-    step_count: steps.len(),
+    plan_sha256: commit.digest.clone(),
+    steps_digest: steps_digest(&commit.steps),
+    step_count: commit.steps.len(),
     cursor: 0,
     active_step: None,
-    config_original_sha256: sha256_bytes(&original),
-    config_target_sha256: sha256_bytes(&target),
+    config_original_sha256: sha256_bytes(original),
+    config_target_sha256: sha256_bytes(target),
     config_phase: ConfigCommitPhase::Prepared,
   });
   Ok(())
@@ -576,12 +720,32 @@ fn commit_resources<F>(
 where
   F: Fn(&TaskJournal),
 {
-  let steps = commit_steps(plan);
-  validate_plan_identity(journal, plan)?;
-  validate_apply_identity(journal, &steps)?;
-  let incoming_root = transaction_subdirectory(game_root, &plan.plan_id, "incoming")?;
-  let backup_root = transaction_subdirectory(game_root, &plan.plan_id, "backup")?;
-  for (index, step) in steps.iter().enumerate().skip(apply(journal)?.cursor) {
+  commit_file_resources(
+    &file_commit_from_plan(plan)?,
+    game_root,
+    journal,
+    task_root,
+    canceled,
+    emit,
+  )
+}
+
+fn commit_file_resources<F>(
+  commit: &FileCommitPlan,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  validate_plan_digest(journal, &commit.digest)?;
+  validate_apply_identity(journal, &commit.steps)?;
+  let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
+  let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
+  for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
     let target = prepare_manifest_output_file(game_root, &step.name)?;
     let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
@@ -643,10 +807,23 @@ fn commit_version<F>(
 where
   F: Fn(&TaskJournal),
 {
+  commit_config(&plan.plan_id, game_root, task_root, journal, emit)
+}
+
+fn commit_config<F>(
+  plan_id: &str,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
   let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
   let current = fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
   if sha256_bytes(&current) != apply(journal)?.config_original_sha256 {
-    return Err("config.ini 在提交期间发生变化，拒绝更新版本".to_string());
+    return Err("config.ini 在提交期间发生变化，拒绝更新配置".to_string());
   }
   if apply(journal)?.config_original_sha256 == apply(journal)?.config_target_sha256 {
     apply_mut(journal)?.config_phase = ConfigCommitPhase::Replaced;
@@ -656,7 +833,7 @@ where
   ensure_game_stopped()?;
   apply_mut(journal)?.config_phase = ConfigCommitPhase::ReplacePending;
   persist_and_emit(task_root, journal, emit)?;
-  let config_root = transaction_subdirectory(game_root, &plan.plan_id, "config")?;
+  let config_root = transaction_subdirectory(game_root, plan_id, "config")?;
   let target = resolve_existing_manifest_file(&config_root, "target")?;
   let target_bytes =
     fs::read(&target).map_err(|error| format!("读取目标 config.ini 失败：{error}"))?;
@@ -667,7 +844,7 @@ where
   atomic_replace(&target, &config_path)?;
   let actual = fs::read(&config_path).map_err(|error| format!("复验 config.ini 失败：{error}"))?;
   if sha256_bytes(&actual) != apply(journal)?.config_target_sha256 {
-    return Err("config.ini 版本提交后完整性校验失败".to_string());
+    return Err("config.ini 提交后完整性校验失败".to_string());
   }
   apply_mut(journal)?.config_phase = ConfigCommitPhase::Replaced;
   persist_and_emit(task_root, journal, emit)
@@ -764,7 +941,9 @@ where
     journal.state = PackageTaskState::RollingBack;
     journal.error_message = Some(error.clone());
     let _ = persist_and_emit(task_root, journal, emit);
-    if let Err(rollback_error) = rollback_transaction(plan, game_root, journal) {
+    if let Err(rollback_error) =
+      rollback_file_transaction(&file_commit_from_plan(plan)?, game_root, journal)
+    {
       let combined = format!("{error}；自动回滚失败：{rollback_error}");
       journal.state = PackageTaskState::RecoveryRequired;
       journal.error_message = Some(combined.clone());
@@ -780,18 +959,17 @@ where
   Err(if canceled { "应用更新已取消".to_string() } else { error })
 }
 
-fn rollback_transaction(
-  plan: &PersistedPlan,
+fn rollback_file_transaction(
+  commit: &FileCommitPlan,
   game_root: &Path,
   journal: &TaskJournal,
 ) -> Result<(), String> {
-  let steps = commit_steps(plan);
-  validate_plan_identity(journal, plan)?;
-  validate_apply_identity(journal, &steps)?;
-  rollback_config(plan, game_root, journal)?;
-  let incoming_root = transaction_subdirectory(game_root, &plan.plan_id, "incoming")?;
-  let backup_root = transaction_subdirectory(game_root, &plan.plan_id, "backup")?;
-  for step in steps.iter().rev() {
+  validate_plan_digest(journal, &commit.digest)?;
+  validate_apply_identity(journal, &commit.steps)?;
+  rollback_config(&commit.plan_id, game_root, journal)?;
+  let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
+  let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
+  for step in commit.steps.iter().rev() {
     let target = resolve_optional_manifest_file(game_root, &step.name)?;
     let incoming = resolve_optional_manifest_file(&incoming_root, &step.name)?;
     let backup = resolve_optional_manifest_file(&backup_root, &step.name)?;
@@ -926,11 +1104,7 @@ fn rollback_transaction(
   Ok(())
 }
 
-fn rollback_config(
-  plan: &PersistedPlan,
-  game_root: &Path,
-  journal: &TaskJournal,
-) -> Result<(), String> {
+fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   let config = resolve_existing_manifest_file(game_root, "config.ini")?;
   let current = fs::read(&config).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
   let current_hash = sha256_bytes(&current);
@@ -939,9 +1113,9 @@ fn rollback_config(
     return Ok(());
   }
   if current_hash != apply.config_target_sha256 {
-    return Err("config.ini 既不匹配源版本也不匹配目标版本".to_string());
+    return Err("config.ini 既不匹配源配置也不匹配目标配置".to_string());
   }
-  let config_root = transaction_subdirectory(game_root, &plan.plan_id, "config")?;
+  let config_root = transaction_subdirectory(game_root, plan_id, "config")?;
   let original = resolve_existing_manifest_file(&config_root, "original")?;
   let original_bytes =
     fs::read(&original).map_err(|error| format!("读取源 config.ini 备份失败：{error}"))?;
@@ -1020,8 +1194,8 @@ fn validate_apply_identity(journal: &TaskJournal, steps: &[CommitStep]) -> Resul
   Ok(())
 }
 
-fn validate_plan_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), String> {
-  if apply(journal)?.plan_sha256 != plan_sha256(plan)? {
+fn validate_plan_digest(journal: &TaskJournal, digest: &str) -> Result<(), String> {
+  if apply(journal)?.plan_sha256 != digest {
     return Err("提交日志与完整资源计划不匹配".to_string());
   }
   Ok(())
@@ -1159,7 +1333,151 @@ fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
   Ok(format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(md5))
 }
 
+fn file_commit_from_plan(plan: &PersistedPlan) -> Result<FileCommitPlan, String> {
+  Ok(FileCommitPlan {
+    plan_id: plan.plan_id.clone(),
+    digest: plan_sha256(plan)?,
+    steps: commit_steps(plan),
+  })
+}
+
+fn file_commit_from_switch(request: &SwitchApplyRequest) -> FileCommitPlan {
+  FileCommitPlan {
+    plan_id: request.plan_id.clone(),
+    digest: request.digest.clone(),
+    steps: request
+      .files
+      .iter()
+      .map(|file| CommitStep {
+        kind: file.kind,
+        name: file.name.clone(),
+        source_size: file.source_size,
+        source_md5: file.source_md5.clone(),
+        size: file.size,
+        md5: file.md5.clone(),
+      })
+      .collect(),
+  }
+}
+
+fn verify_switch_files(
+  commit: &FileCommitPlan,
+  game_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  for step in &commit.steps {
+    check_canceled(canceled)?;
+    match step.kind {
+      CommitStepKind::Add | CommitStepKind::Modify => {
+        let path = resolve_existing_manifest_file(game_root, &step.name)?;
+        if !file_matches(&path, step.size, &step.md5)? {
+          return Err(format!("换服文件校验失败：{}", step.name));
+        }
+      }
+      CommitStepKind::Delete => {
+        if resolve_optional_manifest_file(game_root, &step.name)?.is_some() {
+          return Err(format!("换服应移出的文件仍存在：{}", step.name));
+        }
+      }
+      CommitStepKind::Repair => return Err("换服提交不能包含修复步骤".to_string()),
+    }
+  }
+  Ok(())
+}
+
+fn verify_switch_config(
+  game_root: &Path,
+  channel: u32,
+  sub_channel: u32,
+  original: &[u8],
+) -> Result<(), String> {
+  let config = resolve_existing_manifest_file(game_root, "config.ini")?;
+  let current = fs::read(&config).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
+  let expected = patch_channel(original, channel, sub_channel)?;
+  if sha256_bytes(&current) != sha256_bytes(&expected) {
+    return Err("换服后的 config.ini 与目标渠道配置不一致".to_string());
+  }
+  let original_version = general_value(original, "game_version")?;
+  let current_version = general_value(&current, "game_version")?;
+  if original_version != current_version {
+    return Err("换服不能改写 game_version".to_string());
+  }
+  Ok(())
+}
+
+fn general_value(content: &[u8], key: &str) -> Result<Option<String>, String> {
+  let body = content.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(content);
+  let text = std::str::from_utf8(body).map_err(|_| "config.ini 不是有效 UTF-8".to_string())?;
+  let mut in_general = false;
+  let mut found = None;
+  for line in text.lines() {
+    let trimmed = line.trim();
+    if trimmed.starts_with('[') && trimmed.ends_with(']') {
+      let name = trimmed[1..trimmed.len() - 1].trim();
+      if in_general {
+        break;
+      }
+      in_general = name.eq_ignore_ascii_case("general");
+      continue;
+    }
+    if !in_general {
+      continue;
+    }
+    let Some((line_key, value)) = line.split_once('=') else {
+      continue;
+    };
+    if line_key.trim().eq_ignore_ascii_case(key) {
+      if found.replace(value.trim().to_string()).is_some() {
+        return Err(format!("config.ini 包含重复的 {key}"));
+      }
+    }
+  }
+  Ok(found)
+}
+
+fn finish_failed_switch<F>(
+  commit: &FileCommitPlan,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  canceled: bool,
+  error: String,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  if journal.apply.is_some() {
+    journal.state = PackageTaskState::RollingBack;
+    journal.error_message = Some(error.clone());
+    let _ = persist_and_emit(task_root, journal, emit);
+    if let Err(rollback_error) = rollback_file_transaction(commit, game_root, journal) {
+      let combined = format!("{error}；自动回滚失败：{rollback_error}");
+      journal.state = PackageTaskState::RecoveryRequired;
+      journal.error_message = Some(combined.clone());
+      let _ = persist_and_emit(task_root, journal, emit);
+      return Err(combined);
+    }
+  }
+  cleanup_file_transaction(commit, game_root, task_root);
+  journal.apply = None;
+  journal.state = if canceled { PackageTaskState::Canceled } else { PackageTaskState::Failed };
+  journal.error_message = (!canceled).then_some(error.clone());
+  let _ = persist_and_emit(task_root, journal, emit);
+  Err(if canceled { "换服已取消".to_string() } else { error })
+}
+
 fn patch_game_version(original: &[u8], target_version: &str) -> Result<Vec<u8>, String> {
+  patch_general_keys(original, &[("game_version", target_version)])
+}
+
+fn patch_channel(original: &[u8], channel: u32, sub_channel: u32) -> Result<Vec<u8>, String> {
+  let channel = channel.to_string();
+  let sub_channel = sub_channel.to_string();
+  patch_general_keys(original, &[("channel", &channel), ("sub_channel", &sub_channel)])
+}
+
+fn patch_general_keys(original: &[u8], updates: &[(&str, &str)]) -> Result<Vec<u8>, String> {
   let (bom, body) = original
     .strip_prefix(&[0xef, 0xbb, 0xbf])
     .map_or((&[][..], original), |body| (&[0xef, 0xbb, 0xbf][..], body));
@@ -1184,27 +1502,30 @@ fn patch_game_version(original: &[u8], target_version: &str) -> Result<Vec<u8>, 
     }
   }
   let start = general_start.ok_or_else(|| "config.ini 缺少 [general] 节".to_string())?;
-  let mut version_index = None;
-  for (index, line) in lines.iter().enumerate().take(general_end).skip(start + 1) {
-    let Some((key, _)) = line.split_once('=') else {
-      continue;
-    };
-    if key.trim().eq_ignore_ascii_case("game_version") {
-      if version_index.replace(index).is_some() {
-        return Err("config.ini 包含重复的 game_version".to_string());
+  for (key, value) in updates {
+    let mut key_index = None;
+    for (index, line) in lines.iter().enumerate().take(general_end).skip(start + 1) {
+      let Some((line_key, _)) = line.split_once('=') else {
+        continue;
+      };
+      if line_key.trim().eq_ignore_ascii_case(key) {
+        if key_index.replace(index).is_some() {
+          return Err(format!("config.ini 包含重复的 {key}"));
+        }
       }
     }
+    if let Some(index) = key_index {
+      let (line_key, old_value) =
+        lines[index].split_once('=').ok_or_else(|| format!("config.ini 的 {key} 格式无效"))?;
+      let value_prefix = &old_value[..old_value.len() - old_value.trim_start().len()];
+      lines[index] = format!("{line_key}={value_prefix}{value}");
+    } else {
+      lines.insert(general_end, format!("{key}={value}"));
+      general_end += 1;
+    }
   }
-  if let Some(index) = version_index {
-    let (key, value) = lines[index]
-      .split_once('=')
-      .ok_or_else(|| "config.ini 的 game_version 格式无效".to_string())?;
-    let value_prefix = &value[..value.len() - value.trim_start().len()];
-    lines[index] = format!("{key}={value_prefix}{target_version}");
-  } else {
-    lines.insert(general_end, format!("game_version={target_version}"));
-  }
-  let mut output = Vec::with_capacity(original.len().saturating_add(target_version.len()));
+  let extra: usize = updates.iter().map(|(_, value)| value.len()).sum();
+  let mut output = Vec::with_capacity(original.len().saturating_add(extra));
   output.extend_from_slice(bom);
   output.extend_from_slice(lines.join(newline).as_bytes());
   if had_trailing_newline {
@@ -1235,13 +1556,19 @@ fn remove_optional_file(path: &Path) -> Result<(), String> {
 }
 
 fn cleanup_known_transaction_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
-  let Ok(incoming_root) = transaction_subdirectory(game_root, &plan.plan_id, "incoming") else {
+  if let Ok(commit) = file_commit_from_plan(plan) {
+    cleanup_file_transaction(&commit, game_root, task_root);
+  }
+}
+
+fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root: &Path) {
+  let Ok(incoming_root) = transaction_subdirectory(game_root, &commit.plan_id, "incoming") else {
     return;
   };
-  let Ok(backup_root) = transaction_subdirectory(game_root, &plan.plan_id, "backup") else {
+  let Ok(backup_root) = transaction_subdirectory(game_root, &commit.plan_id, "backup") else {
     return;
   };
-  for step in commit_steps(plan) {
+  for step in &commit.steps {
     for root in [&incoming_root, &backup_root] {
       if let Ok(path) = prepare_manifest_output_file(root, &step.name) {
         let _ = remove_optional_file(&path);
@@ -1251,14 +1578,17 @@ fn cleanup_known_transaction_files(plan: &PersistedPlan, game_root: &Path, task_
       }
     }
   }
-  if let Ok(config_root) = transaction_subdirectory(game_root, &plan.plan_id, "config") {
+  if let Ok(config_root) = transaction_subdirectory(game_root, &commit.plan_id, "config") {
     for name in ["original", "target"] {
       let _ = remove_optional_file(&config_root.join(name));
     }
   }
-  let staging_root = task_root.join("tasks").join(&plan.plan_id).join("staging");
-  for asset in &plan.assets {
-    if let Ok(path) = prepare_manifest_output_file(&staging_root, &asset.name) {
+  let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
+  for step in &commit.steps {
+    if step.kind == CommitStepKind::Delete {
+      continue;
+    }
+    if let Ok(path) = prepare_manifest_output_file(&staging_root, &step.name) {
       let _ = remove_optional_file(&path);
       if let Ok(partial) = sibling_with_suffix(&path, ".part") {
         let _ = remove_optional_file(&partial);
@@ -1332,8 +1662,9 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    ApplyOutcome, atomic_replace, commit_resources, execute_apply, execute_repair,
-    patch_game_version, prepare_transaction, rollback_apply, transaction_subdirectory,
+    ApplyOutcome, SwitchApplyRequest, SwitchFileStep, atomic_replace, commit_resources,
+    execute_apply, execute_repair, execute_switch, patch_channel, patch_game_version,
+    prepare_transaction, rollback_apply, transaction_subdirectory,
   };
   use crate::game::{
     assembler::assemble_manifest_plan,
@@ -1774,6 +2105,87 @@ mod tests {
       b"\xef\xbb\xbf[general]\r\nchannel=1\r\ngame_version = 2.0.0\r\n[other]\r\nvalue=1\r\n"
     );
     assert!(patch_game_version(b"[general]\ngame_version=1\ngame_version=2\n", "3").is_err());
+  }
+
+  #[test]
+  fn patches_channel_without_touching_game_version() {
+    let original =
+      b"[general]\r\nchannel=1\r\nsub_channel=1\r\ngame_version=5.0.0\r\n[other]\r\nvalue=1\r\n";
+    let patched = patch_channel(original, 14, 0).unwrap();
+    let text = String::from_utf8(patched).unwrap();
+    assert!(text.contains("channel=14"));
+    assert!(text.contains("sub_channel=0"));
+    assert!(text.contains("game_version=5.0.0"));
+    assert!(text.contains("[other]\r\nvalue=1"));
+  }
+
+  #[test]
+  fn switch_commit_writes_channel_last_and_rolls_back_files() {
+    let root = TempRoot::new();
+    fs::create_dir_all(root.game().join("YuanShen_Data/Plugins")).unwrap();
+    fs::write(
+      root.game().join("config.ini"),
+      b"[general]\r\nchannel=1\r\nsub_channel=1\r\ngame_version=5.0.0\r\n",
+    )
+    .unwrap();
+    fs::write(root.game().join("YuanShen_Data/Plugins/PCGameSDK.dll"), b"old").unwrap();
+    let plan_id = Uuid::new_v4().to_string();
+    let staging = root.tasks().join("tasks").join(&plan_id).join("staging/YuanShen_Data/Plugins");
+    fs::create_dir_all(&staging).unwrap();
+    fs::write(staging.join("PluginEOSSDK.dll"), b"sdk").unwrap();
+    let mut journal = TaskJournal::from_switch(
+      plan_id.clone(),
+      "installation".to_string(),
+      SchemeId::CnOfficial,
+      SchemeId::CnBilibili,
+      "b".repeat(64),
+      3,
+      2,
+    );
+    journal.state = PackageTaskState::ReadyToApply;
+    let request = SwitchApplyRequest {
+      plan_id: plan_id.clone(),
+      digest: "c".repeat(64),
+      target_channel: 14,
+      target_sub_channel: 0,
+      files: vec![
+        SwitchFileStep {
+          kind: CommitStepKind::Add,
+          name: "YuanShen_Data/Plugins/PluginEOSSDK.dll".to_string(),
+          size: 3,
+          md5: md5(b"sdk"),
+          source_size: None,
+          source_md5: None,
+        },
+        SwitchFileStep {
+          kind: CommitStepKind::Delete,
+          name: "YuanShen_Data/Plugins/PCGameSDK.dll".to_string(),
+          size: 3,
+          md5: md5(b"old"),
+          source_size: Some(3),
+          source_md5: Some(md5(b"old")),
+        },
+      ],
+    };
+    execute_switch(
+      &request,
+      &root.game(),
+      &root.tasks(),
+      &mut journal,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    assert_eq!(journal.state, PackageTaskState::Completed);
+    assert_eq!(
+      fs::read(root.game().join("YuanShen_Data/Plugins/PluginEOSSDK.dll")).unwrap(),
+      b"sdk"
+    );
+    assert!(!root.game().join("YuanShen_Data/Plugins/PCGameSDK.dll").exists());
+    let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
+    assert!(config.contains("channel=14"));
+    assert!(config.contains("sub_channel=0"));
+    assert!(config.contains("game_version=5.0.0"));
   }
 
   fn integrity_plan(task_id: &str, bytes: &[u8]) -> PersistedPlan {

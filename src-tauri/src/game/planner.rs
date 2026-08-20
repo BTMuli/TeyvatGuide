@@ -189,6 +189,9 @@ pub async fn create_and_persist_plan(
     PackagePlanTarget::PreDownload => {
       branches.pre_download.as_ref().ok_or_else(|| "当前没有可用的预下载分支".to_string())?
     }
+    PackagePlanTarget::Switch => {
+      return Err("渠道转换请使用换服评估入口".to_string());
+    }
   };
   if source_tag == target_branch.tag {
     return Err("本地版本已与目标版本一致".to_string());
@@ -328,6 +331,9 @@ pub(crate) async fn hydrate_and_validate_plan(
     PackagePlanTarget::PreDownload => {
       branches.pre_download.as_ref().ok_or_else(|| "预下载分支已不可用，请重新评估".to_string())?
     }
+    PackagePlanTarget::Switch => {
+      return Err("渠道转换任务不能作为资源下载计划恢复".to_string());
+    }
   };
   if target_branch.tag != plan.target_tag {
     return Err("资源计划目标版本已变化，请重新评估".to_string());
@@ -397,6 +403,7 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     return Err(match plan.target {
       PackagePlanTarget::PreDownload => "预下载目标尚未成为正式版本，暂时不能应用".to_string(),
       PackagePlanTarget::Main => "正式版本已变化，请重新评估".to_string(),
+      PackagePlanTarget::Switch => "渠道转换任务不能作为资源更新应用".to_string(),
     });
   }
   let client = create_http_client()?;

@@ -5,10 +5,12 @@ use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
   path_guard::normalize_manifest_path,
   planner::PersistedPlan,
+  scheme::scheme_id_key,
 };
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::{
+  collections::HashSet,
   fs::{self, OpenOptions},
   io::Write,
   path::{Path, PathBuf},
@@ -143,6 +145,47 @@ impl TaskJournal {
     }
   }
 
+  pub(crate) fn from_switch(
+    plan_id: String,
+    installation_id: String,
+    source_scheme: SchemeId,
+    target_scheme: SchemeId,
+    manifest_digest: String,
+    total_bytes: u64,
+    total_count: usize,
+  ) -> Self {
+    let now = Utc::now().to_rfc3339();
+    Self {
+      schema_version: JOURNAL_SCHEMA_VERSION,
+      revision: 1,
+      task_id: plan_id.clone(),
+      plan_id,
+      installation_id,
+      operation: "switch".to_string(),
+      source_scheme,
+      target_scheme,
+      target: PackagePlanTarget::Switch,
+      source_tag: scheme_id_key(source_scheme).to_string(),
+      target_tag: scheme_id_key(target_scheme).to_string(),
+      manifest_digest,
+      state: PackageTaskState::Queued,
+      downloaded_bytes: 0,
+      total_bytes,
+      planned_steps: total_count,
+      committed_step: 0,
+      owned_cache_files: Vec::new(),
+      total_count,
+      current_file: None,
+      bytes_per_second: 0,
+      eta_seconds: None,
+      error_message: None,
+      apply: None,
+      repair: None,
+      created_at: now.clone(),
+      updated_at: now,
+    }
+  }
+
   pub(crate) fn touch(&mut self) {
     self.revision = self.revision.saturating_add(1);
     self.updated_at = Utc::now().to_rfc3339();
@@ -261,6 +304,43 @@ pub(crate) fn list(
   Ok(journals)
 }
 
+/// 安装是否仍有未完成的资源或换服任务，含已下载待应用状态。
+pub(crate) fn has_incomplete_tasks(
+  task_root: &Path,
+  installation_id: Option<&str>,
+) -> Result<bool, String> {
+  Ok(list(task_root, installation_id)?.iter().any(|journal| {
+    !matches!(
+      journal.state,
+      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+    )
+  }))
+}
+
+/// 缓存清理是否会被进行中、待恢复或待修复任务阻止。
+pub(crate) fn blocks_cache_clear(task_root: &Path) -> Result<bool, String> {
+  Ok(list(task_root, None)?.iter().any(|journal| {
+    journal.state.is_active()
+      || journal.state.requires_recovery()
+      || journal.state == PackageTaskState::RepairRequired
+  }))
+}
+
+/// 尚未结束的任务声明拥有、清理时必须保留的缓存键。
+pub(crate) fn protected_cache_files(task_root: &Path) -> Result<HashSet<String>, String> {
+  let mut keys = HashSet::new();
+  for journal in list(task_root, None)? {
+    if matches!(
+      journal.state,
+      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+    ) {
+      continue;
+    }
+    keys.extend(journal.owned_cache_files.iter().cloned());
+  }
+  Ok(keys)
+}
+
 fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), String> {
   if journal.task_id != plan.plan_id
     || journal.plan_id != plan.plan_id
@@ -353,7 +433,10 @@ fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
       && step.index == apply.cursor
       && normalize_manifest_path(&step.relative_path).is_ok_and(|value| value == step.relative_path)
   });
-  if !hashes_valid || apply.step_count == 0 || apply.cursor > apply.step_count || !active_valid {
+  if !hashes_valid || apply.cursor > apply.step_count || !active_valid {
+    return Err("游戏资源任务日志包含无效提交状态".to_string());
+  }
+  if apply.step_count == 0 && apply.config_original_sha256 == apply.config_target_sha256 {
     return Err("游戏资源任务日志包含无效提交状态".to_string());
   }
   Ok(())
@@ -390,6 +473,7 @@ fn operation_for_target(target: PackagePlanTarget) -> &'static str {
   match target {
     PackagePlanTarget::Main => "update",
     PackagePlanTarget::PreDownload => "predownload",
+    PackagePlanTarget::Switch => "switch",
   }
 }
 
@@ -507,5 +591,24 @@ mod tests {
     value.target = PackagePlanTarget::PreDownload;
     assert!(persist(&root, &value).is_err());
     let _ = fs::remove_dir_all(root);
+  }
+
+  #[test]
+  fn accepts_switch_operation() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-switch-{task_id}"));
+    let mut value = journal(&task_id);
+    value.schema_version = super::JOURNAL_SCHEMA_VERSION;
+    value.operation = "switch".to_string();
+    value.target = PackagePlanTarget::Switch;
+    value.source_scheme = SchemeId::CnOfficial;
+    value.target_scheme = SchemeId::CnBilibili;
+    value.source_tag = "cn_official".to_string();
+    value.target_tag = "cn_bilibili".to_string();
+    persist(&root, &value).unwrap();
+    let loaded = load(&root.join("tasks").join(&task_id).join("journal.json")).unwrap();
+    assert_eq!(loaded.operation, "switch");
+    assert_eq!(loaded.target, PackagePlanTarget::Switch);
+    fs::remove_dir_all(root).unwrap();
   }
 }

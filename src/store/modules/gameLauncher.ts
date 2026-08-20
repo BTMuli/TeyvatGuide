@@ -7,6 +7,7 @@ import gameEnum from "@enum/game.js";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import {
+  applyGamePackageSwitch,
   applyGamePackageTask,
   cancelGamePackageTask,
   cancelGamePackageVerify,
@@ -138,6 +139,17 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  async function applySwitch(planId: string): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(planId, true);
+    try {
+      const task = await applyGamePackageSwitch(planId);
+      mergeTask(task);
+      return task;
+    } finally {
+      setPending(planId, false);
+    }
+  }
+
   async function recoverTask(
     taskId: string,
     action: TGApp.Game.Package.RecoveryActionEnum,
@@ -196,6 +208,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     startTask,
     startVerify,
     applyTask,
+    applySwitch,
     cancelTask,
     cancelVerify,
     recoverTask,

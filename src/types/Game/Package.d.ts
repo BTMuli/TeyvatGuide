@@ -8,6 +8,7 @@ declare namespace TGApp.Game.Package {
   const PlanTarget = <const>{
     MAIN: "main",
     PRE_DOWNLOAD: "pre_download",
+    SWITCH: "switch",
   };
 
   /** 目标分支值。 */

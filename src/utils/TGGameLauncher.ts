@@ -42,6 +42,23 @@ export async function launchGameInstallation(
 }
 
 /**
+ * 检测国服客户端 YuanShen.exe 是否仍在运行。
+ * @since Beta v0.11.5
+ * @returns 是否仍在运行
+ */
+export async function isGameRunning(): Promise<boolean> {
+  return await invoke<boolean>("game_is_running");
+}
+
+/**
+ * 结束国服客户端进程；未在运行时直接成功。
+ * @since Beta v0.11.5
+ */
+export async function stopGame(): Promise<void> {
+  await invoke("game_stop");
+}
+
+/**
  * 获取已登记安装的本地与远端版本快照。
  * @since Beta v0.11.5
  * @param installationId - 已登记安装 ID
@@ -85,6 +102,18 @@ export async function createGamePackageSwitchPlan(
 }
 
 /**
+ * 执行已评估的官服与 B 服渠道转换。
+ * @since Beta v0.11.5
+ * @param planId - 已固化换服计划 ID
+ * @returns 换服任务投影
+ */
+export async function applyGamePackageSwitch(
+  planId: string,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_switch", { planId });
+}
+
+/**
  * 读取应用数据目录中的资源分片与渠道 SDK 缓存占用。
  * @since Beta v0.11.5
  * @returns 缓存占用摘要
@@ -94,7 +123,7 @@ export async function getGamePackageCacheStatus(): Promise<TGApp.Game.Package.Ca
 }
 
 /**
- * 清理资源分片与渠道 SDK 缓存；当前仅开放入口，不会删除文件。
+ * 清理资源分片与渠道 SDK 缓存；进行中或待恢复任务会阻止删除。
  * @since Beta v0.11.5
  * @returns 清理后的缓存占用摘要
  */

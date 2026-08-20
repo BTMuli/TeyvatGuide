@@ -31,6 +31,14 @@ pub fn resolve_scheme(channel: u32, sub_channel: u32) -> Option<SchemeId> {
   }
 }
 
+/// 返回方案在持久化字段和任务日志中使用的稳定标识。
+pub fn scheme_id_key(scheme: SchemeId) -> &'static str {
+  match scheme {
+    SchemeId::CnOfficial => "cn_official",
+    SchemeId::CnBilibili => "cn_bilibili",
+  }
+}
+
 /// 返回写入目标渠道时应使用的规范 channel / sub_channel。
 pub fn canonical_channel(scheme: SchemeId) -> (u32, u32) {
   match scheme {

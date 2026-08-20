@@ -52,7 +52,7 @@
       >
         清理缓存
       </v-btn>
-      <span>清理尚未开放，当前只会统计占用。</span>
+      <span>进行中或待恢复任务会阻止清理；未应用的预下载分片会保留。</span>
     </div>
   </section>
 </template>
@@ -87,7 +87,7 @@ async function clearCache(): Promise<void> {
   const occupied = summary.value === null ? "未知" : bytesToSize(summary.value.totalBytes);
   const confirmed = await showDialog.check(
     "确认清理游戏缓存吗？",
-    `当前占用 ${occupied}。将删除资源分片与渠道 SDK 缓存，不影响游戏目录。清理逻辑尚未开放。`,
+    `当前占用 ${occupied}。将删除未被未完成任务引用的资源分片与渠道 SDK 缓存，不影响游戏目录。`,
   );
   if (confirmed !== true) return;
   clearing.value = true;

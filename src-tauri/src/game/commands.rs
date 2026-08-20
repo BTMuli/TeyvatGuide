@@ -16,11 +16,11 @@ use super::{
     create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_plan,
     hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
   },
-  switch::create_and_persist_switch_plan,
+  switch::{self, create_and_persist_switch_plan},
 };
 use chrono::Utc;
 use sqlx::Row;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
@@ -154,6 +154,18 @@ pub async fn game_launch(
   Ok(())
 }
 
+/// 检测国服客户端 YuanShen.exe 是否仍在运行。
+#[tauri::command]
+pub fn game_is_running() -> bool {
+  super::package::is_game_running()
+}
+
+/// 结束国服客户端进程；未在运行时直接成功。
+#[tauri::command]
+pub fn game_stop() -> Result<(), String> {
+  super::package::stop_game()
+}
+
 /// 返回本地、主分支和预下载分支的只读版本快照。
 #[tauri::command]
 pub async fn game_package_snapshot(
@@ -203,16 +215,34 @@ pub async fn game_package_switch_plan(
   create_and_persist_switch_plan(&installation, &branches, &task_root).await
 }
 
+/// 执行已评估的官服 ↔ B 服渠道转换：先缓存 SDK，再写前 journal 提交，最后改渠道配置。
+#[tauri::command]
+pub async fn game_package_switch(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  plan_id: String,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let plan = switch::load_persisted_switch_plan(&task_root, &plan_id)?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
+  manager.start_switch(app_handle, task_root, installation, plan, false)
+}
+
 /// 统计应用数据目录中的资源分片与渠道 SDK 缓存占用。
 #[tauri::command]
 pub fn game_package_cache_status(app_handle: AppHandle) -> Result<PackageCacheSummary, String> {
   cache::status(&game_task_root(&app_handle)?)
 }
 
-/// 清理资源分片与渠道 SDK 缓存；当前仅开放入口，不会删除文件。
+/// 清理资源分片与渠道 SDK 缓存；进行中或待恢复任务会阻止删除。
 #[tauri::command]
-pub fn game_package_cache_clear(app_handle: AppHandle) -> Result<PackageCacheSummary, String> {
-  cache::clear(&game_task_root(&app_handle)?)
+pub fn game_package_cache_clear(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+) -> Result<PackageCacheSummary, String> {
+  cache::clear(&game_task_root(&app_handle)?, manager.has_running_tasks()?)
 }
 
 /// 启动或恢复安装完整性校验；扫描在后台继续，页面刷新后可重连进度。
@@ -291,13 +321,14 @@ pub async fn game_package_apply(
   manager.apply(app_handle, task_root, installation, plan)
 }
 
-/// 在下一个下载安全边界请求取消资源任务。
+/// 在下一个下载安全边界请求取消资源任务；无活动 worker 时收尸空转日志。
 #[tauri::command]
 pub fn game_package_cancel(
+  app_handle: AppHandle,
   manager: tauri::State<'_, GamePackageManager>,
   task_id: String,
 ) -> Result<(), String> {
-  manager.cancel(&task_id)
+  manager.cancel(&app_handle, &game_task_root(&app_handle)?, &task_id)
 }
 
 /// 从 journal 重新读取当前资源任务，供页面重新挂载恢复投影。
@@ -321,6 +352,17 @@ pub async fn game_package_recover(
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   let journal_value = journal::load(&journal::journal_path(&task_root, &task_id))?;
+  if journal_value.operation == "switch" {
+    return recover_switch_task(
+      app_handle,
+      db_instances,
+      manager,
+      task_root,
+      journal_value,
+      action,
+    )
+    .await;
+  }
   if journal_value.repair.is_some() {
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
@@ -425,6 +467,49 @@ async fn load_trusted_installation(
     return Err(installation.status_message);
   }
   Ok(installation)
+}
+
+async fn recover_switch_task(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_root: PathBuf,
+  journal_value: crate::game::journal::TaskJournal,
+  action: PackageRecoveryAction,
+) -> Result<PackageTaskSummary, String> {
+  if journal_value.state.requires_recovery() || journal_value.apply.is_some() {
+    let pool = sqlite_pool(&db_instances).await?;
+    let installation =
+      load_trusted_installation(&app_handle, &pool, &journal_value.installation_id).await?;
+    let game_root = PathBuf::from(&installation.root_path);
+    let request = switch::load_switch_commit(
+      &task_root,
+      &journal_value.plan_id,
+      &journal_value.installation_id,
+    )?;
+    let retry = matches!(action, PackageRecoveryAction::Resume);
+    let rolled_back =
+      manager.rollback_switch(&app_handle, &task_root, &game_root, &request, retry)?;
+    if !retry {
+      return Ok(rolled_back);
+    }
+    let plan = switch::load_persisted_switch_plan(&task_root, &journal_value.plan_id)?;
+    let installation =
+      load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
+    return manager.start_switch(app_handle, task_root, installation, plan, true);
+  }
+  match action {
+    PackageRecoveryAction::Resume => {
+      let plan = switch::load_persisted_switch_plan(&task_root, &journal_value.plan_id)?;
+      let pool = sqlite_pool(&db_instances).await?;
+      let installation =
+        load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
+      manager.start_switch(app_handle, task_root, installation, plan, true)
+    }
+    PackageRecoveryAction::Rollback => {
+      manager.rollback_download(&task_root, &journal_value.plan_id)
+    }
+  }
 }
 
 fn game_task_root(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {

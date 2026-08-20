@@ -49,6 +49,7 @@ uuid = { version = "1.18.1", features = ["v4"] }
 walkdir = "2.5.0"
 widestring = "1.2.1"
 xxhash-rust = { version = "0.8.15", features = ["xxh64"] }
+zip = { version = "2.4.2", default-features = false, features = ["deflate"] }
 zstd = "0.13.3"
 zstd-sys = { version = "2.0.16", default-features = false }
 

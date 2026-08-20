@@ -253,7 +253,9 @@ const errorMessage = ref<string | null>(null);
 let requestSequence = 0;
 
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
-  return tasksByInstallation.value[installation.id] ?? null;
+  const task = tasksByInstallation.value[installation.id];
+  if (task === undefined || task.target === gameEnum.package.planTarget.SWITCH) return null;
+  return task;
 });
 const currentVerify = computed<TGApp.Game.Package.VerifySummary | null>(() => {
   return verifyByInstallation.value[installation.id] ?? null;

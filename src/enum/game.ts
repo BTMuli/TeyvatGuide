@@ -46,6 +46,7 @@ const GameInstallationStatusEnum: typeof TGApp.Game.Installation.Status = {
 const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
   MAIN: "main",
   PRE_DOWNLOAD: "pre_download",
+  SWITCH: "switch",
 };
 
 /**
