@@ -321,6 +321,7 @@ const cardColumnWidth = ref<number>(CARD_COL_WIDTH);
 const cardColumns = ref<number>(1);
 let loadMoreObserver: IntersectionObserver | undefined;
 let cardGridObserver: ResizeObserver | undefined;
+let cardGridRafId: number | undefined;
 let cardGridWidth = 0;
 let loadingMoreRoles = false;
 
@@ -379,6 +380,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   loadMoreObserver?.disconnect();
   cardGridObserver?.disconnect();
+  if (cardGridRafId !== undefined) cancelAnimationFrame(cardGridRafId);
 });
 
 watch(
@@ -468,6 +470,10 @@ function updateCardColumnGap(): void {
 function observeCardGrid(): void {
   cardGridObserver?.disconnect();
   cardGridObserver = undefined;
+  if (cardGridRafId !== undefined) {
+    cancelAnimationFrame(cardGridRafId);
+    cardGridRafId = undefined;
+  }
   const box = rolesBox.value;
   if (!box) return;
   cardGridObserver = new ResizeObserver((entries) => {
@@ -476,7 +482,11 @@ function observeCardGrid(): void {
     const width = Math.floor(entry.contentRect.width);
     if (width === cardGridWidth) return;
     cardGridWidth = width;
-    updateCardColumnGap();
+    if (cardGridRafId !== undefined) cancelAnimationFrame(cardGridRafId);
+    cardGridRafId = requestAnimationFrame(() => {
+      cardGridRafId = undefined;
+      updateCardColumnGap();
+    });
   });
   cardGridObserver.observe(box);
 }
