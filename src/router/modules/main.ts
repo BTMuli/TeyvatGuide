@@ -2,6 +2,7 @@
  * 主路由模块
  * @since Beta v0.11.5
  */
+import { platform } from "@tauri-apps/plugin-os";
 import type { RouteRecordRaw } from "vue-router";
 
 const mainRoutes = (<const>[
@@ -69,6 +70,9 @@ const mainRoutes = (<const>[
     path: "/game",
     name: "游戏安装",
     component: async () => await import("@/pages/common/PageGame.vue"),
+    beforeEnter() {
+      if (platform() !== "windows") return { path: "/" };
+    },
   },
 ]) satisfies Array<RouteRecordRaw>;
 
