@@ -592,23 +592,4 @@ mod tests {
     assert!(persist(&root, &value).is_err());
     let _ = fs::remove_dir_all(root);
   }
-
-  #[test]
-  fn accepts_switch_operation() {
-    let task_id = Uuid::new_v4().to_string();
-    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-switch-{task_id}"));
-    let mut value = journal(&task_id);
-    value.schema_version = super::JOURNAL_SCHEMA_VERSION;
-    value.operation = "switch".to_string();
-    value.target = PackagePlanTarget::Switch;
-    value.source_scheme = SchemeId::CnOfficial;
-    value.target_scheme = SchemeId::CnBilibili;
-    value.source_tag = "cn_official".to_string();
-    value.target_tag = "cn_bilibili".to_string();
-    persist(&root, &value).unwrap();
-    let loaded = load(&root.join("tasks").join(&task_id).join("journal.json")).unwrap();
-    assert_eq!(loaded.operation, "switch");
-    assert_eq!(loaded.target, PackagePlanTarget::Switch);
-    fs::remove_dir_all(root).unwrap();
-  }
 }

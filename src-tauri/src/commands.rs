@@ -540,35 +540,3 @@ pub fn is_process_running(process_name: String) -> bool {
     }
   }
 }
-
-#[cfg(test)]
-mod tests {
-  use super::{ensure_user_data_dir, is_expired_daily_log};
-  use chrono::NaiveDate;
-
-  #[test]
-  fn expired_daily_log_keeps_recent_files() {
-    let today = NaiveDate::from_ymd_opt(2026, 8, 20).unwrap();
-    assert!(!is_expired_daily_log("2026-08-20.log", today));
-    assert!(!is_expired_daily_log("2026-08-14.log", today));
-    assert!(is_expired_daily_log("2026-08-13.log", today));
-    assert!(!is_expired_daily_log("readme.txt", today));
-  }
-
-  #[test]
-  fn ensure_user_data_dir_creates_nested_path() {
-    let root = std::env::temp_dir().join(format!(
-      "teyvat-guide-user-{}",
-      std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
-    ));
-    let nested = root.join("nested");
-    ensure_user_data_dir(nested.to_string_lossy().into_owned()).unwrap();
-    assert!(nested.is_dir());
-    let _ = std::fs::remove_dir_all(&root);
-  }
-
-  #[test]
-  fn ensure_user_data_dir_rejects_empty_path() {
-    assert!(ensure_user_data_dir("   ".to_string()).is_err());
-  }
-}

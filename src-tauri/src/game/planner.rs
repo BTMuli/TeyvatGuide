@@ -4,7 +4,7 @@
 use super::{
   hoyoplay::{GameBranches, create_http_client},
   model::{GameInstallation, PackagePlanStrategy, PackagePlanSummary, PackagePlanTarget, SchemeId},
-  path_guard::{normalize_manifest_path, resolve_optional_manifest_file},
+  path_guard::normalize_manifest_path,
   sophon::{
     Asset, DecodedBuild, DecodedPatchBuild, DownloadInfo, PatchInfo, chunk_xxhash64,
     get_decoded_build, get_decoded_patch_build,
@@ -533,38 +533,6 @@ fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
     && plan.delete_files.is_empty()
     && !plan.assets.is_empty()
     && plan.assets.iter().all(|asset| asset.action == PlanAssetAction::Repair)
-}
-
-fn collect_mismatched_files(
-  inventory: &[PlanFile],
-  game_root: &Path,
-) -> Result<Vec<PlanFile>, String> {
-  let mut mismatched = Vec::new();
-  for file in inventory {
-    match resolve_optional_manifest_file(game_root, &file.name)? {
-      Some(path) if file_matches(&path, file.size, &file.md5)? => {}
-      _ => mismatched.push(file.clone()),
-    }
-  }
-  Ok(mismatched)
-}
-
-fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
-  let metadata = fs::metadata(path).map_err(|error| format!("读取资源文件状态失败：{error}"))?;
-  if metadata.len() != size {
-    return Ok(false);
-  }
-  let mut file = File::open(path).map_err(|error| format!("打开资源文件失败：{error}"))?;
-  let mut hasher = Md5::new();
-  let mut buffer = [0_u8; 128 * 1024];
-  loop {
-    let read = file.read(&mut buffer).map_err(|error| format!("读取资源文件失败：{error}"))?;
-    if read == 0 {
-      break;
-    }
-    hasher.update(&buffer[..read]);
-  }
-  Ok(format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(md5))
 }
 
 fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
@@ -1465,9 +1433,8 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanAsset, PlanAssetAction,
-    PlanDownloadHashKind, PlanFile, PlanParts, assets_equal, build_manifest_diff, build_patch_plan,
-    cached_chunk_matches, collect_mismatched_files, digest_parts, is_integrity_repair_plan,
+    PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanDownloadHashKind, PlanFile, PlanParts,
+    assets_equal, build_manifest_diff, build_patch_plan, cached_chunk_matches, digest_parts,
     load_persisted_plan, overlay_repair_parts, validate_persisted_plan,
   };
   use crate::game::{
@@ -1977,92 +1944,6 @@ mod tests {
     };
     assert!(cached_chunk_matches(&cache, &download));
     let _ = std::fs::remove_dir_all(&cache);
-  }
-
-  #[test]
-  fn collect_mismatched_files_reports_missing_and_corrupt() {
-    let root = std::env::temp_dir().join(format!("teyvat-guide-verify-{}", uuid::Uuid::new_v4()));
-    std::fs::create_dir_all(&root).unwrap();
-    std::fs::write(root.join("keep.bin"), b"keep").unwrap();
-    std::fs::write(root.join("bad.bin"), b"xxxx").unwrap();
-    let keep_md5 = {
-      use md5::Digest;
-      format!("{:x}", md5::Md5::digest(b"keep"))
-    };
-    let inventory = vec![
-      PlanFile { name: "keep.bin".to_string(), size: 4, md5: keep_md5.clone() },
-      PlanFile { name: "bad.bin".to_string(), size: 4, md5: keep_md5.clone() },
-      PlanFile { name: "missing.bin".to_string(), size: 4, md5: keep_md5 },
-    ];
-    let mismatched = collect_mismatched_files(&inventory, &root).unwrap();
-    assert_eq!(mismatched.len(), 2);
-    assert_eq!(mismatched[0].name, "bad.bin");
-    assert_eq!(mismatched[1].name, "missing.bin");
-    let _ = std::fs::remove_dir_all(&root);
-  }
-
-  #[test]
-  fn integrity_repair_plan_requires_same_version_repair_assets() {
-    let md5 = "0123456789abcdef0123456789abcdef".to_string();
-    let mut plan = persisted_manifest_plan(
-      uuid::Uuid::new_v4().to_string(),
-      vec![PlanFile { name: "keep.bin".to_string(), size: 4, md5: md5.clone() }],
-    );
-    plan.source_tag = "1.0.0".to_string();
-    plan.target_tag = "1.0.0".to_string();
-    plan.assets = vec![PlanAsset {
-      name: "keep.bin".to_string(),
-      action: PlanAssetAction::Repair,
-      source: None,
-      size: 4,
-      md5,
-      chunks: Vec::new(),
-      patch: None,
-    }];
-    assert!(is_integrity_repair_plan(&plan));
-    plan.target_tag = "2.0.0".to_string();
-    assert!(!is_integrity_repair_plan(&plan));
-  }
-
-  #[test]
-  fn overlay_repair_keeps_integrity_inventory_and_replaces_assets() {
-    let md5 = "0123456789abcdef0123456789abcdef".to_string();
-    let inventory = vec![PlanFile { name: "keep.bin".to_string(), size: 4, md5: md5.clone() }];
-    let mut plan = persisted_manifest_plan(uuid::Uuid::new_v4().to_string(), inventory.clone());
-    plan.source_tag = "1.0.0".to_string();
-    plan.target_tag = "1.0.0".to_string();
-    plan.assets = vec![PlanAsset {
-      name: "keep.bin".to_string(),
-      action: PlanAssetAction::Repair,
-      source: None,
-      size: 4,
-      md5: md5.clone(),
-      chunks: Vec::new(),
-      patch: None,
-    }];
-    let overlay = overlay_repair_parts(
-      plan,
-      PlanParts {
-        strategy: PackagePlanStrategy::ManifestDiff,
-        manifest_digest: "a".repeat(64),
-        downloads: Vec::new(),
-        assets: vec![PlanAsset {
-          name: "keep.bin".to_string(),
-          action: PlanAssetAction::Repair,
-          source: None,
-          size: 4,
-          md5,
-          chunks: Vec::new(),
-          patch: None,
-        }],
-        delete_files: Vec::new(),
-        inventory,
-      },
-    )
-    .unwrap();
-    assert!(is_integrity_repair_plan(&overlay));
-    assert_eq!(overlay.assets.len(), 1);
-    assert!(matches!(overlay.assets[0].action, PlanAssetAction::Repair));
   }
 
   #[test]

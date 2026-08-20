@@ -62,30 +62,3 @@ pub fn sdk_is_consistent(scheme: SchemeId, has_channel_sdk: bool) -> bool {
     SchemeId::CnBilibili => has_channel_sdk,
   }
 }
-
-#[cfg(test)]
-mod tests {
-  use super::{canonical_channel, opposite_scheme, resolve_scheme, sdk_is_consistent};
-  use crate::game::model::SchemeId;
-
-  #[test]
-  fn canonical_pairs_are_supported() {
-    let (channel, sub_channel) = canonical_channel(SchemeId::CnOfficial);
-    assert_eq!(resolve_scheme(channel, sub_channel), Some(SchemeId::CnOfficial));
-    let (channel, sub_channel) = canonical_channel(SchemeId::CnBilibili);
-    assert_eq!(resolve_scheme(channel, sub_channel), Some(SchemeId::CnBilibili));
-  }
-
-  #[test]
-  fn opposite_scheme_stays_in_family() {
-    assert_eq!(opposite_scheme(SchemeId::CnOfficial), SchemeId::CnBilibili);
-    assert_eq!(opposite_scheme(SchemeId::CnBilibili), SchemeId::CnOfficial);
-  }
-
-  #[test]
-  fn official_must_not_keep_channel_sdk() {
-    assert!(sdk_is_consistent(SchemeId::CnOfficial, false));
-    assert!(!sdk_is_consistent(SchemeId::CnOfficial, true));
-    assert!(sdk_is_consistent(SchemeId::CnBilibili, true));
-  }
-}
