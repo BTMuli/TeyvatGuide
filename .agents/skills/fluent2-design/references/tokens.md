@@ -137,4 +137,4 @@ pipeline（灰阶、品牌色阶、alias 语义 token）。
 - 圆角只使用 0/2/4/8/12/50% 档位。
 - 组件引用语义变量，无裸色值散落组件内。
 - hover / pressed / selected 状态都给出对应背景或描边。
-- 分享截图 DOM 无 `color-mix()`。
+- 仅 `generateShareImg` 的分享 DOM 无 `color-mix()`；`TGShare.modern` 不受此限。

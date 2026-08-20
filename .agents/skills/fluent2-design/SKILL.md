@@ -61,8 +61,9 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 
 ## 分享截图约束
 
-- 会由 html2canvas 捕获并生成分享截图的 DOM 不得使用 `color-mix()`，也不得复用内部含 `color-mix()`
-  的 SCSS 封装；获取分享 DOM 使用原生 `querySelector` 或 `useTemplateRef`。
+- 只有走 `generateShareImg`（html2canvas）的分享图才必须避免 `color-mix()`，也不得复用内部含
+  `color-mix()` 的 SCSS 封装。`TGShare.modern` 可以处理 `color-mix()`，不必规避。
+- 获取分享 DOM 使用原生 `querySelector` 或 `useTemplateRef`。
 
 ## 验证
 
