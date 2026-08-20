@@ -1,173 +1,68 @@
 <template>
-  <section class="scheme-panel" aria-label="游戏渠道转换">
-    <div class="scheme-heading">
-      <div>
-        <span>渠道转换</span>
-        <p>仅在国服官服与国服 B 服之间转换 SDK 与渠道配置；提交前不会改游戏目录。</p>
-      </div>
-    </div>
-
-    <div class="scheme-route">
-      <div class="scheme-node current">
-        <span>当前</span>
-        <strong>{{ gameEnum.installation.schemeDesc(installation.schemeId) }}</strong>
-      </div>
-      <v-icon aria-hidden="true" size="18">mdi-chevron-right</v-icon>
-      <div class="scheme-node">
-        <span>目标</span>
-        <strong>{{ gameEnum.installation.schemeDesc(targetScheme) }}</strong>
-      </div>
-    </div>
-
-    <div class="scheme-actions">
-      <v-btn
-        :disabled="planning"
-        :loading="planning"
-        prepend-icon="mdi-swap-horizontal"
-        size="small"
-        variant="outlined"
-        @click="createPlan"
-      >
-        评估换服
-      </v-btn>
-      <v-btn
-        v-if="canApply"
-        :disabled="applying || plan === null || !plan.hasSufficientSpace"
-        :loading="applying"
-        prepend-icon="mdi-swap-horizontal-bold"
-        size="small"
-        variant="tonal"
-        @click="applySwitch"
-      >
-        应用换服
-      </v-btn>
-      <v-btn
-        v-if="taskActive"
-        :loading="applying"
-        prepend-icon="mdi-stop-circle-outline"
-        size="small"
-        variant="outlined"
-        @click="cancelSwitch"
-      >
-        请求取消
-      </v-btn>
-      <v-btn
-        v-if="canRecover"
-        :loading="applying"
-        prepend-icon="mdi-backup-restore"
-        size="small"
-        variant="tonal"
-        @click="recoverSwitch(gameEnum.package.recoveryAction.RESUME)"
-      >
-        安全恢复
-      </v-btn>
-      <v-btn
-        v-if="canAbandon"
-        :loading="applying"
-        size="small"
-        variant="text"
-        @click="recoverSwitch(gameEnum.package.recoveryAction.ROLLBACK)"
-      >
-        放弃换服
-      </v-btn>
-    </div>
-
-    <v-alert
-      v-if="errorMessage !== null"
-      :text="errorMessage"
-      density="compact"
-      type="warning"
-      variant="tonal"
+  <div class="scheme-body">
+    <slot
+      name="channel"
+      :blockingTask
+      :canAbandon
+      :canConvert
+      :canRecover
+      :cancelSwitch
+      :convertLabel
+      :convertScheme
+      :converting
+      :recoverSwitch
+      :targetScheme
+      :taskActive
     />
 
-    <div v-if="plan !== null" class="plan-summary" aria-live="polite">
-      <div class="plan-title">
-        <div>
-          <span>换服计划已固化</span>
-          <strong>
-            {{ gameEnum.installation.schemeDesc(plan.sourceScheme) }} →
-            {{ gameEnum.installation.schemeDesc(plan.targetScheme) }}
-          </strong>
-        </div>
-        <v-chip
-          :color="plan.hasSufficientSpace ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
+    <PgProgress
+      v-if="switchPanelVisible"
+      ariaLabel="换服进度"
+      :caption="schemeCaption"
+      :currentFile="visibleTask?.currentFile ?? null"
+      :errorMessage="visibleTask?.errorMessage ?? null"
+      :facts="schemeFacts"
+      :indeterminate="switchBarIndeterminate"
+      :percent="progressPercent"
+      :showBar="converting || visibleTask !== null"
+      :tone="schemeTone"
+    >
+      <template #actions>
+        <v-btn
+          v-if="canRecover"
+          :loading="converting"
+          aria-label="继续换服"
+          icon="mdi-backup-restore"
           size="small"
-          variant="tonal"
-        >
-          {{ plan.hasSufficientSpace ? "空间充足" : "空间不足" }}
-        </v-chip>
-      </div>
-      <dl>
-        <div>
-          <dt>目标渠道</dt>
-          <dd>{{ plan.targetChannel }} / {{ plan.targetSubChannel }}</dd>
-        </div>
-        <div>
-          <dt>渠道 SDK</dt>
-          <dd>{{ sdkActionLabel }}</dd>
-        </div>
-        <div>
-          <dt>预计下载</dt>
-          <dd>{{ formatBytes(plan.downloadBytes) }}</dd>
-        </div>
-        <div>
-          <dt>缓存可复用</dt>
-          <dd>{{ formatBytes(plan.cacheHitBytes) }}</dd>
-        </div>
-        <div>
-          <dt>备份移出</dt>
-          <dd>{{ plan.deleteCount }} 个</dd>
-        </div>
-      </dl>
-      <p v-if="plan.deleteFiles.length > 0">仅移出当前清单之外的渠道文件：{{ previewDeletes }}</p>
-      <p>{{ sdkRetainHint }}</p>
-      <p v-if="!canApply && switchTask === null">
-        评估完成后，确认已退出游戏即可应用换服；SDK 会先写入应用缓存。
-      </p>
-    </div>
-
-    <template v-if="switchTask !== null">
-      <v-progress-linear
-        :indeterminate="switchTask.totalBytes === 0 && taskActive"
-        :model-value="progressPercent"
-        color="var(--tgc-od-orange)"
-        height="8"
-        rounded
-      />
-      <p v-if="switchTask.currentFile !== null">当前：{{ switchTask.currentFile }}</p>
-      <v-alert
-        v-if="switchTask.errorMessage !== null"
-        :text="switchTask.errorMessage"
-        density="compact"
-        type="error"
-        variant="tonal"
-      />
-      <v-alert
-        v-else-if="switchTask.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
-        text="换服提交中断。继续或放弃时会先按写前日志回滚，避免留下目标渠道配置加源 SDK。"
-        density="compact"
-        type="warning"
-        variant="tonal"
-      />
-      <v-alert
-        v-else-if="switchTask.state === gameEnum.package.taskState.COMPLETED"
-        text="换服已完成。请重新检测安装，确认渠道、校验和启动判断一致。"
-        density="compact"
-        type="success"
-        variant="tonal"
-      />
-    </template>
-  </section>
+          title="继续"
+          variant="text"
+          @click="recoverSwitch(gameEnum.package.recoveryAction.RESUME)"
+        />
+        <v-btn
+          v-if="canAbandon"
+          :loading="converting"
+          aria-label="放弃换服"
+          icon="mdi-close"
+          size="small"
+          title="放弃"
+          variant="text"
+          @click="recoverSwitch(gameEnum.package.recoveryAction.ROLLBACK)"
+        />
+      </template>
+    </PgProgress>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PgProgress from "@comp/pageGame/pg-progress.vue";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
-import { createGamePackageSwitchPlan, isGameRunning, stopGame } from "@utils/TGGameLauncher.js";
+import { confirmStopRunningGame } from "@utils/TGGame.js";
+import { createGamePackageSwitchPlan } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onWatcherCleanup, ref, watch } from "vue";
 
 type Props = {
   installation: TGApp.Game.Installation.Item;
@@ -175,10 +70,24 @@ type Props = {
 
 const { installation } = defineProps<Props>();
 const emit = defineEmits<{ switched: [] }>();
+defineSlots<{
+  channel(props: {
+    blockingTask: boolean;
+    canAbandon: boolean;
+    canConvert: boolean;
+    canRecover: boolean;
+    cancelSwitch: () => Promise<void>;
+    convertLabel: string;
+    convertScheme: () => Promise<void>;
+    converting: boolean;
+    recoverSwitch: (action: TGApp.Game.Package.RecoveryActionEnum) => Promise<void>;
+    targetScheme: TGApp.Game.Installation.SchemeEnum;
+    taskActive: boolean;
+  }): unknown;
+}>();
 const taskStore = useGameLauncherStore();
-const { pendingActions, tasksByInstallation } = storeToRefs(taskStore);
+const { pendingActions, tasksByInstallation, verifyByInstallation } = storeToRefs(taskStore);
 const planning = ref<boolean>(false);
-const exitingGame = ref<boolean>(false);
 const plan = ref<TGApp.Game.Package.SwitchSummary | null>(null);
 const errorMessage = ref<string | null>(null);
 
@@ -187,21 +96,43 @@ const targetScheme = computed<TGApp.Game.Installation.SchemeEnum>(() => {
     ? gameEnum.installation.scheme.CN_BILIBILI
     : gameEnum.installation.scheme.CN_OFFICIAL;
 });
+const convertLabel = computed<string>(() => {
+  return `转换为${gameEnum.installation.schemeDesc(targetScheme.value)}`;
+});
+const switchConfirmTitle = computed<string>(() => {
+  const from =
+    installation.schemeId === gameEnum.installation.scheme.CN_BILIBILI ? "渠道服（B服）" : "国服";
+  const to =
+    targetScheme.value === gameEnum.installation.scheme.CN_BILIBILI ? "渠道服（B服）" : "国服";
+  return `${from}→${to}`;
+});
 const switchTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   const task = tasksByInstallation.value[installation.id];
   if (task === undefined || task.target !== gameEnum.package.planTarget.SWITCH) return null;
   return task;
 });
+const visibleTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
+  if (switchTask.value === null) return null;
+  if (switchTask.value.state === gameEnum.package.taskState.COMPLETED) return null;
+  return switchTask.value;
+});
 const taskActive = computed<boolean>(() => {
   return switchTask.value !== null && gameEnum.package.taskActive(switchTask.value.state);
 });
-const applying = computed<boolean>(() => {
+const converting = computed<boolean>(() => {
   const taskId = switchTask.value?.taskId ?? plan.value?.planId;
   return (
     planning.value ||
-    exitingGame.value ||
     pendingActions.value[installation.id] === true ||
     (taskId !== undefined && pendingActions.value[taskId] === true)
+  );
+});
+const verifyBusy = computed<boolean>(() => {
+  const summary = verifyByInstallation.value[installation.id];
+  return (
+    (summary !== undefined && gameEnum.package.verifyActive(summary.state)) ||
+    pendingActions.value[`verify:${installation.id}`] === true ||
+    pendingActions.value[`verify-clear:${installation.id}`] === true
   );
 });
 const blockingTask = computed<boolean>(() => {
@@ -214,14 +145,14 @@ const blockingTask = computed<boolean>(() => {
     task.state !== gameEnum.package.taskState.CANCELED
   );
 });
-const canApply = computed<boolean>(() => {
-  if (plan.value === null || blockingTask.value || taskActive.value) return false;
+const canConvert = computed<boolean>(() => {
+  if (blockingTask.value || taskActive.value) return false;
   const task = switchTask.value;
   if (task === null) return true;
   return (
-    task.planId !== plan.value.planId ||
     task.state === gameEnum.package.taskState.FAILED ||
-    task.state === gameEnum.package.taskState.CANCELED
+    task.state === gameEnum.package.taskState.CANCELED ||
+    task.state === gameEnum.package.taskState.COMPLETED
   );
 });
 const canRecover = computed<boolean>(() => {
@@ -235,37 +166,44 @@ const canAbandon = computed<boolean>(() => {
   return canRecover.value || switchTask.value?.state === gameEnum.package.taskState.READY_TO_APPLY;
 });
 const progressPercent = computed<number>(() => {
-  if (switchTask.value === null || switchTask.value.totalBytes === 0) return 0;
-  return Math.min(100, (switchTask.value.downloadedBytes / switchTask.value.totalBytes) * 100);
+  if (visibleTask.value === null || visibleTask.value.totalBytes === 0) return 0;
+  return Math.min(100, (visibleTask.value.downloadedBytes / visibleTask.value.totalBytes) * 100);
 });
-const previewDeletes = computed<string>(() => {
-  if (plan.value === null) return "";
-  const names = plan.value.deleteFiles.slice(0, 3);
-  const extra = plan.value.deleteFiles.length - names.length;
-  const listed = names.join("、");
-  if (extra > 0) return `${listed} 等 ${plan.value.deleteFiles.length} 个`;
-  return listed;
+const switchPanelVisible = computed<boolean>(() => {
+  return (
+    converting.value ||
+    blockingTask.value ||
+    errorMessage.value !== null ||
+    visibleTask.value !== null
+  );
 });
-const sdkActionLabel = computed<string>(() => {
-  if (plan.value === null) return "";
-  if (plan.value.sdkRequired) {
-    if (plan.value.cacheHitBytes > 0) {
-      return `缓存已有 ${plan.value.sdkVersion ?? "渠道 SDK"}`;
-    }
-    return `需要下载 ${plan.value.sdkVersion ?? "渠道 SDK"}`;
+const switchBarIndeterminate = computed<boolean>(() => {
+  if (visibleTask.value === null) return converting.value;
+  return visibleTask.value.totalBytes === 0 && (taskActive.value || converting.value);
+});
+const schemeCaption = computed<string>(() => {
+  if (blockingTask.value) return "有其他资源任务进行中，暂时不能换服";
+  if (errorMessage.value !== null) return errorMessage.value;
+  if (visibleTask.value?.state === gameEnum.package.taskState.RECOVERY_REQUIRED) {
+    return "上次换服中断了，继续会先恢复到转换前";
   }
-  return "备份并移出渠道 SDK";
-});
-const sdkRetainHint = computed<string>(() => {
-  if (plan.value === null) return "";
-  if (plan.value.sdkRequired) {
-    return plan.value.cacheHitBytes > 0
-      ? "将从应用缓存安装渠道 SDK，不必重新下载。"
-      : "SDK 会先写入应用缓存再安装；之后转回可复用。";
+  if (visibleTask.value !== null) {
+    return `正在转换为${gameEnum.installation.schemeDesc(targetScheme.value)}`;
   }
-  return plan.value.cacheHitBytes > 0
-    ? "游戏目录中的渠道 SDK 会备份移出；转回时优先使用已缓存的安装包。"
-    : "游戏目录中的渠道 SDK 会备份到应用缓存，不会直接丢掉；转回时不必重新下载。";
+  if (converting.value) return "正在准备换服…";
+  return "";
+});
+const schemeTone = computed<"" | "err" | "warn">(() => {
+  if (errorMessage.value !== null || visibleTask.value?.errorMessage !== null) return "err";
+  if (blockingTask.value) return "warn";
+  if (visibleTask.value?.state === gameEnum.package.taskState.RECOVERY_REQUIRED) return "warn";
+  return "";
+});
+const schemeFacts = computed<Array<string>>(() => {
+  if (visibleTask.value === null || visibleTask.value.totalBytes === 0) return [];
+  return [
+    `${formatBytes(visibleTask.value.downloadedBytes)} / ${formatBytes(visibleTask.value.totalBytes)}`,
+  ];
 });
 
 function formatBytes(bytes: number): string {
@@ -281,73 +219,38 @@ function formatBytes(bytes: number): string {
   return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
 }
 
-async function confirmLeaveGame(): Promise<boolean> {
-  if (!(await isGameRunning())) return true;
+async function convertScheme(): Promise<void> {
+  if (converting.value || !canConvert.value || verifyBusy.value) return;
   const confirmed = await showDialog.checkF({
-    title: "退出游戏？",
-    text: "检测到游戏正在运行。确认后会先退出游戏，再继续换服；取消则不换服。",
-    confirmLabel: "退出并继续",
+    title: switchConfirmTitle.value,
+    confirmLabel: "开始换服",
   });
-  if (confirmed !== true) return false;
-  exitingGame.value = true;
-  try {
-    await stopGame();
-  } finally {
-    exitingGame.value = false;
-  }
-  return true;
-}
-
-async function createPlan(): Promise<void> {
-  if (planning.value) return;
+  if (confirmed !== true) return;
   planning.value = true;
   errorMessage.value = null;
   try {
-    plan.value = await createGamePackageSwitchPlan(installation.id);
-  } catch (error) {
-    errorMessage.value = `评估换服失败：${error}`;
-  } finally {
-    planning.value = false;
-  }
-}
-
-async function applySwitch(): Promise<void> {
-  if (plan.value === null || applying.value || !canApply.value) return;
-  if (!plan.value.hasSufficientSpace) {
-    showSnackbar.warn("当前评估的磁盘空间不足，不能应用换服");
-    return;
-  }
-  try {
-    if (await isGameRunning()) {
-      if (!(await confirmLeaveGame())) return;
-    } else {
-      const confirmed = await showDialog.checkF({
-        title: "应用渠道转换？",
-        text: "会先把渠道 SDK 写入应用缓存并校验，再按写前日志改游戏目录，最后才更新 channel/sub_channel。",
-        confirmLabel: "应用换服",
-      });
-      if (confirmed !== true) return;
+    const nextPlan = await createGamePackageSwitchPlan(installation.id);
+    plan.value = nextPlan;
+    if (!nextPlan.hasSufficientSpace) {
+      errorMessage.value = "磁盘空间不足，暂时不能换服。";
+      showSnackbar.warn("磁盘空间不足，暂时不能换服");
+      return;
     }
-    const task = await taskStore.applySwitch(plan.value.planId);
-    showSnackbar.success("已开始渠道转换");
+    if (!(await confirmStopRunningGame("换服"))) return;
+    const task = await taskStore.applySwitch(nextPlan.planId);
+    showSnackbar.success(`已开始转换为${gameEnum.installation.schemeDesc(nextPlan.targetScheme)}`);
     if (task.state === gameEnum.package.taskState.COMPLETED) emit("switched");
   } catch (error) {
-    showSnackbar.error(`应用换服失败：${error}`);
+    errorMessage.value = `换服失败：${error}`;
+    showSnackbar.error(`换服失败：${error}`);
+  } finally {
+    planning.value = false;
   }
 }
 
 async function cancelSwitch(): Promise<void> {
   const task = switchTask.value;
   if (task === null || !taskActive.value) return;
-  const applyingCommit = gameEnum.package.taskApplying(task.state);
-  const confirmed = await showDialog.checkF({
-    title: applyingCommit ? "取消换服提交？" : "取消换服下载？",
-    text: applyingCommit
-      ? "会在当前安全检查点停止，并尝试把渠道文件回滚到转换前的状态。"
-      : "已缓存的渠道 SDK 会保留，当前下载会在安全边界停止。",
-    confirmLabel: "请求取消",
-  });
-  if (confirmed !== true) return;
   try {
     await taskStore.cancelTask(task.taskId);
     showSnackbar.info("已请求取消换服");
@@ -365,33 +268,32 @@ async function recoverSwitch(action: TGApp.Game.Package.RecoveryActionEnum): Pro
     gameEnum.package.taskApplying(task.state) ||
     task.state === gameEnum.package.taskState.RECOVERY_REQUIRED;
   try {
-    if (needsGameStopped && (await isGameRunning())) {
-      if (!(await confirmLeaveGame())) return;
-    } else {
-      const confirmed = await showDialog.checkF({
-        title: rollback ? "放弃换服？" : "安全恢复换服？",
-        text: rollback
-          ? "若提交曾中断，会先按写前日志回滚。已缓存的渠道 SDK 不会删除。"
-          : "恢复会先回滚未完成提交，再重新下载缺失的渠道 SDK 并提交。",
-        confirmLabel: rollback ? "放弃换服" : "开始恢复",
-      });
-      if (confirmed !== true) return;
-    }
+    if (needsGameStopped && !(await confirmStopRunningGame("换服"))) return;
     const updated = await taskStore.recoverTask(task.taskId, action);
-    showSnackbar.success(rollback ? "已放弃换服任务" : "已开始恢复换服");
+    showSnackbar.success(rollback ? "已放弃换服" : "已继续换服");
     if (updated.state === gameEnum.package.taskState.COMPLETED) emit("switched");
   } catch (error) {
-    showSnackbar.error(`${rollback ? "放弃" : "恢复"}换服失败：${error}`);
+    showSnackbar.error(`${rollback ? "放弃" : "继续"}换服失败：${error}`);
   }
 }
 
 watch(
-  () => installation.id,
+  () => [installation.id, installation.schemeId],
   () => {
     plan.value = null;
     errorMessage.value = null;
   },
 );
+
+watch(errorMessage, (message) => {
+  if (message === null) return;
+  const timer = window.setTimeout(() => {
+    if (errorMessage.value === message) errorMessage.value = null;
+  }, 5000);
+  onWatcherCleanup(() => {
+    window.clearTimeout(timer);
+  });
+});
 
 watch(
   () => switchTask.value?.state,
@@ -407,170 +309,9 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-.scheme-panel {
-  display: grid;
-  padding-top: 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 16px;
-
-  > p {
-    margin: 0;
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-}
-
-.scheme-heading {
-  span {
-    color: var(--common-text-title);
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 22px;
-  }
-
-  p {
-    margin: 2px 0 0;
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-}
-
-.scheme-route {
-  display: grid;
-  align-items: center;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-
-  > .v-icon {
-    color: var(--box-text-2);
-  }
-}
-
-.scheme-node {
-  display: grid;
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-4);
-  gap: 4px;
-
-  span {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  strong {
-    color: var(--box-text-1);
-    font-size: 14px;
-    line-height: 20px;
-  }
-
-  &.current {
-    border-color: var(--tgc-yellow-3);
-  }
-}
-
-.scheme-actions {
+.scheme-body {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.plan-summary {
-  display: grid;
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--box-bg-4);
+  flex-direction: column;
   gap: 12px;
-
-  p {
-    margin: 0;
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  dl {
-    display: grid;
-    margin: 0;
-    gap: 8px 16px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  dl div {
-    display: grid;
-    gap: 2px;
-  }
-
-  dt {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  dd {
-    margin: 0;
-    color: var(--box-text-1);
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 20px;
-  }
-}
-
-.plan-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-
-  > div {
-    span,
-    strong {
-      display: block;
-    }
-
-    span {
-      color: var(--box-text-2);
-      font-size: 12px;
-      line-height: 16px;
-    }
-
-    strong {
-      color: var(--common-text-title);
-      font-size: 16px;
-      line-height: 22px;
-    }
-  }
-
-  :deep(.v-chip) {
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  :deep(.v-chip__content) {
-    display: flex;
-    align-items: center;
-    line-height: 16px;
-  }
-}
-
-@media (width <= 720px) {
-  .scheme-route {
-    grid-template-columns: 1fr;
-
-    > .v-icon {
-      justify-self: center;
-      transform: rotate(90deg);
-    }
-  }
-
-  .plan-summary dl {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

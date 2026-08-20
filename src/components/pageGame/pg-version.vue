@@ -1,164 +1,104 @@
 <template>
-  <section class="version-panel" aria-label="游戏资源版本">
-    <div class="version-heading">
-      <div>
-        <span>资源版本</span>
-        <p>只读检查官方分支；评估不会修改游戏目录。</p>
-      </div>
-      <v-btn
-        :disabled="planningTarget !== null || taskActive || verifyActive"
-        :loading="loading"
-        aria-label="刷新远端版本"
-        icon="mdi-refresh"
-        size="small"
-        variant="text"
-        @click="refreshSnapshot"
-      />
-    </div>
+  <div class="version-body">
+    <slot
+      name="facts"
+      :loading
+      :refreshDisabled
+      :refreshSnapshot
+      :snapshot
+      :startVerify="verifyInstallation"
+      :verifyActive
+      :verifyBusy
+      :verifyPending
+      :verifyResumeLabel
+    />
 
-    <div v-if="loading && snapshot === null" class="version-loading">
-      <v-progress-linear indeterminate rounded />
-      <span>正在读取 HoyoPlay 分支…</span>
-    </div>
+    <PgProgress
+      v-if="verifyPanelVisible"
+      ariaLabel="完整性校验进度"
+      :caption="verifyCaption"
+      :currentFile="verifyActive ? (currentVerify?.currentFile ?? null) : null"
+      :errorMessage="verifyPanelError"
+      :facts="verifyFacts"
+      :indeterminate="!verifyActive || currentVerify === null || currentVerify.totalBytes === 0"
+      :percent="verifyBytePercent"
+      :showBar="verifyActive || verifyPending"
+      :tone="verifyCaptionTone"
+    >
+      <template #actions>
+        <v-icon
+          v-if="verifyActive"
+          aria-label="暂停校验"
+          class="verify-act"
+          role="button"
+          size="16"
+          tabindex="0"
+          title="暂停"
+          @click="cancelVerify"
+        >
+          mdi-pause-circle-outline
+        </v-icon>
+        <v-icon
+          v-else-if="verifyCanResume"
+          aria-label="继续校验"
+          class="verify-act"
+          role="button"
+          size="16"
+          tabindex="0"
+          title="继续"
+          @click="verifyInstallation"
+        >
+          mdi-play-circle-outline
+        </v-icon>
+        <v-icon
+          aria-label="停止校验"
+          class="verify-act"
+          role="button"
+          size="16"
+          tabindex="0"
+          title="停止"
+          @click="clearVerifyTask"
+        >
+          mdi-stop-circle-outline
+        </v-icon>
+      </template>
+    </PgProgress>
+
     <v-alert
       v-if="errorMessage !== null"
+      class="version-error"
       :text="errorMessage"
       density="compact"
       type="warning"
       variant="tonal"
     />
-    <template v-if="snapshot !== null">
-      <div :class="{ 'has-preview': snapshot.preDownload !== null }" class="version-route">
-        <div class="version-node current">
-          <span>本地</span>
-          <strong>{{ snapshot.localVersion ?? "未知" }}</strong>
-        </div>
-        <v-icon aria-hidden="true" size="18">mdi-chevron-right</v-icon>
-        <div :class="{ current: !snapshot.updateAvailable }" class="version-node">
-          <span>正式版本</span>
-          <strong>{{ snapshot.main.tag }}</strong>
-        </div>
-        <template v-if="snapshot.preDownload !== null">
-          <v-icon aria-hidden="true" size="18">mdi-chevron-right</v-icon>
-          <div class="version-node preview">
-            <span>预下载</span>
-            <strong>{{ snapshot.preDownload.tag }}</strong>
-          </div>
-        </template>
-      </div>
-
-      <div class="version-actions">
-        <span v-if="!snapshot.updateAvailable && !snapshot.preDownloadAvailable">
-          当前已是最新正式版本
-        </span>
-        <v-btn
-          v-if="snapshot.updateAvailable"
-          :disabled="planningTarget !== null || taskActive || verifyActive"
-          :loading="planningTarget === gameEnum.package.planTarget.MAIN"
-          prepend-icon="mdi-file-tree-outline"
-          size="small"
-          variant="outlined"
-          @click="createPlan(gameEnum.package.planTarget.MAIN)"
-        >
-          评估正式更新
-        </v-btn>
-        <v-btn
-          v-if="snapshot.preDownloadAvailable"
-          :disabled="planningTarget !== null || taskActive || verifyActive"
-          :loading="planningTarget === gameEnum.package.planTarget.PRE_DOWNLOAD"
-          prepend-icon="mdi-cloud-download-outline"
-          size="small"
-          variant="tonal"
-          @click="createPlan(gameEnum.package.planTarget.PRE_DOWNLOAD)"
-        >
-          评估预下载
-        </v-btn>
-        <v-btn
-          v-if="!verifyActive"
-          :disabled="planningTarget !== null || taskActive || verifyBusy"
-          :loading="verifyBusy"
-          prepend-icon="mdi-shield-check-outline"
-          size="small"
-          variant="text"
-          @click="verifyInstallation"
-        >
-          {{ verifyResumeLabel }}
-        </v-btn>
-        <v-btn
-          v-else
-          :loading="pendingActions[`verify:${installation.id}`] === true"
-          prepend-icon="mdi-stop-circle-outline"
-          size="small"
-          variant="outlined"
-          @click="cancelVerify"
-        >
-          停止校验
-        </v-btn>
-      </div>
-    </template>
-
-    <section v-if="currentVerify !== null" class="verify-panel" aria-label="完整性校验进度">
-      <div class="verify-heading">
-        <div>
-          <span>完整性校验</span>
-          <strong>{{ currentVerify.version }}</strong>
-        </div>
-        <v-chip :color="verifyStateColor" size="small" variant="tonal">
-          {{ gameEnum.package.verifyStateDesc(currentVerify.state) }}
-        </v-chip>
-      </div>
-      <v-progress-linear
-        :indeterminate="currentVerify.totalBytes === 0 && verifyActive"
-        :model-value="verifyBytePercent"
-        color="var(--tgc-od-orange)"
-        height="8"
-        rounded
-      />
-      <div class="verify-facts" aria-live="polite">
-        <span
-          >总进度 {{ formatBytes(currentVerify.hashedBytes) }} /
-          {{ formatBytes(currentVerify.totalBytes) }}</span
-        >
-        <span>文件 {{ currentVerify.completedFiles }} / {{ currentVerify.totalFiles }}</span>
-        <span v-if="currentVerify.bytesPerSecond > 0">
-          {{ formatBytes(currentVerify.bytesPerSecond) }}/s
-        </span>
-        <span v-if="currentVerify.etaSeconds !== null">
-          预计剩余 {{ formatDuration(currentVerify.etaSeconds) }}
-        </span>
-        <span v-if="verifyActive">当前耗时 {{ formatElapsed(currentVerify.elapsedMs) }}</span>
-        <span v-else-if="currentVerify.state === gameEnum.package.verifyState.COMPLETED">
-          总耗时 {{ formatElapsed(currentVerify.totalElapsedMs) }}
-        </span>
-      </div>
-      <p v-if="currentVerify.currentFile !== null" class="verify-current">
-        当前：{{ currentVerify.currentFile }}
-      </p>
-      <v-alert
-        v-if="currentVerify.errorMessage !== null"
-        :text="currentVerify.errorMessage"
-        density="compact"
-        type="error"
+    <div
+      v-if="snapshot !== null && (snapshot.updateAvailable || snapshot.preDownloadAvailable)"
+      class="version-actions"
+    >
+      <v-btn
+        v-if="snapshot.updateAvailable"
+        :disabled="planningTarget !== null || taskActive || verifyActive"
+        :loading="planningTarget === gameEnum.package.planTarget.MAIN"
+        prepend-icon="mdi-file-tree-outline"
+        size="small"
+        variant="outlined"
+        @click="createPlan(gameEnum.package.planTarget.MAIN)"
+      >
+        评估正式更新
+      </v-btn>
+      <v-btn
+        v-if="snapshot.preDownloadAvailable"
+        :disabled="planningTarget !== null || taskActive || verifyActive"
+        :loading="planningTarget === gameEnum.package.planTarget.PRE_DOWNLOAD"
+        prepend-icon="mdi-cloud-download-outline"
+        size="small"
         variant="tonal"
-      />
-      <v-alert
-        v-else-if="
-          currentVerify.state === gameEnum.package.verifyState.COMPLETED &&
-          currentVerify.healthy === true
-        "
-        text="本地文件与当前安装版本清单一致。"
-        density="compact"
-        type="success"
-        variant="tonal"
-      />
-      <v-alert
-        v-else-if="currentVerify.state === gameEnum.package.verifyState.COMPLETED"
-        :text="`发现 ${currentVerify.issueCount} 个缺失或损坏文件，已生成修复计划。`"
-        density="compact"
-        type="warning"
-        variant="tonal"
-      />
-    </section>
+        @click="createPlan(gameEnum.package.planTarget.PRE_DOWNLOAD)"
+      >
+        评估预下载
+      </v-btn>
+    </div>
 
     <div v-if="plan !== null" class="plan-summary" aria-live="polite">
       <div class="plan-title">
@@ -225,15 +165,17 @@
       @recover-requested="handleRecoverRequested"
       @start-requested="handleStartRequested"
     />
-  </section>
+  </div>
 </template>
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PgProgress from "@comp/pageGame/pg-progress.vue";
 import PgTask from "@comp/pageGame/pg-task.vue";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
+import { confirmStopRunningGame } from "@utils/TGGame.js";
 import { createGamePackagePlan, getGamePackageSnapshot } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, watch } from "vue";
@@ -242,14 +184,29 @@ type Props = {
   installation: TGApp.Game.Installation.Item;
 };
 
+type VersionFactsSlot = {
+  loading: boolean;
+  refreshDisabled: boolean;
+  refreshSnapshot: () => Promise<void>;
+  snapshot: TGApp.Game.Package.Snapshot | null;
+  startVerify: () => Promise<void>;
+  verifyActive: boolean;
+  verifyBusy: boolean;
+  verifyPending: boolean;
+  verifyResumeLabel: string;
+};
+
 const { installation } = defineProps<Props>();
+defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
 const taskStore = useGameLauncherStore();
 const { pendingActions, tasksByInstallation, verifyByInstallation } = storeToRefs(taskStore);
 const snapshot = ref<TGApp.Game.Package.Snapshot | null>(null);
 const plan = ref<TGApp.Game.Package.PlanSummary | null>(null);
 const loading = ref<boolean>(false);
 const planningTarget = ref<TGApp.Game.Package.PlanTargetEnum | null>(null);
+const exitingGame = ref<boolean>(false);
 const errorMessage = ref<string | null>(null);
+const verifyStartError = ref<string | null>(null);
 let requestSequence = 0;
 
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
@@ -263,8 +220,31 @@ const currentVerify = computed<TGApp.Game.Package.VerifySummary | null>(() => {
 const verifyActive = computed<boolean>(() => {
   return currentVerify.value !== null && gameEnum.package.verifyActive(currentVerify.value.state);
 });
+const verifyPending = computed<boolean>(() => {
+  return pendingActions.value[`verify:${installation.id}`] === true;
+});
+const verifyClearing = computed<boolean>(() => {
+  return pendingActions.value[`verify-clear:${installation.id}`] === true;
+});
 const verifyBusy = computed<boolean>(() => {
-  return verifyActive.value || pendingActions.value[`verify:${installation.id}`] === true;
+  return verifyActive.value || verifyPending.value || verifyClearing.value;
+});
+const verifyCanResume = computed<boolean>(() => {
+  if (verifyBusy.value) return false;
+  const state = currentVerify.value?.state;
+  return (
+    state === gameEnum.package.verifyState.CANCELED || state === gameEnum.package.verifyState.FAILED
+  );
+});
+const verifyPanelVisible = computed<boolean>(() => {
+  if (verifyPending.value || verifyStartError.value !== null) return true;
+  const summary = currentVerify.value;
+  if (summary === null) return false;
+  return (
+    summary.state === gameEnum.package.verifyState.SCANNING ||
+    summary.state === gameEnum.package.verifyState.FAILED ||
+    summary.state === gameEnum.package.verifyState.CANCELED
+  );
 });
 const verifyResumeLabel = computed<string>(() => {
   const state = currentVerify.value?.state;
@@ -280,17 +260,47 @@ const verifyBytePercent = computed<number>(() => {
   if (currentVerify.value === null || currentVerify.value.totalBytes === 0) return 0;
   return Math.min(100, (currentVerify.value.hashedBytes / currentVerify.value.totalBytes) * 100);
 });
-const verifyStateColor = computed<string>(() => {
-  switch (currentVerify.value?.state) {
-    case gameEnum.package.verifyState.COMPLETED:
-      return currentVerify.value.healthy === true ? "var(--tgc-od-green)" : "var(--tgc-od-orange)";
-    case gameEnum.package.verifyState.FAILED:
-      return "var(--tgc-od-red)";
-    case gameEnum.package.verifyState.CANCELED:
-      return "var(--tgc-od-orange)";
-    default:
-      return "var(--tgc-od-orange)";
+const verifyCaption = computed<string>(() => {
+  if (verifyPending.value && !verifyActive.value) return "正在开始校验…";
+  if (verifyStartError.value !== null && currentVerify.value === null) return "无法开始校验";
+  const summary = currentVerify.value;
+  if (summary === null) return "";
+  return gameEnum.package.verifyStateDesc(summary.state);
+});
+const verifyCaptionTone = computed<"" | "err" | "ok" | "warn">(() => {
+  const summary = currentVerify.value;
+  if (verifyPending.value && !verifyActive.value) return "";
+  if (verifyStartError.value !== null) return "err";
+  if (summary === null) return "";
+  if (summary.errorMessage !== null || summary.state === gameEnum.package.verifyState.FAILED) {
+    return "err";
   }
+  if (summary.state === gameEnum.package.verifyState.CANCELED) return "warn";
+  return "";
+});
+const verifyPanelError = computed<string | null>(() => {
+  if (verifyStartError.value !== null) return verifyStartError.value;
+  return currentVerify.value?.errorMessage ?? null;
+});
+const verifyFacts = computed<Array<string>>(() => {
+  if (verifyPending.value && !verifyActive.value) return [];
+  const summary = currentVerify.value;
+  if (summary === null) return [];
+  if (
+    summary.state !== gameEnum.package.verifyState.SCANNING &&
+    summary.state !== gameEnum.package.verifyState.FAILED &&
+    summary.state !== gameEnum.package.verifyState.CANCELED
+  ) {
+    return [];
+  }
+  const facts: Array<string> = [
+    `总进度 ${formatBytes(summary.hashedBytes)} / ${formatBytes(summary.totalBytes)}`,
+    `文件 ${summary.completedFiles} / ${summary.totalFiles}`,
+  ];
+  if (summary.bytesPerSecond > 0) facts.push(`${formatBytes(summary.bytesPerSecond)}/s`);
+  if (summary.etaSeconds !== null) facts.push(`预计剩余 ${formatDuration(summary.etaSeconds)}`);
+  if (verifyActive.value) facts.push(`当前耗时 ${formatElapsed(summary.elapsedMs)}`);
+  return facts;
 });
 const targetPublished = computed<boolean>(() => {
   return (
@@ -303,9 +313,13 @@ const targetPublished = computed<boolean>(() => {
 const taskActive = computed<boolean>(() => {
   return currentTask.value !== null && gameEnum.package.taskActive(currentTask.value.state);
 });
+const refreshDisabled = computed<boolean>(() => {
+  return planningTarget.value !== null || taskActive.value || verifyActive.value;
+});
 const taskActionPending = computed<boolean>(() => {
   const taskId = currentTask.value?.taskId;
   return (
+    exitingGame.value ||
     pendingActions.value[installation.id] === true ||
     (taskId !== undefined && pendingActions.value[taskId] === true)
   );
@@ -332,10 +346,16 @@ function formatDuration(seconds: number): string {
 }
 
 function formatElapsed(milliseconds: number): string {
-  return formatDuration(Math.max(0, Math.round(milliseconds / 1000)));
+  const total = Math.max(0, Math.round(milliseconds / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  if (hours > 0) return `${hours} 小时 ${minutes} 分 ${seconds} 秒`;
+  if (minutes > 0) return `${minutes} 分 ${seconds} 秒`;
+  return `${seconds} 秒`;
 }
 
-async function refreshSnapshot(): Promise<void> {
+async function loadSnapshot(notify: boolean): Promise<void> {
   const sequence = ++requestSequence;
   loading.value = true;
   errorMessage.value = null;
@@ -351,12 +371,27 @@ async function refreshSnapshot(): Promise<void> {
     ) {
       plan.value = null;
     }
+    if (!notify) return;
+    if (result.updateAvailable) {
+      showSnackbar.success(`远端版本已刷新，可更新至 ${result.main.tag}`);
+      return;
+    }
+    if (result.preDownloadAvailable && result.preDownload !== null) {
+      showSnackbar.success(`远端版本已刷新，可预下载 ${result.preDownload.tag}`);
+      return;
+    }
+    showSnackbar.success(`远端版本已刷新，当前已是 ${result.main.tag}`);
   } catch (error) {
     if (sequence !== requestSequence) return;
     errorMessage.value = `读取远端版本失败：${error}`;
+    if (notify) showSnackbar.error(`读取远端版本失败：${error}`);
   } finally {
     if (sequence === requestSequence) loading.value = false;
   }
+}
+
+async function refreshSnapshot(): Promise<void> {
+  await loadSnapshot(true);
 }
 
 async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<void> {
@@ -374,11 +409,24 @@ async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<vo
 
 async function verifyInstallation(): Promise<void> {
   if (planningTarget.value !== null || verifyBusy.value || taskActive.value) return;
+  const paused = currentVerify.value?.state === gameEnum.package.verifyState.CANCELED;
+  if (!paused) {
+    const failed = currentVerify.value?.state === gameEnum.package.verifyState.FAILED;
+    const confirmed = await showDialog.checkF({
+      title: failed ? "继续完整性校验？" : "开始完整性校验？",
+      text: failed
+        ? "将从上次进度继续对照当前安装版本清单扫描本地文件。"
+        : "会对照当前安装版本清单扫描本地文件，可能需要较长时间。游戏可以继续运行。",
+      confirmLabel: failed ? "继续校验" : "开始校验",
+    });
+    if (confirmed !== true) return;
+  }
   errorMessage.value = null;
+  verifyStartError.value = null;
   try {
     await taskStore.startVerify(installation.id);
   } catch (error) {
-    errorMessage.value = `校验资源完整性失败：${error}`;
+    verifyStartError.value = `校验资源完整性失败：${error}`;
   }
 }
 
@@ -386,9 +434,20 @@ async function cancelVerify(): Promise<void> {
   if (!verifyActive.value) return;
   try {
     await taskStore.cancelVerify(installation.id);
-    showSnackbar.info("已请求停止完整性校验");
+    showSnackbar.info("已暂停完整性校验");
   } catch (error) {
-    showSnackbar.error(`停止完整性校验失败：${error}`);
+    showSnackbar.error(`暂停完整性校验失败：${error}`);
+  }
+}
+
+async function clearVerifyTask(): Promise<void> {
+  if (verifyClearing.value) return;
+  try {
+    await taskStore.clearVerify(installation.id);
+    verifyStartError.value = null;
+    showSnackbar.info("已停止完整性校验");
+  } catch (error) {
+    showSnackbar.error(`清除完整性校验失败：${error}`);
   }
 }
 
@@ -403,7 +462,7 @@ async function handleStartRequested(): Promise<void> {
         )}。下载只写入应用缓存，完成后不会改写版本号。`
       : `目标版本 ${plan.value.targetTag}，还需下载 ${formatBytes(
           plan.value.downloadBytes - plan.value.cacheHitBytes,
-        )}。下载只写入应用缓存。`,
+        )}。下载只写入应用缓存，游戏可以继续运行。`,
     confirmLabel: "开始下载",
   });
   if (confirmed !== true) return;
@@ -427,28 +486,25 @@ async function handleApplyRequested(): Promise<void> {
     return;
   }
   let title = "应用游戏更新？";
-  let text = "应用会修改游戏文件。请先完全退出游戏，游戏运行时无法应用更新。";
+  let text = "应用会修改游戏文件；全部通过后才更新版本。";
   let confirmLabel = "应用更新";
   let successMessage = "已开始应用游戏更新";
   let errorPrefix = "应用游戏更新";
   if (repairing && integrity) {
     title = "继续修复文件？";
-    text =
-      "会继续替换仍缺失或损坏的文件，完成后不会改写版本号。请先完全退出游戏，游戏运行时无法修复。";
+    text = "会继续替换仍缺失或损坏的文件，完成后不会改写版本号。";
     confirmLabel = "修复并完成";
     successMessage = "已开始修复文件";
     errorPrefix = "修复文件";
   } else if (repairing) {
     title = "修复未变化文件？";
-    text =
-      "会下载并替换缺失或损坏的未变化文件，全部通过后再写入版本号。请先完全退出游戏，游戏运行时无法修复。";
+    text = "会下载并替换缺失或损坏的未变化文件，全部通过后再写入版本号。";
     confirmLabel = "修复并完成";
     successMessage = "已开始修复未变化文件";
     errorPrefix = "修复未变化文件";
   } else if (integrity) {
     title = "应用资源修复？";
-    text =
-      "会替换缺失或损坏的文件，全部通过后不会改写版本号。请先完全退出游戏，游戏运行时无法修复。";
+    text = "会替换缺失或损坏的文件，全部通过后不会改写版本号。";
     confirmLabel = "应用修复";
     successMessage = "已开始应用资源修复";
     errorPrefix = "应用资源修复";
@@ -456,9 +512,18 @@ async function handleApplyRequested(): Promise<void> {
   const confirmed = await showDialog.checkF({ title, text, confirmLabel });
   if (confirmed !== true) return;
   try {
+    exitingGame.value = true;
+    if (!(await confirmStopRunningGame("应用更新"))) return;
+  } catch (error) {
+    showSnackbar.error(`退出游戏失败：${error}`);
+    return;
+  } finally {
+    exitingGame.value = false;
+  }
+  try {
     const updatedTask = await taskStore.applyTask(task.taskId);
     showSnackbar.success(successMessage);
-    if (updatedTask.state === gameEnum.package.taskState.COMPLETED) await refreshSnapshot();
+    if (updatedTask.state === gameEnum.package.taskState.COMPLETED) await loadSnapshot(false);
   } catch (error) {
     showSnackbar.error(`${errorPrefix}失败：${error}`);
   }
@@ -516,6 +581,21 @@ async function handleRecoverRequested(
   }
   const confirmed = await showDialog.checkF({ title, text, confirmLabel });
   if (confirmed !== true) return;
+  const writesGameDir =
+    gameEnum.package.taskApplying(task.state) ||
+    task.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
+    task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
+  if (writesGameDir) {
+    try {
+      exitingGame.value = true;
+      if (!(await confirmStopRunningGame(rollback ? "回滚更新" : "恢复更新"))) return;
+    } catch (error) {
+      showSnackbar.error(`退出游戏失败：${error}`);
+      return;
+    } finally {
+      exitingGame.value = false;
+    }
+  }
   try {
     await taskStore.recoverTask(task.taskId, action);
     showSnackbar.success(rollback ? "资源任务已放弃" : "已开始恢复资源任务");
@@ -527,7 +607,8 @@ async function handleRecoverRequested(
 watch(
   () => [installation.id, installation.version],
   () => {
-    void refreshSnapshot();
+    verifyStartError.value = null;
+    void loadSnapshot(false);
     void taskStore.hydrateVerify(installation.id);
   },
   { immediate: true },
@@ -537,7 +618,7 @@ watch(
   () => [currentTask.value?.taskId, currentTask.value?.state],
   ([taskId, state]) => {
     if (taskId !== undefined && state === gameEnum.package.taskState.COMPLETED) {
-      void refreshSnapshot();
+      void loadSnapshot(false);
     }
   },
 );
@@ -561,94 +642,33 @@ watch(currentVerify, (next, previous) => {
     }
     showSnackbar.info(`发现 ${next.issueCount} 个缺失或损坏文件，已生成修复计划`);
   }
-  if (next.state === gameEnum.package.verifyState.FAILED && next.errorMessage !== null) {
-    errorMessage.value = next.errorMessage;
-  }
 });
 </script>
 
 <style lang="scss" scoped>
-.version-panel {
-  display: grid;
-  padding-top: 16px;
-  border-top: 1px solid var(--common-shadow-1);
-  gap: 16px;
+.version-body {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  padding-bottom: 16px;
+  color: var(--box-text-1);
+  gap: 12px;
 }
 
-.version-heading,
+.verify-act {
+  color: var(--box-text-2);
+  cursor: pointer;
+}
+
 .plan-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-}
-
-.version-heading {
-  span {
-    color: var(--common-text-title);
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 22px;
-  }
-
-  p {
-    margin: 2px 0 0;
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-}
-
-.version-loading {
-  display: grid;
-  color: var(--box-text-2);
-  font-size: 12px;
   gap: 8px;
 }
 
-.version-route {
-  display: grid;
-  align-items: center;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-
-  &.has-preview {
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
-  }
-
-  > .v-icon {
-    color: var(--box-text-2);
-  }
-}
-
-.version-node {
-  display: grid;
-  min-width: 0;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-4);
-  gap: 4px;
-
-  span {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  strong {
-    color: var(--box-text-1);
-    font-size: 14px;
-    line-height: 20px;
-  }
-
-  &.current {
-    border-color: var(--tgc-yellow-3);
-  }
-
-  &.preview {
-    border-style: dashed;
-  }
+.version-error {
+  margin-inline: 16px;
 }
 
 .version-actions {
@@ -658,114 +678,20 @@ watch(currentVerify, (next, previous) => {
   color: var(--box-text-2);
   font-size: 12px;
   gap: 8px;
-}
-
-.verify-panel {
-  display: grid;
-  padding: 16px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-4);
-  gap: 12px;
-}
-
-.verify-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-
-  > div {
-    span,
-    strong {
-      display: block;
-    }
-
-    span {
-      color: var(--box-text-2);
-      font-size: 12px;
-      line-height: 16px;
-    }
-
-    strong {
-      color: var(--common-text-title);
-      font-size: 16px;
-      line-height: 22px;
-    }
-  }
-
-  :deep(.v-chip) {
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  :deep(.v-chip__content) {
-    display: flex;
-    align-items: center;
-    line-height: 16px;
-  }
-}
-
-.verify-facts {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-}
-
-.verify-facts,
-.verify-current {
-  color: var(--box-text-2);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.verify-current {
-  overflow: hidden;
-  margin: 0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding-inline: 16px;
 }
 
 .plan-summary {
   display: grid;
-  padding: 16px;
-  border-radius: 8px;
-  background: var(--box-bg-4);
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
   gap: 12px;
+  margin-inline: 16px;
+}
 
-  p {
-    margin: 0;
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  dl {
-    display: grid;
-    margin: 0;
-    gap: 8px 16px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  dl div {
-    display: grid;
-    gap: 2px;
-  }
-
-  dt {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  dd {
-    margin: 0;
-    color: var(--box-text-1);
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 20px;
-  }
+:deep(.task-panel) {
+  margin-inline: 16px;
 }
 
 .plan-title {
@@ -782,23 +708,47 @@ watch(currentVerify, (next, previous) => {
 
   strong {
     color: var(--common-text-title);
+    font-family: var(--font-title);
     font-size: 16px;
+    font-weight: normal;
     line-height: 22px;
   }
 }
 
-@media (width <= 720px) {
-  .version-route {
-    grid-template-columns: 1fr;
-
-    > .v-icon {
-      justify-self: center;
-      transform: rotate(90deg);
-    }
+.plan-summary {
+  p {
+    margin: 0;
+    color: var(--box-text-2);
+    font-size: 12px;
+    line-height: 16px;
   }
 
-  .plan-summary dl {
-    grid-template-columns: 1fr;
+  dl {
+    display: grid;
+    margin: 0;
+    gap: 4px;
+  }
+
+  dl div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    gap: 8px;
+  }
+
+  dt {
+    color: var(--box-text-2);
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--box-text-1);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
   }
 }
 </style>

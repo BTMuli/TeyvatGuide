@@ -11,6 +11,7 @@ import {
   applyGamePackageTask,
   cancelGamePackageTask,
   cancelGamePackageVerify,
+  clearGamePackageVerify,
   getGamePackageVerifyStatus,
   listGamePackageTasks,
   recoverGamePackageTask,
@@ -23,6 +24,7 @@ import { shallowRef } from "vue";
 const useGameLauncherStore = defineStore("gameLauncher", () => {
   const tasksByInstallation = shallowRef<Record<string, TGApp.Game.Package.TaskSummary>>({});
   const verifyByInstallation = shallowRef<Record<string, TGApp.Game.Package.VerifySummary>>({});
+  const dismissedVerifyInstallations = shallowRef<Set<string>>(new Set());
   const pendingActions = shallowRef<Record<string, boolean>>({});
   let unlisteners: Array<UnlistenFn> = [];
   let listenerPromise: Promise<void> | null = null;
@@ -54,6 +56,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   function mergeVerify(summary: TGApp.Game.Package.VerifySummary): void {
+    if (dismissedVerifyInstallations.value.has(summary.installationId)) return;
     const current = verifyByInstallation.value[summary.installationId];
     if (
       current !== undefined &&
@@ -69,12 +72,30 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     };
   }
 
+  function dismissVerify(installationId: string): void {
+    const nextDismissed = new Set(dismissedVerifyInstallations.value);
+    nextDismissed.add(installationId);
+    dismissedVerifyInstallations.value = nextDismissed;
+    if (verifyByInstallation.value[installationId] === undefined) return;
+    const next = { ...verifyByInstallation.value };
+    delete next[installationId];
+    verifyByInstallation.value = next;
+  }
+
+  function revealVerify(installationId: string): void {
+    if (!dismissedVerifyInstallations.value.has(installationId)) return;
+    const next = new Set(dismissedVerifyInstallations.value);
+    next.delete(installationId);
+    dismissedVerifyInstallations.value = next;
+  }
+
   async function hydrateTasks(installationId?: string): Promise<void> {
     const tasks = await listGamePackageTasks(installationId);
     for (const task of tasks) mergeTask(task);
   }
 
   async function hydrateVerify(installationId: string): Promise<void> {
+    if (dismissedVerifyInstallations.value.has(installationId)) return;
     const status = await getGamePackageVerifyStatus(installationId);
     if (status === null) return;
     mergeVerify(status);
@@ -87,6 +108,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   async function startVerify(installationId: string): Promise<TGApp.Game.Package.VerifySummary> {
+    revealVerify(installationId);
     setPending(`verify:${installationId}`, true);
     try {
       const summary = await verifyGamePackage(installationId);
@@ -103,6 +125,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       await cancelGamePackageVerify(installationId);
     } finally {
       setPending(`verify:${installationId}`, false);
+    }
+  }
+
+  async function clearVerify(installationId: string): Promise<void> {
+    setPending(`verify-clear:${installationId}`, true);
+    try {
+      await clearGamePackageVerify(installationId);
+      dismissVerify(installationId);
+    } finally {
+      setPending(`verify-clear:${installationId}`, false);
     }
   }
 
@@ -211,6 +243,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     applySwitch,
     cancelTask,
     cancelVerify,
+    clearVerify,
+    dismissVerify,
     recoverTask,
     startListening,
     stopListening,

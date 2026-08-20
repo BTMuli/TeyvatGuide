@@ -39,15 +39,10 @@
             <img alt="achievementsIcon" class="side-icon" src="@/assets/icons/achievements.svg" />
           </template>
         </v-list-item>
-        <v-list-item
-          v-if="isWindows && isDevEnv"
-          :link="true"
-          :title.attr="'游戏安装'"
-          href="/game"
-        >
+        <v-list-item v-if="isWindows" :link="true" :title.attr="'游戏安装'" href="/game">
           <template #title>游戏安装</template>
           <template #prepend>
-            <v-icon class="side-icon">mdi-gamepad-variant-outline</v-icon>
+            <img alt="game" class="side-icon" src="/platforms/mhy/launcher.webp" />
           </template>
         </v-list-item>
         <!-- 背包物品，包括材料&武器&圣遗物 -->
@@ -239,7 +234,7 @@
       <!-- 底部菜单 -->
       <div class="bottom-menu">
         <!-- 用户菜单 -->
-        <v-menu :open-on-click="true" location="end">
+        <v-menu :open-on-click="true" location="end" @update:model-value="handleUserMenuToggle">
           <template #activator="{ props }">
             <v-list-item :title.attr="userInfo.nickname" class="thin-spacer" v-bind="props">
               <template #title>{{ userInfo.nickname }}</template>
@@ -395,6 +390,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToGameLogin from "@comp/pageConfig/tco-gameLogin.vue";
 import VpOverlayFollow from "@comp/viewPost/vp-overlay-follow.vue";
+import gameEnum from "@enum/game.js";
 import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import takumiReq from "@req/takumiReq.js";
@@ -406,6 +402,7 @@ import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { platform } from "@tauri-apps/plugin-os";
 import mhyClient from "@utils/TGClient.js";
 import { tryCallYae, tryLaunchGame } from "@utils/TGGame.js";
+import { listGameInstallations } from "@utils/TGGameLauncher.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -436,15 +433,45 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/UI/nav/lumine.webp" };
 });
 const themeTitle = computed<string>(() => (theme.value === "default" ? "深色模式" : "浅色模式"));
+const launchableInstall = ref<TGApp.Game.Installation.Item | null>(null);
 const canLaunch = computed<boolean>(() => {
-  return isWindows;
+  const installation = launchableInstall.value;
+  if (installation === null) return false;
+  if (installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
+    return isLogin.value && account.value.isOfficial === 1;
+  }
+  return true;
 });
+
+function handleUserMenuToggle(open: boolean): void {
+  if (open) void refreshLaunchable();
+}
+
+async function refreshLaunchable(): Promise<void> {
+  if (!isWindows) {
+    launchableInstall.value = null;
+    return;
+  }
+  try {
+    const installations = await listGameInstallations();
+    const chosen = installations.find((item) => item.isChosen) ?? installations[0];
+    if (chosen === undefined || chosen.status !== gameEnum.installation.status.KNOWN) {
+      launchableInstall.value = null;
+      return;
+    }
+    launchableInstall.value = chosen;
+  } catch {
+    // 侧边栏只决定入口是否显示，失败时隐藏启动项即可。
+    launchableInstall.value = null;
+  }
+}
 
 onMounted(async () => {
   themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
     theme.value = e.payload === "default" ? "default" : "dark";
   });
   if (webviewWindow.getCurrentWebviewWindow().label === "TeyvatGuide") await mhyClient.run();
+  await refreshLaunchable();
 });
 
 onUnmounted(() => {

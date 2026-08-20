@@ -21,11 +21,12 @@ use crate::commands::{
   init_app, is_in_admin, is_msix, is_process_running, quit_app, read_text_scale,
 };
 use crate::game::commands::{
-  game_installation_inspect, game_installation_list, game_is_running, game_launch,
-  game_package_apply, game_package_cache_clear, game_package_cache_status, game_package_cancel,
-  game_package_plan, game_package_recover, game_package_snapshot, game_package_start,
-  game_package_switch, game_package_switch_plan, game_package_task_list, game_package_verify,
-  game_package_verify_cancel, game_package_verify_status, game_stop,
+  game_installation_inspect, game_installation_list, game_installation_locate, game_is_running,
+  game_launch, game_package_apply, game_package_cache_clear, game_package_cache_status,
+  game_package_cancel, game_package_plan, game_package_recover, game_package_snapshot,
+  game_package_start, game_package_switch, game_package_switch_plan, game_package_task_list,
+  game_package_verify, game_package_verify_cancel, game_package_verify_clear,
+  game_package_verify_status, game_stop,
 };
 use crate::game::package::GamePackageManager;
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
@@ -141,6 +142,7 @@ pub fn run() {
       read_text_scale,
       game_installation_inspect,
       game_installation_list,
+      game_installation_locate,
       game_is_running,
       game_launch,
       game_stop,
@@ -160,6 +162,8 @@ pub fn run() {
       game_package_verify_status,
       #[cfg(target_os = "windows")]
       game_package_verify_cancel,
+      #[cfg(target_os = "windows")]
+      game_package_verify_clear,
       #[cfg(target_os = "windows")]
       game_package_start,
       #[cfg(target_os = "windows")]

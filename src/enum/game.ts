@@ -76,7 +76,7 @@ function getGamePackageVerifyStateDesc(state: TGApp.Game.Package.VerifyStateEnum
     case GamePackageVerifyStateEnum.FAILED:
       return "校验失败";
     case GamePackageVerifyStateEnum.CANCELED:
-      return "已取消";
+      return "已暂停";
   }
 }
 

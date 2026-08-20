@@ -255,10 +255,9 @@ function formatDuration(seconds: number): string {
 <style lang="scss" scoped>
 .task-panel {
   display: grid;
-  padding: 16px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-4);
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
   gap: 12px;
 }
 
@@ -266,7 +265,7 @@ function formatDuration(seconds: number): string {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 
   span,
   strong {
@@ -281,7 +280,9 @@ function formatDuration(seconds: number): string {
 
   strong {
     color: var(--common-text-title);
+    font-family: var(--font-title);
     font-size: 16px;
+    font-weight: normal;
     line-height: 22px;
   }
 }

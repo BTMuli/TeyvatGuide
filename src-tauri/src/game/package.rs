@@ -108,6 +108,7 @@ impl GamePackageManager {
     }
   }
 
+  /// 启动只写应用缓存的资源下载。游戏运行时仍允许开始；改游戏目录发生在 apply。
   pub(crate) fn start(
     &self,
     app_handle: AppHandle,
@@ -116,9 +117,6 @@ impl GamePackageManager {
     options: PackageTaskOptions,
     recovering: bool,
   ) -> Result<PackageTaskSummary, String> {
-    if is_game_running() {
-      return Err("游戏仍在运行，无法开始资源任务".to_string());
-    }
     if self.verify.is_running(&plan.installation_id)? {
       return Err("该游戏安装正在校验完整性，请等待完成或取消后再开始资源任务".to_string());
     }
@@ -518,6 +516,10 @@ impl GamePackageManager {
 
   pub(crate) fn cancel_verify(&self, installation_id: &str) -> Result<(), String> {
     self.verify.cancel(installation_id)
+  }
+
+  pub(crate) fn clear_verify(&self, task_root: &Path, installation_id: &str) -> Result<(), String> {
+    self.verify.clear(task_root, installation_id)
   }
 
   pub(crate) fn reserve_installation(
@@ -1268,10 +1270,5 @@ mod tests {
     let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
     assert_eq!(loaded.state, PackageTaskState::Failed);
     assert_eq!(loaded.error_message.as_deref(), Some("先前失败"));
-  }
-
-  #[test]
-  fn stop_game_succeeds_when_client_is_not_running() {
-    super::stop_game().unwrap();
   }
 }

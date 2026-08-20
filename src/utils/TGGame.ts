@@ -14,8 +14,10 @@ import { copyFile, exists, mkdir, readDir, readTextFile, stat } from "@tauri-app
 import { platform } from "@tauri-apps/plugin-os";
 import {
   inspectGameInstallation,
+  isGameRunning,
   launchGameInstallation,
   listGameInstallations,
+  stopGame,
 } from "@utils/TGGameLauncher.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -114,6 +116,24 @@ export async function tryLaunchGame(
   } catch (error) {
     showSnackbar.error(`启动游戏失败：${error}`);
   }
+}
+
+/**
+ * 若国服客户端仍在运行，先询问是否退出；取消则中止后续操作。
+ * @since Beta v0.11.5
+ * @param purpose - 需要停游戏的原因，写入确认文案
+ * @returns 游戏未在运行或已确认退出时为 true
+ */
+export async function confirmStopRunningGame(purpose: string): Promise<boolean> {
+  if (!(await isGameRunning())) return true;
+  const confirmed = await showDialog.checkF({
+    title: "退出游戏？",
+    text: `检测到游戏正在运行。确认后会先退出游戏，再继续${purpose}；取消则不继续。`,
+    confirmLabel: "退出并继续",
+  });
+  if (confirmed !== true) return false;
+  await stopGame();
+  return true;
 }
 
 /**
@@ -218,7 +238,7 @@ export async function tryCallYae(gameDir: string, uid?: string): Promise<void> {
     return;
   }
   if (gameDir === "未设置") {
-    showSnackbar.warn("请前往设置页面设置游戏安装目录");
+    showSnackbar.warn("请先在游戏安装页面登记游戏安装");
     return;
   }
   if (!(await exists(gameDir))) {

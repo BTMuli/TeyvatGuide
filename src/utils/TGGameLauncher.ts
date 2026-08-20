@@ -29,6 +29,15 @@ export async function listGameInstallations(): Promise<Array<TGApp.Game.Installa
 }
 
 /**
+ * 从 Unity 日志静默定位国服 YuanShen.exe。
+ * @since Beta v0.11.5
+ * @returns 磁盘上仍存在的可执行文件路径
+ */
+export async function locateGameInstallations(): Promise<Array<string>> {
+  return await invoke<Array<string>>("game_installation_locate");
+}
+
+/**
  * 通过可信安装 ID 启动游戏。
  * @since Beta v0.11.5
  * @param installationId - 已登记安装 ID
@@ -164,6 +173,15 @@ export async function getGamePackageVerifyStatus(
  */
 export async function cancelGamePackageVerify(installationId: string): Promise<void> {
   await invoke("game_package_verify_cancel", { installationId });
+}
+
+/**
+ * 清除完整性校验进度：停止正在运行的扫描，并删除可恢复会话。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ */
+export async function clearGamePackageVerify(installationId: string): Promise<void> {
+  await invoke("game_package_verify_clear", { installationId });
 }
 
 /**

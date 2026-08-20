@@ -29,24 +29,6 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item
-      v-if="platform() === 'windows'"
-      :subtitle="gameDir"
-      :title="`游戏安装目录${gameVer ? `(v${gameVer})` : ''}`"
-    >
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-gamepad</v-icon>
-        </div>
-      </template>
-      <template #append>
-        <div class="config-opers">
-          <v-icon title="修改游戏安装目录" @click="confirmCGD()"> mdi-pencil</v-icon>
-          <v-icon title="打开游戏安装目录" @click="openDataPath('game')"> mdi-folder-open</v-icon>
-          <v-icon title="复制游戏安装目录" @click="copyPath('game')"> mdi-content-copy</v-icon>
-        </div>
-      </template>
-    </v-list-item>
     <v-list-item :subtitle="logDir" title="日志目录">
       <template #prepend>
         <div class="config-icon">
@@ -67,37 +49,20 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import gameEnum from "@enum/game.js";
 import TGSqlite from "@Sql/index.js";
-import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import useAppStore from "@store/app.js";
 import { core, path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
 import { readDir, remove } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
-import { platform } from "@tauri-apps/plugin-os";
 import { backUpUserData } from "@utils/dataBS.js";
-import { inspectGameInstallation, listGameInstallations } from "@utils/TGGameLauncher.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref } from "vue";
+import { onMounted } from "vue";
 
-const { dbPath, logDir, userDir, gameDir } = storeToRefs(useAppStore());
-const gameVer = ref<string | null>();
+const { dbPath, logDir, userDir } = storeToRefs(useAppStore());
 
 onMounted(async () => {
-  if (platform() === "windows") {
-    try {
-      const installations = await listGameInstallations();
-      const current = installations.find((item) => item.isChosen) ?? installations[0];
-      if (current) {
-        gameDir.value = current.rootPath;
-        gameVer.value = current.version;
-      }
-    } catch (error) {
-      await TGLogger.Warn(`[TcDataDir] 读取游戏安装失败：${error}`);
-    }
-  }
   const logDirGet = await path.appLogDir();
   const dbPathGet = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
   let message = "";
@@ -168,61 +133,6 @@ async function confirmCUD(): Promise<void> {
   showSnackbar.success("已删除原用户数据目录!");
 }
 
-async function confirmCGD(): Promise<void> {
-  if (platform() !== "windows") {
-    showSnackbar.warn("不支持的平台！");
-    return;
-  }
-  const oriEmpty = gameDir.value === "未设置";
-  const editCheck = await showDialog.check(
-    oriEmpty ? "确认设置游戏目录？" : "确认修改游戏目录？",
-    oriEmpty ? "请选择国服 YuanShen.exe" : `当前：${gameDir.value}`,
-  );
-  if (!editCheck) {
-    showSnackbar.cancel(oriEmpty ? "已取消设置" : "已取消修改");
-    return;
-  }
-  const file: string | null = await open({
-    defaultPath: oriEmpty ? undefined : `${gameDir.value}${path.sep()}YuanShen.exe`,
-    multiple: false,
-  });
-  if (file === null) {
-    showSnackbar.warn("路径不能为空!");
-    return;
-  }
-  if (!file.toLowerCase().endsWith("yuanshen.exe")) {
-    showSnackbar.warn("仅支持国服游戏本体 YuanShen.exe");
-    return;
-  }
-  if (
-    !oriEmpty &&
-    `${gameDir.value}${path.sep()}YuanShen.exe`.toLowerCase() === file.toLowerCase()
-  ) {
-    showSnackbar.warn("路径未修改！");
-    return;
-  }
-  let installation: TGApp.Game.Installation.Item;
-  try {
-    installation = await inspectGameInstallation(file);
-    if (installation.status === gameEnum.installation.status.UNSUPPORTED) {
-      showSnackbar.warn(installation.statusMessage);
-      return;
-    }
-    await TSGameInstallation.save(installation);
-  } catch (error) {
-    showSnackbar.error(`登记游戏安装失败：${error}`);
-    await TGLogger.Error(`[TcDataDir] 登记游戏安装失败：${error}`);
-    return;
-  }
-  gameDir.value = installation.rootPath;
-  gameVer.value = installation.version;
-  if (installation.status === gameEnum.installation.status.INCONSISTENT) {
-    showSnackbar.warn(`已登记安装，但暂不可启动：${installation.statusMessage}`);
-    return;
-  }
-  showSnackbar.success(oriEmpty ? "成功设置游戏目录" : "成功修改游戏目录");
-}
-
 type ClearAppLogsResult = {
   removed: number;
   failed: number;
@@ -258,7 +168,7 @@ async function confirmCLD(): Promise<void> {
   }
 }
 
-function copyPath(type: "db" | "user" | "log" | "game"): void {
+function copyPath(type: "db" | "user" | "log"): void {
   let targetPath: string, targetName: string;
   switch (type) {
     case "db":
@@ -272,20 +182,12 @@ function copyPath(type: "db" | "user" | "log" | "game"): void {
     case "log":
       targetPath = logDir.value;
       targetName = "日志";
-      break;
-    case "game":
-      if (gameDir.value === "未设置") {
-        showSnackbar.warn("未设置游戏目录！");
-        return;
-      }
-      targetPath = gameDir.value;
-      targetName = "游戏安装目录";
   }
   navigator.clipboard.writeText(targetPath);
   showSnackbar.success(`${targetName}路径已复制!`);
 }
 
-async function openDataPath(type: "db" | "user" | "log" | "game"): Promise<void> {
+async function openDataPath(type: "db" | "user" | "log"): Promise<void> {
   let targetPath: string;
   switch (type) {
     case "db":
@@ -296,13 +198,6 @@ async function openDataPath(type: "db" | "user" | "log" | "game"): Promise<void>
       break;
     case "log":
       targetPath = logDir.value;
-      break;
-    case "game":
-      if (gameDir.value === "未设置") {
-        showSnackbar.warn("未设置游戏目录！");
-        return;
-      }
-      targetPath = gameDir.value;
       break;
   }
   await openPath(targetPath);

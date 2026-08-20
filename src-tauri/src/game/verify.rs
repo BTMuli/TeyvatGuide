@@ -96,6 +96,7 @@ impl VerifySession {
 
 struct ActiveVerify {
   canceled: Arc<AtomicBool>,
+  dropped: Arc<AtomicBool>,
   session: Arc<Mutex<VerifySession>>,
   run_started: Instant,
 }
@@ -120,6 +121,17 @@ impl VerifyRuntime {
       active.get(installation_id).ok_or_else(|| "当前没有正在运行的完整性校验".to_string())?;
     task.canceled.store(true, Ordering::Release);
     Ok(())
+  }
+
+  pub(crate) fn clear(&self, task_root: &Path, installation_id: &str) -> Result<(), String> {
+    {
+      let active = self.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
+      if let Some(task) = active.get(installation_id) {
+        task.dropped.store(true, Ordering::Release);
+        task.canceled.store(true, Ordering::Release);
+      }
+    }
+    delete_session(task_root, installation_id)
   }
 
   pub(crate) fn status(
@@ -154,6 +166,7 @@ pub(crate) fn start_verify(
   }
 
   let canceled = Arc::new(AtomicBool::new(false));
+  let dropped = Arc::new(AtomicBool::new(false));
   let runtime_handle = Arc::clone(runtime);
   let installation_id = installation.id.clone();
   let initial = initial_session(&task_root, &installation)?;
@@ -163,13 +176,18 @@ pub(crate) fn start_verify(
     let mut active = runtime.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
     active.insert(
       installation_id.clone(),
-      ActiveVerify { canceled: Arc::clone(&canceled), session: Arc::clone(&shared), run_started },
+      ActiveVerify {
+        canceled: Arc::clone(&canceled),
+        dropped: Arc::clone(&dropped),
+        session: Arc::clone(&shared),
+        run_started,
+      },
     );
   }
 
   let summary_session = Arc::clone(&shared);
   tauri::async_runtime::spawn(async move {
-    run_verify(app_handle, task_root, installation, branches, shared, canceled).await;
+    run_verify(app_handle, task_root, installation, branches, shared, canceled, dropped).await;
     if let Ok(mut active) = runtime_handle.active.lock() {
       active.remove(&installation_id);
     }
@@ -239,10 +257,23 @@ async fn run_verify(
   branches: GameBranches,
   shared: Arc<Mutex<VerifySession>>,
   canceled: Arc<AtomicBool>,
+  dropped: Arc<AtomicBool>,
 ) {
-  let result =
-    prepare_and_scan(&app_handle, &task_root, &installation, &branches, &shared, &canceled).await;
+  let result = prepare_and_scan(
+    &app_handle,
+    &task_root,
+    &installation,
+    &branches,
+    &shared,
+    &canceled,
+    &dropped,
+  )
+  .await;
   if let Err(error) = result {
+    if dropped.load(Ordering::Acquire) {
+      let _ = delete_session(&task_root, &installation.id);
+      return;
+    }
     if let Ok(mut session) = shared.lock() {
       if session.state == PackageVerifyState::Scanning {
         session.state = PackageVerifyState::Failed;
@@ -265,6 +296,7 @@ async fn prepare_and_scan(
   branches: &GameBranches,
   shared: &Arc<Mutex<VerifySession>>,
   canceled: &Arc<AtomicBool>,
+  dropped: &Arc<AtomicBool>,
 ) -> Result<(), String> {
   let version = installation
     .version
@@ -320,23 +352,44 @@ async fn prepare_and_scan(
   session.error_message = None;
   session.plan = None;
   session.touch();
+  if dropped.load(Ordering::Acquire) {
+    delete_session(task_root, &installation.id)?;
+    return Ok(());
+  }
   persist_session(task_root, &session)?;
+  if dropped.load(Ordering::Acquire) {
+    delete_session(task_root, &installation.id)?;
+    return Ok(());
+  }
   replace_shared(shared, session.clone())?;
   emit_verify(app_handle, &session.summary(Duration::ZERO));
 
   let game_root = PathBuf::from(&installation.root_path);
   let scan_shared = Arc::clone(shared);
   let scan_canceled = Arc::clone(canceled);
+  let scan_dropped = Arc::clone(dropped);
   let scan_task_root = task_root.to_path_buf();
   let scan_app = app_handle.clone();
   let mismatched = tauri::async_runtime::spawn_blocking(move || {
-    scan_inventory(&scan_app, &scan_task_root, &game_root, &inventory, &scan_shared, &scan_canceled)
+    scan_inventory(
+      &scan_app,
+      &scan_task_root,
+      &game_root,
+      &inventory,
+      &scan_shared,
+      &scan_canceled,
+      &scan_dropped,
+    )
   })
   .await
   .map_err(|error| format!("完整性校验任务异常退出：{error}"))??;
 
+  if dropped.load(Ordering::Acquire) {
+    delete_session(task_root, &installation.id)?;
+    return Ok(());
+  }
   if canceled.load(Ordering::Acquire) {
-    finish_canceled(shared, task_root, app_handle)?;
+    finish_canceled(shared, task_root, app_handle, dropped)?;
     return Ok(());
   }
 
@@ -353,7 +406,7 @@ async fn prepare_and_scan(
       task_root,
     )?)
   };
-  finish_completed(shared, task_root, app_handle, mismatched, plan)
+  finish_completed(shared, task_root, app_handle, mismatched, plan, dropped)
 }
 
 fn scan_inventory(
@@ -363,6 +416,7 @@ fn scan_inventory(
   inventory: &[PlanFile],
   shared: &Arc<Mutex<VerifySession>>,
   canceled: &Arc<AtomicBool>,
+  dropped: &Arc<AtomicBool>,
 ) -> Result<Vec<PlanFile>, String> {
   let (mut cursor, mut hashed_bytes, mut mismatched, baseline_elapsed, hashed_at_start) = {
     let session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
@@ -382,7 +436,7 @@ fn scan_inventory(
     scope.spawn(|| {
       while !tick_stop.load(Ordering::Acquire) {
         std::thread::sleep(PROGRESS_TICK);
-        if tick_stop.load(Ordering::Acquire) {
+        if tick_stop.load(Ordering::Acquire) || dropped.load(Ordering::Acquire) {
           return;
         }
         let hashed = hashed_counter.load(Ordering::Relaxed);
@@ -392,7 +446,7 @@ fn scan_inventory(
         {
           return;
         }
-        let _ = emit_current(app_handle, shared, run_started);
+        let _ = emit_current(app_handle, shared, run_started, dropped);
       }
     });
     let scan_result = (|| -> Result<(), String> {
@@ -418,8 +472,8 @@ fn scan_inventory(
             baseline_elapsed,
             run_started,
           )?;
-          persist_current(shared, task_root)?;
-          emit_current(app_handle, shared, run_started)?;
+          persist_current(shared, task_root, dropped)?;
+          emit_current(app_handle, shared, run_started, dropped)?;
           break;
         }
         mismatched.extend(batch_mismatched);
@@ -435,8 +489,8 @@ fn scan_inventory(
           baseline_elapsed,
           run_started,
         )?;
-        persist_current(shared, task_root)?;
-        emit_current(app_handle, shared, run_started)?;
+        persist_current(shared, task_root, dropped)?;
+        emit_current(app_handle, shared, run_started, dropped)?;
       }
       Ok(())
     })();
@@ -453,7 +507,7 @@ fn scan_inventory(
     baseline_elapsed,
     run_started,
   )?;
-  persist_current(shared, task_root)?;
+  persist_current(shared, task_root, dropped)?;
   Ok(mismatched)
 }
 
@@ -651,8 +705,15 @@ fn apply_progress(
   session.touch();
 }
 
-fn persist_current(shared: &Arc<Mutex<VerifySession>>, task_root: &Path) -> Result<(), String> {
+fn persist_current(
+  shared: &Arc<Mutex<VerifySession>>,
+  task_root: &Path,
+  dropped: &AtomicBool,
+) -> Result<(), String> {
   let session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
+  if dropped.load(Ordering::Acquire) {
+    return delete_session(task_root, &session.installation_id);
+  }
   persist_session(task_root, &session)
 }
 
@@ -660,7 +721,11 @@ fn emit_current(
   app_handle: &AppHandle,
   shared: &Arc<Mutex<VerifySession>>,
   run_started: Instant,
+  dropped: &AtomicBool,
 ) -> Result<(), String> {
+  if dropped.load(Ordering::Acquire) {
+    return Ok(());
+  }
   let session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
   emit_verify(app_handle, &session.summary(run_started.elapsed()));
   Ok(())
@@ -670,8 +735,12 @@ fn finish_canceled(
   shared: &Arc<Mutex<VerifySession>>,
   task_root: &Path,
   app_handle: &AppHandle,
+  dropped: &AtomicBool,
 ) -> Result<(), String> {
   let mut session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
+  if dropped.load(Ordering::Acquire) {
+    return delete_session(task_root, &session.installation_id);
+  }
   session.state = PackageVerifyState::Canceled;
   session.current_file = None;
   session.bytes_per_second = 0;
@@ -689,8 +758,12 @@ fn finish_completed(
   app_handle: &AppHandle,
   mismatched: Vec<PlanFile>,
   plan: Option<super::model::PackagePlanSummary>,
+  dropped: &AtomicBool,
 ) -> Result<(), String> {
   let mut session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
+  if dropped.load(Ordering::Acquire) {
+    return delete_session(task_root, &session.installation_id);
+  }
   session.state = PackageVerifyState::Completed;
   session.mismatched = mismatched;
   session.plan = plan;
@@ -725,6 +798,17 @@ fn session_dir(task_root: &Path, installation_id: &str) -> PathBuf {
 
 fn session_path(task_root: &Path, installation_id: &str) -> PathBuf {
   session_dir(task_root, installation_id).join("session.json")
+}
+
+fn delete_session(task_root: &Path, installation_id: &str) -> Result<(), String> {
+  let path = session_path(task_root, installation_id);
+  match fs::remove_file(&path) {
+    Ok(()) => {}
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+    Err(error) => return Err(format!("清除完整性校验会话失败：{error}")),
+  }
+  let _ = fs::remove_dir(session_dir(task_root, installation_id));
+  Ok(())
 }
 
 fn load_session(task_root: &Path, installation_id: &str) -> Result<Option<VerifySession>, String> {
@@ -910,5 +994,47 @@ mod tests {
     assert_eq!(loaded.hashed_bytes, 4096);
     assert_eq!(loaded.elapsed_ms, 1500);
     assert_eq!(loaded.session_id, "session-1");
+  }
+
+  #[test]
+  fn delete_session_removes_checkpoint() {
+    use super::{
+      SESSION_SCHEMA_VERSION, VerifySession, delete_session, load_session, persist_session,
+    };
+    use crate::game::model::PackageVerifyState;
+    use chrono::Utc;
+
+    let root = TempRoot::new();
+    let now = Utc::now().to_rfc3339();
+    persist_session(
+      &root.0,
+      &VerifySession {
+        schema_version: SESSION_SCHEMA_VERSION,
+        session_id: "session-1".to_string(),
+        installation_id: "install-1".to_string(),
+        version: "6.0.0".to_string(),
+        manifest_digest: "digest".to_string(),
+        state: PackageVerifyState::Canceled,
+        total_files: 20,
+        completed_files: 12,
+        total_bytes: 8192,
+        hashed_bytes: 4096,
+        cursor: 12,
+        mismatched: Vec::new(),
+        current_file: None,
+        bytes_per_second: 0,
+        eta_seconds: None,
+        elapsed_ms: 1500,
+        started_at: now.clone(),
+        updated_at: now,
+        error_message: None,
+        plan: None,
+      },
+    )
+    .unwrap();
+    assert!(load_session(&root.0, "install-1").unwrap().is_some());
+    delete_session(&root.0, "install-1").unwrap();
+    assert!(load_session(&root.0, "install-1").unwrap().is_none());
+    delete_session(&root.0, "install-1").unwrap();
   }
 }

@@ -4,7 +4,7 @@
 use super::{
   cache,
   hoyoplay::{create_http_client, create_snapshot, get_game_branches},
-  installation::{derive_installation_id, inspect_executable},
+  installation::{derive_installation_id, inspect_executable, locate_executables},
   journal, launch,
   model::{
     GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanSummary,
@@ -106,6 +106,12 @@ pub async fn game_installation_list(
     }
   }
   Ok(installations)
+}
+
+/// 从 Unity 日志静默定位国服 `YuanShen.exe`。
+#[tauri::command]
+pub fn game_installation_locate() -> Vec<String> {
+  locate_executables()
 }
 
 /// 校验已登记安装的身份和渠道状态，然后使用对应参数启动客户端。
@@ -279,6 +285,16 @@ pub fn game_package_verify_cancel(
   installation_id: String,
 ) -> Result<(), String> {
   manager.cancel_verify(&installation_id)
+}
+
+/// 清除完整性校验进度：停止正在运行的扫描，并删除可恢复会话。
+#[tauri::command]
+pub fn game_package_verify_clear(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  installation_id: String,
+) -> Result<(), String> {
+  manager.clear_verify(&game_task_root(&app_handle)?, &installation_id)
 }
 
 /// 按不可变计划启动只写应用缓存的可恢复资源下载任务；支持正式更新与预下载。

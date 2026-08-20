@@ -1,19 +1,33 @@
 <template>
-  <section class="cache-panel" aria-label="游戏资源缓存">
-    <div class="cache-heading">
-      <div>
-        <span>应用缓存</span>
-        <p>资源分片与渠道 SDK 缓存在应用数据目录，不占用游戏安装盘；清理不影响已安装文件。</p>
+  <section class="cache-panel" aria-label="下载缓存">
+    <div class="cache-top">
+      <span class="cache-title">下载缓存</span>
+      <div class="cache-acts">
+        <v-btn
+          :disabled="loading || clearing"
+          :loading="loading"
+          aria-label="刷新缓存占用"
+          icon="mdi-refresh"
+          size="small"
+          title="刷新缓存占用"
+          variant="text"
+          @click="refreshStatus(true)"
+        />
+        <v-btn
+          :disabled="loading || clearing"
+          :loading="clearing"
+          prepend-icon="mdi-database-remove"
+          size="small"
+          variant="tonal"
+          @click="clearCache"
+        >
+          清理缓存
+        </v-btn>
       </div>
-      <v-btn
-        :disabled="loading || clearing"
-        :loading="loading"
-        aria-label="刷新缓存占用"
-        icon="mdi-refresh"
-        size="small"
-        variant="text"
-        @click="refreshStatus"
-      />
+      <p class="cache-hint">更新、预下载与换服会先下载到这里，不占用游戏安装盘。</p>
+      <p class="cache-hint cache-hint-act">
+        进行中或待恢复任务会阻止清理；未应用的预下载分片会保留。
+      </p>
     </div>
 
     <v-alert
@@ -25,34 +39,18 @@
     />
 
     <div v-if="summary !== null" class="cache-facts">
-      <div>
+      <div class="cache-fact">
         <span>资源分片</span>
-        <strong>{{ bytesToSize(summary.chunkBytes) }}</strong>
-        <span>{{ summary.chunkCount }} 个</span>
+        <strong>{{ bytesToSize(summary.chunkBytes) }} · {{ summary.chunkCount }} 个</strong>
       </div>
-      <div>
+      <div class="cache-fact">
         <span>渠道 SDK</span>
-        <strong>{{ bytesToSize(summary.sdkBytes) }}</strong>
-        <span>{{ summary.sdkCount }} 个</span>
+        <strong>{{ bytesToSize(summary.sdkBytes) }} · {{ summary.sdkCount }} 个</strong>
       </div>
-      <div>
+      <div class="cache-fact">
         <span>合计</span>
         <strong>{{ bytesToSize(summary.totalBytes) }}</strong>
       </div>
-    </div>
-
-    <div class="cache-actions">
-      <v-btn
-        :disabled="loading || clearing"
-        :loading="clearing"
-        prepend-icon="mdi-database-remove"
-        size="small"
-        variant="outlined"
-        @click="clearCache"
-      >
-        清理缓存
-      </v-btn>
-      <span>进行中或待恢复任务会阻止清理；未应用的预下载分片会保留。</span>
     </div>
   </section>
 </template>
@@ -60,25 +58,65 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
+import useGameLauncherStore from "@store/gameLauncher.js";
 import { clearGamePackageCache, getGamePackageCacheStatus } from "@utils/TGGameLauncher.js";
 import { bytesToSize } from "@utils/toolFunc.js";
-import { onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { computed, onMounted, onWatcherCleanup, ref, watch } from "vue";
 
+const taskStore = useGameLauncherStore();
+const { tasksByInstallation } = storeToRefs(taskStore);
 const loading = ref<boolean>(false);
 const clearing = ref<boolean>(false);
 const summary = ref<TGApp.Game.Package.CacheSummary | null>(null);
 const errorMessage = ref<string | null>(null);
+let statusBusy = false;
+let statusQueued = false;
 
-async function refreshStatus(): Promise<void> {
-  if (loading.value || clearing.value) return;
-  loading.value = true;
-  errorMessage.value = null;
+const predlSignature = computed<string>(() => {
+  const parts: Array<string> = [];
+  for (const task of Object.values(tasksByInstallation.value)) {
+    if (task.target !== gameEnum.package.planTarget.PRE_DOWNLOAD) continue;
+    if (
+      task.state !== gameEnum.package.taskState.QUEUED &&
+      task.state !== gameEnum.package.taskState.DOWNLOADING
+    ) {
+      continue;
+    }
+    parts.push(`${task.taskId}:${task.completedCount}:${task.downloadedBytes}`);
+  }
+  return parts.join("|");
+});
+
+async function refreshStatus(notify: boolean = false, silent: boolean = false): Promise<void> {
+  if (clearing.value) return;
+  if (statusBusy) {
+    if (silent) statusQueued = true;
+    return;
+  }
+  if (!silent && loading.value) return;
+  statusBusy = true;
+  if (!silent) {
+    loading.value = true;
+    errorMessage.value = null;
+  }
   try {
     summary.value = await getGamePackageCacheStatus();
+    if (notify) {
+      showSnackbar.success(`缓存占用已刷新，合计 ${bytesToSize(summary.value.totalBytes)}`);
+    }
   } catch (error) {
+    if (silent) return;
     errorMessage.value = `读取游戏缓存失败：${error}`;
+    if (notify) showSnackbar.error(`读取游戏缓存失败：${error}`);
   } finally {
-    loading.value = false;
+    statusBusy = false;
+    if (!silent) loading.value = false;
+    if (statusQueued) {
+      statusQueued = false;
+      void refreshStatus(false, true);
+    }
   }
 }
 
@@ -103,52 +141,85 @@ async function clearCache(): Promise<void> {
   }
 }
 
-onMounted(refreshStatus);
+onMounted(() => {
+  void refreshStatus();
+});
+
+watch(predlSignature, (signature) => {
+  const timer = window.setTimeout(
+    () => {
+      void refreshStatus(false, true);
+    },
+    signature === "" ? 400 : 1000,
+  );
+  onWatcherCleanup(() => {
+    window.clearTimeout(timer);
+  });
+});
 </script>
 
 <style lang="scss" scoped>
 .cache-panel {
-  display: grid;
-  padding: 20px;
-  border: 1px solid var(--common-shadow-1);
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 12px 16px 16px;
   border-radius: 8px;
   background: var(--box-bg-1);
-  gap: 16px;
+  color: var(--box-text-1);
+  gap: 12px;
 }
 
-.cache-heading {
+.cache-top {
+  display: grid;
+  align-items: center;
+  gap: 4px 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.cache-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: large;
+  font-weight: normal;
+}
+
+.cache-hint {
+  min-width: 0;
+  margin: 0;
+  color: var(--box-text-2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.cache-hint-act {
+  text-align: end;
+}
+
+.cache-acts {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-
-  span {
-    color: var(--common-text-title);
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 22px;
-  }
-
-  p {
-    margin: 2px 0 0;
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  justify-self: end;
 }
 
 .cache-facts {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 
-  div {
-    display: grid;
-    padding: 12px;
-    border-radius: 4px;
-    background: var(--box-bg-4);
-    gap: 4px;
-  }
+.cache-fact {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-2);
+  gap: 4px;
 
   span {
     color: var(--box-text-2);
@@ -157,28 +228,12 @@ onMounted(refreshStatus);
   }
 
   strong {
-    color: var(--box-text-1);
+    color: var(--common-text-title);
+    font-family: var(--font-title);
     font-size: 14px;
+    font-weight: normal;
     line-height: 20px;
-  }
-}
-
-.cache-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-
-  span {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-}
-
-@media (width <= 720px) {
-  .cache-facts {
-    grid-template-columns: 1fr;
+    overflow-wrap: anywhere;
   }
 }
 </style>
