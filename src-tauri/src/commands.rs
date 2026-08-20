@@ -366,6 +366,16 @@ pub fn clear_app_logs(app_handle: AppHandle) -> Result<ClearAppLogsResult, Strin
   Ok(ClearAppLogsResult { removed, failed })
 }
 
+/// 确保用户数据目录存在；不走前端 fs 插件作用域。
+#[tauri::command]
+pub fn ensure_user_data_dir(path: String) -> Result<(), String> {
+  let path = path.trim();
+  if path.is_empty() {
+    return Err("用户数据目录不能为空".to_string());
+  }
+  std::fs::create_dir_all(path).map_err(|error| format!("创建用户数据目录失败：{error}"))
+}
+
 fn is_expired_daily_log(name: &str, today: chrono::NaiveDate) -> bool {
   let Some(stem) = name.strip_suffix(".log") else {
     return false;
@@ -533,7 +543,7 @@ pub fn is_process_running(process_name: String) -> bool {
 
 #[cfg(test)]
 mod tests {
-  use super::is_expired_daily_log;
+  use super::{ensure_user_data_dir, is_expired_daily_log};
   use chrono::NaiveDate;
 
   #[test]
@@ -543,5 +553,22 @@ mod tests {
     assert!(!is_expired_daily_log("2026-08-14.log", today));
     assert!(is_expired_daily_log("2026-08-13.log", today));
     assert!(!is_expired_daily_log("readme.txt", today));
+  }
+
+  #[test]
+  fn ensure_user_data_dir_creates_nested_path() {
+    let root = std::env::temp_dir().join(format!(
+      "teyvat-guide-user-{}",
+      std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos()
+    ));
+    let nested = root.join("nested");
+    ensure_user_data_dir(nested.to_string_lossy().into_owned()).unwrap();
+    assert!(nested.is_dir());
+    let _ = std::fs::remove_dir_all(&root);
+  }
+
+  #[test]
+  fn ensure_user_data_dir_rejects_empty_path() {
+    assert!(ensure_user_data_dir("   ".to_string()).is_err());
   }
 }
