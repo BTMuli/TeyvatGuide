@@ -20,7 +20,7 @@
     </div>
     <div class="tua-abl-mid">
       <div :class="{ ori: isFetterMax }" class="tua-abl-bg">
-        <img :src="nameCard" alt="nameCard" decoding="async" loading="lazy" />
+        <img :src="nameCard" alt="nameCard" decoding="async" />
       </div>
       <div :class="{ triple: skills.length === 3 }" class="tua-abl-skills">
         <div
@@ -29,13 +29,13 @@
           :title="`${skill.name} Lv.${skill.level}`"
           class="tua-abl-skill"
         >
-          <img :src="skill.icon" alt="skill" decoding="async" loading="lazy" />
+          <img :src="skill.icon" alt="skill" decoding="async" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
       <div class="tua-abl-bottom">
         <div :title="`好感度：${props.role.avatar.fetter}`" class="tua-abl-fetter">
-          <img alt="fetter" decoding="async" loading="lazy" src="/icon/material/105.webp" />
+          <img alt="fetter" decoding="async" src="/icon/material/105.webp" />
           <span>{{ props.role.avatar.fetter }}</span>
         </div>
         <div class="tua-abl-costume">

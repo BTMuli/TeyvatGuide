@@ -3,15 +3,9 @@
   <div class="tua-ac" title="点击查看详情">
     <div class="tua-ac-head">
       <div class="tua-ac-avatar">
-        <img alt="" class="tua-ac-piece-bg" decoding="async" loading="lazy" :src="avatarStarBg" />
-        <img
-          :alt="role.avatar.name"
-          class="tua-ac-piece-icon"
-          decoding="async"
-          loading="lazy"
-          :src="avatarIcon"
-        />
-        <img alt="" class="tua-ac-piece-lt" decoding="async" loading="lazy" :src="elementIcon" />
+        <img alt="" class="tua-ac-piece-bg" decoding="async" :src="avatarStarBg" />
+        <img :alt="role.avatar.name" class="tua-ac-piece-icon" decoding="async" :src="avatarIcon" />
+        <img alt="" class="tua-ac-piece-lt" decoding="async" :src="elementIcon" />
         <span class="tua-ac-piece-rt">{{ role.avatar.actived_constellation_num }}</span>
       </div>
       <div class="tua-ac-side">
@@ -22,7 +16,7 @@
           <div class="tua-ac-meta">
             <span>Lv.{{ role.avatar.level }}</span>
             <div :title="`好感度：${role.avatar.fetter}`" class="tua-ac-fetter">
-              <img alt="fetter" decoding="async" loading="lazy" src="/icon/material/105.webp" />
+              <img alt="fetter" decoding="async" src="/icon/material/105.webp" />
               <span>{{ role.avatar.fetter }}</span>
             </div>
             <span
@@ -37,27 +31,14 @@
         </div>
         <div class="tua-ac-weapon">
           <div class="tua-ac-weapon-icon">
-            <img
-              alt=""
-              class="tua-ac-piece-bg"
-              decoding="async"
-              loading="lazy"
-              :src="weaponStarBg"
-            />
+            <img alt="" class="tua-ac-piece-bg" decoding="async" :src="weaponStarBg" />
             <img
               :alt="role.weapon.name"
               class="tua-ac-piece-icon"
               decoding="async"
-              loading="lazy"
               :src="weaponIcon"
             />
-            <img
-              alt=""
-              class="tua-ac-piece-lt"
-              decoding="async"
-              loading="lazy"
-              :src="weaponTypeIcon"
-            />
+            <img alt="" class="tua-ac-piece-lt" decoding="async" :src="weaponTypeIcon" />
           </div>
           <div class="tua-ac-wmeta">
             <span :title="`精炼${role.weapon.affix_level}阶`" class="tua-ac-affix">
@@ -82,7 +63,6 @@
             v-if="relicSlot.relic !== false"
             alt=""
             decoding="async"
-            loading="lazy"
             :src="`/icon/bg/${relicSlot.relic.rarity}-Star.webp`"
           />
         </div>
@@ -92,16 +72,9 @@
             alt=""
             class="empty"
             decoding="async"
-            loading="lazy"
             :src="`/icon/relic/${relicSlot.position}.webp`"
           />
-          <img
-            v-else
-            :alt="relicSlot.relic.name"
-            decoding="async"
-            loading="lazy"
-            :src="relicSlot.relic.icon"
-          />
+          <img v-else :alt="relicSlot.relic.name" decoding="async" :src="relicSlot.relic.icon" />
         </div>
       </div>
     </div>
@@ -112,7 +85,6 @@
         :class="{ ori: isFetterMax }"
         class="tua-ac-card"
         decoding="async"
-        loading="lazy"
       />
       <div class="tua-ac-veil" />
       <div :class="{ triple: skills.length === 3 }" class="tua-ac-skills">
@@ -122,7 +94,7 @@
           :title="`${skill.name} Lv.${skill.level}`"
           class="tua-ac-skill"
         >
-          <img :src="skill.icon" :alt="skill.name" decoding="async" loading="lazy" />
+          <img :src="skill.icon" :alt="skill.name" decoding="async" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>

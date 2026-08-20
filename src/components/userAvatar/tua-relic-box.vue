@@ -5,7 +5,6 @@
         v-if="props.modelValue !== false"
         :alt="`relic${props.position}`"
         decoding="async"
-        loading="lazy"
         :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`"
       />
     </div>
@@ -15,16 +14,9 @@
         :alt="`relic${props.position}`"
         class="empty"
         decoding="async"
-        loading="lazy"
         :src="`/icon/relic/${props.position}.webp`"
       />
-      <img
-        v-else
-        :alt="props.modelValue.name"
-        decoding="async"
-        loading="lazy"
-        :src="props.modelValue.icon"
-      />
+      <img v-else :alt="props.modelValue.name" decoding="async" :src="props.modelValue.icon" />
     </div>
   </div>
 </template>
