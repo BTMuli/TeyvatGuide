@@ -542,7 +542,7 @@ function buildRelicTitle(slot: RelicSlot): string {
   justify-content: flex-end;
   row-gap: 4px;
 
-  :first-child {
+  img {
     position: relative;
     display: flex;
     width: 100%;
@@ -558,7 +558,7 @@ function buildRelicTitle(slot: RelicSlot): string {
     object-fit: contain;
   }
 
-  :last-child {
+  span {
     display: flex;
     width: 100%;
     box-sizing: border-box;

@@ -170,6 +170,7 @@
           :model-value="batchSelectedIds.has(role.cid)"
           class="uc-avatar-check"
           color="var(--tgc-od-orange)"
+          data-html2canvas-ignore
           density="compact"
           @click.stop="toggleBatchRole(role.cid)"
         />
@@ -532,19 +533,25 @@ function observeLoadMore(): void {
   loadMoreObserver.observe(loadMoreRef.value);
 }
 
+function waitShareLayout(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+}
+
+function waitImageReady(img: HTMLImageElement): Promise<void> {
+  if (img.complete) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    img.addEventListener("load", () => resolve(), { once: true });
+    img.addEventListener("error", () => resolve(), { once: true });
+  });
+}
+
 async function waitForCardImages(root: HTMLElement): Promise<void> {
-  const pending = Array.from(root.querySelectorAll("img")).filter((img) => !img.complete);
+  const pending = Array.from(root.querySelectorAll("img"));
   if (pending.length === 0) return;
   await Promise.race([
-    Promise.all(
-      pending.map(
-        (img) =>
-          new Promise<void>((resolve) => {
-            img.addEventListener("load", () => resolve(), { once: true });
-            img.addEventListener("error", () => resolve(), { once: true });
-          }),
-      ),
-    ),
+    Promise.all(pending.map((img) => waitImageReady(img))),
     new Promise<void>((resolve) => {
       window.setTimeout(resolve, 8000);
     }),
@@ -983,13 +990,55 @@ async function share(): Promise<void> {
   }
   const fileName = `角色列表_${uidCur.value}`;
   const prevCount = renderedCount.value;
-  await showLoading.start("正在生成图片", fileName);
+  const total = selectedList.value.length;
+  let progressAt = 0;
+
+  function reportShareProgress(progress: {
+    phase: "snapshot" | "bake" | "capture";
+    current: number;
+    total: number;
+  }): void {
+    const isTail = progress.current >= progress.total;
+    const now = performance.now();
+    if (!isTail && now - progressAt < 80) return;
+    progressAt = now;
+    if (progress.phase === "snapshot") {
+      void showLoading.update("正在截取背景", { title: "正在烘焙毛玻璃", timeout: 0 });
+      return;
+    }
+    if (progress.phase === "bake") {
+      void showLoading.update(`${progress.current}/${progress.total}`, {
+        title: "正在烘焙毛玻璃",
+        timeout: 0,
+      });
+      return;
+    }
+    void showLoading.update(`${progress.current}/${progress.total}`, {
+      title: "正在生成图片",
+      timeout: 0,
+    });
+  }
+
+  await showLoading.start("正在准备角色卡片", fileName, 0);
   loadShare.value = true;
-  renderedCount.value = selectedList.value.length;
-  await nextTick();
-  await waitForCardImages(box);
   try {
-    await TGShare.modern(fileName, box, 1, false, { bakeBackdrop: true });
+    let nextCount = Math.min(Math.max(prevCount, CHAR_RENDER_SIZE), total);
+    renderedCount.value = nextCount;
+    await nextTick();
+    await waitShareLayout();
+    while (nextCount < total) {
+      nextCount = Math.min(nextCount + CHAR_RENDER_SIZE, total);
+      renderedCount.value = nextCount;
+      await showLoading.update(`正在渲染角色 ${nextCount}/${total}`, { timeout: 0 });
+      await nextTick();
+      await waitShareLayout();
+    }
+    await waitForCardImages(box);
+    await showLoading.update("正在生成图片", { timeout: 0 });
+    await TGShare.modern(fileName, box, 1, false, {
+      bakeBackdrop: true,
+      onProgress: reportShareProgress,
+    });
     await TGLogger.Info(`[Character][share][${uidCur.value}] 生成分享图片成功`);
   } finally {
     loadShare.value = false;
