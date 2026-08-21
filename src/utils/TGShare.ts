@@ -119,6 +119,27 @@ function getShareImgBgColor(): string {
 }
 
 /**
+ * 获取 modern-screenshot 截图根节点背景色
+ *
+ * modern-screenshot 会用 backgroundColor 覆盖克隆根节点自身的 background-color；
+ * 根节点已有底色时应保留，仅在透明时使用页面底色兜底。
+ * @since Beta v0.11.5
+ * @param element - 截图根节点
+ * @returns 截图根节点背景色
+ */
+function getShareRootBgColor(element: HTMLElement): string {
+  const backgroundColor = getComputedStyle(element).backgroundColor;
+  if (
+    backgroundColor === "" ||
+    backgroundColor === "transparent" ||
+    backgroundColor === "rgba(0, 0, 0, 0)"
+  ) {
+    return getShareImgBgColor();
+  }
+  return backgroundColor;
+}
+
+/**
  * 过滤分享图中需忽略的节点（兼容 data-html2canvas-ignore）
  * @since Beta v0.11.5
  * @param node - DOM 节点
@@ -2252,7 +2273,7 @@ async function captureModernBlob(
   const captureStarted = performance.now();
   try {
     const blob = await domToBlob(element, {
-      backgroundColor: getShareImgBgColor(),
+      backgroundColor: getShareRootBgColor(element),
       scale,
       timeout: 120000,
       drawImageInterval: 0,
