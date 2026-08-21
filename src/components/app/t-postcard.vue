@@ -229,9 +229,11 @@ const cardBg = computed<string>(() => {
   return "none";
 });
 const forumBg = computed<string>(() =>
-  str2Color(`${card.value?.forum?.id}${card.value?.forum?.icon}${card.value?.forum?.name}`, -60),
+  toFrostBg(
+    str2Color(`${card.value?.forum?.id}${card.value?.forum?.icon}${card.value?.forum?.name}`, -60),
+  ),
 );
-const idBg = computed<string>(() => str2Color(`${props.post.post.post_id}`, 0));
+const idBg = computed<string>(() => toFrostBg(str2Color(`${props.post.post.post_id}`, 0)));
 const imgCnt = computed<number>(() => props.post.post.images.length);
 
 const visibleTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
@@ -242,6 +244,11 @@ const hiddenTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
   if (!props.listMode || !card.value) return [];
   return card.value.topics.slice(visibleTopicCount.value);
 });
+
+/** 实色转半透明毛玻璃底色 */
+function toFrostBg(rgb: string): string {
+  return rgb.replace(/^rgb\((.+)\)$/, "rgba($1, 0.45)");
+}
 
 const popupStyle = ref<Record<string, string>>({});
 
@@ -725,8 +732,8 @@ function onUserClick(): void {
   align-items: center;
   justify-content: flex-start;
   padding: 4px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: v-bind(forumBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 4px;
   border-top-right-radius: 4px;
@@ -896,8 +903,8 @@ function onUserClick(): void {
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: v-bind(idBg); /* stylelint-disable-line value-keyword-case */
   border-bottom-right-radius: 4px;
   border-top-left-radius: 4px;
