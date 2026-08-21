@@ -11,7 +11,7 @@
         <div class="twf-group-title">星级</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedStar" :items="starOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -19,7 +19,7 @@
         <div class="twf-group-title">衣装</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedCostume" :items="costumeOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -27,7 +27,7 @@
         <div class="twf-group-title">特殊强化</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedTeam" :items="teamOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -35,7 +35,7 @@
         <div class="twf-group-title">武器类型</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedWeapon" :items="weaponOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -43,7 +43,7 @@
         <div class="twf-group-title">元素</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedElements" :items="elementOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -51,7 +51,7 @@
         <div class="twf-group-title">所属地区或阵营</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedArea" :items="areaOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>

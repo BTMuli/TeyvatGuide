@@ -1,21 +1,32 @@
 <!-- 选项组件 -->
 <template>
   <div class="uav-select-chips-box">
-    <!-- ALL -->
-    <v-chip
-      key="all"
-      :aria-pressed="isAllSelected"
-      :class="{ selected: isAllSelected }"
-      :size
-      class="uav-scb-all"
-      title="全部"
-      variant="elevated"
-      @click.stop="toggleAll"
-    >
-      <div class="uav-scb-inner">
-        <slot :selected="isAllSelected" name="all">All</slot>
-      </div>
-    </v-chip>
+    <div class="uav-scb-actions">
+      <v-chip
+        key="all"
+        :aria-pressed="isAllSelected"
+        :class="{ selected: isAllSelected }"
+        :size
+        class="uav-scb-all"
+        title="全选"
+        variant="elevated"
+        @click.stop="toggleAll"
+      >
+        <div class="uav-scb-inner">
+          <slot :selected="isAllSelected" name="all">全选</slot>
+        </div>
+      </v-chip>
+      <v-chip
+        key="invert"
+        :size
+        class="uav-scb-invert"
+        title="反选"
+        variant="elevated"
+        @click.stop="invertSelection"
+      >
+        <div class="uav-scb-inner">反选</div>
+      </v-chip>
+    </div>
     <v-chip-group v-model="selected" class="uav-scb-group" multiple>
       <!-- Options -->
       <v-chip
@@ -64,7 +75,7 @@ type UavSelectChipsProps = {
 
 const props = withDefaults(defineProps<UavSelectChipsProps>(), { size: "default" });
 
-const selected = defineModel<Array<string>>("selected", { default: [] });
+const selected = defineModel<Array<string>>("selected", { required: true });
 
 defineSlots<{
   all(props: { selected: boolean }): unknown;
@@ -90,12 +101,19 @@ const iconHeight = computed<string>(() => {
   }
 });
 
-async function toggleAll(): Promise<void> {
+function toggleAll(): void {
   if (isAllSelected.value) {
     selected.value = [];
   } else {
     selected.value = props.items.map((i) => i.value);
   }
+}
+
+function invertSelection(): void {
+  const selectedValues = new Set<string>(selected.value);
+  selected.value = props.items
+    .filter((item) => !selectedValues.has(item.value))
+    .map((item) => item.value);
 }
 </script>
 <style lang="scss" scoped>
@@ -113,18 +131,30 @@ async function toggleAll(): Promise<void> {
   }
 }
 
-.uav-scb-all {
-  @include github-styles.github-tag-dark-gen(#41b883);
-
+.uav-scb-actions {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
+  column-gap: 8px;
+}
+
+.uav-scb-all,
+.uav-scb-invert {
   backdrop-filter: blur(4px);
 
   --webkit-backdrop-filter: blur(4px);
+}
+
+.uav-scb-all {
+  @include github-styles.github-tag-dark-gen(#41b883);
 
   &.selected {
     @include github-styles.github-tag-dark-gen(#ffb74d);
   }
+}
+
+.uav-scb-invert {
+  @include github-styles.github-tag-dark-gen(#548af7);
 }
 
 .uav-scb-group {

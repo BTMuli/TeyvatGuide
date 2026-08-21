@@ -11,7 +11,7 @@
         <div class="twf-group-title">星级</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedStar" :items="starOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -19,7 +19,7 @@
         <div class="twf-group-title">武器类型</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedWeapon" :items="weaponOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>

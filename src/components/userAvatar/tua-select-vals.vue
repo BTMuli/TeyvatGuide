@@ -22,11 +22,27 @@
         <span>{{ getStarLabel(props.selectOpts.star[0]) }}</span>
       </div>
       <div
-        v-if="props.selectOpts.level.length === 1"
-        :class="props.selectOpts.level[0] === 'true' ? 'pass' : 'ban'"
+        v-if="
+          props.selectOpts.constellation.length > 0 &&
+          props.selectOpts.constellation.length < FULL_CONSTELLATION
+        "
         class="tua-svs-item"
       >
-        <span>等级:{{ getLevelLabel(props.selectOpts.level[0]) }}</span>
+        <span>命座：</span>
+        <span v-for="constellation in props.selectOpts.constellation" :key="constellation">
+          {{ getConstellationLabel(constellation) }}
+        </span>
+      </div>
+      <div
+        v-if="props.selectOpts.level.length > 0 && props.selectOpts.level.length < FULL_LEVEL"
+        :class="{
+          pass: props.selectOpts.level.length === 1 && props.selectOpts.level[0] === 'true',
+          ban: props.selectOpts.level.length === 1 && props.selectOpts.level[0] === 'false',
+        }"
+        class="tua-svs-item"
+      >
+        <span>等级：</span>
+        <span v-for="level in props.selectOpts.level" :key="level">{{ getLevelLabel(level) }}</span>
       </div>
       <div
         v-if="props.selectOpts.weapon.length > 0 && props.selectOpts.weapon.length < FULL_WEAPON"
@@ -113,6 +129,8 @@ const FULL_WEAPON: Readonly<number> = 5;
 const FULL_ELEMENT: Readonly<number> = 7;
 const FULL_TEAM: Readonly<number> = 3;
 const FULL_AREA: Readonly<number> = 14;
+const FULL_CONSTELLATION: Readonly<number> = 7;
+const FULL_LEVEL: Readonly<number> = 4;
 
 const props = defineProps<TuaSelectValsProps>();
 
@@ -132,7 +150,12 @@ function getStarLabel(star: string): string {
 
 function getLevelLabel(level: string): string {
   if (level === "true") return "≥70";
-  return "<70";
+  if (level === "false") return "<70";
+  return level;
+}
+
+function getConstellationLabel(constellation: string): string {
+  return `${constellation}命`;
 }
 
 function getTeamLabel(team: string): string {

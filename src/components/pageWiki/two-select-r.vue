@@ -11,7 +11,7 @@
         <div class="twf-group-title">最高星级</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedStar" :items="starOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -19,7 +19,7 @@
         <div class="twf-group-title">包含部位</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedPos" :items="posOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>
@@ -27,7 +27,7 @@
         <div class="twf-group-title">套装构成</div>
         <div class="twf-options">
           <UavSelectChips v-model:selected="selectedPieces" :items="pieceOpts" size="small">
-            <template #all>全部</template>
+            <template #all>全选</template>
           </UavSelectChips>
         </div>
       </section>

@@ -307,6 +307,7 @@ const selectOpts = ref<UavSelectModel>({
   costume: [],
   fetter: [],
   star: [],
+  constellation: [],
   level: [],
   weapon: [],
   element: [],
@@ -566,6 +567,7 @@ function resetList(): void {
     costume: [],
     fetter: [],
     star: [],
+    constellation: [],
     level: [],
     weapon: [],
     element: [],
@@ -1074,10 +1076,16 @@ function handleSelect(val: UavSelectModel): void {
   const filterC = roleList.value.filter((role) => {
     const info = appCharacterMap.get(role.cid);
     if (val.star.length > 0 && !val.star.includes(role.avatar.rarity.toString())) return false;
-    if (val.level.length > 0) {
-      if (!val.level.includes("true") && role.avatar.level >= 70) return false;
-      if (!val.level.includes("false") && role.avatar.level < 70) return false;
-    }
+    if (
+      val.constellation.length > 0 &&
+      !val.constellation.includes(role.avatar.actived_constellation_num.toString())
+    )
+      return false;
+    if (
+      val.level.length > 0 &&
+      !val.level.some((level) => isLevelMatched(level, role.avatar.level))
+    )
+      return false;
     if (val.fetter.length > 0) {
       if (!val.fetter.includes("true") && role.avatar.fetter === 10) return false;
       if (!val.fetter.includes("false") && role.avatar.fetter !== 10) return false;
@@ -1113,6 +1121,12 @@ function handleSelect(val: UavSelectModel): void {
     dataVal.value = selectedList.value[0];
     selectIndex.value = 0;
   } else selectIndex.value = selectedList.value.indexOf(dataVal.value);
+}
+
+function isLevelMatched(filterLevel: string, avatarLevel: number): boolean {
+  if (filterLevel === "true") return avatarLevel >= 70;
+  if (filterLevel === "false") return avatarLevel < 70;
+  return avatarLevel === Number(filterLevel);
 }
 
 function handleSwitch(next: boolean): void {

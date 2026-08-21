@@ -1,81 +1,98 @@
 <!-- 角色筛选组件 -->
 <template>
-  <v-bottom-sheet v-model="visible">
-    <div class="uav-select-container">
-      <div class="uav-select-main">
-        <div class="uav-select-left">
-          <div class="uav-select-item">
-            <div class="uav-select-title">衣装</div>
-            <div class="uav-select-props">
-              <UavSelectChips
-                v-model:selected="costumeSelected"
-                :items="costumeOpts"
-                size="small"
-              />
-            </div>
-          </div>
-          <div class="uav-select-item">
-            <div class="uav-select-title">好感</div>
-            <div class="uav-select-props">
-              <UavSelectChips v-model:selected="fetterSelected" :items="fetterOpts" size="small" />
-            </div>
-          </div>
-          <div class="uav-select-item">
-            <div class="uav-select-title">星级</div>
-            <div class="uav-select-props">
-              <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small" />
-            </div>
-          </div>
-          <div class="uav-select-item">
-            <div class="uav-select-title">等级</div>
-            <div class="uav-select-props">
-              <UavSelectChips v-model:selected="levelSelected" :items="levelOpts" size="small" />
-            </div>
-          </div>
+  <TwfFilterShell
+    v-model="visible"
+    description="按角色养成与属性组合筛选，可同时选择多个条件"
+    title="筛选角色"
+    topOffset="112px"
+    @confirm="onConfirm"
+  >
+    <div class="twf-grid twf-grid-3">
+      <section class="twf-group">
+        <div class="twf-group-title">星级</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="starSelected" :items="starOpts" size="small">
+            <template #all>全选</template>
+          </UavSelectChips>
         </div>
-        <div class="uav-select-right">
-          <div class="uav-select-item">
-            <div class="uav-select-title">武器</div>
-            <div class="uav-select-props weapon">
-              <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small" />
-            </div>
-          </div>
-          <div class="uav-select-item">
-            <div class="uav-select-title">元素</div>
-            <div class="uav-select-props">
-              <UavSelectChips
-                v-model:selected="elementSelected"
-                :items="elementOpts"
-                size="small"
-              />
-            </div>
-          </div>
-          <div class="uav-select-item">
-            <div class="uav-select-title">强化</div>
-            <div class="uav-select-props">
-              <UavSelectChips v-model:selected="teamSelected" :items="teamOpts" size="small" />
-            </div>
-          </div>
-          <div class="uav-select-item">
-            <div class="uav-select-title">阵营</div>
-            <div class="uav-select-props">
-              <UavSelectChips v-model:selected="areaSelected" :items="areaOpts" size="small" />
-            </div>
-          </div>
+      </section>
+      <section class="twf-group">
+        <div class="twf-group-title">衣装</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="costumeSelected" :items="costumeOpts" size="small">
+            <template #all>全选</template>
+          </UavSelectChips>
         </div>
+      </section>
+      <section class="twf-group">
+        <div class="twf-group-title">好感</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="fetterSelected" :items="fetterOpts" size="small">
+            <template #all>全选</template>
+          </UavSelectChips>
+        </div>
+      </section>
+      <div class="twf-grid twf-grid-3 twf-group-wide">
+        <section class="twf-group">
+          <div class="twf-group-title">命座</div>
+          <div class="twf-options">
+            <UavSelectChips
+              v-model:selected="constellationSelected"
+              :items="constellationOpts"
+              size="small"
+            >
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
+        <section class="twf-group">
+          <div class="twf-group-title">等级</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="levelSelected" :items="levelOpts" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
+        <section class="twf-group">
+          <div class="twf-group-title">特殊强化</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="teamSelected" :items="teamOpts" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
       </div>
-      <div class="uav-select-acts">
-        <v-btn class="uav-act-btn" prepend-icon="mdi-check" variant="elevated" @click="onConfirm()">
-          确定
-        </v-btn>
-        <v-btn class="uav-act-btn" prepend-icon="mdi-cancel" variant="elevated" @click="onCancel()">
-          取消
-        </v-btn>
+      <div class="twf-grid twf-group-wide">
+        <section class="twf-group twf-group-weapon">
+          <div class="twf-group-title">武器类型</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="weaponSelected" :items="weaponOpts" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
+        <section class="twf-group">
+          <div class="twf-group-title">元素</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="elementSelected" :items="elementOpts" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
       </div>
+      <section class="twf-group twf-group-wide">
+        <div class="twf-group-title">所属地区或阵营</div>
+        <div class="twf-options">
+          <UavSelectChips v-model:selected="areaSelected" :items="areaOpts" size="small">
+            <template #all>全选</template>
+          </UavSelectChips>
+        </div>
+      </section>
     </div>
-  </v-bottom-sheet>
+  </TwfFilterShell>
 </template>
 <script lang="ts" setup>
+import TwfFilterShell from "@comp/pageWiki/twf-filter-shell.vue";
 import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-select-chips.vue";
 import { ref, watch } from "vue";
 
@@ -87,6 +104,8 @@ export type UavSelectModel = {
   fetter: Array<string>;
   /** 星级 */
   star: Array<string>;
+  /** 命座 */
+  constellation: Array<string>;
   /** 等级 */
   level: Array<string>;
   /** 武器 */
@@ -113,9 +132,16 @@ const starOpts: Array<UavSelectChipsItem> = [
   { label: "⭐⭐⭐⭐", value: "4", title: "四星" },
   { label: "⭐⭐⭐⭐⭐", value: "5", title: "五星" },
 ];
+const constellationOpts: Array<UavSelectChipsItem> = Array.from({ length: 7 }, (_, index) => ({
+  label: `${index}命`,
+  value: index.toString(),
+  title: `${index}命`,
+}));
 const levelOpts: Array<UavSelectChipsItem> = [
   { label: "≥70", value: "true", title: "不低于70级" },
   { label: "<70", value: "false", title: "低于70级" },
+  { label: "95", value: "95", title: "95级" },
+  { label: "100", value: "100", title: "100级" },
 ];
 const weaponOpts: Array<UavSelectChipsItem> = ["单手剑", "双手剑", "弓", "法器", "长柄武器"].map(
   (i) => ({ label: i, value: i, title: i, icon: `/icon/weapon/${i}.webp` }),
@@ -147,6 +173,7 @@ const emits = defineEmits<UavSelectEmits>();
 const costumeSelected = ref<Array<string>>([]);
 const fetterSelected = ref<Array<string>>([]);
 const starSelected = ref<Array<string>>([]);
+const constellationSelected = ref<Array<string>>([]);
 const levelSelected = ref<Array<string>>([]);
 const weaponSelected = ref<Array<string>>([]);
 const elementSelected = ref<Array<string>>([]);
@@ -154,7 +181,17 @@ const teamSelected = ref<Array<string>>([]);
 const areaSelected = ref<Array<string>>([]);
 
 const model = defineModel<UavSelectModel>({
-  default: { costume: [], fetter: [], star: [], weapon: [], element: [], team: [], area: [] },
+  default: () => ({
+    costume: [],
+    fetter: [],
+    star: [],
+    constellation: [],
+    level: [],
+    weapon: [],
+    element: [],
+    team: [],
+    area: [],
+  }),
 });
 const visible = defineModel<boolean>("show");
 
@@ -165,6 +202,7 @@ watch(
       costumeSelected.value = [...model.value.costume];
       fetterSelected.value = [...model.value.fetter];
       starSelected.value = [...model.value.star];
+      constellationSelected.value = [...model.value.constellation];
       levelSelected.value = [...model.value.level];
       weaponSelected.value = [...model.value.weapon];
       elementSelected.value = [...model.value.element];
@@ -174,15 +212,12 @@ watch(
   },
 );
 
-function onCancel(): void {
-  visible.value = false;
-}
-
 function onConfirm(): void {
   emits("select", {
     costume: [...costumeSelected.value],
     fetter: [...fetterSelected.value],
     star: [...starSelected.value],
+    constellation: [...constellationSelected.value],
     level: [...levelSelected.value],
     weapon: [...weaponSelected.value],
     element: [...elementSelected.value],
@@ -192,83 +227,3 @@ function onConfirm(): void {
   visible.value = false;
 }
 </script>
-<style lang="scss" scoped>
-@use "@styles/github.styles.scss" as github-styles;
-
-.uav-select-container {
-  position: absolute;
-  z-index: 1;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  backdrop-filter: blur(4px);
-  background: #00000066;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  box-shadow: 0 -4px 8px var(--common-shadow-2);
-
-  --webkit-backdrop-filter: blur(4px);
-}
-
-.uav-select-main {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: flex-start;
-  justify-content: flex-start;
-  column-gap: 24px;
-}
-
-.uav-select-left {
-  width: 360px;
-}
-
-.uav-select-left,
-.uav-select-right {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.uav-select-item {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  column-gap: 8px;
-}
-
-.uav-select-title {
-  color: var(--tgc-white-1);
-  text-shadow: 0 0 4px var(--common-shadow-2);
-  white-space: nowrap;
-}
-
-.uav-select-acts {
-  position: relative;
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-  column-gap: 12px;
-}
-
-.uav-act-btn {
-  @include github-styles.github-tag-dark-gen(#41b883);
-
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  box-shadow: 1px 1px 4px var(--common-shadow-4);
-  font-family: var(--font-text);
-}
-
-.uav-act-btn:last-child {
-  @include github-styles.github-tag-dark-gen(#fb7299);
-}
-</style>

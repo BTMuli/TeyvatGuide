@@ -8,6 +8,7 @@
     panelWidth="min(720px, calc(100vw - 64px))"
     :showShare="false"
     :titleId
+    :topOffset="props.topOffset"
   >
     <template #header>
       <div class="twf-header-icon">
@@ -46,6 +47,7 @@ import { useId } from "vue";
 type TwfFilterShellProps = {
   description: string;
   title: string;
+  topOffset?: string;
 };
 type TwfFilterShellEmits = { confirm: [] };
 
@@ -100,14 +102,16 @@ const titleId = useId();
   }
 
   :deep(.twf-group) {
-    display: flex;
+    display: grid;
     min-width: 0;
-    flex-direction: column;
+    align-content: start;
+    align-items: center;
     padding: 12px;
     border: 1px solid var(--common-shadow-1);
     border-radius: 8px;
     background: var(--box-bg-1);
     gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   :deep(.twf-group-wide) {
@@ -118,22 +122,28 @@ const titleId = useId();
     color: var(--common-text-title);
     font-size: 14px;
     font-weight: 600;
+    grid-column: 1;
+    grid-row: 1;
     line-height: 20px;
   }
 
   :deep(.twf-options) {
-    overflow: visible;
-    min-width: 0;
+    display: contents;
   }
 
   :deep(.uav-select-chips-box) {
-    width: 100%;
-    align-items: flex-start;
-    gap: 8px;
+    display: contents;
   }
 
-  :deep(.uav-scb-all) {
+  :deep(.uav-scb-actions) {
     flex-shrink: 0;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  :deep(.uav-scb-all),
+  :deep(.uav-scb-invert) {
     border-radius: 4px;
   }
 
@@ -142,6 +152,8 @@ const titleId = useId();
     width: 100%;
     min-width: 0;
     flex: 1 1 auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 
   :deep(.v-slide-group__container) {
