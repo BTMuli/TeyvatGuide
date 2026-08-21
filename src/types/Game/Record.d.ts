@@ -1,6 +1,6 @@
 /**
  * 原神战绩相关类型定义文件
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  */
 
 declare namespace TGApp.Game.Record {
@@ -13,7 +13,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 原神战绩返回数据
-   * @since Beta v0.7.2
+   * @since Beta v0.11.5
    */
   type FullData = {
     /** 角色信息 */
@@ -26,6 +26,8 @@ declare namespace TGApp.Game.Record {
     city_explorations: Array<unknown>;
     /** 世界探索信息 */
     world_explorations: Array<WorldExplore>;
+    /** 世界探索展示分组信息 */
+    world_exploration_display: Array<WorldExplorationDisplay>;
     /** 尘歌壶信息 */
     homes: Array<Home>;
     /** 查询工具链接 */
@@ -52,8 +54,35 @@ declare namespace TGApp.Game.Record {
   };
 
   /**
+   * 角色元素枚举
+   * @since Beta v0.11.5
+   */
+  const AvatarElement = <const>{
+    /** 风元素 */
+    ANEMO: "Anemo",
+    /** 岩元素 */
+    GEO: "Geo",
+    /** 雷元素 */
+    ELECTRO: "Electro",
+    /** 草元素 */
+    DENDRO: "Dendro",
+    /** 水元素 */
+    HYDRO: "Hydro",
+    /** 火元素 */
+    PYRO: "Pyro",
+    /** 冰元素 */
+    CRYO: "Cryo",
+  };
+
+  /**
+   * 角色元素枚举类型
+   * @since Beta v0.11.5
+   */
+  type AvatarElementEnum = (typeof AvatarElement)[keyof typeof AvatarElement];
+
+  /**
    * 角色列表类型
-   * @since Beta v0.7.2
+   * @since Beta v0.11.5
    */
   type Avatar = {
     /** 角色 ID */
@@ -62,11 +91,8 @@ declare namespace TGApp.Game.Record {
     image: string;
     /** 角色名称 */
     name: string;
-    /**
-     * 角色元素
-     * @example Dendro
-     */
-    element: string;
+    /** 角色元素 */
+    element: AvatarElementEnum;
     /** 好感等级 */
     fetter: number;
     /** 角色等级 */
@@ -76,7 +102,7 @@ declare namespace TGApp.Game.Record {
     /** 已激活命座数量 */
     actived_constellation_num: number;
     /** 卡片图片 */
-    card_image: number;
+    card_image: string;
     /** 是否展示 */
     is_chosen: boolean;
     /** 武器，通常为 null */
@@ -87,7 +113,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 统计信息类型
-   * @since Beta v0.11.3
+   * @since Beta v0.11.5
    */
   type Stats = {
     /** 成就数量 */
@@ -108,17 +134,8 @@ declare namespace TGApp.Game.Record {
     electroculus_number: number;
     /** 精致宝箱数量 */
     exquisite_chest_number: number;
-    /**
-     * 数据对应链接的 map，用不到设为 unknown
-     * @example
-     * ```json
-     * "dendroculus_number": {
-     *   "link": "https://act.mihoyo.com/ys/app/interactive-map/index.html?bbs_presentation_style=no_header&lang=zh-cn&utm_source=gamerecord&utm_medium=ys&utm_campaign=icon&_markerFps=24#/map/2?shown_types=403&center=2008.50,-1084.00&zoom=-3.00",
-     *   "backup_link": ""
-     * },
-     * ```
-     */
-    field_ext_map: unknown;
+    /** 数据对应链接映射 */
+    field_ext_map: FieldExtMap;
     /** 满好感角色数 */
     full_fetter_avatar_num: number;
     /** 岩神瞳数量 */
@@ -146,6 +163,42 @@ declare namespace TGApp.Game.Record {
     /** 解锁传送点数量 */
     way_point_number: number;
   };
+
+  /**
+   * 战绩字段扩展链接映射类型
+   * @since Beta v0.11.5
+   */
+  type FieldExtMap = Record<string, FieldExtMapItem>;
+
+  /**
+   * 战绩字段扩展链接类型
+   * @since Beta v0.11.5
+   */
+  type FieldExtMapItem = {
+    /** 主链接 */
+    link: string;
+    /** 备用链接 */
+    backup_link: string;
+  };
+
+  /**
+   * 世界探索信息类型枚举
+   * @since Beta v0.11.5
+   */
+  const WorldExploreType = <const>{
+    /** 声望 */
+    REPUTATION: "Reputation",
+    /** 奉献 */
+    OFFERING: "Offering",
+    /** 未知类型 */
+    UNKNOWN: "TypeUnknow",
+  };
+
+  /**
+   * 世界探索信息类型枚举类型
+   * @since Beta v0.11.5
+   */
+  type WorldExploreTypeEnum = (typeof WorldExploreType)[keyof typeof WorldExploreType];
 
   /**
    * 幻想真境剧诗数据类型
@@ -183,8 +236,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索信息类型
-   * @todo 类型更新
-   * @since Beta v0.10.0
+   * @since Beta v0.11.5
    */
   type WorldExplore = {
     /** 声望等级 */
@@ -198,15 +250,8 @@ declare namespace TGApp.Game.Record {
     icon: string;
     /** 名称 */
     name: string;
-    /**
-     * 类型
-     * @todo 转为枚举类
-     * @example
-     * - Reputation: 声望
-     * - Offering: 奉献
-     * - TypeUnknown: 未知类型
-     */
-    type: string;
+    /** 类型 */
+    type: WorldExploreTypeEnum;
     /** 奉献物品 */
     offerings: Array<WorldOffering>;
     /** ID */
@@ -243,19 +288,50 @@ declare namespace TGApp.Game.Record {
     /** 详细激活 */
     detail_active: boolean;
     /** 七天神像等级 */
-    seven_status_level: number;
+    seven_statue_level: number;
     /**
      * 纳塔声望
      * @remarks 用于标识纳塔地区声望，其余地区该值为 null
      */
-    nata_reputation: NataReputation | null;
+    natan_reputation: NataReputation | null;
     /** 世界类型 */
     world_type: number;
   };
 
   /**
+   * 世界探索展示信息类型
+   * @since Beta v0.11.5
+   */
+  type WorldExplorationDisplay = {
+    /** 探索区域 ID */
+    exploration_id: number;
+    /** 展示分组 */
+    group: WorldExplorationDisplayGroup;
+  };
+
+  /**
+   * 世界探索展示分组类型
+   * @since Beta v0.11.5
+   */
+  type WorldExplorationDisplayGroup = {
+    /** 区域探索项 */
+    items: Array<WorldExplorationDisplayItem>;
+  };
+
+  /**
+   * 世界探索展示项类型
+   * @since Beta v0.11.5
+   */
+  type WorldExplorationDisplayItem = {
+    /** 区域 ID 列表 */
+    area_ids: Array<number>;
+    /** 探索千分比 */
+    exploration_percentage: number;
+  };
+
+  /**
    * 奉献物品类型
-   * @since Beta v0.10.0
+   * @since Beta v0.11.5
    */
   type WorldOffering = {
     /** 名称 */
@@ -264,15 +340,29 @@ declare namespace TGApp.Game.Record {
     level: number;
     /** 图标 */
     icon: string;
-    /**
-     * 开启状态
-     * @todo 枚举
-     * @example
-     * - OfferingOpenStateUnknow
-     * - OfferingOpenStateUnlocked
-     */
-    open_state: string;
+    /** 开启状态 */
+    open_state: WorldOfferingOpenStateEnum;
   };
+
+  /**
+   * 世界奉献物品开启状态枚举
+   * @since Beta v0.11.5
+   */
+  const WorldOfferingOpenState = <const>{
+    /** 未知状态 */
+    UNKNOWN: "OfferingOpenStateUnknow",
+    /** 已锁定 */
+    LOCKED: "OfferingOpenStateLocked",
+    /** 已解锁 */
+    UNLOCKED: "OfferingOpenStateUnlocked",
+  };
+
+  /**
+   * 世界奉献物品开启状态枚举类型
+   * @since Beta v0.11.5
+   */
+  type WorldOfferingOpenStateEnum =
+    (typeof WorldOfferingOpenState)[keyof typeof WorldOfferingOpenState];
 
   /**
    * 区域探索类型

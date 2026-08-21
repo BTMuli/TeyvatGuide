@@ -495,6 +495,43 @@ function getChallengeDiffDesc(difficulty: TGApp.Game.Challenge.DiffEnum): string
 }
 
 /**
+ * 战绩角色元素枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Record.AvatarElementEnum
+ */
+const RecordAvatarElementEnum: typeof TGApp.Game.Record.AvatarElement = {
+  ANEMO: "Anemo",
+  GEO: "Geo",
+  ELECTRO: "Electro",
+  DENDRO: "Dendro",
+  HYDRO: "Hydro",
+  PYRO: "Pyro",
+  CRYO: "Cryo",
+};
+
+/**
+ * 战绩世界探索类型枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Record.WorldExploreTypeEnum
+ */
+const RecordWorldExploreTypeEnum: typeof TGApp.Game.Record.WorldExploreType = {
+  REPUTATION: "Reputation",
+  OFFERING: "Offering",
+  UNKNOWN: "TypeUnknow",
+};
+
+/**
+ * 战绩世界奉献物品开启状态枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Record.WorldOfferingOpenStateEnum
+ */
+const RecordWorldOfferingOpenStateEnum: typeof TGApp.Game.Record.WorldOfferingOpenState = {
+  UNKNOWN: "OfferingOpenStateUnknow",
+  LOCKED: "OfferingOpenStateLocked",
+  UNLOCKED: "OfferingOpenStateUnlocked",
+};
+
+/**
  * 绘想游迹状态枚举
  * @since Beta v0.9.6
  */
@@ -550,6 +587,11 @@ const gameEnum = {
   challenge: {
     diff: ChallengeDiffEnum,
     diffDesc: getChallengeDiffDesc,
+  },
+  record: {
+    avatarElement: RecordAvatarElementEnum,
+    worldExploreType: RecordWorldExploreTypeEnum,
+    worldOfferingOpenState: RecordWorldOfferingOpenStateEnum,
   },
 };
 
