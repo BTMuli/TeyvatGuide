@@ -14,7 +14,7 @@ import { platform } from "@tauri-apps/plugin-os";
 import { snapdom } from "@zumer/snapdom";
 import html2canvas from "html2canvas";
 import { domToBlob } from "modern-screenshot";
-import workerUrl from "modern-screenshot/worker?url";
+import workerUrl from "modern-screenshot/worker?url&no-inline";
 import { storeToRefs } from "pinia";
 
 import type {
