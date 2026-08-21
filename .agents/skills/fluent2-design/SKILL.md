@@ -12,8 +12,8 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 
 1. 语义优先：用语义 token 表达「背景/前景/描边/品牌」，不直接使用裸色值。
 2. 中性色主导：界面以中性灰阶为主，品牌色只用于强调、链接与选中态。
-3. 4px 间距系统：间距与内边距取 4 的倍数（2/6/10 仅用于图标对齐）。
-4. 圆角克制：默认 4px，小元素 2px，大面板 8px，浮层 12px，不滥用胶囊形。
+3. 4px 间距系统：gap、margin、padding 等间距尽量取 4 的倍数。
+4. 圆角克制：border-radius 尽量取 4 的倍数；默认 4px，小元素 2px，大面板 8px，浮层 12px，不滥用胶囊形。
 5. 深浅双主题：每个颜色同时给出浅色与深色语义值，禁止只验证浅色。
 
 ## 颜色
