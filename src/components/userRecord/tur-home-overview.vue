@@ -4,40 +4,40 @@
     <div class="tur-hoc-overview">
       <template v-if="overview">
         <div class="tur-hoco-item">
-          <img :src="overview.comfortIcon" alt="icon" />
-          <span>{{ overview.comfortName }}</span>
+          <img :src="overview.comfort_level_icon" alt="icon" class="tur-hoco-value-icon" />
+          <span class="tur-hoco-value">{{ overview.comfort_level_name }}</span>
         </div>
         <div class="tur-hoco-item">
-          <span>{{ props.homes.length }}</span>
-          <span>解锁洞天</span>
+          <span class="tur-hoco-value">{{ props.homes.length }}</span>
+          <span class="tur-hoco-description">解锁洞天</span>
         </div>
         <div class="tur-hoco-item">
-          <span>{{ overview.level }}</span>
-          <span>信任等阶</span>
+          <span class="tur-hoco-value">{{ overview.level }}</span>
+          <span class="tur-hoco-description">信任等阶</span>
         </div>
         <div class="tur-hoco-item">
-          <span>{{ overview.comfort }}</span>
-          <span>最高洞天仙力</span>
+          <span class="tur-hoco-value">{{ overview.comfort_num }}</span>
+          <span class="tur-hoco-description">最高洞天仙力</span>
         </div>
         <div class="tur-hoco-item">
-          <span>{{ overview.furniture }}</span>
-          <span>获得摆设数</span>
+          <span class="tur-hoco-value">{{ overview.item_num }}</span>
+          <span class="tur-hoco-description">获得摆设数</span>
         </div>
         <div class="tur-hoco-item">
-          <span>{{ overview.visit }}</span>
-          <span>历史访客数</span>
+          <span class="tur-hoco-value">{{ overview.visit_num }}</span>
+          <span class="tur-hoco-description">历史访客数</span>
         </div>
       </template>
       <div v-else class="tur-hoco-item">
-        <span>0</span>
-        <span>暂未解锁洞天</span>
+        <span class="tur-hoco-value">0</span>
+        <span class="tur-hoco-description">暂未解锁洞天</span>
       </div>
     </div>
     <div v-if="props.homes.length > 0" class="tur-hoc-list">
       <TurHomeItem
         v-for="(item, idx) in props.homes"
         :key="idx"
-        :icon="item.bg"
+        :icon="item.icon"
         :name="item.name"
       />
     </div>
@@ -48,10 +48,10 @@ import { computed } from "vue";
 
 import TurHomeItem from "./tur-home-item.vue";
 
-type TurHomeOverviewProps = { homes: Array<TGApp.Sqlite.Record.Home> };
+type TurHomeOverviewProps = { homes: Array<TGApp.Game.Record.Home> };
 
 const props = defineProps<TurHomeOverviewProps>();
-const overview = computed<TGApp.Sqlite.Record.Home | undefined>(() => props.homes[0]);
+const overview = computed<TGApp.Game.Record.Home | undefined>(() => props.homes[0]);
 </script>
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
@@ -69,10 +69,17 @@ const overview = computed<TGApp.Sqlite.Record.Home | undefined>(() => props.home
 .tur-hoc-overview {
   position: relative;
   display: flex;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  padding: 8px;
+  border-radius: 4px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-1);
   column-gap: 16px;
 }
 
@@ -89,17 +96,17 @@ const overview = computed<TGApp.Sqlite.Record.Home | undefined>(() => props.home
     height: 24px;
   }
 
-  span {
-    &:first-child {
-      color: var(--tgc-yellow-1);
-      font-family: var(--font-text);
-      text-shadow: 0 0 2px #0d1117;
-    }
+  .tur-hoco-value {
+    color: var(--tgc-od-orange);
+    font-family: var(--font-title);
+    font-size: 16px;
+    font-weight: normal;
+  }
 
-    &:last-child {
-      font-family: var(--font-title);
-      font-size: 16px;
-    }
+  .tur-hoco-description {
+    color: var(--box-text-4);
+    font-family: var(--font-text);
+    font-size: 16px;
   }
 }
 

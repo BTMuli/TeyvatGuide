@@ -14,7 +14,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import TGShare, { generateShareImg } from "@utils/TGShare.js";
+import showLoading from "@comp/func/loading.js";
+import TGShare, { generateShareImg, type ShareProgress } from "@utils/TGShare.js";
 import { useTemplateRef } from "vue";
 
 /** 首页组件参数 */
@@ -25,6 +26,10 @@ type PhCompCardProps = {
   append?: boolean;
   /** 使用 TGShare.modern 截图 */
   modernShare?: boolean;
+  /** 是否显示 modern 分享进度 */
+  shareProgress?: boolean;
+  /** 分享文件名 */
+  shareTitle?: string;
 };
 
 const props = defineProps<PhCompCardProps>();
@@ -33,12 +38,42 @@ const thcEl = useTemplateRef<HTMLDivElement>("thcRef");
 
 async function share(): Promise<void> {
   if (!thcEl.value) return;
-  const fileName = `HomeComp_${props.title}`;
-  if (props.modernShare) {
-    await TGShare.modern(fileName, thcEl.value);
-    return;
+  const fileName = props.shareTitle ?? `HomeComp_${props.title}`;
+  let progressAt = 0;
+
+  function reportShareProgress(progress: ShareProgress): void {
+    const isTail = progress.current >= progress.total;
+    const now = performance.now();
+    if (!isTail && now - progressAt < 80) return;
+    progressAt = now;
+    if (progress.phase === "snapshot") {
+      void showLoading.update("正在截取背景", { title: "正在烘焙毛玻璃", timeout: 0 });
+      return;
+    }
+    if (progress.phase === "bake") {
+      void showLoading.update(`${progress.current}/${progress.total}`, {
+        title: "正在烘焙毛玻璃",
+        timeout: 0,
+      });
+      return;
+    }
+    void showLoading.update(`${progress.current}/${progress.total}`, {
+      title: "正在生成图片",
+      timeout: 0,
+    });
   }
-  await generateShareImg(fileName, thcEl.value);
+
+  await showLoading.start("正在生成分享图片", fileName);
+  try {
+    if (props.modernShare) {
+      const options = props.shareProgress ? { onProgress: reportShareProgress } : undefined;
+      await TGShare.modern(fileName, thcEl.value, 2, false, options);
+      return;
+    }
+    await generateShareImg(fileName, thcEl.value);
+  } finally {
+    await showLoading.end();
+  }
 }
 </script>
 <style lang="scss" scoped>

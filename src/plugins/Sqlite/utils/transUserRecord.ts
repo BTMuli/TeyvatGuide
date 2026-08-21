@@ -1,14 +1,11 @@
 /**
  * 原神战绩数据转换
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  */
-
-import gameEnum from "@enum/game.js";
-import { getZhElement } from "@utils/toolFunc.js";
 
 /**
  * 地区特殊资源配置项
- * @since Beta v0.10.0
+ * @since Beta v0.11.5
  */
 type StaticArea = {
   /** 地区名称 */
@@ -21,7 +18,7 @@ type StaticArea = {
 
 /**
  * 地区特殊资源配置列表
- * @since Beta v0.10.0
+ * @since Beta v0.11.5
  */
 const STATIC_AREA: Readonly<Record<number, StaticArea>> = {
   15: {
@@ -56,164 +53,176 @@ const STATIC_AREA: Readonly<Record<number, StaticArea>> = {
   },
 };
 
+const EMPTY_TEMPLE_STATUE_ICON = "/UI/record/pos.webp";
+
+/**
+ * 不参与世界探索展示合并的区域
+ * @since Beta v0.11.5
+ */
+const UNMERGED_WORLD_AREA_NAMES = new Set<string>([
+  "层岩巨渊",
+  "层岩巨渊·地下矿区",
+  "沉玉谷",
+  "来歆山",
+  "沉玉谷·南陵",
+  "沉玉谷·上谷",
+]);
+
 /**
  * 转换战绩口数据
- * @since Beta v0.9.1
- * @param uid - 用户UID
+ * @since Beta v0.11.5
  * @param data - 用户战绩数据
  * @returns 转换后的用户战绩数据
  */
 export function transUserRecord(
-  uid: number,
   data: TGApp.Game.Record.FullData,
-): TGApp.Sqlite.Record.TableTrans {
+): TGApp.Sqlite.Record.TableTransData {
+  const displayConfig = data.world_explore_display ?? data.world_exploration_display ?? [];
   return {
-    uid: uid,
-    role: transRole(data.role),
-    avatars: data.avatars.map(transAvatar),
-    stats: transStat(data.stats),
-    worldExplore: transWorld(data.world_explorations),
-    homes: data.homes.map(transHome),
-    updated: "",
+    role: data.role,
+    avatars: data.avatars,
+    stats: data.stats,
+    wed: transWorld(data.world_explorations, displayConfig),
+    homes: data.homes,
   };
 }
 
 /**
- * 转换用户信息
- * @since Beta v0.6.0
- * @param data - 用户信息
- * @returns 转换后的用户信息
- */
-function transRole(data: TGApp.Game.Record.Role): TGApp.Sqlite.Record.Role {
-  return {
-    nickname: data.nickname,
-    region: data.region,
-    level: data.level,
-    avatar: data.game_head_icon,
-  };
-}
-
-/**
- * 转换角色数据
- * @since Beta v0.9.1
- * @param data - 角色数据
- * @returns 转换后的角色数据
- */
-function transAvatar(data: TGApp.Game.Record.Avatar): TGApp.Sqlite.Record.Avatar {
-  return {
-    id: data.id,
-    name: data.name,
-    element: getZhElement(data.element),
-    fetter: data.fetter,
-    level: data.level,
-    star: data.rarity === 105 ? 5 : data.rarity,
-    constellation: data.actived_constellation_num,
-    isShow: data.is_chosen ? 1 : 0,
-  };
-}
-
-/**
- * 转换统计信息
- * @since Beta v0.11.3
- * @param data - 统计信息
- * @returns 转换后的统计信息
- */
-function transStat(data: TGApp.Game.Record.Stats): TGApp.Sqlite.Record.Stats {
-  return {
-    activeDays: data.active_day_number,
-    achievementNumber: data.achievement_number,
-    avatarNumber: data.avatar_number,
-    avatarFetter: data.full_fetter_avatar_num,
-    wayPoints: data.way_point_number,
-    domainNumber: data.domain_number,
-    anemoCulus: data.anemoculus_number,
-    geoCulus: data.geoculus_number,
-    electroCulus: data.electroculus_number,
-    dendroCulus: data.dendroculus_number,
-    hydroCulus: data.hydroculus_number,
-    pyroCulus: data.pyroculus_number,
-    moonCulus: data.moonoculus_number,
-    iceCulus: data.iceculus_number,
-    sprialAbyss: data.spiral_abyss,
-    combatRole: data.role_combat.is_unlock ? `第 ${data.role_combat.max_round_id} 幕` : "未解锁",
-    hardChallenge: data.hard_challenge.is_unlock
-      ? `${data.hard_challenge.name}-${gameEnum.challenge.diffDesc(data.hard_challenge.difficulty)}`
-      : "未解锁",
-    luxuriousChest: data.luxurious_chest_number,
-    preciousChest: data.precious_chest_number,
-    exquisiteChest: data.exquisite_chest_number,
-    commonChest: data.common_chest_number,
-    magicChest: data.magic_chest_number,
-  };
-}
-
-/**
- * 转换探索信息
- * @since Beta v0.10.0
- * @param data - 城市探索信息
- * @returns 转换后的城市探索信息
+ * 准备探索展示资源
+ * @since Beta v0.11.5
+ * @param worlds - 世界探索信息
+ * @param displayConfig - 世界探索展示分组配置
+ * @returns 合并展示分组、仅覆盖展示资源后的世界探索信息
  */
 function transWorld(
-  data: Array<TGApp.Game.Record.WorldExplore>,
-): Array<TGApp.Sqlite.Record.WorldExplore> {
-  const areaParent = data.filter((i) => i.parent_id === 0);
-  const areaChild = data.filter((i) => i.parent_id !== 0);
-  const worlds: Array<TGApp.Sqlite.Record.WorldExplore> = [];
-  // 先处理父级城市
-  for (const area of areaParent) {
-    const world: TGApp.Sqlite.Record.WorldExplore = {
-      id: area.id,
-      name: area.name,
-      iconLight: area.icon,
-      bg: area.background_image,
-      cover: area.cover,
-      exploration: area.exploration_percentage,
-      area_exploration_list: area.area_exploration_list,
-      children: [],
-    };
-    if (area.type === "Reputation") world.reputation = area.level;
-    if (area.offerings !== undefined && area.offerings.length > 0) {
-      // 处理空之神殿供奉图标异常 TODO: 后续图标正常加载时替换回来
-      if (area.id === 19) {
-        const offer = {
-          ...area.offerings[0],
-          icon: "https://webstatic.mihoyo.com/app/community-game-records/images/seven-statue-icon.dbb79dd6.png",
-        };
-        world.offerings = [offer];
-      } else world.offerings = area.offerings;
-    }
-    if (area.id in STATIC_AREA && STATIC_AREA[area.id].name === area.name) {
-      world.iconLight = STATIC_AREA[area.id].iconLight;
-      world.bg = STATIC_AREA[area.id].bg;
-    }
-    const children = areaChild.filter((i) => i.parent_id === area.id);
-    for (const child of children) {
-      world.children.push({
-        id: child.id,
-        name: child.name,
-        exploration: child.exploration_percentage,
-      });
-    }
-    worlds.push(world);
-  }
-  return worlds;
+  worlds: Array<TGApp.Game.Record.WorldExplore>,
+  displayConfig: Array<TGApp.Game.Record.WorldExploreDisplayConfig>,
+): Array<TGApp.Game.Record.WorldExploreDisplay> {
+  const worldMap = new Map<number, TGApp.Game.Record.WorldExplore>(
+    worlds.map((world) => [world.id, world]),
+  );
+
+  return displayConfig.flatMap((display) => {
+    const world = worldMap.get(display.exploration_id);
+    if (world === undefined) return [];
+    const staticArea = STATIC_AREA[world.id];
+    const displayWorld: TGApp.Game.Record.WorldExplore =
+      staticArea !== undefined && staticArea.name === world.name
+        ? {
+            ...world,
+            icon: staticArea.iconLight,
+            background_image: staticArea.bg,
+          }
+        : { ...world };
+    const detailWorlds = getWorldDetailWorlds(world.id, worldMap, display);
+    const children = getWorldDisplayItems(detailWorlds, worldMap, display);
+    return [
+      {
+        ...displayWorld,
+        offerings: transWorldOfferings(world),
+        children,
+        detail_worlds: detailWorlds,
+      },
+    ];
+  });
 }
 
 /**
- * 转换尘歌壶数据
- * @since Beta v0.6.0
- * @param data - 尘歌壶信息
- * @returns 转换后的尘歌壶信息
+ * 处理世界探索供奉图标
+ * @since Beta v0.11.5
+ * @param world - 世界探索信息
+ * @returns 处理后的供奉信息
  */
-function transHome(data: TGApp.Game.Record.Home): TGApp.Sqlite.Record.Home {
-  return {
-    comfortIcon: data.comfort_level_icon,
-    comfortName: data.comfort_level_name,
-    name: data.name,
-    level: data.level,
-    comfort: data.comfort_num,
-    furniture: data.item_num,
-    visit: data.visit_num,
-    bg: data.icon,
-  };
+function transWorldOfferings(
+  world: TGApp.Game.Record.WorldExplore,
+): Array<TGApp.Game.Record.WorldOffering> {
+  if (world.id !== 19 || world.offerings.length === 0) return world.offerings;
+  return world.offerings.map((offering, index) =>
+    index === 0 ? { ...offering, icon: EMPTY_TEMPLE_STATUE_ICON } : offering,
+  );
+}
+
+/**
+ * 获取地区的全部子区域
+ * @since Beta v0.11.5
+ * @param worldId - 地区 ID
+ * @param worldMap - 世界探索索引
+ * @param display - 当前父级的展示分组配置
+ * @returns 子区域列表
+ */
+function getWorldDetailWorlds(
+  worldId: number,
+  worldMap: Map<number, TGApp.Game.Record.WorldExplore>,
+  display: TGApp.Game.Record.WorldExploreDisplayConfig,
+): Array<TGApp.Game.Record.WorldExplore> {
+  const childrenByParent = new Map<number, Array<TGApp.Game.Record.WorldExplore>>();
+  for (const world of worldMap.values()) {
+    const children = childrenByParent.get(world.parent_id) ?? [];
+    children.push(world);
+    childrenByParent.set(world.parent_id, children);
+  }
+
+  const result: Array<TGApp.Game.Record.WorldExplore> = [];
+  const visited = new Set<number>();
+  const displayWorlds = display.group.items.flatMap((item) =>
+    item.area_ids.flatMap((areaId) => {
+      const world = worldMap.get(areaId);
+      return world === undefined || world.id === worldId ? [] : [world];
+    }),
+  );
+  const pending = [...(childrenByParent.get(worldId) ?? []), ...displayWorlds];
+  while (pending.length > 0) {
+    const world = pending.shift();
+    if (world === undefined || visited.has(world.id)) continue;
+    visited.add(world.id);
+    result.push(world);
+    pending.push(...(childrenByParent.get(world.id) ?? []));
+  }
+  return result;
+}
+
+/**
+ * 合并世界探索展示子项
+ * @since Beta v0.11.5
+ * @param detailWorlds - 地区的全部子区域
+ * @param worldMap - 世界探索索引
+ * @param display - 当前父级的展示分组配置
+ * @returns 展示子项
+ */
+function getWorldDisplayItems(
+  detailWorlds: Array<TGApp.Game.Record.WorldExplore>,
+  worldMap: Map<number, TGApp.Game.Record.WorldExplore>,
+  display: TGApp.Game.Record.WorldExploreDisplayConfig | undefined,
+): Array<TGApp.Game.Record.WorldExploreDisplayItem> {
+  const displayItems =
+    display?.group.items.flatMap<TGApp.Game.Record.WorldExploreDisplayItem>((item) => {
+      const areaWorlds = item.area_ids
+        .map((id) => worldMap.get(id))
+        .filter((area): area is TGApp.Game.Record.WorldExplore => area !== undefined);
+      if (areaWorlds.length === 0) return [];
+      if (areaWorlds.some((area) => UNMERGED_WORLD_AREA_NAMES.has(area.name))) {
+        return areaWorlds.map((area) => ({
+          area_ids: [area.id],
+          name: area.name,
+          exploration_percentage: area.exploration_percentage,
+        }));
+      }
+      return [
+        {
+          area_ids: [...item.area_ids],
+          name: areaWorlds.map((area) => area.name).join("、"),
+          exploration_percentage: item.exploration_percentage,
+        },
+      ];
+    }) ?? [];
+  const displayedAreaIds = new Set(displayItems.flatMap((item) => item.area_ids));
+  const fallbackItems = detailWorlds
+    .filter((area) => !displayedAreaIds.has(area.id))
+    .map((area) => ({
+      area_ids: [area.id],
+      name: area.name,
+      exploration_percentage: area.exploration_percentage,
+    }));
+  if (displayItems.length === 0) return fallbackItems;
+  return [...displayItems, ...fallbackItems];
 }

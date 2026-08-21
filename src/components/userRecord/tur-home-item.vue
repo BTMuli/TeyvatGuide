@@ -6,35 +6,29 @@
   </div>
 </template>
 <script lang="ts" setup>
-import useAppStore from "@store/app.js";
 import { str2Color } from "@utils/colorFunc.js";
-import { storeToRefs } from "pinia";
 import { computed, ref, useTemplateRef } from "vue";
 
 type TurHomeNameProps = { name: string; icon: string };
-
-const { theme } = storeToRefs(useAppStore());
 
 const props = defineProps<TurHomeNameProps>();
 
 const isErr = ref<boolean>(false);
 const iconEl = useTemplateRef<HTMLImageElement>("TurHiiRef");
-const isDarkMode = computed<boolean>(() => theme.value === "dark");
-const color = computed<string>(() =>
-  tag2Color(`${props.name}_${encodeURIComponent(props.icon)}`, isDarkMode.value),
+const bg = computed<string>(() =>
+  toFrostBg(str2Color(`${props.name}_${encodeURIComponent(props.icon)}`, -60)),
 );
-const bg = computed<string>(() => `rgba(${color.value.slice(4, -1)}, 0.5)`);
+
+/** 实色转半透明毛玻璃底色 */
+function toFrostBg(rgb: string): string {
+  return rgb.replace(/^rgb\((.+)\)$/, "rgba($1, 0.35)");
+}
 
 function handleIconError(e: Event) {
   console.debug(e);
   if (!iconEl.value) return;
   isErr.value = true;
   iconEl.value.style.display = "none";
-}
-
-function tag2Color(str: string, isDarkMode: boolean = false): string {
-  const adjust = isDarkMode ? 90 : 120;
-  return str2Color(str, adjust);
 }
 </script>
 <style lang="scss" scoped>
@@ -77,13 +71,14 @@ function tag2Color(str: string, isDarkMode: boolean = false): string {
   right: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  backdrop-filter: blur(10px);
+  justify-content: flex-start;
+  padding: 4px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   background: v-bind(bg);
-  border-bottom-left-radius: 12px;
-  color: v-bind(color);
-  line-height: 24px;
-  text-shadow: 0 0 4px rgb(0 0 0 / 50%);
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
+  box-shadow: 0 0 10px var(--tgc-dark-2);
+  color: var(--tgc-white-1);
 }
 </style>

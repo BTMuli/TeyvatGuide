@@ -211,7 +211,6 @@ import UavBatchTarget from "@comp/userAvatar/uav-batch-target.vue";
 import UavSelect, { type UavSelectModel } from "@comp/userAvatar/uav-select.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
 import recordReq from "@req/recordReq.js";
-import { transUserRecord } from "@Sql/utils/transUserRecord.js";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
@@ -328,7 +327,7 @@ let cardGridWidth = 0;
 let loadingMoreRoles = false;
 
 const uidList = shallowRef<Array<string>>([]);
-const roleRecord = shallowRef<TGApp.Sqlite.Record.Role | undefined>();
+const roleRecord = shallowRef<TGApp.Game.Record.Role | undefined>();
 const roleOverview = shallowRef<Array<OverviewItem>>([]);
 const roleList = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const dataVal = shallowRef<TGApp.Sqlite.Character.TableTrans>();
@@ -832,7 +831,7 @@ async function hideAllOverlay(): Promise<void> {
 
 function applyLoadedRoles(
   roleData: Array<TGApp.Sqlite.Character.TableTrans>,
-  record: TGApp.Sqlite.Record.Role | undefined,
+  record: TGApp.Game.Record.Role | undefined,
 ): void {
   const ordered = getOrderedList(roleData);
   roleRecord.value = record;
@@ -945,7 +944,6 @@ async function refresh(): Promise<void> {
       details = detailResp.data.list;
     }
     await showLoading.update("正在保存角色数据", { timeout: 0 });
-    const uid = Number(rfAccount.gameUid);
     const savedRoles = await TSUserAvatar.saveAvatars(rfAccount.gameUid, details);
     await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
     await TGLogger.Info(
@@ -955,7 +953,7 @@ async function refresh(): Promise<void> {
       uidList.value = [...uidList.value, rfAccount.gameUid];
     }
     uidCur.value = rfAccount.gameUid;
-    applyLoadedRoles(savedRoles, transUserRecord(uid, indexResp.data).role);
+    applyLoadedRoles(savedRoles, indexResp.data.role);
     showSnackbar.success(`成功加载${savedRoles.length}个角色`);
     await nextTick();
   } catch (error) {

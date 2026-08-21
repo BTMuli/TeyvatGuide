@@ -18,11 +18,11 @@ type TableColumn = {
   pk: number;
 };
 
-const CoreSchemaMigrations = <const>["GameAccount.v2", "HardChallenge.v2"];
-const CoreSchemaVersion = "2026.08.p0.3";
+const CoreSchemaMigrations = <const>["GameAccount.v2", "HardChallenge.v2", "UserRecordRaw.v1"];
+const CoreSchemaVersion = "2026.08.p0.5";
 
 const GameAccountLegacyTable = "GameAccount_legacy_v0_11_2";
-const LegacyTablesForReset = <const>[GameAccountLegacyTable];
+const LegacyTablesForReset = <const>[GameAccountLegacyTable, "UserRecord"];
 const GameAccountColumns = <const>[
   "uid",
   "gameBiz",
@@ -46,6 +46,7 @@ const HardChallengeColumns = <const>[
   "blings",
   "updated",
 ];
+const UserRecordRawColumns = <const>["uid", "rawData", "updated"];
 
 class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
@@ -68,7 +69,7 @@ class Sqlite {
     "UFPost",
     "UserAccount",
     "UserCharacters",
-    "UserRecord",
+    "UserRecordRaw",
     "UserBagMaterial",
     "UserBagWeapon",
     "UserBagRelic",
@@ -85,13 +86,28 @@ class Sqlite {
 
   /**
    * 获取数据库实例
-   * @since Beta v0.11.3
+   * @since Beta v0.11.5
    * @returns 数据库实例
    */
   public async getDB(): Promise<Database> {
     const db = await this.getRawDB();
     await this.ensureCoreSchema();
     return db;
+  }
+
+  /**
+   * 检测数据库表是否存在
+   * @since Beta v0.11.5
+   * @param tableName - 表名
+   * @returns 表是否存在
+   */
+  public async hasTable(tableName: string): Promise<boolean> {
+    const db = await this.getDB();
+    const result = await db.select<Array<{ name: string }>>(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = $1;",
+      [tableName],
+    );
+    return result.length > 0;
   }
 
   private async getRawDB(): Promise<Database> {
@@ -101,7 +117,7 @@ class Sqlite {
 
   /**
    * 在任意数据库消费者运行前校验并迁移核心表结构。
-   * @since Beta v0.11.3
+   * @since Beta v0.11.5
    * @returns 无返回值
    */
   private async ensureCoreSchema(): Promise<void> {
@@ -120,8 +136,17 @@ class Sqlite {
       // 首次初始化仍由现有建表清单负责；既有表会在下方逐项迁移。
       await db.execute(createTable);
       for (const migration of CoreSchemaMigrations) {
-        if (migration === "GameAccount.v2") await this.migrateGameAccountSchema();
-        else await this.migrateHardChallengeSchema();
+        switch (migration) {
+          case "GameAccount.v2":
+            await this.migrateGameAccountSchema();
+            break;
+          case "HardChallenge.v2":
+            await this.migrateHardChallengeSchema();
+            break;
+          case "UserRecordRaw.v1":
+            await this.migrateUserRecordRawSchema();
+            break;
+        }
       }
       await db.execute(
         `INSERT INTO AppData (key, value, updated)
@@ -234,9 +259,21 @@ class Sqlite {
     if (statements.length > 0) await this.executeRawTransaction(statements);
   }
 
+  private async migrateUserRecordRawSchema(): Promise<void> {
+    const columns = await this.getTableColumns("UserRecordRaw");
+    const columnMap = new Map(columns.map((column) => [column.name, column]));
+    const hasExpectedColumns = UserRecordRawColumns.every((name) => columnMap.has(name));
+    const hasExpectedPrimaryKey = columnMap.get("uid")?.pk === 1;
+    const columnsAreRequired = UserRecordRawColumns.every(
+      (name) => (columnMap.get(name)?.notnull ?? 0) !== 0,
+    );
+    if (hasExpectedColumns && hasExpectedPrimaryKey && columnsAreRequired) return;
+    throw new Error("UserRecordRaw 表结构不符合预期");
+  }
+
   /**
    * 在同一数据库连接中执行事务语句
-   * @since Beta v0.11.3
+   * @since Beta v0.11.5
    * @param statements - 按顺序执行的 SQL 语句
    * @returns 无返回值
    */
@@ -256,7 +293,7 @@ class Sqlite {
 
   /**
    * 检测是否需要创建数据库
-   * @since Beta v0.11.3
+   * @since Beta v0.11.5
    * @returns 是否需要创建数据库
    */
   public async check(): Promise<boolean> {
@@ -265,9 +302,10 @@ class Sqlite {
       const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
       const res: Array<{ name: string }> = await db.select(sqlT);
       if (!this.tables.every((item) => res.map((i) => i.name).includes(item))) return false;
-      const [gameAccountColumns, hardChallengeColumns] = await Promise.all([
+      const [gameAccountColumns, hardChallengeColumns, userRecordRawColumns] = await Promise.all([
         this.getTableColumns("GameAccount"),
         this.getTableColumns("HardChallenge"),
+        this.getTableColumns("UserRecordRaw"),
       ]);
       const gameAccountMap = new Map(gameAccountColumns.map((column) => [column.name, column]));
       const gameAccountIsValid =
@@ -283,7 +321,12 @@ class Sqlite {
         HardChallengeColumns.every((name) => hardChallengeMap.has(name)) &&
         hardChallengeMap.get("uid")?.pk === 1 &&
         hardChallengeMap.get("id")?.pk === 2;
-      if (!gameAccountIsValid || !hardChallengeIsValid) return false;
+      const userRecordRawMap = new Map(userRecordRawColumns.map((column) => [column.name, column]));
+      const userRecordRawIsValid =
+        UserRecordRawColumns.every((name) => userRecordRawMap.has(name)) &&
+        userRecordRawMap.get("uid")?.pk === 1 &&
+        UserRecordRawColumns.every((name) => (userRecordRawMap.get(name)?.notnull ?? 0) !== 0);
+      if (!gameAccountIsValid || !hardChallengeIsValid || !userRecordRawIsValid) return false;
       const appVersion = await db.select<Array<{ key: string }>>(
         "SELECT key FROM AppData WHERE key = $1;",
         ["appVersion"],
@@ -461,7 +504,7 @@ class Sqlite {
 
   /**
    * 重置数据库
-   * @since Beta v0.11.3
+   * @since Beta v0.11.5
    * @returns 无返回值
    */
   public async reset(): Promise<void> {

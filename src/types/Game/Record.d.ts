@@ -27,7 +27,9 @@ declare namespace TGApp.Game.Record {
     /** 世界探索信息 */
     world_explorations: Array<WorldExplore>;
     /** 世界探索展示分组信息 */
-    world_exploration_display: Array<WorldExplorationDisplay>;
+    world_explore_display: Array<WorldExploreDisplayConfig>;
+    /** 旧接口字段名；仅用于读取历史原始快照 */
+    world_exploration_display?: Array<WorldExploreDisplayConfig>;
     /** 尘歌壶信息 */
     homes: Array<Home>;
     /** 查询工具链接 */
@@ -299,30 +301,55 @@ declare namespace TGApp.Game.Record {
   };
 
   /**
-   * 世界探索展示信息类型
+   * 世界探索展示结果类型
+   * @since Beta v0.11.5
+   * @remarks 在读取层合并 `world_explorations` 与展示分组数据
+   */
+  type WorldExploreDisplay = WorldExplore & {
+    /** 按接口展示分组整理后的子区域 */
+    children: Array<WorldExploreDisplayItem>;
+    /** 按父子关系及展示分组整理的全部子区域原始数据 */
+    detail_worlds: Array<WorldExplore>;
+  };
+
+  /**
+   * 世界探索展示子项类型
    * @since Beta v0.11.5
    */
-  type WorldExplorationDisplay = {
+  type WorldExploreDisplayItem = {
+    /** 对应的区域 ID 列表 */
+    area_ids: Array<number>;
+    /** 展示名称 */
+    name: string;
+    /** 展示探索千分比 */
+    exploration_percentage: number;
+  };
+
+  /**
+   * 世界探索展示分组原始配置类型
+   * @since Beta v0.11.5
+   */
+  type WorldExploreDisplayConfig = {
     /** 探索区域 ID */
     exploration_id: number;
     /** 展示分组 */
-    group: WorldExplorationDisplayGroup;
+    group: WorldExploreDisplayGroup;
   };
 
   /**
    * 世界探索展示分组类型
    * @since Beta v0.11.5
    */
-  type WorldExplorationDisplayGroup = {
+  type WorldExploreDisplayGroup = {
     /** 区域探索项 */
-    items: Array<WorldExplorationDisplayItem>;
+    items: Array<WorldExploreDisplayConfigItem>;
   };
 
   /**
-   * 世界探索展示项类型
+   * 世界探索展示配置项类型
    * @since Beta v0.11.5
    */
-  type WorldExplorationDisplayItem = {
+  type WorldExploreDisplayConfigItem = {
     /** 区域 ID 列表 */
     area_ids: Array<number>;
     /** 探索千分比 */

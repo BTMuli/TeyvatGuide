@@ -1,5 +1,5 @@
 -- sqlite数据库创建表语句
--- @since Beta v0.11.3
+-- @since Beta v0.11.5
 
 -- @brief 创建养成计划表
 create table if not exists CultivationProject
@@ -216,16 +216,12 @@ create table if not exists HardChallenge
     primary key (uid, id)
 );
 
--- @brief 创建战绩数据表
-create table if not exists UserRecord
+-- @brief 创建原始战绩快照表
+create table if not exists UserRecordRaw
 (
-    uid          integer primary key,
-    role         text,
-    avatars      text,
-    stats        text,
-    worldExplore text,
-    homes        text,
-    updated      text
+    uid     integer primary key not null,
+    rawData text    not null,
+    updated text    not null
 );
 
 -- @brief 创建角色数据表

@@ -1,5 +1,10 @@
 <template>
   <div class="tur-os-box">
+    <div v-if="props.icon !== undefined" aria-hidden="true" class="tur-os-ghost-icon">
+      <slot name="icon">
+        <TMiImg :ori="true" :src="props.icon" alt="" />
+      </slot>
+    </div>
     <div class="tur-os-text">
       <div v-if="props.icon !== undefined" class="tur-os-icon">
         <slot name="icon">
@@ -24,6 +29,7 @@ const props = defineProps<TAOProps>();
 .tur-os-box {
   position: relative;
   display: flex;
+  overflow: hidden;
   width: 100%;
   height: auto;
   align-items: center;
@@ -32,6 +38,27 @@ const props = defineProps<TAOProps>();
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
   background: var(--box-bg-1);
+}
+
+.tur-os-ghost-icon {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  filter: grayscale(0.6);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.tur-os-ghost-icon img {
+  width: auto;
+  max-width: none;
+  height: 100%;
+  object-fit: contain;
+  transform: translateX(25%);
 }
 
 .tur-os-label {

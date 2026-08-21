@@ -399,7 +399,7 @@ const roles = shallowRef<Array<TGApp.Sqlite.Character.TableTrans>>([]);
 const weapons = shallowRef<Array<TGApp.App.UserCalc.WeaponOption>>([]);
 const apiAvatars = shallowRef<Array<TGApp.Game.Calculate.AvatarListItem>>([]);
 const apiWeapons = shallowRef<Array<TGApp.Game.Calculate.WeaponListItem>>([]);
-const recordAvatars = shallowRef<Array<TGApp.Sqlite.Record.Avatar>>([]);
+const recordAvatars = shallowRef<Array<TGApp.Game.Record.Avatar>>([]);
 const bagMaterials = shallowRef<Map<number, number>>(new Map());
 const bagMaterialDetails = shallowRef<Map<number, TGApp.Sqlite.UserBag.MaterialTable>>(new Map());
 const bagSourceUids = shallowRef<Set<number>>(new Set());
@@ -1083,7 +1083,7 @@ function getElementNameByAttrId(elementAttrId: number): string {
 
 function findCurrentTraveler(
   catalog: ReadonlyArray<TGApp.Game.Calculate.AvatarListItem>,
-  records: ReadonlyArray<TGApp.Sqlite.Record.Avatar>,
+  records: ReadonlyArray<TGApp.Game.Record.Avatar>,
   syncedAvatars: ReadonlyArray<TGApp.Game.Calculate.SyncAvatar>,
 ): TGApp.Game.Calculate.AvatarListItem | undefined {
   const record = records.find((avatar) => TRAVELER_IDS.has(avatar.id));

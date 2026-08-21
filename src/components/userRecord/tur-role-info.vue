@@ -1,7 +1,7 @@
 <template>
   <div class="tur-ri-box">
     <div class="tur-ri-avatar">
-      <TMiImg :ori="true" :src="role.avatar" alt="avatar" />
+      <TMiImg :ori="true" :src="role.game_head_icon" alt="avatar" />
     </div>
     <div class="tur-ri-content">
       <div class="tur-ri-title">{{ role.nickname }}({{ uid }})</div>
@@ -12,7 +12,7 @@
 <script lang="ts" setup>
 import TMiImg from "@comp/app/t-mi-img.vue";
 
-type TurRoleInfoProps = { uid: number | string; role: TGApp.Sqlite.Record.Role };
+type TurRoleInfoProps = { uid: number | string; role: TGApp.Game.Record.Role };
 
 defineProps<TurRoleInfoProps>();
 </script>
@@ -30,6 +30,9 @@ defineProps<TurRoleInfoProps>();
   justify-content: center;
   padding: 4px 12px 4px 4px;
   border-radius: 24px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-1);
   column-gap: 4px;
 }
 
