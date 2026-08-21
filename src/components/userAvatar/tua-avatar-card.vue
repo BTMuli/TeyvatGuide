@@ -6,7 +6,13 @@
         <img alt="" class="tua-ac-piece-bg" decoding="async" :src="avatarStarBg" />
         <img :alt="role.avatar.name" class="tua-ac-piece-icon" decoding="async" :src="avatarIcon" />
         <img alt="" class="tua-ac-piece-lt" decoding="async" :src="elementIcon" />
-        <span class="tua-ac-piece-rt">{{ role.avatar.actived_constellation_num }}</span>
+        <span
+          v-if="role.avatar.actived_constellation_num > 0"
+          :class="{ 'tua-ac-piece-rt--max': role.avatar.actived_constellation_num === 6 }"
+          class="tua-ac-piece-rt"
+        >
+          {{ role.avatar.actived_constellation_num }}
+        </span>
       </div>
       <div class="tua-ac-side">
         <div class="tua-ac-id">
@@ -14,8 +20,15 @@
             <strong>{{ role.avatar.name }}</strong>
           </div>
           <div class="tua-ac-meta">
-            <span>Lv.{{ role.avatar.level }}</span>
-            <div :title="`好感度：${role.avatar.fetter}`" class="tua-ac-fetter">
+            <span
+              :class="{
+                'tua-ac-level--max': role.avatar.level === 100,
+                'tua-ac-level--high': role.avatar.level === 95,
+              }"
+            >
+              Lv.{{ role.avatar.level }}
+            </span>
+            <div v-if="hasFetter" :title="`好感度：${role.avatar.fetter}`" class="tua-ac-fetter">
               <img alt="fetter" decoding="async" src="/icon/material/105.webp" />
               <span>{{ role.avatar.fetter }}</span>
             </div>
@@ -41,7 +54,11 @@
             <img alt="" class="tua-ac-piece-lt" decoding="async" :src="weaponTypeIcon" />
           </div>
           <div class="tua-ac-wmeta">
-            <span :title="`精炼${role.weapon.affix_level}阶`" class="tua-ac-affix">
+            <span
+              :class="{ 'tua-ac-affix--max': role.weapon.affix_level === 5 }"
+              :title="`精炼${role.weapon.affix_level}阶`"
+              class="tua-ac-affix"
+            >
               <v-icon size="12">mdi-star-four-points-outline</v-icon>
               {{ role.weapon.affix_level }}
             </span>
@@ -147,9 +164,11 @@ const relicSlots = computed<Array<RelicSlot>>(() =>
 const skills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
   role.skills.filter((skill) => skill.skill_type === 1),
 );
+const hasFetter = computed<boolean>(
+  () => ![10000005, 10000007, 10000117, 10000118].includes(role.avatar.id),
+);
 const isFetterMax = computed<boolean>(() => {
-  const skipList = [10000005, 10000007, 10000117, 10000118];
-  if (skipList.includes(role.avatar.id)) return true;
+  if (!hasFetter.value) return true;
   return role.avatar.fetter === 10;
 });
 const nameCard = computed<string>(
@@ -295,6 +314,15 @@ function buildRelicTitle(slot: RelicSlot): string {
   font-weight: normal;
 }
 
+.tua-ac-piece-rt--max,
+.tua-ac-level--high {
+  color: var(--tgc-yellow-1);
+}
+
+.tua-ac-level--max {
+  color: var(--tgc-od-red);
+}
+
 .tua-ac-side {
   display: flex;
   min-width: 0;
@@ -420,6 +448,10 @@ function buildRelicTitle(slot: RelicSlot): string {
   display: flex;
   align-items: center;
   column-gap: 2px;
+
+  &.tua-ac-affix--max {
+    color: var(--tgc-yellow-1);
+  }
 }
 
 .tua-ac-relics {

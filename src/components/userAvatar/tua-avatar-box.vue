@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="tua-abl-bottom">
-        <div :title="`好感度：${props.role.avatar.fetter}`" class="tua-abl-fetter">
+        <div v-if="hasFetter" :title="`好感度：${props.role.avatar.fetter}`" class="tua-abl-fetter">
           <img alt="fetter" decoding="async" src="/icon/material/105.webp" />
           <span>{{ props.role.avatar.fetter }}</span>
         </div>
@@ -47,7 +47,14 @@
           </span>
         </div>
         <div class="tua-abl-level">
-          <span>Lv.{{ props.role.avatar.level }}</span>
+          <span
+            :class="{
+              'tua-abl-level--max': props.role.avatar.level === 100,
+              'tua-abl-level--high': props.role.avatar.level === 95,
+            }"
+          >
+            Lv.{{ props.role.avatar.level }}
+          </span>
         </div>
       </div>
     </div>
@@ -88,7 +95,11 @@ const avatarBox = computed<TItemBoxData>(() => ({
   icon: avatarIcon.value,
   lt: `/icon/element/${getZhElement(props.role.avatar.element)}元素.webp`,
   ltSize: "20px",
-  rt: props.role.avatar.actived_constellation_num.toString() || "0",
+  rt:
+    props.role.avatar.actived_constellation_num > 0
+      ? props.role.avatar.actived_constellation_num.toString()
+      : undefined,
+  rtColor: props.role.avatar.actived_constellation_num === 6 ? "var(--tgc-yellow-1)" : undefined,
   rtSize: "20px",
   innerText: props.role.avatar.name,
   innerHeight: 30,
@@ -107,6 +118,7 @@ const weaponBox = computed<TItemBoxData>(() => {
     lt: `/icon/weapon/${props.role.weapon.type_name}.webp`,
     ltSize: "20px",
     rt: props.role.weapon.affix_level.toString(),
+    rtColor: props.role.weapon.affix_level === 5 ? "var(--tgc-yellow-1)" : undefined,
     rtSize: "20px",
     innerText: props.role.weapon.name,
     innerHeight: 20,
@@ -124,9 +136,11 @@ const relicsBox = computed<AvatarRelics>(() => {
     relics.find((i) => i.pos === 5) || false,
   ];
 });
+const hasFetter = computed<boolean>(
+  () => ![10000005, 10000007, 10000117, 10000118].includes(props.role.avatar.id),
+);
 const isFetterMax = computed<boolean>(() => {
-  const skipList = [10000005, 10000007, 10000117, 10000118];
-  if (skipList.includes(props.role.avatar.id)) return true;
+  if (!hasFetter.value) return true;
   return props.role.avatar.fetter === 10;
 });
 const skills = computed<Array<TGApp.Game.Avatar.Skill>>(() =>
@@ -259,6 +273,14 @@ function getCostume(): TGApp.App.Character.Costume | false {
 .tua-abl-level {
   font-size: 12px;
   font-weight: normal;
+}
+
+.tua-abl-level--high {
+  color: var(--tgc-yellow-1);
+}
+
+.tua-abl-level--max {
+  color: var(--tgc-od-red);
 }
 
 .tua-abl-mid {

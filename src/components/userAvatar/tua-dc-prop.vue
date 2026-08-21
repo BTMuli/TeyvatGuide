@@ -2,7 +2,7 @@
   <div class="tua-dcp-box">
     <div class="tua-prop-left">
       <img :src="props.prop.icon" alt="icon" v-if="props.prop.icon !== ''" />
-      <span>{{ props.prop.name }}</span>
+      <span :class="{ 'tua-prop-highlight': props.highlight }">{{ props.prop.name }}</span>
     </div>
     <div class="tua-prop-right" :title="getRightTitle()">
       {{ props.modelValue.final }}
@@ -12,7 +12,11 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 
-type TuaDcPropProps = { modelValue: TGApp.Game.Avatar.Prop; prop: TGApp.Game.Avatar.PropMapItem };
+type TuaDcPropProps = {
+  modelValue: TGApp.Game.Avatar.Prop;
+  prop: TGApp.Game.Avatar.PropMapItem;
+  highlight: boolean;
+};
 
 const props = defineProps<TuaDcPropProps>();
 const getWidth = computed<string>(() => {
@@ -52,5 +56,9 @@ function getRightTitle(): string {
 
 .tua-prop-right {
   padding-right: 16px;
+}
+
+.tua-prop-highlight {
+  color: var(--tgc-yellow-1);
 }
 </style>

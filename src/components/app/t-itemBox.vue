@@ -47,6 +47,7 @@ export type TItemBoxData = {
   lt: string;
   ltSize: string;
   rt?: string;
+  rtColor?: string;
   rtSize?: string;
   innerHeight?: number;
   innerIcon?: string;
@@ -137,7 +138,7 @@ const ltInset = computed<string>(() => `calc(${props.modelValue.size} * 0.03)`);
   background: #00000066;
   border-bottom-left-radius: 4px;
   border-top-right-radius: 4px;
-  color: var(--tgc-white-1);
+  color: v-bind("props.modelValue.rtColor ?? 'var(--tgc-white-1)'");
   font-family: var(--font-title);
 }
 

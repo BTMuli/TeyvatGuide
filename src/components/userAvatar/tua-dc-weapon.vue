@@ -20,7 +20,10 @@
               </div>
               <span>{{ props.modelValue.name }}</span>
               <small>
-                Lv.{{ props.modelValue.level }} · 精炼{{ props.modelValue.affix_level }}
+                Lv.{{ props.modelValue.level }} ·
+                <span :class="{ 'tua-dcw-refine--max': props.modelValue.affix_level === 5 }">
+                  精炼{{ props.modelValue.affix_level }}
+                </span>
               </small>
             </div>
             <div class="tua-dcw-menu-body">
@@ -34,7 +37,9 @@
         <span class="tua-dcw-title">{{ props.modelValue.name }}</span>
         <span class="tua-dcw-sub">
           <span>Lv.{{ props.modelValue.level }}</span>
-          <span>精炼{{ props.modelValue.affix_level }}</span>
+          <span :class="{ 'tua-dcw-refine--max': props.modelValue.affix_level === 5 }">
+            精炼{{ props.modelValue.affix_level }}
+          </span>
         </span>
       </div>
     </div>
@@ -287,6 +292,11 @@ function toHtml(desc: string): string {
     font-size: 12px;
     opacity: 0.85;
   }
+}
+
+.tua-dcw-sub .tua-dcw-refine--max,
+.tua-dcw-menu-title small .tua-dcw-refine--max {
+  color: var(--tgc-yellow-1);
 }
 
 .tua-dcw-menu-body {

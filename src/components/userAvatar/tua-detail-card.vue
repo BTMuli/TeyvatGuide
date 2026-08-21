@@ -21,7 +21,7 @@
       <div class="tua-dcr-avatar">
         <span>{{ props.avatar.avatar.name }}</span>
         <span>Lv.{{ props.avatar.avatar.level }}</span>
-        <span>好感{{ props.avatar.avatar.fetter }}</span>
+        <span v-if="hasFetter">好感{{ props.avatar.avatar.fetter }}</span>
         <v-icon
           v-if="props.avatar.costumes.length !== 0"
           :title="`解锁衣装：${props.avatar.costumes.map((i) => i.name).join(',')}`"
@@ -32,7 +32,11 @@
       </div>
       <div v-for="(prop, index) in props.avatar.propSelected" :key="index">
         <div v-if="propMain[index] !== false" class="tua-dc-prop">
-          <TuaDcProp :model-value="prop" :prop="propMain[index]" />
+          <TuaDcProp
+            :highlight="recommendedPropertyTypes.has(prop.property_type)"
+            :model-value="prop"
+            :prop="propMain[index]"
+          />
         </div>
       </div>
     </div>
@@ -98,6 +102,9 @@ type TuaDetailCardProps = {
 
 const props = defineProps<TuaDetailCardProps>();
 
+const hasFetter = computed<boolean>(
+  () => ![10000005, 10000007, 10000117, 10000118].includes(props.avatar.avatar.id),
+);
 const fullIcon = computed<string>(() => {
   if (props.costume) return `/WIKI/costume/${props.costume.id}_full.webp`;
   return props.avatar.avatar.image;
@@ -114,6 +121,15 @@ const relicList = computed<RelicList>(() => {
 const propMain = computed<Array<TGApp.Game.Avatar.PropMapItem | false>>(() =>
   props.avatar.propSelected.map((item) => wikiUtils.getProp(item.property_type)),
 );
+const recommendedPropertyTypes = computed<ReadonlySet<number>>(() => {
+  const recommend = props.avatar.propRecommend.recommend_properties;
+  return new Set([
+    ...recommend.sand_main_property_list,
+    ...recommend.goblet_main_property_list,
+    ...recommend.circlet_main_property_list,
+    ...recommend.sub_property_list,
+  ]);
+});
 
 const bg = computed<string>(() => {
   const card = TSUserAvatar.getAvatarCard(props.avatar.cid);
