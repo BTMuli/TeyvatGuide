@@ -135,6 +135,8 @@ const ltInset = computed<string>(() => `calc(${props.modelValue.size} * 0.03)`);
   height: v-bind("props.modelValue.rtSize");
   align-items: center;
   justify-content: center;
+  -webkit-backdrop-filter: v-bind("innerBackdropFilter");
+  backdrop-filter: v-bind("innerBackdropFilter");
   background: #00000066;
   border-bottom-left-radius: 4px;
   border-top-right-radius: 4px;
