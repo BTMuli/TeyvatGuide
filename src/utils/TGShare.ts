@@ -1559,6 +1559,108 @@ type ShareBackdropElementTarget = {
   tint: string;
 };
 
+type ShareNestedBackdropElementTarget = {
+  target: ShareBackdropElementTarget;
+  host: HTMLElement;
+  depth: number;
+};
+
+/**
+ * 收集存在毛玻璃祖先的真实节点，并按由外到内排序
+ * @since Beta v0.11.5
+ */
+function collectNestedBackdropElementTargets(
+  targets: Array<ShareBackdropElementTarget>,
+): Array<ShareNestedBackdropElementTarget> {
+  const targetElements = new Set(targets.map(({ el }) => el));
+  const nestedTargets: Array<ShareNestedBackdropElementTarget> = [];
+  for (const target of targets) {
+    let host: HTMLElement | undefined;
+    let depth = 0;
+    let ancestor = target.el.parentElement;
+    while (ancestor !== null) {
+      if (targetElements.has(ancestor)) {
+        host ??= ancestor;
+        depth += 1;
+      }
+      ancestor = ancestor.parentElement;
+    }
+    if (host !== undefined) nestedTargets.push({ target, host, depth });
+  }
+  return nestedTargets.sort((left, right) => left.depth - right.depth);
+}
+
+/**
+ * 在外层毛玻璃已写回 DOM 后，由外到内重新烘焙嵌套毛玻璃
+ * @since Beta v0.11.5
+ */
+async function rebakeNestedShareBackdropElements(
+  nestedTargets: Array<ShareNestedBackdropElementTarget>,
+  progressOffset: number,
+  progressTotal: number,
+  onProgress?: ShareProgressFn,
+): Promise<void> {
+  for (let index = 0; index < nestedTargets.length; index += 1) {
+    const { target, host } = nestedTargets[index];
+    const previousMarker = target.el.getAttribute(SHARE_BACKDROP_HIDE_ATTR);
+    target.el.setAttribute(SHARE_BACKDROP_HIDE_ATTR, "1");
+    let snapshotUrl: string | undefined;
+    try {
+      const hostRect = host.getBoundingClientRect();
+      const targetRect = target.el.getBoundingClientRect();
+      if (
+        hostRect.width <= 0 ||
+        hostRect.height <= 0 ||
+        targetRect.width <= 0 ||
+        targetRect.height <= 0
+      ) {
+        continue;
+      }
+      const blob = await domToBlob(host, {
+        scale: 1,
+        backgroundColor: null,
+        filter: shareIgnoreFilter,
+        timeout: 30000,
+        font: false,
+        workerUrl,
+        workerNumber: 1,
+        onCloneNode: (cloned) => {
+          hideShareBackdropCloneTargets(cloned);
+          if (cloned instanceof HTMLElement) hoistShareBackdropAtlasStyles(cloned);
+        },
+        onCreateForeignObjectSvg: embedShareBackdropAtlasStyles,
+      });
+      const loaded = await blobToImage(blob);
+      snapshotUrl = loaded.url;
+      const dataUrl = renderBakedBackdropDataUrl(
+        loaded.img,
+        hostRect,
+        {
+          left: targetRect.left,
+          top: targetRect.top,
+          width: targetRect.width,
+          height: targetRect.height,
+        },
+        target.radius,
+        target.blurPx,
+        target.tint,
+      );
+      if (dataUrl !== undefined) applyBakedElementBackdrop(target.el, dataUrl);
+    } catch (error) {
+      await TGLogger.Warn(`[TGShare][rebakeNestedShareBackdropElements] 嵌套烘焙失败: ${error}`);
+    } finally {
+      if (previousMarker === null) target.el.removeAttribute(SHARE_BACKDROP_HIDE_ATTR);
+      else target.el.setAttribute(SHARE_BACKDROP_HIDE_ATTR, previousMarker);
+      if (snapshotUrl !== undefined) URL.revokeObjectURL(snapshotUrl);
+      reportShareProgress(onProgress, {
+        phase: "bake",
+        current: progressOffset + index + 1,
+        total: progressTotal,
+      });
+    }
+  }
+}
+
 /**
  * 有限并发执行异步任务
  * @since Beta v0.11.5
@@ -1684,6 +1786,9 @@ async function bakeShareBackdropFiltersLocal(
 ): Promise<() => void> {
   const targets = collectBackdropElementTargets(root, blurScale);
   if (targets.length === 0) return () => {};
+  const nestedTargets = collectNestedBackdropElementTargets(targets);
+  const nestedElements = new Set(nestedTargets.map(({ target }) => target.el));
+  const baseTargets = targets.filter(({ el }) => !nestedElements.has(el));
 
   const patches: Array<ShareBackdropElementPatch> = targets.map(({ el }) => ({
     el,
@@ -1701,9 +1806,9 @@ async function bakeShareBackdropFiltersLocal(
 
   reportShareProgress(onProgress, { phase: "bake", current: 0, total: targets.length });
   let completed = 0;
-  await runPool(targets.length, 4, async (index) => {
+  await runPool(baseTargets.length, 4, async (index) => {
     try {
-      const target = targets[index];
+      const target = baseTargets[index];
       const host = target.el.parentElement;
       if (host === null) return;
 
@@ -1763,6 +1868,12 @@ async function bakeShareBackdropFiltersLocal(
       });
     }
   });
+  await rebakeNestedShareBackdropElements(
+    nestedTargets,
+    baseTargets.length,
+    targets.length,
+    onProgress,
+  );
 
   return () => {
     restoreBakedElementPatches(patches);
@@ -1845,6 +1956,8 @@ async function bakeShareBackdropFilters(
 
   const elementTargets = targets.filter((t): t is ElementTarget => t.kind === "element");
   const pseudoTargets = targets.filter((t): t is PseudoTarget => t.kind === "pseudo");
+  const nestedElementTargets = collectNestedBackdropElementTargets(elementTargets);
+  const bakeTotal = targets.length + nestedElementTargets.length;
 
   const elementPatches: Array<ShareBackdropElementPatch> = elementTargets.map(({ el }) => ({
     el,
@@ -1945,11 +2058,20 @@ async function bakeShareBackdropFilters(
       tint: target.tint,
     };
   });
+  const initialBakeProgress: ShareProgressFn | undefined =
+    nestedElementTargets.length === 0
+      ? onProgress
+      : (progress) => {
+          reportShareProgress(
+            onProgress,
+            progress.phase === "bake" ? { ...progress, total: bakeTotal } : progress,
+          );
+        };
   const bakedUrls = await renderBakedBackdropUrls(
     snapshot,
     rootRect,
     bakeJobs,
-    onProgress,
+    initialBakeProgress,
     pseudoTargets.length === 0,
   );
   const bakedPseudoRules: Array<string> = [];
@@ -1980,6 +2102,12 @@ async function bakeShareBackdropFilters(
     styleEl.textContent = bakedPseudoRules.join("");
     document.head.appendChild(styleEl);
   }
+  await rebakeNestedShareBackdropElements(
+    nestedElementTargets,
+    targets.length,
+    bakeTotal,
+    onProgress,
+  );
   if (snapshotUrl !== undefined) URL.revokeObjectURL(snapshotUrl);
 
   return () => {
