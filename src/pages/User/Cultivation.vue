@@ -639,19 +639,10 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
         maxLevel: skill.max_level,
       }));
   }
-  const roleSkills = selectedRole.value?.skills ?? [];
-  if (!selectedRole.value && avatarWiki.value) {
-    return avatarWiki.value.skills
-      .filter((skill) => skill.maxLv > 1)
-      .map((skill) => ({
-        id: skill.id,
-        name: skill.name,
-        icon: `/icon/talents/${skill.icon}.webp`,
-        level: 1,
-        maxLevel: skill.maxLv,
-      }));
-  }
-  if (!avatarWiki.value) {
+  const role = selectedRole.value;
+  const wiki = avatarWiki.value;
+  const roleSkills = role?.skills ?? [];
+  if (!wiki) {
     return roleSkills
       .filter((skill) => skill.skill_type === 1 && skill.is_unlock)
       .slice(0, 3)
@@ -663,15 +654,24 @@ const mainSkills = computed<Array<TGApp.App.UserCalc.SkillOption>>(() => {
         maxLevel: 10,
       }));
   }
-  return userCalc
-    .recordTalentSkills(selectedRole.value, avatarWiki.value)
-    .map(({ recordSkill, wikiSkill }) => ({
-      id: wikiSkill.id,
-      name: recordSkill.name,
-      icon: recordSkill.icon,
-      level: recordSkill.level,
-      maxLevel: wikiSkill.maxLv,
-    }));
+  if (!role) {
+    return wiki.skills
+      .filter((skill) => skill.maxLv > 1)
+      .map((skill) => ({
+        id: skill.id,
+        name: skill.name,
+        icon: `/icon/talents/${skill.icon}.webp`,
+        level: 1,
+        maxLevel: skill.maxLv,
+      }));
+  }
+  return userCalc.recordTalentSkills(role, wiki).map(({ recordSkill, wikiSkill }) => ({
+    id: wikiSkill.id,
+    name: recordSkill.name,
+    icon: recordSkill.icon,
+    level: recordSkill.level,
+    maxLevel: wikiSkill.maxLv,
+  }));
 });
 const currentTalentLevels = computed<Array<number>>(() => {
   if (avatarCurrentStateEditable.value) {

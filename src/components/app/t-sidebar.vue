@@ -413,6 +413,7 @@ const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppS
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
 
+// @ts-expect-error The import.meta meta-property is not allowed in files which will build into CommonJS output.
 const isDevEnv = import.meta.env.DEV;
 const isWindows = platform() === "windows";
 const showFollow = ref<boolean>();

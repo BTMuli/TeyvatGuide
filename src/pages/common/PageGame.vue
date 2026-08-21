@@ -324,12 +324,14 @@ function channelDesc(installation: TGApp.Game.Installation.Item): string {
   return `${installation.channel} / ${installation.subChannel}`;
 }
 
-function schemeTag(schemeId: TGApp.Game.Installation.SchemeEnum): string {
+function schemeTag(schemeId: TGApp.Game.Installation.SchemeEnum | null): string {
   switch (schemeId) {
     case gameEnum.installation.scheme.CN_OFFICIAL:
       return "官服";
     case gameEnum.installation.scheme.CN_BILIBILI:
       return "渠道服";
+    default:
+      return "未知";
   }
 }
 

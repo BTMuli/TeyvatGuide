@@ -1,9 +1,9 @@
 /**
  * 解析游戏内公告数据
- * @since Beta v0.10.3
+ * @since Beta v0.11.5
  */
 
-import TpText from "@comp/viewPost/tp-text.vue";
+import TpText, { type TpText as TpTextType } from "@comp/viewPost/tp-text.vue";
 import { h, render } from "vue";
 
 import { decodeRegExp } from "./toolFunc.js";
@@ -359,8 +359,31 @@ function parseAnnoDetails(details: HTMLElement): TGApp.BBS.SctPost.Base {
 }
 
 /**
+ * 将公告节点转换为文本组件可用的数据
+ * @since Beta v0.11.5
+ * @param data - 公告节点
+ * @returns 文本数据；非文本节点返回 null
+ */
+function getAnnoTextData(data: TGApp.BBS.SctPost.Base): TpTextType | null {
+  if (typeof data.insert !== "string") return null;
+  const attributes = data.attributes;
+  if (attributes === undefined) return { insert: data.insert };
+  return {
+    insert: data.insert,
+    attributes: {
+      header: typeof attributes.header === "number" ? attributes.header : undefined,
+      link: typeof attributes.link === "string" ? attributes.link : undefined,
+      bold: attributes.bold === true || attributes.bold === "true",
+      color: typeof attributes.color === "string" ? attributes.color : undefined,
+      align: typeof attributes.align === "string" ? attributes.align : undefined,
+      italic: attributes.italic === true || attributes.italic === "true",
+    },
+  };
+}
+
+/**
  * 解析公告表格
- * @since Beta v0.7.0
+ * @since Beta v0.11.5
  * @param table - 表格元素
  * @returns 结构化数据
  */
@@ -391,8 +414,10 @@ function parseAnnoTable(table: HTMLElement): TGApp.BBS.SctPost.Base {
               if (cellChild.attributes && JSON.stringify(cellChild.attributes) === "{}") {
                 delete cellChild.attributes;
               }
+              const textData = getAnnoTextData(cellChild);
+              if (textData === null) continue;
               const cellSpan = document.createElement("span");
-              render(h(TpText, { data: cellChild }), cellSpan);
+              render(h(TpText, { data: textData }), cellSpan);
               span.appendChild(cellSpan);
             }
           }
