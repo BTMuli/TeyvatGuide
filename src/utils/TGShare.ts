@@ -767,10 +767,10 @@ function hasGeneratedPseudoBox(style: CSSStyleDeclaration): boolean {
  * @returns blur 像素；无毛玻璃时为 0
  */
 function readBackdropBlurPx(style: CSSStyleDeclaration): number {
-  const backdrop = style.backdropFilter;
+  const backdrop = style.getPropertyValue("backdrop-filter");
   const webkitBackdrop = style.getPropertyValue("-webkit-backdrop-filter");
-  const filterValue = backdrop !== "none" && backdrop !== "" ? backdrop : webkitBackdrop;
-  return parseBackdropBlurPx(filterValue);
+  const filterValue = [backdrop, webkitBackdrop].find((value) => value !== "" && value !== "none");
+  return parseBackdropBlurPx(filterValue ?? "");
 }
 
 /**
@@ -889,6 +889,8 @@ type BakedBackdropDraw = {
 };
 
 const SHARE_BACKDROP_ATLAS_ATTR = "data-tg-share-bd-atlas";
+/** 背景快照克隆体中需要隐藏的真实节点 */
+const SHARE_BACKDROP_HIDE_ATTR = "data-tg-share-bd-hide";
 /** 毛玻璃区域少于该数量时走主线程，避免拉起 Worker 的开销 */
 const SHARE_BACKDROP_WORKER_MIN = 8;
 /** blur 批量回传 ImageBitmap，可高于 CPU 核数 */
@@ -993,6 +995,28 @@ function renderBakedBackdropDataUrl(
   const ctx = canvas.getContext("2d");
   if (ctx === null) return undefined;
 
+  const tileCanvas = document.createElement("canvas");
+  tileCanvas.width = draw.sw;
+  tileCanvas.height = draw.sh;
+  const tileCtx = tileCanvas.getContext("2d");
+  if (tileCtx === null) return undefined;
+  tileCtx.drawImage(snapshot, draw.sx, draw.sy, draw.sw, draw.sh, 0, 0, draw.sw, draw.sh);
+
+  const sampleCanvas = document.createElement("canvas");
+  sampleCanvas.width = draw.sw + draw.pad * 2;
+  sampleCanvas.height = draw.sh + draw.pad * 2;
+  const sampleCtx = sampleCanvas.getContext("2d");
+  if (sampleCtx === null) return undefined;
+  drawMirroredBackdropTiles(sampleCtx, tileCanvas, draw.sw, draw.sh, draw.pad);
+
+  const blurCanvas = document.createElement("canvas");
+  blurCanvas.width = sampleCanvas.width;
+  blurCanvas.height = sampleCanvas.height;
+  const blurCtx = blurCanvas.getContext("2d");
+  if (blurCtx === null) return undefined;
+  blurCtx.filter = `blur(${draw.blurDraw}px)`;
+  blurCtx.drawImage(sampleCanvas, 0, 0);
+
   ctx.beginPath();
   ctx.moveTo(draw.radius.tl, 0);
   ctx.lineTo(draw.sw - draw.radius.tr, 0);
@@ -1005,25 +1029,39 @@ function renderBakedBackdropDataUrl(
   ctx.quadraticCurveTo(0, 0, draw.radius.tl, 0);
   ctx.closePath();
   ctx.clip();
-
-  ctx.filter = `blur(${draw.blurDraw}px)`;
-  ctx.drawImage(
-    snapshot,
-    draw.sx - draw.pad,
-    draw.sy - draw.pad,
-    draw.sw + draw.pad * 2,
-    draw.sh + draw.pad * 2,
-    -draw.pad,
-    -draw.pad,
-    draw.sw + draw.pad * 2,
-    draw.sh + draw.pad * 2,
-  );
-  ctx.filter = "none";
+  ctx.drawImage(blurCanvas, draw.pad, draw.pad, draw.sw, draw.sh, 0, 0, draw.sw, draw.sh);
   if (tint !== "" && tint !== "rgba(0, 0, 0, 0)" && tint !== "transparent") {
     ctx.fillStyle = tint;
     ctx.fillRect(0, 0, draw.sw, draw.sh);
   }
   return canvas.toDataURL("image/png");
+}
+
+/** 用中心图块的镜像平铺填满 blur 采样区，避免根节点边缘混入透明像素 */
+function drawMirroredBackdropTiles(
+  ctx: CanvasRenderingContext2D,
+  tile: CanvasImageSource,
+  width: number,
+  height: number,
+  pad: number,
+): void {
+  const minX = Math.floor(-pad / width);
+  const maxX = Math.ceil((width + pad) / width);
+  const minY = Math.floor(-pad / height);
+  const maxY = Math.ceil((height + pad) / height);
+  for (let y = minY; y < maxY; y += 1) {
+    for (let x = minX; x < maxX; x += 1) {
+      const flipX = Math.abs(x) % 2 === 1;
+      const flipY = Math.abs(y) % 2 === 1;
+      const dx = pad + x * width;
+      const dy = pad + y * height;
+      ctx.save();
+      ctx.translate(dx + (flipX ? width : 0), dy + (flipY ? height : 0));
+      ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+      ctx.drawImage(tile, 0, 0, width, height);
+      ctx.restore();
+    }
+  }
 }
 
 /**
@@ -1040,7 +1078,7 @@ function canUseShareBackdropWorkers(): boolean {
 }
 
 /**
- * 从快照裁出含 blur 采样边的 ImageBitmap
+ * 从快照裁出毛玻璃盒子的中心图块
  * @since Beta v0.11.5
  * @param snapshot - 根节点快照
  * @param draw - 快照像素绘制参数
@@ -1049,18 +1087,19 @@ function canUseShareBackdropWorkers(): boolean {
 async function cropShareBackdropBitmap(
   snapshot: HTMLImageElement | ImageBitmap,
   draw: BakedBackdropDraw,
-): Promise<{ bitmap: ImageBitmap; ox: number; oy: number } | undefined> {
+): Promise<ImageBitmap | undefined> {
   const srcW = "naturalWidth" in snapshot ? snapshot.naturalWidth : snapshot.width;
   const srcH = "naturalHeight" in snapshot ? snapshot.naturalHeight : snapshot.height;
-  const cropX = Math.max(0, Math.floor(draw.sx - draw.pad));
-  const cropY = Math.max(0, Math.floor(draw.sy - draw.pad));
-  const cropX2 = Math.min(srcW, Math.ceil(draw.sx + draw.sw + draw.pad));
-  const cropY2 = Math.min(srcH, Math.ceil(draw.sy + draw.sh + draw.pad));
-  const cropW = cropX2 - cropX;
-  const cropH = cropY2 - cropY;
+  const cropX = Math.max(0, Math.min(srcW - 1, Math.round(draw.sx)));
+  const cropY = Math.max(0, Math.min(srcH - 1, Math.round(draw.sy)));
+  const cropW = Math.min(draw.sw, srcW - cropX);
+  const cropH = Math.min(draw.sh, srcH - cropY);
   if (cropW < 1 || cropH < 1) return undefined;
-  const bitmap = await createImageBitmap(snapshot, cropX, cropY, cropW, cropH);
-  return { bitmap, ox: cropX - draw.sx, oy: cropY - draw.sy };
+  return await createImageBitmap(snapshot, cropX, cropY, cropW, cropH, {
+    resizeWidth: draw.sw,
+    resizeHeight: draw.sh,
+    resizeQuality: "high",
+  });
 }
 
 type ShareBackdropBakeJob = {
@@ -1321,15 +1360,14 @@ async function renderBakedBackdropUrlsWithWorkers(
                 job.blurPx,
               );
               if (draw === undefined) continue;
-              const cropped = await cropShareBackdropBitmap(source, draw);
-              if (cropped === undefined) continue;
+              const bitmap = await cropShareBackdropBitmap(source, draw);
+              if (bitmap === undefined) continue;
               reqs.push({
                 id: index,
-                bitmap: cropped.bitmap,
+                bitmap,
                 sw: draw.sw,
                 sh: draw.sh,
-                ox: cropped.ox,
-                oy: cropped.oy,
+                pad: draw.pad,
                 blurDraw: draw.blurDraw,
                 radius: draw.radius,
                 tint: job.tint,
@@ -1448,6 +1486,7 @@ async function prepareShareBackdrops(
   root: HTMLElement,
   mode: ShareBackdropMode = "auto",
   onProgress?: ShareProgressFn,
+  blurScale: number = 1,
 ): Promise<() => void> {
   if (mode === "none") return () => {};
   if (mode === false) {
@@ -1473,9 +1512,9 @@ async function prepareShareBackdrops(
     await TGLogger.Info(
       `[TGShare][prepareShareBackdrops] 毛玻璃元素 ${elementCount} 处，改用局部烘焙`,
     );
-    return await bakeShareBackdropFiltersLocal(root, onProgress);
+    return await bakeShareBackdropFiltersLocal(root, onProgress, blurScale);
   }
-  return await bakeShareBackdropFilters(root, onProgress);
+  return await bakeShareBackdropFilters(root, onProgress, blurScale);
 }
 
 type ShareBackdropElementPatch = {
@@ -1573,7 +1612,10 @@ function restoreBakedElementPatches(patches: Array<ShareBackdropElementPatch>): 
  * 收集根下真实节点毛玻璃目标
  * @since Beta v0.11.5
  */
-function collectBackdropElementTargets(root: HTMLElement): Array<ShareBackdropElementTarget> {
+function collectBackdropElementTargets(
+  root: HTMLElement,
+  blurScale: number,
+): Array<ShareBackdropElementTarget> {
   const targets: Array<ShareBackdropElementTarget> = [];
   const nodes = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
   for (const el of nodes) {
@@ -1585,12 +1627,27 @@ function collectBackdropElementTargets(root: HTMLElement): Array<ShareBackdropEl
     if (rect.width <= 0 || rect.height <= 0) continue;
     targets.push({
       el,
-      blurPx,
+      blurPx: blurPx * blurScale,
       radius: parseBorderRadiusPx(style.borderRadius, rect.width, rect.height),
       tint: style.backgroundColor,
     });
   }
   return targets;
+}
+
+/**
+ * 仅在 modern-screenshot 的克隆体中隐藏毛玻璃目标，避免真实 DOM 的图像层失效
+ * @since Beta v0.11.5
+ * @param cloned - 截图克隆根节点
+ * @returns 无返回值
+ */
+function hideShareBackdropCloneTargets(cloned: Node): void {
+  if (!(cloned instanceof HTMLElement)) return;
+  const targets = [
+    ...(cloned.hasAttribute(SHARE_BACKDROP_HIDE_ATTR) ? [cloned] : []),
+    ...Array.from(cloned.querySelectorAll<HTMLElement>(`[${SHARE_BACKDROP_HIDE_ATTR}]`)),
+  ];
+  for (const target of targets) target.style.visibility = "hidden";
 }
 
 /**
@@ -1602,8 +1659,9 @@ function collectBackdropElementTargets(root: HTMLElement): Array<ShareBackdropEl
 async function bakeShareBackdropFiltersLocal(
   root: HTMLElement,
   onProgress?: ShareProgressFn,
+  blurScale: number = 1,
 ): Promise<() => void> {
-  const targets = collectBackdropElementTargets(root);
+  const targets = collectBackdropElementTargets(root, blurScale);
   if (targets.length === 0) return () => {};
 
   const patches: Array<ShareBackdropElementPatch> = targets.map(({ el }) => ({
@@ -1628,8 +1686,8 @@ async function bakeShareBackdropFiltersLocal(
       const host = target.el.parentElement;
       if (host === null) return;
 
-      const prevVis = target.el.style.visibility;
-      target.el.style.visibility = "hidden";
+      const previousMarker = target.el.getAttribute(SHARE_BACKDROP_HIDE_ATTR);
+      target.el.setAttribute(SHARE_BACKDROP_HIDE_ATTR, "1");
       let snapshotUrl: string | undefined;
       try {
         const hostRect = host.getBoundingClientRect();
@@ -1650,6 +1708,7 @@ async function bakeShareBackdropFiltersLocal(
           font: false,
           workerUrl,
           workerNumber: 1,
+          onCloneNode: hideShareBackdropCloneTargets,
         });
         const loaded = await blobToImage(blob);
         snapshotUrl = loaded.url;
@@ -1670,7 +1729,8 @@ async function bakeShareBackdropFiltersLocal(
       } catch (e) {
         await TGLogger.Warn(`[TGShare][bakeShareBackdropFiltersLocal] 局部烘焙失败: ${e}`);
       } finally {
-        target.el.style.visibility = prevVis;
+        if (previousMarker === null) target.el.removeAttribute(SHARE_BACKDROP_HIDE_ATTR);
+        else target.el.setAttribute(SHARE_BACKDROP_HIDE_ATTR, previousMarker);
         if (snapshotUrl !== undefined) URL.revokeObjectURL(snapshotUrl);
       }
     } finally {
@@ -1698,9 +1758,8 @@ async function bakeShareBackdropFiltersLocal(
 async function bakeShareBackdropFilters(
   root: HTMLElement,
   onProgress?: ShareProgressFn,
+  blurScale: number = 1,
 ): Promise<() => void> {
-  type VisibilityPatch = { el: HTMLElement; visibility: string };
-
   type ElementTarget = {
     kind: "element";
     el: HTMLElement;
@@ -1734,7 +1793,7 @@ async function bakeShareBackdropFilters(
           targets.push({
             kind: "element",
             el,
-            blurPx,
+            blurPx: blurPx * blurScale,
             radius: parseBorderRadiusPx(style.borderRadius, rect.width, rect.height),
             tint: style.backgroundColor,
           });
@@ -1755,7 +1814,7 @@ async function bakeShareBackdropFilters(
         pseudo,
         attr: pseudo === "::before" ? "data-tg-share-bd-before" : "data-tg-share-bd-after",
         box,
-        blurPx,
+        blurPx: blurPx * blurScale,
         radius: parseBorderRadiusPx(style.borderRadius, box.width, box.height),
         tint: style.backgroundColor,
       });
@@ -1780,48 +1839,30 @@ async function bakeShareBackdropFilters(
     atlasMarker: el.getAttribute(SHARE_BACKDROP_ATLAS_ATTR),
   }));
 
-  const abovePatches: Array<VisibilityPatch> = [];
+  const aboveTargets: Array<HTMLElement> = [];
   const aboveSeen = new Set<HTMLElement>();
   for (const target of pseudoTargets) {
     const pseudoStyle = getComputedStyle(target.el, target.pseudo);
     for (const child of collectChildrenAbovePseudo(target.el, pseudoStyle)) {
       if (aboveSeen.has(child)) continue;
       aboveSeen.add(child);
-      abovePatches.push({ el: child, visibility: child.style.visibility });
+      aboveTargets.push(child);
     }
   }
 
   let styleEl: HTMLStyleElement | undefined;
-  if (pseudoTargets.length > 0) {
-    styleEl = document.createElement("style");
-    styleEl.setAttribute("data-tg-share-bd-style", "1");
-    styleEl.textContent = pseudoTargets
-      .map((t) => `[${t.attr}]${t.pseudo}{visibility:hidden!important}`)
-      .join("");
-    document.head.appendChild(styleEl);
-    for (const target of pseudoTargets) {
-      target.el.setAttribute(target.attr, "1");
-    }
-  }
+  for (const item of elementPatches) item.el.setAttribute(SHARE_BACKDROP_HIDE_ATTR, "1");
+  for (const item of aboveTargets) item.setAttribute(SHARE_BACKDROP_HIDE_ATTR, "1");
+  for (const target of pseudoTargets) target.el.setAttribute(target.attr, "1");
 
-  for (const item of elementPatches) {
-    item.el.style.visibility = "hidden";
-  }
-  for (const item of abovePatches) {
-    item.el.style.visibility = "hidden";
-  }
-
-  const restoreVisibility = (): void => {
-    for (const item of elementPatches) {
-      item.el.style.visibility = item.visibility;
-    }
-    for (const item of abovePatches) {
-      item.el.style.visibility = item.visibility;
-    }
+  const cleanupSnapshotMarks = (): void => {
+    for (const item of elementPatches) item.el.removeAttribute(SHARE_BACKDROP_HIDE_ATTR);
+    for (const item of aboveTargets) item.removeAttribute(SHARE_BACKDROP_HIDE_ATTR);
   };
 
   const cleanupPseudoMarks = (): void => {
     styleEl?.remove();
+    cleanupSnapshotMarks();
     for (const target of pseudoTargets) {
       target.el.removeAttribute(target.attr);
     }
@@ -1843,19 +1884,27 @@ async function bakeShareBackdropFilters(
       workerUrl,
       workerNumber: resolveShareWorkerNumber(root),
       drawImageInterval: 0,
+      onCloneNode: (cloned) => {
+        hideShareBackdropCloneTargets(cloned);
+        if (!(cloned instanceof HTMLElement) || pseudoTargets.length === 0) return;
+        const cloneStyle = cloned.ownerDocument.createElement("style");
+        cloneStyle.textContent = pseudoTargets
+          .map((target) => `[${target.attr}]${target.pseudo}{visibility:hidden!important}`)
+          .join("");
+        cloned.insertBefore(cloneStyle, cloned.firstChild);
+      },
     });
     const loaded = await blobToImage(blob);
     snapshot = loaded.img;
     snapshotUrl = loaded.url;
     reportShareProgress(onProgress, { phase: "snapshot", current: 1, total: 1 });
   } catch (e) {
-    restoreVisibility();
     cleanupPseudoMarks();
     await TGLogger.Warn(`[TGShare][bakeShareBackdropFilters] 背景快照失败: ${e}`);
     return () => {};
   }
 
-  restoreVisibility();
+  cleanupSnapshotMarks();
 
   const rootRect = root.getBoundingClientRect();
   const bakeJobs: Array<ShareBackdropBakeJob> = targets.map((target) => {
@@ -1904,8 +1953,11 @@ async function bakeShareBackdropFilters(
     );
   }
 
-  if (styleEl !== undefined) {
+  if (bakedPseudoRules.length > 0) {
+    styleEl = document.createElement("style");
+    styleEl.setAttribute("data-tg-share-bd-style", "1");
     styleEl.textContent = bakedPseudoRules.join("");
+    document.head.appendChild(styleEl);
   }
   if (snapshotUrl !== undefined) URL.revokeObjectURL(snapshotUrl);
 
@@ -2015,6 +2067,8 @@ export async function generateShareImg(
 export type ShareModernOptions = {
   /** 毛玻璃：true 烘焙 / false flatten / none 跳过 / auto 少量烘焙、过多局部烘焙。默认 auto */
   bakeBackdrop?: ShareBackdropMode;
+  /** Canvas 烘焙的 blur 强度系数；用于校准特定分享视图，默认 1 */
+  backdropBlurScale?: number;
   /**
    * 外层画布边距（逻辑像素）。只加在截图容器上，不改被截节点的 padding。
    * @since Beta v0.11.5
@@ -2190,6 +2244,7 @@ async function captureModernBlob(
     element,
     options?.bakeBackdrop ?? "auto",
     options?.onProgress,
+    options?.backdropBlurScale ?? 1,
   );
   const injectors = createShareFontInjectors(shareCss);
   const imageCount = element.querySelectorAll("img").length;

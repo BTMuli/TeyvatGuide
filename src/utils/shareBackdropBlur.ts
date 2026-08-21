@@ -14,10 +14,8 @@ export type ShareBackdropBlurRequest = {
   sw: number;
   /** 输出高（快照像素） */
   sh: number;
-  /** bitmap 绘制到输出画布的 X */
-  ox: number;
-  /** bitmap 绘制到输出画布的 Y */
-  oy: number;
+  /** blur 采样区在四周扩展的像素 */
+  pad: number;
   /** canvas filter blur（快照像素） */
   blurDraw: number;
   /** 圆角（快照像素） */
@@ -57,10 +55,21 @@ type BackdropDrawContext = OffscreenCanvasRenderingContext2D | CanvasRenderingCo
  */
 export function paintShareBackdropBlur(
   ctx: BackdropDrawContext,
-  bitmap: CanvasImageSource,
+  bitmap: ImageBitmap,
   job: Omit<ShareBackdropBlurRequest, "id" | "bitmap">,
 ): void {
-  const { sw, sh, ox, oy, blurDraw, radius, tint } = job;
+  const { sw, sh, pad, blurDraw, radius, tint } = job;
+  const sampleCanvas = new OffscreenCanvas(sw + pad * 2, sh + pad * 2);
+  const sampleCtx = sampleCanvas.getContext("2d");
+  if (sampleCtx === null) throw new Error("毛玻璃采样 Canvas 2d 不可用");
+  drawMirroredBackdropTiles(sampleCtx, bitmap, sw, sh, pad);
+
+  const blurCanvas = new OffscreenCanvas(sampleCanvas.width, sampleCanvas.height);
+  const blurCtx = blurCanvas.getContext("2d");
+  if (blurCtx === null) throw new Error("毛玻璃模糊 Canvas 2d 不可用");
+  blurCtx.filter = `blur(${blurDraw}px)`;
+  blurCtx.drawImage(sampleCanvas, 0, 0);
+
   ctx.beginPath();
   ctx.moveTo(radius.tl, 0);
   ctx.lineTo(sw - radius.tr, 0);
@@ -73,12 +82,36 @@ export function paintShareBackdropBlur(
   ctx.quadraticCurveTo(0, 0, radius.tl, 0);
   ctx.closePath();
   ctx.clip();
-
-  ctx.filter = `blur(${blurDraw}px)`;
-  ctx.drawImage(bitmap, ox, oy);
-  ctx.filter = "none";
+  ctx.drawImage(blurCanvas, pad, pad, sw, sh, 0, 0, sw, sh);
   if (tint !== "" && tint !== "rgba(0, 0, 0, 0)" && tint !== "transparent") {
     ctx.fillStyle = tint;
     ctx.fillRect(0, 0, sw, sh);
+  }
+}
+
+/** 用中心图块的镜像平铺填满 blur 采样区 */
+function drawMirroredBackdropTiles(
+  ctx: OffscreenCanvasRenderingContext2D,
+  tile: CanvasImageSource,
+  width: number,
+  height: number,
+  pad: number,
+): void {
+  const minX = Math.floor(-pad / width);
+  const maxX = Math.ceil((width + pad) / width);
+  const minY = Math.floor(-pad / height);
+  const maxY = Math.ceil((height + pad) / height);
+  for (let y = minY; y < maxY; y += 1) {
+    for (let x = minX; x < maxX; x += 1) {
+      const flipX = Math.abs(x) % 2 === 1;
+      const flipY = Math.abs(y) % 2 === 1;
+      const dx = pad + x * width;
+      const dy = pad + y * height;
+      ctx.save();
+      ctx.translate(dx + (flipX ? width : 0), dy + (flipY ? height : 0));
+      ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+      ctx.drawImage(tile, 0, 0, width, height);
+      ctx.restore();
+    }
   }
 }

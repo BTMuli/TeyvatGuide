@@ -23,7 +23,12 @@
         class="tpc-forum"
         @click="toForum(card.forum)"
       >
-        <img v-if="card.forum.icon !== ''" :alt="card.forum.name" :src="card.forum.icon" />
+        <TMiImg
+          v-if="card.forum.icon !== ''"
+          :alt="card.forum.name"
+          :ori="true"
+          :src="card.forum.icon"
+        />
         <span>{{ card.forum.name }}</span>
       </div>
       <div v-else-if="imgCnt > 1" :title="`图片数：${imgCnt}`" class="tpc-image-cnt">
@@ -509,7 +514,7 @@ async function shareCard(): Promise<void> {
     return;
   }
   const fileName = `PostCard_${card.value.postId}`;
-  await TGShare.modern(fileName, shareDom, 2.5);
+  await TGShare.modern(fileName, shareDom, 2.5, false, { backdropBlurScale: 0.75 });
 }
 
 async function toTopic(topic: TGApp.BBS.Post.Topic): Promise<void> {
@@ -590,7 +595,7 @@ function onUserClick(): void {
   border-top-right-radius: 4px;
   cursor: pointer;
 
-  img {
+  > img {
     position: relative;
     overflow: hidden;
     aspect-ratio: 69/32;
