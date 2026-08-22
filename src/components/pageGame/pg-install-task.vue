@@ -29,9 +29,7 @@
     <PgProgress
       ariaLabel="游戏本体安装进度"
       :caption
-      :currentFile="task.currentFile"
       :errorMessage="task.errorMessage"
-      :facts
       :indeterminate="progressIndeterminate"
       :percent="progressPercent"
       :progressRows
@@ -192,12 +190,14 @@ const progressRows = computed<
     percent: number;
     indeterminate?: boolean;
     details: Array<string>;
+    status?: string | null;
   }>
 >(() => [
   {
     label: "下载",
     percent: phasePercent(task.downloadedBytes, task.totalBytes),
     indeterminate: task.totalBytes === 0 && active.value,
+    status: task.state === gameEnum.package.taskState.DOWNLOADING ? task.currentFile : null,
     details: [
       `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
       `文件 ${task.completedCount} / ${task.totalCount}`,
@@ -207,6 +207,7 @@ const progressRows = computed<
     label: "组装",
     percent: phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes),
     indeterminate: task.assemblyTotalBytes === 0 && active.value,
+    status: task.state === gameEnum.package.taskState.ASSEMBLING ? task.currentFile : null,
     details:
       task.assemblyTotalBytes === 0
         ? ["无需组装"]
@@ -219,6 +220,7 @@ const progressRows = computed<
     label: "总进度",
     percent: progressPercent.value,
     indeterminate: progressIndeterminate.value,
+    status: overallFacts.value.join(" · "),
     details: [
       `${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(task.totalBytes + task.assemblyTotalBytes)}`,
       `下载 ${phasePercent(task.downloadedBytes, task.totalBytes).toFixed(0)}% · 组装 ${phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes).toFixed(0)}%`,
@@ -254,18 +256,8 @@ const combinedEtaSeconds = computed<number | null>(() => {
   if (remaining === 0) return 0;
   return Math.ceil(remaining / (completedWork / elapsedSeconds));
 });
-const facts = computed<Array<string>>(() => {
-  const values = [
-    `总体进度 ${progressPercent.value.toFixed(0)}%`,
-    `总进度 ${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
-    `文件 ${task.completedCount} / ${task.totalCount}`,
-  ];
-  if (task.assemblyTotalBytes > 0) {
-    values.push(
-      `组装 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-      `组装文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-    );
-  }
+const overallFacts = computed<Array<string>>(() => {
+  const values = [`总体进度 ${progressPercent.value.toFixed(0)}%`];
   values.push(
     `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
     `当前耗时 ${formatElapsed(task.elapsedMs)}`,
