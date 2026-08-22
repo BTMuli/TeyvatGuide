@@ -3,97 +3,13 @@
  * @since Beta v0.10.2
  */
 
-import { tz } from "@date-fns/tz";
 import bbsEnum from "@enum/bbs.js";
 import staticDataEnum from "@enum/staticData.js";
 import { path } from "@tauri-apps/api";
 import { type } from "@tauri-apps/plugin-os";
-import { format, parse, parseISO, differenceInDays, startOfDay } from "date-fns";
 import { v4 } from "uuid";
 
 import { AppCalendarData, AppCharacterData, AppWeaponData } from "@/data/index.js";
-
-/**
- * 时间戳转换为时间字符串
- * @since Beta v0.8.0
- * @param time - 时间戳（毫秒）
- * @returns 时间字符串 d天 hh:mm:ss
- */
-export function stamp2LastTime(time: number): string {
-  const day = Math.floor(time / (24 * 3600 * 1000));
-  const hour = Math.floor((time % (24 * 3600 * 1000)) / (3600 * 1000));
-  const minute = Math.floor((time % (3600 * 1000)) / (60 * 1000));
-  const second = Math.floor((time % (60 * 1000)) / 1000);
-  return `${day === 0 ? "" : `${day}天 `}${hour.toFixed(0).padStart(2, "0")}:${minute
-    .toFixed(0)
-    .padStart(2, "0")}:${second.toFixed(0).padStart(2, "0")}`;
-}
-
-/**
- * 剩余秒数转换为时刻字符串
- * @since Beta v0.10.2
- * @param remainedSeconds - 剩余秒数
- * @returns 时刻字符串 次日xx:xx:xx / x天后xx:xx:xx
- */
-export function stamp2FullTime(remainedSeconds: number): string {
-  if (remainedSeconds <= 0) return "";
-  const now = new Date();
-  const fullTime = new Date(now.getTime() + remainedSeconds * 1000);
-  const dayDiff = differenceInDays(startOfDay(fullTime), startOfDay(now));
-  const hour = fullTime.getHours().toString().padStart(2, "0");
-  const minute = fullTime.getMinutes().toString().padStart(2, "0");
-  const second = fullTime.getSeconds().toString().padStart(2, "0");
-  if (dayDiff === 0) return `${hour}:${minute}:${second}`;
-  if (dayDiff === 1) return `次日${hour}:${minute}:${second}`;
-  return `${dayDiff}天后${hour}:${minute}:${second}`;
-}
-
-/**
- * 时间戳转换为日期
- * @since Beta v0.6.0
- * @param timestamp - 时间戳（毫秒）
- * @returns 日期 2021-01-01 00:00:00
- */
-export function timestampToDate(timestamp: number): string {
-  const date = new Date(timestamp);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
-  const second = String(date.getSeconds()).padStart(2, "0");
-  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-}
-
-/**
- * 获取相近时间
- * @since Beta v0.7.2
- * @remarks
- * - 如果是今天，只显示 hh:mm
- * - 如果是今年，显示 MM-dd
- * - 否则显示 yyyy-MM-dd
- *
- * @param timestamp - 时间戳（秒）
- * @returns 相近时间
- */
-export function getNearTime(timestamp: number): string {
-  const date = new Date(timestamp * 1000);
-  const now = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hour = String(date.getHours()).padStart(2, "0");
-  const minute = String(date.getMinutes()).padStart(2, "0");
-  if (
-    now.getFullYear() === year &&
-    now.getMonth() === date.getMonth() &&
-    now.getDate() === date.getDate()
-  ) {
-    return `${hour}:${minute}`;
-  }
-  if (now.getFullYear() === year) return `${month}-${day}`;
-  return `${year}-${month}-${day}`;
-}
 
 /**
  * 获取设备信息（初始化时）
@@ -125,20 +41,6 @@ export function getDeviceInfo(key: TGApp.App.Device.DeviceInfoKey): string {
     localStorage.setItem("deviceInfo", JSON.stringify({ deviceInfo }));
   } else deviceInfo = JSON.parse(localDevice).deviceInfo;
   return deviceInfo[key];
-}
-
-/**
- * byte 转成 KB MB GB
- * @since Beta v0.3.4
- * @param bytes - 字节数
- * @returns KB MB GB
- */
-export function bytesToSize(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }
 
 /**
@@ -299,24 +201,6 @@ export function getZhElement(element: string): string {
 }
 
 /**
- * 获取视频时长
- * @since Beta v0.6.7
- * @param durationMill - 视频时长（毫秒）
- * @returns 视频时长
- */
-export function getVideoDuration(durationMill: number): string {
-  const duration = Math.floor(durationMill / 1000);
-  const seconds = duration % 60;
-  const minutes = Math.floor(duration / 60) % 60;
-  const hours = Math.floor(duration / 3600);
-  let result = "";
-  if (hours > 0) result += `${hours.toString().padStart(2, "0")}:`;
-  result += `${minutes.toString().padStart(2, "0")}:`;
-  result += `${seconds.toString().padStart(2, "0")}`;
-  return result;
-}
-
-/**
  * 转义正则表达式
  * @since Beta v0.3.3
  * @param data - 内容
@@ -407,32 +291,6 @@ export function getRcStar(cid: number, star: number): number {
 }
 
 /**
- * 接收时间字符串，转成utf8时区
- * @since Beta v0.9.1
- * @param str - 时间字符串
- * @example 2025-09-18T01:01:39+00:00
- * @returns 转换后的时间
- */
-export function timeStr2str(str: string): string {
-  return format(parseISO(str), "yyyy-MM-dd HH:mm:ss", {
-    in: tz("Asia/Shanghai"),
-  });
-}
-
-/**
- * 接收本地时间字符串，转成 ISO8601（含 +08:00）
- * @since Beta v0.9.1
- * @param str - 时间字符串
- * @example "2025-09-18 09:01:39" → "2025-09-18T09:01:39+08:00"
- */
-export function str2timeStr(str: string): string {
-  // 解析为上海时区的本地日期（你可以改成别的时区）
-  const d = parse(str, "yyyy-MM-dd HH:mm:ss", new Date(), { in: tz("Asia/Shanghai") });
-  // 输出为 UTC 的 ISO 字符串
-  return format(d, "yyyy-MM-dd'T'HH:mm:ss.SSSX", { in: tz("UTC") });
-}
-
-/**
  * 验证邮箱
  * @since Beta v0.9.1
  * @param email - 邮箱
@@ -465,18 +323,4 @@ export function compareVersions(v1: string, v2: string): number {
     if (num1 < num2) return -1;
   }
   return 0;
-}
-
-/**
- * 传入时间字符串跟对应时区，转成utc8时间字符串
- * @since Beta v0.9.5
- * @param time - 时间字符串
- * @param timezone - 时区
- * @returns 转换后的时间戳
- */
-export function getUtc8Time(time: string, timezone: number): string {
-  const date = new Date(time);
-  const diffTimezone = -timezone + 8;
-  const realDate = new Date(date.getTime() + diffTimezone * 60 * 60 * 1000);
-  return timestampToDate(realDate.getTime());
 }

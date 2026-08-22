@@ -61,10 +61,10 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { fetch } from "@tauri-apps/plugin-http";
 import { parseBirthGal, parseBirthSrc } from "@utils/birthParser.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
-import { bytesToSize } from "@utils/toolFunc.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 type ToArcBirthProps = { data?: TGApp.Archive.Birth.DrawItem; choice: boolean };
@@ -115,7 +115,7 @@ async function onCopy(): Promise<void> {
   if (!props.data) return;
   await loadImageBuffer();
   if (buffer.value === null) return;
-  const size = bytesToSize(buffer.value.byteLength);
+  const size = fmtUtil.size(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
   showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);
 }

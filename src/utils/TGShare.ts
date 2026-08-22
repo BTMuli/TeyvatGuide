@@ -17,6 +17,7 @@ import { domToBlob } from "modern-screenshot";
 import workerUrl from "modern-screenshot/worker?url&no-inline";
 import { storeToRefs } from "pinia";
 
+import fmtUtil from "./fmtUtil.js";
 import type {
   ShareBackdropBlurBatchRequest,
   ShareBackdropBlurBatchResponse,
@@ -25,7 +26,6 @@ import type {
 import ShareBackdropWorker from "./shareBackdropWorker?worker";
 import TGHttps from "./TGHttps.js";
 import TGLogger from "./TGLogger.js";
-import { bytesToSize } from "./toolFunc.js";
 
 import fontGenshinLightUrl from "@/assets/fonts/HYWenHei-55W.ttf?url";
 import fontJetbrainsBoldUrl from "@/assets/fonts/JetBrainsMono-Bold.ttf?url";
@@ -60,7 +60,7 @@ export async function saveBufferFile(
   await writeFile(res, bf);
   const realName = res.split(sep()).pop();
   await TGLogger.Info(`[saveCanvasImg][${realName}] 已将图像保存到本地`);
-  showSnackbar.success(`已将 ${realName} 保存到本地，大小为 ${bytesToSize(bf.length)}`);
+  showSnackbar.success(`已将 ${realName} 保存到本地，大小为 ${fmtUtil.size(bf.length)}`);
 }
 
 /**
@@ -255,7 +255,7 @@ async function embedShareFontSpecs(
       } catch (e) {
         await TGLogger.Warn(`${logTag} FontFace ${spec.family} 失败: ${e}`);
       }
-      await TGLogger.Info(`${logTag} 已嵌入 ${spec.family} ${bytesToSize(blob.size)}`);
+      await TGLogger.Info(`${logTag} 已嵌入 ${spec.family} ${fmtUtil.size(blob.size)}`);
     } catch (e) {
       await TGLogger.Warn(`${logTag} ${spec.family} 失败: ${e}`);
     }
@@ -2136,7 +2136,7 @@ async function handleShareBuffer(
   buffer: ArrayBuffer,
 ): Promise<void> {
   const size = buffer.byteLength;
-  const sizeStr = bytesToSize(size);
+  const sizeStr = fmtUtil.size(size);
   await TGLogger.Info(`[${tag}][${fileName}] 图像大小为 ${sizeStr}`);
   const { shareDefaultFile } = storeToRefs(useAppStore());
   if (shareDefaultFile.value === 0) {
@@ -2517,7 +2517,7 @@ export async function benchShareColdStart(
     snapBytes: snapBlob.size,
   };
   await TGLogger.Info(
-    `[TGShare][benchShareColdStart] modern ${result.modernMs}ms / ${bytesToSize(result.modernBytes)} · snap ${result.snapMs}ms / ${bytesToSize(result.snapBytes)}`,
+    `[TGShare][benchShareColdStart] modern ${result.modernMs}ms / ${fmtUtil.size(result.modernBytes)} · snap ${result.snapMs}ms / ${fmtUtil.size(result.snapBytes)}`,
   );
   return result;
 }

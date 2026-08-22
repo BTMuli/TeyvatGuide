@@ -5,8 +5,8 @@
 
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
@@ -20,13 +20,13 @@ function transUserCombat(data: TGApp.Game.Combat.Combat): TGApp.Sqlite.Combat.Ta
   return {
     uid: "",
     detail: data.detail,
-    endTime: timestampToDate(Number(data.schedule.end_time) * 1000),
+    endTime: fmtUtil.dateTime(Number(data.schedule.end_time) * 1000),
     hasData: data.has_data,
     hasDetailData: data.has_detail_data,
     id: data.schedule.schedule_id,
-    startTime: timestampToDate(Number(data.schedule.start_time) * 1000),
+    startTime: fmtUtil.dateTime(Number(data.schedule.start_time) * 1000),
     stat: data.stat,
-    updated: timestampToDate(new Date().getTime()),
+    updated: fmtUtil.dateTime(new Date().getTime()),
   };
 }
 
@@ -38,7 +38,7 @@ function transUserCombat(data: TGApp.Game.Combat.Combat): TGApp.Sqlite.Combat.Ta
  * @returns sql
  */
 function getInsertSql(data: TGApp.Sqlite.Combat.TableTrans, uid?: string): string {
-  const timeNow = timestampToDate(new Date().getTime());
+  const timeNow = fmtUtil.dateTime(new Date().getTime());
   const hasData = data.hasData ? 1 : 0;
   const hasDetailData = data.hasDetailData ? 1 : 0;
   return `

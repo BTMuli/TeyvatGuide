@@ -34,7 +34,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { event } from "@tauri-apps/api";
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { ref, toRaw, watch } from "vue";
 
 import { AppAchievementSeriesData } from "@/data/index.js";
@@ -84,7 +84,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
     return;
   }
   data.value.progress = Number(progress);
-  data.value.completedTime = timestampToDate(new Date().getTime());
+  data.value.completedTime = fmtUtil.dateTime(new Date().getTime());
   data.value.isCompleted = true;
   await TSUserAchi.updateAchi(data.value);
   await event.emit("updateAchi", data.value.series);

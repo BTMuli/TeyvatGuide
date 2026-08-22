@@ -160,9 +160,9 @@ import TpcTag from "@comp/viewPost/tpc-tag.vue";
 import useBBSStore from "@store/bbs.js";
 import { emit } from "@tauri-apps/api/event";
 import { str2Color } from "@utils/colorFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import {
   computed,
@@ -495,9 +495,11 @@ function getCommonCard(item: TGApp.BBS.Post.FullData): RenderCard {
     };
   }
   const metaData: RenderMeta = {
-    create_time: timestampToDate(Number(item.post.created_at) * 1000),
+    create_time: fmtUtil.dateTime(Number(item.post.created_at) * 1000),
     update_time:
-      item.post.updated_at === 0 ? undefined : timestampToDate(Number(item.post.updated_at) * 1000),
+      item.post.updated_at === 0
+        ? undefined
+        : fmtUtil.dateTime(Number(item.post.updated_at) * 1000),
   };
   return {
     title: item.post.subject,

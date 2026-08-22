@@ -103,10 +103,11 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import recordReq from "@req/recordReq.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { getRcStar, getZhElement, timestampToDate } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import { computed, ref, shallowRef, useId, useTemplateRef, watch } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
@@ -258,7 +259,7 @@ async function refreshPopList(hint: boolean = true): Promise<void> {
     return;
   }
   popList.value = resp.data.avatar_list;
-  refreshTime.value = timestampToDate(Date.now());
+  refreshTime.value = fmtUtil.dateTime(Date.now());
   reqPop.value = false;
   if (!hint) return;
   showSnackbar.success(`已刷新 ${serverLabel.value} 的 ${popList.value.length} 位赋光之人`);

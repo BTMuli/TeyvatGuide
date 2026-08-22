@@ -27,9 +27,9 @@
 </template>
 <script lang="ts" setup>
 import ApiHubReq from "@req/apiHubReq.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, ref, shallowRef } from "vue";
 
 /** 投票组件数据类型 */
@@ -113,7 +113,7 @@ onMounted(async () => {
       count: voteResult!.option_stats[index] ?? 0,
       percent: ((voteResult!.option_stats[index] ?? 0) / voteResult!.user_cnt) * 100,
     })),
-    endTime: timestampToDate(voteInfo.end_time * 1000),
+    endTime: fmtUtil.dateTime(voteInfo.end_time * 1000),
   };
   maxCnt.value = Math.max(...votes.value.data.map((item) => item.count));
 });

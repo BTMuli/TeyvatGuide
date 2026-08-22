@@ -48,7 +48,7 @@
               <v-icon>mdi-database-remove</v-icon>
             </div>
           </template>
-          <template #append>{{ bytesToSize(cacheSize) }}</template>
+          <template #append>{{ fmtUtil.size(cacheSize) }}</template>
         </v-list-item>
         <v-list-item v-show="showReset" title="重置数据库" @click="confirmResetDB()">
           <template #prepend>
@@ -189,7 +189,11 @@
             />
           </template>
         </v-list-item>
-        <v-list-item v-if="platform() === 'windows'" title="分享设置" @click="confirmShare()">
+        <v-list-item
+          v-if="platform() === 'windows'"
+          title="分享设置"
+          @click="showShareSetting = true"
+        >
           <template #subtitle>默认保存到剪贴板，超过{{ shareDefaultFile }}MB时保存到文件</template>
           <template #prepend>
             <div class="config-icon">
@@ -221,6 +225,7 @@
     </div>
   </div>
   <TcoImgQuality v-model="showImgQuality" />
+  <TcoShareSetting v-model="showShareSetting" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -232,6 +237,7 @@ import TcHutaoBadge from "@comp/pageConfig/tc-hutaoBadge.vue";
 import TcInfo from "@comp/pageConfig/tc-info.vue";
 import TcUserBadge from "@comp/pageConfig/tc-userBadge.vue";
 import TcoImgQuality from "@comp/pageConfig/tco-imgQuality.vue";
+import TcoShareSetting from "@comp/pageConfig/tco-shareSetting.vue";
 import OtherApi from "@req/otherReq.js";
 import TGSqlite from "@Sql/index.js";
 import useAppStore from "@store/app.js";
@@ -242,8 +248,9 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { platform } from "@tauri-apps/plugin-os";
 import { exit, relaunch } from "@tauri-apps/plugin-process";
 import { backUpUserData, restoreUserData } from "@utils/dataBS.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { bytesToSize, getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
+import { getCacheDir, getDeviceInfo, getRandomString } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 
@@ -270,6 +277,7 @@ const isNeedResize = ref<boolean>(needResize.value !== "false");
 const cacheSize = ref<number>(0);
 
 const showImgQuality = ref<boolean>(false);
+const showShareSetting = ref<boolean>(false);
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -321,7 +329,7 @@ onMounted(async () => {
     const size: number = await core.invoke("get_dir_size", { path: dir });
     cacheBSize += size;
   }
-  await showLoading.update(`缓存大小：${bytesToSize(cacheBSize)}`);
+  await showLoading.update(`缓存大小：${fmtUtil.size(cacheBSize)}`);
   cacheSize.value = cacheBSize;
   await showLoading.end();
 });
@@ -410,49 +418,6 @@ async function confirmUpdate(title?: string): Promise<void> {
   window.location.reload();
 }
 
-// 分享设置
-async function confirmShare(): Promise<void> {
-  const input = await showDialog.input(
-    "请输入分享文件大小阈值(MB)",
-    "阈值：",
-    shareDefaultFile.value.toString(),
-  );
-  if (!input) {
-    showSnackbar.cancel("已取消修改分享设置");
-    return;
-  }
-  if (input === "") {
-    showSnackbar.error("阈值不能为空!");
-    return;
-  }
-  if (isNaN(Number(input))) {
-    showSnackbar.error("阈值必须为数字!");
-    return;
-  }
-  if (Number(input) <= 0 || Number(input) !== Math.round(Number(input))) {
-    showSnackbar.warn("请输入正整数");
-    return;
-  }
-  if (Number(input) === shareDefaultFile.value) {
-    showSnackbar.cancel("未修改分享设置");
-    return;
-  }
-  if (Number(input) > 2000) {
-    showSnackbar.error("阈值不能大于2000MB!");
-    return;
-  }
-  const check = await showDialog.check(
-    "确认修改分享设置吗？",
-    `新阈值为${input}MB，超过将保存到文件`,
-  );
-  if (!check) {
-    showSnackbar.cancel("已取消修改分享设置");
-    return;
-  }
-  shareDefaultFile.value = Number(input);
-  showSnackbar.success(`成功修改分享设置!新阈值为${input}MB`);
-}
-
 // 图片质量调整
 async function submitImgQuality(): Promise<void> {
   showImgQuality.value = true;
@@ -513,7 +478,7 @@ async function confirmDelCache(): Promise<void> {
   }
   const delCheck = await showDialog.check(
     "确认清除缓存吗？",
-    `当前缓存大小为 ${bytesToSize(cacheSize.value)}`,
+    `当前缓存大小为 ${fmtUtil.size(cacheSize.value)}`,
   );
   if (!delCheck) {
     showSnackbar.cancel("已取消清除缓存");

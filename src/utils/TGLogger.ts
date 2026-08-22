@@ -6,7 +6,7 @@
 import { event } from "@tauri-apps/api";
 import { attachConsole, debug, error, info, warn } from "@tauri-apps/plugin-log";
 
-import { timestampToDate } from "./toolFunc.js";
+import fmtUtil from "./fmtUtil.js";
 
 /**
  * 日志工具
@@ -82,7 +82,7 @@ class Logger {
    * @returns 无返回值
    */
   async Script(message: string, type: string = "info"): Promise<void> {
-    const timeNow = timestampToDate(new Date().getTime());
+    const timeNow = fmtUtil.dateTime(new Date().getTime());
     const msg = `[${type.toUpperCase()}][${timeNow}]${message}`;
     await event.emitTo("TeyvatGuide", "userScriptLog", msg);
     if (type === "info") await info(message);

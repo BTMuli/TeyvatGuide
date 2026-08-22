@@ -33,7 +33,7 @@
 </template>
 <script lang="ts" setup>
 import dnEnum from "@enum/dailyNote.js";
-import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteExpeditionProps = {
@@ -73,7 +73,7 @@ function initTime(): void {
   remainedTime.value = typeof time === "string" ? parseInt(time) : time;
   isFinished.value =
     props.expedition.status === dnEnum.expedition.FINISHED || remainedTime.value <= 0;
-  fullTimeText.value = stamp2FullTime(remainedTime.value);
+  fullTimeText.value = fmtUtil.fullTime(remainedTime.value);
   updateFormattedTime();
 }
 
@@ -106,7 +106,7 @@ function updateFormattedTime(): void {
     return;
   }
 
-  formattedTime.value = stamp2LastTime(remainedTime.value * 1000);
+  formattedTime.value = fmtUtil.remainingTime(remainedTime.value * 1000);
 }
 </script>
 <style lang="scss" scoped>

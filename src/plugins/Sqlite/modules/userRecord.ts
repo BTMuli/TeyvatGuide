@@ -3,8 +3,8 @@
  * @since Beta v0.11.5
  */
 
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 import { transUserRecord } from "../utils/transUserRecord.js";
@@ -129,7 +129,7 @@ async function saveRawRecord(uid: number, data: TGApp.Game.Record.FullData): Pro
      ON CONFLICT(uid) DO UPDATE SET
        rawData = excluded.rawData,
        updated = excluded.updated;`,
-    [uid, JSON.stringify(data), timestampToDate(new Date().getTime())],
+    [uid, JSON.stringify(data), fmtUtil.dateTime(new Date().getTime())],
   );
 }
 

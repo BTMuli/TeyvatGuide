@@ -13,11 +13,11 @@
       <div v-if="isLogin && userInfo" class="info-list">
         <div class="info-item">
           <span>CDN到期时间</span>
-          <span>{{ fmtUtil.timeStr2str(userInfo.CdnExpireAt) }}</span>
+          <span>{{ fmtUtil.formatTime(userInfo.CdnExpireAt) }}</span>
         </div>
         <div class="info-item">
           <span>祈愿到期时间</span>
-          <span>{{ fmtUtil.timeStr2str(userInfo.GachaLogExpireAt) }}</span>
+          <span>{{ fmtUtil.formatTime(userInfo.GachaLogExpireAt) }}</span>
         </div>
       </div>
       <span v-else>未获取到用户信息</span>

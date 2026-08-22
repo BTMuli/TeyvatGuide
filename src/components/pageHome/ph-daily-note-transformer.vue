@@ -14,7 +14,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteTransformerProps = {
@@ -68,7 +68,7 @@ function initTime(): void {
     remainedTime.value = days * 86400 + hours * 3600 + minutes * 60 + seconds;
     remainingDays.value = days;
     if (days === 0 && remainedTime.value > 0) {
-      fullTimeText.value = stamp2FullTime(remainedTime.value);
+      fullTimeText.value = fmtUtil.fullTime(remainedTime.value);
     } else {
       fullTimeText.value = "";
     }
@@ -113,7 +113,7 @@ function updateFormattedTime(): void {
   }
   const days = Math.floor(remainedTime.value / 86400);
   if (days > 0) formattedTime.value = `${days}天后可再次使用`;
-  else formattedTime.value = stamp2LastTime(remainedTime.value * 1000);
+  else formattedTime.value = fmtUtil.remainingTime(remainedTime.value * 1000);
 }
 </script>
 <style lang="scss" scoped>

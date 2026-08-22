@@ -94,7 +94,7 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import {
   computed,
   nextTick,
@@ -206,7 +206,7 @@ watch(selectedType, () => {
 onMounted(() => {
   const dayNow = new Date().getDay() === 0 ? 7 : new Date().getDay();
   const week = btnText.find((item) => item.week === dayNow) ?? { text: "周日", week: 7 };
-  dateNow.value = `${timestampToDate(new Date().getTime()).split(" ")[0]} ${week.text}`;
+  dateNow.value = `${fmtUtil.dateTime(new Date().getTime()).split(" ")[0]} ${week.text}`;
   weekNow.value = dayNow;
   btnNow.value = dayNow;
   calendarReady = true;

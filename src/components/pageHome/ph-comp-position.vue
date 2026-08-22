@@ -95,9 +95,9 @@ import useAppStore from "@store/app.js";
 import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -313,7 +313,7 @@ function genEmptyMaterial(material: TGApp.App.Material.WikiItem): MaterialInfo {
       id: material.id,
       count: 0,
       records: [],
-      updated: timestampToDate(Date.now()),
+      updated: fmtUtil.dateTime(Date.now()),
     },
   };
 }

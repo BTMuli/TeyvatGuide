@@ -282,6 +282,7 @@ import useHutaoStore from "@store/hutao.js";
 import useUserStore from "@store/user.js";
 import { path } from "@tauri-apps/api";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import fmtUtil from "@utils/fmtUtil.js";
 import {
   filterGachaDisplayList,
   formatGachaInclusiveEnd,
@@ -296,7 +297,6 @@ import {
 } from "@utils/gachaVersion.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { str2timeStr, timeStr2str } from "@utils/toolFunc.js";
 import { exportUigfData } from "@utils/UIGF.js";
 import fetchYattaJson from "@utils/Yatta.js";
 import { storeToRefs } from "pinia";
@@ -594,7 +594,7 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
   if (isExpire) {
     const check = await showDialog.checkF({
       title: "胡桃云祈愿已过期，确定上传？",
-      text: `到期时间:${timeStr2str(userInfo.value.GachaLogExpireAt)}`,
+      text: `到期时间:${fmtUtil.formatTime(userInfo.value.GachaLogExpireAt)}`,
     });
     if (!check) return;
   }
@@ -636,7 +636,7 @@ async function handleHutaoUpload(uids: Array<string>): Promise<void> {
         GachaType: Number(i.gachaType),
         QueryType: Number(i.uigfType),
         ItemId: Number(i.itemId),
-        Time: str2timeStr(i.time),
+        Time: fmtUtil.toTimeStr(i.time),
         Id: i.id.toString(),
       })),
     };

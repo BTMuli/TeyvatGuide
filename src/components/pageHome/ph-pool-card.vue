@@ -61,7 +61,7 @@
         />
         <div v-if="restTs > durationTs" class="ph-pool-stat">未开始</div>
         <div v-else-if="restTs > 0" class="ph-pool-stat">
-          剩余时间：{{ stamp2LastTime(restTs) }}
+          剩余时间：{{ fmtUtil.remainingTime(restTs) }}
         </div>
         <div v-else class="ph-pool-stat">已结束</div>
       </div>
@@ -87,10 +87,10 @@ import showSnackbar from "@comp/func/snackbar.js";
 import postReq from "@req/postReq.js";
 import useHomeStore from "@store/home.js";
 import { str2Color } from "@utils/colorFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { createPost, createTGWindow } from "@utils/TGWindow.js";
-import { stamp2LastTime } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";

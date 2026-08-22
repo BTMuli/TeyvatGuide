@@ -300,10 +300,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import useUserStore from "@store/user.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { createPost } from "@utils/TGWindow.js";
-import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -419,7 +420,7 @@ const currentPoolTypeLabel = computed<string>(() => {
 });
 const poolTimeRange = computed<string>(() => {
   if (props.pool.from === "" || props.pool.to === "") return "";
-  return `${timestampToDate(parseTime(props.pool.from))} ~ ${timestampToDate(parseTime(props.pool.to))}`;
+  return `${fmtUtil.dateTime(parseTime(props.pool.from))} ~ ${fmtUtil.dateTime(parseTime(props.pool.to))}`;
 });
 const upPools = computed<Array<TGApp.App.Gacha.PoolItem>>(() => {
   const item = props.item;
@@ -431,11 +432,11 @@ const upPools = computed<Array<TGApp.App.Gacha.PoolItem>>(() => {
 const upCount = computed<number>(() => upPools.value.length);
 const firstUpTime = computed<string>(() => {
   const pool = upPools.value[upPools.value.length - 1];
-  return pool === undefined ? "--" : timestampToDate(parseTime(pool.from));
+  return pool === undefined ? "--" : fmtUtil.dateTime(parseTime(pool.from));
 });
 const lastUpTime = computed<string>(() => {
   const pool = upPools.value[0];
-  return pool === undefined ? "--" : timestampToDate(parseTime(pool.to));
+  return pool === undefined ? "--" : fmtUtil.dateTime(parseTime(pool.to));
 });
 const poolHistory = computed<Array<TGApp.App.Gacha.PoolItem>>(() => {
   const name = currentPool.value?.name ?? props.pool.name;
@@ -712,7 +713,7 @@ function getPoolTime(pool: TGApp.App.Gacha.PoolItem): string {
  * @returns yyyy-MM-dd
  */
 function getPoolDate(time: string): string {
-  return timestampToDate(parseTime(time)).slice(0, 10);
+  return fmtUtil.dateTime(parseTime(time)).slice(0, 10);
 }
 
 /**

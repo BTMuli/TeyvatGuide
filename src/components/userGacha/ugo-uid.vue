@@ -21,7 +21,9 @@
         </div>
         <div class="ugo-header-item">
           <div>导出时间：</div>
-          <div>{{ timestampToDate(Number(importRaw.data.info.export_timestamp) * 1000) }}</div>
+          <div>
+            {{ fmtUtil.dateTime(Number(importRaw.data.info.export_timestamp) * 1000) }}
+          </div>
         </div>
       </div>
       <v-item-group v-model="selectedData" class="ugo-content" multiple>
@@ -62,8 +64,8 @@ import TSUserGacha from "@Sqlm/userGacha.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { path } from "@tauri-apps/api";
 import { open } from "@tauri-apps/plugin-dialog";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { checkUigfData, exportUigf4Data, readUigf4Data, readUigfData } from "@utils/UIGF.js";
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
@@ -192,7 +194,7 @@ function parseData(data: TGApp.Plugins.UIGF.Schema): UgoUidItem {
   return {
     uid: data.info.uid,
     length: data.list.length,
-    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    time: `${fmtUtil.dateTime(Math.min(...timeList))} ~ ${fmtUtil.dateTime(Math.max(...timeList))}`,
     isUgc: false,
   };
 }
@@ -202,7 +204,7 @@ function parseData4(data: TGApp.Plugins.UIGF.GachaHk4e): UgoUidItem {
   return {
     uid: data.uid.toString(),
     length: data.list.length,
-    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    time: `${fmtUtil.dateTime(Math.min(...timeList))} ~ ${fmtUtil.dateTime(Math.max(...timeList))}`,
     isUgc: false,
   };
 }
@@ -212,7 +214,7 @@ function parseUgc(data: TGApp.Plugins.UIGF.GachaUgc): UgoUidItem {
   return {
     uid: data.uid.toString(),
     length: data.list.length,
-    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    time: `${fmtUtil.dateTime(Math.min(...timeList))} ~ ${fmtUtil.dateTime(Math.max(...timeList))}`,
     isUgc: true,
   };
 }
@@ -237,7 +239,7 @@ function parseLocalHk4e(data: Array<TGApp.Sqlite.Gacha.Gacha>): UgoUidItem {
   return {
     uid: data[0].uid,
     length: data.length,
-    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    time: `${fmtUtil.dateTime(Math.min(...timeList))} ~ ${fmtUtil.dateTime(Math.max(...timeList))}`,
     isUgc: false,
   };
 }
@@ -247,7 +249,7 @@ function parseLocalUgc(data: Array<TGApp.Sqlite.Gacha.GachaB>): UgoUidItem {
   return {
     uid: data[0].uid,
     length: data.length,
-    time: `${timestampToDate(Math.min(...timeList))} ~ ${timestampToDate(Math.max(...timeList))}`,
+    time: `${fmtUtil.dateTime(Math.min(...timeList))} ~ ${fmtUtil.dateTime(Math.max(...timeList))}`,
     isUgc: true,
   };
 }

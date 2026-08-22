@@ -9,9 +9,9 @@ import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
@@ -41,7 +41,7 @@ function transUser(data: TGApp.App.Account.User): TGApp.Sqlite.Account.User {
     uid: data.uid,
     brief: JSON.stringify(data.brief),
     cookie: JSON.stringify(data.cookie),
-    updated: timestampToDate(new Date().getTime()),
+    updated: fmtUtil.dateTime(new Date().getTime()),
   };
 }
 
@@ -201,7 +201,7 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
     showSnackbar.error("获取用户信息失败");
     return false;
   }
-  const updated = timestampToDate(new Date().getTime());
+  const updated = fmtUtil.dateTime(new Date().getTime());
   await showLoading.update("正在写入数据库");
   try {
     await TGSqlite.executeTransaction([
@@ -337,7 +337,7 @@ async function getGameAccountByGid(
  */
 async function switchGameAccount(uid: string, gameUid: string): Promise<void> {
   await TGSqlite.getDB();
-  const updated = timestampToDate(new Date().getTime());
+  const updated = fmtUtil.dateTime(new Date().getTime());
   await TGSqlite.executeTransaction([
     {
       query: "UPDATE GameAccount SET isChosen = 0, updated = $1 WHERE uid = $2;",
@@ -381,7 +381,7 @@ async function saveGameAccount(
   for (const account of accounts) {
     const isChosen = account.is_chosen ? 1 : 0;
     const isOfficial = account.is_official ? 1 : 0;
-    const timeNow = timestampToDate(new Date().getTime());
+    const timeNow = fmtUtil.dateTime(new Date().getTime());
     await db.execute(
       `
           INSERT INTO GameAccount(uid, gameBiz, gameUid, isChosen, isOfficial,

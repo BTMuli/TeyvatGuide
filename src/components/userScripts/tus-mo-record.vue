@@ -53,11 +53,11 @@
             <div class="tus-mr-item-meta">
               <span class="tus-mr-item-type">{{ item.type_name }}</span>
               <span
-                :title="timestampToDate(Number(item.order_time) * 1000)"
+                :title="fmtUtil.dateTime(Number(item.order_time) * 1000)"
                 class="tus-mr-item-time"
               >
                 <v-icon size="12">mdi-clock-outline</v-icon>
-                {{ getNearTime(Number(item.order_time)) }}
+                {{ fmtUtil.nearTime(Number(item.order_time)) }}
               </span>
             </div>
           </div>
@@ -81,9 +81,9 @@ import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { useBoxReachBottom } from "@hooks/reachBottom.js";
 import bbsReq from "@req/bbsReq.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { getNearTime, timestampToDate } from "@utils/toolFunc.js";
 import { ref, shallowRef, useTemplateRef, watch } from "vue";
 
 /** 组件参数 */

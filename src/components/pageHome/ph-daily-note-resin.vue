@@ -31,7 +31,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { stamp2FullTime, stamp2LastTime } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 type PhDailyNoteResinProps = {
@@ -58,7 +58,7 @@ const current = computed<number>(() => {
 const full = computed<boolean>(() => current.value === max.value);
 const formattedTime = computed<string>(() => {
   if (remainedTime.value <= 0) return "已恢复满";
-  return stamp2LastTime(remainedTime.value * 1000);
+  return fmtUtil.remainingTime(remainedTime.value * 1000);
 });
 
 let timer: ReturnType<typeof setInterval> | null = null;
@@ -85,7 +85,7 @@ function initTime(): void {
   initialCurrent.value = props.currentResin || 0;
   const time = props.recoveryTime;
   remainedTime.value = typeof time === "string" ? parseInt(time) : time || 0;
-  fullTimeText.value = stamp2FullTime(remainedTime.value);
+  fullTimeText.value = fmtUtil.fullTime(remainedTime.value);
 }
 
 function startTimer(): void {

@@ -57,7 +57,7 @@
         </header>
         <div class="pbom-record-list">
           <div v-for="record in dbInfo.records" :key="record.time" class="pbom-record">
-            <time>{{ timestampToDate(record.time * 1000) }}</time>
+            <time>{{ fmtUtil.dateTime(record.time * 1000) }}</time>
             <span>{{ record.manual ? "手动更新" : "自动导入" }}</span>
             <strong>{{ fmtUtil.num(record.count) }}</strong>
           </div>
@@ -74,7 +74,6 @@ import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import TSUserBagMaterial, { isTrackableBagMaterial } from "@Sqlm/userBagMaterial.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, shallowRef, useSlots, watch } from "vue";
 
 import PboConvert from "./pbo-convert.vue";

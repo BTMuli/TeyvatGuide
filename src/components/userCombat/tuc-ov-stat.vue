@@ -6,7 +6,7 @@
         <span class="tuc-ovs-title" @click="share()"> 真境剧诗统计-第{{ data.ScheduleId }}期 </span>
         <span class="tuc-ovs-sub">
           <span>共{{ data.RecordTotal }}条数据 | </span>
-          <span>更新于{{ timestampToDate(data.Timestamp) }}</span>
+          <span>更新于{{ fmtUtil.dateTime(data.Timestamp) }}</span>
         </span>
       </div>
       <div class="tuc-ovs-content">
@@ -20,8 +20,8 @@ import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, ref } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";

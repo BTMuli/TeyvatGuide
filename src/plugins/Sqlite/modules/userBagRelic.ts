@@ -3,7 +3,7 @@
  * @since Beta v0.11.0
  */
 
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import wikiUtils from "@utils/wikiUtils.js";
 
 import TGSqlite from "../index.js";
@@ -61,7 +61,7 @@ async function insertRelic(
       info.is_locked ?? false,
       info.is_marked ?? false,
       info.level ?? 0,
-      timestampToDate(now),
+      fmtUtil.dateTime(now),
     ],
   );
 }

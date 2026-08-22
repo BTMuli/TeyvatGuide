@@ -28,8 +28,8 @@
     </div>
     <div class="tpr-info">
       <div class="tpri-left">
-        <span :title="timestampToDate(props.modelValue.reply.created_at * 1000)">
-          {{ getNearTime(props.modelValue.reply.created_at) }}
+        <span :title="fmtUtil.dateTime(props.modelValue.reply.created_at * 1000)">
+          {{ fmtUtil.nearTime(props.modelValue.reply.created_at) }}
         </span>
         <span>{{ props.modelValue.user.ip_region }}</span>
       </div>
@@ -114,10 +114,11 @@ import { event, path } from "@tauri-apps/api";
 import { emit, type Event, type UnlistenFn } from "@tauri-apps/api/event";
 import { save } from "@tauri-apps/plugin-dialog";
 import { writeTextFile } from "@tauri-apps/plugin-fs";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { getNearTime, getUserAvatar, timestampToDate } from "@utils/toolFunc.js";
+import { getUserAvatar } from "@utils/toolFunc.js";
 import {
   computed,
   onMounted,

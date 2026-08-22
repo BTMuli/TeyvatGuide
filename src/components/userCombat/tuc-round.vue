@@ -11,7 +11,7 @@
         圣牌挑战·{{ props.round.tarot_serial_no }}
       </span>
       <span v-else class="main">第{{ props.round.round_id }}幕</span>
-      <span class="sub">{{ timestampToDate(Number(props.round.finish_time) * 1000) }}</span>
+      <span class="sub">{{ fmtUtil.dateTime(Number(props.round.finish_time) * 1000) }}</span>
     </div>
     <span v-if="showInfo" class="tucr-info">UID {{ props.uid }} | 第{{ props.id }}期</span>
     <TucAeBox :avatars="props.round.avatars" :enemies="props.round.enemies" />
@@ -26,8 +26,8 @@
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { nextTick, ref, useTemplateRef } from "vue";
 
 import TucAeBox from "./tuc-ae-box.vue";

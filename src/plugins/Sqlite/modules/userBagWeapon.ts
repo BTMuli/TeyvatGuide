@@ -3,7 +3,7 @@
  * @since Beta v0.10.5
  */
 
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 
 import TGSqlite from "../index.js";
 
@@ -45,7 +45,7 @@ async function insertWeapon(
     guid: guid,
     id: itemId,
     info: JSON.stringify(info),
-    updated: timestampToDate(now),
+    updated: fmtUtil.dateTime(now),
   };
   const db = await TGSqlite.getDB();
   const sql = getInsertSql(newTable);

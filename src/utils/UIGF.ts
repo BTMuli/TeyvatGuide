@@ -11,8 +11,8 @@ import { app, path } from "@tauri-apps/api";
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import Ajv, { type ErrorObject } from "ajv";
 
+import fmtUtil from "./fmtUtil.js";
 import TGLogger from "./TGLogger.js";
-import { timestampToDate } from "./toolFunc.js";
 
 import { Uigf4Schema, UigfSchema } from "@/data/index.js";
 
@@ -39,7 +39,7 @@ function getExportTime(time: string, timezone: number): string {
   const date = new Date(time);
   const diffTimezone = -8 + timezone;
   const realDate = new Date(date.getTime() + diffTimezone * 60 * 60 * 1000);
-  return timestampToDate(realDate.getTime());
+  return fmtUtil.dateTime(realDate.getTime());
 }
 
 /**
@@ -56,7 +56,7 @@ async function getUigfHeader(uid: string, timezone: number): Promise<TGApp.Plugi
     lang: "zh-cn",
     uigf_version: "v3.0",
     export_timestamp: Math.floor(stamp / 1000),
-    export_time: timestampToDate(stamp),
+    export_time: fmtUtil.dateTime(stamp),
     export_app: "TeyvatGuide",
     export_app_version: await app.getVersion(),
     region_time_zone: timezone,

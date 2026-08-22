@@ -19,14 +19,14 @@
         <span class="time">
           {{ props.pos.create_time }}
           ~
-          {{ endTs === 0 ? "未知" : timestampToDate(endTs) }}
+          {{ endTs === 0 ? "未知" : fmtUtil.dateTime(endTs) }}
         </span>
       </div>
       <div class="ph-po-rest">
         <v-icon>mdi-clock-outline</v-icon>
         <span v-if="!hasEndTime">未知</span>
         <span v-else-if="restTs === 0">已结束</span>
-        <span v-else-if="restTs < durationTs">剩余时间：{{ stamp2LastTime(restTs) }}</span>
+        <span v-else-if="restTs < durationTs">剩余时间：{{ fmtUtil.remainingTime(restTs) }}</span>
         <span v-else>未开始</span>
       </div>
     </div>
@@ -36,9 +36,9 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import fmtUtil from "@utils/fmtUtil.js";
 import { parseLink } from "@utils/linkParser.js";
 import { createPost, toObcPage } from "@utils/TGWindow.js";
-import { stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 type PhPosObcProps = { pos: TGApp.BBS.Obc.PositionItem };

@@ -12,7 +12,7 @@
       <img alt="icon" class="tp-vod-icon" src="/UI/post/video_play.svg" />
       <div class="tp-vod-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-        <span>{{ getVideoDuration(props.data.insert.vod.duration) }}</span>
+        <span>{{ fmtUtil.videoDuration(props.data.insert.vod.duration) }}</span>
       </div>
       <div class="tp-vod-view">
         <v-icon size="12">mdi-eye</v-icon>
@@ -27,10 +27,10 @@ import showSnackbar from "@comp/func/snackbar.js";
 import useAppStore from "@store/app.js";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { saveBufferFile, saveImgBlob } from "@utils/TGShare.js";
-import { getVideoDuration } from "@utils/toolFunc.js";
 import Artplayer, { type Option } from "artplayer";
 import { storeToRefs } from "pinia";
 import { onMounted, onUnmounted, ref, shallowRef, toRaw, watch } from "vue";

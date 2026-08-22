@@ -28,8 +28,8 @@
 <script lang="ts" setup>
 import showLoading from "@comp/func/loading.js";
 import useAppStore from "@store/app.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { saveImgBlob } from "@utils/TGShare.js";
-import { bytesToSize } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
@@ -113,7 +113,7 @@ function getImageTitle(): string {
     res.push(`宽度：${props.data.attributes.width}px`);
     res.push(`高度：${props.data.attributes.height}px`);
     if (props.data.attributes.size) {
-      const size = bytesToSize(props.data.attributes.size);
+      const size = fmtUtil.size(props.data.attributes.size);
       res.push(`大小：${size}`);
     }
     res.push(`格式：${getImageExt()}`);
@@ -123,7 +123,7 @@ function getImageTitle(): string {
     res.push(`宽度：${props.data.insert.image.width}px`);
     res.push(`高度：${props.data.insert.image.height}px`);
     if (props.data.insert.image.size) {
-      const size = bytesToSize(Number(props.data.insert.image.size));
+      const size = fmtUtil.size(Number(props.data.insert.image.size));
       res.push(`大小：${size}`);
     }
     res.push(`格式：${getImageExt()}`);

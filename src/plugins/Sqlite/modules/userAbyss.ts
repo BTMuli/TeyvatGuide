@@ -5,8 +5,8 @@
 
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
@@ -19,7 +19,7 @@ import { transCharacterData, transFloorData } from "../utils/transAbyssData.js";
  */
 function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableTrans): string {
   const data = data2Raw(tableData);
-  const timeNow = timestampToDate(new Date().getTime());
+  const timeNow = fmtUtil.dateTime(new Date().getTime());
   return `
       INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes,
                                maxFloor, totalStar, isUnlock, revealRank, defeatRank, damageRank,
@@ -56,8 +56,8 @@ function getRestoreSql(tableData: TGApp.Sqlite.Abyss.TableTrans): string {
  * @returns sql
  */
 function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
-  const startTime = timestampToDate(Number(data.start_time) * 1000);
-  const endTime = timestampToDate(Number(data.end_time) * 1000);
+  const startTime = fmtUtil.dateTime(Number(data.start_time) * 1000);
+  const endTime = fmtUtil.dateTime(Number(data.end_time) * 1000);
   const isUnlock = data.is_unlock ? 1 : 0;
   const revealRank = transCharacterData(data.reveal_rank);
   const defeatRank = transCharacterData(data.defeat_rank);
@@ -67,7 +67,7 @@ function getInsertSql(uid: string, data: TGApp.Game.Abyss.FullData): string {
   const energySkillRank = transCharacterData(data.energy_skill_rank);
   const floors = transFloorData(data.floors);
   const skippedFloor = data.skipped_floor ?? "";
-  const timeNow = timestampToDate(new Date().getTime());
+  const timeNow = fmtUtil.dateTime(new Date().getTime());
   return `
       INSERT INTO SpiralAbyss (uid, id, startTime, endTime, totalBattleTimes, totalWinTimes, maxFloor,
                                totalStar, isUnlock, revealRank, defeatRank, damageRank, takeDamageRank,

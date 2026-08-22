@@ -95,10 +95,12 @@
     </div>
     <div class="ph-puc-duration">
       <template v-if="isStart">
-        <span data-html2canvas-ignore title="剩余时间">{{ stamp2LastTime(restTs * 1000) }}</span>
+        <span data-html2canvas-ignore title="剩余时间">{{
+          fmtUtil.remainingTime(restTs * 1000)
+        }}</span>
         <span title="活动时间">
-          {{ timestampToDate(Number(props.pos.start_timestamp) * 1000) }} ~
-          {{ timestampToDate(Number(props.pos.end_timestamp) * 1000) }}
+          {{ fmtUtil.dateTime(Number(props.pos.start_timestamp) * 1000) }} ~
+          {{ fmtUtil.dateTime(Number(props.pos.end_timestamp) * 1000) }}
         </span>
       </template>
       <template v-else>
@@ -133,7 +135,7 @@
 import gameEnum from "@enum/game.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
-import { parseHtmlText, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
+import { parseHtmlText } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";
 import { useRouter } from "vue-router";
 
@@ -181,7 +183,7 @@ onMounted(() => {
     props.pos.type === "ActTypeHardChallenge" &&
     props.pos.hard_challenge_detail.sub.seconds >= 0
   ) {
-    endHd.value = timestampToDate(Date.now() + props.pos.hard_challenge_detail.sub.seconds * 1000);
+    endHd.value = fmtUtil.dateTime(Date.now() + props.pos.hard_challenge_detail.sub.seconds * 1000);
   }
 });
 

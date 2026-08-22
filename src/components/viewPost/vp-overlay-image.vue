@@ -33,7 +33,7 @@
           <div class="tpoi-info">
             <span class="tpoi-info-item">
               <span>大小：</span>
-              <span>{{ bytesToSize(Number(props.image.insert.image.size) ?? 0) }}</span>
+              <span>{{ fmtUtil.size(Number(props.image.insert.image.size) ?? 0) }}</span>
             </span>
             <span class="tpoi-info-item">
               <span>尺寸：</span>
@@ -55,7 +55,7 @@
           <div class="tpoi-info">
             <span v-if="props.image.attributes.size" class="tpoi-info-item">
               <span>大小：</span>
-              <span>{{ bytesToSize(props.image.attributes.size ?? 0) }}</span>
+              <span>{{ fmtUtil.size(props.image.attributes.size ?? 0) }}</span>
             </span>
             <span
               v-if="props.image.attributes?.width && props.image.attributes?.height"
@@ -89,10 +89,10 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
-import { bytesToSize } from "@utils/toolFunc.js";
 import {
   computed,
   nextTick,
@@ -541,7 +541,7 @@ async function onCopy(): Promise<void> {
     await showLoading.end();
     return;
   }
-  const size = bytesToSize(buffer.value.byteLength);
+  const size = fmtUtil.size(buffer.value.byteLength);
   await copyToClipboard(buffer.value);
   await showLoading.end();
   showSnackbar.success(`图片已复制到剪贴板，大小：${size}`);

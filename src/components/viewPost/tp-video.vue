@@ -19,7 +19,7 @@
       <img :src="videoCover" alt="cover" class="tp-video-cover" />
       <img alt="icon" class="tp-video-icon" src="/UI/post/video_play_bili.webp" />
       <div class="tp-video-info">
-        <span>{{ videoData.bvid }}|{{ timestampToDate(videoData.ctime * 1000) }}</span>
+        <span>{{ videoData.bvid }}|{{ fmtUtil.dateTime(videoData.ctime * 1000) }}</span>
         <span>{{ videoData.title }}</span>
       </div>
       <div class="tp-video-view">
@@ -28,7 +28,7 @@
       </div>
       <div class="tp-video-time">
         <v-icon size="12">mdi-clock-time-four-outline</v-icon>
-        <span>{{ getVideoDuration(videoData.duration * 1000) }}</span>
+        <span>{{ fmtUtil.videoDuration(videoData.duration * 1000) }}</span>
       </div>
     </div>
   </div>
@@ -36,10 +36,10 @@
 <script lang="ts" setup>
 import Bili from "@Bili/index.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { saveImgBlob } from "@utils/TGShare.js";
-import { getVideoDuration, timestampToDate } from "@utils/toolFunc.js";
 import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 
 type TpVideo = { insert: { video: string } };

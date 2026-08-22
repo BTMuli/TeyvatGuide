@@ -66,9 +66,10 @@ import PhPoolItemOverlay, {
 } from "@comp/pageHome/ph-pool-item-overlay.vue";
 import gameEnum from "@enum/game.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { toGachaPeriodEndBound, toGachaPeriodStartBound } from "@utils/gachaVersion.js";
 import { createPost } from "@utils/TGWindow.js";
-import { getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed, nextTick, ref, shallowRef, watch } from "vue";
 
 type UgHisCardProps = {
@@ -236,8 +237,8 @@ function getType(type: number): string {
 }
 
 function getTimeStr(pool: TGApp.App.Gacha.PoolItem): string {
-  const startTime = timestampToDate(new Date(pool.from).getTime());
-  const endTime = timestampToDate(new Date(pool.to).getTime());
+  const startTime = fmtUtil.dateTime(new Date(pool.from).getTime());
+  const endTime = fmtUtil.dateTime(new Date(pool.to).getTime());
   return `${startTime} ~ ${endTime}`;
 }
 

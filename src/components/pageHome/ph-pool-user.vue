@@ -23,7 +23,7 @@
       </template>
       <template v-else>
         <span v-if="restTs > 0" data-html2canvas-ignore title="剩余时间">
-          {{ stamp2LastTime(restTs) }}
+          {{ fmtUtil.remainingTime(restTs) }}
         </span>
         <span v-else>已结束</span>
         <span title="卡池时间">{{ startTime }} ~ {{ endTime }}</span>
@@ -67,8 +67,9 @@
 import TItemBox, { TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
-import { getWikiBrief, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/toolFunc.js";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from "vue";
 
 import PhPoolItemOverlay, {
@@ -150,9 +151,9 @@ const percent = computed<number>(() => {
   return (restTs.value * 100) / durationTs.value;
 });
 const startTime = computed<string>(() =>
-  timestampToDate(Number(props.pool.start_timestamp) * 1000),
+  fmtUtil.dateTime(Number(props.pool.start_timestamp) * 1000),
 );
-const endTime = computed<string>(() => timestampToDate(Number(props.pool.end_timestamp) * 1000));
+const endTime = computed<string>(() => fmtUtil.dateTime(Number(props.pool.end_timestamp) * 1000));
 const typeBg = computed<string>(() => {
   const poolTypeMap: Record<TGApp.Game.ActCalendar.PoolTypeEnum, string> = {
     [gameEnum.actCalendar.poolType.Avatar]: "var(--tgc-od-red)",
@@ -230,8 +231,8 @@ async function openPoolOverlay(): Promise<void> {
     pool: {
       name: props.pool.pool_name,
       type: props.pool.pool_type,
-      from: timestampToDate(Number(props.pool.start_timestamp) * 1000),
-      to: timestampToDate(Number(props.pool.end_timestamp) * 1000),
+      from: fmtUtil.dateTime(Number(props.pool.start_timestamp) * 1000),
+      to: fmtUtil.dateTime(Number(props.pool.end_timestamp) * 1000),
     },
     poolItemIds: poolItemIds.value,
   };
@@ -256,8 +257,8 @@ async function openDetailOverlay(item: PhPoolItemOverlayItem): Promise<void> {
     pool: {
       name: props.pool.pool_name,
       type: props.pool.pool_type,
-      from: timestampToDate(Number(props.pool.start_timestamp) * 1000),
-      to: timestampToDate(Number(props.pool.end_timestamp) * 1000),
+      from: fmtUtil.dateTime(Number(props.pool.start_timestamp) * 1000),
+      to: fmtUtil.dateTime(Number(props.pool.end_timestamp) * 1000),
     },
     poolItemIds: poolItemIds.value,
   };

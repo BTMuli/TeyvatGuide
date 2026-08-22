@@ -6,8 +6,8 @@
 import { UiafAchiStatEnum } from "@enum/uiaf.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
@@ -238,11 +238,11 @@ async function updateAchi(data: TGApp.App.Achievement.RenderItem): Promise<void>
       data.isCompleted ? 1 : 0,
       data.completedTime,
       data.progress,
-      timestampToDate(new Date().getTime()),
+      fmtUtil.dateTime(new Date().getTime()),
       data.isCompleted ? 1 : 0,
       data.completedTime,
       data.progress,
-      timestampToDate(new Date().getTime()),
+      fmtUtil.dateTime(new Date().getTime()),
     ],
   );
 }
@@ -354,8 +354,8 @@ async function mergeUiaf(data: Array<TGApp.Plugins.UIAF.Achievement>, uid: numbe
       achi.status === UiafAchiStatEnum.Finished || achi.status === UiafAchiStatEnum.RewardTaken
         ? 1
         : 0;
-    const timeC = status === 1 ? timestampToDate(achi.timestamp * 1000) : "";
-    const timeN = timestampToDate(new Date().getTime());
+    const timeC = status === 1 ? fmtUtil.dateTime(achi.timestamp * 1000) : "";
+    const timeN = fmtUtil.dateTime(new Date().getTime());
     await db.execute(
       "INSERT INTO Achievements(id, uid, isCompleted, completedTime, progress, updated) \
     VALUES (?,?,?,?,?,?) ON CONFLICT(id,uid) DO UPDATE  SET\

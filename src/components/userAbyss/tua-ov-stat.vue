@@ -50,7 +50,7 @@
                 v-bind="menuProps"
                 variant="text"
               >
-                更新于 {{ timestampToDate(overview.cur.Timestamp) }}
+                更新于 {{ fmtUtil.dateTime(overview.cur.Timestamp) }}
               </v-btn>
             </template>
             <HtaOverlayOverview :data="overview" />
@@ -96,9 +96,9 @@ import HtaTabTeam from "@comp/hutaoAbyss/hta-tab-team.vue";
 import HtaTabUp from "@comp/hutaoAbyss/hta-tab-up.vue";
 import HtaTabUse from "@comp/hutaoAbyss/hta-tab-use.vue";
 import hutao from "@Hutao/index.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, reactive, ref, shallowRef, watch } from "vue";
 
 type AbyssTab = "use" | "up" | "team" | "hold";

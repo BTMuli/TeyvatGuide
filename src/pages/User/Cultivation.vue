@@ -313,9 +313,10 @@ import {
   mergePlanInventory,
   sortCultivationResults,
 } from "@utils/cultivationPlan.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
-import { getRcStar, getZhElement, timestampToDate } from "@utils/toolFunc.js";
+import { getRcStar, getZhElement } from "@utils/toolFunc.js";
 import userCalc, { type CultivationMaterial } from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
@@ -467,7 +468,7 @@ const inventoryUpdatedLabel = computed<string>(() => {
 
 function formatUpdated(value: string): string {
   const timestamp = Date.parse(value);
-  return Number.isNaN(timestamp) ? value : timestampToDate(timestamp);
+  return Number.isNaN(timestamp) ? value : fmtUtil.dateTime(timestamp);
 }
 
 const localCharacterOptions = computed<Array<TGApp.App.UserCalc.CharacterOption>>(() => {

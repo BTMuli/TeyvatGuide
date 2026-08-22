@@ -92,8 +92,8 @@
 import gameEnum from "@enum/game.js";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import fmtUtil from "@utils/fmtUtil.js";
 import { matchGachaDisplayScope } from "@utils/gachaVersion.js";
-import { str2timeStr } from "@utils/toolFunc.js";
 import {
   computed,
   nextTick,
@@ -303,7 +303,7 @@ function getStar5Avg(): string {
 function checkIsUp(item: TGApp.Sqlite.Gacha.Gacha): boolean | undefined {
   // 新手池和常驻池不存在UP概念
   if (item.gachaType === "100" || item.gachaType === "200") return undefined;
-  const itemTime = new Date(str2timeStr(item.time)).getTime();
+  const itemTime = new Date(fmtUtil.toTimeStr(item.time)).getTime();
   const itemIdNum = Number(item.itemId);
   const strictPool: Array<string> = [gameEnum.gachaType.WeaponUp, gameEnum.gachaType.MixUp];
   const avatarUpPool: Array<string> = [gameEnum.gachaType.AvatarUp, gameEnum.gachaType.AvatarUp2];

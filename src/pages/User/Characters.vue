@@ -218,10 +218,11 @@ import useUserStore from "@store/user.js";
 import { getVersion } from "@tauri-apps/api/app";
 import { getRfAc } from "@utils/acUtils.js";
 import { getUidServerTimezone } from "@utils/cultivationPlan.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { getZhElement, timestampToDate } from "@utils/toolFunc.js";
+import { getZhElement } from "@utils/toolFunc.js";
 import userCalc from "@utils/userCalc.js";
 import { storeToRefs } from "pinia";
 import {
@@ -345,7 +346,7 @@ const updateTimeText = computed<string>(() => {
     const updateTime = new Date(role.updated).getTime();
     if (updateTime > lastUpdateTime) lastUpdateTime = updateTime;
   }
-  return timestampToDate(lastUpdateTime);
+  return fmtUtil.dateTime(lastUpdateTime);
 });
 const selectedElementCnt = computed<Map<string, number>>(() => {
   const counts = new Map<string, number>();

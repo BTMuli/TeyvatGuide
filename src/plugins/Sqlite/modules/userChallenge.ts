@@ -6,8 +6,8 @@
 import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
 import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
@@ -42,13 +42,13 @@ function transUserChallenge(
   return {
     uid: "",
     id: Number(data.schedule.schedule_id),
-    startTime: timestampToDate(Number(data.schedule.start_time) * 1000),
-    endTime: timestampToDate(Number(data.schedule.end_time) * 1000),
+    startTime: fmtUtil.dateTime(Number(data.schedule.start_time) * 1000),
+    endTime: fmtUtil.dateTime(Number(data.schedule.end_time) * 1000),
     name: data.schedule.name,
     single: data.single,
     mp: data.mp,
     blings: data.blings,
-    updated: timestampToDate(new Date().getTime()),
+    updated: fmtUtil.dateTime(new Date().getTime()),
   };
 }
 
@@ -311,7 +311,7 @@ function getInsertSql(
   if (isQuarantine(parsed)) {
     throw new Error(`HardChallenge validation failed: ${parsed.field}/${parsed.reason}`);
   }
-  const updated = timestampToDate(new Date().getTime());
+  const updated = fmtUtil.dateTime(new Date().getTime());
   return {
     query: `INSERT INTO HardChallenge(uid, id, startTime, endTime, name, single, mp, blings, updated)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)

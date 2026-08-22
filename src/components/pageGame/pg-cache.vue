@@ -41,15 +41,15 @@
     <div v-if="summary !== null" class="cache-facts">
       <div class="cache-fact">
         <span>资源分片</span>
-        <strong>{{ bytesToSize(summary.chunkBytes) }} · {{ summary.chunkCount }} 个</strong>
+        <strong>{{ fmtUtil.size(summary.chunkBytes) }} · {{ summary.chunkCount }} 个</strong>
       </div>
       <div class="cache-fact">
         <span>渠道 SDK</span>
-        <strong>{{ bytesToSize(summary.sdkBytes) }} · {{ summary.sdkCount }} 个</strong>
+        <strong>{{ fmtUtil.size(summary.sdkBytes) }} · {{ summary.sdkCount }} 个</strong>
       </div>
       <div class="cache-fact">
         <span>合计</span>
-        <strong>{{ bytesToSize(summary.totalBytes) }}</strong>
+        <strong>{{ fmtUtil.size(summary.totalBytes) }}</strong>
       </div>
     </div>
   </section>
@@ -60,8 +60,8 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { clearGamePackageCache, getGamePackageCacheStatus } from "@utils/TGGameLauncher.js";
-import { bytesToSize } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onWatcherCleanup, ref, watch } from "vue";
 
@@ -104,7 +104,7 @@ async function refreshStatus(notify: boolean = false, silent: boolean = false): 
   try {
     summary.value = await getGamePackageCacheStatus();
     if (notify) {
-      showSnackbar.success(`缓存占用已刷新，合计 ${bytesToSize(summary.value.totalBytes)}`);
+      showSnackbar.success(`缓存占用已刷新，合计 ${fmtUtil.size(summary.value.totalBytes)}`);
     }
   } catch (error) {
     if (silent) return;
@@ -122,7 +122,7 @@ async function refreshStatus(notify: boolean = false, silent: boolean = false): 
 
 async function clearCache(): Promise<void> {
   if (loading.value || clearing.value) return;
-  const occupied = summary.value === null ? "未知" : bytesToSize(summary.value.totalBytes);
+  const occupied = summary.value === null ? "未知" : fmtUtil.size(summary.value.totalBytes);
   const confirmed = await showDialog.check(
     "确认清理游戏缓存吗？",
     `当前占用 ${occupied}。将删除未被未完成任务引用的资源分片与渠道 SDK 缓存，不影响游戏目录。`,

@@ -5,8 +5,9 @@
 
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
-import { getUtc8Time, getWikiBrief, timestampToDate } from "@utils/toolFunc.js";
+import { getWikiBrief } from "@utils/toolFunc.js";
 import { ref, type Ref } from "vue";
 
 import TGSqlite from "../index.js";
@@ -34,7 +35,7 @@ async function insertGachaList(
     const batchParams: Array<string | number | null> = [];
     const valueSql = batch
       .map((item, itemIndex) => {
-        const updateTime = timestampToDate(Date.now());
+        const updateTime = fmtUtil.dateTime(Date.now());
         batchParams.push(
           uid,
           item.gacha_type,
@@ -87,12 +88,12 @@ function transGacha(
   timezone: number = 8,
 ): TGApp.Plugins.UIGF.GachaItem {
   const find = getWikiBrief(gacha.item_id);
-  if (!find) return { ...gacha, time: getUtc8Time(gacha.time, timezone) };
+  if (!find) return { ...gacha, time: fmtUtil.utc8Time(gacha.time, timezone) };
   return {
     gacha_type: gacha.gacha_type,
     item_id: gacha.item_id,
     count: gacha.count ?? "1",
-    time: getUtc8Time(gacha.time, timezone),
+    time: fmtUtil.utc8Time(gacha.time, timezone),
     name: find.name,
     item_type: "element" in find ? "角色" : "武器",
     rank_type: find.star.toString(),

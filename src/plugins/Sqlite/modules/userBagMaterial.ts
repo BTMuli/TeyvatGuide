@@ -2,7 +2,7 @@
  * 用户背包材料模块
  * @since Beta v0.11.5
  */
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 
 import TGSqlite from "../index.js";
 
@@ -158,7 +158,7 @@ async function insertMaterial(
     id: itemId,
     count: count,
     records: JSON.stringify(newRecords),
-    updated: timestampToDate(now),
+    updated: fmtUtil.dateTime(now),
   };
   const db = await TGSqlite.getDB();
   const sql = getInsertSql(newTable);
@@ -184,7 +184,7 @@ async function deleteRecord(uid: number, itemId: number, count: number): Promise
     id: itemId,
     count: count,
     records: JSON.stringify([newRecord]),
-    updated: timestampToDate(now),
+    updated: fmtUtil.dateTime(now),
   };
   const db = await TGSqlite.getDB();
   const sql = getInsertSql(newTable);

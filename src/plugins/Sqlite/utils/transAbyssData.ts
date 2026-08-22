@@ -3,7 +3,7 @@
  * @since Beta v0.10.1
  */
 
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 
 /**
  * 转换角色数据
@@ -96,7 +96,7 @@ function transBattleData(
   monsters: Array<TGApp.Sqlite.Abyss.MonsterInfo>,
 ): TGApp.Sqlite.Abyss.Battle {
   return {
-    time: timestampToDate(Number(data.timestamp) * 1000),
+    time: fmtUtil.dateTime(Number(data.timestamp) * 1000),
     characters: data.avatars.map((item) => ({
       id: item.id,
       level: item.level,

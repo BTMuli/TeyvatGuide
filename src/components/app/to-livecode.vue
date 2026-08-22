@@ -22,7 +22,7 @@
         <div class="tolc-list-info">
           <span>{{ item.code === "" ? "暂无兑换码" : item.code }}</span>
           <span v-html="item.title" />
-          <span title="开放时间">{{ timestampToDate(Number(item.to_get_time) * 1000) }}</span>
+          <span title="开放时间">{{ fmtUtil.dateTime(Number(item.to_get_time) * 1000) }}</span>
         </div>
         <div class="tolc-list-btn">
           <v-btn
@@ -42,8 +42,8 @@
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
 import useBBSStore from "@store/bbs.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { storeToRefs } from "pinia";
 import { computed, useTemplateRef } from "vue";
 

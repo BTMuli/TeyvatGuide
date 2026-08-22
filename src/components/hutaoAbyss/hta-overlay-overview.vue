@@ -60,14 +60,14 @@
     </div>
     <div class="hta-oob-extra">
       <v-icon icon="mdi-clock-outline" size="14" />
-      <span>更新于 {{ timestampToDate(props.data.cur.Timestamp) }}</span>
+      <span>更新于 {{ fmtUtil.dateTime(props.data.cur.Timestamp) }}</span>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { timestampToDate } from "@utils/toolFunc.js";
 import { ref, useTemplateRef } from "vue";
 
 import HtaOverviewLine from "./hta-overview-line.vue";
@@ -87,7 +87,7 @@ async function share(): Promise<void> {
     loadShare.value = false;
     return;
   }
-  const fileName = `深渊数据统计_${timestampToDate(props.data.cur.Timestamp)}.png`;
+  const fileName = `深渊数据统计_${fmtUtil.dateTime(props.data.cur.Timestamp)}.png`;
   await generateShareImg(fileName, shareEl.value, 2);
   loadShare.value = false;
 }

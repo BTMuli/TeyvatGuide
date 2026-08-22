@@ -5,7 +5,7 @@
 
 import showLoading from "@comp/func/loading.js";
 import TGSqlite from "@Sql/index.js";
-import { getUtc8Time, timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { ref, type Ref } from "vue";
 
 import { AppGachaBData } from "@/data/index.js";
@@ -33,7 +33,7 @@ async function insertGachaBList(
     const batchParams: Array<string> = [];
     const valueSql = batch
       .map((item, itemIndex) => {
-        const updateTime = timestampToDate(Date.now());
+        const updateTime = fmtUtil.dateTime(Date.now());
         const gachaType = item.op_gacha_type === "1000" ? "1000" : "2000";
         batchParams.push(
           item.id,
@@ -110,7 +110,7 @@ function transGacha(
     op_gacha_type: gacha.op_gacha_type,
     rank_type: find.rank.toString(),
     schedule_id: gacha.schedule_id,
-    time: getUtc8Time(gacha.time, timezone),
+    time: fmtUtil.utc8Time(gacha.time, timezone),
   };
 }
 

@@ -3,7 +3,7 @@
  * @since Beta v0.11.5
  */
 
-import { timestampToDate } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 
 import TGSqlite from "../index.js";
 
@@ -150,7 +150,7 @@ async function saveAvatars(
   uid: string,
   data: Array<TGApp.Game.Avatar.AvatarDetail>,
 ): Promise<Array<TGApp.Sqlite.Character.TableTrans>> {
-  const updated = timestampToDate(new Date().getTime());
+  const updated = fmtUtil.dateTime(new Date().getTime());
   const uidNum = Number(uid);
   if (data.length > 0) {
     await TGSqlite.executeTransaction(data.map((role) => getInsertSql(uid, role, updated)));

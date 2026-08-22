@@ -42,10 +42,10 @@ import TpAvatar from "@comp/viewPost/tp-avatar.vue";
 import painterReq from "@req/painterReq.js";
 import { emit } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
-import { stamp2LastTime } from "@utils/toolFunc.js";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
 
 type TpoLotteryProps = { lottery: string | undefined };
@@ -128,7 +128,7 @@ function flushTimeStatus(): void {
   if (!jsonData.value) return;
   const timeNow = new Date().getTime();
   const timeDiff = Number(jsonData.value.draw_time) * 1000 - timeNow;
-  if (timeDiff > 0) timeStatus.value = stamp2LastTime(timeDiff);
+  if (timeDiff > 0) timeStatus.value = fmtUtil.remainingTime(timeDiff);
   else {
     timeStatus.value = "已开奖";
     if (timer !== undefined) {
