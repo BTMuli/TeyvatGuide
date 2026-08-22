@@ -9,6 +9,7 @@ import TGHttps from "@utils/TGHttps.js";
 
 const trgAbu: Readonly<string> =
   "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/";
+const trcAbu: Readonly<string> = "https://api-takumi-record.mihoyo.com/game_record/app/card/wapi/";
 const CHARACTER_DETAIL_CHUNK_SIZE: Readonly<number> = 40;
 const CHARACTER_DETAIL_CONCURRENCY: Readonly<number> = 2;
 
@@ -98,6 +99,26 @@ async function characterList(
   const resp = await TGHttps.post<TGApp.Game.Avatar.ListResp>(`${trgAbu}character/list`, {
     headers: getRequestHeader(ck, "POST", data),
     body: JSON.stringify(data),
+  });
+  return resp.data;
+}
+
+/**
+ * 获取游戏战绩卡片
+ * @since Beta v0.11.5
+ * @param cookie - Cookie
+ * @param uid - 米游社 UID，默认为 Cookie 对应的 UID
+ * @returns 游戏战绩卡片响应数据
+ */
+async function gameRecordCard(
+  cookie: TGApp.App.Account.Cookie,
+  uid: string = cookie.ltuid,
+): Promise<TGApp.Game.Record.CardResp> {
+  const ck = { ltoken: cookie.ltoken, ltuid: cookie.ltuid };
+  const params = { uid };
+  const resp = await TGHttps.get<TGApp.Game.Record.CardResp>(`${trcAbu}getGameRecordCard`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
   });
   return resp.data;
 }
@@ -298,6 +319,7 @@ async function dailyNote(
 }
 
 const recordReq = {
+  card: gameRecordCard,
   index: index,
   actCalendar: actCalendar,
   daily: dailyNote,

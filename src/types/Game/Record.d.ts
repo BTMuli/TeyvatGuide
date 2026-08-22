@@ -12,6 +12,88 @@ declare namespace TGApp.Game.Record {
   type Resp = TGApp.BBS.Response.BaseWithData<FullData>;
 
   /**
+   * 游戏战绩卡片响应
+   * @since Beta v0.11.5
+   */
+  type CardResp = TGApp.BBS.Response.BaseWithData<CardData>;
+
+  /**
+   * 游戏战绩卡片返回数据
+   * @since Beta v0.11.5
+   */
+  type CardData = {
+    /** 游戏战绩卡片列表 */
+    list: Array<Card>;
+  };
+
+  /**
+   * 游戏战绩卡片
+   * @since Beta v0.11.5
+   */
+  type Card = {
+    /** 是否已绑定该游戏账号 */
+    has_role: boolean;
+    /** 游戏 ID */
+    game_id: number;
+    /** 游戏账号 ID */
+    game_role_id: string;
+    /** 游戏账号昵称 */
+    nickname: string;
+    /** 游戏服务器 */
+    region: string;
+    /** 游戏等级 */
+    level: number;
+    /** 战绩卡片背景图片 */
+    background_image: string;
+    /** 是否公开战绩 */
+    is_public: boolean;
+    /** 战绩摘要数据 */
+    data: Array<CardDataItem>;
+    /** 数据开关 */
+    data_switches: Array<CardDataSwitch>;
+    /** H5 数据开关 */
+    h5_data_switches: Array<unknown>;
+    /** 游戏服务器名称 */
+    region_name: string;
+    /** 战绩卡片跳转链接 */
+    url: string;
+    /** 卡片背景颜色 */
+    background_color: string;
+    /** v2 卡片背景图片 */
+    background_image_v2: string;
+    /** 游戏 Logo */
+    logo: string;
+    /** 游戏名称 */
+    game_name: string;
+  };
+
+  /**
+   * 游戏战绩卡片摘要数据
+   * @since Beta v0.11.5
+   */
+  type CardDataItem = {
+    /** 数据名称 */
+    name: string;
+    /** 数据类型 */
+    type: number;
+    /** 数据值 */
+    value: string;
+  };
+
+  /**
+   * 游戏战绩卡片数据开关
+   * @since Beta v0.11.5
+   */
+  type CardDataSwitch = {
+    /** 开关 ID */
+    switch_id: number;
+    /** 是否公开 */
+    is_public: boolean;
+    /** 开关名称 */
+    switch_name: string;
+  };
+
+  /**
    * 原神战绩返回数据
    * @since Beta v0.11.5
    */
