@@ -22,7 +22,7 @@
     <template #meta>
       <span v-if="showRecord" class="pbom-count">
         <v-icon size="14">mdi-package-variant-closed</v-icon>
-        持有 {{ dbInfo.count }}
+        持有 {{ fmtUtil.num(dbInfo.count) }}
       </span>
     </template>
     <template #convert>
@@ -59,7 +59,7 @@
           <div v-for="record in dbInfo.records" :key="record.time" class="pbom-record">
             <time>{{ timestampToDate(record.time * 1000) }}</time>
             <span>{{ record.manual ? "手动更新" : "自动导入" }}</span>
-            <strong>{{ record.count }}</strong>
+            <strong>{{ fmtUtil.num(record.count) }}</strong>
           </div>
           <div v-if="dbInfo.records.length === 0" class="pbom-record-empty">暂无更新记录</div>
         </div>
@@ -72,6 +72,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TwoMaterial from "@comp/pageWiki/two-material.vue";
 import TSUserBagMaterial, { isTrackableBagMaterial } from "@Sqlm/userBagMaterial.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { timestampToDate } from "@utils/toolFunc.js";
 import { computed, shallowRef, useSlots, watch } from "vue";

@@ -59,6 +59,7 @@
 <script lang="ts" setup>
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
+import fmtUtil from "@utils/fmtUtil.js";
 import { computed, nextTick, ref, shallowRef } from "vue";
 
 import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";
@@ -95,10 +96,9 @@ const entryBadge = computed<string | undefined>(() => {
 });
 
 function getMaterialCountTitle(material: TGApp.App.UserCalc.ResultMaterial): string {
-  const current = material.owned.toLocaleString("zh-CN");
-  const craftable =
-    material.craftable > 0 ? `（${material.craftable.toLocaleString("zh-CN")}）` : "";
-  const required = material.required.toLocaleString("zh-CN");
+  const current = fmtUtil.num(material.owned);
+  const craftable = material.craftable > 0 ? `（${fmtUtil.num(material.craftable)}）` : "";
+  const required = fmtUtil.num(material.required);
   return `${material.name}：${current}${craftable}/${required}`;
 }
 

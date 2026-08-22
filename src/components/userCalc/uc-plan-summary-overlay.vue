@@ -430,7 +430,6 @@ async function shareSummary(): Promise<void> {
   display: grid;
   align-content: start;
   gap: 8px;
-  grid-auto-rows: 58px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 

@@ -30,7 +30,7 @@
             class="ucmd-owned"
           >
             <v-icon size="14">mdi-package-variant-closed</v-icon>
-            持有 {{ bag?.count ?? material.owned }}
+            持有 {{ fmtUtil.num(bag?.count ?? material.owned) }}
           </span>
         </div>
       </div>
@@ -105,7 +105,7 @@
       <header class="ucmd-section-title">
         <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
         <h3>合成消耗</h3>
-        <span v-if="material.craftable > 0">可合成 {{ material.craftable }} 个</span>
+        <span v-if="material.craftable > 0"> 可合成 {{ fmtUtil.num(material.craftable) }} 个 </span>
       </header>
       <div v-if="costMaterials.length > 0" class="ucmd-costs">
         <TMaterialStarChip
@@ -137,6 +137,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
 import TwoSource from "@comp/pageWiki/two-source.vue";
 import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";

@@ -19,7 +19,7 @@
     <div class="tusm-mid">
       <div class="tusm-total">
         <span>持有米游币：</span>
-        <span>{{ userPoints }}</span>
+        <span>{{ fmtUtil.num(userPoints) }}</span>
       </div>
     </div>
     <div class="tusm-content">
@@ -51,6 +51,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TusMoRecord from "@comp/userScripts/tus-mo-record.vue";
 import apiHubReq from "@req/apiHubReq.js";
 import miscReq from "@req/miscReq.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGNotify from "@utils/TGNotify.js";

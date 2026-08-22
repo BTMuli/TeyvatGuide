@@ -110,13 +110,13 @@
       <div
         v-for="reward in props.pos.reward_list"
         :key="reward.item_id"
-        :title="`${reward.name}${reward.num > 0 ? `x${reward.num}` : ''}`"
+        :title="`${reward.name}${reward.num > 0 ? `x${fmtUtil.num(reward.num)}` : ''}`"
         class="ph-puc-reward"
         @click="showMaterial(reward)"
       >
         <img :src="`/icon/bg/${reward.rarity}-Star.webp`" alt="bg" class="bg" />
         <img :alt="reward.name" :src="reward.icon" class="icon" />
-        <span v-if="reward.num > 0" class="count">{{ reward.num }}</span>
+        <span v-if="reward.num > 0" class="count">{{ fmtUtil.num(reward.num) }}</span>
       </div>
     </div>
     <v-progress-linear
@@ -131,6 +131,7 @@
 </template>
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import TGShare from "@utils/TGShare.js";
 import { parseHtmlText, stamp2LastTime, timestampToDate } from "@utils/toolFunc.js";
 import { computed, onMounted, onUnmounted, ref, useTemplateRef } from "vue";

@@ -8,21 +8,22 @@
     <div class="tmsc-right">
       <span class="tmsc-title">{{ name }}</span>
       <span v-if="mode === 'convert' && required !== undefined" class="tmsc-required">
-        x{{ required }}
+        x{{ fmtUtil.num(required) }}
       </span>
     </div>
     <div
       v-if="mode !== 'wiki' && owned !== undefined"
-      :title="mode === 'convert' ? `持有：${owned}` : undefined"
+      :title="mode === 'convert' ? `持有：${fmtUtil.num(owned)}` : undefined"
       class="tmsc-owned"
     >
-      {{ owned }}
+      {{ fmtUtil.num(owned) }}
     </div>
     <div class="tmsc-extra">{{ type }}·{{ id }}</div>
   </div>
 </template>
 
 <script lang="ts" setup>
+import fmtUtil from "@utils/fmtUtil.js";
 import { computed } from "vue";
 
 type MaterialStarChipMode = "bag" | "convert" | "wiki";

@@ -1,18 +1,19 @@
 <!-- 养成材料数量进度 -->
 <template>
   <span :title="countTitle" class="ucmc-count">
-    <span class="ucmc-current">{{ formatCount(current) }}</span>
+    <span class="ucmc-current">{{ formatDisplayCount(current) }}</span>
     <template v-if="craftable > 0">
       <span class="ucmc-separator">（</span>
-      <span class="ucmc-craftable">{{ formatCount(craftable) }}</span>
+      <span class="ucmc-craftable">{{ formatDisplayCount(craftable) }}</span>
       <span class="ucmc-separator">）</span>
     </template>
     <span class="ucmc-separator">/</span>
-    <span :class="{ complete }" class="ucmc-required">{{ formatCount(required) }}</span>
+    <span :class="{ complete }" class="ucmc-required">{{ formatDisplayCount(required) }}</span>
   </span>
 </template>
 
 <script lang="ts" setup>
+import fmtUtil from "@utils/fmtUtil.js";
 import { computed } from "vue";
 
 type UcMaterialCountProps = {
@@ -32,24 +33,20 @@ const {
 } = defineProps<UcMaterialCountProps>();
 
 const countTitle = computed<string>(() => {
-  const craftableLabel = craftable > 0 ? `，可合成量 ${formatFullCount(craftable)}` : "";
-  return `当前量 ${formatFullCount(current)}${craftableLabel}，需求总量 ${formatFullCount(required)}`;
+  const craftableLabel = craftable > 0 ? `，可合成量 ${fmtUtil.num(craftable)}` : "";
+  return `当前量 ${fmtUtil.num(current)}${craftableLabel}，需求总量 ${fmtUtil.num(required)}`;
 });
 
-function formatCount(count: number): string {
-  if (!compact) return formatFullCount(count);
+function formatDisplayCount(count: number): string {
+  if (!compact) return fmtUtil.num(count);
   const units = [
     { base: 1_000_000_000, suffix: "B" },
     { base: 1_000_000, suffix: "M" },
     { base: 1_000, suffix: "k" },
   ];
   const unit = units.find((item) => count >= item.base);
-  if (!unit) return formatFullCount(count);
+  if (!unit) return fmtUtil.num(count);
   return `${(count / unit.base).toFixed(1).replace(/\.0$/, "")}${unit.suffix}`;
-}
-
-function formatFullCount(count: number): string {
-  return count.toLocaleString("zh-CN");
 }
 </script>
 
