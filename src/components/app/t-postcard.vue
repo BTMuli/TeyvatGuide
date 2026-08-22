@@ -62,7 +62,7 @@
           :class="['tpc-tags', { 'is-ready': !props.listMode || tagsReady }]"
         >
           <div
-            v-for="(reason, idx) in card.reasons"
+            v-for="(reason, idx) in visibleReasons"
             :key="`r-${idx}`"
             class="tpc-reason"
             title="推荐理由"
@@ -78,17 +78,22 @@
           />
           <span
             v-if="props.listMode"
-            :class="['tpc-tags-more', { 'tpc-tags-more--hidden': hiddenTopics.length === 0 }]"
+            :class="['tpc-tags-more', { 'tpc-tags-more--hidden': !hasHiddenTags }]"
             @click.stop="toggleTagsMenu()"
           >
             <v-icon>mdi-dots-horizontal</v-icon>
           </span>
           <Teleport to="body">
-            <div
-              v-if="showTagsMenu && hiddenTopics.length > 0"
-              :style="popupStyle"
-              class="tpc-tags-popup"
-            >
+            <div v-if="showTagsMenu && hasHiddenTags" :style="popupStyle" class="tpc-tags-popup">
+              <div
+                v-for="(reason, idx) in hiddenReasons"
+                :key="`hidden-r-${idx}`"
+                class="tpc-reason"
+                title="推荐理由"
+              >
+                <v-icon size="10">mdi-lightbulb-on</v-icon>
+                <span>{{ reason.text }}</span>
+              </div>
               <TpcTag
                 v-for="topic in hiddenTopics"
                 :key="topic.id"
@@ -221,13 +226,13 @@ const isSelected = ref<boolean>(false);
 const card = shallowRef<RenderCard>();
 const tagsContainerEl = useTemplateRef<HTMLElement>("tagsContainerEl");
 const showTagsMenu = ref<boolean>(false);
+const visibleReasonCount = ref<number>(Infinity);
 const visibleTopicCount = ref<number>(Infinity);
 const tagsReady = ref<boolean>(false);
-const tagWidthCache = ref<Array<number>>([]);
+const itemWidthCache = ref<Array<number>>([]);
 let tagsInited = false;
 let resizeObserver: ResizeObserver | null = null;
 let checkRafId: number | null = null;
-let prefixWidth = 0;
 
 const cardBg = computed<string>(() => {
   if (card.value && card.value.status) return card.value.status.color;
@@ -241,6 +246,14 @@ const forumBg = computed<string>(() =>
 const idBg = computed<string>(() => toFrostBg(str2Color(`${props.post.post.post_id}`, 0)));
 const imgCnt = computed<number>(() => props.post.post.images.length);
 
+const visibleReasons = computed<Array<TGApp.BBS.Post.RecommendTags>>(() => {
+  if (!props.listMode || !card.value) return card.value?.reasons ?? [];
+  return card.value.reasons.slice(0, visibleReasonCount.value);
+});
+const hiddenReasons = computed<Array<TGApp.BBS.Post.RecommendTags>>(() => {
+  if (!props.listMode || !card.value) return [];
+  return card.value.reasons.slice(visibleReasonCount.value);
+});
 const visibleTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
   if (!props.listMode || !card.value) return card.value?.topics ?? [];
   return card.value.topics.slice(0, visibleTopicCount.value);
@@ -249,6 +262,9 @@ const hiddenTopics = computed<Array<TGApp.BBS.Post.Topic>>(() => {
   if (!props.listMode || !card.value) return [];
   return card.value.topics.slice(visibleTopicCount.value);
 });
+const hasHiddenTags = computed<boolean>(
+  () => hiddenReasons.value.length > 0 || hiddenTopics.value.length > 0,
+);
 
 /** 实色转半透明毛玻璃底色 */
 function toFrostBg(rgb: string): string {
@@ -292,44 +308,52 @@ function measureAndCheck(): void {
   if (!container || !card.value) return;
   const children = <Array<HTMLElement>>Array.from(container.children);
   const widths: Array<number> = [];
-  let prefix = 0;
-  let foundTag = false;
   for (const child of children) {
     if (child.classList.contains("tpc-tags-more")) break;
-    if (child.classList.contains("tag-label")) {
-      foundTag = true;
+    if (child.classList.contains("tpc-reason") || child.classList.contains("tag-label")) {
       widths.push(child.getBoundingClientRect().width);
-    } else if (!foundTag) {
-      prefix += child.getBoundingClientRect().width + 4;
     }
   }
-  tagWidthCache.value = widths;
-  prefixWidth = prefix;
+  itemWidthCache.value = widths;
   calcVisibleCount();
   tagsReady.value = true;
+}
+
+function updateVisibleCounts(visibleItemCount: number): void {
+  if (!card.value) return;
+  const totalReasons = card.value.reasons.length;
+  const totalTopics = card.value.topics.length;
+  const reasonCount = Math.min(visibleItemCount, totalReasons);
+  const topicCount = Math.max(0, Math.min(visibleItemCount - totalReasons, totalTopics));
+  visibleReasonCount.value = reasonCount < totalReasons ? reasonCount : Infinity;
+  visibleTopicCount.value = topicCount < totalTopics ? topicCount : Infinity;
 }
 
 function calcVisibleCount(): void {
   const container = tagsContainerEl.value;
   if (!container || !card.value) return;
-  const totalTopics = card.value.topics.length;
+  const totalItems = card.value.reasons.length + card.value.topics.length;
   const cw = container.clientWidth;
   const moreBtn = <HTMLElement | null>container.querySelector(".tpc-tags-more");
-  const moreWidth = moreBtn ? moreBtn.getBoundingClientRect().width + 4 : 0;
-  const limit = cw - prefixWidth - moreWidth;
-  const widths = tagWidthCache.value;
-  if (widths.length !== totalTopics || totalTopics === 0) {
-    visibleTopicCount.value = Infinity;
+  const moreWidth = moreBtn?.getBoundingClientRect().width ?? 0;
+  const widths = itemWidthCache.value;
+  if (widths.length !== totalItems || totalItems === 0) {
+    updateVisibleCounts(totalItems);
     return;
   }
-  let acc = 0;
+  const totalWidth = widths.reduce((sum, width, idx) => sum + width + (idx === 0 ? 0 : 4), 0);
+  if (totalWidth <= cw + 1) {
+    updateVisibleCounts(totalItems);
+    return;
+  }
+  let acc = moreWidth;
   let count = 0;
   for (const w of widths) {
+    if (acc + w + 4 > cw + 1) break;
     acc += w + 4;
-    if (acc > limit) break;
     count++;
   }
-  visibleTopicCount.value = count < totalTopics ? count : Infinity;
+  updateVisibleCounts(count);
 }
 
 function checkTagsOverflow(): void {
@@ -337,7 +361,7 @@ function checkTagsOverflow(): void {
   if (checkRafId !== null) cancelAnimationFrame(checkRafId);
   checkRafId = requestAnimationFrame(() => {
     checkRafId = null;
-    if (tagWidthCache.value.length === 0) {
+    if (itemWidthCache.value.length === 0) {
       measureAndCheck();
     } else {
       calcVisibleCount();
@@ -369,30 +393,30 @@ watch(
   async () => (card.value = getPostCard(props.post)),
 );
 
-watch(
-  () => card.value,
-  async () => {
-    if (!props.listMode) return;
-    if (!card.value) return;
-    if (card.value.topics.length === 0) {
-      tagsReady.value = true;
-      return;
-    }
-    if (!tagsInited) {
-      await nextTick();
-      if (!tagsContainerEl.value) return;
-      tagsInited = true;
-      resizeObserver = new ResizeObserver(checkTagsOverflow);
-      resizeObserver.observe(tagsContainerEl.value);
-      checkTagsOverflow();
-    } else {
-      tagWidthCache.value = [];
-      visibleTopicCount.value = Infinity;
-      await nextTick();
-      checkTagsOverflow();
-    }
-  },
-);
+async function refreshTagsLayout(): Promise<void> {
+  if (!props.listMode || !card.value) return;
+  const totalItems = card.value.reasons.length + card.value.topics.length;
+  if (totalItems === 0) {
+    updateVisibleCounts(0);
+    tagsReady.value = true;
+    return;
+  }
+  tagsReady.value = false;
+  itemWidthCache.value = [];
+  visibleReasonCount.value = Infinity;
+  visibleTopicCount.value = Infinity;
+  await nextTick();
+  if (!tagsContainerEl.value) return;
+  if (!tagsInited) {
+    tagsInited = true;
+    resizeObserver = new ResizeObserver(checkTagsOverflow);
+    resizeObserver.observe(tagsContainerEl.value);
+  }
+  checkTagsOverflow();
+}
+
+watch(() => card.value, refreshTagsLayout);
+watch(() => props.listMode, refreshTagsLayout);
 
 function onTagsMenuClose(): void {
   showTagsMenu.value = false;
@@ -720,13 +744,20 @@ function onUserClick(): void {
   @include github-styles.github-tag-dark-gen(#d19a66);
 
   display: flex;
+  max-width: 100%;
   box-sizing: border-box;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   padding: 0 6px;
   border-radius: 12px;
   gap: 2px;
   user-select: none;
+}
+
+.tpc-tags-popup .tpc-reason {
+  flex-shrink: 1;
+  white-space: normal;
 }
 
 .tpc-forum {
