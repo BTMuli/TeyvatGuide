@@ -2,7 +2,10 @@
 //! @since Beta v0.11.5
 
 use super::{
-  assembler::{assemble_manifest_plan_with_progress, assemble_plan_to_root_with_progress},
+  assembler::{
+    assemble_manifest_plan_with_progress_concurrent,
+    assemble_plan_to_root_with_progress_concurrent, default_assembly_concurrency,
+  },
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
@@ -138,12 +141,13 @@ where
           last_emit = Instant::now();
         }
       };
-      assemble_plan_to_root_with_progress(
+      assemble_plan_to_root_with_progress_concurrent(
         plan,
         game_root,
         task_root,
         &incoming_root,
         canceled,
+        default_assembly_concurrency(),
         &mut on_progress,
       )?;
     }
@@ -260,11 +264,12 @@ where
           last_emit = Instant::now();
         }
       };
-      assemble_manifest_plan_with_progress(
+      assemble_manifest_plan_with_progress_concurrent(
         repair_plan,
         game_root,
         task_root,
         canceled,
+        default_assembly_concurrency(),
         &mut on_progress,
       )?;
     }

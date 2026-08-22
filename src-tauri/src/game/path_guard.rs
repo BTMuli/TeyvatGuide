@@ -104,8 +104,7 @@ pub(crate) fn prepare_manifest_output_file(
           }
         }
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-          fs::create_dir(&current)
-            .map_err(|error| format!("创建 manifest 输出目录失败：{error}"))?;
+          create_manifest_directory(&current, "创建 manifest 输出目录失败")?;
           validate_directory(&current)?;
         }
         Err(error) => return Err(format!("读取 manifest 输出路径失败：{error}")),
@@ -147,13 +146,21 @@ pub(crate) fn prepare_guarded_manifest_directory(
         }
       }
       Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-        fs::create_dir(&current).map_err(|error| format!("创建 manifest 子目录失败：{error}"))?;
+        create_manifest_directory(&current, "创建 manifest 子目录失败")?;
         validate_directory(&current)?;
       }
       Err(error) => return Err(format!("读取 manifest 子目录失败：{error}")),
     }
   }
   Ok(current)
+}
+
+fn create_manifest_directory(path: &Path, context: &str) -> Result<(), String> {
+  match fs::create_dir(path) {
+    Ok(()) => Ok(()),
+    Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => validate_directory(path),
+    Err(error) => Err(format!("{context}：{error}")),
+  }
 }
 
 fn validate_directory(path: &Path) -> Result<(), String> {
@@ -187,7 +194,7 @@ mod tests {
     normalize_manifest_path, prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file,
   };
-  use std::fs;
+  use std::{fs, sync::Barrier};
 
   #[test]
   fn normalizes_valid_relative_paths() {
@@ -231,6 +238,27 @@ mod tests {
     assert!(prepare_manifest_output_file(&root, "../escape.bin").is_err());
     let staging = prepare_guarded_manifest_directory(&root, "tasks/id/staging").unwrap();
     assert_eq!(staging, root.join("tasks/id/staging"));
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn prepares_shared_output_parent_concurrently() {
+    let root = std::env::temp_dir().join(format!("teyvat-guide-output-{}", uuid::Uuid::new_v4()));
+    fs::create_dir_all(&root).unwrap();
+    let barrier = Barrier::new(16);
+    std::thread::scope(|scope| {
+      for index in 0..16 {
+        let root = &root;
+        let barrier = &barrier;
+        scope.spawn(move || {
+          barrier.wait();
+          let target =
+            prepare_manifest_output_file(root, &format!("shared/nested/{index}.bin")).unwrap();
+          assert_eq!(target, root.join(format!("shared/nested/{index}.bin")));
+        });
+      }
+    });
+    assert!(root.join("shared/nested").is_dir());
     fs::remove_dir_all(root).unwrap();
   }
 }

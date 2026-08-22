@@ -17,7 +17,11 @@ use std::{
   fs::{self, File, OpenOptions},
   io::{BufReader, Read, Seek, SeekFrom, Write},
   path::{Path, PathBuf},
-  sync::atomic::{AtomicBool, Ordering},
+  sync::{
+    Mutex,
+    atomic::{AtomicBool, AtomicUsize, Ordering},
+    mpsc,
+  },
 };
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
@@ -210,6 +214,7 @@ pub(crate) fn assemble_manifest_plan(
 }
 
 /// Assemble a manifest-diff plan and report verified asset-level progress.
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn assemble_manifest_plan_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -233,7 +238,33 @@ where
   )
 }
 
+pub(crate) fn assemble_manifest_plan_with_progress_concurrent<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  concurrency: usize,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  check_canceled(canceled)?;
+  let staging_root =
+    prepare_guarded_manifest_directory(task_root, &format!("tasks/{}/staging", plan.plan_id))?;
+  assemble_manifest_plan_to_root_with_progress_concurrent(
+    plan,
+    game_root,
+    task_root,
+    &staging_root,
+    canceled,
+    concurrency,
+    &mut progress,
+  )
+}
+
 /// Assemble a manifest-diff plan into a caller-owned guarded output directory.
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn assemble_manifest_plan_to_root_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -308,6 +339,7 @@ where
 }
 
 /// Assemble a patch plan into a caller-owned guarded output directory.
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn assemble_patch_plan_to_root_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -360,6 +392,7 @@ where
 }
 
 /// Assemble a manifest-diff or patch plan into a caller-owned guarded output directory.
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn assemble_plan_to_root_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -390,6 +423,223 @@ where
     ),
     PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
   }
+}
+
+/// Assemble a manifest-diff or patch plan with bounded file-level parallelism.
+pub(crate) fn assemble_plan_to_root_with_progress_concurrent<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  concurrency: usize,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  match plan.strategy {
+    PackagePlanStrategy::ManifestDiff => assemble_manifest_plan_to_root_with_progress_concurrent(
+      plan,
+      game_root,
+      task_root,
+      output_root,
+      canceled,
+      concurrency,
+      &mut progress,
+    ),
+    PackagePlanStrategy::Patch => assemble_patch_plan_to_root_with_progress_concurrent(
+      plan,
+      game_root,
+      task_root,
+      output_root,
+      canceled,
+      concurrency,
+      &mut progress,
+    ),
+    PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
+  }
+}
+
+pub(crate) fn default_assembly_concurrency() -> usize {
+  max_assembly_concurrency()
+}
+
+fn max_assembly_concurrency() -> usize {
+  std::thread::available_parallelism().map(|value| value.get()).unwrap_or(1).max(1)
+}
+
+fn assemble_manifest_plan_to_root_with_progress_concurrent<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  concurrency: usize,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  if plan.strategy != PackagePlanStrategy::ManifestDiff {
+    return Err("当前组装器只支持 manifest-diff 资源计划".to_string());
+  }
+  check_canceled(canceled)?;
+  if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
+    return Err("资源计划缺少载荷编码；请重新验证远端清单".to_string());
+  }
+  let cache_root = task_root.join("cache").join("chunks");
+  let downloads = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  for asset in &plan.assets {
+    validate_asset_layout(asset, &downloads)?;
+  }
+  let (total_count, total_bytes) = assembly_totals(plan)?;
+  assemble_assets_parallel(
+    &plan.assets,
+    concurrency,
+    canceled,
+    |_, asset| assemble_asset(asset, &downloads, game_root, &cache_root, output_root, canceled),
+    total_count,
+    total_bytes,
+    &mut progress,
+  )
+}
+
+fn assemble_patch_plan_to_root_with_progress_concurrent<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  concurrency: usize,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  if plan.strategy != PackagePlanStrategy::Patch {
+    return Err("当前差分组装器只支持 patch 资源计划".to_string());
+  }
+  check_canceled(canceled)?;
+  if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
+    return Err("资源计划缺少载荷编码；请重新验证远端清单".to_string());
+  }
+  let cache_root = task_root.join("cache").join("chunks");
+  let downloads = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  for asset in &plan.assets {
+    let patch =
+      asset.patch.as_ref().ok_or_else(|| format!("patch 资源缺少差分元数据：{}", asset.name))?;
+    downloads
+      .get(patch.id.as_str())
+      .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
+  }
+  let (total_count, total_bytes) = assembly_totals(plan)?;
+  assemble_assets_parallel(
+    &plan.assets,
+    concurrency,
+    canceled,
+    |_, asset| {
+      let patch =
+        asset.patch.as_ref().ok_or_else(|| format!("patch 资源缺少差分元数据：{}", asset.name))?;
+      let download = downloads
+        .get(patch.id.as_str())
+        .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
+      assemble_patch_asset(asset, patch, download, game_root, &cache_root, output_root, canceled)
+    },
+    total_count,
+    total_bytes,
+    &mut progress,
+  )
+}
+
+fn assemble_assets_parallel<F, P>(
+  assets: &[PlanAsset],
+  concurrency: usize,
+  canceled: &AtomicBool,
+  assemble: F,
+  total_count: usize,
+  total_bytes: u64,
+  mut progress: P,
+) -> Result<AssemblySummary, String>
+where
+  F: Fn(usize, &PlanAsset) -> Result<(), String> + Sync,
+  P: FnMut(&AssemblyProgress),
+{
+  if assets.is_empty() {
+    return Ok(AssemblySummary::default());
+  }
+  let worker_count = assets.len().min(concurrency.max(1));
+  let next = AtomicUsize::new(0);
+  let error = Mutex::new(None::<String>);
+  let (sender, receiver) = mpsc::channel::<usize>();
+  let summary = std::thread::scope(|scope| {
+    for _ in 0..worker_count {
+      let sender = sender.clone();
+      let next = &next;
+      let error = &error;
+      let assets = assets;
+      let canceled = canceled;
+      let assemble = &assemble;
+      scope.spawn(move || {
+        loop {
+          if canceled.load(Ordering::Acquire)
+            || error.lock().ok().is_some_and(|guard| guard.is_some())
+          {
+            return;
+          }
+          let index = next.fetch_add(1, Ordering::Relaxed);
+          if index >= assets.len() {
+            return;
+          }
+          match assemble(index, &assets[index]) {
+            Ok(()) => {
+              let _ = sender.send(index);
+            }
+            Err(message) => {
+              if let Ok(mut slot) = error.lock() {
+                if slot.is_none() {
+                  *slot = Some(message);
+                }
+              }
+              return;
+            }
+          }
+        }
+      });
+    }
+    drop(sender);
+    let mut summary = AssemblySummary::default();
+    for index in receiver {
+      summary.asset_count += 1;
+      summary.assembled_bytes = summary.assembled_bytes.saturating_add(assets[index].size);
+      report_asset_progress(
+        &mut progress,
+        summary.asset_count,
+        total_count,
+        summary.assembled_bytes,
+        total_bytes,
+        &assets[index].name,
+      );
+    }
+    summary
+  });
+  if let Some(message) = error.lock().map_err(|_| "组装 worker 错误锁已损坏".to_string())?.clone()
+  {
+    return Err(message);
+  }
+  check_canceled(canceled)?;
+  if summary.asset_count != assets.len() {
+    return Err("组装 worker 未完成全部资源".to_string());
+  }
+  Ok(summary)
 }
 
 fn assembly_totals(plan: &PersistedPlan) -> Result<(usize, u64), String> {
@@ -965,7 +1215,8 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 mod tests {
   use super::{
     AssemblyProgress, assemble_asset_with_fallback, assemble_manifest_plan,
-    assemble_manifest_plan_with_progress, assemble_plan, partial_path,
+    assemble_manifest_plan_with_progress, assemble_manifest_plan_with_progress_concurrent,
+    assemble_plan, partial_path,
   };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
@@ -1197,6 +1448,51 @@ mod tests {
     assert_eq!(progress[1].completed_count, 2);
     assert_eq!(progress[1].completed_bytes, (first_bytes.len() + second_bytes.len()) as u64);
     assert_eq!(progress[1].current_file.as_deref(), Some("second.bin"));
+  }
+
+  #[test]
+  fn assembles_independent_assets_with_bounded_parallelism() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let first_bytes = b"first concurrent asset";
+    let second_bytes = b"second concurrent asset";
+    let first_download =
+      downloaded_chunk("parallel-first", "parallel-first-cache", first_bytes, PayloadEncoding::Raw);
+    let second_download = downloaded_chunk(
+      "parallel-second",
+      "parallel-second-cache",
+      second_bytes,
+      PayloadEncoding::Raw,
+    );
+    write_cache(&task_root, &first_download.cache_key, first_bytes);
+    write_cache(&task_root, &second_download.cache_key, second_bytes);
+    let plan = plan(
+      vec![first_download, second_download],
+      vec![
+        asset("first.bin", first_bytes, vec![chunk("parallel-first", first_bytes, None)]),
+        asset("second.bin", second_bytes, vec![chunk("parallel-second", second_bytes, None)]),
+      ],
+    );
+    let summary = assemble_manifest_plan_with_progress_concurrent(
+      &plan,
+      &root.game_root(),
+      &task_root,
+      &AtomicBool::new(false),
+      2,
+      |_| {},
+    )
+    .unwrap();
+
+    assert_eq!(summary.asset_count, 2);
+    assert_eq!(summary.assembled_bytes, (first_bytes.len() + second_bytes.len()) as u64);
+    assert_eq!(
+      fs::read(task_root.join("tasks/assembler-test/staging/first.bin")).unwrap(),
+      first_bytes
+    );
+    assert_eq!(
+      fs::read(task_root.join("tasks/assembler-test/staging/second.bin")).unwrap(),
+      second_bytes
+    );
   }
 
   #[test]
