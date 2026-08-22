@@ -116,6 +116,16 @@ pub(crate) struct TaskJournal {
   /// Total bytes of game asset staging outputs.
   #[serde(default)]
   pub(crate) assembly_total_bytes: u64,
+  #[serde(default)]
+  pub(crate) spool_root: Option<String>,
+  #[serde(default)]
+  pub(crate) spool_bytes: u64,
+  #[serde(default)]
+  pub(crate) released_bytes: u64,
+  #[serde(default)]
+  pub(crate) completed_asset_cursor: usize,
+  #[serde(default)]
+  pub(crate) assembly_completed_bytes_total: u64,
   pub(crate) current_file: Option<String>,
   pub(crate) bytes_per_second: u64,
   pub(crate) eta_seconds: Option<u64>,
@@ -160,6 +170,11 @@ impl TaskJournal {
       assembly_total_count: plan.assets.len(),
       assembly_completed_bytes: 0,
       assembly_total_bytes: plan.assets.iter().map(|asset| asset.size).sum(),
+      spool_root: plan.install_overlay.as_ref().map(|overlay| overlay.spool_root.clone()),
+      spool_bytes: 0,
+      released_bytes: 0,
+      completed_asset_cursor: 0,
+      assembly_completed_bytes_total: 0,
       current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
@@ -207,6 +222,11 @@ impl TaskJournal {
       assembly_total_count: 0,
       assembly_completed_bytes: 0,
       assembly_total_bytes: 0,
+      spool_root: None,
+      spool_bytes: 0,
+      released_bytes: 0,
+      completed_asset_cursor: 0,
+      assembly_completed_bytes_total: 0,
       current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
@@ -268,6 +288,9 @@ impl TaskJournal {
       assembly_total_count: self.assembly_total_count,
       assembly_completed_bytes: self.assembly_completed_bytes,
       assembly_total_bytes: self.assembly_total_bytes,
+      spool_bytes: self.spool_bytes,
+      released_bytes: self.released_bytes,
+      assembly_completed_bytes_total: self.assembly_completed_bytes_total,
       current_file: self.current_file.clone(),
       bytes_per_second: self.bytes_per_second,
       eta_seconds: self.eta_seconds,
@@ -456,11 +479,15 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.manifest_digest.len() != 64
     || !journal.manifest_digest.bytes().all(|byte| byte.is_ascii_hexdigit())
     || journal.planned_steps != journal.total_count
-    || journal.committed_step != journal.owned_cache_files.len()
+    || (journal.target != PackagePlanTarget::Install
+      && journal.committed_step != journal.owned_cache_files.len())
     || journal.committed_step > journal.planned_steps
     || journal.downloaded_bytes > journal.total_bytes
     || journal.assembly_completed_count > journal.assembly_total_count
     || journal.assembly_completed_bytes > journal.assembly_total_bytes
+    || journal.completed_asset_cursor > journal.assembly_total_count
+    || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
+    || journal.spool_root.as_ref().is_some_and(|value| value.is_empty())
     || journal.current_file.as_ref().is_some_and(|value| value.len() > 256)
     || journal.error_message.as_ref().is_some_and(|value| value.len() > 4096)
   {
@@ -615,6 +642,11 @@ mod tests {
       assembly_total_count: 0,
       assembly_completed_bytes: 0,
       assembly_total_bytes: 0,
+      spool_root: None,
+      spool_bytes: 0,
+      released_bytes: 0,
+      completed_asset_cursor: 0,
+      assembly_completed_bytes_total: 0,
       current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,

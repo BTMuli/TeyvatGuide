@@ -25,7 +25,6 @@ use std::{
   io::{Read, Write},
   path::{Path, PathBuf},
   sync::atomic::{AtomicBool, Ordering},
-  time::{Duration, Instant},
 };
 use uuid::Uuid;
 use walkdir::WalkDir;
@@ -41,7 +40,6 @@ const MAX_SDK_VERSION_BYTES: u64 = 256 * 1024;
 const MAX_SDK_VERSION_FILES: usize = 512;
 const MAX_SDK_DECOMPRESSED_BYTES: u64 = 512 * 1024 * 1024;
 const INSTALL_SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
-const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -350,10 +348,16 @@ pub(crate) fn set_draft_state(
 }
 
 pub(crate) fn overlay_for_draft(draft: &InstallDraft, target_tag: &str) -> InstallOverlay {
+  let spool_root = Path::new(&draft.library_root).join(format!(
+    ".teyvatguide-spool-{}-{}",
+    draft.draft_id,
+    &draft.marker_nonce[..12]
+  ));
   InstallOverlay {
     library_root: draft.library_root.clone(),
     game_root: draft.game_root.clone(),
     staging_root: draft.staging_root.clone(),
+    spool_root: path_text(&spool_root),
     target_path_sha256: path_digest(Path::new(&draft.game_root)),
     library_volume_serial: draft.library_volume_serial,
     library_file_id: draft.library_file_id,
@@ -446,37 +450,46 @@ pub(crate) fn execute_install(
     (marker, sdk_files)
   } else {
     {
-      let mut last_emit = Instant::now();
-      let mut on_progress = |progress: &assembler::AssemblyProgress| {
+      let spool_root = Path::new(&overlay.spool_root);
+      let shared_cache_root = task_root.join("cache/chunks");
+      let start_cursor = journal.completed_asset_cursor.min(plan.assets.len());
+      assembler::validate_full_install_cursor(plan, &staging_root, start_cursor, canceled)?;
+      for index in start_cursor..plan.assets.len() {
+        check_canceled(canceled)?;
+        assembler::assemble_full_install_asset(
+          plan,
+          index,
+          &staging_root,
+          &shared_cache_root,
+          spool_root,
+          canceled,
+        )?;
+        let completed = index + 1;
+        let completed_bytes = plan.assets[..completed].iter().map(|asset| asset.size).sum();
         journal.update_assembly_progress(
-          progress.completed_count,
-          progress.total_count,
-          progress.completed_bytes,
-          progress.total_bytes,
-          progress.current_file.clone(),
+          completed,
+          plan.assets.len(),
+          completed_bytes,
+          assembly_total_bytes,
+          Some(plan.assets[index].name.clone()),
         );
-        if progress.completed_count == progress.total_count
-          || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
-        {
-          journal.touch();
-          emit(journal);
-          last_emit = Instant::now();
-        }
-      };
-      assembler::assemble_full_install_plan_with_progress(
-        plan,
-        &staging_root,
-        task_root,
-        canceled,
-        &mut on_progress,
-      )?;
+        journal.completed_asset_cursor = completed;
+        journal.assembly_completed_bytes_total = completed_bytes;
+        journal.spool_bytes = spool_bytes(spool_root)?;
+        journal.released_bytes = journal.released_bytes.saturating_add(
+          release_consumed_spool_chunks(plan, completed, spool_root, &shared_cache_root)?,
+        );
+        journal.touch();
+        super::journal::persist(task_root, journal)?;
+        emit(journal);
+      }
     }
     check_canceled(canceled)?;
     journal.current_file = Some("准备安装附加文件".to_string());
     journal.touch();
     emit(journal);
     let sdk_files = if let Some(sdk) = overlay.sdk.as_ref() {
-      extract_and_verify_sdk(task_root, &staging_root, sdk)?
+      extract_and_verify_sdk(task_root, &staging_root, &PathBuf::from(&overlay.spool_root), sdk)?
     } else {
       if draft.scheme != SchemeId::CnOfficial {
         return Err("B 服安装计划缺少渠道 SDK".to_string());
@@ -536,6 +549,26 @@ pub(crate) fn execute_install(
   set_task_state(task_root, journal, PackageTaskState::RegistrationPending, emit)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::RegistrationPending)?;
   Ok(installation)
+}
+
+pub(crate) fn prepare_install_assembly(
+  plan: &PersistedPlan,
+  task_root: &Path,
+) -> Result<PathBuf, String> {
+  let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
+  let draft_id = find_draft_id(task_root, &plan.installation_id)?;
+  let draft = load_draft(task_root, &draft_id)?;
+  validate_plan_draft(plan, overlay, &draft)?;
+  let game_root = PathBuf::from(&overlay.game_root);
+  if path_occupied(&game_root)? {
+    validate_empty_install_target(&game_root, &draft)?;
+  }
+  let staging_root = PathBuf::from(&overlay.staging_root);
+  if path_occupied(&staging_root.join(MARKER_FILE_NAME))? {
+    return Err("安装暂存目录已经进入发布边界，请使用恢复入口".to_string());
+  }
+  create_exclusive_staging(&staging_root, &draft)?;
+  Ok(staging_root)
 }
 
 pub(crate) async fn register_installation(
@@ -659,6 +692,20 @@ pub(crate) fn cancel_draft(
   let staging = PathBuf::from(&draft.staging_root);
   if path_occupied(&staging)? {
     remove_owned_staging(&staging, &draft)?;
+  }
+  let spool = Path::new(&draft.library_root).join(format!(
+    ".teyvatguide-spool-{}-{}",
+    draft.draft_id,
+    &draft.marker_nonce[..12]
+  ));
+  if path_occupied(&spool)? {
+    if directory_identity(spool.parent().ok_or_else(|| "任务 spool 缺少父目录".to_string())?)?
+      != (draft.library_volume_serial, draft.library_file_id)
+    {
+      return Err("任务 spool 身份不匹配，拒绝删除".to_string());
+    }
+    validate_no_links(&spool)?;
+    fs::remove_dir_all(spool).map_err(|error| format!("清理安装任务 spool 失败：{error}"))?;
   }
   let draft = set_draft_state(task_root, draft_id, InstallDraftState::Canceled)?;
   Ok(draft.summary())
@@ -857,6 +904,14 @@ fn validate_plan_draft(
     || !same_path(Path::new(&draft.library_root), Path::new(&overlay.library_root))
     || !same_path(Path::new(&draft.game_root), Path::new(&overlay.game_root))
     || !same_path(Path::new(&draft.staging_root), Path::new(&overlay.staging_root))
+    || !same_path(
+      Path::new(&overlay.spool_root),
+      &Path::new(&draft.library_root).join(format!(
+        ".teyvatguide-spool-{}-{}",
+        draft.draft_id,
+        &draft.marker_nonce[..12]
+      )),
+    )
     || !same_path(Path::new(&draft.expected_executable), Path::new(&overlay.expected_executable))
     || draft.marker_nonce != overlay.marker_nonce
     || draft.library_volume_serial != overlay.library_volume_serial
@@ -883,6 +938,54 @@ fn validate_plan_draft(
     return Err("安装渠道配置与计划不匹配".to_string());
   }
   Ok(())
+}
+
+pub(crate) fn prepare_install_spool(
+  task_root: &Path,
+  draft_id: &str,
+  overlay: &InstallOverlay,
+) -> Result<PathBuf, String> {
+  let draft = load_draft(task_root, draft_id)?;
+  let expected = Path::new(&draft.library_root).join(format!(
+    ".teyvatguide-spool-{}-{}",
+    draft.draft_id,
+    &draft.marker_nonce[..12]
+  ));
+  if !same_path(Path::new(&overlay.spool_root), &expected)
+    || directory_identity(expected.parent().ok_or_else(|| "任务 spool 缺少父目录".to_string())?)?
+      != (draft.library_volume_serial, draft.library_file_id)
+  {
+    return Err("安装任务 spool 身份不匹配".to_string());
+  }
+  fs::create_dir_all(&expected).map_err(|error| format!("创建安装任务 spool 失败：{error}"))?;
+  let metadata =
+    fs::symlink_metadata(&expected).map_err(|error| format!("读取安装任务 spool 失败：{error}"))?;
+  if metadata.file_type().is_symlink() || is_reparse_point(&metadata) || !metadata.is_dir() {
+    return Err("安装任务 spool 不是安全的普通目录".to_string());
+  }
+  Ok(expected)
+}
+
+pub(crate) fn cleanup_install_spool(
+  task_root: &Path,
+  draft_id: &str,
+  overlay: &InstallOverlay,
+) -> Result<(), String> {
+  let draft = load_draft(task_root, draft_id)?;
+  let expected = Path::new(&draft.library_root).join(format!(
+    ".teyvatguide-spool-{}-{}",
+    draft.draft_id,
+    &draft.marker_nonce[..12]
+  ));
+  if !same_path(Path::new(&overlay.spool_root), &expected) {
+    return Err("安装任务 spool 身份不匹配".to_string());
+  }
+  if !path_occupied(&expected)? {
+    return Ok(());
+  }
+  let path = expected;
+  validate_no_links(&path)?;
+  fs::remove_dir_all(path).map_err(|error| format!("清理安装任务 spool 失败：{error}"))
 }
 
 fn create_exclusive_staging(path: &Path, draft: &InstallDraft) -> Result<(), String> {
@@ -947,9 +1050,15 @@ fn write_config(staging_root: &Path, config: &str, expected_sha256: &str) -> Res
 fn extract_and_verify_sdk(
   task_root: &Path,
   staging_root: &Path,
+  spool_root: &Path,
   sdk: &super::planner::InstallSdk,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
-  let cache_path = task_root.join("cache/chunks").join(&sdk.cache_key);
+  let shared_path = task_root.join("cache/chunks").join(&sdk.cache_key);
+  let spool_path = spool_root.join(&sdk.cache_key);
+  let cache_path = match file_size_md5(&shared_path) {
+    Ok((size, md5)) if size == sdk.size && md5.eq_ignore_ascii_case(&sdk.md5) => shared_path,
+    _ => spool_path,
+  };
   let (size, md5) = file_size_md5(&cache_path)?;
   if size != sdk.size || !md5.eq_ignore_ascii_case(&sdk.md5) {
     return Err("渠道 SDK 缓存完整性校验失败".to_string());
@@ -1281,6 +1390,66 @@ fn ensure_install_space(plan: &PersistedPlan, game_root: &Path) -> Result<(), St
     return Err(format!("安装磁盘空间不足：需要 {required} 字节，可用 {available} 字节"));
   }
   Ok(())
+}
+
+fn spool_bytes(root: &Path) -> Result<u64, String> {
+  let mut total = 0_u64;
+  let entries = match fs::read_dir(root) {
+    Ok(entries) => entries,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(0),
+    Err(error) => return Err(format!("读取安装任务 spool 失败：{error}")),
+  };
+  for entry in entries {
+    let path = entry.map_err(|error| format!("读取安装任务 spool 条目失败：{error}"))?.path();
+    let metadata = fs::symlink_metadata(&path)
+      .map_err(|error| format!("读取安装任务 spool 文件失败：{error}"))?;
+    if metadata.is_file() {
+      total = total.saturating_add(metadata.len());
+    }
+  }
+  Ok(total)
+}
+
+fn release_consumed_spool_chunks(
+  plan: &PersistedPlan,
+  completed_assets: usize,
+  spool_root: &Path,
+  shared_cache_root: &Path,
+) -> Result<u64, String> {
+  let mut retained = HashSet::new();
+  for asset in plan.assets.iter().skip(completed_assets) {
+    for chunk in &asset.chunks {
+      if chunk.reuse.is_none() {
+        retained.insert(chunk.id.as_str());
+      }
+    }
+  }
+  let mut released = 0_u64;
+  for download in &plan.downloads {
+    if retained.contains(download.id.as_str())
+      || path_occupied(&shared_cache_root.join(&download.cache_key))?
+      || plan
+        .install_overlay
+        .as_ref()
+        .and_then(|overlay| overlay.sdk.as_ref())
+        .is_some_and(|sdk| sdk.cache_key == download.cache_key)
+    {
+      continue;
+    }
+    let path = spool_root.join(&download.cache_key);
+    if !path_occupied(&path)? {
+      continue;
+    }
+    let metadata =
+      fs::symlink_metadata(&path).map_err(|error| format!("读取待回收 spool 文件失败：{error}"))?;
+    if metadata.file_type().is_symlink() || is_reparse_point(&metadata) || !metadata.is_file() {
+      return Err("待回收 spool 文件不是安全的普通文件".to_string());
+    }
+    let bytes = metadata.len();
+    fs::remove_file(&path).map_err(|error| format!("回收安装任务 spool 失败：{error}"))?;
+    released = released.saturating_add(bytes);
+  }
+  Ok(released)
 }
 
 fn validate_empty_install_target(game_root: &Path, draft: &InstallDraft) -> Result<(), String> {

@@ -202,7 +202,16 @@
             <span>需预留空间</span><strong>{{ formatBytes(plan.installRequiredFreeBytes) }}</strong>
           </div>
           <div>
-            <span>缓存盘可用</span><strong>{{ formatBytes(plan.cacheAvailableFreeBytes) }}</strong>
+            <span>任务临时空间需预留</span
+            ><strong>{{ formatBytes(plan.cacheRequiredFreeBytes) }}</strong>
+          </div>
+          <div>
+            <span>完成后预计释放</span>
+            <strong>{{ formatBytes(Math.max(0, plan.downloadBytes - plan.cacheHitBytes)) }}</strong>
+          </div>
+          <div>
+            <span>任务临时空间可用</span
+            ><strong>{{ formatBytes(plan.cacheAvailableFreeBytes) }}</strong>
           </div>
           <div>
             <span>安装盘可用</span
@@ -212,7 +221,7 @@
         <v-alert
           v-if="plan !== null && !plan.hasSufficientSpace"
           density="compact"
-          text="当前缓存盘或安装盘可用空间不足，请释放空间后重新评估。"
+          text="当前任务临时空间或安装盘可用空间不足，请释放空间后重新评估。"
           type="warning"
           variant="tonal"
         />

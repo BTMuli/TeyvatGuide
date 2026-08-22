@@ -80,6 +80,8 @@ where
 }
 
 /// Assemble a source-free full plan and report verified asset-level progress.
+#[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn assemble_full_install_plan_with_progress<F>(
   plan: &PersistedPlan,
   staging_root: &Path,
@@ -102,7 +104,11 @@ where
   if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
     return Err("全新安装计划缺少资源载荷编码".to_string());
   }
-  let cache_root = task_root.join("cache").join("chunks");
+  let cache_root =
+    plan.install_overlay.as_ref().filter(|overlay| !overlay.spool_root.is_empty()).map_or_else(
+      || task_root.join("cache").join("chunks"),
+      |overlay| PathBuf::from(&overlay.spool_root),
+    );
   let downloads = plan
     .downloads
     .iter()
@@ -110,7 +116,7 @@ where
     .collect::<HashMap<_, _>>();
   let (total_count, total_bytes) = assembly_totals(plan)?;
   let mut summary = AssemblySummary::default();
-  for asset in &plan.assets {
+  for asset in plan.assets.iter() {
     check_canceled(canceled)?;
     validate_asset_layout(asset, &downloads)?;
     if asset.chunks.iter().any(|chunk| chunk.reuse.is_some()) {
@@ -132,6 +138,63 @@ where
     );
   }
   Ok(summary)
+}
+
+pub(crate) fn assemble_full_install_asset(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  staging_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  if plan.strategy != PackagePlanStrategy::Full {
+    return Err("安装组装器只接受 Full 计划".to_string());
+  }
+  let asset = plan.assets.get(asset_index).ok_or_else(|| "安装资源游标越界".to_string())?;
+  let downloads = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  validate_asset_layout(asset, &downloads)?;
+  let output = prepare_manifest_output_file(staging_root, &asset.name)?;
+  if output.exists() && verified_asset_file(&output, asset, canceled)? {
+    return Ok(());
+  }
+  assemble_asset_with_fallback(
+    asset,
+    &downloads,
+    staging_root,
+    shared_cache_root,
+    spool_root,
+    staging_root,
+    canceled,
+  )
+}
+
+pub(crate) fn validate_full_install_cursor(
+  plan: &PersistedPlan,
+  staging_root: &Path,
+  cursor: usize,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  if plan.strategy != PackagePlanStrategy::Full {
+    return Err("安装组装器只接受 Full 计划".to_string());
+  }
+  for asset in plan.assets.iter().take(cursor.min(plan.assets.len())) {
+    check_canceled(canceled)?;
+    let path = prepare_manifest_output_file(staging_root, &asset.name)?;
+    let metadata = fs::symlink_metadata(&path)
+      .map_err(|error| format!("读取已完成安装资源失败：{}：{error}", asset.name))?;
+    if metadata.file_type().is_symlink() || !metadata.is_file() {
+      return Err(format!("已完成安装资源不是普通文件：{}", asset.name));
+    }
+    if !verified_asset_file(&path, asset, canceled)? {
+      return Err(format!("已完成安装资源校验失败：{}", asset.name));
+    }
+  }
+  Ok(())
 }
 
 /// 将一个已 hydrate 的 manifest-diff 计划组装到任务私有 staging 目录。
@@ -558,6 +621,113 @@ fn assemble_asset(
   result
 }
 
+fn assemble_asset_with_fallback(
+  asset: &PlanAsset,
+  downloads: &HashMap<&str, &super::planner::PlanDownload>,
+  game_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  let selected_root = asset.chunks.iter().filter(|chunk| chunk.reuse.is_none()).try_fold(
+    None::<&Path>,
+    |selected, chunk| {
+      let download = downloads
+        .get(chunk.id.as_str())
+        .ok_or_else(|| format!("资源 chunk 缺少下载缓存：{}", chunk.id))?;
+      let root = if cached_chunk_matches(shared_cache_root, download) {
+        shared_cache_root
+      } else if cached_chunk_matches(spool_root, download) {
+        spool_root
+      } else {
+        return Err(format!("资源 chunk 完整性复验失败：{}", chunk.id));
+      };
+      match selected {
+        None => Ok(Some(root)),
+        Some(current) if current == root => Ok(Some(current)),
+        Some(_) => Ok(None),
+      }
+    },
+  )?;
+  if let Some(root) = selected_root {
+    return assemble_asset(asset, downloads, game_root, root, staging_root, canceled);
+  }
+
+  let output = prepare_manifest_output_file(staging_root, &asset.name)?;
+  let partial = partial_path(&output)?;
+  remove_stale_partial(&partial)?;
+  remove_stale_output(&output)?;
+  let result = (|| {
+    let mut file = OpenOptions::new()
+      .create_new(true)
+      .read(true)
+      .write(true)
+      .open(&partial)
+      .map_err(|error| format!("创建资源临时文件失败：{}：{error}", asset.name))?;
+    file
+      .set_len(asset.size)
+      .map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
+    let mut chunks = asset.chunks.iter().collect::<Vec<_>>();
+    chunks.sort_by_key(|chunk| chunk.target_offset);
+    for chunk in chunks {
+      check_canceled(canceled)?;
+      file
+        .seek(SeekFrom::Start(chunk.target_offset))
+        .map_err(|error| format!("定位资源 chunk 失败：{}：{error}", asset.name))?;
+      let download = downloads
+        .get(chunk.id.as_str())
+        .ok_or_else(|| format!("资源 chunk 缺少下载缓存：{}", chunk.id))?;
+      let root = if cached_chunk_matches(shared_cache_root, download) {
+        shared_cache_root
+      } else {
+        spool_root
+      };
+      write_downloaded_chunk(&mut file, chunk, root, download, canceled)?;
+    }
+    finalize_open_asset(file, &partial, &output, asset, canceled)
+  })();
+  if result.is_err() {
+    let _ = fs::remove_file(&partial);
+  }
+  result
+}
+
+fn finalize_open_asset(
+  mut file: File,
+  partial: &Path,
+  output: &Path,
+  asset: &PlanAsset,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  file
+    .seek(SeekFrom::Start(0))
+    .map_err(|error| format!("定位资源临时文件失败：{}：{error}", asset.name))?;
+  let actual = hash_exact_file(&mut file, asset.size, canceled)?;
+  if !actual.eq_ignore_ascii_case(&asset.md5) {
+    return Err(format!("资源 MD5 校验失败：{}", asset.name));
+  }
+  file.sync_all().map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
+  drop(file);
+  fs::rename(partial, output)
+    .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
+}
+
+fn verified_asset_file(
+  path: &Path,
+  asset: &PlanAsset,
+  canceled: &AtomicBool,
+) -> Result<bool, String> {
+  let mut file =
+    File::open(path).map_err(|error| format!("打开已组装资源失败：{}：{error}", asset.name))?;
+  if file.metadata().map_err(|error| format!("读取已组装资源失败：{}：{error}", asset.name))?.len()
+    != asset.size
+  {
+    return Ok(false);
+  }
+  Ok(hash_exact_file(&mut file, asset.size, canceled)?.eq_ignore_ascii_case(&asset.md5))
+}
+
 fn write_downloaded_chunk(
   output: &mut File,
   chunk: &PlanChunk,
@@ -713,8 +883,8 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    AssemblyProgress, assemble_manifest_plan, assemble_manifest_plan_with_progress, assemble_plan,
-    partial_path,
+    AssemblyProgress, assemble_asset_with_fallback, assemble_manifest_plan,
+    assemble_manifest_plan_with_progress, assemble_plan, partial_path,
   };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
@@ -725,6 +895,7 @@ mod tests {
   };
   use md5::{Digest, Md5};
   use std::{
+    collections::HashMap,
     fs,
     path::{Path, PathBuf},
     sync::atomic::AtomicBool,
@@ -837,6 +1008,50 @@ mod tests {
 
   fn staging_file(task_root: &Path) -> PathBuf {
     task_root.join("tasks/assembler-test/staging/target.bin")
+  }
+
+  #[test]
+  fn assembles_full_asset_from_mixed_shared_and_private_chunks() {
+    let root = TempRoot::new();
+    let staging = root.0.join("staging");
+    let shared = root.0.join("shared");
+    let spool = root.0.join("spool");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    fs::create_dir_all(&spool).unwrap();
+    let first = b"abc";
+    let second = b"def";
+    let first_download = downloaded_chunk("first", "first.chunk", first, PayloadEncoding::Raw);
+    let second_download = downloaded_chunk("second", "second.chunk", second, PayloadEncoding::Raw);
+    fs::write(shared.join(&first_download.cache_key), first).unwrap();
+    fs::write(spool.join(&second_download.cache_key), second).unwrap();
+    let asset = PlanAsset {
+      name: "mixed.bin".to_string(),
+      action: PlanAssetAction::Add,
+      source: None,
+      size: 6,
+      md5: md5(b"abcdef"),
+      chunks: vec![
+        PlanChunk { target_offset: 0, ..chunk("first", first, None) },
+        PlanChunk { target_offset: 3, ..chunk("second", second, None) },
+      ],
+      patch: None,
+    };
+    let downloads = HashMap::from([
+      (first_download.id.as_str(), &first_download),
+      (second_download.id.as_str(), &second_download),
+    ]);
+    assemble_asset_with_fallback(
+      &asset,
+      &downloads,
+      &staging,
+      &shared,
+      &spool,
+      &staging,
+      &AtomicBool::new(false),
+    )
+    .unwrap();
+    assert_eq!(fs::read(staging.join("mixed.bin")).unwrap(), b"abcdef");
   }
 
   #[test]

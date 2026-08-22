@@ -35,6 +35,7 @@ const LEGACY_PLAN_SCHEMA_VERSION_V4: u32 = 4;
 const LEGACY_PLAN_SCHEMA_VERSION_V3: u32 = 3;
 const LEGACY_PLAN_SCHEMA_VERSION_V2: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+const MIN_INSTALL_SPOOL_WINDOW_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
 const CACHE_VALIDATION_INDEX_FILE: &str = "cache-validation.json";
 const MAX_CACHE_VALIDATION_INDEX_BYTES: u64 = 64 * 1024 * 1024;
@@ -107,6 +108,8 @@ pub(crate) struct InstallOverlay {
   pub(crate) library_root: String,
   pub(crate) game_root: String,
   pub(crate) staging_root: String,
+  #[serde(default)]
+  pub(crate) spool_root: String,
   #[serde(default)]
   pub(crate) target_path_sha256: String,
   #[serde(default)]
@@ -479,32 +482,30 @@ pub(crate) async fn create_and_persist_install_plan(
       })?
       .checked_add(overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size))
       .ok_or_else(|| "安装计划安装大小溢出".to_string())?;
-    let cache_volume_root = task_root.parent().unwrap_or(&task_root);
-    let cache_available = fs2::available_space(cache_volume_root)
-      .map_err(|error| format!("读取资源缓存磁盘剩余空间失败：{error}"))?;
+    let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
+    let cache_available = fs2::available_space(spool_parent)
+      .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
     let install_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
     let install_available = fs2::available_space(install_parent)
       .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
-    let missing_download = download_bytes.saturating_sub(cache_hit_bytes);
-    let same_volume = same_volume(&cache_root, install_parent);
-    let cache_required = missing_download.saturating_add(SAFETY_MARGIN_BYTES);
-    let install_required = install_bytes.saturating_add(SAFETY_MARGIN_BYTES);
-    let (required_free_bytes, available_free_bytes, has_sufficient_space) = if same_volume {
-      let required = missing_download
-        .checked_add(install_bytes)
-        .and_then(|value| value.checked_add(SAFETY_MARGIN_BYTES))
-        .ok_or_else(|| "安装计划所需空间溢出".to_string())?;
-      (
-        required,
-        cache_available.min(install_available),
-        cache_available.min(install_available) >= required,
-      )
+    let spool_window = parts
+      .downloads
+      .iter()
+      .map(|download| download.compressed_size)
+      .max()
+      .unwrap_or(MIN_INSTALL_SPOOL_WINDOW_BYTES)
+      .max(MIN_INSTALL_SPOOL_WINDOW_BYTES);
+    let same_volume = same_volume(spool_parent, install_parent);
+    let cache_required = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
+    let install_required =
+      install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
+    let required_free_bytes = install_required;
+    let available_free_bytes =
+      if same_volume { install_available.min(cache_available) } else { install_available };
+    let has_sufficient_space = if same_volume {
+      install_available.min(cache_available) >= required_free_bytes
     } else {
-      (
-        cache_required.saturating_add(install_required),
-        cache_available.min(install_available),
-        cache_available >= cache_required && install_available >= install_required,
-      )
+      install_available >= install_required && cache_available >= cache_required
     };
     let summary = PackagePlanSummary {
       plan_id: plan_id.clone(),

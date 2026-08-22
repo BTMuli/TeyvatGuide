@@ -220,6 +220,7 @@ const facts = computed<Array<string>>(() => {
     return [
       `组装空间 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
       `组装文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
+      `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
       `当前耗时 ${formatElapsed(task.elapsedMs)}`,
     ];
   }

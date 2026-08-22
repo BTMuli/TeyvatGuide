@@ -170,6 +170,9 @@ declare namespace TGApp.Game.Package {
     assemblyTotalCount: number;
     assemblyCompletedBytes: number;
     assemblyTotalBytes: number;
+    spoolBytes: number;
+    releasedBytes: number;
+    assemblyCompletedBytesTotal: number;
     currentFile: string | null;
     bytesPerSecond: number;
     etaSeconds: number | null;

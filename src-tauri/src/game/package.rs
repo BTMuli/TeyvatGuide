@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  committer,
+  assembler, committer,
   downloader::{RateLimiter, download_object, prepare_cache_root},
   hoyoplay::{create_http_client, get_game_branches},
   installer,
@@ -206,6 +206,7 @@ impl GamePackageManager {
         app_handle.clone(),
         &task_root,
         &cache_root,
+        None,
         plan.clone(),
         download_client,
         shared_journal,
@@ -254,14 +255,8 @@ impl GamePackageManager {
     let mut reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
     let cache_root = prepare_cache_root(&task_root)?;
-    let missing_bytes = plan
-      .downloads
-      .iter()
-      .filter(|download| !cached_chunk_matches(&cache_root, download))
-      .try_fold(0_u64, |total, download| {
-        total.checked_add(download.compressed_size).ok_or_else(|| "安装下载大小溢出".to_string())
-      })?;
     let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
+    let spool_root = installer::prepare_install_spool(&task_root, &draft_id, overlay)?;
     if matches!(
       installer::load_draft(&task_root, &draft_id)?.state,
       installer::InstallDraftState::Completed | installer::InstallDraftState::Canceled
@@ -276,33 +271,34 @@ impl GamePackageManager {
       })?
       .checked_add(overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size))
       .ok_or_else(|| "安装大小溢出".to_string())?;
-    let cache_available = fs2::available_space(&cache_root)
-      .map_err(|error| format!("读取资源缓存磁盘剩余空间失败：{error}"))?;
     let game_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
     let install_available = fs2::available_space(game_parent)
       .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
-    let same_volume = same_volume(&cache_root, game_parent);
-    let cache_required = missing_bytes.saturating_add(SAFETY_MARGIN_BYTES);
-    let install_required = install_bytes.saturating_add(SAFETY_MARGIN_BYTES);
-    let required = if same_volume {
-      missing_bytes
-        .checked_add(install_bytes)
-        .and_then(|value| value.checked_add(SAFETY_MARGIN_BYTES))
-        .ok_or_else(|| "安装所需空间溢出".to_string())?
+    let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
+    let spool_available = fs2::available_space(spool_parent)
+      .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
+    let spool_window = plan
+      .downloads
+      .iter()
+      .map(|download| download.compressed_size)
+      .max()
+      .unwrap_or(0)
+      .max(256 * 1024 * 1024);
+    let required = install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
+    let spool_required = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
+    let sufficient = if same_volume(spool_parent, game_parent) {
+      install_available >= required
     } else {
-      cache_required.checked_add(install_required).ok_or_else(|| "安装所需空间溢出".to_string())?
-    };
-    let available =
-      if same_volume { cache_available.min(install_available) } else { cache_available };
-    let sufficient = if same_volume {
-      available >= required
-    } else {
-      cache_available >= cache_required && install_available >= install_required
+      install_available >= install_bytes.saturating_add(SAFETY_MARGIN_BYTES)
+        && spool_available >= spool_required
     };
     if !sufficient {
       return Err(format!(
-        "安装空间不足：需要约 {required} 字节，可用缓存 {} 字节、安装盘 {} 字节",
-        cache_available, install_available
+        "安装空间不足：安装盘可用 {} 字节，spool 盘可用 {} 字节，至少需要安装输出 {} 字节与 spool {} 字节",
+        install_available,
+        spool_available,
+        install_bytes.saturating_add(SAFETY_MARGIN_BYTES),
+        spool_required,
       ));
     }
     let mut journal = journal::load_or_create(&task_root, &plan)?;
@@ -325,7 +321,7 @@ impl GamePackageManager {
     {
       return Err("安装已经发布，请使用安装恢复命令完成登记".to_string());
     }
-    rebuild_completed_cache(&mut journal, &plan, &cache_root);
+    rebuild_install_cache_state(&mut journal, &plan, &cache_root, &spool_root);
     journal.state = PackageTaskState::Queued;
     journal.error_message = None;
     journal.current_file = None;
@@ -353,10 +349,11 @@ impl GamePackageManager {
     let active = Arc::clone(&self.active);
     let finished_task_id = summary.task_id.clone();
     tauri::async_runtime::spawn(async move {
-      run_task(
+      run_install_streaming_task(
         app_handle.clone(),
-        &task_root,
-        &cache_root,
+        task_root.clone(),
+        cache_root,
+        spool_root,
         plan,
         download_client,
         shared_journal,
@@ -364,7 +361,7 @@ impl GamePackageManager {
         paused,
         concurrency,
         options.max_bytes_per_second,
-        Some(context),
+        context,
       )
       .await;
       finish_task(&active, &finished_task_id);
@@ -515,7 +512,10 @@ impl GamePackageManager {
     if journal_value.state == PackageTaskState::Paused {
       return Ok(journal_value.summary());
     }
-    if !matches!(journal_value.state, PackageTaskState::Queued | PackageTaskState::Downloading) {
+    if !matches!(
+      journal_value.state,
+      PackageTaskState::Queued | PackageTaskState::Downloading | PackageTaskState::Assembling
+    ) {
       return Err("安装任务当前不能暂停".to_string());
     }
     let previous_state = journal_value.state;
@@ -843,6 +843,365 @@ impl GamePackageManager {
   }
 }
 
+async fn run_install_streaming_task(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  shared_cache_root: PathBuf,
+  spool_root: PathBuf,
+  plan: PersistedPlan,
+  download_client: reqwest::Client,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
+  concurrency: usize,
+  max_bytes_per_second: Option<u64>,
+  context: InstallContext,
+) {
+  let staging_root = match installer::prepare_install_assembly(&plan, &task_root) {
+    Ok(path) => path,
+    Err(error) => {
+      let mut value = journal.lock().await;
+      persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+      return;
+    }
+  };
+  let limiter = Arc::new(RateLimiter::new(max_bytes_per_second));
+  let downloads_by_id = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  let start_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
+  if let Err(error) =
+    assembler::validate_full_install_cursor(&plan, &staging_root, start_cursor, &canceled)
+  {
+    persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+    return;
+  }
+  for asset_index in start_cursor..plan.assets.len() {
+    if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
+      break;
+    }
+    let asset = &plan.assets[asset_index];
+    let mut pending = Vec::new();
+    let mut seen = HashSet::new();
+    for chunk in &asset.chunks {
+      if chunk.reuse.is_some() || !seen.insert(chunk.id.as_str()) {
+        continue;
+      }
+      let Some(download) = downloads_by_id.get(chunk.id.as_str()) else {
+        persist_install_stream_error(
+          &task_root,
+          &app_handle,
+          &journal,
+          format!("资源 chunk 缺少下载计划：{}", chunk.id),
+          false,
+          false,
+        )
+        .await;
+        return;
+      };
+      if !cached_chunk_matches(&shared_cache_root, download)
+        && !cached_chunk_matches(&spool_root, download)
+      {
+        pending.push((*download).clone());
+      }
+    }
+    if let Err(error) = check_install_stream_space(&plan, asset_index, &pending, &spool_root) {
+      persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+      return;
+    }
+    {
+      let mut value = journal.lock().await;
+      value.state = PackageTaskState::Downloading;
+      value.current_file = Some(format!("下载游戏文件：{}", asset.name));
+      value.touch();
+      if let Err(error) = journal::persist(&task_root, &value) {
+        persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+        return;
+      }
+      emit_state(&app_handle, &value.summary());
+    }
+    let tasks = stream::iter(pending.into_iter().map(|download| {
+      let root = spool_root.clone();
+      let task_id = plan.plan_id.clone();
+      let canceled = Arc::clone(&canceled);
+      let paused = Arc::clone(&paused);
+      let limiter = Arc::clone(&limiter);
+      let client = download_client.clone();
+      async move {
+        download_object(&client, &root, &download, &task_id, &canceled, &paused, &limiter).await
+      }
+    }))
+    .buffer_unordered(concurrency);
+    futures_util::pin_mut!(tasks);
+    while let Some(result) = tasks.next().await {
+      match result {
+        Ok(downloaded) => {
+          let mut value = journal.lock().await;
+          value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
+          value.spool_bytes = spool_bytes(&spool_root);
+          value.touch();
+          if let Err(error) = journal::persist(&task_root, &value) {
+            persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+            return;
+          }
+          emit_progress(&app_handle, &value.summary());
+        }
+        Err(error) => {
+          let paused_flag = paused.load(Ordering::Acquire);
+          let canceled_flag = canceled.load(Ordering::Acquire);
+          if canceled_flag {
+            let _ = installer::cancel_draft(&task_root, &context.draft_id);
+          }
+          persist_install_stream_error(
+            &task_root,
+            &app_handle,
+            &journal,
+            error,
+            paused_flag,
+            canceled_flag,
+          )
+          .await;
+          return;
+        }
+      }
+    }
+    let assemble_plan = plan.clone();
+    let assemble_staging = staging_root.clone();
+    let assemble_shared = shared_cache_root.clone();
+    let assemble_spool = spool_root.clone();
+    let assemble_canceled = Arc::clone(&canceled);
+    if let Err(error) = tauri::async_runtime::spawn_blocking(move || {
+      assembler::assemble_full_install_asset(
+        &assemble_plan,
+        asset_index,
+        &assemble_staging,
+        &assemble_shared,
+        &assemble_spool,
+        &assemble_canceled,
+      )
+    })
+    .await
+    .map_err(|error| format!("组装 worker 异常退出：{error}"))
+    .and_then(|result| result)
+    {
+      let paused_flag = paused.load(Ordering::Acquire);
+      let canceled_flag = canceled.load(Ordering::Acquire);
+      if canceled_flag {
+        let _ = installer::cancel_draft(&task_root, &context.draft_id);
+      }
+      persist_install_stream_error(
+        &task_root,
+        &app_handle,
+        &journal,
+        error,
+        paused_flag,
+        canceled_flag,
+      )
+      .await;
+      return;
+    }
+    let mut value = journal.lock().await;
+    let completed = asset_index + 1;
+    let completed_bytes = plan.assets[..completed].iter().map(|item| item.size).sum();
+    value.completed_asset_cursor = completed;
+    value.assembly_completed_count = completed;
+    value.assembly_completed_bytes = completed_bytes;
+    value.assembly_completed_bytes_total = completed_bytes;
+    value.released_bytes =
+      value.released_bytes.saturating_add(release_install_spool(&plan, completed, &spool_root));
+    value.spool_bytes = spool_bytes(&spool_root);
+    value.committed_step =
+      completed_download_count(&plan, completed, &shared_cache_root, &spool_root);
+    value.current_file = Some(asset.name.clone());
+    value.touch();
+    if let Err(error) = journal::persist(&task_root, &value) {
+      persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+      return;
+    }
+    emit_progress(&app_handle, &value.summary());
+  }
+  if paused.load(Ordering::Acquire) {
+    let mut value = journal.lock().await;
+    value.state = PackageTaskState::Paused;
+    value.current_file = None;
+    value.touch();
+    let _ = journal::persist(&task_root, &value);
+    emit_state(&app_handle, &value.summary());
+    return;
+  }
+  if canceled.load(Ordering::Acquire) {
+    let _ = installer::cancel_draft(&task_root, &context.draft_id);
+    let mut value = journal.lock().await;
+    value.state = PackageTaskState::Canceled;
+    value.current_file = None;
+    value.touch();
+    let _ = journal::persist(&task_root, &value);
+    emit_state(&app_handle, &value.summary());
+    return;
+  }
+  if let Some(sdk) = plan.install_overlay.as_ref().and_then(|overlay| overlay.sdk.as_ref()) {
+    let Some(download) = plan.downloads.iter().find(|download| download.cache_key == sdk.cache_key)
+    else {
+      persist_install_stream_error(
+        &task_root,
+        &app_handle,
+        &journal,
+        format!("安装计划缺少渠道 SDK 下载项：{}", sdk.cache_key),
+        false,
+        false,
+      )
+      .await;
+      return;
+    };
+    if !cached_chunk_matches(&shared_cache_root, download)
+      && !cached_chunk_matches(&spool_root, download)
+    {
+      if let Err(error) = check_install_stream_space(
+        &plan,
+        plan.assets.len(),
+        std::slice::from_ref(download),
+        &spool_root,
+      ) {
+        persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+        return;
+      }
+      if let Err(error) = download_object(
+        &download_client,
+        &spool_root,
+        download,
+        &plan.plan_id,
+        &canceled,
+        &paused,
+        &limiter,
+      )
+      .await
+      {
+        let paused_flag = paused.load(Ordering::Acquire);
+        let canceled_flag = canceled.load(Ordering::Acquire);
+        if canceled_flag {
+          let _ = installer::cancel_draft(&task_root, &context.draft_id);
+        }
+        persist_install_stream_error(
+          &task_root,
+          &app_handle,
+          &journal,
+          error,
+          paused_flag,
+          canceled_flag,
+        )
+        .await;
+        return;
+      }
+      let mut value = journal.lock().await;
+      value.downloaded_bytes =
+        value.downloaded_bytes.saturating_add(download.compressed_size).min(value.total_bytes);
+      value.spool_bytes = spool_bytes(&spool_root);
+      value.touch();
+      if let Err(error) = journal::persist(&task_root, &value) {
+        persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+        return;
+      }
+      emit_progress(&app_handle, &value.summary());
+    }
+  }
+  {
+    let mut value = journal.lock().await;
+    value.state = PackageTaskState::ReadyToApply;
+    value.current_file = None;
+    value.spool_bytes = spool_bytes(&spool_root);
+    value.touch();
+    if let Err(error) = journal::persist(&task_root, &value) {
+      persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+      return;
+    }
+    emit_state(&app_handle, &value.summary());
+  }
+  run_install_task(app_handle, task_root, plan, journal, canceled, context).await;
+}
+
+async fn persist_install_stream_error(
+  task_root: &Path,
+  app_handle: &AppHandle,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  error: String,
+  paused_requested: bool,
+  canceled_requested: bool,
+) {
+  let mut value = journal.lock().await;
+  value.state = if paused_requested {
+    PackageTaskState::Paused
+  } else if canceled_requested {
+    PackageTaskState::Canceled
+  } else {
+    PackageTaskState::Failed
+  };
+  value.error_message = (!paused_requested && !canceled_requested).then_some(error);
+  value.current_file = None;
+  value.touch();
+  let _ = journal::persist(task_root, &value);
+  emit_state(app_handle, &value.summary());
+}
+
+fn release_install_spool(plan: &PersistedPlan, completed: usize, spool_root: &Path) -> u64 {
+  let retained = plan
+    .assets
+    .iter()
+    .skip(completed)
+    .flat_map(|asset| asset.chunks.iter())
+    .filter(|chunk| chunk.reuse.is_none())
+    .map(|chunk| chunk.id.as_str())
+    .collect::<HashSet<_>>();
+  plan
+    .downloads
+    .iter()
+    .filter(|download| {
+      !retained.contains(download.id.as_str())
+        && plan
+          .install_overlay
+          .as_ref()
+          .and_then(|overlay| overlay.sdk.as_ref())
+          .is_none_or(|sdk| sdk.cache_key != download.cache_key)
+    })
+    .filter_map(|download| {
+      let path = spool_root.join(&download.cache_key);
+      let metadata = fs::symlink_metadata(&path).ok()?;
+      if metadata.file_type().is_symlink() || !metadata.is_file() {
+        return None;
+      }
+      let bytes = metadata.len();
+      fs::remove_file(path).ok()?;
+      Some(bytes)
+    })
+    .sum()
+}
+
+fn completed_download_count(
+  plan: &PersistedPlan,
+  completed: usize,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+) -> usize {
+  let consumed = plan
+    .assets
+    .iter()
+    .take(completed)
+    .flat_map(|asset| asset.chunks.iter())
+    .filter(|chunk| chunk.reuse.is_none())
+    .map(|chunk| chunk.id.as_str())
+    .collect::<HashSet<_>>();
+  plan
+    .downloads
+    .iter()
+    .filter(|download| {
+      consumed.contains(download.id.as_str())
+        || cached_chunk_matches(shared_cache_root, download)
+        || cached_chunk_matches(spool_root, download)
+    })
+    .count()
+}
+
 async fn continue_repair(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -1120,6 +1479,7 @@ async fn run_task(
   app_handle: AppHandle,
   task_root: &Path,
   cache_root: &Path,
+  spool_root: Option<PathBuf>,
   plan: PersistedPlan,
   download_client: reqwest::Client,
   journal: Arc<AsyncMutex<TaskJournal>>,
@@ -1151,10 +1511,14 @@ async fn run_task(
     emit_state(&app_handle, &journal_value.summary());
   }
   let limiter = Arc::new(RateLimiter::new(max_bytes_per_second));
+  let download_root = spool_root.as_deref().unwrap_or(cache_root);
   let pending = plan
     .downloads
     .iter()
-    .filter(|download| !cached_chunk_matches(cache_root, download))
+    .filter(|download| {
+      !cached_chunk_matches(cache_root, download)
+        && spool_root.as_ref().is_none_or(|root| !cached_chunk_matches(root, download))
+    })
     .cloned()
     .collect::<Vec<_>>();
   let download_labels = build_download_labels(&plan);
@@ -1167,7 +1531,7 @@ async fn run_task(
     journal_value.owned_cache_files.iter().cloned().collect::<HashSet<_>>()
   };
   let downloads = stream::iter(pending.into_iter().map(|download| {
-    let cache_root = cache_root.to_path_buf();
+    let cache_root = download_root.to_path_buf();
     let task_id = plan.plan_id.clone();
     let current_file = download_labels
       .get(&download.cache_key)
@@ -1227,8 +1591,15 @@ async fn run_task(
   drop(downloads);
 
   let mut journal_value = journal.lock().await;
-  rebuild_completed_cache(&mut journal_value, &plan, cache_root);
+  if let Some(spool_root) = spool_root.as_deref() {
+    rebuild_completed_cache_with_fallback(&mut journal_value, &plan, cache_root, spool_root);
+  } else {
+    rebuild_completed_cache(&mut journal_value, &plan, download_root);
+  }
   flush_cache_validation_index(cache_root);
+  if let Some(spool_root) = spool_root.as_ref() {
+    flush_cache_validation_index(spool_root);
+  }
   journal_value.current_file = None;
   journal_value.bytes_per_second = 0;
   journal_value.eta_seconds = None;
@@ -1277,6 +1648,11 @@ async fn run_task(
         installer::InstallDraftState::ReadyToApply,
       );
     }
+  }
+  if matches!(journal_value.state, PackageTaskState::Canceled | PackageTaskState::Failed)
+    && let Some(spool_root) = spool_root.as_deref()
+  {
+    let _ = fs::remove_dir_all(spool_root);
   }
   drop(journal_value);
   if should_install {
@@ -1395,6 +1771,11 @@ async fn run_install_task(
   ) {
     log::error!("[game-package][install][{}] 写入安装草稿完成状态失败：{error}", plan.plan_id);
   }
+  if let Some(overlay) = plan.install_overlay.as_ref() {
+    if let Err(error) = installer::cleanup_install_spool(&task_root, &context.draft_id, overlay) {
+      log::warn!("[game-package][install][{}] 清理任务 spool 失败：{error}", plan.plan_id);
+    }
+  }
   emit_state(&app_handle, &value.summary());
 }
 
@@ -1410,6 +1791,97 @@ fn rebuild_completed_cache(journal: &mut TaskJournal, plan: &PersistedPlan, cach
   journal.committed_step = completed.len();
   journal.owned_cache_files = completed;
   journal.downloaded_bytes = bytes;
+}
+
+fn rebuild_install_cache_state(
+  journal: &mut TaskJournal,
+  plan: &PersistedPlan,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+) {
+  let mut shared = Vec::new();
+  let mut available_bytes = 0_u64;
+  for download in &plan.downloads {
+    if cached_chunk_matches(shared_cache_root, download) {
+      shared.push(download.cache_key.clone());
+      available_bytes = available_bytes.saturating_add(download.compressed_size);
+    } else if cached_chunk_matches(spool_root, download) {
+      available_bytes = available_bytes.saturating_add(download.compressed_size);
+    }
+  }
+  journal.committed_step = shared.len();
+  journal.owned_cache_files = shared;
+  if journal.downloaded_bytes == 0 {
+    journal.downloaded_bytes = available_bytes.min(journal.total_bytes);
+  }
+  journal.spool_bytes = spool_bytes(spool_root);
+}
+
+fn rebuild_completed_cache_with_fallback(
+  journal: &mut TaskJournal,
+  plan: &PersistedPlan,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+) {
+  let mut completed = Vec::new();
+  let mut bytes = 0_u64;
+  for download in &plan.downloads {
+    if cached_chunk_matches(shared_cache_root, download)
+      || cached_chunk_matches(spool_root, download)
+    {
+      completed.push(download.cache_key.clone());
+      bytes = bytes.saturating_add(download.compressed_size);
+    }
+  }
+  journal.committed_step = completed.len();
+  journal.owned_cache_files = completed;
+  journal.downloaded_bytes = bytes.min(journal.total_bytes);
+  journal.spool_bytes = spool_bytes(spool_root);
+}
+
+fn check_install_stream_space(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  pending: &[super::planner::PlanDownload],
+  spool_root: &Path,
+) -> Result<(), String> {
+  let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
+  let remaining_assets = plan.assets.iter().skip(asset_index).try_fold(0_u64, |total, asset| {
+    total.checked_add(asset.size).ok_or_else(|| "安装空间需求溢出".to_string())
+  })?;
+  let pending_bytes = pending.iter().try_fold(0_u64, |total, download| {
+    total.checked_add(download.compressed_size).ok_or_else(|| "下载空间需求溢出".to_string())
+  })?;
+  let current_spool = spool_bytes(spool_root);
+  let sdk_bytes = if asset_index >= plan.assets.len() {
+    overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size)
+  } else {
+    0
+  };
+  let required = remaining_assets
+    .saturating_add(current_spool)
+    .saturating_add(pending_bytes)
+    .saturating_add(sdk_bytes)
+    .saturating_add(SAFETY_MARGIN_BYTES);
+  let parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
+  let available =
+    fs2::available_space(parent).map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
+  if available < required {
+    return Err(format!("安装磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
+  }
+  Ok(())
+}
+
+fn spool_bytes(root: &Path) -> u64 {
+  fs::read_dir(root)
+    .ok()
+    .into_iter()
+    .flatten()
+    .filter_map(Result::ok)
+    .filter_map(|entry| fs::metadata(entry.path()).ok())
+    .filter(|metadata| metadata.is_file())
+    .map(|metadata| metadata.len())
+    .sum()
 }
 
 /// 构建进度展示名称，避免直接向用户展示内部 chunk 或缓存键。
