@@ -42,7 +42,7 @@
         <v-list-item v-if="isWindows" :link="true" :title.attr="'游戏安装'" href="/game">
           <template #title>游戏安装</template>
           <template #prepend>
-            <img alt="game" class="side-icon" src="/platforms/mhy/launcher.webp" />
+            <img alt="game" class="side-icon game-page-icon" src="/platforms/mhy/launcher.webp" />
           </template>
         </v-list-item>
         <!-- 背包物品，包括材料&武器&圣遗物 -->
@@ -997,6 +997,10 @@ async function handleLaunchGame(): Promise<void> {
     width: 32px;
     height: 32px;
     border-radius: 50%;
+  }
+
+  &.game-page-icon {
+    filter: var(--icon-filter);
   }
 
   &:hover {

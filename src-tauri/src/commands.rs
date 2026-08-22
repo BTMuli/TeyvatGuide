@@ -228,17 +228,23 @@ pub async fn execute_js(app_handle: AppHandle, label: String, js: String) -> Res
 
 // 获取目录大小
 #[tauri::command]
-pub async fn get_dir_size(path: String) -> u64 {
-  let walk_dir = walkdir::WalkDir::new(path);
-  let mut size = 0;
-  for entry in walk_dir {
-    let entry = entry.unwrap();
-    let file_type = entry.file_type();
-    if file_type.is_file() {
-      size += entry.metadata().unwrap().len();
+pub async fn get_dir_size(path: String) -> Result<u64, String> {
+  tauri::async_runtime::spawn_blocking(move || {
+    let mut size = 0_u64;
+    for entry in walkdir::WalkDir::new(path) {
+      let entry = entry.map_err(|error| format!("读取目录内容失败：{error}"))?;
+      if entry.file_type().is_file() {
+        size = size
+          .checked_add(
+            entry.metadata().map_err(|error| format!("读取文件大小失败：{error}"))?.len(),
+          )
+          .ok_or_else(|| "目录大小溢出".to_string())?;
+      }
     }
-  }
-  size
+    Ok(size)
+  })
+  .await
+  .map_err(|error| format!("目录大小统计任务异常退出：{error}"))?
 }
 
 /// 清除应用内嵌 WebView 的磁盘缓存。

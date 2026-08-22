@@ -4,6 +4,7 @@
 use super::{
   model::{PackageSnapshot, RemoteVersionSnapshot, SchemeId},
   scheme::registry_entry,
+  sophon::is_official_download_host,
 };
 use futures_util::TryStreamExt;
 use reqwest::{Client, Response, redirect::Policy};
@@ -83,7 +84,7 @@ struct GameIdentity {
 pub fn create_http_client() -> Result<Client, String> {
   Client::builder()
     .connect_timeout(Duration::from_secs(15))
-    .timeout(Duration::from_secs(45))
+    .read_timeout(Duration::from_secs(45))
     .redirect(Policy::none())
     .user_agent("TeyvatGuide/0.11.5")
     .build()
@@ -337,7 +338,7 @@ fn validate_channel_sdk(item: ChannelSdkResponse) -> Result<ChannelSdkPackage, S
     return Err("HoyoPlay 渠道 SDK 下载地址必须使用 HTTPS".to_string());
   }
   let host = url.host_str().unwrap_or_default();
-  if !(host.ends_with(".mihoyo.com") || host.ends_with(".hoyoverse.com") || host == "mihoyo.com") {
+  if !is_official_download_host(host) {
     return Err("HoyoPlay 渠道 SDK 下载主机不受信任".to_string());
   }
   Ok(ChannelSdkPackage {

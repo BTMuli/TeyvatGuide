@@ -58,6 +58,7 @@ pub enum PackagePlanTarget {
   Main,
   PreDownload,
   Switch,
+  Install,
 }
 
 /// 一个不含分支密码和下载地址的远端版本投影。
@@ -86,6 +87,7 @@ pub struct PackageSnapshot {
 pub enum PackagePlanStrategy {
   Patch,
   ManifestDiff,
+  Full,
 }
 
 /// 已持久化不可变计划的安全摘要。
@@ -95,7 +97,7 @@ pub struct PackagePlanSummary {
   pub plan_id: String,
   pub installation_id: String,
   pub target: PackagePlanTarget,
-  pub source_tag: String,
+  pub source_tag: Option<String>,
   pub target_tag: String,
   pub manifest_digest: String,
   pub strategy: PackagePlanStrategy,
@@ -105,10 +107,29 @@ pub struct PackagePlanSummary {
   pub required_free_bytes: u64,
   pub available_free_bytes: u64,
   pub has_sufficient_space: bool,
+  #[serde(default)]
+  pub cache_required_free_bytes: u64,
+  #[serde(default)]
+  pub install_required_free_bytes: u64,
+  #[serde(default)]
+  pub cache_available_free_bytes: u64,
+  #[serde(default)]
+  pub install_available_free_bytes: u64,
+  #[serde(default)]
+  pub same_volume: bool,
   pub download_count: usize,
   pub add_count: usize,
   pub modify_count: usize,
   pub delete_count: usize,
+}
+
+/// 后端生成资源计划时上报的真实评估步骤。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackagePlanProgress {
+  pub step: u8,
+  pub total: u8,
+  pub message: String,
 }
 
 /// 安装完整性校验任务状态。
@@ -158,11 +179,16 @@ pub struct PackageVerifySummary {
 pub enum PackageTaskState {
   Queued,
   Downloading,
+  Paused,
   ReadyToApply,
   Assembling,
   CommitPrepared,
   Committing,
   Verifying,
+  PublishPending,
+  Published,
+  Verified,
+  RegistrationPending,
   RepairRequired,
   RollingBack,
   Completed,
@@ -181,6 +207,10 @@ impl PackageTaskState {
         | Self::Assembling
         | Self::Committing
         | Self::Verifying
+        | Self::PublishPending
+        | Self::Published
+        | Self::Verified
+        | Self::RegistrationPending
         | Self::RollingBack
     )
   }
@@ -193,6 +223,10 @@ impl PackageTaskState {
         | Self::CommitPrepared
         | Self::Committing
         | Self::Verifying
+        | Self::PublishPending
+        | Self::Published
+        | Self::Verified
+        | Self::RegistrationPending
         | Self::RollingBack
         | Self::RecoveryRequired
     )
@@ -213,7 +247,11 @@ pub struct PackageTaskSummary {
   pub plan_id: String,
   pub installation_id: String,
   pub target: PackagePlanTarget,
-  pub source_tag: String,
+  pub source_scheme: SchemeId,
+  pub target_scheme: SchemeId,
+  pub install_root: Option<String>,
+  pub audio_languages: Vec<String>,
+  pub source_tag: Option<String>,
   pub target_tag: String,
   pub manifest_digest: String,
   pub state: PackageTaskState,
@@ -221,9 +259,14 @@ pub struct PackageTaskSummary {
   pub total_bytes: u64,
   pub completed_count: usize,
   pub total_count: usize,
+  pub assembly_completed_count: usize,
+  pub assembly_total_count: usize,
+  pub assembly_completed_bytes: u64,
+  pub assembly_total_bytes: u64,
   pub current_file: Option<String>,
   pub bytes_per_second: u64,
   pub eta_seconds: Option<u64>,
+  pub elapsed_ms: u64,
   pub error_message: Option<String>,
   pub updated_at: String,
 }

@@ -5,7 +5,7 @@ use super::{
   hoyoplay::{BranchDescriptor, network_error, read_limited_json},
   path_guard::normalize_manifest_path,
 };
-use futures_util::TryStreamExt;
+use futures_util::{TryStreamExt, future::try_join_all};
 use md5::{Digest, Md5};
 use prost::Message;
 use reqwest::{Client, Response};
@@ -224,26 +224,14 @@ pub async fn get_decoded_build(
   if build.tag != branch.tag || build.manifests.len() > 16 {
     return Err("Sophon build tag 不匹配或分类数量超过上限".to_string());
   }
-  let mut manifests = Vec::new();
-  for manifest in build.manifests {
-    if !category_selected(&manifest.matching_field, audio_languages) {
-      continue;
-    }
-    validate_manifest_download(&manifest.manifest_download)?;
-    validate_payload_download(&manifest.chunk_download)?;
-    let bytes =
-      download_and_decode_manifest(client, &manifest.manifest, &manifest.manifest_download).await?;
-    let data = ManifestProto::decode(bytes.as_slice())
-      .map_err(|error| format!("解析 Sophon manifest protobuf 失败：{error}"))?;
-    validate_manifest(&data)?;
-    manifests.push(DecodedManifest {
-      matching_field: manifest.matching_field,
-      manifest_id: manifest.manifest.id,
-      manifest_checksum: manifest.manifest.checksum,
-      chunk_download: manifest.chunk_download,
-      data,
-    });
-  }
+  let manifests = try_join_all(
+    build
+      .manifests
+      .into_iter()
+      .filter(|manifest| category_selected(&manifest.matching_field, audio_languages))
+      .map(|manifest| decode_build_manifest(client, manifest)),
+  )
+  .await?;
   ensure_selected_categories(
     &manifests.iter().map(|item| item.matching_field.as_str()).collect::<Vec<_>>(),
     audio_languages,
@@ -262,31 +250,72 @@ pub async fn get_decoded_patch_build(
   if build.tag != branch.tag || build.manifests.len() > 16 {
     return Err("Sophon patch build tag 不匹配或分类数量超过上限".to_string());
   }
-  let mut manifests = Vec::new();
-  for manifest in build.manifests {
-    if !category_selected(&manifest.matching_field, audio_languages) {
-      continue;
-    }
-    validate_manifest_download(&manifest.manifest_download)?;
-    validate_payload_download(&manifest.diff_download)?;
-    let bytes =
-      download_and_decode_manifest(client, &manifest.manifest, &manifest.manifest_download).await?;
-    let data = PatchManifestProto::decode(bytes.as_slice())
-      .map_err(|error| format!("解析 Sophon patch protobuf 失败：{error}"))?;
-    validate_patch_manifest(&data, source_tag, &manifest.diff_download)?;
-    manifests.push(DecodedPatchManifest {
-      matching_field: manifest.matching_field,
-      manifest_id: manifest.manifest.id,
-      manifest_checksum: manifest.manifest.checksum,
-      diff_download: manifest.diff_download,
-      data,
-    });
-  }
+  let manifests = try_join_all(
+    build
+      .manifests
+      .into_iter()
+      .filter(|manifest| category_selected(&manifest.matching_field, audio_languages))
+      .map(|manifest| decode_patch_manifest(client, manifest, source_tag)),
+  )
+  .await?;
   ensure_selected_categories(
     &manifests.iter().map(|item| item.matching_field.as_str()).collect::<Vec<_>>(),
     audio_languages,
   )?;
   Ok(DecodedPatchBuild { tag: build.tag, manifests })
+}
+
+async fn decode_build_manifest(
+  client: &Client,
+  manifest: BuildManifest,
+) -> Result<DecodedManifest, String> {
+  validate_manifest_download(&manifest.manifest_download)?;
+  validate_payload_download(&manifest.chunk_download)?;
+  let bytes =
+    download_and_decode_manifest(client, &manifest.manifest, &manifest.manifest_download).await?;
+  let data = tauri::async_runtime::spawn_blocking(move || {
+    let data = ManifestProto::decode(bytes.as_slice())
+      .map_err(|error| format!("解析 Sophon manifest protobuf 失败：{error}"))?;
+    validate_manifest(&data)?;
+    Ok::<ManifestProto, String>(data)
+  })
+  .await
+  .map_err(|error| format!("等待 Sophon manifest 解析失败：{error}"))??;
+  Ok(DecodedManifest {
+    matching_field: manifest.matching_field,
+    manifest_id: manifest.manifest.id,
+    manifest_checksum: manifest.manifest.checksum,
+    chunk_download: manifest.chunk_download,
+    data,
+  })
+}
+
+async fn decode_patch_manifest(
+  client: &Client,
+  manifest: PatchBuildManifest,
+  source_tag: &str,
+) -> Result<DecodedPatchManifest, String> {
+  validate_manifest_download(&manifest.manifest_download)?;
+  validate_payload_download(&manifest.diff_download)?;
+  let bytes =
+    download_and_decode_manifest(client, &manifest.manifest, &manifest.manifest_download).await?;
+  let source_tag = source_tag.to_string();
+  let diff_download = manifest.diff_download.clone();
+  let data = tauri::async_runtime::spawn_blocking(move || {
+    let data = PatchManifestProto::decode(bytes.as_slice())
+      .map_err(|error| format!("解析 Sophon patch protobuf 失败：{error}"))?;
+    validate_patch_manifest(&data, &source_tag, &diff_download)?;
+    Ok::<PatchManifestProto, String>(data)
+  })
+  .await
+  .map_err(|error| format!("等待 Sophon patch 解析失败：{error}"))??;
+  Ok(DecodedPatchManifest {
+    matching_field: manifest.matching_field,
+    manifest_id: manifest.manifest.id,
+    manifest_checksum: manifest.manifest.checksum,
+    diff_download: manifest.diff_download,
+    data,
+  })
 }
 
 async fn get_build(client: &Client, branch: &BranchDescriptor) -> Result<BuildResponse, String> {
@@ -353,21 +382,33 @@ async fn download_and_decode_manifest(
   if compressed.len() as u64 != identity.compressed_size {
     return Err("Sophon manifest 压缩大小与元数据不一致".to_string());
   }
+  let uncompressed_size = identity.uncompressed_size;
+  let checksum = identity.checksum.clone();
+  tauri::async_runtime::spawn_blocking(move || {
+    decode_manifest_payload(compressed, uncompressed_size, &checksum)
+  })
+  .await
+  .map_err(|error| format!("等待 Sophon manifest 解压失败：{error}"))?
+}
+
+fn decode_manifest_payload(
+  compressed: Vec<u8>,
+  uncompressed_size: u64,
+  expected_checksum: &str,
+) -> Result<Vec<u8>, String> {
   let mut decoder = zstd::stream::read::Decoder::new(compressed.as_slice())
     .map_err(|error| format!("创建 Zstandard 解码器失败：{error}"))?;
-  let mut decoded = Vec::with_capacity(identity.uncompressed_size as usize);
+  let mut decoded = Vec::with_capacity(uncompressed_size as usize);
   decoder
     .by_ref()
     .take(MAX_UNCOMPRESSED_MANIFEST_BYTES as u64 + 1)
     .read_to_end(&mut decoded)
     .map_err(|error| format!("解压 Sophon manifest 失败：{error}"))?;
-  if decoded.len() as u64 != identity.uncompressed_size
-    || decoded.len() > MAX_UNCOMPRESSED_MANIFEST_BYTES
-  {
+  if decoded.len() as u64 != uncompressed_size || decoded.len() > MAX_UNCOMPRESSED_MANIFEST_BYTES {
     return Err("Sophon manifest 解压大小与元数据不一致或超过上限".to_string());
   }
   let checksum = format!("{:x}", Md5::digest(&decoded));
-  if !checksum.eq_ignore_ascii_case(&identity.checksum) {
+  if !checksum.eq_ignore_ascii_case(expected_checksum) {
     return Err("Sophon manifest MD5 校验失败".to_string());
   }
   Ok(decoded)
@@ -429,7 +470,7 @@ pub(crate) fn payload_url(url_prefix: &str, url_suffix: &str, id: &str) -> Resul
   Ok(base)
 }
 
-fn is_official_download_host(host: &str) -> bool {
+pub(crate) fn is_official_download_host(host: &str) -> bool {
   let host = host.to_ascii_lowercase();
   ["mihoyo.com", "hoyoverse.com", "hyoverse.com", "yuanshen.com"]
     .iter()

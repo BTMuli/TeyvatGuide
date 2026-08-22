@@ -3,7 +3,7 @@
  * @since Beta v0.11.5
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Channel, invoke } from "@tauri-apps/api/core";
 
 /**
  * 检测国服游戏安装。
@@ -29,12 +29,37 @@ export async function listGameInstallations(): Promise<Array<TGApp.Game.Installa
 }
 
 /**
+ * 读取游戏安装目录的实际文件占用。
+ * @since Beta v0.11.5
+ * @param rootPath - 游戏根目录
+ * @returns 目录内全部文件的字节数
+ */
+export async function getGameInstallationSize(rootPath: string): Promise<number> {
+  return await invoke<number>("get_dir_size", { path: rootPath });
+}
+
+/**
  * 从 Unity 日志静默定位国服 YuanShen.exe。
  * @since Beta v0.11.5
  * @returns 磁盘上仍存在的可执行文件路径
  */
 export async function locateGameInstallations(): Promise<Array<string>> {
   return await invoke<Array<string>>("game_installation_locate");
+}
+
+/**
+ * 检查新安装向导选定的安装目录。
+ * @since Beta v0.11.5
+ * @param installRoot - 用户选定的直接安装目录
+ * @returns 空目录、已有游戏目录或被占用目录的识别结果
+ */
+export async function inspectGameInstallLocation(
+  installRoot: string,
+): Promise<TGApp.Game.Installation.InstallLocationSummary> {
+  return await invoke<TGApp.Game.Installation.InstallLocationSummary>(
+    "game_install_location_inspect",
+    { installRoot },
+  );
 }
 
 /**
@@ -84,15 +109,130 @@ export async function getGamePackageSnapshot(
  * @since Beta v0.11.5
  * @param installationId - 已登记安装 ID
  * @param target - 主分支或预下载分支
+ * @param onProgress - 后端评估步骤更新
  * @returns 不含内部下载地址的计划摘要
  */
 export async function createGamePackagePlan(
   installationId: string,
   target: TGApp.Game.Package.PlanTargetEnum,
+  onProgress?: (progress: TGApp.Game.Package.PlanProgress) => void,
 ): Promise<TGApp.Game.Package.PlanSummary> {
+  const progressChannel = new Channel<TGApp.Game.Package.PlanProgress>((progress) => {
+    onProgress?.(progress);
+  });
   return await invoke<TGApp.Game.Package.PlanSummary>("game_package_plan", {
     installationId,
     target,
+    onProgress: progressChannel,
+  });
+}
+
+export async function createGameInstallDraft(
+  installRoot: string,
+  scheme: TGApp.Game.Installation.SchemeEnum,
+  audioLanguages: Array<string>,
+): Promise<TGApp.Game.Installation.InstallDraftSummary> {
+  return await invoke<TGApp.Game.Installation.InstallDraftSummary>("game_install_draft_create", {
+    installRoot,
+    scheme,
+    audioLanguages,
+  });
+}
+
+/**
+ * 读取所有仍需恢复或取消的全新安装草稿。
+ * @since Beta v0.11.5
+ * @returns 未完成安装草稿列表
+ */
+export async function listGameInstallDrafts(): Promise<
+  Array<TGApp.Game.Installation.InstallDraftSummary>
+> {
+  return await invoke<Array<TGApp.Game.Installation.InstallDraftSummary>>(
+    "game_install_draft_list",
+  );
+}
+
+/**
+ * 取消只完成评估、尚未启动任务的安装草稿。
+ * @since Beta v0.11.5
+ * @param installId - 安装身份
+ * @returns 已取消的草稿摘要
+ */
+export async function cancelGameInstallDraft(
+  installId: string,
+): Promise<TGApp.Game.Installation.InstallDraftSummary> {
+  return await invoke<TGApp.Game.Installation.InstallDraftSummary>("game_install_draft_cancel", {
+    installId,
+  });
+}
+
+export async function createGameInstallPlan(
+  installId: string,
+  onProgress?: (progress: TGApp.Game.Package.PlanProgress) => void,
+): Promise<TGApp.Game.Package.PlanSummary> {
+  const progressChannel = new Channel<TGApp.Game.Package.PlanProgress>((progress) => {
+    onProgress?.(progress);
+  });
+  return await invoke<TGApp.Game.Package.PlanSummary>("game_install_plan", {
+    installId,
+    onProgress: progressChannel,
+  });
+}
+
+export async function startGameInstall(
+  installId: string,
+  planId: string,
+  options?: TGApp.Game.Package.TaskOptions,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_install_start", {
+    installId,
+    planId,
+    options,
+  });
+}
+
+export async function getGameInstallStatus(
+  installId: string,
+): Promise<TGApp.Game.Package.TaskSummary | null> {
+  return await invoke<TGApp.Game.Package.TaskSummary | null>("game_install_status", { installId });
+}
+
+export async function recoverGameInstall(
+  taskId: string,
+  installId: string,
+  action: TGApp.Game.Package.RecoveryActionEnum,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_install_recover", {
+    taskId,
+    installId,
+    action,
+  });
+}
+
+export async function cancelGameInstall(
+  taskId: string,
+  installId: string,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_install_cancel", {
+    taskId,
+    installId,
+  });
+}
+
+/**
+ * 暂停全新安装的资源下载。
+ * @since Beta v0.11.5
+ * @param taskId - 安装任务 ID
+ * @param installId - 安装身份
+ * @returns 已暂停的任务投影
+ */
+export async function pauseGameInstall(
+  taskId: string,
+  installId: string,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_install_pause", {
+    taskId,
+    installId,
   });
 }
 
@@ -131,13 +271,18 @@ export async function getGamePackageCacheStatus(): Promise<TGApp.Game.Package.Ca
   return await invoke<TGApp.Game.Package.CacheSummary>("game_package_cache_status");
 }
 
+type CacheClearTarget = "chunks" | "sdk" | "all";
+
 /**
- * 清理资源分片与渠道 SDK 缓存；进行中或待恢复任务会阻止删除。
+ * 清理指定的资源分片、渠道 SDK 或全部缓存；进行中或待恢复任务会阻止删除。
  * @since Beta v0.11.5
+ * @param target - 要清理的缓存范围，默认为全部缓存
  * @returns 清理后的缓存占用摘要
  */
-export async function clearGamePackageCache(): Promise<TGApp.Game.Package.CacheSummary> {
-  return await invoke<TGApp.Game.Package.CacheSummary>("game_package_cache_clear");
+export async function clearGamePackageCache(
+  target: CacheClearTarget = "all",
+): Promise<TGApp.Game.Package.CacheSummary> {
+  return await invoke<TGApp.Game.Package.CacheSummary>("game_package_cache_clear", { target });
 }
 
 /**

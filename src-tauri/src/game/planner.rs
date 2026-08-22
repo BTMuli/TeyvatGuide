@@ -1,9 +1,13 @@
 //! 游戏资源差异、空间估算与不可变计划持久化。
 //! @since Beta v0.11.5
 
+use super::hoyoplay::get_channel_sdk;
 use super::{
   hoyoplay::{GameBranches, create_http_client},
-  model::{GameInstallation, PackagePlanStrategy, PackagePlanSummary, PackagePlanTarget, SchemeId},
+  model::{
+    GameInstallation, PackagePlanProgress, PackagePlanStrategy, PackagePlanSummary,
+    PackagePlanTarget, SchemeId,
+  },
   path_guard::normalize_manifest_path,
   sophon::{
     Asset, DecodedBuild, DecodedPatchBuild, DownloadInfo, PatchInfo, chunk_xxhash64,
@@ -17,17 +21,60 @@ use sha2::{Digest, Sha256};
 use std::{
   collections::HashMap,
   fs::{self, File, OpenOptions},
-  io::{BufReader, Read, Write},
-  path::Path,
+  io::{BufReader, BufWriter, Read, Write},
+  path::{Path, PathBuf},
+  sync::{LazyLock, Mutex},
+  time::UNIX_EPOCH,
 };
+use tauri::ipc::Channel;
 use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
-const PLAN_SCHEMA_VERSION: u32 = 4;
+const PLAN_SCHEMA_VERSION: u32 = 5;
+const LEGACY_PLAN_SCHEMA_VERSION_V4: u32 = 4;
 const LEGACY_PLAN_SCHEMA_VERSION_V3: u32 = 3;
 const LEGACY_PLAN_SCHEMA_VERSION_V2: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
+const CACHE_VALIDATION_INDEX_FILE: &str = "cache-validation.json";
+const MAX_CACHE_VALIDATION_INDEX_BYTES: u64 = 64 * 1024 * 1024;
+const PLAN_PROGRESS_TOTAL: u8 = 4;
+
+pub(crate) fn report_plan_progress(
+  channel: &Channel<PackagePlanProgress>,
+  step: u8,
+  message: &str,
+) {
+  let _ = channel.send(PackagePlanProgress {
+    step,
+    total: PLAN_PROGRESS_TOTAL,
+    message: message.to_string(),
+  });
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CacheValidationRecord {
+  size: u64,
+  modified_at: u64,
+  hash_kind: PlanDownloadHashKind,
+  expected_hash: String,
+}
+
+#[derive(Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CacheValidationIndex {
+  #[serde(default)]
+  entries: HashMap<String, CacheValidationRecord>,
+}
+
+struct CacheValidationState {
+  index: CacheValidationIndex,
+  dirty: bool,
+}
+
+static CACHE_VALIDATION_STATES: LazyLock<Mutex<HashMap<PathBuf, CacheValidationState>>> =
+  LazyLock::new(|| Mutex::new(HashMap::new()));
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,7 +85,8 @@ pub(crate) struct PersistedPlan {
   pub(crate) source_scheme: SchemeId,
   pub(crate) target_scheme: SchemeId,
   pub(crate) target: PackagePlanTarget,
-  pub(crate) source_tag: String,
+  #[serde(default)]
+  pub(crate) source_tag: Option<String>,
   pub(crate) target_tag: String,
   pub(crate) manifest_digest: String,
   pub(crate) strategy: PackagePlanStrategy,
@@ -47,7 +95,49 @@ pub(crate) struct PersistedPlan {
   pub(crate) delete_files: Vec<PlanDelete>,
   #[serde(default)]
   pub(crate) inventory: Vec<PlanFile>,
+  #[serde(default)]
+  pub(crate) install_overlay: Option<InstallOverlay>,
   pub(crate) created_at: String,
+}
+
+/// The immutable, trusted-Rust overlay for a fresh installation.
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct InstallOverlay {
+  pub(crate) library_root: String,
+  pub(crate) game_root: String,
+  pub(crate) staging_root: String,
+  #[serde(default)]
+  pub(crate) target_path_sha256: String,
+  #[serde(default)]
+  pub(crate) library_volume_serial: u64,
+  #[serde(default)]
+  pub(crate) library_file_id: u64,
+  #[serde(default)]
+  pub(crate) target_volume_serial: u64,
+  #[serde(default)]
+  pub(crate) target_file_id: u64,
+  pub(crate) marker_nonce: String,
+  pub(crate) expected_executable: String,
+  pub(crate) channel: u32,
+  pub(crate) sub_channel: u32,
+  pub(crate) audio_languages: Vec<String>,
+  pub(crate) config: String,
+  pub(crate) config_sha256: String,
+  pub(crate) sdk: Option<InstallSdk>,
+}
+
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct InstallSdk {
+  pub(crate) version: String,
+  pub(crate) pkg_version_file_name: String,
+  pub(crate) md5: String,
+  pub(crate) size: u64,
+  pub(crate) decompressed_size: u64,
+  pub(crate) cache_key: String,
+  #[serde(default, skip_serializing)]
+  pub(crate) url: String,
 }
 
 /// The complete target manifest file inventory used to verify a finished update.
@@ -178,6 +268,7 @@ pub async fn create_and_persist_plan(
   branches: &GameBranches,
   target: PackagePlanTarget,
   app_data_dir: &Path,
+  on_progress: &Channel<PackagePlanProgress>,
 ) -> Result<PackagePlanSummary, String> {
   let source_tag = installation
     .version
@@ -192,12 +283,16 @@ pub async fn create_and_persist_plan(
     PackagePlanTarget::Switch => {
       return Err("渠道转换请使用换服评估入口".to_string());
     }
+    PackagePlanTarget::Install => {
+      return Err("全新安装请使用安装计划入口".to_string());
+    }
   };
   if source_tag == target_branch.tag {
     return Err("本地版本已与目标版本一致".to_string());
   }
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
+  report_plan_progress(on_progress, 3, "正在下载并解析资源清单");
   let parts = build_executable_plan(
     &client,
     branches,
@@ -206,6 +301,7 @@ pub async fn create_and_persist_plan(
     &installation.audio_languages,
   )
   .await?;
+  report_plan_progress(on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
 
   persist_plan_parts(
     installation,
@@ -265,7 +361,7 @@ pub(crate) fn persist_plan_parts(
     plan_id: plan_id.clone(),
     installation_id: installation.id.clone(),
     target,
-    source_tag: source_tag.to_string(),
+    source_tag: Some(source_tag.to_string()),
     target_tag: target_tag.to_string(),
     manifest_digest: parts.manifest_digest.clone(),
     strategy: parts.strategy,
@@ -275,6 +371,13 @@ pub(crate) fn persist_plan_parts(
     required_free_bytes,
     available_free_bytes,
     has_sufficient_space: available_free_bytes >= required_free_bytes,
+    cache_required_free_bytes: download_bytes
+      .saturating_sub(cache_hit_bytes)
+      .saturating_add(SAFETY_MARGIN_BYTES),
+    install_required_free_bytes: install_bytes,
+    cache_available_free_bytes: available_free_bytes,
+    install_available_free_bytes: available_free_bytes,
+    same_volume: true,
     download_count: parts.downloads.len(),
     add_count: parts
       .assets
@@ -295,7 +398,7 @@ pub(crate) fn persist_plan_parts(
     source_scheme: scheme,
     target_scheme: scheme,
     target,
-    source_tag: source_tag.to_string(),
+    source_tag: Some(source_tag.to_string()),
     target_tag: target_tag.to_string(),
     manifest_digest: parts.manifest_digest,
     strategy: parts.strategy,
@@ -303,10 +406,305 @@ pub(crate) fn persist_plan_parts(
     assets: parts.assets,
     delete_files: parts.delete_files,
     inventory: parts.inventory,
+    install_overlay: None,
     created_at: Utc::now().to_rfc3339(),
   };
   persist_plan(task_root, &plan_id, &plan)?;
   Ok(summary)
+}
+
+/// Create the complete, source-free plan used by a fresh installation.
+pub(crate) async fn create_and_persist_install_plan(
+  client: &reqwest::Client,
+  installation_id: &str,
+  scheme: SchemeId,
+  audio_languages: &[String],
+  mut overlay: InstallOverlay,
+  branches: &GameBranches,
+  task_root: &Path,
+  on_progress: Channel<PackagePlanProgress>,
+) -> Result<PackagePlanSummary, String> {
+  if branches.main.tag.trim().is_empty() {
+    return Err("主分支缺少有效版本号".to_string());
+  }
+  if audio_languages.is_empty() {
+    return Err("至少选择一个语音包".to_string());
+  }
+  report_plan_progress(&on_progress, 3, "正在下载并解析资源清单与渠道数据");
+  let (target, sdk) = futures_util::try_join!(
+    get_decoded_build(client, &branches.main, audio_languages),
+    get_channel_sdk(client, scheme),
+  )?;
+  if scheme == SchemeId::CnOfficial && sdk.is_some() {
+    return Err("国服官服不应包含渠道 SDK".to_string());
+  }
+  if scheme == SchemeId::CnBilibili && sdk.is_none() {
+    return Err("国服 B 服缺少渠道 SDK".to_string());
+  }
+  let sdk_file_name = sdk
+    .as_ref()
+    .map(|package| normalize_manifest_path(&package.pkg_version_file_name))
+    .transpose()?;
+  overlay.sdk = sdk.as_ref().zip(sdk_file_name.as_ref()).map(|(package, file_name)| InstallSdk {
+    version: package.version.clone(),
+    pkg_version_file_name: file_name.clone(),
+    md5: package.md5.to_ascii_lowercase(),
+    size: package.size,
+    decompressed_size: package.decompressed_size,
+    cache_key: format!("sdk-{}.zip", package.md5.to_ascii_lowercase()),
+    url: package.url.clone(),
+  });
+  let target_tag = branches.main.tag.clone();
+  let installation_id = installation_id.to_string();
+  let task_root = task_root.to_path_buf();
+  tauri::async_runtime::spawn_blocking(move || -> Result<PackagePlanSummary, String> {
+    let mut parts = build_full_install_plan(target)?;
+    if let Some(install_sdk) = overlay.sdk.as_ref() {
+      parts_download_push_sdk(&mut parts, install_sdk)?;
+    }
+    overlay.config_sha256 = sha256_bytes(overlay.config.as_bytes());
+    parts.manifest_digest = install_manifest_digest(&parts.manifest_digest, &overlay)?;
+    report_plan_progress(&on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
+    let plan_id = Uuid::new_v4().to_string();
+    let cache_root = task_root.join("cache/chunks");
+    let cache_hit_bytes = calculate_cache_hits(&cache_root, &parts.downloads);
+    let download_bytes = parts.downloads.iter().try_fold(0_u64, |total, item| {
+      total.checked_add(item.compressed_size).ok_or_else(|| "安装计划下载大小溢出".to_string())
+    })?;
+    let install_bytes = parts
+      .assets
+      .iter()
+      .try_fold(overlay.config.len() as u64, |total, item| {
+        total.checked_add(item.size).ok_or_else(|| "安装计划安装大小溢出".to_string())
+      })?
+      .checked_add(overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size))
+      .ok_or_else(|| "安装计划安装大小溢出".to_string())?;
+    let cache_volume_root = task_root.parent().unwrap_or(&task_root);
+    let cache_available = fs2::available_space(cache_volume_root)
+      .map_err(|error| format!("读取资源缓存磁盘剩余空间失败：{error}"))?;
+    let install_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
+    let install_available = fs2::available_space(install_parent)
+      .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
+    let missing_download = download_bytes.saturating_sub(cache_hit_bytes);
+    let same_volume = same_volume(&cache_root, install_parent);
+    let cache_required = missing_download.saturating_add(SAFETY_MARGIN_BYTES);
+    let install_required = install_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+    let (required_free_bytes, available_free_bytes, has_sufficient_space) = if same_volume {
+      let required = missing_download
+        .checked_add(install_bytes)
+        .and_then(|value| value.checked_add(SAFETY_MARGIN_BYTES))
+        .ok_or_else(|| "安装计划所需空间溢出".to_string())?;
+      (
+        required,
+        cache_available.min(install_available),
+        cache_available.min(install_available) >= required,
+      )
+    } else {
+      (
+        cache_required.saturating_add(install_required),
+        cache_available.min(install_available),
+        cache_available >= cache_required && install_available >= install_required,
+      )
+    };
+    let summary = PackagePlanSummary {
+      plan_id: plan_id.clone(),
+      installation_id: installation_id.to_string(),
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: target_tag.clone(),
+      manifest_digest: parts.manifest_digest.clone(),
+      strategy: PackagePlanStrategy::Full,
+      download_bytes,
+      install_bytes,
+      cache_hit_bytes,
+      required_free_bytes,
+      available_free_bytes,
+      has_sufficient_space,
+      cache_required_free_bytes: cache_required,
+      install_required_free_bytes: install_required,
+      cache_available_free_bytes: cache_available,
+      install_available_free_bytes: install_available,
+      same_volume,
+      download_count: parts.downloads.len(),
+      add_count: parts.assets.len(),
+      modify_count: 0,
+      delete_count: 0,
+    };
+    let plan = PersistedPlan {
+      schema_version: PLAN_SCHEMA_VERSION,
+      plan_id: plan_id.clone(),
+      installation_id: installation_id.to_string(),
+      source_scheme: scheme,
+      target_scheme: scheme,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag,
+      manifest_digest: parts.manifest_digest,
+      strategy: PackagePlanStrategy::Full,
+      downloads: parts.downloads,
+      assets: parts.assets,
+      delete_files: Vec::new(),
+      inventory: parts.inventory,
+      install_overlay: Some(overlay),
+      created_at: Utc::now().to_rfc3339(),
+    };
+    persist_plan(&task_root, &plan_id, &plan)?;
+    Ok(summary)
+  })
+  .await
+  .map_err(|error| format!("等待全新安装计划评估失败：{error}"))?
+}
+
+pub(crate) async fn hydrate_and_validate_install_plan(
+  installation_id: &str,
+  scheme: SchemeId,
+  audio_languages: &[String],
+  branches: &GameBranches,
+  mut plan: PersistedPlan,
+) -> Result<PersistedPlan, String> {
+  if plan.installation_id != installation_id
+    || plan.target != PackagePlanTarget::Install
+    || plan.strategy != PackagePlanStrategy::Full
+    || plan.source_tag.is_some()
+    || plan.target_tag != branches.main.tag
+  {
+    return Err("全新安装计划与当前草稿或主分支不匹配".to_string());
+  }
+  let mut overlay = plan.install_overlay.clone().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
+  let client = create_http_client()?;
+  let target = get_decoded_build(&client, &branches.main, audio_languages).await?;
+  let sdk = get_channel_sdk(&client, scheme).await?;
+  if (scheme == SchemeId::CnOfficial && sdk.is_some())
+    || (scheme == SchemeId::CnBilibili && sdk.is_none())
+  {
+    return Err("远端渠道 SDK 与安装方案不一致".to_string());
+  }
+  let sdk_file_name = sdk
+    .as_ref()
+    .map(|package| normalize_manifest_path(&package.pkg_version_file_name))
+    .transpose()?;
+  overlay.sdk = sdk.as_ref().zip(sdk_file_name.as_ref()).map(|(package, file_name)| InstallSdk {
+    version: package.version.clone(),
+    pkg_version_file_name: file_name.clone(),
+    md5: package.md5.to_ascii_lowercase(),
+    size: package.size,
+    decompressed_size: package.decompressed_size,
+    cache_key: format!("sdk-{}.zip", package.md5.to_ascii_lowercase()),
+    url: package.url.clone(),
+  });
+  overlay.config_sha256 = sha256_bytes(overlay.config.as_bytes());
+  let mut fresh = build_full_install_plan(target)?;
+  if let Some(sdk) = overlay.sdk.as_ref() {
+    parts_download_push_sdk(&mut fresh, sdk)?;
+  }
+  fresh.manifest_digest = install_manifest_digest(&fresh.manifest_digest, &overlay)?;
+  if fresh.manifest_digest != plan.manifest_digest
+    || !assets_match(&fresh.assets, &plan.assets, false)
+    || !downloads_match(&fresh.downloads, &plan.downloads)
+    || fresh.inventory != plan.inventory
+  {
+    return Err("远端安装资源清单已变化，请重新评估".to_string());
+  }
+  plan.schema_version = PLAN_SCHEMA_VERSION;
+  plan.downloads = fresh.downloads;
+  plan.assets = fresh.assets;
+  plan.inventory = fresh.inventory;
+  plan.install_overlay = Some(overlay);
+  Ok(plan)
+}
+
+fn parts_download_push_sdk(parts: &mut PlanParts, sdk: &InstallSdk) -> Result<(), String> {
+  let download = PlanDownload {
+    id: sdk.cache_key.clone(),
+    cache_key: sdk.cache_key.clone(),
+    hash_kind: PlanDownloadHashKind::Md5,
+    expected_hash: sdk.md5.clone(),
+    compressed_size: sdk.size,
+    decompressed_size: sdk.size,
+    encoding: PayloadEncoding::Raw,
+    url_prefix: sdk.url.clone(),
+    url_suffix: String::new(),
+    range_start: None,
+    range_length: None,
+  };
+  if parts.downloads.iter().any(|item| item.cache_key == download.cache_key) {
+    return Err("全新安装 SDK 缓存键重复".to_string());
+  }
+  parts.downloads.push(download);
+  parts.downloads.sort_by(|left, right| left.id.cmp(&right.id));
+  Ok(())
+}
+
+fn build_full_install_plan(target: DecodedBuild) -> Result<PlanParts, String> {
+  let target_assets = collect_assets(&target)?;
+  let inventory = collect_inventory(&target_assets)?;
+  let target_downloads = collect_category_downloads(&target)?;
+  let mut downloads = HashMap::<String, PlanDownload>::new();
+  let mut assets = Vec::with_capacity(target_assets.len());
+  let mut names = target_assets.keys().cloned().collect::<Vec<_>>();
+  names.sort();
+  let reusable = HashMap::new();
+  for name in names {
+    let asset = target_assets[&name];
+    let download =
+      target_downloads.get(&name).ok_or_else(|| format!("全新安装缺少资源下载信息：{name}"))?;
+    assets.push(plan_target_asset(
+      name,
+      asset,
+      PlanAssetAction::Add,
+      None,
+      download,
+      &reusable,
+      &mut downloads,
+    )?);
+  }
+  assets.sort_by(|left, right| left.name.cmp(&right.name));
+  let mut downloads = downloads.into_values().collect::<Vec<_>>();
+  downloads.sort_by(|left, right| left.id.cmp(&right.id));
+  Ok(PlanParts {
+    strategy: PackagePlanStrategy::Full,
+    manifest_digest: manifest_digest(&target),
+    downloads,
+    assets,
+    delete_files: Vec::new(),
+    inventory,
+  })
+}
+
+fn install_manifest_digest(
+  manifest_digest: &str,
+  overlay: &InstallOverlay,
+) -> Result<String, String> {
+  let bytes = serde_json::to_vec(&(manifest_digest, overlay))
+    .map_err(|error| format!("序列化安装覆盖层失败：{error}"))?;
+  Ok(sha256_bytes(&bytes))
+}
+
+pub(crate) fn same_volume(left: &Path, right: &Path) -> bool {
+  #[cfg(target_os = "windows")]
+  {
+    use std::path::Component;
+    let prefix = |path: &Path| {
+      path.components().next().and_then(|component| match component {
+        Component::Prefix(prefix) => {
+          Some(prefix.as_os_str().to_string_lossy().to_ascii_lowercase())
+        }
+        _ => None,
+      })
+    };
+    return prefix(left) == prefix(right);
+  }
+  #[cfg(not(target_os = "windows"))]
+  {
+    let _ = (left, right);
+    false
+  }
+}
+
+fn sha256_bytes(bytes: &[u8]) -> String {
+  let mut hasher = Sha256::new();
+  hasher.update(bytes);
+  format!("{:x}", hasher.finalize())
 }
 
 /// 重新请求当前远端清单，核对计划摘要并补回不会持久化的签名下载字段。
@@ -316,10 +714,12 @@ pub(crate) async fn hydrate_and_validate_plan(
   mut plan: PersistedPlan,
 ) -> Result<PersistedPlan, String> {
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let source_tag =
+    plan.source_tag.as_deref().ok_or_else(|| "全新安装计划不能用于已有游戏更新".to_string())?;
   if plan.installation_id != installation.id
     || plan.source_scheme != scheme
     || plan.target_scheme != scheme
-    || installation.version.as_deref() != Some(plan.source_tag.as_str())
+    || installation.version.as_deref() != Some(source_tag)
   {
     return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
   }
@@ -334,6 +734,9 @@ pub(crate) async fn hydrate_and_validate_plan(
     PackagePlanTarget::Switch => {
       return Err("渠道转换任务不能作为资源下载计划恢复".to_string());
     }
+    PackagePlanTarget::Install => {
+      return Err("全新安装计划不能用于已有游戏".to_string());
+    }
   };
   if target_branch.tag != plan.target_tag {
     return Err("资源计划目标版本已变化，请重新评估".to_string());
@@ -341,23 +744,22 @@ pub(crate) async fn hydrate_and_validate_plan(
   let client = create_http_client()?;
   let fresh = match plan.strategy {
     PackagePlanStrategy::Patch => {
-      let build = get_decoded_patch_build(
-        &client,
-        target_branch,
-        &plan.source_tag,
-        &installation.audio_languages,
-      )
-      .await?;
-      build_patch_plan(build, &plan.source_tag)?
+      let build =
+        get_decoded_patch_build(&client, target_branch, source_tag, &installation.audio_languages)
+          .await?;
+      build_patch_plan(build, source_tag)?
     }
     PackagePlanStrategy::ManifestDiff => {
       build_manifest_plan(
         &client,
-        &branches.main.with_tag(&plan.source_tag),
+        &branches.main.with_tag(source_tag),
         target_branch,
         &installation.audio_languages,
       )
       .await?
+    }
+    PackagePlanStrategy::Full => {
+      return Err("全新安装计划不能用于已有游戏".to_string());
     }
   };
   if fresh.manifest_digest != plan.manifest_digest
@@ -386,10 +788,12 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
   mut plan: PersistedPlan,
 ) -> Result<PersistedPlan, String> {
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let source_tag =
+    plan.source_tag.as_deref().ok_or_else(|| "全新安装计划不能用于已有游戏更新".to_string())?;
   if plan.installation_id != installation.id
     || plan.source_scheme != scheme
     || plan.target_scheme != scheme
-    || installation.version.as_deref() != Some(plan.source_tag.as_str())
+    || installation.version.as_deref() != Some(source_tag)
   {
     return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
   }
@@ -404,28 +808,28 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
       PackagePlanTarget::PreDownload => "预下载目标尚未成为正式版本，暂时不能应用".to_string(),
       PackagePlanTarget::Main => "正式版本已变化，请重新评估".to_string(),
       PackagePlanTarget::Switch => "渠道转换任务不能作为资源更新应用".to_string(),
+      PackagePlanTarget::Install => "全新安装计划不能用于已有游戏".to_string(),
     });
   }
   let client = create_http_client()?;
   let fresh = match plan.strategy {
     PackagePlanStrategy::Patch => {
-      let build = get_decoded_patch_build(
-        &client,
-        &branches.main,
-        &plan.source_tag,
-        &installation.audio_languages,
-      )
-      .await?;
-      build_patch_plan(build, &plan.source_tag)?
+      let build =
+        get_decoded_patch_build(&client, &branches.main, source_tag, &installation.audio_languages)
+          .await?;
+      build_patch_plan(build, source_tag)?
     }
     PackagePlanStrategy::ManifestDiff => {
       build_manifest_plan(
         &client,
-        &branches.main.with_tag(&plan.source_tag),
+        &branches.main.with_tag(source_tag),
         &branches.main,
         &installation.audio_languages,
       )
       .await?
+    }
+    PackagePlanStrategy::Full => {
+      return Err("全新安装计划不能用于已有游戏".to_string());
     }
   };
   if fresh.manifest_digest != plan.manifest_digest
@@ -461,10 +865,12 @@ pub(crate) async fn hydrate_and_validate_repair_plan(
   files: &[PlanFile],
 ) -> Result<PersistedPlan, String> {
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let source_tag =
+    plan.source_tag.as_deref().ok_or_else(|| "全新安装计划不能用于资源修复".to_string())?;
   if plan.installation_id != installation.id
     || plan.source_scheme != scheme
     || plan.target_scheme != scheme
-    || installation.version.as_deref() != Some(plan.source_tag.as_str())
+    || installation.version.as_deref() != Some(source_tag)
   {
     return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
   }
@@ -473,7 +879,7 @@ pub(crate) async fn hydrate_and_validate_repair_plan(
   }
   let client = create_http_client()?;
   let tagged_branch;
-  let target_branch = if plan.source_tag == plan.target_tag {
+  let target_branch = if source_tag == plan.target_tag {
     tagged_branch = branches.main.with_tag(&plan.target_tag);
     &tagged_branch
   } else {
@@ -527,7 +933,7 @@ async fn hydrate_integrity_repair_plan(
 }
 
 fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
-  plan.source_tag == plan.target_tag
+  plan.source_tag.as_deref() == Some(plan.target_tag.as_str())
     && plan.target == PackagePlanTarget::Main
     && plan.strategy == PackagePlanStrategy::ManifestDiff
     && plan.delete_files.is_empty()
@@ -1032,11 +1438,36 @@ fn digest_parts(tag: &str, entries: &[String]) -> String {
 }
 
 fn calculate_cache_hits(cache_root: &Path, downloads: &[PlanDownload]) -> u64 {
-  downloads
-    .iter()
-    .filter(|download| cached_chunk_matches(cache_root, download))
-    .map(|download| download.compressed_size)
-    .sum()
+  if downloads.is_empty() {
+    return 0;
+  }
+  let available = std::thread::available_parallelism().map_or(1, |value| value.get());
+  let worker_count = cache_hit_worker_count(downloads.len(), available);
+  let chunk_size = downloads.len().div_ceil(worker_count);
+  let cache_hit_bytes = std::thread::scope(|scope| {
+    let handles = downloads
+      .chunks(chunk_size)
+      .map(|chunk| {
+        scope.spawn(move || {
+          chunk
+            .iter()
+            .filter(|download| cached_chunk_matches(cache_root, download))
+            .map(|download| download.compressed_size)
+            .sum::<u64>()
+        })
+      })
+      .collect::<Vec<_>>();
+    handles.into_iter().map(|handle| handle.join().unwrap_or_default()).sum()
+  });
+  flush_cache_validation_index(cache_root);
+  cache_hit_bytes
+}
+
+fn cache_hit_worker_count(download_count: usize, available: usize) -> usize {
+  if download_count == 0 {
+    return 0;
+  }
+  available.max(1).min(download_count)
 }
 
 pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
@@ -1061,7 +1492,10 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       return false;
     }
   }
-  let Ok(file) = File::open(path) else {
+  if cache_validation_matches(cache_root, download, &metadata) {
+    return true;
+  }
+  let Ok(file) = File::open(&path) else {
     return false;
   };
   let mut reader = BufReader::new(file);
@@ -1081,7 +1515,7 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
     }
   }
-  match download.hash_kind {
+  let matches = match download.hash_kind {
     PlanDownloadHashKind::XxHash64 => {
       format!("{:016x}", xxhasher.digest()).eq_ignore_ascii_case(&download.expected_hash)
     }
@@ -1089,6 +1523,132 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       format!("{:x}", md5hasher.finalize()).eq_ignore_ascii_case(&download.expected_hash)
     }
     PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
+  };
+  if matches {
+    remember_cache_validation(cache_root, download, &metadata);
+  } else {
+    forget_cache_validation(cache_root, download);
+  }
+  matches
+}
+
+fn cache_validation_index_path(cache_root: &Path) -> PathBuf {
+  cache_root.parent().unwrap_or(cache_root).join(CACHE_VALIDATION_INDEX_FILE)
+}
+
+fn load_cache_validation_state(cache_root: &Path) -> CacheValidationState {
+  let path = cache_validation_index_path(cache_root);
+  let index = fs::metadata(&path)
+    .ok()
+    .filter(|metadata| metadata.len() > 0 && metadata.len() <= MAX_CACHE_VALIDATION_INDEX_BYTES)
+    .and_then(|_| fs::read(path).ok())
+    .and_then(|bytes| serde_json::from_slice::<CacheValidationIndex>(&bytes).ok())
+    .unwrap_or_default();
+  CacheValidationState { index, dirty: false }
+}
+
+fn cache_modified_at(metadata: &fs::Metadata) -> Option<u64> {
+  metadata.modified().ok()?.duration_since(UNIX_EPOCH).ok()?.as_nanos().try_into().ok()
+}
+
+fn cache_validation_matches(
+  cache_root: &Path,
+  download: &PlanDownload,
+  metadata: &fs::Metadata,
+) -> bool {
+  let Some(modified_at) = cache_modified_at(metadata) else {
+    return false;
+  };
+  let Ok(mut states) = CACHE_VALIDATION_STATES.lock() else {
+    return false;
+  };
+  let state = states
+    .entry(cache_root.to_path_buf())
+    .or_insert_with(|| load_cache_validation_state(cache_root));
+  state.index.entries.get(&download.cache_key).is_some_and(|record| {
+    record.size == metadata.len()
+      && record.modified_at == modified_at
+      && record.hash_kind == download.hash_kind
+      && record.expected_hash.eq_ignore_ascii_case(&download.expected_hash)
+  })
+}
+
+pub(crate) fn remember_cache_validation(
+  cache_root: &Path,
+  download: &PlanDownload,
+  metadata: &fs::Metadata,
+) {
+  let Some(modified_at) = cache_modified_at(metadata) else {
+    return;
+  };
+  let Ok(mut states) = CACHE_VALIDATION_STATES.lock() else {
+    return;
+  };
+  let state = states
+    .entry(cache_root.to_path_buf())
+    .or_insert_with(|| load_cache_validation_state(cache_root));
+  state.index.entries.insert(
+    download.cache_key.clone(),
+    CacheValidationRecord {
+      size: metadata.len(),
+      modified_at,
+      hash_kind: download.hash_kind,
+      expected_hash: download.expected_hash.clone(),
+    },
+  );
+  state.dirty = true;
+}
+
+fn forget_cache_validation(cache_root: &Path, download: &PlanDownload) {
+  let Ok(mut states) = CACHE_VALIDATION_STATES.lock() else {
+    return;
+  };
+  let state = states
+    .entry(cache_root.to_path_buf())
+    .or_insert_with(|| load_cache_validation_state(cache_root));
+  if state.index.entries.remove(&download.cache_key).is_some() {
+    state.dirty = true;
+  }
+}
+
+pub(crate) fn flush_cache_validation_index(cache_root: &Path) {
+  let Ok(mut states) = CACHE_VALIDATION_STATES.lock() else {
+    return;
+  };
+  let state = states
+    .entry(cache_root.to_path_buf())
+    .or_insert_with(|| load_cache_validation_state(cache_root));
+  if !state.dirty {
+    return;
+  }
+  let content = match serde_json::to_vec(&state.index) {
+    Ok(content) => content,
+    Err(error) => {
+      log::warn!("[game-package] 序列化缓存校验索引失败：{error}");
+      return;
+    }
+  };
+  if content.len() as u64 > MAX_CACHE_VALIDATION_INDEX_BYTES {
+    log::warn!("[game-package] 缓存校验索引超过大小上限，暂不持久化");
+    return;
+  }
+  let path = cache_validation_index_path(cache_root);
+  if let Err(error) = fs::write(&path, content) {
+    log::warn!("[game-package] 写入缓存校验索引失败：{error}");
+    return;
+  }
+  state.dirty = false;
+}
+
+pub(crate) fn clear_cache_validation_index(cache_root: &Path) {
+  if let Ok(mut states) = CACHE_VALIDATION_STATES.lock() {
+    states.remove(cache_root);
+  }
+  let path = cache_validation_index_path(cache_root);
+  if let Err(error) = fs::remove_file(path)
+    && error.kind() != std::io::ErrorKind::NotFound
+  {
+    log::warn!("[game-package] 清理缓存校验索引失败：{error}");
   }
 }
 
@@ -1115,15 +1675,25 @@ pub(crate) fn load_persisted_plan(
 fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
   if !matches!(
     plan.schema_version,
-    PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V3 | LEGACY_PLAN_SCHEMA_VERSION_V2
+    PLAN_SCHEMA_VERSION
+      | LEGACY_PLAN_SCHEMA_VERSION_V4
+      | LEGACY_PLAN_SCHEMA_VERSION_V3
+      | LEGACY_PLAN_SCHEMA_VERSION_V2
   ) || plan.plan_id != plan_id
   {
     return Err("游戏资源计划版本或身份不匹配".to_string());
   }
+  let source_tag_valid = plan.source_tag.as_deref().is_some_and(|source_tag| {
+    !source_tag.is_empty() && source_tag.len() <= 128 && !source_tag.chars().any(char::is_control)
+  });
+  let install_plan_valid = plan.schema_version == PLAN_SCHEMA_VERSION
+    && plan.target == PackagePlanTarget::Install
+    && plan.strategy == PackagePlanStrategy::Full
+    && plan.source_tag.is_none()
+    && plan.install_overlay.is_some();
   if plan.installation_id.is_empty()
-    || plan.source_tag.is_empty()
-    || plan.source_tag.len() > 128
-    || plan.source_tag.chars().any(char::is_control)
+    || (!install_plan_valid && !source_tag_valid)
+    || (plan.target == PackagePlanTarget::Install && !install_plan_valid)
     || plan.target_tag.is_empty()
     || plan.target_tag.len() > 128
     || plan.target_tag.chars().any(char::is_control)
@@ -1136,7 +1706,7 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   let mut cache_keys = std::collections::HashSet::with_capacity(plan.downloads.len());
   for download in &plan.downloads {
     let encoding_valid = match plan.schema_version {
-      PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V3 => {
+      PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V4 | LEGACY_PLAN_SCHEMA_VERSION_V3 => {
         download.encoding != PayloadEncoding::LegacyUnspecified
       }
       LEGACY_PLAN_SCHEMA_VERSION_V2 => download.encoding == PayloadEncoding::LegacyUnspecified,
@@ -1188,7 +1758,10 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
     || plan.delete_files.len() > 500_000
     || plan.inventory.len() > 500_000
     || (plan.schema_version == PLAN_SCHEMA_VERSION
-      && matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
+      && matches!(
+        plan.strategy,
+        PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch | PackagePlanStrategy::Full
+      )
       && plan.inventory.is_empty())
   {
     return Err("游戏资源计划文件条目数超过安全上限".to_string());
@@ -1209,6 +1782,10 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
       || !source_valid
       || (plan.strategy == PackagePlanStrategy::ManifestDiff && asset.patch.is_some())
       || (plan.strategy == PackagePlanStrategy::Patch && asset.patch.is_none())
+      || (plan.strategy == PackagePlanStrategy::Full
+        && (asset.action != PlanAssetAction::Add
+          || asset.source.is_some()
+          || asset.patch.is_some()))
     {
       return Err("游戏资源计划包含无效资源条目".to_string());
     }
@@ -1289,7 +1866,10 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   let inventory =
     plan.inventory.iter().map(|file| (file.name.as_str(), file)).collect::<HashMap<_, _>>();
   if plan.schema_version == PLAN_SCHEMA_VERSION
-    && matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
+    && matches!(
+      plan.strategy,
+      PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch | PackagePlanStrategy::Full
+    )
     && plan.assets.iter().any(|asset| {
       inventory
         .get(asset.name.as_str())
@@ -1320,6 +1900,8 @@ fn validate_managed_paths<'a>(paths: impl IntoIterator<Item = &'a str>) -> Resul
     if case_folded == "config.ini"
       || case_folded == ".teyvatguide-update"
       || case_folded.starts_with(".teyvatguide-update/")
+      || case_folded == ".teyvatguide-install.marker"
+      || case_folded.starts_with(".teyvatguide-install.marker/")
     {
       return Err("plan contains a reserved managed path".to_string());
     }
@@ -1341,11 +1923,6 @@ fn is_md5(value: &str) -> bool {
 fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result<(), String> {
   let directory = task_root.join("tasks").join(plan_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建游戏资源计划目录失败：{error}"))?;
-  let content =
-    serde_json::to_vec_pretty(plan).map_err(|error| format!("序列化游戏资源计划失败：{error}"))?;
-  if content.len() > MAX_PLAN_BYTES {
-    return Err("游戏资源计划超过安全大小上限".to_string());
-  }
   let target = directory.join("plan.json");
   let temporary = directory.join("plan.json.tmp");
   match fs::remove_file(&temporary) {
@@ -1353,15 +1930,31 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
     Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
     Err(error) => return Err(format!("清理旧游戏资源计划临时文件失败：{error}")),
   }
-  let mut file = OpenOptions::new()
+  let file = OpenOptions::new()
     .create_new(true)
     .write(true)
     .open(&temporary)
     .map_err(|error| format!("创建游戏资源计划临时文件失败：{error}"))?;
-  file
-    .write_all(&content)
-    .and_then(|()| file.sync_all())
-    .map_err(|error| format!("写入游戏资源计划失败：{error}"))?;
+  let mut writer = BufWriter::with_capacity(256 * 1024, file);
+  if let Err(error) = serde_json::to_writer(&mut writer, plan) {
+    drop(writer);
+    let _ = fs::remove_file(&temporary);
+    return Err(format!("序列化游戏资源计划失败：{error}"));
+  }
+  if let Err(error) = writer.flush() {
+    drop(writer);
+    let _ = fs::remove_file(&temporary);
+    return Err(format!("写入游戏资源计划失败：{error}"));
+  }
+  let file = writer.into_inner().map_err(|error| format!("写入游戏资源计划失败：{error}"))?;
+  let content_len =
+    file.metadata().map_err(|error| format!("读取游戏资源计划大小失败：{error}"))?.len();
+  if content_len > MAX_PLAN_BYTES as u64 {
+    drop(file);
+    let _ = fs::remove_file(&temporary);
+    return Err("游戏资源计划超过安全大小上限".to_string());
+  }
+  file.sync_all().map_err(|error| format!("同步游戏资源计划失败：{error}"))?;
   drop(file);
   atomic_replace_plan(&temporary, &target)?;
   sync_directory(&directory)?;
@@ -1495,7 +2088,7 @@ mod tests {
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
       target: PackagePlanTarget::Main,
-      source_tag: "1.0.0".to_string(),
+      source_tag: Some("1.0.0".to_string()),
       target_tag: "2.0.0".to_string(),
       manifest_digest: "a".repeat(64),
       strategy: PackagePlanStrategy::ManifestDiff,
@@ -1503,6 +2096,7 @@ mod tests {
       assets: Vec::new(),
       delete_files: Vec::new(),
       inventory,
+      install_overlay: None,
       created_at: "2026-08-19T00:00:00Z".to_string(),
     }
   }
@@ -1833,7 +2427,7 @@ mod tests {
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
       target: PackagePlanTarget::Main,
-      source_tag: "1.0.0".to_string(),
+      source_tag: Some("1.0.0".to_string()),
       target_tag: "2.0.0".to_string(),
       manifest_digest: parts.manifest_digest.clone(),
       strategy: parts.strategy,
@@ -1841,6 +2435,7 @@ mod tests {
       assets: parts.assets,
       delete_files: parts.delete_files,
       inventory: parts.inventory.clone(),
+      install_overlay: None,
       created_at: "2026-08-19T00:00:00Z".to_string(),
     };
     assert!(validate_persisted_plan(&plan, &plan_id).is_ok());
@@ -1867,7 +2462,7 @@ mod tests {
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
       target: PackagePlanTarget::Main,
-      source_tag: "1.0.0".to_string(),
+      source_tag: Some("1.0.0".to_string()),
       target_tag: "2.0.0".to_string(),
       manifest_digest: parts.manifest_digest.clone(),
       strategy: parts.strategy,
@@ -1875,6 +2470,7 @@ mod tests {
       assets: parts.assets,
       delete_files: parts.delete_files,
       inventory: parts.inventory.clone(),
+      install_overlay: None,
       created_at: "2026-08-19T00:00:00Z".to_string(),
     };
     let overlay = overlay_repair_parts(
@@ -1944,6 +2540,56 @@ mod tests {
     };
     assert!(cached_chunk_matches(&cache, &download));
     let _ = std::fs::remove_dir_all(&cache);
+  }
+
+  #[test]
+  fn calculates_cache_hits_without_counting_invalid_entries() {
+    use xxhash_rust::xxh64::Xxh64;
+
+    let root =
+      std::env::temp_dir().join(format!("teyvat-guide-cache-hits-{}", uuid::Uuid::new_v4()));
+    let cache = root.join("cache/chunks");
+    std::fs::create_dir_all(&cache).unwrap();
+    let bytes = b"cached-chunk";
+    std::fs::write(cache.join("hit"), bytes).unwrap();
+    std::fs::write(cache.join("invalid"), bytes).unwrap();
+    let mut hasher = Xxh64::new(0);
+    hasher.update(bytes);
+    let hit = super::PlanDownload {
+      id: "hit".to_string(),
+      cache_key: "hit".to_string(),
+      hash_kind: PlanDownloadHashKind::XxHash64,
+      expected_hash: format!("{:016x}", hasher.digest()),
+      compressed_size: bytes.len() as u64,
+      decompressed_size: bytes.len() as u64,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: String::new(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    };
+    let mut invalid = hit.clone();
+    invalid.id = "invalid".to_string();
+    invalid.cache_key = "invalid".to_string();
+    invalid.expected_hash = "0".repeat(16);
+    let missing = {
+      let mut download = hit.clone();
+      download.id = "missing".to_string();
+      download.cache_key = "missing".to_string();
+      download
+    };
+    let expected = bytes.len() as u64;
+    assert_eq!(super::calculate_cache_hits(&cache, &[hit.clone(), invalid, missing]), expected);
+    assert_eq!(super::calculate_cache_hits(&cache, &[hit]), expected);
+    super::clear_cache_validation_index(&cache);
+    let _ = std::fs::remove_dir_all(root);
+  }
+
+  #[test]
+  fn chooses_cache_hit_worker_count_from_downloads_and_cpu() {
+    assert_eq!(super::cache_hit_worker_count(2, 8), 2);
+    assert_eq!(super::cache_hit_worker_count(8, 2), 2);
+    assert_eq!(super::cache_hit_worker_count(0, 8), 0);
   }
 
   #[test]

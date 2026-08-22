@@ -8,6 +8,16 @@
     </template>
     <template #append>
       <v-btn
+        :disabled="installationsLoading || launching"
+        class="game-install-btn"
+        color="var(--tgc-od-orange)"
+        prepend-icon="mdi-download-box-outline"
+        variant="tonal"
+        @click="openInstallOverlay"
+      >
+        安装新客户端
+      </v-btn>
+      <v-btn
         :disabled="launching"
         :loading="launching"
         :title="launchTitle"
@@ -22,7 +32,7 @@
   </v-app-bar>
 
   <div class="game-page">
-    <div v-if="!initialized" class="game-empty">
+    <div v-if="installationsLoading && installations.length === 0" class="game-empty" role="status">
       <v-progress-circular indeterminate />
       <span class="game-empty-title">正在读取本地安装…</span>
     </div>
@@ -45,7 +55,20 @@
     <template v-else>
       <section class="game-list">
         <div class="game-list-header">
-          <span>{{ gameEnum.installation.schemeDesc(chosen.schemeId) }}</span>
+          <div class="game-list-heading">
+            <span>{{ gameEnum.installation.schemeDesc(chosen.schemeId) }}</span>
+            <v-btn
+              :disabled="installationSizeLoading"
+              :loading="installationSizeLoading"
+              class="game-size-btn"
+              prepend-icon="mdi-harddisk"
+              size="small"
+              variant="tonal"
+              @click="handleInstallationSizeClick"
+            >
+              {{ installationSizeButtonLabel }}
+            </v-btn>
+          </div>
           <div class="game-list-chips">
             <v-chip size="small" variant="tonal">当前安装</v-chip>
             <v-chip :color="statusColor(chosen.status)" size="small" variant="tonal">
@@ -251,13 +274,39 @@
           />
         </template>
       </section>
-      <PgCache />
     </template>
+    <PgInstallDraft
+      v-for="draft in visibleInstallDrafts"
+      :key="draft.draftId"
+      :action-pending="taskStore.pendingActions[draft.draftId] ?? false"
+      :draft
+      @cancel-requested="handleInstallDraftCancel(draft)"
+      @resume-requested="handleInstallDraftResume(draft)"
+    />
+    <PgInstallTask
+      v-for="task in installTasks"
+      :key="task.taskId"
+      :action-pending="taskStore.pendingActions[task.taskId] ?? false"
+      :task="task"
+      @cancel-requested="handleInstallTaskCancel(task)"
+      @configure-requested="handleInstallTaskConfigure(task)"
+      @pause-requested="handleInstallTaskPause(task)"
+      @recover-requested="(action) => handleInstallTaskRecover(task, action)"
+    />
+    <PgCache v-if="chosen !== null || installTasks.length > 0 || visibleInstallDrafts.length > 0" />
   </div>
   <PgoPath
+    v-if="pathOverlay"
     v-model="pathOverlay"
     :currentPath="chosen?.executablePath"
-    @selected="refreshRegistered"
+    @selected="refreshPageData"
+  />
+  <PgoInstall
+    v-if="installOverlay"
+    v-model="installOverlay"
+    :initialConfig="installInitialConfig"
+    :installedSchemes
+    @completed="refreshPageData"
   />
 </template>
 
@@ -265,31 +314,78 @@
 import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PgCache from "@comp/pageGame/pg-cache.vue";
-import PgScheme from "@comp/pageGame/pg-scheme.vue";
-import PgVersion from "@comp/pageGame/pg-version.vue";
-import PgoPath from "@comp/pageGame/pgo-path.vue";
 import gameEnum from "@enum/game.js";
 import useAppStore from "@store/app.js";
 import useBBSStore from "@store/bbs.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { tryLaunchGame } from "@utils/TGGame.js";
-import { listGameInstallations } from "@utils/TGGameLauncher.js";
+import {
+  getGameInstallationSize,
+  listGameInstallDrafts,
+  listGameInstallations,
+} from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
+
+const PgCache = defineAsyncComponent(() => import("@comp/pageGame/pg-cache.vue"));
+const PgInstallDraft = defineAsyncComponent(() => import("@comp/pageGame/pg-install-draft.vue"));
+const PgInstallTask = defineAsyncComponent(() => import("@comp/pageGame/pg-install-task.vue"));
+const PgScheme = defineAsyncComponent(() => import("@comp/pageGame/pg-scheme.vue"));
+const PgVersion = defineAsyncComponent(() => import("@comp/pageGame/pg-version.vue"));
+const PgoInstall = defineAsyncComponent(() => import("@comp/pageGame/pgo-install.vue"));
+const PgoPath = defineAsyncComponent(() => import("@comp/pageGame/pgo-path.vue"));
 
 const taskStore = useGameLauncherStore();
 const { isLogin } = storeToRefs(useAppStore());
 const { gameList } = storeToRefs(useBBSStore());
 const { account, cookie } = storeToRefs(useUserStore());
-const initialized = ref<boolean>(false);
 const launching = ref<boolean>(false);
 const pathOverlay = ref<boolean>(false);
+const installOverlay = ref<boolean>(false);
+type InstallInitialConfig = {
+  scheme: TGApp.Game.Installation.SchemeEnum;
+  installRoot: string | null;
+  audioLanguages: Array<string>;
+  taskId: string;
+  installationId: string;
+};
+const installInitialConfig = ref<InstallInitialConfig | null>(null);
 const installations = ref<Array<TGApp.Game.Installation.Item>>([]);
+const installationsLoading = ref<boolean>(true);
+const installDrafts = ref<Array<TGApp.Game.Installation.InstallDraftSummary>>([]);
+const installationSize = ref<number | null>(null);
+const installationSizeLoading = ref<boolean>(false);
+const installationSizeError = ref<boolean>(false);
+const installationSizeCache = new Map<string, { bytes: number; readAt: number }>();
+const installationSizePending = new Map<string, Promise<number>>();
+let installationSizeRequest = 0;
+let pageActive = true;
 
 const chosen = computed<TGApp.Game.Installation.Item | null>(() => {
   return installations.value.find((installation) => installation.isChosen) ?? null;
+});
+const installTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
+  return Object.values(taskStore.tasksByInstallation).filter(
+    (task) =>
+      task.target === gameEnum.package.planTarget.INSTALL &&
+      task.state !== gameEnum.package.taskState.COMPLETED &&
+      task.state !== gameEnum.package.taskState.CANCELED,
+  );
+});
+const visibleInstallDrafts = computed<Array<TGApp.Game.Installation.InstallDraftSummary>>(() => {
+  const taskInstallationIds = new Set(installTasks.value.map((task) => task.installationId));
+  return installDrafts.value.filter((draft) => !taskInstallationIds.has(draft.installId));
+});
+const installedSchemes = computed<Array<TGApp.Game.Installation.SchemeEnum>>(() => {
+  const schemes: Array<TGApp.Game.Installation.SchemeEnum> = [];
+  for (const installation of installations.value) {
+    if (installation.schemeId !== null && !schemes.includes(installation.schemeId)) {
+      schemes.push(installation.schemeId);
+    }
+  }
+  return schemes;
 });
 const genshinIcon = computed<string>(() => {
   const game = gameList.value.find((item) => item.op_name === "hk4e");
@@ -346,6 +442,19 @@ function audioDesc(languages: Array<string>): string {
   return languages.map((language) => descriptions[language] ?? language).join("、");
 }
 
+const installationSizeLabel = computed<string>(() => {
+  if (installationSizeLoading.value) return "读取中…";
+  if (installationSizeError.value) return "读取失败，点击重试";
+  if (installationSize.value === null) return "点击读取占用空间";
+  return fmtUtil.size(installationSize.value);
+});
+const installationSizeButtonLabel = computed<string>(() => {
+  if (installationSizeLoading.value) return "读取中…";
+  if (installationSizeError.value) return "重试占用空间";
+  if (installationSize.value === null) return "读取占用空间";
+  return `占用空间 ${installationSizeLabel.value}`;
+});
+
 function versionPrimary(snapshot: TGApp.Game.Package.Snapshot | null): string {
   const local = snapshot?.localVersion ?? chosen.value?.version ?? "未读取";
   if (snapshot === null || local === snapshot.main.tag) return local;
@@ -374,6 +483,16 @@ function handleVersionVerify(version: { startVerify: () => Promise<void> }): voi
   void version.startVerify();
 }
 
+function openInstallOverlay(): void {
+  installInitialConfig.value = null;
+  installOverlay.value = true;
+}
+
+function handleInstallationSizeClick(): void {
+  if (installationSizeLoading.value) return;
+  void refreshInstallationSize(chosen.value ?? undefined);
+}
+
 function handleSchemeAction(scheme: {
   cancelSwitch: () => Promise<void>;
   convertScheme: () => Promise<void>;
@@ -395,7 +514,7 @@ function taskBlocksLaunch(state: TGApp.Game.Package.TaskStateEnum): boolean {
 }
 
 const launchBlockReason = computed<string | null>(() => {
-  if (!initialized.value) return "正在读取本地安装…";
+  if (installationsLoading.value) return "正在读取本地安装…";
   if (chosen.value === null) return "请先选择游戏路径";
   if (chosen.value.status !== gameEnum.installation.status.KNOWN) {
     return chosen.value.statusMessage;
@@ -431,26 +550,184 @@ async function handleLaunchGame(): Promise<void> {
 }
 
 async function refreshRegistered(): Promise<void> {
+  installationsLoading.value = true;
   try {
-    installations.value = await listGameInstallations();
+    const nextInstallations = await listGameInstallations();
+    installations.value = nextInstallations;
+    installationSizeRequest += 1;
+    installationSize.value = null;
+    installationSizeLoading.value = false;
+    installationSizeError.value = false;
   } catch (error) {
     showSnackbar.error(`读取游戏安装失败：${error}`);
+  } finally {
+    installationsLoading.value = false;
   }
 }
 
-async function initializePage(): Promise<void> {
+async function refreshInstallDrafts(): Promise<void> {
+  try {
+    installDrafts.value = await listGameInstallDrafts();
+  } catch (error) {
+    showSnackbar.error(`读取安装草稿失败：${error}`);
+  }
+}
+
+async function refreshPageData(): Promise<void> {
+  await Promise.all([refreshRegistered(), refreshInstallDrafts()]);
+}
+
+async function refreshInstallationSize(
+  installation: TGApp.Game.Installation.Item | undefined,
+): Promise<void> {
+  const request = ++installationSizeRequest;
+  installationSize.value = null;
+  installationSizeError.value = false;
+  if (installation === undefined) {
+    installationSizeLoading.value = false;
+    return;
+  }
+  installationSizeLoading.value = true;
+  let pending: Promise<number> | undefined;
+  try {
+    const cached = installationSizeCache.get(installation.rootPath);
+    if (cached !== undefined && Date.now() - cached.readAt < 30_000) {
+      installationSize.value = cached.bytes;
+      return;
+    }
+    pending = installationSizePending.get(installation.rootPath);
+    if (pending === undefined) {
+      pending = getGameInstallationSize(installation.rootPath);
+      installationSizePending.set(installation.rootPath, pending);
+    }
+    const size = await pending;
+    installationSizeCache.set(installation.rootPath, { bytes: size, readAt: Date.now() });
+    if (request === installationSizeRequest) installationSize.value = size;
+  } catch {
+    if (request === installationSizeRequest) installationSizeError.value = true;
+  } finally {
+    if (installationSizePending.get(installation.rootPath) === pending) {
+      installationSizePending.delete(installation.rootPath);
+    }
+    if (request === installationSizeRequest) installationSizeLoading.value = false;
+  }
+}
+
+async function handleInstallTaskCancel(task: TGApp.Game.Package.TaskSummary): Promise<void> {
+  const confirmed = await showDialog.checkF({
+    title: "停止安装？",
+    text: "将停止当前安装并清理安装草稿；已经下载完成的共享缓存会保留。",
+    confirmLabel: "停止安装",
+  });
+  if (confirmed !== true) return;
+  try {
+    await taskStore.cancelInstall(task.taskId, task.installationId);
+    await refreshPageData();
+  } catch (error) {
+    showSnackbar.error(`取消游戏安装失败：${error}`);
+  }
+}
+
+async function handleInstallTaskPause(task: TGApp.Game.Package.TaskSummary): Promise<void> {
+  try {
+    await taskStore.pauseInstall(task.taskId, task.installationId);
+  } catch (error) {
+    showSnackbar.error(`暂停游戏安装失败：${error}`);
+  }
+}
+
+async function handleInstallDraftResume(
+  draft: TGApp.Game.Installation.InstallDraftSummary,
+): Promise<void> {
+  try {
+    await taskStore.resumeInstallDraft(draft);
+    await refreshPageData();
+  } catch (error) {
+    showSnackbar.error(`恢复游戏安装失败：${error}`);
+  }
+}
+
+async function handleInstallDraftCancel(
+  draft: TGApp.Game.Installation.InstallDraftSummary,
+): Promise<void> {
+  const confirmed = await showDialog.check("取消安装", "确认取消安装？");
+  if (confirmed !== true) return;
+  try {
+    await taskStore.cancelInstallDraft(draft);
+    await refreshPageData();
+  } catch (error) {
+    showSnackbar.error(`取消安装草稿失败：${error}`);
+  }
+}
+
+async function handleInstallTaskRecover(
+  task: TGApp.Game.Package.TaskSummary,
+  action: TGApp.Game.Package.RecoveryActionEnum,
+): Promise<void> {
+  const deleting = action === gameEnum.package.recoveryAction.ROLLBACK;
+  if (deleting) {
+    const confirmed = await showDialog.checkF({
+      title: "删除安装任务？",
+      text: "将删除当前安装任务并清理安装草稿；已命中的共享缓存不会删除。",
+      confirmLabel: "删除",
+    });
+    if (confirmed !== true) return;
+  }
+  try {
+    const updated = await taskStore.recoverInstall(task.taskId, task.installationId, action);
+    if (updated.state === gameEnum.package.taskState.COMPLETED) await refreshPageData();
+    if (deleting) {
+      await refreshPageData();
+      showSnackbar.info("安装任务已删除，已发布的游戏目录保留");
+    }
+  } catch (error) {
+    showSnackbar.error(`${deleting ? "删除" : "恢复"}游戏安装失败：${error}`);
+  }
+}
+
+function handleInstallTaskConfigure(task: TGApp.Game.Package.TaskSummary): void {
+  installInitialConfig.value = {
+    scheme: task.targetScheme,
+    installRoot: task.installRoot,
+    audioLanguages: [...task.audioLanguages],
+    taskId: task.taskId,
+    installationId: task.installationId,
+  };
+  installOverlay.value = true;
+}
+
+async function initializeTaskProjection(): Promise<void> {
   try {
     await taskStore.startListening();
-    await Promise.all([refreshRegistered(), taskStore.hydrateTasks()]);
+  } catch (error) {
+    showSnackbar.error(`监听游戏资源任务失败：${error}`);
+  }
+  if (!pageActive) return;
+  try {
+    await taskStore.hydrateTasks();
   } catch (error) {
     showSnackbar.error(`读取游戏资源任务失败：${error}`);
-  } finally {
-    initialized.value = true;
   }
+}
+
+function initializePage(): void {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (!pageActive) return;
+      void refreshPageData();
+      void initializeTaskProjection();
+    });
+  });
 }
 
 onMounted(initializePage);
-onUnmounted(taskStore.stopListening);
+watch(installOverlay, (visible) => {
+  if (!visible) installInitialConfig.value = null;
+});
+onUnmounted(() => {
+  pageActive = false;
+  taskStore.stopListening();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -472,6 +749,7 @@ onUnmounted(taskStore.stopListening);
   width: 24px;
   height: 24px;
   border-radius: 4px;
+  filter: var(--icon-filter);
 }
 
 .game-launch-btn {
@@ -480,6 +758,10 @@ onUnmounted(taskStore.stopListening);
   background: var(--tgc-btn-1);
   color: var(--btn-text);
   font-family: var(--font-text);
+}
+
+.game-install-btn {
+  margin-right: 8px;
 }
 
 .game-page {
@@ -514,6 +796,25 @@ onUnmounted(taskStore.stopListening);
     font-size: large;
     font-weight: normal;
   }
+}
+
+.game-list-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+
+  > span {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.game-size-btn {
+  flex-shrink: 0;
+  padding-inline: 4px;
 }
 
 .game-list-chips {
@@ -559,7 +860,7 @@ onUnmounted(taskStore.stopListening);
 .game-facts {
   display: grid;
   padding: 8px 16px 12px;
-  gap: 12px;
+  gap: 8px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
@@ -650,5 +951,11 @@ onUnmounted(taskStore.stopListening);
   font-family: var(--font-title);
   font-size: 18px;
   font-weight: normal;
+}
+
+@media (width <= 900px) {
+  .game-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 </style>

@@ -5,12 +5,16 @@ use super::{
   committer,
   downloader::{RateLimiter, download_object, prepare_cache_root},
   hoyoplay::{create_http_client, get_game_branches},
+  installer,
   journal::{self, TaskJournal},
   model::{
-    GameInstallation, PackagePlanStrategy, PackageTaskOptions, PackageTaskState,
+    GameInstallation, PackagePlanStrategy, PackagePlanTarget, PackageTaskOptions, PackageTaskState,
     PackageTaskSummary, PackageVerifySummary,
   },
-  planner::{PersistedPlan, cached_chunk_matches, hydrate_and_validate_repair_plan},
+  planner::{
+    PersistedPlan, cached_chunk_matches, flush_cache_validation_index,
+    hydrate_and_validate_repair_plan, same_volume,
+  },
   switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
 };
@@ -47,7 +51,15 @@ struct ActiveTasks {
 struct ActiveTask {
   installation_id: String,
   canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
   journal: Arc<AsyncMutex<TaskJournal>>,
+}
+
+#[derive(Clone)]
+pub(crate) struct InstallContext {
+  pub(crate) pool: sqlx::SqlitePool,
+  pub(crate) machine_uid: String,
+  pub(crate) draft_id: String,
 }
 
 pub(crate) struct TaskReservation {
@@ -172,10 +184,163 @@ impl GamePackageManager {
     journal::persist(&task_root, &journal)?;
 
     let canceled = Arc::new(AtomicBool::new(false));
+    let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
       installation_id: plan.installation_id.clone(),
       canceled: Arc::clone(&canceled),
+      paused: Arc::clone(&paused),
+      journal: Arc::clone(&shared_journal),
+    };
+    {
+      let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      active.by_task.insert(plan.plan_id.clone(), task);
+    }
+    reservation.retain();
+    let summary = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?.summary();
+    emit_state(&app_handle, &summary);
+    let active = Arc::clone(&self.active);
+    let finished_task_id = summary.task_id.clone();
+    tauri::async_runtime::spawn(async move {
+      run_task(
+        app_handle.clone(),
+        &task_root,
+        &cache_root,
+        plan.clone(),
+        download_client,
+        shared_journal,
+        Arc::clone(&canceled),
+        Arc::clone(&paused),
+        concurrency,
+        options.max_bytes_per_second,
+        None,
+      )
+      .await;
+      finish_task(&active, &finished_task_id);
+    });
+    Ok(summary)
+  }
+
+  pub(crate) fn has_running_tasks(&self) -> Result<bool, String> {
+    let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+    Ok(!active.by_task.is_empty())
+  }
+
+  pub(crate) fn start_install(
+    &self,
+    app_handle: AppHandle,
+    task_root: PathBuf,
+    plan: PersistedPlan,
+    draft_id: String,
+    options: PackageTaskOptions,
+    context: InstallContext,
+    recovering: bool,
+  ) -> Result<PackageTaskSummary, String> {
+    installer::ensure_windows_install_platform()?;
+    if plan.target != PackagePlanTarget::Install || plan.strategy != PackagePlanStrategy::Full {
+      return Err("当前计划不是全新安装计划".to_string());
+    }
+    if plan.inventory.is_empty() || plan.install_overlay.is_none() {
+      return Err("全新安装计划缺少完整目标清单".to_string());
+    }
+    let concurrency = options.concurrency.unwrap_or(DEFAULT_CONCURRENCY);
+    if !(1..=MAX_CONCURRENCY).contains(&concurrency) {
+      return Err(format!("下载并发数必须在 1 到 {MAX_CONCURRENCY} 之间"));
+    }
+    if options.max_bytes_per_second.is_some_and(|value| value < MIN_RATE_LIMIT) {
+      return Err("下载限速不能低于 1 MiB/s".to_string());
+    }
+    let download_client = create_http_client()?;
+    let mut reservation =
+      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+    let cache_root = prepare_cache_root(&task_root)?;
+    let missing_bytes = plan
+      .downloads
+      .iter()
+      .filter(|download| !cached_chunk_matches(&cache_root, download))
+      .try_fold(0_u64, |total, download| {
+        total.checked_add(download.compressed_size).ok_or_else(|| "安装下载大小溢出".to_string())
+      })?;
+    let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
+    if matches!(
+      installer::load_draft(&task_root, &draft_id)?.state,
+      installer::InstallDraftState::Completed | installer::InstallDraftState::Canceled
+    ) {
+      return Err("安装草稿已经结束，不能重新启动".to_string());
+    }
+    let install_bytes = plan
+      .assets
+      .iter()
+      .try_fold(overlay.config.len() as u64, |total, asset| {
+        total.checked_add(asset.size).ok_or_else(|| "安装大小溢出".to_string())
+      })?
+      .checked_add(overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size))
+      .ok_or_else(|| "安装大小溢出".to_string())?;
+    let cache_available = fs2::available_space(&cache_root)
+      .map_err(|error| format!("读取资源缓存磁盘剩余空间失败：{error}"))?;
+    let game_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
+    let install_available = fs2::available_space(game_parent)
+      .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
+    let same_volume = same_volume(&cache_root, game_parent);
+    let cache_required = missing_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+    let install_required = install_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+    let required = if same_volume {
+      missing_bytes
+        .checked_add(install_bytes)
+        .and_then(|value| value.checked_add(SAFETY_MARGIN_BYTES))
+        .ok_or_else(|| "安装所需空间溢出".to_string())?
+    } else {
+      cache_required.checked_add(install_required).ok_or_else(|| "安装所需空间溢出".to_string())?
+    };
+    let available =
+      if same_volume { cache_available.min(install_available) } else { cache_available };
+    let sufficient = if same_volume {
+      available >= required
+    } else {
+      cache_available >= cache_required && install_available >= install_required
+    };
+    if !sufficient {
+      return Err(format!(
+        "安装空间不足：需要约 {required} 字节，可用缓存 {} 字节、安装盘 {} 字节",
+        cache_available, install_available
+      ));
+    }
+    let mut journal = journal::load_or_create(&task_root, &plan)?;
+    if journal.state.blocks_launch() && !recovering {
+      return Err("检测到未完成的安装提交，请先执行恢复".to_string());
+    }
+    if !recovering && journal.state.is_active() && journal.revision > 1 {
+      return Err("检测到未完成的安装任务，请使用恢复操作继续".to_string());
+    }
+    if !recovering && journal.state == PackageTaskState::Paused {
+      return Err("检测到已暂停的安装任务，请使用恢复操作继续".to_string());
+    }
+    if recovering
+      && matches!(
+        journal.state,
+        PackageTaskState::Published
+          | PackageTaskState::Verified
+          | PackageTaskState::RegistrationPending
+      )
+    {
+      return Err("安装已经发布，请使用安装恢复命令完成登记".to_string());
+    }
+    rebuild_completed_cache(&mut journal, &plan, &cache_root);
+    journal.state = PackageTaskState::Queued;
+    journal.error_message = None;
+    journal.current_file = None;
+    journal.bytes_per_second = 0;
+    journal.eta_seconds = None;
+    journal.touch();
+    journal::persist(&task_root, &journal)?;
+    installer::set_draft_state(&task_root, &draft_id, installer::InstallDraftState::Downloading)?;
+    let canceled = Arc::new(AtomicBool::new(false));
+    let paused = Arc::new(AtomicBool::new(false));
+    let shared_journal = Arc::new(AsyncMutex::new(journal));
+    let task = ActiveTask {
+      installation_id: plan.installation_id.clone(),
+      canceled: Arc::clone(&canceled),
+      paused: Arc::clone(&paused),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -196,18 +361,15 @@ impl GamePackageManager {
         download_client,
         shared_journal,
         canceled,
+        paused,
         concurrency,
         options.max_bytes_per_second,
+        Some(context),
       )
       .await;
       finish_task(&active, &finished_task_id);
     });
     Ok(summary)
-  }
-
-  pub(crate) fn has_running_tasks(&self) -> Result<bool, String> {
-    let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-    Ok(!active.by_task.is_empty())
   }
 
   pub(crate) fn start_switch(
@@ -251,10 +413,12 @@ impl GamePackageManager {
     journal.touch();
     journal::persist(&task_root, &journal)?;
     let canceled = Arc::new(AtomicBool::new(false));
+    let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
       installation_id: plan.installation_id().to_string(),
       canceled: Arc::clone(&canceled),
+      paused: Arc::clone(&paused),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -314,6 +478,81 @@ impl GamePackageManager {
       emit_state(app_handle, &summary);
     }
     Ok(())
+  }
+
+  /// 暂停全新安装的资源下载，保留草稿与已完成缓存以便后续恢复。
+  pub(crate) async fn pause_install(
+    &self,
+    app_handle: &AppHandle,
+    task_root: &Path,
+    task_id: &str,
+    installation_id: &str,
+  ) -> Result<PackageTaskSummary, String> {
+    let task = {
+      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      active.by_task.get(task_id).cloned()
+    };
+    let Some(task) = task else {
+      let journal = journal::load(&journal::journal_path(task_root, task_id))?;
+      if journal.installation_id != installation_id {
+        return Err("安装任务身份不匹配".to_string());
+      }
+      if journal.state == PackageTaskState::Paused {
+        return Ok(journal.summary());
+      }
+      return Err("安装任务当前不在下载中".to_string());
+    };
+    if task.installation_id != installation_id {
+      return Err("安装任务身份不匹配".to_string());
+    }
+    let mut journal_value = task.journal.lock().await;
+    if journal_value.target != PackagePlanTarget::Install {
+      return Err("当前任务不是游戏本体安装任务".to_string());
+    }
+    if journal_value.installation_id != installation_id {
+      return Err("安装任务身份不匹配".to_string());
+    }
+    if journal_value.state == PackageTaskState::Paused {
+      return Ok(journal_value.summary());
+    }
+    if !matches!(journal_value.state, PackageTaskState::Queued | PackageTaskState::Downloading) {
+      return Err("安装任务当前不能暂停".to_string());
+    }
+    let previous_state = journal_value.state;
+    task.paused.store(true, Ordering::Release);
+    journal_value.state = PackageTaskState::Paused;
+    journal_value.current_file = None;
+    journal_value.bytes_per_second = 0;
+    journal_value.eta_seconds = None;
+    journal_value.error_message = None;
+    journal_value.touch();
+    if let Err(error) = journal::persist(task_root, &journal_value) {
+      task.paused.store(false, Ordering::Release);
+      journal_value.state = previous_state;
+      return Err(error);
+    }
+    let summary = journal_value.summary();
+    emit_progress(app_handle, &summary);
+    emit_state(app_handle, &summary);
+    Ok(summary)
+  }
+
+  /// 等待暂停任务的下载 worker 退出，避免恢复或删除与旧 worker 并发操作日志和缓存。
+  pub(crate) async fn wait_for_task_idle(&self, task_id: &str) -> Result<(), String> {
+    let deadline = Instant::now() + Duration::from_secs(60);
+    loop {
+      let running = {
+        let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+        active.by_task.contains_key(task_id)
+      };
+      if !running {
+        return Ok(());
+      }
+      if Instant::now() >= deadline {
+        return Err("安装任务仍在停止，请稍后重试".to_string());
+      }
+      tokio::time::sleep(Duration::from_millis(50)).await;
+    }
   }
 
   fn request_or_reap_cancel(
@@ -382,10 +621,12 @@ impl GamePackageManager {
     let game_root = PathBuf::from(&installation.root_path);
     let summary = journal_value.summary();
     let canceled = Arc::new(AtomicBool::new(false));
+    let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal_value));
     let task = ActiveTask {
       installation_id: plan.installation_id.clone(),
       canceled: Arc::clone(&canceled),
+      paused: Arc::clone(&paused),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -714,14 +955,17 @@ async fn run_repair(
       emit_state(&app_handle, &journal_value.summary());
     }
     let limiter = Arc::new(RateLimiter::new(None));
+    let paused = Arc::new(AtomicBool::new(false));
     let downloads = stream::iter(pending.into_iter().map(|download| {
       let cache_root = cache_root.clone();
       let task_id = repair_plan.plan_id.clone();
       let canceled = Arc::clone(&canceled);
+      let paused = Arc::clone(&paused);
       let limiter = Arc::clone(&limiter);
       let client = client.clone();
       async move {
-        download_object(&client, &cache_root, &download, &task_id, &canceled, &limiter).await
+        download_object(&client, &cache_root, &download, &task_id, &canceled, &paused, &limiter)
+          .await
       }
     }))
     .buffer_unordered(DEFAULT_CONCURRENCY);
@@ -732,6 +976,7 @@ async fn run_repair(
         return Err("应用更新已取消".to_string());
       }
     }
+    flush_cache_validation_index(&cache_root);
   }
   {
     let mut journal_value = journal.lock().await;
@@ -879,11 +1124,24 @@ async fn run_task(
   download_client: reqwest::Client,
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
   concurrency: usize,
   max_bytes_per_second: Option<u64>,
+  install_context: Option<InstallContext>,
 ) {
   {
     let mut journal_value = journal.lock().await;
+    if paused.load(Ordering::Acquire) {
+      journal_value.state = PackageTaskState::Paused;
+      journal_value.error_message = None;
+      journal_value.touch();
+      if let Err(error) = journal::persist(task_root, &journal_value) {
+        persist_terminal_journal(task_root, &mut journal_value, error, false, &app_handle);
+        return;
+      }
+      emit_state(&app_handle, &journal_value.summary());
+      return;
+    }
     journal_value.state = PackageTaskState::Downloading;
     journal_value.touch();
     if let Err(error) = journal::persist(task_root, &journal_value) {
@@ -899,35 +1157,46 @@ async fn run_task(
     .filter(|download| !cached_chunk_matches(cache_root, download))
     .cloned()
     .collect::<Vec<_>>();
+  let download_labels = build_download_labels(&plan);
   let started_at = Instant::now();
   let mut last_emit = Instant::now() - Duration::from_secs(1);
   let mut last_persist = Instant::now();
   let mut fatal_error = None;
+  let mut completed_cache_keys = {
+    let journal_value = journal.lock().await;
+    journal_value.owned_cache_files.iter().cloned().collect::<HashSet<_>>()
+  };
   let downloads = stream::iter(pending.into_iter().map(|download| {
     let cache_root = cache_root.to_path_buf();
     let task_id = plan.plan_id.clone();
+    let current_file = download_labels
+      .get(&download.cache_key)
+      .cloned()
+      .unwrap_or_else(|| format!("资源对象：{}", download.id));
     let canceled = Arc::clone(&canceled);
+    let paused = Arc::clone(&paused);
     let limiter = Arc::clone(&limiter);
     let client = download_client.clone();
     async move {
       let result =
-        download_object(&client, &cache_root, &download, &task_id, &canceled, &limiter).await;
-      (download.cache_key, result)
+        download_object(&client, &cache_root, &download, &task_id, &canceled, &paused, &limiter)
+          .await;
+      (current_file, result)
     }
   }))
   .buffer_unordered(concurrency);
   futures_util::pin_mut!(downloads);
-  while let Some((cache_key, result)) = downloads.next().await {
+  while let Some((current_file, result)) = downloads.next().await {
     match result {
       Ok(downloaded) => {
         let mut journal_value = journal.lock().await;
-        if !journal_value.owned_cache_files.contains(&downloaded.cache_key) {
+        if completed_cache_keys.insert(downloaded.cache_key.clone()) {
           journal_value.owned_cache_files.push(downloaded.cache_key);
           journal_value.committed_step = journal_value.owned_cache_files.len();
           journal_value.downloaded_bytes =
             journal_value.downloaded_bytes.saturating_add(downloaded.bytes);
         }
-        journal_value.current_file = Some(cache_key);
+        journal_value.current_file = Some(current_file);
         let elapsed = started_at.elapsed().as_secs_f64().max(0.001);
         journal_value.bytes_per_second = (journal_value.downloaded_bytes as f64 / elapsed) as u64;
         let remaining = journal_value.total_bytes.saturating_sub(journal_value.downloaded_bytes);
@@ -947,7 +1216,7 @@ async fn run_task(
         }
       }
       Err(error) => {
-        if !canceled.load(Ordering::Acquire) {
+        if !canceled.load(Ordering::Acquire) && !paused.load(Ordering::Acquire) {
           fatal_error = Some(error);
           canceled.store(true, Ordering::Release);
         }
@@ -955,17 +1224,32 @@ async fn run_task(
     }
   }
 
+  drop(downloads);
+
   let mut journal_value = journal.lock().await;
   rebuild_completed_cache(&mut journal_value, &plan, cache_root);
+  flush_cache_validation_index(cache_root);
   journal_value.current_file = None;
   journal_value.bytes_per_second = 0;
   journal_value.eta_seconds = None;
-  if let Some(error) = fatal_error {
+  if paused.load(Ordering::Acquire) {
+    journal_value.state = PackageTaskState::Paused;
+    journal_value.error_message = None;
+  } else if let Some(error) = fatal_error {
     journal_value.state = PackageTaskState::Failed;
     journal_value.error_message = Some(error);
   } else if canceled.load(Ordering::Acquire) {
-    journal_value.state = PackageTaskState::Canceled;
-    journal_value.error_message = None;
+    let draft_canceled = install_context
+      .as_ref()
+      .is_none_or(|context| installer::cancel_draft(task_root, &context.draft_id).is_ok());
+    if draft_canceled {
+      journal_value.state = PackageTaskState::Canceled;
+      journal_value.error_message = None;
+    } else {
+      journal_value.state = PackageTaskState::RecoveryRequired;
+      journal_value.error_message =
+        Some("取消时已进入安装提交边界，请通过恢复入口继续处理".to_string());
+    }
   } else if journal_value.owned_cache_files.len() == plan.downloads.len() {
     journal_value.state = PackageTaskState::ReadyToApply;
     journal_value.error_message = None;
@@ -974,12 +1258,144 @@ async fn run_task(
     journal_value.error_message = Some("下载结束后仍有资源未通过完整性校验".to_string());
   }
   journal_value.touch();
+  if matches!(journal_value.state, PackageTaskState::Failed | PackageTaskState::RecoveryRequired) {
+    log_install_failure(&journal_value);
+  }
   if let Err(error) = journal::persist(task_root, &journal_value) {
     persist_terminal_journal(task_root, &mut journal_value, error, false, &app_handle);
     return;
   }
   emit_progress(&app_handle, &journal_value.summary());
   emit_state(&app_handle, &journal_value.summary());
+  let should_install =
+    install_context.is_some() && journal_value.state == PackageTaskState::ReadyToApply;
+  if should_install {
+    if let Some(context) = install_context.as_ref() {
+      let _ = installer::set_draft_state(
+        task_root,
+        &context.draft_id,
+        installer::InstallDraftState::ReadyToApply,
+      );
+    }
+  }
+  drop(journal_value);
+  if should_install {
+    if let Some(context) = install_context {
+      run_install_task(
+        app_handle,
+        task_root.to_path_buf(),
+        plan.clone(),
+        journal,
+        Arc::clone(&canceled),
+        context,
+      )
+      .await;
+    }
+  }
+}
+
+async fn run_install_task(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  plan: PersistedPlan,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  context: InstallContext,
+) {
+  let snapshot = Arc::clone(&journal);
+  let handle = app_handle.clone();
+  let task_root_for_blocking = task_root.clone();
+  let plan_for_blocking = plan.clone();
+  let canceled_for_blocking = Arc::clone(&canceled);
+  let machine_uid = context.machine_uid.clone();
+  let result = tauri::async_runtime::spawn_blocking(move || {
+    let mut journal_value = snapshot.blocking_lock().clone();
+    let emit = |value: &TaskJournal| {
+      *snapshot.blocking_lock() = value.clone();
+      let summary = value.summary();
+      emit_state(&handle, &summary);
+      emit_progress(&handle, &summary);
+    };
+    installer::execute_install(
+      &plan_for_blocking,
+      &task_root_for_blocking,
+      &machine_uid,
+      &mut journal_value,
+      &canceled_for_blocking,
+      &emit,
+    )
+  })
+  .await;
+  let installation = match result {
+    Ok(Ok(installation)) => installation,
+    Ok(Err(error)) => {
+      log::error!("[game-package][install][{}] 全新安装提交失败：{error}", plan.plan_id);
+      let mut value = journal.lock().await;
+      if value.state != PackageTaskState::Canceled {
+        value.state = if value.state.blocks_launch() {
+          PackageTaskState::RecoveryRequired
+        } else {
+          PackageTaskState::Failed
+        };
+        value.error_message = Some(error);
+        value.touch();
+        if let Err(persist_error) = journal::persist(&task_root, &value) {
+          log::error!(
+            "[game-package][install][{}] 持久化失败任务日志失败：{persist_error}",
+            plan.plan_id
+          );
+        }
+        emit_state(&app_handle, &value.summary());
+      }
+      return;
+    }
+    Err(error) => {
+      log::error!("[game-package] 全新安装 worker 异常退出：{error}");
+      let mut value = journal.lock().await;
+      value.state = PackageTaskState::RecoveryRequired;
+      value.error_message = Some(format!("安装 worker 异常退出：{error}"));
+      value.touch();
+      if let Err(persist_error) = journal::persist(&task_root, &value) {
+        log::error!(
+          "[game-package][install][{}] 持久化 worker 异常日志失败：{persist_error}",
+          plan.plan_id
+        );
+      }
+      emit_state(&app_handle, &value.summary());
+      return;
+    }
+  };
+  if let Err(error) = installer::register_installation(&context.pool, &installation).await {
+    log::error!("[game-package][install][{}] 登记游戏安装失败：{error}", plan.plan_id);
+    let mut value = journal.lock().await;
+    value.state = PackageTaskState::RecoveryRequired;
+    value.error_message = Some(error);
+    value.touch();
+    if let Err(persist_error) = journal::persist(&task_root, &value) {
+      log::error!(
+        "[game-package][install][{}] 持久化登记失败日志失败：{persist_error}",
+        plan.plan_id
+      );
+    }
+    emit_state(&app_handle, &value.summary());
+    return;
+  }
+  let mut value = journal.lock().await;
+  value.state = PackageTaskState::Completed;
+  value.error_message = None;
+  value.current_file = None;
+  value.touch();
+  if let Err(error) = journal::persist(&task_root, &value) {
+    log::error!("[game-package][install][{}] 写入安装完成状态失败：{error}", plan.plan_id);
+  }
+  if let Err(error) = installer::set_draft_state(
+    &task_root,
+    &context.draft_id,
+    installer::InstallDraftState::Completed,
+  ) {
+    log::error!("[game-package][install][{}] 写入安装草稿完成状态失败：{error}", plan.plan_id);
+  }
+  emit_state(&app_handle, &value.summary());
 }
 
 fn rebuild_completed_cache(journal: &mut TaskJournal, plan: &PersistedPlan, cache_root: &Path) {
@@ -994,6 +1410,48 @@ fn rebuild_completed_cache(journal: &mut TaskJournal, plan: &PersistedPlan, cach
   journal.committed_step = completed.len();
   journal.owned_cache_files = completed;
   journal.downloaded_bytes = bytes;
+}
+
+/// 构建进度展示名称，避免直接向用户展示内部 chunk 或缓存键。
+fn build_download_labels(plan: &PersistedPlan) -> HashMap<String, String> {
+  let mut asset_names = HashMap::<String, String>::new();
+  for asset in &plan.assets {
+    for chunk in &asset.chunks {
+      asset_names.entry(chunk.id.clone()).or_insert_with(|| asset.name.clone());
+    }
+    if let Some(patch) = &asset.patch {
+      asset_names.entry(patch.id.clone()).or_insert_with(|| asset.name.clone());
+    }
+  }
+
+  plan
+    .downloads
+    .iter()
+    .map(|download| {
+      let label = plan
+        .install_overlay
+        .as_ref()
+        .and_then(|overlay| overlay.sdk.as_ref())
+        .filter(|sdk| sdk.cache_key == download.cache_key)
+        .map(|sdk| format!("渠道 SDK：{}", sdk.pkg_version_file_name))
+        .or_else(|| asset_names.get(&download.id).map(|name| format!("游戏文件：{name}")))
+        .unwrap_or_else(|| format!("资源对象：{}", download.id));
+      (download.cache_key.clone(), truncate_progress_label(label))
+    })
+    .collect()
+}
+
+fn truncate_progress_label(value: String) -> String {
+  const MAX_PROGRESS_LABEL_BYTES: usize = 256;
+  if value.len() <= MAX_PROGRESS_LABEL_BYTES {
+    return value;
+  }
+  let suffix = "…";
+  let mut end = MAX_PROGRESS_LABEL_BYTES - suffix.len();
+  while !value.is_char_boundary(end) {
+    end -= 1;
+  }
+  format!("{}{}", &value[..end], suffix)
 }
 
 fn cleanup_task_partials(cache_root: &Path, task_id: &str) -> Result<(), String> {
@@ -1023,8 +1481,24 @@ fn persist_terminal_journal(
   journal.error_message = (!canceled).then_some(error);
   journal.current_file = None;
   journal.touch();
-  let _ = journal::persist(task_root, journal);
+  if !canceled {
+    log_install_failure(journal);
+  }
+  if let Err(persist_error) = journal::persist(task_root, journal) {
+    log::error!("[game-package] 持久化终止任务日志失败：{persist_error}");
+  }
   emit_state(app_handle, &journal.summary());
+}
+
+fn log_install_failure(journal: &TaskJournal) {
+  if journal.target != PackagePlanTarget::Install {
+    return;
+  }
+  log::error!(
+    "[game-package][install][{}] 安装任务失败：{}",
+    journal.task_id,
+    journal.error_message.as_deref().unwrap_or("未提供错误信息")
+  );
 }
 
 fn emit_state(app_handle: &AppHandle, summary: &PackageTaskSummary) {
@@ -1216,6 +1690,7 @@ mod tests {
         ActiveTask {
           installation_id: "installation".to_string(),
           canceled: Arc::clone(&canceled),
+          paused: Arc::new(AtomicBool::new(false)),
           journal: Arc::new(AsyncMutex::new(journal)),
         },
       );

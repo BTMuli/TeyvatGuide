@@ -29,31 +29,133 @@ pub(crate) struct AssemblySummary {
   pub(crate) assembled_bytes: u64,
 }
 
+/// Progress reported after a game asset has been fully assembled and verified.
+///
+/// The byte counters intentionally describe output game assets, rather than
+/// downloaded payloads.  This keeps assembly progress independent from the
+/// download counters shown by the task journal.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct AssemblyProgress {
+  pub(crate) completed_count: usize,
+  pub(crate) total_count: usize,
+  pub(crate) completed_bytes: u64,
+  pub(crate) total_bytes: u64,
+  pub(crate) current_file: Option<String>,
+}
+
 /// 将一个已 hydrate 的计划组装到任务私有 staging 目录。
 ///
 /// 此函数绝不会写入 `game_root`；它只将经过校验的完整资源原子提交至
 /// `<task_root>/tasks/<plan_id>/staging`。调用方应在提交阶段之外使用该目录。
+#[cfg(test)]
 pub(crate) fn assemble_plan(
   plan: &PersistedPlan,
   game_root: &Path,
   task_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<AssemblySummary, String> {
+  assemble_plan_with_progress(plan, game_root, task_root, canceled, |_| {})
+}
+
+/// Assemble a plan and report verified asset-level progress to the caller.
+pub(crate) fn assemble_plan_with_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
   match plan.strategy {
     PackagePlanStrategy::ManifestDiff => {
-      assemble_manifest_plan(plan, game_root, task_root, canceled)
+      assemble_manifest_plan_with_progress(plan, game_root, task_root, canceled, &mut progress)
     }
-    PackagePlanStrategy::Patch => assemble_patch_plan(plan, game_root, task_root, canceled),
+    PackagePlanStrategy::Patch => {
+      assemble_patch_plan_with_progress(plan, game_root, task_root, canceled, &mut progress)
+    }
+    PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
   }
 }
 
+/// Assemble a source-free full plan and report verified asset-level progress.
+pub(crate) fn assemble_full_install_plan_with_progress<F>(
+  plan: &PersistedPlan,
+  staging_root: &Path,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  if plan.strategy != PackagePlanStrategy::Full {
+    return Err("安装组装器只接受 Full 计划".to_string());
+  }
+  if plan.assets.is_empty()
+    || plan.assets.iter().any(|asset| asset.source.is_some() || asset.patch.is_some())
+  {
+    return Err("全新安装计划不能复用已有资源或 patch".to_string());
+  }
+  check_canceled(canceled)?;
+  if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
+    return Err("全新安装计划缺少资源载荷编码".to_string());
+  }
+  let cache_root = task_root.join("cache").join("chunks");
+  let downloads = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  let (total_count, total_bytes) = assembly_totals(plan)?;
+  let mut summary = AssemblySummary::default();
+  for asset in &plan.assets {
+    check_canceled(canceled)?;
+    validate_asset_layout(asset, &downloads)?;
+    if asset.chunks.iter().any(|chunk| chunk.reuse.is_some()) {
+      return Err(format!("全新安装资源包含复用 chunk：{}", asset.name));
+    }
+    assemble_asset(asset, &downloads, staging_root, &cache_root, staging_root, canceled)?;
+    summary.asset_count += 1;
+    summary.assembled_bytes = summary
+      .assembled_bytes
+      .checked_add(asset.size)
+      .ok_or_else(|| "组装资源总大小溢出".to_string())?;
+    report_asset_progress(
+      &mut progress,
+      summary.asset_count,
+      total_count,
+      summary.assembled_bytes,
+      total_bytes,
+      &asset.name,
+    );
+  }
+  Ok(summary)
+}
+
 /// 将一个已 hydrate 的 manifest-diff 计划组装到任务私有 staging 目录。
+#[cfg(test)]
 pub(crate) fn assemble_manifest_plan(
   plan: &PersistedPlan,
   game_root: &Path,
   task_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<AssemblySummary, String> {
+  assemble_manifest_plan_with_progress(plan, game_root, task_root, canceled, |_| {})
+}
+
+/// Assemble a manifest-diff plan and report verified asset-level progress.
+pub(crate) fn assemble_manifest_plan_with_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
   if plan.strategy != PackagePlanStrategy::ManifestDiff {
     return Err("当前组装器只支持 manifest-diff 资源计划".to_string());
   }
@@ -71,6 +173,7 @@ pub(crate) fn assemble_manifest_plan(
     .iter()
     .map(|download| (download.id.as_str(), download))
     .collect::<HashMap<_, _>>();
+  let (total_count, total_bytes) = assembly_totals(plan)?;
   let mut summary = AssemblySummary::default();
   for asset in &plan.assets {
     check_canceled(canceled)?;
@@ -81,16 +184,28 @@ pub(crate) fn assemble_manifest_plan(
       .assembled_bytes
       .checked_add(asset.size)
       .ok_or_else(|| "组装资源总大小溢出".to_string())?;
+    report_asset_progress(
+      &mut progress,
+      summary.asset_count,
+      total_count,
+      summary.assembled_bytes,
+      total_bytes,
+      &asset.name,
+    );
   }
   Ok(summary)
 }
 
-fn assemble_patch_plan(
+fn assemble_patch_plan_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
   task_root: &Path,
   canceled: &AtomicBool,
-) -> Result<AssemblySummary, String> {
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
   if plan.strategy != PackagePlanStrategy::Patch {
     return Err("当前差分组装器只支持 patch 资源计划".to_string());
   }
@@ -106,6 +221,7 @@ fn assemble_patch_plan(
     .iter()
     .map(|download| (download.id.as_str(), download))
     .collect::<HashMap<_, _>>();
+  let (total_count, total_bytes) = assembly_totals(plan)?;
   let mut summary = AssemblySummary::default();
   for asset in &plan.assets {
     check_canceled(canceled)?;
@@ -120,8 +236,40 @@ fn assemble_patch_plan(
       .assembled_bytes
       .checked_add(asset.size)
       .ok_or_else(|| "组装资源总大小溢出".to_string())?;
+    report_asset_progress(
+      &mut progress,
+      summary.asset_count,
+      total_count,
+      summary.assembled_bytes,
+      total_bytes,
+      &asset.name,
+    );
   }
   Ok(summary)
+}
+
+fn assembly_totals(plan: &PersistedPlan) -> Result<(usize, u64), String> {
+  let total_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
+    total.checked_add(asset.size).ok_or_else(|| "组装资源总大小溢出".to_string())
+  })?;
+  Ok((plan.assets.len(), total_bytes))
+}
+
+fn report_asset_progress(
+  progress: &mut impl FnMut(&AssemblyProgress),
+  completed_count: usize,
+  total_count: usize,
+  completed_bytes: u64,
+  total_bytes: u64,
+  current_file: &str,
+) {
+  progress(&AssemblyProgress {
+    completed_count,
+    total_count,
+    completed_bytes,
+    total_bytes,
+    current_file: Some(current_file.to_string()),
+  });
 }
 
 fn assemble_patch_asset(
@@ -564,7 +712,10 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{assemble_manifest_plan, assemble_plan, partial_path};
+  use super::{
+    AssemblyProgress, assemble_manifest_plan, assemble_manifest_plan_with_progress, assemble_plan,
+    partial_path,
+  };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
     planner::{
@@ -621,7 +772,7 @@ mod tests {
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
       target: PackagePlanTarget::Main,
-      source_tag: "1.0.0".to_string(),
+      source_tag: Some("1.0.0".to_string()),
       target_tag: "1.0.1".to_string(),
       manifest_digest: "0".repeat(64),
       strategy: PackagePlanStrategy::ManifestDiff,
@@ -629,6 +780,7 @@ mod tests {
       assets,
       delete_files: Vec::new(),
       inventory: Vec::new(),
+      install_overlay: None,
       created_at: "2026-01-01T00:00:00Z".to_string(),
     }
   }
@@ -704,6 +856,51 @@ mod tests {
     assert_eq!(summary.asset_count, 1);
     assert_eq!(summary.assembled_bytes, bytes.len() as u64);
     assert_eq!(fs::read(staging_file(&task_root)).unwrap(), bytes);
+  }
+
+  #[test]
+  fn reports_cumulative_asset_progress_after_each_verified_output() {
+    let root = TempRoot::new();
+    let task_root = root.task_root();
+    let first_bytes = b"first";
+    let second_bytes = b"second output";
+    let first_download =
+      downloaded_chunk("progress-first", "progress-first-cache", first_bytes, PayloadEncoding::Raw);
+    let second_download = downloaded_chunk(
+      "progress-second",
+      "progress-second-cache",
+      second_bytes,
+      PayloadEncoding::Raw,
+    );
+    write_cache(&task_root, &first_download.cache_key, first_bytes);
+    write_cache(&task_root, &second_download.cache_key, second_bytes);
+    let plan = plan(
+      vec![first_download, second_download],
+      vec![
+        asset("first.bin", first_bytes, vec![chunk("progress-first", first_bytes, None)]),
+        asset("second.bin", second_bytes, vec![chunk("progress-second", second_bytes, None)]),
+      ],
+    );
+    let mut progress = Vec::<AssemblyProgress>::new();
+
+    assemble_manifest_plan_with_progress(
+      &plan,
+      &root.game_root(),
+      &task_root,
+      &AtomicBool::new(false),
+      |value| progress.push(value.clone()),
+    )
+    .unwrap();
+
+    assert_eq!(progress.len(), 2);
+    assert_eq!(progress[0].completed_count, 1);
+    assert_eq!(progress[0].total_count, 2);
+    assert_eq!(progress[0].completed_bytes, first_bytes.len() as u64);
+    assert_eq!(progress[0].total_bytes, (first_bytes.len() + second_bytes.len()) as u64);
+    assert_eq!(progress[0].current_file.as_deref(), Some("first.bin"));
+    assert_eq!(progress[1].completed_count, 2);
+    assert_eq!(progress[1].completed_bytes, (first_bytes.len() + second_bytes.len()) as u64);
+    assert_eq!(progress[1].current_file.as_deref(), Some("second.bin"));
   }
 
   #[test]

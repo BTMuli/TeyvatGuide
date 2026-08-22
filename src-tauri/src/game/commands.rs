@@ -5,23 +5,25 @@ use super::{
   cache,
   hoyoplay::{create_http_client, create_snapshot, get_game_branches},
   installation::{derive_installation_id, inspect_executable, locate_executables},
-  journal, launch,
+  installer, journal, launch,
   model::{
-    GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanSummary,
-    PackagePlanTarget, PackageRecoveryAction, PackageSnapshot, PackageSwitchSummary,
-    PackageTaskOptions, PackageTaskSummary, PackageVerifySummary, SchemeId,
+    GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanProgress,
+    PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction, PackageSnapshot,
+    PackageSwitchSummary, PackageTaskOptions, PackageTaskState, PackageTaskSummary,
+    PackageVerifySummary, SchemeId,
   },
   package::GamePackageManager,
   planner::{
-    create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_plan,
-    hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
+    create_and_persist_install_plan, create_and_persist_plan, hydrate_and_validate_apply_plan,
+    hydrate_and_validate_install_plan, hydrate_and_validate_plan, hydrate_and_validate_repair_plan,
+    load_persisted_plan, persist_validated_plan, report_plan_progress,
   },
   switch::{self, create_and_persist_switch_plan},
 };
 use chrono::Utc;
 use sqlx::Row;
 use std::path::{Path, PathBuf};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Manager, ipc::Channel};
 use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
 
@@ -114,6 +116,338 @@ pub fn game_installation_locate() -> Vec<String> {
   locate_executables()
 }
 
+/// 创建未登记的全新安装草稿；最终游戏目录和 staging 路径均由 Rust 派生。
+#[tauri::command]
+pub async fn game_install_draft_create(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  install_root: String,
+  scheme: SchemeId,
+  audio_languages: Vec<String>,
+) -> Result<installer::InstallDraftSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let app_data_dir =
+    app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let rows = sqlx::query("SELECT rootPath FROM GameInstallation")
+    .fetch_all(&pool)
+    .await
+    .map_err(|error| format!("读取已登记游戏目录失败：{error}"))?;
+  let mut protected_roots = vec![app_data_dir, task_root.clone()];
+  protected_roots
+    .extend(rows.into_iter().map(|row| PathBuf::from(row.get::<String, _>("rootPath"))));
+  installer::create_draft(
+    &task_root,
+    &install_root,
+    scheme,
+    audio_languages,
+    &read_machine_uid(&app_handle)?,
+    &protected_roots,
+  )
+}
+
+/// 读取所有仍需恢复或取消的全新安装草稿。
+#[tauri::command]
+pub fn game_install_draft_list(
+  app_handle: AppHandle,
+) -> Result<Vec<installer::InstallDraftSummary>, String> {
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  installer::list_draft_summaries(&task_root)
+}
+
+/// 校验新安装向导选择的直接安装目录，并识别空目录或已有游戏目录。
+#[tauri::command]
+pub async fn game_install_location_inspect(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  install_root: String,
+) -> Result<installer::InstallLocationSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let app_data_dir =
+    app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let rows = sqlx::query("SELECT rootPath FROM GameInstallation")
+    .fetch_all(&pool)
+    .await
+    .map_err(|error| format!("读取已登记游戏目录失败：{error}"))?;
+  let registered_roots =
+    rows.into_iter().map(|row| PathBuf::from(row.get::<String, _>("rootPath"))).collect::<Vec<_>>();
+  let protected_roots = vec![app_data_dir, task_root];
+  installer::inspect_install_location(
+    &install_root,
+    &read_machine_uid(&app_handle)?,
+    &protected_roots,
+    &registered_roots,
+  )
+}
+
+/// 为安装草稿请求 main 分支、语音资源和渠道 SDK，并持久化 Full 计划。
+#[tauri::command]
+pub async fn game_install_plan(
+  app_handle: AppHandle,
+  install_id: String,
+  on_progress: Channel<PackagePlanProgress>,
+) -> Result<PackagePlanSummary, String> {
+  report_plan_progress(&on_progress, 1, "正在读取本地安装草稿");
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  let draft = installer::load_draft(&task_root, &draft_id)?;
+  let client = create_http_client()?;
+  report_plan_progress(&on_progress, 2, "正在读取远端分支");
+  let branches = get_game_branches(&client, draft.scheme).await?;
+  let overlay = installer::overlay_for_draft(&draft, &branches.main.tag);
+  let summary = create_and_persist_install_plan(
+    &client,
+    &draft.install_id,
+    draft.scheme,
+    &draft.audio_languages,
+    overlay,
+    &branches,
+    &task_root,
+    on_progress,
+  )
+  .await?;
+  let plan = load_persisted_plan(&task_root, &summary.plan_id)?;
+  installer::mark_draft_plan(&task_root, &draft_id, &plan)?;
+  Ok(summary)
+}
+
+/// 取消仅完成评估、尚未启动任务的安装草稿。
+#[tauri::command]
+pub fn game_install_draft_cancel(
+  app_handle: AppHandle,
+  install_id: String,
+) -> Result<installer::InstallDraftSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  if journal::list(&task_root, Some(&install_id))?.iter().any(|task| {
+    task.operation == "install"
+      && !matches!(
+        task.state,
+        PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+      )
+  }) {
+    return Err("该安装已有未完成任务，请先取消或恢复原任务".to_string());
+  }
+  installer::cancel_draft(&task_root, &draft_id)
+}
+
+/// 启动全新安装下载；资源下载完成后自动进入 staging、发布和最终登记。
+#[tauri::command]
+pub async fn game_install_start(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  install_id: String,
+  plan_id: String,
+  options: Option<PackageTaskOptions>,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  let draft = installer::load_draft(&task_root, &draft_id)?;
+  let plan = load_persisted_plan(&task_root, &plan_id)?;
+  if plan.installation_id != draft.install_id {
+    return Err("安装计划与草稿不匹配".to_string());
+  }
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, draft.scheme).await?;
+  let plan = hydrate_and_validate_install_plan(
+    &draft.install_id,
+    draft.scheme,
+    &draft.audio_languages,
+    &branches,
+    plan,
+  )
+  .await?;
+  persist_validated_plan(&task_root, &plan)?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let context =
+    super::package::InstallContext { pool, machine_uid: read_machine_uid(&app_handle)?, draft_id };
+  manager.start_install(
+    app_handle,
+    task_root,
+    plan,
+    context.draft_id.clone(),
+    options.unwrap_or_default(),
+    context,
+    false,
+  )
+}
+
+/// 读取尚未登记安装的任务投影。
+#[tauri::command]
+pub async fn game_install_status(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  install_id: String,
+) -> Result<Option<PackageTaskSummary>, String> {
+  Ok(
+    manager
+      .list(&game_task_root(&app_handle)?, Some(&install_id))
+      .await?
+      .into_iter()
+      .find(|summary| summary.target == PackagePlanTarget::Install),
+  )
+}
+
+/// 恢复全新安装的下载、发布或最终登记阶段。
+#[tauri::command]
+pub async fn game_install_recover(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+  install_id: String,
+  action: PackageRecoveryAction,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  let draft_id = installer::find_recovery_draft_id(&task_root, &install_id)?;
+  let journal_path = journal::journal_path(&task_root, &task_id);
+  let mut journal_value = journal::load(&journal_path)?;
+  if journal_value.operation != "install" {
+    return Err("该任务不是全新安装任务".to_string());
+  }
+  let plan = load_persisted_plan(&task_root, &journal_value.plan_id)?;
+  let draft = installer::load_draft(&task_root, &draft_id)?;
+  if plan.installation_id != draft.install_id || journal_value.installation_id != draft.install_id {
+    return Err("安装恢复身份不匹配".to_string());
+  }
+  if journal_value.state == PackageTaskState::Paused {
+    manager.wait_for_task_idle(&task_id).await?;
+    journal_value = journal::load(&journal_path)?;
+  }
+  let published = installer::has_published_installation(&draft)?;
+  if matches!(action, PackageRecoveryAction::Rollback) {
+    if journal_value.state == PackageTaskState::RecoveryRequired {
+      return Err("RecoveryRequired 状态禁止删除暂存目录，请先完成安全复验".to_string());
+    }
+    if journal_value.state.is_active() {
+      manager.cancel(&app_handle, &task_root, &task_id)?;
+      return Ok(journal_value.summary());
+    }
+    if published {
+      let machine_uid = read_machine_uid(&app_handle)?;
+      installer::verify_published_installation(&task_root, &plan, &machine_uid)?;
+      let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
+    } else {
+      let _ = installer::cancel_draft(&task_root, &draft_id)?;
+    }
+    let mut canceled = journal_value;
+    canceled.state = PackageTaskState::Canceled;
+    canceled.error_message = None;
+    canceled.touch();
+    journal::persist(&task_root, &canceled)?;
+    return Ok(canceled.summary());
+  }
+  if published {
+    return complete_install_registration(
+      &app_handle,
+      &db_instances,
+      &task_root,
+      &task_id,
+      &draft_id,
+      &plan,
+    )
+    .await;
+  }
+  let client = create_http_client()?;
+  let staging_path = Path::new(&draft.staging_root);
+  let staging_exists = installer::path_occupied(staging_path)?;
+  let marker_exists = installer::path_occupied(&staging_path.join(installer::MARKER_FILE_NAME))?;
+  if !staging_exists && journal_value.state.requires_recovery() {
+    return Err("安装暂存目录与最终目录均不存在，需要人工恢复".to_string());
+  }
+  if staging_exists && journal_value.state.requires_recovery() && !marker_exists {
+    return Err("安装提交阶段缺少 marker，需要人工恢复".to_string());
+  }
+  let branches = get_game_branches(&client, draft.scheme).await?;
+  let plan = hydrate_and_validate_install_plan(
+    &draft.install_id,
+    draft.scheme,
+    &draft.audio_languages,
+    &branches,
+    plan,
+  )
+  .await?;
+  persist_validated_plan(&task_root, &plan)?;
+  let context = super::package::InstallContext {
+    pool: sqlite_pool(&db_instances).await?,
+    machine_uid: read_machine_uid(&app_handle)?,
+    draft_id: draft_id.clone(),
+  };
+  manager.start_install(
+    app_handle,
+    task_root,
+    plan,
+    draft_id,
+    PackageTaskOptions::default(),
+    context,
+    true,
+  )
+}
+
+/// 请求取消未发布的全新安装任务，并在安全边界外清理草稿暂存目录。
+#[tauri::command]
+pub fn game_install_cancel(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+  install_id: String,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  manager.cancel(&app_handle, &task_root, &task_id)?;
+  let journal_path = journal::journal_path(&task_root, &task_id);
+  let journal_value = journal::load(&journal_path)?;
+  if journal_value.state.is_active() || journal_value.state.blocks_launch() {
+    return Ok(journal_value.summary());
+  }
+  let _ = installer::cancel_draft(&task_root, &draft_id)?;
+  Ok(journal_value.summary())
+}
+
+/// 暂停全新安装的资源下载，保留安装草稿以便继续安装。
+#[tauri::command]
+pub async fn game_install_pause(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+  install_id: String,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  installer::ensure_windows_install_platform()?;
+  manager.pause_install(&app_handle, &task_root, &task_id, &install_id).await
+}
+
+async fn complete_install_registration(
+  app_handle: &AppHandle,
+  db_instances: &DbInstances,
+  task_root: &Path,
+  task_id: &str,
+  draft_id: &str,
+  plan: &super::planner::PersistedPlan,
+) -> Result<PackageTaskSummary, String> {
+  let pool = sqlite_pool(db_instances).await?;
+  let installation =
+    installer::verify_published_installation(task_root, plan, &read_machine_uid(app_handle)?)?;
+  installer::register_installation(&pool, &installation).await?;
+  let path = journal::journal_path(task_root, task_id);
+  let mut journal_value = journal::load(&path)?;
+  journal_value.state = PackageTaskState::Completed;
+  journal_value.error_message = None;
+  journal_value.current_file = None;
+  journal_value.touch();
+  journal::persist(task_root, &journal_value)?;
+  installer::set_draft_state(task_root, draft_id, installer::InstallDraftState::Completed)?;
+  Ok(journal_value.summary())
+}
+
 /// 校验已登记安装的身份和渠道状态，然后使用对应参数启动客户端。
 #[tauri::command]
 pub async fn game_launch(
@@ -194,15 +528,18 @@ pub async fn game_package_plan(
   db_instances: tauri::State<'_, DbInstances>,
   installation_id: String,
   target: PackagePlanTarget,
+  on_progress: Channel<PackagePlanProgress>,
 ) -> Result<PackagePlanSummary, String> {
+  report_plan_progress(&on_progress, 1, "正在读取本地安装信息");
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
+  report_plan_progress(&on_progress, 2, "正在读取远端分支");
   let branches = get_game_branches(&client, scheme).await?;
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
-  create_and_persist_plan(&installation, &branches, target, &app_data_dir).await
+  create_and_persist_plan(&installation, &branches, target, &app_data_dir, &on_progress).await
 }
 
 /// 评估官服与 B 服之间的同资源家族渠道转换；只生成计划，不修改游戏目录。
@@ -238,17 +575,28 @@ pub async fn game_package_switch(
 
 /// 统计应用数据目录中的资源分片与渠道 SDK 缓存占用。
 #[tauri::command]
-pub fn game_package_cache_status(app_handle: AppHandle) -> Result<PackageCacheSummary, String> {
-  cache::status(&game_task_root(&app_handle)?)
+pub async fn game_package_cache_status(
+  app_handle: AppHandle,
+) -> Result<PackageCacheSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  tauri::async_runtime::spawn_blocking(move || cache::status(&task_root))
+    .await
+    .map_err(|error| format!("缓存占用统计任务异常退出：{error}"))?
 }
 
 /// 清理资源分片与渠道 SDK 缓存；进行中或待恢复任务会阻止删除。
 #[tauri::command]
-pub fn game_package_cache_clear(
+pub async fn game_package_cache_clear(
   app_handle: AppHandle,
   manager: tauri::State<'_, GamePackageManager>,
+  target: cache::CacheClearTarget,
 ) -> Result<PackageCacheSummary, String> {
-  cache::clear(&game_task_root(&app_handle)?, manager.has_running_tasks()?)
+  let task_root = game_task_root(&app_handle)?;
+  let has_running_tasks =
+    manager.has_running_tasks().map_err(|error| format!("读取缓存清理任务状态失败：{error}"))?;
+  tauri::async_runtime::spawn_blocking(move || cache::clear(&task_root, has_running_tasks, target))
+    .await
+    .map_err(|error| format!("缓存清理任务异常退出：{error}"))?
 }
 
 /// 启动或恢复安装完整性校验；扫描在后台继续，页面刷新后可重连进度。
@@ -368,6 +716,17 @@ pub async fn game_package_recover(
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   let journal_value = journal::load(&journal::journal_path(&task_root, &task_id))?;
+  if journal_value.operation == "install" {
+    return game_install_recover(
+      app_handle,
+      db_instances,
+      manager,
+      task_id,
+      journal_value.installation_id,
+      action,
+    )
+    .await;
+  }
   if journal_value.operation == "switch" {
     return recover_switch_task(
       app_handle,

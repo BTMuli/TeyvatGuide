@@ -1,8 +1,8 @@
 <!-- 基础悬浮窗组件 -->
 <template>
-  <transition enter-from-class="tolo-enter-from" name="tolo">
+  <transition appear enter-from-class="tolo-enter-from" name="tolo">
     <div v-if="showTolo" class="tolo-box" @click.self.prevent="toClick()">
-      <transition enter-from-class="toli-enter-from" name="toli">
+      <transition appear enter-from-class="toli-enter-from" name="toli">
         <slot v-if="showToli" />
       </transition>
     </div>

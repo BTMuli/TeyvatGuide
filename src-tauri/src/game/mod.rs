@@ -10,6 +10,7 @@ mod hoyoplay;
 #[cfg(windows)]
 mod hpatch;
 mod installation;
+mod installer;
 mod journal;
 mod launch;
 mod model;

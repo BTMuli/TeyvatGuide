@@ -17,7 +17,10 @@
     <div v-if="facts.length > 0" class="progress-facts" aria-live="polite">
       <span v-for="fact in facts" :key="fact">{{ fact }}</span>
     </div>
-    <p v-if="currentFile !== null" class="progress-current">当前：{{ currentFile }}</p>
+    <p v-if="currentFile !== null" class="progress-current">
+      <span class="progress-current-label">当前资源：</span>
+      <span class="progress-current-value" :title="currentFile">{{ currentFile }}</span>
+    </p>
     <p v-if="errorMessage !== null && errorMessage !== caption" class="progress-error">
       {{ errorMessage }}
     </p>
@@ -107,11 +110,23 @@ defineSlots<{
 }
 
 .progress-current {
-  overflow: hidden;
+  display: flex;
+  min-width: 0;
   margin: 0;
   color: var(--box-text-2);
   font-size: 12px;
+  gap: 4px;
   line-height: 16px;
+}
+
+.progress-current-label {
+  flex-shrink: 0;
+}
+
+.progress-current-value {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--common-text-title);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

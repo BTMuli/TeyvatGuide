@@ -51,6 +51,7 @@
           mdi-play-circle-outline
         </v-icon>
         <v-icon
+          v-if="!verifyStopping"
           aria-label="停止校验"
           class="verify-act"
           role="button"
@@ -99,6 +100,15 @@
         评估预下载
       </v-btn>
     </div>
+
+    <PgProgress
+      v-if="planningTarget !== null"
+      ariaLabel="资源计划评估进度"
+      :caption="planProgress?.message ?? '正在准备资源评估…'"
+      :facts="planProgress === null ? [] : [`步骤 ${planProgress.step} / ${planProgress.total}`]"
+      :indeterminate="planProgress === null"
+      :percent="planProgressPercent"
+    />
 
     <div v-if="plan !== null" class="plan-summary" aria-live="polite">
       <div class="plan-title">
@@ -178,7 +188,7 @@ import useGameLauncherStore from "@store/gameLauncher.js";
 import { confirmStopRunningGame } from "@utils/TGGame.js";
 import { createGamePackagePlan, getGamePackageSnapshot } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 
 type Props = {
   installation: TGApp.Game.Installation.Item;
@@ -204,9 +214,13 @@ const snapshot = ref<TGApp.Game.Package.Snapshot | null>(null);
 const plan = ref<TGApp.Game.Package.PlanSummary | null>(null);
 const loading = ref<boolean>(false);
 const planningTarget = ref<TGApp.Game.Package.PlanTargetEnum | null>(null);
+const planProgress = ref<TGApp.Game.Package.PlanProgress | null>(null);
 const exitingGame = ref<boolean>(false);
 const errorMessage = ref<string | null>(null);
 const verifyStartError = ref<string | null>(null);
+const verifyStopping = ref<boolean>(false);
+let verifyHideTimer: number | null = null;
+let verifyStoppingInstallationId: string | null = null;
 let requestSequence = 0;
 
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
@@ -218,7 +232,11 @@ const currentVerify = computed<TGApp.Game.Package.VerifySummary | null>(() => {
   return verifyByInstallation.value[installation.id] ?? null;
 });
 const verifyActive = computed<boolean>(() => {
-  return currentVerify.value !== null && gameEnum.package.verifyActive(currentVerify.value.state);
+  return (
+    !verifyStopping.value &&
+    currentVerify.value !== null &&
+    gameEnum.package.verifyActive(currentVerify.value.state)
+  );
 });
 const verifyPending = computed<boolean>(() => {
   return pendingActions.value[`verify:${installation.id}`] === true;
@@ -227,7 +245,7 @@ const verifyClearing = computed<boolean>(() => {
   return pendingActions.value[`verify-clear:${installation.id}`] === true;
 });
 const verifyBusy = computed<boolean>(() => {
-  return verifyActive.value || verifyPending.value || verifyClearing.value;
+  return verifyStopping.value || verifyActive.value || verifyPending.value || verifyClearing.value;
 });
 const verifyCanResume = computed<boolean>(() => {
   if (verifyBusy.value) return false;
@@ -237,6 +255,7 @@ const verifyCanResume = computed<boolean>(() => {
   );
 });
 const verifyPanelVisible = computed<boolean>(() => {
+  if (verifyStopping.value) return true;
   if (verifyPending.value || verifyStartError.value !== null) return true;
   const summary = currentVerify.value;
   if (summary === null) return false;
@@ -261,6 +280,7 @@ const verifyBytePercent = computed<number>(() => {
   return Math.min(100, (currentVerify.value.hashedBytes / currentVerify.value.totalBytes) * 100);
 });
 const verifyCaption = computed<string>(() => {
+  if (verifyStopping.value) return "已停止完整性校验";
   if (verifyPending.value && !verifyActive.value) return "正在开始校验…";
   if (verifyStartError.value !== null && currentVerify.value === null) return "无法开始校验";
   const summary = currentVerify.value;
@@ -268,6 +288,7 @@ const verifyCaption = computed<string>(() => {
   return gameEnum.package.verifyStateDesc(summary.state);
 });
 const verifyCaptionTone = computed<"" | "err" | "ok" | "warn">(() => {
+  if (verifyStopping.value) return "warn";
   const summary = currentVerify.value;
   if (verifyPending.value && !verifyActive.value) return "";
   if (verifyStartError.value !== null) return "err";
@@ -324,6 +345,11 @@ const taskActionPending = computed<boolean>(() => {
     (taskId !== undefined && pendingActions.value[taskId] === true)
   );
 });
+const planProgressPercent = computed<number>(() => {
+  const progress = planProgress.value;
+  if (progress === null || progress.total === 0) return 0;
+  return Math.min(100, (progress.step / progress.total) * 100);
+});
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -353,6 +379,34 @@ function formatElapsed(milliseconds: number): string {
   if (hours > 0) return `${hours} 小时 ${minutes} 分 ${seconds} 秒`;
   if (minutes > 0) return `${minutes} 分 ${seconds} 秒`;
   return `${seconds} 秒`;
+}
+
+function clearVerifyHideTimer(): void {
+  if (verifyHideTimer !== null) {
+    window.clearTimeout(verifyHideTimer);
+    verifyHideTimer = null;
+  }
+  if (verifyStoppingInstallationId !== null) {
+    taskStore.dismissVerify(verifyStoppingInstallationId);
+    verifyStoppingInstallationId = null;
+  }
+}
+
+function scheduleVerifyHide(): void {
+  if (verifyHideTimer !== null) window.clearTimeout(verifyHideTimer);
+  const installationId = installation.id;
+  const sessionId = currentVerify.value?.sessionId ?? null;
+  verifyStoppingInstallationId = installationId;
+  verifyStopping.value = true;
+  verifyHideTimer = window.setTimeout(() => {
+    verifyHideTimer = null;
+    const current = currentVerify.value;
+    if (sessionId === null || current === null || current.sessionId === sessionId) {
+      taskStore.dismissVerify(installationId);
+    }
+    verifyStoppingInstallationId = null;
+    verifyStopping.value = false;
+  }, 5000);
 }
 
 async function loadSnapshot(notify: boolean): Promise<void> {
@@ -397,13 +451,17 @@ async function refreshSnapshot(): Promise<void> {
 async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<void> {
   if (planningTarget.value !== null || verifyActive.value) return;
   planningTarget.value = target;
+  planProgress.value = null;
   errorMessage.value = null;
   try {
-    plan.value = await createGamePackagePlan(installation.id, target);
+    plan.value = await createGamePackagePlan(installation.id, target, (progress) => {
+      planProgress.value = progress;
+    });
   } catch (error) {
     errorMessage.value = `生成资源计划失败：${error}`;
   } finally {
     planningTarget.value = null;
+    planProgress.value = null;
   }
 }
 
@@ -441,10 +499,11 @@ async function cancelVerify(): Promise<void> {
 }
 
 async function clearVerifyTask(): Promise<void> {
-  if (verifyClearing.value) return;
+  if (verifyClearing.value || verifyStopping.value) return;
   try {
     await taskStore.clearVerify(installation.id);
     verifyStartError.value = null;
+    scheduleVerifyHide();
     showSnackbar.info("已停止完整性校验");
   } catch (error) {
     showSnackbar.error(`清除完整性校验失败：${error}`);
@@ -607,6 +666,8 @@ async function handleRecoverRequested(
 watch(
   () => [installation.id, installation.version],
   () => {
+    clearVerifyHideTimer();
+    verifyStopping.value = false;
     verifyStartError.value = null;
     void loadSnapshot(false);
     void taskStore.hydrateVerify(installation.id);
@@ -642,6 +703,11 @@ watch(currentVerify, (next, previous) => {
     }
     showSnackbar.info(`发现 ${next.issueCount} 个缺失或损坏文件，已生成修复计划`);
   }
+});
+
+onUnmounted(() => {
+  clearVerifyHideTimer();
+  verifyStopping.value = false;
 });
 </script>
 

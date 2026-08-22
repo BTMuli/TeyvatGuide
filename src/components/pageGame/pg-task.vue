@@ -3,32 +3,35 @@
     <div class="task-heading">
       <div>
         <span>资源任务</span>
-        <strong v-if="task !== null && task.sourceTag === task.targetTag">
+        <strong v-if="task !== null && task.target === gameEnum.package.planTarget.INSTALL">
+          全新安装 {{ task.targetTag }}
+        </strong>
+        <strong v-else-if="task !== null && task.sourceTag === task.targetTag">
           修复 {{ task.targetTag }}
         </strong>
         <strong v-else-if="task !== null"> {{ task.sourceTag }} → {{ task.targetTag }} </strong>
         <strong v-else-if="plan !== null">等待开始 {{ plan.targetTag }}</strong>
       </div>
       <v-chip v-if="task !== null" :color="stateColor" size="small" variant="tonal">
-        {{ gameEnum.package.taskStateDesc(task.state) }}
+        {{ taskStateLabel }}
       </v-chip>
     </div>
 
     <template v-if="task !== null">
       <v-progress-linear
-        :indeterminate="task.totalBytes === 0 && active"
+        :indeterminate="progressIndeterminate"
         :model-value="progressPercent"
         color="var(--tgc-od-orange)"
         height="8"
         rounded
       />
       <div class="task-facts" aria-live="polite">
-        <span>{{ formatBytes(task.downloadedBytes) }} / {{ formatBytes(task.totalBytes) }}</span>
-        <span>{{ task.completedCount }} / {{ task.totalCount }} 个对象</span>
-        <span v-if="task.bytesPerSecond > 0">{{ formatBytes(task.bytesPerSecond) }}/s</span>
-        <span v-if="task.etaSeconds !== null">预计 {{ formatDuration(task.etaSeconds) }}</span>
+        <span v-for="fact in progressFacts" :key="fact">{{ fact }}</span>
       </div>
-      <p v-if="task.currentFile !== null" class="task-current">当前：{{ task.currentFile }}</p>
+      <p v-if="task.currentFile !== null" class="task-current">
+        <span class="task-current-label">当前资源：</span>
+        <span class="task-current-value" :title="task.currentFile">{{ task.currentFile }}</span>
+      </p>
       <v-alert
         v-if="task.errorMessage !== null"
         :text="task.errorMessage"
@@ -60,6 +63,16 @@
       <v-alert
         v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && integrityRepair"
         text="全部下载对象已通过 hash 复验。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
+        density="compact"
+        type="success"
+        variant="tonal"
+      />
+      <v-alert
+        v-else-if="
+          task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+          task.target === gameEnum.package.planTarget.INSTALL
+        "
+        text="安装资源已下载，准备进入 staging、发布和最终复检。"
         density="compact"
         type="success"
         variant="tonal"
@@ -115,7 +128,7 @@
         {{ applyActionLabel }}
       </v-btn>
       <v-btn
-        v-if="active && task !== null"
+        v-if="canCancel && task !== null"
         :loading="actionPending"
         prepend-icon="mdi-stop-circle-outline"
         size="small"
@@ -172,8 +185,28 @@ const emit = defineEmits<{
 const active = computed<boolean>(() => {
   return task !== null && gameEnum.package.taskActive(task.state);
 });
+const taskStateLabel = computed<string>(() => {
+  if (
+    task?.target === gameEnum.package.planTarget.INSTALL &&
+    task.state === gameEnum.package.taskState.FAILED
+  ) {
+    return "安装失败";
+  }
+  return task === null ? "" : gameEnum.package.taskStateDesc(task.state);
+});
+const canCancel = computed<boolean>(() => {
+  if (!active.value || task === null) return false;
+  return !(
+    task.target === gameEnum.package.planTarget.INSTALL && gameEnum.package.taskApplying(task.state)
+  );
+});
 const recoverable = computed<boolean>(() => {
-  return task !== null && gameEnum.package.taskRecoverable(task.state);
+  return (
+    task !== null &&
+    (gameEnum.package.taskRecoverable(task.state) ||
+      (task.target === gameEnum.package.planTarget.INSTALL &&
+        task.state === gameEnum.package.taskState.READY_TO_APPLY))
+  );
 });
 const readyToApply = computed<boolean>(() => {
   return task?.state === gameEnum.package.taskState.READY_TO_APPLY;
@@ -193,6 +226,12 @@ const applyActionLabel = computed<string>(() => {
   return "应用更新";
 });
 const canAbandon = computed<boolean>(() => {
+  if (
+    task?.target === gameEnum.package.planTarget.INSTALL &&
+    task.state === gameEnum.package.taskState.RECOVERY_REQUIRED
+  ) {
+    return false;
+  }
   return recoverable.value || readyToApply.value || repairRequired.value;
 });
 const canStart = computed<boolean>(() => {
@@ -211,8 +250,41 @@ const canStart = computed<boolean>(() => {
   );
 });
 const progressPercent = computed<number>(() => {
-  if (task === null || task.totalBytes === 0) return 0;
+  if (task === null) return 0;
+  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
+    if (task.assemblyTotalBytes > 0) {
+      return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
+    }
+    if (task.assemblyTotalCount > 0) {
+      return Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100);
+    }
+    return 0;
+  }
+  if (task.totalBytes === 0) return 0;
   return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
+});
+const progressIndeterminate = computed<boolean>(() => {
+  if (task === null || !active.value) return false;
+  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
+    return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
+  }
+  return task.totalBytes === 0 || gameEnum.package.taskApplying(task.state);
+});
+const progressFacts = computed<Array<string>>(() => {
+  if (task === null) return [];
+  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
+    return [
+      `组装空间 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+      `组装文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
+    ];
+  }
+  const values = [
+    `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
+    `${task.completedCount} / ${task.totalCount} 个对象`,
+  ];
+  if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
+  if (task.etaSeconds !== null) values.push(`预计 ${formatDuration(task.etaSeconds)}`);
+  return values;
 });
 const stateColor = computed<string>(() => {
   switch (task?.state) {
@@ -255,17 +327,22 @@ function formatDuration(seconds: number): string {
 <style lang="scss" scoped>
 .task-panel {
   display: grid;
-  padding: 12px;
-  border-radius: 4px;
-  background: var(--box-bg-2);
-  gap: 12px;
+  border-radius: 8px;
+  background: var(--box-bg-1);
+  gap: 4px;
 }
 
 .task-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  padding: 12px 16px 4px;
   gap: 8px;
+
+  > .v-chip {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
 
   span,
   strong {
@@ -305,13 +382,42 @@ function formatDuration(seconds: number): string {
 
 .task-current,
 .task-note {
-  overflow: hidden;
   margin: 0;
+}
+
+.task-current {
+  display: flex;
+  min-width: 0;
+  gap: 4px;
+}
+
+.task-current-label {
+  flex-shrink: 0;
+}
+
+.task-current-value {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--common-text-title);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .task-note {
   color: var(--tgc-red-2);
+}
+
+.task-panel > :deep(.v-progress-linear),
+.task-panel > .task-facts,
+.task-panel > .task-current,
+.task-panel > .task-actions,
+.task-panel > .task-note,
+.task-panel > :deep(.v-alert) {
+  margin-inline: 16px;
+}
+
+.task-panel > .task-actions,
+.task-panel > .task-note {
+  margin-bottom: 12px;
 }
 </style>

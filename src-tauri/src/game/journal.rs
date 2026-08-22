@@ -7,7 +7,7 @@ use super::{
   planner::PersistedPlan,
   scheme::scheme_id_key,
 };
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashSet,
@@ -17,8 +17,9 @@ use std::{
 };
 use uuid::Uuid;
 
-pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 2;
-const LEGACY_JOURNAL_SCHEMA_VERSION: u32 = 1;
+pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 3;
+const LEGACY_JOURNAL_SCHEMA_VERSION_V2: u32 = 2;
+const LEGACY_JOURNAL_SCHEMA_VERSION_V1: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -88,8 +89,12 @@ pub(crate) struct TaskJournal {
   pub(crate) operation: String,
   pub(crate) source_scheme: SchemeId,
   pub(crate) target_scheme: SchemeId,
+  #[serde(default)]
+  pub(crate) install_root: Option<String>,
+  #[serde(default)]
+  pub(crate) audio_languages: Vec<String>,
   pub(crate) target: PackagePlanTarget,
-  pub(crate) source_tag: String,
+  pub(crate) source_tag: Option<String>,
   pub(crate) target_tag: String,
   pub(crate) manifest_digest: String,
   pub(crate) state: PackageTaskState,
@@ -99,6 +104,18 @@ pub(crate) struct TaskJournal {
   pub(crate) committed_step: usize,
   pub(crate) owned_cache_files: Vec<String>,
   pub(crate) total_count: usize,
+  /// Number of game assets whose staging output has been fully assembled.
+  #[serde(default)]
+  pub(crate) assembly_completed_count: usize,
+  /// Total number of game assets that must be assembled.
+  #[serde(default)]
+  pub(crate) assembly_total_count: usize,
+  /// Number of bytes in completed game asset staging outputs.
+  #[serde(default)]
+  pub(crate) assembly_completed_bytes: u64,
+  /// Total bytes of game asset staging outputs.
+  #[serde(default)]
+  pub(crate) assembly_total_bytes: u64,
   pub(crate) current_file: Option<String>,
   pub(crate) bytes_per_second: u64,
   pub(crate) eta_seconds: Option<u64>,
@@ -123,6 +140,11 @@ impl TaskJournal {
       operation: operation_for_target(plan.target).to_string(),
       source_scheme: plan.source_scheme,
       target_scheme: plan.target_scheme,
+      install_root: plan.install_overlay.as_ref().map(|overlay| overlay.game_root.clone()),
+      audio_languages: plan
+        .install_overlay
+        .as_ref()
+        .map_or_else(Vec::new, |overlay| overlay.audio_languages.clone()),
       target: plan.target,
       source_tag: plan.source_tag.clone(),
       target_tag: plan.target_tag.clone(),
@@ -134,6 +156,10 @@ impl TaskJournal {
       committed_step: 0,
       owned_cache_files: Vec::new(),
       total_count: plan.downloads.len(),
+      assembly_completed_count: 0,
+      assembly_total_count: plan.assets.len(),
+      assembly_completed_bytes: 0,
+      assembly_total_bytes: plan.assets.iter().map(|asset| asset.size).sum(),
       current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
@@ -164,8 +190,10 @@ impl TaskJournal {
       operation: "switch".to_string(),
       source_scheme,
       target_scheme,
+      install_root: None,
+      audio_languages: Vec::new(),
       target: PackagePlanTarget::Switch,
-      source_tag: scheme_id_key(source_scheme).to_string(),
+      source_tag: Some(scheme_id_key(source_scheme).to_string()),
       target_tag: scheme_id_key(target_scheme).to_string(),
       manifest_digest,
       state: PackageTaskState::Queued,
@@ -175,6 +203,10 @@ impl TaskJournal {
       committed_step: 0,
       owned_cache_files: Vec::new(),
       total_count,
+      assembly_completed_count: 0,
+      assembly_total_count: 0,
+      assembly_completed_bytes: 0,
+      assembly_total_bytes: 0,
       current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
@@ -191,6 +223,28 @@ impl TaskJournal {
     self.updated_at = Utc::now().to_rfc3339();
   }
 
+  pub(crate) fn reset_assembly_progress(&mut self, total_count: usize, total_bytes: u64) {
+    self.assembly_completed_count = 0;
+    self.assembly_total_count = total_count;
+    self.assembly_completed_bytes = 0;
+    self.assembly_total_bytes = total_bytes;
+  }
+
+  pub(crate) fn update_assembly_progress(
+    &mut self,
+    completed_count: usize,
+    total_count: usize,
+    completed_bytes: u64,
+    total_bytes: u64,
+    current_file: Option<String>,
+  ) {
+    self.assembly_completed_count = completed_count;
+    self.assembly_total_count = total_count;
+    self.assembly_completed_bytes = completed_bytes;
+    self.assembly_total_bytes = total_bytes;
+    self.current_file = current_file;
+  }
+
   pub(crate) fn summary(&self) -> PackageTaskSummary {
     PackageTaskSummary {
       revision: self.revision,
@@ -198,6 +252,10 @@ impl TaskJournal {
       plan_id: self.plan_id.clone(),
       installation_id: self.installation_id.clone(),
       target: self.target,
+      source_scheme: self.source_scheme,
+      target_scheme: self.target_scheme,
+      install_root: self.install_root.clone(),
+      audio_languages: self.audio_languages.clone(),
       source_tag: self.source_tag.clone(),
       target_tag: self.target_tag.clone(),
       manifest_digest: self.manifest_digest.clone(),
@@ -206,12 +264,33 @@ impl TaskJournal {
       total_bytes: self.total_bytes,
       completed_count: self.committed_step,
       total_count: self.total_count,
+      assembly_completed_count: self.assembly_completed_count,
+      assembly_total_count: self.assembly_total_count,
+      assembly_completed_bytes: self.assembly_completed_bytes,
+      assembly_total_bytes: self.assembly_total_bytes,
       current_file: self.current_file.clone(),
       bytes_per_second: self.bytes_per_second,
       eta_seconds: self.eta_seconds,
+      elapsed_ms: self.elapsed_ms(),
       error_message: self.error_message.clone(),
       updated_at: self.updated_at.clone(),
     }
+  }
+
+  fn elapsed_ms(&self) -> u64 {
+    let created = match DateTime::parse_from_rfc3339(&self.created_at) {
+      Ok(value) => value.with_timezone(&Utc),
+      Err(_) => return 0,
+    };
+    let ended = if self.state.is_active() {
+      Utc::now()
+    } else {
+      match DateTime::parse_from_rfc3339(&self.updated_at) {
+        Ok(value) => value.with_timezone(&Utc),
+        Err(_) => return 0,
+      }
+    };
+    ended.signed_duration_since(created).num_milliseconds().max(0) as u64
   }
 }
 
@@ -322,6 +401,7 @@ pub(crate) fn blocks_cache_clear(task_root: &Path) -> Result<bool, String> {
   Ok(list(task_root, None)?.iter().any(|journal| {
     journal.state.is_active()
       || journal.state.requires_recovery()
+      || journal.state == PackageTaskState::Paused
       || journal.state == PackageTaskState::RepairRequired
   }))
 }
@@ -359,13 +439,18 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
 }
 
 fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
-  if !matches!(journal.schema_version, JOURNAL_SCHEMA_VERSION | LEGACY_JOURNAL_SCHEMA_VERSION)
-    || Uuid::parse_str(&journal.task_id).is_err()
+  if !matches!(
+    journal.schema_version,
+    JOURNAL_SCHEMA_VERSION | LEGACY_JOURNAL_SCHEMA_VERSION_V2 | LEGACY_JOURNAL_SCHEMA_VERSION_V1
+  ) || Uuid::parse_str(&journal.task_id).is_err()
     || journal.task_id != journal.plan_id
     || journal.installation_id.is_empty()
     || journal.operation != operation_for_target(journal.target)
-    || journal.source_tag.is_empty()
-    || journal.source_tag.len() > 128
+    || (journal.target != PackagePlanTarget::Install
+      && journal.source_tag.as_deref().is_none_or(|value| {
+        value.is_empty() || value.len() > 128 || value.chars().any(char::is_control)
+      }))
+    || (journal.target == PackagePlanTarget::Install && journal.source_tag.is_some())
     || journal.target_tag.is_empty()
     || journal.target_tag.len() > 128
     || journal.manifest_digest.len() != 64
@@ -374,6 +459,8 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.committed_step != journal.owned_cache_files.len()
     || journal.committed_step > journal.planned_steps
     || journal.downloaded_bytes > journal.total_bytes
+    || journal.assembly_completed_count > journal.assembly_total_count
+    || journal.assembly_completed_bytes > journal.assembly_total_bytes
     || journal.current_file.as_ref().is_some_and(|value| value.len() > 256)
     || journal.error_message.as_ref().is_some_and(|value| value.len() > 4096)
   {
@@ -390,7 +477,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
   }) {
     return Err("游戏资源任务日志包含无效缓存对象".to_string());
   }
-  if journal.schema_version == LEGACY_JOURNAL_SCHEMA_VERSION
+  if journal.schema_version == LEGACY_JOURNAL_SCHEMA_VERSION_V1
     && (journal.apply.is_some() || journal.repair.is_some())
   {
     return Err("旧版游戏资源任务日志不能包含提交状态".to_string());
@@ -474,6 +561,7 @@ fn operation_for_target(target: PackagePlanTarget) -> &'static str {
     PackagePlanTarget::Main => "update",
     PackagePlanTarget::PreDownload => "predownload",
     PackagePlanTarget::Switch => "switch",
+    PackagePlanTarget::Install => "install",
   }
 }
 
@@ -510,8 +598,10 @@ mod tests {
       operation: "predownload".to_string(),
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
+      install_root: None,
+      audio_languages: Vec::new(),
       target: PackagePlanTarget::PreDownload,
-      source_tag: "1.0.0".to_string(),
+      source_tag: Some("1.0.0".to_string()),
       target_tag: "2.0.0".to_string(),
       manifest_digest: "a".repeat(64),
       state: PackageTaskState::Queued,
@@ -521,6 +611,10 @@ mod tests {
       committed_step: 0,
       owned_cache_files: Vec::new(),
       total_count: 1,
+      assembly_completed_count: 0,
+      assembly_total_count: 0,
+      assembly_completed_bytes: 0,
+      assembly_total_bytes: 0,
       current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,

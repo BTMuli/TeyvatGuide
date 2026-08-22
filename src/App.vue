@@ -4,7 +4,13 @@
     <TSidebar v-if="isMain" />
     <v-main>
       <v-container :fluid="true" class="app-container">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <component :is="Component" v-if="Component" />
+          <div v-else class="app-route-loading" role="status">
+            <v-progress-circular indeterminate />
+            <span>正在加载页面…</span>
+          </div>
+        </router-view>
       </v-container>
     </v-main>
     <TBackTop />
@@ -41,6 +47,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const appStore = useAppStore();
 const {
   theme,
   needResize,
@@ -51,7 +58,7 @@ const {
   buildTime,
   closeToTray,
   showFeedback,
-} = storeToRefs(useAppStore());
+} = storeToRefs(appStore);
 const userStore = useUserStore();
 const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
 
@@ -69,6 +76,11 @@ let yaeFlag: Array<string> = [];
 onMounted(async () => {
   const win = getCurrentWindow();
   isMain.value = win.label === "TeyvatGuide";
+  try {
+    await appStore.initializePaths();
+  } catch (error) {
+    showSnackbar.error(`读取应用目录失败：${error}`);
+  }
   if (isMain.value) {
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
@@ -555,5 +567,16 @@ async function handleCommands(cmds: CliMatches): Promise<void> {
   height: 100%;
   background: var(--app-page-bg);
   color: var(--app-page-content);
+}
+
+.app-route-loading {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  color: var(--app-page-content);
+  font-family: var(--font-text);
+  font-size: 14px;
+  gap: 12px;
 }
 </style>

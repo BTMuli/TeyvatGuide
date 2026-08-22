@@ -39,6 +39,38 @@ const GameInstallationStatusEnum: typeof TGApp.Game.Installation.Status = {
 };
 
 /**
+ * 游戏安装目录识别结果枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Installation.LocationKindEnum
+ */
+const GameInstallationLocationKindEnum: typeof TGApp.Game.Installation.LocationKind = {
+  EMPTY: "empty",
+  EXISTING: "existing",
+  OCCUPIED: "occupied",
+};
+
+/**
+ * 游戏本体安装草稿状态枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Installation.InstallDraftStateEnum
+ */
+const GameInstallationInstallDraftStateEnum: typeof TGApp.Game.Installation.InstallDraftState = {
+  CREATED: "created",
+  PLANNED: "planned",
+  DOWNLOADING: "downloading",
+  READY_TO_APPLY: "ready_to_apply",
+  ASSEMBLING: "assembling",
+  COMMIT_PREPARED: "commit_prepared",
+  PUBLISH_PENDING: "publish_pending",
+  PUBLISHED: "published",
+  VERIFIED: "verified",
+  REGISTRATION_PENDING: "registration_pending",
+  COMPLETED: "completed",
+  RECOVERY_REQUIRED: "recovery_required",
+  CANCELED: "canceled",
+};
+
+/**
  * 游戏资源计划目标枚举。
  * @since Beta v0.11.5
  * @see TGApp.Game.Package.PlanTargetEnum
@@ -47,6 +79,7 @@ const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
   MAIN: "main",
   PRE_DOWNLOAD: "pre_download",
   SWITCH: "switch",
+  INSTALL: "install",
 };
 
 /**
@@ -98,6 +131,7 @@ function isGamePackageVerifyActive(state: TGApp.Game.Package.VerifyStateEnum): b
 const GamePackagePlanStrategyEnum: typeof TGApp.Game.Package.PlanStrategy = {
   PATCH: "patch",
   MANIFEST_DIFF: "manifest_diff",
+  FULL: "full",
 };
 
 /**
@@ -108,11 +142,16 @@ const GamePackagePlanStrategyEnum: typeof TGApp.Game.Package.PlanStrategy = {
 const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
   QUEUED: "queued",
   DOWNLOADING: "downloading",
+  PAUSED: "paused",
   READY_TO_APPLY: "ready_to_apply",
   ASSEMBLING: "assembling",
   COMMIT_PREPARED: "commit_prepared",
   COMMITTING: "committing",
   VERIFYING: "verifying",
+  PUBLISH_PENDING: "publish_pending",
+  PUBLISHED: "published",
+  VERIFIED: "verified",
+  REGISTRATION_PENDING: "registration_pending",
   REPAIR_REQUIRED: "repair_required",
   ROLLING_BACK: "rolling_back",
   COMPLETED: "completed",
@@ -143,6 +182,8 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
       return "等待开始";
     case GamePackageTaskStateEnum.DOWNLOADING:
       return "正在下载";
+    case GamePackageTaskStateEnum.PAUSED:
+      return "已暂停";
     case GamePackageTaskStateEnum.READY_TO_APPLY:
       return "下载完成";
     case GamePackageTaskStateEnum.ASSEMBLING:
@@ -153,6 +194,14 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
       return "正在提交";
     case GamePackageTaskStateEnum.VERIFYING:
       return "正在验证";
+    case GamePackageTaskStateEnum.PUBLISH_PENDING:
+      return "等待发布";
+    case GamePackageTaskStateEnum.PUBLISHED:
+      return "已发布，等待复检";
+    case GamePackageTaskStateEnum.VERIFIED:
+      return "复检完成";
+    case GamePackageTaskStateEnum.REGISTRATION_PENDING:
+      return "等待登记";
     case GamePackageTaskStateEnum.REPAIR_REQUIRED:
       return "等待修复";
     case GamePackageTaskStateEnum.ROLLING_BACK:
@@ -194,6 +243,10 @@ function isGamePackageTaskApplying(state: TGApp.Game.Package.TaskStateEnum): boo
     state === GamePackageTaskStateEnum.COMMIT_PREPARED ||
     state === GamePackageTaskStateEnum.COMMITTING ||
     state === GamePackageTaskStateEnum.VERIFYING ||
+    state === GamePackageTaskStateEnum.PUBLISH_PENDING ||
+    state === GamePackageTaskStateEnum.PUBLISHED ||
+    state === GamePackageTaskStateEnum.VERIFIED ||
+    state === GamePackageTaskStateEnum.REGISTRATION_PENDING ||
     state === GamePackageTaskStateEnum.ROLLING_BACK
   );
 }
@@ -208,6 +261,7 @@ function isGamePackageTaskRecoverable(state: TGApp.Game.Package.TaskStateEnum): 
   return (
     state === GamePackageTaskStateEnum.RECOVERY_REQUIRED ||
     state === GamePackageTaskStateEnum.FAILED ||
+    state === GamePackageTaskStateEnum.PAUSED ||
     state === GamePackageTaskStateEnum.CANCELED
   );
 }
@@ -222,6 +276,8 @@ function getGamePackagePlanStrategyDesc(strategy: TGApp.Game.Package.PlanStrateg
   switch (strategy) {
     case GamePackagePlanStrategyEnum.PATCH:
       return "官方差分包";
+    case GamePackagePlanStrategyEnum.FULL:
+      return "完整安装";
     case GamePackagePlanStrategyEnum.MANIFEST_DIFF:
       return "资源清单差异";
   }
@@ -547,6 +603,8 @@ const gameEnum = {
     scheme: GameInstallationSchemeEnum,
     schemeDesc: getGameInstallationSchemeDesc,
     status: GameInstallationStatusEnum,
+    locationKind: GameInstallationLocationKindEnum,
+    draftState: GameInstallationInstallDraftStateEnum,
   },
   package: {
     planTarget: GamePackagePlanTargetEnum,

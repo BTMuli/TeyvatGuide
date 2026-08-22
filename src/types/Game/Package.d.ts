@@ -9,6 +9,7 @@ declare namespace TGApp.Game.Package {
     MAIN: "main",
     PRE_DOWNLOAD: "pre_download",
     SWITCH: "switch",
+    INSTALL: "install",
   };
 
   /** 目标分支值。 */
@@ -18,6 +19,7 @@ declare namespace TGApp.Game.Package {
   const PlanStrategy = <const>{
     PATCH: "patch",
     MANIFEST_DIFF: "manifest_diff",
+    FULL: "full",
   };
 
   /** 差异策略值。 */
@@ -44,7 +46,7 @@ declare namespace TGApp.Game.Package {
     planId: string;
     installationId: string;
     target: PlanTargetEnum;
-    sourceTag: string;
+    sourceTag: string | null;
     targetTag: string;
     manifestDigest: string;
     strategy: PlanStrategyEnum;
@@ -54,10 +56,22 @@ declare namespace TGApp.Game.Package {
     requiredFreeBytes: number;
     availableFreeBytes: number;
     hasSufficientSpace: boolean;
+    cacheRequiredFreeBytes: number;
+    installRequiredFreeBytes: number;
+    cacheAvailableFreeBytes: number;
+    installAvailableFreeBytes: number;
+    sameVolume: boolean;
     downloadCount: number;
     addCount: number;
     modifyCount: number;
     deleteCount: number;
+  };
+
+  /** 后端生成资源计划时上报的真实步骤。 */
+  type PlanProgress = {
+    step: number;
+    total: number;
+    message: string;
   };
 
   /** 安装完整性校验任务状态。 */
@@ -97,11 +111,16 @@ declare namespace TGApp.Game.Package {
   const TaskState = <const>{
     QUEUED: "queued",
     DOWNLOADING: "downloading",
+    PAUSED: "paused",
     READY_TO_APPLY: "ready_to_apply",
     ASSEMBLING: "assembling",
     COMMIT_PREPARED: "commit_prepared",
     COMMITTING: "committing",
     VERIFYING: "verifying",
+    PUBLISH_PENDING: "publish_pending",
+    PUBLISHED: "published",
+    VERIFIED: "verified",
+    REGISTRATION_PENDING: "registration_pending",
     REPAIR_REQUIRED: "repair_required",
     ROLLING_BACK: "rolling_back",
     COMPLETED: "completed",
@@ -135,7 +154,11 @@ declare namespace TGApp.Game.Package {
     planId: string;
     installationId: string;
     target: PlanTargetEnum;
-    sourceTag: string;
+    sourceScheme: TGApp.Game.Installation.SchemeEnum;
+    targetScheme: TGApp.Game.Installation.SchemeEnum;
+    installRoot: string | null;
+    audioLanguages: Array<string>;
+    sourceTag: string | null;
     targetTag: string;
     manifestDigest: string;
     state: TaskStateEnum;
@@ -143,9 +166,14 @@ declare namespace TGApp.Game.Package {
     totalBytes: number;
     completedCount: number;
     totalCount: number;
+    assemblyCompletedCount: number;
+    assemblyTotalCount: number;
+    assemblyCompletedBytes: number;
+    assemblyTotalBytes: number;
     currentFile: string | null;
     bytesPerSecond: number;
     etaSeconds: number | null;
+    elapsedMs: number;
     errorMessage: string | null;
     updatedAt: string;
   };

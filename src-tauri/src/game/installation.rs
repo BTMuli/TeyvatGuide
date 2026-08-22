@@ -12,12 +12,23 @@ use std::{
   path::{Path, PathBuf},
 };
 
-const AUDIO_PACKAGES: [(&str, &str); 4] = [
+pub(crate) const AUDIO_PACKAGES: [(&str, &str); 4] = [
   ("Audio_Chinese_pkg_version", "zh-cn"),
   ("Audio_English(US)_pkg_version", "en-us"),
   ("Audio_Japanese_pkg_version", "ja-jp"),
   ("Audio_Korean_pkg_version", "ko-kr"),
 ];
+
+pub(crate) fn supported_audio_languages() -> &'static [(&'static str, &'static str)] {
+  &AUDIO_PACKAGES
+}
+
+pub(crate) fn audio_marker(language: &str) -> Option<&'static str> {
+  AUDIO_PACKAGES
+    .iter()
+    .find(|(_, value)| value.eq_ignore_ascii_case(language))
+    .map(|(marker, _)| *marker)
+}
 
 /// 校验国服游戏可执行文件，并从安装目录读取渠道、版本和语音包状态。
 pub fn inspect_executable(
@@ -137,7 +148,7 @@ fn strip_windows_local_verbatim_prefix(path: &str) -> &str {
 
 #[cfg(target_os = "windows")]
 /// 归一化 Windows 本地 verbatim 路径，并拒绝其他 verbatim 路径类型。
-fn normalize_windows_local_path(path: &str) -> Result<PathBuf, String> {
+pub(crate) fn normalize_windows_local_path(path: &str) -> Result<PathBuf, String> {
   let normalized = strip_windows_local_verbatim_prefix(path);
   if normalized == path && path.starts_with("\\\\?\\") {
     return Err("不支持网络路径或 Windows 设备路径".to_string());
@@ -147,7 +158,7 @@ fn normalize_windows_local_path(path: &str) -> Result<PathBuf, String> {
 
 #[cfg(target_os = "windows")]
 /// 拒绝网络路径、网络映射盘以及包含重解析点的 Windows 路径。
-fn validate_windows_path(path: &Path) -> Result<(), String> {
+pub(crate) fn validate_windows_path(path: &Path) -> Result<(), String> {
   use std::os::windows::fs::MetadataExt;
   use std::path::{Component, Prefix};
   use widestring::U16CString;

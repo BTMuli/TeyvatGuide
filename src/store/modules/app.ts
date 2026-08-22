@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.11.3
+ * @since Beta v0.11.5
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -9,13 +9,6 @@ import { path } from "@tauri-apps/api";
 import { getInitDeviceInfo } from "@utils/toolFunc.js";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-
-/** 用于存储用户数据的路径 */
-const userDataDir: Readonly<string> = `${await path.appLocalDataDir()}${path.sep()}userData`;
-/** 用于存放数据库的路径 */
-const dbDataPath: Readonly<string> = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
-/** 用于存放日志的路径 */
-const logDataDir: Readonly<string> = await path.appLogDir();
 
 const useAppStore = defineStore(
   "app",
@@ -31,11 +24,11 @@ const useAppStore = defineStore(
     /** 是否登录 */
     const isLogin = ref<boolean>(false);
     /** 用户数据目录 */
-    const userDir = ref<string>(userDataDir);
+    const userDir = ref<string>("");
     /** 数据库路径 */
-    const dbPath = ref<Readonly<string>>(dbDataPath);
+    const dbPath = ref<Readonly<string>>("");
     /** 日志目录 */
-    const logDir = ref<string>(logDataDir);
+    const logDir = ref<string>("");
     /** 游戏安装目录 */
     const gameDir = ref<string>("未设置");
     /** 设备信息 */
@@ -76,6 +69,32 @@ const useAppStore = defineStore(
      * @remarks LastUpdateCheckTimeStamp
      */
     const lastUcts = ref<number>(0);
+    let pathInitialization: Promise<void> | null = null;
+
+    /**
+     * 在应用挂载后并行读取系统路径，避免模块加载阶段阻塞首屏。
+     * @since Beta v0.11.5
+     * @returns 路径初始化完成
+     */
+    async function initializePaths(): Promise<void> {
+      if (pathInitialization !== null) return await pathInitialization;
+      pathInitialization = (async () => {
+        const [appLocalDataDir, appConfigDir, appLogDir] = await Promise.all([
+          path.appLocalDataDir(),
+          path.appConfigDir(),
+          path.appLogDir(),
+        ]);
+        if (userDir.value === "") userDir.value = `${appLocalDataDir}${path.sep()}userData`;
+        if (dbPath.value === "") dbPath.value = `${appConfigDir}${path.sep()}TeyvatGuide.db`;
+        if (logDir.value === "") logDir.value = appLogDir;
+      })();
+      try {
+        await pathInitialization;
+      } catch (error) {
+        pathInitialization = null;
+        throw error;
+      }
+    }
 
     /**
      * 初始化应用状态
@@ -164,6 +183,7 @@ const useAppStore = defineStore(
       showFeedback,
       useProxy,
       lastUcts,
+      initializePaths,
       init,
       changeTheme,
       getImageUrl,

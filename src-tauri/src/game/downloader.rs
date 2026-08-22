@@ -3,8 +3,8 @@
 
 use super::{
   hoyoplay::network_error,
-  planner::{PlanDownload, PlanDownloadHashKind, cached_chunk_matches},
-  sophon::payload_url,
+  planner::{PlanDownload, PlanDownloadHashKind, cached_chunk_matches, remember_cache_validation},
+  sophon::{is_official_download_host, payload_url},
 };
 use futures_util::TryStreamExt;
 use md5::{Digest as Md5Digest, Md5};
@@ -19,10 +19,15 @@ use std::{
   },
   time::{Duration, Instant},
 };
-use tokio::{fs::OpenOptions, io::AsyncWriteExt, sync::Mutex as AsyncMutex};
+use tokio::{
+  fs::OpenOptions,
+  io::{AsyncWriteExt, BufWriter},
+  sync::Mutex as AsyncMutex,
+};
 use xxhash_rust::xxh64::Xxh64;
 
 const MAX_ATTEMPTS: usize = 4;
+const WRITE_BUFFER_BYTES: usize = 256 * 1024;
 
 static DOWNLOAD_LOCKS: LazyLock<Mutex<HashMap<String, Weak<AsyncMutex<()>>>>> =
   LazyLock::new(|| Mutex::new(HashMap::new()));
@@ -54,16 +59,18 @@ impl RateLimiter {
     let Some(limit) = self.bytes_per_second else {
       return;
     };
-    let mut state = self.state.lock().await;
-    state.bytes = state.bytes.saturating_add(bytes);
-    let expected = Duration::from_secs_f64(state.bytes as f64 / limit as f64);
-    let elapsed = state.started_at.elapsed();
-    if expected > elapsed {
-      tokio::time::sleep(expected - elapsed).await;
-    }
-    if state.started_at.elapsed() > Duration::from_secs(10) {
-      state.started_at = Instant::now();
-      state.bytes = 0;
+    let delay = {
+      let mut state = self.state.lock().await;
+      if state.started_at.elapsed() > Duration::from_secs(10) {
+        state.started_at = Instant::now();
+        state.bytes = 0;
+      }
+      state.bytes = state.bytes.saturating_add(bytes);
+      let expected = Duration::from_secs_f64(state.bytes as f64 / limit as f64);
+      expected.saturating_sub(state.started_at.elapsed())
+    };
+    if !delay.is_zero() {
+      tokio::time::sleep(delay).await;
     }
   }
 }
@@ -83,6 +90,7 @@ pub(crate) async fn download_object(
   download: &PlanDownload,
   task_id: &str,
   canceled: &AtomicBool,
+  paused: &AtomicBool,
   limiter: &RateLimiter,
 ) -> Result<DownloadedObject, String> {
   if download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange {
@@ -101,13 +109,21 @@ pub(crate) async fn download_object(
   let partial = cache_root.join(format!("{}.part.{task_id}", download.cache_key));
   let mut last_error = String::new();
   for attempt in 0..MAX_ATTEMPTS {
+    if paused.load(Ordering::Acquire) {
+      remove_partial(&partial);
+      return Err("任务已暂停".to_string());
+    }
     if canceled.load(Ordering::Acquire) {
       remove_partial(&partial);
       return Err("任务已取消".to_string());
     }
     remove_partial(&partial);
-    match download_once(client, download, &partial, canceled, limiter).await {
+    match download_once(client, download, &partial, canceled, paused, limiter).await {
       Ok(()) => {
+        if paused.load(Ordering::Acquire) {
+          remove_partial(&partial);
+          return Err("任务已暂停".to_string());
+        }
         if target.exists() {
           if cached_chunk_matches(cache_root, download) {
             remove_partial(&partial);
@@ -119,16 +135,32 @@ pub(crate) async fn download_object(
           fs::remove_file(&target).map_err(|error| format!("清理损坏缓存文件失败：{error}"))?;
         }
         fs::rename(&partial, &target).map_err(|error| format!("提交游戏资源缓存失败：{error}"))?;
-        if !cached_chunk_matches(cache_root, download) {
+        let metadata = fs::symlink_metadata(&target)
+          .map_err(|error| format!("读取已提交游戏资源缓存失败：{error}"))?;
+        if !metadata.is_file() || metadata.len() != download.compressed_size {
           let _ = fs::remove_file(&target);
-          return Err("下载完成后的缓存完整性复验失败".to_string());
+          return Err("已提交游戏资源缓存的类型或大小无效".to_string());
         }
+        #[cfg(target_os = "windows")]
+        {
+          use std::os::windows::fs::MetadataExt;
+          use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
+          if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+            let _ = fs::remove_file(&target);
+            return Err("已提交游戏资源缓存不能是重解析点".to_string());
+          }
+        }
+        remember_cache_validation(cache_root, download, &metadata);
         return Ok(DownloadedObject {
           cache_key: download.cache_key.clone(),
           bytes: download.compressed_size,
         });
       }
       Err(error) => last_error = error,
+    }
+    if paused.load(Ordering::Acquire) {
+      remove_partial(&partial);
+      return Err("任务已暂停".to_string());
     }
     if canceled.load(Ordering::Acquire) {
       remove_partial(&partial);
@@ -148,9 +180,10 @@ async fn download_once(
   download: &PlanDownload,
   partial: &Path,
   canceled: &AtomicBool,
+  paused: &AtomicBool,
   limiter: &RateLimiter,
 ) -> Result<(), String> {
-  let url = payload_url(&download.url_prefix, &download.url_suffix, &download.id)?;
+  let url = download_url(download)?;
   let mut request = client.get(url);
   if let (Some(start), Some(length)) = (download.range_start, download.range_length) {
     let end = start.checked_add(length - 1).ok_or_else(|| "下载 Range 溢出".to_string())?;
@@ -171,12 +204,13 @@ async fn download_once(
       return Err("资源响应长度与计划不一致".to_string());
     }
   }
-  let mut file = OpenOptions::new()
+  let file = OpenOptions::new()
     .create_new(true)
     .write(true)
     .open(partial)
     .await
     .map_err(|error| format!("创建资源下载临时文件失败：{error}"))?;
+  let mut writer = BufWriter::with_capacity(WRITE_BUFFER_BYTES, file);
   let mut stream = response.bytes_stream();
   let mut bytes = 0_u64;
   let mut xxhasher = Xxh64::new(0);
@@ -184,8 +218,13 @@ async fn download_once(
   while let Some(chunk) =
     stream.try_next().await.map_err(|error| network_error("读取游戏资源", &error))?
   {
+    if paused.load(Ordering::Acquire) {
+      drop(writer);
+      remove_partial(partial);
+      return Err("任务已暂停".to_string());
+    }
     if canceled.load(Ordering::Acquire) {
-      drop(file);
+      drop(writer);
       remove_partial(partial);
       return Err("任务已取消".to_string());
     }
@@ -194,7 +233,7 @@ async fn download_once(
     if bytes > download.compressed_size {
       return Err("下载资源超过计划大小".to_string());
     }
-    file.write_all(&chunk).await.map_err(|error| format!("写入资源下载临时文件失败：{error}"))?;
+    writer.write_all(&chunk).await.map_err(|error| format!("写入资源下载临时文件失败：{error}"))?;
     match download.hash_kind {
       PlanDownloadHashKind::XxHash64 => xxhasher.update(&chunk),
       PlanDownloadHashKind::Md5 => md5hasher.update(&chunk),
@@ -214,11 +253,16 @@ async fn download_once(
     }
   };
   if !actual_hash.eq_ignore_ascii_case(&download.expected_hash) {
-    drop(file);
+    drop(writer);
     remove_partial(partial);
     return Err("下载资源 hash 校验失败".to_string());
   }
-  file.sync_all().await.map_err(|error| format!("刷新资源下载临时文件失败：{error}"))?;
+  writer.flush().await.map_err(|error| format!("刷新资源下载缓冲区失败：{error}"))?;
+  writer
+    .get_ref()
+    .sync_all()
+    .await
+    .map_err(|error| format!("刷新资源下载临时文件失败：{error}"))?;
   Ok(())
 }
 
@@ -302,9 +346,30 @@ fn remove_partial(path: &Path) {
   }
 }
 
+fn download_url(download: &PlanDownload) -> Result<reqwest::Url, String> {
+  if download.cache_key.starts_with("sdk-")
+    && download.cache_key.ends_with(".zip")
+    && download.id == download.cache_key
+    && download.url_suffix.is_empty()
+  {
+    let parsed =
+      reqwest::Url::parse(&download.url_prefix).map_err(|_| "安装资源下载地址无效".to_string())?;
+    let host = parsed.host_str().unwrap_or_default();
+    if parsed.scheme() != "https"
+      || !parsed.username().is_empty()
+      || parsed.password().is_some()
+      || !is_official_download_host(host)
+    {
+      return Err("安装资源下载地址主机不受信任".to_string());
+    }
+    return Ok(parsed);
+  }
+  payload_url(&download.url_prefix, &download.url_suffix, &download.id)
+}
+
 #[cfg(test)]
 mod tests {
-  use super::validate_content_range;
+  use super::{download_url, is_official_download_host, validate_content_range};
   use crate::game::planner::{PayloadEncoding, PlanDownload, PlanDownloadHashKind};
   use reqwest::header::HeaderValue;
 
@@ -334,5 +399,47 @@ mod tests {
   fn rejects_mismatched_content_range() {
     let header = HeaderValue::from_static("bytes 0-7/128");
     assert!(validate_content_range(Some(&header), &range_download()).is_err());
+  }
+
+  #[test]
+  fn accepts_official_legacy_download_hosts() {
+    assert!(is_official_download_host("autopatchcn.yuanshen.com"));
+    assert!(is_official_download_host("launcher-webstatic.mihoyo.com"));
+    assert!(!is_official_download_host("example.com"));
+  }
+
+  #[test]
+  fn appends_resource_id_to_sophon_url_without_suffix() {
+    let mut download = range_download();
+    download.id = "0123456789abcdef".to_string();
+    download.cache_key = download.id.clone();
+    download.url_prefix = "https://autopatchcn.yuanshen.com/chunks".to_string();
+
+    assert_eq!(
+      download_url(&download).unwrap().as_str(),
+      "https://autopatchcn.yuanshen.com/chunks/0123456789abcdef"
+    );
+  }
+
+  #[test]
+  fn keeps_sdk_direct_url_without_appending_cache_key() {
+    let download = PlanDownload {
+      id: "sdk-0123456789abcdef0123456789abcdef.zip".to_string(),
+      cache_key: "sdk-0123456789abcdef0123456789abcdef.zip".to_string(),
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: String::new(),
+      compressed_size: 1,
+      decompressed_size: 1,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: "https://launcher-webstatic.mihoyo.com/sdk.zip?signature=test".to_string(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    };
+
+    assert_eq!(
+      download_url(&download).unwrap().as_str(),
+      "https://launcher-webstatic.mihoyo.com/sdk.zip?signature=test"
+    );
   }
 }

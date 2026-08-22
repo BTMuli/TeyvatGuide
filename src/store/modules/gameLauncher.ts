@@ -11,10 +11,16 @@ import {
   applyGamePackageTask,
   cancelGamePackageTask,
   cancelGamePackageVerify,
+  cancelGameInstallDraft,
   clearGamePackageVerify,
+  cancelGameInstall,
+  createGameInstallPlan,
   getGamePackageVerifyStatus,
   listGamePackageTasks,
+  pauseGameInstall,
   recoverGamePackageTask,
+  recoverGameInstall,
+  startGameInstall,
   startGamePackageTask,
   verifyGamePackage,
 } from "@utils/TGGameLauncher.js";
@@ -46,6 +52,48 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
+  }
+
+  function createStartingInstallTask(
+    draft: TGApp.Game.Installation.InstallDraftSummary,
+    plan: TGApp.Game.Package.PlanSummary,
+  ): TGApp.Game.Package.TaskSummary {
+    return {
+      revision: 0,
+      taskId: plan.planId,
+      planId: plan.planId,
+      installationId: draft.installId,
+      target: gameEnum.package.planTarget.INSTALL,
+      sourceScheme: draft.scheme,
+      targetScheme: draft.scheme,
+      installRoot: draft.installRoot,
+      audioLanguages: [...draft.audioLanguages],
+      sourceTag: null,
+      targetTag: plan.targetTag,
+      manifestDigest: plan.manifestDigest,
+      state: gameEnum.package.taskState.QUEUED,
+      downloadedBytes: 0,
+      totalBytes: plan.downloadBytes,
+      completedCount: 0,
+      totalCount: plan.downloadCount,
+      assemblyCompletedCount: 0,
+      assemblyTotalCount: 0,
+      assemblyCompletedBytes: 0,
+      assemblyTotalBytes: 0,
+      currentFile: null,
+      bytesPerSecond: 0,
+      etaSeconds: null,
+      elapsedMs: 0,
+      errorMessage: null,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
+  function removeTaskProjection(task: TGApp.Game.Package.TaskSummary): void {
+    if (tasksByInstallation.value[task.installationId] !== task) return;
+    const next = { ...tasksByInstallation.value };
+    delete next[task.installationId];
+    tasksByInstallation.value = next;
   }
 
   function setPending(key: string, pending: boolean): void {
@@ -132,7 +180,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     setPending(`verify-clear:${installationId}`, true);
     try {
       await clearGamePackageVerify(installationId);
-      dismissVerify(installationId);
     } finally {
       setPending(`verify-clear:${installationId}`, false);
     }
@@ -151,10 +198,95 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  async function startInstall(
+    draft: TGApp.Game.Installation.InstallDraftSummary,
+    plan: TGApp.Game.Package.PlanSummary,
+  ): Promise<TGApp.Game.Package.TaskSummary> {
+    const startingTask = createStartingInstallTask(draft, plan);
+    mergeTask(startingTask);
+    setPending(plan.planId, true);
+    try {
+      const task = await startGameInstall(draft.installId, plan.planId);
+      mergeTask(task);
+      return task;
+    } catch (error) {
+      removeTaskProjection(startingTask);
+      throw error;
+    } finally {
+      setPending(plan.planId, false);
+    }
+  }
+
+  async function resumeInstallDraft(
+    draft: TGApp.Game.Installation.InstallDraftSummary,
+  ): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(draft.draftId, true);
+    try {
+      if (
+        draft.state === gameEnum.installation.draftState.CREATED ||
+        draft.state === gameEnum.installation.draftState.PLANNED
+      ) {
+        const plan = await createGameInstallPlan(draft.installId);
+        const task = await startGameInstall(draft.installId, plan.planId);
+        mergeTask(task);
+        return task;
+      }
+      if (draft.planId === null) throw new Error("安装草稿缺少可恢复的安装计划");
+      const task = await recoverGameInstall(
+        draft.planId,
+        draft.installId,
+        gameEnum.package.recoveryAction.RESUME,
+      );
+      mergeTask(task);
+      return task;
+    } finally {
+      setPending(draft.draftId, false);
+    }
+  }
+
+  async function cancelInstallDraft(
+    draft: TGApp.Game.Installation.InstallDraftSummary,
+  ): Promise<TGApp.Game.Installation.InstallDraftSummary> {
+    setPending(draft.draftId, true);
+    try {
+      return await cancelGameInstallDraft(draft.installId);
+    } finally {
+      setPending(draft.draftId, false);
+    }
+  }
+
   async function cancelTask(taskId: string): Promise<void> {
     setPending(taskId, true);
     try {
       await cancelGamePackageTask(taskId);
+    } finally {
+      setPending(taskId, false);
+    }
+  }
+
+  async function cancelInstall(
+    taskId: string,
+    installId: string,
+  ): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(taskId, true);
+    try {
+      const task = await cancelGameInstall(taskId, installId);
+      mergeTask(task);
+      return task;
+    } finally {
+      setPending(taskId, false);
+    }
+  }
+
+  async function pauseInstall(
+    taskId: string,
+    installId: string,
+  ): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(taskId, true);
+    try {
+      const task = await pauseGameInstall(taskId, installId);
+      mergeTask(task);
+      return task;
     } finally {
       setPending(taskId, false);
     }
@@ -189,6 +321,21 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     setPending(taskId, true);
     try {
       const task = await recoverGamePackageTask(taskId, action);
+      mergeTask(task);
+      return task;
+    } finally {
+      setPending(taskId, false);
+    }
+  }
+
+  async function recoverInstall(
+    taskId: string,
+    installId: string,
+    action: TGApp.Game.Package.RecoveryActionEnum,
+  ): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(taskId, true);
+    try {
+      const task = await recoverGameInstall(taskId, installId, action);
       mergeTask(task);
       return task;
     } finally {
@@ -238,14 +385,20 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     hydrateTasks,
     hydrateVerify,
     startTask,
+    startInstall,
+    resumeInstallDraft,
+    cancelInstallDraft,
     startVerify,
     applyTask,
     applySwitch,
     cancelTask,
+    cancelInstall,
+    pauseInstall,
     cancelVerify,
     clearVerify,
     dismissVerify,
     recoverTask,
+    recoverInstall,
     startListening,
     stopListening,
   };

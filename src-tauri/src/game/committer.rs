@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  assembler::{assemble_manifest_plan, assemble_plan},
+  assembler::{assemble_manifest_plan_with_progress, assemble_plan_with_progress},
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
@@ -21,9 +21,11 @@ use std::{
   io::{Read, Write},
   path::{Path, PathBuf},
   sync::atomic::{AtomicBool, Ordering},
+  time::{Duration, Instant},
 };
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
+const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
 const TRANSACTION_DIRECTORY: &str = ".teyvatguide-update";
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
@@ -113,10 +115,30 @@ where
 
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
+  journal.reset_assembly_progress(plan.assets.len(), incoming_bytes);
   journal.current_file = Some("组装资源文件".to_string());
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
-    assemble_plan(plan, game_root, task_root, canceled)?;
+    {
+      let mut last_emit = Instant::now();
+      let mut on_progress = |progress: &super::assembler::AssemblyProgress| {
+        journal.update_assembly_progress(
+          progress.completed_count,
+          progress.total_count,
+          progress.completed_bytes,
+          progress.total_bytes,
+          progress.current_file.clone(),
+        );
+        if progress.completed_count == progress.total_count
+          || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
+        {
+          journal.touch();
+          emit(&journal);
+          last_emit = Instant::now();
+        }
+      };
+      assemble_plan_with_progress(plan, game_root, task_root, canceled, &mut on_progress)?;
+    }
     check_canceled(canceled)?;
     prepare_transaction(plan, game_root, task_root, journal)?;
     ensure_game_stopped()?;
@@ -208,10 +230,36 @@ where
 
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
+  journal.reset_assembly_progress(repair_plan.assets.len(), incoming_bytes);
   journal.current_file = Some("组装修复文件".to_string());
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
-    assemble_manifest_plan(repair_plan, game_root, task_root, canceled)?;
+    {
+      let mut last_emit = Instant::now();
+      let mut on_progress = |progress: &super::assembler::AssemblyProgress| {
+        journal.update_assembly_progress(
+          progress.completed_count,
+          progress.total_count,
+          progress.completed_bytes,
+          progress.total_bytes,
+          progress.current_file.clone(),
+        );
+        if progress.completed_count == progress.total_count
+          || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
+        {
+          journal.touch();
+          emit(&journal);
+          last_emit = Instant::now();
+        }
+      };
+      assemble_manifest_plan_with_progress(
+        repair_plan,
+        game_root,
+        task_root,
+        canceled,
+        &mut on_progress,
+      )?;
+    }
     check_canceled(canceled)?;
     prepare_repair_transaction(plan, repair_plan, game_root, task_root, journal)?;
     ensure_game_stopped()?;
@@ -631,7 +679,7 @@ fn prepare_transaction(
   let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
   let original =
     fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
-  let target = if plan.source_tag == plan.target_tag {
+  let target = if plan.source_tag.as_deref() == Some(plan.target_tag.as_str()) {
     original.clone()
   } else {
     patch_game_version(&original, &plan.target_tag)?
@@ -1719,7 +1767,7 @@ mod tests {
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
       target: PackagePlanTarget::PreDownload,
-      source_tag: "1.0.0".to_string(),
+      source_tag: Some("1.0.0".to_string()),
       target_tag: "2.0.0".to_string(),
       manifest_digest: "a".repeat(64),
       strategy: PackagePlanStrategy::ManifestDiff,
@@ -1754,6 +1802,7 @@ mod tests {
         PlanFile { name: "modify.bin".to_string(), size: 0, md5: empty_md5.clone() },
         PlanFile { name: "new.bin".to_string(), size: 0, md5: empty_md5 },
       ],
+      install_overlay: None,
       created_at: "2026-08-19T00:00:00Z".to_string(),
     }
   }
