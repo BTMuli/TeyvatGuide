@@ -10,6 +10,7 @@ import {
   applyGamePackageSwitch,
   applyGamePackageTask,
   cancelGamePackageTask,
+  cleanupGamePackageTasks,
   cancelGamePackageVerify,
   cancelGameInstallDraft,
   clearGamePackageVerify,
@@ -346,6 +347,27 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  async function cleanupTasks(): Promise<TGApp.Game.Package.TaskCleanupSummary> {
+    setPending("task-cleanup", true);
+    try {
+      const summary = await cleanupGamePackageTasks();
+      const next = { ...tasksByInstallation.value };
+      for (const [installationId, task] of Object.entries(next)) {
+        if (
+          task.state === gameEnum.package.taskState.COMPLETED ||
+          task.state === gameEnum.package.taskState.FAILED ||
+          task.state === gameEnum.package.taskState.CANCELED
+        ) {
+          delete next[installationId];
+        }
+      }
+      tasksByInstallation.value = next;
+      return summary;
+    } finally {
+      setPending("task-cleanup", false);
+    }
+  }
+
   async function startListening(): Promise<void> {
     if (unlisteners.length > 0) return;
     if (listenerPromise !== null) return await listenerPromise;
@@ -402,6 +424,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     dismissVerify,
     recoverTask,
     recoverInstall,
+    cleanupTasks,
     startListening,
     stopListening,
   };

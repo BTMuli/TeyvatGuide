@@ -1,7 +1,7 @@
 //! 游戏任务共享缓存的占用统计与清理。
 //!
 //! `cache/chunks` 存放 Sophon 分片，`cache/sdks` 存放渠道 SDK 压缩包。
-//! 清理会拒绝进行中或待恢复任务，并保留未完成任务引用的缓存对象。
+//! 清理会按缓存类型保留仍被未完成任务引用的缓存对象。
 //! @since Beta v0.11.5
 
 use super::{
@@ -21,9 +21,12 @@ pub(crate) enum CacheClearTarget {
 
 /// 统计 `cache/chunks` 与 `cache/sdks` 的文件数和占用。
 pub(crate) fn status(task_root: &Path) -> Result<PackageCacheSummary, String> {
-  let protected = journal::protected_cache_files(task_root)?;
-  let chunk = summarize_dir(&task_root.join("cache/chunks"), &protected)?;
-  let sdk = summarize_dir(&task_root.join("cache/sdks"), &protected)?;
+  let chunk_protected =
+    journal::protected_cache_files_for_target(task_root, Some(CacheClearTarget::Chunks))?;
+  let sdk_protected =
+    journal::protected_cache_files_for_target(task_root, Some(CacheClearTarget::Sdk))?;
+  let chunk = summarize_dir(&task_root.join("cache/chunks"), &chunk_protected)?;
+  let sdk = summarize_dir(&task_root.join("cache/sdks"), &sdk_protected)?;
   let total_bytes = chunk.total_bytes.saturating_add(sdk.total_bytes);
   let protected_bytes = chunk.protected_bytes.saturating_add(sdk.protected_bytes);
   Ok(PackageCacheSummary {
@@ -46,10 +49,15 @@ pub(crate) fn clear(
   has_running_tasks: bool,
   target: CacheClearTarget,
 ) -> Result<PackageCacheSummary, String> {
-  if has_running_tasks || is_game_running() || journal::blocks_cache_clear(task_root)? {
-    return Err("存在进行中或待恢复的游戏资源任务，暂时不能清理缓存".to_string());
+  if target != CacheClearTarget::Sdk && is_game_running() {
+    return Err("游戏仍在运行，请先关闭游戏后再清理缓存".to_string());
   }
-  let protected = journal::protected_cache_files(task_root)?;
+  if (target != CacheClearTarget::Sdk && has_running_tasks)
+    || journal::blocks_cache_clear(task_root, target)?
+  {
+    return Err("还有任务正在使用这类缓存，请等待任务完成后再清理".to_string());
+  }
+  let protected = journal::protected_cache_files_for_target(task_root, Some(target))?;
   match target {
     CacheClearTarget::Chunks => {
       clear_dir(&task_root.join("cache/chunks"), &protected)?;
@@ -196,7 +204,7 @@ mod tests {
     }
   }
 
-  fn persist_protected_cache_file(root: &Path, cache_file: &str) {
+  fn persist_protected_cache_file(root: &Path, cache_file: &str, target: PackagePlanTarget) {
     let task_id = Uuid::new_v4().to_string();
     let now = Utc::now().to_rfc3339();
     let journal = TaskJournal {
@@ -205,12 +213,16 @@ mod tests {
       task_id: task_id.clone(),
       plan_id: task_id,
       installation_id: "installation".to_string(),
-      operation: "predownload".to_string(),
+      operation: if target == PackagePlanTarget::Switch {
+        "switch".to_string()
+      } else {
+        "predownload".to_string()
+      },
       source_scheme: SchemeId::CnOfficial,
       target_scheme: SchemeId::CnOfficial,
       install_root: None,
       audio_languages: Vec::new(),
-      target: PackagePlanTarget::PreDownload,
+      target,
       source_tag: Some("1.0.0".to_string()),
       target_tag: "2.0.0".to_string(),
       manifest_digest: "a".repeat(64),
@@ -283,7 +295,7 @@ mod tests {
     fs::write(root.0.join("cache/chunks/keep"), b"keep").unwrap();
     fs::write(root.0.join("cache/sdks/bbbb"), b"sdk!").unwrap();
     fs::write(root.0.join("cache/cache-validation.json"), b"{}").unwrap();
-    persist_protected_cache_file(&root.0, "keep");
+    persist_protected_cache_file(&root.0, "keep", PackagePlanTarget::PreDownload);
 
     clear(&root.0, false, CacheClearTarget::Chunks).unwrap();
 
@@ -301,7 +313,7 @@ mod tests {
     fs::write(root.0.join("cache/chunks/aaaa"), b"chunk").unwrap();
     fs::write(root.0.join("cache/sdks/bbbb"), b"sdk!").unwrap();
     fs::write(root.0.join("cache/sdks/keep"), b"keep").unwrap();
-    persist_protected_cache_file(&root.0, "keep");
+    persist_protected_cache_file(&root.0, "keep", PackagePlanTarget::Switch);
 
     clear(&root.0, false, CacheClearTarget::Sdk).unwrap();
 
@@ -375,7 +387,7 @@ mod tests {
     journal::persist(&root.0, &journal).unwrap();
     assert_eq!(
       clear(&root.0, false, CacheClearTarget::All).unwrap_err(),
-      "存在进行中或待恢复的游戏资源任务，暂时不能清理缓存"
+      "还有任务正在使用这类缓存，请等待任务完成后再清理"
     );
   }
 
@@ -387,7 +399,7 @@ mod tests {
 
     let error = clear(&root.0, true, CacheClearTarget::Chunks).unwrap_err();
 
-    assert_eq!(error, "存在进行中或待恢复的游戏资源任务，暂时不能清理缓存");
+    assert_eq!(error, "还有任务正在使用这类缓存，请等待任务完成后再清理");
     assert!(root.0.join("cache/chunks/aaaa").exists());
   }
 }

@@ -9,8 +9,8 @@ use super::{
   model::{
     GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanProgress,
     PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction, PackageSnapshot,
-    PackageSwitchSummary, PackageTaskOptions, PackageTaskState, PackageTaskSummary,
-    PackageVerifySummary, SchemeId,
+    PackageSwitchSummary, PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskState,
+    PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::GamePackageManager,
   planner::{
@@ -20,7 +20,7 @@ use super::{
   },
   switch::{self, create_and_persist_switch_plan},
 };
-use chrono::Utc;
+use chrono::{Duration as ChronoDuration, Utc};
 use sqlx::Row;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager, ipc::Channel};
@@ -702,7 +702,20 @@ pub async fn game_package_task_list(
   manager: tauri::State<'_, GamePackageManager>,
   installation_id: Option<String>,
 ) -> Result<Vec<PackageTaskSummary>, String> {
-  manager.list(&game_task_root(&app_handle)?, installation_id.as_deref()).await
+  let task_root = game_task_root(&app_handle)?;
+  manager
+    .cleanup_tasks(&task_root, Some(ChronoDuration::days(7)))
+    .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
+  manager.list(&task_root, installation_id.as_deref()).await
+}
+
+/// 清理所有已结束且不再运行的资源任务日志，不触碰缓存内容或未完成任务。
+#[tauri::command]
+pub fn game_package_task_cleanup(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+) -> Result<PackageTaskCleanupSummary, String> {
+  manager.cleanup_tasks(&game_task_root(&app_handle)?, None)
 }
 
 /// 恢复中断的下载/提交，或安全回滚任务拥有的临时文件与游戏备份。

@@ -19,9 +19,7 @@
       </div>
       <div class="cache-hints">
         <p class="cache-hint">更新、预下载与换服会先下载到这里，不占用游戏安装盘。</p>
-        <p class="cache-hint cache-hint-act">
-          进行中或待恢复任务会阻止清理；未应用的预下载分片会保留。
-        </p>
+        <p class="cache-hint cache-hint-act">SDK 可单独清理；任务仍使用的缓存会自动保留。</p>
       </div>
     </div>
 
@@ -29,6 +27,7 @@
       v-if="errorMessage !== null"
       :text="errorMessage"
       density="compact"
+      title="缓存操作未完成"
       type="warning"
       variant="tonal"
     />
@@ -154,8 +153,9 @@ async function refreshStatus(notify: boolean = false, silent: boolean = false): 
     }
   } catch (error) {
     if (silent) return;
-    errorMessage.value = `读取游戏缓存失败：${error}`;
-    if (notify) showSnackbar.error(`读取游戏缓存失败：${error}`);
+    const message = cacheErrorText(error, "读取游戏缓存");
+    errorMessage.value = message;
+    if (notify) showSnackbar.error(message);
   } finally {
     statusBusy = false;
     if (!silent) loading.value = false;
@@ -188,9 +188,18 @@ function isClearDisabled(target: CacheClearTarget): boolean {
 
 function cacheClearText(target: CacheClearTarget, occupied: string): string {
   if (target === "all") {
-    return `当前可回收缓存占用 ${occupied}。将删除未被未完成任务引用的资源分片与渠道 SDK 缓存，不影响游戏目录。`;
+    return `当前可回收缓存占用 ${occupied}。将清理未被任务使用的资源分片与渠道 SDK，不影响游戏目录。`;
   }
-  return `当前可回收${cacheClearLabel(target)}占用 ${occupied}。将删除未被未完成任务引用的${cacheClearLabel(target)}缓存，不影响游戏目录。`;
+  return `当前可回收${cacheClearLabel(target)}占用 ${occupied}。仍被任务使用的文件会保留，不影响游戏目录。`;
+}
+
+function cacheErrorText(error: unknown, action: string): string {
+  const message = String(error);
+  if (message.includes("游戏仍在运行")) return "请先关闭游戏，再清理缓存。";
+  if (message.includes("还有任务正在使用")) {
+    return "还有任务正在使用这类缓存，请等待任务完成后再试。";
+  }
+  return `${action}失败，请稍后重试。`;
 }
 
 async function clearCache(target: CacheClearTarget): Promise<void> {
@@ -211,8 +220,9 @@ async function clearCache(target: CacheClearTarget): Promise<void> {
     summary.value = await clearGamePackageCache(target);
     showSnackbar.success(`${label}已清理，释放 ${occupied}`);
   } catch (error) {
-    errorMessage.value = `清理${label}失败：${error}`;
-    showSnackbar.warn(`清理${label}失败：${error}`);
+    const message = cacheErrorText(error, `清理${label}`);
+    errorMessage.value = message;
+    showSnackbar.warn(message);
   } finally {
     clearingTarget.value = null;
     if (statusQueued) {

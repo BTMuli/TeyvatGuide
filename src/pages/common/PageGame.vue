@@ -18,6 +18,17 @@
         安装新客户端
       </v-btn>
       <v-btn
+        :disabled="taskCleanupPending"
+        :loading="taskCleanupPending"
+        aria-label="清理已结束任务"
+        class="game-task-clean-btn"
+        icon="mdi-broom"
+        size="small"
+        title="清理已结束任务"
+        variant="text"
+        @click="handleTaskCleanup"
+      />
+      <v-btn
         :disabled="launching"
         :loading="launching"
         :title="launchTitle"
@@ -374,6 +385,18 @@ const installTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
       task.state !== gameEnum.package.taskState.CANCELED,
   );
 });
+const taskCleanupCount = computed<number>(() => {
+  return Object.values(taskStore.tasksByInstallation).filter((task) => {
+    return (
+      task.state === gameEnum.package.taskState.COMPLETED ||
+      task.state === gameEnum.package.taskState.FAILED ||
+      task.state === gameEnum.package.taskState.CANCELED
+    );
+  }).length;
+});
+const taskCleanupPending = computed<boolean>(
+  () => taskStore.pendingActions["task-cleanup"] === true,
+);
 const visibleInstallDrafts = computed<Array<TGApp.Game.Installation.InstallDraftSummary>>(() => {
   const taskInstallationIds = new Set(installTasks.value.map((task) => task.installationId));
   return installDrafts.value.filter((draft) => !taskInstallationIds.has(draft.installId));
@@ -685,6 +708,29 @@ async function handleInstallTaskRecover(
   }
 }
 
+async function handleTaskCleanup(): Promise<void> {
+  const confirmed = await showDialog.checkF({
+    title: "清理已结束任务？",
+    text:
+      taskCleanupCount.value > 0
+        ? `将移除已结束任务记录（当前页面可见 ${taskCleanupCount.value} 条），不会删除游戏文件或共享缓存。`
+        : "将移除所有已结束任务记录，不会删除游戏文件或共享缓存。",
+    confirmLabel: "清理记录",
+    cancelLabel: "取消",
+  });
+  if (confirmed !== true) return;
+  try {
+    const summary = await taskStore.cleanupTasks();
+    showSnackbar.success(
+      summary.removedCount > 0
+        ? `已清理 ${summary.removedCount} 条任务记录，释放 ${fmtUtil.size(summary.removedBytes)}`
+        : "没有可清理的已结束任务",
+    );
+  } catch {
+    showSnackbar.error("清理任务记录失败，请稍后重试");
+  }
+}
+
 function handleInstallTaskConfigure(task: TGApp.Game.Package.TaskSummary): void {
   installInitialConfig.value = {
     scheme: task.targetScheme,
@@ -762,6 +808,10 @@ onUnmounted(() => {
 
 .game-install-btn {
   margin-right: 8px;
+}
+
+.game-task-clean-btn {
+  margin-right: 4px;
 }
 
 .game-page {

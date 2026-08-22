@@ -216,4 +216,10 @@ declare namespace TGApp.Game.Package {
     totalBytes: number;
     reclaimableBytes: number;
   };
+
+  /** 清理已结束游戏资源任务后的统计。 */
+  type TaskCleanupSummary = {
+    removedCount: number;
+    removedBytes: number;
+  };
 }

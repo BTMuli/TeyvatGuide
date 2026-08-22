@@ -34,6 +34,7 @@
       :facts
       :indeterminate="progressIndeterminate"
       :percent="progressPercent"
+      :progressRows
       :showBar="showProgressBar"
       :tone="captionTone"
     >
@@ -185,6 +186,45 @@ const progressPercent = computed<number>(() => {
   const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
   return Math.min(100, (completedWork / totalWork) * 100);
 });
+const progressRows = computed<
+  Array<{
+    label: string;
+    percent: number;
+    indeterminate?: boolean;
+    details: Array<string>;
+  }>
+>(() => [
+  {
+    label: "下载",
+    percent: phasePercent(task.downloadedBytes, task.totalBytes),
+    indeterminate: task.totalBytes === 0 && active.value,
+    details: [
+      `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
+      `文件 ${task.completedCount} / ${task.totalCount}`,
+    ],
+  },
+  {
+    label: "组装",
+    percent: phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes),
+    indeterminate: task.assemblyTotalBytes === 0 && active.value,
+    details:
+      task.assemblyTotalBytes === 0
+        ? ["无需组装"]
+        : [
+            `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+            `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
+          ],
+  },
+  {
+    label: "总进度",
+    percent: progressPercent.value,
+    indeterminate: progressIndeterminate.value,
+    details: [
+      `${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(task.totalBytes + task.assemblyTotalBytes)}`,
+      `下载 ${phasePercent(task.downloadedBytes, task.totalBytes).toFixed(0)}% · 组装 ${phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes).toFixed(0)}%`,
+    ],
+  },
+]);
 const progressIndeterminate = computed<boolean>(() => {
   return task.totalBytes + task.assemblyTotalBytes === 0 && active.value;
 });
@@ -268,6 +308,11 @@ function formatBytes(bytes: number): string {
     unit = candidate;
   }
   return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
+}
+
+function phasePercent(completed: number, total: number): number {
+  if (total === 0) return 100;
+  return Math.min(100, (completed / total) * 100);
 }
 
 function formatDuration(seconds: number): string {

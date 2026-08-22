@@ -7,13 +7,31 @@
       </div>
     </div>
     <v-progress-linear
-      v-if="showBar"
+      v-if="showBar && progressRows.length === 0"
       :indeterminate
       :model-value="percent"
       color="var(--tgc-od-orange)"
       height="8"
       rounded
     />
+    <div v-if="showBar && progressRows.length > 0" class="progress-rows">
+      <div v-for="row in progressRows" :key="row.label" class="progress-row">
+        <div class="progress-row-head">
+          <span>{{ row.label }}</span>
+          <strong>{{ row.percent.toFixed(0) }}%</strong>
+        </div>
+        <v-progress-linear
+          :indeterminate="row.indeterminate"
+          :model-value="row.percent"
+          color="var(--tgc-od-orange)"
+          height="8"
+          rounded
+        />
+        <div class="progress-row-facts">
+          <span v-for="detail in row.details" :key="detail">{{ detail }}</span>
+        </div>
+      </div>
+    </div>
     <div v-if="facts.length > 0" class="progress-facts" aria-live="polite">
       <span v-for="fact in facts" :key="fact">{{ fact }}</span>
     </div>
@@ -36,6 +54,12 @@ type Props = {
   facts?: Array<string>;
   indeterminate?: boolean;
   percent?: number;
+  progressRows?: Array<{
+    label: string;
+    percent: number;
+    indeterminate?: boolean;
+    details: Array<string>;
+  }>;
   showBar?: boolean;
   tone?: "err" | "ok" | "warn" | "";
 };
@@ -48,6 +72,7 @@ const {
   facts = [],
   indeterminate = false,
   percent = 0,
+  progressRows = [],
   showBar = true,
   tone = "",
 } = defineProps<Props>();
@@ -107,6 +132,39 @@ defineSlots<{
   font-size: 12px;
   gap: 8px 16px;
   line-height: 16px;
+}
+
+.progress-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.progress-row {
+  display: grid;
+  gap: 4px;
+}
+
+.progress-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--box-text-2);
+  font-size: 12px;
+  line-height: 16px;
+
+  strong {
+    color: var(--common-text-title);
+    font-weight: normal;
+  }
+}
+
+.progress-row-facts {
+  display: flex;
+  flex-wrap: wrap;
+  color: var(--box-text-2);
+  font-size: 11px;
+  gap: 4px 12px;
+  line-height: 15px;
 }
 
 .progress-current {

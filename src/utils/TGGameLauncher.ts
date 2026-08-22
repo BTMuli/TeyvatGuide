@@ -379,6 +379,14 @@ export async function listGamePackageTasks(
 }
 
 /**
+ * 清理所有已结束的资源任务日志；不会删除共享缓存或未完成任务。
+ * @since Beta v0.11.5
+ */
+export async function cleanupGamePackageTasks(): Promise<TGApp.Game.Package.TaskCleanupSummary> {
+  return await invoke<TGApp.Game.Package.TaskCleanupSummary>("game_package_task_cleanup");
+}
+
+/**
  * 恢复中断下载或回滚任务私有临时文件。
  * @since Beta v0.11.5
  * @param taskId - 资源任务 ID

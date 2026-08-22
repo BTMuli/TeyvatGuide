@@ -7,7 +7,7 @@ use super::{
   planner::PersistedPlan,
   scheme::scheme_id_key,
 };
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
   collections::HashSet,
@@ -419,18 +419,30 @@ pub(crate) fn has_incomplete_tasks(
   }))
 }
 
-/// 缓存清理是否会被进行中、待恢复或待修复任务阻止。
-pub(crate) fn blocks_cache_clear(task_root: &Path) -> Result<bool, String> {
+/// 按缓存类型判断是否存在仍可能使用目标缓存的任务。
+pub(crate) fn blocks_cache_clear(
+  task_root: &Path,
+  target: super::cache::CacheClearTarget,
+) -> Result<bool, String> {
   Ok(list(task_root, None)?.iter().any(|journal| {
-    journal.state.is_active()
-      || journal.state.requires_recovery()
-      || journal.state == PackageTaskState::Paused
-      || journal.state == PackageTaskState::RepairRequired
+    let relevant = match target {
+      super::cache::CacheClearTarget::Sdk => journal.target == PackagePlanTarget::Switch,
+      super::cache::CacheClearTarget::Chunks => journal.target != PackagePlanTarget::Switch,
+      super::cache::CacheClearTarget::All => true,
+    };
+    relevant
+      && (journal.state.is_active()
+        || journal.state.requires_recovery()
+        || journal.state == PackageTaskState::Paused
+        || journal.state == PackageTaskState::RepairRequired)
   }))
 }
 
 /// 尚未结束的任务声明拥有、清理时必须保留的缓存键。
-pub(crate) fn protected_cache_files(task_root: &Path) -> Result<HashSet<String>, String> {
+pub(crate) fn protected_cache_files_for_target(
+  task_root: &Path,
+  target: Option<super::cache::CacheClearTarget>,
+) -> Result<HashSet<String>, String> {
   let mut keys = HashSet::new();
   for journal in list(task_root, None)? {
     if matches!(
@@ -439,9 +451,74 @@ pub(crate) fn protected_cache_files(task_root: &Path) -> Result<HashSet<String>,
     ) {
       continue;
     }
-    keys.extend(journal.owned_cache_files.iter().cloned());
+    match target {
+      Some(super::cache::CacheClearTarget::Sdk) if journal.target == PackagePlanTarget::Switch => {
+        keys.extend(journal.owned_cache_files.iter().cloned());
+      }
+      Some(super::cache::CacheClearTarget::Chunks)
+        if journal.target == PackagePlanTarget::Switch => {}
+      _ => keys.extend(journal.owned_cache_files.iter().cloned()),
+    }
   }
   Ok(keys)
+}
+
+pub(crate) fn cleanup_terminal_tasks(
+  task_root: &Path,
+  active_ids: &HashSet<String>,
+  max_age: Option<Duration>,
+) -> Result<super::model::PackageTaskCleanupSummary, String> {
+  let now = Utc::now();
+  let mut removed_count = 0;
+  let mut removed_bytes = 0_u64;
+  for journal in list(task_root, None)? {
+    if active_ids.contains(&journal.task_id)
+      || !matches!(
+        journal.state,
+        PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+      )
+      || max_age.is_some_and(|age| {
+        DateTime::parse_from_rfc3339(&journal.updated_at)
+          .map(|updated| now.signed_duration_since(updated.with_timezone(&Utc)) < age)
+          .unwrap_or(true)
+      })
+    {
+      continue;
+    }
+    let directory = task_root.join("tasks").join(&journal.task_id);
+    let metadata = fs::symlink_metadata(&directory)
+      .map_err(|error| format!("读取游戏资源任务目录失败：{error}"))?;
+    if metadata.file_type().is_symlink() || !metadata.is_dir() {
+      continue;
+    }
+    removed_bytes = removed_bytes.saturating_add(directory_bytes(&directory)?);
+    fs::remove_dir_all(&directory).map_err(|error| format!("清理过期游戏资源任务失败：{error}"))?;
+    removed_count += 1;
+  }
+  Ok(super::model::PackageTaskCleanupSummary { removed_count, removed_bytes })
+}
+
+fn directory_bytes(path: &Path) -> Result<u64, String> {
+  let mut total = 0_u64;
+  let mut pending = vec![path.to_path_buf()];
+  while let Some(directory) = pending.pop() {
+    for entry in
+      fs::read_dir(&directory).map_err(|error| format!("读取游戏资源任务目录失败：{error}"))?
+    {
+      let entry = entry.map_err(|error| format!("读取游戏资源任务文件失败：{error}"))?;
+      let metadata = fs::symlink_metadata(entry.path())
+        .map_err(|error| format!("读取游戏资源任务文件失败：{error}"))?;
+      if metadata.file_type().is_symlink() {
+        continue;
+      }
+      if metadata.is_dir() {
+        pending.push(entry.path());
+      } else if metadata.is_file() {
+        total = total.saturating_add(metadata.len());
+      }
+    }
+  }
+  Ok(total)
 }
 
 fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), String> {
@@ -608,10 +685,10 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{TaskJournal, load, persist};
+  use super::{TaskJournal, cleanup_terminal_tasks, load, persist};
   use crate::game::model::{PackagePlanTarget, PackageTaskState, SchemeId};
   use chrono::Utc;
-  use std::fs;
+  use std::{collections::HashSet, fs};
   use uuid::Uuid;
 
   fn journal(task_id: &str) -> TaskJournal {
@@ -670,6 +747,35 @@ mod tests {
     let loaded = load(&root.join("tasks").join(&task_id).join("journal.json")).unwrap();
     assert_eq!(loaded.state, PackageTaskState::Downloading);
     assert_eq!(loaded.revision, 2);
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn cleans_only_terminal_tasks_outside_active_set() {
+    let root =
+      std::env::temp_dir().join(format!("teyvat-guide-journal-cleanup-{}", Uuid::new_v4()));
+    let removable_id = Uuid::new_v4().to_string();
+    let retained_id = Uuid::new_v4().to_string();
+    let active_id = Uuid::new_v4().to_string();
+    let mut removable = journal(&removable_id);
+    removable.state = PackageTaskState::Completed;
+    removable.updated_at = "2020-01-01T00:00:00Z".to_string();
+    persist(&root, &removable).unwrap();
+    fs::write(root.join("tasks").join(&removable_id).join("plan.json"), b"plan").unwrap();
+
+    let mut retained = journal(&retained_id);
+    retained.state = PackageTaskState::Failed;
+    persist(&root, &retained).unwrap();
+    let mut active = journal(&active_id);
+    active.state = PackageTaskState::Completed;
+    persist(&root, &active).unwrap();
+
+    let summary = cleanup_terminal_tasks(&root, &HashSet::from([active_id]), None).unwrap();
+    assert_eq!(summary.removed_count, 2);
+    assert!(summary.removed_bytes >= 4);
+    assert!(!root.join("tasks").join(&removable_id).exists());
+    assert!(!root.join("tasks").join(&retained_id).exists());
+    assert!(root.join("tasks").join(&active.task_id).exists());
     fs::remove_dir_all(root).unwrap();
   }
 

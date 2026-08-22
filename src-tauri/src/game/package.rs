@@ -8,8 +8,8 @@ use super::{
   installer,
   journal::{self, TaskJournal},
   model::{
-    GameInstallation, PackagePlanStrategy, PackagePlanTarget, PackageTaskOptions, PackageTaskState,
-    PackageTaskSummary, PackageVerifySummary,
+    GameInstallation, PackagePlanStrategy, PackagePlanTarget, PackageTaskCleanupSummary,
+    PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary,
   },
   planner::{
     PersistedPlan, cached_chunk_matches, flush_cache_validation_index,
@@ -18,6 +18,7 @@ use super::{
   switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
 };
+use chrono::Duration as ChronoDuration;
 use futures_util::{StreamExt, stream};
 use std::{
   collections::{HashMap, HashSet},
@@ -811,6 +812,18 @@ impl GamePackageManager {
     let mut summaries = summaries.into_values().collect::<Vec<_>>();
     summaries.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
     Ok(summaries)
+  }
+
+  pub(crate) fn cleanup_tasks(
+    &self,
+    task_root: &Path,
+    max_age: Option<ChronoDuration>,
+  ) -> Result<PackageTaskCleanupSummary, String> {
+    let active_ids = {
+      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      active.by_task.keys().cloned().collect::<HashSet<_>>()
+    };
+    journal::cleanup_terminal_tasks(task_root, &active_ids, max_age)
   }
 
   pub(crate) fn rollback_download(

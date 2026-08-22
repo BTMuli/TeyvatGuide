@@ -274,6 +274,14 @@ pub struct PackageTaskSummary {
   pub updated_at: String,
 }
 
+/// 清理安全终态资源任务记录后的结果。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageTaskCleanupSummary {
+  pub removed_count: usize,
+  pub removed_bytes: u64,
+}
+
 /// 启动资源任务时允许覆盖的安全下载参数。
 #[derive(Clone, Copy, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
