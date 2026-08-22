@@ -15,14 +15,14 @@
       :style="{ '--ucls-marker-position': getMarkerPosition(current) }"
       class="ucls-marker current"
     >
-      {{ currentEditable ? "起始" : "当前" }} Lv.{{ current }}
+      {{ currentEditable ? "起始" : "当前" }} {{ formatValue(current) }}
     </span>
     <span
       :class="{ 'at-start': model <= min, 'at-end': model >= max, single }"
       :style="{ '--ucls-marker-position': getMarkerPosition(model) }"
       class="ucls-marker target"
     >
-      {{ single ? "等级" : "目标" }} Lv.{{ model }}
+      {{ targetLabel ?? (single ? "等级" : "目标") }} {{ formatValue(model) }}
     </span>
     <div class="ucls-track" aria-hidden="true">
       <span
@@ -51,6 +51,8 @@
       density="compact"
       hide-details
       step="1"
+      @end="emits('end')"
+      @start="emits('start')"
       @update:model-value="updateRange"
     />
     <v-slider
@@ -59,13 +61,15 @@
       :max
       :min
       :model-value="model"
-      :aria-label="single ? '等级' : '目标等级'"
+      :aria-label="targetLabel ?? (single ? '等级' : '目标等级')"
       :color="single ? 'var(--tgc-od-blue)' : 'var(--tgc-od-green)'"
       class="ucls-control"
       data-html2canvas-ignore="true"
       density="compact"
       hide-details
       step="1"
+      @end="emits('end')"
+      @start="emits('start')"
       @update:model-value="updateValue"
     />
   </div>
@@ -83,6 +87,17 @@ type UcLevelSliderProps = {
   compact?: boolean;
   single?: boolean;
   levels?: Array<number>;
+  /** 目标值标记文案；默认按模式显示“等级”或“目标” */
+  targetLabel?: string;
+  /** 数值前缀 */
+  valuePrefix?: string;
+  /** 数值后缀 */
+  valueSuffix?: string;
+};
+
+type UcLevelSliderEmits = {
+  end: [];
+  start: [];
 };
 
 const props = withDefaults(defineProps<UcLevelSliderProps>(), {
@@ -91,8 +106,11 @@ const props = withDefaults(defineProps<UcLevelSliderProps>(), {
   disabled: false,
   compact: false,
   single: false,
+  valuePrefix: "Lv.",
+  valueSuffix: "",
 });
 
+const emits = defineEmits<UcLevelSliderEmits>();
 const current = defineModel<number>("current", { required: true });
 const model = defineModel<number>({ required: true });
 
@@ -139,6 +157,10 @@ function getMarkerPosition(value: number): string {
   if (range <= 0) return "0%";
   const normalized = Math.min(Math.max(value, props.min), props.max);
   return `${((normalized - props.min) / range) * 100}%`;
+}
+
+function formatValue(value: number): string {
+  return `${props.valuePrefix}${value}${props.valueSuffix}`;
 }
 </script>
 

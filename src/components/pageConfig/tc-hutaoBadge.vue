@@ -13,11 +13,11 @@
       <div v-if="isLogin && userInfo" class="info-list">
         <div class="info-item">
           <span>CDN到期时间</span>
-          <span>{{ timeStr2str(userInfo.CdnExpireAt) }}</span>
+          <span>{{ fmtUtil.timeStr2str(userInfo.CdnExpireAt) }}</span>
         </div>
         <div class="info-item">
           <span>祈愿到期时间</span>
-          <span>{{ timeStr2str(userInfo.GachaLogExpireAt) }}</span>
+          <span>{{ fmtUtil.timeStr2str(userInfo.GachaLogExpireAt) }}</span>
         </div>
       </div>
       <span v-else>未获取到用户信息</span>
@@ -44,7 +44,7 @@ import showDialog from "@comp/func/dialog.js";
 import TcoHutaoVerify from "@comp/pageConfig/tco-hutaoVerify.vue";
 import useHutaoStore from "@store/hutao.js";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { timeStr2str } from "@utils/toolFunc.js";
+import fmtUtil from "@utils/fmtUtil.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
 

@@ -1,10 +1,10 @@
-<!-- 设置图片质量浮窗 -->
+<!-- 设置分享阈值浮窗 -->
 <template>
   <TopOverlay
     v-model="model"
     :outerClose="clickOuter"
     blurVal="10px"
-    closeAriaLabel="关闭图片质量调整"
+    closeAriaLabel="关闭分享设置"
     contentMaxHeight="none"
     panelWidth="520px"
     :showShare="false"
@@ -12,36 +12,35 @@
     @close="onCancel"
   >
     <template #header>
-      <div class="toi-heading">
-        <h2 :id="titleId">调整图片质量</h2>
-        <p>设置图片质量，数值越大图片越清晰，但也会占用更多空间</p>
+      <div class="tcss-heading">
+        <h2 :id="titleId">分享设置</h2>
+        <p>设置为 0 时始终保存为文件，否则超过阈值后保存为文件</p>
       </div>
     </template>
 
-    <div class="toi-controls">
-      <UcLevelSlider
-        v-model="quality"
-        :current="QUALITY_MIN"
-        :levels="QUALITY_LEVELS"
-        :max="QUALITY_MAX"
-        :min="QUALITY_MIN"
-        class="toi-level-slider"
-        compact
-        single
-        targetLabel="质量"
-        valuePrefix=""
-        valueSuffix="%"
+    <div class="tcss-controls">
+      <v-slider
+        v-model="threshold"
+        :max="SHARE_MAX"
+        :min="SHARE_MIN"
+        :step="1"
+        class="tcss-slider"
+        color="var(--tgc-od-blue)"
+        hide-details
+        thumb-color="var(--tgc-od-red)"
+        thumb-label="always"
         @end="handleSliderEnd"
         @start="clickOuter = false"
       />
       <v-number-input
-        v-model="quality"
-        :max="QUALITY_MAX"
-        :min="QUALITY_SELECTABLE_MIN"
+        v-model="threshold"
+        :max="SHARE_MAX"
+        :min="SHARE_MIN"
         :step="1"
-        class="toi-input"
+        class="tcss-input"
         control-variant="split"
         density="compact"
+        suffix="MB"
         type="number"
         variant="outlined"
         width="128px"
@@ -49,53 +48,67 @@
     </div>
 
     <template #footer>
-      <span class="toi-hint">可调范围 5%–100%</span>
-      <div class="toi-actions">
-        <v-btn class="toi-cancel" variant="text" @click="onCancel">取消</v-btn>
-        <v-btn class="toi-confirm" prepend-icon="mdi-check" variant="flat" @click="onConfirm">
+      <span class="tcss-hint">可设置范围 0–255 MB</span>
+      <div class="tcss-actions">
+        <v-btn class="tcss-cancel" variant="text" @click="onCancel">取消</v-btn>
+        <v-btn class="tcss-confirm" prepend-icon="mdi-check" variant="flat" @click="onConfirm">
           确定
         </v-btn>
       </div>
     </template>
   </TopOverlay>
 </template>
+
 <script lang="ts" setup>
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
-import UcLevelSlider from "@comp/userCalc/uc-level-slider.vue";
 import useAppStore from "@store/app.js";
 import { storeToRefs } from "pinia";
-import { ref, useId } from "vue";
+import { ref, useId, watch } from "vue";
 
-const QUALITY_MIN = 0;
-const QUALITY_SELECTABLE_MIN = 5;
-const QUALITY_MAX = 100;
-const QUALITY_LEVELS = Array.from(
-  { length: QUALITY_MAX - QUALITY_SELECTABLE_MIN + 1 },
-  (_, index) => QUALITY_SELECTABLE_MIN + index,
-);
+const SHARE_MIN = 0;
+const SHARE_MAX = 255;
 
-const { imageQualityPercent } = storeToRefs(useAppStore());
+const { shareDefaultFile } = storeToRefs(useAppStore());
 
 const model = defineModel<boolean>({ default: false });
-const quality = ref<number>(imageQualityPercent.value);
+const threshold = ref<number>(shareDefaultFile.value);
 const clickOuter = ref<boolean>(true);
 const titleId = useId();
 
+watch(model, (visible) => {
+  clickOuter.value = true;
+  if (visible) threshold.value = shareDefaultFile.value;
+});
+
 function onCancel(): void {
   model.value = false;
-  quality.value = imageQualityPercent.value;
+  threshold.value = shareDefaultFile.value;
+  showSnackbar.cancel("已取消修改分享设置");
 }
 
 function onConfirm(): void {
-  if (quality.value === imageQualityPercent.value) {
-    model.value = false;
-    showSnackbar.info(`图片质量未修改`);
+  const value = threshold.value;
+  if (value === null || !Number.isFinite(value)) {
+    showSnackbar.error("阈值不能为空!");
     return;
   }
-  imageQualityPercent.value = quality.value;
+  if (value < SHARE_MIN || value !== Math.round(value)) {
+    showSnackbar.warn("请输入非负整数");
+    return;
+  }
+  if (value > SHARE_MAX) {
+    showSnackbar.error(`阈值不能大于${SHARE_MAX}MB!`);
+    return;
+  }
+  if (value === shareDefaultFile.value) {
+    model.value = false;
+    showSnackbar.cancel("未修改分享设置");
+    return;
+  }
+  shareDefaultFile.value = value;
   model.value = false;
-  showSnackbar.success(`图片质量已修改为 ${quality.value}%`);
+  showSnackbar.success(`成功修改分享设置!新阈值为${value}MB`);
 }
 
 async function handleSliderEnd(): Promise<void> {
@@ -103,8 +116,9 @@ async function handleSliderEnd(): Promise<void> {
   clickOuter.value = true;
 }
 </script>
+
 <style lang="scss" scoped>
-.toi-heading {
+.tcss-heading {
   display: flex;
   min-width: 0;
   flex: 1;
@@ -128,7 +142,7 @@ async function handleSliderEnd(): Promise<void> {
   }
 }
 
-.toi-controls {
+.tcss-controls {
   display: flex;
   width: 100%;
   align-items: center;
@@ -136,12 +150,12 @@ async function handleSliderEnd(): Promise<void> {
   gap: 20px;
 }
 
-.toi-level-slider {
+.tcss-slider {
   min-width: 0;
   flex: 1;
 }
 
-.toi-input {
+.tcss-input {
   max-width: 128px;
   flex: 0 0 128px;
 
@@ -160,31 +174,31 @@ async function handleSliderEnd(): Promise<void> {
   }
 }
 
-.toi-hint {
+.tcss-hint {
   color: var(--box-text-4);
   font-size: 12px;
   line-height: 16px;
   opacity: 0.72;
 }
 
-.toi-actions {
+.tcss-actions {
   display: flex;
   flex-shrink: 0;
   align-items: center;
   column-gap: 8px;
 }
 
-.toi-cancel,
-.toi-confirm {
+.tcss-cancel,
+.tcss-confirm {
   border-radius: 4px;
   font-family: var(--font-text);
 }
 
-.toi-cancel {
+.tcss-cancel {
   color: var(--box-text-2);
 }
 
-.toi-confirm {
+.tcss-confirm {
   background: var(--tgc-btn-1);
   color: var(--btn-text);
 }
