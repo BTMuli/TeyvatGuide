@@ -58,6 +58,7 @@ pub(crate) fn assemble_plan(
 }
 
 /// Assemble a plan and report verified asset-level progress to the caller.
+#[cfg(test)]
 pub(crate) fn assemble_plan_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -219,6 +220,31 @@ pub(crate) fn assemble_manifest_plan_with_progress<F>(
 where
   F: FnMut(&AssemblyProgress),
 {
+  check_canceled(canceled)?;
+  let staging_root =
+    prepare_guarded_manifest_directory(task_root, &format!("tasks/{}/staging", plan.plan_id))?;
+  assemble_manifest_plan_to_root_with_progress(
+    plan,
+    game_root,
+    task_root,
+    &staging_root,
+    canceled,
+    &mut progress,
+  )
+}
+
+/// Assemble a manifest-diff plan into a caller-owned guarded output directory.
+pub(crate) fn assemble_manifest_plan_to_root_with_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
   if plan.strategy != PackagePlanStrategy::ManifestDiff {
     return Err("当前组装器只支持 manifest-diff 资源计划".to_string());
   }
@@ -228,8 +254,6 @@ where
   }
 
   let cache_root = task_root.join("cache").join("chunks");
-  let staging_root =
-    prepare_guarded_manifest_directory(task_root, &format!("tasks/{}/staging", plan.plan_id))?;
 
   let downloads = plan
     .downloads
@@ -241,7 +265,7 @@ where
   for asset in &plan.assets {
     check_canceled(canceled)?;
     validate_asset_layout(asset, &downloads)?;
-    assemble_asset(asset, &downloads, game_root, &cache_root, &staging_root, canceled)?;
+    assemble_asset(asset, &downloads, game_root, &cache_root, output_root, canceled)?;
     summary.asset_count += 1;
     summary.assembled_bytes = summary
       .assembled_bytes
@@ -259,10 +283,36 @@ where
   Ok(summary)
 }
 
+#[cfg(test)]
 fn assemble_patch_plan_with_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
   task_root: &Path,
+  canceled: &AtomicBool,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  check_canceled(canceled)?;
+  let staging_root =
+    prepare_guarded_manifest_directory(task_root, &format!("tasks/{}/staging", plan.plan_id))?;
+  assemble_patch_plan_to_root_with_progress(
+    plan,
+    game_root,
+    task_root,
+    &staging_root,
+    canceled,
+    &mut progress,
+  )
+}
+
+/// Assemble a patch plan into a caller-owned guarded output directory.
+pub(crate) fn assemble_patch_plan_to_root_with_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
   canceled: &AtomicBool,
   mut progress: F,
 ) -> Result<AssemblySummary, String>
@@ -277,8 +327,6 @@ where
     return Err("资源计划缺少载荷编码；请重新验证远端清单".to_string());
   }
   let cache_root = task_root.join("cache").join("chunks");
-  let staging_root =
-    prepare_guarded_manifest_directory(task_root, &format!("tasks/{}/staging", plan.plan_id))?;
   let downloads = plan
     .downloads
     .iter()
@@ -293,7 +341,7 @@ where
     let download = downloads
       .get(patch.id.as_str())
       .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
-    assemble_patch_asset(asset, patch, download, game_root, &cache_root, &staging_root, canceled)?;
+    assemble_patch_asset(asset, patch, download, game_root, &cache_root, output_root, canceled)?;
     summary.asset_count += 1;
     summary.assembled_bytes = summary
       .assembled_bytes
@@ -309,6 +357,39 @@ where
     );
   }
   Ok(summary)
+}
+
+/// Assemble a manifest-diff or patch plan into a caller-owned guarded output directory.
+pub(crate) fn assemble_plan_to_root_with_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+  mut progress: F,
+) -> Result<AssemblySummary, String>
+where
+  F: FnMut(&AssemblyProgress),
+{
+  match plan.strategy {
+    PackagePlanStrategy::ManifestDiff => assemble_manifest_plan_to_root_with_progress(
+      plan,
+      game_root,
+      task_root,
+      output_root,
+      canceled,
+      &mut progress,
+    ),
+    PackagePlanStrategy::Patch => assemble_patch_plan_to_root_with_progress(
+      plan,
+      game_root,
+      task_root,
+      output_root,
+      canceled,
+      &mut progress,
+    ),
+    PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
+  }
 }
 
 fn assembly_totals(plan: &PersistedPlan) -> Result<(usize, u64), String> {

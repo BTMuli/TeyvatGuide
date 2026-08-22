@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  assembler::{assemble_manifest_plan_with_progress, assemble_plan_with_progress},
+  assembler::{assemble_manifest_plan_with_progress, assemble_plan_to_root_with_progress},
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
@@ -119,6 +119,7 @@ where
   journal.current_file = Some("组装资源文件".to_string());
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
+    let incoming_root = prepare_apply_assembly(plan, game_root)?;
     {
       let mut last_emit = Instant::now();
       let mut on_progress = |progress: &super::assembler::AssemblyProgress| {
@@ -137,7 +138,14 @@ where
           last_emit = Instant::now();
         }
       };
-      assemble_plan_with_progress(plan, game_root, task_root, canceled, &mut on_progress)?;
+      assemble_plan_to_root_with_progress(
+        plan,
+        game_root,
+        task_root,
+        &incoming_root,
+        canceled,
+        &mut on_progress,
+      )?;
     }
     check_canceled(canceled)?;
     prepare_transaction(plan, game_root, task_root, journal)?;
@@ -687,6 +695,10 @@ fn prepare_transaction(
   prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal)
 }
 
+fn prepare_apply_assembly(plan: &PersistedPlan, game_root: &Path) -> Result<PathBuf, String> {
+  transaction_subdirectory(game_root, &plan.plan_id, "incoming")
+}
+
 fn prepare_file_transaction(
   commit: &FileCommitPlan,
   original: &[u8],
@@ -706,9 +718,14 @@ fn prepare_file_transaction(
     if step.kind == CommitStepKind::Delete {
       continue;
     }
-    let source = resolve_existing_manifest_file(&staging_root, &step.name)?;
     let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
-    copy_verified(&source, &incoming, step.size, &step.md5)?;
+    if resolve_optional_manifest_file(&incoming_root, &step.name)?.is_none() {
+      let source = resolve_existing_manifest_file(&staging_root, &step.name)?;
+      copy_verified(&source, &incoming, step.size, &step.md5)?;
+    }
+    if !file_matches(&incoming, step.size, &step.md5)? {
+      return Err(format!("incoming 资源在提交前校验失败：{}", step.name));
+    }
   }
 
   let config_root = transaction_subdirectory(game_root, &commit.plan_id, "config")?;
@@ -1711,10 +1728,11 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 mod tests {
   use super::{
     ApplyOutcome, atomic_replace, commit_resources, execute_apply, execute_repair,
-    patch_game_version, prepare_transaction, rollback_apply, transaction_subdirectory,
+    patch_game_version, prepare_apply_assembly, prepare_transaction, rollback_apply,
+    transaction_subdirectory,
   };
   use crate::game::{
-    assembler::assemble_manifest_plan,
+    assembler::{assemble_manifest_plan, assemble_plan_to_root_with_progress},
     journal::{ActiveCommitStep, CommitStepKind, CommitStepPhase, ConfigCommitPhase, TaskJournal},
     model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState, SchemeId},
     planner::{
@@ -1843,6 +1861,56 @@ mod tests {
     assert!(!root.game().join("delete.bin").exists());
     let config = fs::read_to_string(root.game().join("config.ini")).unwrap();
     assert!(config.contains("game_version=2.0.0"));
+  }
+
+  #[test]
+  fn assembles_fresh_update_directly_into_transaction_incoming() {
+    let root = TempRoot::new();
+    prepare(&root);
+    let plan = plan(&Uuid::new_v4().to_string());
+    let incoming = prepare_apply_assembly(&plan, &root.game()).unwrap();
+
+    assemble_plan_to_root_with_progress(
+      &plan,
+      &root.game(),
+      &root.tasks(),
+      &incoming,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+
+    assert!(!root.tasks().join("tasks").join(&plan.plan_id).join("staging").exists());
+    assert_eq!(fs::read(incoming.join("modify.bin")).unwrap(), b"");
+    assert_eq!(fs::read(incoming.join("new.bin")).unwrap(), b"");
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::Assembling;
+    prepare_transaction(&plan, &root.game(), &root.tasks(), &mut journal).unwrap();
+    assert!(journal.apply.is_some());
+  }
+
+  #[test]
+  fn rejects_corrupted_direct_incoming_before_writing_apply_journal() {
+    let root = TempRoot::new();
+    prepare(&root);
+    let plan = plan(&Uuid::new_v4().to_string());
+    let incoming = prepare_apply_assembly(&plan, &root.game()).unwrap();
+    assemble_plan_to_root_with_progress(
+      &plan,
+      &root.game(),
+      &root.tasks(),
+      &incoming,
+      &AtomicBool::new(false),
+      |_| {},
+    )
+    .unwrap();
+    fs::write(incoming.join("new.bin"), b"corrupt").unwrap();
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.state = PackageTaskState::Assembling;
+
+    assert!(prepare_transaction(&plan, &root.game(), &root.tasks(), &mut journal).is_err());
+    assert!(journal.apply.is_none());
+    assert!(!root.tasks().join("tasks").join(&plan.plan_id).join("staging").exists());
   }
 
   #[test]

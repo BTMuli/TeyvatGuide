@@ -207,8 +207,13 @@ declare namespace TGApp.Game.Package {
   type CacheSummary = {
     chunkBytes: number;
     chunkCount: number;
+    chunkProtectedBytes: number;
+    chunkProtectedCount: number;
     sdkBytes: number;
     sdkCount: number;
+    sdkProtectedBytes: number;
+    sdkProtectedCount: number;
     totalBytes: number;
+    reclaimableBytes: number;
   };
 }

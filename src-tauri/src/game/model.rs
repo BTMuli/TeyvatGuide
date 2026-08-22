@@ -320,7 +320,12 @@ pub struct PackageSwitchSummary {
 pub struct PackageCacheSummary {
   pub chunk_bytes: u64,
   pub chunk_count: usize,
+  pub chunk_protected_bytes: u64,
+  pub chunk_protected_count: usize,
   pub sdk_bytes: u64,
   pub sdk_count: usize,
+  pub sdk_protected_bytes: u64,
+  pub sdk_protected_count: usize,
   pub total_bytes: u64,
+  pub reclaimable_bytes: u64,
 }

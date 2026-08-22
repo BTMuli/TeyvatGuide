@@ -51,6 +51,10 @@
           />
         </div>
         <strong>{{ fmtUtil.size(summary.chunkBytes) }} · {{ summary.chunkCount }} 个</strong>
+        <span class="cache-fact-meta">
+          受保护 {{ fmtUtil.size(summary.chunkProtectedBytes) }} · 可回收
+          {{ fmtUtil.size(summary.chunkBytes - summary.chunkProtectedBytes) }}
+        </span>
       </div>
       <div class="cache-fact">
         <div class="cache-fact-head">
@@ -69,6 +73,10 @@
           />
         </div>
         <strong>{{ fmtUtil.size(summary.sdkBytes) }} · {{ summary.sdkCount }} 个</strong>
+        <span class="cache-fact-meta">
+          受保护 {{ fmtUtil.size(summary.sdkProtectedBytes) }} · 可回收
+          {{ fmtUtil.size(summary.sdkBytes - summary.sdkProtectedBytes) }}
+        </span>
       </div>
       <div class="cache-fact">
         <div class="cache-fact-head">
@@ -87,6 +95,10 @@
           />
         </div>
         <strong>{{ fmtUtil.size(summary.totalBytes) }}</strong>
+        <span class="cache-fact-meta">
+          受保护 {{ fmtUtil.size(summary.totalBytes - summary.reclaimableBytes) }} · 可回收
+          {{ fmtUtil.size(summary.reclaimableBytes) }}
+        </span>
       </div>
     </div>
   </section>
@@ -162,9 +174,11 @@ function cacheClearLabel(target: CacheClearTarget): string {
 
 function cacheClearBytes(target: CacheClearTarget): number | null {
   if (summary.value === null) return null;
-  if (target === "chunks") return summary.value.chunkBytes;
-  if (target === "sdk") return summary.value.sdkBytes;
-  return summary.value.totalBytes;
+  if (target === "chunks") {
+    return summary.value.chunkBytes - summary.value.chunkProtectedBytes;
+  }
+  if (target === "sdk") return summary.value.sdkBytes - summary.value.sdkProtectedBytes;
+  return summary.value.reclaimableBytes;
 }
 
 function isClearDisabled(target: CacheClearTarget): boolean {
@@ -174,9 +188,9 @@ function isClearDisabled(target: CacheClearTarget): boolean {
 
 function cacheClearText(target: CacheClearTarget, occupied: string): string {
   if (target === "all") {
-    return `当前缓存合计占用 ${occupied}。将删除未被未完成任务引用的资源分片与渠道 SDK 缓存，不影响游戏目录。`;
+    return `当前可回收缓存占用 ${occupied}。将删除未被未完成任务引用的资源分片与渠道 SDK 缓存，不影响游戏目录。`;
   }
-  return `当前${cacheClearLabel(target)}占用 ${occupied}。将删除未被未完成任务引用的${cacheClearLabel(target)}缓存，不影响游戏目录。`;
+  return `当前可回收${cacheClearLabel(target)}占用 ${occupied}。将删除未被未完成任务引用的${cacheClearLabel(target)}缓存，不影响游戏目录。`;
 }
 
 async function clearCache(target: CacheClearTarget): Promise<void> {
@@ -323,6 +337,13 @@ watch(taskSignature, (signature) => {
   font-size: 14px;
   font-weight: normal;
   line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.cache-fact-meta {
+  color: var(--box-text-2);
+  font-size: 12px;
+  line-height: 16px;
   overflow-wrap: anywhere;
 }
 

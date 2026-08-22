@@ -180,23 +180,13 @@ const stateColor = computed<string>(() => {
   }
 });
 const progressPercent = computed<number>(() => {
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    if (task.assemblyTotalBytes > 0) {
-      return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
-    }
-    if (task.assemblyTotalCount > 0) {
-      return Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100);
-    }
-    return 0;
-  }
-  if (task.totalBytes === 0) return 0;
-  return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
+  const totalWork = task.totalBytes + task.assemblyTotalBytes;
+  if (totalWork === 0) return gameEnum.package.taskApplying(task.state) ? 100 : 0;
+  const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
+  return Math.min(100, (completedWork / totalWork) * 100);
 });
 const progressIndeterminate = computed<boolean>(() => {
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
-  }
-  return task.totalBytes === 0 || gameEnum.package.taskApplying(task.state);
+  return task.totalBytes + task.assemblyTotalBytes === 0 && active.value;
 });
 const showProgressBar = computed<boolean>(() => {
   return (
@@ -215,22 +205,34 @@ const audioLabel = computed<string>(() => {
   const languages = task.audioLanguages ?? [];
   return languages.map((language) => labels[language] ?? language).join("、") || "未记录";
 });
+const combinedEtaSeconds = computed<number | null>(() => {
+  const totalWork = task.totalBytes + task.assemblyTotalBytes;
+  const completedWork = Math.min(totalWork, task.downloadedBytes + task.assemblyCompletedBytes);
+  const elapsedSeconds = task.elapsedMs / 1000;
+  if (!active.value || totalWork === 0 || completedWork === 0 || elapsedSeconds <= 0) return null;
+  const remaining = totalWork - completedWork;
+  if (remaining === 0) return 0;
+  return Math.ceil(remaining / (completedWork / elapsedSeconds));
+});
 const facts = computed<Array<string>>(() => {
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    return [
-      `组装空间 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-      `组装文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-      `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
-      `当前耗时 ${formatElapsed(task.elapsedMs)}`,
-    ];
-  }
   const values = [
+    `总体进度 ${progressPercent.value.toFixed(0)}%`,
     `总进度 ${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
     `文件 ${task.completedCount} / ${task.totalCount}`,
-    `当前耗时 ${formatElapsed(task.elapsedMs)}`,
   ];
+  if (task.assemblyTotalBytes > 0) {
+    values.push(
+      `组装 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+      `组装文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
+    );
+  }
+  values.push(
+    `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
+    `当前耗时 ${formatElapsed(task.elapsedMs)}`,
+  );
   if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
-  if (task.etaSeconds !== null) values.push(`预计剩余 ${formatDuration(task.etaSeconds)}`);
+  const eta = combinedEtaSeconds.value;
+  if (eta !== null) values.push(`预计剩余 ${formatDuration(eta)}`);
   return values;
 });
 const canCancel = computed<boolean>(() => {
@@ -239,7 +241,8 @@ const canCancel = computed<boolean>(() => {
 const canPause = computed<boolean>(() => {
   return (
     task.state === gameEnum.package.taskState.QUEUED ||
-    task.state === gameEnum.package.taskState.DOWNLOADING
+    task.state === gameEnum.package.taskState.DOWNLOADING ||
+    task.state === gameEnum.package.taskState.ASSEMBLING
   );
 });
 const recoverable = computed<boolean>(() => {

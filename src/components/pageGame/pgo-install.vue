@@ -217,11 +217,14 @@
             <span>安装盘可用</span
             ><strong>{{ formatBytes(plan.installAvailableFreeBytes) }}</strong>
           </div>
+          <div>
+            <span>缓存与安装磁盘</span><strong>{{ plan.sameVolume ? "同一卷" : "不同卷" }}</strong>
+          </div>
         </div>
         <v-alert
           v-if="plan !== null && !plan.hasSufficientSpace"
           density="compact"
-          text="当前任务临时空间或安装盘可用空间不足，请释放空间后重新评估。"
+          :text="spaceGuidance"
           type="warning"
           variant="tonal"
         />
@@ -444,6 +447,24 @@ const footerHint = computed<string>(() => {
   if (step.value === 4 && plan.value === null) return "评估期间不会修改游戏目录";
   if (step.value === 4) return "计划会同时校验缓存盘与安装盘空间";
   return "安装完成前不会修改或登记现有游戏";
+});
+const spaceGuidance = computed<string>(() => {
+  if (plan.value === null || plan.value.hasSufficientSpace) return "";
+  const cacheShortage = Math.max(
+    0,
+    plan.value.cacheRequiredFreeBytes - plan.value.cacheAvailableFreeBytes,
+  );
+  const installShortage = Math.max(
+    0,
+    plan.value.installRequiredFreeBytes - plan.value.installAvailableFreeBytes,
+  );
+  const parts: Array<string> = [];
+  if (cacheShortage > 0) parts.push(`缓存盘还需 ${formatBytes(cacheShortage)}`);
+  if (installShortage > 0) parts.push(`安装盘还需 ${formatBytes(installShortage)}`);
+  if (parts.length === 0) {
+    return "当前磁盘峰值空间不足，请释放缓存或安装盘空间后重新评估。";
+  }
+  return `${parts.join("；")}。请释放空间后重新评估。`;
 });
 
 function resolveDefaultScheme(): Scheme {

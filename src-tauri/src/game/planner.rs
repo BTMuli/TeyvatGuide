@@ -74,6 +74,15 @@ struct CacheValidationState {
   dirty: bool,
 }
 
+#[derive(Debug, Eq, PartialEq)]
+struct SpaceBudget {
+  required_free_bytes: u64,
+  available_free_bytes: u64,
+  cache_required_free_bytes: u64,
+  install_required_free_bytes: u64,
+  has_sufficient_space: bool,
+}
+
 static CACHE_VALIDATION_STATES: LazyLock<Mutex<HashMap<PathBuf, CacheValidationState>>> =
   LazyLock::new(|| Mutex::new(HashMap::new()));
 
@@ -346,19 +355,32 @@ pub(crate) fn persist_plan_parts(
 ) -> Result<PackagePlanSummary, String> {
   let cache_root = task_root.join("cache/chunks");
   let cache_hit_bytes = calculate_cache_hits(&cache_root, &parts.downloads);
+  fs::create_dir_all(&cache_root).map_err(|error| format!("创建资源缓存目录失败：{error}"))?;
+  let missing_download_bytes = parts
+    .downloads
+    .iter()
+    .try_fold(0_u64, |total, item| {
+      total.checked_add(item.compressed_size).ok_or_else(|| "计划下载字节数溢出".to_string())
+    })?
+    .saturating_sub(cache_hit_bytes);
   let download_bytes = parts.downloads.iter().try_fold(0_u64, |total, item| {
     total.checked_add(item.compressed_size).ok_or_else(|| "计划下载字节数溢出".to_string())
   })?;
   let install_bytes = parts.assets.iter().try_fold(0_u64, |total, item| {
     total.checked_add(item.size).ok_or_else(|| "计划安装字节数溢出".to_string())
   })?;
-  let required_free_bytes = download_bytes
-    .saturating_sub(cache_hit_bytes)
-    .checked_add(install_bytes)
-    .and_then(|value| value.checked_add(SAFETY_MARGIN_BYTES))
-    .ok_or_else(|| "计划所需空间溢出".to_string())?;
-  let available_free_bytes = fs2::available_space(&installation.root_path)
+  let cache_available_free_bytes = fs2::available_space(&cache_root)
+    .map_err(|error| format!("读取资源缓存磁盘剩余空间失败：{error}"))?;
+  let install_available_free_bytes = fs2::available_space(&installation.root_path)
     .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
+  let same_volume = same_volume(&cache_root, Path::new(&installation.root_path));
+  let budget = calculate_update_space_budget(
+    missing_download_bytes,
+    install_bytes,
+    cache_available_free_bytes,
+    install_available_free_bytes,
+    same_volume,
+  );
   let plan_id = Uuid::new_v4().to_string();
   let summary = PackagePlanSummary {
     plan_id: plan_id.clone(),
@@ -371,16 +393,14 @@ pub(crate) fn persist_plan_parts(
     download_bytes,
     install_bytes,
     cache_hit_bytes,
-    required_free_bytes,
-    available_free_bytes,
-    has_sufficient_space: available_free_bytes >= required_free_bytes,
-    cache_required_free_bytes: download_bytes
-      .saturating_sub(cache_hit_bytes)
-      .saturating_add(SAFETY_MARGIN_BYTES),
-    install_required_free_bytes: install_bytes,
-    cache_available_free_bytes: available_free_bytes,
-    install_available_free_bytes: available_free_bytes,
-    same_volume: true,
+    required_free_bytes: budget.required_free_bytes,
+    available_free_bytes: budget.available_free_bytes,
+    has_sufficient_space: budget.has_sufficient_space,
+    cache_required_free_bytes: budget.cache_required_free_bytes,
+    install_required_free_bytes: budget.install_required_free_bytes,
+    cache_available_free_bytes,
+    install_available_free_bytes,
+    same_volume,
     download_count: parts.downloads.len(),
     add_count: parts
       .assets
@@ -699,6 +719,36 @@ pub(crate) fn same_volume(left: &Path, right: &Path) -> bool {
   {
     let _ = (left, right);
     false
+  }
+}
+
+fn calculate_update_space_budget(
+  missing_download_bytes: u64,
+  install_bytes: u64,
+  cache_available_free_bytes: u64,
+  install_available_free_bytes: u64,
+  same_volume: bool,
+) -> SpaceBudget {
+  let cache_required_free_bytes = missing_download_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+  let install_required_free_bytes = install_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+  let required_free_bytes = if same_volume {
+    missing_download_bytes.saturating_add(install_bytes).saturating_add(SAFETY_MARGIN_BYTES)
+  } else {
+    cache_required_free_bytes.max(install_required_free_bytes)
+  };
+  let available_free_bytes = cache_available_free_bytes.min(install_available_free_bytes);
+  let has_sufficient_space = if same_volume {
+    available_free_bytes >= required_free_bytes
+  } else {
+    cache_available_free_bytes >= cache_required_free_bytes
+      && install_available_free_bytes >= install_required_free_bytes
+  };
+  SpaceBudget {
+    required_free_bytes,
+    available_free_bytes,
+    cache_required_free_bytes,
+    install_required_free_bytes,
+    has_sufficient_space,
   }
 }
 
@@ -2028,8 +2078,9 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
 mod tests {
   use super::{
     PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanDownloadHashKind, PlanFile, PlanParts,
-    assets_equal, build_manifest_diff, build_patch_plan, cached_chunk_matches, digest_parts,
-    load_persisted_plan, overlay_repair_parts, validate_persisted_plan,
+    assets_equal, build_manifest_diff, build_patch_plan, cached_chunk_matches,
+    calculate_update_space_budget, digest_parts, load_persisted_plan, overlay_repair_parts,
+    validate_persisted_plan,
   };
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
@@ -2040,6 +2091,19 @@ mod tests {
       get_decoded_patch_build,
     },
   };
+
+  #[test]
+  fn update_space_budget_distinguishes_same_and_different_volumes() {
+    let margin = super::SAFETY_MARGIN_BYTES;
+    let same = calculate_update_space_budget(4, 6, margin + 10, margin + 10, true);
+    assert_eq!(same.required_free_bytes, 4 + 6 + super::SAFETY_MARGIN_BYTES);
+    assert!(same.has_sufficient_space);
+
+    let different = calculate_update_space_budget(4, 6, margin + 4, margin + 5, false);
+    assert_eq!(different.cache_required_free_bytes, 4 + super::SAFETY_MARGIN_BYTES);
+    assert_eq!(different.install_required_free_bytes, 6 + super::SAFETY_MARGIN_BYTES);
+    assert!(!different.has_sufficient_space);
+  }
 
   fn download_info() -> DownloadInfo {
     serde_json::from_value(serde_json::json!({
