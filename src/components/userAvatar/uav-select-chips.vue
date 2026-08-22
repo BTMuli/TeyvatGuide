@@ -40,10 +40,12 @@
         class="uav-scb-item"
         variant="elevated"
       >
-        <div class="uav-scb-inner">
-          <TMiImg v-if="item.icon" :src="item.icon" alt="icon" />
-          <span>{{ item.label }}</span>
-        </div>
+        <slot name="item" :item="item" :selected="selected.includes(item.value)">
+          <div class="uav-scb-inner">
+            <TMiImg v-if="item.icon" :src="item.icon" alt="icon" />
+            <span>{{ item.label }}</span>
+          </div>
+        </slot>
         <div v-if="selected.includes(item.value)" class="uav-scb-selected">
           <v-icon color="var(--tgc-od-red)">mdi-check-circle</v-icon>
         </div>
@@ -61,6 +63,8 @@ export type UavSelectChipsItem = {
   label?: string;
   /** 渲染图标 */
   icon?: string;
+  /** 图标背景 */
+  iconBackground?: string;
   /** 提示文本 */
   title: string;
   /** 选项值 */
@@ -79,6 +83,7 @@ const selected = defineModel<Array<string>>("selected", { required: true });
 
 defineSlots<{
   all(props: { selected: boolean }): unknown;
+  item(props: { item: UavSelectChipsItem; selected: boolean }): unknown;
 }>();
 const isAllSelected = computed<boolean>(() => {
   if (!props.items || props.items.length === 0) return false;

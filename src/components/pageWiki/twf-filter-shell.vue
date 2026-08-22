@@ -18,6 +18,7 @@
         <h2 :id="titleId">{{ props.title }}</h2>
         <p>{{ props.description }}</p>
       </div>
+      <slot name="headerActions" />
     </template>
 
     <div class="twf-content">
@@ -25,18 +26,20 @@
     </div>
 
     <template #footer>
-      <span class="twf-footer-hint">未选择或全选均表示不限</span>
-      <div class="twf-actions">
-        <v-btn class="twf-cancel" variant="text" @click="visible = false">取消</v-btn>
-        <v-btn
-          class="twf-confirm"
-          prepend-icon="mdi-check"
-          variant="flat"
-          @click="emits('confirm')"
-        >
-          应用筛选
-        </v-btn>
-      </div>
+      <slot name="footer">
+        <span class="twf-footer-hint">未选择或全选均表示不限</span>
+        <div class="twf-actions">
+          <v-btn class="twf-cancel" variant="text" @click="visible = false">取消</v-btn>
+          <v-btn
+            class="twf-confirm"
+            prepend-icon="mdi-check"
+            variant="flat"
+            @click="emits('confirm')"
+          >
+            应用筛选
+          </v-btn>
+        </div>
+      </slot>
     </template>
   </TopOverlay>
 </template>
@@ -55,6 +58,12 @@ const props = defineProps<TwfFilterShellProps>();
 const emits = defineEmits<TwfFilterShellEmits>();
 const visible = defineModel<boolean>({ default: false });
 const titleId = useId();
+
+defineSlots<{
+  default?: () => unknown;
+  footer?: () => unknown;
+  headerActions?: () => unknown;
+}>();
 </script>
 <style lang="scss" scoped>
 .twf-header-icon {

@@ -1,118 +1,81 @@
 <!-- 武器筛选浮窗 -->
 <template>
-  <TOverlay v-model="visible">
-    <div class="pbwf-container">
-      <div class="pbwf-tabs">
-        <v-btn
-          v-for="tab in tabs"
-          :key="tab.key"
-          :active="activeTab === tab.key"
-          activeColor="blue"
-          @click="activeTab = tab.key"
-        >
-          {{ tab.label }}
-        </v-btn>
+  <TwfFilterShell
+    v-model="visible"
+    description="按武器星级、类型、精炼等级与词条组合筛选"
+    title="筛选武器"
+    topOffset="64px"
+    @confirm="confirmSelect"
+  >
+    <div class="pbwf-content">
+      <div class="twf-grid pbwf-basic-row">
+        <section class="twf-group">
+          <div class="twf-group-title">星级</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="selectedStar" :items="starList" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
+        <section class="twf-group">
+          <div class="twf-group-title">精炼等级</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="selectedRefine" :items="refineList" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
       </div>
-      <div class="pbwf-content">
-        <!-- 基础筛选 -->
-        <div v-show="activeTab === 'basic'" class="pbwf-section">
-          <div class="pbwf-item">
-            <div class="pbwf-title">星级</div>
-            <v-item-group v-model="selectedStar" class="pbwf-select" multiple>
-              <div v-for="item in starList" :key="item.value">
-                <v-item v-slot="{ isSelected, toggle }" :value="item.value">
-                  <v-btn :active="isSelected" activeColor="blue" size="small" @click="toggle">
-                    <v-icon>{{ isSelected ? "mdi-star" : "mdi-star-outline" }}</v-icon>
-                    <span>{{ item.text }}</span>
-                  </v-btn>
-                </v-item>
-              </div>
-            </v-item-group>
+
+      <div class="pbwf-weapon-status-row">
+        <section class="twf-group twf-group-weapon pbwf-weapon-type-group">
+          <div class="twf-group-title">武器类型</div>
+          <div class="twf-options">
+            <UavSelectChips
+              v-model:selected="selectedWeaponType"
+              :items="weaponTypeList"
+              size="small"
+            >
+              <template #all>全选</template>
+            </UavSelectChips>
           </div>
-          <div class="pbwf-item">
-            <div class="pbwf-title">武器类型</div>
-            <v-item-group v-model="selectedWeaponType" class="pbwf-select" multiple>
-              <div v-for="item in weaponTypeList" :key="item.value">
-                <v-item v-slot="{ isSelected, toggle }" :value="item.value">
-                  <v-btn
-                    :active="isSelected"
-                    :title="item.text"
-                    activeColor="blue"
-                    size="small"
-                    @click="toggle"
-                  >
-                    <img
-                      :alt="item.text"
-                      :src="`/icon/weapon/${item.value}.webp`"
-                      class="pbwf-icon"
-                    />
-                  </v-btn>
-                </v-item>
-              </div>
-            </v-item-group>
+        </section>
+        <section class="twf-group pbwf-status-group">
+          <div class="twf-group-title">状态</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="selectedStatus" :items="statusList" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
           </div>
-          <div class="pbwf-item">
-            <div class="pbwf-title">精炼等级</div>
-            <v-item-group v-model="selectedRefine" class="pbwf-select" multiple>
-              <div v-for="item in refineList" :key="item.value">
-                <v-item v-slot="{ isSelected, toggle }" :value="item.value">
-                  <v-btn :active="isSelected" activeColor="blue" size="small" @click="toggle">
-                    <span>{{ item.text }}</span>
-                  </v-btn>
-                </v-item>
-              </div>
-            </v-item-group>
-          </div>
-          <div class="pbwf-item">
-            <div class="pbwf-title">状态</div>
-            <v-item-group v-model="selectedStatus" class="pbwf-select" multiple>
-              <div v-for="item in statusList" :key="item.key">
-                <v-item v-slot="{ isSelected, toggle }" :value="item.key">
-                  <v-btn
-                    :active="isSelected"
-                    :title="item.label"
-                    activeColor="blue"
-                    size="small"
-                    @click="toggle"
-                  >
-                    <v-icon>{{ item.icon }}</v-icon>
-                  </v-btn>
-                </v-item>
-              </div>
-            </v-item-group>
-          </div>
-        </div>
-        <!-- 副词条筛选 -->
-        <div v-show="activeTab === 'subProp'" class="pbwf-section">
-          <div class="pbwf-item">
-            <v-item-group v-model="selectedSubProp" class="pbwf-select" multiple>
-              <div v-for="item in subPropList" :key="item.id">
-                <v-item v-slot="{ isSelected, toggle }" :value="item.id">
-                  <v-btn
-                    :active="isSelected"
-                    activeColor="blue"
-                    class="pbwf-pm-btn"
-                    size="small"
-                    @click="toggle"
-                  >
-                    <img v-if="item.icon !== ''" :src="item.icon" alt="icon" />
-                    <span>{{ item.name }}</span>
-                  </v-btn>
-                </v-item>
-              </div>
-            </v-item-group>
-          </div>
-        </div>
+        </section>
       </div>
-      <div class="pbwf-submit">
-        <v-btn variant="tonal" @click="resetFilter">重置</v-btn>
-        <v-btn @click="confirmSelect">确定</v-btn>
+
+      <div class="twf-grid">
+        <section class="twf-group twf-group-weapon twf-group-wide">
+          <div class="twf-group-title">副词条</div>
+          <div class="twf-options">
+            <UavSelectChips v-model:selected="selectedSubProp" :items="subPropList" size="small">
+              <template #all>全选</template>
+            </UavSelectChips>
+          </div>
+        </section>
       </div>
     </div>
-  </TOverlay>
+
+    <template #footer>
+      <span class="pbwf-footer-hint">未选择或全选均表示不限</span>
+      <div class="pbwf-actions">
+        <v-btn class="pbwf-reset" variant="text" @click="resetFilter">重置</v-btn>
+        <v-btn class="pbwf-confirm" prepend-icon="mdi-check" variant="flat" @click="confirmSelect">
+          确定
+        </v-btn>
+      </div>
+    </template>
+  </TwfFilterShell>
 </template>
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
+import TwfFilterShell from "@comp/pageWiki/twf-filter-shell.vue";
+import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-select-chips.vue";
 import { ref, watch } from "vue";
 
 import { AppPropMapData, wwWeapon } from "@/data/index.js";
@@ -129,38 +92,37 @@ type PbWeaponFilterEmits = { filter: [v: WeaponFilterValue] };
 
 const emits = defineEmits<PbWeaponFilterEmits>();
 
-const tabs = [
-  { key: "basic", label: "基础筛选" },
-  { key: "subProp", label: "副词条筛选" },
+const starList: Array<UavSelectChipsItem> = [1, 2, 3, 4, 5].map((star) => ({
+  label: `${star}星`,
+  value: star.toString(),
+  title: `${star}星`,
+}));
+
+const weaponTypeList: Array<UavSelectChipsItem> = [
+  "单手剑",
+  "双手剑",
+  "长柄武器",
+  "法器",
+  "弓",
+].map((weaponType) => ({
+  label: weaponType,
+  value: weaponType,
+  title: weaponType,
+  icon: `/icon/weapon/${weaponType}.webp`,
+}));
+
+const refineList: Array<UavSelectChipsItem> = [1, 2, 3, 4, 5].map((refine) => ({
+  label: `精${refine}`,
+  value: refine.toString(),
+  title: `精${refine}`,
+}));
+
+const statusList: Array<UavSelectChipsItem> = [
+  { label: "锁定", value: "locked", title: "锁定" },
+  { label: "未锁定", value: "unlocked", title: "未锁定" },
 ];
 
-const starList = [
-  { text: "1星", value: 1 },
-  { text: "2星", value: 2 },
-  { text: "3星", value: 3 },
-  { text: "4星", value: 4 },
-  { text: "5星", value: 5 },
-];
-
-const weaponTypeList = [
-  { text: "单手剑", value: "单手剑" },
-  { text: "双手剑", value: "双手剑" },
-  { text: "长柄武器", value: "长柄武器" },
-  { text: "法器", value: "法器" },
-  { text: "弓", value: "弓" },
-];
-
-const refineList = [
-  { text: "1精", value: 1 },
-  { text: "2精", value: 2 },
-  { text: "3精", value: 3 },
-  { text: "4精", value: 4 },
-  { text: "5精", value: 5 },
-];
-
-const statusList = [{ key: "locked", label: "锁定", icon: "mdi-lock" }];
-
-const subPropList = (() => {
+const subPropList: Array<UavSelectChipsItem> = (() => {
   const propSet = new Set<number>();
   for (const weapon of wwWeapon) {
     if (weapon.curves) {
@@ -172,18 +134,18 @@ const subPropList = (() => {
   return Array.from(propSet).map((propId) => {
     const propInfo = AppPropMapData[propId];
     return {
-      id: propId,
-      name: propInfo ? propInfo.filter_name : `属性${propId}`,
-      icon: propInfo.icon,
+      label: propInfo ? propInfo.filter_name : `属性${propId}`,
+      value: propId.toString(),
+      title: propInfo ? propInfo.filter_name : `属性${propId}`,
+      icon: propInfo ? propInfo.icon : "",
     };
   });
 })();
 
-const activeTab = ref<string>("basic");
-const selectedStar = ref<Array<number>>([]);
+const selectedStar = ref<Array<string>>([]);
 const selectedWeaponType = ref<Array<string>>([]);
-const selectedRefine = ref<Array<number>>([]);
-const selectedSubProp = ref<Array<number>>([]);
+const selectedRefine = ref<Array<string>>([]);
+const selectedSubProp = ref<Array<string>>([]);
 const selectedStatus = ref<Array<string>>([]);
 
 const visible = defineModel<boolean>();
@@ -212,101 +174,91 @@ function resetFilter(): void {
   confirmSelect();
 }
 
+function getBooleanFilter(
+  selectedValues: ReadonlyArray<string>,
+  trueValue: string,
+  falseValue: string,
+): boolean | null {
+  const hasTrueValue = selectedValues.includes(trueValue);
+  const hasFalseValue = selectedValues.includes(falseValue);
+  return hasTrueValue === hasFalseValue ? null : hasTrueValue;
+}
+
 function confirmSelect(): void {
   const value: WeaponFilterValue = {
-    star: selectedStar.value,
+    star: selectedStar.value.map(Number),
     weaponType: selectedWeaponType.value,
-    refine: selectedRefine.value,
-    subProp: selectedSubProp.value,
-    locked: selectedStatus.value.includes("locked") ? true : null,
+    refine: selectedRefine.value.map(Number),
+    subProp: selectedSubProp.value.map(Number),
+    locked: getBooleanFilter(selectedStatus.value, "locked", "unlocked"),
   };
   emits("filter", value);
   visible.value = false;
 }
 </script>
-<style lang="css" scoped>
-.pbwf-container {
-  display: flex;
-  width: 500px;
-  max-height: 600px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 8px;
-  border-radius: 4px;
-  background-color: var(--box-bg-1);
-  row-gap: 8px;
-}
-
-.pbwf-tabs {
-  display: flex;
-  width: 100%;
-  font-family: var(--font-title);
-  gap: 8px;
-}
-
+<style lang="scss" scoped>
 .pbwf-content {
+  display: flex;
   width: 100%;
-  max-height: 450px;
-  overflow-y: auto;
-}
-
-.pbwf-section {
-  display: flex;
   flex-direction: column;
-  padding: 4px;
-  gap: 8px;
-}
-
-.pbwf-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-}
-
-.pbwf-title {
-  color: var(--common-text-title);
-  font-size: 16px;
-  white-space: nowrap;
-}
-
-.pbwf-select {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pbwf-icon {
-  width: 24px;
-  height: 24px;
-  filter: invert(0.5);
-
-  .dark & {
-    filter: unset;
-  }
-}
-
-.pbwf-pm-btn {
-  img {
-    width: 16px;
-    height: 16px;
-    margin-right: 2px;
-    filter: invert(0.5);
-  }
-
-  .dark & {
-    img {
-      filter: unset;
-    }
-  }
-}
-
-.pbwf-submit {
-  display: flex;
-  padding-top: 8px;
-  margin-left: auto;
   gap: 12px;
+}
+
+.pbwf-weapon-status-row {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.pbwf-weapon-type-group {
+  width: fit-content;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.pbwf-status-group {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.pbwf-footer-hint {
+  color: var(--box-text-4);
+  font-size: 12px;
+  line-height: 16px;
+  opacity: 0.72;
+}
+
+.pbwf-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.pbwf-reset,
+.pbwf-confirm {
+  border-radius: 4px;
+  font-family: var(--font-text);
+}
+
+.pbwf-reset {
+  color: var(--box-text-2);
+}
+
+.pbwf-confirm {
+  background: var(--tgc-btn-1);
+  color: var(--btn-text);
+}
+
+@media (width <= 720px) {
+  .pbwf-weapon-status-row {
+    flex-direction: column;
+  }
+
+  .pbwf-weapon-type-group,
+  .pbwf-status-group {
+    width: 100%;
+  }
 }
 </style>
