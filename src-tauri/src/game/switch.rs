@@ -292,6 +292,10 @@ where
     journal.downloaded_bytes =
       base_downloaded.saturating_add(package.size).min(journal.total_bytes);
     journal.committed_step = (index + 1).min(journal.total_count);
+    // 日志校验要求非 Install 任务 committed_step 与 owned_cache_files 长度一致；
+    // 下载推进时同步登记已落盘的 SDK 缓存，避免持久化报「字段无效」。
+    journal.owned_cache_files =
+      packages.iter().take(index + 1).map(|package| package.md5.clone()).collect();
     journal.touch();
     on_progress(journal)?;
   }
