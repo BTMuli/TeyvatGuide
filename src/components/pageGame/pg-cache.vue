@@ -105,8 +105,10 @@
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
+import { listen } from "@tauri-apps/api/event";
 import fmtUtil from "@utils/fmtUtil.js";
 import { clearGamePackageCache, getGamePackageCacheStatus } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
@@ -216,14 +218,25 @@ async function clearCache(target: CacheClearTarget): Promise<void> {
   if (confirmed !== true) return;
   clearingTarget.value = target;
   errorMessage.value = null;
+  const unlisten = await listen<TGApp.Game.Package.CacheClearProgress>(
+    "game-cache://progress",
+    (event) => {
+      const { completed, total } = event.payload;
+      void showLoading.update(total > 0 ? `正在清理缓存 ${completed}/${total}…` : "正在清理缓存…");
+    },
+  );
+  await showLoading.start("正在清理缓存", "正在统计缓存文件…");
   try {
     summary.value = await clearGamePackageCache(target);
+    showLoading.end();
     showSnackbar.success(`${label}已清理，释放 ${occupied}`);
   } catch (error) {
+    showLoading.end();
     const message = cacheErrorText(error, `清理${label}`);
     errorMessage.value = message;
     showSnackbar.warn(message);
   } finally {
+    await unlisten();
     clearingTarget.value = null;
     if (statusQueued) {
       statusQueued = false;

@@ -42,6 +42,14 @@ struct GameUninstallProgress {
   current: Option<String>,
 }
 
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GameCacheClearProgress {
+  completed: usize,
+  total: usize,
+  current: Option<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GameUninstallSummary {
@@ -778,9 +786,22 @@ pub async fn game_package_cache_clear(
   let task_root = game_task_root(&app_handle)?;
   let has_running_tasks =
     manager.has_running_tasks().map_err(|error| format!("读取缓存清理任务状态失败：{error}"))?;
-  tauri::async_runtime::spawn_blocking(move || cache::clear(&task_root, has_running_tasks, target))
-    .await
-    .map_err(|error| format!("缓存清理任务异常退出：{error}"))?
+  let app = app_handle.clone();
+  tauri::async_runtime::spawn_blocking(move || {
+    let mut last_emit = Instant::now() - Duration::from_millis(300);
+    let mut progress = move |completed: usize, total: usize, current: &str| {
+      if last_emit.elapsed() >= Duration::from_millis(120) {
+        let _ = app.emit(
+          "game-cache://progress",
+          GameCacheClearProgress { completed, total, current: Some(current.to_string()) },
+        );
+        last_emit = Instant::now();
+      }
+    };
+    cache::clear_with_progress(&task_root, has_running_tasks, target, &mut progress)
+  })
+  .await
+  .map_err(|error| format!("缓存清理任务异常退出：{error}"))?
 }
 
 /// 启动或恢复安装完整性校验；扫描在后台继续，页面刷新后可重连进度。

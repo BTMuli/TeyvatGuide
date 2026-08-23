@@ -224,6 +224,13 @@ declare namespace TGApp.Game.Package {
     reclaimableBytes: number;
   };
 
+  /** 缓存清理进度事件载荷（`game-cache://progress`）。 */
+  type CacheClearProgress = {
+    completed: number;
+    total: number;
+    current: string | null;
+  };
+
   /** 清理已结束游戏资源任务后的统计。 */
   type TaskCleanupSummary = {
     removedCount: number;

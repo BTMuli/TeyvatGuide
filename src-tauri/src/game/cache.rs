@@ -49,6 +49,21 @@ pub(crate) fn clear(
   has_running_tasks: bool,
   target: CacheClearTarget,
 ) -> Result<PackageCacheSummary, String> {
+  clear_with_progress(task_root, has_running_tasks, target, &mut |_, _, _| {})
+}
+
+/// 删除未被未完成任务引用的共享缓存，并通过回调上报清理进度。
+///
+/// 回调参数依次为：已处理文件数、总文件数、当前文件名。
+pub(crate) fn clear_with_progress<F>(
+  task_root: &Path,
+  has_running_tasks: bool,
+  target: CacheClearTarget,
+  progress: &mut F,
+) -> Result<PackageCacheSummary, String>
+where
+  F: FnMut(usize, usize, &str),
+{
   if target != CacheClearTarget::Sdk && is_game_running() {
     return Err("游戏仍在运行，请先关闭游戏后再清理缓存".to_string());
   }
@@ -58,24 +73,73 @@ pub(crate) fn clear(
     return Err("还有任务正在使用这类缓存，请等待任务完成后再清理".to_string());
   }
   let protected = journal::protected_cache_files_for_target(task_root, Some(target))?;
+  let total = match target {
+    CacheClearTarget::Chunks => count_dir_files(&task_root.join("cache/chunks"))?,
+    CacheClearTarget::Sdk => count_dir_files(&task_root.join("cache/sdks"))?,
+    CacheClearTarget::All => count_dir_files(&task_root.join("cache/chunks"))?
+      .saturating_add(count_dir_files(&task_root.join("cache/sdks"))?),
+  };
+  let mut completed = 0_usize;
+  let mut on_file = |name: &str| {
+    completed = completed.saturating_add(1);
+    progress(completed, total, name);
+  };
   match target {
     CacheClearTarget::Chunks => {
-      clear_dir(&task_root.join("cache/chunks"), &protected)?;
+      clear_dir(&task_root.join("cache/chunks"), &protected, &mut on_file)?;
       clear_cache_validation_index(&task_root.join("cache/chunks"));
     }
     CacheClearTarget::Sdk => {
-      clear_dir(&task_root.join("cache/sdks"), &protected)?;
+      clear_dir(&task_root.join("cache/sdks"), &protected, &mut on_file)?;
     }
     CacheClearTarget::All => {
-      clear_dir(&task_root.join("cache/chunks"), &protected)?;
-      clear_dir(&task_root.join("cache/sdks"), &protected)?;
+      clear_dir(&task_root.join("cache/chunks"), &protected, &mut on_file)?;
+      clear_dir(&task_root.join("cache/sdks"), &protected, &mut on_file)?;
       clear_cache_validation_index(&task_root.join("cache/chunks"));
     }
   }
   status(task_root)
 }
 
-fn clear_dir(path: &Path, protected: &HashSet<String>) -> Result<(), String> {
+fn count_dir_files(path: &Path) -> Result<usize, String> {
+  let mut count = 0_usize;
+  if !path.exists() {
+    return Ok(0);
+  }
+  let mut pending = vec![path.to_path_buf()];
+  while let Some(dir) = pending.pop() {
+    let entries = match fs::read_dir(&dir) {
+      Ok(entries) => entries,
+      Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+      Err(error) => return Err(format!("读取游戏缓存目录失败：{error}")),
+    };
+    for entry in entries {
+      let entry = entry.map_err(|error| format!("读取游戏缓存项失败：{error}"))?;
+      let metadata = match fs::symlink_metadata(entry.path()) {
+        Ok(metadata) => metadata,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+        Err(error) => return Err(format!("读取游戏缓存元数据失败：{error}")),
+      };
+      if metadata.file_type().is_symlink() {
+        continue;
+      }
+      if metadata.is_dir() {
+        pending.push(entry.path());
+        continue;
+      }
+      if metadata.is_file() {
+        count += 1;
+      }
+    }
+  }
+  Ok(count)
+}
+
+fn clear_dir(
+  path: &Path,
+  protected: &HashSet<String>,
+  on_file: &mut dyn FnMut(&str),
+) -> Result<(), String> {
   if !path.exists() {
     return Ok(());
   }
@@ -104,6 +168,7 @@ fn clear_dir(path: &Path, protected: &HashSet<String>) -> Result<(), String> {
         continue;
       }
       let name = entry.file_name().to_string_lossy().into_owned();
+      on_file(&name);
       if protected.contains(&name) {
         continue;
       }
