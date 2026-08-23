@@ -85,7 +85,7 @@
           停止安装
         </v-btn>
         <v-btn
-          v-if="recoverable && !failed"
+          v-if="resumable && !failed"
           :disabled="actionPending"
           :loading="actionPending"
           aria-label="继续安装"
@@ -183,6 +183,19 @@ const recoverable = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.FAILED ||
     task.state === gameEnum.package.taskState.PAUSED ||
     task.state === gameEnum.package.taskState.READY_TO_APPLY
+  );
+});
+// 已越过发布边界但尚未登记的任务（已发布/复检完成/等待登记），以及提交边界前
+// 中断的任务（提交准备/等待发布），应用重启后都需要「继续安装」来恢复收尾。
+const resumable = computed<boolean>(() => {
+  if (gameEnum.package.taskActive(task.state)) return false;
+  return (
+    recoverable.value ||
+    task.state === gameEnum.package.taskState.COMMIT_PREPARED ||
+    task.state === gameEnum.package.taskState.PUBLISH_PENDING ||
+    task.state === gameEnum.package.taskState.PUBLISHED ||
+    task.state === gameEnum.package.taskState.VERIFIED ||
+    task.state === gameEnum.package.taskState.REGISTRATION_PENDING
   );
 });
 const canAbandon = computed<boolean>(() => {
