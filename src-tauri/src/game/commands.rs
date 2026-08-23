@@ -21,13 +21,33 @@ use super::{
   switch::{self, create_and_persist_switch_plan},
 };
 use chrono::{Duration as ChronoDuration, Utc};
+use serde::Serialize;
 use sqlx::Row;
-use std::path::{Path, PathBuf};
-use tauri::{AppHandle, Manager, ipc::Channel};
+use std::{
+  fs,
+  path::{Path, PathBuf},
+  time::{Duration, Instant},
+};
+use tauri::{AppHandle, Emitter, Manager, ipc::Channel};
 use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
 
 const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GameUninstallProgress {
+  completed: usize,
+  total: usize,
+  current: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameUninstallSummary {
+  pub removed_files: usize,
+  pub removed_dirs: usize,
+}
 
 /// 检测指定可执行文件，并返回当前磁盘上的游戏安装状态。
 #[tauri::command]
@@ -114,6 +134,170 @@ pub async fn game_installation_list(
 #[tauri::command]
 pub fn game_installation_locate() -> Vec<String> {
   locate_executables()
+}
+
+/// 卸载已登记的游戏安装：删除 `YuanShen.exe` 所在目录的全部内容，保留空目录本身，
+/// 并删除数据库登记。删除过程中通过 `game-uninstall://progress` 事件上报进度。
+#[tauri::command]
+pub async fn game_installation_uninstall(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+) -> Result<GameUninstallSummary, String> {
+  if super::package::is_game_running() {
+    return Err("游戏正在运行，请先退出游戏再卸载".to_string());
+  }
+  if journal::list(&game_task_root(&app_handle)?, Some(&installation_id))?
+    .iter()
+    .any(|task| task.state.blocks_launch())
+  {
+    return Err("该游戏安装存在进行中或等待恢复的资源提交，暂时不能卸载".to_string());
+  }
+  let pool = sqlite_pool(&db_instances).await?;
+  let root_path =
+    sqlx::query_scalar::<_, String>("SELECT rootPath FROM GameInstallation WHERE id = ? LIMIT 1")
+      .bind(&installation_id)
+      .fetch_optional(&pool)
+      .await
+      .map_err(|error| error.to_string())?
+      .ok_or_else(|| "未找到已登记的游戏安装".to_string())?;
+  let summary = tauri::async_runtime::spawn_blocking(move || {
+    uninstall_game_root(&app_handle, Path::new(&root_path))
+  })
+  .await
+  .map_err(|error| format!("卸载任务异常退出：{error}"))??;
+  sqlx::query("DELETE FROM GameInstallation WHERE id = ?")
+    .bind(&installation_id)
+    .execute(&pool)
+    .await
+    .map_err(|error| format!("删除安装登记失败：{error}"))?;
+  Ok(summary)
+}
+
+/// 删除游戏根目录的全部内容，保留根目录本身为空目录。
+fn uninstall_game_root(
+  app_handle: &AppHandle,
+  root: &Path,
+) -> Result<GameUninstallSummary, String> {
+  if !root.is_absolute() || root.parent().is_none() || root.parent() == Some(root) {
+    return Err("卸载目标不是安全的本地目录".to_string());
+  }
+  let metadata =
+    fs::symlink_metadata(root).map_err(|error| format!("读取卸载目标失败：{error}"))?;
+  if metadata.file_type().is_symlink()
+    || installer::is_reparse_point(&metadata)
+    || !metadata.is_dir()
+  {
+    return Err("卸载目标不是安全的普通目录".to_string());
+  }
+  let app_data =
+    app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  if paths_overlap(root, &app_data) {
+    return Err("卸载目标与应用数据目录冲突，拒绝卸载".to_string());
+  }
+  let total = count_tree_entries(root)?;
+  let mut removed_files = 0_usize;
+  let mut removed_dirs = 0_usize;
+  let mut completed = 0_usize;
+  let mut last_emit = Instant::now() - Duration::from_millis(300);
+  delete_tree_contents(
+    root,
+    app_handle,
+    total,
+    &mut completed,
+    &mut last_emit,
+    &mut removed_files,
+    &mut removed_dirs,
+  )?;
+  emit_uninstall_progress(app_handle, completed, total, None);
+  Ok(GameUninstallSummary { removed_files, removed_dirs })
+}
+
+fn count_tree_entries(root: &Path) -> Result<usize, String> {
+  let mut count = 0_usize;
+  count_tree_entries_inner(root, &mut count)?;
+  Ok(count)
+}
+
+fn count_tree_entries_inner(path: &Path, count: &mut usize) -> Result<(), String> {
+  for entry in fs::read_dir(path).map_err(|error| format!("读取卸载目录失败：{error}"))? {
+    let entry = entry.map_err(|error| format!("读取卸载目录条目失败：{error}"))?;
+    let child = entry.path();
+    let metadata =
+      fs::symlink_metadata(&child).map_err(|error| format!("读取卸载条目状态失败：{error}"))?;
+    if metadata.file_type().is_symlink() || installer::is_reparse_point(&metadata) {
+      return Err(format!("卸载目录包含符号链接或重解析点：{}", child.display()));
+    }
+    *count = count.saturating_add(1);
+    if metadata.is_dir() {
+      count_tree_entries_inner(&child, count)?;
+    }
+  }
+  Ok(())
+}
+
+fn delete_tree_contents(
+  path: &Path,
+  app_handle: &AppHandle,
+  total: usize,
+  completed: &mut usize,
+  last_emit: &mut Instant,
+  removed_files: &mut usize,
+  removed_dirs: &mut usize,
+) -> Result<(), String> {
+  for entry in fs::read_dir(path).map_err(|error| format!("读取卸载目录失败：{error}"))? {
+    let entry = entry.map_err(|error| format!("读取卸载目录条目失败：{error}"))?;
+    let child = entry.path();
+    let metadata =
+      fs::symlink_metadata(&child).map_err(|error| format!("读取卸载条目状态失败：{error}"))?;
+    if metadata.file_type().is_symlink() || installer::is_reparse_point(&metadata) {
+      return Err(format!("卸载目录包含符号链接或重解析点：{}", child.display()));
+    }
+    if metadata.is_dir() {
+      delete_tree_contents(
+        &child,
+        app_handle,
+        total,
+        completed,
+        last_emit,
+        removed_files,
+        removed_dirs,
+      )?;
+      fs::remove_dir(&child).map_err(|error| format!("删除卸载子目录失败：{error}"))?;
+      *removed_dirs = removed_dirs.saturating_add(1);
+    } else {
+      fs::remove_file(&child).map_err(|error| format!("删除卸载文件失败：{error}"))?;
+      *removed_files = removed_files.saturating_add(1);
+    }
+    *completed = completed.saturating_add(1);
+    if last_emit.elapsed() >= Duration::from_millis(120) {
+      emit_uninstall_progress(app_handle, *completed, total, Some(child.display().to_string()));
+      *last_emit = Instant::now();
+    }
+  }
+  Ok(())
+}
+
+fn emit_uninstall_progress(
+  app_handle: &AppHandle,
+  completed: usize,
+  total: usize,
+  current: Option<String>,
+) {
+  let _ = app_handle
+    .emit("game-uninstall://progress", GameUninstallProgress { completed, total, current });
+}
+
+fn paths_overlap(left: &Path, right: &Path) -> bool {
+  let left_key = path_key(left);
+  let right_key = path_key(right);
+  left_key == right_key
+    || left_key.starts_with(&format!("{right_key}\\"))
+    || right_key.starts_with(&format!("{left_key}\\"))
+}
+
+fn path_key(path: &Path) -> String {
+  path.to_string_lossy().replace('/', "\\").to_ascii_lowercase()
 }
 
 /// 创建未登记的全新安装草稿；最终游戏目录和 staging 路径均由 Rust 派生。

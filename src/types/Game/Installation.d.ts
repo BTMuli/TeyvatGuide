@@ -103,4 +103,17 @@ declare namespace TGApp.Game.Installation {
     installation: Item | null;
     message: string | null;
   };
+
+  /** 卸载进度事件载荷（`game-uninstall://progress`）。 */
+  type UninstallProgress = {
+    completed: number;
+    total: number;
+    current: string | null;
+  };
+
+  /** 卸载完成结果。 */
+  type UninstallSummary = {
+    removedFiles: number;
+    removedDirs: number;
+  };
 }

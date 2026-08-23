@@ -2437,7 +2437,7 @@ pub(crate) fn directory_identity(path: &Path) -> Result<(u64, u64), String> {
   }
 }
 
-fn is_reparse_point(metadata: &fs::Metadata) -> bool {
+pub(crate) fn is_reparse_point(metadata: &fs::Metadata) -> bool {
   #[cfg(target_os = "windows")]
   {
     use std::os::windows::fs::MetadataExt;

@@ -49,14 +49,14 @@
       <v-progress-circular indeterminate />
       <span class="game-empty-title">正在读取本地安装…</span>
     </div>
-    <v-list v-else-if="chosen === null" class="game-list">
+    <v-list v-else-if="installations.length === 0" class="game-list">
       <div class="game-list-header">
         <span>本地安装</span>
       </div>
       <v-list-item
         subtitle="从已发现的安装中选择，或手动指定国服 YuanShen.exe"
         title="选择游戏路径"
-        @click="pathOverlay = true"
+        @click="openPathOverlay(null)"
       >
         <template #prepend>
           <div class="game-icon">
@@ -66,227 +66,14 @@
       </v-list-item>
     </v-list>
     <template v-else>
-      <section class="game-list">
-        <div class="game-list-header">
-          <div class="game-list-heading">
-            <span>{{ gameEnum.installation.schemeDesc(chosen.schemeId) }}</span>
-            <v-btn
-              :disabled="installationSizeLoading"
-              :loading="installationSizeLoading"
-              class="game-size-btn"
-              prepend-icon="mdi-harddisk"
-              size="small"
-              variant="tonal"
-              @click="handleInstallationSizeClick"
-            >
-              {{ installationSizeButtonLabel }}
-            </v-btn>
-          </div>
-          <div class="game-list-chips">
-            <v-chip size="small" variant="tonal">当前安装</v-chip>
-            <v-chip :color="statusColor(chosen.status)" size="small" variant="tonal">
-              {{ statusDesc(chosen.status) }}
-            </v-chip>
-          </div>
-        </div>
-        <div class="game-path">
-          <div class="game-icon">
-            <TMiImg :ori="true" :size="40" :src="genshinIcon" alt="原神" />
-          </div>
-          <div class="game-path-copy">
-            <span>安装路径</span>
-            <strong>{{ chosen.executablePath }}</strong>
-          </div>
-          <v-btn
-            class="game-path-act"
-            color="var(--tgc-od-orange)"
-            prepend-icon="mdi-folder-swap-outline"
-            variant="tonal"
-            @click="pathOverlay = true"
-          >
-            更换路径
-          </v-btn>
-        </div>
-        <PgVersion
-          v-if="chosen.status === gameEnum.installation.status.KNOWN"
-          :installation="chosen"
-        >
-          <template #facts="version">
-            <PgScheme :installation="chosen" @switched="refreshRegistered">
-              <template #channel="scheme">
-                <div class="game-facts">
-                  <div class="game-fact">
-                    <div class="game-fact-head">
-                      <span>版本</span>
-                      <v-icon
-                        v-if="
-                          isLatestOfficial(version.snapshot) && !hasPreDownload(version.snapshot)
-                        "
-                        color="var(--tgc-od-green)"
-                        size="16"
-                        title="已是最新正式版本"
-                      >
-                        mdi-check-circle-outline
-                      </v-icon>
-                      <v-icon
-                        v-else-if="version.snapshot !== null && !isLatestOfficial(version.snapshot)"
-                        color="var(--tgc-od-orange)"
-                        size="16"
-                        :title="`正式 ${version.snapshot.main.tag}`"
-                      >
-                        mdi-arrow-up-circle-outline
-                      </v-icon>
-                      <v-icon
-                        v-if="preDownloadTag(version.snapshot) !== null"
-                        color="var(--tgc-od-orange)"
-                        size="16"
-                        :title="`预下载 ${preDownloadTag(version.snapshot)}`"
-                      >
-                        mdi-cloud-download-outline
-                      </v-icon>
-                      <div class="game-fact-acts">
-                        <v-btn
-                          :disabled="version.refreshDisabled"
-                          :loading="version.loading"
-                          aria-label="刷新远端版本"
-                          density="compact"
-                          icon="mdi-cloud-sync-outline"
-                          size="small"
-                          title="刷新远端版本"
-                          variant="text"
-                          @click="handleVersionRefresh(version)"
-                        />
-                        <v-progress-circular
-                          v-if="version.verifyActive || version.verifyPending"
-                          color="var(--tgc-od-orange)"
-                          indeterminate
-                          size="16"
-                          :title="version.verifyActive ? '正在校验' : '正在开始校验'"
-                          width="2"
-                        />
-                        <v-btn
-                          v-else
-                          :aria-label="version.verifyResumeLabel"
-                          :disabled="version.verifyBusy"
-                          :title="version.verifyResumeLabel"
-                          density="compact"
-                          icon="mdi-shield-check-outline"
-                          size="small"
-                          variant="text"
-                          @click="handleVersionVerify(version)"
-                        />
-                      </div>
-                    </div>
-                    <strong>{{ versionPrimary(version.snapshot) }}</strong>
-                  </div>
-                  <div class="game-fact">
-                    <div class="game-fact-head">
-                      <span>渠道参数</span>
-                      <v-chip class="game-fact-tag" size="x-small" variant="tonal">
-                        {{ schemeTag(chosen.schemeId) }}
-                      </v-chip>
-                      <div v-if="scheme.canConvert || scheme.taskActive" class="game-fact-acts">
-                        <v-btn
-                          :aria-label="
-                            version.verifyBusy
-                              ? '校验进行中，暂时不能换服'
-                              : scheme.taskActive
-                                ? '取消换服'
-                                : scheme.convertLabel
-                          "
-                          :disabled="
-                            version.verifyBusy || (scheme.converting && !scheme.taskActive)
-                          "
-                          :icon="
-                            scheme.taskActive
-                              ? 'mdi-stop-circle-outline'
-                              : 'mdi-swap-horizontal-bold'
-                          "
-                          :loading="scheme.converting && !scheme.taskActive"
-                          :title="
-                            version.verifyBusy
-                              ? '校验进行中，暂时不能换服'
-                              : scheme.taskActive
-                                ? '取消换服'
-                                : `可转为${gameEnum.installation.schemeDesc(scheme.targetScheme)}`
-                          "
-                          density="compact"
-                          size="small"
-                          variant="text"
-                          @click="handleSchemeAction(scheme)"
-                        />
-                      </div>
-                    </div>
-                    <strong>{{ channelDesc(chosen) }}</strong>
-                  </div>
-                  <div class="game-fact">
-                    <span>语音包</span>
-                    <strong>{{ audioDesc(chosen.audioLanguages) }}</strong>
-                  </div>
-                  <div class="game-fact">
-                    <div class="game-fact-head">
-                      <span>渠道 SDK</span>
-                      <v-icon
-                        :color="chosen.hasChannelSdk ? 'var(--tgc-od-green)' : 'var(--tgc-od-red)'"
-                        :icon="
-                          chosen.hasChannelSdk
-                            ? 'mdi-check-circle-outline'
-                            : 'mdi-close-circle-outline'
-                        "
-                        :title="chosen.hasChannelSdk ? '已安装' : '未安装'"
-                        size="16"
-                      />
-                    </div>
-                    <strong>{{ chosen.hasChannelSdk ? "已安装" : "未安装" }}</strong>
-                  </div>
-                </div>
-              </template>
-            </PgScheme>
-          </template>
-        </PgVersion>
-        <template v-else>
-          <div class="game-facts">
-            <div class="game-fact">
-              <span>版本</span>
-              <strong>{{ chosen.version ?? "未读取" }}</strong>
-            </div>
-            <div class="game-fact">
-              <div class="game-fact-head">
-                <span>渠道参数</span>
-                <v-chip class="game-fact-tag" size="x-small" variant="tonal">
-                  {{ schemeTag(chosen.schemeId) }}
-                </v-chip>
-              </div>
-              <strong>{{ channelDesc(chosen) }}</strong>
-            </div>
-            <div class="game-fact">
-              <span>语音包</span>
-              <strong>{{ audioDesc(chosen.audioLanguages) }}</strong>
-            </div>
-            <div class="game-fact">
-              <div class="game-fact-head">
-                <span>渠道 SDK</span>
-                <v-icon
-                  :color="chosen.hasChannelSdk ? 'var(--tgc-od-green)' : 'var(--tgc-od-red)'"
-                  :icon="
-                    chosen.hasChannelSdk ? 'mdi-check-circle-outline' : 'mdi-close-circle-outline'
-                  "
-                  :title="chosen.hasChannelSdk ? '已安装' : '未安装'"
-                  size="16"
-                />
-              </div>
-              <strong>{{ chosen.hasChannelSdk ? "已安装" : "未安装" }}</strong>
-            </div>
-          </div>
-          <v-alert
-            :text="chosen.statusMessage"
-            class="game-alert"
-            density="compact"
-            type="warning"
-            variant="tonal"
-          />
-        </template>
-      </section>
+      <PgInstallation
+        v-for="installation in installations"
+        :key="installation.id"
+        :installation="installation"
+        :installation-count="installations.length"
+        @updated="refreshPageData"
+        @change-path="openPathOverlay"
+      />
     </template>
     <PgInstallDraft
       v-for="draft in visibleInstallDrafts"
@@ -311,7 +98,7 @@
   <PgoPath
     v-if="pathOverlay"
     v-model="pathOverlay"
-    :currentPath="chosen?.executablePath"
+    :currentPath="pathTarget?.executablePath ?? undefined"
     @selected="refreshPageData"
   />
   <PgoInstall
@@ -324,38 +111,31 @@
 </template>
 
 <script lang="ts" setup>
-import TMiImg from "@comp/app/t-mi-img.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useAppStore from "@store/app.js";
-import useBBSStore from "@store/bbs.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import { tryLaunchGame } from "@utils/TGGame.js";
-import {
-  getGameInstallationSize,
-  listGameInstallDrafts,
-  listGameInstallations,
-} from "@utils/TGGameLauncher.js";
+import { listGameInstallDrafts, listGameInstallations } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
 
 const PgCache = defineAsyncComponent(() => import("@comp/pageGame/pg-cache.vue"));
 const PgInstallDraft = defineAsyncComponent(() => import("@comp/pageGame/pg-install-draft.vue"));
 const PgInstallTask = defineAsyncComponent(() => import("@comp/pageGame/pg-install-task.vue"));
-const PgScheme = defineAsyncComponent(() => import("@comp/pageGame/pg-scheme.vue"));
-const PgVersion = defineAsyncComponent(() => import("@comp/pageGame/pg-version.vue"));
+const PgInstallation = defineAsyncComponent(() => import("@comp/pageGame/pg-installation.vue"));
 const PgoInstall = defineAsyncComponent(() => import("@comp/pageGame/pgo-install.vue"));
 const PgoPath = defineAsyncComponent(() => import("@comp/pageGame/pgo-path.vue"));
 
 const taskStore = useGameLauncherStore();
 const { isLogin } = storeToRefs(useAppStore());
-const { gameList } = storeToRefs(useBBSStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const launching = ref<boolean>(false);
 const pathOverlay = ref<boolean>(false);
+const pathTarget = ref<TGApp.Game.Installation.Item | null>(null);
 const installOverlay = ref<boolean>(false);
 type InstallInitialConfig = {
   scheme: TGApp.Game.Installation.SchemeEnum;
@@ -368,12 +148,6 @@ const installInitialConfig = ref<InstallInitialConfig | null>(null);
 const installations = ref<Array<TGApp.Game.Installation.Item>>([]);
 const installationsLoading = ref<boolean>(true);
 const installDrafts = ref<Array<TGApp.Game.Installation.InstallDraftSummary>>([]);
-const installationSize = ref<number | null>(null);
-const installationSizeLoading = ref<boolean>(false);
-const installationSizeError = ref<boolean>(false);
-const installationSizeCache = new Map<string, { bytes: number; readAt: number }>();
-const installationSizePending = new Map<string, Promise<number>>();
-let installationSizeRequest = 0;
 let pageActive = true;
 
 const chosen = computed<TGApp.Game.Installation.Item | null>(() => {
@@ -412,122 +186,14 @@ const installedSchemes = computed<Array<TGApp.Game.Installation.SchemeEnum>>(() 
   }
   return schemes;
 });
-const genshinIcon = computed<string>(() => {
-  const game = gameList.value.find((item) => item.op_name === "hk4e");
-  if (game === undefined || game.app_icon === "") return "/platforms/mhy/ys.webp";
-  return game.app_icon;
-});
-
-function statusDesc(status: TGApp.Game.Installation.StatusEnum): string {
-  switch (status) {
-    case gameEnum.installation.status.KNOWN:
-      return "可用";
-    case gameEnum.installation.status.INCONSISTENT:
-      return "状态不一致";
-    case gameEnum.installation.status.UNSUPPORTED:
-      return "不支持";
-  }
-}
-
-function statusColor(status: TGApp.Game.Installation.StatusEnum): string {
-  switch (status) {
-    case gameEnum.installation.status.KNOWN:
-      return "success";
-    case gameEnum.installation.status.INCONSISTENT:
-      return "warning";
-    case gameEnum.installation.status.UNSUPPORTED:
-      return "error";
-  }
-}
-
-function channelDesc(installation: TGApp.Game.Installation.Item): string {
-  if (installation.channel === null || installation.subChannel === null) return "未读取";
-  return `${installation.channel} / ${installation.subChannel}`;
-}
-
-function schemeTag(schemeId: TGApp.Game.Installation.SchemeEnum | null): string {
-  switch (schemeId) {
-    case gameEnum.installation.scheme.CN_OFFICIAL:
-      return "官服";
-    case gameEnum.installation.scheme.CN_BILIBILI:
-      return "渠道服";
-    default:
-      return "未知";
-  }
-}
-
-function audioDesc(languages: Array<string>): string {
-  if (languages.length === 0) return "未识别";
-  const descriptions: Record<string, string> = {
-    "zh-cn": "中文",
-    "en-us": "英语",
-    "ja-jp": "日语",
-    "ko-kr": "韩语",
-  };
-  return languages.map((language) => descriptions[language] ?? language).join("、");
-}
-
-const installationSizeLabel = computed<string>(() => {
-  if (installationSizeLoading.value) return "读取中…";
-  if (installationSizeError.value) return "读取失败，点击重试";
-  if (installationSize.value === null) return "点击读取占用空间";
-  return fmtUtil.size(installationSize.value);
-});
-const installationSizeButtonLabel = computed<string>(() => {
-  if (installationSizeLoading.value) return "读取中…";
-  if (installationSizeError.value) return "重试占用空间";
-  if (installationSize.value === null) return "读取占用空间";
-  return `占用空间 ${installationSizeLabel.value}`;
-});
-
-function versionPrimary(snapshot: TGApp.Game.Package.Snapshot | null): string {
-  const local = snapshot?.localVersion ?? chosen.value?.version ?? "未读取";
-  if (snapshot === null || local === snapshot.main.tag) return local;
-  return `${local} → ${snapshot.main.tag}`;
-}
-
-function isLatestOfficial(snapshot: TGApp.Game.Package.Snapshot | null): boolean {
-  if (snapshot === null) return false;
-  const local = snapshot.localVersion ?? chosen.value?.version;
-  return local === snapshot.main.tag;
-}
-
-function hasPreDownload(snapshot: TGApp.Game.Package.Snapshot | null): boolean {
-  return snapshot !== null && snapshot.preDownload !== null;
-}
-
-function preDownloadTag(snapshot: TGApp.Game.Package.Snapshot | null): string | null {
-  return snapshot?.preDownload?.tag ?? null;
-}
-
-function handleVersionRefresh(version: { refreshSnapshot: () => Promise<void> }): void {
-  void version.refreshSnapshot();
-}
-
-function handleVersionVerify(version: { startVerify: () => Promise<void> }): void {
-  void version.startVerify();
-}
-
 function openInstallOverlay(): void {
   installInitialConfig.value = null;
   installOverlay.value = true;
 }
 
-function handleInstallationSizeClick(): void {
-  if (installationSizeLoading.value) return;
-  void refreshInstallationSize(chosen.value ?? undefined);
-}
-
-function handleSchemeAction(scheme: {
-  cancelSwitch: () => Promise<void>;
-  convertScheme: () => Promise<void>;
-  taskActive: boolean;
-}): void {
-  if (scheme.taskActive) {
-    void scheme.cancelSwitch();
-    return;
-  }
-  void scheme.convertScheme();
+function openPathOverlay(installation: TGApp.Game.Installation.Item | null): void {
+  pathTarget.value = installation;
+  pathOverlay.value = true;
 }
 
 function taskBlocksLaunch(state: TGApp.Game.Package.TaskStateEnum): boolean {
@@ -579,10 +245,6 @@ async function refreshRegistered(): Promise<void> {
   try {
     const nextInstallations = await listGameInstallations();
     installations.value = nextInstallations;
-    installationSizeRequest += 1;
-    installationSize.value = null;
-    installationSizeLoading.value = false;
-    installationSizeError.value = false;
   } catch (error) {
     showSnackbar.error(`读取游戏安装失败：${error}`);
   } finally {
@@ -600,42 +262,6 @@ async function refreshInstallDrafts(): Promise<void> {
 
 async function refreshPageData(): Promise<void> {
   await Promise.all([refreshRegistered(), refreshInstallDrafts()]);
-}
-
-async function refreshInstallationSize(
-  installation: TGApp.Game.Installation.Item | undefined,
-): Promise<void> {
-  const request = ++installationSizeRequest;
-  installationSize.value = null;
-  installationSizeError.value = false;
-  if (installation === undefined) {
-    installationSizeLoading.value = false;
-    return;
-  }
-  installationSizeLoading.value = true;
-  let pending: Promise<number> | undefined;
-  try {
-    const cached = installationSizeCache.get(installation.rootPath);
-    if (cached !== undefined && Date.now() - cached.readAt < 30_000) {
-      installationSize.value = cached.bytes;
-      return;
-    }
-    pending = installationSizePending.get(installation.rootPath);
-    if (pending === undefined) {
-      pending = getGameInstallationSize(installation.rootPath);
-      installationSizePending.set(installation.rootPath, pending);
-    }
-    const size = await pending;
-    installationSizeCache.set(installation.rootPath, { bytes: size, readAt: Date.now() });
-    if (request === installationSizeRequest) installationSize.value = size;
-  } catch {
-    if (request === installationSizeRequest) installationSizeError.value = true;
-  } finally {
-    if (installationSizePending.get(installation.rootPath) === pending) {
-      installationSizePending.delete(installation.rootPath);
-    }
-    if (request === installationSizeRequest) installationSizeLoading.value = false;
-  }
 }
 
 async function handleInstallTaskCancel(task: TGApp.Game.Package.TaskSummary): Promise<void> {
@@ -850,120 +476,6 @@ onUnmounted(() => {
   }
 }
 
-.game-list-heading {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-
-  > span {
-    overflow: hidden;
-    min-width: 0;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-}
-
-.game-size-btn {
-  flex-shrink: 0;
-  padding-inline: 4px;
-}
-
-.game-list-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.game-path-act {
-  flex-shrink: 0;
-}
-
-.game-path {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
-}
-
-.game-path-copy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-  gap: 4px;
-
-  span {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  strong {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 14px;
-    font-weight: normal;
-    line-height: 20px;
-    overflow-wrap: anywhere;
-  }
-}
-
-.game-facts {
-  display: grid;
-  padding: 8px 16px 12px;
-  gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.game-fact {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
-  background: var(--box-bg-2);
-  gap: 4px;
-
-  span {
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
-
-  strong {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 14px;
-    font-weight: normal;
-    line-height: 20px;
-    overflow-wrap: anywhere;
-  }
-}
-
-.game-fact-head {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-
-  > span {
-    margin-inline-end: 4px;
-  }
-}
-
-.game-fact-acts {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 2px;
-  margin-inline-start: auto;
-}
-
-.game-fact-tag {
-  flex-shrink: 0;
-}
-
 .game-icon {
   display: flex;
   overflow: hidden;
@@ -976,16 +488,6 @@ onUnmounted(() => {
   margin-right: 15px;
   background: var(--box-bg-2);
   color: var(--box-text-2);
-
-  :deep(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.game-alert {
-  margin: 8px 16px 16px;
 }
 
 .game-empty {
@@ -1003,11 +505,5 @@ onUnmounted(() => {
   font-family: var(--font-title);
   font-size: 18px;
   font-weight: normal;
-}
-
-@media (width <= 900px) {
-  .game-facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 </style>

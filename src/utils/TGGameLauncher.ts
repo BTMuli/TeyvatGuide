@@ -93,6 +93,20 @@ export async function stopGame(): Promise<void> {
 }
 
 /**
+ * 卸载已登记的游戏安装：删除游戏根目录全部内容（保留空目录），并删除数据库登记。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ * @returns 卸载结果
+ */
+export async function uninstallGameInstallation(
+  installationId: string,
+): Promise<TGApp.Game.Installation.UninstallSummary> {
+  return await invoke<TGApp.Game.Installation.UninstallSummary>("game_installation_uninstall", {
+    installationId,
+  });
+}
+
+/**
  * 获取已登记安装的本地与远端版本快照。
  * @since Beta v0.11.5
  * @param installationId - 已登记安装 ID

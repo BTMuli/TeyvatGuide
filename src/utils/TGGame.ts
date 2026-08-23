@@ -56,7 +56,58 @@ export async function migrateLegacyGameInstallation(gameDir: string): Promise<bo
 }
 
 /**
- * 启动当前登记的游戏安装。
+ * 启动指定游戏安装。
+ * @since Beta v0.11.5
+ * @param installation - 目标安装
+ * @param account - 官服启动账号；B 服可省略
+ * @param cookie - 官服启动 Cookie；B 服可省略
+ */
+export async function launchInstallation(
+  installation: TGApp.Game.Installation.Item,
+  account?: TGApp.Sqlite.Account.Game,
+  cookie?: TGApp.App.Account.Cookie,
+): Promise<void> {
+  if (installation.status !== gameEnum.installation.status.KNOWN) {
+    showSnackbar.warn(installation.statusMessage);
+    return;
+  }
+  let ticket: string | undefined;
+  if (installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
+    if (!account?.uid || !cookie) {
+      showSnackbar.warn("启动国服官服前请先选择已登录的官服账号");
+      return;
+    }
+    if (account.isOfficial !== 1) {
+      showSnackbar.warn("当前米游社账号不是官服账号");
+      return;
+    }
+    try {
+      const response = await passportReq.authTicket(account, cookie);
+      if (response.retcode !== 0) {
+        showSnackbar.error(`[${response.retcode}] ${response.message}`);
+        await TGLogger.Warn(
+          `[TGGame][launchInstallation] 获取官服 ticket 失败：${response.retcode}-${response.message}`,
+        );
+        return;
+      }
+      ticket = response.data.ticket;
+    } catch (error) {
+      const message = TGHttps.getErrMsg(error);
+      showSnackbar.error(`获取 authTicket 失败：${message}`);
+      await TGLogger.Error(`[TGGame][launchInstallation] 获取官服 ticket 异常：${message}`);
+      return;
+    }
+  }
+  try {
+    await launchGameInstallation(installation.id, ticket);
+    showSnackbar.success(`正在启动${gameEnum.installation.schemeDesc(installation.schemeId)}`);
+  } catch (error) {
+    showSnackbar.error(`启动游戏失败：${error}`);
+  }
+}
+
+/**
+ * 启动当前登记（主启动路径）的游戏安装。
  * @since Beta v0.11.5
  * @param account - 当前米游社游戏账号
  * @param cookie - 当前米游社 Cookie
@@ -77,45 +128,7 @@ export async function tryLaunchGame(
     showSnackbar.warn("请先在游戏安装页面登记游戏安装");
     return;
   }
-  if (installation.status !== gameEnum.installation.status.KNOWN) {
-    showSnackbar.warn(installation.statusMessage);
-    return;
-  }
-
-  let ticket: string | undefined;
-  if (installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
-    if (!account?.uid || !cookie) {
-      showSnackbar.warn("启动国服官服前请先登录米游社");
-      return;
-    }
-    if (account.isOfficial !== 1) {
-      showSnackbar.warn("当前米游社账号不是官服账号");
-      return;
-    }
-    try {
-      const response = await passportReq.authTicket(account, cookie);
-      if (response.retcode !== 0) {
-        showSnackbar.error(`[${response.retcode}] ${response.message}`);
-        await TGLogger.Warn(
-          `[TGGame][tryLaunchGame] 获取官服 ticket 失败：${response.retcode}-${response.message}`,
-        );
-        return;
-      }
-      ticket = response.data.ticket;
-    } catch (error) {
-      const message = TGHttps.getErrMsg(error);
-      showSnackbar.error(`获取 authTicket 失败：${message}`);
-      await TGLogger.Error(`[TGGame][tryLaunchGame] 获取官服 ticket 异常：${message}`);
-      return;
-    }
-  }
-
-  try {
-    await launchGameInstallation(installation.id, ticket);
-    showSnackbar.success(`正在启动${gameEnum.installation.schemeDesc(installation.schemeId)}`);
-  } catch (error) {
-    showSnackbar.error(`启动游戏失败：${error}`);
-  }
+  await launchInstallation(installation, account, cookie);
 }
 
 /**
