@@ -22,12 +22,14 @@
         :loading="taskCleanupPending"
         aria-label="清理已结束任务"
         class="game-task-clean-btn"
-        icon="mdi-broom"
-        size="small"
+        color="var(--tgc-od-red)"
+        prepend-icon="mdi-broom"
         title="清理已结束任务"
-        variant="text"
+        variant="tonal"
         @click="handleTaskCleanup"
-      />
+      >
+        清理任务
+      </v-btn>
       <v-btn
         :disabled="launching"
         :loading="launching"
@@ -807,11 +809,11 @@ onUnmounted(() => {
 }
 
 .game-install-btn {
-  margin-right: 8px;
+  margin-right: 4px;
 }
 
 .game-task-clean-btn {
-  margin-right: 4px;
+  margin-right: 8px;
 }
 
 .game-page {
