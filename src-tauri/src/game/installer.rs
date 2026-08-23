@@ -563,12 +563,14 @@ pub(crate) fn execute_install(
         "校验暂存目录",
       )?
     } else {
-      verify_install_tree_with_evidence_timed(
+      verify_install_tree_parallel_timed(
         plan,
         overlay,
         &staging_root,
         &sdk_files,
         &evidence,
+        task_root,
+        false,
         timing,
         journal,
         emit,
@@ -751,12 +753,14 @@ pub(crate) fn execute_install(
           "复检最终目录",
         )?
       } else {
-        verify_install_tree_with_evidence_with_journal_progress(
+        verify_install_tree_parallel_with_journal_progress(
           plan,
           overlay,
           &game_root,
           &sdk_files,
           &evidence,
+          task_root,
+          false,
           journal,
           emit,
           "复检最终目录",
@@ -1768,25 +1772,6 @@ fn verify_install_tree_with_journal_progress(
     emit,
     phase,
   )
-}
-
-fn verify_install_tree_with_evidence_timed(
-  plan: &PersistedPlan,
-  overlay: &InstallOverlay,
-  root: &Path,
-  sdk_files: &BTreeMap<String, (u64, String)>,
-  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
-  timing: &mut InstallValidationTiming,
-  journal: &mut TaskJournal,
-  emit: &dyn Fn(&TaskJournal),
-  phase: &str,
-) -> Result<BTreeMap<String, (u64, String)>, String> {
-  let started_at = Instant::now();
-  let result = verify_install_tree_with_evidence_with_journal_progress(
-    plan, overlay, root, sdk_files, evidence, journal, emit, phase,
-  );
-  timing.record_staging_tree(started_at.elapsed());
-  result
 }
 
 /// 并行「校验暂存目录」：逐清单文件并发做证据核对/回退 hash，证据缺失时补写证据，
