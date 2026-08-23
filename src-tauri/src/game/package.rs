@@ -186,6 +186,87 @@ struct InstallPipelineMetrics {
   recovery_validate_micros: AtomicU64,
 }
 
+#[derive(Clone, Default)]
+struct RecoveryValidationProgress {
+  completed: usize,
+  total: usize,
+  completed_bytes: u64,
+  total_bytes: u64,
+  current_file: String,
+}
+
+/// 在独立阻塞线程中按逐文件证据复检已组装资源，并持续把进度投影到 journal。
+async fn run_install_recovery_validation(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  staging_root: &Path,
+  plan: &Arc<PersistedPlan>,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  canceled: &Arc<AtomicBool>,
+  metrics: &Arc<InstallPipelineMetrics>,
+  start_cursor: usize,
+) -> Result<(), String> {
+  let (progress_tx, mut progress_rx) =
+    tokio::sync::mpsc::unbounded_channel::<RecoveryValidationProgress>();
+  let plan_for_validation = Arc::clone(plan);
+  let task_root_for_validation = task_root.to_path_buf();
+  let staging_for_validation = staging_root.to_path_buf();
+  let canceled_for_validation = Arc::clone(canceled);
+  let validation = tauri::async_runtime::spawn_blocking(move || {
+    assembler::validate_full_install_cursor_with_evidence(
+      &plan_for_validation,
+      &task_root_for_validation,
+      &staging_for_validation,
+      start_cursor,
+      &canceled_for_validation,
+      |completed, total, completed_bytes, total_bytes, current_file| {
+        let _ = progress_tx.send(RecoveryValidationProgress {
+          completed,
+          total,
+          completed_bytes,
+          total_bytes,
+          current_file: current_file.to_string(),
+        });
+      },
+    )
+  });
+  let mut validation = Box::pin(validation);
+  let mut last_emit = Instant::now();
+  loop {
+    let recv_future = Box::pin(progress_rx.recv());
+    match futures_util::future::select(validation, recv_future).await {
+      futures_util::future::Either::Left((result, _)) => {
+        return match result {
+          Ok(result) => result,
+          Err(error) => Err(format!("安装资源复检 worker 异常退出：{error}")),
+        };
+      }
+      futures_util::future::Either::Right((progress, validation_rest)) => {
+        validation = validation_rest;
+        let Some(progress) = progress else {
+          continue;
+        };
+        let mut value = journal.lock().await;
+        value.verification_completed_count = progress.completed;
+        value.verification_total_count = progress.total;
+        value.assembly_completed_bytes = progress.completed_bytes;
+        value.assembly_total_bytes = progress.total_bytes;
+        value.commit_current_step =
+          Some(format!("复检已组装资源：{}/{}", progress.completed, progress.total));
+        value.current_file = Some(progress.current_file);
+        value.touch();
+        if last_emit.elapsed() >= Duration::from_millis(500) {
+          if let Err(error) = persist_install_progress(task_root, &value, metrics) {
+            return Err(error);
+          }
+          emit_progress(app_handle, &value.summary());
+          last_emit = Instant::now();
+        }
+      }
+    }
+  }
+}
+
 impl InstallPipelineMetrics {
   fn new(
     plan: &PersistedPlan,
@@ -1336,8 +1417,36 @@ async fn run_install_streaming_task(
   ));
   let start_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
   let recovery_started_at = Instant::now();
-  let recovery_result =
-    assembler::validate_full_install_cursor(&plan, &staging_root, start_cursor, &canceled);
+  let recovery_result = if start_cursor == 0 {
+    Ok(())
+  } else {
+    {
+      let mut value = journal.lock().await;
+      value.state = PackageTaskState::Assembling;
+      value.verification_completed_count = 0;
+      value.verification_total_count = start_cursor;
+      value.commit_current_step = Some("正在复检已组装资源".to_string());
+      value.current_file = value.commit_current_step.clone();
+      value.assembly_current_file = None;
+      value.touch();
+      if let Err(error) = persist_install_checkpoint(&task_root, &value, &metrics) {
+        persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+        return;
+      }
+      emit_state(&app_handle, &value.summary());
+    }
+    run_install_recovery_validation(
+      &app_handle,
+      &task_root,
+      &staging_root,
+      &plan,
+      &journal,
+      &canceled,
+      &metrics,
+      start_cursor,
+    )
+    .await
+  };
   metrics.record_recovery_validation(start_cursor, recovery_started_at.elapsed());
   if let Err(error) = recovery_result {
     persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
@@ -1527,7 +1636,15 @@ async fn run_install_streaming_task(
       let assembly_result = match assembly_worker_result {
         Ok((result, timing)) => {
           metrics.record_assembly_detail(&timing);
-          result
+          result.and_then(|()| {
+            super::evidence::capture_and_persist_asset_evidence(
+              &task_root,
+              &plan,
+              asset_index,
+              &staging_root,
+            )
+            .map(|_| ())
+          })
         }
         Err(error) => Err(format!("组装 worker 异常退出：{error}")),
       };
@@ -2036,7 +2153,15 @@ async fn run_install_asset_job(
     match worker_result {
       Ok((result, timing)) => {
         metrics.record_assembly_detail(&timing);
-        result
+        result.and_then(|()| {
+          super::evidence::capture_and_persist_asset_evidence(
+            &task_root,
+            &plan,
+            asset_index,
+            &staging_root,
+          )
+          .map(|_| ())
+        })
       }
       Err(error) => Err(format!("组装 worker 异常退出：{error}")),
     }

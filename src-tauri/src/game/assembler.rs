@@ -350,26 +350,59 @@ fn assemble_full_install_asset_inner(
   )
 }
 
-pub(crate) fn validate_full_install_cursor(
+/// 按逐文件证据选择性复检已完成的安装资源。
+///
+/// - 证据完整且文件身份/大小/写入时间与证据一致时复用已验证 MD5，不读取内容；
+/// - 证据缺失、身份不符或内容校验失败时回退到单文件完整 hash，并重新生成证据；
+/// - 旧 schema / 证据目录整体缺失时仍按文件逐个完整 hash，语义与
+///   旧版全量游标复检一致。
+///
+/// `progress` 回调参数依次为：已完成文件数、总文件数、已完成字节、总字节、当前文件。
+pub(crate) fn validate_full_install_cursor_with_evidence<F>(
   plan: &PersistedPlan,
+  task_root: &Path,
   staging_root: &Path,
   cursor: usize,
   canceled: &AtomicBool,
-) -> Result<(), String> {
+  mut progress: F,
+) -> Result<(), String>
+where
+  F: FnMut(usize, usize, u64, u64, &str),
+{
   if plan.strategy != PackagePlanStrategy::Full {
     return Err("安装组装器只接受 Full 计划".to_string());
   }
-  for asset in plan.assets.iter().take(cursor.min(plan.assets.len())) {
+  let count = cursor.min(plan.assets.len());
+  let total_bytes =
+    plan.assets[..count].iter().fold(0_u64, |total, asset| total.saturating_add(asset.size));
+  let root_identity = super::installer::directory_identity(staging_root)?;
+  let mut completed_bytes = 0_u64;
+  for index in 0..count {
     check_canceled(canceled)?;
+    let asset = &plan.assets[index];
     let path = prepare_manifest_output_file(staging_root, &asset.name)?;
-    let metadata = fs::symlink_metadata(&path)
-      .map_err(|error| format!("读取已完成安装资源失败：{}：{error}", asset.name))?;
-    if metadata.file_type().is_symlink() || !metadata.is_file() {
-      return Err(format!("已完成安装资源不是普通文件：{}", asset.name));
+    let evidence = super::evidence::load_asset_evidence(task_root, plan, index)?;
+    let trusted = evidence.as_ref().is_some_and(|evidence| {
+      evidence.path == asset.name
+        && evidence.expected_size == asset.size
+        && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
+        && evidence.staging_volume_serial == root_identity.0
+        && evidence.staging_file_id == root_identity.1
+        && super::evidence::file_matches_evidence(staging_root, evidence).unwrap_or(false)
+    });
+    if !trusted {
+      let metadata = fs::symlink_metadata(&path)
+        .map_err(|error| format!("读取已完成安装资源失败：{}：{error}", asset.name))?;
+      if metadata.file_type().is_symlink() || !metadata.is_file() {
+        return Err(format!("已完成安装资源不是普通文件：{}", asset.name));
+      }
+      if !verified_asset_file_with_timing(&path, asset, canceled, None)? {
+        return Err(format!("已完成安装资源校验失败：{}", asset.name));
+      }
+      super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, staging_root)?;
     }
-    if !verified_asset_file(&path, asset, canceled)? {
-      return Err(format!("已完成安装资源校验失败：{}", asset.name));
-    }
+    completed_bytes = completed_bytes.saturating_add(asset.size);
+    progress(index + 1, count, completed_bytes, total_bytes, &asset.name);
   }
   Ok(())
 }
@@ -1278,14 +1311,6 @@ fn finalize_open_asset_with_timing(
     .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
-fn verified_asset_file(
-  path: &Path,
-  asset: &PlanAsset,
-  canceled: &AtomicBool,
-) -> Result<bool, String> {
-  verified_asset_file_with_timing(path, asset, canceled, None)
-}
-
 fn verified_asset_file_with_timing(
   path: &Path,
   asset: &PlanAsset,
@@ -1582,6 +1607,7 @@ mod tests {
     assemble_full_install_asset_with_timing, assemble_full_install_asset_with_timing_observer,
     assemble_manifest_plan, assemble_manifest_plan_with_progress,
     assemble_manifest_plan_with_progress_concurrent, assemble_plan, partial_path,
+    validate_full_install_cursor_with_evidence,
   };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
@@ -1848,6 +1874,101 @@ mod tests {
     assert_eq!(timing.asset_md5_bytes, bytes.len() as u64);
     assert_eq!(timing.staging_file_sync_count, 0);
     assert!(!staging.join("failed-timing.bin").exists());
+  }
+
+  #[test]
+  fn evidence_cursor_validation_reuses_verified_assets_and_rehashes_changes() {
+    let root = TempRoot::new();
+    let staging = root.0.join("staging");
+    let shared = root.0.join("shared");
+    let spool = root.0.join("spool");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    fs::create_dir_all(&spool).unwrap();
+    let first = b"first evidence payload";
+    let second = b"second evidence payload";
+    let first_download =
+      downloaded_chunk("evidence-a", "evidence-a.cache", first, PayloadEncoding::Raw);
+    let second_download =
+      downloaded_chunk("evidence-b", "evidence-b.cache", second, PayloadEncoding::Raw);
+    fs::write(shared.join(&first_download.cache_key), first).unwrap();
+    fs::write(shared.join(&second_download.cache_key), second).unwrap();
+    let plan = full_plan(
+      vec![first_download, second_download],
+      vec![
+        asset("evidence-a.bin", first, vec![chunk("evidence-a", first, None)]),
+        asset("evidence-b.bin", second, vec![chunk("evidence-b", second, None)]),
+      ],
+    );
+    let index = FullInstallDownloadIndex::from_plan(&plan).unwrap();
+    let canceled = AtomicBool::new(false);
+    for asset_index in 0..plan.assets.len() {
+      assemble_full_install_asset_with_timing(
+        &plan,
+        &index,
+        asset_index,
+        &staging,
+        &shared,
+        &spool,
+        &canceled,
+      )
+      .unwrap();
+      crate::game::evidence::capture_and_persist_asset_evidence(
+        &root.task_root(),
+        &plan,
+        asset_index,
+        &staging,
+      )
+      .unwrap();
+    }
+
+    let mut progress = Vec::new();
+    validate_full_install_cursor_with_evidence(
+      &plan,
+      &root.task_root(),
+      &staging,
+      plan.assets.len(),
+      &canceled,
+      |completed, total, bytes, total_bytes, current| {
+        progress.push((completed, total, bytes, total_bytes, current.to_string()));
+      },
+    )
+    .unwrap();
+    assert_eq!(progress.len(), plan.assets.len());
+    assert_eq!(progress.last().unwrap().0, plan.assets.len());
+    assert_eq!(progress.last().unwrap().1, plan.assets.len());
+
+    // 同长度内容改写：证据身份/时间变化，复检必须重新 hash 并失败。
+    std::thread::sleep(std::time::Duration::from_millis(20));
+    let changed = staging.join("evidence-b.bin");
+    fs::write(&changed, b"second evidence chan!").unwrap();
+    let error = validate_full_install_cursor_with_evidence(
+      &plan,
+      &root.task_root(),
+      &staging,
+      plan.assets.len(),
+      &canceled,
+      |_, _, _, _, _| {},
+    )
+    .unwrap_err();
+    assert!(error.contains("校验失败"));
+
+    // 恢复原内容后删除证据：回退完整 hash 通过并重新生成证据。
+    fs::write(&changed, second).unwrap();
+    let evidence_dir = crate::game::evidence::evidence_dir(&root.task_root(), &plan.plan_id);
+    fs::remove_dir_all(&evidence_dir).unwrap();
+    validate_full_install_cursor_with_evidence(
+      &plan,
+      &root.task_root(),
+      &staging,
+      plan.assets.len(),
+      &canceled,
+      |_, _, _, _, _| {},
+    )
+    .unwrap();
+    assert!(
+      crate::game::evidence::load_asset_evidence(&root.task_root(), &plan, 1).unwrap().is_some()
+    );
   }
 
   fn staging_file(task_root: &Path) -> PathBuf {

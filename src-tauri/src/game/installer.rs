@@ -32,7 +32,8 @@ use walkdir::WalkDir;
 use zip::ZipArchive;
 
 const DRAFT_SCHEMA_VERSION: u32 = 2;
-const MARKER_SCHEMA_VERSION: u32 = 1;
+const MARKER_SCHEMA_VERSION: u32 = 2;
+const MARKER_SCHEMA_VERSION_LEGACY: u32 = 1;
 pub(crate) const MARKER_FILE_NAME: &str = ".teyvatguide-install.marker";
 const MAX_DRAFT_BYTES: u64 = 1024 * 1024;
 const MAX_MARKER_BYTES: u64 = 64 * 1024;
@@ -217,6 +218,8 @@ struct InstallMarker {
   manifest_digest: String,
   tree_digest: String,
   config_sha256: String,
+  #[serde(default)]
+  evidence_sha256: String,
 }
 
 pub(crate) fn create_draft(
@@ -528,22 +531,47 @@ pub(crate) fn execute_install(
   let (marker, sdk_files) = if staging_has_marker {
     let marker = read_marker(&staging_root)?;
     validate_marker_identity(&marker, plan, overlay, &draft, &game_root)?;
+    let evidence = if marker.evidence_sha256.is_empty() {
+      BTreeMap::new()
+    } else {
+      let evidence = super::evidence::load_evidence_set(task_root, plan)?;
+      if super::evidence::evidence_digest(&evidence) == marker.evidence_sha256 {
+        evidence
+      } else {
+        // 证据缺失或失配：回退全量内容校验，不允许仅凭证据快速路径。
+        BTreeMap::new()
+      }
+    };
     let sdk_files = overlay
       .sdk
       .as_ref()
-      .map(|sdk| collect_published_sdk_files(&staging_root, sdk))
+      .map(|sdk| collect_published_sdk_files_with_evidence(&staging_root, sdk, &evidence))
       .transpose()?
       .unwrap_or_default();
-    let files = verify_install_tree_timed(
-      plan,
-      overlay,
-      &staging_root,
-      &sdk_files,
-      timing,
-      journal,
-      emit,
-      "校验暂存目录",
-    )?;
+    let files = if evidence.is_empty() {
+      verify_install_tree_timed(
+        plan,
+        overlay,
+        &staging_root,
+        &sdk_files,
+        timing,
+        journal,
+        emit,
+        "校验暂存目录",
+      )?
+    } else {
+      verify_install_tree_with_evidence_timed(
+        plan,
+        overlay,
+        &staging_root,
+        &sdk_files,
+        &evidence,
+        timing,
+        journal,
+        emit,
+        "校验暂存目录",
+      )?
+    };
     if tree_digest(&files) != marker.tree_digest {
       return Err("安装暂存目录摘要不一致，需要恢复".to_string());
     }
@@ -563,7 +591,36 @@ pub(crate) fn execute_install(
       let shared_cache_root = task_root.join("cache/chunks");
       let start_cursor = journal.completed_asset_cursor.min(plan.assets.len());
       let download_index = assembler::FullInstallDownloadIndex::from_plan(plan)?;
-      assembler::validate_full_install_cursor(plan, &staging_root, start_cursor, canceled)?;
+      if start_cursor > 0 {
+        journal.verification_completed_count = 0;
+        journal.verification_total_count = start_cursor;
+        journal.commit_current_step = Some("正在复检已组装资源".to_string());
+        journal.current_file = journal.commit_current_step.clone();
+        journal.touch();
+        emit(journal);
+        let mut last_emit = Instant::now();
+        assembler::validate_full_install_cursor_with_evidence(
+          plan,
+          task_root,
+          &staging_root,
+          start_cursor,
+          canceled,
+          |completed_count, total_count, completed_bytes, total_bytes, current_file| {
+            journal.verification_completed_count = completed_count;
+            journal.verification_total_count = total_count;
+            journal.commit_current_step =
+              Some(format!("复检已组装资源：{completed_count}/{total_count}"));
+            journal.current_file = Some(current_file.to_string());
+            journal.assembly_completed_bytes = completed_bytes;
+            journal.assembly_total_bytes = total_bytes;
+            journal.touch();
+            if last_emit.elapsed() >= Duration::from_millis(250) {
+              emit(journal);
+              last_emit = Instant::now();
+            }
+          },
+        )?;
+      }
       for index in start_cursor..plan.assets.len() {
         check_canceled(canceled)?;
         assembler::assemble_full_install_asset_with_timing_observer(
@@ -576,6 +633,7 @@ pub(crate) fn execute_install(
           canceled,
           &mut timing.assembly,
         )?;
+        super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, &staging_root)?;
         let completed = index + 1;
         let completed_bytes = plan.assets[..completed].iter().map(|asset| asset.size).sum();
         journal.update_assembly_progress(
@@ -604,25 +662,52 @@ pub(crate) fn execute_install(
     journal.touch();
     emit(journal);
     let sdk_files = if let Some(sdk) = overlay.sdk.as_ref() {
-      extract_and_verify_sdk(task_root, &staging_root, &PathBuf::from(&overlay.spool_root), sdk)?
+      extract_and_verify_sdk(
+        plan,
+        task_root,
+        &staging_root,
+        &PathBuf::from(&overlay.spool_root),
+        sdk,
+        journal,
+        emit,
+      )?
     } else {
       if draft.scheme != SchemeId::CnOfficial {
         return Err("B 服安装计划缺少渠道 SDK".to_string());
       }
       BTreeMap::new()
     };
-    write_config(&staging_root, &overlay.config, &overlay.config_sha256)?;
-    let expected = verify_install_tree_timed(
+    journal.commit_current_step = Some("写入安装配置".to_string());
+    journal.current_file = journal.commit_current_step.clone();
+    journal.touch();
+    emit(journal);
+    let config_actual = write_config(&staging_root, &overlay.config, &overlay.config_sha256)?;
+    journal.commit_current_step = Some("安装配置已提交".to_string());
+    journal.current_file = journal.commit_current_step.clone();
+    journal.touch();
+    emit(journal);
+    super::evidence::capture_and_persist_additional_evidence(
+      task_root,
+      plan,
+      &staging_root,
+      "config.ini",
+      config_actual.0,
+      &config_actual.1,
+    )?;
+    let evidence = super::evidence::load_evidence_set(task_root, plan)?;
+    let expected = verify_install_tree_with_evidence_timed(
       plan,
       overlay,
       &staging_root,
       &sdk_files,
+      &evidence,
       timing,
       journal,
       emit,
       "校验暂存目录",
     )?;
     let expected_tree_digest = tree_digest(&expected);
+    let evidence_sha256 = super::evidence::evidence_digest(&evidence);
     let (directory_volume_serial, directory_file_id) = directory_identity(&staging_root)?;
     let marker = InstallMarker {
       schema_version: MARKER_SCHEMA_VERSION,
@@ -637,6 +722,7 @@ pub(crate) fn execute_install(
       manifest_digest: plan.manifest_digest.clone(),
       tree_digest: expected_tree_digest,
       config_sha256: overlay.config_sha256.clone(),
+      evidence_sha256,
     };
     write_marker(&staging_root, &marker)?;
     (marker, sdk_files)
@@ -663,15 +749,41 @@ pub(crate) fn execute_install(
     {
       return Err("发布后的游戏目录身份发生变化，需要恢复".to_string());
     }
-    let published_files = verify_install_tree_with_journal_progress(
-      plan,
-      overlay,
-      &game_root,
-      &sdk_files,
-      journal,
-      emit,
-      "复检最终目录",
-    )?;
+    let published_files = if marker.evidence_sha256.is_empty() {
+      verify_install_tree_with_journal_progress(
+        plan,
+        overlay,
+        &game_root,
+        &sdk_files,
+        journal,
+        emit,
+        "复检最终目录",
+      )?
+    } else {
+      let evidence = super::evidence::load_evidence_set(task_root, plan)?;
+      if super::evidence::evidence_digest(&evidence) != marker.evidence_sha256 {
+        verify_install_tree_with_journal_progress(
+          plan,
+          overlay,
+          &game_root,
+          &sdk_files,
+          journal,
+          emit,
+          "复检最终目录",
+        )?
+      } else {
+        verify_install_tree_with_evidence_with_journal_progress(
+          plan,
+          overlay,
+          &game_root,
+          &sdk_files,
+          &evidence,
+          journal,
+          emit,
+          "复检最终目录",
+        )?
+      }
+    };
     if tree_digest(&published_files) != marker.tree_digest {
       return Err("发布后的游戏树摘要不一致".to_string());
     }
@@ -770,13 +882,28 @@ pub(crate) fn verify_published_installation(
   if directory_identity(&game_root)? != (marker.directory_volume_serial, marker.directory_file_id) {
     return Err("发布后的游戏目录身份不匹配".to_string());
   }
+  let evidence = if marker.evidence_sha256.is_empty() {
+    BTreeMap::new()
+  } else {
+    let evidence = super::evidence::load_evidence_set(task_root, plan)?;
+    if super::evidence::evidence_digest(&evidence) == marker.evidence_sha256 {
+      evidence
+    } else {
+      // 证据缺失或失配：回退全量内容校验。
+      BTreeMap::new()
+    }
+  };
   let sdk_files = overlay
     .sdk
     .as_ref()
-    .map(|sdk| collect_published_sdk_files(&game_root, sdk))
+    .map(|sdk| collect_published_sdk_files_with_evidence(&game_root, sdk, &evidence))
     .transpose()?
     .unwrap_or_default();
-  let files = verify_install_tree(plan, overlay, &game_root, &sdk_files)?;
+  let files = if evidence.is_empty() {
+    verify_install_tree(plan, overlay, &game_root, &sdk_files)?
+  } else {
+    verify_install_tree_with_evidence(plan, overlay, &game_root, &sdk_files, &evidence)?
+  };
   if tree_digest(&files) != marker.tree_digest {
     return Err("发布后的游戏树摘要不一致".to_string());
   }
@@ -1170,7 +1297,14 @@ fn create_exclusive_staging(path: &Path, draft: &InstallDraft) -> Result<(), Str
   Ok(())
 }
 
-fn write_config(staging_root: &Path, config: &str, expected_sha256: &str) -> Result<(), String> {
+/// 原子写入 `config.ini` 并返回实际大小与 MD5，供逐文件证据使用。
+///
+/// 已存在且内容一致时视为幂等成功；内容不一致则失败，不允许覆盖。
+fn write_config(
+  staging_root: &Path,
+  config: &str,
+  expected_sha256: &str,
+) -> Result<(u64, String), String> {
   if sha256_bytes(config.as_bytes()) != expected_sha256 {
     return Err("安装配置摘要不匹配".to_string());
   }
@@ -1181,22 +1315,54 @@ fn write_config(staging_root: &Path, config: &str, expected_sha256: &str) -> Res
     if existing != config {
       return Err("安装暂存配置已经被修改".to_string());
     }
-    return Ok(());
+    return file_size_md5(&path);
   }
+  let partial = partial_for(&path);
+  remove_stale_partial_file(&partial)?;
   let mut file = OpenOptions::new()
     .create_new(true)
     .write(true)
-    .open(&path)
-    .map_err(|error| format!("创建安装配置失败：{error}"))?;
-  file.write_all(config.as_bytes()).map_err(|error| format!("写入安装配置失败：{error}"))?;
-  file.sync_all().map_err(|error| format!("同步安装配置失败：{error}"))
+    .open(&partial)
+    .map_err(|error| format!("创建安装配置临时文件失败：{error}"))?;
+  let result = (|| {
+    file.write_all(config.as_bytes()).map_err(|error| format!("写入安装配置失败：{error}"))?;
+    file.sync_all().map_err(|error| format!("同步安装配置失败：{error}"))?;
+    drop(file);
+    let actual = file_size_md5(&partial)?;
+    if actual.0 != config.len() as u64 {
+      return Err("安装配置长度校验失败".to_string());
+    }
+    fs::rename(&partial, &path).map_err(|error| format!("提交安装配置失败：{error}"))?;
+    Ok(actual)
+  })();
+  if result.is_err() {
+    let _ = fs::remove_file(&partial);
+  }
+  result
+}
+
+fn partial_for(path: &Path) -> PathBuf {
+  let mut name = path.file_name().unwrap_or_default().to_os_string();
+  name.push(".part");
+  path.with_file_name(name)
+}
+
+fn remove_stale_partial_file(path: &Path) -> Result<(), String> {
+  match fs::remove_file(path) {
+    Ok(()) => Ok(()),
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+    Err(error) => Err(format!("清理过期临时文件失败：{error}")),
+  }
 }
 
 fn extract_and_verify_sdk(
+  plan: &PersistedPlan,
   task_root: &Path,
   staging_root: &Path,
   spool_root: &Path,
   sdk: &super::planner::InstallSdk,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   let shared_path = task_root.join("cache/chunks").join(&sdk.cache_key);
   let spool_path = spool_root.join(&sdk.cache_key);
@@ -1216,6 +1382,8 @@ fn extract_and_verify_sdk(
   let version_name = normalize_manifest_path(&sdk.pkg_version_file_name)?;
   let mut total = 0_u64;
   let mut files = BTreeMap::new();
+  let mut last_emit = Instant::now();
+  let total_entries = archive.len();
   for index in 0..archive.len() {
     let mut entry =
       archive.by_index(index).map_err(|error| format!("读取渠道 SDK 失败：{error}"))?;
@@ -1239,6 +1407,14 @@ fn extract_and_verify_sdk(
     if total > decompressed_limit {
       return Err("渠道 SDK 解压大小超过安全上限".to_string());
     }
+    journal.commit_current_step =
+      Some(format!("解压渠道 SDK：{}/{} 个条目", index + 1, total_entries));
+    journal.current_file = Some(name.clone());
+    journal.touch();
+    if last_emit.elapsed() >= Duration::from_millis(250) {
+      emit(journal);
+      last_emit = Instant::now();
+    }
     let target = prepare_manifest_output_file(staging_root, &name)?;
     if path_occupied(&target)? {
       let metadata =
@@ -1248,16 +1424,30 @@ fn extract_and_verify_sdk(
       }
       fs::remove_file(&target).map_err(|error| format!("清理已有 SDK 文件失败：{error}"))?;
     }
+    let partial = partial_for(&target);
+    remove_stale_partial_file(&partial)?;
     let mut output = OpenOptions::new()
       .create_new(true)
       .write(true)
-      .open(&target)
-      .map_err(|error| format!("创建渠道 SDK 文件失败：{error}"))?;
-    std::io::copy(&mut entry, &mut output)
-      .map_err(|error| format!("解压渠道 SDK 失败：{error}"))?;
-    output.sync_all().map_err(|error| format!("同步渠道 SDK 失败：{error}"))?;
-    let actual = file_size_md5(&target)?;
-    files.insert(name, actual);
+      .open(&partial)
+      .map_err(|error| format!("创建渠道 SDK 临时文件失败：{error}"))?;
+    let result = (|| {
+      std::io::copy(&mut entry, &mut output)
+        .map_err(|error| format!("解压渠道 SDK 失败：{error}"))?;
+      output.sync_all().map_err(|error| format!("同步渠道 SDK 失败：{error}"))?;
+      drop(output);
+      let actual = file_size_md5(&partial)?;
+      if actual.0 != entry_size {
+        return Err("渠道 SDK 条目长度校验失败".to_string());
+      }
+      fs::rename(&partial, &target).map_err(|error| format!("提交渠道 SDK 文件失败：{error}"))?;
+      files.insert(name.clone(), actual);
+      Ok(())
+    })();
+    if result.is_err() {
+      let _ = fs::remove_file(&partial);
+    }
+    result?;
   }
   let version_path = staging_root.join(&version_name);
   let metadata = fs::symlink_metadata(&version_path)
@@ -1295,6 +1485,20 @@ fn extract_and_verify_sdk(
   if allowed.len() != files.len() || files.keys().any(|name| !allowed.contains(name)) {
     return Err("渠道 SDK 包含未在 sdk_pkg_version 列出的文件".to_string());
   }
+  journal.commit_current_step = Some("渠道 SDK 版本清单校验完成".to_string());
+  journal.current_file = None;
+  journal.touch();
+  emit(journal);
+  for (name, (size, md5)) in &files {
+    super::evidence::capture_and_persist_additional_evidence(
+      task_root,
+      plan,
+      staging_root,
+      name,
+      *size,
+      md5,
+    )?;
+  }
   Ok(files)
 }
 
@@ -1306,9 +1510,10 @@ struct SdkVersionEntry {
   file_size: u64,
 }
 
-fn collect_published_sdk_files(
+fn collect_published_sdk_files_with_evidence(
   root: &Path,
   sdk: &super::planner::InstallSdk,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   let version_name = normalize_manifest_path(&sdk.pkg_version_file_name)?;
   let path = root.join(&version_name);
@@ -1335,7 +1540,13 @@ fn collect_published_sdk_files(
     {
       return Err("sdk_pkg_version 内容无效".to_string());
     }
-    let actual = file_size_md5(&root.join(&name))?;
+    let actual = if evidence.is_empty() {
+      None
+    } else {
+      let root_identity = directory_identity(root)?;
+      trusted_file_value(root, root_identity, evidence, &name, value.file_size, &value.md5)?
+    }
+    .unwrap_or(file_size_md5(&root.join(&name))?);
     if actual.0 != value.file_size || !actual.1.eq_ignore_ascii_case(&value.md5) {
       return Err(format!("已发布 SDK 文件与 sdk_pkg_version 不一致：{name}"));
     }
@@ -1344,7 +1555,21 @@ fn collect_published_sdk_files(
   if files.is_empty() {
     return Err("sdk_pkg_version 没有可安装文件".to_string());
   }
-  files.insert(version_name.clone(), file_size_md5(&root.join(version_name))?);
+  let version_actual = if evidence.is_empty() {
+    None
+  } else {
+    let root_identity = directory_identity(root)?;
+    trusted_file_value(
+      root,
+      root_identity,
+      evidence,
+      &version_name,
+      text.len() as u64,
+      &md5_hex(text.as_bytes()),
+    )?
+  }
+  .unwrap_or(file_size_md5(&root.join(&version_name))?);
+  files.insert(version_name.clone(), version_actual);
   Ok(files)
 }
 
@@ -1354,23 +1579,46 @@ fn verify_install_tree(
   root: &Path,
   sdk_files: &BTreeMap<String, (u64, String)>,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
-  verify_install_tree_with_progress(plan, overlay, root, sdk_files, &mut |_, _| {})
+  verify_install_tree_with_evidence(plan, overlay, root, sdk_files, &BTreeMap::new())
 }
 
-fn verify_install_tree_with_progress(
+fn verify_install_tree_with_evidence(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
   root: &Path,
   sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  verify_install_tree_with_evidence_and_progress(
+    plan,
+    overlay,
+    root,
+    sdk_files,
+    evidence,
+    &mut |_, _| {},
+  )
+}
+
+/// 轻量全树校验：证据可信任的文件只做身份/元数据核对，不再读取内容；证据缺失或失配时
+/// 回退到单文件完整 hash。config 内容始终校验，SDK/config 同样优先复用证据。
+fn verify_install_tree_with_evidence_and_progress(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
   progress: &mut dyn FnMut(usize, usize),
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   validate_no_links(root)?;
+  let root_identity = directory_identity(root)?;
   let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
   let mut completed_count = 0_usize;
   let mut expected = BTreeMap::new();
   for file in &plan.inventory {
     let path = root.join(&file.name);
-    let actual = file_size_md5(&path)?;
+    let actual =
+      trusted_file_value(root, root_identity, evidence, &file.name, file.size, &file.md5)?
+        .unwrap_or(file_size_md5(&path)?);
     if actual.0 != file.size || !actual.1.eq_ignore_ascii_case(&file.md5) {
       return Err(format!("安装资源校验失败：{}", file.name));
     }
@@ -1394,12 +1642,21 @@ fn verify_install_tree_with_progress(
   if sha256_bytes(&config_bytes) != overlay.config_sha256 {
     return Err("安装配置校验失败".to_string());
   }
-  let config_actual = file_size_md5(&config)?;
+  let config_actual = trusted_file_value(
+    root,
+    root_identity,
+    evidence,
+    "config.ini",
+    config_bytes.len() as u64,
+    &md5_hex(&config_bytes),
+  )?
+  .unwrap_or(file_size_md5(&config)?);
   expected.insert("config.ini".to_string(), config_actual);
   completed_count = completed_count.saturating_add(1);
   progress(completed_count, total_count);
   for (name, value) in sdk_files {
-    let actual = file_size_md5(&root.join(name))?;
+    let actual = trusted_file_value(root, root_identity, evidence, name, value.0, &value.1)?
+      .unwrap_or(file_size_md5(&root.join(name))?);
     if &actual != value {
       return Err(format!("渠道 SDK 文件校验失败：{name}"));
     }
@@ -1456,6 +1713,37 @@ fn verify_install_tree_with_progress(
   Ok(expected)
 }
 
+/// 当证据绑定、暂存根身份与文件身份/元数据全部一致时返回可信值；否则返回 `None` 由调用方
+/// 回退完整 hash。
+fn trusted_file_value(
+  root: &Path,
+  root_identity: (u64, u64),
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  path: &str,
+  expected_size: u64,
+  expected_md5: &str,
+) -> Result<Option<(u64, String)>, String> {
+  let Some(entry) = evidence.get(path) else {
+    return Ok(None);
+  };
+  if entry.path != path
+    || entry.expected_size != expected_size
+    || !entry.expected_md5.eq_ignore_ascii_case(expected_md5)
+    || entry.staging_volume_serial != root_identity.0
+    || entry.staging_file_id != root_identity.1
+    || !super::evidence::file_matches_evidence(root, entry)?
+  {
+    return Ok(None);
+  }
+  Ok(Some((entry.actual_size, entry.actual_md5.clone())))
+}
+
+fn md5_hex(bytes: &[u8]) -> String {
+  let mut hasher = Md5::new();
+  hasher.update(bytes);
+  format!("{:x}", hasher.finalize())
+}
+
 fn verify_install_tree_timed(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -1482,6 +1770,47 @@ fn verify_install_tree_with_journal_progress(
   emit: &dyn Fn(&TaskJournal),
   phase: &str,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
+  verify_install_tree_with_evidence_with_journal_progress(
+    plan,
+    overlay,
+    root,
+    sdk_files,
+    &BTreeMap::new(),
+    journal,
+    emit,
+    phase,
+  )
+}
+
+fn verify_install_tree_with_evidence_timed(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  timing: &mut InstallValidationTiming,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
+  phase: &str,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  let started_at = Instant::now();
+  let result = verify_install_tree_with_evidence_with_journal_progress(
+    plan, overlay, root, sdk_files, evidence, journal, emit, phase,
+  );
+  timing.record_staging_tree(started_at.elapsed());
+  result
+}
+
+fn verify_install_tree_with_evidence_with_journal_progress(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
+  phase: &str,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
   let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
   journal.verification_completed_count = 0;
   journal.verification_total_count = total_count;
@@ -1503,7 +1832,14 @@ fn verify_install_tree_with_journal_progress(
       last_emit = Instant::now();
     }
   };
-  let result = verify_install_tree_with_progress(plan, overlay, root, sdk_files, &mut observer);
+  let result = verify_install_tree_with_evidence_and_progress(
+    plan,
+    overlay,
+    root,
+    sdk_files,
+    evidence,
+    &mut observer,
+  );
   if result.is_ok() {
     journal.verification_completed_count = total_count;
     journal.commit_current_step = Some(format!("{phase}：目录清单检查完成"));
@@ -1561,7 +1897,9 @@ fn write_marker(root: &Path, marker: &InstallMarker) -> Result<(), String> {
 
 fn verify_marker(root: &Path, expected: &InstallMarker) -> Result<(), String> {
   let actual = read_marker(root)?;
-  if actual.schema_version != MARKER_SCHEMA_VERSION || &actual != expected {
+  if !matches!(actual.schema_version, MARKER_SCHEMA_VERSION | MARKER_SCHEMA_VERSION_LEGACY)
+    || &actual != expected
+  {
     return Err("安装标记身份不匹配".to_string());
   }
   Ok(())
@@ -1588,7 +1926,7 @@ fn validate_marker_identity(
   draft: &InstallDraft,
   game_root: &Path,
 ) -> Result<(), String> {
-  if marker.schema_version != MARKER_SCHEMA_VERSION
+  if !matches!(marker.schema_version, MARKER_SCHEMA_VERSION | MARKER_SCHEMA_VERSION_LEGACY)
     || marker.plan_id != plan.plan_id
     || marker.install_id != plan.installation_id
     || marker.marker_nonce != overlay.marker_nonce
@@ -1768,7 +2106,7 @@ fn is_md5_value(value: &str) -> bool {
   value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
-fn directory_identity(path: &Path) -> Result<(u64, u64), String> {
+pub(crate) fn directory_identity(path: &Path) -> Result<(u64, u64), String> {
   #[cfg(target_os = "windows")]
   super::installation::validate_windows_path(path)?;
   let metadata =
@@ -2172,5 +2510,149 @@ mod tests {
     assert!(game_root.is_dir());
     assert!(list_draft_summaries(&task_root).unwrap().is_empty());
     fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn evidence_light_tree_verify_skips_content_and_detects_tampering() {
+    use super::{
+      file_size_md5, tree_digest, verify_install_tree, verify_install_tree_with_evidence,
+    };
+    use crate::game::{
+      evidence::{
+        capture_and_persist_additional_evidence, capture_and_persist_asset_evidence,
+        load_evidence_set,
+      },
+      model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
+      planner::{InstallOverlay, PersistedPlan, PlanAsset, PlanAssetAction, PlanFile},
+    };
+    use md5::{Digest as Md5Digest, Md5};
+    use sha2::Sha256;
+    use std::collections::BTreeMap;
+
+    let temp = std::env::temp_dir().join(format!("teyvat-guide-installer-{}", Uuid::new_v4()));
+    let staging = temp.join("staging");
+    let task_root = temp.join("task-root");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&task_root).unwrap();
+
+    let exe = b"exe";
+    let data = b"data";
+    let extra = b"extra";
+    let config = "[general]\r\nchannel=1\r\nsub_channel=1\r\ngame_version=1.0.0\r\ncps=mihoyo\r\ngame_biz=hk4e_cn\r\n";
+    fs::write(staging.join("YuanShen.exe"), exe).unwrap();
+    fs::create_dir_all(staging.join("YuanShen_Data")).unwrap();
+    fs::write(staging.join("YuanShen_Data/data.bin"), data).unwrap();
+    fs::write(staging.join("a.bin"), extra).unwrap();
+    fs::write(staging.join("config.ini"), config).unwrap();
+
+    let md5 = |bytes: &[u8]| {
+      let mut hasher = Md5::new();
+      hasher.update(bytes);
+      format!("{:x}", hasher.finalize())
+    };
+    let sha256 = |bytes: &[u8]| {
+      let mut hasher = Sha256::new();
+      hasher.update(bytes);
+      format!("{:x}", hasher.finalize())
+    };
+
+    let files = vec![
+      PlanFile { name: "YuanShen.exe".to_string(), size: exe.len() as u64, md5: md5(exe) },
+      PlanFile {
+        name: "YuanShen_Data/data.bin".to_string(),
+        size: data.len() as u64,
+        md5: md5(data),
+      },
+      PlanFile { name: "a.bin".to_string(), size: extra.len() as u64, md5: md5(extra) },
+    ];
+    let assets = files
+      .iter()
+      .map(|file| PlanAsset {
+        name: file.name.clone(),
+        action: PlanAssetAction::Add,
+        source: None,
+        size: file.size,
+        md5: file.md5.clone(),
+        chunks: Vec::new(),
+        patch: None,
+      })
+      .collect::<Vec<_>>();
+    let overlay = InstallOverlay {
+      library_root: temp.to_string_lossy().into_owned(),
+      game_root: temp.join("game").to_string_lossy().into_owned(),
+      staging_root: staging.to_string_lossy().into_owned(),
+      spool_root: String::new(),
+      target_path_sha256: "0".repeat(64),
+      library_volume_serial: 0,
+      library_file_id: 0,
+      target_volume_serial: 0,
+      target_file_id: 0,
+      marker_nonce: "a".repeat(64),
+      expected_executable: "YuanShen.exe".to_string(),
+      channel: 1,
+      sub_channel: 1,
+      audio_languages: Vec::new(),
+      config: config.to_string(),
+      config_sha256: sha256(config.as_bytes()),
+      sdk: None,
+    };
+    let plan = PersistedPlan {
+      schema_version: 3,
+      plan_id: "installer-evidence-test".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "b".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: Vec::new(),
+      assets,
+      delete_files: Vec::new(),
+      inventory: files,
+      install_overlay: Some(overlay.clone()),
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    for index in 0..plan.assets.len() {
+      capture_and_persist_asset_evidence(&task_root, &plan, index, &staging).unwrap();
+    }
+    let config_actual = file_size_md5(&staging.join("config.ini")).unwrap();
+    capture_and_persist_additional_evidence(
+      &task_root,
+      &plan,
+      &staging,
+      "config.ini",
+      config_actual.0,
+      &config_actual.1,
+    )
+    .unwrap();
+
+    let sdk_files = BTreeMap::new();
+    let evidence = load_evidence_set(&task_root, &plan).unwrap();
+    let trusted =
+      verify_install_tree_with_evidence(&plan, &overlay, &staging, &sdk_files, &evidence).unwrap();
+    let full = verify_install_tree(&plan, &overlay, &staging, &sdk_files).unwrap();
+    assert_eq!(trusted, full);
+    assert_eq!(tree_digest(&trusted), tree_digest(&full));
+
+    // 同长度内容改写：证据身份/时间失配后必须回退内容 hash 并失败。
+    std::thread::sleep(std::time::Duration::from_millis(20));
+    fs::write(staging.join("a.bin"), b"exraa").unwrap();
+    let error = verify_install_tree_with_evidence(&plan, &overlay, &staging, &sdk_files, &evidence)
+      .unwrap_err();
+    assert!(error.contains("安装资源校验失败"));
+
+    // 缺失文件：轻量扫描必须拒绝。
+    fs::remove_file(staging.join("a.bin")).unwrap();
+    let error = verify_install_tree_with_evidence(&plan, &overlay, &staging, &sdk_files, &evidence)
+      .unwrap_err();
+    assert!(
+      error.contains("缺少计划文件")
+        || error.contains("校验失败")
+        || error.contains("读取文件状态失败")
+    );
+
+    let _ = fs::remove_dir_all(&temp);
   }
 }

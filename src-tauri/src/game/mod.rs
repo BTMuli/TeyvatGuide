@@ -6,6 +6,7 @@ mod cache;
 pub mod commands;
 mod committer;
 mod downloader;
+mod evidence;
 mod hoyoplay;
 #[cfg(windows)]
 mod hpatch;
