@@ -203,6 +203,114 @@ struct RecoveryValidationProgress {
   current_file: String,
 }
 
+/// 全新安装私有 spool 的增量记账。
+///
+/// 每次游标前推不再遍历全部下载计划：只维护「spool 内文件、已消费 chunk、已计入
+/// `committed_step` 的下载项」三组集合，下载/消费/释放都是 O(1) 更新。
+struct InstallSpoolTracker {
+  counted: HashSet<String>,
+  consumed: HashSet<String>,
+  resident: HashMap<String, String>,
+}
+
+impl InstallSpoolTracker {
+  /// 从磁盘现状构建：一次扫描 spool 目录与共享缓存，之后只做增量更新。
+  fn from_disk(
+    plan: &PersistedPlan,
+    spool_root: &Path,
+    shared_cache_root: &Path,
+    completed: usize,
+  ) -> Self {
+    let mut resident = HashMap::new();
+    if let Ok(entries) = fs::read_dir(spool_root) {
+      for entry in entries.flatten() {
+        let Some(name) = entry.file_name().to_str().map(str::to_string) else {
+          continue;
+        };
+        if name.ends_with(".part") {
+          continue;
+        }
+        if let Some(download) = plan.downloads.iter().find(|download| download.cache_key == name) {
+          resident.insert(name, download.id.clone());
+        }
+      }
+    }
+    let mut consumed = HashSet::new();
+    for asset in plan.assets.iter().take(completed) {
+      for chunk in &asset.chunks {
+        if chunk.reuse.is_none() {
+          consumed.insert(chunk.id.clone());
+        }
+      }
+    }
+    let mut counted = consumed.clone();
+    for download in &plan.downloads {
+      if resident.contains_key(&download.cache_key)
+        || cached_chunk_matches(shared_cache_root, download)
+      {
+        counted.insert(download.id.clone());
+      }
+    }
+    Self { counted, consumed, resident }
+  }
+
+  fn committed_step(&self) -> usize {
+    self.counted.len()
+  }
+
+  fn mark_downloaded(&mut self, id: &str, cache_key: &str) {
+    self.resident.insert(cache_key.to_string(), id.to_string());
+    self.counted.insert(id.to_string());
+  }
+
+  fn mark_consumed(&mut self, ids: impl IntoIterator<Item = String>) {
+    self.consumed.extend(ids);
+  }
+
+  /// 释放不再被未来资源引用、且不属于 SDK 的私有 chunk，返回释放字节数。
+  ///
+  /// 只遍历当前 spool 内文件，不再全表扫描下载计划。
+  fn release_unneeded(&mut self, plan: &PersistedPlan, completed: usize, spool_root: &Path) -> u64 {
+    let mut retained = HashSet::new();
+    for asset in plan.assets.iter().skip(completed) {
+      for chunk in &asset.chunks {
+        if chunk.reuse.is_none() {
+          retained.insert(chunk.id.as_str());
+        }
+      }
+    }
+    let sdk_key = plan
+      .install_overlay
+      .as_ref()
+      .and_then(|overlay| overlay.sdk.as_ref())
+      .map(|sdk| sdk.cache_key.as_str());
+    let mut released = 0_u64;
+    let keys = self.resident.keys().cloned().collect::<Vec<_>>();
+    for key in keys {
+      let Some(id) = self.resident.get(&key).cloned() else {
+        continue;
+      };
+      if retained.contains(id.as_str()) || sdk_key == Some(key.as_str()) {
+        continue;
+      }
+      let path = spool_root.join(&key);
+      let Ok(metadata) = fs::symlink_metadata(&path) else {
+        continue;
+      };
+      if metadata.file_type().is_symlink() || !metadata.is_file() || fs::remove_file(&path).is_err()
+      {
+        continue;
+      }
+      released = released.saturating_add(metadata.len());
+      self.resident.remove(&key);
+      if !self.consumed.contains(&id) {
+        self.counted.remove(&id);
+      }
+    }
+    released
+  }
+}
+
 /// 在独立阻塞线程中按逐文件证据复检已组装资源，并持续把进度投影到 journal。
 async fn run_install_recovery_validation(
   app_handle: &AppHandle,
@@ -1460,6 +1568,12 @@ async fn run_install_streaming_task(
     persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
     return;
   }
+  let spool_tracker = Arc::new(Mutex::new(InstallSpoolTracker::from_disk(
+    &plan,
+    &spool_root,
+    &shared_cache_root,
+    start_cursor,
+  )));
   if concurrency > 1 {
     if let Err(error) = run_install_bounded_asset_pipeline(
       &app_handle,
@@ -1476,6 +1590,7 @@ async fn run_install_streaming_task(
       concurrency,
       &limiter,
       &staging_root,
+      &spool_tracker,
     )
     .await
     {
@@ -1550,6 +1665,7 @@ async fn run_install_streaming_task(
         let limiter = Arc::clone(&limiter);
         let metrics = Arc::clone(&metrics);
         let client = download_client.clone();
+        let tracker = Arc::clone(&spool_tracker);
         async move {
           let started_at = metrics.begin_download();
           let result = download_object(
@@ -1567,6 +1683,9 @@ async fn run_install_streaming_task(
           )
           .await;
           metrics.finish_download(started_at);
+          if result.is_ok() {
+            tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+          }
           result
         }
       }))
@@ -1682,8 +1801,19 @@ async fn run_install_streaming_task(
       value.assembly_completed_bytes_total = completed_bytes;
       metrics.observe_logical_staging(completed_bytes);
       value.spool_bytes = spool_bytes(&spool_root);
-      value.committed_step =
-        completed_download_count(&plan, completed, &shared_cache_root, &spool_root);
+      {
+        let mut tracker_value = spool_tracker.lock().unwrap();
+        let mut newly_consumed = Vec::new();
+        for asset in &plan.assets[asset_index..completed] {
+          for chunk in &asset.chunks {
+            if chunk.reuse.is_none() {
+              newly_consumed.push(chunk.id.clone());
+            }
+          }
+        }
+        tracker_value.mark_consumed(newly_consumed);
+        value.committed_step = tracker_value.committed_step();
+      }
       value.download_current_file = None;
       value.assembly_current_file = None;
       value.touch();
@@ -1691,7 +1821,7 @@ async fn run_install_streaming_task(
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
-      let released = release_install_spool(&plan, completed, &spool_root);
+      let released = spool_tracker.lock().unwrap().release_unneeded(&plan, completed, &spool_root);
       value.released_bytes = value.released_bytes.saturating_add(released);
       value.spool_bytes = spool_bytes(&spool_root);
       metrics.observe_spool(value.spool_bytes);
@@ -1853,6 +1983,7 @@ async fn run_install_bounded_asset_pipeline(
   concurrency: usize,
   limiter: &Arc<RateLimiter>,
   staging_root: &Path,
+  spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
 ) -> Result<(), String> {
   let download_slots = Arc::new(Semaphore::new(concurrency.max(1)));
   let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
@@ -1931,6 +2062,7 @@ async fn run_install_bounded_asset_pipeline(
         Arc::clone(&assembly_slots),
         staging_root.to_path_buf(),
         concurrency,
+        Arc::clone(spool_tracker),
       ));
     }
     if scheduled_count > 0 {
@@ -1977,10 +2109,22 @@ async fn run_install_bounded_asset_pipeline(
           value.completed_asset_cursor = asset_cursor;
           value.assembly_completed_bytes_total = completed_bytes;
           metrics.observe_logical_staging(completed_bytes);
-          value.committed_step =
-            completed_download_count(plan, asset_cursor, shared_cache_root, spool_root);
+          {
+            let mut tracker_value = spool_tracker.lock().unwrap();
+            let mut newly_consumed = Vec::new();
+            for asset in &plan.assets[previous_cursor..asset_cursor] {
+              for chunk in &asset.chunks {
+                if chunk.reuse.is_none() {
+                  newly_consumed.push(chunk.id.clone());
+                }
+              }
+            }
+            tracker_value.mark_consumed(newly_consumed);
+            value.committed_step = tracker_value.committed_step();
+          }
           persist_install_checkpoint(task_root, &value, metrics)?;
-          let released = release_install_spool(plan, asset_cursor, spool_root);
+          let released =
+            spool_tracker.lock().unwrap().release_unneeded(plan, asset_cursor, spool_root);
           value.released_bytes = value.released_bytes.saturating_add(released);
           value.spool_bytes = spool_bytes(spool_root);
           metrics.observe_spool(value.spool_bytes);
@@ -2054,6 +2198,7 @@ async fn run_install_asset_job(
   assembly_slots: Arc<Semaphore>,
   staging_root: PathBuf,
   concurrency: usize,
+  spool_tracker: Arc<Mutex<InstallSpoolTracker>>,
 ) -> InstallAssetJobCompletion {
   let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
   let result = async {
@@ -2068,6 +2213,7 @@ async fn run_install_asset_job(
       let metrics = Arc::clone(&metrics);
       let slots = Arc::clone(&download_slots);
       let guards = Arc::clone(&download_guards);
+      let tracker = Arc::clone(&spool_tracker);
       async move {
         let download_guard = {
           let mut values = guards.lock().await;
@@ -2098,6 +2244,9 @@ async fn run_install_asset_job(
         .await;
         metrics.finish_download(started_at);
         drop(permit);
+        if result.is_ok() {
+          tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+        }
         result.map(|downloaded| Some(downloaded.bytes))
       }
     }))
@@ -3458,6 +3607,70 @@ mod tests {
       chunks,
       patch: None,
     }
+  }
+
+  #[test]
+  fn spool_tracker_incrementally_matches_full_scan_semantics() {
+    use super::{InstallSpoolTracker, completed_download_count};
+    use crate::game::planner::PlanDownloadHashKind;
+    use xxhash_rust::xxh64::xxh64;
+    let root = TempRoot::new();
+    let spool = root.0.join("spool");
+    let shared = root.0.join("shared");
+    fs::create_dir_all(&spool).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    let mut d1 = baseline_download("d1", 10);
+    let mut d2 = baseline_download("d2", 20);
+    d1.hash_kind = PlanDownloadHashKind::XxHash64;
+    d1.expected_hash = format!("{:016x}", xxh64(b"0123456789", 0));
+    d2.hash_kind = PlanDownloadHashKind::XxHash64;
+    d2.expected_hash = format!("{:016x}", xxh64(b"01234567890123456789", 0));
+    let plan = PersistedPlan {
+      schema_version: 3,
+      plan_id: "spool-tracker-test".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: vec![d1.clone(), d2.clone()],
+      assets: vec![
+        baseline_asset("a.bin", 10, vec![baseline_chunk("d1", 10, false)]),
+        baseline_asset("b.bin", 20, vec![baseline_chunk("d2", 20, false)]),
+      ],
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    fs::write(spool.join(&d1.cache_key), b"0123456789").unwrap();
+    let mut tracker = InstallSpoolTracker::from_disk(&plan, &spool, &shared, 0);
+    assert_eq!(tracker.committed_step(), 1);
+
+    // 下载 d2 后：增量计数必须与全量扫描一致。
+    fs::write(spool.join(&d2.cache_key), b"01234567890123456789").unwrap();
+    tracker.mark_downloaded(&d2.id, &d2.cache_key);
+    assert_eq!(tracker.committed_step(), 2);
+    assert_eq!(tracker.committed_step(), completed_download_count(&plan, 0, &shared, &spool));
+
+    // 消费并释放 d1：d1 已消费仍计数，d2 仍保留给 b.bin。
+    tracker.mark_consumed(vec!["d1".to_string()]);
+    let released = tracker.release_unneeded(&plan, 1, &spool);
+    assert_eq!(released, 10);
+    assert!(!spool.join(&d1.cache_key).exists());
+    assert!(spool.join(&d2.cache_key).exists());
+    assert_eq!(tracker.committed_step(), 2);
+    assert_eq!(tracker.committed_step(), completed_download_count(&plan, 1, &shared, &spool));
+
+    // 全部消费后释放 d2：计数仍保留，spool 清空。
+    tracker.mark_consumed(vec!["d2".to_string()]);
+    let released = tracker.release_unneeded(&plan, 2, &spool);
+    assert_eq!(released, 20);
+    assert_eq!(tracker.committed_step(), 2);
+    assert_eq!(tracker.committed_step(), completed_download_count(&plan, 2, &shared, &spool));
   }
 
   #[test]
