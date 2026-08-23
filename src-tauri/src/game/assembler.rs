@@ -20,10 +20,10 @@ use std::{
   path::{Path, PathBuf},
   sync::{
     Mutex,
-    atomic::{AtomicBool, AtomicUsize, Ordering},
+    atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
     mpsc,
   },
-  time::Instant,
+  time::{Duration, Instant},
 };
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
@@ -350,20 +350,22 @@ fn assemble_full_install_asset_inner(
   )
 }
 
-/// 按逐文件证据选择性复检已完成的安装资源。
+/// 按逐文件证据并行选择性复检已完成的安装资源。
 ///
 /// - 证据完整且文件身份/大小/写入时间与证据一致时复用已验证 MD5，不读取内容；
 /// - 证据缺失、身份不符或内容校验失败时回退到单文件完整 hash，并重新生成证据；
 /// - 旧 schema / 证据目录整体缺失时仍按文件逐个完整 hash，语义与
 ///   旧版全量游标复检一致。
 ///
-/// `progress` 回调参数依次为：已完成文件数、总文件数、已完成字节、总字节、当前文件。
+/// 每个文件的检查相互独立，用 `workers` 个线程并行执行；`progress` 回调只在调用线程
+/// 中节流触发，参数依次为：已完成文件数、总文件数、已完成字节、总字节、当前文件。
 pub(crate) fn validate_full_install_cursor_with_evidence<F>(
   plan: &PersistedPlan,
   task_root: &Path,
   staging_root: &Path,
   cursor: usize,
   canceled: &AtomicBool,
+  workers: usize,
   mut progress: F,
 ) -> Result<(), String>
 where
@@ -376,34 +378,119 @@ where
   let total_bytes =
     plan.assets[..count].iter().fold(0_u64, |total, asset| total.saturating_add(asset.size));
   let root_identity = super::installer::directory_identity(staging_root)?;
-  let mut completed_bytes = 0_u64;
-  for index in 0..count {
-    check_canceled(canceled)?;
-    let asset = &plan.assets[index];
-    let path = prepare_manifest_output_file(staging_root, &asset.name)?;
-    let evidence = super::evidence::load_asset_evidence(task_root, plan, index)?;
-    let trusted = evidence.as_ref().is_some_and(|evidence| {
-      evidence.path == asset.name
-        && evidence.expected_size == asset.size
-        && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
-        && evidence.staging_volume_serial == root_identity.0
-        && evidence.staging_file_id == root_identity.1
-        && super::evidence::file_matches_evidence(staging_root, evidence).unwrap_or(false)
-    });
-    if !trusted {
-      let metadata = fs::symlink_metadata(&path)
-        .map_err(|error| format!("读取已完成安装资源失败：{}：{error}", asset.name))?;
-      if metadata.file_type().is_symlink() || !metadata.is_file() {
-        return Err(format!("已完成安装资源不是普通文件：{}", asset.name));
-      }
-      if !verified_asset_file_with_timing(&path, asset, canceled, None)? {
-        return Err(format!("已完成安装资源校验失败：{}", asset.name));
-      }
-      super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, staging_root)?;
-    }
-    completed_bytes = completed_bytes.saturating_add(asset.size);
-    progress(index + 1, count, completed_bytes, total_bytes, &asset.name);
+  if count == 0 {
+    progress(0, 0, 0, 0, "");
+    return Ok(());
   }
+  let next_index = std::sync::Arc::new(AtomicUsize::new(0));
+  let completed = std::sync::Arc::new(AtomicUsize::new(0));
+  let completed_bytes = std::sync::Arc::new(AtomicU64::new(0));
+  let current_file = std::sync::Arc::new(Mutex::new(String::new()));
+  let first_error = std::sync::Arc::new(Mutex::new(None::<String>));
+  let worker_count = workers.clamp(1, 16);
+  std::thread::scope(|scope| {
+    let mut handles = Vec::new();
+    for _ in 0..worker_count {
+      let plan = &*plan;
+      let task_root = &*task_root;
+      let staging_root = &*staging_root;
+      let canceled = &*canceled;
+      let next_index = std::sync::Arc::clone(&next_index);
+      let completed = std::sync::Arc::clone(&completed);
+      let completed_bytes = std::sync::Arc::clone(&completed_bytes);
+      let current_file = std::sync::Arc::clone(&current_file);
+      let first_error = std::sync::Arc::clone(&first_error);
+      handles.push(scope.spawn(move || {
+        loop {
+          if canceled.load(Ordering::Acquire)
+            || first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).is_some()
+          {
+            break;
+          }
+          let index = next_index.fetch_add(1, Ordering::Relaxed);
+          if index >= count {
+            break;
+          }
+          let asset = &plan.assets[index];
+          if let Err(error) = validate_install_asset_with_evidence(
+            plan,
+            task_root,
+            staging_root,
+            asset,
+            index,
+            root_identity,
+            canceled,
+          ) {
+            let mut slot = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+            if slot.is_none() {
+              *slot = Some(error);
+            }
+            break;
+          }
+          completed.fetch_add(1, Ordering::Relaxed);
+          completed_bytes.fetch_add(asset.size, Ordering::Relaxed);
+          *current_file.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) =
+            asset.name.clone();
+        }
+      }));
+    }
+    let mut last_emit = Instant::now();
+    loop {
+      if handles.iter().all(|handle| handle.is_finished()) {
+        break;
+      }
+      std::thread::sleep(Duration::from_millis(50));
+      if last_emit.elapsed() >= Duration::from_millis(250) {
+        let done = completed.load(Ordering::Relaxed);
+        let bytes = completed_bytes.load(Ordering::Relaxed);
+        let current = current_file.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone();
+        progress(done, count, bytes, total_bytes, &current);
+        last_emit = Instant::now();
+      }
+    }
+    let done = completed.load(Ordering::Relaxed);
+    let bytes = completed_bytes.load(Ordering::Relaxed);
+    let current = current_file.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone();
+    progress(done, count, bytes, total_bytes, &current);
+  });
+  if let Some(error) = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone() {
+    return Err(error);
+  }
+  Ok(())
+}
+
+fn validate_install_asset_with_evidence(
+  plan: &PersistedPlan,
+  task_root: &Path,
+  staging_root: &Path,
+  asset: &PlanAsset,
+  index: usize,
+  root_identity: (u64, u64),
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  check_canceled(canceled)?;
+  let path = prepare_manifest_output_file(staging_root, &asset.name)?;
+  let evidence = super::evidence::load_asset_evidence(task_root, plan, index)?;
+  let trusted = evidence.as_ref().is_some_and(|evidence| {
+    evidence.path == asset.name
+      && evidence.expected_size == asset.size
+      && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
+      && evidence.staging_volume_serial == root_identity.0
+      && evidence.staging_file_id == root_identity.1
+      && super::evidence::file_matches_evidence(staging_root, evidence).unwrap_or(false)
+  });
+  if trusted {
+    return Ok(());
+  }
+  let metadata = fs::symlink_metadata(&path)
+    .map_err(|error| format!("读取已完成安装资源失败：{}：{error}", asset.name))?;
+  if metadata.file_type().is_symlink() || !metadata.is_file() {
+    return Err(format!("已完成安装资源不是普通文件：{}", asset.name));
+  }
+  if !verified_asset_file_with_timing(&path, asset, canceled, None)? {
+    return Err(format!("已完成安装资源校验失败：{}", asset.name));
+  }
+  super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, staging_root)?;
   Ok(())
 }
 
@@ -1929,14 +2016,17 @@ mod tests {
       &staging,
       plan.assets.len(),
       &canceled,
+      4,
       |completed, total, bytes, total_bytes, current| {
         progress.push((completed, total, bytes, total_bytes, current.to_string()));
       },
     )
     .unwrap();
-    assert_eq!(progress.len(), plan.assets.len());
+    assert!(!progress.is_empty());
     assert_eq!(progress.last().unwrap().0, plan.assets.len());
     assert_eq!(progress.last().unwrap().1, plan.assets.len());
+    let expected_bytes = plan.assets.iter().map(|asset| asset.size).sum::<u64>();
+    assert_eq!(progress.last().unwrap().2, expected_bytes);
 
     // 同长度内容改写：证据身份/时间变化，复检必须重新 hash 并失败。
     std::thread::sleep(std::time::Duration::from_millis(20));
@@ -1948,6 +2038,7 @@ mod tests {
       &staging,
       plan.assets.len(),
       &canceled,
+      4,
       |_, _, _, _, _| {},
     )
     .unwrap_err();
@@ -1963,6 +2054,7 @@ mod tests {
       &staging,
       plan.assets.len(),
       &canceled,
+      4,
       |_, _, _, _, _| {},
     )
     .unwrap();

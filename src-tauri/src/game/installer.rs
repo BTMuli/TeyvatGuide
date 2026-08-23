@@ -591,10 +591,22 @@ pub(crate) fn execute_install(
       let shared_cache_root = task_root.join("cache/chunks");
       let start_cursor = journal.completed_asset_cursor.min(plan.assets.len());
       let download_index = assembler::FullInstallDownloadIndex::from_plan(plan)?;
-      if start_cursor > 0 {
+      let evidence_at_start = super::evidence::load_evidence_set(task_root, plan)?;
+      let evidence_complete = start_cursor == plan.assets.len()
+        && super::evidence::evidence_covers_cursor(plan, &evidence_at_start, start_cursor);
+      if evidence_complete {
+        // 正常连续路径：只核对证据集合与暂存根目录身份；逐文件身份核对由随后的
+        // 轻量树扫描承担，不再逐文件复检。
+        directory_identity(&staging_root)?;
+        journal.commit_current_step = Some("校验已组装资源：证据完整".to_string());
+        journal.current_file = journal.commit_current_step.clone();
+        journal.touch();
+        emit(journal);
+      } else {
+        // 真正恢复（游标未到末尾或证据缺失）：并发逐文件复检。
         journal.verification_completed_count = 0;
         journal.verification_total_count = start_cursor;
-        journal.commit_current_step = Some("正在复检已组装资源".to_string());
+        journal.commit_current_step = Some("正在校验已组装资源".to_string());
         journal.current_file = journal.commit_current_step.clone();
         journal.touch();
         emit(journal);
@@ -605,11 +617,12 @@ pub(crate) fn execute_install(
           &staging_root,
           start_cursor,
           canceled,
+          super::package::default_concurrency(),
           |completed_count, total_count, completed_bytes, total_bytes, current_file| {
             journal.verification_completed_count = completed_count;
             journal.verification_total_count = total_count;
             journal.commit_current_step =
-              Some(format!("复检已组装资源：{completed_count}/{total_count}"));
+              Some(format!("校验已组装资源：{completed_count}/{total_count}"));
             journal.current_file = Some(current_file.to_string());
             journal.assembly_completed_bytes = completed_bytes;
             journal.assembly_total_bytes = total_bytes;

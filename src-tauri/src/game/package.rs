@@ -42,7 +42,7 @@ const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
 /// 默认下载/组装并发：按 CPU 核心数，最低 4 路。
-fn default_concurrency() -> usize {
+pub(crate) fn default_concurrency() -> usize {
   std::thread::available_parallelism()
     .map(|parallelism| parallelism.get())
     .unwrap_or(MIN_CONCURRENCY)
@@ -311,7 +311,7 @@ impl InstallSpoolTracker {
   }
 }
 
-/// 在独立阻塞线程中按逐文件证据复检已组装资源，并持续把进度投影到 journal。
+/// 在独立阻塞线程中按逐文件证据并发复检已组装资源，并持续把进度投影到 journal。
 async fn run_install_recovery_validation(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -335,6 +335,7 @@ async fn run_install_recovery_validation(
       &staging_for_validation,
       start_cursor,
       &canceled_for_validation,
+      default_concurrency(),
       |completed, total, completed_bytes, total_bytes, current_file| {
         let _ = progress_tx.send(RecoveryValidationProgress {
           completed,
@@ -368,7 +369,7 @@ async fn run_install_recovery_validation(
         value.assembly_completed_bytes = progress.completed_bytes;
         value.assembly_total_bytes = progress.total_bytes;
         value.commit_current_step =
-          Some(format!("复检已组装资源：{}/{}", progress.completed, progress.total));
+          Some(format!("校验已组装资源：{}/{}", progress.completed, progress.total));
         value.current_file = Some(progress.current_file);
         value.touch();
         if last_emit.elapsed() >= Duration::from_millis(500) {
@@ -1541,7 +1542,7 @@ async fn run_install_streaming_task(
       value.state = PackageTaskState::Assembling;
       value.verification_completed_count = 0;
       value.verification_total_count = start_cursor;
-      value.commit_current_step = Some("正在复检已组装资源".to_string());
+      value.commit_current_step = Some("正在校验已组装资源".to_string());
       value.current_file = value.commit_current_step.clone();
       value.assembly_current_file = None;
       value.touch();
