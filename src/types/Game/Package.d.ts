@@ -174,6 +174,8 @@ declare namespace TGApp.Game.Package {
     releasedBytes: number;
     assemblyCompletedBytesTotal: number;
     currentFile: string | null;
+    downloadCurrentFile: string | null;
+    assemblyCurrentFile: string | null;
     bytesPerSecond: number;
     etaSeconds: number | null;
     elapsedMs: number;

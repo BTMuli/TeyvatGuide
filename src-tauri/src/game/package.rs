@@ -955,7 +955,8 @@ async fn run_install_streaming_task(
       {
         let mut value = journal.lock().await;
         value.state = PackageTaskState::Downloading;
-        value.current_file = Some(format!("下载游戏文件：{}", asset.name));
+        value.download_current_file = Some(format!("资源文件：{}", asset.name));
+        value.assembly_current_file = None;
         value.touch();
         if let Err(error) = journal::persist(&task_root, &value) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -1008,6 +1009,18 @@ async fn run_install_streaming_task(
           }
         }
       }
+      {
+        let mut value = journal.lock().await;
+        value.download_current_file = None;
+        value.assembly_current_file =
+          Some(format!("组装资源 {}/{}：{}", asset_index + 1, plan.assets.len(), asset.name));
+        value.touch();
+        if let Err(error) = journal::persist(&task_root, &value) {
+          persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+          return;
+        }
+        emit_progress(&app_handle, &value.summary());
+      }
       let assemble_plan = plan.clone();
       let assemble_staging = staging_root.clone();
       let assemble_shared = shared_cache_root.clone();
@@ -1055,7 +1068,8 @@ async fn run_install_streaming_task(
       value.spool_bytes = spool_bytes(&spool_root);
       value.committed_step =
         completed_download_count(&plan, completed, &shared_cache_root, &spool_root);
-      value.current_file = Some(asset.name.clone());
+      value.download_current_file = None;
+      value.assembly_current_file = None;
       value.touch();
       if let Err(error) = journal::persist(&task_root, &value) {
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -1067,6 +1081,8 @@ async fn run_install_streaming_task(
   if paused.load(Ordering::Acquire) {
     let mut value = journal.lock().await;
     value.state = PackageTaskState::Paused;
+    value.download_current_file = None;
+    value.assembly_current_file = None;
     value.current_file = None;
     value.touch();
     let _ = journal::persist(&task_root, &value);
@@ -1077,6 +1093,8 @@ async fn run_install_streaming_task(
     let _ = installer::cancel_draft(&task_root, &context.draft_id);
     let mut value = journal.lock().await;
     value.state = PackageTaskState::Canceled;
+    value.download_current_file = None;
+    value.assembly_current_file = None;
     value.current_file = None;
     value.touch();
     let _ = journal::persist(&task_root, &value);
@@ -1109,6 +1127,16 @@ async fn run_install_streaming_task(
         persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
         return;
       }
+      {
+        let mut value = journal.lock().await;
+        value.download_current_file = Some("渠道 SDK".to_string());
+        value.touch();
+        if let Err(error) = journal::persist(&task_root, &value) {
+          persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+          return;
+        }
+        emit_progress(&app_handle, &value.summary());
+      }
       if let Err(error) = download_object(
         &download_client,
         &spool_root,
@@ -1139,6 +1167,7 @@ async fn run_install_streaming_task(
       let mut value = journal.lock().await;
       value.downloaded_bytes =
         value.downloaded_bytes.saturating_add(download.compressed_size).min(value.total_bytes);
+      value.download_current_file = None;
       value.spool_bytes = spool_bytes(&spool_root);
       value.touch();
       if let Err(error) = journal::persist(&task_root, &value) {
@@ -1151,6 +1180,8 @@ async fn run_install_streaming_task(
   {
     let mut value = journal.lock().await;
     value.state = PackageTaskState::ReadyToApply;
+    value.download_current_file = None;
+    value.assembly_current_file = None;
     value.current_file = None;
     value.spool_bytes = spool_bytes(&spool_root);
     value.touch();
@@ -1183,7 +1214,20 @@ async fn run_install_streaming_asset_pipeline_v2(
     .map(|download| (download.id.as_str(), download))
     .collect::<HashMap<_, _>>();
   let download_slots = Arc::new(Semaphore::new(concurrency.max(1)));
-  let mut asset_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
+  let mut asset_cursor = {
+    let mut value = journal.lock().await;
+    let cursor = value.completed_asset_cursor.min(plan.assets.len());
+    let completed_bytes = plan.assets[..cursor].iter().map(|asset| asset.size).sum();
+    value.assembly_completed_count = cursor;
+    value.assembly_completed_bytes = completed_bytes;
+    value.assembly_completed_bytes_total = completed_bytes;
+    value.download_current_file = None;
+    value.assembly_current_file = None;
+    value.touch();
+    journal::persist(task_root, &value)?;
+    emit_progress(app_handle, &value.summary());
+    cursor
+  };
 
   while asset_cursor < plan.assets.len() {
     if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
@@ -1222,7 +1266,8 @@ async fn run_install_streaming_asset_pipeline_v2(
     {
       let mut value = journal.lock().await;
       value.state = PackageTaskState::Downloading;
-      value.current_file = Some(format!("下载游戏文件 {} - {}", asset_cursor + 1, batch_end));
+      value.download_current_file = Some(format!("资源文件 {} - {}", asset_cursor + 1, batch_end));
+      value.assembly_current_file = None;
       value.touch();
       journal::persist(task_root, &value)?;
       emit_state(app_handle, &value.summary());
@@ -1241,6 +1286,9 @@ async fn run_install_streaming_asset_pipeline_v2(
       let assemble_shared = shared_cache_root.to_path_buf();
       let assemble_spool = spool_root.to_path_buf();
       let assemble_canceled = Arc::clone(&canceled);
+      let assemble_journal = Arc::clone(journal);
+      let assemble_task_root = task_root.to_path_buf();
+      let assemble_app_handle = app_handle.clone();
       async move {
         let download_tasks = stream::iter(pending.into_iter().map(|download| {
           let client = client.clone();
@@ -1267,6 +1315,23 @@ async fn run_install_streaming_asset_pipeline_v2(
         while let Some(result) = download_tasks.next().await {
           result?;
         }
+        {
+          let mut value = assemble_journal.lock().await;
+          value.downloaded_bytes =
+            value.downloaded_bytes.saturating_add(counted_bytes).min(value.total_bytes);
+          value.download_current_file =
+            (value.downloaded_bytes < value.total_bytes).then_some("并行下载剩余资源".to_string());
+          value.assembly_current_file = Some(format!(
+            "组装资源 {}/{}：{}",
+            value.assembly_completed_count + 1,
+            value.assembly_total_count,
+            assemble_plan.assets[asset_index].name
+          ));
+          value.spool_bytes = spool_bytes(&assemble_spool);
+          value.touch();
+          journal::persist(&assemble_task_root, &value)?;
+          emit_progress(&assemble_app_handle, &value.summary());
+        }
         tauri::async_runtime::spawn_blocking(move || {
           assembler::assemble_full_install_asset(
             &assemble_plan,
@@ -1280,7 +1345,7 @@ async fn run_install_streaming_asset_pipeline_v2(
         .await
         .map_err(|error| format!("组装 worker 异常退出：{error}"))
         .and_then(|result| result)
-        .map(|()| (asset_index, counted_bytes))
+        .map(|()| asset_index)
       }
     }))
     .buffer_unordered(concurrency.max(1));
@@ -1288,17 +1353,22 @@ async fn run_install_streaming_asset_pipeline_v2(
     let mut first_error = None;
     while let Some(result) = tasks.next().await {
       match result {
-        Ok((asset_index, downloaded_bytes)) => {
-          if downloaded_bytes > 0 {
-            let mut value = journal.lock().await;
-            value.downloaded_bytes =
-              value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
-            value.spool_bytes = spool_bytes(spool_root);
-            value.current_file = Some(plan.assets[asset_index].name.clone());
-            value.touch();
-            journal::persist(task_root, &value)?;
-            emit_progress(app_handle, &value.summary());
-          }
+        Ok(asset_index) => {
+          let mut value = journal.lock().await;
+          value.assembly_completed_count =
+            value.assembly_completed_count.saturating_add(1).min(value.assembly_total_count);
+          value.assembly_completed_bytes = value
+            .assembly_completed_bytes
+            .saturating_add(plan.assets[asset_index].size)
+            .min(value.assembly_total_bytes);
+          value.assembly_current_file =
+            (value.assembly_completed_count < value.assembly_total_count).then_some(format!(
+              "已组装 {}/{}，继续处理剩余文件",
+              value.assembly_completed_count, value.assembly_total_count
+            ));
+          value.touch();
+          journal::persist(task_root, &value)?;
+          emit_progress(app_handle, &value.summary());
         }
         Err(error) => {
           first_error.get_or_insert(error);
@@ -1320,7 +1390,9 @@ async fn run_install_streaming_asset_pipeline_v2(
       value.released_bytes.saturating_add(release_install_spool(plan, completed, spool_root));
     value.spool_bytes = spool_bytes(spool_root);
     value.committed_step = completed_download_count(plan, completed, shared_cache_root, spool_root);
-    value.current_file = Some(plan.assets[completed - 1].name.clone());
+    value.download_current_file = None;
+    value.assembly_current_file = (completed < plan.assets.len())
+      .then_some(format!("已完成 {} 个资源，准备下一批下载与组装", completed));
     value.touch();
     journal::persist(task_root, &value)?;
     emit_progress(app_handle, &value.summary());
@@ -1376,7 +1448,8 @@ async fn run_install_streaming_asset_pipeline(
     {
       let mut value = journal.lock().await;
       value.state = PackageTaskState::Downloading;
-      value.current_file = Some(format!("下载游戏文件 {} - {}", asset_cursor + 1, batch_end));
+      value.download_current_file = Some(format!("资源文件 {} - {}", asset_cursor + 1, batch_end));
+      value.assembly_current_file = None;
       value.touch();
       journal::persist(task_root, &value)?;
       emit_state(app_handle, &value.summary());
@@ -1444,7 +1517,13 @@ async fn run_install_streaming_asset_pipeline(
       value.released_bytes.saturating_add(release_install_spool(plan, completed, spool_root));
     value.spool_bytes = spool_bytes(spool_root);
     value.committed_step = completed_download_count(plan, completed, shared_cache_root, spool_root);
-    value.current_file = Some(plan.assets[completed - 1].name.clone());
+    value.download_current_file = None;
+    value.assembly_current_file = Some(format!(
+      "已组装 {}/{}，最近完成：{}",
+      value.assembly_completed_count,
+      value.assembly_total_count,
+      plan.assets[completed - 1].name
+    ));
     value.touch();
     journal::persist(task_root, &value)?;
     emit_progress(app_handle, &value.summary());
@@ -1470,6 +1549,8 @@ async fn persist_install_stream_error(
     PackageTaskState::Failed
   };
   value.error_message = (!paused_requested && !canceled_requested).then_some(error);
+  value.download_current_file = None;
+  value.assembly_current_file = None;
   value.current_file = None;
   value.touch();
   let _ = journal::persist(task_root, &value);
@@ -1733,6 +1814,14 @@ async fn run_switch(
   }
   let request = {
     let mut journal_value = journal.lock().await;
+    let started_at = Instant::now();
+    let mut emit_prepare_progress = |summary: &TaskJournal| -> Result<(), String> {
+      journal::persist(&task_root, summary)?;
+      let summary = summary.summary();
+      emit_state(&app_handle, &summary);
+      emit_progress(&app_handle, &summary);
+      Ok(())
+    };
     match switch::prepare_switch_commit(
       &client,
       &installation,
@@ -1740,12 +1829,18 @@ async fn run_switch(
       &task_root,
       &mut journal_value,
       &canceled,
+      started_at,
+      &mut emit_prepare_progress,
     )
     .await
     {
       Ok(request) => {
         journal_value.state = PackageTaskState::ReadyToApply;
         journal_value.current_file = Some("渠道文件已就绪".to_string());
+        journal_value.download_current_file = None;
+        journal_value.assembly_current_file = None;
+        journal_value.bytes_per_second = 0;
+        journal_value.eta_seconds = None;
         journal_value.touch();
         if let Err(error) = journal::persist(&task_root, &journal_value) {
           persist_terminal_journal(&task_root, &mut journal_value, error, false, &app_handle);
@@ -1761,6 +1856,10 @@ async fn run_switch(
           if canceled_flag { PackageTaskState::Canceled } else { PackageTaskState::Failed };
         journal_value.error_message = (!canceled_flag).then_some(error);
         journal_value.current_file = None;
+        journal_value.download_current_file = None;
+        journal_value.assembly_current_file = None;
+        journal_value.bytes_per_second = 0;
+        journal_value.eta_seconds = None;
         journal_value.touch();
         let _ = journal::persist(&task_root, &journal_value);
         emit_state(&app_handle, &journal_value.summary());
@@ -1835,6 +1934,8 @@ async fn run_task(
       return;
     }
     journal_value.state = PackageTaskState::Downloading;
+    journal_value.download_current_file = None;
+    journal_value.assembly_current_file = None;
     journal_value.touch();
     if let Err(error) = journal::persist(task_root, &journal_value) {
       persist_terminal_journal(task_root, &mut journal_value, error, false, &app_handle);
@@ -1892,7 +1993,8 @@ async fn run_task(
           journal_value.downloaded_bytes =
             journal_value.downloaded_bytes.saturating_add(downloaded.bytes);
         }
-        journal_value.current_file = Some(current_file);
+        journal_value.current_file = Some(current_file.clone());
+        journal_value.download_current_file = Some(current_file);
         let elapsed = started_at.elapsed().as_secs_f64().max(0.001);
         journal_value.bytes_per_second = (journal_value.downloaded_bytes as f64 / elapsed) as u64;
         let remaining = journal_value.total_bytes.saturating_sub(journal_value.downloaded_bytes);
@@ -1933,6 +2035,8 @@ async fn run_task(
     flush_cache_validation_index(spool_root);
   }
   journal_value.current_file = None;
+  journal_value.download_current_file = None;
+  journal_value.assembly_current_file = None;
   journal_value.bytes_per_second = 0;
   journal_value.eta_seconds = None;
   if paused.load(Ordering::Acquire) {

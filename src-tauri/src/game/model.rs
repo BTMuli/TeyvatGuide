@@ -267,6 +267,8 @@ pub struct PackageTaskSummary {
   pub released_bytes: u64,
   pub assembly_completed_bytes_total: u64,
   pub current_file: Option<String>,
+  pub download_current_file: Option<String>,
+  pub assembly_current_file: Option<String>,
   pub bytes_per_second: u64,
   pub eta_seconds: Option<u64>,
   pub elapsed_ms: u64,

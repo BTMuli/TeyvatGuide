@@ -18,7 +18,7 @@
     <PgProgress
       v-if="switchPanelVisible"
       :caption="schemeCaption"
-      :currentFile="visibleTask?.currentFile ?? null"
+      :currentFile="schemeCurrentFile"
       :errorMessage="visibleTask?.errorMessage ?? null"
       :facts="schemeFacts"
       :indeterminate="switchBarIndeterminate"
@@ -166,8 +166,44 @@ const canAbandon = computed<boolean>(() => {
   return canRecover.value || switchTask.value?.state === gameEnum.package.taskState.READY_TO_APPLY;
 });
 const progressPercent = computed<number>(() => {
-  if (visibleTask.value === null || visibleTask.value.totalBytes === 0) return 0;
-  return Math.min(100, (visibleTask.value.downloadedBytes / visibleTask.value.totalBytes) * 100);
+  const task = visibleTask.value;
+  if (task === null) return 0;
+  switch (task.state) {
+    case gameEnum.package.taskState.QUEUED:
+      return 2;
+    case gameEnum.package.taskState.DOWNLOADING:
+      return task.totalBytes === 0
+        ? 8
+        : 5 + Math.min(1, task.downloadedBytes / task.totalBytes) * 65;
+    case gameEnum.package.taskState.READY_TO_APPLY:
+      return 74;
+    case gameEnum.package.taskState.ASSEMBLING:
+      return 82;
+    case gameEnum.package.taskState.COMMIT_PREPARED:
+      return 87;
+    case gameEnum.package.taskState.COMMITTING:
+      return 93;
+    case gameEnum.package.taskState.VERIFYING:
+      return 98;
+    case gameEnum.package.taskState.PUBLISH_PENDING:
+    case gameEnum.package.taskState.PUBLISHED:
+    case gameEnum.package.taskState.VERIFIED:
+    case gameEnum.package.taskState.REGISTRATION_PENDING:
+      return 99;
+    case gameEnum.package.taskState.ROLLING_BACK:
+    case gameEnum.package.taskState.RECOVERY_REQUIRED:
+      return 85;
+    case gameEnum.package.taskState.COMPLETED:
+      return 100;
+    case gameEnum.package.taskState.PAUSED:
+    case gameEnum.package.taskState.REPAIR_REQUIRED:
+    case gameEnum.package.taskState.FAILED:
+    case gameEnum.package.taskState.CANCELED:
+      return task.totalBytes === 0
+        ? 0
+        : Math.min(70, 5 + (task.downloadedBytes / task.totalBytes) * 65);
+  }
+  return 0;
 });
 const switchPanelVisible = computed<boolean>(() => {
   return (
@@ -179,7 +215,40 @@ const switchPanelVisible = computed<boolean>(() => {
 });
 const switchBarIndeterminate = computed<boolean>(() => {
   if (visibleTask.value === null) return converting.value;
-  return visibleTask.value.totalBytes === 0 && (taskActive.value || converting.value);
+  return (
+    visibleTask.value.state === gameEnum.package.taskState.DOWNLOADING &&
+    visibleTask.value.totalBytes === 0 &&
+    (taskActive.value || converting.value)
+  );
+});
+const schemeStage = computed<string>(() => {
+  const task = visibleTask.value;
+  if (task === null) return converting.value ? "正在生成换服计划" : "";
+  switch (task.state) {
+    case gameEnum.package.taskState.QUEUED:
+      return "等待开始换服";
+    case gameEnum.package.taskState.DOWNLOADING:
+      return "下载渠道 SDK";
+    case gameEnum.package.taskState.READY_TO_APPLY:
+      return "渠道资源准备完成";
+    case gameEnum.package.taskState.ASSEMBLING:
+      return "准备渠道文件";
+    case gameEnum.package.taskState.COMMIT_PREPARED:
+      return "准备提交换服事务";
+    case gameEnum.package.taskState.COMMITTING:
+      return "写入渠道文件";
+    case gameEnum.package.taskState.VERIFYING:
+      return "校验渠道文件";
+    case gameEnum.package.taskState.ROLLING_BACK:
+      return "恢复原渠道文件";
+    default:
+      return gameEnum.package.taskStateDesc(task.state);
+  }
+});
+const schemeCurrentFile = computed<string | null>(() => {
+  const task = visibleTask.value;
+  if (task === null) return null;
+  return task.downloadCurrentFile ?? task.currentFile ?? task.assemblyCurrentFile;
 });
 const schemeCaption = computed<string>(() => {
   if (blockingTask.value) return "有其他资源任务进行中，暂时不能换服";
@@ -188,7 +257,7 @@ const schemeCaption = computed<string>(() => {
     return "上次换服中断了，继续会先恢复到转换前";
   }
   if (visibleTask.value !== null) {
-    return `正在转换为${gameEnum.installation.schemeDesc(targetScheme.value)}`;
+    return `转换为${gameEnum.installation.schemeDesc(targetScheme.value)} · ${schemeStage.value}`;
   }
   if (converting.value) return "正在准备换服…";
   return "";
@@ -200,10 +269,17 @@ const schemeTone = computed<"" | "err" | "warn">(() => {
   return "";
 });
 const schemeFacts = computed<Array<string>>(() => {
-  if (visibleTask.value === null || visibleTask.value.totalBytes === 0) return [];
-  return [
-    `${formatBytes(visibleTask.value.downloadedBytes)} / ${formatBytes(visibleTask.value.totalBytes)}`,
-  ];
+  const task = visibleTask.value;
+  if (task === null) return [];
+  const facts = [`阶段：${schemeStage.value}`, `整体 ${progressPercent.value.toFixed(0)}%`];
+  if (task.totalBytes > 0) {
+    facts.push(`${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
+  }
+  if (task.state === gameEnum.package.taskState.DOWNLOADING && task.bytesPerSecond > 0) {
+    facts.push(`${formatBytes(task.bytesPerSecond)}/s`);
+    if (task.etaSeconds !== null) facts.push(`预计剩余 ${formatDuration(task.etaSeconds)}`);
+  }
+  return facts;
 });
 
 function formatBytes(bytes: number): string {
@@ -217,6 +293,13 @@ function formatBytes(bytes: number): string {
     unit = candidate;
   }
   return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds} 秒`;
+  const minutes = Math.ceil(seconds / 60);
+  if (minutes < 60) return `${minutes} 分钟`;
+  return `${Math.ceil(minutes / 60)} 小时`;
 }
 
 async function convertScheme(): Promise<void> {

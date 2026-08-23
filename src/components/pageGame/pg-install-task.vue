@@ -26,16 +26,7 @@
       </div>
     </div>
 
-    <PgProgress
-      ariaLabel="游戏本体安装进度"
-      :caption
-      :errorMessage="task.errorMessage"
-      :indeterminate="progressIndeterminate"
-      :percent="progressPercent"
-      :progressRows
-      :showBar="showProgressBar"
-      :tone="captionTone"
-    >
+    <PgInstallProgress :task>
       <template #actions>
         <v-btn
           v-if="failed"
@@ -118,7 +109,7 @@
           @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
         />
       </template>
-    </PgProgress>
+    </PgInstallProgress>
 
     <v-alert
       v-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
@@ -132,7 +123,7 @@
 </template>
 
 <script lang="ts" setup>
-import PgProgress from "@comp/pageGame/pg-progress.vue";
+import PgInstallProgress from "@comp/pageGame/pg-install-progress.vue";
 import gameEnum from "@enum/game.js";
 import { computed } from "vue";
 
@@ -154,18 +145,6 @@ const failed = computed<boolean>(() => task.state === gameEnum.package.taskState
 const caption = computed<string>(() =>
   failed.value ? "安装失败" : gameEnum.package.taskStateDesc(task.state),
 );
-const captionTone = computed<"err" | "ok" | "warn" | "">(() => {
-  switch (task.state) {
-    case gameEnum.package.taskState.FAILED:
-      return "err";
-    case gameEnum.package.taskState.RECOVERY_REQUIRED:
-    case gameEnum.package.taskState.REPAIR_REQUIRED:
-    case gameEnum.package.taskState.ROLLING_BACK:
-      return "warn";
-    default:
-      return "";
-  }
-});
 const stateColor = computed<string>(() => {
   switch (task.state) {
     case gameEnum.package.taskState.FAILED:
@@ -178,65 +157,6 @@ const stateColor = computed<string>(() => {
       return "var(--tgc-od-orange)";
   }
 });
-const progressPercent = computed<number>(() => {
-  const totalWork = task.totalBytes + task.assemblyTotalBytes;
-  if (totalWork === 0) return gameEnum.package.taskApplying(task.state) ? 100 : 0;
-  const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
-  return Math.min(100, (completedWork / totalWork) * 100);
-});
-const progressRows = computed<
-  Array<{
-    label: string;
-    percent: number;
-    indeterminate?: boolean;
-    details: Array<string>;
-    status?: string | null;
-  }>
->(() => [
-  {
-    label: "下载",
-    percent: phasePercent(task.downloadedBytes, task.totalBytes),
-    indeterminate: task.totalBytes === 0 && active.value,
-    status: task.state === gameEnum.package.taskState.DOWNLOADING ? task.currentFile : null,
-    details: [
-      `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
-      `文件 ${task.completedCount} / ${task.totalCount}`,
-    ],
-  },
-  {
-    label: "组装",
-    percent: phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes),
-    indeterminate: task.assemblyTotalBytes === 0 && active.value,
-    status: task.state === gameEnum.package.taskState.ASSEMBLING ? task.currentFile : null,
-    details:
-      task.assemblyTotalBytes === 0
-        ? ["无需组装"]
-        : [
-            `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-            `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-          ],
-  },
-  {
-    label: "总进度",
-    percent: progressPercent.value,
-    indeterminate: progressIndeterminate.value,
-    status: overallFacts.value.join(" · "),
-    details: [
-      `${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(task.totalBytes + task.assemblyTotalBytes)}`,
-      `下载 ${phasePercent(task.downloadedBytes, task.totalBytes).toFixed(0)}% · 组装 ${phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes).toFixed(0)}%`,
-    ],
-  },
-]);
-const progressIndeterminate = computed<boolean>(() => {
-  return task.totalBytes + task.assemblyTotalBytes === 0 && active.value;
-});
-const showProgressBar = computed<boolean>(() => {
-  return (
-    active.value ||
-    task.state === gameEnum.package.taskState.PAUSED ||
-    task.state === gameEnum.package.taskState.READY_TO_APPLY
-  );
-});
 const audioLabel = computed<string>(() => {
   const labels: Record<string, string> = {
     "zh-cn": "中文",
@@ -246,26 +166,6 @@ const audioLabel = computed<string>(() => {
   };
   const languages = task.audioLanguages ?? [];
   return languages.map((language) => labels[language] ?? language).join("、") || "未记录";
-});
-const combinedEtaSeconds = computed<number | null>(() => {
-  const totalWork = task.totalBytes + task.assemblyTotalBytes;
-  const completedWork = Math.min(totalWork, task.downloadedBytes + task.assemblyCompletedBytes);
-  const elapsedSeconds = task.elapsedMs / 1000;
-  if (!active.value || totalWork === 0 || completedWork === 0 || elapsedSeconds <= 0) return null;
-  const remaining = totalWork - completedWork;
-  if (remaining === 0) return 0;
-  return Math.ceil(remaining / (completedWork / elapsedSeconds));
-});
-const overallFacts = computed<Array<string>>(() => {
-  const values = [`总体进度 ${progressPercent.value.toFixed(0)}%`];
-  values.push(
-    `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
-    `当前耗时 ${formatElapsed(task.elapsedMs)}`,
-  );
-  if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
-  const eta = combinedEtaSeconds.value;
-  if (eta !== null) values.push(`预计剩余 ${formatDuration(eta)}`);
-  return values;
 });
 const canCancel = computed<boolean>(() => {
   return active.value && !gameEnum.package.taskApplying(task.state);
@@ -288,41 +188,6 @@ const recoverable = computed<boolean>(() => {
 const canAbandon = computed<boolean>(() => {
   return recoverable.value && task.state !== gameEnum.package.taskState.RECOVERY_REQUIRED;
 });
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  const units = ["KiB", "MiB", "GiB", "TiB"];
-  let value = bytes / 1024;
-  let unit = units[0];
-  for (const candidate of units.slice(1)) {
-    if (value < 1024) break;
-    value /= 1024;
-    unit = candidate;
-  }
-  return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
-}
-
-function phasePercent(completed: number, total: number): number {
-  if (total === 0) return 100;
-  return Math.min(100, (completed / total) * 100);
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds} 秒`;
-  const minutes = Math.ceil(seconds / 60);
-  if (minutes < 60) return `${minutes} 分钟`;
-  return `${Math.ceil(minutes / 60)} 小时`;
-}
-
-function formatElapsed(milliseconds: number): string {
-  const total = Math.max(0, Math.round(milliseconds / 1000));
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
-  if (hours > 0) return `${hours} 小时 ${minutes} 分 ${seconds} 秒`;
-  if (minutes > 0) return `${minutes} 分 ${seconds} 秒`;
-  return `${seconds} 秒`;
-}
 </script>
 
 <style lang="scss" scoped>
@@ -379,11 +244,6 @@ function formatElapsed(milliseconds: number): string {
 
 .install-task-config-wide {
   grid-column: 1 / -1;
-}
-
-.install-task :deep(.progress-panel) {
-  border: 1px solid var(--common-shadow-1);
-  margin-inline: 0;
 }
 
 .install-task-title {

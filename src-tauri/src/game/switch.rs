@@ -29,6 +29,7 @@ use std::{
   io::{Read, Write},
   path::{Path, PathBuf},
   sync::atomic::{AtomicBool, Ordering},
+  time::{Duration, Instant},
 };
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
@@ -246,21 +247,64 @@ pub(crate) fn switch_plan_digest(plan: &PersistedSwitchPlan) -> Result<String, S
 }
 
 /// 下载并解压渠道 SDK，生成可提交的写前步骤；不会修改游戏目录。
-pub(crate) async fn prepare_switch_commit(
+pub(crate) async fn prepare_switch_commit<F>(
   client: &reqwest::Client,
   installation: &GameInstallation,
   plan: &PersistedSwitchPlan,
   task_root: &Path,
   journal: &mut TaskJournal,
   canceled: &AtomicBool,
-) -> Result<SwitchApplyRequest, String> {
+  started_at: Instant,
+  on_progress: &mut F,
+) -> Result<SwitchApplyRequest, String>
+where
+  F: FnMut(&TaskJournal) -> Result<(), String>,
+{
   validate_switch_installation(installation, plan)?;
   let packages = unique_sdk_packages(plan);
-  for package in &packages {
-    download_sdk_zip(client, package, task_root, &plan.plan_id, canceled).await?;
+  for (index, package) in packages.iter().enumerate() {
+    let label = format!("下载渠道 SDK {}/{}：{}", index + 1, packages.len(), package.version);
+    journal.state = super::model::PackageTaskState::Downloading;
+    journal.current_file = Some(label.clone());
+    journal.download_current_file = Some(label);
+    journal.touch();
+    on_progress(journal)?;
+    let base_downloaded = journal.downloaded_bytes;
+    let mut last_emit = Instant::now() - Duration::from_millis(250);
+    download_sdk_zip(client, package, task_root, &plan.plan_id, canceled, &mut |bytes| -> Result<
+      (),
+      String,
+    > {
+      journal.downloaded_bytes = base_downloaded.saturating_add(bytes).min(journal.total_bytes);
+      let elapsed = started_at.elapsed().as_secs_f64().max(0.001);
+      journal.bytes_per_second = (journal.downloaded_bytes as f64 / elapsed) as u64;
+      let remaining = journal.total_bytes.saturating_sub(journal.downloaded_bytes);
+      journal.eta_seconds =
+        (journal.bytes_per_second > 0).then_some(remaining / journal.bytes_per_second);
+      journal.touch();
+      if last_emit.elapsed() >= Duration::from_millis(250) || bytes == package.size {
+        on_progress(journal)?;
+        last_emit = Instant::now();
+      }
+      Ok(())
+    })
+    .await?;
+    journal.downloaded_bytes =
+      base_downloaded.saturating_add(package.size).min(journal.total_bytes);
+    journal.committed_step = (index + 1).min(journal.total_count);
+    journal.touch();
+    on_progress(journal)?;
   }
   record_switch_cache(journal, task_root, &packages);
   check_canceled(canceled)?;
+  journal.state = super::model::PackageTaskState::Assembling;
+  journal.current_file = Some("准备渠道文件：解压并校验 SDK".to_string());
+  journal.download_current_file = None;
+  journal.assembly_current_file = Some("准备渠道文件：解压并校验 SDK".to_string());
+  journal.bytes_per_second = 0;
+  journal.eta_seconds = None;
+  journal.touch();
+  on_progress(journal)?;
   let game_root = PathBuf::from(&installation.root_path);
   let staging_root = task_root.join("tasks").join(&plan.plan_id).join("staging");
   if staging_root.exists() {
@@ -273,6 +317,10 @@ pub(crate) async fn prepare_switch_commit(
     extract_sdk_zip(&zip_path, &staging_root, sdk_decompress_budget(package.decompressed_size))?;
     staged = verify_staged_sdk(&staging_root, package)?;
   }
+  journal.current_file = Some("准备渠道文件：生成提交清单".to_string());
+  journal.assembly_current_file = Some("准备渠道文件：生成提交清单".to_string());
+  journal.touch();
+  on_progress(journal)?;
   let mut files = Vec::new();
   let mut seen = HashSet::new();
   for (name, (size, md5)) in &staged {
@@ -547,9 +595,11 @@ async fn download_sdk_zip(
   task_root: &Path,
   task_id: &str,
   canceled: &AtomicBool,
+  on_progress: &mut impl FnMut(u64) -> Result<(), String>,
 ) -> Result<(), String> {
   let converted = channel_sdk_from_persisted(package);
   if sdk_cache_hit(task_root, &converted) > 0 {
+    on_progress(package.size)?;
     return Ok(());
   }
   let cache_root = task_root.join("cache/sdks");
@@ -564,7 +614,7 @@ async fn download_sdk_zip(
       Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
       Err(error) => return Err(format!("清理渠道 SDK 下载临时文件失败：{error}")),
     }
-    match download_sdk_once(client, package, &partial, canceled).await {
+    match download_sdk_once(client, package, &partial, canceled, on_progress).await {
       Ok(()) => {
         let digest = file_md5(&partial)?;
         if !digest.eq_ignore_ascii_case(&package.md5) {
@@ -595,6 +645,7 @@ async fn download_sdk_once(
   package: &PersistedSdk,
   partial: &Path,
   canceled: &AtomicBool,
+  on_progress: &mut impl FnMut(u64) -> Result<(), String>,
 ) -> Result<(), String> {
   let response =
     client.get(&package.url).send().await.map_err(|error| network_error("下载渠道 SDK", &error))?;
@@ -621,6 +672,7 @@ async fn download_sdk_once(
       return Err("渠道 SDK 超过计划大小".to_string());
     }
     file.write_all(&chunk).await.map_err(|error| format!("写入渠道 SDK 临时文件失败：{error}"))?;
+    on_progress(bytes)?;
   }
   if bytes != package.size {
     return Err("渠道 SDK 下载大小与计划不一致".to_string());

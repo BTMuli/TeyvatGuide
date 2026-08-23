@@ -85,6 +85,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       releasedBytes: 0,
       assemblyCompletedBytesTotal: 0,
       currentFile: null,
+      downloadCurrentFile: null,
+      assemblyCurrentFile: null,
       bytesPerSecond: 0,
       etaSeconds: null,
       elapsedMs: 0,

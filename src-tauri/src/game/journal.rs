@@ -127,6 +127,10 @@ pub(crate) struct TaskJournal {
   #[serde(default)]
   pub(crate) assembly_completed_bytes_total: u64,
   pub(crate) current_file: Option<String>,
+  #[serde(default)]
+  pub(crate) download_current_file: Option<String>,
+  #[serde(default)]
+  pub(crate) assembly_current_file: Option<String>,
   pub(crate) bytes_per_second: u64,
   pub(crate) eta_seconds: Option<u64>,
   pub(crate) error_message: Option<String>,
@@ -176,6 +180,8 @@ impl TaskJournal {
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
       current_file: None,
+      download_current_file: None,
+      assembly_current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
       error_message: None,
@@ -228,6 +234,8 @@ impl TaskJournal {
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
       current_file: None,
+      download_current_file: None,
+      assembly_current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
       error_message: None,
@@ -248,6 +256,7 @@ impl TaskJournal {
     self.assembly_total_count = total_count;
     self.assembly_completed_bytes = 0;
     self.assembly_total_bytes = total_bytes;
+    self.assembly_current_file = None;
   }
 
   pub(crate) fn update_assembly_progress(
@@ -262,7 +271,8 @@ impl TaskJournal {
     self.assembly_total_count = total_count;
     self.assembly_completed_bytes = completed_bytes;
     self.assembly_total_bytes = total_bytes;
-    self.current_file = current_file;
+    self.current_file = current_file.clone();
+    self.assembly_current_file = current_file;
   }
 
   pub(crate) fn summary(&self) -> PackageTaskSummary {
@@ -292,6 +302,8 @@ impl TaskJournal {
       released_bytes: self.released_bytes,
       assembly_completed_bytes_total: self.assembly_completed_bytes_total,
       current_file: self.current_file.clone(),
+      download_current_file: self.download_current_file.clone(),
+      assembly_current_file: self.assembly_current_file.clone(),
       bytes_per_second: self.bytes_per_second,
       eta_seconds: self.eta_seconds,
       elapsed_ms: self.elapsed_ms(),
@@ -566,6 +578,8 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
     || journal.spool_root.as_ref().is_some_and(|value| value.is_empty())
     || journal.current_file.as_ref().is_some_and(|value| value.len() > 256)
+    || journal.download_current_file.as_ref().is_some_and(|value| value.len() > 256)
+    || journal.assembly_current_file.as_ref().is_some_and(|value| value.len() > 256)
     || journal.error_message.as_ref().is_some_and(|value| value.len() > 4096)
   {
     return Err("游戏资源任务日志字段无效".to_string());
@@ -725,6 +739,8 @@ mod tests {
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
       current_file: None,
+      download_current_file: None,
+      assembly_current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
       error_message: None,

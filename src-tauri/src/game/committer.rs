@@ -380,6 +380,10 @@ where
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
   journal.current_file = Some("准备渠道文件".to_string());
+  journal.download_current_file = None;
+  journal.assembly_current_file = Some("准备渠道文件：校验 SDK 解压结果".to_string());
+  journal.bytes_per_second = 0;
+  journal.eta_seconds = None;
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
     let config_path = resolve_existing_manifest_file(game_root, "config.ini")?;
@@ -390,13 +394,16 @@ where
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
     journal.current_file = Some("准备提交事务".to_string());
+    journal.assembly_current_file = Some("准备提交事务：生成渠道文件变更清单".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     check_canceled(canceled)?;
     journal.state = PackageTaskState::Committing;
+    journal.assembly_current_file = Some("提交事务：写入渠道文件".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     commit_file_resources(&commit, game_root, journal, task_root, canceled, &emit)?;
     journal.state = PackageTaskState::Verifying;
     journal.current_file = Some("校验渠道文件".to_string());
+    journal.assembly_current_file = Some("校验渠道文件：确认文件完整性".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     verify_switch_files(&commit, game_root, canceled)?;
     commit_config(&commit.plan_id, game_root, task_root, journal, &emit)?;
@@ -405,6 +412,8 @@ where
     journal.state = PackageTaskState::Completed;
     journal.error_message = None;
     journal.current_file = None;
+    journal.download_current_file = None;
+    journal.assembly_current_file = None;
     persist_and_emit(task_root, journal, &emit)?;
     Ok(())
   })();
@@ -1533,6 +1542,11 @@ where
   journal.apply = None;
   journal.state = if canceled { PackageTaskState::Canceled } else { PackageTaskState::Failed };
   journal.error_message = (!canceled).then_some(error.clone());
+  journal.current_file = None;
+  journal.download_current_file = None;
+  journal.assembly_current_file = None;
+  journal.bytes_per_second = 0;
+  journal.eta_seconds = None;
   let _ = persist_and_emit(task_root, journal, emit);
   Err(if canceled { "换服已取消".to_string() } else { error })
 }
