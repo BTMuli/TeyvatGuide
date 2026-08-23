@@ -885,7 +885,17 @@ pub(crate) fn verify_published_installation(
   let files = if evidence.is_empty() {
     verify_install_tree(plan, overlay, &game_root, &sdk_files)?
   } else {
-    verify_install_tree_with_evidence(plan, overlay, &game_root, &sdk_files, &evidence)?
+    verify_install_tree_parallel_with_progress(
+      plan,
+      overlay,
+      &game_root,
+      &sdk_files,
+      &evidence,
+      task_root,
+      false,
+      super::package::default_concurrency(),
+      &mut |_, _| {},
+    )?
   };
   if tree_digest(&files) != marker.tree_digest {
     return Err("发布后的游戏树摘要不一致".to_string());
