@@ -25,6 +25,7 @@ use std::{
   io::{Read, Write},
   path::{Path, PathBuf},
   sync::atomic::{AtomicBool, Ordering},
+  time::{Duration, Instant},
 };
 use uuid::Uuid;
 use walkdir::WalkDir;
@@ -40,6 +41,85 @@ const MAX_SDK_VERSION_BYTES: u64 = 256 * 1024;
 const MAX_SDK_VERSION_FILES: usize = 512;
 const MAX_SDK_DECOMPRESSED_BYTES: u64 = 512 * 1024 * 1024;
 const INSTALL_SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+
+#[derive(Default)]
+pub(crate) struct InstallValidationTiming {
+  pub(crate) assembly: assembler::AssemblyTiming,
+  pub(crate) staging_tree_micros: u64,
+  pub(crate) staging_tree_count: u64,
+  pub(crate) post_publish_micros: u64,
+  pub(crate) post_publish_count: u64,
+  pub(crate) journal_attempt_count: u64,
+  pub(crate) journal_write_count: u64,
+  pub(crate) journal_serialized_bytes: u64,
+  pub(crate) journal_serialize_micros: u64,
+  pub(crate) journal_write_micros: u64,
+  pub(crate) journal_file_sync_count: u64,
+  pub(crate) journal_file_sync_micros: u64,
+  pub(crate) journal_rename_micros: u64,
+  pub(crate) journal_directory_sync_count: u64,
+  pub(crate) journal_directory_sync_micros: u64,
+  pub(crate) journal_lock_wait_micros: u64,
+}
+
+impl InstallValidationTiming {
+  fn record_staging_tree(&mut self, elapsed: Duration) {
+    self.staging_tree_count = self.staging_tree_count.saturating_add(1);
+    self.staging_tree_micros = self.staging_tree_micros.saturating_add(duration_micros(elapsed));
+  }
+
+  fn record_post_publish(&mut self, elapsed: Duration) {
+    self.post_publish_count = self.post_publish_count.saturating_add(1);
+    self.post_publish_micros = self.post_publish_micros.saturating_add(duration_micros(elapsed));
+  }
+
+  fn record_journal(&mut self, sample: &super::journal::JournalPersistTiming) {
+    self.journal_attempt_count = self.journal_attempt_count.saturating_add(1);
+    self.journal_write_count = self.journal_write_count.saturating_add(u64::from(sample.persisted));
+    self.journal_serialized_bytes =
+      self.journal_serialized_bytes.saturating_add(sample.serialized_bytes);
+    self.journal_serialize_micros =
+      self.journal_serialize_micros.saturating_add(sample.serialize_micros);
+    self.journal_write_micros = self.journal_write_micros.saturating_add(sample.write_micros);
+    self.journal_file_sync_count =
+      self.journal_file_sync_count.saturating_add(sample.file_sync_count);
+    self.journal_file_sync_micros =
+      self.journal_file_sync_micros.saturating_add(sample.file_sync_micros);
+    self.journal_rename_micros = self.journal_rename_micros.saturating_add(sample.rename_micros);
+    self.journal_directory_sync_count =
+      self.journal_directory_sync_count.saturating_add(sample.directory_sync_count);
+    self.journal_directory_sync_micros =
+      self.journal_directory_sync_micros.saturating_add(sample.directory_sync_micros);
+    self.journal_lock_wait_micros =
+      self.journal_lock_wait_micros.saturating_add(sample.lock_wait_micros);
+  }
+}
+
+fn duration_micros(duration: Duration) -> u64 {
+  duration.as_micros().min(u128::from(u64::MAX)) as u64
+}
+
+fn persist_install_journal(
+  task_root: &Path,
+  journal: &TaskJournal,
+  timing: &mut InstallValidationTiming,
+) -> Result<(), String> {
+  let mut sample = super::journal::JournalPersistTiming::default();
+  let result = super::journal::persist_timed(task_root, journal, &mut sample);
+  timing.record_journal(&sample);
+  result
+}
+
+fn persist_install_progress(
+  task_root: &Path,
+  journal: &TaskJournal,
+  timing: &mut InstallValidationTiming,
+) -> Result<(), String> {
+  let mut sample = super::journal::JournalPersistTiming::default();
+  let result = super::journal::persist_progress_timed(task_root, journal, &mut sample);
+  timing.record_journal(&sample);
+  result
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -392,6 +472,7 @@ pub(crate) fn execute_install(
   journal: &mut TaskJournal,
   canceled: &AtomicBool,
   emit: &dyn Fn(&TaskJournal),
+  timing: &mut InstallValidationTiming,
 ) -> Result<GameInstallation, String> {
   ensure_windows_install_platform()?;
   if plan.target != PackagePlanTarget::Install
@@ -418,11 +499,11 @@ pub(crate) fn execute_install(
   let assembly_total_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "组装资源总大小溢出".to_string())
   })?;
-  set_task_state(task_root, journal, PackageTaskState::Assembling, emit)?;
+  set_task_state(task_root, journal, PackageTaskState::Assembling, emit, timing)?;
   journal.reset_assembly_progress(plan.assets.len(), assembly_total_bytes);
   journal.current_file = Some("组装资源文件".to_string());
   journal.touch();
-  super::journal::persist(task_root, journal)?;
+  persist_install_journal(task_root, journal, timing)?;
   emit(journal);
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::Assembling)?;
   let (marker, sdk_files) = if staging_has_marker {
@@ -434,7 +515,7 @@ pub(crate) fn execute_install(
       .map(|sdk| collect_published_sdk_files(&staging_root, sdk))
       .transpose()?
       .unwrap_or_default();
-    let files = verify_install_tree(plan, overlay, &staging_root, &sdk_files)?;
+    let files = verify_install_tree_timed(plan, overlay, &staging_root, &sdk_files, timing)?;
     if tree_digest(&files) != marker.tree_digest {
       return Err("安装暂存目录摘要不一致，需要恢复".to_string());
     }
@@ -457,7 +538,7 @@ pub(crate) fn execute_install(
       assembler::validate_full_install_cursor(plan, &staging_root, start_cursor, canceled)?;
       for index in start_cursor..plan.assets.len() {
         check_canceled(canceled)?;
-        assembler::assemble_full_install_asset(
+        assembler::assemble_full_install_asset_with_timing_observer(
           plan,
           &download_index,
           index,
@@ -465,6 +546,7 @@ pub(crate) fn execute_install(
           &shared_cache_root,
           spool_root,
           canceled,
+          &mut timing.assembly,
         )?;
         let completed = index + 1;
         let completed_bytes = plan.assets[..completed].iter().map(|asset| asset.size).sum();
@@ -479,13 +561,13 @@ pub(crate) fn execute_install(
         journal.assembly_completed_bytes_total = completed_bytes;
         journal.spool_bytes = spool_bytes(spool_root)?;
         journal.touch();
-        super::journal::persist(task_root, journal)?;
+        persist_install_journal(task_root, journal, timing)?;
         let released =
           release_consumed_spool_chunks(plan, completed, spool_root, &shared_cache_root)?;
         journal.released_bytes = journal.released_bytes.saturating_add(released);
         journal.spool_bytes = spool_bytes(spool_root)?;
         journal.touch();
-        super::journal::persist_progress(task_root, journal)?;
+        persist_install_progress(task_root, journal, timing)?;
         emit(journal);
       }
     }
@@ -502,7 +584,7 @@ pub(crate) fn execute_install(
       BTreeMap::new()
     };
     write_config(&staging_root, &overlay.config, &overlay.config_sha256)?;
-    let expected = verify_install_tree(plan, overlay, &staging_root, &sdk_files)?;
+    let expected = verify_install_tree_timed(plan, overlay, &staging_root, &sdk_files, timing)?;
     let expected_tree_digest = tree_digest(&expected);
     let (directory_volume_serial, directory_file_id) = directory_identity(&staging_root)?;
     let marker = InstallMarker {
@@ -522,36 +604,43 @@ pub(crate) fn execute_install(
     write_marker(&staging_root, &marker)?;
     (marker, sdk_files)
   };
-  set_task_state(task_root, journal, PackageTaskState::CommitPrepared, emit)?;
+  set_task_state(task_root, journal, PackageTaskState::CommitPrepared, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::CommitPrepared)?;
   check_canceled(canceled)?;
   ensure_publish_facts(plan, overlay, &draft, &staging_root, &game_root, &marker)?;
-  set_task_state(task_root, journal, PackageTaskState::PublishPending, emit)?;
+  set_task_state(task_root, journal, PackageTaskState::PublishPending, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::PublishPending)?;
   check_canceled(canceled)?;
   prepare_publish_target(&game_root, &draft)?;
   publish_directory(&staging_root, &game_root)?;
-  set_task_state(task_root, journal, PackageTaskState::Published, emit)?;
+  set_task_state(task_root, journal, PackageTaskState::Published, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::Published)?;
-  verify_marker(&game_root, &marker)?;
-  if directory_identity(&game_root)? != (marker.directory_volume_serial, marker.directory_file_id) {
-    return Err("发布后的游戏目录身份发生变化，需要恢复".to_string());
-  }
-  let published_files = verify_install_tree(plan, overlay, &game_root, &sdk_files)?;
-  if tree_digest(&published_files) != marker.tree_digest {
-    return Err("发布后的游戏树摘要不一致".to_string());
-  }
-  set_task_state(task_root, journal, PackageTaskState::Verified, emit)?;
+  let post_publish_started_at = Instant::now();
+  let post_publish_result = (|| {
+    verify_marker(&game_root, &marker)?;
+    if directory_identity(&game_root)? != (marker.directory_volume_serial, marker.directory_file_id)
+    {
+      return Err("发布后的游戏目录身份发生变化，需要恢复".to_string());
+    }
+    let published_files = verify_install_tree(plan, overlay, &game_root, &sdk_files)?;
+    if tree_digest(&published_files) != marker.tree_digest {
+      return Err("发布后的游戏树摘要不一致".to_string());
+    }
+    let installation = inspect_executable(&overlay.expected_executable, machine_uid)?;
+    if installation.id != plan.installation_id
+      || installation.scheme_id != Some(draft.scheme)
+      || installation.version.as_deref() != Some(plan.target_tag.as_str())
+      || !sdk_is_consistent(draft.scheme, installation.has_channel_sdk)
+    {
+      return Err("发布后的游戏安装复验不通过".to_string());
+    }
+    Ok(installation)
+  })();
+  timing.record_post_publish(post_publish_started_at.elapsed());
+  let installation = post_publish_result?;
+  set_task_state(task_root, journal, PackageTaskState::Verified, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::Verified)?;
-  let installation = inspect_executable(&overlay.expected_executable, machine_uid)?;
-  if installation.id != plan.installation_id
-    || installation.scheme_id != Some(draft.scheme)
-    || installation.version.as_deref() != Some(plan.target_tag.as_str())
-    || !sdk_is_consistent(draft.scheme, installation.has_channel_sdk)
-  {
-    return Err("发布后的游戏安装复验不通过".to_string());
-  }
-  set_task_state(task_root, journal, PackageTaskState::RegistrationPending, emit)?;
+  set_task_state(task_root, journal, PackageTaskState::RegistrationPending, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::RegistrationPending)?;
   Ok(installation)
 }
@@ -1298,6 +1387,19 @@ fn verify_install_tree(
   Ok(expected)
 }
 
+fn verify_install_tree_timed(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  timing: &mut InstallValidationTiming,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  let started_at = Instant::now();
+  let result = verify_install_tree(plan, overlay, root, sdk_files);
+  timing.record_staging_tree(started_at.elapsed());
+  result
+}
+
 fn tree_digest(files: &BTreeMap<String, (u64, String)>) -> String {
   let mut bytes = Vec::new();
   for (name, (size, md5)) in files {
@@ -1672,12 +1774,13 @@ fn set_task_state(
   journal: &mut TaskJournal,
   state: PackageTaskState,
   emit: &dyn Fn(&TaskJournal),
+  timing: &mut InstallValidationTiming,
 ) -> Result<(), String> {
   journal.state = state;
   journal.current_file = None;
   journal.error_message = None;
   journal.touch();
-  super::journal::persist(task_root, journal)?;
+  persist_install_journal(task_root, journal, timing)?;
   emit(journal);
   Ok(())
 }

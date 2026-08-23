@@ -23,6 +23,7 @@ use std::{
     atomic::{AtomicBool, AtomicUsize, Ordering},
     mpsc,
   },
+  time::Instant,
 };
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
@@ -32,6 +33,57 @@ const COPY_BUFFER_SIZE: usize = 128 * 1024;
 pub(crate) struct AssemblySummary {
   pub(crate) asset_count: usize,
   pub(crate) assembled_bytes: u64,
+}
+
+/// Scalar timing counters for one full-install asset assembly operation.
+///
+/// The counters intentionally contain no asset, chunk, cache-key, or path
+/// identity.  A caller can aggregate them into a task-level performance
+/// record without emitting per-chunk diagnostics.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct AssemblyTiming {
+  pub(crate) zstd_decode_read_micros: u64,
+  pub(crate) zstd_decode_read_count: u64,
+  pub(crate) zstd_decode_read_bytes: u64,
+  pub(crate) chunk_md5_micros: u64,
+  pub(crate) chunk_md5_count: u64,
+  pub(crate) chunk_md5_bytes: u64,
+  pub(crate) asset_md5_micros: u64,
+  pub(crate) asset_md5_count: u64,
+  pub(crate) asset_md5_bytes: u64,
+  pub(crate) staging_file_sync_micros: u64,
+  pub(crate) staging_file_sync_count: u64,
+  pub(crate) staging_file_sync_bytes: u64,
+}
+
+impl AssemblyTiming {
+  fn record_zstd_decode_read(&mut self, elapsed_micros: u64, bytes: u64) {
+    self.zstd_decode_read_micros = self.zstd_decode_read_micros.saturating_add(elapsed_micros);
+    self.zstd_decode_read_count = self.zstd_decode_read_count.saturating_add(1);
+    self.zstd_decode_read_bytes = self.zstd_decode_read_bytes.saturating_add(bytes);
+  }
+
+  fn record_chunk_md5(&mut self, elapsed_micros: u64, bytes: u64) {
+    self.chunk_md5_micros = self.chunk_md5_micros.saturating_add(elapsed_micros);
+    self.chunk_md5_count = self.chunk_md5_count.saturating_add(1);
+    self.chunk_md5_bytes = self.chunk_md5_bytes.saturating_add(bytes);
+  }
+
+  fn record_asset_md5(&mut self, elapsed_micros: u64, bytes: u64) {
+    self.asset_md5_micros = self.asset_md5_micros.saturating_add(elapsed_micros);
+    self.asset_md5_count = self.asset_md5_count.saturating_add(1);
+    self.asset_md5_bytes = self.asset_md5_bytes.saturating_add(bytes);
+  }
+
+  fn record_staging_file_sync(&mut self, elapsed_micros: u64, bytes: u64) {
+    self.staging_file_sync_micros = self.staging_file_sync_micros.saturating_add(elapsed_micros);
+    self.staging_file_sync_count = self.staging_file_sync_count.saturating_add(1);
+    self.staging_file_sync_bytes = self.staging_file_sync_bytes.saturating_add(bytes);
+  }
+}
+
+fn duration_micros(duration: std::time::Duration) -> u64 {
+  duration.as_micros().min(u128::from(u64::MAX)) as u64
 }
 
 /// Progress reported after a game asset has been fully assembled and verified.
@@ -200,6 +252,80 @@ pub(crate) fn assemble_full_install_asset(
   spool_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<(), String> {
+  assemble_full_install_asset_inner(
+    plan,
+    download_index,
+    asset_index,
+    staging_root,
+    shared_cache_root,
+    spool_root,
+    canceled,
+    None,
+  )
+}
+
+/// Assemble one full-install asset and return stage timing counters.
+#[cfg(test)]
+pub(crate) fn assemble_full_install_asset_with_timing(
+  plan: &PersistedPlan,
+  download_index: &FullInstallDownloadIndex,
+  asset_index: usize,
+  staging_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<AssemblyTiming, String> {
+  let mut timing = AssemblyTiming::default();
+  assemble_full_install_asset_inner(
+    plan,
+    download_index,
+    asset_index,
+    staging_root,
+    shared_cache_root,
+    spool_root,
+    canceled,
+    Some(&mut timing),
+  )?;
+  Ok(timing)
+}
+
+/// Assemble one full-install asset while writing timing counters into a
+/// caller-owned observer.  The observer makes partial timing available to the
+/// caller even when the assembly returns an error, without changing the
+/// existing `String` error contract.
+#[allow(dead_code)]
+pub(crate) fn assemble_full_install_asset_with_timing_observer(
+  plan: &PersistedPlan,
+  download_index: &FullInstallDownloadIndex,
+  asset_index: usize,
+  staging_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  canceled: &AtomicBool,
+  timing: &mut AssemblyTiming,
+) -> Result<(), String> {
+  assemble_full_install_asset_inner(
+    plan,
+    download_index,
+    asset_index,
+    staging_root,
+    shared_cache_root,
+    spool_root,
+    canceled,
+    Some(timing),
+  )
+}
+
+fn assemble_full_install_asset_inner(
+  plan: &PersistedPlan,
+  download_index: &FullInstallDownloadIndex,
+  asset_index: usize,
+  staging_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  canceled: &AtomicBool,
+  mut timing: Option<&mut AssemblyTiming>,
+) -> Result<(), String> {
   if plan.strategy != PackagePlanStrategy::Full {
     return Err("安装组装器只接受 Full 计划".to_string());
   }
@@ -207,10 +333,12 @@ pub(crate) fn assemble_full_install_asset(
   let downloads = FullInstallDownloadLookup { plan, index: download_index };
   validate_asset_layout(asset, &downloads)?;
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
-  if output.exists() && verified_asset_file(&output, asset, canceled)? {
+  if output.exists()
+    && verified_asset_file_with_timing(&output, asset, canceled, timing.as_deref_mut())?
+  {
     return Ok(());
   }
-  assemble_asset_with_fallback(
+  assemble_asset_with_fallback_with_timing(
     asset,
     &downloads,
     staging_root,
@@ -218,6 +346,7 @@ pub(crate) fn assemble_full_install_asset(
     spool_root,
     staging_root,
     canceled,
+    timing,
   )
 }
 
@@ -930,6 +1059,18 @@ fn assemble_asset<L: DownloadLookup>(
   staging_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<(), String> {
+  assemble_asset_with_timing(asset, downloads, game_root, cache_root, staging_root, canceled, None)
+}
+
+fn assemble_asset_with_timing<L: DownloadLookup>(
+  asset: &PlanAsset,
+  downloads: &L,
+  game_root: &Path,
+  cache_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+  mut timing: Option<&mut AssemblyTiming>,
+) -> Result<(), String> {
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   let partial = partial_path(&output)?;
   remove_stale_partial(&partial)?;
@@ -953,19 +1094,27 @@ fn assemble_asset<L: DownloadLookup>(
         .seek(SeekFrom::Start(chunk.target_offset))
         .map_err(|error| format!("定位资源 chunk 失败：{}：{error}", asset.name))?;
       if let Some(reuse) = &chunk.reuse {
-        write_reused_chunk(
+        write_reused_chunk_with_timing(
           &mut file,
           chunk,
           game_root,
           &reuse.asset_name,
           reuse.source_offset,
           canceled,
+          timing.as_deref_mut(),
         )?;
       } else {
         let download = downloads
           .get(chunk.id.as_str())
           .ok_or_else(|| format!("资源 chunk 缺少下载缓存：{}", chunk.id))?;
-        write_downloaded_chunk(&mut file, chunk, cache_root, download, canceled)?;
+        write_downloaded_chunk_with_timing(
+          &mut file,
+          chunk,
+          cache_root,
+          download,
+          canceled,
+          timing.as_deref_mut(),
+        )?;
       }
     }
     let output_size = file
@@ -978,12 +1127,14 @@ fn assemble_asset<L: DownloadLookup>(
     file
       .seek(SeekFrom::Start(0))
       .map_err(|error| format!("定位资源临时文件失败：{}：{error}", asset.name))?;
-    let actual_asset_md5 = hash_exact_file(&mut file, asset.size, canceled)?;
+    let actual_asset_md5 =
+      hash_exact_file_with_timing(&mut file, asset.size, canceled, timing.as_deref_mut())?;
     if !actual_asset_md5.eq_ignore_ascii_case(&asset.md5) {
       return Err(format!("资源 MD5 校验失败：{}", asset.name));
     }
     check_canceled(canceled)?;
-    file.sync_all().map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
+    sync_staging_file(&file, asset.size, timing.as_deref_mut())
+      .map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
     drop(file);
     fs::rename(&partial, &output)
       .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))?;
@@ -995,6 +1146,7 @@ fn assemble_asset<L: DownloadLookup>(
   result
 }
 
+#[cfg_attr(not(test), allow(dead_code))]
 fn assemble_asset_with_fallback<L: DownloadLookup>(
   asset: &PlanAsset,
   downloads: &L,
@@ -1003,6 +1155,28 @@ fn assemble_asset_with_fallback<L: DownloadLookup>(
   spool_root: &Path,
   staging_root: &Path,
   canceled: &AtomicBool,
+) -> Result<(), String> {
+  assemble_asset_with_fallback_with_timing(
+    asset,
+    downloads,
+    game_root,
+    shared_cache_root,
+    spool_root,
+    staging_root,
+    canceled,
+    None,
+  )
+}
+
+fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
+  asset: &PlanAsset,
+  downloads: &L,
+  game_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+  mut timing: Option<&mut AssemblyTiming>,
 ) -> Result<(), String> {
   let selected_root = asset.chunks.iter().filter(|chunk| chunk.reuse.is_none()).try_fold(
     None::<&Path>,
@@ -1025,7 +1199,15 @@ fn assemble_asset_with_fallback<L: DownloadLookup>(
     },
   )?;
   if let Some(root) = selected_root {
-    return assemble_asset(asset, downloads, game_root, root, staging_root, canceled);
+    return assemble_asset_with_timing(
+      asset,
+      downloads,
+      game_root,
+      root,
+      staging_root,
+      canceled,
+      timing,
+    );
   }
 
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
@@ -1057,9 +1239,16 @@ fn assemble_asset_with_fallback<L: DownloadLookup>(
       } else {
         spool_root
       };
-      write_downloaded_chunk(&mut file, chunk, root, download, canceled)?;
+      write_downloaded_chunk_with_timing(
+        &mut file,
+        chunk,
+        root,
+        download,
+        canceled,
+        timing.as_deref_mut(),
+      )?;
     }
-    finalize_open_asset(file, &partial, &output, asset, canceled)
+    finalize_open_asset_with_timing(file, &partial, &output, asset, canceled, timing.as_deref_mut())
   })();
   if result.is_err() {
     let _ = fs::remove_file(&partial);
@@ -1067,21 +1256,23 @@ fn assemble_asset_with_fallback<L: DownloadLookup>(
   result
 }
 
-fn finalize_open_asset(
+fn finalize_open_asset_with_timing(
   mut file: File,
   partial: &Path,
   output: &Path,
   asset: &PlanAsset,
   canceled: &AtomicBool,
+  mut timing: Option<&mut AssemblyTiming>,
 ) -> Result<(), String> {
   file
     .seek(SeekFrom::Start(0))
     .map_err(|error| format!("定位资源临时文件失败：{}：{error}", asset.name))?;
-  let actual = hash_exact_file(&mut file, asset.size, canceled)?;
+  let actual = hash_exact_file_with_timing(&mut file, asset.size, canceled, timing.as_deref_mut())?;
   if !actual.eq_ignore_ascii_case(&asset.md5) {
     return Err(format!("资源 MD5 校验失败：{}", asset.name));
   }
-  file.sync_all().map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
+  sync_staging_file(&file, asset.size, timing.as_deref_mut())
+    .map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
   drop(file);
   fs::rename(partial, output)
     .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
@@ -1092,6 +1283,15 @@ fn verified_asset_file(
   asset: &PlanAsset,
   canceled: &AtomicBool,
 ) -> Result<bool, String> {
+  verified_asset_file_with_timing(path, asset, canceled, None)
+}
+
+fn verified_asset_file_with_timing(
+  path: &Path,
+  asset: &PlanAsset,
+  canceled: &AtomicBool,
+  timing: Option<&mut AssemblyTiming>,
+) -> Result<bool, String> {
   let mut file =
     File::open(path).map_err(|error| format!("打开已组装资源失败：{}：{error}", asset.name))?;
   if file.metadata().map_err(|error| format!("读取已组装资源失败：{}：{error}", asset.name))?.len()
@@ -1099,15 +1299,34 @@ fn verified_asset_file(
   {
     return Ok(false);
   }
-  Ok(hash_exact_file(&mut file, asset.size, canceled)?.eq_ignore_ascii_case(&asset.md5))
+  Ok(
+    hash_exact_file_with_timing(&mut file, asset.size, canceled, timing)?
+      .eq_ignore_ascii_case(&asset.md5),
+  )
 }
 
-fn write_downloaded_chunk(
+#[derive(Default)]
+struct ZstdReadTiming {
+  micros: u64,
+  bytes: u64,
+  attempted: bool,
+}
+
+impl ZstdReadTiming {
+  fn record(&mut self, elapsed_micros: u64, bytes: u64) {
+    self.attempted = true;
+    self.micros = self.micros.saturating_add(elapsed_micros);
+    self.bytes = self.bytes.saturating_add(bytes);
+  }
+}
+
+fn write_downloaded_chunk_with_timing(
   output: &mut File,
   chunk: &PlanChunk,
   cache_root: &Path,
   download: &super::planner::PlanDownload,
   canceled: &AtomicBool,
+  mut timing: Option<&mut AssemblyTiming>,
 ) -> Result<(), String> {
   check_canceled(canceled)?;
   if !cached_chunk_matches(cache_root, download) {
@@ -1122,20 +1341,59 @@ fn write_downloaded_chunk(
         return Err(format!("Raw 下载缓存大小不一致：{}", chunk.id));
       }
       let mut reader = BufReader::new(file);
-      write_exact_chunk(output, chunk, &mut reader, canceled)?;
+      write_exact_chunk_with_timing(
+        output,
+        chunk,
+        &mut reader,
+        canceled,
+        timing.as_deref_mut(),
+        None,
+      )?;
     }
     PayloadEncoding::Zstd => {
       let mut reader = zstd::stream::read::Decoder::new(BufReader::new(file))
         .map_err(|error| format!("打开 zstd 下载缓存失败：{}：{error}", chunk.id))?;
-      write_exact_chunk(output, chunk, &mut reader, canceled)?;
-      let mut extra = [0_u8; 1];
-      if reader
-        .read(&mut extra)
-        .map_err(|error| format!("读取 zstd 下载缓存失败：{}：{error}", chunk.id))?
-        != 0
-      {
-        return Err(format!("zstd 下载缓存解压后超出计划大小：{}", chunk.id));
+      let timing_enabled = timing.is_some();
+      let mut zstd_timing = ZstdReadTiming::default();
+      let result = write_exact_chunk_with_timing(
+        output,
+        chunk,
+        &mut reader,
+        canceled,
+        timing.as_deref_mut(),
+        timing_enabled.then_some(&mut zstd_timing),
+      );
+      let result = match result {
+        Err(error) => Err(error),
+        Ok(()) => {
+          let mut extra = [0_u8; 1];
+          let (read_result, elapsed_micros) = if timing_enabled {
+            let started_at = Instant::now();
+            let read_result = reader.read(&mut extra);
+            (read_result, duration_micros(started_at.elapsed()))
+          } else {
+            (reader.read(&mut extra), 0)
+          };
+          if timing_enabled {
+            zstd_timing.record(elapsed_micros, read_result.as_ref().map_or(0, |read| *read as u64));
+          }
+          read_result
+            .map_err(|error| format!("读取 zstd 下载缓存失败：{}：{error}", chunk.id))
+            .and_then(|read| {
+              if read != 0 {
+                Err(format!("zstd 下载缓存解压后超出计划大小：{}", chunk.id))
+              } else {
+                Ok(())
+              }
+            })
+        }
+      };
+      if zstd_timing.attempted {
+        if let Some(timing) = timing.as_deref_mut() {
+          timing.record_zstd_decode_read(zstd_timing.micros, zstd_timing.bytes);
+        }
       }
+      result?;
     }
     PayloadEncoding::LegacyUnspecified => {
       return Err(format!("资源 chunk 缺少载荷编码：{}", chunk.id));
@@ -1144,13 +1402,14 @@ fn write_downloaded_chunk(
   Ok(())
 }
 
-fn write_reused_chunk(
+fn write_reused_chunk_with_timing(
   output: &mut File,
   chunk: &PlanChunk,
   game_root: &Path,
   asset_name: &str,
   source_offset: u64,
   canceled: &AtomicBool,
+  timing: Option<&mut AssemblyTiming>,
 ) -> Result<(), String> {
   let path = resolve_existing_manifest_file(game_root, asset_name)?;
   let source_end = source_offset
@@ -1167,59 +1426,121 @@ fn write_reused_chunk(
     .seek(SeekFrom::Start(source_offset))
     .map_err(|error| format!("定位复用 chunk 源文件失败：{}：{error}", chunk.id))?;
   let mut reader = BufReader::new(file);
-  write_exact_chunk(output, chunk, &mut reader, canceled)
+  write_exact_chunk_with_timing(output, chunk, &mut reader, canceled, timing, None)
 }
 
-fn write_exact_chunk<R: Read>(
+fn write_exact_chunk_with_timing<R: Read>(
   output: &mut File,
   chunk: &PlanChunk,
   reader: &mut R,
   canceled: &AtomicBool,
+  mut timing: Option<&mut AssemblyTiming>,
+  mut zstd_timing: Option<&mut ZstdReadTiming>,
 ) -> Result<(), String> {
   let mut remaining = chunk.decompressed_size;
   let mut chunk_hasher = Md5::new();
   let mut buffer = [0_u8; COPY_BUFFER_SIZE];
-  while remaining > 0 {
-    check_canceled(canceled)?;
-    let maximum = usize::try_from(remaining.min(buffer.len() as u64))
-      .map_err(|_| format!("资源 chunk 大小无法表示：{}", chunk.id))?;
-    let read = reader
-      .read(&mut buffer[..maximum])
-      .map_err(|error| format!("读取资源 chunk 失败：{}：{error}", chunk.id))?;
-    if read == 0 {
-      return Err(format!("资源 chunk 小于计划解压大小：{}", chunk.id));
+  let mut md5_micros = 0_u64;
+  let mut md5_bytes = 0_u64;
+  let mut md5_attempted = false;
+  let result = (|| {
+    while remaining > 0 {
+      check_canceled(canceled)?;
+      let maximum = usize::try_from(remaining.min(buffer.len() as u64))
+        .map_err(|_| format!("资源 chunk 大小无法表示：{}", chunk.id))?;
+      let read_started_at = zstd_timing.as_ref().map(|_| Instant::now());
+      let read_result = reader.read(&mut buffer[..maximum]);
+      if let (Some(started_at), Some(zstd_timing)) = (read_started_at, zstd_timing.as_deref_mut()) {
+        zstd_timing.record(
+          duration_micros(started_at.elapsed()),
+          read_result.as_ref().map_or(0, |read| *read as u64),
+        );
+      }
+      let read =
+        read_result.map_err(|error| format!("读取资源 chunk 失败：{}：{error}", chunk.id))?;
+      if read == 0 {
+        return Err(format!("资源 chunk 小于计划解压大小：{}", chunk.id));
+      }
+      output
+        .write_all(&buffer[..read])
+        .map_err(|error| format!("写入资源 chunk 失败：{}：{error}", chunk.id))?;
+      let hash_started_at = timing.as_ref().map(|_| Instant::now());
+      md5_attempted = true;
+      chunk_hasher.update(&buffer[..read]);
+      if let Some(hash_started_at) = hash_started_at {
+        md5_micros = md5_micros.saturating_add(duration_micros(hash_started_at.elapsed()));
+      }
+      md5_bytes = md5_bytes.saturating_add(read as u64);
+      remaining -= read as u64;
     }
-    output
-      .write_all(&buffer[..read])
-      .map_err(|error| format!("写入资源 chunk 失败：{}：{error}", chunk.id))?;
-    chunk_hasher.update(&buffer[..read]);
-    remaining -= read as u64;
+    let hash_started_at = timing.as_ref().map(|_| Instant::now());
+    md5_attempted = true;
+    let actual_md5 = format!("{:x}", chunk_hasher.finalize());
+    if let Some(hash_started_at) = hash_started_at {
+      md5_micros = md5_micros.saturating_add(duration_micros(hash_started_at.elapsed()));
+    }
+    if !actual_md5.eq_ignore_ascii_case(&chunk.decompressed_md5) {
+      return Err(format!("资源 chunk MD5 校验失败：{}", chunk.id));
+    }
+    Ok(())
+  })();
+  if md5_attempted {
+    if let Some(timing) = timing.as_deref_mut() {
+      timing.record_chunk_md5(md5_micros, md5_bytes);
+    }
   }
-  let actual_md5 = format!("{:x}", chunk_hasher.finalize());
-  if !actual_md5.eq_ignore_ascii_case(&chunk.decompressed_md5) {
-    return Err(format!("资源 chunk MD5 校验失败：{}", chunk.id));
-  }
-  Ok(())
+  result
 }
 
 fn hash_exact_file(file: &mut File, size: u64, canceled: &AtomicBool) -> Result<String, String> {
+  hash_exact_file_with_timing(file, size, canceled, None)
+}
+
+fn hash_exact_file_with_timing(
+  file: &mut File,
+  size: u64,
+  canceled: &AtomicBool,
+  timing: Option<&mut AssemblyTiming>,
+) -> Result<String, String> {
   let mut remaining = size;
   let mut hasher = Md5::new();
   let mut buffer = [0_u8; COPY_BUFFER_SIZE];
-  while remaining > 0 {
-    check_canceled(canceled)?;
-    let maximum = usize::try_from(remaining.min(buffer.len() as u64))
-      .map_err(|_| "资源文件大小无法表示".to_string())?;
-    let read = file
-      .read(&mut buffer[..maximum])
-      .map_err(|error| format!("读取资源临时文件失败：{error}"))?;
-    if read == 0 {
-      return Err("资源临时文件小于计划大小".to_string());
+  let mut processed_bytes = 0_u64;
+  let started_at = timing.as_ref().map(|_| Instant::now());
+  let result = (|| {
+    while remaining > 0 {
+      check_canceled(canceled)?;
+      let maximum = usize::try_from(remaining.min(buffer.len() as u64))
+        .map_err(|_| "资源文件大小无法表示".to_string())?;
+      let read = file
+        .read(&mut buffer[..maximum])
+        .map_err(|error| format!("读取资源临时文件失败：{error}"))?;
+      if read == 0 {
+        return Err("资源临时文件小于计划大小".to_string());
+      }
+      hasher.update(&buffer[..read]);
+      processed_bytes = processed_bytes.saturating_add(read as u64);
+      remaining -= read as u64;
     }
-    hasher.update(&buffer[..read]);
-    remaining -= read as u64;
+    Ok(format!("{:x}", hasher.finalize()))
+  })();
+  if let (Some(started_at), Some(timing)) = (started_at, timing) {
+    timing.record_asset_md5(duration_micros(started_at.elapsed()), processed_bytes);
   }
-  Ok(format!("{:x}", hasher.finalize()))
+  result
+}
+
+fn sync_staging_file(
+  file: &File,
+  bytes: u64,
+  timing: Option<&mut AssemblyTiming>,
+) -> std::io::Result<()> {
+  let started_at = timing.as_ref().map(|_| Instant::now());
+  let result = file.sync_all();
+  if let (Some(started_at), Some(timing)) = (started_at, timing) {
+    timing.record_staging_file_sync(duration_micros(started_at.elapsed()), bytes);
+  }
+  result
 }
 
 fn partial_path(output: &Path) -> Result<PathBuf, String> {
@@ -1258,6 +1579,7 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 mod tests {
   use super::{
     AssemblyProgress, FullInstallDownloadIndex, assemble_asset_with_fallback,
+    assemble_full_install_asset_with_timing, assemble_full_install_asset_with_timing_observer,
     assemble_manifest_plan, assemble_manifest_plan_with_progress,
     assemble_manifest_plan_with_progress_concurrent, assemble_plan, partial_path,
   };
@@ -1331,6 +1653,13 @@ mod tests {
     }
   }
 
+  fn full_plan(downloads: Vec<PlanDownload>, assets: Vec<PlanAsset>) -> PersistedPlan {
+    let mut plan = plan(downloads, assets);
+    plan.strategy = PackagePlanStrategy::Full;
+    plan.target = PackagePlanTarget::Install;
+    plan
+  }
+
   fn downloaded_chunk(
     id: &str,
     cache_key: &str,
@@ -1396,6 +1725,129 @@ mod tests {
     let duplicate_plan = plan(vec![first.clone(), first], Vec::new());
     let error = FullInstallDownloadIndex::from_plan(&duplicate_plan).unwrap_err();
     assert!(error.contains("下载项重复"));
+  }
+
+  #[test]
+  fn records_raw_full_install_assembly_timing_without_zstd_reads() {
+    let root = TempRoot::new();
+    let staging = root.0.join("staging");
+    let shared = root.0.join("shared");
+    let spool = root.0.join("spool");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    fs::create_dir_all(&spool).unwrap();
+    let bytes = b"raw timing payload";
+    let download = downloaded_chunk("raw-timing", "raw-timing.cache", bytes, PayloadEncoding::Raw);
+    fs::write(shared.join(&download.cache_key), bytes).unwrap();
+    let plan = full_plan(
+      vec![download],
+      vec![asset("raw-timing.bin", bytes, vec![chunk("raw-timing", bytes, None)])],
+    );
+    let index = FullInstallDownloadIndex::from_plan(&plan).unwrap();
+
+    let timing = assemble_full_install_asset_with_timing(
+      &plan,
+      &index,
+      0,
+      &staging,
+      &shared,
+      &spool,
+      &AtomicBool::new(false),
+    )
+    .unwrap();
+
+    assert_eq!(timing.zstd_decode_read_count, 0);
+    assert_eq!(timing.zstd_decode_read_bytes, 0);
+    assert_eq!(timing.chunk_md5_count, 1);
+    assert_eq!(timing.chunk_md5_bytes, bytes.len() as u64);
+    assert_eq!(timing.asset_md5_count, 1);
+    assert_eq!(timing.asset_md5_bytes, bytes.len() as u64);
+    assert_eq!(timing.staging_file_sync_count, 1);
+    assert_eq!(timing.staging_file_sync_bytes, bytes.len() as u64);
+  }
+
+  #[test]
+  fn records_zstd_full_install_assembly_timing_once_per_chunk() {
+    let root = TempRoot::new();
+    let staging = root.0.join("staging");
+    let shared = root.0.join("shared");
+    let spool = root.0.join("spool");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    fs::create_dir_all(&spool).unwrap();
+    let plain = b"zstd timing payload with enough bytes";
+    let compressed = zstd::stream::encode_all(&plain[..], 1).unwrap();
+    let download =
+      downloaded_chunk("zstd-timing", "zstd-timing.cache", &compressed, PayloadEncoding::Zstd);
+    let mut target_chunk = chunk("zstd-timing", plain, None);
+    target_chunk.compressed_size = compressed.len() as u64;
+    fs::write(shared.join(&download.cache_key), compressed).unwrap();
+    let plan = full_plan(
+      vec![PlanDownload { decompressed_size: plain.len() as u64, ..download }],
+      vec![asset("zstd-timing.bin", plain, vec![target_chunk])],
+    );
+    let index = FullInstallDownloadIndex::from_plan(&plan).unwrap();
+
+    let timing = assemble_full_install_asset_with_timing(
+      &plan,
+      &index,
+      0,
+      &staging,
+      &shared,
+      &spool,
+      &AtomicBool::new(false),
+    )
+    .unwrap();
+
+    assert_eq!(timing.zstd_decode_read_count, 1);
+    assert_eq!(timing.zstd_decode_read_bytes, plain.len() as u64);
+    assert_eq!(timing.chunk_md5_count, 1);
+    assert_eq!(timing.chunk_md5_bytes, plain.len() as u64);
+    assert_eq!(timing.asset_md5_count, 1);
+    assert_eq!(timing.asset_md5_bytes, plain.len() as u64);
+    assert_eq!(timing.staging_file_sync_count, 1);
+    assert_eq!(timing.staging_file_sync_bytes, plain.len() as u64);
+  }
+
+  #[test]
+  fn timing_observer_keeps_partial_counters_when_asset_md5_fails() {
+    let root = TempRoot::new();
+    let staging = root.0.join("staging");
+    let shared = root.0.join("shared");
+    let spool = root.0.join("spool");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    fs::create_dir_all(&spool).unwrap();
+    let bytes = b"failed timing payload";
+    let download =
+      downloaded_chunk("failed-timing", "failed-timing.cache", bytes, PayloadEncoding::Raw);
+    fs::write(shared.join(&download.cache_key), bytes).unwrap();
+    let mut output = asset("failed-timing.bin", bytes, vec![chunk("failed-timing", bytes, None)]);
+    output.md5 = md5(b"different");
+    let plan = full_plan(vec![download], vec![output]);
+    let index = FullInstallDownloadIndex::from_plan(&plan).unwrap();
+    let mut timing = super::AssemblyTiming::default();
+
+    let error = assemble_full_install_asset_with_timing_observer(
+      &plan,
+      &index,
+      0,
+      &staging,
+      &shared,
+      &spool,
+      &AtomicBool::new(false),
+      &mut timing,
+    )
+    .unwrap_err();
+
+    assert!(error.contains("资源 MD5 校验失败"));
+    assert_eq!(timing.zstd_decode_read_count, 0);
+    assert_eq!(timing.chunk_md5_count, 1);
+    assert_eq!(timing.chunk_md5_bytes, bytes.len() as u64);
+    assert_eq!(timing.asset_md5_count, 1);
+    assert_eq!(timing.asset_md5_bytes, bytes.len() as u64);
+    assert_eq!(timing.staging_file_sync_count, 0);
+    assert!(!staging.join("failed-timing.bin").exists());
   }
 
   fn staging_file(task_root: &Path) -> PathBuf {

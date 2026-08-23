@@ -26,6 +26,29 @@ const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
 const JOURNAL_PROGRESS_INTERVAL: StdDuration = StdDuration::from_millis(500);
 const JOURNAL_PROGRESS_SLOT_TTL: StdDuration = StdDuration::from_secs(60);
 
+/// Timing for one journal persistence attempt.
+///
+/// The value is reset by each timed API and is populated on both success and
+/// persistence errors.  It intentionally contains no task identity or path.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct JournalPersistTiming {
+  pub(crate) persisted: bool,
+  pub(crate) serialized_bytes: u64,
+  pub(crate) serialize_micros: u64,
+  pub(crate) write_micros: u64,
+  pub(crate) file_sync_micros: u64,
+  pub(crate) rename_micros: u64,
+  pub(crate) directory_sync_micros: u64,
+  pub(crate) total_micros: u64,
+  pub(crate) lock_wait_micros: u64,
+  pub(crate) file_sync_count: u64,
+  pub(crate) directory_sync_count: u64,
+}
+
+fn duration_micros(duration: StdDuration) -> u64 {
+  duration.as_micros().min(u128::from(u64::MAX)) as u64
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum CommitStepKind {
@@ -395,17 +418,36 @@ pub(crate) fn load(path: &Path) -> Result<TaskJournal, String> {
 }
 
 pub(crate) fn persist(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
-  validate_journal(journal)?;
-  let now = Instant::now();
-  let key = progress_key(task_root, &journal.task_id);
-  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
-  prune_progress_slots(&mut registry, now);
-  let slot = registry.slots.entry(key).or_default();
-  let result = persist_file(task_root, journal);
-  if result.is_ok() {
-    slot.last_persisted_at = Some(now);
-    slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
-  }
+  let mut timing = JournalPersistTiming::default();
+  persist_timed(task_root, journal, &mut timing)
+}
+
+/// Persist a strict journal checkpoint and collect stage timings.
+pub(crate) fn persist_timed(
+  task_root: &Path,
+  journal: &TaskJournal,
+  timing: &mut JournalPersistTiming,
+) -> Result<(), String> {
+  *timing = JournalPersistTiming::default();
+  let started_at = Instant::now();
+  let result = (|| {
+    validate_journal(journal)?;
+    let now = Instant::now();
+    let key = progress_key(task_root, &journal.task_id);
+    let lock_started_at = Instant::now();
+    let registry_result = progress_registry().lock();
+    timing.lock_wait_micros = duration_micros(lock_started_at.elapsed());
+    let mut registry = registry_result.map_err(|_| "任务日志进度锁已损坏".to_string())?;
+    prune_progress_slots(&mut registry, now);
+    let slot = registry.slots.entry(key).or_default();
+    let result = persist_file(task_root, journal, timing);
+    if result.is_ok() {
+      slot.last_persisted_at = Some(now);
+      slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
+    }
+    result
+  })();
+  timing.total_micros = duration_micros(started_at.elapsed());
   result
 }
 
@@ -416,54 +458,103 @@ pub(crate) fn persist(task_root: &Path, journal: &TaskJournal) -> Result<(), Str
 /// [`flush_progress`] before a lifecycle boundary and [`forget_progress`] after the
 /// task is terminal.
 pub(crate) fn persist_progress(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
-  persist_progress_at(task_root, journal, Instant::now())
+  let mut timing = JournalPersistTiming::default();
+  persist_progress_timed(task_root, journal, &mut timing)
 }
 
+/// Persist display progress when the throttle and revision fence allow it.
+pub(crate) fn persist_progress_timed(
+  task_root: &Path,
+  journal: &TaskJournal,
+  timing: &mut JournalPersistTiming,
+) -> Result<(), String> {
+  persist_progress_at_timed(task_root, journal, Instant::now(), timing)
+}
+
+#[cfg(test)]
 fn persist_progress_at(
   task_root: &Path,
   journal: &TaskJournal,
   now: Instant,
 ) -> Result<(), String> {
-  let key = progress_key(task_root, &journal.task_id);
-  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
-  prune_progress_slots(&mut registry, now);
-  let slot = registry.slots.entry(key).or_default();
-  if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
-    // A snapshot that was created before a strict checkpoint must never restore
-    // an older security state, even if it reaches this lock after that checkpoint.
-    return Ok(());
-  }
-  let due = slot
-    .last_persisted_at
-    .is_none_or(|last| now.saturating_duration_since(last) >= JOURNAL_PROGRESS_INTERVAL);
-  if !due {
-    return Ok(());
-  }
-  validate_journal(journal)?;
-  let result = persist_file(task_root, journal);
-  if result.is_ok() {
-    slot.last_persisted_at = Some(now);
-    slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
-  }
+  let mut timing = JournalPersistTiming::default();
+  persist_progress_at_timed(task_root, journal, now, &mut timing)
+}
+
+fn persist_progress_at_timed(
+  task_root: &Path,
+  journal: &TaskJournal,
+  now: Instant,
+  timing: &mut JournalPersistTiming,
+) -> Result<(), String> {
+  *timing = JournalPersistTiming::default();
+  let started_at = Instant::now();
+  let result = (|| {
+    let key = progress_key(task_root, &journal.task_id);
+    let lock_started_at = Instant::now();
+    let registry_result = progress_registry().lock();
+    timing.lock_wait_micros = duration_micros(lock_started_at.elapsed());
+    let mut registry = registry_result.map_err(|_| "任务日志进度锁已损坏".to_string())?;
+    prune_progress_slots(&mut registry, now);
+    let slot = registry.slots.entry(key).or_default();
+    if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
+      // A snapshot that was created before a strict checkpoint must never restore
+      // an older security state, even if it reaches this lock after that checkpoint.
+      return Ok(());
+    }
+    let due = slot
+      .last_persisted_at
+      .is_none_or(|last| now.saturating_duration_since(last) >= JOURNAL_PROGRESS_INTERVAL);
+    if !due {
+      return Ok(());
+    }
+    validate_journal(journal)?;
+    let result = persist_file(task_root, journal, timing);
+    if result.is_ok() {
+      slot.last_persisted_at = Some(now);
+      slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
+    }
+    result
+  })();
+  timing.total_micros = duration_micros(started_at.elapsed());
   result
 }
 
 /// Persist the caller's newest progress snapshot immediately.
 pub(crate) fn flush_progress(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
-  validate_journal(journal)?;
-  let now = Instant::now();
-  let key = progress_key(task_root, &journal.task_id);
-  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
-  prune_progress_slots(&mut registry, now);
-  let slot = registry.slots.entry(key).or_default();
-  if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
-    return Ok(());
-  }
-  let result = persist_file(task_root, journal);
-  if result.is_ok() {
-    slot.last_persisted_at = Some(now);
-    slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
-  }
+  let mut timing = JournalPersistTiming::default();
+  flush_progress_timed(task_root, journal, &mut timing)
+}
+
+/// Flush display progress immediately when the revision fence allows it.
+pub(crate) fn flush_progress_timed(
+  task_root: &Path,
+  journal: &TaskJournal,
+  timing: &mut JournalPersistTiming,
+) -> Result<(), String> {
+  *timing = JournalPersistTiming::default();
+  let started_at = Instant::now();
+  let result = (|| {
+    validate_journal(journal)?;
+    let now = Instant::now();
+    let key = progress_key(task_root, &journal.task_id);
+    let lock_started_at = Instant::now();
+    let registry_result = progress_registry().lock();
+    timing.lock_wait_micros = duration_micros(lock_started_at.elapsed());
+    let mut registry = registry_result.map_err(|_| "任务日志进度锁已损坏".to_string())?;
+    prune_progress_slots(&mut registry, now);
+    let slot = registry.slots.entry(key).or_default();
+    if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
+      return Ok(());
+    }
+    let result = persist_file(task_root, journal, timing);
+    if result.is_ok() {
+      slot.last_persisted_at = Some(now);
+      slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
+    }
+    result
+  })();
+  timing.total_micros = duration_micros(started_at.elapsed());
   result
 }
 
@@ -475,11 +566,23 @@ pub(crate) fn forget_progress(task_root: &Path, task_id: &str) -> Result<(), Str
   Ok(())
 }
 
-fn persist_file(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
+fn persist_file(
+  task_root: &Path,
+  journal: &TaskJournal,
+  timing: &mut JournalPersistTiming,
+) -> Result<(), String> {
   let directory = task_root.join("tasks").join(&journal.task_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建游戏资源任务目录失败：{error}"))?;
-  let content =
-    serde_json::to_vec_pretty(journal).map_err(|error| format!("序列化任务日志失败：{error}"))?;
+  let serialize_started_at = Instant::now();
+  let content = match serde_json::to_vec_pretty(journal) {
+    Ok(content) => content,
+    Err(error) => {
+      timing.serialize_micros = duration_micros(serialize_started_at.elapsed());
+      return Err(format!("序列化任务日志失败：{error}"));
+    }
+  };
+  timing.serialize_micros = duration_micros(serialize_started_at.elapsed());
+  timing.serialized_bytes = content.len() as u64;
   if content.is_empty() || content.len() as u64 > MAX_JOURNAL_BYTES {
     return Err("游戏资源任务日志大小无效".to_string());
   }
@@ -488,18 +591,45 @@ fn persist_file(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   if temporary.exists() {
     fs::remove_file(&temporary).map_err(|error| format!("清理旧任务日志临时文件失败：{error}"))?;
   }
-  let mut file = OpenOptions::new()
-    .create_new(true)
-    .write(true)
-    .open(&temporary)
-    .map_err(|error| format!("创建任务日志临时文件失败：{error}"))?;
-  file
-    .write_all(&content)
-    .and_then(|()| file.sync_all())
-    .map_err(|error| format!("写入任务日志失败：{error}"))?;
+  let write_started_at = Instant::now();
+  let mut file = match OpenOptions::new().create_new(true).write(true).open(&temporary) {
+    Ok(file) => file,
+    Err(error) => {
+      timing.write_micros = duration_micros(write_started_at.elapsed());
+      return Err(format!("创建任务日志临时文件失败：{error}"));
+    }
+  };
+  if let Err(error) = file.write_all(&content) {
+    timing.write_micros = duration_micros(write_started_at.elapsed());
+    return Err(format!("写入任务日志失败：{error}"));
+  }
+  timing.write_micros = duration_micros(write_started_at.elapsed());
+  let file_sync_started_at = Instant::now();
+  timing.file_sync_count = timing.file_sync_count.saturating_add(1);
+  if let Err(error) = file.sync_all() {
+    timing.file_sync_micros = duration_micros(file_sync_started_at.elapsed());
+    return Err(format!("写入任务日志失败：{error}"));
+  }
+  timing.file_sync_micros = duration_micros(file_sync_started_at.elapsed());
   drop(file);
-  atomic_replace(&temporary, &target)?;
-  sync_directory(&directory)
+  let rename_started_at = Instant::now();
+  if let Err(error) = atomic_replace(&temporary, &target) {
+    timing.rename_micros = duration_micros(rename_started_at.elapsed());
+    return Err(error);
+  }
+  timing.rename_micros = duration_micros(rename_started_at.elapsed());
+  let directory_sync_started_at = Instant::now();
+  #[cfg(not(target_os = "windows"))]
+  {
+    timing.directory_sync_count = timing.directory_sync_count.saturating_add(1);
+  }
+  if let Err(error) = sync_directory(&directory) {
+    timing.directory_sync_micros = duration_micros(directory_sync_started_at.elapsed());
+    return Err(error);
+  }
+  timing.directory_sync_micros = duration_micros(directory_sync_started_at.elapsed());
+  timing.persisted = true;
+  Ok(())
 }
 
 pub(crate) fn list(
@@ -813,8 +943,9 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    JOURNAL_PROGRESS_INTERVAL, TaskJournal, cleanup_terminal_tasks, flush_progress,
-    forget_progress, load, persist, persist_progress, persist_progress_at,
+    JOURNAL_PROGRESS_INTERVAL, JournalPersistTiming, TaskJournal, cleanup_terminal_tasks,
+    flush_progress, forget_progress, load, persist, persist_progress, persist_progress_at,
+    persist_progress_timed, persist_timed,
   };
   use crate::game::model::{PackagePlanTarget, PackageTaskState, SchemeId};
   use chrono::Utc;
@@ -883,6 +1014,46 @@ mod tests {
   }
 
   #[test]
+  fn strict_timing_reports_stages_and_matches_final_file() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-timing-{task_id}"));
+    let value = journal(&task_id);
+    let mut timing = JournalPersistTiming::default();
+
+    persist_timed(&root, &value, &mut timing).unwrap();
+
+    let path = root.join("tasks").join(&task_id).join("journal.json");
+    assert!(timing.persisted);
+    assert!(timing.serialized_bytes > 0);
+    assert!(timing.total_micros > 0);
+    assert_eq!(timing.file_sync_count, 1);
+    assert_eq!(timing.serialized_bytes, fs::metadata(&path).unwrap().len());
+    assert_eq!(load(&path).unwrap().revision, value.revision);
+    #[cfg(target_os = "windows")]
+    assert_eq!(timing.directory_sync_count, 0);
+    #[cfg(not(target_os = "windows"))]
+    assert_eq!(timing.directory_sync_count, 1);
+
+    forget_progress(&root, &task_id).unwrap();
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn failed_timing_keeps_total_and_remains_unpersisted() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-timing-error-{task_id}"));
+    fs::write(&root, b"not a directory").unwrap();
+    let value = journal(&task_id);
+    let mut timing = JournalPersistTiming::default();
+
+    assert!(persist_timed(&root, &value, &mut timing).is_err());
+    assert!(!timing.persisted);
+    assert!(timing.total_micros > 0);
+
+    fs::remove_file(root).unwrap();
+  }
+
+  #[test]
   fn throttles_display_progress_events() {
     let task_id = Uuid::new_v4().to_string();
     let root = std::env::temp_dir().join(format!("teyvat-guide-journal-progress-{task_id}"));
@@ -902,6 +1073,28 @@ mod tests {
 
     let path = root.join("tasks").join(&task_id).join("journal.json");
     assert_eq!(load(&path).unwrap().downloaded_bytes, 3);
+    forget_progress(&root, &task_id).unwrap();
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn timed_display_progress_marks_throttled_snapshot_as_not_persisted() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-timed-progress-{task_id}"));
+    let initial = journal(&task_id);
+    let mut initial_timing = JournalPersistTiming::default();
+    persist_progress_timed(&root, &initial, &mut initial_timing).unwrap();
+    assert!(initial_timing.persisted);
+
+    let mut pending = initial.clone();
+    pending.revision = 2;
+    pending.downloaded_bytes = 2;
+    let mut pending_timing = JournalPersistTiming::default();
+    persist_progress_timed(&root, &pending, &mut pending_timing).unwrap();
+    assert!(!pending_timing.persisted);
+    assert_eq!(pending_timing.file_sync_count, 0);
+    assert_eq!(load(&root.join("tasks").join(&task_id).join("journal.json")).unwrap().revision, 1);
+
     forget_progress(&root, &task_id).unwrap();
     fs::remove_dir_all(root).unwrap();
   }

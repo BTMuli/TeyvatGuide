@@ -4,7 +4,8 @@
 use super::{
   assembler, committer,
   downloader::{
-    DownloadControl, DownloadDurability, RateLimiter, download_object, prepare_cache_root,
+    DownloadControl, DownloadDurability, DownloadTelemetry, RateLimiter, download_object,
+    prepare_cache_root,
   },
   hoyoplay::{create_http_client, get_game_branches},
   installer,
@@ -40,10 +41,106 @@ const MAX_CONCURRENCY: usize = 16;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
+#[derive(Debug)]
+struct PlanWorksetBaseline {
+  asset_count: usize,
+  download_count: usize,
+  chunk_count: usize,
+  planned_download_bytes: u64,
+  planned_output_bytes: u64,
+  asset_workset_max: u64,
+  asset_workset_p50: u64,
+  asset_workset_p95: u64,
+  asset_workset_p99: u64,
+  asset_workset_chunk_max: usize,
+  batch_union_max: u64,
+  batch_union_p95: u64,
+  max_download_consumers: usize,
+  max_download_span: usize,
+}
+
+impl PlanWorksetBaseline {
+  fn from_plan(plan: &PersistedPlan, concurrency: usize) -> Self {
+    let mut asset_worksets = Vec::with_capacity(plan.assets.len());
+    let mut asset_workset_chunk_max = 0_usize;
+    let mut batch_unions = Vec::with_capacity(plan.assets.len().div_ceil(concurrency.max(1)));
+    let mut consumers = HashMap::<&str, (usize, usize, usize)>::new();
+    let batch_size = concurrency.max(1);
+
+    for (batch_start, batch) in plan.assets.chunks(batch_size).enumerate() {
+      let mut batch_downloads = HashSet::new();
+      let mut batch_bytes = 0_u64;
+      for (offset, asset) in batch.iter().enumerate() {
+        let asset_index = batch_start.saturating_mul(batch_size).saturating_add(offset);
+        let mut asset_downloads = HashSet::new();
+        let mut workset_bytes = 0_u64;
+        for chunk in &asset.chunks {
+          if chunk.reuse.is_some() || !asset_downloads.insert(chunk.id.as_str()) {
+            continue;
+          }
+          workset_bytes = workset_bytes.saturating_add(chunk.compressed_size);
+          let entry = consumers.entry(chunk.id.as_str()).or_insert((asset_index, asset_index, 0));
+          entry.1 = asset_index;
+          entry.2 = entry.2.saturating_add(1);
+          if batch_downloads.insert(chunk.id.as_str()) {
+            batch_bytes = batch_bytes.saturating_add(chunk.compressed_size);
+          }
+        }
+        asset_workset_chunk_max = asset_workset_chunk_max.max(asset_downloads.len());
+        asset_worksets.push(workset_bytes);
+      }
+      batch_unions.push(batch_bytes);
+    }
+
+    let asset_workset_max = asset_worksets.iter().copied().max().unwrap_or_default();
+    let batch_union_max = batch_unions.iter().copied().max().unwrap_or_default();
+    let max_download_consumers =
+      consumers.values().map(|(_, _, count)| *count).max().unwrap_or_default();
+    let max_download_span = consumers
+      .values()
+      .map(|(first, last, _)| last.saturating_sub(*first).saturating_add(1))
+      .max()
+      .unwrap_or_default();
+    Self {
+      asset_count: plan.assets.len(),
+      download_count: plan.downloads.len(),
+      chunk_count: plan.assets.iter().map(|asset| asset.chunks.len()).sum(),
+      planned_download_bytes: plan
+        .downloads
+        .iter()
+        .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
+      planned_output_bytes: plan
+        .assets
+        .iter()
+        .fold(0_u64, |total, asset| total.saturating_add(asset.size)),
+      asset_workset_max,
+      asset_workset_p50: nearest_rank(&asset_worksets, 50),
+      asset_workset_p95: nearest_rank(&asset_worksets, 95),
+      asset_workset_p99: nearest_rank(&asset_worksets, 99),
+      asset_workset_chunk_max,
+      batch_union_max,
+      batch_union_p95: nearest_rank(&batch_unions, 95),
+      max_download_consumers,
+      max_download_span,
+    }
+  }
+}
+
+fn nearest_rank(values: &[u64], percentile: usize) -> u64 {
+  if values.is_empty() {
+    return 0;
+  }
+  let mut sorted = values.to_vec();
+  sorted.sort_unstable();
+  let rank = sorted.len().saturating_mul(percentile).div_ceil(100).clamp(1, sorted.len());
+  sorted[rank - 1]
+}
+
 struct InstallPipelineMetrics {
   plan_id: String,
   started_at: Instant,
   index_build_micros: u64,
+  baseline: PlanWorksetBaseline,
   batch_count: AtomicUsize,
   active_downloads: AtomicUsize,
   peak_active_downloads: AtomicUsize,
@@ -56,14 +153,51 @@ struct InstallPipelineMetrics {
   unique_download_bytes: AtomicU64,
   duplicate_wait_bytes: AtomicU64,
   peak_spool_bytes: AtomicU64,
+  peak_logical_staging_bytes: AtomicU64,
+  download_telemetry: Arc<DownloadTelemetry>,
+  journal_attempt_count: AtomicU64,
+  journal_write_count: AtomicU64,
+  journal_serialized_bytes: AtomicU64,
+  journal_serialize_micros: AtomicU64,
+  journal_write_micros: AtomicU64,
+  journal_file_sync_count: AtomicU64,
+  journal_file_sync_micros: AtomicU64,
+  journal_rename_micros: AtomicU64,
+  journal_directory_sync_count: AtomicU64,
+  journal_directory_sync_micros: AtomicU64,
+  journal_lock_wait_micros: AtomicU64,
+  staging_verify_count: AtomicU64,
+  staging_verify_micros: AtomicU64,
+  post_publish_verify_count: AtomicU64,
+  post_publish_verify_micros: AtomicU64,
+  zstd_decode_read_count: AtomicU64,
+  zstd_decode_read_bytes: AtomicU64,
+  zstd_decode_read_micros: AtomicU64,
+  chunk_md5_count: AtomicU64,
+  chunk_md5_bytes: AtomicU64,
+  chunk_md5_micros: AtomicU64,
+  asset_md5_count: AtomicU64,
+  asset_md5_bytes: AtomicU64,
+  asset_md5_micros: AtomicU64,
+  staging_file_sync_count: AtomicU64,
+  staging_file_sync_bytes: AtomicU64,
+  staging_file_sync_micros: AtomicU64,
+  resume_asset_cursor: AtomicUsize,
+  recovery_validate_micros: AtomicU64,
 }
 
 impl InstallPipelineMetrics {
-  fn new(plan_id: String, started_at: Instant, index_build_micros: u64) -> Self {
+  fn new(
+    plan: &PersistedPlan,
+    concurrency: usize,
+    started_at: Instant,
+    index_build_micros: u64,
+  ) -> Self {
     Self {
-      plan_id,
+      plan_id: plan.plan_id.clone(),
       started_at,
       index_build_micros,
+      baseline: PlanWorksetBaseline::from_plan(plan, concurrency),
       batch_count: AtomicUsize::new(0),
       active_downloads: AtomicUsize::new(0),
       peak_active_downloads: AtomicUsize::new(0),
@@ -76,6 +210,37 @@ impl InstallPipelineMetrics {
       unique_download_bytes: AtomicU64::new(0),
       duplicate_wait_bytes: AtomicU64::new(0),
       peak_spool_bytes: AtomicU64::new(0),
+      peak_logical_staging_bytes: AtomicU64::new(0),
+      download_telemetry: DownloadTelemetry::new(),
+      journal_attempt_count: AtomicU64::new(0),
+      journal_write_count: AtomicU64::new(0),
+      journal_serialized_bytes: AtomicU64::new(0),
+      journal_serialize_micros: AtomicU64::new(0),
+      journal_write_micros: AtomicU64::new(0),
+      journal_file_sync_count: AtomicU64::new(0),
+      journal_file_sync_micros: AtomicU64::new(0),
+      journal_rename_micros: AtomicU64::new(0),
+      journal_directory_sync_count: AtomicU64::new(0),
+      journal_directory_sync_micros: AtomicU64::new(0),
+      journal_lock_wait_micros: AtomicU64::new(0),
+      staging_verify_count: AtomicU64::new(0),
+      staging_verify_micros: AtomicU64::new(0),
+      post_publish_verify_count: AtomicU64::new(0),
+      post_publish_verify_micros: AtomicU64::new(0),
+      zstd_decode_read_count: AtomicU64::new(0),
+      zstd_decode_read_bytes: AtomicU64::new(0),
+      zstd_decode_read_micros: AtomicU64::new(0),
+      chunk_md5_count: AtomicU64::new(0),
+      chunk_md5_bytes: AtomicU64::new(0),
+      chunk_md5_micros: AtomicU64::new(0),
+      asset_md5_count: AtomicU64::new(0),
+      asset_md5_bytes: AtomicU64::new(0),
+      asset_md5_micros: AtomicU64::new(0),
+      staging_file_sync_count: AtomicU64::new(0),
+      staging_file_sync_bytes: AtomicU64::new(0),
+      staging_file_sync_micros: AtomicU64::new(0),
+      resume_asset_cursor: AtomicUsize::new(0),
+      recovery_validate_micros: AtomicU64::new(0),
     }
   }
 
@@ -110,6 +275,69 @@ impl InstallPipelineMetrics {
     self.peak_spool_bytes.fetch_max(bytes, Ordering::Relaxed);
   }
 
+  fn observe_logical_staging(&self, bytes: u64) {
+    self.peak_logical_staging_bytes.fetch_max(bytes, Ordering::Relaxed);
+  }
+
+  fn record_journal(&self, timing: &journal::JournalPersistTiming) {
+    self.journal_attempt_count.fetch_add(1, Ordering::Relaxed);
+    if timing.persisted {
+      self.journal_write_count.fetch_add(1, Ordering::Relaxed);
+    }
+    self.journal_serialized_bytes.fetch_add(timing.serialized_bytes, Ordering::Relaxed);
+    self.journal_serialize_micros.fetch_add(timing.serialize_micros, Ordering::Relaxed);
+    self.journal_write_micros.fetch_add(timing.write_micros, Ordering::Relaxed);
+    self.journal_file_sync_count.fetch_add(timing.file_sync_count, Ordering::Relaxed);
+    self.journal_file_sync_micros.fetch_add(timing.file_sync_micros, Ordering::Relaxed);
+    self.journal_rename_micros.fetch_add(timing.rename_micros, Ordering::Relaxed);
+    self.journal_directory_sync_count.fetch_add(timing.directory_sync_count, Ordering::Relaxed);
+    self.journal_directory_sync_micros.fetch_add(timing.directory_sync_micros, Ordering::Relaxed);
+    self.journal_lock_wait_micros.fetch_add(timing.lock_wait_micros, Ordering::Relaxed);
+  }
+
+  fn record_validation(&self, timing: &installer::InstallValidationTiming) {
+    self.record_assembly_detail(&timing.assembly);
+    self.staging_verify_count.fetch_add(timing.staging_tree_count, Ordering::Relaxed);
+    self.staging_verify_micros.fetch_add(timing.staging_tree_micros, Ordering::Relaxed);
+    self.post_publish_verify_count.fetch_add(timing.post_publish_count, Ordering::Relaxed);
+    self.post_publish_verify_micros.fetch_add(timing.post_publish_micros, Ordering::Relaxed);
+    self.journal_attempt_count.fetch_add(timing.journal_attempt_count, Ordering::Relaxed);
+    self.journal_write_count.fetch_add(timing.journal_write_count, Ordering::Relaxed);
+    self.journal_serialized_bytes.fetch_add(timing.journal_serialized_bytes, Ordering::Relaxed);
+    self.journal_serialize_micros.fetch_add(timing.journal_serialize_micros, Ordering::Relaxed);
+    self.journal_write_micros.fetch_add(timing.journal_write_micros, Ordering::Relaxed);
+    self.journal_file_sync_count.fetch_add(timing.journal_file_sync_count, Ordering::Relaxed);
+    self.journal_file_sync_micros.fetch_add(timing.journal_file_sync_micros, Ordering::Relaxed);
+    self.journal_rename_micros.fetch_add(timing.journal_rename_micros, Ordering::Relaxed);
+    self
+      .journal_directory_sync_count
+      .fetch_add(timing.journal_directory_sync_count, Ordering::Relaxed);
+    self
+      .journal_directory_sync_micros
+      .fetch_add(timing.journal_directory_sync_micros, Ordering::Relaxed);
+    self.journal_lock_wait_micros.fetch_add(timing.journal_lock_wait_micros, Ordering::Relaxed);
+  }
+
+  fn record_assembly_detail(&self, timing: &assembler::AssemblyTiming) {
+    self.zstd_decode_read_count.fetch_add(timing.zstd_decode_read_count, Ordering::Relaxed);
+    self.zstd_decode_read_bytes.fetch_add(timing.zstd_decode_read_bytes, Ordering::Relaxed);
+    self.zstd_decode_read_micros.fetch_add(timing.zstd_decode_read_micros, Ordering::Relaxed);
+    self.chunk_md5_count.fetch_add(timing.chunk_md5_count, Ordering::Relaxed);
+    self.chunk_md5_bytes.fetch_add(timing.chunk_md5_bytes, Ordering::Relaxed);
+    self.chunk_md5_micros.fetch_add(timing.chunk_md5_micros, Ordering::Relaxed);
+    self.asset_md5_count.fetch_add(timing.asset_md5_count, Ordering::Relaxed);
+    self.asset_md5_bytes.fetch_add(timing.asset_md5_bytes, Ordering::Relaxed);
+    self.asset_md5_micros.fetch_add(timing.asset_md5_micros, Ordering::Relaxed);
+    self.staging_file_sync_count.fetch_add(timing.staging_file_sync_count, Ordering::Relaxed);
+    self.staging_file_sync_bytes.fetch_add(timing.staging_file_sync_bytes, Ordering::Relaxed);
+    self.staging_file_sync_micros.fetch_add(timing.staging_file_sync_micros, Ordering::Relaxed);
+  }
+
+  fn record_recovery_validation(&self, cursor: usize, elapsed: Duration) {
+    self.resume_asset_cursor.store(cursor, Ordering::Relaxed);
+    self.recovery_validate_micros.store(duration_micros(elapsed), Ordering::Relaxed);
+  }
+
   fn record_duplicate_wait(&self, bytes: u64) {
     self.duplicate_wait_bytes.fetch_add(bytes, Ordering::Relaxed);
   }
@@ -121,21 +349,81 @@ impl InstallPipelineMetrics {
 
 impl Drop for InstallPipelineMetrics {
   fn drop(&mut self) {
+    let download = self.download_telemetry.snapshot();
     log::info!(
-      "[game-package][install][{}][perf] totalMs={} indexBuildUs={} batches={} peakDownloads={} peakAssemblies={} downloadMs={} assemblyMs={} checkpoints={} checkpointMs={} uniqueDownloadBytes={} duplicateWaitBytes={} peakSpoolBytes={}",
+      "[game-package][install][{}][perf] totalMs={} indexBuildCount=1 indexBuildUs={} assets={} downloads={} chunks={} plannedDownloadBytes={} plannedOutputBytes={} assetWorksetMax={} assetWorksetP50={} assetWorksetP95={} assetWorksetP99={} assetWorksetChunkMax={} batchUnionMax={} batchUnionP95={} maxDownloadConsumers={} maxDownloadSpan={} batches={} peakDownloads={} peakAssemblies={} downloadMs={} assemblyMs={} downloadNetworkMs={} downloadWriteMs={} downloadHashMs={} downloadFileSyncCount={} downloadFileSyncMs={} downloadReceivedBytes={} downloadCacheHits={} downloadAttempts={} downloadAttemptSuccesses={} downloadAttemptFailures={} downloadRetries={} downloadObjectSuccesses={} downloadObjectFailures={} downloadAborts={} downloadPublishFailures={} zstdDecodeReadCount={} zstdDecodeReadBytes={} zstdDecodeReadMs={} chunkMd5Count={} chunkMd5Bytes={} chunkMd5Ms={} assetMd5Count={} assetMd5Bytes={} assetMd5Ms={} stagingFileSyncCount={} stagingFileSyncBytes={} stagingFileSyncMs={} journalAttempts={} journalWrites={} journalSerializedBytes={} journalSerializeMs={} journalWriteMs={} journalFileSyncCount={} journalFileSyncMs={} journalRenameMs={} journalDirectorySyncCount={} journalDirectorySyncMs={} journalLockWaitMs={} stagingVerifyCount={} stagingVerifyMs={} postPublishVerifyCount={} postPublishVerifyMs={} resumeAssetCursor={} recoveryValidateMs={} checkpoints={} checkpointMs={} scheduledUniqueDownloadBytes={} duplicateWaitBytes={} peakSpoolBytes={} peakLogicalStagingBytes={}",
       self.plan_id,
       self.started_at.elapsed().as_millis(),
       self.index_build_micros,
+      self.baseline.asset_count,
+      self.baseline.download_count,
+      self.baseline.chunk_count,
+      self.baseline.planned_download_bytes,
+      self.baseline.planned_output_bytes,
+      self.baseline.asset_workset_max,
+      self.baseline.asset_workset_p50,
+      self.baseline.asset_workset_p95,
+      self.baseline.asset_workset_p99,
+      self.baseline.asset_workset_chunk_max,
+      self.baseline.batch_union_max,
+      self.baseline.batch_union_p95,
+      self.baseline.max_download_consumers,
+      self.baseline.max_download_span,
       self.batch_count.load(Ordering::Relaxed),
       self.peak_active_downloads.load(Ordering::Relaxed),
       self.peak_active_assemblies.load(Ordering::Relaxed),
       self.download_micros.load(Ordering::Relaxed) / 1_000,
       self.assembly_micros.load(Ordering::Relaxed) / 1_000,
+      download.network_wait_micros / 1_000,
+      download.write_micros / 1_000,
+      download.hash_micros / 1_000,
+      download.file_sync_count,
+      download.file_sync_micros / 1_000,
+      download.received_bytes,
+      download.cache_hits,
+      download.attempts,
+      download.successful_attempts,
+      download.failed_attempts,
+      download.retries,
+      download.successful_objects,
+      download.failed_objects,
+      download.aborted_objects,
+      download.publish_failures,
+      self.zstd_decode_read_count.load(Ordering::Relaxed),
+      self.zstd_decode_read_bytes.load(Ordering::Relaxed),
+      self.zstd_decode_read_micros.load(Ordering::Relaxed) / 1_000,
+      self.chunk_md5_count.load(Ordering::Relaxed),
+      self.chunk_md5_bytes.load(Ordering::Relaxed),
+      self.chunk_md5_micros.load(Ordering::Relaxed) / 1_000,
+      self.asset_md5_count.load(Ordering::Relaxed),
+      self.asset_md5_bytes.load(Ordering::Relaxed),
+      self.asset_md5_micros.load(Ordering::Relaxed) / 1_000,
+      self.staging_file_sync_count.load(Ordering::Relaxed),
+      self.staging_file_sync_bytes.load(Ordering::Relaxed),
+      self.staging_file_sync_micros.load(Ordering::Relaxed) / 1_000,
+      self.journal_attempt_count.load(Ordering::Relaxed),
+      self.journal_write_count.load(Ordering::Relaxed),
+      self.journal_serialized_bytes.load(Ordering::Relaxed),
+      self.journal_serialize_micros.load(Ordering::Relaxed) / 1_000,
+      self.journal_write_micros.load(Ordering::Relaxed) / 1_000,
+      self.journal_file_sync_count.load(Ordering::Relaxed),
+      self.journal_file_sync_micros.load(Ordering::Relaxed) / 1_000,
+      self.journal_rename_micros.load(Ordering::Relaxed) / 1_000,
+      self.journal_directory_sync_count.load(Ordering::Relaxed),
+      self.journal_directory_sync_micros.load(Ordering::Relaxed) / 1_000,
+      self.journal_lock_wait_micros.load(Ordering::Relaxed) / 1_000,
+      self.staging_verify_count.load(Ordering::Relaxed),
+      self.staging_verify_micros.load(Ordering::Relaxed) / 1_000,
+      self.post_publish_verify_count.load(Ordering::Relaxed),
+      self.post_publish_verify_micros.load(Ordering::Relaxed) / 1_000,
+      self.resume_asset_cursor.load(Ordering::Relaxed),
+      self.recovery_validate_micros.load(Ordering::Relaxed) / 1_000,
       self.checkpoint_count.load(Ordering::Relaxed),
       self.checkpoint_micros.load(Ordering::Relaxed) / 1_000,
       self.unique_download_bytes.load(Ordering::Relaxed),
       self.duplicate_wait_bytes.load(Ordering::Relaxed),
       self.peak_spool_bytes.load(Ordering::Relaxed),
+      self.peak_logical_staging_bytes.load(Ordering::Relaxed),
     );
   }
 }
@@ -149,10 +437,33 @@ fn persist_install_checkpoint(
   journal_value: &TaskJournal,
   metrics: &InstallPipelineMetrics,
 ) -> Result<(), String> {
-  let started_at = Instant::now();
-  let result = journal::persist(task_root, journal_value);
-  metrics.record_checkpoint(started_at.elapsed());
+  let mut timing = journal::JournalPersistTiming::default();
+  let result = journal::persist_timed(task_root, journal_value, &mut timing);
+  metrics.record_checkpoint(Duration::from_micros(timing.total_micros));
+  metrics.record_journal(&timing);
   result
+}
+
+fn persist_install_progress(
+  task_root: &Path,
+  journal_value: &TaskJournal,
+  metrics: &InstallPipelineMetrics,
+) -> Result<(), String> {
+  let mut timing = journal::JournalPersistTiming::default();
+  let result = journal::persist_progress_timed(task_root, journal_value, &mut timing);
+  metrics.record_journal(&timing);
+  result
+}
+
+fn persist_optional_install_checkpoint(
+  task_root: &Path,
+  journal_value: &TaskJournal,
+  metrics: Option<&InstallPipelineMetrics>,
+) -> Result<(), String> {
+  match metrics {
+    Some(metrics) => persist_install_checkpoint(task_root, journal_value, metrics),
+    None => journal::persist(task_root, journal_value),
+  }
 }
 
 pub(crate) struct GamePackageManager {
@@ -1001,14 +1312,17 @@ async fn run_install_streaming_task(
     }
   };
   let metrics = Arc::new(InstallPipelineMetrics::new(
-    plan.plan_id.clone(),
+    &plan,
+    concurrency,
     pipeline_started_at,
     duration_micros(index_started_at.elapsed()),
   ));
   let start_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
-  if let Err(error) =
-    assembler::validate_full_install_cursor(&plan, &staging_root, start_cursor, &canceled)
-  {
+  let recovery_started_at = Instant::now();
+  let recovery_result =
+    assembler::validate_full_install_cursor(&plan, &staging_root, start_cursor, &canceled);
+  metrics.record_recovery_validation(start_cursor, recovery_started_at.elapsed());
+  if let Err(error) = recovery_result {
     persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
     return;
   }
@@ -1088,7 +1402,7 @@ async fn run_install_streaming_task(
         value.download_current_file = Some(format!("资源文件：{}", asset.name));
         value.assembly_current_file = None;
         value.touch();
-        if let Err(error) = journal::persist_progress(&task_root, &value) {
+        if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
           return;
         }
@@ -1114,7 +1428,8 @@ async fn run_install_streaming_task(
               &paused,
               &limiter,
               DownloadDurability::Recoverable,
-            ),
+            )
+            .with_telemetry(Arc::clone(&metrics.download_telemetry)),
           )
           .await;
           metrics.finish_download(started_at);
@@ -1132,7 +1447,7 @@ async fn run_install_streaming_task(
             value.spool_bytes = spool_bytes(&spool_root);
             metrics.observe_spool(value.spool_bytes);
             value.touch();
-            if let Err(error) = journal::persist_progress(&task_root, &value) {
+            if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
               persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
               return;
             }
@@ -1163,7 +1478,7 @@ async fn run_install_streaming_task(
         value.assembly_current_file =
           Some(format!("组装资源 {}/{}：{}", asset_index + 1, plan.assets.len(), asset.name));
         value.touch();
-        if let Err(error) = journal::persist_progress(&task_root, &value) {
+        if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
           return;
         }
@@ -1176,8 +1491,9 @@ async fn run_install_streaming_task(
       let assemble_spool = spool_root.clone();
       let assemble_canceled = Arc::clone(&canceled);
       let assembly_started_at = metrics.begin_assembly();
-      let assembly_result = tauri::async_runtime::spawn_blocking(move || {
-        assembler::assemble_full_install_asset(
+      let assembly_worker_result = tauri::async_runtime::spawn_blocking(move || {
+        let mut timing = assembler::AssemblyTiming::default();
+        let result = assembler::assemble_full_install_asset_with_timing_observer(
           &assemble_plan,
           &assemble_download_index,
           asset_index,
@@ -1185,12 +1501,19 @@ async fn run_install_streaming_task(
           &assemble_shared,
           &assemble_spool,
           &assemble_canceled,
-        )
+          &mut timing,
+        );
+        (result, timing)
       })
-      .await
-      .map_err(|error| format!("组装 worker 异常退出：{error}"))
-      .and_then(|result| result);
+      .await;
       metrics.finish_assembly(assembly_started_at);
+      let assembly_result = match assembly_worker_result {
+        Ok((result, timing)) => {
+          metrics.record_assembly_detail(&timing);
+          result
+        }
+        Err(error) => Err(format!("组装 worker 异常退出：{error}")),
+      };
       if let Err(error) = assembly_result {
         let paused_flag = paused.load(Ordering::Acquire);
         let canceled_flag = canceled.load(Ordering::Acquire);
@@ -1215,6 +1538,7 @@ async fn run_install_streaming_task(
       value.assembly_completed_count = completed;
       value.assembly_completed_bytes = completed_bytes;
       value.assembly_completed_bytes_total = completed_bytes;
+      metrics.observe_logical_staging(completed_bytes);
       value.spool_bytes = spool_bytes(&spool_root);
       value.committed_step =
         completed_download_count(&plan, completed, &shared_cache_root, &spool_root);
@@ -1230,7 +1554,7 @@ async fn run_install_streaming_task(
       value.spool_bytes = spool_bytes(&spool_root);
       metrics.observe_spool(value.spool_bytes);
       value.touch();
-      if let Err(error) = journal::persist_progress(&task_root, &value) {
+      if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
@@ -1308,7 +1632,8 @@ async fn run_install_streaming_task(
           &paused,
           &limiter,
           DownloadDurability::Recoverable,
-        ),
+        )
+        .with_telemetry(Arc::clone(&metrics.download_telemetry)),
       )
       .await
       {
@@ -1334,7 +1659,7 @@ async fn run_install_streaming_task(
       value.download_current_file = None;
       value.spool_bytes = spool_bytes(&spool_root);
       value.touch();
-      if let Err(error) = journal::persist_progress(&task_root, &value) {
+      if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
@@ -1349,13 +1674,13 @@ async fn run_install_streaming_task(
     value.current_file = None;
     value.spool_bytes = spool_bytes(&spool_root);
     value.touch();
-    if let Err(error) = journal::persist(&task_root, &value) {
+    if let Err(error) = persist_install_checkpoint(&task_root, &value, &metrics) {
       persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
       return;
     }
     emit_state(&app_handle, &value.summary());
   }
-  run_install_task(app_handle, task_root, plan, journal, canceled, context).await;
+  run_install_task(app_handle, task_root, plan, journal, canceled, context, Some(metrics)).await;
 }
 
 async fn run_install_streaming_asset_pipeline_v2(
@@ -1382,6 +1707,7 @@ async fn run_install_streaming_asset_pipeline_v2(
     value.assembly_completed_count = cursor;
     value.assembly_completed_bytes = completed_bytes;
     value.assembly_completed_bytes_total = completed_bytes;
+    metrics.observe_logical_staging(completed_bytes);
     value.download_current_file = None;
     value.assembly_current_file = None;
     value.touch();
@@ -1433,7 +1759,7 @@ async fn run_install_streaming_asset_pipeline_v2(
       value.download_current_file = Some(format!("资源文件 {} - {}", asset_cursor + 1, batch_end));
       value.assembly_current_file = None;
       value.touch();
-      journal::persist_progress(task_root, &value)?;
+      persist_install_progress(task_root, &value, metrics)?;
       emit_state(app_handle, &value.summary());
     }
 
@@ -1481,7 +1807,8 @@ async fn run_install_streaming_asset_pipeline_v2(
                 &paused,
                 &limiter,
                 DownloadDurability::Recoverable,
-              ),
+              )
+              .with_telemetry(Arc::clone(&metrics.download_telemetry)),
             )
             .await;
             metrics.finish_download(started_at);
@@ -1510,12 +1837,13 @@ async fn run_install_streaming_asset_pipeline_v2(
           value.spool_bytes = spool_bytes(&assemble_spool);
           metrics.observe_spool(value.spool_bytes);
           value.touch();
-          journal::persist_progress(&assemble_task_root, &value)?;
+          persist_install_progress(&assemble_task_root, &value, &metrics)?;
           emit_progress(&assemble_app_handle, &value.summary());
         }
         let assembly_started_at = metrics.begin_assembly();
-        let result = tauri::async_runtime::spawn_blocking(move || {
-          assembler::assemble_full_install_asset(
+        let worker_result = tauri::async_runtime::spawn_blocking(move || {
+          let mut timing = assembler::AssemblyTiming::default();
+          let result = assembler::assemble_full_install_asset_with_timing_observer(
             &assemble_plan,
             &assemble_download_index,
             asset_index,
@@ -1523,14 +1851,19 @@ async fn run_install_streaming_asset_pipeline_v2(
             &assemble_shared,
             &assemble_spool,
             &assemble_canceled,
-          )
+            &mut timing,
+          );
+          (result, timing)
         })
-        .await
-        .map_err(|error| format!("组装 worker 异常退出：{error}"))
-        .and_then(|result| result)
-        .map(|()| asset_index);
+        .await;
         metrics.finish_assembly(assembly_started_at);
-        result
+        match worker_result {
+          Ok((result, timing)) => {
+            metrics.record_assembly_detail(&timing);
+            result.map(|()| asset_index)
+          }
+          Err(error) => Err(format!("组装 worker 异常退出：{error}")),
+        }
       }
     }))
     .buffer_unordered(concurrency.max(1));
@@ -1552,7 +1885,7 @@ async fn run_install_streaming_asset_pipeline_v2(
               value.assembly_completed_count, value.assembly_total_count
             ));
           value.touch();
-          journal::persist_progress(task_root, &value)?;
+          persist_install_progress(task_root, &value, metrics)?;
           emit_progress(app_handle, &value.summary());
         }
         Err(error) => {
@@ -1571,6 +1904,7 @@ async fn run_install_streaming_asset_pipeline_v2(
     value.assembly_completed_count = completed;
     value.assembly_completed_bytes = completed_bytes;
     value.assembly_completed_bytes_total = completed_bytes;
+    metrics.observe_logical_staging(completed_bytes);
     value.spool_bytes = spool_bytes(spool_root);
     value.committed_step = completed_download_count(plan, completed, shared_cache_root, spool_root);
     value.download_current_file = None;
@@ -1583,7 +1917,7 @@ async fn run_install_streaming_asset_pipeline_v2(
     value.spool_bytes = spool_bytes(spool_root);
     metrics.observe_spool(value.spool_bytes);
     value.touch();
-    journal::persist_progress(task_root, &value)?;
+    persist_install_progress(task_root, &value, metrics)?;
     emit_progress(app_handle, &value.summary());
     asset_cursor = completed;
   }
@@ -2313,6 +2647,7 @@ async fn run_task(
         journal,
         Arc::clone(&canceled),
         context,
+        None,
       )
       .await;
     }
@@ -2326,6 +2661,7 @@ async fn run_install_task(
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
   context: InstallContext,
+  metrics: Option<Arc<InstallPipelineMetrics>>,
 ) {
   let snapshot = Arc::clone(&journal);
   let handle = app_handle.clone();
@@ -2335,44 +2671,56 @@ async fn run_install_task(
   let machine_uid = context.machine_uid.clone();
   let result = tauri::async_runtime::spawn_blocking(move || {
     let mut journal_value = snapshot.blocking_lock().clone();
+    let mut validation_timing = installer::InstallValidationTiming::default();
     let emit = |value: &TaskJournal| {
       *snapshot.blocking_lock() = value.clone();
       let summary = value.summary();
       emit_state(&handle, &summary);
       emit_progress(&handle, &summary);
     };
-    installer::execute_install(
+    let result = installer::execute_install(
       &plan_for_blocking,
       &task_root_for_blocking,
       &machine_uid,
       &mut journal_value,
       &canceled_for_blocking,
       &emit,
-    )
+      &mut validation_timing,
+    );
+    (result, validation_timing)
   })
   .await;
   let installation = match result {
-    Ok(Ok(installation)) => installation,
-    Ok(Err(error)) => {
-      log::error!("[game-package][install][{}] 全新安装提交失败：{error}", plan.plan_id);
-      let mut value = journal.lock().await;
-      if value.state != PackageTaskState::Canceled {
-        value.state = if value.state.blocks_launch() {
-          PackageTaskState::RecoveryRequired
-        } else {
-          PackageTaskState::Failed
-        };
-        value.error_message = Some(error);
-        value.touch();
-        if let Err(persist_error) = journal::persist(&task_root, &value) {
-          log::error!(
-            "[game-package][install][{}] 持久化失败任务日志失败：{persist_error}",
-            plan.plan_id
-          );
-        }
-        emit_state(&app_handle, &value.summary());
+    Ok((result, validation_timing)) => {
+      if let Some(metrics) = metrics.as_ref() {
+        metrics.record_validation(&validation_timing);
       }
-      return;
+      match result {
+        Ok(installation) => installation,
+        Err(error) => {
+          log::error!("[game-package][install][{}] 全新安装提交失败：{error}", plan.plan_id);
+          let mut value = journal.lock().await;
+          if value.state != PackageTaskState::Canceled {
+            value.state = if value.state.blocks_launch() {
+              PackageTaskState::RecoveryRequired
+            } else {
+              PackageTaskState::Failed
+            };
+            value.error_message = Some(error);
+            value.touch();
+            if let Err(persist_error) =
+              persist_optional_install_checkpoint(&task_root, &value, metrics.as_deref())
+            {
+              log::error!(
+                "[game-package][install][{}] 持久化失败任务日志失败：{persist_error}",
+                plan.plan_id
+              );
+            }
+            emit_state(&app_handle, &value.summary());
+          }
+          return;
+        }
+      }
     }
     Err(error) => {
       log::error!("[game-package] 全新安装 worker 异常退出：{error}");
@@ -2380,7 +2728,9 @@ async fn run_install_task(
       value.state = PackageTaskState::RecoveryRequired;
       value.error_message = Some(format!("安装 worker 异常退出：{error}"));
       value.touch();
-      if let Err(persist_error) = journal::persist(&task_root, &value) {
+      if let Err(persist_error) =
+        persist_optional_install_checkpoint(&task_root, &value, metrics.as_deref())
+      {
         log::error!(
           "[game-package][install][{}] 持久化 worker 异常日志失败：{persist_error}",
           plan.plan_id
@@ -2396,7 +2746,9 @@ async fn run_install_task(
     value.state = PackageTaskState::RecoveryRequired;
     value.error_message = Some(error);
     value.touch();
-    if let Err(persist_error) = journal::persist(&task_root, &value) {
+    if let Err(persist_error) =
+      persist_optional_install_checkpoint(&task_root, &value, metrics.as_deref())
+    {
       log::error!(
         "[game-package][install][{}] 持久化登记失败日志失败：{persist_error}",
         plan.plan_id
@@ -2410,7 +2762,7 @@ async fn run_install_task(
   value.error_message = None;
   value.current_file = None;
   value.touch();
-  if let Err(error) = journal::persist(&task_root, &value) {
+  if let Err(error) = persist_optional_install_checkpoint(&task_root, &value, metrics.as_deref()) {
     log::error!("[game-package][install][{}] 写入安装完成状态失败：{error}", plan.plan_id);
   }
   let _ = journal::forget_progress(&task_root, &value.task_id);
@@ -2747,10 +3099,14 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{ActiveTask, GamePackageManager};
+  use super::{ActiveTask, GamePackageManager, PlanWorksetBaseline, nearest_rank};
   use crate::game::{
     journal::{self, TaskJournal},
-    model::{PackageTaskState, SchemeId},
+    model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState, SchemeId},
+    planner::{
+      PayloadEncoding, PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDownload,
+      PlanDownloadHashKind, PlanReuse,
+    },
   };
   use std::{
     fs,
@@ -2789,6 +3145,111 @@ mod tests {
       0,
       0,
     )
+  }
+
+  fn baseline_download(id: &str, compressed_size: u64) -> PlanDownload {
+    PlanDownload {
+      id: id.to_string(),
+      cache_key: id.to_string(),
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: "0".repeat(32),
+      compressed_size,
+      decompressed_size: compressed_size,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: String::new(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    }
+  }
+
+  fn baseline_chunk(id: &str, compressed_size: u64, reused: bool) -> PlanChunk {
+    PlanChunk {
+      id: id.to_string(),
+      decompressed_md5: "0".repeat(32),
+      target_offset: 0,
+      compressed_size,
+      decompressed_size: compressed_size,
+      reuse: reused.then(|| PlanReuse { asset_name: "source.bin".to_string(), source_offset: 0 }),
+    }
+  }
+
+  fn baseline_asset(name: &str, size: u64, chunks: Vec<PlanChunk>) -> PlanAsset {
+    PlanAsset {
+      name: name.to_string(),
+      action: PlanAssetAction::Add,
+      source: None,
+      size,
+      md5: "0".repeat(32),
+      chunks,
+      patch: None,
+    }
+  }
+
+  #[test]
+  fn plan_workset_baseline_deduplicates_assets_and_fixed_batches() {
+    let plan = PersistedPlan {
+      schema_version: 5,
+      plan_id: "plan".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "0".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: vec![
+        baseline_download("a", 10),
+        baseline_download("b", 20),
+        baseline_download("c", 30),
+      ],
+      assets: vec![
+        baseline_asset(
+          "a.bin",
+          30,
+          vec![
+            baseline_chunk("a", 10, false),
+            baseline_chunk("a", 10, false),
+            baseline_chunk("b", 20, false),
+            baseline_chunk("reuse", 5, true),
+          ],
+        ),
+        baseline_asset(
+          "b.bin",
+          50,
+          vec![baseline_chunk("b", 20, false), baseline_chunk("c", 30, false)],
+        ),
+        baseline_asset("c.bin", 30, vec![baseline_chunk("c", 30, false)]),
+      ],
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+
+    let baseline = PlanWorksetBaseline::from_plan(&plan, 2);
+    assert_eq!(baseline.asset_count, 3);
+    assert_eq!(baseline.download_count, 3);
+    assert_eq!(baseline.chunk_count, 7);
+    assert_eq!(baseline.planned_download_bytes, 60);
+    assert_eq!(baseline.planned_output_bytes, 110);
+    assert_eq!(baseline.asset_workset_max, 50);
+    assert_eq!(baseline.asset_workset_p50, 30);
+    assert_eq!(baseline.asset_workset_p95, 50);
+    assert_eq!(baseline.asset_workset_p99, 50);
+    assert_eq!(baseline.asset_workset_chunk_max, 2);
+    assert_eq!(baseline.batch_union_max, 60);
+    assert_eq!(baseline.batch_union_p95, 60);
+    assert_eq!(baseline.max_download_consumers, 2);
+    assert_eq!(baseline.max_download_span, 2);
+  }
+
+  #[test]
+  fn nearest_rank_handles_empty_and_tail_percentiles() {
+    assert_eq!(nearest_rank(&[], 95), 0);
+    assert_eq!(nearest_rank(&[50, 10, 30, 20, 40], 50), 30);
+    assert_eq!(nearest_rank(&[50, 10, 30, 20, 40], 95), 50);
   }
 
   #[test]
