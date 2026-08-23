@@ -20,6 +20,7 @@ use std::{
 use uuid::Uuid;
 
 pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 3;
+pub(crate) const INSTALL_COMMIT_TOTAL_STEPS: usize = 6;
 const LEGACY_JOURNAL_SCHEMA_VERSION_V2: u32 = 2;
 const LEGACY_JOURNAL_SCHEMA_VERSION_V1: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
@@ -143,6 +144,21 @@ pub(crate) struct TaskJournal {
   /// Total bytes of game asset staging outputs.
   #[serde(default)]
   pub(crate) assembly_total_bytes: u64,
+  /// Number of durable install finalization milestones completed.
+  #[serde(default)]
+  pub(crate) commit_completed_count: usize,
+  /// Total install finalization milestones exposed to the UI.
+  #[serde(default)]
+  pub(crate) commit_total_count: usize,
+  /// Current install finalization milestone without internal paths or identifiers.
+  #[serde(default)]
+  pub(crate) commit_current_step: Option<String>,
+  /// Number of files verified in the current install-tree verification pass.
+  #[serde(default)]
+  pub(crate) verification_completed_count: usize,
+  /// Total files in the current install-tree verification pass.
+  #[serde(default)]
+  pub(crate) verification_total_count: usize,
   #[serde(default)]
   pub(crate) spool_root: Option<String>,
   #[serde(default)]
@@ -201,6 +217,16 @@ impl TaskJournal {
       assembly_total_count: plan.assets.len(),
       assembly_completed_bytes: 0,
       assembly_total_bytes: plan.assets.iter().map(|asset| asset.size).sum(),
+      commit_completed_count: 0,
+      commit_total_count: if plan.target == PackagePlanTarget::Install {
+        INSTALL_COMMIT_TOTAL_STEPS
+      } else {
+        0
+      },
+      commit_current_step: (plan.target == PackagePlanTarget::Install)
+        .then_some("等待资源组装完成".to_string()),
+      verification_completed_count: 0,
+      verification_total_count: 0,
       spool_root: plan.install_overlay.as_ref().map(|overlay| overlay.spool_root.clone()),
       spool_bytes: 0,
       released_bytes: 0,
@@ -255,6 +281,11 @@ impl TaskJournal {
       assembly_total_count: 0,
       assembly_completed_bytes: 0,
       assembly_total_bytes: 0,
+      commit_completed_count: 0,
+      commit_total_count: 0,
+      commit_current_step: None,
+      verification_completed_count: 0,
+      verification_total_count: 0,
       spool_root: None,
       spool_bytes: 0,
       released_bytes: 0,
@@ -325,6 +356,11 @@ impl TaskJournal {
       assembly_total_count: self.assembly_total_count,
       assembly_completed_bytes: self.assembly_completed_bytes,
       assembly_total_bytes: self.assembly_total_bytes,
+      commit_completed_count: self.commit_completed_count,
+      commit_total_count: self.commit_total_count,
+      commit_current_step: self.commit_current_step.clone(),
+      verification_completed_count: self.verification_completed_count,
+      verification_total_count: self.verification_total_count,
       spool_bytes: self.spool_bytes,
       released_bytes: self.released_bytes,
       assembly_completed_bytes_total: self.assembly_completed_bytes_total,
@@ -817,12 +853,15 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.downloaded_bytes > journal.total_bytes
     || journal.assembly_completed_count > journal.assembly_total_count
     || journal.assembly_completed_bytes > journal.assembly_total_bytes
+    || journal.commit_completed_count > journal.commit_total_count
+    || journal.verification_completed_count > journal.verification_total_count
     || journal.completed_asset_cursor > journal.assembly_total_count
     || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
     || journal.spool_root.as_ref().is_some_and(|value| value.is_empty())
     || journal.current_file.as_ref().is_some_and(|value| value.len() > 256)
     || journal.download_current_file.as_ref().is_some_and(|value| value.len() > 256)
     || journal.assembly_current_file.as_ref().is_some_and(|value| value.len() > 256)
+    || journal.commit_current_step.as_ref().is_some_and(|value| value.len() > 256)
     || journal.error_message.as_ref().is_some_and(|value| value.len() > 4096)
   {
     return Err("游戏资源任务日志字段无效".to_string());
@@ -980,6 +1019,11 @@ mod tests {
       assembly_total_count: 0,
       assembly_completed_bytes: 0,
       assembly_total_bytes: 0,
+      commit_completed_count: 0,
+      commit_total_count: 0,
+      commit_current_step: None,
+      verification_completed_count: 0,
+      verification_total_count: 0,
       spool_root: None,
       spool_bytes: 0,
       released_bytes: 0,

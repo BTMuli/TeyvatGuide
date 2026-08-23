@@ -170,6 +170,11 @@ declare namespace TGApp.Game.Package {
     assemblyTotalCount: number;
     assemblyCompletedBytes: number;
     assemblyTotalBytes: number;
+    commitCompletedCount: number;
+    commitTotalCount: number;
+    commitCurrentStep: string | null;
+    verificationCompletedCount: number;
+    verificationTotalCount: number;
     spoolBytes: number;
     releasedBytes: number;
     assemblyCompletedBytesTotal: number;

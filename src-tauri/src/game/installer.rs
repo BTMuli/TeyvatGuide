@@ -8,7 +8,7 @@ use super::{
   installation::{
     audio_marker, derive_installation_id, inspect_executable, supported_audio_languages,
   },
-  journal::TaskJournal,
+  journal::{INSTALL_COMMIT_TOTAL_STEPS, TaskJournal},
   model::{GameInstallation, PackagePlanTarget, PackageTaskState, SchemeId},
   path_guard::{normalize_manifest_path, prepare_manifest_output_file},
   planner::{InstallOverlay, PersistedPlan},
@@ -499,9 +499,28 @@ pub(crate) fn execute_install(
   let assembly_total_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "组装资源总大小溢出".to_string())
   })?;
+  let assembly_completed_count = journal.completed_asset_cursor.min(plan.assets.len());
+  let assembly_completed_bytes = plan.assets[..assembly_completed_count]
+    .iter()
+    .fold(0_u64, |total, asset| total.saturating_add(asset.size));
+  journal.update_assembly_progress(
+    assembly_completed_count,
+    plan.assets.len(),
+    assembly_completed_bytes,
+    assembly_total_bytes,
+    None,
+  );
+  journal.commit_completed_count = 0;
+  journal.commit_total_count = INSTALL_COMMIT_TOTAL_STEPS;
+  journal.commit_current_step = Some("正在校验暂存目录".to_string());
+  journal.verification_completed_count = 0;
+  journal.verification_total_count = 0;
   set_task_state(task_root, journal, PackageTaskState::Assembling, emit, timing)?;
-  journal.reset_assembly_progress(plan.assets.len(), assembly_total_bytes);
-  journal.current_file = Some("组装资源文件".to_string());
+  journal.current_file = Some(if assembly_completed_count == plan.assets.len() {
+    "准备校验安装内容".to_string()
+  } else {
+    "组装资源文件".to_string()
+  });
   journal.touch();
   persist_install_journal(task_root, journal, timing)?;
   emit(journal);
@@ -515,7 +534,16 @@ pub(crate) fn execute_install(
       .map(|sdk| collect_published_sdk_files(&staging_root, sdk))
       .transpose()?
       .unwrap_or_default();
-    let files = verify_install_tree_timed(plan, overlay, &staging_root, &sdk_files, timing)?;
+    let files = verify_install_tree_timed(
+      plan,
+      overlay,
+      &staging_root,
+      &sdk_files,
+      timing,
+      journal,
+      emit,
+      "校验暂存目录",
+    )?;
     if tree_digest(&files) != marker.tree_digest {
       return Err("安装暂存目录摘要不一致，需要恢复".to_string());
     }
@@ -584,7 +612,16 @@ pub(crate) fn execute_install(
       BTreeMap::new()
     };
     write_config(&staging_root, &overlay.config, &overlay.config_sha256)?;
-    let expected = verify_install_tree_timed(plan, overlay, &staging_root, &sdk_files, timing)?;
+    let expected = verify_install_tree_timed(
+      plan,
+      overlay,
+      &staging_root,
+      &sdk_files,
+      timing,
+      journal,
+      emit,
+      "校验暂存目录",
+    )?;
     let expected_tree_digest = tree_digest(&expected);
     let (directory_volume_serial, directory_file_id) = directory_identity(&staging_root)?;
     let marker = InstallMarker {
@@ -604,15 +641,19 @@ pub(crate) fn execute_install(
     write_marker(&staging_root, &marker)?;
     (marker, sdk_files)
   };
+  update_commit_progress(journal, 1, "暂存目录校验完成", emit);
+  update_commit_progress(journal, 2, "提交准备完成", emit);
   set_task_state(task_root, journal, PackageTaskState::CommitPrepared, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::CommitPrepared)?;
   check_canceled(canceled)?;
   ensure_publish_facts(plan, overlay, &draft, &staging_root, &game_root, &marker)?;
+  update_commit_progress(journal, 3, "发布前检查完成", emit);
   set_task_state(task_root, journal, PackageTaskState::PublishPending, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::PublishPending)?;
   check_canceled(canceled)?;
   prepare_publish_target(&game_root, &draft)?;
   publish_directory(&staging_root, &game_root)?;
+  update_commit_progress(journal, 4, "游戏目录已发布", emit);
   set_task_state(task_root, journal, PackageTaskState::Published, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::Published)?;
   let post_publish_started_at = Instant::now();
@@ -622,7 +663,15 @@ pub(crate) fn execute_install(
     {
       return Err("发布后的游戏目录身份发生变化，需要恢复".to_string());
     }
-    let published_files = verify_install_tree(plan, overlay, &game_root, &sdk_files)?;
+    let published_files = verify_install_tree_with_journal_progress(
+      plan,
+      overlay,
+      &game_root,
+      &sdk_files,
+      journal,
+      emit,
+      "复检最终目录",
+    )?;
     if tree_digest(&published_files) != marker.tree_digest {
       return Err("发布后的游戏树摘要不一致".to_string());
     }
@@ -638,7 +687,9 @@ pub(crate) fn execute_install(
   })();
   timing.record_post_publish(post_publish_started_at.elapsed());
   let installation = post_publish_result?;
+  update_commit_progress(journal, 5, "最终目录复检完成", emit);
   set_task_state(task_root, journal, PackageTaskState::Verified, emit, timing)?;
+  journal.commit_current_step = Some("正在登记游戏安装".to_string());
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::Verified)?;
   set_task_state(task_root, journal, PackageTaskState::RegistrationPending, emit, timing)?;
   set_draft_state(task_root, &draft.draft_id, InstallDraftState::RegistrationPending)?;
@@ -1303,7 +1354,19 @@ fn verify_install_tree(
   root: &Path,
   sdk_files: &BTreeMap<String, (u64, String)>,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
+  verify_install_tree_with_progress(plan, overlay, root, sdk_files, &mut |_, _| {})
+}
+
+fn verify_install_tree_with_progress(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  progress: &mut dyn FnMut(usize, usize),
+) -> Result<BTreeMap<String, (u64, String)>, String> {
   validate_no_links(root)?;
+  let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  let mut completed_count = 0_usize;
   let mut expected = BTreeMap::new();
   for file in &plan.inventory {
     let path = root.join(&file.name);
@@ -1312,6 +1375,8 @@ fn verify_install_tree(
       return Err(format!("安装资源校验失败：{}", file.name));
     }
     expected.insert(file.name.clone(), actual);
+    completed_count = completed_count.saturating_add(1);
+    progress(completed_count, total_count);
   }
   if !expected.contains_key("YuanShen.exe")
     || !expected.keys().any(|name| name.starts_with("YuanShen_Data/"))
@@ -1331,12 +1396,16 @@ fn verify_install_tree(
   }
   let config_actual = file_size_md5(&config)?;
   expected.insert("config.ini".to_string(), config_actual);
+  completed_count = completed_count.saturating_add(1);
+  progress(completed_count, total_count);
   for (name, value) in sdk_files {
     let actual = file_size_md5(&root.join(name))?;
     if &actual != value {
       return Err(format!("渠道 SDK 文件校验失败：{name}"));
     }
     expected.insert(name.clone(), actual);
+    completed_count = completed_count.saturating_add(1);
+    progress(completed_count, total_count);
   }
   let mut allowed_directories = HashSet::new();
   for name in expected.keys() {
@@ -1393,11 +1462,69 @@ fn verify_install_tree_timed(
   root: &Path,
   sdk_files: &BTreeMap<String, (u64, String)>,
   timing: &mut InstallValidationTiming,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
+  phase: &str,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   let started_at = Instant::now();
-  let result = verify_install_tree(plan, overlay, root, sdk_files);
+  let result =
+    verify_install_tree_with_journal_progress(plan, overlay, root, sdk_files, journal, emit, phase);
   timing.record_staging_tree(started_at.elapsed());
   result
+}
+
+fn verify_install_tree_with_journal_progress(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
+  phase: &str,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  journal.verification_completed_count = 0;
+  journal.verification_total_count = total_count;
+  journal.commit_current_step = Some(format!("{phase}：扫描目录安全性"));
+  journal.current_file = journal.commit_current_step.clone();
+  journal.touch();
+  emit(journal);
+  let mut last_emit = Instant::now();
+  let mut observer = |completed_count: usize, observed_total_count: usize| {
+    journal.verification_completed_count = completed_count;
+    journal.verification_total_count = observed_total_count;
+    if completed_count == observed_total_count || last_emit.elapsed() >= Duration::from_millis(250)
+    {
+      journal.commit_current_step =
+        Some(format!("{phase}：校验文件 {completed_count}/{observed_total_count}"));
+      journal.current_file = journal.commit_current_step.clone();
+      journal.touch();
+      emit(journal);
+      last_emit = Instant::now();
+    }
+  };
+  let result = verify_install_tree_with_progress(plan, overlay, root, sdk_files, &mut observer);
+  if result.is_ok() {
+    journal.verification_completed_count = total_count;
+    journal.commit_current_step = Some(format!("{phase}：目录清单检查完成"));
+    journal.current_file = journal.commit_current_step.clone();
+    journal.touch();
+    emit(journal);
+  }
+  result
+}
+
+fn update_commit_progress(
+  journal: &mut TaskJournal,
+  completed_count: usize,
+  current_step: &str,
+  emit: &dyn Fn(&TaskJournal),
+) {
+  journal.commit_completed_count = completed_count.min(journal.commit_total_count);
+  journal.commit_current_step = Some(current_step.to_string());
+  journal.current_file = journal.commit_current_step.clone();
+  journal.touch();
+  emit(journal);
 }
 
 fn tree_digest(files: &BTreeMap<String, (u64, String)>) -> String {

@@ -15,7 +15,7 @@ use super::{
     PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary,
   },
   planner::{
-    PersistedPlan, cached_chunk_matches, flush_cache_validation_index,
+    PersistedPlan, PlanDownload, cached_chunk_matches, flush_cache_validation_index,
     hydrate_and_validate_repair_plan, same_volume,
   },
   switch::{self, PersistedSwitchPlan},
@@ -141,7 +141,7 @@ struct InstallPipelineMetrics {
   started_at: Instant,
   index_build_micros: u64,
   baseline: PlanWorksetBaseline,
-  batch_count: AtomicUsize,
+  queue_refill_count: AtomicUsize,
   active_downloads: AtomicUsize,
   peak_active_downloads: AtomicUsize,
   active_assemblies: AtomicUsize,
@@ -198,7 +198,7 @@ impl InstallPipelineMetrics {
       started_at,
       index_build_micros,
       baseline: PlanWorksetBaseline::from_plan(plan, concurrency),
-      batch_count: AtomicUsize::new(0),
+      queue_refill_count: AtomicUsize::new(0),
       active_downloads: AtomicUsize::new(0),
       peak_active_downloads: AtomicUsize::new(0),
       active_assemblies: AtomicUsize::new(0),
@@ -351,7 +351,7 @@ impl Drop for InstallPipelineMetrics {
   fn drop(&mut self) {
     let download = self.download_telemetry.snapshot();
     log::info!(
-      "[game-package][install][{}][perf] totalMs={} indexBuildCount=1 indexBuildUs={} assets={} downloads={} chunks={} plannedDownloadBytes={} plannedOutputBytes={} assetWorksetMax={} assetWorksetP50={} assetWorksetP95={} assetWorksetP99={} assetWorksetChunkMax={} batchUnionMax={} batchUnionP95={} maxDownloadConsumers={} maxDownloadSpan={} batches={} peakDownloads={} peakAssemblies={} downloadMs={} assemblyMs={} downloadNetworkMs={} downloadWriteMs={} downloadHashMs={} downloadFileSyncCount={} downloadFileSyncMs={} downloadReceivedBytes={} downloadCacheHits={} downloadAttempts={} downloadAttemptSuccesses={} downloadAttemptFailures={} downloadRetries={} downloadObjectSuccesses={} downloadObjectFailures={} downloadAborts={} downloadPublishFailures={} zstdDecodeReadCount={} zstdDecodeReadBytes={} zstdDecodeReadMs={} chunkMd5Count={} chunkMd5Bytes={} chunkMd5Ms={} assetMd5Count={} assetMd5Bytes={} assetMd5Ms={} stagingFileSyncCount={} stagingFileSyncBytes={} stagingFileSyncMs={} journalAttempts={} journalWrites={} journalSerializedBytes={} journalSerializeMs={} journalWriteMs={} journalFileSyncCount={} journalFileSyncMs={} journalRenameMs={} journalDirectorySyncCount={} journalDirectorySyncMs={} journalLockWaitMs={} stagingVerifyCount={} stagingVerifyMs={} postPublishVerifyCount={} postPublishVerifyMs={} resumeAssetCursor={} recoveryValidateMs={} checkpoints={} checkpointMs={} scheduledUniqueDownloadBytes={} duplicateWaitBytes={} peakSpoolBytes={} peakLogicalStagingBytes={}",
+      "[game-package][install][{}][perf] totalMs={} indexBuildCount=1 indexBuildUs={} assets={} downloads={} chunks={} plannedDownloadBytes={} plannedOutputBytes={} assetWorksetMax={} assetWorksetP50={} assetWorksetP95={} assetWorksetP99={} assetWorksetChunkMax={} batchUnionMax={} batchUnionP95={} maxDownloadConsumers={} maxDownloadSpan={} queueRefills={} peakDownloads={} peakAssemblies={} downloadMs={} assemblyMs={} downloadNetworkMs={} downloadWriteMs={} downloadHashMs={} downloadFileSyncCount={} downloadFileSyncMs={} downloadReceivedBytes={} downloadCacheHits={} downloadAttempts={} downloadAttemptSuccesses={} downloadAttemptFailures={} downloadRetries={} downloadObjectSuccesses={} downloadObjectFailures={} downloadAborts={} downloadPublishFailures={} zstdDecodeReadCount={} zstdDecodeReadBytes={} zstdDecodeReadMs={} chunkMd5Count={} chunkMd5Bytes={} chunkMd5Ms={} assetMd5Count={} assetMd5Bytes={} assetMd5Ms={} stagingFileSyncCount={} stagingFileSyncBytes={} stagingFileSyncMs={} journalAttempts={} journalWrites={} journalSerializedBytes={} journalSerializeMs={} journalWriteMs={} journalFileSyncCount={} journalFileSyncMs={} journalRenameMs={} journalDirectorySyncCount={} journalDirectorySyncMs={} journalLockWaitMs={} stagingVerifyCount={} stagingVerifyMs={} postPublishVerifyCount={} postPublishVerifyMs={} resumeAssetCursor={} recoveryValidateMs={} checkpoints={} checkpointMs={} scheduledUniqueDownloadBytes={} duplicateWaitBytes={} peakSpoolBytes={} peakLogicalStagingBytes={}",
       self.plan_id,
       self.started_at.elapsed().as_millis(),
       self.index_build_micros,
@@ -369,7 +369,7 @@ impl Drop for InstallPipelineMetrics {
       self.baseline.batch_union_p95,
       self.baseline.max_download_consumers,
       self.baseline.max_download_span,
-      self.batch_count.load(Ordering::Relaxed),
+      self.queue_refill_count.load(Ordering::Relaxed),
       self.peak_active_downloads.load(Ordering::Relaxed),
       self.peak_active_assemblies.load(Ordering::Relaxed),
       self.download_micros.load(Ordering::Relaxed) / 1_000,
@@ -706,23 +706,16 @@ impl GamePackageManager {
     let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
     let spool_available = fs2::available_space(spool_parent)
       .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
-    let spool_window = install_spool_window(&plan, concurrency);
-    let required = install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
-    let spool_required = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
-    let sufficient = if same_volume(spool_parent, game_parent) {
-      install_available >= required
+    let minimum_spool_window = 256 * 1024 * 1024;
+    let minimum_sufficient = if same_volume(spool_parent, game_parent) {
+      install_available
+        >= install_bytes.saturating_add(minimum_spool_window).saturating_add(SAFETY_MARGIN_BYTES)
     } else {
       install_available >= install_bytes.saturating_add(SAFETY_MARGIN_BYTES)
-        && spool_available >= spool_required
+        && spool_available >= minimum_spool_window.saturating_add(SAFETY_MARGIN_BYTES)
     };
-    if !sufficient {
-      return Err(format!(
-        "安装空间不足：安装盘可用 {} 字节，spool 盘可用 {} 字节，至少需要安装输出 {} 字节与 spool {} 字节",
-        install_available,
-        spool_available,
-        install_bytes.saturating_add(SAFETY_MARGIN_BYTES),
-        spool_required,
-      ));
+    if !minimum_sufficient {
+      return Err("安装空间不足，无法创建安装任务".to_string());
     }
     let mut journal = journal::load_or_create(&task_root, &plan)?;
     if journal.state.blocks_launch() && !recovering {
@@ -745,6 +738,30 @@ impl GamePackageManager {
       return Err("安装已经发布，请使用安装恢复命令完成登记".to_string());
     }
     rebuild_install_cache_state(&mut journal, &plan, &cache_root, &spool_root);
+    let cache_complete = journal.committed_step >= journal.total_count;
+    let spool_window = install_spool_window(&plan, concurrency, cache_complete);
+    let required = install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
+    let spool_required = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
+    let sufficient = if same_volume(spool_parent, game_parent) {
+      install_available >= required
+    } else {
+      install_available >= install_bytes.saturating_add(SAFETY_MARGIN_BYTES)
+        && spool_available >= spool_required
+    };
+    if !sufficient {
+      let error = format!(
+        "安装空间不足：安装盘可用 {} 字节，spool 盘可用 {} 字节，至少需要安装输出 {} 字节与 spool {} 字节",
+        install_available,
+        spool_available,
+        install_bytes.saturating_add(SAFETY_MARGIN_BYTES),
+        spool_required,
+      );
+      journal.state = PackageTaskState::Failed;
+      journal.error_message = Some(error.clone());
+      journal.touch();
+      journal::persist(&task_root, &journal)?;
+      return Err(error);
+    }
     journal.state = PackageTaskState::Queued;
     journal.error_message = None;
     journal.current_file = None;
@@ -1327,7 +1344,7 @@ async fn run_install_streaming_task(
     return;
   }
   if concurrency > 1 {
-    if let Err(error) = run_install_streaming_asset_pipeline_v2(
+    if let Err(error) = run_install_bounded_asset_pipeline(
       &app_handle,
       &task_root,
       &shared_cache_root,
@@ -1366,7 +1383,7 @@ async fn run_install_streaming_task(
       if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
         break;
       }
-      metrics.batch_count.fetch_add(1, Ordering::Relaxed);
+      metrics.queue_refill_count.fetch_add(1, Ordering::Relaxed);
       let asset = &plan.assets[asset_index];
       let mut pending = Vec::new();
       let mut seen = HashSet::new();
@@ -1683,7 +1700,20 @@ async fn run_install_streaming_task(
   run_install_task(app_handle, task_root, plan, journal, canceled, context, Some(metrics)).await;
 }
 
-async fn run_install_streaming_asset_pipeline_v2(
+struct InstallAssetJob {
+  asset_index: usize,
+  pending: Vec<PlanDownload>,
+  scheduled_download_ids: Vec<String>,
+  reserved_bytes: u64,
+}
+
+struct InstallAssetJobCompletion {
+  asset_index: usize,
+  reserved_bytes: u64,
+  result: Result<(), String>,
+}
+
+async fn run_install_bounded_asset_pipeline(
   app_handle: &AppHandle,
   task_root: &Path,
   shared_cache_root: &Path,
@@ -1700,6 +1730,7 @@ async fn run_install_streaming_asset_pipeline_v2(
   staging_root: &Path,
 ) -> Result<(), String> {
   let download_slots = Arc::new(Semaphore::new(concurrency.max(1)));
+  let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
   let mut asset_cursor = {
     let mut value = journal.lock().await;
     let cursor = value.completed_asset_cursor.min(plan.assets.len());
@@ -1715,213 +1746,303 @@ async fn run_install_streaming_asset_pipeline_v2(
     emit_progress(app_handle, &value.summary());
     cursor
   };
+  let cache_complete = journal.lock().await.committed_step >= plan.downloads.len();
+  let spool_budget = install_spool_window(plan, concurrency, cache_complete);
+  let max_in_flight = concurrency.max(1).saturating_mul(2);
+  let mut next_asset_index = asset_cursor;
+  let mut reserved_spool_bytes = 0_u64;
+  let mut scheduled_downloads = HashSet::<String>::new();
+  let download_guards = Arc::new(AsyncMutex::new(HashMap::<String, Arc<AsyncMutex<()>>>::new()));
+  let mut completed_assets = HashSet::<usize>::new();
+  let mut jobs = futures_util::stream::FuturesUnordered::new();
+  let mut first_error = None;
 
-  while asset_cursor < plan.assets.len() {
-    if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
-      break;
-    }
-    metrics.batch_count.fetch_add(1, Ordering::Relaxed);
-    let batch_end = asset_cursor.saturating_add(concurrency.max(1)).min(plan.assets.len());
-    let mut jobs = Vec::new();
-    let mut unique_pending = Vec::new();
-    let mut owned_downloads = HashSet::new();
-    for asset_index in asset_cursor..batch_end {
-      let mut pending = Vec::new();
-      let mut counted_bytes = 0_u64;
-      let mut seen = HashSet::new();
-      for chunk in &plan.assets[asset_index].chunks {
-        if chunk.reuse.is_some() || !seen.insert(chunk.id.as_str()) {
-          continue;
-        }
-        let download = download_index
-          .get(plan, chunk.id.as_str())
-          .ok_or_else(|| format!("资源 chunk 缺少下载计划：{}", chunk.id))?;
-        if cached_chunk_matches(shared_cache_root, download)
-          || cached_chunk_matches(spool_root, download)
-        {
-          continue;
-        }
-        let cloned = download.clone();
-        if owned_downloads.insert(download.id.as_str()) {
-          counted_bytes = counted_bytes.saturating_add(download.compressed_size);
-          unique_pending.push(cloned.clone());
-        } else {
-          metrics.record_duplicate_wait(download.compressed_size);
-        }
-        pending.push(cloned);
-      }
-      jobs.push((asset_index, pending, counted_bytes));
-    }
-    check_install_stream_space(plan, asset_cursor, &unique_pending, spool_root)?;
+  loop {
+    let mut scheduled_count = 0_usize;
+    while first_error.is_none()
+      && !canceled.load(Ordering::Acquire)
+      && !paused.load(Ordering::Acquire)
+      && next_asset_index < plan.assets.len()
+      && jobs.len() < max_in_flight
     {
+      let job = prepare_install_asset_job(
+        plan,
+        download_index,
+        next_asset_index,
+        shared_cache_root,
+        spool_root,
+        &scheduled_downloads,
+        metrics,
+      )?;
+      let projected_spool = spool_bytes(spool_root)
+        .saturating_add(reserved_spool_bytes)
+        .saturating_add(job.reserved_bytes);
+      if projected_spool > spool_budget && !jobs.is_empty() {
+        break;
+      }
+      check_install_stream_space(plan, asset_cursor, &job.pending, spool_root)?;
+      for download_id in &job.scheduled_download_ids {
+        scheduled_downloads.insert(download_id.clone());
+      }
+      reserved_spool_bytes = reserved_spool_bytes.saturating_add(job.reserved_bytes);
+      next_asset_index = next_asset_index.saturating_add(1);
+      scheduled_count = scheduled_count.saturating_add(1);
+      jobs.push(run_install_asset_job(
+        job,
+        app_handle.clone(),
+        task_root.to_path_buf(),
+        shared_cache_root.to_path_buf(),
+        spool_root.to_path_buf(),
+        Arc::clone(plan),
+        Arc::clone(download_index),
+        Arc::clone(metrics),
+        download_client.clone(),
+        Arc::clone(journal),
+        Arc::clone(canceled),
+        Arc::clone(paused),
+        Arc::clone(limiter),
+        Arc::clone(&download_slots),
+        Arc::clone(&download_guards),
+        Arc::clone(&assembly_slots),
+        staging_root.to_path_buf(),
+        concurrency,
+      ));
+    }
+    if scheduled_count > 0 {
+      metrics.queue_refill_count.fetch_add(1, Ordering::Relaxed);
       let mut value = journal.lock().await;
       value.state = PackageTaskState::Downloading;
-      value.download_current_file = Some(format!("资源文件 {} - {}", asset_cursor + 1, batch_end));
-      value.assembly_current_file = None;
+      value.download_current_file =
+        Some(format!("持续队列已调度 {}/{} 个资源", next_asset_index, plan.assets.len()));
       value.touch();
       persist_install_progress(task_root, &value, metrics)?;
       emit_state(app_handle, &value.summary());
     }
 
-    let tasks = stream::iter(jobs.into_iter().map(|(asset_index, pending, counted_bytes)| {
-      let client = download_client.clone();
-      let root = spool_root.to_path_buf();
-      let task_id = plan.plan_id.clone();
-      let canceled = Arc::clone(canceled);
-      let paused = Arc::clone(paused);
-      let limiter = Arc::clone(limiter);
-      let metrics = Arc::clone(metrics);
-      let slots = Arc::clone(&download_slots);
-      let assemble_plan = Arc::clone(plan);
-      let assemble_download_index = Arc::clone(download_index);
-      let assemble_staging = staging_root.to_path_buf();
-      let assemble_shared = shared_cache_root.to_path_buf();
-      let assemble_spool = spool_root.to_path_buf();
-      let assemble_canceled = Arc::clone(&canceled);
-      let assemble_journal = Arc::clone(journal);
-      let assemble_task_root = task_root.to_path_buf();
-      let assemble_app_handle = app_handle.clone();
-      async move {
-        let download_tasks = stream::iter(pending.into_iter().map(|download| {
-          let client = client.clone();
-          let root = root.clone();
-          let task_id = task_id.clone();
-          let canceled = Arc::clone(&canceled);
-          let paused = Arc::clone(&paused);
-          let limiter = Arc::clone(&limiter);
-          let metrics = Arc::clone(&metrics);
-          let slots = Arc::clone(&slots);
-          async move {
-            let permit = slots
-              .acquire_owned()
-              .await
-              .map_err(|error| format!("获取下载并发槽位失败：{error}"))?;
-            let started_at = metrics.begin_download();
-            let result = download_object(
-              &client,
-              &root,
-              &download,
-              DownloadControl::new(
-                &task_id,
-                &canceled,
-                &paused,
-                &limiter,
-                DownloadDurability::Recoverable,
-              )
-              .with_telemetry(Arc::clone(&metrics.download_telemetry)),
-            )
-            .await;
-            metrics.finish_download(started_at);
-            drop(permit);
-            result.map(|_| ())
-          }
-        }))
-        .buffer_unordered(concurrency.max(1));
-        futures_util::pin_mut!(download_tasks);
-        while let Some(result) = download_tasks.next().await {
-          result?;
+    let Some(completion) = jobs.next().await else {
+      break;
+    };
+    reserved_spool_bytes = reserved_spool_bytes.saturating_sub(completion.reserved_bytes);
+    match completion.result {
+      Ok(()) => {
+        completed_assets.insert(completion.asset_index);
+        let mut value = journal.lock().await;
+        value.assembly_completed_count =
+          value.assembly_completed_count.saturating_add(1).min(value.assembly_total_count);
+        value.assembly_completed_bytes = value
+          .assembly_completed_bytes
+          .saturating_add(plan.assets[completion.asset_index].size)
+          .min(value.assembly_total_bytes);
+        let previous_cursor = asset_cursor;
+        while asset_cursor < plan.assets.len() && completed_assets.remove(&asset_cursor) {
+          asset_cursor = asset_cursor.saturating_add(1);
         }
-        metrics.record_unique_download(counted_bytes);
-        {
-          let mut value = assemble_journal.lock().await;
-          value.downloaded_bytes =
-            value.downloaded_bytes.saturating_add(counted_bytes).min(value.total_bytes);
-          value.download_current_file =
-            (value.downloaded_bytes < value.total_bytes).then_some("并行下载剩余资源".to_string());
-          value.assembly_current_file = Some(format!(
-            "组装资源 {}/{}：{}",
-            value.assembly_completed_count + 1,
-            value.assembly_total_count,
-            assemble_plan.assets[asset_index].name
+        value.assembly_current_file = (value.assembly_completed_count < value.assembly_total_count)
+          .then_some(format!(
+            "已组装 {}/{}，持续队列继续补充资源",
+            value.assembly_completed_count, value.assembly_total_count
           ));
-          value.spool_bytes = spool_bytes(&assemble_spool);
+        value.spool_bytes = spool_bytes(spool_root);
+        metrics.observe_spool(value.spool_bytes);
+        value.touch();
+        if asset_cursor > previous_cursor {
+          let completed_bytes = plan.assets[..asset_cursor]
+            .iter()
+            .fold(0_u64, |total, asset| total.saturating_add(asset.size));
+          value.completed_asset_cursor = asset_cursor;
+          value.assembly_completed_bytes_total = completed_bytes;
+          metrics.observe_logical_staging(completed_bytes);
+          value.committed_step =
+            completed_download_count(plan, asset_cursor, shared_cache_root, spool_root);
+          persist_install_checkpoint(task_root, &value, metrics)?;
+          let released = release_install_spool(plan, asset_cursor, spool_root);
+          value.released_bytes = value.released_bytes.saturating_add(released);
+          value.spool_bytes = spool_bytes(spool_root);
           metrics.observe_spool(value.spool_bytes);
           value.touch();
-          persist_install_progress(&assemble_task_root, &value, &metrics)?;
-          emit_progress(&assemble_app_handle, &value.summary());
         }
-        let assembly_started_at = metrics.begin_assembly();
-        let worker_result = tauri::async_runtime::spawn_blocking(move || {
-          let mut timing = assembler::AssemblyTiming::default();
-          let result = assembler::assemble_full_install_asset_with_timing_observer(
-            &assemble_plan,
-            &assemble_download_index,
-            asset_index,
-            &assemble_staging,
-            &assemble_shared,
-            &assemble_spool,
-            &assemble_canceled,
-            &mut timing,
-          );
-          (result, timing)
-        })
+        persist_install_progress(task_root, &value, metrics)?;
+        emit_progress(app_handle, &value.summary());
+      }
+      Err(error) => {
+        first_error.get_or_insert(error);
+      }
+    }
+  }
+  if let Some(error) = first_error { Err(error) } else { Ok(()) }
+}
+
+fn prepare_install_asset_job(
+  plan: &PersistedPlan,
+  download_index: &assembler::FullInstallDownloadIndex,
+  asset_index: usize,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  scheduled_downloads: &HashSet<String>,
+  metrics: &InstallPipelineMetrics,
+) -> Result<InstallAssetJob, String> {
+  let asset = plan.assets.get(asset_index).ok_or_else(|| "安装资源游标越界".to_string())?;
+  let mut pending = Vec::new();
+  let mut scheduled_download_ids = Vec::new();
+  let mut reserved_bytes = 0_u64;
+  let mut seen = HashSet::new();
+  for chunk in &asset.chunks {
+    if chunk.reuse.is_some() || !seen.insert(chunk.id.as_str()) {
+      continue;
+    }
+    let download = download_index
+      .get(plan, chunk.id.as_str())
+      .ok_or_else(|| format!("资源 chunk 缺少下载计划：{}", chunk.id))?;
+    if cached_chunk_matches(shared_cache_root, download)
+      || cached_chunk_matches(spool_root, download)
+    {
+      continue;
+    }
+    if !scheduled_downloads.contains(&download.id) {
+      reserved_bytes = reserved_bytes.saturating_add(download.compressed_size);
+      scheduled_download_ids.push(download.id.clone());
+    } else {
+      metrics.record_duplicate_wait(download.compressed_size);
+    }
+    pending.push(download.clone());
+  }
+  Ok(InstallAssetJob { asset_index, pending, scheduled_download_ids, reserved_bytes })
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn run_install_asset_job(
+  job: InstallAssetJob,
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  shared_cache_root: PathBuf,
+  spool_root: PathBuf,
+  plan: Arc<PersistedPlan>,
+  download_index: Arc<assembler::FullInstallDownloadIndex>,
+  metrics: Arc<InstallPipelineMetrics>,
+  download_client: reqwest::Client,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
+  limiter: Arc<RateLimiter>,
+  download_slots: Arc<Semaphore>,
+  download_guards: Arc<AsyncMutex<HashMap<String, Arc<AsyncMutex<()>>>>>,
+  assembly_slots: Arc<Semaphore>,
+  staging_root: PathBuf,
+  concurrency: usize,
+) -> InstallAssetJobCompletion {
+  let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
+  let result = async {
+    let downloads = stream::iter(pending.into_iter().map(|download| {
+      let client = download_client.clone();
+      let root = spool_root.clone();
+      let shared_root = shared_cache_root.clone();
+      let task_id = plan.plan_id.clone();
+      let canceled = Arc::clone(&canceled);
+      let paused = Arc::clone(&paused);
+      let limiter = Arc::clone(&limiter);
+      let metrics = Arc::clone(&metrics);
+      let slots = Arc::clone(&download_slots);
+      let guards = Arc::clone(&download_guards);
+      async move {
+        let download_guard = {
+          let mut values = guards.lock().await;
+          Arc::clone(
+            values.entry(download.id.clone()).or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+          )
+        };
+        let _download_guard = download_guard.lock().await;
+        if cached_chunk_matches(&shared_root, &download) || cached_chunk_matches(&root, &download) {
+          return Ok(None);
+        }
+        let permit =
+          slots.acquire_owned().await.map_err(|error| format!("获取下载并发槽位失败：{error}"))?;
+        let started_at = metrics.begin_download();
+        let result = download_object(
+          &client,
+          &root,
+          &download,
+          DownloadControl::new(
+            &task_id,
+            &canceled,
+            &paused,
+            &limiter,
+            DownloadDurability::Recoverable,
+          )
+          .with_telemetry(Arc::clone(&metrics.download_telemetry)),
+        )
         .await;
-        metrics.finish_assembly(assembly_started_at);
-        match worker_result {
-          Ok((result, timing)) => {
-            metrics.record_assembly_detail(&timing);
-            result.map(|()| asset_index)
-          }
-          Err(error) => Err(format!("组装 worker 异常退出：{error}")),
-        }
+        metrics.finish_download(started_at);
+        drop(permit);
+        result.map(|downloaded| Some(downloaded.bytes))
       }
     }))
     .buffer_unordered(concurrency.max(1));
-    futures_util::pin_mut!(tasks);
-    let mut first_error = None;
-    while let Some(result) = tasks.next().await {
-      match result {
-        Ok(asset_index) => {
-          let mut value = journal.lock().await;
-          value.assembly_completed_count =
-            value.assembly_completed_count.saturating_add(1).min(value.assembly_total_count);
-          value.assembly_completed_bytes = value
-            .assembly_completed_bytes
-            .saturating_add(plan.assets[asset_index].size)
-            .min(value.assembly_total_bytes);
-          value.assembly_current_file =
-            (value.assembly_completed_count < value.assembly_total_count).then_some(format!(
-              "已组装 {}/{}，继续处理剩余文件",
-              value.assembly_completed_count, value.assembly_total_count
-            ));
-          value.touch();
-          persist_install_progress(task_root, &value, metrics)?;
-          emit_progress(app_handle, &value.summary());
-        }
-        Err(error) => {
-          first_error.get_or_insert(error);
-        }
+    futures_util::pin_mut!(downloads);
+    while let Some(download_result) = downloads.next().await {
+      if let Some(downloaded_bytes) = download_result? {
+        metrics.record_unique_download(downloaded_bytes);
+        let mut value = journal.lock().await;
+        value.downloaded_bytes =
+          value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
+        value.download_current_file =
+          (value.downloaded_bytes < value.total_bytes).then_some("持续下载资源对象".to_string());
+        value.spool_bytes = spool_bytes(&spool_root);
+        metrics.observe_spool(value.spool_bytes);
+        value.touch();
+        persist_install_progress(&task_root, &value, &metrics)?;
+        emit_progress(&app_handle, &value.summary());
       }
     }
-    if let Some(error) = first_error {
-      return Err(error);
-    }
 
-    let completed = batch_end;
-    let completed_bytes = plan.assets[..completed].iter().map(|asset| asset.size).sum();
-    let mut value = journal.lock().await;
-    value.completed_asset_cursor = completed;
-    value.assembly_completed_count = completed;
-    value.assembly_completed_bytes = completed_bytes;
-    value.assembly_completed_bytes_total = completed_bytes;
-    metrics.observe_logical_staging(completed_bytes);
-    value.spool_bytes = spool_bytes(spool_root);
-    value.committed_step = completed_download_count(plan, completed, shared_cache_root, spool_root);
-    value.download_current_file = None;
-    value.assembly_current_file = (completed < plan.assets.len())
-      .then_some(format!("已完成 {} 个资源，准备下一批下载与组装", completed));
-    value.touch();
-    persist_install_checkpoint(task_root, &value, metrics)?;
-    let released = release_install_spool(plan, completed, spool_root);
-    value.released_bytes = value.released_bytes.saturating_add(released);
-    value.spool_bytes = spool_bytes(spool_root);
-    metrics.observe_spool(value.spool_bytes);
-    value.touch();
-    persist_install_progress(task_root, &value, metrics)?;
-    emit_progress(app_handle, &value.summary());
-    asset_cursor = completed;
+    {
+      let mut value = journal.lock().await;
+      value.assembly_current_file = Some(format!(
+        "等待组装 {}/{}：{}",
+        asset_index + 1,
+        plan.assets.len(),
+        plan.assets[asset_index].name
+      ));
+      value.touch();
+      emit_progress(&app_handle, &value.summary());
+    }
+    let assembly_permit = assembly_slots
+      .acquire_owned()
+      .await
+      .map_err(|error| format!("获取组装并发槽位失败：{error}"))?;
+    let assemble_plan = Arc::clone(&plan);
+    let assemble_download_index = Arc::clone(&download_index);
+    let assemble_staging = staging_root.clone();
+    let assemble_shared = shared_cache_root.clone();
+    let assemble_spool = spool_root.clone();
+    let assemble_canceled = Arc::clone(&canceled);
+    let assembly_started_at = metrics.begin_assembly();
+    let worker_result = tauri::async_runtime::spawn_blocking(move || {
+      let mut timing = assembler::AssemblyTiming::default();
+      let result = assembler::assemble_full_install_asset_with_timing_observer(
+        &assemble_plan,
+        &assemble_download_index,
+        asset_index,
+        &assemble_staging,
+        &assemble_shared,
+        &assemble_spool,
+        &assemble_canceled,
+        &mut timing,
+      );
+      (result, timing)
+    })
+    .await;
+    metrics.finish_assembly(assembly_started_at);
+    drop(assembly_permit);
+    match worker_result {
+      Ok((result, timing)) => {
+        metrics.record_assembly_detail(&timing);
+        result
+      }
+      Err(error) => Err(format!("组装 worker 异常退出：{error}")),
+    }
   }
-  Ok(())
+  .await;
+  InstallAssetJobCompletion { asset_index, reserved_bytes, result }
 }
 
 #[allow(dead_code)]
@@ -2758,6 +2879,8 @@ async fn run_install_task(
     return;
   }
   let mut value = journal.lock().await;
+  value.commit_completed_count = value.commit_total_count;
+  value.commit_current_step = Some("安装登记完成".to_string());
   value.state = PackageTaskState::Completed;
   value.error_message = None;
   value.current_file = None;
@@ -2841,17 +2964,17 @@ fn rebuild_completed_cache_with_fallback(
   journal.spool_bytes = spool_bytes(spool_root);
 }
 
-fn check_install_stream_space(
+fn check_install_stream_space<'a>(
   plan: &PersistedPlan,
   asset_index: usize,
-  pending: &[super::planner::PlanDownload],
+  pending: impl IntoIterator<Item = &'a PlanDownload>,
   spool_root: &Path,
 ) -> Result<(), String> {
   let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
   let remaining_assets = plan.assets.iter().skip(asset_index).try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "安装空间需求溢出".to_string())
   })?;
-  let pending_bytes = pending.iter().try_fold(0_u64, |total, download| {
+  let pending_bytes = pending.into_iter().try_fold(0_u64, |total, download| {
     total.checked_add(download.compressed_size).ok_or_else(|| "下载空间需求溢出".to_string())
   })?;
   let current_spool = spool_bytes(spool_root);
@@ -2874,11 +2997,27 @@ fn check_install_stream_space(
   Ok(())
 }
 
-fn install_spool_window(plan: &PersistedPlan, concurrency: usize) -> u64 {
-  let mut sizes =
-    plan.downloads.iter().map(|download| download.compressed_size).collect::<Vec<_>>();
-  sizes.sort_unstable_by(|left, right| right.cmp(left));
-  sizes.into_iter().take(concurrency.max(1)).fold(256 * 1024 * 1024, u64::saturating_add)
+fn install_spool_window(plan: &PersistedPlan, concurrency: usize, cache_complete: bool) -> u64 {
+  if cache_complete {
+    return 256 * 1024 * 1024;
+  }
+  let mut asset_worksets = plan
+    .assets
+    .iter()
+    .map(|asset| {
+      let mut seen = HashSet::new();
+      asset
+        .chunks
+        .iter()
+        .filter(|chunk| chunk.reuse.is_none() && seen.insert(chunk.id.as_str()))
+        .fold(0_u64, |total, chunk| total.saturating_add(chunk.compressed_size))
+    })
+    .collect::<Vec<_>>();
+  asset_worksets.sort_unstable_by(|left, right| right.cmp(left));
+  asset_worksets
+    .into_iter()
+    .take(concurrency.max(1).saturating_mul(2))
+    .fold(256 * 1024 * 1024, u64::saturating_add)
 }
 
 fn spool_bytes(root: &Path) -> u64 {
@@ -3099,7 +3238,9 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{ActiveTask, GamePackageManager, PlanWorksetBaseline, nearest_rank};
+  use super::{
+    ActiveTask, GamePackageManager, PlanWorksetBaseline, install_spool_window, nearest_rank,
+  };
   use crate::game::{
     journal::{self, TaskJournal},
     model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState, SchemeId},
@@ -3243,6 +3384,8 @@ mod tests {
     assert_eq!(baseline.batch_union_p95, 60);
     assert_eq!(baseline.max_download_consumers, 2);
     assert_eq!(baseline.max_download_span, 2);
+    assert_eq!(install_spool_window(&plan, 2, false), 256 * 1024 * 1024 + 110);
+    assert_eq!(install_spool_window(&plan, 2, true), 256 * 1024 * 1024);
   }
 
   #[test]

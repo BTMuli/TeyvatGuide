@@ -102,11 +102,19 @@ const assemblyPercent = computed<number>(() => {
   }
   return phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes);
 });
-const progressPercent = computed<number>(() => {
+const commitPercent = computed<number>(() => {
+  if (task.commitTotalCount === 0) return 100;
+  return phasePercent(task.commitCompletedCount, task.commitTotalCount);
+});
+const resourcePercent = computed<number>(() => {
   const totalWork = task.totalBytes + task.assemblyTotalBytes;
   if (totalWork === 0) return gameEnum.package.taskApplying(task.state) ? 100 : 0;
   const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
   return Math.min(100, (completedWork / totalWork) * 100);
+});
+const progressPercent = computed<number>(() => {
+  if (task.commitTotalCount === 0) return resourcePercent.value;
+  return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
 });
 const downloadComplete = computed<boolean>(() => {
   return task.totalBytes > 0 && task.downloadedBytes >= task.totalBytes;
@@ -193,6 +201,19 @@ const assemblyRow = computed<ProgressRow>(() => ({
           `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
         ],
 }));
+const commitRow = computed<ProgressRow>(() => ({
+  label: "提交",
+  percent: commitPercent.value,
+  indeterminate: task.commitTotalCount === 0 && gameEnum.package.taskApplying(task.state),
+  complete: task.commitTotalCount > 0 && task.commitCompletedCount >= task.commitTotalCount,
+  status: task.commitCurrentStep,
+  details: [
+    `里程碑 ${task.commitCompletedCount} / ${task.commitTotalCount}`,
+    ...(task.verificationTotalCount > 0
+      ? [`本轮目录校验 ${task.verificationCompletedCount} / ${task.verificationTotalCount} 个文件`]
+      : []),
+  ],
+}));
 const overallRow = computed<ProgressRow>(() => ({
   label: "总进度",
   percent: progressPercent.value,
@@ -201,14 +222,17 @@ const overallRow = computed<ProgressRow>(() => ({
   status: overallFacts.value.join(" · "),
   details: [
     `${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(task.totalBytes + task.assemblyTotalBytes)}`,
-    `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}%`,
+    task.commitTotalCount > 0
+      ? `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
+      : `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}%`,
   ],
 }));
-const progressRows = computed<Array<ProgressRow>>(() => [
-  downloadRow.value,
-  assemblyRow.value,
-  overallRow.value,
-]);
+const progressRows = computed<Array<ProgressRow>>(() => {
+  const rows = [downloadRow.value, assemblyRow.value];
+  if (task.commitTotalCount > 0) rows.push(commitRow.value);
+  rows.push(overallRow.value);
+  return rows;
+});
 const showProgressBar = computed<boolean>(() => {
   return (
     active.value ||
