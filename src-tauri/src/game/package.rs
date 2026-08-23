@@ -198,8 +198,6 @@ struct InstallPipelineMetrics {
 struct RecoveryValidationProgress {
   completed: usize,
   total: usize,
-  completed_bytes: u64,
-  total_bytes: u64,
   current_file: String,
 }
 
@@ -336,12 +334,10 @@ async fn run_install_recovery_validation(
       start_cursor,
       &canceled_for_validation,
       default_concurrency(),
-      |completed, total, completed_bytes, total_bytes, current_file| {
+      |completed, total, _completed_bytes, _total_bytes, current_file| {
         let _ = progress_tx.send(RecoveryValidationProgress {
           completed,
           total,
-          completed_bytes,
-          total_bytes,
           current_file: current_file.to_string(),
         });
       },
@@ -366,8 +362,6 @@ async fn run_install_recovery_validation(
         let mut value = journal.lock().await;
         value.verification_completed_count = progress.completed;
         value.verification_total_count = progress.total;
-        value.assembly_completed_bytes = progress.completed_bytes;
-        value.assembly_total_bytes = progress.total_bytes;
         value.commit_current_step =
           Some(format!("校验已组装资源：{}/{}", progress.completed, progress.total));
         value.current_file = Some(progress.current_file);

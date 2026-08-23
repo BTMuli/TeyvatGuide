@@ -260,6 +260,10 @@ const progressPercent = computed<number>(() => {
     }
     return 0;
   }
+  // 组装已完成的资源任务不再切回下载百分比，避免缓存命中时下载量小于总量导致回退。
+  if (task.assemblyTotalBytes > 0 && task.assemblyCompletedBytes >= task.assemblyTotalBytes) {
+    return 100;
+  }
   if (task.totalBytes === 0) return 0;
   return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
 });

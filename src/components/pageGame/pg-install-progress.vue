@@ -112,10 +112,8 @@ const resourcePercent = computed<number>(() => {
   const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
   return Math.min(100, (completedWork / totalWork) * 100);
 });
-const progressPercent = computed<number>(() => {
-  if (task.commitTotalCount === 0) return resourcePercent.value;
-  return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
-});
+// 总进度只反映下载与组装资源进度，不掺提交里程碑，避免阶段切换时进度回退。
+const progressPercent = computed<number>(() => resourcePercent.value);
 const downloadComplete = computed<boolean>(() => {
   return task.totalBytes > 0 && task.downloadedBytes >= task.totalBytes;
 });
