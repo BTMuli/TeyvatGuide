@@ -453,11 +453,13 @@ pub(crate) fn execute_install(
       let spool_root = Path::new(&overlay.spool_root);
       let shared_cache_root = task_root.join("cache/chunks");
       let start_cursor = journal.completed_asset_cursor.min(plan.assets.len());
+      let download_index = assembler::FullInstallDownloadIndex::from_plan(plan)?;
       assembler::validate_full_install_cursor(plan, &staging_root, start_cursor, canceled)?;
       for index in start_cursor..plan.assets.len() {
         check_canceled(canceled)?;
         assembler::assemble_full_install_asset(
           plan,
+          &download_index,
           index,
           &staging_root,
           &shared_cache_root,
@@ -476,11 +478,14 @@ pub(crate) fn execute_install(
         journal.completed_asset_cursor = completed;
         journal.assembly_completed_bytes_total = completed_bytes;
         journal.spool_bytes = spool_bytes(spool_root)?;
-        journal.released_bytes = journal.released_bytes.saturating_add(
-          release_consumed_spool_chunks(plan, completed, spool_root, &shared_cache_root)?,
-        );
         journal.touch();
         super::journal::persist(task_root, journal)?;
+        let released =
+          release_consumed_spool_chunks(plan, completed, spool_root, &shared_cache_root)?;
+        journal.released_bytes = journal.released_bytes.saturating_add(released);
+        journal.spool_bytes = spool_bytes(spool_root)?;
+        journal.touch();
+        super::journal::persist_progress(task_root, journal)?;
         emit(journal);
       }
     }

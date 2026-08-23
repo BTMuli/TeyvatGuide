@@ -47,6 +47,46 @@ pub(crate) struct DownloadedObject {
   pub(crate) bytes: u64,
 }
 
+/// Controls whether a completed download must be durable across a crash before it is published.
+///
+/// `Recoverable` is only appropriate for task-private spool objects that can be revalidated and
+/// downloaded again after a crash. It deliberately makes no cross-crash durability claim for the
+/// file's page-cache contents.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum DownloadDurability {
+  /// Flush and force the temporary file to stable storage before publishing it.
+  Strict,
+  /// Flush and close the temporary file, but leave forcing it to stable storage to a later
+  /// checkpoint because the object is safe to redownload.
+  Recoverable,
+}
+
+pub(crate) struct DownloadControl<'a> {
+  task_id: &'a str,
+  canceled: &'a AtomicBool,
+  paused: &'a AtomicBool,
+  limiter: &'a RateLimiter,
+  durability: DownloadDurability,
+}
+
+impl<'a> DownloadControl<'a> {
+  pub(crate) fn new(
+    task_id: &'a str,
+    canceled: &'a AtomicBool,
+    paused: &'a AtomicBool,
+    limiter: &'a RateLimiter,
+    durability: DownloadDurability,
+  ) -> Self {
+    Self { task_id, canceled, paused, limiter, durability }
+  }
+}
+
+impl DownloadDurability {
+  fn requires_file_sync(self) -> bool {
+    matches!(self, Self::Strict)
+  }
+}
+
 impl RateLimiter {
   pub(crate) fn new(bytes_per_second: Option<u64>) -> Self {
     Self {
@@ -88,11 +128,9 @@ pub(crate) async fn download_object(
   client: &reqwest::Client,
   cache_root: &Path,
   download: &PlanDownload,
-  task_id: &str,
-  canceled: &AtomicBool,
-  paused: &AtomicBool,
-  limiter: &RateLimiter,
+  control: DownloadControl<'_>,
 ) -> Result<DownloadedObject, String> {
+  let DownloadControl { task_id, canceled, paused, limiter, durability } = control;
   if download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange {
     return Err("当前阶段不支持下载无法独立校验的 patch Range".to_string());
   }
@@ -118,7 +156,7 @@ pub(crate) async fn download_object(
       return Err("任务已取消".to_string());
     }
     remove_partial(&partial);
-    match download_once(client, download, &partial, canceled, paused, limiter).await {
+    match download_once(client, download, &partial, canceled, paused, limiter, durability).await {
       Ok(()) => {
         if paused.load(Ordering::Acquire) {
           remove_partial(&partial);
@@ -182,6 +220,7 @@ async fn download_once(
   canceled: &AtomicBool,
   paused: &AtomicBool,
   limiter: &RateLimiter,
+  durability: DownloadDurability,
 ) -> Result<(), String> {
   let url = download_url(download)?;
   let mut request = client.get(url);
@@ -258,11 +297,11 @@ async fn download_once(
     return Err("下载资源 hash 校验失败".to_string());
   }
   writer.flush().await.map_err(|error| format!("刷新资源下载缓冲区失败：{error}"))?;
-  writer
-    .get_ref()
-    .sync_all()
-    .await
-    .map_err(|error| format!("刷新资源下载临时文件失败：{error}"))?;
+  let file = writer.into_inner();
+  if durability.requires_file_sync() {
+    file.sync_all().await.map_err(|error| format!("刷新资源下载临时文件失败：{error}"))?;
+  }
+  drop(file);
   Ok(())
 }
 
@@ -369,7 +408,9 @@ fn download_url(download: &PlanDownload) -> Result<reqwest::Url, String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{download_url, is_official_download_host, validate_content_range};
+  use super::{
+    DownloadDurability, download_url, is_official_download_host, validate_content_range,
+  };
   use crate::game::planner::{PayloadEncoding, PlanDownload, PlanDownloadHashKind};
   use reqwest::header::HeaderValue;
 
@@ -441,5 +482,11 @@ mod tests {
       download_url(&download).unwrap().as_str(),
       "https://launcher-webstatic.mihoyo.com/sdk.zip?signature=test"
     );
+  }
+
+  #[test]
+  fn durability_policy_only_syncs_strict_downloads() {
+    assert!(DownloadDurability::Strict.requires_file_sync());
+    assert!(!DownloadDurability::Recoverable.requires_file_sync());
   }
 }

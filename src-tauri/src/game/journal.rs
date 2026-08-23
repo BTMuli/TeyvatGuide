@@ -10,10 +10,12 @@ use super::{
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
-  collections::HashSet,
+  collections::{HashMap, HashSet},
   fs::{self, OpenOptions},
   io::Write,
   path::{Path, PathBuf},
+  sync::{Mutex, OnceLock},
+  time::{Duration as StdDuration, Instant},
 };
 use uuid::Uuid;
 
@@ -21,6 +23,8 @@ pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 3;
 const LEGACY_JOURNAL_SCHEMA_VERSION_V2: u32 = 2;
 const LEGACY_JOURNAL_SCHEMA_VERSION_V1: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
+const JOURNAL_PROGRESS_INTERVAL: StdDuration = StdDuration::from_millis(500);
+const JOURNAL_PROGRESS_SLOT_TTL: StdDuration = StdDuration::from_secs(60);
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -329,6 +333,35 @@ impl TaskJournal {
   }
 }
 
+#[derive(Default)]
+struct JournalProgressSlot {
+  last_persisted_at: Option<Instant>,
+  revision_floor: Option<u64>,
+}
+
+#[derive(Default)]
+struct JournalProgressRegistry {
+  slots: HashMap<PathBuf, JournalProgressSlot>,
+}
+
+static JOURNAL_PROGRESS_REGISTRY: OnceLock<Mutex<JournalProgressRegistry>> = OnceLock::new();
+
+fn progress_registry() -> &'static Mutex<JournalProgressRegistry> {
+  JOURNAL_PROGRESS_REGISTRY.get_or_init(|| Mutex::new(JournalProgressRegistry::default()))
+}
+
+fn progress_key(task_root: &Path, task_id: &str) -> PathBuf {
+  journal_path(task_root, task_id)
+}
+
+fn prune_progress_slots(registry: &mut JournalProgressRegistry, now: Instant) {
+  registry.slots.retain(|_, slot| {
+    slot
+      .last_persisted_at
+      .is_some_and(|last| now.saturating_duration_since(last) < JOURNAL_PROGRESS_SLOT_TTL)
+  });
+}
+
 pub(crate) fn journal_path(task_root: &Path, task_id: &str) -> PathBuf {
   task_root.join("tasks").join(task_id).join("journal.json")
 }
@@ -363,6 +396,86 @@ pub(crate) fn load(path: &Path) -> Result<TaskJournal, String> {
 
 pub(crate) fn persist(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   validate_journal(journal)?;
+  let now = Instant::now();
+  let key = progress_key(task_root, &journal.task_id);
+  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
+  prune_progress_slots(&mut registry, now);
+  let slot = registry.slots.entry(key).or_default();
+  let result = persist_file(task_root, journal);
+  if result.is_ok() {
+    slot.last_persisted_at = Some(now);
+    slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
+  }
+  result
+}
+
+/// Persist display progress at most once per throttle window.
+///
+/// The first snapshot for a task is written immediately. Calls within the interval
+/// are dropped because the fields are recomputable from the live task state. Call
+/// [`flush_progress`] before a lifecycle boundary and [`forget_progress`] after the
+/// task is terminal.
+pub(crate) fn persist_progress(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
+  persist_progress_at(task_root, journal, Instant::now())
+}
+
+fn persist_progress_at(
+  task_root: &Path,
+  journal: &TaskJournal,
+  now: Instant,
+) -> Result<(), String> {
+  let key = progress_key(task_root, &journal.task_id);
+  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
+  prune_progress_slots(&mut registry, now);
+  let slot = registry.slots.entry(key).or_default();
+  if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
+    // A snapshot that was created before a strict checkpoint must never restore
+    // an older security state, even if it reaches this lock after that checkpoint.
+    return Ok(());
+  }
+  let due = slot
+    .last_persisted_at
+    .is_none_or(|last| now.saturating_duration_since(last) >= JOURNAL_PROGRESS_INTERVAL);
+  if !due {
+    return Ok(());
+  }
+  validate_journal(journal)?;
+  let result = persist_file(task_root, journal);
+  if result.is_ok() {
+    slot.last_persisted_at = Some(now);
+    slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
+  }
+  result
+}
+
+/// Persist the caller's newest progress snapshot immediately.
+pub(crate) fn flush_progress(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
+  validate_journal(journal)?;
+  let now = Instant::now();
+  let key = progress_key(task_root, &journal.task_id);
+  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
+  prune_progress_slots(&mut registry, now);
+  let slot = registry.slots.entry(key).or_default();
+  if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
+    return Ok(());
+  }
+  let result = persist_file(task_root, journal);
+  if result.is_ok() {
+    slot.last_persisted_at = Some(now);
+    slot.revision_floor = Some(slot.revision_floor.unwrap_or_default().max(journal.revision));
+  }
+  result
+}
+
+/// Drop queued progress for a task after its final strict checkpoint has been flushed.
+pub(crate) fn forget_progress(task_root: &Path, task_id: &str) -> Result<(), String> {
+  let key = progress_key(task_root, task_id);
+  let mut registry = progress_registry().lock().map_err(|_| "任务日志进度锁已损坏".to_string())?;
+  registry.slots.remove(&key);
+  Ok(())
+}
+
+fn persist_file(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   let directory = task_root.join("tasks").join(&journal.task_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建游戏资源任务目录失败：{error}"))?;
   let content =
@@ -699,10 +812,13 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-  use super::{TaskJournal, cleanup_terminal_tasks, load, persist};
+  use super::{
+    JOURNAL_PROGRESS_INTERVAL, TaskJournal, cleanup_terminal_tasks, flush_progress,
+    forget_progress, load, persist, persist_progress, persist_progress_at,
+  };
   use crate::game::model::{PackagePlanTarget, PackageTaskState, SchemeId};
   use chrono::Utc;
-  use std::{collections::HashSet, fs};
+  use std::{collections::HashSet, fs, time::Instant};
   use uuid::Uuid;
 
   fn journal(task_id: &str) -> TaskJournal {
@@ -764,6 +880,95 @@ mod tests {
     assert_eq!(loaded.state, PackageTaskState::Downloading);
     assert_eq!(loaded.revision, 2);
     fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn throttles_display_progress_events() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-progress-{task_id}"));
+    let started = Instant::now();
+    let initial = journal(&task_id);
+    persist_progress_at(&root, &initial, started).unwrap();
+
+    let mut within_window = initial.clone();
+    within_window.revision = 2;
+    within_window.downloaded_bytes = 1;
+    persist_progress_at(&root, &within_window, started + JOURNAL_PROGRESS_INTERVAL / 2).unwrap();
+
+    let mut latest = within_window.clone();
+    latest.revision = 3;
+    latest.downloaded_bytes = 3;
+    persist_progress_at(&root, &latest, started + JOURNAL_PROGRESS_INTERVAL).unwrap();
+
+    let path = root.join("tasks").join(&task_id).join("journal.json");
+    assert_eq!(load(&path).unwrap().downloaded_bytes, 3);
+    forget_progress(&root, &task_id).unwrap();
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn strict_persist_rejects_stale_progress() {
+    let task_id = Uuid::new_v4().to_string();
+    let root = std::env::temp_dir().join(format!("teyvat-guide-journal-strict-{task_id}"));
+    let started = Instant::now();
+    let initial = journal(&task_id);
+    persist_progress(&root, &initial).unwrap();
+
+    let mut pending = initial.clone();
+    pending.revision = 2;
+    pending.downloaded_bytes = 2;
+    persist_progress_at(&root, &pending, started + JOURNAL_PROGRESS_INTERVAL / 2).unwrap();
+
+    let mut strict = pending.clone();
+    strict.revision = 3;
+    strict.state = PackageTaskState::Failed;
+    strict.error_message = Some("strict checkpoint".to_string());
+    persist(&root, &strict).unwrap();
+    let stale = pending.clone();
+    persist_progress_at(&root, &stale, started + JOURNAL_PROGRESS_INTERVAL).unwrap();
+    flush_progress(&root, &stale).unwrap();
+
+    let loaded = load(&root.join("tasks").join(&task_id).join("journal.json")).unwrap();
+    assert_eq!(loaded.revision, 3);
+    assert_eq!(loaded.state, PackageTaskState::Failed);
+    forget_progress(&root, &task_id).unwrap();
+    fs::remove_dir_all(root).unwrap();
+  }
+
+  #[test]
+  fn progress_isolated_by_task_root_and_forget_resets_lifecycle_state() {
+    let task_id = Uuid::new_v4().to_string();
+    let base = std::env::temp_dir();
+    let root_a = base.join(format!("teyvat-guide-journal-root-a-{task_id}"));
+    let root_b = base.join(format!("teyvat-guide-journal-root-b-{task_id}"));
+    let started = Instant::now();
+    let initial = journal(&task_id);
+    persist_progress_at(&root_a, &initial, started).unwrap();
+    persist_progress_at(&root_b, &initial, started).unwrap();
+
+    let mut pending = initial.clone();
+    pending.revision = 2;
+    pending.downloaded_bytes = 2;
+    persist_progress_at(&root_a, &pending, started + JOURNAL_PROGRESS_INTERVAL / 2).unwrap();
+    persist_progress_at(&root_b, &pending, started + JOURNAL_PROGRESS_INTERVAL / 2).unwrap();
+
+    flush_progress(&root_a, &pending).unwrap();
+    assert_eq!(
+      load(&root_a.join("tasks").join(&task_id).join("journal.json")).unwrap().downloaded_bytes,
+      2
+    );
+    forget_progress(&root_b, &task_id).unwrap();
+    let mut after_forget = pending.clone();
+    after_forget.revision = 3;
+    after_forget.downloaded_bytes = 3;
+    persist_progress_at(&root_b, &after_forget, started + JOURNAL_PROGRESS_INTERVAL / 2).unwrap();
+    assert_eq!(
+      load(&root_b.join("tasks").join(&task_id).join("journal.json")).unwrap().downloaded_bytes,
+      3
+    );
+    forget_progress(&root_a, &task_id).unwrap();
+    fs::remove_dir_all(root_a).unwrap();
+    fs::remove_dir_all(root_b).unwrap();
   }
 
   #[test]

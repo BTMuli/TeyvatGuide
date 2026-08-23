@@ -8,7 +8,8 @@ use super::{
     resolve_existing_manifest_file,
   },
   planner::{
-    PayloadEncoding, PersistedPlan, PlanAsset, PlanChunk, PlanPatch, cached_chunk_matches,
+    PayloadEncoding, PersistedPlan, PlanAsset, PlanChunk, PlanDownload, PlanPatch,
+    cached_chunk_matches,
   },
 };
 use md5::{Digest, Md5};
@@ -45,6 +46,54 @@ pub(crate) struct AssemblyProgress {
   pub(crate) completed_bytes: u64,
   pub(crate) total_bytes: u64,
   pub(crate) current_file: Option<String>,
+}
+
+/// Immutable, reusable lookup for downloads in a full-install plan.
+///
+/// The index stores only the download id and its position in the plan.  It
+/// therefore avoids cloning every [`PlanDownload`] while remaining owned and
+/// safe to share between assembly workers.  Callers must keep using the same
+/// immutable plan that was passed to [`Self::from_plan`].
+#[derive(Debug)]
+pub(crate) struct FullInstallDownloadIndex {
+  by_id: HashMap<String, usize>,
+}
+
+impl FullInstallDownloadIndex {
+  pub(crate) fn from_plan(plan: &PersistedPlan) -> Result<Self, String> {
+    let mut by_id = HashMap::with_capacity(plan.downloads.len());
+    for (index, download) in plan.downloads.iter().enumerate() {
+      if by_id.insert(download.id.clone(), index).is_some() {
+        return Err(format!("全新安装计划下载项重复：{}", download.id));
+      }
+    }
+    Ok(Self { by_id })
+  }
+
+  pub(crate) fn get<'a>(&self, plan: &'a PersistedPlan, id: &str) -> Option<&'a PlanDownload> {
+    self.by_id.get(id).and_then(|index| plan.downloads.get(*index))
+  }
+}
+
+struct FullInstallDownloadLookup<'a> {
+  plan: &'a PersistedPlan,
+  index: &'a FullInstallDownloadIndex,
+}
+
+trait DownloadLookup {
+  fn get(&self, id: &str) -> Option<&PlanDownload>;
+}
+
+impl DownloadLookup for HashMap<&str, &PlanDownload> {
+  fn get(&self, id: &str) -> Option<&PlanDownload> {
+    HashMap::get(self, id).copied()
+  }
+}
+
+impl DownloadLookup for FullInstallDownloadLookup<'_> {
+  fn get(&self, id: &str) -> Option<&PlanDownload> {
+    self.index.get(self.plan, id)
+  }
 }
 
 /// 将一个已 hydrate 的计划组装到任务私有 staging 目录。
@@ -114,11 +163,8 @@ where
       || task_root.join("cache").join("chunks"),
       |overlay| PathBuf::from(&overlay.spool_root),
     );
-  let downloads = plan
-    .downloads
-    .iter()
-    .map(|download| (download.id.as_str(), download))
-    .collect::<HashMap<_, _>>();
+  let download_index = FullInstallDownloadIndex::from_plan(plan)?;
+  let downloads = FullInstallDownloadLookup { plan, index: &download_index };
   let (total_count, total_bytes) = assembly_totals(plan)?;
   let mut summary = AssemblySummary::default();
   for asset in plan.assets.iter() {
@@ -147,6 +193,7 @@ where
 
 pub(crate) fn assemble_full_install_asset(
   plan: &PersistedPlan,
+  download_index: &FullInstallDownloadIndex,
   asset_index: usize,
   staging_root: &Path,
   shared_cache_root: &Path,
@@ -157,11 +204,7 @@ pub(crate) fn assemble_full_install_asset(
     return Err("安装组装器只接受 Full 计划".to_string());
   }
   let asset = plan.assets.get(asset_index).ok_or_else(|| "安装资源游标越界".to_string())?;
-  let downloads = plan
-    .downloads
-    .iter()
-    .map(|download| (download.id.as_str(), download))
-    .collect::<HashMap<_, _>>();
+  let downloads = FullInstallDownloadLookup { plan, index: download_index };
   validate_asset_layout(asset, &downloads)?;
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   if output.exists() && verified_asset_file(&output, asset, canceled)? {
@@ -835,9 +878,9 @@ fn finalize_staging_file(
     .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
-fn validate_asset_layout<'a>(
+fn validate_asset_layout<L: DownloadLookup>(
   asset: &PlanAsset,
-  downloads: &HashMap<&'a str, &'a super::planner::PlanDownload>,
+  downloads: &L,
 ) -> Result<(), String> {
   if asset.patch.is_some() {
     return Err(format!("manifest-diff 资源不能包含 patch：{}", asset.name));
@@ -879,9 +922,9 @@ fn validate_asset_layout<'a>(
   Ok(())
 }
 
-fn assemble_asset(
+fn assemble_asset<L: DownloadLookup>(
   asset: &PlanAsset,
-  downloads: &HashMap<&str, &super::planner::PlanDownload>,
+  downloads: &L,
   game_root: &Path,
   cache_root: &Path,
   staging_root: &Path,
@@ -952,9 +995,9 @@ fn assemble_asset(
   result
 }
 
-fn assemble_asset_with_fallback(
+fn assemble_asset_with_fallback<L: DownloadLookup>(
   asset: &PlanAsset,
-  downloads: &HashMap<&str, &super::planner::PlanDownload>,
+  downloads: &L,
   game_root: &Path,
   shared_cache_root: &Path,
   spool_root: &Path,
@@ -1214,9 +1257,9 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    AssemblyProgress, assemble_asset_with_fallback, assemble_manifest_plan,
-    assemble_manifest_plan_with_progress, assemble_manifest_plan_with_progress_concurrent,
-    assemble_plan, partial_path,
+    AssemblyProgress, FullInstallDownloadIndex, assemble_asset_with_fallback,
+    assemble_manifest_plan, assemble_manifest_plan_with_progress,
+    assemble_manifest_plan_with_progress_concurrent, assemble_plan, partial_path,
   };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
@@ -1336,6 +1379,23 @@ mod tests {
     let cache = task_root.join("cache/chunks");
     fs::create_dir_all(&cache).unwrap();
     fs::write(cache.join(key), bytes).unwrap();
+  }
+
+  #[test]
+  fn full_install_download_index_rejects_duplicate_ids_and_missing_ids() {
+    let first = downloaded_chunk("duplicate", "first-cache", b"first", PayloadEncoding::Raw);
+    let single_plan = plan(vec![first.clone()], Vec::new());
+    let index = FullInstallDownloadIndex::from_plan(&single_plan).unwrap();
+
+    assert_eq!(
+      index.get(&single_plan, "duplicate").map(|download| download.id.as_str()),
+      Some("duplicate")
+    );
+    assert!(index.get(&single_plan, "missing").is_none());
+
+    let duplicate_plan = plan(vec![first.clone(), first], Vec::new());
+    let error = FullInstallDownloadIndex::from_plan(&duplicate_plan).unwrap_err();
+    assert!(error.contains("下载项重复"));
   }
 
   fn staging_file(task_root: &Path) -> PathBuf {
