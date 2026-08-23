@@ -338,14 +338,13 @@ function formatDuration(seconds: number): string {
 
 .task-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   padding: 12px 16px 4px;
   gap: 8px;
 
   > .v-chip {
     flex-shrink: 0;
-    margin-top: 2px;
   }
 
   span,

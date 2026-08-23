@@ -3,7 +3,7 @@
   <section class="install-task" aria-label="当前安装">
     <div class="install-task-heading">
       <div class="install-task-title">
-        <span>当前安装</span>
+        <span>安装任务</span>
         <strong>{{ task.targetTag }}</strong>
       </div>
       <v-chip :color="stateColor" size="small" variant="tonal">
@@ -214,13 +214,12 @@ const canAbandon = computed<boolean>(() => {
 
 .install-task-heading {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
 
   > .v-chip {
     flex-shrink: 0;
-    margin-top: 2px;
   }
 }
 
