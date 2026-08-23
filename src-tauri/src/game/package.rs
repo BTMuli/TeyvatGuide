@@ -36,10 +36,18 @@ use std::{
 use tauri::{AppHandle, Emitter};
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 
-const DEFAULT_CONCURRENCY: usize = 4;
-const MAX_CONCURRENCY: usize = 16;
+const MIN_CONCURRENCY: usize = 4;
+const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+
+/// 默认下载/组装并发：按 CPU 核心数，最低 4 路。
+fn default_concurrency() -> usize {
+  std::thread::available_parallelism()
+    .map(|parallelism| parallelism.get())
+    .unwrap_or(MIN_CONCURRENCY)
+    .max(MIN_CONCURRENCY)
+}
 
 #[derive(Debug)]
 struct PlanWorksetBaseline {
@@ -647,8 +655,8 @@ impl GamePackageManager {
     {
       return Err("当前只能启动包含完整目标清单的资源计划".to_string());
     }
-    let concurrency = options.concurrency.unwrap_or(DEFAULT_CONCURRENCY);
-    if !(1..=MAX_CONCURRENCY).contains(&concurrency) {
+    let concurrency = options.concurrency.unwrap_or_else(default_concurrency);
+    if options.concurrency.is_some() && !(1..=MAX_CONCURRENCY).contains(&concurrency) {
       return Err(format!("下载并发数必须在 1 到 {MAX_CONCURRENCY} 之间"));
     }
     if options.max_bytes_per_second.is_some_and(|value| value < MIN_RATE_LIMIT) {
@@ -754,8 +762,8 @@ impl GamePackageManager {
     if plan.inventory.is_empty() || plan.install_overlay.is_none() {
       return Err("全新安装计划缺少完整目标清单".to_string());
     }
-    let concurrency = options.concurrency.unwrap_or(DEFAULT_CONCURRENCY);
-    if !(1..=MAX_CONCURRENCY).contains(&concurrency) {
+    let concurrency = options.concurrency.unwrap_or_else(default_concurrency);
+    if options.concurrency.is_some() && !(1..=MAX_CONCURRENCY).contains(&concurrency) {
       return Err(format!("下载并发数必须在 1 到 {MAX_CONCURRENCY} 之间"));
     }
     if options.max_bytes_per_second.is_some_and(|value| value < MIN_RATE_LIMIT) {
@@ -2529,7 +2537,7 @@ async fn run_repair(
         .await
       }
     }))
-    .buffer_unordered(DEFAULT_CONCURRENCY);
+    .buffer_unordered(default_concurrency());
     futures_util::pin_mut!(downloads);
     while let Some(result) = downloads.next().await {
       result?;
