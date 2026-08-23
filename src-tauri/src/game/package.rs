@@ -1534,7 +1534,9 @@ async fn run_install_streaming_task(
   ));
   let start_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
   let recovery_started_at = Instant::now();
-  let recovery_result = if start_cursor == 0 {
+  // 游标已到末尾（组装完成后崩溃）：由随后的并行「校验暂存目录」统一承担逐文件校验与
+  // 证据补写，不再单独复检；只有还需要继续组装时才前置校验已组装文件。
+  let recovery_result = if start_cursor == 0 || start_cursor >= plan.assets.len() {
     Ok(())
   } else {
     {

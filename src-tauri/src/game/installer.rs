@@ -20,11 +20,14 @@ use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use sqlx::SqlitePool;
 use std::{
-  collections::{BTreeMap, HashSet},
+  collections::{BTreeMap, HashMap, HashSet},
   fs::{self, File, OpenOptions},
   io::{Read, Write},
   path::{Path, PathBuf},
-  sync::atomic::{AtomicBool, Ordering},
+  sync::{
+    Arc, Mutex,
+    atomic::{AtomicBool, AtomicUsize, Ordering},
+  },
   time::{Duration, Instant},
 };
 use uuid::Uuid;
@@ -591,49 +594,8 @@ pub(crate) fn execute_install(
       let shared_cache_root = task_root.join("cache/chunks");
       let start_cursor = journal.completed_asset_cursor.min(plan.assets.len());
       let download_index = assembler::FullInstallDownloadIndex::from_plan(plan)?;
-      let evidence_at_start = super::evidence::load_evidence_set(task_root, plan)?;
-      let evidence_complete = start_cursor == plan.assets.len()
-        && super::evidence::evidence_covers_cursor(plan, &evidence_at_start, start_cursor);
-      if evidence_complete {
-        // 正常连续路径：只核对证据集合与暂存根目录身份；逐文件身份核对由随后的
-        // 轻量树扫描承担，不再逐文件复检。
-        directory_identity(&staging_root)?;
-        journal.commit_current_step = Some("校验已组装资源：证据完整".to_string());
-        journal.current_file = journal.commit_current_step.clone();
-        journal.touch();
-        emit(journal);
-      } else {
-        // 真正恢复（游标未到末尾或证据缺失）：并发逐文件复检。
-        journal.verification_completed_count = 0;
-        journal.verification_total_count = start_cursor;
-        journal.commit_current_step = Some("正在校验已组装资源".to_string());
-        journal.current_file = journal.commit_current_step.clone();
-        journal.touch();
-        emit(journal);
-        let mut last_emit = Instant::now();
-        assembler::validate_full_install_cursor_with_evidence(
-          plan,
-          task_root,
-          &staging_root,
-          start_cursor,
-          canceled,
-          super::package::default_concurrency(),
-          |completed_count, total_count, completed_bytes, total_bytes, current_file| {
-            journal.verification_completed_count = completed_count;
-            journal.verification_total_count = total_count;
-            journal.commit_current_step =
-              Some(format!("校验已组装资源：{completed_count}/{total_count}"));
-            journal.current_file = Some(current_file.to_string());
-            journal.assembly_completed_bytes = completed_bytes;
-            journal.assembly_total_bytes = total_bytes;
-            journal.touch();
-            if last_emit.elapsed() >= Duration::from_millis(250) {
-              emit(journal);
-              last_emit = Instant::now();
-            }
-          },
-        )?;
-      }
+      // 已组装文件的逐文件校验统一由随后的并行「校验暂存目录」承担：证据完整时只做
+      // 身份核对，证据缺失/失配时并行回退内容 hash 并补写证据；此处不再单独复检。
       for index in start_cursor..plan.assets.len() {
         check_canceled(canceled)?;
         assembler::assemble_full_install_asset_with_timing_observer(
@@ -708,19 +670,23 @@ pub(crate) fn execute_install(
       &config_actual.1,
     )?;
     let evidence = super::evidence::load_evidence_set(task_root, plan)?;
-    let expected = verify_install_tree_with_evidence_timed(
+    let expected = verify_install_tree_parallel_timed(
       plan,
       overlay,
       &staging_root,
       &sdk_files,
       &evidence,
+      task_root,
+      true,
       timing,
       journal,
       emit,
       "校验暂存目录",
     )?;
     let expected_tree_digest = tree_digest(&expected);
-    let evidence_sha256 = super::evidence::evidence_digest(&evidence);
+    // 校验可能补写缺失的证据，重新加载后再计算摘要写入 marker。
+    let healed_evidence = super::evidence::load_evidence_set(task_root, plan)?;
+    let evidence_sha256 = super::evidence::evidence_digest(&healed_evidence);
     let (directory_volume_serial, directory_file_id) = directory_identity(&staging_root)?;
     let marker = InstallMarker {
       schema_version: MARKER_SCHEMA_VERSION,
@@ -1677,6 +1643,15 @@ fn verify_install_tree_with_evidence_and_progress(
     completed_count = completed_count.saturating_add(1);
     progress(completed_count, total_count);
   }
+  validate_tree_structure(root, &expected)?;
+  progress(total_count, total_count);
+  Ok(expected)
+}
+
+fn validate_tree_structure(
+  root: &Path,
+  expected: &BTreeMap<String, (u64, String)>,
+) -> Result<(), String> {
   let mut allowed_directories = HashSet::new();
   for name in expected.keys() {
     let mut current = Path::new(name);
@@ -1723,7 +1698,7 @@ fn verify_install_tree_with_evidence_and_progress(
   if seen.len() != expected.len() {
     return Err("安装树缺少计划文件".to_string());
   }
-  Ok(expected)
+  Ok(())
 }
 
 /// 当证据绑定、暂存根身份与文件身份/元数据全部一致时返回可信值；否则返回 `None` 由调用方
@@ -1812,6 +1787,292 @@ fn verify_install_tree_with_evidence_timed(
   );
   timing.record_staging_tree(started_at.elapsed());
   result
+}
+
+/// 并行「校验暂存目录」：逐清单文件并发做证据核对/回退 hash，证据缺失时补写证据，
+/// 主线程合并结果后执行 config/SDK 校验与全树结构扫描。
+fn verify_install_tree_parallel_timed(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  task_root: &Path,
+  heal_evidence: bool,
+  timing: &mut InstallValidationTiming,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
+  phase: &str,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  let started_at = Instant::now();
+  let result = verify_install_tree_parallel_with_journal_progress(
+    plan,
+    overlay,
+    root,
+    sdk_files,
+    evidence,
+    task_root,
+    heal_evidence,
+    journal,
+    emit,
+    phase,
+  );
+  timing.record_staging_tree(started_at.elapsed());
+  result
+}
+
+fn verify_install_tree_parallel_with_journal_progress(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  task_root: &Path,
+  heal_evidence: bool,
+  journal: &mut TaskJournal,
+  emit: &dyn Fn(&TaskJournal),
+  phase: &str,
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  journal.verification_completed_count = 0;
+  journal.verification_total_count = total_count;
+  journal.commit_current_step = Some(format!("{phase}：扫描目录安全性"));
+  journal.current_file = journal.commit_current_step.clone();
+  journal.touch();
+  emit(journal);
+  let mut last_emit = Instant::now();
+  let mut observer = |completed_count: usize, observed_total_count: usize| {
+    journal.verification_completed_count = completed_count;
+    journal.verification_total_count = observed_total_count;
+    if completed_count == observed_total_count || last_emit.elapsed() >= Duration::from_millis(250)
+    {
+      journal.commit_current_step =
+        Some(format!("{phase}：校验文件 {completed_count}/{observed_total_count}"));
+      journal.current_file = journal.commit_current_step.clone();
+      journal.touch();
+      emit(journal);
+      last_emit = Instant::now();
+    }
+  };
+  let result = verify_install_tree_parallel_with_progress(
+    plan,
+    overlay,
+    root,
+    sdk_files,
+    evidence,
+    task_root,
+    heal_evidence,
+    super::package::default_concurrency(),
+    &mut observer,
+  );
+  if result.is_ok() {
+    journal.verification_completed_count = total_count;
+    journal.commit_current_step = Some(format!("{phase}：目录清单检查完成"));
+    journal.current_file = journal.commit_current_step.clone();
+    journal.touch();
+    emit(journal);
+  }
+  result
+}
+
+fn verify_install_tree_parallel_with_progress(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  root: &Path,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  task_root: &Path,
+  heal_evidence: bool,
+  workers: usize,
+  progress: &mut dyn FnMut(usize, usize),
+) -> Result<BTreeMap<String, (u64, String)>, String> {
+  validate_no_links(root)?;
+  let root_identity = directory_identity(root)?;
+  let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  let asset_index_by_name = plan
+    .assets
+    .iter()
+    .enumerate()
+    .map(|(index, asset)| (asset.name.as_str(), index))
+    .collect::<HashMap<_, _>>();
+  let mut expected = if plan.inventory.is_empty() {
+    BTreeMap::new()
+  } else {
+    let inventory = &plan.inventory;
+    let next_index = Arc::new(AtomicUsize::new(0));
+    let completed_count = Arc::new(AtomicUsize::new(0));
+    let first_error = Arc::new(Mutex::new(None::<String>));
+    let results = Arc::new(Mutex::new(Vec::<(String, (u64, String))>::new()));
+    let worker_count = workers.clamp(1, 16);
+    std::thread::scope(|scope| {
+      let mut handles = Vec::new();
+      for _ in 0..worker_count {
+        let inventory = &*inventory;
+        let plan = &*plan;
+        let root = &*root;
+        let evidence = &*evidence;
+        let task_root = &*task_root;
+        let asset_index_by_name = &asset_index_by_name;
+        let next_index = Arc::clone(&next_index);
+        let completed_count = Arc::clone(&completed_count);
+        let first_error = Arc::clone(&first_error);
+        let results = Arc::clone(&results);
+        handles.push(scope.spawn(move || {
+          loop {
+            if first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).is_some() {
+              break;
+            }
+            let index = next_index.fetch_add(1, Ordering::Relaxed);
+            let Some(file) = inventory.get(index) else {
+              break;
+            };
+            match verify_one_inventory_file_parallel(
+              plan,
+              root,
+              root_identity,
+              evidence,
+              task_root,
+              heal_evidence,
+              &asset_index_by_name,
+              file,
+            ) {
+              Ok(value) => {
+                results.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).push(value);
+                completed_count.fetch_add(1, Ordering::Relaxed);
+              }
+              Err(error) => {
+                let mut slot = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+                if slot.is_none() {
+                  *slot = Some(error);
+                }
+                break;
+              }
+            }
+          }
+        }));
+      }
+      let mut last_emit = Instant::now();
+      loop {
+        if handles.iter().all(|handle| handle.is_finished()) {
+          break;
+        }
+        std::thread::sleep(Duration::from_millis(50));
+        if last_emit.elapsed() >= Duration::from_millis(250) {
+          progress(completed_count.load(Ordering::Relaxed), total_count);
+          last_emit = Instant::now();
+        }
+      }
+      progress(completed_count.load(Ordering::Relaxed), total_count);
+    });
+    if let Some(error) = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone()
+    {
+      return Err(error);
+    }
+    let mut expected = BTreeMap::new();
+    for (name, value) in results.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).drain(..) {
+      expected.insert(name, value);
+    }
+    expected
+  };
+  progress(expected.len(), total_count);
+  if !expected.contains_key("YuanShen.exe")
+    || !expected.keys().any(|name| name.starts_with("YuanShen_Data/"))
+  {
+    return Err("安装资源缺少 YuanShen.exe 或 YuanShen_Data".to_string());
+  }
+  for language in &overlay.audio_languages {
+    let marker = audio_marker(language).ok_or_else(|| format!("不支持的语音包：{language}"))?;
+    if !expected.contains_key(marker) {
+      return Err(format!("安装资源缺少语音包：{language}"));
+    }
+  }
+  let config = root.join("config.ini");
+  let config_bytes = fs::read(&config).map_err(|error| format!("读取安装配置失败：{error}"))?;
+  if sha256_bytes(&config_bytes) != overlay.config_sha256 {
+    return Err("安装配置校验失败".to_string());
+  }
+  let config_actual = match trusted_file_value(
+    root,
+    root_identity,
+    evidence,
+    "config.ini",
+    config_bytes.len() as u64,
+    &md5_hex(&config_bytes),
+  )? {
+    Some(value) => value,
+    None => {
+      let value = file_size_md5(&config)?;
+      if heal_evidence {
+        super::evidence::capture_and_persist_additional_evidence(
+          task_root,
+          plan,
+          root,
+          "config.ini",
+          value.0,
+          &value.1,
+        )?;
+      }
+      value
+    }
+  };
+  expected.insert("config.ini".to_string(), config_actual);
+  progress(expected.len(), total_count);
+  for (name, value) in sdk_files {
+    let actual = match trusted_file_value(root, root_identity, evidence, name, value.0, &value.1)? {
+      Some(value) => value,
+      None => {
+        let actual = file_size_md5(&root.join(name))?;
+        if heal_evidence {
+          super::evidence::capture_and_persist_additional_evidence(
+            task_root, plan, root, name, actual.0, &actual.1,
+          )?;
+        }
+        actual
+      }
+    };
+    if &actual != value {
+      return Err(format!("渠道 SDK 文件校验失败：{name}"));
+    }
+    expected.insert(name.clone(), actual);
+    progress(expected.len(), total_count);
+  }
+  validate_tree_structure(root, &expected)?;
+  progress(total_count, total_count);
+  Ok(expected)
+}
+
+fn verify_one_inventory_file_parallel(
+  plan: &PersistedPlan,
+  root: &Path,
+  root_identity: (u64, u64),
+  evidence: &BTreeMap<String, super::evidence::FileEvidence>,
+  task_root: &Path,
+  heal_evidence: bool,
+  asset_index_by_name: &HashMap<&str, usize>,
+  file: &super::planner::PlanFile,
+) -> Result<(String, (u64, String)), String> {
+  let path = root.join(&file.name);
+  let actual =
+    match trusted_file_value(root, root_identity, evidence, &file.name, file.size, &file.md5)? {
+      Some(value) => value,
+      None => {
+        let value = file_size_md5(&path)?;
+        if heal_evidence && value.0 == file.size && value.1.eq_ignore_ascii_case(&file.md5) {
+          if let Some(&index) = asset_index_by_name.get(file.name.as_str()) {
+            super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, root)?;
+          } else {
+            super::evidence::capture_and_persist_additional_evidence(
+              task_root, plan, root, &file.name, value.0, &value.1,
+            )?;
+          }
+        }
+        value
+      }
+    };
+  if actual.0 != file.size || !actual.1.eq_ignore_ascii_case(&file.md5) {
+    return Err(format!("安装资源校验失败：{}", file.name));
+  }
+  Ok((file.name.clone(), actual))
 }
 
 fn verify_install_tree_with_evidence_with_journal_progress(
@@ -2665,6 +2926,132 @@ mod tests {
         || error.contains("校验失败")
         || error.contains("读取文件状态失败")
     );
+
+    let _ = fs::remove_dir_all(&temp);
+  }
+
+  #[test]
+  fn parallel_tree_verify_heals_missing_evidence() {
+    use super::verify_install_tree_parallel_with_progress;
+    use crate::game::{
+      evidence::{capture_and_persist_asset_evidence, load_asset_evidence, load_evidence_set},
+      model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
+      planner::{InstallOverlay, PersistedPlan, PlanAsset, PlanAssetAction, PlanFile},
+    };
+    use md5::{Digest, Md5};
+    use sha2::Sha256;
+    use std::collections::BTreeMap;
+
+    let temp = std::env::temp_dir().join(format!("teyvat-guide-installer-{}", Uuid::new_v4()));
+    let staging = temp.join("staging");
+    let task_root = temp.join("task-root");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&task_root).unwrap();
+
+    let exe = b"exe";
+    let data = b"data";
+    let extra = b"extra";
+    let config = "[general]\r\nchannel=1\r\nsub_channel=1\r\ngame_version=1.0.0\r\ncps=mihoyo\r\ngame_biz=hk4e_cn\r\n";
+    fs::write(staging.join("YuanShen.exe"), exe).unwrap();
+    fs::create_dir_all(staging.join("YuanShen_Data")).unwrap();
+    fs::write(staging.join("YuanShen_Data/data.bin"), data).unwrap();
+    fs::write(staging.join("a.bin"), extra).unwrap();
+    fs::write(staging.join("config.ini"), config).unwrap();
+
+    let md5 = |bytes: &[u8]| {
+      let mut hasher = Md5::new();
+      hasher.update(bytes);
+      format!("{:x}", hasher.finalize())
+    };
+    let sha256 = |bytes: &[u8]| {
+      let mut hasher = Sha256::new();
+      hasher.update(bytes);
+      format!("{:x}", hasher.finalize())
+    };
+    let files = vec![
+      PlanFile { name: "YuanShen.exe".to_string(), size: exe.len() as u64, md5: md5(exe) },
+      PlanFile {
+        name: "YuanShen_Data/data.bin".to_string(),
+        size: data.len() as u64,
+        md5: md5(data),
+      },
+      PlanFile { name: "a.bin".to_string(), size: extra.len() as u64, md5: md5(extra) },
+    ];
+    let assets = files
+      .iter()
+      .map(|file| PlanAsset {
+        name: file.name.clone(),
+        action: PlanAssetAction::Add,
+        source: None,
+        size: file.size,
+        md5: file.md5.clone(),
+        chunks: Vec::new(),
+        patch: None,
+      })
+      .collect::<Vec<_>>();
+    let overlay = InstallOverlay {
+      library_root: temp.to_string_lossy().into_owned(),
+      game_root: temp.join("game").to_string_lossy().into_owned(),
+      staging_root: staging.to_string_lossy().into_owned(),
+      spool_root: String::new(),
+      target_path_sha256: "0".repeat(64),
+      library_volume_serial: 0,
+      library_file_id: 0,
+      target_volume_serial: 0,
+      target_file_id: 0,
+      marker_nonce: "a".repeat(64),
+      expected_executable: "YuanShen.exe".to_string(),
+      channel: 1,
+      sub_channel: 1,
+      audio_languages: Vec::new(),
+      config: config.to_string(),
+      config_sha256: sha256(config.as_bytes()),
+      sdk: None,
+    };
+    let plan = PersistedPlan {
+      schema_version: 3,
+      plan_id: "installer-parallel-test".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "b".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: Vec::new(),
+      assets,
+      delete_files: Vec::new(),
+      inventory: files,
+      install_overlay: Some(overlay.clone()),
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    for index in 0..plan.assets.len() {
+      capture_and_persist_asset_evidence(&task_root, &plan, index, &staging).unwrap();
+    }
+
+    // 删除 a.bin 的证据：并行校验必须回退内容 hash 并补写证据。
+    fs::remove_file(
+      crate::game::evidence::evidence_dir(&task_root, &plan.plan_id).join("a-000002.json"),
+    )
+    .unwrap();
+    assert!(load_asset_evidence(&task_root, &plan, 2).unwrap().is_none());
+    let evidence_set = load_evidence_set(&task_root, &plan).unwrap();
+
+    verify_install_tree_parallel_with_progress(
+      &plan,
+      &overlay,
+      &staging,
+      &BTreeMap::new(),
+      &evidence_set,
+      &task_root,
+      true,
+      4,
+      &mut |_, _| {},
+    )
+    .unwrap();
+    assert!(load_asset_evidence(&task_root, &plan, 2).unwrap().is_some());
+    assert_eq!(load_evidence_set(&task_root, &plan).unwrap().len(), 4);
 
     let _ = fs::remove_dir_all(&temp);
   }

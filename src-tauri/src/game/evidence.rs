@@ -314,23 +314,6 @@ pub(crate) fn evidence_digest(entries: &BTreeMap<String, FileEvidence>) -> Strin
   format!("{:x}", hasher.finalize())
 }
 
-/// 判断已加载的证据集合是否完整覆盖 `cursor` 之前的全部主资源。
-pub(crate) fn evidence_covers_cursor(
-  plan: &PersistedPlan,
-  evidence: &BTreeMap<String, FileEvidence>,
-  cursor: usize,
-) -> bool {
-  plan.assets.iter().take(cursor).all(|asset| {
-    evidence.get(&asset.name).is_some_and(|entry| {
-      entry.path == asset.name
-        && entry.plan_id == plan.plan_id
-        && entry.manifest_digest == plan.manifest_digest
-        && entry.expected_size == asset.size
-        && entry.expected_md5.eq_ignore_ascii_case(&asset.md5)
-    })
-  })
-}
-
 /// 判断当前文件是否与证据一致（身份/大小/写入时间），不读取内容。
 pub(crate) fn file_matches_evidence(root: &Path, evidence: &FileEvidence) -> Result<bool, String> {
   let path = root.join(&evidence.path);
