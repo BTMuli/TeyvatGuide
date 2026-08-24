@@ -9,11 +9,15 @@ use super::{
 use futures_util::TryStreamExt;
 use reqwest::{Client, Response, redirect::Policy};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use std::time::Duration;
+use std::{
+  sync::atomic::{AtomicBool, Ordering},
+  time::Duration,
+};
 use url::Url;
 
 const API_ORIGIN: &str = "https://hyp-api.mihoyo.com";
 const MAX_JSON_BYTES: usize = 4 * 1024 * 1024;
+static USE_SYSTEM_PROXY: AtomicBool = AtomicBool::new(false);
 
 /// HoyoPlay 返回的单个资源分类。
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -80,15 +84,22 @@ struct GameIdentity {
   id: String,
 }
 
+/// 更新游戏资源 HTTP 客户端是否跟随系统代理。
+pub(crate) fn configure_system_proxy(enabled: bool) {
+  USE_SYSTEM_PROXY.store(enabled, Ordering::Relaxed);
+}
+
 /// 只允许访问固定国服 API 且不跟随重定向的 HTTP 客户端。
 pub fn create_http_client() -> Result<Client, String> {
-  Client::builder()
+  let mut builder = Client::builder()
     .connect_timeout(Duration::from_secs(15))
     .read_timeout(Duration::from_secs(45))
     .redirect(Policy::none())
-    .user_agent("TeyvatGuide/0.11.5")
-    .build()
-    .map_err(|error| format!("创建游戏资源 HTTP 客户端失败：{error}"))
+    .user_agent("TeyvatGuide/0.11.5");
+  if !USE_SYSTEM_PROXY.load(Ordering::Relaxed) {
+    builder = builder.no_proxy();
+  }
+  builder.build().map_err(|error| format!("创建游戏资源 HTTP 客户端失败：{error}"))
 }
 
 /// 按严格字节上限读取 JSON 响应，避免无界响应占用内存。

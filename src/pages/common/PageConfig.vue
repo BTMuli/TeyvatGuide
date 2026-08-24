@@ -603,6 +603,7 @@ async function switchIncognito(): Promise<void> {
 
 async function switchUseProxy(): Promise<void> {
   useProxy.value = !useProxy.value;
+  await core.invoke("game_http_proxy_configure", { useSystemProxy: useProxy.value });
   if (!useProxy.value) {
     showSnackbar.success("已切换为直连模式");
     return;

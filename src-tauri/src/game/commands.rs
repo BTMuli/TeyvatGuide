@@ -3,7 +3,7 @@
 
 use super::{
   cache,
-  hoyoplay::{create_http_client, create_snapshot, get_game_branches},
+  hoyoplay::{configure_system_proxy, create_http_client, create_snapshot, get_game_branches},
   installation::{derive_installation_id, inspect_executable, locate_executables},
   installer, journal, launch,
   model::{
@@ -34,6 +34,12 @@ use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
 
 const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
+
+/// 配置后续创建的游戏资源 HTTP 客户端是否跟随系统代理。
+#[tauri::command]
+pub fn game_http_proxy_configure(use_system_proxy: bool) {
+  configure_system_proxy(use_system_proxy);
+}
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]

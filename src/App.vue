@@ -58,6 +58,7 @@ const {
   buildTime,
   closeToTray,
   showFeedback,
+  useProxy,
 } = storeToRefs(appStore);
 const userStore = useUserStore();
 const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
@@ -82,6 +83,7 @@ onMounted(async () => {
     showSnackbar.error(`读取应用目录失败：${error}`);
   }
   if (isMain.value) {
+    await core.invoke("game_http_proxy_configure", { useSystemProxy: useProxy.value });
     const title = "Teyvat Guide v" + (await app.getVersion()) + " Beta";
     await win.setTitle(title);
     await listenOnInit();
