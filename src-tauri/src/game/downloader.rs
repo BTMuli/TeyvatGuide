@@ -12,6 +12,7 @@ use reqwest::header::{CONTENT_LENGTH, CONTENT_RANGE, RANGE};
 use std::{
   collections::HashMap,
   fs,
+  future::Future,
   path::{Path, PathBuf},
   sync::{
     Arc, LazyLock, Mutex, Weak,
@@ -27,6 +28,8 @@ use tokio::{
 use xxhash_rust::xxh64::Xxh64;
 
 const MAX_ATTEMPTS: usize = 4;
+const DOWNLOAD_IO_STALL_TIMEOUT: Duration = Duration::from_secs(45);
+const DOWNLOAD_CONTROL_POLL_INTERVAL: Duration = Duration::from_millis(100);
 const WRITE_BUFFER_BYTES: usize = 256 * 1024;
 
 fn duration_micros(duration: Duration) -> u64 {
@@ -319,6 +322,42 @@ impl RateLimiter {
   }
 }
 
+async fn wait_for_download_io<F>(
+  future: F,
+  canceled: &AtomicBool,
+  paused: &AtomicBool,
+  stall_timeout: Duration,
+  timeout_error: &'static str,
+) -> Result<F::Output, String>
+where
+  F: Future,
+{
+  if paused.load(Ordering::Acquire) {
+    return Err("任务已暂停".to_string());
+  }
+  if canceled.load(Ordering::Acquire) {
+    return Err("任务已取消".to_string());
+  }
+
+  tokio::pin!(future);
+  let timeout = tokio::time::sleep(stall_timeout);
+  tokio::pin!(timeout);
+  loop {
+    tokio::select! {
+      result = &mut future => return Ok(result),
+      () = &mut timeout => return Err(timeout_error.to_string()),
+      () = tokio::time::sleep(DOWNLOAD_CONTROL_POLL_INTERVAL) => {
+        if paused.load(Ordering::Acquire) {
+          return Err("任务已暂停".to_string());
+        }
+        if canceled.load(Ordering::Acquire) {
+          return Err("任务已取消".to_string());
+        }
+      }
+    }
+  }
+}
+
 pub(crate) fn prepare_cache_root(task_root: &Path) -> Result<PathBuf, String> {
   let cache_root = task_root.join("cache/chunks");
   fs::create_dir_all(&cache_root).map_err(|error| format!("创建游戏资源缓存目录失败：{error}"))?;
@@ -504,11 +543,18 @@ async fn download_once(
     request = request.header(RANGE, format!("bytes={start}-{end}"));
   }
   let send_started_at = Instant::now();
-  let response = request.send().await;
+  let response = wait_for_download_io(
+    request.send(),
+    canceled,
+    paused,
+    DOWNLOAD_IO_STALL_TIMEOUT,
+    "等待游戏资源响应超时",
+  )
+  .await;
   if let Some(telemetry) = telemetry.as_deref_mut() {
     telemetry.record_network_wait(send_started_at.elapsed());
   }
-  let response = response.map_err(|error| network_error("下载游戏资源", &error))?;
+  let response = response?.map_err(|error| network_error("下载游戏资源", &error))?;
   if download.range_start.is_some() {
     if response.status() != reqwest::StatusCode::PARTIAL_CONTENT {
       return Err("资源服务器未按请求返回 Range 数据".to_string());
@@ -536,11 +582,18 @@ async fn download_once(
   let mut md5hasher = <Md5 as Md5Digest>::new();
   loop {
     let body_started_at = Instant::now();
-    let next_chunk = stream.try_next().await;
+    let next_chunk = wait_for_download_io(
+      stream.try_next(),
+      canceled,
+      paused,
+      DOWNLOAD_IO_STALL_TIMEOUT,
+      "读取游戏资源超时：长时间未收到数据",
+    )
+    .await;
     if let Some(telemetry) = telemetry.as_deref_mut() {
       telemetry.record_network_wait(body_started_at.elapsed());
     }
-    let Some(chunk) = next_chunk.map_err(|error| network_error("读取游戏资源", &error))?
+    let Some(chunk) = next_chunk?.map_err(|error| network_error("读取游戏资源", &error))?
     else {
       break;
     };
