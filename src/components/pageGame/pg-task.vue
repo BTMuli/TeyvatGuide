@@ -21,20 +21,28 @@
     </div>
 
     <template v-if="task !== null">
-      <v-progress-linear
-        :indeterminate="progressIndeterminate"
-        :model-value="progressPercent"
-        color="var(--tgc-od-orange)"
-        height="8"
-        rounded
+      <PgInstallProgress
+        v-if="task.target === gameEnum.package.planTarget.AUDIO && recoveryProgress === null"
+        embedded
+        mode="audio"
+        :task
       />
-      <div class="task-facts" aria-live="polite">
-        <span v-for="fact in progressFacts" :key="fact">{{ fact }}</span>
-      </div>
-      <p v-if="currentResource !== null" class="task-current">
-        <span class="task-current-label">{{ currentResourceLabel }}：</span>
-        <span class="task-current-value" :title="currentResource">{{ currentResource }}</span>
-      </p>
+      <template v-else>
+        <v-progress-linear
+          :indeterminate="progressIndeterminate"
+          :model-value="progressPercent"
+          color="var(--tgc-od-orange)"
+          height="8"
+          rounded
+        />
+        <div class="task-facts" aria-live="polite">
+          <span v-for="fact in progressFacts" :key="fact">{{ fact }}</span>
+        </div>
+        <p v-if="currentResource !== null" class="task-current">
+          <span class="task-current-label">{{ currentResourceLabel }}：</span>
+          <span class="task-current-value" :title="currentResource">{{ currentResource }}</span>
+        </p>
+      </template>
       <template v-if="recoveryProgress === null">
         <PgNotice v-if="task.errorMessage !== null" :text="task.errorMessage" tone="error" />
         <PgNotice
@@ -158,6 +166,7 @@
 import gameEnum from "@enum/game.js";
 import { computed } from "vue";
 
+import PgInstallProgress from "./pg-install-progress.vue";
 import PgNotice from "./pg-notice.vue";
 
 type Props = {
@@ -307,30 +316,54 @@ const canStart = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.FAILED
   );
 });
+const audioPreflightPercent = computed<number>(() => {
+  if (task === null || task.verificationTotalCount === 0) return 0;
+  return Math.min(100, (task.verificationCompletedCount / task.verificationTotalCount) * 100);
+});
+const audioCommitPhasePercent = computed<number>(() => {
+  if (task === null || task.commitTotalCount === 0) return 100;
+  if (
+    task.state === gameEnum.package.taskState.REGISTRATION_PENDING ||
+    task.state === gameEnum.package.taskState.COMPLETED
+  ) {
+    return 100;
+  }
+  if (task.state === gameEnum.package.taskState.VERIFYING) {
+    return (200 + audioPreflightPercent.value) / 3;
+  }
+  const committed = Math.min(100, (task.commitCompletedCount / task.commitTotalCount) * 100);
+  return (audioPreflightPercent.value + committed) / 3;
+});
 const audioProgressPercent = computed<number | null>(() => {
   if (task === null || task.target !== gameEnum.package.planTarget.AUDIO) return null;
+  const hasAssembly = task.assemblyTotalCount > 0;
+  const resourceWeight = hasAssembly ? 0.5 : 0;
   switch (task.state) {
     case gameEnum.package.taskState.ASSEMBLING:
       if (task.assemblyTotalBytes > 0) {
-        return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
+        return (
+          Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100) *
+          resourceWeight
+        );
       }
       if (task.assemblyTotalCount > 0) {
-        return Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100);
+        return (
+          Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100) *
+          resourceWeight
+        );
       }
       return 0;
     case gameEnum.package.taskState.COMMIT_PREPARED:
     case gameEnum.package.taskState.COMMITTING:
-      if (task.commitTotalCount === 0) return 0;
-      return Math.min(100, (task.commitCompletedCount / task.commitTotalCount) * 100);
+      return resourceWeight * 100 + audioCommitPhasePercent.value * (1 - resourceWeight);
     case gameEnum.package.taskState.VERIFYING:
-      if (task.verificationTotalCount === 0) return 0;
-      return Math.min(100, (task.verificationCompletedCount / task.verificationTotalCount) * 100);
+      return resourceWeight * 100 + audioCommitPhasePercent.value * (1 - resourceWeight);
     case gameEnum.package.taskState.REGISTRATION_PENDING:
     case gameEnum.package.taskState.COMPLETED:
       return 100;
     default:
       if (task.totalBytes === 0) return 0;
-      return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
+      return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100) * resourceWeight;
   }
 });
 const progressPercent = computed<number>(() => {

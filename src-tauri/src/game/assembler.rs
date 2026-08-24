@@ -445,6 +445,40 @@ where
   }
 }
 
+/// Assemble and verify one manifest-diff or patch asset after all of its download inputs exist.
+pub(crate) fn assemble_plan_asset_to_root(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  game_root: &Path,
+  task_root: &Path,
+  output_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  check_canceled(canceled)?;
+  let asset = plan.assets.get(asset_index).ok_or_else(|| "资源组装游标越界".to_string())?;
+  let cache_root = task_root.join("cache").join("chunks");
+  let downloads = plan
+    .downloads
+    .iter()
+    .map(|download| (download.id.as_str(), download))
+    .collect::<HashMap<_, _>>();
+  match plan.strategy {
+    PackagePlanStrategy::ManifestDiff => {
+      validate_asset_layout(asset, &downloads)?;
+      assemble_asset(asset, &downloads, game_root, &cache_root, output_root, canceled)
+    }
+    PackagePlanStrategy::Patch => {
+      let patch =
+        asset.patch.as_ref().ok_or_else(|| format!("patch 资源缺少差分元数据：{}", asset.name))?;
+      let download = downloads
+        .get(patch.id.as_str())
+        .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
+      assemble_patch_asset(asset, patch, download, game_root, &cache_root, output_root, canceled)
+    }
+    PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
+  }
+}
+
 pub(crate) fn default_assembly_concurrency() -> usize {
   max_assembly_concurrency()
 }

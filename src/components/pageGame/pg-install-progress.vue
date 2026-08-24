@@ -1,7 +1,11 @@
-<!-- 游戏本体安装的下载、组装与总进度 -->
+<!-- 游戏本体安装或配音包流水线的下载、组装与总进度 -->
 <template>
-  <section class="install-progress" aria-label="游戏本体安装进度">
-    <div class="install-progress-status">
+  <section
+    :aria-label="mode === 'audio' ? '配音包资源进度' : '游戏本体安装进度'"
+    :class="{ embedded }"
+    class="install-progress"
+  >
+    <div v-if="!embedded" class="install-progress-status">
       <span :class="captionTone">{{ caption }}</span>
       <div class="install-progress-actions">
         <slot name="actions" />
@@ -9,7 +13,7 @@
     </div>
 
     <div v-if="showProgressBar" class="install-progress-rows" aria-live="polite">
-      <PgInstallThroughput :task />
+      <PgInstallThroughput v-if="mode === 'install'" :task />
       <div v-for="row in progressRows" :key="row.label" class="install-progress-row">
         <div class="install-progress-row-head">
           <div class="install-progress-row-label">
@@ -56,7 +60,7 @@
     </div>
 
     <p
-      v-if="task.errorMessage !== null && task.errorMessage !== caption"
+      v-if="!embedded && task.errorMessage !== null && task.errorMessage !== caption"
       class="install-progress-error"
     >
       {{ task.errorMessage }}
@@ -72,6 +76,8 @@ import PgInstallThroughput from "./pg-install-throughput.vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
+  mode?: "install" | "audio";
+  embedded?: boolean;
 };
 
 type ProgressRow = {
@@ -85,7 +91,7 @@ type ProgressRow = {
   activeAssemblyCount: number;
 };
 
-const { task } = defineProps<Props>();
+const { task, mode = "install", embedded = false } = defineProps<Props>();
 defineSlots<{ actions?: () => unknown }>();
 const clock = ref<number>(Date.now());
 let clockTimer: ReturnType<typeof setInterval> | null = null;
@@ -103,7 +109,11 @@ onUnmounted(() => {
 const active = computed<boolean>(() => gameEnum.package.taskActive(task.state));
 const failed = computed<boolean>(() => task.state === gameEnum.package.taskState.FAILED);
 const caption = computed<string>(() =>
-  failed.value ? "安装失败" : gameEnum.package.taskStateDesc(task.state),
+  failed.value
+    ? mode === "audio"
+      ? "配音包任务失败"
+      : "安装失败"
+    : gameEnum.package.taskStateDesc(task.state),
 );
 const captionTone = computed<"err" | "warn" | "">(() => {
   switch (task.state) {
@@ -127,7 +137,28 @@ const commitPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return 100;
   return phasePercent(task.commitCompletedCount, task.commitTotalCount);
 });
+const audioPreflightPercent = computed<number>(() => {
+  if (task.verificationTotalCount === 0) {
+    return task.commitCompletedCount >= task.commitTotalCount ? 100 : 0;
+  }
+  return phasePercent(task.verificationCompletedCount, task.verificationTotalCount);
+});
+const audioCommitPercent = computed<number>(() => {
+  if (task.commitTotalCount === 0) return 100;
+  if (
+    task.state === gameEnum.package.taskState.REGISTRATION_PENDING ||
+    task.state === gameEnum.package.taskState.COMPLETED
+  ) {
+    return 100;
+  }
+  if (task.state === gameEnum.package.taskState.VERIFYING) {
+    return (200 + audioPreflightPercent.value) / 3;
+  }
+  const committed = phasePercent(task.commitCompletedCount, task.commitTotalCount);
+  return (audioPreflightPercent.value + committed) / 3;
+});
 const commitComplete = computed<boolean>(() => {
+  if (mode === "audio") return audioCommitPercent.value >= 100;
   return task.commitTotalCount === 0 || task.commitCompletedCount >= task.commitTotalCount;
 });
 const resourcePercent = computed<number>(() => {
@@ -136,6 +167,10 @@ const resourcePercent = computed<number>(() => {
 // 下载对象只是组装输入；本地资源以证据落盘后的组装字节为准，收尾阶段预留 5%。
 const progressPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return resourcePercent.value;
+  if (mode === "audio") {
+    if (task.assemblyTotalCount === 0) return audioCommitPercent.value;
+    return resourcePercent.value * 0.5 + audioCommitPercent.value * 0.5;
+  }
   return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
 });
 const downloadComplete = computed<boolean>(() => {
@@ -156,7 +191,8 @@ const resourceStatus = computed<string | null>(() => {
   if (task.downloadCurrentFile !== null) return task.downloadCurrentFile;
   if (gameEnum.package.taskApplying(task.state)) return task.currentFile;
   if (active.value) {
-    return downloadComplete.value ? "准备校验本地资源" : "正在获取并安装下一个资源";
+    if (downloadComplete.value) return "准备校验本地资源";
+    return mode === "audio" ? "正在获取并组装配音文件" : "正在获取并安装下一个资源";
   }
   return null;
 });
@@ -167,10 +203,13 @@ const displayElapsedMs = computed<number>(() => {
   return task.elapsedMs + Math.max(0, clock.value - updatedAt);
 });
 const overallFacts = computed<Array<string>>(() => {
-  return [
-    `当前私有临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
-    `当前耗时 ${formatElapsed(displayElapsedMs.value)}`,
-  ];
+  const values = [`当前耗时 ${formatElapsed(displayElapsedMs.value)}`];
+  if (mode === "install") {
+    values.unshift(
+      `当前私有临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
+    );
+  }
+  return values;
 });
 const resourceFacts = computed<Array<string>>(() => {
   return [
@@ -179,7 +218,7 @@ const resourceFacts = computed<Array<string>>(() => {
   ];
 });
 const resourceRow = computed<ProgressRow>(() => ({
-  label: "资源安装",
+  label: mode === "audio" ? "资源准备" : "资源安装",
   percent: resourcePercent.value,
   indeterminate:
     task.assemblyTotalBytes === 0 &&
@@ -194,13 +233,22 @@ const resourceRow = computed<ProgressRow>(() => ({
 }));
 const commitRow = computed<ProgressRow>(() => ({
   label: "提交",
-  percent: commitPercent.value,
+  percent: mode === "audio" ? audioCommitPercent.value : commitPercent.value,
   indeterminate: task.commitTotalCount === 0 && gameEnum.package.taskApplying(task.state),
-  complete: task.commitTotalCount > 0 && task.commitCompletedCount >= task.commitTotalCount,
+  complete:
+    task.commitTotalCount > 0 &&
+    (mode === "audio"
+      ? audioCommitPercent.value >= 100
+      : task.commitCompletedCount >= task.commitTotalCount),
   status: task.commitCurrentStep,
   details: [
-    `里程碑 ${task.commitCompletedCount} / ${task.commitTotalCount}`,
-    ...(task.verificationTotalCount > 0
+    ...(mode === "audio" && task.verificationTotalCount > 0
+      ? [
+          `${task.state === gameEnum.package.taskState.VERIFYING ? "最终复验" : "并行校验"} ${task.verificationCompletedCount} / ${task.verificationTotalCount}`,
+        ]
+      : []),
+    `${mode === "audio" ? "提交文件" : "里程碑"} ${task.commitCompletedCount} / ${task.commitTotalCount}`,
+    ...(mode !== "audio" && task.verificationTotalCount > 0
       ? [`本轮目录校验 ${task.verificationCompletedCount} / ${task.verificationTotalCount} 个文件`]
       : []),
   ],
@@ -216,8 +264,10 @@ const overallRow = computed<ProgressRow>(() => ({
   details: [
     `本地资源 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
     task.commitTotalCount > 0
-      ? `资源安装 ${resourcePercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
-      : `资源安装 ${resourcePercent.value.toFixed(0)}%`,
+      ? `${mode === "audio" ? "资源准备" : "资源安装"} ${resourcePercent.value.toFixed(0)}% · 提交 ${
+          mode === "audio" ? audioCommitPercent.value.toFixed(0) : commitPercent.value.toFixed(0)
+        }%`
+      : `${mode === "audio" ? "资源准备" : "资源安装"} ${resourcePercent.value.toFixed(0)}%`,
   ],
   downloadObjectStatus: null,
   activeAssemblyCount: 0,
@@ -273,6 +323,12 @@ function formatElapsed(milliseconds: number): string {
   border-radius: 4px;
   background: var(--box-bg-2);
   gap: 8px;
+
+  &.embedded {
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
 }
 
 .install-progress-status,

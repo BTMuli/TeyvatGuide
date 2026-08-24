@@ -7,6 +7,7 @@ use super::{
     DownloadControl, DownloadDurability, DownloadTelemetry, RateLimiter, download_object,
     prepare_cache_root,
   },
+  evidence,
   hoyoplay::{create_http_client, get_game_branches},
   installation::{inspect_audio_languages, inspect_executable, normalize_audio_languages},
   installer,
@@ -49,6 +50,11 @@ pub(crate) struct AudioApplyContext {
   pub installation: GameInstallation,
   pub machine_uid: String,
   pub registration_pool: sqlx::SqlitePool,
+}
+
+struct AudioAssemblyCompletion {
+  asset_index: usize,
+  result: Result<(), String>,
 }
 
 /// 默认下载/组装并发：按 CPU 核心数，最低 4 路。
@@ -1032,23 +1038,22 @@ impl GamePackageManager {
     let active = Arc::clone(&self.active);
     let finished_task_id = summary.task_id.clone();
     tauri::async_runtime::spawn(async move {
-      run_task(
-        app_handle.clone(),
-        &task_root,
-        &cache_root,
-        None,
-        plan.clone(),
-        download_client,
-        Arc::clone(&shared_journal),
-        Arc::clone(&canceled),
-        Arc::clone(&paused),
-        concurrency,
-        options.max_bytes_per_second,
-        None,
-      )
-      .await;
-      if let Some(context) = audio_apply
-        && let Err(error) = apply_audio_after_download(
+      if let Some(context) = audio_apply {
+        run_audio_streaming_task(
+          app_handle.clone(),
+          task_root.clone(),
+          cache_root,
+          PathBuf::from(&context.installation.root_path),
+          plan.clone(),
+          download_client,
+          Arc::clone(&shared_journal),
+          Arc::clone(&canceled),
+          Arc::clone(&paused),
+          concurrency,
+          options.max_bytes_per_second,
+        )
+        .await;
+        if let Err(error) = apply_audio_after_download(
           app_handle.clone(),
           task_root.clone(),
           plan.clone(),
@@ -1057,21 +1062,38 @@ impl GamePackageManager {
           context,
         )
         .await
-      {
-        let mut journal_value = shared_journal.lock().await;
-        if journal_value.state == PackageTaskState::ReadyToApply
-          && journal_value.error_message.is_none()
         {
-          journal_value.error_message = Some(error.clone());
-          journal_value.current_file = None;
-          journal_value.commit_current_step = Some("等待重试提交配音文件".to_string());
-          journal_value.touch();
-          let _ = journal::persist(&task_root, &journal_value);
-          let summary = journal_value.summary();
-          emit_state(&app_handle, &summary);
-          emit_progress(&app_handle, &summary);
+          let mut journal_value = shared_journal.lock().await;
+          if journal_value.state == PackageTaskState::ReadyToApply
+            && journal_value.error_message.is_none()
+          {
+            journal_value.error_message = Some(error.clone());
+            journal_value.current_file = None;
+            journal_value.commit_current_step = Some("等待重试提交配音文件".to_string());
+            journal_value.touch();
+            let _ = journal::persist(&task_root, &journal_value);
+            let summary = journal_value.summary();
+            emit_state(&app_handle, &summary);
+            emit_progress(&app_handle, &summary);
+          }
+          log::warn!("[game-package] 自动应用配音包变更失败：{error}");
         }
-        log::warn!("[game-package] 自动应用配音包变更失败：{error}");
+      } else {
+        run_task(
+          app_handle.clone(),
+          &task_root,
+          &cache_root,
+          None,
+          plan.clone(),
+          download_client,
+          Arc::clone(&shared_journal),
+          Arc::clone(&canceled),
+          Arc::clone(&paused),
+          concurrency,
+          options.max_bytes_per_second,
+          None,
+        )
+        .await;
       }
       finish_task(&active, &finished_task_id);
     });
@@ -1796,6 +1818,461 @@ impl GamePackageManager {
     journal.touch();
     journal::persist(task_root, &journal)?;
     Ok(journal.summary())
+  }
+}
+
+fn audio_asset_download_dependencies(plan: &PersistedPlan) -> Result<Vec<Vec<usize>>, String> {
+  let mut downloads = HashMap::with_capacity(plan.downloads.len());
+  for (index, download) in plan.downloads.iter().enumerate() {
+    if downloads.insert(download.id.as_str(), index).is_some() {
+      return Err(format!("配音包下载对象重复：{}", download.id));
+    }
+  }
+  plan
+    .assets
+    .iter()
+    .map(|asset| {
+      let mut dependencies = Vec::new();
+      let mut seen = HashSet::new();
+      match plan.strategy {
+        PackagePlanStrategy::ManifestDiff => {
+          for chunk in &asset.chunks {
+            if chunk.reuse.is_some() || !seen.insert(chunk.id.as_str()) {
+              continue;
+            }
+            dependencies.push(
+              *downloads
+                .get(chunk.id.as_str())
+                .ok_or_else(|| format!("配音资源缺少下载对象：{}", chunk.id))?,
+            );
+          }
+        }
+        PackagePlanStrategy::Patch => {
+          let patch = asset
+            .patch
+            .as_ref()
+            .ok_or_else(|| format!("配音资源缺少 patch 元数据：{}", asset.name))?;
+          dependencies.push(
+            *downloads
+              .get(patch.id.as_str())
+              .ok_or_else(|| format!("配音资源缺少 patch 下载对象：{}", patch.id))?,
+          );
+        }
+        PackagePlanStrategy::Full => {
+          return Err("配音包流水线不支持全量安装计划".to_string());
+        }
+      }
+      Ok(dependencies)
+    })
+    .collect()
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn assemble_audio_asset(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  game_root: PathBuf,
+  output_root: PathBuf,
+  plan: Arc<PersistedPlan>,
+  asset_index: usize,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  assembly_slots: Arc<Semaphore>,
+) -> AudioAssemblyCompletion {
+  let permit = match assembly_slots.acquire_owned().await {
+    Ok(permit) => permit,
+    Err(error) => {
+      return AudioAssemblyCompletion {
+        asset_index,
+        result: Err(format!("获取配音组装并发槽位失败：{error}")),
+      };
+    }
+  };
+  {
+    let mut value = journal.lock().await;
+    value.active_assembly_count = value.active_assembly_count.saturating_add(1);
+    value.assembly_current_file = Some(format!("正在组装：{}", plan.assets[asset_index].name));
+    value.current_file = value.assembly_current_file.clone();
+    value.touch();
+    emit_progress(&app_handle, &value.summary());
+  }
+  let worker_plan = Arc::clone(&plan);
+  let worker_task_root = task_root.clone();
+  let worker_output_root = output_root.clone();
+  let worker_canceled = Arc::clone(&canceled);
+  let result = tauri::async_runtime::spawn_blocking(move || {
+    assembler::assemble_plan_asset_to_root(
+      &worker_plan,
+      asset_index,
+      &game_root,
+      &worker_task_root,
+      &worker_output_root,
+      &worker_canceled,
+    )?;
+    evidence::capture_and_persist_asset_evidence(
+      &worker_task_root,
+      &worker_plan,
+      asset_index,
+      &worker_output_root,
+    )?;
+    Ok::<(), String>(())
+  })
+  .await
+  .map_err(|error| format!("配音资源组装 worker 异常退出：{error}"))
+  .and_then(|result| result);
+  drop(permit);
+  {
+    let mut value = journal.lock().await;
+    value.active_assembly_count = value.active_assembly_count.saturating_sub(1);
+    value.touch();
+    emit_progress(&app_handle, &value.summary());
+  }
+  AudioAssemblyCompletion { asset_index, result }
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn run_audio_streaming_task(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  cache_root: PathBuf,
+  game_root: PathBuf,
+  plan: PersistedPlan,
+  download_client: reqwest::Client,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
+  concurrency: usize,
+  max_bytes_per_second: Option<u64>,
+) {
+  let output_root = match committer::prepare_apply_assembly(&plan, &game_root) {
+    Ok(path) => path,
+    Err(error) => {
+      persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
+        .await;
+      return;
+    }
+  };
+  let incoming_bytes =
+    plan.assets.iter().fold(0_u64, |total, asset| total.saturating_add(asset.size));
+  let required = incoming_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+  let available = match fs2::available_space(&game_root) {
+    Ok(available) => available,
+    Err(error) => {
+      persist_audio_pipeline_error(
+        &task_root,
+        &app_handle,
+        &journal,
+        &paused,
+        &canceled,
+        format!("读取游戏磁盘剩余空间失败：{error}"),
+      )
+      .await;
+      return;
+    }
+  };
+  if available < required {
+    persist_audio_pipeline_error(
+      &task_root,
+      &app_handle,
+      &journal,
+      &paused,
+      &canceled,
+      format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"),
+    )
+    .await;
+    return;
+  }
+  let dependencies = match audio_asset_download_dependencies(&plan) {
+    Ok(dependencies) => dependencies,
+    Err(error) => {
+      persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
+        .await;
+      return;
+    }
+  };
+  let completed_assets = match evidence::trusted_asset_indices(&task_root, &plan, &output_root) {
+    Ok(completed) => completed,
+    Err(error) => {
+      persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
+        .await;
+      return;
+    }
+  };
+  let plan = Arc::new(plan);
+  let limiter = Arc::new(RateLimiter::new(max_bytes_per_second));
+  let labels = build_download_labels(&plan);
+  let mut completed_assets = completed_assets;
+  let mut scheduled_assets = completed_assets.clone();
+  let mut completed_cache_keys = {
+    let value = journal.lock().await;
+    value.owned_cache_files.iter().cloned().collect::<HashSet<_>>()
+  };
+  let mut available_downloads = plan
+    .downloads
+    .iter()
+    .enumerate()
+    .filter_map(|(index, download)| {
+      completed_cache_keys.contains(&download.cache_key).then_some(index)
+    })
+    .collect::<HashSet<_>>();
+  let pending = plan
+    .downloads
+    .iter()
+    .enumerate()
+    .filter(|(index, _)| !available_downloads.contains(index))
+    .map(|(index, download)| (index, download.clone()))
+    .collect::<Vec<_>>();
+  let download_started_at = Instant::now();
+  let assembly_started_at = Instant::now();
+  let mut last_emit = Instant::now() - Duration::from_secs(1);
+  let mut last_persist = Instant::now();
+  {
+    let completed_bytes = completed_assets
+      .iter()
+      .filter_map(|index| plan.assets.get(*index))
+      .fold(0_u64, |total, asset| total.saturating_add(asset.size));
+    let mut value = journal.lock().await;
+    value.state = PackageTaskState::Downloading;
+    value.update_assembly_progress(
+      completed_assets.len(),
+      plan.assets.len(),
+      completed_bytes,
+      plan.assets.iter().fold(0_u64, |total, asset| total.saturating_add(asset.size)),
+      None,
+    );
+    value.active_assembly_count = 0;
+    value.download_current_file =
+      (!pending.is_empty()).then_some("正在获取配音资源对象".to_string());
+    value.current_file = value.download_current_file.clone();
+    value.error_message = None;
+    value.touch();
+    if let Err(error) = journal::persist(&task_root, &value) {
+      persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+      return;
+    }
+    emit_state(&app_handle, &value.summary());
+    emit_progress(&app_handle, &value.summary());
+  }
+
+  let downloads = stream::iter(pending.into_iter().map(|(download_index, download)| {
+    let root = cache_root.clone();
+    let task_id = plan.plan_id.clone();
+    let current_file = labels
+      .get(&download.cache_key)
+      .cloned()
+      .unwrap_or_else(|| format!("资源对象：{}", download.id));
+    let canceled = Arc::clone(&canceled);
+    let paused = Arc::clone(&paused);
+    let limiter = Arc::clone(&limiter);
+    let client = download_client.clone();
+    async move {
+      let result = download_object(
+        &client,
+        &root,
+        &download,
+        DownloadControl::new(&task_id, &canceled, &paused, &limiter, DownloadDurability::Strict),
+      )
+      .await;
+      (download_index, current_file, result)
+    }
+  }))
+  .buffer_unordered(concurrency);
+  futures_util::pin_mut!(downloads);
+  let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
+  let mut assemblies = stream::FuturesUnordered::new();
+  let mut downloads_done = false;
+  let mut pipeline_error = None;
+
+  loop {
+    if pipeline_error.is_none()
+      && !paused.load(Ordering::Acquire)
+      && !canceled.load(Ordering::Acquire)
+    {
+      for (asset_index, asset_dependencies) in dependencies.iter().enumerate() {
+        if scheduled_assets.contains(&asset_index)
+          || !asset_dependencies.iter().all(|index| available_downloads.contains(index))
+        {
+          continue;
+        }
+        scheduled_assets.insert(asset_index);
+        assemblies.push(assemble_audio_asset(
+          app_handle.clone(),
+          task_root.clone(),
+          game_root.clone(),
+          output_root.clone(),
+          Arc::clone(&plan),
+          asset_index,
+          Arc::clone(&journal),
+          Arc::clone(&canceled),
+          Arc::clone(&assembly_slots),
+        ));
+      }
+    }
+    if downloads_done && assemblies.is_empty() {
+      break;
+    }
+    tokio::select! {
+      download = downloads.next(), if !downloads_done && pipeline_error.is_none() => {
+        let Some((download_index, current_file, result)) = download else {
+          downloads_done = true;
+          continue;
+        };
+        match result {
+          Ok(downloaded) => {
+            available_downloads.insert(download_index);
+            let mut value = journal.lock().await;
+            if completed_cache_keys.insert(downloaded.cache_key.clone()) {
+              value.owned_cache_files.push(downloaded.cache_key);
+              value.committed_step = value.owned_cache_files.len();
+              value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
+            }
+            value.download_current_file = Some(current_file.clone());
+            value.current_file = value.assembly_current_file.clone().or(Some(current_file));
+            let elapsed = download_started_at.elapsed().as_secs_f64().max(0.001);
+            value.bytes_per_second = (value.downloaded_bytes as f64 / elapsed) as u64;
+            let remaining = value.total_bytes.saturating_sub(value.downloaded_bytes);
+            value.eta_seconds = (value.bytes_per_second > 0)
+              .then_some(remaining / value.bytes_per_second);
+            value.touch();
+            if last_persist.elapsed() >= Duration::from_secs(1) {
+              if let Err(error) = journal::persist(&task_root, &value) {
+                pipeline_error = Some(error);
+              }
+              last_persist = Instant::now();
+            }
+            if last_emit.elapsed() >= Duration::from_millis(250) {
+              emit_progress(&app_handle, &value.summary());
+              last_emit = Instant::now();
+            }
+          }
+          Err(error) => pipeline_error = Some(error),
+        }
+      }
+      completion = assemblies.next(), if !assemblies.is_empty() => {
+        let Some(completion) = completion else {
+          continue;
+        };
+        match completion.result {
+          Ok(()) => {
+            completed_assets.insert(completion.asset_index);
+            let completed_bytes = completed_assets
+              .iter()
+              .filter_map(|index| plan.assets.get(*index))
+              .fold(0_u64, |total, asset| total.saturating_add(asset.size));
+            let mut cursor = 0_usize;
+            while completed_assets.contains(&cursor) {
+              cursor = cursor.saturating_add(1);
+            }
+            let mut value = journal.lock().await;
+            value.completed_asset_cursor = cursor.min(plan.assets.len());
+            value.assembly_completed_bytes_total = completed_bytes;
+            let assembly_total_bytes = value.assembly_total_bytes;
+            value.update_assembly_progress(
+              completed_assets.len(),
+              plan.assets.len(),
+              completed_bytes,
+              assembly_total_bytes,
+              Some(format!(
+                "已组装 {}/{}：{}",
+                completed_assets.len(),
+                plan.assets.len(),
+                plan.assets[completion.asset_index].name,
+              )),
+            );
+            let elapsed = assembly_started_at.elapsed().as_secs_f64().max(0.001);
+            value.assembly_bytes_per_second = (completed_bytes as f64 / elapsed) as u64;
+            let remaining = value.assembly_total_bytes.saturating_sub(completed_bytes);
+            value.assembly_eta_seconds = (value.assembly_bytes_per_second > 0)
+              .then_some(remaining / value.assembly_bytes_per_second);
+            value.touch();
+            if let Err(error) = journal::persist(&task_root, &value) {
+              pipeline_error = Some(error);
+            }
+            emit_progress(&app_handle, &value.summary());
+          }
+          Err(error) => {
+            pipeline_error.get_or_insert(error);
+          }
+        }
+      }
+    }
+    if pipeline_error.is_some() {
+      downloads_done = true;
+    }
+  }
+
+  flush_cache_validation_index(&cache_root);
+  let mut value = journal.lock().await;
+  value.active_assembly_count = 0;
+  value.bytes_per_second = 0;
+  value.eta_seconds = None;
+  value.assembly_bytes_per_second = 0;
+  value.assembly_eta_seconds = None;
+  value.download_current_file = None;
+  value.assembly_current_file = None;
+  value.current_file = None;
+  if paused.load(Ordering::Acquire) {
+    value.state = PackageTaskState::Paused;
+    value.error_message = None;
+  } else if canceled.load(Ordering::Acquire) {
+    value.state = PackageTaskState::Canceled;
+    value.error_message = None;
+  } else if let Some(error) = pipeline_error {
+    value.state = PackageTaskState::Failed;
+    value.error_message = Some(error);
+  } else if available_downloads.len() == plan.downloads.len()
+    && completed_assets.len() == plan.assets.len()
+  {
+    value.state = PackageTaskState::ReadyToApply;
+    value.downloaded_bytes = value.total_bytes;
+    value.committed_step = value.total_count;
+    value.assembly_completed_count = value.assembly_total_count;
+    value.assembly_completed_bytes = value.assembly_total_bytes;
+    value.error_message = None;
+  } else {
+    value.state = PackageTaskState::Failed;
+    value.error_message = Some("配音资源流水线结束后仍有下载或组装对象未完成".to_string());
+  }
+  value.touch();
+  if let Err(error) = journal::persist(&task_root, &value) {
+    persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+    return;
+  }
+  emit_progress(&app_handle, &value.summary());
+  emit_state(&app_handle, &value.summary());
+}
+
+async fn persist_audio_pipeline_error(
+  task_root: &Path,
+  app_handle: &AppHandle,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  paused: &AtomicBool,
+  canceled: &AtomicBool,
+  error: String,
+) {
+  let mut value = journal.lock().await;
+  value.state = if paused.load(Ordering::Acquire) {
+    PackageTaskState::Paused
+  } else if canceled.load(Ordering::Acquire) {
+    PackageTaskState::Canceled
+  } else {
+    PackageTaskState::Failed
+  };
+  value.error_message =
+    (!matches!(value.state, PackageTaskState::Paused | PackageTaskState::Canceled))
+      .then_some(error);
+  value.active_assembly_count = 0;
+  value.current_file = None;
+  value.download_current_file = None;
+  value.assembly_current_file = None;
+  value.bytes_per_second = 0;
+  value.eta_seconds = None;
+  value.assembly_bytes_per_second = 0;
+  value.assembly_eta_seconds = None;
+  value.touch();
+  if journal::persist(task_root, &value).is_ok() {
+    emit_progress(app_handle, &value.summary());
+    emit_state(app_handle, &value.summary());
   }
 }
 

@@ -6,6 +6,7 @@ use super::{
     assemble_manifest_plan_with_progress_concurrent,
     assemble_plan_to_root_with_progress_concurrent, default_assembly_concurrency,
   },
+  evidence,
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
@@ -29,7 +30,6 @@ use std::{
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
 const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
-const MAX_AUDIO_VERIFY_WORKERS: usize = 4;
 const TRANSACTION_DIRECTORY: &str = ".teyvatguide-update";
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
@@ -117,15 +117,27 @@ where
     return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
   }
 
+  let incoming_root = prepare_apply_assembly(plan, game_root)?;
+  let audio_preassembled = plan.target == PackagePlanTarget::Audio
+    && evidence::trusted_asset_indices(task_root, plan, &incoming_root)?.len() == plan.assets.len();
   reset_audio_commit_progress(plan, journal);
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
-  journal.reset_assembly_progress(plan.assets.len(), incoming_bytes);
+  if audio_preassembled {
+    journal.update_assembly_progress(
+      plan.assets.len(),
+      plan.assets.len(),
+      incoming_bytes,
+      incoming_bytes,
+      None,
+    );
+  } else {
+    journal.reset_assembly_progress(plan.assets.len(), incoming_bytes);
+  }
   journal.current_file = None;
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
-    let incoming_root = prepare_apply_assembly(plan, game_root)?;
-    {
+    if !audio_preassembled {
       let mut last_emit = Instant::now();
       let mut on_progress = |progress: &super::assembler::AssemblyProgress| {
         journal.update_assembly_progress(
@@ -430,7 +442,9 @@ where
     let original =
       fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
     let target = patch_channel(&original, request.target_channel, request.target_sub_channel)?;
-    prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal, false)?;
+    prepare_file_transaction(
+      &commit, &original, &target, game_root, task_root, journal, false, true,
+    )?;
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
     journal.current_file = Some("准备提交事务".to_string());
@@ -755,10 +769,15 @@ fn prepare_transaction(
     task_root,
     journal,
     plan.target == PackagePlanTarget::Audio,
+    // 配音任务只在提交前并行校验 Modify 源文件；Delete 只检查路径，Add 只检查目标不存在。
+    plan.target != PackagePlanTarget::Audio,
   )
 }
 
-fn prepare_apply_assembly(plan: &PersistedPlan, game_root: &Path) -> Result<PathBuf, String> {
+pub(crate) fn prepare_apply_assembly(
+  plan: &PersistedPlan,
+  game_root: &Path,
+) -> Result<PathBuf, String> {
   transaction_subdirectory(game_root, &plan.plan_id, "incoming")
 }
 
@@ -770,8 +789,9 @@ fn prepare_file_transaction(
   task_root: &Path,
   journal: &mut TaskJournal,
   trust_preverified_incoming: bool,
+  verify_source: bool,
 ) -> Result<(), String> {
-  preflight_targets(&commit.steps, game_root, !trust_preverified_incoming)?;
+  preflight_targets(&commit.steps, game_root, verify_source)?;
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
@@ -832,12 +852,6 @@ fn preflight_targets(
       CommitStepKind::Delete if current.is_none() => {
         return Err(format!("待删除资源已缺失：{}", step.name));
       }
-      CommitStepKind::Delete if verify_source => {
-        let path = current.ok_or_else(|| format!("待删除资源已缺失：{}", step.name))?;
-        if !file_matches(&path, step.size, &step.md5)? {
-          return Err(format!("待删除资源与计划源文件不一致：{}", step.name));
-        }
-      }
       CommitStepKind::Repair => {}
       _ => {}
     }
@@ -883,12 +897,24 @@ where
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   if journal.target == PackagePlanTarget::Audio {
     let cursor = apply(journal)?.cursor;
+    let remaining_modify_count = commit.steps[cursor.min(commit.steps.len())..]
+      .iter()
+      .filter(|step| step.kind == CommitStepKind::Modify)
+      .count();
     journal.commit_completed_count = cursor.min(commit.steps.len());
     journal.commit_total_count = commit.steps.len();
+    journal.verification_completed_count = 0;
+    journal.verification_total_count = remaining_modify_count;
+    journal.commit_current_step = (remaining_modify_count > 0)
+      .then(|| format!("校验待替换配音文件 0/{remaining_modify_count}"));
+    persist_and_emit(task_root, journal, emit)?;
+    preflight_audio_sources(commit, cursor, game_root, journal, task_root, canceled, emit)?;
     journal.commit_current_step = Some(format!(
       "提交配音文件 {}/{}",
       journal.commit_completed_count, journal.commit_total_count
     ));
+    journal.current_file = None;
+    persist_and_emit(task_root, journal, emit)?;
   }
   for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
@@ -903,8 +929,22 @@ where
     if backup_existing {
       ensure_game_stopped()?;
       let current = resolve_existing_manifest_file(game_root, &step.name)?;
-      if step.kind != CommitStepKind::Repair && !source_file_matches(&current, step)? {
-        return Err(format!("游戏资源在提交前发生变化：{}", step.name));
+      if step.kind != CommitStepKind::Repair {
+        let source_matches = match step.kind {
+          CommitStepKind::Delete => true,
+          // Modify 已在并行阶段完成 MD5；事务移动前只做轻量长度复查，避免重复串行哈希。
+          CommitStepKind::Modify if journal.target == PackagePlanTarget::Audio => {
+            let expected =
+              step.source_size.ok_or_else(|| format!("资源步骤缺少源大小：{}", step.name))?;
+            fs::metadata(&current).map_err(|error| format!("读取资源文件状态失败：{error}"))?.len()
+              == expected
+          }
+          CommitStepKind::Modify => source_file_matches(&current, step)?,
+          CommitStepKind::Add | CommitStepKind::Repair => true,
+        };
+        if !source_matches {
+          return Err(format!("游戏资源在提交前发生变化：{}", step.name));
+        }
       }
       if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
         return Err(format!("游戏资源备份目标已存在：{}", step.name));
@@ -955,6 +995,104 @@ where
     persist_and_emit(task_root, journal, emit)?;
   }
   Ok(())
+}
+
+fn preflight_audio_sources<F>(
+  commit: &FileCommitPlan,
+  cursor: usize,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let steps = &commit.steps[cursor.min(commit.steps.len())..];
+  preflight_targets(steps, game_root, false)?;
+  let modify_steps =
+    steps.iter().filter(|step| step.kind == CommitStepKind::Modify).collect::<Vec<_>>();
+  let worker_count = modify_steps.len().min(default_assembly_concurrency());
+  if worker_count == 0 {
+    return persist_and_emit(task_root, journal, emit);
+  }
+  let chunk_size = modify_steps.len().div_ceil(worker_count);
+  let first_error = std::thread::scope(|scope| {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    let handles = modify_steps
+      .chunks(chunk_size)
+      .map(|chunk| {
+        let sender = sender.clone();
+        scope.spawn(move || {
+          for step in chunk {
+            let result = verify_audio_commit_step(step, game_root, canceled);
+            let _ = sender.send((step.name.clone(), result));
+          }
+        })
+      })
+      .collect::<Vec<_>>();
+    drop(sender);
+
+    let mut first_error = None;
+    let mut last_emit = Instant::now() - ASSEMBLY_PROGRESS_EMIT_INTERVAL;
+    for (name, result) in receiver {
+      if let Err(error) = result {
+        if first_error.is_none() {
+          first_error = Some(error);
+        }
+        continue;
+      }
+      journal.verification_completed_count = journal
+        .verification_completed_count
+        .saturating_add(1)
+        .min(journal.verification_total_count);
+      journal.current_file = Some(name);
+      journal.commit_current_step = Some(format!(
+        "并行校验待替换配音文件 {}/{}",
+        journal.verification_completed_count, journal.verification_total_count
+      ));
+      if journal.verification_completed_count == journal.verification_total_count
+        || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
+      {
+        journal.touch();
+        emit(journal);
+        last_emit = Instant::now();
+      }
+    }
+    for handle in handles {
+      if handle.join().is_err() && first_error.is_none() {
+        first_error = Some("配音文件并行校验线程异常退出".to_string());
+      }
+    }
+    first_error
+  });
+  check_canceled(canceled)?;
+  if let Some(error) = first_error {
+    journal.touch();
+    emit(journal);
+    return Err(error);
+  }
+  persist_and_emit(task_root, journal, emit)
+}
+
+fn verify_audio_commit_step(
+  step: &CommitStep,
+  game_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  check_canceled(canceled)?;
+  match step.kind {
+    CommitStepKind::Add | CommitStepKind::Repair => Ok(()),
+    CommitStepKind::Modify => {
+      let current = resolve_existing_manifest_file(game_root, &step.name)?;
+      if !source_file_matches(&current, step)? {
+        return Err(format!("游戏资源在提交前发生变化：{}", step.name));
+      }
+      Ok(())
+    }
+    CommitStepKind::Delete => Ok(()),
+  }
 }
 
 fn commit_version<F>(
@@ -1031,8 +1169,7 @@ where
 {
   let mut last_emit = Instant::now();
   if !plan.assets.is_empty() {
-    let available = std::thread::available_parallelism().map_or(1, |value| value.get());
-    let worker_count = plan.assets.len().min(available.min(MAX_AUDIO_VERIFY_WORKERS).max(1));
+    let worker_count = plan.assets.len().min(default_assembly_concurrency());
     let chunk_size = plan.assets.len().div_ceil(worker_count);
     let first_error = std::thread::scope(|scope| {
       let (sender, receiver) = std::sync::mpsc::channel();
@@ -1322,23 +1459,13 @@ fn rollback_file_transaction_with_progress(
         }
         match (target, backup) {
           (None, Some(backup)) => {
-            if !source_file_matches(&backup, step)? {
-              return Err(format!("删除资源备份完整性校验失败：{}", step.name));
-            }
             let target = prepare_manifest_output_file(game_root, &step.name)?;
             ensure_game_stopped()?;
             fs::rename(backup, target)
               .map_err(|error| format!("恢复已删除资源失败：{}：{error}", step.name))?;
-            let restored = resolve_existing_manifest_file(game_root, &step.name)?;
-            if !source_file_matches(&restored, step)? {
-              return Err(format!("恢复后的删除资源校验失败：{}", step.name));
-            }
+            resolve_existing_manifest_file(game_root, &step.name)?;
           }
-          (Some(target), None) => {
-            if !source_file_matches(&target, step)? {
-              return Err(format!("删除资源已恢复状态校验失败：{}", step.name));
-            }
-          }
+          (Some(_), None) => {}
           _ => return Err(format!("删除资源处于未知状态：{}", step.name)),
         }
       }
@@ -1872,6 +1999,22 @@ fn remove_optional_file(path: &Path) -> Result<(), String> {
   }
 }
 
+fn remove_empty_directory_tree(root: &Path) {
+  let Ok(entries) = fs::read_dir(root) else {
+    return;
+  };
+  for entry in entries.flatten() {
+    let path = entry.path();
+    let Ok(metadata) = fs::symlink_metadata(&path) else {
+      continue;
+    };
+    if metadata.is_dir() && !metadata.file_type().is_symlink() {
+      remove_empty_directory_tree(&path);
+    }
+  }
+  let _ = fs::remove_dir(root);
+}
+
 fn cleanup_known_transaction_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
   if let Ok(commit) = file_commit_from_plan(plan) {
     cleanup_file_transaction(&commit, game_root, task_root);
@@ -1899,6 +2042,15 @@ fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root
     for name in ["original", "target"] {
       let _ = remove_optional_file(&config_root.join(name));
     }
+    remove_empty_directory_tree(&config_root);
+  }
+  remove_empty_directory_tree(&incoming_root);
+  remove_empty_directory_tree(&backup_root);
+  if let Some(transaction_root) = incoming_root.parent() {
+    remove_empty_directory_tree(transaction_root);
+    if let Some(container_root) = transaction_root.parent() {
+      let _ = fs::remove_dir(container_root);
+    }
   }
   let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
   for step in &commit.steps {
@@ -1912,6 +2064,7 @@ fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root
       }
     }
   }
+  remove_empty_directory_tree(&staging_root);
 }
 
 fn cleanup_repair_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
@@ -1930,6 +2083,14 @@ fn cleanup_repair_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path
           let _ = remove_optional_file(&partial);
         }
       }
+    }
+  }
+  remove_empty_directory_tree(&incoming_root);
+  remove_empty_directory_tree(&backup_root);
+  if let Some(transaction_root) = incoming_root.parent() {
+    remove_empty_directory_tree(transaction_root);
+    if let Some(container_root) = transaction_root.parent() {
+      let _ = fs::remove_dir(container_root);
     }
   }
 }
