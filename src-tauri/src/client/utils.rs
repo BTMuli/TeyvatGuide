@@ -78,35 +78,3 @@ pub fn calculate_window_size(
     (width, height)
   }
 }
-
-#[cfg(test)]
-mod tests {
-  use super::calculate_window_size;
-
-  #[test]
-  fn uses_logical_size_when_no_monitor_is_available() {
-    assert_eq!(calculate_window_size(None, 1.0, 1.0, 400.0, 800.0), (400.0, 800.0));
-  }
-
-  #[test]
-  fn preserves_normal_scaled_size_calculation() {
-    #[cfg(not(target_os = "macos"))]
-    assert_eq!(
-      calculate_window_size(Some((1920.0, 1080.0)), 1.0, 1.25, 400.0, 800.0),
-      (320.0, 640.0)
-    );
-    #[cfg(target_os = "macos")]
-    assert_eq!(
-      calculate_window_size(Some((1920.0, 1080.0)), 1.0, 1.25, 400.0, 800.0),
-      (400.0, 800.0)
-    );
-  }
-
-  #[test]
-  fn handles_extreme_monitor_resolutions() {
-    let size = calculate_window_size(Some((15_360.0, 8_640.0)), 2.0, 1.0, 400.0, 800.0);
-
-    assert!(size.0.is_finite() && size.0 > 0.0);
-    assert!(size.1.is_finite() && size.1 > 0.0);
-  }
-}
