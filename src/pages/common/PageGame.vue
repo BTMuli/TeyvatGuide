@@ -173,6 +173,17 @@ const taskCleanupCount = computed<number>(() => {
 const taskCleanupPending = computed<boolean>(
   () => taskStore.pendingActions["task-cleanup"] === true,
 );
+const completedInstallTaskKey = computed<string>(() => {
+  return Object.values(taskStore.tasksByInstallation)
+    .filter(
+      (task) =>
+        task.target === gameEnum.package.planTarget.INSTALL &&
+        task.state === gameEnum.package.taskState.COMPLETED,
+    )
+    .map((task) => task.taskId)
+    .sort()
+    .join(":");
+});
 const visibleInstallDrafts = computed<Array<TGApp.Game.Installation.InstallDraftSummary>>(() => {
   const taskInstallationIds = new Set(installTasks.value.map((task) => task.installationId));
   return installDrafts.value.filter((draft) => !taskInstallationIds.has(draft.installId));
@@ -397,6 +408,22 @@ function initializePage(): void {
 onMounted(initializePage);
 watch(installOverlay, (visible) => {
   if (!visible) installInitialConfig.value = null;
+});
+watch(completedInstallTaskKey, (taskKey) => {
+  if (taskKey.length === 0) return;
+  const completedInstallationIds = new Set(
+    Object.values(taskStore.tasksByInstallation)
+      .filter(
+        (task) =>
+          task.target === gameEnum.package.planTarget.INSTALL &&
+          task.state === gameEnum.package.taskState.COMPLETED,
+      )
+      .map((task) => task.installationId),
+  );
+  installDrafts.value = installDrafts.value.filter(
+    (draft) => !completedInstallationIds.has(draft.installId),
+  );
+  void refreshPageData();
 });
 onUnmounted(() => {
   pageActive = false;
