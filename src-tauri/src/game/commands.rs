@@ -509,6 +509,15 @@ pub async fn game_install_recover(
   if plan.installation_id != draft.install_id || journal_value.installation_id != draft.install_id {
     return Err("安装恢复身份不匹配".to_string());
   }
+  if matches!(action, PackageRecoveryAction::Resume)
+    && manager.is_task_running(&task_id, &install_id)?
+  {
+    if journal_value.state.is_active() {
+      return Ok(journal_value.summary());
+    }
+    manager.wait_for_task_idle(&task_id).await?;
+    journal_value = journal::load(&journal_path)?;
+  }
   if journal_value.state == PackageTaskState::Paused {
     manager.wait_for_task_idle(&task_id).await?;
     journal_value = journal::load(&journal_path)?;

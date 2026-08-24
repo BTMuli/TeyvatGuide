@@ -997,6 +997,16 @@ impl GamePackageManager {
     Ok(!active.by_task.is_empty())
   }
 
+  /// 判断指定安装的运行互斥是否正由同一个任务持有。
+  pub(crate) fn is_task_running(
+    &self,
+    task_id: &str,
+    installation_id: &str,
+  ) -> Result<bool, String> {
+    let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+    Ok(active.by_installation.get(installation_id).is_some_and(|id| id == task_id))
+  }
+
   pub(crate) fn start_install(
     &self,
     app_handle: AppHandle,
