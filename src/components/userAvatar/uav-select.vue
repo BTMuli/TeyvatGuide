@@ -7,7 +7,7 @@
     topOffset="112px"
     @confirm="onConfirm"
   >
-    <div class="twf-grid twf-grid-3">
+    <div class="twf-grid twf-grid-3 uav-select-primary-grid">
       <section class="twf-group">
         <div class="twf-group-title">星级</div>
         <div class="twf-options">
@@ -227,3 +227,8 @@ function onConfirm(): void {
   visible.value = false;
 }
 </script>
+<style lang="scss" scoped>
+.twf-grid.twf-grid-3.uav-select-primary-grid {
+  grid-template-columns: minmax(0, 1fr) repeat(2, max-content);
+}
+</style>
