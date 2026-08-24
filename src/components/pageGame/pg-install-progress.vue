@@ -9,6 +9,7 @@
     </div>
 
     <div v-if="showProgressBar" class="install-progress-rows" aria-live="polite">
+      <PgInstallThroughput :task />
       <div v-for="row in progressRows" :key="row.label" class="install-progress-row">
         <div class="install-progress-row-head">
           <div class="install-progress-row-label">
@@ -49,6 +50,8 @@
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+
+import PgInstallThroughput from "./pg-install-throughput.vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
@@ -151,20 +154,11 @@ const overallFacts = computed<Array<string>>(() => {
   ];
 });
 const resourceFacts = computed<Array<string>>(() => {
-  const values = [
+  return [
     `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
     `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
     `下载对象 ${task.completedCount} / ${task.totalCount}`,
   ];
-  if (task.state === gameEnum.package.taskState.DOWNLOADING) {
-    values.push(
-      task.bytesPerSecond > 0
-        ? `当前速度 ${formatBytes(task.bytesPerSecond)}/s`
-        : "当前速度 测速中",
-      task.etaSeconds !== null ? `预计剩余 ${formatDuration(task.etaSeconds)}` : "预计剩余 计算中",
-    );
-  }
-  return values;
 });
 const resourceRow = computed<ProgressRow>(() => ({
   label: "资源安装",
@@ -233,13 +227,6 @@ function formatBytes(bytes: number): string {
     unit = candidate;
   }
   return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds} 秒`;
-  const minutes = Math.ceil(seconds / 60);
-  if (minutes < 60) return `${minutes} 分钟`;
-  return `${Math.ceil(minutes / 60)} 小时`;
 }
 
 function formatElapsed(milliseconds: number): string {

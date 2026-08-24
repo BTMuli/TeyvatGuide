@@ -183,6 +183,8 @@ declare namespace TGApp.Game.Package {
     assemblyCurrentFile: string | null;
     bytesPerSecond: number;
     etaSeconds: number | null;
+    assemblyBytesPerSecond: number;
+    assemblyEtaSeconds: number | null;
     elapsedMs: number;
     errorMessage: string | null;
     updatedAt: string;

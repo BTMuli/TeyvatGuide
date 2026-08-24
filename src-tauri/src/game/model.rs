@@ -276,6 +276,8 @@ pub struct PackageTaskSummary {
   pub assembly_current_file: Option<String>,
   pub bytes_per_second: u64,
   pub eta_seconds: Option<u64>,
+  pub assembly_bytes_per_second: u64,
+  pub assembly_eta_seconds: Option<u64>,
   pub elapsed_ms: u64,
   pub error_message: Option<String>,
   pub updated_at: String,

@@ -182,6 +182,18 @@ pub(crate) struct TaskJournal {
   pub(crate) assembly_current_file: Option<String>,
   pub(crate) bytes_per_second: u64,
   pub(crate) eta_seconds: Option<u64>,
+  /// 根据最近成功组装资源的输出大小与实际组装耗时估算的写入速度。
+  #[serde(default)]
+  pub(crate) assembly_bytes_per_second: u64,
+  /// 按写入速度估算的剩余资源组装时间。
+  #[serde(default)]
+  pub(crate) assembly_eta_seconds: Option<u64>,
+  /// 已结算的实际任务运行时长；暂停和应用关闭期间不累计。
+  #[serde(default)]
+  pub(crate) accumulated_elapsed_ms: u64,
+  /// 当前进程内本轮运行的开始时间；任务中断时只结算到最后一次持久化更新时间。
+  #[serde(default)]
+  pub(crate) active_started_at: Option<String>,
   pub(crate) error_message: Option<String>,
   #[serde(default)]
   pub(crate) apply: Option<ApplyJournal>,
@@ -245,6 +257,10 @@ impl TaskJournal {
       assembly_current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
+      assembly_bytes_per_second: 0,
+      assembly_eta_seconds: None,
+      accumulated_elapsed_ms: 0,
+      active_started_at: Some(now.clone()),
       error_message: None,
       apply: None,
       repair: None,
@@ -306,6 +322,10 @@ impl TaskJournal {
       assembly_current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
+      assembly_bytes_per_second: 0,
+      assembly_eta_seconds: None,
+      accumulated_elapsed_ms: 0,
+      active_started_at: Some(now.clone()),
       error_message: None,
       apply: None,
       repair: None,
@@ -317,6 +337,29 @@ impl TaskJournal {
   pub(crate) fn touch(&mut self) {
     self.revision = self.revision.saturating_add(1);
     self.updated_at = Utc::now().to_rfc3339();
+  }
+
+  /// 结算上一轮运行并从当前时刻开始新的有效计时区间。
+  pub(crate) fn resume_elapsed(&mut self) {
+    self.freeze_elapsed_at_updated_at();
+    self.active_started_at = Some(Utc::now().to_rfc3339());
+  }
+
+  /// 将本轮运行结算到最后一次持久化更新时间，避免把应用关闭时间计入任务耗时。
+  pub(crate) fn freeze_elapsed_at_updated_at(&mut self) -> bool {
+    if let Some(started_at) = self.active_started_at.take() {
+      let elapsed = elapsed_between(&started_at, &self.updated_at);
+      self.accumulated_elapsed_ms = self.accumulated_elapsed_ms.saturating_add(elapsed);
+      return true;
+    }
+    if self.accumulated_elapsed_ms == 0 {
+      let legacy_elapsed = elapsed_between(&self.created_at, &self.updated_at);
+      if legacy_elapsed > 0 {
+        self.accumulated_elapsed_ms = legacy_elapsed;
+        return true;
+      }
+    }
+    false
   }
 
   pub(crate) fn reset_assembly_progress(&mut self, total_count: usize, total_bytes: u64) {
@@ -379,6 +422,8 @@ impl TaskJournal {
       assembly_current_file: self.assembly_current_file.clone(),
       bytes_per_second: self.bytes_per_second,
       eta_seconds: self.eta_seconds,
+      assembly_bytes_per_second: self.assembly_bytes_per_second,
+      assembly_eta_seconds: self.assembly_eta_seconds,
       elapsed_ms: self.elapsed_ms(),
       error_message: self.error_message.clone(),
       updated_at: self.updated_at.clone(),
@@ -386,20 +431,28 @@ impl TaskJournal {
   }
 
   fn elapsed_ms(&self) -> u64 {
-    let created = match DateTime::parse_from_rfc3339(&self.created_at) {
-      Ok(value) => value.with_timezone(&Utc),
-      Err(_) => return 0,
-    };
-    let ended = if self.state.is_active() {
-      Utc::now()
-    } else {
-      match DateTime::parse_from_rfc3339(&self.updated_at) {
-        Ok(value) => value.with_timezone(&Utc),
-        Err(_) => return 0,
+    let Some(started_at) = self.active_started_at.as_deref() else {
+      if self.accumulated_elapsed_ms > 0 {
+        return self.accumulated_elapsed_ms;
       }
+      return elapsed_between(&self.created_at, &self.updated_at);
     };
-    ended.signed_duration_since(created).num_milliseconds().max(0) as u64
+    let ended_at =
+      if self.state.is_active() { Utc::now().to_rfc3339() } else { self.updated_at.clone() };
+    self.accumulated_elapsed_ms.saturating_add(elapsed_between(started_at, &ended_at))
   }
+}
+
+fn elapsed_between(started_at: &str, ended_at: &str) -> u64 {
+  let started = match DateTime::parse_from_rfc3339(started_at) {
+    Ok(value) => value.with_timezone(&Utc),
+    Err(_) => return 0,
+  };
+  let ended = match DateTime::parse_from_rfc3339(ended_at) {
+    Ok(value) => value.with_timezone(&Utc),
+    Err(_) => return 0,
+  };
+  ended.signed_duration_since(started).num_milliseconds().max(0) as u64
 }
 
 #[derive(Default)]
@@ -1060,12 +1113,54 @@ mod tests {
       assembly_current_file: None,
       bytes_per_second: 0,
       eta_seconds: None,
+      assembly_bytes_per_second: 0,
+      assembly_eta_seconds: None,
+      accumulated_elapsed_ms: 0,
+      active_started_at: Some(now.clone()),
       error_message: None,
       apply: None,
       repair: None,
       created_at: now.clone(),
       updated_at: now,
     }
+  }
+
+  #[test]
+  fn elapsed_time_excludes_restart_gap_and_resumes_new_interval() {
+    let mut value = journal("elapsed-restart");
+    value.created_at = "2026-01-01T10:00:00Z".to_string();
+    value.updated_at = "2026-01-01T10:10:00Z".to_string();
+    value.accumulated_elapsed_ms = 120_000;
+    value.active_started_at = Some("2026-01-01T10:05:00Z".to_string());
+    value.state = PackageTaskState::Downloading;
+
+    assert!(value.freeze_elapsed_at_updated_at());
+    assert_eq!(value.accumulated_elapsed_ms, 420_000);
+    assert_eq!(value.active_started_at, None);
+
+    value.state = PackageTaskState::Failed;
+    value.updated_at = "2026-01-01T11:00:00Z".to_string();
+    assert_eq!(value.elapsed_ms(), 420_000);
+
+    value.resume_elapsed();
+    assert_eq!(value.accumulated_elapsed_ms, 420_000);
+    assert!(value.active_started_at.is_some());
+  }
+
+  #[test]
+  fn elapsed_time_migrates_legacy_journal_to_last_update() {
+    let mut value = journal("elapsed-legacy");
+    value.created_at = "2026-01-01T10:00:00Z".to_string();
+    value.updated_at = "2026-01-01T10:05:00Z".to_string();
+    value.accumulated_elapsed_ms = 0;
+    value.active_started_at = None;
+    value.state = PackageTaskState::Failed;
+
+    assert_eq!(value.elapsed_ms(), 300_000);
+
+    value.resume_elapsed();
+    assert_eq!(value.accumulated_elapsed_ms, 300_000);
+    assert!(value.active_started_at.is_some());
   }
 
   #[test]

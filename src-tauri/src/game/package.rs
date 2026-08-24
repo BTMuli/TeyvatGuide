@@ -578,9 +578,11 @@ impl InstallPipelineMetrics {
     Instant::now()
   }
 
-  fn finish_assembly(&self, started_at: Instant) {
+  fn finish_assembly(&self, started_at: Instant) -> Duration {
+    let elapsed = started_at.elapsed();
     self.active_assemblies.fetch_sub(1, Ordering::AcqRel);
-    self.assembly_micros.fetch_add(duration_micros(started_at.elapsed()), Ordering::Relaxed);
+    self.assembly_micros.fetch_add(duration_micros(elapsed), Ordering::Relaxed);
+    elapsed
   }
 
   fn record_checkpoint(&self, elapsed: Duration) {
@@ -928,6 +930,7 @@ impl GamePackageManager {
     if recovering && journal.state == PackageTaskState::ReadyToApply {
       return Err("资源任务已经完成下载".to_string());
     }
+    journal.resume_elapsed();
     rebuild_completed_cache(&mut journal, &plan, &cache_root);
     journal.state = PackageTaskState::Queued;
     journal.error_message = None;
@@ -1062,6 +1065,7 @@ impl GamePackageManager {
     {
       return Err("安装已经发布，请使用安装恢复命令完成登记".to_string());
     }
+    journal.resume_elapsed();
     rebuild_install_cache_state(&mut journal, &plan, &cache_root, &spool_root);
     let cache_complete = journal.committed_step >= journal.total_count;
     let spool_window = install_spool_window(&plan.assets, concurrency, cache_complete);
@@ -1169,6 +1173,7 @@ impl GamePackageManager {
     if !recovering && journal.state.is_active() && journal.revision > 1 {
       return Err("检测到未完成的换服任务，请使用恢复操作继续".to_string());
     }
+    journal.resume_elapsed();
     journal.state = PackageTaskState::Queued;
     journal.error_message = None;
     journal.current_file = None;
@@ -1548,12 +1553,16 @@ impl GamePackageManager {
     };
     let mut summaries = HashMap::new();
     for mut journal in journal::list(task_root, installation_id)? {
-      if matches!(journal.state, PackageTaskState::Queued | PackageTaskState::Downloading)
-        && !live_ids.contains(&journal.task_id)
-      {
+      let interrupted = journal.state.is_active() && !live_ids.contains(&journal.task_id);
+      let elapsed_frozen = interrupted && journal.freeze_elapsed_at_updated_at();
+      let abandoned_download = interrupted
+        && matches!(journal.state, PackageTaskState::Queued | PackageTaskState::Downloading);
+      if abandoned_download {
         journal.state = PackageTaskState::Failed;
         journal.error_message = Some("资源任务已中断，请恢复或放弃".to_string());
         journal.current_file = None;
+      }
+      if elapsed_frozen || abandoned_download {
         journal.touch();
         journal::persist(task_root, &journal)?;
       }
@@ -1717,6 +1726,7 @@ async fn run_install_streaming_task(
         (tracker.completion_snapshot(&plan), tracker.committed_step())
       };
       apply_install_completion_snapshot(&mut value, snapshot, &metrics);
+      update_install_assembly_estimate(&mut value, 0, Duration::ZERO);
       value.committed_step = committed_step.min(value.total_count);
       value.commit_current_step = None;
       value.current_file = None;
@@ -1937,7 +1947,7 @@ async fn run_install_streaming_task(
         (result, timing)
       })
       .await;
-      metrics.finish_assembly(assembly_started_at);
+      let assembly_elapsed = metrics.finish_assembly(assembly_started_at);
       let assembly_result = match assembly_worker_result {
         Ok((result, timing)) => {
           metrics.record_assembly_detail(&timing);
@@ -1979,6 +1989,7 @@ async fn run_install_streaming_task(
         apply_install_completion_snapshot(&mut value, snapshot, &metrics);
         value.committed_step = tracker_value.committed_step();
       }
+      update_install_assembly_estimate(&mut value, plan.assets[asset_index].size, assembly_elapsed);
       value.download_current_file = None;
       value.assembly_current_file = None;
       value.touch();
@@ -2180,6 +2191,7 @@ struct InstallAssetJob {
 struct InstallAssetJobCompletion {
   asset_index: usize,
   reserved_bytes: u64,
+  assembly_elapsed: Option<Duration>,
   result: Result<(), String>,
 }
 
@@ -2192,6 +2204,26 @@ fn format_install_assembly_status(
   file: &str,
 ) -> String {
   format!("{completed_count}/{total_count} {file}")
+}
+
+fn update_install_assembly_estimate(
+  journal: &mut TaskJournal,
+  assembled_bytes: u64,
+  assembly_elapsed: Duration,
+) {
+  if assembled_bytes > 0 {
+    let elapsed_micros = assembly_elapsed.as_micros().max(1);
+    let sample = ((u128::from(assembled_bytes) * 1_000_000) / elapsed_micros)
+      .clamp(1, u128::from(u64::MAX)) as u64;
+    journal.assembly_bytes_per_second = if journal.assembly_bytes_per_second > 0 {
+      ((u128::from(journal.assembly_bytes_per_second) * 7 + u128::from(sample) * 3) / 10)
+        .min(u128::from(u64::MAX)) as u64
+    } else {
+      sample
+    };
+  }
+  let remaining = journal.assembly_total_bytes.saturating_sub(journal.assembly_completed_bytes);
+  journal.assembly_eta_seconds = download_eta_seconds(remaining, journal.assembly_bytes_per_second);
 }
 
 fn reserve_install_repair_attempt(
@@ -2286,6 +2318,7 @@ async fn run_install_prepublish_repair(
         tracker.completion_snapshot(plan)
       };
       apply_install_completion_snapshot(&mut value, snapshot, metrics);
+      update_install_assembly_estimate(&mut value, 0, Duration::ZERO);
       value.state = PackageTaskState::Downloading;
       value.download_current_file = Some(format!(
         "校验失败，重新获取资源 {}/{}：{}",
@@ -2331,6 +2364,13 @@ async fn run_install_prepublish_repair(
       snapshot
     };
     apply_install_completion_snapshot(&mut value, snapshot, metrics);
+    if let Some(assembly_elapsed) = completion.assembly_elapsed {
+      update_install_assembly_estimate(
+        &mut value,
+        plan.assets[failure.asset_index].size,
+        assembly_elapsed,
+      );
+    }
     value.download_current_file = None;
     value.assembly_current_file = Some(format!("自动修复完成：{}", failure.path));
     value.current_file = value.assembly_current_file.clone();
@@ -2470,6 +2510,13 @@ async fn run_install_bounded_asset_pipeline(
           snapshot
         };
         apply_install_completion_snapshot(&mut value, snapshot, metrics);
+        if let Some(assembly_elapsed) = completion.assembly_elapsed {
+          update_install_assembly_estimate(
+            &mut value,
+            plan.assets[completion.asset_index].size,
+            assembly_elapsed,
+          );
+        }
         asset_cursor = snapshot.contiguous_cursor;
         value.assembly_current_file = (value.assembly_completed_count < value.assembly_total_count)
           .then(|| {
@@ -2559,6 +2606,7 @@ async fn run_install_asset_job(
   spool_tracker: Arc<Mutex<InstallSpoolTracker>>,
 ) -> InstallAssetJobCompletion {
   let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
+  let mut assembly_elapsed = None;
   let result = async {
     let downloads = stream::iter(pending.into_iter().map(|download| {
       let client = download_client.clone();
@@ -2664,7 +2712,7 @@ async fn run_install_asset_job(
       (result, timing)
     })
     .await;
-    metrics.finish_assembly(assembly_started_at);
+    assembly_elapsed = Some(metrics.finish_assembly(assembly_started_at));
     drop(assembly_permit);
     match worker_result {
       Ok((result, timing)) => {
@@ -2683,7 +2731,7 @@ async fn run_install_asset_job(
     }
   }
   .await;
-  InstallAssetJobCompletion { asset_index, reserved_bytes, result }
+  InstallAssetJobCompletion { asset_index, reserved_bytes, assembly_elapsed, result }
 }
 
 #[allow(dead_code)]
@@ -3861,6 +3909,7 @@ mod tests {
     ActiveTask, GamePackageManager, InstallPipelineMetrics, InstallSpoolTracker,
     PlanWorksetBaseline, download_eta_seconds, format_install_assembly_status,
     install_download_concurrency, nearest_rank, reserve_install_repair_attempt,
+    update_install_assembly_estimate,
   };
   use crate::game::{
     journal::{self, TaskJournal},
@@ -3878,7 +3927,7 @@ mod tests {
       Arc,
       atomic::{AtomicBool, Ordering},
     },
-    time::Instant,
+    time::{Duration, Instant},
   };
   use tokio::sync::Mutex as AsyncMutex;
   use uuid::Uuid;
@@ -4174,6 +4223,46 @@ mod tests {
       format_install_assembly_status(611, 2848, "GenshinImpact_Data/StreamingAssets/test.blk"),
       "611/2848 GenshinImpact_Data/StreamingAssets/test.blk"
     );
+  }
+
+  #[test]
+  fn install_assembly_estimate_uses_output_bytes_and_worker_elapsed_time() {
+    let plan = PersistedPlan {
+      schema_version: 5,
+      plan_id: "assembly-speed-test".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: Vec::new(),
+      assets: vec![baseline_asset("a.bin", 100, Vec::new())],
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    let mut value = TaskJournal::from_plan(&plan);
+    value.assembly_completed_bytes = 20;
+    update_install_assembly_estimate(&mut value, 20, Duration::from_secs(2));
+    assert_eq!(value.assembly_bytes_per_second, 10);
+    assert_eq!(value.assembly_eta_seconds, Some(8));
+
+    value.assembly_completed_bytes = 60;
+    update_install_assembly_estimate(&mut value, 40, Duration::from_secs(2));
+    assert_eq!(value.assembly_bytes_per_second, 13);
+    assert_eq!(value.assembly_eta_seconds, Some(4));
+
+    value.assembly_completed_bytes = value.assembly_total_bytes;
+    update_install_assembly_estimate(&mut value, 40, Duration::from_secs(2));
+    assert_eq!(value.assembly_eta_seconds, None);
+
+    value.assembly_completed_bytes = 60;
+    update_install_assembly_estimate(&mut value, 0, Duration::ZERO);
+    assert_eq!(value.assembly_eta_seconds, Some(3));
   }
 
   #[test]
