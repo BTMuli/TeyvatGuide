@@ -34,6 +34,23 @@
         />
         <div class="install-progress-row-facts">
           <span v-for="detail in row.details" :key="detail">{{ detail }}</span>
+          <span v-if="row.downloadObjectStatus !== null" class="install-progress-download-activity">
+            <span>{{ row.downloadObjectStatus }}</span>
+            <span
+              v-if="row.activeAssemblyCount > 0"
+              :aria-label="`正在组装 ${row.activeAssemblyCount} 个资源`"
+              class="install-progress-assembly-slots"
+              role="img"
+              :title="`正在组装 ${row.activeAssemblyCount} 个资源`"
+            >
+              <span
+                v-for="slot in row.activeAssemblyCount"
+                :key="slot"
+                aria-hidden="true"
+                class="install-progress-assembly-slot"
+              />
+            </span>
+          </span>
         </div>
       </div>
     </div>
@@ -64,6 +81,8 @@ type ProgressRow = {
   complete: boolean;
   status: string | null;
   details: Array<string>;
+  downloadObjectStatus: string | null;
+  activeAssemblyCount: number;
 };
 
 const { task } = defineProps<Props>();
@@ -157,7 +176,6 @@ const resourceFacts = computed<Array<string>>(() => {
   return [
     `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
     `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-    `下载对象 ${task.completedCount} / ${task.totalCount}`,
   ];
 });
 const resourceRow = computed<ProgressRow>(() => ({
@@ -170,6 +188,9 @@ const resourceRow = computed<ProgressRow>(() => ({
   complete: assemblyComplete.value,
   status: resourceStatus.value,
   details: task.assemblyTotalBytes === 0 ? ["没有需要组装的游戏文件"] : resourceFacts.value,
+  downloadObjectStatus:
+    task.assemblyTotalBytes === 0 ? null : `下载对象 ${task.completedCount} / ${task.totalCount}`,
+  activeAssemblyCount: task.activeAssemblyCount,
 }));
 const commitRow = computed<ProgressRow>(() => ({
   label: "提交",
@@ -183,6 +204,8 @@ const commitRow = computed<ProgressRow>(() => ({
       ? [`本轮目录校验 ${task.verificationCompletedCount} / ${task.verificationTotalCount} 个文件`]
       : []),
   ],
+  downloadObjectStatus: null,
+  activeAssemblyCount: 0,
 }));
 const overallRow = computed<ProgressRow>(() => ({
   label: "总进度",
@@ -196,6 +219,8 @@ const overallRow = computed<ProgressRow>(() => ({
       ? `资源安装 ${resourcePercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
       : `资源安装 ${resourcePercent.value.toFixed(0)}%`,
   ],
+  downloadObjectStatus: null,
+  activeAssemblyCount: 0,
 }));
 const progressRows = computed<Array<ProgressRow>>(() => {
   const rows = [resourceRow.value];
@@ -328,6 +353,28 @@ function formatElapsed(milliseconds: number): string {
   font-size: 11px;
   gap: 4px 12px;
   line-height: 15px;
+}
+
+.install-progress-download-activity {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.install-progress-assembly-slots {
+  display: inline-flex;
+  max-width: 160px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.install-progress-assembly-slot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--tgc-od-green);
 }
 
 .install-progress-error {

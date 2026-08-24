@@ -81,6 +81,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       assemblyTotalCount: 0,
       assemblyCompletedBytes: 0,
       assemblyTotalBytes: 0,
+      activeAssemblyCount: 0,
       commitCompletedCount: 0,
       commitTotalCount: 0,
       commitCurrentStep: null,

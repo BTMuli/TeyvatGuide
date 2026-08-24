@@ -144,6 +144,9 @@ pub(crate) struct TaskJournal {
   /// Total bytes of game asset staging outputs.
   #[serde(default)]
   pub(crate) assembly_total_bytes: u64,
+  /// Number of game assets currently being assembled; never persisted across process restarts.
+  #[serde(skip)]
+  pub(crate) active_assembly_count: usize,
   /// Number of durable install finalization milestones completed.
   #[serde(default)]
   pub(crate) commit_completed_count: usize,
@@ -235,6 +238,7 @@ impl TaskJournal {
       assembly_total_count: plan.assets.len(),
       assembly_completed_bytes: 0,
       assembly_total_bytes: plan.assets.iter().map(|asset| asset.size).sum(),
+      active_assembly_count: 0,
       commit_completed_count: 0,
       commit_total_count: if plan.target == PackagePlanTarget::Install {
         INSTALL_COMMIT_TOTAL_STEPS
@@ -305,6 +309,7 @@ impl TaskJournal {
       assembly_total_count: 0,
       assembly_completed_bytes: 0,
       assembly_total_bytes: 0,
+      active_assembly_count: 0,
       commit_completed_count: 0,
       commit_total_count: 0,
       commit_current_step: None,
@@ -409,6 +414,7 @@ impl TaskJournal {
       assembly_total_count: self.assembly_total_count,
       assembly_completed_bytes: self.assembly_completed_bytes,
       assembly_total_bytes: self.assembly_total_bytes,
+      active_assembly_count: self.active_assembly_count,
       commit_completed_count: self.commit_completed_count,
       commit_total_count: self.commit_total_count,
       commit_current_step: self.commit_current_step.clone(),

@@ -1,5 +1,5 @@
 <template>
-  <section class="install-throughput" aria-label="安装下载与写入速度" aria-live="off">
+  <section class="install-throughput" aria-label="安装下载、写入与私有临时空间" aria-live="off">
     <div class="install-throughput-metrics">
       <div class="install-throughput-metric">
         <span class="install-throughput-dot download" aria-hidden="true" />
@@ -12,6 +12,12 @@
         <span>写入预估</span>
         <strong>{{ formatSpeed(currentAssemblySpeed) }}</strong>
         <small>{{ assemblyRemaining }}</small>
+      </div>
+      <div class="install-throughput-metric">
+        <span class="install-throughput-dot spool" aria-hidden="true" />
+        <span>私有临时空间</span>
+        <strong>{{ formatBytes(currentSpoolBytes) }}</strong>
+        <small>已释放 {{ formatBytes(task.releasedBytes) }}</small>
       </div>
     </div>
 
@@ -30,8 +36,10 @@
         <path :d="assemblyAreaPath" class="install-throughput-area assembly" />
         <path :d="downloadLinePath" class="install-throughput-line download" />
         <path :d="assemblyLinePath" class="install-throughput-line assembly" />
+        <path :d="spoolLinePath" class="install-throughput-line spool" />
       </svg>
-      <span class="install-throughput-scale">{{ chartScaleLabel }}</span>
+      <span class="install-throughput-scale speed">速度 {{ speedScaleLabel }}</span>
+      <span class="install-throughput-scale spool">临时 {{ spoolScaleLabel }}</span>
       <span class="install-throughput-window">最近 60 秒</span>
     </div>
   </section>
@@ -48,9 +56,10 @@ type Props = {
 type ThroughputSample = {
   download: number;
   assembly: number;
+  spool: number;
 };
 
-type SampleMetric = "download" | "assembly";
+type SampleMetric = "download" | "assembly" | "spool";
 
 const { task } = defineProps<Props>();
 const chartWidth = 600;
@@ -69,20 +78,27 @@ const currentDownloadSpeed = computed<number>(() =>
 const currentAssemblySpeed = computed<number>(() =>
   throughputActive.value ? task.assemblyBytesPerSecond : 0,
 );
-const sampleMaximum = computed<number>(() => {
+const currentSpoolBytes = computed<number>(() => Math.max(0, task.spoolBytes));
+const speedSampleMaximum = computed<number>(() => {
   return samples.value.reduce(
     (value, sample) => Math.max(value, sample.download, sample.assembly),
     0,
   );
 });
-const chartMaximum = computed<number>(() =>
-  sampleMaximum.value > 0 ? 2 ** Math.ceil(Math.log2(sampleMaximum.value)) : 1,
+const spoolSampleMaximum = computed<number>(() => {
+  return samples.value.reduce((value, sample) => Math.max(value, sample.spool), 0);
+});
+const speedChartMaximum = computed<number>(() => chartMaximum(speedSampleMaximum.value));
+const spoolChartMaximum = computed<number>(() => chartMaximum(spoolSampleMaximum.value));
+const speedScaleLabel = computed<string>(() =>
+  speedSampleMaximum.value > 0 ? formatSpeed(speedChartMaximum.value) : "等待采样",
 );
-const chartScaleLabel = computed<string>(() =>
-  sampleMaximum.value > 0 ? formatSpeed(chartMaximum.value) : "等待采样",
+const spoolScaleLabel = computed<string>(() =>
+  spoolSampleMaximum.value > 0 ? formatBytes(spoolChartMaximum.value) : "等待采样",
 );
 const downloadLinePath = computed<string>(() => createLinePath("download"));
 const assemblyLinePath = computed<string>(() => createLinePath("assembly"));
+const spoolLinePath = computed<string>(() => createLinePath("spool"));
 const downloadAreaPath = computed<string>(() => createAreaPath("download"));
 const assemblyAreaPath = computed<string>(() => createAreaPath("assembly"));
 const downloadRemaining = computed<string>(() => {
@@ -101,7 +117,7 @@ const assemblyRemaining = computed<string>(() => {
   return `组装剩余 ${formatDuration(task.assemblyEtaSeconds)}`;
 });
 const chartAriaLabel = computed<string>(() => {
-  return `最近 60 秒速度，下载 ${formatSpeed(currentDownloadSpeed.value)}，写入预估 ${formatSpeed(currentAssemblySpeed.value)}`;
+  return `最近 60 秒趋势，下载 ${formatSpeed(currentDownloadSpeed.value)}，写入预估 ${formatSpeed(currentAssemblySpeed.value)}，当前私有临时空间 ${formatBytes(currentSpoolBytes.value)}`;
 });
 
 watch(
@@ -125,6 +141,7 @@ function appendSample(): void {
   const next: ThroughputSample = {
     download: currentDownloadSpeed.value,
     assembly: currentAssemblySpeed.value,
+    spool: currentSpoolBytes.value,
   };
   samples.value = [...samples.value.slice(-(sampleLimit - 1)), next];
 }
@@ -163,8 +180,13 @@ function samplePoint(
 ): { x: number; y: number } {
   const step = chartWidth / (sampleLimit - 1);
   const x = chartWidth - (samples.value.length - 1 - index) * step;
-  const ratio = Math.min(1, sample[metric] / chartMaximum.value);
+  const maximum = metric === "spool" ? spoolChartMaximum.value : speedChartMaximum.value;
+  const ratio = Math.min(1, sample[metric] / maximum);
   return { x, y: chartHeight - ratio * chartHeight };
+}
+
+function chartMaximum(value: number): number {
+  return value > 0 ? 2 ** Math.ceil(Math.log2(value)) : 1;
 }
 
 function formatSpeed(bytesPerSecond: number): string {
@@ -247,6 +269,10 @@ function formatDuration(seconds: number): string {
   &.assembly {
     background: var(--tgc-od-green);
   }
+
+  &.spool {
+    background: var(--tgc-od-orange);
+  }
 }
 
 .install-throughput-chart {
@@ -297,6 +323,11 @@ function formatDuration(seconds: number): string {
   &.assembly {
     stroke: var(--tgc-od-green);
   }
+
+  &.spool {
+    stroke: var(--tgc-od-orange);
+    stroke-dasharray: 4 3;
+  }
 }
 
 .install-throughput-scale,
@@ -311,7 +342,12 @@ function formatDuration(seconds: number): string {
   pointer-events: none;
 }
 
-.install-throughput-scale {
+.install-throughput-scale.speed {
+  top: 4px;
+  left: 4px;
+}
+
+.install-throughput-scale.spool {
   top: 4px;
   right: 4px;
 }

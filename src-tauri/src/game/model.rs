@@ -263,6 +263,7 @@ pub struct PackageTaskSummary {
   pub assembly_total_count: usize,
   pub assembly_completed_bytes: u64,
   pub assembly_total_bytes: u64,
+  pub active_assembly_count: usize,
   pub commit_completed_count: usize,
   pub commit_total_count: usize,
   pub commit_current_step: Option<String>,

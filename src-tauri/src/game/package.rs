@@ -267,6 +267,19 @@ fn download_eta_seconds(remaining_bytes: u64, bytes_per_second: u64) -> Option<u
   (remaining_bytes > 0 && bytes_per_second > 0).then(|| remaining_bytes.div_ceil(bytes_per_second))
 }
 
+async fn emit_active_assembly_count(
+  app_handle: &AppHandle,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  metrics: &InstallPipelineMetrics,
+) {
+  let mut value = journal.lock().await;
+  value.active_assembly_count = metrics.active_assemblies.load(Ordering::Acquire);
+  value.touch();
+  let summary = value.summary();
+  drop(value);
+  emit_progress(app_handle, &summary);
+}
+
 /// 全新安装私有 spool 的增量记账。
 ///
 /// 每个资源证据落盘后立即扣减其对象消费者；乱序完成不会再被连续游标阻塞释放。
@@ -1932,6 +1945,7 @@ async fn run_install_streaming_task(
       let assemble_spool = spool_root.clone();
       let assemble_canceled = Arc::clone(&canceled);
       let assembly_started_at = metrics.begin_assembly();
+      emit_active_assembly_count(&app_handle, &journal, &metrics).await;
       let assembly_worker_result = tauri::async_runtime::spawn_blocking(move || {
         let mut timing = assembler::AssemblyTiming::default();
         let result = assembler::assemble_full_install_asset_with_timing_observer(
@@ -1948,6 +1962,7 @@ async fn run_install_streaming_task(
       })
       .await;
       let assembly_elapsed = metrics.finish_assembly(assembly_started_at);
+      emit_active_assembly_count(&app_handle, &journal, &metrics).await;
       let assembly_result = match assembly_worker_result {
         Ok((result, timing)) => {
           metrics.record_assembly_detail(&timing);
@@ -2697,6 +2712,7 @@ async fn run_install_asset_job(
     let assemble_spool = spool_root.clone();
     let assemble_canceled = Arc::clone(&canceled);
     let assembly_started_at = metrics.begin_assembly();
+    emit_active_assembly_count(&app_handle, &journal, &metrics).await;
     let worker_result = tauri::async_runtime::spawn_blocking(move || {
       let mut timing = assembler::AssemblyTiming::default();
       let result = assembler::assemble_full_install_asset_with_timing_observer(
@@ -2714,6 +2730,7 @@ async fn run_install_asset_job(
     .await;
     assembly_elapsed = Some(metrics.finish_assembly(assembly_started_at));
     drop(assembly_permit);
+    emit_active_assembly_count(&app_handle, &journal, &metrics).await;
     match worker_result {
       Ok((result, timing)) => {
         metrics.record_assembly_detail(&timing);
