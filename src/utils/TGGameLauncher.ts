@@ -141,6 +141,29 @@ export async function createGamePackagePlan(
   });
 }
 
+/**
+ * 评估当前正式版本的官方语音包新增、删除或替换。
+ * @since Beta v0.11.4
+ * @param installationId - 已登记安装 ID
+ * @param targetAudioLanguages - 目标语音语言集合
+ * @param onProgress - 后端评估步骤更新
+ * @returns 不含内部下载地址的计划摘要
+ */
+export async function createGamePackageAudioPlan(
+  installationId: string,
+  targetAudioLanguages: Array<string>,
+  onProgress?: (progress: TGApp.Game.Package.PlanProgress) => void,
+): Promise<TGApp.Game.Package.PlanSummary> {
+  const progressChannel = new Channel<TGApp.Game.Package.PlanProgress>((progress) => {
+    onProgress?.(progress);
+  });
+  return await invoke<TGApp.Game.Package.PlanSummary>("game_package_audio_plan", {
+    installationId,
+    targetAudioLanguages,
+    onProgress: progressChannel,
+  });
+}
+
 export async function createGameInstallDraft(
   installRoot: string,
   scheme: TGApp.Game.Installation.SchemeEnum,

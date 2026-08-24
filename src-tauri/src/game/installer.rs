@@ -6,7 +6,7 @@
 use super::{
   assembler,
   installation::{
-    audio_marker, derive_installation_id, inspect_executable, supported_audio_languages,
+    audio_marker, derive_installation_id, inspect_executable, normalize_audio_languages,
   },
   journal::{INSTALL_COMMIT_TOTAL_STEPS, TaskJournal},
   model::{GameInstallation, PackagePlanTarget, PackageTaskState, SchemeId},
@@ -1064,26 +1064,6 @@ fn is_directory_empty(path: &Path) -> Result<bool, String> {
     Some(Ok(_)) => Ok(false),
     Some(Err(error)) => Err(format!("读取安装目录失败：{error}")),
   }
-}
-
-fn normalize_audio_languages(values: Vec<String>) -> Result<Vec<String>, String> {
-  let supported = supported_audio_languages();
-  let mut result = Vec::new();
-  for value in values {
-    let normalized = supported
-      .iter()
-      .find(|(_, language)| language.eq_ignore_ascii_case(value.trim()))
-      .map(|(_, language)| (*language).to_string())
-      .ok_or_else(|| format!("不支持的语音包：{value}"))?;
-    if !result.iter().any(|item| item == &normalized) {
-      result.push(normalized);
-    }
-  }
-  if result.is_empty() {
-    return Err("至少选择一个语音包".to_string());
-  }
-  result.sort();
-  Ok(result)
 }
 
 fn validate_draft(draft: &InstallDraft, draft_id: &str) -> Result<(), String> {

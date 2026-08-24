@@ -26,7 +26,7 @@ import {
   verifyGamePackage,
 } from "@utils/TGGameLauncher.js";
 import { defineStore } from "pinia";
-import { shallowRef } from "vue";
+import { nextTick, shallowRef } from "vue";
 
 const useGameLauncherStore = defineStore("gameLauncher", () => {
   const tasksByInstallation = shallowRef<Record<string, TGApp.Game.Package.TaskSummary>>({});
@@ -53,6 +53,12 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
+    if (
+      task.target === gameEnum.package.planTarget.AUDIO &&
+      task.state === gameEnum.package.taskState.COMPLETED
+    ) {
+      void nextTick(() => removeTaskProjection(task));
+    }
   }
 
   function createStartingInstallTask(

@@ -57,6 +57,7 @@ pub struct GameInstallation {
 pub enum PackagePlanTarget {
   Main,
   PreDownload,
+  Audio,
   Switch,
   Install,
 }
@@ -121,6 +122,10 @@ pub struct PackagePlanSummary {
   pub add_count: usize,
   pub modify_count: usize,
   pub delete_count: usize,
+  #[serde(default)]
+  pub source_audio_languages: Vec<String>,
+  #[serde(default)]
+  pub target_audio_languages: Vec<String>,
 }
 
 /// 后端生成资源计划时上报的真实评估步骤。

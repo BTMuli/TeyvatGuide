@@ -4,6 +4,7 @@
 use super::hoyoplay::get_channel_sdk;
 use super::{
   hoyoplay::{GameBranches, create_http_client},
+  installation::normalize_audio_languages,
   model::{
     GameInstallation, PackagePlanProgress, PackagePlanStrategy, PackagePlanSummary,
     PackagePlanTarget, SchemeId,
@@ -30,7 +31,8 @@ use tauri::ipc::Channel;
 use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
-const PLAN_SCHEMA_VERSION: u32 = 5;
+const PLAN_SCHEMA_VERSION: u32 = 6;
+const LEGACY_PLAN_SCHEMA_VERSION_V5: u32 = 5;
 const LEGACY_PLAN_SCHEMA_VERSION_V4: u32 = 4;
 const LEGACY_PLAN_SCHEMA_VERSION_V3: u32 = 3;
 const LEGACY_PLAN_SCHEMA_VERSION_V2: u32 = 2;
@@ -148,7 +150,17 @@ pub(crate) struct PersistedPlan {
   pub(crate) inventory: Vec<PlanFile>,
   #[serde(default)]
   pub(crate) install_overlay: Option<InstallOverlay>,
+  #[serde(default)]
+  pub(crate) audio_selection: Option<PlanAudioSelection>,
   pub(crate) created_at: String,
+}
+
+/// 已安装游戏语音包变更计划绑定的源集合与目标集合。
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct PlanAudioSelection {
+  pub(crate) source_audio_languages: Vec<String>,
+  pub(crate) target_audio_languages: Vec<String>,
 }
 
 /// The immutable, trusted-Rust overlay for a fresh installation.
@@ -333,6 +345,9 @@ pub async fn create_and_persist_plan(
     PackagePlanTarget::PreDownload => {
       branches.pre_download.as_ref().ok_or_else(|| "当前没有可用的预下载分支".to_string())?
     }
+    PackagePlanTarget::Audio => {
+      return Err("语音包变更请使用语音包评估入口".to_string());
+    }
     PackagePlanTarget::Switch => {
       return Err("渠道转换请使用换服评估入口".to_string());
     }
@@ -364,6 +379,50 @@ pub async fn create_and_persist_plan(
     &target_branch.tag,
     parts,
     &app_data_dir.join("game-tasks"),
+    None,
+  )
+}
+
+/// 为当前正式版本生成只改变官方语音分类的 manifest-diff 计划。
+pub async fn create_and_persist_audio_plan(
+  installation: &GameInstallation,
+  branches: &GameBranches,
+  target_audio_languages: Vec<String>,
+  app_data_dir: &Path,
+  on_progress: &Channel<PackagePlanProgress>,
+) -> Result<PackagePlanSummary, String> {
+  let source_tag = installation
+    .version
+    .as_deref()
+    .filter(|value| !value.trim().is_empty())
+    .ok_or_else(|| "本地游戏版本未知，无法生成语音包计划".to_string())?;
+  if source_tag != branches.main.tag {
+    return Err("请先将游戏更新到当前正式版本，再管理语音包".to_string());
+  }
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let source_audio_languages = normalize_audio_languages(installation.audio_languages.clone())
+    .map_err(|_| "未识别到完整的已安装语音包，请先校验游戏完整性".to_string())?;
+  let target_audio_languages = normalize_audio_languages(target_audio_languages)?;
+  if source_audio_languages == target_audio_languages {
+    return Err("语音包选择未发生变化".to_string());
+  }
+  let selection = PlanAudioSelection { source_audio_languages, target_audio_languages };
+  let client = create_http_client()?;
+  report_plan_progress(on_progress, 3, "正在下载并解析语音资源清单");
+  let parts = build_audio_manifest_plan(&client, &branches.main, &selection).await?;
+  if parts.assets.is_empty() && parts.delete_files.is_empty() {
+    return Err("所选语音包没有产生可执行的文件变化".to_string());
+  }
+  report_plan_progress(on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
+  persist_plan_parts(
+    installation,
+    scheme,
+    PackagePlanTarget::Audio,
+    source_tag,
+    source_tag,
+    parts,
+    &app_data_dir.join("game-tasks"),
+    Some(selection),
   )
 }
 
@@ -393,6 +452,7 @@ pub(crate) fn persist_plan_parts(
   target_tag: &str,
   parts: PlanParts,
   task_root: &Path,
+  audio_selection: Option<PlanAudioSelection>,
 ) -> Result<PackagePlanSummary, String> {
   let cache_root = task_root.join("cache/chunks");
   let cache_hit_bytes = calculate_cache_hits(&cache_root, &parts.downloads);
@@ -423,6 +483,14 @@ pub(crate) fn persist_plan_parts(
     same_volume,
   );
   let plan_id = Uuid::new_v4().to_string();
+  let source_audio_languages = audio_selection.as_ref().map_or_else(
+    || installation.audio_languages.clone(),
+    |value| value.source_audio_languages.clone(),
+  );
+  let target_audio_languages = audio_selection.as_ref().map_or_else(
+    || installation.audio_languages.clone(),
+    |value| value.target_audio_languages.clone(),
+  );
   let summary = PackagePlanSummary {
     plan_id: plan_id.clone(),
     installation_id: installation.id.clone(),
@@ -454,6 +522,8 @@ pub(crate) fn persist_plan_parts(
       .filter(|asset| matches!(asset.action, PlanAssetAction::Modify))
       .count(),
     delete_count: parts.delete_files.len(),
+    source_audio_languages,
+    target_audio_languages,
   };
   let plan = PersistedPlan {
     schema_version: PLAN_SCHEMA_VERSION,
@@ -471,6 +541,7 @@ pub(crate) fn persist_plan_parts(
     delete_files: parts.delete_files,
     inventory: parts.inventory,
     install_overlay: None,
+    audio_selection,
     created_at: Utc::now().to_rfc3339(),
   };
   persist_plan(task_root, &plan_id, &plan)?;
@@ -521,6 +592,7 @@ pub(crate) async fn create_and_persist_install_plan(
   let target_tag = branches.main.tag.clone();
   let installation_id = installation_id.to_string();
   let task_root = task_root.to_path_buf();
+  let summary_audio_languages = audio_languages.to_vec();
   tauri::async_runtime::spawn_blocking(move || -> Result<PackagePlanSummary, String> {
     let mut parts = build_full_install_plan(target)?;
     if let Some(install_sdk) = overlay.sdk.as_ref() {
@@ -581,6 +653,8 @@ pub(crate) async fn create_and_persist_install_plan(
       add_count: parts.assets.len(),
       modify_count: 0,
       delete_count: 0,
+      source_audio_languages: Vec::new(),
+      target_audio_languages: summary_audio_languages,
     };
     let plan = PersistedPlan {
       schema_version: PLAN_SCHEMA_VERSION,
@@ -598,6 +672,7 @@ pub(crate) async fn create_and_persist_install_plan(
       delete_files: Vec::new(),
       inventory: parts.inventory,
       install_overlay: Some(overlay),
+      audio_selection: None,
       created_at: Utc::now().to_rfc3339(),
     };
     persist_plan(&task_root, &plan_id, &plan)?;
@@ -841,6 +916,9 @@ pub(crate) async fn hydrate_and_validate_plan(
   {
     return Err("资源计划与当前安装状态不匹配，请重新评估".to_string());
   }
+  if plan.target == PackagePlanTarget::Audio {
+    return hydrate_audio_plan(installation, branches, plan).await;
+  }
   if is_integrity_repair_plan(&plan) {
     return hydrate_integrity_repair_plan(installation, branches, plan).await;
   }
@@ -849,6 +927,7 @@ pub(crate) async fn hydrate_and_validate_plan(
     PackagePlanTarget::PreDownload => {
       branches.pre_download.as_ref().ok_or_else(|| "预下载分支已不可用，请重新评估".to_string())?
     }
+    PackagePlanTarget::Audio => unreachable!(),
     PackagePlanTarget::Switch => {
       return Err("渠道转换任务不能作为资源下载计划恢复".to_string());
     }
@@ -918,6 +997,9 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
   if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch) {
     return Err("当前只能应用包含完整目标清单的资源计划".to_string());
   }
+  if plan.target == PackagePlanTarget::Audio {
+    return hydrate_audio_plan(installation, branches, plan).await;
+  }
   if is_integrity_repair_plan(&plan) {
     return hydrate_integrity_repair_plan(installation, branches, plan).await;
   }
@@ -925,6 +1007,7 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     return Err(match plan.target {
       PackagePlanTarget::PreDownload => "预下载目标尚未成为正式版本，暂时不能应用".to_string(),
       PackagePlanTarget::Main => "正式版本已变化，请重新评估".to_string(),
+      PackagePlanTarget::Audio => "正式版本已变化，请重新评估语音包".to_string(),
       PackagePlanTarget::Switch => "渠道转换任务不能作为资源更新应用".to_string(),
       PackagePlanTarget::Install => "全新安装计划不能用于已有游戏".to_string(),
     });
@@ -969,6 +1052,43 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
   Ok(plan)
 }
 
+async fn hydrate_audio_plan(
+  installation: &GameInstallation,
+  branches: &GameBranches,
+  mut plan: PersistedPlan,
+) -> Result<PersistedPlan, String> {
+  if plan.schema_version != PLAN_SCHEMA_VERSION
+    || plan.strategy != PackagePlanStrategy::ManifestDiff
+    || plan.source_tag.as_deref() != Some(branches.main.tag.as_str())
+    || plan.target_tag != branches.main.tag
+  {
+    return Err("语音包计划版本或正式分支已变化，请重新评估".to_string());
+  }
+  let selection =
+    plan.audio_selection.as_ref().ok_or_else(|| "语音包计划缺少语言选择".to_string())?;
+  let current_audio_languages = normalize_audio_languages(installation.audio_languages.clone())
+    .map_err(|_| "未识别到完整的已安装语音包，请先校验游戏完整性".to_string())?;
+  if current_audio_languages != selection.source_audio_languages
+    && current_audio_languages != selection.target_audio_languages
+  {
+    return Err("已安装语音包在计划生成后发生变化，请重新评估".to_string());
+  }
+  let client = create_http_client()?;
+  let fresh = build_audio_manifest_plan(&client, &branches.main, selection).await?;
+  if fresh.manifest_digest != plan.manifest_digest
+    || !assets_match(&fresh.assets, &plan.assets, false)
+    || fresh.delete_files != plan.delete_files
+    || !downloads_match(&fresh.downloads, &plan.downloads)
+    || fresh.inventory != plan.inventory
+  {
+    return Err("远端语音资源清单已变化，请重新评估".to_string());
+  }
+  plan.downloads = fresh.downloads;
+  plan.assets = fresh.assets;
+  plan.inventory = fresh.inventory;
+  Ok(plan)
+}
+
 /// 将已重新验证并补齐的计划覆盖持久化，供断电恢复离线读取。
 pub(crate) fn persist_validated_plan(task_root: &Path, plan: &PersistedPlan) -> Result<(), String> {
   validate_persisted_plan(plan, &plan.plan_id)?;
@@ -1006,7 +1126,11 @@ pub(crate) async fn hydrate_and_validate_repair_plan(
     }
     &branches.main
   };
-  let target = get_decoded_build(&client, target_branch, &installation.audio_languages).await?;
+  let repair_audio_languages = plan.audio_selection.as_ref().map_or_else(
+    || installation.audio_languages.as_slice(),
+    |selection| selection.target_audio_languages.as_slice(),
+  );
+  let target = get_decoded_build(&client, target_branch, repair_audio_languages).await?;
   overlay_repair_parts(plan, build_repair_parts(target, files)?)
 }
 
@@ -1017,7 +1141,8 @@ fn overlay_repair_parts(
   if parts.inventory != plan.inventory {
     return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
   }
-  if plan.strategy == PackagePlanStrategy::ManifestDiff
+  if plan.target != PackagePlanTarget::Audio
+    && plan.strategy == PackagePlanStrategy::ManifestDiff
     && parts.manifest_digest != plan.manifest_digest
   {
     return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
@@ -1135,6 +1260,21 @@ async fn build_manifest_plan(
     get_decoded_build(client, target_branch, audio_languages),
   )?;
   build_manifest_diff(source, target)
+}
+
+async fn build_audio_manifest_plan(
+  client: &reqwest::Client,
+  branch: &super::hoyoplay::BranchDescriptor,
+  selection: &PlanAudioSelection,
+) -> Result<PlanParts, String> {
+  let (source, target) = futures_util::try_join!(
+    get_decoded_build(client, branch, &selection.source_audio_languages),
+    get_decoded_build(client, branch, &selection.target_audio_languages),
+  )?;
+  let manifest_digest = audio_manifest_digest(&source, &target, selection);
+  let mut parts = build_manifest_diff(source, target)?;
+  parts.manifest_digest = manifest_digest;
+  Ok(parts)
 }
 
 fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<PlanParts, String> {
@@ -1407,13 +1547,17 @@ fn plan_target_asset(
 }
 
 fn collect_assets(build: &DecodedBuild) -> Result<HashMap<String, &Asset>, String> {
-  let mut assets = HashMap::new();
+  let mut assets = HashMap::<String, &Asset>::new();
   for manifest in &build.manifests {
     for asset in &manifest.data.assets {
       let name = normalize_manifest_path(&asset.asset_name)?;
-      if assets.insert(name.clone(), asset).is_some() {
-        return Err(format!("Sophon build 包含重复资源：{name}"));
+      if let Some(existing) = assets.get(&name) {
+        if !assets_equal(existing, asset) {
+          return Err(format!("Sophon build 包含元数据冲突的重复资源：{name}"));
+        }
+        continue;
       }
+      assets.insert(name, asset);
     }
   }
   validate_managed_paths(assets.keys().map(String::as_str))?;
@@ -1531,6 +1675,34 @@ pub(crate) fn manifest_digest(build: &DecodedBuild) -> String {
     .collect::<Vec<_>>();
   entries.sort();
   digest_parts(&build.tag, &entries)
+}
+
+fn audio_manifest_digest(
+  source: &DecodedBuild,
+  target: &DecodedBuild,
+  selection: &PlanAudioSelection,
+) -> String {
+  let mut entries = Vec::new();
+  entries.extend(source.manifests.iter().map(|manifest| {
+    format!(
+      "source:{}:{}:{}",
+      manifest.matching_field, manifest.manifest_id, manifest.manifest_checksum
+    )
+  }));
+  entries.extend(target.manifests.iter().map(|manifest| {
+    format!(
+      "target:{}:{}:{}",
+      manifest.matching_field, manifest.manifest_id, manifest.manifest_checksum
+    )
+  }));
+  entries.extend(
+    selection.source_audio_languages.iter().map(|language| format!("source-language:{language}")),
+  );
+  entries.extend(
+    selection.target_audio_languages.iter().map(|language| format!("target-language:{language}")),
+  );
+  entries.sort();
+  digest_parts(&target.tag, &entries)
 }
 
 fn patch_manifest_digest(build: &DecodedPatchBuild) -> String {
@@ -1794,6 +1966,7 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   if !matches!(
     plan.schema_version,
     PLAN_SCHEMA_VERSION
+      | LEGACY_PLAN_SCHEMA_VERSION_V5
       | LEGACY_PLAN_SCHEMA_VERSION_V4
       | LEGACY_PLAN_SCHEMA_VERSION_V3
       | LEGACY_PLAN_SCHEMA_VERSION_V2
@@ -1804,14 +1977,31 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   let source_tag_valid = plan.source_tag.as_deref().is_some_and(|source_tag| {
     !source_tag.is_empty() && source_tag.len() <= 128 && !source_tag.chars().any(char::is_control)
   });
-  let install_plan_valid = plan.schema_version == PLAN_SCHEMA_VERSION
-    && plan.target == PackagePlanTarget::Install
-    && plan.strategy == PackagePlanStrategy::Full
-    && plan.source_tag.is_none()
-    && plan.install_overlay.is_some();
+  let install_plan_valid =
+    matches!(plan.schema_version, PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V5)
+      && plan.target == PackagePlanTarget::Install
+      && plan.strategy == PackagePlanStrategy::Full
+      && plan.source_tag.is_none()
+      && plan.install_overlay.is_some();
+  let audio_plan_valid = if plan.target == PackagePlanTarget::Audio {
+    plan.schema_version == PLAN_SCHEMA_VERSION
+      && plan.strategy == PackagePlanStrategy::ManifestDiff
+      && plan.install_overlay.is_none()
+      && plan.source_tag.as_deref() == Some(plan.target_tag.as_str())
+      && plan.audio_selection.as_ref().is_some_and(|selection| {
+        normalize_audio_languages(selection.source_audio_languages.clone())
+          .is_ok_and(|languages| languages == selection.source_audio_languages)
+          && normalize_audio_languages(selection.target_audio_languages.clone())
+            .is_ok_and(|languages| languages == selection.target_audio_languages)
+          && selection.source_audio_languages != selection.target_audio_languages
+      })
+  } else {
+    plan.audio_selection.is_none()
+  };
   if plan.installation_id.is_empty()
     || (!install_plan_valid && !source_tag_valid)
     || (plan.target == PackagePlanTarget::Install && !install_plan_valid)
+    || !audio_plan_valid
     || plan.target_tag.is_empty()
     || plan.target_tag.len() > 128
     || plan.target_tag.chars().any(char::is_control)
@@ -1824,9 +2014,10 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   let mut cache_keys = std::collections::HashSet::with_capacity(plan.downloads.len());
   for download in &plan.downloads {
     let encoding_valid = match plan.schema_version {
-      PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V4 | LEGACY_PLAN_SCHEMA_VERSION_V3 => {
-        download.encoding != PayloadEncoding::LegacyUnspecified
-      }
+      PLAN_SCHEMA_VERSION
+      | LEGACY_PLAN_SCHEMA_VERSION_V5
+      | LEGACY_PLAN_SCHEMA_VERSION_V4
+      | LEGACY_PLAN_SCHEMA_VERSION_V3 => download.encoding != PayloadEncoding::LegacyUnspecified,
       LEGACY_PLAN_SCHEMA_VERSION_V2 => download.encoding == PayloadEncoding::LegacyUnspecified,
       _ => false,
     };
@@ -2138,5 +2329,30 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
     0 => Ok(PayloadEncoding::Raw),
     1 => Ok(PayloadEncoding::Zstd),
     _ => Err(format!("Sophon 资源载荷使用了不支持的压缩方式：{compression}")),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{PlanAudioSelection, audio_manifest_digest};
+  use crate::game::sophon::DecodedBuild;
+
+  #[test]
+  fn audio_digest_binds_source_and_target_languages() {
+    let source = DecodedBuild { tag: "6.0.0".to_string(), manifests: Vec::new() };
+    let target = DecodedBuild { tag: "6.0.0".to_string(), manifests: Vec::new() };
+    let add_japanese = PlanAudioSelection {
+      source_audio_languages: vec!["zh-cn".to_string()],
+      target_audio_languages: vec!["ja-jp".to_string(), "zh-cn".to_string()],
+    };
+    let add_english = PlanAudioSelection {
+      source_audio_languages: vec!["zh-cn".to_string()],
+      target_audio_languages: vec!["en-us".to_string(), "zh-cn".to_string()],
+    };
+
+    assert_ne!(
+      audio_manifest_digest(&source, &target, &add_japanese),
+      audio_manifest_digest(&source, &target, &add_english)
+    );
   }
 }

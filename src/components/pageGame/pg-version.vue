@@ -65,13 +65,11 @@
       </template>
     </PgProgress>
 
-    <v-alert
+    <PgNotice
       v-if="errorMessage !== null"
       class="version-error"
       :text="errorMessage"
-      density="compact"
-      type="warning"
-      variant="tonal"
+      tone="warning"
     />
     <div
       v-if="snapshot !== null && (snapshot.updateAvailable || snapshot.preDownloadAvailable)"
@@ -181,14 +179,16 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PgProgress from "@comp/pageGame/pg-progress.vue";
-import PgTask from "@comp/pageGame/pg-task.vue";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { confirmStopRunningGame } from "@utils/TGGame.js";
 import { createGamePackagePlan, getGamePackageSnapshot } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onUnmounted, ref, watch } from "vue";
+
+import PgNotice from "./pg-notice.vue";
+import PgProgress from "./pg-progress.vue";
+import PgTask from "./pg-task.vue";
 
 type Props = {
   installation: TGApp.Game.Installation.Item;
@@ -207,6 +207,7 @@ type VersionFactsSlot = {
 };
 
 const { installation } = defineProps<Props>();
+const emit = defineEmits<{ updated: [] }>();
 defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
 const taskStore = useGameLauncherStore();
 const { pendingActions, tasksByInstallation, verifyByInstallation } = storeToRefs(taskStore);
@@ -535,7 +536,7 @@ async function handleStartRequested(): Promise<void> {
 
 async function handleApplyRequested(): Promise<void> {
   const task = currentTask.value;
-  if (task === null) return;
+  if (task === null || task.target === gameEnum.package.planTarget.AUDIO) return;
   const repairing = task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
   const integrity = task.sourceTag === task.targetTag;
   if (
@@ -616,14 +617,29 @@ async function handleRecoverRequested(
   action: TGApp.Game.Package.RecoveryActionEnum,
 ): Promise<void> {
   const task = currentTask.value;
-  if (task === null || taskActive.value) return;
+  const audioRegistrationPending =
+    task?.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.REGISTRATION_PENDING;
+  const audioApplyRetry =
+    task?.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    task.errorMessage !== null;
+  if (task === null || (taskActive.value && !audioRegistrationPending && !audioApplyRetry)) return;
   const rollback = action === gameEnum.package.recoveryAction.ROLLBACK;
   const abandonReady = rollback && task.state === gameEnum.package.taskState.READY_TO_APPLY;
   const abandonRepair = rollback && task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
   let title = "安全恢复资源任务？";
   let text = "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。";
   let confirmLabel = "开始恢复";
-  if (abandonRepair) {
+  if (audioRegistrationPending) {
+    title = "重试同步配音包记录？";
+    text = "配音文件已经提交并校验，只会重新同步本地安装记录，不会再次修改游戏文件。";
+    confirmLabel = "重试同步";
+  } else if (audioApplyRetry) {
+    title = "重试配音包修改？";
+    text = "上次自动应用未完成；将重新退出游戏并提交已下载完成的配音文件。";
+    confirmLabel = "重试修改";
+  } else if (abandonRepair) {
     title = "放弃更新并回滚？";
     text =
       "已提交的新增、修改和删除会回滚到源版本。未完成的修复会先还原；已经修好的未变化文件会保留。已校验缓存不会删除。";
@@ -641,6 +657,7 @@ async function handleRecoverRequested(
   const confirmed = await showDialog.checkF({ title, text, confirmLabel });
   if (confirmed !== true) return;
   const writesGameDir =
+    audioApplyRetry ||
     gameEnum.package.taskApplying(task.state) ||
     task.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
     task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
@@ -680,6 +697,7 @@ watch(
   ([taskId, state]) => {
     if (taskId !== undefined && state === gameEnum.package.taskState.COMPLETED) {
       void loadSnapshot(false);
+      emit("updated");
     }
   },
 );

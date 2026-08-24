@@ -8,6 +8,7 @@ declare namespace TGApp.Game.Package {
   const PlanTarget = <const>{
     MAIN: "main",
     PRE_DOWNLOAD: "pre_download",
+    AUDIO: "audio",
     SWITCH: "switch",
     INSTALL: "install",
   };
@@ -65,6 +66,8 @@ declare namespace TGApp.Game.Package {
     addCount: number;
     modifyCount: number;
     deleteCount: number;
+    sourceAudioLanguages: Array<string>;
+    targetAudioLanguages: Array<string>;
   };
 
   /** 后端生成资源计划时上报的真实步骤。 */

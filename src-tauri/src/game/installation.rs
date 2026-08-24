@@ -19,15 +19,40 @@ pub(crate) const AUDIO_PACKAGES: [(&str, &str); 4] = [
   ("Audio_Korean_pkg_version", "ko-kr"),
 ];
 
-pub(crate) fn supported_audio_languages() -> &'static [(&'static str, &'static str)] {
-  &AUDIO_PACKAGES
-}
-
 pub(crate) fn audio_marker(language: &str) -> Option<&'static str> {
   AUDIO_PACKAGES
     .iter()
     .find(|(_, value)| value.eq_ignore_ascii_case(language))
     .map(|(marker, _)| *marker)
+}
+
+/// 规范化语音包标识，拒绝不支持的值并保证稳定顺序。
+pub(crate) fn normalize_audio_languages(values: Vec<String>) -> Result<Vec<String>, String> {
+  let mut result = Vec::new();
+  for value in values {
+    let normalized = AUDIO_PACKAGES
+      .iter()
+      .find(|(_, language)| language.eq_ignore_ascii_case(value.trim()))
+      .map(|(_, language)| (*language).to_string())
+      .ok_or_else(|| format!("不支持的语音包：{value}"))?;
+    if !result.iter().any(|item| item == &normalized) {
+      result.push(normalized);
+    }
+  }
+  if result.is_empty() {
+    return Err("至少选择一个语音包".to_string());
+  }
+  result.sort();
+  Ok(result)
+}
+
+/// 从游戏根目录读取当前实际存在的官方语音包标记。
+pub(crate) fn inspect_audio_languages(root_path: &Path) -> Vec<String> {
+  AUDIO_PACKAGES
+    .iter()
+    .filter(|(file_name, _)| root_path.join(file_name).is_file())
+    .map(|(_, language)| (*language).to_string())
+    .collect()
 }
 
 /// 校验国服游戏可执行文件，并从安装目录读取渠道、版本和语音包状态。
@@ -70,11 +95,7 @@ pub fn inspect_executable(
     .filter(|value| !value.is_empty())
     .or_else(|| read_script_version(root_path));
   let has_channel_sdk = root_path.join("YuanShen_Data/Plugins/PCGameSDK.dll").is_file();
-  let audio_languages = AUDIO_PACKAGES
-    .iter()
-    .filter(|(file_name, _)| root_path.join(file_name).is_file())
-    .map(|(_, language)| (*language).to_string())
-    .collect::<Vec<_>>();
+  let audio_languages = inspect_audio_languages(root_path);
 
   let (scheme_id, status, status_message) = match (channel, sub_channel) {
     (Some(channel), Some(sub_channel)) => match resolve_scheme(channel, sub_channel) {
@@ -325,4 +346,27 @@ fn executable_from_data_prefix(prefix: &str) -> Option<String> {
     return Some(path);
   }
   None
+}
+
+#[cfg(test)]
+mod tests {
+  use super::normalize_audio_languages;
+
+  #[test]
+  fn normalizes_audio_languages_with_stable_order() {
+    let result = normalize_audio_languages(vec![
+      "JA-JP".to_string(),
+      " zh-cn ".to_string(),
+      "ja-jp".to_string(),
+    ])
+    .expect("supported languages should normalize");
+
+    assert_eq!(result, vec!["ja-jp".to_string(), "zh-cn".to_string()]);
+  }
+
+  #[test]
+  fn rejects_empty_or_unsupported_audio_languages() {
+    assert!(normalize_audio_languages(Vec::new()).is_err());
+    assert!(normalize_audio_languages(vec!["fr-fr".to_string()]).is_err());
+  }
 }

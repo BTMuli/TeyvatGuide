@@ -111,21 +111,21 @@
       </template>
     </PgInstallProgress>
 
-    <v-alert
+    <PgNotice
       v-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
       class="install-task-alert"
-      density="compact"
       text="安装任务未完成，请继续安装或放弃任务。"
-      type="warning"
-      variant="tonal"
+      tone="warning"
     />
   </section>
 </template>
 
 <script lang="ts" setup>
-import PgInstallProgress from "@comp/pageGame/pg-install-progress.vue";
 import gameEnum from "@enum/game.js";
 import { computed } from "vue";
+
+import PgInstallProgress from "./pg-install-progress.vue";
+import PgNotice from "./pg-notice.vue";
 
 type Props = {
   actionPending: boolean;
@@ -220,6 +220,7 @@ const canAbandon = computed<boolean>(() => {
 
   > .v-chip {
     flex-shrink: 0;
+    align-self: center;
   }
 }
 

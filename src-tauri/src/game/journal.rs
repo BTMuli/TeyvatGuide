@@ -219,10 +219,15 @@ impl TaskJournal {
       source_scheme: plan.source_scheme,
       target_scheme: plan.target_scheme,
       install_root: plan.install_overlay.as_ref().map(|overlay| overlay.game_root.clone()),
-      audio_languages: plan
-        .install_overlay
-        .as_ref()
-        .map_or_else(Vec::new, |overlay| overlay.audio_languages.clone()),
+      audio_languages: plan.audio_selection.as_ref().map_or_else(
+        || {
+          plan
+            .install_overlay
+            .as_ref()
+            .map_or_else(Vec::new, |overlay| overlay.audio_languages.clone())
+        },
+        |selection| selection.target_audio_languages.clone(),
+      ),
       target: plan.target,
       source_tag: plan.source_tag.clone(),
       target_tag: plan.target_tag.clone(),
@@ -240,13 +245,18 @@ impl TaskJournal {
       assembly_total_bytes: plan.assets.iter().map(|asset| asset.size).sum(),
       active_assembly_count: 0,
       commit_completed_count: 0,
-      commit_total_count: if plan.target == PackagePlanTarget::Install {
-        INSTALL_COMMIT_TOTAL_STEPS
-      } else {
-        0
+      commit_total_count: match plan.target {
+        PackagePlanTarget::Install => INSTALL_COMMIT_TOTAL_STEPS,
+        PackagePlanTarget::Audio => plan.delete_files.len(),
+        _ => 0,
       },
-      commit_current_step: (plan.target == PackagePlanTarget::Install)
-        .then_some("等待资源组装完成".to_string()),
+      commit_current_step: match plan.target {
+        PackagePlanTarget::Install => Some("等待资源组装完成".to_string()),
+        PackagePlanTarget::Audio if !plan.delete_files.is_empty() => {
+          Some("等待删除配音文件".to_string())
+        }
+        _ => None,
+      },
       verification_completed_count: 0,
       verification_total_count: 0,
       spool_root: plan.install_overlay.as_ref().map(|overlay| overlay.spool_root.clone()),
@@ -882,6 +892,16 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
     || journal.source_tag != plan.source_tag
     || journal.target_tag != plan.target_tag
     || journal.manifest_digest != plan.manifest_digest
+    || journal.audio_languages
+      != plan.audio_selection.as_ref().map_or_else(
+        || {
+          plan
+            .install_overlay
+            .as_ref()
+            .map_or_else(Vec::new, |overlay| overlay.audio_languages.clone())
+        },
+        |selection| selection.target_audio_languages.clone(),
+      )
   {
     return Err("任务日志与不可变计划不匹配".to_string());
   }
@@ -1029,6 +1049,7 @@ fn operation_for_target(target: PackagePlanTarget) -> &'static str {
   match target {
     PackagePlanTarget::Main => "update",
     PackagePlanTarget::PreDownload => "predownload",
+    PackagePlanTarget::Audio => "audio",
     PackagePlanTarget::Switch => "switch",
     PackagePlanTarget::Install => "install",
   }

@@ -8,6 +8,7 @@ use super::{
     prepare_cache_root,
   },
   hoyoplay::{create_http_client, get_game_branches},
+  installation::{inspect_audio_languages, inspect_executable, normalize_audio_languages},
   installer,
   journal::{self, TaskJournal},
   model::{
@@ -16,13 +17,13 @@ use super::{
   },
   planner::{
     PersistedPlan, PlanDownload, cached_chunk_matches, default_install_concurrency,
-    flush_cache_validation_index, hydrate_and_validate_repair_plan, install_spool_window,
-    same_volume,
+    flush_cache_validation_index, hydrate_and_validate_apply_plan,
+    hydrate_and_validate_repair_plan, install_spool_window, persist_validated_plan, same_volume,
   },
   switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
 };
-use chrono::Duration as ChronoDuration;
+use chrono::{Duration as ChronoDuration, Utc};
 use futures_util::{StreamExt, stream};
 use std::{
   collections::{HashMap, HashSet},
@@ -40,6 +41,13 @@ use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+
+/// 配音下载完成后自动提交所需的可信安装与登记上下文。
+pub(crate) struct AudioApplyContext {
+  pub installation: GameInstallation,
+  pub machine_uid: String,
+  pub registration_pool: sqlx::SqlitePool,
+}
 
 /// 默认下载/组装并发：按 CPU 核心数，最低 4 路。
 pub(crate) fn default_concurrency() -> usize {
@@ -897,9 +905,16 @@ impl GamePackageManager {
     plan: PersistedPlan,
     options: PackageTaskOptions,
     recovering: bool,
+    audio_apply: Option<AudioApplyContext>,
   ) -> Result<PackageTaskSummary, String> {
     if self.verify.is_running(&plan.installation_id)? {
       return Err("该游戏安装正在校验完整性，请等待完成或取消后再开始资源任务".to_string());
+    }
+    if journal::list(&task_root, Some(&plan.installation_id))?
+      .iter()
+      .any(|task| task.state.blocks_launch())
+    {
+      return Err("该游戏安装存在等待恢复的资源提交，请先完成恢复".to_string());
     }
     if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
       || plan.inventory.is_empty()
@@ -979,7 +994,7 @@ impl GamePackageManager {
         None,
         plan.clone(),
         download_client,
-        shared_journal,
+        Arc::clone(&shared_journal),
         Arc::clone(&canceled),
         Arc::clone(&paused),
         concurrency,
@@ -987,6 +1002,30 @@ impl GamePackageManager {
         None,
       )
       .await;
+      if let Some(context) = audio_apply
+        && let Err(error) = apply_audio_after_download(
+          app_handle.clone(),
+          task_root.clone(),
+          plan.clone(),
+          Arc::clone(&shared_journal),
+          Arc::clone(&canceled),
+          context,
+        )
+        .await
+      {
+        let mut journal_value = shared_journal.lock().await;
+        if journal_value.state == PackageTaskState::ReadyToApply
+          && journal_value.error_message.is_none()
+        {
+          journal_value.error_message = Some(error.clone());
+          journal_value.touch();
+          let _ = journal::persist(&task_root, &journal_value);
+          let summary = journal_value.summary();
+          emit_state(&app_handle, &summary);
+          emit_progress(&app_handle, &summary);
+        }
+        log::warn!("[game-package] 自动应用配音包变更失败：{error}");
+      }
       finish_task(&active, &finished_task_id);
     });
     Ok(summary)
@@ -1382,6 +1421,7 @@ impl GamePackageManager {
     task_root: PathBuf,
     installation: GameInstallation,
     plan: PersistedPlan,
+    registration_pool: sqlx::SqlitePool,
   ) -> Result<PackageTaskSummary, String> {
     if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
       || plan.inventory.is_empty()
@@ -1412,6 +1452,7 @@ impl GamePackageManager {
     }
     let should_execute_apply = can_apply;
     let game_root = PathBuf::from(&installation.root_path);
+    let registration_game_root = game_root.clone();
     let summary = journal_value.summary();
     let canceled = Arc::new(AtomicBool::new(false));
     let paused = Arc::new(AtomicBool::new(false));
@@ -1434,6 +1475,7 @@ impl GamePackageManager {
       let worker_app_handle = app_handle.clone();
       let canceled_flag = Arc::clone(&canceled);
       let snapshot = Arc::clone(&worker_journal);
+      let mut completed = false;
       if should_execute_apply {
         let apply_plan = plan.clone();
         let apply_game_root = game_root.clone();
@@ -1461,8 +1503,7 @@ impl GamePackageManager {
         .await;
         match result {
           Ok(Ok(committer::ApplyOutcome::Completed)) => {
-            finish_task(&active, &finished_task_id);
-            return;
+            completed = true;
           }
           Ok(Ok(committer::ApplyOutcome::RepairNeeded)) => {}
           Ok(Err(error)) => {
@@ -1477,18 +1518,37 @@ impl GamePackageManager {
           }
         }
       }
-      if let Err(error) = continue_repair(
-        worker_app_handle,
-        task_root,
-        game_root,
-        installation,
-        plan,
-        snapshot,
-        canceled_flag,
-      )
-      .await
+      if !completed {
+        if let Err(error) = continue_repair(
+          worker_app_handle.clone(),
+          task_root.clone(),
+          game_root,
+          installation,
+          plan.clone(),
+          Arc::clone(&snapshot),
+          canceled_flag,
+        )
+        .await
+        {
+          log::warn!("[game-package] 修复资源任务失败：{error}");
+          finish_task(&active, &finished_task_id);
+          return;
+        }
+      }
+      let should_finalize_audio = plan.target == PackagePlanTarget::Audio
+        && snapshot.lock().await.state == PackageTaskState::RegistrationPending;
+      if should_finalize_audio
+        && let Err(error) = finalize_audio_registration(
+          &worker_app_handle,
+          &task_root,
+          &registration_pool,
+          &plan,
+          &registration_game_root,
+          &snapshot,
+        )
+        .await
       {
-        log::warn!("[game-package] 修复资源任务失败：{error}");
+        log::warn!("[game-package] 同步语音包安装记录失败：{error}");
       }
       finish_task(&active, &finished_task_id);
     });
@@ -1650,6 +1710,83 @@ impl GamePackageManager {
     journal::persist(task_root, &journal)?;
     Ok(journal.summary())
   }
+}
+
+async fn apply_audio_after_download(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  plan: PersistedPlan,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  context: AudioApplyContext,
+) -> Result<(), String> {
+  if plan.target != PackagePlanTarget::Audio
+    || journal.lock().await.state != PackageTaskState::ReadyToApply
+  {
+    return Ok(());
+  }
+  let installation =
+    inspect_executable(&context.installation.executable_path, &context.machine_uid)?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
+  persist_validated_plan(&task_root, &plan)?;
+  let stop_result = tauri::async_runtime::spawn_blocking(stop_game)
+    .await
+    .map_err(|error| format!("退出游戏任务异常：{error}"))?;
+  if let Err(error) = stop_result {
+    let message = format!("自动退出游戏失败：{error}");
+    let mut journal_value = journal.lock().await;
+    journal_value.error_message = Some(message.clone());
+    journal_value.touch();
+    journal::persist(&task_root, &journal_value)?;
+    let summary = journal_value.summary();
+    emit_state(&app_handle, &summary);
+    emit_progress(&app_handle, &summary);
+    return Err(message);
+  }
+  let game_root = PathBuf::from(&installation.root_path);
+  let registration_game_root = game_root.clone();
+  let apply_plan = plan.clone();
+  let apply_task_root = task_root.clone();
+  let apply_journal = Arc::clone(&journal);
+  let apply_handle = app_handle.clone();
+  let result = tauri::async_runtime::spawn_blocking(move || {
+    let mut journal_value = apply_journal.blocking_lock().clone();
+    let emit = |journal: &TaskJournal| {
+      *apply_journal.blocking_lock() = journal.clone();
+      let summary = journal.summary();
+      emit_state(&apply_handle, &summary);
+      emit_progress(&apply_handle, &summary);
+    };
+    committer::execute_apply(
+      &apply_plan,
+      &game_root,
+      &apply_task_root,
+      &mut journal_value,
+      &canceled,
+      emit,
+    )
+  })
+  .await
+  .map_err(|error| format!("应用配音包任务异常退出：{error}"))??;
+  if result == committer::ApplyOutcome::RepairNeeded {
+    return Err("配音包提交后仍需修复，请执行安全恢复".to_string());
+  }
+  if journal.lock().await.state != PackageTaskState::RegistrationPending {
+    return Ok(());
+  }
+  finalize_audio_registration(
+    &app_handle,
+    &task_root,
+    &context.registration_pool,
+    &plan,
+    &registration_game_root,
+    &journal,
+  )
+  .await
+  .map(|_| ())
 }
 
 async fn run_install_streaming_task(
@@ -3285,6 +3422,101 @@ fn finish_task(active: &Mutex<ActiveTasks>, task_id: &str) {
   if let Some(task) = active.by_task.remove(task_id) {
     active.by_installation.remove(&task.installation_id);
   }
+}
+
+async fn finalize_audio_registration(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  pool: &sqlx::SqlitePool,
+  plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+) -> Result<PackageTaskSummary, String> {
+  let selection =
+    plan.audio_selection.as_ref().ok_or_else(|| "语音包计划缺少语言选择".to_string())?;
+  if journal.lock().await.state != PackageTaskState::RegistrationPending {
+    return Err("语音包任务当前不在安装记录同步阶段".to_string());
+  }
+  let actual = match normalize_audio_languages(inspect_audio_languages(game_root)) {
+    Ok(actual) => actual,
+    Err(_) => {
+      let error = "应用完成后未识别到有效语音包".to_string();
+      persist_audio_registration_error(app_handle, task_root, journal, &error).await;
+      return Err(error);
+    }
+  };
+  if actual != selection.target_audio_languages {
+    let error = "应用完成后的语音包标记与计划目标不一致".to_string();
+    persist_audio_registration_error(app_handle, task_root, journal, &error).await;
+    return Err(error);
+  }
+  let audio_languages = serde_json::to_string(&selection.target_audio_languages)
+    .map_err(|error| format!("序列化语音包安装记录失败：{error}"))?;
+  let updated_at = Utc::now().to_rfc3339();
+  let result =
+    sqlx::query("UPDATE GameInstallation SET audioLanguages = ?, lastSeen = ? WHERE id = ?")
+      .bind(audio_languages)
+      .bind(updated_at)
+      .bind(&plan.installation_id)
+      .execute(pool)
+      .await;
+  match result {
+    Ok(result) if result.rows_affected() == 1 => {}
+    Ok(_) => {
+      let error = "同步语音包安装记录失败：未找到对应安装".to_string();
+      persist_audio_registration_error(app_handle, task_root, journal, &error).await;
+      return Err(error);
+    }
+    Err(error) => {
+      let error = format!("同步语音包安装记录失败：{error}");
+      persist_audio_registration_error(app_handle, task_root, journal, &error).await;
+      return Err(error);
+    }
+  }
+  let mut journal_value = journal.lock().await;
+  if journal_value.state != PackageTaskState::RegistrationPending {
+    return Err("语音包任务当前不在安装记录同步阶段".to_string());
+  }
+  journal_value.state = PackageTaskState::Completed;
+  journal_value.error_message = None;
+  journal_value.current_file = None;
+  journal_value.touch();
+  journal::persist(task_root, &journal_value)?;
+  let summary = journal_value.summary();
+  emit_state(app_handle, &summary);
+  emit_progress(app_handle, &summary);
+  Ok(summary)
+}
+
+async fn persist_audio_registration_error(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  error: &str,
+) {
+  let mut journal_value = journal.lock().await;
+  journal_value.state = PackageTaskState::RegistrationPending;
+  journal_value.error_message = Some(error.to_string());
+  journal_value.current_file = Some("等待同步语音包安装记录".to_string());
+  journal_value.touch();
+  let _ = journal::persist(task_root, &journal_value);
+  emit_state(app_handle, &journal_value.summary());
+}
+
+/// 重试只涉及 SQLite 投影的语音包任务最终同步。
+pub(crate) async fn retry_audio_registration(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  pool: &sqlx::SqlitePool,
+  plan: &PersistedPlan,
+  game_root: &Path,
+) -> Result<PackageTaskSummary, String> {
+  if plan.target != PackagePlanTarget::Audio {
+    return Err("当前任务不是语音包管理任务".to_string());
+  }
+  let journal =
+    Arc::new(AsyncMutex::new(journal::load(&journal::journal_path(task_root, &plan.plan_id))?));
+  finalize_audio_registration(app_handle, task_root, pool, plan, game_root, &journal).await
 }
 
 async fn run_task(

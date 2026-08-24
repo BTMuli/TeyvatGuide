@@ -86,12 +86,10 @@
                 {{ statusDesc(pendingInstall.status) }}
               </v-chip>
             </div>
-            <v-alert
+            <PgNotice
               v-if="pendingInstall.status !== knownStatus"
               :text="pendingInstall.statusMessage"
-              density="compact"
-              type="warning"
-              variant="tonal"
+              tone="warning"
             />
           </template>
         </div>
@@ -127,6 +125,8 @@ import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { inspectGameInstallation, locateGameInstallations } from "@utils/TGGameLauncher.js";
 import { computed, onWatcherCleanup, ref, useId, watch } from "vue";
+
+import PgNotice from "./pg-notice.vue";
 
 type SelectMethod = "auto" | "manual";
 
@@ -490,6 +490,6 @@ watch(
 
 .pgop-confirm {
   background: var(--tgc-btn-1);
-  color: var(--btn-text);
+  color: var(--box-text-1);
 }
 </style>

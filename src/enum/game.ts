@@ -78,6 +78,7 @@ const GameInstallationInstallDraftStateEnum: typeof TGApp.Game.Installation.Inst
 const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
   MAIN: "main",
   PRE_DOWNLOAD: "pre_download",
+  AUDIO: "audio",
   SWITCH: "switch",
   INSTALL: "install",
 };

@@ -85,6 +85,7 @@
     <PgVersion
       v-if="installation.status === gameEnum.installation.status.KNOWN"
       :installation="installation"
+      @updated="refreshRegistered"
     >
       <template #facts="version">
         <PgScheme :installation="installation" @switched="refreshRegistered">
@@ -189,7 +190,23 @@
                 <strong>{{ channelDesc(installation) }}</strong>
               </div>
               <div class="game-fact">
-                <span>语音包</span>
+                <div class="game-fact-head">
+                  <span>语音包</span>
+                  <div class="game-fact-acts">
+                    <v-btn
+                      :disabled="version.refreshDisabled || !isLatestOfficial(version.snapshot)"
+                      aria-label="管理配音包"
+                      density="compact"
+                      icon="mdi-tune-variant"
+                      size="small"
+                      :title="
+                        isLatestOfficial(version.snapshot) ? '管理配音包' : '请先更新到当前正式版本'
+                      "
+                      variant="text"
+                      @click="audioOverlay = true"
+                    />
+                  </div>
+                </div>
                 <strong>{{ audioDesc(installation.audioLanguages) }}</strong>
               </div>
               <div class="game-fact">
@@ -249,15 +266,16 @@
           <strong>{{ installation.hasChannelSdk ? "已安装" : "未安装" }}</strong>
         </div>
       </div>
-      <v-alert
-        :text="installation.statusMessage"
-        class="game-alert"
-        density="compact"
-        type="warning"
-        variant="tonal"
-      />
+      <PgNotice :text="installation.statusMessage" class="game-alert" tone="warning" />
     </template>
   </section>
+
+  <PgoAudio
+    v-if="audioOverlay"
+    v-model="audioOverlay"
+    :installation="installation"
+    @task-started="audioOverlay = false"
+  />
 
   <v-dialog v-model="accountDialog" max-width="420">
     <v-card>
@@ -298,8 +316,11 @@ import { getGameInstallationSize, uninstallGameInstallation } from "@utils/TGGam
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, ref } from "vue";
 
-const PgScheme = defineAsyncComponent(() => import("@comp/pageGame/pg-scheme.vue"));
-const PgVersion = defineAsyncComponent(() => import("@comp/pageGame/pg-version.vue"));
+import PgNotice from "./pg-notice.vue";
+
+const PgScheme = defineAsyncComponent(() => import("./pg-scheme.vue"));
+const PgVersion = defineAsyncComponent(() => import("./pg-version.vue"));
+const PgoAudio = defineAsyncComponent(() => import("./pgo-audio.vue"));
 
 const props = defineProps<{
   installation: TGApp.Game.Installation.Item;
@@ -320,6 +341,7 @@ type AccountChoice = {
 const accountDialog = ref<boolean>(false);
 const officialAccounts = ref<Array<AccountChoice>>([]);
 const uninstalling = ref<boolean>(false);
+const audioOverlay = ref<boolean>(false);
 
 const { gameList } = storeToRefs(useBBSStore());
 const genshinIcon = computed<string>(() => {

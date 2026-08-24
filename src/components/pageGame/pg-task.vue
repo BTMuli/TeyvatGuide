@@ -1,10 +1,13 @@
 <template>
   <section v-if="plan !== null || task !== null" class="task-panel" aria-label="资源下载任务">
     <div class="task-heading">
-      <div>
+      <div class="task-heading-copy">
         <span>资源任务</span>
         <strong v-if="task !== null && task.target === gameEnum.package.planTarget.INSTALL">
           全新安装 {{ task.targetTag }}
+        </strong>
+        <strong v-else-if="task !== null && task.target === gameEnum.package.planTarget.AUDIO">
+          配音包 · {{ audioLabel }}
         </strong>
         <strong v-else-if="task !== null && task.sourceTag === task.targetTag">
           修复 {{ task.targetTag }}
@@ -28,78 +31,64 @@
       <div class="task-facts" aria-live="polite">
         <span v-for="fact in progressFacts" :key="fact">{{ fact }}</span>
       </div>
-      <p v-if="task.currentFile !== null" class="task-current">
+      <p v-if="currentResource !== null" class="task-current">
         <span class="task-current-label">当前资源：</span>
-        <span class="task-current-value" :title="task.currentFile">{{ task.currentFile }}</span>
+        <span class="task-current-value" :title="currentResource">{{ currentResource }}</span>
       </p>
-      <v-alert
-        v-if="task.errorMessage !== null"
-        :text="task.errorMessage"
-        density="compact"
-        type="error"
-        variant="tonal"
+      <PgNotice v-if="task.errorMessage !== null" :text="task.errorMessage" tone="error" />
+      <PgNotice
+        v-else-if="
+          task.state === gameEnum.package.taskState.REGISTRATION_PENDING &&
+          task.target === gameEnum.package.planTarget.AUDIO
+        "
+        text="配音文件已经提交并校验，正在同步本地安装记录。若同步失败，可使用安全恢复重试。"
+        tone="warning"
       />
-      <v-alert
+      <PgNotice
         v-else-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
         text="检测到上次未完成的资源任务。继续或回滚时会先调和提交日志与实际文件状态。"
-        density="compact"
-        type="warning"
-        variant="tonal"
+        tone="warning"
       />
-      <v-alert
+      <PgNotice
         v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED && integrityRepair"
         text="仍有文件缺失或损坏。继续修复后完成；不会改写版本号。放弃任务会恢复本次替换前的文件。"
-        density="compact"
-        type="warning"
-        variant="tonal"
+        tone="warning"
       />
-      <v-alert
+      <PgNotice
         v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED"
         text="更新文件已提交，但仍有未变化文件缺失或损坏。修复这些文件后才会写入版本号；放弃任务会回滚本次更新。"
-        density="compact"
-        type="warning"
-        variant="tonal"
+        tone="warning"
       />
-      <v-alert
+      <PgNotice
         v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && integrityRepair"
         text="全部下载对象已通过 hash 复验。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
-        density="compact"
-        type="success"
-        variant="tonal"
+        tone="success"
       />
-      <v-alert
+      <PgNotice
         v-else-if="
           task.state === gameEnum.package.taskState.READY_TO_APPLY &&
           task.target === gameEnum.package.planTarget.INSTALL
         "
         text="安装资源已下载，准备进入 staging、发布和最终复检。"
-        density="compact"
-        type="success"
-        variant="tonal"
+        tone="success"
       />
-      <v-alert
+      <PgNotice
         v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
         text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
-        density="compact"
-        type="success"
-        variant="tonal"
+        tone="success"
       />
-      <v-alert
+      <PgNotice
         v-else-if="
           task.state === gameEnum.package.taskState.READY_TO_APPLY &&
           task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
         "
         text="预下载已完成。目标版本成为正式版本后即可应用更新。"
-        density="compact"
-        type="info"
-        variant="tonal"
+        tone="info"
       />
-      <v-alert
+      <PgNotice
         v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
         text="下载已完成，但当前正式版本与任务目标不一致，请重新评估。"
-        density="compact"
-        type="warning"
-        variant="tonal"
+        tone="warning"
       />
     </template>
 
@@ -167,6 +156,8 @@
 import gameEnum from "@enum/game.js";
 import { computed } from "vue";
 
+import PgNotice from "./pg-notice.vue";
+
 type Props = {
   plan: TGApp.Game.Package.PlanSummary | null;
   task: TGApp.Game.Package.TaskSummary | null;
@@ -196,6 +187,7 @@ const taskStateLabel = computed<string>(() => {
 });
 const canCancel = computed<boolean>(() => {
   if (!active.value || task === null) return false;
+  if (task.state === gameEnum.package.taskState.REGISTRATION_PENDING) return false;
   return !(
     task.target === gameEnum.package.planTarget.INSTALL && gameEnum.package.taskApplying(task.state)
   );
@@ -204,6 +196,10 @@ const recoverable = computed<boolean>(() => {
   return (
     task !== null &&
     (gameEnum.package.taskRecoverable(task.state) ||
+      (task.target === gameEnum.package.planTarget.AUDIO &&
+        (task.state === gameEnum.package.taskState.REGISTRATION_PENDING ||
+          (task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+            task.errorMessage !== null))) ||
       (task.target === gameEnum.package.planTarget.INSTALL &&
         task.state === gameEnum.package.taskState.READY_TO_APPLY))
   );
@@ -215,9 +211,34 @@ const repairRequired = computed<boolean>(() => {
   return task?.state === gameEnum.package.taskState.REPAIR_REQUIRED;
 });
 const integrityRepair = computed<boolean>(() => {
-  return task !== null && task.sourceTag === task.targetTag;
+  return (
+    task !== null &&
+    task.target !== gameEnum.package.planTarget.AUDIO &&
+    task.sourceTag === task.targetTag
+  );
+});
+const audioLabel = computed<string>(() => {
+  if (task === null) return "";
+  const labels: Record<string, string> = {
+    "zh-cn": "中文",
+    "en-us": "英语",
+    "ja-jp": "日语",
+    "ko-kr": "韩语",
+  };
+  return task.audioLanguages.map((language) => labels[language] ?? language).join("、");
+});
+const currentResource = computed<string | null>(() => {
+  if (task === null) return null;
+  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
+    return task.assemblyCurrentFile ?? task.currentFile;
+  }
+  if (task.state === gameEnum.package.taskState.DOWNLOADING) {
+    return task.downloadCurrentFile;
+  }
+  return task.currentFile;
 });
 const canApply = computed<boolean>(() => {
+  if (task?.target === gameEnum.package.planTarget.AUDIO) return false;
   return (readyToApply.value && targetPublished) || repairRequired.value;
 });
 const applyActionLabel = computed<string>(() => {
@@ -226,6 +247,12 @@ const applyActionLabel = computed<string>(() => {
   return "应用更新";
 });
 const canAbandon = computed<boolean>(() => {
+  if (
+    task?.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.REGISTRATION_PENDING
+  ) {
+    return false;
+  }
   if (
     task?.target === gameEnum.package.planTarget.INSTALL &&
     task.state === gameEnum.package.taskState.RECOVERY_REQUIRED
@@ -249,8 +276,22 @@ const canStart = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.FAILED
   );
 });
+const audioProgressCounts = computed<{ completed: number; total: number } | null>(() => {
+  if (task === null || task.target !== gameEnum.package.planTarget.AUDIO) return null;
+  return {
+    completed: task.completedCount + task.commitCompletedCount,
+    total: task.totalCount + task.commitTotalCount,
+  };
+});
 const progressPercent = computed<number>(() => {
   if (task === null) return 0;
+  if (audioProgressCounts.value !== null) {
+    if (audioProgressCounts.value.total === 0) return 0;
+    return Math.min(
+      100,
+      (audioProgressCounts.value.completed / audioProgressCounts.value.total) * 100,
+    );
+  }
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     if (task.assemblyTotalBytes > 0) {
       return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
@@ -269,6 +310,7 @@ const progressPercent = computed<number>(() => {
 });
 const progressIndeterminate = computed<boolean>(() => {
   if (task === null || !active.value) return false;
+  if (audioProgressCounts.value !== null) return audioProgressCounts.value.total === 0;
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
   }
@@ -276,6 +318,19 @@ const progressIndeterminate = computed<boolean>(() => {
 });
 const progressFacts = computed<Array<string>>(() => {
   if (task === null) return [];
+  if (task.target === gameEnum.package.planTarget.AUDIO) {
+    const values = [];
+    if (task.totalCount > 0) {
+      values.push(`下载文件 ${task.completedCount} / ${task.totalCount}`);
+      values.push(`${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
+    }
+    if (task.commitTotalCount > 0) {
+      values.push(`删除文件 ${task.commitCompletedCount} / ${task.commitTotalCount}`);
+    }
+    if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
+    if (task.etaSeconds !== null) values.push(`预计 ${formatDuration(task.etaSeconds)}`);
+    return values;
+  }
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     return [
       `组装空间 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
@@ -331,22 +386,25 @@ function formatDuration(seconds: number): string {
 <style lang="scss" scoped>
 .task-panel {
   display: grid;
-  border-radius: 8px;
-  background: var(--box-bg-1);
-  gap: 4px;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--box-bg-2);
+  gap: 8px;
 }
 
 .task-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px 4px;
   gap: 8px;
 
   > .v-chip {
     flex-shrink: 0;
+    align-self: center;
   }
+}
 
+.task-heading-copy {
   span,
   strong {
     display: block;
@@ -408,19 +466,5 @@ function formatDuration(seconds: number): string {
 
 .task-note {
   color: var(--tgc-red-2);
-}
-
-.task-panel > :deep(.v-progress-linear),
-.task-panel > .task-facts,
-.task-panel > .task-current,
-.task-panel > .task-actions,
-.task-panel > .task-note,
-.task-panel > :deep(.v-alert) {
-  margin-inline: 16px;
-}
-
-.task-panel > .task-actions,
-.task-panel > .task-note {
-  margin-bottom: 12px;
 }
 </style>

@@ -10,7 +10,7 @@ use super::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
   },
-  model::{PackagePlanStrategy, PackageTaskState},
+  model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState},
   path_guard::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file, resolve_optional_manifest_file,
@@ -116,10 +116,11 @@ where
     return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
   }
 
+  reset_audio_delete_progress(plan, journal);
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
   journal.reset_assembly_progress(plan.assets.len(), incoming_bytes);
-  journal.current_file = Some("组装资源文件".to_string());
+  journal.current_file = None;
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
     let incoming_root = prepare_apply_assembly(plan, game_root)?;
@@ -152,6 +153,13 @@ where
       )?;
     }
     check_canceled(canceled)?;
+    journal.assembly_current_file = None;
+    journal.current_file = Some(if plan.target == PackagePlanTarget::Audio {
+      "准备配音文件提交事务".to_string()
+    } else {
+      "准备资源提交事务".to_string()
+    });
+    persist_and_emit(task_root, journal, &emit)?;
     prepare_transaction(plan, game_root, task_root, journal)?;
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
@@ -162,27 +170,41 @@ where
     persist_and_emit(task_root, journal, &emit)?;
     commit_resources(plan, game_root, journal, task_root, canceled, &emit)?;
     journal.state = PackageTaskState::Verifying;
-    journal.current_file = Some("校验目标清单".to_string());
+    journal.current_file = Some(if plan.target == PackagePlanTarget::Audio {
+      "校验本次配音变更".to_string()
+    } else {
+      "校验目标清单".to_string()
+    });
     persist_and_emit(task_root, journal, &emit)?;
-    let issues = inspect_inventory(plan, game_root, canceled)?;
-    if let Some(error) = commit_integrity_error(plan, &issues) {
-      return Err(error);
-    }
-    let repair_files = repairable_files(plan, &issues);
-    if !repair_files.is_empty() {
-      journal.repair = Some(RepairJournal { files: repair_files.clone(), apply: None });
-      journal.state = PackageTaskState::RepairRequired;
-      journal.error_message = Some(format!(
-        "完整清单发现 {} 个未变化文件缺失或损坏，需修复后才能提交版本",
-        repair_files.len()
-      ));
-      journal.current_file = None;
-      persist_and_emit(task_root, journal, &emit)?;
-      return Ok(ApplyOutcome::RepairNeeded);
+    if plan.target == PackagePlanTarget::Audio {
+      verify_changed_files(plan, game_root, canceled)?;
+    } else {
+      let issues = inspect_inventory(plan, game_root, canceled)?;
+      if let Some(error) = commit_integrity_error(plan, &issues) {
+        return Err(error);
+      }
+      let repair_files = repairable_files(plan, &issues);
+      if !repair_files.is_empty() {
+        journal.repair = Some(RepairJournal { files: repair_files.clone(), apply: None });
+        journal.state = PackageTaskState::RepairRequired;
+        journal.error_message = Some(format!(
+          "完整清单发现 {} 个未变化文件缺失或损坏，需修复后才能提交版本",
+          repair_files.len()
+        ));
+        journal.current_file = None;
+        persist_and_emit(task_root, journal, &emit)?;
+        return Ok(ApplyOutcome::RepairNeeded);
+      }
     }
     commit_version(plan, game_root, task_root, journal, &emit)?;
-    verify_inventory(plan, game_root, canceled)?;
-    journal.state = PackageTaskState::Completed;
+    if plan.target != PackagePlanTarget::Audio {
+      verify_inventory(plan, game_root, canceled)?;
+    }
+    journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
+      PackageTaskState::RegistrationPending
+    } else {
+      PackageTaskState::Completed
+    };
     journal.error_message = None;
     journal.current_file = None;
     persist_and_emit(task_root, journal, &emit)?;
@@ -286,7 +308,11 @@ where
     commit_version(plan, game_root, task_root, journal, &emit)?;
     verify_inventory(plan, game_root, canceled)?;
     journal.repair = None;
-    journal.state = PackageTaskState::Completed;
+    journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
+      PackageTaskState::RegistrationPending
+    } else {
+      PackageTaskState::Completed
+    };
     journal.error_message = None;
     journal.current_file = None;
     persist_and_emit(task_root, journal, &emit)
@@ -341,6 +367,7 @@ where
   cleanup_known_transaction_files(plan, game_root, task_root);
   journal.apply = None;
   journal.repair = None;
+  reset_audio_delete_progress(plan, journal);
   journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
   journal.error_message = None;
   persist_and_emit(task_root, journal, &emit)
@@ -390,7 +417,7 @@ where
     let original =
       fs::read(&config_path).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
     let target = patch_channel(&original, request.target_channel, request.target_sub_channel)?;
-    prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal)?;
+    prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal, false)?;
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
     journal.current_file = Some("准备提交事务".to_string());
@@ -706,7 +733,15 @@ fn prepare_transaction(
   } else {
     patch_game_version(&original, &plan.target_tag)?
   };
-  prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal)
+  prepare_file_transaction(
+    &commit,
+    &original,
+    &target,
+    game_root,
+    task_root,
+    journal,
+    plan.target == PackagePlanTarget::Audio,
+  )
 }
 
 fn prepare_apply_assembly(plan: &PersistedPlan, game_root: &Path) -> Result<PathBuf, String> {
@@ -720,8 +755,9 @@ fn prepare_file_transaction(
   game_root: &Path,
   task_root: &Path,
   journal: &mut TaskJournal,
+  trust_preverified_incoming: bool,
 ) -> Result<(), String> {
-  preflight_targets(&commit.steps, game_root)?;
+  preflight_targets(&commit.steps, game_root, !trust_preverified_incoming)?;
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
@@ -737,7 +773,7 @@ fn prepare_file_transaction(
       let source = resolve_existing_manifest_file(&staging_root, &step.name)?;
       copy_verified(&source, &incoming, step.size, &step.md5)?;
     }
-    if !file_matches(&incoming, step.size, &step.md5)? {
+    if !trust_preverified_incoming && !file_matches(&incoming, step.size, &step.md5)? {
       return Err(format!("incoming 资源在提交前校验失败：{}", step.name));
     }
   }
@@ -759,7 +795,11 @@ fn prepare_file_transaction(
   Ok(())
 }
 
-fn preflight_targets(steps: &[CommitStep], game_root: &Path) -> Result<(), String> {
+fn preflight_targets(
+  steps: &[CommitStep],
+  game_root: &Path,
+  verify_source: bool,
+) -> Result<(), String> {
   for step in steps {
     let current = resolve_optional_manifest_file(game_root, &step.name)?;
     match step.kind {
@@ -769,13 +809,16 @@ fn preflight_targets(steps: &[CommitStep], game_root: &Path) -> Result<(), Strin
       CommitStepKind::Modify if current.is_none() => {
         return Err(format!("待更新资源已缺失，请先执行修复：{}", step.name));
       }
-      CommitStepKind::Modify => {
+      CommitStepKind::Modify if verify_source => {
         let path = current.ok_or_else(|| format!("待更新资源已缺失：{}", step.name))?;
         if !source_file_matches(&path, step)? {
           return Err(format!("待更新资源与计划源文件不一致：{}", step.name));
         }
       }
-      CommitStepKind::Delete => {
+      CommitStepKind::Delete if current.is_none() => {
+        return Err(format!("待删除资源已缺失：{}", step.name));
+      }
+      CommitStepKind::Delete if verify_source => {
         let path = current.ok_or_else(|| format!("待删除资源已缺失：{}", step.name))?;
         if !file_matches(&path, step.size, &step.md5)? {
           return Err(format!("待删除资源与计划源文件不一致：{}", step.name));
@@ -824,6 +867,13 @@ where
   validate_apply_identity(journal, &commit.steps)?;
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
+  if journal.target == PackagePlanTarget::Audio {
+    let cursor = apply(journal)?.cursor;
+    let (completed, total) = audio_delete_progress(&commit.steps, cursor);
+    journal.commit_completed_count = completed;
+    journal.commit_total_count = total;
+    journal.commit_current_step = (total > 0).then(|| format!("删除配音文件 {completed}/{total}"));
+  }
   for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
     let target = prepare_manifest_output_file(game_root, &step.name)?;
@@ -868,9 +918,19 @@ where
     }
     set_active_step(journal, index, step, CommitStepPhase::Installed);
     persist_and_emit(task_root, journal, emit)?;
-    let apply = apply_mut(journal)?;
-    apply.cursor = index + 1;
-    apply.active_step = None;
+    {
+      let apply = apply_mut(journal)?;
+      apply.cursor = index + 1;
+      apply.active_step = None;
+    }
+    if journal.target == PackagePlanTarget::Audio && step.kind == CommitStepKind::Delete {
+      journal.commit_completed_count =
+        journal.commit_completed_count.saturating_add(1).min(journal.commit_total_count);
+      journal.commit_current_step = Some(format!(
+        "删除配音文件 {}/{}",
+        journal.commit_completed_count, journal.commit_total_count
+      ));
+    }
     persist_and_emit(task_root, journal, emit)?;
   }
   Ok(())
@@ -936,6 +996,27 @@ fn verify_inventory(
 ) -> Result<(), String> {
   let issues = inspect_inventory(plan, game_root, canceled)?;
   issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
+}
+
+fn verify_changed_files(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  for asset in &plan.assets {
+    check_canceled(canceled)?;
+    let path = resolve_existing_manifest_file(game_root, &asset.name)?;
+    if !file_matches(&path, asset.size, &asset.md5)? {
+      return Err(format!("配音变更文件校验失败：{}", asset.name));
+    }
+  }
+  for deleted in &plan.delete_files {
+    check_canceled(canceled)?;
+    if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
+      return Err(format!("应删除的配音文件仍然存在：{}", deleted.name));
+    }
+  }
+  Ok(())
 }
 
 fn inspect_inventory(
@@ -1032,6 +1113,7 @@ where
   }
   cleanup_known_transaction_files(plan, game_root, task_root);
   journal.apply = None;
+  reset_audio_delete_progress(plan, journal);
   journal.state = PackageTaskState::ReadyToApply;
   journal.error_message = (!canceled).then_some(error.clone());
   let _ = persist_and_emit(task_root, journal, emit);
@@ -1236,6 +1318,26 @@ fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
     md5: file.md5.clone(),
   }));
   steps
+}
+
+fn audio_delete_progress(steps: &[CommitStep], cursor: usize) -> (usize, usize) {
+  let total = steps.iter().filter(|step| step.kind == CommitStepKind::Delete).count();
+  let completed = steps
+    .iter()
+    .take(cursor.min(steps.len()))
+    .filter(|step| step.kind == CommitStepKind::Delete)
+    .count();
+  (completed, total)
+}
+
+fn reset_audio_delete_progress(plan: &PersistedPlan, journal: &mut TaskJournal) {
+  if plan.target != PackagePlanTarget::Audio {
+    return;
+  }
+  journal.commit_completed_count = 0;
+  journal.commit_total_count = plan.delete_files.len();
+  journal.commit_current_step =
+    (!plan.delete_files.is_empty()).then_some("等待删除配音文件".to_string());
 }
 
 fn steps_digest(steps: &[CommitStep]) -> String {
@@ -1741,4 +1843,34 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子替换 config.ini 失败：{error}"))
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  fn commit_step(kind: CommitStepKind, name: &str) -> CommitStep {
+    CommitStep {
+      kind,
+      name: name.to_string(),
+      source_size: None,
+      source_md5: None,
+      size: 1,
+      md5: "0".repeat(32),
+    }
+  }
+
+  #[test]
+  fn audio_delete_progress_counts_only_completed_delete_steps() {
+    let steps = vec![
+      commit_step(CommitStepKind::Add, "add.pck"),
+      commit_step(CommitStepKind::Delete, "delete-a.pck"),
+      commit_step(CommitStepKind::Modify, "modify.pck"),
+      commit_step(CommitStepKind::Delete, "delete-b.pck"),
+    ];
+
+    assert_eq!(audio_delete_progress(&steps, 0), (0, 2));
+    assert_eq!(audio_delete_progress(&steps, 2), (1, 2));
+    assert_eq!(audio_delete_progress(&steps, steps.len()), (2, 2));
+  }
 }

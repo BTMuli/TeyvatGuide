@@ -357,16 +357,21 @@ function formatElapsed(milliseconds: number): string {
 
 .install-progress-download-activity {
   display: inline-flex;
+  min-height: 16px;
   align-items: center;
   gap: 4px;
+  line-height: 16px;
 }
 
 .install-progress-assembly-slots {
   display: inline-flex;
   max-width: 160px;
+  min-height: 16px;
   flex-wrap: wrap;
   align-items: center;
   gap: 2px;
+  line-height: 0;
+  vertical-align: middle;
 }
 
 .install-progress-assembly-slot {

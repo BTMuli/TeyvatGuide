@@ -23,13 +23,11 @@
       </div>
     </div>
 
-    <v-alert
+    <PgNotice
       v-if="errorMessage !== null"
       :text="errorMessage"
-      density="compact"
       title="缓存操作未完成"
-      type="warning"
-      variant="tonal"
+      tone="warning"
     />
 
     <div v-if="summary !== null" class="cache-facts">
@@ -113,6 +111,8 @@ import fmtUtil from "@utils/fmtUtil.js";
 import { clearGamePackageCache, getGamePackageCacheStatus } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onMounted, onWatcherCleanup, ref, watch } from "vue";
+
+import PgNotice from "./pg-notice.vue";
 
 type CacheClearTarget = "chunks" | "sdk" | "all";
 

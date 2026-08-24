@@ -404,6 +404,7 @@ async fn prepare_and_scan(
       &version,
       build_repair_parts(build, &mismatched)?,
       task_root,
+      None,
     )?)
   };
   finish_completed(shared, task_root, app_handle, mismatched, plan, dropped)

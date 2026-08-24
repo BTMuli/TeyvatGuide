@@ -105,19 +105,15 @@
             <v-icon icon="mdi-folder-open" />
           </v-btn>
         </div>
-        <v-alert
+        <PgNotice
           v-if="locationSummary?.kind === locationKind.OCCUPIED"
           :text="locationSummary.message ?? '当前目录不可用于安装'"
-          density="compact"
-          type="warning"
-          variant="tonal"
+          tone="warning"
         />
-        <v-alert
+        <PgNotice
           v-else-if="existingInstallation !== null && !existingInstallUsable"
           :text="existingInstallation.statusMessage"
-          density="compact"
-          type="warning"
-          variant="tonal"
+          tone="warning"
         />
       </section>
 
@@ -225,20 +221,12 @@
             安全余量；资源完成组装后会滚动释放。
           </p>
         </div>
-        <v-alert
+        <PgNotice
           v-if="plan !== null && !plan.hasSufficientSpace"
-          density="compact"
           :text="spaceGuidance"
-          type="warning"
-          variant="tonal"
+          tone="warning"
         />
-        <v-alert
-          v-if="errorMessage !== null"
-          :text="errorMessage"
-          density="compact"
-          type="error"
-          variant="tonal"
-        />
+        <PgNotice v-if="errorMessage !== null" :text="errorMessage" tone="error" />
       </section>
     </div>
 
@@ -250,6 +238,7 @@
         <v-btn
           :disabled="!canContinue"
           :loading="busy"
+          class="install-confirm"
           color="var(--tgc-od-orange)"
           variant="flat"
           @click="onContinue"
@@ -276,6 +265,8 @@ import {
   inspectGameInstallLocation,
 } from "@utils/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
+
+import PgNotice from "./pg-notice.vue";
 
 const visible = defineModel<boolean>({ required: true });
 const emit = defineEmits<{ completed: [] }>();
@@ -1155,6 +1146,10 @@ watch(
 
 .install-actions {
   flex-shrink: 0;
+}
+
+.install-confirm {
+  color: var(--box-text-1);
 }
 
 @media (width <= 640px) {

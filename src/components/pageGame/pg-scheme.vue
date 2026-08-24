@@ -56,13 +56,14 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import PgProgress from "@comp/pageGame/pg-progress.vue";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { confirmStopRunningGame } from "@utils/TGGame.js";
 import { createGamePackageSwitchPlan } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onWatcherCleanup, ref, watch } from "vue";
+
+import PgProgress from "./pg-progress.vue";
 
 type Props = {
   installation: TGApp.Game.Installation.Item;
@@ -206,12 +207,7 @@ const progressPercent = computed<number>(() => {
   return 0;
 });
 const switchPanelVisible = computed<boolean>(() => {
-  return (
-    converting.value ||
-    blockingTask.value ||
-    errorMessage.value !== null ||
-    visibleTask.value !== null
-  );
+  return converting.value || errorMessage.value !== null || visibleTask.value !== null;
 });
 const switchBarIndeterminate = computed<boolean>(() => {
   if (visibleTask.value === null) return converting.value;
@@ -251,7 +247,6 @@ const schemeCurrentFile = computed<string | null>(() => {
   return task.downloadCurrentFile ?? task.currentFile ?? task.assemblyCurrentFile;
 });
 const schemeCaption = computed<string>(() => {
-  if (blockingTask.value) return "有其他资源任务进行中，暂时不能换服";
   if (errorMessage.value !== null) return errorMessage.value;
   if (visibleTask.value?.state === gameEnum.package.taskState.RECOVERY_REQUIRED) {
     return "上次换服中断了，继续会先恢复到转换前";
@@ -264,7 +259,6 @@ const schemeCaption = computed<string>(() => {
 });
 const schemeTone = computed<"" | "err" | "warn">(() => {
   if (errorMessage.value !== null || visibleTask.value?.errorMessage !== null) return "err";
-  if (blockingTask.value) return "warn";
   if (visibleTask.value?.state === gameEnum.package.taskState.RECOVERY_REQUIRED) return "warn";
   return "";
 });

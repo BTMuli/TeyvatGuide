@@ -12,11 +12,12 @@ use super::{
     PackageSwitchSummary, PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskState,
     PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
-  package::GamePackageManager,
+  package::{AudioApplyContext, GamePackageManager},
   planner::{
-    create_and_persist_install_plan, create_and_persist_plan, hydrate_and_validate_apply_plan,
-    hydrate_and_validate_install_plan, hydrate_and_validate_plan, hydrate_and_validate_repair_plan,
-    load_persisted_plan, persist_validated_plan, report_plan_progress,
+    create_and_persist_audio_plan, create_and_persist_install_plan, create_and_persist_plan,
+    hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan, hydrate_and_validate_plan,
+    hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
+    report_plan_progress,
   },
   switch::{self, create_and_persist_switch_plan},
 };
@@ -743,6 +744,34 @@ pub async fn game_package_plan(
   create_and_persist_plan(&installation, &branches, target, &app_data_dir, &on_progress).await
 }
 
+/// 评估当前正式版本的官方语音包新增、删除或替换；只生成计划，不修改游戏目录。
+#[tauri::command]
+pub async fn game_package_audio_plan(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+  target_audio_languages: Vec<String>,
+  on_progress: Channel<PackagePlanProgress>,
+) -> Result<PackagePlanSummary, String> {
+  report_plan_progress(&on_progress, 1, "正在读取本地语音包状态");
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  report_plan_progress(&on_progress, 2, "正在读取当前正式版本");
+  let branches = get_game_branches(&client, scheme).await?;
+  let app_data_dir =
+    app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  create_and_persist_audio_plan(
+    &installation,
+    &branches,
+    target_audio_languages,
+    &app_data_dir,
+    &on_progress,
+  )
+  .await
+}
+
 /// 评估官服与 B 服之间的同资源家族渠道转换；只生成计划，不修改游戏目录。
 #[tauri::command]
 pub async fn game_package_switch_plan(
@@ -876,7 +905,16 @@ pub async fn game_package_start(
   let client = create_http_client()?;
   let branches = get_game_branches(&client, scheme).await?;
   let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
-  manager.start(app_handle, task_root, plan, options.unwrap_or_default(), false)
+  let audio_apply = if plan.target == PackagePlanTarget::Audio {
+    Some(AudioApplyContext {
+      installation,
+      machine_uid: read_machine_uid(&app_handle)?,
+      registration_pool: pool,
+    })
+  } else {
+    None
+  };
+  manager.start(app_handle, task_root, plan, options.unwrap_or_default(), false, audio_apply)
 }
 
 /// 消费 ReadyToApply 的正式更新或已转正预下载，完整校验后最后提交版本号。
@@ -896,7 +934,7 @@ pub async fn game_package_apply(
   let branches = get_game_branches(&client, scheme).await?;
   let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
   persist_validated_plan(&task_root, &plan)?;
-  manager.apply(app_handle, task_root, installation, plan)
+  manager.apply(app_handle, task_root, installation, plan, pool)
 }
 
 /// 在下一个下载安全边界请求取消资源任务；无活动 worker 时收尸空转日志。
@@ -965,6 +1003,42 @@ pub async fn game_package_recover(
     )
     .await;
   }
+  if journal_value.operation == "audio"
+    && journal_value.state == PackageTaskState::RegistrationPending
+  {
+    if manager.has_running_tasks().map_err(|error| format!("读取语音包任务状态失败：{error}"))?
+    {
+      return Err("语音包任务仍在同步安装记录，请稍候".to_string());
+    }
+    if matches!(action, PackageRecoveryAction::Rollback) {
+      return Err("语音包文件已经提交并校验，只能重试同步安装记录".to_string());
+    }
+    let plan = load_persisted_plan(&task_root, &task_id)?;
+    let pool = sqlite_pool(&db_instances).await?;
+    let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+    return super::package::retry_audio_registration(
+      &app_handle,
+      &task_root,
+      &pool,
+      &plan,
+      Path::new(&installation.root_path),
+    )
+    .await;
+  }
+  if journal_value.operation == "audio" && journal_value.state == PackageTaskState::ReadyToApply {
+    if matches!(action, PackageRecoveryAction::Rollback) {
+      return manager.rollback_download(&task_root, &task_id);
+    }
+    let plan = load_persisted_plan(&task_root, &task_id)?;
+    let pool = sqlite_pool(&db_instances).await?;
+    let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+    let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    let client = create_http_client()?;
+    let branches = get_game_branches(&client, scheme).await?;
+    let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
+    persist_validated_plan(&task_root, &plan)?;
+    return manager.apply(app_handle, task_root, installation, plan, pool);
+  }
   if journal_value.repair.is_some() {
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
@@ -1002,7 +1076,7 @@ pub async fn game_package_recover(
     let branches = get_game_branches(&client, scheme).await?;
     let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
     persist_validated_plan(&task_root, &plan)?;
-    return manager.apply(app_handle, task_root, installation, plan);
+    return manager.apply(app_handle, task_root, installation, plan, pool);
   }
   if journal_value.state.requires_recovery() {
     let plan = load_persisted_plan(&task_root, &task_id)?;
@@ -1026,7 +1100,7 @@ pub async fn game_package_recover(
     let branches = get_game_branches(&client, scheme).await?;
     let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
     persist_validated_plan(&task_root, &plan)?;
-    return manager.apply(app_handle, task_root, installation, plan);
+    return manager.apply(app_handle, task_root, installation, plan, pool);
   }
   match action {
     PackageRecoveryAction::Resume => {
@@ -1038,7 +1112,16 @@ pub async fn game_package_recover(
       let client = create_http_client()?;
       let branches = get_game_branches(&client, scheme).await?;
       let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
-      manager.start(app_handle, task_root, plan, PackageTaskOptions::default(), true)
+      let audio_apply = if plan.target == PackagePlanTarget::Audio {
+        Some(AudioApplyContext {
+          installation,
+          machine_uid: read_machine_uid(&app_handle)?,
+          registration_pool: pool,
+        })
+      } else {
+        None
+      };
+      manager.start(app_handle, task_root, plan, PackageTaskOptions::default(), true, audio_apply)
     }
     PackageRecoveryAction::Rollback => manager.rollback_download(&task_root, &task_id),
   }
