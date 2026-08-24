@@ -1903,8 +1903,11 @@ async fn run_install_streaming_task(
       {
         let mut value = journal.lock().await;
         value.download_current_file = None;
-        value.assembly_current_file =
-          Some(format!("组装资源 {}/{}：{}", asset_index + 1, plan.assets.len(), asset.name));
+        value.assembly_current_file = Some(format_install_assembly_status(
+          value.assembly_completed_count,
+          value.assembly_total_count,
+          &asset.name,
+        ));
         value.touch();
         if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -2182,6 +2185,14 @@ struct InstallAssetJobCompletion {
 
 const MAX_INSTALL_ASSET_REPAIR_ATTEMPTS: usize = 2;
 const MAX_INSTALL_TASK_REPAIR_ATTEMPTS: usize = 3;
+
+fn format_install_assembly_status(
+  completed_count: usize,
+  total_count: usize,
+  file: &str,
+) -> String {
+  format!("{completed_count}/{total_count} {file}")
+}
 
 fn reserve_install_repair_attempt(
   journal: &mut TaskJournal,
@@ -2461,10 +2472,13 @@ async fn run_install_bounded_asset_pipeline(
         apply_install_completion_snapshot(&mut value, snapshot, metrics);
         asset_cursor = snapshot.contiguous_cursor;
         value.assembly_current_file = (value.assembly_completed_count < value.assembly_total_count)
-          .then_some(format!(
-            "已组装 {}/{}，持续队列继续补充资源",
-            value.assembly_completed_count, value.assembly_total_count
-          ));
+          .then(|| {
+            format_install_assembly_status(
+              value.assembly_completed_count,
+              value.assembly_total_count,
+              &plan.assets[completion.asset_index].name,
+            )
+          });
         value.spool_bytes = spool_bytes(spool_root);
         metrics.observe_spool(value.spool_bytes);
         value.touch();
@@ -2616,11 +2630,10 @@ async fn run_install_asset_job(
 
     {
       let mut value = journal.lock().await;
-      value.assembly_current_file = Some(format!(
-        "等待组装 {}/{}：{}",
-        asset_index + 1,
-        plan.assets.len(),
-        plan.assets[asset_index].name
+      value.assembly_current_file = Some(format_install_assembly_status(
+        value.assembly_completed_count,
+        value.assembly_total_count,
+        &plan.assets[asset_index].name,
       ));
       value.touch();
       emit_progress(&app_handle, &value.summary());
@@ -2798,11 +2811,10 @@ async fn run_install_streaming_asset_pipeline(
     value.spool_bytes = spool_bytes(spool_root);
     value.committed_step = completed_download_count(plan, completed, shared_cache_root, spool_root);
     value.download_current_file = None;
-    value.assembly_current_file = Some(format!(
-      "已组装 {}/{}，最近完成：{}",
+    value.assembly_current_file = Some(format_install_assembly_status(
       value.assembly_completed_count,
       value.assembly_total_count,
-      plan.assets[completed - 1].name
+      &plan.assets[completed - 1].name,
     ));
     value.touch();
     journal::persist(task_root, &value)?;
@@ -3847,8 +3859,8 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 mod tests {
   use super::{
     ActiveTask, GamePackageManager, InstallPipelineMetrics, InstallSpoolTracker,
-    PlanWorksetBaseline, download_eta_seconds, install_download_concurrency, nearest_rank,
-    reserve_install_repair_attempt,
+    PlanWorksetBaseline, download_eta_seconds, format_install_assembly_status,
+    install_download_concurrency, nearest_rank, reserve_install_repair_attempt,
   };
   use crate::game::{
     journal::{self, TaskJournal},
@@ -4154,6 +4166,14 @@ mod tests {
     assert_eq!(download_eta_seconds(13, 5), Some(3));
     assert_eq!(download_eta_seconds(0, 5), None);
     assert_eq!(download_eta_seconds(13, 0), None);
+  }
+
+  #[test]
+  fn install_assembly_status_uses_completed_progress_and_file_name() {
+    assert_eq!(
+      format_install_assembly_status(611, 2848, "GenshinImpact_Data/StreamingAssets/test.blk"),
+      "611/2848 GenshinImpact_Data/StreamingAssets/test.blk"
+    );
   }
 
   #[test]
