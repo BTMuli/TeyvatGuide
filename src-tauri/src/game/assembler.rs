@@ -1814,8 +1814,8 @@ mod tests {
     assemble_asset_with_fallback, assemble_full_install_asset_with_timing,
     assemble_full_install_asset_with_timing_observer, assemble_manifest_plan,
     assemble_manifest_plan_with_progress, assemble_manifest_plan_with_progress_concurrent,
-    assemble_plan, partial_path, validate_full_install_assets_for_repair,
-    validate_full_install_cursor_with_evidence,
+    assemble_plan, discover_completed_install_assets, partial_path,
+    validate_full_install_assets_for_repair, validate_full_install_cursor_with_evidence,
   };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
@@ -2194,6 +2194,46 @@ mod tests {
     assert!(
       crate::game::evidence::load_asset_evidence(&root.task_root(), &plan, 1).unwrap().is_some()
     );
+  }
+
+  #[test]
+  fn discovery_preserves_trusted_asset_after_contiguous_gap() {
+    let root = TempRoot::new();
+    let staging = root.0.join("staging");
+    let shared = root.0.join("shared");
+    let spool = root.0.join("spool");
+    fs::create_dir_all(&staging).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    fs::create_dir_all(&spool).unwrap();
+    let first = b"first gap payload";
+    let second = b"second trusted payload";
+    let first_download = downloaded_chunk("gap-a", "gap-a.cache", first, PayloadEncoding::Raw);
+    let second_download = downloaded_chunk("gap-b", "gap-b.cache", second, PayloadEncoding::Raw);
+    fs::write(shared.join(&first_download.cache_key), first).unwrap();
+    fs::write(shared.join(&second_download.cache_key), second).unwrap();
+    let plan = full_plan(
+      vec![first_download, second_download],
+      vec![
+        asset("gap-a.bin", first, vec![chunk("gap-a", first, None)]),
+        asset("gap-b.bin", second, vec![chunk("gap-b", second, None)]),
+      ],
+    );
+    let index = FullInstallDownloadIndex::from_plan(&plan).unwrap();
+    let canceled = AtomicBool::new(false);
+    assemble_full_install_asset_with_timing(&plan, &index, 1, &staging, &shared, &spool, &canceled)
+      .unwrap();
+    crate::game::evidence::capture_and_persist_asset_evidence(
+      &root.task_root(),
+      &plan,
+      1,
+      &staging,
+    )
+    .unwrap();
+
+    let completed =
+      discover_completed_install_assets(&plan, &root.task_root(), &staging, &canceled).unwrap();
+    assert!(!completed.contains(&0));
+    assert!(completed.contains(&1));
   }
 
   fn staging_file(task_root: &Path) -> PathBuf {
