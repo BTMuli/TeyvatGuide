@@ -77,6 +77,17 @@ declare namespace TGApp.Game.Package {
     message: string;
   };
 
+  /** 恢复资源任务时的计划复验与缓存核对进度。 */
+  type RecoveryProgress = {
+    taskId: string;
+    step: number;
+    totalSteps: number;
+    scannedObjects: number;
+    totalObjects: number;
+    confirmedBytes: number;
+    message: string;
+  };
+
   /** 安装完整性校验任务状态。 */
   const VerifyState = <const>{
     SCANNING: "scanning",

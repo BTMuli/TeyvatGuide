@@ -33,6 +33,9 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   const verifyByInstallation = shallowRef<Record<string, TGApp.Game.Package.VerifySummary>>({});
   const dismissedVerifyInstallations = shallowRef<Set<string>>(new Set());
   const pendingActions = shallowRef<Record<string, boolean>>({});
+  const recoveryProgressByTask = shallowRef<Record<string, TGApp.Game.Package.RecoveryProgress>>(
+    {},
+  );
   let unlisteners: Array<UnlistenFn> = [];
   let listenerPromise: Promise<void> | null = null;
   let listenerGeneration = 0;
@@ -59,6 +62,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     ) {
       void nextTick(() => removeTaskProjection(task));
     }
+  }
+
+  function setRecoveryProgress(
+    taskId: string,
+    progress: TGApp.Game.Package.RecoveryProgress | null,
+  ): void {
+    const next = { ...recoveryProgressByTask.value };
+    if (progress === null) delete next[taskId];
+    else next[taskId] = progress;
+    recoveryProgressByTask.value = next;
   }
 
   function createStartingInstallTask(
@@ -339,11 +352,15 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     action: TGApp.Game.Package.RecoveryActionEnum,
   ): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(taskId, true);
+    setRecoveryProgress(taskId, null);
     try {
-      const task = await recoverGamePackageTask(taskId, action);
+      const task = await recoverGamePackageTask(taskId, action, (progress) => {
+        setRecoveryProgress(taskId, progress);
+      });
       mergeTask(task);
       return task;
     } finally {
+      setRecoveryProgress(taskId, null);
       setPending(taskId, false);
     }
   }
@@ -423,6 +440,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     tasksByInstallation,
     verifyByInstallation,
     pendingActions,
+    recoveryProgressByTask,
     hydrateTasks,
     hydrateVerify,
     startTask,

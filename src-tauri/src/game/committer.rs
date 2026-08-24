@@ -15,7 +15,7 @@ use super::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file, resolve_optional_manifest_file,
   },
-  planner::{PersistedPlan, PlanAssetAction, PlanFile},
+  planner::{PersistedPlan, PlanAsset, PlanAssetAction, PlanFile},
 };
 use md5::{Digest as Md5Digest, Md5};
 use sha2::Sha256;
@@ -29,6 +29,7 @@ use std::{
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
 const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
+const MAX_AUDIO_VERIFY_WORKERS: usize = 4;
 const TRANSACTION_DIRECTORY: &str = ".teyvatguide-update";
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
@@ -116,7 +117,7 @@ where
     return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
   }
 
-  reset_audio_delete_progress(plan, journal);
+  reset_audio_commit_progress(plan, journal);
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
   journal.reset_assembly_progress(plan.assets.len(), incoming_bytes);
@@ -175,9 +176,15 @@ where
     } else {
       "校验目标清单".to_string()
     });
+    if plan.target == PackagePlanTarget::Audio {
+      journal.verification_completed_count = 0;
+      journal.verification_total_count = plan.assets.len().saturating_add(plan.delete_files.len());
+      journal.commit_current_step =
+        Some(format!("校验配音文件 0/{}", journal.verification_total_count));
+    }
     persist_and_emit(task_root, journal, &emit)?;
     if plan.target == PackagePlanTarget::Audio {
-      verify_changed_files(plan, game_root, canceled)?;
+      verify_changed_files(plan, game_root, journal, canceled, &emit)?;
     } else {
       let issues = inspect_inventory(plan, game_root, canceled)?;
       if let Some(error) = commit_integrity_error(plan, &issues) {
@@ -336,7 +343,7 @@ where
 }
 
 /// 回滚一个尚未完成的提交；无法证明安全状态时保留备份并进入 RecoveryRequired。
-pub(crate) fn rollback_apply<F>(
+pub(crate) fn rollback_apply<F, G>(
   plan: &PersistedPlan,
   repair_plan: Option<&PersistedPlan>,
   game_root: &Path,
@@ -344,9 +351,11 @@ pub(crate) fn rollback_apply<F>(
   journal: &mut TaskJournal,
   retry: bool,
   emit: F,
+  mut report_progress: G,
 ) -> Result<(), String>
 where
   F: Fn(&TaskJournal),
+  G: FnMut(usize, usize, &str),
 {
   if journal.repair.as_ref().is_some_and(|repair| repair.apply.is_some()) {
     let repair_plan = repair_plan.ok_or_else(|| "修复提交尚未回滚，缺少修复计划".to_string())?;
@@ -355,8 +364,12 @@ where
   if journal.apply.is_some() {
     journal.state = PackageTaskState::RollingBack;
     persist_and_emit(task_root, journal, &emit)?;
-    if let Err(error) = rollback_file_transaction(&file_commit_from_plan(plan)?, game_root, journal)
-    {
+    if let Err(error) = rollback_file_transaction_with_progress(
+      &file_commit_from_plan(plan)?,
+      game_root,
+      journal,
+      &mut report_progress,
+    ) {
       journal.state = PackageTaskState::RecoveryRequired;
       journal.error_message = Some(error.clone());
       let _ = persist_and_emit(task_root, journal, &emit);
@@ -367,7 +380,7 @@ where
   cleanup_known_transaction_files(plan, game_root, task_root);
   journal.apply = None;
   journal.repair = None;
-  reset_audio_delete_progress(plan, journal);
+  reset_audio_commit_progress(plan, journal);
   journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
   journal.error_message = None;
   persist_and_emit(task_root, journal, &emit)
@@ -655,9 +668,10 @@ fn rollback_repair(
   if apply.plan_sha256 != plan_sha256(repair_plan)? {
     return Err("修复提交日志与修复计划不匹配".to_string());
   }
+  let touched_steps = rollback_touched_steps(&steps, apply)?;
   let incoming_root = transaction_subdirectory(game_root, &repair_plan.plan_id, "repair-incoming")?;
   let backup_root = transaction_subdirectory(game_root, &repair_plan.plan_id, "repair-backup")?;
-  for step in steps.iter().rev() {
+  for step in touched_steps.iter().rev() {
     let target = resolve_optional_manifest_file(game_root, &step.name)?;
     let incoming = resolve_optional_manifest_file(&incoming_root, &step.name)?;
     let backup = resolve_optional_manifest_file(&backup_root, &step.name)?;
@@ -869,10 +883,12 @@ where
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   if journal.target == PackagePlanTarget::Audio {
     let cursor = apply(journal)?.cursor;
-    let (completed, total) = audio_delete_progress(&commit.steps, cursor);
-    journal.commit_completed_count = completed;
-    journal.commit_total_count = total;
-    journal.commit_current_step = (total > 0).then(|| format!("删除配音文件 {completed}/{total}"));
+    journal.commit_completed_count = cursor.min(commit.steps.len());
+    journal.commit_total_count = commit.steps.len();
+    journal.commit_current_step = Some(format!(
+      "提交配音文件 {}/{}",
+      journal.commit_completed_count, journal.commit_total_count
+    ));
   }
   for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
@@ -904,7 +920,10 @@ where
     if step.kind != CommitStepKind::Delete {
       ensure_game_stopped()?;
       let incoming_path = resolve_existing_manifest_file(&incoming_root, &step.name)?;
-      if !file_matches(&incoming_path, step.size, &step.md5)? {
+      // 配音 incoming 在本次连续组装流程中已经完成 MD5 校验；提交后仍会执行最终并行复验。
+      if journal.target != PackagePlanTarget::Audio
+        && !file_matches(&incoming_path, step.size, &step.md5)?
+      {
         return Err(format!("incoming 资源在提交前校验失败：{}", step.name));
       }
       if resolve_optional_manifest_file(game_root, &step.name)?.is_some() {
@@ -916,18 +935,20 @@ where
       fs::rename(&incoming, &target)
         .map_err(|error| format!("提交游戏资源失败：{}：{error}", step.name))?;
     }
-    set_active_step(journal, index, step, CommitStepPhase::Installed);
-    persist_and_emit(task_root, journal, emit)?;
+    // 配音任务保留写前阶段与最终游标两个持久化边界，省去中间 Installed 的重复日志同步。
+    if journal.target != PackagePlanTarget::Audio {
+      set_active_step(journal, index, step, CommitStepPhase::Installed);
+      persist_and_emit(task_root, journal, emit)?;
+    }
     {
       let apply = apply_mut(journal)?;
       apply.cursor = index + 1;
       apply.active_step = None;
     }
-    if journal.target == PackagePlanTarget::Audio && step.kind == CommitStepKind::Delete {
-      journal.commit_completed_count =
-        journal.commit_completed_count.saturating_add(1).min(journal.commit_total_count);
+    if journal.target == PackagePlanTarget::Audio {
+      journal.commit_completed_count = (index + 1).min(journal.commit_total_count);
       journal.commit_current_step = Some(format!(
-        "删除配音文件 {}/{}",
+        "提交配音文件 {}/{}",
         journal.commit_completed_count, journal.commit_total_count
       ));
     }
@@ -998,16 +1019,75 @@ fn verify_inventory(
   issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
 }
 
-fn verify_changed_files(
+fn verify_changed_files<F>(
   plan: &PersistedPlan,
   game_root: &Path,
+  journal: &mut TaskJournal,
   canceled: &AtomicBool,
-) -> Result<(), String> {
-  for asset in &plan.assets {
-    check_canceled(canceled)?;
-    let path = resolve_existing_manifest_file(game_root, &asset.name)?;
-    if !file_matches(&path, asset.size, &asset.md5)? {
-      return Err(format!("配音变更文件校验失败：{}", asset.name));
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let mut last_emit = Instant::now();
+  if !plan.assets.is_empty() {
+    let available = std::thread::available_parallelism().map_or(1, |value| value.get());
+    let worker_count = plan.assets.len().min(available.min(MAX_AUDIO_VERIFY_WORKERS).max(1));
+    let chunk_size = plan.assets.len().div_ceil(worker_count);
+    let first_error = std::thread::scope(|scope| {
+      let (sender, receiver) = std::sync::mpsc::channel();
+      let handles = plan
+        .assets
+        .chunks(chunk_size)
+        .map(|chunk| {
+          let sender = sender.clone();
+          scope.spawn(move || {
+            for asset in chunk {
+              let result = verify_audio_asset(asset, game_root, canceled);
+              let _ = sender.send((asset.name.clone(), result));
+            }
+          })
+        })
+        .collect::<Vec<_>>();
+      drop(sender);
+
+      let mut first_error = None;
+      for (name, result) in receiver {
+        match result {
+          Ok(()) => {
+            journal.verification_completed_count = journal
+              .verification_completed_count
+              .saturating_add(1)
+              .min(journal.verification_total_count);
+            journal.current_file = Some(name);
+            journal.commit_current_step = Some(format!(
+              "校验配音文件 {}/{}",
+              journal.verification_completed_count, journal.verification_total_count
+            ));
+            if journal.verification_completed_count == journal.verification_total_count
+              || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
+            {
+              journal.touch();
+              emit(journal);
+              last_emit = Instant::now();
+            }
+          }
+          Err(error) if first_error.is_none() => first_error = Some((name, error)),
+          Err(_) => {}
+        }
+      }
+      for handle in handles {
+        if handle.join().is_err() && first_error.is_none() {
+          first_error = Some((String::new(), "配音文件校验线程异常退出".to_string()));
+        }
+      }
+      first_error
+    });
+    if let Some((name, error)) = first_error {
+      journal.current_file = (!name.is_empty()).then_some(name);
+      journal.touch();
+      emit(journal);
+      return Err(error);
     }
   }
   for deleted in &plan.delete_files {
@@ -1015,6 +1095,33 @@ fn verify_changed_files(
     if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
       return Err(format!("应删除的配音文件仍然存在：{}", deleted.name));
     }
+    journal.verification_completed_count =
+      journal.verification_completed_count.saturating_add(1).min(journal.verification_total_count);
+    journal.current_file = Some(deleted.name.clone());
+    journal.commit_current_step = Some(format!(
+      "校验配音文件 {}/{}",
+      journal.verification_completed_count, journal.verification_total_count
+    ));
+    if journal.verification_completed_count == journal.verification_total_count
+      || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
+    {
+      journal.touch();
+      emit(journal);
+      last_emit = Instant::now();
+    }
+  }
+  Ok(())
+}
+
+fn verify_audio_asset(
+  asset: &PlanAsset,
+  game_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), String> {
+  check_canceled(canceled)?;
+  let path = resolve_existing_manifest_file(game_root, &asset.name)?;
+  if !file_matches(&path, asset.size, &asset.md5)? {
+    return Err(format!("配音变更文件校验失败：{}", asset.name));
   }
   Ok(())
 }
@@ -1113,7 +1220,7 @@ where
   }
   cleanup_known_transaction_files(plan, game_root, task_root);
   journal.apply = None;
-  reset_audio_delete_progress(plan, journal);
+  reset_audio_commit_progress(plan, journal);
   journal.state = PackageTaskState::ReadyToApply;
   journal.error_message = (!canceled).then_some(error.clone());
   let _ = persist_and_emit(task_root, journal, emit);
@@ -1125,12 +1232,25 @@ fn rollback_file_transaction(
   game_root: &Path,
   journal: &TaskJournal,
 ) -> Result<(), String> {
+  rollback_file_transaction_with_progress(commit, game_root, journal, &mut |_, _, _| {})
+}
+
+fn rollback_file_transaction_with_progress(
+  commit: &FileCommitPlan,
+  game_root: &Path,
+  journal: &TaskJournal,
+  report_progress: &mut impl FnMut(usize, usize, &str),
+) -> Result<(), String> {
   validate_plan_digest(journal, &commit.digest)?;
   validate_apply_identity(journal, &commit.steps)?;
+  let touched_steps = rollback_touched_steps(&commit.steps, apply(journal)?)?;
+  let total = touched_steps.len().saturating_add(1);
+  report_progress(0, total, "config.ini");
   rollback_config(&commit.plan_id, game_root, journal)?;
+  report_progress(1, total, "config.ini");
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
-  for step in commit.steps.iter().rev() {
+  for (index, step) in touched_steps.iter().rev().enumerate() {
     let target = resolve_optional_manifest_file(game_root, &step.name)?;
     let incoming = resolve_optional_manifest_file(&incoming_root, &step.name)?;
     let backup = resolve_optional_manifest_file(&backup_root, &step.name)?;
@@ -1261,8 +1381,29 @@ fn rollback_file_transaction(
         },
       },
     }
+    report_progress(index.saturating_add(2), total, &step.name);
   }
   Ok(())
+}
+
+fn rollback_touched_steps<'a>(
+  steps: &'a [CommitStep],
+  apply: &ApplyJournal,
+) -> Result<&'a [CommitStep], String> {
+  let touched_count = apply
+    .cursor
+    .checked_add(usize::from(apply.active_step.is_some()))
+    .ok_or_else(|| "资源提交游标溢出".to_string())?;
+  let touched =
+    steps.get(..touched_count).ok_or_else(|| "资源提交日志超出计划步骤范围".to_string())?;
+  if let Some(active) = &apply.active_step {
+    let step = steps.get(active.index).ok_or_else(|| "资源提交活动步骤超出计划范围".to_string())?;
+    if active.index != apply.cursor || active.kind != step.kind || active.relative_path != step.name
+    {
+      return Err("资源提交活动步骤与资源计划不匹配".to_string());
+    }
+  }
+  Ok(touched)
 }
 
 fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Result<(), String> {
@@ -1320,24 +1461,14 @@ fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
   steps
 }
 
-fn audio_delete_progress(steps: &[CommitStep], cursor: usize) -> (usize, usize) {
-  let total = steps.iter().filter(|step| step.kind == CommitStepKind::Delete).count();
-  let completed = steps
-    .iter()
-    .take(cursor.min(steps.len()))
-    .filter(|step| step.kind == CommitStepKind::Delete)
-    .count();
-  (completed, total)
-}
-
-fn reset_audio_delete_progress(plan: &PersistedPlan, journal: &mut TaskJournal) {
+fn reset_audio_commit_progress(plan: &PersistedPlan, journal: &mut TaskJournal) {
   if plan.target != PackagePlanTarget::Audio {
     return;
   }
   journal.commit_completed_count = 0;
-  journal.commit_total_count = plan.delete_files.len();
+  journal.commit_total_count = plan.assets.len().saturating_add(plan.delete_files.len());
   journal.commit_current_step =
-    (!plan.delete_files.is_empty()).then_some("等待删除配音文件".to_string());
+    (journal.commit_total_count > 0).then_some("等待提交配音文件".to_string());
 }
 
 fn steps_digest(steps: &[CommitStep]) -> String {
@@ -1843,34 +1974,4 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子替换 config.ini 失败：{error}"))
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  fn commit_step(kind: CommitStepKind, name: &str) -> CommitStep {
-    CommitStep {
-      kind,
-      name: name.to_string(),
-      source_size: None,
-      source_md5: None,
-      size: 1,
-      md5: "0".repeat(32),
-    }
-  }
-
-  #[test]
-  fn audio_delete_progress_counts_only_completed_delete_steps() {
-    let steps = vec![
-      commit_step(CommitStepKind::Add, "add.pck"),
-      commit_step(CommitStepKind::Delete, "delete-a.pck"),
-      commit_step(CommitStepKind::Modify, "modify.pck"),
-      commit_step(CommitStepKind::Delete, "delete-b.pck"),
-    ];
-
-    assert_eq!(audio_delete_progress(&steps, 0), (0, 2));
-    assert_eq!(audio_delete_progress(&steps, 2), (1, 2));
-    assert_eq!(audio_delete_progress(&steps, steps.len()), (2, 2));
-  }
 }

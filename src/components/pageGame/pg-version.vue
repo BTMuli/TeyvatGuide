@@ -166,6 +166,7 @@
     <PgTask
       :actionPending="taskActionPending"
       :plan
+      :recoveryProgress="currentRecoveryProgress"
       :targetPublished
       :task="currentTask"
       @apply-requested="handleApplyRequested"
@@ -210,7 +211,8 @@ const { installation } = defineProps<Props>();
 const emit = defineEmits<{ updated: [] }>();
 defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
 const taskStore = useGameLauncherStore();
-const { pendingActions, tasksByInstallation, verifyByInstallation } = storeToRefs(taskStore);
+const { pendingActions, recoveryProgressByTask, tasksByInstallation, verifyByInstallation } =
+  storeToRefs(taskStore);
 const snapshot = ref<TGApp.Game.Package.Snapshot | null>(null);
 const plan = ref<TGApp.Game.Package.PlanSummary | null>(null);
 const loading = ref<boolean>(false);
@@ -228,6 +230,10 @@ const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   const task = tasksByInstallation.value[installation.id];
   if (task === undefined || task.target === gameEnum.package.planTarget.SWITCH) return null;
   return task;
+});
+const currentRecoveryProgress = computed<TGApp.Game.Package.RecoveryProgress | null>(() => {
+  const taskId = currentTask.value?.taskId;
+  return taskId === undefined ? null : (recoveryProgressByTask.value[taskId] ?? null);
 });
 const currentVerify = computed<TGApp.Game.Package.VerifySummary | null>(() => {
   return verifyByInstallation.value[installation.id] ?? null;
@@ -332,8 +338,18 @@ const targetPublished = computed<boolean>(() => {
       currentTask.value.sourceTag === currentTask.value.targetTag)
   );
 });
+const audioApplyPreparing = computed<boolean>(() => {
+  return (
+    currentTask.value?.target === gameEnum.package.planTarget.AUDIO &&
+    currentTask.value.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    currentTask.value.currentFile !== null
+  );
+});
 const taskActive = computed<boolean>(() => {
-  return currentTask.value !== null && gameEnum.package.taskActive(currentTask.value.state);
+  return (
+    currentTask.value !== null &&
+    (gameEnum.package.taskActive(currentTask.value.state) || audioApplyPreparing.value)
+  );
 });
 const refreshDisabled = computed<boolean>(() => {
   return planningTarget.value !== null || taskActive.value || verifyActive.value;
@@ -592,7 +608,7 @@ async function handleApplyRequested(): Promise<void> {
 async function handleCancelRequested(): Promise<void> {
   const task = currentTask.value;
   if (task === null || !taskActive.value) return;
-  const applying = gameEnum.package.taskApplying(task.state);
+  const applying = gameEnum.package.taskApplying(task.state) || audioApplyPreparing.value;
   const confirmed = await showDialog.checkF({
     title: applying ? "取消资源提交？" : "取消资源下载？",
     text: applying
@@ -626,36 +642,26 @@ async function handleRecoverRequested(
     task.errorMessage !== null;
   if (task === null || (taskActive.value && !audioRegistrationPending && !audioApplyRetry)) return;
   const rollback = action === gameEnum.package.recoveryAction.ROLLBACK;
-  const abandonReady = rollback && task.state === gameEnum.package.taskState.READY_TO_APPLY;
-  const abandonRepair = rollback && task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
-  let title = "安全恢复资源任务？";
-  let text = "恢复会重新校验缓存；若提交曾中断，会先安全回滚到源版本再重新应用。";
-  let confirmLabel = "开始恢复";
-  if (audioRegistrationPending) {
-    title = "重试同步配音包记录？";
-    text = "配音文件已经提交并校验，只会重新同步本地安装记录，不会再次修改游戏文件。";
-    confirmLabel = "重试同步";
-  } else if (audioApplyRetry) {
-    title = "重试配音包修改？";
-    text = "上次自动应用未完成；将重新退出游戏并提交已下载完成的配音文件。";
-    confirmLabel = "重试修改";
-  } else if (abandonRepair) {
-    title = "放弃更新并回滚？";
-    text =
-      "已提交的新增、修改和删除会回滚到源版本。未完成的修复会先还原；已经修好的未变化文件会保留。已校验缓存不会删除。";
-    confirmLabel = "放弃并回滚";
-  } else if (abandonReady) {
-    const predownload = task.target === gameEnum.package.planTarget.PRE_DOWNLOAD;
-    title = predownload ? "放弃预下载任务？" : "放弃资源任务？";
-    text = "放弃不会修改游戏目录，也不会删除已校验的共享缓存。之后可以重新评估并下载。";
-    confirmLabel = "放弃任务";
-  } else if (rollback) {
-    title = "回滚资源任务？";
-    text = "若任务已进入文件提交，会先恢复备份；已校验的共享下载缓存不会删除。";
-    confirmLabel = "安全回滚";
+  if (rollback) {
+    const abandonReady = task.state === gameEnum.package.taskState.READY_TO_APPLY;
+    const abandonRepair = task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
+    let title = "回滚资源任务？";
+    let text = "若任务已进入文件提交，会先恢复备份；已校验的共享下载缓存不会删除。";
+    let confirmLabel = "安全回滚";
+    if (abandonRepair) {
+      title = "放弃更新并回滚？";
+      text =
+        "已提交的新增、修改和删除会回滚到源版本。未完成的修复会先还原；已经修好的未变化文件会保留。已校验缓存不会删除。";
+      confirmLabel = "放弃并回滚";
+    } else if (abandonReady) {
+      const predownload = task.target === gameEnum.package.planTarget.PRE_DOWNLOAD;
+      title = predownload ? "放弃预下载任务？" : "放弃资源任务？";
+      text = "放弃不会修改游戏目录，也不会删除已校验的共享缓存。之后可以重新评估并下载。";
+      confirmLabel = "放弃任务";
+    }
+    const confirmed = await showDialog.checkF({ title, text, confirmLabel });
+    if (confirmed !== true) return;
   }
-  const confirmed = await showDialog.checkF({ title, text, confirmLabel });
-  if (confirmed !== true) return;
   const writesGameDir =
     audioApplyRetry ||
     gameEnum.package.taskApplying(task.state) ||

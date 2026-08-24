@@ -8,9 +8,9 @@ use super::{
   installer, journal, launch,
   model::{
     GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanProgress,
-    PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction, PackageSnapshot,
-    PackageSwitchSummary, PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskState,
-    PackageTaskSummary, PackageVerifySummary, SchemeId,
+    PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction, PackageRecoveryProgress,
+    PackageSnapshot, PackageSwitchSummary, PackageTaskCleanupSummary, PackageTaskOptions,
+    PackageTaskState, PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::{AudioApplyContext, GamePackageManager},
   planner::{
@@ -34,6 +34,23 @@ use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
 
 const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
+
+fn report_recovery_progress(
+  channel: &Channel<PackageRecoveryProgress>,
+  task_id: &str,
+  step: u8,
+  message: &str,
+) {
+  let _ = channel.send(PackageRecoveryProgress {
+    task_id: task_id.to_string(),
+    step,
+    total_steps: 4,
+    scanned_objects: 0,
+    total_objects: 0,
+    confirmed_bytes: 0,
+    message: message.to_string(),
+  });
+}
 
 /// 配置后续创建的游戏资源 HTTP 客户端是否跟随系统代理。
 #[tauri::command]
@@ -920,7 +937,9 @@ pub async fn game_package_start(
   } else {
     None
   };
-  manager.start(app_handle, task_root, plan, options.unwrap_or_default(), false, audio_apply)
+  manager
+    .start(app_handle, task_root, plan, options.unwrap_or_default(), false, audio_apply, None)
+    .await
 }
 
 /// 消费 ReadyToApply 的正式更新或已转正预下载，完整校验后最后提交版本号。
@@ -984,6 +1003,7 @@ pub async fn game_package_recover(
   manager: tauri::State<'_, GamePackageManager>,
   task_id: String,
   action: PackageRecoveryAction,
+  on_progress: Channel<PackageRecoveryProgress>,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   let journal_value = journal::load(&journal::journal_path(&task_root, &task_id))?;
@@ -1009,6 +1029,12 @@ pub async fn game_package_recover(
     )
     .await;
   }
+  if !journal_value.state.is_active() && journal_value.state != PackageTaskState::ReadyToApply {
+    if matches!(action, PackageRecoveryAction::Resume) {
+      report_recovery_progress(&on_progress, &task_id, 1, "正在等待旧资源任务安全退出");
+    }
+    manager.wait_for_task_idle(&task_id).await?;
+  }
   if journal_value.operation == "audio"
     && journal_value.state == PackageTaskState::RegistrationPending
   {
@@ -1019,33 +1045,49 @@ pub async fn game_package_recover(
     if matches!(action, PackageRecoveryAction::Rollback) {
       return Err("语音包文件已经提交并校验，只能重试同步安装记录".to_string());
     }
+    report_recovery_progress(&on_progress, &task_id, 1, "正在读取配音包安装记录");
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
+    report_recovery_progress(&on_progress, &task_id, 2, "正在核对配音文件与安装状态");
     let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
-    return super::package::retry_audio_registration(
+    report_recovery_progress(&on_progress, &task_id, 3, "正在同步本地安装记录");
+    let summary = super::package::retry_audio_registration(
       &app_handle,
       &task_root,
       &pool,
       &plan,
       Path::new(&installation.root_path),
     )
-    .await;
+    .await?;
+    report_recovery_progress(&on_progress, &task_id, 4, "配音包安装记录已同步");
+    return Ok(summary);
   }
   if journal_value.operation == "audio" && journal_value.state == PackageTaskState::ReadyToApply {
     if matches!(action, PackageRecoveryAction::Rollback) {
+      if manager.cancel_if_running(&task_id)? {
+        manager.wait_for_task_idle(&task_id).await?;
+      }
       return manager.rollback_download(&task_root, &task_id);
     }
+    report_recovery_progress(&on_progress, &task_id, 1, "正在读取已下载的配音包计划");
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
     let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
     let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    report_recovery_progress(&on_progress, &task_id, 2, "正在验证当前版本与远端资源计划");
     let client = create_http_client()?;
     let branches = get_game_branches(&client, scheme).await?;
     let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
     persist_validated_plan(&task_root, &plan)?;
-    return manager.apply(app_handle, task_root, installation, plan, pool);
+    report_recovery_progress(&on_progress, &task_id, 3, "正在准备配音文件提交");
+    let summary = manager.apply(app_handle, task_root, installation, plan, pool)?;
+    report_recovery_progress(&on_progress, &task_id, 4, "配音包提交任务已启动");
+    return Ok(summary);
   }
   if journal_value.repair.is_some() {
+    if matches!(action, PackageRecoveryAction::Resume) {
+      report_recovery_progress(&on_progress, &task_id, 1, "正在读取待修复资源计划");
+    }
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
     let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
@@ -1068,53 +1110,72 @@ pub async fn game_package_recover(
         } else {
           None
         };
-      return manager.rollback_apply(
-        &app_handle,
-        &task_root,
-        Path::new(&installation.root_path),
-        &plan,
-        repair_plan.as_ref(),
-        false,
-      );
+      return manager
+        .rollback_apply(
+          app_handle,
+          task_root,
+          PathBuf::from(&installation.root_path),
+          plan,
+          repair_plan,
+          false,
+          Some(on_progress),
+        )
+        .await;
     }
     let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    report_recovery_progress(&on_progress, &task_id, 2, "正在验证当前版本与远端资源计划");
     let client = create_http_client()?;
     let branches = get_game_branches(&client, scheme).await?;
     let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
     persist_validated_plan(&task_root, &plan)?;
-    return manager.apply(app_handle, task_root, installation, plan, pool);
+    report_recovery_progress(&on_progress, &task_id, 3, "正在准备继续修复资源");
+    let summary = manager.apply(app_handle, task_root, installation, plan, pool)?;
+    report_recovery_progress(&on_progress, &task_id, 4, "资源修复任务已启动");
+    return Ok(summary);
   }
   if journal_value.state.requires_recovery() {
+    if matches!(action, PackageRecoveryAction::Resume) {
+      report_recovery_progress(&on_progress, &task_id, 1, "正在调和未完成的资源提交");
+    }
     let plan = load_persisted_plan(&task_root, &task_id)?;
     let pool = sqlite_pool(&db_instances).await?;
     let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
     let retry = matches!(action, PackageRecoveryAction::Resume);
-    let rolled_back = manager.rollback_apply(
-      &app_handle,
-      &task_root,
-      Path::new(&installation.root_path),
-      &plan,
-      None,
-      retry,
-    )?;
+    let rolled_back = manager
+      .rollback_apply(
+        app_handle.clone(),
+        task_root.clone(),
+        PathBuf::from(&installation.root_path),
+        plan.clone(),
+        None,
+        retry,
+        Some(on_progress.clone()),
+      )
+      .await?;
     if !retry {
       return Ok(rolled_back);
     }
     let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
     let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+    report_recovery_progress(&on_progress, &task_id, 2, "正在验证当前版本与远端资源计划");
     let client = create_http_client()?;
     let branches = get_game_branches(&client, scheme).await?;
     let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
     persist_validated_plan(&task_root, &plan)?;
-    return manager.apply(app_handle, task_root, installation, plan, pool);
+    report_recovery_progress(&on_progress, &task_id, 3, "正在准备重新提交资源");
+    let summary = manager.apply(app_handle, task_root, installation, plan, pool)?;
+    report_recovery_progress(&on_progress, &task_id, 4, "资源提交任务已恢复");
+    return Ok(summary);
   }
   match action {
     PackageRecoveryAction::Resume => {
+      report_recovery_progress(&on_progress, &task_id, 1, "正在读取已保存的资源计划");
       let plan = load_persisted_plan(&task_root, &task_id)?;
       let pool = sqlite_pool(&db_instances).await?;
       let installation =
         load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
       let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+      report_recovery_progress(&on_progress, &task_id, 2, "正在验证当前版本与远端资源计划");
       let client = create_http_client()?;
       let branches = get_game_branches(&client, scheme).await?;
       let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
@@ -1127,7 +1188,17 @@ pub async fn game_package_recover(
       } else {
         None
       };
-      manager.start(app_handle, task_root, plan, PackageTaskOptions::default(), true, audio_apply)
+      manager
+        .start(
+          app_handle,
+          task_root,
+          plan,
+          PackageTaskOptions::default(),
+          true,
+          audio_apply,
+          Some(on_progress),
+        )
+        .await
     }
     PackageRecoveryAction::Rollback => manager.rollback_download(&task_root, &task_id),
   }

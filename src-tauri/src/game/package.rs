@@ -12,13 +12,15 @@ use super::{
   installer,
   journal::{self, TaskJournal},
   model::{
-    GameInstallation, PackagePlanStrategy, PackagePlanTarget, PackageTaskCleanupSummary,
-    PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary,
+    GameInstallation, PackagePlanStrategy, PackagePlanTarget, PackageRecoveryProgress,
+    PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskState, PackageTaskSummary,
+    PackageVerifySummary,
   },
   planner::{
     PersistedPlan, PlanDownload, cached_chunk_matches, default_install_concurrency,
     flush_cache_validation_index, hydrate_and_validate_apply_plan,
     hydrate_and_validate_repair_plan, install_spool_window, persist_validated_plan, same_volume,
+    scan_cached_downloads,
   },
   switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
@@ -35,7 +37,7 @@ use std::{
   },
   time::{Duration, Instant},
 };
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, ipc::Channel};
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 
 const MAX_CONCURRENCY: usize = 64;
@@ -906,7 +908,7 @@ impl GamePackageManager {
   }
 
   /// 启动只写应用缓存的资源下载。游戏运行时仍允许开始；改游戏目录发生在 apply。
-  pub(crate) fn start(
+  pub(crate) async fn start(
     &self,
     app_handle: AppHandle,
     task_root: PathBuf,
@@ -914,6 +916,7 @@ impl GamePackageManager {
     options: PackageTaskOptions,
     recovering: bool,
     audio_apply: Option<AudioApplyContext>,
+    recovery_progress: Option<Channel<PackageRecoveryProgress>>,
   ) -> Result<PackageTaskSummary, String> {
     if self.verify.is_running(&plan.installation_id)? {
       return Err("该游戏安装正在校验完整性，请等待完成或取消后再开始资源任务".to_string());
@@ -936,18 +939,39 @@ impl GamePackageManager {
     if options.max_bytes_per_second.is_some_and(|value| value < MIN_RATE_LIMIT) {
       return Err("下载限速不能低于 1 MiB/s".to_string());
     }
+    let plan = Arc::new(plan);
     let mut reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
     let cache_root = prepare_cache_root(&task_root)?;
     let download_client = create_http_client()?;
-    let missing_bytes = plan
-      .downloads
-      .iter()
-      .filter(|download| !cached_chunk_matches(&cache_root, download))
-      .try_fold(0_u64, |total, download| {
-        total.checked_add(download.compressed_size).ok_or_else(|| "待下载资源大小溢出".to_string())
-      })?;
-    let required = missing_bytes
+    let scan_task_id = plan.plan_id.clone();
+    let scan_cache_root = cache_root.clone();
+    let scan_plan = Arc::clone(&plan);
+    let scan_progress = recovery_progress.clone();
+    let cache_scan = tauri::async_runtime::spawn_blocking(move || {
+      scan_cached_downloads(
+        &scan_cache_root,
+        &scan_plan.downloads,
+        |scanned_objects, total_objects, confirmed_bytes| {
+          if let Some(channel) = &scan_progress {
+            let _ = channel.send(PackageRecoveryProgress {
+              task_id: scan_task_id.clone(),
+              step: 3,
+              total_steps: 4,
+              scanned_objects,
+              total_objects,
+              confirmed_bytes,
+              message: "正在核对已下载缓存".to_string(),
+            });
+          }
+        },
+      )
+    })
+    .await
+    .map_err(|error| format!("资源缓存核对任务异常退出：{error}"))??;
+    let plan = Arc::try_unwrap(plan).map_err(|_| "资源计划核对完成后仍被占用".to_string())?;
+    let required = cache_scan
+      .missing_bytes
       .checked_add(SAFETY_MARGIN_BYTES)
       .ok_or_else(|| "缓存空间需求溢出".to_string())?;
     let available = fs2::available_space(&cache_root)
@@ -967,7 +991,9 @@ impl GamePackageManager {
       return Err("资源任务已经完成下载".to_string());
     }
     journal.resume_elapsed();
-    rebuild_completed_cache(&mut journal, &plan, &cache_root);
+    journal.committed_step = cache_scan.completed_cache_keys.len();
+    journal.owned_cache_files = cache_scan.completed_cache_keys;
+    journal.downloaded_bytes = cache_scan.confirmed_bytes;
     journal.state = PackageTaskState::Queued;
     journal.error_message = None;
     journal.current_file = None;
@@ -975,6 +1001,17 @@ impl GamePackageManager {
     journal.eta_seconds = None;
     journal.touch();
     journal::persist(&task_root, &journal)?;
+    if let Some(channel) = &recovery_progress {
+      let _ = channel.send(PackageRecoveryProgress {
+        task_id: plan.plan_id.clone(),
+        step: 4,
+        total_steps: 4,
+        scanned_objects: plan.downloads.len(),
+        total_objects: plan.downloads.len(),
+        confirmed_bytes: journal.downloaded_bytes,
+        message: "缓存核对完成，正在继续任务".to_string(),
+      });
+    }
 
     let canceled = Arc::new(AtomicBool::new(false));
     let paused = Arc::new(AtomicBool::new(false));
@@ -1026,6 +1063,8 @@ impl GamePackageManager {
           && journal_value.error_message.is_none()
         {
           journal_value.error_message = Some(error.clone());
+          journal_value.current_file = None;
+          journal_value.commit_current_step = Some("等待重试提交配音文件".to_string());
           journal_value.touch();
           let _ = journal::persist(&task_root, &journal_value);
           let summary = journal_value.summary();
@@ -1381,7 +1420,7 @@ impl GamePackageManager {
     Ok(summary)
   }
 
-  /// 等待暂停任务的下载 worker 退出，避免恢复或删除与旧 worker 并发操作日志和缓存。
+  /// 等待指定资源 worker 退出，避免恢复或删除与旧 worker 并发操作日志和缓存。
   pub(crate) async fn wait_for_task_idle(&self, task_id: &str) -> Result<(), String> {
     let deadline = Instant::now() + Duration::from_secs(60);
     loop {
@@ -1393,10 +1432,20 @@ impl GamePackageManager {
         return Ok(());
       }
       if Instant::now() >= deadline {
-        return Err("安装任务仍在停止，请稍后重试".to_string());
+        return Err("资源任务仍在停止，请稍后重试".to_string());
       }
       tokio::time::sleep(Duration::from_millis(50)).await;
     }
+  }
+
+  /// 若指定任务仍在运行，请求它在安全边界取消。
+  pub(crate) fn cancel_if_running(&self, task_id: &str) -> Result<bool, String> {
+    let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+    let Some(task) = active.by_task.get(task_id) else {
+      return Ok(false);
+    };
+    task.canceled.store(true, Ordering::Release);
+    Ok(true)
   }
 
   fn request_or_reap_cancel(
@@ -1567,33 +1616,59 @@ impl GamePackageManager {
     Ok(summary)
   }
 
-  pub(crate) fn rollback_apply(
+  pub(crate) async fn rollback_apply(
     &self,
-    app_handle: &AppHandle,
-    task_root: &Path,
-    game_root: &Path,
-    plan: &PersistedPlan,
-    repair_plan: Option<&PersistedPlan>,
+    app_handle: AppHandle,
+    task_root: PathBuf,
+    game_root: PathBuf,
+    plan: PersistedPlan,
+    repair_plan: Option<PersistedPlan>,
     retry: bool,
+    recovery_progress: Option<Channel<PackageRecoveryProgress>>,
   ) -> Result<PackageTaskSummary, String> {
-    let _reservation =
-      TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
-    if is_game_running() {
-      return Err("游戏仍在运行，无法恢复资源提交".to_string());
-    }
-    let mut journal_value = journal::load(&journal::journal_path(task_root, &plan.plan_id))?;
-    committer::rollback_apply(
-      plan,
-      repair_plan,
-      game_root,
-      task_root,
-      &mut journal_value,
-      retry,
-      |journal| {
-        emit_state(app_handle, &journal.summary());
-      },
-    )?;
-    Ok(journal_value.summary())
+    let active = Arc::clone(&self.active);
+    tauri::async_runtime::spawn_blocking(move || {
+      let _reservation = TaskReservation::acquire(active, &plan.installation_id, &plan.plan_id)?;
+      if is_game_running() {
+        return Err("游戏仍在运行，无法恢复资源提交".to_string());
+      }
+      let mut journal_value = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?;
+      let progress_task_id = plan.plan_id.clone();
+      committer::rollback_apply(
+        &plan,
+        repair_plan.as_ref(),
+        &game_root,
+        &task_root,
+        &mut journal_value,
+        retry,
+        |journal| {
+          emit_state(&app_handle, &journal.summary());
+        },
+        |completed, total, current_file| {
+          let Some(channel) = &recovery_progress else {
+            return;
+          };
+          let total_steps = if retry { 4 } else { 1 };
+          let message = if completed == 0 {
+            "正在核对未完成的资源提交".to_string()
+          } else {
+            format!("正在恢复资源 {completed}/{total}：{current_file}")
+          };
+          let _ = channel.send(PackageRecoveryProgress {
+            task_id: progress_task_id.clone(),
+            step: 1,
+            total_steps,
+            scanned_objects: completed,
+            total_objects: total,
+            confirmed_bytes: 0,
+            message,
+          });
+        },
+      )?;
+      Ok(journal_value.summary())
+    })
+    .await
+    .map_err(|error| format!("资源提交恢复线程异常退出：{error}"))?
   }
 
   pub(crate) fn start_verify(
@@ -1737,6 +1812,15 @@ async fn apply_audio_after_download(
   {
     return Ok(());
   }
+  {
+    let mut journal_value = journal.lock().await;
+    journal_value.commit_current_step = Some("正在验证配音包提交计划".to_string());
+    journal_value.current_file = journal_value.commit_current_step.clone();
+    journal_value.touch();
+    let summary = journal_value.summary();
+    emit_state(&app_handle, &summary);
+    emit_progress(&app_handle, &summary);
+  }
   let installation =
     inspect_executable(&context.installation.executable_path, &context.machine_uid)?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
@@ -1744,6 +1828,15 @@ async fn apply_audio_after_download(
   let branches = get_game_branches(&client, scheme).await?;
   let plan = hydrate_and_validate_apply_plan(&installation, &branches, plan).await?;
   persist_validated_plan(&task_root, &plan)?;
+  {
+    let mut journal_value = journal.lock().await;
+    journal_value.commit_current_step = Some("正在退出游戏并准备提交配音文件".to_string());
+    journal_value.current_file = journal_value.commit_current_step.clone();
+    journal_value.touch();
+    let summary = journal_value.summary();
+    emit_state(&app_handle, &summary);
+    emit_progress(&app_handle, &summary);
+  }
   let stop_result = tauri::async_runtime::spawn_blocking(stop_game)
     .await
     .map_err(|error| format!("退出游戏任务异常：{error}"))?;
@@ -1751,6 +1844,8 @@ async fn apply_audio_after_download(
     let message = format!("自动退出游戏失败：{error}");
     let mut journal_value = journal.lock().await;
     journal_value.error_message = Some(message.clone());
+    journal_value.current_file = None;
+    journal_value.commit_current_step = Some("等待重试提交配音文件".to_string());
     journal_value.touch();
     journal::persist(&task_root, &journal_value)?;
     let summary = journal_value.summary();

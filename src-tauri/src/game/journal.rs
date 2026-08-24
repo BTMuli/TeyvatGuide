@@ -247,13 +247,13 @@ impl TaskJournal {
       commit_completed_count: 0,
       commit_total_count: match plan.target {
         PackagePlanTarget::Install => INSTALL_COMMIT_TOTAL_STEPS,
-        PackagePlanTarget::Audio => plan.delete_files.len(),
+        PackagePlanTarget::Audio => plan.assets.len().saturating_add(plan.delete_files.len()),
         _ => 0,
       },
       commit_current_step: match plan.target {
         PackagePlanTarget::Install => Some("等待资源组装完成".to_string()),
-        PackagePlanTarget::Audio if !plan.delete_files.is_empty() => {
-          Some("等待删除配音文件".to_string())
+        PackagePlanTarget::Audio if !plan.assets.is_empty() || !plan.delete_files.is_empty() => {
+          Some("等待提交配音文件".to_string())
         }
         _ => None,
       },

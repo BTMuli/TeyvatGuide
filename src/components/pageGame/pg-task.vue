@@ -32,64 +32,66 @@
         <span v-for="fact in progressFacts" :key="fact">{{ fact }}</span>
       </div>
       <p v-if="currentResource !== null" class="task-current">
-        <span class="task-current-label">当前资源：</span>
+        <span class="task-current-label">{{ currentResourceLabel }}：</span>
         <span class="task-current-value" :title="currentResource">{{ currentResource }}</span>
       </p>
-      <PgNotice v-if="task.errorMessage !== null" :text="task.errorMessage" tone="error" />
-      <PgNotice
-        v-else-if="
-          task.state === gameEnum.package.taskState.REGISTRATION_PENDING &&
-          task.target === gameEnum.package.planTarget.AUDIO
-        "
-        text="配音文件已经提交并校验，正在同步本地安装记录。若同步失败，可使用安全恢复重试。"
-        tone="warning"
-      />
-      <PgNotice
-        v-else-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
-        text="检测到上次未完成的资源任务。继续或回滚时会先调和提交日志与实际文件状态。"
-        tone="warning"
-      />
-      <PgNotice
-        v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED && integrityRepair"
-        text="仍有文件缺失或损坏。继续修复后完成；不会改写版本号。放弃任务会恢复本次替换前的文件。"
-        tone="warning"
-      />
-      <PgNotice
-        v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED"
-        text="更新文件已提交，但仍有未变化文件缺失或损坏。修复这些文件后才会写入版本号；放弃任务会回滚本次更新。"
-        tone="warning"
-      />
-      <PgNotice
-        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && integrityRepair"
-        text="全部下载对象已通过 hash 复验。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
-        tone="success"
-      />
-      <PgNotice
-        v-else-if="
-          task.state === gameEnum.package.taskState.READY_TO_APPLY &&
-          task.target === gameEnum.package.planTarget.INSTALL
-        "
-        text="安装资源已下载，准备进入 staging、发布和最终复检。"
-        tone="success"
-      />
-      <PgNotice
-        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
-        text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
-        tone="success"
-      />
-      <PgNotice
-        v-else-if="
-          task.state === gameEnum.package.taskState.READY_TO_APPLY &&
-          task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
-        "
-        text="预下载已完成。目标版本成为正式版本后即可应用更新。"
-        tone="info"
-      />
-      <PgNotice
-        v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
-        text="下载已完成，但当前正式版本与任务目标不一致，请重新评估。"
-        tone="warning"
-      />
+      <template v-if="recoveryProgress === null">
+        <PgNotice v-if="task.errorMessage !== null" :text="task.errorMessage" tone="error" />
+        <PgNotice
+          v-else-if="
+            task.state === gameEnum.package.taskState.REGISTRATION_PENDING &&
+            task.target === gameEnum.package.planTarget.AUDIO
+          "
+          text="配音文件已经提交并校验，正在同步本地安装记录。若同步失败，可使用安全恢复重试。"
+          tone="warning"
+        />
+        <PgNotice
+          v-else-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
+          text="检测到上次未完成的资源任务。继续或回滚时会先调和提交日志与实际文件状态。"
+          tone="warning"
+        />
+        <PgNotice
+          v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED && integrityRepair"
+          text="仍有文件缺失或损坏。继续修复后完成；不会改写版本号。放弃任务会恢复本次替换前的文件。"
+          tone="warning"
+        />
+        <PgNotice
+          v-else-if="task.state === gameEnum.package.taskState.REPAIR_REQUIRED"
+          text="更新文件已提交，但仍有未变化文件缺失或损坏。修复这些文件后才会写入版本号；放弃任务会回滚本次更新。"
+          tone="warning"
+        />
+        <PgNotice
+          v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && integrityRepair"
+          text="全部下载对象已通过 hash 复验。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
+          tone="success"
+        />
+        <PgNotice
+          v-else-if="
+            task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+            task.target === gameEnum.package.planTarget.INSTALL
+          "
+          text="安装资源已下载，准备进入 staging、发布和最终复检。"
+          tone="success"
+        />
+        <PgNotice
+          v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
+          text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
+          tone="success"
+        />
+        <PgNotice
+          v-else-if="
+            task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+            task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+          "
+          text="预下载已完成。目标版本成为正式版本后即可应用更新。"
+          tone="info"
+        />
+        <PgNotice
+          v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
+          text="下载已完成，但当前正式版本与任务目标不一致，请重新评估。"
+          tone="warning"
+        />
+      </template>
     </template>
 
     <div class="task-actions">
@@ -162,10 +164,11 @@ type Props = {
   plan: TGApp.Game.Package.PlanSummary | null;
   task: TGApp.Game.Package.TaskSummary | null;
   actionPending: boolean;
+  recoveryProgress: TGApp.Game.Package.RecoveryProgress | null;
   targetPublished: boolean;
 };
 
-const { plan, task, actionPending, targetPublished } = defineProps<Props>();
+const { plan, task, actionPending, recoveryProgress, targetPublished } = defineProps<Props>();
 const emit = defineEmits<{
   startRequested: [];
   applyRequested: [];
@@ -173,10 +176,25 @@ const emit = defineEmits<{
   recoverRequested: [action: TGApp.Game.Package.RecoveryActionEnum];
 }>();
 
+const audioApplyPreparing = computed<boolean>(() => {
+  return (
+    task?.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    task.currentFile !== null
+  );
+});
 const active = computed<boolean>(() => {
-  return task !== null && gameEnum.package.taskActive(task.state);
+  return task !== null && (gameEnum.package.taskActive(task.state) || audioApplyPreparing.value);
 });
 const taskStateLabel = computed<string>(() => {
+  if (recoveryProgress !== null) return "正在恢复";
+  if (
+    task?.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    task.currentFile !== null
+  ) {
+    return "准备提交";
+  }
   if (
     task?.target === gameEnum.package.planTarget.INSTALL &&
     task.state === gameEnum.package.taskState.FAILED
@@ -228,6 +246,7 @@ const audioLabel = computed<string>(() => {
   return task.audioLanguages.map((language) => labels[language] ?? language).join("、");
 });
 const currentResource = computed<string | null>(() => {
+  if (recoveryProgress !== null) return recoveryProgress.message;
   if (task === null) return null;
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     return task.assemblyCurrentFile ?? task.currentFile;
@@ -236,6 +255,17 @@ const currentResource = computed<string | null>(() => {
     return task.downloadCurrentFile;
   }
   return task.currentFile;
+});
+const currentResourceLabel = computed<string>(() => {
+  if (recoveryProgress !== null) return "恢复阶段";
+  if (
+    task?.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    task.currentFile !== null
+  ) {
+    return "提交阶段";
+  }
+  return "当前资源";
 });
 const canApply = computed<boolean>(() => {
   if (task?.target === gameEnum.package.planTarget.AUDIO) return false;
@@ -247,6 +277,7 @@ const applyActionLabel = computed<string>(() => {
   return "应用更新";
 });
 const canAbandon = computed<boolean>(() => {
+  if (active.value) return false;
   if (
     task?.target === gameEnum.package.planTarget.AUDIO &&
     task.state === gameEnum.package.taskState.REGISTRATION_PENDING
@@ -276,22 +307,39 @@ const canStart = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.FAILED
   );
 });
-const audioProgressCounts = computed<{ completed: number; total: number } | null>(() => {
+const audioProgressPercent = computed<number | null>(() => {
   if (task === null || task.target !== gameEnum.package.planTarget.AUDIO) return null;
-  return {
-    completed: task.completedCount + task.commitCompletedCount,
-    total: task.totalCount + task.commitTotalCount,
-  };
+  switch (task.state) {
+    case gameEnum.package.taskState.ASSEMBLING:
+      if (task.assemblyTotalBytes > 0) {
+        return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
+      }
+      if (task.assemblyTotalCount > 0) {
+        return Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100);
+      }
+      return 0;
+    case gameEnum.package.taskState.COMMIT_PREPARED:
+    case gameEnum.package.taskState.COMMITTING:
+      if (task.commitTotalCount === 0) return 0;
+      return Math.min(100, (task.commitCompletedCount / task.commitTotalCount) * 100);
+    case gameEnum.package.taskState.VERIFYING:
+      if (task.verificationTotalCount === 0) return 0;
+      return Math.min(100, (task.verificationCompletedCount / task.verificationTotalCount) * 100);
+    case gameEnum.package.taskState.REGISTRATION_PENDING:
+    case gameEnum.package.taskState.COMPLETED:
+      return 100;
+    default:
+      if (task.totalBytes === 0) return 0;
+      return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
+  }
 });
 const progressPercent = computed<number>(() => {
-  if (task === null) return 0;
-  if (audioProgressCounts.value !== null) {
-    if (audioProgressCounts.value.total === 0) return 0;
-    return Math.min(
-      100,
-      (audioProgressCounts.value.completed / audioProgressCounts.value.total) * 100,
-    );
+  if (recoveryProgress !== null) {
+    if (recoveryProgress.totalObjects === 0) return 0;
+    return Math.min(100, (recoveryProgress.scannedObjects / recoveryProgress.totalObjects) * 100);
   }
+  if (task === null) return 0;
+  if (audioProgressPercent.value !== null) return audioProgressPercent.value;
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     if (task.assemblyTotalBytes > 0) {
       return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
@@ -309,27 +357,73 @@ const progressPercent = computed<number>(() => {
   return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
 });
 const progressIndeterminate = computed<boolean>(() => {
-  if (task === null || !active.value) return false;
-  if (audioProgressCounts.value !== null) return audioProgressCounts.value.total === 0;
+  if (recoveryProgress !== null) return recoveryProgress.totalObjects === 0;
+  if (task === null) return false;
+  if (
+    task.target === gameEnum.package.planTarget.AUDIO &&
+    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    task.currentFile !== null
+  ) {
+    return true;
+  }
+  if (!active.value) return false;
+  if (task.target === gameEnum.package.planTarget.AUDIO) {
+    switch (task.state) {
+      case gameEnum.package.taskState.ASSEMBLING:
+        return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
+      case gameEnum.package.taskState.COMMIT_PREPARED:
+      case gameEnum.package.taskState.COMMITTING:
+        return task.commitTotalCount === 0;
+      case gameEnum.package.taskState.VERIFYING:
+        return task.verificationTotalCount === 0;
+      case gameEnum.package.taskState.REGISTRATION_PENDING:
+        return true;
+      default:
+        return task.totalBytes === 0;
+    }
+  }
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
   }
   return task.totalBytes === 0 || gameEnum.package.taskApplying(task.state);
 });
 const progressFacts = computed<Array<string>>(() => {
+  if (recoveryProgress !== null) {
+    const values = [`步骤 ${recoveryProgress.step} / ${recoveryProgress.totalSteps}`];
+    if (recoveryProgress.totalObjects > 0) {
+      values.push(`处理对象 ${recoveryProgress.scannedObjects} / ${recoveryProgress.totalObjects}`);
+      if (recoveryProgress.confirmedBytes > 0) {
+        values.push(`已确认 ${formatBytes(recoveryProgress.confirmedBytes)}`);
+      }
+    }
+    return values;
+  }
   if (task === null) return [];
   if (task.target === gameEnum.package.planTarget.AUDIO) {
-    const values = [];
-    if (task.totalCount > 0) {
-      values.push(`下载文件 ${task.completedCount} / ${task.totalCount}`);
-      values.push(`${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
+    switch (task.state) {
+      case gameEnum.package.taskState.ASSEMBLING:
+        return [
+          `准备文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
+          `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+        ];
+      case gameEnum.package.taskState.COMMIT_PREPARED:
+      case gameEnum.package.taskState.COMMITTING:
+        return [`提交文件 ${task.commitCompletedCount} / ${task.commitTotalCount}`];
+      case gameEnum.package.taskState.VERIFYING:
+        return [`校验文件 ${task.verificationCompletedCount} / ${task.verificationTotalCount}`];
+      case gameEnum.package.taskState.REGISTRATION_PENDING:
+        return ["正在同步本地安装记录"];
+      default: {
+        const values = [];
+        if (task.totalCount > 0) {
+          values.push(`下载文件 ${task.completedCount} / ${task.totalCount}`);
+          values.push(`${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
+        }
+        if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
+        if (task.etaSeconds !== null) values.push(`预计 ${formatDuration(task.etaSeconds)}`);
+        return values;
+      }
     }
-    if (task.commitTotalCount > 0) {
-      values.push(`删除文件 ${task.commitCompletedCount} / ${task.commitTotalCount}`);
-    }
-    if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
-    if (task.etaSeconds !== null) values.push(`预计 ${formatDuration(task.etaSeconds)}`);
-    return values;
   }
   if (task.state === gameEnum.package.taskState.ASSEMBLING) {
     return [
@@ -346,6 +440,7 @@ const progressFacts = computed<Array<string>>(() => {
   return values;
 });
 const stateColor = computed<string>(() => {
+  if (recoveryProgress !== null) return "var(--tgc-od-orange)";
   switch (task?.state) {
     case gameEnum.package.taskState.READY_TO_APPLY:
     case gameEnum.package.taskState.COMPLETED:

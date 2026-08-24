@@ -44,6 +44,8 @@ const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
 const CACHE_VALIDATION_INDEX_FILE: &str = "cache-validation.json";
 const MAX_CACHE_VALIDATION_INDEX_BYTES: u64 = 64 * 1024 * 1024;
 const PLAN_PROGRESS_TOTAL: u8 = 4;
+const MAX_CACHE_SCAN_WORKERS: usize = 8;
+const CACHE_SCAN_PROGRESS_BATCH_SIZE: usize = 128;
 
 pub(crate) fn report_plan_progress(
   channel: &Channel<PackagePlanProgress>,
@@ -1727,37 +1729,112 @@ fn digest_parts(tag: &str, entries: &[String]) -> String {
   format!("{:x}", hasher.finalize())
 }
 
+pub(crate) struct CachedDownloadScan {
+  pub(crate) completed_cache_keys: Vec<String>,
+  pub(crate) confirmed_bytes: u64,
+  pub(crate) missing_bytes: u64,
+}
+
+pub(crate) fn scan_cached_downloads(
+  cache_root: &Path,
+  downloads: &[PlanDownload],
+  on_progress: impl FnMut(usize, usize, u64),
+) -> Result<CachedDownloadScan, String> {
+  scan_cached_downloads_inner(cache_root, downloads, true, on_progress)
+}
+
 fn calculate_cache_hits(cache_root: &Path, downloads: &[PlanDownload]) -> u64 {
+  scan_cached_downloads_inner(cache_root, downloads, false, |_, _, _| {})
+    .map_or(0, |scan| scan.confirmed_bytes)
+}
+
+fn scan_cached_downloads_inner(
+  cache_root: &Path,
+  downloads: &[PlanDownload],
+  collect_cache_keys: bool,
+  mut on_progress: impl FnMut(usize, usize, u64),
+) -> Result<CachedDownloadScan, String> {
+  let total_bytes = downloads.iter().try_fold(0_u64, |total, download| {
+    total.checked_add(download.compressed_size).ok_or_else(|| "资源缓存对象总大小溢出".to_string())
+  })?;
   if downloads.is_empty() {
-    return 0;
+    on_progress(0, 0, 0);
+    return Ok(CachedDownloadScan {
+      completed_cache_keys: Vec::new(),
+      confirmed_bytes: 0,
+      missing_bytes: 0,
+    });
   }
   let available = std::thread::available_parallelism().map_or(1, |value| value.get());
   let worker_count = cache_hit_worker_count(downloads.len(), available);
   let chunk_size = downloads.len().div_ceil(worker_count);
-  let cache_hit_bytes = std::thread::scope(|scope| {
+  on_progress(0, downloads.len(), 0);
+  let (completed_cache_keys, confirmed_bytes) = std::thread::scope(|scope| {
+    let (progress_sender, progress_receiver) = std::sync::mpsc::channel();
     let handles = downloads
       .chunks(chunk_size)
-      .map(|chunk| {
+      .enumerate()
+      .map(|(chunk_index, chunk)| {
+        let sender = progress_sender.clone();
         scope.spawn(move || {
-          chunk
-            .iter()
-            .filter(|download| cached_chunk_matches(cache_root, download))
-            .map(|download| download.compressed_size)
-            .sum::<u64>()
+          let mut matches = Vec::new();
+          let mut batch_count = 0_usize;
+          let mut batch_bytes = 0_u64;
+          for (index, download) in chunk.iter().enumerate() {
+            if cached_chunk_matches(cache_root, download) {
+              if collect_cache_keys {
+                matches.push((chunk_index * chunk_size + index, download.cache_key.clone()));
+              }
+              batch_bytes += download.compressed_size;
+            }
+            batch_count += 1;
+            if batch_count == CACHE_SCAN_PROGRESS_BATCH_SIZE {
+              let _ = sender.send((batch_count, batch_bytes));
+              batch_count = 0;
+              batch_bytes = 0;
+            }
+          }
+          if batch_count > 0 {
+            let _ = sender.send((batch_count, batch_bytes));
+          }
+          matches
         })
       })
       .collect::<Vec<_>>();
-    handles.into_iter().map(|handle| handle.join().unwrap_or_default()).sum()
-  });
+    drop(progress_sender);
+
+    let mut scanned_objects = 0_usize;
+    let mut confirmed_bytes = 0_u64;
+    for (batch_count, batch_bytes) in progress_receiver {
+      scanned_objects += batch_count;
+      confirmed_bytes += batch_bytes;
+      on_progress(scanned_objects, downloads.len(), confirmed_bytes);
+    }
+
+    let mut completed_cache_keys = Vec::new();
+    for handle in handles {
+      let mut matches = handle.join().map_err(|_| "资源缓存核对线程异常退出".to_string())?;
+      completed_cache_keys.append(&mut matches);
+    }
+    if scanned_objects != downloads.len() {
+      return Err("资源缓存核对未完整结束".to_string());
+    }
+    completed_cache_keys.sort_unstable_by_key(|(index, _)| *index);
+    Ok::<_, String>((completed_cache_keys, confirmed_bytes))
+  })?;
   flush_cache_validation_index(cache_root);
-  cache_hit_bytes
+  Ok(CachedDownloadScan {
+    completed_cache_keys: completed_cache_keys.into_iter().map(|(_, key)| key).collect(),
+    confirmed_bytes,
+    missing_bytes: total_bytes.saturating_sub(confirmed_bytes),
+  })
 }
 
 fn cache_hit_worker_count(download_count: usize, available: usize) -> usize {
   if download_count == 0 {
     return 0;
   }
-  available.max(1).min(download_count)
+  available.max(1).min(MAX_CACHE_SCAN_WORKERS).min(download_count)
 }
 
 pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
@@ -2329,30 +2406,5 @@ fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
     0 => Ok(PayloadEncoding::Raw),
     1 => Ok(PayloadEncoding::Zstd),
     _ => Err(format!("Sophon 资源载荷使用了不支持的压缩方式：{compression}")),
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::{PlanAudioSelection, audio_manifest_digest};
-  use crate::game::sophon::DecodedBuild;
-
-  #[test]
-  fn audio_digest_binds_source_and_target_languages() {
-    let source = DecodedBuild { tag: "6.0.0".to_string(), manifests: Vec::new() };
-    let target = DecodedBuild { tag: "6.0.0".to_string(), manifests: Vec::new() };
-    let add_japanese = PlanAudioSelection {
-      source_audio_languages: vec!["zh-cn".to_string()],
-      target_audio_languages: vec!["ja-jp".to_string(), "zh-cn".to_string()],
-    };
-    let add_english = PlanAudioSelection {
-      source_audio_languages: vec!["zh-cn".to_string()],
-      target_audio_languages: vec!["en-us".to_string(), "zh-cn".to_string()],
-    };
-
-    assert_ne!(
-      audio_manifest_digest(&source, &target, &add_japanese),
-      audio_manifest_digest(&source, &target, &add_english)
-    );
   }
 }

@@ -137,6 +137,19 @@ pub struct PackagePlanProgress {
   pub message: String,
 }
 
+/// 恢复资源任务时上报的计划复验与缓存核对进度。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageRecoveryProgress {
+  pub task_id: String,
+  pub step: u8,
+  pub total_steps: u8,
+  pub scanned_objects: usize,
+  pub total_objects: usize,
+  pub confirmed_bytes: u64,
+  pub message: String,
+}
+
 /// 安装完整性校验任务状态。
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]

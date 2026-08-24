@@ -428,11 +428,20 @@ export async function cleanupGamePackageTasks(): Promise<TGApp.Game.Package.Task
  * @since Beta v0.11.5
  * @param taskId - 资源任务 ID
  * @param action - 恢复动作
+ * @param onProgress - 恢复准备进度回调
  * @returns 更新后的任务投影
  */
 export async function recoverGamePackageTask(
   taskId: string,
   action: TGApp.Game.Package.RecoveryActionEnum,
+  onProgress?: (progress: TGApp.Game.Package.RecoveryProgress) => void,
 ): Promise<TGApp.Game.Package.TaskSummary> {
-  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_recover", { taskId, action });
+  const progressChannel = new Channel<TGApp.Game.Package.RecoveryProgress>((progress) => {
+    onProgress?.(progress);
+  });
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_recover", {
+    taskId,
+    action,
+    onProgress: progressChannel,
+  });
 }
