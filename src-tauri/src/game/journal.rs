@@ -26,6 +26,8 @@ const LEGACY_JOURNAL_SCHEMA_VERSION_V1: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
 const JOURNAL_PROGRESS_INTERVAL: StdDuration = StdDuration::from_millis(500);
 const JOURNAL_PROGRESS_SLOT_TTL: StdDuration = StdDuration::from_secs(60);
+const ATOMIC_REPLACE_RETRIES: usize = 10;
+const ATOMIC_REPLACE_RETRY_INTERVAL: StdDuration = StdDuration::from_millis(100);
 
 /// Timing for one journal persistence attempt.
 ///
@@ -1021,21 +1023,62 @@ fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
 #[cfg(target_os = "windows")]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   use std::os::windows::ffi::OsStrExt;
+  use std::thread;
   use windows_sys::Win32::Storage::FileSystem::{
     MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH, MoveFileExW,
   };
 
+  // 目标日志可能被实时扫描/索引进程瞬时占用（ERROR_ACCESS_DENIED）或带只读属性；
+  // 先清理只读，再对可重试错误短暂重试，避免转服任务因一次落盘竞争直接失败。
+  clear_readonly_attribute(target).map_err(|error| format!("清除任务日志只读属性失败：{error}"))?;
+
   let source = source.as_os_str().encode_wide().chain([0]).collect::<Vec<_>>();
   let target = target.as_os_str().encode_wide().chain([0]).collect::<Vec<_>>();
-  let result = unsafe {
-    MoveFileExW(
-      source.as_ptr(),
-      target.as_ptr(),
-      MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
-    )
+  let mut last_error = None;
+  for attempt in 0..ATOMIC_REPLACE_RETRIES {
+    let result = unsafe {
+      MoveFileExW(
+        source.as_ptr(),
+        target.as_ptr(),
+        MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+      )
+    };
+    if result != 0 {
+      return Ok(());
+    }
+    let error = std::io::Error::last_os_error();
+    last_error = Some(error);
+    let retriable =
+      last_error.as_ref().is_some_and(|error| matches!(error.raw_os_error(), Some(5 | 32)));
+    if !retriable || attempt + 1 >= ATOMIC_REPLACE_RETRIES {
+      break;
+    }
+    thread::sleep(ATOMIC_REPLACE_RETRY_INTERVAL);
+  }
+  let message =
+    last_error.map(|error| error.to_string()).unwrap_or_else(|| "未知系统错误".to_string());
+  Err(format!("原子提交任务日志失败：{message}"))
+}
+
+#[cfg(target_os = "windows")]
+fn clear_readonly_attribute(path: &Path) -> std::io::Result<()> {
+  use std::os::windows::ffi::OsStrExt;
+  use windows_sys::Win32::Storage::FileSystem::{
+    FILE_ATTRIBUTE_READONLY, GetFileAttributesW, SetFileAttributesW,
   };
-  if result == 0 {
-    return Err(format!("原子提交任务日志失败：{}", std::io::Error::last_os_error()));
+
+  let wide = path.as_os_str().encode_wide().chain([0]).collect::<Vec<_>>();
+  let attributes = unsafe { GetFileAttributesW(wide.as_ptr()) };
+  if attributes == u32::MAX {
+    let error = std::io::Error::last_os_error();
+    return if error.kind() == std::io::ErrorKind::NotFound { Ok(()) } else { Err(error) };
+  }
+  if attributes & FILE_ATTRIBUTE_READONLY != 0 {
+    let result =
+      unsafe { SetFileAttributesW(wide.as_ptr(), attributes & !FILE_ATTRIBUTE_READONLY) };
+    if result == 0 {
+      return Err(std::io::Error::last_os_error());
+    }
   }
   Ok(())
 }
