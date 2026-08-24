@@ -15,8 +15,9 @@ use super::{
     PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary,
   },
   planner::{
-    PersistedPlan, PlanDownload, cached_chunk_matches, flush_cache_validation_index,
-    hydrate_and_validate_repair_plan, same_volume,
+    PersistedPlan, PlanDownload, cached_chunk_matches, default_install_concurrency,
+    flush_cache_validation_index, hydrate_and_validate_repair_plan, install_spool_window,
+    same_volume,
   },
   switch::{self, PersistedSwitchPlan},
   verify::{self, VerifyRuntime},
@@ -36,17 +37,17 @@ use std::{
 use tauri::{AppHandle, Emitter};
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 
-const MIN_CONCURRENCY: usize = 4;
 const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
 /// 默认下载/组装并发：按 CPU 核心数，最低 4 路。
 pub(crate) fn default_concurrency() -> usize {
-  std::thread::available_parallelism()
-    .map(|parallelism| parallelism.get())
-    .unwrap_or(MIN_CONCURRENCY)
-    .max(MIN_CONCURRENCY)
+  default_install_concurrency()
+}
+
+fn install_download_concurrency(pipeline_concurrency: usize) -> usize {
+  pipeline_concurrency.saturating_mul(2).clamp(1, MAX_CONCURRENCY)
 }
 
 #[derive(Debug)]
@@ -201,6 +202,73 @@ struct RecoveryValidationProgress {
   current_file: String,
 }
 
+struct InstallDownloadProgressMonitor {
+  stopped: Arc<AtomicBool>,
+}
+
+impl Drop for InstallDownloadProgressMonitor {
+  fn drop(&mut self) {
+    self.stopped.store(true, Ordering::Release);
+  }
+}
+
+fn start_install_download_progress_monitor(
+  app_handle: AppHandle,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  metrics: Arc<InstallPipelineMetrics>,
+) -> InstallDownloadProgressMonitor {
+  let stopped = Arc::new(AtomicBool::new(false));
+  let stopped_for_task = Arc::clone(&stopped);
+  tauri::async_runtime::spawn(async move {
+    let mut last_received_bytes = metrics.download_telemetry.snapshot().received_bytes;
+    let mut last_sample = Instant::now();
+    let mut smoothed_bytes_per_second = 0_f64;
+    loop {
+      tokio::time::sleep(Duration::from_secs(1)).await;
+      if stopped_for_task.load(Ordering::Acquire) {
+        break;
+      }
+      let received_bytes = metrics.download_telemetry.snapshot().received_bytes;
+      let elapsed = last_sample.elapsed().as_secs_f64().max(0.001);
+      let received_delta = received_bytes.saturating_sub(last_received_bytes);
+      last_received_bytes = received_bytes;
+      last_sample = Instant::now();
+      let active_downloads = metrics.active_downloads.load(Ordering::Acquire);
+      if active_downloads > 0 && received_delta > 0 {
+        let sample = received_delta as f64 / elapsed;
+        smoothed_bytes_per_second = if smoothed_bytes_per_second > 0.0 {
+          smoothed_bytes_per_second * 0.7 + sample * 0.3
+        } else {
+          sample
+        };
+      } else if active_downloads == 0 {
+        smoothed_bytes_per_second = 0.0;
+      } else {
+        smoothed_bytes_per_second *= 0.5;
+      }
+
+      let mut value = journal.lock().await;
+      let speed = if value.state == PackageTaskState::Downloading {
+        smoothed_bytes_per_second.max(0.0) as u64
+      } else {
+        0
+      };
+      let remaining = value.total_bytes.saturating_sub(value.downloaded_bytes);
+      let eta = if speed > 0 { Some(remaining.div_ceil(speed)) } else { None };
+      if value.bytes_per_second == speed && value.eta_seconds == eta {
+        continue;
+      }
+      value.bytes_per_second = speed;
+      value.eta_seconds = eta;
+      value.touch();
+      let summary = value.summary();
+      drop(value);
+      emit_progress(&app_handle, &summary);
+    }
+  });
+  InstallDownloadProgressMonitor { stopped }
+}
+
 /// 全新安装私有 spool 的增量记账。
 ///
 /// 每次游标前推不再遍历全部下载计划：只维护「spool 内文件、已消费 chunk、已计入
@@ -256,9 +324,10 @@ impl InstallSpoolTracker {
     self.counted.len()
   }
 
-  fn mark_downloaded(&mut self, id: &str, cache_key: &str) {
+  fn mark_downloaded(&mut self, id: &str, cache_key: &str) -> usize {
     self.resident.insert(cache_key.to_string(), id.to_string());
     self.counted.insert(id.to_string());
+    self.committed_step()
   }
 
   fn mark_consumed(&mut self, ids: impl IntoIterator<Item = String>) {
@@ -931,7 +1000,7 @@ impl GamePackageManager {
     }
     rebuild_install_cache_state(&mut journal, &plan, &cache_root, &spool_root);
     let cache_complete = journal.committed_step >= journal.total_count;
-    let spool_window = install_spool_window(&plan, concurrency, cache_complete);
+    let spool_window = install_spool_window(&plan.assets, concurrency, cache_complete);
     let required = install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
     let spool_required = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
     let sufficient = if same_volume(spool_parent, game_parent) {
@@ -1526,6 +1595,11 @@ async fn run_install_streaming_task(
     pipeline_started_at,
     duration_micros(index_started_at.elapsed()),
   ));
+  let _download_progress_monitor = start_install_download_progress_monitor(
+    app_handle.clone(),
+    Arc::clone(&journal),
+    Arc::clone(&metrics),
+  );
   let start_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
   let recovery_started_at = Instant::now();
   // 游标已到末尾（组装完成后崩溃）：由随后的并行「校验暂存目录」统一承担逐文件校验与
@@ -1680,20 +1754,22 @@ async fn run_install_streaming_task(
           )
           .await;
           metrics.finish_download(started_at);
-          if result.is_ok() {
-            tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-          }
-          result
+          result.map(|downloaded| {
+            let completed_count =
+              tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+            (downloaded, completed_count)
+          })
         }
       }))
       .buffer_unordered(concurrency);
       futures_util::pin_mut!(tasks);
       while let Some(result) = tasks.next().await {
         match result {
-          Ok(downloaded) => {
+          Ok((downloaded, completed_count)) => {
             metrics.record_unique_download(downloaded.bytes);
             let mut value = journal.lock().await;
             value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
+            value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
             value.spool_bytes = spool_bytes(&spool_root);
             metrics.observe_spool(value.spool_bytes);
             value.touch();
@@ -1836,6 +1912,8 @@ async fn run_install_streaming_task(
     value.download_current_file = None;
     value.assembly_current_file = None;
     value.current_file = None;
+    value.bytes_per_second = 0;
+    value.eta_seconds = None;
     value.touch();
     let _ = journal::persist(&task_root, &value);
     let _ = journal::forget_progress(&task_root, &value.task_id);
@@ -1849,6 +1927,8 @@ async fn run_install_streaming_task(
     value.download_current_file = None;
     value.assembly_current_file = None;
     value.current_file = None;
+    value.bytes_per_second = 0;
+    value.eta_seconds = None;
     value.touch();
     let _ = journal::persist(&task_root, &value);
     let _ = journal::forget_progress(&task_root, &value.task_id);
@@ -1922,9 +2002,12 @@ async fn run_install_streaming_task(
         .await;
         return;
       }
+      let completed_count =
+        spool_tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
       let mut value = journal.lock().await;
       value.downloaded_bytes =
         value.downloaded_bytes.saturating_add(download.compressed_size).min(value.total_bytes);
+      value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
       value.download_current_file = None;
       value.spool_bytes = spool_bytes(&spool_root);
       value.touch();
@@ -1941,6 +2024,8 @@ async fn run_install_streaming_task(
     value.download_current_file = None;
     value.assembly_current_file = None;
     value.current_file = None;
+    value.bytes_per_second = 0;
+    value.eta_seconds = None;
     value.spool_bytes = spool_bytes(&spool_root);
     value.touch();
     if let Err(error) = persist_install_checkpoint(&task_root, &value, &metrics) {
@@ -1982,7 +2067,10 @@ async fn run_install_bounded_asset_pipeline(
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
 ) -> Result<(), String> {
-  let download_slots = Arc::new(Semaphore::new(concurrency.max(1)));
+  // 网络对象通常小于最终资源文件，允许下载使用双倍槽位来隐藏连接延迟；组装仍按
+  // 流水线并发限制，避免机械盘或低端 SSD 因并行写入过多而反向降速。
+  let network_concurrency = install_download_concurrency(concurrency);
+  let download_slots = Arc::new(Semaphore::new(network_concurrency));
   let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
   let mut asset_cursor = {
     let mut value = journal.lock().await;
@@ -2000,7 +2088,7 @@ async fn run_install_bounded_asset_pipeline(
     cursor
   };
   let cache_complete = journal.lock().await.committed_step >= plan.downloads.len();
-  let spool_budget = install_spool_window(plan, concurrency, cache_complete);
+  let spool_budget = install_spool_window(&plan.assets, concurrency, cache_complete);
   let max_in_flight = concurrency.max(1).saturating_mul(2);
   let mut next_asset_index = asset_cursor;
   let mut reserved_spool_bytes = 0_u64;
@@ -2058,7 +2146,7 @@ async fn run_install_bounded_asset_pipeline(
         Arc::clone(&download_guards),
         Arc::clone(&assembly_slots),
         staging_root.to_path_buf(),
-        concurrency,
+        network_concurrency,
         Arc::clone(spool_tracker),
       ));
     }
@@ -2194,7 +2282,7 @@ async fn run_install_asset_job(
   download_guards: Arc<AsyncMutex<HashMap<String, Arc<AsyncMutex<()>>>>>,
   assembly_slots: Arc<Semaphore>,
   staging_root: PathBuf,
-  concurrency: usize,
+  network_concurrency: usize,
   spool_tracker: Arc<Mutex<InstallSpoolTracker>>,
 ) -> InstallAssetJobCompletion {
   let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
@@ -2241,20 +2329,22 @@ async fn run_install_asset_job(
         .await;
         metrics.finish_download(started_at);
         drop(permit);
-        if result.is_ok() {
-          tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-        }
-        result.map(|downloaded| Some(downloaded.bytes))
+        result.map(|downloaded| {
+          let completed_count =
+            tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+          Some((downloaded.bytes, completed_count))
+        })
       }
     }))
-    .buffer_unordered(concurrency.max(1));
+    .buffer_unordered(network_concurrency);
     futures_util::pin_mut!(downloads);
     while let Some(download_result) = downloads.next().await {
-      if let Some(downloaded_bytes) = download_result? {
+      if let Some((downloaded_bytes, completed_count)) = download_result? {
         metrics.record_unique_download(downloaded_bytes);
         let mut value = journal.lock().await;
         value.downloaded_bytes =
           value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
+        value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
         value.download_current_file =
           (value.downloaded_bytes < value.total_bytes).then_some("持续下载资源对象".to_string());
         value.spool_bytes = spool_bytes(&spool_root);
@@ -2489,6 +2579,8 @@ async fn persist_install_stream_error(
   value.download_current_file = None;
   value.assembly_current_file = None;
   value.current_file = None;
+  value.bytes_per_second = 0;
+  value.eta_seconds = None;
   value.touch();
   let _ = journal::persist(task_root, &value);
   let _ = journal::forget_progress(task_root, &value.task_id);
@@ -3276,29 +3368,6 @@ fn check_install_stream_space<'a>(
   Ok(())
 }
 
-fn install_spool_window(plan: &PersistedPlan, concurrency: usize, cache_complete: bool) -> u64 {
-  if cache_complete {
-    return 256 * 1024 * 1024;
-  }
-  let mut asset_worksets = plan
-    .assets
-    .iter()
-    .map(|asset| {
-      let mut seen = HashSet::new();
-      asset
-        .chunks
-        .iter()
-        .filter(|chunk| chunk.reuse.is_none() && seen.insert(chunk.id.as_str()))
-        .fold(0_u64, |total, chunk| total.saturating_add(chunk.compressed_size))
-    })
-    .collect::<Vec<_>>();
-  asset_worksets.sort_unstable_by(|left, right| right.cmp(left));
-  asset_worksets
-    .into_iter()
-    .take(concurrency.max(1).saturating_mul(2))
-    .fold(256 * 1024 * 1024, u64::saturating_add)
-}
-
 fn spool_bytes(root: &Path) -> u64 {
   fs::read_dir(root)
     .ok()
@@ -3518,14 +3587,14 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    ActiveTask, GamePackageManager, PlanWorksetBaseline, install_spool_window, nearest_rank,
+    ActiveTask, GamePackageManager, PlanWorksetBaseline, install_download_concurrency, nearest_rank,
   };
   use crate::game::{
     journal::{self, TaskJournal},
     model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState, SchemeId},
     planner::{
       PayloadEncoding, PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDownload,
-      PlanDownloadHashKind, PlanReuse,
+      PlanDownloadHashKind, PlanReuse, install_spool_window,
     },
   };
   use std::{
@@ -3727,8 +3796,8 @@ mod tests {
     assert_eq!(baseline.batch_union_p95, 60);
     assert_eq!(baseline.max_download_consumers, 2);
     assert_eq!(baseline.max_download_span, 2);
-    assert_eq!(install_spool_window(&plan, 2, false), 256 * 1024 * 1024 + 110);
-    assert_eq!(install_spool_window(&plan, 2, true), 256 * 1024 * 1024);
+    assert_eq!(install_spool_window(&plan.assets, 2, false), 256 * 1024 * 1024 + 110);
+    assert_eq!(install_spool_window(&plan.assets, 2, true), 256 * 1024 * 1024);
   }
 
   #[test]
@@ -3736,6 +3805,12 @@ mod tests {
     assert_eq!(nearest_rank(&[], 95), 0);
     assert_eq!(nearest_rank(&[50, 10, 30, 20, 40], 50), 30);
     assert_eq!(nearest_rank(&[50, 10, 30, 20, 40], 95), 50);
+  }
+
+  #[test]
+  fn download_concurrency_doubles_pipeline_without_exceeding_limit() {
+    assert_eq!(install_download_concurrency(4), 8);
+    assert_eq!(install_download_concurrency(64), 64);
   }
 
   #[test]

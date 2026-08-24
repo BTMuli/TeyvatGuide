@@ -106,14 +106,20 @@ const commitPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return 100;
   return phasePercent(task.commitCompletedCount, task.commitTotalCount);
 });
+const commitComplete = computed<boolean>(() => {
+  return task.commitTotalCount === 0 || task.commitCompletedCount >= task.commitTotalCount;
+});
 const resourcePercent = computed<number>(() => {
   const totalWork = task.totalBytes + task.assemblyTotalBytes;
   if (totalWork === 0) return gameEnum.package.taskApplying(task.state) ? 100 : 0;
   const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
   return Math.min(100, (completedWork / totalWork) * 100);
 });
-// 总进度只反映下载与组装资源进度，不掺提交里程碑，避免阶段切换时进度回退。
-const progressPercent = computed<number>(() => resourcePercent.value);
+// 下载与组装按实际字节工作量计权；安装收尾预留 5%，避免发布、校验和登记期间提前显示 100%。
+const progressPercent = computed<number>(() => {
+  if (task.commitTotalCount === 0) return resourcePercent.value;
+  return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
+});
 const downloadComplete = computed<boolean>(() => {
   return task.totalBytes > 0 && task.downloadedBytes >= task.totalBytes;
 });
@@ -150,25 +156,25 @@ const displayElapsedMs = computed<number>(() => {
   if (!Number.isFinite(updatedAt)) return task.elapsedMs;
   return task.elapsedMs + Math.max(0, clock.value - updatedAt);
 });
-const combinedEtaSeconds = computed<number | null>(() => {
-  const totalWork = task.totalBytes + task.assemblyTotalBytes;
-  const completedWork = Math.min(totalWork, task.downloadedBytes + task.assemblyCompletedBytes);
-  const elapsedSeconds = displayElapsedMs.value / 1000;
-  if (!active.value || totalWork === 0 || completedWork === 0 || elapsedSeconds <= 0) return null;
-  const remaining = totalWork - completedWork;
-  if (remaining === 0) return 0;
-  return Math.ceil(remaining / (completedWork / elapsedSeconds));
-});
 const overallFacts = computed<Array<string>>(() => {
-  const values = [
+  return [
     `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
     `当前耗时 ${formatElapsed(displayElapsedMs.value)}`,
   ];
-  if (!downloadComplete.value && task.bytesPerSecond > 0) {
-    values.push(`${formatBytes(task.bytesPerSecond)}/s`);
+});
+const downloadFacts = computed<Array<string>>(() => {
+  const values = [
+    `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
+    `对象 ${task.completedCount} / ${task.totalCount}`,
+  ];
+  if (!downloadComplete.value && task.state === gameEnum.package.taskState.DOWNLOADING) {
+    values.push(
+      task.bytesPerSecond > 0
+        ? `当前速度 ${formatBytes(task.bytesPerSecond)}/s`
+        : "当前速度 测速中",
+      task.etaSeconds !== null ? `预计剩余 ${formatDuration(task.etaSeconds)}` : "预计剩余 计算中",
+    );
   }
-  const eta = combinedEtaSeconds.value;
-  if (eta !== null) values.push(`预计剩余 ${formatDuration(eta)}`);
   return values;
 });
 const downloadRow = computed<ProgressRow>(() => ({
@@ -177,10 +183,7 @@ const downloadRow = computed<ProgressRow>(() => ({
   indeterminate: task.totalBytes === 0 && active.value,
   complete: downloadComplete.value,
   status: downloadStatus.value,
-  details: [
-    `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
-    `对象 ${task.completedCount} / ${task.totalCount}`,
-  ],
+  details: downloadFacts.value,
 }));
 const assemblyRow = computed<ProgressRow>(() => ({
   label: "组装",
@@ -216,10 +219,12 @@ const overallRow = computed<ProgressRow>(() => ({
   label: "总进度",
   percent: progressPercent.value,
   indeterminate: task.totalBytes + task.assemblyTotalBytes === 0 && active.value,
-  complete: progressPercent.value >= 100,
+  complete: resourcePercent.value >= 100 && commitComplete.value,
   status: overallFacts.value.join(" · "),
   details: [
-    `${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(task.totalBytes + task.assemblyTotalBytes)}`,
+    `资源工作量 ${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(
+      task.totalBytes + task.assemblyTotalBytes,
+    )}`,
     task.commitTotalCount > 0
       ? `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
       : `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}%`,

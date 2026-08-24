@@ -202,7 +202,7 @@
             <span>需预留空间</span><strong>{{ formatBytes(plan.installRequiredFreeBytes) }}</strong>
           </div>
           <div>
-            <span>任务临时空间需预留</span
+            <span>任务临时空间（峰值）</span
             ><strong>{{ formatBytes(plan.cacheRequiredFreeBytes) }}</strong>
           </div>
           <div>
@@ -220,6 +220,10 @@
           <div>
             <span>缓存与安装磁盘</span><strong>{{ plan.sameVolume ? "同一卷" : "不同卷" }}</strong>
           </div>
+          <p class="review-space-note">
+            临时空间按并发队列内最大的资源工作集估算，包含 256 MiB 基础窗口与 1 GiB
+            安全余量；资源完成组装后会滚动释放。
+          </p>
         </div>
         <v-alert
           v-if="plan !== null && !plan.hasSufficientSpace"
@@ -1135,6 +1139,14 @@ watch(
   }
 }
 
+.review-space-note {
+  margin: 2px 4px 0;
+  color: var(--box-text-2);
+  font-size: 11px;
+  grid-column: 1 / -1;
+  line-height: 16px;
+}
+
 .install-footer-hint {
   min-width: 0;
   color: var(--box-text-2);
@@ -1152,6 +1164,10 @@ watch(
   }
 
   .review-facts .review-fact-wide {
+    grid-column: auto;
+  }
+
+  .review-space-note {
     grid-column: auto;
   }
 

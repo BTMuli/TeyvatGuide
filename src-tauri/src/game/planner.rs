@@ -36,6 +36,8 @@ const LEGACY_PLAN_SCHEMA_VERSION_V3: u32 = 3;
 const LEGACY_PLAN_SCHEMA_VERSION_V2: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MIN_INSTALL_SPOOL_WINDOW_BYTES: u64 = 256 * 1024 * 1024;
+const MIN_INSTALL_CONCURRENCY: usize = 4;
+const MAX_INSTALL_CONCURRENCY: usize = 64;
 const MAX_PLAN_BYTES: usize = 256 * 1024 * 1024;
 const CACHE_VALIDATION_INDEX_FILE: &str = "cache-validation.json";
 const MAX_CACHE_VALIDATION_INDEX_BYTES: u64 = 64 * 1024 * 1024;
@@ -81,6 +83,45 @@ struct SpaceBudget {
   cache_required_free_bytes: u64,
   install_required_free_bytes: u64,
   has_sufficient_space: bool,
+}
+
+/// 默认全新安装并发数；空间评估与任务执行必须共用同一取值。
+pub(crate) fn default_install_concurrency() -> usize {
+  std::thread::available_parallelism()
+    .map(|parallelism| parallelism.get())
+    .unwrap_or(MIN_INSTALL_CONCURRENCY)
+    .max(MIN_INSTALL_CONCURRENCY)
+    .min(MAX_INSTALL_CONCURRENCY)
+}
+
+/// 估算流式安装的峰值私有 spool 窗口。
+///
+/// 队列最多同时持有两倍并发数的资源工作集，因此取最大的这些工作集，加上固定的
+/// 256 MiB 基础窗口。已完成全部对象下载时只保留基础窗口用于恢复与收尾。
+pub(crate) fn install_spool_window(
+  assets: &[PlanAsset],
+  concurrency: usize,
+  cache_complete: bool,
+) -> u64 {
+  if cache_complete {
+    return MIN_INSTALL_SPOOL_WINDOW_BYTES;
+  }
+  let mut asset_worksets = assets
+    .iter()
+    .map(|asset| {
+      let mut seen = std::collections::HashSet::new();
+      asset
+        .chunks
+        .iter()
+        .filter(|chunk| chunk.reuse.is_none() && seen.insert(chunk.id.as_str()))
+        .fold(0_u64, |total, chunk| total.saturating_add(chunk.compressed_size))
+    })
+    .collect::<Vec<_>>();
+  asset_worksets.sort_unstable_by(|left, right| right.cmp(left));
+  asset_worksets
+    .into_iter()
+    .take(concurrency.max(1).saturating_mul(2))
+    .fold(MIN_INSTALL_SPOOL_WINDOW_BYTES, u64::saturating_add)
 }
 
 static CACHE_VALIDATION_STATES: LazyLock<Mutex<HashMap<PathBuf, CacheValidationState>>> =
@@ -508,25 +549,15 @@ pub(crate) async fn create_and_persist_install_plan(
     let install_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
     let install_available = fs2::available_space(install_parent)
       .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
-    let spool_window = parts
-      .downloads
-      .iter()
-      .map(|download| download.compressed_size)
-      .max()
-      .unwrap_or(MIN_INSTALL_SPOOL_WINDOW_BYTES)
-      .max(MIN_INSTALL_SPOOL_WINDOW_BYTES);
+    let spool_window = install_spool_window(&parts.assets, default_install_concurrency(), false);
     let same_volume = same_volume(spool_parent, install_parent);
-    let cache_required = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
-    let install_required =
-      install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
-    let required_free_bytes = install_required;
-    let available_free_bytes =
-      if same_volume { install_available.min(cache_available) } else { install_available };
-    let has_sufficient_space = if same_volume {
-      install_available.min(cache_available) >= required_free_bytes
-    } else {
-      install_available >= install_required && cache_available >= cache_required
-    };
+    let budget = calculate_install_space_budget(
+      install_bytes,
+      spool_window,
+      cache_available,
+      install_available,
+      same_volume,
+    );
     let summary = PackagePlanSummary {
       plan_id: plan_id.clone(),
       installation_id: installation_id.to_string(),
@@ -538,11 +569,11 @@ pub(crate) async fn create_and_persist_install_plan(
       download_bytes,
       install_bytes,
       cache_hit_bytes,
-      required_free_bytes,
-      available_free_bytes,
-      has_sufficient_space,
-      cache_required_free_bytes: cache_required,
-      install_required_free_bytes: install_required,
+      required_free_bytes: budget.required_free_bytes,
+      available_free_bytes: budget.available_free_bytes,
+      has_sufficient_space: budget.has_sufficient_space,
+      cache_required_free_bytes: budget.cache_required_free_bytes,
+      install_required_free_bytes: budget.install_required_free_bytes,
       cache_available_free_bytes: cache_available,
       install_available_free_bytes: install_available,
       same_volume,
@@ -737,6 +768,42 @@ fn calculate_update_space_budget(
     cache_required_free_bytes.max(install_required_free_bytes)
   };
   let available_free_bytes = cache_available_free_bytes.min(install_available_free_bytes);
+  let has_sufficient_space = if same_volume {
+    available_free_bytes >= required_free_bytes
+  } else {
+    cache_available_free_bytes >= cache_required_free_bytes
+      && install_available_free_bytes >= install_required_free_bytes
+  };
+  SpaceBudget {
+    required_free_bytes,
+    available_free_bytes,
+    cache_required_free_bytes,
+    install_required_free_bytes,
+    has_sufficient_space,
+  }
+}
+
+fn calculate_install_space_budget(
+  install_bytes: u64,
+  spool_window: u64,
+  cache_available_free_bytes: u64,
+  install_available_free_bytes: u64,
+  same_volume: bool,
+) -> SpaceBudget {
+  let cache_required_free_bytes = spool_window.saturating_add(SAFETY_MARGIN_BYTES);
+  let install_required_free_bytes = install_bytes
+    .saturating_add(if same_volume { spool_window } else { 0 })
+    .saturating_add(SAFETY_MARGIN_BYTES);
+  let required_free_bytes = if same_volume {
+    install_required_free_bytes
+  } else {
+    cache_required_free_bytes.max(install_required_free_bytes)
+  };
+  let available_free_bytes = if same_volume {
+    cache_available_free_bytes.min(install_available_free_bytes)
+  } else {
+    install_available_free_bytes
+  };
   let has_sufficient_space = if same_volume {
     available_free_bytes >= required_free_bytes
   } else {
@@ -2079,8 +2146,8 @@ mod tests {
   use super::{
     PLAN_SCHEMA_VERSION, PayloadEncoding, PersistedPlan, PlanDownloadHashKind, PlanFile, PlanParts,
     assets_equal, build_manifest_diff, build_patch_plan, cached_chunk_matches,
-    calculate_update_space_budget, digest_parts, load_persisted_plan, overlay_repair_parts,
-    validate_persisted_plan,
+    calculate_install_space_budget, calculate_update_space_budget, digest_parts,
+    load_persisted_plan, overlay_repair_parts, validate_persisted_plan,
   };
   use crate::game::{
     hoyoplay::{create_http_client, get_game_branches},
@@ -2102,6 +2169,19 @@ mod tests {
     let different = calculate_update_space_budget(4, 6, margin + 4, margin + 5, false);
     assert_eq!(different.cache_required_free_bytes, 4 + super::SAFETY_MARGIN_BYTES);
     assert_eq!(different.install_required_free_bytes, 6 + super::SAFETY_MARGIN_BYTES);
+    assert!(!different.has_sufficient_space);
+  }
+
+  #[test]
+  fn install_space_budget_keeps_spool_on_its_own_volume() {
+    let margin = super::SAFETY_MARGIN_BYTES;
+    let same = calculate_install_space_budget(6, 4, margin + 10, margin + 10, true);
+    assert_eq!(same.install_required_free_bytes, 6 + 4 + margin);
+    assert!(same.has_sufficient_space);
+
+    let different = calculate_install_space_budget(6, 4, margin + 3, margin + 6, false);
+    assert_eq!(different.cache_required_free_bytes, 4 + margin);
+    assert_eq!(different.install_required_free_bytes, 6 + margin);
     assert!(!different.has_sufficient_space);
   }
 
