@@ -95,7 +95,6 @@ const captionTone = computed<"err" | "warn" | "">(() => {
       return "";
   }
 });
-const downloadPercent = computed<number>(() => phasePercent(task.downloadedBytes, task.totalBytes));
 const assemblyPercent = computed<number>(() => {
   if (task.assemblyTotalBytes === 0) {
     return task.state === gameEnum.package.taskState.QUEUED ? 0 : 100;
@@ -110,12 +109,9 @@ const commitComplete = computed<boolean>(() => {
   return task.commitTotalCount === 0 || task.commitCompletedCount >= task.commitTotalCount;
 });
 const resourcePercent = computed<number>(() => {
-  const totalWork = task.totalBytes + task.assemblyTotalBytes;
-  if (totalWork === 0) return gameEnum.package.taskApplying(task.state) ? 100 : 0;
-  const completedWork = task.downloadedBytes + task.assemblyCompletedBytes;
-  return Math.min(100, (completedWork / totalWork) * 100);
+  return assemblyPercent.value;
 });
-// 下载与组装按实际字节工作量计权；安装收尾预留 5%，避免发布、校验和登记期间提前显示 100%。
+// 下载对象只是组装输入；本地资源以证据落盘后的组装字节为准，收尾阶段预留 5%。
 const progressPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return resourcePercent.value;
   return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
@@ -127,14 +123,7 @@ const assemblyComplete = computed<boolean>(() => {
   if (task.assemblyTotalBytes === 0) return task.state !== gameEnum.package.taskState.QUEUED;
   return task.assemblyCompletedBytes >= task.assemblyTotalBytes;
 });
-const downloadStatus = computed<string | null>(() => {
-  if (downloadComplete.value) return "已完成";
-  if (task.downloadCurrentFile !== null) return task.downloadCurrentFile;
-  if (task.state === gameEnum.package.taskState.DOWNLOADING) return task.currentFile;
-  if (active.value) return "等待下载：准备下一个资源批次";
-  return null;
-});
-const assemblyStatus = computed<string | null>(() => {
+const resourceStatus = computed<string | null>(() => {
   if (task.assemblyTotalBytes === 0) {
     return active.value && task.state === gameEnum.package.taskState.QUEUED
       ? "正在准备：等待下载阶段开始"
@@ -142,11 +131,10 @@ const assemblyStatus = computed<string | null>(() => {
   }
   if (assemblyComplete.value) return "已完成";
   if (task.assemblyCurrentFile !== null) return task.assemblyCurrentFile;
+  if (task.downloadCurrentFile !== null) return task.downloadCurrentFile;
   if (gameEnum.package.taskApplying(task.state)) return task.currentFile;
   if (active.value) {
-    return downloadComplete.value
-      ? "等待组装：下载已完成，准备开始组装"
-      : "等待组装：等待对应资源下载完成";
+    return downloadComplete.value ? "准备校验本地资源" : "正在获取并安装下一个资源";
   }
   return null;
 });
@@ -158,16 +146,17 @@ const displayElapsedMs = computed<number>(() => {
 });
 const overallFacts = computed<Array<string>>(() => {
   return [
-    `任务临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
+    `当前私有临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
     `当前耗时 ${formatElapsed(displayElapsedMs.value)}`,
   ];
 });
-const downloadFacts = computed<Array<string>>(() => {
+const resourceFacts = computed<Array<string>>(() => {
   const values = [
-    `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
-    `对象 ${task.completedCount} / ${task.totalCount}`,
+    `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+    `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
+    `下载对象 ${task.completedCount} / ${task.totalCount}`,
   ];
-  if (!downloadComplete.value && task.state === gameEnum.package.taskState.DOWNLOADING) {
+  if (task.state === gameEnum.package.taskState.DOWNLOADING) {
     values.push(
       task.bytesPerSecond > 0
         ? `当前速度 ${formatBytes(task.bytesPerSecond)}/s`
@@ -177,30 +166,16 @@ const downloadFacts = computed<Array<string>>(() => {
   }
   return values;
 });
-const downloadRow = computed<ProgressRow>(() => ({
-  label: "下载",
-  percent: downloadPercent.value,
-  indeterminate: task.totalBytes === 0 && active.value,
-  complete: downloadComplete.value,
-  status: downloadStatus.value,
-  details: downloadFacts.value,
-}));
-const assemblyRow = computed<ProgressRow>(() => ({
-  label: "组装",
-  percent: assemblyPercent.value,
+const resourceRow = computed<ProgressRow>(() => ({
+  label: "资源安装",
+  percent: resourcePercent.value,
   indeterminate:
     task.assemblyTotalBytes === 0 &&
     active.value &&
     task.state === gameEnum.package.taskState.QUEUED,
   complete: assemblyComplete.value,
-  status: assemblyStatus.value,
-  details:
-    task.assemblyTotalBytes === 0
-      ? ["没有需要组装的游戏文件"]
-      : [
-          `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-          `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-        ],
+  status: resourceStatus.value,
+  details: task.assemblyTotalBytes === 0 ? ["没有需要组装的游戏文件"] : resourceFacts.value,
 }));
 const commitRow = computed<ProgressRow>(() => ({
   label: "提交",
@@ -218,20 +193,18 @@ const commitRow = computed<ProgressRow>(() => ({
 const overallRow = computed<ProgressRow>(() => ({
   label: "总进度",
   percent: progressPercent.value,
-  indeterminate: task.totalBytes + task.assemblyTotalBytes === 0 && active.value,
+  indeterminate: task.assemblyTotalBytes === 0 && active.value,
   complete: resourcePercent.value >= 100 && commitComplete.value,
   status: overallFacts.value.join(" · "),
   details: [
-    `资源工作量 ${formatBytes(task.downloadedBytes + task.assemblyCompletedBytes)} / ${formatBytes(
-      task.totalBytes + task.assemblyTotalBytes,
-    )}`,
+    `本地资源 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
     task.commitTotalCount > 0
-      ? `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
-      : `下载 ${downloadPercent.value.toFixed(0)}% · 组装 ${assemblyPercent.value.toFixed(0)}%`,
+      ? `资源安装 ${resourcePercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
+      : `资源安装 ${resourcePercent.value.toFixed(0)}%`,
   ],
 }));
 const progressRows = computed<Array<ProgressRow>>(() => {
-  const rows = [downloadRow.value, assemblyRow.value];
+  const rows = [resourceRow.value];
   if (task.commitTotalCount > 0) rows.push(commitRow.value);
   rows.push(overallRow.value);
   return rows;

@@ -248,6 +248,7 @@ mod tests {
   use crate::game::model::{PackagePlanTarget, PackageTaskState, SchemeId};
   use chrono::Utc;
   use std::{
+    collections::HashMap,
     fs,
     path::{Path, PathBuf},
   };
@@ -312,6 +313,8 @@ mod tests {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      install_repair_attempts: 0,
+      install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,
@@ -440,6 +443,8 @@ mod tests {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      install_repair_attempts: 0,
+      install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,

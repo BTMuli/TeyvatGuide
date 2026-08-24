@@ -195,13 +195,6 @@ struct InstallPipelineMetrics {
   recovery_validate_micros: AtomicU64,
 }
 
-#[derive(Clone, Default)]
-struct RecoveryValidationProgress {
-  completed: usize,
-  total: usize,
-  current_file: String,
-}
-
 struct InstallDownloadProgressMonitor {
   stopped: Arc<AtomicBool>,
 }
@@ -271,12 +264,25 @@ fn start_install_download_progress_monitor(
 
 /// 全新安装私有 spool 的增量记账。
 ///
-/// 每次游标前推不再遍历全部下载计划：只维护「spool 内文件、已消费 chunk、已计入
-/// `committed_step` 的下载项」三组集合，下载/消费/释放都是 O(1) 更新。
+/// 每个资源证据落盘后立即扣减其对象消费者；乱序完成不会再被连续游标阻塞释放。
 struct InstallSpoolTracker {
   counted: HashSet<String>,
   consumed: HashSet<String>,
   resident: HashMap<String, String>,
+  completed_assets: HashSet<usize>,
+  remaining_consumers: HashMap<String, usize>,
+  completed_count: usize,
+  completed_bytes: u64,
+  contiguous_cursor: usize,
+  contiguous_bytes: u64,
+}
+
+#[derive(Clone, Copy)]
+struct InstallCompletionSnapshot {
+  completed_count: usize,
+  completed_bytes: u64,
+  contiguous_cursor: usize,
+  contiguous_bytes: u64,
 }
 
 impl InstallSpoolTracker {
@@ -285,7 +291,7 @@ impl InstallSpoolTracker {
     plan: &PersistedPlan,
     spool_root: &Path,
     shared_cache_root: &Path,
-    completed: usize,
+    completed_assets: HashSet<usize>,
   ) -> Self {
     let mut resident = HashMap::new();
     if let Ok(entries) = fs::read_dir(spool_root) {
@@ -301,11 +307,26 @@ impl InstallSpoolTracker {
         }
       }
     }
-    let mut consumed = HashSet::new();
-    for asset in plan.assets.iter().take(completed) {
+    let mut remaining_consumers = HashMap::<String, usize>::new();
+    for asset in &plan.assets {
+      let mut seen = HashSet::new();
       for chunk in &asset.chunks {
-        if chunk.reuse.is_none() {
-          consumed.insert(chunk.id.clone());
+        if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
+          *remaining_consumers.entry(chunk.id.clone()).or_default() += 1;
+        }
+      }
+    }
+    let mut consumed = HashSet::new();
+    for index in &completed_assets {
+      if let Some(asset) = plan.assets.get(*index) {
+        let mut seen = HashSet::new();
+        for chunk in &asset.chunks {
+          if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
+            consumed.insert(chunk.id.clone());
+            if let Some(remaining) = remaining_consumers.get_mut(&chunk.id) {
+              *remaining = remaining.saturating_sub(1);
+            }
+          }
         }
       }
     }
@@ -317,7 +338,27 @@ impl InstallSpoolTracker {
         counted.insert(download.id.clone());
       }
     }
-    Self { counted, consumed, resident }
+    let completed_count = completed_assets.len().min(plan.assets.len());
+    let completed_bytes = completed_assets.iter().fold(0_u64, |total, index| {
+      total.saturating_add(plan.assets.get(*index).map_or(0, |asset| asset.size))
+    });
+    let mut contiguous_cursor = 0_usize;
+    let mut contiguous_bytes = 0_u64;
+    while contiguous_cursor < plan.assets.len() && completed_assets.contains(&contiguous_cursor) {
+      contiguous_bytes = contiguous_bytes.saturating_add(plan.assets[contiguous_cursor].size);
+      contiguous_cursor = contiguous_cursor.saturating_add(1);
+    }
+    Self {
+      counted,
+      consumed,
+      resident,
+      completed_assets,
+      remaining_consumers,
+      completed_count,
+      completed_bytes,
+      contiguous_cursor,
+      contiguous_bytes,
+    }
   }
 
   fn committed_step(&self) -> usize {
@@ -330,22 +371,71 @@ impl InstallSpoolTracker {
     self.committed_step()
   }
 
-  fn mark_consumed(&mut self, ids: impl IntoIterator<Item = String>) {
-    self.consumed.extend(ids);
+  fn asset_completed(&self, index: usize) -> bool {
+    self.completed_assets.contains(&index)
   }
 
-  /// 释放不再被未来资源引用、且不属于 SDK 的私有 chunk，返回释放字节数。
-  ///
-  /// 只遍历当前 spool 内文件，不再全表扫描下载计划。
-  fn release_unneeded(&mut self, plan: &PersistedPlan, completed: usize, spool_root: &Path) -> u64 {
-    let mut retained = HashSet::new();
-    for asset in plan.assets.iter().skip(completed) {
+  fn mark_asset_completed(&mut self, plan: &PersistedPlan, index: usize) -> bool {
+    if !self.completed_assets.insert(index) {
+      return false;
+    }
+    if let Some(asset) = plan.assets.get(index) {
+      self.completed_count = self.completed_count.saturating_add(1).min(plan.assets.len());
+      self.completed_bytes = self.completed_bytes.saturating_add(asset.size);
+      let mut seen = HashSet::new();
       for chunk in &asset.chunks {
-        if chunk.reuse.is_none() {
-          retained.insert(chunk.id.as_str());
+        if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
+          self.consumed.insert(chunk.id.clone());
+          if let Some(remaining) = self.remaining_consumers.get_mut(&chunk.id) {
+            *remaining = remaining.saturating_sub(1);
+          }
         }
       }
     }
+    while self.contiguous_cursor < plan.assets.len()
+      && self.completed_assets.contains(&self.contiguous_cursor)
+    {
+      self.contiguous_bytes =
+        self.contiguous_bytes.saturating_add(plan.assets[self.contiguous_cursor].size);
+      self.contiguous_cursor = self.contiguous_cursor.saturating_add(1);
+    }
+    true
+  }
+
+  fn invalidate_asset(&mut self, plan: &PersistedPlan, index: usize) -> bool {
+    if !self.completed_assets.remove(&index) {
+      return false;
+    }
+    if let Some(asset) = plan.assets.get(index) {
+      self.completed_count = self.completed_count.saturating_sub(1);
+      self.completed_bytes = self.completed_bytes.saturating_sub(asset.size);
+      let mut seen = HashSet::new();
+      for chunk in &asset.chunks {
+        if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
+          *self.remaining_consumers.entry(chunk.id.clone()).or_default() += 1;
+        }
+      }
+      if index < self.contiguous_cursor {
+        self.contiguous_cursor = index;
+        self.contiguous_bytes =
+          plan.assets[..index].iter().fold(0_u64, |total, asset| total.saturating_add(asset.size));
+      }
+    }
+    true
+  }
+
+  fn completion_snapshot(&self, plan: &PersistedPlan) -> InstallCompletionSnapshot {
+    debug_assert!(self.completed_count <= plan.assets.len());
+    InstallCompletionSnapshot {
+      completed_count: self.completed_count,
+      completed_bytes: self.completed_bytes,
+      contiguous_cursor: self.contiguous_cursor,
+      contiguous_bytes: self.contiguous_bytes,
+    }
+  }
+
+  /// 释放已经没有资源消费者、且不属于 SDK 的任务私有对象。
+  fn release_unneeded(&mut self, plan: &PersistedPlan, spool_root: &Path) -> u64 {
     let sdk_key = plan
       .install_overlay
       .as_ref()
@@ -357,7 +447,9 @@ impl InstallSpoolTracker {
       let Some(id) = self.resident.get(&key).cloned() else {
         continue;
       };
-      if retained.contains(id.as_str()) || sdk_key == Some(key.as_str()) {
+      if self.remaining_consumers.get(&id).copied().unwrap_or_default() > 0
+        || sdk_key == Some(key.as_str())
+      {
         continue;
       }
       let path = spool_root.join(&key);
@@ -378,73 +470,16 @@ impl InstallSpoolTracker {
   }
 }
 
-/// 在独立阻塞线程中按逐文件证据并发复检已组装资源，并持续把进度投影到 journal。
-async fn run_install_recovery_validation(
-  app_handle: &AppHandle,
-  task_root: &Path,
-  staging_root: &Path,
-  plan: &Arc<PersistedPlan>,
-  journal: &Arc<AsyncMutex<TaskJournal>>,
-  canceled: &Arc<AtomicBool>,
-  metrics: &Arc<InstallPipelineMetrics>,
-  start_cursor: usize,
-) -> Result<(), String> {
-  let (progress_tx, mut progress_rx) =
-    tokio::sync::mpsc::unbounded_channel::<RecoveryValidationProgress>();
-  let plan_for_validation = Arc::clone(plan);
-  let task_root_for_validation = task_root.to_path_buf();
-  let staging_for_validation = staging_root.to_path_buf();
-  let canceled_for_validation = Arc::clone(canceled);
-  let validation = tauri::async_runtime::spawn_blocking(move || {
-    assembler::validate_full_install_cursor_with_evidence(
-      &plan_for_validation,
-      &task_root_for_validation,
-      &staging_for_validation,
-      start_cursor,
-      &canceled_for_validation,
-      default_concurrency(),
-      |completed, total, _completed_bytes, _total_bytes, current_file| {
-        let _ = progress_tx.send(RecoveryValidationProgress {
-          completed,
-          total,
-          current_file: current_file.to_string(),
-        });
-      },
-    )
-  });
-  let mut validation = Box::pin(validation);
-  let mut last_emit = Instant::now();
-  loop {
-    let recv_future = Box::pin(progress_rx.recv());
-    match futures_util::future::select(validation, recv_future).await {
-      futures_util::future::Either::Left((result, _)) => {
-        return match result {
-          Ok(result) => result,
-          Err(error) => Err(format!("安装资源复检 worker 异常退出：{error}")),
-        };
-      }
-      futures_util::future::Either::Right((progress, validation_rest)) => {
-        validation = validation_rest;
-        let Some(progress) = progress else {
-          continue;
-        };
-        let mut value = journal.lock().await;
-        value.verification_completed_count = progress.completed;
-        value.verification_total_count = progress.total;
-        value.commit_current_step =
-          Some(format!("校验已组装资源：{}/{}", progress.completed, progress.total));
-        value.current_file = Some(progress.current_file);
-        value.touch();
-        if last_emit.elapsed() >= Duration::from_millis(500) {
-          if let Err(error) = persist_install_progress(task_root, &value, metrics) {
-            return Err(error);
-          }
-          emit_progress(app_handle, &value.summary());
-          last_emit = Instant::now();
-        }
-      }
-    }
-  }
+fn apply_install_completion_snapshot(
+  value: &mut TaskJournal,
+  snapshot: InstallCompletionSnapshot,
+  metrics: &InstallPipelineMetrics,
+) {
+  value.completed_asset_cursor = snapshot.contiguous_cursor;
+  value.assembly_completed_count = snapshot.completed_count;
+  value.assembly_completed_bytes = snapshot.completed_bytes;
+  value.assembly_completed_bytes_total = snapshot.contiguous_bytes;
+  metrics.observe_logical_staging(snapshot.completed_bytes);
 }
 
 impl InstallPipelineMetrics {
@@ -1600,51 +1635,85 @@ async fn run_install_streaming_task(
     Arc::clone(&journal),
     Arc::clone(&metrics),
   );
-  let start_cursor = journal.lock().await.completed_asset_cursor.min(plan.assets.len());
   let recovery_started_at = Instant::now();
-  // 游标已到末尾（组装完成后崩溃）：由随后的并行「校验暂存目录」统一承担逐文件校验与
-  // 证据补写，不再单独复检；只有还需要继续组装时才前置校验已组装文件。
-  let recovery_result = if start_cursor == 0 || start_cursor >= plan.assets.len() {
-    Ok(())
-  } else {
-    {
-      let mut value = journal.lock().await;
-      value.state = PackageTaskState::Assembling;
-      value.verification_completed_count = 0;
-      value.verification_total_count = start_cursor;
-      value.commit_current_step = Some("正在校验已组装资源".to_string());
-      value.current_file = value.commit_current_step.clone();
-      value.assembly_current_file = None;
-      value.touch();
-      if let Err(error) = persist_install_checkpoint(&task_root, &value, &metrics) {
-        persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
-        return;
-      }
-      emit_state(&app_handle, &value.summary());
-    }
-    run_install_recovery_validation(
-      &app_handle,
-      &task_root,
-      &staging_root,
-      &plan,
-      &journal,
-      &canceled,
-      &metrics,
-      start_cursor,
-    )
-    .await
-  };
-  metrics.record_recovery_validation(start_cursor, recovery_started_at.elapsed());
-  if let Err(error) = recovery_result {
-    persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
-    return;
+  {
+    let mut value = journal.lock().await;
+    value.state = PackageTaskState::Assembling;
+    value.commit_current_step = Some("正在恢复资源安装状态".to_string());
+    value.current_file = value.commit_current_step.clone();
+    value.download_current_file = None;
+    value.assembly_current_file = None;
+    value.touch();
+    emit_state(&app_handle, &value.summary());
   }
+  let discovery_plan = Arc::clone(&plan);
+  let discovery_task_root = task_root.clone();
+  let discovery_staging_root = staging_root.clone();
+  let discovery_canceled = Arc::clone(&canceled);
+  let completed_assets = match tauri::async_runtime::spawn_blocking(move || {
+    assembler::discover_completed_install_assets(
+      &discovery_plan,
+      &discovery_task_root,
+      &discovery_staging_root,
+      &discovery_canceled,
+    )
+  })
+  .await
+  {
+    Ok(Ok(completed)) => completed,
+    Ok(Err(error)) => {
+      persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+      return;
+    }
+    Err(error) => {
+      persist_install_stream_error(
+        &task_root,
+        &app_handle,
+        &journal,
+        format!("恢复资源状态 worker 异常退出：{error}"),
+        false,
+        false,
+      )
+      .await;
+      return;
+    }
+  };
+  metrics.record_recovery_validation(completed_assets.len(), recovery_started_at.elapsed());
   let spool_tracker = Arc::new(Mutex::new(InstallSpoolTracker::from_disk(
     &plan,
     &spool_root,
     &shared_cache_root,
-    start_cursor,
+    completed_assets,
   )));
+  let start_cursor_result = {
+    let mut value = journal.lock().await;
+    (|| -> Result<usize, String> {
+      let (snapshot, committed_step) = {
+        let tracker = spool_tracker.lock().unwrap();
+        (tracker.completion_snapshot(&plan), tracker.committed_step())
+      };
+      apply_install_completion_snapshot(&mut value, snapshot, &metrics);
+      value.committed_step = committed_step.min(value.total_count);
+      value.commit_current_step = None;
+      value.current_file = None;
+      value.touch();
+      persist_install_checkpoint(&task_root, &value, &metrics)?;
+      let released = spool_tracker.lock().unwrap().release_unneeded(&plan, &spool_root);
+      value.released_bytes = value.released_bytes.saturating_add(released);
+      value.spool_bytes = spool_bytes(&spool_root);
+      value.touch();
+      persist_install_progress(&task_root, &value, &metrics)?;
+      emit_progress(&app_handle, &value.summary());
+      Ok(snapshot.contiguous_cursor)
+    })()
+  };
+  let start_cursor = match start_cursor_result {
+    Ok(cursor) => cursor,
+    Err(error) => {
+      persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+      return;
+    }
+  };
   if concurrency > 1 {
     if let Err(error) = run_install_bounded_asset_pipeline(
       &app_handle,
@@ -1685,6 +1754,9 @@ async fn run_install_streaming_task(
     for asset_index in start_cursor..plan.assets.len() {
       if canceled.load(Ordering::Acquire) || paused.load(Ordering::Acquire) {
         break;
+      }
+      if spool_tracker.lock().unwrap().asset_completed(asset_index) {
+        continue;
       }
       metrics.queue_refill_count.fetch_add(1, Ordering::Relaxed);
       let asset = &plan.assets[asset_index];
@@ -1866,25 +1938,12 @@ async fn run_install_streaming_task(
         return;
       }
       let mut value = journal.lock().await;
-      let completed = asset_index + 1;
-      let completed_bytes = plan.assets[..completed].iter().map(|item| item.size).sum();
-      value.completed_asset_cursor = completed;
-      value.assembly_completed_count = completed;
-      value.assembly_completed_bytes = completed_bytes;
-      value.assembly_completed_bytes_total = completed_bytes;
-      metrics.observe_logical_staging(completed_bytes);
       value.spool_bytes = spool_bytes(&spool_root);
       {
         let mut tracker_value = spool_tracker.lock().unwrap();
-        let mut newly_consumed = Vec::new();
-        for asset in &plan.assets[asset_index..completed] {
-          for chunk in &asset.chunks {
-            if chunk.reuse.is_none() {
-              newly_consumed.push(chunk.id.clone());
-            }
-          }
-        }
-        tracker_value.mark_consumed(newly_consumed);
+        tracker_value.mark_asset_completed(&plan, asset_index);
+        let snapshot = tracker_value.completion_snapshot(&plan);
+        apply_install_completion_snapshot(&mut value, snapshot, &metrics);
         value.committed_step = tracker_value.committed_step();
       }
       value.download_current_file = None;
@@ -1894,7 +1953,7 @@ async fn run_install_streaming_task(
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
-      let released = spool_tracker.lock().unwrap().release_unneeded(&plan, completed, &spool_root);
+      let released = spool_tracker.lock().unwrap().release_unneeded(&plan, &spool_root);
       value.released_bytes = value.released_bytes.saturating_add(released);
       value.spool_bytes = spool_bytes(&spool_root);
       metrics.observe_spool(value.spool_bytes);
@@ -1933,6 +1992,41 @@ async fn run_install_streaming_task(
     let _ = journal::persist(&task_root, &value);
     let _ = journal::forget_progress(&task_root, &value.task_id);
     emit_state(&app_handle, &value.summary());
+    return;
+  }
+  if let Err(error) = run_install_prepublish_repair(
+    &app_handle,
+    &task_root,
+    &shared_cache_root,
+    &spool_root,
+    &plan,
+    &download_index,
+    &metrics,
+    &download_client,
+    &journal,
+    &canceled,
+    &paused,
+    concurrency,
+    &limiter,
+    &staging_root,
+    &spool_tracker,
+  )
+  .await
+  {
+    let paused_flag = paused.load(Ordering::Acquire);
+    let canceled_flag = canceled.load(Ordering::Acquire);
+    if canceled_flag {
+      let _ = installer::cancel_draft(&task_root, &context.draft_id);
+    }
+    persist_install_stream_error(
+      &task_root,
+      &app_handle,
+      &journal,
+      error,
+      paused_flag,
+      canceled_flag,
+    )
+    .await;
     return;
   }
   if let Some(sdk) = plan.install_overlay.as_ref().and_then(|overlay| overlay.sdk.as_ref()) {
@@ -2050,6 +2144,142 @@ struct InstallAssetJobCompletion {
   result: Result<(), String>,
 }
 
+const MAX_INSTALL_ASSET_REPAIR_ATTEMPTS: usize = 2;
+const MAX_INSTALL_TASK_REPAIR_ATTEMPTS: usize = 3;
+
+#[allow(clippy::too_many_arguments)]
+async fn run_install_prepublish_repair(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  plan: &Arc<PersistedPlan>,
+  download_index: &Arc<assembler::FullInstallDownloadIndex>,
+  metrics: &Arc<InstallPipelineMetrics>,
+  download_client: &reqwest::Client,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  canceled: &Arc<AtomicBool>,
+  paused: &Arc<AtomicBool>,
+  concurrency: usize,
+  limiter: &Arc<RateLimiter>,
+  staging_root: &Path,
+  spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
+) -> Result<(), String> {
+  let (mut asset_attempts, mut task_attempts) = {
+    let value = journal.lock().await;
+    (value.install_asset_repair_attempts.clone(), value.install_repair_attempts)
+  };
+  loop {
+    let validation_plan = Arc::clone(plan);
+    let validation_task_root = task_root.to_path_buf();
+    let validation_staging_root = staging_root.to_path_buf();
+    let validation_canceled = Arc::clone(canceled);
+    let validation = tauri::async_runtime::spawn_blocking(move || {
+      assembler::validate_full_install_assets_for_repair(
+        &validation_plan,
+        &validation_task_root,
+        &validation_staging_root,
+        &validation_canceled,
+      )
+    })
+    .await
+    .map_err(|error| format!("发布前资源校验 worker 异常退出：{error}"))?;
+    let failure = match validation {
+      Ok(()) => return Ok(()),
+      Err(failure) if failure.repairable() => failure,
+      Err(failure) => return Err(failure.message),
+    };
+    let previous_attempts = asset_attempts.get(&failure.asset_index).copied().unwrap_or_default();
+    if previous_attempts >= MAX_INSTALL_ASSET_REPAIR_ATTEMPTS
+      || task_attempts >= MAX_INSTALL_TASK_REPAIR_ATTEMPTS
+    {
+      return Err(format!("资源自动修复已达到重试上限：{}（{}）", failure.path, failure.message));
+    }
+    let attempt_number = previous_attempts.saturating_add(1);
+    asset_attempts.insert(failure.asset_index, attempt_number);
+    task_attempts += 1;
+
+    super::evidence::invalidate_asset_evidence(task_root, plan, failure.asset_index)?;
+    {
+      let mut value = journal.lock().await;
+      let snapshot = {
+        let mut tracker = spool_tracker.lock().unwrap();
+        tracker.invalidate_asset(plan, failure.asset_index);
+        tracker.completion_snapshot(plan)
+      };
+      apply_install_completion_snapshot(&mut value, snapshot, metrics);
+      value.install_repair_attempts = task_attempts;
+      value.install_asset_repair_attempts = asset_attempts.clone();
+      value.state = PackageTaskState::Downloading;
+      value.download_current_file = Some(format!(
+        "校验失败，重新获取资源 {}/{}：{}",
+        attempt_number, MAX_INSTALL_ASSET_REPAIR_ATTEMPTS, failure.path
+      ));
+      value.assembly_current_file = None;
+      value.current_file = value.download_current_file.clone();
+      value.touch();
+      persist_install_checkpoint(task_root, &value, metrics)?;
+      emit_state(app_handle, &value.summary());
+    }
+
+    let job = prepare_install_asset_job(
+      plan,
+      download_index,
+      failure.asset_index,
+      shared_cache_root,
+      spool_root,
+      &HashSet::new(),
+      metrics,
+    )?;
+    check_install_stream_space(plan, failure.asset_index, &job.pending, spool_root)?;
+    let network_concurrency = install_download_concurrency(concurrency);
+    let completion = run_install_asset_job(
+      job,
+      app_handle.clone(),
+      task_root.to_path_buf(),
+      shared_cache_root.to_path_buf(),
+      spool_root.to_path_buf(),
+      Arc::clone(plan),
+      Arc::clone(download_index),
+      Arc::clone(metrics),
+      download_client.clone(),
+      Arc::clone(journal),
+      Arc::clone(canceled),
+      Arc::clone(paused),
+      Arc::clone(limiter),
+      Arc::new(Semaphore::new(network_concurrency)),
+      Arc::new(AsyncMutex::new(HashMap::new())),
+      Arc::new(Semaphore::new(1)),
+      staging_root.to_path_buf(),
+      network_concurrency,
+      Arc::clone(spool_tracker),
+    )
+    .await;
+    completion.result?;
+
+    let mut value = journal.lock().await;
+    let snapshot = {
+      let mut tracker = spool_tracker.lock().unwrap();
+      tracker.mark_asset_completed(plan, failure.asset_index);
+      let snapshot = tracker.completion_snapshot(plan);
+      value.committed_step = tracker.committed_step().min(value.total_count);
+      snapshot
+    };
+    apply_install_completion_snapshot(&mut value, snapshot, metrics);
+    value.download_current_file = None;
+    value.assembly_current_file = Some(format!("自动修复完成：{}", failure.path));
+    value.current_file = value.assembly_current_file.clone();
+    value.touch();
+    persist_install_checkpoint(task_root, &value, metrics)?;
+    let released = spool_tracker.lock().unwrap().release_unneeded(plan, spool_root);
+    value.released_bytes = value.released_bytes.saturating_add(released);
+    value.spool_bytes = spool_bytes(spool_root);
+    value.touch();
+    persist_install_progress(task_root, &value, metrics)?;
+    emit_progress(app_handle, &value.summary());
+  }
+}
+
 async fn run_install_bounded_asset_pipeline(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -2074,18 +2304,14 @@ async fn run_install_bounded_asset_pipeline(
   let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
   let mut asset_cursor = {
     let mut value = journal.lock().await;
-    let cursor = value.completed_asset_cursor.min(plan.assets.len());
-    let completed_bytes = plan.assets[..cursor].iter().map(|asset| asset.size).sum();
-    value.assembly_completed_count = cursor;
-    value.assembly_completed_bytes = completed_bytes;
-    value.assembly_completed_bytes_total = completed_bytes;
-    metrics.observe_logical_staging(completed_bytes);
+    let snapshot = spool_tracker.lock().unwrap().completion_snapshot(plan);
+    apply_install_completion_snapshot(&mut value, snapshot, metrics);
     value.download_current_file = None;
     value.assembly_current_file = None;
     value.touch();
     persist_install_checkpoint(task_root, &value, metrics)?;
     emit_progress(app_handle, &value.summary());
-    cursor
+    snapshot.contiguous_cursor
   };
   let cache_complete = journal.lock().await.committed_step >= plan.downloads.len();
   let spool_budget = install_spool_window(&plan.assets, concurrency, cache_complete);
@@ -2094,7 +2320,6 @@ async fn run_install_bounded_asset_pipeline(
   let mut reserved_spool_bytes = 0_u64;
   let mut scheduled_downloads = HashSet::<String>::new();
   let download_guards = Arc::new(AsyncMutex::new(HashMap::<String, Arc<AsyncMutex<()>>>::new()));
-  let mut completed_assets = HashSet::<usize>::new();
   let mut jobs = futures_util::stream::FuturesUnordered::new();
   let mut first_error = None;
 
@@ -2106,6 +2331,10 @@ async fn run_install_bounded_asset_pipeline(
       && next_asset_index < plan.assets.len()
       && jobs.len() < max_in_flight
     {
+      if spool_tracker.lock().unwrap().asset_completed(next_asset_index) {
+        next_asset_index = next_asset_index.saturating_add(1);
+        continue;
+      }
       let job = prepare_install_asset_job(
         plan,
         download_index,
@@ -2167,18 +2396,16 @@ async fn run_install_bounded_asset_pipeline(
     reserved_spool_bytes = reserved_spool_bytes.saturating_sub(completion.reserved_bytes);
     match completion.result {
       Ok(()) => {
-        completed_assets.insert(completion.asset_index);
         let mut value = journal.lock().await;
-        value.assembly_completed_count =
-          value.assembly_completed_count.saturating_add(1).min(value.assembly_total_count);
-        value.assembly_completed_bytes = value
-          .assembly_completed_bytes
-          .saturating_add(plan.assets[completion.asset_index].size)
-          .min(value.assembly_total_bytes);
-        let previous_cursor = asset_cursor;
-        while asset_cursor < plan.assets.len() && completed_assets.remove(&asset_cursor) {
-          asset_cursor = asset_cursor.saturating_add(1);
-        }
+        let snapshot = {
+          let mut tracker = spool_tracker.lock().unwrap();
+          tracker.mark_asset_completed(plan, completion.asset_index);
+          let snapshot = tracker.completion_snapshot(plan);
+          value.committed_step = tracker.committed_step().min(value.total_count);
+          snapshot
+        };
+        apply_install_completion_snapshot(&mut value, snapshot, metrics);
+        asset_cursor = snapshot.contiguous_cursor;
         value.assembly_current_file = (value.assembly_completed_count < value.assembly_total_count)
           .then_some(format!(
             "已组装 {}/{}，持续队列继续补充资源",
@@ -2187,34 +2414,12 @@ async fn run_install_bounded_asset_pipeline(
         value.spool_bytes = spool_bytes(spool_root);
         metrics.observe_spool(value.spool_bytes);
         value.touch();
-        if asset_cursor > previous_cursor {
-          let completed_bytes = plan.assets[..asset_cursor]
-            .iter()
-            .fold(0_u64, |total, asset| total.saturating_add(asset.size));
-          value.completed_asset_cursor = asset_cursor;
-          value.assembly_completed_bytes_total = completed_bytes;
-          metrics.observe_logical_staging(completed_bytes);
-          {
-            let mut tracker_value = spool_tracker.lock().unwrap();
-            let mut newly_consumed = Vec::new();
-            for asset in &plan.assets[previous_cursor..asset_cursor] {
-              for chunk in &asset.chunks {
-                if chunk.reuse.is_none() {
-                  newly_consumed.push(chunk.id.clone());
-                }
-              }
-            }
-            tracker_value.mark_consumed(newly_consumed);
-            value.committed_step = tracker_value.committed_step();
-          }
-          persist_install_checkpoint(task_root, &value, metrics)?;
-          let released =
-            spool_tracker.lock().unwrap().release_unneeded(plan, asset_cursor, spool_root);
-          value.released_bytes = value.released_bytes.saturating_add(released);
-          value.spool_bytes = spool_bytes(spool_root);
-          metrics.observe_spool(value.spool_bytes);
-          value.touch();
-        }
+        persist_install_checkpoint(task_root, &value, metrics)?;
+        let released = spool_tracker.lock().unwrap().release_unneeded(plan, spool_root);
+        value.released_bytes = value.released_bytes.saturating_add(released);
+        value.spool_bytes = spool_bytes(spool_root);
+        metrics.observe_spool(value.spool_bytes);
+        value.touch();
         persist_install_progress(task_root, &value, metrics)?;
         emit_progress(app_handle, &value.summary());
       }
@@ -3587,7 +3792,8 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    ActiveTask, GamePackageManager, PlanWorksetBaseline, install_download_concurrency, nearest_rank,
+    ActiveTask, GamePackageManager, InstallSpoolTracker, PlanWorksetBaseline,
+    install_download_concurrency, nearest_rank,
   };
   use crate::game::{
     journal::{self, TaskJournal},
@@ -3598,6 +3804,7 @@ mod tests {
     },
   };
   use std::{
+    collections::HashSet,
     fs,
     path::PathBuf,
     sync::{
@@ -3677,7 +3884,7 @@ mod tests {
 
   #[test]
   fn spool_tracker_incrementally_matches_full_scan_semantics() {
-    use super::{InstallSpoolTracker, completed_download_count};
+    use super::completed_download_count;
     use crate::game::planner::PlanDownloadHashKind;
     use xxhash_rust::xxh64::xxh64;
     let root = TempRoot::new();
@@ -3713,7 +3920,7 @@ mod tests {
       created_at: "2026-01-01T00:00:00Z".to_string(),
     };
     fs::write(spool.join(&d1.cache_key), b"0123456789").unwrap();
-    let mut tracker = InstallSpoolTracker::from_disk(&plan, &spool, &shared, 0);
+    let mut tracker = InstallSpoolTracker::from_disk(&plan, &spool, &shared, HashSet::new());
     assert_eq!(tracker.committed_step(), 1);
 
     // 下载 d2 后：增量计数必须与全量扫描一致。
@@ -3723,8 +3930,8 @@ mod tests {
     assert_eq!(tracker.committed_step(), completed_download_count(&plan, 0, &shared, &spool));
 
     // 消费并释放 d1：d1 已消费仍计数，d2 仍保留给 b.bin。
-    tracker.mark_consumed(vec!["d1".to_string()]);
-    let released = tracker.release_unneeded(&plan, 1, &spool);
+    tracker.mark_asset_completed(&plan, 0);
+    let released = tracker.release_unneeded(&plan, &spool);
     assert_eq!(released, 10);
     assert!(!spool.join(&d1.cache_key).exists());
     assert!(spool.join(&d2.cache_key).exists());
@@ -3732,11 +3939,58 @@ mod tests {
     assert_eq!(tracker.committed_step(), completed_download_count(&plan, 1, &shared, &spool));
 
     // 全部消费后释放 d2：计数仍保留，spool 清空。
-    tracker.mark_consumed(vec!["d2".to_string()]);
-    let released = tracker.release_unneeded(&plan, 2, &spool);
+    tracker.mark_asset_completed(&plan, 1);
+    let released = tracker.release_unneeded(&plan, &spool);
     assert_eq!(released, 20);
     assert_eq!(tracker.committed_step(), 2);
     assert_eq!(tracker.committed_step(), completed_download_count(&plan, 2, &shared, &spool));
+  }
+
+  #[test]
+  fn spool_tracker_waits_for_shared_last_consumer_and_tracks_out_of_order_completion() {
+    let root = TempRoot::new();
+    let spool = root.0.join("spool");
+    let shared = root.0.join("shared");
+    fs::create_dir_all(&spool).unwrap();
+    fs::create_dir_all(&shared).unwrap();
+    let download = baseline_download("shared", 10);
+    fs::write(spool.join(&download.cache_key), b"0123456789").unwrap();
+    let plan = PersistedPlan {
+      schema_version: 5,
+      plan_id: "spool-shared-test".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: vec![download.clone()],
+      assets: vec![
+        baseline_asset("a.bin", 10, vec![baseline_chunk("shared", 10, false)]),
+        baseline_asset("b.bin", 10, vec![baseline_chunk("shared", 10, false)]),
+      ],
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    let mut tracker = InstallSpoolTracker::from_disk(&plan, &spool, &shared, HashSet::new());
+
+    tracker.mark_asset_completed(&plan, 1);
+    let snapshot = tracker.completion_snapshot(&plan);
+    assert_eq!(snapshot.completed_count, 1);
+    assert_eq!(snapshot.contiguous_cursor, 0);
+    assert_eq!(tracker.release_unneeded(&plan, &spool), 0);
+    assert!(spool.join(&download.cache_key).exists());
+
+    tracker.mark_asset_completed(&plan, 0);
+    let snapshot = tracker.completion_snapshot(&plan);
+    assert_eq!(snapshot.completed_count, 2);
+    assert_eq!(snapshot.contiguous_cursor, 2);
+    assert_eq!(tracker.release_unneeded(&plan, &spool), 10);
+    assert!(!spool.join(&download.cache_key).exists());
   }
 
   #[test]

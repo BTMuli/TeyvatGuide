@@ -17,7 +17,7 @@ use md5::Digest as Md5Digest;
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;
 use std::{
-  collections::BTreeMap,
+  collections::{BTreeMap, HashSet},
   fs::{self, File, OpenOptions},
   io::Write,
   path::{Path, PathBuf},
@@ -236,6 +236,58 @@ pub(crate) fn load_asset_evidence(
   load_evidence_file(&path)
 }
 
+/// 删除一个主资源的证据，使后续恢复和进度重建不再把该资源视为已完成。
+pub(crate) fn invalidate_asset_evidence(
+  task_root: &Path,
+  plan: &PersistedPlan,
+  index: usize,
+) -> Result<(), String> {
+  if index >= plan.assets.len() {
+    return Err("安装资源游标越界".to_string());
+  }
+  let dir = evidence_dir(task_root, &plan.plan_id);
+  let path = asset_evidence_path(&dir, index);
+  let metadata = match fs::symlink_metadata(&path) {
+    Ok(metadata) => metadata,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+    Err(error) => return Err(format!("读取待失效证据失败：{error}")),
+  };
+  if metadata.file_type().is_symlink() || !metadata.is_file() {
+    return Err("待失效证据不是安全的普通文件".to_string());
+  }
+  fs::remove_file(&path).map_err(|error| format!("删除失效证据失败：{error}"))?;
+  sync_directory(&dir)
+}
+
+/// 返回当前仍与计划、暂存目录身份和文件元数据一致的主资源索引。
+pub(crate) fn trusted_asset_indices(
+  task_root: &Path,
+  plan: &PersistedPlan,
+  staging_root: &Path,
+) -> Result<HashSet<usize>, String> {
+  let staging_identity = directory_identity(staging_root)?;
+  let mut trusted = HashSet::new();
+  for (index, asset) in plan.assets.iter().enumerate() {
+    let Ok(Some(evidence)) = load_asset_evidence(task_root, plan, index) else {
+      continue;
+    };
+    if evidence.plan_id == plan.plan_id
+      && evidence.manifest_digest == plan.manifest_digest
+      && evidence.path == asset.name
+      && evidence.expected_size == asset.size
+      && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
+      && evidence.actual_size == asset.size
+      && evidence.actual_md5.eq_ignore_ascii_case(&asset.md5)
+      && evidence.staging_volume_serial == staging_identity.0
+      && evidence.staging_file_id == staging_identity.1
+      && file_matches_evidence(staging_root, &evidence).unwrap_or(false)
+    {
+      trusted.insert(index);
+    }
+  }
+  Ok(trusted)
+}
+
 fn load_evidence_file(path: &Path) -> Result<Option<FileEvidence>, String> {
   if !path_occupied(path)? {
     return Ok(None);
@@ -372,7 +424,7 @@ pub(crate) fn file_identity(path: &Path) -> Result<Option<(u64, u64)>, String> {
 mod tests {
   use super::{
     capture_and_persist_asset_evidence, evidence_digest, evidence_dir, file_matches_evidence,
-    load_asset_evidence, load_evidence_set,
+    invalidate_asset_evidence, load_asset_evidence, load_evidence_set, trusted_asset_indices,
   };
   use crate::game::{
     model::{PackagePlanStrategy, PackagePlanTarget, SchemeId},
@@ -536,5 +588,22 @@ mod tests {
     assert!(!file_matches_evidence(&root.staging(), &evidence).unwrap());
     let actual_md5 = hash_asset_content(&path, &plan.assets[0]).unwrap();
     assert_ne!(actual_md5, md5(payload));
+  }
+
+  #[test]
+  fn trusted_indices_drop_asset_after_evidence_is_invalidated() {
+    let root = TempRoot::new();
+    let payload = b"trusted";
+    let plan = plan_with_asset("root.bin", payload.len() as u64, &md5(payload));
+    write_staging_asset(&root, "root.bin", payload);
+    capture_and_persist_asset_evidence(&root.task_root(), &plan, 0, &root.staging()).unwrap();
+    let trusted = trusted_asset_indices(&root.task_root(), &plan, &root.staging()).unwrap();
+    if cfg!(target_os = "windows") {
+      assert!(trusted.contains(&0));
+    }
+
+    invalidate_asset_evidence(&root.task_root(), &plan, 0).unwrap();
+    assert!(load_asset_evidence(&root.task_root(), &plan, 0).unwrap().is_none());
+    assert!(trusted_asset_indices(&root.task_root(), &plan, &root.staging()).unwrap().is_empty());
   }
 }

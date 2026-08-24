@@ -14,7 +14,7 @@ use super::{
 };
 use md5::{Digest, Md5};
 use std::{
-  collections::HashMap,
+  collections::{HashMap, HashSet},
   fs::{self, File, OpenOptions},
   io::{BufReader, Read, Seek, SeekFrom, Write},
   path::{Path, PathBuf},
@@ -33,6 +33,31 @@ const COPY_BUFFER_SIZE: usize = 128 * 1024;
 pub(crate) struct AssemblySummary {
   pub(crate) asset_count: usize,
   pub(crate) assembled_bytes: u64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum InstallAssetValidationKind {
+  Missing,
+  ContentMismatch,
+  Unsafe,
+  Other,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub(crate) struct InstallAssetValidationFailure {
+  pub(crate) asset_index: usize,
+  pub(crate) path: String,
+  pub(crate) kind: InstallAssetValidationKind,
+  pub(crate) message: String,
+}
+
+impl InstallAssetValidationFailure {
+  pub(crate) fn repairable(&self) -> bool {
+    matches!(
+      self.kind,
+      InstallAssetValidationKind::Missing | InstallAssetValidationKind::ContentMismatch
+    )
+  }
 }
 
 /// Scalar timing counters for one full-install asset assembly operation.
@@ -359,6 +384,7 @@ fn assemble_full_install_asset_inner(
 ///
 /// 每个文件的检查相互独立，用 `workers` 个线程并行执行；`progress` 回调只在调用线程
 /// 中节流触发，参数依次为：已完成文件数、总文件数、已完成字节、总字节、当前文件。
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn validate_full_install_cursor_with_evidence<F>(
   plan: &PersistedPlan,
   task_root: &Path,
@@ -386,7 +412,7 @@ where
   let completed = std::sync::Arc::new(AtomicUsize::new(0));
   let completed_bytes = std::sync::Arc::new(AtomicU64::new(0));
   let current_file = std::sync::Arc::new(Mutex::new(String::new()));
-  let first_error = std::sync::Arc::new(Mutex::new(None::<String>));
+  let first_error = std::sync::Arc::new(Mutex::new(None::<InstallAssetValidationFailure>));
   let worker_count = workers.clamp(1, 16);
   std::thread::scope(|scope| {
     let mut handles = Vec::new();
@@ -454,7 +480,75 @@ where
     progress(done, count, bytes, total_bytes, &current);
   });
   if let Some(error) = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone() {
-    return Err(error);
+    return Err(error.message);
+  }
+  Ok(())
+}
+
+/// 从逐文件证据和必要的内容复验中重建可恢复的已完成资源集合。
+///
+/// 缺失或内容损坏的资源按“尚未完成”返回，路径安全和环境错误则阻止继续安装。
+pub(crate) fn discover_completed_install_assets(
+  plan: &PersistedPlan,
+  task_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<HashSet<usize>, String> {
+  if plan.strategy != PackagePlanStrategy::Full {
+    return Err("安装组装器只接受 Full 计划".to_string());
+  }
+  let root_identity = super::installer::directory_identity(staging_root)?;
+  let mut completed = super::evidence::trusted_asset_indices(task_root, plan, staging_root)?;
+  for (index, asset) in plan.assets.iter().enumerate() {
+    if completed.contains(&index) {
+      continue;
+    }
+    match validate_install_asset_with_evidence(
+      plan,
+      task_root,
+      staging_root,
+      asset,
+      index,
+      root_identity,
+      canceled,
+    ) {
+      Ok(()) => {
+        completed.insert(index);
+      }
+      Err(failure) if failure.repairable() => {
+        super::evidence::invalidate_asset_evidence(task_root, plan, index)?;
+      }
+      Err(failure) => return Err(failure.message),
+    }
+  }
+  Ok(completed)
+}
+
+/// 校验全部主资源，返回首个可用于自动修复决策的结构化失败。
+pub(crate) fn validate_full_install_assets_for_repair(
+  plan: &PersistedPlan,
+  task_root: &Path,
+  staging_root: &Path,
+  canceled: &AtomicBool,
+) -> Result<(), InstallAssetValidationFailure> {
+  let root_identity = super::installer::directory_identity(staging_root).map_err(|message| {
+    InstallAssetValidationFailure {
+      asset_index: 0,
+      path: String::new(),
+      kind: InstallAssetValidationKind::Other,
+      message,
+    }
+  })?;
+  for (index, asset) in plan.assets.iter().enumerate() {
+    validate_install_asset_with_evidence(
+      plan,
+      task_root,
+      staging_root,
+      asset,
+      index,
+      root_identity,
+      canceled,
+    )?;
   }
   Ok(())
 }
@@ -467,14 +561,25 @@ fn validate_install_asset_with_evidence(
   index: usize,
   root_identity: (u64, u64),
   canceled: &AtomicBool,
-) -> Result<(), String> {
-  check_canceled(canceled)?;
-  let path = prepare_manifest_output_file(staging_root, &asset.name)?;
-  let evidence = super::evidence::load_asset_evidence(task_root, plan, index)?;
+) -> Result<(), InstallAssetValidationFailure> {
+  let failure = |kind, message| InstallAssetValidationFailure {
+    asset_index: index,
+    path: asset.name.clone(),
+    kind,
+    message,
+  };
+  check_canceled(canceled)
+    .map_err(|message| failure(InstallAssetValidationKind::Other, message))?;
+  let path = prepare_manifest_output_file(staging_root, &asset.name)
+    .map_err(|message| failure(InstallAssetValidationKind::Unsafe, message))?;
+  // 单条旧证据或损坏证据不阻止内容复验；可信状态仍必须由实际文件重新建立。
+  let evidence = super::evidence::load_asset_evidence(task_root, plan, index).ok().flatten();
   let trusted = evidence.as_ref().is_some_and(|evidence| {
     evidence.path == asset.name
       && evidence.expected_size == asset.size
       && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
+      && evidence.actual_size == asset.size
+      && evidence.actual_md5.eq_ignore_ascii_case(&asset.md5)
       && evidence.staging_volume_serial == root_identity.0
       && evidence.staging_file_id == root_identity.1
       && super::evidence::file_matches_evidence(staging_root, evidence).unwrap_or(false)
@@ -482,15 +587,30 @@ fn validate_install_asset_with_evidence(
   if trusted {
     return Ok(());
   }
-  let metadata = fs::symlink_metadata(&path)
-    .map_err(|error| format!("读取已完成安装资源失败：{}：{error}", asset.name))?;
+  let metadata = fs::symlink_metadata(&path).map_err(|error| {
+    let kind = if error.kind() == std::io::ErrorKind::NotFound {
+      InstallAssetValidationKind::Missing
+    } else {
+      InstallAssetValidationKind::Other
+    };
+    failure(kind, format!("读取已完成安装资源失败：{}：{error}", asset.name))
+  })?;
   if metadata.file_type().is_symlink() || !metadata.is_file() {
-    return Err(format!("已完成安装资源不是普通文件：{}", asset.name));
+    return Err(failure(
+      InstallAssetValidationKind::Unsafe,
+      format!("已完成安装资源不是普通文件：{}", asset.name),
+    ));
   }
-  if !verified_asset_file_with_timing(&path, asset, canceled, None)? {
-    return Err(format!("已完成安装资源校验失败：{}", asset.name));
+  let verified = verified_asset_file_with_timing(&path, asset, canceled, None)
+    .map_err(|message| failure(InstallAssetValidationKind::Other, message))?;
+  if !verified {
+    return Err(failure(
+      InstallAssetValidationKind::ContentMismatch,
+      format!("已完成安装资源校验失败：{}", asset.name),
+    ));
   }
-  super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, staging_root)?;
+  super::evidence::capture_and_persist_asset_evidence(task_root, plan, index, staging_root)
+    .map_err(|message| failure(InstallAssetValidationKind::Other, message))?;
   Ok(())
 }
 
@@ -1690,10 +1810,11 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    AssemblyProgress, FullInstallDownloadIndex, assemble_asset_with_fallback,
-    assemble_full_install_asset_with_timing, assemble_full_install_asset_with_timing_observer,
-    assemble_manifest_plan, assemble_manifest_plan_with_progress,
-    assemble_manifest_plan_with_progress_concurrent, assemble_plan, partial_path,
+    AssemblyProgress, FullInstallDownloadIndex, InstallAssetValidationKind,
+    assemble_asset_with_fallback, assemble_full_install_asset_with_timing,
+    assemble_full_install_asset_with_timing_observer, assemble_manifest_plan,
+    assemble_manifest_plan_with_progress, assemble_manifest_plan_with_progress_concurrent,
+    assemble_plan, partial_path, validate_full_install_assets_for_repair,
     validate_full_install_cursor_with_evidence,
   };
   use crate::game::{
@@ -2043,6 +2164,18 @@ mod tests {
     )
     .unwrap_err();
     assert!(error.contains("校验失败"));
+    let failure =
+      validate_full_install_assets_for_repair(&plan, &root.task_root(), &staging, &canceled)
+        .unwrap_err();
+    assert_eq!(failure.asset_index, 1);
+    assert_eq!(failure.kind, InstallAssetValidationKind::ContentMismatch);
+
+    fs::remove_file(&changed).unwrap();
+    let failure =
+      validate_full_install_assets_for_repair(&plan, &root.task_root(), &staging, &canceled)
+        .unwrap_err();
+    assert_eq!(failure.asset_index, 1);
+    assert_eq!(failure.kind, InstallAssetValidationKind::Missing);
 
     // 恢复原内容后删除证据：回退完整 hash 通过并重新生成证据。
     fs::write(&changed, second).unwrap();

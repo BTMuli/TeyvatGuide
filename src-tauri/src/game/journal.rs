@@ -169,6 +169,12 @@ pub(crate) struct TaskJournal {
   pub(crate) completed_asset_cursor: usize,
   #[serde(default)]
   pub(crate) assembly_completed_bytes_total: u64,
+  /// 发布前资源自动修复的任务级累计次数。
+  #[serde(default)]
+  pub(crate) install_repair_attempts: usize,
+  /// 发布前资源自动修复的逐资源累计次数；键为计划资源索引。
+  #[serde(default)]
+  pub(crate) install_asset_repair_attempts: HashMap<usize, usize>,
   pub(crate) current_file: Option<String>,
   #[serde(default)]
   pub(crate) download_current_file: Option<String>,
@@ -232,6 +238,8 @@ impl TaskJournal {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      install_repair_attempts: 0,
+      install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,
@@ -291,6 +299,8 @@ impl TaskJournal {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      install_repair_attempts: 0,
+      install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,
@@ -857,6 +867,16 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.verification_completed_count > journal.verification_total_count
     || journal.completed_asset_cursor > journal.assembly_total_count
     || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
+    || journal.install_repair_attempts > 3
+    || journal.install_asset_repair_attempts.len() > journal.assembly_total_count
+    || journal.install_asset_repair_attempts.iter().any(|(index, attempts)| {
+      *index >= journal.assembly_total_count || *attempts == 0 || *attempts > 2
+    })
+    || journal
+      .install_asset_repair_attempts
+      .values()
+      .fold(0_usize, |total, attempts| total.saturating_add(*attempts))
+      != journal.install_repair_attempts
     || journal.spool_root.as_ref().is_some_and(|value| value.is_empty())
     || journal.current_file.as_ref().is_some_and(|value| value.len() > 256)
     || journal.download_current_file.as_ref().is_some_and(|value| value.len() > 256)
@@ -988,7 +1008,11 @@ mod tests {
   };
   use crate::game::model::{PackagePlanTarget, PackageTaskState, SchemeId};
   use chrono::Utc;
-  use std::{collections::HashSet, fs, time::Instant};
+  use std::{
+    collections::{HashMap, HashSet},
+    fs,
+    time::Instant,
+  };
   use uuid::Uuid;
 
   fn journal(task_id: &str) -> TaskJournal {
@@ -1029,6 +1053,8 @@ mod tests {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      install_repair_attempts: 0,
+      install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
       assembly_current_file: None,
