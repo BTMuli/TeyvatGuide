@@ -832,6 +832,14 @@ struct ActiveTask {
   journal: Arc<AsyncMutex<TaskJournal>>,
 }
 
+async fn signal_pause_and_lock_journal(
+  task: &ActiveTask,
+) -> (bool, tokio::sync::MutexGuard<'_, TaskJournal>) {
+  let was_paused = task.paused.swap(true, Ordering::AcqRel);
+  let journal = task.journal.lock().await;
+  (was_paused, journal)
+}
+
 #[derive(Clone)]
 pub(crate) struct InstallContext {
   pub(crate) pool: sqlx::SqlitePool,
@@ -1334,11 +1342,15 @@ impl GamePackageManager {
     if task.installation_id != installation_id {
       return Err("安装任务身份不匹配".to_string());
     }
-    let mut journal_value = task.journal.lock().await;
+    // 先通知下载 worker 停止，再等待高频更新的任务日志锁。否则流水线越繁忙，
+    // 暂停命令越容易长期排在进度更新之后，前端也会一直停留在加载态。
+    let (was_paused, mut journal_value) = signal_pause_and_lock_journal(&task).await;
     if journal_value.target != PackagePlanTarget::Install {
+      task.paused.store(was_paused, Ordering::Release);
       return Err("当前任务不是游戏本体安装任务".to_string());
     }
     if journal_value.installation_id != installation_id {
+      task.paused.store(was_paused, Ordering::Release);
       return Err("安装任务身份不匹配".to_string());
     }
     if journal_value.state == PackageTaskState::Paused {
@@ -1348,10 +1360,10 @@ impl GamePackageManager {
       journal_value.state,
       PackageTaskState::Queued | PackageTaskState::Downloading | PackageTaskState::Assembling
     ) {
+      task.paused.store(was_paused, Ordering::Release);
       return Err("安装任务当前不能暂停".to_string());
     }
     let previous_state = journal_value.state;
-    task.paused.store(true, Ordering::Release);
     journal_value.state = PackageTaskState::Paused;
     journal_value.current_file = None;
     journal_value.bytes_per_second = 0;
@@ -1359,7 +1371,7 @@ impl GamePackageManager {
     journal_value.error_message = None;
     journal_value.touch();
     if let Err(error) = journal::persist(task_root, &journal_value) {
-      task.paused.store(false, Ordering::Release);
+      task.paused.store(was_paused, Ordering::Release);
       journal_value.state = previous_state;
       return Err(error);
     }
