@@ -163,6 +163,7 @@ struct InstallPipelineMetrics {
   duplicate_wait_bytes: AtomicU64,
   peak_spool_bytes: AtomicU64,
   peak_logical_staging_bytes: AtomicU64,
+  eta_remaining_bytes: AtomicU64,
   download_telemetry: Arc<DownloadTelemetry>,
   journal_attempt_count: AtomicU64,
   journal_write_count: AtomicU64,
@@ -246,8 +247,8 @@ fn start_install_download_progress_monitor(
       } else {
         0
       };
-      let remaining = value.total_bytes.saturating_sub(value.downloaded_bytes);
-      let eta = if speed > 0 { Some(remaining.div_ceil(speed)) } else { None };
+      let remaining = metrics.eta_remaining_bytes.load(Ordering::Acquire);
+      let eta = download_eta_seconds(remaining, speed);
       if value.bytes_per_second == speed && value.eta_seconds == eta {
         continue;
       }
@@ -260,6 +261,10 @@ fn start_install_download_progress_monitor(
     }
   });
   InstallDownloadProgressMonitor { stopped }
+}
+
+fn download_eta_seconds(remaining_bytes: u64, bytes_per_second: u64) -> Option<u64> {
+  (remaining_bytes > 0 && bytes_per_second > 0).then(|| remaining_bytes.div_ceil(bytes_per_second))
 }
 
 /// 全新安装私有 spool 的增量记账。
@@ -363,6 +368,16 @@ impl InstallSpoolTracker {
 
   fn committed_step(&self) -> usize {
     self.counted.len()
+  }
+
+  fn remaining_download_bytes(&self, plan: &PersistedPlan) -> u64 {
+    plan.downloads.iter().fold(0_u64, |total, download| {
+      if self.counted.contains(&download.id) {
+        total
+      } else {
+        total.saturating_add(download.compressed_size)
+      }
+    })
   }
 
   fn mark_downloaded(&mut self, id: &str, cache_key: &str) -> usize {
@@ -507,6 +522,12 @@ impl InstallPipelineMetrics {
       duplicate_wait_bytes: AtomicU64::new(0),
       peak_spool_bytes: AtomicU64::new(0),
       peak_logical_staging_bytes: AtomicU64::new(0),
+      eta_remaining_bytes: AtomicU64::new(
+        plan
+          .downloads
+          .iter()
+          .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
+      ),
       download_telemetry: DownloadTelemetry::new(),
       journal_attempt_count: AtomicU64::new(0),
       journal_write_count: AtomicU64::new(0),
@@ -640,6 +661,14 @@ impl InstallPipelineMetrics {
 
   fn record_unique_download(&self, bytes: u64) {
     self.unique_download_bytes.fetch_add(bytes, Ordering::Relaxed);
+    let _ =
+      self.eta_remaining_bytes.fetch_update(Ordering::AcqRel, Ordering::Acquire, |remaining| {
+        Some(remaining.saturating_sub(bytes))
+      });
+  }
+
+  fn set_eta_remaining_bytes(&self, bytes: u64) {
+    self.eta_remaining_bytes.store(bytes, Ordering::Release);
   }
 }
 
@@ -1630,11 +1659,6 @@ async fn run_install_streaming_task(
     pipeline_started_at,
     duration_micros(index_started_at.elapsed()),
   ));
-  let _download_progress_monitor = start_install_download_progress_monitor(
-    app_handle.clone(),
-    Arc::clone(&journal),
-    Arc::clone(&metrics),
-  );
   let recovery_started_at = Instant::now();
   {
     let mut value = journal.lock().await;
@@ -1714,6 +1738,12 @@ async fn run_install_streaming_task(
       return;
     }
   };
+  metrics.set_eta_remaining_bytes(spool_tracker.lock().unwrap().remaining_download_bytes(&plan));
+  let _download_progress_monitor = start_install_download_progress_monitor(
+    app_handle.clone(),
+    Arc::clone(&journal),
+    Arc::clone(&metrics),
+  );
   if concurrency > 1 {
     if let Err(error) = run_install_bounded_asset_pipeline(
       &app_handle,
@@ -2065,7 +2095,8 @@ async fn run_install_streaming_task(
         }
         emit_progress(&app_handle, &value.summary());
       }
-      if let Err(error) = download_object(
+      let sdk_download_started_at = metrics.begin_download();
+      let sdk_download_result = download_object(
         &download_client,
         &spool_root,
         download,
@@ -2078,24 +2109,29 @@ async fn run_install_streaming_task(
         )
         .with_telemetry(Arc::clone(&metrics.download_telemetry)),
       )
-      .await
-      {
-        let paused_flag = paused.load(Ordering::Acquire);
-        let canceled_flag = canceled.load(Ordering::Acquire);
-        if canceled_flag {
-          let _ = installer::cancel_draft(&task_root, &context.draft_id);
+      .await;
+      metrics.finish_download(sdk_download_started_at);
+      let downloaded = match sdk_download_result {
+        Ok(downloaded) => downloaded,
+        Err(error) => {
+          let paused_flag = paused.load(Ordering::Acquire);
+          let canceled_flag = canceled.load(Ordering::Acquire);
+          if canceled_flag {
+            let _ = installer::cancel_draft(&task_root, &context.draft_id);
+          }
+          persist_install_stream_error(
+            &task_root,
+            &app_handle,
+            &journal,
+            error,
+            paused_flag,
+            canceled_flag,
+          )
+          .await;
+          return;
         }
-        persist_install_stream_error(
-          &task_root,
-          &app_handle,
-          &journal,
-          error,
-          paused_flag,
-          canceled_flag,
-        )
-        .await;
-        return;
-      }
+      };
+      metrics.record_unique_download(downloaded.bytes);
       let completed_count =
         spool_tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
       let mut value = journal.lock().await;
@@ -2147,6 +2183,25 @@ struct InstallAssetJobCompletion {
 const MAX_INSTALL_ASSET_REPAIR_ATTEMPTS: usize = 2;
 const MAX_INSTALL_TASK_REPAIR_ATTEMPTS: usize = 3;
 
+fn reserve_install_repair_attempt(
+  journal: &mut TaskJournal,
+  asset_index: usize,
+  path: &str,
+  validation_message: &str,
+) -> Result<usize, String> {
+  let previous_attempts =
+    journal.install_asset_repair_attempts.get(&asset_index).copied().unwrap_or_default();
+  if previous_attempts >= MAX_INSTALL_ASSET_REPAIR_ATTEMPTS
+    || journal.install_repair_attempts >= MAX_INSTALL_TASK_REPAIR_ATTEMPTS
+  {
+    return Err(format!("资源自动修复已达到重试上限：{path}（{validation_message}）"));
+  }
+  let attempt_number = previous_attempts.saturating_add(1);
+  journal.install_asset_repair_attempts.insert(asset_index, attempt_number);
+  journal.install_repair_attempts = journal.install_repair_attempts.saturating_add(1);
+  Ok(attempt_number)
+}
+
 #[allow(clippy::too_many_arguments)]
 async fn run_install_prepublish_repair(
   app_handle: &AppHandle,
@@ -2165,10 +2220,6 @@ async fn run_install_prepublish_repair(
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
 ) -> Result<(), String> {
-  let (mut asset_attempts, mut task_attempts) = {
-    let value = journal.lock().await;
-    (value.install_asset_repair_attempts.clone(), value.install_repair_attempts)
-  };
   loop {
     let validation_plan = Arc::clone(plan);
     let validation_task_root = task_root.to_path_buf();
@@ -2189,17 +2240,33 @@ async fn run_install_prepublish_repair(
       Err(failure) if failure.repairable() => failure,
       Err(failure) => return Err(failure.message),
     };
-    let previous_attempts = asset_attempts.get(&failure.asset_index).copied().unwrap_or_default();
-    if previous_attempts >= MAX_INSTALL_ASSET_REPAIR_ATTEMPTS
-      || task_attempts >= MAX_INSTALL_TASK_REPAIR_ATTEMPTS
-    {
-      return Err(format!("资源自动修复已达到重试上限：{}（{}）", failure.path, failure.message));
-    }
-    let attempt_number = previous_attempts.saturating_add(1);
-    asset_attempts.insert(failure.asset_index, attempt_number);
-    task_attempts += 1;
+    let attempt_number = {
+      let mut value = journal.lock().await;
+      reserve_install_repair_attempt(
+        &mut value,
+        failure.asset_index,
+        &failure.path,
+        &failure.message,
+      )?
+    };
 
     super::evidence::invalidate_asset_evidence(task_root, plan, failure.asset_index)?;
+    let job = prepare_install_asset_job(
+      plan,
+      download_index,
+      failure.asset_index,
+      shared_cache_root,
+      spool_root,
+      &HashSet::new(),
+      metrics,
+    )?;
+    metrics.set_eta_remaining_bytes(
+      job
+        .pending
+        .iter()
+        .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
+    );
+    check_install_stream_space(plan, failure.asset_index, &job.pending, spool_root)?;
     {
       let mut value = journal.lock().await;
       let snapshot = {
@@ -2208,8 +2275,6 @@ async fn run_install_prepublish_repair(
         tracker.completion_snapshot(plan)
       };
       apply_install_completion_snapshot(&mut value, snapshot, metrics);
-      value.install_repair_attempts = task_attempts;
-      value.install_asset_repair_attempts = asset_attempts.clone();
       value.state = PackageTaskState::Downloading;
       value.download_current_file = Some(format!(
         "校验失败，重新获取资源 {}/{}：{}",
@@ -2221,17 +2286,6 @@ async fn run_install_prepublish_repair(
       persist_install_checkpoint(task_root, &value, metrics)?;
       emit_state(app_handle, &value.summary());
     }
-
-    let job = prepare_install_asset_job(
-      plan,
-      download_index,
-      failure.asset_index,
-      shared_cache_root,
-      spool_root,
-      &HashSet::new(),
-      metrics,
-    )?;
-    check_install_stream_space(plan, failure.asset_index, &job.pending, spool_root)?;
     let network_concurrency = install_download_concurrency(concurrency);
     let completion = run_install_asset_job(
       job,
@@ -3792,8 +3846,9 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
   use super::{
-    ActiveTask, GamePackageManager, InstallSpoolTracker, PlanWorksetBaseline,
-    install_download_concurrency, nearest_rank,
+    ActiveTask, GamePackageManager, InstallPipelineMetrics, InstallSpoolTracker,
+    PlanWorksetBaseline, download_eta_seconds, install_download_concurrency, nearest_rank,
+    reserve_install_repair_attempt,
   };
   use crate::game::{
     journal::{self, TaskJournal},
@@ -3811,6 +3866,7 @@ mod tests {
       Arc,
       atomic::{AtomicBool, Ordering},
     },
+    time::Instant,
   };
   use tokio::sync::Mutex as AsyncMutex;
   use uuid::Uuid;
@@ -3922,11 +3978,13 @@ mod tests {
     fs::write(spool.join(&d1.cache_key), b"0123456789").unwrap();
     let mut tracker = InstallSpoolTracker::from_disk(&plan, &spool, &shared, HashSet::new());
     assert_eq!(tracker.committed_step(), 1);
+    assert_eq!(tracker.remaining_download_bytes(&plan), 20);
 
     // 下载 d2 后：增量计数必须与全量扫描一致。
     fs::write(spool.join(&d2.cache_key), b"01234567890123456789").unwrap();
     tracker.mark_downloaded(&d2.id, &d2.cache_key);
     assert_eq!(tracker.committed_step(), 2);
+    assert_eq!(tracker.remaining_download_bytes(&plan), 0);
     assert_eq!(tracker.committed_step(), completed_download_count(&plan, 0, &shared, &spool));
 
     // 消费并释放 d1：d1 已消费仍计数，d2 仍保留给 b.bin。
@@ -4065,6 +4123,74 @@ mod tests {
   fn download_concurrency_doubles_pipeline_without_exceeding_limit() {
     assert_eq!(install_download_concurrency(4), 8);
     assert_eq!(install_download_concurrency(64), 64);
+  }
+
+  #[test]
+  fn download_eta_tracks_current_transfer_window_and_hides_zero_remaining() {
+    let plan = PersistedPlan {
+      schema_version: 5,
+      plan_id: "eta-test".to_string(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: vec![baseline_download("a", 10), baseline_download("b", 20)],
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    let metrics = InstallPipelineMetrics::new(&plan, 1, Instant::now(), 0);
+    assert_eq!(metrics.eta_remaining_bytes.load(Ordering::Acquire), 30);
+
+    metrics.set_eta_remaining_bytes(20);
+    metrics.record_unique_download(7);
+    assert_eq!(metrics.eta_remaining_bytes.load(Ordering::Acquire), 13);
+    assert_eq!(download_eta_seconds(13, 5), Some(3));
+    assert_eq!(download_eta_seconds(0, 5), None);
+    assert_eq!(download_eta_seconds(13, 0), None);
+  }
+
+  #[test]
+  fn install_repair_budget_persists_and_enforces_asset_and_task_limits() {
+    let root = TempRoot::new();
+    let task_id = Uuid::new_v4().to_string();
+    let plan = PersistedPlan {
+      schema_version: 5,
+      plan_id: task_id.clone(),
+      installation_id: "installation".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "1.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::Full,
+      downloads: Vec::new(),
+      assets: vec![baseline_asset("a.bin", 1, Vec::new()), baseline_asset("b.bin", 1, Vec::new())],
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    };
+    let mut value = TaskJournal::from_plan(&plan);
+    assert_eq!(reserve_install_repair_attempt(&mut value, 0, "a.bin", "损坏").unwrap(), 1);
+    assert_eq!(reserve_install_repair_attempt(&mut value, 0, "a.bin", "损坏").unwrap(), 2);
+    assert_eq!(reserve_install_repair_attempt(&mut value, 1, "b.bin", "缺失").unwrap(), 1);
+    assert!(reserve_install_repair_attempt(&mut value, 1, "b.bin", "缺失").is_err());
+
+    journal::persist(&root.0, &value).unwrap();
+    let loaded = journal::load(&journal::journal_path(&root.0, &task_id)).unwrap();
+    assert_eq!(loaded.install_repair_attempts, 3);
+    assert_eq!(loaded.install_asset_repair_attempts.get(&0), Some(&2));
+    assert_eq!(loaded.install_asset_repair_attempts.get(&1), Some(&1));
+    let mut resumed = loaded.clone();
+    assert!(reserve_install_repair_attempt(&mut resumed, 1, "b.bin", "缺失").is_err());
   }
 
   #[test]
