@@ -829,7 +829,13 @@ pub(crate) struct GamePackageManager {
 
 struct ActiveTasks {
   by_task: HashMap<String, ActiveTask>,
-  by_installation: HashMap<String, String>,
+  by_installation: HashMap<String, InstallationReservation>,
+  cache_clear_active: bool,
+}
+
+struct InstallationReservation {
+  task_id: String,
+  canceled: Arc<AtomicBool>,
 }
 
 #[derive(Clone)]
@@ -859,7 +865,7 @@ pub(crate) struct TaskReservation {
   active: Arc<Mutex<ActiveTasks>>,
   installation_id: String,
   task_id: String,
-  retained: bool,
+  canceled: Arc<AtomicBool>,
 }
 
 impl TaskReservation {
@@ -868,36 +874,59 @@ impl TaskReservation {
     installation_id: &str,
     task_id: &str,
   ) -> Result<Self, String> {
+    let canceled = Arc::new(AtomicBool::new(false));
     {
       let mut tasks = active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      if tasks.cache_clear_active {
+        return Err("游戏资源缓存正在清理，请稍后重试".to_string());
+      }
       if tasks.by_installation.contains_key(installation_id) {
         return Err("该游戏安装已有资源任务正在运行".to_string());
       }
-      tasks.by_installation.insert(installation_id.to_string(), task_id.to_string());
+      tasks.by_installation.insert(
+        installation_id.to_string(),
+        InstallationReservation { task_id: task_id.to_string(), canceled: Arc::clone(&canceled) },
+      );
     }
     Ok(Self {
       active,
       installation_id: installation_id.to_string(),
       task_id: task_id.to_string(),
-      retained: false,
+      canceled,
     })
   }
 
-  fn retain(&mut self) {
-    self.retained = true;
+  pub(crate) fn canceled_flag(&self) -> Arc<AtomicBool> {
+    Arc::clone(&self.canceled)
   }
 }
 
 impl Drop for TaskReservation {
   fn drop(&mut self) {
-    if self.retained {
-      return;
-    }
     let Ok(mut active) = self.active.lock() else {
       return;
     };
-    if active.by_installation.get(&self.installation_id) == Some(&self.task_id) {
+    if active.by_task.get(&self.task_id).is_some_and(|task| {
+      task.installation_id == self.installation_id && Arc::ptr_eq(&task.canceled, &self.canceled)
+    }) {
+      active.by_task.remove(&self.task_id);
+    }
+    if active.by_installation.get(&self.installation_id).is_some_and(|reservation| {
+      reservation.task_id == self.task_id && Arc::ptr_eq(&reservation.canceled, &self.canceled)
+    }) {
       active.by_installation.remove(&self.installation_id);
+    }
+  }
+}
+
+pub(crate) struct CacheClearReservation {
+  active: Arc<Mutex<ActiveTasks>>,
+}
+
+impl Drop for CacheClearReservation {
+  fn drop(&mut self) {
+    if let Ok(mut active) = self.active.lock() {
+      active.cache_clear_active = false;
     }
   }
 }
@@ -908,6 +937,7 @@ impl GamePackageManager {
       active: Arc::new(Mutex::new(ActiveTasks {
         by_task: HashMap::new(),
         by_installation: HashMap::new(),
+        cache_clear_active: false,
       })),
       verify: Arc::new(VerifyRuntime::new()),
     }
@@ -946,8 +976,9 @@ impl GamePackageManager {
       return Err("下载限速不能低于 1 MiB/s".to_string());
     }
     let plan = Arc::new(plan);
-    let mut reservation =
+    let reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+    let canceled = reservation.canceled_flag();
     let cache_root = prepare_cache_root(&task_root)?;
     let download_client = create_http_client()?;
     let scan_task_id = plan.plan_id.clone();
@@ -1019,7 +1050,7 @@ impl GamePackageManager {
       });
     }
 
-    let canceled = Arc::new(AtomicBool::new(false));
+    let summary = journal.summary();
     let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
@@ -1032,12 +1063,9 @@ impl GamePackageManager {
       let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       active.by_task.insert(plan.plan_id.clone(), task);
     }
-    reservation.retain();
-    let summary = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?.summary();
     emit_state(&app_handle, &summary);
-    let active = Arc::clone(&self.active);
-    let finished_task_id = summary.task_id.clone();
     tauri::async_runtime::spawn(async move {
+      let _reservation = reservation;
       if let Some(context) = audio_apply {
         run_audio_streaming_task(
           app_handle.clone(),
@@ -1095,14 +1123,8 @@ impl GamePackageManager {
         )
         .await;
       }
-      finish_task(&active, &finished_task_id);
     });
     Ok(summary)
-  }
-
-  pub(crate) fn has_running_tasks(&self) -> Result<bool, String> {
-    let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-    Ok(!active.by_task.is_empty())
   }
 
   /// 判断指定安装的运行互斥是否正由同一个任务持有。
@@ -1112,7 +1134,12 @@ impl GamePackageManager {
     installation_id: &str,
   ) -> Result<bool, String> {
     let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-    Ok(active.by_installation.get(installation_id).is_some_and(|id| id == task_id))
+    Ok(
+      active
+        .by_installation
+        .get(installation_id)
+        .is_some_and(|reservation| reservation.task_id == task_id),
+    )
   }
 
   pub(crate) fn start_install(
@@ -1140,8 +1167,9 @@ impl GamePackageManager {
       return Err("下载限速不能低于 1 MiB/s".to_string());
     }
     let download_client = create_http_client()?;
-    let mut reservation =
+    let reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+    let canceled = reservation.canceled_flag();
     let cache_root = prepare_cache_root(&task_root)?;
     let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
     let spool_root = installer::prepare_install_spool(&task_root, &draft_id, overlay)?;
@@ -1230,7 +1258,7 @@ impl GamePackageManager {
     journal.touch();
     journal::persist(&task_root, &journal)?;
     installer::set_draft_state(&task_root, &draft_id, installer::InstallDraftState::Downloading)?;
-    let canceled = Arc::new(AtomicBool::new(false));
+    let summary = journal.summary();
     let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
@@ -1243,12 +1271,9 @@ impl GamePackageManager {
       let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       active.by_task.insert(plan.plan_id.clone(), task);
     }
-    reservation.retain();
-    let summary = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?.summary();
     emit_state(&app_handle, &summary);
-    let active = Arc::clone(&self.active);
-    let finished_task_id = summary.task_id.clone();
     tauri::async_runtime::spawn(async move {
+      let _reservation = reservation;
       run_install_streaming_task(
         app_handle.clone(),
         task_root.clone(),
@@ -1264,7 +1289,6 @@ impl GamePackageManager {
         context,
       )
       .await;
-      finish_task(&active, &finished_task_id);
     });
     Ok(summary)
   }
@@ -1295,8 +1319,9 @@ impl GamePackageManager {
         return Err("该游戏安装已有未完成的资源任务，暂时不能换服".to_string());
       }
     }
-    let mut reservation =
+    let reservation =
       TaskReservation::acquire(Arc::clone(&self.active), plan.installation_id(), plan.plan_id())?;
+    let canceled = reservation.canceled_flag();
     let mut journal = switch::load_or_create_switch_journal(&task_root, &plan)?;
     if journal.state.blocks_launch() && !recovering {
       return Err("检测到未完成的换服提交，请先执行恢复".to_string());
@@ -1310,7 +1335,7 @@ impl GamePackageManager {
     journal.current_file = None;
     journal.touch();
     journal::persist(&task_root, &journal)?;
-    let canceled = Arc::new(AtomicBool::new(false));
+    let summary = journal.summary();
     let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
@@ -1323,14 +1348,10 @@ impl GamePackageManager {
       let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       active.by_task.insert(plan.plan_id().to_string(), task);
     }
-    reservation.retain();
-    let summary = journal::load(&journal::journal_path(&task_root, plan.plan_id()))?.summary();
     emit_state(&app_handle, &summary);
-    let active = Arc::clone(&self.active);
-    let finished_task_id = summary.task_id.clone();
     tauri::async_runtime::spawn(async move {
+      let _reservation = reservation;
       run_switch(app_handle, task_root, installation, plan, shared_journal, canceled).await;
-      finish_task(&active, &finished_task_id);
     });
     Ok(summary)
   }
@@ -1449,6 +1470,7 @@ impl GamePackageManager {
       let running = {
         let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
         active.by_task.contains_key(task_id)
+          || active.by_installation.values().any(|reservation| reservation.task_id == task_id)
       };
       if !running {
         return Ok(());
@@ -1463,11 +1485,17 @@ impl GamePackageManager {
   /// 若指定任务仍在运行，请求它在安全边界取消。
   pub(crate) fn cancel_if_running(&self, task_id: &str) -> Result<bool, String> {
     let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-    let Some(task) = active.by_task.get(task_id) else {
-      return Ok(false);
-    };
-    task.canceled.store(true, Ordering::Release);
-    Ok(true)
+    if let Some(task) = active.by_task.get(task_id) {
+      task.canceled.store(true, Ordering::Release);
+      return Ok(true);
+    }
+    if let Some(reservation) =
+      active.by_installation.values().find(|reservation| reservation.task_id == task_id)
+    {
+      reservation.canceled.store(true, Ordering::Release);
+      return Ok(true);
+    }
+    Ok(false)
   }
 
   fn request_or_reap_cancel(
@@ -1481,7 +1509,10 @@ impl GamePackageManager {
         task.canceled.store(true, Ordering::Release);
         return Ok(None);
       }
-      if active.by_installation.values().any(|id| id == task_id) {
+      if let Some(reservation) =
+        active.by_installation.values().find(|reservation| reservation.task_id == task_id)
+      {
+        reservation.canceled.store(true, Ordering::Release);
         return Ok(None);
       }
     }
@@ -1514,8 +1545,9 @@ impl GamePackageManager {
     if self.verify.is_running(&installation.id)? {
       return Err("该游戏安装正在校验完整性，请等待完成或取消后再应用更新".to_string());
     }
-    let mut reservation =
+    let reservation =
       TaskReservation::acquire(Arc::clone(&self.active), &plan.installation_id, &plan.plan_id)?;
+    let canceled = reservation.canceled_flag();
     if is_game_running() {
       return Err("游戏仍在运行，无法应用资源更新".to_string());
     }
@@ -1537,7 +1569,6 @@ impl GamePackageManager {
     let game_root = PathBuf::from(&installation.root_path);
     let registration_game_root = game_root.clone();
     let summary = journal_value.summary();
-    let canceled = Arc::new(AtomicBool::new(false));
     let paused = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal_value));
     let task = ActiveTask {
@@ -1550,11 +1581,9 @@ impl GamePackageManager {
       let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       active.by_task.insert(plan.plan_id.clone(), task);
     }
-    reservation.retain();
-    let active = Arc::clone(&self.active);
-    let finished_task_id = plan.plan_id.clone();
     let worker_journal = Arc::clone(&shared_journal);
     tauri::async_runtime::spawn(async move {
+      let _reservation = reservation;
       let worker_app_handle = app_handle.clone();
       let canceled_flag = Arc::clone(&canceled);
       let snapshot = Arc::clone(&worker_journal);
@@ -1591,12 +1620,10 @@ impl GamePackageManager {
           Ok(Ok(committer::ApplyOutcome::RepairNeeded)) => {}
           Ok(Err(error)) => {
             log::warn!("[game-package] 应用资源任务失败：{error}");
-            finish_task(&active, &finished_task_id);
             return;
           }
           Err(error) => {
             log::error!("[game-package] 应用资源任务异常退出：{error}");
-            finish_task(&active, &finished_task_id);
             return;
           }
         }
@@ -1614,7 +1641,6 @@ impl GamePackageManager {
         .await
         {
           log::warn!("[game-package] 修复资源任务失败：{error}");
-          finish_task(&active, &finished_task_id);
           return;
         }
       }
@@ -1633,7 +1659,6 @@ impl GamePackageManager {
       {
         log::warn!("[game-package] 同步语音包安装记录失败：{error}");
       }
-      finish_task(&active, &finished_task_id);
     });
     Ok(summary)
   }
@@ -1700,13 +1725,29 @@ impl GamePackageManager {
     installation: GameInstallation,
     branches: super::hoyoplay::GameBranches,
   ) -> Result<PackageVerifySummary, String> {
-    {
-      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-      if active.by_installation.contains_key(&installation.id) {
-        return Err("该游戏安装已有资源任务正在运行".to_string());
-      }
+    if self.verify.is_running(&installation.id)? {
+      return self
+        .verify
+        .status(&task_root, &installation.id)?
+        .ok_or_else(|| "完整性校验运行状态不可用".to_string());
     }
-    verify::start_verify(&self.verify, app_handle, task_root, installation, branches)
+    let reservation = match TaskReservation::acquire(
+      Arc::clone(&self.active),
+      &installation.id,
+      &format!("verify:{}", installation.id),
+    ) {
+      Ok(reservation) => reservation,
+      Err(error) => {
+        if self.verify.is_running(&installation.id)? {
+          return self
+            .verify
+            .status(&task_root, &installation.id)?
+            .ok_or_else(|| "完整性校验运行状态不可用".to_string());
+        }
+        return Err(error);
+      }
+    };
+    verify::start_verify(&self.verify, app_handle, task_root, installation, branches, reservation)
   }
 
   pub(crate) fn verify_status(
@@ -1729,7 +1770,27 @@ impl GamePackageManager {
     &self,
     installation_id: &str,
   ) -> Result<TaskReservation, String> {
-    TaskReservation::acquire(Arc::clone(&self.active), installation_id, "game-launch")
+    self.reserve_installation_operation(installation_id, "game-launch")
+  }
+
+  pub(crate) fn reserve_installation_operation(
+    &self,
+    installation_id: &str,
+    operation: &str,
+  ) -> Result<TaskReservation, String> {
+    TaskReservation::acquire(Arc::clone(&self.active), installation_id, operation)
+  }
+
+  pub(crate) fn reserve_cache_clear(&self) -> Result<CacheClearReservation, String> {
+    let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+    if active.cache_clear_active {
+      return Err("游戏资源缓存已经在清理".to_string());
+    }
+    if !active.by_task.is_empty() || !active.by_installation.is_empty() {
+      return Err("还有资源任务正在运行，请等待完成后再清理缓存".to_string());
+    }
+    active.cache_clear_active = true;
+    Ok(CacheClearReservation { active: Arc::clone(&self.active) })
   }
 
   pub(crate) async fn list(
@@ -1740,13 +1801,13 @@ impl GamePackageManager {
     let live_ids = {
       let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
-      ids.extend(active.by_installation.values().cloned());
+      ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
       ids
     };
     let mut summaries = HashMap::new();
     for mut journal in journal::list(task_root, installation_id)? {
       let interrupted = journal.state.is_active() && !live_ids.contains(&journal.task_id);
-      let elapsed_frozen = interrupted && journal.freeze_elapsed_at_updated_at();
+      let _elapsed_frozen = interrupted && journal.freeze_elapsed_at_updated_at();
       let abandoned_download = interrupted
         && matches!(journal.state, PackageTaskState::Queued | PackageTaskState::Downloading);
       if abandoned_download {
@@ -1754,10 +1815,8 @@ impl GamePackageManager {
         journal.error_message = Some("资源任务已中断，请恢复或放弃".to_string());
         journal.current_file = None;
       }
-      if elapsed_frozen || abandoned_download {
-        journal.touch();
-        journal::persist(task_root, &journal)?;
-      }
+      // `list` 只生成恢复投影，不再依据可能过期的 active 快照写回 journal。
+      // worker 或显式恢复命令是生命周期状态的唯一持久化写入者。
       let mut summary = journal.summary();
       if summary.state.requires_recovery() {
         summary.state = PackageTaskState::RecoveryRequired;
@@ -1786,7 +1845,9 @@ impl GamePackageManager {
   ) -> Result<PackageTaskCleanupSummary, String> {
     let active_ids = {
       let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-      active.by_task.keys().cloned().collect::<HashSet<_>>()
+      let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
+      ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
+      ids
     };
     journal::cleanup_terminal_tasks(task_root, &active_ids, max_age)
   }
@@ -1796,13 +1857,11 @@ impl GamePackageManager {
     task_root: &Path,
     task_id: &str,
   ) -> Result<PackageTaskSummary, String> {
-    {
-      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-      if active.by_task.contains_key(task_id) {
-        return Err("任务仍在运行，请先请求取消并等待安全边界".to_string());
-      }
-    }
     let path = journal::journal_path(task_root, task_id);
+    let identity = journal::load(&path)?;
+    let _reservation =
+      TaskReservation::acquire(Arc::clone(&self.active), &identity.installation_id, task_id)
+        .map_err(|_| "任务仍在运行，请先请求取消并等待安全边界".to_string())?;
     let mut journal = journal::load(&path)?;
     if journal.state == PackageTaskState::Completed {
       return Err("资源任务已经完成".to_string());
@@ -3996,15 +4055,6 @@ async fn run_switch(
     Ok(Ok(())) => {}
     Ok(Err(error)) => log::warn!("[game-package] 换服失败：{error}"),
     Err(error) => log::error!("[game-package] 换服任务异常退出：{error}"),
-  }
-}
-
-fn finish_task(active: &Mutex<ActiveTasks>, task_id: &str) {
-  let Ok(mut active) = active.lock() else {
-    return;
-  };
-  if let Some(task) = active.by_task.remove(task_id) {
-    active.by_installation.remove(&task.installation_id);
   }
 }
 

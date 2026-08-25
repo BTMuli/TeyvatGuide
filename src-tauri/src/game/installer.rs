@@ -25,7 +25,7 @@ use std::{
   io::{Read, Write},
   path::{Path, PathBuf},
   sync::{
-    Arc, Mutex,
+    Arc, LazyLock, Mutex, Weak,
     atomic::{AtomicBool, AtomicUsize, Ordering},
   },
   time::{Duration, Instant},
@@ -45,6 +45,12 @@ const MAX_SDK_VERSION_BYTES: u64 = 256 * 1024;
 const MAX_SDK_VERSION_FILES: usize = 512;
 const MAX_SDK_DECOMPRESSED_BYTES: u64 = 512 * 1024 * 1024;
 const INSTALL_SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+
+// Draft mutations are keyed so an unrelated draft does not wait for filesystem cleanup of
+// another draft. The task-root key additionally makes create's active-check and persist one
+// operation for concurrent creators.
+static DRAFT_MUTATION_LOCKS: LazyLock<Mutex<HashMap<String, Weak<Mutex<()>>>>> =
+  LazyLock::new(|| Mutex::new(HashMap::new()));
 
 #[derive(Default)]
 pub(crate) struct InstallValidationTiming {
@@ -249,9 +255,6 @@ pub(crate) fn create_draft(
   if path_occupied(&staging_root)? {
     return Err("安装暂存目录已存在，请重新选择安装位置".to_string());
   }
-  if has_active_draft(task_root, &expected_executable, machine_uid)? {
-    return Err("该游戏库目录已有未完成的安装草稿，请先恢复或取消原任务。".to_string());
-  }
   let (library_volume_serial, library_file_id) = directory_identity(&library_root)?;
   let (target_volume_serial, target_file_id) = directory_identity(&game_root)?;
   let draft = InstallDraft {
@@ -278,6 +281,11 @@ pub(crate) fn create_draft(
     created_at: Utc::now().to_rfc3339(),
     updated_at: Utc::now().to_rfc3339(),
   };
+  let lock = draft_mutation_lock(&task_root_lock_key(task_root))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
+  if has_active_draft(task_root, &expected_executable, machine_uid)? {
+    return Err("该游戏库目录已有未完成的安装草稿，请先恢复或取消原任务。".to_string());
+  }
   persist_draft(task_root, &draft)?;
   Ok(draft.summary())
 }
@@ -378,6 +386,12 @@ pub(crate) fn load_draft(task_root: &Path, draft_id: &str) -> Result<InstallDraf
 }
 
 pub(crate) fn persist_draft(task_root: &Path, draft: &InstallDraft) -> Result<(), String> {
+  let lock = draft_mutation_lock(&draft_lock_key(task_root, &draft.draft_id))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
+  persist_draft_unlocked(task_root, draft)
+}
+
+fn persist_draft_unlocked(task_root: &Path, draft: &InstallDraft) -> Result<(), String> {
   validate_draft(draft, &draft.draft_id)?;
   let directory = task_root.join("install-drafts");
   fs::create_dir_all(&directory).map_err(|error| format!("创建安装草稿目录失败：{error}"))?;
@@ -399,10 +413,10 @@ pub(crate) fn mark_draft_plan(
   draft_id: &str,
   plan: &PersistedPlan,
 ) -> Result<InstallDraft, String> {
+  let lock = draft_mutation_lock(&draft_lock_key(task_root, draft_id))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
   let mut draft = load_draft(task_root, draft_id)?;
-  if draft.state == InstallDraftState::Completed || draft.state == InstallDraftState::Canceled {
-    return Err("安装草稿已经结束".to_string());
-  }
+  validate_draft_state_transition(draft.state, InstallDraftState::Planned)?;
   let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
   if plan.installation_id != draft.install_id
     || plan.target != PackagePlanTarget::Install
@@ -417,7 +431,7 @@ pub(crate) fn mark_draft_plan(
   draft.sdk_md5 = overlay.sdk.as_ref().map(|sdk| sdk.md5.clone());
   draft.state = InstallDraftState::Planned;
   draft.updated_at = Utc::now().to_rfc3339();
-  persist_draft(task_root, &draft)?;
+  persist_draft_unlocked(task_root, &draft)?;
   Ok(draft)
 }
 
@@ -426,10 +440,21 @@ pub(crate) fn set_draft_state(
   draft_id: &str,
   state: InstallDraftState,
 ) -> Result<InstallDraft, String> {
+  let lock = draft_mutation_lock(&draft_lock_key(task_root, draft_id))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
+  set_draft_state_unlocked(task_root, draft_id, state)
+}
+
+fn set_draft_state_unlocked(
+  task_root: &Path,
+  draft_id: &str,
+  state: InstallDraftState,
+) -> Result<InstallDraft, String> {
   let mut draft = load_draft(task_root, draft_id)?;
+  validate_draft_state_transition(draft.state, state)?;
   draft.state = state;
   draft.updated_at = Utc::now().to_rfc3339();
-  persist_draft(task_root, &draft)?;
+  persist_draft_unlocked(task_root, &draft)?;
   Ok(draft)
 }
 
@@ -944,6 +969,8 @@ pub(crate) fn cancel_draft(
   task_root: &Path,
   draft_id: &str,
 ) -> Result<InstallDraftSummary, String> {
+  let lock = draft_mutation_lock(&draft_lock_key(task_root, draft_id))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
   let draft = load_draft(task_root, draft_id)?;
   if matches!(
     draft.state,
@@ -972,7 +999,7 @@ pub(crate) fn cancel_draft(
     validate_no_links(&spool)?;
     fs::remove_dir_all(spool).map_err(|error| format!("清理安装任务 spool 失败：{error}"))?;
   }
-  let draft = set_draft_state(task_root, draft_id, InstallDraftState::Canceled)?;
+  let draft = set_draft_state_unlocked(task_root, draft_id, InstallDraftState::Canceled)?;
   Ok(draft.summary())
 }
 
@@ -981,6 +1008,8 @@ pub(crate) fn abandon_published_draft(
   task_root: &Path,
   draft_id: &str,
 ) -> Result<InstallDraftSummary, String> {
+  let lock = draft_mutation_lock(&draft_lock_key(task_root, draft_id))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
   let draft = load_draft(task_root, draft_id)?;
   if draft.state == InstallDraftState::Canceled {
     return Err("安装草稿已经结束，不能重复放弃".to_string());
@@ -994,7 +1023,7 @@ pub(crate) fn abandon_published_draft(
   if draft.state == InstallDraftState::Completed {
     return Ok(draft.summary());
   }
-  let draft = set_draft_state(task_root, draft_id, InstallDraftState::Canceled)?;
+  let draft = set_draft_state_unlocked(task_root, draft_id, InstallDraftState::Canceled)?;
   Ok(draft.summary())
 }
 
@@ -2585,6 +2614,18 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) { Err("安装任务已取消".to_string()) } else { Ok(()) }
 }
 
+fn validate_draft_state_transition(
+  current: InstallDraftState,
+  next: InstallDraftState,
+) -> Result<(), String> {
+  if matches!(current, InstallDraftState::Canceled | InstallDraftState::Completed)
+    && current != next
+  {
+    return Err("安装草稿已经结束".to_string());
+  }
+  Ok(())
+}
+
 pub(crate) fn ensure_windows_install_platform() -> Result<(), String> {
   #[cfg(target_os = "windows")]
   {
@@ -2598,6 +2639,24 @@ pub(crate) fn ensure_windows_install_platform() -> Result<(), String> {
 
 fn draft_path(task_root: &Path, draft_id: &str) -> PathBuf {
   task_root.join("install-drafts").join(format!("{draft_id}.json"))
+}
+
+fn draft_mutation_lock(key: &str) -> Result<Arc<Mutex<()>>, String> {
+  let mut locks = DRAFT_MUTATION_LOCKS.lock().map_err(|_| "安装草稿锁注册表已损坏".to_string())?;
+  if let Some(lock) = locks.get(key).and_then(Weak::upgrade) {
+    return Ok(lock);
+  }
+  let lock = Arc::new(Mutex::new(()));
+  locks.insert(key.to_string(), Arc::downgrade(&lock));
+  Ok(lock)
+}
+
+fn task_root_lock_key(task_root: &Path) -> String {
+  format!("task\0{}", path_text(task_root))
+}
+
+fn draft_lock_key(task_root: &Path, draft_id: &str) -> String {
+  format!("draft\0{}\0{draft_id}", path_text(task_root))
 }
 
 fn path_text(path: &Path) -> String {

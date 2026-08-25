@@ -8,6 +8,7 @@
 use super::{
   hoyoplay::GameBranches,
   model::{GameInstallation, PackagePlanTarget, PackageVerifyState, PackageVerifySummary},
+  package::TaskReservation,
   path_guard::resolve_optional_manifest_file,
   planner::{
     PlanFile, build_repair_parts, load_verify_target, manifest_digest, persist_plan_parts,
@@ -95,6 +96,7 @@ impl VerifySession {
 }
 
 struct ActiveVerify {
+  run_id: String,
   canceled: Arc<AtomicBool>,
   dropped: Arc<AtomicBool>,
   session: Arc<Mutex<VerifySession>>,
@@ -124,12 +126,17 @@ impl VerifyRuntime {
   }
 
   pub(crate) fn clear(&self, task_root: &Path, installation_id: &str) -> Result<(), String> {
-    {
+    let active_task = {
       let active = self.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
-      if let Some(task) = active.get(installation_id) {
-        task.dropped.store(true, Ordering::Release);
-        task.canceled.store(true, Ordering::Release);
-      }
+      active.get(installation_id).map(|task| {
+        (Arc::clone(&task.canceled), Arc::clone(&task.dropped), Arc::clone(&task.session))
+      })
+    };
+    if let Some((canceled, dropped, session)) = active_task {
+      let session = session.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
+      dropped.store(true, Ordering::Release);
+      canceled.store(true, Ordering::Release);
+      return delete_session(task_root, &session.installation_id);
     }
     delete_session(task_root, installation_id)
   }
@@ -156,6 +163,7 @@ pub(crate) fn start_verify(
   task_root: PathBuf,
   installation: GameInstallation,
   branches: GameBranches,
+  reservation: TaskReservation,
 ) -> Result<PackageVerifySummary, String> {
   {
     let active = runtime.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
@@ -172,11 +180,17 @@ pub(crate) fn start_verify(
   let initial = initial_session(&task_root, &installation)?;
   let shared = Arc::new(Mutex::new(initial));
   let run_started = Instant::now();
+  let run_id = Uuid::new_v4().to_string();
   {
     let mut active = runtime.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
+    if let Some(running) = active.get(&installation.id) {
+      let session = running.session.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
+      return Ok(session.summary(running.run_started.elapsed()));
+    }
     active.insert(
       installation_id.clone(),
       ActiveVerify {
+        run_id: run_id.clone(),
         canceled: Arc::clone(&canceled),
         dropped: Arc::clone(&dropped),
         session: Arc::clone(&shared),
@@ -187,8 +201,11 @@ pub(crate) fn start_verify(
 
   let summary_session = Arc::clone(&shared);
   tauri::async_runtime::spawn(async move {
+    let _reservation = reservation;
     run_verify(app_handle, task_root, installation, branches, shared, canceled, dropped).await;
-    if let Ok(mut active) = runtime_handle.active.lock() {
+    if let Ok(mut active) = runtime_handle.active.lock()
+      && active.get(&installation_id).is_some_and(|task| task.run_id == run_id)
+    {
       active.remove(&installation_id);
     }
   });
@@ -275,6 +292,10 @@ async fn run_verify(
       return;
     }
     if let Ok(mut session) = shared.lock() {
+      if dropped.load(Ordering::Acquire) {
+        let _ = delete_session(&task_root, &session.installation_id);
+        return;
+      }
       if session.state == PackageVerifyState::Scanning {
         session.state = PackageVerifyState::Failed;
         session.error_message = Some(error);
@@ -352,16 +373,15 @@ async fn prepare_and_scan(
   session.error_message = None;
   session.plan = None;
   session.touch();
-  if dropped.load(Ordering::Acquire) {
-    delete_session(task_root, &installation.id)?;
-    return Ok(());
+  {
+    let mut shared_session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
+    if dropped.load(Ordering::Acquire) {
+      delete_session(task_root, &shared_session.installation_id)?;
+      return Ok(());
+    }
+    persist_session(task_root, &session)?;
+    *shared_session = session.clone();
   }
-  persist_session(task_root, &session)?;
-  if dropped.load(Ordering::Acquire) {
-    delete_session(task_root, &installation.id)?;
-    return Ok(());
-  }
-  replace_shared(shared, session.clone())?;
   emit_verify(app_handle, &session.summary(Duration::ZERO));
 
   let game_root = PathBuf::from(&installation.root_path);
@@ -778,12 +798,6 @@ fn finish_completed(
   session.touch();
   persist_session(task_root, &session)?;
   emit_verify(app_handle, &session.summary(Duration::ZERO));
-  Ok(())
-}
-
-fn replace_shared(shared: &Arc<Mutex<VerifySession>>, value: VerifySession) -> Result<(), String> {
-  let mut session = shared.lock().map_err(|_| "完整性校验会话锁已损坏".to_string())?;
-  *session = value;
   Ok(())
 }
 

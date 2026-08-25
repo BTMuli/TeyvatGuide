@@ -174,8 +174,10 @@ pub fn game_installation_locate() -> Vec<String> {
 pub async fn game_installation_uninstall(
   app_handle: AppHandle,
   db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
   installation_id: String,
 ) -> Result<GameUninstallSummary, String> {
+  let _reservation = manager.reserve_installation_operation(&installation_id, "game-uninstall")?;
   if super::package::is_game_running() {
     return Err("游戏正在运行，请先退出游戏再卸载".to_string());
   }
@@ -402,6 +404,7 @@ pub async fn game_install_location_inspect(
 #[tauri::command]
 pub async fn game_install_plan(
   app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
   install_id: String,
   on_progress: Channel<PackagePlanProgress>,
 ) -> Result<PackagePlanSummary, String> {
@@ -410,6 +413,8 @@ pub async fn game_install_plan(
   installer::ensure_windows_install_platform()?;
   let draft_id = installer::find_draft_id(&task_root, &install_id)?;
   let draft = installer::load_draft(&task_root, &draft_id)?;
+  let _reservation =
+    manager.reserve_installation_operation(&draft.install_id, "game-install-plan")?;
   let client = create_http_client()?;
   report_plan_progress(&on_progress, 2, "正在读取远端分支");
   let branches = get_game_branches(&client, draft.scheme).await?;
@@ -434,11 +439,14 @@ pub async fn game_install_plan(
 #[tauri::command]
 pub fn game_install_draft_cancel(
   app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
   install_id: String,
 ) -> Result<installer::InstallDraftSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   installer::ensure_windows_install_platform()?;
   let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  let _reservation =
+    manager.reserve_installation_operation(&install_id, "game-install-draft-cancel")?;
   if journal::list(&task_root, Some(&install_id))?.iter().any(|task| {
     task.operation == "install"
       && !matches!(
@@ -555,6 +563,8 @@ pub async fn game_install_recover(
       manager.cancel(&app_handle, &task_root, &task_id)?;
       return Ok(journal_value.summary());
     }
+    let _reservation =
+      manager.reserve_installation_operation(&install_id, "game-install-rollback")?;
     if published {
       let machine_uid = read_machine_uid(&app_handle)?;
       installer::verify_published_installation(&task_root, &plan, &machine_uid)?;
@@ -570,6 +580,8 @@ pub async fn game_install_recover(
     return Ok(canceled.summary());
   }
   if published {
+    let _reservation =
+      manager.reserve_installation_operation(&install_id, "game-install-registration")?;
     return complete_install_registration(
       &app_handle,
       &db_instances,
@@ -629,6 +641,11 @@ pub fn game_install_cancel(
   let draft_id = installer::find_draft_id(&task_root, &install_id)?;
   manager.cancel(&app_handle, &task_root, &task_id)?;
   let journal_path = journal::journal_path(&task_root, &task_id);
+  let journal_value = journal::load(&journal_path)?;
+  if journal_value.state.is_active() || journal_value.state.blocks_launch() {
+    return Ok(journal_value.summary());
+  }
+  let _reservation = manager.reserve_installation_operation(&install_id, "game-install-cancel")?;
   let journal_value = journal::load(&journal_path)?;
   if journal_value.state.is_active() || journal_value.state.blocks_launch() {
     return Ok(journal_value.summary());
@@ -845,8 +862,8 @@ pub async fn game_package_cache_clear(
   target: cache::CacheClearTarget,
 ) -> Result<PackageCacheSummary, String> {
   let task_root = game_task_root(&app_handle)?;
-  let has_running_tasks =
-    manager.has_running_tasks().map_err(|error| format!("读取缓存清理任务状态失败：{error}"))?;
+  let _reservation =
+    manager.reserve_cache_clear().map_err(|error| format!("开始缓存清理失败：{error}"))?;
   let app = app_handle.clone();
   tauri::async_runtime::spawn_blocking(move || {
     let mut last_emit = Instant::now() - Duration::from_millis(300);
@@ -859,7 +876,7 @@ pub async fn game_package_cache_clear(
         last_emit = Instant::now();
       }
     };
-    cache::clear_with_progress(&task_root, has_running_tasks, target, &mut progress)
+    cache::clear_with_progress(&task_root, false, target, &mut progress)
   })
   .await
   .map_err(|error| format!("缓存清理任务异常退出：{error}"))?
@@ -1038,10 +1055,9 @@ pub async fn game_package_recover(
   if journal_value.operation == "audio"
     && journal_value.state == PackageTaskState::RegistrationPending
   {
-    if manager.has_running_tasks().map_err(|error| format!("读取语音包任务状态失败：{error}"))?
-    {
-      return Err("语音包任务仍在同步安装记录，请稍候".to_string());
-    }
+    let _reservation = manager
+      .reserve_installation_operation(&journal_value.installation_id, "audio-registration-retry")
+      .map_err(|_| "语音包任务仍在同步安装记录，请稍候".to_string())?;
     if matches!(action, PackageRecoveryAction::Rollback) {
       return Err("语音包文件已经提交并校验，只能重试同步安装记录".to_string());
     }

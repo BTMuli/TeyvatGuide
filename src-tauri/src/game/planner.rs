@@ -2310,12 +2310,7 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
   let directory = task_root.join("tasks").join(plan_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建游戏资源计划目录失败：{error}"))?;
   let target = directory.join("plan.json");
-  let temporary = directory.join("plan.json.tmp");
-  match fs::remove_file(&temporary) {
-    Ok(()) => {}
-    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-    Err(error) => return Err(format!("清理旧游戏资源计划临时文件失败：{error}")),
-  }
+  let temporary = directory.join(format!("plan.json.{}.tmp", Uuid::new_v4()));
   let file = OpenOptions::new()
     .create_new(true)
     .write(true)
@@ -2332,17 +2327,38 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
     let _ = fs::remove_file(&temporary);
     return Err(format!("写入游戏资源计划失败：{error}"));
   }
-  let file = writer.into_inner().map_err(|error| format!("写入游戏资源计划失败：{error}"))?;
-  let content_len =
-    file.metadata().map_err(|error| format!("读取游戏资源计划大小失败：{error}"))?.len();
+  let file = match writer.into_inner() {
+    Ok(file) => file,
+    Err(error) => {
+      let message = error.error().to_string();
+      drop(error);
+      let _ = fs::remove_file(&temporary);
+      return Err(format!("写入游戏资源计划失败：{message}"));
+    }
+  };
+  let content_len = match file.metadata() {
+    Ok(metadata) => metadata.len(),
+    Err(error) => {
+      drop(file);
+      let _ = fs::remove_file(&temporary);
+      return Err(format!("读取游戏资源计划大小失败：{error}"));
+    }
+  };
   if content_len > MAX_PLAN_BYTES as u64 {
     drop(file);
     let _ = fs::remove_file(&temporary);
     return Err("游戏资源计划超过安全大小上限".to_string());
   }
-  file.sync_all().map_err(|error| format!("同步游戏资源计划失败：{error}"))?;
+  if let Err(error) = file.sync_all() {
+    drop(file);
+    let _ = fs::remove_file(&temporary);
+    return Err(format!("同步游戏资源计划失败：{error}"));
+  }
   drop(file);
-  atomic_replace_plan(&temporary, &target)?;
+  if let Err(error) = atomic_replace_plan(&temporary, &target) {
+    let _ = fs::remove_file(&temporary);
+    return Err(error);
+  }
   sync_directory(&directory)?;
   Ok(())
 }
