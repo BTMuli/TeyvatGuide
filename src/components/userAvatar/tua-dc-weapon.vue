@@ -2,8 +2,8 @@
   <div class="tua-dcw-box">
     <div class="tua-dcw-main">
       <div class="tua-dcw-left">
-        <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" alt="star" />
-        <img :src="`/WIKI/weapon/${props.modelValue.id}.webp`" alt="weapon" />
+        <img :src="weaponStarBg" alt="star" />
+        <img :src="weaponIcon" alt="weapon" />
         <v-menu
           :close-on-content-click="false"
           :z-index="2400"
@@ -15,10 +15,10 @@
           <div class="tua-dcw-menu">
             <div class="tua-dcw-menu-title">
               <div class="tua-dcw-menu-icon">
-                <img :src="`/icon/bg/${props.modelValue.rarity}-Star.webp`" alt="star" />
-                <img :src="`/WIKI/weapon/${props.modelValue.id}.webp`" alt="weapon" />
+                <img :src="weaponStarBg" alt="star" />
+                <img :src="weaponIcon" alt="weapon" />
               </div>
-              <span>{{ props.modelValue.name }}</span>
+              <span>{{ weaponName }}</span>
               <small>
                 Lv.{{ props.modelValue.level }} ·
                 <span :class="{ 'tua-dcw-refine--max': props.modelValue.affix_level === 5 }">
@@ -77,19 +77,37 @@ import { parseHtmlText } from "@utils/toolFunc.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { computed, onMounted, ref } from "vue";
 
+import { AppCalendarData } from "@/data/index.js";
+
 type TuaDcWeaponProps = {
-  modelValue: TGApp.Game.Avatar.WeaponDetail;
+  modelValue: TGApp.Sqlite.Character.TableWeapon;
   updated: string;
   uid: number;
 };
 
 const props = defineProps<TuaDcWeaponProps>();
 const version = ref<string>();
+const calendarIdSet = new Set(AppCalendarData.map((item) => item.id));
 
 onMounted(async () => {
   version.value = await app.getVersion();
 });
 
+const weaponStarBg = computed<string>(() => {
+  let star = props.modelValue.rarity;
+  if (props.modelValue.skin) star = props.modelValue.skin.weapon_skin_rarity;
+  return `/icon/bg/${star}-Star.webp`;
+});
+const weaponName = computed<string>(() => {
+  const oriName = props.modelValue.name;
+  if (props.modelValue.skin) return `${oriName}(${props.modelValue.skin.weapon_skin_name})`;
+  return oriName;
+});
+const weaponIcon = computed<string>(() => {
+  if (props.modelValue.skin) return props.modelValue.skin.weapon_skin_icon;
+  if (calendarIdSet.has(props.modelValue.id)) return `/WIKI/weapon/${props.modelValue.id}.webp`;
+  return props.modelValue.icon;
+});
 const propMain = computed<TGApp.Game.Avatar.PropMapItem | false>(() => {
   return wikiUtils.getProp(props.modelValue.main_property.property_type);
 });

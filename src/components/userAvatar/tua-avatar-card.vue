@@ -1,11 +1,11 @@
-<!-- 角色列表卡片：左角色 / 右身份+武器 / 五圣遗物均分 + 名片底 -->
+<!-- 角色列表卡片（新UI） -->
 <template>
-  <div class="tua-ac" title="点击查看详情">
+  <div class="tua-ac" title="点击查看详情" @click="console.log(role)">
     <div class="tua-ac-head">
       <div class="tua-ac-avatar">
-        <img alt="" class="tua-ac-piece-bg" decoding="async" :src="avatarStarBg" />
-        <img :alt="role.avatar.name" class="tua-ac-piece-icon" decoding="async" :src="avatarIcon" />
-        <img alt="" class="tua-ac-piece-lt" decoding="async" :src="elementIcon" />
+        <img :src="avatarStarBg" alt="" class="tua-ac-piece-bg" decoding="async" />
+        <img :alt="role.avatar.name" :src="avatarIcon" class="tua-ac-piece-icon" decoding="async" />
+        <img :src="elementIcon" alt="" class="tua-ac-piece-lt" decoding="async" />
         <span
           v-if="role.avatar.actived_constellation_num > 0"
           :class="{ 'tua-ac-piece-rt--max': role.avatar.actived_constellation_num === 6 }"
@@ -40,18 +40,18 @@
               <v-icon size="14">mdi-tshirt-crew</v-icon>
             </span>
           </div>
-          <span class="tua-ac-wname">{{ role.weapon.name }}</span>
+          <span :title="weaponName" class="tua-ac-wname">{{ role.weapon.name }}</span>
         </div>
         <div class="tua-ac-weapon">
           <div class="tua-ac-weapon-icon">
-            <img alt="" class="tua-ac-piece-bg" decoding="async" :src="weaponStarBg" />
+            <img :src="weaponStarBg" alt="" class="tua-ac-piece-bg" decoding="async" />
             <img
               :alt="role.weapon.name"
+              :src="weaponIcon"
               class="tua-ac-piece-icon"
               decoding="async"
-              :src="weaponIcon"
             />
-            <img alt="" class="tua-ac-piece-lt" decoding="async" :src="weaponTypeIcon" />
+            <img :src="weaponTypeIcon" alt="" class="tua-ac-piece-lt" decoding="async" />
           </div>
           <div class="tua-ac-wmeta">
             <span
@@ -71,35 +71,35 @@
       <div
         v-for="relicSlot in relicSlots"
         :key="relicSlot.position"
-        class="tua-ac-relic"
         :title="relicTitles[relicSlot.position]"
+        class="tua-ac-relic"
         @mouseenter="ensureRelicTitle(relicSlot)"
       >
         <div class="tua-ac-relic-bg">
           <img
             v-if="relicSlot.relic !== false"
+            :src="`/icon/bg/${relicSlot.relic.rarity}-Star.webp`"
             alt=""
             decoding="async"
-            :src="`/icon/bg/${relicSlot.relic.rarity}-Star.webp`"
           />
         </div>
         <div class="tua-ac-relic-icon">
           <img
             v-if="relicSlot.relic === false"
+            :src="`/icon/relic/${relicSlot.position}.webp`"
             alt=""
             class="empty"
             decoding="async"
-            :src="`/icon/relic/${relicSlot.position}.webp`"
           />
-          <img v-else :alt="relicSlot.relic.name" decoding="async" :src="relicSlot.relic.icon" />
+          <img v-else :alt="relicSlot.relic.name" :src="relicSlot.relic.icon" decoding="async" />
         </div>
       </div>
     </div>
     <div class="tua-ac-mid">
       <img
+        :class="{ ori: isFetterMax }"
         :src="nameCard"
         alt=""
-        :class="{ ori: isFetterMax }"
         class="tua-ac-card"
         decoding="async"
       />
@@ -111,7 +111,7 @@
           :title="`${skill.name} Lv.${skill.level}`"
           class="tua-ac-skill"
         >
-          <img :src="skill.icon" :alt="skill.name" decoding="async" />
+          <img :alt="skill.name" :src="skill.icon" decoding="async" />
           <span>Lv.{{ skill.level }}</span>
         </div>
       </div>
@@ -149,8 +149,18 @@ const avatarIcon = computed<string>(() => {
 const elementIcon = computed<string>(
   () => `/icon/element/${getZhElement(role.avatar.element)}元素.webp`,
 );
-const weaponStarBg = computed<string>(() => `/icon/bg/${role.weapon.rarity}-Star.webp`);
+const weaponStarBg = computed<string>(() => {
+  let star = role.weapon.rarity;
+  if (role.weapon.skin) star = role.weapon.skin.weapon_skin_rarity;
+  return `/icon/bg/${star}-Star.webp`;
+});
+const weaponName = computed<string>(() => {
+  const oriName = role.weapon.name;
+  if (role.weapon.skin) return `${oriName}(${role.weapon.skin.weapon_skin_name})`;
+  return oriName;
+});
 const weaponIcon = computed<string>(() => {
+  if (role.weapon.skin) return role.weapon.skin.weapon_skin_icon;
   if (calendarIdSet.has(role.weapon.id)) return `/WIKI/weapon/${role.weapon.id}.webp`;
   return role.weapon.icon;
 });

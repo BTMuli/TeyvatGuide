@@ -1,4 +1,4 @@
-<!-- 角色卡片组件 -->
+<!-- 角色列表卡片（经典UI） -->
 <template>
   <div class="tua-ab-box" title="点击查看详情">
     <div class="tua-ab-top">
@@ -106,15 +106,27 @@ const avatarBox = computed<TItemBoxData>(() => ({
   display: "inner",
   clickable: true,
 }));
+const weaponStarBg = computed<string>(() => {
+  let star = props.role.weapon.rarity;
+  if (props.role.weapon.skin) star = props.role.weapon.skin.weapon_skin_rarity;
+  return `/icon/bg/${star}-Star.webp`;
+});
+const weaponName = computed<string>(() => {
+  const oriName = props.role.weapon.name;
+  if (props.role.weapon.skin) return `${oriName}(${props.role.weapon.skin.weapon_skin_name})`;
+  return oriName;
+});
+const weaponIcon = computed<string>(() => {
+  if (props.role.weapon.skin) return props.role.weapon.skin.weapon_skin_icon;
+  if (calendarIdSet.has(props.role.weapon.id)) return `/WIKI/weapon/${props.role.weapon.id}.webp`;
+  return props.role.weapon.icon;
+});
 const weaponBox = computed<TItemBoxData>(() => {
-  const icon = calendarIdSet.has(props.role.weapon.id)
-    ? `/WIKI/weapon/${props.role.weapon.id}.webp`
-    : props.role.weapon.icon;
   return {
     size: "65px",
     height: "65px",
-    bg: `/icon/bg/${props.role.weapon.rarity}-Star.webp`,
-    icon: icon,
+    bg: weaponStarBg.value,
+    icon: weaponIcon.value,
     lt: `/icon/weapon/${props.role.weapon.type_name}.webp`,
     ltSize: "20px",
     rt: props.role.weapon.affix_level.toString(),
@@ -153,7 +165,7 @@ const nameCard = computed<string>(() => {
 const weaponTitle = computed<string>(() => {
   const weapon = props.role.weapon;
   const title: Array<string> = [];
-  title.push(`${weapon.type_name} - ${weapon.name}`);
+  title.push(`${weapon.type_name} - ${weaponName.value}`);
   title.push(`${weapon.rarity}星 精炼${weapon.affix_level} Lv.${weapon.level}`);
   const propMain = wikiUtils.getProp(weapon.main_property.property_type);
   title.push(`${propMain !== false ? propMain.name : "未知属性"} - ${weapon.main_property.final}`);

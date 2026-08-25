@@ -18,19 +18,26 @@ const avatarNameCardMap = new Map<number, string>(
  * @since Beta v0.11.5
  * @param uid - 用户 UID
  * @param data - 角色详情
+ * @param tps - 用户TPS数据
  * @param updated - 更新时间
  * @returns 本地角色数据
  */
 function transAvatar(
   uid: number,
   data: TGApp.Game.Avatar.AvatarDetail,
+  tps: TGApp.Game.Avatar.TpsRes,
   updated: string,
 ): TGApp.Sqlite.Character.TableTrans {
+  const tAvatar: TGApp.Sqlite.Character.TableAvatar = {
+    ...data.base,
+    tps: data.unlock_tps ? tps : null,
+  };
+  const tWeapon: TGApp.Sqlite.Character.TableWeapon = { ...data.weapon, skin: data.weapon_skin };
   return {
     uid,
     cid: data.base.id,
-    avatar: data.base,
-    weapon: data.weapon,
+    avatar: tAvatar,
+    weapon: tWeapon,
     relics: data.relics,
     constellations: data.constellations,
     costumes: data.costumes,
@@ -72,35 +79,41 @@ function parseAvatar(data: TGApp.Sqlite.Character.TableRaw): TGApp.Sqlite.Charac
  * @since Beta v0.11.5
  * @param uid - 用户UID
  * @param data - 角色数据
+ * @param tps - 用户TPS
  * @param updated - 更新时间
  * @returns sql
  */
 function getInsertSql(
   uid: string,
   data: TGApp.Game.Avatar.AvatarDetail,
+  tps: TGApp.Game.Avatar.TpsRes | null,
   updated: string,
 ): TGApp.App.Sqlite.SqlStatement {
+  const tAvatar: TGApp.Sqlite.Character.TableAvatar = {
+    ...data.base,
+    tps: data.unlock_tps ? tps : null,
+  };
+  const tWeapon: TGApp.Sqlite.Character.TableWeapon = { ...data.weapon, skin: data.weapon_skin };
   return {
     query: `INSERT INTO UserCharacters (uid, cid, avatar, weapon, relics, constellations, costumes, skills,
-                                  propSelected, propBase, propExtra, propRecommend, updated)
+                                        propSelected, propBase, propExtra, propRecommend, updated)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-            ON CONFLICT(uid, cid) DO UPDATE SET
-                avatar         = $3,
-                weapon         = $4,
-                relics         = $5,
-                constellations = $6,
-                costumes       = $7,
-                skills         = $8,
-                propSelected   = $9,
-                propBase       = $10,
-                propExtra      = $11,
-                propRecommend  = $12,
-                updated        = $13;`,
+            ON CONFLICT(uid, cid) DO UPDATE SET avatar         = $3,
+                                                weapon         = $4,
+                                                relics         = $5,
+                                                constellations = $6,
+                                                costumes       = $7,
+                                                skills         = $8,
+                                                propSelected   = $9,
+                                                propBase       = $10,
+                                                propExtra      = $11,
+                                                propRecommend  = $12,
+                                                updated        = $13;`,
     values: [
       Number(uid),
       data.base.id,
-      JSON.stringify(data.base),
-      JSON.stringify(data.weapon),
+      JSON.stringify(tAvatar),
+      JSON.stringify(tWeapon),
       JSON.stringify(data.relics),
       JSON.stringify(data.constellations),
       JSON.stringify(data.costumes),
@@ -144,18 +157,20 @@ async function getAvatars(uid: number): Promise<Array<TGApp.Sqlite.Character.Tab
  * @since Beta v0.11.5
  * @param uid - 用户 uid
  * @param data - 角色数据
+ * @param tps - 用户TPS数据
  * @returns 保存后的本地角色数据
  */
 async function saveAvatars(
   uid: string,
   data: Array<TGApp.Game.Avatar.AvatarDetail>,
+  tps: TGApp.Game.Avatar.TpsRes,
 ): Promise<Array<TGApp.Sqlite.Character.TableTrans>> {
   const updated = fmtUtil.dateTime(new Date().getTime());
   const uidNum = Number(uid);
   if (data.length > 0) {
-    await TGSqlite.executeTransaction(data.map((role) => getInsertSql(uid, role, updated)));
+    await TGSqlite.executeTransaction(data.map((role) => getInsertSql(uid, role, tps, updated)));
   }
-  return data.map((role) => transAvatar(uidNum, role, updated));
+  return data.map((role) => transAvatar(uidNum, role, tps, updated));
 }
 
 /**

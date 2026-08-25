@@ -1,6 +1,6 @@
 /**
  * 角色相关类型定义文件
- * @since Beta v0.5.3
+ * @since Beta v0.11.5
  */
 
 declare namespace TGApp.Sqlite.Character {
@@ -70,7 +70,7 @@ declare namespace TGApp.Sqlite.Character {
 
   /**
    * 用户角色列表的角色类型
-   * @since Beta v0.5.3
+   * @since Beta v0.11.5
    * @remarks 解析自 {@link TableRaw} 数据
    */
   type TableTrans = {
@@ -79,9 +79,9 @@ declare namespace TGApp.Sqlite.Character {
     /** 角色 ID */
     cid: number;
     /** 角色信息 */
-    avatar: TGApp.Game.Avatar.Avatar;
+    avatar: TableAvatar;
     /** 武器信息 */
-    weapon: TGApp.Game.Avatar.WeaponDetail;
+    weapon: TableWeapon;
     /** 圣遗物信息 */
     relics: Array<TGApp.Game.Avatar.Relic>;
     /** 命座信息 */
@@ -100,5 +100,22 @@ declare namespace TGApp.Sqlite.Character {
     propRecommend: TGApp.Game.Avatar.RelicRecommendProp;
     /** 更新时间 */
     updated: string;
+  };
+
+  /**
+   * 转换后的角色数据
+   * @since Beta v0.11.5
+   */
+  type TableAvatar = TGApp.Game.Avatar.Avatar & {
+    tps?: TGApp.Game.Avatar.TpsRes | null;
+  };
+
+  /**
+   * 转换后的武器数据
+   * @since Beta v0.11.5
+   */
+  type TableWeapon = TGApp.Game.Avatar.WeaponDetail & {
+    /** 武器幻化 */
+    skin?: TGApp.Game.Avatar.WeaponSkin | null;
   };
 }
