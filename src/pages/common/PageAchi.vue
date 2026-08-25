@@ -117,7 +117,7 @@ const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order);
 
 const route = useRoute();
 const router = useRouter();
-const { gameDir, isLogin } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 let achiListener: UnlistenFn | null = null;
@@ -348,7 +348,7 @@ async function deleteUid(): Promise<void> {
 }
 
 async function toYae(): Promise<void> {
-  await tryCallYae(gameDir.value, uidCur.value.toString());
+  await tryCallYae(uidCur.value.toString());
 }
 </script>
 <style lang="scss" scoped>

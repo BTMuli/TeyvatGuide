@@ -301,7 +301,6 @@ import TSUserAvatar from "@Sqlm/userAvatar.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
-import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
 import { platform } from "@tauri-apps/plugin-os";
 import { getRfAc } from "@utils/acUtils.js";
@@ -363,7 +362,6 @@ type LocalAvatarRefreshResult = {
 };
 
 const { account, cookie } = storeToRefs(useUserStore());
-const { gameDir } = storeToRefs(useAppStore());
 const route = useRoute();
 const router = useRouter();
 
@@ -1565,7 +1563,7 @@ async function importInventory(): Promise<void> {
   if (uid === undefined) return;
   planLoading.value = true;
   try {
-    await tryCallYae(gameDir.value, String(uid));
+    await tryCallYae(String(uid));
     if (useApiCalculation.value) await loadInventoryData(uid, dataLoadVersion);
     else await loadLocalData(uid, dataLoadVersion);
     await syncBagWeaponPlanEntries(uid);

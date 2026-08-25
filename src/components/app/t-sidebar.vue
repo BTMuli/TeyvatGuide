@@ -409,7 +409,7 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef } from "vue";
 
 const userStore = useUserStore();
-const { sidebar, theme, isLogin, recentNewsType, gameDir } = storeToRefs(useAppStore());
+const { sidebar, theme, isLogin, recentNewsType } = storeToRefs(useAppStore());
 const { uid, briefInfo, cookie, account } = storeToRefs(userStore);
 let themeListener: UnlistenFn | null = null;
 
@@ -514,7 +514,7 @@ async function switchTheme(): Promise<void> {
 }
 
 async function tryImportBag(): Promise<void> {
-  await tryCallYae(gameDir.value, account.value.gameUid || undefined);
+  await tryCallYae(account.value.gameUid || undefined);
 }
 
 async function openClient(func: string): Promise<void> {

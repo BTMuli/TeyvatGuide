@@ -95,7 +95,7 @@ export type WeaponInfo = {
   info: TGApp.App.Weapon.WikiItem;
 };
 
-const { gameDir, isLogin } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 const curUid = ref<number>(0);
@@ -258,7 +258,7 @@ function searchWeapon(): void {
 }
 
 async function tryImportWeapon(): Promise<void> {
-  await tryCallYae(gameDir.value, curUid.value.toString());
+  await tryCallYae(curUid.value.toString());
 }
 
 async function createUid(): Promise<void> {

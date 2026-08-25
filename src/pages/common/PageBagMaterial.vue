@@ -214,7 +214,7 @@ export type MaterialInfo = {
   info: TGApp.App.Material.WikiItem;
 };
 
-const { gameDir, isLogin } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 const sortList: Array<MaterialSort> = [
@@ -502,7 +502,7 @@ function bagOwnedCount(material: MaterialInfo): number {
 }
 
 async function tryImportMaterial(): Promise<void> {
-  await tryCallYae(gameDir.value, curUid.value.toString());
+  await tryCallYae(curUid.value.toString());
 }
 
 /**

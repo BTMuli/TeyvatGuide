@@ -113,7 +113,7 @@ import {
   watch,
 } from "vue";
 
-const { gameDir, isLogin } = storeToRefs(useAppStore());
+const { isLogin } = storeToRefs(useAppStore());
 const { account } = storeToRefs(useUserStore());
 
 const curUid = ref<number>(0);
@@ -309,7 +309,7 @@ function searchRelic(): void {
 }
 
 async function tryImportRelic(): Promise<void> {
-  await tryCallYae(gameDir.value, curUid.value.toString());
+  await tryCallYae(curUid.value.toString());
 }
 
 async function createUid(): Promise<void> {

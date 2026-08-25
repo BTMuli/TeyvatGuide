@@ -240,20 +240,28 @@ export async function tryCopyYae(): Promise<boolean> {
 
 /**
  * 尝试调用Yae
- * @since Beta v0.9.6
- * @param gameDir - 游戏目录
+ * @since Beta v0.11.5
  * @param uid - 启动UID
  * @returns void
  */
-export async function tryCallYae(gameDir: string, uid?: string): Promise<void> {
+export async function tryCallYae(uid?: string): Promise<void> {
   if (platform() !== "windows") {
     showSnackbar.warn("该功能仅支持Windows系统");
     return;
   }
-  if (gameDir === "未设置") {
+  let installations: Array<TGApp.Game.Installation.Item>;
+  try {
+    installations = await listGameInstallations();
+  } catch (error) {
+    showSnackbar.error(`读取游戏安装失败：${error}`);
+    return;
+  }
+  const installation = installations.find((item) => item.isChosen) ?? installations[0];
+  if (!installation) {
     showSnackbar.warn("请先在游戏安装页面登记游戏安装");
     return;
   }
+  const gameDir = installation.rootPath;
   if (!(await exists(gameDir))) {
     showSnackbar.warn("游戏目录不存在，请检查设置");
     await TGLogger.Warn(`[TGGame][tryCallYae] 游戏目录不存在: ${gameDir}`);
