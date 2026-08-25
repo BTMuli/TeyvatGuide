@@ -1,6 +1,6 @@
 /**
  * 游戏角色详情相关类型定义文件
- * @since Beta v0.9.5
+ * @since Beta v0.11.5
  */
 
 declare namespace TGApp.Game.Avatar {
@@ -24,6 +24,12 @@ declare namespace TGApp.Game.Avatar {
    * @since Beta v0.5.3
    */
   type DetailResp = TGApp.BBS.Response.BaseWithData<DetailRes>;
+
+  /**
+   * 玩家TPS数据返回响应
+   * @since Beta v0.11.5
+   */
+  type TpsResp = TGApp.BBS.Response.BaseWithData<TpsRes>;
 
   /**
    * 角色列表数据类型
@@ -98,7 +104,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * 角色详情列表数据类型
-   * @since Beta v0.5.3
+   * @since Beta v0.11.5
    */
   type AvatarDetail = {
     /** 角色基础信息 */
@@ -123,6 +129,10 @@ declare namespace TGApp.Game.Avatar {
     skills: Array<Skill>;
     /** 推荐圣遗物属性 */
     recommend_relic_property: RelicRecommendProp;
+    /** 是否解锁枪械 */
+    unlock_tps: boolean;
+    /** 武器皮肤 */
+    weapon_skin: null | WeaponSkin;
   };
 
   /**
@@ -154,6 +164,19 @@ declare namespace TGApp.Game.Avatar {
     main_property: Prop;
     /** 武器副属性 */
     sub_property?: Prop;
+  };
+
+  /**
+   * 角色详情武器幻化数据
+   * @since Beta v0.11.5
+   */
+  type WeaponSkin = {
+    /** 图标 */
+    weapon_skin_icon: string;
+    /** 名称 */
+    weapon_skin_name: string;
+    /** 星级 */
+    weapon_skin_rarity: number;
   };
 
   /**
@@ -348,5 +371,88 @@ declare namespace TGApp.Game.Avatar {
     icon: string;
     /** 属性过滤名称 */
     filter_name: string;
+  };
+
+  /**
+   * TPS返回数据
+   * @since Beta v0.11.5
+   */
+  type TpsRes = {
+    /** 属性列表 */
+    properties: Array<TpsProp>;
+    /** 背景图 */
+    bg_pic: string;
+    /** 武器列表 */
+    weapons: Array<TpsWeapon>;
+  };
+
+  /**
+   * TPS属性
+   * @since Beta v0.11.5
+   */
+  type TpsProp = {
+    /** 属性类型 */
+    property_type: number;
+    /** 属性名称 */
+    name: string;
+    /** 属性值 */
+    final: string;
+    /** 属性图标 */
+    icon: string;
+  };
+
+  /**
+   * TPS武器
+   * @since Beta v0.11.5
+   */
+  type TpsWeapon = {
+    /**
+     * 武器类型
+     * @TODO 枚举
+     */
+    weapon_type: string;
+    /** 武器名称 */
+    weapon_name: string;
+    /** 武器图标 */
+    weapon_icon: string;
+    /**
+     * 元素列表
+     * @TODO 枚举
+     */
+    element_type: Array<number>;
+    /** 配件解锁信息 */
+    accessory_unlock_info: TpsWeaponAccess;
+    /** 武器属性 */
+    weapon_properties: Array<TpsWeaponProp>;
+    /** WIKI 链接 */
+    wiki_link: string;
+    /** 槽位 */
+    slot: number;
+  };
+
+  /**
+   * TPS武器配件信息
+   * @since Beta v0.11.5
+   */
+  type TpsWeaponAccess = {
+    /** 解锁数量 */
+    unlock_info: number;
+    /** 解锁上限 */
+    unlock_info_max: number;
+  };
+
+  /**
+   * TPS武器属性信息
+   * @since Beta v0.11.5
+   */
+  type TpsWeaponProp = {
+    /** 属性类型 */
+    property_type: number;
+    /** 属性名称 */
+    property_name: string;
+    /** 属性值 */
+    property_value: string;
+    /** 是否是主属性 */
+    is_main: boolean;
   };
 }

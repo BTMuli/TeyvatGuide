@@ -318,12 +318,32 @@ async function dailyNote(
   return resp.data;
 }
 
+/**
+ * 获取角色TPS信息
+ * @since Beta v0.11.5
+ * @param cookie - 用户 Cookie
+ * @param user - 用户
+ * @returns 用户TPS信息
+ */
+async function roleTps(
+  cookie: TGApp.App.Account.Cookie,
+  user: TGApp.Sqlite.Account.Game,
+): Promise<TGApp.Game.Avatar.TpsResp> {
+  const ck = { account_id: cookie.account_id, cookie_token: cookie.cookie_token };
+  const params = { role_id: user.gameUid, server: user.region };
+  const resp = await TGHttps.get<TGApp.Game.Avatar.TpsResp>(`${trgAbu}tps`, {
+    headers: getRequestHeader(ck, "GET", params),
+    query: params,
+  });
+  return resp.data;
+}
+
 const recordReq = {
   card: gameRecordCard,
   index: index,
   actCalendar: actCalendar,
   daily: dailyNote,
-  character: { list: characterList, detail: characterDetail },
+  character: { list: characterList, detail: characterDetail, tps: roleTps },
   combat: {
     base: roleCombat,
     char: charMaster,
