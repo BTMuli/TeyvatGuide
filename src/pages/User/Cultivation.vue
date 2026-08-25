@@ -2281,16 +2281,22 @@ async function refreshLocalAvatarData(
   }
 
   await showLoading.update(`正在获取 ${requestedIds.size} 个计划角色详情`);
-  const detailResponse = await recordReq.character.detail(
-    gameCookie,
-    gameAccount,
-    Array.from(requestedIds, (avatarId) => avatarId.toString()),
-  );
+  const [tpsResponse, detailResponse] = await Promise.all([
+    recordReq.character.tps(gameCookie, gameAccount),
+    recordReq.character.detail(
+      gameCookie,
+      gameAccount,
+      Array.from(requestedIds, (avatarId) => avatarId.toString()),
+    ),
+  ]);
+  if (tpsResponse.retcode !== 0) {
+    throw new Error(`[${tpsResponse.retcode}] ${tpsResponse.message}`);
+  }
   if (detailResponse.retcode !== 0) {
     throw new Error(`[${detailResponse.retcode}] ${detailResponse.message}`);
   }
   await showLoading.update("正在保存计划角色详情");
-  await TSUserAvatar.saveAvatars(String(uid), detailResponse.data.list);
+  await TSUserAvatar.saveAvatars(String(uid), detailResponse.data.list, tpsResponse.data);
   const refreshedIds = new Set(
     detailResponse.data.list.map((avatar) => avatar.base.id).filter((id) => targetIds.has(id)),
   );

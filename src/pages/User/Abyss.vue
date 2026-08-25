@@ -498,13 +498,24 @@ async function refreshAvatars(
   }
   const idList = listResp.data.list.map((i) => i.id.toString());
   await showLoading.update(`正在获取 ${idList.length} 个角色详情`);
+  let tpsResp: TGApp.Game.Avatar.TpsResp | undefined;
   let detailResp: TGApp.Game.Avatar.DetailResp | undefined;
   try {
-    detailResp = await recordReq.character.detail(ck, ac, idList);
+    [tpsResp, detailResp] = await Promise.all([
+      recordReq.character.tps(ck, ac),
+      recordReq.character.detail(ck, ac, idList),
+    ]);
     if (detailResp.retcode !== 0) {
       await showLoading.update("角色详情获取失败");
       showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
       await TGLogger.Warn(`[Abyss][refreshAvatars] ${detailResp.retcode} ${detailResp.message}`);
+      await showLoading.end();
+      return false;
+    }
+    if (tpsResp.retcode !== 0) {
+      await showLoading.update("角色详情获取失败");
+      showSnackbar.error(`[${tpsResp.retcode}] ${tpsResp.message}`);
+      await TGLogger.Warn(`[Abyss][refreshAvatars] ${tpsResp.retcode} ${tpsResp.message}`);
       await showLoading.end();
       return false;
     }
@@ -516,7 +527,7 @@ async function refreshAvatars(
     return false;
   }
   await showLoading.update("正在保存角色数据");
-  await TSUserAvatar.saveAvatars(ac.gameUid, detailResp.data.list);
+  await TSUserAvatar.saveAvatars(ac.gameUid, detailResp.data.list, tpsResp.data);
   return true;
 }
 </script>
