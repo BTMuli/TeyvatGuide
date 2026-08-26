@@ -101,6 +101,17 @@ create table if not exists UserBagRelic
     primary key (uid, guid)
 );
 
+-- @brief 创建背包角色表
+create table if not exists UserBagAvatar
+(
+    uid     integer not null,
+    rid     integer not null,
+    equips  text,
+    raw     text,
+    updated text,
+    primary key (uid, rid)
+);
+
 -- @brief 创建成就数据表
 create table if not exists Achievements
 (

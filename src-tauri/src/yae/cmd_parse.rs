@@ -1,7 +1,8 @@
 //! Yae 命令解析处理
-//! @since Beta v0.11.3
+//! @since Beta v0.11.5
 
 use crate::yae::pt_ac::parse_achi_list;
+use crate::yae::pt_avatar::parse_avatar_list;
 use crate::yae::pt_store::parse_store_list;
 use crate::yae::read_conf;
 use crate::yae::read_rva;
@@ -99,6 +100,30 @@ pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -
   false
 }
 
+pub fn handle_avatar_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -> bool {
+  println!("AvatarDataNotify");
+  match read_u32_le(file) {
+    Ok(len) => match read_exact_vec(file, len as usize) {
+      Ok(data) => {
+        println!("长度: {}", len);
+        match parse_avatar_list(&data) {
+          Ok(list) => {
+            println!("解码成功，角色列表长度: {}", list.len());
+            let json = serde_json::to_string_pretty(&list).unwrap();
+            let payload = serde_json::json!({"type":"avatar","data":json,"uid":&uid});
+            let _ = app_handle.emit("yae_read", payload);
+            return true;
+          }
+          Err(e) => println!("解析失败: {:?}", e),
+        }
+      }
+      Err(e) => println!("读取数据失败: {:?}", e),
+    },
+    Err(e) => println!("读取长度失败: {:?}", e),
+  }
+  false
+}
+
 pub fn handle_packet_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
   let handled = match read_u16_le(file) {
     Ok(cmd_id) if cmd_id == read_conf("nativeConfig.achievementCmdId") as u16 => {
@@ -106,6 +131,9 @@ pub fn handle_packet_notify(file: &mut File, app_handle: &AppHandle, uid: &str) 
     }
     Ok(cmd_id) if cmd_id == read_conf("nativeConfig.storeCmdId") as u16 => {
       handle_store_notify(file, app_handle, uid)
+    }
+    Ok(cmd_id) if cmd_id == read_conf("nativeConfig.avatarCmdId") as u16 => {
+      handle_avatar_notify(file, app_handle, uid)
     }
     Ok(cmd_id) => {
       println!("收到未配置的网络包: {}", cmd_id);
@@ -150,8 +178,11 @@ pub fn handle_prop_notify(file: &mut File, prop_map: &mut HashMap<u32, f64>) {
 }
 
 pub fn handle_packet_tasks_write(file: &mut File) -> std::io::Result<()> {
-  for key in ["achievementCmdId", "storeCmdId"] {
+  for key in ["achievementCmdId", "storeCmdId", "avatarCmdId"] {
     let cmd_id = read_conf(&format!("nativeConfig.{}", key)) as u32;
+    if cmd_id == 0 {
+      continue;
+    }
     file.write_all(&cmd_id.to_le_bytes())?;
   }
   file.write_all(&u32::MAX.to_le_bytes())
@@ -187,6 +218,11 @@ pub fn handle_prop_list(
   uid: &str,
   prop_map: &HashMap<u32, f64>,
 ) {
+  if read_conf("nativeConfig.avatarCmdId") == 0 {
+    println!("avatarCmdId 未配置，返回空角色列表");
+    let payload = serde_json::json!({"type":"avatar","data":"[]","uid":uid});
+    let _ = app_handle.emit("yae_read", payload);
+  }
   println!("处理 Prop 列表，长度: {}", prop_map.len());
   let mut new_data: HashMap<u32, f64> = HashMap::new();
   // 201 = 10015 - 10022 原石

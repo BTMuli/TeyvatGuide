@@ -145,4 +145,38 @@ declare namespace TGApp.Sqlite.UserBag {
     /** 更新时间 */
     updated: string;
   };
+
+  /**
+   * 用户背包角色表-存储数据
+   * @since Beta v0.11.5
+   */
+  type AvatarRaw = {
+    /** 存档/用户UID */
+    uid: number;
+    /** 角色ID */
+    rid: number;
+    /** 装备GUID列表JSON */
+    equips: string;
+    /** 角色原始数据JSON */
+    raw: string;
+    /** 更新时间 */
+    updated: string;
+  };
+
+  /**
+   * 用户背包角色表-解析数据
+   * @since Beta v0.11.5
+   */
+  type AvatarTable = {
+    /** 存档/用户UID */
+    uid: number;
+    /** 角色ID */
+    rid: number;
+    /** 装备GUID列表 */
+    equips: Array<string>;
+    /** 角色原始数据 */
+    raw: TGApp.Plugins.Yae.AvatarInfo;
+    /** 更新时间 */
+    updated: string;
+  };
 }

@@ -1,18 +1,18 @@
 /**
  * Yae 插件类型定义
- * @since Beta v0.11.0
+ * @since Beta v0.11.5
  */
 
 declare namespace TGApp.Plugins.Yae {
   /**
    * 后端返的事件数据
-   * @since Beta v0.9.1
+   * @since Beta v0.11.5
    */
   type RsEvent = {
     /** 数据，序列化后的JSON */
     data: string;
-    /** 类型，成就或背包或属性 */
-    type: "achievement" | "store" | "prop";
+    /** 类型 */
+    type: "achievement" | "store" | "prop" | "avatar";
     /** 存档UID，需要预先输入 */
     uid: string;
   };
@@ -34,6 +34,64 @@ declare namespace TGApp.Plugins.Yae {
    * @since Beta v0.9.1
    */
   type PropRes = Record<number, number>;
+
+  /**
+   * 后端返回的角色列表数据
+   * @since Beta v0.11.5
+   */
+  type AvatarListRes = Array<AvatarInfo>;
+
+  /**
+   * 后端返回的角色信息
+   * @since Beta v0.11.5
+   */
+  type AvatarInfo = {
+    /** 角色 ID */
+    avatar_id: number;
+    /** 角色 GUID */
+    guid: string;
+    /** 属性表 */
+    prop_map: Record<string, PropValue>;
+    /** 存活状态 */
+    life_state: number;
+    /** 装备 GUID 列表 */
+    equip_guid_list: Array<string>;
+    /** 命座 ID 列表 */
+    talent_id_list: Array<number>;
+    /** 战斗属性 */
+    fight_prop_map: Record<string, number>;
+    /** 技能库 ID */
+    skill_depot_id: number;
+    /** 核心天赋等级 */
+    core_proud_skill_level: number;
+    /** 固有天赋列表 */
+    inherent_proud_skill_list: Array<number>;
+    /** 技能等级 */
+    skill_level_map: Record<string, number>;
+    /** 天赋额外等级 */
+    proud_skill_extra_level_map: Record<string, number>;
+    /** 角色类型 */
+    avatar_type: number;
+    /** 风之翼 ID */
+    wearing_flycloak_id: number;
+    /** 出生时间 */
+    born_time: number;
+    /** 衣装 ID */
+    costume_id: number;
+  };
+
+  /**
+   * 属性值
+   * @since Beta v0.11.5
+   */
+  type PropValue = {
+    /** 整数值 */
+    ival: number | null;
+    /** 浮点值 */
+    fval: number | null;
+    /** 通用值 */
+    val: number;
+  };
 
   /**
    * 背包物品类型
@@ -81,7 +139,7 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 物品信息表，用于锁定类型
-   * @since Beta v0.11.0
+   * @since Beta v0.11.5
    */
   type ItemInfoMap = {
     /** 材料 */
@@ -95,7 +153,7 @@ declare namespace TGApp.Plugins.Yae {
     /** Facility */
     facility: FacilityInfo;
     /** BeyondMaterial */
-    beyondMaterial: BeyondMaterialInfo;
+    beyond_material: BeyondMaterialInfo;
     /** 未知 */
     unknown: Record<string, never>;
   };

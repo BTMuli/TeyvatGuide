@@ -1,10 +1,11 @@
 //! Yae 相关处理
-//! @since Beta v0.10.4
+//! @since Beta v0.11.5
 #![cfg(target_os = "windows")]
 
 pub mod cmd_parse;
 pub mod inject;
 pub mod pt_ac;
+pub mod pt_avatar;
 pub mod pt_store;
 
 use cmd_parse::{

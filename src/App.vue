@@ -29,6 +29,7 @@ import { commands } from "@skipperndt/plugin-machine-uid";
 import TGSqlite from "@Sql/index.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
+import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
@@ -204,11 +205,14 @@ async function handleYaeListen(event: Event<TGApp.Plugins.Yae.RsEvent>): Promise
   } else if (event.payload.type === "store") {
     await loadYaeBag(event.payload.uid, JSON.parse(event.payload.data));
     if (!yaeFlag.includes("store")) yaeFlag.push("store");
+  } else if (event.payload.type === "avatar") {
+    await loadYaeAvatar(event.payload.uid, JSON.parse(event.payload.data));
+    if (!yaeFlag.includes("avatar")) yaeFlag.push("avatar");
   } else if (event.payload.type === "prop") {
     await loadYaeProp(event.payload.uid, JSON.parse(event.payload.data));
     if (!yaeFlag.includes("prop")) yaeFlag.push("prop");
   }
-  if (yaeFlag.length === 3) {
+  if (yaeFlag.length === 4) {
     yaeFlag = [];
     showSnackbar.success(`导入Yae数据完成，即将刷新页面`);
     await showLoading.end();
@@ -324,6 +328,26 @@ async function loadYaeBagRelic(
 async function loadYaeProp(uid: string, data: TGApp.Plugins.Yae.PropRes): Promise<void> {
   for (const [k, v] of Object.entries(data)) {
     await TSUserBagMaterial.saveYaeCoin(Number(uid), Number(k), v);
+  }
+}
+
+/**
+ * 处理角色数据
+ * @param uid - 用户UID
+ * @param data - 角色数据
+ * @returns 无返回值
+ */
+async function loadYaeAvatar(uid: string, data: TGApp.Plugins.Yae.AvatarListRes): Promise<void> {
+  console.warn("角色数据", data);
+  await showLoading.start("正在导入角色数据", `UID:${uid},数量:${data.length}`);
+  await TGLogger.Info(`[App][loadYaeAvatar] 开始处理 ${uid} 的 ${data.length} 个角色`);
+  try {
+    await TSUserBagAvatar.saveYaeData(Number(uid), data);
+    showSnackbar.success(`成功导入 ${uid} 的 ${data.length} 个角色`);
+    await TGLogger.Info(`[App][loadYaeAvatar] 成功导入 ${uid} 的 ${data.length} 个角色`);
+  } catch (error) {
+    console.error(error);
+    await TGLogger.Error(`[App][loadYaeAvatar] 角色数据导入失败：${error}`);
   }
 }
 

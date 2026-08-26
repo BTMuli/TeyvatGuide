@@ -73,6 +73,7 @@ class Sqlite {
     "UserBagMaterial",
     "UserBagWeapon",
     "UserBagRelic",
+    "UserBagAvatar",
   ];
   private db: Database | null = null;
   private coreSchemaUpdate: Promise<void> | null = null;
