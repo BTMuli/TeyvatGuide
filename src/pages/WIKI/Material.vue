@@ -42,6 +42,7 @@
           :clearable="true"
           :hide-details="true"
           append-inner-icon="mdi-magnify"
+          autocomplete="off"
           class="twm-search-input"
           density="compact"
           label="搜索"

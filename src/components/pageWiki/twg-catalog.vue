@@ -15,6 +15,7 @@
             v-model="search"
             :placeholder="props.searchPlaceholder"
             aria-label="按名称搜索"
+            autocomplete="off"
             class="twg-search"
             clearable
             density="compact"

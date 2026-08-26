@@ -66,6 +66,7 @@
                 <v-text-field
                   v-model="searchKeyword"
                   aria-label="搜索武器名称"
+                  autocomplete="off"
                   class="ucw-picker-search"
                   clearable
                   density="compact"

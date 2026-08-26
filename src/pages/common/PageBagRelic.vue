@@ -24,6 +24,7 @@
             :clearable="true"
             :hide-details="true"
             append-inner-icon="mdi-magnify"
+            autocomplete="off"
             density="compact"
             label="搜索"
             variant="outlined"

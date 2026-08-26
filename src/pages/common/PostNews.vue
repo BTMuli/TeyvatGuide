@@ -18,6 +18,7 @@
         :clearable="true"
         :hide-details="true"
         append-inner-icon="mdi-magnify"
+        autocomplete="off"
         class="pn-nav-search"
         density="compact"
         label="请输入帖子 ID 或搜索词"

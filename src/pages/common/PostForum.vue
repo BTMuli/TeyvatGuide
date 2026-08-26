@@ -79,6 +79,7 @@
         :clearable="true"
         :hide-details="true"
         append-inner-icon="mdi-magnify"
+        autocomplete="off"
         class="post-switch-item"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"

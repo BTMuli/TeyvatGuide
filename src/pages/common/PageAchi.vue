@@ -23,6 +23,7 @@
           v-model="search"
           :hide-details="true"
           append-inner-icon="mdi-magnify"
+          autocomplete="off"
           @click:append-inner="isSearch = true"
           variant="outlined"
           :clearable="true"

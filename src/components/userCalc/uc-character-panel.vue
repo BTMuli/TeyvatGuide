@@ -53,6 +53,7 @@
                 <v-text-field
                   v-model="searchKeyword"
                   aria-label="搜索角色名称"
+                  autocomplete="off"
                   base-color="var(--app-page-content)"
                   bg-color="var(--box-bg-1)"
                   class="ucc-picker-search"

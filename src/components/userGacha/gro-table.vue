@@ -6,6 +6,7 @@
         <v-text-field
           v-model="searchKeyword"
           aria-label="搜索物品名称"
+          autocomplete="off"
           bg-color="var(--app-page-bg)"
           class="gro-t-search"
           clearable
