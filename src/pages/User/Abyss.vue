@@ -498,13 +498,10 @@ async function refreshAvatars(
   }
   const idList = listResp.data.list.map((i) => i.id.toString());
   await showLoading.update(`正在获取 ${idList.length} 个角色详情`);
-  let tpsResp: TGApp.Game.Avatar.TpsResp | undefined;
+  let tpsResp: TGApp.Game.Avatar.TpsResp | null = null;
   let detailResp: TGApp.Game.Avatar.DetailResp | undefined;
   try {
-    [tpsResp, detailResp] = await Promise.all([
-      recordReq.character.tps(ck, ac),
-      recordReq.character.detail(ck, ac, idList),
-    ]);
+    detailResp = await recordReq.character.detail(ck, ac, idList);
     if (detailResp.retcode !== 0) {
       await showLoading.update("角色详情获取失败");
       showSnackbar.error(`[${detailResp.retcode}] ${detailResp.message}`);
@@ -512,12 +509,15 @@ async function refreshAvatars(
       await showLoading.end();
       return false;
     }
-    if (tpsResp.retcode !== 0) {
-      await showLoading.update("角色详情获取失败");
-      showSnackbar.error(`[${tpsResp.retcode}] ${tpsResp.message}`);
-      await TGLogger.Warn(`[Abyss][refreshAvatars] ${tpsResp.retcode} ${tpsResp.message}`);
-      await showLoading.end();
-      return false;
+    if (detailResp.data.list.some((detail) => detail.unlock_tps)) {
+      tpsResp = await recordReq.character.tps(ck, ac);
+      if (tpsResp.retcode !== 0) {
+        await showLoading.update("角色详情获取失败");
+        showSnackbar.error(`[${tpsResp.retcode}] ${tpsResp.message}`);
+        await TGLogger.Warn(`[Abyss][refreshAvatars] ${tpsResp.retcode} ${tpsResp.message}`);
+        await showLoading.end();
+        return false;
+      }
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
@@ -527,7 +527,11 @@ async function refreshAvatars(
     return false;
   }
   await showLoading.update("正在保存角色数据");
-  await TSUserAvatar.saveAvatars(ac.gameUid, detailResp.data.list, tpsResp.data);
+  await TSUserAvatar.saveAvatars(
+    ac.gameUid,
+    detailResp.data.list,
+    tpsResp === null ? null : tpsResp.data,
+  );
   return true;
 }
 </script>

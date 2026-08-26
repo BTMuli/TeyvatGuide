@@ -2279,22 +2279,27 @@ async function refreshLocalAvatarData(
   }
 
   await showLoading.update(`正在获取 ${requestedIds.size} 个计划角色详情`);
-  const [tpsResponse, detailResponse] = await Promise.all([
-    recordReq.character.tps(gameCookie, gameAccount),
-    recordReq.character.detail(
-      gameCookie,
-      gameAccount,
-      Array.from(requestedIds, (avatarId) => avatarId.toString()),
-    ),
-  ]);
-  if (tpsResponse.retcode !== 0) {
-    throw new Error(`[${tpsResponse.retcode}] ${tpsResponse.message}`);
-  }
+  const detailResponse = await recordReq.character.detail(
+    gameCookie,
+    gameAccount,
+    Array.from(requestedIds, (avatarId) => avatarId.toString()),
+  );
   if (detailResponse.retcode !== 0) {
     throw new Error(`[${detailResponse.retcode}] ${detailResponse.message}`);
   }
+  let tpsResponse: TGApp.Game.Avatar.TpsResp | null = null;
+  if (detailResponse.data.list.some((detail) => detail.unlock_tps)) {
+    tpsResponse = await recordReq.character.tps(gameCookie, gameAccount);
+    if (tpsResponse.retcode !== 0) {
+      throw new Error(`[${tpsResponse.retcode}] ${tpsResponse.message}`);
+    }
+  }
   await showLoading.update("正在保存计划角色详情");
-  await TSUserAvatar.saveAvatars(String(uid), detailResponse.data.list, tpsResponse.data);
+  await TSUserAvatar.saveAvatars(
+    String(uid),
+    detailResponse.data.list,
+    tpsResponse === null ? null : tpsResponse.data,
+  );
   const refreshedIds = new Set(
     detailResponse.data.list.map((avatar) => avatar.base.id).filter((id) => targetIds.has(id)),
   );

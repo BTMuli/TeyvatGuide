@@ -912,10 +912,9 @@ async function refresh(): Promise<void> {
   try {
     await showLoading.start(`正在更新${rfAccount.gameUid}的角色数据`);
     await showLoading.update("正在获取首页与角色列表", { timeout: 0 });
-    const [indexResp, listResp, tpsResp] = await Promise.all([
+    const [indexResp, listResp] = await Promise.all([
       recordReq.index(rfCk!, rfAccount, 1),
       recordReq.character.list(rfCk!, rfAccount),
-      recordReq.character.tps(rfCk!, rfAccount),
     ]);
     if (indexResp.retcode !== 0) {
       showSnackbar.error(`[${indexResp.retcode}] ${indexResp.message}`);
@@ -927,14 +926,6 @@ async function refresh(): Promise<void> {
       await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色列表失败`);
       await TGLogger.Warn(
         `[Character][refresh][${rfAccount.gameUid}] ${listResp.retcode} ${listResp.message}`,
-      );
-      return;
-    }
-    if (tpsResp.retcode !== 0) {
-      showSnackbar.error(`[${tpsResp.retcode}] ${tpsResp.message}`);
-      await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色TPS数据失败`);
-      await TGLogger.Warn(
-        `[Character][refresh][${rfAccount.gameUid}] ${tpsResp.retcode} ${tpsResp.message}`,
       );
       return;
     }
@@ -953,8 +944,21 @@ async function refresh(): Promise<void> {
       }
       details = detailResp.data.list;
     }
+    let tpsRes: TGApp.Game.Avatar.TpsRes | null = null;
+    if (details.some((detail) => detail.unlock_tps)) {
+      const tpsResp = await recordReq.character.tps(rfCk!, rfAccount);
+      if (tpsResp.retcode !== 0) {
+        showSnackbar.error(`[${tpsResp.retcode}] ${tpsResp.message}`);
+        await TGLogger.Warn(`[Character][refresh][${rfAccount.gameUid}] 获取角色TPS数据失败`);
+        await TGLogger.Warn(
+          `[Character][refresh][${rfAccount.gameUid}] ${tpsResp.retcode} ${tpsResp.message}`,
+        );
+        return;
+      }
+      tpsRes = tpsResp.data;
+    }
     await showLoading.update("正在保存角色数据", { timeout: 0 });
-    const savedRoles = await TSUserAvatar.saveAvatars(rfAccount.gameUid, details, tpsResp.data);
+    const savedRoles = await TSUserAvatar.saveAvatars(rfAccount.gameUid, details, tpsRes);
     await TGLogger.Info(`[Character][refreshRoles][${rfAccount.gameUid}] 成功更新角色数据`);
     await TGLogger.Info(
       `[Character][refreshRoles][${rfAccount.gameUid}] 共更新${details.length}个角色`,

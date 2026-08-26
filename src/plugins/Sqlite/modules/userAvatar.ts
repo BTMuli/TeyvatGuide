@@ -25,7 +25,7 @@ const avatarNameCardMap = new Map<number, string>(
 function transAvatar(
   uid: number,
   data: TGApp.Game.Avatar.AvatarDetail,
-  tps: TGApp.Game.Avatar.TpsRes,
+  tps: TGApp.Game.Avatar.TpsRes | null,
   updated: string,
 ): TGApp.Sqlite.Character.TableTrans {
   const tAvatar: TGApp.Sqlite.Character.TableAvatar = {
@@ -163,7 +163,7 @@ async function getAvatars(uid: number): Promise<Array<TGApp.Sqlite.Character.Tab
 async function saveAvatars(
   uid: string,
   data: Array<TGApp.Game.Avatar.AvatarDetail>,
-  tps: TGApp.Game.Avatar.TpsRes,
+  tps: TGApp.Game.Avatar.TpsRes | null,
 ): Promise<Array<TGApp.Sqlite.Character.TableTrans>> {
   const updated = fmtUtil.dateTime(new Date().getTime());
   const uidNum = Number(uid);
