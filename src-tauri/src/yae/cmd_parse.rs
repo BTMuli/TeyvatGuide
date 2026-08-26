@@ -11,6 +11,17 @@ use std::fs::File;
 use std::io::{Read, Write};
 use tauri::{AppHandle, Emitter};
 
+const REQUIRED_PLAYER_PROPERTIES: [u32; 10] =
+  [10015, 10016, 10025, 10042, 10022, 10023, 10026, 10053, 10043, 10058];
+
+fn read_u16_le<R: Read>(r: &mut R) -> std::io::Result<u16> {
+  let mut buf = [0u8; 2];
+  match r.read_exact(&mut buf) {
+    Ok(_) => Ok(u16::from_le_bytes(buf)),
+    Err(e) => Err(e),
+  }
+}
+
 fn read_u32_le<R: Read>(r: &mut R) -> std::io::Result<u32> {
   let mut buf = [0u8; 4];
   match r.read_exact(&mut buf) {
@@ -35,7 +46,7 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> std::io::Result<Vec<u8>> {
   }
 }
 
-pub fn handle_achievement_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
+pub fn handle_achievement_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -> bool {
   println!("AchievementNotify");
   match read_u32_le(file) {
     Ok(len) => {
@@ -50,6 +61,7 @@ pub fn handle_achievement_notify(file: &mut File, app_handle: &AppHandle, uid: &
               let json = serde_json::to_string_pretty(&list).unwrap();
               let payload = serde_json::json!({"type":"achievement","data":json,"uid":&uid});
               let _ = app_handle.emit("yae_read", payload);
+              return true;
             }
             Err(e) => println!("解析失败: {:?}", e),
           }
@@ -59,9 +71,10 @@ pub fn handle_achievement_notify(file: &mut File, app_handle: &AppHandle, uid: &
     }
     Err(e) => println!("读取长度失败: {:?}", e),
   }
+  false
 }
 
-pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
+pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -> bool {
   println!("PlayerStoreNotify");
   // 读取剩余数据
   match read_u32_le(file) {
@@ -74,6 +87,7 @@ pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
             let json = serde_json::to_string_pretty(&list).unwrap();
             let payload = serde_json::json!({"type":"store","data":json,"uid":&uid});
             let _ = app_handle.emit("yae_read", payload);
+            return true;
           }
           Err(e) => println!("解析失败: {:?}", e),
         }
@@ -82,25 +96,72 @@ pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
     },
     Err(e) => println!("读取长度失败: {:?}", e),
   }
+  false
+}
+
+pub fn handle_packet_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
+  let handled = match read_u16_le(file) {
+    Ok(cmd_id) if cmd_id == read_conf("nativeConfig.achievementCmdId") as u16 => {
+      handle_achievement_notify(file, app_handle, uid)
+    }
+    Ok(cmd_id) if cmd_id == read_conf("nativeConfig.storeCmdId") as u16 => {
+      handle_store_notify(file, app_handle, uid)
+    }
+    Ok(cmd_id) => {
+      println!("收到未配置的网络包: {}", cmd_id);
+      match read_u32_le(file) {
+        Ok(len) => {
+          if let Err(e) = read_exact_vec(file, len as usize) {
+            println!("读取未知网络包失败: {:?}", e);
+          }
+        }
+        Err(e) => println!("读取未知网络包长度失败: {:?}", e),
+      }
+      false
+    }
+    Err(e) => {
+      println!("读取网络包命令 ID 失败: {:?}", e);
+      false
+    }
+  };
+  let _ = file.write_all(&[u8::from(handled)]);
 }
 
 pub fn handle_prop_notify(file: &mut File, prop_map: &mut HashMap<u32, f64>) {
   println!("PlayerPropNotify");
   // 读取剩余数据
-  match read_u32_le(file) {
+  let handled = match read_u32_le(file) {
     Ok(prop_type) => match read_f64_le(file) {
       Ok(value) => {
         prop_map.insert(prop_type, value);
+        true
       }
-      Err(e) => println!("读取值失败: {:?}", e),
+      Err(e) => {
+        println!("读取值失败: {:?}", e);
+        false
+      }
     },
-    Err(e) => println!("读取类型失败: {:?}", e),
-  }
+    Err(e) => {
+      println!("读取类型失败: {:?}", e);
+      false
+    }
+  };
+  let _ = file.write_all(&[u8::from(handled)]);
 }
 
-pub fn handle_config_write(file: &mut File) {
-  let _ = file.write_all(&read_conf("nativeConfig.achievementCmdId").to_le_bytes());
-  let _ = file.write_all(&read_conf("nativeConfig.storeCmdId").to_le_bytes());
+pub fn handle_packet_tasks_write(file: &mut File) -> std::io::Result<()> {
+  for key in ["achievementCmdId", "storeCmdId"] {
+    let cmd_id = read_conf(&format!("nativeConfig.{}", key)) as u32;
+    file.write_all(&cmd_id.to_le_bytes())?;
+  }
+  file.write_all(&u32::MAX.to_le_bytes())
+}
+
+pub fn handle_prop_tasks_write(file: &mut File) -> std::io::Result<()> {
+  for prop_type in REQUIRED_PLAYER_PROPERTIES {
+    file.write_all(&prop_type.to_le_bytes())?;
+  }
+  file.write_all(&u32::MAX.to_le_bytes())
 }
 
 pub fn handle_rva_write(file: &mut File) {

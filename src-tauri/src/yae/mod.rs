@@ -8,8 +8,8 @@ pub mod pt_ac;
 pub mod pt_store;
 
 use cmd_parse::{
-  handle_achievement_notify, handle_config_write, handle_prop_list, handle_prop_notify,
-  handle_rva_write, handle_store_notify,
+  handle_packet_notify, handle_packet_tasks_write, handle_prop_list, handle_prop_notify,
+  handle_prop_tasks_write, handle_rva_write,
 };
 use inject::{call_yaemain, create_named_pipe, find_module_base, inject_dll, spawn_process};
 use serde_json::Value;
@@ -116,11 +116,24 @@ pub fn call_yae_dll(
           Ok(_) => {
             println!("收到命令: {}", cmd[0]);
             match cmd[0] {
-              0x01 => handle_achievement_notify(&mut file, &app_handle, &uid),
-              0x02 => handle_store_notify(&mut file, &app_handle, &uid),
               0x03 => handle_prop_notify(&mut file, &mut prop_map),
-              0xFC => handle_config_write(&mut file),
+              0x04 => handle_packet_notify(&mut file, &app_handle, &uid),
+              0xFA => {
+                if let Err(e) = handle_packet_tasks_write(&mut file) {
+                  println!("写入网络包任务失败: {:?}", e);
+                  break;
+                }
+              }
+              0xFB => {
+                if let Err(e) = handle_prop_tasks_write(&mut file) {
+                  println!("写入玩家属性任务失败: {:?}", e);
+                  break;
+                }
+              }
               0xFD => handle_rva_write(&mut file),
+              0xFE => {
+                dbg!("DLL 已请求恢复游戏主线程");
+              }
               0xFF => {
                 handle_prop_list(&mut file, &app_handle, &uid, &prop_map);
                 break;
