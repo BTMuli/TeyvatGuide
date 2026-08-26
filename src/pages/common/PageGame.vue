@@ -93,25 +93,25 @@
     <PgCache v-if="chosen !== null || installTasks.length > 0 || visibleInstallDrafts.length > 0" />
   </div>
   <PgoClientSource
-    v-if="clientSourceOverlay"
+    v-if="clientSourceMounted"
     v-model="clientSourceOverlay"
     @create-new="openInstallOverlay"
     @locate-existing="openPathOverlay(null)"
   />
   <PgoPath
-    v-if="pathOverlay"
+    v-if="pathMounted"
     v-model="pathOverlay"
     :currentPath="pathTarget?.executablePath ?? undefined"
     @selected="refreshPageData"
   />
   <PgoInstall
-    v-if="installOverlay"
+    v-if="installMounted"
     v-model="installOverlay"
     :initialConfig="installInitialConfig"
     :installedSchemes
     @completed="refreshPageData"
   />
-  <PgoTaskHistory v-if="taskHistoryOverlay" v-model="taskHistoryOverlay" />
+  <PgoTaskHistory v-if="taskHistoryMounted" v-model="taskHistoryOverlay" />
 </template>
 
 <script lang="ts" setup>
@@ -144,6 +144,11 @@ const pathOverlay = ref<boolean>(false);
 const pathTarget = ref<TGApp.Game.Installation.Item | null>(null);
 const installOverlay = ref<boolean>(false);
 const taskHistoryOverlay = ref<boolean>(false);
+// 浮层首次打开后保持挂载，关闭只切 v-model，让 TOverlay 的消失过渡有播放时间
+const clientSourceMounted = ref<boolean>(false);
+const pathMounted = ref<boolean>(false);
+const installMounted = ref<boolean>(false);
+const taskHistoryMounted = ref<boolean>(false);
 type InstallInitialConfig = {
   scheme: TGApp.Game.Installation.SchemeEnum;
   installRoot: string | null;
@@ -402,6 +407,18 @@ function initializePage(): void {
 }
 
 onMounted(initializePage);
+watch(clientSourceOverlay, (open) => {
+  if (open) clientSourceMounted.value = true;
+});
+watch(pathOverlay, (open) => {
+  if (open) pathMounted.value = true;
+});
+watch(installOverlay, (open) => {
+  if (open) installMounted.value = true;
+});
+watch(taskHistoryOverlay, (open) => {
+  if (open) taskHistoryMounted.value = true;
+});
 watch(installOverlay, (visible) => {
   if (!visible) installInitialConfig.value = null;
 });

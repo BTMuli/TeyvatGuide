@@ -271,7 +271,7 @@
   </section>
 
   <PgoAudio
-    v-if="audioOverlay"
+    v-if="audioMounted"
     v-model="audioOverlay"
     :installation="installation"
     @task-started="audioOverlay = false"
@@ -314,7 +314,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import { launchInstallation } from "@utils/TGGame.js";
 import { getGameInstallationSize, uninstallGameInstallation } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
-import { computed, defineAsyncComponent, ref } from "vue";
+import { computed, defineAsyncComponent, ref, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";
 
@@ -342,6 +342,12 @@ const accountDialog = ref<boolean>(false);
 const officialAccounts = ref<Array<AccountChoice>>([]);
 const uninstalling = ref<boolean>(false);
 const audioOverlay = ref<boolean>(false);
+// 浮层首次打开后保持挂载，关闭只切 v-model，让 TOverlay 的消失过渡有播放时间
+const audioMounted = ref<boolean>(false);
+
+watch(audioOverlay, (open) => {
+  if (open) audioMounted.value = true;
+});
 
 const { gameList } = storeToRefs(useBBSStore());
 const genshinIcon = computed<string>(() => {

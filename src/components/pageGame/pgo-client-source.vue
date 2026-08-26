@@ -78,7 +78,7 @@
 
 <script lang="ts" setup>
 import TopOverlay from "@comp/app/top-overlay.vue";
-import { computed, ref, useId } from "vue";
+import { computed, ref, useId, watch } from "vue";
 
 type ClientSource = "existing" | "new";
 
@@ -107,6 +107,11 @@ function onContinue(): void {
   }
   emit("createNew");
 }
+
+watch(visible, (open) => {
+  // 组件常驻挂载后，每次打开都回到未选择状态，与之前的卸载重挂行为一致
+  if (open) selectedSource.value = null;
+});
 </script>
 
 <style lang="scss" scoped>
