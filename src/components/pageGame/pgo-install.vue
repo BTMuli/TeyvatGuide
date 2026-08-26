@@ -153,7 +153,18 @@
             <span>游戏版本</span><strong>{{ existingInstallation.version ?? "未读取版本" }}</strong>
           </div>
           <div>
-            <span>已安装语音</span><strong>{{ installedAudioLabel }}</strong>
+            <span>已安装语音</span>
+            <div v-if="installedAudioLabels.length > 0" class="review-fact-tags">
+              <v-chip
+                v-for="label in installedAudioLabels"
+                :key="label"
+                size="x-small"
+                variant="tonal"
+              >
+                {{ label }}
+              </v-chip>
+            </div>
+            <strong v-else>未读取</strong>
           </div>
           <div class="review-fact-wide">
             <span>安装位置</span><strong>{{ planLocation }}</strong>
@@ -364,12 +375,9 @@ const selectedAudioLabel = computed<string>(() => {
     .map((item) => item.label);
   return labels.join("、") || "未选择";
 });
-const installedAudioLabel = computed<string>(() => {
+const installedAudioLabels = computed<Array<string>>(() => {
   const languages = existingInstallation.value?.audioLanguages ?? [];
-  const labels = audioOptions
-    .filter((item) => languages.includes(item.value))
-    .map((item) => item.label);
-  return labels.join("、") || "未读取";
+  return audioOptions.filter((item) => languages.includes(item.value)).map((item) => item.label);
 });
 const locationStatusLabel = computed<string>(() => {
   switch (locationSummary.value?.kind) {
@@ -1128,6 +1136,12 @@ watch(
     font-weight: normal;
     overflow-wrap: anywhere;
   }
+}
+
+.review-fact-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .review-space-note {

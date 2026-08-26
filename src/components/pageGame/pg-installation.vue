@@ -207,7 +207,18 @@
                     />
                   </div>
                 </div>
-                <strong>{{ audioDesc(installation.audioLanguages) }}</strong>
+                <div v-if="installedAudioLabels.length > 0" class="game-fact-tags">
+                  <v-chip
+                    v-for="label in installedAudioLabels"
+                    :key="label"
+                    class="game-fact-tag"
+                    size="x-small"
+                    variant="tonal"
+                  >
+                    {{ label }}
+                  </v-chip>
+                </div>
+                <strong v-else>未识别</strong>
               </div>
               <div class="game-fact">
                 <div class="game-fact-head">
@@ -249,7 +260,18 @@
         </div>
         <div class="game-fact">
           <span>语音包</span>
-          <strong>{{ audioDesc(installation.audioLanguages) }}</strong>
+          <div v-if="installedAudioLabels.length > 0" class="game-fact-tags">
+            <v-chip
+              v-for="label in installedAudioLabels"
+              :key="label"
+              class="game-fact-tag"
+              size="x-small"
+              variant="tonal"
+            >
+              {{ label }}
+            </v-chip>
+          </div>
+          <strong v-else>未识别</strong>
         </div>
         <div class="game-fact">
           <div class="game-fact-head">
@@ -449,16 +471,20 @@ function schemeTag(schemeId: TGApp.Game.Installation.SchemeEnum | null): string 
   }
 }
 
-function audioDesc(languages: Array<string>): string {
-  if (languages.length === 0) return "未识别";
+function audioLabels(languages: Array<string>): Array<string> {
+  if (languages.length === 0) return [];
   const descriptions: Record<string, string> = {
     "zh-cn": "中文",
     "en-us": "英语",
     "ja-jp": "日语",
     "ko-kr": "韩语",
   };
-  return languages.map((language) => descriptions[language] ?? language).join("、");
+  return languages.map((language) => descriptions[language] ?? language);
 }
+
+const installedAudioLabels = computed<Array<string>>(() =>
+  audioLabels(props.installation.audioLanguages),
+);
 
 function versionPrimary(snapshot: TGApp.Game.Package.Snapshot | null): string {
   const local = snapshot?.localVersion ?? props.installation.version ?? "未读取";
@@ -733,6 +759,12 @@ async function handleUninstall(): Promise<void> {
 
 .game-fact-tag {
   flex-shrink: 0;
+}
+
+.game-fact-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .game-icon {
