@@ -1,3 +1,4 @@
+<!-- 全新安装向导浮层：渠道、安装路径、语音包与安装计划 -->
 <template>
   <TopOverlay
     v-model="visible"

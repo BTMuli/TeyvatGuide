@@ -11,7 +11,7 @@
 use super::{
   installer::{directory_identity, path_occupied},
   path_guard::prepare_manifest_output_file,
-  planner::PersistedPlan,
+  planner::{PersistedPlan, PlanAsset},
 };
 use md5::Digest as Md5Digest;
 use serde::{Deserialize, Serialize};
@@ -266,26 +266,68 @@ pub(crate) fn trusted_asset_indices(
   staging_root: &Path,
 ) -> Result<HashSet<usize>, String> {
   let staging_identity = directory_identity(staging_root)?;
-  let mut trusted = HashSet::new();
-  for (index, asset) in plan.assets.iter().enumerate() {
-    let Ok(Some(evidence)) = load_asset_evidence(task_root, plan, index) else {
-      continue;
-    };
-    if evidence.plan_id == plan.plan_id
-      && evidence.manifest_digest == plan.manifest_digest
-      && evidence.path == asset.name
-      && evidence.expected_size == asset.size
-      && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
-      && evidence.actual_size == asset.size
-      && evidence.actual_md5.eq_ignore_ascii_case(&asset.md5)
-      && evidence.staging_volume_serial == staging_identity.0
-      && evidence.staging_file_id == staging_identity.1
-      && file_matches_evidence(staging_root, &evidence).unwrap_or(false)
-    {
-      trusted.insert(index);
-    }
+  if plan.assets.is_empty() {
+    return Ok(HashSet::new());
   }
-  Ok(trusted)
+  let available = std::thread::available_parallelism().map_or(1, |value| value.get());
+  let worker_count = available.max(1).min(plan.assets.len());
+  let chunk_size = plan.assets.len().div_ceil(worker_count);
+  std::thread::scope(|scope| {
+    let handles = plan
+      .assets
+      .chunks(chunk_size)
+      .enumerate()
+      .map(|(chunk_index, chunk)| {
+        scope.spawn(move || {
+          let mut trusted = Vec::new();
+          for (offset, asset) in chunk.iter().enumerate() {
+            let index = chunk_index * chunk_size + offset;
+            if asset_evidence_matches(
+              task_root,
+              plan,
+              staging_root,
+              &staging_identity,
+              index,
+              asset,
+            ) {
+              trusted.push(index);
+            }
+          }
+          trusted
+        })
+      })
+      .collect::<Vec<_>>();
+    let mut trusted = HashSet::new();
+    for handle in handles {
+      let result = handle.join().map_err(|_| "资源证据核对线程异常退出".to_string())?;
+      trusted.extend(result);
+    }
+    Ok::<_, String>(trusted)
+  })
+}
+
+/// 单条主资源证据复验：计划身份、文件元数据与暂存目录身份均一致才算可信。
+fn asset_evidence_matches(
+  task_root: &Path,
+  plan: &PersistedPlan,
+  staging_root: &Path,
+  staging_identity: &(u64, u64),
+  index: usize,
+  asset: &PlanAsset,
+) -> bool {
+  let Ok(Some(evidence)) = load_asset_evidence(task_root, plan, index) else {
+    return false;
+  };
+  evidence.plan_id == plan.plan_id
+    && evidence.manifest_digest == plan.manifest_digest
+    && evidence.path == asset.name
+    && evidence.expected_size == asset.size
+    && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
+    && evidence.actual_size == asset.size
+    && evidence.actual_md5.eq_ignore_ascii_case(&asset.md5)
+    && evidence.staging_volume_serial == staging_identity.0
+    && evidence.staging_file_id == staging_identity.1
+    && file_matches_evidence(staging_root, &evidence).unwrap_or(false)
 }
 
 fn load_evidence_file(path: &Path) -> Result<Option<FileEvidence>, String> {

@@ -996,6 +996,18 @@ pub fn game_package_cancel(
   manager.cancel(&app_handle, &game_task_root(&app_handle)?, &task_id)
 }
 
+/// 暂停配音包等资源任务的下载或组装，保留已完成缓存以便安全恢复。
+#[tauri::command]
+pub async fn game_package_pause(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+) -> Result<PackageTaskSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let journal_value = journal::load(&journal::journal_path(&task_root, &task_id))?;
+  manager.pause_install(&app_handle, &task_root, &task_id, &journal_value.installation_id).await
+}
+
 /// 从 journal 重新读取当前资源任务，供页面重新挂载恢复投影。
 #[tauri::command]
 pub async fn game_package_task_list(
@@ -1082,6 +1094,12 @@ pub async fn game_package_recover(
   if journal_value.operation == "audio"
     && journal_value.state == PackageTaskState::RegistrationPending
   {
+    if matches!(action, PackageRecoveryAction::Resume) {
+      report_recovery_progress(&on_progress, &task_id, 1, "正在等待旧资源任务安全退出");
+    }
+    // 自动提交 worker 可能仍在收尾（仍持有安装级互斥），先等它退出再重试登记，
+    // 避免误报"该游戏安装已有资源任务正在运行"。
+    manager.wait_for_task_idle(&task_id).await?;
     let _reservation = manager
       .reserve_installation_operation(&journal_value.installation_id, "audio-registration-retry")
       .map_err(|_| "语音包任务仍在同步安装记录，请稍候".to_string())?;
@@ -1106,6 +1124,10 @@ pub async fn game_package_recover(
     return Ok(summary);
   }
   if journal_value.operation == "audio" && journal_value.state == PackageTaskState::ReadyToApply {
+    if matches!(action, PackageRecoveryAction::Resume) {
+      report_recovery_progress(&on_progress, &task_id, 1, "正在等待旧资源任务安全退出");
+    }
+    manager.wait_for_task_idle(&task_id).await?;
     if matches!(action, PackageRecoveryAction::Rollback) {
       if manager.cancel_if_running(&task_id)? {
         manager.wait_for_task_idle(&task_id).await?;

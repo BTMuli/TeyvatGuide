@@ -796,11 +796,13 @@ fn prepare_file_transaction(
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
   for step in &commit.steps {
-    if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
-      return Err(format!("提交备份目录包含未恢复文件：{}", step.name));
-    }
+    // 资源准备阶段前移删除时已把待删除文件移入备份目录，备份中存在 Delete 步骤
+    // 文件是预期状态；其余步骤的备份残留仍视为未恢复，继续拦截。
     if step.kind == CommitStepKind::Delete {
       continue;
+    }
+    if resolve_optional_manifest_file(&backup_root, &step.name)?.is_some() {
+      return Err(format!("提交备份目录包含未恢复文件：{}", step.name));
     }
     let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
     if resolve_optional_manifest_file(&incoming_root, &step.name)?.is_none() {
@@ -849,9 +851,8 @@ fn preflight_targets(
           return Err(format!("待更新资源与计划源文件不一致：{}", step.name));
         }
       }
-      CommitStepKind::Delete if current.is_none() => {
-        return Err(format!("待删除资源已缺失：{}", step.name));
-      }
+      // 删除目标已缺失视为目标已达成：资源准备阶段前移删除或外部已移除均可安全跳过。
+      CommitStepKind::Delete => {}
       CommitStepKind::Repair => {}
       _ => {}
     }
@@ -918,6 +919,23 @@ where
   }
   for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
+    if step.kind == CommitStepKind::Delete
+      && resolve_optional_manifest_file(game_root, &step.name)?.is_none()
+    {
+      // 目标已缺失即视为删除完成：准备阶段已移入备份，或外部已移除，直接推进游标。
+      let apply = apply_mut(journal)?;
+      apply.cursor = index + 1;
+      apply.active_step = None;
+      if journal.target == PackagePlanTarget::Audio {
+        journal.commit_completed_count = (index + 1).min(journal.commit_total_count);
+        journal.commit_current_step = Some(format!(
+          "提交配音文件 {}/{}",
+          journal.commit_completed_count, journal.commit_total_count
+        ));
+      }
+      persist_and_emit(task_root, journal, emit)?;
+      continue;
+    }
     let target = prepare_manifest_output_file(game_root, &step.name)?;
     let incoming = prepare_manifest_output_file(&incoming_root, &step.name)?;
     let backup = prepare_manifest_output_file(&backup_root, &step.name)?;
@@ -984,6 +1002,9 @@ where
       let apply = apply_mut(journal)?;
       apply.cursor = index + 1;
       apply.active_step = None;
+    }
+    if step.kind == CommitStepKind::Delete {
+      journal.delete_completed_bytes = journal.delete_completed_bytes.saturating_add(step.size);
     }
     if journal.target == PackagePlanTarget::Audio {
       journal.commit_completed_count = (index + 1).min(journal.commit_total_count);
@@ -1465,6 +1486,7 @@ fn rollback_file_transaction_with_progress(
               .map_err(|error| format!("恢复已删除资源失败：{}：{error}", step.name))?;
             resolve_existing_manifest_file(game_root, &step.name)?;
           }
+          (None, None) => {}
           (Some(_), None) => {}
           _ => return Err(format!("删除资源处于未知状态：{}", step.name)),
         }
@@ -1509,6 +1531,33 @@ fn rollback_file_transaction_with_progress(
       },
     }
     report_progress(index.saturating_add(2), total, &step.name);
+  }
+  restore_prep_staged_deletions(commit, game_root, &backup_root, journal)?;
+  Ok(())
+}
+
+/// 还原配音包资源准备阶段前移删除时移入备份目录的文件。
+fn restore_prep_staged_deletions(
+  commit: &FileCommitPlan,
+  game_root: &Path,
+  backup_root: &Path,
+  journal: &TaskJournal,
+) -> Result<(), String> {
+  if journal.target != PackagePlanTarget::Audio {
+    return Ok(());
+  }
+  for step in commit.steps.iter().filter(|step| step.kind == CommitStepKind::Delete) {
+    if resolve_optional_manifest_file(game_root, &step.name)?.is_some() {
+      continue;
+    }
+    let Some(backup) = resolve_optional_manifest_file(backup_root, &step.name)? else {
+      continue;
+    };
+    let target_path = prepare_manifest_output_file(game_root, &step.name)?;
+    ensure_game_stopped()?;
+    fs::rename(&backup, &target_path)
+      .map_err(|error| format!("恢复资源准备阶段删除的配音文件失败：{}：{error}", step.name))?;
+    resolve_existing_manifest_file(game_root, &step.name)?;
   }
   Ok(())
 }
@@ -1594,6 +1643,7 @@ fn reset_audio_commit_progress(plan: &PersistedPlan, journal: &mut TaskJournal) 
   }
   journal.commit_completed_count = 0;
   journal.commit_total_count = plan.assets.len().saturating_add(plan.delete_files.len());
+  journal.delete_total_bytes = plan.delete_files.iter().map(|file| file.size).sum();
   journal.commit_current_step =
     (journal.commit_total_count > 0).then_some("等待提交配音文件".to_string());
 }
@@ -1714,6 +1764,14 @@ fn transaction_subdirectory(
     game_root,
     &format!("{TRANSACTION_DIRECTORY}/{task_id}/{child}"),
   )
+}
+
+/// 配音包资源准备阶段用于暂存待删除文件的备份目录。
+pub(crate) fn prepare_audio_backup_root(
+  game_root: &Path,
+  plan_id: &str,
+) -> Result<PathBuf, String> {
+  transaction_subdirectory(game_root, plan_id, "backup")
 }
 
 fn copy_verified(source: &Path, target: &Path, size: u64, md5: &str) -> Result<(), String> {

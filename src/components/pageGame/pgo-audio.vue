@@ -1,3 +1,4 @@
+<!-- 配音包管理浮层：选择目标语音并评估、启动语音包变更任务 -->
 <template>
   <TopOverlay
     v-model="visible"
@@ -302,9 +303,47 @@ async function startTask(): Promise<void> {
     emit("taskStarted");
     visible.value = false;
   } catch (error) {
-    errorMessage.value = `确认配音包修改失败：${error}`;
+    const message = String(error);
+    if (message.includes("语音包在计划生成后发生变化")) {
+      errorMessage.value = null;
+      const confirmed = await showDialog.checkF({
+        title: "重新评估语音包？",
+        text: "已安装语音包在计划生成后发生变化。将重新读取远端清单生成新计划后再继续。",
+        confirmLabel: "重新评估并继续",
+        cancelLabel: "取消",
+      });
+      if (confirmed === true) await reEvaluateAndStart();
+      return;
+    }
+    errorMessage.value = `确认配音包修改失败：${message}`;
   } finally {
     busy.value = false;
+  }
+}
+
+async function reEvaluateAndStart(): Promise<void> {
+  plan.value = null;
+  planProgress.value = null;
+  try {
+    plan.value = await createGamePackageAudioPlan(
+      installation.id,
+      selectedLanguages.value,
+      (progress) => {
+        planProgress.value = progress;
+      },
+    );
+  } catch (error) {
+    errorMessage.value = `重新评估配音包变更失败：${error}`;
+    return;
+  }
+  if (plan.value === null || !plan.value.hasSufficientSpace) return;
+  try {
+    await taskStore.startTask(plan.value);
+    showSnackbar.success("配音包修改任务已开始（已按最新语音包重新评估）");
+    emit("taskStarted");
+    visible.value = false;
+  } catch (error) {
+    errorMessage.value = `确认配音包修改失败：${error}`;
   }
 }
 

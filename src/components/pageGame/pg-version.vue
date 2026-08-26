@@ -1,3 +1,4 @@
+<!-- 游戏版本面板：远端快照、更新/预下载评估、完整性校验与资源任务串联 -->
 <template>
   <div class="version-body">
     <slot
@@ -171,6 +172,7 @@
       :task="currentTask"
       @apply-requested="handleApplyRequested"
       @cancel-requested="handleCancelRequested"
+      @pause-requested="handlePauseRequested"
       @recover-requested="handleRecoverRequested"
       @start-requested="handleStartRequested"
     />
@@ -626,6 +628,17 @@ async function handleCancelRequested(): Promise<void> {
     }
   } catch (error) {
     showSnackbar.error(`${applying ? "取消资源提交" : "取消资源下载"}失败：${error}`);
+  }
+}
+
+async function handlePauseRequested(): Promise<void> {
+  const task = currentTask.value;
+  if (task === null || task.target !== gameEnum.package.planTarget.AUDIO) return;
+  try {
+    await taskStore.pauseTask(task.taskId);
+    showSnackbar.info("已暂停配音包任务，可稍后安全恢复");
+  } catch (error) {
+    showSnackbar.error(`暂停配音包任务失败：${error}`);
   }
 }
 

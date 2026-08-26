@@ -1,3 +1,4 @@
+<!-- 添加客户端来源浮层：自动发现或手动选择已安装客户端 -->
 <template>
   <TopOverlay
     v-model="visible"

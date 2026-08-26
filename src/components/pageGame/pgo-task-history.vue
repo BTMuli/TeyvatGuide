@@ -1,3 +1,4 @@
+<!-- 资源任务历史浮层：查看与清除最近 7 天已结束任务 -->
 <template>
   <TopOverlay
     v-model="visible"
@@ -76,7 +77,18 @@
                 {{ gameEnum.package.taskStateDesc(task.state) }}
               </v-chip>
             </div>
-            <span class="task-history-item-target">{{ taskTarget(task) }}</span>
+            <span
+              v-if="task.target === gameEnum.package.planTarget.AUDIO"
+              class="task-history-audio-target"
+            >
+              <PgAudioLangTags
+                size="x-small"
+                :sourceLanguages="task.sourceAudioLanguages"
+                :targetLanguages="task.targetAudioLanguages"
+              />
+              <span class="task-history-item-target">{{ task.targetTag }}</span>
+            </span>
+            <span v-else class="task-history-item-target">{{ taskTarget(task) }}</span>
           </div>
           <v-btn
             :aria-label="`清除${taskType(task)}记录`"
@@ -93,7 +105,10 @@
         </div>
 
         <div class="task-history-facts">
-          <span v-for="fact in taskFacts(task)" :key="fact">{{ fact }}</span>
+          <span v-for="fact in taskFacts(task)" :key="fact.text" class="task-history-fact">
+            <v-icon :icon="fact.icon" size="14" />
+            <span>{{ fact.text }}</span>
+          </span>
         </div>
 
         <p v-if="task.errorMessage !== null" class="task-history-error">
@@ -143,12 +158,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import { listGamePackageTaskHistory } from "@utils/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
-const audioLanguageLabels: Record<string, string> = {
-  "en-us": "英语",
-  "ja-jp": "日语",
-  "ko-kr": "韩语",
-  "zh-cn": "中文",
-};
+import PgAudioLangTags from "./pg-audio-lang-tags.vue";
 
 const visible = defineModel<boolean>({ required: true });
 const taskStore = useGameLauncherStore();
@@ -203,17 +213,9 @@ function taskIcon(task: TGApp.Game.Package.TaskSummary): string {
   }
 }
 
-function audioLanguages(task: TGApp.Game.Package.TaskSummary): string {
-  const labels = task.audioLanguages.map((language) => audioLanguageLabels[language] ?? language);
-  return labels.length > 0 ? labels.join("、") : "未记录语音";
-}
-
 function taskTarget(task: TGApp.Game.Package.TaskSummary): string {
   if (task.target === gameEnum.package.planTarget.SWITCH) {
     return `${gameEnum.installation.schemeDesc(task.sourceScheme)} → ${gameEnum.installation.schemeDesc(task.targetScheme)}`;
-  }
-  if (task.target === gameEnum.package.planTarget.AUDIO) {
-    return `${audioLanguages(task)} · ${task.targetTag}`;
   }
   if (task.target === gameEnum.package.planTarget.INSTALL) {
     return `${gameEnum.installation.schemeDesc(task.targetScheme)} · ${task.targetTag}`;
@@ -248,16 +250,27 @@ function formatUpdatedAt(updatedAt: string): string {
   return Number.isFinite(timestamp) ? fmtUtil.dateTime(timestamp) : "时间未知";
 }
 
-function taskFacts(task: TGApp.Game.Package.TaskSummary): Array<string> {
+type TaskHistoryFact = {
+  icon: string;
+  text: string;
+};
+
+function taskFacts(task: TGApp.Game.Package.TaskSummary): Array<TaskHistoryFact> {
   const facts = [
-    `结束于 ${formatUpdatedAt(task.updatedAt)}`,
-    `耗时 ${formatDuration(task.elapsedMs)}`,
+    { icon: "mdi-calendar-clock-outline", text: formatUpdatedAt(task.updatedAt) },
+    { icon: "mdi-timer-outline", text: formatDuration(task.elapsedMs) },
   ];
   if (task.totalBytes > 0 || task.downloadedBytes > 0) {
-    facts.push(`下载 ${fmtUtil.size(task.downloadedBytes)} / ${fmtUtil.size(task.totalBytes)}`);
+    facts.push({
+      icon: "mdi-download-outline",
+      text: `${fmtUtil.size(task.downloadedBytes)} / ${fmtUtil.size(task.totalBytes)}`,
+    });
   }
   if (task.totalCount > 0) {
-    facts.push(`文件 ${task.completedCount} / ${task.totalCount}`);
+    facts.push({
+      icon: "mdi-file-multiple-outline",
+      text: `${task.completedCount} / ${task.totalCount}`,
+    });
   }
   return facts;
 }
@@ -472,7 +485,7 @@ watch(
 }
 
 .task-history-item-copy {
-  gap: 4px;
+  gap: 2px;
 }
 
 .task-history-item-title {
@@ -484,36 +497,36 @@ watch(
 
   strong {
     color: var(--common-text-title);
-    font-size: 16px;
-    line-height: 22px;
+    font-size: 15px;
+    line-height: 20px;
   }
 }
 
 .task-history-item-target {
-  color: var(--box-text-2);
-  font-size: 12px;
-  line-height: 18px;
+  color: var(--box-text-4);
+  font-size: 11px;
+  line-height: 16px;
   overflow-wrap: anywhere;
+}
+
+.task-history-audio-target {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+
+  .task-history-item-target {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .task-history-remove {
   flex-shrink: 0;
   border-radius: 4px;
-}
-
-.task-history-facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  span {
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: var(--box-bg-2);
-    color: var(--box-text-2);
-    font-size: 12px;
-    line-height: 16px;
-  }
 }
 
 .task-history-error,
@@ -548,6 +561,28 @@ watch(
   padding: 8px 12px;
   border-radius: 4px;
   background: var(--common-shadow-t-2);
+}
+
+.task-history-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .task-history-fact {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--box-bg-2);
+    color: var(--box-text-2);
+    font-size: 12px;
+    gap: 5px;
+    line-height: 16px;
+
+    .v-icon {
+      flex-shrink: 0;
+    }
+  }
 }
 
 .task-history-footer-hint {

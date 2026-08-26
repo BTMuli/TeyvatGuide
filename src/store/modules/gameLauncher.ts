@@ -19,6 +19,7 @@ import {
   getGamePackageVerifyStatus,
   listGamePackageTasks,
   pauseGameInstall,
+  pauseGamePackageTask,
   recoverGamePackageTask,
   recoverGameInstall,
   removeGamePackageTask,
@@ -146,6 +147,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       targetScheme: draft.scheme,
       installRoot: draft.installRoot,
       audioLanguages: [...draft.audioLanguages],
+      sourceAudioLanguages: [],
+      targetAudioLanguages: [...draft.audioLanguages],
       sourceTag: null,
       targetTag: plan.targetTag,
       manifestDigest: plan.manifestDigest,
@@ -167,6 +170,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       spoolBytes: 0,
       releasedBytes: 0,
       assemblyCompletedBytesTotal: 0,
+      deleteTotalBytes: 0,
+      deleteCompletedBytes: 0,
       currentFile: null,
       downloadCurrentFile: null,
       assemblyCurrentFile: null,
@@ -389,6 +394,17 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  async function pauseTask(taskId: string): Promise<TGApp.Game.Package.TaskSummary> {
+    setPending(taskId, true);
+    try {
+      const task = await pauseGamePackageTask(taskId);
+      mergeTask(task);
+      return task;
+    } finally {
+      setPending(taskId, false);
+    }
+  }
+
   async function cancelInstall(
     taskId: string,
     installId: string,
@@ -550,6 +566,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     applyTask,
     applySwitch,
     cancelTask,
+    pauseTask,
     cancelInstall,
     pauseInstall,
     cancelVerify,

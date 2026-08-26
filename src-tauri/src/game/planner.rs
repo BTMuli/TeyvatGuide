@@ -20,7 +20,7 @@ use md5::Md5;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
-  collections::HashMap,
+  collections::{HashMap, HashSet},
   fs::{self, File, OpenOptions},
   io::{BufReader, BufWriter, Read, Write},
   path::{Path, PathBuf},
@@ -1073,11 +1073,30 @@ async fn hydrate_audio_plan(
   }
   let selection =
     plan.audio_selection.as_ref().ok_or_else(|| "语音包计划缺少语言选择".to_string())?;
-  let current_audio_languages = normalize_audio_languages(installation.audio_languages.clone())
-    .map_err(|_| "未识别到完整的已安装语音包，请先校验游戏完整性".to_string())?;
-  if current_audio_languages != selection.source_audio_languages
-    && current_audio_languages != selection.target_audio_languages
-  {
+  // 资源准备阶段前移删除后、新增尚未落盘前，磁盘只保留两端共有的语音，
+  // 全部替换时甚至可能暂时为空；这里不做严格 normalize（空集不报错），
+  // 交给下面的兼容性判定：只要共有语音仍在、且没有计划外的语音出现即可。
+  let mut current_audio_languages = installation
+    .audio_languages
+    .iter()
+    .filter(|language| matches!(language.as_str(), "zh-cn" | "en-us" | "ja-jp" | "ko-kr"))
+    .cloned()
+    .collect::<Vec<_>>();
+  current_audio_languages.sort();
+  current_audio_languages.dedup();
+  let allowed_languages =
+    selection.source_audio_languages.iter().chain(selection.target_audio_languages.iter());
+  let allowed_set = allowed_languages.collect::<HashSet<_>>();
+  let has_unexpected =
+    current_audio_languages.iter().any(|language| !allowed_set.contains(language));
+  let kept_languages = selection
+    .source_audio_languages
+    .iter()
+    .filter(|language| selection.target_audio_languages.contains(language))
+    .collect::<Vec<_>>();
+  let kept_missing =
+    kept_languages.iter().any(|language| !current_audio_languages.contains(language));
+  if has_unexpected || kept_missing {
     return Err("已安装语音包在计划生成后发生变化，请重新评估".to_string());
   }
   let client = create_http_client()?;

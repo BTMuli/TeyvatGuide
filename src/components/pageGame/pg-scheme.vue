@@ -1,3 +1,4 @@
+<!-- 游戏渠道切换面板：SDK 检查、换服执行与恢复/放弃 -->
 <template>
   <div class="scheme-body">
     <slot

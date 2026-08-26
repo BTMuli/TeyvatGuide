@@ -1,3 +1,4 @@
+<!-- 选择游戏路径浮层：自动发现或手动指定安装目录 -->
 <template>
   <TopOverlay
     v-model="visible"

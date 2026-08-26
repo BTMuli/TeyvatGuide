@@ -1,3 +1,4 @@
+<!-- 游戏页通用提示条：信息、成功、警告与错误 -->
 <template>
   <section :class="tone" class="game-notice" :role="tone === 'error' ? 'alert' : 'status'">
     <v-icon :icon="noticeIcon" size="18" />

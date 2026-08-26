@@ -121,8 +121,14 @@ pub(crate) struct TaskJournal {
   pub(crate) target_scheme: SchemeId,
   #[serde(default)]
   pub(crate) install_root: Option<String>,
+  /// 资源任务目标游戏根目录；配音包准备阶段前移删除时用于取消/回滚还原。
+  #[serde(default)]
+  pub(crate) game_root: Option<String>,
   #[serde(default)]
   pub(crate) audio_languages: Vec<String>,
+  /// 配音包计划生成时的源语音语言集合；用于界面标注新增/删除语音包。
+  #[serde(default)]
+  pub(crate) source_audio_languages: Vec<String>,
   pub(crate) target: PackagePlanTarget,
   pub(crate) source_tag: Option<String>,
   pub(crate) target_tag: String,
@@ -174,6 +180,12 @@ pub(crate) struct TaskJournal {
   pub(crate) completed_asset_cursor: usize,
   #[serde(default)]
   pub(crate) assembly_completed_bytes_total: u64,
+  /// 配音包变更需要删除的资源总字节数。
+  #[serde(default)]
+  pub(crate) delete_total_bytes: u64,
+  /// 已删除的资源字节数。
+  #[serde(default)]
+  pub(crate) delete_completed_bytes: u64,
   /// 发布前资源自动修复的任务级累计次数。
   #[serde(default)]
   pub(crate) install_repair_attempts: usize,
@@ -221,6 +233,7 @@ impl TaskJournal {
       source_scheme: plan.source_scheme,
       target_scheme: plan.target_scheme,
       install_root: plan.install_overlay.as_ref().map(|overlay| overlay.game_root.clone()),
+      game_root: None,
       audio_languages: plan.audio_selection.as_ref().map_or_else(
         || {
           plan
@@ -230,6 +243,10 @@ impl TaskJournal {
         },
         |selection| selection.target_audio_languages.clone(),
       ),
+      source_audio_languages: plan
+        .audio_selection
+        .as_ref()
+        .map_or_else(Vec::new, |selection| selection.source_audio_languages.clone()),
       target: plan.target,
       source_tag: plan.source_tag.clone(),
       target_tag: plan.target_tag.clone(),
@@ -266,6 +283,8 @@ impl TaskJournal {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      delete_total_bytes: plan.delete_files.iter().map(|file| file.size).sum(),
+      delete_completed_bytes: 0,
       install_repair_attempts: 0,
       install_asset_repair_attempts: HashMap::new(),
       current_file: None,
@@ -305,7 +324,9 @@ impl TaskJournal {
       source_scheme,
       target_scheme,
       install_root: None,
+      game_root: None,
       audio_languages: Vec::new(),
+      source_audio_languages: Vec::new(),
       target: PackagePlanTarget::Switch,
       source_tag: Some(scheme_id_key(source_scheme).to_string()),
       target_tag: scheme_id_key(target_scheme).to_string(),
@@ -332,6 +353,8 @@ impl TaskJournal {
       released_bytes: 0,
       completed_asset_cursor: 0,
       assembly_completed_bytes_total: 0,
+      delete_total_bytes: 0,
+      delete_completed_bytes: 0,
       install_repair_attempts: 0,
       install_asset_repair_attempts: HashMap::new(),
       current_file: None,
@@ -414,6 +437,8 @@ impl TaskJournal {
       target_scheme: self.target_scheme,
       install_root: self.install_root.clone(),
       audio_languages: self.audio_languages.clone(),
+      source_audio_languages: self.source_audio_languages.clone(),
+      target_audio_languages: self.audio_languages.clone(),
       source_tag: self.source_tag.clone(),
       target_tag: self.target_tag.clone(),
       manifest_digest: self.manifest_digest.clone(),
@@ -435,6 +460,8 @@ impl TaskJournal {
       spool_bytes: self.spool_bytes,
       released_bytes: self.released_bytes,
       assembly_completed_bytes_total: self.assembly_completed_bytes_total,
+      delete_total_bytes: self.delete_total_bytes,
+      delete_completed_bytes: self.delete_completed_bytes,
       current_file: self.current_file.clone(),
       download_current_file: self.download_current_file.clone(),
       assembly_current_file: self.assembly_current_file.clone(),

@@ -402,6 +402,18 @@ export async function cancelGamePackageTask(taskId: string): Promise<void> {
 }
 
 /**
+ * 暂停配音包等资源任务的下载或组装；已完成缓存保留，可稍后安全恢复。
+ * @since Beta v0.11.5
+ * @param taskId - 资源任务 ID
+ * @returns 已暂停的任务投影
+ */
+export async function pauseGamePackageTask(
+  taskId: string,
+): Promise<TGApp.Game.Package.TaskSummary> {
+  return await invoke<TGApp.Game.Package.TaskSummary>("game_package_pause", { taskId });
+}
+
+/**
  * 读取 journal 中的资源任务投影。
  * @since Beta v0.11.5
  * @param installationId - 可选安装 ID 过滤

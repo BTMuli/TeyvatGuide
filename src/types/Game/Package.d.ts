@@ -173,6 +173,8 @@ declare namespace TGApp.Game.Package {
     targetScheme: TGApp.Game.Installation.SchemeEnum;
     installRoot: string | null;
     audioLanguages: Array<string>;
+    sourceAudioLanguages: Array<string>;
+    targetAudioLanguages: Array<string>;
     sourceTag: string | null;
     targetTag: string;
     manifestDigest: string;
@@ -194,6 +196,8 @@ declare namespace TGApp.Game.Package {
     spoolBytes: number;
     releasedBytes: number;
     assemblyCompletedBytesTotal: number;
+    deleteTotalBytes: number;
+    deleteCompletedBytes: number;
     currentFile: string | null;
     downloadCurrentFile: string | null;
     assemblyCurrentFile: string | null;

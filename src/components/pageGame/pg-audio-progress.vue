@@ -1,23 +1,23 @@
-<!-- 游戏本体安装流水线的下载、组装与总进度 -->
+<!-- 配音包资源变更流水线的下载、组装、提交与总进度 -->
 <template>
-  <section :class="{ embedded }" class="install-progress" aria-label="游戏本体安装进度">
-    <div v-if="!embedded" class="install-progress-status">
+  <section :class="{ embedded }" class="audio-progress" aria-label="配音包资源进度">
+    <div v-if="!embedded" class="audio-progress-status">
       <span :class="captionTone">{{ caption }}</span>
-      <div class="install-progress-actions">
+      <div class="audio-progress-actions">
         <slot name="actions" />
       </div>
     </div>
 
-    <div v-if="showProgressBar" class="install-progress-rows" aria-live="polite">
-      <PgInstallThroughput :task />
-      <div v-for="row in progressRows" :key="row.label" class="install-progress-row">
-        <div class="install-progress-row-head">
-          <div class="install-progress-row-label">
+    <div v-if="showProgressBar" class="audio-progress-rows" aria-live="polite">
+      <PgAudioThroughput v-if="!prepComplete" :task />
+      <div v-for="row in progressRows" :key="row.label" class="audio-progress-row">
+        <div class="audio-progress-row-head">
+          <div class="audio-progress-row-label">
             <span>{{ row.label }}</span>
             <span
               v-if="row.status !== null"
-              :class="{ 'install-progress-complete': row.complete }"
-              class="install-progress-row-status"
+              :class="{ 'audio-progress-complete': row.complete }"
+              class="audio-progress-row-status"
               :title="row.status"
             >
               {{ row.status }}
@@ -32,14 +32,14 @@
           height="8"
           rounded
         />
-        <div class="install-progress-row-facts">
+        <div class="audio-progress-row-facts">
           <span v-for="detail in row.details" :key="detail">{{ detail }}</span>
-          <span v-if="row.downloadObjectStatus !== null" class="install-progress-download-activity">
+          <span v-if="row.downloadObjectStatus !== null" class="audio-progress-download-activity">
             <span>{{ row.downloadObjectStatus }}</span>
             <span
               v-if="row.activeAssemblyCount > 0"
               :aria-label="`正在组装 ${row.activeAssemblyCount} 个资源`"
-              class="install-progress-assembly-slots"
+              class="audio-progress-assembly-slots"
               role="img"
               :title="`正在组装 ${row.activeAssemblyCount} 个资源`"
             >
@@ -47,7 +47,7 @@
                 v-for="slot in row.activeAssemblyCount"
                 :key="slot"
                 aria-hidden="true"
-                class="install-progress-assembly-slot"
+                class="audio-progress-assembly-slot"
               />
             </span>
           </span>
@@ -57,7 +57,7 @@
 
     <p
       v-if="!embedded && task.errorMessage !== null && task.errorMessage !== caption"
-      class="install-progress-error"
+      class="audio-progress-error"
     >
       {{ task.errorMessage }}
     </p>
@@ -68,7 +68,7 @@
 import gameEnum from "@enum/game.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
-import PgInstallThroughput from "./pg-install-throughput.vue";
+import PgAudioThroughput from "./pg-audio-throughput.vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
@@ -104,7 +104,7 @@ onUnmounted(() => {
 const active = computed<boolean>(() => gameEnum.package.taskActive(task.state));
 const failed = computed<boolean>(() => task.state === gameEnum.package.taskState.FAILED);
 const caption = computed<string>(() =>
-  failed.value ? "安装失败" : gameEnum.package.taskStateDesc(task.state),
+  failed.value ? "配音包任务失败" : gameEnum.package.taskStateDesc(task.state),
 );
 const captionTone = computed<"err" | "warn" | "">(() => {
   switch (task.state) {
@@ -118,31 +118,59 @@ const captionTone = computed<"err" | "warn" | "">(() => {
       return "";
   }
 });
-const assemblyPercent = computed<number>(() => {
-  if (task.assemblyTotalBytes === 0) {
-    return task.state === gameEnum.package.taskState.QUEUED ? 0 : 100;
+const audioPreflightPercent = computed<number>(() => {
+  if (task.verificationTotalCount === 0) {
+    return task.commitCompletedCount >= task.commitTotalCount ? 100 : 0;
   }
-  return phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes);
+  return phasePercent(task.verificationCompletedCount, task.verificationTotalCount);
 });
-const commitPercent = computed<number>(() => {
+const audioCommitPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return 100;
-  return phasePercent(task.commitCompletedCount, task.commitTotalCount);
+  if (
+    task.state === gameEnum.package.taskState.REGISTRATION_PENDING ||
+    task.state === gameEnum.package.taskState.COMPLETED
+  ) {
+    return 100;
+  }
+  if (task.state === gameEnum.package.taskState.VERIFYING) {
+    return (200 + audioPreflightPercent.value) / 3;
+  }
+  const committed = phasePercent(task.commitCompletedCount, task.commitTotalCount);
+  return (audioPreflightPercent.value + committed) / 3;
 });
-const commitComplete = computed<boolean>(() => {
-  return task.commitTotalCount === 0 || task.commitCompletedCount >= task.commitTotalCount;
-});
-const resourcePercent = computed<number>(() => assemblyPercent.value);
-// 下载对象只是组装输入；本地资源以证据落盘后的组装字节为准，收尾阶段预留 5%。
-const progressPercent = computed<number>(() => {
-  if (task.commitTotalCount === 0) return resourcePercent.value;
-  return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
-});
+const commitComplete = computed<boolean>(() => audioCommitPercent.value >= 100);
 const downloadComplete = computed<boolean>(() => {
   return task.totalBytes > 0 && task.downloadedBytes >= task.totalBytes;
+});
+// 资源准备进度把下载与组装分开折算：既要下载又要组装时按双倍计入
+// （13G 下载 + 13G 组装 = 26G），再叠加删除字节，例如 13+13+11G。
+const prepTotalBytes = computed<number>(() => {
+  return task.totalBytes + task.assemblyTotalBytes + task.deleteTotalBytes;
+});
+const prepCompletedBytes = computed<number>(() => {
+  return task.downloadedBytes + task.assemblyCompletedBytes + task.deleteCompletedBytes;
+});
+const prepComplete = computed<boolean>(() => {
+  const downloadDone = task.totalBytes === 0 || task.downloadedBytes >= task.totalBytes;
+  const assemblyDone =
+    task.assemblyTotalBytes === 0 || task.assemblyCompletedBytes >= task.assemblyTotalBytes;
+  const deleteDone =
+    task.deleteTotalBytes === 0 || task.deleteCompletedBytes >= task.deleteTotalBytes;
+  return downloadDone && assemblyDone && deleteDone;
 });
 const assemblyComplete = computed<boolean>(() => {
   if (task.assemblyTotalBytes === 0) return task.state !== gameEnum.package.taskState.QUEUED;
   return task.assemblyCompletedBytes >= task.assemblyTotalBytes;
+});
+const resourcePercent = computed<number>(() => {
+  if (prepTotalBytes.value === 0) return 100;
+  return phasePercent(prepCompletedBytes.value, prepTotalBytes.value);
+});
+// 下载对象只是组装输入；本地资源以证据落盘后的组装字节为准，收尾阶段预留 50% 权重。
+const progressPercent = computed<number>(() => {
+  if (task.commitTotalCount === 0) return resourcePercent.value;
+  if (task.assemblyTotalCount === 0) return audioCommitPercent.value;
+  return resourcePercent.value * 0.5 + audioCommitPercent.value * 0.5;
 });
 const resourceStatus = computed<string | null>(() => {
   if (task.assemblyTotalBytes === 0) {
@@ -151,12 +179,11 @@ const resourceStatus = computed<string | null>(() => {
       : "无需组装";
   }
   if (assemblyComplete.value) return "已完成";
-  if (task.assemblyCurrentFile !== null) return task.assemblyCurrentFile;
-  if (task.downloadCurrentFile !== null) return task.downloadCurrentFile;
+  // 当前下载/组装文件已移入吞吐面板对应指标的副标题，这里只保留阶段文案。
   if (gameEnum.package.taskApplying(task.state)) return task.currentFile;
   if (active.value) {
     if (downloadComplete.value) return "准备校验本地资源";
-    return "正在获取并安装下一个资源";
+    return "正在获取并组装配音文件";
   }
   return null;
 });
@@ -167,19 +194,30 @@ const displayElapsedMs = computed<number>(() => {
   return task.elapsedMs + Math.max(0, clock.value - updatedAt);
 });
 const overallFacts = computed<Array<string>>(() => {
-  return [
-    `当前私有临时空间 ${formatBytes(task.spoolBytes)}，已释放 ${formatBytes(task.releasedBytes)}`,
-    `当前耗时 ${formatElapsed(displayElapsedMs.value)}`,
-  ];
+  return [`当前耗时 ${formatElapsed(displayElapsedMs.value)}`];
 });
 const resourceFacts = computed<Array<string>>(() => {
-  return [
-    `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+  const facts = [
+    `准备 ${formatBytes(prepCompletedBytes.value)} / ${formatBytes(prepTotalBytes.value)}`,
     `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
   ];
+  if (task.totalBytes > 0) {
+    facts.push(`下载 ${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
+  }
+  if (task.assemblyTotalBytes > 0) {
+    facts.push(
+      `组装 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+    );
+  }
+  if (task.deleteTotalBytes > 0) {
+    facts.push(
+      `删除 ${formatBytes(task.deleteCompletedBytes)} / ${formatBytes(task.deleteTotalBytes)}`,
+    );
+  }
+  return facts;
 });
 const resourceRow = computed<ProgressRow>(() => ({
-  label: "资源安装",
+  label: "资源准备",
   percent: resourcePercent.value,
   indeterminate:
     task.assemblyTotalBytes === 0 &&
@@ -194,15 +232,18 @@ const resourceRow = computed<ProgressRow>(() => ({
 }));
 const commitRow = computed<ProgressRow>(() => ({
   label: "提交",
-  percent: commitPercent.value,
+  percent: audioCommitPercent.value,
   indeterminate: task.commitTotalCount === 0 && gameEnum.package.taskApplying(task.state),
-  complete: task.commitTotalCount > 0 && task.commitCompletedCount >= task.commitTotalCount,
-  status: task.commitCurrentStep,
+  complete: task.commitTotalCount > 0 && audioCommitPercent.value >= 100,
+  // 提交步骤文本与下方事实行重复，行首右侧不再单独展示。
+  status: null,
   details: [
-    `里程碑 ${task.commitCompletedCount} / ${task.commitTotalCount}`,
     ...(task.verificationTotalCount > 0
-      ? [`本轮目录校验 ${task.verificationCompletedCount} / ${task.verificationTotalCount} 个文件`]
+      ? [
+          `${task.state === gameEnum.package.taskState.VERIFYING ? "最终复验" : "并行校验"} ${task.verificationCompletedCount} / ${task.verificationTotalCount}`,
+        ]
       : []),
+    `提交文件 ${task.commitCompletedCount} / ${task.commitTotalCount}`,
   ],
   downloadObjectStatus: null,
   activeAssemblyCount: 0,
@@ -214,10 +255,10 @@ const overallRow = computed<ProgressRow>(() => ({
   complete: resourcePercent.value >= 100 && commitComplete.value,
   status: overallFacts.value.join(" · "),
   details: [
-    `本地资源 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+    `资源准备 ${formatBytes(prepCompletedBytes.value)} / ${formatBytes(prepTotalBytes.value)}`,
     task.commitTotalCount > 0
-      ? `资源安装 ${resourcePercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
-      : `资源安装 ${resourcePercent.value.toFixed(0)}%`,
+      ? `资源准备 ${resourcePercent.value.toFixed(0)}% · 提交 ${audioCommitPercent.value.toFixed(0)}%`
+      : `资源准备 ${resourcePercent.value.toFixed(0)}%`,
   ],
   downloadObjectStatus: null,
   activeAssemblyCount: 0,
@@ -266,7 +307,7 @@ function formatElapsed(milliseconds: number): string {
 </script>
 
 <style lang="scss" scoped>
-.install-progress {
+.audio-progress {
   display: grid;
   padding: 12px;
   border: 1px solid var(--common-shadow-1);
@@ -281,8 +322,8 @@ function formatElapsed(milliseconds: number): string {
   }
 }
 
-.install-progress-status,
-.install-progress-row-head {
+.audio-progress-status,
+.audio-progress-row-head {
   display: flex;
   align-items: center;
   color: var(--box-text-2);
@@ -290,7 +331,7 @@ function formatElapsed(milliseconds: number): string {
   line-height: 16px;
 }
 
-.install-progress-status {
+.audio-progress-status {
   gap: 8px;
 
   .warn {
@@ -302,7 +343,7 @@ function formatElapsed(milliseconds: number): string {
   }
 }
 
-.install-progress-actions {
+.audio-progress-actions {
   display: flex;
   flex-shrink: 0;
   align-items: center;
@@ -313,28 +354,28 @@ function formatElapsed(milliseconds: number): string {
   }
 }
 
-.install-progress-rows {
+.audio-progress-rows {
   display: grid;
   gap: 10px;
 }
 
-.install-progress-row {
+.audio-progress-row {
   display: grid;
   gap: 4px;
 }
 
-.install-progress-row-head {
+.audio-progress-row-head {
   justify-content: space-between;
 }
 
-.install-progress-row-label {
+.audio-progress-row-label {
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 8px;
 }
 
-.install-progress-row-status {
+.audio-progress-row-status {
   overflow: hidden;
   min-width: 0;
   color: var(--common-text-title);
@@ -342,17 +383,17 @@ function formatElapsed(milliseconds: number): string {
   white-space: nowrap;
 }
 
-.install-progress-complete {
+.audio-progress-complete {
   color: var(--tgc-od-green);
 }
 
-.install-progress-row-head strong {
+.audio-progress-row-head strong {
   flex-shrink: 0;
   color: var(--common-text-title);
   font-weight: normal;
 }
 
-.install-progress-row-facts {
+.audio-progress-row-facts {
   display: flex;
   flex-wrap: wrap;
   color: var(--box-text-2);
@@ -361,7 +402,7 @@ function formatElapsed(milliseconds: number): string {
   line-height: 15px;
 }
 
-.install-progress-download-activity {
+.audio-progress-download-activity {
   display: inline-flex;
   min-height: 16px;
   align-items: center;
@@ -369,7 +410,7 @@ function formatElapsed(milliseconds: number): string {
   line-height: 16px;
 }
 
-.install-progress-assembly-slots {
+.audio-progress-assembly-slots {
   display: inline-flex;
   max-width: 160px;
   min-height: 16px;
@@ -380,7 +421,7 @@ function formatElapsed(milliseconds: number): string {
   vertical-align: middle;
 }
 
-.install-progress-assembly-slot {
+.audio-progress-assembly-slot {
   display: block;
   width: 8px;
   height: 8px;
@@ -388,7 +429,7 @@ function formatElapsed(milliseconds: number): string {
   background: var(--tgc-od-green);
 }
 
-.install-progress-error {
+.audio-progress-error {
   margin: 0;
   color: var(--tgc-od-red);
   font-size: 12px;

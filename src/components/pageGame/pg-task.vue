@@ -1,3 +1,4 @@
+<!-- 资源下载任务面板：开始、暂停、取消、恢复与进度展示 -->
 <template>
   <section v-if="plan !== null || task !== null" class="task-panel" aria-label="资源下载任务">
     <div class="task-heading">
@@ -6,8 +7,17 @@
         <strong v-if="task !== null && task.target === gameEnum.package.planTarget.INSTALL">
           全新安装 {{ task.targetTag }}
         </strong>
-        <strong v-else-if="task !== null && task.target === gameEnum.package.planTarget.AUDIO">
-          配音包 · {{ audioLabel }}
+        <strong
+          class="task-audio-title"
+          v-else-if="task !== null && task.target === gameEnum.package.planTarget.AUDIO"
+        >
+          <span class="task-audio-title-label">配音包</span>
+          <span class="task-audio-tags">
+            <PgAudioLangTags
+              :sourceLanguages="task.sourceAudioLanguages"
+              :targetLanguages="task.targetAudioLanguages"
+            />
+          </span>
         </strong>
         <strong v-else-if="task !== null && task.sourceTag === task.targetTag">
           修复 {{ task.targetTag }}
@@ -15,16 +25,67 @@
         <strong v-else-if="task !== null"> {{ task.sourceTag }} → {{ task.targetTag }} </strong>
         <strong v-else-if="plan !== null">等待开始 {{ plan.targetTag }}</strong>
       </div>
-      <v-chip v-if="task !== null" :color="stateColor" size="small" variant="tonal">
-        {{ taskStateLabel }}
-      </v-chip>
+      <div class="task-heading-actions">
+        <template v-if="isAudio">
+          <v-btn
+            v-if="canPause"
+            :disabled="actionPending"
+            :loading="actionPending"
+            class="task-heading-pause"
+            prepend-icon="mdi-pause-circle-outline"
+            size="small"
+            variant="tonal"
+            @click="emit('pauseRequested')"
+          >
+            暂停
+          </v-btn>
+          <v-btn
+            v-if="canCancel"
+            :disabled="actionPending"
+            :loading="actionPending"
+            class="task-heading-stop"
+            prepend-icon="mdi-stop-circle-outline"
+            size="small"
+            variant="tonal"
+            @click="emit('cancelRequested')"
+          >
+            取消
+          </v-btn>
+          <v-btn
+            v-if="recoverable && task !== null"
+            :disabled="actionPending"
+            :loading="actionPending"
+            class="task-heading-recover"
+            prepend-icon="mdi-backup-restore"
+            size="small"
+            variant="tonal"
+            @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
+          >
+            安全恢复
+          </v-btn>
+          <v-btn
+            v-if="canAbandon && task !== null"
+            :disabled="actionPending"
+            :loading="actionPending"
+            class="task-heading-abandon"
+            prepend-icon="mdi-delete-outline"
+            size="small"
+            variant="tonal"
+            @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
+          >
+            放弃任务
+          </v-btn>
+        </template>
+        <v-chip v-if="task !== null" :color="stateColor" size="small" variant="tonal">
+          {{ taskStateLabel }}
+        </v-chip>
+      </div>
     </div>
 
     <template v-if="task !== null">
-      <PgInstallProgress
+      <PgAudioProgress
         v-if="task.target === gameEnum.package.planTarget.AUDIO && recoveryProgress === null"
         embedded
-        mode="audio"
         :task
       />
       <template v-else>
@@ -127,7 +188,7 @@
         {{ applyActionLabel }}
       </v-btn>
       <v-btn
-        v-if="canCancel && task !== null"
+        v-if="canCancel && task !== null && !isAudio"
         :loading="actionPending"
         prepend-icon="mdi-stop-circle-outline"
         size="small"
@@ -137,7 +198,7 @@
         请求取消
       </v-btn>
       <v-btn
-        v-if="recoverable && task !== null"
+        v-if="recoverable && task !== null && !isAudio"
         :loading="actionPending"
         prepend-icon="mdi-backup-restore"
         size="small"
@@ -147,7 +208,7 @@
         安全恢复
       </v-btn>
       <v-btn
-        v-if="canAbandon && task !== null"
+        v-if="canAbandon && task !== null && !isAudio"
         :loading="actionPending"
         size="small"
         variant="text"
@@ -166,7 +227,8 @@
 import gameEnum from "@enum/game.js";
 import { computed } from "vue";
 
-import PgInstallProgress from "./pg-install-progress.vue";
+import PgAudioLangTags from "./pg-audio-lang-tags.vue";
+import PgAudioProgress from "./pg-audio-progress.vue";
 import PgNotice from "./pg-notice.vue";
 
 type Props = {
@@ -182,9 +244,11 @@ const emit = defineEmits<{
   startRequested: [];
   applyRequested: [];
   cancelRequested: [];
+  pauseRequested: [];
   recoverRequested: [action: TGApp.Game.Package.RecoveryActionEnum];
 }>();
 
+const isAudio = computed<boolean>(() => task?.target === gameEnum.package.planTarget.AUDIO);
 const audioApplyPreparing = computed<boolean>(() => {
   return (
     task?.target === gameEnum.package.planTarget.AUDIO &&
@@ -219,6 +283,14 @@ const canCancel = computed<boolean>(() => {
     task.target === gameEnum.package.planTarget.INSTALL && gameEnum.package.taskApplying(task.state)
   );
 });
+const canPause = computed<boolean>(() => {
+  if (!isAudio.value || task === null) return false;
+  return (
+    task.state === gameEnum.package.taskState.QUEUED ||
+    task.state === gameEnum.package.taskState.DOWNLOADING ||
+    task.state === gameEnum.package.taskState.ASSEMBLING
+  );
+});
 const recoverable = computed<boolean>(() => {
   return (
     task !== null &&
@@ -243,16 +315,6 @@ const integrityRepair = computed<boolean>(() => {
     task.target !== gameEnum.package.planTarget.AUDIO &&
     task.sourceTag === task.targetTag
   );
-});
-const audioLabel = computed<string>(() => {
-  if (task === null) return "";
-  const labels: Record<string, string> = {
-    "zh-cn": "中文",
-    "en-us": "英语",
-    "ja-jp": "日语",
-    "ko-kr": "韩语",
-  };
-  return task.audioLanguages.map((language) => labels[language] ?? language).join("、");
 });
 const currentResource = computed<string | null>(() => {
   if (recoveryProgress !== null) return recoveryProgress.message;
@@ -522,6 +584,7 @@ function formatDuration(seconds: number): string {
 
 .task-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -530,6 +593,33 @@ function formatDuration(seconds: number): string {
     flex-shrink: 0;
     align-self: center;
   }
+}
+
+.task-heading-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+
+  > .v-chip {
+    flex-shrink: 0;
+  }
+}
+
+.task-heading-pause {
+  color: var(--tgc-od-orange);
+}
+
+.task-heading-stop {
+  color: var(--tgc-od-red);
+}
+
+.task-heading-recover {
+  color: var(--tgc-od-blue);
+}
+
+.task-heading-abandon {
+  color: var(--tgc-od-red);
 }
 
 .task-heading-copy {
@@ -551,6 +641,32 @@ function formatDuration(seconds: number): string {
     font-weight: normal;
     line-height: 22px;
   }
+}
+
+.task-heading-copy strong.task-audio-title {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  white-space: normal;
+}
+
+.task-audio-title-label {
+  display: inline;
+  width: fit-content;
+  flex-shrink: 0;
+}
+
+.task-audio-tags {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
 }
 
 .task-facts,

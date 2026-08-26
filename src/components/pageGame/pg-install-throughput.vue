@@ -1,3 +1,4 @@
+<!-- 游戏本体安装任务的下载速度、写入预估与私有临时空间实时趋势图 -->
 <template>
   <section class="install-throughput" aria-label="安装下载、写入与私有临时空间" aria-live="off">
     <div class="install-throughput-metrics">
@@ -69,14 +70,24 @@ const chartGridLines = [0, 30, 60, 90, 120];
 const samples = ref<Array<ThroughputSample>>([]);
 let sampleTimer: ReturnType<typeof setInterval> | null = null;
 
-const throughputActive = computed<boolean>(
+const downloadActive = computed<boolean>(
   () => task.state === gameEnum.package.taskState.DOWNLOADING,
 );
+// 下载与组装在流水线中并行推进，组装阶段仍需持续采样写入速度与剩余时间。
+const assemblyActive = computed<boolean>(() => {
+  return (
+    task.state === gameEnum.package.taskState.DOWNLOADING ||
+    task.state === gameEnum.package.taskState.ASSEMBLING
+  );
+});
 const currentDownloadSpeed = computed<number>(() =>
-  throughputActive.value ? task.bytesPerSecond : 0,
+  downloadActive.value ? task.bytesPerSecond : 0,
 );
 const currentAssemblySpeed = computed<number>(() =>
-  throughputActive.value ? task.assemblyBytesPerSecond : 0,
+  assemblyActive.value ? task.assemblyBytesPerSecond : 0,
+);
+const assemblyRunning = computed<boolean>(
+  () => task.state === gameEnum.package.taskState.ASSEMBLING,
 );
 const currentSpoolBytes = computed<number>(() => Math.max(0, task.spoolBytes));
 const speedSampleMaximum = computed<number>(() => {
@@ -112,7 +123,9 @@ const assemblyRemaining = computed<string>(() => {
     return "组装完成";
   }
   if (task.assemblyEtaSeconds === null) {
-    return task.assemblyBytesPerSecond > 0 ? "组装剩余 计算中" : "组装剩余 等待首个样本";
+    return assemblyRunning.value || task.assemblyBytesPerSecond > 0
+      ? "组装剩余 计算中"
+      : "组装剩余 等待首个样本";
   }
   return `组装剩余 ${formatDuration(task.assemblyEtaSeconds)}`;
 });

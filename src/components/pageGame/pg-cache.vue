@@ -1,3 +1,4 @@
+<!-- 游戏资源下载缓存面板：查看占用并清理分片与渠道 SDK 缓存 -->
 <template>
   <section class="cache-panel" aria-label="下载缓存">
     <div class="cache-top">

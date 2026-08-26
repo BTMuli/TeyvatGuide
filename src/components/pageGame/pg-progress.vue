@@ -1,3 +1,4 @@
+<!-- 通用进度面板：标题、百分比、当前文件与操作槽 -->
 <template>
   <section class="progress-panel" :aria-label="ariaLabel">
     <div class="progress-status">
