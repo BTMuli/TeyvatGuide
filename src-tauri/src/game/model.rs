@@ -308,6 +308,7 @@ pub struct PackageTaskSummary {
 pub struct PackageTaskCleanupSummary {
   pub removed_count: usize,
   pub removed_bytes: u64,
+  pub removed_task_ids: Vec<String>,
 }
 
 /// 启动资源任务时允许覆盖的安全下载参数。

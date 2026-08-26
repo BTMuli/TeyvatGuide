@@ -252,5 +252,6 @@ declare namespace TGApp.Game.Package {
   type TaskCleanupSummary = {
     removedCount: number;
     removedBytes: number;
+    removedTaskIds: Array<string>;
   };
 }

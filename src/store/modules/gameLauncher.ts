@@ -21,6 +21,7 @@ import {
   pauseGameInstall,
   recoverGamePackageTask,
   recoverGameInstall,
+  removeGamePackageTask,
   startGameInstall,
   startGamePackageTask,
   verifyGamePackage,
@@ -53,6 +54,14 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
           current.revision === task.revision &&
           current.updatedAt > task.updatedAt) ||
         (current.taskId !== task.taskId && current.updatedAt > task.updatedAt))
+    );
+  }
+
+  function isTerminalTask(task: TGApp.Game.Package.TaskSummary): boolean {
+    return (
+      task.state === gameEnum.package.taskState.COMPLETED ||
+      task.state === gameEnum.package.taskState.FAILED ||
+      task.state === gameEnum.package.taskState.CANCELED
     );
   }
 
@@ -176,6 +185,22 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     const next = { ...tasksByInstallation.value };
     delete next[task.installationId];
     tasksByInstallation.value = next;
+  }
+
+  function removeTaskProjections(removedTaskIds: ReadonlySet<string>): void {
+    const next = { ...tasksByInstallation.value };
+    let changed = false;
+    for (const [installationId, task] of Object.entries(next)) {
+      if (!removedTaskIds.has(task.taskId) || !isTerminalTask(task)) continue;
+      delete next[installationId];
+      changed = true;
+    }
+    for (const [installationId, task] of pendingProgressByInstallation) {
+      if (removedTaskIds.has(task.taskId) && isTerminalTask(task)) {
+        pendingProgressByInstallation.delete(installationId);
+      }
+    }
+    if (changed) tasksByInstallation.value = next;
   }
 
   function setPending(key: string, pending: boolean): void {
@@ -447,21 +472,25 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
   }
 
+  async function removeTaskHistory(taskId: string): Promise<TGApp.Game.Package.TaskCleanupSummary> {
+    const pendingKey = `task-history-remove:${taskId}`;
+    setPending(pendingKey, true);
+    try {
+      const summary = await removeGamePackageTask(taskId);
+      if (summary.removedTaskIds.includes(taskId)) {
+        removeTaskProjections(new Set([taskId]));
+      }
+      return summary;
+    } finally {
+      setPending(pendingKey, false);
+    }
+  }
+
   async function cleanupTasks(): Promise<TGApp.Game.Package.TaskCleanupSummary> {
     setPending("task-cleanup", true);
     try {
       const summary = await cleanupGamePackageTasks();
-      const next = { ...tasksByInstallation.value };
-      for (const [installationId, task] of Object.entries(next)) {
-        if (
-          task.state === gameEnum.package.taskState.COMPLETED ||
-          task.state === gameEnum.package.taskState.FAILED ||
-          task.state === gameEnum.package.taskState.CANCELED
-        ) {
-          delete next[installationId];
-        }
-      }
-      tasksByInstallation.value = next;
+      removeTaskProjections(new Set(summary.removedTaskIds));
       return summary;
     } finally {
       setPending("task-cleanup", false);
@@ -528,6 +557,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     dismissVerify,
     recoverTask,
     recoverInstall,
+    removeTaskHistory,
     cleanupTasks,
     startListening,
     stopListening,

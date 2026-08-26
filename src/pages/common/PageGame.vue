@@ -18,17 +18,14 @@
         安装新客户端
       </v-btn>
       <v-btn
-        :disabled="taskCleanupPending"
-        :loading="taskCleanupPending"
-        aria-label="清理已结束任务"
-        class="game-task-clean-btn"
-        color="var(--tgc-od-red)"
-        prepend-icon="mdi-broom"
-        title="清理已结束任务"
+        aria-label="查看任务历史"
+        class="game-task-history-btn"
+        prepend-icon="mdi-history"
+        title="查看任务历史"
         variant="tonal"
-        @click="handleTaskCleanup"
+        @click="openTaskHistoryOverlay"
       >
-        清理任务
+        任务历史
       </v-btn>
       <v-btn
         :disabled="launching"
@@ -108,6 +105,7 @@
     :installedSchemes
     @completed="refreshPageData"
   />
+  <PgoTaskHistory v-if="taskHistoryOverlay" v-model="taskHistoryOverlay" />
 </template>
 
 <script lang="ts" setup>
@@ -117,7 +115,6 @@ import gameEnum from "@enum/game.js";
 import useAppStore from "@store/app.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
-import fmtUtil from "@utils/fmtUtil.js";
 import { tryLaunchGame } from "@utils/TGGame.js";
 import { listGameInstallDrafts, listGameInstallations } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
@@ -129,6 +126,7 @@ const PgInstallTask = defineAsyncComponent(() => import("@comp/pageGame/pg-insta
 const PgInstallation = defineAsyncComponent(() => import("@comp/pageGame/pg-installation.vue"));
 const PgoInstall = defineAsyncComponent(() => import("@comp/pageGame/pgo-install.vue"));
 const PgoPath = defineAsyncComponent(() => import("@comp/pageGame/pgo-path.vue"));
+const PgoTaskHistory = defineAsyncComponent(() => import("@comp/pageGame/pgo-task-history.vue"));
 
 const taskStore = useGameLauncherStore();
 const { isLogin } = storeToRefs(useAppStore());
@@ -137,6 +135,7 @@ const launching = ref<boolean>(false);
 const pathOverlay = ref<boolean>(false);
 const pathTarget = ref<TGApp.Game.Installation.Item | null>(null);
 const installOverlay = ref<boolean>(false);
+const taskHistoryOverlay = ref<boolean>(false);
 type InstallInitialConfig = {
   scheme: TGApp.Game.Installation.SchemeEnum;
   installRoot: string | null;
@@ -163,18 +162,6 @@ const installTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
       task.state !== gameEnum.package.taskState.CANCELED,
   );
 });
-const taskCleanupCount = computed<number>(() => {
-  return Object.values(taskStore.tasksByInstallation).filter((task) => {
-    return (
-      task.state === gameEnum.package.taskState.COMPLETED ||
-      task.state === gameEnum.package.taskState.FAILED ||
-      task.state === gameEnum.package.taskState.CANCELED
-    );
-  }).length;
-});
-const taskCleanupPending = computed<boolean>(
-  () => taskStore.pendingActions["task-cleanup"] === true,
-);
 const completedInstallTaskKey = computed<string>(() => {
   return Object.values(taskStore.tasksByInstallation)
     .filter(
@@ -202,6 +189,10 @@ const installedSchemes = computed<Array<TGApp.Game.Installation.SchemeEnum>>(() 
 function openInstallOverlay(): void {
   installInitialConfig.value = null;
   installOverlay.value = true;
+}
+
+function openTaskHistoryOverlay(): void {
+  taskHistoryOverlay.value = true;
 }
 
 function openPathOverlay(installation: TGApp.Game.Installation.Item | null): void {
@@ -363,29 +354,6 @@ async function handleInstallTaskRecover(
   }
 }
 
-async function handleTaskCleanup(): Promise<void> {
-  const confirmed = await showDialog.checkF({
-    title: "清理已结束任务？",
-    text:
-      taskCleanupCount.value > 0
-        ? `将移除已结束任务记录（当前页面可见 ${taskCleanupCount.value} 条），不会删除游戏文件或共享缓存。`
-        : "将移除所有已结束任务记录，不会删除游戏文件或共享缓存。",
-    confirmLabel: "清理记录",
-    cancelLabel: "取消",
-  });
-  if (confirmed !== true) return;
-  try {
-    const summary = await taskStore.cleanupTasks();
-    showSnackbar.success(
-      summary.removedCount > 0
-        ? `已清理 ${summary.removedCount} 条任务记录，释放 ${fmtUtil.size(summary.removedBytes)}`
-        : "没有可清理的已结束任务",
-    );
-  } catch {
-    showSnackbar.error("清理任务记录失败，请稍后重试");
-  }
-}
-
 function handleInstallTaskConfigure(task: TGApp.Game.Package.TaskSummary): void {
   installInitialConfig.value = {
     scheme: task.targetScheme,
@@ -481,7 +449,7 @@ onUnmounted(() => {
   margin-right: 4px;
 }
 
-.game-task-clean-btn {
+.game-task-history-btn {
   margin-right: 8px;
 }
 

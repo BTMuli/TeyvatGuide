@@ -755,12 +755,17 @@ pub(crate) fn list(
     if !entry.file_type().is_ok_and(|file_type| file_type.is_dir()) {
       continue;
     }
+    let Some(directory_task_id) = entry.file_name().to_str().map(str::to_string) else {
+      continue;
+    };
     let path = entry.path().join("journal.json");
     if !path.exists() {
       continue;
     }
     let journal = load(&path)?;
-    if installation_id.is_none_or(|id| id == journal.installation_id) {
+    if directory_task_id == journal.task_id
+      && installation_id.is_none_or(|id| id == journal.installation_id)
+    {
       journals.push(journal);
     }
   }
@@ -844,6 +849,7 @@ pub(crate) fn cleanup_terminal_tasks_from_journals(
   let now = Utc::now();
   let mut removed_count = 0;
   let mut removed_bytes = 0_u64;
+  let mut removed_task_ids = Vec::new();
   let mut retained = Vec::with_capacity(journals.len());
   for journal in journals {
     if active_ids.contains(&journal.task_id)
@@ -870,8 +876,73 @@ pub(crate) fn cleanup_terminal_tasks_from_journals(
     removed_bytes = removed_bytes.saturating_add(directory_bytes(&directory)?);
     fs::remove_dir_all(&directory).map_err(|error| format!("清理过期游戏资源任务失败：{error}"))?;
     removed_count += 1;
+    removed_task_ids.push(journal.task_id);
   }
-  Ok((super::model::PackageTaskCleanupSummary { removed_count, removed_bytes }, retained))
+  Ok((
+    super::model::PackageTaskCleanupSummary { removed_count, removed_bytes, removed_task_ids },
+    retained,
+  ))
+}
+
+/// Remove one persisted terminal task record without treating a missing record as an error.
+pub(crate) fn cleanup_terminal_task(
+  task_root: &Path,
+  active_ids: &HashSet<String>,
+  task_id: &str,
+) -> Result<super::model::PackageTaskCleanupSummary, String> {
+  let journals = list(task_root, None)?;
+  let Some(journal) = journals.into_iter().find(|journal| journal.task_id == task_id) else {
+    return Ok(super::model::PackageTaskCleanupSummary {
+      removed_count: 0,
+      removed_bytes: 0,
+      removed_task_ids: Vec::new(),
+    });
+  };
+  if active_ids.contains(task_id) {
+    return Err("任务仍在运行，无法删除任务记录".to_string());
+  }
+  if !matches!(
+    journal.state,
+    PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+  ) {
+    return Err("任务尚未结束，无法删除任务记录".to_string());
+  }
+
+  let directory = task_root.join("tasks").join(task_id);
+  let metadata = match fs::symlink_metadata(&directory) {
+    Ok(metadata) => metadata,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+      return Ok(super::model::PackageTaskCleanupSummary {
+        removed_count: 0,
+        removed_bytes: 0,
+        removed_task_ids: Vec::new(),
+      });
+    }
+    Err(error) => return Err(format!("读取游戏资源任务目录失败：{error}")),
+  };
+  if metadata.file_type().is_symlink() || !metadata.is_dir() {
+    return Ok(super::model::PackageTaskCleanupSummary {
+      removed_count: 0,
+      removed_bytes: 0,
+      removed_task_ids: Vec::new(),
+    });
+  }
+  let removed_bytes = directory_bytes(&directory)?;
+  match fs::remove_dir_all(&directory) {
+    Ok(()) => Ok(super::model::PackageTaskCleanupSummary {
+      removed_count: 1,
+      removed_bytes,
+      removed_task_ids: vec![task_id.to_string()],
+    }),
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+      Ok(super::model::PackageTaskCleanupSummary {
+        removed_count: 0,
+        removed_bytes: 0,
+        removed_task_ids: Vec::new(),
+      })
+    }
+    Err(error) => Err(format!("清理游戏资源任务失败：{error}")),
+  }
 }
 
 fn directory_bytes(path: &Path) -> Result<u64, String> {

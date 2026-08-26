@@ -40,6 +40,7 @@ use std::{
 };
 use tauri::{AppHandle, Emitter, ipc::Channel};
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
+use uuid::Uuid;
 
 const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
@@ -831,6 +832,20 @@ struct ActiveTasks {
   by_task: HashMap<String, ActiveTask>,
   by_installation: HashMap<String, InstallationReservation>,
   cache_clear_active: bool,
+}
+
+/// 在持有任务生命周期锁期间执行同步清理，阻止新的 reservation 与目录删除交错。
+fn with_active_task_ids<T>(
+  active: &Arc<Mutex<ActiveTasks>>,
+  operation: impl FnOnce(&HashSet<String>) -> Result<T, String>,
+) -> Result<T, String> {
+  let active_guard = active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+  let mut active_ids = active_guard.by_task.keys().cloned().collect::<HashSet<_>>();
+  active_ids
+    .extend(active_guard.by_installation.values().map(|reservation| reservation.task_id.clone()));
+  let result = operation(&active_ids);
+  drop(active_guard);
+  result
 }
 
 struct InstallationReservation {
@@ -1802,6 +1817,49 @@ impl GamePackageManager {
     self.list_from_journals(journals, installation_id).await
   }
 
+  /// 清理过期记录后列出磁盘上持久化的安全终态任务。
+  pub(crate) fn history_list(&self, task_root: &Path) -> Result<Vec<PackageTaskSummary>, String> {
+    with_active_task_ids(&self.active, |active_ids| {
+      let journals = journal::list(task_root, None)
+        .map_err(|error| format!("读取游戏资源任务历史失败：{error}"))?;
+      let (_, journals) = journal::cleanup_terminal_tasks_from_journals(
+        task_root,
+        active_ids,
+        Some(ChronoDuration::days(7)),
+        journals,
+      )
+      .map_err(|error| format!("清理过期游戏资源任务历史失败：{error}"))?;
+      let mut summaries = journals
+        .into_iter()
+        .filter(|journal| {
+          !active_ids.contains(&journal.task_id)
+            && matches!(
+              journal.state,
+              PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+            )
+        })
+        .map(|journal| journal.summary())
+        .collect::<Vec<_>>();
+      summaries.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
+      Ok(summaries)
+    })
+  }
+
+  pub(crate) fn remove_task(
+    &self,
+    task_root: &Path,
+    task_id: &str,
+  ) -> Result<PackageTaskCleanupSummary, String> {
+    let task_id =
+      Uuid::parse_str(task_id).map_err(|_| "任务 ID 无效：必须是 UUID".to_string())?.to_string();
+    with_active_task_ids(&self.active, |active_ids| {
+      if active_ids.contains(&task_id) {
+        return Err("任务仍在运行，无法删除任务记录".to_string());
+      }
+      journal::cleanup_terminal_task(task_root, active_ids, &task_id)
+    })
+  }
+
   async fn list_from_journals(
     &self,
     journals: Vec<TaskJournal>,
@@ -1853,17 +1911,13 @@ impl GamePackageManager {
     installation_id: Option<&str>,
     max_age: Option<ChronoDuration>,
   ) -> Result<Vec<PackageTaskSummary>, String> {
-    let active_ids = {
-      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-      let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
-      ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
-      ids
-    };
-    let journals = journal::list(task_root, None)
-      .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
-    let (_, journals) =
-      journal::cleanup_terminal_tasks_from_journals(task_root, &active_ids, max_age, journals)
+    let journals = with_active_task_ids(&self.active, |active_ids| {
+      let journals = journal::list(task_root, None)
         .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
+      journal::cleanup_terminal_tasks_from_journals(task_root, active_ids, max_age, journals)
+        .map(|(_, journals)| journals)
+        .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))
+    })?;
     let journals = journals
       .into_iter()
       .filter(|journal| installation_id.is_none_or(|id| id == journal.installation_id))
@@ -1876,13 +1930,9 @@ impl GamePackageManager {
     task_root: &Path,
     max_age: Option<ChronoDuration>,
   ) -> Result<PackageTaskCleanupSummary, String> {
-    let active_ids = {
-      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-      let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
-      ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
-      ids
-    };
-    journal::cleanup_terminal_tasks(task_root, &active_ids, max_age)
+    with_active_task_ids(&self.active, |active_ids| {
+      journal::cleanup_terminal_tasks(task_root, active_ids, max_age)
+    })
   }
 
   pub(crate) fn rollback_download(
@@ -4827,4 +4877,45 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
     }
   }
   Ok(())
+}
+
+#[cfg(test)]
+mod task_cleanup_synchronization_tests {
+  use super::*;
+  use std::{
+    sync::{TryLockError, mpsc},
+    thread,
+  };
+
+  #[test]
+  fn active_task_snapshot_holds_lifecycle_lock_and_includes_reservations() {
+    let active = Arc::new(Mutex::new(ActiveTasks {
+      by_task: HashMap::new(),
+      by_installation: HashMap::new(),
+      cache_clear_active: false,
+    }));
+    let reservation =
+      TaskReservation::acquire(Arc::clone(&active), "install-id", "task-id").unwrap();
+
+    with_active_task_ids(&active, |active_ids| {
+      assert!(active_ids.contains("task-id"));
+      let active_for_thread = Arc::clone(&active);
+      let (sender, receiver) = mpsc::channel();
+      let contender = thread::spawn(move || {
+        let blocked = matches!(active_for_thread.try_lock(), Err(TryLockError::WouldBlock));
+        sender.send(blocked).unwrap();
+      });
+      assert!(receiver.recv().unwrap());
+      contender.join().unwrap();
+      Ok(())
+    })
+    .unwrap();
+
+    drop(reservation);
+    with_active_task_ids(&active, |active_ids| {
+      assert!(!active_ids.contains("task-id"));
+      Ok(())
+    })
+    .unwrap();
+  }
 }

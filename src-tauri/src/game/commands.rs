@@ -32,6 +32,7 @@ use std::{
 use tauri::{AppHandle, Emitter, Manager, ipc::Channel};
 use tauri_plugin_machine_uid::MachineUidExt;
 use tauri_plugin_sql::{DbInstances, DbPool};
+use uuid::Uuid;
 
 const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
 
@@ -1000,6 +1001,27 @@ pub async fn game_package_task_list(
   manager
     .cleanup_and_list(&task_root, installation_id.as_deref(), Some(chrono::Duration::days(7)))
     .await
+}
+
+/// 读取仅包含磁盘上安全终态任务的近期历史记录。
+#[tauri::command]
+pub fn game_package_task_history_list(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+) -> Result<Vec<PackageTaskSummary>, String> {
+  manager.history_list(&game_task_root(&app_handle)?)
+}
+
+/// 删除一个已结束的游戏资源任务记录，不触碰游戏文件或共享缓存。
+#[tauri::command]
+pub fn game_package_task_remove(
+  app_handle: AppHandle,
+  manager: tauri::State<'_, GamePackageManager>,
+  task_id: String,
+) -> Result<PackageTaskCleanupSummary, String> {
+  let task_id =
+    Uuid::parse_str(&task_id).map_err(|_| "任务 ID 无效：必须是 UUID".to_string())?.to_string();
+  manager.remove_task(&game_task_root(&app_handle)?, &task_id)
 }
 
 /// 清理所有已结束且不再运行的资源任务日志，不触碰缓存内容或未完成任务。

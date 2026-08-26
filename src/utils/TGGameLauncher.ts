@@ -416,6 +416,29 @@ export async function listGamePackageTasks(
 }
 
 /**
+ * 读取后端确认可清理的近期资源任务历史。
+ * @since Beta v0.11.4
+ * @returns 已结束且不在活动任务集合中的任务列表
+ */
+export async function listGamePackageTaskHistory(): Promise<Array<TGApp.Game.Package.TaskSummary>> {
+  return await invoke<Array<TGApp.Game.Package.TaskSummary>>("game_package_task_history_list");
+}
+
+/**
+ * 清除指定的已结束资源任务记录；不会删除共享缓存或未完成任务。
+ * @since Beta v0.11.4
+ * @param taskId - 资源任务 ID
+ * @returns 清理结果
+ */
+export async function removeGamePackageTask(
+  taskId: string,
+): Promise<TGApp.Game.Package.TaskCleanupSummary> {
+  return await invoke<TGApp.Game.Package.TaskCleanupSummary>("game_package_task_remove", {
+    taskId,
+  });
+}
+
+/**
  * 清理所有已结束的资源任务日志；不会删除共享缓存或未完成任务。
  * @since Beta v0.11.5
  */
