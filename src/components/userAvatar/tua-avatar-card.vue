@@ -1,6 +1,6 @@
 <!-- 角色列表卡片（新UI） -->
 <template>
-  <div class="tua-ac" title="点击查看详情" @click="console.log(role)">
+  <div class="tua-ac" title="点击查看详情">
     <div class="tua-ac-head">
       <div class="tua-ac-avatar">
         <img :src="avatarStarBg" alt="" class="tua-ac-piece-bg" decoding="async" />
