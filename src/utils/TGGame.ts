@@ -25,8 +25,8 @@ import { parse } from "ini";
 
 // YAE支持的游戏版本
 export const YAE_GAME_VER: Readonly<string> = "7.0.0";
-// v0.11.3 发版时间，该版本更新了 dll 版本
-const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-12");
+// Yae.Lib 5.5.0 更新时间
+const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-26");
 
 /**
  * 从旧 gameDir 设置迁移当前游戏安装。
