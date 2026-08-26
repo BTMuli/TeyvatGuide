@@ -472,6 +472,9 @@ pub(crate) fn persist_plan_parts(
   let install_bytes = parts.assets.iter().try_fold(0_u64, |total, item| {
     total.checked_add(item.size).ok_or_else(|| "计划安装字节数溢出".to_string())
   })?;
+  let delete_bytes = parts.delete_files.iter().try_fold(0_u64, |total, item| {
+    total.checked_add(item.size).ok_or_else(|| "计划删除字节数溢出".to_string())
+  })?;
   let cache_available_free_bytes = fs2::available_space(&cache_root)
     .map_err(|error| format!("读取资源缓存磁盘剩余空间失败：{error}"))?;
   let install_available_free_bytes = fs2::available_space(&installation.root_path)
@@ -503,6 +506,7 @@ pub(crate) fn persist_plan_parts(
     strategy: parts.strategy,
     download_bytes,
     install_bytes,
+    delete_bytes,
     cache_hit_bytes,
     required_free_bytes: budget.required_free_bytes,
     available_free_bytes: budget.available_free_bytes,
@@ -642,6 +646,7 @@ pub(crate) async fn create_and_persist_install_plan(
       strategy: PackagePlanStrategy::Full,
       download_bytes,
       install_bytes,
+      delete_bytes: 0,
       cache_hit_bytes,
       required_free_bytes: budget.required_free_bytes,
       available_free_bytes: budget.available_free_bytes,

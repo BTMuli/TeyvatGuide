@@ -53,6 +53,7 @@ declare namespace TGApp.Game.Package {
     strategy: PlanStrategyEnum;
     downloadBytes: number;
     installBytes: number;
+    deleteBytes: number;
     cacheHitBytes: number;
     requiredFreeBytes: number;
     availableFreeBytes: number;

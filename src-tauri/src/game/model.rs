@@ -136,6 +136,8 @@ pub struct PackagePlanSummary {
   pub strategy: PackagePlanStrategy,
   pub download_bytes: u64,
   pub install_bytes: u64,
+  #[serde(default)]
+  pub delete_bytes: u64,
   pub cache_hit_bytes: u64,
   pub required_free_bytes: u64,
   pub available_free_bytes: u64,

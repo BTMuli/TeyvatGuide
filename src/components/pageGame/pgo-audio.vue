@@ -71,7 +71,10 @@
           </v-chip>
         </div>
         <dl>
-          <div class="audio-plan-row audio-plan-row-primary">
+          <div
+            class="audio-plan-row audio-plan-row-primary"
+            :class="{ 'audio-plan-row-wide': plan.deleteBytes > 0 }"
+          >
             <div>
               <dt>预计下载</dt>
               <dd>{{ formatBytes(plan.downloadBytes - plan.cacheHitBytes) }}</dd>
@@ -83,6 +86,10 @@
             <div>
               <dt>安装写入</dt>
               <dd>{{ formatBytes(plan.installBytes) }}</dd>
+            </div>
+            <div v-if="plan.deleteBytes > 0">
+              <dt>删除占用</dt>
+              <dd>{{ formatBytes(plan.deleteBytes) }}</dd>
             </div>
           </div>
           <div class="audio-plan-row audio-plan-row-secondary">
@@ -97,6 +104,12 @@
               <dd>
                 {{ formatBytes(plan.requiredFreeBytes) }} /
                 {{ formatBytes(plan.availableFreeBytes) }}
+              </dd>
+            </div>
+            <div>
+              <dt>空间变更</dt>
+              <dd :class="`space-change-${spaceChangeTone}`">
+                {{ formatSignedBytes(spaceChangeBytes) }}
               </dd>
             </div>
           </div>
@@ -187,6 +200,15 @@ const targetAudioLabel = computed<string>(() => {
     .filter((item) => selectedLanguages.value.includes(item.value))
     .map((item) => item.label)
     .join("、");
+});
+const spaceChangeBytes = computed<number>(() => {
+  if (plan.value === null) return 0;
+  return plan.value.installBytes - plan.value.deleteBytes;
+});
+const spaceChangeTone = computed<"down" | "flat" | "up">(() => {
+  if (spaceChangeBytes.value > 0) return "up";
+  if (spaceChangeBytes.value < 0) return "down";
+  return "flat";
 });
 
 function audioOptionState(language: string): AudioOptionState {
@@ -318,6 +340,11 @@ function formatBytes(bytes: number): string {
     unit = candidate;
   }
   return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
+}
+
+function formatSignedBytes(bytes: number): string {
+  if (bytes === 0) return formatBytes(0);
+  return `${bytes > 0 ? "+" : "-"}${formatBytes(Math.abs(bytes))}`;
 }
 
 watch(
@@ -534,8 +561,12 @@ watch(
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .audio-plan-row-primary.audio-plan-row-wide {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
   .audio-plan-row-secondary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
   }
 
   dt,
@@ -552,6 +583,14 @@ watch(
     color: var(--common-text-title);
     font-weight: 600;
     overflow-wrap: anywhere;
+  }
+
+  dd.space-change-up {
+    color: var(--tgc-od-orange);
+  }
+
+  dd.space-change-down {
+    color: var(--tgc-od-green);
   }
 }
 
