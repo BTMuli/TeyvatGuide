@@ -67,6 +67,28 @@ async function getAllUid(): Promise<Array<number>> {
 }
 
 /**
+ * 获取装备GUID到角色ID的映射
+ * @since Beta v0.11.5
+ * @param uid - 存档UID
+ * @returns 装备GUID到角色ID映射
+ */
+async function getEquipMap(uid: number): Promise<Map<string, number>> {
+  const db = await TGSqlite.getDB();
+  const res = await db.select<Array<Pick<TGApp.Sqlite.UserBag.AvatarRaw, "rid" | "equips">>>(
+    "SELECT rid, equips FROM UserBagAvatar WHERE uid = $1;",
+    [uid],
+  );
+  const map = new Map<string, number>();
+  for (const row of res) {
+    const guids = <Array<string>>JSON.parse(row.equips);
+    for (const guid of guids) {
+      map.set(guid, row.rid);
+    }
+  }
+  return map;
+}
+
+/**
  * 删除指定UID的所有角色数据
  * @since Beta v0.11.5
  * @param uid - 存档UID
@@ -81,6 +103,7 @@ const TSUserBagAvatar = {
   saveYaeData,
   getByUid,
   getAllUid,
+  getEquipMap,
   delUid,
 };
 

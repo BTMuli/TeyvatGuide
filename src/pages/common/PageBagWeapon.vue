@@ -14,6 +14,13 @@
           variant="outlined"
           width="200px"
         />
+        <v-switch
+          v-model="onlyEquipped"
+          color="var(--tgc-od-blue)"
+          density="compact"
+          hide-details
+          label="仅显示已装备"
+        />
       </div>
     </template>
     <template #append>
@@ -66,11 +73,17 @@
         :info="weapon.info"
         :selected="weapon.tb.guid === curWeapon?.tb.guid"
         :tb="weapon.tb"
+        :avatar-id="equipAvatarMap.get(weapon.tb.guid)"
         @select="handleSelect"
       />
     </template>
   </div>
-  <PbWeaponDetail v-if="curWeapon" v-model:show="showDetail" :cur="curWeapon" />
+  <PbWeaponDetail
+    v-if="curWeapon"
+    v-model:show="showDetail"
+    :avatar-id="equipAvatarMap.get(curWeapon.tb.guid)"
+    :cur="curWeapon"
+  />
   <PbWeaponFilter v-model="showFilter" @filter="handleFilter" />
 </template>
 <script lang="ts" setup>
@@ -80,6 +93,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PbWeaponDetail from "@comp/pageBag/pb-weapon-detail.vue";
 import PbWeaponFilter, { type WeaponFilterValue } from "@comp/pageBag/pb-weapon-filter.vue";
 import PbWeaponItem from "@comp/pageBag/pb-weapon-item.vue";
+import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
@@ -104,10 +118,12 @@ const search = ref<string>();
 const curIdx = ref<number>(0);
 const showDetail = ref<boolean>(false);
 const showFilter = ref<boolean>(false);
+const onlyEquipped = ref<boolean>(false);
 const uidList = shallowRef<Array<number>>([]);
 const curWeapon = shallowRef<WeaponInfo>();
 const weaponList = shallowRef<Array<WeaponInfo>>([]);
 const weaponShow = shallowRef<Array<WeaponInfo>>([]);
+const equipAvatarMap = shallowRef<Map<string, number>>(new Map());
 const filterValue = ref<WeaponFilterValue>({
   star: [],
   weaponType: [],
@@ -149,6 +165,16 @@ watch(
   { deep: true },
 );
 
+watch(
+  () => onlyEquipped.value,
+  () => {
+    const renderWeapons = getSelectWeapons();
+    weaponShow.value = sortWeapons(renderWeapons);
+    triggerRef(weaponShow);
+    curIdx.value = 0;
+  },
+);
+
 async function reloadUid(): Promise<void> {
   uidList.value = await TSUserBagWeapon.getAllUid();
   if (uidList.value.includes(Number(account.value.gameUid))) {
@@ -162,6 +188,9 @@ async function reloadUid(): Promise<void> {
 
 function getSelectWeapons(): Array<WeaponInfo> {
   let result = weaponList.value;
+  if (onlyEquipped.value) {
+    result = result.filter((i) => equipAvatarMap.value.has(i.tb.guid));
+  }
   const filter = filterValue.value;
   if (filter.star.length > 0) {
     result = result.filter((i) => filter.star.includes(i.info.star));
@@ -217,6 +246,7 @@ async function loadWeaponList(uid: number): Promise<void> {
     subProp: [],
     locked: null,
   };
+  equipAvatarMap.value = await TSUserBagAvatar.getEquipMap(uid);
   const dList = await TSUserBagWeapon.getWeapon(uid);
   const wList = [];
   for (const weapon of dList) {

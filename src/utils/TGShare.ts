@@ -2549,6 +2549,8 @@ export async function copyToClipboard(buffer: ArrayBuffer): Promise<void> {
  * @since Beta v0.11.5
  */
 const TGShare = <const>{
+  /** html2canvas */
+  canvas: generateShareImg,
   /** modern-screenshot */
   modern: gsiModernScreenshot,
   /** snapdom */

@@ -29,22 +29,41 @@
       <span v-if="props.relic.is_marked">⭐</span>
     </div>
     <div class="pb-ri-level">Lv.{{ props.relic.level - 1 }}</div>
+    <div v-if="props.avatarId !== undefined" class="pb-ri-avatar">
+      <img
+        v-if="avatarStar !== undefined"
+        :src="`/icon/bg/${avatarStar}-Star.webp`"
+        alt="star"
+        class="pb-ri-avatar-bg"
+      />
+      <img :src="`/WIKI/character/${props.avatarId}.webp`" alt="avatar" class="pb-ri-avatar-icon" />
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
 import { getOdStarColor } from "@utils/colorFunc.js";
 import { computed } from "vue";
 
+import { AppCharacterData } from "@/data/index.js";
+
 type PbRelicItemProps = {
   selected: boolean;
   detail: boolean;
   relic: TGApp.Sqlite.UserBag.RelicTable;
+  avatarId?: number;
 };
 
 type PbRelicItemEmits = { select: [v: TGApp.Sqlite.UserBag.RelicTable] };
 
 const props = defineProps<PbRelicItemProps>();
 const emits = defineEmits<PbRelicItemEmits>();
+
+const characterStarMap = new Map<number, number>(
+  AppCharacterData.map((character) => [character.id, character.star]),
+);
+const avatarStar = computed<number | undefined>(() =>
+  props.avatarId === undefined ? undefined : characterStarMap.get(props.avatarId),
+);
 
 function toRelic(): void {
   emits("select", props.relic);
@@ -132,5 +151,24 @@ $pb-ri-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   font-size: 10px;
   line-height: 12px;
   text-align: center;
+}
+
+.pb-ri-avatar {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px 0 0;
+  box-shadow: -1px -1px 4px rgb(0 0 0 / 30%);
+
+  &-bg,
+  &-icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>

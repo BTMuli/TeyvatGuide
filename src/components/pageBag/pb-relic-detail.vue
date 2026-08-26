@@ -1,9 +1,11 @@
 <!-- 圣遗物详情浮窗 -->
 <template>
   <v-navigation-drawer v-model="visible" :location="'right'" :style="{ zIndex: 9 }">
-    <div class="pb-rdt-meta">GUID:{{ props.cur.guid }}</div>
-    <div class="pb-rd-box">
-      <v-icon class="pb-rdt-act" size="16" title="收起" @click="hide()">mdi-close</v-icon>
+    <div ref="shareRef" class="pb-rd-box">
+      <div class="pb-rdt-meta">GUID:{{ props.cur.guid }}</div>
+      <v-icon class="pb-rdt-act" data-html2canvas-ignore size="16" title="收起" @click="hide()"
+        >mdi-close</v-icon
+      >
       <div class="pb-rd-top">
         <div class="pb-rdt-left">
           <img :src="`/icon/bg/${props.cur.brief.star}-Star.webp`" alt="bg" class="pb-rdtl-bg" />
@@ -22,6 +24,28 @@
             </span>
           </div>
         </div>
+        <div v-if="props.avatarId !== undefined" class="pb-rdtl-avatar">
+          <img
+            v-if="avatarStar !== undefined"
+            :src="`/icon/bg/${avatarStar}-Star.webp`"
+            alt="star"
+            class="pb-rdtl-avatar-bg"
+          />
+          <img
+            :src="`/WIKI/character/${props.avatarId}.webp`"
+            alt="avatar"
+            class="pb-rdtl-avatar-icon"
+          />
+        </div>
+        <v-icon
+          class="pb-rdt-share"
+          data-html2canvas-ignore
+          size="12"
+          title="分享"
+          @click="share()"
+        >
+          mdi-share-variant
+        </v-icon>
       </div>
       <div class="pb-rd-props">
         <div class="pb-rdp-main">
@@ -51,15 +75,24 @@
   </v-navigation-drawer>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TGShare from "@utils/TGShare.js";
 import wikiUtils from "@utils/wikiUtils.js";
-import { shallowRef, watch } from "vue";
+import { computed, shallowRef, useTemplateRef, watch } from "vue";
 
-import { wrRelic, wrSet } from "@/data/index.js";
+import { AppCharacterData, wrRelic, wrSet } from "@/data/index.js";
 
-type PbRelicDetailProps = { cur: TGApp.Sqlite.UserBag.RelicTable };
+type PbRelicDetailProps = { cur: TGApp.Sqlite.UserBag.RelicTable; avatarId?: number };
 
 const props = defineProps<PbRelicDetailProps>();
 const visible = defineModel<boolean>("show");
+const shareRef = useTemplateRef<HTMLElement>("shareRef");
+const characterStarMap = new Map<number, number>(
+  AppCharacterData.map((character) => [character.id, character.star]),
+);
+const avatarStar = computed<number | undefined>(() =>
+  props.avatarId === undefined ? undefined : characterStarMap.get(props.avatarId),
+);
 const posInfo = shallowRef<TGApp.App.Relic.RelicItem>();
 const setInfo = shallowRef<TGApp.App.Relic.SetItem>();
 
@@ -75,6 +108,15 @@ function hide(): void {
   visible.value = false;
 }
 
+async function share(): Promise<void> {
+  if (shareRef.value === null) {
+    showSnackbar.error("分享失败，未找到分享元素");
+    return;
+  }
+  const fileName = `圣遗物-${props.cur.brief.name}-${props.cur.guid}`;
+  await TGShare.modern(fileName, shareRef.value, 4);
+}
+
 function loadPosInfo(): void {
   posInfo.value = wrRelic.find(
     (i) => i.pos === props.cur.brief.pos && i.set === props.cur.brief.set,
@@ -86,6 +128,7 @@ function loadPosInfo(): void {
 .pb-rd-box {
   position: relative;
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -130,6 +173,26 @@ function loadPosInfo(): void {
   height: 100%;
 }
 
+.pb-rdtl-avatar {
+  position: absolute;
+  z-index: 2;
+  bottom: -4px;
+  left: 20px;
+  overflow: hidden;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+
+  &-bg,
+  &-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .pb-rdt-right {
   position: relative;
   display: flex;
@@ -170,6 +233,15 @@ function loadPosInfo(): void {
   left: 0;
   margin-left: auto;
   color: var(--tgc-od-red);
+  cursor: pointer;
+}
+
+.pb-rdt-share {
+  position: absolute;
+  z-index: 1;
+  bottom: -4px;
+  left: -6px;
+  color: var(--tgc-od-blue);
   cursor: pointer;
 }
 

@@ -1,9 +1,11 @@
 <!-- 武器详情浮窗 -->
 <template>
   <v-navigation-drawer v-model="visible" :location="'right'" :style="{ zIndex: 9 }">
-    <div class="pb-wdt-meta">GUID:{{ props.cur.tb.guid }}</div>
-    <div class="pb-wd-box">
-      <v-icon class="pb-wdt-act" size="16" title="收起" @click="hide()">mdi-close</v-icon>
+    <div ref="shareRef" class="pb-wd-box">
+      <div class="pb-wdt-meta">GUID:{{ props.cur.tb.guid }}</div>
+      <v-icon class="pb-wdt-act" data-html2canvas-ignore size="16" title="收起" @click="hide()">
+        mdi-close
+      </v-icon>
       <div class="pb-wd-top">
         <div class="pb-wdt-left">
           <img :src="`/icon/bg/${props.cur.info.star}-Star.webp`" alt="bg" class="pb-wdtl-bg" />
@@ -19,6 +21,28 @@
             <span>精炼{{ getAffixLevel() }}</span>
           </div>
         </div>
+        <div v-if="props.avatarId !== undefined" class="pb-wdtl-avatar">
+          <img
+            v-if="avatarStar !== undefined"
+            :src="`/icon/bg/${avatarStar}-Star.webp`"
+            alt="star"
+            class="pb-wdtl-avatar-bg"
+          />
+          <img
+            :src="`/WIKI/character/${props.avatarId}.webp`"
+            alt="avatar"
+            class="pb-wdtl-avatar-icon"
+          />
+        </div>
+        <v-icon
+          class="pb-wdt-share"
+          data-html2canvas-ignore
+          size="12"
+          title="分享"
+          @click="share()"
+        >
+          mdi-share-variant
+        </v-icon>
       </div>
       <div class="pb-wd-stats">
         <div
@@ -42,19 +66,38 @@
   </v-navigation-drawer>
 </template>
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
+import TGShare from "@utils/TGShare.js";
 import { parseHtmlText } from "@utils/toolFunc.js";
 import wikiUtils from "@utils/wikiUtils.js";
-import { computed } from "vue";
+import { computed, useTemplateRef } from "vue";
 
+import { AppCharacterData } from "@/data/index.js";
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
 
-type PbWeaponDetailProps = { cur: WeaponInfo };
+type PbWeaponDetailProps = { cur: WeaponInfo; avatarId?: number };
 
 const props = defineProps<PbWeaponDetailProps>();
 const visible = defineModel<boolean>("show");
+const shareRef = useTemplateRef<HTMLElement>("shareRef");
+const characterStarMap = new Map<number, number>(
+  AppCharacterData.map((character) => [character.id, character.star]),
+);
+const avatarStar = computed<number | undefined>(() =>
+  props.avatarId === undefined ? undefined : characterStarMap.get(props.avatarId),
+);
 
 function hide(): void {
   visible.value = false;
+}
+
+async function share(): Promise<void> {
+  if (shareRef.value === null) {
+    showSnackbar.error("分享失败，未找到分享元素");
+    return;
+  }
+  const fileName = `武器-${props.cur.info.name}-${props.cur.tb.guid}`;
+  await TGShare.modern(fileName, shareRef.value, 4);
 }
 
 function getAffixLevel(): number {
@@ -80,6 +123,7 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
 .pb-wd-box {
   position: relative;
   display: flex;
+  box-sizing: border-box;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -124,6 +168,26 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   height: 100%;
 }
 
+.pb-wdtl-avatar {
+  position: absolute;
+  z-index: 2;
+  bottom: -4px;
+  left: 20px;
+  overflow: hidden;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+
+  &-bg,
+  &-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .pb-wdt-right {
   position: relative;
   display: flex;
@@ -159,12 +223,21 @@ const weaponStats = computed<Array<TGApp.App.Weapon.WeaponProp>>(() => {
   cursor: pointer;
 }
 
+.pb-wdt-share {
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: -6px;
+  color: var(--tgc-od-blue);
+  cursor: pointer;
+}
+
 .pb-wdt-meta {
   position: absolute;
   right: 0;
   bottom: 0;
   color: var(--tgc-od-white);
-  font-size: 10px;
+  font-size: 8px;
 }
 
 .pb-wd-desc {

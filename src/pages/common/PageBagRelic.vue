@@ -14,6 +14,13 @@
           variant="outlined"
           width="200px"
         />
+        <v-switch
+          v-model="onlyEquipped"
+          color="var(--tgc-od-blue)"
+          density="compact"
+          hide-details
+          label="仅显示已装备"
+        />
       </div>
     </template>
     <template #append>
@@ -79,6 +86,7 @@
   <div class="pbr-container">
     <template v-for="relic in visibleRelics" :key="relic.guid">
       <PbRelicItem
+        :avatar-id="equipAvatarMap.get(relic.guid)"
         :detail="showDetail"
         :relic
         :selected="relic.guid === curRelic?.guid"
@@ -87,7 +95,12 @@
     </template>
     <div v-if="hasMoreRelics" ref="loadMoreRef" class="pbr-load-trigger" />
   </div>
-  <PbRelicDetail v-if="curRelic" v-model:show="showDetail" :cur="curRelic" />
+  <PbRelicDetail
+    v-if="curRelic"
+    v-model:show="showDetail"
+    :avatar-id="equipAvatarMap.get(curRelic.guid)"
+    :cur="curRelic"
+  />
   <PbRelicFilter v-model="showFilter" @filter="handleFilter" />
 </template>
 <script lang="ts" setup>
@@ -97,6 +110,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import PbRelicDetail from "@comp/pageBag/pb-relic-detail.vue";
 import PbRelicFilter, { type RelicFilterValue } from "@comp/pageBag/pb-relic-filter.vue";
 import PbRelicItem from "@comp/pageBag/pb-relic-item.vue";
+import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
@@ -122,6 +136,7 @@ const uidList = shallowRef<Array<number>>([]);
 
 const search = ref<string>();
 const showFilter = ref<boolean>(false);
+const onlyEquipped = ref<boolean>(false);
 
 const filterSlot = ref<Array<number>>([]);
 const filterStar = ref<Array<number>>([]);
@@ -137,6 +152,7 @@ const showDetail = ref<boolean>(false);
 const curRelic = shallowRef<TGApp.Sqlite.UserBag.RelicTable>();
 const relicList = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
 const relicShow = shallowRef<Array<TGApp.Sqlite.UserBag.RelicTable>>([]);
+const equipAvatarMap = shallowRef<Map<string, number>>(new Map());
 const isFilterInitialized = ref<boolean>(false);
 const RELIC_RENDER_SIZE: Readonly<number> = 100;
 const renderedCount = ref<number>(RELIC_RENDER_SIZE);
@@ -163,6 +179,16 @@ watch(
   () => curUid.value,
   async () => {
     await loadRelicList(curUid.value);
+  },
+);
+
+watch(
+  () => onlyEquipped.value,
+  () => {
+    relicShow.value = filterRelics(relicList.value);
+    triggerRef(relicShow);
+    curIdx.value = 0;
+    resetRenderedRelics();
   },
 );
 
@@ -202,6 +228,9 @@ function filterRelics(
   data: Array<TGApp.Sqlite.UserBag.RelicTable>,
 ): Array<TGApp.Sqlite.UserBag.RelicTable> {
   let result = data;
+  if (onlyEquipped.value) {
+    result = result.filter((i) => equipAvatarMap.value.has(i.guid));
+  }
   if (filterSlot.value.length > 0) {
     result = result.filter((i) => filterSlot.value.includes(i.brief.pos));
   }
@@ -271,6 +300,7 @@ async function loadRelicList(uid: number): Promise<void> {
   filterLocked.value = null;
   filterMarked.value = null;
   filterGrade.value = [];
+  equipAvatarMap.value = await TSUserBagAvatar.getEquipMap(uid);
   const dList = await TSUserBagRelic.getRelic(uid);
   relicList.value = sortRelics(dList);
   relicShow.value = relicList.value;

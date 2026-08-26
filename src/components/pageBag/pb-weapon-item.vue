@@ -10,6 +10,19 @@
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
       <img :src="`/WIKI/weapon/${props.info.id}.webp`" alt="icon" class="icon" />
       <img :src="`/icon/weapon/${props.info.weapon}.webp`" alt="weapon" class="weapon" />
+      <div v-if="props.avatarId !== undefined" class="pb-wi-avatar">
+        <img
+          v-if="avatarStar !== undefined"
+          :src="`/icon/bg/${avatarStar}-Star.webp`"
+          alt="star"
+          class="pb-wi-avatar-bg"
+        />
+        <img
+          :src="`/WIKI/character/${props.avatarId}.webp`"
+          alt="avatar"
+          class="pb-wi-avatar-icon"
+        />
+      </div>
     </div>
     <div class="pb-wi-right">
       <div class="pb-wi-name">{{ props.info.name }}</div>
@@ -26,6 +39,7 @@
 import { getOdStarColor } from "@utils/colorFunc.js";
 import { computed, shallowRef, watch } from "vue";
 
+import { AppCharacterData } from "@/data/index.js";
 import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
 
 type PbWeaponItemProps = {
@@ -34,6 +48,7 @@ type PbWeaponItemProps = {
   cur?: WeaponInfo;
   selected: boolean;
   detail: boolean;
+  avatarId?: number;
 };
 
 type PbWeaponItemEmits = { select: [v: WeaponInfo] };
@@ -42,6 +57,12 @@ const props = defineProps<PbWeaponItemProps>();
 const emits = defineEmits<PbWeaponItemEmits>();
 
 const item = shallowRef<TGApp.Sqlite.UserBag.WeaponTable>(props.tb);
+const characterStarMap = new Map<number, number>(
+  AppCharacterData.map((character) => [character.id, character.star]),
+);
+const avatarStar = computed<number | undefined>(() =>
+  props.avatarId === undefined ? undefined : characterStarMap.get(props.avatarId),
+);
 
 function toWeapon(): void {
   emits("select", { guid: item.value.guid, tb: item.value, info: props.info });
@@ -170,6 +191,25 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   font-size: 8px;
   font-style: italic;
   opacity: 0.8;
+}
+
+.pb-wi-avatar {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px 0 0;
+  box-shadow: -1px -1px 4px rgb(0 0 0 / 30%);
+
+  &-bg,
+  &-icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .pb-wi-refine {
