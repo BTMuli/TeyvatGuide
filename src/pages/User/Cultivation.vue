@@ -298,6 +298,7 @@ import takumiReq from "@req/takumiReq.js";
 import TSCultivationPlan from "@Sqlm/cultivationPlan.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAvatar from "@Sqlm/userAvatar.js";
+import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import TSUserRecord from "@Sqlm/userRecord.js";
@@ -1036,11 +1037,15 @@ function selectPreferredWeapon(): void {
     return;
   }
   if (options.some((weapon) => weapon.key === selectedWeaponKey.value)) return;
+  const equippedWeaponKey = options.find(
+    (weapon) => weapon.equippedBy === selectedCharacterId.value,
+  )?.key;
   const roleWeaponId = selectedSyncAvatar.value?.weapon.id ?? selectedRole.value?.weapon.id;
   selectedWeaponKey.value =
-    roleWeaponId === undefined
+    equippedWeaponKey ??
+    (roleWeaponId === undefined
       ? null
-      : (options.find((weapon) => weapon.wiki.id === roleWeaponId)?.key ?? null);
+      : (options.find((weapon) => weapon.wiki.id === roleWeaponId)?.key ?? null));
 }
 
 function clearApiResult(): void {
@@ -1500,10 +1505,11 @@ async function requestAllWeapons(
 
 async function loadLocalData(uid: number, requestVersion: number): Promise<void> {
   const previousCharacterId = selectedCharacterId.value;
-  const [roleData, materialData, weaponData] = await Promise.all([
+  const [roleData, materialData, weaponData, equipMap] = await Promise.all([
     TSUserAvatar.getAvatars(uid),
     TSUserBagMaterial.getMaterial(uid),
     TSUserBagWeapon.getWeapon(uid),
+    TSUserBagAvatar.getEquipMap(uid),
   ]);
   if (requestVersion !== dataLoadVersion || useApiCalculation.value) return;
   roles.value = roleData
@@ -1514,7 +1520,7 @@ async function loadLocalData(uid: number, requestVersion: number): Promise<void>
     );
   bagMaterials.value = new Map(materialData.map((material) => [material.id, material.count]));
   bagMaterialDetails.value = new Map(materialData.map((material) => [material.id, material]));
-  weapons.value = buildWeaponOptions(weaponData, roles.value);
+  weapons.value = buildWeaponOptions(weaponData, roles.value, equipMap);
   useBagWeaponSource.value = weapons.value.some((weapon) => weapon.fromBag);
   selectedWeaponKey.value = null;
   selectedCharacterId.value = restoreCharacterSelection(
@@ -2670,9 +2676,17 @@ function createApiWeaponWiki(
   };
 }
 
+/**
+ * 构建武器选项列表
+ * @param bagWeapons - 背包武器数据
+ * @param roleData - 战绩角色数据
+ * @param equipMap - 武器 GUID 到角色 ID 的映射（Yae 本地角色数据）
+ * @returns 武器选项列表
+ */
 function buildWeaponOptions(
   bagWeapons: Array<TGApp.Sqlite.UserBag.WeaponTable>,
   roleData: Array<TGApp.Sqlite.Character.TableTrans>,
+  equipMap?: ReadonlyMap<string, number>,
 ): Array<TGApp.App.UserCalc.WeaponOption> {
   const result: Array<TGApp.App.UserCalc.WeaponOption> = [];
   for (const bagWeapon of bagWeapons) {
@@ -2691,6 +2705,7 @@ function buildWeaponOptions(
       locked: bagWeapon.info.is_locked,
       source: "bag",
       guid: bagWeapon.guid,
+      equippedBy: equipMap?.get(bagWeapon.guid),
     });
   }
   for (const role of roleData) {

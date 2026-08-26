@@ -1,6 +1,6 @@
 /**
  * 用户养成计算相关类型定义文件
- * @since Beta v0.11.2
+ * @since Beta v0.11.5
  */
 
 declare namespace TGApp.App.UserCalc {
@@ -55,7 +55,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 武器选择项
-   * @since Beta v0.11.2
+   * @since Beta v0.11.5
    */
   type WeaponOption = {
     /** 用于区分背包武器和默认武器的唯一键 */
@@ -82,6 +82,8 @@ declare namespace TGApp.App.UserCalc {
     api?: TGApp.Game.Calculate.WeaponListItem;
     /** 背包武器 GUID */
     guid?: string;
+    /** 装备该武器的角色 ID（Yae 本地角色数据） */
+    equippedBy?: number;
   };
 
   /**
