@@ -46,12 +46,20 @@
           </template>
         </v-list-item>
         <!-- 背包物品，包括材料&武器&圣遗物 -->
-        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+        <v-menu v-model="bagMenuOpen" :offset="[8, 0]" :open-on-click="true" location="end">
           <template #activator="{ props }">
             <v-list-item :title.attr="'背包物品'" v-bind="props">
               <template #title>背包物品</template>
               <template #prepend>
-                <img alt="bagIcon" class="side-icon" src="/UI/nav/userBag.webp" />
+                <span class="side-icon-wrap">
+                  <img alt="bagIcon" class="side-icon" src="/UI/nav/userBag.webp" />
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: bagMenuOpen }"
+                    size="12"
+                  />
+                </span>
               </template>
             </v-list-item>
           </template>
@@ -134,12 +142,20 @@
           </template>
         </v-list-item>
         <!-- 高难挑战，包括深渊&剧诗&危战 -->
-        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+        <v-menu v-model="challengeMenuOpen" :offset="[8, 0]" :open-on-click="true" location="end">
           <template #activator="{ props }">
             <v-list-item :title.attr="'高难挑战'" v-bind="props">
               <template #title>高难挑战</template>
               <template #prepend>
-                <img alt="abyssLab" class="side-icon" src="/UI/nav/userAbyssLab.webp" />
+                <span class="side-icon-wrap">
+                  <img alt="abyssLab" class="side-icon" src="/UI/nav/userAbyssLab.webp" />
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: challengeMenuOpen }"
+                    size="12"
+                  />
+                </span>
               </template>
             </v-list-item>
           </template>
@@ -181,12 +197,20 @@
         </v-list-item>
         <v-divider v-show="isDevEnv" />
         <!-- 图鉴 -->
-        <v-menu :offset="[8, 0]" :open-on-click="true" location="end">
+        <v-menu v-model="wikiMenuOpen" :offset="[8, 0]" :open-on-click="true" location="end">
           <template #activator="{ props }">
             <v-list-item :title.attr="'图鉴'" v-bind="props">
               <template #title>图鉴</template>
               <template #prepend>
-                <img alt="wikiIcon" class="side-icon" src="/UI/nav/wikiIcon.webp" />
+                <span class="side-icon-wrap">
+                  <img alt="wikiIcon" class="side-icon" src="/UI/nav/wikiIcon.webp" />
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: wikiMenuOpen }"
+                    size="12"
+                  />
+                </span>
               </template>
             </v-list-item>
           </template>
@@ -234,12 +258,25 @@
       <!-- 底部菜单 -->
       <div class="bottom-menu">
         <!-- 用户菜单 -->
-        <v-menu :open-on-click="true" location="end" @update:model-value="handleUserMenuToggle">
+        <v-menu
+          v-model="userMenuOpen"
+          :open-on-click="true"
+          location="end"
+          @update:model-value="handleUserMenuToggle"
+        >
           <template #activator="{ props }">
             <v-list-item :title.attr="userInfo.nickname" class="thin-spacer" v-bind="props">
               <template #title>{{ userInfo.nickname }}</template>
               <template #prepend>
-                <img :src="userInfo.avatar" alt="userIcon" class="side-icon paimon" />
+                <span class="side-icon-wrap">
+                  <img :src="userInfo.avatar" alt="userIcon" class="side-icon paimon" />
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: userMenuOpen }"
+                    size="12"
+                  />
+                </span>
               </template>
             </v-list-item>
           </template>
@@ -302,10 +339,26 @@
           </v-list>
         </v-menu>
         <!-- 添加账号 -->
-        <v-menu :disabled="isTryLogin" :open-on-click="true" location="end">
+        <v-menu
+          v-model="addAccountMenuOpen"
+          :disabled="isTryLogin"
+          :open-on-click="true"
+          location="end"
+        >
           <template #activator="{ props }">
-            <v-list-item :title.attr="'添加账号'" prepend-icon="mdi-account-plus" v-bind="props">
+            <v-list-item :title.attr="'添加账号'" v-bind="props">
               <template #title>添加账号</template>
+              <template #prepend>
+                <span class="side-icon-wrap">
+                  <v-icon class="side-icon">mdi-account-plus</v-icon>
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: addAccountMenuOpen }"
+                    size="12"
+                  />
+                </span>
+              </template>
             </v-list-item>
           </template>
           <v-list :nav="true" class="side-list-menu" density="compact">
@@ -335,14 +388,26 @@
         <!-- 切换账号 -->
         <v-menu
           v-if="isLogin"
+          v-model="switchAccountMenuOpen"
           :disabled="isTryLogin"
           :open-on-click="true"
           location="end"
           @update:model-value="handleGameAccountToggle"
         >
           <template #activator="{ props }">
-            <v-list-item :title.attr="'切换账号'" prepend-icon="mdi-account-switch" v-bind="props">
+            <v-list-item :title.attr="'切换账号'" v-bind="props">
               <v-list-item-title>切换账号</v-list-item-title>
+              <template #prepend>
+                <span class="side-icon-wrap">
+                  <v-icon class="side-icon">mdi-account-switch</v-icon>
+                  <v-icon
+                    class="side-expand-icon"
+                    icon="mdi-chevron-right"
+                    :class="{ active: switchAccountMenuOpen }"
+                    size="12"
+                  />
+                </span>
+              </template>
             </v-list-item>
           </template>
           <v-list :nav="true" class="side-list-menu">
@@ -419,6 +484,12 @@ const isWindows = platform() === "windows";
 const showFollow = ref<boolean>();
 const showLoginQr = ref<boolean>(false);
 const isTryLogin = ref<boolean>(false);
+const bagMenuOpen = ref<boolean>(false);
+const challengeMenuOpen = ref<boolean>(false);
+const wikiMenuOpen = ref<boolean>(false);
+const userMenuOpen = ref<boolean>(false);
+const addAccountMenuOpen = ref<boolean>(false);
+const switchAccountMenuOpen = ref<boolean>(false);
 const allGameAc = shallowRef<Array<TGApp.Sqlite.Account.Game>>([]);
 
 const rail = computed<boolean>({
@@ -1005,6 +1076,37 @@ async function handleLaunchGame(): Promise<void> {
 
   &:hover {
     transform: scale(1.15);
+  }
+}
+
+.side-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.side-expand-icon {
+  position: absolute;
+  bottom: -4px;
+  left: -5px;
+  width: 14px;
+  min-width: 14px;
+  max-width: 14px;
+  height: 14px;
+  min-height: 14px;
+  max-height: 14px;
+  flex-shrink: 0;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-1);
+  color: var(--app-side-content);
+  transition: transform 0.2s ease;
+
+  &.active {
+    transform: rotate(90deg);
   }
 }
 
