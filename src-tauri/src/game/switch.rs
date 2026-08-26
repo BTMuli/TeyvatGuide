@@ -1,8 +1,8 @@
 //! 国服官服与国服 B 服同资源家族渠道转换。
 //!
-//! 评估阶段只写 `switch/<installation-id>/plan.json`。执行阶段先把 SDK zip 写入
-//! `cache/sdks/<md5>`，安全解压到任务 staging 并按 `sdk_pkg_version` 校验，再复用写前
-//! journal 提交文件，最后才改 `channel/sub_channel`。
+//! 评估阶段只写 `switch/<installation-id>/plan.json`。目标渠道存在 SDK 时，执行阶段先把
+//! SDK zip 写入 `cache/sdks/<md5>`，安全解压到任务 staging 并按 `sdk_pkg_version` 校验，
+//! 再复用写前 journal 提交文件，最后才改 `channel/sub_channel`。
 //! @since Beta v0.11.5
 
 use super::{
@@ -68,6 +68,7 @@ pub(crate) struct PersistedSwitchPlan {
   target_channel: u32,
   target_sub_channel: u32,
   sdk: Option<PersistedSdk>,
+  /// 兼容已持久化的 v1 计划；来源 SDK 不参与当前换服任务。
   source_sdk: Option<PersistedSdk>,
   delete_files: Vec<String>,
   created_at: String,
@@ -144,9 +145,8 @@ pub(crate) async fn create_and_persist_switch_plan(
   }
   let (target_channel, target_sub_channel) = canonical_channel(target_scheme);
   let client = super::hoyoplay::create_http_client()?;
-  let (target_sdk, source_sdk, deprecated, inventory) = tokio::try_join!(
+  let (target_sdk, deprecated, inventory) = tokio::try_join!(
     get_channel_sdk(&client, target_scheme),
-    get_channel_sdk(&client, source_scheme),
     get_deprecated_files(&client, target_scheme),
     async { load_verify_target(installation, branches).await.map(|(_, inventory)| inventory) },
   )?;
@@ -154,8 +154,8 @@ pub(crate) async fn create_and_persist_switch_plan(
   let inventory_names = inventory.into_iter().map(|file| file.name).collect::<HashSet<_>>();
   let delete_files =
     collect_delete_files(&game_root, &deprecated, &inventory_names, target_sdk.is_none())?;
-  let cached_sdk = target_sdk.as_ref().or(source_sdk.as_ref());
-  let cache_hit_bytes = cached_sdk.map(|package| sdk_cache_hit(task_root, package)).unwrap_or(0);
+  let cache_hit_bytes =
+    target_sdk.as_ref().map(|package| sdk_cache_hit(task_root, package)).unwrap_or(0);
   let download_bytes = target_sdk
     .as_ref()
     .map(|package| package.size.saturating_sub(sdk_cache_hit(task_root, package)))
@@ -178,7 +178,7 @@ pub(crate) async fn create_and_persist_switch_plan(
     target_channel,
     target_sub_channel,
     sdk: target_sdk.as_ref().map(persisted_sdk),
-    source_sdk: source_sdk.as_ref().map(persisted_sdk),
+    source_sdk: None,
     delete_files: delete_files.clone(),
     created_at: Utc::now().to_rfc3339(),
   };
@@ -193,7 +193,7 @@ pub(crate) async fn create_and_persist_switch_plan(
     target_channel,
     target_sub_channel,
     sdk_required: target_sdk.is_some(),
-    sdk_version: target_sdk.as_ref().or(source_sdk.as_ref()).map(|package| package.version.clone()),
+    sdk_version: target_sdk.as_ref().map(|package| package.version.clone()),
     download_bytes,
     install_bytes,
     cache_hit_bytes,
@@ -248,7 +248,7 @@ pub(crate) fn switch_plan_digest(plan: &PersistedSwitchPlan) -> Result<String, S
   Ok(sha256_bytes(&bytes))
 }
 
-/// 下载并解压渠道 SDK，生成可提交的写前步骤；不会修改游戏目录。
+/// 下载并解压目标渠道 SDK（若有），生成可提交的写前步骤；不会修改游戏目录。
 pub(crate) async fn prepare_switch_commit<F>(
   client: &reqwest::Client,
   installation: &GameInstallation,
@@ -263,7 +263,7 @@ where
   F: FnMut(&TaskJournal) -> Result<(), String>,
 {
   validate_switch_installation(installation, plan)?;
-  let packages = unique_sdk_packages(plan);
+  let packages = target_sdk_packages(plan);
   for (index, package) in packages.iter().enumerate() {
     let label = format!("下载渠道 SDK {}/{}：{}", index + 1, packages.len(), package.version);
     journal.state = super::model::PackageTaskState::Downloading;
@@ -420,7 +420,7 @@ pub(crate) fn load_or_create_switch_journal(
     persist_task_switch_plan(task_root, plan)?;
     return Ok(journal);
   }
-  let packages = unique_sdk_packages(plan);
+  let packages = target_sdk_packages(plan);
   let journal = TaskJournal::from_switch(
     plan.plan_id.clone(),
     plan.installation_id.clone(),
@@ -557,15 +557,8 @@ fn validate_switch_installation(
   Ok(())
 }
 
-fn unique_sdk_packages(plan: &PersistedSwitchPlan) -> Vec<PersistedSdk> {
-  let mut packages = Vec::new();
-  let mut seen = HashSet::new();
-  for package in [&plan.source_sdk, &plan.sdk].into_iter().flatten() {
-    if seen.insert(package.md5.to_ascii_lowercase()) {
-      packages.push(package.clone());
-    }
-  }
-  packages
+fn target_sdk_packages(plan: &PersistedSwitchPlan) -> Vec<PersistedSdk> {
+  plan.sdk.iter().cloned().collect()
 }
 
 fn record_switch_cache(journal: &mut TaskJournal, task_root: &Path, packages: &[PersistedSdk]) {
