@@ -1798,6 +1798,15 @@ impl GamePackageManager {
     task_root: &Path,
     installation_id: Option<&str>,
   ) -> Result<Vec<PackageTaskSummary>, String> {
+    let journals = journal::list(task_root, installation_id)?;
+    self.list_from_journals(journals, installation_id).await
+  }
+
+  async fn list_from_journals(
+    &self,
+    journals: Vec<TaskJournal>,
+    installation_id: Option<&str>,
+  ) -> Result<Vec<PackageTaskSummary>, String> {
     let live_ids = {
       let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
@@ -1805,7 +1814,7 @@ impl GamePackageManager {
       ids
     };
     let mut summaries = HashMap::new();
-    for mut journal in journal::list(task_root, installation_id)? {
+    for mut journal in journals {
       let interrupted = journal.state.is_active() && !live_ids.contains(&journal.task_id);
       let _elapsed_frozen = interrupted && journal.freeze_elapsed_at_updated_at();
       let abandoned_download = interrupted
@@ -1836,6 +1845,30 @@ impl GamePackageManager {
     let mut summaries = summaries.into_values().collect::<Vec<_>>();
     summaries.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
     Ok(summaries)
+  }
+
+  pub(crate) async fn cleanup_and_list(
+    &self,
+    task_root: &Path,
+    installation_id: Option<&str>,
+    max_age: Option<ChronoDuration>,
+  ) -> Result<Vec<PackageTaskSummary>, String> {
+    let active_ids = {
+      let active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      let mut ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
+      ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
+      ids
+    };
+    let journals = journal::list(task_root, None)
+      .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
+    let (_, journals) =
+      journal::cleanup_terminal_tasks_from_journals(task_root, &active_ids, max_age, journals)
+        .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
+    let journals = journals
+      .into_iter()
+      .filter(|journal| installation_id.is_none_or(|id| id == journal.installation_id))
+      .collect();
+    self.list_from_journals(journals, installation_id).await
   }
 
   pub(crate) fn cleanup_tasks(

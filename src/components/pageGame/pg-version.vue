@@ -687,7 +687,7 @@ async function handleRecoverRequested(
 }
 
 watch(
-  () => [installation.id, installation.version],
+  [() => installation.id, () => installation.version],
   () => {
     clearVerifyHideTimer();
     verifyStopping.value = false;
@@ -699,10 +699,13 @@ watch(
 );
 
 watch(
-  () => [currentTask.value?.taskId, currentTask.value?.state],
-  ([taskId, state]) => {
-    if (taskId !== undefined && state === gameEnum.package.taskState.COMPLETED) {
-      void loadSnapshot(false);
+  [() => currentTask.value?.taskId, () => currentTask.value?.state],
+  ([taskId, state], [previousTaskId, previousState]) => {
+    if (
+      taskId !== undefined &&
+      state === gameEnum.package.taskState.COMPLETED &&
+      (taskId !== previousTaskId || previousState !== gameEnum.package.taskState.COMPLETED)
+    ) {
       emit("updated");
     }
   },

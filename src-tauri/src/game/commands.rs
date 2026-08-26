@@ -21,7 +21,7 @@ use super::{
   },
   switch::{self, create_and_persist_switch_plan},
 };
-use chrono::{Duration as ChronoDuration, Utc};
+use chrono::Utc;
 use serde::Serialize;
 use sqlx::Row;
 use std::{
@@ -998,9 +998,8 @@ pub async fn game_package_task_list(
 ) -> Result<Vec<PackageTaskSummary>, String> {
   let task_root = game_task_root(&app_handle)?;
   manager
-    .cleanup_tasks(&task_root, Some(ChronoDuration::days(7)))
-    .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
-  manager.list(&task_root, installation_id.as_deref()).await
+    .cleanup_and_list(&task_root, installation_id.as_deref(), Some(chrono::Duration::days(7)))
+    .await
 }
 
 /// 清理所有已结束且不再运行的资源任务日志，不触碰缓存内容或未完成任务。

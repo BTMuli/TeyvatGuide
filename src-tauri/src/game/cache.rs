@@ -21,10 +21,18 @@ pub(crate) enum CacheClearTarget {
 
 /// 统计 `cache/chunks` 与 `cache/sdks` 的文件数和占用。
 pub(crate) fn status(task_root: &Path) -> Result<PackageCacheSummary, String> {
+  let journals = journal::list(task_root, None)?;
+  status_with_journals(task_root, &journals)
+}
+
+fn status_with_journals(
+  task_root: &Path,
+  journals: &[journal::TaskJournal],
+) -> Result<PackageCacheSummary, String> {
   let chunk_protected =
-    journal::protected_cache_files_for_target(task_root, Some(CacheClearTarget::Chunks))?;
+    journal::protected_cache_files_for_target(journals, Some(CacheClearTarget::Chunks));
   let sdk_protected =
-    journal::protected_cache_files_for_target(task_root, Some(CacheClearTarget::Sdk))?;
+    journal::protected_cache_files_for_target(journals, Some(CacheClearTarget::Sdk));
   let chunk = summarize_dir(&task_root.join("cache/chunks"), &chunk_protected)?;
   let sdk = summarize_dir(&task_root.join("cache/sdks"), &sdk_protected)?;
   let total_bytes = chunk.total_bytes.saturating_add(sdk.total_bytes);
@@ -58,12 +66,13 @@ where
   if target != CacheClearTarget::Sdk && is_game_running() {
     return Err("游戏仍在运行，请先关闭游戏后再清理缓存".to_string());
   }
+  let journals = journal::list(task_root, None)?;
   if (target != CacheClearTarget::Sdk && has_running_tasks)
-    || journal::blocks_cache_clear(task_root, target)?
+    || journal::blocks_cache_clear(&journals, target)
   {
     return Err("还有任务正在使用这类缓存，请等待任务完成后再清理".to_string());
   }
-  let protected = journal::protected_cache_files_for_target(task_root, Some(target))?;
+  let protected = journal::protected_cache_files_for_target(&journals, Some(target));
   let total = match target {
     CacheClearTarget::Chunks => count_dir_files(&task_root.join("cache/chunks"))?,
     CacheClearTarget::Sdk => count_dir_files(&task_root.join("cache/sdks"))?,
@@ -89,7 +98,7 @@ where
       clear_cache_validation_index(&task_root.join("cache/chunks"));
     }
   }
-  status(task_root)
+  status_with_journals(task_root, &journals)
 }
 
 fn count_dir_files(path: &Path) -> Result<usize, String> {

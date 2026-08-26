@@ -149,6 +149,8 @@ const installations = ref<Array<TGApp.Game.Installation.Item>>([]);
 const installationsLoading = ref<boolean>(true);
 const installDrafts = ref<Array<TGApp.Game.Installation.InstallDraftSummary>>([]);
 let pageActive = true;
+let pageDataRefreshPromise: Promise<void> | null = null;
+let pageDataRefreshRequested = false;
 
 const chosen = computed<TGApp.Game.Installation.Item | null>(() => {
   return installations.value.find((installation) => installation.isChosen) ?? null;
@@ -272,7 +274,20 @@ async function refreshInstallDrafts(): Promise<void> {
 }
 
 async function refreshPageData(): Promise<void> {
-  await Promise.all([refreshRegistered(), refreshInstallDrafts()]);
+  pageDataRefreshRequested = true;
+  if (pageDataRefreshPromise !== null) return pageDataRefreshPromise;
+  pageDataRefreshPromise = (async () => {
+    await Promise.resolve();
+    try {
+      while (pageActive && pageDataRefreshRequested) {
+        pageDataRefreshRequested = false;
+        await Promise.all([refreshRegistered(), refreshInstallDrafts()]);
+      }
+    } finally {
+      pageDataRefreshPromise = null;
+    }
+  })();
+  return pageDataRefreshPromise;
 }
 
 async function handleInstallTaskCancel(task: TGApp.Game.Package.TaskSummary): Promise<void> {
@@ -337,9 +352,10 @@ async function handleInstallTaskRecover(
   }
   try {
     const updated = await taskStore.recoverInstall(task.taskId, task.installationId, action);
-    if (updated.state === gameEnum.package.taskState.COMPLETED) await refreshPageData();
-    if (deleting) {
+    if (updated.state === gameEnum.package.taskState.COMPLETED || deleting) {
       await refreshPageData();
+    }
+    if (deleting) {
       showSnackbar.info("安装任务已删除，已发布的游戏目录保留");
     }
   } catch (error) {

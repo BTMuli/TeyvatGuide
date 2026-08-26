@@ -783,10 +783,10 @@ pub(crate) fn has_incomplete_tasks(
 
 /// 按缓存类型判断是否存在仍可能使用目标缓存的任务。
 pub(crate) fn blocks_cache_clear(
-  task_root: &Path,
+  journals: &[TaskJournal],
   target: super::cache::CacheClearTarget,
-) -> Result<bool, String> {
-  Ok(list(task_root, None)?.iter().any(|journal| {
+) -> bool {
+  journals.iter().any(|journal| {
     let relevant = match target {
       super::cache::CacheClearTarget::Sdk => journal.target == PackagePlanTarget::Switch,
       super::cache::CacheClearTarget::Chunks => journal.target != PackagePlanTarget::Switch,
@@ -797,16 +797,16 @@ pub(crate) fn blocks_cache_clear(
         || journal.state.requires_recovery()
         || journal.state == PackageTaskState::Paused
         || journal.state == PackageTaskState::RepairRequired)
-  }))
+  })
 }
 
 /// 尚未结束的任务声明拥有、清理时必须保留的缓存键。
 pub(crate) fn protected_cache_files_for_target(
-  task_root: &Path,
+  journals: &[TaskJournal],
   target: Option<super::cache::CacheClearTarget>,
-) -> Result<HashSet<String>, String> {
+) -> HashSet<String> {
   let mut keys = HashSet::new();
-  for journal in list(task_root, None)? {
+  for journal in journals {
     if matches!(
       journal.state,
       PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
@@ -822,7 +822,7 @@ pub(crate) fn protected_cache_files_for_target(
       _ => keys.extend(journal.owned_cache_files.iter().cloned()),
     }
   }
-  Ok(keys)
+  keys
 }
 
 pub(crate) fn cleanup_terminal_tasks(
@@ -830,10 +830,22 @@ pub(crate) fn cleanup_terminal_tasks(
   active_ids: &HashSet<String>,
   max_age: Option<Duration>,
 ) -> Result<super::model::PackageTaskCleanupSummary, String> {
+  let journals = list(task_root, None)?;
+  cleanup_terminal_tasks_from_journals(task_root, active_ids, max_age, journals)
+    .map(|(summary, _)| summary)
+}
+
+pub(crate) fn cleanup_terminal_tasks_from_journals(
+  task_root: &Path,
+  active_ids: &HashSet<String>,
+  max_age: Option<Duration>,
+  journals: Vec<TaskJournal>,
+) -> Result<(super::model::PackageTaskCleanupSummary, Vec<TaskJournal>), String> {
   let now = Utc::now();
   let mut removed_count = 0;
   let mut removed_bytes = 0_u64;
-  for journal in list(task_root, None)? {
+  let mut retained = Vec::with_capacity(journals.len());
+  for journal in journals {
     if active_ids.contains(&journal.task_id)
       || !matches!(
         journal.state,
@@ -845,19 +857,21 @@ pub(crate) fn cleanup_terminal_tasks(
           .unwrap_or(true)
       })
     {
+      retained.push(journal);
       continue;
     }
     let directory = task_root.join("tasks").join(&journal.task_id);
     let metadata = fs::symlink_metadata(&directory)
       .map_err(|error| format!("读取游戏资源任务目录失败：{error}"))?;
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
+      retained.push(journal);
       continue;
     }
     removed_bytes = removed_bytes.saturating_add(directory_bytes(&directory)?);
     fs::remove_dir_all(&directory).map_err(|error| format!("清理过期游戏资源任务失败：{error}"))?;
     removed_count += 1;
   }
-  Ok(super::model::PackageTaskCleanupSummary { removed_count, removed_bytes })
+  Ok((super::model::PackageTaskCleanupSummary { removed_count, removed_bytes }, retained))
 }
 
 fn directory_bytes(path: &Path) -> Result<u64, String> {

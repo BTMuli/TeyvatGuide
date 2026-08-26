@@ -125,10 +125,10 @@ const errorMessage = ref<string | null>(null);
 let statusBusy = false;
 let statusQueued = false;
 
-const taskSignature = computed<string>(() => {
+const taskStateSignature = computed<string>(() => {
   const parts: Array<string> = [];
   for (const task of Object.values(tasksByInstallation.value)) {
-    parts.push(`${task.taskId}:${task.state}:${task.completedCount}:${task.downloadedBytes}`);
+    parts.push(`${task.taskId}:${task.state}`);
   }
   return parts.join("|");
 });
@@ -249,7 +249,7 @@ onMounted(() => {
   void refreshStatus();
 });
 
-watch(taskSignature, (signature) => {
+watch(taskStateSignature, (signature) => {
   const timer = window.setTimeout(
     () => {
       void refreshStatus(false, true);
