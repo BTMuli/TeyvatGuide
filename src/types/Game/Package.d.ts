@@ -193,6 +193,10 @@ declare namespace TGApp.Game.Package {
     commitCurrentStep: string | null;
     verificationCompletedCount: number;
     verificationTotalCount: number;
+    /** 当前复验阶段已经确认的文件字节数。 */
+    verificationCompletedBytes: number;
+    /** 当前复验阶段需要确认的文件总字节数。 */
+    verificationTotalBytes: number;
     spoolBytes: number;
     releasedBytes: number;
     assemblyCompletedBytesTotal: number;

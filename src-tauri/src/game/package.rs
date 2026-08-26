@@ -1034,6 +1034,7 @@ impl GamePackageManager {
     }
 
     let mut journal = journal::load_or_create(&task_root, &plan)?;
+    journal.ensure_update_commit_progress(&plan);
     if journal.state.blocks_launch() {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
@@ -1567,7 +1568,11 @@ impl GamePackageManager {
     if is_game_running() {
       return Err("游戏仍在运行，无法应用资源更新".to_string());
     }
-    let journal_value = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?;
+    let mut journal_value = journal::load(&journal::journal_path(&task_root, &plan.plan_id))?;
+    if journal_value.ensure_update_commit_progress(&plan) {
+      journal_value.touch();
+      journal::persist(&task_root, &journal_value)?;
+    }
     let can_apply = journal_value.state == PackageTaskState::ReadyToApply;
     let can_repair = journal_value.repair.is_some()
       && matches!(

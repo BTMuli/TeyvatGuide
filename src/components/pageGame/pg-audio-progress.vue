@@ -1,67 +1,21 @@
 <!-- 配音包资源变更流水线的下载、组装、提交与总进度 -->
 <template>
-  <section :class="{ embedded }" class="audio-progress" aria-label="配音包资源进度">
-    <div v-if="!embedded" class="audio-progress-status">
-      <span :class="captionTone">{{ caption }}</span>
-      <div class="audio-progress-actions">
-        <slot name="actions" />
-      </div>
-    </div>
-
-    <div v-if="showProgressBar" class="audio-progress-rows" aria-live="polite">
+  <PgTaskProgressRows
+    ariaLabel="配音包资源进度"
+    :caption
+    :captionTone
+    :embedded
+    :errorMessage="task.errorMessage"
+    :rows="progressRows"
+    :showRows="showProgressBar"
+  >
+    <template #actions>
+      <slot name="actions" />
+    </template>
+    <template #beforeRows>
       <PgAudioThroughput v-if="!prepComplete" :task />
-      <div v-for="row in progressRows" :key="row.label" class="audio-progress-row">
-        <div class="audio-progress-row-head">
-          <div class="audio-progress-row-label">
-            <span>{{ row.label }}</span>
-            <span
-              v-if="row.status !== null"
-              :class="{ 'audio-progress-complete': row.complete }"
-              class="audio-progress-row-status"
-              :title="row.status"
-            >
-              {{ row.status }}
-            </span>
-          </div>
-          <strong>{{ row.percent.toFixed(0) }}%</strong>
-        </div>
-        <v-progress-linear
-          :indeterminate="row.indeterminate"
-          :model-value="row.percent"
-          color="var(--tgc-od-orange)"
-          height="8"
-          rounded
-        />
-        <div class="audio-progress-row-facts">
-          <span v-for="detail in row.details" :key="detail">{{ detail }}</span>
-          <span v-if="row.downloadObjectStatus !== null" class="audio-progress-download-activity">
-            <span>{{ row.downloadObjectStatus }}</span>
-            <span
-              v-if="row.activeAssemblyCount > 0"
-              :aria-label="`正在组装 ${row.activeAssemblyCount} 个资源`"
-              class="audio-progress-assembly-slots"
-              role="img"
-              :title="`正在组装 ${row.activeAssemblyCount} 个资源`"
-            >
-              <span
-                v-for="slot in row.activeAssemblyCount"
-                :key="slot"
-                aria-hidden="true"
-                class="audio-progress-assembly-slot"
-              />
-            </span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <p
-      v-if="!embedded && task.errorMessage !== null && task.errorMessage !== caption"
-      class="audio-progress-error"
-    >
-      {{ task.errorMessage }}
-    </p>
-  </section>
+    </template>
+  </PgTaskProgressRows>
 </template>
 
 <script lang="ts" setup>
@@ -69,6 +23,7 @@ import gameEnum from "@enum/game.js";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import PgAudioThroughput from "./pg-audio-throughput.vue";
+import PgTaskProgressRows from "./pg-task-progress-rows.vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
@@ -305,134 +260,3 @@ function formatElapsed(milliseconds: number): string {
   return `${seconds} 秒`;
 }
 </script>
-
-<style lang="scss" scoped>
-.audio-progress {
-  display: grid;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-2);
-  gap: 8px;
-
-  &.embedded {
-    padding: 0;
-    border: 0;
-    background: transparent;
-  }
-}
-
-.audio-progress-status,
-.audio-progress-row-head {
-  display: flex;
-  align-items: center;
-  color: var(--box-text-2);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.audio-progress-status {
-  gap: 8px;
-
-  .warn {
-    color: var(--tgc-od-orange);
-  }
-
-  .err {
-    color: var(--tgc-od-red);
-  }
-}
-
-.audio-progress-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 4px;
-
-  &:empty {
-    display: none;
-  }
-}
-
-.audio-progress-rows {
-  display: grid;
-  gap: 10px;
-}
-
-.audio-progress-row {
-  display: grid;
-  gap: 4px;
-}
-
-.audio-progress-row-head {
-  justify-content: space-between;
-}
-
-.audio-progress-row-label {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-}
-
-.audio-progress-row-status {
-  overflow: hidden;
-  min-width: 0;
-  color: var(--common-text-title);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.audio-progress-complete {
-  color: var(--tgc-od-green);
-}
-
-.audio-progress-row-head strong {
-  flex-shrink: 0;
-  color: var(--common-text-title);
-  font-weight: normal;
-}
-
-.audio-progress-row-facts {
-  display: flex;
-  flex-wrap: wrap;
-  color: var(--box-text-2);
-  font-size: 11px;
-  gap: 4px 12px;
-  line-height: 15px;
-}
-
-.audio-progress-download-activity {
-  display: inline-flex;
-  min-height: 16px;
-  align-items: center;
-  gap: 4px;
-  line-height: 16px;
-}
-
-.audio-progress-assembly-slots {
-  display: inline-flex;
-  max-width: 160px;
-  min-height: 16px;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  line-height: 0;
-  vertical-align: middle;
-}
-
-.audio-progress-assembly-slot {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--tgc-od-green);
-}
-
-.audio-progress-error {
-  margin: 0;
-  color: var(--tgc-od-red);
-  font-size: 12px;
-  line-height: 16px;
-}
-</style>

@@ -6,28 +6,7 @@
         <span>安装任务</span>
         <strong>{{ task.targetTag }}</strong>
       </div>
-      <v-chip :color="stateColor" size="small" variant="tonal">
-        {{ caption }}
-      </v-chip>
-    </div>
-
-    <div class="install-task-config">
-      <div class="install-task-config-item">
-        <span>渠道</span>
-        <strong>{{ gameEnum.installation.schemeDesc(task.targetScheme) }}</strong>
-      </div>
-      <div class="install-task-config-item">
-        <span>语音包</span>
-        <strong>{{ audioLabel }}</strong>
-      </div>
-      <div class="install-task-config-item install-task-config-wide">
-        <span>安装目录</span>
-        <strong>{{ task.installRoot ?? "未记录" }}</strong>
-      </div>
-    </div>
-
-    <PgInstallProgress :task>
-      <template #actions>
+      <div class="install-task-heading-actions">
         <v-btn
           v-if="failed"
           :disabled="actionPending"
@@ -88,28 +67,47 @@
           v-if="resumable && !failed"
           :disabled="actionPending"
           :loading="actionPending"
-          aria-label="继续安装"
-          density="compact"
-          icon="mdi-play-circle-outline"
+          prepend-icon="mdi-play-circle-outline"
           size="small"
-          title="继续安装"
           variant="text"
           @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
-        />
+        >
+          继续安装
+        </v-btn>
         <v-btn
           v-if="canAbandon && !failed"
           :disabled="actionPending"
           :loading="actionPending"
-          aria-label="放弃安装任务"
-          density="compact"
-          icon="mdi-delete-outline"
+          class="install-task-abandon"
+          prepend-icon="mdi-delete-outline"
           size="small"
-          title="放弃安装任务"
           variant="text"
           @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
-        />
-      </template>
-    </PgInstallProgress>
+        >
+          放弃安装
+        </v-btn>
+      </div>
+      <v-chip :color="stateColor" size="small" variant="tonal">
+        {{ caption }}
+      </v-chip>
+    </div>
+
+    <div class="install-task-config">
+      <div class="install-task-config-item">
+        <span>渠道</span>
+        <strong>{{ gameEnum.installation.schemeDesc(task.targetScheme) }}</strong>
+      </div>
+      <div class="install-task-config-item">
+        <span>语音包</span>
+        <strong>{{ audioLabel }}</strong>
+      </div>
+      <div class="install-task-config-item install-task-config-wide">
+        <span>安装目录</span>
+        <strong>{{ task.installRoot ?? "未记录" }}</strong>
+      </div>
+    </div>
+
+    <PgInstallProgress :task />
 
     <PgNotice
       v-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
@@ -214,6 +212,7 @@ const canAbandon = computed<boolean>(() => {
 
 .install-task-heading {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -222,6 +221,15 @@ const canAbandon = computed<boolean>(() => {
     flex-shrink: 0;
     align-self: center;
   }
+}
+
+.install-task-heading-actions {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
 .install-task-config {
@@ -293,7 +301,16 @@ const canAbandon = computed<boolean>(() => {
   color: var(--tgc-od-red);
 }
 
+.install-task-abandon {
+  color: var(--tgc-od-red);
+}
+
 @media (width <= 640px) {
+  .install-task-heading-actions {
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+
   .install-task-config {
     grid-template-columns: 1fr;
   }

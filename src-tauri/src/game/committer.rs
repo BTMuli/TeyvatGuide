@@ -121,6 +121,7 @@ where
   let audio_preassembled = plan.target == PackagePlanTarget::Audio
     && evidence::trusted_asset_indices(task_root, plan, &incoming_root)?.len() == plan.assets.len();
   reset_audio_commit_progress(plan, journal);
+  journal.reset_update_commit_progress(plan);
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
   if audio_preassembled {
@@ -191,14 +192,33 @@ where
     if plan.target == PackagePlanTarget::Audio {
       journal.verification_completed_count = 0;
       journal.verification_total_count = plan.assets.len().saturating_add(plan.delete_files.len());
+      journal.verification_completed_bytes = 0;
+      journal.verification_total_bytes = plan.assets.iter().map(|asset| asset.size).sum();
       journal.commit_current_step =
         Some(format!("校验配音文件 0/{}", journal.verification_total_count));
+    } else {
+      let (single_pass_count, single_pass_bytes) = inventory_verification_totals(plan);
+      journal.verification_completed_count = 0;
+      journal.verification_total_count = single_pass_count.saturating_mul(2);
+      journal.verification_completed_bytes = 0;
+      journal.verification_total_bytes = single_pass_bytes.saturating_mul(2);
     }
     persist_and_emit(task_root, journal, &emit)?;
     if plan.target == PackagePlanTarget::Audio {
       verify_changed_files(plan, game_root, journal, canceled, &emit)?;
     } else {
-      let issues = inspect_inventory(plan, game_root, canceled)?;
+      let issues = inspect_inventory_with_journal_progress(
+        plan,
+        game_root,
+        journal,
+        task_root,
+        canceled,
+        &emit,
+        0,
+        0,
+        inventory_verification_totals(plan).0.saturating_mul(2),
+        inventory_verification_totals(plan).1.saturating_mul(2),
+      )?;
       if let Some(error) = commit_integrity_error(plan, &issues) {
         return Err(error);
       }
@@ -217,7 +237,18 @@ where
     }
     commit_version(plan, game_root, task_root, journal, &emit)?;
     if plan.target != PackagePlanTarget::Audio {
-      verify_inventory(plan, game_root, canceled)?;
+      verify_inventory_with_journal_progress(
+        plan,
+        game_root,
+        journal,
+        task_root,
+        canceled,
+        &emit,
+        inventory_verification_totals(plan).0,
+        inventory_verification_totals(plan).1,
+        inventory_verification_totals(plan).0.saturating_mul(2),
+        inventory_verification_totals(plan).1.saturating_mul(2),
+      )?;
     }
     journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
       PackageTaskState::RegistrationPending
@@ -269,6 +300,7 @@ where
   {
     return Err("修复计划与当前资源任务不匹配".to_string());
   }
+  journal.ensure_update_commit_progress(plan);
   let incoming_bytes = repair_plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "修复空间需求溢出".to_string())
   })?;
@@ -323,9 +355,31 @@ where
     journal.state = PackageTaskState::Verifying;
     journal.current_file = Some("校验目标清单".to_string());
     persist_and_emit(task_root, journal, &emit)?;
-    verify_inventory(plan, game_root, canceled)?;
+    verify_inventory_with_journal_progress(
+      plan,
+      game_root,
+      journal,
+      task_root,
+      canceled,
+      &emit,
+      0,
+      0,
+      inventory_verification_totals(plan).0.saturating_mul(2),
+      inventory_verification_totals(plan).1.saturating_mul(2),
+    )?;
     commit_version(plan, game_root, task_root, journal, &emit)?;
-    verify_inventory(plan, game_root, canceled)?;
+    verify_inventory_with_journal_progress(
+      plan,
+      game_root,
+      journal,
+      task_root,
+      canceled,
+      &emit,
+      inventory_verification_totals(plan).0,
+      inventory_verification_totals(plan).1,
+      inventory_verification_totals(plan).0.saturating_mul(2),
+      inventory_verification_totals(plan).1.saturating_mul(2),
+    )?;
     journal.repair = None;
     journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
       PackageTaskState::RegistrationPending
@@ -393,6 +447,7 @@ where
   journal.apply = None;
   journal.repair = None;
   reset_audio_commit_progress(plan, journal);
+  journal.reset_update_commit_progress(plan);
   journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
   journal.error_message = None;
   persist_and_emit(task_root, journal, &emit)
@@ -896,16 +951,28 @@ where
   validate_apply_identity(journal, &commit.steps)?;
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
-  if journal.target == PackagePlanTarget::Audio {
+  if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+    let cursor = apply(journal)?.cursor.min(commit.steps.len());
+    journal.commit_completed_count = cursor;
+    journal.commit_total_count = commit.steps.len().saturating_add(1);
+    journal.commit_current_step = Some(format!("提交资源文件 {cursor}/{}", commit.steps.len()));
+    persist_and_emit(task_root, journal, emit)?;
+  } else if journal.target == PackagePlanTarget::Audio {
     let cursor = apply(journal)?.cursor;
     let remaining_modify_count = commit.steps[cursor.min(commit.steps.len())..]
       .iter()
       .filter(|step| step.kind == CommitStepKind::Modify)
       .count();
+    let remaining_modify_bytes = commit.steps[cursor.min(commit.steps.len())..]
+      .iter()
+      .filter(|step| step.kind == CommitStepKind::Modify)
+      .fold(0_u64, |total, step| total.saturating_add(step.source_size.unwrap_or(step.size)));
     journal.commit_completed_count = cursor.min(commit.steps.len());
     journal.commit_total_count = commit.steps.len();
     journal.verification_completed_count = 0;
     journal.verification_total_count = remaining_modify_count;
+    journal.verification_completed_bytes = 0;
+    journal.verification_total_bytes = remaining_modify_bytes;
     journal.commit_current_step = (remaining_modify_count > 0)
       .then(|| format!("校验待替换配音文件 0/{remaining_modify_count}"));
     persist_and_emit(task_root, journal, emit)?;
@@ -926,7 +993,15 @@ where
       let apply = apply_mut(journal)?;
       apply.cursor = index + 1;
       apply.active_step = None;
-      if journal.target == PackagePlanTarget::Audio {
+      if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+        journal.commit_completed_count =
+          (index + 1).min(journal.commit_total_count.saturating_sub(1));
+        journal.commit_current_step = Some(format!(
+          "提交资源文件 {}/{}",
+          journal.commit_completed_count,
+          journal.commit_total_count.saturating_sub(1)
+        ));
+      } else if journal.target == PackagePlanTarget::Audio {
         journal.commit_completed_count = (index + 1).min(journal.commit_total_count);
         journal.commit_current_step = Some(format!(
           "提交配音文件 {}/{}",
@@ -1006,7 +1081,15 @@ where
     if step.kind == CommitStepKind::Delete {
       journal.delete_completed_bytes = journal.delete_completed_bytes.saturating_add(step.size);
     }
-    if journal.target == PackagePlanTarget::Audio {
+    if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+      journal.commit_completed_count =
+        (index + 1).min(journal.commit_total_count.saturating_sub(1));
+      journal.commit_current_step = Some(format!(
+        "提交资源文件 {}/{}",
+        journal.commit_completed_count,
+        journal.commit_total_count.saturating_sub(1)
+      ));
+    } else if journal.target == PackagePlanTarget::Audio {
       journal.commit_completed_count = (index + 1).min(journal.commit_total_count);
       journal.commit_current_step = Some(format!(
         "提交配音文件 {}/{}",
@@ -1068,6 +1151,17 @@ where
         .verification_completed_count
         .saturating_add(1)
         .min(journal.verification_total_count);
+      journal.verification_completed_bytes = journal
+        .verification_completed_bytes
+        .saturating_add(
+          commit
+            .steps
+            .iter()
+            .find(|step| step.name == name)
+            .and_then(|step| step.source_size)
+            .unwrap_or_default(),
+        )
+        .min(journal.verification_total_bytes);
       journal.current_file = Some(name);
       journal.commit_current_step = Some(format!(
         "并行校验待替换配音文件 {}/{}",
@@ -1146,6 +1240,7 @@ where
   }
   if apply(journal)?.config_original_sha256 == apply(journal)?.config_target_sha256 {
     apply_mut(journal)?.config_phase = ConfigCommitPhase::Replaced;
+    mark_update_commit_complete(journal);
     persist_and_emit(task_root, journal, emit)?;
     return Ok(());
   }
@@ -1166,16 +1261,8 @@ where
     return Err("config.ini 提交后完整性校验失败".to_string());
   }
   apply_mut(journal)?.config_phase = ConfigCommitPhase::Replaced;
+  mark_update_commit_complete(journal);
   persist_and_emit(task_root, journal, emit)
-}
-
-fn verify_inventory(
-  plan: &PersistedPlan,
-  game_root: &Path,
-  canceled: &AtomicBool,
-) -> Result<(), String> {
-  let issues = inspect_inventory(plan, game_root, canceled)?;
-  issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
 }
 
 fn verify_changed_files<F>(
@@ -1188,7 +1275,7 @@ fn verify_changed_files<F>(
 where
   F: Fn(&TaskJournal),
 {
-  let mut last_emit = Instant::now();
+  let mut last_emit = Instant::now() - ASSEMBLY_PROGRESS_EMIT_INTERVAL;
   if !plan.assets.is_empty() {
     let worker_count = plan.assets.len().min(default_assembly_concurrency());
     let chunk_size = plan.assets.len().div_ceil(worker_count);
@@ -1212,11 +1299,15 @@ where
       let mut first_error = None;
       for (name, result) in receiver {
         match result {
-          Ok(()) => {
+          Ok(completed_bytes) => {
             journal.verification_completed_count = journal
               .verification_completed_count
               .saturating_add(1)
               .min(journal.verification_total_count);
+            journal.verification_completed_bytes = journal
+              .verification_completed_bytes
+              .saturating_add(completed_bytes)
+              .min(journal.verification_total_bytes);
             journal.current_file = Some(name);
             journal.commit_current_step = Some(format!(
               "校验配音文件 {}/{}",
@@ -1275,22 +1366,28 @@ fn verify_audio_asset(
   asset: &PlanAsset,
   game_root: &Path,
   canceled: &AtomicBool,
-) -> Result<(), String> {
+) -> Result<u64, String> {
   check_canceled(canceled)?;
   let path = resolve_existing_manifest_file(game_root, &asset.name)?;
   if !file_matches(&path, asset.size, &asset.md5)? {
     return Err(format!("配音变更文件校验失败：{}", asset.name));
   }
-  Ok(())
+  Ok(asset.size)
 }
 
-fn inspect_inventory(
+fn inspect_inventory_with_progress(
   plan: &PersistedPlan,
   game_root: &Path,
   canceled: &AtomicBool,
+  progress: &mut dyn FnMut(usize, usize, u64, u64, Option<String>),
 ) -> Result<Vec<InventoryIssue>, String> {
   let mut issues = Vec::new();
   let changed = changed_names(plan);
+  let total_count = plan.inventory.len().saturating_add(plan.delete_files.len());
+  let total_bytes =
+    plan.inventory.iter().fold(0_u64, |total, file| total.saturating_add(file.size));
+  let mut completed_count = 0_usize;
+  let mut completed_bytes = 0_u64;
   for file in &plan.inventory {
     check_canceled(canceled)?;
     match resolve_optional_manifest_file(game_root, &file.name)? {
@@ -1309,6 +1406,9 @@ fn inspect_inventory(
         }
       }
     }
+    completed_count = completed_count.saturating_add(1).min(total_count);
+    completed_bytes = completed_bytes.saturating_add(file.size).min(total_bytes);
+    progress(completed_count, total_count, completed_bytes, total_bytes, Some(file.name.clone()));
   }
   for deleted in &plan.delete_files {
     check_canceled(canceled)?;
@@ -1319,8 +1419,122 @@ fn inspect_inventory(
         repairable: false,
       });
     }
+    completed_count = completed_count.saturating_add(1).min(total_count);
+    progress(
+      completed_count,
+      total_count,
+      completed_bytes,
+      total_bytes,
+      Some(deleted.name.clone()),
+    );
   }
   Ok(issues)
+}
+
+fn inventory_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
+  (
+    plan.inventory.len().saturating_add(plan.delete_files.len()),
+    plan.inventory.iter().fold(0_u64, |total, file| total.saturating_add(file.size)),
+  )
+}
+
+fn inspect_inventory_with_journal_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  emit: &F,
+  completed_offset_count: usize,
+  completed_offset_bytes: u64,
+  verification_total_count: usize,
+  verification_total_bytes: u64,
+) -> Result<Vec<InventoryIssue>, String>
+where
+  F: Fn(&TaskJournal),
+{
+  let (total_count, total_bytes) = inventory_verification_totals(plan);
+  journal.verification_completed_count = completed_offset_count.min(verification_total_count);
+  journal.verification_total_count = verification_total_count;
+  journal.verification_completed_bytes = completed_offset_bytes.min(verification_total_bytes);
+  journal.verification_total_bytes = verification_total_bytes;
+  journal.commit_current_step = Some(format!(
+    "校验目标清单 {}/{}",
+    journal.verification_completed_count, journal.verification_total_count
+  ));
+  journal.current_file = None;
+  persist_and_emit(task_root, journal, emit)?;
+  let mut last_emit = Instant::now() - ASSEMBLY_PROGRESS_EMIT_INTERVAL;
+  let issues = {
+    let mut observer = |completed_count: usize,
+                        observed_total_count: usize,
+                        completed_bytes: u64,
+                        _observed_total_bytes: u64,
+                        current_file: Option<String>| {
+      journal.verification_completed_count =
+        completed_offset_count.saturating_add(completed_count).min(verification_total_count);
+      journal.verification_total_count = verification_total_count;
+      journal.verification_completed_bytes =
+        completed_offset_bytes.saturating_add(completed_bytes).min(verification_total_bytes);
+      journal.verification_total_bytes = verification_total_bytes;
+      journal.current_file = current_file;
+      if completed_count == observed_total_count
+        || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
+      {
+        journal.commit_current_step = Some(format!(
+          "校验目标清单 {}/{}",
+          journal.verification_completed_count, journal.verification_total_count
+        ));
+        journal.touch();
+        emit(journal);
+        last_emit = Instant::now();
+      }
+    };
+    inspect_inventory_with_progress(plan, game_root, canceled, &mut observer)?
+  };
+  let completed_count =
+    completed_offset_count.saturating_add(total_count).min(verification_total_count);
+  let completed_bytes =
+    completed_offset_bytes.saturating_add(total_bytes).min(verification_total_bytes);
+  journal.commit_current_step =
+    Some(format!("目标清单校验完成 {completed_count}/{verification_total_count}"));
+  journal.current_file = None;
+  journal.verification_completed_count = completed_count;
+  journal.verification_total_count = verification_total_count;
+  journal.verification_completed_bytes = completed_bytes;
+  journal.verification_total_bytes = verification_total_bytes;
+  persist_and_emit(task_root, journal, emit)?;
+  Ok(issues)
+}
+
+fn verify_inventory_with_journal_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  emit: &F,
+  completed_offset_count: usize,
+  completed_offset_bytes: u64,
+  verification_total_count: usize,
+  verification_total_bytes: u64,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let issues = inspect_inventory_with_journal_progress(
+    plan,
+    game_root,
+    journal,
+    task_root,
+    canceled,
+    emit,
+    completed_offset_count,
+    completed_offset_bytes,
+    verification_total_count,
+    verification_total_bytes,
+  )?;
+  issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
 }
 
 fn changed_names(plan: &PersistedPlan) -> std::collections::HashSet<String> {
@@ -1644,8 +1858,19 @@ fn reset_audio_commit_progress(plan: &PersistedPlan, journal: &mut TaskJournal) 
   journal.commit_completed_count = 0;
   journal.commit_total_count = plan.assets.len().saturating_add(plan.delete_files.len());
   journal.delete_total_bytes = plan.delete_files.iter().map(|file| file.size).sum();
+  journal.verification_completed_bytes = 0;
+  journal.verification_total_bytes = 0;
   journal.commit_current_step =
     (journal.commit_total_count > 0).then_some("等待提交配音文件".to_string());
+}
+
+fn mark_update_commit_complete(journal: &mut TaskJournal) {
+  if !matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+    return;
+  }
+  journal.commit_completed_count = journal.commit_total_count;
+  journal.commit_current_step = Some("目标版本写入完成".to_string());
+  journal.current_file = journal.commit_current_step.clone();
 }
 
 fn steps_digest(steps: &[CommitStep]) -> String {

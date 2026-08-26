@@ -26,7 +26,7 @@ use std::{
   path::{Path, PathBuf},
   sync::{
     Arc, LazyLock, Mutex, Weak,
-    atomic::{AtomicBool, AtomicUsize, Ordering},
+    atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
   },
   time::{Duration, Instant},
 };
@@ -546,6 +546,8 @@ pub(crate) fn execute_install(
   journal.commit_current_step = Some("正在校验暂存目录".to_string());
   journal.verification_completed_count = 0;
   journal.verification_total_count = 0;
+  journal.verification_completed_bytes = 0;
+  journal.verification_total_bytes = 0;
   set_task_state(task_root, journal, PackageTaskState::Assembling, emit, timing)?;
   journal.current_file = Some(if assembly_completed_count == plan.assets.len() {
     "准备校验安装内容".to_string()
@@ -919,7 +921,7 @@ pub(crate) fn verify_published_installation(
       task_root,
       false,
       super::package::default_concurrency(),
-      &mut |_, _| {},
+      &mut |_, _, _, _| {},
     )?
   };
   if tree_digest(&files) != marker.tree_digest {
@@ -1597,8 +1599,20 @@ fn verify_install_tree_with_evidence(
     root,
     sdk_files,
     evidence,
-    &mut |_, _| {},
+    &mut |_, _, _, _| {},
   )
+}
+
+fn install_verification_total_bytes(
+  plan: &PersistedPlan,
+  overlay: &InstallOverlay,
+  sdk_files: &BTreeMap<String, (u64, String)>,
+) -> u64 {
+  plan
+    .inventory
+    .iter()
+    .fold(overlay.config.len() as u64, |total, file| total.saturating_add(file.size))
+    .saturating_add(sdk_files.values().fold(0_u64, |total, (size, _)| total.saturating_add(*size)))
 }
 
 /// 轻量全树校验：证据可信任的文件只做身份/元数据核对，不再读取内容；证据缺失或失配时
@@ -1609,12 +1623,14 @@ fn verify_install_tree_with_evidence_and_progress(
   root: &Path,
   sdk_files: &BTreeMap<String, (u64, String)>,
   evidence: &BTreeMap<String, super::evidence::FileEvidence>,
-  progress: &mut dyn FnMut(usize, usize),
+  progress: &mut dyn FnMut(usize, usize, u64, u64),
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   validate_no_links(root)?;
   let root_identity = directory_identity(root)?;
   let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  let total_bytes = install_verification_total_bytes(plan, overlay, sdk_files);
   let mut completed_count = 0_usize;
+  let mut completed_bytes = 0_u64;
   let mut expected = BTreeMap::new();
   for file in &plan.inventory {
     let path = root.join(&file.name);
@@ -1626,7 +1642,8 @@ fn verify_install_tree_with_evidence_and_progress(
     }
     expected.insert(file.name.clone(), actual);
     completed_count = completed_count.saturating_add(1);
-    progress(completed_count, total_count);
+    completed_bytes = completed_bytes.saturating_add(file.size).min(total_bytes);
+    progress(completed_count, total_count, completed_bytes, total_bytes);
   }
   if !expected.contains_key("YuanShen.exe")
     || !expected.keys().any(|name| name.starts_with("YuanShen_Data/"))
@@ -1653,21 +1670,25 @@ fn verify_install_tree_with_evidence_and_progress(
     &md5_hex(&config_bytes),
   )?
   .unwrap_or(file_size_md5(&config)?);
+  let config_completed_bytes = config_actual.0;
   expected.insert("config.ini".to_string(), config_actual);
   completed_count = completed_count.saturating_add(1);
-  progress(completed_count, total_count);
+  completed_bytes = completed_bytes.saturating_add(config_completed_bytes).min(total_bytes);
+  progress(completed_count, total_count, completed_bytes, total_bytes);
   for (name, value) in sdk_files {
     let actual = trusted_file_value(root, root_identity, evidence, name, value.0, &value.1)?
       .unwrap_or(file_size_md5(&root.join(name))?);
     if &actual != value {
       return Err(format!("渠道 SDK 文件校验失败：{name}"));
     }
+    let actual_bytes = actual.0;
     expected.insert(name.clone(), actual);
     completed_count = completed_count.saturating_add(1);
-    progress(completed_count, total_count);
+    completed_bytes = completed_bytes.saturating_add(actual_bytes).min(total_bytes);
+    progress(completed_count, total_count, completed_bytes, total_bytes);
   }
   validate_tree_structure(root, &expected)?;
-  progress(total_count, total_count);
+  progress(total_count, total_count, total_bytes, total_bytes);
   Ok(expected)
 }
 
@@ -1838,16 +1859,24 @@ fn verify_install_tree_parallel_with_journal_progress(
   phase: &str,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  let total_bytes = install_verification_total_bytes(plan, overlay, sdk_files);
   journal.verification_completed_count = 0;
   journal.verification_total_count = total_count;
+  journal.verification_completed_bytes = 0;
+  journal.verification_total_bytes = total_bytes;
   journal.commit_current_step = Some(format!("{phase}：扫描目录安全性"));
   journal.current_file = journal.commit_current_step.clone();
   journal.touch();
   emit(journal);
-  let mut last_emit = Instant::now();
-  let mut observer = |completed_count: usize, observed_total_count: usize| {
-    journal.verification_completed_count = completed_count;
+  let mut last_emit = Instant::now() - Duration::from_millis(250);
+  let mut observer = |completed_count: usize,
+                      observed_total_count: usize,
+                      completed_bytes: u64,
+                      observed_total_bytes: u64| {
+    journal.verification_completed_count = completed_count.min(observed_total_count);
     journal.verification_total_count = observed_total_count;
+    journal.verification_completed_bytes = completed_bytes.min(observed_total_bytes);
+    journal.verification_total_bytes = observed_total_bytes;
     if completed_count == observed_total_count || last_emit.elapsed() >= Duration::from_millis(250)
     {
       journal.commit_current_step =
@@ -1871,6 +1900,7 @@ fn verify_install_tree_parallel_with_journal_progress(
   );
   if result.is_ok() {
     journal.verification_completed_count = total_count;
+    journal.verification_completed_bytes = total_bytes;
     journal.commit_current_step = Some(format!("{phase}：目录清单检查完成"));
     journal.current_file = journal.commit_current_step.clone();
     journal.touch();
@@ -1888,11 +1918,12 @@ fn verify_install_tree_parallel_with_progress(
   task_root: &Path,
   heal_evidence: bool,
   workers: usize,
-  progress: &mut dyn FnMut(usize, usize),
+  progress: &mut dyn FnMut(usize, usize, u64, u64),
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   validate_no_links(root)?;
   let root_identity = directory_identity(root)?;
   let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  let total_bytes = install_verification_total_bytes(plan, overlay, sdk_files);
   let asset_index_by_name = plan
     .assets
     .iter()
@@ -1905,6 +1936,7 @@ fn verify_install_tree_parallel_with_progress(
     let inventory = &plan.inventory;
     let next_index = Arc::new(AtomicUsize::new(0));
     let completed_count = Arc::new(AtomicUsize::new(0));
+    let completed_bytes = Arc::new(AtomicU64::new(0));
     let first_error = Arc::new(Mutex::new(None::<String>));
     let results = Arc::new(Mutex::new(Vec::<(String, (u64, String))>::new()));
     let worker_count = workers.clamp(1, 16);
@@ -1919,6 +1951,7 @@ fn verify_install_tree_parallel_with_progress(
         let asset_index_by_name = &asset_index_by_name;
         let next_index = Arc::clone(&next_index);
         let completed_count = Arc::clone(&completed_count);
+        let completed_bytes = Arc::clone(&completed_bytes);
         let first_error = Arc::clone(&first_error);
         let results = Arc::clone(&results);
         handles.push(scope.spawn(move || {
@@ -1943,6 +1976,7 @@ fn verify_install_tree_parallel_with_progress(
               Ok(value) => {
                 results.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).push(value);
                 completed_count.fetch_add(1, Ordering::Relaxed);
+                completed_bytes.fetch_add(file.size, Ordering::Relaxed);
               }
               Err(error) => {
                 let mut slot = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
@@ -1962,11 +1996,21 @@ fn verify_install_tree_parallel_with_progress(
         }
         std::thread::sleep(Duration::from_millis(50));
         if last_emit.elapsed() >= Duration::from_millis(250) {
-          progress(completed_count.load(Ordering::Relaxed), total_count);
+          progress(
+            completed_count.load(Ordering::Relaxed),
+            total_count,
+            completed_bytes.load(Ordering::Relaxed).min(total_bytes),
+            total_bytes,
+          );
           last_emit = Instant::now();
         }
       }
-      progress(completed_count.load(Ordering::Relaxed), total_count);
+      progress(
+        completed_count.load(Ordering::Relaxed),
+        total_count,
+        completed_bytes.load(Ordering::Relaxed).min(total_bytes),
+        total_bytes,
+      );
     });
     if let Some(error) = first_error.lock().unwrap_or_else(|poisoned| poisoned.into_inner()).clone()
     {
@@ -1978,7 +2022,9 @@ fn verify_install_tree_parallel_with_progress(
     }
     expected
   };
-  progress(expected.len(), total_count);
+  let mut completed_bytes =
+    expected.values().fold(0_u64, |total, (size, _)| total.saturating_add(*size));
+  progress(expected.len(), total_count, completed_bytes.min(total_bytes), total_bytes);
   if !expected.contains_key("YuanShen.exe")
     || !expected.keys().any(|name| name.starts_with("YuanShen_Data/"))
   {
@@ -2019,8 +2065,10 @@ fn verify_install_tree_parallel_with_progress(
       value
     }
   };
+  let config_completed_bytes = config_actual.0;
   expected.insert("config.ini".to_string(), config_actual);
-  progress(expected.len(), total_count);
+  completed_bytes = completed_bytes.saturating_add(config_completed_bytes).min(total_bytes);
+  progress(expected.len(), total_count, completed_bytes, total_bytes);
   for (name, value) in sdk_files {
     let actual = match trusted_file_value(root, root_identity, evidence, name, value.0, &value.1)? {
       Some(value) => value,
@@ -2037,11 +2085,13 @@ fn verify_install_tree_parallel_with_progress(
     if &actual != value {
       return Err(format!("渠道 SDK 文件校验失败：{name}"));
     }
+    let actual_bytes = actual.0;
     expected.insert(name.clone(), actual);
-    progress(expected.len(), total_count);
+    completed_bytes = completed_bytes.saturating_add(actual_bytes).min(total_bytes);
+    progress(expected.len(), total_count, completed_bytes, total_bytes);
   }
   validate_tree_structure(root, &expected)?;
-  progress(total_count, total_count);
+  progress(total_count, total_count, total_bytes, total_bytes);
   Ok(expected)
 }
 
@@ -2090,16 +2140,24 @@ fn verify_install_tree_with_evidence_with_journal_progress(
   phase: &str,
 ) -> Result<BTreeMap<String, (u64, String)>, String> {
   let total_count = plan.inventory.len().saturating_add(1).saturating_add(sdk_files.len());
+  let total_bytes = install_verification_total_bytes(plan, overlay, sdk_files);
   journal.verification_completed_count = 0;
   journal.verification_total_count = total_count;
+  journal.verification_completed_bytes = 0;
+  journal.verification_total_bytes = total_bytes;
   journal.commit_current_step = Some(format!("{phase}：扫描目录安全性"));
   journal.current_file = journal.commit_current_step.clone();
   journal.touch();
   emit(journal);
-  let mut last_emit = Instant::now();
-  let mut observer = |completed_count: usize, observed_total_count: usize| {
-    journal.verification_completed_count = completed_count;
+  let mut last_emit = Instant::now() - Duration::from_millis(250);
+  let mut observer = |completed_count: usize,
+                      observed_total_count: usize,
+                      completed_bytes: u64,
+                      observed_total_bytes: u64| {
+    journal.verification_completed_count = completed_count.min(observed_total_count);
     journal.verification_total_count = observed_total_count;
+    journal.verification_completed_bytes = completed_bytes.min(observed_total_bytes);
+    journal.verification_total_bytes = observed_total_bytes;
     if completed_count == observed_total_count || last_emit.elapsed() >= Duration::from_millis(250)
     {
       journal.commit_current_step =
@@ -2120,6 +2178,7 @@ fn verify_install_tree_with_evidence_with_journal_progress(
   );
   if result.is_ok() {
     journal.verification_completed_count = total_count;
+    journal.verification_completed_bytes = total_bytes;
     journal.commit_current_step = Some(format!("{phase}：目录清单检查完成"));
     journal.current_file = journal.commit_current_step.clone();
     journal.touch();

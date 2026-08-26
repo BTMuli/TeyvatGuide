@@ -323,6 +323,8 @@ pub struct PackageTaskSummary {
   pub commit_current_step: Option<String>,
   pub verification_completed_count: usize,
   pub verification_total_count: usize,
+  pub verification_completed_bytes: u64,
+  pub verification_total_bytes: u64,
   pub spool_bytes: u64,
   pub released_bytes: u64,
   pub assembly_completed_bytes_total: u64,

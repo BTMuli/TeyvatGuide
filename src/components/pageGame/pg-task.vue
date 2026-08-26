@@ -22,11 +22,18 @@
         <strong v-else-if="task !== null && task.sourceTag === task.targetTag">
           修复 {{ task.targetTag }}
         </strong>
-        <strong v-else-if="task !== null"> {{ task.sourceTag }} → {{ task.targetTag }} </strong>
+        <strong
+          v-else-if="task !== null && task.target === gameEnum.package.planTarget.PRE_DOWNLOAD"
+        >
+          预下载 {{ task.sourceTag }} → {{ task.targetTag }}
+        </strong>
+        <strong v-else-if="task !== null">
+          更新 {{ task.sourceTag }} → {{ task.targetTag }}
+        </strong>
         <strong v-else-if="plan !== null">等待开始 {{ plan.targetTag }}</strong>
       </div>
       <div class="task-heading-actions">
-        <template v-if="isAudio">
+        <template v-if="task !== null">
           <v-btn
             v-if="canPause"
             :disabled="actionPending"
@@ -49,7 +56,7 @@
             variant="tonal"
             @click="emit('cancelRequested')"
           >
-            取消
+            {{ isAudio ? "取消" : "停止任务" }}
           </v-btn>
           <v-btn
             v-if="recoverable && task !== null"
@@ -88,22 +95,15 @@
         embedded
         :task
       />
-      <template v-else>
-        <v-progress-linear
-          :indeterminate="progressIndeterminate"
-          :model-value="progressPercent"
-          color="var(--tgc-od-orange)"
-          height="8"
-          rounded
-        />
-        <div class="task-facts" aria-live="polite">
-          <span v-for="fact in progressFacts" :key="fact">{{ fact }}</span>
-        </div>
-        <p v-if="currentResource !== null" class="task-current">
-          <span class="task-current-label">{{ currentResourceLabel }}：</span>
-          <span class="task-current-value" :title="currentResource">{{ currentResource }}</span>
-        </p>
-      </template>
+      <PgUpdateProgress v-else-if="recoveryProgress === null" embedded :targetPublished :task />
+      <PgProgress
+        v-else
+        ariaLabel="资源任务恢复进度"
+        :caption="recoveryProgress.message"
+        :facts="recoveryFacts"
+        :indeterminate="recoveryProgress.totalObjects === 0"
+        :percent="recoveryPercent"
+      />
       <template v-if="recoveryProgress === null">
         <PgNotice v-if="task.errorMessage !== null" :text="task.errorMessage" tone="error" />
         <PgNotice
@@ -187,35 +187,6 @@
       >
         {{ applyActionLabel }}
       </v-btn>
-      <v-btn
-        v-if="canCancel && task !== null && !isAudio"
-        :loading="actionPending"
-        prepend-icon="mdi-stop-circle-outline"
-        size="small"
-        variant="outlined"
-        @click="emit('cancelRequested')"
-      >
-        请求取消
-      </v-btn>
-      <v-btn
-        v-if="recoverable && task !== null && !isAudio"
-        :loading="actionPending"
-        prepend-icon="mdi-backup-restore"
-        size="small"
-        variant="tonal"
-        @click="emit('recoverRequested', gameEnum.package.recoveryAction.RESUME)"
-      >
-        安全恢复
-      </v-btn>
-      <v-btn
-        v-if="canAbandon && task !== null && !isAudio"
-        :loading="actionPending"
-        size="small"
-        variant="text"
-        @click="emit('recoverRequested', gameEnum.package.recoveryAction.ROLLBACK)"
-      >
-        放弃任务
-      </v-btn>
     </div>
     <p v-if="plan !== null && !plan.hasSufficientSpace" class="task-note">
       当前评估的磁盘空间不足，不能开始下载。
@@ -230,6 +201,8 @@ import { computed } from "vue";
 import PgAudioLangTags from "./pg-audio-lang-tags.vue";
 import PgAudioProgress from "./pg-audio-progress.vue";
 import PgNotice from "./pg-notice.vue";
+import PgProgress from "./pg-progress.vue";
+import PgUpdateProgress from "./pg-update-progress.vue";
 
 type Props = {
   plan: TGApp.Game.Package.PlanSummary | null;
@@ -274,6 +247,12 @@ const taskStateLabel = computed<string>(() => {
   ) {
     return "安装失败";
   }
+  if (task?.state === gameEnum.package.taskState.READY_TO_APPLY) {
+    if (task.target === gameEnum.package.planTarget.PRE_DOWNLOAD && !targetPublished) {
+      return "等待正式发布";
+    }
+    if (task.target !== gameEnum.package.planTarget.AUDIO) return "可应用";
+  }
   return task === null ? "" : gameEnum.package.taskStateDesc(task.state);
 });
 const canCancel = computed<boolean>(() => {
@@ -316,28 +295,6 @@ const integrityRepair = computed<boolean>(() => {
     task.sourceTag === task.targetTag
   );
 });
-const currentResource = computed<string | null>(() => {
-  if (recoveryProgress !== null) return recoveryProgress.message;
-  if (task === null) return null;
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    return task.assemblyCurrentFile ?? task.currentFile;
-  }
-  if (task.state === gameEnum.package.taskState.DOWNLOADING) {
-    return task.downloadCurrentFile;
-  }
-  return task.currentFile;
-});
-const currentResourceLabel = computed<string>(() => {
-  if (recoveryProgress !== null) return "恢复阶段";
-  if (
-    task?.target === gameEnum.package.planTarget.AUDIO &&
-    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
-    task.currentFile !== null
-  ) {
-    return "提交阶段";
-  }
-  return "当前资源";
-});
 const canApply = computed<boolean>(() => {
   if (task?.target === gameEnum.package.planTarget.AUDIO) return false;
   return (readyToApply.value && targetPublished) || repairRequired.value;
@@ -378,160 +335,19 @@ const canStart = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.FAILED
   );
 });
-const audioPreflightPercent = computed<number>(() => {
-  if (task === null || task.verificationTotalCount === 0) return 0;
-  return Math.min(100, (task.verificationCompletedCount / task.verificationTotalCount) * 100);
+const recoveryPercent = computed<number>(() => {
+  if (recoveryProgress === null || recoveryProgress.totalObjects === 0) return 0;
+  return Math.min(100, (recoveryProgress.scannedObjects / recoveryProgress.totalObjects) * 100);
 });
-const audioCommitPhasePercent = computed<number>(() => {
-  if (task === null || task.commitTotalCount === 0) return 100;
-  if (
-    task.state === gameEnum.package.taskState.REGISTRATION_PENDING ||
-    task.state === gameEnum.package.taskState.COMPLETED
-  ) {
-    return 100;
-  }
-  if (task.state === gameEnum.package.taskState.VERIFYING) {
-    return (200 + audioPreflightPercent.value) / 3;
-  }
-  const committed = Math.min(100, (task.commitCompletedCount / task.commitTotalCount) * 100);
-  return (audioPreflightPercent.value + committed) / 3;
-});
-const audioProgressPercent = computed<number | null>(() => {
-  if (task === null || task.target !== gameEnum.package.planTarget.AUDIO) return null;
-  const hasAssembly = task.assemblyTotalCount > 0;
-  const resourceWeight = hasAssembly ? 0.5 : 0;
-  switch (task.state) {
-    case gameEnum.package.taskState.ASSEMBLING:
-      if (task.assemblyTotalBytes > 0) {
-        return (
-          Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100) *
-          resourceWeight
-        );
-      }
-      if (task.assemblyTotalCount > 0) {
-        return (
-          Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100) *
-          resourceWeight
-        );
-      }
-      return 0;
-    case gameEnum.package.taskState.COMMIT_PREPARED:
-    case gameEnum.package.taskState.COMMITTING:
-      return resourceWeight * 100 + audioCommitPhasePercent.value * (1 - resourceWeight);
-    case gameEnum.package.taskState.VERIFYING:
-      return resourceWeight * 100 + audioCommitPhasePercent.value * (1 - resourceWeight);
-    case gameEnum.package.taskState.REGISTRATION_PENDING:
-    case gameEnum.package.taskState.COMPLETED:
-      return 100;
-    default:
-      if (task.totalBytes === 0) return 0;
-      return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100) * resourceWeight;
-  }
-});
-const progressPercent = computed<number>(() => {
-  if (recoveryProgress !== null) {
-    if (recoveryProgress.totalObjects === 0) return 0;
-    return Math.min(100, (recoveryProgress.scannedObjects / recoveryProgress.totalObjects) * 100);
-  }
-  if (task === null) return 0;
-  if (audioProgressPercent.value !== null) return audioProgressPercent.value;
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    if (task.assemblyTotalBytes > 0) {
-      return Math.min(100, (task.assemblyCompletedBytes / task.assemblyTotalBytes) * 100);
-    }
-    if (task.assemblyTotalCount > 0) {
-      return Math.min(100, (task.assemblyCompletedCount / task.assemblyTotalCount) * 100);
-    }
-    return 0;
-  }
-  // 组装已完成的资源任务不再切回下载百分比，避免缓存命中时下载量小于总量导致回退。
-  if (task.assemblyTotalBytes > 0 && task.assemblyCompletedBytes >= task.assemblyTotalBytes) {
-    return 100;
-  }
-  if (task.totalBytes === 0) return 0;
-  return Math.min(100, (task.downloadedBytes / task.totalBytes) * 100);
-});
-const progressIndeterminate = computed<boolean>(() => {
-  if (recoveryProgress !== null) return recoveryProgress.totalObjects === 0;
-  if (task === null) return false;
-  if (
-    task.target === gameEnum.package.planTarget.AUDIO &&
-    task.state === gameEnum.package.taskState.READY_TO_APPLY &&
-    task.currentFile !== null
-  ) {
-    return true;
-  }
-  if (!active.value) return false;
-  if (task.target === gameEnum.package.planTarget.AUDIO) {
-    switch (task.state) {
-      case gameEnum.package.taskState.ASSEMBLING:
-        return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
-      case gameEnum.package.taskState.COMMIT_PREPARED:
-      case gameEnum.package.taskState.COMMITTING:
-        return task.commitTotalCount === 0;
-      case gameEnum.package.taskState.VERIFYING:
-        return task.verificationTotalCount === 0;
-      case gameEnum.package.taskState.REGISTRATION_PENDING:
-        return true;
-      default:
-        return task.totalBytes === 0;
+const recoveryFacts = computed<Array<string>>(() => {
+  if (recoveryProgress === null) return [];
+  const values = [`步骤 ${recoveryProgress.step} / ${recoveryProgress.totalSteps}`];
+  if (recoveryProgress.totalObjects > 0) {
+    values.push(`处理对象 ${recoveryProgress.scannedObjects} / ${recoveryProgress.totalObjects}`);
+    if (recoveryProgress.confirmedBytes > 0) {
+      values.push(`已确认 ${formatBytes(recoveryProgress.confirmedBytes)}`);
     }
   }
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    return task.assemblyTotalBytes === 0 && task.assemblyTotalCount === 0;
-  }
-  return task.totalBytes === 0 || gameEnum.package.taskApplying(task.state);
-});
-const progressFacts = computed<Array<string>>(() => {
-  if (recoveryProgress !== null) {
-    const values = [`步骤 ${recoveryProgress.step} / ${recoveryProgress.totalSteps}`];
-    if (recoveryProgress.totalObjects > 0) {
-      values.push(`处理对象 ${recoveryProgress.scannedObjects} / ${recoveryProgress.totalObjects}`);
-      if (recoveryProgress.confirmedBytes > 0) {
-        values.push(`已确认 ${formatBytes(recoveryProgress.confirmedBytes)}`);
-      }
-    }
-    return values;
-  }
-  if (task === null) return [];
-  if (task.target === gameEnum.package.planTarget.AUDIO) {
-    switch (task.state) {
-      case gameEnum.package.taskState.ASSEMBLING:
-        return [
-          `准备文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-          `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-        ];
-      case gameEnum.package.taskState.COMMIT_PREPARED:
-      case gameEnum.package.taskState.COMMITTING:
-        return [`提交文件 ${task.commitCompletedCount} / ${task.commitTotalCount}`];
-      case gameEnum.package.taskState.VERIFYING:
-        return [`校验文件 ${task.verificationCompletedCount} / ${task.verificationTotalCount}`];
-      case gameEnum.package.taskState.REGISTRATION_PENDING:
-        return ["正在同步本地安装记录"];
-      default: {
-        const values = [];
-        if (task.totalCount > 0) {
-          values.push(`下载文件 ${task.completedCount} / ${task.totalCount}`);
-          values.push(`${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
-        }
-        if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
-        if (task.etaSeconds !== null) values.push(`预计 ${formatDuration(task.etaSeconds)}`);
-        return values;
-      }
-    }
-  }
-  if (task.state === gameEnum.package.taskState.ASSEMBLING) {
-    return [
-      `组装空间 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-      `组装文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-    ];
-  }
-  const values = [
-    `${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`,
-    `${task.completedCount} / ${task.totalCount} 个对象`,
-  ];
-  if (task.bytesPerSecond > 0) values.push(`${formatBytes(task.bytesPerSecond)}/s`);
-  if (task.etaSeconds !== null) values.push(`预计 ${formatDuration(task.etaSeconds)}`);
   return values;
 });
 const stateColor = computed<string>(() => {
@@ -563,13 +379,6 @@ function formatBytes(bytes: number): string {
     unit = candidate;
   }
   return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
-}
-
-function formatDuration(seconds: number): string {
-  if (seconds < 60) return `${seconds} 秒`;
-  const minutes = Math.ceil(seconds / 60);
-  if (minutes < 60) return `${minutes} 分钟`;
-  return `${Math.ceil(minutes / 60)} 小时`;
 }
 </script>
 
@@ -669,7 +478,6 @@ function formatDuration(seconds: number): string {
   gap: 4px;
 }
 
-.task-facts,
 .task-actions {
   display: flex;
   flex-wrap: wrap;
@@ -677,35 +485,14 @@ function formatDuration(seconds: number): string {
   gap: 8px 16px;
 }
 
-.task-facts,
-.task-current,
 .task-note {
   color: var(--box-text-2);
   font-size: 12px;
   line-height: 16px;
 }
 
-.task-current,
 .task-note {
   margin: 0;
-}
-
-.task-current {
-  display: flex;
-  min-width: 0;
-  gap: 4px;
-}
-
-.task-current-label {
-  flex-shrink: 0;
-}
-
-.task-current-value {
-  overflow: hidden;
-  min-width: 0;
-  color: var(--common-text-title);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .task-note {

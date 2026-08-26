@@ -19,8 +19,9 @@ use std::{
 };
 use uuid::Uuid;
 
-pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 3;
+pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 4;
 pub(crate) const INSTALL_COMMIT_TOTAL_STEPS: usize = 6;
+const LEGACY_JOURNAL_SCHEMA_VERSION_V3: u32 = 3;
 const LEGACY_JOURNAL_SCHEMA_VERSION_V2: u32 = 2;
 const LEGACY_JOURNAL_SCHEMA_VERSION_V1: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
@@ -170,6 +171,12 @@ pub(crate) struct TaskJournal {
   /// Total files in the current install-tree verification pass.
   #[serde(default)]
   pub(crate) verification_total_count: usize,
+  /// Number of verified bytes in the current inventory verification pass.
+  #[serde(default)]
+  pub(crate) verification_completed_bytes: u64,
+  /// Total bytes in the current inventory verification pass.
+  #[serde(default)]
+  pub(crate) verification_total_bytes: u64,
   #[serde(default)]
   pub(crate) spool_root: Option<String>,
   #[serde(default)]
@@ -267,6 +274,9 @@ impl TaskJournal {
       commit_total_count: match plan.target {
         PackagePlanTarget::Install => INSTALL_COMMIT_TOTAL_STEPS,
         PackagePlanTarget::Audio => plan.assets.len().saturating_add(plan.delete_files.len()),
+        PackagePlanTarget::Main | PackagePlanTarget::PreDownload => {
+          plan.assets.len().saturating_add(plan.delete_files.len()).saturating_add(1)
+        }
         _ => 0,
       },
       commit_current_step: match plan.target {
@@ -274,10 +284,15 @@ impl TaskJournal {
         PackagePlanTarget::Audio if !plan.assets.is_empty() || !plan.delete_files.is_empty() => {
           Some("等待提交配音文件".to_string())
         }
+        PackagePlanTarget::Main | PackagePlanTarget::PreDownload => {
+          Some("等待提交资源文件".to_string())
+        }
         _ => None,
       },
       verification_completed_count: 0,
       verification_total_count: 0,
+      verification_completed_bytes: 0,
+      verification_total_bytes: 0,
       spool_root: plan.install_overlay.as_ref().map(|overlay| overlay.spool_root.clone()),
       spool_bytes: 0,
       released_bytes: 0,
@@ -348,6 +363,8 @@ impl TaskJournal {
       commit_current_step: None,
       verification_completed_count: 0,
       verification_total_count: 0,
+      verification_completed_bytes: 0,
+      verification_total_bytes: 0,
       spool_root: None,
       spool_bytes: 0,
       released_bytes: 0,
@@ -426,6 +443,56 @@ impl TaskJournal {
     self.assembly_current_file = current_file;
   }
 
+  /// Populate the commit projection for ordinary update and pre-download plans.
+  ///
+  /// Older journals did not persist this projection.  Derive it from the
+  /// immutable plan when the task is loaded, while preserving a resumable
+  /// apply cursor when one is present.
+  pub(crate) fn ensure_update_commit_progress(&mut self, plan: &PersistedPlan) -> bool {
+    if !matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+      return false;
+    }
+    let resource_total = plan.assets.len().saturating_add(plan.delete_files.len());
+    let total = resource_total.saturating_add(1);
+    let completed = self
+      .apply
+      .as_ref()
+      .map_or_else(
+        || {
+          if self.state == PackageTaskState::Completed {
+            total
+          } else {
+            self.commit_completed_count.min(resource_total)
+          }
+        },
+        |apply| apply.cursor.min(resource_total),
+      )
+      .saturating_add(usize::from(
+        self.apply.as_ref().is_some_and(|apply| apply.config_phase == ConfigCommitPhase::Replaced),
+      ))
+      .min(total);
+    let current_step =
+      self.commit_current_step.clone().or_else(|| Some("等待提交资源文件".to_string()));
+    let changed = self.commit_completed_count != completed
+      || self.commit_total_count != total
+      || self.commit_current_step != current_step;
+    self.commit_completed_count = completed;
+    self.commit_total_count = total;
+    self.commit_current_step = current_step;
+    changed
+  }
+
+  /// Reset the ordinary update commit projection before a fresh apply attempt.
+  pub(crate) fn reset_update_commit_progress(&mut self, plan: &PersistedPlan) {
+    if !matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+      return;
+    }
+    let resource_total = plan.assets.len().saturating_add(plan.delete_files.len());
+    self.commit_completed_count = 0;
+    self.commit_total_count = resource_total.saturating_add(1);
+    self.commit_current_step = Some("等待提交资源文件".to_string());
+  }
+
   pub(crate) fn summary(&self) -> PackageTaskSummary {
     PackageTaskSummary {
       revision: self.revision,
@@ -455,8 +522,14 @@ impl TaskJournal {
       commit_completed_count: self.commit_completed_count,
       commit_total_count: self.commit_total_count,
       commit_current_step: self.commit_current_step.clone(),
-      verification_completed_count: self.verification_completed_count,
+      verification_completed_count: self
+        .verification_completed_count
+        .min(self.verification_total_count),
       verification_total_count: self.verification_total_count,
+      verification_completed_bytes: self
+        .verification_completed_bytes
+        .min(self.verification_total_bytes),
+      verification_total_bytes: self.verification_total_bytes,
       spool_bytes: self.spool_bytes,
       released_bytes: self.released_bytes,
       assembly_completed_bytes_total: self.assembly_completed_bytes_total,
@@ -1025,7 +1098,10 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
 fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
   if !matches!(
     journal.schema_version,
-    JOURNAL_SCHEMA_VERSION | LEGACY_JOURNAL_SCHEMA_VERSION_V2 | LEGACY_JOURNAL_SCHEMA_VERSION_V1
+    JOURNAL_SCHEMA_VERSION
+      | LEGACY_JOURNAL_SCHEMA_VERSION_V3
+      | LEGACY_JOURNAL_SCHEMA_VERSION_V2
+      | LEGACY_JOURNAL_SCHEMA_VERSION_V1
   ) || Uuid::parse_str(&journal.task_id).is_err()
     || journal.task_id != journal.plan_id
     || journal.installation_id.is_empty()
@@ -1048,6 +1124,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.assembly_completed_bytes > journal.assembly_total_bytes
     || journal.commit_completed_count > journal.commit_total_count
     || journal.verification_completed_count > journal.verification_total_count
+    || journal.verification_completed_bytes > journal.verification_total_bytes
     || journal.completed_asset_cursor > journal.assembly_total_count
     || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
     || journal.install_repair_attempts > 3
@@ -1221,5 +1298,75 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
     std::fs::File::open(directory)
       .and_then(|file| file.sync_all())
       .map_err(|error| format!("刷新游戏资源任务目录失败：{error}"))
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::game::model::{PackagePlanStrategy, SchemeId};
+  use crate::game::planner::{PersistedPlan, PlanDelete};
+  use serde_json::json;
+
+  fn update_plan() -> PersistedPlan {
+    PersistedPlan {
+      schema_version: 6,
+      plan_id: Uuid::new_v4().to_string(),
+      installation_id: Uuid::new_v4().to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Main,
+      source_tag: Some("1.0.0".to_string()),
+      target_tag: "1.0.1".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: vec![PlanDelete {
+        name: "obsolete.pak".to_string(),
+        size: 42,
+        md5: "b".repeat(32),
+      }],
+      inventory: Vec::new(),
+      install_overlay: None,
+      audio_selection: None,
+      created_at: Utc::now().to_rfc3339(),
+    }
+  }
+
+  #[test]
+  fn legacy_journal_without_verification_bytes_is_readable() {
+    let plan = update_plan();
+    let journal = TaskJournal::from_plan(&plan);
+    let mut value = serde_json::to_value(journal).expect("journal serializes");
+    let object = value.as_object_mut().expect("journal is an object");
+    object.insert("schemaVersion".to_string(), json!(LEGACY_JOURNAL_SCHEMA_VERSION_V3));
+    object.remove("verificationCompletedBytes");
+    object.remove("verificationTotalBytes");
+    let loaded: TaskJournal = serde_json::from_value(value).expect("legacy journal deserializes");
+    validate_journal(&loaded).expect("legacy journal validates");
+    assert_eq!(loaded.verification_completed_bytes, 0);
+    assert_eq!(loaded.verification_total_bytes, 0);
+  }
+
+  #[test]
+  fn update_commit_progress_uses_apply_cursor_and_clamps_completion() {
+    let plan = update_plan();
+    let mut journal = TaskJournal::from_plan(&plan);
+    journal.apply = Some(ApplyJournal {
+      plan_sha256: "a".repeat(64),
+      steps_digest: "b".repeat(64),
+      step_count: 3,
+      cursor: 9,
+      active_step: None,
+      config_original_sha256: "c".repeat(64),
+      config_target_sha256: "d".repeat(64),
+      config_phase: ConfigCommitPhase::Prepared,
+    });
+    journal.commit_completed_count = 0;
+    journal.commit_total_count = 0;
+    assert!(journal.ensure_update_commit_progress(&plan));
+    assert_eq!(journal.commit_completed_count, 1);
+    assert_eq!(journal.commit_total_count, 2);
   }
 }

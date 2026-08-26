@@ -167,6 +167,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       commitCurrentStep: null,
       verificationCompletedCount: 0,
       verificationTotalCount: 0,
+      verificationCompletedBytes: 0,
+      verificationTotalBytes: 0,
       spoolBytes: 0,
       releasedBytes: 0,
       assemblyCompletedBytesTotal: 0,

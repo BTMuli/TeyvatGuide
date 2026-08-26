@@ -1,74 +1,29 @@
 <!-- 游戏本体安装流水线的下载、组装与总进度 -->
 <template>
-  <section :class="{ embedded }" class="install-progress" aria-label="游戏本体安装进度">
-    <div v-if="!embedded" class="install-progress-status">
-      <span :class="captionTone">{{ caption }}</span>
-      <div class="install-progress-actions">
-        <slot name="actions" />
-      </div>
-    </div>
-
-    <div v-if="showProgressBar" class="install-progress-rows" aria-live="polite">
-      <PgInstallThroughput :task />
-      <div v-for="row in progressRows" :key="row.label" class="install-progress-row">
-        <div class="install-progress-row-head">
-          <div class="install-progress-row-label">
-            <span>{{ row.label }}</span>
-            <span
-              v-if="row.status !== null"
-              :class="{ 'install-progress-complete': row.complete }"
-              class="install-progress-row-status"
-              :title="row.status"
-            >
-              {{ row.status }}
-            </span>
-          </div>
-          <strong>{{ row.percent.toFixed(0) }}%</strong>
-        </div>
-        <v-progress-linear
-          :indeterminate="row.indeterminate"
-          :model-value="row.percent"
-          color="var(--tgc-od-orange)"
-          height="8"
-          rounded
-        />
-        <div class="install-progress-row-facts">
-          <span v-for="detail in row.details" :key="detail">{{ detail }}</span>
-          <span v-if="row.downloadObjectStatus !== null" class="install-progress-download-activity">
-            <span>{{ row.downloadObjectStatus }}</span>
-            <span
-              v-if="row.activeAssemblyCount > 0"
-              :aria-label="`正在组装 ${row.activeAssemblyCount} 个资源`"
-              class="install-progress-assembly-slots"
-              role="img"
-              :title="`正在组装 ${row.activeAssemblyCount} 个资源`"
-            >
-              <span
-                v-for="slot in row.activeAssemblyCount"
-                :key="slot"
-                aria-hidden="true"
-                class="install-progress-assembly-slot"
-              />
-            </span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <p
-      v-if="!embedded && task.errorMessage !== null && task.errorMessage !== caption"
-      class="install-progress-error"
-    >
-      {{ task.errorMessage }}
-    </p>
-  </section>
+  <PgTaskProgressRows
+    ariaLabel="游戏本体安装进度"
+    :caption
+    :captionTone
+    :embedded
+    :errorMessage="task.errorMessage"
+    :rows="progressRows"
+    :showRows="showProgressBar"
+  >
+    <template #actions>
+      <slot name="actions" />
+    </template>
+    <template #beforeRows>
+      <PgInstallThroughput v-if="showThroughput" :task />
+    </template>
+  </PgTaskProgressRows>
 </template>
 
 <script lang="ts" setup>
 import gameEnum from "@enum/game.js";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import PgInstallThroughput from "./pg-install-throughput.vue";
+import PgTaskProgressRows from "./pg-task-progress-rows.vue";
 
 type Props = {
   task: TGApp.Game.Package.TaskSummary;
@@ -118,12 +73,6 @@ const captionTone = computed<"err" | "warn" | "">(() => {
       return "";
   }
 });
-const assemblyPercent = computed<number>(() => {
-  if (task.assemblyTotalBytes === 0) {
-    return task.state === gameEnum.package.taskState.QUEUED ? 0 : 100;
-  }
-  return phasePercent(task.assemblyCompletedBytes, task.assemblyTotalBytes);
-});
 const commitPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return 100;
   return phasePercent(task.commitCompletedCount, task.commitTotalCount);
@@ -131,32 +80,53 @@ const commitPercent = computed<number>(() => {
 const commitComplete = computed<boolean>(() => {
   return task.commitTotalCount === 0 || task.commitCompletedCount >= task.commitTotalCount;
 });
-const resourcePercent = computed<number>(() => assemblyPercent.value);
-// 下载对象只是组装输入；本地资源以证据落盘后的组装字节为准，收尾阶段预留 5%。
+const downloadComplete = computed<boolean>(() => {
+  return task.totalBytes === 0
+    ? task.state !== gameEnum.package.taskState.QUEUED
+    : task.downloadedBytes >= task.totalBytes;
+});
+const assemblyComplete = computed<boolean>(() => {
+  if (task.assemblyTotalBytes > 0) {
+    return task.assemblyCompletedBytes >= task.assemblyTotalBytes;
+  }
+  if (task.assemblyTotalCount > 0) {
+    return task.assemblyCompletedCount >= task.assemblyTotalCount;
+  }
+  return (
+    task.state !== gameEnum.package.taskState.QUEUED &&
+    task.state !== gameEnum.package.taskState.DOWNLOADING &&
+    task.state !== gameEnum.package.taskState.ASSEMBLING
+  );
+});
+const resourceTotalBytes = computed<number>(() => task.totalBytes + task.assemblyTotalBytes);
+const resourceCompletedBytes = computed<number>(
+  () => task.downloadedBytes + task.assemblyCompletedBytes,
+);
+const resourceComplete = computed<boolean>(() => {
+  return downloadComplete.value && assemblyComplete.value;
+});
+// 下载对象是安装写入的输入，资源安装进度同时累计下载与组装字节。
+// 收尾阶段沿用 95% / 5% 兼容权重，避免把阶段时间误解为剩余时长。
+const resourcePercent = computed<number>(() => {
+  if (resourceTotalBytes.value === 0) return resourceComplete.value ? 100 : 0;
+  return phasePercent(resourceCompletedBytes.value, resourceTotalBytes.value);
+});
 const progressPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return resourcePercent.value;
   return resourcePercent.value * 0.95 + commitPercent.value * 0.05;
 });
-const downloadComplete = computed<boolean>(() => {
-  return task.totalBytes > 0 && task.downloadedBytes >= task.totalBytes;
-});
-const assemblyComplete = computed<boolean>(() => {
-  if (task.assemblyTotalBytes === 0) return task.state !== gameEnum.package.taskState.QUEUED;
-  return task.assemblyCompletedBytes >= task.assemblyTotalBytes;
-});
 const resourceStatus = computed<string | null>(() => {
-  if (task.assemblyTotalBytes === 0) {
-    return active.value && task.state === gameEnum.package.taskState.QUEUED
-      ? "正在准备：等待下载阶段开始"
-      : "无需组装";
+  if (resourceComplete.value) return "已完成";
+  if (resourceTotalBytes.value === 0) {
+    return active.value ? "正在准备资源安装" : "无需下载或安装资源";
   }
-  if (assemblyComplete.value) return "已完成";
-  if (task.assemblyCurrentFile !== null) return task.assemblyCurrentFile;
-  if (task.downloadCurrentFile !== null) return task.downloadCurrentFile;
-  if (gameEnum.package.taskApplying(task.state)) return task.currentFile;
+  if (task.state === gameEnum.package.taskState.QUEUED) return "正在准备：等待下载阶段开始";
+  if (gameEnum.package.taskApplying(task.state)) {
+    return task.commitCurrentStep ?? "正在校验安装内容";
+  }
   if (active.value) {
-    if (downloadComplete.value) return "准备校验本地资源";
-    return "正在获取并安装下一个资源";
+    if (downloadComplete.value) return "正在安装已下载资源";
+    return "正在获取并安装资源";
   }
   return null;
 });
@@ -173,27 +143,38 @@ const overallFacts = computed<Array<string>>(() => {
   ];
 });
 const resourceFacts = computed<Array<string>>(() => {
-  return [
-    `${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
-    `文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`,
-  ];
+  const facts: Array<string> = [];
+  if (resourceTotalBytes.value > 0) {
+    facts.push(
+      `资源 ${formatBytes(resourceCompletedBytes.value)} / ${formatBytes(resourceTotalBytes.value)}`,
+    );
+  }
+  if (task.totalBytes > 0) {
+    facts.push(`下载 ${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
+  }
+  if (task.assemblyTotalBytes > 0) {
+    facts.push(
+      `安装写入 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+    );
+  }
+  if (task.assemblyTotalCount > 0) {
+    facts.push(`文件 ${task.assemblyCompletedCount} / ${task.assemblyTotalCount}`);
+  }
+  return facts.length > 0 ? facts : ["没有需要下载或安装的游戏文件"];
 });
 const resourceRow = computed<ProgressRow>(() => ({
   label: "资源安装",
   percent: resourcePercent.value,
-  indeterminate:
-    task.assemblyTotalBytes === 0 &&
-    active.value &&
-    task.state === gameEnum.package.taskState.QUEUED,
-  complete: assemblyComplete.value,
+  indeterminate: resourceTotalBytes.value === 0 && active.value && !resourceComplete.value,
+  complete: resourceComplete.value,
   status: resourceStatus.value,
-  details: task.assemblyTotalBytes === 0 ? ["没有需要组装的游戏文件"] : resourceFacts.value,
+  details: resourceFacts.value,
   downloadObjectStatus:
-    task.assemblyTotalBytes === 0 ? null : `下载对象 ${task.completedCount} / ${task.totalCount}`,
+    task.totalCount > 0 ? `下载对象 ${task.completedCount} / ${task.totalCount}` : null,
   activeAssemblyCount: task.activeAssemblyCount,
 }));
 const commitRow = computed<ProgressRow>(() => ({
-  label: "提交",
+  label: "发布与登记",
   percent: commitPercent.value,
   indeterminate: task.commitTotalCount === 0 && gameEnum.package.taskApplying(task.state),
   complete: task.commitTotalCount > 0 && task.commitCompletedCount >= task.commitTotalCount,
@@ -210,13 +191,17 @@ const commitRow = computed<ProgressRow>(() => ({
 const overallRow = computed<ProgressRow>(() => ({
   label: "总进度",
   percent: progressPercent.value,
-  indeterminate: task.assemblyTotalBytes === 0 && active.value,
-  complete: resourcePercent.value >= 100 && commitComplete.value,
+  indeterminate: resourceTotalBytes.value === 0 && active.value && !resourceComplete.value,
+  complete: resourceComplete.value && commitComplete.value,
   status: overallFacts.value.join(" · "),
   details: [
-    `本地资源 ${formatBytes(task.assemblyCompletedBytes)} / ${formatBytes(task.assemblyTotalBytes)}`,
+    resourceTotalBytes.value > 0
+      ? `资源安装 ${formatBytes(resourceCompletedBytes.value)} / ${formatBytes(resourceTotalBytes.value)}`
+      : resourceComplete.value
+        ? "资源安装无需下载或安装"
+        : "资源安装等待数据",
     task.commitTotalCount > 0
-      ? `资源安装 ${resourcePercent.value.toFixed(0)}% · 提交 ${commitPercent.value.toFixed(0)}%`
+      ? `资源安装 ${resourcePercent.value.toFixed(0)}% · 发布与登记 ${commitPercent.value.toFixed(0)}%`
       : `资源安装 ${resourcePercent.value.toFixed(0)}%`,
   ],
   downloadObjectStatus: null,
@@ -228,17 +213,55 @@ const progressRows = computed<Array<ProgressRow>>(() => {
   rows.push(overallRow.value);
   return rows;
 });
+const resourceCompleteAt = ref<number | null>(null);
+const resourceCompleteObserved = ref<boolean>(resourceComplete.value);
+const resourceCompleteElapsedMs = computed<number>(() => {
+  if (resourceCompleteAt.value === null) return 0;
+  return Math.max(0, clock.value - resourceCompleteAt.value);
+});
+const showThroughput = computed<boolean>(() => {
+  if (
+    task.state === gameEnum.package.taskState.COMPLETED ||
+    task.state === gameEnum.package.taskState.FAILED ||
+    task.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
+    task.state === gameEnum.package.taskState.CANCELED
+  ) {
+    return false;
+  }
+  return (
+    !resourceComplete.value ||
+    (resourceCompleteAt.value !== null && resourceCompleteElapsedMs.value < 5000)
+  );
+});
 const showProgressBar = computed<boolean>(() => {
   return (
     active.value ||
     task.state === gameEnum.package.taskState.PAUSED ||
-    task.state === gameEnum.package.taskState.READY_TO_APPLY
+    task.state === gameEnum.package.taskState.READY_TO_APPLY ||
+    task.state === gameEnum.package.taskState.COMPLETED ||
+    task.state === gameEnum.package.taskState.FAILED ||
+    task.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
+    task.state === gameEnum.package.taskState.CANCELED
   );
 });
 
+watch(resourceComplete, (complete) => {
+  if (complete && !resourceCompleteObserved.value) resourceCompleteAt.value = Date.now();
+  if (!complete) resourceCompleteAt.value = null;
+  resourceCompleteObserved.value = complete;
+});
+
+watch(
+  () => task.taskId,
+  () => {
+    resourceCompleteAt.value = null;
+    resourceCompleteObserved.value = resourceComplete.value;
+  },
+);
+
 function phasePercent(completed: number, total: number): number {
   if (total === 0) return 100;
-  return Math.min(100, (completed / total) * 100);
+  return Math.min(100, Math.max(0, (completed / total) * 100));
 }
 
 function formatBytes(bytes: number): string {
@@ -264,134 +287,3 @@ function formatElapsed(milliseconds: number): string {
   return `${seconds} 秒`;
 }
 </script>
-
-<style lang="scss" scoped>
-.install-progress {
-  display: grid;
-  padding: 12px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-2);
-  gap: 8px;
-
-  &.embedded {
-    padding: 0;
-    border: 0;
-    background: transparent;
-  }
-}
-
-.install-progress-status,
-.install-progress-row-head {
-  display: flex;
-  align-items: center;
-  color: var(--box-text-2);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.install-progress-status {
-  gap: 8px;
-
-  .warn {
-    color: var(--tgc-od-orange);
-  }
-
-  .err {
-    color: var(--tgc-od-red);
-  }
-}
-
-.install-progress-actions {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 4px;
-
-  &:empty {
-    display: none;
-  }
-}
-
-.install-progress-rows {
-  display: grid;
-  gap: 10px;
-}
-
-.install-progress-row {
-  display: grid;
-  gap: 4px;
-}
-
-.install-progress-row-head {
-  justify-content: space-between;
-}
-
-.install-progress-row-label {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-}
-
-.install-progress-row-status {
-  overflow: hidden;
-  min-width: 0;
-  color: var(--common-text-title);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.install-progress-complete {
-  color: var(--tgc-od-green);
-}
-
-.install-progress-row-head strong {
-  flex-shrink: 0;
-  color: var(--common-text-title);
-  font-weight: normal;
-}
-
-.install-progress-row-facts {
-  display: flex;
-  flex-wrap: wrap;
-  color: var(--box-text-2);
-  font-size: 11px;
-  gap: 4px 12px;
-  line-height: 15px;
-}
-
-.install-progress-download-activity {
-  display: inline-flex;
-  min-height: 16px;
-  align-items: center;
-  gap: 4px;
-  line-height: 16px;
-}
-
-.install-progress-assembly-slots {
-  display: inline-flex;
-  max-width: 160px;
-  min-height: 16px;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  line-height: 0;
-  vertical-align: middle;
-}
-
-.install-progress-assembly-slot {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-radius: 2px;
-  background: var(--tgc-od-green);
-}
-
-.install-progress-error {
-  margin: 0;
-  color: var(--tgc-od-red);
-  font-size: 12px;
-  line-height: 16px;
-}
-</style>
