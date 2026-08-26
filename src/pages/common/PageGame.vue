@@ -11,11 +11,11 @@
         :disabled="installationsLoading || launching"
         class="game-install-btn"
         color="var(--tgc-od-orange)"
-        prepend-icon="mdi-download-box-outline"
+        prepend-icon="mdi-plus-box-outline"
         variant="tonal"
-        @click="openInstallOverlay"
+        @click="openClientSourceOverlay"
       >
-        安装新客户端
+        添加新客户端
       </v-btn>
       <v-btn
         aria-label="查看任务历史"
@@ -92,6 +92,12 @@
     />
     <PgCache v-if="chosen !== null || installTasks.length > 0 || visibleInstallDrafts.length > 0" />
   </div>
+  <PgoClientSource
+    v-if="clientSourceOverlay"
+    v-model="clientSourceOverlay"
+    @create-new="openInstallOverlay"
+    @locate-existing="openPathOverlay(null)"
+  />
   <PgoPath
     v-if="pathOverlay"
     v-model="pathOverlay"
@@ -124,6 +130,7 @@ const PgCache = defineAsyncComponent(() => import("@comp/pageGame/pg-cache.vue")
 const PgInstallDraft = defineAsyncComponent(() => import("@comp/pageGame/pg-install-draft.vue"));
 const PgInstallTask = defineAsyncComponent(() => import("@comp/pageGame/pg-install-task.vue"));
 const PgInstallation = defineAsyncComponent(() => import("@comp/pageGame/pg-installation.vue"));
+const PgoClientSource = defineAsyncComponent(() => import("@comp/pageGame/pgo-client-source.vue"));
 const PgoInstall = defineAsyncComponent(() => import("@comp/pageGame/pgo-install.vue"));
 const PgoPath = defineAsyncComponent(() => import("@comp/pageGame/pgo-path.vue"));
 const PgoTaskHistory = defineAsyncComponent(() => import("@comp/pageGame/pgo-task-history.vue"));
@@ -132,6 +139,7 @@ const taskStore = useGameLauncherStore();
 const { isLogin } = storeToRefs(useAppStore());
 const { account, cookie } = storeToRefs(useUserStore());
 const launching = ref<boolean>(false);
+const clientSourceOverlay = ref<boolean>(false);
 const pathOverlay = ref<boolean>(false);
 const pathTarget = ref<TGApp.Game.Installation.Item | null>(null);
 const installOverlay = ref<boolean>(false);
@@ -189,6 +197,10 @@ const installedSchemes = computed<Array<TGApp.Game.Installation.SchemeEnum>>(() 
 function openInstallOverlay(): void {
   installInitialConfig.value = null;
   installOverlay.value = true;
+}
+
+function openClientSourceOverlay(): void {
+  clientSourceOverlay.value = true;
 }
 
 function openTaskHistoryOverlay(): void {
