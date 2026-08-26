@@ -50,6 +50,16 @@ const GameInstallationLocationKindEnum: typeof TGApp.Game.Installation.LocationK
 };
 
 /**
+ * 游戏安装自动发现来源枚举。
+ * @since Beta v0.11.5
+ * @see TGApp.Game.Installation.DiscoverySourceEnum
+ */
+const GameInstallationDiscoverySourceEnum: typeof TGApp.Game.Installation.DiscoverySource = {
+  HOYOPLAY_REGISTRY: "hoyoplay_registry",
+  UNITY_LOG: "unity_log",
+};
+
+/**
  * 游戏本体安装草稿状态枚举。
  * @since Beta v0.11.5
  * @see TGApp.Game.Installation.InstallDraftStateEnum
@@ -298,6 +308,25 @@ function getGameInstallationSchemeDesc(scheme: TGApp.Game.Installation.SchemeEnu
       return "国服 B 服";
     default:
       return "未知渠道";
+  }
+}
+
+/**
+ * 获取游戏安装自动发现来源描述。
+ * @since Beta v0.11.5
+ * @param source - 自动发现来源
+ * @returns 来源描述
+ */
+function getGameInstallationDiscoverySourceDesc(
+  source: TGApp.Game.Installation.DiscoverySourceEnum,
+): string {
+  switch (source) {
+    case GameInstallationDiscoverySourceEnum.HOYOPLAY_REGISTRY:
+      return "HoYoPlay 登记";
+    case GameInstallationDiscoverySourceEnum.UNITY_LOG:
+      return "游戏日志";
+    default:
+      return "未知来源";
   }
 }
 
@@ -604,6 +633,8 @@ const gameEnum = {
     scheme: GameInstallationSchemeEnum,
     schemeDesc: getGameInstallationSchemeDesc,
     status: GameInstallationStatusEnum,
+    discoverySource: GameInstallationDiscoverySourceEnum,
+    discoverySourceDesc: getGameInstallationDiscoverySourceDesc,
     locationKind: GameInstallationLocationKindEnum,
     draftState: GameInstallationInstallDraftStateEnum,
   },

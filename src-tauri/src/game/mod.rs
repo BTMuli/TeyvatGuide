@@ -11,6 +11,7 @@ mod hoyoplay;
 #[cfg(windows)]
 mod hpatch;
 mod installation;
+mod installation_locator;
 mod installer;
 mod journal;
 mod launch;

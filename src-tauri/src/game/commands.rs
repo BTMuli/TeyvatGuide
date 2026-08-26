@@ -4,13 +4,14 @@
 use super::{
   cache,
   hoyoplay::{configure_system_proxy, create_http_client, create_snapshot, get_game_branches},
-  installation::{derive_installation_id, inspect_executable, locate_executables},
+  installation::{derive_installation_id, inspect_executable},
+  installation_locator::discover_installations,
   installer, journal, launch,
   model::{
-    GameInstallation, InstallationStatus, PackageCacheSummary, PackagePlanProgress,
-    PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction, PackageRecoveryProgress,
-    PackageSnapshot, PackageSwitchSummary, PackageTaskCleanupSummary, PackageTaskOptions,
-    PackageTaskState, PackageTaskSummary, PackageVerifySummary, SchemeId,
+    GameInstallation, GameInstallationDiscovery, InstallationStatus, PackageCacheSummary,
+    PackagePlanProgress, PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction,
+    PackageRecoveryProgress, PackageSnapshot, PackageSwitchSummary, PackageTaskCleanupSummary,
+    PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::{AudioApplyContext, GamePackageManager},
   planner::{
@@ -163,10 +164,15 @@ pub async fn game_installation_list(
   Ok(installations)
 }
 
-/// 从 Unity 日志静默定位国服 `YuanShen.exe`。
+/// 自动定位本机国服安装候选：合并 HoYoPlay 登记与 Unity 日志来源。
 #[tauri::command]
-pub fn game_installation_locate() -> Vec<String> {
-  locate_executables()
+pub async fn game_installation_locate(
+  app_handle: AppHandle,
+) -> Result<GameInstallationDiscovery, String> {
+  let machine_uid = read_machine_uid(&app_handle)?;
+  tauri::async_runtime::spawn_blocking(move || discover_installations(&machine_uid))
+    .await
+    .map_err(|error| format!("定位任务异常退出：{error}"))
 }
 
 /// 卸载已登记的游戏安装：删除 `YuanShen.exe` 所在目录的全部内容，保留空目录本身，

@@ -51,6 +51,38 @@ pub struct GameInstallation {
   pub last_seen: String,
 }
 
+/// 自动发现安装的来源。
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum InstallationDiscoverySource {
+  HoyoPlayRegistry,
+  UnityLog,
+}
+
+/// 自动发现的一个候选安装及命中的来源列表。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameInstallationCandidate {
+  pub installation: GameInstallation,
+  pub sources: Vec<InstallationDiscoverySource>,
+}
+
+/// 单个来源的非致命告警；code 只包含稳定错误码，不含本地路径。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InstallationDiscoveryNotice {
+  pub source: InstallationDiscoverySource,
+  pub code: String,
+}
+
+/// 自动定位报告：排序后的候选与来源级告警。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameInstallationDiscovery {
+  pub candidates: Vec<GameInstallationCandidate>,
+  pub notices: Vec<InstallationDiscoveryNotice>,
+}
+
 /// 可用于生成包计划的目标分支。
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]

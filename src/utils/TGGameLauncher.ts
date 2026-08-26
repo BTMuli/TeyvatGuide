@@ -39,12 +39,12 @@ export async function getGameInstallationSize(rootPath: string): Promise<number>
 }
 
 /**
- * 从 Unity 日志静默定位国服 YuanShen.exe。
+ * 自动定位本机国服游戏安装候选：合并 HoYoPlay 登记与 Unity 日志来源。
  * @since Beta v0.11.5
- * @returns 磁盘上仍存在的可执行文件路径
+ * @returns 排序后的候选列表与来源级告警
  */
-export async function locateGameInstallations(): Promise<Array<string>> {
-  return await invoke<Array<string>>("game_installation_locate");
+export async function locateGameInstallations(): Promise<TGApp.Game.Installation.DiscoveryResult> {
+  return await invoke<TGApp.Game.Installation.DiscoveryResult>("game_installation_locate");
 }
 
 /**

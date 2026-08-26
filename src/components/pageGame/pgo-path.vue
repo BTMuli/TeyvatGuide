@@ -11,46 +11,32 @@
     <template #header>
       <div class="pgop-heading">
         <h2 :id="titleId">选择游戏路径</h2>
-        <p>先自动识别或手动选择，确认后才会设为当前安装。</p>
+        <p>自动发现或手动选择本机安装，确认后才会设为当前安装。</p>
       </div>
     </template>
 
     <div class="pgop-body">
       <div class="pgop-methods">
-        <v-menu :disabled="discovered.length <= 1 || busy" location="bottom">
-          <template #activator="{ props: menuProps }">
-            <button
-              v-bind="discovered.length > 1 ? menuProps : undefined"
-              :aria-pressed="method === 'auto'"
-              :class="{ selected: method === 'auto' }"
-              :disabled="busy"
-              class="pgop-method"
-              type="button"
-              @click="handleAutoDetect"
-            >
-              <div class="pgop-method-icon">
-                <v-icon>mdi-magnify</v-icon>
-              </div>
-              <div class="pgop-method-copy">
-                <strong>自动识别</strong>
-                <span>{{ autoDetectHint }}</span>
-              </div>
-            </button>
-          </template>
-          <v-list class="pgop-menu" density="compact">
-            <v-list-item
-              v-for="path in discovered"
-              :key="path"
-              :subtitle="path"
-              title="已发现的安装"
-              @click="selectPath(path, 'auto')"
-            />
-          </v-list>
-        </v-menu>
+        <button
+          :aria-pressed="method === 'auto'"
+          :class="{ selected: method === 'auto' }"
+          :disabled="registering || discovering"
+          class="pgop-method"
+          type="button"
+          @click="handleRescan"
+        >
+          <div class="pgop-method-icon">
+            <v-icon>mdi-magnify</v-icon>
+          </div>
+          <div class="pgop-method-copy">
+            <strong>自动识别</strong>
+            <span>{{ autoDetectHint }}</span>
+          </div>
+        </button>
         <button
           :aria-pressed="method === 'manual'"
           :class="{ selected: method === 'manual' }"
-          :disabled="busy"
+          :disabled="registering"
           class="pgop-method"
           type="button"
           @click="pickExecutable"
@@ -65,9 +51,54 @@
         </button>
       </div>
 
+      <PgNotice v-if="degradedHint !== null" :text="degradedHint" tone="warning" />
+
+      <section
+        v-if="discoveredCandidates.length > 0"
+        aria-label="发现的安装候选"
+        class="pgop-candidates"
+      >
+        <header class="pgop-candidates-title">发现的安装</header>
+        <ul class="pgop-candidate-list">
+          <li v-for="candidate in discoveredCandidates" :key="candidate.installation.id">
+            <button
+              :aria-pressed="isSelected(candidate)"
+              :class="{ selected: isSelected(candidate) }"
+              class="pgop-candidate"
+              type="button"
+              @click="selectCandidate(candidate)"
+            >
+              <span class="pgop-candidate-path">{{ candidate.installation.executablePath }}</span>
+              <span class="pgop-candidate-meta">
+                <v-chip size="small" variant="tonal">
+                  {{ gameEnum.installation.schemeDesc(candidate.installation.schemeId) }}
+                </v-chip>
+                <v-chip size="small" variant="tonal">
+                  {{ candidate.installation.version ?? "未读取版本" }}
+                </v-chip>
+                <v-chip
+                  :color="statusColor(candidate.installation.status)"
+                  size="small"
+                  variant="tonal"
+                >
+                  {{ statusDesc(candidate.installation.status) }}
+                </v-chip>
+                <v-chip size="small" variant="tonal">{{ sourceDesc(candidate.sources) }}</v-chip>
+              </span>
+            </button>
+          </li>
+        </ul>
+      </section>
+
+      <p v-else-if="showEmptyState" class="pgop-empty">
+        未发现本地安装，可重新扫描或手动选择国服 YuanShen.exe
+      </p>
+
       <section class="pgop-detail" aria-label="选中路径">
         <header class="pgop-detail-title">选中路径</header>
-        <p v-if="pendingPath === null && !inspecting" class="pgop-detail-empty">尚未选择路径</p>
+        <p v-if="pendingPath === null && !inspecting" class="pgop-detail-empty">
+          {{ discovering ? "正在查找本地安装…" : "尚未选择路径" }}
+        </p>
         <div v-else class="pgop-detail-body">
           <p v-if="pendingPath !== null" class="pgop-detail-path">{{ pendingPath }}</p>
           <div v-if="inspecting" class="pgop-detail-empty">
@@ -124,11 +155,14 @@ import gameEnum from "@enum/game.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import { inspectGameInstallation, locateGameInstallations } from "@utils/TGGameLauncher.js";
-import { computed, onWatcherCleanup, ref, useId, watch } from "vue";
+import { computed, ref, useId, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";
 
 type SelectMethod = "auto" | "manual";
+
+/** 当前选中项的来源；current 表示浮层打开时已登记的当前安装。 */
+type SelectionOrigin = SelectMethod | "current";
 
 type Props = {
   currentPath?: string | null;
@@ -139,25 +173,41 @@ const emit = defineEmits<{ selected: [] }>();
 const visible = defineModel<boolean>({ required: true });
 const titleId = useId();
 const knownStatus = gameEnum.installation.status.KNOWN;
-const loading = ref<boolean>(false);
+const unsupportedStatus = gameEnum.installation.status.UNSUPPORTED;
+const discovering = ref<boolean>(false);
 const inspecting = ref<boolean>(false);
 const registering = ref<boolean>(false);
-const discovered = ref<Array<string>>([]);
+const discovery = ref<TGApp.Game.Installation.DiscoveryResult | null>(null);
 const method = ref<SelectMethod | null>(null);
+const selectionOrigin = ref<SelectionOrigin | null>(null);
 const pendingPath = ref<string | null>(null);
 const pendingInstall = ref<TGApp.Game.Installation.Item | null>(null);
+let discoveryRequestId = 0;
+let inspectionRequestId = 0;
 
-const busy = computed<boolean>(() => loading.value || inspecting.value || registering.value);
+const discoveredCandidates = computed<Array<TGApp.Game.Installation.DiscoveryCandidate>>(
+  () => discovery.value?.candidates ?? [],
+);
+const degradedHint = computed<string | null>(() => {
+  if (discovering.value || discovery.value === null || discovery.value.notices.length === 0) {
+    return null;
+  }
+  return "部分位置无法读取，结果可能不完整";
+});
+const showEmptyState = computed<boolean>(
+  () => !discovering.value && discovery.value !== null && discoveredCandidates.value.length === 0,
+);
 const canConfirm = computed<boolean>(() => {
   const installation = pendingInstall.value;
-  if (installation === null || busy.value) return false;
-  return installation.status !== gameEnum.installation.status.UNSUPPORTED;
+  if (installation === null || registering.value || inspecting.value) return false;
+  return installation.status !== unsupportedStatus;
 });
 const autoDetectHint = computed<string>(() => {
-  if (loading.value) return "正在定位本地安装";
-  if (discovered.value.length === 0) return "未发现本地安装";
-  if (discovered.value.length === 1) return "已发现 1 处安装";
-  return `已发现 ${discovered.value.length} 处安装`;
+  if (discovering.value) return "正在查找本地安装";
+  if (discovery.value === null) return "从 HoYoPlay 登记与游戏日志中查找";
+  const count = discovery.value.candidates.length;
+  if (count === 0) return "未发现本地安装，点击重新扫描";
+  return `已发现 ${count} 处安装，点击重新扫描`;
 });
 
 function normalizePath(path: string): string {
@@ -186,74 +236,125 @@ function statusColor(status: TGApp.Game.Installation.StatusEnum): string {
   }
 }
 
+function sourceDesc(sources: Array<TGApp.Game.Installation.DiscoverySourceEnum>): string {
+  return sources.map((source) => gameEnum.installation.discoverySourceDesc(source)).join(" + ");
+}
+
+function isSelected(candidate: TGApp.Game.Installation.DiscoveryCandidate): boolean {
+  if (pendingInstall.value !== null) {
+    return pendingInstall.value.id === candidate.installation.id;
+  }
+  return (
+    pendingPath.value !== null &&
+    normalizePath(pendingPath.value) === normalizePath(candidate.installation.executablePath)
+  );
+}
+
 function resetDraft(): void {
-  loading.value = false;
+  discoveryRequestId += 1;
+  inspectionRequestId += 1;
+  discovering.value = false;
   inspecting.value = false;
   registering.value = false;
-  discovered.value = [];
+  discovery.value = null;
   method.value = null;
+  selectionOrigin.value = null;
   pendingPath.value = null;
   pendingInstall.value = null;
 }
 
-async function prepareOverlay(isCanceled: () => boolean): Promise<void> {
-  loading.value = true;
-  discovered.value = [];
+/** 打开浮层：当前路径检测与自动发现并行执行，互不阻塞。 */
+function prepareOverlay(): void {
+  discoveryRequestId += 1;
+  inspectionRequestId += 1;
+  discovery.value = null;
   method.value = null;
+  selectionOrigin.value = currentPath === null ? null : "current";
   pendingInstall.value = null;
   pendingPath.value = currentPath;
+  if (currentPath !== null) void inspectPending(currentPath);
+  void runDiscovery();
+}
+
+async function runDiscovery(): Promise<void> {
+  const requestId = ++discoveryRequestId;
+  discovering.value = true;
   try {
-    const located = await locateGameInstallations();
-    if (isCanceled()) return;
-    discovered.value = located;
-    const initial = currentPath;
-    if (initial === null) return;
-    if (located.some((path) => normalizePath(path) === normalizePath(initial))) {
-      method.value = "auto";
-    }
-    await inspectPending(initial);
+    const result = await locateGameInstallations();
+    if (requestId !== discoveryRequestId) return;
+    // 扫描成功后原子替换候选列表，保留已选路径与详情
+    discovery.value = result;
+    applyAutoPreselection();
   } catch (error) {
-    if (isCanceled()) return;
+    if (requestId !== discoveryRequestId) return;
     showSnackbar.error(`定位游戏安装失败：${error}`);
   } finally {
-    if (!isCanceled()) loading.value = false;
+    if (requestId === discoveryRequestId) discovering.value = false;
   }
 }
 
+/**
+ * 唯一有效候选自动预选；多候选与已有选择时不自动切换。
+ * 预选只展示检测快照，不写数据库，确认仍需用户点击。
+ */
+function applyAutoPreselection(): void {
+  if (selectionOrigin.value !== null) return;
+  const candidates = discoveredCandidates.value;
+  const usable = candidates.filter(
+    (candidate) => candidate.installation.status !== unsupportedStatus,
+  );
+  if (usable.length === 1) {
+    selectCandidate(usable[0]);
+    return;
+  }
+  if (usable.length === 0 && candidates.length === 1) {
+    selectCandidate(candidates[0]);
+  }
+}
+
+function selectCandidate(candidate: TGApp.Game.Installation.DiscoveryCandidate): void {
+  if (registering.value) return;
+  method.value = "auto";
+  selectionOrigin.value = "auto";
+  // 发现候选已带检测快照，直接展示；确认时会重新检测
+  inspecting.value = false;
+  pendingPath.value = candidate.installation.executablePath;
+  pendingInstall.value = candidate.installation;
+}
+
+function handleRescan(): void {
+  if (registering.value || discovering.value) return;
+  void runDiscovery();
+}
+
 async function inspectPending(executablePath: string): Promise<void> {
+  const requestId = ++inspectionRequestId;
   inspecting.value = true;
   pendingInstall.value = null;
   try {
     const installation = await inspectGameInstallation(executablePath);
-    if (!visible.value || pendingPath.value !== executablePath) return;
+    if (requestId !== inspectionRequestId || pendingPath.value !== executablePath) return;
     pendingInstall.value = installation;
   } catch (error) {
-    if (!visible.value || pendingPath.value !== executablePath) return;
+    if (requestId !== inspectionRequestId || pendingPath.value !== executablePath) return;
     showSnackbar.error(`检测游戏安装失败：${error}`);
   } finally {
-    if (visible.value && pendingPath.value === executablePath) inspecting.value = false;
+    if (requestId === inspectionRequestId && pendingPath.value === executablePath) {
+      inspecting.value = false;
+    }
   }
 }
 
 async function selectPath(executablePath: string, nextMethod: SelectMethod): Promise<void> {
   if (registering.value) return;
   method.value = nextMethod;
+  selectionOrigin.value = nextMethod;
   pendingPath.value = executablePath;
   await inspectPending(executablePath);
 }
 
-function handleAutoDetect(): void {
-  if (busy.value) return;
-  if (discovered.value.length === 0) {
-    showSnackbar.warn("未发现本地安装，请手动选择路径");
-    return;
-  }
-  if (discovered.value.length > 1) return;
-  void selectPath(discovered.value[0], "auto");
-}
-
 async function pickExecutable(): Promise<void> {
-  if (busy.value) return;
+  if (registering.value) return;
   const file: string | null = await open({
     defaultPath: pendingPath.value ?? currentPath ?? undefined,
     filters: [{ name: "原神国服客户端", extensions: ["exe"] }],
@@ -303,11 +404,7 @@ watch(
       resetDraft();
       return;
     }
-    let canceled = false;
-    onWatcherCleanup(() => {
-      canceled = true;
-    });
-    void prepareOverlay(() => canceled);
+    prepareOverlay();
   },
 );
 </script>
@@ -408,9 +505,81 @@ watch(
   }
 }
 
-.pgop-menu {
+.pgop-candidates {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--box-bg-2);
+  gap: 12px;
+}
+
+.pgop-candidates-title {
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+}
+
+.pgop-candidate-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.pgop-candidate {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 10px 12px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 6px;
   background: var(--box-bg-1);
   color: var(--box-text-4);
+  cursor: pointer;
+  gap: 8px;
+  text-align: left;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.64;
+  }
+
+  &.selected {
+    border-color: var(--tgc-od-orange);
+    background: var(--box-bg-2);
+  }
+}
+
+.pgop-candidate-path {
+  color: var(--box-text-4);
+  font-family: var(--font-text);
+  font-size: 13px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.pgop-candidate-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pgop-empty {
+  padding: 24px 16px;
+  border: 1px dashed var(--common-shadow-1);
+  border-radius: 8px;
+  margin: 0;
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
 }
 
 .pgop-detail {

@@ -53,6 +53,15 @@ declare namespace TGApp.Game.Installation {
   /** 未完成全新安装草稿状态值。 */
   type InstallDraftStateEnum = (typeof InstallDraftState)[keyof typeof InstallDraftState];
 
+  /** 自动发现安装的来源。 */
+  const DiscoverySource = <const>{
+    HOYOPLAY_REGISTRY: "hoyoplay_registry",
+    UNITY_LOG: "unity_log",
+  };
+
+  /** 自动发现安装来源值。 */
+  type DiscoverySourceEnum = (typeof DiscoverySource)[keyof typeof DiscoverySource];
+
   /** 已登记安装及其最新磁盘检测结果。 */
   type Item = {
     /** 稳定安装 ID。 */
@@ -115,5 +124,25 @@ declare namespace TGApp.Game.Installation {
   type UninstallSummary = {
     removedFiles: number;
     removedDirs: number;
+  };
+
+  /** 自动发现的一个候选安装及命中的来源列表。 */
+  type DiscoveryCandidate = {
+    /** 后端检测后的安装快照。 */
+    installation: Item;
+    /** 命中的发现来源。 */
+    sources: Array<DiscoverySourceEnum>;
+  };
+
+  /** 单个来源的非致命告警；code 为稳定错误码，不含本地路径。 */
+  type DiscoveryNotice = {
+    source: DiscoverySourceEnum;
+    code: string;
+  };
+
+  /** 自动定位报告：排序后的候选与来源级告警。 */
+  type DiscoveryResult = {
+    candidates: Array<DiscoveryCandidate>;
+    notices: Array<DiscoveryNotice>;
   };
 }
