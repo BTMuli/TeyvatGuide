@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  assembler, committer,
+  assembler, committer, defender,
   downloader::{
     DownloadControl, DownloadDurability, DownloadTelemetry, RateLimiter, download_object,
     prepare_cache_root,
@@ -2623,14 +2623,15 @@ impl GamePackageManager {
     with_active_task_ids(&self.active, |active_ids| {
       let journals = journal::list(task_root, None)
         .map_err(|error| format!("读取游戏资源任务历史失败：{error}"))?;
-      let (_, journals) = journal::cleanup_terminal_tasks_from_journals(
+      let (_, retained) = journal::cleanup_terminal_tasks_from_journals(
         task_root,
         active_ids,
         Some(ChronoDuration::days(7)),
-        journals,
+        journals.clone(),
       )
       .map_err(|error| format!("清理过期游戏资源任务历史失败：{error}"))?;
-      let mut summaries = journals
+      cleanup_finished_task_sidecars(task_root, &journals, &retained);
+      let mut summaries = retained
         .into_iter()
         .filter(|journal| {
           !active_ids.contains(&journal.task_id)
@@ -2657,7 +2658,15 @@ impl GamePackageManager {
       if active_ids.contains(&task_id) {
         return Err("任务仍在运行，无法删除任务记录".to_string());
       }
-      journal::cleanup_terminal_task(task_root, active_ids, &task_id)
+      let journals = journal::list(task_root, None)?;
+      let summary = journal::cleanup_terminal_task(task_root, active_ids, &task_id)?;
+      let retained = journals
+        .iter()
+        .filter(|journal| !summary.removed_task_ids.contains(&journal.task_id))
+        .cloned()
+        .collect::<Vec<_>>();
+      cleanup_finished_task_sidecars(task_root, &journals, &retained);
+      Ok(summary)
     })
   }
 
@@ -2715,9 +2724,17 @@ impl GamePackageManager {
     let journals = with_active_task_ids(&self.active, |active_ids| {
       let journals = journal::list(task_root, None)
         .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
-      journal::cleanup_terminal_tasks_from_journals(task_root, active_ids, max_age, journals)
-        .map(|(_, journals)| journals)
-        .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))
+      journal::cleanup_terminal_tasks_from_journals(
+        task_root,
+        active_ids,
+        max_age,
+        journals.clone(),
+      )
+      .map(|(_, retained)| {
+        cleanup_finished_task_sidecars(task_root, &journals, &retained);
+        retained
+      })
+      .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))
     })?;
     let journals = journals
       .into_iter()
@@ -2732,7 +2749,15 @@ impl GamePackageManager {
     max_age: Option<ChronoDuration>,
   ) -> Result<PackageTaskCleanupSummary, String> {
     with_active_task_ids(&self.active, |active_ids| {
-      journal::cleanup_terminal_tasks(task_root, active_ids, max_age)
+      let journals = journal::list(task_root, None)?;
+      let summary = journal::cleanup_terminal_tasks(task_root, active_ids, max_age)?;
+      let retained = journals
+        .iter()
+        .filter(|journal| !summary.removed_task_ids.contains(&journal.task_id))
+        .cloned()
+        .collect::<Vec<_>>();
+      cleanup_finished_task_sidecars(task_root, &journals, &retained);
+      Ok(summary)
     })
   }
 
@@ -2762,6 +2787,30 @@ impl GamePackageManager {
     journal.touch();
     journal::persist(task_root, &journal)?;
     Ok(journal.summary())
+  }
+}
+
+/// 任务记录删除后清理已结束、且不再被未完成任务使用的 sidecar。
+fn cleanup_finished_task_sidecars(
+  task_root: &Path,
+  before: &[TaskJournal],
+  retained: &[TaskJournal],
+) {
+  let retained_ids =
+    retained.iter().map(|journal| journal.task_id.as_str()).collect::<HashSet<_>>();
+  for journal in before.iter().filter(|journal| !retained_ids.contains(journal.task_id.as_str())) {
+    if journal.target == PackagePlanTarget::Switch
+      && let Err(error) =
+        switch::remove_finished_switch_dir(task_root, &journal.installation_id, &journal.plan_id)
+    {
+      log::warn!("[game-package][{}] 清理换服计划目录失败：{error}", journal.plan_id);
+    }
+    if let Err(error) = defender::cleanup_install_exclusions(task_root, &journal.plan_id) {
+      log::warn!("[game-package][{}] 清理 Defender 排除登记失败：{error}", journal.plan_id);
+    }
+  }
+  if let Err(error) = installer::sweep_terminal_drafts(task_root) {
+    log::warn!("[game-package] 清理已结束安装草稿失败：{error}");
   }
 }
 

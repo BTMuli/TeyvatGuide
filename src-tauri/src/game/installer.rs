@@ -457,6 +457,10 @@ fn set_draft_state_unlocked(
   validate_draft_state_transition(draft.state, state)?;
   draft.state = state;
   draft.updated_at = Utc::now().to_rfc3339();
+  if is_terminal_draft_state(state) {
+    remove_draft_file(task_root, draft_id)?;
+    return Ok(draft);
+  }
   persist_draft_unlocked(task_root, &draft)?;
   Ok(draft)
 }
@@ -2856,8 +2860,58 @@ pub(crate) fn ensure_windows_install_platform() -> Result<(), String> {
   }
 }
 
+fn is_terminal_draft_state(state: InstallDraftState) -> bool {
+  matches!(state, InstallDraftState::Canceled | InstallDraftState::Completed)
+}
+
 fn draft_path(task_root: &Path, draft_id: &str) -> PathBuf {
   task_root.join("install-drafts").join(format!("{draft_id}.json"))
+}
+
+fn remove_draft_file(task_root: &Path, draft_id: &str) -> Result<(), String> {
+  let path = draft_path(task_root, draft_id);
+  match fs::remove_file(&path) {
+    Ok(()) => {}
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+    Err(error) => return Err(format!("删除安装草稿失败：{error}")),
+  }
+  let _ = fs::remove_dir(task_root.join("install-drafts"));
+  Ok(())
+}
+
+/// 删除已经取消或完成的安装草稿；评估中或恢复中的草稿会保留。
+pub(crate) fn sweep_terminal_drafts(task_root: &Path) -> Result<(), String> {
+  let lock = draft_mutation_lock(&task_root_lock_key(task_root))?;
+  let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
+  let directory = task_root.join("install-drafts");
+  let entries = match fs::read_dir(&directory) {
+    Ok(entries) => entries,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+    Err(error) => return Err(format!("读取安装草稿目录失败：{error}")),
+  };
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取安装草稿失败：{error}"))?;
+    let Some(name) = entry.file_name().to_str().map(str::to_string) else {
+      continue;
+    };
+    let Some(draft_id) = name.strip_suffix(".json") else {
+      continue;
+    };
+    let draft = match load_draft(task_root, draft_id) {
+      Ok(draft) => draft,
+      Err(error) => {
+        log::warn!("[game-install] 忽略无法读取的安装草稿 {draft_id}：{error}");
+        continue;
+      }
+    };
+    if is_terminal_draft_state(draft.state)
+      && let Err(error) = remove_draft_file(task_root, draft_id)
+    {
+      log::warn!("[game-install] 清理已结束安装草稿 {draft_id} 失败：{error}");
+    }
+  }
+  let _ = fs::remove_dir(&directory);
+  Ok(())
 }
 
 fn draft_mutation_lock(key: &str) -> Result<Arc<Mutex<()>>, String> {

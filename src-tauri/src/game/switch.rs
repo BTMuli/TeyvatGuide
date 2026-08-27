@@ -868,6 +868,51 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) { Err("任务已取消".to_string()) } else { Ok(()) }
 }
 
+/// 任务结束后删除安装级换服目录；若目录已被更新评估覆盖则只清匹配的 commit。
+pub(crate) fn remove_finished_switch_dir(
+  task_root: &Path,
+  installation_id: &str,
+  plan_id: &str,
+) -> Result<(), String> {
+  let directory = task_root.join("switch").join(installation_id);
+  if !directory.exists() {
+    return Ok(());
+  }
+  let plan_path = directory.join("plan.json");
+  if plan_path.is_file() {
+    let plan = load_plan_file(&plan_path)?;
+    if plan.plan_id != plan_id {
+      remove_matching_switch_commit(task_root, installation_id, plan_id)?;
+      return Ok(());
+    }
+  }
+  fs::remove_dir_all(&directory).map_err(|error| format!("清理换服计划目录失败：{error}"))?;
+  let _ = fs::remove_dir(task_root.join("switch"));
+  Ok(())
+}
+
+fn remove_matching_switch_commit(
+  task_root: &Path,
+  installation_id: &str,
+  plan_id: &str,
+) -> Result<(), String> {
+  let path = commit_path(task_root, installation_id);
+  if !path.is_file() {
+    return Ok(());
+  }
+  let bytes = fs::read(&path).map_err(|error| format!("读取换服提交计划失败：{error}"))?;
+  let commit: PersistedSwitchCommit =
+    serde_json::from_slice(&bytes).map_err(|error| format!("解析换服提交计划失败：{error}"))?;
+  if commit.plan_id != plan_id {
+    return Ok(());
+  }
+  match fs::remove_file(&path) {
+    Ok(()) => Ok(()),
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
+    Err(error) => Err(format!("清理换服提交计划失败：{error}")),
+  }
+}
+
 fn persist_plan(task_root: &Path, plan: &PersistedSwitchPlan) -> Result<(), String> {
   persist_plan_at(&task_root.join("switch").join(&plan.installation_id), plan)?;
   persist_task_switch_plan(task_root, plan)

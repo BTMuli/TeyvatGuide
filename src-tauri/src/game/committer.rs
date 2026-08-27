@@ -530,6 +530,13 @@ where
   match result {
     Ok(()) => {
       cleanup_file_transaction(&commit, game_root, task_root);
+      if let Err(error) = super::switch::remove_finished_switch_dir(
+        task_root,
+        &journal.installation_id,
+        &journal.plan_id,
+      ) {
+        log::warn!("[game-switch][{}] 清理换服计划目录失败：{error}", journal.plan_id);
+      }
       Ok(())
     }
     Err(error) => {
@@ -566,7 +573,17 @@ where
   journal.apply = None;
   journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
   journal.error_message = None;
-  persist_and_emit(task_root, journal, &emit)
+  persist_and_emit(task_root, journal, &emit)?;
+  if !retry
+    && let Err(error) = super::switch::remove_finished_switch_dir(
+      task_root,
+      &journal.installation_id,
+      &journal.plan_id,
+    )
+  {
+    log::warn!("[game-switch][{}] 清理换服计划目录失败：{error}", journal.plan_id);
+  }
+  Ok(())
 }
 
 fn prepare_repair_transaction(
