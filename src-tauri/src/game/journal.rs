@@ -4,6 +4,7 @@
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
   path_guard::normalize_manifest_path,
+  perf,
   planner::PersistedPlan,
   scheme::scheme_id_key,
 };
@@ -196,6 +197,9 @@ pub(crate) struct TaskJournal {
   /// 发布前资源自动修复的任务级累计次数。
   #[serde(default)]
   pub(crate) install_repair_attempts: usize,
+  /// 安装流水线因持续停滞触发的自动恢复累计次数。
+  #[serde(default)]
+  pub(crate) install_auto_stall_retry_count: usize,
   /// 发布前资源自动修复的逐资源累计次数；键为计划资源索引。
   #[serde(default)]
   pub(crate) install_asset_repair_attempts: HashMap<usize, usize>,
@@ -301,6 +305,7 @@ impl TaskJournal {
       delete_total_bytes: plan.delete_files.iter().map(|file| file.size).sum(),
       delete_completed_bytes: 0,
       install_repair_attempts: 0,
+      install_auto_stall_retry_count: 0,
       install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
@@ -373,6 +378,7 @@ impl TaskJournal {
       delete_total_bytes: 0,
       delete_completed_bytes: 0,
       install_repair_attempts: 0,
+      install_auto_stall_retry_count: 0,
       install_asset_repair_attempts: HashMap::new(),
       current_file: None,
       download_current_file: None,
@@ -622,6 +628,7 @@ pub(crate) fn load_or_create(
 }
 
 pub(crate) fn load(path: &Path) -> Result<TaskJournal, String> {
+  perf::record_journal_load();
   let metadata =
     fs::metadata(path).map_err(|error| format!("读取游戏资源任务日志失败：{error}"))?;
   if metadata.len() == 0 || metadata.len() > MAX_JOURNAL_BYTES {
@@ -843,6 +850,7 @@ pub(crate) fn list(
   task_root: &Path,
   installation_id: Option<&str>,
 ) -> Result<Vec<TaskJournal>, String> {
+  perf::record_journal_list();
   let tasks_root = task_root.join("tasks");
   let entries = match fs::read_dir(tasks_root) {
     Ok(entries) => entries,
@@ -1128,6 +1136,7 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
     || journal.completed_asset_cursor > journal.assembly_total_count
     || journal.assembly_completed_bytes_total > journal.assembly_total_bytes
     || journal.install_repair_attempts > 3
+    || journal.install_auto_stall_retry_count > 1
     || journal.install_asset_repair_attempts.len() > journal.assembly_total_count
     || journal.install_asset_repair_attempts.iter().any(|(index, attempts)| {
       *index >= journal.assembly_total_count || *attempts == 0 || *attempts > 2

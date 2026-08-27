@@ -40,12 +40,208 @@ use std::{
   time::{Duration, Instant},
 };
 use tauri::{AppHandle, Emitter, ipc::Channel};
+use tauri_plugin_notification::NotificationExt;
 use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 use uuid::Uuid;
 
 const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+const INSTALL_STALL_THRESHOLD: Duration = Duration::from_secs(45);
+const INSTALL_STALL_POLL_INTERVAL: Duration = Duration::from_secs(5);
+const INSTALL_STALL_CONFIRMATIONS: usize = 3;
+const INSTALL_AUTO_STALL_RETRY_LIMIT: usize = 1;
+const INSTALL_STALL_PAUSE_MESSAGE: &str =
+  "检测到下载写入或资源组装持续停滞，任务已自动暂停；可从任务记录继续。详情见运行日志。";
+const INSTALL_STALL_NOTIFICATION_TITLE: &str = "游戏安装已暂停";
+const INSTALL_STALL_NOTIFICATION_BODY: &str =
+  "自动重试后仍检测到磁盘 I/O 持续停滞，请检查磁盘状态后手动继续。";
+
+/// 安装流水线停滞看门狗：独立线程联合检查 journal 与下载/组装阶段心跳。
+fn spawn_install_stall_watchdog(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  plan_id: String,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  paused: Arc<AtomicBool>,
+  canceled: Arc<AtomicBool>,
+  metrics: Arc<InstallPipelineMetrics>,
+  notify_on_stall: bool,
+) {
+  std::thread::spawn(move || {
+    let journal_path = journal::journal_path(&task_root, &plan_id);
+    let mut last_signature = None;
+    let mut last_progress_at = Instant::now();
+    let mut confirmations = 0_usize;
+    loop {
+      std::thread::sleep(INSTALL_STALL_POLL_INTERVAL);
+      if paused.load(Ordering::Acquire) || canceled.load(Ordering::Acquire) {
+        break;
+      }
+      let Ok(value) = journal::load(&journal_path) else {
+        continue;
+      };
+      if !matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+        break;
+      }
+      let download = metrics.download_telemetry.snapshot();
+      let assembly = metrics.assembly_telemetry.snapshot();
+      let signature = (value.revision, download.heartbeat_count, assembly.heartbeat_count);
+      if last_signature != Some(signature) {
+        last_signature = Some(signature);
+        last_progress_at = Instant::now();
+        confirmations = 0;
+        continue;
+      }
+      let stalled_for = last_progress_at.elapsed();
+      if stalled_for < INSTALL_STALL_THRESHOLD {
+        continue;
+      }
+      confirmations = confirmations.saturating_add(1);
+      let journal_age_seconds = fs::metadata(&journal_path)
+        .ok()
+        .and_then(|metadata| metadata.modified().ok())
+        .and_then(|modified| modified.elapsed().ok())
+        .map_or(0, |age| age.as_secs());
+      log_install_stall_diagnostics(
+        &plan_id,
+        stalled_for,
+        journal_age_seconds,
+        confirmations,
+        &metrics,
+        download,
+        assembly,
+      );
+      if confirmations >= INSTALL_STALL_CONFIRMATIONS
+        && !metrics.stall_pause_requested.swap(true, Ordering::AcqRel)
+      {
+        paused.store(true, Ordering::Release);
+        log::error!("[game-install][{plan_id}] 安装流水线已连续确认停滞，自动转为可恢复暂停状态");
+        if notify_on_stall {
+          if let Err(error) = app_handle
+            .notification()
+            .builder()
+            .title(INSTALL_STALL_NOTIFICATION_TITLE)
+            .body(INSTALL_STALL_NOTIFICATION_BODY)
+            .show()
+          {
+            log::error!("[game-install][{plan_id}] 发送安装停滞系统通知失败：{error}");
+          }
+        }
+        persist_install_watchdog_pause(
+          &app_handle,
+          &task_root,
+          &plan_id,
+          &journal,
+          INSTALL_STALL_PAUSE_MESSAGE,
+        );
+        break;
+      }
+    }
+  });
+}
+
+fn log_install_stall_diagnostics(
+  plan_id: &str,
+  stalled_for: Duration,
+  journal_age_seconds: u64,
+  confirmations: usize,
+  metrics: &InstallPipelineMetrics,
+  download: super::downloader::DownloadTelemetrySnapshot,
+  assembly: assembler::AssemblyTelemetrySnapshot,
+) {
+  log::warn!(
+    "[game-install][{plan_id}] 安装流水线停滞样本：stalled={}s journalAge={}s confirmation={}/{} activeDownloads={} activeAssemblies={} downloadHeartbeatAge={}ms downloadNetworkActive={} downloadWriteActive={} downloadNetworkOps={} downloadWriteOps={} downloadWrittenBytes={} downloadNetworkMax={}ms downloadWriteMax={}ms assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyReadOps={} assemblyWriteOps={} assemblyHashOps={} assemblySyncOps={} assemblyReadBytes={} assemblyWrittenBytes={} assemblyHashedBytes={} assemblyReadMax={}ms assemblyWriteMax={}ms assemblyHashMax={}ms assemblySyncMax={}ms queueRefills={}",
+    stalled_for.as_secs(),
+    journal_age_seconds,
+    confirmations,
+    INSTALL_STALL_CONFIRMATIONS,
+    metrics.active_downloads.load(Ordering::Relaxed),
+    metrics.active_assemblies.load(Ordering::Relaxed),
+    download.last_activity_age_millis,
+    download.active_network_waits,
+    download.active_local_writes,
+    download.network_wait_operation_count,
+    download.local_write_operation_count,
+    download.local_written_bytes,
+    download.max_network_wait_micros / 1_000,
+    download.max_local_write_micros / 1_000,
+    assembly.last_activity_age_millis,
+    assembly.active_reads,
+    assembly.active_writes,
+    assembly.active_hashes,
+    assembly.active_syncs,
+    assembly.read_operations,
+    assembly.write_operations,
+    assembly.hash_operations,
+    assembly.sync_operations,
+    assembly.read_bytes,
+    assembly.written_bytes,
+    assembly.hashed_bytes,
+    assembly.max_read_micros / 1_000,
+    assembly.max_write_micros / 1_000,
+    assembly.max_hash_micros / 1_000,
+    assembly.max_sync_micros / 1_000,
+    metrics.queue_refill_count.load(Ordering::Relaxed),
+  );
+}
+
+fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool {
+  if !matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+    return false;
+  }
+  value.state = PackageTaskState::Paused;
+  value.error_message = Some(message.to_string());
+  value.active_assembly_count = 0;
+  value.download_current_file = None;
+  value.assembly_current_file = None;
+  value.current_file = None;
+  value.bytes_per_second = 0;
+  value.eta_seconds = None;
+  value.assembly_bytes_per_second = 0;
+  value.assembly_eta_seconds = None;
+  value.touch();
+  true
+}
+
+fn persist_install_watchdog_pause(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  plan_id: &str,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  message: &str,
+) {
+  if let Ok(mut value) = journal.try_lock() {
+    if apply_install_watchdog_pause(&mut value, message) {
+      if let Err(error) = journal::persist(task_root, &value) {
+        log::error!("[game-install][{}] 持久化自动暂停状态失败：{error}", value.plan_id);
+      }
+      let _ = journal::forget_progress(task_root, &value.task_id);
+      emit_progress(app_handle, &value.summary());
+      emit_state(app_handle, &value.summary());
+    }
+    return;
+  }
+
+  let journal_path = journal::journal_path(task_root, plan_id);
+  match journal::load(&journal_path) {
+    Ok(mut value) => {
+      if apply_install_watchdog_pause(&mut value, message) {
+        if let Err(error) = journal::persist(task_root, &value) {
+          log::error!("[game-install][{}] 持久化自动暂停状态失败：{error}", value.plan_id);
+        }
+        let _ = journal::forget_progress(task_root, &value.task_id);
+        emit_progress(app_handle, &value.summary());
+        emit_state(app_handle, &value.summary());
+      }
+    }
+    Err(error) => {
+      log::error!(
+        "[game-install][{plan_id}] 自动暂停时任务内存锁被占用，且无法读取持久化记录：{error}"
+      );
+    }
+  }
+}
 
 /// 配音下载完成后自动提交所需的可信安装与登记上下文。
 pub(crate) struct AudioApplyContext {
@@ -183,6 +379,8 @@ struct InstallPipelineMetrics {
   peak_logical_staging_bytes: AtomicU64,
   eta_remaining_bytes: AtomicU64,
   download_telemetry: Arc<DownloadTelemetry>,
+  assembly_telemetry: Arc<assembler::AssemblyTelemetry>,
+  stall_pause_requested: Arc<AtomicBool>,
   journal_attempt_count: AtomicU64,
   journal_write_count: AtomicU64,
   journal_serialized_bytes: AtomicU64,
@@ -237,7 +435,9 @@ fn start_install_download_progress_monitor(
     let mut smoothed_bytes_per_second = 0_f64;
     loop {
       tokio::time::sleep(Duration::from_secs(1)).await;
-      if stopped_for_task.load(Ordering::Acquire) {
+      if stopped_for_task.load(Ordering::Acquire)
+        || metrics.stall_pause_requested.load(Ordering::Acquire)
+      {
         break;
       }
       let received_bytes = metrics.download_telemetry.snapshot().received_bytes;
@@ -260,6 +460,11 @@ fn start_install_download_progress_monitor(
       }
 
       let mut value = journal.lock().await;
+      if stopped_for_task.load(Ordering::Acquire)
+        || metrics.stall_pause_requested.load(Ordering::Acquire)
+      {
+        break;
+      }
       let speed = if value.state == PackageTaskState::Downloading {
         smoothed_bytes_per_second.max(0.0) as u64
       } else {
@@ -479,40 +684,61 @@ impl InstallSpoolTracker {
       contiguous_bytes: self.contiguous_bytes,
     }
   }
+}
 
-  /// 释放已经没有资源消费者、且不属于 SDK 的任务私有对象。
-  fn release_unneeded(&mut self, plan: &PersistedPlan, spool_root: &Path) -> u64 {
-    let sdk_key = plan
-      .install_overlay
-      .as_ref()
-      .and_then(|overlay| overlay.sdk.as_ref())
-      .map(|sdk| sdk.cache_key.as_str());
-    let mut released = 0_u64;
-    let keys = self.resident.keys().cloned().collect::<Vec<_>>();
-    for key in keys {
-      let Some(id) = self.resident.get(&key).cloned() else {
-        continue;
-      };
-      if self.remaining_consumers.get(&id).copied().unwrap_or_default() > 0
-        || sdk_key == Some(key.as_str())
-      {
-        continue;
-      }
-      let path = spool_root.join(&key);
-      let Ok(metadata) = fs::symlink_metadata(&path) else {
-        continue;
-      };
-      if metadata.file_type().is_symlink() || !metadata.is_file() || fs::remove_file(&path).is_err()
-      {
-        continue;
-      }
-      released = released.saturating_add(metadata.len());
-      self.resident.remove(&key);
-      if !self.consumed.contains(&id) {
-        self.counted.remove(&id);
-      }
+/// 释放已经没有资源消费者、且不属于 SDK 的任务私有 spool 对象。
+///
+/// fs 探测与删除放在 `InstallSpoolTracker` 锁外执行，避免单个文件操作卡住时
+/// 让所有 tokio 工作线程排队等锁、导致整个下载流水线饿死。
+fn release_spool_unneeded(
+  tracker: &Arc<Mutex<InstallSpoolTracker>>,
+  plan: &PersistedPlan,
+  spool_root: &Path,
+) -> u64 {
+  let sdk_key = plan
+    .install_overlay
+    .as_ref()
+    .and_then(|overlay| overlay.sdk.as_ref())
+    .map(|sdk| sdk.cache_key.as_str());
+  let candidates = {
+    let guard = tracker.lock().unwrap();
+    guard
+      .resident
+      .iter()
+      .filter(|(key, id)| {
+        guard.remaining_consumers.get(id.as_str()).copied().unwrap_or_default() == 0
+          && sdk_key != Some(key.as_str())
+      })
+      .map(|(key, id)| (key.clone(), id.clone()))
+      .collect::<Vec<_>>()
+  };
+  let mut released = 0_u64;
+  for (key, id) in candidates {
+    let path = spool_root.join(&key);
+    let Ok(metadata) = fs::symlink_metadata(&path) else {
+      forget_released_spool_file(tracker, &key, &id);
+      continue;
+    };
+    if metadata.file_type().is_symlink() || !metadata.is_file() {
+      continue;
     }
-    released
+    if fs::remove_file(&path).is_err() {
+      continue;
+    }
+    released = released.saturating_add(metadata.len());
+    forget_released_spool_file(tracker, &key, &id);
+  }
+  released
+}
+
+/// 从 spool 记账中移除一个已释放对象；仅当 resident 仍指向同一 id 时才更新。
+fn forget_released_spool_file(tracker: &Arc<Mutex<InstallSpoolTracker>>, key: &str, id: &str) {
+  let mut guard = tracker.lock().unwrap();
+  if guard.resident.get(key).is_some_and(|current| current == id) {
+    guard.resident.remove(key);
+    if !guard.consumed.contains(id) {
+      guard.counted.remove(id);
+    }
   }
 }
 
@@ -534,6 +760,7 @@ impl InstallPipelineMetrics {
     concurrency: usize,
     started_at: Instant,
     index_build_micros: u64,
+    stall_pause_requested: Arc<AtomicBool>,
   ) -> Self {
     Self {
       plan_id: plan.plan_id.clone(),
@@ -560,6 +787,8 @@ impl InstallPipelineMetrics {
           .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
       ),
       download_telemetry: DownloadTelemetry::new(),
+      assembly_telemetry: assembler::AssemblyTelemetry::new(),
+      stall_pause_requested,
       journal_attempt_count: AtomicU64::new(0),
       journal_write_count: AtomicU64::new(0),
       journal_serialized_bytes: AtomicU64::new(0),
@@ -708,6 +937,7 @@ impl InstallPipelineMetrics {
 impl Drop for InstallPipelineMetrics {
   fn drop(&mut self) {
     let download = self.download_telemetry.snapshot();
+    let assembly = self.assembly_telemetry.snapshot();
     log::info!(
       "[game-package][install][{}][perf] totalMs={} indexBuildCount=1 indexBuildUs={} assets={} downloads={} chunks={} plannedDownloadBytes={} plannedOutputBytes={} assetWorksetMax={} assetWorksetP50={} assetWorksetP95={} assetWorksetP99={} assetWorksetChunkMax={} batchUnionMax={} batchUnionP95={} maxDownloadConsumers={} maxDownloadSpan={} queueRefills={} peakDownloads={} peakAssemblies={} downloadMs={} assemblyMs={} downloadNetworkMs={} downloadWriteMs={} downloadHashMs={} downloadFileSyncCount={} downloadFileSyncMs={} downloadReceivedBytes={} downloadCacheHits={} downloadAttempts={} downloadAttemptSuccesses={} downloadAttemptFailures={} downloadRetries={} downloadObjectSuccesses={} downloadObjectFailures={} downloadAborts={} downloadPublishFailures={} zstdDecodeReadCount={} zstdDecodeReadBytes={} zstdDecodeReadMs={} chunkMd5Count={} chunkMd5Bytes={} chunkMd5Ms={} assetMd5Count={} assetMd5Bytes={} assetMd5Ms={} stagingFileSyncCount={} stagingFileSyncBytes={} stagingFileSyncMs={} journalAttempts={} journalWrites={} journalSerializedBytes={} journalSerializeMs={} journalWriteMs={} journalFileSyncCount={} journalFileSyncMs={} journalRenameMs={} journalDirectorySyncCount={} journalDirectorySyncMs={} journalLockWaitMs={} stagingVerifyCount={} stagingVerifyMs={} postPublishVerifyCount={} postPublishVerifyMs={} resumeAssetCursor={} recoveryValidateMs={} checkpoints={} checkpointMs={} scheduledUniqueDownloadBytes={} duplicateWaitBytes={} peakSpoolBytes={} peakLogicalStagingBytes={}",
       self.plan_id,
@@ -783,6 +1013,33 @@ impl Drop for InstallPipelineMetrics {
       self.peak_spool_bytes.load(Ordering::Relaxed),
       self.peak_logical_staging_bytes.load(Ordering::Relaxed),
     );
+    log::info!(
+      "[game-package][install][{}][stage-perf] downloadNetworkOps={} downloadWriteOps={} downloadWrittenBytes={} downloadNetworkMs={} downloadWriteMs={} downloadNetworkMaxMs={} downloadWriteMaxMs={} assemblyReadOps={} assemblyWriteOps={} assemblyHashOps={} assemblySyncOps={} assemblyReadBytes={} assemblyWrittenBytes={} assemblyHashedBytes={} assemblyReadMs={} assemblyWriteMs={} assemblyHashMs={} assemblySyncMs={} assemblyReadMaxMs={} assemblyWriteMaxMs={} assemblyHashMaxMs={} assemblySyncMaxMs={} watchdogPaused={}",
+      self.plan_id,
+      download.network_wait_operation_count,
+      download.local_write_operation_count,
+      download.local_written_bytes,
+      download.network_wait_micros / 1_000,
+      download.write_micros / 1_000,
+      download.max_network_wait_micros / 1_000,
+      download.max_local_write_micros / 1_000,
+      assembly.read_operations,
+      assembly.write_operations,
+      assembly.hash_operations,
+      assembly.sync_operations,
+      assembly.read_bytes,
+      assembly.written_bytes,
+      assembly.hashed_bytes,
+      assembly.read_micros / 1_000,
+      assembly.write_micros / 1_000,
+      assembly.hash_micros / 1_000,
+      assembly.sync_micros / 1_000,
+      assembly.max_read_micros / 1_000,
+      assembly.max_write_micros / 1_000,
+      assembly.max_hash_micros / 1_000,
+      assembly.max_sync_micros / 1_000,
+      self.stall_pause_requested.load(Ordering::Relaxed),
+    );
   }
 }
 
@@ -795,6 +1052,9 @@ fn persist_install_checkpoint(
   journal_value: &TaskJournal,
   metrics: &InstallPipelineMetrics,
 ) -> Result<(), String> {
+  if metrics.stall_pause_requested.load(Ordering::Acquire) {
+    return Ok(());
+  }
   let mut timing = journal::JournalPersistTiming::default();
   let result = journal::persist_timed(task_root, journal_value, &mut timing);
   metrics.record_checkpoint(Duration::from_micros(timing.total_micros));
@@ -807,6 +1067,9 @@ fn persist_install_progress(
   journal_value: &TaskJournal,
   metrics: &InstallPipelineMetrics,
 ) -> Result<(), String> {
+  if metrics.stall_pause_requested.load(Ordering::Acquire) {
+    return Ok(());
+  }
   let mut timing = journal::JournalPersistTiming::default();
   let result = journal::persist_progress_timed(task_root, journal_value, &mut timing);
   metrics.record_journal(&timing);
@@ -858,16 +1121,19 @@ struct InstallationReservation {
 struct ActiveTask {
   installation_id: String,
   canceled: Arc<AtomicBool>,
-  paused: Arc<AtomicBool>,
+  paused: Arc<Mutex<Arc<AtomicBool>>>,
+  manual_pause_requested: Arc<AtomicBool>,
   journal: Arc<AsyncMutex<TaskJournal>>,
 }
 
 async fn signal_pause_and_lock_journal(
   task: &ActiveTask,
-) -> (bool, tokio::sync::MutexGuard<'_, TaskJournal>) {
-  let was_paused = task.paused.swap(true, Ordering::AcqRel);
+) -> Result<(Arc<AtomicBool>, bool, tokio::sync::MutexGuard<'_, TaskJournal>), String> {
+  let paused = task.paused.lock().map_err(|_| "游戏资源任务暂停令牌锁已损坏".to_string())?.clone();
+  task.manual_pause_requested.store(true, Ordering::Release);
+  let was_paused = paused.swap(true, Ordering::AcqRel);
   let journal = task.journal.lock().await;
-  (was_paused, journal)
+  Ok((paused, was_paused, journal))
 }
 
 #[derive(Clone)]
@@ -1069,11 +1335,13 @@ impl GamePackageManager {
 
     let summary = journal.summary();
     let paused = Arc::new(AtomicBool::new(false));
+    let paused_slot = Arc::new(Mutex::new(Arc::clone(&paused)));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
       installation_id: plan.installation_id.clone(),
       canceled: Arc::clone(&canceled),
-      paused: Arc::clone(&paused),
+      paused: paused_slot,
+      manual_pause_requested: Arc::new(AtomicBool::new(false)),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -1276,12 +1544,17 @@ impl GamePackageManager {
     journal::persist(&task_root, &journal)?;
     installer::set_draft_state(&task_root, &draft_id, installer::InstallDraftState::Downloading)?;
     let summary = journal.summary();
+    let retry_budget_exhausted =
+      journal.install_auto_stall_retry_count >= INSTALL_AUTO_STALL_RETRY_LIMIT;
     let paused = Arc::new(AtomicBool::new(false));
+    let paused_slot = Arc::new(Mutex::new(Arc::clone(&paused)));
+    let manual_pause_requested = Arc::new(AtomicBool::new(false));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
       installation_id: plan.installation_id.clone(),
       canceled: Arc::clone(&canceled),
-      paused: Arc::clone(&paused),
+      paused: Arc::clone(&paused_slot),
+      manual_pause_requested: Arc::clone(&manual_pause_requested),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -1291,7 +1564,7 @@ impl GamePackageManager {
     emit_state(&app_handle, &summary);
     tauri::async_runtime::spawn(async move {
       let _reservation = reservation;
-      run_install_streaming_task(
+      run_install_streaming_supervisor(
         app_handle.clone(),
         task_root.clone(),
         cache_root,
@@ -1300,10 +1573,12 @@ impl GamePackageManager {
         download_client,
         shared_journal,
         canceled,
-        paused,
+        paused_slot,
+        manual_pause_requested,
         concurrency,
         options.max_bytes_per_second,
         context,
+        retry_budget_exhausted,
       )
       .await;
     });
@@ -1354,11 +1629,13 @@ impl GamePackageManager {
     journal::persist(&task_root, &journal)?;
     let summary = journal.summary();
     let paused = Arc::new(AtomicBool::new(false));
+    let paused_slot = Arc::new(Mutex::new(Arc::clone(&paused)));
     let shared_journal = Arc::new(AsyncMutex::new(journal));
     let task = ActiveTask {
       installation_id: plan.installation_id().to_string(),
       canceled: Arc::clone(&canceled),
-      paused: Arc::clone(&paused),
+      paused: paused_slot,
+      manual_pause_requested: Arc::new(AtomicBool::new(false)),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -1443,13 +1720,13 @@ impl GamePackageManager {
     }
     // 先通知下载 worker 停止，再等待高频更新的任务日志锁。否则流水线越繁忙，
     // 暂停命令越容易长期排在进度更新之后，前端也会一直停留在加载态。
-    let (was_paused, mut journal_value) = signal_pause_and_lock_journal(&task).await;
+    let (paused, was_paused, mut journal_value) = signal_pause_and_lock_journal(&task).await?;
     if !matches!(journal_value.target, PackagePlanTarget::Install | PackagePlanTarget::Audio) {
-      task.paused.store(was_paused, Ordering::Release);
+      paused.store(was_paused, Ordering::Release);
       return Err("当前资源任务不能暂停".to_string());
     }
     if journal_value.installation_id != installation_id {
-      task.paused.store(was_paused, Ordering::Release);
+      paused.store(was_paused, Ordering::Release);
       return Err("资源任务身份不匹配".to_string());
     }
     if journal_value.state == PackageTaskState::Paused {
@@ -1459,7 +1736,7 @@ impl GamePackageManager {
       journal_value.state,
       PackageTaskState::Queued | PackageTaskState::Downloading | PackageTaskState::Assembling
     ) {
-      task.paused.store(was_paused, Ordering::Release);
+      paused.store(was_paused, Ordering::Release);
       return Err("当前资源任务不能暂停".to_string());
     }
     let previous_state = journal_value.state;
@@ -1470,7 +1747,7 @@ impl GamePackageManager {
     journal_value.error_message = None;
     journal_value.touch();
     if let Err(error) = journal::persist(task_root, &journal_value) {
-      task.paused.store(was_paused, Ordering::Release);
+      paused.store(was_paused, Ordering::Release);
       journal_value.state = previous_state;
       return Err(error);
     }
@@ -1591,11 +1868,13 @@ impl GamePackageManager {
     let registration_game_root = game_root.clone();
     let summary = journal_value.summary();
     let paused = Arc::new(AtomicBool::new(false));
+    let paused_slot = Arc::new(Mutex::new(Arc::clone(&paused)));
     let shared_journal = Arc::new(AsyncMutex::new(journal_value));
     let task = ActiveTask {
       installation_id: plan.installation_id.clone(),
       canceled: Arc::clone(&canceled),
-      paused: Arc::clone(&paused),
+      paused: paused_slot,
+      manual_pause_requested: Arc::new(AtomicBool::new(false)),
       journal: Arc::clone(&shared_journal),
     };
     {
@@ -2661,6 +2940,125 @@ async fn apply_audio_after_download(
   .map(|_| ())
 }
 
+#[allow(clippy::too_many_arguments)]
+async fn run_install_streaming_supervisor(
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  shared_cache_root: PathBuf,
+  spool_root: PathBuf,
+  plan: PersistedPlan,
+  download_client: reqwest::Client,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  paused_slot: Arc<Mutex<Arc<AtomicBool>>>,
+  manual_pause_requested: Arc<AtomicBool>,
+  concurrency: usize,
+  max_bytes_per_second: Option<u64>,
+  context: InstallContext,
+  mut retry_budget_exhausted: bool,
+) {
+  loop {
+    let paused = match paused_slot.lock() {
+      Ok(value) => value.clone(),
+      Err(_) => {
+        log::error!("[game-install][{}] 安装暂停令牌锁已损坏", plan.plan_id);
+        break;
+      }
+    };
+    let stall_pause_requested = Arc::new(AtomicBool::new(false));
+    run_install_streaming_task(
+      app_handle.clone(),
+      task_root.clone(),
+      shared_cache_root.clone(),
+      spool_root.clone(),
+      plan.clone(),
+      download_client.clone(),
+      Arc::clone(&journal),
+      Arc::clone(&canceled),
+      paused,
+      concurrency,
+      max_bytes_per_second,
+      context.clone(),
+      Arc::clone(&stall_pause_requested),
+      retry_budget_exhausted,
+    )
+    .await;
+
+    if !stall_pause_requested.load(Ordering::Acquire)
+      || canceled.load(Ordering::Acquire)
+      || manual_pause_requested.load(Ordering::Acquire)
+      || retry_budget_exhausted
+    {
+      break;
+    }
+
+    let next_paused = Arc::new(AtomicBool::new(false));
+    let pause_slot_updated = match paused_slot.lock() {
+      Ok(mut value) => {
+        *value = Arc::clone(&next_paused);
+        true
+      }
+      Err(_) => {
+        log::error!("[game-install][{}] 自动恢复时暂停令牌锁已损坏", plan.plan_id);
+        false
+      }
+    };
+    if !pause_slot_updated {
+      break;
+    }
+
+    let retry_summary = {
+      let mut value = journal.lock().await;
+      if value.plan_id != plan.plan_id
+        || value.installation_id != plan.installation_id
+        || value.target != PackagePlanTarget::Install
+        || value.state != PackageTaskState::Paused
+        || value.install_auto_stall_retry_count >= INSTALL_AUTO_STALL_RETRY_LIMIT
+        || canceled.load(Ordering::Acquire)
+        || manual_pause_requested.load(Ordering::Acquire)
+      {
+        None
+      } else {
+        value.install_auto_stall_retry_count =
+          value.install_auto_stall_retry_count.saturating_add(1);
+        value.resume_elapsed();
+        value.state = PackageTaskState::Queued;
+        value.error_message = None;
+        value.current_file = Some("检测到持续停滞，正在自动重试 1/1".to_string());
+        value.download_current_file = None;
+        value.assembly_current_file = None;
+        value.active_assembly_count = 0;
+        value.bytes_per_second = 0;
+        value.eta_seconds = None;
+        value.assembly_bytes_per_second = 0;
+        value.assembly_eta_seconds = None;
+        value.touch();
+        match journal::persist(&task_root, &value) {
+          Ok(()) => Some(value.summary()),
+          Err(error) => {
+            log::error!("[game-install][{}] 持久化自动重试状态失败：{error}", plan.plan_id);
+            None
+          }
+        }
+      }
+    };
+    let Some(summary) = retry_summary else {
+      break;
+    };
+    if next_paused.load(Ordering::Acquire)
+      || canceled.load(Ordering::Acquire)
+      || manual_pause_requested.load(Ordering::Acquire)
+    {
+      break;
+    }
+    log::warn!("[game-install][{}] 首次停滞任务已完全退出，开始唯一一次自动重试", plan.plan_id);
+    emit_progress(&app_handle, &summary);
+    emit_state(&app_handle, &summary);
+    retry_budget_exhausted = true;
+  }
+}
+
+#[allow(clippy::too_many_arguments)]
 async fn run_install_streaming_task(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -2674,9 +3072,12 @@ async fn run_install_streaming_task(
   concurrency: usize,
   max_bytes_per_second: Option<u64>,
   context: InstallContext,
+  stall_pause_requested: Arc<AtomicBool>,
+  notify_on_stall: bool,
 ) {
   let pipeline_started_at = Instant::now();
   let plan = Arc::new(plan);
+  let download_labels = Arc::new(build_download_labels(&plan));
   let staging_root = match installer::prepare_install_assembly(&plan, &task_root) {
     Ok(path) => path,
     Err(error) => {
@@ -2699,6 +3100,7 @@ async fn run_install_streaming_task(
     concurrency,
     pipeline_started_at,
     duration_micros(index_started_at.elapsed()),
+    Arc::clone(&stall_pause_requested),
   ));
   let recovery_started_at = Instant::now();
   {
@@ -2764,7 +3166,7 @@ async fn run_install_streaming_task(
       value.current_file = None;
       value.touch();
       persist_install_checkpoint(&task_root, &value, &metrics)?;
-      let released = spool_tracker.lock().unwrap().release_unneeded(&plan, &spool_root);
+      let released = release_spool_unneeded(&spool_tracker, &plan, &spool_root);
       value.released_bytes = value.released_bytes.saturating_add(released);
       value.spool_bytes = spool_bytes(&spool_root);
       value.touch();
@@ -2786,6 +3188,16 @@ async fn run_install_streaming_task(
     Arc::clone(&journal),
     Arc::clone(&metrics),
   );
+  spawn_install_stall_watchdog(
+    app_handle.clone(),
+    task_root.clone(),
+    plan.plan_id.clone(),
+    Arc::clone(&journal),
+    Arc::clone(&paused),
+    Arc::clone(&canceled),
+    Arc::clone(&metrics),
+    notify_on_stall,
+  );
   if concurrency > 1 {
     if let Err(error) = run_install_bounded_asset_pipeline(
       &app_handle,
@@ -2796,6 +3208,7 @@ async fn run_install_streaming_task(
       &download_index,
       &metrics,
       &download_client,
+      Arc::clone(&download_labels),
       &journal,
       &canceled,
       &paused,
@@ -2963,11 +3376,12 @@ async fn run_install_streaming_task(
       let assemble_shared = shared_cache_root.clone();
       let assemble_spool = spool_root.clone();
       let assemble_canceled = Arc::clone(&canceled);
+      let assemble_telemetry = Arc::clone(&metrics.assembly_telemetry);
       let assembly_started_at = metrics.begin_assembly();
       emit_active_assembly_count(&app_handle, &journal, &metrics).await;
       let assembly_worker_result = tauri::async_runtime::spawn_blocking(move || {
         let mut timing = assembler::AssemblyTiming::default();
-        let result = assembler::assemble_full_install_asset_with_timing_observer(
+        let result = assembler::assemble_full_install_asset_with_observers(
           &assemble_plan,
           &assemble_download_index,
           asset_index,
@@ -2976,6 +3390,7 @@ async fn run_install_streaming_task(
           &assemble_spool,
           &assemble_canceled,
           &mut timing,
+          &assemble_telemetry,
         );
         (result, timing)
       })
@@ -3031,7 +3446,7 @@ async fn run_install_streaming_task(
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
-      let released = spool_tracker.lock().unwrap().release_unneeded(&plan, &spool_root);
+      let released = release_spool_unneeded(&spool_tracker, &plan, &spool_root);
       value.released_bytes = value.released_bytes.saturating_add(released);
       value.spool_bytes = spool_bytes(&spool_root);
       metrics.observe_spool(value.spool_bytes);
@@ -3081,6 +3496,7 @@ async fn run_install_streaming_task(
     &download_index,
     &metrics,
     &download_client,
+    Arc::clone(&download_labels),
     &journal,
     &canceled,
     &paused,
@@ -3135,7 +3551,10 @@ async fn run_install_streaming_task(
       }
       {
         let mut value = journal.lock().await;
-        value.download_current_file = Some("渠道 SDK".to_string());
+        value.download_current_file = download_labels
+          .get(&download.cache_key)
+          .cloned()
+          .or_else(|| Some("渠道 SDK".to_string()));
         value.touch();
         if let Err(error) = journal::persist(&task_root, &value) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -3289,6 +3708,7 @@ async fn run_install_prepublish_repair(
   download_index: &Arc<assembler::FullInstallDownloadIndex>,
   metrics: &Arc<InstallPipelineMetrics>,
   download_client: &reqwest::Client,
+  download_labels: Arc<HashMap<String, String>>,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   canceled: &Arc<AtomicBool>,
   paused: &Arc<AtomicBool>,
@@ -3375,6 +3795,7 @@ async fn run_install_prepublish_repair(
       Arc::clone(download_index),
       Arc::clone(metrics),
       download_client.clone(),
+      Arc::clone(&download_labels),
       Arc::clone(journal),
       Arc::clone(canceled),
       Arc::clone(paused),
@@ -3410,7 +3831,7 @@ async fn run_install_prepublish_repair(
     value.current_file = value.assembly_current_file.clone();
     value.touch();
     persist_install_checkpoint(task_root, &value, metrics)?;
-    let released = spool_tracker.lock().unwrap().release_unneeded(plan, spool_root);
+    let released = release_spool_unneeded(spool_tracker, plan, spool_root);
     value.released_bytes = value.released_bytes.saturating_add(released);
     value.spool_bytes = spool_bytes(spool_root);
     value.touch();
@@ -3428,6 +3849,7 @@ async fn run_install_bounded_asset_pipeline(
   download_index: &Arc<assembler::FullInstallDownloadIndex>,
   metrics: &Arc<InstallPipelineMetrics>,
   download_client: &reqwest::Client,
+  download_labels: Arc<HashMap<String, String>>,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   canceled: &Arc<AtomicBool>,
   paused: &Arc<AtomicBool>,
@@ -3474,7 +3896,7 @@ async fn run_install_bounded_asset_pipeline(
         next_asset_index = next_asset_index.saturating_add(1);
         continue;
       }
-      let job = prepare_install_asset_job(
+      let job = match prepare_install_asset_job(
         plan,
         download_index,
         next_asset_index,
@@ -3482,14 +3904,23 @@ async fn run_install_bounded_asset_pipeline(
         spool_root,
         &scheduled_downloads,
         metrics,
-      )?;
+      ) {
+        Ok(job) => job,
+        Err(error) => {
+          first_error.get_or_insert(error);
+          break;
+        }
+      };
       let projected_spool = spool_bytes(spool_root)
         .saturating_add(reserved_spool_bytes)
         .saturating_add(job.reserved_bytes);
       if projected_spool > spool_budget && !jobs.is_empty() {
         break;
       }
-      check_install_stream_space(plan, asset_cursor, &job.pending, spool_root)?;
+      if let Err(error) = check_install_stream_space(plan, asset_cursor, &job.pending, spool_root) {
+        first_error.get_or_insert(error);
+        break;
+      }
       for download_id in &job.scheduled_download_ids {
         scheduled_downloads.insert(download_id.clone());
       }
@@ -3506,6 +3937,7 @@ async fn run_install_bounded_asset_pipeline(
         Arc::clone(download_index),
         Arc::clone(metrics),
         download_client.clone(),
+        Arc::clone(&download_labels),
         Arc::clone(journal),
         Arc::clone(canceled),
         Arc::clone(paused),
@@ -3525,7 +3957,9 @@ async fn run_install_bounded_asset_pipeline(
       value.download_current_file =
         Some(format!("持续队列已调度 {}/{} 个资源", next_asset_index, plan.assets.len()));
       value.touch();
-      persist_install_progress(task_root, &value, metrics)?;
+      if let Err(error) = persist_install_progress(task_root, &value, metrics) {
+        first_error.get_or_insert(error);
+      }
       emit_state(app_handle, &value.summary());
     }
 
@@ -3563,13 +3997,18 @@ async fn run_install_bounded_asset_pipeline(
         value.spool_bytes = spool_bytes(spool_root);
         metrics.observe_spool(value.spool_bytes);
         value.touch();
-        persist_install_checkpoint(task_root, &value, metrics)?;
-        let released = spool_tracker.lock().unwrap().release_unneeded(plan, spool_root);
-        value.released_bytes = value.released_bytes.saturating_add(released);
-        value.spool_bytes = spool_bytes(spool_root);
-        metrics.observe_spool(value.spool_bytes);
-        value.touch();
-        persist_install_progress(task_root, &value, metrics)?;
+        let progress_result = (|| -> Result<(), String> {
+          persist_install_checkpoint(task_root, &value, metrics)?;
+          let released = release_spool_unneeded(spool_tracker, plan, spool_root);
+          value.released_bytes = value.released_bytes.saturating_add(released);
+          value.spool_bytes = spool_bytes(spool_root);
+          metrics.observe_spool(value.spool_bytes);
+          value.touch();
+          persist_install_progress(task_root, &value, metrics)
+        })();
+        if let Err(error) = progress_result {
+          first_error.get_or_insert(error);
+        }
         emit_progress(app_handle, &value.summary());
       }
       Err(error) => {
@@ -3628,6 +4067,7 @@ async fn run_install_asset_job(
   download_index: Arc<assembler::FullInstallDownloadIndex>,
   metrics: Arc<InstallPipelineMetrics>,
   download_client: reqwest::Client,
+  download_labels: Arc<HashMap<String, String>>,
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
   paused: Arc<AtomicBool>,
@@ -3654,6 +4094,7 @@ async fn run_install_asset_job(
       let slots = Arc::clone(&download_slots);
       let guards = Arc::clone(&download_guards);
       let tracker = Arc::clone(&spool_tracker);
+      let labels = Arc::clone(&download_labels);
       async move {
         let download_guard = {
           let mut values = guards.lock().await;
@@ -3687,27 +4128,43 @@ async fn run_install_asset_job(
         result.map(|downloaded| {
           let completed_count =
             tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-          Some((downloaded.bytes, completed_count))
+          let label = labels
+            .get(&download.cache_key)
+            .cloned()
+            .unwrap_or_else(|| format!("资源对象：{}", download.id));
+          Some((downloaded.bytes, completed_count, label))
         })
       }
     }))
     .buffer_unordered(network_concurrency);
     futures_util::pin_mut!(downloads);
+    let mut first_download_error = None;
     while let Some(download_result) = downloads.next().await {
-      if let Some((downloaded_bytes, completed_count)) = download_result? {
-        metrics.record_unique_download(downloaded_bytes);
-        let mut value = journal.lock().await;
-        value.downloaded_bytes =
-          value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
-        value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
-        value.download_current_file =
-          (value.downloaded_bytes < value.total_bytes).then_some("持续下载资源对象".to_string());
-        value.spool_bytes = spool_bytes(&spool_root);
-        metrics.observe_spool(value.spool_bytes);
-        value.touch();
-        persist_install_progress(&task_root, &value, &metrics)?;
-        emit_progress(&app_handle, &value.summary());
+      match download_result {
+        Ok(Some((downloaded_bytes, completed_count, label))) => {
+          metrics.record_unique_download(downloaded_bytes);
+          let mut value = journal.lock().await;
+          value.downloaded_bytes =
+            value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
+          value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
+          value.download_current_file =
+            (value.downloaded_bytes < value.total_bytes).then_some(label);
+          value.spool_bytes = spool_bytes(&spool_root);
+          metrics.observe_spool(value.spool_bytes);
+          value.touch();
+          if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
+            first_download_error.get_or_insert(error);
+          }
+          emit_progress(&app_handle, &value.summary());
+        }
+        Ok(None) => {}
+        Err(error) => {
+          first_download_error.get_or_insert(error);
+        }
       }
+    }
+    if let Some(error) = first_download_error {
+      return Err(error);
     }
 
     {
@@ -3730,11 +4187,12 @@ async fn run_install_asset_job(
     let assemble_shared = shared_cache_root.clone();
     let assemble_spool = spool_root.clone();
     let assemble_canceled = Arc::clone(&canceled);
+    let assemble_telemetry = Arc::clone(&metrics.assembly_telemetry);
     let assembly_started_at = metrics.begin_assembly();
     emit_active_assembly_count(&app_handle, &journal, &metrics).await;
     let worker_result = tauri::async_runtime::spawn_blocking(move || {
       let mut timing = assembler::AssemblyTiming::default();
-      let result = assembler::assemble_full_install_asset_with_timing_observer(
+      let result = assembler::assemble_full_install_asset_with_observers(
         &assemble_plan,
         &assemble_download_index,
         asset_index,
@@ -3743,6 +4201,7 @@ async fn run_install_asset_job(
         &assemble_spool,
         &assemble_canceled,
         &mut timing,
+        &assemble_telemetry,
       );
       (result, timing)
     })
@@ -3930,7 +4389,11 @@ async fn persist_install_stream_error(
   } else {
     PackageTaskState::Failed
   };
-  value.error_message = (!paused_requested && !canceled_requested).then_some(error);
+  if !paused_requested && !canceled_requested {
+    value.error_message = Some(error);
+  } else if canceled_requested {
+    value.error_message = None;
+  }
   value.download_current_file = None;
   value.assembly_current_file = None;
   value.current_file = None;

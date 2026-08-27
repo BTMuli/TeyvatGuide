@@ -31,7 +31,8 @@ use crate::game::commands::{
   game_package_snapshot, game_package_start, game_package_switch, game_package_switch_plan,
   game_package_task_cleanup, game_package_task_history_list, game_package_task_list,
   game_package_task_remove, game_package_verify, game_package_verify_cancel,
-  game_package_verify_clear, game_package_verify_status, game_stop,
+  game_package_verify_clear, game_package_verify_status, game_perf_export, game_perf_reset,
+  game_perf_snapshot, game_stop,
 };
 use crate::game::package::GamePackageManager;
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
@@ -209,6 +210,9 @@ pub fn run() {
       #[cfg(target_os = "windows")]
       game_package_task_remove,
       game_package_task_cleanup,
+      game_perf_snapshot,
+      game_perf_reset,
+      game_perf_export,
       is_msix,
       is_process_running,
       #[cfg(target_os = "windows")]

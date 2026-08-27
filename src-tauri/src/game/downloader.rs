@@ -16,7 +16,7 @@ use std::{
   path::{Path, PathBuf},
   sync::{
     Arc, LazyLock, Mutex, Weak,
-    atomic::{AtomicBool, AtomicU64, Ordering},
+    atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
   },
   time::{Duration, Instant},
 };
@@ -59,8 +59,17 @@ pub(crate) struct DownloadedObject {
 /// The telemetry is intentionally detached from the download URL, cache key and local paths. It
 /// is created by the owning task and is never stored in global state, so concurrent install tasks
 /// cannot mix their samples.
-#[derive(Default)]
 pub(crate) struct DownloadTelemetry {
+  started_at: Instant,
+  heartbeat_count: AtomicU64,
+  last_heartbeat_micros: AtomicU64,
+  active_network_waits: AtomicUsize,
+  active_local_writes: AtomicUsize,
+  network_wait_operation_count: AtomicU64,
+  local_write_operation_count: AtomicU64,
+  local_written_bytes: AtomicU64,
+  max_network_wait_micros: AtomicU64,
+  max_local_write_micros: AtomicU64,
   network_wait_micros: AtomicU64,
   write_micros: AtomicU64,
   hash_micros: AtomicU64,
@@ -80,6 +89,15 @@ pub(crate) struct DownloadTelemetry {
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(crate) struct DownloadTelemetrySnapshot {
+  pub(crate) heartbeat_count: u64,
+  pub(crate) last_activity_age_millis: u64,
+  pub(crate) active_network_waits: usize,
+  pub(crate) active_local_writes: usize,
+  pub(crate) network_wait_operation_count: u64,
+  pub(crate) local_write_operation_count: u64,
+  pub(crate) local_written_bytes: u64,
+  pub(crate) max_network_wait_micros: u64,
+  pub(crate) max_local_write_micros: u64,
   pub(crate) network_wait_micros: u64,
   pub(crate) write_micros: u64,
   pub(crate) hash_micros: u64,
@@ -97,13 +115,68 @@ pub(crate) struct DownloadTelemetrySnapshot {
   pub(crate) failed_objects: u64,
 }
 
+impl Default for DownloadTelemetry {
+  fn default() -> Self {
+    Self {
+      started_at: Instant::now(),
+      heartbeat_count: AtomicU64::new(0),
+      last_heartbeat_micros: AtomicU64::new(0),
+      active_network_waits: AtomicUsize::new(0),
+      active_local_writes: AtomicUsize::new(0),
+      network_wait_operation_count: AtomicU64::new(0),
+      local_write_operation_count: AtomicU64::new(0),
+      local_written_bytes: AtomicU64::new(0),
+      max_network_wait_micros: AtomicU64::new(0),
+      max_local_write_micros: AtomicU64::new(0),
+      network_wait_micros: AtomicU64::new(0),
+      write_micros: AtomicU64::new(0),
+      hash_micros: AtomicU64::new(0),
+      file_sync_count: AtomicU64::new(0),
+      file_sync_micros: AtomicU64::new(0),
+      received_bytes: AtomicU64::new(0),
+      cache_hits: AtomicU64::new(0),
+      attempts: AtomicU64::new(0),
+      successful_attempts: AtomicU64::new(0),
+      failed_attempts: AtomicU64::new(0),
+      retries: AtomicU64::new(0),
+      aborted_objects: AtomicU64::new(0),
+      publish_failures: AtomicU64::new(0),
+      successful_objects: AtomicU64::new(0),
+      failed_objects: AtomicU64::new(0),
+    }
+  }
+}
+
+#[derive(Clone, Copy)]
+enum DownloadLiveStage {
+  NetworkWait,
+  LocalWrite,
+}
+
+struct DownloadLiveStageGuard {
+  telemetry: Arc<DownloadTelemetry>,
+  stage: DownloadLiveStage,
+  started_at: Instant,
+}
+
 impl DownloadTelemetry {
   pub(crate) fn new() -> Arc<Self> {
     Arc::new(Self::default())
   }
 
   pub(crate) fn snapshot(&self) -> DownloadTelemetrySnapshot {
+    let now_micros = duration_micros(self.started_at.elapsed());
+    let last_heartbeat_micros = self.last_heartbeat_micros.load(Ordering::Acquire);
     DownloadTelemetrySnapshot {
+      heartbeat_count: self.heartbeat_count.load(Ordering::Acquire),
+      last_activity_age_millis: now_micros.saturating_sub(last_heartbeat_micros) / 1_000,
+      active_network_waits: self.active_network_waits.load(Ordering::Acquire),
+      active_local_writes: self.active_local_writes.load(Ordering::Acquire),
+      network_wait_operation_count: self.network_wait_operation_count.load(Ordering::Relaxed),
+      local_write_operation_count: self.local_write_operation_count.load(Ordering::Relaxed),
+      local_written_bytes: self.local_written_bytes.load(Ordering::Relaxed),
+      max_network_wait_micros: self.max_network_wait_micros.load(Ordering::Relaxed),
+      max_local_write_micros: self.max_local_write_micros.load(Ordering::Relaxed),
       network_wait_micros: self.network_wait_micros.load(Ordering::Relaxed),
       write_micros: self.write_micros.load(Ordering::Relaxed),
       hash_micros: self.hash_micros.load(Ordering::Relaxed),
@@ -146,6 +219,55 @@ impl DownloadTelemetry {
 
   fn record_publish_failure(&self) {
     self.publish_failures.fetch_add(1, Ordering::Relaxed);
+  }
+
+  fn begin_live_stage(self: &Arc<Self>, stage: DownloadLiveStage) -> DownloadLiveStageGuard {
+    match stage {
+      DownloadLiveStage::NetworkWait => {
+        self.active_network_waits.fetch_add(1, Ordering::AcqRel);
+      }
+      DownloadLiveStage::LocalWrite => {
+        self.active_local_writes.fetch_add(1, Ordering::AcqRel);
+      }
+    }
+    self.heartbeat();
+    DownloadLiveStageGuard { telemetry: Arc::clone(self), stage, started_at: Instant::now() }
+  }
+
+  fn heartbeat(&self) {
+    self.last_heartbeat_micros.store(duration_micros(self.started_at.elapsed()), Ordering::Release);
+    self.heartbeat_count.fetch_add(1, Ordering::AcqRel);
+  }
+}
+
+impl DownloadLiveStageGuard {
+  fn finish(self, bytes: u64) {
+    let elapsed_micros = duration_micros(self.started_at.elapsed());
+    match self.stage {
+      DownloadLiveStage::NetworkWait => {
+        self.telemetry.network_wait_operation_count.fetch_add(1, Ordering::Relaxed);
+        self.telemetry.max_network_wait_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+      }
+      DownloadLiveStage::LocalWrite => {
+        self.telemetry.local_write_operation_count.fetch_add(1, Ordering::Relaxed);
+        self.telemetry.local_written_bytes.fetch_add(bytes, Ordering::Relaxed);
+        self.telemetry.max_local_write_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+      }
+    }
+  }
+}
+
+impl Drop for DownloadLiveStageGuard {
+  fn drop(&mut self) {
+    match self.stage {
+      DownloadLiveStage::NetworkWait => {
+        self.telemetry.active_network_waits.fetch_sub(1, Ordering::AcqRel);
+      }
+      DownloadLiveStage::LocalWrite => {
+        self.telemetry.active_local_writes.fetch_sub(1, Ordering::AcqRel);
+      }
+    }
+    self.telemetry.heartbeat();
   }
 }
 
@@ -198,6 +320,10 @@ struct DownloadAttemptTelemetry {
 }
 
 impl DownloadAttemptTelemetry {
+  fn begin_live_stage(&self, stage: DownloadLiveStage) -> DownloadLiveStageGuard {
+    self.telemetry.begin_live_stage(stage)
+  }
+
   fn record_network_wait(&mut self, elapsed: Duration) {
     self.network_wait_micros = self.network_wait_micros.saturating_add(duration_micros(elapsed));
   }
@@ -455,7 +581,13 @@ pub(crate) async fn download_object(
             return Err(format!("清理损坏缓存文件失败：{error}"));
           }
         }
-        if let Err(error) = fs::rename(&partial, &target) {
+        let live_stage =
+          telemetry.as_ref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
+        let rename_result = fs::rename(&partial, &target);
+        if let Some(live_stage) = live_stage {
+          live_stage.finish(0);
+        }
+        if let Err(error) = rename_result {
           if let Some(telemetry) = telemetry.as_ref() {
             telemetry.record_publish_failure();
           }
@@ -543,6 +675,8 @@ async fn download_once(
     request = request.header(RANGE, format!("bytes={start}-{end}"));
   }
   let send_started_at = Instant::now();
+  let live_stage =
+    telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::NetworkWait));
   let response = wait_for_download_io(
     request.send(),
     canceled,
@@ -551,6 +685,9 @@ async fn download_once(
     "等待游戏资源响应超时",
   )
   .await;
+  if let Some(live_stage) = live_stage {
+    live_stage.finish(0);
+  }
   if let Some(telemetry) = telemetry.as_deref_mut() {
     telemetry.record_network_wait(send_started_at.elapsed());
   }
@@ -569,12 +706,13 @@ async fn download_once(
       return Err("资源响应长度与计划不一致".to_string());
     }
   }
-  let file = OpenOptions::new()
-    .create_new(true)
-    .write(true)
-    .open(partial)
-    .await
-    .map_err(|error| format!("创建资源下载临时文件失败：{error}"))?;
+  let live_stage =
+    telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
+  let file_result = OpenOptions::new().create_new(true).write(true).open(partial).await;
+  if let Some(live_stage) = live_stage {
+    live_stage.finish(0);
+  }
+  let file = file_result.map_err(|error| format!("创建资源下载临时文件失败：{error}"))?;
   let mut writer = BufWriter::with_capacity(WRITE_BUFFER_BYTES, file);
   let mut stream = response.bytes_stream();
   let mut bytes = 0_u64;
@@ -582,6 +720,8 @@ async fn download_once(
   let mut md5hasher = <Md5 as Md5Digest>::new();
   loop {
     let body_started_at = Instant::now();
+    let live_stage =
+      telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::NetworkWait));
     let next_chunk = wait_for_download_io(
       stream.try_next(),
       canceled,
@@ -590,6 +730,9 @@ async fn download_once(
       "读取游戏资源超时：长时间未收到数据",
     )
     .await;
+    if let Some(live_stage) = live_stage {
+      live_stage.finish(0);
+    }
     if let Some(telemetry) = telemetry.as_deref_mut() {
       telemetry.record_network_wait(body_started_at.elapsed());
     }
@@ -616,7 +759,12 @@ async fn download_once(
       return Err("下载资源超过计划大小".to_string());
     }
     let write_started_at = Instant::now();
+    let live_stage =
+      telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
     let write_result = writer.write_all(&chunk).await;
+    if let Some(live_stage) = live_stage {
+      live_stage.finish(write_result.as_ref().map_or(0, |_| chunk.len() as u64));
+    }
     if let Some(telemetry) = telemetry.as_deref_mut() {
       telemetry.record_write(write_started_at.elapsed());
     }
@@ -653,7 +801,12 @@ async fn download_once(
     return Err("下载资源 hash 校验失败".to_string());
   }
   let flush_started_at = Instant::now();
+  let live_stage =
+    telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
   let flush_result = writer.flush().await;
+  if let Some(live_stage) = live_stage {
+    live_stage.finish(0);
+  }
   if let Some(telemetry) = telemetry.as_deref_mut() {
     telemetry.record_write(flush_started_at.elapsed());
   }
@@ -661,7 +814,12 @@ async fn download_once(
   let file = writer.into_inner();
   if durability.requires_file_sync() {
     let sync_started_at = Instant::now();
+    let live_stage =
+      telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
     let sync_result = file.sync_all().await;
+    if let Some(live_stage) = live_stage {
+      live_stage.finish(0);
+    }
     if let Some(telemetry) = telemetry.as_deref_mut() {
       telemetry.record_file_sync(sync_started_at.elapsed());
     }

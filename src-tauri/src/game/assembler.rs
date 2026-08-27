@@ -19,8 +19,8 @@ use std::{
   io::{BufReader, Read, Seek, SeekFrom, Write},
   path::{Path, PathBuf},
   sync::{
-    Mutex,
-    atomic::{AtomicBool, AtomicUsize, Ordering},
+    Arc, Mutex,
+    atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
     mpsc,
   },
   time::Instant,
@@ -104,6 +104,196 @@ impl AssemblyTiming {
     self.staging_file_sync_micros = self.staging_file_sync_micros.saturating_add(elapsed_micros);
     self.staging_file_sync_count = self.staging_file_sync_count.saturating_add(1);
     self.staging_file_sync_bytes = self.staging_file_sync_bytes.saturating_add(bytes);
+  }
+}
+
+/// Live stage counters for one install pipeline.
+///
+/// Unlike [`AssemblyTiming`], these counters are updated at operation boundaries so a watchdog
+/// can distinguish an active read, write, hash, or file sync that has stopped returning.
+pub(crate) struct AssemblyTelemetry {
+  started_at: Instant,
+  heartbeat_count: AtomicU64,
+  last_heartbeat_micros: AtomicU64,
+  active_reads: AtomicUsize,
+  active_writes: AtomicUsize,
+  active_hashes: AtomicUsize,
+  active_syncs: AtomicUsize,
+  read_operations: AtomicU64,
+  write_operations: AtomicU64,
+  hash_operations: AtomicU64,
+  sync_operations: AtomicU64,
+  read_bytes: AtomicU64,
+  written_bytes: AtomicU64,
+  hashed_bytes: AtomicU64,
+  read_micros: AtomicU64,
+  write_micros: AtomicU64,
+  hash_micros: AtomicU64,
+  sync_micros: AtomicU64,
+  max_read_micros: AtomicU64,
+  max_write_micros: AtomicU64,
+  max_hash_micros: AtomicU64,
+  max_sync_micros: AtomicU64,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct AssemblyTelemetrySnapshot {
+  pub(crate) heartbeat_count: u64,
+  pub(crate) last_activity_age_millis: u64,
+  pub(crate) active_reads: usize,
+  pub(crate) active_writes: usize,
+  pub(crate) active_hashes: usize,
+  pub(crate) active_syncs: usize,
+  pub(crate) read_operations: u64,
+  pub(crate) write_operations: u64,
+  pub(crate) hash_operations: u64,
+  pub(crate) sync_operations: u64,
+  pub(crate) read_bytes: u64,
+  pub(crate) written_bytes: u64,
+  pub(crate) hashed_bytes: u64,
+  pub(crate) read_micros: u64,
+  pub(crate) write_micros: u64,
+  pub(crate) hash_micros: u64,
+  pub(crate) sync_micros: u64,
+  pub(crate) max_read_micros: u64,
+  pub(crate) max_write_micros: u64,
+  pub(crate) max_hash_micros: u64,
+  pub(crate) max_sync_micros: u64,
+}
+
+impl Default for AssemblyTelemetry {
+  fn default() -> Self {
+    Self {
+      started_at: Instant::now(),
+      heartbeat_count: AtomicU64::new(0),
+      last_heartbeat_micros: AtomicU64::new(0),
+      active_reads: AtomicUsize::new(0),
+      active_writes: AtomicUsize::new(0),
+      active_hashes: AtomicUsize::new(0),
+      active_syncs: AtomicUsize::new(0),
+      read_operations: AtomicU64::new(0),
+      write_operations: AtomicU64::new(0),
+      hash_operations: AtomicU64::new(0),
+      sync_operations: AtomicU64::new(0),
+      read_bytes: AtomicU64::new(0),
+      written_bytes: AtomicU64::new(0),
+      hashed_bytes: AtomicU64::new(0),
+      read_micros: AtomicU64::new(0),
+      write_micros: AtomicU64::new(0),
+      hash_micros: AtomicU64::new(0),
+      sync_micros: AtomicU64::new(0),
+      max_read_micros: AtomicU64::new(0),
+      max_write_micros: AtomicU64::new(0),
+      max_hash_micros: AtomicU64::new(0),
+      max_sync_micros: AtomicU64::new(0),
+    }
+  }
+}
+
+#[derive(Clone, Copy)]
+enum AssemblyLiveStage {
+  Read,
+  Write,
+  Hash,
+  Sync,
+}
+
+struct AssemblyLiveStageGuard<'a> {
+  telemetry: &'a AssemblyTelemetry,
+  stage: AssemblyLiveStage,
+  started_at: Instant,
+}
+
+impl AssemblyTelemetry {
+  pub(crate) fn new() -> Arc<Self> {
+    Arc::new(Self::default())
+  }
+
+  pub(crate) fn snapshot(&self) -> AssemblyTelemetrySnapshot {
+    let now_micros = duration_micros(self.started_at.elapsed());
+    let last_heartbeat_micros = self.last_heartbeat_micros.load(Ordering::Acquire);
+    AssemblyTelemetrySnapshot {
+      heartbeat_count: self.heartbeat_count.load(Ordering::Acquire),
+      last_activity_age_millis: now_micros.saturating_sub(last_heartbeat_micros) / 1_000,
+      active_reads: self.active_reads.load(Ordering::Acquire),
+      active_writes: self.active_writes.load(Ordering::Acquire),
+      active_hashes: self.active_hashes.load(Ordering::Acquire),
+      active_syncs: self.active_syncs.load(Ordering::Acquire),
+      read_operations: self.read_operations.load(Ordering::Relaxed),
+      write_operations: self.write_operations.load(Ordering::Relaxed),
+      hash_operations: self.hash_operations.load(Ordering::Relaxed),
+      sync_operations: self.sync_operations.load(Ordering::Relaxed),
+      read_bytes: self.read_bytes.load(Ordering::Relaxed),
+      written_bytes: self.written_bytes.load(Ordering::Relaxed),
+      hashed_bytes: self.hashed_bytes.load(Ordering::Relaxed),
+      read_micros: self.read_micros.load(Ordering::Relaxed),
+      write_micros: self.write_micros.load(Ordering::Relaxed),
+      hash_micros: self.hash_micros.load(Ordering::Relaxed),
+      sync_micros: self.sync_micros.load(Ordering::Relaxed),
+      max_read_micros: self.max_read_micros.load(Ordering::Relaxed),
+      max_write_micros: self.max_write_micros.load(Ordering::Relaxed),
+      max_hash_micros: self.max_hash_micros.load(Ordering::Relaxed),
+      max_sync_micros: self.max_sync_micros.load(Ordering::Relaxed),
+    }
+  }
+
+  fn begin(&self, stage: AssemblyLiveStage) -> AssemblyLiveStageGuard<'_> {
+    match stage {
+      AssemblyLiveStage::Read => self.active_reads.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Write => self.active_writes.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Hash => self.active_hashes.fetch_add(1, Ordering::AcqRel),
+      AssemblyLiveStage::Sync => self.active_syncs.fetch_add(1, Ordering::AcqRel),
+    };
+    self.heartbeat();
+    AssemblyLiveStageGuard { telemetry: self, stage, started_at: Instant::now() }
+  }
+
+  fn heartbeat(&self) {
+    self.last_heartbeat_micros.store(duration_micros(self.started_at.elapsed()), Ordering::Release);
+    self.heartbeat_count.fetch_add(1, Ordering::AcqRel);
+  }
+}
+
+impl AssemblyLiveStageGuard<'_> {
+  fn finish(self, bytes: u64) {
+    let elapsed_micros = duration_micros(self.started_at.elapsed());
+    match self.stage {
+      AssemblyLiveStage::Read => {
+        self.telemetry.read_operations.fetch_add(1, Ordering::Relaxed);
+        self.telemetry.read_bytes.fetch_add(bytes, Ordering::Relaxed);
+        self.telemetry.read_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        self.telemetry.max_read_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+      }
+      AssemblyLiveStage::Write => {
+        self.telemetry.write_operations.fetch_add(1, Ordering::Relaxed);
+        self.telemetry.written_bytes.fetch_add(bytes, Ordering::Relaxed);
+        self.telemetry.write_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        self.telemetry.max_write_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+      }
+      AssemblyLiveStage::Hash => {
+        self.telemetry.hash_operations.fetch_add(1, Ordering::Relaxed);
+        self.telemetry.hashed_bytes.fetch_add(bytes, Ordering::Relaxed);
+        self.telemetry.hash_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        self.telemetry.max_hash_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+      }
+      AssemblyLiveStage::Sync => {
+        self.telemetry.sync_operations.fetch_add(1, Ordering::Relaxed);
+        self.telemetry.sync_micros.fetch_add(elapsed_micros, Ordering::Relaxed);
+        self.telemetry.max_sync_micros.fetch_max(elapsed_micros, Ordering::Relaxed);
+      }
+    }
+  }
+}
+
+impl Drop for AssemblyLiveStageGuard<'_> {
+  fn drop(&mut self) {
+    match self.stage {
+      AssemblyLiveStage::Read => self.telemetry.active_reads.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Write => self.telemetry.active_writes.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Hash => self.telemetry.active_hashes.fetch_sub(1, Ordering::AcqRel),
+      AssemblyLiveStage::Sync => self.telemetry.active_syncs.fetch_sub(1, Ordering::AcqRel),
+    };
+    self.telemetry.heartbeat();
   }
 }
 
@@ -191,6 +381,7 @@ pub(crate) fn assemble_full_install_asset(
     spool_root,
     canceled,
     None,
+    None,
   )
 }
 
@@ -218,6 +409,31 @@ pub(crate) fn assemble_full_install_asset_with_timing_observer(
     spool_root,
     canceled,
     Some(timing),
+    None,
+  )
+}
+
+pub(crate) fn assemble_full_install_asset_with_observers(
+  plan: &PersistedPlan,
+  download_index: &FullInstallDownloadIndex,
+  asset_index: usize,
+  staging_root: &Path,
+  shared_cache_root: &Path,
+  spool_root: &Path,
+  canceled: &AtomicBool,
+  timing: &mut AssemblyTiming,
+  telemetry: &AssemblyTelemetry,
+) -> Result<(), String> {
+  assemble_full_install_asset_inner(
+    plan,
+    download_index,
+    asset_index,
+    staging_root,
+    shared_cache_root,
+    spool_root,
+    canceled,
+    Some(timing),
+    Some(telemetry),
   )
 }
 
@@ -230,6 +446,7 @@ fn assemble_full_install_asset_inner(
   spool_root: &Path,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   if plan.strategy != PackagePlanStrategy::Full {
     return Err("安装组装器只接受 Full 计划".to_string());
@@ -239,7 +456,7 @@ fn assemble_full_install_asset_inner(
   validate_asset_layout(asset, &downloads)?;
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   if output.exists()
-    && verified_asset_file_with_timing(&output, asset, canceled, timing.as_deref_mut())?
+    && verified_asset_file_with_timing(&output, asset, canceled, timing.as_deref_mut(), telemetry)?
   {
     return Ok(());
   }
@@ -252,6 +469,7 @@ fn assemble_full_install_asset_inner(
     staging_root,
     canceled,
     timing,
+    telemetry,
   )
 }
 
@@ -371,7 +589,7 @@ fn validate_install_asset_with_evidence(
       format!("已完成安装资源不是普通文件：{}", asset.name),
     ));
   }
-  let verified = verified_asset_file_with_timing(&path, asset, canceled, None)
+  let verified = verified_asset_file_with_timing(&path, asset, canceled, None, None)
     .map_err(|message| failure(InstallAssetValidationKind::Other, message))?;
   if !verified {
     return Err(failure(
@@ -905,7 +1123,16 @@ fn assemble_asset<L: DownloadLookup>(
   staging_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<(), String> {
-  assemble_asset_with_timing(asset, downloads, game_root, cache_root, staging_root, canceled, None)
+  assemble_asset_with_timing(
+    asset,
+    downloads,
+    game_root,
+    cache_root,
+    staging_root,
+    canceled,
+    None,
+    None,
+  )
 }
 
 fn assemble_asset_with_timing<L: DownloadLookup>(
@@ -916,22 +1143,31 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
   staging_root: &Path,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
+  let prepare_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   let partial = partial_path(&output)?;
   remove_stale_partial(&partial)?;
   remove_stale_output(&output)?;
+  if let Some(prepare_stage) = prepare_stage {
+    prepare_stage.finish(0);
+  }
 
   let result = (|| {
-    let mut file = OpenOptions::new()
-      .create_new(true)
-      .read(true)
-      .write(true)
-      .open(&partial)
-      .map_err(|error| format!("创建资源临时文件失败：{}：{error}", asset.name))?;
-    file
-      .set_len(asset.size)
-      .map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
+    let create_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let file_result = OpenOptions::new().create_new(true).read(true).write(true).open(&partial);
+    if let Some(create_stage) = create_stage {
+      create_stage.finish(0);
+    }
+    let mut file =
+      file_result.map_err(|error| format!("创建资源临时文件失败：{}：{error}", asset.name))?;
+    let resize_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let resize_result = file.set_len(asset.size);
+    if let Some(resize_stage) = resize_stage {
+      resize_stage.finish(asset.size);
+    }
+    resize_result.map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
     let mut chunks = asset.chunks.iter().collect::<Vec<_>>();
     chunks.sort_by_key(|chunk| chunk.target_offset);
     for chunk in chunks {
@@ -948,6 +1184,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
           reuse.source_offset,
           canceled,
           timing.as_deref_mut(),
+          telemetry,
         )?;
       } else {
         let download = downloads
@@ -960,6 +1197,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
           download,
           canceled,
           timing.as_deref_mut(),
+          telemetry,
         )?;
       }
     }
@@ -973,17 +1211,26 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
     file
       .seek(SeekFrom::Start(0))
       .map_err(|error| format!("定位资源临时文件失败：{}：{error}", asset.name))?;
-    let actual_asset_md5 =
-      hash_exact_file_with_timing(&mut file, asset.size, canceled, timing.as_deref_mut())?;
+    let actual_asset_md5 = hash_exact_file_with_timing(
+      &mut file,
+      asset.size,
+      canceled,
+      timing.as_deref_mut(),
+      telemetry,
+    )?;
     if !actual_asset_md5.eq_ignore_ascii_case(&asset.md5) {
       return Err(format!("资源 MD5 校验失败：{}", asset.name));
     }
     check_canceled(canceled)?;
-    sync_staging_file(&file, asset.size, timing.as_deref_mut())
+    sync_staging_file(&file, asset.size, timing.as_deref_mut(), telemetry)
       .map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
     drop(file);
-    fs::rename(&partial, &output)
-      .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))?;
+    let rename_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let rename_result = fs::rename(&partial, &output);
+    if let Some(rename_stage) = rename_stage {
+      rename_stage.finish(0);
+    }
+    rename_result.map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))?;
     Ok(())
   })();
   if result.is_err() {
@@ -1001,6 +1248,7 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
   staging_root: &Path,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   let selected_root = asset.chunks.iter().filter(|chunk| chunk.reuse.is_none()).try_fold(
     None::<&Path>,
@@ -1031,23 +1279,32 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
       staging_root,
       canceled,
       timing,
+      telemetry,
     );
   }
 
+  let prepare_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
   let output = prepare_manifest_output_file(staging_root, &asset.name)?;
   let partial = partial_path(&output)?;
   remove_stale_partial(&partial)?;
   remove_stale_output(&output)?;
+  if let Some(prepare_stage) = prepare_stage {
+    prepare_stage.finish(0);
+  }
   let result = (|| {
-    let mut file = OpenOptions::new()
-      .create_new(true)
-      .read(true)
-      .write(true)
-      .open(&partial)
-      .map_err(|error| format!("创建资源临时文件失败：{}：{error}", asset.name))?;
-    file
-      .set_len(asset.size)
-      .map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
+    let create_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let file_result = OpenOptions::new().create_new(true).read(true).write(true).open(&partial);
+    if let Some(create_stage) = create_stage {
+      create_stage.finish(0);
+    }
+    let mut file =
+      file_result.map_err(|error| format!("创建资源临时文件失败：{}：{error}", asset.name))?;
+    let resize_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let resize_result = file.set_len(asset.size);
+    if let Some(resize_stage) = resize_stage {
+      resize_stage.finish(asset.size);
+    }
+    resize_result.map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
     let mut chunks = asset.chunks.iter().collect::<Vec<_>>();
     chunks.sort_by_key(|chunk| chunk.target_offset);
     for chunk in chunks {
@@ -1070,9 +1327,18 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
         download,
         canceled,
         timing.as_deref_mut(),
+        telemetry,
       )?;
     }
-    finalize_open_asset_with_timing(file, &partial, &output, asset, canceled, timing.as_deref_mut())
+    finalize_open_asset_with_timing(
+      file,
+      &partial,
+      &output,
+      asset,
+      canceled,
+      timing.as_deref_mut(),
+      telemetry,
+    )
   })();
   if result.is_err() {
     let _ = fs::remove_file(&partial);
@@ -1087,19 +1353,25 @@ fn finalize_open_asset_with_timing(
   asset: &PlanAsset,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   file
     .seek(SeekFrom::Start(0))
     .map_err(|error| format!("定位资源临时文件失败：{}：{error}", asset.name))?;
-  let actual = hash_exact_file_with_timing(&mut file, asset.size, canceled, timing.as_deref_mut())?;
+  let actual =
+    hash_exact_file_with_timing(&mut file, asset.size, canceled, timing.as_deref_mut(), telemetry)?;
   if !actual.eq_ignore_ascii_case(&asset.md5) {
     return Err(format!("资源 MD5 校验失败：{}", asset.name));
   }
-  sync_staging_file(&file, asset.size, timing.as_deref_mut())
+  sync_staging_file(&file, asset.size, timing.as_deref_mut(), telemetry)
     .map_err(|error| format!("同步资源临时文件失败：{}：{error}", asset.name))?;
   drop(file);
-  fs::rename(partial, output)
-    .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
+  let rename_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+  let rename_result = fs::rename(partial, output);
+  if let Some(rename_stage) = rename_stage {
+    rename_stage.finish(0);
+  }
+  rename_result.map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
 fn verified_asset_file_with_timing(
@@ -1107,16 +1379,22 @@ fn verified_asset_file_with_timing(
   asset: &PlanAsset,
   canceled: &AtomicBool,
   timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<bool, String> {
+  let open_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
+  let file_result = File::open(path);
+  if let Some(open_stage) = open_stage {
+    open_stage.finish(0);
+  }
   let mut file =
-    File::open(path).map_err(|error| format!("打开已组装资源失败：{}：{error}", asset.name))?;
+    file_result.map_err(|error| format!("打开已组装资源失败：{}：{error}", asset.name))?;
   if file.metadata().map_err(|error| format!("读取已组装资源失败：{}：{error}", asset.name))?.len()
     != asset.size
   {
     return Ok(false);
   }
   Ok(
-    hash_exact_file_with_timing(&mut file, asset.size, canceled, timing)?
+    hash_exact_file_with_timing(&mut file, asset.size, canceled, timing, telemetry)?
       .eq_ignore_ascii_case(&asset.md5),
   )
 }
@@ -1143,14 +1421,20 @@ fn write_downloaded_chunk_with_timing(
   download: &super::planner::PlanDownload,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   check_canceled(canceled)?;
-  if !cached_chunk_matches(cache_root, download) {
+  let open_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
+  let cache_matches = cached_chunk_matches(cache_root, download);
+  if !cache_matches {
     return Err(format!("下载缓存完整性复验失败：{}", chunk.id));
   }
   let path = cache_root.join(&download.cache_key);
-  let file =
-    File::open(&path).map_err(|error| format!("打开下载缓存失败：{}：{error}", chunk.id))?;
+  let file_result = File::open(&path);
+  if let Some(open_stage) = open_stage {
+    open_stage.finish(0);
+  }
+  let file = file_result.map_err(|error| format!("打开下载缓存失败：{}：{error}", chunk.id))?;
   match download.encoding {
     PayloadEncoding::Raw => {
       if download.compressed_size != download.decompressed_size {
@@ -1164,6 +1448,7 @@ fn write_downloaded_chunk_with_timing(
         canceled,
         timing.as_deref_mut(),
         None,
+        telemetry,
       )?;
     }
     PayloadEncoding::Zstd => {
@@ -1178,11 +1463,13 @@ fn write_downloaded_chunk_with_timing(
         canceled,
         timing.as_deref_mut(),
         timing_enabled.then_some(&mut zstd_timing),
+        telemetry,
       );
       let result = match result {
         Err(error) => Err(error),
         Ok(()) => {
           let mut extra = [0_u8; 1];
+          let live_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
           let (read_result, elapsed_micros) = if timing_enabled {
             let started_at = Instant::now();
             let read_result = reader.read(&mut extra);
@@ -1190,6 +1477,9 @@ fn write_downloaded_chunk_with_timing(
           } else {
             (reader.read(&mut extra), 0)
           };
+          if let Some(live_stage) = live_stage {
+            live_stage.finish(read_result.as_ref().map_or(0, |read| *read as u64));
+          }
           if timing_enabled {
             zstd_timing.record(elapsed_micros, read_result.as_ref().map_or(0, |read| *read as u64));
           }
@@ -1226,7 +1516,9 @@ fn write_reused_chunk_with_timing(
   source_offset: u64,
   canceled: &AtomicBool,
   timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
+  let open_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
   let path = resolve_existing_manifest_file(game_root, asset_name)?;
   let source_end = source_offset
     .checked_add(chunk.decompressed_size)
@@ -1241,8 +1533,11 @@ fn write_reused_chunk_with_timing(
   file
     .seek(SeekFrom::Start(source_offset))
     .map_err(|error| format!("定位复用 chunk 源文件失败：{}：{error}", chunk.id))?;
+  if let Some(open_stage) = open_stage {
+    open_stage.finish(0);
+  }
   let mut reader = BufReader::new(file);
-  write_exact_chunk_with_timing(output, chunk, &mut reader, canceled, timing, None)
+  write_exact_chunk_with_timing(output, chunk, &mut reader, canceled, timing, None, telemetry)
 }
 
 fn write_exact_chunk_with_timing<R: Read>(
@@ -1252,6 +1547,7 @@ fn write_exact_chunk_with_timing<R: Read>(
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
   mut zstd_timing: Option<&mut ZstdReadTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   let mut remaining = chunk.decompressed_size;
   let mut chunk_hasher = Md5::new();
@@ -1265,7 +1561,11 @@ fn write_exact_chunk_with_timing<R: Read>(
       let maximum = usize::try_from(remaining.min(buffer.len() as u64))
         .map_err(|_| format!("资源 chunk 大小无法表示：{}", chunk.id))?;
       let read_started_at = zstd_timing.as_ref().map(|_| Instant::now());
+      let live_read = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
       let read_result = reader.read(&mut buffer[..maximum]);
+      if let Some(live_read) = live_read {
+        live_read.finish(read_result.as_ref().map_or(0, |read| *read as u64));
+      }
       if let (Some(started_at), Some(zstd_timing)) = (read_started_at, zstd_timing.as_deref_mut()) {
         zstd_timing.record(
           duration_micros(started_at.elapsed()),
@@ -1277,12 +1577,19 @@ fn write_exact_chunk_with_timing<R: Read>(
       if read == 0 {
         return Err(format!("资源 chunk 小于计划解压大小：{}", chunk.id));
       }
-      output
-        .write_all(&buffer[..read])
-        .map_err(|error| format!("写入资源 chunk 失败：{}：{error}", chunk.id))?;
+      let live_write = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+      let write_result = output.write_all(&buffer[..read]);
+      if let Some(live_write) = live_write {
+        live_write.finish(write_result.as_ref().map_or(0, |_| read as u64));
+      }
+      write_result.map_err(|error| format!("写入资源 chunk 失败：{}：{error}", chunk.id))?;
       let hash_started_at = timing.as_ref().map(|_| Instant::now());
+      let live_hash = telemetry.map(|value| value.begin(AssemblyLiveStage::Hash));
       md5_attempted = true;
       chunk_hasher.update(&buffer[..read]);
+      if let Some(live_hash) = live_hash {
+        live_hash.finish(read as u64);
+      }
       if let Some(hash_started_at) = hash_started_at {
         md5_micros = md5_micros.saturating_add(duration_micros(hash_started_at.elapsed()));
       }
@@ -1290,8 +1597,12 @@ fn write_exact_chunk_with_timing<R: Read>(
       remaining -= read as u64;
     }
     let hash_started_at = timing.as_ref().map(|_| Instant::now());
+    let live_hash = telemetry.map(|value| value.begin(AssemblyLiveStage::Hash));
     md5_attempted = true;
     let actual_md5 = format!("{:x}", chunk_hasher.finalize());
+    if let Some(live_hash) = live_hash {
+      live_hash.finish(0);
+    }
     if let Some(hash_started_at) = hash_started_at {
       md5_micros = md5_micros.saturating_add(duration_micros(hash_started_at.elapsed()));
     }
@@ -1309,7 +1620,7 @@ fn write_exact_chunk_with_timing<R: Read>(
 }
 
 fn hash_exact_file(file: &mut File, size: u64, canceled: &AtomicBool) -> Result<String, String> {
-  hash_exact_file_with_timing(file, size, canceled, None)
+  hash_exact_file_with_timing(file, size, canceled, None, None)
 }
 
 fn hash_exact_file_with_timing(
@@ -1317,12 +1628,14 @@ fn hash_exact_file_with_timing(
   size: u64,
   canceled: &AtomicBool,
   timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<String, String> {
   let mut remaining = size;
   let mut hasher = Md5::new();
   let mut buffer = [0_u8; COPY_BUFFER_SIZE];
   let mut processed_bytes = 0_u64;
   let started_at = timing.as_ref().map(|_| Instant::now());
+  let live_hash = telemetry.map(|value| value.begin(AssemblyLiveStage::Hash));
   let result = (|| {
     while remaining > 0 {
       check_canceled(canceled)?;
@@ -1343,6 +1656,9 @@ fn hash_exact_file_with_timing(
   if let (Some(started_at), Some(timing)) = (started_at, timing) {
     timing.record_asset_md5(duration_micros(started_at.elapsed()), processed_bytes);
   }
+  if let Some(live_hash) = live_hash {
+    live_hash.finish(processed_bytes);
+  }
   result
 }
 
@@ -1350,9 +1666,14 @@ fn sync_staging_file(
   file: &File,
   bytes: u64,
   timing: Option<&mut AssemblyTiming>,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> std::io::Result<()> {
   let started_at = timing.as_ref().map(|_| Instant::now());
+  let live_sync = telemetry.map(|value| value.begin(AssemblyLiveStage::Sync));
   let result = file.sync_all();
+  if let Some(live_sync) = live_sync {
+    live_sync.finish(bytes);
+  }
   if let (Some(started_at), Some(timing)) = (started_at, timing) {
     timing.record_staging_file_sync(duration_micros(started_at.elapsed()), bytes);
   }

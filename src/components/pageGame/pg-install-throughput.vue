@@ -274,9 +274,20 @@ function normalizeCurrentFile(value: string): string {
     .replace(/^正在安装：/, "")
     .replace(/^正在组装：/, "")
     .replace(/^已组装 \d+\/\d+：/, "")
+    .replace(/^\d+\/\d+ /, "")
     .replace(/^游戏文件：/, "")
     .replace(/^资源对象：/, "")
-    .replace(/^渠道 SDK：/, "");
+    .replace(/^资源文件：/, "")
+    .replace(/^渠道 SDK：/, "")
+    .replace(/^渠道 SDK$/, "")
+    .replace(/^持续下载资源对象$/, "")
+    .replace(/^持续队列已调度 \d+\/\d+ 个资源$/, "")
+    .replace(/^正在获取资源$/, "")
+    .replace(/^正在获取配音资源对象$/, "")
+    .replace(/^正在恢复资源 \d+\/\d+：/, "")
+    .replace(/^校验失败，重新获取资源 \d+\/\d+：/, "")
+    .replace(/^自动修复完成：/, "")
+    .trim();
 }
 
 function createLinePath(metric: SampleMetric): string {
@@ -383,10 +394,14 @@ function formatDuration(seconds: number): string {
   }
 
   small {
+    overflow: hidden;
+    min-height: 14px;
     color: var(--box-text-2);
     font-size: 10px;
     grid-column: 2 / 4;
     line-height: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

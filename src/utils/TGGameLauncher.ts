@@ -3,7 +3,33 @@
  * @since Beta v0.11.5
  */
 
-import { Channel, invoke } from "@tauri-apps/api/core";
+import {
+  Channel,
+  invoke as tauriInvoke,
+  type InvokeArgs,
+  type InvokeOptions,
+} from "@tauri-apps/api/core";
+
+import { TGPerf } from "./TGPerf.js";
+
+/**
+ * 统计游戏资源页 IPC 调用次数后转发给 Tauri。
+ * @since Beta v0.11.4
+ */
+function invoke<T = unknown>(
+  command: string,
+  args?: InvokeArgs,
+  options?: InvokeOptions,
+): Promise<T> {
+  TGPerf.recordIpc(command);
+  const pending = tauriInvoke<T>(command, args, options);
+  if (command === "game_package_cache_status") {
+    void pending.then(() => TGPerf.recordCacheStatusRead()).catch(() => {});
+  } else if (command === "game_package_cache_clear") {
+    void pending.then(() => TGPerf.recordCacheClear()).catch(() => {});
+  }
+  return pending;
+}
 
 /**
  * 检测国服游戏安装。
