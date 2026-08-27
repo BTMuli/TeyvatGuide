@@ -62,6 +62,8 @@ declare namespace TGApp.Game.Package {
     installRequiredFreeBytes: number;
     cacheAvailableFreeBytes: number;
     installAvailableFreeBytes: number;
+    /** 应用缓存目录（cache/chunks 所在磁盘）当前可用空间。 */
+    cacheStorageAvailableFreeBytes: number;
     sameVolume: boolean;
     downloadCount: number;
     addCount: number;
@@ -162,6 +164,8 @@ declare namespace TGApp.Game.Package {
   type TaskOptions = {
     concurrency?: number;
     maxBytesPerSecond?: number;
+    /** 全新安装组装消费分片后是否转入共享缓存而不是删除。 */
+    preserveChunks?: boolean;
   };
 
   /** 可通过命令重新读取的资源任务投影。 */

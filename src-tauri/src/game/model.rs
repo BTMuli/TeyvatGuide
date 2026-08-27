@@ -151,6 +151,8 @@ pub struct PackagePlanSummary {
   #[serde(default)]
   pub install_available_free_bytes: u64,
   #[serde(default)]
+  pub cache_storage_available_free_bytes: u64,
+  #[serde(default)]
   pub same_volume: bool,
   pub download_count: usize,
   pub add_count: usize,
@@ -359,6 +361,8 @@ pub struct PackageTaskCleanupSummary {
 pub struct PackageTaskOptions {
   pub concurrency: Option<usize>,
   pub max_bytes_per_second: Option<u64>,
+  /// 全新安装组装消费分片后是否转入共享缓存而不是删除。
+  pub preserve_chunks: Option<bool>,
 }
 
 /// 中断任务的恢复动作。

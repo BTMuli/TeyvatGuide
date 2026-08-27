@@ -342,6 +342,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   async function startInstall(
     draft: TGApp.Game.Installation.InstallDraftSummary,
     plan: TGApp.Game.Package.PlanSummary,
+    options?: TGApp.Game.Package.TaskOptions,
   ): Promise<TGApp.Game.Package.TaskSummary> {
     await TGPerf.reset();
     await TGPerf.milestone("m0");
@@ -349,7 +350,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     mergeTask(startingTask);
     setPending(plan.planId, true);
     try {
-      const task = await startGameInstall(draft.installId, plan.planId);
+      const task = await startGameInstall(draft.installId, plan.planId, options);
       mergeTask(task);
       return task;
     } catch (error) {

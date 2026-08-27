@@ -180,6 +180,9 @@ pub(crate) struct InstallDraft {
   pub(crate) sdk_version: Option<String>,
   #[serde(default)]
   pub(crate) sdk_md5: Option<String>,
+  /// 组装消费分片后是否转入共享缓存而不是删除；任务恢复时沿用该选择。
+  #[serde(default)]
+  pub(crate) preserve_chunks: bool,
   pub(crate) created_at: String,
   pub(crate) updated_at: String,
 }
@@ -279,6 +282,7 @@ pub(crate) fn create_draft(
     manifest_digest: None,
     sdk_version: None,
     sdk_md5: None,
+    preserve_chunks: false,
     created_at: Utc::now().to_rfc3339(),
     updated_at: Utc::now().to_rfc3339(),
   };
@@ -1123,7 +1127,7 @@ fn preserve_spool_downloads(
 }
 
 /// 把单个已校验的 spool 分片并入共享缓存；跳过缺失、冲突或校验不通过的条目。
-fn adopt_spool_chunk(
+pub(crate) fn adopt_spool_chunk(
   shared_cache_root: &Path,
   spool: &Path,
   download: &super::planner::PlanDownload,

@@ -233,6 +233,25 @@
             安全余量；资源完成组装后会滚动释放。
           </p>
         </div>
+        <div v-if="plan !== null" class="install-preserve-cache">
+          <v-checkbox
+            v-model="preserveChunks"
+            :disabled="busy"
+            :hide-details="true"
+            class="install-preserve-cache-toggle"
+            density="compact"
+            label="组装完成后保留下载分片到共享缓存"
+          />
+          <p class="install-preserve-cache-hint">
+            勾选后，已下载分片在组装完成后会转入共享缓存，供后续更新或重新安装复用；需要应用缓存目录所在磁盘额外预留约
+            {{ formatBytes(preserveCacheRequiredBytes) }} 空间。
+          </p>
+          <PgNotice
+            v-if="preserveChunks && !preserveCacheSpaceSufficient"
+            :text="preserveCacheSpaceGuidance"
+            tone="warning"
+          />
+        </div>
         <PgNotice
           v-if="plan !== null && !plan.hasSufficientSpace"
           :text="spaceGuidance"
@@ -342,6 +361,7 @@ const locationSummary = ref<TGApp.Game.Installation.InstallLocationSummary | nul
 const draft = ref<TGApp.Game.Installation.InstallDraftSummary | null>(null);
 const plan = ref<TGApp.Game.Package.PlanSummary | null>(null);
 const planProgress = ref<TGApp.Game.Package.PlanProgress | null>(null);
+const preserveChunks = ref<boolean>(false);
 const busy = ref<boolean>(false);
 const errorMessage = ref<string | null>(null);
 const editingTaskRolledBack = ref<boolean>(false);
@@ -440,7 +460,11 @@ const canContinue = computed<boolean>(() => {
   if (plan.value === null) {
     return errorMessage.value !== null && locationSummary.value?.kind === locationKind.EMPTY;
   }
-  return plan.value !== null && plan.value.hasSufficientSpace;
+  return (
+    plan.value !== null &&
+    plan.value.hasSufficientSpace &&
+    (!preserveChunks.value || preserveCacheSpaceSufficient.value)
+  );
 });
 const continueLabel = computed<string>(() => {
   if (step.value === 3 && isExistingInstall.value) return "开始完整性校验";
@@ -472,6 +496,26 @@ const spaceGuidance = computed<string>(() => {
     return "当前磁盘峰值空间不足，请释放缓存或安装盘空间后重新评估。";
   }
   return `${parts.join("；")}。请释放空间后重新评估。`;
+});
+const preserveCacheRequiredBytes = computed<number>(() => {
+  if (plan.value === null) return 0;
+  return Math.max(0, plan.value.downloadBytes - plan.value.cacheHitBytes) + 1024 * 1024 * 1024;
+});
+const preserveCacheSpaceSufficient = computed<boolean>(() => {
+  if (plan.value === null) return true;
+  return plan.value.cacheStorageAvailableFreeBytes >= preserveCacheRequiredBytes.value;
+});
+const preserveCacheSpaceGuidance = computed<string>(() => {
+  if (plan.value === null) return "";
+  const shortage = Math.max(
+    0,
+    preserveCacheRequiredBytes.value - plan.value.cacheStorageAvailableFreeBytes,
+  );
+  return `应用缓存目录所在磁盘可用空间不足：保留分片需要约 ${formatBytes(
+    preserveCacheRequiredBytes.value,
+  )}，当前仅 ${formatBytes(
+    plan.value.cacheStorageAvailableFreeBytes,
+  )}，还需 ${formatBytes(shortage)}。请释放应用缓存磁盘空间或取消勾选。`;
 });
 
 function resolveDefaultScheme(): Scheme {
@@ -662,7 +706,9 @@ async function startInstall(): Promise<void> {
   visible.value = false;
   emit("completed");
   try {
-    await taskStore.startInstall(currentDraft, currentPlan);
+    await taskStore.startInstall(currentDraft, currentPlan, {
+      preserveChunks: preserveChunks.value,
+    });
     reset();
     showSnackbar.success("已开始安装，进度可在游戏安装页查看");
   } catch (error) {
@@ -780,6 +826,7 @@ function reset(): void {
   draft.value = null;
   plan.value = null;
   planProgress.value = null;
+  preserveChunks.value = false;
   busy.value = false;
   errorMessage.value = null;
   editingTaskRolledBack.value = false;
@@ -1187,6 +1234,29 @@ watch(
   color: var(--box-text-2);
   font-size: 11px;
   grid-column: 1 / -1;
+  line-height: 16px;
+}
+
+.install-preserve-cache {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 6px;
+  margin-top: 8px;
+  background: var(--box-bg-2);
+  gap: 2px;
+}
+
+.install-preserve-cache-toggle {
+  align-self: flex-start;
+  color: var(--common-text-title);
+}
+
+.install-preserve-cache-hint {
+  margin: 0 2px;
+  color: var(--box-text-2);
+  font-size: 11px;
   line-height: 16px;
 }
 

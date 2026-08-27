@@ -515,6 +515,7 @@ pub(crate) fn persist_plan_parts(
     install_required_free_bytes: budget.install_required_free_bytes,
     cache_available_free_bytes,
     install_available_free_bytes,
+    cache_storage_available_free_bytes: cache_available_free_bytes,
     same_volume,
     download_count: parts.downloads.len(),
     add_count: parts
@@ -624,6 +625,8 @@ pub(crate) async fn create_and_persist_install_plan(
     let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
     let cache_available = fs2::available_space(spool_parent)
       .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
+    let cache_storage_available = fs2::available_space(&task_root)
+      .map_err(|error| format!("读取应用缓存磁盘剩余空间失败：{error}"))?;
     let install_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
     let install_available = fs2::available_space(install_parent)
       .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
@@ -655,6 +658,7 @@ pub(crate) async fn create_and_persist_install_plan(
       install_required_free_bytes: budget.install_required_free_bytes,
       cache_available_free_bytes: cache_available,
       install_available_free_bytes: install_available,
+      cache_storage_available_free_bytes: cache_storage_available,
       same_volume,
       download_count: parts.downloads.len(),
       add_count: parts.assets.len(),

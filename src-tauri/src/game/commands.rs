@@ -505,8 +505,14 @@ pub async fn game_install_start(
   .await?;
   persist_validated_plan(&task_root, &plan)?;
   let pool = sqlite_pool(&db_instances).await?;
-  let context =
-    super::package::InstallContext { pool, machine_uid: read_machine_uid(&app_handle)?, draft_id };
+  let context = super::package::InstallContext {
+    pool,
+    machine_uid: read_machine_uid(&app_handle)?,
+    draft_id,
+    preserve_chunks: options.map_or(draft.preserve_chunks, |value| {
+      value.preserve_chunks.unwrap_or(draft.preserve_chunks)
+    }),
+  };
   manager.start_install(
     app_handle,
     task_root,
@@ -736,6 +742,7 @@ pub async fn game_install_recover(
     pool: sqlite_pool(&db_instances).await?,
     machine_uid: read_machine_uid(&app_handle)?,
     draft_id: draft_id.clone(),
+    preserve_chunks: draft.preserve_chunks,
   };
   manager.start_install(
     app_handle,

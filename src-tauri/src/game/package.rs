@@ -811,10 +811,13 @@ impl InstallSpoolTracker {
 ///
 /// fs 探测与删除放在 `InstallSpoolTracker` 锁外执行，避免单个文件操作卡住时
 /// 让所有 tokio 工作线程排队等锁、导致整个下载流水线饿死。
+/// `preserve_chunks` 为真时先把分片转入共享缓存再清理 spool。
 fn release_spool_unneeded(
   tracker: &Arc<Mutex<InstallSpoolTracker>>,
   plan: &PersistedPlan,
   spool_root: &Path,
+  shared_cache_root: &Path,
+  preserve_chunks: bool,
 ) -> u64 {
   let sdk_key = plan
     .install_overlay
@@ -843,6 +846,36 @@ fn release_spool_unneeded(
     if metadata.file_type().is_symlink() || !metadata.is_file() {
       continue;
     }
+    if preserve_chunks {
+      let Some(download) = plan.downloads.iter().find(|download| download.cache_key == key) else {
+        if fs::remove_file(&path).is_err() {
+          continue;
+        }
+        released = released.saturating_add(metadata.len());
+        forget_released_spool_file(tracker, &key, &id);
+        continue;
+      };
+      match super::installer::adopt_spool_chunk(
+        shared_cache_root,
+        spool_root,
+        download,
+        &plan.plan_id,
+      ) {
+        Ok(_) => {
+          // adopt 成功或跳过（目标已存在/校验不符）后，确保 spool 残留文件被清理。
+          let _ = fs::remove_file(&path);
+          released = released.saturating_add(metadata.len());
+          forget_released_spool_file(tracker, &key, &id);
+        }
+        Err(error) => {
+          log::warn!(
+            "[game-install][{}] 保留下载分片到共享缓存失败，将在后续批次重试：{error}",
+            plan.plan_id
+          );
+        }
+      }
+      continue;
+    }
     if fs::remove_file(&path).is_err() {
       continue;
     }
@@ -868,13 +901,18 @@ async fn release_spool_unneeded_async(
   tracker: &Arc<Mutex<InstallSpoolTracker>>,
   plan: &Arc<PersistedPlan>,
   spool_root: &Path,
+  shared_cache_root: &Path,
+  preserve_chunks: bool,
 ) -> u64 {
   let tracker = Arc::clone(tracker);
   let plan = Arc::clone(plan);
   let spool_root = spool_root.to_path_buf();
-  tauri::async_runtime::spawn_blocking(move || release_spool_unneeded(&tracker, &plan, &spool_root))
-    .await
-    .unwrap_or(0)
+  let shared_cache_root = shared_cache_root.to_path_buf();
+  tauri::async_runtime::spawn_blocking(move || {
+    release_spool_unneeded(&tracker, &plan, &spool_root, &shared_cache_root, preserve_chunks)
+  })
+  .await
+  .unwrap_or(0)
 }
 
 fn apply_install_completion_snapshot(
@@ -1276,6 +1314,7 @@ pub(crate) struct InstallContext {
   pub(crate) pool: sqlx::SqlitePool,
   pub(crate) machine_uid: String,
   pub(crate) draft_id: String,
+  pub(crate) preserve_chunks: bool,
 }
 
 pub(crate) struct TaskReservation {
@@ -1593,11 +1632,17 @@ impl GamePackageManager {
     let cache_root = prepare_cache_root(&task_root)?;
     let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
     let spool_root = installer::prepare_install_spool(&task_root, &draft_id, overlay)?;
+    let mut draft = installer::load_draft(&task_root, &draft_id)?;
     if matches!(
-      installer::load_draft(&task_root, &draft_id)?.state,
+      draft.state,
       installer::InstallDraftState::Completed | installer::InstallDraftState::Canceled
     ) {
       return Err("安装草稿已经结束，不能重新启动".to_string());
+    }
+    let preserve_chunks = options.preserve_chunks.unwrap_or(draft.preserve_chunks);
+    if draft.preserve_chunks != preserve_chunks {
+      draft.preserve_chunks = preserve_chunks;
+      installer::persist_draft(&task_root, &draft)?;
     }
     let install_bytes = plan
       .assets
@@ -1646,6 +1691,33 @@ impl GamePackageManager {
     }
     journal.resume_elapsed();
     rebuild_install_cache_state(&mut journal, &plan, &cache_root, &spool_root);
+    if preserve_chunks {
+      let total_download_bytes = plan.downloads.iter().try_fold(0_u64, |total, download| {
+        total.checked_add(download.compressed_size).ok_or_else(|| "安装下载大小溢出".to_string())
+      })?;
+      let shared_cache_bytes = plan.downloads.iter().try_fold(0_u64, |total, download| {
+        if cached_chunk_matches(&cache_root, download) {
+          total.checked_add(download.compressed_size).ok_or_else(|| "安装缓存大小溢出".to_string())
+        } else {
+          Ok(total)
+        }
+      })?;
+      let cache_storage_required =
+        total_download_bytes.saturating_sub(shared_cache_bytes).saturating_add(SAFETY_MARGIN_BYTES);
+      let cache_storage_available = fs2::available_space(&cache_root)
+        .map_err(|error| format!("读取应用缓存磁盘剩余空间失败：{error}"))?;
+      if cache_storage_available < cache_storage_required {
+        let error = format!(
+          "缓存目录所在磁盘空间不足：保留下载分片需要约 {} 字节，当前仅 {} 字节可用；请释放应用缓存磁盘空间或取消保留分片选项",
+          cache_storage_required, cache_storage_available
+        );
+        journal.state = PackageTaskState::Failed;
+        journal.error_message = Some(error.clone());
+        journal.touch();
+        journal::persist(&task_root, &journal)?;
+        return Err(error);
+      }
+    }
     let cache_complete = journal.committed_step >= journal.total_count;
     let spool_window = install_spool_window(&plan.assets, concurrency, cache_complete);
     let required = install_bytes.saturating_add(spool_window).saturating_add(SAFETY_MARGIN_BYTES);
@@ -1697,6 +1769,7 @@ impl GamePackageManager {
       active.by_task.insert(plan.plan_id.clone(), task);
     }
     emit_state(&app_handle, &summary);
+    let context = InstallContext { preserve_chunks, ..context };
     tauri::async_runtime::spawn(async move {
       let _reservation = reservation;
       run_install_streaming_supervisor(
@@ -3373,7 +3446,13 @@ async fn run_install_streaming_task(
       value.current_file = None;
       value.touch();
       persist_install_checkpoint(&task_root, &value, &metrics)?;
-      let released = release_spool_unneeded(&spool_tracker, &plan, &spool_root);
+      let released = release_spool_unneeded(
+        &spool_tracker,
+        &plan,
+        &spool_root,
+        &shared_cache_root,
+        context.preserve_chunks,
+      );
       value.released_bytes = value.released_bytes.saturating_add(released);
       value.spool_bytes = spool_bytes(&spool_root);
       value.touch();
@@ -3425,6 +3504,7 @@ async fn run_install_streaming_task(
       &staging_root,
       &spool_tracker,
       &spool_bytes_cache,
+      context.preserve_chunks,
     )
     .await
     {
@@ -3652,7 +3732,14 @@ async fn run_install_streaming_task(
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
-      let released = release_spool_unneeded_async(&spool_tracker, &plan, &spool_root).await;
+      let released = release_spool_unneeded_async(
+        &spool_tracker,
+        &plan,
+        &spool_root,
+        &shared_cache_root,
+        context.preserve_chunks,
+      )
+      .await;
       value.released_bytes = value.released_bytes.saturating_add(released);
       value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
       metrics.observe_spool(value.spool_bytes);
@@ -3711,6 +3798,7 @@ async fn run_install_streaming_task(
     &staging_root,
     &spool_tracker,
     &spool_bytes_cache,
+    context.preserve_chunks,
   )
   .await
   {
@@ -3925,6 +4013,7 @@ async fn run_install_prepublish_repair(
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
   spool_bytes_cache: &Arc<Mutex<SpoolBytesCache>>,
+  preserve_chunks: bool,
 ) -> Result<(), String> {
   loop {
     let validation_plan = Arc::clone(plan);
@@ -4041,7 +4130,14 @@ async fn run_install_prepublish_repair(
     value.current_file = value.assembly_current_file.clone();
     value.touch();
     persist_install_checkpoint(task_root, &value, metrics)?;
-    let released = release_spool_unneeded_async(spool_tracker, plan, spool_root).await;
+    let released = release_spool_unneeded_async(
+      spool_tracker,
+      plan,
+      spool_root,
+      shared_cache_root,
+      preserve_chunks,
+    )
+    .await;
     value.released_bytes = value.released_bytes.saturating_add(released);
     value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
     value.touch();
@@ -4068,6 +4164,7 @@ async fn run_install_bounded_asset_pipeline(
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
   spool_bytes_cache: &Arc<Mutex<SpoolBytesCache>>,
+  preserve_chunks: bool,
 ) -> Result<(), String> {
   // 下载并发与流水线并发一致（与 CPU 核心数对齐）；组装取下载并发的 1/2，
   // 避免机械盘或低端 SSD 因并行写入过多而反向降速。
@@ -4234,7 +4331,14 @@ async fn run_install_bounded_asset_pipeline(
         if let Err(error) = persist_install_checkpoint(task_root, &value, metrics) {
           first_error.get_or_insert(error);
         } else {
-          let released = release_spool_unneeded_async(spool_tracker, plan, spool_root).await;
+          let released = release_spool_unneeded_async(
+            spool_tracker,
+            plan,
+            spool_root,
+            shared_cache_root,
+            preserve_chunks,
+          )
+          .await;
           value.released_bytes = value.released_bytes.saturating_add(released);
           value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
           metrics.observe_spool(value.spool_bytes);
