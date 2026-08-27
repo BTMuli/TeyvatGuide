@@ -1214,6 +1214,38 @@ fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
     && plan.assets.iter().all(|asset| asset.action == PlanAssetAction::Repair)
 }
 
+/// 正式发行版是否开放正式更新与预下载。仅 debug 构建开放。
+pub(crate) fn is_debug_game_update_enabled() -> bool {
+  cfg!(debug_assertions)
+}
+
+/// 计划是否属于尚未对正式版开放的更新/预下载（不含完整性修复）。
+pub(crate) fn is_debug_only_update_plan(plan: &PersistedPlan) -> bool {
+  match plan.target {
+    PackagePlanTarget::PreDownload => true,
+    PackagePlanTarget::Main => !is_integrity_repair_plan(plan),
+    _ => false,
+  }
+}
+
+/// 正式发行版拒绝新建正式更新或预下载评估。
+pub(crate) fn reject_release_game_update(target: PackagePlanTarget) -> Result<(), String> {
+  if is_debug_game_update_enabled()
+    || !matches!(target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload)
+  {
+    return Ok(());
+  }
+  Err("正式更新与预下载仅在调试版本开放".to_string())
+}
+
+/// 正式发行版拒绝启动尚未开放的更新/预下载任务；完整性修复仍可执行。
+pub(crate) fn reject_release_game_update_plan(plan: &PersistedPlan) -> Result<(), String> {
+  if is_debug_game_update_enabled() || !is_debug_only_update_plan(plan) {
+    return Ok(());
+  }
+  Err("正式更新与预下载仅在调试版本开放".to_string())
+}
+
 fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
   left.len() == right.len()
     && left.iter().zip(right).all(|(left, right)| {

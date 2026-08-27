@@ -73,7 +73,11 @@
       tone="warning"
     />
     <div
-      v-if="snapshot !== null && (snapshot.updateAvailable || snapshot.preDownloadAvailable)"
+      v-if="
+        debugUpdateEnabled &&
+        snapshot !== null &&
+        (snapshot.updateAvailable || snapshot.preDownloadAvailable)
+      "
       class="version-actions"
     >
       <v-btn
@@ -109,56 +113,63 @@
       :percent="planProgressPercent"
     />
 
-    <div v-if="plan !== null" class="plan-summary" aria-live="polite">
+    <div v-if="visiblePlan !== null" class="plan-summary" aria-live="polite">
       <div class="plan-title">
         <div>
-          <span>{{ plan.sourceTag === plan.targetTag ? "修复计划已固化" : "计划已固化" }}</span>
-          <strong v-if="plan.sourceTag === plan.targetTag">修复 {{ plan.targetTag }}</strong>
-          <strong v-else>{{ plan.sourceTag }} → {{ plan.targetTag }}</strong>
+          <span>
+            {{ visiblePlan.sourceTag === visiblePlan.targetTag ? "修复计划已固化" : "计划已固化" }}
+          </span>
+          <strong v-if="visiblePlan.sourceTag === visiblePlan.targetTag">
+            修复 {{ visiblePlan.targetTag }}
+          </strong>
+          <strong v-else>{{ visiblePlan.sourceTag }} → {{ visiblePlan.targetTag }}</strong>
         </div>
         <v-chip
-          :color="plan.hasSufficientSpace ? 'success' : 'warning'"
+          :color="visiblePlan.hasSufficientSpace ? 'success' : 'warning'"
           size="small"
           variant="tonal"
         >
-          {{ plan.hasSufficientSpace ? "空间充足" : "空间不足" }}
+          {{ visiblePlan.hasSufficientSpace ? "空间充足" : "空间不足" }}
         </v-chip>
       </div>
       <dl>
         <div>
           <dt>差异方式</dt>
-          <dd>{{ gameEnum.package.planStrategyDesc(plan.strategy) }}</dd>
+          <dd>{{ gameEnum.package.planStrategyDesc(visiblePlan.strategy) }}</dd>
         </div>
         <div>
           <dt>预计下载</dt>
-          <dd>{{ formatBytes(plan.downloadBytes - plan.cacheHitBytes) }}</dd>
+          <dd>{{ formatBytes(visiblePlan.downloadBytes - visiblePlan.cacheHitBytes) }}</dd>
         </div>
         <div>
           <dt>安装写入</dt>
-          <dd>{{ formatBytes(plan.installBytes) }}</dd>
+          <dd>{{ formatBytes(visiblePlan.installBytes) }}</dd>
         </div>
         <div>
           <dt>缓存命中</dt>
-          <dd>{{ formatBytes(plan.cacheHitBytes) }}</dd>
+          <dd>{{ formatBytes(visiblePlan.cacheHitBytes) }}</dd>
         </div>
         <div>
           <dt>磁盘空间</dt>
           <dd>
-            需要 {{ formatBytes(plan.requiredFreeBytes) }} · 可用
-            {{ formatBytes(plan.availableFreeBytes) }}
+            需要 {{ formatBytes(visiblePlan.requiredFreeBytes) }} · 可用
+            {{ formatBytes(visiblePlan.availableFreeBytes) }}
           </dd>
         </div>
         <div>
           <dt>文件变化</dt>
-          <dd v-if="plan.sourceTag === plan.targetTag">{{ plan.addCount }} 个待修复文件</dd>
+          <dd v-if="visiblePlan.sourceTag === visiblePlan.targetTag">
+            {{ visiblePlan.addCount }} 个待修复文件
+          </dd>
           <dd v-else>
-            {{ plan.addCount }} 新增 · {{ plan.modifyCount }} 修改 · {{ plan.deleteCount }} 删除
+            {{ visiblePlan.addCount }} 新增 · {{ visiblePlan.modifyCount }} 修改 ·
+            {{ visiblePlan.deleteCount }} 删除
           </dd>
         </div>
       </dl>
       <p>
         {{
-          plan.sourceTag === plan.targetTag
+          visiblePlan.sourceTag === visiblePlan.targetTag
             ? "下载只写入应用缓存；应用修复时不会改写版本号。"
             : "下载只写入应用缓存；不会在此阶段修改游戏目录。"
         }}
@@ -166,7 +177,7 @@
     </div>
     <PgTask
       :actionPending="taskActionPending"
-      :plan
+      :plan="visiblePlan"
       :recoveryProgress="currentRecoveryProgress"
       :targetPublished
       :task="currentTask"
@@ -212,6 +223,7 @@ type VersionFactsSlot = {
 const { installation } = defineProps<Props>();
 const emit = defineEmits<{ updated: [] }>();
 defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
+const debugUpdateEnabled = gameEnum.package.debugUpdateEnabled();
 const taskStore = useGameLauncherStore();
 const { pendingActions, recoveryProgressByTask, tasksByInstallation, verifyByInstallation } =
   storeToRefs(taskStore);
@@ -232,6 +244,11 @@ const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   const task = tasksByInstallation.value[installation.id];
   if (task === undefined || task.target === gameEnum.package.planTarget.SWITCH) return null;
   return task;
+});
+const visiblePlan = computed<TGApp.Game.Package.PlanSummary | null>(() => {
+  if (plan.value === null) return null;
+  if (debugUpdateEnabled || plan.value.sourceTag === plan.value.targetTag) return plan.value;
+  return null;
 });
 const currentRecoveryProgress = computed<TGApp.Game.Package.RecoveryProgress | null>(() => {
   const taskId = currentTask.value?.taskId;
@@ -445,15 +462,15 @@ async function loadSnapshot(notify: boolean): Promise<void> {
       plan.value = null;
     }
     if (!notify) return;
-    if (result.updateAvailable) {
+    if (debugUpdateEnabled && result.updateAvailable) {
       showSnackbar.success(`远端版本已刷新，可更新至 ${result.main.tag}`);
       return;
     }
-    if (result.preDownloadAvailable && result.preDownload !== null) {
+    if (debugUpdateEnabled && result.preDownloadAvailable && result.preDownload !== null) {
       showSnackbar.success(`远端版本已刷新，可预下载 ${result.preDownload.tag}`);
       return;
     }
-    showSnackbar.success(`远端版本已刷新，当前已是 ${result.main.tag}`);
+    showSnackbar.success(`远端版本已刷新，当前正式版本 ${result.main.tag}`);
   } catch (error) {
     if (sequence !== requestSequence) return;
     errorMessage.value = `读取远端版本失败：${error}`;
@@ -468,7 +485,7 @@ async function refreshSnapshot(): Promise<void> {
 }
 
 async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<void> {
-  if (planningTarget.value !== null || verifyActive.value) return;
+  if (!debugUpdateEnabled || planningTarget.value !== null || verifyActive.value) return;
   planningTarget.value = target;
   planProgress.value = null;
   errorMessage.value = null;

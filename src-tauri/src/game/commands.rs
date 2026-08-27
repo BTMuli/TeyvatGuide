@@ -18,7 +18,7 @@ use super::{
     create_and_persist_audio_plan, create_and_persist_install_plan, create_and_persist_plan,
     hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan, hydrate_and_validate_plan,
     hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
-    report_plan_progress,
+    reject_release_game_update, reject_release_game_update_plan, report_plan_progress,
   },
   switch::{self, create_and_persist_switch_plan},
 };
@@ -924,6 +924,7 @@ pub async fn game_package_plan(
   target: PackagePlanTarget,
   on_progress: Channel<PackagePlanProgress>,
 ) -> Result<PackagePlanSummary, String> {
+  reject_release_game_update(target)?;
   report_plan_progress(&on_progress, 1, "正在读取本地安装信息");
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
@@ -1091,6 +1092,7 @@ pub async fn game_package_start(
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   let plan = load_persisted_plan(&task_root, &plan_id)?;
+  reject_release_game_update_plan(&plan)?;
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
