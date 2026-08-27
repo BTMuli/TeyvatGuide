@@ -61,9 +61,9 @@ const INSTALL_STALL_PAUSE_MESSAGE: &str =
 const INSTALL_STALL_NOTIFICATION_TITLE: &str = "游戏安装已暂停";
 const INSTALL_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到磁盘 I/O 持续停滞，请检查磁盘状态后手动继续。";
-/// 配音包同时只让一个资源占用下载槽，下一个资源排队；组装与下一包下载重叠。
-const AUDIO_DOWNLOAD_FOCUS: usize = 1;
-/// 一个正在下载、一个等待下载焦点，避免所有大包同时抢带宽。
+/// 配音包同时让 4 个资源占用下载槽；组装与后续包下载重叠。
+const AUDIO_DOWNLOAD_FOCUS: usize = 4;
+/// 4 路下载之外再预取 1 个资源，焦点空出后立刻接上下一包。
 const AUDIO_DOWNLOAD_PREFETCH: usize = 1;
 
 /// 安装流水线停滞看门狗：独立线程联合检查 journal 与下载/组装阶段心跳。
@@ -306,11 +306,6 @@ pub(crate) struct AudioApplyContext {
   pub installation: GameInstallation,
   pub machine_uid: String,
   pub registration_pool: sqlx::SqlitePool,
-}
-
-struct AudioAssemblyCompletion {
-  asset_index: usize,
-  result: Result<(), String>,
 }
 
 /// 组装进度条用写出增量叠加已完成成品，不把预分配或会话写出写进 journal。
@@ -2889,15 +2884,10 @@ async fn assemble_audio_asset(
   assembly_slots: Arc<Semaphore>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
   overlay: Arc<AudioLiveAssemblyOverlay>,
-) -> AudioAssemblyCompletion {
+) -> Result<(), String> {
   let permit = match assembly_slots.acquire_owned().await {
     Ok(permit) => permit,
-    Err(error) => {
-      return AudioAssemblyCompletion {
-        asset_index,
-        result: Err(format!("获取配音组装并发槽位失败：{error}")),
-      };
-    }
+    Err(error) => return Err(format!("获取配音组装并发槽位失败：{error}")),
   };
   {
     let mut value = journal.lock().await;
@@ -2940,7 +2930,7 @@ async fn assemble_audio_asset(
     value.touch();
     emit_audio_progress(&app_handle, &value, &telemetry, &overlay);
   }
-  AudioAssemblyCompletion { asset_index, result }
+  result
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -3054,7 +3044,7 @@ async fn run_audio_asset_job(
         }
       }
     }
-    let completion = assemble_audio_asset(
+    assemble_audio_asset(
       app_handle,
       task_root,
       game_root,
@@ -3067,8 +3057,7 @@ async fn run_audio_asset_job(
       telemetry,
       overlay,
     )
-    .await;
-    completion.result
+    .await
   }
   .await;
   AudioAssetJobCompletion { asset_index, needs_download, result }
@@ -6736,9 +6725,12 @@ mod audio_delete_progress_tests {
     let backup_file =
       prepare_manifest_output_file(&backup, "Audio/dup.pck").expect("prepare backup path");
     fs::write(&backup_file, b"x").expect("write backup file");
-    let error =
-      discover_audio_delete_progress("plan-1", &[plan_delete("Audio/dup.pck", 50)], &root)
-        .expect_err("duplicate copies are rejected");
+    let result =
+      discover_audio_delete_progress("plan-1", &[plan_delete("Audio/dup.pck", 50)], &root);
+    let error = match result {
+      Err(error) => error,
+      Ok(_) => panic!("duplicate copies are rejected"),
+    };
     assert!(error.contains("同时存在"));
     let _ = fs::remove_dir_all(&root);
   }
