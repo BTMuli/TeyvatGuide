@@ -236,6 +236,31 @@ pub(crate) fn load_asset_evidence(
   load_evidence_file(&path)
 }
 
+/// 提交后复验：计划与证据一致，且目标目录里仍是同一文件身份（不读内容）。
+///
+/// 同盘 rename 后 FileId 不变；对不上时由调用方回退整文件哈希。
+pub(crate) fn published_asset_matches_evidence(
+  task_root: &Path,
+  plan: &PersistedPlan,
+  index: usize,
+  published_root: &Path,
+) -> bool {
+  let Some(asset) = plan.assets.get(index) else {
+    return false;
+  };
+  let Ok(Some(evidence)) = load_asset_evidence(task_root, plan, index) else {
+    return false;
+  };
+  evidence.plan_id == plan.plan_id
+    && evidence.manifest_digest == plan.manifest_digest
+    && evidence.path == asset.name
+    && evidence.expected_size == asset.size
+    && evidence.expected_md5.eq_ignore_ascii_case(&asset.md5)
+    && evidence.actual_size == asset.size
+    && evidence.actual_md5.eq_ignore_ascii_case(&asset.md5)
+    && file_matches_evidence(published_root, &evidence).unwrap_or(false)
+}
+
 /// 删除一个主资源的证据，使后续恢复和进度重建不再把该资源视为已完成。
 pub(crate) fn invalidate_asset_evidence(
   task_root: &Path,

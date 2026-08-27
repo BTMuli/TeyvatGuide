@@ -73,12 +73,6 @@ const captionTone = computed<"err" | "warn" | "">(() => {
       return "";
   }
 });
-const audioPreflightPercent = computed<number>(() => {
-  if (task.verificationTotalCount === 0) {
-    return task.commitCompletedCount >= task.commitTotalCount ? 100 : 0;
-  }
-  return phasePercent(task.verificationCompletedCount, task.verificationTotalCount);
-});
 const audioCommitPercent = computed<number>(() => {
   if (task.commitTotalCount === 0) return 100;
   if (
@@ -87,11 +81,13 @@ const audioCommitPercent = computed<number>(() => {
   ) {
     return 100;
   }
-  if (task.state === gameEnum.package.taskState.VERIFYING) {
-    return (200 + audioPreflightPercent.value) / 3;
-  }
   const committed = phasePercent(task.commitCompletedCount, task.commitTotalCount);
-  return (audioPreflightPercent.value + committed) / 3;
+  if (task.verificationTotalCount === 0) return committed;
+  const verified = phasePercent(task.verificationCompletedCount, task.verificationTotalCount);
+  if (task.state === gameEnum.package.taskState.VERIFYING) {
+    return committed * 0.5 + verified * 0.5;
+  }
+  return committed;
 });
 const commitComplete = computed<boolean>(() => audioCommitPercent.value >= 100);
 const downloadComplete = computed<boolean>(() => {
@@ -194,9 +190,7 @@ const commitRow = computed<ProgressRow>(() => ({
   status: null,
   details: [
     ...(task.verificationTotalCount > 0
-      ? [
-          `${task.state === gameEnum.package.taskState.VERIFYING ? "最终复验" : "并行校验"} ${task.verificationCompletedCount} / ${task.verificationTotalCount}`,
-        ]
+      ? [`复验 ${task.verificationCompletedCount} / ${task.verificationTotalCount}`]
       : []),
     `提交文件 ${task.commitCompletedCount} / ${task.commitTotalCount}`,
   ],

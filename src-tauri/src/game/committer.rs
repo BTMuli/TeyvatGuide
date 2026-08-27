@@ -205,7 +205,7 @@ where
     }
     persist_and_emit(task_root, journal, &emit)?;
     if plan.target == PackagePlanTarget::Audio {
-      verify_changed_files(plan, game_root, journal, canceled, &emit)?;
+      verify_changed_files(plan, game_root, task_root, journal, canceled, &emit)?;
     } else {
       let issues = inspect_inventory_with_journal_progress(
         plan,
@@ -824,7 +824,7 @@ fn prepare_transaction(
     task_root,
     journal,
     plan.target == PackagePlanTarget::Audio,
-    // 配音任务只在提交前并行校验 Modify 源文件；Delete 只检查路径，Add 只检查目标不存在。
+    // 配音 incoming 已在组装时写入证据；提交前只核对目标是否存在，Modify 只比长度。
     plan.target != PackagePlanTarget::Audio,
   )
 }
@@ -959,30 +959,19 @@ where
     persist_and_emit(task_root, journal, emit)?;
   } else if journal.target == PackagePlanTarget::Audio {
     let cursor = apply(journal)?.cursor;
-    let remaining_modify_count = commit.steps[cursor.min(commit.steps.len())..]
-      .iter()
-      .filter(|step| step.kind == CommitStepKind::Modify)
-      .count();
-    let remaining_modify_bytes = commit.steps[cursor.min(commit.steps.len())..]
-      .iter()
-      .filter(|step| step.kind == CommitStepKind::Modify)
-      .fold(0_u64, |total, step| total.saturating_add(step.source_size.unwrap_or(step.size)));
     journal.commit_completed_count = cursor.min(commit.steps.len());
     journal.commit_total_count = commit.steps.len();
     journal.verification_completed_count = 0;
-    journal.verification_total_count = remaining_modify_count;
+    journal.verification_total_count = 0;
     journal.verification_completed_bytes = 0;
-    journal.verification_total_bytes = remaining_modify_bytes;
-    journal.commit_current_step = (remaining_modify_count > 0)
-      .then(|| format!("校验待替换配音文件 0/{remaining_modify_count}"));
-    persist_and_emit(task_root, journal, emit)?;
-    preflight_audio_sources(commit, cursor, game_root, journal, task_root, canceled, emit)?;
+    journal.verification_total_bytes = 0;
     journal.commit_current_step = Some(format!(
       "提交配音文件 {}/{}",
       journal.commit_completed_count, journal.commit_total_count
     ));
     journal.current_file = None;
     persist_and_emit(task_root, journal, emit)?;
+    preflight_audio_sources(commit, cursor, game_root, journal, task_root, canceled, emit)?;
   }
   for (index, step) in commit.steps.iter().enumerate().skip(apply(journal)?.cursor) {
     check_canceled(canceled)?;
@@ -1025,7 +1014,7 @@ where
       if step.kind != CommitStepKind::Repair {
         let source_matches = match step.kind {
           CommitStepKind::Delete => true,
-          // Modify 已在并行阶段完成 MD5；事务移动前只做轻量长度复查，避免重复串行哈希。
+          // 配音 Modify 只比长度：旧文件整包哈希已取消，回滚恢复的是实际挪走的备份。
           CommitStepKind::Modify if journal.target == PackagePlanTarget::Audio => {
             let expected =
               step.source_size.ok_or_else(|| format!("资源步骤缺少源大小：{}", step.name))?;
@@ -1053,7 +1042,7 @@ where
     if step.kind != CommitStepKind::Delete {
       ensure_game_stopped()?;
       let incoming_path = resolve_existing_manifest_file(&incoming_root, &step.name)?;
-      // 配音 incoming 在本次连续组装流程中已经完成 MD5 校验；提交后仍会执行最终并行复验。
+      // 配音 incoming 在组装时已写入证据；提交后按文件身份复验，对不上再回退 MD5。
       if journal.target != PackagePlanTarget::Audio
         && !file_matches(&incoming_path, step.size, &step.md5)?
       {
@@ -1115,99 +1104,17 @@ where
 {
   let steps = &commit.steps[cursor.min(commit.steps.len())..];
   preflight_targets(steps, game_root, false)?;
-  let modify_steps =
-    steps.iter().filter(|step| step.kind == CommitStepKind::Modify).collect::<Vec<_>>();
-  let worker_count = modify_steps.len().min(default_assembly_concurrency());
-  if worker_count == 0 {
-    return persist_and_emit(task_root, journal, emit);
-  }
-  let chunk_size = modify_steps.len().div_ceil(worker_count);
-  let first_error = std::thread::scope(|scope| {
-    let (sender, receiver) = std::sync::mpsc::channel();
-    let handles = modify_steps
-      .chunks(chunk_size)
-      .map(|chunk| {
-        let sender = sender.clone();
-        scope.spawn(move || {
-          for step in chunk {
-            let result = verify_audio_commit_step(step, game_root, canceled);
-            let _ = sender.send((step.name.clone(), result));
-          }
-        })
-      })
-      .collect::<Vec<_>>();
-    drop(sender);
-
-    let mut first_error = None;
-    let mut last_emit = Instant::now() - ASSEMBLY_PROGRESS_EMIT_INTERVAL;
-    for (name, result) in receiver {
-      if let Err(error) = result {
-        if first_error.is_none() {
-          first_error = Some(error);
-        }
-        continue;
-      }
-      journal.verification_completed_count = journal
-        .verification_completed_count
-        .saturating_add(1)
-        .min(journal.verification_total_count);
-      journal.verification_completed_bytes = journal
-        .verification_completed_bytes
-        .saturating_add(
-          commit
-            .steps
-            .iter()
-            .find(|step| step.name == name)
-            .and_then(|step| step.source_size)
-            .unwrap_or_default(),
-        )
-        .min(journal.verification_total_bytes);
-      journal.current_file = Some(name);
-      journal.commit_current_step = Some(format!(
-        "并行校验待替换配音文件 {}/{}",
-        journal.verification_completed_count, journal.verification_total_count
-      ));
-      if journal.verification_completed_count == journal.verification_total_count
-        || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL
-      {
-        journal.touch();
-        emit(journal);
-        last_emit = Instant::now();
-      }
+  for step in steps.iter().filter(|step| step.kind == CommitStepKind::Modify) {
+    check_canceled(canceled)?;
+    let current = resolve_existing_manifest_file(game_root, &step.name)?;
+    let expected = step.source_size.ok_or_else(|| format!("资源步骤缺少源大小：{}", step.name))?;
+    let actual =
+      fs::metadata(&current).map_err(|error| format!("读取资源文件状态失败：{error}"))?.len();
+    if actual != expected {
+      return Err(format!("游戏资源在提交前发生变化：{}", step.name));
     }
-    for handle in handles {
-      if handle.join().is_err() && first_error.is_none() {
-        first_error = Some("配音文件并行校验线程异常退出".to_string());
-      }
-    }
-    first_error
-  });
-  check_canceled(canceled)?;
-  if let Some(error) = first_error {
-    journal.touch();
-    emit(journal);
-    return Err(error);
   }
   persist_and_emit(task_root, journal, emit)
-}
-
-fn verify_audio_commit_step(
-  step: &CommitStep,
-  game_root: &Path,
-  canceled: &AtomicBool,
-) -> Result<(), String> {
-  check_canceled(canceled)?;
-  match step.kind {
-    CommitStepKind::Add | CommitStepKind::Repair => Ok(()),
-    CommitStepKind::Modify => {
-      let current = resolve_existing_manifest_file(game_root, &step.name)?;
-      if !source_file_matches(&current, step)? {
-        return Err(format!("游戏资源在提交前发生变化：{}", step.name));
-      }
-      Ok(())
-    }
-    CommitStepKind::Delete => Ok(()),
-  }
 }
 
 fn commit_version<F>(
@@ -1268,6 +1175,7 @@ where
 fn verify_changed_files<F>(
   plan: &PersistedPlan,
   game_root: &Path,
+  task_root: &Path,
   journal: &mut TaskJournal,
   canceled: &AtomicBool,
   emit: &F,
@@ -1284,11 +1192,13 @@ where
       let handles = plan
         .assets
         .chunks(chunk_size)
-        .map(|chunk| {
+        .enumerate()
+        .map(|(chunk_index, chunk)| {
           let sender = sender.clone();
           scope.spawn(move || {
-            for asset in chunk {
-              let result = verify_audio_asset(asset, game_root, canceled);
+            for (offset, asset) in chunk.iter().enumerate() {
+              let index = chunk_index * chunk_size + offset;
+              let result = verify_audio_asset(asset, index, plan, game_root, task_root, canceled);
               let _ = sender.send((asset.name.clone(), result));
             }
           })
@@ -1364,11 +1274,17 @@ where
 
 fn verify_audio_asset(
   asset: &PlanAsset,
+  asset_index: usize,
+  plan: &PersistedPlan,
   game_root: &Path,
+  task_root: &Path,
   canceled: &AtomicBool,
 ) -> Result<u64, String> {
   check_canceled(canceled)?;
   let path = resolve_existing_manifest_file(game_root, &asset.name)?;
+  if evidence::published_asset_matches_evidence(task_root, plan, asset_index, game_root) {
+    return Ok(asset.size);
+  }
   if !file_matches(&path, asset.size, &asset.md5)? {
     return Err(format!("配音变更文件校验失败：{}", asset.name));
   }
