@@ -468,10 +468,15 @@ function formatBytes(bytes: number): string {
   white-space: normal;
 }
 
-.task-audio-title-label {
+.task-heading-copy .task-audio-title-label {
   display: inline;
   width: fit-content;
   flex-shrink: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .task-audio-tags {

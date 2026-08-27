@@ -327,7 +327,6 @@ function formatDuration(seconds: number): string {
 .audio-throughput-metrics {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
   gap: 8px 20px;
 }
 
@@ -352,6 +351,7 @@ function formatDuration(seconds: number): string {
 
   small {
     overflow: hidden;
+    min-height: 14px;
     color: var(--box-text-2);
     font-size: 10px;
     grid-column: 2 / 4;
@@ -453,7 +453,7 @@ function formatDuration(seconds: number): string {
 
 .audio-throughput-scale {
   top: 4px;
-  right: 4px;
+  left: 4px;
 }
 
 .audio-throughput-window {
