@@ -2,15 +2,27 @@
 <template>
   <v-app v-model:theme="vuetifyTheme">
     <TSidebar v-if="isMain" />
-    <v-main>
-      <v-container :fluid="true" class="app-container">
-        <router-view v-slot="{ Component }">
-          <component :is="Component" v-if="Component" />
-          <div v-else class="app-route-loading" role="status">
-            <v-progress-circular indeterminate />
-            <span>正在加载页面…</span>
-          </div>
-        </router-view>
+    <v-main class="app-main">
+      <div v-if="pageCoverUrl !== null" aria-hidden="true" class="app-page-cover-layer">
+        <Transition name="app-page-cover">
+          <div :key="pageCoverUrl" :style="pageCoverStyle" class="app-page-cover" />
+        </Transition>
+      </div>
+      <v-container
+        :class="{ 'app-container-cover': pageCoverUrl !== null }"
+        :fluid="true"
+        class="app-container"
+      >
+        <div class="app-page-content">
+          <router-view v-slot="{ Component }">
+            <component :is="Component" v-if="Component" />
+            <div v-else class="app-route-loading" role="status">
+              <v-progress-circular indeterminate />
+              <span>正在加载页面…</span>
+            </div>
+          </router-view>
+        </div>
+        <TPageCoverSwitcher />
       </v-container>
     </v-main>
     <TBackTop />
@@ -18,10 +30,12 @@
 </template>
 <script lang="ts" setup>
 import TBackTop from "@comp/app/t-backTop.vue";
+import TPageCoverSwitcher from "@comp/app/t-page-cover-switcher.vue";
 import TSidebar from "@comp/app/t-sidebar.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { usePageCover } from "@hooks/usePageCover.js";
 import OtherApi from "@req/otherReq.js";
 import type { FeedbackInternalOptions, Integration } from "@sentry/core";
 import * as Sentry from "@sentry/vue";
@@ -65,7 +79,12 @@ const userStore = useUserStore();
 const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
 
 const isMain = ref<boolean>(false);
+const { pageCoverUrl } = usePageCover();
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
+const pageCoverStyle = computed<{ backgroundImage: string } | undefined>(() => {
+  if (pageCoverUrl.value === null) return undefined;
+  return { backgroundImage: `url("${pageCoverUrl.value}")` };
+});
 
 let themeListener: UnlistenFn | null = null;
 let dpListener: UnlistenFn | null = null;
@@ -589,10 +608,58 @@ async function handleCommands(cmds: CliMatches): Promise<void> {
   color: var(--app-page-content);
 }
 
+.app-main {
+  position: relative;
+}
+
 .app-container {
+  position: relative;
+  z-index: 1;
   height: 100%;
   background: var(--app-page-bg);
   color: var(--app-page-content);
+}
+
+.app-container-cover {
+  background: transparent;
+}
+
+.app-page-cover-layer {
+  position: absolute;
+  z-index: 0;
+  overflow: hidden;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-page-cover {
+  position: absolute;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  inset: 0;
+}
+
+.app-page-cover-enter-active,
+.app-page-cover-leave-active {
+  transition: opacity 0.8s ease;
+}
+
+.app-page-cover-enter-from,
+.app-page-cover-leave-to {
+  opacity: 0;
+}
+
+.app-page-content {
+  position: relative;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-page-cover-enter-active,
+  .app-page-cover-leave-active {
+    transition: none;
+  }
 }
 
 .app-route-loading {

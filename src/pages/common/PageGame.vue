@@ -1,9 +1,17 @@
 <template>
-  <v-app-bar>
+  <v-app-bar
+    :class="{ 'game-app-bar-frost': pageCoverUrl !== null }"
+    :color="pageCoverUrl !== null ? 'transparent' : undefined"
+    :elevation="pageCoverUrl !== null ? 0 : undefined"
+    :flat="pageCoverUrl !== null"
+  >
     <template #prepend>
       <div class="game-title">
         <img alt="启动器" class="game-title-icon" src="/platforms/mhy/launcher.webp" />
-        <span>游戏安装</span>
+        <span class="game-title-text">
+          游戏安装
+          <span class="game-title-beta">Beta</span>
+        </span>
       </div>
     </template>
     <template #append>
@@ -41,7 +49,7 @@
     </template>
   </v-app-bar>
 
-  <div class="game-page">
+  <div :class="{ 'game-page-cover': pageCoverUrl !== null }" class="game-page">
     <div v-if="installationsLoading && installations.length === 0" class="game-empty" role="status">
       <v-progress-circular indeterminate />
       <span class="game-empty-title">正在读取本地安装…</span>
@@ -119,6 +127,7 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
+import { useHoYoPlayPageCover, usePageCover } from "@hooks/usePageCover.js";
 import useAppStore from "@store/app.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
@@ -174,6 +183,8 @@ let pageDataRefreshRequested = false;
 const chosen = computed<TGApp.Game.Installation.Item | null>(() => {
   return installations.value.find((installation) => installation.isChosen) ?? null;
 });
+useHoYoPlayPageCover();
+const { pageCoverUrl } = usePageCover();
 const installTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
   return Object.values(taskStore.tasksByInstallation).filter(
     (task) =>
@@ -569,18 +580,41 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.game-app-bar-frost {
+  border-bottom: 1px solid var(--common-shadow-1);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--app-page-bg) 58%, transparent) !important;
+}
+
 .game-title {
   display: flex;
   align-items: center;
   margin-left: 12px;
   gap: 8px;
+}
 
-  span {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 20px;
-    font-weight: normal;
-  }
+.game-title-text {
+  position: relative;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 20px;
+  font-weight: normal;
+}
+
+.game-title-beta {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--tgc-od-orange);
+  color: var(--tgc-white-1);
+  font-family: var(--font-text);
+  font-size: 10px;
+  line-height: 14px;
+  pointer-events: none;
+  transform: translateX(100%);
 }
 
 .game-title-icon {
@@ -669,5 +703,57 @@ onUnmounted(() => {
   font-family: var(--font-title);
   font-size: 18px;
   font-weight: normal;
+}
+
+.game-page-cover {
+  padding-bottom: 144px;
+
+  .game-empty,
+  :deep(.audio-throughput),
+  :deep(.audio-throughput-window),
+  :deep(.cache-panel),
+  :deep(.game-list),
+  :deep(.install-draft),
+  :deep(.install-task),
+  :deep(.install-throughput),
+  :deep(.install-throughput-window),
+  :deep(.update-throughput),
+  :deep(.update-throughput-window) {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    background: color-mix(in srgb, var(--box-bg-1) 30%, transparent);
+  }
+
+  .game-empty,
+  :deep(.audio-throughput),
+  :deep(.audio-throughput-window),
+  :deep(.cache-panel),
+  :deep(.game-list),
+  :deep(.install-task),
+  :deep(.install-throughput),
+  :deep(.install-throughput-window),
+  :deep(.update-throughput),
+  :deep(.update-throughput-window) {
+    border: 1px solid var(--common-shadow-1);
+  }
+
+  .game-icon,
+  :deep(.audio-throughput-chart),
+  :deep(.cache-fact),
+  :deep(.game-fact),
+  :deep(.game-icon),
+  :deep(.game-notice),
+  :deep(.install-draft-config-item),
+  :deep(.install-task-config-item),
+  :deep(.install-throughput-chart),
+  :deep(.plan-summary),
+  :deep(.progress-panel:not(.embedded)),
+  :deep(.task-panel),
+  :deep(.task-progress),
+  :deep(.update-throughput-chart) {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    background: color-mix(in srgb, var(--box-bg-2) 20%, transparent);
+  }
 }
 </style>
