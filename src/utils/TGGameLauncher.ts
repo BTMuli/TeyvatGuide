@@ -254,6 +254,46 @@ export async function startGameInstall(
   });
 }
 
+/**
+ * 读取全新安装需要临时排除 Windows Defender 扫描的目录集合。
+ * @since Beta v0.11.5
+ * @param installId - 安装草案身份
+ * @returns 目标目录、临时 spool 与下载缓存路径
+ */
+export async function getGameInstallDraftDirs(
+  installId: string,
+): Promise<TGApp.Game.Installation.InstallDraftDirs> {
+  return await invoke<TGApp.Game.Installation.InstallDraftDirs>("game_install_draft_dirs", {
+    installId,
+  });
+}
+
+/**
+ * 将全新安装涉及目录临时加入 Windows Defender 排除列表（触发 UAC 授权）。
+ * @since Beta v0.11.5
+ * @param installId - 安装草案身份
+ * @param planId - 已固化的安装计划 ID
+ * @returns 已加入白名单的目录路径列表
+ */
+export async function addGameInstallDefenderExclusions(
+  installId: string,
+  planId: string,
+): Promise<Array<string>> {
+  return await invoke<Array<string>>("game_install_defender_exclude_add", {
+    installId,
+    planId,
+  });
+}
+
+/**
+ * 将全新安装临时加入白名单的目录移出（触发 UAC 授权）。
+ * @since Beta v0.11.5
+ * @param planId - 已固化的安装计划 ID
+ */
+export async function removeGameInstallDefenderExclusions(planId: string): Promise<void> {
+  await invoke("game_install_defender_exclude_remove", { planId });
+}
+
 export async function getGameInstallStatus(
   installId: string,
 ): Promise<TGApp.Game.Package.TaskSummary | null> {

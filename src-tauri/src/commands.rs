@@ -164,6 +164,20 @@ pub async fn init_app(app_handle: AppHandle) {
     }
   }
   app_handle.emit("initApp", ()).unwrap();
+  #[cfg(target_os = "windows")]
+  {
+    let sweep_handle = app_handle.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+      let Ok(task_root) =
+        sweep_handle.path().app_data_dir().map(|directory| directory.join("game-tasks"))
+      else {
+        return;
+      };
+      if let Err(error) = crate::game::defender::sweep_stale_exclusions(&task_root) {
+        log::warn!("[defender] 清理遗留排除失败：{error}");
+      }
+    });
+  }
   unsafe {
     APP_INITIALIZED = true;
   }

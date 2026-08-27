@@ -2,7 +2,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  cache,
+  cache, defender,
   hoyoplay::{configure_system_proxy, create_http_client, create_snapshot, get_game_branches},
   installation::{derive_installation_id, inspect_executable},
   installation_locator::discover_installations,
@@ -516,6 +516,61 @@ pub async fn game_install_start(
     context,
     false,
   )
+}
+
+/// 解析全新安装需要临时排除 Windows Defender 扫描的目录集合。
+#[tauri::command]
+pub async fn game_install_draft_dirs(
+  app_handle: AppHandle,
+  install_id: String,
+) -> Result<defender::InstallDefenderDirs, String> {
+  let task_root = game_task_root(&app_handle)?;
+  defender::resolve_install_dirs(&task_root, &install_id)
+}
+
+/// 将全新安装涉及的目标目录、临时 spool 与下载缓存加入 Windows Defender 排除列表。
+/// 需要 UAC 授权；成功后目录路径会打印到终端，并在安装结束后自动移出。
+#[tauri::command]
+pub async fn game_install_defender_exclude_add(
+  app_handle: AppHandle,
+  install_id: String,
+  plan_id: String,
+) -> Result<Vec<String>, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let dirs = defender::resolve_install_dirs(&task_root, &install_id)?;
+  defender::print_dirs("添加 Windows Defender 排除：", &dirs);
+  defender::persist_registry(&task_root, &plan_id, &dirs)?;
+  let paths = dirs.paths();
+  let added = {
+    let operation_paths = paths.clone();
+    tauri::async_runtime::spawn_blocking(move || defender::add_exclusions(&operation_paths))
+      .await
+      .map_err(|error| format!("排除任务异常退出：{error}"))?
+  };
+  if let Err(error) = added {
+    defender::remove_registry(&task_root, &plan_id);
+    return Err(error);
+  }
+  Ok(paths)
+}
+
+/// 将全新安装临时加入白名单的目录移出 Windows Defender 排除列表（UAC 提权）。
+#[tauri::command]
+pub async fn game_install_defender_exclude_remove(
+  app_handle: AppHandle,
+  plan_id: String,
+) -> Result<(), String> {
+  let task_root = game_task_root(&app_handle)?;
+  let Some(dirs) = defender::load_registry(&task_root, &plan_id) else {
+    return Ok(());
+  };
+  let paths = dirs.paths();
+  defender::print_paths("移出 Windows Defender 排除：", &paths);
+  tauri::async_runtime::spawn_blocking(move || defender::remove_exclusions(&paths))
+    .await
+    .map_err(|error| format!("排除清理任务异常退出：{error}"))??;
+  defender::remove_registry(&task_root, &plan_id);
+  Ok(())
 }
 
 /// 读取尚未登记安装的任务投影。

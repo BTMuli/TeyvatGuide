@@ -3219,6 +3219,26 @@ async fn run_install_streaming_supervisor(
     emit_state(&app_handle, &summary);
     retry_budget_exhausted = true;
   }
+
+  // 安装流水线结束后，若任务已进入终态，将临时加入 Defender 白名单的目录移出。
+  let cleanup_task_root = task_root.clone();
+  let cleanup_plan_id = plan.plan_id.clone();
+  let terminal = {
+    let value = journal.lock().await;
+    matches!(
+      value.state,
+      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+    )
+  };
+  if terminal {
+    tauri::async_runtime::spawn_blocking(move || {
+      if let Err(error) =
+        super::defender::cleanup_install_exclusions(&cleanup_task_root, &cleanup_plan_id)
+      {
+        log::warn!("[game-install][{cleanup_plan_id}] 移出 Defender 排除失败：{error}");
+      }
+    });
+  }
 }
 
 #[allow(clippy::too_many_arguments)]

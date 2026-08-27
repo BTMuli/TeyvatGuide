@@ -5,6 +5,7 @@ mod assembler;
 mod cache;
 pub mod commands;
 mod committer;
+pub(crate) mod defender;
 mod downloader;
 mod evidence;
 mod hoyoplay;

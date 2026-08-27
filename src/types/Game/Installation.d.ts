@@ -106,6 +106,16 @@ declare namespace TGApp.Game.Installation {
     targetTag: string | null;
   };
 
+  /** 全新安装需要临时排除 Windows Defender 扫描的目录集合。 */
+  type InstallDraftDirs = {
+    /** 游戏安装目标目录。 */
+    targetRoot: string;
+    /** 安装任务临时 spool 目录。 */
+    spoolRoot: string;
+    /** 游戏资源下载缓存目录。 */
+    downloadRoot: string;
+  };
+
   /** 新安装向导选择目录后的后端校验结果。 */
   type InstallLocationSummary = {
     kind: LocationKindEnum;

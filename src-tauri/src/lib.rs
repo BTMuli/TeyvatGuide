@@ -21,8 +21,9 @@ use crate::commands::{
   init_app, is_in_admin, is_msix, is_process_running, quit_app, read_text_scale,
 };
 use crate::game::commands::{
-  game_http_proxy_configure, game_install_cancel, game_install_draft_cancel,
-  game_install_draft_create, game_install_draft_list, game_install_location_inspect,
+  game_http_proxy_configure, game_install_cancel, game_install_defender_exclude_add,
+  game_install_defender_exclude_remove, game_install_draft_cancel, game_install_draft_create,
+  game_install_draft_dirs, game_install_draft_list, game_install_location_inspect,
   game_install_pause, game_install_plan, game_install_recover, game_install_start,
   game_install_status, game_installation_inspect, game_installation_list, game_installation_locate,
   game_installation_uninstall, game_is_running, game_launch, game_package_apply,
@@ -155,6 +156,12 @@ pub fn run() {
       game_install_draft_create,
       #[cfg(target_os = "windows")]
       game_install_draft_list,
+      #[cfg(target_os = "windows")]
+      game_install_draft_dirs,
+      #[cfg(target_os = "windows")]
+      game_install_defender_exclude_add,
+      #[cfg(target_os = "windows")]
+      game_install_defender_exclude_remove,
       #[cfg(target_os = "windows")]
       game_install_location_inspect,
       #[cfg(target_os = "windows")]
