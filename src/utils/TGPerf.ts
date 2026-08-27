@@ -335,6 +335,7 @@ async function resetCounters(): Promise<void> {
   } catch (error) {
     console.warn("[TGPerf] 重置 Rust 计数器失败", error);
   }
+  await captureMilestone("m0");
 }
 
 function ipcByCommandCleanup(): void {

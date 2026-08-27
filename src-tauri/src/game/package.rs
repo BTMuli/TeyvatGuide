@@ -18,6 +18,7 @@ use super::{
     PackageVerifySummary,
   },
   path_guard::{prepare_manifest_output_file, resolve_optional_manifest_file},
+  perf,
   planner::{
     PersistedPlan, PlanDelete, PlanDownload, cached_chunk_matches, cached_chunk_matches_async,
     default_install_concurrency, flush_cache_validation_index, hydrate_and_validate_apply_plan,
@@ -48,7 +49,8 @@ const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const INSTALL_ABORT_DRAIN_TIMEOUT: Duration = Duration::from_secs(120);
-const SPOOL_BYTES_REFRESH_INTERVAL: Duration = Duration::from_millis(500);
+const UI_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(150);
+const UI_PROGRESS_EMIT_SLOT_TTL: Duration = Duration::from_secs(60);
 const INSTALL_STALL_THRESHOLD: Duration = Duration::from_secs(45);
 const INSTALL_STALL_POLL_INTERVAL: Duration = Duration::from_secs(5);
 const INSTALL_STALL_CONFIRMATIONS: usize = 3;
@@ -83,15 +85,15 @@ fn spawn_install_stall_watchdog(
       if paused.load(Ordering::Acquire) || canceled.load(Ordering::Acquire) {
         break;
       }
-      let Ok(value) = journal::load(&journal_path) else {
+      let Some((state, revision)) = install_watchdog_live_progress(&journal) else {
         continue;
       };
-      if !matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+      if !matches!(state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
         break;
       }
       let download = metrics.download_telemetry.snapshot();
       let assembly = metrics.assembly_telemetry.snapshot();
-      let signature = install_watchdog_progress_signature(value.revision, &download, &assembly);
+      let signature = install_watchdog_progress_signature(revision, &download, &assembly);
       if last_signature != Some(signature) {
         last_signature = Some(signature);
         last_progress_at = Instant::now();
@@ -156,6 +158,12 @@ fn spawn_install_stall_watchdog(
       }
     }
   });
+}
+
+fn install_watchdog_live_progress(
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+) -> Option<(PackageTaskState, u64)> {
+  journal.try_lock().ok().map(|value| (value.state, value.revision))
 }
 
 fn install_watchdog_progress_signature(
@@ -315,29 +323,20 @@ fn install_assembly_concurrency(pipeline_concurrency: usize) -> usize {
   pipeline_concurrency.saturating_div(2).clamp(1, MAX_CONCURRENCY)
 }
 
-/// spool 占用字节的节流缓存：磁盘正常时 500ms 内只全目录扫描一次，
-/// 磁盘抖动时同步扫描在 blocking 线程池执行，不阻塞 async worker。
 #[derive(Default)]
-struct SpoolBytesCache {
-  last_refresh: Option<Instant>,
-  bytes: u64,
+struct ProgressEmitRegistry {
+  slots: HashMap<String, Instant>,
 }
 
-async fn refresh_spool_bytes(cache: &Mutex<SpoolBytesCache>, root: &Path) -> u64 {
-  {
-    let guard = cache.lock().unwrap();
-    if let Some(last_refresh) = guard.last_refresh
-      && last_refresh.elapsed() < SPOOL_BYTES_REFRESH_INTERVAL
-    {
-      return guard.bytes;
-    }
-  }
-  let root = root.to_path_buf();
-  let bytes = tauri::async_runtime::spawn_blocking(move || spool_bytes(&root)).await.unwrap_or(0);
-  let mut guard = cache.lock().unwrap();
-  guard.last_refresh = Some(Instant::now());
-  guard.bytes = bytes;
-  bytes
+static PROGRESS_EMIT_REGISTRY: LazyLock<Mutex<ProgressEmitRegistry>> =
+  LazyLock::new(|| Mutex::new(ProgressEmitRegistry::default()));
+
+fn prune_progress_emit_slots(registry: &mut ProgressEmitRegistry, now: Instant) {
+  registry.slots.retain(|_, last| now.saturating_duration_since(*last) < UI_PROGRESS_EMIT_SLOT_TTL);
+}
+
+fn install_tracker_spool_bytes(tracker: &Mutex<InstallSpoolTracker>) -> u64 {
+  tracker.lock().unwrap().spool_bytes()
 }
 
 /// 组装 worker 完成栅栏：看门狗中止流水线后，下一次运行会等待旧 worker 结束，
@@ -674,19 +673,28 @@ async fn emit_active_assembly_count(
   emit_progress(app_handle, &summary);
 }
 
+/// 任务私有 spool 中一个已知对象的增量记账。
+struct ResidentSpoolFile {
+  id: String,
+  bytes: u64,
+}
+
 /// 全新安装私有 spool 的增量记账。
 ///
 /// 每个资源证据落盘后立即扣减其对象消费者；乱序完成不会再被连续游标阻塞释放。
+/// `spool_bytes` 在 `from_disk` 时计入目录内全部普通文件，之后只对已知对象做加减，
+/// 删除失败不会漏记，避免空间检查低估占用。
 struct InstallSpoolTracker {
   counted: HashSet<String>,
   consumed: HashSet<String>,
-  resident: HashMap<String, String>,
+  resident: HashMap<String, ResidentSpoolFile>,
   completed_assets: HashSet<usize>,
   remaining_consumers: HashMap<String, usize>,
   completed_count: usize,
   completed_bytes: u64,
   contiguous_cursor: usize,
   contiguous_bytes: u64,
+  spool_bytes: u64,
 }
 
 #[derive(Clone, Copy)]
@@ -705,17 +713,27 @@ impl InstallSpoolTracker {
     shared_cache_root: &Path,
     completed_assets: HashSet<usize>,
   ) -> Self {
+    perf::record_spool_dir_scan();
     let mut resident = HashMap::new();
+    let mut spool_bytes = 0_u64;
     if let Ok(entries) = fs::read_dir(spool_root) {
       for entry in entries.flatten() {
+        let Ok(metadata) = fs::symlink_metadata(entry.path()) else {
+          continue;
+        };
+        if metadata.file_type().is_symlink() || !metadata.is_file() {
+          continue;
+        }
         let Some(name) = entry.file_name().to_str().map(str::to_string) else {
           continue;
         };
         if name.ends_with(".part") {
           continue;
         }
+        spool_bytes = spool_bytes.saturating_add(metadata.len());
         if let Some(download) = plan.downloads.iter().find(|download| download.cache_key == name) {
-          resident.insert(name, download.id.clone());
+          resident
+            .insert(name, ResidentSpoolFile { id: download.id.clone(), bytes: metadata.len() });
         }
       }
     }
@@ -770,7 +788,12 @@ impl InstallSpoolTracker {
       completed_bytes,
       contiguous_cursor,
       contiguous_bytes,
+      spool_bytes,
     }
+  }
+
+  fn spool_bytes(&self) -> u64 {
+    self.spool_bytes
   }
 
   fn committed_step(&self) -> usize {
@@ -787,8 +810,16 @@ impl InstallSpoolTracker {
     })
   }
 
-  fn mark_downloaded(&mut self, id: &str, cache_key: &str) -> usize {
-    self.resident.insert(cache_key.to_string(), id.to_string());
+  fn mark_downloaded(&mut self, id: &str, cache_key: &str, bytes: u64) -> usize {
+    if let Some(existing) = self.resident.get(cache_key) {
+      if existing.id == id {
+        self.counted.insert(id.to_string());
+        return self.committed_step();
+      }
+      self.spool_bytes = self.spool_bytes.saturating_sub(existing.bytes);
+    }
+    self.spool_bytes = self.spool_bytes.saturating_add(bytes);
+    self.resident.insert(cache_key.to_string(), ResidentSpoolFile { id: id.to_string(), bytes });
     self.counted.insert(id.to_string());
     self.committed_step()
   }
@@ -879,11 +910,11 @@ fn release_spool_unneeded(
     guard
       .resident
       .iter()
-      .filter(|(key, id)| {
-        guard.remaining_consumers.get(id.as_str()).copied().unwrap_or_default() == 0
+      .filter(|(key, file)| {
+        guard.remaining_consumers.get(file.id.as_str()).copied().unwrap_or_default() == 0
           && sdk_key != Some(key.as_str())
       })
-      .map(|(key, id)| (key.clone(), id.clone()))
+      .map(|(key, file)| (key.clone(), file.id.clone()))
       .collect::<Vec<_>>()
   };
   let mut released = 0_u64;
@@ -893,6 +924,7 @@ fn release_spool_unneeded(
       forget_released_spool_file(tracker, &key, &id);
       continue;
     };
+    perf::record_spool_metadata_probe();
     if metadata.file_type().is_symlink() || !metadata.is_file() {
       continue;
     }
@@ -938,8 +970,11 @@ fn release_spool_unneeded(
 /// 从 spool 记账中移除一个已释放对象；仅当 resident 仍指向同一 id 时才更新。
 fn forget_released_spool_file(tracker: &Arc<Mutex<InstallSpoolTracker>>, key: &str, id: &str) {
   let mut guard = tracker.lock().unwrap();
-  if guard.resident.get(key).is_some_and(|current| current == id) {
-    guard.resident.remove(key);
+  if guard.resident.get(key).is_none_or(|file| file.id != id) {
+    return;
+  }
+  if let Some(file) = guard.resident.remove(key) {
+    guard.spool_bytes = guard.spool_bytes.saturating_sub(file.bytes);
     if !guard.consumed.contains(id) {
       guard.counted.remove(id);
     }
@@ -1356,7 +1391,7 @@ async fn commit_install_download_progress(
     Arc::clone(metrics),
   )
   .await?;
-  emit_progress(app_handle, &overlay_install_download_progress(&persist_value, metrics));
+  emit_progress_throttled(app_handle, &overlay_install_download_progress(&persist_value, metrics));
   Ok(persist_value)
 }
 
@@ -3542,7 +3577,6 @@ async fn run_install_streaming_task(
       return;
     }
   };
-  let spool_bytes_cache = Arc::new(Mutex::new(SpoolBytesCache::default()));
   let start_cursor = {
     let (snapshot, persist_value) = {
       let mut value = journal.lock().await;
@@ -3572,7 +3606,7 @@ async fn run_install_streaming_task(
       context.preserve_chunks,
     )
     .await;
-    let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+    let spool = install_tracker_spool_bytes(&spool_tracker);
     if let Err(error) =
       commit_install_download_progress(&app_handle, &task_root, &journal, &metrics, |value| {
         value.released_bytes = value.released_bytes.saturating_add(released);
@@ -3621,7 +3655,6 @@ async fn run_install_streaming_task(
       &limiter,
       &staging_root,
       &spool_tracker,
-      &spool_bytes_cache,
       context.preserve_chunks,
     )
     .await
@@ -3676,7 +3709,12 @@ async fn run_install_streaming_task(
           pending.push(download.clone());
         }
       }
-      if let Err(error) = check_install_stream_space(&plan, asset_index, &pending, &spool_root) {
+      if let Err(error) = check_install_stream_space_with_spool(
+        &plan,
+        asset_index,
+        &pending,
+        install_tracker_spool_bytes(&spool_tracker),
+      ) {
         persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
         return;
       }
@@ -3720,8 +3758,11 @@ async fn run_install_streaming_task(
             .await;
             metrics.finish_download(started_at);
             result.map(|downloaded| {
-              let completed_count =
-                tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+              let completed_count = tracker.lock().unwrap().mark_downloaded(
+                &download.id,
+                &download.cache_key,
+                downloaded.bytes,
+              );
               (downloaded, completed_count)
             })
           }))
@@ -3734,7 +3775,7 @@ async fn run_install_streaming_task(
         match result {
           Ok((downloaded, completed_count)) => {
             metrics.record_unique_download(downloaded.bytes);
-            let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+            let spool = install_tracker_spool_bytes(&spool_tracker);
             if let Err(error) = commit_install_download_progress(
               &app_handle,
               &task_root,
@@ -3846,7 +3887,7 @@ async fn run_install_streaming_task(
         return;
       }
       let mut value = journal.lock().await;
-      value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+      value.spool_bytes = install_tracker_spool_bytes(&spool_tracker);
       {
         let mut tracker_value = spool_tracker.lock().unwrap();
         tracker_value.mark_asset_completed(&plan, asset_index);
@@ -3871,7 +3912,7 @@ async fn run_install_streaming_task(
       )
       .await;
       value.released_bytes = value.released_bytes.saturating_add(released);
-      value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+      value.spool_bytes = install_tracker_spool_bytes(&spool_tracker);
       metrics.observe_spool(value.spool_bytes);
       value.touch();
       if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
@@ -3927,7 +3968,6 @@ async fn run_install_streaming_task(
     &limiter,
     &staging_root,
     &spool_tracker,
-    &spool_bytes_cache,
     context.preserve_chunks,
   )
   .await
@@ -3965,11 +4005,11 @@ async fn run_install_streaming_task(
     if !cached_chunk_matches_async(&shared_cache_root, download).await
       && !cached_chunk_matches_async(&spool_root, download).await
     {
-      if let Err(error) = check_install_stream_space(
+      if let Err(error) = check_install_stream_space_with_spool(
         &plan,
         plan.assets.len(),
         std::slice::from_ref(download),
-        &spool_root,
+        install_tracker_spool_bytes(&spool_tracker),
       ) {
         persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
         return;
@@ -4025,9 +4065,12 @@ async fn run_install_streaming_task(
         }
       };
       metrics.record_unique_download(downloaded.bytes);
-      let completed_count =
-        spool_tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-      let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+      let completed_count = spool_tracker.lock().unwrap().mark_downloaded(
+        &download.id,
+        &download.cache_key,
+        downloaded.bytes,
+      );
+      let spool = install_tracker_spool_bytes(&spool_tracker);
       if let Err(error) =
         commit_install_download_progress(&app_handle, &task_root, &journal, &metrics, |value| {
           value.downloaded_bytes =
@@ -4052,7 +4095,7 @@ async fn run_install_streaming_task(
     value.current_file = None;
     value.bytes_per_second = 0;
     value.eta_seconds = None;
-    value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+    value.spool_bytes = spool_bytes(&spool_root);
     value.touch();
     if let Err(error) = persist_install_checkpoint(&task_root, &value, &metrics) {
       persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -4145,7 +4188,6 @@ async fn run_install_prepublish_repair(
   limiter: &Arc<RateLimiter>,
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
-  spool_bytes_cache: &Arc<Mutex<SpoolBytesCache>>,
   preserve_chunks: bool,
 ) -> Result<(), String> {
   loop {
@@ -4194,7 +4236,12 @@ async fn run_install_prepublish_repair(
         .iter()
         .fold(0_u64, |total, download| total.saturating_add(download.compressed_size)),
     );
-    check_install_stream_space(plan, failure.asset_index, &job.pending, spool_root)?;
+    check_install_stream_space_with_spool(
+      plan,
+      failure.asset_index,
+      &job.pending,
+      install_tracker_spool_bytes(spool_tracker),
+    )?;
     {
       let mut value = journal.lock().await;
       let snapshot = {
@@ -4237,7 +4284,6 @@ async fn run_install_prepublish_repair(
       staging_root.to_path_buf(),
       network_concurrency,
       Arc::clone(spool_tracker),
-      Arc::clone(spool_bytes_cache),
     )
     .await;
     completion.result?;
@@ -4272,7 +4318,7 @@ async fn run_install_prepublish_repair(
     )
     .await;
     value.released_bytes = value.released_bytes.saturating_add(released);
-    value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
+    value.spool_bytes = install_tracker_spool_bytes(spool_tracker);
     value.touch();
     persist_install_progress(task_root, &value, metrics)?;
     emit_progress(app_handle, &value.summary());
@@ -4296,7 +4342,6 @@ async fn run_install_bounded_asset_pipeline(
   limiter: &Arc<RateLimiter>,
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
-  spool_bytes_cache: &Arc<Mutex<SpoolBytesCache>>,
   preserve_chunks: bool,
 ) -> Result<(), String> {
   // 下载并发与流水线并发一致（与 CPU 核心数对齐）；组装取下载并发的 1/2，
@@ -4337,7 +4382,7 @@ async fn run_install_bounded_asset_pipeline(
         next_asset_index = next_asset_index.saturating_add(1);
         continue;
       }
-      let current_spool = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
+      let current_spool = install_tracker_spool_bytes(spool_tracker);
       let scheduled_plan = Arc::clone(plan);
       let scheduled_index = Arc::clone(download_index);
       let scheduled_shared = shared_cache_root.to_path_buf();
@@ -4411,7 +4456,6 @@ async fn run_install_bounded_asset_pipeline(
         staging_root.to_path_buf(),
         network_concurrency,
         Arc::clone(spool_tracker),
-        Arc::clone(spool_bytes_cache),
       ));
     }
     if scheduled_count > 0 {
@@ -4458,7 +4502,7 @@ async fn run_install_bounded_asset_pipeline(
               &plan.assets[completion.asset_index].name,
             )
           });
-        value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
+        value.spool_bytes = install_tracker_spool_bytes(spool_tracker);
         metrics.observe_spool(value.spool_bytes);
         value.touch();
         if let Err(error) = persist_install_checkpoint(task_root, &value, metrics) {
@@ -4473,7 +4517,7 @@ async fn run_install_bounded_asset_pipeline(
           )
           .await;
           value.released_bytes = value.released_bytes.saturating_add(released);
-          value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
+          value.spool_bytes = install_tracker_spool_bytes(spool_tracker);
           metrics.observe_spool(value.spool_bytes);
           value.touch();
           if let Err(error) = persist_install_progress(task_root, &value, metrics) {
@@ -4549,7 +4593,6 @@ async fn run_install_asset_job(
   staging_root: PathBuf,
   network_concurrency: usize,
   spool_tracker: Arc<Mutex<InstallSpoolTracker>>,
-  spool_bytes_cache: Arc<Mutex<SpoolBytesCache>>,
 ) -> InstallAssetJobCompletion {
   let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
   let mut assembly_elapsed = None;
@@ -4603,8 +4646,11 @@ async fn run_install_asset_job(
           metrics.finish_download(started_at);
           drop(permit);
           result.map(|downloaded| {
-            let completed_count =
-              tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+            let completed_count = tracker.lock().unwrap().mark_downloaded(
+              &download.id,
+              &download.cache_key,
+              downloaded.bytes,
+            );
             let label = labels
               .get(&download.cache_key)
               .cloned()
@@ -4622,7 +4668,7 @@ async fn run_install_asset_job(
       match download_result {
         Ok(Some((downloaded_bytes, completed_count, label))) => {
           metrics.record_unique_download(downloaded_bytes);
-          let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+          let spool = install_tracker_spool_bytes(&spool_tracker);
           if let Err(error) =
             commit_install_download_progress(&app_handle, &task_root, &journal, &metrics, |value| {
               value.downloaded_bytes =
@@ -5759,6 +5805,7 @@ fn check_install_stream_space<'a>(
 }
 
 fn spool_bytes(root: &Path) -> u64 {
+  perf::record_spool_dir_scan();
   fs::read_dir(root)
     .ok()
     .into_iter()
@@ -5868,9 +5915,45 @@ fn emit_state(app_handle: &AppHandle, summary: &PackageTaskSummary) {
 }
 
 fn emit_progress(app_handle: &AppHandle, summary: &PackageTaskSummary) {
+  remember_progress_emit(&summary.task_id);
   if let Err(error) = app_handle.emit("game-package://progress", summary) {
     log::warn!("[game-package] 发送任务进度事件失败：{error}");
   }
+}
+
+fn emit_progress_throttled(app_handle: &AppHandle, summary: &PackageTaskSummary) {
+  if !should_emit_progress(&summary.task_id) {
+    return;
+  }
+  if let Err(error) = app_handle.emit("game-package://progress", summary) {
+    log::warn!("[game-package] 发送任务进度事件失败：{error}");
+  }
+}
+
+fn remember_progress_emit(task_id: &str) {
+  let now = Instant::now();
+  let Ok(mut registry) = PROGRESS_EMIT_REGISTRY.lock() else {
+    return;
+  };
+  prune_progress_emit_slots(&mut registry, now);
+  registry.slots.insert(task_id.to_string(), now);
+}
+
+fn should_emit_progress(task_id: &str) -> bool {
+  let now = Instant::now();
+  let Ok(mut registry) = PROGRESS_EMIT_REGISTRY.lock() else {
+    return true;
+  };
+  prune_progress_emit_slots(&mut registry, now);
+  if registry
+    .slots
+    .get(task_id)
+    .is_some_and(|last| now.saturating_duration_since(*last) < UI_PROGRESS_EMIT_INTERVAL)
+  {
+    return false;
+  }
+  registry.slots.insert(task_id.to_string(), now);
+  true
 }
 
 #[cfg(target_os = "windows")]
@@ -6089,6 +6172,24 @@ mod install_stall_watchdog_tests {
   }
 
   #[test]
+  fn live_progress_reads_in_memory_journal_without_disk() {
+    let plan = install_plan();
+    let mut journal_value = journal::TaskJournal::from_plan(&plan);
+    journal_value.state = PackageTaskState::Downloading;
+    journal_value.revision = 9;
+    let journal = Arc::new(AsyncMutex::new(journal_value));
+    let runtime = tokio::runtime::Builder::new_current_thread()
+      .enable_time()
+      .build()
+      .expect("create test runtime");
+    let (state, revision) = runtime
+      .block_on(async { install_watchdog_live_progress(&journal) })
+      .expect("live progress is available");
+    assert_eq!(state, PackageTaskState::Downloading);
+    assert_eq!(revision, 9);
+  }
+
+  #[test]
   fn watchdog_pause_updates_in_memory_journal() {
     let task_root = std::env::temp_dir().join(format!("tg-watchdog-{}", Uuid::new_v4()));
     fs::create_dir_all(&task_root).expect("create temp task root");
@@ -6112,5 +6213,101 @@ mod install_stall_watchdog_tests {
     assert_eq!(locked.state, PackageTaskState::Paused);
     assert_eq!(locked.error_message.as_deref(), Some(INSTALL_STALL_PAUSE_MESSAGE));
     let _ = fs::remove_dir_all(&task_root);
+  }
+}
+
+#[cfg(test)]
+mod install_spool_tracker_tests {
+  use super::*;
+  use crate::game::model::SchemeId;
+  use crate::game::planner::{
+    PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDownload, PlanDownloadHashKind,
+  };
+
+  fn install_plan(downloads: Vec<PlanDownload>, assets: Vec<PlanAsset>) -> PersistedPlan {
+    PersistedPlan {
+      schema_version: 6,
+      plan_id: Uuid::new_v4().to_string(),
+      installation_id: Uuid::new_v4().to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "7.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads,
+      assets,
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      audio_selection: None,
+      created_at: Utc::now().to_rfc3339(),
+    }
+  }
+
+  fn plan_download(id: &str, cache_key: &str, size: u64) -> PlanDownload {
+    PlanDownload {
+      id: id.to_string(),
+      cache_key: cache_key.to_string(),
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: "d".repeat(32),
+      compressed_size: size,
+      decompressed_size: size,
+      encoding: Default::default(),
+      url_prefix: String::new(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    }
+  }
+
+  fn plan_asset(name: &str, chunk_id: &str, size: u64) -> PlanAsset {
+    PlanAsset {
+      name: name.to_string(),
+      action: PlanAssetAction::Add,
+      source: None,
+      size,
+      md5: "e".repeat(32),
+      chunks: vec![PlanChunk {
+        id: chunk_id.to_string(),
+        decompressed_md5: "f".repeat(32),
+        target_offset: 0,
+        compressed_size: size,
+        decompressed_size: size,
+        reuse: None,
+      }],
+      patch: None,
+    }
+  }
+
+  #[test]
+  fn from_disk_counts_known_and_unknown_files_then_updates_incrementally() {
+    let root = std::env::temp_dir().join(format!("tg-spool-{}", Uuid::new_v4()));
+    let spool_root = root.join("spool");
+    let shared_root = root.join("shared");
+    fs::create_dir_all(&spool_root).expect("create spool");
+    fs::create_dir_all(&shared_root).expect("create shared");
+    fs::write(spool_root.join("chunk-a"), vec![0_u8; 32]).expect("write known file");
+    fs::write(spool_root.join("orphan.bin"), vec![0_u8; 8]).expect("write unknown file");
+    let plan = install_plan(
+      vec![plan_download("chunk-a", "chunk-a", 32), plan_download("chunk-b", "chunk-b", 16)],
+      vec![plan_asset("a.bin", "chunk-a", 32), plan_asset("b.bin", "chunk-b", 16)],
+    );
+
+    let mut tracker =
+      InstallSpoolTracker::from_disk(&plan, &spool_root, &shared_root, HashSet::new());
+    assert_eq!(tracker.spool_bytes(), 40);
+    assert_eq!(tracker.mark_downloaded("chunk-a", "chunk-a", 32), 1);
+    assert_eq!(tracker.spool_bytes(), 40);
+    assert_eq!(tracker.mark_downloaded("chunk-b", "chunk-b", 16), 2);
+    assert_eq!(tracker.spool_bytes(), 56);
+
+    let tracker = Arc::new(Mutex::new(tracker));
+    forget_released_spool_file(&tracker, "chunk-b", "chunk-b");
+    assert_eq!(tracker.lock().unwrap().spool_bytes(), 40);
+    forget_released_spool_file(&tracker, "missing", "missing");
+    assert_eq!(tracker.lock().unwrap().spool_bytes(), 40);
+    let _ = fs::remove_dir_all(&root);
   }
 }
