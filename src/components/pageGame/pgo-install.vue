@@ -196,37 +196,49 @@
           <div class="review-fact-wide">
             <span>安装位置</span><strong>{{ planLocation }}</strong>
           </div>
-          <div>
-            <span>预计下载</span>
-            <strong>{{ formatBytes(Math.max(0, plan.downloadBytes - plan.cacheHitBytes)) }}</strong>
+          <div class="review-fact-row">
+            <div>
+              <span>预计下载</span>
+              <strong>{{
+                formatBytes(Math.max(0, plan.downloadBytes - plan.cacheHitBytes))
+              }}</strong>
+            </div>
+            <div>
+              <span>安装后占用</span><strong>{{ formatBytes(plan.installBytes) }}</strong>
+            </div>
+            <div>
+              <span>需预留空间</span
+              ><strong>{{ formatBytes(plan.installRequiredFreeBytes) }}</strong>
+            </div>
           </div>
-          <div>
-            <span>已命中缓存</span><strong>{{ formatBytes(plan.cacheHitBytes) }}</strong>
+          <div class="review-fact-row">
+            <div>
+              <span>已命中缓存</span><strong>{{ formatBytes(plan.cacheHitBytes) }}</strong>
+            </div>
+            <div>
+              <span>任务临时空间</span>
+              <strong>{{ formatBytes(plan.cacheRequiredFreeBytes) }}</strong>
+            </div>
+            <div>
+              <span>完成后预计释放</span>
+              <strong>{{
+                formatBytes(Math.max(0, plan.downloadBytes - plan.cacheHitBytes))
+              }}</strong>
+            </div>
           </div>
-          <div>
-            <span>安装后占用（估算）</span><strong>{{ formatBytes(plan.installBytes) }}</strong>
-          </div>
-          <div>
-            <span>需预留空间</span><strong>{{ formatBytes(plan.installRequiredFreeBytes) }}</strong>
-          </div>
-          <div>
-            <span>任务临时空间（峰值）</span
-            ><strong>{{ formatBytes(plan.cacheRequiredFreeBytes) }}</strong>
-          </div>
-          <div>
-            <span>完成后预计释放</span>
-            <strong>{{ formatBytes(Math.max(0, plan.downloadBytes - plan.cacheHitBytes)) }}</strong>
-          </div>
-          <div>
-            <span>任务临时空间可用</span
-            ><strong>{{ formatBytes(plan.cacheAvailableFreeBytes) }}</strong>
-          </div>
-          <div>
-            <span>安装盘可用</span
-            ><strong>{{ formatBytes(plan.installAvailableFreeBytes) }}</strong>
-          </div>
-          <div>
-            <span>缓存与安装磁盘</span><strong>{{ plan.sameVolume ? "同一卷" : "不同卷" }}</strong>
+          <div class="review-fact-row">
+            <div>
+              <span>任务临时空间可用</span>
+              <strong>{{ formatBytes(plan.cacheAvailableFreeBytes) }}</strong>
+            </div>
+            <div>
+              <span>安装盘可用</span>
+              <strong>{{ formatBytes(plan.installAvailableFreeBytes) }}</strong>
+            </div>
+            <div>
+              <span>缓存与安装磁盘</span>
+              <strong>{{ plan.sameVolume ? "同一卷" : "不同卷" }}</strong>
+            </div>
           </div>
           <p class="review-space-note">
             临时空间按并发队列内最大的资源工作集估算，包含 256 MiB 基础窗口与 1 GiB
@@ -1195,7 +1207,8 @@ watch(
   gap: 6px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
-  > div {
+  > div:not(.review-fact-row),
+  .review-fact-row > div {
     display: flex;
     min-width: 0;
     flex-direction: column;
@@ -1208,6 +1221,14 @@ watch(
 
   .review-fact-wide {
     grid-column: 1 / -1;
+  }
+
+  .review-fact-row {
+    display: grid;
+    min-width: 0;
+    gap: 6px;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   span {
@@ -1276,7 +1297,8 @@ watch(
 
 @media (width <= 640px) {
   .install-options,
-  .review-facts {
+  .review-facts,
+  .review-facts .review-fact-row {
     grid-template-columns: 1fr;
   }
 
