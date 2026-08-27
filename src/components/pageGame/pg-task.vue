@@ -95,6 +95,11 @@
         embedded
         :task
       />
+      <PgInstallProgress
+        v-else-if="task.target === gameEnum.package.planTarget.INSTALL && recoveryProgress === null"
+        embedded
+        :task
+      />
       <PgUpdateProgress v-else-if="recoveryProgress === null" embedded :targetPublished :task />
       <PgProgress
         v-else
@@ -200,6 +205,7 @@ import { computed } from "vue";
 
 import PgAudioLangTags from "./pg-audio-lang-tags.vue";
 import PgAudioProgress from "./pg-audio-progress.vue";
+import PgInstallProgress from "./pg-install-progress.vue";
 import PgNotice from "./pg-notice.vue";
 import PgProgress from "./pg-progress.vue";
 import PgUpdateProgress from "./pg-update-progress.vue";

@@ -46,7 +46,10 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   let listenerPromise: Promise<void> | null = null;
   let listenerGeneration = 0;
   const pendingProgressByInstallation = new Map<string, TGApp.Game.Package.TaskSummary>();
-  let progressFrame: number | null = null;
+  const PROGRESS_FLUSH_MS = 150;
+  let progressTimer: number | null = null;
+  const completedInstallHideTimers = new Map<string, number>();
+  const completedInstallHideMs = 5000;
 
   function shouldReplaceTask(
     current: TGApp.Game.Package.TaskSummary | undefined,
@@ -70,14 +73,40 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     );
   }
 
-  function scheduleCompletedAudioRemoval(task: TGApp.Game.Package.TaskSummary): void {
-    if (
-      task.target !== gameEnum.package.planTarget.AUDIO ||
-      task.state !== gameEnum.package.taskState.COMPLETED
-    ) {
+  function scheduleCompletedTaskRemoval(task: TGApp.Game.Package.TaskSummary): void {
+    if (task.state !== gameEnum.package.taskState.COMPLETED) return;
+    if (task.target === gameEnum.package.planTarget.AUDIO) {
+      void nextTick(() => removeTaskProjection(task));
       return;
     }
-    void nextTick(() => removeTaskProjection(task));
+    if (task.target !== gameEnum.package.planTarget.INSTALL) return;
+    if (completedInstallHideTimers.has(task.taskId)) return;
+    const timer = window.setTimeout(() => {
+      completedInstallHideTimers.delete(task.taskId);
+      const current = tasksByInstallation.value[task.installationId];
+      if (
+        current === undefined ||
+        current.taskId !== task.taskId ||
+        current.state !== gameEnum.package.taskState.COMPLETED
+      ) {
+        return;
+      }
+      removeTaskProjection(current);
+    }, completedInstallHideMs);
+    completedInstallHideTimers.set(task.taskId, timer);
+  }
+
+  function shouldOmitCompletedInstall(task: TGApp.Game.Package.TaskSummary): boolean {
+    return (
+      task.target === gameEnum.package.planTarget.INSTALL &&
+      task.state === gameEnum.package.taskState.COMPLETED &&
+      !completedInstallHideTimers.has(task.taskId)
+    );
+  }
+
+  function clearCompletedInstallHideTimers(): void {
+    for (const timer of completedInstallHideTimers.values()) window.clearTimeout(timer);
+    completedInstallHideTimers.clear();
   }
 
   function mergeTask(task: TGApp.Game.Package.TaskSummary): void {
@@ -93,32 +122,37 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       [task.installationId]: task,
     };
     TGPerf.recordStateReplace();
-    scheduleCompletedAudioRemoval(task);
+    scheduleCompletedTaskRemoval(task);
+  }
+
+  function shouldFlushProgressImmediately(task: TGApp.Game.Package.TaskSummary): boolean {
+    return task.state !== gameEnum.package.taskState.DOWNLOADING;
+  }
+
+  function clearProgressTimer(): void {
+    if (progressTimer === null) return;
+    window.clearTimeout(progressTimer);
+    progressTimer = null;
   }
 
   function flushTaskProgress(): void {
     TGPerf.recordFlush();
-    progressFrame = null;
+    progressTimer = null;
     if (pendingProgressByInstallation.size === 0) return;
     const next = { ...tasksByInstallation.value };
-    const completedAudioTasks: Array<TGApp.Game.Package.TaskSummary> = [];
+    const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
     let changed = false;
     for (const task of pendingProgressByInstallation.values()) {
       if (!shouldReplaceTask(next[task.installationId], task)) continue;
       next[task.installationId] = task;
       changed = true;
-      if (
-        task.target === gameEnum.package.planTarget.AUDIO &&
-        task.state === gameEnum.package.taskState.COMPLETED
-      ) {
-        completedAudioTasks.push(task);
-      }
+      if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
     }
     pendingProgressByInstallation.clear();
     if (!changed) return;
     tasksByInstallation.value = next;
     TGPerf.recordFlushReplace();
-    for (const task of completedAudioTasks) scheduleCompletedAudioRemoval(task);
+    for (const task of completedTasks) scheduleCompletedTaskRemoval(task);
   }
 
   function queueTaskProgress(task: TGApp.Game.Package.TaskSummary): void {
@@ -129,8 +163,13 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       return;
     }
     pendingProgressByInstallation.set(task.installationId, task);
-    if (progressFrame !== null) return;
-    progressFrame = window.requestAnimationFrame(flushTaskProgress);
+    if (shouldFlushProgressImmediately(task)) {
+      clearProgressTimer();
+      flushTaskProgress();
+      return;
+    }
+    if (progressTimer !== null) return;
+    progressTimer = window.setTimeout(flushTaskProgress, PROGRESS_FLUSH_MS);
   }
 
   function setRecoveryProgress(
@@ -265,25 +304,27 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   async function hydrateTasks(installationId?: string): Promise<void> {
     const tasks = await listGamePackageTasks(installationId);
     const next = { ...tasksByInstallation.value };
-    const completedAudioTasks: Array<TGApp.Game.Package.TaskSummary> = [];
+    const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
     let changed = false;
     for (const task of tasks) {
       const pending = pendingProgressByInstallation.get(task.installationId);
       if (!shouldReplaceTask(pending ?? next[task.installationId], task)) continue;
       if (pending !== undefined) pendingProgressByInstallation.delete(task.installationId);
+      if (shouldOmitCompletedInstall(task)) {
+        if (next[task.installationId]?.taskId === task.taskId) {
+          delete next[task.installationId];
+          changed = true;
+        }
+        continue;
+      }
       next[task.installationId] = task;
       changed = true;
-      if (
-        task.target === gameEnum.package.planTarget.AUDIO &&
-        task.state === gameEnum.package.taskState.COMPLETED
-      ) {
-        completedAudioTasks.push(task);
-      }
+      if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
     }
     if (!changed) return;
     tasksByInstallation.value = next;
     TGPerf.recordHydrate();
-    for (const task of completedAudioTasks) scheduleCompletedAudioRemoval(task);
+    for (const task of completedTasks) scheduleCompletedTaskRemoval(task);
   }
 
   async function hydrateVerify(installationId: string): Promise<void> {
@@ -584,8 +625,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     for (const unlisten of unlisteners) unlisten();
     unlisteners = [];
     pendingProgressByInstallation.clear();
-    if (progressFrame !== null) window.cancelAnimationFrame(progressFrame);
-    progressFrame = null;
+    clearProgressTimer();
+    clearCompletedInstallHideTimers();
   }
 
   return {

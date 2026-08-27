@@ -72,6 +72,7 @@ const caption = computed<string>(() => {
     return "更新资源已经准备完成";
   }
   if (task.state === gameEnum.package.taskState.COMPLETED) {
+    if (task.target === gameEnum.package.planTarget.INSTALL) return "安装完成";
     return integrityRepair.value ? "完整性修复完成" : "更新完成";
   }
   return gameEnum.package.taskStateDesc(task.state);
