@@ -258,12 +258,7 @@
       <!-- 底部菜单 -->
       <div class="bottom-menu">
         <!-- 用户菜单 -->
-        <v-menu
-          v-model="userMenuOpen"
-          :open-on-click="true"
-          location="end"
-          @update:model-value="handleUserMenuToggle"
-        >
+        <v-menu v-model="userMenuOpen" :open-on-click="true" location="end">
           <template #activator="{ props }">
             <v-list-item :title.attr="userInfo.nickname" class="thin-spacer" v-bind="props">
               <template #title>{{ userInfo.nickname }}</template>
@@ -324,16 +319,6 @@
             >
               <template #prepend>
                 <img alt="follow" class="side-icon-menu" src="/platforms/mhy/mys.webp" />
-              </template>
-            </v-list-item>
-            <v-list-item
-              v-if="canLaunch"
-              class="side-item-menu"
-              title="启动"
-              @click="handleLaunchGame()"
-            >
-              <template #prepend>
-                <img alt="genshin" class="side-icon-menu" src="/icon/material/220120.webp" />
               </template>
             </v-list-item>
           </v-list>
@@ -455,7 +440,6 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import ToGameLogin from "@comp/pageConfig/tco-gameLogin.vue";
 import VpOverlayFollow from "@comp/viewPost/vp-overlay-follow.vue";
-import gameEnum from "@enum/game.js";
 import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import takumiReq from "@req/takumiReq.js";
@@ -466,8 +450,7 @@ import { event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { platform } from "@tauri-apps/plugin-os";
 import mhyClient from "@utils/TGClient.js";
-import { tryCallYae, tryLaunchGame } from "@utils/TGGame.js";
-import { listGameInstallations } from "@utils/TGGameLauncher.js";
+import { tryCallYae } from "@utils/TGGame.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
@@ -505,45 +488,12 @@ const userInfo = computed<TGApp.App.Account.BriefInfo>(() => {
   return { nickname: "未登录", uid: "-1", desc: "请扫码登录", avatar: "/UI/nav/lumine.webp" };
 });
 const themeTitle = computed<string>(() => (theme.value === "default" ? "深色模式" : "浅色模式"));
-const launchableInstall = ref<TGApp.Game.Installation.Item | null>(null);
-const canLaunch = computed<boolean>(() => {
-  const installation = launchableInstall.value;
-  if (installation === null) return false;
-  if (installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
-    return isLogin.value && account.value.isOfficial === 1;
-  }
-  return true;
-});
-
-function handleUserMenuToggle(open: boolean): void {
-  if (open) void refreshLaunchable();
-}
-
-async function refreshLaunchable(): Promise<void> {
-  if (!isWindows) {
-    launchableInstall.value = null;
-    return;
-  }
-  try {
-    const installations = await listGameInstallations();
-    const chosen = installations.find((item) => item.isChosen) ?? installations[0];
-    if (chosen === undefined || chosen.status !== gameEnum.installation.status.KNOWN) {
-      launchableInstall.value = null;
-      return;
-    }
-    launchableInstall.value = chosen;
-  } catch {
-    // 侧边栏只决定入口是否显示，失败时隐藏启动项即可。
-    launchableInstall.value = null;
-  }
-}
 
 onMounted(async () => {
   themeListener = await event.listen<string>("readTheme", (e: Event<string>) => {
     theme.value = e.payload === "default" ? "default" : "dark";
   });
   if (webviewWindow.getCurrentWebviewWindow().label === "TeyvatGuide") await mhyClient.run();
-  await refreshLaunchable();
 });
 
 onUnmounted(() => {
@@ -1015,13 +965,6 @@ async function addByCookie(): Promise<void> {
   await showLoading.end();
   showSnackbar.success("成功添加用户!");
   isTryLogin.value = false;
-}
-
-/**
- * 尝试启动游戏
- */
-async function handleLaunchGame(): Promise<void> {
-  await tryLaunchGame(account.value, cookie.value);
 }
 </script>
 <style lang="scss" scoped>
