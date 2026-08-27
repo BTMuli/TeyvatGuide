@@ -203,15 +203,9 @@ const assemblyRemaining = computed<string>(() => {
   return `组装剩余 ${formatDuration(task.assemblyEtaSeconds)}`;
 });
 const downloadTitle = computed<string>(() => `下载 · ${downloadRemaining.value}`);
-const downloadSubtitle = computed<string>(() => {
-  if (task.downloadCurrentFile === null) return "";
-  return normalizeCurrentFile(task.downloadCurrentFile);
-});
+const downloadSubtitle = computed<string>(() => task.downloadCurrentFile ?? "");
 const assemblyTitle = computed<string>(() => `写入预估 · ${assemblyRemaining.value}`);
-const assemblySubtitle = computed<string>(() => {
-  if (task.assemblyCurrentFile === null) return "";
-  return normalizeCurrentFile(task.assemblyCurrentFile);
-});
+const assemblySubtitle = computed<string>(() => task.assemblyCurrentFile ?? "");
 const chartAriaLabel = computed<string>(() => {
   return `最近 60 秒趋势，下载 ${formatSpeed(currentDownloadSpeed.value)}，写入预估 ${formatSpeed(currentAssemblySpeed.value)}，当前私有临时空间 ${formatBytes(currentSpoolBytes.value)}`;
 });
@@ -267,27 +261,6 @@ function appendSample(): void {
     spool: currentSpoolBytes.value,
   };
   samples.value = [...samples.value.slice(-(sampleLimit - 1)), next];
-}
-
-function normalizeCurrentFile(value: string): string {
-  return value
-    .replace(/^正在安装：/, "")
-    .replace(/^正在组装：/, "")
-    .replace(/^已组装 \d+\/\d+：/, "")
-    .replace(/^\d+\/\d+ /, "")
-    .replace(/^游戏文件：/, "")
-    .replace(/^资源对象：/, "")
-    .replace(/^资源文件：/, "")
-    .replace(/^渠道 SDK：/, "")
-    .replace(/^渠道 SDK$/, "")
-    .replace(/^持续下载资源对象$/, "")
-    .replace(/^持续队列已调度 \d+\/\d+ 个资源$/, "")
-    .replace(/^正在获取资源$/, "")
-    .replace(/^正在获取配音资源对象$/, "")
-    .replace(/^正在恢复资源 \d+\/\d+：/, "")
-    .replace(/^校验失败，重新获取资源 \d+\/\d+：/, "")
-    .replace(/^自动修复完成：/, "")
-    .trim();
 }
 
 function createLinePath(metric: SampleMetric): string {

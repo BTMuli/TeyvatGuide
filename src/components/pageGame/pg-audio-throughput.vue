@@ -1,4 +1,4 @@
-<!-- 配音包任务的下载速度、组装速度/计数与实时 SVG 趋势图 -->
+<!-- 配音包任务的下载速度、组装速度与实时 SVG 趋势图 -->
 <template>
   <section class="audio-throughput" aria-label="配音包下载与组装进度" aria-live="off">
     <div class="audio-throughput-metrics">
@@ -159,43 +159,25 @@ const downloadRemaining = computed<string>(() => {
 });
 // 剩余时间并入标题，当前下载文件显示在副标题。
 const downloadTitle = computed<string>(() => `下载 · ${downloadRemaining.value}`);
-const downloadSubtitle = computed<string>(() => {
-  if (task.downloadCurrentFile === null) return "";
-  return task.downloadCurrentFile
-    .replace(/^游戏文件：/, "")
-    .replace(/^资源对象：/, "")
-    .replace(/^渠道 SDK：/, "");
-});
-const assemblyFacts = computed<string>(() => {
-  const parts: Array<string> = [];
-  if (task.assemblyTotalCount > 0) {
-    parts.push(`当前 ${task.activeAssemblyCount} 个`);
-  }
+const downloadSubtitle = computed<string>(() => task.downloadCurrentFile ?? "");
+const assemblyRemaining = computed<string>(() => {
   if (task.assemblyTotalBytes > 0 && task.assemblyCompletedBytes >= task.assemblyTotalBytes) {
-    parts.push("组装完成");
-  } else if (task.assemblyEtaSeconds === null) {
-    parts.push(
-      assemblyRunning.value || task.assemblyBytesPerSecond > 0
-        ? "组装剩余 计算中"
-        : "组装剩余 等待首个样本",
-    );
-  } else {
-    parts.push(`组装剩余 ${formatDuration(task.assemblyEtaSeconds)}`);
+    return "组装完成";
   }
-  return parts.join(" · ");
+  if (task.assemblyEtaSeconds === null) {
+    return assemblyRunning.value || task.assemblyBytesPerSecond > 0
+      ? "组装剩余 计算中"
+      : "组装剩余 等待首个样本";
+  }
+  return `组装剩余 ${formatDuration(task.assemblyEtaSeconds)}`;
 });
-// 组装计数与剩余时间并入标题，当前组装文件显示在副标题（去掉“正在组装：”前缀）。
-const assemblyTitle = computed<string>(() => `组装 · ${assemblyFacts.value}`);
-const assemblySubtitle = computed<string>(() => {
-  if (task.assemblyCurrentFile === null) return "";
-  // Rust 组装中返回“正在组装：”，单个资源完成后返回“已组装 X/Y：”，统一剥离。
-  return task.assemblyCurrentFile.replace(/^(正在组装|已组装 \d+\/\d+)：/, "");
-});
+// 剩余时间并入标题，当前组装文件显示在副标题。
+const assemblyTitle = computed<string>(() => `组装 · ${assemblyRemaining.value}`);
+const assemblySubtitle = computed<string>(() => task.assemblyCurrentFile ?? "");
 const chartAriaLabel = computed<string>(() => {
   const parts = [
     `最近 60 秒趋势，下载 ${formatSpeed(currentDownloadSpeed.value)}`,
     `组装 ${formatSpeed(currentAssemblySpeed.value)}`,
-    `当前组装 ${task.activeAssemblyCount} 个`,
   ];
   if (task.deleteTotalBytes > 0) {
     parts.push(`删除 ${formatSpeed(deleteSpeed.value)}`);

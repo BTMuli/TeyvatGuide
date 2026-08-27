@@ -265,10 +265,9 @@ where
   validate_switch_installation(installation, plan)?;
   let packages = target_sdk_packages(plan);
   for (index, package) in packages.iter().enumerate() {
-    let label = format!("下载渠道 SDK {}/{}：{}", index + 1, packages.len(), package.version);
     journal.state = super::model::PackageTaskState::Downloading;
-    journal.current_file = Some(label.clone());
-    journal.download_current_file = Some(label);
+    journal.current_file = Some("下载渠道 SDK".to_string());
+    journal.download_current_file = Some(package.version.clone());
     journal.touch();
     on_progress(journal)?;
     let base_downloaded = journal.downloaded_bytes;
@@ -304,9 +303,9 @@ where
   record_switch_cache(journal, task_root, &packages);
   check_canceled(canceled)?;
   journal.state = super::model::PackageTaskState::Assembling;
-  journal.current_file = Some("准备渠道文件：解压并校验 SDK".to_string());
+  journal.current_file = Some("准备渠道文件".to_string());
   journal.download_current_file = None;
-  journal.assembly_current_file = Some("准备渠道文件：解压并校验 SDK".to_string());
+  journal.assembly_current_file = Some("解压并校验 SDK".to_string());
   journal.bytes_per_second = 0;
   journal.eta_seconds = None;
   journal.touch();
@@ -323,8 +322,8 @@ where
     extract_sdk_zip(&zip_path, &staging_root, sdk_decompress_budget(package.decompressed_size))?;
     staged = verify_staged_sdk(&staging_root, package)?;
   }
-  journal.current_file = Some("准备渠道文件：生成提交清单".to_string());
-  journal.assembly_current_file = Some("准备渠道文件：生成提交清单".to_string());
+  journal.current_file = Some("准备渠道文件".to_string());
+  journal.assembly_current_file = Some("生成提交清单".to_string());
   journal.touch();
   on_progress(journal)?;
   let mut files = Vec::new();

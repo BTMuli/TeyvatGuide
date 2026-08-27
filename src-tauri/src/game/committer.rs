@@ -488,7 +488,7 @@ where
   journal.error_message = None;
   journal.current_file = Some("准备渠道文件".to_string());
   journal.download_current_file = None;
-  journal.assembly_current_file = Some("准备渠道文件：校验 SDK 解压结果".to_string());
+  journal.assembly_current_file = Some("校验 SDK 解压结果".to_string());
   journal.bytes_per_second = 0;
   journal.eta_seconds = None;
   persist_and_emit(task_root, journal, &emit)?;
@@ -503,16 +503,16 @@ where
     ensure_game_stopped()?;
     journal.state = PackageTaskState::CommitPrepared;
     journal.current_file = Some("准备提交事务".to_string());
-    journal.assembly_current_file = Some("准备提交事务：生成渠道文件变更清单".to_string());
+    journal.assembly_current_file = Some("生成渠道文件变更清单".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     check_canceled(canceled)?;
     journal.state = PackageTaskState::Committing;
-    journal.assembly_current_file = Some("提交事务：写入渠道文件".to_string());
+    journal.assembly_current_file = Some("写入渠道文件".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     commit_file_resources(&commit, game_root, journal, task_root, canceled, &emit)?;
     journal.state = PackageTaskState::Verifying;
     journal.current_file = Some("校验渠道文件".to_string());
-    journal.assembly_current_file = Some("校验渠道文件：确认文件完整性".to_string());
+    journal.assembly_current_file = Some("确认文件完整性".to_string());
     persist_and_emit(task_root, journal, &emit)?;
     verify_switch_files(&commit, game_root, canceled)?;
     commit_config(&commit.plan_id, game_root, task_root, journal, &emit)?;

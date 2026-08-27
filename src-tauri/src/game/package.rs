@@ -333,8 +333,9 @@ impl AudioLiveAssemblyOverlay {
     summary
   }
 
-  fn account(&self, written: u64) {
-    self.accounted_written.store(written, Ordering::Relaxed);
+  /// 只把该成品大小入账，保留其他正在写盘资源的会话增量。
+  fn account_completed(&self, asset_size: u64) {
+    self.accounted_written.fetch_add(asset_size, Ordering::Relaxed);
   }
 }
 
@@ -2871,13 +2872,21 @@ fn prepare_audio_asset_job(
   AudioAssetJob { asset_index, pending }
 }
 
+fn overlay_audio_summary(
+  journal: &TaskJournal,
+  telemetry: &assembler::AssemblyTelemetry,
+  overlay: &AudioLiveAssemblyOverlay,
+) -> PackageTaskSummary {
+  overlay.overlay(journal, telemetry.snapshot().written_bytes)
+}
+
 fn emit_audio_progress(
   app_handle: &AppHandle,
   journal: &TaskJournal,
   telemetry: &assembler::AssemblyTelemetry,
   overlay: &AudioLiveAssemblyOverlay,
 ) {
-  emit_progress(app_handle, &overlay.overlay(journal, telemetry.snapshot().written_bytes));
+  emit_progress(app_handle, &overlay_audio_summary(journal, telemetry, overlay));
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -2901,7 +2910,7 @@ async fn assemble_audio_asset(
   {
     let mut value = journal.lock().await;
     value.active_assembly_count = value.active_assembly_count.saturating_add(1);
-    value.assembly_current_file = Some(format!("正在组装：{}", plan.assets[asset_index].name));
+    value.assembly_current_file = Some(plan.assets[asset_index].name.clone());
     value.current_file = value.assembly_current_file.clone();
     value.touch();
     emit_audio_progress(&app_handle, &value, &telemetry, &overlay);
@@ -3000,10 +3009,8 @@ async fn run_audio_asset_job(
             .acquire_owned()
             .await
             .map_err(|error| format!("获取配音下载并发槽位失败：{error}"))?;
-          let current_file = labels
-            .get(&download.cache_key)
-            .cloned()
-            .unwrap_or_else(|| format!("资源对象：{}", download.id));
+          let current_file =
+            labels.get(&download.cache_key).cloned().unwrap_or_else(|| download.id.clone());
           let result = download_object(
             &client,
             &root,
@@ -3095,6 +3102,7 @@ fn discover_audio_delete_progress(
 }
 
 /// 并发删除单个待移除配音资源：把文件移入备份目录并累计删除进度。
+#[allow(clippy::too_many_arguments)]
 async fn delete_audio_resource(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -3103,6 +3111,8 @@ async fn delete_audio_resource(
   journal: &Arc<AsyncMutex<TaskJournal>>,
   canceled: &Arc<AtomicBool>,
   paused: &Arc<AtomicBool>,
+  telemetry: &assembler::AssemblyTelemetry,
+  overlay: &AudioLiveAssemblyOverlay,
   deleted: &PlanDelete,
 ) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) {
@@ -3131,7 +3141,7 @@ async fn delete_audio_resource(
   if let Err(error) = journal::persist(task_root, &value) {
     return Err(error);
   }
-  let summary = value.summary();
+  let summary = overlay_audio_summary(&value, telemetry, overlay);
   drop(value);
   emit_state(app_handle, &summary);
   emit_progress(app_handle, &summary);
@@ -3268,9 +3278,6 @@ async fn run_audio_streaming_task(
       completed_cache_keys.contains(&download.cache_key).then_some(index)
     })
     .collect::<HashSet<_>>();
-  let has_pending_downloads = plan.downloads.iter().enumerate().any(|(index, download)| {
-    !available_downloads.contains(&index) && !cached_chunk_matches(&cache_root, download)
-  });
   let completed_cache_keys = Arc::new(Mutex::new(completed_cache_keys));
   let available_downloads = Arc::new(Mutex::new(available_downloads));
   let download_started_at = Instant::now();
@@ -3293,9 +3300,8 @@ async fn run_audio_streaming_task(
       plan.delete_files.iter().fold(0_u64, |total, file| total.saturating_add(file.size));
     value.delete_completed_bytes = delete_completed_bytes.min(value.delete_total_bytes);
     value.active_assembly_count = 0;
-    value.download_current_file =
-      has_pending_downloads.then_some("正在获取配音资源对象".to_string());
-    value.current_file = value.download_current_file.clone();
+    value.download_current_file = None;
+    value.current_file = None;
     value.error_message = None;
     value.touch();
     if let Err(error) = journal::persist(&task_root, &value) {
@@ -3334,6 +3340,8 @@ async fn run_audio_streaming_task(
     let journal = Arc::clone(&journal);
     let canceled = Arc::clone(&canceled);
     let paused = Arc::clone(&paused);
+    let telemetry = Arc::clone(&assembly_telemetry);
+    let overlay = Arc::clone(&assembly_overlay);
     let deletion_blocked = deletion_blocked;
     async move {
       if deletion_blocked {
@@ -3347,6 +3355,8 @@ async fn run_audio_streaming_task(
         &journal,
         &canceled,
         &paused,
+        &telemetry,
+        &overlay,
         &deleted,
       )
       .await
@@ -3423,7 +3433,9 @@ async fn run_audio_streaming_task(
         match completion.result {
           Ok(()) => {
             completed_assets.insert(completion.asset_index);
-            assembly_overlay.account(assembly_telemetry.snapshot().written_bytes);
+            if let Some(asset) = plan.assets.get(completion.asset_index) {
+              assembly_overlay.account_completed(asset.size);
+            }
             let completed_bytes = completed_assets
               .iter()
               .filter_map(|index| plan.assets.get(*index))
@@ -3441,12 +3453,7 @@ async fn run_audio_streaming_task(
               plan.assets.len(),
               completed_bytes,
               assembly_total_bytes,
-              Some(format!(
-                "已组装 {}/{}：{}",
-                completed_assets.len(),
-                plan.assets.len(),
-                plan.assets[completion.asset_index].name,
-              )),
+              Some(plan.assets[completion.asset_index].name.clone()),
             );
             value.touch();
             if let Err(error) = journal::persist(&task_root, &value) {
@@ -4067,7 +4074,7 @@ async fn run_install_streaming_task(
       {
         let mut value = journal.lock().await;
         value.state = PackageTaskState::Downloading;
-        value.download_current_file = Some(format!("资源文件：{}", asset.name));
+        value.download_current_file = Some(asset.name.clone());
         value.assembly_current_file = None;
         value.touch();
         if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
@@ -4165,11 +4172,7 @@ async fn run_install_streaming_task(
       {
         let mut value = journal.lock().await;
         value.download_current_file = None;
-        value.assembly_current_file = Some(format_install_assembly_status(
-          value.assembly_completed_count,
-          value.assembly_total_count,
-          &asset.name,
-        ));
+        value.assembly_current_file = Some(asset.name.clone());
         value.touch();
         if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -4364,7 +4367,7 @@ async fn run_install_streaming_task(
         value.download_current_file = download_labels
           .get(&download.cache_key)
           .cloned()
-          .or_else(|| Some("渠道 SDK".to_string()));
+          .or_else(|| Some(sdk.pkg_version_file_name.clone()));
         value.touch();
         if let Err(error) = journal::persist(&task_root, &value) {
           persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -4467,14 +4470,6 @@ struct InstallAssetJobCompletion {
 const MAX_INSTALL_ASSET_REPAIR_ATTEMPTS: usize = 2;
 const MAX_INSTALL_TASK_REPAIR_ATTEMPTS: usize = 3;
 
-fn format_install_assembly_status(
-  completed_count: usize,
-  total_count: usize,
-  file: &str,
-) -> String {
-  format!("{completed_count}/{total_count} {file}")
-}
-
 fn reserve_install_repair_attempt(
   journal: &mut TaskJournal,
   asset_index: usize,
@@ -4534,15 +4529,15 @@ async fn run_install_prepublish_repair(
       Err(failure) if failure.repairable() => failure,
       Err(failure) => return Err(failure.message),
     };
-    let attempt_number = {
+    {
       let mut value = journal.lock().await;
       reserve_install_repair_attempt(
         &mut value,
         failure.asset_index,
         &failure.path,
         &failure.message,
-      )?
-    };
+      )?;
+    }
 
     super::evidence::invalidate_asset_evidence(task_root, plan, failure.asset_index)?;
     let job = prepare_install_asset_job(
@@ -4575,10 +4570,7 @@ async fn run_install_prepublish_repair(
       };
       apply_install_completion_snapshot(&mut value, snapshot, metrics);
       value.state = PackageTaskState::Downloading;
-      value.download_current_file = Some(format!(
-        "校验失败，重新获取资源 {}/{}：{}",
-        attempt_number, MAX_INSTALL_ASSET_REPAIR_ATTEMPTS, failure.path
-      ));
+      value.download_current_file = Some(failure.path.clone());
       value.assembly_current_file = None;
       value.current_file = value.download_current_file.clone();
       value.touch();
@@ -4621,7 +4613,7 @@ async fn run_install_prepublish_repair(
     };
     apply_install_completion_snapshot(&mut value, snapshot, metrics);
     value.download_current_file = None;
-    value.assembly_current_file = Some(format!("自动修复完成：{}", failure.path));
+    value.assembly_current_file = Some(failure.path.clone());
     value.current_file = value.assembly_current_file.clone();
     value.touch();
     persist_install_checkpoint(task_root, &value, metrics)?;
@@ -4777,8 +4769,7 @@ async fn run_install_bounded_asset_pipeline(
       metrics.queue_refill_count.fetch_add(1, Ordering::Relaxed);
       let mut value = journal.lock().await;
       value.state = PackageTaskState::Downloading;
-      value.download_current_file =
-        Some(format!("持续队列已调度 {}/{} 个资源", next_asset_index, plan.assets.len()));
+      value.download_current_file = None;
       value.touch();
       if let Err(error) = persist_install_progress(task_root, &value, metrics) {
         first_error.get_or_insert(error);
@@ -4803,13 +4794,7 @@ async fn run_install_bounded_asset_pipeline(
         apply_install_completion_snapshot(&mut value, snapshot, metrics);
         asset_cursor = snapshot.contiguous_cursor;
         value.assembly_current_file = (value.assembly_completed_count < value.assembly_total_count)
-          .then(|| {
-            format_install_assembly_status(
-              value.assembly_completed_count,
-              value.assembly_total_count,
-              &plan.assets[completion.asset_index].name,
-            )
-          });
+          .then(|| plan.assets[completion.asset_index].name.clone());
         value.spool_bytes = install_tracker_spool_bytes(spool_tracker);
         metrics.observe_spool(value.spool_bytes);
         value.touch();
@@ -4958,10 +4943,8 @@ async fn run_install_asset_job(
               &download.cache_key,
               downloaded.bytes,
             );
-            let label = labels
-              .get(&download.cache_key)
-              .cloned()
-              .unwrap_or_else(|| format!("资源对象：{}", download.id));
+            let label =
+              labels.get(&download.cache_key).cloned().unwrap_or_else(|| download.id.clone());
             Some((downloaded.bytes, completed_count, label))
           })
         }))
@@ -5004,11 +4987,7 @@ async fn run_install_asset_job(
 
     {
       let mut value = journal.lock().await;
-      value.assembly_current_file = Some(format_install_assembly_status(
-        value.assembly_completed_count,
-        value.assembly_total_count,
-        &plan.assets[asset_index].name,
-      ));
+      value.assembly_current_file = Some(plan.assets[asset_index].name.clone());
       value.touch();
       emit_progress(&app_handle, &value.summary());
     }
@@ -5103,7 +5082,7 @@ async fn run_install_streaming_asset_pipeline(
     {
       let mut value = journal.lock().await;
       value.state = PackageTaskState::Downloading;
-      value.download_current_file = Some(format!("资源文件 {} - {}", asset_cursor + 1, batch_end));
+      value.download_current_file = plan.assets.get(asset_cursor).map(|asset| asset.name.clone());
       value.assembly_current_file = None;
       value.touch();
       journal::persist_progress(task_root, &value)?;
@@ -5185,11 +5164,7 @@ async fn run_install_streaming_asset_pipeline(
     value.spool_bytes = spool_bytes(spool_root);
     value.committed_step = completed_download_count(plan, completed, shared_cache_root, spool_root);
     value.download_current_file = None;
-    value.assembly_current_file = Some(format_install_assembly_status(
-      value.assembly_completed_count,
-      value.assembly_total_count,
-      &plan.assets[completed - 1].name,
-    ));
+    value.assembly_current_file = Some(plan.assets[completed - 1].name.clone());
     value.touch();
     journal::persist(task_root, &value)?;
     let released = release_install_spool(plan, completed, spool_root);
@@ -5736,10 +5711,8 @@ async fn run_task(
   let downloads = stream::iter(pending.into_iter().map(|download| {
     let cache_root = download_root.to_path_buf();
     let task_id = plan.plan_id.clone();
-    let current_file = download_labels
-      .get(&download.cache_key)
-      .cloned()
-      .unwrap_or_else(|| format!("资源对象：{}", download.id));
+    let current_file =
+      download_labels.get(&download.cache_key).cloned().unwrap_or_else(|| download.id.clone());
     let canceled = Arc::clone(&canceled);
     let paused = Arc::clone(&paused);
     let limiter = Arc::clone(&limiter);
@@ -6144,9 +6117,9 @@ fn build_download_labels(plan: &PersistedPlan) -> HashMap<String, String> {
         .as_ref()
         .and_then(|overlay| overlay.sdk.as_ref())
         .filter(|sdk| sdk.cache_key == download.cache_key)
-        .map(|sdk| format!("渠道 SDK：{}", sdk.pkg_version_file_name))
-        .or_else(|| asset_names.get(&download.id).map(|name| format!("游戏文件：{name}")))
-        .unwrap_or_else(|| format!("资源对象：{}", download.id));
+        .map(|sdk| sdk.pkg_version_file_name.clone())
+        .or_else(|| asset_names.get(&download.id).cloned())
+        .unwrap_or_else(|| download.id.clone());
       (download.cache_key.clone(), truncate_progress_label(label))
     })
     .collect()

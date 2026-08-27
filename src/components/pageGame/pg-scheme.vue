@@ -245,7 +245,7 @@ const schemeStage = computed<string>(() => {
 const schemeCurrentFile = computed<string | null>(() => {
   const task = visibleTask.value;
   if (task === null) return null;
-  return task.downloadCurrentFile ?? task.currentFile ?? task.assemblyCurrentFile;
+  return task.downloadCurrentFile ?? task.assemblyCurrentFile;
 });
 const schemeCaption = computed<string>(() => {
   if (errorMessage.value !== null) return errorMessage.value;
@@ -266,7 +266,7 @@ const schemeTone = computed<"" | "err" | "warn">(() => {
 const schemeFacts = computed<Array<string>>(() => {
   const task = visibleTask.value;
   if (task === null) return [];
-  const facts = [`阶段：${schemeStage.value}`, `整体 ${progressPercent.value.toFixed(0)}%`];
+  const facts: Array<string> = [];
   if (task.totalBytes > 0) {
     facts.push(`${formatBytes(task.downloadedBytes)} / ${formatBytes(task.totalBytes)}`);
   }

@@ -150,10 +150,7 @@ const downloadSubtitle = computed<string>(() => {
   if (task.downloadCurrentFile === null) {
     return downloadDone.value ? "资源已写入共享缓存" : "等待下载对象";
   }
-  return task.downloadCurrentFile
-    .replace(/^游戏文件：/, "")
-    .replace(/^资源对象：/, "")
-    .replace(/^渠道 SDK：/, "");
+  return task.downloadCurrentFile;
 });
 const assemblyRemaining = computed<string>(() => {
   if (task.assemblyTotalCount === 0 && !assemblyActive.value) return "等待应用";
@@ -166,7 +163,7 @@ const assemblyRemaining = computed<string>(() => {
 const assemblyTitle = computed<string>(() => `组装 · ${assemblyRemaining.value}`);
 const assemblySubtitle = computed<string>(() => {
   if (task.assemblyCurrentFile !== null) {
-    return task.assemblyCurrentFile.replace(/^(正在组装|已组装 \d+\/\d+)：/, "");
+    return task.assemblyCurrentFile;
   }
   if (assemblyDone.value) return "事务资源已经组装";
   return assemblyActive.value ? "正在准备事务资源" : "游戏目录尚未修改";
