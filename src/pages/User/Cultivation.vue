@@ -895,7 +895,6 @@ watch(selectedCharacter, async (character) => {
       selectedSyncAvatar.value.level_current,
       selectedSyncAvatar.value.promote_level,
     );
-    selectPreferredWeapon();
   } else {
     const role = selectedRole.value;
     if (role) {
@@ -904,7 +903,6 @@ watch(selectedCharacter, async (character) => {
     } else {
       avatarAscended.value = false;
     }
-    selectPreferredWeapon();
   }
   const wiki = await getWikiCharacterById(characterId);
   if (selectedCharacterId.value === characterId) {
@@ -937,6 +935,7 @@ watch(
   clearApiResult,
 );
 
+watch(selectedCharacterId, () => selectPreferredWeapon(true));
 watch(weaponOptions, () => selectPreferredWeapon());
 
 watch(avatarTargetAtAscensionLevel, (atAscensionLevel) => {
@@ -1030,22 +1029,32 @@ function restoreCharacterSelection(
   return options[0]?.value ?? null;
 }
 
-function selectPreferredWeapon(): void {
+function resolvePreferredWeaponKey(
+  options: ReadonlyArray<TGApp.App.UserCalc.WeaponOption>,
+): string | null {
+  const equippedWeaponKey = options.find(
+    (weapon) => weapon.equippedBy === selectedCharacterId.value,
+  )?.key;
+  if (equippedWeaponKey !== undefined) return equippedWeaponKey;
+  const roleWeaponId = selectedSyncAvatar.value?.weapon.id ?? selectedRole.value?.weapon.id;
+  if (roleWeaponId === undefined) return null;
+  return options.find((weapon) => weapon.wiki.id === roleWeaponId)?.key ?? null;
+}
+
+function selectPreferredWeapon(force = false): void {
   const options = weaponOptions.value;
   if (options.length === 0) {
     selectedWeaponKey.value = null;
     return;
   }
-  if (options.some((weapon) => weapon.key === selectedWeaponKey.value)) return;
-  const equippedWeaponKey = options.find(
-    (weapon) => weapon.equippedBy === selectedCharacterId.value,
-  )?.key;
-  const roleWeaponId = selectedSyncAvatar.value?.weapon.id ?? selectedRole.value?.weapon.id;
-  selectedWeaponKey.value =
-    equippedWeaponKey ??
-    (roleWeaponId === undefined
-      ? null
-      : (options.find((weapon) => weapon.wiki.id === roleWeaponId)?.key ?? null));
+  const currentValid = options.some((weapon) => weapon.key === selectedWeaponKey.value);
+  if (currentValid && (!force || weaponSelectionReadonly.value)) return;
+  const preferredKey = resolvePreferredWeaponKey(options);
+  if (preferredKey !== null) {
+    selectedWeaponKey.value = preferredKey;
+    return;
+  }
+  if (!currentValid) selectedWeaponKey.value = null;
 }
 
 function clearApiResult(): void {
@@ -1420,7 +1429,7 @@ async function loadApiData(uid: number, requestVersion: number): Promise<void> {
       previousCharacterId,
       apiCharacterOptions.value,
     );
-    if (selectedCharacterId.value === null) selectPreferredWeapon();
+    selectPreferredWeapon();
   } catch (error) {
     if (requestVersion !== dataLoadVersion) return;
     recordAvatars.value = [];
@@ -1527,7 +1536,7 @@ async function loadLocalData(uid: number, requestVersion: number): Promise<void>
     previousCharacterId,
     localCharacterOptions.value,
   );
-  if (selectedCharacterId.value === null) selectPreferredWeapon();
+  selectPreferredWeapon();
 }
 
 async function loadInventoryData(uid: number, requestVersion: number): Promise<void> {
@@ -2638,6 +2647,7 @@ function buildApiWeaponOptions(
       locked: false,
       source: "equipped",
       api,
+      equippedBy: avatar.id,
     });
   }
   for (const weapon of catalog) {
@@ -2723,6 +2733,7 @@ function buildWeaponOptions(
       fromBag: false,
       locked: false,
       source: "equipped",
+      equippedBy: role.cid,
     });
   }
   for (const wiki of wwWeapon) {
