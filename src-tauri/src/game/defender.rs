@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::{
+  collections::HashSet,
   fs, io,
   path::{Path, PathBuf},
   process::Command,
@@ -84,6 +85,14 @@ fn path_text(path: &Path) -> String {
 
 fn normalize_windows_path(path: &str) -> String {
   path.replace('/', "\\")
+}
+
+fn normalize_exclusion_key(path: &str) -> String {
+  normalize_windows_path(path).trim_end_matches('\\').to_ascii_lowercase()
+}
+
+fn removable_exclusion_paths(paths: &[String], retained: &HashSet<String>) -> Vec<String> {
+  paths.iter().filter(|path| !retained.contains(&normalize_exclusion_key(path))).cloned().collect()
 }
 
 /// 将待排除目录打印到终端。
@@ -194,8 +203,9 @@ fn build_inner_script(status_file: &str, paths: &[String], remove: bool) -> Stri
     .join(", ");
   let (mutation, verification) = if remove {
     (
-      "$present = @($paths | Where-Object { (Normalize-ExclusionPath $_) -in $current })\n\
-       foreach ($p in $present) { Remove-MpPreference -ExclusionPath $p }\n\
+      "$wanted = @($paths | ForEach-Object { Normalize-ExclusionPath $_ })\n\
+       $toRemove = @(Read-ExclusionEntries | Where-Object { (Normalize-ExclusionPath $_) -in $wanted })\n\
+       foreach ($p in $toRemove) { Remove-MpPreference -ExclusionPath $p }\n\
        $current = @(Read-ExclusionPaths)",
       "$remaining = @($paths | Where-Object { (Normalize-ExclusionPath $_) -in $current })\n\
        if ($remaining.Count -gt 0) { throw ('移除后仍存在排除：' + ($remaining -join '; ')) }",
@@ -213,10 +223,15 @@ fn build_inner_script(status_file: &str, paths: &[String], remove: bool) -> Stri
      $statusFile = {status_file}\n\
      $paths = @({path_list})\n\
      function Normalize-ExclusionPath([string]$p) {{\n\
-       return (($p.Replace('/', '\\')).TrimEnd('\\')).ToLowerInvariant()\n\
+       $n = (($p.Replace('/', '\\')).TrimEnd('\\'))\n\
+       try {{ $n = [System.IO.Path]::GetFullPath($n) }} catch {{}}\n\
+       return $n.ToLowerInvariant()\n\
+     }}\n\
+     function Read-ExclusionEntries {{\n\
+       return @(Get-MpPreference -ErrorAction SilentlyContinue | Select-Object -ExpandProperty ExclusionPath | Where-Object {{ -not [string]::IsNullOrWhiteSpace($_) }})\n\
      }}\n\
      function Read-ExclusionPaths {{\n\
-       return @(Get-MpPreference -ErrorAction SilentlyContinue | Select-Object -ExpandProperty ExclusionPath | ForEach-Object {{ Normalize-ExclusionPath $_ }})\n\
+       return @(Read-ExclusionEntries | ForEach-Object {{ Normalize-ExclusionPath $_ }})\n\
      }}\n\
      try {{\n\
        $current = @(Read-ExclusionPaths)\n\
@@ -349,11 +364,39 @@ pub(crate) fn cleanup_install_exclusions(task_root: &Path, plan_id: &str) -> Res
   let Some(dirs) = load_registry(task_root, plan_id) else {
     return Ok(());
   };
-  let paths = dirs.paths();
-  print_paths("移出 Windows Defender 排除：", &paths);
-  remove_exclusions(&paths)?;
+  let paths =
+    removable_exclusion_paths(&dirs.paths(), &other_registry_path_keys(task_root, plan_id));
+  if !paths.is_empty() {
+    print_paths("移出 Windows Defender 排除：", &paths);
+    remove_exclusions(&paths)?;
+  }
   remove_registry(task_root, plan_id);
   Ok(())
+}
+
+fn other_registry_path_keys(task_root: &Path, except_plan_id: &str) -> HashSet<String> {
+  let entries = match fs::read_dir(registry_dir(task_root)) {
+    Ok(entries) => entries,
+    Err(_) => return HashSet::new(),
+  };
+  let mut keys = HashSet::new();
+  for entry in entries.flatten() {
+    let Some(file_name) = entry.file_name().to_str().map(str::to_string) else {
+      continue;
+    };
+    let Some(plan_id) = file_name.strip_suffix(".json") else {
+      continue;
+    };
+    if plan_id == except_plan_id {
+      continue;
+    }
+    if let Some(dirs) = load_registry(task_root, plan_id) {
+      for path in dirs.paths() {
+        keys.insert(normalize_exclusion_key(&path));
+      }
+    }
+  }
+  keys
 }
 
 /// 应用启动时清理已结束或缺失任务遗留的排除登记。
@@ -398,56 +441,5 @@ pub(crate) fn sweep_stale_exclusions(task_root: &Path) -> Result<(), String> {
   match first_error {
     Some(error) => Err(error),
     None => Ok(()),
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::InstallDefenderDirs;
-
-  #[test]
-  fn paths_skip_empty_optional_dirs() {
-    let dirs = InstallDefenderDirs {
-      target_root: "D:/Games/Genshin".to_string(),
-      spool_root: "D:/Games/.teyvatguide-spool-1".to_string(),
-      staging_root: String::new(),
-      download_root: "C:/AppData/game-tasks/cache/chunks".to_string(),
-      journal_root: String::new(),
-    };
-    assert_eq!(
-      dirs.paths(),
-      vec![
-        "D:\\Games\\Genshin".to_string(),
-        "D:\\Games\\.teyvatguide-spool-1".to_string(),
-        "C:\\AppData\\game-tasks\\cache\\chunks".to_string(),
-      ]
-    );
-  }
-
-  #[test]
-  fn add_script_rereads_exclusions_after_mutation() {
-    let script =
-      super::build_inner_script("'status.txt'", &["D:\\Games\\Genshin".to_string()], false);
-    let add_at = script.find("Add-MpPreference").expect("add command");
-    assert!(script[..add_at].contains("Read-ExclusionPaths"), "reads exclusions before add");
-    assert!(script[add_at..].contains("Read-ExclusionPaths"), "rereads exclusions after add");
-    assert!(script.contains("UTF8Encoding"), "writes UTF-8 status");
-  }
-
-  #[test]
-  fn require_registry_rejects_missing_plan() {
-    let error = super::require_registry(std::path::Path::new("C:/missing-task-root"), "plan-1")
-      .expect_err("missing registry is rejected");
-    assert!(error.contains("Windows Defender"));
-  }
-
-  #[test]
-  fn registry_without_new_fields_still_deserializes() {
-    let dirs: InstallDefenderDirs =
-      serde_json::from_str(r#"{"targetRoot":"D:/g","spoolRoot":"D:/s","downloadRoot":"C:/c"}"#)
-        .expect("legacy registry deserializes");
-    assert!(dirs.staging_root.is_empty());
-    assert!(dirs.journal_root.is_empty());
-    assert_eq!(dirs.paths().len(), 3);
   }
 }

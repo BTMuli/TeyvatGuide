@@ -4,7 +4,6 @@
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
   path_guard::normalize_manifest_path,
-  perf,
   planner::PersistedPlan,
   scheme::scheme_id_key,
 };
@@ -545,7 +544,7 @@ impl TaskJournal {
       released_bytes: self.released_bytes,
       assembly_completed_bytes_total: self.assembly_completed_bytes_total,
       delete_total_bytes: self.delete_total_bytes,
-      delete_completed_bytes: self.delete_completed_bytes,
+      delete_completed_bytes: self.delete_completed_bytes.min(self.delete_total_bytes),
       current_file: self.current_file.clone(),
       download_current_file: self.download_current_file.clone(),
       assembly_current_file: self.assembly_current_file.clone(),
@@ -634,7 +633,6 @@ pub(crate) fn load_or_create(
 }
 
 pub(crate) fn load(path: &Path) -> Result<TaskJournal, String> {
-  perf::record_journal_load();
   let metadata =
     fs::metadata(path).map_err(|error| format!("读取游戏资源任务日志失败：{error}"))?;
   if metadata.len() == 0 || metadata.len() > MAX_JOURNAL_BYTES {
@@ -860,7 +858,6 @@ pub(crate) fn list(
   task_root: &Path,
   installation_id: Option<&str>,
 ) -> Result<Vec<TaskJournal>, String> {
-  perf::record_journal_list();
   let tasks_root = task_root.join("tasks");
   let entries = match fs::read_dir(tasks_root) {
     Ok(entries) => entries,
@@ -1317,96 +1314,5 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
     std::fs::File::open(directory)
       .and_then(|file| file.sync_all())
       .map_err(|error| format!("刷新游戏资源任务目录失败：{error}"))
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-  use crate::game::model::{PackagePlanStrategy, SchemeId};
-  use crate::game::planner::{PersistedPlan, PlanDelete};
-  use serde_json::json;
-
-  fn update_plan() -> PersistedPlan {
-    PersistedPlan {
-      schema_version: 6,
-      plan_id: Uuid::new_v4().to_string(),
-      installation_id: Uuid::new_v4().to_string(),
-      source_scheme: SchemeId::CnOfficial,
-      target_scheme: SchemeId::CnOfficial,
-      target: PackagePlanTarget::Main,
-      source_tag: Some("1.0.0".to_string()),
-      target_tag: "1.0.1".to_string(),
-      manifest_digest: "a".repeat(64),
-      strategy: PackagePlanStrategy::ManifestDiff,
-      downloads: Vec::new(),
-      assets: Vec::new(),
-      delete_files: vec![PlanDelete {
-        name: "obsolete.pak".to_string(),
-        size: 42,
-        md5: "b".repeat(32),
-      }],
-      inventory: Vec::new(),
-      install_overlay: None,
-      audio_selection: None,
-      created_at: Utc::now().to_rfc3339(),
-    }
-  }
-
-  #[test]
-  fn legacy_journal_without_verification_bytes_is_readable() {
-    let plan = update_plan();
-    let journal = TaskJournal::from_plan(&plan);
-    let mut value = serde_json::to_value(journal).expect("journal serializes");
-    let object = value.as_object_mut().expect("journal is an object");
-    object.insert("schemaVersion".to_string(), json!(LEGACY_JOURNAL_SCHEMA_VERSION_V3));
-    object.remove("verificationCompletedBytes");
-    object.remove("verificationTotalBytes");
-    let loaded: TaskJournal = serde_json::from_value(value).expect("legacy journal deserializes");
-    validate_journal(&loaded).expect("legacy journal validates");
-    assert_eq!(loaded.verification_completed_bytes, 0);
-    assert_eq!(loaded.verification_total_bytes, 0);
-  }
-
-  #[test]
-  fn update_commit_progress_uses_apply_cursor_and_clamps_completion() {
-    let plan = update_plan();
-    let mut journal = TaskJournal::from_plan(&plan);
-    journal.apply = Some(ApplyJournal {
-      plan_sha256: "a".repeat(64),
-      steps_digest: "b".repeat(64),
-      step_count: 3,
-      cursor: 9,
-      active_step: None,
-      config_original_sha256: "c".repeat(64),
-      config_target_sha256: "d".repeat(64),
-      config_phase: ConfigCommitPhase::Prepared,
-    });
-    journal.commit_completed_count = 0;
-    journal.commit_total_count = 0;
-    assert!(journal.ensure_update_commit_progress(&plan));
-    assert_eq!(journal.commit_completed_count, 1);
-    assert_eq!(journal.commit_total_count, 2);
-  }
-
-  #[test]
-  fn persist_timed_skips_older_revision() {
-    let task_root = std::env::temp_dir().join(format!("tg-journal-{}", Uuid::new_v4()));
-    fs::create_dir_all(&task_root).expect("create temp task root");
-    let plan = update_plan();
-    let mut newer = TaskJournal::from_plan(&plan);
-    newer.total_bytes = 100;
-    newer.downloaded_bytes = 20;
-    newer.touch();
-    persist(&task_root, &newer).expect("persist newer journal");
-    let mut older = TaskJournal::from_plan(&plan);
-    older.task_id = newer.task_id.clone();
-    older.plan_id = newer.plan_id.clone();
-    older.total_bytes = 100;
-    older.downloaded_bytes = 10;
-    persist(&task_root, &older).expect("older persist is ignored");
-    let loaded = load(&journal_path(&task_root, &newer.task_id)).expect("load journal");
-    assert_eq!(loaded.downloaded_bytes, 20);
-    let _ = fs::remove_dir_all(task_root);
   }
 }

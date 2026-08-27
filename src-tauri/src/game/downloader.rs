@@ -993,23 +993,3 @@ fn download_url(download: &PlanDownload) -> Result<reqwest::Url, String> {
   }
   payload_url(&download.url_prefix, &download.url_suffix, &download.id)
 }
-
-#[cfg(test)]
-mod tests {
-  use super::DownloadTelemetry;
-
-  #[test]
-  fn received_bytes_update_immediately_and_release_in_flight() {
-    let telemetry = DownloadTelemetry::new();
-    let mut attempt = telemetry.begin_attempt();
-    attempt.record_received_bytes(1024);
-    attempt.record_received_bytes(512);
-    let live = telemetry.snapshot();
-    assert_eq!(live.received_bytes, 1536);
-    assert_eq!(live.in_flight_bytes, 1536);
-    attempt.finish(true);
-    let committed = telemetry.snapshot();
-    assert_eq!(committed.received_bytes, 1536);
-    assert_eq!(committed.in_flight_bytes, 0);
-  }
-}

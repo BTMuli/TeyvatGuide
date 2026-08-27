@@ -18,7 +18,6 @@ use super::{
     PackageVerifySummary,
   },
   path_guard::{prepare_manifest_output_file, resolve_optional_manifest_file},
-  perf,
   planner::{
     PersistedPlan, PlanDelete, PlanDownload, cached_chunk_matches, cached_chunk_matches_async,
     default_install_concurrency, flush_cache_validation_index, hydrate_and_validate_apply_plan,
@@ -62,6 +61,10 @@ const INSTALL_STALL_PAUSE_MESSAGE: &str =
 const INSTALL_STALL_NOTIFICATION_TITLE: &str = "游戏安装已暂停";
 const INSTALL_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到磁盘 I/O 持续停滞，请检查磁盘状态后手动继续。";
+/// 配音包同时只让一个资源占用下载槽，下一个资源排队；组装与下一包下载重叠。
+const AUDIO_DOWNLOAD_FOCUS: usize = 1;
+/// 一个正在下载、一个等待下载焦点，避免所有大包同时抢带宽。
+const AUDIO_DOWNLOAD_PREFETCH: usize = 1;
 
 /// 安装流水线停滞看门狗：独立线程联合检查 journal 与下载/组装阶段心跳。
 fn spawn_install_stall_watchdog(
@@ -307,6 +310,47 @@ pub(crate) struct AudioApplyContext {
 
 struct AudioAssemblyCompletion {
   asset_index: usize,
+  result: Result<(), String>,
+}
+
+/// 组装进度条用写出增量叠加已完成成品，不把预分配或会话写出写进 journal。
+struct AudioLiveAssemblyOverlay {
+  accounted_written: AtomicU64,
+}
+
+impl AudioLiveAssemblyOverlay {
+  fn new() -> Self {
+    Self { accounted_written: AtomicU64::new(0) }
+  }
+
+  fn display_bytes(durable_completed: u64, total: u64, written: u64, accounted: u64) -> u64 {
+    durable_completed.saturating_add(written.saturating_sub(accounted)).min(total)
+  }
+
+  fn overlay(&self, journal: &TaskJournal, written: u64) -> PackageTaskSummary {
+    let mut summary = journal.summary();
+    summary.assembly_completed_bytes = Self::display_bytes(
+      journal.assembly_completed_bytes,
+      journal.assembly_total_bytes,
+      written,
+      self.accounted_written.load(Ordering::Relaxed),
+    );
+    summary
+  }
+
+  fn account(&self, written: u64) {
+    self.accounted_written.store(written, Ordering::Relaxed);
+  }
+}
+
+struct AudioAssetJob {
+  asset_index: usize,
+  pending: Vec<(usize, PlanDownload)>,
+}
+
+struct AudioAssetJobCompletion {
+  asset_index: usize,
+  needs_download: bool,
   result: Result<(), String>,
 }
 
@@ -731,6 +775,7 @@ fn start_assembly_write_progress_monitor(
   app_handle: AppHandle,
   journal: Arc<AsyncMutex<TaskJournal>>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
+  overlay: Arc<AudioLiveAssemblyOverlay>,
   canceled: Arc<AtomicBool>,
   paused: Arc<AtomicBool>,
 ) -> AssemblyWriteProgressMonitor {
@@ -738,6 +783,7 @@ fn start_assembly_write_progress_monitor(
   let stopped_for_task = Arc::clone(&stopped);
   tauri::async_runtime::spawn(async move {
     let mut tracker = AssemblyWriteBandwidthTracker::new(telemetry.snapshot().written_bytes);
+    let mut last_display_bytes = 0_u64;
     loop {
       tokio::time::sleep(Duration::from_secs(1)).await;
       if stopped_for_task.load(Ordering::Acquire)
@@ -756,11 +802,13 @@ fn start_assembly_write_progress_monitor(
         break;
       }
       let speed = tracker.sample(written_bytes, value.active_assembly_count, Instant::now());
-      if !apply_assembly_write_bandwidth(&mut value, speed) {
+      let speed_changed = apply_assembly_write_bandwidth(&mut value, speed);
+      let summary = overlay.overlay(&value, written_bytes);
+      drop(value);
+      if !speed_changed && summary.assembly_completed_bytes == last_display_bytes {
         continue;
       }
-      let summary = value.summary();
-      drop(value);
+      last_display_bytes = summary.assembly_completed_bytes;
       emit_progress(&app_handle, &summary);
     }
   });
@@ -824,7 +872,6 @@ impl InstallSpoolTracker {
     shared_cache_root: &Path,
     completed_assets: HashSet<usize>,
   ) -> Self {
-    perf::record_spool_dir_scan();
     let mut resident = HashMap::new();
     let mut spool_bytes = 0_u64;
     if let Ok(entries) = fs::read_dir(spool_root) {
@@ -1035,7 +1082,6 @@ fn release_spool_unneeded(
       forget_released_spool_file(tracker, &key, &id);
       continue;
     };
-    perf::record_spool_metadata_probe();
     if metadata.file_type().is_symlink() || !metadata.is_file() {
       continue;
     }
@@ -2794,6 +2840,42 @@ fn audio_asset_download_dependencies(plan: &PersistedPlan) -> Result<Vec<Vec<usi
     .collect()
 }
 
+fn prepare_audio_asset_job(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  dependencies: &[Vec<usize>],
+  available_downloads: &mut HashSet<usize>,
+  cache_root: &Path,
+) -> AudioAssetJob {
+  let pending = dependencies
+    .get(asset_index)
+    .into_iter()
+    .flatten()
+    .copied()
+    .filter_map(|index| {
+      if available_downloads.contains(&index) {
+        return None;
+      }
+      let download = plan.downloads.get(index)?.clone();
+      if cached_chunk_matches(cache_root, &download) {
+        available_downloads.insert(index);
+        return None;
+      }
+      Some((index, download))
+    })
+    .collect();
+  AudioAssetJob { asset_index, pending }
+}
+
+fn emit_audio_progress(
+  app_handle: &AppHandle,
+  journal: &TaskJournal,
+  telemetry: &assembler::AssemblyTelemetry,
+  overlay: &AudioLiveAssemblyOverlay,
+) {
+  emit_progress(app_handle, &overlay.overlay(journal, telemetry.snapshot().written_bytes));
+}
+
 #[allow(clippy::too_many_arguments)]
 async fn assemble_audio_asset(
   app_handle: AppHandle,
@@ -2806,6 +2888,7 @@ async fn assemble_audio_asset(
   canceled: Arc<AtomicBool>,
   assembly_slots: Arc<Semaphore>,
   telemetry: Arc<assembler::AssemblyTelemetry>,
+  overlay: Arc<AudioLiveAssemblyOverlay>,
 ) -> AudioAssemblyCompletion {
   let permit = match assembly_slots.acquire_owned().await {
     Ok(permit) => permit,
@@ -2822,7 +2905,7 @@ async fn assemble_audio_asset(
     value.assembly_current_file = Some(format!("正在组装：{}", plan.assets[asset_index].name));
     value.current_file = value.assembly_current_file.clone();
     value.touch();
-    emit_progress(&app_handle, &value.summary());
+    emit_audio_progress(&app_handle, &value, &telemetry, &overlay);
   }
   let worker_plan = Arc::clone(&plan);
   let worker_task_root = task_root.clone();
@@ -2855,9 +2938,162 @@ async fn assemble_audio_asset(
     let mut value = journal.lock().await;
     value.active_assembly_count = value.active_assembly_count.saturating_sub(1);
     value.touch();
-    emit_progress(&app_handle, &value.summary());
+    emit_audio_progress(&app_handle, &value, &telemetry, &overlay);
   }
   AudioAssemblyCompletion { asset_index, result }
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn run_audio_asset_job(
+  job: AudioAssetJob,
+  app_handle: AppHandle,
+  task_root: PathBuf,
+  cache_root: PathBuf,
+  game_root: PathBuf,
+  output_root: PathBuf,
+  plan: Arc<PersistedPlan>,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
+  limiter: Arc<RateLimiter>,
+  download_client: reqwest::Client,
+  download_focus: Arc<Semaphore>,
+  download_slots: Arc<Semaphore>,
+  download_guards: Arc<AsyncMutex<HashMap<String, Arc<AsyncMutex<()>>>>>,
+  assembly_slots: Arc<Semaphore>,
+  telemetry: Arc<assembler::AssemblyTelemetry>,
+  overlay: Arc<AudioLiveAssemblyOverlay>,
+  completed_cache_keys: Arc<Mutex<HashSet<String>>>,
+  available_downloads: Arc<Mutex<HashSet<usize>>>,
+  labels: Arc<HashMap<String, String>>,
+  download_started_at: Instant,
+) -> AudioAssetJobCompletion {
+  let AudioAssetJob { asset_index, pending } = job;
+  let needs_download = !pending.is_empty();
+  let result = async {
+    if needs_download {
+      let _focus = download_focus
+        .acquire_owned()
+        .await
+        .map_err(|error| format!("获取配音下载焦点失败：{error}"))?;
+      let downloads = stream::iter(pending.into_iter().map(|(download_index, download)| {
+        let root = cache_root.clone();
+        let task_id = plan.plan_id.clone();
+        let canceled = Arc::clone(&canceled);
+        let paused = Arc::clone(&paused);
+        let limiter = Arc::clone(&limiter);
+        let client = download_client.clone();
+        let slots = Arc::clone(&download_slots);
+        let guards = Arc::clone(&download_guards);
+        let labels = Arc::clone(&labels);
+        async move {
+          let download_guard = {
+            let mut values = guards.lock().await;
+            Arc::clone(
+              values.entry(download.id.clone()).or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+            )
+          };
+          let _download_guard = download_guard.lock().await;
+          if cached_chunk_matches_async(&root, &download).await {
+            return Ok((download_index, None));
+          }
+          let permit = slots
+            .acquire_owned()
+            .await
+            .map_err(|error| format!("获取配音下载并发槽位失败：{error}"))?;
+          let current_file = labels
+            .get(&download.cache_key)
+            .cloned()
+            .unwrap_or_else(|| format!("资源对象：{}", download.id));
+          let result = download_object(
+            &client,
+            &root,
+            &download,
+            DownloadControl::new(
+              &task_id,
+              &canceled,
+              &paused,
+              &limiter,
+              DownloadDurability::Strict,
+            ),
+          )
+          .await;
+          drop(permit);
+          result.map(|downloaded| (download_index, Some((downloaded, current_file))))
+        }
+      }))
+      .buffer_unordered(download_slots.available_permits().max(AUDIO_DOWNLOAD_FOCUS));
+      futures_util::pin_mut!(downloads);
+      while let Some(download_result) = downloads.next().await {
+        match download_result {
+          Ok((download_index, Some((downloaded, current_file)))) => {
+            available_downloads.lock().unwrap().insert(download_index);
+            let mut value = journal.lock().await;
+            if completed_cache_keys.lock().unwrap().insert(downloaded.cache_key.clone()) {
+              value.owned_cache_files.push(downloaded.cache_key);
+              value.committed_step = value.owned_cache_files.len();
+              value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
+            }
+            value.download_current_file = Some(current_file.clone());
+            value.current_file = value.assembly_current_file.clone().or(Some(current_file));
+            let elapsed = download_started_at.elapsed().as_secs_f64().max(0.001);
+            value.bytes_per_second = (value.downloaded_bytes as f64 / elapsed) as u64;
+            let remaining = value.total_bytes.saturating_sub(value.downloaded_bytes);
+            value.eta_seconds =
+              (value.bytes_per_second > 0).then_some(remaining / value.bytes_per_second);
+            value.touch();
+            if let Err(error) = journal::persist(&task_root, &value) {
+              return Err(error);
+            }
+            emit_audio_progress(&app_handle, &value, &telemetry, &overlay);
+          }
+          Ok((download_index, None)) => {
+            available_downloads.lock().unwrap().insert(download_index);
+          }
+          Err(error) => return Err(error),
+        }
+      }
+    }
+    let completion = assemble_audio_asset(
+      app_handle,
+      task_root,
+      game_root,
+      output_root,
+      plan,
+      asset_index,
+      journal,
+      canceled,
+      assembly_slots,
+      telemetry,
+      overlay,
+    )
+    .await;
+    completion.result
+  }
+  .await;
+  AudioAssetJobCompletion { asset_index, needs_download, result }
+}
+
+/// 按磁盘现状重建配音删除进度：游戏目录已缺失的条目视为完成，仍存在的继续删除。
+fn discover_audio_delete_progress(
+  plan_id: &str,
+  delete_files: &[PlanDelete],
+  game_root: &Path,
+) -> Result<(Vec<PlanDelete>, u64), String> {
+  let backup_root = committer::prepare_audio_backup_root(game_root, plan_id)?;
+  let mut pending = Vec::new();
+  let mut completed_bytes = 0_u64;
+  for deleted in delete_files {
+    if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
+      if resolve_optional_manifest_file(&backup_root, &deleted.name)?.is_some() {
+        return Err(format!("待删除配音资源同时存在于游戏目录与备份目录：{}", deleted.name));
+      }
+      pending.push(deleted.clone());
+    } else {
+      completed_bytes = completed_bytes.saturating_add(deleted.size);
+    }
+  }
+  Ok((pending, completed_bytes))
 }
 
 /// 并发删除单个待移除配音资源：把文件移入备份目录并累计删除进度。
@@ -2889,7 +3125,8 @@ async fn delete_audio_resource(
   }
   // 目标已缺失（备份中也没有）视为删除目标已达成，仍按完整大小累计进度。
   let mut value = journal.lock().await;
-  value.delete_completed_bytes = value.delete_completed_bytes.saturating_add(deleted.size);
+  value.delete_completed_bytes =
+    value.delete_completed_bytes.saturating_add(deleted.size).min(value.delete_total_bytes);
   value.current_file = Some(deleted.name.clone());
   // 删除属于资源准备阶段，不写入提交行状态，避免“提交”进度条显示删除进度。
   value.touch();
@@ -2990,16 +3227,42 @@ async fn run_audio_streaming_task(
       return;
     }
   };
+  let (pending_deletes, delete_completed_bytes) = match tauri::async_runtime::spawn_blocking({
+    let plan = plan.clone();
+    let game_root = game_root.clone();
+    move || discover_audio_delete_progress(&plan.plan_id, &plan.delete_files, &game_root)
+  })
+  .await
+  {
+    Ok(Ok(progress)) => progress,
+    Ok(Err(error)) => {
+      persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
+        .await;
+      return;
+    }
+    Err(error) => {
+      persist_audio_pipeline_error(
+        &task_root,
+        &app_handle,
+        &journal,
+        &paused,
+        &canceled,
+        format!("配音删除进度核对 worker 异常退出：{error}"),
+      )
+      .await;
+      return;
+    }
+  };
   let plan = Arc::new(plan);
   let limiter = Arc::new(RateLimiter::new(max_bytes_per_second));
-  let labels = build_download_labels(&plan);
+  let labels = Arc::new(build_download_labels(&plan));
   let mut completed_assets = completed_assets;
   let mut scheduled_assets = completed_assets.clone();
-  let mut completed_cache_keys = {
+  let completed_cache_keys = {
     let value = journal.lock().await;
     value.owned_cache_files.iter().cloned().collect::<HashSet<_>>()
   };
-  let mut available_downloads = plan
+  let available_downloads = plan
     .downloads
     .iter()
     .enumerate()
@@ -3007,16 +3270,12 @@ async fn run_audio_streaming_task(
       completed_cache_keys.contains(&download.cache_key).then_some(index)
     })
     .collect::<HashSet<_>>();
-  let pending = plan
-    .downloads
-    .iter()
-    .enumerate()
-    .filter(|(index, _)| !available_downloads.contains(index))
-    .map(|(index, download)| (index, download.clone()))
-    .collect::<Vec<_>>();
+  let has_pending_downloads = plan.downloads.iter().enumerate().any(|(index, download)| {
+    !available_downloads.contains(&index) && !cached_chunk_matches(&cache_root, download)
+  });
+  let completed_cache_keys = Arc::new(Mutex::new(completed_cache_keys));
+  let available_downloads = Arc::new(Mutex::new(available_downloads));
   let download_started_at = Instant::now();
-  let mut last_emit = Instant::now() - Duration::from_secs(1);
-  let mut last_persist = Instant::now();
   {
     let completed_bytes = completed_assets
       .iter()
@@ -3032,9 +3291,12 @@ async fn run_audio_streaming_task(
       plan.assets.iter().fold(0_u64, |total, asset| total.saturating_add(asset.size)),
       None,
     );
+    value.delete_total_bytes =
+      plan.delete_files.iter().fold(0_u64, |total, file| total.saturating_add(file.size));
+    value.delete_completed_bytes = delete_completed_bytes.min(value.delete_total_bytes);
     value.active_assembly_count = 0;
     value.download_current_file =
-      (!pending.is_empty()).then_some("正在获取配音资源对象".to_string());
+      has_pending_downloads.then_some("正在获取配音资源对象".to_string());
     value.current_file = value.download_current_file.clone();
     value.error_message = None;
     value.touch();
@@ -3046,47 +3308,27 @@ async fn run_audio_streaming_task(
     emit_progress(&app_handle, &value.summary());
   }
   let assembly_telemetry = assembler::AssemblyTelemetry::new();
+  let assembly_overlay = Arc::new(AudioLiveAssemblyOverlay::new());
   let _assembly_progress_monitor = start_assembly_write_progress_monitor(
     app_handle.clone(),
     Arc::clone(&journal),
     Arc::clone(&assembly_telemetry),
+    Arc::clone(&assembly_overlay),
     Arc::clone(&canceled),
     Arc::clone(&paused),
   );
-
-  let downloads = stream::iter(pending.into_iter().map(|(download_index, download)| {
-    let root = cache_root.clone();
-    let task_id = plan.plan_id.clone();
-    let current_file = labels
-      .get(&download.cache_key)
-      .cloned()
-      .unwrap_or_else(|| format!("资源对象：{}", download.id));
-    let canceled = Arc::clone(&canceled);
-    let paused = Arc::clone(&paused);
-    let limiter = Arc::clone(&limiter);
-    let client = download_client.clone();
-    async move {
-      let result = download_object(
-        &client,
-        &root,
-        &download,
-        DownloadControl::new(&task_id, &canceled, &paused, &limiter, DownloadDurability::Strict),
-      )
-      .await;
-      (download_index, current_file, result)
-    }
-  }))
-  .buffer_unordered(concurrency);
-  futures_util::pin_mut!(downloads);
+  let download_focus = Arc::new(Semaphore::new(AUDIO_DOWNLOAD_FOCUS));
+  let download_slots = Arc::new(Semaphore::new(install_download_concurrency(concurrency)));
   let assembly_slots = Arc::new(Semaphore::new(install_assembly_concurrency(concurrency)));
-  let mut assemblies = stream::FuturesUnordered::new();
-  let mut downloads_done = false;
+  let download_guards = Arc::new(AsyncMutex::new(HashMap::<String, Arc<AsyncMutex<()>>>::new()));
+  let mut jobs = stream::FuturesUnordered::new();
+  let mut inflight_downloads = 0_usize;
   let mut pipeline_error = None;
   // 删除只移动游戏目录中待移除的语音文件（移入备份），与下载（缓存）、组装
   // （incoming）路径互不冲突；与下载/组装并发执行，避免串行拖长准备阶段。
   let deletion_blocked = is_game_running();
-  let delete_files = plan.delete_files.clone();
-  let delete_tasks = stream::iter(delete_files.into_iter().map(|deleted| {
+  let mut deletes_done = pending_deletes.is_empty();
+  let delete_tasks = stream::iter(pending_deletes.into_iter().map(|deleted| {
     let app_handle = app_handle.clone();
     let task_root = task_root.clone();
     let game_root = game_root.clone();
@@ -3114,81 +3356,76 @@ async fn run_audio_streaming_task(
   }))
   .buffer_unordered(concurrency.max(1));
   futures_util::pin_mut!(delete_tasks);
-  let mut deletes_done = plan.delete_files.is_empty();
+  let max_assembly = install_assembly_concurrency(concurrency);
+  let max_download_jobs = AUDIO_DOWNLOAD_FOCUS.saturating_add(AUDIO_DOWNLOAD_PREFETCH);
 
   loop {
     if pipeline_error.is_none()
       && !paused.load(Ordering::Acquire)
       && !canceled.load(Ordering::Acquire)
     {
-      for (asset_index, asset_dependencies) in dependencies.iter().enumerate() {
-        if scheduled_assets.contains(&asset_index)
-          || !asset_dependencies.iter().all(|index| available_downloads.contains(index))
-        {
-          continue;
+      while let Some(asset_index) =
+        (0..plan.assets.len()).find(|index| !scheduled_assets.contains(index))
+      {
+        let job = {
+          let mut available = available_downloads.lock().unwrap();
+          prepare_audio_asset_job(&plan, asset_index, &dependencies, &mut available, &cache_root)
+        };
+        let needs_download = !job.pending.is_empty();
+        if needs_download && inflight_downloads >= max_download_jobs {
+          break;
+        }
+        if !needs_download && jobs.len() >= max_assembly {
+          break;
+        }
+        if jobs.len() >= max_assembly.max(max_download_jobs) {
+          break;
         }
         scheduled_assets.insert(asset_index);
-        assemblies.push(assemble_audio_asset(
+        if needs_download {
+          inflight_downloads = inflight_downloads.saturating_add(1);
+        }
+        jobs.push(run_audio_asset_job(
+          job,
           app_handle.clone(),
           task_root.clone(),
+          cache_root.clone(),
           game_root.clone(),
           output_root.clone(),
           Arc::clone(&plan),
-          asset_index,
           Arc::clone(&journal),
           Arc::clone(&canceled),
+          Arc::clone(&paused),
+          Arc::clone(&limiter),
+          download_client.clone(),
+          Arc::clone(&download_focus),
+          Arc::clone(&download_slots),
+          Arc::clone(&download_guards),
           Arc::clone(&assembly_slots),
           Arc::clone(&assembly_telemetry),
+          Arc::clone(&assembly_overlay),
+          Arc::clone(&completed_cache_keys),
+          Arc::clone(&available_downloads),
+          Arc::clone(&labels),
+          download_started_at,
         ));
       }
     }
-    if downloads_done && assemblies.is_empty() && deletes_done {
+    if jobs.is_empty() && deletes_done {
       break;
     }
     tokio::select! {
-      download = downloads.next(), if !downloads_done => {
-        let Some((download_index, current_file, result)) = download else {
-          downloads_done = true;
-          continue;
-        };
-        match result {
-          Ok(downloaded) => {
-            available_downloads.insert(download_index);
-            let mut value = journal.lock().await;
-            if completed_cache_keys.insert(downloaded.cache_key.clone()) {
-              value.owned_cache_files.push(downloaded.cache_key);
-              value.committed_step = value.owned_cache_files.len();
-              value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
-            }
-            value.download_current_file = Some(current_file.clone());
-            value.current_file = value.assembly_current_file.clone().or(Some(current_file));
-            let elapsed = download_started_at.elapsed().as_secs_f64().max(0.001);
-            value.bytes_per_second = (value.downloaded_bytes as f64 / elapsed) as u64;
-            let remaining = value.total_bytes.saturating_sub(value.downloaded_bytes);
-            value.eta_seconds = (value.bytes_per_second > 0)
-              .then_some(remaining / value.bytes_per_second);
-            value.touch();
-            if last_persist.elapsed() >= Duration::from_secs(1) {
-              if let Err(error) = journal::persist(&task_root, &value) {
-                pipeline_error = Some(error);
-              }
-              last_persist = Instant::now();
-            }
-            if last_emit.elapsed() >= Duration::from_millis(250) {
-              emit_progress(&app_handle, &value.summary());
-              last_emit = Instant::now();
-            }
-          }
-          Err(error) => pipeline_error = Some(error),
-        }
-      }
-      completion = assemblies.next(), if !assemblies.is_empty() => {
+      completion = jobs.next(), if !jobs.is_empty() => {
         let Some(completion) = completion else {
           continue;
         };
+        if completion.needs_download {
+          inflight_downloads = inflight_downloads.saturating_sub(1);
+        }
         match completion.result {
           Ok(()) => {
             completed_assets.insert(completion.asset_index);
+            assembly_overlay.account(assembly_telemetry.snapshot().written_bytes);
             let completed_bytes = completed_assets
               .iter()
               .filter_map(|index| plan.assets.get(*index))
@@ -3217,7 +3454,7 @@ async fn run_audio_streaming_task(
             if let Err(error) = journal::persist(&task_root, &value) {
               pipeline_error = Some(error);
             }
-            emit_progress(&app_handle, &value.summary());
+            emit_audio_progress(&app_handle, &value, &assembly_telemetry, &assembly_overlay);
           }
           Err(error) => {
             pipeline_error.get_or_insert(error);
@@ -3233,9 +3470,6 @@ async fn run_audio_streaming_task(
           pipeline_error.get_or_insert(error);
         }
       }
-    }
-    if pipeline_error.is_some() {
-      downloads_done = true;
     }
   }
 
@@ -3258,9 +3492,7 @@ async fn run_audio_streaming_task(
   } else if let Some(error) = pipeline_error {
     value.state = PackageTaskState::Failed;
     value.error_message = Some(error);
-  } else if available_downloads.len() == plan.downloads.len()
-    && completed_assets.len() == plan.assets.len()
-  {
+  } else if completed_assets.len() == plan.assets.len() {
     value.state = PackageTaskState::ReadyToApply;
     value.downloaded_bytes = value.total_bytes;
     value.committed_step = value.total_count;
@@ -5882,7 +6114,6 @@ fn check_install_stream_space<'a>(
 }
 
 fn spool_bytes(root: &Path) -> u64 {
-  perf::record_spool_dir_scan();
   fs::read_dir(root)
     .ok()
     .into_iter()
@@ -6461,5 +6692,54 @@ mod assembly_write_bandwidth_tests {
     assert_eq!(install_assembly_concurrency(2), 4);
     assert_eq!(install_assembly_concurrency(1), 4);
     assert_eq!(install_assembly_concurrency(128), 64);
+  }
+
+  #[test]
+  fn audio_live_assembly_adds_session_writes_without_double_count() {
+    assert_eq!(AudioLiveAssemblyOverlay::display_bytes(5_000, 10_000, 0, 0), 5_000);
+    assert_eq!(AudioLiveAssemblyOverlay::display_bytes(5_000, 10_000, 1_200, 0), 6_200);
+    assert_eq!(AudioLiveAssemblyOverlay::display_bytes(8_000, 10_000, 3_000, 3_000), 8_000);
+    assert_eq!(AudioLiveAssemblyOverlay::display_bytes(8_000, 10_000, 4_500, 3_000), 9_500);
+    assert_eq!(AudioLiveAssemblyOverlay::display_bytes(8_000, 10_000, 8_000, 3_000), 10_000);
+  }
+}
+
+#[cfg(test)]
+mod audio_delete_progress_tests {
+  use super::*;
+  use crate::game::planner::PlanDelete;
+
+  fn plan_delete(name: &str, size: u64) -> PlanDelete {
+    PlanDelete { name: name.to_string(), size, md5: "a".repeat(32) }
+  }
+
+  #[test]
+  fn resume_skips_files_already_removed_from_game() {
+    let root = std::env::temp_dir().join(format!("tg-audio-del-{}", Uuid::new_v4()));
+    fs::create_dir_all(root.join("Audio")).expect("create game audio dir");
+    fs::write(root.join("Audio").join("pending.pck"), b"x").expect("write pending file");
+    let deletes = vec![plan_delete("Audio/pending.pck", 100), plan_delete("Audio/gone.pck", 200)];
+    let (pending, completed) =
+      discover_audio_delete_progress("plan-1", &deletes, &root).expect("scan delete progress");
+    assert_eq!(completed, 200);
+    assert_eq!(pending.len(), 1);
+    assert_eq!(pending[0].name, "Audio/pending.pck");
+    let _ = fs::remove_dir_all(&root);
+  }
+
+  #[test]
+  fn both_game_and_backup_copies_are_rejected() {
+    let root = std::env::temp_dir().join(format!("tg-audio-del-dup-{}", Uuid::new_v4()));
+    fs::create_dir_all(root.join("Audio")).expect("create game audio dir");
+    fs::write(root.join("Audio").join("dup.pck"), b"x").expect("write game file");
+    let backup = committer::prepare_audio_backup_root(&root, "plan-1").expect("create backup root");
+    let backup_file =
+      prepare_manifest_output_file(&backup, "Audio/dup.pck").expect("prepare backup path");
+    fs::write(&backup_file, b"x").expect("write backup file");
+    let error =
+      discover_audio_delete_progress("plan-1", &[plan_delete("Audio/dup.pck", 50)], &root)
+        .expect_err("duplicate copies are rejected");
+    assert!(error.contains("同时存在"));
+    let _ = fs::remove_dir_all(&root);
   }
 }
