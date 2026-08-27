@@ -179,6 +179,7 @@ const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
 const GamePackageRecoveryActionEnum: typeof TGApp.Game.Package.RecoveryAction = {
   RESUME: "resume",
   ROLLBACK: "rollback",
+  RESTORE_MARKER: "restore_marker",
 };
 
 /**

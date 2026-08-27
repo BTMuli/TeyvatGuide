@@ -367,6 +367,8 @@ pub struct PackageTaskOptions {
 pub enum PackageRecoveryAction {
   Resume,
   Rollback,
+  /// 最终目录缺少安装标记时，人工校验目录内容并重建标记后继续登记。
+  RestoreMarker,
 }
 
 /// 同资源家族渠道转换的只读计划摘要；不含 SDK 下载地址。

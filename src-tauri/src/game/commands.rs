@@ -614,7 +614,7 @@ pub async fn game_install_recover(
   if plan.installation_id != draft.install_id || journal_value.installation_id != draft.install_id {
     return Err("安装恢复身份不匹配".to_string());
   }
-  if matches!(action, PackageRecoveryAction::Resume)
+  if matches!(action, PackageRecoveryAction::Resume | PackageRecoveryAction::RestoreMarker)
     && manager.is_task_running(&task_id, &install_id)?
   {
     if journal_value.state.is_active() {
@@ -627,7 +627,7 @@ pub async fn game_install_recover(
     manager.wait_for_task_idle(&task_id).await?;
     journal_value = journal::load(&journal_path)?;
   }
-  let published = installer::has_published_installation(&draft)?;
+  let published_state = installer::published_installation_state(&draft)?;
   if matches!(action, PackageRecoveryAction::Rollback) {
     if journal_value.state == PackageTaskState::RecoveryRequired {
       return Err("RecoveryRequired 状态禁止删除暂存目录，请先完成安全复验".to_string());
@@ -649,12 +649,20 @@ pub async fn game_install_recover(
         last_emit = Instant::now();
       }
     };
-    if published {
-      let machine_uid = read_machine_uid(&app_handle)?;
-      installer::verify_published_installation(&task_root, &plan, &machine_uid)?;
-      let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
-    } else {
-      let _ = installer::cancel_draft(&task_root, &draft_id, keep_downloads, &mut progress)?;
+    match published_state {
+      installer::PublishedInstallationState::Published => {
+        let machine_uid = read_machine_uid(&app_handle)?;
+        installer::verify_published_installation(&task_root, &plan, &machine_uid)?;
+        let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
+      }
+      installer::PublishedInstallationState::MissingMarker
+      | installer::PublishedInstallationState::MissingDirectory => {
+        // 缺少 marker 或最终目录已不存在时无法安全复验；放弃只结束草稿，不触碰最终目录。
+        let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
+      }
+      installer::PublishedInstallationState::NotPublished => {
+        let _ = installer::cancel_draft(&task_root, &draft_id, keep_downloads, &mut progress)?;
+      }
     }
     let mut canceled = journal_value;
     canceled.state = PackageTaskState::Canceled;
@@ -663,18 +671,46 @@ pub async fn game_install_recover(
     journal::persist(&task_root, &canceled)?;
     return Ok(canceled.summary());
   }
-  if published {
+  if matches!(action, PackageRecoveryAction::RestoreMarker) {
+    if published_state != installer::PublishedInstallationState::MissingMarker {
+      return Err("当前安装状态无需恢复标记".to_string());
+    }
     let _reservation =
-      manager.reserve_installation_operation(&install_id, "game-install-registration")?;
-    return complete_install_registration(
-      &app_handle,
+      manager.reserve_installation_operation(&install_id, "game-install-marker-restore")?;
+    let machine_uid = read_machine_uid(&app_handle)?;
+    let installation = installer::restore_published_marker(&task_root, &plan, &machine_uid)?;
+    return finish_install_registration(
       &db_instances,
       &task_root,
       &task_id,
       &draft_id,
-      &plan,
+      &installation,
     )
     .await;
+  }
+  match published_state {
+    installer::PublishedInstallationState::Published => {
+      let _reservation =
+        manager.reserve_installation_operation(&install_id, "game-install-registration")?;
+      return complete_install_registration(
+        &app_handle,
+        &db_instances,
+        &task_root,
+        &task_id,
+        &draft_id,
+        &plan,
+      )
+      .await;
+    }
+    installer::PublishedInstallationState::MissingMarker => {
+      return Err(installer::INSTALL_MARKER_MISSING_MESSAGE.to_string());
+    }
+    installer::PublishedInstallationState::MissingDirectory => {
+      return Err(
+        "安装草稿显示最终目录已发布，但目录不存在；请放弃安装后重新选择安装目录".to_string(),
+      );
+    }
+    installer::PublishedInstallationState::NotPublished => {}
   }
   let client = create_http_client()?;
   let staging_path = Path::new(&draft.staging_root);
@@ -759,10 +795,21 @@ async fn complete_install_registration(
   draft_id: &str,
   plan: &super::planner::PersistedPlan,
 ) -> Result<PackageTaskSummary, String> {
-  let pool = sqlite_pool(db_instances).await?;
   let installation =
     installer::verify_published_installation(task_root, plan, &read_machine_uid(app_handle)?)?;
-  installer::register_installation(&pool, &installation).await?;
+  finish_install_registration(db_instances, task_root, task_id, draft_id, &installation).await
+}
+
+/// 使用已验证的安装信息完成数据库登记与任务收尾。
+async fn finish_install_registration(
+  db_instances: &DbInstances,
+  task_root: &Path,
+  task_id: &str,
+  draft_id: &str,
+  installation: &GameInstallation,
+) -> Result<PackageTaskSummary, String> {
+  let pool = sqlite_pool(db_instances).await?;
+  installer::register_installation(&pool, installation).await?;
   let path = journal::journal_path(task_root, task_id);
   let mut journal_value = journal::load(&path)?;
   journal_value.state = PackageTaskState::Completed;
@@ -1176,6 +1223,9 @@ pub async fn game_package_recover(
     )
     .await;
   }
+  if matches!(action, PackageRecoveryAction::RestoreMarker) {
+    return Err("该资源任务不支持恢复安装标记".to_string());
+  }
   if journal_value.operation == "switch" {
     return recover_switch_task(
       app_handle,
@@ -1368,6 +1418,7 @@ pub async fn game_package_recover(
         .await
     }
     PackageRecoveryAction::Rollback => manager.rollback_download(&task_root, &task_id),
+    PackageRecoveryAction::RestoreMarker => Err("该资源任务不支持恢复安装标记".to_string()),
   }
 }
 
@@ -1438,6 +1489,7 @@ async fn recover_switch_task(
     PackageRecoveryAction::Rollback => {
       manager.rollback_download(&task_root, &journal_value.plan_id)
     }
+    PackageRecoveryAction::RestoreMarker => Err("换服任务不支持恢复安装标记".to_string()),
   }
 }
 

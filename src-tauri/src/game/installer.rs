@@ -939,8 +939,27 @@ pub(crate) fn verify_published_installation(
   Ok(installation)
 }
 
-/// 判断最终目录是否已经越过发布边界，避免把用户预先创建的空目录当成已发布安装。
-pub(crate) fn has_published_installation(draft: &InstallDraft) -> Result<bool, String> {
+/// 最终目录发布边界状态，供恢复入口区分可自动收尾与需要人工确认的场景。
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) enum PublishedInstallationState {
+  /// 尚未越过发布边界，可按常规流程继续下载或组装。
+  NotPublished,
+  /// 已发布且安装标记存在。
+  Published,
+  /// 最终目录存在但缺少安装标记（含空目录），需要人工确认后恢复。
+  MissingMarker,
+  /// 草稿显示已发布但最终目录不存在。
+  MissingDirectory,
+}
+
+/// 最终目录缺少安装标记时的统一提示，供前端识别人工恢复入口。
+pub(crate) const INSTALL_MARKER_MISSING_MESSAGE: &str =
+  "已发布的最终游戏目录缺少安装标记，需要人工恢复";
+
+/// 判断最终目录的发布边界状态，避免把用户预先创建的空目录当成已发布安装。
+pub(crate) fn published_installation_state(
+  draft: &InstallDraft,
+) -> Result<PublishedInstallationState, String> {
   let game_root = Path::new(&draft.game_root);
   let published_state = matches!(
     draft.state,
@@ -951,21 +970,75 @@ pub(crate) fn has_published_installation(draft: &InstallDraft) -> Result<bool, S
   );
   if !path_occupied(game_root)? {
     if published_state {
-      return Err("安装草稿显示最终目录已发布，但目录不存在，需要人工恢复".to_string());
+      return Ok(PublishedInstallationState::MissingDirectory);
     }
-    return Ok(false);
+    return Ok(PublishedInstallationState::NotPublished);
   }
 
   if path_occupied(&game_root.join(MARKER_FILE_NAME))? {
-    return Ok(true);
+    return Ok(PublishedInstallationState::Published);
   }
-  if is_directory_empty(game_root)? {
-    if published_state {
-      return Err("已发布的最终游戏目录缺少安装标记，需要人工恢复".to_string());
-    }
-    return Ok(false);
+  if is_directory_empty(game_root)? && !published_state {
+    return Ok(PublishedInstallationState::NotPublished);
   }
-  Err("最终游戏目录缺少安装标记，需要人工恢复".to_string())
+  Ok(PublishedInstallationState::MissingMarker)
+}
+
+/// 人工恢复最终目录缺失的安装标记：按不可变计划全量复检最终目录与可执行文件身份，
+/// 通过后重建 marker（不绑定旧证据，后续复检回退全量校验）并返回可登记的安装信息。
+pub(crate) fn restore_published_marker(
+  task_root: &Path,
+  plan: &PersistedPlan,
+  machine_uid: &str,
+) -> Result<GameInstallation, String> {
+  let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
+  let draft_id = find_recovery_draft_id(task_root, &plan.installation_id)?;
+  let draft = load_draft(task_root, &draft_id)?;
+  validate_plan_draft(plan, overlay, &draft)?;
+  let game_root = PathBuf::from(&overlay.game_root);
+  if path_occupied(&PathBuf::from(&overlay.staging_root))? {
+    return Err("安装暂存目录与最终目录同时存在，需要先恢复或放弃任务".to_string());
+  }
+  if !path_occupied(&game_root)? {
+    return Err("最终游戏目录不存在，无法恢复安装标记".to_string());
+  }
+  if path_occupied(&game_root.join(MARKER_FILE_NAME))? {
+    return Err("最终游戏目录已经存在安装标记，无需恢复".to_string());
+  }
+  let sdk_files = overlay
+    .sdk
+    .as_ref()
+    .map(|sdk| collect_published_sdk_files_with_evidence(&game_root, sdk, &BTreeMap::new()))
+    .transpose()?
+    .unwrap_or_default();
+  let files = verify_install_tree(plan, overlay, &game_root, &sdk_files)?;
+  let tree_digest = tree_digest(&files);
+  let installation = inspect_executable(&overlay.expected_executable, machine_uid)?;
+  if installation.id != plan.installation_id
+    || installation.scheme_id != Some(draft.scheme)
+    || installation.version.as_deref() != Some(plan.target_tag.as_str())
+    || !sdk_is_consistent(draft.scheme, installation.has_channel_sdk)
+  {
+    return Err("发布后的游戏安装复验不通过".to_string());
+  }
+  let (directory_volume_serial, directory_file_id) = directory_identity(&game_root)?;
+  let marker = InstallMarker {
+    schema_version: MARKER_SCHEMA_VERSION,
+    plan_id: plan.plan_id.clone(),
+    install_id: plan.installation_id.clone(),
+    marker_nonce: draft.marker_nonce.clone(),
+    game_root: path_text(&game_root),
+    target_path_sha256: overlay.target_path_sha256.clone(),
+    scheme: draft.scheme,
+    directory_volume_serial,
+    directory_file_id,
+    manifest_digest: plan.manifest_digest.clone(),
+    tree_digest,
+    config_sha256: overlay.config_sha256.clone(),
+    evidence_sha256: String::new(),
+  };
+  write_marker(&game_root, &marker)?;
+  Ok(installation)
 }
 
 /// 放弃未发布的安装草稿；`keep_downloads` 为真时先把任务 spool 中已下载且
@@ -1095,6 +1168,7 @@ fn adopt_spool_chunk(
 }
 
 /// 放弃已经发布但尚未完成登记的安装任务；只清理草稿状态，不删除最终游戏目录。
+/// 最终目录已不存在或缺少安装标记时同样允许放弃，避免恢复入口卡死。
 pub(crate) fn abandon_published_draft(
   task_root: &Path,
   draft_id: &str,
@@ -1104,9 +1178,6 @@ pub(crate) fn abandon_published_draft(
   let draft = load_draft(task_root, draft_id)?;
   if draft.state == InstallDraftState::Canceled {
     return Err("安装草稿已经结束，不能重复放弃".to_string());
-  }
-  if !path_occupied(Path::new(&draft.game_root))? {
-    return Err("最终游戏目录不存在，不能放弃已发布安装".to_string());
   }
   if path_occupied(Path::new(&draft.staging_root))? {
     return Err("安装暂存目录仍存在，不能放弃已发布安装".to_string());

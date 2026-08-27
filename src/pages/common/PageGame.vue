@@ -332,6 +332,14 @@ async function handleInstallDraftResume(
     await taskStore.resumeInstallDraft(draft);
     await refreshPageData();
   } catch (error) {
+    if (isInstallMarkerMissingError(error)) {
+      if (draft.planId === null) {
+        showSnackbar.error(`恢复游戏安装失败：${error}`);
+        return;
+      }
+      await handleInstallMarkerMissing(draft.planId, draft.installId);
+      return;
+    }
     showSnackbar.error(`恢复游戏安装失败：${error}`);
   }
 }
@@ -371,7 +379,59 @@ async function handleInstallTaskRecover(
       await refreshPageData();
     }
   } catch (error) {
+    if (isInstallMarkerMissingError(error)) {
+      await handleInstallMarkerMissing(task.taskId, task.installationId);
+      return;
+    }
     showSnackbar.error(`恢复游戏安装失败：${error}`);
+  }
+}
+
+const installMarkerMissingText = "缺少安装标记";
+
+function isInstallMarkerMissingError(error: unknown): boolean {
+  return String(error).includes(installMarkerMissingText);
+}
+
+async function handleInstallMarkerMissing(taskId: string, installId: string): Promise<void> {
+  const decision = await showDialog.checkF({
+    title: "恢复安装标记",
+    text: "最终游戏目录缺少安装标记。可全量校验目录内容并重建安装标记、继续完成登记；也可以放弃当前安装（不会删除已发布的游戏目录）。",
+    confirmLabel: "校验并恢复",
+    cancelLabel: "放弃安装",
+  });
+  if (decision === undefined) return;
+  if (decision === true) {
+    try {
+      const updated = await taskStore.recoverInstall(
+        taskId,
+        installId,
+        gameEnum.package.recoveryAction.RESTORE_MARKER,
+      );
+      if (updated.state === gameEnum.package.taskState.COMPLETED) {
+        await refreshPageData();
+      }
+      showSnackbar.success("安装标记已恢复，游戏安装已完成登记");
+    } catch (error) {
+      showSnackbar.error(`校验并恢复安装标记失败：${error}`);
+    }
+    return;
+  }
+  try {
+    const updated = await taskStore.recoverInstall(
+      taskId,
+      installId,
+      gameEnum.package.recoveryAction.ROLLBACK,
+    );
+    if (
+      updated.state === gameEnum.package.taskState.COMPLETED ||
+      updated.state === gameEnum.package.taskState.CANCELED
+    ) {
+      await refreshPageData();
+    }
+    showSnackbar.info("已放弃安装，已发布的游戏目录保留");
+  } catch (error) {
+    showSnackbar.error(`放弃游戏安装失败：${error}`);
   }
 }
 

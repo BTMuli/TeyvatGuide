@@ -151,6 +151,8 @@ declare namespace TGApp.Game.Package {
   const RecoveryAction = <const>{
     RESUME: "resume",
     ROLLBACK: "rollback",
+    /** 最终目录缺少安装标记时，人工校验并重建标记后继续登记。 */
+    RESTORE_MARKER: "restore_marker",
   };
 
   /** 中断任务恢复动作值。 */
