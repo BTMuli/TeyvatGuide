@@ -130,7 +130,6 @@ import {
   listGameInstallDrafts,
   listGameInstallations,
 } from "@utils/TGGameLauncher.js";
-import { TGPerf } from "@utils/TGPerf.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
 
@@ -561,7 +560,6 @@ watch(completedInstallTaskKey, (taskKey) => {
   installDrafts.value = installDrafts.value.filter(
     (draft) => !completedInstallationIds.has(draft.installId),
   );
-  void TGPerf.dumpAll();
   void refreshPageData();
 });
 onUnmounted(() => {

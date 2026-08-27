@@ -14,7 +14,6 @@ use super::{
     PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::{AudioApplyContext, GamePackageManager},
-  perf,
   planner::{
     create_and_persist_audio_plan, create_and_persist_install_plan, create_and_persist_plan,
     hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan, hydrate_and_validate_plan,
@@ -1195,30 +1194,6 @@ pub fn game_package_task_cleanup(
   manager: tauri::State<'_, GamePackageManager>,
 ) -> Result<PackageTaskCleanupSummary, String> {
   manager.cleanup_tasks(&game_task_root(&app_handle)?, None)
-}
-
-/// 读取游戏资源页性能基线计数器快照。
-#[tauri::command]
-pub fn game_perf_snapshot() -> perf::GamePerfSnapshot {
-  perf::snapshot()
-}
-
-/// 清零游戏资源页性能基线计数器。
-#[tauri::command]
-pub fn game_perf_reset() {
-  perf::reset();
-}
-
-/// 将性能基线快照写入系统下载目录，返回写入路径。
-#[tauri::command]
-pub fn game_perf_export(contents: String) -> Result<String, String> {
-  let profile = std::env::var("USERPROFILE").map_err(|_| "无法读取用户目录".to_string())?;
-  let downloads = Path::new(&profile).join("Downloads");
-  fs::create_dir_all(&downloads).map_err(|error| format!("创建下载目录失败：{error}"))?;
-  let stamp = chrono::Local::now().format("%Y%m%d-%H%M%S");
-  let path = downloads.join(format!("TGPerf-baseline-{stamp}.json"));
-  fs::write(&path, contents).map_err(|error| format!("写入性能基线文件失败：{error}"))?;
-  Ok(path.to_string_lossy().into_owned())
 }
 
 /// 恢复中断的下载/提交，或安全回滚任务拥有的临时文件与游戏备份。

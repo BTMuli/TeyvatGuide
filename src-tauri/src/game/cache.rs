@@ -5,7 +5,7 @@
 //! @since Beta v0.11.5
 
 use super::{
-  journal, model::PackageCacheSummary, package::is_game_running, perf,
+  journal, model::PackageCacheSummary, package::is_game_running,
   planner::clear_cache_validation_index,
 };
 use serde::Deserialize;
@@ -102,7 +102,6 @@ where
 }
 
 fn count_dir_files(path: &Path) -> Result<usize, String> {
-  perf::record_cache_dir_pass();
   let mut count = 0_usize;
   if !path.exists() {
     return Ok(0);
@@ -141,7 +140,6 @@ fn clear_dir(
   protected: &HashSet<String>,
   on_file: &mut dyn FnMut(&str),
 ) -> Result<(), String> {
-  perf::record_cache_dir_pass();
   if !path.exists() {
     return Ok(());
   }
@@ -191,7 +189,6 @@ fn summarize_dir(
   path: &Path,
   protected: &HashSet<String>,
 ) -> Result<CacheDirectorySummary, String> {
-  perf::record_cache_dir_pass();
   if !path.exists() {
     return Ok(CacheDirectorySummary {
       total_bytes: 0,

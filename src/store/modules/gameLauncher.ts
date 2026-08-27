@@ -30,7 +30,6 @@ import {
   startGamePackageTask,
   verifyGamePackage,
 } from "@utils/TGGameLauncher.js";
-import { TGPerf } from "@utils/TGPerf.js";
 import { defineStore } from "pinia";
 import { nextTick, shallowRef } from "vue";
 
@@ -121,7 +120,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
-    TGPerf.recordStateReplace();
     scheduleCompletedTaskRemoval(task);
   }
 
@@ -136,7 +134,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   function flushTaskProgress(): void {
-    TGPerf.recordFlush();
     progressTimer = null;
     if (pendingProgressByInstallation.size === 0) return;
     const next = { ...tasksByInstallation.value };
@@ -151,17 +148,13 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     pendingProgressByInstallation.clear();
     if (!changed) return;
     tasksByInstallation.value = next;
-    TGPerf.recordFlushReplace();
     for (const task of completedTasks) scheduleCompletedTaskRemoval(task);
   }
 
   function queueTaskProgress(task: TGApp.Game.Package.TaskSummary): void {
     const pending = pendingProgressByInstallation.get(task.installationId);
     const current = pending ?? tasksByInstallation.value[task.installationId];
-    if (!shouldReplaceTask(current, task)) {
-      TGPerf.recordProgressDropped();
-      return;
-    }
+    if (!shouldReplaceTask(current, task)) return;
     pendingProgressByInstallation.set(task.installationId, task);
     if (shouldFlushProgressImmediately(task)) {
       clearProgressTimer();
@@ -323,7 +316,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     }
     if (!changed) return;
     tasksByInstallation.value = next;
-    TGPerf.recordHydrate();
     for (const task of completedTasks) scheduleCompletedTaskRemoval(task);
   }
 
@@ -388,8 +380,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     plan: TGApp.Game.Package.PlanSummary,
     options?: TGApp.Game.Package.TaskOptions,
   ): Promise<TGApp.Game.Package.TaskSummary> {
-    await TGPerf.reset();
-    await TGPerf.milestone("m0");
     const startingTask = createStartingInstallTask(draft, plan);
     mergeTask(startingTask);
     setPending(plan.planId, true);
@@ -414,8 +404,6 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
         draft.state === gameEnum.installation.draftState.CREATED ||
         draft.state === gameEnum.installation.draftState.PLANNED
       ) {
-        await TGPerf.reset();
-        await TGPerf.milestone("m0");
         const planId = draft.planId ?? (await createGameInstallPlan(draft.installId)).planId;
         await ensureInstallDefenderRegistry(draft.installId, planId);
         try {
@@ -593,17 +581,12 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     listenerPromise = (async () => {
       const created = await Promise.all([
         listen<TGApp.Game.Package.TaskSummary>("game-package://state", (event) => {
-          TGPerf.recordEvent("state");
-          TGPerf.recordTaskState(event.payload);
           mergeTask(event.payload);
         }),
         listen<TGApp.Game.Package.TaskSummary>("game-package://progress", (event) => {
-          TGPerf.recordEvent("progress");
-          TGPerf.recordTaskProgress(event.payload);
           queueTaskProgress(event.payload);
         }),
         listen<TGApp.Game.Package.VerifySummary>("game-package://verify", (event) => {
-          TGPerf.recordEvent("verify");
           mergeVerify(event.payload);
         }),
       ]);

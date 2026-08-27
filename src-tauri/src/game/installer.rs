@@ -11,7 +11,6 @@ use super::{
   journal::{INSTALL_COMMIT_TOTAL_STEPS, TaskJournal},
   model::{GameInstallation, PackagePlanTarget, PackageTaskState, SchemeId},
   path_guard::{normalize_manifest_path, prepare_manifest_output_file},
-  perf,
   planner::{InstallOverlay, PersistedPlan},
   scheme::{canonical_channel, scheme_id_key, sdk_is_consistent},
 };
@@ -2466,7 +2465,6 @@ fn ensure_install_space(plan: &PersistedPlan, game_root: &Path) -> Result<(), St
 }
 
 fn spool_bytes(root: &Path) -> Result<u64, String> {
-  perf::record_spool_dir_scan();
   let mut total = 0_u64;
   let entries = match fs::read_dir(root) {
     Ok(entries) => entries,
@@ -2516,7 +2514,6 @@ fn release_consumed_spool_chunks(
     }
     let metadata =
       fs::symlink_metadata(&path).map_err(|error| format!("读取待回收 spool 文件失败：{error}"))?;
-    perf::record_spool_metadata_probe();
     if metadata.file_type().is_symlink() || is_reparse_point(&metadata) || !metadata.is_file() {
       return Err("待回收 spool 文件不是安全的普通文件".to_string());
     }
