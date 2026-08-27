@@ -27,6 +27,7 @@ use std::{
 };
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
+const MIN_ASSEMBLY_CONCURRENCY: usize = 4;
 
 /// 已成功写入 staging 的资源统计。
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -671,6 +672,7 @@ pub(crate) fn assemble_plan_asset_to_root(
   task_root: &Path,
   output_root: &Path,
   canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   check_canceled(canceled)?;
   let asset = plan.assets.get(asset_index).ok_or_else(|| "资源组装游标越界".to_string())?;
@@ -683,7 +685,16 @@ pub(crate) fn assemble_plan_asset_to_root(
   match plan.strategy {
     PackagePlanStrategy::ManifestDiff => {
       validate_asset_layout(asset, &downloads)?;
-      assemble_asset(asset, &downloads, game_root, &cache_root, output_root, canceled)
+      assemble_asset_with_timing(
+        asset,
+        &downloads,
+        game_root,
+        &cache_root,
+        output_root,
+        canceled,
+        None,
+        telemetry,
+      )
     }
     PackagePlanStrategy::Patch => {
       let patch =
@@ -691,18 +702,29 @@ pub(crate) fn assemble_plan_asset_to_root(
       let download = downloads
         .get(patch.id.as_str())
         .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
-      assemble_patch_asset(asset, patch, download, game_root, &cache_root, output_root, canceled)
+      assemble_patch_asset(
+        asset,
+        patch,
+        download,
+        game_root,
+        &cache_root,
+        output_root,
+        canceled,
+        telemetry,
+      )
     }
     PackagePlanStrategy::Full => Err("全新安装计划必须使用专用安装组装器".to_string()),
   }
 }
 
 pub(crate) fn default_assembly_concurrency() -> usize {
-  max_assembly_concurrency()
+  assembly_concurrency_from_parallelism(
+    std::thread::available_parallelism().ok().map(|value| value.get()),
+  )
 }
 
-fn max_assembly_concurrency() -> usize {
-  std::thread::available_parallelism().map(|value| value.get()).unwrap_or(1).max(1)
+fn assembly_concurrency_from_parallelism(parallelism: Option<usize>) -> usize {
+  parallelism.unwrap_or(MIN_ASSEMBLY_CONCURRENCY).max(MIN_ASSEMBLY_CONCURRENCY)
 }
 
 fn assemble_manifest_plan_to_root_with_progress_concurrent<F>(
@@ -788,7 +810,16 @@ where
       let download = downloads
         .get(patch.id.as_str())
         .ok_or_else(|| format!("patch 资源缺少下载缓存：{}", asset.name))?;
-      assemble_patch_asset(asset, patch, download, game_root, &cache_root, output_root, canceled)
+      assemble_patch_asset(
+        asset,
+        patch,
+        download,
+        game_root,
+        &cache_root,
+        output_root,
+        canceled,
+        None,
+      )
     },
     total_count,
     total_bytes,
@@ -910,6 +941,7 @@ fn assemble_patch_asset(
   cache_root: &Path,
   staging_root: &Path,
   canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   if !asset.chunks.is_empty() {
     return Err(format!("patch 资源不能包含 chunk：{}", asset.name));
@@ -934,11 +966,13 @@ fn assemble_patch_asset(
       if patch.range_length != asset.size {
         return Err(format!("新增 patch 范围与目标大小不一致：{}", asset.name));
       }
-      copy_container_range(cache_root, download, patch, &partial, canceled)?;
+      copy_container_range(cache_root, download, patch, &partial, canceled, telemetry)?;
     } else {
-      apply_hdiff_patch(asset, patch, download, game_root, cache_root, &partial, canceled)?;
+      apply_hdiff_patch(
+        asset, patch, download, game_root, cache_root, &partial, canceled, telemetry,
+      )?;
     }
-    finalize_staging_file(&partial, &output, asset, canceled)
+    finalize_staging_file(&partial, &output, asset, canceled, telemetry)
   })();
   if result.is_err() {
     let _ = fs::remove_file(&partial);
@@ -952,6 +986,7 @@ fn copy_container_range(
   patch: &PlanPatch,
   output: &Path,
   canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   let container = cache_root.join(&download.cache_key);
   let mut source =
@@ -959,11 +994,12 @@ fn copy_container_range(
   source
     .seek(SeekFrom::Start(patch.range_start))
     .map_err(|error| format!("定位差分范围失败：{}：{error}", patch.id))?;
-  let mut target = OpenOptions::new()
-    .create_new(true)
-    .write(true)
-    .open(output)
-    .map_err(|error| format!("创建 patch 临时文件失败：{error}"))?;
+  let create_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+  let target_result = OpenOptions::new().create_new(true).write(true).open(output);
+  if let Some(create_stage) = create_stage {
+    create_stage.finish(0);
+  }
+  let mut target = target_result.map_err(|error| format!("创建 patch 临时文件失败：{error}"))?;
   let mut remaining = patch.range_length;
   let mut buffer = [0_u8; COPY_BUFFER_SIZE];
   while remaining > 0 {
@@ -976,9 +1012,12 @@ fn copy_container_range(
     if read == 0 {
       return Err(format!("差分范围小于计划长度：{}", patch.id));
     }
-    target
-      .write_all(&buffer[..read])
-      .map_err(|error| format!("写入 patch 临时文件失败：{error}"))?;
+    let live_write = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let write_result = target.write_all(&buffer[..read]);
+    if let Some(live_write) = live_write {
+      live_write.finish(write_result.as_ref().map_or(0, |_| read as u64));
+    }
+    write_result.map_err(|error| format!("写入 patch 临时文件失败：{error}"))?;
     remaining -= read as u64;
   }
   target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
@@ -992,10 +1031,11 @@ fn apply_hdiff_patch(
   cache_root: &Path,
   output: &Path,
   canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   #[cfg(not(windows))]
   {
-    let _ = (asset, patch, download, game_root, cache_root, output, canceled);
+    let _ = (asset, patch, download, game_root, cache_root, output, canceled, telemetry);
     return Err(format!("修改型 patch 仅支持 Windows：{}", asset.name));
   }
   #[cfg(windows)]
@@ -1023,16 +1063,21 @@ fn apply_hdiff_patch(
       .map_err(|error| format!("定位修改型 patch 原文件失败：{}：{error}", asset.name))?;
     let container = File::open(cache_root.join(&download.cache_key))
       .map_err(|error| format!("打开差分容器失败：{}：{error}", patch.id))?;
-    let target = OpenOptions::new()
-      .create_new(true)
-      .read(true)
-      .write(true)
-      .open(output)
-      .map_err(|error| format!("创建 patch 临时文件失败：{error}"))?;
-    target
-      .set_len(asset.size)
+    let create_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let target_result = OpenOptions::new().create_new(true).read(true).write(true).open(output);
+    if let Some(create_stage) = create_stage {
+      create_stage.finish(0);
+    }
+    let target = target_result.map_err(|error| format!("创建 patch 临时文件失败：{error}"))?;
+    let resize_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let resize_result = target.set_len(asset.size);
+    if let Some(resize_stage) = resize_stage {
+      resize_stage.finish(0);
+    }
+    resize_result
       .map_err(|error| format!("设置 patch 临时文件长度失败：{}：{error}", asset.name))?;
-    super::hpatch::patch_zstd(
+    let write_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+    let patch_result = super::hpatch::patch_zstd(
       &source,
       patch.original_size,
       &container,
@@ -1040,7 +1085,11 @@ fn apply_hdiff_patch(
       patch.range_length,
       &target,
       asset.size,
-    )?;
+    );
+    if let Some(write_stage) = write_stage {
+      write_stage.finish(patch_result.as_ref().map_or(0, |_| asset.size));
+    }
+    patch_result?;
     target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
   }
 }
@@ -1050,6 +1099,7 @@ fn finalize_staging_file(
   output: &Path,
   asset: &PlanAsset,
   canceled: &AtomicBool,
+  telemetry: Option<&AssemblyTelemetry>,
 ) -> Result<(), String> {
   let mut file = OpenOptions::new()
     .read(true)
@@ -1067,8 +1117,12 @@ fn finalize_staging_file(
     return Err(format!("资源 MD5 校验失败：{}", asset.name));
   }
   drop(file);
-  fs::rename(partial, output)
-    .map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
+  let rename_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
+  let rename_result = fs::rename(partial, output);
+  if let Some(rename_stage) = rename_stage {
+    rename_stage.finish(0);
+  }
+  rename_result.map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
 fn validate_asset_layout<L: DownloadLookup>(
@@ -1165,7 +1219,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
     let resize_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
     let resize_result = file.set_len(asset.size);
     if let Some(resize_stage) = resize_stage {
-      resize_stage.finish(asset.size);
+      resize_stage.finish(0);
     }
     resize_result.map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
     let mut chunks = asset.chunks.iter().collect::<Vec<_>>();
@@ -1302,7 +1356,7 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
     let resize_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Write));
     let resize_result = file.set_len(asset.size);
     if let Some(resize_stage) = resize_stage {
-      resize_stage.finish(asset.size);
+      resize_stage.finish(0);
     }
     resize_result.map_err(|error| format!("设置资源临时文件长度失败：{}：{error}", asset.name))?;
     let mut chunks = asset.chunks.iter().collect::<Vec<_>>();
@@ -1709,5 +1763,107 @@ fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
     Err("游戏资源组装已取消".to_string())
   } else {
     Ok(())
+  }
+}
+
+#[cfg(test)]
+mod written_bytes_tests {
+  use super::*;
+  use crate::game::planner::{PlanAssetAction, PlanDownloadHashKind};
+
+  fn md5_hex(bytes: &[u8]) -> String {
+    format!("{:x}", Md5::digest(bytes))
+  }
+
+  fn raw_download(id: &str, payload: &[u8]) -> PlanDownload {
+    PlanDownload {
+      id: id.to_string(),
+      cache_key: id.to_string(),
+      hash_kind: PlanDownloadHashKind::Md5,
+      expected_hash: md5_hex(payload),
+      compressed_size: payload.len() as u64,
+      decompressed_size: payload.len() as u64,
+      encoding: PayloadEncoding::Raw,
+      url_prefix: String::new(),
+      url_suffix: String::new(),
+      range_start: None,
+      range_length: None,
+    }
+  }
+
+  fn raw_asset(name: &str, chunk_id: &str, payload: &[u8]) -> PlanAsset {
+    let digest = md5_hex(payload);
+    PlanAsset {
+      name: name.to_string(),
+      action: PlanAssetAction::Add,
+      source: None,
+      size: payload.len() as u64,
+      md5: digest.clone(),
+      chunks: vec![PlanChunk {
+        id: chunk_id.to_string(),
+        decompressed_md5: digest,
+        target_offset: 0,
+        compressed_size: payload.len() as u64,
+        decompressed_size: payload.len() as u64,
+        reuse: None,
+      }],
+      patch: None,
+    }
+  }
+
+  #[test]
+  fn preallocation_does_not_increase_written_bytes() {
+    let telemetry = AssemblyTelemetry::default();
+    let stage = telemetry.begin(AssemblyLiveStage::Write);
+    stage.finish(0);
+    assert_eq!(telemetry.snapshot().written_bytes, 0);
+    assert_eq!(telemetry.snapshot().write_operations, 1);
+  }
+
+  #[test]
+  fn write_all_counts_only_payload_bytes() {
+    let telemetry = AssemblyTelemetry::default();
+    let stage = telemetry.begin(AssemblyLiveStage::Write);
+    stage.finish(4096);
+    assert_eq!(telemetry.snapshot().written_bytes, 4096);
+  }
+
+  #[test]
+  fn manifest_diff_written_bytes_exclude_set_len() {
+    let payload = b"write-bandwidth";
+    let root = std::env::temp_dir().join(format!("tg-assemble-{}", uuid::Uuid::new_v4()));
+    let cache_root = root.join("cache");
+    let staging_root = root.join("staging");
+    fs::create_dir_all(&cache_root).expect("create cache");
+    fs::create_dir_all(&staging_root).expect("create staging");
+    fs::write(cache_root.join("chunk-a"), payload).expect("write cache");
+    let download = raw_download("chunk-a", payload);
+    let asset = raw_asset("voice.bin", "chunk-a", payload);
+    let downloads = HashMap::from([("chunk-a", &download)]);
+    let telemetry = AssemblyTelemetry::default();
+    assemble_asset_with_timing(
+      &asset,
+      &downloads,
+      &root,
+      &cache_root,
+      &staging_root,
+      &AtomicBool::new(false),
+      None,
+      Some(&telemetry),
+    )
+    .expect("assemble asset");
+    let snapshot = telemetry.snapshot();
+    assert_eq!(snapshot.written_bytes, payload.len() as u64);
+    let _ = fs::remove_dir_all(&root);
+  }
+
+  #[test]
+  fn default_assembly_concurrency_floors_at_four_without_cap() {
+    assert_eq!(assembly_concurrency_from_parallelism(None), 4);
+    assert_eq!(assembly_concurrency_from_parallelism(Some(2)), 4);
+    assert_eq!(assembly_concurrency_from_parallelism(Some(3)), 4);
+    assert_eq!(assembly_concurrency_from_parallelism(Some(8)), 8);
+    assert_eq!(assembly_concurrency_from_parallelism(Some(128)), 128);
+    assert!(default_assembly_concurrency() >= 4);
   }
 }

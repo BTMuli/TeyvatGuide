@@ -46,6 +46,7 @@ use tokio::sync::{Mutex as AsyncMutex, Semaphore};
 use uuid::Uuid;
 
 const MAX_CONCURRENCY: usize = 64;
+const MIN_ASSEMBLY_CONCURRENCY: usize = 4;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const INSTALL_ABORT_DRAIN_TIMEOUT: Duration = Duration::from_secs(120);
@@ -318,9 +319,9 @@ fn install_download_concurrency(pipeline_concurrency: usize) -> usize {
   pipeline_concurrency.clamp(1, MAX_CONCURRENCY)
 }
 
-/// 组装并发取下载并发的 1/2，最低 1 路，避免低端盘因并行写过多而反向下行。
+/// 组装并发与下载默认同一套：跟随流水线 concurrency，最低 4 路，最高 64 路。
 fn install_assembly_concurrency(pipeline_concurrency: usize) -> usize {
-  pipeline_concurrency.saturating_div(2).clamp(1, MAX_CONCURRENCY)
+  pipeline_concurrency.clamp(MIN_ASSEMBLY_CONCURRENCY, MAX_CONCURRENCY)
 }
 
 #[derive(Default)]
@@ -582,6 +583,63 @@ impl Drop for InstallDownloadProgressMonitor {
   }
 }
 
+struct AssemblyWriteProgressMonitor {
+  stopped: Arc<AtomicBool>,
+}
+
+impl Drop for AssemblyWriteProgressMonitor {
+  fn drop(&mut self) {
+    self.stopped.store(true, Ordering::Release);
+  }
+}
+
+/// 1 秒写盘带宽采样：多路 `write_all` 增量合计，再按下载侧同一套 EMA 平滑。
+struct AssemblyWriteBandwidthTracker {
+  last_written_bytes: u64,
+  last_sample_at: Instant,
+  smoothed_bytes_per_second: f64,
+}
+
+impl AssemblyWriteBandwidthTracker {
+  fn new(written_bytes: u64) -> Self {
+    Self {
+      last_written_bytes: written_bytes,
+      last_sample_at: Instant::now(),
+      smoothed_bytes_per_second: 0.0,
+    }
+  }
+
+  fn sample(&mut self, written_bytes: u64, active_assemblies: usize, now: Instant) -> u64 {
+    let elapsed = now.saturating_duration_since(self.last_sample_at).as_secs_f64().max(0.001);
+    let delta = written_bytes.saturating_sub(self.last_written_bytes);
+    self.last_written_bytes = written_bytes;
+    self.last_sample_at = now;
+    if active_assemblies == 0 {
+      self.smoothed_bytes_per_second = 0.0;
+    } else if delta > 0 {
+      let sample = delta as f64 / elapsed;
+      self.smoothed_bytes_per_second = if self.smoothed_bytes_per_second > 0.0 {
+        self.smoothed_bytes_per_second * 0.7 + sample * 0.3
+      } else {
+        sample
+      };
+    }
+    self.smoothed_bytes_per_second.max(0.0) as u64
+  }
+}
+
+fn apply_assembly_write_bandwidth(journal: &mut TaskJournal, speed: u64) -> bool {
+  let remaining = journal.assembly_total_bytes.saturating_sub(journal.assembly_completed_bytes);
+  let eta = download_eta_seconds(remaining, speed);
+  if journal.assembly_bytes_per_second == speed && journal.assembly_eta_seconds == eta {
+    return false;
+  }
+  journal.assembly_bytes_per_second = speed;
+  journal.assembly_eta_seconds = eta;
+  journal.touch();
+  true
+}
+
 fn start_install_download_progress_monitor(
   app_handle: AppHandle,
   journal: Arc<AsyncMutex<TaskJournal>>,
@@ -594,6 +652,8 @@ fn start_install_download_progress_monitor(
     let mut last_sample = Instant::now();
     let mut last_in_flight_bytes = 0_u64;
     let mut smoothed_bytes_per_second = 0_f64;
+    let mut assembly_tracker =
+      AssemblyWriteBandwidthTracker::new(metrics.assembly_telemetry.snapshot().written_bytes);
     loop {
       tokio::time::sleep(Duration::from_secs(1)).await;
       if stopped_for_task.load(Ordering::Acquire)
@@ -620,6 +680,10 @@ fn start_install_download_progress_monitor(
       } else {
         smoothed_bytes_per_second *= 0.5;
       }
+      let assembly_written = metrics.assembly_telemetry.snapshot().written_bytes;
+      let active_assemblies = metrics.active_assemblies.load(Ordering::Acquire);
+      let sampled_assembly_speed =
+        assembly_tracker.sample(assembly_written, active_assemblies, Instant::now());
 
       let mut value = journal.lock().await;
       if stopped_for_task.load(Ordering::Acquire)
@@ -640,13 +704,20 @@ fn start_install_download_progress_monitor(
       let in_flight_changed = last_in_flight_bytes != snapshot.in_flight_bytes;
       last_in_flight_bytes = snapshot.in_flight_bytes;
       let speed_changed = value.bytes_per_second != speed || value.eta_seconds != eta;
-      if !speed_changed && !in_flight_changed {
-        continue;
-      }
       if speed_changed {
         value.bytes_per_second = speed;
         value.eta_seconds = eta;
         value.touch();
+      }
+      let assembly_speed =
+        if matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+          sampled_assembly_speed
+        } else {
+          0
+        };
+      let assembly_changed = apply_assembly_write_bandwidth(&mut value, assembly_speed);
+      if !speed_changed && !in_flight_changed && !assembly_changed {
+        continue;
       }
       let summary = overlay_install_download_progress(&value, &metrics);
       drop(value);
@@ -654,6 +725,46 @@ fn start_install_download_progress_monitor(
     }
   });
   InstallDownloadProgressMonitor { stopped }
+}
+
+fn start_assembly_write_progress_monitor(
+  app_handle: AppHandle,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  telemetry: Arc<assembler::AssemblyTelemetry>,
+  canceled: Arc<AtomicBool>,
+  paused: Arc<AtomicBool>,
+) -> AssemblyWriteProgressMonitor {
+  let stopped = Arc::new(AtomicBool::new(false));
+  let stopped_for_task = Arc::clone(&stopped);
+  tauri::async_runtime::spawn(async move {
+    let mut tracker = AssemblyWriteBandwidthTracker::new(telemetry.snapshot().written_bytes);
+    loop {
+      tokio::time::sleep(Duration::from_secs(1)).await;
+      if stopped_for_task.load(Ordering::Acquire)
+        || canceled.load(Ordering::Acquire)
+        || paused.load(Ordering::Acquire)
+      {
+        break;
+      }
+      let written_bytes = telemetry.snapshot().written_bytes;
+      let mut value = journal.lock().await;
+      if stopped_for_task.load(Ordering::Acquire)
+        || canceled.load(Ordering::Acquire)
+        || paused.load(Ordering::Acquire)
+        || !matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling)
+      {
+        break;
+      }
+      let speed = tracker.sample(written_bytes, value.active_assembly_count, Instant::now());
+      if !apply_assembly_write_bandwidth(&mut value, speed) {
+        continue;
+      }
+      let summary = value.summary();
+      drop(value);
+      emit_progress(&app_handle, &summary);
+    }
+  });
+  AssemblyWriteProgressMonitor { stopped }
 }
 
 fn download_eta_seconds(remaining_bytes: u64, bytes_per_second: u64) -> Option<u64> {
@@ -2694,6 +2805,7 @@ async fn assemble_audio_asset(
   journal: Arc<AsyncMutex<TaskJournal>>,
   canceled: Arc<AtomicBool>,
   assembly_slots: Arc<Semaphore>,
+  telemetry: Arc<assembler::AssemblyTelemetry>,
 ) -> AudioAssemblyCompletion {
   let permit = match assembly_slots.acquire_owned().await {
     Ok(permit) => permit,
@@ -2716,6 +2828,7 @@ async fn assemble_audio_asset(
   let worker_task_root = task_root.clone();
   let worker_output_root = output_root.clone();
   let worker_canceled = Arc::clone(&canceled);
+  let worker_telemetry = Arc::clone(&telemetry);
   let result = tauri::async_runtime::spawn_blocking(move || {
     assembler::assemble_plan_asset_to_root(
       &worker_plan,
@@ -2724,6 +2837,7 @@ async fn assemble_audio_asset(
       &worker_task_root,
       &worker_output_root,
       &worker_canceled,
+      Some(&worker_telemetry),
     )?;
     evidence::capture_and_persist_asset_evidence(
       &worker_task_root,
@@ -2901,7 +3015,6 @@ async fn run_audio_streaming_task(
     .map(|(index, download)| (index, download.clone()))
     .collect::<Vec<_>>();
   let download_started_at = Instant::now();
-  let assembly_started_at = Instant::now();
   let mut last_emit = Instant::now() - Duration::from_secs(1);
   let mut last_persist = Instant::now();
   {
@@ -2932,6 +3045,14 @@ async fn run_audio_streaming_task(
     emit_state(&app_handle, &value.summary());
     emit_progress(&app_handle, &value.summary());
   }
+  let assembly_telemetry = assembler::AssemblyTelemetry::new();
+  let _assembly_progress_monitor = start_assembly_write_progress_monitor(
+    app_handle.clone(),
+    Arc::clone(&journal),
+    Arc::clone(&assembly_telemetry),
+    Arc::clone(&canceled),
+    Arc::clone(&paused),
+  );
 
   let downloads = stream::iter(pending.into_iter().map(|(download_index, download)| {
     let root = cache_root.clone();
@@ -2957,7 +3078,7 @@ async fn run_audio_streaming_task(
   }))
   .buffer_unordered(concurrency);
   futures_util::pin_mut!(downloads);
-  let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
+  let assembly_slots = Arc::new(Semaphore::new(install_assembly_concurrency(concurrency)));
   let mut assemblies = stream::FuturesUnordered::new();
   let mut downloads_done = false;
   let mut pipeline_error = None;
@@ -3017,6 +3138,7 @@ async fn run_audio_streaming_task(
           Arc::clone(&journal),
           Arc::clone(&canceled),
           Arc::clone(&assembly_slots),
+          Arc::clone(&assembly_telemetry),
         ));
       }
     }
@@ -3091,11 +3213,6 @@ async fn run_audio_streaming_task(
                 plan.assets[completion.asset_index].name,
               )),
             );
-            let elapsed = assembly_started_at.elapsed().as_secs_f64().max(0.001);
-            value.assembly_bytes_per_second = (completed_bytes as f64 / elapsed) as u64;
-            let remaining = value.assembly_total_bytes.saturating_sub(completed_bytes);
-            value.assembly_eta_seconds = (value.assembly_bytes_per_second > 0)
-              .then_some(remaining / value.assembly_bytes_per_second);
             value.touch();
             if let Err(error) = journal::persist(&task_root, &value) {
               pipeline_error = Some(error);
@@ -3585,7 +3702,6 @@ async fn run_install_streaming_task(
         (tracker.completion_snapshot(&plan), tracker.committed_step())
       };
       apply_install_completion_snapshot(&mut value, snapshot, &metrics);
-      update_install_assembly_estimate(&mut value, 0, Duration::ZERO);
       value.committed_step = committed_step.min(value.total_count);
       value.commit_current_step = None;
       value.current_file = None;
@@ -3852,7 +3968,7 @@ async fn run_install_streaming_task(
         assemble_telemetry,
       );
       let assembly_worker_result = assembly_worker.await;
-      let assembly_elapsed = metrics.finish_assembly(assembly_started_at);
+      let _assembly_elapsed = metrics.finish_assembly(assembly_started_at);
       emit_active_assembly_count(&app_handle, &journal, &metrics).await;
       let assembly_result = match assembly_worker_result {
         Ok((result, timing)) => {
@@ -3895,7 +4011,6 @@ async fn run_install_streaming_task(
         apply_install_completion_snapshot(&mut value, snapshot, &metrics);
         value.committed_step = tracker_value.committed_step();
       }
-      update_install_assembly_estimate(&mut value, plan.assets[asset_index].size, assembly_elapsed);
       value.download_current_file = None;
       value.assembly_current_file = None;
       value.touch();
@@ -4116,7 +4231,6 @@ struct InstallAssetJob {
 struct InstallAssetJobCompletion {
   asset_index: usize,
   reserved_bytes: u64,
-  assembly_elapsed: Option<Duration>,
   result: Result<(), String>,
 }
 
@@ -4129,26 +4243,6 @@ fn format_install_assembly_status(
   file: &str,
 ) -> String {
   format!("{completed_count}/{total_count} {file}")
-}
-
-fn update_install_assembly_estimate(
-  journal: &mut TaskJournal,
-  assembled_bytes: u64,
-  assembly_elapsed: Duration,
-) {
-  if assembled_bytes > 0 {
-    let elapsed_micros = assembly_elapsed.as_micros().max(1);
-    let sample = ((u128::from(assembled_bytes) * 1_000_000) / elapsed_micros)
-      .clamp(1, u128::from(u64::MAX)) as u64;
-    journal.assembly_bytes_per_second = if journal.assembly_bytes_per_second > 0 {
-      ((u128::from(journal.assembly_bytes_per_second) * 7 + u128::from(sample) * 3) / 10)
-        .min(u128::from(u64::MAX)) as u64
-    } else {
-      sample
-    };
-  }
-  let remaining = journal.assembly_total_bytes.saturating_sub(journal.assembly_completed_bytes);
-  journal.assembly_eta_seconds = download_eta_seconds(remaining, journal.assembly_bytes_per_second);
 }
 
 fn reserve_install_repair_attempt(
@@ -4250,7 +4344,6 @@ async fn run_install_prepublish_repair(
         tracker.completion_snapshot(plan)
       };
       apply_install_completion_snapshot(&mut value, snapshot, metrics);
-      update_install_assembly_estimate(&mut value, 0, Duration::ZERO);
       value.state = PackageTaskState::Downloading;
       value.download_current_file = Some(format!(
         "校验失败，重新获取资源 {}/{}：{}",
@@ -4297,13 +4390,6 @@ async fn run_install_prepublish_repair(
       snapshot
     };
     apply_install_completion_snapshot(&mut value, snapshot, metrics);
-    if let Some(assembly_elapsed) = completion.assembly_elapsed {
-      update_install_assembly_estimate(
-        &mut value,
-        plan.assets[failure.asset_index].size,
-        assembly_elapsed,
-      );
-    }
     value.download_current_file = None;
     value.assembly_current_file = Some(format!("自动修复完成：{}", failure.path));
     value.current_file = value.assembly_current_file.clone();
@@ -4344,8 +4430,7 @@ async fn run_install_bounded_asset_pipeline(
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
   preserve_chunks: bool,
 ) -> Result<(), String> {
-  // 下载并发与流水线并发一致（与 CPU 核心数对齐）；组装取下载并发的 1/2，
-  // 避免机械盘或低端 SSD 因并行写入过多而反向降速。
+  // 下载并发与流水线并发一致（与 CPU 核心数对齐）；组装与下载同一套默认并发。
   let network_concurrency = install_download_concurrency(concurrency);
   let download_slots = Arc::new(Semaphore::new(network_concurrency));
   let assembly_slots = Arc::new(Semaphore::new(install_assembly_concurrency(concurrency)));
@@ -4486,13 +4571,6 @@ async fn run_install_bounded_asset_pipeline(
           snapshot
         };
         apply_install_completion_snapshot(&mut value, snapshot, metrics);
-        if let Some(assembly_elapsed) = completion.assembly_elapsed {
-          update_install_assembly_estimate(
-            &mut value,
-            plan.assets[completion.asset_index].size,
-            assembly_elapsed,
-          );
-        }
         asset_cursor = snapshot.contiguous_cursor;
         value.assembly_current_file = (value.assembly_completed_count < value.assembly_total_count)
           .then(|| {
@@ -4595,7 +4673,6 @@ async fn run_install_asset_job(
   spool_tracker: Arc<Mutex<InstallSpoolTracker>>,
 ) -> InstallAssetJobCompletion {
   let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
-  let mut assembly_elapsed = None;
   let result = async {
     let downloads = stream::iter(pending.into_iter().map(|download| {
       let client = download_client.clone();
@@ -4730,7 +4807,7 @@ async fn run_install_asset_job(
       assemble_telemetry,
     );
     let worker_result = worker.await;
-    assembly_elapsed = Some(metrics.finish_assembly(assembly_started_at));
+    let _assembly_elapsed = metrics.finish_assembly(assembly_started_at);
     drop(assembly_permit);
     emit_active_assembly_count(&app_handle, &journal, &metrics).await;
     match worker_result {
@@ -4750,7 +4827,7 @@ async fn run_install_asset_job(
     }
   }
   .await;
-  InstallAssetJobCompletion { asset_index, reserved_bytes, assembly_elapsed, result }
+  InstallAssetJobCompletion { asset_index, reserved_bytes, result }
 }
 
 #[allow(dead_code)]
@@ -6309,5 +6386,80 @@ mod install_spool_tracker_tests {
     forget_released_spool_file(&tracker, "missing", "missing");
     assert_eq!(tracker.lock().unwrap().spool_bytes(), 40);
     let _ = fs::remove_dir_all(&root);
+  }
+}
+
+#[cfg(test)]
+mod assembly_write_bandwidth_tests {
+  use super::*;
+  use crate::game::model::SchemeId;
+  use crate::game::planner::PersistedPlan;
+
+  fn empty_plan() -> PersistedPlan {
+    PersistedPlan {
+      schema_version: 6,
+      plan_id: Uuid::new_v4().to_string(),
+      installation_id: Uuid::new_v4().to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "7.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      audio_selection: None,
+      created_at: Utc::now().to_rfc3339(),
+    }
+  }
+
+  #[test]
+  fn two_workers_writing_one_mib_each_sample_near_two_mib_per_second() {
+    let started = Instant::now();
+    let mut tracker = AssemblyWriteBandwidthTracker::new(0);
+    let speed = tracker.sample(2 * 1024 * 1024, 2, started + Duration::from_secs(1));
+    assert!((2 * 1024 * 1024 - 8 * 1024..=2 * 1024 * 1024 + 8 * 1024).contains(&speed));
+  }
+
+  #[test]
+  fn idle_assembly_slots_clear_speed() {
+    let started = Instant::now();
+    let mut tracker = AssemblyWriteBandwidthTracker::new(0);
+    let first = tracker.sample(1024 * 1024, 1, started + Duration::from_secs(1));
+    assert!(first > 0);
+    let cleared = tracker.sample(1024 * 1024, 0, started + Duration::from_secs(2));
+    assert_eq!(cleared, 0);
+  }
+
+  #[test]
+  fn hash_window_without_writes_holds_last_speed() {
+    let started = Instant::now();
+    let mut tracker = AssemblyWriteBandwidthTracker::new(0);
+    let first = tracker.sample(1024 * 1024, 1, started + Duration::from_secs(1));
+    let held = tracker.sample(1024 * 1024, 1, started + Duration::from_secs(2));
+    assert_eq!(held, first);
+    assert!(first > 0);
+  }
+
+  #[test]
+  fn eta_uses_completed_asset_bytes_not_written_bytes() {
+    let mut journal = journal::TaskJournal::from_plan(&empty_plan());
+    journal.assembly_total_bytes = 100;
+    journal.assembly_completed_bytes = 40;
+    assert!(apply_assembly_write_bandwidth(&mut journal, 20));
+    assert_eq!(journal.assembly_bytes_per_second, 20);
+    assert_eq!(journal.assembly_eta_seconds, Some(3));
+  }
+
+  #[test]
+  fn install_assembly_concurrency_matches_download_defaults() {
+    assert_eq!(install_assembly_concurrency(8), 8);
+    assert_eq!(install_assembly_concurrency(2), 4);
+    assert_eq!(install_assembly_concurrency(1), 4);
+    assert_eq!(install_assembly_concurrency(128), 64);
   }
 }
