@@ -3,7 +3,9 @@
 
 use super::{
   hoyoplay::network_error,
-  planner::{PlanDownload, PlanDownloadHashKind, cached_chunk_matches, remember_cache_validation},
+  planner::{
+    PlanDownload, PlanDownloadHashKind, cached_chunk_matches_async, remember_cache_validation,
+  },
   sophon::{is_official_download_host, payload_url},
 };
 use futures_util::TryStreamExt;
@@ -507,7 +509,7 @@ pub(crate) async fn download_object(
   }
   let lock = download_lock(&download.cache_key)?;
   let _guard = lock.lock().await;
-  if cached_chunk_matches(cache_root, download) {
+  if cached_chunk_matches_async(cache_root, download).await {
     if let Some(telemetry) = telemetry.as_ref() {
       telemetry.record_cache_hit();
     }
@@ -520,25 +522,25 @@ pub(crate) async fn download_object(
     });
   }
   let target = cache_root.join(&download.cache_key);
-  reject_existing_link(&target)?;
+  reject_existing_link(&target).await?;
   let partial = cache_root.join(format!("{}.part.{task_id}", download.cache_key));
   let mut last_error = String::new();
   for attempt in 0..MAX_ATTEMPTS {
     if paused.load(Ordering::Acquire) {
-      remove_partial(&partial);
+      remove_partial(&partial).await;
       if let Some(object_telemetry) = object_telemetry.as_mut() {
         object_telemetry.finish(DownloadObjectOutcome::Aborted);
       }
       return Err("任务已暂停".to_string());
     }
     if canceled.load(Ordering::Acquire) {
-      remove_partial(&partial);
+      remove_partial(&partial).await;
       if let Some(object_telemetry) = object_telemetry.as_mut() {
         object_telemetry.finish(DownloadObjectOutcome::Aborted);
       }
       return Err("任务已取消".to_string());
     }
-    remove_partial(&partial);
+    remove_partial(&partial).await;
     let mut attempt_telemetry = telemetry.as_ref().map(|value| value.begin_attempt());
     let result = download_once(
       client,
@@ -557,15 +559,15 @@ pub(crate) async fn download_object(
           attempt_telemetry.finish(true);
         }
         if paused.load(Ordering::Acquire) {
-          remove_partial(&partial);
+          remove_partial(&partial).await;
           if let Some(object_telemetry) = object_telemetry.as_mut() {
             object_telemetry.finish(DownloadObjectOutcome::Aborted);
           }
           return Err("任务已暂停".to_string());
         }
-        if target.exists() {
-          if cached_chunk_matches(cache_root, download) {
-            remove_partial(&partial);
+        if tokio::fs::try_exists(&target).await.unwrap_or(false) {
+          if cached_chunk_matches_async(cache_root, download).await {
+            remove_partial(&partial).await;
             if let Some(object_telemetry) = object_telemetry.as_mut() {
               object_telemetry.finish(DownloadObjectOutcome::Success);
             }
@@ -574,7 +576,7 @@ pub(crate) async fn download_object(
               bytes: download.compressed_size,
             });
           }
-          if let Err(error) = fs::remove_file(&target) {
+          if let Err(error) = tokio::fs::remove_file(&target).await {
             if let Some(telemetry) = telemetry.as_ref() {
               telemetry.record_publish_failure();
             }
@@ -583,7 +585,7 @@ pub(crate) async fn download_object(
         }
         let live_stage =
           telemetry.as_ref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
-        let rename_result = fs::rename(&partial, &target);
+        let rename_result = tokio::fs::rename(&partial, &target).await;
         if let Some(live_stage) = live_stage {
           live_stage.finish(0);
         }
@@ -593,7 +595,7 @@ pub(crate) async fn download_object(
           }
           return Err(format!("提交游戏资源缓存失败：{error}"));
         }
-        let metadata = match fs::symlink_metadata(&target) {
+        let metadata = match tokio::fs::symlink_metadata(&target).await {
           Ok(metadata) => metadata,
           Err(error) => {
             if let Some(telemetry) = telemetry.as_ref() {
@@ -603,7 +605,7 @@ pub(crate) async fn download_object(
           }
         };
         if !metadata.is_file() || metadata.len() != download.compressed_size {
-          let _ = fs::remove_file(&target);
+          let _ = tokio::fs::remove_file(&target).await;
           if let Some(telemetry) = telemetry.as_ref() {
             telemetry.record_publish_failure();
           }
@@ -614,7 +616,7 @@ pub(crate) async fn download_object(
           use std::os::windows::fs::MetadataExt;
           use windows_sys::Win32::Storage::FileSystem::FILE_ATTRIBUTE_REPARSE_POINT;
           if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
-            let _ = fs::remove_file(&target);
+            let _ = tokio::fs::remove_file(&target).await;
             if let Some(telemetry) = telemetry.as_ref() {
               telemetry.record_publish_failure();
             }
@@ -633,14 +635,14 @@ pub(crate) async fn download_object(
       Err(error) => last_error = error,
     }
     if paused.load(Ordering::Acquire) {
-      remove_partial(&partial);
+      remove_partial(&partial).await;
       if let Some(object_telemetry) = object_telemetry.as_mut() {
         object_telemetry.finish(DownloadObjectOutcome::Aborted);
       }
       return Err("任务已暂停".to_string());
     }
     if canceled.load(Ordering::Acquire) {
-      remove_partial(&partial);
+      remove_partial(&partial).await;
       if let Some(object_telemetry) = object_telemetry.as_mut() {
         object_telemetry.finish(DownloadObjectOutcome::Aborted);
       }
@@ -654,7 +656,7 @@ pub(crate) async fn download_object(
       tokio::time::sleep(Duration::from_millis((1_u64 << attempt) * 500 + jitter)).await;
     }
   }
-  remove_partial(&partial);
+  remove_partial(&partial).await;
   Err(format!("游戏资源下载重试后仍失败：{last_error}"))
 }
 
@@ -708,11 +710,18 @@ async fn download_once(
   }
   let live_stage =
     telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
-  let file_result = OpenOptions::new().create_new(true).write(true).open(partial).await;
+  let file_result = wait_for_download_io(
+    OpenOptions::new().create_new(true).write(true).open(partial),
+    canceled,
+    paused,
+    DOWNLOAD_IO_STALL_TIMEOUT,
+    "创建资源下载临时文件超时：长时间无法写入",
+  )
+  .await;
   if let Some(live_stage) = live_stage {
     live_stage.finish(0);
   }
-  let file = file_result.map_err(|error| format!("创建资源下载临时文件失败：{error}"))?;
+  let file = file_result?.map_err(|error| format!("创建资源下载临时文件失败：{error}"))?;
   let mut writer = BufWriter::with_capacity(WRITE_BUFFER_BYTES, file);
   let mut stream = response.bytes_stream();
   let mut bytes = 0_u64;
@@ -742,12 +751,12 @@ async fn download_once(
     };
     if paused.load(Ordering::Acquire) {
       drop(writer);
-      remove_partial(partial);
+      remove_partial(partial).await;
       return Err("任务已暂停".to_string());
     }
     if canceled.load(Ordering::Acquire) {
       drop(writer);
-      remove_partial(partial);
+      remove_partial(partial).await;
       return Err("任务已取消".to_string());
     }
     if let Some(telemetry) = telemetry.as_deref_mut() {
@@ -761,14 +770,26 @@ async fn download_once(
     let write_started_at = Instant::now();
     let live_stage =
       telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
-    let write_result = writer.write_all(&chunk).await;
+    let write_result = wait_for_download_io(
+      writer.write_all(&chunk),
+      canceled,
+      paused,
+      DOWNLOAD_IO_STALL_TIMEOUT,
+      "写入资源下载临时文件超时：长时间无法写入",
+    )
+    .await;
+    let written_bytes = write_result
+      .as_ref()
+      .ok()
+      .and_then(|result| result.as_ref().ok())
+      .map_or(0, |_| chunk.len() as u64);
     if let Some(live_stage) = live_stage {
-      live_stage.finish(write_result.as_ref().map_or(0, |_| chunk.len() as u64));
+      live_stage.finish(written_bytes);
     }
     if let Some(telemetry) = telemetry.as_deref_mut() {
       telemetry.record_write(write_started_at.elapsed());
     }
-    write_result.map_err(|error| format!("写入资源下载临时文件失败：{error}"))?;
+    write_result?.map_err(|error| format!("写入资源下载临时文件失败：{error}"))?;
     let hash_started_at = Instant::now();
     match download.hash_kind {
       PlanDownloadHashKind::XxHash64 => xxhasher.update(&chunk),
@@ -797,33 +818,47 @@ async fn download_once(
   }
   if !actual_hash.eq_ignore_ascii_case(&download.expected_hash) {
     drop(writer);
-    remove_partial(partial);
+    remove_partial(partial).await;
     return Err("下载资源 hash 校验失败".to_string());
   }
   let flush_started_at = Instant::now();
   let live_stage =
     telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
-  let flush_result = writer.flush().await;
+  let flush_result = wait_for_download_io(
+    writer.flush(),
+    canceled,
+    paused,
+    DOWNLOAD_IO_STALL_TIMEOUT,
+    "刷新资源下载缓冲超时：长时间无法写入",
+  )
+  .await;
   if let Some(live_stage) = live_stage {
     live_stage.finish(0);
   }
   if let Some(telemetry) = telemetry.as_deref_mut() {
     telemetry.record_write(flush_started_at.elapsed());
   }
-  flush_result.map_err(|error| format!("刷新资源下载缓冲区失败：{error}"))?;
+  flush_result?.map_err(|error| format!("刷新资源下载缓冲区失败：{error}"))?;
   let file = writer.into_inner();
   if durability.requires_file_sync() {
     let sync_started_at = Instant::now();
     let live_stage =
       telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::LocalWrite));
-    let sync_result = file.sync_all().await;
+    let sync_result = wait_for_download_io(
+      file.sync_all(),
+      canceled,
+      paused,
+      DOWNLOAD_IO_STALL_TIMEOUT,
+      "同步资源下载临时文件超时：长时间无法写入",
+    )
+    .await;
     if let Some(live_stage) = live_stage {
       live_stage.finish(0);
     }
     if let Some(telemetry) = telemetry.as_deref_mut() {
       telemetry.record_file_sync(sync_started_at.elapsed());
     }
-    sync_result.map_err(|error| format!("刷新资源下载临时文件失败：{error}"))?;
+    sync_result?.map_err(|error| format!("刷新资源下载临时文件失败：{error}"))?;
   }
   drop(file);
   Ok(())
@@ -862,8 +897,8 @@ fn download_lock(cache_key: &str) -> Result<Arc<AsyncMutex<()>>, String> {
   Ok(lock)
 }
 
-fn reject_existing_link(path: &Path) -> Result<(), String> {
-  match fs::symlink_metadata(path) {
+async fn reject_existing_link(path: &Path) -> Result<(), String> {
+  match tokio::fs::symlink_metadata(path).await {
     Ok(metadata) if metadata.file_type().is_symlink() => {
       Err("游戏资源缓存路径不能是符号链接".to_string())
     }
@@ -901,8 +936,8 @@ fn reject_reparse_point(path: &Path) -> Result<(), String> {
   Ok(())
 }
 
-fn remove_partial(path: &Path) {
-  if let Err(error) = fs::remove_file(path)
+async fn remove_partial(path: &Path) {
+  if let Err(error) = tokio::fs::remove_file(path).await
     && error.kind() != std::io::ErrorKind::NotFound
   {
     log::warn!("[game-package] 清理任务私有下载临时文件失败：{error}");

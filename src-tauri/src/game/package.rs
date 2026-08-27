@@ -19,8 +19,8 @@ use super::{
   },
   path_guard::{prepare_manifest_output_file, resolve_optional_manifest_file},
   planner::{
-    PersistedPlan, PlanDelete, PlanDownload, cached_chunk_matches, default_install_concurrency,
-    flush_cache_validation_index, hydrate_and_validate_apply_plan,
+    PersistedPlan, PlanDelete, PlanDownload, cached_chunk_matches, cached_chunk_matches_async,
+    default_install_concurrency, flush_cache_validation_index, hydrate_and_validate_apply_plan,
     hydrate_and_validate_repair_plan, install_spool_window, load_persisted_plan,
     persist_validated_plan, same_volume, scan_cached_downloads,
   },
@@ -28,13 +28,13 @@ use super::{
   verify::{self, VerifyRuntime},
 };
 use chrono::{Duration as ChronoDuration, Utc};
-use futures_util::{StreamExt, stream};
+use futures_util::{StreamExt, future::AbortHandle, stream};
 use std::{
   collections::{HashMap, HashSet},
   fs,
   path::{Path, PathBuf},
   sync::{
-    Arc, Mutex,
+    Arc, LazyLock, Mutex,
     atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering},
   },
   time::{Duration, Instant},
@@ -47,6 +47,8 @@ use uuid::Uuid;
 const MAX_CONCURRENCY: usize = 64;
 const MIN_RATE_LIMIT: u64 = 1024 * 1024;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
+const INSTALL_ABORT_DRAIN_TIMEOUT: Duration = Duration::from_secs(120);
+const SPOOL_BYTES_REFRESH_INTERVAL: Duration = Duration::from_millis(500);
 const INSTALL_STALL_THRESHOLD: Duration = Duration::from_secs(45);
 const INSTALL_STALL_POLL_INTERVAL: Duration = Duration::from_secs(5);
 const INSTALL_STALL_CONFIRMATIONS: usize = 3;
@@ -67,6 +69,7 @@ fn spawn_install_stall_watchdog(
   canceled: Arc<AtomicBool>,
   metrics: Arc<InstallPipelineMetrics>,
   notify_on_stall: bool,
+  abort_handle: AbortHandle,
 ) {
   std::thread::spawn(move || {
     let journal_path = journal::journal_path(&task_root, &plan_id);
@@ -135,6 +138,7 @@ fn spawn_install_stall_watchdog(
           &journal,
           INSTALL_STALL_PAUSE_MESSAGE,
         );
+        abort_handle.abort();
         break;
       }
     }
@@ -261,7 +265,122 @@ pub(crate) fn default_concurrency() -> usize {
 }
 
 fn install_download_concurrency(pipeline_concurrency: usize) -> usize {
-  pipeline_concurrency.saturating_mul(2).clamp(1, MAX_CONCURRENCY)
+  pipeline_concurrency.clamp(1, MAX_CONCURRENCY)
+}
+
+/// 组装并发取下载并发的 1/2，最低 1 路，避免低端盘因并行写过多而反向下行。
+fn install_assembly_concurrency(pipeline_concurrency: usize) -> usize {
+  pipeline_concurrency.saturating_div(2).clamp(1, MAX_CONCURRENCY)
+}
+
+/// spool 占用字节的节流缓存：磁盘正常时 500ms 内只全目录扫描一次，
+/// 磁盘抖动时同步扫描在 blocking 线程池执行，不阻塞 async worker。
+#[derive(Default)]
+struct SpoolBytesCache {
+  last_refresh: Option<Instant>,
+  bytes: u64,
+}
+
+async fn refresh_spool_bytes(cache: &Mutex<SpoolBytesCache>, root: &Path) -> u64 {
+  {
+    let guard = cache.lock().unwrap();
+    if let Some(last_refresh) = guard.last_refresh
+      && last_refresh.elapsed() < SPOOL_BYTES_REFRESH_INTERVAL
+    {
+      return guard.bytes;
+    }
+  }
+  let root = root.to_path_buf();
+  let bytes = tauri::async_runtime::spawn_blocking(move || spool_bytes(&root)).await.unwrap_or(0);
+  let mut guard = cache.lock().unwrap();
+  guard.last_refresh = Some(Instant::now());
+  guard.bytes = bytes;
+  bytes
+}
+
+/// 组装 worker 完成栅栏：看门狗中止流水线后，下一次运行会等待旧 worker 结束，
+/// 避免旧 worker 在磁盘恢复后继续写 staging 与新一轮组装互相覆盖。
+struct AssemblyWorkerSlot {
+  active: AtomicUsize,
+  finished: tokio::sync::Notify,
+}
+
+static ASSEMBLY_WORKER_SLOTS: LazyLock<Mutex<HashMap<String, Arc<AssemblyWorkerSlot>>>> =
+  LazyLock::new(|| Mutex::new(HashMap::new()));
+
+struct AssemblyWorkerDoneGuard {
+  slot: Arc<AssemblyWorkerSlot>,
+}
+
+impl Drop for AssemblyWorkerDoneGuard {
+  fn drop(&mut self) {
+    if self.slot.active.fetch_sub(1, Ordering::AcqRel) == 1 {
+      self.slot.finished.notify_waiters();
+    }
+  }
+}
+
+fn assembly_worker_slot(plan_id: &str) -> Arc<AssemblyWorkerSlot> {
+  let mut slots = ASSEMBLY_WORKER_SLOTS.lock().unwrap();
+  Arc::clone(slots.entry(plan_id.to_string()).or_insert_with(|| {
+    Arc::new(AssemblyWorkerSlot {
+      active: AtomicUsize::new(0),
+      finished: tokio::sync::Notify::new(),
+    })
+  }))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_install_assembly_worker(
+  plan_id: &str,
+  plan: Arc<PersistedPlan>,
+  download_index: Arc<assembler::FullInstallDownloadIndex>,
+  asset_index: usize,
+  staging_root: PathBuf,
+  shared_cache_root: PathBuf,
+  spool_root: PathBuf,
+  canceled: Arc<AtomicBool>,
+  telemetry: Arc<assembler::AssemblyTelemetry>,
+) -> tauri::async_runtime::JoinHandle<(Result<(), String>, assembler::AssemblyTiming)> {
+  let slot = assembly_worker_slot(plan_id);
+  slot.active.fetch_add(1, Ordering::AcqRel);
+  let worker_slot = Arc::clone(&slot);
+  tauri::async_runtime::spawn_blocking(move || {
+    let _done = AssemblyWorkerDoneGuard { slot: worker_slot };
+    let mut timing = assembler::AssemblyTiming::default();
+    let result = assembler::assemble_full_install_asset_with_observers(
+      &plan,
+      &download_index,
+      asset_index,
+      &staging_root,
+      &shared_cache_root,
+      &spool_root,
+      &canceled,
+      &mut timing,
+      &telemetry,
+    );
+    (result, timing)
+  })
+}
+
+/// 等待上一次中止流水线遗留的组装 worker 结束；全部结束时返回 true。
+async fn drain_assembly_workers(plan_id: &str, timeout: Duration) -> bool {
+  let Some(slot) = ASSEMBLY_WORKER_SLOTS.lock().unwrap().remove(plan_id) else {
+    return true;
+  };
+  let deadline = Instant::now() + timeout;
+  loop {
+    if slot.active.load(Ordering::Acquire) == 0 {
+      return true;
+    }
+    let remaining = deadline.saturating_duration_since(Instant::now());
+    if remaining.is_zero() {
+      return false;
+    }
+    if tokio::time::timeout(remaining, slot.finished.notified()).await.is_err() {
+      return slot.active.load(Ordering::Acquire) == 0;
+    }
+  }
 }
 
 #[derive(Debug)]
@@ -740,6 +859,20 @@ fn forget_released_spool_file(tracker: &Arc<Mutex<InstallSpoolTracker>>, key: &s
       guard.counted.remove(id);
     }
   }
+}
+
+/// 异步释放 spool 中不再被引用的分片：同步删除移到 blocking 线程池执行。
+async fn release_spool_unneeded_async(
+  tracker: &Arc<Mutex<InstallSpoolTracker>>,
+  plan: &Arc<PersistedPlan>,
+  spool_root: &Path,
+) -> u64 {
+  let tracker = Arc::clone(tracker);
+  let plan = Arc::clone(plan);
+  let spool_root = spool_root.to_path_buf();
+  tauri::async_runtime::spawn_blocking(move || release_spool_unneeded(&tracker, &plan, &spool_root))
+    .await
+    .unwrap_or(0)
 }
 
 fn apply_install_completion_snapshot(
@@ -2965,24 +3098,50 @@ async fn run_install_streaming_supervisor(
         break;
       }
     };
+    if !drain_assembly_workers(&plan.plan_id, INSTALL_ABORT_DRAIN_TIMEOUT).await {
+      log::error!(
+        "[game-install][{}] 上一次中止流水线的组装 worker 未在超时内结束，任务保持暂停状态",
+        plan.plan_id
+      );
+      let mut value = journal.lock().await;
+      if value.state == PackageTaskState::Queued {
+        value.state = PackageTaskState::Paused;
+        value.error_message = Some(INSTALL_STALL_PAUSE_MESSAGE.to_string());
+        value.current_file = None;
+        value.download_current_file = None;
+        value.assembly_current_file = None;
+        value.bytes_per_second = 0;
+        value.eta_seconds = None;
+        value.touch();
+        let _ = journal::persist(&task_root, &value);
+        let _ = journal::forget_progress(&task_root, &value.task_id);
+        emit_state(&app_handle, &value.summary());
+      }
+      break;
+    }
     let stall_pause_requested = Arc::new(AtomicBool::new(false));
-    run_install_streaming_task(
-      app_handle.clone(),
-      task_root.clone(),
-      shared_cache_root.clone(),
-      spool_root.clone(),
-      plan.clone(),
-      download_client.clone(),
-      Arc::clone(&journal),
-      Arc::clone(&canceled),
-      paused,
-      concurrency,
-      max_bytes_per_second,
-      context.clone(),
-      Arc::clone(&stall_pause_requested),
-      retry_budget_exhausted,
-    )
-    .await;
+    let (abort_handle, abort_registration) = futures_util::future::AbortHandle::new_pair();
+    let pipeline = futures_util::future::Abortable::new(
+      run_install_streaming_task(
+        app_handle.clone(),
+        task_root.clone(),
+        shared_cache_root.clone(),
+        spool_root.clone(),
+        plan.clone(),
+        download_client.clone(),
+        Arc::clone(&journal),
+        Arc::clone(&canceled),
+        paused,
+        concurrency,
+        max_bytes_per_second,
+        context.clone(),
+        Arc::clone(&stall_pause_requested),
+        retry_budget_exhausted,
+        abort_handle.clone(),
+      ),
+      abort_registration,
+    );
+    let _ = pipeline.await;
 
     if !stall_pause_requested.load(Ordering::Acquire)
       || canceled.load(Ordering::Acquire)
@@ -3074,6 +3233,7 @@ async fn run_install_streaming_task(
   context: InstallContext,
   stall_pause_requested: Arc<AtomicBool>,
   notify_on_stall: bool,
+  abort_handle: AbortHandle,
 ) {
   let pipeline_started_at = Instant::now();
   let plan = Arc::new(plan);
@@ -3146,12 +3306,34 @@ async fn run_install_streaming_task(
     }
   };
   metrics.record_recovery_validation(completed_assets.len(), recovery_started_at.elapsed());
-  let spool_tracker = Arc::new(Mutex::new(InstallSpoolTracker::from_disk(
-    &plan,
-    &spool_root,
-    &shared_cache_root,
-    completed_assets,
-  )));
+  let tracker_plan = Arc::clone(&plan);
+  let tracker_spool_root = spool_root.clone();
+  let tracker_shared_cache_root = shared_cache_root.clone();
+  let spool_tracker = match tauri::async_runtime::spawn_blocking(move || {
+    InstallSpoolTracker::from_disk(
+      &tracker_plan,
+      &tracker_spool_root,
+      &tracker_shared_cache_root,
+      completed_assets,
+    )
+  })
+  .await
+  {
+    Ok(tracker) => Arc::new(Mutex::new(tracker)),
+    Err(error) => {
+      persist_install_stream_error(
+        &task_root,
+        &app_handle,
+        &journal,
+        format!("恢复资源状态 worker 异常退出：{error}"),
+        false,
+        false,
+      )
+      .await;
+      return;
+    }
+  };
+  let spool_bytes_cache = Arc::new(Mutex::new(SpoolBytesCache::default()));
   let start_cursor_result = {
     let mut value = journal.lock().await;
     (|| -> Result<usize, String> {
@@ -3197,6 +3379,7 @@ async fn run_install_streaming_task(
     Arc::clone(&canceled),
     Arc::clone(&metrics),
     notify_on_stall,
+    abort_handle,
   );
   if concurrency > 1 {
     if let Err(error) = run_install_bounded_asset_pipeline(
@@ -3216,6 +3399,7 @@ async fn run_install_streaming_task(
       &limiter,
       &staging_root,
       &spool_tracker,
+      &spool_bytes_cache,
     )
     .await
     {
@@ -3263,8 +3447,8 @@ async fn run_install_streaming_task(
           .await;
           return;
         };
-        if !cached_chunk_matches(&shared_cache_root, download)
-          && !cached_chunk_matches(&spool_root, download)
+        if !cached_chunk_matches_async(&shared_cache_root, download).await
+          && !cached_chunk_matches_async(&spool_root, download).await
         {
           pending.push(download.clone());
         }
@@ -3327,7 +3511,7 @@ async fn run_install_streaming_task(
             let mut value = journal.lock().await;
             value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
             value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
-            value.spool_bytes = spool_bytes(&spool_root);
+            value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
             metrics.observe_spool(value.spool_bytes);
             value.touch();
             if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
@@ -3380,22 +3564,18 @@ async fn run_install_streaming_task(
       let assemble_telemetry = Arc::clone(&metrics.assembly_telemetry);
       let assembly_started_at = metrics.begin_assembly();
       emit_active_assembly_count(&app_handle, &journal, &metrics).await;
-      let assembly_worker_result = tauri::async_runtime::spawn_blocking(move || {
-        let mut timing = assembler::AssemblyTiming::default();
-        let result = assembler::assemble_full_install_asset_with_observers(
-          &assemble_plan,
-          &assemble_download_index,
-          asset_index,
-          &assemble_staging,
-          &assemble_shared,
-          &assemble_spool,
-          &assemble_canceled,
-          &mut timing,
-          &assemble_telemetry,
-        );
-        (result, timing)
-      })
-      .await;
+      let assembly_worker = spawn_install_assembly_worker(
+        &plan.plan_id,
+        assemble_plan,
+        assemble_download_index,
+        asset_index,
+        assemble_staging,
+        assemble_shared,
+        assemble_spool,
+        assemble_canceled,
+        assemble_telemetry,
+      );
+      let assembly_worker_result = assembly_worker.await;
       let assembly_elapsed = metrics.finish_assembly(assembly_started_at);
       emit_active_assembly_count(&app_handle, &journal, &metrics).await;
       let assembly_result = match assembly_worker_result {
@@ -3431,7 +3611,7 @@ async fn run_install_streaming_task(
         return;
       }
       let mut value = journal.lock().await;
-      value.spool_bytes = spool_bytes(&spool_root);
+      value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
       {
         let mut tracker_value = spool_tracker.lock().unwrap();
         tracker_value.mark_asset_completed(&plan, asset_index);
@@ -3447,9 +3627,9 @@ async fn run_install_streaming_task(
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
         return;
       }
-      let released = release_spool_unneeded(&spool_tracker, &plan, &spool_root);
+      let released = release_spool_unneeded_async(&spool_tracker, &plan, &spool_root).await;
       value.released_bytes = value.released_bytes.saturating_add(released);
-      value.spool_bytes = spool_bytes(&spool_root);
+      value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
       metrics.observe_spool(value.spool_bytes);
       value.touch();
       if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
@@ -3505,6 +3685,7 @@ async fn run_install_streaming_task(
     &limiter,
     &staging_root,
     &spool_tracker,
+    &spool_bytes_cache,
   )
   .await
   {
@@ -3538,8 +3719,8 @@ async fn run_install_streaming_task(
       .await;
       return;
     };
-    if !cached_chunk_matches(&shared_cache_root, download)
-      && !cached_chunk_matches(&spool_root, download)
+    if !cached_chunk_matches_async(&shared_cache_root, download).await
+      && !cached_chunk_matches_async(&spool_root, download).await
     {
       if let Err(error) = check_install_stream_space(
         &plan,
@@ -3608,7 +3789,7 @@ async fn run_install_streaming_task(
         value.downloaded_bytes.saturating_add(download.compressed_size).min(value.total_bytes);
       value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
       value.download_current_file = None;
-      value.spool_bytes = spool_bytes(&spool_root);
+      value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
       value.touch();
       if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
         persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -3625,7 +3806,7 @@ async fn run_install_streaming_task(
     value.current_file = None;
     value.bytes_per_second = 0;
     value.eta_seconds = None;
-    value.spool_bytes = spool_bytes(&spool_root);
+    value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
     value.touch();
     if let Err(error) = persist_install_checkpoint(&task_root, &value, &metrics) {
       persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
@@ -3718,6 +3899,7 @@ async fn run_install_prepublish_repair(
   limiter: &Arc<RateLimiter>,
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
+  spool_bytes_cache: &Arc<Mutex<SpoolBytesCache>>,
 ) -> Result<(), String> {
   loop {
     let validation_plan = Arc::clone(plan);
@@ -3808,6 +3990,7 @@ async fn run_install_prepublish_repair(
       staging_root.to_path_buf(),
       network_concurrency,
       Arc::clone(spool_tracker),
+      Arc::clone(spool_bytes_cache),
     )
     .await;
     completion.result?;
@@ -3833,9 +4016,9 @@ async fn run_install_prepublish_repair(
     value.current_file = value.assembly_current_file.clone();
     value.touch();
     persist_install_checkpoint(task_root, &value, metrics)?;
-    let released = release_spool_unneeded(spool_tracker, plan, spool_root);
+    let released = release_spool_unneeded_async(spool_tracker, plan, spool_root).await;
     value.released_bytes = value.released_bytes.saturating_add(released);
-    value.spool_bytes = spool_bytes(spool_root);
+    value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
     value.touch();
     persist_install_progress(task_root, &value, metrics)?;
     emit_progress(app_handle, &value.summary());
@@ -3859,12 +4042,13 @@ async fn run_install_bounded_asset_pipeline(
   limiter: &Arc<RateLimiter>,
   staging_root: &Path,
   spool_tracker: &Arc<Mutex<InstallSpoolTracker>>,
+  spool_bytes_cache: &Arc<Mutex<SpoolBytesCache>>,
 ) -> Result<(), String> {
-  // 网络对象通常小于最终资源文件，允许下载使用双倍槽位来隐藏连接延迟；组装仍按
-  // 流水线并发限制，避免机械盘或低端 SSD 因并行写入过多而反向降速。
+  // 下载并发与流水线并发一致（与 CPU 核心数对齐）；组装取下载并发的 1/2，
+  // 避免机械盘或低端 SSD 因并行写入过多而反向降速。
   let network_concurrency = install_download_concurrency(concurrency);
   let download_slots = Arc::new(Semaphore::new(network_concurrency));
-  let assembly_slots = Arc::new(Semaphore::new(concurrency.max(1)));
+  let assembly_slots = Arc::new(Semaphore::new(install_assembly_concurrency(concurrency)));
   let mut asset_cursor = {
     let mut value = journal.lock().await;
     let snapshot = spool_tracker.lock().unwrap().completion_snapshot(plan);
@@ -3881,7 +4065,7 @@ async fn run_install_bounded_asset_pipeline(
   let max_in_flight = concurrency.max(1).saturating_mul(2);
   let mut next_asset_index = asset_cursor;
   let mut reserved_spool_bytes = 0_u64;
-  let mut scheduled_downloads = HashSet::<String>::new();
+  let scheduled_downloads = Arc::new(Mutex::new(HashSet::<String>::new()));
   let download_guards = Arc::new(AsyncMutex::new(HashMap::<String, Arc<AsyncMutex<()>>>::new()));
   let mut jobs = futures_util::stream::FuturesUnordered::new();
   let mut first_error = None;
@@ -3898,33 +4082,55 @@ async fn run_install_bounded_asset_pipeline(
         next_asset_index = next_asset_index.saturating_add(1);
         continue;
       }
-      let job = match prepare_install_asset_job(
-        plan,
-        download_index,
-        next_asset_index,
-        shared_cache_root,
-        spool_root,
-        &scheduled_downloads,
-        metrics,
-      ) {
-        Ok(job) => job,
-        Err(error) => {
+      let current_spool = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
+      let scheduled_plan = Arc::clone(plan);
+      let scheduled_index = Arc::clone(download_index);
+      let scheduled_shared = shared_cache_root.to_path_buf();
+      let scheduled_spool = spool_root.to_path_buf();
+      let scheduled_set = Arc::clone(&scheduled_downloads);
+      let scheduled_metrics = Arc::clone(metrics);
+      let schedule_result = tauri::async_runtime::spawn_blocking(move || {
+        let scheduled = scheduled_set.lock().unwrap();
+        let job = prepare_install_asset_job(
+          &scheduled_plan,
+          &scheduled_index,
+          next_asset_index,
+          &scheduled_shared,
+          &scheduled_spool,
+          &scheduled,
+          &scheduled_metrics,
+        )?;
+        let space = check_install_stream_space_with_spool(
+          &scheduled_plan,
+          asset_cursor,
+          &job.pending,
+          current_spool,
+        );
+        Ok::<_, String>((job, space))
+      })
+      .await;
+      let (job, space) = match schedule_result {
+        Ok(Ok(result)) => result,
+        Ok(Err(error)) => {
           first_error.get_or_insert(error);
           break;
         }
+        Err(error) => {
+          first_error.get_or_insert(error.to_string());
+          break;
+        }
       };
-      let projected_spool = spool_bytes(spool_root)
-        .saturating_add(reserved_spool_bytes)
-        .saturating_add(job.reserved_bytes);
+      let projected_spool =
+        current_spool.saturating_add(reserved_spool_bytes).saturating_add(job.reserved_bytes);
       if projected_spool > spool_budget && !jobs.is_empty() {
         break;
       }
-      if let Err(error) = check_install_stream_space(plan, asset_cursor, &job.pending, spool_root) {
+      if let Err(error) = space {
         first_error.get_or_insert(error);
         break;
       }
       for download_id in &job.scheduled_download_ids {
-        scheduled_downloads.insert(download_id.clone());
+        scheduled_downloads.lock().unwrap().insert(download_id.clone());
       }
       reserved_spool_bytes = reserved_spool_bytes.saturating_add(job.reserved_bytes);
       next_asset_index = next_asset_index.saturating_add(1);
@@ -3950,6 +4156,7 @@ async fn run_install_bounded_asset_pipeline(
         staging_root.to_path_buf(),
         network_concurrency,
         Arc::clone(spool_tracker),
+        Arc::clone(spool_bytes_cache),
       ));
     }
     if scheduled_count > 0 {
@@ -3996,20 +4203,20 @@ async fn run_install_bounded_asset_pipeline(
               &plan.assets[completion.asset_index].name,
             )
           });
-        value.spool_bytes = spool_bytes(spool_root);
+        value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
         metrics.observe_spool(value.spool_bytes);
         value.touch();
-        let progress_result = (|| -> Result<(), String> {
-          persist_install_checkpoint(task_root, &value, metrics)?;
-          let released = release_spool_unneeded(spool_tracker, plan, spool_root);
+        if let Err(error) = persist_install_checkpoint(task_root, &value, metrics) {
+          first_error.get_or_insert(error);
+        } else {
+          let released = release_spool_unneeded_async(spool_tracker, plan, spool_root).await;
           value.released_bytes = value.released_bytes.saturating_add(released);
-          value.spool_bytes = spool_bytes(spool_root);
+          value.spool_bytes = refresh_spool_bytes(spool_bytes_cache, spool_root).await;
           metrics.observe_spool(value.spool_bytes);
           value.touch();
-          persist_install_progress(task_root, &value, metrics)
-        })();
-        if let Err(error) = progress_result {
-          first_error.get_or_insert(error);
+          if let Err(error) = persist_install_progress(task_root, &value, metrics) {
+            first_error.get_or_insert(error);
+          }
         }
         emit_progress(app_handle, &value.summary());
       }
@@ -4080,6 +4287,7 @@ async fn run_install_asset_job(
   staging_root: PathBuf,
   network_concurrency: usize,
   spool_tracker: Arc<Mutex<InstallSpoolTracker>>,
+  spool_bytes_cache: Arc<Mutex<SpoolBytesCache>>,
 ) -> InstallAssetJobCompletion {
   let InstallAssetJob { asset_index, pending, reserved_bytes, .. } = job;
   let mut assembly_elapsed = None;
@@ -4105,7 +4313,9 @@ async fn run_install_asset_job(
           )
         };
         let _download_guard = download_guard.lock().await;
-        if cached_chunk_matches(&shared_root, &download) || cached_chunk_matches(&root, &download) {
+        if cached_chunk_matches_async(&shared_root, &download).await
+          || cached_chunk_matches_async(&root, &download).await
+        {
           return Ok(None);
         }
         let permit =
@@ -4151,7 +4361,7 @@ async fn run_install_asset_job(
           value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
           value.download_current_file =
             (value.downloaded_bytes < value.total_bytes).then_some(label);
-          value.spool_bytes = spool_bytes(&spool_root);
+          value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
           metrics.observe_spool(value.spool_bytes);
           value.touch();
           if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
@@ -4192,22 +4402,18 @@ async fn run_install_asset_job(
     let assemble_telemetry = Arc::clone(&metrics.assembly_telemetry);
     let assembly_started_at = metrics.begin_assembly();
     emit_active_assembly_count(&app_handle, &journal, &metrics).await;
-    let worker_result = tauri::async_runtime::spawn_blocking(move || {
-      let mut timing = assembler::AssemblyTiming::default();
-      let result = assembler::assemble_full_install_asset_with_observers(
-        &assemble_plan,
-        &assemble_download_index,
-        asset_index,
-        &assemble_staging,
-        &assemble_shared,
-        &assemble_spool,
-        &assemble_canceled,
-        &mut timing,
-        &assemble_telemetry,
-      );
-      (result, timing)
-    })
-    .await;
+    let worker = spawn_install_assembly_worker(
+      &plan.plan_id,
+      assemble_plan,
+      assemble_download_index,
+      asset_index,
+      assemble_staging,
+      assemble_shared,
+      assemble_spool,
+      assemble_canceled,
+      assemble_telemetry,
+    );
+    let worker_result = worker.await;
     assembly_elapsed = Some(metrics.finish_assembly(assembly_started_at));
     drop(assembly_permit);
     emit_active_assembly_count(&app_handle, &journal, &metrics).await;
@@ -5241,11 +5447,11 @@ fn rebuild_completed_cache_with_fallback(
   journal.spool_bytes = spool_bytes(spool_root);
 }
 
-fn check_install_stream_space<'a>(
+fn check_install_stream_space_with_spool<'a>(
   plan: &PersistedPlan,
   asset_index: usize,
   pending: impl IntoIterator<Item = &'a PlanDownload>,
-  spool_root: &Path,
+  current_spool: u64,
 ) -> Result<(), String> {
   let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
   let remaining_assets = plan.assets.iter().skip(asset_index).try_fold(0_u64, |total, asset| {
@@ -5254,7 +5460,6 @@ fn check_install_stream_space<'a>(
   let pending_bytes = pending.into_iter().try_fold(0_u64, |total, download| {
     total.checked_add(download.compressed_size).ok_or_else(|| "下载空间需求溢出".to_string())
   })?;
-  let current_spool = spool_bytes(spool_root);
   let sdk_bytes = if asset_index >= plan.assets.len() {
     overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size)
   } else {
@@ -5272,6 +5477,15 @@ fn check_install_stream_space<'a>(
     return Err(format!("安装磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
   }
   Ok(())
+}
+
+fn check_install_stream_space<'a>(
+  plan: &PersistedPlan,
+  asset_index: usize,
+  pending: impl IntoIterator<Item = &'a PlanDownload>,
+  spool_root: &Path,
+) -> Result<(), String> {
+  check_install_stream_space_with_spool(plan, asset_index, pending, spool_bytes(spool_root))
 }
 
 fn spool_bytes(root: &Path) -> u64 {

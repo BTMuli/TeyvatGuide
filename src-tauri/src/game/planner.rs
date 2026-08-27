@@ -1885,6 +1885,14 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
   matches
 }
 
+pub(crate) async fn cached_chunk_matches_async(cache_root: &Path, download: &PlanDownload) -> bool {
+  let cache_root = cache_root.to_path_buf();
+  let download = download.clone();
+  tauri::async_runtime::spawn_blocking(move || cached_chunk_matches(&cache_root, &download))
+    .await
+    .unwrap_or(false)
+}
+
 /// 校验任意路径下的普通文件是否与计划下载对象一致；不读写缓存校验索引。
 ///
 /// 供安装任务放弃时把任务私有 spool 分片并入共享缓存前复核使用，避免把
