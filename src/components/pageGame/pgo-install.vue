@@ -302,11 +302,10 @@ import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
-  addGameInstallDefenderExclusions,
   cancelGameInstallDraft,
   createGameInstallDraft,
   createGameInstallPlan,
-  getGameInstallDraftDirs,
+  ensureGameInstallDefenderExclusions,
   inspectGameInstallLocation,
   removeGameInstallDefenderExclusions,
 } from "@utils/TGGameLauncher.js";
@@ -683,38 +682,13 @@ async function startInstall(): Promise<void> {
   if (draft.value === null || plan.value === null) return;
   const currentDraft = draft.value;
   const currentPlan = plan.value;
-  let dirs: TGApp.Game.Installation.InstallDraftDirs;
-  try {
-    dirs = await getGameInstallDraftDirs(currentDraft.installId);
-  } catch (error) {
-    errorMessage.value = String(error);
-    showSnackbar.error(`读取安装目录失败：${error}`);
-    return;
-  }
-  const exclusionText = [
-    "为避免 Defender 实时防护扫描导致安装磁盘 I/O 停滞，开始安装前将临时把以下目录加入排除列表，安装完成后自动移出：",
-    `目标目录：${dirs.targetRoot}`,
-    `临时 spool：${dirs.spoolRoot}`,
-    `下载缓存：${dirs.downloadRoot}`,
-    "",
-    "此操作需要 UAC 管理员授权。",
-  ].join("\n");
-  const confirmed = await showDialog.checkF({
-    title: "添加 Windows Defender 排除",
-    text: exclusionText,
-    confirmLabel: "添加排除并开始安装",
-  });
-  if (confirmed !== true) return;
-  busy.value = true;
   errorMessage.value = null;
-  try {
-    await addGameInstallDefenderExclusions(currentDraft.installId, currentPlan.planId);
-  } catch (error) {
-    errorMessage.value = String(error);
-    showSnackbar.error(`添加 Defender 排除失败：${error}`);
-    busy.value = false;
-    return;
-  }
+  const ready = await ensureGameInstallDefenderExclusions(
+    currentDraft.installId,
+    currentPlan.planId,
+  );
+  if (!ready) return;
+  busy.value = true;
   visible.value = false;
   emit("completed");
   try {

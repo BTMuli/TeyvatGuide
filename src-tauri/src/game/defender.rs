@@ -1,6 +1,6 @@
 //! Windows Defender 排除目录的临时管理与提权执行。
-//! 全新安装前将目标目录、临时 spool 与下载缓存加入 Defender 白名单，
-//! 安装结束后自动移出，避免实时防护扫描造成磁盘 I/O 停滞。
+//! 全新安装前将目标目录、临时 spool、暂存目录、下载缓存与任务 journal
+//! 加入 Defender 白名单，安装结束后自动移出，避免实时防护扫描造成磁盘 I/O 停滞。
 
 use serde::{Deserialize, Serialize};
 use std::{
@@ -22,13 +22,29 @@ pub(crate) struct InstallDefenderDirs {
   pub(crate) target_root: String,
   /// 安装任务临时 spool 目录。
   pub(crate) spool_root: String,
+  /// 安装组装暂存目录；下载期并行写入完整游戏文件。
+  #[serde(default)]
+  pub(crate) staging_root: String,
   /// 游戏资源下载缓存目录。
   pub(crate) download_root: String,
+  /// 当前安装任务 journal 目录。
+  #[serde(default)]
+  pub(crate) journal_root: String,
 }
 
 impl InstallDefenderDirs {
   pub(crate) fn paths(&self) -> Vec<String> {
-    vec![self.target_root.clone(), self.spool_root.clone(), self.download_root.clone()]
+    [
+      self.target_root.as_str(),
+      self.spool_root.as_str(),
+      self.staging_root.as_str(),
+      self.download_root.as_str(),
+      self.journal_root.as_str(),
+    ]
+    .into_iter()
+    .filter(|path| !path.is_empty())
+    .map(str::to_string)
+    .collect()
   }
 }
 
@@ -45,10 +61,20 @@ pub(crate) fn resolve_install_dirs(
     &draft.marker_nonce[..12]
   ));
   let download_root = super::downloader::prepare_cache_root(task_root)?;
+  let journal_root = draft.plan_id.as_deref().map_or_else(
+    || task_root.join("tasks"),
+    |plan_id| {
+      super::journal::journal_path(task_root, plan_id)
+        .parent()
+        .map_or_else(|| task_root.join("tasks"), Path::to_path_buf)
+    },
+  );
   Ok(InstallDefenderDirs {
     target_root: draft.game_root,
     spool_root: path_text(&spool_root),
+    staging_root: draft.staging_root,
     download_root: path_text(&download_root),
+    journal_root: path_text(&journal_root),
   })
 }
 
@@ -61,7 +87,9 @@ pub(crate) fn print_dirs(action: &str, dirs: &InstallDefenderDirs) {
   println!("[defender] {action}");
   println!("[defender]   目标目录：{}", dirs.target_root);
   println!("[defender]   临时 spool：{}", dirs.spool_root);
+  println!("[defender]   暂存目录：{}", dirs.staging_root);
   println!("[defender]   下载缓存：{}", dirs.download_root);
+  println!("[defender]   任务日志：{}", dirs.journal_root);
 }
 
 /// 将待移出目录打印到终端。
@@ -255,6 +283,19 @@ pub(crate) fn load_registry(task_root: &Path, plan_id: &str) -> Option<InstallDe
   }
 }
 
+/// 指定安装计划是否已成功登记 Defender 排除。
+pub(crate) fn has_registry(task_root: &Path, plan_id: &str) -> bool {
+  load_registry(task_root, plan_id).is_some()
+}
+
+/// 启动或恢复全新安装前要求已登记 Defender 排除。
+pub(crate) fn require_registry(task_root: &Path, plan_id: &str) -> Result<(), String> {
+  if has_registry(task_root, plan_id) {
+    return Ok(());
+  }
+  Err("请先将安装目录加入 Windows Defender 排除列表".to_string())
+}
+
 /// 删除指定安装任务的排除登记；登记缺失时静默成功。
 pub(crate) fn remove_registry(task_root: &Path, plan_id: &str) {
   let path = registry_path(task_root, plan_id);
@@ -319,5 +360,46 @@ pub(crate) fn sweep_stale_exclusions(task_root: &Path) -> Result<(), String> {
   match first_error {
     Some(error) => Err(error),
     None => Ok(()),
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::InstallDefenderDirs;
+
+  #[test]
+  fn paths_skip_empty_optional_dirs() {
+    let dirs = InstallDefenderDirs {
+      target_root: "D:/Games/Genshin".to_string(),
+      spool_root: "D:/Games/.teyvatguide-spool-1".to_string(),
+      staging_root: String::new(),
+      download_root: "C:/AppData/game-tasks/cache/chunks".to_string(),
+      journal_root: String::new(),
+    };
+    assert_eq!(
+      dirs.paths(),
+      vec![
+        "D:/Games/Genshin".to_string(),
+        "D:/Games/.teyvatguide-spool-1".to_string(),
+        "C:/AppData/game-tasks/cache/chunks".to_string(),
+      ]
+    );
+  }
+
+  #[test]
+  fn require_registry_rejects_missing_plan() {
+    let error = super::require_registry(std::path::Path::new("C:/missing-task-root"), "plan-1")
+      .expect_err("missing registry is rejected");
+    assert!(error.contains("Windows Defender"));
+  }
+
+  #[test]
+  fn registry_without_new_fields_still_deserializes() {
+    let dirs: InstallDefenderDirs =
+      serde_json::from_str(r#"{"targetRoot":"D:/g","spoolRoot":"D:/s","downloadRoot":"C:/c"}"#)
+        .expect("legacy registry deserializes");
+    assert!(dirs.staging_root.is_empty());
+    assert!(dirs.journal_root.is_empty());
+    assert_eq!(dirs.paths().len(), 3);
   }
 }

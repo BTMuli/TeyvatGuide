@@ -3,6 +3,8 @@
  * @since Beta v0.11.5
  */
 
+import showDialog from "@comp/func/dialog.js";
+import showSnackbar from "@comp/func/snackbar.js";
 import {
   Channel,
   invoke as tauriInvoke,
@@ -258,7 +260,7 @@ export async function startGameInstall(
  * 读取全新安装需要临时排除 Windows Defender 扫描的目录集合。
  * @since Beta v0.11.5
  * @param installId - 安装草案身份
- * @returns 目标目录、临时 spool 与下载缓存路径
+ * @returns 目标目录、临时 spool、暂存目录、下载缓存与任务日志路径
  */
 export async function getGameInstallDraftDirs(
   installId: string,
@@ -286,12 +288,72 @@ export async function addGameInstallDefenderExclusions(
 }
 
 /**
+ * 查询指定安装计划是否已成功登记 Defender 排除。
+ * @since Beta v0.11.5
+ * @param planId - 已固化的安装计划 ID
+ * @returns 已登记时为 true
+ */
+export async function hasGameInstallDefenderExclusions(planId: string): Promise<boolean> {
+  return await invoke<boolean>("game_install_defender_exclude_status", { planId });
+}
+
+/**
  * 将全新安装临时加入白名单的目录移出（触发 UAC 授权）。
  * @since Beta v0.11.5
  * @param planId - 已固化的安装计划 ID
  */
 export async function removeGameInstallDefenderExclusions(planId: string): Promise<void> {
   await invoke("game_install_defender_exclude_remove", { planId });
+}
+
+/**
+ * 确认全新安装目录已加入 Windows Defender 排除。
+ * 已有登记则直接通过；否则弹出确认并在已有 planId 时提权添加。
+ * 草稿尚无 planId 时只完成确认，由调用方在计划固化后补登记。
+ * @since Beta v0.11.5
+ * @param installId - 安装草案身份
+ * @param planId - 已固化的安装计划 ID；评估中草稿可为 null
+ * @param confirmLabel - 确认按钮文案
+ * @returns 已就绪或用户确认后为 true；取消或添加失败为 false
+ */
+export async function ensureGameInstallDefenderExclusions(
+  installId: string,
+  planId: string | null,
+  confirmLabel = "添加排除并开始安装",
+): Promise<boolean> {
+  if (planId !== null && (await hasGameInstallDefenderExclusions(planId))) {
+    return true;
+  }
+  let dirs: TGApp.Game.Installation.InstallDraftDirs;
+  try {
+    dirs = await getGameInstallDraftDirs(installId);
+  } catch (error) {
+    showSnackbar.error(`读取安装目录失败：${error}`);
+    return false;
+  }
+  const confirmed = await showDialog.checkF({
+    title: "添加 Windows Defender 排除",
+    text: [
+      "为避免 Defender 实时防护扫描导致安装磁盘 I/O 停滞，开始安装前将临时把以下目录加入排除列表，安装完成后自动移出：",
+      `目标目录：${dirs.targetRoot}`,
+      `临时 spool：${dirs.spoolRoot}`,
+      `暂存目录：${dirs.stagingRoot}`,
+      `下载缓存：${dirs.downloadRoot}`,
+      `任务日志：${dirs.journalRoot}`,
+      "",
+      "此操作需要 UAC 管理员授权。",
+    ].join("\n"),
+    confirmLabel,
+  });
+  if (confirmed !== true) return false;
+  if (planId === null) return true;
+  try {
+    await addGameInstallDefenderExclusions(installId, planId);
+    return true;
+  } catch (error) {
+    showSnackbar.error(`添加 Defender 排除失败：${error}`);
+    return false;
+  }
 }
 
 export async function getGameInstallStatus(

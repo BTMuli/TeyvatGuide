@@ -112,8 +112,12 @@ declare namespace TGApp.Game.Installation {
     targetRoot: string;
     /** 安装任务临时 spool 目录。 */
     spoolRoot: string;
+    /** 安装组装暂存目录。 */
+    stagingRoot: string;
     /** 游戏资源下载缓存目录。 */
     downloadRoot: string;
+    /** 当前安装任务 journal 目录。 */
+    journalRoot: string;
   };
 
   /** 新安装向导选择目录后的后端校验结果。 */

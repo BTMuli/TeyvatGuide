@@ -493,6 +493,7 @@ pub async fn game_install_start(
   if plan.installation_id != draft.install_id {
     return Err("安装计划与草稿不匹配".to_string());
   }
+  defender::require_registry(&task_root, &plan_id)?;
   let client = create_http_client()?;
   let branches = get_game_branches(&client, draft.scheme).await?;
   let plan = hydrate_and_validate_install_plan(
@@ -534,7 +535,8 @@ pub async fn game_install_draft_dirs(
   defender::resolve_install_dirs(&task_root, &install_id)
 }
 
-/// 将全新安装涉及的目标目录、临时 spool 与下载缓存加入 Windows Defender 排除列表。
+/// 将全新安装涉及的目标目录、临时 spool、暂存目录、下载缓存与任务 journal
+/// 加入 Windows Defender 排除列表。
 /// 需要 UAC 授权；成功后目录路径会打印到终端，并在安装结束后自动移出。
 #[tauri::command]
 pub async fn game_install_defender_exclude_add(
@@ -558,6 +560,16 @@ pub async fn game_install_defender_exclude_add(
     return Err(error);
   }
   Ok(paths)
+}
+
+/// 查询指定安装计划是否已成功登记 Defender 排除。
+#[tauri::command]
+pub fn game_install_defender_exclude_status(
+  app_handle: AppHandle,
+  plan_id: String,
+) -> Result<bool, String> {
+  let task_root = game_task_root(&app_handle)?;
+  Ok(defender::has_registry(&task_root, &plan_id))
 }
 
 /// 将全新安装临时加入白名单的目录移出 Windows Defender 排除列表（UAC 提权）。
@@ -619,6 +631,9 @@ pub async fn game_install_recover(
   let draft = installer::load_draft(&task_root, &draft_id)?;
   if plan.installation_id != draft.install_id || journal_value.installation_id != draft.install_id {
     return Err("安装恢复身份不匹配".to_string());
+  }
+  if matches!(action, PackageRecoveryAction::Resume) {
+    defender::require_registry(&task_root, &journal_value.plan_id)?;
   }
   if matches!(action, PackageRecoveryAction::Resume | PackageRecoveryAction::RestoreMarker)
     && manager.is_task_running(&task_id, &install_id)?

@@ -125,7 +125,11 @@ import useUserStore from "@store/user.js";
 import { listen } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { tryLaunchGame } from "@utils/TGGame.js";
-import { listGameInstallDrafts, listGameInstallations } from "@utils/TGGameLauncher.js";
+import {
+  ensureGameInstallDefenderExclusions,
+  listGameInstallDrafts,
+  listGameInstallations,
+} from "@utils/TGGameLauncher.js";
 import { TGPerf } from "@utils/TGPerf.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from "vue";
@@ -328,6 +332,12 @@ async function handleInstallTaskPause(task: TGApp.Game.Package.TaskSummary): Pro
 async function handleInstallDraftResume(
   draft: TGApp.Game.Installation.InstallDraftSummary,
 ): Promise<void> {
+  const ready = await ensureGameInstallDefenderExclusions(
+    draft.installId,
+    draft.planId,
+    "添加排除并恢复安装",
+  );
+  if (!ready) return;
   try {
     await taskStore.resumeInstallDraft(draft);
     await refreshPageData();
@@ -373,6 +383,12 @@ async function handleInstallTaskRecover(
     await handleInstallTaskAbandon(task, decision);
     return;
   }
+  const ready = await ensureGameInstallDefenderExclusions(
+    task.installationId,
+    task.planId,
+    "添加排除并恢复安装",
+  );
+  if (!ready) return;
   try {
     const updated = await taskStore.recoverInstall(task.taskId, task.installationId, action);
     if (updated.state === gameEnum.package.taskState.COMPLETED) {

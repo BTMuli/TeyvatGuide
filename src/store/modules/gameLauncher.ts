@@ -7,6 +7,7 @@ import gameEnum from "@enum/game.js";
 import type { UnlistenFn } from "@tauri-apps/api/event";
 import { listen } from "@tauri-apps/api/event";
 import {
+  addGameInstallDefenderExclusions,
   applyGamePackageSwitch,
   applyGamePackageTask,
   cancelGamePackageTask,
@@ -17,11 +18,13 @@ import {
   cancelGameInstall,
   createGameInstallPlan,
   getGamePackageVerifyStatus,
+  hasGameInstallDefenderExclusions,
   listGamePackageTasks,
   pauseGameInstall,
   pauseGamePackageTask,
   recoverGamePackageTask,
   recoverGameInstall,
+  removeGameInstallDefenderExclusions,
   removeGamePackageTask,
   startGameInstall,
   startGamePackageTask,
@@ -372,12 +375,19 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ) {
         await TGPerf.reset();
         await TGPerf.milestone("m0");
-        const plan = await createGameInstallPlan(draft.installId);
-        const task = await startGameInstall(draft.installId, plan.planId);
-        mergeTask(task);
-        return task;
+        const planId = draft.planId ?? (await createGameInstallPlan(draft.installId)).planId;
+        await ensureInstallDefenderRegistry(draft.installId, planId);
+        try {
+          const task = await startGameInstall(draft.installId, planId);
+          mergeTask(task);
+          return task;
+        } catch (error) {
+          void removeGameInstallDefenderExclusions(planId).catch(() => {});
+          throw error;
+        }
       }
       if (draft.planId === null) throw new Error("安装草稿缺少可恢复的安装计划");
+      await ensureInstallDefenderRegistry(draft.installId, draft.planId);
       const task = await recoverGameInstall(
         draft.planId,
         draft.installId,
@@ -388,6 +398,11 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     } finally {
       setPending(draft.draftId, false);
     }
+  }
+
+  async function ensureInstallDefenderRegistry(installId: string, planId: string): Promise<void> {
+    if (await hasGameInstallDefenderExclusions(planId)) return;
+    await addGameInstallDefenderExclusions(installId, planId);
   }
 
   async function cancelInstallDraft(
