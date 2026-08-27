@@ -61,7 +61,7 @@ const INSTALL_STALL_PAUSE_MESSAGE: &str =
 const INSTALL_STALL_NOTIFICATION_TITLE: &str = "游戏安装已暂停";
 const INSTALL_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到磁盘 I/O 持续停滞，请检查磁盘状态后手动继续。";
-/// 配音包同时让 4 个资源占用下载槽；组装与后续包下载重叠。
+/// 配音包同时让 4 个资源占用下载槽；真正下多少仍由这个焦点信号量卡住。
 const AUDIO_DOWNLOAD_FOCUS: usize = 4;
 /// 4 路下载之外再预取 1 个资源，焦点空出后立刻接上下一包。
 const AUDIO_DOWNLOAD_PREFETCH: usize = 1;
@@ -361,6 +361,15 @@ fn install_download_concurrency(pipeline_concurrency: usize) -> usize {
 /// 组装并发与下载默认同一套：跟随流水线 concurrency，最低 4 路，最高 64 路。
 fn install_assembly_concurrency(pipeline_concurrency: usize) -> usize {
   pipeline_concurrency.clamp(MIN_ASSEMBLY_CONCURRENCY, MAX_CONCURRENCY)
+}
+
+/// 配音任务窗口：组装槽 + 4 路下载 + 1 路预取。
+///
+/// 下载焦点仍是 4 路；窗口放大是为了组装吃满时下一波已经在下，避免组装空档。
+fn audio_pipeline_window(pipeline_concurrency: usize) -> usize {
+  install_assembly_concurrency(pipeline_concurrency)
+    .saturating_add(AUDIO_DOWNLOAD_FOCUS)
+    .saturating_add(AUDIO_DOWNLOAD_PREFETCH)
 }
 
 #[derive(Default)]
@@ -3346,7 +3355,7 @@ async fn run_audio_streaming_task(
   .buffer_unordered(concurrency.max(1));
   futures_util::pin_mut!(delete_tasks);
   let max_assembly = install_assembly_concurrency(concurrency);
-  let max_download_jobs = AUDIO_DOWNLOAD_FOCUS.saturating_add(AUDIO_DOWNLOAD_PREFETCH);
+  let max_in_flight = audio_pipeline_window(concurrency);
 
   loop {
     if pipeline_error.is_none()
@@ -3361,13 +3370,13 @@ async fn run_audio_streaming_task(
           prepare_audio_asset_job(&plan, asset_index, &dependencies, &mut available, &cache_root)
         };
         let needs_download = !job.pending.is_empty();
-        if needs_download && inflight_downloads >= max_download_jobs {
+        if needs_download && inflight_downloads >= max_in_flight {
           break;
         }
         if !needs_download && jobs.len() >= max_assembly {
           break;
         }
-        if jobs.len() >= max_assembly.max(max_download_jobs) {
+        if jobs.len() >= max_in_flight {
           break;
         }
         scheduled_assets.insert(asset_index);
