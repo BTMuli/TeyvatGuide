@@ -32,10 +32,6 @@ use uuid::Uuid;
 use xxhash_rust::xxh64::Xxh64;
 
 const PLAN_SCHEMA_VERSION: u32 = 6;
-const LEGACY_PLAN_SCHEMA_VERSION_V5: u32 = 5;
-const LEGACY_PLAN_SCHEMA_VERSION_V4: u32 = 4;
-const LEGACY_PLAN_SCHEMA_VERSION_V3: u32 = 3;
-const LEGACY_PLAN_SCHEMA_VERSION_V2: u32 = 2;
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 const MIN_INSTALL_SPOOL_WINDOW_BYTES: u64 = 256 * 1024 * 1024;
 const MIN_INSTALL_CONCURRENCY: usize = 4;
@@ -148,7 +144,6 @@ pub(crate) struct PersistedPlan {
   pub(crate) downloads: Vec<PlanDownload>,
   pub(crate) assets: Vec<PlanAsset>,
   pub(crate) delete_files: Vec<PlanDelete>,
-  #[serde(default)]
   pub(crate) inventory: Vec<PlanFile>,
   #[serde(default)]
   pub(crate) install_overlay: Option<InstallOverlay>,
@@ -225,7 +220,6 @@ pub(crate) struct PlanDownload {
   pub(crate) expected_hash: String,
   pub(crate) compressed_size: u64,
   pub(crate) decompressed_size: u64,
-  #[serde(default)]
   pub(crate) encoding: PayloadEncoding,
   #[serde(default, skip_serializing)]
   pub(crate) url_prefix: String,
@@ -244,14 +238,11 @@ pub(crate) enum PlanDownloadHashKind {
 }
 
 /// 下载对象写入目标资源前采用的载荷编码。
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub(crate) enum PayloadEncoding {
   Raw,
   Zstd,
-  /// v2 计划未保存编码；仅允许在重新请求远端清单前短暂存在。
-  #[default]
-  LegacyUnspecified,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Serialize)]
@@ -737,13 +728,12 @@ pub(crate) async fn hydrate_and_validate_install_plan(
   }
   fresh.manifest_digest = install_manifest_digest(&fresh.manifest_digest, &overlay)?;
   if fresh.manifest_digest != plan.manifest_digest
-    || !assets_match(&fresh.assets, &plan.assets, false)
+    || !assets_match(&fresh.assets, &plan.assets)
     || !downloads_match(&fresh.downloads, &plan.downloads)
     || fresh.inventory != plan.inventory
   {
     return Err("远端安装资源清单已变化，请重新评估".to_string());
   }
-  plan.schema_version = PLAN_SCHEMA_VERSION;
   plan.downloads = fresh.downloads;
   plan.assets = fresh.assets;
   plan.inventory = fresh.inventory;
@@ -971,18 +961,13 @@ pub(crate) async fn hydrate_and_validate_plan(
     }
   };
   if fresh.manifest_digest != plan.manifest_digest
-    || !assets_match(&fresh.assets, &plan.assets, plan.schema_version != PLAN_SCHEMA_VERSION)
+    || !assets_match(&fresh.assets, &plan.assets)
     || fresh.delete_files != plan.delete_files
     || !downloads_match(&fresh.downloads, &plan.downloads)
-    || !(fresh.inventory == plan.inventory
-      || (matches!(
-        plan.schema_version,
-        LEGACY_PLAN_SCHEMA_VERSION_V2 | LEGACY_PLAN_SCHEMA_VERSION_V3
-      ) && plan.inventory.is_empty()))
+    || fresh.inventory != plan.inventory
   {
     return Err("远端资源清单已变化，请重新评估".to_string());
   }
-  plan.schema_version = PLAN_SCHEMA_VERSION;
   plan.downloads = fresh.downloads;
   plan.assets = fresh.assets;
   plan.inventory = fresh.inventory;
@@ -1045,18 +1030,13 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
     }
   };
   if fresh.manifest_digest != plan.manifest_digest
-    || !assets_match(&fresh.assets, &plan.assets, plan.schema_version != PLAN_SCHEMA_VERSION)
+    || !assets_match(&fresh.assets, &plan.assets)
     || fresh.delete_files != plan.delete_files
     || !downloads_match(&fresh.downloads, &plan.downloads)
-    || !(fresh.inventory == plan.inventory
-      || (matches!(
-        plan.schema_version,
-        LEGACY_PLAN_SCHEMA_VERSION_V2 | LEGACY_PLAN_SCHEMA_VERSION_V3
-      ) && plan.inventory.is_empty()))
+    || fresh.inventory != plan.inventory
   {
     return Err("正式版本资源清单与计划不一致，请重新评估".to_string());
   }
-  plan.schema_version = PLAN_SCHEMA_VERSION;
   plan.downloads = fresh.downloads;
   plan.assets = fresh.assets;
   plan.inventory = fresh.inventory;
@@ -1106,7 +1086,7 @@ async fn hydrate_audio_plan(
   let client = create_http_client()?;
   let fresh = build_audio_manifest_plan(&client, &branches.main, selection).await?;
   if fresh.manifest_digest != plan.manifest_digest
-    || !assets_match(&fresh.assets, &plan.assets, false)
+    || !assets_match(&fresh.assets, &plan.assets)
     || fresh.delete_files != plan.delete_files
     || !downloads_match(&fresh.downloads, &plan.downloads)
     || fresh.inventory != plan.inventory
@@ -1255,18 +1235,18 @@ fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
         && left.expected_hash.eq_ignore_ascii_case(&right.expected_hash)
         && left.compressed_size == right.compressed_size
         && left.decompressed_size == right.decompressed_size
-        && (left.encoding == right.encoding || right.encoding == PayloadEncoding::LegacyUnspecified)
+        && left.encoding == right.encoding
         && left.range_start == right.range_start
         && left.range_length == right.range_length
     })
 }
 
-fn assets_match(left: &[PlanAsset], right: &[PlanAsset], allow_missing_source: bool) -> bool {
+fn assets_match(left: &[PlanAsset], right: &[PlanAsset]) -> bool {
   left.len() == right.len()
     && left.iter().zip(right).all(|(left, right)| {
       left.name == right.name
         && left.action == right.action
-        && (left.source == right.source || (allow_missing_source && right.source.is_none()))
+        && left.source == right.source
         && left.size == right.size
         && left.md5.eq_ignore_ascii_case(&right.md5)
         && left.chunks == right.chunks
@@ -2134,26 +2114,16 @@ pub(crate) fn load_persisted_plan(
 }
 
 fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
-  if !matches!(
-    plan.schema_version,
-    PLAN_SCHEMA_VERSION
-      | LEGACY_PLAN_SCHEMA_VERSION_V5
-      | LEGACY_PLAN_SCHEMA_VERSION_V4
-      | LEGACY_PLAN_SCHEMA_VERSION_V3
-      | LEGACY_PLAN_SCHEMA_VERSION_V2
-  ) || plan.plan_id != plan_id
-  {
+  if plan.schema_version != PLAN_SCHEMA_VERSION || plan.plan_id != plan_id {
     return Err("游戏资源计划版本或身份不匹配".to_string());
   }
   let source_tag_valid = plan.source_tag.as_deref().is_some_and(|source_tag| {
     !source_tag.is_empty() && source_tag.len() <= 128 && !source_tag.chars().any(char::is_control)
   });
-  let install_plan_valid =
-    matches!(plan.schema_version, PLAN_SCHEMA_VERSION | LEGACY_PLAN_SCHEMA_VERSION_V5)
-      && plan.target == PackagePlanTarget::Install
-      && plan.strategy == PackagePlanStrategy::Full
-      && plan.source_tag.is_none()
-      && plan.install_overlay.is_some();
+  let install_plan_valid = plan.target == PackagePlanTarget::Install
+    && plan.strategy == PackagePlanStrategy::Full
+    && plan.source_tag.is_none()
+    && plan.install_overlay.is_some();
   let audio_plan_valid = if plan.target == PackagePlanTarget::Audio {
     plan.schema_version == PLAN_SCHEMA_VERSION
       && plan.strategy == PackagePlanStrategy::ManifestDiff
@@ -2184,14 +2154,6 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   }
   let mut cache_keys = std::collections::HashSet::with_capacity(plan.downloads.len());
   for download in &plan.downloads {
-    let encoding_valid = match plan.schema_version {
-      PLAN_SCHEMA_VERSION
-      | LEGACY_PLAN_SCHEMA_VERSION_V5
-      | LEGACY_PLAN_SCHEMA_VERSION_V4
-      | LEGACY_PLAN_SCHEMA_VERSION_V3 => download.encoding != PayloadEncoding::LegacyUnspecified,
-      LEGACY_PLAN_SCHEMA_VERSION_V2 => download.encoding == PayloadEncoding::LegacyUnspecified,
-      _ => false,
-    };
     let hash_valid = match download.hash_kind {
       PlanDownloadHashKind::XxHash64 => chunk_xxhash64(&download.id).is_some_and(|expected| {
         format!("{expected:016x}").eq_ignore_ascii_case(&download.expected_hash)
@@ -2219,7 +2181,6 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
         .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.'))
       || download.compressed_size == 0
       || download.decompressed_size == 0
-      || !encoding_valid
       || (download.encoding == PayloadEncoding::Raw
         && download.compressed_size != download.decompressed_size)
       || !hash_valid
@@ -2237,12 +2198,10 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   if plan.assets.len() > 500_000
     || plan.delete_files.len() > 500_000
     || plan.inventory.len() > 500_000
-    || (plan.schema_version == PLAN_SCHEMA_VERSION
-      && matches!(
-        plan.strategy,
-        PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch | PackagePlanStrategy::Full
-      )
-      && plan.inventory.is_empty())
+    || (matches!(
+      plan.strategy,
+      PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch | PackagePlanStrategy::Full
+    ) && plan.inventory.is_empty())
   {
     return Err("游戏资源计划文件条目数超过安全上限".to_string());
   }
@@ -2254,8 +2213,9 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
     let source_valid = match (asset.action, &asset.source) {
       (PlanAssetAction::Add, None) | (PlanAssetAction::Repair, None) => true,
       (PlanAssetAction::Modify, Some(source)) => is_md5(&source.md5),
-      (PlanAssetAction::Modify, None) => plan.schema_version != PLAN_SCHEMA_VERSION,
-      (PlanAssetAction::Add, Some(_)) | (PlanAssetAction::Repair, Some(_)) => false,
+      (PlanAssetAction::Modify, None)
+      | (PlanAssetAction::Add, Some(_))
+      | (PlanAssetAction::Repair, Some(_)) => false,
     };
     if !asset_names.insert(asset.name.as_str())
       || !is_md5(&asset.md5)
@@ -2345,17 +2305,14 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   validate_inventory(&plan.inventory)?;
   let inventory =
     plan.inventory.iter().map(|file| (file.name.as_str(), file)).collect::<HashMap<_, _>>();
-  if plan.schema_version == PLAN_SCHEMA_VERSION
-    && matches!(
-      plan.strategy,
-      PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch | PackagePlanStrategy::Full
-    )
-    && plan.assets.iter().any(|asset| {
-      inventory
-        .get(asset.name.as_str())
-        .is_none_or(|file| file.size != asset.size || !file.md5.eq_ignore_ascii_case(&asset.md5))
-    })
-  {
+  if matches!(
+    plan.strategy,
+    PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch | PackagePlanStrategy::Full
+  ) && plan.assets.iter().any(|asset| {
+    inventory
+      .get(asset.name.as_str())
+      .is_none_or(|file| file.size != asset.size || !file.md5.eq_ignore_ascii_case(&asset.md5))
+  }) {
     return Err("plan inventory does not match changed assets".to_string());
   }
   Ok(())

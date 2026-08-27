@@ -743,9 +743,6 @@ where
     return Err("当前组装器只支持 manifest-diff 资源计划".to_string());
   }
   check_canceled(canceled)?;
-  if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
-    return Err("资源计划缺少载荷编码；请重新验证远端清单".to_string());
-  }
   let cache_root = task_root.join("cache").join("chunks");
   let downloads = plan
     .downloads
@@ -783,9 +780,6 @@ where
     return Err("当前差分组装器只支持 patch 资源计划".to_string());
   }
   check_canceled(canceled)?;
-  if plan.downloads.iter().any(|download| download.encoding == PayloadEncoding::LegacyUnspecified) {
-    return Err("资源计划缺少载荷编码；请重新验证远端清单".to_string());
-  }
   let cache_root = task_root.join("cache").join("chunks");
   let downloads = plan
     .downloads
@@ -1160,9 +1154,6 @@ fn validate_asset_layout<L: DownloadLookup>(
         || download.decompressed_size != chunk.decompressed_size
       {
         return Err(format!("资源 chunk 下载元数据不一致：{}", chunk.id));
-      }
-      if download.encoding == PayloadEncoding::LegacyUnspecified {
-        return Err(format!("资源 chunk 缺少载荷编码：{}", chunk.id));
       }
     }
   }
@@ -1554,9 +1545,6 @@ fn write_downloaded_chunk_with_timing(
         }
       }
       result?;
-    }
-    PayloadEncoding::LegacyUnspecified => {
-      return Err(format!("资源 chunk 缺少载荷编码：{}", chunk.id));
     }
   }
   Ok(())

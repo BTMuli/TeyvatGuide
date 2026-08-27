@@ -6500,7 +6500,8 @@ mod install_spool_tracker_tests {
   use super::*;
   use crate::game::model::SchemeId;
   use crate::game::planner::{
-    PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDownload, PlanDownloadHashKind,
+    PayloadEncoding, PersistedPlan, PlanAsset, PlanAssetAction, PlanChunk, PlanDownload,
+    PlanDownloadHashKind,
   };
 
   fn install_plan(downloads: Vec<PlanDownload>, assets: Vec<PlanAsset>) -> PersistedPlan {
@@ -6533,7 +6534,7 @@ mod install_spool_tracker_tests {
       expected_hash: "d".repeat(32),
       compressed_size: size,
       decompressed_size: size,
-      encoding: Default::default(),
+      encoding: PayloadEncoding::Raw,
       url_prefix: String::new(),
       url_suffix: String::new(),
       range_start: None,

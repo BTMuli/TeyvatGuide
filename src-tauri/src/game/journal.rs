@@ -21,9 +21,6 @@ use uuid::Uuid;
 
 pub(crate) const JOURNAL_SCHEMA_VERSION: u32 = 4;
 pub(crate) const INSTALL_COMMIT_TOTAL_STEPS: usize = 6;
-const LEGACY_JOURNAL_SCHEMA_VERSION_V3: u32 = 3;
-const LEGACY_JOURNAL_SCHEMA_VERSION_V2: u32 = 2;
-const LEGACY_JOURNAL_SCHEMA_VERSION_V1: u32 = 1;
 const MAX_JOURNAL_BYTES: u64 = 256 * 1024 * 1024;
 const JOURNAL_PROGRESS_INTERVAL: StdDuration = StdDuration::from_millis(500);
 const JOURNAL_PROGRESS_SLOT_TTL: StdDuration = StdDuration::from_secs(60);
@@ -414,19 +411,12 @@ impl TaskJournal {
 
   /// 将本轮运行结算到最后一次持久化更新时间，避免把应用关闭时间计入任务耗时。
   pub(crate) fn freeze_elapsed_at_updated_at(&mut self) -> bool {
-    if let Some(started_at) = self.active_started_at.take() {
-      let elapsed = elapsed_between(&started_at, &self.updated_at);
-      self.accumulated_elapsed_ms = self.accumulated_elapsed_ms.saturating_add(elapsed);
-      return true;
-    }
-    if self.accumulated_elapsed_ms == 0 {
-      let legacy_elapsed = elapsed_between(&self.created_at, &self.updated_at);
-      if legacy_elapsed > 0 {
-        self.accumulated_elapsed_ms = legacy_elapsed;
-        return true;
-      }
-    }
-    false
+    let Some(started_at) = self.active_started_at.take() else {
+      return false;
+    };
+    let elapsed = elapsed_between(&started_at, &self.updated_at);
+    self.accumulated_elapsed_ms = self.accumulated_elapsed_ms.saturating_add(elapsed);
+    true
   }
 
   pub(crate) fn reset_assembly_progress(&mut self, total_count: usize, total_bytes: u64) {
@@ -455,9 +445,8 @@ impl TaskJournal {
 
   /// Populate the commit projection for ordinary update and pre-download plans.
   ///
-  /// Older journals did not persist this projection.  Derive it from the
-  /// immutable plan when the task is loaded, while preserving a resumable
-  /// apply cursor when one is present.
+  /// Derive it from the immutable plan when the task is loaded, while
+  /// preserving a resumable apply cursor when one is present.
   pub(crate) fn ensure_update_commit_progress(&mut self, plan: &PersistedPlan) -> bool {
     if !matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
       return false;
@@ -1111,13 +1100,8 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
 }
 
 fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
-  if !matches!(
-    journal.schema_version,
-    JOURNAL_SCHEMA_VERSION
-      | LEGACY_JOURNAL_SCHEMA_VERSION_V3
-      | LEGACY_JOURNAL_SCHEMA_VERSION_V2
-      | LEGACY_JOURNAL_SCHEMA_VERSION_V1
-  ) || Uuid::parse_str(&journal.task_id).is_err()
+  if journal.schema_version != JOURNAL_SCHEMA_VERSION
+    || Uuid::parse_str(&journal.task_id).is_err()
     || journal.task_id != journal.plan_id
     || journal.installation_id.is_empty()
     || journal.operation != operation_for_target(journal.target)
@@ -1172,11 +1156,6 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
       || !completed.insert(cache_key.as_str())
   }) {
     return Err("游戏资源任务日志包含无效缓存对象".to_string());
-  }
-  if journal.schema_version == LEGACY_JOURNAL_SCHEMA_VERSION_V1
-    && (journal.apply.is_some() || journal.repair.is_some())
-  {
-    return Err("旧版游戏资源任务日志不能包含提交状态".to_string());
   }
   if let Some(apply) = &journal.apply {
     validate_apply_journal(apply)?;

@@ -68,8 +68,6 @@ pub(crate) struct PersistedSwitchPlan {
   target_channel: u32,
   target_sub_channel: u32,
   sdk: Option<PersistedSdk>,
-  /// 兼容已持久化的 v1 计划；来源 SDK 不参与当前换服任务。
-  source_sdk: Option<PersistedSdk>,
   delete_files: Vec<String>,
   created_at: String,
 }
@@ -178,7 +176,6 @@ pub(crate) async fn create_and_persist_switch_plan(
     target_channel,
     target_sub_channel,
     sdk: target_sdk.as_ref().map(persisted_sdk),
-    source_sdk: None,
     delete_files: delete_files.clone(),
     created_at: Utc::now().to_rfc3339(),
   };

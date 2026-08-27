@@ -36,7 +36,6 @@ use zip::ZipArchive;
 
 const DRAFT_SCHEMA_VERSION: u32 = 2;
 const MARKER_SCHEMA_VERSION: u32 = 2;
-const MARKER_SCHEMA_VERSION_LEGACY: u32 = 1;
 pub(crate) const MARKER_FILE_NAME: &str = ".teyvatguide-install.marker";
 const MAX_DRAFT_BYTES: u64 = 1024 * 1024;
 const MAX_MARKER_BYTES: u64 = 64 * 1024;
@@ -2397,9 +2396,7 @@ fn write_marker(root: &Path, marker: &InstallMarker) -> Result<(), String> {
 
 fn verify_marker(root: &Path, expected: &InstallMarker) -> Result<(), String> {
   let actual = read_marker(root)?;
-  if !matches!(actual.schema_version, MARKER_SCHEMA_VERSION | MARKER_SCHEMA_VERSION_LEGACY)
-    || &actual != expected
-  {
+  if actual.schema_version != MARKER_SCHEMA_VERSION || &actual != expected {
     return Err("安装标记身份不匹配".to_string());
   }
   Ok(())
@@ -2426,7 +2423,7 @@ fn validate_marker_identity(
   draft: &InstallDraft,
   game_root: &Path,
 ) -> Result<(), String> {
-  if !matches!(marker.schema_version, MARKER_SCHEMA_VERSION | MARKER_SCHEMA_VERSION_LEGACY)
+  if marker.schema_version != MARKER_SCHEMA_VERSION
     || marker.plan_id != plan.plan_id
     || marker.install_id != plan.installation_id
     || marker.marker_nonce != overlay.marker_nonce
