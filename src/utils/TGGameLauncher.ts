@@ -331,15 +331,11 @@ export async function ensureGameInstallDefenderExclusions(
     showSnackbar.error(`读取安装目录失败：${error}`);
     return false;
   }
+  console.log(dirs);
   const confirmed = await showDialog.checkF({
     title: "添加 Windows Defender 排除",
     text: [
-      "为避免 Defender 实时防护扫描导致安装磁盘 I/O 停滞，开始安装前将临时把以下目录加入排除列表，安装完成后自动移出：",
-      `目标目录：${dirs.targetRoot}`,
-      `临时 spool：${dirs.spoolRoot}`,
-      `暂存目录：${dirs.stagingRoot}`,
-      `下载缓存：${dirs.downloadRoot}`,
-      `任务日志：${dirs.journalRoot}`,
+      "为避免 Defender 实时防护扫描导致安装磁盘 I/O 停滞，开始安装前将临时把相关目录加入排除列表，安装完成后自动移出。",
       "",
       "此操作需要 UAC 管理员授权。",
     ].join("\n"),
