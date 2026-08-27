@@ -34,6 +34,15 @@
         @click="loadHistory"
       />
       <v-btn
+        :loading="openingTaskDir"
+        aria-label="打开任务目录"
+        density="comfortable"
+        icon="mdi-folder-open"
+        title="打开任务目录"
+        variant="text"
+        @click="openTaskDirectory"
+      />
+      <v-btn
         aria-label="关闭任务历史"
         density="comfortable"
         icon="mdi-close"
@@ -154,6 +163,9 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
+import { path } from "@tauri-apps/api";
+import { exists } from "@tauri-apps/plugin-fs";
+import { openPath } from "@tauri-apps/plugin-opener";
 import fmtUtil from "@utils/fmtUtil.js";
 import { listGamePackageTaskHistory } from "@utils/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
@@ -166,6 +178,7 @@ const titleId = useId();
 const history = ref<Array<TGApp.Game.Package.TaskSummary>>([]);
 const loading = ref<boolean>(false);
 const loadError = ref<string | null>(null);
+const openingTaskDir = ref<boolean>(false);
 let requestSequence = 0;
 
 const clearingAll = computed<boolean>(() => taskStore.pendingActions["task-cleanup"] === true);
@@ -352,6 +365,23 @@ async function handleClearAll(): Promise<void> {
     );
   } catch (error) {
     showSnackbar.error(`清除全部任务记录失败：${error}`);
+  }
+}
+
+async function openTaskDirectory(): Promise<void> {
+  if (openingTaskDir.value) return;
+  openingTaskDir.value = true;
+  try {
+    const taskDir = await path.join(await path.appDataDir(), "game-tasks");
+    if (!(await exists(taskDir))) {
+      showSnackbar.warn("任务目录尚不存在");
+      return;
+    }
+    await openPath(taskDir);
+  } catch (error) {
+    showSnackbar.error(`打开任务目录失败：${error}`);
+  } finally {
+    openingTaskDir.value = false;
   }
 }
 
