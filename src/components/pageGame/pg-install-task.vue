@@ -110,6 +110,14 @@
     <PgInstallProgress :task />
 
     <PgNotice
+      v-if="task.autoRetryMessage !== null"
+      class="install-task-alert"
+      title="正在自动重试"
+      :text="task.autoRetryMessage"
+      tone="warning"
+    />
+
+    <PgNotice
       v-if="task.state === gameEnum.package.taskState.RECOVERY_REQUIRED"
       class="install-task-alert"
       text="安装任务未完成，请继续安装或放弃任务。"
@@ -140,9 +148,11 @@ const emit = defineEmits<{
 
 const active = computed<boolean>(() => gameEnum.package.taskActive(task.state));
 const failed = computed<boolean>(() => task.state === gameEnum.package.taskState.FAILED);
-const caption = computed<string>(() =>
-  failed.value ? "安装失败" : gameEnum.package.taskStateDesc(task.state),
-);
+const caption = computed<string>(() => {
+  if (failed.value) return "安装失败";
+  if (task.autoRetryMessage !== null) return "正在自动重试";
+  return gameEnum.package.taskStateDesc(task.state);
+});
 const stateColor = computed<string>(() => {
   switch (task.state) {
     case gameEnum.package.taskState.FAILED:

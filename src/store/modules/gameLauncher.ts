@@ -190,6 +190,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       assemblyEtaSeconds: null,
       elapsedMs: 0,
       errorMessage: null,
+      autoRetryMessage: null,
       updatedAt: new Date().toISOString(),
     };
   }

@@ -223,6 +223,9 @@ pub(crate) struct TaskJournal {
   #[serde(default)]
   pub(crate) active_started_at: Option<String>,
   pub(crate) error_message: Option<String>,
+  /// 安装流水线因持续停滞自动暂停并重试时透出到前端的提示；重试流水线启动后清空。
+  #[serde(default)]
+  pub(crate) auto_retry_message: Option<String>,
   #[serde(default)]
   pub(crate) apply: Option<ApplyJournal>,
   #[serde(default)]
@@ -317,6 +320,7 @@ impl TaskJournal {
       accumulated_elapsed_ms: 0,
       active_started_at: Some(now.clone()),
       error_message: None,
+      auto_retry_message: None,
       apply: None,
       repair: None,
       created_at: now.clone(),
@@ -390,6 +394,7 @@ impl TaskJournal {
       accumulated_elapsed_ms: 0,
       active_started_at: Some(now.clone()),
       error_message: None,
+      auto_retry_message: None,
       apply: None,
       repair: None,
       created_at: now.clone(),
@@ -550,6 +555,7 @@ impl TaskJournal {
       assembly_eta_seconds: self.assembly_eta_seconds,
       elapsed_ms: self.elapsed_ms(),
       error_message: self.error_message.clone(),
+      auto_retry_message: self.auto_retry_message.clone(),
       updated_at: self.updated_at.clone(),
     }
   }

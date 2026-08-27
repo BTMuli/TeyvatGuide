@@ -211,6 +211,8 @@ declare namespace TGApp.Game.Package {
     assemblyEtaSeconds: number | null;
     elapsedMs: number;
     errorMessage: string | null;
+    /** 安装流水线因持续停滞自动暂停并重试时的提示；未处于自动重试时为空。 */
+    autoRetryMessage: string | null;
     updatedAt: string;
   };
 

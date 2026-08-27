@@ -58,9 +58,11 @@ onUnmounted(() => {
 
 const active = computed<boolean>(() => gameEnum.package.taskActive(task.state));
 const failed = computed<boolean>(() => task.state === gameEnum.package.taskState.FAILED);
-const caption = computed<string>(() =>
-  failed.value ? "安装失败" : gameEnum.package.taskStateDesc(task.state),
-);
+const caption = computed<string>(() => {
+  if (failed.value) return "安装失败";
+  if (task.autoRetryMessage !== null) return "正在自动重试";
+  return gameEnum.package.taskStateDesc(task.state);
+});
 const captionTone = computed<"err" | "warn" | "">(() => {
   switch (task.state) {
     case gameEnum.package.taskState.FAILED:
@@ -120,7 +122,9 @@ const resourceStatus = computed<string | null>(() => {
   if (resourceTotalBytes.value === 0) {
     return active.value ? "正在准备资源安装" : "无需下载或安装资源";
   }
-  if (task.state === gameEnum.package.taskState.QUEUED) return "正在准备：等待下载阶段开始";
+  if (task.state === gameEnum.package.taskState.QUEUED) {
+    return task.autoRetryMessage ?? "正在准备：等待下载阶段开始";
+  }
   if (gameEnum.package.taskApplying(task.state)) {
     return task.commitCurrentStep ?? "正在校验安装内容";
   }

@@ -339,6 +339,8 @@ pub struct PackageTaskSummary {
   pub assembly_eta_seconds: Option<u64>,
   pub elapsed_ms: u64,
   pub error_message: Option<String>,
+  /// 安装流水线因持续停滞自动暂停并重试时透出到前端的提示；未处于自动重试时为空。
+  pub auto_retry_message: Option<String>,
   pub updated_at: String,
 }
 

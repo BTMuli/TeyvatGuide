@@ -53,6 +53,7 @@ const INSTALL_STALL_THRESHOLD: Duration = Duration::from_secs(45);
 const INSTALL_STALL_POLL_INTERVAL: Duration = Duration::from_secs(5);
 const INSTALL_STALL_CONFIRMATIONS: usize = 3;
 const INSTALL_AUTO_STALL_RETRY_LIMIT: usize = 1;
+const INSTALL_AUTO_STALL_RETRY_MESSAGE: &str = "检测到持续停滞，正在自动重试 1/1";
 const INSTALL_STALL_PAUSE_MESSAGE: &str =
   "检测到下载写入或资源组装持续停滞，任务已自动暂停；可从任务记录继续。详情见运行日志。";
 const INSTALL_STALL_NOTIFICATION_TITLE: &str = "游戏安装已暂停";
@@ -196,6 +197,7 @@ fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool 
   }
   value.state = PackageTaskState::Paused;
   value.error_message = Some(message.to_string());
+  value.auto_retry_message = None;
   value.active_assembly_count = 0;
   value.download_current_file = None;
   value.assembly_current_file = None;
@@ -3107,6 +3109,7 @@ async fn run_install_streaming_supervisor(
       if value.state == PackageTaskState::Queued {
         value.state = PackageTaskState::Paused;
         value.error_message = Some(INSTALL_STALL_PAUSE_MESSAGE.to_string());
+        value.auto_retry_message = None;
         value.current_file = None;
         value.download_current_file = None;
         value.assembly_current_file = None;
@@ -3183,7 +3186,8 @@ async fn run_install_streaming_supervisor(
         value.resume_elapsed();
         value.state = PackageTaskState::Queued;
         value.error_message = None;
-        value.current_file = Some("检测到持续停滞，正在自动重试 1/1".to_string());
+        value.auto_retry_message = Some(INSTALL_AUTO_STALL_RETRY_MESSAGE.to_string());
+        value.current_file = Some(INSTALL_AUTO_STALL_RETRY_MESSAGE.to_string());
         value.download_current_file = None;
         value.assembly_current_file = None;
         value.active_assembly_count = 0;
@@ -3266,6 +3270,7 @@ async fn run_install_streaming_task(
   {
     let mut value = journal.lock().await;
     value.state = PackageTaskState::Assembling;
+    value.auto_retry_message = None;
     value.commit_current_step = Some("正在恢复资源安装状态".to_string());
     value.current_file = value.commit_current_step.clone();
     value.download_current_file = None;
