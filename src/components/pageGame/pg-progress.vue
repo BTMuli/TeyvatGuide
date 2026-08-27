@@ -1,6 +1,6 @@
 <!-- 通用进度面板：标题、百分比、当前文件与操作槽 -->
 <template>
-  <section class="progress-panel" :aria-label="ariaLabel">
+  <section :class="{ embedded }" class="progress-panel" :aria-label="ariaLabel">
     <div class="progress-status">
       <span :class="tone">{{ caption }}</span>
       <span v-if="currentFile !== null" class="progress-status-file" :title="currentFile">
@@ -36,6 +36,7 @@ type Props = {
   facts?: Array<string>;
   indeterminate?: boolean;
   percent?: number;
+  embedded?: boolean;
   showBar?: boolean;
   tone?: "err" | "ok" | "warn" | "";
 };
@@ -48,6 +49,7 @@ const {
   facts = [],
   indeterminate = false,
   percent = 0,
+  embedded = false,
   showBar = true,
   tone = "",
 } = defineProps<Props>();
@@ -65,6 +67,12 @@ defineSlots<{
   background: var(--box-bg-2);
   gap: 8px;
   margin-inline: 16px;
+
+  &.embedded {
+    padding: 0;
+    background: transparent;
+    margin-inline: 0;
+  }
 }
 
 .progress-status {

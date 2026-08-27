@@ -103,6 +103,7 @@
       <PgUpdateProgress v-else-if="recoveryProgress === null" embedded :targetPublished :task />
       <PgProgress
         v-else
+        embedded
         ariaLabel="资源任务恢复进度"
         :caption="recoveryProgress.message"
         :facts="recoveryFacts"
