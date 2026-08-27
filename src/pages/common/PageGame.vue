@@ -116,11 +116,14 @@
 
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
+import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useAppStore from "@store/app.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
+import { listen } from "@tauri-apps/api/event";
+import type { UnlistenFn } from "@tauri-apps/api/event";
 import { tryLaunchGame } from "@utils/TGGame.js";
 import { listGameInstallDrafts, listGameInstallations } from "@utils/TGGameLauncher.js";
 import { TGPerf } from "@utils/TGPerf.js";
@@ -352,23 +355,68 @@ async function handleInstallTaskRecover(
 ): Promise<void> {
   const deleting = action === gameEnum.package.recoveryAction.ROLLBACK;
   if (deleting) {
-    const confirmed = await showDialog.checkF({
-      title: "删除安装任务？",
-      text: "将删除当前安装任务并清理安装草稿；已命中的共享缓存不会删除。",
-      confirmLabel: "删除",
+    const decision = await showDialog.checkF({
+      title: "放弃安装任务？",
+      text: "将清理当前安装草稿。已下载内容可转为共享下载缓存，供后续更新或重新安装复用；也可以随任务一并删除。已发布的游戏目录不受影响。",
+      confirmLabel: "转为下载缓存",
+      cancelLabel: "删除下载",
     });
-    if (confirmed !== true) return;
+    if (decision === undefined) return;
+    await handleInstallTaskAbandon(task, decision);
+    return;
   }
   try {
     const updated = await taskStore.recoverInstall(task.taskId, task.installationId, action);
-    if (updated.state === gameEnum.package.taskState.COMPLETED || deleting) {
+    if (updated.state === gameEnum.package.taskState.COMPLETED) {
       await refreshPageData();
     }
-    if (deleting) {
-      showSnackbar.info("安装任务已删除，已发布的游戏目录保留");
+  } catch (error) {
+    showSnackbar.error(`恢复游戏安装失败：${error}`);
+  }
+}
+
+async function handleInstallTaskAbandon(
+  task: TGApp.Game.Package.TaskSummary,
+  keepDownloads: boolean,
+): Promise<void> {
+  let unlisten: UnlistenFn | null = null;
+  if (keepDownloads) {
+    unlisten = await listen<TGApp.Game.Package.InstallAbandonProgress>(
+      "game-install://abandon-progress",
+      (event) => {
+        const { completed, total } = event.payload;
+        void showLoading.update(
+          total > 0 ? `正在转为下载缓存 ${completed}/${total}…` : "正在转为下载缓存…",
+        );
+      },
+    );
+    await showLoading.start("正在转为下载缓存", "正在核对已下载分片…");
+  }
+  try {
+    const updated = await taskStore.recoverInstall(
+      task.taskId,
+      task.installationId,
+      gameEnum.package.recoveryAction.ROLLBACK,
+      keepDownloads,
+    );
+    if (updated.state === gameEnum.package.taskState.COMPLETED) {
+      await refreshPageData();
+    }
+    if (keepDownloads) {
+      await showLoading.end();
+      showSnackbar.info("安装任务已放弃，已下载内容已转为共享缓存");
+    } else {
+      showSnackbar.info("安装任务已删除，下载内容已清理；已发布的游戏目录保留");
     }
   } catch (error) {
-    showSnackbar.error(`${deleting ? "删除" : "恢复"}游戏安装失败：${error}`);
+    if (keepDownloads) {
+      await showLoading.end();
+    }
+    showSnackbar.error(`${keepDownloads ? "放弃并保留下载" : "删除"}游戏安装失败：${error}`);
+  } finally {
+    if (unlisten !== null) {
+      unlisten();
+    }
   }
 }
 

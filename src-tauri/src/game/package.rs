@@ -3222,7 +3222,7 @@ async fn run_install_streaming_task(
       let paused_flag = paused.load(Ordering::Acquire);
       let canceled_flag = canceled.load(Ordering::Acquire);
       if canceled_flag {
-        let _ = installer::cancel_draft(&task_root, &context.draft_id);
+        let _ = installer::cancel_draft(&task_root, &context.draft_id, false, &mut |_, _, _| {});
       }
       persist_install_stream_error(
         &task_root,
@@ -3340,7 +3340,8 @@ async fn run_install_streaming_task(
             let paused_flag = paused.load(Ordering::Acquire);
             let canceled_flag = canceled.load(Ordering::Acquire);
             if canceled_flag {
-              let _ = installer::cancel_draft(&task_root, &context.draft_id);
+              let _ =
+                installer::cancel_draft(&task_root, &context.draft_id, false, &mut |_, _, _| {});
             }
             persist_install_stream_error(
               &task_root,
@@ -3416,7 +3417,7 @@ async fn run_install_streaming_task(
         let paused_flag = paused.load(Ordering::Acquire);
         let canceled_flag = canceled.load(Ordering::Acquire);
         if canceled_flag {
-          let _ = installer::cancel_draft(&task_root, &context.draft_id);
+          let _ = installer::cancel_draft(&task_root, &context.draft_id, false, &mut |_, _, _| {});
         }
         persist_install_stream_error(
           &task_root,
@@ -3473,7 +3474,7 @@ async fn run_install_streaming_task(
     return;
   }
   if canceled.load(Ordering::Acquire) {
-    let _ = installer::cancel_draft(&task_root, &context.draft_id);
+    let _ = installer::cancel_draft(&task_root, &context.draft_id, false, &mut |_, _, _| {});
     let mut value = journal.lock().await;
     value.state = PackageTaskState::Canceled;
     value.download_current_file = None;
@@ -3510,7 +3511,7 @@ async fn run_install_streaming_task(
     let paused_flag = paused.load(Ordering::Acquire);
     let canceled_flag = canceled.load(Ordering::Acquire);
     if canceled_flag {
-      let _ = installer::cancel_draft(&task_root, &context.draft_id);
+      let _ = installer::cancel_draft(&task_root, &context.draft_id, false, &mut |_, _, _| {});
     }
     persist_install_stream_error(
       &task_root,
@@ -3584,7 +3585,8 @@ async fn run_install_streaming_task(
           let paused_flag = paused.load(Ordering::Acquire);
           let canceled_flag = canceled.load(Ordering::Acquire);
           if canceled_flag {
-            let _ = installer::cancel_draft(&task_root, &context.draft_id);
+            let _ =
+              installer::cancel_draft(&task_root, &context.draft_id, false, &mut |_, _, _| {});
           }
           persist_install_stream_error(
             &task_root,
@@ -4989,9 +4991,9 @@ async fn run_task(
     journal_value.state = PackageTaskState::Failed;
     journal_value.error_message = Some(error);
   } else if canceled.load(Ordering::Acquire) {
-    let draft_canceled = install_context
-      .as_ref()
-      .is_none_or(|context| installer::cancel_draft(task_root, &context.draft_id).is_ok());
+    let draft_canceled = install_context.as_ref().is_none_or(|context| {
+      installer::cancel_draft(task_root, &context.draft_id, false, &mut |_, _, _| {}).is_ok()
+    });
     if draft_canceled {
       journal_value.state = PackageTaskState::Canceled;
       journal_value.error_message = None;

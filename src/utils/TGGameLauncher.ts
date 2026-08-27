@@ -264,11 +264,13 @@ export async function recoverGameInstall(
   taskId: string,
   installId: string,
   action: TGApp.Game.Package.RecoveryActionEnum,
+  keepDownloads = false,
 ): Promise<TGApp.Game.Package.TaskSummary> {
   return await invoke<TGApp.Game.Package.TaskSummary>("game_install_recover", {
     taskId,
     installId,
     action,
+    keepDownloads,
   });
 }
 

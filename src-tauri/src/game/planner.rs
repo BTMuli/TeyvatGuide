@@ -1869,6 +1869,37 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
   let Ok(metadata) = fs::symlink_metadata(&path) else {
     return false;
   };
+  if !cache_file_metadata_matches(&metadata, download) {
+    forget_cache_validation(cache_root, download);
+    return false;
+  }
+  if cache_validation_matches(cache_root, download, &metadata) {
+    return true;
+  }
+  let matches = cache_file_hash_matches(&path, download);
+  if matches {
+    remember_cache_validation(cache_root, download, &metadata);
+  } else {
+    forget_cache_validation(cache_root, download);
+  }
+  matches
+}
+
+/// 校验任意路径下的普通文件是否与计划下载对象一致；不读写缓存校验索引。
+///
+/// 供安装任务放弃时把任务私有 spool 分片并入共享缓存前复核使用，避免把
+/// 未完整下载或损坏的对象当作缓存命中。
+pub(crate) fn cache_file_matches(path: &Path, download: &PlanDownload) -> bool {
+  if download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange {
+    return false;
+  }
+  let Ok(metadata) = fs::symlink_metadata(path) else {
+    return false;
+  };
+  cache_file_metadata_matches(&metadata, download) && cache_file_hash_matches(path, download)
+}
+
+fn cache_file_metadata_matches(metadata: &fs::Metadata, download: &PlanDownload) -> bool {
   if metadata.file_type().is_symlink()
     || !metadata.is_file()
     || metadata.len() != download.compressed_size
@@ -1883,10 +1914,11 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       return false;
     }
   }
-  if cache_validation_matches(cache_root, download, &metadata) {
-    return true;
-  }
-  let Ok(file) = File::open(&path) else {
+  true
+}
+
+fn cache_file_hash_matches(path: &Path, download: &PlanDownload) -> bool {
+  let Ok(file) = File::open(path) else {
     return false;
   };
   let mut reader = BufReader::new(file);
@@ -1906,7 +1938,7 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
     }
   }
-  let matches = match download.hash_kind {
+  match download.hash_kind {
     PlanDownloadHashKind::XxHash64 => {
       format!("{:016x}", xxhasher.digest()).eq_ignore_ascii_case(&download.expected_hash)
     }
@@ -1914,13 +1946,7 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       format!("{:x}", md5hasher.finalize()).eq_ignore_ascii_case(&download.expected_hash)
     }
     PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
-  };
-  if matches {
-    remember_cache_validation(cache_root, download, &metadata);
-  } else {
-    forget_cache_validation(cache_root, download);
   }
-  matches
 }
 
 fn cache_validation_index_path(cache_root: &Path) -> PathBuf {

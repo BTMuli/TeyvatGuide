@@ -257,6 +257,13 @@ declare namespace TGApp.Game.Package {
     current: string | null;
   };
 
+  /** 放弃安装时转存分片的进度事件载荷（`game-install://abandon-progress`）。 */
+  type InstallAbandonProgress = {
+    completed: number;
+    total: number;
+    current: string | null;
+  };
+
   /** 清理已结束游戏资源任务后的统计。 */
   type TaskCleanupSummary = {
     removedCount: number;

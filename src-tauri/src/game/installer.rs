@@ -968,9 +968,13 @@ pub(crate) fn has_published_installation(draft: &InstallDraft) -> Result<bool, S
   Err("最终游戏目录缺少安装标记，需要人工恢复".to_string())
 }
 
+/// 放弃未发布的安装草稿；`keep_downloads` 为真时先把任务 spool 中已下载且
+/// 校验通过的分片转入共享缓存，再清理暂存目录与 spool。
 pub(crate) fn cancel_draft(
   task_root: &Path,
   draft_id: &str,
+  keep_downloads: bool,
+  progress: &mut dyn FnMut(usize, usize, &str),
 ) -> Result<InstallDraftSummary, String> {
   let lock = draft_mutation_lock(&draft_lock_key(task_root, draft_id))?;
   let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
@@ -999,11 +1003,95 @@ pub(crate) fn cancel_draft(
     {
       return Err("任务 spool 身份不匹配，拒绝删除".to_string());
     }
+    if keep_downloads {
+      let _ = preserve_spool_downloads(task_root, &draft, &spool, progress)?;
+    }
     validate_no_links(&spool)?;
     fs::remove_dir_all(spool).map_err(|error| format!("清理安装任务 spool 失败：{error}"))?;
   }
   let draft = set_draft_state_unlocked(task_root, draft_id, InstallDraftState::Canceled)?;
   Ok(draft.summary())
+}
+
+/// 把安装任务 spool 中已下载且校验通过的分片并入共享缓存，返回保留的字节数。
+///
+/// 只处理与计划下载对象一致的普通文件：大小或哈希不符、已是共享缓存同名对象、
+/// 或文件不存在的条目会被跳过并随 spool 一起删除；复制失败则中止放弃，避免
+/// 静默丢失已下载内容。
+fn preserve_spool_downloads(
+  task_root: &Path,
+  draft: &InstallDraft,
+  spool: &Path,
+  progress: &mut dyn FnMut(usize, usize, &str),
+) -> Result<u64, String> {
+  let Some(plan_id) = draft.plan_id.as_deref() else {
+    return Ok(0);
+  };
+  let plan = super::planner::load_persisted_plan(task_root, plan_id)?;
+  if plan.target != PackagePlanTarget::Install {
+    return Ok(0);
+  }
+  let shared_cache_root = task_root.join("cache/chunks");
+  let mut preserved = 0_u64;
+  let total = plan.downloads.len();
+  let mut completed = 0_usize;
+  for download in &plan.downloads {
+    completed = completed.saturating_add(1);
+    preserved = preserved.saturating_add(adopt_spool_chunk(
+      &shared_cache_root,
+      spool,
+      download,
+      &draft.draft_id,
+    )?);
+    progress(completed, total, &download.cache_key);
+  }
+  super::planner::flush_cache_validation_index(&shared_cache_root);
+  Ok(preserved)
+}
+
+/// 把单个已校验的 spool 分片并入共享缓存；跳过缺失、冲突或校验不通过的条目。
+fn adopt_spool_chunk(
+  shared_cache_root: &Path,
+  spool: &Path,
+  download: &super::planner::PlanDownload,
+  draft_id: &str,
+) -> Result<u64, String> {
+  let spool_path = spool.join(&download.cache_key);
+  if !path_occupied(&spool_path)? {
+    return Ok(0);
+  }
+  let target = shared_cache_root.join(&download.cache_key);
+  if path_occupied(&target)? {
+    return Ok(0);
+  }
+  if !super::planner::cache_file_matches(&spool_path, download) {
+    return Ok(0);
+  }
+  let partial = shared_cache_root.join(format!("{}.adopt.{}.part", download.cache_key, draft_id));
+  match fs::copy(&spool_path, &partial) {
+    Ok(_) => {}
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(0),
+    Err(error) => {
+      return Err(format!("复制安装分片到共享缓存失败：{error}"));
+    }
+  }
+  if path_occupied(&target)? {
+    let _ = fs::remove_file(&partial);
+    return Ok(0);
+  }
+  if let Err(error) = fs::rename(&partial, &target) {
+    let _ = fs::remove_file(&partial);
+    if path_occupied(&target)? {
+      return Ok(0);
+    }
+    return Err(format!("写入共享缓存分片失败：{error}"));
+  }
+  let metadata = fs::symlink_metadata(&target)
+    .map_err(|error| format!("读取共享缓存分片元数据失败：{error}"))?;
+  super::planner::remember_cache_validation(shared_cache_root, download, &metadata);
+  fs::remove_file(&spool_path)
+    .map_err(|error| format!("清理已并入缓存的安装 spool 分片失败：{error}"))?;
+  Ok(download.compressed_size)
 }
 
 /// 放弃已经发布但尚未完成登记的安装任务；只清理草稿状态，不删除最终游戏目录。

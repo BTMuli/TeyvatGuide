@@ -595,6 +595,7 @@ async function createPlan(): Promise<void> {
           initialConfig.taskId,
           initialConfig.installationId,
           gameEnum.package.recoveryAction.ROLLBACK,
+          true,
         );
         editingTaskRolledBack.value = true;
         emit("completed");
@@ -687,6 +688,7 @@ async function onCancel(): Promise<void> {
           initialConfig.taskId,
           initialConfig.installationId,
           gameEnum.package.recoveryAction.ROLLBACK,
+          true,
         );
         editingTaskRolledBack.value = true;
       }

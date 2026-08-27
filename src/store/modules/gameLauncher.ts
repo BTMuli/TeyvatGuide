@@ -491,10 +491,11 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     taskId: string,
     installId: string,
     action: TGApp.Game.Package.RecoveryActionEnum,
+    keepDownloads = false,
   ): Promise<TGApp.Game.Package.TaskSummary> {
     setPending(taskId, true);
     try {
-      const task = await recoverGameInstall(taskId, installId, action);
+      const task = await recoverGameInstall(taskId, installId, action, keepDownloads);
       mergeTask(task);
       return task;
     } finally {

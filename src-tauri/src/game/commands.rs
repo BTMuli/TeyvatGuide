@@ -77,6 +77,14 @@ struct GameCacheClearProgress {
   current: Option<String>,
 }
 
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GameInstallAbandonProgress {
+  completed: usize,
+  total: usize,
+  current: Option<String>,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GameUninstallSummary {
@@ -464,7 +472,7 @@ pub fn game_install_draft_cancel(
   }) {
     return Err("该安装已有未完成任务，请先取消或恢复原任务".to_string());
   }
-  installer::cancel_draft(&task_root, &draft_id)
+  installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
 }
 
 /// 启动全新安装下载；资源下载完成后自动进入 staging、发布和最终登记。
@@ -526,7 +534,8 @@ pub async fn game_install_status(
   )
 }
 
-/// 恢复全新安装的下载、发布或最终登记阶段。
+/// 恢复全新安装的下载、发布或最终登记阶段；回滚时 `keep_downloads` 决定是否
+/// 把已下载分片转入共享缓存而不是随任务删除。
 #[tauri::command]
 pub async fn game_install_recover(
   app_handle: AppHandle,
@@ -535,6 +544,7 @@ pub async fn game_install_recover(
   task_id: String,
   install_id: String,
   action: PackageRecoveryAction,
+  keep_downloads: bool,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
   installer::ensure_windows_install_platform()?;
@@ -573,12 +583,23 @@ pub async fn game_install_recover(
     }
     let _reservation =
       manager.reserve_installation_operation(&install_id, "game-install-rollback")?;
+    let app = app_handle.clone();
+    let mut last_emit = Instant::now() - Duration::from_millis(300);
+    let mut progress = move |completed: usize, total: usize, current: &str| {
+      if last_emit.elapsed() >= Duration::from_millis(120) {
+        let _ = app.emit(
+          "game-install://abandon-progress",
+          GameInstallAbandonProgress { completed, total, current: Some(current.to_string()) },
+        );
+        last_emit = Instant::now();
+      }
+    };
     if published {
       let machine_uid = read_machine_uid(&app_handle)?;
       installer::verify_published_installation(&task_root, &plan, &machine_uid)?;
       let _ = installer::abandon_published_draft(&task_root, &draft_id)?;
     } else {
-      let _ = installer::cancel_draft(&task_root, &draft_id)?;
+      let _ = installer::cancel_draft(&task_root, &draft_id, keep_downloads, &mut progress)?;
     }
     let mut canceled = journal_value;
     canceled.state = PackageTaskState::Canceled;
@@ -658,7 +679,7 @@ pub fn game_install_cancel(
   if journal_value.state.is_active() || journal_value.state.blocks_launch() {
     return Ok(journal_value.summary());
   }
-  let _ = installer::cancel_draft(&task_root, &draft_id)?;
+  let _ = installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})?;
   Ok(journal_value.summary())
 }
 
@@ -1096,6 +1117,7 @@ pub async fn game_package_recover(
       task_id,
       journal_value.installation_id,
       action,
+      false,
     )
     .await;
   }
