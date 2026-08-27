@@ -133,8 +133,9 @@ import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
 import { listen } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
-import { tryLaunchGame } from "@utils/TGGame.js";
+import { confirmStopRunningGame, tryLaunchGame } from "@utils/TGGame.js";
 import {
+  createGamePackageSwitchPlan,
   ensureGameInstallDefenderExclusions,
   listGameInstallDrafts,
   listGameInstallations,
@@ -249,9 +250,8 @@ const launchBlockReason = computed<string | null>(() => {
   if (chosen.value.status !== gameEnum.installation.status.KNOWN) {
     return chosen.value.statusMessage;
   }
-  if (chosen.value.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
-    if (!isLogin.value) return "启动国服官服前请先登录米游社";
-    if (account.value.isOfficial !== 1) return "当前米游社账号不是官服账号";
+  if (chosen.value.schemeId === gameEnum.installation.scheme.CN_OFFICIAL && !isLogin.value) {
+    return "启动国服官服前请先登录米游社";
   }
   const task = taskStore.tasksByInstallation[chosen.value.id];
   if (task !== undefined && taskBlocksLaunch(task.state)) {
@@ -259,7 +259,108 @@ const launchBlockReason = computed<string | null>(() => {
   }
   return null;
 });
-const launchTitle = computed<string>(() => launchBlockReason.value ?? "启动游戏");
+const launchNeedsSchemeSwitch = computed<boolean>(() => {
+  return (
+    chosen.value?.schemeId === gameEnum.installation.scheme.CN_OFFICIAL &&
+    isLogin.value &&
+    account.value.isOfficial !== 1
+  );
+});
+const launchTitle = computed<string>(() => {
+  if (launchBlockReason.value !== null) return launchBlockReason.value;
+  if (launchNeedsSchemeSwitch.value) return "当前账号是 B 服，启动将先换服";
+  return "启动游戏";
+});
+
+/**
+ * 判断安装是否正在校验，换服前不能改写渠道。
+ * @since Beta v0.11.5
+ * @param installationId - 安装 ID
+ * @returns 校验进行中时为 true
+ */
+function isInstallationVerifyBusy(installationId: string): boolean {
+  const summary = taskStore.verifyByInstallation[installationId];
+  return (
+    (summary !== undefined && gameEnum.package.verifyActive(summary.state)) ||
+    taskStore.pendingActions[`verify:${installationId}`] === true ||
+    taskStore.pendingActions[`verify-clear:${installationId}`] === true
+  );
+}
+
+/**
+ * 判断是否已有未结束的非换服任务挡住渠道转换。
+ * @since Beta v0.11.5
+ * @param installationId - 安装 ID
+ * @returns 存在阻挡任务时为 true
+ */
+function hasBlockingNonSwitchTask(installationId: string): boolean {
+  const task = taskStore.tasksByInstallation[installationId];
+  if (task === undefined || task.target === gameEnum.package.planTarget.SWITCH) return false;
+  return (
+    task.state !== gameEnum.package.taskState.COMPLETED &&
+    task.state !== gameEnum.package.taskState.FAILED &&
+    task.state !== gameEnum.package.taskState.CANCELED
+  );
+}
+
+/**
+ * B 服账号启动官服安装时，确认后转为 B 服。
+ * @since Beta v0.11.5
+ * @param installation - 当前主启动安装
+ */
+async function handleLaunchSchemeSwitch(installation: TGApp.Game.Installation.Item): Promise<void> {
+  const existing = taskStore.tasksByInstallation[installation.id];
+  if (
+    existing !== undefined &&
+    existing.target === gameEnum.package.planTarget.SWITCH &&
+    gameEnum.package.taskActive(existing.state)
+  ) {
+    await showDialog.checkF({
+      title: "正在换服",
+      text: "客户端正在转为国服 B 服，完成后即可启动。",
+      confirmLabel: "知道了",
+    });
+    return;
+  }
+  if (isInstallationVerifyBusy(installation.id)) {
+    await showDialog.checkF({
+      title: "暂时无法启动",
+      text: "正在校验资源，暂时不能换服。",
+      confirmLabel: "知道了",
+    });
+    return;
+  }
+  if (hasBlockingNonSwitchTask(installation.id)) {
+    await showDialog.checkF({
+      title: "暂时无法启动",
+      text: "存在进行中的资源任务，暂时不能换服。",
+      confirmLabel: "知道了",
+    });
+    return;
+  }
+  const confirmed = await showDialog.checkF({
+    title: "确认转换服务器?",
+    text: "当前米游社账号是渠道服（B服），安装版本是国服官服。确认后会把客户端转为国服 B 服。",
+    confirmLabel: "开始换服",
+  });
+  if (confirmed !== true) return;
+  launching.value = true;
+  try {
+    const nextPlan = await createGamePackageSwitchPlan(installation.id);
+    if (!nextPlan.hasSufficientSpace) {
+      showSnackbar.warn("磁盘空间不足，暂时不能换服");
+      return;
+    }
+    if (!(await confirmStopRunningGame("换服"))) return;
+    const task = await taskStore.applySwitch(nextPlan.planId);
+    showSnackbar.success(`已开始转换为${gameEnum.installation.schemeDesc(nextPlan.targetScheme)}`);
+    if (task.state === gameEnum.package.taskState.COMPLETED) await refreshPageData();
+  } catch (error) {
+    showSnackbar.error(`换服失败：${error}`);
+  } finally {
+    launching.value = false;
+  }
+}
 
 async function handleLaunchGame(): Promise<void> {
   const reason = launchBlockReason.value;
@@ -269,6 +370,11 @@ async function handleLaunchGame(): Promise<void> {
       text: reason,
       confirmLabel: "知道了",
     });
+    return;
+  }
+  const installation = chosen.value;
+  if (installation !== null && launchNeedsSchemeSwitch.value) {
+    await handleLaunchSchemeSwitch(installation);
     return;
   }
   launching.value = true;
