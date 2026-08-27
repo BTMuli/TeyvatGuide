@@ -78,6 +78,7 @@ pub(crate) struct DownloadTelemetry {
   file_sync_count: AtomicU64,
   file_sync_micros: AtomicU64,
   received_bytes: AtomicU64,
+  in_flight_bytes: AtomicU64,
   cache_hits: AtomicU64,
   attempts: AtomicU64,
   successful_attempts: AtomicU64,
@@ -106,6 +107,7 @@ pub(crate) struct DownloadTelemetrySnapshot {
   pub(crate) file_sync_count: u64,
   pub(crate) file_sync_micros: u64,
   pub(crate) received_bytes: u64,
+  pub(crate) in_flight_bytes: u64,
   pub(crate) cache_hits: u64,
   pub(crate) attempts: u64,
   pub(crate) successful_attempts: u64,
@@ -136,6 +138,7 @@ impl Default for DownloadTelemetry {
       file_sync_count: AtomicU64::new(0),
       file_sync_micros: AtomicU64::new(0),
       received_bytes: AtomicU64::new(0),
+      in_flight_bytes: AtomicU64::new(0),
       cache_hits: AtomicU64::new(0),
       attempts: AtomicU64::new(0),
       successful_attempts: AtomicU64::new(0),
@@ -185,6 +188,7 @@ impl DownloadTelemetry {
       file_sync_count: self.file_sync_count.load(Ordering::Relaxed),
       file_sync_micros: self.file_sync_micros.load(Ordering::Relaxed),
       received_bytes: self.received_bytes.load(Ordering::Relaxed),
+      in_flight_bytes: self.in_flight_bytes.load(Ordering::Relaxed),
       cache_hits: self.cache_hits.load(Ordering::Relaxed),
       attempts: self.attempts.load(Ordering::Relaxed),
       successful_attempts: self.successful_attempts.load(Ordering::Relaxed),
@@ -345,6 +349,27 @@ impl DownloadAttemptTelemetry {
 
   fn record_received_bytes(&mut self, bytes: u64) {
     self.received_bytes = self.received_bytes.saturating_add(bytes);
+    self.telemetry.received_bytes.fetch_add(bytes, Ordering::Relaxed);
+    self.telemetry.in_flight_bytes.fetch_add(bytes, Ordering::Relaxed);
+  }
+
+  fn release_in_flight_bytes(&self) {
+    if self.received_bytes == 0 {
+      return;
+    }
+    let mut current = self.telemetry.in_flight_bytes.load(Ordering::Relaxed);
+    loop {
+      let next = current.saturating_sub(self.received_bytes);
+      match self.telemetry.in_flight_bytes.compare_exchange_weak(
+        current,
+        next,
+        Ordering::AcqRel,
+        Ordering::Relaxed,
+      ) {
+        Ok(_) => break,
+        Err(actual) => current = actual,
+      }
+    }
   }
 
   fn finish(mut self, success: bool) {
@@ -360,7 +385,7 @@ impl DownloadAttemptTelemetry {
     self.telemetry.hash_micros.fetch_add(self.hash_micros, Ordering::Relaxed);
     self.telemetry.file_sync_count.fetch_add(self.file_sync_count, Ordering::Relaxed);
     self.telemetry.file_sync_micros.fetch_add(self.file_sync_micros, Ordering::Relaxed);
-    self.telemetry.received_bytes.fetch_add(self.received_bytes, Ordering::Relaxed);
+    self.release_in_flight_bytes();
     if success {
       self.telemetry.successful_attempts.fetch_add(1, Ordering::Relaxed);
     } else {
@@ -470,11 +495,15 @@ where
   tokio::pin!(future);
   let timeout = tokio::time::sleep(stall_timeout);
   tokio::pin!(timeout);
+  let deadline = Instant::now() + stall_timeout;
   loop {
     tokio::select! {
       result = &mut future => return Ok(result),
       () = &mut timeout => return Err(timeout_error.to_string()),
       () = tokio::time::sleep(DOWNLOAD_CONTROL_POLL_INTERVAL) => {
+        if Instant::now() >= deadline {
+          return Err(timeout_error.to_string());
+        }
         if paused.load(Ordering::Acquire) {
           return Err("任务已暂停".to_string());
         }
@@ -963,4 +992,24 @@ fn download_url(download: &PlanDownload) -> Result<reqwest::Url, String> {
     return Ok(parsed);
   }
   payload_url(&download.url_prefix, &download.url_suffix, &download.id)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::DownloadTelemetry;
+
+  #[test]
+  fn received_bytes_update_immediately_and_release_in_flight() {
+    let telemetry = DownloadTelemetry::new();
+    let mut attempt = telemetry.begin_attempt();
+    attempt.record_received_bytes(1024);
+    attempt.record_received_bytes(512);
+    let live = telemetry.snapshot();
+    assert_eq!(live.received_bytes, 1536);
+    assert_eq!(live.in_flight_bytes, 1536);
+    attempt.finish(true);
+    let committed = telemetry.snapshot();
+    assert_eq!(committed.received_bytes, 1536);
+    assert_eq!(committed.in_flight_bytes, 0);
+  }
 }

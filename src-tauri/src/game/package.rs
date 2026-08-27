@@ -72,6 +72,7 @@ fn spawn_install_stall_watchdog(
   notify_on_stall: bool,
   abort_handle: AbortHandle,
 ) {
+  let runtime = tokio::runtime::Handle::current();
   std::thread::spawn(move || {
     let journal_path = journal::journal_path(&task_root, &plan_id);
     let mut last_signature = None;
@@ -90,7 +91,7 @@ fn spawn_install_stall_watchdog(
       }
       let download = metrics.download_telemetry.snapshot();
       let assembly = metrics.assembly_telemetry.snapshot();
-      let signature = (value.revision, download.heartbeat_count, assembly.heartbeat_count);
+      let signature = install_watchdog_progress_signature(value.revision, &download, &assembly);
       if last_signature != Some(signature) {
         last_signature = Some(signature);
         last_progress_at = Instant::now();
@@ -98,6 +99,17 @@ fn spawn_install_stall_watchdog(
         continue;
       }
       let stalled_for = last_progress_at.elapsed();
+      if install_watchdog_is_network_only_wait(&download, &assembly) {
+        if stalled_for >= INSTALL_STALL_THRESHOLD {
+          log::info!(
+            "[game-install][{plan_id}] 仅网络等待持续 {}s，交由单对象超时处理，不暂停流水线",
+            stalled_for.as_secs()
+          );
+          last_progress_at = Instant::now();
+        }
+        confirmations = 0;
+        continue;
+      }
       if stalled_for < INSTALL_STALL_THRESHOLD {
         continue;
       }
@@ -135,15 +147,44 @@ fn spawn_install_stall_watchdog(
         persist_install_watchdog_pause(
           &app_handle,
           &task_root,
-          &plan_id,
           &journal,
           INSTALL_STALL_PAUSE_MESSAGE,
+          &runtime,
         );
         abort_handle.abort();
         break;
       }
     }
   });
+}
+
+fn install_watchdog_progress_signature(
+  revision: u64,
+  download: &super::downloader::DownloadTelemetrySnapshot,
+  assembly: &assembler::AssemblyTelemetrySnapshot,
+) -> (u64, u64, u64, u64, u64, u64, u64, u64) {
+  (
+    revision,
+    download.heartbeat_count,
+    download.received_bytes,
+    download.in_flight_bytes,
+    download.local_written_bytes,
+    assembly.heartbeat_count,
+    assembly.written_bytes,
+    assembly.hashed_bytes,
+  )
+}
+
+/// 纯网络等待由单对象 I/O 超时处理；看门狗只对写盘/组装停滞整单暂停。
+fn install_watchdog_is_network_only_wait(
+  download: &super::downloader::DownloadTelemetrySnapshot,
+  assembly: &assembler::AssemblyTelemetrySnapshot,
+) -> bool {
+  let assembly_io_active = assembly.active_reads > 0
+    || assembly.active_writes > 0
+    || assembly.active_hashes > 0
+    || assembly.active_syncs > 0;
+  download.active_network_waits > 0 && download.active_local_writes == 0 && !assembly_io_active
 }
 
 fn log_install_stall_diagnostics(
@@ -213,40 +254,39 @@ fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool 
 fn persist_install_watchdog_pause(
   app_handle: &AppHandle,
   task_root: &Path,
-  plan_id: &str,
   journal: &Arc<AsyncMutex<TaskJournal>>,
   message: &str,
+  runtime: &tokio::runtime::Handle,
 ) {
-  if let Ok(mut value) = journal.try_lock() {
-    if apply_install_watchdog_pause(&mut value, message) {
-      if let Err(error) = journal::persist(task_root, &value) {
-        log::error!("[game-install][{}] 持久化自动暂停状态失败：{error}", value.plan_id);
-      }
-      let _ = journal::forget_progress(task_root, &value.task_id);
-      emit_progress(app_handle, &value.summary());
-      emit_state(app_handle, &value.summary());
-    }
+  let Some(summary) =
+    runtime.block_on(apply_install_watchdog_pause_locked(task_root, journal, message))
+  else {
     return;
-  }
+  };
+  emit_progress(app_handle, &summary);
+  emit_state(app_handle, &summary);
+}
 
-  let journal_path = journal::journal_path(task_root, plan_id);
-  match journal::load(&journal_path) {
-    Ok(mut value) => {
-      if apply_install_watchdog_pause(&mut value, message) {
-        if let Err(error) = journal::persist(task_root, &value) {
-          log::error!("[game-install][{}] 持久化自动暂停状态失败：{error}", value.plan_id);
-        }
-        let _ = journal::forget_progress(task_root, &value.task_id);
-        emit_progress(app_handle, &value.summary());
-        emit_state(app_handle, &value.summary());
-      }
-    }
-    Err(error) => {
-      log::error!(
-        "[game-install][{plan_id}] 自动暂停时任务内存锁被占用，且无法读取持久化记录：{error}"
-      );
-    }
+async fn apply_install_watchdog_pause_locked(
+  task_root: &Path,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  message: &str,
+) -> Option<PackageTaskSummary> {
+  let mut value = journal.lock().await;
+  if !apply_install_watchdog_pause(&mut value, message) {
+    return None;
   }
+  if let Err(error) = journal::persist(task_root, &value) {
+    log::error!("[game-install][{}] 持久化自动暂停状态失败：{error}", value.plan_id);
+  }
+  let _ = journal::forget_progress(task_root, &value.task_id);
+  Some(value.summary())
+}
+
+async fn await_install_download_worker<T>(
+  worker: tauri::async_runtime::JoinHandle<Result<T, String>>,
+) -> Result<T, String> {
+  worker.await.map_err(|error| format!("下载 worker 异常退出：{error}"))?
 }
 
 /// 配音下载完成后自动提交所需的可信安装与登记上下文。
@@ -553,6 +593,7 @@ fn start_install_download_progress_monitor(
   tauri::async_runtime::spawn(async move {
     let mut last_received_bytes = metrics.download_telemetry.snapshot().received_bytes;
     let mut last_sample = Instant::now();
+    let mut last_in_flight_bytes = 0_u64;
     let mut smoothed_bytes_per_second = 0_f64;
     loop {
       tokio::time::sleep(Duration::from_secs(1)).await;
@@ -561,7 +602,8 @@ fn start_install_download_progress_monitor(
       {
         break;
       }
-      let received_bytes = metrics.download_telemetry.snapshot().received_bytes;
+      let snapshot = metrics.download_telemetry.snapshot();
+      let received_bytes = snapshot.received_bytes;
       let elapsed = last_sample.elapsed().as_secs_f64().max(0.001);
       let received_delta = received_bytes.saturating_sub(last_received_bytes);
       last_received_bytes = received_bytes;
@@ -591,15 +633,23 @@ fn start_install_download_progress_monitor(
       } else {
         0
       };
-      let remaining = metrics.eta_remaining_bytes.load(Ordering::Acquire);
+      let remaining = metrics
+        .eta_remaining_bytes
+        .load(Ordering::Acquire)
+        .saturating_sub(snapshot.in_flight_bytes);
       let eta = download_eta_seconds(remaining, speed);
-      if value.bytes_per_second == speed && value.eta_seconds == eta {
+      let in_flight_changed = last_in_flight_bytes != snapshot.in_flight_bytes;
+      last_in_flight_bytes = snapshot.in_flight_bytes;
+      let speed_changed = value.bytes_per_second != speed || value.eta_seconds != eta;
+      if !speed_changed && !in_flight_changed {
         continue;
       }
-      value.bytes_per_second = speed;
-      value.eta_seconds = eta;
-      value.touch();
-      let summary = value.summary();
+      if speed_changed {
+        value.bytes_per_second = speed;
+        value.eta_seconds = eta;
+        value.touch();
+      }
+      let summary = overlay_install_download_progress(&value, &metrics);
       drop(value);
       emit_progress(&app_handle, &summary);
     }
@@ -1247,6 +1297,67 @@ fn persist_install_progress(
   let result = journal::persist_progress_timed(task_root, journal_value, &mut timing);
   metrics.record_journal(&timing);
   result
+}
+
+fn overlay_install_download_progress(
+  journal: &TaskJournal,
+  metrics: &InstallPipelineMetrics,
+) -> PackageTaskSummary {
+  let mut summary = journal.summary();
+  if !matches!(journal.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
+    return summary;
+  }
+  let in_flight = metrics.download_telemetry.snapshot().in_flight_bytes;
+  summary.downloaded_bytes =
+    journal.downloaded_bytes.saturating_add(in_flight).min(journal.total_bytes);
+  summary
+}
+
+async fn persist_install_progress_async(
+  task_root: PathBuf,
+  journal_value: TaskJournal,
+  metrics: Arc<InstallPipelineMetrics>,
+) -> Result<(), String> {
+  tauri::async_runtime::spawn_blocking(move || {
+    persist_install_progress(&task_root, &journal_value, &metrics)
+  })
+  .await
+  .map_err(|error| format!("持久化安装进度 worker 异常退出：{error}"))?
+}
+
+async fn persist_install_checkpoint_async(
+  task_root: PathBuf,
+  journal_value: TaskJournal,
+  metrics: Arc<InstallPipelineMetrics>,
+) -> Result<(), String> {
+  tauri::async_runtime::spawn_blocking(move || {
+    persist_install_checkpoint(&task_root, &journal_value, &metrics)
+  })
+  .await
+  .map_err(|error| format!("持久化安装检查点 worker 异常退出：{error}"))?
+}
+
+async fn commit_install_download_progress(
+  app_handle: &AppHandle,
+  task_root: &Path,
+  journal: &Arc<AsyncMutex<TaskJournal>>,
+  metrics: &Arc<InstallPipelineMetrics>,
+  update: impl FnOnce(&mut TaskJournal),
+) -> Result<TaskJournal, String> {
+  let persist_value = {
+    let mut value = journal.lock().await;
+    update(&mut value);
+    value.touch();
+    value.clone()
+  };
+  persist_install_progress_async(
+    task_root.to_path_buf(),
+    persist_value.clone(),
+    Arc::clone(metrics),
+  )
+  .await?;
+  emit_progress(app_handle, &overlay_install_download_progress(&persist_value, metrics));
+  Ok(persist_value)
 }
 
 fn persist_optional_install_checkpoint(
@@ -3432,9 +3543,9 @@ async fn run_install_streaming_task(
     }
   };
   let spool_bytes_cache = Arc::new(Mutex::new(SpoolBytesCache::default()));
-  let start_cursor_result = {
-    let mut value = journal.lock().await;
-    (|| -> Result<usize, String> {
+  let start_cursor = {
+    let (snapshot, persist_value) = {
+      let mut value = journal.lock().await;
       let (snapshot, committed_step) = {
         let tracker = spool_tracker.lock().unwrap();
         (tracker.completion_snapshot(&plan), tracker.committed_step())
@@ -3445,28 +3556,35 @@ async fn run_install_streaming_task(
       value.commit_current_step = None;
       value.current_file = None;
       value.touch();
-      persist_install_checkpoint(&task_root, &value, &metrics)?;
-      let released = release_spool_unneeded(
-        &spool_tracker,
-        &plan,
-        &spool_root,
-        &shared_cache_root,
-        context.preserve_chunks,
-      );
-      value.released_bytes = value.released_bytes.saturating_add(released);
-      value.spool_bytes = spool_bytes(&spool_root);
-      value.touch();
-      persist_install_progress(&task_root, &value, &metrics)?;
-      emit_progress(&app_handle, &value.summary());
-      Ok(snapshot.contiguous_cursor)
-    })()
-  };
-  let start_cursor = match start_cursor_result {
-    Ok(cursor) => cursor,
-    Err(error) => {
+      (snapshot, value.clone())
+    };
+    if let Err(error) =
+      persist_install_checkpoint_async(task_root.clone(), persist_value, Arc::clone(&metrics)).await
+    {
       persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
       return;
     }
+    let released = release_spool_unneeded_async(
+      &spool_tracker,
+      &plan,
+      &spool_root,
+      &shared_cache_root,
+      context.preserve_chunks,
+    )
+    .await;
+    let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+    if let Err(error) =
+      commit_install_download_progress(&app_handle, &task_root, &journal, &metrics, |value| {
+        value.released_bytes = value.released_bytes.saturating_add(released);
+        value.spool_bytes = spool;
+        metrics.observe_spool(value.spool_bytes);
+      })
+      .await
+    {
+      persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
+      return;
+    }
+    snapshot.contiguous_cursor
   };
   metrics.set_eta_remaining_bytes(spool_tracker.lock().unwrap().remaining_download_bytes(&plan));
   let _download_progress_monitor = start_install_download_progress_monitor(
@@ -3584,27 +3702,30 @@ async fn run_install_streaming_task(
         let client = download_client.clone();
         let tracker = Arc::clone(&spool_tracker);
         async move {
-          let started_at = metrics.begin_download();
-          let result = download_object(
-            &client,
-            &root,
-            &download,
-            DownloadControl::new(
-              &task_id,
-              &canceled,
-              &paused,
-              &limiter,
-              DownloadDurability::Recoverable,
+          await_install_download_worker(tauri::async_runtime::spawn(async move {
+            let started_at = metrics.begin_download();
+            let result = download_object(
+              &client,
+              &root,
+              &download,
+              DownloadControl::new(
+                &task_id,
+                &canceled,
+                &paused,
+                &limiter,
+                DownloadDurability::Recoverable,
+              )
+              .with_telemetry(Arc::clone(&metrics.download_telemetry)),
             )
-            .with_telemetry(Arc::clone(&metrics.download_telemetry)),
-          )
-          .await;
-          metrics.finish_download(started_at);
-          result.map(|downloaded| {
-            let completed_count =
-              tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-            (downloaded, completed_count)
-          })
+            .await;
+            metrics.finish_download(started_at);
+            result.map(|downloaded| {
+              let completed_count =
+                tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+              (downloaded, completed_count)
+            })
+          }))
+          .await
         }
       }))
       .buffer_unordered(concurrency);
@@ -3613,17 +3734,26 @@ async fn run_install_streaming_task(
         match result {
           Ok((downloaded, completed_count)) => {
             metrics.record_unique_download(downloaded.bytes);
-            let mut value = journal.lock().await;
-            value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
-            value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
-            value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
-            metrics.observe_spool(value.spool_bytes);
-            value.touch();
-            if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
-              persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+            let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+            if let Err(error) = commit_install_download_progress(
+              &app_handle,
+              &task_root,
+              &journal,
+              &metrics,
+              |value| {
+                value.downloaded_bytes = value.downloaded_bytes.saturating_add(downloaded.bytes);
+                value.committed_step =
+                  value.committed_step.max(completed_count).min(value.total_count);
+                value.spool_bytes = spool;
+                metrics.observe_spool(value.spool_bytes);
+              },
+            )
+            .await
+            {
+              persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false)
+                .await;
               return;
             }
-            emit_progress(&app_handle, &value.summary());
           }
           Err(error) => {
             let paused_flag = paused.load(Ordering::Acquire);
@@ -3897,18 +4027,21 @@ async fn run_install_streaming_task(
       metrics.record_unique_download(downloaded.bytes);
       let completed_count =
         spool_tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-      let mut value = journal.lock().await;
-      value.downloaded_bytes =
-        value.downloaded_bytes.saturating_add(download.compressed_size).min(value.total_bytes);
-      value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
-      value.download_current_file = None;
-      value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
-      value.touch();
-      if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
-        persist_terminal_journal(&task_root, &mut value, error, false, &app_handle);
+      let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+      if let Err(error) =
+        commit_install_download_progress(&app_handle, &task_root, &journal, &metrics, |value| {
+          value.downloaded_bytes =
+            value.downloaded_bytes.saturating_add(download.compressed_size).min(value.total_bytes);
+          value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
+          value.download_current_file = None;
+          value.spool_bytes = spool;
+          metrics.observe_spool(value.spool_bytes);
+        })
+        .await
+      {
+        persist_install_stream_error(&task_root, &app_handle, &journal, error, false, false).await;
         return;
       }
-      emit_progress(&app_handle, &value.summary());
     }
   }
   {
@@ -4435,46 +4568,51 @@ async fn run_install_asset_job(
       let tracker = Arc::clone(&spool_tracker);
       let labels = Arc::clone(&download_labels);
       async move {
-        let download_guard = {
-          let mut values = guards.lock().await;
-          Arc::clone(
-            values.entry(download.id.clone()).or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+        await_install_download_worker(tauri::async_runtime::spawn(async move {
+          let download_guard = {
+            let mut values = guards.lock().await;
+            Arc::clone(
+              values.entry(download.id.clone()).or_insert_with(|| Arc::new(AsyncMutex::new(()))),
+            )
+          };
+          let _download_guard = download_guard.lock().await;
+          if cached_chunk_matches_async(&shared_root, &download).await
+            || cached_chunk_matches_async(&root, &download).await
+          {
+            return Ok(None);
+          }
+          let permit = slots
+            .acquire_owned()
+            .await
+            .map_err(|error| format!("获取下载并发槽位失败：{error}"))?;
+          let started_at = metrics.begin_download();
+          let result = download_object(
+            &client,
+            &root,
+            &download,
+            DownloadControl::new(
+              &task_id,
+              &canceled,
+              &paused,
+              &limiter,
+              DownloadDurability::Recoverable,
+            )
+            .with_telemetry(Arc::clone(&metrics.download_telemetry)),
           )
-        };
-        let _download_guard = download_guard.lock().await;
-        if cached_chunk_matches_async(&shared_root, &download).await
-          || cached_chunk_matches_async(&root, &download).await
-        {
-          return Ok(None);
-        }
-        let permit =
-          slots.acquire_owned().await.map_err(|error| format!("获取下载并发槽位失败：{error}"))?;
-        let started_at = metrics.begin_download();
-        let result = download_object(
-          &client,
-          &root,
-          &download,
-          DownloadControl::new(
-            &task_id,
-            &canceled,
-            &paused,
-            &limiter,
-            DownloadDurability::Recoverable,
-          )
-          .with_telemetry(Arc::clone(&metrics.download_telemetry)),
-        )
-        .await;
-        metrics.finish_download(started_at);
-        drop(permit);
-        result.map(|downloaded| {
-          let completed_count =
-            tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
-          let label = labels
-            .get(&download.cache_key)
-            .cloned()
-            .unwrap_or_else(|| format!("资源对象：{}", download.id));
-          Some((downloaded.bytes, completed_count, label))
-        })
+          .await;
+          metrics.finish_download(started_at);
+          drop(permit);
+          result.map(|downloaded| {
+            let completed_count =
+              tracker.lock().unwrap().mark_downloaded(&download.id, &download.cache_key);
+            let label = labels
+              .get(&download.cache_key)
+              .cloned()
+              .unwrap_or_else(|| format!("资源对象：{}", download.id));
+            Some((downloaded.bytes, completed_count, label))
+          })
+        }))
+        .await
       }
     }))
     .buffer_unordered(network_concurrency);
@@ -4484,19 +4622,22 @@ async fn run_install_asset_job(
       match download_result {
         Ok(Some((downloaded_bytes, completed_count, label))) => {
           metrics.record_unique_download(downloaded_bytes);
-          let mut value = journal.lock().await;
-          value.downloaded_bytes =
-            value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
-          value.committed_step = value.committed_step.max(completed_count).min(value.total_count);
-          value.download_current_file =
-            (value.downloaded_bytes < value.total_bytes).then_some(label);
-          value.spool_bytes = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
-          metrics.observe_spool(value.spool_bytes);
-          value.touch();
-          if let Err(error) = persist_install_progress(&task_root, &value, &metrics) {
+          let spool = refresh_spool_bytes(&spool_bytes_cache, &spool_root).await;
+          if let Err(error) =
+            commit_install_download_progress(&app_handle, &task_root, &journal, &metrics, |value| {
+              value.downloaded_bytes =
+                value.downloaded_bytes.saturating_add(downloaded_bytes).min(value.total_bytes);
+              value.committed_step =
+                value.committed_step.max(completed_count).min(value.total_count);
+              value.download_current_file =
+                (value.downloaded_bytes < value.total_bytes).then_some(label);
+              value.spool_bytes = spool;
+              metrics.observe_spool(value.spool_bytes);
+            })
+            .await
+          {
             first_download_error.get_or_insert(error);
           }
-          emit_progress(&app_handle, &value.summary());
         }
         Ok(None) => {}
         Err(error) => {
@@ -5871,5 +6012,105 @@ mod task_cleanup_synchronization_tests {
       Ok(())
     })
     .unwrap();
+  }
+}
+
+#[cfg(test)]
+mod install_stall_watchdog_tests {
+  use super::*;
+  use crate::game::assembler::AssemblyTelemetrySnapshot;
+  use crate::game::downloader::DownloadTelemetrySnapshot;
+  use crate::game::model::SchemeId;
+  use crate::game::planner::PersistedPlan;
+
+  fn install_plan() -> PersistedPlan {
+    PersistedPlan {
+      schema_version: 6,
+      plan_id: Uuid::new_v4().to_string(),
+      installation_id: Uuid::new_v4().to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target: PackagePlanTarget::Install,
+      source_tag: None,
+      target_tag: "7.0.0".to_string(),
+      manifest_digest: "a".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory: Vec::new(),
+      install_overlay: None,
+      audio_selection: None,
+      created_at: Utc::now().to_rfc3339(),
+    }
+  }
+
+  #[test]
+  fn network_only_wait_is_not_an_io_stall() {
+    let download = DownloadTelemetrySnapshot {
+      active_network_waits: 15,
+      active_local_writes: 0,
+      ..DownloadTelemetrySnapshot::default()
+    };
+    let assembly = AssemblyTelemetrySnapshot::default();
+    assert!(install_watchdog_is_network_only_wait(&download, &assembly));
+  }
+
+  #[test]
+  fn local_write_or_assembly_io_is_an_io_stall() {
+    let writing = DownloadTelemetrySnapshot {
+      active_network_waits: 0,
+      active_local_writes: 2,
+      ..DownloadTelemetrySnapshot::default()
+    };
+    assert!(!install_watchdog_is_network_only_wait(
+      &writing,
+      &AssemblyTelemetrySnapshot::default()
+    ));
+
+    let hashing =
+      AssemblyTelemetrySnapshot { active_hashes: 1, ..AssemblyTelemetrySnapshot::default() };
+    let idle_download = DownloadTelemetrySnapshot {
+      active_network_waits: 4,
+      active_local_writes: 0,
+      ..DownloadTelemetrySnapshot::default()
+    };
+    assert!(!install_watchdog_is_network_only_wait(&idle_download, &hashing));
+  }
+
+  #[test]
+  fn progress_signature_includes_received_bytes() {
+    let mut download = DownloadTelemetrySnapshot::default();
+    let assembly = AssemblyTelemetrySnapshot::default();
+    let before = install_watchdog_progress_signature(1, &download, &assembly);
+    download.received_bytes = 4096;
+    let after = install_watchdog_progress_signature(1, &download, &assembly);
+    assert_ne!(before, after);
+  }
+
+  #[test]
+  fn watchdog_pause_updates_in_memory_journal() {
+    let task_root = std::env::temp_dir().join(format!("tg-watchdog-{}", Uuid::new_v4()));
+    fs::create_dir_all(&task_root).expect("create temp task root");
+    let plan = install_plan();
+    let mut journal_value = journal::TaskJournal::from_plan(&plan);
+    journal_value.state = PackageTaskState::Downloading;
+    let journal = Arc::new(AsyncMutex::new(journal_value));
+    let runtime = tokio::runtime::Builder::new_current_thread()
+      .enable_time()
+      .build()
+      .expect("create test runtime");
+    let summary = runtime
+      .block_on(apply_install_watchdog_pause_locked(
+        &task_root,
+        &journal,
+        INSTALL_STALL_PAUSE_MESSAGE,
+      ))
+      .expect("pause applies");
+    assert_eq!(summary.state, PackageTaskState::Paused);
+    let locked = runtime.block_on(journal.lock());
+    assert_eq!(locked.state, PackageTaskState::Paused);
+    assert_eq!(locked.error_message.as_deref(), Some(INSTALL_STALL_PAUSE_MESSAGE));
+    let _ = fs::remove_dir_all(&task_root);
   }
 }

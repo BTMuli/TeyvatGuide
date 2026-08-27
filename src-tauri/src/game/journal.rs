@@ -670,6 +670,10 @@ pub(crate) fn persist_timed(
     let mut registry = registry_result.map_err(|_| "任务日志进度锁已损坏".to_string())?;
     prune_progress_slots(&mut registry, now);
     let slot = registry.slots.entry(key).or_default();
+    if slot.revision_floor.is_some_and(|revision| journal.revision <= revision) {
+      // Off-lock persist of an older clone must not overwrite a newer snapshot.
+      return Ok(());
+    }
     let result = persist_file(task_root, journal, timing);
     if result.is_ok() {
       slot.last_persisted_at = Some(now);
@@ -1383,5 +1387,26 @@ mod tests {
     assert!(journal.ensure_update_commit_progress(&plan));
     assert_eq!(journal.commit_completed_count, 1);
     assert_eq!(journal.commit_total_count, 2);
+  }
+
+  #[test]
+  fn persist_timed_skips_older_revision() {
+    let task_root = std::env::temp_dir().join(format!("tg-journal-{}", Uuid::new_v4()));
+    fs::create_dir_all(&task_root).expect("create temp task root");
+    let plan = update_plan();
+    let mut newer = TaskJournal::from_plan(&plan);
+    newer.total_bytes = 100;
+    newer.downloaded_bytes = 20;
+    newer.touch();
+    persist(&task_root, &newer).expect("persist newer journal");
+    let mut older = TaskJournal::from_plan(&plan);
+    older.task_id = newer.task_id.clone();
+    older.plan_id = newer.plan_id.clone();
+    older.total_bytes = 100;
+    older.downloaded_bytes = 10;
+    persist(&task_root, &older).expect("older persist is ignored");
+    let loaded = load(&journal_path(&task_root, &newer.task_id)).expect("load journal");
+    assert_eq!(loaded.downloaded_bytes, 20);
+    let _ = fs::remove_dir_all(task_root);
   }
 }
