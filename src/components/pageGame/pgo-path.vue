@@ -407,6 +407,9 @@ watch(
     }
     prepareOverlay();
   },
+  // 首次从「添加新客户端」打开时组件才挂载，且 v-model 已为 true；
+  // 无 immediate 则不会触发扫描，表现为未自动选中且未调用定位命令。
+  { immediate: true },
 );
 </script>
 
