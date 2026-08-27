@@ -43,7 +43,7 @@ impl InstallDefenderDirs {
     ]
     .into_iter()
     .filter(|path| !path.is_empty())
-    .map(str::to_string)
+    .map(normalize_windows_path)
     .collect()
   }
 }
@@ -70,16 +70,20 @@ pub(crate) fn resolve_install_dirs(
     },
   );
   Ok(InstallDefenderDirs {
-    target_root: draft.game_root,
+    target_root: normalize_windows_path(&draft.game_root),
     spool_root: path_text(&spool_root),
-    staging_root: draft.staging_root,
+    staging_root: normalize_windows_path(&draft.staging_root),
     download_root: path_text(&download_root),
     journal_root: path_text(&journal_root),
   })
 }
 
 fn path_text(path: &Path) -> String {
-  path.to_string_lossy().into_owned()
+  normalize_windows_path(&path.to_string_lossy())
+}
+
+fn normalize_windows_path(path: &str) -> String {
+  path.replace('/', "\\")
 }
 
 /// 将待排除目录打印到终端。
@@ -111,12 +115,13 @@ pub(crate) fn remove_exclusions(paths: &[String]) -> Result<(), String> {
 }
 
 fn run_defender_elevated(paths: &[String], remove: bool) -> Result<(), String> {
-  for path in paths {
+  let paths = paths.iter().map(|path| normalize_windows_path(path)).collect::<Vec<String>>();
+  for path in &paths {
     validate_exclusion_path(path)?;
   }
   let status_file = std::env::temp_dir().join(format!("tg-defender-{}.txt", Uuid::new_v4()));
   let status_text = ps_quote(&path_text(&status_file));
-  let inner = build_inner_script(&status_text, paths, remove);
+  let inner = build_inner_script(&status_text, &paths, remove);
   let encoded = base64_encode(&utf16le_bytes(&inner));
   let outer = build_outer_script(&status_text, &encoded);
   let output = Command::new("powershell.exe")
@@ -128,7 +133,15 @@ fn run_defender_elevated(paths: &[String], remove: bool) -> Result<(), String> {
     .arg(&outer)
     .output()
     .map_err(|error| format!("启动 PowerShell 失败：{error}"))?;
+  let status = read_status_file(&status_file);
   let _ = fs::remove_file(&status_file);
+  if let Some(status) = status {
+    if status.eq_ignore_ascii_case("ok") {
+      return Ok(());
+    }
+    let message = status.strip_prefix("err:").map(str::trim).unwrap_or(status.as_str());
+    return Err(message.to_string());
+  }
   let stdout = String::from_utf8_lossy(&output.stdout).trim().to_string();
   let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
   if !output.status.success() {
@@ -142,6 +155,17 @@ fn run_defender_elevated(paths: &[String], remove: bool) -> Result<(), String> {
     return Err(message);
   }
   Ok(())
+}
+
+fn read_status_file(path: &Path) -> Option<String> {
+  let bytes = fs::read(path).ok()?;
+  let text = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
+    String::from_utf8_lossy(&bytes[3..])
+  } else {
+    String::from_utf8_lossy(&bytes)
+  };
+  let text = text.trim();
+  if text.is_empty() { None } else { Some(text.to_string()) }
 }
 
 fn validate_exclusion_path(path: &str) -> Result<(), String> {
@@ -163,18 +187,24 @@ fn ps_quote(value: &str) -> String {
 }
 
 fn build_inner_script(status_file: &str, paths: &[String], remove: bool) -> String {
-  let path_list = paths.iter().map(|path| ps_quote(path)).collect::<Vec<String>>().join(", ");
+  let path_list = paths
+    .iter()
+    .map(|path| ps_quote(&normalize_windows_path(path)))
+    .collect::<Vec<String>>()
+    .join(", ");
   let (mutation, verification) = if remove {
     (
-      "$present = @($paths | Where-Object { $_ -in $current })\n\
-       foreach ($p in $present) { Remove-MpPreference -ExclusionPath $p }",
-      "$remaining = @($paths | Where-Object { $_ -in $current })\n\
+      "$present = @($paths | Where-Object { (Normalize-ExclusionPath $_) -in $current })\n\
+       foreach ($p in $present) { Remove-MpPreference -ExclusionPath $p }\n\
+       $current = @(Read-ExclusionPaths)",
+      "$remaining = @($paths | Where-Object { (Normalize-ExclusionPath $_) -in $current })\n\
        if ($remaining.Count -gt 0) { throw ('移除后仍存在排除：' + ($remaining -join '; ')) }",
     )
   } else {
     (
-      "foreach ($p in $paths) { Add-MpPreference -ExclusionPath $p }",
-      "$missing = @($paths | Where-Object { $_ -notin $current })\n\
+      "foreach ($p in $paths) { Add-MpPreference -ExclusionPath $p }\n\
+       $current = @(Read-ExclusionPaths)",
+      "$missing = @($paths | Where-Object { (Normalize-ExclusionPath $_) -notin $current })\n\
        if ($missing.Count -gt 0) { throw ('添加后未生效：' + ($missing -join '; ')) }",
     )
   };
@@ -182,14 +212,22 @@ fn build_inner_script(status_file: &str, paths: &[String], remove: bool) -> Stri
     "$ErrorActionPreference = 'Stop'\n\
      $statusFile = {status_file}\n\
      $paths = @({path_list})\n\
+     function Normalize-ExclusionPath([string]$p) {{\n\
+       return (($p.Replace('/', '\\')).TrimEnd('\\')).ToLowerInvariant()\n\
+     }}\n\
+     function Read-ExclusionPaths {{\n\
+       return @(Get-MpPreference -ErrorAction SilentlyContinue | Select-Object -ExpandProperty ExclusionPath | ForEach-Object {{ Normalize-ExclusionPath $_ }})\n\
+     }}\n\
      try {{\n\
-       $current = @(Get-MpPreference -ErrorAction SilentlyContinue | Select-Object -ExpandProperty ExclusionPath)\n\
+       $current = @(Read-ExclusionPaths)\n\
        {mutation}\n\
        {verification}\n\
-       Set-Content -LiteralPath $statusFile -Value 'ok' -Encoding ASCII\n\
+       $utf8 = New-Object System.Text.UTF8Encoding $true\n\
+       [System.IO.File]::WriteAllText($statusFile, 'ok', $utf8)\n\
        exit 0\n\
      }} catch {{\n\
-       Set-Content -LiteralPath $statusFile -Value ('err: ' + $_.Exception.Message) -Encoding ASCII\n\
+       $utf8 = New-Object System.Text.UTF8Encoding $true\n\
+       [System.IO.File]::WriteAllText($statusFile, ('err: ' + $_.Exception.Message), $utf8)\n\
        exit 1\n\
      }}"
   )
@@ -207,7 +245,7 @@ fn build_outer_script(status_file: &str, encoded_command: &str) -> String {
        exit 1\n\
      }}\n\
      if (Test-Path -LiteralPath $statusFile) {{\n\
-       $status = Get-Content -LiteralPath $statusFile -Raw\n\
+       $status = [System.IO.File]::ReadAllText($statusFile).Trim()\n\
        Write-Output $status\n\
        if ($status -eq 'ok') {{ exit 0 }}\n\
        exit 1\n\
@@ -379,11 +417,21 @@ mod tests {
     assert_eq!(
       dirs.paths(),
       vec![
-        "D:/Games/Genshin".to_string(),
-        "D:/Games/.teyvatguide-spool-1".to_string(),
-        "C:/AppData/game-tasks/cache/chunks".to_string(),
+        "D:\\Games\\Genshin".to_string(),
+        "D:\\Games\\.teyvatguide-spool-1".to_string(),
+        "C:\\AppData\\game-tasks\\cache\\chunks".to_string(),
       ]
     );
+  }
+
+  #[test]
+  fn add_script_rereads_exclusions_after_mutation() {
+    let script =
+      super::build_inner_script("'status.txt'", &["D:\\Games\\Genshin".to_string()], false);
+    let add_at = script.find("Add-MpPreference").expect("add command");
+    assert!(script[..add_at].contains("Read-ExclusionPaths"), "reads exclusions before add");
+    assert!(script[add_at..].contains("Read-ExclusionPaths"), "rereads exclusions after add");
+    assert!(script.contains("UTF8Encoding"), "writes UTF-8 status");
   }
 
   #[test]
