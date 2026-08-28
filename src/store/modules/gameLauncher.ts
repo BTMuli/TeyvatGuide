@@ -50,10 +50,26 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   const completedInstallHideTimers = new Map<string, number>();
   const completedInstallHideMs = 5000;
 
+  function isInterruptState(state: TGApp.Game.Package.TaskStateEnum): boolean {
+    return (
+      state === gameEnum.package.taskState.PAUSED ||
+      state === gameEnum.package.taskState.FAILED ||
+      state === gameEnum.package.taskState.CANCELED ||
+      state === gameEnum.package.taskState.ABANDONED ||
+      state === gameEnum.package.taskState.RECOVERY_REQUIRED
+    );
+  }
+
   function shouldReplaceTask(
     current: TGApp.Game.Package.TaskSummary | undefined,
     task: TGApp.Game.Package.TaskSummary,
   ): boolean {
+    if (current !== undefined && current.taskId === task.taskId) {
+      if (isInterruptState(task.state) && !isInterruptState(current.state)) return true;
+      if (isInterruptState(current.state) && !isInterruptState(task.state)) {
+        return current.revision < task.revision && current.updatedAt < task.updatedAt;
+      }
+    }
     return !(
       current !== undefined &&
       ((current.taskId === task.taskId && current.revision > task.revision) ||
