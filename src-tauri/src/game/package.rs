@@ -73,6 +73,40 @@ const AUDIO_DOWNLOAD_FOCUS: usize = 4;
 /// 4 路下载之外再预取 1 个资源，焦点空出后立刻接上下一包。
 const AUDIO_DOWNLOAD_PREFETCH: usize = 1;
 
+/// 应用阶段轻量心跳：长时间校验时继续推送当前 journal，避免页面看起来冻结。
+fn spawn_apply_heartbeat(
+  app_handle: AppHandle,
+  journal: Arc<AsyncMutex<TaskJournal>>,
+  canceled: Arc<AtomicBool>,
+) -> Arc<AtomicBool> {
+  let stop = Arc::new(AtomicBool::new(false));
+  let stop_flag = Arc::clone(&stop);
+  std::thread::spawn(move || {
+    loop {
+      std::thread::sleep(Duration::from_secs(8));
+      if stop_flag.load(Ordering::Acquire) || canceled.load(Ordering::Acquire) {
+        break;
+      }
+      let Ok(value) = journal.try_lock() else {
+        continue;
+      };
+      if !matches!(
+        value.state,
+        PackageTaskState::Assembling
+          | PackageTaskState::CommitPrepared
+          | PackageTaskState::Committing
+          | PackageTaskState::Verifying
+      ) {
+        continue;
+      }
+      let summary = value.summary();
+      drop(value);
+      emit_progress(&app_handle, &summary);
+    }
+  });
+  stop
+}
+
 /// 安装流水线停滞看门狗：独立线程联合检查 journal 与下载/组装阶段心跳。
 fn spawn_install_stall_watchdog(
   app_handle: AppHandle,
@@ -1962,7 +1996,8 @@ impl GamePackageManager {
     }
   }
 
-  /// 启动只写应用缓存的资源下载。游戏运行时仍允许开始；改游戏目录发生在 apply。
+  /// 启动资源下载。Main / PreDownload 只写应用缓存，游戏运行时仍允许开始。
+  /// Audio 准备阶段会写入 incoming 并前移删除，改游戏目录发生在下载完成前。
   pub(crate) async fn start(
     &self,
     app_handle: AppHandle,
@@ -1982,6 +2017,11 @@ impl GamePackageManager {
     {
       return Err("该游戏安装存在等待恢复的资源提交，请先完成恢复".to_string());
     }
+    journal::reject_occupying_resource_task(
+      &task_root,
+      &plan.installation_id,
+      Some(&plan.plan_id),
+    )?;
     if !matches!(plan.strategy, PackagePlanStrategy::ManifestDiff | PackagePlanStrategy::Patch)
       || plan.inventory.is_empty()
     {
@@ -2043,6 +2083,9 @@ impl GamePackageManager {
     }
     if !recovering && journal.state.is_active() && journal.revision > 1 {
       return Err("检测到未完成的资源任务，请使用恢复操作继续".to_string());
+    }
+    if !recovering && journal.state == PackageTaskState::Paused {
+      return Err("检测到已暂停的资源任务，请使用恢复操作继续".to_string());
     }
     if recovering && journal.state == PackageTaskState::ReadyToApply {
       return Err("资源任务已经完成下载".to_string());
@@ -2212,8 +2255,13 @@ impl GamePackageManager {
       return Err("安装草稿已经结束，不能重新启动".to_string());
     }
     let preserve_chunks = options.preserve_chunks.unwrap_or(draft.preserve_chunks);
-    if draft.preserve_chunks != preserve_chunks {
+    let options_changed = draft.preserve_chunks != preserve_chunks
+      || draft.last_concurrency != options.concurrency
+      || draft.last_max_bytes_per_second != options.max_bytes_per_second;
+    if options_changed {
       draft.preserve_chunks = preserve_chunks;
+      draft.last_concurrency = options.concurrency;
+      draft.last_max_bytes_per_second = options.max_bytes_per_second;
       installer::persist_draft(&task_root, &draft)?;
     }
     let install_bytes = plan
@@ -2381,13 +2429,10 @@ impl GamePackageManager {
     }
     if journal::has_incomplete_tasks(&task_root, Some(plan.installation_id()))? {
       let incomplete = journal::list(&task_root, Some(plan.installation_id()))?;
-      if incomplete.iter().any(|journal| {
-        journal.plan_id != plan.plan_id()
-          && !matches!(
-            journal.state,
-            PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-          )
-      }) {
+      if incomplete
+        .iter()
+        .any(|journal| journal.plan_id != plan.plan_id() && !journal.state.is_history_terminal())
+      {
         return Err("该游戏安装已有未完成的资源任务，暂时不能换服".to_string());
       }
     }
@@ -2501,7 +2546,17 @@ impl GamePackageManager {
     // 先通知下载 worker 停止，再等待高频更新的任务日志锁。否则流水线越繁忙，
     // 暂停命令越容易长期排在进度更新之后，前端也会一直停留在加载态。
     let (paused, was_paused, mut journal_value) = signal_pause_and_lock_journal(&task).await?;
-    if !matches!(journal_value.target, PackagePlanTarget::Install | PackagePlanTarget::Audio) {
+    let can_pause = match journal_value.target {
+      PackagePlanTarget::Install | PackagePlanTarget::Audio => matches!(
+        journal_value.state,
+        PackageTaskState::Queued | PackageTaskState::Downloading | PackageTaskState::Assembling
+      ),
+      PackagePlanTarget::Main | PackagePlanTarget::PreDownload => {
+        matches!(journal_value.state, PackageTaskState::Queued | PackageTaskState::Downloading)
+      }
+      PackagePlanTarget::Switch => false,
+    };
+    if !can_pause {
       paused.store(was_paused, Ordering::Release);
       return Err("当前资源任务不能暂停".to_string());
     }
@@ -2511,13 +2566,6 @@ impl GamePackageManager {
     }
     if journal_value.state == PackageTaskState::Paused {
       return Ok(journal_value.summary());
-    }
-    if !matches!(
-      journal_value.state,
-      PackageTaskState::Queued | PackageTaskState::Downloading | PackageTaskState::Assembling
-    ) {
-      paused.store(was_paused, Ordering::Release);
-      return Err("当前资源任务不能暂停".to_string());
     }
     let previous_state = journal_value.state;
     journal_value.state = PackageTaskState::Paused;
@@ -2591,10 +2639,7 @@ impl GamePackageManager {
       }
     }
     let journal = journal::load(&journal::journal_path(task_root, task_id))?;
-    if matches!(
-      journal.state,
-      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-    ) {
+    if journal.state.is_history_terminal() {
       return Ok(Some(journal.summary()));
     }
     if journal.state.blocks_launch() {
@@ -2667,6 +2712,11 @@ impl GamePackageManager {
       let worker_app_handle = app_handle.clone();
       let canceled_flag = Arc::clone(&canceled);
       let snapshot = Arc::clone(&worker_journal);
+      let apply_heartbeat_stop = spawn_apply_heartbeat(
+        worker_app_handle.clone(),
+        Arc::clone(&snapshot),
+        Arc::clone(&canceled_flag),
+      );
       let mut completed = false;
       if should_execute_apply {
         let apply_plan = plan.clone();
@@ -2739,6 +2789,7 @@ impl GamePackageManager {
       {
         log::warn!("[game-package] 同步语音包安装记录失败：{error}");
       }
+      apply_heartbeat_stop.store(true, Ordering::Release);
     });
     Ok(summary)
   }
@@ -3155,7 +3206,7 @@ impl GamePackageManager {
     restore_prep_staged_audio_deletions(task_root, &mut journal)?;
     cleanup_task_partials(&task_root.join("cache/chunks"), task_id)?;
     cleanup_task_partials(&task_root.join("cache/sdks"), task_id)?;
-    journal.state = PackageTaskState::Canceled;
+    journal.state = PackageTaskState::Abandoned;
     journal.error_message = None;
     journal.current_file = None;
     journal.touch();
@@ -4285,10 +4336,7 @@ async fn run_install_streaming_supervisor(
   let cleanup_plan_id = plan.plan_id.clone();
   let terminal = {
     let value = journal.lock().await;
-    matches!(
-      value.state,
-      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-    )
+    value.state.is_history_terminal()
   };
   if terminal {
     tauri::async_runtime::spawn_blocking(move || {
@@ -6739,16 +6787,39 @@ fn check_install_stream_space_with_spool<'a>(
   } else {
     0
   };
-  let required = remaining_assets
-    .saturating_add(current_spool)
-    .saturating_add(pending_bytes)
+  let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
+  let game_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
+  let same_volume = same_volume(spool_parent, game_parent);
+  let cache_required =
+    current_spool.saturating_add(pending_bytes).saturating_add(SAFETY_MARGIN_BYTES);
+  let install_required = remaining_assets
     .saturating_add(sdk_bytes)
+    .saturating_add(if same_volume { current_spool.saturating_add(pending_bytes) } else { 0 })
     .saturating_add(SAFETY_MARGIN_BYTES);
-  let parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
-  let available =
-    fs2::available_space(parent).map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
-  if available < required {
-    return Err(format!("安装磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
+  if same_volume {
+    let available = fs2::available_space(game_parent)
+      .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
+    if available < install_required {
+      return Err(format!(
+        "安装磁盘空间不足：至少需要 {install_required} 字节，可用 {available} 字节"
+      ));
+    }
+    return Ok(());
+  }
+  let spool_available = fs2::available_space(spool_parent)
+    .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
+  if spool_available < cache_required {
+    return Err(format!(
+      "安装任务 spool 磁盘空间不足：至少需要 {cache_required} 字节，可用 {spool_available} 字节"
+    ));
+  }
+  let install_available = fs2::available_space(game_parent)
+    .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
+  let install_only = remaining_assets.saturating_add(sdk_bytes).saturating_add(SAFETY_MARGIN_BYTES);
+  if install_available < install_only {
+    return Err(format!(
+      "安装磁盘空间不足：至少需要 {install_only} 字节，可用 {install_available} 字节"
+    ));
   }
   Ok(())
 }
