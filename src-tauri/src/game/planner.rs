@@ -1689,8 +1689,11 @@ fn collect_category_downloads(
 fn collect_reusable_chunks(
   assets: &HashMap<String, &Asset>,
 ) -> Result<HashMap<(String, u64), PlanReuse>, String> {
+  let mut names = assets.keys().cloned().collect::<Vec<_>>();
+  names.sort();
   let mut chunks = HashMap::new();
-  for (asset_name, asset) in assets {
+  for asset_name in names {
+    let asset = assets[&asset_name];
     for chunk in &asset.asset_chunks {
       let size = positive_u64(chunk.chunk_size_decompressed, "旧 chunk 解压大小")?;
       chunks.entry((chunk.chunk_decompressed_hash_md5.clone(), size)).or_insert(PlanReuse {
