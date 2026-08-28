@@ -690,6 +690,7 @@ pub(crate) fn assemble_plan_asset_to_root(
         &downloads,
         game_root,
         &cache_root,
+        &cache_root,
         output_root,
         canceled,
         None,
@@ -1173,6 +1174,7 @@ fn assemble_asset<L: DownloadLookup>(
     downloads,
     game_root,
     cache_root,
+    cache_root,
     staging_root,
     canceled,
     None,
@@ -1185,6 +1187,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
   downloads: &L,
   game_root: &Path,
   cache_root: &Path,
+  shared_cache_root: &Path,
   staging_root: &Path,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
@@ -1239,6 +1242,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
           &mut file,
           chunk,
           cache_root,
+          shared_cache_root,
           download,
           canceled,
           timing.as_deref_mut(),
@@ -1306,6 +1310,15 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
       } else if cached_chunk_matches(spool_root, download) {
         spool_root
       } else {
+        let shared_meta = fs::symlink_metadata(shared_cache_root.join(&download.cache_key)).ok();
+        let spool_meta = fs::symlink_metadata(spool_root.join(&download.cache_key)).ok();
+        log::warn!(
+          "[game-install] 组装缓存复验失败：chunk={} key={} shared={:?} spool={:?}",
+          chunk.id,
+          download.cache_key,
+          shared_meta.as_ref().map(|m| (m.len(), m.is_file())),
+          spool_meta.as_ref().map(|m| (m.len(), m.is_file())),
+        );
         return Err(format!("资源 chunk 完整性复验失败：{}", chunk.id));
       };
       match selected {
@@ -1321,6 +1334,7 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
       downloads,
       game_root,
       root,
+      shared_cache_root,
       staging_root,
       canceled,
       timing,
@@ -1369,6 +1383,7 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
         &mut file,
         chunk,
         root,
+        shared_cache_root,
         download,
         canceled,
         timing.as_deref_mut(),
@@ -1463,6 +1478,7 @@ fn write_downloaded_chunk_with_timing(
   output: &mut File,
   chunk: &PlanChunk,
   cache_root: &Path,
+  shared_cache_root: &Path,
   download: &super::planner::PlanDownload,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
@@ -1470,11 +1486,34 @@ fn write_downloaded_chunk_with_timing(
 ) -> Result<(), String> {
   check_canceled(canceled)?;
   let open_stage = telemetry.map(|value| value.begin(AssemblyLiveStage::Read));
-  let cache_matches = cached_chunk_matches(cache_root, download);
-  if !cache_matches {
+  let mut root = cache_root;
+  if cached_chunk_matches(root, download) {
+    // 主根分片可用。
+  } else if root != shared_cache_root && cached_chunk_matches(shared_cache_root, download) {
+    // 主根的分片在组装前被释放/删除，但共享缓存仍有有效副本：
+    // 直接回退使用共享缓存，避免整个安装因单个分片缺失而失败。
+    log::warn!(
+      "[game-install] 组装回退共享缓存：chunk={} key={} root={} shared={}",
+      chunk.id,
+      download.cache_key,
+      root.display(),
+      shared_cache_root.display(),
+    );
+    root = shared_cache_root;
+  } else {
+    let path = root.join(&download.cache_key);
+    let shared_path = shared_cache_root.join(&download.cache_key);
+    log::warn!(
+      "[game-install] 组装写盘缓存复验失败：chunk={} key={} root={} path_len={:?} shared_len={:?}",
+      chunk.id,
+      download.cache_key,
+      root.display(),
+      fs::symlink_metadata(&path).ok().map(|m| m.len()),
+      fs::symlink_metadata(&shared_path).ok().map(|m| m.len()),
+    );
     return Err(format!("下载缓存完整性复验失败：{}", chunk.id));
   }
-  let path = cache_root.join(&download.cache_key);
+  let path = root.join(&download.cache_key);
   let file_result = File::open(&path);
   if let Some(open_stage) = open_stage {
     open_stage.finish(0);

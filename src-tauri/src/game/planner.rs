@@ -1886,6 +1886,13 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
     return false;
   };
   if !cache_file_metadata_matches(&metadata, download) {
+    log::warn!(
+      "[game-package] 缓存元数据不匹配：key={} root={} len={} is_file={}",
+      download.cache_key,
+      cache_root.display(),
+      metadata.len(),
+      metadata.is_file(),
+    );
     forget_cache_validation(cache_root, download);
     return false;
   }
@@ -1896,6 +1903,12 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
   if matches {
     remember_cache_validation(cache_root, download, &metadata);
   } else {
+    log::warn!(
+      "[game-package] 缓存哈希不匹配：key={} root={} len={}",
+      download.cache_key,
+      cache_root.display(),
+      metadata.len(),
+    );
     forget_cache_validation(cache_root, download);
   }
   matches

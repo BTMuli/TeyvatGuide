@@ -451,8 +451,10 @@ pub async fn game_install_plan(
 }
 
 /// 取消仅完成评估、尚未启动任务的安装草稿。
+/// 若该安装仍有资源任务在运行，先请求取消并等待其完全退出，再清理草稿，
+/// 避免任务尚未收尾时取消草稿报“该游戏安装已有资源任务正在运行”。
 #[tauri::command]
-pub fn game_install_draft_cancel(
+pub async fn game_install_draft_cancel(
   app_handle: AppHandle,
   manager: tauri::State<'_, GamePackageManager>,
   install_id: String,
@@ -460,6 +462,10 @@ pub fn game_install_draft_cancel(
   let task_root = game_task_root(&app_handle)?;
   installer::ensure_windows_install_platform()?;
   let draft_id = installer::find_draft_id(&task_root, &install_id)?;
+  if let Some(task_id) = manager.running_task_for_installation(&install_id)? {
+    manager.cancel(&app_handle, &task_root, &task_id)?;
+    manager.wait_for_task_idle(&task_id).await?;
+  }
   let _reservation =
     manager.reserve_installation_operation(&install_id, "game-install-draft-cancel")?;
   if journal::list(&task_root, Some(&install_id))?.iter().any(|task| {
@@ -647,14 +653,16 @@ pub async fn game_install_recover(
     manager.wait_for_task_idle(&task_id).await?;
     journal_value = journal::load(&journal_path)?;
   }
-  let published_state = installer::published_installation_state(&draft)?;
+  let mut published_state = installer::published_installation_state(&draft)?;
   if matches!(action, PackageRecoveryAction::Rollback) {
     if journal_value.state == PackageTaskState::RecoveryRequired {
       return Err("RecoveryRequired 状态禁止删除暂存目录，请先完成安全复验".to_string());
     }
     if journal_value.state.is_active() {
       manager.cancel(&app_handle, &task_root, &task_id)?;
-      return Ok(journal_value.summary());
+      manager.wait_for_task_idle(&task_id).await?;
+      journal_value = journal::load(&journal_path)?;
+      published_state = installer::published_installation_state(&draft)?;
     }
     let _reservation =
       manager.reserve_installation_operation(&install_id, "game-install-rollback")?;
@@ -771,7 +779,7 @@ pub async fn game_install_recover(
 
 /// 请求取消未发布的全新安装任务，并在安全边界外清理草稿暂存目录。
 #[tauri::command]
-pub fn game_install_cancel(
+pub async fn game_install_cancel(
   app_handle: AppHandle,
   manager: tauri::State<'_, GamePackageManager>,
   task_id: String,
@@ -781,6 +789,7 @@ pub fn game_install_cancel(
   installer::ensure_windows_install_platform()?;
   let draft_id = installer::find_draft_id(&task_root, &install_id)?;
   manager.cancel(&app_handle, &task_root, &task_id)?;
+  manager.wait_for_task_idle(&task_id).await?;
   let journal_path = journal::journal_path(&task_root, &task_id);
   let journal_value = journal::load(&journal_path)?;
   if journal_value.state.is_active() || journal_value.state.blocks_launch() {
