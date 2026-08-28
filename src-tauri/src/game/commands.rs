@@ -1093,7 +1093,7 @@ pub async fn game_package_cache_status(
     .map_err(|error| format!("缓存占用统计任务异常退出：{error}"))?
 }
 
-/// 清理资源分片与渠道 SDK 缓存；进行中或待恢复任务会阻止删除。
+/// 清理资源分片与渠道 SDK 缓存；仍被未完成任务引用的文件会保留。
 #[tauri::command]
 pub async fn game_package_cache_clear(
   app_handle: AppHandle,
@@ -1115,7 +1115,7 @@ pub async fn game_package_cache_clear(
         last_emit = Instant::now();
       }
     };
-    cache::clear_with_progress(&task_root, false, target, &mut progress)
+    cache::clear_with_progress(&task_root, target, &mut progress)
   })
   .await
   .map_err(|error| format!("缓存清理任务异常退出：{error}"))?

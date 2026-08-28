@@ -208,8 +208,8 @@ function cacheClearText(target: CacheClearTarget, occupied: string): string {
 function cacheErrorText(error: unknown, action: string): string {
   const message = String(error);
   if (message.includes("游戏仍在运行")) return "请先关闭游戏，再清理缓存。";
-  if (message.includes("还有任务正在使用")) {
-    return "还有任务正在使用这类缓存，请等待任务完成后再试。";
+  if (message.includes("还有资源任务正在运行") || message.includes("还有任务正在使用")) {
+    return "还有任务正在下载或应用，请等待完成或暂停后再试。";
   }
   return `${action}失败，请稍后重试。`;
 }

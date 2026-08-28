@@ -56,7 +56,6 @@ fn status_with_journals(
 /// 回调参数依次为：已处理文件数、总文件数、当前文件名。
 pub(crate) fn clear_with_progress<F>(
   task_root: &Path,
-  has_running_tasks: bool,
   target: CacheClearTarget,
   progress: &mut F,
 ) -> Result<PackageCacheSummary, String>
@@ -67,11 +66,6 @@ where
     return Err("游戏仍在运行，请先关闭游戏后再清理缓存".to_string());
   }
   let journals = journal::list(task_root, None)?;
-  if (target != CacheClearTarget::Sdk && has_running_tasks)
-    || journal::blocks_cache_clear(&journals, target)
-  {
-    return Err("还有任务正在使用这类缓存，请等待任务完成后再清理".to_string());
-  }
   let protected = journal::protected_cache_files_for_target(&journals, Some(target));
   let total = match target {
     CacheClearTarget::Chunks => count_dir_files(&task_root.join("cache/chunks"))?,

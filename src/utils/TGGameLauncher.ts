@@ -420,7 +420,7 @@ export async function getGamePackageCacheStatus(): Promise<TGApp.Game.Package.Ca
 type CacheClearTarget = "chunks" | "sdk" | "all";
 
 /**
- * 清理指定的资源分片、渠道 SDK 或全部缓存；进行中或待恢复任务会阻止删除。
+ * 清理指定的资源分片、渠道 SDK 或全部缓存；仍被未完成任务引用的文件会保留。
  * @since Beta v0.11.5
  * @param target - 要清理的缓存范围，默认为全部缓存
  * @returns 清理后的缓存占用摘要

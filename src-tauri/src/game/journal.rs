@@ -1070,25 +1070,6 @@ pub(crate) fn reject_occupying_resource_task(
   }
 }
 
-/// 按缓存类型判断是否存在仍可能使用目标缓存的任务。
-pub(crate) fn blocks_cache_clear(
-  journals: &[TaskJournal],
-  target: super::cache::CacheClearTarget,
-) -> bool {
-  journals.iter().any(|journal| {
-    let relevant = match target {
-      super::cache::CacheClearTarget::Sdk => journal.target == PackagePlanTarget::Switch,
-      super::cache::CacheClearTarget::Chunks => journal.target != PackagePlanTarget::Switch,
-      super::cache::CacheClearTarget::All => true,
-    };
-    relevant
-      && (journal.state.is_active()
-        || journal.state.requires_recovery()
-        || journal.state == PackageTaskState::Paused
-        || journal.state == PackageTaskState::RepairRequired)
-  })
-}
-
 /// 尚未结束的任务声明拥有、清理时必须保留的缓存键。
 pub(crate) fn protected_cache_files_for_target(
   journals: &[TaskJournal],
