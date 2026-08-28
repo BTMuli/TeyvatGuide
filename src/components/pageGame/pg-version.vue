@@ -808,7 +808,9 @@ onUnmounted(() => {
   display: grid;
   padding: 12px;
   border-radius: 4px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   gap: 12px;
   margin-inline: 16px;
 }

@@ -68,6 +68,12 @@ defineSlots<{
   gap: 8px;
   margin-inline: 16px;
 
+  &:not(.embedded) {
+    -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+    backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+    background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
+  }
+
   &.embedded {
     padding: 0;
     background: transparent;

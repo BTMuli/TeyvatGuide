@@ -108,13 +108,15 @@ defineSlots<{
   padding: 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   gap: 8px;
 
   &.embedded {
     padding: 0;
     border: 0;
-    background: transparent;
+    background: var(--game-page-cover-subpanel-bg, transparent);
   }
 }
 

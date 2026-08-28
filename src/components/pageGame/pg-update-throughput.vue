@@ -313,7 +313,9 @@ function formatDuration(seconds: number): string {
   padding: 8px 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--box-bg-1);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-panel-bg, var(--box-bg-1));
   gap: 8px;
 }
 
@@ -373,7 +375,9 @@ function formatDuration(seconds: number): string {
   overflow: hidden;
   height: 104px;
   border-radius: 4px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
 
   svg {
     display: block;
@@ -438,6 +442,10 @@ function formatDuration(seconds: number): string {
 .update-throughput-window {
   right: 4px;
   bottom: 4px;
+  border: var(--game-page-cover-border, 0);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-panel-bg, var(--box-bg-1));
 }
 
 @media (prefers-reduced-motion: reduce) {

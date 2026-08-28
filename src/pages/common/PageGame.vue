@@ -727,7 +727,6 @@ onUnmounted(() => {
   width: 24px;
   height: 24px;
   border-radius: 4px;
-  filter: var(--icon-filter);
 }
 
 .game-launch-btn {
@@ -761,7 +760,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   border-radius: 8px;
   background: var(--box-bg-1);
-  color: var(--box-text-4);
+  color: var(--app-page-content);
   font-family: var(--font-text);
 }
 
@@ -812,54 +811,25 @@ onUnmounted(() => {
 }
 
 .game-page-cover {
+  --game-page-cover-backdrop-filter: blur(4px);
+  --game-page-cover-border: 1px solid var(--common-shadow-1);
+  --game-page-cover-panel-bg: color-mix(in srgb, var(--box-bg-1) 30%, transparent);
+  --game-page-cover-subpanel-bg: color-mix(in srgb, var(--box-bg-2) 20%, transparent);
+
   padding-bottom: 144px;
 
   .game-empty,
-  :deep(.audio-throughput),
-  :deep(.audio-throughput-window),
-  :deep(.cache-panel),
-  :deep(.game-list),
-  :deep(.install-draft),
-  :deep(.install-task),
-  :deep(.install-throughput),
-  :deep(.install-throughput-window),
-  :deep(.update-throughput),
-  :deep(.update-throughput-window) {
+  .game-list {
+    border: var(--game-page-cover-border);
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
-    background: color-mix(in srgb, var(--box-bg-1) 30%, transparent);
+    background: var(--game-page-cover-panel-bg);
   }
 
-  .game-empty,
-  :deep(.audio-throughput),
-  :deep(.audio-throughput-window),
-  :deep(.cache-panel),
-  :deep(.game-list),
-  :deep(.install-task),
-  :deep(.install-throughput),
-  :deep(.install-throughput-window),
-  :deep(.update-throughput),
-  :deep(.update-throughput-window) {
-    border: 1px solid var(--common-shadow-1);
-  }
-
-  .game-icon,
-  :deep(.audio-throughput-chart),
-  :deep(.cache-fact),
-  :deep(.game-fact),
-  :deep(.game-icon),
-  :deep(.game-notice),
-  :deep(.install-draft-config-item),
-  :deep(.install-task-config-item),
-  :deep(.install-throughput-chart),
-  :deep(.plan-summary),
-  :deep(.progress-panel:not(.embedded)),
-  :deep(.task-panel),
-  :deep(.task-progress),
-  :deep(.update-throughput-chart) {
+  .game-icon {
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
-    background: color-mix(in srgb, var(--box-bg-2) 20%, transparent);
+    background: var(--game-page-cover-subpanel-bg);
   }
 }
 </style>

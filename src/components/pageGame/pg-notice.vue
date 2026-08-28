@@ -41,7 +41,9 @@ const noticeIcon = computed<string>(() => {
   padding: 10px 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   border-inline-start-width: 3px;
   color: var(--box-text-2);
   gap: 8px;

@@ -616,8 +616,11 @@ async function handleUninstall(): Promise<void> {
 .game-list {
   width: 100%;
   flex-shrink: 0;
+  border: var(--game-page-cover-border, 0);
   border-radius: 8px;
-  background: var(--box-bg-1);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-panel-bg, var(--box-bg-1));
   color: var(--box-text-4);
   font-family: var(--font-text);
 }
@@ -728,7 +731,9 @@ async function handleUninstall(): Promise<void> {
   padding: 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 8px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   gap: 4px;
 
   span {
@@ -785,7 +790,9 @@ async function handleUninstall(): Promise<void> {
   border: 1px solid var(--common-shadow-1);
   border-radius: 5px;
   margin-right: 15px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   color: var(--box-text-2);
 
   :deep(img) {

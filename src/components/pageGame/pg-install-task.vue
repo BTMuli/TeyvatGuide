@@ -215,8 +215,11 @@ const canAbandon = computed<boolean>(() => {
 .install-task {
   display: grid;
   padding: 12px 16px 16px;
+  border: var(--game-page-cover-border, 0);
   border-radius: 8px;
-  background: var(--box-bg-1);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-panel-bg, var(--box-bg-1));
   gap: 8px;
 }
 
@@ -255,7 +258,9 @@ const canAbandon = computed<boolean>(() => {
   padding: 8px 12px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 6px;
-  background: var(--box-bg-2);
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   gap: 3px;
 
   span {
