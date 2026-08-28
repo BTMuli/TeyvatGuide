@@ -216,7 +216,7 @@ impl DownloadTelemetry {
     }
   }
 
-  fn record_cache_hit(&self) {
+  pub(crate) fn record_cache_hit(&self) {
     self.cache_hits.fetch_add(1, Ordering::Relaxed);
   }
 
@@ -231,7 +231,10 @@ impl DownloadTelemetry {
   fn begin_live_stage(self: &Arc<Self>, stage: DownloadLiveStage) -> DownloadLiveStageGuard {
     match stage {
       DownloadLiveStage::NetworkWait => {
-        self.active_network_waits.fetch_add(1, Ordering::AcqRel);
+        let previous = self.active_network_waits.fetch_add(1, Ordering::AcqRel);
+        if previous == 0 && self.network_wait_operation_count.load(Ordering::Relaxed) == 0 {
+          log::info!("[game-package] 首个游戏资源下载请求已发出");
+        }
       }
       DownloadLiveStage::LocalWrite => {
         self.active_local_writes.fetch_add(1, Ordering::AcqRel);
@@ -423,6 +426,7 @@ pub(crate) struct DownloadControl<'a> {
   limiter: &'a RateLimiter,
   durability: DownloadDurability,
   telemetry: Option<Arc<DownloadTelemetry>>,
+  skip_initial_cache_check: bool,
 }
 
 impl<'a> DownloadControl<'a> {
@@ -433,11 +437,24 @@ impl<'a> DownloadControl<'a> {
     limiter: &'a RateLimiter,
     durability: DownloadDurability,
   ) -> Self {
-    Self { task_id, canceled, paused, limiter, durability, telemetry: None }
+    Self {
+      task_id,
+      canceled,
+      paused,
+      limiter,
+      durability,
+      telemetry: None,
+      skip_initial_cache_check: false,
+    }
   }
 
   pub(crate) fn with_telemetry(mut self, telemetry: Arc<DownloadTelemetry>) -> Self {
     self.telemetry = Some(telemetry);
+    self
+  }
+
+  pub(crate) fn skip_initial_cache_check(mut self) -> Self {
+    self.skip_initial_cache_check = true;
     self
   }
 }
@@ -531,7 +548,15 @@ pub(crate) async fn download_object(
   download: &PlanDownload,
   control: DownloadControl<'_>,
 ) -> Result<DownloadedObject, String> {
-  let DownloadControl { task_id, canceled, paused, limiter, durability, telemetry } = control;
+  let DownloadControl {
+    task_id,
+    canceled,
+    paused,
+    limiter,
+    durability,
+    telemetry,
+    skip_initial_cache_check,
+  } = control;
   let mut object_telemetry =
     telemetry.as_ref().map(|value| DownloadObjectTelemetry::new(Arc::clone(value)));
   if download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange {
@@ -539,7 +564,7 @@ pub(crate) async fn download_object(
   }
   let lock = download_lock(&download.cache_key)?;
   let _guard = lock.lock().await;
-  if cached_chunk_matches_async(cache_root, download).await {
+  if !skip_initial_cache_check && cached_chunk_matches_async(cache_root, download).await {
     if let Some(telemetry) = telemetry.as_ref() {
       telemetry.record_cache_hit();
     }
@@ -552,7 +577,6 @@ pub(crate) async fn download_object(
     });
   }
   let target = cache_root.join(&download.cache_key);
-  reject_existing_link(&target).await?;
   let partial = cache_root.join(format!("{}.part.{task_id}", download.cache_key));
   let mut last_error = String::new();
   for attempt in 0..MAX_ATTEMPTS {
@@ -570,11 +594,11 @@ pub(crate) async fn download_object(
       }
       return Err("任务已取消".to_string());
     }
-    remove_partial(&partial).await;
     let mut attempt_telemetry = telemetry.as_ref().map(|value| value.begin_attempt());
     let result = download_once(
       client,
       download,
+      &target,
       &partial,
       canceled,
       paused,
@@ -664,6 +688,11 @@ pub(crate) async fn download_object(
       }
       Err(error) => last_error = error,
     }
+    if is_permanent_download_setup_error(&last_error) {
+      log::error!("[game-package] 游戏资源下载地址不可用：{last_error}");
+      remove_partial(&partial).await;
+      return Err(last_error);
+    }
     if paused.load(Ordering::Acquire) {
       remove_partial(&partial).await;
       if let Some(object_telemetry) = object_telemetry.as_mut() {
@@ -693,6 +722,7 @@ pub(crate) async fn download_object(
 async fn download_once(
   client: &reqwest::Client,
   download: &PlanDownload,
+  target: &Path,
   partial: &Path,
   canceled: &AtomicBool,
   paused: &AtomicBool,
@@ -709,20 +739,28 @@ async fn download_once(
   let send_started_at = Instant::now();
   let live_stage =
     telemetry.as_deref().map(|value| value.begin_live_stage(DownloadLiveStage::NetworkWait));
-  let response = wait_for_download_io(
-    request.send(),
-    canceled,
-    paused,
-    DOWNLOAD_IO_STALL_TIMEOUT,
-    "等待游戏资源响应超时",
-  )
-  .await;
+  let prepare = async {
+    reject_existing_link(target).await?;
+    remove_partial(partial).await;
+    Ok::<(), String>(())
+  };
+  let (response, prepare_result) = tokio::join!(
+    wait_for_download_io(
+      request.send(),
+      canceled,
+      paused,
+      DOWNLOAD_IO_STALL_TIMEOUT,
+      "等待游戏资源响应超时",
+    ),
+    prepare,
+  );
   if let Some(live_stage) = live_stage {
     live_stage.finish(0);
   }
   if let Some(telemetry) = telemetry.as_deref_mut() {
     telemetry.record_network_wait(send_started_at.elapsed());
   }
+  prepare_result?;
   let response = response?.map_err(|error| network_error("下载游戏资源", &error))?;
   if download.range_start.is_some() {
     if response.status() != reqwest::StatusCode::PARTIAL_CONTENT {
@@ -974,7 +1012,14 @@ async fn remove_partial(path: &Path) {
   }
 }
 
+fn is_permanent_download_setup_error(error: &str) -> bool {
+  error.contains("下载地址") || error.contains("主机不受信任") || error.contains("字段无效")
+}
+
 fn download_url(download: &PlanDownload) -> Result<reqwest::Url, String> {
+  if download.url_prefix.is_empty() {
+    return Err("游戏资源下载地址未水合，请重新评估或恢复安装计划".to_string());
+  }
   if download.cache_key.starts_with("sdk-")
     && download.cache_key.ends_with(".zip")
     && download.id == download.cache_key

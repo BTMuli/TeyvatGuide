@@ -259,7 +259,7 @@ fn log_install_stall_diagnostics(
   assembly: assembler::AssemblyTelemetrySnapshot,
 ) {
   log::warn!(
-    "[game-install][{plan_id}] 安装流水线停滞样本：stalled={}s journalAge={}s confirmation={}/{} activeDownloads={} activeAssemblies={} downloadHeartbeatAge={}ms downloadNetworkActive={} downloadWriteActive={} downloadNetworkOps={} downloadWriteOps={} downloadWrittenBytes={} downloadNetworkMax={}ms downloadWriteMax={}ms assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyReadOps={} assemblyWriteOps={} assemblyHashOps={} assemblySyncOps={} assemblyReadBytes={} assemblyWrittenBytes={} assemblyHashedBytes={} assemblyReadMax={}ms assemblyWriteMax={}ms assemblyHashMax={}ms assemblySyncMax={}ms queueRefills={}",
+    "[game-install][{plan_id}] 安装流水线停滞样本：stalled={}s journalAge={}s confirmation={}/{} activeDownloads={} activeAssemblies={} downloadHeartbeatAge={}ms downloadNetworkActive={} downloadWriteActive={} downloadNetworkOps={} downloadWriteOps={} downloadWrittenBytes={} downloadAttempts={} downloadCacheHits={} downloadNetworkMax={}ms downloadWriteMax={}ms assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyReadOps={} assemblyWriteOps={} assemblyHashOps={} assemblySyncOps={} assemblyReadBytes={} assemblyWrittenBytes={} assemblyHashedBytes={} assemblyReadMax={}ms assemblyWriteMax={}ms assemblyHashMax={}ms assemblySyncMax={}ms queueRefills={}",
     stalled_for.as_secs(),
     journal_age_seconds,
     confirmations,
@@ -272,6 +272,8 @@ fn log_install_stall_diagnostics(
     download.network_wait_operation_count,
     download.local_write_operation_count,
     download.local_written_bytes,
+    download.attempts,
+    download.cache_hits,
     download.max_network_wait_micros / 1_000,
     download.max_local_write_micros / 1_000,
     assembly.last_activity_age_millis,
@@ -5514,20 +5516,32 @@ async fn download_install_chunk(
       Arc::clone(values.entry(download.id.clone()).or_insert_with(|| Arc::new(AsyncMutex::new(()))))
     };
     let _download_guard = download_guard.lock().await;
-    if cached_chunk_matches_async(&shared_root, &download).await
-      || cached_chunk_matches_async(&root, &download).await
-    {
-      return Ok(None);
-    }
     let permit =
       slots.acquire_owned().await.map_err(|error| format!("获取下载并发槽位失败：{error}"))?;
     let started_at = metrics.begin_download();
+    let cache_hit = {
+      let shared_root = shared_root.clone();
+      let root = root.clone();
+      let download = download.clone();
+      tauri::async_runtime::spawn_blocking(move || {
+        cached_chunk_matches(&shared_root, &download) || cached_chunk_matches(&root, &download)
+      })
+      .await
+      .unwrap_or(false)
+    };
+    if cache_hit {
+      metrics.download_telemetry.record_cache_hit();
+      metrics.finish_download(started_at);
+      drop(permit);
+      return Ok(None);
+    }
     let result = download_object(
       &client,
       &root,
       &download,
       DownloadControl::new(&task_id, &canceled, &paused, &limiter, DownloadDurability::Recoverable)
-        .with_telemetry(Arc::clone(&metrics.download_telemetry)),
+        .with_telemetry(Arc::clone(&metrics.download_telemetry))
+        .skip_initial_cache_check(),
     )
     .await;
     metrics.finish_download(started_at);
