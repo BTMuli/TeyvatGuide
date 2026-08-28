@@ -211,7 +211,7 @@ function cacheErrorText(error: unknown, action: string): string {
   if (message.includes("还有资源任务正在运行") || message.includes("还有任务正在使用")) {
     return "还有任务正在下载或应用，请等待完成或暂停后再试。";
   }
-  return `${action}失败，请稍后重试。`;
+  return `${action}失败：${message}`;
 }
 
 async function clearCache(target: CacheClearTarget): Promise<void> {
