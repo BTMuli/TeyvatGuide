@@ -779,10 +779,11 @@ pub async fn game_install_recover(
   let staging_path = Path::new(&draft.staging_root);
   let staging_exists = installer::path_occupied(staging_path)?;
   let marker_exists = installer::path_occupied(&staging_path.join(installer::MARKER_FILE_NAME))?;
-  if !staging_exists && journal_value.state.requires_recovery() {
+  let commit_phase = installer::resume_requires_staging_marker(journal_value.state, draft.state);
+  if commit_phase && !staging_exists {
     return Err("安装暂存目录与最终目录均不存在，需要人工恢复".to_string());
   }
-  if staging_exists && journal_value.state.requires_recovery() && !marker_exists {
+  if commit_phase && staging_exists && !marker_exists {
     return Err("安装提交阶段缺少 marker，需要人工恢复".to_string());
   }
   let branches = get_game_branches(&client, draft.scheme).await?;

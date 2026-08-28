@@ -1014,6 +1014,23 @@ pub(crate) enum PublishedInstallationState {
 pub(crate) const INSTALL_MARKER_MISSING_MESSAGE: &str =
   "已发布的最终游戏目录缺少安装标记，需要人工恢复";
 
+/// 流式安装在下载阶段就会把 journal 写成 `Assembling`，marker 要到校验完成后才写入。
+/// 只有已经越过提交准备边界时，暂存目录才必须带 marker。
+pub(crate) fn resume_requires_staging_marker(
+  journal_state: PackageTaskState,
+  draft_state: InstallDraftState,
+) -> bool {
+  matches!(
+    journal_state,
+    PackageTaskState::CommitPrepared
+      | PackageTaskState::Committing
+      | PackageTaskState::Verifying
+      | PackageTaskState::PublishPending
+      | PackageTaskState::RollingBack
+  ) || (journal_state == PackageTaskState::RecoveryRequired
+    && matches!(draft_state, InstallDraftState::CommitPrepared | InstallDraftState::PublishPending))
+}
+
 /// 判断最终目录的发布边界状态，避免把用户预先创建的空目录当成已发布安装。
 pub(crate) fn published_installation_state(
   draft: &InstallDraft,
