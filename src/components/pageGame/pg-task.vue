@@ -149,6 +149,15 @@
           tone="success"
         />
         <PgNotice
+          v-else-if="
+            task.state === gameEnum.package.taskState.READY_TO_APPLY &&
+            task.target === gameEnum.package.planTarget.PRE_DOWNLOAD &&
+            targetPublished
+          "
+          text="预下载已完成，资源在分片缓存中。应用时会组装到事务目录并提交，全部通过后才更新版本。"
+          tone="success"
+        />
+        <PgNotice
           v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
           text="更新资源已下载并组装到事务目录。应用会执行可逆提交和完整目标清单验证，全部通过后才更新版本。"
           tone="success"
