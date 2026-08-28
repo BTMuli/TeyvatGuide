@@ -8,11 +8,11 @@ use super::{
   installation_locator::discover_installations,
   installer, journal, launch,
   model::{
-    GameInstallation, GameInstallationDiscovery, InstallationStatus, PackageCacheSummary,
-    PackagePlanProgress, PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction,
-    PackageRecoveryProgress, PackageSnapshot, PackageSwitchSummary, PackageTaskCleanupSummary,
-    PackageTaskOptions, PackageTaskRecord, PackageTaskState, PackageTaskSummary,
-    PackageVerifySummary, SchemeId,
+    GameInstallation, GameInstallationDiscovery, InstallationStatus, PackageApplySpaceSummary,
+    PackageCacheSummary, PackagePlanProgress, PackagePlanSummary, PackagePlanTarget,
+    PackageRecoveryAction, PackageRecoveryProgress, PackageSnapshot, PackageSwitchSummary,
+    PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskRecord, PackageTaskState,
+    PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::{AudioApplyContext, GamePackageManager},
   planner::{
@@ -505,13 +505,10 @@ pub async fn game_install_draft_cancel(
   }
   let _reservation =
     manager.reserve_installation_operation(&install_id, "game-install-draft-cancel")?;
-  if journal::list(&task_root, Some(&install_id))?.iter().any(|task| {
-    task.operation == "install"
-      && !matches!(
-        task.state,
-        PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-      )
-  }) {
+  if journal::list(&task_root, Some(&install_id))?
+    .iter()
+    .any(|task| task.operation == "install" && !task.state.is_history_terminal())
+  {
     return Err("该安装已有未完成任务，请先取消或恢复原任务".to_string());
   }
   installer::cancel_draft(&task_root, &draft_id, false, &mut |_, _, _| {})
@@ -809,7 +806,11 @@ pub async fn game_install_recover(
     task_root,
     plan,
     draft_id,
-    PackageTaskOptions::default(),
+    PackageTaskOptions {
+      concurrency: draft.last_concurrency,
+      max_bytes_per_second: draft.last_max_bytes_per_second,
+      preserve_chunks: Some(draft.preserve_chunks),
+    },
     context,
     true,
   )
@@ -985,6 +986,11 @@ pub async fn game_package_plan(
   let branches = get_game_branches(&client, scheme).await?;
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  journal::reject_occupying_resource_task(
+    &app_data_dir.join("game-tasks"),
+    &installation.id,
+    None,
+  )?;
   let summary =
     create_and_persist_plan(&installation, &branches, target, &app_data_dir, &on_progress).await?;
   if let Err(error) =
@@ -1016,6 +1022,11 @@ pub async fn game_package_audio_plan(
   let branches = get_game_branches(&client, scheme).await?;
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  journal::reject_occupying_resource_task(
+    &app_data_dir.join("game-tasks"),
+    &installation.id,
+    None,
+  )?;
   let summary = create_and_persist_audio_plan(
     &installation,
     &branches,
@@ -1175,6 +1186,7 @@ pub async fn game_package_start(
   let client = create_http_client()?;
   let branches = get_game_branches(&client, scheme).await?;
   let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
+  persist_validated_plan(&task_root, &plan)?;
   let audio_apply = if plan.target == PackagePlanTarget::Audio {
     Some(AudioApplyContext {
       installation,
@@ -1187,6 +1199,20 @@ pub async fn game_package_start(
   manager
     .start(app_handle, task_root, plan, options.unwrap_or_default(), false, audio_apply, None)
     .await
+}
+
+/// 按当前游戏盘剩余空间检查应用门槛，不依赖评估时的计划摘要。
+#[tauri::command]
+pub async fn game_package_apply_space(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  task_id: String,
+) -> Result<PackageApplySpaceSummary, String> {
+  let task_root = game_task_root(&app_handle)?;
+  let plan = load_persisted_plan(&task_root, &task_id)?;
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
+  super::committer::evaluate_apply_space(&plan, Path::new(&installation.root_path), &task_root)
 }
 
 /// 消费 ReadyToApply 的正式更新或已转正预下载，完整校验后最后提交版本号。
@@ -1220,7 +1246,7 @@ pub fn game_package_cancel(
   manager.cancel(&app_handle, &game_task_root(&app_handle)?, &task_id)
 }
 
-/// 暂停配音包等资源任务的下载或组装，保留已完成缓存以便安全恢复。
+/// 暂停资源任务的下载或组装，保留已完成缓存以便安全恢复。
 #[tauri::command]
 pub async fn game_package_pause(
   app_handle: AppHandle,
@@ -1468,7 +1494,13 @@ pub async fn game_package_recover(
       report_recovery_progress(&on_progress, &task_id, 2, "正在验证当前版本与远端资源计划");
       let client = create_http_client()?;
       let branches = get_game_branches(&client, scheme).await?;
+      journal::reject_occupying_resource_task(
+        &task_root,
+        &plan.installation_id,
+        Some(&plan.plan_id),
+      )?;
       let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
+      persist_validated_plan(&task_root, &plan)?;
       let audio_apply = if plan.target == PackagePlanTarget::Audio {
         Some(AudioApplyContext {
           installation,

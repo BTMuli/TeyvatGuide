@@ -502,6 +502,18 @@ export async function applyGamePackageTask(
 }
 
 /**
+ * 按当前游戏盘剩余空间检查应用门槛，不依赖评估时的计划摘要。
+ * @since Beta v0.11.5
+ * @param taskId - 资源任务 ID
+ * @returns 应用阶段实时空间预算
+ */
+export async function getGamePackageApplySpace(
+  taskId: string,
+): Promise<TGApp.Game.Package.ApplySpaceSummary> {
+  return await invoke<TGApp.Game.Package.ApplySpaceSummary>("game_package_apply_space", { taskId });
+}
+
+/**
  * 请求在安全边界取消游戏资源任务。
  * @since Beta v0.11.5
  * @param taskId - 资源任务 ID
@@ -511,7 +523,7 @@ export async function cancelGamePackageTask(taskId: string): Promise<void> {
 }
 
 /**
- * 暂停配音包等资源任务的下载或组装；已完成缓存保留，可稍后安全恢复。
+ * 暂停资源任务的下载或组装；已完成缓存保留，可稍后安全恢复。
  * @since Beta v0.11.5
  * @param taskId - 资源任务 ID
  * @returns 已暂停的任务投影

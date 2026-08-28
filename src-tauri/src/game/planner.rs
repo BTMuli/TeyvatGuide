@@ -84,6 +84,8 @@ struct SpaceBudget {
   cache_required_free_bytes: u64,
   install_required_free_bytes: u64,
   has_sufficient_space: bool,
+  cache_has_sufficient_space: bool,
+  install_has_sufficient_space: bool,
 }
 
 /// 默认全新安装并发数；空间评估与任务执行必须共用同一取值。
@@ -503,6 +505,8 @@ pub(crate) fn persist_plan_parts(
     required_free_bytes: budget.required_free_bytes,
     available_free_bytes: budget.available_free_bytes,
     has_sufficient_space: budget.has_sufficient_space,
+    cache_has_sufficient_space: budget.cache_has_sufficient_space,
+    install_has_sufficient_space: budget.install_has_sufficient_space,
     cache_required_free_bytes: budget.cache_required_free_bytes,
     install_required_free_bytes: budget.install_required_free_bytes,
     cache_available_free_bytes,
@@ -646,6 +650,8 @@ pub(crate) async fn create_and_persist_install_plan(
       required_free_bytes: budget.required_free_bytes,
       available_free_bytes: budget.available_free_bytes,
       has_sufficient_space: budget.has_sufficient_space,
+      cache_has_sufficient_space: budget.cache_has_sufficient_space,
+      install_has_sufficient_space: budget.install_has_sufficient_space,
       cache_required_free_bytes: budget.cache_required_free_bytes,
       install_required_free_bytes: budget.install_required_free_bytes,
       cache_available_free_bytes: cache_available,
@@ -845,11 +851,12 @@ fn calculate_update_space_budget(
     cache_required_free_bytes.max(install_required_free_bytes)
   };
   let available_free_bytes = cache_available_free_bytes.min(install_available_free_bytes);
+  let cache_has_sufficient_space = cache_available_free_bytes >= cache_required_free_bytes;
+  let install_has_sufficient_space = install_available_free_bytes >= install_required_free_bytes;
   let has_sufficient_space = if same_volume {
     available_free_bytes >= required_free_bytes
   } else {
-    cache_available_free_bytes >= cache_required_free_bytes
-      && install_available_free_bytes >= install_required_free_bytes
+    cache_has_sufficient_space && install_has_sufficient_space
   };
   SpaceBudget {
     required_free_bytes,
@@ -857,6 +864,8 @@ fn calculate_update_space_budget(
     cache_required_free_bytes,
     install_required_free_bytes,
     has_sufficient_space,
+    cache_has_sufficient_space,
+    install_has_sufficient_space,
   }
 }
 
@@ -881,11 +890,12 @@ fn calculate_install_space_budget(
   } else {
     install_available_free_bytes
   };
+  let cache_has_sufficient_space = cache_available_free_bytes >= cache_required_free_bytes;
+  let install_has_sufficient_space = install_available_free_bytes >= install_required_free_bytes;
   let has_sufficient_space = if same_volume {
     available_free_bytes >= required_free_bytes
   } else {
-    cache_available_free_bytes >= cache_required_free_bytes
-      && install_available_free_bytes >= install_required_free_bytes
+    cache_has_sufficient_space && install_has_sufficient_space
   };
   SpaceBudget {
     required_free_bytes,
@@ -893,6 +903,8 @@ fn calculate_install_space_budget(
     cache_required_free_bytes,
     install_required_free_bytes,
     has_sufficient_space,
+    cache_has_sufficient_space,
+    install_has_sufficient_space,
   }
 }
 
@@ -900,6 +912,22 @@ fn sha256_bytes(bytes: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(bytes);
   format!("{:x}", hasher.finalize())
+}
+
+fn resolve_pre_download_hydrate_branch<'a>(
+  branches: &'a GameBranches,
+  plan: &PersistedPlan,
+) -> Result<&'a super::hoyoplay::BranchDescriptor, String> {
+  if let Some(branch) = branches.pre_download.as_ref() {
+    if branch.tag == plan.target_tag {
+      return Ok(branch);
+    }
+    return Err("资源计划目标版本已变化，请重新评估".to_string());
+  }
+  if branches.main.tag == plan.target_tag {
+    return Ok(&branches.main);
+  }
+  Err("资源计划目标版本已变化，请重新评估".to_string())
 }
 
 /// 重新请求当前远端清单，核对计划摘要并补回不会持久化的签名下载字段。
@@ -926,9 +954,7 @@ pub(crate) async fn hydrate_and_validate_plan(
   }
   let target_branch = match plan.target {
     PackagePlanTarget::Main => &branches.main,
-    PackagePlanTarget::PreDownload => {
-      branches.pre_download.as_ref().ok_or_else(|| "预下载分支已不可用，请重新评估".to_string())?
-    }
+    PackagePlanTarget::PreDownload => resolve_pre_download_hydrate_branch(branches, &plan)?,
     PackagePlanTarget::Audio => unreachable!(),
     PackagePlanTarget::Switch => {
       return Err("渠道转换任务不能作为资源下载计划恢复".to_string());

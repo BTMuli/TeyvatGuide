@@ -11,7 +11,7 @@ use super::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
     RepairJournal, TaskJournal,
   },
-  model::{PackagePlanStrategy, PackagePlanTarget, PackageTaskState},
+  model::{PackageApplySpaceSummary, PackagePlanStrategy, PackagePlanTarget, PackageTaskState},
   path_guard::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file, resolve_optional_manifest_file,
@@ -105,21 +105,19 @@ where
   if journal.state != PackageTaskState::ReadyToApply {
     return Err("资源任务尚未完成下载，不能应用更新".to_string());
   }
-  let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
-    total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
-  })?;
-  let required = incoming_bytes
-    .checked_add(SAFETY_MARGIN_BYTES)
-    .ok_or_else(|| "提交空间需求溢出".to_string())?;
-  let available = fs2::available_space(game_root)
-    .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
-  if available < required {
-    return Err(format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"));
-  }
-
   let incoming_root = prepare_apply_assembly(plan, game_root)?;
   let audio_preassembled = plan.target == PackagePlanTarget::Audio
     && evidence::trusted_asset_indices(task_root, plan, &incoming_root)?.len() == plan.assets.len();
+  let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
+    total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
+  })?;
+  let space = evaluate_apply_space_with_preassembled(plan, game_root, audio_preassembled)?;
+  if !space.has_sufficient_space {
+    return Err(format!(
+      "游戏磁盘空间不足：至少需要 {} 字节，可用 {} 字节",
+      space.required_free_bytes, space.available_free_bytes
+    ));
+  }
   reset_audio_commit_progress(plan, journal);
   journal.reset_update_commit_progress(plan);
   journal.state = PackageTaskState::Assembling;
@@ -448,7 +446,7 @@ where
   journal.repair = None;
   reset_audio_commit_progress(plan, journal);
   journal.reset_update_commit_progress(plan);
-  journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Canceled };
+  journal.state = if retry { PackageTaskState::ReadyToApply } else { PackageTaskState::Abandoned };
   journal.error_message = None;
   persist_and_emit(task_root, journal, &emit)
 }
@@ -851,6 +849,41 @@ pub(crate) fn prepare_apply_assembly(
   game_root: &Path,
 ) -> Result<PathBuf, String> {
   transaction_subdirectory(game_root, &plan.plan_id, "incoming")
+}
+
+/// 按当前游戏盘剩余空间计算应用门槛；配音预组装后不再把 incoming 当作尚未占用。
+pub(crate) fn evaluate_apply_space(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+) -> Result<PackageApplySpaceSummary, String> {
+  let incoming_root = game_root.join(TRANSACTION_DIRECTORY).join(&plan.plan_id).join("incoming");
+  let audio_preassembled = plan.target == PackagePlanTarget::Audio
+    && incoming_root.is_dir()
+    && evidence::trusted_asset_indices(task_root, plan, &incoming_root)?.len() == plan.assets.len();
+  evaluate_apply_space_with_preassembled(plan, game_root, audio_preassembled)
+}
+
+fn evaluate_apply_space_with_preassembled(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  audio_preassembled: bool,
+) -> Result<PackageApplySpaceSummary, String> {
+  let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
+    total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
+  })?;
+  let required = if audio_preassembled {
+    SAFETY_MARGIN_BYTES
+  } else {
+    incoming_bytes.checked_add(SAFETY_MARGIN_BYTES).ok_or_else(|| "提交空间需求溢出".to_string())?
+  };
+  let available = fs2::available_space(game_root)
+    .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
+  Ok(PackageApplySpaceSummary {
+    required_free_bytes: required,
+    available_free_bytes: available,
+    has_sufficient_space: available >= required,
+  })
 }
 
 fn prepare_file_transaction(

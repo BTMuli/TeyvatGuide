@@ -182,6 +182,10 @@ pub(crate) struct InstallDraft {
   /// 组装消费分片后是否转入共享缓存而不是删除；任务恢复时沿用该选择。
   #[serde(default)]
   pub(crate) preserve_chunks: bool,
+  #[serde(default)]
+  pub(crate) last_concurrency: Option<usize>,
+  #[serde(default)]
+  pub(crate) last_max_bytes_per_second: Option<u64>,
   pub(crate) created_at: String,
   pub(crate) updated_at: String,
 }
@@ -282,6 +286,8 @@ pub(crate) fn create_draft(
     sdk_version: None,
     sdk_md5: None,
     preserve_chunks: false,
+    last_concurrency: None,
+    last_max_bytes_per_second: None,
     created_at: Utc::now().to_rfc3339(),
     updated_at: Utc::now().to_rfc3339(),
   };
@@ -687,8 +693,13 @@ pub(crate) fn execute_install(
         journal.spool_bytes = spool_bytes(spool_root)?;
         journal.touch();
         persist_install_journal(task_root, journal, timing)?;
-        let released =
-          release_consumed_spool_chunks(plan, completed, spool_root, &shared_cache_root)?;
+        let released = release_consumed_spool_chunks(
+          plan,
+          completed,
+          spool_root,
+          &shared_cache_root,
+          draft.preserve_chunks,
+        )?;
         journal.released_bytes = journal.released_bytes.saturating_add(released);
         journal.spool_bytes = spool_bytes(spool_root)?;
         journal.touch();
@@ -2520,18 +2531,23 @@ fn release_consumed_spool_chunks(
   completed_assets: usize,
   spool_root: &Path,
   shared_cache_root: &Path,
+  preserve_chunks: bool,
 ) -> Result<u64, String> {
-  let mut retained = HashSet::new();
-  for asset in plan.assets.iter().skip(completed_assets) {
+  let mut consumers: HashMap<&str, Vec<usize>> = HashMap::new();
+  for (index, asset) in plan.assets.iter().enumerate() {
     for chunk in &asset.chunks {
       if chunk.reuse.is_none() {
-        retained.insert(chunk.id.as_str());
+        consumers.entry(chunk.id.as_str()).or_default().push(index);
       }
     }
   }
+  let completed: HashSet<usize> = (0..completed_assets).collect();
   let mut released = 0_u64;
   for download in &plan.downloads {
-    if retained.contains(download.id.as_str())
+    let releasable = consumers
+      .get(download.id.as_str())
+      .is_some_and(|indices| indices.iter().all(|index| completed.contains(index)));
+    if !releasable
       || path_occupied(&shared_cache_root.join(&download.cache_key))?
       || plan
         .install_overlay
@@ -2551,6 +2567,18 @@ fn release_consumed_spool_chunks(
       return Err("待回收 spool 文件不是安全的普通文件".to_string());
     }
     let bytes = metadata.len();
+    if preserve_chunks {
+      match adopt_spool_chunk(shared_cache_root, spool_root, download, &plan.plan_id) {
+        Ok(_) => {
+          let _ = fs::remove_file(&path);
+          released = released.saturating_add(bytes);
+        }
+        Err(error) => {
+          log::warn!("[game-install][{}] 提交阶段保留分片失败，稍后重试：{error}", plan.plan_id);
+        }
+      }
+      continue;
+    }
     fs::remove_file(&path).map_err(|error| format!("回收安装任务 spool 失败：{error}"))?;
     released = released.saturating_add(bytes);
   }
