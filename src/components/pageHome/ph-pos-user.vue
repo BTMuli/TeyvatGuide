@@ -1,124 +1,128 @@
 <!-- 近期活动卡片组件（用户）-->
 <template>
   <div ref="posRef" class="ph-pos-user-card">
-    <div class="ph-puc-top">
-      <div class="title">
-        <v-icon v-if="isFin" color="var(--tgc-od-green)" title="已完成">
-          mdi-checkbox-marked-circle-outline
-        </v-icon>
-        <v-icon v-else color="var(--tgc-od-white)" title="未完成">mdi-circle</v-icon>
-        <span>{{ props.pos.name }}</span>
-        <v-icon
-          class="share"
-          data-html2canvas-ignore
-          size="12"
-          title="分享活动"
-          @click.stop="sharePos()"
+    <div class="ph-puc-content">
+      <div class="ph-puc-top">
+        <div class="title">
+          <v-icon v-if="isFin" color="var(--tgc-od-green)" title="已完成">
+            mdi-checkbox-marked-circle-outline
+          </v-icon>
+          <v-icon v-else color="var(--tgc-od-white)" title="未完成">mdi-circle</v-icon>
+          <span>{{ props.pos.name }}</span>
+          <v-icon
+            class="share"
+            data-html2canvas-ignore
+            size="12"
+            title="分享活动"
+            @click.stop="sharePos()"
+          >
+            mdi-share-variant
+          </v-icon>
+        </div>
+        <div class="subtitle">
+          <!-- 处理幽境危战 -->
+          <template v-if="props.pos.type === gameEnum.actCalendar.actType.HardChallenge">
+            <div class="challenge-append" title="点击前往幽境页面" @click="toChallenge()">
+              <template v-if="!props.pos.hard_challenge_detail.is_unlock">
+                <span>未解锁</span>
+              </template>
+              <template v-else>
+                <span>最佳记录</span>
+                <span>{{ props.pos.hard_challenge_detail.second }}s</span>
+                <img
+                  :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.pos.hard_challenge_detail.difficulty}.webp`"
+                  :title="gameEnum.challenge.diffDesc(props.pos.hard_challenge_detail.difficulty)"
+                  alt="medal"
+                />
+                <div
+                  v-if="props.pos.hard_challenge_detail.sub.seconds > 0"
+                  :title="`紊乱爆发期结束:${endHd}`"
+                  class="challenge-sub"
+                >
+                  <span>{{ props.pos.hard_challenge_detail.sub.x }}</span>
+                  <span>/{{ props.pos.hard_challenge_detail.sub.y }}</span>
+                  <img alt="sub" src="/icon/challenge/pos_sub.webp" />
+                </div>
+              </template>
+            </div>
+          </template>
+          <!-- 处理真境剧诗 -->
+          <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.RoleCombat">
+            <div class="combat-append" title="点击前往剧诗页面" @click="toCombat()">
+              <span>{{ getCombatStat(props.pos.role_combat_detail) }}</span>
+            </div>
+          </template>
+          <!-- 处理深境螺旋 -->
+          <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Tower">
+            <div class="abyss-append" title="点击前往深渊页面" @click="toAbyss()">
+              <template v-if="!props.pos.tower_detail.is_unlock">
+                <span>未解锁</span>
+              </template>
+              <template v-else-if="!props.pos.tower_detail.has_data">
+                <span>尚未挑战</span>
+              </template>
+              <template v-else>
+                <span>
+                  {{ props.pos.tower_detail.max_star }}/{{ props.pos.tower_detail.total_star }}
+                </span>
+                <img alt="abyss" src="/icon/star/Abyss.webp" />
+              </template>
+            </div>
+          </template>
+          <!-- 处理区域探索 -->
+          <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Explore">
+            <span>当前区域探索度: {{ props.pos.explore_detail.explore_percent }}%</span>
+          </template>
+          <!-- 处理双倍经验 -->
+          <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Double">
+            <span>
+              剩余双倍次数: {{ props.pos.double_detail.left }}/{{ props.pos.double_detail.total }}
+            </span>
+          </template>
+          <!-- 处理立本活动 -->
+          <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.LiBen">
+            <span>当天{{ props.pos.liben_detail.status === 1 ? "未" : "已" }}兑换</span>
+            <span>{{ props.pos.liben_detail.progress }}/{{ props.pos.liben_detail.total }}</span>
+            <span>
+              {{ props.pos.liben_detail.is_has_taken_special_reward ? "已" : "未" }}领取礼盒
+            </span>
+          </template>
+          <!-- 处理累登活动 -->
+          <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.SignIn">
+            <span
+              >{{ props.pos.sign_in_detail.progress }}/{{ props.pos.sign_in_detail.total }}</span
+            >
+            <span>当天{{ props.pos.sign_in_detail.status === 1 ? "未领取" : "已领取" }}</span>
+          </template>
+        </div>
+      </div>
+      <div class="ph-puc-duration">
+        <template v-if="isStart">
+          <span data-html2canvas-ignore title="剩余时间">{{
+            fmtUtil.remainingTime(restTs * 1000)
+          }}</span>
+          <span title="活动时间">
+            {{ fmtUtil.dateTime(Number(props.pos.start_timestamp) * 1000) }} ~
+            {{ fmtUtil.dateTime(Number(props.pos.end_timestamp) * 1000) }}
+          </span>
+        </template>
+        <template v-else>
+          <span>未开始</span>
+        </template>
+      </div>
+      <div class="ph-puc-desc" v-html="parseHtmlText(props.pos.desc)" />
+      <div class="ph-puc-rewards">
+        <div
+          v-for="reward in props.pos.reward_list"
+          :key="reward.item_id"
+          :title="`${reward.name}${reward.num > 0 ? `x${fmtUtil.num(reward.num)}` : ''}`"
+          class="ph-puc-reward"
+          @click="showMaterial(reward)"
         >
-          mdi-share-variant
-        </v-icon>
-      </div>
-      <div class="subtitle">
-        <!-- 处理幽境危战 -->
-        <template v-if="props.pos.type === gameEnum.actCalendar.actType.HardChallenge">
-          <div class="challenge-append" title="点击前往幽境页面" @click="toChallenge()">
-            <template v-if="!props.pos.hard_challenge_detail.is_unlock">
-              <span>未解锁</span>
-            </template>
-            <template v-else>
-              <span>最佳记录</span>
-              <span>{{ props.pos.hard_challenge_detail.second }}s</span>
-              <img
-                :src="`/icon/challenge/UI_LeyLineChallenge_Medal_${props.pos.hard_challenge_detail.difficulty}.webp`"
-                :title="gameEnum.challenge.diffDesc(props.pos.hard_challenge_detail.difficulty)"
-                alt="medal"
-              />
-              <div
-                v-if="props.pos.hard_challenge_detail.sub.seconds > 0"
-                :title="`紊乱爆发期结束:${endHd}`"
-                class="challenge-sub"
-              >
-                <span>{{ props.pos.hard_challenge_detail.sub.x }}</span>
-                <span>/{{ props.pos.hard_challenge_detail.sub.y }}</span>
-                <img alt="sub" src="/icon/challenge/pos_sub.webp" />
-              </div>
-            </template>
-          </div>
-        </template>
-        <!-- 处理真境剧诗 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.RoleCombat">
-          <div class="combat-append" title="点击前往剧诗页面" @click="toCombat()">
-            <span>{{ getCombatStat(props.pos.role_combat_detail) }}</span>
-          </div>
-        </template>
-        <!-- 处理深境螺旋 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Tower">
-          <div class="abyss-append" title="点击前往深渊页面" @click="toAbyss()">
-            <template v-if="!props.pos.tower_detail.is_unlock">
-              <span>未解锁</span>
-            </template>
-            <template v-else-if="!props.pos.tower_detail.has_data">
-              <span>尚未挑战</span>
-            </template>
-            <template v-else>
-              <span>
-                {{ props.pos.tower_detail.max_star }}/{{ props.pos.tower_detail.total_star }}
-              </span>
-              <img alt="abyss" src="/icon/star/Abyss.webp" />
-            </template>
-          </div>
-        </template>
-        <!-- 处理区域探索 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Explore">
-          <span>当前区域探索度: {{ props.pos.explore_detail.explore_percent }}%</span>
-        </template>
-        <!-- 处理双倍经验 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.Double">
-          <span>
-            剩余双倍次数: {{ props.pos.double_detail.left }}/{{ props.pos.double_detail.total }}
-          </span>
-        </template>
-        <!-- 处理立本活动 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.LiBen">
-          <span>当天{{ props.pos.liben_detail.status === 1 ? "未" : "已" }}兑换</span>
-          <span>{{ props.pos.liben_detail.progress }}/{{ props.pos.liben_detail.total }}</span>
-          <span>
-            {{ props.pos.liben_detail.is_has_taken_special_reward ? "已" : "未" }}领取礼盒
-          </span>
-        </template>
-        <!-- 处理累登活动 -->
-        <template v-else-if="props.pos.type === gameEnum.actCalendar.actType.SignIn">
-          <span>{{ props.pos.sign_in_detail.progress }}/{{ props.pos.sign_in_detail.total }}</span>
-          <span>当天{{ props.pos.sign_in_detail.status === 1 ? "未领取" : "已领取" }}</span>
-        </template>
-      </div>
-    </div>
-    <div class="ph-puc-duration">
-      <template v-if="isStart">
-        <span data-html2canvas-ignore title="剩余时间">{{
-          fmtUtil.remainingTime(restTs * 1000)
-        }}</span>
-        <span title="活动时间">
-          {{ fmtUtil.dateTime(Number(props.pos.start_timestamp) * 1000) }} ~
-          {{ fmtUtil.dateTime(Number(props.pos.end_timestamp) * 1000) }}
-        </span>
-      </template>
-      <template v-else>
-        <span>未开始</span>
-      </template>
-    </div>
-    <div class="ph-puc-desc" v-html="parseHtmlText(props.pos.desc)" />
-    <div class="ph-puc-rewards">
-      <div
-        v-for="reward in props.pos.reward_list"
-        :key="reward.item_id"
-        :title="`${reward.name}${reward.num > 0 ? `x${fmtUtil.num(reward.num)}` : ''}`"
-        class="ph-puc-reward"
-        @click="showMaterial(reward)"
-      >
-        <img :src="`/icon/bg/${reward.rarity}-Star.webp`" alt="bg" class="bg" />
-        <img :alt="reward.name" :src="reward.icon" class="icon" />
-        <span v-if="reward.num > 0" class="count">{{ fmtUtil.num(reward.num) }}</span>
+          <img :src="`/icon/bg/${reward.rarity}-Star.webp`" alt="bg" class="bg" />
+          <img :alt="reward.name" :src="reward.icon" class="icon" />
+          <span v-if="reward.num > 0" class="count">{{ fmtUtil.num(reward.num) }}</span>
+        </div>
       </div>
     </div>
     <v-progress-linear
@@ -243,6 +247,15 @@ async function sharePos(): Promise<void> {
   border-radius: 4px;
   background: var(--box-bg-1);
   color: var(--box-text-1);
+  row-gap: 4px;
+}
+
+.ph-puc-content {
+  display: flex;
+  width: 100%;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
   row-gap: 4px;
 }
 
@@ -396,6 +409,5 @@ async function sharePos(): Promise<void> {
 
 .ph-puc-progress {
   position: relative;
-  margin-top: auto;
 }
 </style>
