@@ -58,6 +58,8 @@ declare namespace TGApp.Game.Package {
     requiredFreeBytes: number;
     availableFreeBytes: number;
     hasSufficientSpace: boolean;
+    cacheHasSufficientSpace: boolean;
+    installHasSufficientSpace: boolean;
     cacheRequiredFreeBytes: number;
     installRequiredFreeBytes: number;
     cacheAvailableFreeBytes: number;
@@ -144,6 +146,7 @@ declare namespace TGApp.Game.Package {
     RECOVERY_REQUIRED: "recovery_required",
     FAILED: "failed",
     CANCELED: "canceled",
+    ABANDONED: "abandoned",
   };
 
   /** 可恢复资源任务状态值。 */
@@ -176,6 +179,13 @@ declare namespace TGApp.Game.Package {
     maxBytesPerSecond?: number;
     /** 全新安装组装消费分片后是否转入共享缓存而不是删除。 */
     preserveChunks?: boolean;
+  };
+
+  /** 应用阶段按当前游戏盘剩余空间计算的实时门槛。 */
+  type ApplySpaceSummary = {
+    requiredFreeBytes: number;
+    availableFreeBytes: number;
+    hasSufficientSpace: boolean;
   };
 
   /** 可通过命令重新读取的资源任务投影。 */

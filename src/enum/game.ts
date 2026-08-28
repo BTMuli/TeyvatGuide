@@ -180,6 +180,7 @@ const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
   RECOVERY_REQUIRED: "recovery_required",
   FAILED: "failed",
   CANCELED: "canceled",
+  ABANDONED: "abandoned",
 };
 
 /**
@@ -248,6 +249,8 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
       return "任务失败";
     case GamePackageTaskStateEnum.CANCELED:
       return "已取消";
+    case GamePackageTaskStateEnum.ABANDONED:
+      return "已放弃";
   }
 }
 
@@ -298,6 +301,28 @@ function isGamePackageTaskRecoverable(state: TGApp.Game.Package.TaskStateEnum): 
     state === GamePackageTaskStateEnum.PAUSED ||
     state === GamePackageTaskStateEnum.CANCELED
   );
+}
+
+/**
+ * 判断任务是否已完成或明确放弃，不再占用同安装可恢复名额。
+ * @since Beta v0.11.5
+ * @param state - 资源任务状态
+ * @returns 是否为完成或放弃终态
+ */
+function isGamePackageTaskTerminalDisposition(state: TGApp.Game.Package.TaskStateEnum): boolean {
+  return (
+    state === GamePackageTaskStateEnum.COMPLETED || state === GamePackageTaskStateEnum.ABANDONED
+  );
+}
+
+/**
+ * 判断任务是否仍占用同安装唯一可恢复名额。
+ * @since Beta v0.11.5
+ * @param state - 资源任务状态
+ * @returns 是否阻止另一条资源计划
+ */
+function isGamePackageTaskOccupying(state: TGApp.Game.Package.TaskStateEnum): boolean {
+  return !isGamePackageTaskTerminalDisposition(state);
 }
 
 /**
@@ -675,6 +700,8 @@ const gameEnum = {
     taskActive: isGamePackageTaskActive,
     taskApplying: isGamePackageTaskApplying,
     taskRecoverable: isGamePackageTaskRecoverable,
+    taskOccupying: isGamePackageTaskOccupying,
+    taskTerminalDisposition: isGamePackageTaskTerminalDisposition,
     debugUpdateEnabled: isDebugGameUpdateEnabled,
   },
   actCalendar: {

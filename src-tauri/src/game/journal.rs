@@ -1028,12 +1028,46 @@ pub(crate) fn has_incomplete_tasks(
   task_root: &Path,
   installation_id: Option<&str>,
 ) -> Result<bool, String> {
-  Ok(list(task_root, installation_id)?.iter().any(|journal| {
-    !matches!(
-      journal.state,
-      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-    )
-  }))
+  Ok(list(task_root, installation_id)?.iter().any(|journal| !journal.state.is_history_terminal()))
+}
+
+fn is_uniqueness_target(target: PackagePlanTarget) -> bool {
+  matches!(
+    target,
+    PackagePlanTarget::Main | PackagePlanTarget::PreDownload | PackagePlanTarget::Audio
+  )
+}
+
+/// 同安装占用可恢复名额的资源任务；`except_plan_id` 用于恢复同一计划。
+pub(crate) fn find_occupying_resource_task(
+  task_root: &Path,
+  installation_id: &str,
+  except_plan_id: Option<&str>,
+) -> Result<Option<TaskJournal>, String> {
+  let occupying = list(task_root, Some(installation_id))?
+    .into_iter()
+    .filter(|journal| {
+      is_uniqueness_target(journal.target)
+        && journal.state.occupies_recoverable_slot()
+        && except_plan_id != Some(journal.plan_id.as_str())
+    })
+    .max_by(|left, right| left.updated_at.cmp(&right.updated_at));
+  Ok(occupying)
+}
+
+/// 发现另一条未结束资源任务时拒绝新建或启动。
+pub(crate) fn reject_occupying_resource_task(
+  task_root: &Path,
+  installation_id: &str,
+  except_plan_id: Option<&str>,
+) -> Result<(), String> {
+  match find_occupying_resource_task(task_root, installation_id, except_plan_id)? {
+    Some(existing) => Err(format!(
+      "该游戏安装已有未结束的资源任务（{}，目标 {}），请先继续、应用或放弃",
+      existing.task_id, existing.target_tag
+    )),
+    None => Ok(()),
+  }
 }
 
 /// 按缓存类型判断是否存在仍可能使用目标缓存的任务。
@@ -1062,10 +1096,7 @@ pub(crate) fn protected_cache_files_for_target(
 ) -> HashSet<String> {
   let mut keys = HashSet::new();
   for journal in journals {
-    if matches!(
-      journal.state,
-      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-    ) {
+    if journal.state.is_history_terminal() {
       continue;
     }
     match target {
@@ -1093,10 +1124,7 @@ pub(crate) fn cleanup_terminal_tasks_from_journals(
   let mut retained = Vec::with_capacity(journals.len());
   for journal in journals {
     if active_ids.contains(&journal.task_id)
-      || !matches!(
-        journal.state,
-        PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-      )
+      || !journal.state.is_history_terminal()
       || max_age.is_some_and(|age| {
         DateTime::parse_from_rfc3339(&journal.updated_at)
           .map(|updated| now.signed_duration_since(updated.with_timezone(&Utc)) < age)
@@ -1161,10 +1189,7 @@ pub(crate) fn cleanup_task_record(
     if journal.task_id != task_id {
       return Err("任务目录与 journal 身份不匹配，无法安全清理".to_string());
     }
-    if !matches!(
-      journal.state,
-      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-    ) {
+    if !journal.state.is_history_terminal() {
       return Err("任务尚未结束，无法删除任务记录".to_string());
     }
   } else if !plan_lifecycle::is_safe_plan_only_directory(&directory, task_id)? {

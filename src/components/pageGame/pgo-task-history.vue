@@ -279,7 +279,8 @@ function isTerminalTask(task: TGApp.Game.Package.TaskSummary): boolean {
   return (
     task.state === gameEnum.package.taskState.COMPLETED ||
     task.state === gameEnum.package.taskState.FAILED ||
-    task.state === gameEnum.package.taskState.CANCELED
+    task.state === gameEnum.package.taskState.CANCELED ||
+    task.state === gameEnum.package.taskState.ABANDONED
   );
 }
 
@@ -287,7 +288,8 @@ function isAbnormalRecord(record: TGApp.Game.Package.TaskRecord): boolean {
   return (
     record.kind === gameEnum.package.taskRecordKind.INVALID ||
     record.task?.state === gameEnum.package.taskState.FAILED ||
-    record.task?.state === gameEnum.package.taskState.CANCELED
+    record.task?.state === gameEnum.package.taskState.CANCELED ||
+    record.task?.state === gameEnum.package.taskState.ABANDONED
   );
 }
 
@@ -375,6 +377,12 @@ function taskTarget(task: TGApp.Game.Package.TaskSummary): string {
 function taskStatusColor(state: TGApp.Game.Package.TaskStateEnum): string | undefined {
   if (state === gameEnum.package.taskState.COMPLETED) return "success";
   if (state === gameEnum.package.taskState.FAILED) return "error";
+  if (
+    state === gameEnum.package.taskState.CANCELED ||
+    state === gameEnum.package.taskState.ABANDONED
+  ) {
+    return "warning";
+  }
   return undefined;
 }
 

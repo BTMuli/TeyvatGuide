@@ -132,7 +132,7 @@
         <v-btn :disabled="busy" variant="text" @click="visible = false">取消</v-btn>
         <v-btn
           v-if="plan === null"
-          :disabled="!selectionChanged || selectedLanguages.length === 0"
+          :disabled="!selectionChanged || selectedLanguages.length === 0 || occupyingTask"
           :loading="busy"
           class="audio-confirm"
           color="var(--tgc-od-orange)"
@@ -162,8 +162,10 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { createGamePackageAudioPlan, isGameRunning, stopGame } from "@utils/TGGameLauncher.js";
+import { storeToRefs } from "pinia";
 import { computed, ref, useId, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";
@@ -179,6 +181,15 @@ const emit = defineEmits<{ taskStarted: [] }>();
 const visible = defineModel<boolean>({ required: true });
 const titleId = useId();
 const taskStore = useGameLauncherStore();
+const { tasksByInstallation } = storeToRefs(taskStore);
+const occupyingTask = computed<boolean>(() => {
+  const task = tasksByInstallation.value[installation.id];
+  return (
+    task !== undefined &&
+    task.target !== gameEnum.package.planTarget.SWITCH &&
+    gameEnum.package.taskOccupying(task.state)
+  );
+});
 const audioOptions: Array<{ value: string; label: string }> = [
   { value: "zh-cn", label: "中文" },
   { value: "en-us", label: "英语" },
@@ -259,7 +270,14 @@ function toggleAudio(language: string): void {
 }
 
 async function evaluatePlan(): Promise<void> {
-  if (!selectionChanged.value || selectedLanguages.value.length === 0 || busy.value) return;
+  if (
+    !selectionChanged.value ||
+    selectedLanguages.value.length === 0 ||
+    busy.value ||
+    occupyingTask.value
+  ) {
+    return;
+  }
   busy.value = true;
   plan.value = null;
   planProgress.value = null;

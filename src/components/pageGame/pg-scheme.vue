@@ -144,7 +144,8 @@ const blockingTask = computed<boolean>(() => {
   return (
     task.state !== gameEnum.package.taskState.COMPLETED &&
     task.state !== gameEnum.package.taskState.FAILED &&
-    task.state !== gameEnum.package.taskState.CANCELED
+    task.state !== gameEnum.package.taskState.CANCELED &&
+    task.state !== gameEnum.package.taskState.ABANDONED
   );
 });
 const canConvert = computed<boolean>(() => {
@@ -154,6 +155,7 @@ const canConvert = computed<boolean>(() => {
   return (
     task.state === gameEnum.package.taskState.FAILED ||
     task.state === gameEnum.package.taskState.CANCELED ||
+    task.state === gameEnum.package.taskState.ABANDONED ||
     task.state === gameEnum.package.taskState.COMPLETED
   );
 });
@@ -201,6 +203,7 @@ const progressPercent = computed<number>(() => {
     case gameEnum.package.taskState.REPAIR_REQUIRED:
     case gameEnum.package.taskState.FAILED:
     case gameEnum.package.taskState.CANCELED:
+    case gameEnum.package.taskState.ABANDONED:
       return task.totalBytes === 0
         ? 0
         : Math.min(70, 5 + (task.downloadedBytes / task.totalBytes) * 65);

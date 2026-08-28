@@ -191,7 +191,8 @@ const installTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
     (task) =>
       task.target === gameEnum.package.planTarget.INSTALL &&
       task.state !== gameEnum.package.taskState.COMPLETED &&
-      task.state !== gameEnum.package.taskState.CANCELED,
+      task.state !== gameEnum.package.taskState.CANCELED &&
+      task.state !== gameEnum.package.taskState.ABANDONED,
   );
 });
 const completedInstallTaskKey = computed<string>(() => {
@@ -299,7 +300,8 @@ function hasBlockingNonSwitchTask(installationId: string): boolean {
   return (
     task.state !== gameEnum.package.taskState.COMPLETED &&
     task.state !== gameEnum.package.taskState.FAILED &&
-    task.state !== gameEnum.package.taskState.CANCELED
+    task.state !== gameEnum.package.taskState.CANCELED &&
+    task.state !== gameEnum.package.taskState.ABANDONED
   );
 }
 

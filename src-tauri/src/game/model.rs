@@ -143,6 +143,10 @@ pub struct PackagePlanSummary {
   pub available_free_bytes: u64,
   pub has_sufficient_space: bool,
   #[serde(default)]
+  pub cache_has_sufficient_space: bool,
+  #[serde(default)]
+  pub install_has_sufficient_space: bool,
+  #[serde(default)]
   pub cache_required_free_bytes: u64,
   #[serde(default)]
   pub install_required_free_bytes: u64,
@@ -249,6 +253,7 @@ pub enum PackageTaskState {
   RecoveryRequired,
   Failed,
   Canceled,
+  Abandoned,
 }
 
 impl PackageTaskState {
@@ -289,6 +294,21 @@ impl PackageTaskState {
   /// 判断未完成提交或待修复状态是否应阻止启动游戏。
   pub fn blocks_launch(self) -> bool {
     self.requires_recovery() || self == Self::RepairRequired
+  }
+
+  /// 已完成或已明确放弃，不再占用同安装可恢复任务名额。
+  pub fn is_terminal_disposition(self) -> bool {
+    matches!(self, Self::Completed | Self::Abandoned)
+  }
+
+  /// 任务历史与 sidecar 清理可删除的终态。
+  pub fn is_history_terminal(self) -> bool {
+    matches!(self, Self::Completed | Self::Failed | Self::Canceled | Self::Abandoned)
+  }
+
+  /// 仍占用同安装唯一可恢复任务名额。
+  pub fn occupies_recoverable_slot(self) -> bool {
+    !self.is_terminal_disposition()
   }
 }
 
@@ -415,6 +435,15 @@ pub struct PackageSwitchSummary {
   pub cache_hit_bytes: u64,
   pub delete_count: usize,
   pub delete_files: Vec<String>,
+  pub required_free_bytes: u64,
+  pub available_free_bytes: u64,
+  pub has_sufficient_space: bool,
+}
+
+/// 应用阶段按当前游戏盘剩余空间计算的实时门槛。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageApplySpaceSummary {
   pub required_free_bytes: u64,
   pub available_free_bytes: u64,
   pub has_sufficient_space: bool,

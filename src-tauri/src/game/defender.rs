@@ -11,8 +11,6 @@ use std::{
 };
 use uuid::Uuid;
 
-use super::model::PackageTaskState;
-
 const EXCLUSION_REGISTRY_DIR: &str = "defender-exclusions";
 
 /// 全新安装需要临时排除 Windows Defender 扫描的目录集合。
@@ -441,10 +439,7 @@ pub(crate) fn sweep_stale_exclusions(task_root: &Path) -> Result<(), String> {
     };
     let journal_path = super::journal::journal_path(task_root, &plan_id);
     let stale = match super::journal::load(&journal_path) {
-      Ok(journal) => matches!(
-        journal.state,
-        PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-      ),
+      Ok(journal) => journal.state.is_history_terminal(),
       Err(_) => true,
     };
     if !stale {
