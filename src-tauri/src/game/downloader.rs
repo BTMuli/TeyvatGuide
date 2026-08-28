@@ -4,7 +4,8 @@
 use super::{
   hoyoplay::network_error,
   planner::{
-    PlanDownload, PlanDownloadHashKind, cached_chunk_matches_async, remember_cache_validation,
+    PlanDownload, PlanDownloadHashKind, cache_file_matches_async, cached_chunk_matches_async,
+    remember_cache_validation,
   },
   sophon::{is_official_download_host, payload_url},
 };
@@ -595,7 +596,7 @@ pub(crate) async fn download_object(
           return Err("任务已暂停".to_string());
         }
         if tokio::fs::try_exists(&target).await.unwrap_or(false) {
-          if cached_chunk_matches_async(cache_root, download).await {
+          if cache_file_matches_async(target.clone(), download.clone()).await {
             remove_partial(&partial).await;
             if let Some(object_telemetry) = object_telemetry.as_mut() {
               object_telemetry.finish(DownloadObjectOutcome::Success);
