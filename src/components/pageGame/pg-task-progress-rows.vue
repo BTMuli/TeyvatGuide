@@ -114,7 +114,7 @@ defineSlots<{
   gap: 8px;
 
   &.embedded {
-    padding: 0;
+    padding: 12px;
     border: 0;
     background: var(--game-page-cover-subpanel-bg, transparent);
   }
