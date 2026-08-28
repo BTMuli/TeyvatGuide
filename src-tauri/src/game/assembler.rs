@@ -9,7 +9,7 @@ use super::{
   },
   planner::{
     PayloadEncoding, PersistedPlan, PlanAsset, PlanChunk, PlanDownload, PlanPatch,
-    cached_chunk_matches,
+    cached_chunk_matches, invalidate_cached_download,
   },
 };
 use md5::{Digest, Md5};
@@ -28,6 +28,14 @@ use std::{
 
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
 const MIN_ASSEMBLY_CONCURRENCY: usize = 4;
+pub(crate) const DOWNLOAD_CACHE_INTEGRITY_ERROR_PREFIX: &str = "下载缓存完整性复验失败：";
+pub(crate) const RESOURCE_CHUNK_INTEGRITY_ERROR_PREFIX: &str = "资源 chunk 完整性复验失败：";
+
+pub(crate) fn cache_integrity_chunk_id(error: &str) -> Option<&str> {
+  error
+    .strip_prefix(DOWNLOAD_CACHE_INTEGRITY_ERROR_PREFIX)
+    .or_else(|| error.strip_prefix(RESOURCE_CHUNK_INTEGRITY_ERROR_PREFIX))
+}
 
 /// 已成功写入 staging 的资源统计。
 #[derive(Debug, Default, Eq, PartialEq)]
@@ -691,6 +699,7 @@ pub(crate) fn assemble_plan_asset_to_root(
         game_root,
         &cache_root,
         &cache_root,
+        None,
         output_root,
         canceled,
         None,
@@ -1175,6 +1184,7 @@ fn assemble_asset<L: DownloadLookup>(
     game_root,
     cache_root,
     cache_root,
+    None,
     staging_root,
     canceled,
     None,
@@ -1188,6 +1198,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
   game_root: &Path,
   cache_root: &Path,
   shared_cache_root: &Path,
+  spool_root: Option<&Path>,
   staging_root: &Path,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
@@ -1243,6 +1254,7 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
           chunk,
           cache_root,
           shared_cache_root,
+          spool_root,
           download,
           canceled,
           timing.as_deref_mut(),
@@ -1319,7 +1331,9 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
           shared_meta.as_ref().map(|m| (m.len(), m.is_file())),
           spool_meta.as_ref().map(|m| (m.len(), m.is_file())),
         );
-        return Err(format!("资源 chunk 完整性复验失败：{}", chunk.id));
+        invalidate_cached_download(shared_cache_root, download);
+        invalidate_cached_download(spool_root, download);
+        return Err(format!("{RESOURCE_CHUNK_INTEGRITY_ERROR_PREFIX}{}", chunk.id));
       };
       match selected {
         None => Ok(Some(root)),
@@ -1335,6 +1349,7 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
       game_root,
       root,
       shared_cache_root,
+      Some(spool_root),
       staging_root,
       canceled,
       timing,
@@ -1384,6 +1399,7 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
         chunk,
         root,
         shared_cache_root,
+        Some(spool_root),
         download,
         canceled,
         timing.as_deref_mut(),
@@ -1479,6 +1495,7 @@ fn write_downloaded_chunk_with_timing(
   chunk: &PlanChunk,
   cache_root: &Path,
   shared_cache_root: &Path,
+  spool_root: Option<&Path>,
   download: &super::planner::PlanDownload,
   canceled: &AtomicBool,
   mut timing: Option<&mut AssemblyTiming>,
@@ -1500,18 +1517,41 @@ fn write_downloaded_chunk_with_timing(
       shared_cache_root.display(),
     );
     root = shared_cache_root;
+  } else if let Some(spool) = spool_root.filter(|spool| {
+    *spool != cache_root && *spool != shared_cache_root && cached_chunk_matches(spool, download)
+  }) {
+    log::warn!(
+      "[game-install] 组装回退 spool：chunk={} key={} root={} spool={}",
+      chunk.id,
+      download.cache_key,
+      root.display(),
+      spool.display(),
+    );
+    root = spool;
   } else {
     let path = root.join(&download.cache_key);
     let shared_path = shared_cache_root.join(&download.cache_key);
+    let spool_path = spool_root.map(|spool| spool.join(&download.cache_key));
     log::warn!(
-      "[game-install] 组装写盘缓存复验失败：chunk={} key={} root={} path_len={:?} shared_len={:?}",
+      "[game-install] 组装写盘缓存复验失败：chunk={} key={} root={} path_len={:?} shared_len={:?} spool_len={:?}",
       chunk.id,
       download.cache_key,
       root.display(),
       fs::symlink_metadata(&path).ok().map(|m| m.len()),
       fs::symlink_metadata(&shared_path).ok().map(|m| m.len()),
+      spool_path.as_ref().and_then(|value| fs::symlink_metadata(value).ok().map(|m| m.len())),
     );
-    return Err(format!("下载缓存完整性复验失败：{}", chunk.id));
+    invalidate_cached_download(cache_root, download);
+    if shared_cache_root != cache_root {
+      invalidate_cached_download(shared_cache_root, download);
+    }
+    if let Some(spool) = spool_root
+      && spool != cache_root
+      && spool != shared_cache_root
+    {
+      invalidate_cached_download(spool, download);
+    }
+    return Err(format!("{DOWNLOAD_CACHE_INTEGRITY_ERROR_PREFIX}{}", chunk.id));
   }
   let path = root.join(&download.cache_key);
   let file_result = File::open(&path);
