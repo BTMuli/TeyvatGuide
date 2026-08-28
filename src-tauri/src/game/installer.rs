@@ -892,33 +892,42 @@ pub(crate) async fn register_installation(
     .map_err(|error| format!("序列化安装语音包失败：{error}"))?;
   let mut transaction =
     pool.begin().await.map_err(|error| format!("开始安装登记事务失败：{error}"))?;
-  sqlx::query("UPDATE GameInstallation SET isChosen = 0 WHERE isChosen = 1")
-    .execute(&mut *transaction)
-    .await
-    .map_err(|error| format!("清理当前安装失败：{error}"))?;
+  let chosen_id =
+    sqlx::query_scalar::<_, String>("SELECT id FROM GameInstallation WHERE isChosen <> 0 LIMIT 1")
+      .fetch_optional(&mut *transaction)
+      .await
+      .map_err(|error| format!("读取主启动安装失败：{error}"))?;
+  let become_chosen = chosen_id.as_deref().is_none_or(|id| id == installation.id);
+  if become_chosen {
+    sqlx::query("UPDATE GameInstallation SET isChosen = 0 WHERE isChosen <> 0")
+      .execute(&mut *transaction)
+      .await
+      .map_err(|error| format!("清理当前安装失败：{error}"))?;
+  }
   sqlx::query(
     "INSERT INTO GameInstallation
        (id, executablePath, rootPath, preferredScheme, audioLanguages, isChosen, lastSeen)
-     VALUES (?, ?, ?, ?, ?, 1, ?)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
        executablePath = excluded.executablePath,
        rootPath = excluded.rootPath,
        preferredScheme = excluded.preferredScheme,
        audioLanguages = excluded.audioLanguages,
-       isChosen = 1,
+       isChosen = CASE WHEN excluded.isChosen <> 0 THEN 1 ELSE GameInstallation.isChosen END,
        lastSeen = excluded.lastSeen",
   )
   .bind(&installation.id)
   .bind(&installation.executable_path)
   .bind(&installation.root_path)
   .bind(installation.scheme_id.map(scheme_id_key))
-  .bind(audio_languages)
+  .bind(&audio_languages)
+  .bind(become_chosen)
   .bind(&installation.last_seen)
   .execute(&mut *transaction)
   .await
   .map_err(|error| format!("登记游戏安装失败：{error}"))?;
   transaction.commit().await.map_err(|error| format!("提交安装登记事务失败：{error}"))?;
-  if let Err(error) = launch::sync_voice_language(&installation.audio_languages) {
+  if become_chosen && let Err(error) = launch::sync_voice_language(&installation.audio_languages) {
     log::warn!("[game-install][register] 同步主启动配音失败：{error}");
   }
   Ok(())
