@@ -106,12 +106,11 @@ where
     return Err("资源任务尚未完成下载，不能应用更新".to_string());
   }
   let incoming_root = prepare_apply_assembly(plan, game_root)?;
-  let audio_preassembled = plan.target == PackagePlanTarget::Audio
-    && evidence::trusted_asset_indices(task_root, plan, &incoming_root)?.len() == plan.assets.len();
+  let incoming_preassembled = incoming_is_preassembled(plan, task_root, &incoming_root)?;
   let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
   })?;
-  let space = evaluate_apply_space_with_preassembled(plan, game_root, audio_preassembled)?;
+  let space = evaluate_apply_space_with_preassembled(plan, game_root, incoming_preassembled)?;
   if !space.has_sufficient_space {
     return Err(format!(
       "游戏磁盘空间不足：至少需要 {} 字节，可用 {} 字节",
@@ -122,7 +121,7 @@ where
   journal.reset_update_commit_progress(plan);
   journal.state = PackageTaskState::Assembling;
   journal.error_message = None;
-  if audio_preassembled {
+  if incoming_preassembled {
     journal.update_assembly_progress(
       plan.assets.len(),
       plan.assets.len(),
@@ -136,7 +135,7 @@ where
   journal.current_file = None;
   persist_and_emit(task_root, journal, &emit)?;
   let result = (|| {
-    if !audio_preassembled {
+    if !incoming_preassembled {
       let mut last_emit = Instant::now();
       let mut on_progress = |progress: &super::assembler::AssemblyProgress| {
         journal.update_assembly_progress(
@@ -851,28 +850,70 @@ pub(crate) fn prepare_apply_assembly(
   transaction_subdirectory(game_root, &plan.plan_id, "incoming")
 }
 
-/// 按当前游戏盘剩余空间计算应用门槛；配音预组装后不再把 incoming 当作尚未占用。
+/// 按当前游戏盘剩余空间计算应用门槛；incoming 已预组装后不再把它当作尚未占用。
 pub(crate) fn evaluate_apply_space(
   plan: &PersistedPlan,
   game_root: &Path,
   task_root: &Path,
 ) -> Result<PackageApplySpaceSummary, String> {
   let incoming_root = game_root.join(TRANSACTION_DIRECTORY).join(&plan.plan_id).join("incoming");
-  let audio_preassembled = plan.target == PackagePlanTarget::Audio
-    && incoming_root.is_dir()
-    && evidence::trusted_asset_indices(task_root, plan, &incoming_root)?.len() == plan.assets.len();
-  evaluate_apply_space_with_preassembled(plan, game_root, audio_preassembled)
+  let incoming_preassembled = incoming_is_preassembled(plan, task_root, &incoming_root)?;
+  evaluate_apply_space_with_preassembled(plan, game_root, incoming_preassembled)
+}
+
+fn incoming_is_preassembled(
+  plan: &PersistedPlan,
+  task_root: &Path,
+  incoming_root: &Path,
+) -> Result<bool, String> {
+  if !matches!(plan.target, PackagePlanTarget::Audio | PackagePlanTarget::Main) {
+    return Ok(false);
+  }
+  if !incoming_root.is_dir() {
+    return Ok(false);
+  }
+  Ok(evidence::trusted_asset_indices(task_root, plan, incoming_root)?.len() == plan.assets.len())
+}
+
+/// 放弃未提交的更新/预下载时，清掉下载阶段写入的 incoming。
+pub(crate) fn cleanup_uncommitted_transaction(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+) {
+  cleanup_known_transaction_files(plan, game_root, task_root);
+}
+
+/// 下载阶段还需要写入 incoming 的剩余字节；已有证据的成品不再计入。
+pub(crate) fn remaining_incoming_bytes(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  task_root: &Path,
+) -> Result<u64, String> {
+  let incoming_root = game_root.join(TRANSACTION_DIRECTORY).join(&plan.plan_id).join("incoming");
+  if !incoming_root.is_dir() {
+    return plan.assets.iter().try_fold(0_u64, |total, asset| {
+      total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
+    });
+  }
+  let trusted = evidence::trusted_asset_indices(task_root, plan, &incoming_root)?;
+  plan.assets.iter().enumerate().try_fold(0_u64, |total, (index, asset)| {
+    if trusted.contains(&index) {
+      return Ok(total);
+    }
+    total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
+  })
 }
 
 fn evaluate_apply_space_with_preassembled(
   plan: &PersistedPlan,
   game_root: &Path,
-  audio_preassembled: bool,
+  incoming_preassembled: bool,
 ) -> Result<PackageApplySpaceSummary, String> {
   let incoming_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "提交空间需求溢出".to_string())
   })?;
-  let required = if audio_preassembled {
+  let required = if incoming_preassembled {
     SAFETY_MARGIN_BYTES
   } else {
     incoming_bytes.checked_add(SAFETY_MARGIN_BYTES).ok_or_else(|| "提交空间需求溢出".to_string())?

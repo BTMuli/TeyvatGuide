@@ -137,7 +137,7 @@
         />
         <PgNotice
           v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && integrityRepair"
-          text="全部下载对象已通过 hash 复验。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
+          text="修复资源已下载并组装。应用会替换缺失或损坏的文件，完成后不会改写版本号。"
           tone="success"
         />
         <PgNotice
@@ -150,7 +150,7 @@
         />
         <PgNotice
           v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY && targetPublished"
-          text="全部下载对象已通过 hash 复验。应用会执行安全暂存、可逆提交和完整目标清单验证，全部通过后才更新版本。"
+          text="更新资源已下载并组装到事务目录。应用会执行可逆提交和完整目标清单验证，全部通过后才更新版本。"
           tone="success"
         />
         <PgNotice
@@ -158,12 +158,12 @@
             task.state === gameEnum.package.taskState.READY_TO_APPLY &&
             task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
           "
-          text="预下载已完成。目标版本成为正式版本后即可应用更新。"
+          text="预下载已完成，资源在分片缓存中。目标版本成为正式版本后即可应用更新。"
           tone="info"
         />
         <PgNotice
           v-else-if="task.state === gameEnum.package.taskState.READY_TO_APPLY"
-          text="下载已完成，但当前正式版本与任务目标不一致，请重新评估。"
+          text="资源已准备完成，但当前正式版本与任务目标不一致，请重新评估。"
           tone="warning"
         />
       </template>
@@ -284,22 +284,19 @@ const canCancel = computed<boolean>(() => {
 });
 const canPause = computed<boolean>(() => {
   if (task === null) return false;
-  if (isAudio.value) {
+  if (task.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
     return (
       task.state === gameEnum.package.taskState.QUEUED ||
-      task.state === gameEnum.package.taskState.DOWNLOADING ||
-      task.state === gameEnum.package.taskState.ASSEMBLING
+      task.state === gameEnum.package.taskState.DOWNLOADING
     );
   }
-  if (
-    task.target !== gameEnum.package.planTarget.MAIN &&
-    task.target !== gameEnum.package.planTarget.PRE_DOWNLOAD
-  ) {
+  if (!isAudio.value && task.target !== gameEnum.package.planTarget.MAIN) {
     return false;
   }
   return (
     task.state === gameEnum.package.taskState.QUEUED ||
-    task.state === gameEnum.package.taskState.DOWNLOADING
+    task.state === gameEnum.package.taskState.DOWNLOADING ||
+    task.state === gameEnum.package.taskState.ASSEMBLING
   );
 });
 const recoverable = computed<boolean>(() => {
@@ -355,22 +352,18 @@ const canAbandon = computed<boolean>(() => {
 });
 const canStartBySpace = computed<boolean>(() => {
   if (plan === null) return false;
-  if (
-    plan.target === gameEnum.package.planTarget.MAIN ||
-    plan.target === gameEnum.package.planTarget.PRE_DOWNLOAD
-  ) {
+  if (plan.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
     return plan.cacheHasSufficientSpace;
   }
   return plan.hasSufficientSpace;
 });
 const startSpaceNote = computed<string>(() => {
   if (plan === null) return "";
-  if (
-    plan.target === gameEnum.package.planTarget.MAIN ||
-    plan.target === gameEnum.package.planTarget.PRE_DOWNLOAD
-  ) {
+  if (plan.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
     return "缓存磁盘空间不足，不能开始下载。";
   }
+  if (!plan.cacheHasSufficientSpace) return "缓存磁盘空间不足，不能开始下载。";
+  if (!plan.installHasSufficientSpace) return "游戏磁盘空间不足，不能开始下载并组装。";
   return "当前评估的磁盘空间不足，不能开始下载。";
 });
 const canStart = computed<boolean>(() => {

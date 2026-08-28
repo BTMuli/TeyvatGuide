@@ -85,9 +85,18 @@ let sampleTimer: ReturnType<typeof setInterval> | null = null;
 const downloadActive = computed<boolean>(
   () => task.state === gameEnum.package.taskState.DOWNLOADING,
 );
-const assemblyActive = computed<boolean>(
-  () => task.state === gameEnum.package.taskState.ASSEMBLING,
+const isPreDownload = computed<boolean>(
+  () => task.target === gameEnum.package.planTarget.PRE_DOWNLOAD,
 );
+const assemblyActive = computed<boolean>(() => {
+  if (isPreDownload.value) {
+    return task.state === gameEnum.package.taskState.ASSEMBLING;
+  }
+  return (
+    task.state === gameEnum.package.taskState.DOWNLOADING ||
+    task.state === gameEnum.package.taskState.ASSEMBLING
+  );
+});
 const currentDownloadSpeed = computed<number>(() =>
   downloadActive.value ? task.bytesPerSecond : 0,
 );
@@ -147,14 +156,19 @@ const downloadRemaining = computed<string>(() => {
 });
 const downloadTitle = computed<string>(() => `下载 · ${downloadRemaining.value}`);
 const downloadSubtitle = computed<string>(() => {
-  if (task.downloadCurrentFile === null) {
-    return downloadDone.value ? "资源已写入共享缓存" : "等待下载对象";
+  if (task.downloadCurrentFile !== null) return task.downloadCurrentFile;
+  if (downloadDone.value) return "缺失分片已写入共享缓存";
+  if (task.state === gameEnum.package.taskState.DOWNLOADING && task.bytesPerSecond === 0) {
+    return "等待首个分片发出请求";
   }
-  return task.downloadCurrentFile;
+  return "等待下载对象";
 });
 const assemblyRemaining = computed<string>(() => {
-  if (task.assemblyTotalCount === 0 && !assemblyActive.value) return "等待应用";
   if (assemblyDone.value) return "组装完成";
+  if (isPreDownload.value && !assemblyActive.value) return "等待应用";
+  if (task.assemblyTotalCount === 0 && task.assemblyTotalBytes === 0) {
+    return assemblyActive.value ? "正在准备组装" : "等待组装清单";
+  }
   if (task.assemblyEtaSeconds !== null) {
     return `组装剩余 ${formatDuration(task.assemblyEtaSeconds)}`;
   }
@@ -166,7 +180,10 @@ const assemblySubtitle = computed<string>(() => {
     return task.assemblyCurrentFile;
   }
   if (assemblyDone.value) return "事务资源已经组装";
-  return assemblyActive.value ? "正在准备事务资源" : "游戏目录尚未修改";
+  if (isPreDownload.value) {
+    return assemblyActive.value ? "正在组装事务资源" : "游戏目录尚未修改";
+  }
+  return assemblyActive.value ? "正在边下边组装" : "等待可组装文件";
 });
 const chartAriaLabel = computed<string>(() => {
   return `最近 60 秒趋势，下载 ${formatSpeed(currentDownloadSpeed.value)}，组装 ${formatSpeed(currentAssemblySpeed.value)}`;

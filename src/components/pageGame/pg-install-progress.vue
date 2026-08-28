@@ -132,6 +132,13 @@ const resourceStatus = computed<string | null>(() => {
   }
   if (active.value) {
     if (downloadComplete.value) return "正在安装已下载资源";
+    if (
+      task.state === gameEnum.package.taskState.DOWNLOADING &&
+      task.bytesPerSecond === 0 &&
+      task.downloadCurrentFile === null
+    ) {
+      return "正在准备下载：等待首个分片发出请求";
+    }
     return "正在获取并安装资源";
   }
   return null;

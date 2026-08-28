@@ -186,9 +186,10 @@ const downloadAreaPath = computed<string>(() => createAreaPath("download"));
 const assemblyAreaPath = computed<string>(() => createAreaPath("assembly"));
 const downloadRemaining = computed<string>(() => {
   if (downloadDone.value) return task.totalBytes === 0 ? "已使用缓存" : "下载完成";
-  return task.etaSeconds === null
-    ? "下载剩余 计算中"
-    : `下载剩余 ${formatDuration(task.etaSeconds)}`;
+  if (task.etaSeconds === null) {
+    return task.bytesPerSecond === 0 ? "下载剩余 等待首个分片" : "下载剩余 计算中";
+  }
+  return `下载剩余 ${formatDuration(task.etaSeconds)}`;
 });
 const assemblyRemaining = computed<string>(() => {
   if (assemblyDone.value && !hasAssemblyWork.value) return "无需安装写入";

@@ -1,4 +1,4 @@
-<!-- 正式更新、预下载与完整性修复任务的缓存、应用和复验进度 -->
+<!-- 正式更新、预下载与完整性修复任务的下载、组装、提交和复验进度 -->
 <template>
   <PgTaskProgressRows
     ariaLabel="游戏更新资源进度"
@@ -68,8 +68,8 @@ const caption = computed<string>(() => {
   if (task.state === gameEnum.package.taskState.READY_TO_APPLY) {
     if (isPreDownload.value && !targetPublished) return "预下载完成，等待正式发布";
     if (isPreDownload.value) return "预下载完成，可应用更新";
-    if (integrityRepair.value) return "修复资源已经准备完成";
-    return "更新资源已经准备完成";
+    if (integrityRepair.value) return "修复资源已下载并组装";
+    return "更新资源已下载并组装";
   }
   if (task.state === gameEnum.package.taskState.COMPLETED) {
     if (task.target === gameEnum.package.planTarget.INSTALL) return "安装完成";
@@ -104,9 +104,20 @@ const applicationStarted = computed<boolean>(() => {
     gameEnum.package.taskApplying(task.state) ||
     task.state === gameEnum.package.taskState.REPAIR_REQUIRED ||
     task.state === gameEnum.package.taskState.COMPLETED ||
-    task.assemblyCompletedCount > 0 ||
     task.commitCompletedCount > 0 ||
     task.verificationCompletedCount > 0
+  );
+});
+const streamAssemble = computed<boolean>(() => !isPreDownload.value);
+const resourcePreparing = computed<boolean>(() => {
+  if (!streamAssemble.value) return false;
+  return (
+    task.state === gameEnum.package.taskState.QUEUED ||
+    task.state === gameEnum.package.taskState.DOWNLOADING ||
+    task.state === gameEnum.package.taskState.PAUSED ||
+    task.assemblyTotalBytes > 0 ||
+    task.assemblyTotalCount > 0 ||
+    task.assemblyCompletedCount > 0
   );
 });
 const repairAssembly = computed<boolean>(() => {
@@ -203,14 +214,28 @@ const acquisitionStatus = computed<string | null>(() => {
     if (isPreDownload.value) return "已完成，可应用更新";
     return "已完成";
   }
-  if (task.state === gameEnum.package.taskState.QUEUED) return "正在准备缓存任务";
-  if (task.state === gameEnum.package.taskState.DOWNLOADING) return "正在写入共享缓存";
+  if (task.state === gameEnum.package.taskState.QUEUED) {
+    return isPreDownload.value ? "正在准备缓存任务" : "正在准备：等待下载阶段开始";
+  }
+  if (
+    task.state === gameEnum.package.taskState.DOWNLOADING &&
+    task.bytesPerSecond === 0 &&
+    task.downloadCurrentFile === null
+  ) {
+    return "正在准备下载：等待首个分片发出请求";
+  }
+  if (task.state === gameEnum.package.taskState.DOWNLOADING) {
+    return isPreDownload.value ? "正在写入共享缓存" : "正在获取并组装资源";
+  }
   return task.downloadCurrentFile;
 });
 const assemblyStatus = computed<string | null>(() => {
   if (assemblyComplete.value) return "已完成";
   if (task.state === gameEnum.package.taskState.ASSEMBLING) return "正在组装事务资源";
-  return "等待资源组装";
+  if (streamAssemble.value && task.state === gameEnum.package.taskState.DOWNLOADING) {
+    return task.assemblyCurrentFile ?? "正在边下边组装";
+  }
+  return isPreDownload.value ? "等待应用后组装" : "等待可组装文件";
 });
 const commitStatus = computed<string | null>(() => {
   if (commitComplete.value) return "已完成";
@@ -231,7 +256,7 @@ const verificationStatus = computed<string | null>(() => {
   return "等待完整复验";
 });
 const acquisitionRow = computed<ProgressRow>(() => ({
-  label: isPreDownload.value ? "预下载资源" : integrityRepair.value ? "修复资源" : "资源缓存",
+  label: isPreDownload.value ? "预下载资源" : integrityRepair.value ? "修复资源" : "资源下载",
   percent: acquisitionPercent.value,
   indeterminate:
     task.totalBytes === 0 &&
@@ -312,8 +337,20 @@ const verificationRow = computed<ProgressRow>(() => ({
 }));
 const progressRows = computed<Array<ProgressRow>>(() => {
   const rows = [acquisitionRow.value];
-  if (!applicationStarted.value) return rows;
-  rows.push(assemblyRow.value, commitRow.value);
+  if (isPreDownload.value) {
+    if (applicationStarted.value) {
+      rows.push(assemblyRow.value, commitRow.value);
+      if (!repairAssembly.value) rows.push(verificationRow.value);
+    }
+    return rows;
+  }
+  if (resourcePreparing.value || applicationStarted.value) {
+    rows.push(assemblyRow.value);
+  }
+  if (!applicationStarted.value && task.state !== gameEnum.package.taskState.READY_TO_APPLY) {
+    return rows;
+  }
+  rows.push(commitRow.value);
   if (!repairAssembly.value) rows.push(verificationRow.value);
   return rows;
 });

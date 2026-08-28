@@ -1168,7 +1168,7 @@ pub fn game_package_verify_clear(
   manager.clear_verify(&game_task_root(&app_handle)?, &installation_id)
 }
 
-/// 按不可变计划启动只写应用缓存的可恢复资源下载任务；支持正式更新与预下载。
+/// 按不可变计划启动可恢复资源下载任务。正式更新边下边组装；预下载只写分片缓存。
 #[tauri::command]
 pub async fn game_package_start(
   app_handle: AppHandle,
@@ -1188,6 +1188,7 @@ pub async fn game_package_start(
   let branches = get_game_branches(&client, scheme).await?;
   let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
   persist_validated_plan(&task_root, &plan)?;
+  let game_root = PathBuf::from(&installation.root_path);
   let audio_apply = if plan.target == PackagePlanTarget::Audio {
     Some(AudioApplyContext {
       installation,
@@ -1198,7 +1199,16 @@ pub async fn game_package_start(
     None
   };
   manager
-    .start(app_handle, task_root, plan, options.unwrap_or_default(), false, audio_apply, None)
+    .start(
+      app_handle,
+      task_root,
+      plan,
+      game_root,
+      options.unwrap_or_default(),
+      false,
+      audio_apply,
+      None,
+    )
     .await
 }
 
@@ -1502,6 +1512,7 @@ pub async fn game_package_recover(
       )?;
       let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
       persist_validated_plan(&task_root, &plan)?;
+      let game_root = PathBuf::from(&installation.root_path);
       let audio_apply = if plan.target == PackagePlanTarget::Audio {
         Some(AudioApplyContext {
           installation,
@@ -1516,6 +1527,7 @@ pub async fn game_package_recover(
           app_handle,
           task_root,
           plan,
+          game_root,
           PackageTaskOptions::default(),
           true,
           audio_apply,

@@ -124,12 +124,8 @@
           </strong>
           <strong v-else>{{ visiblePlan.sourceTag }} → {{ visiblePlan.targetTag }}</strong>
         </div>
-        <v-chip
-          :color="visiblePlan.cacheHasSufficientSpace ? 'success' : 'warning'"
-          size="small"
-          variant="tonal"
-        >
-          {{ visiblePlan.cacheHasSufficientSpace ? "缓存空间充足" : "缓存空间不足" }}
+        <v-chip :color="planSpaceChipColor" size="small" variant="tonal">
+          {{ planSpaceChip }}
         </v-chip>
       </div>
       <dl>
@@ -157,16 +153,29 @@
           </dd>
         </div>
         <div>
-          <dt>游戏应用</dt>
+          <dt>游戏写入</dt>
           <dd>
             预计 {{ formatBytes(visiblePlan.installRequiredFreeBytes) }} · 评估时可用
             {{ formatBytes(visiblePlan.installAvailableFreeBytes) }}
-            <template v-if="!visiblePlan.installHasSufficientSpace"> · 应用前再检查</template>
+            <template v-if="!visiblePlan.installHasSufficientSpace">
+              {{
+                visiblePlan.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+                  ? " · 应用前再检查"
+                  : " · 开始前需足够空间"
+              }}
+            </template>
           </dd>
         </div>
         <div v-if="visiblePlan.sameVolume">
           <dt>同卷峰值</dt>
-          <dd>完成下载并应用预计需要 {{ formatBytes(visiblePlan.requiredFreeBytes) }}</dd>
+          <dd>
+            {{
+              visiblePlan.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+                ? "完成下载并应用预计需要"
+                : "完成下载并组装预计需要"
+            }}
+            {{ formatBytes(visiblePlan.requiredFreeBytes) }}
+          </dd>
         </div>
         <div>
           <dt>文件变化</dt>
@@ -180,11 +189,7 @@
         </div>
       </dl>
       <p>
-        {{
-          visiblePlan.sourceTag === visiblePlan.targetTag
-            ? "下载只写入应用缓存；应用修复时不会改写版本号。"
-            : "下载只写入应用缓存；不会在此阶段修改游戏目录。"
-        }}
+        {{ planDownloadNote }}
       </p>
     </div>
     <PgTask
@@ -269,6 +274,36 @@ const visiblePlan = computed<TGApp.Game.Package.PlanSummary | null>(() => {
   if (plan.value === null) return null;
   if (debugUpdateEnabled || plan.value.sourceTag === plan.value.targetTag) return plan.value;
   return null;
+});
+const planSpaceChip = computed<string>(() => {
+  const summary = visiblePlan.value;
+  if (summary === null) return "空间充足";
+  if (summary.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
+    return summary.cacheHasSufficientSpace ? "缓存空间充足" : "缓存空间不足";
+  }
+  if (summary.hasSufficientSpace) return "空间充足";
+  if (!summary.cacheHasSufficientSpace) return "缓存空间不足";
+  if (!summary.installHasSufficientSpace) return "游戏空间不足";
+  return "空间不足";
+});
+const planSpaceChipColor = computed<string>(() => {
+  const summary = visiblePlan.value;
+  if (summary === null) return "success";
+  if (summary.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
+    return summary.cacheHasSufficientSpace ? "success" : "warning";
+  }
+  return summary.hasSufficientSpace ? "success" : "warning";
+});
+const planDownloadNote = computed<string>(() => {
+  const summary = visiblePlan.value;
+  if (summary === null) return "";
+  if (summary.sourceTag === summary.targetTag) {
+    return "下载阶段会组装到事务目录；应用修复时不会改写版本号。";
+  }
+  if (summary.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
+    return "预下载只写入应用缓存；不会在此阶段修改游戏目录。";
+  }
+  return "下载阶段会边下边组装到事务目录；正式游戏文件仍等应用后才替换。";
 });
 const currentRecoveryProgress = computed<TGApp.Game.Package.RecoveryProgress | null>(() => {
   const taskId = currentTask.value?.taskId;

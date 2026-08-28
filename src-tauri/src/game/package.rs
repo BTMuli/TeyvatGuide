@@ -2005,13 +2005,14 @@ impl GamePackageManager {
     }
   }
 
-  /// 启动资源下载。Main / PreDownload 只写应用缓存，游戏运行时仍允许开始。
-  /// Audio 准备阶段会写入 incoming 并前移删除，改游戏目录发生在下载完成前。
+  /// 启动资源下载。Main / Audio 边下边组装到 incoming；PreDownload 只写分片缓存。
+  /// 游戏运行时仍允许开始；提交仍须游戏未在运行。
   pub(crate) async fn start(
     &self,
     app_handle: AppHandle,
     task_root: PathBuf,
     plan: PersistedPlan,
+    game_root: PathBuf,
     options: PackageTaskOptions,
     recovering: bool,
     audio_apply: Option<AudioApplyContext>,
@@ -2084,6 +2085,28 @@ impl GamePackageManager {
     if available < required {
       return Err(format!("资源缓存磁盘空间不足：至少还需 {required} 字节，可用 {available} 字节"));
     }
+    if plan.target == PackagePlanTarget::Main {
+      let remaining_incoming = committer::remaining_incoming_bytes(&plan, &game_root, &task_root)?;
+      let incoming_required = remaining_incoming.saturating_add(SAFETY_MARGIN_BYTES);
+      let game_available = fs2::available_space(&game_root)
+        .map_err(|error| format!("读取游戏磁盘剩余空间失败：{error}"))?;
+      if game_available < incoming_required {
+        return Err(format!(
+          "游戏磁盘空间不足：至少还需 {incoming_required} 字节，可用 {game_available} 字节"
+        ));
+      }
+      if same_volume(&cache_root, &game_root) {
+        let peak = cache_scan
+          .missing_bytes
+          .saturating_add(remaining_incoming)
+          .saturating_add(SAFETY_MARGIN_BYTES);
+        if available < peak {
+          return Err(format!(
+            "磁盘空间不足：下载并组装至少还需 {peak} 字节，可用 {available} 字节"
+          ));
+        }
+      }
+    }
 
     let mut journal = journal::load_or_create(&task_root, &plan)?;
     journal.ensure_update_commit_progress(&plan);
@@ -2097,7 +2120,11 @@ impl GamePackageManager {
       return Err("检测到已暂停的资源任务，请使用恢复操作继续".to_string());
     }
     if recovering && journal.state == PackageTaskState::ReadyToApply {
-      return Err("资源任务已经完成下载".to_string());
+      return Err(if plan.target == PackagePlanTarget::Main {
+        "资源任务已经完成下载和组装".to_string()
+      } else {
+        "资源任务已经完成下载".to_string()
+      });
     }
     journal.resume_elapsed();
     journal.committed_step = cache_scan.completed_cache_keys.len();
@@ -2140,12 +2167,13 @@ impl GamePackageManager {
     emit_state(&app_handle, &summary);
     tauri::async_runtime::spawn(async move {
       let _reservation = reservation;
-      if let Some(context) = audio_apply {
-        run_audio_streaming_task(
+      let stream_assemble = audio_apply.is_some() || plan.target == PackagePlanTarget::Main;
+      if stream_assemble {
+        run_streaming_prepare_task(
           app_handle.clone(),
           task_root.clone(),
           cache_root,
-          PathBuf::from(&context.installation.root_path),
+          game_root,
           plan.clone(),
           download_client,
           Arc::clone(&shared_journal),
@@ -2153,17 +2181,19 @@ impl GamePackageManager {
           Arc::clone(&paused),
           concurrency,
           options.max_bytes_per_second,
+          audio_apply.is_some(),
         )
         .await;
-        if let Err(error) = apply_audio_after_download(
-          app_handle.clone(),
-          task_root.clone(),
-          plan.clone(),
-          Arc::clone(&shared_journal),
-          Arc::clone(&canceled),
-          context,
-        )
-        .await
+        if let Some(context) = audio_apply
+          && let Err(error) = apply_audio_after_download(
+            app_handle.clone(),
+            task_root.clone(),
+            plan.clone(),
+            Arc::clone(&shared_journal),
+            Arc::clone(&canceled),
+            context,
+          )
+          .await
         {
           let mut journal_value = shared_journal.lock().await;
           if journal_value.state == PackageTaskState::ReadyToApply
@@ -2181,6 +2211,7 @@ impl GamePackageManager {
           log::warn!("[game-package] 自动应用配音包变更失败：{error}");
         }
       } else {
+        let _ = game_root;
         run_task(
           app_handle.clone(),
           &task_root,
@@ -2527,7 +2558,7 @@ impl GamePackageManager {
     Ok(())
   }
 
-  /// 暂停全新安装或配音包任务的资源下载/组装，保留草稿与已完成缓存以便后续恢复。
+  /// 暂停安装、配音、正式更新或预下载的资源下载，以及安装/配音/正式更新的组装。
   pub(crate) async fn pause_install(
     &self,
     app_handle: &AppHandle,
@@ -2556,11 +2587,11 @@ impl GamePackageManager {
     // 暂停命令越容易长期排在进度更新之后，前端也会一直停留在加载态。
     let (paused, was_paused, mut journal_value) = signal_pause_and_lock_journal(&task).await?;
     let can_pause = match journal_value.target {
-      PackagePlanTarget::Install | PackagePlanTarget::Audio => matches!(
+      PackagePlanTarget::Install | PackagePlanTarget::Audio | PackagePlanTarget::Main => matches!(
         journal_value.state,
         PackageTaskState::Queued | PackageTaskState::Downloading | PackageTaskState::Assembling
       ),
-      PackagePlanTarget::Main | PackagePlanTarget::PreDownload => {
+      PackagePlanTarget::PreDownload => {
         matches!(journal_value.state, PackageTaskState::Queued | PackageTaskState::Downloading)
       }
       PackagePlanTarget::Switch => false,
@@ -3213,6 +3244,12 @@ impl GamePackageManager {
       return Err("检测到未完成的资源提交，请先执行恢复".to_string());
     }
     restore_prep_staged_audio_deletions(task_root, &mut journal)?;
+    if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload)
+      && let Some(game_root) = journal.game_root.as_deref()
+      && let Ok(plan) = load_persisted_plan(task_root, &journal.plan_id)
+    {
+      committer::cleanup_uncommitted_transaction(&plan, Path::new(game_root), task_root);
+    }
     cleanup_task_partials(&task_root.join("cache/chunks"), task_id)?;
     cleanup_task_partials(&task_root.join("cache/sdks"), task_id)?;
     journal.state = PackageTaskState::Abandoned;
@@ -3665,7 +3702,7 @@ async fn delete_audio_resource(
 }
 
 #[allow(clippy::too_many_arguments)]
-async fn run_audio_streaming_task(
+async fn run_streaming_prepare_task(
   app_handle: AppHandle,
   task_root: PathBuf,
   cache_root: PathBuf,
@@ -3677,6 +3714,7 @@ async fn run_audio_streaming_task(
   paused: Arc<AtomicBool>,
   concurrency: usize,
   max_bytes_per_second: Option<u64>,
+  stage_audio_deletes: bool,
 ) {
   let output_root = match committer::prepare_apply_assembly(&plan, &game_root) {
     Ok(path) => path,
@@ -3686,36 +3724,6 @@ async fn run_audio_streaming_task(
       return;
     }
   };
-  let incoming_bytes =
-    plan.assets.iter().fold(0_u64, |total, asset| total.saturating_add(asset.size));
-  let required = incoming_bytes.saturating_add(SAFETY_MARGIN_BYTES);
-  let available = match fs2::available_space(&game_root) {
-    Ok(available) => available,
-    Err(error) => {
-      persist_audio_pipeline_error(
-        &task_root,
-        &app_handle,
-        &journal,
-        &paused,
-        &canceled,
-        format!("读取游戏磁盘剩余空间失败：{error}"),
-      )
-      .await;
-      return;
-    }
-  };
-  if available < required {
-    persist_audio_pipeline_error(
-      &task_root,
-      &app_handle,
-      &journal,
-      &paused,
-      &canceled,
-      format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"),
-    )
-    .await;
-    return;
-  }
   let dependencies = match audio_asset_download_dependencies(&plan) {
     Ok(dependencies) => dependencies,
     Err(error) => {
@@ -3745,25 +3753,21 @@ async fn run_audio_streaming_task(
         &journal,
         &paused,
         &canceled,
-        format!("配音资源证据核对 worker 异常退出：{error}"),
+        format!("资源证据核对 worker 异常退出：{error}"),
       )
       .await;
       return;
     }
   };
-  let (pending_deletes, delete_completed_bytes) = match tauri::async_runtime::spawn_blocking({
-    let plan = plan.clone();
-    let game_root = game_root.clone();
-    move || discover_audio_delete_progress(&plan.plan_id, &plan.delete_files, &game_root)
-  })
-  .await
-  {
-    Ok(Ok(progress)) => progress,
-    Ok(Err(error)) => {
-      persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
-        .await;
-      return;
-    }
+  let remaining_incoming_bytes = plan
+    .assets
+    .iter()
+    .enumerate()
+    .filter(|(index, _)| !completed_assets.contains(index))
+    .fold(0_u64, |total, (_, asset)| total.saturating_add(asset.size));
+  let required = remaining_incoming_bytes.saturating_add(SAFETY_MARGIN_BYTES);
+  let available = match fs2::available_space(&game_root) {
+    Ok(available) => available,
     Err(error) => {
       persist_audio_pipeline_error(
         &task_root,
@@ -3771,11 +3775,53 @@ async fn run_audio_streaming_task(
         &journal,
         &paused,
         &canceled,
-        format!("配音删除进度核对 worker 异常退出：{error}"),
+        format!("读取游戏磁盘剩余空间失败：{error}"),
       )
       .await;
       return;
     }
+  };
+  if available < required {
+    persist_audio_pipeline_error(
+      &task_root,
+      &app_handle,
+      &journal,
+      &paused,
+      &canceled,
+      format!("游戏磁盘空间不足：至少需要 {required} 字节，可用 {available} 字节"),
+    )
+    .await;
+    return;
+  }
+  let (pending_deletes, delete_completed_bytes) = if stage_audio_deletes {
+    match tauri::async_runtime::spawn_blocking({
+      let plan = plan.clone();
+      let game_root = game_root.clone();
+      move || discover_audio_delete_progress(&plan.plan_id, &plan.delete_files, &game_root)
+    })
+    .await
+    {
+      Ok(Ok(progress)) => progress,
+      Ok(Err(error)) => {
+        persist_audio_pipeline_error(&task_root, &app_handle, &journal, &paused, &canceled, error)
+          .await;
+        return;
+      }
+      Err(error) => {
+        persist_audio_pipeline_error(
+          &task_root,
+          &app_handle,
+          &journal,
+          &paused,
+          &canceled,
+          format!("配音删除进度核对 worker 异常退出：{error}"),
+        )
+        .await;
+        return;
+      }
+    }
+  } else {
+    (Vec::new(), 0)
   };
   let plan = Arc::new(plan);
   let events = match AudioEventDispatcher::new(app_handle.clone(), &plan.plan_id) {
@@ -4028,7 +4074,7 @@ async fn run_audio_streaming_task(
     value.error_message = None;
   } else {
     value.state = PackageTaskState::Failed;
-    value.error_message = Some("配音资源流水线结束后仍有下载或组装对象未完成".to_string());
+    value.error_message = Some("资源流水线结束后仍有下载或组装对象未完成".to_string());
   }
   value.touch();
   if let Err(error) = journal::persist(&task_root, &value) {
