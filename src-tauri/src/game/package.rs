@@ -5631,6 +5631,10 @@ async fn finalize_audio_registration(
     persist_audio_registration_error(app_handle, task_root, journal, &error).await;
     return Err(error);
   }
+  if let Err(error) = super::launch::sync_voice_language(&actual) {
+    persist_audio_registration_error(app_handle, task_root, journal, &error).await;
+    return Err(error);
+  }
   let audio_languages = serde_json::to_string(&selection.target_audio_languages)
     .map_err(|error| format!("序列化语音包安装记录失败：{error}"))?;
   let updated_at = Utc::now().to_rfc3339();

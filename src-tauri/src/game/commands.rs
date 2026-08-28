@@ -878,6 +878,7 @@ pub async fn game_launch(
     return Err(installation.status_message);
   }
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  launch::sync_voice_language(&installation.audio_languages)?;
   launch::launch(Path::new(&installation.executable_path), scheme, ticket)?;
   sqlx::query("UPDATE GameInstallation SET lastSeen = ? WHERE id = ?")
     .bind(Utc::now().to_rfc3339())
