@@ -133,13 +133,16 @@ fn run_defender_elevated(paths: &[String], remove: bool) -> Result<(), String> {
   let inner = build_inner_script(&status_text, &paths, remove);
   let encoded = base64_encode(&utf16le_bytes(&inner));
   let outer = build_outer_script(&status_text, &encoded);
+  // 外层脚本也走 -EncodedCommand：直接传 -Command 时，PowerShell 报错会把整段
+  // 可读脚本回显到 stderr，导致日志文件被大段脚本污染。
+  let outer_encoded = base64_encode(&utf16le_bytes(&outer));
   let output = Command::new("powershell.exe")
     .arg("-NoProfile")
     .arg("-NonInteractive")
     .arg("-ExecutionPolicy")
     .arg("Bypass")
-    .arg("-Command")
-    .arg(&outer)
+    .arg("-EncodedCommand")
+    .arg(&outer_encoded)
     .output()
     .map_err(|error| format!("启动 PowerShell 失败：{error}"))?;
   let status = read_status_file(&status_file);
@@ -155,15 +158,29 @@ fn run_defender_elevated(paths: &[String], remove: bool) -> Result<(), String> {
   let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
   if !output.status.success() {
     let message = if !stderr.is_empty() {
-      stderr
+      sanitize_powershell_error(&stderr)
     } else if !stdout.is_empty() {
-      stdout
+      sanitize_powershell_error(&stdout)
     } else {
       "未知错误（可能取消了 UAC 授权）".to_string()
     };
     return Err(message);
   }
   Ok(())
+}
+
+/// 将 PowerShell 报错压缩为单行短消息，避免把整段脚本或调用栈写入日志。
+fn sanitize_powershell_error(text: &str) -> String {
+  const MAX_LOG_CHARS: usize = 400;
+  let compact = text.split_whitespace().collect::<Vec<_>>().join(" ");
+  let mut capped = String::new();
+  for ch in compact.chars().take(MAX_LOG_CHARS) {
+    capped.push(ch);
+  }
+  if compact.chars().count() > MAX_LOG_CHARS {
+    capped.push('…');
+  }
+  capped
 }
 
 fn read_status_file(path: &Path) -> Option<String> {
