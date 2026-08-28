@@ -1920,7 +1920,7 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       metadata.len(),
       metadata.is_file(),
     );
-    forget_cache_validation(cache_root, download);
+    invalidate_cached_download(cache_root, download);
     return false;
   }
   if cache_validation_matches(cache_root, download, &metadata) {
@@ -1936,7 +1936,7 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
       cache_root.display(),
       metadata.len(),
     );
-    forget_cache_validation(cache_root, download);
+    invalidate_cached_download(cache_root, download);
   }
   matches
 }
@@ -1947,6 +1947,32 @@ pub(crate) async fn cached_chunk_matches_async(cache_root: &Path, download: &Pla
   tauri::async_runtime::spawn_blocking(move || cached_chunk_matches(&cache_root, &download))
     .await
     .unwrap_or(false)
+}
+
+/// 作废一个缓存根下的下载对象：忘掉校验索引并删除不合格文件。
+///
+/// 文件不存在时只清索引。删除失败只记日志，不把作废当成致命错误，
+/// 以便组装复验失败后仍能继续走重下。
+pub(crate) fn invalidate_cached_download(cache_root: &Path, download: &PlanDownload) {
+  forget_cache_validation(cache_root, download);
+  let path = cache_root.join(&download.cache_key);
+  match fs::remove_file(&path) {
+    Ok(()) => {
+      log::warn!(
+        "[game-package] 已删除不合格缓存：key={} root={}",
+        download.cache_key,
+        cache_root.display(),
+      );
+    }
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+    Err(error) => {
+      log::warn!(
+        "[game-package] 删除不合格缓存失败：key={} root={} error={error}",
+        download.cache_key,
+        cache_root.display(),
+      );
+    }
+  }
 }
 
 /// 校验任意路径下的普通文件是否与计划下载对象一致；不读写缓存校验索引。
@@ -1961,6 +1987,12 @@ pub(crate) fn cache_file_matches(path: &Path, download: &PlanDownload) -> bool {
     return false;
   };
   cache_file_metadata_matches(&metadata, download) && cache_file_hash_matches(path, download)
+}
+
+pub(crate) async fn cache_file_matches_async(path: PathBuf, download: PlanDownload) -> bool {
+  tauri::async_runtime::spawn_blocking(move || cache_file_matches(&path, &download))
+    .await
+    .unwrap_or(false)
 }
 
 fn cache_file_metadata_matches(metadata: &fs::Metadata, download: &PlanDownload) -> bool {
