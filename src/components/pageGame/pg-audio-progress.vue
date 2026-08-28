@@ -68,6 +68,8 @@ const captionTone = computed<"err" | "warn" | "">(() => {
     case gameEnum.package.taskState.RECOVERY_REQUIRED:
     case gameEnum.package.taskState.REPAIR_REQUIRED:
     case gameEnum.package.taskState.ROLLING_BACK:
+    case gameEnum.package.taskState.CANCELED:
+    case gameEnum.package.taskState.ABANDONED:
       return "warn";
     default:
       return "";

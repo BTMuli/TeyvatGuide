@@ -70,6 +70,8 @@ const captionTone = computed<"err" | "warn" | "">(() => {
     case gameEnum.package.taskState.RECOVERY_REQUIRED:
     case gameEnum.package.taskState.REPAIR_REQUIRED:
     case gameEnum.package.taskState.ROLLING_BACK:
+    case gameEnum.package.taskState.CANCELED:
+    case gameEnum.package.taskState.ABANDONED:
       return "warn";
     default:
       return "";
@@ -228,7 +230,8 @@ const showThroughput = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.COMPLETED ||
     task.state === gameEnum.package.taskState.FAILED ||
     task.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
-    task.state === gameEnum.package.taskState.CANCELED
+    task.state === gameEnum.package.taskState.CANCELED ||
+    task.state === gameEnum.package.taskState.ABANDONED
   ) {
     return false;
   }
@@ -245,7 +248,8 @@ const showProgressBar = computed<boolean>(() => {
     task.state === gameEnum.package.taskState.COMPLETED ||
     task.state === gameEnum.package.taskState.FAILED ||
     task.state === gameEnum.package.taskState.RECOVERY_REQUIRED ||
-    task.state === gameEnum.package.taskState.CANCELED
+    task.state === gameEnum.package.taskState.CANCELED ||
+    task.state === gameEnum.package.taskState.ABANDONED
   );
 });
 

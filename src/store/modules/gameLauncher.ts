@@ -68,7 +68,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     return (
       task.state === gameEnum.package.taskState.COMPLETED ||
       task.state === gameEnum.package.taskState.FAILED ||
-      task.state === gameEnum.package.taskState.CANCELED
+      task.state === gameEnum.package.taskState.CANCELED ||
+      task.state === gameEnum.package.taskState.ABANDONED
+    );
+  }
+
+  function isDelayedDismissTarget(task: TGApp.Game.Package.TaskSummary): boolean {
+    return (
+      task.target === gameEnum.package.planTarget.INSTALL ||
+      task.target === gameEnum.package.planTarget.MAIN ||
+      task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
     );
   }
 
@@ -78,7 +87,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       void nextTick(() => removeTaskProjection(task));
       return;
     }
-    if (task.target !== gameEnum.package.planTarget.INSTALL) return;
+    if (!isDelayedDismissTarget(task)) return;
     if (completedInstallHideTimers.has(task.taskId)) return;
     const timer = window.setTimeout(() => {
       completedInstallHideTimers.delete(task.taskId);
@@ -97,7 +106,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
 
   function shouldOmitCompletedInstall(task: TGApp.Game.Package.TaskSummary): boolean {
     return (
-      task.target === gameEnum.package.planTarget.INSTALL &&
+      isDelayedDismissTarget(task) &&
       task.state === gameEnum.package.taskState.COMPLETED &&
       !completedInstallHideTimers.has(task.taskId)
     );

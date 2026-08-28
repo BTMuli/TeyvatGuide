@@ -82,7 +82,7 @@
     >
       <v-btn
         v-if="snapshot.updateAvailable"
-        :disabled="planningTarget !== null || taskActive || verifyActive"
+        :disabled="planningTarget !== null || taskActive || verifyActive || occupyingTask"
         :loading="planningTarget === gameEnum.package.planTarget.MAIN"
         prepend-icon="mdi-file-tree-outline"
         size="small"
@@ -93,7 +93,7 @@
       </v-btn>
       <v-btn
         v-if="snapshot.preDownloadAvailable"
-        :disabled="planningTarget !== null || taskActive || verifyActive"
+        :disabled="planningTarget !== null || taskActive || verifyActive || occupyingTask"
         :loading="planningTarget === gameEnum.package.planTarget.PRE_DOWNLOAD"
         prepend-icon="mdi-cloud-download-outline"
         size="small"
@@ -125,11 +125,11 @@
           <strong v-else>{{ visiblePlan.sourceTag }} → {{ visiblePlan.targetTag }}</strong>
         </div>
         <v-chip
-          :color="visiblePlan.hasSufficientSpace ? 'success' : 'warning'"
+          :color="visiblePlan.cacheHasSufficientSpace ? 'success' : 'warning'"
           size="small"
           variant="tonal"
         >
-          {{ visiblePlan.hasSufficientSpace ? "空间充足" : "空间不足" }}
+          {{ visiblePlan.cacheHasSufficientSpace ? "缓存空间充足" : "缓存空间不足" }}
         </v-chip>
       </div>
       <dl>
@@ -150,11 +150,23 @@
           <dd>{{ formatBytes(visiblePlan.cacheHitBytes) }}</dd>
         </div>
         <div>
-          <dt>磁盘空间</dt>
+          <dt>缓存下载</dt>
           <dd>
-            需要 {{ formatBytes(visiblePlan.requiredFreeBytes) }} · 可用
-            {{ formatBytes(visiblePlan.availableFreeBytes) }}
+            需要 {{ formatBytes(visiblePlan.cacheRequiredFreeBytes) }} · 可用
+            {{ formatBytes(visiblePlan.cacheAvailableFreeBytes) }}
           </dd>
+        </div>
+        <div>
+          <dt>游戏应用</dt>
+          <dd>
+            预计 {{ formatBytes(visiblePlan.installRequiredFreeBytes) }} · 评估时可用
+            {{ formatBytes(visiblePlan.installAvailableFreeBytes) }}
+            <template v-if="!visiblePlan.installHasSufficientSpace"> · 应用前再检查</template>
+          </dd>
+        </div>
+        <div v-if="visiblePlan.sameVolume">
+          <dt>同卷峰值</dt>
+          <dd>完成下载并应用预计需要 {{ formatBytes(visiblePlan.requiredFreeBytes) }}</dd>
         </div>
         <div>
           <dt>文件变化</dt>
@@ -177,6 +189,7 @@
     </div>
     <PgTask
       :actionPending="taskActionPending"
+      :applySpace
       :plan="visiblePlan"
       :recoveryProgress="currentRecoveryProgress"
       :targetPublished
@@ -196,7 +209,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { confirmStopRunningGame } from "@utils/TGGame.js";
-import { createGamePackagePlan, getGamePackageSnapshot } from "@utils/TGGameLauncher.js";
+import {
+  createGamePackagePlan,
+  getGamePackageApplySpace,
+  getGamePackageSnapshot,
+} from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, onUnmounted, ref, watch } from "vue";
 
@@ -236,9 +253,12 @@ const exitingGame = ref<boolean>(false);
 const errorMessage = ref<string | null>(null);
 const verifyStartError = ref<string | null>(null);
 const verifyStopping = ref<boolean>(false);
+const applySpace = ref<TGApp.Game.Package.ApplySpaceSummary | null>(null);
 let verifyHideTimer: number | null = null;
 let verifyStoppingInstallationId: string | null = null;
 let requestSequence = 0;
+let applySpaceSequence = 0;
+let snapshotRefreshTimer: number | null = null;
 
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   const task = tasksByInstallation.value[installation.id];
@@ -364,6 +384,17 @@ const audioApplyPreparing = computed<boolean>(() => {
     currentTask.value.currentFile !== null
   );
 });
+const occupyingTask = computed<boolean>(() => {
+  return currentTask.value !== null && gameEnum.package.taskOccupying(currentTask.value.state);
+});
+const waitingPromotion = computed<boolean>(() => {
+  return (
+    currentTask.value !== null &&
+    currentTask.value.target === gameEnum.package.planTarget.PRE_DOWNLOAD &&
+    currentTask.value.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    !targetPublished.value
+  );
+});
 const taskActive = computed<boolean>(() => {
   return (
     currentTask.value !== null &&
@@ -484,8 +515,69 @@ async function refreshSnapshot(): Promise<void> {
   await loadSnapshot(true);
 }
 
+async function loadApplySpace(): Promise<void> {
+  const task = currentTask.value;
+  if (
+    task === null ||
+    (task.state !== gameEnum.package.taskState.READY_TO_APPLY &&
+      task.state !== gameEnum.package.taskState.REPAIR_REQUIRED) ||
+    task.target === gameEnum.package.planTarget.AUDIO
+  ) {
+    applySpace.value = null;
+    return;
+  }
+  const sequence = ++applySpaceSequence;
+  try {
+    const result = await getGamePackageApplySpace(task.taskId);
+    if (sequence !== applySpaceSequence) return;
+    applySpace.value = result;
+  } catch {
+    if (sequence !== applySpaceSequence) return;
+    applySpace.value = null;
+  }
+}
+
+function canRefreshSnapshotSilently(): boolean {
+  return !loading.value && planningTarget.value === null && !verifyActive.value;
+}
+
+function handlePromotionVisibility(): void {
+  if (document.visibilityState !== "visible" || !waitingPromotion.value) return;
+  if (!canRefreshSnapshotSilently()) return;
+  void loadSnapshot(false);
+}
+
+function startPromotionWatch(): void {
+  if (snapshotRefreshTimer !== null) return;
+  window.addEventListener("focus", handlePromotionVisibility);
+  document.addEventListener("visibilitychange", handlePromotionVisibility);
+  snapshotRefreshTimer = window.setInterval(
+    () => {
+      if (!waitingPromotion.value || !canRefreshSnapshotSilently()) return;
+      void loadSnapshot(false);
+    },
+    7 * 60 * 1000,
+  );
+}
+
+function stopPromotionWatch(): void {
+  if (snapshotRefreshTimer !== null) {
+    window.clearInterval(snapshotRefreshTimer);
+    snapshotRefreshTimer = null;
+  }
+  window.removeEventListener("focus", handlePromotionVisibility);
+  document.removeEventListener("visibilitychange", handlePromotionVisibility);
+}
+
 async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<void> {
-  if (!debugUpdateEnabled || planningTarget.value !== null || verifyActive.value) return;
+  if (
+    !debugUpdateEnabled ||
+    planningTarget.value !== null ||
+    verifyActive.value ||
+    occupyingTask.value
+  ) {
+    return;
+  }
   planningTarget.value = target;
   planProgress.value = null;
   errorMessage.value = null;
@@ -650,12 +742,17 @@ async function handleCancelRequested(): Promise<void> {
 
 async function handlePauseRequested(): Promise<void> {
   const task = currentTask.value;
-  if (task === null || task.target !== gameEnum.package.planTarget.AUDIO) return;
+  if (task === null) return;
+  const audio = task.target === gameEnum.package.planTarget.AUDIO;
+  const update =
+    task.target === gameEnum.package.planTarget.MAIN ||
+    task.target === gameEnum.package.planTarget.PRE_DOWNLOAD;
+  if (!audio && !update) return;
   try {
     await taskStore.pauseTask(task.taskId);
-    showSnackbar.info("已暂停配音包任务，可稍后安全恢复");
+    showSnackbar.info(audio ? "已暂停配音包任务，可稍后安全恢复" : "已暂停下载，可稍后安全恢复");
   } catch (error) {
-    showSnackbar.error(`暂停配音包任务失败：${error}`);
+    showSnackbar.error(`${audio ? "暂停配音包任务" : "暂停下载"}失败：${error}`);
   }
 }
 
@@ -738,8 +835,14 @@ watch(
     ) {
       emit("updated");
     }
+    void loadApplySpace();
   },
 );
+
+watch(waitingPromotion, (waiting) => {
+  if (waiting) startPromotionWatch();
+  else stopPromotionWatch();
+});
 
 watch(currentVerify, (next, previous) => {
   if (next === null) return;
@@ -765,6 +868,7 @@ watch(currentVerify, (next, previous) => {
 onUnmounted(() => {
   clearVerifyHideTimer();
   verifyStopping.value = false;
+  stopPromotionWatch();
 });
 </script>
 

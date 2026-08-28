@@ -172,7 +172,7 @@
     <div class="task-actions">
       <v-btn
         v-if="canStart"
-        :disabled="plan === null || !plan.hasSufficientSpace"
+        :disabled="plan === null || !canStartBySpace"
         :loading="actionPending"
         prepend-icon="mdi-download"
         size="small"
@@ -194,8 +194,13 @@
         {{ applyActionLabel }}
       </v-btn>
     </div>
-    <p v-if="plan !== null && !plan.hasSufficientSpace" class="task-note">
-      当前评估的磁盘空间不足，不能开始下载。
+    <p v-if="plan !== null && !canStartBySpace" class="task-note">
+      {{ startSpaceNote }}
+    </p>
+    <p v-else-if="applySpace !== null && !applySpace.hasSufficientSpace" class="task-note">
+      游戏磁盘空间不足，不能应用更新。需要
+      {{ formatBytes(applySpace.requiredFreeBytes) }}，当前可用
+      {{ formatBytes(applySpace.availableFreeBytes) }}。
     </p>
   </section>
 </template>
@@ -217,9 +222,17 @@ type Props = {
   actionPending: boolean;
   recoveryProgress: TGApp.Game.Package.RecoveryProgress | null;
   targetPublished: boolean;
+  applySpace?: TGApp.Game.Package.ApplySpaceSummary | null;
 };
 
-const { plan, task, actionPending, recoveryProgress, targetPublished } = defineProps<Props>();
+const {
+  plan,
+  task,
+  actionPending,
+  recoveryProgress,
+  targetPublished,
+  applySpace = null,
+} = defineProps<Props>();
 const emit = defineEmits<{
   startRequested: [];
   applyRequested: [];
@@ -270,11 +283,23 @@ const canCancel = computed<boolean>(() => {
   );
 });
 const canPause = computed<boolean>(() => {
-  if (!isAudio.value || task === null) return false;
+  if (task === null) return false;
+  if (isAudio.value) {
+    return (
+      task.state === gameEnum.package.taskState.QUEUED ||
+      task.state === gameEnum.package.taskState.DOWNLOADING ||
+      task.state === gameEnum.package.taskState.ASSEMBLING
+    );
+  }
+  if (
+    task.target !== gameEnum.package.planTarget.MAIN &&
+    task.target !== gameEnum.package.planTarget.PRE_DOWNLOAD
+  ) {
+    return false;
+  }
   return (
     task.state === gameEnum.package.taskState.QUEUED ||
-    task.state === gameEnum.package.taskState.DOWNLOADING ||
-    task.state === gameEnum.package.taskState.ASSEMBLING
+    task.state === gameEnum.package.taskState.DOWNLOADING
   );
 });
 const recoverable = computed<boolean>(() => {
@@ -304,7 +329,8 @@ const integrityRepair = computed<boolean>(() => {
 });
 const canApply = computed<boolean>(() => {
   if (task?.target === gameEnum.package.planTarget.AUDIO) return false;
-  return (readyToApply.value && targetPublished) || repairRequired.value;
+  if (!((readyToApply.value && targetPublished) || repairRequired.value)) return false;
+  return applySpace === null || applySpace.hasSufficientSpace;
 });
 const applyActionLabel = computed<string>(() => {
   if (repairRequired.value) return "修复并完成";
@@ -327,6 +353,26 @@ const canAbandon = computed<boolean>(() => {
   }
   return recoverable.value || readyToApply.value || repairRequired.value;
 });
+const canStartBySpace = computed<boolean>(() => {
+  if (plan === null) return false;
+  if (
+    plan.target === gameEnum.package.planTarget.MAIN ||
+    plan.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+  ) {
+    return plan.cacheHasSufficientSpace;
+  }
+  return plan.hasSufficientSpace;
+});
+const startSpaceNote = computed<string>(() => {
+  if (plan === null) return "";
+  if (
+    plan.target === gameEnum.package.planTarget.MAIN ||
+    plan.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+  ) {
+    return "缓存磁盘空间不足，不能开始下载。";
+  }
+  return "当前评估的磁盘空间不足，不能开始下载。";
+});
 const canStart = computed<boolean>(() => {
   if (
     plan === null ||
@@ -334,6 +380,9 @@ const canStart = computed<boolean>(() => {
       plan.strategy !== gameEnum.package.planStrategy.PATCH) ||
     active.value
   ) {
+    return false;
+  }
+  if (task !== null && task.planId !== plan.planId && gameEnum.package.taskOccupying(task.state)) {
     return false;
   }
   if (task === null || task.planId !== plan.planId) return true;
@@ -369,6 +418,7 @@ const stateColor = computed<string>(() => {
     case gameEnum.package.taskState.REPAIR_REQUIRED:
     case gameEnum.package.taskState.ROLLING_BACK:
     case gameEnum.package.taskState.CANCELED:
+    case gameEnum.package.taskState.ABANDONED:
       return "warning";
     default:
       return "var(--tgc-od-orange)";

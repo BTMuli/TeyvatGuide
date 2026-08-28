@@ -160,6 +160,8 @@ const stateColor = computed<string>(() => {
     case gameEnum.package.taskState.RECOVERY_REQUIRED:
     case gameEnum.package.taskState.REPAIR_REQUIRED:
     case gameEnum.package.taskState.ROLLING_BACK:
+    case gameEnum.package.taskState.CANCELED:
+    case gameEnum.package.taskState.ABANDONED:
       return "warning";
     default:
       return "var(--tgc-od-orange)";
