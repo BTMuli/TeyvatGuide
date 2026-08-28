@@ -528,12 +528,12 @@ export async function listGamePackageTasks(
 }
 
 /**
- * 读取后端确认可清理的近期资源任务历史。
+ * 扫描任务目录中的全部资源任务记录。
  * @since Beta v0.11.4
- * @returns 已结束且不在活动任务集合中的任务列表
+ * @returns 按更新时间倒序排列的任务列表
  */
-export async function listGamePackageTaskHistory(): Promise<Array<TGApp.Game.Package.TaskSummary>> {
-  return await invoke<Array<TGApp.Game.Package.TaskSummary>>("game_package_task_history_list");
+export async function listGamePackageTaskRecords(): Promise<Array<TGApp.Game.Package.TaskRecord>> {
+  return await invoke<Array<TGApp.Game.Package.TaskRecord>>("game_package_task_history_list");
 }
 
 /**

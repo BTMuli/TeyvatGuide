@@ -10,6 +10,7 @@ use super::{
     PackagePlanTarget, SchemeId,
   },
   path_guard::normalize_manifest_path,
+  plan_lifecycle,
   sophon::{
     Asset, DecodedBuild, DecodedPatchBuild, DownloadInfo, PatchInfo, chunk_xxhash64,
     get_decoded_build, get_decoded_patch_build,
@@ -542,7 +543,7 @@ pub(crate) fn persist_plan_parts(
     audio_selection,
     created_at: Utc::now().to_rfc3339(),
   };
-  persist_plan(task_root, &plan_id, &plan)?;
+  persist_new_plan(task_root, &plan)?;
   Ok(summary)
 }
 
@@ -677,7 +678,7 @@ pub(crate) async fn create_and_persist_install_plan(
       audio_selection: None,
       created_at: Utc::now().to_rfc3339(),
     };
-    persist_plan(&task_root, &plan_id, &plan)?;
+    persist_new_plan(&task_root, &plan)?;
     Ok(summary)
   })
   .await
@@ -2424,6 +2425,21 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
     return Err(error);
   }
   sync_directory(&directory)?;
+  Ok(())
+}
+
+fn persist_new_plan(task_root: &Path, plan: &PersistedPlan) -> Result<(), String> {
+  persist_plan(task_root, &plan.plan_id, plan)?;
+  if let Err(error) = plan_lifecycle::persist_metadata(
+    task_root,
+    &plan.plan_id,
+    &plan.installation_id,
+    plan.target,
+    &plan.created_at,
+  ) {
+    let _ = fs::remove_dir_all(task_root.join("tasks").join(&plan.plan_id));
+    return Err(error);
+  }
   Ok(())
 }
 

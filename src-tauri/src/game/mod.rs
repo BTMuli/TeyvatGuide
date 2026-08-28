@@ -19,6 +19,7 @@ mod launch;
 mod model;
 pub(crate) mod package;
 mod path_guard;
+mod plan_lifecycle;
 mod planner;
 mod scheme;
 mod sophon;

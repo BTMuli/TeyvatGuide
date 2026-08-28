@@ -183,6 +183,17 @@ const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
 };
 
 /**
+ * 游戏资源任务目录记录类别枚举。
+ * @since Beta v0.11.4
+ * @see TGApp.Game.Package.TaskRecordKindEnum
+ */
+const GamePackageTaskRecordKindEnum: typeof TGApp.Game.Package.TaskRecordKind = {
+  TASK: "task",
+  PLAN_ONLY: "plan_only",
+  INVALID: "invalid",
+};
+
+/**
  * 游戏资源任务恢复动作枚举。
  * @since Beta v0.11.5
  * @see TGApp.Game.Package.RecoveryActionEnum
@@ -658,6 +669,7 @@ const gameEnum = {
     verifyStateDesc: getGamePackageVerifyStateDesc,
     verifyActive: isGamePackageVerifyActive,
     recoveryAction: GamePackageRecoveryActionEnum,
+    taskRecordKind: GamePackageTaskRecordKindEnum,
     taskState: GamePackageTaskStateEnum,
     taskStateDesc: getGamePackageTaskStateDesc,
     taskActive: isGamePackageTaskActive,

@@ -14,10 +14,11 @@ use super::{
   journal::{self, TaskJournal},
   model::{
     GameInstallation, PackagePlanStrategy, PackagePlanTarget, PackageRecoveryProgress,
-    PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskState, PackageTaskSummary,
-    PackageVerifySummary,
+    PackageTaskCleanupSummary, PackageTaskOptions, PackageTaskRecord, PackageTaskRecordKind,
+    PackageTaskState, PackageTaskSummary, PackageVerifySummary,
   },
   path_guard::{prepare_manifest_output_file, resolve_optional_manifest_file},
+  plan_lifecycle,
   planner::{
     PersistedPlan, PlanDelete, PlanDownload, cached_chunk_matches, cached_chunk_matches_async,
     default_install_concurrency, flush_cache_validation_index, hydrate_and_validate_apply_plan,
@@ -1788,7 +1789,15 @@ pub(crate) struct GamePackageManager {
 struct ActiveTasks {
   by_task: HashMap<String, ActiveTask>,
   by_installation: HashMap<String, InstallationReservation>,
+  record_operations: HashSet<String>,
+  retired_task_ids: HashSet<String>,
   cache_clear_active: bool,
+}
+
+fn active_task_ids(active: &ActiveTasks) -> HashSet<String> {
+  let mut active_ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
+  active_ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
+  active_ids
 }
 
 /// 在持有任务生命周期锁期间执行同步清理，阻止新的 reservation 与目录删除交错。
@@ -1797,9 +1806,8 @@ fn with_active_task_ids<T>(
   operation: impl FnOnce(&HashSet<String>) -> Result<T, String>,
 ) -> Result<T, String> {
   let active_guard = active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
-  let mut active_ids = active_guard.by_task.keys().cloned().collect::<HashSet<_>>();
-  active_ids
-    .extend(active_guard.by_installation.values().map(|reservation| reservation.task_id.clone()));
+  let mut active_ids = active_task_ids(&active_guard);
+  active_ids.extend(active_guard.record_operations.iter().cloned());
   let result = operation(&active_ids);
   drop(active_guard);
   result
@@ -1844,6 +1852,36 @@ pub(crate) struct TaskReservation {
   canceled: Arc<AtomicBool>,
 }
 
+pub(crate) struct TaskRecordOperation {
+  active: Arc<Mutex<ActiveTasks>>,
+  task_id: String,
+}
+
+impl TaskRecordOperation {
+  fn acquire(active: Arc<Mutex<ActiveTasks>>, task_id: &str) -> Result<Self, String> {
+    let task_id =
+      Uuid::parse_str(task_id).map_err(|_| "任务 ID 无效：必须是 UUID".to_string())?.to_string();
+    {
+      let mut tasks = active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+      if tasks.retired_task_ids.contains(&task_id) {
+        return Err("任务计划已清除，请重新评估".to_string());
+      }
+      if !tasks.record_operations.insert(task_id.clone()) {
+        return Err("任务记录正在被其他操作使用，请稍后重试".to_string());
+      }
+    }
+    Ok(Self { active, task_id })
+  }
+}
+
+impl Drop for TaskRecordOperation {
+  fn drop(&mut self) {
+    if let Ok(mut active) = self.active.lock() {
+      active.record_operations.remove(&self.task_id);
+    }
+  }
+}
+
 impl TaskReservation {
   fn acquire(
     active: Arc<Mutex<ActiveTasks>>,
@@ -1855,6 +1893,9 @@ impl TaskReservation {
       let mut tasks = active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
       if tasks.cache_clear_active {
         return Err("游戏资源缓存正在清理，请稍后重试".to_string());
+      }
+      if tasks.retired_task_ids.contains(task_id) {
+        return Err("任务计划已清除，请重新评估".to_string());
       }
       if tasks.by_installation.contains_key(installation_id) {
         return Err("该游戏安装已有资源任务正在运行".to_string());
@@ -1913,6 +1954,8 @@ impl GamePackageManager {
       active: Arc::new(Mutex::new(ActiveTasks {
         by_task: HashMap::new(),
         by_installation: HashMap::new(),
+        record_operations: HashSet::new(),
+        retired_task_ids: HashSet::new(),
         cache_clear_active: false,
       })),
       verify: Arc::new(VerifyRuntime::new()),
@@ -2839,33 +2882,144 @@ impl GamePackageManager {
     self.list_from_journals(journals, installation_id).await
   }
 
-  /// 清理过期记录后列出磁盘上持久化的安全终态任务。
-  pub(crate) fn history_list(&self, task_root: &Path) -> Result<Vec<PackageTaskSummary>, String> {
+  pub(crate) async fn record_list(
+    &self,
+    task_root: &Path,
+  ) -> Result<Vec<PackageTaskRecord>, String> {
+    let disk_records = journal::scan_records(task_root)?;
+    let journals = disk_records
+      .iter()
+      .filter_map(|record| match record {
+        journal::TaskDirectoryRecord::Journal(journal) => Some(journal.clone()),
+        _ => None,
+      })
+      .collect::<Vec<_>>();
+    let mut summaries = self
+      .list_from_journals(journals, None)
+      .await?
+      .into_iter()
+      .map(|summary| (summary.task_id.clone(), summary))
+      .collect::<HashMap<_, _>>();
+    let mut records = Vec::with_capacity(disk_records.len());
+    for record in disk_records {
+      match record {
+        journal::TaskDirectoryRecord::Journal(journal) => {
+          if let Some(summary) = summaries.remove(&journal.task_id) {
+            records.push(PackageTaskRecord {
+              task_id: summary.task_id.clone(),
+              kind: PackageTaskRecordKind::Task,
+              updated_at: summary.updated_at.clone(),
+              task: Some(summary),
+              plan_bytes: 0,
+              issue_message: None,
+            });
+          } else {
+            records.push(PackageTaskRecord {
+              task_id: journal.task_id,
+              kind: PackageTaskRecordKind::Invalid,
+              task: None,
+              updated_at: journal.updated_at,
+              plan_bytes: 0,
+              issue_message: Some("无法生成任务安全投影".to_string()),
+            });
+          }
+        }
+        journal::TaskDirectoryRecord::PlanOnly { task_id, updated_at, plan_bytes } => {
+          records.push(PackageTaskRecord {
+            task_id,
+            kind: PackageTaskRecordKind::PlanOnly,
+            task: None,
+            updated_at,
+            plan_bytes,
+            issue_message: None,
+          });
+        }
+        journal::TaskDirectoryRecord::Invalid { task_id, updated_at, issue_message } => {
+          records.push(PackageTaskRecord {
+            task_id,
+            kind: PackageTaskRecordKind::Invalid,
+            task: None,
+            updated_at,
+            plan_bytes: 0,
+            issue_message: Some(issue_message),
+          });
+        }
+      }
+    }
+    records.extend(summaries.into_values().map(|summary| PackageTaskRecord {
+      task_id: summary.task_id.clone(),
+      kind: PackageTaskRecordKind::Task,
+      updated_at: summary.updated_at.clone(),
+      task: Some(summary),
+      plan_bytes: 0,
+      issue_message: None,
+    }));
+    records.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
+    Ok(records)
+  }
+
+  /// 新计划落盘并被页面接管后，清理同安装、同目标且未被其他生命周期引用的旧计划。
+  pub(crate) fn cleanup_superseded_plans(
+    &self,
+    task_root: &Path,
+    current_plan_id: &str,
+  ) -> Result<PackageTaskCleanupSummary, String> {
+    let Some(current) = plan_lifecycle::load_metadata(task_root, current_plan_id)? else {
+      return Ok(empty_task_cleanup_summary());
+    };
     with_active_task_ids(&self.active, |active_ids| {
-      let journals = journal::list(task_root, None)
-        .map_err(|error| format!("读取游戏资源任务历史失败：{error}"))?;
-      let (_, retained) = journal::cleanup_terminal_tasks_from_journals(
-        task_root,
-        active_ids,
-        Some(ChronoDuration::days(7)),
-        journals.clone(),
-      )
-      .map_err(|error| format!("清理过期游戏资源任务历史失败：{error}"))?;
-      cleanup_finished_task_sidecars(task_root, &journals, &retained);
-      let mut summaries = retained
-        .into_iter()
-        .filter(|journal| {
-          !active_ids.contains(&journal.task_id)
-            && matches!(
-              journal.state,
-              PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-            )
-        })
-        .map(|journal| journal.summary())
-        .collect::<Vec<_>>();
-      summaries.sort_by(|left, right| right.updated_at.cmp(&left.updated_at));
-      Ok(summaries)
+      let mut protected_ids = persistent_plan_references(task_root)?;
+      protected_ids.extend(active_ids.iter().cloned());
+      protected_ids.insert(current_plan_id.to_string());
+      let mut removable_ids = Vec::new();
+      for record in journal::scan_records(task_root)? {
+        let journal::TaskDirectoryRecord::PlanOnly { task_id, .. } = record else {
+          continue;
+        };
+        if protected_ids.contains(&task_id) {
+          continue;
+        }
+        let Some(candidate) = plan_lifecycle::load_metadata(task_root, &task_id)? else {
+          continue;
+        };
+        if candidate.installation_id == current.installation_id
+          && candidate.target == current.target
+        {
+          removable_ids.push(task_id);
+        }
+      }
+      cleanup_plan_only_records(task_root, active_ids, removable_ids)
     })
+  }
+
+  /// 应用启动后，页面内存引用已失效；只保留草稿、换服与正式任务仍引用的计划。
+  pub(crate) fn cleanup_expired_plans(
+    &self,
+    task_root: &Path,
+  ) -> Result<PackageTaskCleanupSummary, String> {
+    with_active_task_ids(&self.active, |active_ids| {
+      let mut protected_ids = persistent_plan_references(task_root)?;
+      protected_ids.extend(active_ids.iter().cloned());
+      let removable_ids = journal::scan_records(task_root)?
+        .into_iter()
+        .filter_map(|record| match record {
+          journal::TaskDirectoryRecord::PlanOnly { task_id, .. }
+            if !protected_ids.contains(&task_id) =>
+          {
+            Some(task_id)
+          }
+          _ => None,
+        })
+        .collect::<Vec<_>>();
+      cleanup_plan_only_records(task_root, active_ids, removable_ids)
+    })
+  }
+
+  pub(crate) fn reserve_task_record_operation(
+    &self,
+    task_id: &str,
+  ) -> Result<TaskRecordOperation, String> {
+    TaskRecordOperation::acquire(Arc::clone(&self.active), task_id)
   }
 
   pub(crate) fn remove_task(
@@ -2875,20 +3029,41 @@ impl GamePackageManager {
   ) -> Result<PackageTaskCleanupSummary, String> {
     let task_id =
       Uuid::parse_str(task_id).map_err(|_| "任务 ID 无效：必须是 UUID".to_string())?.to_string();
-    with_active_task_ids(&self.active, |active_ids| {
-      if active_ids.contains(&task_id) {
-        return Err("任务仍在运行，无法删除任务记录".to_string());
-      }
-      let journals = journal::list(task_root, None)?;
-      let summary = journal::cleanup_terminal_task(task_root, active_ids, &task_id)?;
+    let _record_operation = self.reserve_task_record_operation(&task_id)?;
+    let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
+    let active_ids = active_task_ids(&active);
+    if active_ids.contains(&task_id) {
+      return Err("任务仍在运行，无法删除任务记录".to_string());
+    }
+    active.retired_task_ids.insert(task_id.clone());
+    let result = (|| {
+      let journals = journal::scan_records(task_root)?
+        .into_iter()
+        .filter_map(|record| match record {
+          journal::TaskDirectoryRecord::Journal(journal) => Some(journal),
+          _ => None,
+        })
+        .collect::<Vec<_>>();
+      let plan_only = !journals.iter().any(|journal| journal.task_id == task_id);
+      let summary = journal::cleanup_task_record(task_root, &active_ids, &task_id)?;
       let retained = journals
         .iter()
         .filter(|journal| !summary.removed_task_ids.contains(&journal.task_id))
         .cloned()
         .collect::<Vec<_>>();
       cleanup_finished_task_sidecars(task_root, &journals, &retained);
+      if plan_only && summary.removed_count > 0 {
+        cleanup_plan_only_sidecars(task_root, &task_id);
+      }
       Ok(summary)
-    })
+    })();
+    if result
+      .as_ref()
+      .map_or(true, |summary: &PackageTaskCleanupSummary| summary.removed_count == 0)
+    {
+      active.retired_task_ids.remove(&task_id);
+    }
+    result
   }
 
   async fn list_from_journals(
@@ -2936,47 +3111,25 @@ impl GamePackageManager {
     Ok(summaries)
   }
 
-  pub(crate) async fn cleanup_and_list(
-    &self,
-    task_root: &Path,
-    installation_id: Option<&str>,
-    max_age: Option<ChronoDuration>,
-  ) -> Result<Vec<PackageTaskSummary>, String> {
-    let journals = with_active_task_ids(&self.active, |active_ids| {
-      let journals = journal::list(task_root, None)
-        .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))?;
-      journal::cleanup_terminal_tasks_from_journals(
-        task_root,
-        active_ids,
-        max_age,
-        journals.clone(),
-      )
-      .map(|(_, retained)| {
-        cleanup_finished_task_sidecars(task_root, &journals, &retained);
-        retained
-      })
-      .map_err(|error| format!("自动清理过期游戏资源任务失败：{error}"))
-    })?;
-    let journals = journals
-      .into_iter()
-      .filter(|journal| installation_id.is_none_or(|id| id == journal.installation_id))
-      .collect();
-    self.list_from_journals(journals, installation_id).await
-  }
-
   pub(crate) fn cleanup_tasks(
     &self,
     task_root: &Path,
     max_age: Option<ChronoDuration>,
   ) -> Result<PackageTaskCleanupSummary, String> {
     with_active_task_ids(&self.active, |active_ids| {
-      let journals = journal::list(task_root, None)?;
-      let summary = journal::cleanup_terminal_tasks(task_root, active_ids, max_age)?;
-      let retained = journals
-        .iter()
-        .filter(|journal| !summary.removed_task_ids.contains(&journal.task_id))
-        .cloned()
+      let journals = journal::scan_records(task_root)?
+        .into_iter()
+        .filter_map(|record| match record {
+          journal::TaskDirectoryRecord::Journal(journal) => Some(journal),
+          _ => None,
+        })
         .collect::<Vec<_>>();
+      let (summary, retained) = journal::cleanup_terminal_tasks_from_journals(
+        task_root,
+        active_ids,
+        max_age,
+        journals.clone(),
+      )?;
       cleanup_finished_task_sidecars(task_root, &journals, &retained);
       Ok(summary)
     })
@@ -3033,6 +3186,44 @@ fn cleanup_finished_task_sidecars(
   if let Err(error) = installer::sweep_terminal_drafts(task_root) {
     log::warn!("[game-package] 清理已结束安装草稿失败：{error}");
   }
+}
+
+fn persistent_plan_references(task_root: &Path) -> Result<HashSet<String>, String> {
+  let mut references = installer::referenced_plan_ids(task_root)?;
+  references.extend(switch::referenced_plan_ids(task_root)?);
+  Ok(references)
+}
+
+fn cleanup_plan_only_records(
+  task_root: &Path,
+  active_ids: &HashSet<String>,
+  task_ids: Vec<String>,
+) -> Result<PackageTaskCleanupSummary, String> {
+  let mut summary = empty_task_cleanup_summary();
+  for task_id in task_ids {
+    let removed = journal::cleanup_task_record(task_root, active_ids, &task_id)?;
+    if removed.removed_count == 0 {
+      continue;
+    }
+    summary.removed_count += removed.removed_count;
+    summary.removed_bytes = summary.removed_bytes.saturating_add(removed.removed_bytes);
+    summary.removed_task_ids.extend(removed.removed_task_ids);
+    cleanup_plan_only_sidecars(task_root, &task_id);
+  }
+  Ok(summary)
+}
+
+fn cleanup_plan_only_sidecars(task_root: &Path, task_id: &str) {
+  if let Err(error) = switch::remove_unstarted_plan_reference(task_root, task_id) {
+    log::warn!("[game-package][{task_id}] 清理未启动换服计划副本失败：{error}");
+  }
+  if let Err(error) = defender::cleanup_install_exclusions(task_root, task_id) {
+    log::warn!("[game-package][{task_id}] 清理未启动计划的 Defender 排除失败：{error}");
+  }
+}
+
+fn empty_task_cleanup_summary() -> PackageTaskCleanupSummary {
+  PackageTaskCleanupSummary { removed_count: 0, removed_bytes: 0, removed_task_ids: Vec::new() }
 }
 
 /// 取消/回滚资源任务时，还原资源准备阶段前移删除移入备份目录的配音文件。
@@ -6803,4 +6994,62 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
     }
   }
   Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  struct TestTaskRoot(PathBuf);
+
+  impl TestTaskRoot {
+    fn new() -> Self {
+      let root = std::env::temp_dir().join(format!("teyvatguide-plan-cleanup-{}", Uuid::new_v4()));
+      fs::create_dir_all(root.join("tasks")).expect("create task root");
+      Self(root)
+    }
+
+    fn create_plan(&self, installation_id: &str, target: PackagePlanTarget) -> String {
+      let plan_id = Uuid::new_v4().to_string();
+      let directory = self.0.join("tasks").join(&plan_id);
+      fs::create_dir_all(&directory).expect("create plan directory");
+      fs::write(directory.join("plan.json"), b"{}").expect("write plan");
+      plan_lifecycle::persist_metadata(
+        &self.0,
+        &plan_id,
+        installation_id,
+        target,
+        &Utc::now().to_rfc3339(),
+      )
+      .expect("persist plan metadata");
+      plan_id
+    }
+  }
+
+  impl Drop for TestTaskRoot {
+    fn drop(&mut self) {
+      let _ = fs::remove_dir_all(&self.0);
+    }
+  }
+
+  #[test]
+  fn replaces_same_target_plan_and_sweeps_startup_orphans() {
+    let root = TestTaskRoot::new();
+    let old_main = root.create_plan("game-test", PackagePlanTarget::Main);
+    let current_main = root.create_plan("game-test", PackagePlanTarget::Main);
+    let audio = root.create_plan("game-test", PackagePlanTarget::Audio);
+    let manager = GamePackageManager::new();
+
+    let replaced =
+      manager.cleanup_superseded_plans(&root.0, &current_main).expect("cleanup superseded plans");
+    assert_eq!(replaced.removed_task_ids, vec![old_main.clone()]);
+    assert!(!root.0.join("tasks").join(old_main).exists());
+    assert!(root.0.join("tasks").join(&current_main).exists());
+    assert!(root.0.join("tasks").join(&audio).exists());
+
+    let expired = manager.cleanup_expired_plans(&root.0).expect("cleanup startup plans");
+    assert_eq!(expired.removed_count, 2);
+    assert!(!root.0.join("tasks").join(current_main).exists());
+    assert!(!root.0.join("tasks").join(audio).exists());
+  }
 }

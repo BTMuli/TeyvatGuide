@@ -149,6 +149,16 @@ declare namespace TGApp.Game.Package {
   /** 可恢复资源任务状态值。 */
   type TaskStateEnum = (typeof TaskState)[keyof typeof TaskState];
 
+  /** 任务目录扫描记录类别。 */
+  const TaskRecordKind = <const>{
+    TASK: "task",
+    PLAN_ONLY: "plan_only",
+    INVALID: "invalid",
+  };
+
+  /** 任务目录扫描记录类别值。 */
+  type TaskRecordKindEnum = (typeof TaskRecordKind)[keyof typeof TaskRecordKind];
+
   /** 中断任务允许的恢复动作。 */
   const RecoveryAction = <const>{
     RESUME: "resume",
@@ -220,6 +230,16 @@ declare namespace TGApp.Game.Package {
     /** 安装流水线因持续停滞自动暂停并重试时的提示；未处于自动重试时为空。 */
     autoRetryMessage: string | null;
     updatedAt: string;
+  };
+
+  /** 任务目录中的安全扫描记录；未启动计划和异常记录不伪造任务投影。 */
+  type TaskRecord = {
+    taskId: string;
+    kind: TaskRecordKindEnum;
+    task: TaskSummary | null;
+    updatedAt: string;
+    planBytes: number;
+    issueMessage: string | null;
   };
 
   /** 同资源家族渠道转换的只读计划摘要。 */

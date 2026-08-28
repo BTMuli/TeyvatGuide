@@ -173,6 +173,18 @@ pub async fn init_app(app_handle: AppHandle) {
       else {
         return;
       };
+      let manager = sweep_handle.state::<crate::game::package::GamePackageManager>();
+      match manager.cleanup_expired_plans(&task_root) {
+        Ok(summary) if summary.removed_count > 0 => {
+          log::info!(
+            "[game-package] 启动清理 {} 个失效未启动计划，释放 {} 字节",
+            summary.removed_count,
+            summary.removed_bytes
+          );
+        }
+        Ok(_) => {}
+        Err(error) => log::warn!("[game-package] 启动清理失效计划失败：{error}"),
+      }
       if let Err(error) = crate::game::defender::sweep_stale_exclusions(&task_root) {
         log::warn!("[defender] 清理遗留排除失败：{error}");
       }

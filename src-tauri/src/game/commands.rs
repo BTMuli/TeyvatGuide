@@ -11,7 +11,8 @@ use super::{
     GameInstallation, GameInstallationDiscovery, InstallationStatus, PackageCacheSummary,
     PackagePlanProgress, PackagePlanSummary, PackagePlanTarget, PackageRecoveryAction,
     PackageRecoveryProgress, PackageSnapshot, PackageSwitchSummary, PackageTaskCleanupSummary,
-    PackageTaskOptions, PackageTaskState, PackageTaskSummary, PackageVerifySummary, SchemeId,
+    PackageTaskOptions, PackageTaskRecord, PackageTaskState, PackageTaskSummary,
+    PackageVerifySummary, SchemeId,
   },
   package::{AudioApplyContext, GamePackageManager},
   planner::{
@@ -447,6 +448,9 @@ pub async fn game_install_plan(
   .await?;
   let plan = load_persisted_plan(&task_root, &summary.plan_id)?;
   installer::mark_draft_plan(&task_root, &draft_id, &plan)?;
+  if let Err(error) = manager.cleanup_superseded_plans(&task_root, &summary.plan_id) {
+    log::warn!("[game-install][{}] 清理被替代安装计划失败：{error}", summary.plan_id);
+  }
   Ok(summary)
 }
 
@@ -491,6 +495,7 @@ pub async fn game_install_start(
   options: Option<PackageTaskOptions>,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
+  let _record_operation = manager.reserve_task_record_operation(&plan_id)?;
   installer::ensure_windows_install_platform()?;
   let draft_id = installer::find_draft_id(&task_root, &install_id)?;
   let draft = installer::load_draft(&task_root, &draft_id)?;
@@ -930,6 +935,7 @@ pub async fn game_package_snapshot(
 pub async fn game_package_plan(
   app_handle: AppHandle,
   db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
   installation_id: String,
   target: PackagePlanTarget,
   on_progress: Channel<PackagePlanProgress>,
@@ -938,13 +944,22 @@ pub async fn game_package_plan(
   report_plan_progress(&on_progress, 1, "正在读取本地安装信息");
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let _reservation =
+    manager.reserve_installation_operation(&installation.id, "game-package-plan")?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
   report_plan_progress(&on_progress, 2, "正在读取远端分支");
   let branches = get_game_branches(&client, scheme).await?;
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
-  create_and_persist_plan(&installation, &branches, target, &app_data_dir, &on_progress).await
+  let summary =
+    create_and_persist_plan(&installation, &branches, target, &app_data_dir, &on_progress).await?;
+  if let Err(error) =
+    manager.cleanup_superseded_plans(&app_data_dir.join("game-tasks"), &summary.plan_id)
+  {
+    log::warn!("[game-package][{}] 清理被替代资源计划失败：{error}", summary.plan_id);
+  }
+  Ok(summary)
 }
 
 /// 评估当前正式版本的官方语音包新增、删除或替换；只生成计划，不修改游戏目录。
@@ -952,6 +967,7 @@ pub async fn game_package_plan(
 pub async fn game_package_audio_plan(
   app_handle: AppHandle,
   db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
   installation_id: String,
   target_audio_languages: Vec<String>,
   on_progress: Channel<PackagePlanProgress>,
@@ -959,20 +975,28 @@ pub async fn game_package_audio_plan(
   report_plan_progress(&on_progress, 1, "正在读取本地语音包状态");
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let _reservation =
+    manager.reserve_installation_operation(&installation.id, "game-package-audio-plan")?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
   report_plan_progress(&on_progress, 2, "正在读取当前正式版本");
   let branches = get_game_branches(&client, scheme).await?;
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
-  create_and_persist_audio_plan(
+  let summary = create_and_persist_audio_plan(
     &installation,
     &branches,
     target_audio_languages,
     &app_data_dir,
     &on_progress,
   )
-  .await
+  .await?;
+  if let Err(error) =
+    manager.cleanup_superseded_plans(&app_data_dir.join("game-tasks"), &summary.plan_id)
+  {
+    log::warn!("[game-audio][{}] 清理被替代语音计划失败：{error}", summary.plan_id);
+  }
+  Ok(summary)
 }
 
 /// 评估官服与 B 服之间的同资源家族渠道转换；只生成计划，不修改游戏目录。
@@ -980,15 +1004,22 @@ pub async fn game_package_audio_plan(
 pub async fn game_package_switch_plan(
   app_handle: AppHandle,
   db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
   installation_id: String,
 ) -> Result<PackageSwitchSummary, String> {
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let _reservation =
+    manager.reserve_installation_operation(&installation.id, "game-package-switch-plan")?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let client = create_http_client()?;
   let branches = get_game_branches(&client, scheme).await?;
   let task_root = game_task_root(&app_handle)?;
-  create_and_persist_switch_plan(&installation, &branches, &task_root).await
+  let summary = create_and_persist_switch_plan(&installation, &branches, &task_root).await?;
+  if let Err(error) = manager.cleanup_superseded_plans(&task_root, &summary.plan_id) {
+    log::warn!("[game-switch][{}] 清理被替代换服计划失败：{error}", summary.plan_id);
+  }
+  Ok(summary)
 }
 
 /// 执行已评估的官服 ↔ B 服渠道转换：先缓存 SDK，再写前 journal 提交，最后改渠道配置。
@@ -1000,6 +1031,7 @@ pub async fn game_package_switch(
   plan_id: String,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
+  let _record_operation = manager.reserve_task_record_operation(&plan_id)?;
   let plan = switch::load_persisted_switch_plan(&task_root, &plan_id)?;
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
@@ -1101,6 +1133,7 @@ pub async fn game_package_start(
   options: Option<PackageTaskOptions>,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
+  let _record_operation = manager.reserve_task_record_operation(&plan_id)?;
   let plan = load_persisted_plan(&task_root, &plan_id)?;
   reject_release_game_update_plan(&plan)?;
   let pool = sqlite_pool(&db_instances).await?;
@@ -1132,6 +1165,7 @@ pub async fn game_package_apply(
   task_id: String,
 ) -> Result<PackageTaskSummary, String> {
   let task_root = game_task_root(&app_handle)?;
+  let _record_operation = manager.reserve_task_record_operation(&task_id)?;
   let plan = load_persisted_plan(&task_root, &task_id)?;
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
@@ -1172,19 +1206,16 @@ pub async fn game_package_task_list(
   manager: tauri::State<'_, GamePackageManager>,
   installation_id: Option<String>,
 ) -> Result<Vec<PackageTaskSummary>, String> {
-  let task_root = game_task_root(&app_handle)?;
-  manager
-    .cleanup_and_list(&task_root, installation_id.as_deref(), Some(chrono::Duration::days(7)))
-    .await
+  manager.list(&game_task_root(&app_handle)?, installation_id.as_deref()).await
 }
 
-/// 读取仅包含磁盘上安全终态任务的近期历史记录。
+/// 扫描磁盘上的全部游戏资源任务记录，并合并仍在运行的任务投影。
 #[tauri::command]
-pub fn game_package_task_history_list(
+pub async fn game_package_task_history_list(
   app_handle: AppHandle,
   manager: tauri::State<'_, GamePackageManager>,
-) -> Result<Vec<PackageTaskSummary>, String> {
-  manager.history_list(&game_task_root(&app_handle)?)
+) -> Result<Vec<PackageTaskRecord>, String> {
+  manager.record_list(&game_task_root(&app_handle)?).await
 }
 
 /// 删除一个已结束的游戏资源任务记录，不触碰游戏文件或共享缓存。

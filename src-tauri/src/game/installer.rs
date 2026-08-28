@@ -326,6 +326,33 @@ pub(crate) fn list_draft_summaries(task_root: &Path) -> Result<Vec<InstallDraftS
   Ok(drafts)
 }
 
+/// 返回仍可恢复的安装草稿所引用的计划；读取异常时停止自动清理以避免误删。
+pub(crate) fn referenced_plan_ids(task_root: &Path) -> Result<HashSet<String>, String> {
+  let directory = task_root.join("install-drafts");
+  let entries = match fs::read_dir(&directory) {
+    Ok(entries) => entries,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(HashSet::new()),
+    Err(error) => return Err(format!("读取安装草稿目录失败：{error}")),
+  };
+  let mut plan_ids = HashSet::new();
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取安装草稿失败：{error}"))?;
+    let Some(name) = entry.file_name().to_str().map(str::to_string) else {
+      continue;
+    };
+    let Some(draft_id) = name.strip_suffix(".json") else {
+      continue;
+    };
+    let draft = load_draft(task_root, draft_id)?;
+    if !is_terminal_draft_state(draft.state)
+      && let Some(plan_id) = draft.plan_id
+    {
+      plan_ids.insert(plan_id);
+    }
+  }
+  Ok(plan_ids)
+}
+
 pub(crate) fn inspect_install_location(
   install_root_input: &str,
   machine_uid: &str,

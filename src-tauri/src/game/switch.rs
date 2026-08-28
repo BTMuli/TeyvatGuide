@@ -11,10 +11,13 @@ use super::{
     ChannelSdkPackage, GameBranches, get_channel_sdk, get_deprecated_files, network_error,
   },
   journal::{CommitStepKind, TaskJournal},
-  model::{GameInstallation, InstallationStatus, PackageSwitchSummary, SchemeId},
+  model::{
+    GameInstallation, InstallationStatus, PackagePlanTarget, PackageSwitchSummary, SchemeId,
+  },
   path_guard::{
     normalize_manifest_path, prepare_manifest_output_file, resolve_optional_manifest_file,
   },
+  plan_lifecycle,
   planner::load_verify_target,
   scheme::{canonical_channel, opposite_scheme},
 };
@@ -237,6 +240,56 @@ pub(crate) fn load_persisted_switch_plan(
     }
   }
   Err("未找到换服计划".to_string())
+}
+
+/// 返回安装级换服计划所引用的任务计划；读取异常时停止自动清理以避免误删。
+pub(crate) fn referenced_plan_ids(task_root: &Path) -> Result<HashSet<String>, String> {
+  let switch_root = task_root.join("switch");
+  let entries = match fs::read_dir(&switch_root) {
+    Ok(entries) => entries,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(HashSet::new()),
+    Err(error) => return Err(format!("读取换服计划目录失败：{error}")),
+  };
+  let mut plan_ids = HashSet::new();
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取换服计划条目失败：{error}"))?;
+    let path = entry.path().join("plan.json");
+    if !path.exists() {
+      continue;
+    }
+    plan_ids.insert(load_plan_file(&path)?.plan_id);
+  }
+  Ok(plan_ids)
+}
+
+/// 清理仍指向未启动计划的安装级换服副本。
+pub(crate) fn remove_unstarted_plan_reference(
+  task_root: &Path,
+  plan_id: &str,
+) -> Result<(), String> {
+  let switch_root = task_root.join("switch");
+  let entries = match fs::read_dir(&switch_root) {
+    Ok(entries) => entries,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+    Err(error) => return Err(format!("读取换服计划目录失败：{error}")),
+  };
+  let mut installation_id = None;
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取换服计划条目失败：{error}"))?;
+    let path = entry.path().join("plan.json");
+    if !path.exists() {
+      continue;
+    }
+    let plan = load_plan_file(&path)?;
+    if plan.plan_id == plan_id {
+      installation_id = Some(plan.installation_id);
+      break;
+    }
+  }
+  if let Some(installation_id) = installation_id {
+    remove_finished_switch_dir(task_root, &installation_id, plan_id)?;
+  }
+  Ok(())
 }
 
 /// 换服任务日志绑定的评估计划摘要。
@@ -915,7 +968,20 @@ fn remove_matching_switch_commit(
 
 fn persist_plan(task_root: &Path, plan: &PersistedSwitchPlan) -> Result<(), String> {
   persist_plan_at(&task_root.join("switch").join(&plan.installation_id), plan)?;
-  persist_task_switch_plan(task_root, plan)
+  if let Err(error) = persist_task_switch_plan(task_root, plan).and_then(|()| {
+    plan_lifecycle::persist_metadata(
+      task_root,
+      &plan.plan_id,
+      &plan.installation_id,
+      PackagePlanTarget::Switch,
+      &plan.created_at,
+    )
+  }) {
+    let _ = fs::remove_dir_all(task_root.join("tasks").join(&plan.plan_id));
+    let _ = remove_finished_switch_dir(task_root, &plan.installation_id, &plan.plan_id);
+    return Err(error);
+  }
+  Ok(())
 }
 
 fn persist_task_switch_plan(task_root: &Path, plan: &PersistedSwitchPlan) -> Result<(), String> {

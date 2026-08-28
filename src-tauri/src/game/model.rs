@@ -346,6 +346,27 @@ pub struct PackageTaskSummary {
   pub updated_at: String,
 }
 
+/// 任务目录记录的可展示类别。
+#[derive(Clone, Copy, Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PackageTaskRecordKind {
+  Task,
+  PlanOnly,
+  Invalid,
+}
+
+/// 扫描任务目录得到的安全记录；异常记录不暴露计划或 journal 原文。
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageTaskRecord {
+  pub task_id: String,
+  pub kind: PackageTaskRecordKind,
+  pub task: Option<PackageTaskSummary>,
+  pub updated_at: String,
+  pub plan_bytes: u64,
+  pub issue_message: Option<String>,
+}
+
 /// 清理安全终态资源任务记录后的结果。
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]

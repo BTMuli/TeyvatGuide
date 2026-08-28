@@ -1,9 +1,9 @@
-<!-- 资源任务历史浮层：查看与清除最近 7 天已结束任务 -->
+<!-- 资源任务列表浮层：扫描、筛选与清除磁盘任务记录 -->
 <template>
   <TopOverlay
     v-model="visible"
     :titleId
-    closeAriaLabel="关闭任务历史"
+    closeAriaLabel="关闭任务列表"
     contentMaxHeight="min(560px, calc(100vh - 200px))"
     panelMaxHeight="calc(100vh - 96px)"
     panelWidth="720px"
@@ -13,11 +13,35 @@
     <template #header>
       <div class="task-history-heading">
         <div aria-hidden="true" class="task-history-heading-icon">
-          <v-icon icon="mdi-history" size="24" />
+          <v-icon icon="mdi-clipboard-text-clock-outline" size="24" />
         </div>
         <div class="task-history-heading-copy">
-          <h2 :id="titleId">任务历史</h2>
-          <p>查看最近 7 天已结束的游戏资源任务</p>
+          <div class="task-history-heading-title">
+            <h2 :id="titleId">任务列表</h2>
+            <p>查看任务目录中的全部游戏资源任务</p>
+          </div>
+          <div v-if="records.length > 0" class="task-history-filter">
+            <v-btn-toggle
+              v-model="selectedFilter"
+              :mandatory="true"
+              aria-label="按任务状态筛选"
+              class="task-history-toggle"
+              color="var(--tgc-od-orange)"
+              density="compact"
+              variant="outlined"
+            >
+              <v-btn
+                v-for="option in taskFilterOptions"
+                :key="option.value"
+                :aria-label="`${option.label}任务 ${option.count} 条`"
+                size="small"
+                :value="option.value"
+              >
+                {{ option.label }}
+                <span class="task-history-filter-count">{{ option.count }}</span>
+              </v-btn>
+            </v-btn-toggle>
+          </div>
         </div>
       </div>
     </template>
@@ -26,12 +50,12 @@
       <v-btn
         :disabled="clearingAll || removingAny"
         :loading="loading"
-        aria-label="刷新任务历史"
+        aria-label="刷新任务列表"
         density="comfortable"
         icon="mdi-refresh"
-        title="刷新任务历史"
+        title="刷新任务列表"
         variant="text"
-        @click="loadHistory"
+        @click="loadTasks"
       />
       <v-btn
         :loading="openingTaskDir"
@@ -43,114 +67,136 @@
         @click="openTaskDirectory"
       />
       <v-btn
-        aria-label="关闭任务历史"
+        aria-label="关闭任务列表"
         density="comfortable"
         icon="mdi-close"
-        title="关闭任务历史"
+        title="关闭任务列表"
         variant="text"
         @click="closeOverlay"
       />
     </template>
 
-    <div v-if="loading && history.length === 0" class="task-history-state" role="status">
+    <div v-if="loading && records.length === 0" class="task-history-state" role="status">
       <v-progress-circular indeterminate size="28" width="3" />
-      <strong>正在读取任务历史…</strong>
-      <span>任务记录只保留最近 7 天</span>
+      <strong>正在扫描任务目录…</strong>
+      <span>正在读取任务目录中的全部条目</span>
     </div>
 
-    <div v-else-if="loadError !== null && history.length === 0" class="task-history-state">
+    <div v-else-if="loadError !== null && records.length === 0" class="task-history-state">
       <v-icon color="error" icon="mdi-alert-circle-outline" size="32" />
-      <strong>任务历史读取失败</strong>
+      <strong>任务列表读取失败</strong>
       <span role="alert">{{ loadError }}</span>
-      <v-btn prepend-icon="mdi-refresh" size="small" variant="tonal" @click="loadHistory">
+      <v-btn prepend-icon="mdi-refresh" size="small" variant="tonal" @click="loadTasks">
         重新加载
       </v-btn>
     </div>
 
-    <div v-else-if="history.length === 0" class="task-history-state">
-      <v-icon icon="mdi-history" size="36" />
-      <strong>最近 7 天没有已结束任务</strong>
-      <span>完成、失败或取消的资源任务会显示在这里</span>
+    <div v-else-if="records.length === 0" class="task-history-state">
+      <v-icon icon="mdi-clipboard-text-clock-outline" size="36" />
+      <strong>任务目录中没有任务</strong>
+      <span>开始下载、更新或安装后，任务记录会显示在这里</span>
     </div>
 
-    <div v-else class="task-history-list" aria-label="已结束任务列表" role="list">
-      <article v-for="task in history" :key="task.taskId" class="task-history-item" role="listitem">
-        <div class="task-history-item-main">
-          <div aria-hidden="true" class="task-history-item-icon">
-            <v-icon :icon="taskIcon(task)" size="22" />
-          </div>
-          <div class="task-history-item-copy">
-            <div class="task-history-item-title">
-              <strong>{{ taskType(task) }}</strong>
-              <v-chip :color="taskStatusColor(task.state)" size="x-small" variant="tonal">
-                {{ gameEnum.package.taskStateDesc(task.state) }}
-              </v-chip>
+    <template v-else>
+      <div
+        v-if="filteredRecords.length === 0"
+        class="task-history-state task-history-state-filtered"
+      >
+        <v-icon icon="mdi-filter-off-outline" size="32" />
+        <strong>没有{{ selectedFilterLabel }}任务</strong>
+        <span>可以切换状态查看其他任务记录</span>
+      </div>
+
+      <div v-else class="task-history-list" aria-label="资源任务列表" role="list">
+        <article
+          v-for="record in filteredRecords"
+          :key="record.taskId"
+          class="task-history-item"
+          role="listitem"
+        >
+          <div class="task-history-item-main">
+            <div aria-hidden="true" class="task-history-item-icon">
+              <v-icon :icon="recordIcon(record)" size="22" />
             </div>
-            <span
-              v-if="task.target === gameEnum.package.planTarget.AUDIO"
-              class="task-history-audio-target"
-            >
-              <PgAudioLangTags
-                size="x-small"
-                :sourceLanguages="task.sourceAudioLanguages"
-                :targetLanguages="task.targetAudioLanguages"
-              />
-              <span class="task-history-item-target">{{ task.targetTag }}</span>
-            </span>
-            <span v-else class="task-history-item-target">{{ taskTarget(task) }}</span>
+            <div class="task-history-item-copy">
+              <div class="task-history-item-title">
+                <strong>{{ recordTitle(record) }}</strong>
+                <v-chip :color="recordStatusColor(record)" size="x-small" variant="tonal">
+                  {{ recordStatus(record) }}
+                </v-chip>
+              </div>
+              <template v-if="record.task !== null">
+                <span
+                  v-if="record.task.target === gameEnum.package.planTarget.AUDIO"
+                  class="task-history-audio-target"
+                >
+                  <PgAudioLangTags
+                    size="x-small"
+                    :sourceLanguages="record.task.sourceAudioLanguages"
+                    :targetLanguages="record.task.targetAudioLanguages"
+                  />
+                  <span class="task-history-item-target">{{ record.task.targetTag }}</span>
+                </span>
+                <span v-else class="task-history-item-target">
+                  {{ taskTarget(record.task) }}
+                </span>
+              </template>
+              <span v-else class="task-history-item-target">任务 ID · {{ record.taskId }}</span>
+            </div>
+            <v-btn
+              v-if="recordCanRemove(record)"
+              :aria-label="`清除${recordTitle(record)}记录`"
+              :disabled="clearingAll || loading"
+              :loading="taskRemoving(record.taskId)"
+              class="task-history-remove"
+              color="error"
+              density="comfortable"
+              icon="mdi-delete-outline"
+              :title="`清除${recordTitle(record)}记录`"
+              variant="text"
+              @click="handleRemoveRecord(record)"
+            />
           </div>
-          <v-btn
-            :aria-label="`清除${taskType(task)}记录`"
-            :disabled="clearingAll || loading"
-            :loading="taskRemoving(task.taskId)"
-            class="task-history-remove"
-            color="error"
-            density="comfortable"
-            icon="mdi-delete-outline"
-            :title="`清除${taskType(task)}记录`"
-            variant="text"
-            @click="handleRemoveTask(task)"
-          />
-        </div>
 
-        <div class="task-history-facts">
-          <span v-for="fact in taskFacts(task)" :key="fact.text" class="task-history-fact">
-            <v-icon :icon="fact.icon" size="14" />
-            <span>{{ fact.text }}</span>
-          </span>
-        </div>
+          <div class="task-history-facts">
+            <span v-for="fact in recordFacts(record)" :key="fact.text" class="task-history-fact">
+              <v-icon :icon="fact.icon" size="14" />
+              <span>{{ fact.text }}</span>
+            </span>
+          </div>
 
-        <p v-if="task.errorMessage !== null" class="task-history-error">
-          <v-icon icon="mdi-alert-outline" size="16" />
-          <span>{{ task.errorMessage }}</span>
-        </p>
-      </article>
-    </div>
+          <p v-if="recordError(record) !== null" class="task-history-error">
+            <v-icon icon="mdi-alert-outline" size="16" />
+            <span>{{ recordError(record) }}</span>
+          </p>
+        </article>
+      </div>
+    </template>
 
     <p
-      v-if="loadError !== null && history.length > 0"
+      v-if="loadError !== null && records.length > 0"
       class="task-history-inline-error"
       role="alert"
     >
       <v-icon icon="mdi-alert-circle-outline" size="16" />
-      <span>刷新失败，当前仍显示上次读取的记录：{{ loadError }}</span>
+      <span>刷新失败，当前仍显示上次扫描的记录：{{ loadError }}</span>
     </p>
 
     <template #footer>
       <span class="task-history-footer-hint">
-        记录最多保留 7 天，清除不会影响游戏文件或共享缓存
+        扫描任务目录全部条目；清除记录不会影响游戏文件或共享缓存
       </span>
       <div class="task-history-actions">
         <v-btn variant="text" @click="closeOverlay">关闭</v-btn>
         <v-btn
-          :disabled="history.length === 0 || loading || removingAny"
+          :disabled="terminalTasks.length === 0 || loading || removingAny"
           :loading="clearingAll"
           color="error"
           prepend-icon="mdi-delete-sweep-outline"
           variant="tonal"
           @click="handleClearAll"
         >
-          清除全部
+          清除已结束
         </v-btn>
       </div>
     </template>
@@ -167,7 +213,7 @@ import { path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import fmtUtil from "@utils/fmtUtil.js";
-import { listGamePackageTaskHistory } from "@utils/TGGameLauncher.js";
+import { listGamePackageTaskRecords } from "@utils/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
 import PgAudioLangTags from "./pg-audio-lang-tags.vue";
@@ -175,7 +221,20 @@ import PgAudioLangTags from "./pg-audio-lang-tags.vue";
 const visible = defineModel<boolean>({ required: true });
 const taskStore = useGameLauncherStore();
 const titleId = useId();
-const history = ref<Array<TGApp.Game.Package.TaskSummary>>([]);
+const TaskFilter = <const>{
+  COMPLETED: "completed",
+  PENDING: "pending",
+  ABNORMAL: "abnormal",
+  ALL: "all",
+};
+type TaskFilterEnum = (typeof TaskFilter)[keyof typeof TaskFilter];
+type TaskFilterOption = {
+  value: TaskFilterEnum;
+  label: string;
+  count: number;
+};
+const records = ref<Array<TGApp.Game.Package.TaskRecord>>([]);
+const selectedFilter = ref<TaskFilterEnum>(TaskFilter.COMPLETED);
 const loading = ref<boolean>(false);
 const loadError = ref<string | null>(null);
 const openingTaskDir = ref<boolean>(false);
@@ -187,6 +246,34 @@ const removingAny = computed<boolean>(() => {
     ([key, pending]) => key.startsWith("task-history-remove:") && pending,
   );
 });
+const terminalTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
+  return records.value.flatMap((record) => {
+    return record.task !== null && isTerminalTask(record.task) ? [record.task] : [];
+  });
+});
+const taskFilterOptions = computed<Array<TaskFilterOption>>(() => {
+  const completedCount = records.value.filter(
+    (record) => record.task?.state === gameEnum.package.taskState.COMPLETED,
+  ).length;
+  const pendingCount = records.value.filter(
+    (record) => record.task !== null && !isTerminalTask(record.task),
+  ).length;
+  const abnormalCount = records.value.filter(isAbnormalRecord).length;
+  return [
+    { value: TaskFilter.COMPLETED, label: "已完成", count: completedCount },
+    { value: TaskFilter.PENDING, label: "未完成", count: pendingCount },
+    { value: TaskFilter.ABNORMAL, label: "失败/已取消/异常", count: abnormalCount },
+    { value: TaskFilter.ALL, label: "全部", count: records.value.length },
+  ];
+});
+const selectedFilterLabel = computed<string>(() => {
+  return (
+    taskFilterOptions.value.find((option) => option.value === selectedFilter.value)?.label ?? ""
+  );
+});
+const filteredRecords = computed<Array<TGApp.Game.Package.TaskRecord>>(() => {
+  return records.value.filter((record) => recordMatchesFilter(record, selectedFilter.value));
+});
 
 function isTerminalTask(task: TGApp.Game.Package.TaskSummary): boolean {
   return (
@@ -194,6 +281,54 @@ function isTerminalTask(task: TGApp.Game.Package.TaskSummary): boolean {
     task.state === gameEnum.package.taskState.FAILED ||
     task.state === gameEnum.package.taskState.CANCELED
   );
+}
+
+function isAbnormalRecord(record: TGApp.Game.Package.TaskRecord): boolean {
+  return (
+    record.kind === gameEnum.package.taskRecordKind.INVALID ||
+    record.task?.state === gameEnum.package.taskState.FAILED ||
+    record.task?.state === gameEnum.package.taskState.CANCELED
+  );
+}
+
+function recordMatchesFilter(
+  record: TGApp.Game.Package.TaskRecord,
+  filter: TaskFilterEnum,
+): boolean {
+  switch (filter) {
+    case TaskFilter.COMPLETED:
+      return record.task?.state === gameEnum.package.taskState.COMPLETED;
+    case TaskFilter.PENDING:
+      return record.task !== null && !isTerminalTask(record.task);
+    case TaskFilter.ABNORMAL:
+      return isAbnormalRecord(record);
+    case TaskFilter.ALL:
+      return true;
+  }
+}
+
+function recordTitle(record: TGApp.Game.Package.TaskRecord): string {
+  if (record.task !== null) return taskType(record.task);
+  return "异常任务记录";
+}
+
+function recordIcon(record: TGApp.Game.Package.TaskRecord): string {
+  if (record.task !== null) return taskIcon(record.task);
+  return "mdi-file-alert-outline";
+}
+
+function recordStatus(record: TGApp.Game.Package.TaskRecord): string {
+  if (record.task !== null) return gameEnum.package.taskStateDesc(record.task.state);
+  return "异常";
+}
+
+function recordStatusColor(record: TGApp.Game.Package.TaskRecord): string | undefined {
+  if (record.task !== null) return taskStatusColor(record.task.state);
+  return "error";
+}
+
+function recordCanRemove(record: TGApp.Game.Package.TaskRecord): boolean {
+  return record.task !== null && isTerminalTask(record.task);
 }
 
 function taskType(task: TGApp.Game.Package.TaskSummary): string {
@@ -288,51 +423,64 @@ function taskFacts(task: TGApp.Game.Package.TaskSummary): Array<TaskHistoryFact>
   return facts;
 }
 
+function recordFacts(record: TGApp.Game.Package.TaskRecord): Array<TaskHistoryFact> {
+  if (record.task !== null) return taskFacts(record.task);
+  const facts = [{ icon: "mdi-calendar-clock-outline", text: formatUpdatedAt(record.updatedAt) }];
+  if (record.planBytes > 0) {
+    facts.push({ icon: "mdi-file-outline", text: `plan.json · ${fmtUtil.size(record.planBytes)}` });
+  }
+  return facts;
+}
+
+function recordError(record: TGApp.Game.Package.TaskRecord): string | null {
+  return record.task?.errorMessage ?? record.issueMessage;
+}
+
 function taskRemoving(taskId: string): boolean {
   return taskStore.pendingActions[`task-history-remove:${taskId}`] === true;
 }
 
-function removeHistoryItems(taskIds: Array<string>): void {
+function removeTaskItems(taskIds: Array<string>): void {
   if (taskIds.length === 0) return;
   const removedIds = new Set(taskIds);
-  history.value = history.value.filter((task) => !removedIds.has(task.taskId));
+  records.value = records.value.filter((record) => !removedIds.has(record.taskId));
 }
 
-async function loadHistory(): Promise<void> {
+async function loadTasks(): Promise<void> {
   if (loading.value || clearingAll.value || removingAny.value) return;
   const sequence = ++requestSequence;
   loading.value = true;
   loadError.value = null;
   try {
-    const tasks = await listGamePackageTaskHistory();
+    const taskRecords = await listGamePackageTaskRecords();
     if (!visible.value || sequence !== requestSequence) return;
-    history.value = tasks
-      .filter(isTerminalTask)
+    records.value = taskRecords
+      .filter((record) => record.kind !== gameEnum.package.taskRecordKind.PLAN_ONLY)
       .toSorted((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   } catch (error) {
     if (!visible.value || sequence !== requestSequence) return;
     loadError.value = error instanceof Error ? error.message : String(error);
-    showSnackbar.error("读取任务历史失败，请稍后重试");
+    showSnackbar.error("读取任务列表失败，请稍后重试");
   } finally {
     if (sequence === requestSequence) loading.value = false;
   }
 }
 
-async function handleRemoveTask(task: TGApp.Game.Package.TaskSummary): Promise<void> {
-  if (clearingAll.value || taskRemoving(task.taskId)) return;
+async function handleRemoveRecord(record: TGApp.Game.Package.TaskRecord): Promise<void> {
+  if (!recordCanRemove(record) || clearingAll.value || taskRemoving(record.taskId)) return;
   const confirmed = await showDialog.checkF({
     title: "清除任务记录？",
-    text: `将清除“${taskType(task)}”记录，不会删除游戏文件或共享缓存。`,
+    text: `将清除“${recordTitle(record)}”记录，不会删除游戏文件或共享缓存。`,
     confirmLabel: "清除记录",
     cancelLabel: "取消",
   });
   if (confirmed !== true) return;
   try {
-    const summary = await taskStore.removeTaskHistory(task.taskId);
-    removeHistoryItems(summary.removedTaskIds);
+    const summary = await taskStore.removeTaskHistory(record.taskId);
+    removeTaskItems(summary.removedTaskIds);
     if (summary.removedCount === 0) {
       showSnackbar.info("记录已不存在或已被清理");
-      await loadHistory();
+      await loadTasks();
       return;
     }
     showSnackbar.success(
@@ -344,20 +492,22 @@ async function handleRemoveTask(task: TGApp.Game.Package.TaskSummary): Promise<v
 }
 
 async function handleClearAll(): Promise<void> {
-  if (history.value.length === 0 || loading.value || clearingAll.value || removingAny.value) return;
+  if (terminalTasks.value.length === 0 || loading.value || clearingAll.value || removingAny.value) {
+    return;
+  }
   const confirmed = await showDialog.checkF({
-    title: "清除全部任务记录？",
-    text: `将清除全部已结束任务记录（当前 ${history.value.length} 条），不会删除游戏文件或共享缓存。`,
-    confirmLabel: "清除全部",
+    title: "清除已结束任务记录？",
+    text: `将清除全部已结束任务记录（当前 ${terminalTasks.value.length} 条），不会删除游戏文件或共享缓存。`,
+    confirmLabel: "清除已结束",
     cancelLabel: "取消",
   });
   if (confirmed !== true) return;
   try {
     const summary = await taskStore.cleanupTasks();
-    removeHistoryItems(summary.removedTaskIds);
+    removeTaskItems(summary.removedTaskIds);
     if (summary.removedCount === 0) {
       showSnackbar.info("没有可清除的已结束任务");
-      await loadHistory();
+      await loadTasks();
       return;
     }
     showSnackbar.success(
@@ -398,7 +548,8 @@ watch(
       loadError.value = null;
       return;
     }
-    void loadHistory();
+    selectedFilter.value = TaskFilter.COMPLETED;
+    void loadTasks();
   },
   { immediate: true },
 );
@@ -407,6 +558,8 @@ watch(
 <style lang="scss" scoped>
 .task-history-heading {
   display: flex;
+  overflow: hidden;
+  width: 100%;
   min-width: 0;
   align-items: center;
   gap: 12px;
@@ -438,7 +591,14 @@ watch(
 }
 
 .task-history-heading-copy {
-  gap: 2px;
+  overflow: hidden;
+  gap: 8px;
+
+  .task-history-heading-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
 
   h2,
   p {
@@ -482,6 +642,31 @@ watch(
     line-height: 18px;
     overflow-wrap: anywhere;
   }
+}
+
+.task-history-state-filtered {
+  min-height: 200px;
+}
+
+.task-history-filter {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.task-history-toggle {
+  min-width: max-content;
+  border-radius: 4px;
+}
+
+.task-history-filter-count {
+  min-width: 18px;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--box-bg-2);
+  color: var(--box-text-2);
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
 }
 
 .task-history-list {

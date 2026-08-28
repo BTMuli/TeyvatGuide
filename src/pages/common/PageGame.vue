@@ -26,14 +26,14 @@
         添加新客户端
       </v-btn>
       <v-btn
-        aria-label="查看任务历史"
+        aria-label="查看任务列表"
         class="game-task-history-btn"
-        prepend-icon="mdi-history"
-        title="查看任务历史"
+        prepend-icon="mdi-clipboard-text-clock-outline"
+        title="查看任务列表"
         variant="tonal"
         @click="openTaskHistoryOverlay"
       >
-        任务历史
+        任务列表
       </v-btn>
       <v-btn
         :disabled="launching"

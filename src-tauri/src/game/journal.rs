@@ -4,6 +4,7 @@
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
   path_guard::normalize_manifest_path,
+  plan_lifecycle,
   planner::PersistedPlan,
   scheme::scheme_id_key,
 };
@@ -26,6 +27,13 @@ const JOURNAL_PROGRESS_INTERVAL: StdDuration = StdDuration::from_millis(500);
 const JOURNAL_PROGRESS_SLOT_TTL: StdDuration = StdDuration::from_secs(60);
 const ATOMIC_REPLACE_RETRIES: usize = 10;
 const ATOMIC_REPLACE_RETRY_INTERVAL: StdDuration = StdDuration::from_millis(100);
+
+#[derive(Clone)]
+pub(crate) enum TaskDirectoryRecord {
+  Journal(TaskJournal),
+  PlanOnly { task_id: String, updated_at: String, plan_bytes: u64 },
+  Invalid { task_id: String, updated_at: String, issue_message: String },
+}
 
 /// Timing for one journal persistence attempt.
 ///
@@ -877,6 +885,144 @@ pub(crate) fn list(
   Ok(journals)
 }
 
+/// 扫描任务目录中的每个条目；异常条目作为记录返回，不阻断其他任务展示。
+pub(crate) fn scan_records(task_root: &Path) -> Result<Vec<TaskDirectoryRecord>, String> {
+  let tasks_root = task_root.join("tasks");
+  let entries = match fs::read_dir(tasks_root) {
+    Ok(entries) => entries,
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+    Err(error) => return Err(format!("读取游戏资源任务目录失败：{error}")),
+  };
+  let mut records = Vec::new();
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取游戏资源任务条目失败：{error}"))?;
+    let task_id = entry.file_name().to_string_lossy().into_owned();
+    let entry_metadata = fs::symlink_metadata(entry.path())
+      .map_err(|error| format!("读取游戏资源任务条目失败：{error}"))?;
+    let entry_updated_at = metadata_updated_at(&entry_metadata);
+    if entry_metadata.file_type().is_symlink() || !entry_metadata.is_dir() {
+      records.push(TaskDirectoryRecord::Invalid {
+        task_id,
+        updated_at: entry_updated_at,
+        issue_message: "任务条目不是普通目录".to_string(),
+      });
+      continue;
+    }
+
+    let directory = entry.path();
+    let journal_path = directory.join("journal.json");
+    let plan_path = directory.join("plan.json");
+    let journal_metadata = symlink_metadata_optional(&journal_path)?;
+    let plan_metadata = symlink_metadata_optional(&plan_path)?;
+    if let Some(metadata) = journal_metadata {
+      if metadata.file_type().is_symlink() || !metadata.is_file() {
+        records.push(TaskDirectoryRecord::Invalid {
+          task_id,
+          updated_at: metadata_updated_at(&metadata),
+          issue_message: "journal.json 不是普通文件".to_string(),
+        });
+        continue;
+      }
+      if plan_metadata
+        .as_ref()
+        .is_none_or(|metadata| metadata.file_type().is_symlink() || !metadata.is_file())
+      {
+        records.push(TaskDirectoryRecord::Invalid {
+          task_id,
+          updated_at: metadata_updated_at(&metadata),
+          issue_message: "任务日志存在，但缺少普通 plan.json".to_string(),
+        });
+        continue;
+      }
+      match load(&journal_path) {
+        Ok(journal) if journal.task_id == task_id => {
+          records.push(TaskDirectoryRecord::Journal(journal));
+        }
+        Ok(_) => records.push(TaskDirectoryRecord::Invalid {
+          task_id,
+          updated_at: metadata_updated_at(&metadata),
+          issue_message: "任务目录与 journal 身份不匹配".to_string(),
+        }),
+        Err(error) => records.push(TaskDirectoryRecord::Invalid {
+          task_id,
+          updated_at: metadata_updated_at(&metadata),
+          issue_message: error,
+        }),
+      }
+      continue;
+    }
+
+    let Some(plan_metadata) = plan_metadata else {
+      records.push(TaskDirectoryRecord::Invalid {
+        task_id,
+        updated_at: entry_updated_at,
+        issue_message: "任务目录缺少 journal.json 与 plan.json".to_string(),
+      });
+      continue;
+    };
+    let plan_updated_at = metadata_updated_at(&plan_metadata);
+    let plan_bytes = plan_metadata.len();
+    if Uuid::parse_str(&task_id).is_err()
+      || plan_metadata.file_type().is_symlink()
+      || !plan_metadata.is_file()
+      || plan_bytes == 0
+    {
+      records.push(TaskDirectoryRecord::Invalid {
+        task_id,
+        updated_at: plan_updated_at,
+        issue_message: "未启动计划的目录身份或 plan.json 结构无效".to_string(),
+      });
+      continue;
+    }
+    match plan_lifecycle::is_safe_plan_only_directory(&directory, &task_id) {
+      Ok(true) => {}
+      Ok(false) => {
+        records.push(TaskDirectoryRecord::Invalid {
+          task_id,
+          updated_at: plan_updated_at,
+          issue_message: "缺少任务日志，但目录中仍有其他任务文件".to_string(),
+        });
+        continue;
+      }
+      Err(error) => {
+        records.push(TaskDirectoryRecord::Invalid {
+          task_id,
+          updated_at: plan_updated_at,
+          issue_message: error,
+        });
+        continue;
+      }
+    }
+    records.push(TaskDirectoryRecord::PlanOnly {
+      task_id,
+      updated_at: plan_updated_at,
+      plan_bytes,
+    });
+  }
+  records.sort_by(|left, right| record_updated_at(right).cmp(record_updated_at(left)));
+  Ok(records)
+}
+
+fn symlink_metadata_optional(path: &Path) -> Result<Option<fs::Metadata>, String> {
+  match fs::symlink_metadata(path) {
+    Ok(metadata) => Ok(Some(metadata)),
+    Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+    Err(error) => Err(format!("读取游戏资源任务文件失败：{error}")),
+  }
+}
+
+fn metadata_updated_at(metadata: &fs::Metadata) -> String {
+  metadata.modified().map(DateTime::<Utc>::from).unwrap_or(DateTime::<Utc>::UNIX_EPOCH).to_rfc3339()
+}
+
+fn record_updated_at(record: &TaskDirectoryRecord) -> &str {
+  match record {
+    TaskDirectoryRecord::Journal(journal) => &journal.updated_at,
+    TaskDirectoryRecord::PlanOnly { updated_at, .. }
+    | TaskDirectoryRecord::Invalid { updated_at, .. } => updated_at,
+  }
+}
+
 /// 安装是否仍有未完成的资源或换服任务，含已下载待应用状态。
 pub(crate) fn has_incomplete_tasks(
   task_root: &Path,
@@ -934,16 +1080,6 @@ pub(crate) fn protected_cache_files_for_target(
   keys
 }
 
-pub(crate) fn cleanup_terminal_tasks(
-  task_root: &Path,
-  active_ids: &HashSet<String>,
-  max_age: Option<Duration>,
-) -> Result<super::model::PackageTaskCleanupSummary, String> {
-  let journals = list(task_root, None)?;
-  cleanup_terminal_tasks_from_journals(task_root, active_ids, max_age, journals)
-    .map(|(summary, _)| summary)
-}
-
 pub(crate) fn cleanup_terminal_tasks_from_journals(
   task_root: &Path,
   active_ids: &HashSet<String>,
@@ -988,28 +1124,17 @@ pub(crate) fn cleanup_terminal_tasks_from_journals(
   ))
 }
 
-/// Remove one persisted terminal task record without treating a missing record as an error.
-pub(crate) fn cleanup_terminal_task(
+/// Remove one safe task record without treating a missing record as an error.
+pub(crate) fn cleanup_task_record(
   task_root: &Path,
   active_ids: &HashSet<String>,
   task_id: &str,
 ) -> Result<super::model::PackageTaskCleanupSummary, String> {
-  let journals = list(task_root, None)?;
-  let Some(journal) = journals.into_iter().find(|journal| journal.task_id == task_id) else {
-    return Ok(super::model::PackageTaskCleanupSummary {
-      removed_count: 0,
-      removed_bytes: 0,
-      removed_task_ids: Vec::new(),
-    });
-  };
   if active_ids.contains(task_id) {
     return Err("任务仍在运行，无法删除任务记录".to_string());
   }
-  if !matches!(
-    journal.state,
-    PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
-  ) {
-    return Err("任务尚未结束，无法删除任务记录".to_string());
+  if Uuid::parse_str(task_id).is_err() {
+    return Err("任务 ID 无效：必须是 UUID".to_string());
   }
 
   let directory = task_root.join("tasks").join(task_id);
@@ -1025,11 +1150,25 @@ pub(crate) fn cleanup_terminal_task(
     Err(error) => return Err(format!("读取游戏资源任务目录失败：{error}")),
   };
   if metadata.file_type().is_symlink() || !metadata.is_dir() {
-    return Ok(super::model::PackageTaskCleanupSummary {
-      removed_count: 0,
-      removed_bytes: 0,
-      removed_task_ids: Vec::new(),
-    });
+    return Err("任务记录不是普通目录，无法安全清理".to_string());
+  }
+  let journal_path = directory.join("journal.json");
+  if let Some(journal_metadata) = symlink_metadata_optional(&journal_path)? {
+    if journal_metadata.file_type().is_symlink() || !journal_metadata.is_file() {
+      return Err("任务日志不是普通文件，无法安全清理".to_string());
+    }
+    let journal = load(&journal_path)?;
+    if journal.task_id != task_id {
+      return Err("任务目录与 journal 身份不匹配，无法安全清理".to_string());
+    }
+    if !matches!(
+      journal.state,
+      PackageTaskState::Completed | PackageTaskState::Failed | PackageTaskState::Canceled
+    ) {
+      return Err("任务尚未结束，无法删除任务记录".to_string());
+    }
+  } else if !plan_lifecycle::is_safe_plan_only_directory(&directory, task_id)? {
+    return Err("该记录不是可安全清理的未启动计划".to_string());
   }
   let removed_bytes = directory_bytes(&directory)?;
   match fs::remove_dir_all(&directory) {
@@ -1293,5 +1432,67 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
     std::fs::File::open(directory)
       .and_then(|file| file.sync_all())
       .map_err(|error| format!("刷新游戏资源任务目录失败：{error}"))
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  struct TestTaskRoot(PathBuf);
+
+  impl TestTaskRoot {
+    fn new() -> Self {
+      let path = std::env::temp_dir().join(format!("teyvatguide-task-scan-{}", Uuid::new_v4()));
+      fs::create_dir_all(path.join("tasks")).expect("create test task root");
+      Self(path)
+    }
+
+    fn task_directory(&self, task_id: &str) -> PathBuf {
+      self.0.join("tasks").join(task_id)
+    }
+  }
+
+  impl Drop for TestTaskRoot {
+    fn drop(&mut self) {
+      let _ = fs::remove_dir_all(&self.0);
+    }
+  }
+
+  #[test]
+  fn scans_every_directory_and_only_removes_strict_plan_only_records() {
+    let root = TestTaskRoot::new();
+    let removable_id = Uuid::new_v4().to_string();
+    let abnormal_id = Uuid::new_v4().to_string();
+    let removable_directory = root.task_directory(&removable_id);
+    let abnormal_directory = root.task_directory(&abnormal_id);
+    fs::create_dir_all(&removable_directory).expect("create removable task");
+    fs::write(removable_directory.join("plan.json"), b"{}").expect("write removable plan");
+    fs::create_dir_all(&abnormal_directory).expect("create abnormal task");
+    fs::write(abnormal_directory.join("plan.json"), b"{}").expect("write abnormal plan");
+    fs::write(abnormal_directory.join("unexpected.bin"), b"residue")
+      .expect("write abnormal residue");
+
+    let records = scan_records(&root.0).expect("scan task records");
+    assert_eq!(records.len(), 2);
+    assert!(records.iter().any(|record| {
+      matches!(
+        record,
+        TaskDirectoryRecord::PlanOnly { task_id, .. } if task_id == &removable_id
+      )
+    }));
+    assert!(records.iter().any(|record| {
+      matches!(
+        record,
+        TaskDirectoryRecord::Invalid { task_id, .. } if task_id == &abnormal_id
+      )
+    }));
+
+    let summary = cleanup_task_record(&root.0, &HashSet::new(), &removable_id)
+      .expect("remove strict plan-only task");
+    assert_eq!(summary.removed_task_ids, vec![removable_id]);
+    assert!(!removable_directory.exists());
+    assert!(cleanup_task_record(&root.0, &HashSet::new(), &abnormal_id).is_err());
+    assert!(abnormal_directory.exists());
   }
 }

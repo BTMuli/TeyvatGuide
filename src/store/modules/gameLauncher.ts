@@ -298,13 +298,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     const tasks = await listGamePackageTasks(installationId);
     const next = { ...tasksByInstallation.value };
     const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
+    const hydratedInstallationIds = new Set<string>();
     let changed = false;
     for (const task of tasks) {
+      if (hydratedInstallationIds.has(task.installationId)) continue;
+      hydratedInstallationIds.add(task.installationId);
       const pending = pendingProgressByInstallation.get(task.installationId);
       if (!shouldReplaceTask(pending ?? next[task.installationId], task)) continue;
       if (pending !== undefined) pendingProgressByInstallation.delete(task.installationId);
       if (shouldOmitCompletedInstall(task)) {
-        if (next[task.installationId]?.taskId === task.taskId) {
+        if (next[task.installationId] !== undefined) {
           delete next[task.installationId];
           changed = true;
         }
