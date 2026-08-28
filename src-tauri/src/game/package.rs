@@ -1058,7 +1058,9 @@ struct InstallSpoolTracker {
   consumed: HashSet<String>,
   resident: HashMap<String, ResidentSpoolFile>,
   completed_assets: HashSet<usize>,
-  remaining_consumers: HashMap<String, usize>,
+  /// 分片 id → 引用它的全部资源下标；释放时按“当前完成集合”实时判定，
+  /// 避免“证据失效重做”的资源被当作已完成、其分片被提前释放。
+  consumers: HashMap<String, Vec<usize>>,
   completed_count: usize,
   completed_bytes: u64,
   contiguous_cursor: usize,
@@ -1105,12 +1107,12 @@ impl InstallSpoolTracker {
         }
       }
     }
-    let mut remaining_consumers = HashMap::<String, usize>::new();
-    for asset in &plan.assets {
+    let mut consumers = HashMap::<String, Vec<usize>>::new();
+    for (index, asset) in plan.assets.iter().enumerate() {
       let mut seen = HashSet::new();
       for chunk in &asset.chunks {
         if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
-          *remaining_consumers.entry(chunk.id.clone()).or_default() += 1;
+          consumers.entry(chunk.id.clone()).or_default().push(index);
         }
       }
     }
@@ -1121,9 +1123,6 @@ impl InstallSpoolTracker {
         for chunk in &asset.chunks {
           if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
             consumed.insert(chunk.id.clone());
-            if let Some(remaining) = remaining_consumers.get_mut(&chunk.id) {
-              *remaining = remaining.saturating_sub(1);
-            }
           }
         }
       }
@@ -1151,7 +1150,7 @@ impl InstallSpoolTracker {
       consumed,
       resident,
       completed_assets,
-      remaining_consumers,
+      consumers,
       completed_count,
       completed_bytes,
       contiguous_cursor,
@@ -1207,9 +1206,6 @@ impl InstallSpoolTracker {
       for chunk in &asset.chunks {
         if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
           self.consumed.insert(chunk.id.clone());
-          if let Some(remaining) = self.remaining_consumers.get_mut(&chunk.id) {
-            *remaining = remaining.saturating_sub(1);
-          }
         }
       }
     }
@@ -1230,12 +1226,6 @@ impl InstallSpoolTracker {
     if let Some(asset) = plan.assets.get(index) {
       self.completed_count = self.completed_count.saturating_sub(1);
       self.completed_bytes = self.completed_bytes.saturating_sub(asset.size);
-      let mut seen = HashSet::new();
-      for chunk in &asset.chunks {
-        if chunk.reuse.is_none() && seen.insert(chunk.id.as_str()) {
-          *self.remaining_consumers.entry(chunk.id.clone()).or_default() += 1;
-        }
-      }
       if index < self.contiguous_cursor {
         self.contiguous_cursor = index;
         self.contiguous_bytes =
@@ -1243,6 +1233,16 @@ impl InstallSpoolTracker {
       }
     }
     true
+  }
+
+  /// 分片是否可释放：仅当引用它的所有资源都已在完成集合中。
+  /// 任何资源仍处于“待组装/证据失效重做”状态都不可释放，
+  /// 避免重做资产的分片被提前删除导致组装时缓存复验失败。
+  fn releasable_file(&self, id: &str) -> bool {
+    self
+      .consumers
+      .get(id)
+      .is_some_and(|indices| indices.iter().all(|index| self.completed_assets.contains(index)))
   }
 
   fn completion_snapshot(&self, plan: &PersistedPlan) -> InstallCompletionSnapshot {
@@ -1279,10 +1279,9 @@ fn release_spool_unneeded(
       .resident
       .iter()
       .filter(|(key, file)| {
-        // 只释放“明确知道已无消费者”的分片；未知键（记账缺口）一律保留，
-        // 避免仍被在飞任务引用的分片被提前删除导致组装时缓存复验失败。
-        guard.remaining_consumers.get(file.id.as_str()).copied() == Some(0)
-          && sdk_key != Some(key.as_str())
+        // 只释放“所有引用资源均已完成”的分片；未知键或仍有未完成资源一律保留，
+        // 避免“证据失效重做”资产的分片被提前删除导致组装时缓存复验失败。
+        guard.releasable_file(&file.id) && sdk_key != Some(key.as_str())
       })
       .map(|(key, file)| (key.clone(), file.id.clone()))
       .collect::<Vec<_>>()
