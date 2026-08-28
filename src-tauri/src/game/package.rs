@@ -6213,9 +6213,18 @@ async fn finalize_audio_registration(
     persist_audio_registration_error(app_handle, task_root, journal, &error).await;
     return Err(error);
   }
-  if let Err(error) = super::launch::sync_voice_language(&actual) {
-    persist_audio_registration_error(app_handle, task_root, journal, &error).await;
-    return Err(error);
+  let is_chosen =
+    sqlx::query_scalar::<_, bool>("SELECT isChosen FROM GameInstallation WHERE id = ?")
+      .bind(&plan.installation_id)
+      .fetch_optional(pool)
+      .await
+      .map_err(|error| format!("读取主启动状态失败：{error}"))?
+      .unwrap_or(false);
+  if is_chosen {
+    if let Err(error) = super::launch::sync_voice_language(&actual) {
+      persist_audio_registration_error(app_handle, task_root, journal, &error).await;
+      return Err(error);
+    }
   }
   let audio_languages = serde_json::to_string(&selection.target_audio_languages)
     .map_err(|error| format!("序列化语音包安装记录失败：{error}"))?;

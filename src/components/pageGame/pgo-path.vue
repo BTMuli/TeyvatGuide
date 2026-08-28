@@ -155,7 +155,11 @@ import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import { open } from "@tauri-apps/plugin-dialog";
-import { inspectGameInstallation, locateGameInstallations } from "@utils/TGGameLauncher.js";
+import {
+  chooseGameInstallation,
+  inspectGameInstallation,
+  locateGameInstallations,
+} from "@utils/TGGameLauncher.js";
 import { computed, ref, useId, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";
@@ -384,6 +388,7 @@ async function onConfirm(): Promise<void> {
       return;
     }
     await TSGameInstallation.save(installation);
+    await chooseGameInstallation(installation.id);
     visible.value = false;
     emit("selected");
     if (installation.status === gameEnum.installation.status.INCONSISTENT) {

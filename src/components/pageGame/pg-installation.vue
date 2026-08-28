@@ -166,27 +166,19 @@
                   <v-chip class="game-fact-tag" size="x-small" variant="tonal">
                     {{ schemeTag(installation.schemeId) }}
                   </v-chip>
-                  <div v-if="scheme.canConvert || scheme.taskActive" class="game-fact-acts">
+                  <div class="game-fact-acts">
                     <v-btn
-                      :aria-label="
-                        version.verifyBusy
-                          ? '校验进行中，暂时不能换服'
-                          : scheme.taskActive
-                            ? '取消换服'
-                            : scheme.convertLabel
+                      :aria-label="schemeActionLabel(scheme, version.verifyBusy)"
+                      :disabled="
+                        version.verifyBusy ||
+                        (scheme.converting && !scheme.taskActive) ||
+                        (!scheme.canConvert && !scheme.taskActive)
                       "
-                      :disabled="version.verifyBusy || (scheme.converting && !scheme.taskActive)"
                       :icon="
                         scheme.taskActive ? 'mdi-stop-circle-outline' : 'mdi-swap-horizontal-bold'
                       "
                       :loading="scheme.converting && !scheme.taskActive"
-                      :title="
-                        version.verifyBusy
-                          ? '校验进行中，暂时不能换服'
-                          : scheme.taskActive
-                            ? '取消换服'
-                            : `可转为${gameEnum.installation.schemeDesc(scheme.targetScheme)}`
-                      "
+                      :title="schemeActionTitle(scheme, version.verifyBusy)"
                       density="compact"
                       size="small"
                       variant="text"
@@ -335,13 +327,16 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
-import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useBBSStore from "@store/bbs.js";
 import { listen } from "@tauri-apps/api/event";
 import fmtUtil from "@utils/fmtUtil.js";
 import { launchInstallation } from "@utils/TGGame.js";
-import { getGameInstallationSize, uninstallGameInstallation } from "@utils/TGGameLauncher.js";
+import {
+  chooseGameInstallation,
+  getGameInstallationSize,
+  uninstallGameInstallation,
+} from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, ref, watch } from "vue";
 
@@ -522,11 +517,33 @@ function handleVersionVerify(version: { startVerify: () => Promise<void> }): voi
   void version.startVerify();
 }
 
-function handleSchemeAction(scheme: {
+type SchemeAction = {
+  blockingTask: boolean;
+  canConvert: boolean;
   cancelSwitch: () => Promise<void>;
+  convertLabel: string;
   convertScheme: () => Promise<void>;
+  targetScheme: TGApp.Game.Installation.SchemeEnum;
   taskActive: boolean;
-}): void {
+};
+
+function schemeActionLabel(scheme: SchemeAction, verifyBusy: boolean): string {
+  if (verifyBusy) return "校验进行中，暂时不能换服";
+  if (scheme.taskActive) return "取消换服";
+  if (!scheme.canConvert) {
+    return scheme.blockingTask ? "安装任务进行中，暂时不能换服" : "换服任务未完成，暂时不能换服";
+  }
+  return scheme.convertLabel;
+}
+
+function schemeActionTitle(scheme: SchemeAction, verifyBusy: boolean): string {
+  if (verifyBusy || scheme.taskActive || !scheme.canConvert) {
+    return schemeActionLabel(scheme, verifyBusy);
+  }
+  return `可转为${gameEnum.installation.schemeDesc(scheme.targetScheme)}`;
+}
+
+function handleSchemeAction(scheme: SchemeAction): void {
   if (scheme.taskActive) {
     void scheme.cancelSwitch();
     return;
@@ -545,7 +562,7 @@ function openPathOverlay(): void {
 async function handleChooseInstallation(): Promise<void> {
   if (props.installation.isChosen) return;
   try {
-    await TSGameInstallation.choose(props.installation.id);
+    await chooseGameInstallation(props.installation.id);
     emit("updated");
     showSnackbar.success("已设为主启动路径");
   } catch (error) {

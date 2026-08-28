@@ -31,6 +31,15 @@ export async function listGameInstallations(): Promise<Array<TGApp.Game.Installa
 }
 
 /**
+ * 将指定本地安装设为主启动路径（唯一 isChosen），并同步主启动的语音包到游戏设置注册表。
+ * @since Beta v0.11.5
+ * @param installationId - 已登记安装 ID
+ */
+export async function chooseGameInstallation(installationId: string): Promise<void> {
+  await invoke("game_installation_choose", { installationId });
+}
+
+/**
  * 读取游戏安装目录的实际文件占用。
  * @since Beta v0.11.5
  * @param rootPath - 游戏根目录

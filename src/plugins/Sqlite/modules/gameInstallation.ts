@@ -38,18 +38,6 @@ async function save(installation: TGApp.Game.Installation.Item): Promise<void> {
   ]);
 }
 
-/**
- * 将指定本地安装设为主启动路径（唯一 isChosen）。
- * @since Beta v0.11.5
- * @param id - 安装记录 id
- */
-async function choose(id: string): Promise<void> {
-  await TGSqlite.executeTransaction([
-    { query: "UPDATE GameInstallation SET isChosen = 0 WHERE isChosen <> 0;" },
-    { query: "UPDATE GameInstallation SET isChosen = 1 WHERE id = $1;", values: [id] },
-  ]);
-}
-
-const TSGameInstallation = { save, choose };
+const TSGameInstallation = { save };
 
 export default TSGameInstallation;

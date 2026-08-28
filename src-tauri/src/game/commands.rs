@@ -173,6 +173,39 @@ pub async fn game_installation_list(
   Ok(installations)
 }
 
+/// 将指定本地安装设为主启动路径（唯一 isChosen），并按主启动安装的语音包同步游戏设置注册表。
+#[tauri::command]
+pub async fn game_installation_choose(
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+) -> Result<(), String> {
+  let pool = sqlite_pool(&db_instances).await?;
+  let audio_languages_json = sqlx::query_scalar::<_, String>(
+    "SELECT audioLanguages FROM GameInstallation WHERE id = ? LIMIT 1",
+  )
+  .bind(&installation_id)
+  .fetch_optional(&pool)
+  .await
+  .map_err(|error| format!("读取主启动语音包失败：{error}"))?
+  .ok_or_else(|| "未找到已登记的游戏安装".to_string())?;
+  let audio_languages: Vec<String> = serde_json::from_str(&audio_languages_json)
+    .map_err(|error| format!("解析主启动语音包失败：{error}"))?;
+  let mut transaction =
+    pool.begin().await.map_err(|error| format!("开始切换主启动事务失败：{error}"))?;
+  sqlx::query("UPDATE GameInstallation SET isChosen = 0 WHERE isChosen <> 0")
+    .execute(&mut *transaction)
+    .await
+    .map_err(|error| format!("清理当前主启动失败：{error}"))?;
+  sqlx::query("UPDATE GameInstallation SET isChosen = 1 WHERE id = ?")
+    .bind(&installation_id)
+    .execute(&mut *transaction)
+    .await
+    .map_err(|error| format!("设置主启动失败：{error}"))?;
+  transaction.commit().await.map_err(|error| format!("提交主启动切换事务失败：{error}"))?;
+  launch::sync_voice_language(&audio_languages)?;
+  Ok(())
+}
+
 /// 自动定位本机国服安装候选：合并 HoYoPlay 登记与 Unity 日志来源。
 #[tauri::command]
 pub async fn game_installation_locate(

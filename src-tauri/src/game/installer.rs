@@ -9,6 +9,7 @@ use super::{
     audio_marker, derive_installation_id, inspect_executable, normalize_audio_languages,
   },
   journal::{INSTALL_COMMIT_TOTAL_STEPS, TaskJournal},
+  launch,
   model::{GameInstallation, PackagePlanTarget, PackageTaskState, SchemeId},
   path_guard::{normalize_manifest_path, prepare_manifest_output_file},
   planner::{InstallOverlay, PersistedPlan},
@@ -905,7 +906,11 @@ pub(crate) async fn register_installation(
   .execute(&mut *transaction)
   .await
   .map_err(|error| format!("登记游戏安装失败：{error}"))?;
-  transaction.commit().await.map_err(|error| format!("提交安装登记事务失败：{error}"))
+  transaction.commit().await.map_err(|error| format!("提交安装登记事务失败：{error}"))?;
+  if let Err(error) = launch::sync_voice_language(&installation.audio_languages) {
+    log::warn!("[game-install][register] 同步主启动配音失败：{error}");
+  }
+  Ok(())
 }
 
 pub(crate) fn verify_published_installation(

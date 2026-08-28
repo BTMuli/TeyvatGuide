@@ -303,6 +303,7 @@ import useGameLauncherStore from "@store/gameLauncher.js";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
   cancelGameInstallDraft,
+  chooseGameInstallation,
   createGameInstallDraft,
   createGameInstallPlan,
   ensureGameInstallDefenderExclusions,
@@ -717,6 +718,7 @@ async function startIntegrityCheck(): Promise<void> {
   busy.value = true;
   try {
     await TSGameInstallation.save(installation);
+    await chooseGameInstallation(installation.id);
     await taskStore.startVerify(installation.id);
     emit("completed");
     reset();
