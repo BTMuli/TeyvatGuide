@@ -3532,5 +3532,41 @@
     "postId": "77322275",
     "up5List": [11520, 13512],
     "up4List": [11401, 12402, 13401, 14403, 15405]
+  },
+  {
+    "name": "孤灯夜访",
+    "version": "7.0",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/08/18/ea633682a29be769b52d32744d6d9b8a_5416475972197875744_transformed.jpg",
+    "from": "2026-09-01T18:00:00+08:00",
+    "to": "2026-09-22T14:59:00+08:00",
+    "type": 301,
+    "postId": "77797176",
+    "up5List": [10000120],
+    "up4List": [10000121, 10000110, 10000108]
+  },
+  {
+    "name": "聚星源动",
+    "version": "7.0",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/08/18/1a55332fb785a86c501a69918ea52844_7466642129189982555_transformed.jpg",
+    "from": "2026-09-01T18:00:00+08:00",
+    "to": "2026-09-22T14:59:00+08:00",
+    "type": 400,
+    "postId": "77797177",
+    "up5List": [10000116],
+    "up4List": [10000121, 10000110, 10000108]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "7.0",
+    "order": 2,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/08/18/81c378b75443f31b4f94d24462b8e10c_963347245316198726_transformed.jpg",
+    "from": "2026-09-01T18:00:00+08:00",
+    "to": "2026-09-22T14:59:00+08:00",
+    "type": 302,
+    "postId": "77797178",
+    "up5List": [13516, 13515],
+    "up4List": [11402, 12401, 13407, 14409, 15402]
   }
 ]
