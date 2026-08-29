@@ -2255,11 +2255,12 @@ fn remove_optional_file(path: &Path) -> Result<(), String> {
 }
 
 fn remove_empty_directory_tree(root: &Path) {
-  let Ok(entries) = fs::read_dir(root) else {
-    return;
+  // Windows 上 ReadDir 会锁住当前目录，必须先收集子项并释放句柄，否则空目录也删不掉。
+  let children = match fs::read_dir(root) {
+    Ok(entries) => entries.flatten().map(|entry| entry.path()).collect::<Vec<_>>(),
+    Err(_) => return,
   };
-  for entry in entries.flatten() {
-    let path = entry.path();
+  for path in children {
     let Ok(metadata) = fs::symlink_metadata(&path) else {
       continue;
     };
@@ -2304,7 +2305,7 @@ fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root
   if let Some(transaction_root) = incoming_root.parent() {
     remove_empty_directory_tree(transaction_root);
     if let Some(container_root) = transaction_root.parent() {
-      let _ = fs::remove_dir(container_root);
+      remove_empty_directory_tree(container_root);
     }
   }
   let staging_root = task_root.join("tasks").join(&commit.plan_id).join("staging");
@@ -2345,7 +2346,7 @@ fn cleanup_repair_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path
   if let Some(transaction_root) = incoming_root.parent() {
     remove_empty_directory_tree(transaction_root);
     if let Some(container_root) = transaction_root.parent() {
-      let _ = fs::remove_dir(container_root);
+      remove_empty_directory_tree(container_root);
     }
   }
 }
