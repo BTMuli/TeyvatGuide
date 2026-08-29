@@ -1,5 +1,5 @@
 //! 游戏安装、渠道方案与检测状态数据模型。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use serde::{Deserialize, Serialize};
 

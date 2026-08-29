@@ -1,5 +1,5 @@
 //! Yae 命令解析处理
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use crate::yae::pt_ac::parse_achi_list;
 use crate::yae::pt_avatar::parse_avatar_list;

@@ -2,7 +2,7 @@
 //!
 //! `cache/chunks` 存放 Sophon 分片，`cache/sdks` 存放渠道 SDK 压缩包。
 //! 清理会按缓存类型保留仍被未完成任务引用的缓存对象。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   journal, model::PackageCacheSummary, package::is_game_running,

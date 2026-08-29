@@ -1,5 +1,5 @@
 //! Sophon build/patch 元数据、Zstandard 清单与 protobuf 解码。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   hoyoplay::{BranchDescriptor, network_error, read_limited_json},

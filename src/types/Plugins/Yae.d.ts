@@ -1,12 +1,12 @@
 /**
  * Yae 插件类型定义
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Plugins.Yae {
   /**
    * 后端返的事件数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type RsEvent = {
     /** 数据，序列化后的JSON */
@@ -37,13 +37,13 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 后端返回的角色列表数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type AvatarListRes = Array<AvatarInfo>;
 
   /**
    * 后端返回的角色信息
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type AvatarInfo = {
     /** 角色 ID */
@@ -82,7 +82,7 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 属性值
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type PropValue = {
     /** 整数值 */
@@ -139,7 +139,7 @@ declare namespace TGApp.Plugins.Yae {
 
   /**
    * 物品信息表，用于锁定类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type ItemInfoMap = {
     /** 材料 */

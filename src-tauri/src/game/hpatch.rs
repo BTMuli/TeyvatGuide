@@ -1,5 +1,5 @@
 //! Windows 上的 HDiffPatch 4.8.0 zstd 差分应用。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use std::{fs::File, os::windows::io::AsRawHandle};
 

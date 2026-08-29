@@ -1,5 +1,5 @@
 //! 游戏资源任务写前日志与重启恢复投影。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},

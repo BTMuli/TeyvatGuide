@@ -1,6 +1,6 @@
 /**
  * 游戏资源长任务的非权威前端投影。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import gameEnum from "@enum/game.js";

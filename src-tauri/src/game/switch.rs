@@ -3,7 +3,7 @@
 //! 评估阶段只写 `switch/<installation-id>/plan.json`。目标渠道存在 SDK 时，执行阶段先把
 //! SDK zip 写入 `cache/sdks/<md5>`，安全解压到任务 staging 并按 `sdk_pkg_version` 校验，
 //! 再复用写前 journal 提交文件，最后才改 `channel/sub_channel`。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   committer::{SwitchApplyRequest, SwitchFileStep},

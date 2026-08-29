@@ -1,5 +1,5 @@
 //! 国服官服与哔哩哔哩服客户端启动实现。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::model::SchemeId;
 use std::path::Path;

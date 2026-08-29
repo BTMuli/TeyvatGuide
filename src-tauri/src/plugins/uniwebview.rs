@@ -1,5 +1,5 @@
 // 拦截游戏内公告 iframe 的 uniwebview:// 协议
-// @since Beta v0.11.5
+// @since Beta v0.12.0
 
 use tauri::webview::PlatformWebview;
 use tauri::{AppHandle, Emitter, Manager};

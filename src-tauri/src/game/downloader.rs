@@ -1,5 +1,5 @@
 //! 内容寻址游戏资源缓存、并发下载、限速与完整性校验。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   hoyoplay::network_error,

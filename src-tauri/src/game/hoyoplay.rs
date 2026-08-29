@@ -1,5 +1,5 @@
 //! 国服 HoyoPlay 分支元数据的只读客户端。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   model::{PackageSnapshot, RemoteVersionSnapshot, SchemeId},

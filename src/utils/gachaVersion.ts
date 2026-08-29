@@ -1,6 +1,6 @@
 /**
  * 祈愿版本区间与展示筛选工具
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import { compareVersions } from "@utils/toolFunc.js";
@@ -49,7 +49,7 @@ export type GachaVersionLegendItem = {
 
 /**
  * 将卡�?ISO 时间转为祈愿记录时间格式
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param iso - ISO 时间字符�?
  * @returns yyyy-MM-dd HH:mm:ss
  */
@@ -59,7 +59,7 @@ function toGachaTime(iso: string): string {
 
 /**
  * 格式化本地日期为 yyyy-MM-dd
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param date - 日期
  * @returns 日期字符串；非法日期返回空串
  */
@@ -73,7 +73,7 @@ export function formatGachaPeriodDate(date: unknown): string {
 
 /**
  * 解析 yyyy-MM-dd 为本�?Date
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param isoDate - 日期字符�?
  * @returns Date；非法则 undefined
  */
@@ -87,7 +87,7 @@ export function parseGachaIsoDate(isoDate: string): Date | undefined {
 
 /**
  * 按天数偏�?ISO 日期
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param isoDate - yyyy-MM-dd
  * @param days - 偏移天数
  * @returns 偏移后的日期
@@ -100,7 +100,7 @@ export function shiftGachaIsoDate(isoDate: string, days: number): string {
 
 /**
  * 将半开区间�?endDay 转为可读的闭区间结束�?
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param endDay - 半开区间结束�?
  * @returns 展示用结束日或“至今�?
  */
@@ -143,7 +143,7 @@ export function formatGachaVersionPeriodTime(range: GachaVersionRange): string {
 
 /**
  * 构建版本时间区间（按卡池元数据合并）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 版本区间列表（按开始时间升序）
  */
 function buildVersionRanges(): Array<GachaVersionRange> {
@@ -193,7 +193,7 @@ export const GACHA_VERSION_RANGES: Array<GachaVersionRange> = buildVersionRanges
 
 /**
  * 版本下拉选项（按版本号降序；清空表示全部�?
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export const GACHA_VERSION_OPTIONS: Array<{ title: string; value: string }> = [
   ...GACHA_VERSION_RANGES,
@@ -203,7 +203,7 @@ export const GACHA_VERSION_OPTIONS: Array<{ title: string; value: string }> = [
 
 /**
  * 根据抽卡时间解析所属版�?
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param time - 抽卡时间 yyyy-MM-dd HH:mm:ss
  * @returns 版本号；未命中返回空�?
  */
@@ -216,7 +216,7 @@ export function getGachaVersion(time: string): string {
 
 /**
  * 根据 ISO 日期查找版本区间
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param isoDate - yyyy-MM-dd
  * @returns 版本区间
  */
@@ -229,7 +229,7 @@ export function getGachaVersionRangeByIso(isoDate: string): GachaVersionRange | 
 
 /**
  * 将日期选择结果规范为时期区�?
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param dates - 选中日期（范围）；null/空表示全部时�?
  * @returns start/end 均为 yyyy-MM-dd，未选时为空�?
  */
@@ -246,7 +246,7 @@ export function normalizeGachaPeriodDates(dates: Array<Date> | null | undefined)
 
 /**
  * 判断记录是否落在版本/时期展示筛选内
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param item - 祈愿记录
  * @param versionFilter - 版本筛选；null/空表示全部版�?
  * @param period - 时期筛�?
@@ -275,7 +275,7 @@ export function matchGachaDisplayScope(
 
 /**
  * 按版�?时期过滤祈愿记录（仅用于展示�?
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param list - 原始记录
  * @param versionFilter - 版本筛选；null/空表示全部版�?
  * @param period - 时期筛�?
@@ -299,7 +299,7 @@ export function filterGachaDisplayList(
 
 /**
  * 当前日历月可见的版本图例
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param year - �?
  * @param month - 月（0-11�?
  * @returns 图例�?

@@ -1,5 +1,5 @@
 //! 国服游戏安装候选发现：合并 HoYoPlay 登记与 Unity 日志来源。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   installation::inspect_executable,

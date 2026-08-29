@@ -1,6 +1,6 @@
 /**
  * 养成计划材料聚合工具
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import type { CraftableMaterial, CultivationMaterial } from "@utils/userCalc.js";
@@ -8,7 +8,7 @@ import userCalc, { calculateCraftingAllocation } from "@utils/userCalc.js";
 
 /**
  * 养成计划的材料分配结果。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export type PlanMaterialAllocation = {
   /** 按目标 ID 保存的实际材料分配结果 */
@@ -21,7 +21,7 @@ export type PlanMaterialAllocation = {
 
 /**
  * 将单个目标的重复材料需求合并。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function aggregateRequirements(
   items: ReadonlyArray<TGApp.Sqlite.Cultivation.Item>,
@@ -36,7 +36,7 @@ function aggregateRequirements(
 
 /**
  * 根据材料 Wiki 数据构建合成消耗展示项。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function buildCraftingCosts(
   crafting: CraftableMaterial | undefined,
@@ -65,7 +65,7 @@ type EntryMaterialAllocation = {
 
 /**
  * 按单个目标的需求从指定库存中分配材料。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param entry - 养成目标
  * @param inventory - 可用于该目标的背包材料
  * @param materialMap - 材料 Wiki 映射
@@ -133,7 +133,7 @@ function allocateEntryMaterials(
  * 按目标优先级分配计划库存并汇总材料完成情况。
  *
  * 已完成目标仍生成展示用材料列表，但不占用进行中目标的库存，也不计入计划汇总。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param entries - 养成目标列表
  * @param inventory - 计划可用背包材料
  * @param materials - 材料 Wiki 数据
@@ -271,7 +271,7 @@ export function getCalculateInventory(result: TGApp.Game.Calculate.Result): Map<
  *
  * 每种材料只采用最新接口快照；接口在材料充足时最多返回本次需求量，因此仅提高库存下界。接口
  * 确认不足的数据会先回写背包，写入时间会使更早的接口快照失效。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param inventory - 本地背包材料
  * @param bagMaterials - 本地背包材料记录
  * @param entries - 养成目标列表

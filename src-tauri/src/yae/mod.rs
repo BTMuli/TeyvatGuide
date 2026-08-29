@@ -1,5 +1,5 @@
 //! Yae 相关处理
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 #![cfg(target_os = "windows")]
 
 pub mod cmd_parse;

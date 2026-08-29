@@ -1,6 +1,6 @@
 /**
  * 用户角色模块
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import fmtUtil from "@utils/fmtUtil.js";
@@ -15,7 +15,7 @@ const avatarNameCardMap = new Map<number, string>(
 
 /**
  * 将角色详情转换为本地角色数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 用户 UID
  * @param data - 角色详情
  * @param tps - 用户TPS数据
@@ -52,7 +52,7 @@ function transAvatar(
 
 /**
  * 解析数据库角色行
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param data - 数据库原始行
  * @returns 本地角色数据
  */
@@ -76,7 +76,7 @@ function parseAvatar(data: TGApp.Sqlite.Character.TableRaw): TGApp.Sqlite.Charac
 
 /**
  * 获取角色插入语句
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 用户UID
  * @param data - 角色数据
  * @param tps - 用户TPS
@@ -141,7 +141,7 @@ async function getAllUid(): Promise<Array<string>> {
 
 /**
  * 获取用户角色数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 用户 uid
  * @returns 用户角色数据
  */
@@ -154,7 +154,7 @@ async function getAvatars(uid: number): Promise<Array<TGApp.Sqlite.Character.Tab
 
 /**
  * 保存用户角色数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 用户 uid
  * @param data - 角色数据
  * @param tps - 用户TPS数据
@@ -175,7 +175,7 @@ async function saveAvatars(
 
 /**
  * 获取角色名片
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param id - 角色 id
  * @returns 名片
  */
@@ -187,7 +187,7 @@ function getAvatarCard(id: number): string {
 
 /**
  * 删除指定UID的数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 游戏UID
  * @returns 无返回值
  */

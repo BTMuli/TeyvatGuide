@@ -1,6 +1,6 @@
 /**
  * 用户养成计算相关类型定义文件
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.App.UserCalc {
@@ -55,7 +55,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 武器选择项
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WeaponOption = {
     /** 用于区分背包武器和默认武器的唯一键 */
@@ -134,7 +134,7 @@ declare namespace TGApp.App.UserCalc {
 
   /**
    * 天赋等级展示项
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TalentLevelView = {
     /** 当前等级 */

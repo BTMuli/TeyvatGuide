@@ -1,5 +1,5 @@
 //! 将已验证的 manifest-diff 计划流式组装到任务 staging 目录。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   model::PackagePlanStrategy,

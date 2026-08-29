@@ -1,5 +1,5 @@
 //! 资源计划的轻量归属元数据与安全目录识别。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::model::PackagePlanTarget;
 use chrono::DateTime;

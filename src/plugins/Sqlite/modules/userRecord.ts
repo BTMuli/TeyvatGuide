@@ -1,6 +1,6 @@
 /**
  * 用户战绩模块
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import fmtUtil from "@utils/fmtUtil.js";
@@ -13,7 +13,7 @@ type UserRecordSource = "raw" | "legacy" | false;
 
 /**
  * 解析序列化数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param value - 序列化数据
  * @param uid - 用户 UID
  * @param field - 字段名
@@ -30,7 +30,7 @@ function parseJson<T>(value: string, uid: number, field: string): T {
 
 /**
  * 解析原始战绩数据并在读取侧转换
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param data - 原始数据库数据
  * @returns 渲染数据
  */
@@ -46,7 +46,7 @@ function parseRawRecord(data: TGApp.Sqlite.Record.RawTableRow): TGApp.Sqlite.Rec
 
 /**
  * 获取 UID 列表
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns UID 列表
  */
 async function getAllUid(): Promise<Array<number>> {
@@ -67,7 +67,7 @@ async function getAllUid(): Promise<Array<number>> {
 
 /**
  * 获取指定 UID 的战绩存储来源
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 游戏 UID
  * @returns 原始快照、旧架构数据或不存在
  */
@@ -89,7 +89,7 @@ async function getRecordSource(uid: number): Promise<UserRecordSource> {
 
 /**
  * 获取指定 UID 的战绩数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 游戏 UID
  * @returns 战绩数据；旧架构数据不会在读取层转换
  */
@@ -115,7 +115,7 @@ async function getRecord(uid: number): Promise<TGApp.Sqlite.Record.TableTrans | 
 
 /**
  * 保存原始战绩数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 游戏 UID
  * @param data - 接口原始战绩数据
  * @returns 无返回值
@@ -135,7 +135,7 @@ async function saveRawRecord(uid: number, data: TGApp.Game.Record.FullData): Pro
 
 /**
  * 删除指定 UID 的旧架构战绩数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - UID
  * @returns 无返回值
  */
@@ -148,7 +148,7 @@ async function deleteLegacyUid(uid: number): Promise<void> {
 
 /**
  * 旧架构数据清空后删除旧表
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 无返回值
  */
 async function dropLegacyTableIfEmpty(): Promise<void> {
@@ -160,7 +160,7 @@ async function dropLegacyTableIfEmpty(): Promise<void> {
 
 /**
  * 删除战绩数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - UID
  * @returns 无返回值
  */

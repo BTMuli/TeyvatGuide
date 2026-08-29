@@ -1,5 +1,5 @@
 //! 游戏安装路径校验、磁盘信息读取与渠道识别。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   model::{GameInstallation, InstallationStatus},

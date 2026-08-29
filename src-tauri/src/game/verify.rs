@@ -3,7 +3,7 @@
 //! MD5 是 Merkle–Damgård 链式摘要，单文件无法在 GPU 上按块并行。
 //! 因此扫描用多线程占满 CPU，并对顺序读取开启 Windows SEQUENTIAL_SCAN；
 //! 把整文件搬上 GPU 再串行压缩通常更慢，故不走 GPU 路径。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   hoyoplay::GameBranches,

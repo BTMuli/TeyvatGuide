@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -30,7 +30,7 @@ const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-26");
 
 /**
  * 从旧 gameDir 设置迁移当前游戏安装。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param gameDir - 旧版游戏目录
  * @returns 是否已存在或成功迁移安装
  */
@@ -57,7 +57,7 @@ export async function migrateLegacyGameInstallation(gameDir: string): Promise<bo
 
 /**
  * 启动指定游戏安装。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installation - 目标安装
  * @param account - 官服启动账号；B 服可省略
  * @param cookie - 官服启动 Cookie；B 服可省略
@@ -108,7 +108,7 @@ export async function launchInstallation(
 
 /**
  * 启动当前登记（主启动路径）的游戏安装。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param account - 当前米游社游戏账号
  * @param cookie - 当前米游社 Cookie
  */
@@ -133,7 +133,7 @@ export async function tryLaunchGame(
 
 /**
  * 若国服客户端仍在运行，先询问是否退出；取消则中止后续操作。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param purpose - 需要停游戏的原因，写入确认文案
  * @returns 游戏未在运行或已确认退出时为 true
  */
@@ -216,7 +216,7 @@ export async function isRunInAdmin(): Promise<boolean> {
 
 /**
  * 尝试移动dll
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 是否存在 YaeAchievementLib.dll
  */
 export async function tryCopyYae(): Promise<boolean> {
@@ -240,7 +240,7 @@ export async function tryCopyYae(): Promise<boolean> {
 
 /**
  * 尝试调用Yae
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 启动UID
  * @returns void
  */

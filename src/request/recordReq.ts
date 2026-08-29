@@ -1,6 +1,6 @@
 /**
  * TakumiRecordGenshinApi 相关请求
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import gameEnum from "@enum/game.js";
@@ -23,7 +23,7 @@ function splitChunks<T>(items: Array<T>, size: number): Array<Array<T>> {
 
 /**
  * 请求单批角色详情
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param cookie - Cookie
  * @param user - 用户
  * @param avatarIds - 角色 id 列表
@@ -45,7 +45,7 @@ async function requestCharacterDetail(
 
 /**
  * 获取角色详情
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param cookie - Cookie
  * @param user -  用户
  * @param avatarIds - 角色 id 列表
@@ -105,7 +105,7 @@ async function characterList(
 
 /**
  * 获取游戏战绩卡片
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param cookie - Cookie
  * @param uid - 米游社 UID，默认为 Cookie 对应的 UID
  * @returns 游戏战绩卡片响应数据
@@ -125,7 +125,7 @@ async function gameRecordCard(
 
 /**
  * 获取首页信息
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param cookie - Cookie
  * @param user - 用户
  * @param listType - 列表类型。`0` 为战绩展示列表，可写入 UserRecord；`1` 为完整角色列表，仅供内存使用，不得回写数据库
@@ -320,7 +320,7 @@ async function dailyNote(
 
 /**
  * 获取角色TPS信息
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param cookie - 用户 Cookie
  * @param user - 用户
  * @returns 用户TPS信息

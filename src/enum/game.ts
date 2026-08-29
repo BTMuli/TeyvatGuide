@@ -1,6 +1,6 @@
 /**
  * 游戏相关枚举
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 /**
@@ -19,7 +19,7 @@ const GameServerEnum: typeof TGApp.Game.Base.ServerType = {
 
 /**
  * 游戏安装方案枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Installation.SchemeEnum
  */
 const GameInstallationSchemeEnum: typeof TGApp.Game.Installation.Scheme = {
@@ -29,7 +29,7 @@ const GameInstallationSchemeEnum: typeof TGApp.Game.Installation.Scheme = {
 
 /**
  * 游戏安装检测状态枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Installation.StatusEnum
  */
 const GameInstallationStatusEnum: typeof TGApp.Game.Installation.Status = {
@@ -40,7 +40,7 @@ const GameInstallationStatusEnum: typeof TGApp.Game.Installation.Status = {
 
 /**
  * 游戏安装目录识别结果枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Installation.LocationKindEnum
  */
 const GameInstallationLocationKindEnum: typeof TGApp.Game.Installation.LocationKind = {
@@ -51,7 +51,7 @@ const GameInstallationLocationKindEnum: typeof TGApp.Game.Installation.LocationK
 
 /**
  * 游戏安装自动发现来源枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Installation.DiscoverySourceEnum
  */
 const GameInstallationDiscoverySourceEnum: typeof TGApp.Game.Installation.DiscoverySource = {
@@ -61,7 +61,7 @@ const GameInstallationDiscoverySourceEnum: typeof TGApp.Game.Installation.Discov
 
 /**
  * 游戏本体安装草稿状态枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Installation.InstallDraftStateEnum
  */
 const GameInstallationInstallDraftStateEnum: typeof TGApp.Game.Installation.InstallDraftState = {
@@ -82,7 +82,7 @@ const GameInstallationInstallDraftStateEnum: typeof TGApp.Game.Installation.Inst
 
 /**
  * 游戏资源计划目标枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Package.PlanTargetEnum
  */
 const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
@@ -95,7 +95,7 @@ const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
 
 /**
  * 游戏资源完整性校验状态枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Package.VerifyStateEnum
  */
 const GamePackageVerifyStateEnum: typeof TGApp.Game.Package.VerifyState = {
@@ -107,7 +107,7 @@ const GamePackageVerifyStateEnum: typeof TGApp.Game.Package.VerifyState = {
 
 /**
  * 获取完整性校验状态描述。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 校验状态
  * @returns 状态描述
  */
@@ -126,7 +126,7 @@ function getGamePackageVerifyStateDesc(state: TGApp.Game.Package.VerifyStateEnum
 
 /**
  * 判断完整性校验是否仍在扫描。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 校验状态
  * @returns 是否占用扫描任务
  */
@@ -136,7 +136,7 @@ function isGamePackageVerifyActive(state: TGApp.Game.Package.VerifyStateEnum): b
 
 /**
  * 游戏资源计划策略枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Package.PlanStrategyEnum
  */
 const GamePackagePlanStrategyEnum: typeof TGApp.Game.Package.PlanStrategy = {
@@ -147,7 +147,7 @@ const GamePackagePlanStrategyEnum: typeof TGApp.Game.Package.PlanStrategy = {
 
 /**
  * 游戏资源任务状态枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Package.TaskStateEnum
  */
 const GamePackageTaskStateEnum: typeof TGApp.Game.Package.TaskState = {
@@ -185,7 +185,7 @@ const GamePackageTaskRecordKindEnum: typeof TGApp.Game.Package.TaskRecordKind = 
 
 /**
  * 游戏资源任务恢复动作枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Package.RecoveryActionEnum
  */
 const GamePackageRecoveryActionEnum: typeof TGApp.Game.Package.RecoveryAction = {
@@ -196,7 +196,7 @@ const GamePackageRecoveryActionEnum: typeof TGApp.Game.Package.RecoveryAction = 
 
 /**
  * 获取游戏资源任务状态描述。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 资源任务状态
  * @returns 状态描述
  */
@@ -245,7 +245,7 @@ function getGamePackageTaskStateDesc(state: TGApp.Game.Package.TaskStateEnum): s
 
 /**
  * 判断资源任务是否仍在运行。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 资源任务状态
  * @returns 是否占用安装级运行互斥
  */
@@ -259,7 +259,7 @@ function isGamePackageTaskActive(state: TGApp.Game.Package.TaskStateEnum): boole
 
 /**
  * 判断资源任务是否已进入组装或提交阶段。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 资源任务状态
  * @returns 是否正在改写游戏目录或准备提交
  */
@@ -279,7 +279,7 @@ function isGamePackageTaskApplying(state: TGApp.Game.Package.TaskStateEnum): boo
 
 /**
  * 判断中断任务是否应展示恢复入口。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 资源任务状态
  * @returns 是否可安全恢复或回滚
  */
@@ -294,7 +294,7 @@ function isGamePackageTaskRecoverable(state: TGApp.Game.Package.TaskStateEnum): 
 
 /**
  * 判断任务是否已完成或明确放弃，不再占用同安装可恢复名额。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 资源任务状态
  * @returns 是否为完成或放弃终态
  */
@@ -306,7 +306,7 @@ function isGamePackageTaskTerminalDisposition(state: TGApp.Game.Package.TaskStat
 
 /**
  * 判断任务是否仍占用同安装唯一可恢复名额。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param state - 资源任务状态
  * @returns 是否阻止另一条资源计划
  */
@@ -316,7 +316,7 @@ function isGamePackageTaskOccupying(state: TGApp.Game.Package.TaskStateEnum): bo
 
 /**
  * 获取游戏资源计划策略描述。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param strategy - 计划差异策略
  * @returns 策略描述
  */
@@ -333,7 +333,7 @@ function getGamePackagePlanStrategyDesc(strategy: TGApp.Game.Package.PlanStrateg
 
 /**
  * 获取游戏安装方案描述。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param scheme - 游戏安装方案
  * @returns 方案描述
  */
@@ -350,7 +350,7 @@ function getGameInstallationSchemeDesc(scheme: TGApp.Game.Installation.SchemeEnu
 
 /**
  * 获取游戏安装自动发现来源描述。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param source - 自动发现来源
  * @returns 来源描述
  */
@@ -619,7 +619,7 @@ function getChallengeDiffDesc(difficulty: TGApp.Game.Challenge.DiffEnum): string
 
 /**
  * 战绩角色元素枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Record.AvatarElementEnum
  */
 const RecordAvatarElementEnum: typeof TGApp.Game.Record.AvatarElement = {
@@ -634,7 +634,7 @@ const RecordAvatarElementEnum: typeof TGApp.Game.Record.AvatarElement = {
 
 /**
  * 战绩世界探索类型枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Record.WorldExploreTypeEnum
  */
 const RecordWorldExploreTypeEnum: typeof TGApp.Game.Record.WorldExploreType = {
@@ -645,7 +645,7 @@ const RecordWorldExploreTypeEnum: typeof TGApp.Game.Record.WorldExploreType = {
 
 /**
  * 战绩世界奉献物品开启状态枚举。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @see TGApp.Game.Record.WorldOfferingOpenStateEnum
  */
 const RecordWorldOfferingOpenStateEnum: typeof TGApp.Game.Record.WorldOfferingOpenState = {

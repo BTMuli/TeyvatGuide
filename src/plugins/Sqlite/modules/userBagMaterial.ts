@@ -1,6 +1,6 @@
 /**
  * 用户背包材料模块
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 import fmtUtil from "@utils/fmtUtil.js";
 
@@ -321,7 +321,7 @@ async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> 
  *
  * 仅 `lack_num > 0` 时，`num - lack_num` 才能真实反映当前背包数量；材料充足时接口数量只是
  * 本次需求上限，不能用于覆盖背包。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 存档 UID
  * @param result - 接口养成计算结果
  * @returns 发生变更的材料数量

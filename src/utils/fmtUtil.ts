@@ -1,6 +1,6 @@
 /**
  * 展示格式化工具。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import { tz } from "@date-fns/tz";
@@ -8,7 +8,7 @@ import { differenceInDays, format, parse, parseISO, startOfDay } from "date-fns"
 
 /**
  * 按四位一组格式化数字。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param value - 待格式化的数字
  * @returns 使用半角逗号按四位分组的数字字符串
  */
@@ -22,7 +22,7 @@ function formatNumber(value: number): string {
 
 /**
  * 时间戳转换为时间字符串
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param time - 时间戳（毫秒）
  * @returns 时间字符串 d天 hh:mm:ss
  */
@@ -38,7 +38,7 @@ function formatRemainingTime(time: number): string {
 
 /**
  * 剩余秒数转换为时刻字符串
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param remainedSeconds - 剩余秒数
  * @returns 时刻字符串 次日xx:xx:xx / x天后xx:xx:xx
  */
@@ -57,7 +57,7 @@ function formatFullTime(remainedSeconds: number): string {
 
 /**
  * 时间戳转换为日期
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param timestamp - 时间戳（毫秒）
  * @returns 日期 2021-01-01 00:00:00
  */
@@ -74,7 +74,7 @@ function formatDateTime(timestamp: number): string {
 
 /**
  * 获取相近时间
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @remarks
  * - 如果是今天，只显示 hh:mm
  * - 如果是今年，显示 MM-dd
@@ -104,7 +104,7 @@ function formatNearTime(timestamp: number): string {
 
 /**
  * byte 转成 KB MB GB
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param bytes - 字节数
  * @returns KB MB GB
  */
@@ -118,7 +118,7 @@ function formatByteSize(bytes: number): string {
 
 /**
  * 获取视频时长
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param durationMill - 视频时长（毫秒）
  * @returns 视频时长
  */
@@ -136,7 +136,7 @@ function formatVideoDuration(durationMill: number): string {
 
 /**
  * 将时间字符串转换为上海时区的日期时间字符串
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param str - 时间字符串
  * @example 2025-09-18T01:01:39+00:00
  * @returns 上海时区的日期时间字符串
@@ -149,7 +149,7 @@ function formatShanghaiTime(str: string): string {
 
 /**
  * 将本地时间字符串转换为 ISO8601 时间字符串
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param str - 时间字符串
  * @example "2025-09-18 09:01:39" → "2025-09-18T09:01:39+08:00"
  * @returns ISO8601 时间字符串
@@ -161,7 +161,7 @@ function convertLocalTimeToIsoString(str: string): string {
 
 /**
  * 将指定时区的时间字符串转换为 UTC+8 时间字符串
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param time - 时间字符串
  * @param timezone - 时区
  * @returns UTC+8 时间字符串
@@ -175,7 +175,7 @@ function convertTimeToUtc8(time: string, timezone: number): string {
 
 /**
  * 展示格式化方法集合。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 const fmtUtil = {
   num: formatNumber,

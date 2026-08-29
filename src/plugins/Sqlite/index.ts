@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -87,7 +87,7 @@ class Sqlite {
 
   /**
    * 获取数据库实例
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @returns 数据库实例
    */
   public async getDB(): Promise<Database> {
@@ -98,7 +98,7 @@ class Sqlite {
 
   /**
    * 检测数据库表是否存在
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @param tableName - 表名
    * @returns 表是否存在
    */
@@ -118,7 +118,7 @@ class Sqlite {
 
   /**
    * 在任意数据库消费者运行前校验并迁移核心表结构。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @returns 无返回值
    */
   private async ensureCoreSchema(): Promise<void> {
@@ -274,7 +274,7 @@ class Sqlite {
 
   /**
    * 在同一数据库连接中执行事务语句
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @param statements - 按顺序执行的 SQL 语句
    * @returns 无返回值
    */
@@ -294,7 +294,7 @@ class Sqlite {
 
   /**
    * 检测是否需要创建数据库
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @returns 是否需要创建数据库
    */
   public async check(): Promise<boolean> {
@@ -505,7 +505,7 @@ class Sqlite {
 
   /**
    * 重置数据库
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @returns 无返回值
    */
   public async reset(): Promise<void> {

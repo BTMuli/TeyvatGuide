@@ -1,6 +1,6 @@
 /**
  * 角色相关类型定义文件
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Sqlite.Character {
@@ -70,7 +70,7 @@ declare namespace TGApp.Sqlite.Character {
 
   /**
    * 用户角色列表的角色类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @remarks 解析自 {@link TableRaw} 数据
    */
   type TableTrans = {
@@ -104,7 +104,7 @@ declare namespace TGApp.Sqlite.Character {
 
   /**
    * 转换后的角色数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TableAvatar = TGApp.Game.Avatar.Avatar & {
     tps?: TGApp.Game.Avatar.TpsRes | null;
@@ -112,7 +112,7 @@ declare namespace TGApp.Sqlite.Character {
 
   /**
    * 转换后的武器数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TableWeapon = TGApp.Game.Avatar.WeaponDetail & {
     /** 武器幻化 */

@@ -148,7 +148,7 @@ declare namespace TGApp.Sqlite.UserBag {
 
   /**
    * 用户背包角色表-存储数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type AvatarRaw = {
     /** 存档/用户UID */
@@ -165,7 +165,7 @@ declare namespace TGApp.Sqlite.UserBag {
 
   /**
    * 用户背包角色表-解析数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type AvatarTable = {
     /** 存档/用户UID */

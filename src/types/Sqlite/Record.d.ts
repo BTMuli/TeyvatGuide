@@ -1,12 +1,12 @@
 /**
  * 原神战绩类型定义文件
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Sqlite.Record {
   /**
    * 原始战绩数据库行
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @remarks UserRecordRaw 表
    */
   type RawTableRow = {
@@ -20,7 +20,7 @@ declare namespace TGApp.Sqlite.Record {
 
   /**
    * 战绩渲染数据（不包含数据库元数据）
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TableTransData = {
     /** 用户信息 */
@@ -37,7 +37,7 @@ declare namespace TGApp.Sqlite.Record {
 
   /**
    * 战绩数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @remarks 由 UserRecordRaw 原始数据解析得到
    */
   type TableTrans = TableTransData & {

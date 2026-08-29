@@ -1,6 +1,6 @@
 /**
  * 处理链接
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -12,7 +12,7 @@ import { createPost } from "./TGWindow.js";
 
 /**
  * 从 uniwebview://open_url 或 uniwebview://load_url 取出目标链接
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param url - uniwebview 链接
  * @returns 目标链接
  */
@@ -27,7 +27,7 @@ function getUniwebviewTargetUrl(url: URL): string | undefined {
 
 /**
  * 处理帖子链接
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param link - 链接
  * @returns 处理情况，或者转换后的链接
  */
@@ -70,7 +70,7 @@ export async function parsePost(link: string): Promise<false | string> {
 
 /**
  * 处理链接
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param link - 链接
  * @param useInner - 是否采用内置 JSBridge 打开
  * @returns 处理情况，或者转换后的链接

@@ -82,7 +82,7 @@ declare namespace TGApp.App.Calendar {
 
   /**
    * 掉落日标签
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type DropDayLabel = {
     /** 是否为今天 */

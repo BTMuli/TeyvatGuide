@@ -1,6 +1,6 @@
 /**
  * 用户背包角色模块
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import fmtUtil from "@utils/fmtUtil.js";
@@ -9,7 +9,7 @@ import TGSqlite from "../index.js";
 
 /**
  * 保存Yae获取的角色数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 存档UID
  * @param list - 角色数据列表
  * @returns 无返回值
@@ -36,7 +36,7 @@ async function saveYaeData(uid: number, list: Array<TGApp.Plugins.Yae.AvatarInfo
 
 /**
  * 获取指定UID的角色数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 存档UID
  * @returns 角色数据列表
  */
@@ -57,7 +57,7 @@ async function getByUid(uid: number): Promise<Array<TGApp.Sqlite.UserBag.AvatarT
 
 /**
  * 获取所有有角色数据的UID列表
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns UID列表
  */
 async function getAllUid(): Promise<Array<number>> {
@@ -68,7 +68,7 @@ async function getAllUid(): Promise<Array<number>> {
 
 /**
  * 获取装备GUID到角色ID的映射
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 存档UID
  * @returns 装备GUID到角色ID映射
  */
@@ -90,7 +90,7 @@ async function getEquipMap(uid: number): Promise<Map<string, number>> {
 
 /**
  * 删除指定UID的所有角色数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param uid - 存档UID
  * @returns 无返回值
  */

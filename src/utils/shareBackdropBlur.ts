@@ -1,6 +1,6 @@
 /**
  * 分享图毛玻璃烘焙：Worker 与主线程共用的绘制与消息类型
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 export type ShareBackdropCorner = { tl: number; tr: number; br: number; bl: number };
@@ -47,7 +47,7 @@ type BackdropDrawContext = OffscreenCanvasRenderingContext2D | CanvasRenderingCo
 
 /**
  * 在目标画布上绘制圆角毛玻璃
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param ctx - 2D 上下文，画布尺寸应为 sw × sh
  * @param bitmap - 裁切后的快照
  * @param job - 绘制参数

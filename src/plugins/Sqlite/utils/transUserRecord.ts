@@ -1,11 +1,11 @@
 /**
  * 原神战绩数据转换
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 /**
  * 地区特殊资源配置项
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 type StaticArea = {
   /** 地区名称 */
@@ -18,7 +18,7 @@ type StaticArea = {
 
 /**
  * 地区特殊资源配置列表
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 const STATIC_AREA: Readonly<Record<number, StaticArea>> = {
   15: {
@@ -57,7 +57,7 @@ const EMPTY_TEMPLE_STATUE_ICON = "/UI/record/pos.webp";
 
 /**
  * 不参与世界探索展示合并的区域
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 const UNMERGED_WORLD_AREA_NAMES = new Set<string>([
   "层岩巨渊",
@@ -70,7 +70,7 @@ const UNMERGED_WORLD_AREA_NAMES = new Set<string>([
 
 /**
  * 转换战绩口数据
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param data - 用户战绩数据
  * @returns 转换后的用户战绩数据
  */
@@ -89,7 +89,7 @@ export function transUserRecord(
 
 /**
  * 准备探索展示资源
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param worlds - 世界探索信息
  * @param displayConfig - 世界探索展示分组配置
  * @returns 合并展示分组、仅覆盖展示资源后的世界探索信息
@@ -129,7 +129,7 @@ function transWorld(
 
 /**
  * 处理世界探索供奉图标
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param world - 世界探索信息
  * @returns 处理后的供奉信息
  */
@@ -144,7 +144,7 @@ function transWorldOfferings(
 
 /**
  * 获取地区的全部子区域
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param worldId - 地区 ID
  * @param worldMap - 世界探索索引
  * @param display - 当前父级的展示分组配置
@@ -183,7 +183,7 @@ function getWorldDetailWorlds(
 
 /**
  * 合并世界探索展示子项
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param detailWorlds - 地区的全部子区域
  * @param worldMap - 世界探索索引
  * @param display - 当前父级的展示分组配置

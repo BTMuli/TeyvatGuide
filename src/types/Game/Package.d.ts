@@ -1,6 +1,6 @@
 /**
  * 游戏资源快照与不可变计划类型。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Game.Package {

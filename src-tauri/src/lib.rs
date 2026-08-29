@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 mod client;
 mod commands;

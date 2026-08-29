@@ -275,7 +275,7 @@ const launchTitle = computed<string>(() => {
 
 /**
  * 判断安装是否正在校验，换服前不能改写渠道。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 安装 ID
  * @returns 校验进行中时为 true
  */
@@ -290,7 +290,7 @@ function isInstallationVerifyBusy(installationId: string): boolean {
 
 /**
  * 判断是否已有未结束的非换服任务挡住渠道转换。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 安装 ID
  * @returns 存在阻挡任务时为 true
  */
@@ -307,7 +307,7 @@ function hasBlockingNonSwitchTask(installationId: string): boolean {
 
 /**
  * B 服账号启动官服安装时，确认后转为 B 服。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installation - 当前主启动安装
  */
 async function handleLaunchSchemeSwitch(installation: TGApp.Game.Installation.Item): Promise<void> {

@@ -1,5 +1,5 @@
 //! 游戏资源差异、空间估算与不可变计划持久化。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::hoyoplay::get_channel_sdk;
 use super::{

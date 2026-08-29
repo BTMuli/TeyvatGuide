@@ -1,5 +1,5 @@
 //! 游戏安装检测、列表读取与可信启动命令。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   cache, defender,

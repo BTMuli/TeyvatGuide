@@ -1,5 +1,5 @@
 -- sqlite数据库创建表语句
--- @since Beta v0.11.5
+-- @since Beta v0.12.0
 
 -- @brief 创建养成计划表
 create table if not exists CultivationProject

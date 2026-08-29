@@ -1,6 +1,6 @@
 /**
  * 原神战绩相关类型定义文件
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Game.Record {
@@ -13,13 +13,13 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 游戏战绩卡片响应
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type CardResp = TGApp.BBS.Response.BaseWithData<CardData>;
 
   /**
    * 游戏战绩卡片返回数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type CardData = {
     /** 游戏战绩卡片列表 */
@@ -28,7 +28,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 游戏战绩卡片
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type Card = {
     /** 是否已绑定该游戏账号 */
@@ -69,7 +69,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 游戏战绩卡片摘要数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type CardDataItem = {
     /** 数据名称 */
@@ -82,7 +82,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 游戏战绩卡片数据开关
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type CardDataSwitch = {
     /** 开关 ID */
@@ -95,7 +95,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 原神战绩返回数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type FullData = {
     /** 角色信息 */
@@ -139,7 +139,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 角色元素枚举
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   const AvatarElement = <const>{
     /** 风元素 */
@@ -160,13 +160,13 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 角色元素枚举类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type AvatarElementEnum = (typeof AvatarElement)[keyof typeof AvatarElement];
 
   /**
    * 角色列表类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type Avatar = {
     /** 角色 ID */
@@ -197,7 +197,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 统计信息类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type Stats = {
     /** 成就数量 */
@@ -250,13 +250,13 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 战绩字段扩展链接映射类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type FieldExtMap = Record<string, FieldExtMapItem>;
 
   /**
    * 战绩字段扩展链接类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type FieldExtMapItem = {
     /** 主链接 */
@@ -267,7 +267,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索信息类型枚举
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   const WorldExploreType = <const>{
     /** 声望 */
@@ -280,7 +280,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索信息类型枚举类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldExploreTypeEnum = (typeof WorldExploreType)[keyof typeof WorldExploreType];
 
@@ -320,7 +320,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索信息类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldExplore = {
     /** 声望等级 */
@@ -384,7 +384,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索展示结果类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    * @remarks 在读取层合并 `world_explorations` 与展示分组数据
    */
   type WorldExploreDisplay = WorldExplore & {
@@ -396,7 +396,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索展示子项类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldExploreDisplayItem = {
     /** 对应的区域 ID 列表 */
@@ -409,7 +409,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索展示分组原始配置类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldExploreDisplayConfig = {
     /** 探索区域 ID */
@@ -420,7 +420,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索展示分组类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldExploreDisplayGroup = {
     /** 区域探索项 */
@@ -429,7 +429,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界探索展示配置项类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldExploreDisplayConfigItem = {
     /** 区域 ID 列表 */
@@ -440,7 +440,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 奉献物品类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldOffering = {
     /** 名称 */
@@ -455,7 +455,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界奉献物品开启状态枚举
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   const WorldOfferingOpenState = <const>{
     /** 未知状态 */
@@ -468,7 +468,7 @@ declare namespace TGApp.Game.Record {
 
   /**
    * 世界奉献物品开启状态枚举类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WorldOfferingOpenStateEnum =
     (typeof WorldOfferingOpenState)[keyof typeof WorldOfferingOpenState];

@@ -1,6 +1,6 @@
 /**
  * 用户养成计划数据库模块
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import type Database from "@tauri-apps/plugin-sql";
@@ -476,7 +476,7 @@ async function saveEntries(
 
 /**
  * 批量更新养成目标的计算方式与合成配置
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param projectId - 计划 ID
  * @param entryIds - 目标 ID
  * @param config - 计算方式与合成配置

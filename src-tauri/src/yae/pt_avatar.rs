@@ -1,5 +1,5 @@
 //! Yae 角色信息的 Protobuf 定义&解析
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 #![cfg(target_os = "windows")]
 
 use prost::Message;

@@ -1,6 +1,6 @@
 /**
  * 分享图毛玻璃烘焙 Worker：OffscreenCanvas 批量 blur，回传 ImageBitmap
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import { paintShareBackdropBlur } from "./shareBackdropBlur.js";

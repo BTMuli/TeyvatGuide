@@ -1,6 +1,6 @@
 /**
  * 游戏角色详情相关类型定义文件
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Game.Avatar {
@@ -27,7 +27,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * 玩家TPS数据返回响应
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TpsResp = TGApp.BBS.Response.BaseWithData<TpsRes>;
 
@@ -104,7 +104,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * 角色详情列表数据类型
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type AvatarDetail = {
     /** 角色基础信息 */
@@ -168,7 +168,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * 角色详情武器幻化数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type WeaponSkin = {
     /** 图标 */
@@ -375,7 +375,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * TPS返回数据
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TpsRes = {
     /** 属性列表 */
@@ -388,7 +388,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * TPS属性
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TpsProp = {
     /** 属性类型 */
@@ -403,7 +403,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * TPS武器
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TpsWeapon = {
     /**
@@ -432,7 +432,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * TPS武器配件信息
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TpsWeaponAccess = {
     /** 解锁数量 */
@@ -443,7 +443,7 @@ declare namespace TGApp.Game.Avatar {
 
   /**
    * TPS武器属性信息
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type TpsWeaponProp = {
     /** 属性类型 */

@@ -1,5 +1,5 @@
 //! 远端资源相对路径的规范化与 Windows 逃逸防护。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use std::{
   fs,

@@ -1,6 +1,6 @@
 /**
  * 页面渲染容器背景。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import hoyoPlayReq from "@req/hoyoPlayReq.js";
@@ -21,7 +21,7 @@ let rotating = false;
 
 /**
  * 读取当前交给渲染容器的页面背景。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 页面背景地址、轮换列表与当前下标
  */
 export function usePageCover(): {
@@ -34,7 +34,7 @@ export function usePageCover(): {
 
 /**
  * 判断地址是否可作为页面背景。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param url - 资源地址
  * @returns 是否为 https 地址
  */
@@ -48,7 +48,7 @@ function isSafeCoverUrl(url: string): boolean {
 
 /**
  * 预加载背景图，避免轮换时闪空。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param url - 背景地址
  * @returns 预加载完成
  */
@@ -63,7 +63,7 @@ async function preloadCover(url: string): Promise<void> {
 
 /**
  * 从背景条目中取出可用于页面背景的静态图。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param backgrounds - 启动器背景列表
  * @returns 去重后的 https 背景地址
  */
@@ -79,7 +79,7 @@ function collectCoverUrls(backgrounds: Array<TGApp.Game.HoYoPlay.Background>): A
 
 /**
  * 是否应跳过自动轮换。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 系统要求减少动效时为 true
  */
 function prefersReducedMotion(): boolean {
@@ -88,7 +88,7 @@ function prefersReducedMotion(): boolean {
 
 /**
  * 判断请求是否仍是当前轮次。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param requestId - 请求代次
  * @returns 是否仍有效
  */
@@ -98,7 +98,7 @@ function isCurrentRequest(requestId: number): boolean {
 
 /**
  * 停止自动轮换。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function stopRotation(): void {
   if (rotateTimer === null) return;
@@ -108,7 +108,7 @@ function stopRotation(): void {
 
 /**
  * 清空渲染容器背景。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function clearPageCover(): void {
   stopRotation();
@@ -119,7 +119,7 @@ function clearPageCover(): void {
 
 /**
  * 展示指定下标的背景。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param index - 背景下标
  * @param requestId - 请求代次
  */
@@ -139,7 +139,7 @@ async function showCover(index: number, requestId: number): Promise<void> {
 
 /**
  * 启动自动轮换。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param requestId - 请求代次
  */
 function startRotation(requestId: number): void {
@@ -154,7 +154,7 @@ function startRotation(requestId: number): void {
 
 /**
  * 手动切换到指定轮换背景，并重新计时。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param index - 背景下标
  */
 export function selectPageCover(index: number): void {
@@ -170,7 +170,7 @@ export function selectPageCover(index: number): void {
 
 /**
  * 拉取国服官服 HoYoPlay 轮换背景并交给应用渲染容器。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export function useHoYoPlayPageCover(): void {
   const appStore = useAppStore();

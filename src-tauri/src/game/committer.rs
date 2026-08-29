@@ -1,5 +1,5 @@
 //! 将已验证 staging 资源以可恢复事务提交到游戏目录。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   assembler::{

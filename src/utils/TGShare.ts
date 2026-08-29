@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -123,7 +123,7 @@ function getShareImgBgColor(): string {
  *
  * modern-screenshot 会用 backgroundColor 覆盖克隆根节点自身的 background-color；
  * 根节点已有底色时应保留，仅在透明时使用页面底色兜底。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param element - 截图根节点
  * @returns 截图根节点背景色
  */
@@ -141,7 +141,7 @@ function getShareRootBgColor(element: HTMLElement): string {
 
 /**
  * 过滤分享图中需忽略的节点（兼容 data-html2canvas-ignore）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param node - DOM 节点
  * @returns 是否纳入截图
  */
@@ -180,7 +180,7 @@ let shareSvgFontsWarmed = false;
 
 /**
  * Blob 转 data URL
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param blob - Blob
  * @returns data URL
  */
@@ -203,7 +203,7 @@ async function blobToDataUrl(blob: Blob): Promise<string> {
 
 /**
  * 等待指定毫秒
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param ms - 毫秒
  * @returns 无返回值
  */
@@ -215,7 +215,7 @@ function waitShareMs(ms: number): Promise<void> {
 
 /**
  * 构建 \@font-face CSS，并用 FontFace 解码进 document.fonts
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param specs - 字体列表
  * @param logTag - 日志标签
  * @returns \@font-face CSS；全部失败时为 undefined
@@ -276,7 +276,7 @@ async function embedShareFontSpecs(
 
 /**
  * 拉取并缓存分享用字体（正文字体 + MDI），转为 data URL \@font-face
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns \@font-face CSS；全部失败时为 undefined
  */
 async function ensureShareFontEmbed(): Promise<string | undefined> {
@@ -293,7 +293,7 @@ async function ensureShareFontEmbed(): Promise<string | undefined> {
 
 /**
  * 加载图片并尝试 decode
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param url - 图片 URL
  * @returns 图片元素
  */
@@ -315,7 +315,7 @@ async function loadShareWarmupImage(url: string): Promise<HTMLImageElement> {
 
 /**
  * 判断图片是否画出浅色像素（预热 SVG 白字是否已出现）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param img - 图片
  * @returns 是否已有文字墨迹
  */
@@ -343,7 +343,7 @@ function shareWarmupImageHasInk(img: HTMLImageElement): boolean {
  * 预热 SVG foreignObject 内的 \@font-face。
  * Chromium 把 SVG 当 Image 绘制时，onload 早于字体解码；font-display:block
  * 会让首次截图文字空白，第二次才命中字体缓存。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param css - \@font-face CSS
  * @returns 无返回值
  */
@@ -383,7 +383,7 @@ async function warmupShareSvgFonts(css: string): Promise<void> {
 
 /**
  * 临时让图标节点自身声明 MDI 字体族（foreignObject 路线才能收集到该字体）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根节点
  * @returns 还原函数
  */
@@ -403,7 +403,7 @@ function patchShareIconFonts(root: HTMLElement): () => void {
 
 /**
  * 解析伪元素 content 为实际字形字符串
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param content - getComputedStyle(...).content
  * @returns 字形；无法解析时为空串
  */
@@ -425,7 +425,7 @@ function parsePseudoContentGlyph(content: string): string {
 
 /**
  * 将单字形（含代理对）栅格化为 data URL
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param glyph - 图标字形
  * @param family - 字体族
  * @param fontSize - 字号 px
@@ -497,7 +497,7 @@ async function rasterizeIconGlyph(
  * 且仅在 content 的 JS string.length === 1 时栅格化；MDI 码点在 BMP 外（代理对 length===2）
  * 会被落成空伪元素，导致图标空白。
  *
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根节点
  * @returns 还原函数
  */
@@ -583,7 +583,7 @@ async function bakeShareMdiIcons(root: HTMLElement): Promise<() => void> {
 
 /**
  * 将分享字体 CSS 注入到截图 SVG / clone 根节点
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param css - \@font-face CSS
  * @returns modern-screenshot 回调
  */
@@ -619,7 +619,7 @@ function createShareFontInjectors(css: string | undefined): {
 
 /**
  * 将 clone 中重复的图集 URL 提升为根节点 CSS 变量
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - modern-screenshot 的 clone 根节点
  * @returns 无返回值
  */
@@ -647,7 +647,7 @@ function hoistShareBackdropAtlasStyles(root: HTMLElement): void {
 
 /**
  * 将图集 CSS 变量里的 blob URL 只嵌入一次，并清理 clone 标记
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param svg - modern-screenshot 创建的 foreignObject SVG
  * @returns 无返回值
  */
@@ -688,7 +688,7 @@ async function embedShareBackdropAtlasStyles(svg: SVGSVGElement): Promise<void> 
 
 /**
  * 解析 backdrop-filter 中的 blur 像素值
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param value - computed backdrop-filter
  * @returns blur 像素；无法解析时为 0
  */
@@ -700,7 +700,7 @@ function parseBackdropBlurPx(value: string): number {
 
 /**
  * 解析 border-radius 为画布像素半径
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param value - computed border-radius
  * @param width - 元素宽
  * @param height - 元素高
@@ -746,7 +746,7 @@ function parseBorderRadiusPx(
 
 /**
  * Blob 转 HTMLImageElement
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param blob - 图片 Blob
  * @returns 图片元素与可释放 URL
  */
@@ -771,7 +771,7 @@ type SharePseudoKind = "::before" | "::after";
 
 /**
  * 伪元素是否生成了可布局盒子
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param style - getComputedStyle(..., "::before"| "::after")
  * @returns 是否存在盒子
  */
@@ -783,7 +783,7 @@ function hasGeneratedPseudoBox(style: CSSStyleDeclaration): boolean {
 
 /**
  * 读取节点上 backdrop-filter 的 blur 像素
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param style - computed style
  * @returns blur 像素；无毛玻璃时为 0
  */
@@ -796,7 +796,7 @@ function readBackdropBlurPx(style: CSSStyleDeclaration): number {
 
 /**
  * 解析 CSS 长度（px / %）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param value - 声明值
  * @param base - 百分比基准
  * @returns 像素；auto / 无法解析时为 undefined
@@ -816,7 +816,7 @@ function parseCssLengthPx(value: string, base: number): number | undefined {
 
 /**
  * 估算伪元素相对视口的盒子（absolute / fixed 按 containing block）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param host - 宿主元素
  * @param pseudoStyle - 伪元素 computed style
  * @returns 视口坐标盒子；无效时为 undefined
@@ -878,7 +878,7 @@ function resolvePseudoBoxRect(
 
 /**
  * 收集叠在伪元素之上、快照时应隐藏的宿主子节点
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param host - 伪元素宿主
  * @param pseudoStyle - 伪元素 computed style
  * @returns 需临时隐藏的子元素
@@ -925,7 +925,7 @@ const SHARE_BACKDROP_ATLAS_GAP = 1;
 
 /**
  * 分享截图进度
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export type ShareProgress = {
   /** snapshot 背景快照 / bake 毛玻璃 / capture 最终截图 */
@@ -948,7 +948,7 @@ function reportShareProgress(
 
 /**
  * 将毛玻璃盒子换算为快照像素上的绘制参数
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param snapshot - 根节点快照
  * @param rootRect - 根节点视口矩形
  * @param box - 毛玻璃视口矩形
@@ -990,7 +990,7 @@ function resolveBakedBackdropDraw(
 
 /**
  * 将毛玻璃区域绘制为圆角 PNG data URL
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param snapshot - 隐藏毛玻璃后的根节点快照
  * @param rootRect - 根节点视口矩形
  * @param box - 毛玻璃视口矩形
@@ -1087,7 +1087,7 @@ function drawMirroredBackdropTiles(
 
 /**
  * 当前环境是否可用 OffscreenCanvas Worker 做 blur
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 是否走 Worker
  */
 function canUseShareBackdropWorkers(): boolean {
@@ -1100,7 +1100,7 @@ function canUseShareBackdropWorkers(): boolean {
 
 /**
  * 从快照裁出毛玻璃盒子的中心图块
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param snapshot - 根节点快照
  * @param draw - 快照像素绘制参数
  * @returns 裁切结果；区域无效时为空
@@ -1159,7 +1159,7 @@ type ShareBackdropAtlasPage = {
 
 /**
  * 用 Worker 池并行烘焙毛玻璃区域，失败则回退主线程
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param snapshot - 根节点快照
  * @param rootRect - 根节点视口矩形
  * @param jobs - 烘焙任务
@@ -1202,7 +1202,7 @@ async function renderBakedBackdropUrls(
 
 /**
  * 将一批烘焙任务交给 Worker 并等待 ImageBitmap
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param worker - blur Worker
  * @param items - 批量请求
  * @returns 批量结果
@@ -1232,7 +1232,7 @@ function postShareBackdropBlurBatch(
 
 /**
  * 把 Worker 回传的小图分装成边长受控的图集
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param tiles - 已绘制的毛玻璃小图
  * @returns 图集页面及各区域坐标
  */
@@ -1284,7 +1284,7 @@ function packShareBackdropAtlasPages(
 
 /**
  * 编码图集页面，并换算为 CSS 像素背景定位
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param tiles - 已绘制的毛玻璃小图
  * @param scaleX - 快照横向缩放
  * @param scaleY - 快照纵向缩放
@@ -1338,7 +1338,7 @@ async function encodeShareBackdropAtlases(
 
 /**
  * 最多 16 个 Worker 批量 blur，主线程拼图集后只编码一次
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param snapshot - 根节点快照
  * @param rootRect - 根节点视口矩形
  * @param jobs - 烘焙任务
@@ -1441,7 +1441,7 @@ async function renderBakedBackdropUrlsWithWorkers(
 
 /**
  * 快速路径：去掉 backdrop-filter，保留原半透明底色（alpha 底色 foreignObject 可截；勿加深以免发黑）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根节点
  * @returns 还原函数
  */
@@ -1485,7 +1485,7 @@ type ShareBackdropMode = boolean | "auto" | "none";
 
 /**
  * 大图按图片数量提高 worker 并发（须为 2 的幂，modern-screenshot 用位运算分发）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根节点
  * @returns worker 数量
  */
@@ -1498,7 +1498,7 @@ function resolveShareWorkerNumber(root: HTMLElement): number {
 
 /**
  * 按策略准备毛玻璃：强制时整页烘焙，自动模式下的大列表按卡片局部烘焙
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根节点
  * @param mode - true 强制烘焙 / false 强制 flatten / none 跳过 / auto 按数量选全局或局部烘焙
  * @returns 还原函数
@@ -1567,7 +1567,7 @@ type ShareNestedBackdropElementTarget = {
 
 /**
  * 收集存在毛玻璃祖先的真实节点，并按由外到内排序
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function collectNestedBackdropElementTargets(
   targets: Array<ShareBackdropElementTarget>,
@@ -1592,7 +1592,7 @@ function collectNestedBackdropElementTargets(
 
 /**
  * 在外层毛玻璃已写回 DOM 后，由外到内重新烘焙嵌套毛玻璃
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 async function rebakeNestedShareBackdropElements(
   nestedTargets: Array<ShareNestedBackdropElementTarget>,
@@ -1663,7 +1663,7 @@ async function rebakeNestedShareBackdropElements(
 
 /**
  * 有限并发执行异步任务
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 async function runPool(
   count: number,
@@ -1683,7 +1683,7 @@ async function runPool(
 
 /**
  * 将烘焙结果写回真实毛玻璃节点
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function applyBakedElementBackdrop(el: HTMLElement, fill: string | ShareBakedFill): void {
   const url = typeof fill === "string" ? fill : fill.url;
@@ -1706,7 +1706,7 @@ function applyBakedElementBackdrop(el: HTMLElement, fill: string | ShareBakedFil
 
 /**
  * 还原毛玻璃节点样式
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function restoreBakedElementPatches(patches: Array<ShareBackdropElementPatch>): void {
   for (const item of patches) {
@@ -1733,7 +1733,7 @@ function restoreBakedElementPatches(patches: Array<ShareBackdropElementPatch>): 
 
 /**
  * 收集根下真实节点毛玻璃目标
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function collectBackdropElementTargets(
   root: HTMLElement,
@@ -1760,7 +1760,7 @@ function collectBackdropElementTargets(
 
 /**
  * 仅在 modern-screenshot 的克隆体中隐藏毛玻璃目标，避免真实 DOM 的图像层失效
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param cloned - 截图克隆根节点
  * @returns 无返回值
  */
@@ -1775,7 +1775,7 @@ function hideShareBackdropCloneTargets(cloned: Node): void {
 
 /**
  * 大列表局部烘焙：对每个毛玻璃节点，只截其父容器（如名片中段），有限并发
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根（仅用于收集目标）
  * @returns 还原函数
  */
@@ -1883,7 +1883,7 @@ async function bakeShareBackdropFiltersLocal(
 /**
  * 将毛玻璃烘焙为圆角背景图（foreignObject 无法正确裁切 backdrop-filter）
  * 同时处理真实节点与 ::before / ::after 伪元素。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param root - 截图根节点
  * @returns 还原函数
  */
@@ -2124,7 +2124,7 @@ async function bakeShareBackdropFilters(
 
 /**
  * 处理分享图 Buffer：按设置写入文件或复制到剪贴板
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param tag - 日志标签
  * @param fileName - 文件名
  * @param buffer - 图片数据
@@ -2159,7 +2159,7 @@ async function handleShareBuffer(
 
 /**
  * 生成分享截图
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param fileName - 文件名
  * @param element - 元素
  * @param scale - 缩放比例
@@ -2211,7 +2211,7 @@ export async function generateShareImg(
 
 /**
  * modern 截图可选参数
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export type ShareModernOptions = {
   /** 毛玻璃：true 烘焙 / false flatten / none 跳过 / auto 少量烘焙、过多局部烘焙。默认 auto */
@@ -2220,19 +2220,19 @@ export type ShareModernOptions = {
   backdropBlurScale?: number;
   /**
    * 外层画布边距（逻辑像素）。只加在截图容器上，不改被截节点的 padding。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   ppx?: number;
   /**
    * 快照 / 毛玻璃烘焙 / 最终截图进度
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   onProgress?: ShareProgressFn;
 };
 
 /**
  * 生成分享截图（modern-screenshot）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param fileName - 文件名
  * @param element - 元素
  * @param scale - 缩放比例
@@ -2262,7 +2262,7 @@ export async function gsiModernScreenshot(
 
 /**
  * 在截图外围铺边距背景，相当于把渲染内容放进新容器，不改动原节点样式
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param blob - 原始截图
  * @param paddingPx - 逻辑像素边距
  * @param scale - 截图缩放
@@ -2294,7 +2294,7 @@ async function frameShareBlob(blob: Blob, paddingPx: number, scale: number): Pro
 
 /**
  * 生成分享截图（snapdom）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param fileName - 文件名
  * @param element - 元素
  * @param scale - 缩放比例
@@ -2331,7 +2331,7 @@ type ShareColdBenchResult = {
 
 /**
  * 清空可重置的分享截图缓存（模块级字体 CSS；snap 侧用 cache:'disabled'）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 function resetShareCaptureCaches(): void {
   shareFontFaceCss = undefined;
@@ -2341,7 +2341,7 @@ function resetShareCaptureCaches(): void {
 
 /**
  * 为冷启动测速给字体 URL 加防缓存参数
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param url - 原始 URL
  * @param nonce - 防缓存随机串
  * @returns 带 query 的 URL
@@ -2354,7 +2354,7 @@ function bustShareFontUrl(url: string, nonce: string): string {
 
 /**
  * 仅生成 modern-screenshot Blob（不含保存/剪贴板）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 async function captureModernBlob(
   element: HTMLElement,
@@ -2435,7 +2435,7 @@ async function captureModernBlob(
 
 /**
  * 仅生成 snapdom Blob（不含保存/剪贴板）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 async function captureSnapBlob(
   element: HTMLElement,
@@ -2481,7 +2481,7 @@ async function captureSnapBlob(
 
 /**
  * 冷启动对比 modern / snap（仅截图层，不含保存；各自独立清缓存 + 字体 URL 防缓存）
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param element - 截图根节点
  * @param scale - 缩放
  * @returns 两侧耗时与体积
@@ -2546,7 +2546,7 @@ export async function copyToClipboard(buffer: ArrayBuffer): Promise<void> {
 
 /**
  * 分享截图入口
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 const TGShare = <const>{
   /** html2canvas */

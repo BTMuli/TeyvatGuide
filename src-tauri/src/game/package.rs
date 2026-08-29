@@ -1,5 +1,5 @@
 //! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
-//! @since Beta v0.11.5
+//! @since Beta v0.12.0
 
 use super::{
   assembler, committer, defender,

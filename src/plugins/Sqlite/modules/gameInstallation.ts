@@ -1,13 +1,13 @@
 /**
  * 游戏安装数据库模块。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import TGSqlite from "../index.js";
 
 /**
  * 保存检测结果并设为当前安装。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installation - 后端检测确认的安装
  */
 async function save(installation: TGApp.Game.Installation.Item): Promise<void> {

@@ -1,6 +1,6 @@
 /**
  * 游戏安装与启动命令适配。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -9,7 +9,7 @@ import { Channel, invoke } from "@tauri-apps/api/core";
 
 /**
  * 检测国服游戏安装。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param executablePath - YuanShen.exe 完整路径
  * @returns 安装磁盘状态
  */
@@ -23,7 +23,7 @@ export async function inspectGameInstallation(
 
 /**
  * 获取全部已登记游戏安装及最新磁盘状态。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 游戏安装列表
  */
 export async function listGameInstallations(): Promise<Array<TGApp.Game.Installation.Item>> {
@@ -32,7 +32,7 @@ export async function listGameInstallations(): Promise<Array<TGApp.Game.Installa
 
 /**
  * 将指定本地安装设为主启动路径（唯一 isChosen），并同步主启动的语音包到游戏设置注册表。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  */
 export async function chooseGameInstallation(installationId: string): Promise<void> {
@@ -41,7 +41,7 @@ export async function chooseGameInstallation(installationId: string): Promise<vo
 
 /**
  * 读取游戏安装目录的实际文件占用。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param rootPath - 游戏根目录
  * @returns 目录内全部文件的字节数
  */
@@ -51,7 +51,7 @@ export async function getGameInstallationSize(rootPath: string): Promise<number>
 
 /**
  * 自动定位本机国服游戏安装候选：合并 HoYoPlay 登记与 Unity 日志来源。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 排序后的候选列表与来源级告警
  */
 export async function locateGameInstallations(): Promise<TGApp.Game.Installation.DiscoveryResult> {
@@ -60,7 +60,7 @@ export async function locateGameInstallations(): Promise<TGApp.Game.Installation
 
 /**
  * 检查新安装向导选定的安装目录。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installRoot - 用户选定的直接安装目录
  * @returns 空目录、已有游戏目录或被占用目录的识别结果
  */
@@ -75,7 +75,7 @@ export async function inspectGameInstallLocation(
 
 /**
  * 通过可信安装 ID 启动游戏。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @param ticket - 官服登录 ticket；B 服不传
  */
@@ -88,7 +88,7 @@ export async function launchGameInstallation(
 
 /**
  * 检测国服客户端 YuanShen.exe 是否仍在运行。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 是否仍在运行
  */
 export async function isGameRunning(): Promise<boolean> {
@@ -97,7 +97,7 @@ export async function isGameRunning(): Promise<boolean> {
 
 /**
  * 结束国服客户端进程；未在运行时直接成功。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export async function stopGame(): Promise<void> {
   await invoke("game_stop");
@@ -105,7 +105,7 @@ export async function stopGame(): Promise<void> {
 
 /**
  * 卸载已登记的游戏安装：删除游戏根目录全部内容（保留空目录），并删除数据库登记。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @returns 卸载结果
  */
@@ -119,7 +119,7 @@ export async function uninstallGameInstallation(
 
 /**
  * 获取已登记安装的本地与远端版本快照。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @returns 不含分支密码和下载地址的版本快照
  */
@@ -131,7 +131,7 @@ export async function getGamePackageSnapshot(
 
 /**
  * 生成并持久化不可变的游戏资源计划。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @param target - 主分支或预下载分支
  * @param onProgress - 后端评估步骤更新
@@ -189,7 +189,7 @@ export async function createGameInstallDraft(
 
 /**
  * 读取所有仍需恢复或取消的全新安装草稿。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 未完成安装草稿列表
  */
 export async function listGameInstallDrafts(): Promise<
@@ -202,7 +202,7 @@ export async function listGameInstallDrafts(): Promise<
 
 /**
  * 取消只完成评估、尚未启动任务的安装草稿。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installId - 安装身份
  * @returns 已取消的草稿摘要
  */
@@ -241,7 +241,7 @@ export async function startGameInstall(
 
 /**
  * 读取全新安装需要临时排除 Windows Defender 扫描的目录集合。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installId - 安装草案身份
  * @returns 目标目录、临时 spool、暂存目录、下载缓存与任务日志路径
  */
@@ -255,7 +255,7 @@ export async function getGameInstallDraftDirs(
 
 /**
  * 将全新安装涉及目录临时加入 Windows Defender 排除列表（触发 UAC 授权）。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installId - 安装草案身份
  * @param planId - 已固化的安装计划 ID
  * @returns 已加入白名单的目录路径列表
@@ -272,7 +272,7 @@ export async function addGameInstallDefenderExclusions(
 
 /**
  * 查询指定安装计划是否已成功登记 Defender 排除。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param planId - 已固化的安装计划 ID
  * @returns 已登记时为 true
  */
@@ -282,7 +282,7 @@ export async function hasGameInstallDefenderExclusions(planId: string): Promise<
 
 /**
  * 将全新安装临时加入白名单的目录移出（触发 UAC 授权）。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param planId - 已固化的安装计划 ID
  */
 export async function removeGameInstallDefenderExclusions(planId: string): Promise<void> {
@@ -293,7 +293,7 @@ export async function removeGameInstallDefenderExclusions(planId: string): Promi
  * 确认全新安装目录已加入 Windows Defender 排除。
  * 已有登记则直接通过；否则弹出确认并在已有 planId 时提权添加。
  * 草稿尚无 planId 时只完成确认，由调用方在计划固化后补登记。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installId - 安装草案身份
  * @param planId - 已固化的安装计划 ID；评估中草稿可为 null
  * @param confirmLabel - 确认按钮文案
@@ -367,7 +367,7 @@ export async function cancelGameInstall(
 
 /**
  * 暂停全新安装的资源下载。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param taskId - 安装任务 ID
  * @param installId - 安装身份
  * @returns 已暂停的任务投影
@@ -384,7 +384,7 @@ export async function pauseGameInstall(
 
 /**
  * 评估官服与 B 服之间的同资源家族渠道转换；不会修改游戏目录。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @returns 不含 SDK 下载地址的换服计划摘要
  */
@@ -398,7 +398,7 @@ export async function createGamePackageSwitchPlan(
 
 /**
  * 执行已评估的官服与 B 服渠道转换。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param planId - 已固化换服计划 ID
  * @returns 换服任务投影
  */
@@ -410,7 +410,7 @@ export async function applyGamePackageSwitch(
 
 /**
  * 读取应用数据目录中的资源分片与渠道 SDK 缓存占用。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @returns 缓存占用摘要
  */
 export async function getGamePackageCacheStatus(): Promise<TGApp.Game.Package.CacheSummary> {
@@ -421,7 +421,7 @@ type CacheClearTarget = "chunks" | "sdk" | "all";
 
 /**
  * 清理指定的资源分片、渠道 SDK 或全部缓存；仍被未完成任务引用的文件会保留。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param target - 要清理的缓存范围，默认为全部缓存
  * @returns 清理后的缓存占用摘要
  */
@@ -433,7 +433,7 @@ export async function clearGamePackageCache(
 
 /**
  * 启动或恢复安装完整性校验；扫描在后台继续，刷新页面后可重连进度。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @returns 当前校验进度
  */
@@ -445,7 +445,7 @@ export async function verifyGamePackage(
 
 /**
  * 读取已持久化或正在运行的完整性校验进度。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @returns 校验进度；从未校验时为空
  */
@@ -459,7 +459,7 @@ export async function getGamePackageVerifyStatus(
 
 /**
  * 请求停止正在运行的完整性校验。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  */
 export async function cancelGamePackageVerify(installationId: string): Promise<void> {
@@ -468,7 +468,7 @@ export async function cancelGamePackageVerify(installationId: string): Promise<v
 
 /**
  * 清除完整性校验进度：停止正在运行的扫描，并删除可恢复会话。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  */
 export async function clearGamePackageVerify(installationId: string): Promise<void> {
@@ -477,7 +477,7 @@ export async function clearGamePackageVerify(installationId: string): Promise<vo
 
 /**
  * 按不可变计划启动游戏资源下载任务；正式更新与预下载均只写入应用缓存。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param planId - 已持久化计划 ID
  * @param options - 可选并发与带宽限制
  * @returns 当前任务投影
@@ -491,7 +491,7 @@ export async function startGamePackageTask(
 
 /**
  * 应用已完成下载并复验的游戏资源任务；正式更新可立即应用，预下载需目标已转正。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param taskId - 资源任务 ID
  * @returns 应用开始后的任务投影
  */
@@ -503,7 +503,7 @@ export async function applyGamePackageTask(
 
 /**
  * 按当前游戏盘剩余空间检查应用门槛，不依赖评估时的计划摘要。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param taskId - 资源任务 ID
  * @returns 应用阶段实时空间预算
  */
@@ -515,7 +515,7 @@ export async function getGamePackageApplySpace(
 
 /**
  * 请求在安全边界取消游戏资源任务。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param taskId - 资源任务 ID
  */
 export async function cancelGamePackageTask(taskId: string): Promise<void> {
@@ -524,7 +524,7 @@ export async function cancelGamePackageTask(taskId: string): Promise<void> {
 
 /**
  * 暂停资源任务的下载或组装；已完成缓存保留，可稍后安全恢复。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param taskId - 资源任务 ID
  * @returns 已暂停的任务投影
  */
@@ -536,7 +536,7 @@ export async function pauseGamePackageTask(
 
 /**
  * 读取 journal 中的资源任务投影。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param installationId - 可选安装 ID 过滤
  * @returns 任务投影列表
  */
@@ -573,7 +573,7 @@ export async function removeGamePackageTask(
 
 /**
  * 清理所有已结束的资源任务日志；不会删除共享缓存或未完成任务。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 export async function cleanupGamePackageTasks(): Promise<TGApp.Game.Package.TaskCleanupSummary> {
   return await invoke<TGApp.Game.Package.TaskCleanupSummary>("game_package_task_cleanup");
@@ -581,7 +581,7 @@ export async function cleanupGamePackageTasks(): Promise<TGApp.Game.Package.Task
 
 /**
  * 恢复中断下载或回滚任务私有临时文件。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param taskId - 资源任务 ID
  * @param action - 恢复动作
  * @param onProgress - 恢复准备进度回调

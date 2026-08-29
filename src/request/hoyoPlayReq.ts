@@ -1,6 +1,6 @@
 /**
  * HoYoPlay 启动器请求。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import TGHttps from "@utils/TGHttps.js";
@@ -11,7 +11,7 @@ const OfficialLauncherId: Readonly<string> = "jGHBHlcOq1";
 
 /**
  * 获取启动器轮换背景。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  * @param language - 语言
  * @returns 国服官服的背景列表
  */

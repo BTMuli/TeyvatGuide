@@ -1,12 +1,12 @@
 /**
  * HoYoPlay 启动器接口类型。
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 declare namespace TGApp.Game.HoYoPlay {
   /**
    * 启动器背景类型。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   const BackgroundType = <const>{
     /** 静态图 */
@@ -21,13 +21,13 @@ declare namespace TGApp.Game.HoYoPlay {
 
   /**
    * 启动器背景类型值。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type BackgroundTypeEnum = (typeof BackgroundType)[keyof typeof BackgroundType];
 
   /**
    * HoYoPlay 游戏标识。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type GameId = {
     /** 游戏 ID */
@@ -38,7 +38,7 @@ declare namespace TGApp.Game.HoYoPlay {
 
   /**
    * 启动器图片资源。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type GameImage = {
     /** 资源地址 */
@@ -57,7 +57,7 @@ declare namespace TGApp.Game.HoYoPlay {
 
   /**
    * 单张启动器背景。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type Background = {
     /** 背景 ID */
@@ -76,7 +76,7 @@ declare namespace TGApp.Game.HoYoPlay {
 
   /**
    * 单个游戏的背景列表。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type BackgroundInfo = {
     /** 游戏标识 */
@@ -87,7 +87,7 @@ declare namespace TGApp.Game.HoYoPlay {
 
   /**
    * 启动器背景接口数据。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type BackgroundData = {
     /** 各游戏背景列表 */
@@ -96,7 +96,7 @@ declare namespace TGApp.Game.HoYoPlay {
 
   /**
    * 启动器背景接口响应。
-   * @since Beta v0.11.5
+   * @since Beta v0.12.0
    */
   type BackgroundResp = TGApp.BBS.Response.BaseWithData<BackgroundData>;
 }

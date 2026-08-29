@@ -1,6 +1,6 @@
 /**
  * 应用状态管理
- * @since Beta v0.11.5
+ * @since Beta v0.12.0
  */
 
 import bbsEnum from "@enum/bbs.js";
@@ -73,7 +73,7 @@ const useAppStore = defineStore(
 
     /**
      * 在应用挂载后并行读取系统路径，避免模块加载阶段阻塞首屏。
-     * @since Beta v0.11.5
+     * @since Beta v0.12.0
      * @returns 路径初始化完成
      */
     async function initializePaths(): Promise<void> {
