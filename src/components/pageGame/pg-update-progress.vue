@@ -251,9 +251,9 @@ const verificationStatus = computed<string | null>(() => {
   if (verificationComplete.value) return "已完成";
   if (task.state === gameEnum.package.taskState.REPAIR_REQUIRED) return "发现文件需要修复";
   if (task.state === gameEnum.package.taskState.VERIFYING) {
-    return task.currentFile ?? "正在校验目标清单";
+    return task.currentFile ?? (integrityRepair.value ? "正在校验目标清单" : "正在校验本次变更");
   }
-  return "等待完整复验";
+  return integrityRepair.value ? "等待完整复验" : "等待校验本次变更";
 });
 const acquisitionRow = computed<ProgressRow>(() => ({
   label: isPreDownload.value ? "预下载资源" : integrityRepair.value ? "修复资源" : "资源下载",
@@ -316,7 +316,7 @@ const commitRow = computed<ProgressRow>(() => ({
   activeAssemblyCount: 0,
 }));
 const verificationRow = computed<ProgressRow>(() => ({
-  label: "完整复验",
+  label: integrityRepair.value ? "完整复验" : "变更校验",
   percent: verificationPercent.value,
   indeterminate: verificationIndeterminate.value,
   complete: verificationComplete.value,

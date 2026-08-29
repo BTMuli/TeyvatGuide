@@ -9,14 +9,14 @@ use super::{
   evidence,
   journal::{
     self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
-    RepairJournal, TaskJournal,
+    TaskJournal,
   },
   model::{PackageApplySpaceSummary, PackagePlanStrategy, PackagePlanTarget, PackageTaskState},
   path_guard::{
     prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file, resolve_optional_manifest_file,
   },
-  planner::{PersistedPlan, PlanAsset, PlanAssetAction, PlanFile},
+  planner::{PersistedPlan, PlanAsset, PlanAssetAction},
 };
 use md5::{Digest as Md5Digest, Md5};
 use sha2::Sha256;
@@ -33,7 +33,7 @@ const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
 const TRANSACTION_DIRECTORY: &str = ".teyvatguide-update";
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
-/// 提交结果：完整完成，或资源已提交但仍需修复未变化文件。
+/// 提交结果：正常完成，或兼容旧路径返回的「仍需修复未变化文件」。
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum ApplyOutcome {
   Completed,
@@ -42,9 +42,7 @@ pub(crate) enum ApplyOutcome {
 
 #[derive(Clone)]
 struct InventoryIssue {
-  name: String,
   message: String,
-  repairable: bool,
 }
 
 #[derive(Clone)]
@@ -184,69 +182,27 @@ where
     journal.current_file = Some(if plan.target == PackagePlanTarget::Audio {
       "校验本次配音变更".to_string()
     } else {
-      "校验目标清单".to_string()
+      "校验本次变更".to_string()
     });
-    if plan.target == PackagePlanTarget::Audio {
-      journal.verification_completed_count = 0;
-      journal.verification_total_count = plan.assets.len().saturating_add(plan.delete_files.len());
-      journal.verification_completed_bytes = 0;
-      journal.verification_total_bytes = plan.assets.iter().map(|asset| asset.size).sum();
-      journal.commit_current_step =
-        Some(format!("校验配音文件 0/{}", journal.verification_total_count));
+    let (changed_count, changed_bytes) = changed_verification_totals(plan);
+    journal.verification_completed_count = 0;
+    journal.verification_total_count = changed_count;
+    journal.verification_completed_bytes = 0;
+    journal.verification_total_bytes = changed_bytes;
+    journal.commit_current_step = Some(if plan.target == PackagePlanTarget::Audio {
+      format!("校验配音文件 0/{changed_count}")
     } else {
-      let (single_pass_count, single_pass_bytes) = inventory_verification_totals(plan);
-      journal.verification_completed_count = 0;
-      journal.verification_total_count = single_pass_count.saturating_mul(2);
-      journal.verification_completed_bytes = 0;
-      journal.verification_total_bytes = single_pass_bytes.saturating_mul(2);
-    }
+      format!("校验本次变更 0/{changed_count}")
+    });
     persist_and_emit(task_root, journal, &emit)?;
     if plan.target == PackagePlanTarget::Audio {
       verify_changed_files(plan, game_root, task_root, journal, canceled, &emit)?;
     } else {
-      let issues = inspect_inventory_with_journal_progress(
-        plan,
-        game_root,
-        journal,
-        task_root,
-        canceled,
-        &emit,
-        0,
-        0,
-        inventory_verification_totals(plan).0.saturating_mul(2),
-        inventory_verification_totals(plan).1.saturating_mul(2),
+      inspect_changed_layout_with_journal_progress(
+        plan, game_root, journal, task_root, canceled, &emit,
       )?;
-      if let Some(error) = commit_integrity_error(plan, &issues) {
-        return Err(error);
-      }
-      let repair_files = repairable_files(plan, &issues);
-      if !repair_files.is_empty() {
-        journal.repair = Some(RepairJournal { files: repair_files.clone(), apply: None });
-        journal.state = PackageTaskState::RepairRequired;
-        journal.error_message = Some(format!(
-          "完整清单发现 {} 个未变化文件缺失或损坏，需修复后才能提交版本",
-          repair_files.len()
-        ));
-        journal.current_file = None;
-        persist_and_emit(task_root, journal, &emit)?;
-        return Ok(ApplyOutcome::RepairNeeded);
-      }
     }
     commit_version(plan, game_root, task_root, journal, &emit)?;
-    if plan.target != PackagePlanTarget::Audio {
-      verify_inventory_with_journal_progress(
-        plan,
-        game_root,
-        journal,
-        task_root,
-        canceled,
-        &emit,
-        inventory_verification_totals(plan).0,
-        inventory_verification_totals(plan).1,
-        inventory_verification_totals(plan).0.saturating_mul(2),
-        inventory_verification_totals(plan).1.saturating_mul(2),
-      )?;
-    }
     journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
       PackageTaskState::RegistrationPending
     } else {
@@ -361,22 +317,10 @@ where
       &emit,
       0,
       0,
-      inventory_verification_totals(plan).0.saturating_mul(2),
-      inventory_verification_totals(plan).1.saturating_mul(2),
-    )?;
-    commit_version(plan, game_root, task_root, journal, &emit)?;
-    verify_inventory_with_journal_progress(
-      plan,
-      game_root,
-      journal,
-      task_root,
-      canceled,
-      &emit,
       inventory_verification_totals(plan).0,
       inventory_verification_totals(plan).1,
-      inventory_verification_totals(plan).0.saturating_mul(2),
-      inventory_verification_totals(plan).1.saturating_mul(2),
     )?;
+    commit_version(plan, game_root, task_root, journal, &emit)?;
     journal.repair = None;
     journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
       PackageTaskState::RegistrationPending
@@ -830,17 +774,7 @@ fn prepare_transaction(
   } else {
     patch_game_version(&original, &plan.target_tag)?
   };
-  prepare_file_transaction(
-    &commit,
-    &original,
-    &target,
-    game_root,
-    task_root,
-    journal,
-    plan.target == PackagePlanTarget::Audio,
-    // 配音 incoming 已在组装时写入证据；提交前只核对目标是否存在，Modify 只比长度。
-    plan.target != PackagePlanTarget::Audio,
-  )
+  prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal, true, false)
 }
 
 pub(crate) fn prepare_apply_assembly(
@@ -866,7 +800,10 @@ fn incoming_is_preassembled(
   task_root: &Path,
   incoming_root: &Path,
 ) -> Result<bool, String> {
-  if !matches!(plan.target, PackagePlanTarget::Audio | PackagePlanTarget::Main) {
+  if !matches!(
+    plan.target,
+    PackagePlanTarget::Audio | PackagePlanTarget::Main | PackagePlanTarget::PreDownload
+  ) {
     return Ok(false);
   }
   if !incoming_root.is_dir() {
@@ -1105,14 +1042,12 @@ where
       if step.kind != CommitStepKind::Repair {
         let source_matches = match step.kind {
           CommitStepKind::Delete => true,
-          // 配音 Modify 只比长度：旧文件整包哈希已取消，回滚恢复的是实际挪走的备份。
-          CommitStepKind::Modify if journal.target == PackagePlanTarget::Audio => {
+          CommitStepKind::Modify => {
             let expected =
               step.source_size.ok_or_else(|| format!("资源步骤缺少源大小：{}", step.name))?;
             fs::metadata(&current).map_err(|error| format!("读取资源文件状态失败：{error}"))?.len()
               == expected
           }
-          CommitStepKind::Modify => source_file_matches(&current, step)?,
           CommitStepKind::Add | CommitStepKind::Repair => true,
         };
         if !source_matches {
@@ -1132,13 +1067,7 @@ where
     }
     if step.kind != CommitStepKind::Delete {
       ensure_game_stopped()?;
-      let incoming_path = resolve_existing_manifest_file(&incoming_root, &step.name)?;
-      // 配音 incoming 在组装时已写入证据；提交后按文件身份复验，对不上再回退 MD5。
-      if journal.target != PackagePlanTarget::Audio
-        && !file_matches(&incoming_path, step.size, &step.md5)?
-      {
-        return Err(format!("incoming 资源在提交前校验失败：{}", step.name));
-      }
+      resolve_existing_manifest_file(&incoming_root, &step.name)?;
       if resolve_optional_manifest_file(game_root, &step.name)?.is_some() {
         return Err(format!("游戏资源目标在提交前意外存在：{}", step.name));
       }
@@ -1389,7 +1318,6 @@ fn inspect_inventory_with_progress(
   progress: &mut dyn FnMut(usize, usize, u64, u64, Option<String>),
 ) -> Result<Vec<InventoryIssue>, String> {
   let mut issues = Vec::new();
-  let changed = changed_names(plan);
   let total_count = plan.inventory.len().saturating_add(plan.delete_files.len());
   let total_bytes =
     plan.inventory.iter().fold(0_u64, |total, file| total.saturating_add(file.size));
@@ -1398,17 +1326,13 @@ fn inspect_inventory_with_progress(
   for file in &plan.inventory {
     check_canceled(canceled)?;
     match resolve_optional_manifest_file(game_root, &file.name)? {
-      None => issues.push(InventoryIssue {
-        name: file.name.clone(),
-        message: format!("目标清单文件缺失：{}", file.name),
-        repairable: !changed.contains(&file.name),
-      }),
+      None => {
+        issues.push(InventoryIssue { message: format!("目标清单文件缺失：{}", file.name) })
+      }
       Some(path) => {
         if !file_matches(&path, file.size, &file.md5)? {
           issues.push(InventoryIssue {
-            name: file.name.clone(),
-            message: format!("目标清单文件校验失败：{}", file.name),
-            repairable: !changed.contains(&file.name),
+            message: format!("目标清单文件校验失败：{}", file.name)
           });
         }
       }
@@ -1421,9 +1345,7 @@ fn inspect_inventory_with_progress(
     check_canceled(canceled)?;
     if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
       issues.push(InventoryIssue {
-        name: deleted.name.clone(),
         message: format!("目标版本应删除的文件仍然存在：{}", deleted.name),
-        repairable: false,
       });
     }
     completed_count = completed_count.saturating_add(1).min(total_count);
@@ -1443,6 +1365,76 @@ fn inventory_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
     plan.inventory.len().saturating_add(plan.delete_files.len()),
     plan.inventory.iter().fold(0_u64, |total, file| total.saturating_add(file.size)),
   )
+}
+
+fn changed_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
+  (
+    plan.assets.len().saturating_add(plan.delete_files.len()),
+    plan.assets.iter().fold(0_u64, |total, asset| total.saturating_add(asset.size)),
+  )
+}
+
+fn inspect_changed_layout_with_journal_progress<F>(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+  task_root: &Path,
+  canceled: &AtomicBool,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let (total_count, total_bytes) = changed_verification_totals(plan);
+  journal.verification_completed_count = 0;
+  journal.verification_total_count = total_count;
+  journal.verification_completed_bytes = 0;
+  journal.verification_total_bytes = total_bytes;
+  journal.commit_current_step = Some(format!("校验本次变更 0/{total_count}"));
+  journal.current_file = None;
+  persist_and_emit(task_root, journal, emit)?;
+  let mut last_emit = Instant::now() - ASSEMBLY_PROGRESS_EMIT_INTERVAL;
+  let mut emit_progress = |completed_count: usize, completed_bytes: u64, current_file: String| {
+    journal.verification_completed_count = completed_count.min(total_count);
+    journal.verification_completed_bytes = completed_bytes.min(total_bytes);
+    journal.current_file = Some(current_file);
+    if completed_count == total_count || last_emit.elapsed() >= ASSEMBLY_PROGRESS_EMIT_INTERVAL {
+      journal.commit_current_step =
+        Some(format!("校验本次变更 {}/{total_count}", journal.verification_completed_count));
+      journal.touch();
+      emit(journal);
+      last_emit = Instant::now();
+    }
+  };
+  let mut completed_count = 0_usize;
+  let mut completed_bytes = 0_u64;
+  for asset in &plan.assets {
+    check_canceled(canceled)?;
+    let path = resolve_existing_manifest_file(game_root, &asset.name)?;
+    let size = fs::metadata(&path)
+      .map_err(|error| format!("读取已提交资源失败：{}：{error}", asset.name))?
+      .len();
+    if size != asset.size {
+      return Err(format!("已提交资源大小与计划不一致：{}", asset.name));
+    }
+    completed_count = completed_count.saturating_add(1);
+    completed_bytes = completed_bytes.saturating_add(asset.size);
+    emit_progress(completed_count, completed_bytes, asset.name.clone());
+  }
+  for deleted in &plan.delete_files {
+    check_canceled(canceled)?;
+    if resolve_optional_manifest_file(game_root, &deleted.name)?.is_some() {
+      return Err(format!("目标版本应删除的文件仍然存在：{}", deleted.name));
+    }
+    completed_count = completed_count.saturating_add(1);
+    emit_progress(completed_count, completed_bytes, deleted.name.clone());
+  }
+  journal.commit_current_step = Some(format!("本次变更校验完成 {completed_count}/{total_count}"));
+  journal.current_file = None;
+  journal.verification_completed_count = completed_count.min(total_count);
+  journal.verification_completed_bytes = completed_bytes.min(total_bytes);
+  persist_and_emit(task_root, journal, emit)?;
+  Ok(())
 }
 
 fn inspect_inventory_with_journal_progress<F>(
@@ -1542,33 +1534,6 @@ where
     verification_total_bytes,
   )?;
   issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
-}
-
-fn changed_names(plan: &PersistedPlan) -> std::collections::HashSet<String> {
-  plan
-    .assets
-    .iter()
-    .map(|asset| asset.name.clone())
-    .chain(plan.delete_files.iter().map(|file| file.name.clone()))
-    .collect()
-}
-
-fn commit_integrity_error(plan: &PersistedPlan, issues: &[InventoryIssue]) -> Option<String> {
-  let _ = plan;
-  issues.iter().find(|issue| !issue.repairable).map(|issue| issue.message.clone())
-}
-
-fn repairable_files(plan: &PersistedPlan, issues: &[InventoryIssue]) -> Vec<PlanFile> {
-  let inventory = plan
-    .inventory
-    .iter()
-    .map(|file| (file.name.as_str(), file))
-    .collect::<std::collections::HashMap<_, _>>();
-  issues
-    .iter()
-    .filter(|issue| issue.repairable)
-    .filter_map(|issue| inventory.get(issue.name.as_str()).cloned().cloned())
-    .collect()
 }
 
 fn finish_failed_apply<F>(
