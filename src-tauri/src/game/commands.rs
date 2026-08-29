@@ -16,10 +16,10 @@ use super::{
   },
   package::{AudioApplyContext, GamePackageManager},
   planner::{
-    create_and_persist_audio_plan, create_and_persist_install_plan, create_and_persist_plan,
-    hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan, hydrate_and_validate_plan,
-    hydrate_and_validate_repair_plan, load_persisted_plan, persist_validated_plan,
-    reject_release_game_update, reject_release_game_update_plan, report_plan_progress,
+    PersistedPlan, create_and_persist_audio_plan, create_and_persist_install_plan,
+    create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan,
+    hydrate_and_validate_plan, hydrate_and_validate_repair_plan, load_persisted_plan,
+    persist_validated_plan, report_plan_progress,
   },
   switch::{self, create_and_persist_switch_plan},
 };
@@ -37,6 +37,21 @@ use tauri_plugin_sql::{DbInstances, DbPool};
 use uuid::Uuid;
 
 const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
+
+async fn refill_install_plan_for_resume(
+  task_root: &Path,
+  install_id: &str,
+  scheme: SchemeId,
+  audio_languages: &[String],
+  plan: PersistedPlan,
+) -> Result<PersistedPlan, String> {
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  let plan =
+    hydrate_and_validate_install_plan(install_id, scheme, audio_languages, &branches, plan).await?;
+  persist_validated_plan(task_root, &plan)?;
+  Ok(plan)
+}
 
 fn report_recovery_progress(
   channel: &Channel<PackageRecoveryProgress>,
@@ -585,9 +600,17 @@ pub async fn game_install_defender_exclude_add(
   plan_id: String,
 ) -> Result<Vec<String>, String> {
   let task_root = game_task_root(&app_handle)?;
-  let dirs = defender::resolve_install_dirs(&task_root, &install_id)?;
+  add_install_defender_exclusions(&task_root, &install_id, &plan_id).await
+}
+
+async fn add_install_defender_exclusions(
+  task_root: &Path,
+  install_id: &str,
+  plan_id: &str,
+) -> Result<Vec<String>, String> {
+  let dirs = defender::resolve_install_dirs(task_root, install_id)?;
   defender::print_dirs("添加 Windows Defender 排除：", &dirs);
-  defender::persist_registry(&task_root, &plan_id, &dirs)?;
+  defender::persist_registry(task_root, plan_id, &dirs)?;
   let paths = dirs.paths();
   let added = {
     let operation_paths = paths.clone();
@@ -596,7 +619,7 @@ pub async fn game_install_defender_exclude_add(
       .map_err(|error| format!("排除任务异常退出：{error}"))?
   };
   if let Err(error) = added {
-    defender::remove_registry(&task_root, &plan_id);
+    defender::remove_registry(task_root, plan_id);
     return Err(error);
   }
   Ok(paths)
@@ -775,7 +798,6 @@ pub async fn game_install_recover(
     }
     installer::PublishedInstallationState::NotPublished => {}
   }
-  let client = create_http_client()?;
   let staging_path = Path::new(&draft.staging_root);
   let staging_exists = installer::path_occupied(staging_path)?;
   let marker_exists = installer::path_occupied(&staging_path.join(installer::MARKER_FILE_NAME))?;
@@ -786,16 +808,14 @@ pub async fn game_install_recover(
   if commit_phase && staging_exists && !marker_exists {
     return Err("安装提交阶段缺少 marker，需要人工恢复".to_string());
   }
-  let branches = get_game_branches(&client, draft.scheme).await?;
-  let plan = hydrate_and_validate_install_plan(
+  let plan = refill_install_plan_for_resume(
+    &task_root,
     &draft.install_id,
     draft.scheme,
     &draft.audio_languages,
-    &branches,
     plan,
   )
   .await?;
-  persist_validated_plan(&task_root, &plan)?;
   let context = super::package::InstallContext {
     pool: sqlite_pool(&db_instances).await?,
     machine_uid: read_machine_uid(&app_handle)?,
@@ -975,7 +995,6 @@ pub async fn game_package_plan(
   target: PackagePlanTarget,
   on_progress: Channel<PackagePlanProgress>,
 ) -> Result<PackagePlanSummary, String> {
-  reject_release_game_update(target)?;
   report_plan_progress(&on_progress, 1, "正在读取本地安装信息");
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
@@ -1180,7 +1199,6 @@ pub async fn game_package_start(
   let task_root = game_task_root(&app_handle)?;
   let _record_operation = manager.reserve_task_record_operation(&plan_id)?;
   let plan = load_persisted_plan(&task_root, &plan_id)?;
-  reject_release_game_update_plan(&plan)?;
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
@@ -1503,13 +1521,13 @@ pub async fn game_package_recover(
         load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
       let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
       report_recovery_progress(&on_progress, &task_id, 2, "正在验证当前版本与远端资源计划");
-      let client = create_http_client()?;
-      let branches = get_game_branches(&client, scheme).await?;
       journal::reject_occupying_resource_task(
         &task_root,
         &plan.installation_id,
         Some(&plan.plan_id),
       )?;
+      let client = create_http_client()?;
+      let branches = get_game_branches(&client, scheme).await?;
       let plan = hydrate_and_validate_plan(&installation, &branches, plan).await?;
       persist_validated_plan(&task_root, &plan)?;
       let game_root = PathBuf::from(&installation.root_path);

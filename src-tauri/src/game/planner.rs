@@ -596,99 +596,121 @@ pub(crate) async fn create_and_persist_install_plan(
   let installation_id = installation_id.to_string();
   let task_root = task_root.to_path_buf();
   let summary_audio_languages = audio_languages.to_vec();
-  tauri::async_runtime::spawn_blocking(move || -> Result<PackagePlanSummary, String> {
-    let mut parts = build_full_install_plan(target)?;
-    if let Some(install_sdk) = overlay.sdk.as_ref() {
-      parts_download_push_sdk(&mut parts, install_sdk)?;
-    }
-    overlay.config_sha256 = sha256_bytes(overlay.config.as_bytes());
-    parts.manifest_digest = install_manifest_digest(&parts.manifest_digest, &overlay)?;
-    report_plan_progress(&on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
-    let plan_id = Uuid::new_v4().to_string();
-    let cache_root = task_root.join("cache/chunks");
-    let cache_hit_bytes = calculate_cache_hits(&cache_root, &parts.downloads);
-    let download_bytes = parts.downloads.iter().try_fold(0_u64, |total, item| {
-      total.checked_add(item.compressed_size).ok_or_else(|| "安装计划下载大小溢出".to_string())
-    })?;
-    let install_bytes = parts
-      .assets
-      .iter()
-      .try_fold(overlay.config.len() as u64, |total, item| {
-        total.checked_add(item.size).ok_or_else(|| "安装计划安装大小溢出".to_string())
-      })?
-      .checked_add(overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size))
-      .ok_or_else(|| "安装计划安装大小溢出".to_string())?;
-    let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
-    let cache_available = fs2::available_space(spool_parent)
-      .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
-    let cache_storage_available = fs2::available_space(&task_root)
-      .map_err(|error| format!("读取应用缓存磁盘剩余空间失败：{error}"))?;
-    let install_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
-    let install_available = fs2::available_space(install_parent)
-      .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
-    let spool_window = install_spool_window(&parts.assets, default_install_concurrency(), false);
-    let same_volume = same_volume(spool_parent, install_parent);
-    let budget = calculate_install_space_budget(
-      install_bytes,
-      spool_window,
-      cache_available,
-      install_available,
-      same_volume,
-    );
-    let summary = PackagePlanSummary {
-      plan_id: plan_id.clone(),
-      installation_id: installation_id.to_string(),
-      target: PackagePlanTarget::Install,
-      source_tag: None,
-      target_tag: target_tag.clone(),
-      manifest_digest: parts.manifest_digest.clone(),
-      strategy: PackagePlanStrategy::Full,
-      download_bytes,
-      install_bytes,
-      delete_bytes: 0,
-      cache_hit_bytes,
-      required_free_bytes: budget.required_free_bytes,
-      available_free_bytes: budget.available_free_bytes,
-      has_sufficient_space: budget.has_sufficient_space,
-      cache_has_sufficient_space: budget.cache_has_sufficient_space,
-      install_has_sufficient_space: budget.install_has_sufficient_space,
-      cache_required_free_bytes: budget.cache_required_free_bytes,
-      install_required_free_bytes: budget.install_required_free_bytes,
-      cache_available_free_bytes: cache_available,
-      install_available_free_bytes: install_available,
-      cache_storage_available_free_bytes: cache_storage_available,
-      same_volume,
-      download_count: parts.downloads.len(),
-      add_count: parts.assets.len(),
-      modify_count: 0,
-      delete_count: 0,
-      source_audio_languages: Vec::new(),
-      target_audio_languages: summary_audio_languages,
-    };
-    let plan = PersistedPlan {
-      schema_version: PLAN_SCHEMA_VERSION,
-      plan_id: plan_id.clone(),
-      installation_id: installation_id.to_string(),
-      source_scheme: scheme,
-      target_scheme: scheme,
-      target: PackagePlanTarget::Install,
-      source_tag: None,
+  report_plan_progress(&on_progress, 4, "正在计算缓存、磁盘空间并保存计划");
+  tauri::async_runtime::spawn_blocking(move || {
+    persist_install_plan_from_decoded(
+      &installation_id,
+      scheme,
       target_tag,
-      manifest_digest: parts.manifest_digest,
-      strategy: PackagePlanStrategy::Full,
-      downloads: parts.downloads,
-      assets: parts.assets,
-      delete_files: Vec::new(),
-      inventory: parts.inventory,
-      install_overlay: Some(overlay),
-      audio_selection: None,
-      created_at: Utc::now().to_rfc3339(),
-    };
-    persist_new_plan(&task_root, &plan)?;
-    Ok(summary)
+      summary_audio_languages,
+      overlay,
+      target,
+      &task_root,
+    )
+    .map(|(summary, _plan)| summary)
   })
   .await
   .map_err(|error| format!("等待全新安装计划评估失败：{error}"))?
+}
+
+/// 用已解码的完整 build 生成并持久化全新安装计划，不再请求远端清单。
+fn persist_install_plan_from_decoded(
+  installation_id: &str,
+  scheme: SchemeId,
+  target_tag: String,
+  audio_languages: Vec<String>,
+  mut overlay: InstallOverlay,
+  target: DecodedBuild,
+  task_root: &Path,
+) -> Result<(PackagePlanSummary, PersistedPlan), String> {
+  let mut parts = build_full_install_plan(target)?;
+  if let Some(install_sdk) = overlay.sdk.as_ref() {
+    parts_download_push_sdk(&mut parts, install_sdk)?;
+  }
+  overlay.config_sha256 = sha256_bytes(overlay.config.as_bytes());
+  parts.manifest_digest = install_manifest_digest(&parts.manifest_digest, &overlay)?;
+  let plan_id = Uuid::new_v4().to_string();
+  let cache_root = task_root.join("cache/chunks");
+  let cache_hit_bytes = calculate_cache_hits(&cache_root, &parts.downloads);
+  let download_bytes = parts.downloads.iter().try_fold(0_u64, |total, item| {
+    total.checked_add(item.compressed_size).ok_or_else(|| "安装计划下载大小溢出".to_string())
+  })?;
+  let install_bytes = parts
+    .assets
+    .iter()
+    .try_fold(overlay.config.len() as u64, |total, item| {
+      total.checked_add(item.size).ok_or_else(|| "安装计划安装大小溢出".to_string())
+    })?
+    .checked_add(overlay.sdk.as_ref().map_or(0, |sdk| sdk.decompressed_size))
+    .ok_or_else(|| "安装计划安装大小溢出".to_string())?;
+  let spool_parent = Path::new(&overlay.spool_root).parent().unwrap_or(Path::new("."));
+  let cache_available = fs2::available_space(spool_parent)
+    .map_err(|error| format!("读取安装任务 spool 磁盘剩余空间失败：{error}"))?;
+  let cache_storage_available = fs2::available_space(task_root)
+    .map_err(|error| format!("读取应用缓存磁盘剩余空间失败：{error}"))?;
+  let install_parent = Path::new(&overlay.game_root).parent().unwrap_or(Path::new("."));
+  let install_available = fs2::available_space(install_parent)
+    .map_err(|error| format!("读取安装磁盘剩余空间失败：{error}"))?;
+  let spool_window = install_spool_window(&parts.assets, default_install_concurrency(), false);
+  let same_volume = same_volume(spool_parent, install_parent);
+  let budget = calculate_install_space_budget(
+    install_bytes,
+    spool_window,
+    cache_available,
+    install_available,
+    same_volume,
+  );
+  let summary = PackagePlanSummary {
+    plan_id: plan_id.clone(),
+    installation_id: installation_id.to_string(),
+    target: PackagePlanTarget::Install,
+    source_tag: None,
+    target_tag: target_tag.clone(),
+    manifest_digest: parts.manifest_digest.clone(),
+    strategy: PackagePlanStrategy::Full,
+    download_bytes,
+    install_bytes,
+    delete_bytes: 0,
+    cache_hit_bytes,
+    required_free_bytes: budget.required_free_bytes,
+    available_free_bytes: budget.available_free_bytes,
+    has_sufficient_space: budget.has_sufficient_space,
+    cache_has_sufficient_space: budget.cache_has_sufficient_space,
+    install_has_sufficient_space: budget.install_has_sufficient_space,
+    cache_required_free_bytes: budget.cache_required_free_bytes,
+    install_required_free_bytes: budget.install_required_free_bytes,
+    cache_available_free_bytes: cache_available,
+    install_available_free_bytes: install_available,
+    cache_storage_available_free_bytes: cache_storage_available,
+    same_volume,
+    download_count: parts.downloads.len(),
+    add_count: parts.assets.len(),
+    modify_count: 0,
+    delete_count: 0,
+    source_audio_languages: Vec::new(),
+    target_audio_languages: audio_languages,
+  };
+  let plan = PersistedPlan {
+    schema_version: PLAN_SCHEMA_VERSION,
+    plan_id: plan_id.clone(),
+    installation_id: installation_id.to_string(),
+    source_scheme: scheme,
+    target_scheme: scheme,
+    target: PackagePlanTarget::Install,
+    source_tag: None,
+    target_tag,
+    manifest_digest: parts.manifest_digest,
+    strategy: PackagePlanStrategy::Full,
+    downloads: parts.downloads,
+    assets: parts.assets,
+    delete_files: Vec::new(),
+    inventory: parts.inventory,
+    install_overlay: Some(overlay),
+    audio_selection: None,
+    created_at: Utc::now().to_rfc3339(),
+  };
+  persist_new_plan(task_root, &plan)?;
+  Ok((summary, plan))
 }
 
 pub(crate) async fn hydrate_and_validate_install_plan(
@@ -1219,38 +1241,6 @@ fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
     && plan.delete_files.is_empty()
     && !plan.assets.is_empty()
     && plan.assets.iter().all(|asset| asset.action == PlanAssetAction::Repair)
-}
-
-/// 正式发行版是否开放正式更新与预下载。仅 debug 构建开放。
-pub(crate) fn is_debug_game_update_enabled() -> bool {
-  cfg!(debug_assertions)
-}
-
-/// 计划是否属于尚未对正式版开放的更新/预下载（不含完整性修复）。
-pub(crate) fn is_debug_only_update_plan(plan: &PersistedPlan) -> bool {
-  match plan.target {
-    PackagePlanTarget::PreDownload => true,
-    PackagePlanTarget::Main => !is_integrity_repair_plan(plan),
-    _ => false,
-  }
-}
-
-/// 正式发行版拒绝新建正式更新或预下载评估。
-pub(crate) fn reject_release_game_update(target: PackagePlanTarget) -> Result<(), String> {
-  if is_debug_game_update_enabled()
-    || !matches!(target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload)
-  {
-    return Ok(());
-  }
-  Err("正式更新与预下载仅在调试版本开放".to_string())
-}
-
-/// 正式发行版拒绝启动尚未开放的更新/预下载任务；完整性修复仍可执行。
-pub(crate) fn reject_release_game_update_plan(plan: &PersistedPlan) -> Result<(), String> {
-  if is_debug_game_update_enabled() || !is_debug_only_update_plan(plan) {
-    return Ok(());
-  }
-  Err("正式更新与预下载仅在调试版本开放".to_string())
 }
 
 fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {

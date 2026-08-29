@@ -94,17 +94,6 @@ const GamePackagePlanTargetEnum: typeof TGApp.Game.Package.PlanTarget = {
 };
 
 /**
- * 判断正式更新与预下载入口是否开放。
- * @remarks `pnpm dev` 与 `tauri build --debug` 开放；正式发行版隐藏。完整性修复不受此限制。
- * @since Beta v0.11.5
- * @returns 当前是否为调试开发构建
- */
-function isDebugGameUpdateEnabled(): boolean {
-  if (import.meta.env.DEV || import.meta.env.MODE === "development") return true;
-  return `${proEnv.TAURI_DEBUG}` === "true";
-}
-
-/**
  * 游戏资源完整性校验状态枚举。
  * @since Beta v0.11.5
  * @see TGApp.Game.Package.VerifyStateEnum
@@ -702,7 +691,6 @@ const gameEnum = {
     taskRecoverable: isGamePackageTaskRecoverable,
     taskOccupying: isGamePackageTaskOccupying,
     taskTerminalDisposition: isGamePackageTaskTerminalDisposition,
-    debugUpdateEnabled: isDebugGameUpdateEnabled,
   },
   actCalendar: {
     actType: ActCalendarTypeEnum,

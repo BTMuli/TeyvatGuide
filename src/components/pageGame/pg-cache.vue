@@ -19,13 +19,7 @@
         </v-btn>
       </div>
       <div class="cache-hints">
-        <p class="cache-hint">
-          {{
-            debugUpdateEnabled
-              ? "更新、预下载与换服会先下载到这里，不占用游戏安装盘。"
-              : "换服会先下载到这里，不占用游戏安装盘。"
-          }}
-        </p>
+        <p class="cache-hint">更新、预下载与换服会先下载到这里，不占用游戏安装盘。</p>
         <p class="cache-hint cache-hint-act">SDK 可单独清理；任务仍使用的缓存会自动保留。</p>
       </div>
     </div>
@@ -112,7 +106,6 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import { listen } from "@tauri-apps/api/event";
 import fmtUtil from "@utils/fmtUtil.js";
@@ -123,8 +116,6 @@ import { computed, onMounted, onWatcherCleanup, ref, watch } from "vue";
 import PgNotice from "./pg-notice.vue";
 
 type CacheClearTarget = "chunks" | "sdk" | "all";
-
-const debugUpdateEnabled = gameEnum.package.debugUpdateEnabled();
 
 const taskStore = useGameLauncherStore();
 const { tasksByInstallation } = storeToRefs(taskStore);

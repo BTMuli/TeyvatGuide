@@ -73,11 +73,7 @@
       tone="warning"
     />
     <div
-      v-if="
-        debugUpdateEnabled &&
-        snapshot !== null &&
-        (snapshot.updateAvailable || snapshot.preDownloadAvailable)
-      "
+      v-if="snapshot !== null && (snapshot.updateAvailable || snapshot.preDownloadAvailable)"
       class="version-actions"
     >
       <v-btn
@@ -245,7 +241,6 @@ type VersionFactsSlot = {
 const { installation } = defineProps<Props>();
 const emit = defineEmits<{ updated: [] }>();
 defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
-const debugUpdateEnabled = gameEnum.package.debugUpdateEnabled();
 const taskStore = useGameLauncherStore();
 const { pendingActions, recoveryProgressByTask, tasksByInstallation, verifyByInstallation } =
   storeToRefs(taskStore);
@@ -272,8 +267,7 @@ const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
 });
 const visiblePlan = computed<TGApp.Game.Package.PlanSummary | null>(() => {
   if (plan.value === null) return null;
-  if (debugUpdateEnabled || plan.value.sourceTag === plan.value.targetTag) return plan.value;
-  return null;
+  return plan.value;
 });
 const planSpaceChip = computed<string>(() => {
   const summary = visiblePlan.value;
@@ -528,11 +522,11 @@ async function loadSnapshot(notify: boolean): Promise<void> {
       plan.value = null;
     }
     if (!notify) return;
-    if (debugUpdateEnabled && result.updateAvailable) {
+    if (result.updateAvailable) {
       showSnackbar.success(`远端版本已刷新，可更新至 ${result.main.tag}`);
       return;
     }
-    if (debugUpdateEnabled && result.preDownloadAvailable && result.preDownload !== null) {
+    if (result.preDownloadAvailable && result.preDownload !== null) {
       showSnackbar.success(`远端版本已刷新，可预下载 ${result.preDownload.tag}`);
       return;
     }
@@ -605,12 +599,7 @@ function stopPromotionWatch(): void {
 }
 
 async function createPlan(target: TGApp.Game.Package.PlanTargetEnum): Promise<void> {
-  if (
-    !debugUpdateEnabled ||
-    planningTarget.value !== null ||
-    verifyActive.value ||
-    occupyingTask.value
-  ) {
+  if (planningTarget.value !== null || verifyActive.value || occupyingTask.value) {
     return;
   }
   planningTarget.value = target;

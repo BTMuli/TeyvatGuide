@@ -95,10 +95,7 @@
                 <div class="game-fact-head">
                   <span>版本</span>
                   <v-icon
-                    v-if="
-                      isLatestOfficial(version.snapshot) &&
-                      (debugUpdateEnabled || !hasPreDownload(version.snapshot))
-                    "
+                    v-if="isLatestOfficial(version.snapshot)"
                     color="var(--tgc-od-green)"
                     size="16"
                     title="已是最新正式版本"
@@ -106,11 +103,7 @@
                     mdi-check-circle-outline
                   </v-icon>
                   <v-icon
-                    v-else-if="
-                      debugUpdateEnabled &&
-                      version.snapshot !== null &&
-                      !isLatestOfficial(version.snapshot)
-                    "
+                    v-else-if="version.snapshot !== null && !isLatestOfficial(version.snapshot)"
                     color="var(--tgc-od-orange)"
                     size="16"
                     :title="`正式 ${version.snapshot.main.tag}`"
@@ -118,7 +111,7 @@
                     mdi-arrow-up-circle-outline
                   </v-icon>
                   <v-icon
-                    v-if="debugUpdateEnabled && preDownloadTag(version.snapshot) !== null"
+                    v-if="preDownloadTag(version.snapshot) !== null"
                     color="var(--tgc-od-orange)"
                     size="16"
                     :title="`预下载 ${preDownloadTag(version.snapshot)}`"
@@ -346,7 +339,6 @@ const PgScheme = defineAsyncComponent(() => import("./pg-scheme.vue"));
 const PgVersion = defineAsyncComponent(() => import("./pg-version.vue"));
 const PgoAudio = defineAsyncComponent(() => import("./pgo-audio.vue"));
 
-const debugUpdateEnabled = gameEnum.package.debugUpdateEnabled();
 const props = defineProps<{
   installation: TGApp.Game.Installation.Item;
   installationCount: number;
@@ -499,10 +491,6 @@ function isLatestOfficial(snapshot: TGApp.Game.Package.Snapshot | null): boolean
   if (snapshot === null) return false;
   const local = snapshot.localVersion ?? props.installation.version;
   return local === snapshot.main.tag;
-}
-
-function hasPreDownload(snapshot: TGApp.Game.Package.Snapshot | null): boolean {
-  return snapshot !== null && snapshot.preDownload !== null;
 }
 
 function preDownloadTag(snapshot: TGApp.Game.Package.Snapshot | null): string | null {
