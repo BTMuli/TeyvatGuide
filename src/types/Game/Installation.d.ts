@@ -94,6 +94,19 @@ declare namespace TGApp.Game.Installation {
     lastSeen: string;
   };
 
+  /**
+   * 已安装官方语音包当前实际存在的清单文件占用。
+   * @since Beta v0.12.0
+   */
+  type AudioPackageUsage = {
+    /** 语音语言标识。 */
+    language: string;
+    /** 清单中当前实际存在的文件总字节数。 */
+    bytes: number;
+    /** 计入占用的文件数量，包含语音包清单自身。 */
+    fileCount: number;
+  };
+
   /** 未完成全新安装的 Rust 持久化草稿投影。 */
   type InstallDraftSummary = {
     draftId: string;

@@ -199,15 +199,19 @@
                     />
                   </div>
                 </div>
-                <div v-if="installedAudioLabels.length > 0" class="game-fact-tags">
+                <div v-if="installedAudioItems.length > 0" class="game-fact-tags">
                   <v-chip
-                    v-for="label in installedAudioLabels"
-                    :key="label"
+                    v-for="item in installedAudioItems"
+                    :key="item.language"
                     class="game-fact-tag"
                     size="x-small"
+                    :title="audioUsageTitle(item)"
                     variant="tonal"
                   >
-                    {{ label }}
+                    {{ item.label }}
+                    <template v-if="item.bytes !== null">
+                      · {{ fmtUtil.size(item.bytes) }}</template
+                    >
                   </v-chip>
                 </div>
                 <strong v-else>未识别</strong>
@@ -252,15 +256,17 @@
         </div>
         <div class="game-fact">
           <span>语音包</span>
-          <div v-if="installedAudioLabels.length > 0" class="game-fact-tags">
+          <div v-if="installedAudioItems.length > 0" class="game-fact-tags">
             <v-chip
-              v-for="label in installedAudioLabels"
-              :key="label"
+              v-for="item in installedAudioItems"
+              :key="item.language"
               class="game-fact-tag"
               size="x-small"
+              :title="audioUsageTitle(item)"
               variant="tonal"
             >
-              {{ label }}
+              {{ item.label }}
+              <template v-if="item.bytes !== null"> · {{ fmtUtil.size(item.bytes) }}</template>
             </v-chip>
           </div>
           <strong v-else>未识别</strong>
@@ -327,6 +333,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import { launchInstallation } from "@utils/TGGame.js";
 import {
   chooseGameInstallation,
+  getGameInstallationAudioUsage,
   getGameInstallationSize,
   uninstallGameInstallation,
 } from "@utils/TGGameLauncher.js";
@@ -355,6 +362,12 @@ type AccountChoice = {
   cookie: TGApp.App.Account.Cookie;
 };
 
+type InstalledAudioItem = {
+  language: string;
+  label: string;
+  bytes: number | null;
+};
+
 const accountDialog = ref<boolean>(false);
 const officialAccounts = ref<Array<AccountChoice>>([]);
 const uninstalling = ref<boolean>(false);
@@ -376,6 +389,9 @@ const genshinIcon = computed<string>(() => {
 const installationSize = ref<number | null>(null);
 const installationSizeLoading = ref<boolean>(false);
 const installationSizeError = ref<boolean>(false);
+const audioUsageByLanguage = ref<Record<string, number>>({});
+const audioUsageLoading = ref<boolean>(false);
+const audioUsageError = ref<boolean>(false);
 const installationSizeCache = new Map<string, { bytes: number; readAt: number }>();
 const installationSizePending = new Map<string, Promise<number>>();
 let installationSizeRequest = 0;
@@ -403,28 +419,47 @@ async function refreshInstallationSize(): Promise<void> {
   installationSize.value = null;
   installationSizeError.value = false;
   installationSizeLoading.value = true;
+  audioUsageLoading.value = true;
+  audioUsageError.value = false;
   let pending: Promise<number> | undefined;
   try {
     const cached = installationSizeCache.get(props.installation.rootPath);
-    if (cached !== undefined && Date.now() - cached.readAt < 30_000) {
-      installationSize.value = cached.bytes;
-      return;
+    const sizePromise =
+      cached !== undefined && Date.now() - cached.readAt < 30_000
+        ? Promise.resolve(cached.bytes)
+        : (installationSizePending.get(props.installation.rootPath) ??
+          getGameInstallationSize(props.installation.rootPath));
+    pending = sizePromise;
+    installationSizePending.set(props.installation.rootPath, sizePromise);
+    const [sizeResult, audioUsageResult] = await Promise.allSettled([
+      sizePromise,
+      getGameInstallationAudioUsage(props.installation.id),
+    ]);
+    if (request !== installationSizeRequest) return;
+    if (sizeResult.status === "fulfilled") {
+      installationSize.value = sizeResult.value;
+      installationSizeCache.set(props.installation.rootPath, {
+        bytes: sizeResult.value,
+        readAt: Date.now(),
+      });
+    } else {
+      installationSizeError.value = true;
     }
-    pending = installationSizePending.get(props.installation.rootPath);
-    if (pending === undefined) {
-      pending = getGameInstallationSize(props.installation.rootPath);
-      installationSizePending.set(props.installation.rootPath, pending);
+    if (audioUsageResult.status === "fulfilled") {
+      audioUsageByLanguage.value = Object.fromEntries(
+        audioUsageResult.value.map((item) => [item.language, item.bytes]),
+      );
+    } else {
+      audioUsageError.value = true;
     }
-    const size = await pending;
-    installationSizeCache.set(props.installation.rootPath, { bytes: size, readAt: Date.now() });
-    if (request === installationSizeRequest) installationSize.value = size;
-  } catch {
-    if (request === installationSizeRequest) installationSizeError.value = true;
   } finally {
     if (installationSizePending.get(props.installation.rootPath) === pending) {
       installationSizePending.delete(props.installation.rootPath);
     }
-    if (request === installationSizeRequest) installationSizeLoading.value = false;
+    if (request === installationSizeRequest) {
+      installationSizeLoading.value = false;
+      audioUsageLoading.value = false;
+    }
   }
 }
 
@@ -477,9 +512,21 @@ function audioLabels(languages: Array<string>): Array<string> {
   return languages.map((language) => descriptions[language] ?? language);
 }
 
-const installedAudioLabels = computed<Array<string>>(() =>
-  audioLabels(props.installation.audioLanguages),
-);
+const installedAudioItems = computed<Array<InstalledAudioItem>>(() => {
+  const labels = audioLabels(props.installation.audioLanguages);
+  return props.installation.audioLanguages.map((language, index) => ({
+    language,
+    label: labels[index] ?? language,
+    bytes: audioUsageByLanguage.value[language] ?? null,
+  }));
+});
+
+function audioUsageTitle(item: InstalledAudioItem): string {
+  if (audioUsageLoading.value) return `${item.label}语音包占用读取中`;
+  if (audioUsageError.value) return `${item.label}语音包占用读取失败`;
+  if (item.bytes === null) return `点击顶部“读取占用空间”统计${item.label}语音包`;
+  return `${item.label}语音包占用 ${fmtUtil.size(item.bytes)}`;
+}
 
 function versionPrimary(snapshot: TGApp.Game.Package.Snapshot | null): string {
   const local = snapshot?.localVersion ?? props.installation.version ?? "未读取";

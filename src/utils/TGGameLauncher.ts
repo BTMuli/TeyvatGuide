@@ -50,6 +50,21 @@ export async function getGameInstallationSize(rootPath: string): Promise<number>
 }
 
 /**
+ * 读取已登记安装中各个官方语音包当前实际存在的清单文件占用。
+ * @since Beta v0.12.0
+ * @param installationId - 已登记安装 ID
+ * @returns 各语音语言的本地占用
+ */
+export async function getGameInstallationAudioUsage(
+  installationId: string,
+): Promise<Array<TGApp.Game.Installation.AudioPackageUsage>> {
+  return await invoke<Array<TGApp.Game.Installation.AudioPackageUsage>>(
+    "game_installation_audio_usage",
+    { installationId },
+  );
+}
+
+/**
  * 自动定位本机国服游戏安装候选：合并 HoYoPlay 登记与 Unity 日志来源。
  * @since Beta v0.12.0
  * @returns 排序后的候选列表与来源级告警

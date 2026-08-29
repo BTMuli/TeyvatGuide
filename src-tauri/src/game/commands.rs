@@ -4,7 +4,7 @@
 use super::{
   cache, defender,
   hoyoplay::{configure_system_proxy, create_http_client, create_snapshot, get_game_branches},
-  installation::{derive_installation_id, inspect_executable},
+  installation::{AUDIO_PACKAGES, derive_installation_id, inspect_executable},
   installation_locator::discover_installations,
   installer, journal, launch,
   model::{
@@ -15,6 +15,7 @@ use super::{
     PackageTaskSummary, PackageVerifySummary, SchemeId,
   },
   package::{AudioApplyContext, GamePackageManager},
+  path_guard::resolve_optional_manifest_file,
   planner::{
     PersistedPlan, create_and_persist_audio_plan, create_and_persist_install_plan,
     create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan,
@@ -24,10 +25,12 @@ use super::{
   switch::{self, create_and_persist_switch_plan},
 };
 use chrono::Utc;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use std::{
+  collections::HashSet,
   fs,
+  io::{BufRead, BufReader},
   path::{Path, PathBuf},
   time::{Duration, Instant},
 };
@@ -37,6 +40,8 @@ use tauri_plugin_sql::{DbInstances, DbPool};
 use uuid::Uuid;
 
 const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
+const MAX_AUDIO_VERSION_BYTES: u64 = 64 * 1024 * 1024;
+const MAX_AUDIO_VERSION_FILES: usize = 500_000;
 
 async fn refill_install_plan_for_resume(
   task_root: &Path,
@@ -105,6 +110,20 @@ struct GameInstallAbandonProgress {
 pub struct GameUninstallSummary {
   pub removed_files: usize,
   pub removed_dirs: usize,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GameAudioPackageUsage {
+  pub language: String,
+  pub bytes: u64,
+  pub file_count: usize,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AudioVersionEntry {
+  remote_name: String,
 }
 
 /// 检测指定可执行文件，并返回当前磁盘上的游戏安装状态。
@@ -230,6 +249,67 @@ pub async fn game_installation_locate(
   tauri::async_runtime::spawn_blocking(move || discover_installations(&machine_uid))
     .await
     .map_err(|error| format!("定位任务异常退出：{error}"))
+}
+
+/// 读取已登记安装中各个官方语音包当前实际存在的清单文件占用。
+#[tauri::command]
+pub async fn game_installation_audio_usage(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  installation_id: String,
+) -> Result<Vec<GameAudioPackageUsage>, String> {
+  let pool = sqlite_pool(&db_instances).await?;
+  let installation = load_trusted_installation(&app_handle, &pool, &installation_id).await?;
+  let root = PathBuf::from(installation.root_path);
+  tauri::async_runtime::spawn_blocking(move || collect_audio_package_usage(&root))
+    .await
+    .map_err(|error| format!("语音包占用统计任务异常退出：{error}"))?
+}
+
+fn collect_audio_package_usage(root: &Path) -> Result<Vec<GameAudioPackageUsage>, String> {
+  let mut result = Vec::new();
+  for (marker_name, language) in AUDIO_PACKAGES {
+    let Some(marker_path) = resolve_optional_manifest_file(root, marker_name)? else {
+      continue;
+    };
+    let marker_size =
+      marker_path.metadata().map_err(|error| format!("读取语音包清单大小失败：{error}"))?.len();
+    if marker_size == 0 || marker_size > MAX_AUDIO_VERSION_BYTES {
+      return Err(format!("语音包清单大小无效：{marker_name}"));
+    }
+    let marker =
+      fs::File::open(&marker_path).map_err(|error| format!("打开语音包清单失败：{error}"))?;
+    let mut bytes = marker_size;
+    let mut file_count = 1_usize;
+    let mut names = HashSet::new();
+    names.insert(marker_name.to_ascii_lowercase());
+    for line in BufReader::new(marker).lines() {
+      let line = line.map_err(|error| format!("读取语音包清单失败：{error}"))?;
+      if line.trim().is_empty() {
+        continue;
+      }
+      let entry: AudioVersionEntry = serde_json::from_str(&line)
+        .map_err(|error| format!("解析语音包清单失败：{marker_name}：{error}"))?;
+      let normalized = super::path_guard::normalize_manifest_path(&entry.remote_name)?;
+      if !names.insert(normalized.to_ascii_lowercase()) {
+        continue;
+      }
+      if names.len() > MAX_AUDIO_VERSION_FILES {
+        return Err(format!("语音包清单文件数量超过上限：{marker_name}"));
+      }
+      let Some(path) = resolve_optional_manifest_file(root, &normalized)? else {
+        continue;
+      };
+      bytes = bytes
+        .checked_add(
+          path.metadata().map_err(|error| format!("读取语音资源大小失败：{error}"))?.len(),
+        )
+        .ok_or_else(|| format!("语音包占用大小溢出：{marker_name}"))?;
+      file_count += 1;
+    }
+    result.push(GameAudioPackageUsage { language: language.to_string(), bytes, file_count });
+  }
+  Ok(result)
 }
 
 /// 卸载已登记的游戏安装：删除 `YuanShen.exe` 所在目录的全部内容，保留空目录本身，
