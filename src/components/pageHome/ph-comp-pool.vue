@@ -61,7 +61,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { A11y, Autoplay } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import THomeCard from "./ph-comp-card.vue";
 
@@ -70,12 +70,18 @@ type TPoolEmits = { success: [] };
 const { isLogin } = storeToRefs(useAppStore());
 const { cookie, account } = storeToRefs(useUserStore());
 const homeStore = useHomeStore();
+const { isUserPool: preferUserPool } = storeToRefs(homeStore);
 
 const emits = defineEmits<TPoolEmits>();
 
 const isInit = ref<boolean>(false);
 const isRefreshing = ref<boolean>(false);
-const isUserPool = ref<boolean>(isLogin.value);
+const isUserPool = computed<boolean>({
+  get: () => isLogin.value && preferUserPool.value,
+  set: (value: boolean) => {
+    preferUserPool.value = value;
+  },
+});
 const obcPools = shallowRef<Array<TGApp.BBS.Obc.GachaItem>>([]);
 const userPools = shallowRef<Array<TGApp.Game.ActCalendar.ActPool>>([]);
 const swiperModules = [Autoplay, A11y];
@@ -100,7 +106,7 @@ watch(
 );
 
 onMounted(async () => {
-  if (isLogin.value) await loadUserPool();
+  if (isUserPool.value) await loadUserPool();
   else await loadObcPool();
   emits("success");
   isInit.value = true;

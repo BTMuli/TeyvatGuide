@@ -94,7 +94,9 @@
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import useHomeStore from "@store/home.js";
 import fmtUtil from "@utils/fmtUtil.js";
+import { storeToRefs } from "pinia";
 import {
   computed,
   nextTick,
@@ -137,8 +139,8 @@ const weekNow = ref<number>(0);
 const btnNow = ref<number>(0);
 const dateNow = ref<string>("");
 const page = ref<number>(1);
+const { showCalendar } = storeToRefs(useHomeStore());
 const showItem = ref<boolean>(false);
-const showCalendar = ref<boolean>(true);
 const selectedType = ref<"character" | "weapon">("character");
 const cultivationProject = shallowRef<TGApp.Sqlite.Cultivation.Project>();
 const cultivationEntries = shallowRef<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>([]);

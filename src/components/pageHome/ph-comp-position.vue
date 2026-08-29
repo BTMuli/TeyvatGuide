@@ -111,12 +111,18 @@ type TPositionEmits = { success: [] };
 const { isLogin } = storeToRefs(useAppStore());
 const { cookie, account } = storeToRefs(useUserStore());
 const homeStore = useHomeStore();
+const { isUserPos: preferUserPos } = storeToRefs(homeStore);
 
 const emits = defineEmits<TPositionEmits>();
 
 const isInit = ref<boolean>(false);
 const isRefreshing = ref<boolean>(false);
-const isUserPos = ref<boolean>(isLogin.value);
+const isUserPos = computed<boolean>({
+  get: () => isLogin.value && preferUserPos.value,
+  set: (value: boolean) => {
+    preferUserPos.value = value;
+  },
+});
 const showMaterial = ref<boolean>(false);
 const showCalendar = ref<boolean>(false);
 const rewardIndex = ref<number>(0);
@@ -151,7 +157,7 @@ watch(
 );
 
 onMounted(async () => {
-  if (isLogin.value) await loadUserPosition();
+  if (isUserPos.value) await loadUserPosition();
   else await loadWikiPosition();
   emits("success");
   isInit.value = true;

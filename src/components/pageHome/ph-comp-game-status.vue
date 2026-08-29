@@ -57,6 +57,7 @@ import miscReq from "@req/miscReq.js";
 import recordReq from "@req/recordReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";
 import useAppStore from "@store/app.js";
+import useHomeStore from "@store/home.js";
 import useUserStore from "@store/user.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -85,8 +86,7 @@ type TNoteSignEmits = {
 const emits = defineEmits<TNoteSignEmits>();
 const { cookie, uid, account } = storeToRefs(useUserStore());
 const { isLogin } = storeToRefs(useAppStore());
-
-const isDailyNote = ref<boolean>(true);
+const { isDailyNote } = storeToRefs(useHomeStore());
 const dailyNoteLoaded = ref<boolean>(false);
 const signLoaded = ref<boolean>(false);
 const loadingDailyNote = ref<boolean>(false);
@@ -201,7 +201,8 @@ watch(
 );
 
 onMounted(async () => {
-  await loadDailyNoteData();
+  if (isDailyNote.value) await loadDailyNoteData();
+  else await loadSignData();
   emits("success");
 });
 
