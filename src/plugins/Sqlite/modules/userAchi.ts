@@ -1,11 +1,11 @@
 /**
  * 用户成就模块
- * @since Beta v0.9.2
+ * @since Beta v0.12.0
  */
 
 import { UiafAchiStatEnum } from "@enum/uiaf.js";
 import { path } from "@tauri-apps/api";
-import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 
@@ -291,7 +291,7 @@ async function getAllUid(): Promise<Array<number>> {
 
 /**
  * 备份成就数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.0
  * @param dir - 存档数据
  * @param uid - 存档UID，未指定则导出所有
  * @returns 无返回值
@@ -300,27 +300,27 @@ async function backupUiaf(dir: string, uid?: number): Promise<void> {
   let uidList = [];
   if (uid === undefined) uidList = await getAllUid();
   else uidList.push(uid);
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     await TGLogger.Warn("不存在指定的成就备份目录，即将创建");
-    await mkdir(dir, { recursive: true });
+    await appFs.mkdir(dir, { recursive: true });
   }
   for (const uidItem of uidList) {
     const data = await getUiafData(uidItem);
     const fileName = `UIAF_${uidItem}`;
-    await writeTextFile(`${dir}${path.sep()}${fileName}.json`, JSON.stringify(data, null, 2));
+    await appFs.writeTextFile(`${dir}${path.sep()}${fileName}.json`, JSON.stringify(data, null, 2));
     await TGLogger.Info(`成功备份${uidItem}的成就存档`);
   }
 }
 
 /**
  * 恢复成就数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.0
  * @param dir - 数据目录
  * @returns 是否恢复成功
  */
 async function restoreUiaf(dir: string): Promise<boolean> {
-  if (!(await exists(dir))) return false;
-  const filesRead = await readDir(dir);
+  if (!(await appFs.exists(dir))) return false;
+  const filesRead = await appFs.readDir(dir);
   // 校验 UIAF_xxx.json 文件
   const fileRegex = /^UIAF_\d+\.json$/;
   const files = filesRead.filter((item) => item.isFile && fileRegex.test(item.name));
@@ -329,7 +329,9 @@ async function restoreUiaf(dir: string): Promise<boolean> {
     try {
       const uid = parseInt(file.name.replace("UIAF_", "").replace(".json", ""));
       const filePath = `${dir}${path.sep()}${file.name}`;
-      const data: Array<TGApp.Plugins.UIAF.Achievement> = JSON.parse(await readTextFile(filePath));
+      const data: Array<TGApp.Plugins.UIAF.Achievement> = JSON.parse(
+        await appFs.readTextFile(filePath),
+      );
       await TSUserAchi.mergeUiaf(data, uid);
     } catch (e) {
       await TGLogger.Error(`[UIAF][RESTORE] 恢复成就数据${file.name} `);

@@ -1,6 +1,6 @@
 /**
  * 用户数据的备份、恢复、迁移
- * @since Beta v0.11.3
+ * @since Beta v0.12.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -10,22 +10,22 @@ import TSUserAccount from "@Sqlm/userAccount.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import TSUserChallenge from "@Sqlm/userChallenge.js";
 import TSUserCombat from "@Sqlm/userCombat.js";
-import { exists, mkdir } from "@tauri-apps/plugin-fs";
+import appFs from "@utils/appFs.js";
 import { backUpUigf, restoreUigf } from "@utils/UIGF.js";
 
 import TGLogger from "./TGLogger.js";
 
 /**
  * 备份用户数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @TODO 处理胡桃数据&应用自身数据的导入
  * @param dir - 备份目录路径
  * @returns 无返回值
  */
 export async function backUpUserData(dir: string): Promise<void> {
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     await TGLogger.Warn("备份数据不存在，即将创建");
-    await mkdir(dir, { recursive: true });
+    await appFs.mkdir(dir, { recursive: true });
   }
   await showLoading.update("正在备份UIAF成就数据");
   await TSUserAchi.backupUiaf(dir);
@@ -43,13 +43,13 @@ export async function backUpUserData(dir: string): Promise<void> {
 
 /**
  * 恢复用户数据
- * @since Beta v0.11.3
+ * @since Beta v0.12.0
  * @param dir - 备份目录路径
  * @returns 无返回值
  */
 export async function restoreUserData(dir: string): Promise<boolean> {
   let errNum = 0;
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     showSnackbar.error("备份目录不存在");
     return false;
   }

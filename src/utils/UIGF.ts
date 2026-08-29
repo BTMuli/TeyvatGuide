@@ -1,6 +1,6 @@
 /**
  * UIGF工具类
- * @since Beta v0.9.9
+ * @since Beta v0.12.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -8,7 +8,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import TSUserGacha from "@Sqlm/userGacha.js";
 import TSUserGachaB from "@Sqlm/userGachaB.js";
 import { app, path } from "@tauri-apps/api";
-import { exists, mkdir, readDir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import appFs from "@utils/appFs.js";
 import Ajv, { type ErrorObject } from "ajv";
 
 import fmtUtil from "./fmtUtil.js";
@@ -128,14 +128,14 @@ function convertUgc2Uigf(
 
 /**
  * 检测是否是v4版本的UIGF
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @remarks 祈愿&颂愿数据需要进一步确定
  * @param path - UIGF 文件路径
  * @returns 是否是v4，null表示数据异常
  */
 export async function checkUigfData(path: string): Promise<boolean | null> {
   try {
-    const fileData: string = await readTextFile(path);
+    const fileData: string = await appFs.readTextFile(path);
     const fileJson = JSON.parse(fileData);
     if (!("info" in fileJson) || typeof fileJson.info !== "object") {
       validateUigf4Data(fileJson);
@@ -159,14 +159,14 @@ export async function checkUigfData(path: string): Promise<boolean | null> {
 
 /**
  * 检测是否存在 UIGF 数据，采用 ajv 验证 schema
- * @since Beta v0.6.5
+ * @since Beta v0.12.0
  * @param path - UIGF 数据路径
  * @param isVersion4 - 是否为 UIGF v4.0
  * @returns 是否存在 UIGF 数据
  */
 export async function verifyUigfData(path: string, isVersion4: boolean = false): Promise<boolean> {
   try {
-    const fileData: string = await readTextFile(path);
+    const fileData: string = await appFs.readTextFile(path);
     const fileJson = JSON.parse(fileData);
     if (isVersion4) return validateUigf4Data(fileJson);
     return validateUigfData(fileJson);
@@ -219,31 +219,31 @@ function validateUigf4Data(data: object): boolean {
 
 /**
  * 读取 UIGF 数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @todo 重构
  * @param userPath - UIGF 数据路径
  * @returns UIGF 数据
  */
 export async function readUigfData(userPath: string): Promise<TGApp.Plugins.UIGF.Schema> {
-  const fileData: string = await readTextFile(userPath);
+  const fileData: string = await appFs.readTextFile(userPath);
   return <TGApp.Plugins.UIGF.Schema>JSON.parse(fileData);
 }
 
 /**
  * 读取 UIGF 4.0 数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @todo 重构
  * @param userPath - UIGF 数据路径
  * @returns UIGF 数据
  */
 export async function readUigf4Data(userPath: string): Promise<TGApp.Plugins.UIGF.Schema4> {
-  const fileData: string = await readTextFile(userPath);
+  const fileData: string = await appFs.readTextFile(userPath);
   return <TGApp.Plugins.UIGF.Schema4>JSON.parse(fileData);
 }
 
 /**
  * 导出 UIGF 数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @param uid - UID
  * @param gachaList - 祈愿列表
  * @param savePath - 保存路径
@@ -260,13 +260,13 @@ export async function exportUigfData(
     list: convertHk4e2Uigf(gachaList, timezone),
   };
   const filePath =
-    savePath ?? `${await path.appLocalDataDir()}userData${path.sep()}UIGF_${uid}.json`;
-  await writeTextFile(filePath, JSON.stringify(UigfData));
+    savePath ?? `${await path.appLocalDataDir()}${path.sep()}userData${path.sep()}UIGF_${uid}.json`;
+  await appFs.writeTextFile(filePath, JSON.stringify(UigfData));
 }
 
 /**
  * 导出UIGF4数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @param usg - 祈愿UID列表
  * @param usb - 颂愿UID列表
  * @param savePath - 保存路径
@@ -278,7 +278,8 @@ export async function exportUigf4Data(
   savePath?: string,
 ): Promise<void> {
   const header = await getUigf4Header();
-  const filePath = savePath ?? `${await path.appLocalDataDir()}userData${path.sep()}UIGF4.json`;
+  const filePath =
+    savePath ?? `${await path.appLocalDataDir()}${path.sep()}userData${path.sep()}UIGF4.json`;
   const dataHk4e: Array<TGApp.Plugins.UIGF.GachaHk4e> = [];
   const dataUgc: Array<TGApp.Plugins.UIGF.GachaUgc> = [];
   for (const uid of usg) {
@@ -294,19 +295,19 @@ export async function exportUigf4Data(
     dataUgc.push({ uid: uid, timezone: timezone, list: convertUgc2Uigf(gachaList, timezone) });
   }
   const uigf4Data: TGApp.Plugins.UIGF.Schema4 = { info: header, hk4e: dataHk4e, hk4e_ugc: dataUgc };
-  await writeTextFile(filePath, JSON.stringify(uigf4Data, null, 2));
+  await appFs.writeTextFile(filePath, JSON.stringify(uigf4Data, null, 2));
 }
 
 /**
  * 备份祈愿数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @param dir - 备份目录
  * @returns 无返回值
  */
 export async function backUpUigf(dir: string): Promise<void> {
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     await TGLogger.Warn("不存在指定的祈愿备份目录，即将创建");
-    await mkdir(dir, { recursive: true });
+    await appFs.mkdir(dir, { recursive: true });
   }
   const usg = await TSUserGacha.getUidList();
   const usb = await TSUserGachaB.getUidList();
@@ -377,30 +378,30 @@ async function restoreUigfByFile(filePath: string): Promise<boolean> {
 
 /**
  * 恢复祈愿数据
- * @since Beta v0.9.5
+ * @since Beta v0.12.0
  * @param dir - 备份目录
  * @returns 是否恢复成功
  */
 export async function restoreUigf(dir: string): Promise<boolean> {
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     await TGLogger.Warn("不存在指定的祈愿备份目录");
     return false;
   }
-  let cnt = 0;
+  let restored = false;
   // 适配旧版备份文件 UIGF_{{uid}}.json
   const legacyReg = /^UIGF_\d+\.json$/;
-  const legacyFiles = (await readDir(dir)).filter(
+  const legacyFiles = (await appFs.readDir(dir)).filter(
     (item) => item.isFile && legacyReg.test(item.name),
   );
   for (const file of legacyFiles) {
     const checkL = await restoreUigfByLegacyFile(dir, file.name);
-    if (checkL) cnt++;
+    if (checkL) restored = true;
   }
   const filePath = `${dir}${path.sep()}UIGF4.json`;
-  if (!(await exists(filePath))) {
+  if (!(await appFs.exists(filePath))) {
     await TGLogger.Warn(`未检测到UIGF4备份文件`);
-  } else {
-    await restoreUigfByFile(filePath);
+    return restored;
   }
-  return cnt > 0;
+  const check4 = await restoreUigfByFile(filePath);
+  return check4 || restored;
 }

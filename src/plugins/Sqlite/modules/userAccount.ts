@@ -1,6 +1,6 @@
 /**
  * 用户账户模块
- * @since Beta v0.11.3
+ * @since Beta v0.12.0
  */
 
 import showLoading from "@comp/func/loading.js";
@@ -8,7 +8,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import bbsReq from "@req/bbsReq.js";
 import passportReq from "@req/passportReq.js";
 import { path } from "@tauri-apps/api";
-import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
@@ -219,38 +219,38 @@ async function updateAccountCk(data: TGApp.App.Account.User): Promise<boolean> {
 
 /**
  * 备份用户数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.0
  * @param dir - 备份目录
  * @returns 无返回值
  */
 async function backUpAccount(dir: string): Promise<void> {
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     await TGLogger.Warn("不存在指定的账户备份目录，即将创建");
-    await mkdir(dir, { recursive: true });
+    await appFs.mkdir(dir, { recursive: true });
   }
   const accounts = await getAllAccount();
-  await writeTextFile(`${dir}${path.sep()}accounts.json`, JSON.stringify(accounts, null, 2));
+  await appFs.writeTextFile(`${dir}${path.sep()}accounts.json`, JSON.stringify(accounts, null, 2));
   await TGLogger.Info("账户数据备份完成");
 }
 
 /**
  * 恢复用户数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.0
  * @param dir - 恢复目录
  * @returns 是否恢复成功
  */
 async function restoreAccount(dir: string): Promise<boolean> {
-  if (!(await exists(dir))) {
+  if (!(await appFs.exists(dir))) {
     await TGLogger.Warn("不存在指定的账户备份目录");
     return false;
   }
   try {
     const filePath = `${dir}${path.sep()}accounts.json`;
-    if (!(await exists(filePath))) {
+    if (!(await appFs.exists(filePath))) {
       await TGLogger.Warn("不存在指定的账户备份文件");
       return false;
     }
-    const data = await readTextFile(filePath);
+    const data = await appFs.readTextFile(filePath);
     const accounts: Array<TGApp.App.Account.User> = JSON.parse(data);
     for (const account of accounts) {
       await saveAccount(account);

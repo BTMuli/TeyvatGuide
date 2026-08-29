@@ -16,6 +16,7 @@ mod yae;
 
 use crate::client::create_mhy_client;
 use crate::commands::{
+  app_fs_exists, app_fs_mkdir, app_fs_read_dir, app_fs_read_text_file, app_fs_write_text_file,
   clear_app_cache, clear_app_logs, create_window, destroy_window, destroy_window_by_label,
   ensure_user_data_dir, execute_js, execute_sql_transaction, get_dir_size, hide_main_window,
   init_app, is_in_admin, is_msix, is_process_running, quit_app, read_text_scale,
@@ -142,6 +143,11 @@ pub fn run() {
       clear_app_cache,
       clear_app_logs,
       ensure_user_data_dir,
+      app_fs_exists,
+      app_fs_mkdir,
+      app_fs_write_text_file,
+      app_fs_read_text_file,
+      app_fs_read_dir,
       create_mhy_client,
       is_in_admin,
       hide_main_window,

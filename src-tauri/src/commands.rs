@@ -1,5 +1,5 @@
 // 命令模块，负责处理命令
-// @since Beta v0.11.3
+// @since Beta v0.12.0
 
 use crate::utils;
 use serde::{Deserialize, Serialize};
@@ -406,6 +406,85 @@ pub fn ensure_user_data_dir(path: String) -> Result<(), String> {
     return Err("用户数据目录不能为空".to_string());
   }
   std::fs::create_dir_all(path).map_err(|error| format!("创建用户数据目录失败：{error}"))
+}
+
+/// 备份/恢复使用的目录项，字段名对齐 `@tauri-apps/plugin-fs` 的 `DirEntry`。
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AppFsDirEntry {
+  pub name: String,
+  pub is_directory: bool,
+  pub is_file: bool,
+  pub is_symlink: bool,
+}
+
+fn prepare_app_fs_path(path: &str) -> Result<std::path::PathBuf, String> {
+  let trimmed = path.trim();
+  if trimmed.is_empty() {
+    return Err("路径不能为空".to_string());
+  }
+  let resolved = std::path::PathBuf::from(trimmed);
+  if resolved.components().any(|component| component.as_os_str().eq_ignore_ascii_case("EBWebView"))
+  {
+    return Err("禁止访问 WebView 数据目录".to_string());
+  }
+  Ok(resolved)
+}
+
+/// 判断路径是否存在；不走前端 fs 插件作用域。
+#[tauri::command]
+pub fn app_fs_exists(path: String) -> Result<bool, String> {
+  let path = prepare_app_fs_path(&path)?;
+  Ok(path.exists())
+}
+
+/// 创建目录；不走前端 fs 插件作用域。
+#[tauri::command]
+pub fn app_fs_mkdir(path: String, recursive: Option<bool>) -> Result<(), String> {
+  let path = prepare_app_fs_path(&path)?;
+  if recursive.unwrap_or(false) {
+    std::fs::create_dir_all(&path).map_err(|error| format!("创建目录失败：{error}"))
+  } else {
+    std::fs::create_dir(&path).map_err(|error| format!("创建目录失败：{error}"))
+  }
+}
+
+/// 写入文本文件；不走前端 fs 插件作用域。
+#[tauri::command]
+pub fn app_fs_write_text_file(path: String, contents: String) -> Result<(), String> {
+  let path = prepare_app_fs_path(&path)?;
+  if let Some(parent) = path.parent() {
+    if !parent.as_os_str().is_empty() {
+      std::fs::create_dir_all(parent).map_err(|error| format!("创建文件目录失败：{error}"))?;
+    }
+  }
+  std::fs::write(&path, contents).map_err(|error| format!("写入文件失败：{error}"))
+}
+
+/// 读取文本文件；不走前端 fs 插件作用域。
+#[tauri::command]
+pub fn app_fs_read_text_file(path: String) -> Result<String, String> {
+  let path = prepare_app_fs_path(&path)?;
+  std::fs::read_to_string(&path).map_err(|error| format!("读取文件失败：{error}"))
+}
+
+/// 读取目录项；不走前端 fs 插件作用域。
+#[tauri::command]
+pub fn app_fs_read_dir(path: String) -> Result<Vec<AppFsDirEntry>, String> {
+  let path = prepare_app_fs_path(&path)?;
+  let entries = std::fs::read_dir(&path).map_err(|error| format!("读取目录失败：{error}"))?;
+  let mut result = Vec::new();
+  for entry in entries {
+    let entry = entry.map_err(|error| format!("读取目录项失败：{error}"))?;
+    let file_type = entry.file_type().map_err(|error| format!("读取目录项类型失败：{error}"))?;
+    result.push(AppFsDirEntry {
+      name: entry.file_name().to_string_lossy().into_owned(),
+      is_directory: file_type.is_dir(),
+      is_file: file_type.is_file(),
+      is_symlink: file_type.is_symlink(),
+    });
+  }
+  Ok(result)
 }
 
 fn is_expired_daily_log(name: &str, today: chrono::NaiveDate) -> bool {

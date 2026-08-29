@@ -1,10 +1,10 @@
 /**
  * Sqlite-用户深渊模块
- * @since Beta v0.8.6
+ * @since Beta v0.12.0
  */
 
 import { path } from "@tauri-apps/api";
-import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 
@@ -213,30 +213,32 @@ async function delAbyss(uid: string): Promise<void> {
 
 /**
  * 备份深渊数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.0
  * @param dir - 备份目录
  * @returns 无返回值
  */
 async function backupAbyss(dir: string): Promise<void> {
-  if (!(await exists(dir))) {
-    await mkdir(dir, { recursive: true });
+  if (!(await appFs.exists(dir))) {
+    await appFs.mkdir(dir, { recursive: true });
     await TGLogger.Warn(`未检测到备份目录，已创建`);
   }
   const data = await getAbyss();
-  await writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(data, null, 2));
+  await appFs.writeTextFile(`${dir}${path.sep()}abyss.json`, JSON.stringify(data, null, 2));
 }
 
 /**
  * 恢复深渊数据
- * @since Beta v0.6.8
+ * @since Beta v0.12.0
  * @param dir - 备份文件目录
  * @returns 是否恢复成功
  */
 async function restoreAbyss(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}abyss.json`;
-  if (!(await exists(filePath))) return false;
+  if (!(await appFs.exists(filePath))) return false;
   try {
-    const data: Array<TGApp.Sqlite.Abyss.TableTrans> = JSON.parse(await readTextFile(filePath));
+    const data: Array<TGApp.Sqlite.Abyss.TableTrans> = JSON.parse(
+      await appFs.readTextFile(filePath),
+    );
     const db = await TGSqlite.getDB();
     for (const abyss of data) {
       await db.execute(getRestoreSql(abyss));

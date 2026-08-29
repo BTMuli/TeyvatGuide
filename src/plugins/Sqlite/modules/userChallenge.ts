@@ -1,11 +1,11 @@
 /**
  * 幽境危战模块
- * @since Beta v0.11.4
+ * @since Beta v0.12.0
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
 import { path } from "@tauri-apps/api";
-import { exists, mkdir, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 
@@ -387,18 +387,18 @@ async function delChallenge(uid: string): Promise<void> {
 
 /**
  * 备份挑战数据
- * @since Beta v0.11.3
+ * @since Beta v0.12.0
  * @param dir - 备份目录
  * @returns 无返回值
  */
 async function backupChallenge(dir: string): Promise<void> {
-  if (!(await exists(dir))) {
-    await mkdir(dir, { recursive: true });
+  if (!(await appFs.exists(dir))) {
+    await appFs.mkdir(dir, { recursive: true });
     await TGLogger.Warn(`[TSUserChallenge][Backup] 未检测到备份目录，已创建`);
   }
   const data = await readChallenges();
-  await writeTextFile(`${dir}${path.sep()}challenge.json`, JSON.stringify(data.valid));
-  await writeTextFile(
+  await appFs.writeTextFile(`${dir}${path.sep()}challenge.json`, JSON.stringify(data.valid));
+  await appFs.writeTextFile(
     `${dir}${path.sep()}challenge.quarantine.json`,
     JSON.stringify(data.quarantine.map((item) => item.raw)),
   );
@@ -406,19 +406,19 @@ async function backupChallenge(dir: string): Promise<void> {
 
 /**
  * 恢复挑战数据
- * @since Beta v0.11.3
+ * @since Beta v0.12.0
  * @param dir - 备份目录
  * @returns 是否恢复成功
  */
 async function restoreChallenge(dir: string): Promise<boolean> {
   const filePath = `${dir}${path.sep()}challenge.json`;
-  if (!(await exists(filePath))) return false;
+  if (!(await appFs.exists(filePath))) return false;
   try {
-    const backupData: unknown = JSON.parse(await readTextFile(filePath));
+    const backupData: unknown = JSON.parse(await appFs.readTextFile(filePath));
     if (!Array.isArray(backupData)) throw new Error("challenge.json must contain an array");
     const quarantinePath = `${dir}${path.sep()}challenge.quarantine.json`;
-    if (await exists(quarantinePath)) {
-      const quarantineData: unknown = JSON.parse(await readTextFile(quarantinePath));
+    if (await appFs.exists(quarantinePath)) {
+      const quarantineData: unknown = JSON.parse(await appFs.readTextFile(quarantinePath));
       if (!Array.isArray(quarantineData))
         throw new Error("challenge.quarantine.json must contain an array");
       if (quarantineData.length > 0) {
