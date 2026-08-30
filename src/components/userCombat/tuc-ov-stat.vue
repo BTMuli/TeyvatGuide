@@ -119,7 +119,7 @@ async function share(): Promise<void> {
     showSnackbar.error("未获取到分享内容");
     return;
   }
-  const fileName = `真境剧诗统计_${new Date().getTime()}.png`;
+  const fileName = `真境剧诗统计_${new Date().getTime()}`;
   const contentMaxHeight = content.style.maxHeight;
   const contentOverflowY = content.style.overflowY;
   shareLoading.value = true;

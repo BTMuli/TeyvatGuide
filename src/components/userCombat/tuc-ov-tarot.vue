@@ -84,7 +84,7 @@ async function share(): Promise<void> {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `月谕圣牌_${uid}_${new Date().getTime()}.png`;
+  const fileName = `月谕圣牌_${uid}_${new Date().getTime()}`;
   const contentMaxHeight = content.style.maxHeight;
   const contentOverflowY = content.style.overflowY;
   shareLoading.value = true;
