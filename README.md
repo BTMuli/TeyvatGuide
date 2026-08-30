@@ -2,12 +2,12 @@
 Author: 目棃
 Description: 说明文档
 Date: 2023-03-05
-Update: 2026-08-12
+Update: 2026-08-30
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2023-03-05 14:41:55`
 >
-> 更新于 `2026-08-12 10:57:11`
+> 更新于 `2026-08-30 20:11:02`
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/BTMuli/TeyvatGuide) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FBTMuli%2FTeyvatGuide?ref=badge_shield)
 
@@ -55,6 +55,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 米游社各分区帖子获取（支持通过 ID 获取）
   - [x] 米游社话题帖子获取（通过话题点击跳转）
   - [x] 成就管理（UIAF v1.1），支持 [`Yae`](https://github.com/HolographicHat/Yae) 导入 & 自动导入（内置Yae）
+  - [x] 游戏安装管理
   - [x] 祈愿管理（UIGF v3.0，UIGF v4.2）
   - [x] 背包物品获取，包括材料&武器&圣遗物（内置 Yae）
   - [x] 留影叙佳期画片查看
@@ -76,8 +77,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
   - [x] 千星奇域颂愿数据获取（近一年）
   - [x] 用户收藏帖子获取
   - [x] 用户关注帖子获取
-  - [x] 一键完成米游币每日任务
-  - [x] 一键完成游戏签到
+  - [x] 一键完成米游币每日任务&游戏签到
 
 - Wiki 功能：
   - [x] 角色图鉴（支持名称搜索）
@@ -139,6 +139,7 @@ Game tool for Genshin Impact players, built with Tauri 2 and supporting Windows 
 - [Echarts](https://echarts.apache.org/zh/index.html)：用于祈愿概览图生成
 - [Html2Canvas](https://github.com/niklasvh/html2canvas)：用于分享图生成
 - [Sentry](https://github.com/getsentry/sentry)：用于收集应用崩溃信息
+- [Snap.HPatch](https://github.com/DGP-Studio/Snap.HPatch)：用于解析游戏资源
 
 ## 协议 / License
 
