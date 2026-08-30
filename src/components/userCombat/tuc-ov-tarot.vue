@@ -1,129 +1,170 @@
 <!-- 月谕圣牌浮窗 -->
 <template>
-  <TOverlay v-model="visible" topOffset="112px">
-    <div v-if="data" :class="{ share: isShare }" class="tuc-ovt-box">
-      <div class="tuc-ovt-top">
-        <div class="tuc-ovt-title" @click="share()">月谕圣牌</div>
-        <div class="tuc-ovt-append">
-          <span>已解锁：</span>
-          <span>{{ finish }}/{{ total }}</span>
+  <TopOverlay
+    v-if="data"
+    ref="overlayPanel"
+    v-model="visible"
+    panelMaxHeight="calc(100% - 32px)"
+    panelWidth="800px"
+    :titleId
+    topOffset="112px"
+  >
+    <template #header>
+      <div class="tuc-ovt-icon">
+        <img alt="" src="/UI/combat/tarotDefault.webp" />
+      </div>
+      <div class="tuc-ovt-heading">
+        <h2 :id="titleId">月谕圣牌</h2>
+        <div class="tuc-ovt-progress">
+          <span>已解锁</span>
+          <strong>{{ finish }} / {{ total }}</strong>
         </div>
       </div>
-      <div class="tuc-ovt-list">
-        <TucOvtItem v-for="(item, index) in data.list" :key="index" :item />
-      </div>
-      <div class="tuc-ovt-share">
-        <span>UID {{ props.uid }}</span>
-        <span>|</span>
-        <span>TeyvatGuide v{{ version }}</span>
-      </div>
+    </template>
+
+    <template #actions>
+      <v-btn
+        :loading="shareLoading"
+        aria-label="保存月谕圣牌分享图"
+        density="comfortable"
+        icon="mdi-share-variant"
+        title="保存月谕圣牌分享图"
+        variant="text"
+        @click="share"
+      />
+      <v-btn
+        aria-label="关闭月谕圣牌"
+        density="comfortable"
+        icon="mdi-close"
+        title="关闭月谕圣牌"
+        variant="text"
+        @click="visible = false"
+      />
+    </template>
+
+    <div class="tuc-ovt-list">
+      <TucOvtItem v-for="item in data.list" :key="item.name" :item />
     </div>
-  </TOverlay>
+
+    <template #share>
+      <span>UID {{ uid }}</span>
+      <span> · TeyvatGuide v{{ version }}</span>
+    </template>
+  </TopOverlay>
 </template>
 <script lang="ts" setup>
-import TOverlay from "@comp/app/t-overlay.vue";
+import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TucOvtItem from "@comp/userCombat/tuc-ovt-item.vue";
 import { getVersion } from "@tauri-apps/api/app";
 import TGShare from "@utils/TGShare.js";
-import { computed, nextTick, onMounted, ref } from "vue";
+import { computed, onMounted, ref, useId, useTemplateRef } from "vue";
 
 type TucOvTarotProps = { data: TGApp.Game.Combat.TarotState | undefined; uid: string | undefined };
 
-const visible = defineModel<boolean>();
-const props = defineProps<TucOvTarotProps>();
+const { data, uid } = defineProps<TucOvTarotProps>();
+const visible = defineModel<boolean>({ required: true });
+const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
+const titleId = useId();
 
-const isShare = ref<boolean>(false);
 const version = ref<string>("");
-const finish = computed<number>(() => props.data?.curr_num ?? 0);
-const total = computed<number>(() => props.data?.total_num ?? 22);
+const shareLoading = ref<boolean>(false);
+const finish = computed<number>(() => data?.curr_num ?? 0);
+const total = computed<number>(() => data?.total_num ?? 22);
 
 onMounted(async () => {
   version.value = await getVersion();
 });
 
 async function share(): Promise<void> {
-  const element = document.querySelector<HTMLElement>(".tuc-ovt-box");
-  if (element === null) {
+  const panel = overlayPanel.value?.panel ?? null;
+  const content = overlayPanel.value?.content ?? null;
+  if (panel === null || content === null) {
     showSnackbar.warn("未获取到分享内容");
     return;
   }
-  const fileName = `月谕圣牌_${props.uid}_${new Date().getTime()}.png`;
+  const fileName = `月谕圣牌_${uid}_${new Date().getTime()}.png`;
+  const contentMaxHeight = content.style.maxHeight;
+  const contentOverflowY = content.style.overflowY;
+  shareLoading.value = true;
   await showLoading.start("正在生成分享图", fileName);
-  isShare.value = true;
-  await nextTick();
-  await TGShare.modern(fileName, element, 1.2, true);
-  isShare.value = false;
-  await showLoading.end();
+  content.style.maxHeight = "none";
+  content.style.overflowY = "visible";
+  try {
+    await TGShare.modern(fileName, panel, 1.2, true);
+  } finally {
+    content.style.maxHeight = contentMaxHeight;
+    content.style.overflowY = contentOverflowY;
+    await showLoading.end();
+    shareLoading.value = false;
+  }
 }
 </script>
 <style lang="scss" scoped>
-.tuc-ovt-list {
-  position: relative;
-  display: grid;
-  width: 100%;
-  padding-right: 4px;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-  overflow-y: auto;
-}
-
-.tuc-ovt-box {
-  position: relative;
+.tuc-ovt-icon {
   display: flex;
-  width: 800px;
-  max-height: 600px;
-  flex-direction: column;
+  width: 28px;
+  height: 48px;
+  flex: 0 0 28px;
   align-items: center;
-  justify-content: flex-start;
-  padding: 8px;
-  border: 1px solid var(--common-shadow-2);
-  border-radius: 4px;
-  background: var(--app-page-bg);
-  gap: 8px;
+  justify-content: center;
+  margin-right: -4px;
 
-  &.share {
-    overflow-y: auto;
-
-    .tuc-ovt-list {
-      overflow-y: unset;
-    }
+  img {
+    height: 48px;
+    object-fit: contain;
   }
 }
 
-.tuc-ovt-top {
-  position: relative;
-  display: flex;
+.tuc-ovt-list {
+  display: grid;
   width: 100%;
-  align-items: center;
-  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 8px;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+
+  > :deep(.tuc-ovti-box) {
+    grid-column: span 2;
+  }
+
+  > :deep(.tuc-ovti-box:first-child),
+  > :deep(.tuc-ovti-box:nth-child(16)) {
+    grid-column: 2 / span 2;
+  }
 }
 
-.tuc-ovt-title {
-  position: relative;
-  cursor: pointer;
-  font-family: var(--font-title);
-  font-size: 20px;
+.tuc-ovt-heading {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+
+  h2 {
+    overflow: hidden;
+    margin: 0;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 26px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
-.tuc-ovt-append {
-  position: relative;
+.tuc-ovt-progress {
   display: flex;
   align-items: center;
-  justify-content: center;
-  column-gap: 8px;
-}
-
-.tuc-ovt-share {
-  position: absolute;
-  z-index: -1;
-  right: 4px;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  column-gap: 2px;
+  color: var(--box-text-4);
   font-size: 12px;
+  gap: 8px;
+  line-height: 16px;
+
+  strong {
+    color: var(--tgc-od-orange);
+    font-weight: 600;
+  }
 }
 </style>

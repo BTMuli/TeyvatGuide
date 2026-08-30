@@ -17,10 +17,8 @@ const props = defineProps<TucOvtItemProps>();
 .tuc-ovti-box {
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  row-gap: 12px;
 }
 
 .tuc-ovti-icon {
@@ -36,6 +34,15 @@ const props = defineProps<TucOvtItemProps>();
 }
 
 .tuc-ovti-name {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 4px);
+  left: 50%;
   font-family: var(--font-title);
+  font-size: 12px;
+  font-weight: normal;
+  line-height: 16px;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 </style>
