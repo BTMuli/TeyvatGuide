@@ -21,7 +21,11 @@ description: Apply the Fluent 2 UI/UX design language to TeyvatGuide's Vue/Vueti
 - 中性灰阶与品牌色阶见 [references/tokens.md](references/tokens.md)，数值已按官方 token pipeline 核验。
 - 优先复用仓库现有变量：`--tgc-*`、`--app-*`、`--box-*`、`--common-*`（定义于
   `src/assets/index.scss`、`src/assets/themes/default.scss`、`src/assets/themes/dark.scss`）。
-- 需要新颜色时，在主题文件中定义语义变量（如 `--app-page-bg`），组件内引用变量而非硬编码色值。
+- 默认不得把页面、功能或组件专用的样式变量写入 `src/assets`。先复用现有全局语义变量；确需功能级
+  映射时，在该功能的根组件或当前组件内定义局部变量，并在同一作用域完成深浅主题映射。
+- 只有用户明确要求全局 token，或该变量已被确认会跨多个独立功能复用时，才在
+  `src/assets/themes/default.scss` 与 `src/assets/themes/dark.scss` 中成对新增语义变量。
+- 组件内仍应通过现有或局部语义变量表达颜色，避免散落裸色值。
 - 品牌强调色：保留原神黄色系（`--tgc-yellow-*`）作为品牌色，对应 Fluent 的 brand ramp；需要更中性的
   品牌感时，使用 Fluent brand 蓝（70=`#115ea3`、80=`#0f6cbd`）。
 - 正文对比度：正文 ≥ 4.5:1，大号文本（≥24px 常规或 ≥18.5px 加粗）≥ 3:1。
