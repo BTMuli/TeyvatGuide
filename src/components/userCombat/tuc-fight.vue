@@ -72,7 +72,7 @@ function getBox2(item: TGApp.Game.Combat.AvatarMini): TItemBoxData {
   justify-content: center;
   padding: 10px;
   border-radius: 5px;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   font-family: var(--font-title);
 }
 

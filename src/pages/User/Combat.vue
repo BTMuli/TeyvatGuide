@@ -102,30 +102,8 @@
         class="uc-window-item"
       >
         <div :class="userTab === item.id ? 'ucw-i-ref active' : 'ucw-i-ref'">
-          <div class="ucw-top">
-            <img
-              v-if="isFinTarot(item)"
-              alt="tarot"
-              class="ucw-tarot"
-              src="/icon/combat/tarot.webp"
-            />
-            <div class="ucw-title">
-              <span>第</span>
-              <span>{{ item.id }}</span>
-              <span>期 UID</span>
-              <span>{{ uidCur }}</span>
-            </div>
-            <div class="ucw-share">真境剧诗 | Render by TeyvatGuide v{{ version }}</div>
-          </div>
-          <TSubLine>
-            <div class="ucw-subtitle">
-              <span>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</span>
-              <span>{{ item.updated }}更新</span>
-            </div>
-          </TSubLine>
-          <TucOverview :data="item.stat" :fights="item.detail.fight_statisic" />
-          <TSubLine>使用角色({{ item.detail.backup_avatars.length }}名)</TSubLine>
-          <TucAvatars :detail="false" :model-value="item.detail.backup_avatars" />
+          <TucOverview :data="item" :showShareInfo :version />
+          <TucAvatars :model-value="item.detail.backup_avatars" />
           <div class="ucw-rounds">
             <TucRound
               v-for="round in item.detail.rounds_data"
@@ -148,7 +126,6 @@
   <TucOvTarot v-model="showTarot" :data="tarotStat" :uid="uidCur" />
 </template>
 <script lang="ts" setup>
-import TSubLine from "@comp/app/t-subline.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -173,7 +150,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -184,6 +161,7 @@ const { userName } = storeToRefs(hutaoStore);
 
 const userTab = ref<number>(0);
 const version = ref<string>();
+const showShareInfo = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
@@ -417,8 +395,14 @@ async function shareCombat(): Promise<void> {
     return;
   }
   await showLoading.start("正在生成图片", fileName);
-  await TGShare.modern(fileName, shareDom, 2.0);
-  await showLoading.end();
+  showShareInfo.value = true;
+  await nextTick();
+  try {
+    await TGShare.modern(fileName, shareDom, 2.0, false, { ppx: 12 });
+  } finally {
+    showShareInfo.value = false;
+    await showLoading.end();
+  }
   await TGLogger.Info(`[UserCombat][shareCombat][${userTab.value}] 生成剧诗数据分享图片成功`);
 }
 
@@ -540,11 +524,6 @@ async function tryReadCombat(): Promise<void> {
     await showLoading.end();
     showSnackbar.error("导入剧诗数据失败，请检查文件格式是否正确");
   }
-}
-
-function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
-  if (!data.hasData) return false;
-  return data.stat.max_round_id === 10 && data.stat.tarot_finished_cnt > 0;
 }
 </script>
 <style lang="scss" scoped>
@@ -675,48 +654,6 @@ function isFinTarot(data: TGApp.Sqlite.Combat.TableTrans): boolean {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.ucw-top {
-  display: flex;
-  width: 100%;
-  align-items: flex-end;
-  justify-content: flex-start;
-  column-gap: 8px;
-}
-
-.ucw-title {
-  display: flex;
-  align-items: center;
-  color: var(--common-text-title);
-  column-gap: 4px;
-  font-size: 18px;
-
-  :nth-child(2n) {
-    color: var(--tgc-od-orange);
-    font-family: var(--font-title);
-  }
-}
-
-.ucw-tarot {
-  width: 48px;
-}
-
-.ucw-share {
-  z-index: -1;
-  margin-left: auto;
-  font-size: 12px;
-  opacity: 0.8;
-}
-
-.ucw-subtitle {
-  position: relative;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding-right: 8px;
-  padding-left: 4px;
 }
 
 .ucw-rounds {

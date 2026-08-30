@@ -42,7 +42,7 @@ const props = defineProps<TucTileProps>();
   justify-content: center;
   padding: 8px;
   border-radius: 4px;
-  background: var(--box-bg-1);
+  background: var(--box-bg-2);
   font-family: var(--font-title);
 }
 
