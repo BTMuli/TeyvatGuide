@@ -120,7 +120,6 @@ function updateFormattedTime(): void {
   padding-right: 14px;
   border-radius: 20px;
   background: linear-gradient(to right, var(--box-bg-2) 32px, var(--box-bg-1) 100%);
-  column-gap: 4px;
 
   &.empty {
     background: var(--box-bg-2);
@@ -131,13 +130,14 @@ function updateFormattedTime(): void {
 .dni-exp-icon {
   position: relative;
   z-index: 1;
-  overflow: hidden;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: transparent;
 
   img {
+    position: absolute;
+    bottom: 6px;
     width: 100%;
     height: 100%;
     object-fit: cover;

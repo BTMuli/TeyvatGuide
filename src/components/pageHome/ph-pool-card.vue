@@ -298,10 +298,9 @@ function getBox(info: TGApp.App.Character.WikiBriefInfo): TItemBoxData {
     display: "inner",
     clickable: true,
     lt: `/icon/element/${info.element}元素.webp`,
-    ltSize: "15px",
-    innerHeight: 20,
-    innerIcon: `/icon/weapon/${info.weapon}.webp`,
-    innerText: info.name,
+    ltSize: "14px",
+    innerHeight: 0,
+    innerText: "",
   };
 }
 
@@ -406,8 +405,8 @@ async function toPool(): Promise<void> {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
   box-shadow: 0 -2px 10px var(--common-shadow-2);
@@ -444,7 +443,6 @@ async function toPool(): Promise<void> {
   font-size: 12px;
   gap: 8px;
   text-align: left;
-  text-shadow: 0 0 4px var(--tgc-dark-1);
 }
 
 .ph-pool-time {

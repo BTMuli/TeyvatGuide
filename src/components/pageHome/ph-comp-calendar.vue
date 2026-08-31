@@ -45,6 +45,7 @@
               :key="item.id"
               :class="{ planned: isCultivationTarget(item) }"
               class="tc-calendar-item"
+              :title="item.name"
             >
               <TItemBox :model-value="getBoxData(item)" @click="selectItem(item)" />
             </div>
@@ -62,9 +63,9 @@
   <ToCalendar
     v-if="selectedItem"
     v-model="showItem"
-    :item="selectedItem"
     :entries="selectedCultivationEntries"
     :entry-materials="cultivationEntryMaterials"
+    :item="selectedItem"
     :plan-entries="cultivationEntries"
     :project="cultivationProject"
     src="素材日历"
@@ -385,6 +386,7 @@ function getBoxData(item: TGApp.App.Calendar.Item): TItemBoxData {
     innerHeight: 25,
     innerIcon: item.element ? `/icon/weapon/${item.weapon}.webp` : undefined,
     innerText: item.name,
+    innerBlur: "4px",
     rt: isCultivationTarget(item) ? "⭐" : undefined,
     rtSize: isCultivationTarget(item) ? "20px" : undefined,
   };
