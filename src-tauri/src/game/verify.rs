@@ -3,7 +3,7 @@
 //! MD5 是 Merkle–Damgård 链式摘要，单文件无法在 GPU 上按块并行。
 //! 因此扫描用多线程占满 CPU，并对顺序读取开启 Windows SEQUENTIAL_SCAN；
 //! 把整文件搬上 GPU 再串行压缩通常更慢，故不走 GPU 路径。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::{
   hoyoplay::GameBranches,
@@ -637,7 +637,7 @@ fn hash_existing(
   if consumed < file.size {
     hashed_bytes.fetch_add(file.size.saturating_sub(consumed), Ordering::Relaxed);
   }
-  Ok(format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(&file.md5))
+  Ok(hex::encode(hasher.finalize()).eq_ignore_ascii_case(&file.md5))
 }
 
 fn open_sequential(path: &Path) -> Result<File, String> {

@@ -1,5 +1,5 @@
 //! 将已验证 staging 资源以可恢复事务提交到游戏目录。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::{
   assembler::{
@@ -1862,7 +1862,7 @@ fn steps_digest(steps: &[CommitStep]) -> String {
     hasher.update(step.size.to_le_bytes());
     hasher.update(step.md5.as_bytes());
   }
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 fn source_file_matches(path: &Path, step: &CommitStep) -> Result<bool, String> {
@@ -2024,7 +2024,7 @@ fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
     }
     hasher.update(&buffer[..read]);
   }
-  Ok(format!("{:x}", hasher.finalize()).eq_ignore_ascii_case(md5))
+  Ok(hex::encode(hasher.finalize()).eq_ignore_ascii_case(md5))
 }
 
 fn file_commit_from_plan(plan: &PersistedPlan) -> Result<FileCommitPlan, String> {
@@ -2236,7 +2236,7 @@ fn patch_general_keys(original: &[u8], updates: &[(&str, &str)]) -> Result<Vec<u
 fn sha256_bytes(content: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(content);
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 fn sibling_with_suffix(path: &Path, suffix: &str) -> Result<PathBuf, String> {

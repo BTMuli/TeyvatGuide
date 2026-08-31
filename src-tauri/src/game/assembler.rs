@@ -1,5 +1,5 @@
 //! 将已验证的 manifest-diff 计划流式组装到任务 staging 目录。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::{
   model::PackagePlanStrategy,
@@ -1720,7 +1720,7 @@ fn write_exact_chunk_with_timing<R: Read>(
     let hash_started_at = timing.as_ref().map(|_| Instant::now());
     let live_hash = telemetry.map(|value| value.begin(AssemblyLiveStage::Hash));
     md5_attempted = true;
-    let actual_md5 = format!("{:x}", chunk_hasher.finalize());
+    let actual_md5 = hex::encode(chunk_hasher.finalize());
     if let Some(live_hash) = live_hash {
       live_hash.finish(0);
     }
@@ -1772,7 +1772,7 @@ fn hash_exact_file_with_timing(
       processed_bytes = processed_bytes.saturating_add(read as u64);
       remaining -= read as u64;
     }
-    Ok(format!("{:x}", hasher.finalize()))
+    Ok(hex::encode(hasher.finalize()))
   })();
   if let (Some(started_at), Some(timing)) = (started_at, timing) {
     timing.record_asset_md5(duration_micros(started_at.elapsed()), processed_bytes);

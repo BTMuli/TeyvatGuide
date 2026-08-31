@@ -3,7 +3,7 @@
 //! 评估阶段只写 `switch/<installation-id>/plan.json`。目标渠道存在 SDK 时，执行阶段先把
 //! SDK zip 写入 `cache/sdks/<md5>`，安全解压到任务 staging 并按 `sdk_pkg_version` 校验，
 //! 再复用写前 journal 提交文件，最后才改 `channel/sub_channel`。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::{
   committer::{SwitchApplyRequest, SwitchFileStep},
@@ -565,7 +565,7 @@ fn file_size_and_md5(path: &Path) -> Result<(u64, String), String> {
     }
     hasher.update(&buffer[..read]);
   }
-  Ok((metadata.len(), format!("{:x}", hasher.finalize())))
+  Ok((metadata.len(), hex::encode(hasher.finalize())))
 }
 
 fn load_plan_file(path: &Path) -> Result<PersistedSwitchPlan, String> {
@@ -914,7 +914,7 @@ fn switch_apply_request(commit: &PersistedSwitchCommit) -> Result<SwitchApplyReq
 fn sha256_bytes(content: &[u8]) -> String {
   let mut hasher = <Sha256 as Sha2Digest>::new();
   hasher.update(content);
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {

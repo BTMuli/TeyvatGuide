@@ -52,7 +52,7 @@ widestring = "1.2.1"
 xxhash-rust = { version = "0.8.18", features = ["xxh64"] }
 zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
 zstd = "0.13.3"
-zstd-sys = { version = "2.0.16+zstd.1.5.7", default-features = false }
+zstd-sys = { version = "2.0.16", default-features = false }
 
 [target.'cfg(windows)'.dependencies.winreg]
 version = "0.55.0"

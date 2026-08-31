@@ -1,5 +1,5 @@
-//! Sophon build/patch 元数据、Zstandard 清单与 protobuf 解码。
-//! @since Beta v0.12.0
+//! Sophon 游戏构建、补丁元数据与清单解码。
+//! @since Beta v0.12.1
 
 use super::{
   hoyoplay::{BranchDescriptor, network_error, read_limited_json},
@@ -407,7 +407,7 @@ fn decode_manifest_payload(
   if decoded.len() as u64 != uncompressed_size || decoded.len() > MAX_UNCOMPRESSED_MANIFEST_BYTES {
     return Err("Sophon manifest 解压大小与元数据不一致或超过上限".to_string());
   }
-  let checksum = format!("{:x}", Md5::digest(&decoded));
+  let checksum = hex::encode(Md5::digest(&decoded));
   if !checksum.eq_ignore_ascii_case(expected_checksum) {
     return Err("Sophon manifest MD5 校验失败".to_string());
   }

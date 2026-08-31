@@ -1,12 +1,5 @@
-//! Per-file verification evidence for fresh game installations.
-//!
-//! Evidence records the verified content hash and the filesystem identity
-//! (Volume Serial + FileId) plus size/last-write-time of a staging file at the
-//! moment it was fully assembled. It is persisted before the assembly cursor
-//! advances so a crash can reuse verified content without a full re-hash.
-//!
-//! Evidence is deliberately small per file and stored under the task-private
-//! directory; the installation marker only keeps a digest of the whole set.
+//! 游戏安装文件的校验证据与持久化逻辑。
+//! @since Beta v0.12.1
 
 use super::{
   installer::{directory_identity, path_occupied},
@@ -430,7 +423,7 @@ pub(crate) fn evidence_digest(entries: &BTreeMap<String, FileEvidence>) -> Strin
     hasher.update(evidence.staging_file_id.to_string().as_bytes());
     hasher.update(b"\n");
   }
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 /// 判断当前文件是否与证据一致（身份/大小/写入时间），不读取内容。

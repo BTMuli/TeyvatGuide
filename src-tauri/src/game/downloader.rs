@@ -1,5 +1,5 @@
 //! 内容寻址游戏资源缓存、并发下载、限速与完整性校验。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::{
   hoyoplay::network_error,
@@ -876,7 +876,7 @@ async fn download_once(
   let hash_started_at = Instant::now();
   let actual_hash = match download.hash_kind {
     PlanDownloadHashKind::XxHash64 => format!("{:016x}", xxhasher.digest()),
-    PlanDownloadHashKind::Md5 => format!("{:x}", md5hasher.finalize()),
+    PlanDownloadHashKind::Md5 => hex::encode(md5hasher.finalize()),
     PlanDownloadHashKind::UnsupportedPatchRange => {
       return Err("当前阶段不支持校验 patch Range".to_string());
     }

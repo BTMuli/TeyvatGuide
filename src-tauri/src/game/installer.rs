@@ -2,6 +2,7 @@
 //!
 //! An installation draft is deliberately kept outside `GameInstallation` until
 //! the final tree has been published and inspected successfully.
+//! @since Beta v0.12.1
 
 use super::{
   assembler,
@@ -2008,7 +2009,7 @@ fn trusted_file_value(
 fn md5_hex(bytes: &[u8]) -> String {
   let mut hasher = Md5::new();
   hasher.update(bytes);
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 fn verify_install_tree_timed(
@@ -3047,13 +3048,13 @@ fn file_size_md5(path: &Path) -> Result<(u64, String), String> {
     }
     hasher.update(&buffer[..read]);
   }
-  Ok((metadata.len(), format!("{:x}", hasher.finalize())))
+  Ok((metadata.len(), hex::encode(hasher.finalize())))
 }
 
 fn sha256_bytes(bytes: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(bytes);
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 fn is_related(left: &Path, right: &Path) -> bool {

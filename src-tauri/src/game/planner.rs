@@ -1,5 +1,5 @@
 //! 游戏资源差异、空间估算与不可变计划持久化。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::hoyoplay::get_channel_sdk;
 use super::{
@@ -933,7 +933,7 @@ fn calculate_install_space_budget(
 fn sha256_bytes(bytes: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(bytes);
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 fn resolve_pre_download_hydrate_branch<'a>(
@@ -1724,7 +1724,7 @@ fn patch_container_cache_key(patch: &PlanPatch) -> String {
   hasher.update(patch.patch_file_size.to_le_bytes());
   hasher.update([0]);
   hasher.update(patch.patch_md5.as_bytes());
-  format!("{:x}.patch", hasher.finalize())
+  format!("{}.patch", hex::encode(hasher.finalize()))
 }
 
 pub(crate) fn manifest_digest(build: &DecodedBuild) -> String {
@@ -1786,7 +1786,7 @@ fn digest_parts(tag: &str, entries: &[String]) -> String {
     hasher.update([0]);
     hasher.update(entry.as_bytes());
   }
-  format!("{:x}", hasher.finalize())
+  hex::encode(hasher.finalize())
 }
 
 pub(crate) struct CachedDownloadScan {
@@ -2032,7 +2032,7 @@ fn cache_file_hash_matches(path: &Path, download: &PlanDownload) -> bool {
       format!("{:016x}", xxhasher.digest()).eq_ignore_ascii_case(&download.expected_hash)
     }
     PlanDownloadHashKind::Md5 => {
-      format!("{:x}", md5hasher.finalize()).eq_ignore_ascii_case(&download.expected_hash)
+      hex::encode(md5hasher.finalize()).eq_ignore_ascii_case(&download.expected_hash)
     }
     PlanDownloadHashKind::UnsupportedPatchRange => unreachable!(),
   }
