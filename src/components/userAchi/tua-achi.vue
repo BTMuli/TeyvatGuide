@@ -37,8 +37,6 @@ import { event } from "@tauri-apps/api";
 import fmtUtil from "@utils/fmtUtil.js";
 import { ref, toRaw, watch } from "vue";
 
-import { AppAchievementSeriesData } from "@/data/index.js";
-
 type TuaAchiProps = { modelValue: TGApp.App.Achievement.RenderItem };
 type TuaAchiEmits = { "select-achi": [data: TGApp.App.Achievement.RenderItem] };
 
@@ -55,9 +53,9 @@ watch(
 );
 
 function getAchiTitle(): string {
-  const seriesFind = AppAchievementSeriesData.find((s) => s.id === data.value.series);
-  if (!seriesFind) return "未知";
-  return seriesFind.name;
+  const category = TSUserAchi.getAchievementCategoryById(data.value.categoryId);
+  if (!category) return "未知";
+  return category.name;
 }
 
 function selectAchi(): void {
@@ -69,7 +67,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
     data.value.isCompleted = false;
     await TSUserAchi.updateAchi(data.value);
     model.value = data.value;
-    await event.emit("updateAchi", data.value.series);
+    await event.emit("updateAchi", data.value.categoryId);
     showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为未完成`);
     return;
   }
@@ -87,7 +85,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
   data.value.completedTime = fmtUtil.dateTime(new Date().getTime());
   data.value.isCompleted = true;
   await TSUserAchi.updateAchi(data.value);
-  await event.emit("updateAchi", data.value.series);
+  await event.emit("updateAchi", data.value.categoryId);
   showSnackbar.success(`已将成就 ${data.value.name}(${data.value.id}) 状态设为已完成`);
   model.value = data.value;
 }

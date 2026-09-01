@@ -1,6 +1,6 @@
 /**
  * 用户成就模块
- * @since Beta v0.12.0
+ * @since Beta v0.12.1
  */
 
 import { UiafAchiStatEnum } from "@enum/uiaf.js";
@@ -8,10 +8,104 @@ import { path } from "@tauri-apps/api";
 import appFs from "@utils/appFs.js";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
+import { compareVersions } from "@utils/toolFunc.js";
 
 import TGSqlite from "../index.js";
 
-import { AppAchievementsData, AppAchievementSeriesData } from "@/data/index.js";
+import { AppAchiData } from "@/data/index.js";
+
+const achievementCategoryMap: ReadonlyMap<number, TGApp.App.Achievement.Category> = new Map(
+  AppAchiData.categories.map((category): [number, TGApp.App.Achievement.Category] => [
+    category.id,
+    category,
+  ]),
+);
+const achievementMap: ReadonlyMap<number, TGApp.App.Achievement.Definition> = new Map(
+  AppAchiData.categories.flatMap((category) =>
+    category.achievements.map((achievement): [number, TGApp.App.Achievement.Definition] => [
+      achievement.id,
+      achievement,
+    ]),
+  ),
+);
+const achievementsByCategoryMap: ReadonlyMap<
+  number,
+  ReadonlyArray<TGApp.App.Achievement.Definition>
+> = new Map(
+  AppAchiData.categories.map(
+    (category): [number, ReadonlyArray<TGApp.App.Achievement.Definition>] => [
+      category.id,
+      category.achievements,
+    ],
+  ),
+);
+const achievementStageRootMap: ReadonlyMap<number, number> = new Map(
+  [...achievementMap.keys()].map((id): [number, number] => {
+    let rootId = id;
+    const visited = new Set<number>();
+    while (!visited.has(rootId)) {
+      visited.add(rootId);
+      const current = achievementMap.get(rootId);
+      if (current?.preStageId === undefined) break;
+      rootId = current.preStageId;
+    }
+    return [id, rootId];
+  }),
+);
+
+/**
+ * 根据 ID 获取成就静态定义
+ * @since Beta v0.12.1
+ * @param id - 成就 ID
+ * @returns 成就定义；未找到时为 undefined
+ */
+function getAchievementById(id: number): TGApp.App.Achievement.Definition | undefined {
+  return achievementMap.get(id);
+}
+
+/**
+ * 根据 ID 获取成就分类
+ * @since Beta v0.12.1
+ * @param id - 分类 ID
+ * @returns 成就分类；未找到时为 undefined
+ */
+function getAchievementCategoryById(id: number): TGApp.App.Achievement.Category | undefined {
+  return achievementCategoryMap.get(id);
+}
+
+/**
+ * 根据分类 ID 获取该分类下的全部成就定义
+ * @since Beta v0.12.1
+ * @param id - 分类 ID
+ * @returns 成就定义列表；未找到时为 undefined
+ */
+function getAchievementsByCategoryId(
+  id: number,
+): ReadonlyArray<TGApp.App.Achievement.Definition> | undefined {
+  return achievementsByCategoryMap.get(id);
+}
+
+/**
+ * 根据成就 ID 获取完整阶段链（从根阶段到末阶段）
+ * @since Beta v0.12.1
+ * @param id - 成就 ID
+ * @returns 阶段链成就定义；未找到时为 undefined
+ */
+function getAchievementStageChain(id: number): Array<TGApp.App.Achievement.Definition> | undefined {
+  const rootId = achievementStageRootMap.get(id);
+  if (rootId === undefined) return undefined;
+  const chain: Array<TGApp.App.Achievement.Definition> = [];
+  const visited = new Set<number>();
+  let currentId: number | undefined = rootId;
+  while (currentId !== undefined && !visited.has(currentId)) {
+    visited.add(currentId);
+    const current = achievementMap.get(currentId);
+    if (current === undefined) break;
+    chain.push(current);
+    currentId = current.postStageId;
+  }
+  return chain;
+}
 
 /**
  * 根据 completed 跟 progress 获取 status
@@ -29,51 +123,64 @@ function getUiafStatus(completed: boolean, progress: number): TGApp.Plugins.UIAF
 
 /**
  * 获取最新成就版本
- * @since Beta v0.6.0
+ * @since Beta v0.12.1
  * @returns 最新成就版本
  */
 function getLatestAchiVersion(): string {
-  let maxVersion = "0";
-  for (const series of AppAchievementSeriesData) {
-    if (series.version > maxVersion) maxVersion = series.version;
+  let maxVersion = "";
+  for (const category of AppAchiData.categories) {
+    if (maxVersion === "" || compareVersions(category.version, maxVersion) > 0) {
+      maxVersion = category.version;
+    }
   }
   return maxVersion;
 }
 
 /**
  * 获取成就概况
- * @since Beta v0.6.0
+ * @since Beta v0.12.1
  * @param uid - 存档UID
- * @param series - 系列ID
- * @remarks series 为可选参数
- * - 当传入 series 时，统计该系列成就
+ * @param categoryId - 分类ID
+ * @remarks categoryId 为可选参数
+ * - 当传入 categoryId 时，统计该分类成就
  * - 否则，统计全部成就
  * @returns 成就概况
  */
-async function getOverview(uid: number, series?: number): Promise<TGApp.App.Achievement.Overview> {
+async function getOverview(
+  uid: number,
+  categoryId?: number,
+): Promise<TGApp.App.Achievement.Overview> {
   const db = await TGSqlite.getDB();
-  let totalAchi: Array<number> = [];
-  if (series === undefined) totalAchi = AppAchievementsData.map((i) => i.id);
-  else totalAchi = AppAchievementsData.filter((s) => s.series === series).map((i) => i.id);
-  const finAchi = (
+  let totalAchi: Array<number>;
+  if (categoryId === undefined) {
+    totalAchi = AppAchiData.categories.flatMap((category) =>
+      category.achievements.map((achievement) => achievement.id),
+    );
+  } else {
+    totalAchi = (getAchievementsByCategoryId(categoryId) ?? []).map(
+      (achievement) => achievement.id,
+    );
+  }
+  const totalAchiSet = new Set<number>(totalAchi);
+  const userData = (
     await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
       "SELECT * FROM Achievements WHERE uid = ? AND isCompleted = 1;",
       [uid],
     )
-  ).filter((i) => totalAchi.includes(i.id));
-  return { total: totalAchi.length, fin: finAchi.length };
+  ).filter((item) => totalAchiSet.has(item.id));
+  return { total: totalAchi.length, fin: userData.length };
 }
 
 /**
  * 合并成就数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.1
  * @param raw - 元数据
  * @param uid - 存档 UID，可选参数
  * @param data - 数据库数据，可选参数
  * @returns 渲染数据
  */
 function getRenderAchi(
-  raw: TGApp.App.Achievement.Item,
+  raw: TGApp.App.Achievement.Definition,
   uid?: number,
   data?: TGApp.Sqlite.Achievement.TableRaw,
 ): TGApp.App.Achievement.RenderItem {
@@ -86,46 +193,22 @@ function getRenderAchi(
     updated: "",
   };
   const achiData = data ?? emptyAchi;
+  const isCompleted = achiData.isCompleted === 1;
   return {
-    id: raw.id,
+    ...raw,
     uid: achiData.uid,
-    order: raw.order,
-    series: raw.series,
-    name: raw.name,
-    description: raw.description,
-    reward: raw.reward,
-    version: raw.version,
-    trigger: raw.trigger,
-    isCompleted: achiData.isCompleted === 1,
+    status: getUiafStatus(isCompleted, achiData.progress),
+    isCompleted,
     completedTime: achiData.completedTime,
     progress: achiData.progress,
+    partialTimestamps: new Map<number, number>(),
     updated: achiData.updated,
   };
 }
 
 /**
- * 获取单个成就
- * @since Beta v0.6.0
- * @param uid - 存档 UID
- * @param id - 成就 ID
- * @returns 成就数据
- */
-async function getAchi(
-  uid: number,
-  id: number,
-): Promise<TGApp.Sqlite.Achievement.TableRaw | false> {
-  const db = await TGSqlite.getDB();
-  const res = await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
-    "SELECT * FROM Achievements WHERE uid = ? AND id = ?;",
-    [uid, id],
-  );
-  if (res.length === 0) return false;
-  return res[0];
-}
-
-/**
  * 对混合系列成就数据进行排序
- * @since Beta v0.9.2
+ * @since Beta v0.12.1
  * @param data - 成旧数据
  * @returns 排序后的成就数据
  */
@@ -135,41 +218,44 @@ function sortMixAchi(
   return data.sort((a, b) => {
     if (a.isCompleted !== b.isCompleted) return Number(a.isCompleted) - Number(b.isCompleted);
     if (!a.isCompleted) {
-      if (a.version !== b.version) return Number(b.version) - Number(a.version);
+      const versionCompare = compareVersions(b.version, a.version);
+      if (versionCompare !== 0) return versionCompare;
       return a.order - b.order;
     }
     if (b.completedTime !== a.completedTime) return b.completedTime.localeCompare(a.completedTime);
-    if (a.version !== b.version) return Number(b.version) - Number(a.version);
+    const versionCompare = compareVersions(b.version, a.version);
+    if (versionCompare !== 0) return versionCompare;
     return b.order - a.order;
   });
 }
 
 /**
  * 获取成就数据
- * @since Beta v0.9.2
+ * @since Beta v0.12.1
  * @param uid - 存档 UID
- * @param series - 成就系列ID
+ * @param categoryId - 成就分类ID
  * @returns 成就数据
  */
 async function getAchievements(
   uid: number,
-  series?: number,
+  categoryId?: number,
 ): Promise<Array<TGApp.App.Achievement.RenderItem>> {
   const db = await TGSqlite.getDB();
-  let res: Array<TGApp.App.Achievement.RenderItem> = [];
   const userData = await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
     "SELECT * FROM Achievements WHERE uid = ?;",
     [uid],
   );
-  let rawData: Array<TGApp.App.Achievement.Item>;
-  if (series === undefined || series === -1) rawData = AppAchievementsData;
-  else rawData = AppAchievementsData.filter((a) => a.series === series);
-  for (const achi of rawData) {
-    const achiFind = userData.find((u) => u.id === achi.id);
-    const achievement = getRenderAchi(achi, uid, achiFind);
-    res.push(achievement);
+  const userStateMap = new Map<number, TGApp.Sqlite.Achievement.TableRaw>(
+    userData.map((item) => [item.id, item]),
+  );
+  let rawData: ReadonlyArray<TGApp.App.Achievement.Definition>;
+  if (categoryId === undefined || categoryId === -1) {
+    rawData = AppAchiData.categories.flatMap((category) => category.achievements);
+  } else {
+    rawData = getAchievementsByCategoryId(categoryId) ?? [];
   }
-  if (series && series !== -1) {
+  let res = rawData.map((achi) => getRenderAchi(achi, uid, userStateMap.get(achi.id)));
+  if (categoryId !== undefined && categoryId !== -1) {
     res.sort((a, b) => Number(a.isCompleted) - Number(b.isCompleted) || a.order - b.order);
   } else {
     res = sortMixAchi(res);
@@ -179,7 +265,7 @@ async function getAchievements(
 
 /**
  * 查找成就数据
- * @since Beta v0.8.7
+ * @since Beta v0.12.1
  * @remarks 支持三种搜索方式：
  * - 版本搜索：输入 vx.x 格式的关键词（如 v1.2），搜索对应版本的成就
  * - ID搜索：输入 ixxx 格式的关键词（如 i1001），搜索对应ID的成就
@@ -195,34 +281,39 @@ async function searchAchi(
   if (keyword === "") return await getAchievements(uid);
   const versionReg = /^v\d+(\.\d+)?$/;
   const idReg = /^i\d+$/;
-  let rawData: Array<TGApp.App.Achievement.Item>;
-  let res: Array<TGApp.App.Achievement.RenderItem> = [];
+  let rawData: ReadonlyArray<TGApp.App.Achievement.Definition>;
   if (versionReg.test(keyword)) {
     const version = keyword.replace("v", "");
-    rawData = AppAchievementsData.filter((i) => i.version.includes(version));
+    rawData = AppAchiData.categories.flatMap((category) =>
+      category.achievements.filter((achievement) => achievement.version.includes(version)),
+    );
   } else if (idReg.test(keyword)) {
     const id = parseInt(keyword.replace("i", ""));
-    rawData = AppAchievementsData.filter((a) => a.id === id);
+    const find = getAchievementById(id);
+    rawData = find === undefined ? [] : [find];
   } else {
-    rawData = AppAchievementsData.filter((a) => {
-      if (a.name.includes(keyword)) return true;
-      if (a.description.includes(keyword)) return true;
-    });
+    rawData = AppAchiData.categories.flatMap((category) =>
+      category.achievements.filter(
+        (achievement) =>
+          achievement.name.includes(keyword) || achievement.description.includes(keyword),
+      ),
+    );
   }
-  for (const data of rawData) {
-    const achiFind = await getAchi(uid, data.id);
-    let achievement: TGApp.App.Achievement.RenderItem;
-    if (achiFind === false) achievement = getRenderAchi(data, uid);
-    else achievement = getRenderAchi(data, uid, achiFind);
-    res.push(achievement);
-  }
-  res = sortMixAchi(res);
-  return res;
+  const db = await TGSqlite.getDB();
+  const userData = await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
+    "SELECT * FROM Achievements WHERE uid = ?;",
+    [uid],
+  );
+  const userStateMap = new Map<number, TGApp.Sqlite.Achievement.TableRaw>(
+    userData.map((item) => [item.id, item]),
+  );
+  const res = rawData.map((data) => getRenderAchi(data, uid, userStateMap.get(data.id)));
+  return sortMixAchi(res);
 }
 
 /**
  * 更新成就数据
- * @since Beta v0.6.0
+ * @since Beta v0.12.1
  * @param data - 成就数据
  * @returns 无返回值
  */
@@ -380,9 +471,13 @@ async function delUid(uid: number): Promise<void> {
 
 /**
  * 用户成就数据库操作类
- * @since Beta v0.9.0
+ * @since Beta v0.12.1
  */
 const TSUserAchi = {
+  getAchievementById,
+  getAchievementCategoryById,
+  getAchievementsByCategoryId,
+  getAchievementStageChain,
   getLatestAchiVersion,
   getOverview,
   getAchievements,

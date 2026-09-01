@@ -1,12 +1,11 @@
 /**
  * 数据文件入口
- * @since Beta v0.11.3
+ * @since Beta v0.12.1
  */
 
 import type { Schema } from "ajv";
 
 import achievements from "./app/achievements.json" with { type: "json" };
-import achievementSeries from "./app/achievementSeries.json" with { type: "json" };
 import calendar from "./app/calendar.json" with { type: "json" };
 import character from "./app/character.json" with { type: "json" };
 import gacha from "./app/gacha.json" with { type: "json" };
@@ -36,8 +35,11 @@ import wikiWeaponPromote from "./WIKI/weapon/promote.json" with { type: "json" }
 import wikiWeapon from "./WIKI/weapon/weapon.json" with { type: "json" };
 
 // App
-export const AppAchievementsData: Array<TGApp.App.Achievement.Item> = achievements;
-export const AppAchievementSeriesData: Array<TGApp.App.Achievement.Series> = achievementSeries;
+/**
+ * 成就目录
+ * @since Beta v0.12.1
+ */
+export const AppAchiData = <TGApp.App.Achievement.Catalog>achievements;
 export const AppCalendarData: Array<TGApp.App.Calendar.Item> = calendar;
 export const AppCharacterData: Array<TGApp.App.Character.WikiBriefInfo> = character;
 export const AppGachaData: Array<TGApp.App.Gacha.PoolItem> = gacha;

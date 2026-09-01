@@ -10,7 +10,7 @@
             class="tua-ao-series"
             title="查看所属系列"
             type="button"
-            @click="emits('select-series', props.data.series)"
+            @click="emits('select-series', props.data.categoryId)"
           >
             <img :src="achievementSeriesIcon" alt="" aria-hidden="true" />
             <span>{{ achievementSeriesName }}</span>
@@ -117,12 +117,13 @@
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
 import showSnackbar from "@comp/func/snackbar.js";
+import TSUserAchi from "@Sqlm/userAchi.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
 import { computed, onMounted, ref } from "vue";
 
-import { AppAchievementSeriesData } from "@/data/index.js";
+import { AppNameCardsData } from "@/data/index.js";
 
 type ToAchiInfoProps = { data: TGApp.App.Achievement.RenderItem };
 type ToAchiInfoEmits = {
@@ -139,8 +140,8 @@ const emits = defineEmits<ToAchiInfoEmits>();
 const visible = defineModel<boolean>({ required: true });
 const loading = ref<boolean>(false);
 const appVersion = ref<string>();
-const achievementSeries = computed<TGApp.App.Achievement.Series | undefined>(() =>
-  AppAchievementSeriesData.find((series) => series.id === props.data.series),
+const achievementSeries = computed<TGApp.App.Achievement.Category | undefined>(() =>
+  TSUserAchi.getAchievementCategoryById(props.data.categoryId),
 );
 const achievementSeriesName = computed<string>(() => achievementSeries.value?.name ?? "未知系列");
 const achievementSeriesIcon = computed<string>(() => {
@@ -148,13 +149,16 @@ const achievementSeriesIcon = computed<string>(() => {
   return `/icon/achievement/${icon}.webp`;
 });
 const achievementCard = computed<string>(() => {
-  const card = achievementSeries.value?.card;
-  const cardName = card === undefined || card === "" ? "原神·印象" : card;
+  const namecardId = achievementSeries.value?.namecardId;
+  const cardName =
+    namecardId === undefined || namecardId === null
+      ? "原神·印象"
+      : (AppNameCardsData.find((item) => item.id === namecardId)?.name ?? "原神·印象");
   return `/WIKI/nameCard/profile/${cardName}.webp`;
 });
 const groupedTriggerTasks = computed<Array<GroupedTriggerTask>>(() => {
   const taskMap = new Map<string, GroupedTriggerTask>();
-  for (const task of props.data.trigger.task ?? []) {
+  for (const task of props.data.trigger.tasks) {
     const key = `${task.questId}:${task.name}:${task.type}`;
     const groupedTask = taskMap.get(key);
     if (groupedTask !== undefined) {

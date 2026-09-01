@@ -15,7 +15,7 @@
     <div v-if="showCard" class="tuas-reward">
       <img
         :class="progress === 100 ? 'finish' : ''"
-        :src="`/WIKI/nameCard/bg/${series.card}.webp`"
+        :src="`/WIKI/nameCard/bg/${nameCardName}.webp`"
         alt="card"
       />
     </div>
@@ -39,11 +39,13 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import { type Event, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 
+import { AppNameCardsData } from "@/data/index.js";
+
 type TuaSeriesProps = {
   /** 存档 UID */
   uid: number;
-  /** 成就系列数据 */
-  series: TGApp.App.Achievement.Series;
+  /** 成就分类数据 */
+  series: TGApp.App.Achievement.Category;
   /** 当前选中系列 ID，-1表示未选择 */
   cur: number;
   /** 是否隐藏已完成 */
@@ -60,9 +62,11 @@ const progress = computed<number>(() => {
   if (overview.value.total === 0) return 0;
   return Math.round((overview.value.fin / overview.value.total) * 1000) / 10;
 });
-const showCard = computed<boolean>(() => {
-  return props.series.card !== "";
+const nameCardName = computed<string | undefined>(() => {
+  if (props.series.namecardId === null) return undefined;
+  return AppNameCardsData.find((item) => item.id === props.series.namecardId)?.name;
 });
+const showCard = computed<boolean>(() => nameCardName.value !== undefined);
 
 onMounted(async () => {
   await refreshOverview();

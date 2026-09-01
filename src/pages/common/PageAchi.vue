@@ -69,7 +69,7 @@
   <div class="wrap">
     <div class="left-wrap">
       <TuaSeries
-        v-for="item in seriesList"
+        v-for="item in categoryList"
         :key="item.id"
         v-model:cur="selectedSeries"
         :hideFin
@@ -112,9 +112,9 @@ import { storeToRefs } from "pinia";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { AppAchievementSeriesData } from "@/data/index.js";
+import { AppAchiData } from "@/data/index.js";
 
-const seriesList = AppAchievementSeriesData.sort((a, b) => a.order - b.order);
+const categoryList = AppAchiData.categories;
 
 const route = useRoute();
 const router = useRouter();

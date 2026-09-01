@@ -51,7 +51,7 @@ import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import TuaAchiOverlay from "./tua-achi-overlay.vue";
 import TuaAchi from "./tua-achi.vue";
 
-import { AppAchievementSeriesData, AppNameCardsData } from "@/data/index.js";
+import { AppNameCardsData } from "@/data/index.js";
 
 type TuaAchiListProps = {
   uid: number;
@@ -63,7 +63,6 @@ const props = defineProps<TuaAchiListProps>();
 const series = defineModel<number>("series", { required: true });
 const isSearch = defineModel<boolean>("isSearch", { required: true });
 
-const nameCard = ref<string>();
 const showNc = ref<boolean>(false);
 const showOverlay = ref<boolean>(false);
 const isFinish = ref<boolean>(false);
@@ -105,7 +104,6 @@ async function searchAchi(): Promise<void> {
   const searchRes = await TSUserAchi.searchAchi(props.uid, props.search);
   if (showOverlay.value) showOverlay.value = false;
   if (searchRes.length > 0) {
-    nameCard.value = undefined;
     ncData.value = undefined;
     achievements.value = searchRes;
     showSnackbar.success(`成功获取${achievements.value.length}条成就`);
@@ -128,15 +126,12 @@ async function loadAchi(): Promise<void> {
     const index = achievements.value.findIndex((a) => a.id === selectedAchi.value!.id);
     if (index === -1) selectedAchi.value = achievements.value[0];
   }
-  const seriesFind = AppAchievementSeriesData.find((s) => s.id === series.value);
-  if (!seriesFind || seriesFind.card === "") {
-    nameCard.value = undefined;
+  const seriesFind = TSUserAchi.getAchievementCategoryById(series.value);
+  if (!seriesFind || seriesFind.namecardId === null) {
     ncData.value = undefined;
-  } else nameCard.value = seriesFind.card;
-  if (nameCard.value && nameCard.value !== "") {
-    const ncFind = AppNameCardsData.find((c) => c.name === nameCard.value);
-    if (ncFind) ncData.value = ncFind;
-    else ncData.value = undefined;
+  } else {
+    const ncFind = AppNameCardsData.find((item) => item.id === seriesFind.namecardId);
+    ncData.value = ncFind ?? undefined;
   }
   showSnackbar.success(`已获取 ${achievements.value.length} 条成就数据`);
 }
