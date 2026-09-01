@@ -1,5 +1,5 @@
 //! 国服官服与哔哩哔哩服客户端启动实现。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::model::SchemeId;
 use std::path::Path;
@@ -84,7 +84,7 @@ fn sync_windows_voice_language(installed: &[u32]) -> Result<(), String> {
     .map_err(|error| format!("同步游戏当前配音失败：{error}"))
 }
 
-/// 以管理员权限启动指定国服客户端，并仅为官服附加登录票据参数。
+/// 以管理员权限启动指定国服客户端；官服附加登录票据且不传工作目录，B 服使用游戏目录。
 pub fn launch(
   executable_path: &Path,
   scheme: SchemeId,
@@ -118,6 +118,19 @@ pub fn launch(
       .transpose()
       .map_err(|error| format!("启动参数编码失败：{error}"))?;
     let parameter_pointer = parameters.as_ref().map_or(std::ptr::null(), |value| value.as_ptr());
+    let working_directory = match scheme {
+      SchemeId::CnOfficial => None,
+      SchemeId::CnBilibili => {
+        let directory =
+          executable_path.parent().ok_or_else(|| "无法读取游戏工作目录".to_string())?;
+        Some(
+          U16CString::from_os_str(directory.as_os_str())
+            .map_err(|error| format!("游戏工作目录编码失败：{error}"))?,
+        )
+      }
+    };
+    let working_directory_pointer =
+      working_directory.as_ref().map_or(std::ptr::null(), |value| value.as_ptr());
 
     let result = unsafe {
       ShellExecuteW(
@@ -125,7 +138,7 @@ pub fn launch(
         operation.as_ptr(),
         file.as_ptr(),
         parameter_pointer,
-        std::ptr::null(),
+        working_directory_pointer,
         SW_SHOWNORMAL,
       )
     };

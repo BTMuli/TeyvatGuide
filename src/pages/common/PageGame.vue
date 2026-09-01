@@ -178,6 +178,7 @@ const installations = ref<Array<TGApp.Game.Installation.Item>>([]);
 const installationsLoading = ref<boolean>(true);
 const installDrafts = ref<Array<TGApp.Game.Installation.InstallDraftSummary>>([]);
 let pageActive = true;
+let pageMounted = false;
 let pageDataRefreshPromise: Promise<void> | null = null;
 let pageDataRefreshRequested = false;
 
@@ -381,7 +382,8 @@ async function handleLaunchGame(): Promise<void> {
   }
   launching.value = true;
   try {
-    await tryLaunchGame(account.value, cookie.value);
+    if (isLogin.value) await tryLaunchGame(account.value, cookie.value);
+    else await tryLaunchGame();
   } finally {
     launching.value = false;
   }
@@ -649,7 +651,25 @@ function initializePage(): void {
   });
 }
 
-onMounted(initializePage);
+async function handleRequestedLaunch(): Promise<void> {
+  if (!pageMounted || !taskStore.consumeLaunchRequest()) return;
+  if (launching.value) return;
+  await Promise.all([refreshPageData(), taskStore.hydrateTasks()]);
+  if (!pageActive) return;
+  await handleLaunchGame();
+}
+
+onMounted(() => {
+  pageMounted = true;
+  initializePage();
+  void handleRequestedLaunch();
+});
+watch(
+  () => taskStore.launchRequested,
+  (requested) => {
+    if (requested) void handleRequestedLaunch();
+  },
+);
 watch(clientSourceOverlay, (open) => {
   if (open) clientSourceMounted.value = true;
 });
@@ -683,6 +703,7 @@ watch(completedInstallTaskKey, (taskKey) => {
 });
 onUnmounted(() => {
   pageActive = false;
+  pageMounted = false;
   taskStore.stopListening();
 });
 </script>

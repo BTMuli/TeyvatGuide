@@ -93,12 +93,14 @@ export async function inspectGameInstallLocation(
  * @since Beta v0.12.0
  * @param installationId - 已登记安装 ID
  * @param ticket - 官服登录 ticket；B 服不传
+ * @param launchScheme - 启动渠道；B 服安装可指定官服
  */
 export async function launchGameInstallation(
   installationId: string,
   ticket?: string,
+  launchScheme?: TGApp.Game.Installation.SchemeEnum,
 ): Promise<void> {
-  await invoke("game_launch", { installationId, ticket });
+  await invoke("game_launch", { installationId, ticket, launchScheme });
 }
 
 /**

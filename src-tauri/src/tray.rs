@@ -1,6 +1,8 @@
 // 系统托盘模块，负责创建和管理系统托盘图标
-// @since Beta v0.11.3
+// @since Beta v0.12.1
 
+#[cfg(target_os = "windows")]
+use tauri::Emitter;
 use tauri::image::Image;
 use tauri::menu::{MenuBuilder, MenuItemBuilder, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -21,12 +23,17 @@ fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
 /// 创建系统托盘图标
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
   // 创建托盘菜单
+  #[cfg(target_os = "windows")]
+  let launch_item = MenuItemBuilder::with_id("launch", "启动游戏").build(app)?;
   let show_item = MenuItemBuilder::with_id("show", "显示窗口").build(app)?;
   let separator = PredefinedMenuItem::separator(app)?;
   let quit_item = MenuItemBuilder::with_id("quit", "退出应用").build(app)?;
   // TODO: 窗口回正&最大化
 
-  let menu = MenuBuilder::new(app).item(&show_item).item(&separator).item(&quit_item).build()?;
+  let menu = MenuBuilder::new(app);
+  #[cfg(target_os = "windows")]
+  let menu = menu.item(&launch_item);
+  let menu = menu.item(&show_item).item(&separator).item(&quit_item).build()?;
 
   // 加载托盘图标
   let icon_bytes = include_bytes!("../icons/icon.ico");
@@ -43,6 +50,12 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     .tooltip("Teyvat Guide")
     .menu(&menu)
     .on_menu_event(|app, event| match event.id.as_ref() {
+      #[cfg(target_os = "windows")]
+      "launch" => {
+        if let Err(error) = app.emit("tray://launch-game", ()) {
+          log::warn!("[tray] 发送启动游戏事件失败：{error}");
+        }
+      }
       "show" => {
         show_main_window(app);
       }

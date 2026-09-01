@@ -1,5 +1,5 @@
 //! 游戏安装检测、列表读取与可信启动命令。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.1
 
 use super::{
   cache, defender,
@@ -999,6 +999,7 @@ pub async fn game_launch(
   manager: tauri::State<'_, GamePackageManager>,
   installation_id: String,
   ticket: Option<String>,
+  launch_scheme: Option<SchemeId>,
 ) -> Result<(), String> {
   let _reservation = manager.reserve_installation(&installation_id)?;
   if journal::list(&game_task_root(&app_handle)?, Some(&installation_id))?
@@ -1026,7 +1027,13 @@ pub async fn game_launch(
   if installation.status != InstallationStatus::Known {
     return Err(installation.status_message);
   }
-  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let installed_scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let scheme = launch_scheme.unwrap_or(installed_scheme);
+  if scheme != installed_scheme
+    && !(installed_scheme == SchemeId::CnBilibili && scheme == SchemeId::CnOfficial)
+  {
+    return Err("当前安装不支持指定的启动渠道".to_string());
+  }
   launch::sync_voice_language(&installation.audio_languages)?;
   launch::launch(Path::new(&installation.executable_path), scheme, ticket)?;
   sqlx::query("UPDATE GameInstallation SET lastSeen = ? WHERE id = ?")

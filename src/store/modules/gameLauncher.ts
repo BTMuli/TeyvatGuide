@@ -31,9 +31,10 @@ import {
   verifyGamePackage,
 } from "@utils/TGGameLauncher.js";
 import { defineStore } from "pinia";
-import { nextTick, shallowRef } from "vue";
+import { nextTick, ref, shallowRef } from "vue";
 
 const useGameLauncherStore = defineStore("gameLauncher", () => {
+  const launchRequested = ref<boolean>(false);
   const tasksByInstallation = shallowRef<Record<string, TGApp.Game.Package.TaskSummary>>({});
   const verifyByInstallation = shallowRef<Record<string, TGApp.Game.Package.VerifySummary>>({});
   const dismissedVerifyInstallations = shallowRef<Set<string>>(new Set());
@@ -49,6 +50,16 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   let progressTimer: number | null = null;
   const completedInstallHideTimers = new Map<string, number>();
   const completedInstallHideMs = 5000;
+
+  function requestLaunch(): void {
+    launchRequested.value = true;
+  }
+
+  function consumeLaunchRequest(): boolean {
+    if (!launchRequested.value) return false;
+    launchRequested.value = false;
+    return true;
+  }
 
   function isInterruptState(state: TGApp.Game.Package.TaskStateEnum): boolean {
     return (
@@ -641,6 +652,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
   }
 
   return {
+    launchRequested,
     tasksByInstallation,
     verifyByInstallation,
     pendingActions,
@@ -665,6 +677,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     recoverInstall,
     removeTaskHistory,
     cleanupTasks,
+    requestLaunch,
+    consumeLaunchRequest,
     startListening,
     stopListening,
   };

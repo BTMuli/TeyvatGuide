@@ -35,6 +35,7 @@ import TSidebar from "@comp/app/t-sidebar.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import gameEnum from "@enum/game.js";
 import { usePageCover } from "@hooks/usePageCover.js";
 import OtherApi from "@req/otherReq.js";
 import type { FeedbackInternalOptions, Integration } from "@sentry/core";
@@ -48,13 +49,15 @@ import TSUserBagMaterial from "@Sqlm/userBagMaterial.js";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
+import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
 import { app, core, event, webviewWindow } from "@tauri-apps/api";
 import type { Event, UnlistenFn } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { type CliMatches, getMatches } from "@tauri-apps/plugin-cli";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { migrateLegacyGameInstallation } from "@utils/TGGame.js";
+import { launchInstallation, migrateLegacyGameInstallation } from "@utils/TGGame.js";
+import { listGameInstallations } from "@utils/TGGameLauncher.js";
 import TGLogger from "@utils/TGLogger.js";
 import { resizeWindow, setWindowPos } from "@utils/TGWindow.js";
 import { storeToRefs } from "pinia";
@@ -63,6 +66,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const appStore = useAppStore();
+const gameLauncherStore = useGameLauncherStore();
 const {
   theme,
   needResize,
@@ -91,6 +95,7 @@ let dpListener: UnlistenFn | null = null;
 let resizeListener: UnlistenFn | null = null;
 let yaeListener: UnlistenFn | null = null;
 let closeListener: UnlistenFn | null = null;
+let trayLaunchListener: UnlistenFn | null = null;
 let textScaleListener: UnlistenFn | null = null;
 let yaeFlag: Array<string> = [];
 
@@ -110,6 +115,7 @@ onMounted(async () => {
     dpListener = await event.listen<string>("active_deep_link", handleDpListen);
     yaeListener = await event.listen<TGApp.Plugins.Yae.RsEvent>("yae_read", handleYaeListen);
     closeListener = await event.listen("main-window-close-requested", handleWindowClose);
+    trayLaunchListener = await event.listen("tray://launch-game", handleTrayLaunch);
     await nextTick();
     await core.invoke("init_app");
   }
@@ -153,11 +159,55 @@ onUnmounted(() => {
     closeListener();
     closeListener = null;
   }
+  if (trayLaunchListener !== null) {
+    trayLaunchListener();
+    trayLaunchListener = null;
+  }
   if (textScaleListener !== null) {
     textScaleListener();
     textScaleListener = null;
   }
 });
+
+async function revealMainWindow(): Promise<void> {
+  const window = getCurrentWindow();
+  if (await window.isMinimized()) await window.unminimize();
+  if (!(await window.isVisible())) await window.show();
+  await window.setFocus();
+}
+
+async function handleTrayLaunch(): Promise<void> {
+  let installations: Array<TGApp.Game.Installation.Item>;
+  try {
+    installations = await listGameInstallations();
+  } catch (error) {
+    showSnackbar.error(`读取游戏安装失败：${error}`);
+    await revealMainWindow();
+    return;
+  }
+  const installation = installations.find((item) => item.isChosen) ?? installations[0];
+  if (installation === undefined) {
+    showSnackbar.warn("请先在游戏安装页面登记游戏安装");
+    await revealMainWindow();
+    return;
+  }
+  const needsSchemeSwitch =
+    installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL &&
+    isLogin.value &&
+    account.value.isOfficial !== 1;
+  if (needsSchemeSwitch) {
+    gameLauncherStore.requestLaunch();
+    if (router.currentRoute.value.path !== "/game") await router.push("/game");
+    await revealMainWindow();
+    return;
+  }
+  const launched = isLogin.value
+    ? await launchInstallation(installation, account.value, cookie.value)
+    : await launchInstallation(installation);
+  if (!launched) {
+    await revealMainWindow();
+  }
+}
 
 function getSentryFeedback(): Integration {
   return Sentry.feedbackAsyncIntegration(<FeedbackInternalOptions>{
