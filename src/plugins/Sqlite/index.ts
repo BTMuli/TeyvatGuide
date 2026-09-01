@@ -1,6 +1,6 @@
 /**
  * Sqlite 数据库操作类
- * @since Beta v0.12.0
+ * @since Beta v0.12.1
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -18,8 +18,13 @@ type TableColumn = {
   pk: number;
 };
 
-const CoreSchemaMigrations = <const>["GameAccount.v2", "HardChallenge.v2", "UserRecordRaw.v1"];
-const CoreSchemaVersion = "2026.08.p0.5";
+const CoreSchemaMigrations = <const>[
+  "GameAccount.v2",
+  "HardChallenge.v2",
+  "UserRecordRaw.v1",
+  "Achievements.v2",
+];
+const CoreSchemaVersion = "2026.08.p0.6";
 
 const GameAccountLegacyTable = "GameAccount_legacy_v0_11_2";
 const LegacyTablesForReset = <const>[GameAccountLegacyTable, "UserRecord"];
@@ -47,6 +52,15 @@ const HardChallengeColumns = <const>[
   "updated",
 ];
 const UserRecordRawColumns = <const>["uid", "rawData", "updated"];
+const AchievementsColumns = <const>[
+  "id",
+  "uid",
+  "isCompleted",
+  "completedTime",
+  "progress",
+  "status",
+  "updated",
+];
 
 class Sqlite {
   private readonly dbPath: string = "sqlite:TeyvatGuide.db";
@@ -146,6 +160,9 @@ class Sqlite {
             break;
           case "UserRecordRaw.v1":
             await this.migrateUserRecordRawSchema();
+            break;
+          case "Achievements.v2":
+            await this.migrateAchievementsSchema();
             break;
         }
       }
@@ -272,6 +289,37 @@ class Sqlite {
     throw new Error("UserRecordRaw 表结构不符合预期");
   }
 
+  private async migrateAchievementsSchema(): Promise<void> {
+    const db = await this.getRawDB();
+    const columns = await this.getTableColumns("Achievements");
+    const columnNames = new Set(columns.map((column) => column.name));
+    const beforeCountResult = await db.select<Array<{ count: number }>>(
+      "SELECT COUNT(*) AS count FROM Achievements;",
+    );
+    const beforeCount = beforeCountResult[0]?.count ?? 0;
+    const statements: Array<TGApp.App.Sqlite.SqlStatement> = [];
+    if (!columnNames.has("status")) {
+      statements.push({ query: "ALTER TABLE Achievements ADD status INTEGER;" });
+      statements.push({
+        query: `UPDATE Achievements
+                SET status = CASE
+                  WHEN isCompleted = 1 AND progress <> 0 THEN 3
+                  WHEN isCompleted = 1 THEN 2
+                  ELSE 1
+                END
+                WHERE status IS NULL;`,
+      });
+    }
+    if (statements.length > 0) await this.executeRawTransaction(statements);
+    const afterCountResult = await db.select<Array<{ count: number }>>(
+      "SELECT COUNT(*) AS count FROM Achievements;",
+    );
+    const afterCount = afterCountResult[0]?.count ?? 0;
+    if (beforeCount !== afterCount) {
+      throw new Error(`Achievements 迁移前后行数不一致：${beforeCount} / ${afterCount}`);
+    }
+  }
+
   /**
    * 在同一数据库连接中执行事务语句
    * @since Beta v0.12.0
@@ -294,7 +342,7 @@ class Sqlite {
 
   /**
    * 检测是否需要创建数据库
-   * @since Beta v0.12.0
+   * @since Beta v0.12.1
    * @returns 是否需要创建数据库
    */
   public async check(): Promise<boolean> {
@@ -303,11 +351,13 @@ class Sqlite {
       const sqlT = "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;";
       const res: Array<{ name: string }> = await db.select(sqlT);
       if (!this.tables.every((item) => res.map((i) => i.name).includes(item))) return false;
-      const [gameAccountColumns, hardChallengeColumns, userRecordRawColumns] = await Promise.all([
-        this.getTableColumns("GameAccount"),
-        this.getTableColumns("HardChallenge"),
-        this.getTableColumns("UserRecordRaw"),
-      ]);
+      const [gameAccountColumns, hardChallengeColumns, userRecordRawColumns, achievementsColumns] =
+        await Promise.all([
+          this.getTableColumns("GameAccount"),
+          this.getTableColumns("HardChallenge"),
+          this.getTableColumns("UserRecordRaw"),
+          this.getTableColumns("Achievements"),
+        ]);
       const gameAccountMap = new Map(gameAccountColumns.map((column) => [column.name, column]));
       const gameAccountIsValid =
         GameAccountColumns.every((name) => gameAccountMap.has(name)) &&
@@ -327,7 +377,19 @@ class Sqlite {
         UserRecordRawColumns.every((name) => userRecordRawMap.has(name)) &&
         userRecordRawMap.get("uid")?.pk === 1 &&
         UserRecordRawColumns.every((name) => (userRecordRawMap.get(name)?.notnull ?? 0) !== 0);
-      if (!gameAccountIsValid || !hardChallengeIsValid || !userRecordRawIsValid) return false;
+      const achievementsMap = new Map(achievementsColumns.map((column) => [column.name, column]));
+      const achievementsIsValid =
+        AchievementsColumns.every((name) => achievementsMap.has(name)) &&
+        achievementsMap.get("id")?.pk === 1 &&
+        achievementsMap.get("uid")?.pk === 2;
+      if (
+        !gameAccountIsValid ||
+        !hardChallengeIsValid ||
+        !userRecordRawIsValid ||
+        !achievementsIsValid
+      ) {
+        return false;
+      }
       const appVersion = await db.select<Array<{ key: string }>>(
         "SELECT key FROM AppData WHERE key = $1;",
         ["appVersion"],

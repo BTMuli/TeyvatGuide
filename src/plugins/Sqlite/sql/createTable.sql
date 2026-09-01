@@ -1,5 +1,5 @@
 -- sqlite数据库创建表语句
--- @since Beta v0.12.0
+-- @since Beta v0.12.1
 
 -- @brief 创建养成计划表
 create table if not exists CultivationProject
@@ -120,6 +120,7 @@ create table if not exists Achievements
     isCompleted   boolean default false,
     completedTime text,
     progress      integer default 0,
+    status        integer default 1,
     updated       text,
     primary key (id, uid)
 );

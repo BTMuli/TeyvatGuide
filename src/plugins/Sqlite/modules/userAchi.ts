@@ -108,17 +108,19 @@ function getAchievementStageChain(id: number): Array<TGApp.App.Achievement.Defin
 }
 
 /**
- * 根据 completed 跟 progress 获取 status
- * @since Beta v0.9.0
- * @param completed - 是否完成
- * @param progress - 进度
- * @returns 完成状态
+ * UIAF 未记录完成时间的哨兵秒数
+ * @since Beta v0.12.1
  */
-function getUiafStatus(completed: boolean, progress: number): TGApp.Plugins.UIAF.AchiItemStatEnum {
-  if (!completed) return UiafAchiStatEnum.Unfinished;
-  if (progress === 0) return UiafAchiStatEnum.Finished;
-  if (progress !== 0) return UiafAchiStatEnum.RewardTaken;
-  return UiafAchiStatEnum.Invalid;
+const UIAFMagicTime = 253402271999;
+
+/**
+ * 判断 UIAF 状态是否已完成
+ * @since Beta v0.12.1
+ * @param status - UIAF 成就状态
+ * @returns 是否已完成
+ */
+function isAchiCompleted(status: TGApp.Plugins.UIAF.AchiItemStatEnum): boolean {
+  return status === UiafAchiStatEnum.Finished || status === UiafAchiStatEnum.RewardTaken;
 }
 
 /**
@@ -164,7 +166,7 @@ async function getOverview(
   const totalAchiSet = new Set<number>(totalAchi);
   const userData = (
     await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
-      "SELECT * FROM Achievements WHERE uid = ? AND isCompleted = 1;",
+      "SELECT * FROM Achievements WHERE uid = $1 AND status IN (2, 3);",
       [uid],
     )
   ).filter((item) => totalAchiSet.has(item.id));
@@ -190,18 +192,19 @@ function getRenderAchi(
     isCompleted: 0,
     completedTime: "",
     progress: 0,
+    status: UiafAchiStatEnum.Unfinished,
     updated: "",
   };
   const achiData = data ?? emptyAchi;
-  const isCompleted = achiData.isCompleted === 1;
+  const status = achiData.status ?? UiafAchiStatEnum.Unfinished;
+  const isCompleted = isAchiCompleted(status);
   return {
     ...raw,
     uid: achiData.uid,
-    status: getUiafStatus(isCompleted, achiData.progress),
+    status,
     isCompleted,
     completedTime: achiData.completedTime,
     progress: achiData.progress,
-    partialTimestamps: new Map<number, number>(),
     updated: achiData.updated,
   };
 }
@@ -319,21 +322,25 @@ async function searchAchi(
  */
 async function updateAchi(data: TGApp.App.Achievement.RenderItem): Promise<void> {
   const db = await TGSqlite.getDB();
+  const isCompleted = isAchiCompleted(data.status);
+  const updated = fmtUtil.dateTime(new Date().getTime());
   await db.execute(
-    "INSERT INTO Achievements(id, uid, isCompleted, completedTime, progress, updated) \
-      VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(id,uid) DO UPDATE \
-      SET isCompleted=?,completedTime=?,progress=?,updated=?;",
+    `INSERT INTO Achievements(id, uid, isCompleted, completedTime, progress, status, updated)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     ON CONFLICT(id, uid) DO UPDATE SET
+       isCompleted = $3,
+       completedTime = $4,
+       progress = $5,
+       status = $6,
+       updated = $7;`,
     [
       data.id,
       data.uid,
-      data.isCompleted ? 1 : 0,
+      isCompleted ? 1 : 0,
       data.completedTime,
       data.progress,
-      fmtUtil.dateTime(new Date().getTime()),
-      data.isCompleted ? 1 : 0,
-      data.completedTime,
-      data.progress,
-      fmtUtil.dateTime(new Date().getTime()),
+      data.status,
+      updated,
     ],
   );
 }
@@ -345,10 +352,15 @@ async function updateAchi(data: TGApp.App.Achievement.RenderItem): Promise<void>
  * @returns UIAF数据
  */
 function transDb2Uiaf(data: TGApp.Sqlite.Achievement.TableRaw): TGApp.Plugins.UIAF.Achievement {
+  const status = data.status ?? UiafAchiStatEnum.Unfinished;
   let timestamp = 0;
-  if (data.isCompleted === 1) timestamp = Math.floor(new Date(data.completedTime).getTime() / 1000);
-  const status = getUiafStatus(data.isCompleted === 1, data.progress);
-  return { id: data.id, timestamp: timestamp, current: data.progress, status };
+  if (isAchiCompleted(status)) {
+    timestamp =
+      data.completedTime === ""
+        ? UIAFMagicTime
+        : Math.floor(new Date(data.completedTime).getTime() / 1000);
+  }
+  return { id: data.id, timestamp, current: data.progress, status };
 }
 
 /**
@@ -441,21 +453,35 @@ async function restoreUiaf(dir: string): Promise<boolean> {
  * @returns 无返回值
  */
 async function mergeUiaf(data: Array<TGApp.Plugins.UIAF.Achievement>, uid: number): Promise<void> {
-  const db = await TGSqlite.getDB();
+  const updated = fmtUtil.dateTime(new Date().getTime());
+  const statements: Array<TGApp.App.Sqlite.SqlStatement> = [];
   for (const achi of data) {
     const status =
-      achi.status === UiafAchiStatEnum.Finished || achi.status === UiafAchiStatEnum.RewardTaken
-        ? 1
-        : 0;
-    const timeC = status === 1 ? fmtUtil.dateTime(achi.timestamp * 1000) : "";
-    const timeN = fmtUtil.dateTime(new Date().getTime());
-    await db.execute(
-      "INSERT INTO Achievements(id, uid, isCompleted, completedTime, progress, updated) \
-    VALUES (?,?,?,?,?,?) ON CONFLICT(id,uid) DO UPDATE  SET\
-    isCompleted=?,completedTime=?,progress=?,updated=?;",
-      [achi.id, uid, status, timeC, achi.current, timeN, status, timeC, achi.current, timeN],
-    );
+      achi.status >= UiafAchiStatEnum.Invalid && achi.status <= UiafAchiStatEnum.RewardTaken
+        ? achi.status
+        : UiafAchiStatEnum.Unfinished;
+    if (status !== achi.status) {
+      await TGLogger.Warn(`[Achievements][mergeUiaf] 非法 status ${achi.status}，按未完成处理`);
+    }
+    const isCompleted = isAchiCompleted(status);
+    const timeC = isCompleted
+      ? achi.timestamp === UIAFMagicTime
+        ? ""
+        : fmtUtil.dateTime(achi.timestamp * 1000)
+      : "";
+    statements.push({
+      query: `INSERT INTO Achievements(id, uid, isCompleted, completedTime, progress, status, updated)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)
+              ON CONFLICT(id, uid) DO UPDATE SET
+                isCompleted = $3,
+                completedTime = $4,
+                progress = $5,
+                status = $6,
+                updated = $7;`,
+      values: [achi.id, uid, isCompleted ? 1 : 0, timeC, achi.current, status, updated],
+    });
   }
+  if (statements.length > 0) await TGSqlite.executeTransaction(statements);
 }
 
 /**

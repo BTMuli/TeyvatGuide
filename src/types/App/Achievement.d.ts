@@ -105,7 +105,24 @@ declare namespace TGApp.App.Achievement {
    * 成就分步项类型
    * @since Beta v0.12.1
    */
-  type PartialType = "quest" | "subquest" | "task" | "subtask";
+  const PartialType = <const>{
+    /** 成就 */
+    Achievement: "achievement",
+    /** 任务 */
+    Quest: "quest",
+    /** 子任务 */
+    SubQuest: "subquest",
+    /** 任务目标 */
+    Task: "task",
+    /** 子目标 */
+    SubTask: "subtask",
+  };
+
+  /**
+   * 成就分步项类型枚举
+   * @since Beta v0.12.1
+   */
+  type PartialTypeEnum = (typeof PartialType)[keyof typeof PartialType];
 
   /**
    * 成就分步项定义
@@ -115,14 +132,14 @@ declare namespace TGApp.App.Achievement {
     /** 分步项 ID。 */
     id: number;
     /** 分步项类型。 */
-    type: PartialType;
+    type: PartialTypeEnum;
     /** 分步项名称。 */
     name: string;
   };
 
   /**
    * 供成就组件使用的静态定义与用户状态合并数据
-   * @since Beta v0.12.0
+   * @since Beta v0.12.1
    */
   type RenderItem = Definition & {
     /** 用户成就记录 ID。 */
@@ -135,8 +152,6 @@ declare namespace TGApp.App.Achievement {
     completedTime: string;
     /** 当前进度。 */
     progress: number;
-    /** 分步项完成时间，键为分步项 ID。 */
-    partialTimestamps: Map<number, number>;
     /** 用户记录更新时间。 */
     updated: string;
   };

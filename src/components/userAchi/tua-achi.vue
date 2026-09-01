@@ -32,6 +32,7 @@
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { UiafAchiStatEnum } from "@enum/uiaf.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { event } from "@tauri-apps/api";
 import fmtUtil from "@utils/fmtUtil.js";
@@ -65,6 +66,7 @@ function selectAchi(): void {
 async function setAchiStat(stat: boolean): Promise<void> {
   if (!stat) {
     data.value.isCompleted = false;
+    data.value.status = UiafAchiStatEnum.Unfinished;
     await TSUserAchi.updateAchi(data.value);
     model.value = data.value;
     await event.emit("updateAchi", data.value.categoryId);
@@ -83,6 +85,8 @@ async function setAchiStat(stat: boolean): Promise<void> {
   }
   data.value.progress = Number(progress);
   data.value.completedTime = fmtUtil.dateTime(new Date().getTime());
+  data.value.status =
+    data.value.progress > 0 ? UiafAchiStatEnum.RewardTaken : UiafAchiStatEnum.Finished;
   data.value.isCompleted = true;
   await TSUserAchi.updateAchi(data.value);
   await event.emit("updateAchi", data.value.categoryId);
