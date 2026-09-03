@@ -32,6 +32,16 @@
       <span :title="series.name">{{ series.name }}</span>
       <span>{{ overview.fin }}/{{ overview.total }}</span>
     </div>
+    <button
+      v-if="props.showHiddenFilter"
+      :aria-label="hiddenFilterTitle"
+      :title="hiddenFilterTitle"
+      class="tuas-filter"
+      type="button"
+      @click.stop="switchHiddenFilter"
+    >
+      <v-icon :color="hiddenFilterColor" :icon="hiddenFilterIcon" size="20" />
+    </button>
   </div>
 </template>
 <script lang="ts" setup>
@@ -41,6 +51,7 @@ import { computed, onMounted, onUnmounted, shallowRef, watch } from "vue";
 
 import { AppNameCardsData } from "@/data/index.js";
 
+type HiddenFilter = "all" | "hidden" | "visible";
 type TuaSeriesProps = {
   /** 存档 UID */
   uid: number;
@@ -50,8 +61,15 @@ type TuaSeriesProps = {
   cur: number;
   /** 是否隐藏已完成 */
   hideFin: boolean;
+  /** 隐藏成就筛选状态 */
+  hiddenFilter: HiddenFilter;
+  /** 是否显示隐藏成就筛选入口 */
+  showHiddenFilter: boolean;
 };
-type TuaSeriesEmits = { selected: [v: number] };
+type TuaSeriesEmits = {
+  selected: [v: number];
+  "switch-hidden-filter": [];
+};
 
 let achiListener: UnlistenFn | null = null;
 const props = defineProps<TuaSeriesProps>();
@@ -67,6 +85,21 @@ const nameCardName = computed<string | undefined>(() => {
   return AppNameCardsData.find((item) => item.id === props.series.namecardId)?.name;
 });
 const showCard = computed<boolean>(() => nameCardName.value !== undefined);
+const hiddenFilterIcon = computed<string>(() => {
+  if (props.hiddenFilter === "hidden") return "mdi-eye-off-outline";
+  if (props.hiddenFilter === "visible") return "mdi-eye-outline";
+  return "mdi-eye-settings-outline";
+});
+const hiddenFilterColor = computed<string>(() => {
+  if (props.hiddenFilter === "hidden") return "var(--tgc-od-orange)";
+  if (props.hiddenFilter === "visible") return "var(--tgc-od-green)";
+  return "var(--box-text-4)";
+});
+const hiddenFilterTitle = computed<string>(() => {
+  if (props.hiddenFilter === "hidden") return "当前仅显示隐藏成就，点击切换为非隐藏成就";
+  if (props.hiddenFilter === "visible") return "当前仅显示非隐藏成就，点击切换为全部成就";
+  return "当前显示全部成就，点击切换为隐藏成就";
+});
 
 onMounted(async () => {
   await refreshOverview();
@@ -97,6 +130,10 @@ onUnmounted(async () => {
 
 function selectSeries(): void {
   emits("selected", props.series.id);
+}
+
+function switchHiddenFilter(): void {
+  emits("switch-hidden-filter");
 }
 </script>
 <style lang="scss" scoped>
@@ -145,6 +182,31 @@ function selectSeries(): void {
     left: 0;
     width: 40px;
     height: 40px;
+  }
+}
+
+.tuas-filter {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--common-shadow-1);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-yellow-2);
+    outline-offset: 1px;
   }
 }
 

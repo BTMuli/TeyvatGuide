@@ -5,7 +5,17 @@
     </div>
     <v-virtual-scroll :item-height="60" :items="renderAchi" class="tua-al-list">
       <template #default="{ item }">
-        <TuaAchi :modelValue="item" @select-achi="selectAchi" />
+        <TuaAchi
+          :data="item.achievement"
+          :expandable="item.expandable"
+          :expanded="item.expanded"
+          :isStageChild="item.isStageChild"
+          :stageCount="item.stageCount"
+          :stageIndex="item.stageIndex"
+          @select-achi="selectAchi"
+          @toggle-stages="toggleStageChain(item.stageChainId)"
+          @updated="handleAchiUpdated"
+        />
       </template>
     </v-virtual-scroll>
     <ToNameCard v-if="ncData" v-model="showNc" :data="ncData" topOffset="112px" />
@@ -56,7 +66,17 @@ import { AppNameCardsData } from "@/data/index.js";
 type TuaAchiListProps = {
   uid: number;
   hideFin: boolean;
+  hiddenFilter: "all" | "hidden" | "visible";
   search?: string;
+};
+type AchievementListItem = {
+  achievement: TGApp.App.Achievement.RenderItem;
+  stageChainId: number;
+  stageIndex: number;
+  stageCount: number;
+  isStageChild: boolean;
+  expandable: boolean;
+  expanded: boolean;
 };
 
 const props = defineProps<TuaAchiListProps>();
@@ -68,20 +88,39 @@ const showOverlay = ref<boolean>(false);
 const isFinish = ref<boolean>(false);
 const searchWd = ref<string>();
 const showSearch = ref<boolean>(false);
+const expandedStageChains = ref<Set<number>>(new Set());
 
 const ncData = shallowRef<TGApp.App.NameCard.Item>();
 const achievements = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([]);
 const selectedAchi = shallowRef<TGApp.App.Achievement.RenderItem>();
 
-const renderAchi = computed<Array<TGApp.App.Achievement.RenderItem>>(() => {
-  if (props.hideFin) return achievements.value.filter((a) => !a.isCompleted);
-  return achievements.value;
-});
+const renderAchi = computed<Array<AchievementListItem>>(() =>
+  groupAchievementStages(achievements.value),
+);
 
 onMounted(async () => await loadAchi());
 
 watch(() => [props.search, isSearch.value], searchAchi);
-watch(() => [series.value, props.uid], loadAchi);
+watch(
+  () => [series.value, props.uid],
+  async () => await loadAchi(),
+);
+watch(
+  renderAchi,
+  (items) => {
+    const selectedId = selectedAchi.value?.id;
+    const selectedStageChainId =
+      selectedId === undefined
+        ? undefined
+        : TSUserAchi.getAchievementStageChain(selectedId)?.[0]?.id;
+    selectedAchi.value =
+      items.find((item) => item.achievement.id === selectedId)?.achievement ??
+      items.find((item) => item.stageChainId === selectedStageChainId)?.achievement ??
+      items[0]?.achievement;
+    if (selectedAchi.value === undefined) showOverlay.value = false;
+  },
+  { flush: "sync" },
+);
 
 function handleSearch(kw: string): void {
   searchWd.value = kw;
@@ -115,17 +154,14 @@ async function searchAchi(): Promise<void> {
   isSearch.value = false;
 }
 
-async function loadAchi(): Promise<void> {
+async function loadAchi(showFeedback: boolean = true): Promise<void> {
   if (isSearch.value) return;
-  achievements.value = await TSUserAchi.getAchievements(props.uid, series.value);
+  achievements.value =
+    series.value === -1 && props.search
+      ? await TSUserAchi.searchAchi(props.uid, props.search)
+      : await TSUserAchi.getAchievements(props.uid, series.value);
   const ov = await TSUserAchi.getOverview(props.uid, series.value);
   isFinish.value = ov.fin === ov.total;
-  if (!selectedAchi.value && achievements.value.length > 0) {
-    selectedAchi.value = achievements.value[0];
-  } else if (selectedAchi.value !== undefined && achievements.value.length > 0) {
-    const index = achievements.value.findIndex((a) => a.id === selectedAchi.value!.id);
-    if (index === -1) selectedAchi.value = achievements.value[0];
-  }
   const seriesFind = TSUserAchi.getAchievementCategoryById(series.value);
   if (!seriesFind || seriesFind.namecardId === null) {
     ncData.value = undefined;
@@ -133,7 +169,77 @@ async function loadAchi(): Promise<void> {
     const ncFind = AppNameCardsData.find((item) => item.id === seriesFind.namecardId);
     ncData.value = ncFind ?? undefined;
   }
-  showSnackbar.success(`已获取 ${achievements.value.length} 条成就数据`);
+  if (showFeedback) showSnackbar.success(`已获取 ${achievements.value.length} 条成就数据`);
+}
+
+async function handleAchiUpdated(): Promise<void> {
+  await loadAchi(false);
+}
+
+function groupAchievementStages(
+  items: Array<TGApp.App.Achievement.RenderItem>,
+): Array<AchievementListItem> {
+  const itemMap = new Map<number, TGApp.App.Achievement.RenderItem>(
+    items.map((item) => [item.id, item]),
+  );
+  const visited = new Set<number>();
+  const result: Array<AchievementListItem> = [];
+  for (const item of items) {
+    if (visited.has(item.id)) continue;
+    const chain = TSUserAchi.getAchievementStageChain(item.id) ?? [item];
+    const stageChainId = chain[0]?.id ?? item.id;
+    const availableStages: Array<{
+      achievement: TGApp.App.Achievement.RenderItem;
+      stageIndex: number;
+    }> = [];
+    for (const [index, definition] of chain.entries()) {
+      const achievement = itemMap.get(definition.id);
+      if (achievement === undefined || visited.has(achievement.id)) continue;
+      visited.add(achievement.id);
+      availableStages.push({ achievement, stageIndex: index + 1 });
+    }
+    const maxStage = availableStages[availableStages.length - 1];
+    if (maxStage === undefined || !matchesAchievementFilters(maxStage.achievement)) continue;
+    const expandable = availableStages.length > 1;
+    const expanded = expandable && expandedStageChains.value.has(stageChainId);
+    result.push({
+      ...maxStage,
+      stageChainId,
+      stageCount: chain.length,
+      isStageChild: false,
+      expandable,
+      expanded,
+    });
+    if (!expanded) continue;
+    for (let index = availableStages.length - 2; index >= 0; index -= 1) {
+      result.push({
+        ...availableStages[index],
+        stageChainId,
+        stageCount: chain.length,
+        isStageChild: true,
+        expandable: false,
+        expanded: false,
+      });
+    }
+  }
+  return result;
+}
+
+function matchesAchievementFilters(achievement: TGApp.App.Achievement.RenderItem): boolean {
+  if (props.hideFin && achievement.isCompleted) return false;
+  if (props.hiddenFilter === "hidden") return achievement.hidden;
+  if (props.hiddenFilter === "visible") return !achievement.hidden;
+  return true;
+}
+
+function toggleStageChain(stageChainId: number): void {
+  const next = new Set(expandedStageChains.value);
+  if (next.has(stageChainId)) {
+    next.delete(stageChainId);
+  } else {
+    next.add(stageChainId);
+  }
+  expandedStageChains.value = next;
 }
 
 function selectAchi(data: TGApp.App.Achievement.RenderItem): void {
@@ -150,7 +256,9 @@ function switchAchiInfo(next: boolean): void {
     showSnackbar.warn("当前未选中成就！");
     return;
   }
-  const index = renderAchi.value.findIndex((i) => i === selectedAchi.value);
+  const index = renderAchi.value.findIndex(
+    (item) => item.achievement.id === selectedAchi.value?.id,
+  );
   if (index === -1) {
     showSnackbar.warn(
       `未找到选中成就 ${selectedAchi.value.name}(${selectedAchi.value.id}) 的索引！`,
@@ -162,17 +270,17 @@ function switchAchiInfo(next: boolean): void {
       showSnackbar.warn("已经是最后一个了");
       return;
     }
-    selectedAchi.value = renderAchi.value[index + 1];
+    selectedAchi.value = renderAchi.value[index + 1].achievement;
     return;
   }
   if (index === 0) {
     showSnackbar.warn("已经是第一个了");
     return;
   }
-  selectedAchi.value = renderAchi.value[index - 1];
+  selectedAchi.value = renderAchi.value[index - 1].achievement;
 }
 </script>
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .tua-al-container {
   display: flex;
   width: 100%;

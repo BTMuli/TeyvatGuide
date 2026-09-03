@@ -18,6 +18,14 @@
           <div class="tua-ao-title-main">
             <h2 class="tua-ao-title">{{ props.data.name }}</h2>
             <span class="tua-ao-version">v{{ props.data.version }}</span>
+            <span v-if="achievementStageChain.length > 1" class="tua-ao-stage">
+              阶段 {{ achievementStageIndex }}/{{ achievementStageChain.length }} · 目标
+              {{ props.data.target }}
+            </span>
+            <span v-if="props.data.hidden" class="tua-ao-hidden">
+              <v-icon size="12">mdi-eye-off-outline</v-icon>
+              隐藏成就
+            </span>
           </div>
         </header>
 
@@ -39,8 +47,8 @@
               <v-icon size="16">mdi-alert-decagram-outline</v-icon>
               <span class="tua-ao-task-content">
                 <span class="tua-ao-task-name">{{ item.name }}</span>
-                <span class="tua-ao-task-meta">
-                  {{ item.type }}<b v-if="item.count > 1"> ×{{ item.count }}</b>
+                <span :title="item.type" class="tua-ao-task-meta">
+                  {{ getTaskTypeLabel(item.type) }}<b v-if="item.count > 1"> ×{{ item.count }}</b>
                 </span>
               </span>
             </button>
@@ -55,6 +63,7 @@
         </section>
 
         <section aria-labelledby="achi-record-title" class="tua-ao-panel tua-ao-record">
+          <img :src="achievementStatusIcon" alt="" aria-hidden="true" class="tua-ao-record-ghost" />
           <div class="tua-ao-section-heading">
             <h3 id="achi-record-title">成就记录</h3>
           </div>
@@ -74,7 +83,7 @@
             </div>
             <div>
               <dt>当前进度</dt>
-              <dd>{{ props.data.progress > 0 ? props.data.progress : "—" }}</dd>
+              <dd>{{ props.data.progress }} / {{ props.data.target }}</dd>
             </div>
           </dl>
         </section>
@@ -148,6 +157,20 @@ const achievementSeriesIcon = computed<string>(() => {
   const icon = achievementSeries.value?.icon ?? "UI_AchievementIcon_O001";
   return `/icon/achievement/${icon}.webp`;
 });
+const achievementStageChain = computed<Array<TGApp.App.Achievement.Definition>>(
+  () => TSUserAchi.getAchievementStageChain(props.data.id) ?? [props.data],
+);
+const achievementStageIndex = computed<number>(() => {
+  const index = achievementStageChain.value.findIndex((item) => item.id === props.data.id);
+  return index === -1 ? 1 : index + 1;
+});
+const completedStageCount = computed<number>(() =>
+  props.data.isCompleted ? achievementStageIndex.value : achievementStageIndex.value - 1,
+);
+const achievementStatusIcon = computed<string>(
+  () =>
+    `/icon/achievement/UI_AchievementIcon_${achievementStageChain.value.length}_${completedStageCount.value}.webp`,
+);
 const achievementCard = computed<string>(() => {
   const namecardId = achievementSeries.value?.namecardId;
   const cardName =
@@ -209,6 +232,21 @@ function parseTriggerType(triggerType: string): string {
       return "完成以下任意任务";
     default:
       return triggerType;
+  }
+}
+
+function getTaskTypeLabel(taskType: string): string {
+  switch (taskType) {
+    case "AQ":
+      return "魔神任务";
+    case "IQ":
+      return "邀约任务";
+    case "LQ":
+      return "传说任务";
+    case "WQ":
+      return "世界任务";
+    default:
+      return taskType;
   }
 }
 </script>
@@ -378,6 +416,27 @@ $achi-action-share-text-dark: #c678ddff;
   line-height: 14px;
 }
 
+.tua-ao-stage,
+.tua-ao-hidden {
+  display: inline-flex;
+  height: 20px;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 2px 6px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--common-shadow-t-2);
+  color: var(--box-text-2);
+  column-gap: 4px;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.tua-ao-hidden {
+  border-color: var(--tgc-od-orange);
+  color: var(--tgc-od-orange);
+}
+
 .tua-ao-condition-text {
   display: -webkit-box;
   overflow: hidden;
@@ -403,8 +462,28 @@ $achi-action-share-text-dark: #c678ddff;
 }
 
 .tua-ao-record {
+  overflow: hidden;
   align-self: start;
   grid-area: record;
+  isolation: isolate;
+}
+
+.tua-ao-record > :not(.tua-ao-record-ghost) {
+  position: relative;
+  z-index: 1;
+}
+
+.tua-ao-record-ghost {
+  position: absolute;
+  z-index: 0;
+  top: -20px;
+  right: -16px;
+  width: 120px;
+  height: 120px;
+  filter: grayscale(0.6);
+  object-fit: contain;
+  opacity: 0.18;
+  pointer-events: none;
 }
 
 .tua-ao-section-heading {

@@ -73,9 +73,12 @@
         :key="item.id"
         v-model:cur="selectedSeries"
         :hideFin
+        :hiddenFilter="getHiddenFilter(item.id)"
         :series="item"
+        :showHiddenFilter="hiddenAchievementCategoryIds.has(item.id)"
         :uid="uidCur"
         @selected="handleSeriesSelect"
+        @switch-hidden-filter="switchHiddenFilter(item.id)"
       />
     </div>
     <TuaAchiList
@@ -83,6 +86,7 @@
       v-model:search="search"
       v-model:series="selectedSeries"
       :hideFin
+      :hiddenFilter="activeHiddenFilter"
       :uid="uidCur"
     />
   </div>
@@ -114,7 +118,14 @@ import { useRoute, useRouter } from "vue-router";
 
 import { AppAchiData } from "@/data/index.js";
 
+type HiddenFilter = "all" | "hidden" | "visible";
+
 const categoryList = AppAchiData.categories;
+const hiddenAchievementCategoryIds = new Set<number>(
+  categoryList
+    .filter((category) => category.achievements.some((achievement) => achievement.hidden))
+    .map((category) => category.id),
+);
 
 const route = useRoute();
 const router = useRouter();
@@ -126,6 +137,7 @@ let achiListener: UnlistenFn | null = null;
 const search = ref<string>("");
 const isSearch = ref<boolean>(false);
 const hideFin = ref<boolean>(false);
+const hiddenFilters = ref<Partial<Record<number, HiddenFilter>>>({});
 const uidList = ref<Array<number>>([]);
 const uidCur = ref<number>(0);
 const selectedSeries = ref<number>(-1);
@@ -133,6 +145,10 @@ const overview = shallowRef<TGApp.App.Achievement.Overview>({ fin: 0, total: 1 }
 const title = computed<string>(() => {
   const percentage = ((overview.value.fin * 100) / overview.value.total).toFixed(2);
   return `${overview.value.fin}/${overview.value.total} ${percentage}%`;
+});
+const activeHiddenFilter = computed<HiddenFilter>(() => {
+  if (!hiddenAchievementCategoryIds.has(selectedSeries.value)) return "all";
+  return getHiddenFilter(selectedSeries.value);
 });
 
 onMounted(async () => {
@@ -181,6 +197,19 @@ function handleSeriesSelect(id: number): void {
     return;
   }
   selectedSeries.value = id;
+}
+
+function getHiddenFilter(seriesId: number): HiddenFilter {
+  return hiddenFilters.value[seriesId] ?? "all";
+}
+
+function switchHiddenFilter(seriesId: number): void {
+  const current = getHiddenFilter(seriesId);
+  let next: HiddenFilter = "all";
+  if (current === "all") next = "hidden";
+  else if (current === "hidden") next = "visible";
+  hiddenFilters.value = { ...hiddenFilters.value, [seriesId]: next };
+  selectedSeries.value = seriesId;
 }
 
 async function refreshOverview(): Promise<void> {

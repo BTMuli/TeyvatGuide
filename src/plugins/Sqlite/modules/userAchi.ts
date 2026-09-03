@@ -113,6 +113,35 @@ function getAchievementStageChain(id: number): Array<TGApp.App.Achievement.Defin
  */
 const UIAFMagicTime = 253402271999;
 
+type AchievementProgressUpdateItem = {
+  definition: TGApp.App.Achievement.Definition;
+  previous: TGApp.Sqlite.Achievement.UserState;
+  next: TGApp.Sqlite.Achievement.UserState;
+};
+
+type AchievementProgressUpdate = {
+  uid: number;
+  progress: number;
+  updated: string;
+  items: Array<AchievementProgressUpdateItem>;
+};
+
+type AchievementProgressPreviewItem = {
+  id: number;
+  name: string;
+  target: number;
+  previousProgress: number;
+  progress: number;
+  previousStatus: TGApp.Plugins.UIAF.AchiItemStatEnum;
+  status: TGApp.Plugins.UIAF.AchiItemStatEnum;
+};
+
+type AchievementProgressPreview = {
+  progress: number;
+  maxProgress: number;
+  items: Array<AchievementProgressPreviewItem>;
+};
+
 /**
  * 判断 UIAF 状态是否已完成
  * @since Beta v0.12.1
@@ -121,6 +150,81 @@ const UIAFMagicTime = 253402271999;
  */
 function isAchiCompleted(status: TGApp.Plugins.UIAF.AchiItemStatEnum): boolean {
   return status === UiafAchiStatEnum.Finished || status === UiafAchiStatEnum.RewardTaken;
+}
+
+function getEmptyUserState(id: number, uid: number): TGApp.Sqlite.Achievement.UserState {
+  return {
+    id,
+    uid,
+    isCompleted: false,
+    completedTime: "",
+    progress: 0,
+    status: UiafAchiStatEnum.Unfinished,
+    updated: "",
+  };
+}
+
+function getUserState(raw: TGApp.Sqlite.Achievement.TableRaw): TGApp.Sqlite.Achievement.UserState {
+  return {
+    ...raw,
+    isCompleted: isAchiCompleted(raw.status),
+  };
+}
+
+function resolveProgressStatus(
+  status: TGApp.Plugins.UIAF.AchiItemStatEnum,
+  completed: boolean,
+): TGApp.Plugins.UIAF.AchiItemStatEnum {
+  if (completed) {
+    return isAchiCompleted(status) ? status : UiafAchiStatEnum.RewardTaken;
+  }
+  return isAchiCompleted(status) ? UiafAchiStatEnum.Unfinished : status;
+}
+
+async function buildAchievementProgressUpdate(
+  uid: number,
+  achievementId: number,
+  progress: number,
+): Promise<AchievementProgressUpdate> {
+  const chain = getAchievementStageChain(achievementId);
+  if (chain === undefined || chain.length === 0) {
+    throw new Error(`未找到成就 ${achievementId}`);
+  }
+  const maxProgress = Math.max(...chain.map((item) => item.target));
+  if (!Number.isSafeInteger(progress) || progress < 0 || progress > maxProgress) {
+    throw new Error(`成就进度必须是 0 到 ${maxProgress} 之间的整数`);
+  }
+  const db = await TGSqlite.getDB();
+  const placeholders = chain.map(() => "?").join(", ");
+  const userData = await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
+    `SELECT * FROM Achievements WHERE uid = ? AND id IN (${placeholders});`,
+    [uid, ...chain.map((item) => item.id)],
+  );
+  const userStateMap = new Map<number, TGApp.Sqlite.Achievement.UserState>(
+    userData.map((item) => [item.id, getUserState(item)]),
+  );
+  const updated = fmtUtil.dateTime(new Date().getTime());
+  const items = chain.map((definition): AchievementProgressUpdateItem => {
+    const previous = userStateMap.get(definition.id) ?? getEmptyUserState(definition.id, uid);
+    const completed = progress >= definition.target;
+    const status = resolveProgressStatus(previous.status, completed);
+    const newlyCompleted = completed && !isAchiCompleted(previous.status);
+    const completedTime =
+      newlyCompleted && previous.completedTime === "" ? updated : previous.completedTime;
+    return {
+      definition,
+      previous,
+      next: {
+        ...previous,
+        isCompleted: isAchiCompleted(status),
+        completedTime,
+        progress,
+        status,
+        updated,
+      },
+    };
+  });
+  return { uid, progress, updated, items };
 }
 
 /**
@@ -272,7 +376,7 @@ async function getAchievements(
  * @remarks 支持三种搜索方式：
  * - 版本搜索：输入 vx.x 格式的关键词（如 v1.2），搜索对应版本的成就
  * - ID搜索：输入 ixxx 格式的关键词（如 i1001），搜索对应ID的成就
- * - 名称/描述搜索：输入任意关键词，搜索成就名称或描述中包含该关键词的成就
+ * - 文本搜索：输入任意关键词，搜索成就名称、描述或关联任务名称
  * @param uid - 存档 UID
  * @param keyword - 关键词
  * @returns 成就数据
@@ -298,7 +402,9 @@ async function searchAchi(
     rawData = AppAchiData.categories.flatMap((category) =>
       category.achievements.filter(
         (achievement) =>
-          achievement.name.includes(keyword) || achievement.description.includes(keyword),
+          achievement.name.includes(keyword) ||
+          achievement.description.includes(keyword) ||
+          achievement.trigger.tasks.some((task) => task.name.includes(keyword)),
       ),
     );
   }
@@ -343,6 +449,71 @@ async function updateAchi(data: TGApp.App.Achievement.RenderItem): Promise<void>
       updated,
     ],
   );
+}
+
+/**
+ * 预览共享进度对成就阶段链的影响
+ * @since Beta v0.12.1
+ * @param uid - 存档 UID
+ * @param achievementId - 成就 ID
+ * @param progress - 共享进度
+ * @returns 阶段链变更预览
+ */
+async function getAchievementProgressPreview(
+  uid: number,
+  achievementId: number,
+  progress: number,
+): Promise<AchievementProgressPreview> {
+  const update = await buildAchievementProgressUpdate(uid, achievementId, progress);
+  return {
+    progress: update.progress,
+    maxProgress: Math.max(...update.items.map((item) => item.definition.target)),
+    items: update.items.map((item) => ({
+      id: item.definition.id,
+      name: item.definition.name,
+      target: item.definition.target,
+      previousProgress: item.previous.progress,
+      progress: item.next.progress,
+      previousStatus: item.previous.status,
+      status: item.next.status,
+    })),
+  };
+}
+
+/**
+ * 在同一事务中更新完整阶段链的共享进度
+ * @since Beta v0.12.1
+ * @param uid - 存档 UID
+ * @param achievementId - 成就 ID
+ * @param progress - 共享进度
+ * @returns 无返回值
+ */
+async function updateAchievementProgress(
+  uid: number,
+  achievementId: number,
+  progress: number,
+): Promise<void> {
+  const update = await buildAchievementProgressUpdate(uid, achievementId, progress);
+  const statements = update.items.map((item): TGApp.App.Sqlite.SqlStatement => ({
+    query: `INSERT INTO Achievements(id, uid, isCompleted, completedTime, progress, status, updated)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)
+              ON CONFLICT(id, uid) DO UPDATE SET
+                isCompleted = $3,
+                completedTime = $4,
+                progress = $5,
+                status = $6,
+                updated = $7;`,
+    values: [
+      item.next.id,
+      update.uid,
+      item.next.isCompleted ? 1 : 0,
+      item.next.completedTime,
+      update.progress,
+      item.next.status,
+      update.updated,
+    ],
+  }));
+  await TGSqlite.executeTransaction(statements);
 }
 
 /**
@@ -511,6 +682,8 @@ const TSUserAchi = {
   getUiafData,
   searchAchi,
   updateAchi,
+  getAchievementProgressPreview,
+  updateAchievementProgress,
   mergeUiaf,
   backupUiaf,
   restoreUiaf,
