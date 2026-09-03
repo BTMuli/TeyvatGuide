@@ -18,8 +18,8 @@ use crate::client::create_mhy_client;
 use crate::commands::{
   app_fs_exists, app_fs_mkdir, app_fs_read_dir, app_fs_read_text_file, app_fs_write_text_file,
   clear_app_cache, clear_app_logs, create_window, destroy_window, destroy_window_by_label,
-  ensure_user_data_dir, execute_js, execute_sql_transaction, get_dir_size, hide_main_window,
-  init_app, is_in_admin, is_msix, is_process_running, quit_app, read_text_scale,
+  ensure_user_data_dir, execute_js, execute_sql_transaction, get_app_log_dir, get_dir_size,
+  hide_main_window, init_app, is_in_admin, is_msix, is_process_running, quit_app, read_text_scale,
 };
 use crate::game::commands::{
   game_http_proxy_configure, game_install_cancel, game_install_defender_exclude_add,
@@ -142,6 +142,7 @@ pub fn run() {
       get_dir_size,
       clear_app_cache,
       clear_app_logs,
+      get_app_log_dir,
       ensure_user_data_dir,
       app_fs_exists,
       app_fs_mkdir,

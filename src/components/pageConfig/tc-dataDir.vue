@@ -63,7 +63,7 @@ import { onMounted } from "vue";
 const { dbPath, logDir, userDir } = storeToRefs(useAppStore());
 
 onMounted(async () => {
-  const logDirGet = await path.appLogDir();
+  const logDirGet = await core.invoke<string>("get_app_log_dir");
   const dbPathGet = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
   let message = "";
   if (dbPath.value !== dbPathGet) {

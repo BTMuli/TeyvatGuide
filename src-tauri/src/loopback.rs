@@ -9,7 +9,7 @@ use windows_sys::Win32::UI::Shell::ShellExecuteW;
 use windows_sys::Win32::UI::WindowsAndMessaging::SW_HIDE;
 
 /// 获取当前 MSIX 包的 PackageFamilyName
-fn get_package_family_name() -> Result<String, String> {
+pub(crate) fn get_package_family_name() -> Result<String, String> {
   unsafe {
     let mut length: u32 = 0;
     if GetCurrentPackageFamilyName(&mut length, std::ptr::null_mut()) != ERROR_INSUFFICIENT_BUFFER {
