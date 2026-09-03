@@ -6,6 +6,7 @@
     <v-virtual-scroll :item-height="60" :items="renderAchi" class="tua-al-list">
       <template #default="{ item }">
         <TuaAchi
+          :completedStageCount="item.completedStageCount"
           :data="item.achievement"
           :expandable="item.expandable"
           :expanded="item.expanded"
@@ -24,6 +25,7 @@
       v-model="showOverlay"
       :data="selectedAchi"
       @search="handleSearch"
+      @select-achievement="selectAchi"
       @select-series="selectSeries"
     >
       <template #left>
@@ -71,6 +73,7 @@ type TuaAchiListProps = {
 };
 type AchievementListItem = {
   achievement: TGApp.App.Achievement.RenderItem;
+  completedStageCount: number;
   stageChainId: number;
   stageIndex: number;
   stageCount: number;
@@ -198,12 +201,19 @@ function groupAchievementStages(
       visited.add(achievement.id);
       availableStages.push({ achievement, stageIndex: index + 1 });
     }
-    const maxStage = availableStages[availableStages.length - 1];
-    if (maxStage === undefined || !matchesAchievementFilters(maxStage.achievement)) continue;
+    const currentStage =
+      availableStages.find((stage) => !stage.achievement.isCompleted) ??
+      availableStages[availableStages.length - 1];
+    if (currentStage === undefined || !matchesAchievementFilters(currentStage.achievement))
+      continue;
+    const currentStageCompletedCount = currentStage.achievement.isCompleted
+      ? currentStage.stageIndex
+      : currentStage.stageIndex - 1;
     const expandable = availableStages.length > 1;
     const expanded = expandable && expandedStageChains.value.has(stageChainId);
     result.push({
-      ...maxStage,
+      ...currentStage,
+      completedStageCount: currentStageCompletedCount,
       stageChainId,
       stageCount: chain.length,
       isStageChild: false,
@@ -211,9 +221,15 @@ function groupAchievementStages(
       expanded,
     });
     if (!expanded) continue;
-    for (let index = availableStages.length - 2; index >= 0; index -= 1) {
+    const currentStageIndex = availableStages.indexOf(currentStage);
+    const otherStages = [
+      ...availableStages.slice(currentStageIndex + 1),
+      ...availableStages.slice(0, currentStageIndex).reverse(),
+    ];
+    for (const stage of otherStages) {
       result.push({
-        ...availableStages[index],
+        ...stage,
+        completedStageCount: Math.min(stage.stageIndex, currentStageCompletedCount),
         stageChainId,
         stageCount: chain.length,
         isStageChild: true,

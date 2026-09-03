@@ -2,7 +2,7 @@
   <TOverlay v-model="visible" blur-val="5px" topOffset="112px">
     <div v-if="props.data" class="tua-ao-container">
       <slot name="left"></slot>
-      <div class="tua-ao-box">
+      <div :class="{ 'has-stage-chain': achievementStageChain.length > 1 }" class="tua-ao-box">
         <img :src="achievementCard" alt="" aria-hidden="true" class="tua-ao-bg" />
 
         <header class="tua-ao-header">
@@ -19,8 +19,7 @@
             <h2 class="tua-ao-title">{{ props.data.name }}</h2>
             <span class="tua-ao-version">v{{ props.data.version }}</span>
             <span v-if="achievementStageChain.length > 1" class="tua-ao-stage">
-              阶段 {{ achievementStageIndex }}/{{ achievementStageChain.length }} · 目标
-              {{ props.data.target }}
+              阶段 {{ achievementStageIndex }}/{{ achievementStageChain.length }}
             </span>
             <span v-if="props.data.hidden" class="tua-ao-hidden">
               <v-icon size="12">mdi-eye-off-outline</v-icon>
@@ -88,6 +87,48 @@
           </dl>
         </section>
 
+        <section
+          v-if="otherAchievementStages.length > 0"
+          aria-labelledby="achi-stages-title"
+          class="tua-ao-panel tua-ao-stages"
+        >
+          <div class="tua-ao-section-heading">
+            <h3 id="achi-stages-title">其他阶段</h3>
+            <span data-html2canvas-ignore>点击阶段可查看完整详情</span>
+          </div>
+          <div class="tua-ao-stage-list">
+            <button
+              v-for="item in otherAchievementStages"
+              :key="item.id"
+              :class="{ 'is-completed': item.isCompleted }"
+              :title="'查看阶段 ' + getStageIndex(item.id) + '：' + item.name"
+              class="tua-ao-stage-item"
+              type="button"
+              @click="emits('select-achievement', item)"
+            >
+              <span class="tua-ao-stage-item-head">
+                <strong>{{ item.name }}</strong>
+                <span class="tua-ao-stage-item-index">
+                  阶段 {{ getStageIndex(item.id) }}/{{ achievementStageChain.length }}
+                </span>
+              </span>
+              <span class="tua-ao-stage-item-desc">{{ item.description }}</span>
+              <span class="tua-ao-stage-item-footer">
+                <span class="tua-ao-stage-item-status">
+                  <v-icon size="14">
+                    {{ item.isCompleted ? "mdi-check-circle" : "mdi-progress-clock" }}
+                  </v-icon>
+                  {{ item.isCompleted ? "已完成" : "未完成" }}
+                </span>
+                <span class="tua-ao-stage-item-reward">
+                  {{ item.reward }}
+                  <img alt="原石" src="/icon/material/201.webp" />
+                </span>
+              </span>
+            </button>
+          </div>
+        </section>
+
         <footer class="tua-ao-footer">
           <div class="tua-ao-metadata">
             <span>
@@ -130,12 +171,13 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 
 import { AppNameCardsData } from "@/data/index.js";
 
 type ToAchiInfoProps = { data: TGApp.App.Achievement.RenderItem };
 type ToAchiInfoEmits = {
+  "select-achievement": [data: TGApp.App.Achievement.RenderItem];
   "select-series": [seriesId: number];
   search: [word: string];
 };
@@ -149,6 +191,8 @@ const emits = defineEmits<ToAchiInfoEmits>();
 const visible = defineModel<boolean>({ required: true });
 const loading = ref<boolean>(false);
 const appVersion = ref<string>();
+const achievementStages = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([props.data]);
+let stageLoadRequest = 0;
 const achievementSeries = computed<TGApp.App.Achievement.Category | undefined>(() =>
   TSUserAchi.getAchievementCategoryById(props.data.categoryId),
 );
@@ -164,9 +208,13 @@ const achievementStageIndex = computed<number>(() => {
   const index = achievementStageChain.value.findIndex((item) => item.id === props.data.id);
   return index === -1 ? 1 : index + 1;
 });
-const completedStageCount = computed<number>(() =>
-  props.data.isCompleted ? achievementStageIndex.value : achievementStageIndex.value - 1,
+const otherAchievementStages = computed<Array<TGApp.App.Achievement.RenderItem>>(() =>
+  achievementStages.value.filter((item) => item.id !== props.data.id),
 );
+const completedStageCount = computed<number>(() => {
+  const currentStageIndex = achievementStages.value.findIndex((item) => !item.isCompleted);
+  return currentStageIndex === -1 ? achievementStageChain.value.length : currentStageIndex;
+});
 const achievementStatusIcon = computed<string>(
   () =>
     `/icon/achievement/UI_AchievementIcon_${achievementStageChain.value.length}_${completedStageCount.value}.webp`,
@@ -198,6 +246,30 @@ const triggerTypeLabel = computed<string>(() => {
 });
 
 onMounted(async () => (appVersion.value = await getVersion()));
+watch(
+  () => [props.data.id, props.data.uid],
+  async () => await loadAchievementStages(),
+  { immediate: true },
+);
+
+async function loadAchievementStages(): Promise<void> {
+  const requestId = ++stageLoadRequest;
+  if (achievementStageChain.value.length === 1) {
+    achievementStages.value = [props.data];
+    return;
+  }
+  if (!achievementStages.value.some((item) => item.id === props.data.id)) {
+    achievementStages.value = [props.data];
+  }
+  const stages = await TSUserAchi.getAchievementStageItems(props.data.uid, props.data.id);
+  if (requestId !== stageLoadRequest) return;
+  achievementStages.value = stages.length > 0 ? stages : [props.data];
+}
+
+function getStageIndex(achievementId: number): number {
+  const index = achievementStageChain.value.findIndex((item) => item.id === achievementId);
+  return index === -1 ? 1 : index + 1;
+}
 
 async function searchDirect(word: string): Promise<void> {
   await TGLogger.Info(`[ToAchiInfo][${props.data.id}][Search] 查询 ${word}`);
@@ -270,7 +342,8 @@ $achi-action-share-text-dark: #c678ddff;
 
 @media (prefers-reduced-motion: reduce) {
   .tua-ao-task,
-  .tua-ao-series {
+  .tua-ao-series,
+  .tua-ao-stage-item {
     transition: none;
   }
 }
@@ -303,6 +376,17 @@ $achi-action-share-text-dark: #c678ddff;
     "conditions record" minmax(0, 1fr)
     "footer footer" 36px / minmax(0, 1fr) 248px;
   isolation: isolate;
+}
+
+.tua-ao-box.has-stage-chain {
+  width: 880px;
+  min-height: 460px;
+  aspect-ratio: auto;
+  grid-template:
+    "header header" 64px
+    "conditions record" minmax(0, 1fr)
+    "stages stages" auto
+    "footer footer" 36px / minmax(0, 1fr) 248px;
 }
 
 .tua-ao-box::after {
@@ -646,6 +730,117 @@ $achi-action-share-text-dark: #c678ddff;
 .tua-ao-record-list dd.is-completed {
   color: var(--tgc-yellow-3);
   font-weight: 600;
+}
+
+.tua-ao-stages {
+  grid-area: stages;
+}
+
+.tua-ao-stage-list {
+  display: grid;
+  margin-top: 8px;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.tua-ao-stage-item {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  background: var(--common-shadow-t-2);
+  color: var(--box-text-1);
+  cursor: pointer;
+  font: inherit;
+  gap: 4px;
+  text-align: left;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.tua-ao-stage-item:hover {
+  border-color: var(--common-shadow-3);
+  background: var(--box-bg-4);
+}
+
+.tua-ao-stage-item:focus-visible {
+  outline: 2px solid var(--tgc-yellow-1);
+  outline-offset: 2px;
+}
+
+.tua-ao-stage-item-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 8px;
+}
+
+.tua-ao-stage-item-head strong {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--common-text-title);
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tua-ao-stage-item-index {
+  flex-shrink: 0;
+  color: var(--box-text-4);
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.tua-ao-stage-item-desc {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: 28px;
+  -webkit-box-orient: vertical;
+  color: var(--box-text-4);
+  font-size: 10px;
+  -webkit-line-clamp: 2;
+  line-height: 14px;
+}
+
+.tua-ao-stage-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 12px;
+}
+
+.tua-ao-stage-item-status,
+.tua-ao-stage-item-reward {
+  display: inline-flex;
+  align-items: center;
+  color: var(--box-text-2);
+  column-gap: 4px;
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.tua-ao-stage-item.is-completed .tua-ao-stage-item-status {
+  color: var(--tgc-yellow-3);
+  font-weight: 600;
+}
+
+.tua-ao-stage-item-reward {
+  color: var(--common-text-title);
+  column-gap: 2px;
+  font-weight: 600;
+}
+
+.tua-ao-stage-item-reward img {
+  width: 16px;
+  height: 16px;
 }
 
 .tua-ao-footer {

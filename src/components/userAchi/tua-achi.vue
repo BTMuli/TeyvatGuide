@@ -14,9 +14,9 @@
     <div class="achi-version">v{{ props.data.version }}</div>
     <button
       v-if="props.expandable"
-      :aria-label="props.expanded ? '收起前序阶段' : '展开前序阶段'"
+      :aria-label="props.expanded ? '收起其他阶段' : '展开其他阶段'"
       :aria-expanded="props.expanded"
-      :title="props.expanded ? '收起前序阶段' : '展开前序阶段'"
+      :title="props.expanded ? '收起其他阶段' : '展开其他阶段'"
       class="achi-stage-toggle"
       type="button"
       @click.stop="emits('toggle-stages')"
@@ -72,6 +72,7 @@ import { event } from "@tauri-apps/api";
 import { computed } from "vue";
 
 type TuaAchiProps = {
+  completedStageCount: number;
   data: TGApp.App.Achievement.RenderItem;
   expandable: boolean;
   expanded: boolean;
@@ -90,12 +91,9 @@ const emits = defineEmits<TuaAchiEmits>();
 const stageChain = computed<Array<TGApp.App.Achievement.Definition>>(
   () => TSUserAchi.getAchievementStageChain(props.data.id) ?? [props.data],
 );
-const completedStageCount = computed<number>(() =>
-  props.data.isCompleted ? props.stageIndex : props.stageIndex - 1,
-);
 const achievementStatusIcon = computed<string>(
   () =>
-    `/icon/achievement/UI_AchievementIcon_${props.stageCount}_${completedStageCount.value}.webp`,
+    `/icon/achievement/UI_AchievementIcon_${props.stageCount}_${props.completedStageCount}.webp`,
 );
 const maxProgress = computed<number>(() =>
   Math.max(...stageChain.value.map((achievement) => achievement.target)),

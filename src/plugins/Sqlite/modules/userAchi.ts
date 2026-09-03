@@ -371,6 +371,31 @@ async function getAchievements(
 }
 
 /**
+ * 获取成就完整阶段链的渲染数据
+ * @since Beta v0.12.1
+ * @param uid - 存档 UID
+ * @param achievementId - 成就 ID
+ * @returns 从根阶段到末阶段排列的成就渲染数据
+ */
+async function getAchievementStageItems(
+  uid: number,
+  achievementId: number,
+): Promise<Array<TGApp.App.Achievement.RenderItem>> {
+  const chain = getAchievementStageChain(achievementId);
+  if (chain === undefined || chain.length === 0) return [];
+  const db = await TGSqlite.getDB();
+  const placeholders = chain.map(() => "?").join(", ");
+  const userData = await db.select<Array<TGApp.Sqlite.Achievement.TableRaw>>(
+    `SELECT * FROM Achievements WHERE uid = ? AND id IN (${placeholders});`,
+    [uid, ...chain.map((item) => item.id)],
+  );
+  const userStateMap = new Map<number, TGApp.Sqlite.Achievement.TableRaw>(
+    userData.map((item) => [item.id, item]),
+  );
+  return chain.map((definition) => getRenderAchi(definition, uid, userStateMap.get(definition.id)));
+}
+
+/**
  * 查找成就数据
  * @since Beta v0.12.1
  * @remarks 支持三种搜索方式：
@@ -678,6 +703,7 @@ const TSUserAchi = {
   getLatestAchiVersion,
   getOverview,
   getAchievements,
+  getAchievementStageItems,
   getAllUid,
   getUiafData,
   searchAchi,
