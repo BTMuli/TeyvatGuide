@@ -366,11 +366,17 @@ pub struct ClearAppLogsResult {
   pub failed: u32,
 }
 
-/// 返回系统文件管理器可直接访问的日志目录。
+/// 返回系统文件管理器可直接访问的路径。
 #[tauri::command]
-pub fn get_app_log_dir(app_handle: AppHandle) -> Result<String, String> {
-  let log_dir =
-    app_handle.path().app_log_dir().map_err(|error| format!("读取日志目录失败：{error}"))?;
+pub fn resolve_external_path(app_handle: AppHandle, path: String) -> Result<String, String> {
+  let path = path.trim();
+  if path.is_empty() {
+    return Err("路径不能为空".to_string());
+  }
+  let source = std::path::PathBuf::from(path);
+  if !source.is_absolute() {
+    return Err("路径必须是绝对路径".to_string());
+  }
 
   #[cfg(target_os = "windows")]
   if let Ok(package_family_name) = crate::loopback::get_package_family_name() {
@@ -378,21 +384,39 @@ pub fn get_app_log_dir(app_handle: AppHandle) -> Result<String, String> {
       .path()
       .local_data_dir()
       .map_err(|error| format!("读取本地数据目录失败：{error}"))?;
-    let relative_log_dir = log_dir
-      .strip_prefix(&local_data_dir)
-      .map_err(|_| "日志目录不在本地数据目录中".to_string())?;
-    let redirected_log_dir = local_data_dir
-      .join("Packages")
-      .join(package_family_name)
-      .join("LocalCache")
-      .join("Local")
-      .join(relative_log_dir);
-    if redirected_log_dir.exists() {
-      return Ok(redirected_log_dir.to_string_lossy().into_owned());
+    let roaming_data_dir =
+      app_handle.path().data_dir().map_err(|error| format!("读取漫游数据目录失败：{error}"))?;
+    if let Some(redirected) =
+      msix_redirected_path(&source, &local_data_dir, &roaming_data_dir, &package_family_name)
+    {
+      if redirected.exists() {
+        return Ok(redirected.to_string_lossy().into_owned());
+      }
     }
   }
 
-  Ok(log_dir.to_string_lossy().into_owned())
+  Ok(source.to_string_lossy().into_owned())
+}
+
+#[cfg(target_os = "windows")]
+fn msix_redirected_path(
+  source: &std::path::Path,
+  local_data_dir: &std::path::Path,
+  roaming_data_dir: &std::path::Path,
+  package_family_name: &str,
+) -> Option<std::path::PathBuf> {
+  if source.components().any(|component| component == std::path::Component::ParentDir) {
+    return None;
+  }
+  let package_cache_dir =
+    local_data_dir.join("Packages").join(package_family_name).join("LocalCache");
+  if let Ok(relative) = source.strip_prefix(local_data_dir) {
+    return Some(package_cache_dir.join("Local").join(relative));
+  }
+  if let Ok(relative) = source.strip_prefix(roaming_data_dir) {
+    return Some(package_cache_dir.join("Roaming").join(relative));
+  }
+  None
 }
 
 #[tauri::command]

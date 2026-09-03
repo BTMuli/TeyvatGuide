@@ -209,7 +209,7 @@ import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
-import { path } from "@tauri-apps/api";
+import { core, path } from "@tauri-apps/api";
 import { exists } from "@tauri-apps/plugin-fs";
 import { openPath } from "@tauri-apps/plugin-opener";
 import fmtUtil from "@utils/fmtUtil.js";
@@ -535,7 +535,8 @@ async function openTaskDirectory(): Promise<void> {
       showSnackbar.warn("任务目录尚不存在");
       return;
     }
-    await openPath(taskDir);
+    const externalTaskDir = await core.invoke<string>("resolve_external_path", { path: taskDir });
+    await openPath(externalTaskDir);
   } catch (error) {
     showSnackbar.error(`打开任务目录失败：${error}`);
   } finally {

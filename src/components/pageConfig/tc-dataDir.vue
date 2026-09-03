@@ -2,7 +2,7 @@
   <v-list class="config-list">
     <v-list-subheader :inset="true" class="config-header" title="路径" />
     <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item :subtitle="userDir" title="用户数据目录">
+    <v-list-item :subtitle="externalUserDir" title="用户数据目录">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-key</v-icon>
@@ -16,7 +16,7 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item :subtitle="dbPath" title="应用数据库路径">
+    <v-list-item :subtitle="externalDbPath" title="应用数据库路径">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-account</v-icon>
@@ -29,7 +29,7 @@
         </div>
       </template>
     </v-list-item>
-    <v-list-item :subtitle="logDir" title="日志目录">
+    <v-list-item :subtitle="externalLogDir" title="日志目录">
       <template #prepend>
         <div class="config-icon">
           <v-icon>mdi-folder-multiple</v-icon>
@@ -58,21 +58,34 @@ import { openPath } from "@tauri-apps/plugin-opener";
 import { backUpUserData } from "@utils/dataBS.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
 const { dbPath, logDir, userDir } = storeToRefs(useAppStore());
+const externalUserDir = ref<string>(userDir.value);
+const externalDbDir = ref<string>("");
+const externalDbPath = ref<string>(dbPath.value);
+const externalLogDir = ref<string>(logDir.value);
 
 onMounted(async () => {
-  const logDirGet = await core.invoke<string>("get_app_log_dir");
-  const dbPathGet = `${await path.appConfigDir()}${path.sep()}TeyvatGuide.db`;
+  const [logDirRaw, dbDirRaw] = await Promise.all([path.appLogDir(), path.appConfigDir()]);
+  const dbPathGet = `${dbDirRaw}${path.sep()}TeyvatGuide.db`;
+  const [externalUserDirGet, externalDbDirGet, logDirGet] = await Promise.all([
+    resolveExternalPath(userDir.value),
+    resolveExternalPath(dbDirRaw),
+    resolveExternalPath(logDirRaw),
+  ]);
+  externalUserDir.value = externalUserDirGet;
+  externalDbDir.value = externalDbDirGet;
+  externalDbPath.value = `${externalDbDir.value}${path.sep()}TeyvatGuide.db`;
+  externalLogDir.value = logDirGet;
   let message = "";
   if (dbPath.value !== dbPathGet) {
     dbPath.value = dbPathGet;
     await TGSqlite.saveAppData("dbPath", dbPathGet);
     message += "数据库路径 ";
   }
-  if (logDir.value !== logDirGet) {
-    logDir.value = logDirGet;
+  if (logDir.value !== logDirRaw) {
+    logDir.value = logDirRaw;
     message += "日志路径 ";
   }
   if (message !== "") showSnackbar.success(`${message}已更新!`);
@@ -85,12 +98,16 @@ async function confirmCUD(): Promise<void> {
     showSnackbar.cancel("已取消修改");
     return;
   }
-  const dir: string | null = await open({ directory: true, defaultPath: oriDir, multiple: false });
+  const dir: string | null = await open({
+    directory: true,
+    defaultPath: externalUserDir.value,
+    multiple: false,
+  });
   if (dir === null) {
     showSnackbar.warn("路径不能为空!");
     return;
   }
-  if (dir === oriDir) {
+  if (dir === oriDir || dir === externalUserDir.value) {
     showSnackbar.warn("路径未修改!");
     return;
   }
@@ -101,6 +118,7 @@ async function confirmCUD(): Promise<void> {
   }
   await TGLogger.Info(`[TcDataDir] 修改用户数据目录： ${userDir.value} → ${dir}`);
   userDir.value = dir;
+  externalUserDir.value = await resolveExternalPath(dir);
   await TGSqlite.saveAppData("userDir", dir);
   await backUpUserData(dir);
   showSnackbar.success("已修改用户数据路径!");
@@ -172,15 +190,15 @@ function copyPath(type: "db" | "user" | "log"): void {
   let targetPath: string, targetName: string;
   switch (type) {
     case "db":
-      targetPath = dbPath.value;
+      targetPath = externalDbPath.value;
       targetName = "数据库";
       break;
     case "user":
-      targetPath = userDir.value;
+      targetPath = externalUserDir.value;
       targetName = "用户数据";
       break;
     case "log":
-      targetPath = logDir.value;
+      targetPath = externalLogDir.value;
       targetName = "日志";
   }
   navigator.clipboard.writeText(targetPath);
@@ -191,16 +209,20 @@ async function openDataPath(type: "db" | "user" | "log"): Promise<void> {
   let targetPath: string;
   switch (type) {
     case "db":
-      targetPath = await path.appConfigDir();
+      targetPath = externalDbDir.value;
       break;
     case "user":
-      targetPath = userDir.value;
+      targetPath = externalUserDir.value;
       break;
     case "log":
-      targetPath = logDir.value;
+      targetPath = externalLogDir.value;
       break;
   }
   await openPath(targetPath);
+}
+
+async function resolveExternalPath(targetPath: string): Promise<string> {
+  return await core.invoke<string>("resolve_external_path", { path: targetPath });
 }
 </script>
 <style lang="css" scoped>
