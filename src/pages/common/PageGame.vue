@@ -98,7 +98,7 @@
       @pause-requested="handleInstallTaskPause(task)"
       @recover-requested="(action) => handleInstallTaskRecover(task, action)"
     />
-    <PgCache v-if="chosen !== null || installTasks.length > 0 || visibleInstallDrafts.length > 0" />
+    <PgCache />
   </div>
   <PgoClientSource
     v-if="clientSourceMounted"
