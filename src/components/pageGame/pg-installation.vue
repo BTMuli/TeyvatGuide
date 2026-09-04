@@ -16,7 +16,17 @@
           {{ installationSizeButtonLabel }}
         </v-btn>
         <v-btn
-          :disabled="uninstalling"
+          :disabled="installationActionPending"
+          :loading="unregistering"
+          prepend-icon="mdi-link-off"
+          size="small"
+          variant="tonal"
+          @click="handleUnregister"
+        >
+          移除登记
+        </v-btn>
+        <v-btn
+          :disabled="installationActionPending"
           :loading="uninstalling"
           class="game-uninstall-btn"
           prepend-icon="mdi-delete-outline"
@@ -335,6 +345,7 @@ import {
   chooseGameInstallation,
   getGameInstallationAudioUsage,
   getGameInstallationSize,
+  unregisterGameInstallation,
   uninstallGameInstallation,
 } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
@@ -370,6 +381,7 @@ type InstalledAudioItem = {
 
 const accountDialog = ref<boolean>(false);
 const officialAccounts = ref<Array<AccountChoice>>([]);
+const unregistering = ref<boolean>(false);
 const uninstalling = ref<boolean>(false);
 const audioOverlay = ref<boolean>(false);
 // 浮层首次打开后保持挂载，关闭只切 v-model，让 TOverlay 的消失过渡有播放时间
@@ -395,6 +407,10 @@ const audioUsageError = ref<boolean>(false);
 const installationSizeCache = new Map<string, { bytes: number; readAt: number }>();
 const installationSizePending = new Map<string, Promise<number>>();
 let installationSizeRequest = 0;
+
+const installationActionPending = computed<boolean>(() => {
+  return unregistering.value || uninstalling.value;
+});
 
 const installationSizeLabel = computed<string>(() => {
   if (installationSizeLoading.value) return "读取中…";
@@ -629,6 +645,25 @@ async function loadOfficialAccounts(): Promise<void> {
 function launchWithAccount(entry: AccountChoice): void {
   accountDialog.value = false;
   void launchInstallation(props.installation, entry.game, entry.cookie);
+}
+
+async function handleUnregister(): Promise<void> {
+  const confirmed = await showDialog.checkF({
+    title: "移除安装登记？",
+    text: `将从 TeyvatGuide 中移除该安装记录，不会删除任何游戏文件。之后仍可通过“添加新客户端”重新登记。`,
+    confirmLabel: "移除登记",
+  });
+  if (confirmed !== true) return;
+  unregistering.value = true;
+  try {
+    await unregisterGameInstallation(props.installation.id);
+    showSnackbar.success("已移除安装登记，游戏文件未作修改");
+    emit("updated");
+  } catch (error) {
+    showSnackbar.error(`移除安装登记失败：${error}`);
+  } finally {
+    unregistering.value = false;
+  }
 }
 
 async function handleUninstall(): Promise<void> {

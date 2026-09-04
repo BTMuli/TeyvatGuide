@@ -1,6 +1,6 @@
 /**
  * 游戏安装与启动命令适配。
- * @since Beta v0.12.0
+ * @since Beta v0.12.2
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -37,6 +37,15 @@ export async function listGameInstallations(): Promise<Array<TGApp.Game.Installa
  */
 export async function chooseGameInstallation(installationId: string): Promise<void> {
   await invoke("game_installation_choose", { installationId });
+}
+
+/**
+ * 移除游戏安装登记，不修改或删除游戏目录中的任何文件。
+ * @since Beta v0.12.2
+ * @param installationId - 已登记安装 ID
+ */
+export async function unregisterGameInstallation(installationId: string): Promise<void> {
+  await invoke("game_installation_unregister", { installationId });
 }
 
 /**

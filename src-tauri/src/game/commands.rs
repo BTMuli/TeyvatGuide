@@ -1,5 +1,5 @@
 //! 游戏安装检测、列表读取与可信启动命令。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.2
 
 use super::{
   cache, defender,
@@ -310,6 +310,34 @@ fn collect_audio_package_usage(root: &Path) -> Result<Vec<GameAudioPackageUsage>
     result.push(GameAudioPackageUsage { language: language.to_string(), bytes, file_count });
   }
   Ok(result)
+}
+
+/// 移除已登记的游戏安装记录，不修改或删除游戏目录中的任何文件。
+#[tauri::command]
+pub async fn game_installation_unregister(
+  app_handle: AppHandle,
+  db_instances: tauri::State<'_, DbInstances>,
+  manager: tauri::State<'_, GamePackageManager>,
+  installation_id: String,
+) -> Result<(), String> {
+  let _reservation =
+    manager.reserve_installation_operation(&installation_id, "game-installation-unregister")?;
+  if journal::list(&game_task_root(&app_handle)?, Some(&installation_id))?
+    .iter()
+    .any(|task| task.state.blocks_launch())
+  {
+    return Err("该游戏安装存在进行中或等待恢复的资源提交，暂时不能移除登记".to_string());
+  }
+  let pool = sqlite_pool(&db_instances).await?;
+  let result = sqlx::query("DELETE FROM GameInstallation WHERE id = $1")
+    .bind(&installation_id)
+    .execute(&pool)
+    .await
+    .map_err(|error| format!("移除安装登记失败：{error}"))?;
+  if result.rows_affected() == 0 {
+    return Err("未找到已登记的游戏安装".to_string());
+  }
+  Ok(())
 }
 
 /// 卸载已登记的游戏安装：删除 `YuanShen.exe` 所在目录的全部内容，保留空目录本身，
