@@ -5,7 +5,106 @@
 
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import { Channel, invoke } from "@tauri-apps/api/core";
+import { Channel, invoke as invokeTauriCommand } from "@tauri-apps/api/core";
+
+import TGLogger from "./TGLogger.js";
+
+type GameCommandArgs = Record<string, unknown>;
+type GameCommandContext = Record<string, boolean | number | string | null>;
+
+const gameOperationCommands = new Set<string>([
+  "game_installation_choose",
+  "game_installation_unregister",
+  "game_launch",
+  "game_stop",
+  "game_installation_uninstall",
+  "game_package_plan",
+  "game_package_audio_plan",
+  "game_install_draft_create",
+  "game_install_draft_cancel",
+  "game_install_plan",
+  "game_install_start",
+  "game_install_defender_exclude_add",
+  "game_install_defender_exclude_remove",
+  "game_install_recover",
+  "game_install_cancel",
+  "game_install_pause",
+  "game_package_switch_plan",
+  "game_package_switch",
+  "game_package_cache_clear",
+  "game_package_verify",
+  "game_package_verify_cancel",
+  "game_package_verify_clear",
+  "game_package_start",
+  "game_package_apply",
+  "game_package_cancel",
+  "game_package_pause",
+  "game_package_task_remove",
+  "game_package_task_cleanup",
+  "game_package_recover",
+]);
+const gameCommandContextKeys = new Set<string>([
+  "installationId",
+  "installId",
+  "taskId",
+  "planId",
+  "target",
+  "action",
+  "keepDownloads",
+  "launchScheme",
+  "scheme",
+]);
+
+function formatGameCommandContext(args: GameCommandArgs | undefined): string {
+  if (args === undefined) return "";
+  const context: GameCommandContext = {};
+  for (const [key, value] of Object.entries(args)) {
+    if (!gameCommandContextKeys.has(key)) continue;
+    if (
+      value === null ||
+      typeof value === "boolean" ||
+      typeof value === "number" ||
+      typeof value === "string"
+    ) {
+      context[key] = value;
+    }
+  }
+  return Object.keys(context).length === 0 ? "" : ` context=${JSON.stringify(context)}`;
+}
+
+async function writeGameCommandLog(level: "error" | "info", message: string): Promise<void> {
+  try {
+    if (level === "error") await TGLogger.Error(message);
+    else await TGLogger.Info(message);
+  } catch (error) {
+    console.error(`[GameInstall][logger] 写入操作日志失败：${error}`);
+  }
+}
+
+async function invoke<T>(command: string, args?: GameCommandArgs): Promise<T> {
+  const startedAt = Date.now();
+  const context = formatGameCommandContext(args);
+  const logLifecycle = gameOperationCommands.has(command);
+  if (logLifecycle) {
+    await writeGameCommandLog("info", `[GameInstall][${command}] 开始${context}`);
+  }
+  try {
+    const result = await invokeTauriCommand<T>(command, args);
+    if (logLifecycle) {
+      await writeGameCommandLog(
+        "info",
+        `[GameInstall][${command}] 成功 durationMs=${Date.now() - startedAt}${context}`,
+      );
+    }
+    return result;
+  } catch (error) {
+    await writeGameCommandLog(
+      "error",
+      `[GameInstall][${command}] 失败 durationMs=${Date.now() - startedAt}${context} error=${error}`,
+    );
+    throw error;
+  }
+}
 
 /**
  * 检测国服游戏安装。
@@ -333,14 +432,12 @@ export async function ensureGameInstallDefenderExclusions(
   if (planId !== null && (await hasGameInstallDefenderExclusions(planId))) {
     return true;
   }
-  let dirs: TGApp.Game.Installation.InstallDraftDirs;
   try {
-    dirs = await getGameInstallDraftDirs(installId);
+    await getGameInstallDraftDirs(installId);
   } catch (error) {
     showSnackbar.error(`读取安装目录失败：${error}`);
     return false;
   }
-  console.log(dirs);
   const confirmed = await showDialog.checkF({
     title: "添加 Windows Defender 排除",
     text: [
