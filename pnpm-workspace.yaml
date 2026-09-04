@@ -83,4 +83,4 @@ minimumReleaseAgeExclude:
   - yaml-eslint-parser@2.1.0
   - globals@17.11.0
   - pinia@4.0.3
-  - '@zumer/snapdom@2.24.15'
+  - "@zumer/snapdom@2.24.15"
