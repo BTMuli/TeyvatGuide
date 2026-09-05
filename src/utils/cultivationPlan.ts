@@ -1,10 +1,13 @@
 /**
  * 养成计划材料聚合工具
- * @since Beta v0.12.0
+ * @since Beta v0.12.2
  */
 
-import type { CraftableMaterial, CultivationMaterial } from "@utils/userCalc.js";
-import userCalc, { calculateCraftingAllocation } from "@utils/userCalc.js";
+import type { CraftableMaterial, CultivationMaterial, ExperienceTarget } from "@utils/userCalc.js";
+import userCalc, {
+  allocateExperienceRequirements,
+  calculateCraftingAllocation,
+} from "@utils/userCalc.js";
 
 /**
  * 养成计划的材料分配结果。
@@ -65,7 +68,7 @@ type EntryMaterialAllocation = {
 
 /**
  * 按单个目标的需求从指定库存中分配材料。
- * @since Beta v0.12.0
+ * @since Beta v0.12.2
  * @param entry - 养成目标
  * @param inventory - 可用于该目标的背包材料
  * @param materialMap - 材料 Wiki 映射
@@ -79,7 +82,20 @@ function allocateEntryMaterials(
   materials: ReadonlyArray<TGApp.App.Material.WikiItem>,
 ): EntryMaterialAllocation {
   const remainingInventory = new Map(inventory);
-  const requirements = aggregateRequirements(entry.items);
+  const requirements = new Map(
+    allocateExperienceRequirements(
+      Array.from(aggregateRequirements(entry.items), ([id, count]) => ({ id, count })),
+      inventory,
+      [
+        {
+          type: entry.type,
+          currentLevel: entry.currentState.level,
+          targetLevel: entry.targetState.level,
+          star: entry.star,
+        },
+      ],
+    ).map((item) => [item.id, item.count]),
+  );
   const ownedMaterials = new Map<number, number>();
   for (const [materialId, required] of requirements) {
     const owned = Math.min(Math.max(remainingInventory.get(materialId) ?? 0, 0), required);
@@ -303,13 +319,14 @@ export function mergePlanInventory(
 
 /**
  * 根据需求和背包构建材料完成情况
- * @since Beta v0.11.2
+ * @since Beta v0.12.2
  * @param requirements - 材料需求
  * @param inventory - 背包材料
  * @param materials - 材料 Wiki 数据
  * @param allowCrafting - 是否允许合成
  * @param useDust - 是否允许使用嬗变之尘
  * @param useSolvent - 是否允许使用异梦溶媒
+ * @param experienceTargets - 用于独立结算突破区间的等级目标
  * @returns 材料完成情况
  */
 export function buildCultivationResults(
@@ -319,12 +336,18 @@ export function buildCultivationResults(
   allowCrafting: boolean,
   useDust: boolean,
   useSolvent: boolean,
+  experienceTargets: ReadonlyArray<ExperienceTarget> = [],
 ): Array<TGApp.App.UserCalc.ResultMaterial> {
+  const adjustedRequirements = allocateExperienceRequirements(
+    requirements,
+    inventory,
+    experienceTargets,
+  );
   const craftableMaterials: Map<number, CraftableMaterial> = allowCrafting
-    ? userCalc.craft(requirements, inventory, materials, useDust, useSolvent)
+    ? userCalc.craft(adjustedRequirements, inventory, materials, useDust, useSolvent)
     : new Map();
   return sortCultivationResults(
-    requirements.map((required) => {
+    adjustedRequirements.map((required) => {
       const info = materials.find((material) => material.id === required.id);
       const owned = inventory.get(required.id) ?? 0;
       const crafting = craftableMaterials.get(required.id);

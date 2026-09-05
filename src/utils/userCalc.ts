@@ -1,7 +1,7 @@
 /**
  * 离线养成材料计算
  * @remarks 计算规则参考 Snap.Hutao Service/Cultivation/Offline
- * @since Beta v0.11.3
+ * @since Beta v0.12.2
  */
 
 /** 单项养成材料需求 */
@@ -10,6 +10,17 @@ export type CultivationMaterial = {
   id: number;
   /** 所需数量 */
   count: number;
+};
+
+/**
+ * 用于按突破区间分配经验材料的等级目标。
+ * @since Beta v0.12.2
+ */
+export type ExperienceTarget = {
+  type: "avatar" | "weapon";
+  currentLevel: number;
+  targetLevel: number;
+  star: number;
 };
 
 /**
@@ -69,8 +80,16 @@ type CraftingContext = {
 };
 
 const MORA_ID = 202;
-const HEROES_WIT_ID = 104003;
-const MYSTIC_ENHANCEMENT_ORE_ID = 104013;
+const AVATAR_EXP_MATERIALS = <const>[
+  [104003, 20000],
+  [104002, 5000],
+  [104001, 1000],
+];
+const WEAPON_EXP_MATERIALS = <const>[
+  [104013, 10000],
+  [104012, 2000],
+  [104011, 400],
+];
 const MASTERLESS_STELLA_FORTUNA_ID = 104300;
 const CROWN_OF_INSIGHT_ID = 104319;
 const DUST_OF_AZOTH_ID = 104201;
@@ -450,6 +469,150 @@ function sumExperience(data: ReadonlyArray<number>, current: number, target: num
 }
 
 /**
+ * 按突破区间分配经验材料，溢出经验不计入下一区间。
+ * @since Beta v0.12.2
+ */
+function addExperienceMaterials(
+  items: Map<number, number>,
+  data: ReadonlyArray<number>,
+  current: number,
+  target: number,
+  materials: ReadonlyArray<readonly [id: number, experience: number]>,
+  moraDivisor: number,
+): void {
+  if (current < 1 || current >= target || target >= data.length) return;
+  const minimumExp = materials[materials.length - 1][1];
+  const boundaries = [
+    ...ASCENSION_LEVELS.filter((level) => level > current && level < target),
+    target,
+  ];
+  let start = current;
+  for (const end of boundaries) {
+    // 先按最小材料取整，再优先使用高档材料，避免可整合的低档材料占用更多数量。
+    let remaining = Math.ceil(sumExperience(data, start, end) / minimumExp) * minimumExp;
+    for (const [id, experience] of materials) {
+      const count = Math.floor(remaining / experience);
+      add(items, id, count);
+      add(items, MORA_ID, (count * experience) / moraDivisor);
+      remaining -= count * experience;
+    }
+    start = end;
+  }
+}
+
+/** 获取目标各突破区间的经验需求。 */
+function getExperienceSegments(target: ExperienceTarget): Array<number> {
+  const data = target.type === "avatar" ? AVATAR_LEVEL_EXP : WEAPON_LEVEL_EXP[target.star];
+  const end = target.type === "avatar" ? Math.min(target.targetLevel, 90) : target.targetLevel;
+  if (!data || target.currentLevel < 1 || end >= data.length) return [];
+  let start = target.currentLevel;
+  const segments: Array<number> = [];
+  for (const boundary of [...ASCENSION_LEVELS, end]) {
+    if (boundary <= start || boundary > end) continue;
+    segments.push(sumExperience(data, start, boundary));
+    start = boundary;
+  }
+  return segments;
+}
+
+/** 从三档整件材料中选择足够经验且溢出最少的组合；不足时使用全部库存。 */
+function selectExperienceMaterials(
+  experience: number,
+  values: ReadonlyArray<number>,
+  stock: ReadonlyArray<number>,
+): Array<number> {
+  const total = stock.reduce((sum, count, index) => sum + count * values[index], 0);
+  if (total < experience) return [...stock];
+  let best: Array<number> = [];
+  let bestExperience = Infinity;
+  let bestCount = Infinity;
+  const highLimit = Math.min(stock[0], Math.ceil(experience / values[0]));
+  for (let high = 0; high <= highLimit; high++) {
+    const rest = Math.max(experience - high * values[0], 0);
+    // 面额逐档整除，低两档只需比较向下取整后补小档与直接向上取整。
+    const mediumFloor = Math.min(stock[1], Math.floor(rest / values[1]));
+    const mediumCeil = Math.min(stock[1], Math.ceil(rest / values[1]));
+    for (const medium of new Set([mediumFloor, mediumCeil])) {
+      const low = Math.max(Math.ceil((rest - medium * values[1]) / values[2]), 0);
+      if (low > stock[2]) continue;
+      const supplied = high * values[0] + medium * values[1] + low * values[2];
+      const count = high + medium + low;
+      if (supplied < bestExperience || (supplied === bestExperience && count < bestCount)) {
+        best = [high, medium, low];
+        bestExperience = supplied;
+        bestCount = count;
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * 按可用库存重新组合经验材料需求，保留实际材料 ID 和整件数量。
+ * @since Beta v0.12.2
+ * @param requirements - 原始材料需求
+ * @param inventory - 可用背包库存，不会被修改
+ * @param targets - 等级目标；省略时将每类已有经验需求作为单一区间
+ * @returns 按库存替代后的材料需求，包含对应的摩拉调整
+ */
+export function allocateExperienceRequirements(
+  requirements: ReadonlyArray<CultivationMaterial>,
+  inventory: ReadonlyMap<number, number>,
+  targets: ReadonlyArray<ExperienceTarget> = [],
+): Array<CultivationMaterial> {
+  const items = new Map<number, number>();
+  for (const item of requirements) add(items, item.id, item.count);
+  for (const type of <const>["avatar", "weapon"]) {
+    const materials = type === "avatar" ? AVATAR_EXP_MATERIALS : WEAPON_EXP_MATERIALS;
+    const divisor = type === "avatar" ? 5 : 10;
+    const originalExperience = materials.reduce(
+      (sum, [id, value]) => sum + (items.get(id) ?? 0) * value,
+      0,
+    );
+    if (originalExperience <= 0) continue;
+    const matchingTargets = targets.filter((target) => target.type === type);
+    const segments =
+      matchingTargets.length > 0
+        ? matchingTargets.flatMap(getExperienceSegments)
+        : [originalExperience];
+    // 无有效等级区间时保留原始需求，兼容缺失等级信息的旧数据。
+    if (segments.length === 0) continue;
+    const stock = materials.map(([id]) => Math.max(Math.floor(inventory.get(id) ?? 0), 0));
+    const values = materials.map(([, value]) => value);
+    for (const [id] of materials) items.delete(id);
+    let suppliedExperience = 0;
+    for (const segment of segments) {
+      const consumed = selectExperienceMaterials(segment, values, stock);
+      let supplied = 0;
+      for (const [index, count] of consumed.entries()) {
+        add(items, materials[index][0], count);
+        stock[index] -= count;
+        supplied += count * values[index];
+      }
+      // 缺口按最小档取整后推荐高档优先的组合，不把溢出写回库存。
+      const minimum = values[values.length - 1];
+      let missing = Math.ceil(Math.max(segment - supplied, 0) / minimum) * minimum;
+      suppliedExperience += supplied + missing;
+      for (const [id, value] of materials) {
+        const count = Math.floor(missing / value);
+        add(items, id, count);
+        missing -= count * value;
+      }
+    }
+    if (items.has(MORA_ID)) {
+      items.set(
+        MORA_ID,
+        Math.max(
+          (items.get(MORA_ID) ?? 0) + (suppliedExperience - originalExperience) / divisor,
+          0,
+        ),
+      );
+    }
+  }
+  return toList(items);
+}
+
+/**
  * 获取可选的角色等级。
  *
  * @param maxLevel - 角色等级上限
@@ -539,7 +702,7 @@ function toList(items: Map<number, number>): Array<CultivationMaterial> {
 
 /**
  * 根据角色当前状态计算等级、突破及天赋升级材料。
- * @since Beta v0.11.2
+ * @since Beta v0.12.2
  * @param wiki - 角色 Wiki 数据
  * @param currentLevel - 当前等级
  * @param currentPromoteLevel - 已完成的突破次数
@@ -559,14 +722,14 @@ export function calculateAvatarMaterialsFromState(
   targetAscendedAtThreshold = false,
 ): Array<CultivationMaterial> {
   const items = new Map<number, number>();
-  const levelExp = sumExperience(
+  addExperienceMaterials(
+    items,
     AVATAR_LEVEL_EXP,
     currentLevel,
     Math.min(targetLevel, AVATAR_REGULAR_MAX_LEVEL),
+    AVATAR_EXP_MATERIALS,
+    5,
   );
-  const expBookCount = Math.ceil(levelExp / 20000);
-  add(items, HEROES_WIT_ID, expBookCount);
-  add(items, MORA_ID, expBookCount * 4000);
   for (const [level, count] of AVATAR_LIMIT_BREAK_COSTS) {
     if (currentLevel < level && targetLevel >= level) {
       add(items, MASTERLESS_STELLA_FORTUNA_ID, count);
@@ -642,7 +805,7 @@ export function calculateAvatarMaterials(
 
 /**
  * 计算武器等级与突破所需的材料。
- *
+ * @since Beta v0.12.2
  * @param weapon - 武器 Wiki 数据
  * @param currentLevel - 当前等级
  * @param currentPromoteLevel - 已完成的突破次数
@@ -659,10 +822,7 @@ export function calculateWeaponMaterials(
   const items = new Map<number, number>();
   const experience = WEAPON_LEVEL_EXP[weapon.star];
   if (!experience) return [];
-  const levelExp = sumExperience(experience, currentLevel, targetLevel);
-  const oreCount = Math.ceil(levelExp / 10000);
-  add(items, MYSTIC_ENHANCEMENT_ORE_ID, oreCount);
-  add(items, MORA_ID, oreCount * 1000);
+  addExperienceMaterials(items, experience, currentLevel, targetLevel, WEAPON_EXP_MATERIALS, 10);
 
   const ascensions = requiredAscensionIndices(
     currentLevel,

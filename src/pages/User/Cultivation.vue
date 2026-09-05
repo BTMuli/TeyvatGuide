@@ -781,6 +781,20 @@ const localResultMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(
     allowCrafting.value,
     useDust.value,
     useSolvent.value,
+    [
+      {
+        type: "avatar",
+        currentLevel: avatarCurrentLevel.value,
+        targetLevel: avatarTargetLevel.value,
+        star: avatarWiki.value ? avatarWiki.value.star : 5,
+      },
+      {
+        type: "weapon",
+        currentLevel: weaponCurrentLevel.value,
+        targetLevel: weaponTargetLevel.value,
+        star: selectedWeapon.value?.wiki.star ?? 5,
+      },
+    ],
   ),
 );
 const planInventory = computed<Map<number, number>>(() =>

@@ -365,6 +365,14 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
     hasBagData.value && allowCrafting.value,
     useDust.value,
     useSolvent.value,
+    [
+      {
+        type: isCharacter.value ? "avatar" : "weapon",
+        currentLevel: currentLevel.value,
+        targetLevel: targetLevel.value,
+        star: wikiStar.value,
+      },
+    ],
   ),
 );
 const missingKinds = computed<number>(
