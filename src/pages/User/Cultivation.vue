@@ -308,7 +308,6 @@ import { getRfAc } from "@utils/acUtils.js";
 import {
   allocatePlanMaterials,
   buildCultivationResults,
-  getCalculateInventory,
   getUidServerTimezone,
   mergePlanInventory,
   sortCultivationResults,
@@ -1274,11 +1273,12 @@ function createApiWeaponTarget(
 function convertApiResult(
   result: TGApp.Game.Calculate.Result,
 ): Array<TGApp.App.UserCalc.ResultMaterial> {
-  const available = getCalculateInventory(result);
   return sortCultivationResults(
     result.overall_consume.map((material) => {
       const wiki = WikiMaterialData.find((item) => item.id === material.id);
-      const owned = available.get(material.id) ?? 0;
+      // 接口缺口已经计算了接口侧的合成，`num - lack_num` 只用于展示有效进度，不能作为
+      // 背包库存写回或参与后续本地合成。
+      const owned = Math.max(material.num - material.lack_num, 0);
       return {
         id: material.id,
         name: wiki?.name ?? material.name,

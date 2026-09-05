@@ -263,23 +263,17 @@ export function aggregateEntryMaterials(
 }
 
 /**
- * 从接口计算结果解析用户当前可用材料
+ * 从接口计算结果解析用户当前背包材料。
  *
- * 接口不会始终在 `available_material` 中返回摩拉等材料，此时使用总需求与缺口数量推导。
- * @since Beta v0.11.2
+ * `overall_consume` 中的 `lack_num` 已经包含接口侧的材料合成结果，不能用
+ * `num - lack_num` 反推真实背包数量，否则后续本地合成会重复计算。真实库存只取接口明确返回
+ * 的 `available_material`。
+ * @since Beta v0.12.1
  * @param result - 接口养成计算结果
- * @returns 材料 ID 与当前可用数量映射
+ * @returns 材料 ID 与当前背包数量映射
  */
 export function getCalculateInventory(result: TGApp.Game.Calculate.Result): Map<number, number> {
-  const inventory = new Map(
-    result.available_material.map((material) => [material.id, material.num]),
-  );
-  for (const material of result.overall_consume) {
-    if (inventory.has(material.id)) continue;
-    const inferredCount = Math.max(material.num - material.lack_num, 0);
-    inventory.set(material.id, inferredCount);
-  }
-  return inventory;
+  return new Map(result.available_material.map((material) => [material.id, material.num]));
 }
 
 /**

@@ -317,11 +317,11 @@ async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> 
 }
 
 /**
- * 使用养成接口明确不足的材料数量更新背包存档。
+ * 使用养成接口明确返回的背包材料更新背包存档。
  *
- * 仅 `lack_num > 0` 时，`num - lack_num` 才能真实反映当前背包数量；材料充足时接口数量只是
- * 本次需求上限，不能用于覆盖背包。
- * @since Beta v0.12.0
+ * `overall_consume.lack_num` 已经包含接口侧的材料合成，不能用 `num - lack_num` 覆盖背包，
+ * 否则会把合成产物和合成材料重复计入。接口未返回的材料保持本地记录不变。
+ * @since Beta v0.12.1
  * @param uid - 存档 UID
  * @param result - 接口养成计算结果
  * @returns 发生变更的材料数量
@@ -338,14 +338,10 @@ async function saveCalculateData(
   );
   if (bagRows.length === 0) return 0;
   const validIds = new Set<number>(getValidMIds());
-  const processedIds = new Set<number>();
   let changed = 0;
-  for (const material of result.overall_consume) {
-    if (material.lack_num <= 0 || !validIds.has(material.id) || processedIds.has(material.id)) {
-      continue;
-    }
-    processedIds.add(material.id);
-    const count = Math.max(material.num - material.lack_num, 0);
+  for (const material of result.available_material) {
+    if (!validIds.has(material.id)) continue;
+    const count = Math.max(material.num, 0);
     const read = await getMaterial(uid, material.id);
     const local = read[0];
     if (local?.updated && local.count === count) continue;
