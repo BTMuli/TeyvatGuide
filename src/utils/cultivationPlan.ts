@@ -6,8 +6,11 @@
 import type { CraftableMaterial, CultivationMaterial, ExperienceTarget } from "@utils/userCalc.js";
 import userCalc, {
   allocateExperienceRequirements,
+  calculateCraftableMaterials,
   calculateCraftingAllocation,
 } from "@utils/userCalc.js";
+
+import { WikiMaterialData } from "@/data/index.js";
 
 /**
  * 养成计划的材料分配结果。
@@ -66,6 +69,49 @@ type EntryMaterialAllocation = {
   results: Array<TGApp.App.UserCalc.ResultMaterial>;
 };
 
+type ApiConsumeCount = {
+  lack: number;
+  num: number;
+};
+
+/** 将接口材料列表按 ID 合并需求与缺口。 */
+function mergeApiConsume(
+  materials: ReadonlyArray<TGApp.Game.Calculate.Material>,
+): Map<number, ApiConsumeCount> {
+  const consume = new Map<number, ApiConsumeCount>();
+  for (const material of materials) {
+    const current = consume.get(material.id);
+    if (current) {
+      current.num += material.num;
+      current.lack += material.lack_num;
+      continue;
+    }
+    consume.set(material.id, { lack: material.lack_num, num: material.num });
+  }
+  return consume;
+}
+
+/**
+ * 读取养成目标对应的接口消耗条目。
+ *
+ * 成对角色/武器共用一次计算结果时，只取该目标自己的消耗列表，避免把同伴的缺口算进来。
+ */
+function getEntryApiConsume(
+  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
+): Map<number, ApiConsumeCount> | undefined {
+  const result = entry.apiResult?.result;
+  if (!result) return undefined;
+  const item = result.items[0];
+  const entryConsume =
+    item === undefined
+      ? []
+      : entry.type === "avatar"
+        ? [...item.avatar_consume, ...item.avatar_skill_consume]
+        : item.weapon_consume;
+  const consume = mergeApiConsume(entryConsume.length > 0 ? entryConsume : result.overall_consume);
+  return consume.size > 0 ? consume : undefined;
+}
+
 /**
  * 按单个目标的需求从指定库存中分配材料。
  * @since Beta v0.12.2
@@ -118,12 +164,23 @@ function allocateEntryMaterials(
       )
     : undefined;
   const afterCrafting = craftingAllocation?.remainingInventory ?? remainingInventory;
+  const apiConsume = entry.calculationMode === "api" ? getEntryApiConsume(entry) : undefined;
 
   const entryMaterials = Array.from(requirements, ([id, required]) => {
     const material = materialMap.get(id);
-    const owned = ownedMaterials.get(id) ?? 0;
     const crafting = craftingAllocation?.materials.get(id);
-    const craftable = crafting?.count ?? 0;
+    let owned = ownedMaterials.get(id) ?? 0;
+    let craftable = crafting?.count ?? 0;
+    const consume = apiConsume?.get(id);
+    if (consume) {
+      // 接口缺口已含合成，把可合成量折入持有量，避免刷新后只回写蓝/绿而紫色仍停在合成前。
+      const apiAvailable = Math.min(Math.max(consume.num - consume.lack, 0), required);
+      if (apiAvailable > owned + craftable) owned = apiAvailable - craftable;
+      if (entry.allowCrafting && craftable > 0) {
+        owned += craftable;
+        craftable = 0;
+      }
+    }
     const available = owned + craftable;
     return {
       id,
@@ -263,24 +320,51 @@ export function aggregateEntryMaterials(
 }
 
 /**
+ * 从接口快照读取明确返回的背包数量。
+ */
+function getCalculateAvailableMaterials(result: TGApp.Game.Calculate.Result): Map<number, number> {
+  return new Map(
+    result.available_material.map((material) => [material.id, Math.max(material.num, 0)]),
+  );
+}
+
+/**
  * 从接口计算结果解析用户当前背包材料。
  *
- * `overall_consume` 中的 `lack_num` 已经包含接口侧的材料合成结果，不能用
- * `num - lack_num` 反推真实背包数量，否则后续本地合成会重复计算。真实库存只取接口明确返回
- * 的 `available_material`。
+ * `available_material` 通常只含本次计算用到的低阶材料。`overall_consume.lack_num` 已含接口侧
+ * 合成，因此 `num - lack_num` 是持有加可合成的上限，不能直接当真实库存，否则本地合成会把蓝/
+ * 绿材料再算一次。这里用本地配方扣掉仍可合成的部分，把合成产物的持有量补进快照，刷新后紫色
+ * 等高阶材料也会更新。
  * @since Beta v0.12.1
  * @param result - 接口养成计算结果
  * @returns 材料 ID 与当前背包数量映射
  */
 export function getCalculateInventory(result: TGApp.Game.Calculate.Result): Map<number, number> {
-  return new Map(result.available_material.map((material) => [material.id, material.num]));
+  const inventory = getCalculateAvailableMaterials(result);
+  const requirements = result.overall_consume
+    .filter((material) => material.num > 0)
+    .map((material) => ({ id: material.id, count: material.num }));
+  const craftableMaterials =
+    requirements.length > 0
+      ? calculateCraftableMaterials(requirements, inventory, WikiMaterialData)
+      : new Map<number, CraftableMaterial>();
+  for (const material of result.overall_consume) {
+    const effective = Math.max(material.num - material.lack_num, 0);
+    const crafted = craftableMaterials.get(material.id)?.count ?? 0;
+    const impliedOwned = Math.max(effective - crafted, 0);
+    if (impliedOwned > (inventory.get(material.id) ?? 0)) {
+      inventory.set(material.id, impliedOwned);
+    }
+  }
+  return inventory;
 }
 
 /**
  * 将比背包记录更新的接口库存下界合并到计划库存。
  *
- * 每种材料只采用最新接口快照；接口在材料充足时最多返回本次需求量，因此仅提高库存下界。接口
- * 确认不足的数据会先回写背包，写入时间会使更早的接口快照失效。
+ * 每种材料只采用最新接口快照（含由 `overall_consume` 反推的合成产物持有量）；接口在材料充足
+ * 时最多返回本次需求量，因此仅提高库存下界。接口确认不足的数据会先回写背包，写入时间会使更
+ * 早的接口快照失效。
  * @since Beta v0.12.0
  * @param inventory - 本地背包材料
  * @param bagMaterials - 本地背包材料记录

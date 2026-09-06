@@ -2,6 +2,7 @@
  * 用户背包材料模块
  * @since Beta v0.12.0
  */
+import { getCalculateInventory } from "@utils/cultivationPlan.js";
 import fmtUtil from "@utils/fmtUtil.js";
 
 import TGSqlite from "../index.js";
@@ -317,10 +318,10 @@ async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> 
 }
 
 /**
- * 使用养成接口明确返回的背包材料更新背包存档。
+ * 使用养成接口返回的背包材料更新背包存档。
  *
- * `overall_consume.lack_num` 已经包含接口侧的材料合成，不能用 `num - lack_num` 覆盖背包，
- * 否则会把合成产物和合成材料重复计入。接口未返回的材料保持本地记录不变。
+ * `available_material` 会覆盖对应材料。合成产物往往只出现在 `overall_consume` 里，这里把扣掉
+ * 仍可合成量后的持有量作为下界补写，避免刷新后只更新蓝/绿、紫色仍停在合成前。
  * @since Beta v0.12.1
  * @param uid - 存档 UID
  * @param result - 接口养成计算结果
@@ -338,14 +339,25 @@ async function saveCalculateData(
   );
   if (bagRows.length === 0) return 0;
   const validIds = new Set<number>(getValidMIds());
+  const calculated = getCalculateInventory(result);
+  const written = new Map<number, number>();
   let changed = 0;
   for (const material of result.available_material) {
     if (!validIds.has(material.id)) continue;
     const count = Math.max(material.num, 0);
+    written.set(material.id, count);
     const read = await getMaterial(uid, material.id);
     const local = read[0];
     if (local?.updated && local.count === count) continue;
     await insertMaterial(uid, material.id, count, local?.records ?? []);
+    changed++;
+  }
+  for (const [materialId, count] of calculated) {
+    if (!validIds.has(materialId) || (written.get(materialId) ?? 0) >= count) continue;
+    const read = await getMaterial(uid, materialId);
+    const local = read[0];
+    if ((local?.count ?? 0) >= count) continue;
+    await insertMaterial(uid, materialId, count, local?.records ?? []);
     changed++;
   }
   return changed;
