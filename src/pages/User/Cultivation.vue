@@ -2099,7 +2099,7 @@ async function updatePlanEntryStatus(
 }
 
 async function removePlanEntry(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Promise<void> {
-  const confirmed = await showDialog.check(`删除目标“${entry.name}”？`, "删除后无法恢复。");
+  const confirmed = await showDialog.check(`确认删除？`, `将删除${entry.name}养成计划`);
   if (!confirmed) return;
   planLoading.value = true;
   try {
