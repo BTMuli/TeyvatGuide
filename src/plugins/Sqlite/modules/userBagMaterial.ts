@@ -1,7 +1,8 @@
 /**
  * 用户背包材料模块
- * @since Beta v0.12.0
+ * @since Beta v0.12.2
  */
+import { platform } from "@tauri-apps/plugin-os";
 import { getCalculateInventory } from "@utils/cultivationPlan.js";
 import fmtUtil from "@utils/fmtUtil.js";
 
@@ -322,7 +323,8 @@ async function saveYaeCoin(uid: number, id: number, cnt: number): Promise<void> 
  *
  * `available_material` 会覆盖对应材料。合成产物往往只出现在 `overall_consume` 里，这里把扣掉
  * 仍可合成量后的持有量作为下界补写，避免刷新后只更新蓝/绿、紫色仍停在合成前。
- * @since Beta v0.12.1
+ * macOS 无需已有背包存档，接口解析数量直接回写，允许减少或归零；其他平台保留下界补写。
+ * @since Beta v0.12.2
  * @param uid - 存档 UID
  * @param result - 接口养成计算结果
  * @returns 发生变更的材料数量
@@ -332,14 +334,26 @@ async function saveCalculateData(
   result: TGApp.Game.Calculate.Result,
 ): Promise<number> {
   if (!result.has_user_info) return 0;
+  const preferApiInventory = platform() === "macos";
   const db = await TGSqlite.getDB();
   const bagRows = await db.select<Array<{ value: number }>>(
     "SELECT 1 AS value FROM UserBagMaterial WHERE uid = $1 LIMIT 1;",
     [uid],
   );
-  if (bagRows.length === 0) return 0;
+  if (!preferApiInventory && bagRows.length === 0) return 0;
   const validIds = new Set<number>(getValidMIds());
   const calculated = getCalculateInventory(result);
+  if (preferApiInventory) {
+    let changed = 0;
+    for (const [materialId, count] of calculated) {
+      if (!validIds.has(materialId)) continue;
+      const [local] = await getMaterial(uid, materialId);
+      if (local?.updated && local.count === count) continue;
+      await insertMaterial(uid, materialId, count, local?.records ?? []);
+      changed++;
+    }
+    return changed;
+  }
   const written = new Map<number, number>();
   let changed = 0;
   for (const material of result.available_material) {

@@ -3,6 +3,7 @@
  * @since Beta v0.12.2
  */
 
+import { platform } from "@tauri-apps/plugin-os";
 import type { CraftableMaterial, CultivationMaterial, ExperienceTarget } from "@utils/userCalc.js";
 import userCalc, {
   allocateExperienceRequirements,
@@ -69,49 +70,6 @@ type EntryMaterialAllocation = {
   results: Array<TGApp.App.UserCalc.ResultMaterial>;
 };
 
-type ApiConsumeCount = {
-  lack: number;
-  num: number;
-};
-
-/** 将接口材料列表按 ID 合并需求与缺口。 */
-function mergeApiConsume(
-  materials: ReadonlyArray<TGApp.Game.Calculate.Material>,
-): Map<number, ApiConsumeCount> {
-  const consume = new Map<number, ApiConsumeCount>();
-  for (const material of materials) {
-    const current = consume.get(material.id);
-    if (current) {
-      current.num += material.num;
-      current.lack += material.lack_num;
-      continue;
-    }
-    consume.set(material.id, { lack: material.lack_num, num: material.num });
-  }
-  return consume;
-}
-
-/**
- * 读取养成目标对应的接口消耗条目。
- *
- * 成对角色/武器共用一次计算结果时，只取该目标自己的消耗列表，避免把同伴的缺口算进来。
- */
-function getEntryApiConsume(
-  entry: TGApp.Sqlite.Cultivation.EntryWithItems,
-): Map<number, ApiConsumeCount> | undefined {
-  const result = entry.apiResult?.result;
-  if (!result) return undefined;
-  const item = result.items[0];
-  const entryConsume =
-    item === undefined
-      ? []
-      : entry.type === "avatar"
-        ? [...item.avatar_consume, ...item.avatar_skill_consume]
-        : item.weapon_consume;
-  const consume = mergeApiConsume(entryConsume.length > 0 ? entryConsume : result.overall_consume);
-  return consume.size > 0 ? consume : undefined;
-}
-
 /**
  * 按单个目标的需求从指定库存中分配材料。
  * @since Beta v0.12.2
@@ -164,23 +122,12 @@ function allocateEntryMaterials(
       )
     : undefined;
   const afterCrafting = craftingAllocation?.remainingInventory ?? remainingInventory;
-  const apiConsume = entry.calculationMode === "api" ? getEntryApiConsume(entry) : undefined;
 
   const entryMaterials = Array.from(requirements, ([id, required]) => {
     const material = materialMap.get(id);
     const crafting = craftingAllocation?.materials.get(id);
-    let owned = ownedMaterials.get(id) ?? 0;
-    let craftable = crafting?.count ?? 0;
-    const consume = apiConsume?.get(id);
-    if (consume) {
-      // 接口缺口已含合成，把可合成量折入持有量，避免刷新后只回写蓝/绿而紫色仍停在合成前。
-      const apiAvailable = Math.min(Math.max(consume.num - consume.lack, 0), required);
-      if (apiAvailable > owned + craftable) owned = apiAvailable - craftable;
-      if (entry.allowCrafting && craftable > 0) {
-        owned += craftable;
-        craftable = 0;
-      }
-    }
+    const owned = ownedMaterials.get(id) ?? 0;
+    const craftable = crafting?.count ?? 0;
     const available = owned + craftable;
     return {
       id,
@@ -352,7 +299,7 @@ export function getCalculateInventory(result: TGApp.Game.Calculate.Result): Map<
     const effective = Math.max(material.num - material.lack_num, 0);
     const crafted = craftableMaterials.get(material.id)?.count ?? 0;
     const impliedOwned = Math.max(effective - crafted, 0);
-    if (impliedOwned > (inventory.get(material.id) ?? 0)) {
+    if (!inventory.has(material.id) || impliedOwned > (inventory.get(material.id) ?? 0)) {
       inventory.set(material.id, impliedOwned);
     }
   }
@@ -365,6 +312,7 @@ export function getCalculateInventory(result: TGApp.Game.Calculate.Result): Map<
  * 每种材料只采用最新接口快照（含由 `overall_consume` 反推的合成产物持有量）；接口在材料充足
  * 时最多返回本次需求量，因此仅提高库存下界。接口确认不足的数据会先回写背包，写入时间会使更
  * 早的接口快照失效。
+ * macOS 以接口数量覆盖对应材料，允许库存减少或归零。
  * @since Beta v0.12.0
  * @param inventory - 本地背包材料
  * @param bagMaterials - 本地背包材料记录
@@ -377,6 +325,7 @@ export function mergePlanInventory(
   entries: ReadonlyArray<TGApp.Sqlite.Cultivation.EntryWithItems>,
 ): Map<number, number> {
   const merged = new Map(inventory);
+  const preferApiInventory = platform() === "macos";
   const latestApiInventory = new Map<number, { count: number; updated: string }>();
   for (const entry of entries) {
     if (entry.calculationMode !== "api" || !entry.apiResult) continue;
@@ -390,7 +339,12 @@ export function mergePlanInventory(
     const bagUpdated = bagMaterials.get(materialId)?.updated ?? "";
     if (bagUpdated.length > 0 && Date.parse(bagUpdated) >= Date.parse(apiInventory.updated))
       continue;
-    merged.set(materialId, Math.max(merged.get(materialId) ?? 0, apiInventory.count));
+    merged.set(
+      materialId,
+      preferApiInventory
+        ? apiInventory.count
+        : Math.max(merged.get(materialId) ?? 0, apiInventory.count),
+    );
   }
   return merged;
 }
