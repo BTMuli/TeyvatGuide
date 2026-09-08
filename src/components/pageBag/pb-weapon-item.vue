@@ -1,10 +1,15 @@
 <!-- 背包武器物品项 -->
 <template>
   <div
+    :aria-label="`${props.info.name}，Lv.${props.tb.info.level}`"
+    :aria-selected="props.selected"
     :class="{ selected: props.selected, detail: props.detail }"
     :title="props.info.name"
     class="pb-wi-box"
-    @click="toWeapon()"
+    role="option"
+    tabindex="0"
+    @click="toWeapon"
+    @keydown="handleKeydown"
   >
     <div class="pb-wi-left">
       <img :src="`/icon/bg/${props.info.star}-Star.webp`" alt="bg" class="bg" />
@@ -27,61 +32,61 @@
     <div class="pb-wi-right">
       <div class="pb-wi-name">{{ props.info.name }}</div>
       <div class="pb-wi-sub">
-        <span class="pb-wi-level">Lv.{{ item.info.level }}</span>
+        <span class="pb-wi-level">Lv.{{ props.tb.info.level }}</span>
         <span v-if="props.tb.info.is_locked" class="pb-wi-lock">🔒</span>
       </div>
     </div>
     <div class="pb-wi-extra">{{ props.info.weapon }}·{{ props.info.id }}</div>
-    <div v-if="item.info.affix_map" class="pb-wi-refine">精炼{{ getAffixLevel() }}</div>
+    <div v-if="props.tb.info.affix_map" class="pb-wi-refine">精炼{{ getAffixLevel() }}</div>
   </div>
 </template>
 <script lang="ts" setup>
 import { getOdStarColor } from "@utils/colorFunc.js";
-import { computed, shallowRef, watch } from "vue";
+import { getWeaponRefineLevel } from "@utils/userBagGroup.js";
+import { computed } from "vue";
 
 import { AppCharacterData } from "@/data/index.js";
-import type { WeaponInfo } from "@/pages/common/PageBagWeapon.vue";
 
 type PbWeaponItemProps = {
   tb: TGApp.Sqlite.UserBag.WeaponTable;
   info: TGApp.App.Weapon.WikiItem;
-  cur?: WeaponInfo;
+  /** 兼容单件视图的旧入参，实例内容始终以 tb/info 为准。 */
+  cur?: TGApp.App.UserBag.WeaponItem;
   selected: boolean;
   detail: boolean;
   avatarId?: number;
 };
 
-type PbWeaponItemEmits = { select: [v: WeaponInfo] };
+type PbWeaponItemEmits = { select: [v: TGApp.App.UserBag.WeaponItem] };
 
 const props = defineProps<PbWeaponItemProps>();
 const emits = defineEmits<PbWeaponItemEmits>();
 
-const item = shallowRef<TGApp.Sqlite.UserBag.WeaponTable>(props.tb);
 const characterStarMap = new Map<number, number>(
   AppCharacterData.map((character) => [character.id, character.star]),
 );
 const avatarStar = computed<number | undefined>(() =>
   props.avatarId === undefined ? undefined : characterStarMap.get(props.avatarId),
 );
+const weaponItem = computed<TGApp.App.UserBag.WeaponItem>(() => ({
+  guid: props.tb.guid,
+  tb: props.tb,
+  info: props.info,
+}));
 
 function toWeapon(): void {
-  emits("select", { guid: item.value.guid, tb: item.value, info: props.info });
+  emits("select", weaponItem.value);
 }
 
 function getAffixLevel(): number {
-  if (!item.value.info.affix_map) return 1;
-  const values = Object.values(item.value.info.affix_map);
-  return values.length > 0 ? values[0] + 1 : 1;
+  return getWeaponRefineLevel(weaponItem.value);
 }
 
-watch(
-  () => props.cur,
-  () => {
-    if (props.cur && props.cur.tb.guid === props.tb.guid) {
-      item.value = props.cur.tb;
-    }
-  },
-);
+function handleKeydown(event: KeyboardEvent): void {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  event.preventDefault();
+  toWeapon();
+}
 
 const idColor = computed<string>(() => getOdStarColor(props.info.star));
 </script>
@@ -109,8 +114,15 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
     filter: grayscale(0.75);
 
     &.selected {
+      border: 2px solid var(--tgc-od-blue);
+      background: var(--box-bg-4);
       filter: unset;
     }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-od-blue);
+    outline-offset: 2px;
   }
 }
 
@@ -161,6 +173,7 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   color: var(--box-text-2);
   font-family: var(--font-title);
   font-size: 14px;
+  font-weight: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -176,6 +189,7 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   color: var(--tgc-od-green);
   font-family: var(--font-title);
   font-size: 12px;
+  font-weight: normal;
 }
 
 .pb-wi-lock {
@@ -202,7 +216,7 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   width: 24px;
   height: 24px;
   border-radius: 4px 0 0;
-  box-shadow: -1px -1px 4px rgb(0 0 0 / 30%);
+  box-shadow: -1px -1px 4px var(--common-shadow-2);
 
   &-bg,
   &-icon {
@@ -226,6 +240,7 @@ $pb-wi-base: v-bind(idColor); /* stylelint-disable-line value-keyword-case */
   border-bottom-left-radius: 12px;
   font-family: var(--font-title);
   font-size: 10px;
+  font-weight: normal;
   line-height: 12px;
   text-align: center;
 }

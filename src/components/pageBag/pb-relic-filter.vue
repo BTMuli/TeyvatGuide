@@ -172,6 +172,7 @@ export type RelicFilterValue = {
 type PbRelicFilterEmits = { filter: [v: RelicFilterValue] };
 
 const emits = defineEmits<PbRelicFilterEmits>();
+const props = defineProps<{ value: RelicFilterValue }>();
 
 const tabs = [
   { key: "basic", label: "基础筛选" },
@@ -258,6 +259,22 @@ const subPropMatchCount = ref<number>(0);
 
 const visible = defineModel<boolean>();
 const resetModel = defineModel<boolean>("reset");
+
+watch(visible, (open) => {
+  if (!open) return;
+  const value = props.value;
+  selectedSlot.value = value.slot.map(String);
+  selectedStar.value = value.star.map(String);
+  selectedSet.value = value.set.map(String);
+  selectedMainProp.value = value.mainProp.map(String);
+  selectedSubProp.value = value.subProp.map(String);
+  selectedGrade.value = [...value.grade];
+  subPropMatchCount.value = value.subPropMatchCount;
+  selectedStatus.value = [
+    ...(value.locked === null ? [] : [value.locked ? "locked" : "unlocked"]),
+    ...(value.marked === null ? [] : [value.marked ? "marked" : "unmarked"]),
+  ];
+});
 
 watch(
   () => resetModel.value,

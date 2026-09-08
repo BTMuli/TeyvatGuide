@@ -91,6 +91,7 @@ export type WeaponFilterValue = {
 type PbWeaponFilterEmits = { filter: [v: WeaponFilterValue] };
 
 const emits = defineEmits<PbWeaponFilterEmits>();
+const props = defineProps<{ value: WeaponFilterValue }>();
 
 const starList: Array<UavSelectChipsItem> = [1, 2, 3, 4, 5].map((star) => ({
   label: `${star}星`,
@@ -150,6 +151,16 @@ const selectedStatus = ref<Array<string>>([]);
 
 const visible = defineModel<boolean>();
 const resetModel = defineModel<boolean>("reset");
+
+watch(visible, (open) => {
+  if (!open) return;
+  const value = props.value;
+  selectedStar.value = value.star.map(String);
+  selectedWeaponType.value = [...value.weaponType];
+  selectedRefine.value = value.refine.map(String);
+  selectedSubProp.value = value.subProp.map(String);
+  selectedStatus.value = value.locked === null ? [] : [value.locked ? "locked" : "unlocked"];
+});
 
 watch(
   () => resetModel.value,
