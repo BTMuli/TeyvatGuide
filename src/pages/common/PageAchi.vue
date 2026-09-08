@@ -35,6 +35,14 @@
     </template>
     <template #extension>
       <div class="top-extension">
+        <v-btn
+          class="top-btn"
+          prepend-icon="mdi-view-grid-outline"
+          variant="elevated"
+          @click="showOverview = true"
+        >
+          成就概览
+        </v-btn>
         <v-btn class="top-btn" prepend-icon="mdi-import" variant="elevated" @click="importJson()">
           导入
         </v-btn>
@@ -90,12 +98,14 @@
       :uid="uidCur"
     />
   </div>
+  <TuaOverview v-model="showOverview" :uid="uidCur" />
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TuaAchiList from "@comp/userAchi/tua-achi-list.vue";
+import TuaOverview from "@comp/userAchi/tua-overview.vue";
 import TuaSeries from "@comp/userAchi/tua-series.vue";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import useAppStore from "@store/app.js";
@@ -135,6 +145,7 @@ const { account } = storeToRefs(useUserStore());
 let achiListener: UnlistenFn | null = null;
 
 const search = ref<string>("");
+const showOverview = ref<boolean>(false);
 const isSearch = ref<boolean>(false);
 const hideFin = ref<boolean>(false);
 const hiddenFilters = ref<Partial<Record<number, HiddenFilter>>>({});
