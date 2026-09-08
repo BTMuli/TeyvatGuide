@@ -27,6 +27,7 @@
       @search="handleSearch"
       @select-achievement="selectAchi"
       @select-series="selectSeries"
+      @updated="handleAchiUpdated"
     >
       <template #left>
         <v-btn
@@ -238,7 +239,23 @@ function groupAchievementStages(
       });
     }
   }
-  return result;
+  if (series.value !== -1 && series.value !== 0 && series.value !== 17) return result;
+  // 按显示阶段排序整组成就，避免其他阶段的完成时间影响位置或拆散展开项。
+  const groups: Array<Array<AchievementListItem>> = [];
+  for (const item of result) {
+    if (item.isStageChild) groups[groups.length - 1].push(item);
+    else groups.push([item]);
+  }
+  groups.sort((a, b) => {
+    const first = a[0].achievement;
+    const second = b[0].achievement;
+    if (first.isCompleted !== second.isCompleted) {
+      return Number(first.isCompleted) - Number(second.isCompleted);
+    }
+    if (!first.isCompleted) return 0;
+    return second.completedTime.localeCompare(first.completedTime);
+  });
+  return groups.flat();
 }
 
 function matchesAchievementFilters(achievement: TGApp.App.Achievement.RenderItem): boolean {
