@@ -111,6 +111,12 @@ function selectAchi(): void {
 
 async function setAchiStat(stat: boolean): Promise<void> {
   if (!stat) {
+    const confirmed = await showDialog.checkF({
+      title: "取消完成？",
+      text: `确认将成就「${props.data.name}」设为未完成？`,
+      confirmLabel: "设为未完成",
+    });
+    if (!confirmed) return;
     await TSUserAchi.updateAchi({
       ...props.data,
       isCompleted: false,
@@ -122,6 +128,17 @@ async function setAchiStat(stat: boolean): Promise<void> {
         ? `仅将阶段 ${props.stageIndex}/${props.stageCount} 设为未完成，其他阶段保持不变`
         : `已将成就 ${props.data.name}(${props.data.id}) 状态设为未完成`,
     );
+    return;
+  }
+  if (props.data.target === 1) {
+    const confirmed = await showDialog.checkF({
+      title: "标记完成？",
+      text: `确认将成就「${props.data.name}」标记为已完成？`,
+      confirmLabel: "标记完成",
+    });
+    if (!confirmed) return;
+    await TSUserAchi.updateAchievementProgress(props.data.uid, props.data.id, 1);
+    await notifyUpdated();
     return;
   }
   await editProgress(props.data.target);

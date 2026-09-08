@@ -65,6 +65,18 @@
           <img :src="achievementStatusIcon" alt="" aria-hidden="true" class="tua-ao-record-ghost" />
           <div class="tua-ao-section-heading">
             <h3 id="achi-record-title">成就记录</h3>
+            <button
+              :aria-label="props.data.isCompleted ? '取消完成' : '标记完成'"
+              :title="props.data.isCompleted ? '取消完成' : '标记完成'"
+              class="tua-ao-completion-button"
+              data-html2canvas-ignore
+              type="button"
+              @click="toggleCompletion"
+            >
+              <v-icon size="16">
+                {{ props.data.isCompleted ? "mdi-undo" : "mdi-check-circle-outline" }}
+              </v-icon>
+            </button>
           </div>
           <dl class="tua-ao-record-list">
             <div>
@@ -166,8 +178,10 @@
 </template>
 <script lang="ts" setup>
 import TOverlay from "@comp/app/t-overlay.vue";
+import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
+import { event } from "@tauri-apps/api";
 import { getVersion } from "@tauri-apps/api/app";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
@@ -180,6 +194,7 @@ type ToAchiInfoEmits = {
   "select-achievement": [data: TGApp.App.Achievement.RenderItem];
   "select-series": [seriesId: number];
   search: [word: string];
+  updated: [];
 };
 type GroupedTriggerTask = TGApp.App.Achievement.TriggerTask & {
   count: number;
@@ -190,6 +205,23 @@ const props = defineProps<ToAchiInfoProps>();
 const emits = defineEmits<ToAchiInfoEmits>();
 const visible = defineModel<boolean>({ required: true });
 const loading = ref<boolean>(false);
+
+async function toggleCompletion(): Promise<void> {
+  const completed = props.data.isCompleted;
+  const confirmed = await showDialog.checkF({
+    title: completed ? "取消完成？" : "标记完成？",
+    text: `确认将成就「${props.data.name}」${completed ? "设为未完成" : "标记为已完成"}？`,
+    confirmLabel: completed ? "设为未完成" : "标记完成",
+  });
+  if (!confirmed) return;
+  await TSUserAchi.updateAchievementProgress(
+    props.data.uid,
+    props.data.id,
+    completed ? 0 : props.data.target,
+  );
+  await event.emit("updateAchi", props.data.categoryId);
+  emits("updated");
+}
 const appVersion = ref<string>();
 const achievementStages = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([props.data]);
 let stageLoadRequest = 0;
@@ -574,7 +606,7 @@ $achi-action-share-text-dark: #c678ddff;
   display: flex;
   height: 22px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   column-gap: 8px;
 }
 
@@ -594,6 +626,32 @@ $achi-action-share-text-dark: #c678ddff;
   line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tua-ao-completion-button {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-2);
+  color: var(--box-text-2);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--common-shadow-1);
+    color: var(--tgc-yellow-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--tgc-yellow-2);
+    outline-offset: 1px;
+  }
 }
 
 .tua-ao-task-grid {
