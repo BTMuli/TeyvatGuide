@@ -21,7 +21,7 @@
         v-if="card.forum !== null && card.forum.name !== ''"
         :title="`频道: ${card.forum.name}`"
         class="tpc-forum"
-        @click="toForum(card.forum)"
+        @click.stop="toForum(card.forum)"
       >
         <TMiImg
           v-if="card.forum.icon !== ''"
