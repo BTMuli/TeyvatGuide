@@ -61,8 +61,8 @@ function getBoxData(avatar: TGApp.Sqlite.Abyss.CharacterData): TItemBoxData {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 8px;
+  border-radius: 4px;
   background: var(--box-bg-1);
 }
 

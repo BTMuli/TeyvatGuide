@@ -63,7 +63,7 @@ async function shareFloor(): Promise<void> {
   align-items: flex-start;
   justify-content: flex-start;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--box-bg-1);
   row-gap: 4px;
 }

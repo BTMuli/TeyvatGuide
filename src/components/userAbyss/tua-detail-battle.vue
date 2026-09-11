@@ -38,28 +38,30 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   if (avatar.id === 10000005 || avatar.id === 10000007) {
     return {
       clickable: false,
-      height: "70px",
+      height: "80px",
       ltSize: "20px",
       bg: `/icon/bg/${avatar.star}-Star.webp`,
       icon: `/WIKI/character/${avatar.id}.webp`,
       lt: `/icon/weapon/${res?.weapon ?? "单手剑"}.webp`,
+      innerBlur: "4px",
       innerText: `Lv.${avatar.level}`,
       innerHeight: 20,
       display: "inner",
-      size: "70px",
+      size: "80px",
     };
   }
   return {
     clickable: false,
-    height: "70px",
+    height: "80px",
     ltSize: "20px",
     bg: `/icon/bg/${getRcStar(avatar.id, avatar.star)}-Star.webp`,
     icon: `/WIKI/character/${avatar.id}.webp`,
     lt: `/icon/element/${res?.element ?? "风"}元素.webp`,
+    innerBlur: "4px",
     innerText: `Lv.${avatar.level}`,
     innerHeight: 20,
     display: "inner",
-    size: "70px",
+    size: "80px",
   };
 }
 </script>
@@ -84,7 +86,7 @@ function getAvatarBox(avatar: TGApp.Sqlite.Abyss.CharacterInfo): TItemBoxData {
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 4px;
 }
 
 .tua-db-monsters {
