@@ -145,17 +145,10 @@ const materialShareCaption = computed<string>(() => {
 function entryProgress(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
   if (entry.status === "completed") return 100;
   if (entry.items.length === 0) return 100;
-  const materialResultMap = new Map(
-    (entryMaterialResults.value.get(entry.id) ?? []).map((material) => [material.id, material]),
-  );
-  const progress = entry.items.reduce((total, item) => {
-    const material = materialResultMap.get(item.materialId);
-    if (!material || material.required <= 0) return total;
-    const available = material.owned + material.craftable;
-    const ratio = Math.min(available / material.required, 1);
-    return total + ratio;
-  }, 0);
-  return Math.min((progress / entry.items.length) * 100, 100);
+  const materials = entryMaterialResults.value.get(entry.id) ?? [];
+  if (materials.length === 0) return 0;
+  const progress = materials.reduce((total, material) => total + material.progress, 0);
+  return Math.min(progress / materials.length, 100);
 }
 
 function isEntryFulfilled(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean {
@@ -169,17 +162,10 @@ function entrySortRank(entry: TGApp.Sqlite.Cultivation.EntryWithItems): number {
 
 function hasTodayMaterial(entry: TGApp.Sqlite.Cultivation.EntryWithItems): boolean {
   const serverDay = getServerDay(props.timezone);
-  const materialResultMap = new Map(
-    (entryMaterialResults.value.get(entry.id) ?? []).map((material) => [material.id, material]),
+  return (entryMaterialResults.value.get(entry.id) ?? []).some(
+    (material) =>
+      material.missing > 0 && isMaterialAvailableToday(material.id, serverDay, WikiMaterialData),
   );
-  return entry.items.some((item) => {
-    const material = materialResultMap.get(item.materialId);
-    return (
-      material !== undefined &&
-      material.missing > 0 &&
-      isMaterialAvailableToday(item.materialId, serverDay, WikiMaterialData)
-    );
-  });
 }
 
 function compareEntries(
@@ -279,20 +265,18 @@ function getBagMaterial(materialId: number): TGApp.Sqlite.UserBag.MaterialTable 
   );
 }
 
-/** 与目标卡片 displayMaterials 同序：按 entry.items，缺料优先 */
+/** 与目标卡片 displayMaterials 同序：使用分配结果，缺料优先 */
 function buildEntryMaterials(entry: TGApp.Sqlite.Cultivation.EntryWithItems): Array<MaterialInfo> {
-  const materialResultMap = new Map(
-    (entryMaterialResults.value.get(entry.id) ?? []).map((material) => [material.id, material]),
-  );
-  return entry.items
+  const results = entryMaterialResults.value.get(entry.id) ?? [];
+  const materials =
+    results.length > 0
+      ? results
+      : entry.items.map((item) => ({ id: item.materialId, missing: item.required }));
+  return materials
     .map((item) => {
-      const info = WikiMaterialData.find((material) => material.id === item.materialId);
+      const info = WikiMaterialData.find((material) => material.id === item.id);
       if (info === undefined) return undefined;
-      const result = materialResultMap.get(item.materialId);
-      const owned = result?.owned ?? 0;
-      const craftable = result?.craftable ?? 0;
-      const missing = Math.max(item.required - (owned + craftable), 0);
-      return { info, tb: getBagMaterial(item.materialId), missing };
+      return { info, tb: getBagMaterial(item.id), missing: item.missing };
     })
     .filter((material): material is MaterialInfo & { missing: number } => material !== undefined)
     .sort((a, b) => Number(a.missing === 0) - Number(b.missing === 0))

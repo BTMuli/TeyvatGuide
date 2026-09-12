@@ -222,39 +222,25 @@ const talentLevels = computed<Array<TGApp.App.UserCalc.TalentLevelView>>(() => {
     targetLevel: talent.level,
   }));
 });
-const materialResultMap = computed<Map<number, TGApp.App.UserCalc.ResultMaterial>>(
-  () => new Map(props.materials.map((material) => [material.id, material])),
-);
 const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =>
-  props.entry.items
-    .map((item) => {
-      const result = materialResultMap.value.get(item.materialId);
-      if (result) {
+  (props.materials.length > 0
+    ? [...props.materials]
+    : props.entry.items.map((item) => {
+        const wiki = WikiMaterialData.find((material) => material.id === item.materialId);
         return {
-          ...result,
+          id: item.materialId,
+          name: wiki?.name ?? `材料 ${item.materialId}`,
+          type: wiki?.type ?? "未知类型",
+          star: wiki?.star ?? 1,
           required: item.required,
-          missing: Math.max(item.required - (result.owned + result.craftable), 0),
-          progress:
-            item.required > 0
-              ? Math.min(((result.owned + result.craftable) / item.required) * 100, 100)
-              : 100,
+          owned: 0,
+          craftable: 0,
+          craftingCosts: [],
+          missing: item.required,
+          progress: 0,
         };
-      }
-      const wiki = WikiMaterialData.find((material) => material.id === item.materialId);
-      return {
-        id: item.materialId,
-        name: wiki?.name ?? `材料 ${item.materialId}`,
-        type: wiki?.type ?? "未知类型",
-        star: wiki?.star ?? 1,
-        required: item.required,
-        owned: 0,
-        craftable: 0,
-        craftingCosts: [],
-        missing: item.required,
-        progress: 0,
-      };
-    })
-    .sort((a, b) => Number(a.missing === 0) - Number(b.missing === 0)),
+      })
+  ).sort((a, b) => Number(a.missing === 0) - Number(b.missing === 0)),
 );
 </script>
 
