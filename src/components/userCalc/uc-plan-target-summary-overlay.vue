@@ -20,19 +20,36 @@
     </template>
 
     <template #header>
-      <UcItemIcon :alt="entry.name" :icon="entry.icon" :size="64" :star="entry.star" />
+      <UcItemIcon
+        :alt="entry.name"
+        :icon="entry.icon"
+        :primaryBadge="weaponBadge"
+        :size="64"
+        :star="entry.star"
+      />
       <div class="ucpts-identity">
         <div class="ucpts-name-row">
           <h2 id="cultivation-target-summary-title">{{ entry.name }}</h2>
-          <v-chip :color="statusColor" size="small" variant="tonal">{{ statusLabel }}</v-chip>
+          <v-chip :color="statusColor" size="x-small" variant="tonal">{{ statusLabel }}</v-chip>
         </div>
+        <div class="ucpts-details">{{ itemDescription }}</div>
         <div class="ucpts-meta">
-          <span class="ucpts-meta-tag">
+          <v-chip color="var(--tgc-od-orange)" size="x-small" variant="tonal">
             {{ entry.type === "avatar" ? "角色" : "武器" }}养成目标
-          </span>
-          <span class="ucpts-meta-tag ucpts-meta-tag--muted">
+          </v-chip>
+          <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
             {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
-          </span>
+          </v-chip>
+          <v-chip
+            v-if="entry.allowCrafting"
+            color="var(--tgc-od-green)"
+            size="x-small"
+            variant="tonal"
+          >
+            允许合成
+          </v-chip>
+          <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
+          <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用溶媒</v-chip>
         </div>
       </div>
     </template>
@@ -74,8 +91,14 @@
         <div v-if="talentLevels.length > 0">
           <span>天赋</span>
           <strong>
-            <span v-for="talent in talentLevels" :key="talent.id" :title="talent.name">
-              {{ talent.label }} {{ talent.currentLevel }}→{{ talent.targetLevel }}
+            <span
+              v-for="talent in talentLevels"
+              :key="talent.id"
+              :title="talent.name"
+              class="ucpts-talent"
+            >
+              <span class="ucpts-talent-label">{{ talent.label }}</span>
+              <span>{{ talent.currentLevel }}→{{ talent.targetLevel }}</span>
             </span>
           </strong>
         </div>
@@ -173,7 +196,7 @@ import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { computed, nextTick, ref, shallowRef, useTemplateRef } from "vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";
 
 type UcPlanTargetSummaryOverlayProps = {
   bagMaterials: ReadonlyMap<number, TGApp.Sqlite.UserBag.MaterialTable>;
@@ -190,6 +213,22 @@ type UcPlanTargetSummaryOverlayEmits = {
 const TALENT_LABELS = <const>["A", "E", "Q"];
 
 const props = defineProps<UcPlanTargetSummaryOverlayProps>();
+const itemInfo = computed<
+  TGApp.App.Character.WikiBriefInfo | TGApp.App.Weapon.WikiBriefInfo | undefined
+>(() => {
+  const items = props.entry.type === "avatar" ? AppCharacterData : AppWeaponData;
+  return items.find((item) => item.id === props.entry.itemId);
+});
+const weaponBadge = computed<string | undefined>(() =>
+  itemInfo.value?.weapon ? `/icon/weapon/${itemInfo.value.weapon}.webp` : undefined,
+);
+const itemDescription = computed<string>(() => {
+  const info = itemInfo.value;
+  const details = [`${props.entry.star % 100}★`];
+  if (info && "element" in info && info.element) details.push(`${info.element}元素`);
+  if (info?.weapon) details.push(info.weapon);
+  return details.join(" · ");
+});
 const emits = defineEmits<UcPlanTargetSummaryOverlayEmits>();
 const visible = defineModel<boolean>({ required: true });
 const shareLoading = ref<boolean>(false);
@@ -357,8 +396,13 @@ async function shareSummary(): Promise<void> {
 }
 
 .ucpts-identity {
+  display: flex;
   min-width: 0;
+  min-height: 64px;
   flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
 }
 
 .ucpts-name-row {
@@ -370,14 +414,15 @@ async function shareSummary(): Promise<void> {
     margin: 0;
     color: var(--common-text-title);
     font-family: var(--font-title);
-    font-size: 24px;
+    font-size: 18px;
     font-weight: normal;
-    line-height: 32px;
+    line-height: 24px;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 }
 
+.ucpts-details,
 .ucpts-meta,
 .ucpts-section-label {
   color: var(--common-text-sub);
@@ -387,23 +432,7 @@ async function shareSummary(): Promise<void> {
 
 .ucpts-meta {
   flex-wrap: wrap;
-  gap: 8px;
-}
-
-.ucpts-meta-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 6px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 4px;
-  background: var(--box-bg-2);
-  color: var(--tgc-od-orange);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.ucpts-meta-tag--muted {
-  color: var(--box-text-2);
+  gap: 4px;
 }
 
 .ucpts-overview,
@@ -428,6 +457,8 @@ async function shareSummary(): Promise<void> {
 }
 
 .ucpts-overview-heading {
+  align-items: flex-end;
+
   > div {
     display: flex;
     flex-direction: column;
@@ -444,6 +475,7 @@ async function shareSummary(): Promise<void> {
     color: var(--common-text-sub);
     font-size: 16px;
     font-weight: 600;
+    line-height: 22px;
   }
 }
 
@@ -486,6 +518,17 @@ async function shareSummary(): Promise<void> {
       border-left-color: var(--tgc-od-orange);
     }
   }
+}
+
+.ucpts-talent {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.ucpts-talent-label {
+  color: var(--common-text-sub);
+  font-size: 11px;
 }
 
 .ucpts-materials {

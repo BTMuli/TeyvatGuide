@@ -74,7 +74,7 @@
         <h3>获取来源</h3>
         <span>{{ activeMaterial.source.length }} 项</span>
       </header>
-      <div class="twom-source">
+      <div :class="{ 'twom-source--four': activeMaterial.source.length === 4 }" class="twom-source">
         <TwoSource
           v-for="(item, index) in activeMaterial.source"
           :key="`${item.type}-${item.name}-${index}`"
@@ -342,6 +342,10 @@ defineSlots<{
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+  &.twom-source--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .twom-convert {

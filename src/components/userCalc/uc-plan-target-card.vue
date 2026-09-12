@@ -10,67 +10,76 @@
     variant="outlined"
   >
     <div class="ucptc-main">
-      <UcItemIcon :alt="entry.name" :icon="entry.icon" :size="64" :star="entry.star" />
-      <div class="ucptc-info">
-        <div class="ucptc-name-row">
-          <span class="ucptc-name">{{ entry.name }}</span>
-          <v-chip v-if="entry.status === 'active'" size="x-small" variant="outlined">
-            优先 {{ priority }}
-          </v-chip>
-          <v-chip
-            :color="fulfilled ? 'var(--tgc-od-green)' : undefined"
-            size="x-small"
-            variant="tonal"
-          >
-            {{ statusLabel }}
-          </v-chip>
-          <v-chip
-            v-if="entry.status === 'active' && !fulfilled && hasTodayMaterial"
-            color="var(--tgc-od-orange)"
-            size="x-small"
-            variant="tonal"
-          >
-            今日可刷
-          </v-chip>
-        </div>
-        <span class="ucptc-level">
-          Lv.{{ entry.currentState.level }} → Lv.{{ entry.targetState.level }}
-        </span>
-        <div v-if="talentLevels.length > 0" class="ucptc-talents">
-          <span>天赋</span>
-          <span
-            v-for="talent in talentLevels"
-            :key="talent.id"
-            :title="talent.name"
-            class="ucptc-talent"
-          >
-            {{ talent.label }}：{{ talent.currentLevel }} → {{ talent.targetLevel }}
+      <div class="ucptc-heading">
+        <UcItemIcon
+          :alt="entry.name"
+          :icon="entry.icon"
+          :primaryBadge="weaponBadge"
+          :size="64"
+          :star="entry.star"
+        />
+        <div class="ucptc-info">
+          <div class="ucptc-name-row">
+            <span class="ucptc-name">{{ entry.name }}</span>
+            <span v-if="entry.status === 'active'" class="ucptc-priority">
+              <span>优先级</span>
+              <strong>{{ priority }}</strong>
+            </span>
+            <v-chip
+              :color="fulfilled ? 'var(--tgc-od-green)' : undefined"
+              size="x-small"
+              variant="tonal"
+            >
+              {{ statusLabel }}
+            </v-chip>
+            <v-chip
+              v-if="entry.status === 'active' && !fulfilled && hasTodayMaterial"
+              color="var(--tgc-od-orange)"
+              size="x-small"
+              variant="tonal"
+            >
+              今日可刷
+            </v-chip>
+          </div>
+          <span class="ucptc-level">
+            Lv.{{ entry.currentState.level }} → Lv.{{ entry.targetState.level }}
           </span>
+          <div v-if="talentLevels.length > 0" class="ucptc-talents">
+            <span>天赋</span>
+            <span
+              v-for="talent in talentLevels"
+              :key="talent.id"
+              :title="talent.name"
+              class="ucptc-talent"
+            >
+              {{ talent.label }}：{{ talent.currentLevel }} → {{ talent.targetLevel }}
+            </span>
+          </div>
         </div>
-        <div class="ucptc-options">
-          <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
-            {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
-          </v-chip>
-          <v-chip
-            v-if="entry.allowCrafting"
-            color="var(--tgc-od-green)"
-            size="x-small"
-            variant="tonal"
-          >
-            允许合成
-          </v-chip>
-          <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
-          <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用溶媒</v-chip>
-        </div>
-        <div class="ucptc-progress-row">
-          <v-progress-linear
-            :color="fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
-            :model-value="progress"
-            height="5"
-            rounded
-          />
-          <span>{{ progress.toFixed(0) }}%</span>
-        </div>
+      </div>
+      <div class="ucptc-options">
+        <v-chip color="var(--tgc-od-blue)" size="x-small" variant="tonal">
+          {{ entry.calculationMode === "api" ? "接口计算" : "背包计算" }}
+        </v-chip>
+        <v-chip
+          v-if="entry.allowCrafting"
+          color="var(--tgc-od-green)"
+          size="x-small"
+          variant="tonal"
+        >
+          允许合成
+        </v-chip>
+        <v-chip v-if="entry.useDust" size="x-small" variant="tonal">使用嬗变之尘</v-chip>
+        <v-chip v-if="entry.useSolvent" size="x-small" variant="tonal">使用溶媒</v-chip>
+      </div>
+      <div class="ucptc-progress-row">
+        <v-progress-linear
+          :color="fulfilled ? 'var(--tgc-od-green)' : 'var(--tgc-od-orange)'"
+          :model-value="progress"
+          height="8"
+          rounded
+        />
+        <span>{{ progress.toFixed(0) }}%</span>
       </div>
     </div>
 
@@ -168,7 +177,7 @@ import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import { computed } from "vue";
 
-import { WikiMaterialData } from "@/data/index.js";
+import { AppCharacterData, AppWeaponData, WikiMaterialData } from "@/data/index.js";
 
 type UcPlanTargetCardProps = {
   canMoveDown: boolean;
@@ -195,6 +204,12 @@ type UcPlanTargetCardEmits = {
 
 const props = defineProps<UcPlanTargetCardProps>();
 const emits = defineEmits<UcPlanTargetCardEmits>();
+
+const weaponBadge = computed<string | undefined>(() => {
+  const items = props.entry.type === "avatar" ? AppCharacterData : AppWeaponData;
+  const weapon = items.find((item) => item.id === props.entry.itemId)?.weapon;
+  return weapon ? `/icon/weapon/${weapon}.webp` : undefined;
+});
 
 function selectMaterial(materialId: number): void {
   emits("material", materialId);
@@ -278,7 +293,13 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
 
 .ucptc-main {
   display: flex;
-  padding: 12px;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+}
+
+.ucptc-heading {
+  display: flex;
   gap: 12px;
 }
 
@@ -287,8 +308,8 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  justify-content: center;
-  gap: 4px;
+  justify-content: flex-start;
+  gap: 2px;
 }
 
 .ucptc-name-row,
@@ -306,25 +327,56 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
   gap: 8px;
 }
 
+.ucptc-priority {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 12px;
+  background: var(--common-shadow-t-1);
+  color: var(--common-text-sub);
+  font-size: 10px;
+  gap: 2px;
+  line-height: 16px;
+  white-space: nowrap;
+
+  strong {
+    color: var(--tgc-od-orange);
+    font-family: var(--font-title);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 .ucptc-options {
-  flex-wrap: wrap;
+  min-width: 0;
   gap: 4px;
+  overflow-x: auto;
+
+  > :deep(.v-chip) {
+    flex-shrink: 0;
+  }
 }
 
 .ucptc-name {
+  color: var(--common-text-title);
   font-family: var(--font-title);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: normal;
+  line-height: 24px;
 }
 
 .ucptc-level {
   color: var(--tgc-od-orange);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  line-height: 16px;
 }
 
 .ucptc-talents,
 .ucptc-progress-row span {
   color: var(--common-text-sub);
   font-size: 12px;
+  line-height: 16px;
 }
 
 .ucptc-talents {
@@ -335,11 +387,14 @@ const displayMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>>(() =
 }
 
 .ucptc-talent {
-  color: var(--common-text-title);
+  color: var(--common-text-sub);
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .ucptc-progress-row {
+  margin-top: -4px;
+  margin-bottom: -4px;
   gap: 8px;
 
   :deep(.v-progress-linear) {
