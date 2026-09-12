@@ -55,7 +55,8 @@
             </v-btn>
           </div>
         </header>
-        <div class="pbom-record-list">
+        <PbMaterialRecordChart v-if="dbInfo.records.length > 5" :records="dbInfo.records" />
+        <div v-else class="pbom-record-list">
           <div v-for="record in dbInfo.records" :key="record.time" class="pbom-record">
             <time>{{ fmtUtil.dateTime(record.time * 1000) }}</time>
             <span>{{ record.manual ? "手动更新" : "自动导入" }}</span>
@@ -76,6 +77,7 @@ import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { computed, shallowRef, useSlots, watch } from "vue";
 
+import PbMaterialRecordChart from "./pb-material-record-chart.vue";
 import PboConvert from "./pbo-convert.vue";
 
 import type { MaterialInfo } from "@/pages/common/PageBagMaterial.vue";
