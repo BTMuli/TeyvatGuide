@@ -204,7 +204,8 @@ function switchHideFin(): void {
 
 function handleSeriesSelect(id: number): void {
   if (selectedSeries.value === id) {
-    showSnackbar.warn("已经选中当前系列");
+    selectedSeries.value = -1;
+    // showSnackbar.warn("已经选中当前系列");
     return;
   }
   selectedSeries.value = id;

@@ -56,9 +56,20 @@
     </div>
     <div class="achi-append">
       <span v-show="props.data.isCompleted">{{ props.data.completedTime }}</span>
-      <div class="achi-append-icon">
+      <div
+        class="achi-append-icon"
+        :aria-label="props.data.isCompleted ? '设为未完成' : '设置完成进度'"
+        :title="props.data.isCompleted ? '设为未完成' : '设置完成进度'"
+        @click.stop="setAchiStat(!props.data.isCompleted)"
+      >
         <img alt="icon" src="/icon/material/201.webp" />
         <span>{{ props.data.reward }}</span>
+        <img
+          alt="fin"
+          class="achi-append-fin"
+          v-if="props.data.isCompleted"
+          src="/UI/app/finish.webp"
+        />
       </div>
     </div>
   </div>
@@ -147,7 +158,7 @@ async function setAchiStat(stat: boolean): Promise<void> {
 async function editProgress(defaultProgress: number): Promise<void> {
   const progressInput = await showDialog.inputF({
     title: "编辑成就进度",
-    text: `请输入 0 到 ${maxProgress.value} 之间的整数`,
+    text: `编辑进度（0~${maxProgress.value}）:`,
     input: Math.min(defaultProgress, maxProgress.value).toString(),
     type: "number",
     confirmLabel: stageChain.value.length > 1 ? "预览变更" : "保存进度",
@@ -412,6 +423,7 @@ async function notifyUpdated(): Promise<void> {
 
 .achi-append-icon {
   position: relative;
+  overflow: hidden;
   width: 40px;
   height: 40px;
   border-radius: 4px;
@@ -426,6 +438,7 @@ async function notifyUpdated(): Promise<void> {
 
   span {
     position: absolute;
+    z-index: 2;
     bottom: 0;
     left: 0;
     display: flex;
@@ -439,5 +452,14 @@ async function notifyUpdated(): Promise<void> {
     color: var(--tgc-white-1);
     font-size: 8px;
   }
+}
+
+.achi-append-fin {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  padding: 8px;
+  background: #00000060;
 }
 </style>

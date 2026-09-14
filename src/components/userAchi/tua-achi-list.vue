@@ -13,9 +13,9 @@
           :isStageChild="item.isStageChild"
           :stageCount="item.stageCount"
           :stageIndex="item.stageIndex"
+          @updated="handleAchiUpdated"
           @select-achi="selectAchi"
           @toggle-stages="toggleStageChain(item.stageChainId)"
-          @updated="handleAchiUpdated"
         />
       </template>
     </v-virtual-scroll>
@@ -25,9 +25,9 @@
       v-model="showOverlay"
       :data="selectedAchi"
       @search="handleSearch"
+      @updated="handleAchiUpdated"
       @select-achievement="selectAchi"
       @select-series="selectSeries"
-      @updated="handleAchiUpdated"
     >
       <template #left>
         <v-btn
@@ -50,7 +50,7 @@
         />
       </template>
     </TuaAchiOverlay>
-    <VpOverlaySearch topOffset="112px" v-model="showSearch" :gid="2" :keyword="searchWd" />
+    <VpOverlaySearch v-model="showSearch" :gid="2" :keyword="searchWd" topOffset="112px" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -281,6 +281,10 @@ function selectAchi(data: TGApp.App.Achievement.RenderItem): void {
 }
 
 function selectSeries(data: number): void {
+  if (series.value === data) {
+    showSnackbar.warn("已经选中当前系列");
+    return;
+  }
   series.value = data;
 }
 
@@ -324,10 +328,6 @@ function switchAchiInfo(next: boolean): void {
 
 .tua-al-nc {
   margin-bottom: 8px;
-}
-
-.tua-al-list {
-  padding-right: 10px;
 }
 
 .card-arrow {
