@@ -1,10 +1,12 @@
 /**
  * 幻想真境剧诗相关请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.2
  */
 import TGHttps from "@utils/TGHttps.js";
 
-const CombatUrl: Readonly<string> = "https://homa.gentle.house/RoleCombat/";
+import { HOMA_API } from "./base.js";
+
+const CombatUrl: Readonly<string> = `${HOMA_API}RoleCombat/`;
 
 /**
  * 获取剧诗统计数据

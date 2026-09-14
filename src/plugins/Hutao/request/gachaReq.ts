@@ -1,12 +1,14 @@
 /**
  * 祈愿相关请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.2
  */
 import TGHttps from "@utils/TGHttps.js";
 
 import { getReqHeader } from "../utils/authUtils.js";
 
-const HUTAO_GACHA_API = "https://homa.gentle.house/GachaLog/";
+import { HOMA_API } from "./base.js";
+
+const HUTAO_GACHA_API = `${HOMA_API}GachaLog/`;
 
 /**
  * 获取抽卡入口

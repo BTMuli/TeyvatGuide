@@ -1,10 +1,12 @@
 /**
  * 深渊相关请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.2
  */
 import TGHttps from "@utils/TGHttps.js";
 
-const AbyssUrl: Readonly<string> = `https://homa.gentle.house/Statistics/`;
+import { HOMA_API } from "./base.js";
+
+const AbyssUrl: Readonly<string> = `${HOMA_API}Statistics/`;
 
 /**
  * 获取深渊概览数据
@@ -104,14 +106,14 @@ async function getTeamCollect(
 
 /**
  * 上传用户数据
- * @since Beta v0.10.1
+ * @since Beta v0.12.2
  * @param data - 用户数据
  * @returns 上传结果
  */
 async function uploadData(
   data: TGApp.Plugins.Hutao.Abyss.RecordUpload,
 ): Promise<TGApp.Plugins.Hutao.Abyss.UploadResp> {
-  const url = "https://homa.gentle.house/Record/Upload";
+  const url = `${HOMA_API}Record/Upload`;
   const resp = await TGHttps.post<TGApp.Plugins.Hutao.Abyss.UploadResp>(url, {
     body: data,
     query: { returningRank: false },

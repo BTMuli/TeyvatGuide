@@ -1,13 +1,15 @@
 /**
  * 账号相关请求
- * @since Beta v0.10.1
+ * @since Beta v0.12.2
  */
 
 import TGHttps from "@utils/TGHttps.js";
 
 import { getReqHeader, rsaEncrypt } from "../utils/authUtils.js";
 
-const PassportUrl = "https://homa.gentle.house/Passport/v2/";
+import { HOMA_API } from "./base.js";
+
+const PassportUrl = `${HOMA_API}Passport/v2/`;
 
 /**
  * 登录
