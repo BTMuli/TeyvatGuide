@@ -15,6 +15,7 @@
     </div>
     <TucChallengeItem
       v-for="(challenge, idx) in props.data.challenge"
+      :id="props.anchorPrefix ? `${props.anchorPrefix}-${idx}` : undefined"
       :key="idx"
       :data="challenge"
     />
@@ -25,7 +26,11 @@ import gameEnum from "@enum/game.js";
 
 import TucChallengeItem from "./tuc-challenge-item.vue";
 
-type TucOverviewProps = { title: string; data: TGApp.Game.Challenge.Challenge };
+type TucOverviewProps = {
+  title: string;
+  data: TGApp.Game.Challenge.Challenge;
+  anchorPrefix?: string;
+};
 
 const props = defineProps<TucOverviewProps>();
 </script>

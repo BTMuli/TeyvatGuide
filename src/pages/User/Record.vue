@@ -52,19 +52,37 @@
       <TurRoleInfo :role="recordData.role" :uid="uidCur ?? 0" />
       <span class="sign">TeyvatGuide v{{ version }} | {{ recordData.updated }}</span>
     </div>
-    <PhCompCard :shareTitle="`战绩_数据总览_${uidCur}`" modernShare title="数据总览">
+    <PhCompCard
+      id="record-overview"
+      :shareTitle="`战绩_数据总览_${uidCur}`"
+      modernShare
+      title="数据总览"
+    >
       <TurOverviewGrid :model-value="recordData.stats" />
     </PhCompCard>
-    <PhCompCard :shareTitle="`战绩_角色信息_${uidCur}`" modernShare shareProgress title="角色信息">
+    <PhCompCard
+      id="record-avatars"
+      :shareTitle="`战绩_角色信息_${uidCur}`"
+      modernShare
+      shareProgress
+      title="角色信息"
+    >
       <TurAvatarGrid :model-value="recordData.avatars" />
     </PhCompCard>
-    <PhCompCard :shareTitle="`战绩_世界探索_${uidCur}`" modernShare shareProgress title="世界探索">
+    <PhCompCard
+      id="record-world"
+      :shareTitle="`战绩_世界探索_${uidCur}`"
+      modernShare
+      shareProgress
+      title="世界探索"
+    >
       <TurWorldGrid :uid="uidCur ?? 0" :version :worlds="recordData.wed" />
     </PhCompCard>
-    <PhCompCard :shareTitle="`战绩_尘歌壶_${uidCur}`" modernShare title="尘歌壶">
+    <PhCompCard id="record-home" :shareTitle="`战绩_尘歌壶_${uidCur}`" modernShare title="尘歌壶">
       <TurHomeOverview :homes="recordData.homes" />
     </PhCompCard>
   </div>
+  <TurToc v-if="recordData" />
   <div v-else class="ur-empty">
     <img alt="empty" src="/UI/app/empty.webp" />
     <span>DATA NOT FOUND</span>
@@ -79,6 +97,7 @@ import TurAvatarGrid from "@comp/userRecord/tur-avatar-grid.vue";
 import TurHomeOverview from "@comp/userRecord/tur-home-overview.vue";
 import TurOverviewGrid from "@comp/userRecord/tur-overview-grid.vue";
 import TurRoleInfo from "@comp/userRecord/tur-role-info.vue";
+import TurToc from "@comp/userRecord/tur-toc.vue";
 import TurWorldGrid from "@comp/userRecord/tur-world-grid.vue";
 import recordReq from "@req/recordReq.js";
 import TSUserAccount from "@Sqlm/userAccount.js";

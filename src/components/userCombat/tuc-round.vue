@@ -1,6 +1,6 @@
 <!-- 剧诗单幕 -->
 <template>
-  <div ref="tucrEl" class="tucr-box">
+  <div :id="props.anchorId" ref="tucrEl" class="tucr-box">
     <div class="tucr-title" @click="shareRound()">
       <img
         :class="`stat_${props.round.is_get_medal}`"
@@ -38,6 +38,7 @@ type TucRoundProps = {
   round: TGApp.Game.Combat.RoundData;
   uid: string;
   id: number;
+  anchorId?: string;
 };
 const props = defineProps<TucRoundProps>();
 const showInfo = ref<boolean>(false);

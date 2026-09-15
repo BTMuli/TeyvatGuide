@@ -102,11 +102,17 @@
         class="uc-window-item"
       >
         <div :class="userTab === item.id ? 'ucw-i-ref active' : 'ucw-i-ref'">
-          <TucOverview :data="item" :showShareInfo :version />
-          <TucAvatars :model-value="item.detail.backup_avatars" />
+          <TucOverview
+            :anchorId="`combat-${item.id}-overview`"
+            :data="item"
+            :showShareInfo
+            :version
+          />
+          <TucAvatars :id="`combat-${item.id}-avatars`" :model-value="item.detail.backup_avatars" />
           <div class="ucw-rounds">
             <TucRound
-              v-for="round in item.detail.rounds_data"
+              v-for="(round, index) in item.detail.rounds_data"
+              :anchorId="`combat-${item.id}-round-${round.round_id}-${index}`"
               :id="item.id"
               :key="round.round_id"
               :round
@@ -121,11 +127,13 @@
       </div>
     </v-window>
   </div>
+  <TFloatingToc :items="tocItems" label="幻想真境剧诗目录" />
   <TucOvStat v-model="showStat" :data="cloudCombat" />
   <TucOvChar v-model="showChar" :data="charMasters" :uid="uidCur" />
   <TucOvTarot v-model="showTarot" :data="tarotStat" :uid="uidCur" />
 </template>
 <script lang="ts" setup>
+import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -150,7 +158,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import TGShare from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { nextTick, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, nextTick, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -165,6 +173,35 @@ const showShareInfo = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localCombat = shallowRef<Array<TGApp.Sqlite.Combat.TableTrans>>([]);
+const tocItems = computed<Array<FloatingTocItem>>(() => {
+  const selected = localCombat.value.find((item) => item.id === userTab.value);
+  if (!selected || (!selected.hasData && !selected.hasDetailData)) return [];
+
+  const prefix = `combat-${selected.id}`;
+  const items: Array<FloatingTocItem> = [
+    {
+      id: `${prefix}-overview`,
+      label: "数据概览",
+      icon: "mdi-chart-box-outline",
+    },
+  ];
+  if (selected.detail.backup_avatars.length > 0) {
+    items.push({
+      id: `${prefix}-avatars`,
+      label: "出战角色",
+      icon: "mdi-account-group-outline",
+    });
+  }
+  for (const [index, round] of selected.detail.rounds_data.entries()) {
+    items.push({
+      id: `${prefix}-round-${round.round_id}-${index}`,
+      label: round.is_tarot ? `圣牌挑战·${round.tarot_serial_no}` : `第${round.round_id}幕`,
+      icon: round.is_tarot ? "mdi-cards-outline" : "mdi-sword-cross",
+      badge: round.is_tarot ? round.tarot_serial_no : round.round_id,
+    });
+  }
+  return items;
+});
 
 const showStat = ref<boolean>(false);
 const cloudCombat = shallowRef<TGApp.Plugins.Hutao.Combat.Data>();

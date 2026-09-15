@@ -94,7 +94,7 @@
             <div class="uaw-share">深境螺旋 | Render by TeyvatGuide v{{ version }}</div>
           </div>
           <TSubLine>统计周期 {{ item.startTime }} ~ {{ item.endTime }}</TSubLine>
-          <div class="uaw-o-box">
+          <div :id="`user-abyss-${item.id}-overview`" class="uaw-o-box">
             <TuaOverview :val-text="item.totalBattleTimes" title="战斗次数" />
             <TuaOverview :val-text="item.totalStar" title="获得渊星" />
             <TuaOverview :val-text="getMaxFloor(item)" title="最深抵达" />
@@ -106,13 +106,13 @@
             <TuaOverview :val-icons="item.energySkillRank" title="元素爆发" />
           </div>
           <div class="uaw-d-box">
-            <TuaDetail
+            <div
               v-for="floor in item.floors"
-              :id="item.id"
+              :id="`user-abyss-${item.id}-floor-${floor.id}`"
               :key="floor.id"
-              :floor
-              :uid="uidCur"
-            />
+            >
+              <TuaDetail :id="item.id" :floor :uid="uidCur" />
+            </div>
           </div>
         </div>
       </v-window-item>
@@ -122,9 +122,11 @@
       </div>
     </v-window>
   </div>
+  <TFloatingToc :items="tocItems" label="深境螺旋目录" />
   <TuaOvStat v-model="showStat" />
 </template>
 <script lang="ts" setup>
+import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import TSubLine from "@comp/app/t-subline.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
@@ -148,7 +150,7 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
 import { storeToRefs } from "pinia";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -161,6 +163,23 @@ const version = ref<string>();
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localAbyss = shallowRef<Array<TGApp.Sqlite.Abyss.TableTrans>>([]);
+const tocItems = computed<Array<FloatingTocItem>>(() => {
+  const selected = localAbyss.value.find((item) => item.id === userTab.value);
+  if (!selected) return [];
+  return [
+    {
+      id: `user-abyss-${selected.id}-overview`,
+      label: "数据总览",
+      icon: "mdi-chart-box-outline",
+    },
+    ...selected.floors.map((floor) => ({
+      id: `user-abyss-${selected.id}-floor-${floor.id}`,
+      label: `第${floor.id}层`,
+      icon: "mdi-stairs",
+      badge: floor.id,
+    })),
+  ];
+});
 const showStat = ref<boolean>(false);
 
 onMounted(async () => {

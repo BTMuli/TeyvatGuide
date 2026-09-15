@@ -116,9 +116,24 @@
             </div>
             <div class="ucw-share">幽境危战 | UID-{{ item.uid }} | TeyvatGuide v{{ version }}</div>
           </div>
-          <TucBlings v-if="item.blings.length > 0" :data="item.blings" />
-          <TucOverview :data="item.single" title="单人模式" />
-          <TucOverview v-if="item.mp.has_data" :data="item.mp" title="联机模式" />
+          <TucBlings
+            v-if="item.blings.length > 0"
+            :id="`challenge-${item.id}-blings`"
+            :data="item.blings"
+          />
+          <TucOverview
+            :id="`challenge-${item.id}-single`"
+            :anchorPrefix="`challenge-${item.id}-single`"
+            :data="item.single"
+            title="单人模式"
+          />
+          <TucOverview
+            v-if="item.mp.has_data"
+            :id="`challenge-${item.id}-mp`"
+            :anchorPrefix="`challenge-${item.id}-mp`"
+            :data="item.mp"
+            title="联机模式"
+          />
         </div>
       </v-window-item>
       <div v-show="localChallenge.length === 0" class="ucb-empty">
@@ -127,6 +142,7 @@
       </div>
     </v-window>
   </div>
+  <TFloatingToc :items="tocItems" label="幽境危战目录" />
   <TucPopOverlay
     v-model="showPopOverlay"
     :periodName="currentPeriod?.name"
@@ -135,6 +151,7 @@
   />
 </template>
 <script lang="ts" setup>
+import TFloatingToc, { type FloatingTocItem } from "@comp/app/t-floating-toc.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
@@ -175,6 +192,36 @@ const showPopOverlay = ref<boolean>(false);
 const uidCur = ref<string>();
 const uidList = shallowRef<Array<string>>();
 const localChallenge = shallowRef<Array<TGApp.Sqlite.Challenge.TableTrans>>([]);
+const tocItems = computed<Array<FloatingTocItem>>(() => {
+  const selected = localChallenge.value.find((item) => item.id === userTab.value);
+  if (!selected) return [];
+  const items: Array<FloatingTocItem> = [];
+  if (selected.blings.length > 0) {
+    items.push({
+      id: `challenge-${selected.id}-blings`,
+      label: "赋光之人",
+      icon: "mdi-star-four-points-outline",
+    });
+  }
+  for (const mode of <const>["single", "mp"]) {
+    if (mode === "mp" && !selected.mp.has_data) continue;
+    const label = mode === "single" ? "单人模式" : "联机模式";
+    const prefix = `challenge-${selected.id}-${mode}`;
+    items.push({
+      id: prefix,
+      label,
+      icon: mode === "single" ? "mdi-account-outline" : "mdi-account-group-outline",
+    });
+    selected[mode].challenge.forEach((challenge, index) => {
+      items.push({
+        id: `${prefix}-${index}`,
+        label: `${label} · ${challenge.name}`,
+        icon: "mdi-sword-cross",
+      });
+    });
+  }
+  return items;
+});
 const currentPeriod = computed<TGApp.Sqlite.Challenge.TableTrans | undefined>(() => {
   const now = Date.now();
   const ongoing = localChallenge.value.find((item) => {

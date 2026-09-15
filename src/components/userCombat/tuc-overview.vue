@@ -1,6 +1,6 @@
 <!-- 剧诗数据概览 -->
 <template>
-  <div class="tuco-box">
+  <div :id="props.anchorId" class="tuco-box">
     <div class="tuco-title">
       <div class="tuco-heading">
         <div class="tuco-heading-main">
@@ -59,6 +59,7 @@ import TucTile from "./tuc-tile.vue";
 
 type TucOverviewProps = {
   data: TGApp.Sqlite.Combat.TableTrans;
+  anchorId?: string;
   showShareInfo: boolean;
   version: string | undefined;
 };
