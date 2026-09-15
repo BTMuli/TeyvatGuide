@@ -2,12 +2,27 @@
 Author: 目棃
 Description: CHANGELOG
 Date: 2026-08-30
-Update: 2026-09-04
+Update: 2026-09-15
 ---
 
 > 本文档 [`Frontmatter`](https://github.com/BTMuli/MuCli#Frontmatter) 由 [MuCli](https://github.com/BTMuli/Mucli) 自动生成于 `2026-08-30 15:00:05`
 >
-> 更新于 `2026-09-04 12:49:28`
+> 更新于 `2026-09-15 10:41:38`
+
+## [0.12.2](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.2) (2026-09-15)
+
+- ✨ 战绩/高难挑战页面添加右侧悬浮TOC
+- ✨ 背包武器/圣遗物新增合并视图
+- ✨ 成就页面新增概览浮窗
+- ✨ 添加材料更新记录折线图
+- 👽️ 更新胡桃云新域名
+- 🚸 游戏安装添加“移除安装登记”按钮
+- 🚸 优化已完成成就排序
+- 🚸 优化成就完成标记交互
+- ♻️ 优化养成计划角色/武器经验计算逻辑，将低级经验材料纳入计算
+- ♻️ 角色列表详情浮窗技能描述/属性分离，组件抽离
+- 🐛 修复养成接口合成结果重复计入库存
+- 🐛 修复帖子卡片频道点击触发异常
 
 ## [0.12.1](https://github.com/BTMuli/TeyvatGuide/releases/v0.12.0) (2026-09-04)
 
