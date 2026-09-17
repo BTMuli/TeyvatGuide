@@ -305,7 +305,7 @@ function applyWeaponFilters(
     result = result.filter((item) => filter.refine.includes(getWeaponRefineLevel(item)));
   if (filter.subProp.length > 0)
     result = result.filter((item) =>
-      item.info.curves.some((curve) => curve.curve !== 1101 && filter.subProp.includes(curve.prop)),
+      item.info.curves.some((curve) => curve.prop !== 4 && filter.subProp.includes(curve.prop)),
     );
   if (filter.locked !== null)
     result = result.filter((item) => item.tb.info.is_locked === filter.locked);

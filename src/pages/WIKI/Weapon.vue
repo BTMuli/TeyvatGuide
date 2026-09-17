@@ -34,7 +34,9 @@ import { toObcPage } from "@utils/TGWindow.js";
 import { computed, ref, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-import { AppWeaponData } from "@/data/index.js";
+import { AppWeaponData, wwWeapon } from "@/data/index.js";
+
+const weaponInfoMap = new Map(wwWeapon.map((item) => [item.id, item]));
 
 const appWData = AppWeaponData.sort((a, b) => {
   if (a.star !== b.star) return b.star - a.star;
@@ -99,14 +101,20 @@ function handleSelectW(val: SelectedWValue): void {
   showSelect.value = false;
   const filterW = AppWeaponData.filter((item) => {
     if (val.star.length > 0 && !val.star.includes(item.star)) return false;
-    return !(val.weapon.length > 0 && !val.weapon.includes(item.weapon));
+    if (val.weapon.length > 0 && !val.weapon.includes(item.weapon)) return false;
+    if (val.subProp.length === 0) return true;
+    return (
+      weaponInfoMap
+        .get(item.id)
+        ?.curves.some((curve) => curve.prop !== 4 && val.subProp.includes(curve.prop)) ?? false
+    );
   });
+  cardsInfo.value = filterW;
   if (filterW.length === 0) {
     showSnackbar.warn("未找到符合条件的武器");
     return;
   }
   showSnackbar.success(`找到 ${filterW.length} 件符合条件的武器`);
-  cardsInfo.value = filterW;
 }
 
 function resetCatalog(): void {

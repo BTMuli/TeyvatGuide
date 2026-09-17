@@ -78,7 +78,7 @@ import TwfFilterShell from "@comp/pageWiki/twf-filter-shell.vue";
 import UavSelectChips, { type UavSelectChipsItem } from "@comp/userAvatar/uav-select-chips.vue";
 import { ref, watch } from "vue";
 
-import { AppPropMapData, wwWeapon } from "@/data/index.js";
+import { AppPropMapData } from "@/data/index.js";
 
 export type WeaponFilterValue = {
   star: Array<number>;
@@ -123,25 +123,12 @@ const statusList: Array<UavSelectChipsItem> = [
   { label: "未锁定", value: "unlocked", title: "未锁定" },
 ];
 
-const subPropList: Array<UavSelectChipsItem> = (() => {
-  const propSet = new Set<number>();
-  for (const weapon of wwWeapon) {
-    if (weapon.curves) {
-      for (const curve of weapon.curves) {
-        if (curve.curve !== 1101) propSet.add(curve.prop);
-      }
-    }
-  }
-  return Array.from(propSet).map((propId) => {
-    const propInfo = AppPropMapData[propId];
-    return {
-      label: propInfo ? propInfo.filter_name : `属性${propId}`,
-      value: propId.toString(),
-      title: propInfo ? propInfo.filter_name : `属性${propId}`,
-      icon: propInfo ? propInfo.icon : "",
-    };
-  });
-})();
+const subPropList: Array<UavSelectChipsItem> = [6, 23, 9, 3, 20, 22, 28, 30].map((id) => ({
+  label: AppPropMapData[id].filter_name,
+  value: id.toString(),
+  title: AppPropMapData[id].filter_name,
+  icon: AppPropMapData[id].icon,
+}));
 
 const selectedStar = ref<Array<string>>([]);
 const selectedWeaponType = ref<Array<string>>([]);
@@ -200,7 +187,8 @@ function confirmSelect(): void {
     star: selectedStar.value.map(Number),
     weaponType: selectedWeaponType.value,
     refine: selectedRefine.value.map(Number),
-    subProp: selectedSubProp.value.map(Number),
+    subProp:
+      selectedSubProp.value.length === subPropList.length ? [] : selectedSubProp.value.map(Number),
     locked: getBooleanFilter(selectedStatus.value, "locked", "unlocked"),
   };
   emits("filter", value);
