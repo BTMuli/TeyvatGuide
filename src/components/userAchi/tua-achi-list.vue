@@ -19,7 +19,17 @@
         />
       </template>
     </v-virtual-scroll>
-    <ToNameCard v-if="ncData" v-model="showNc" :data="ncData" topOffset="112px" />
+    <ToNameCard
+      v-if="ncData"
+      v-model="showNc"
+      :data="ncData"
+      :achievementSeries="{
+        uid: props.uid,
+        name: TSUserAchi.getAchievementCategoryById(series)?.name ?? '成就系列',
+        items: achievements,
+      }"
+      topOffset="112px"
+    />
     <TuaAchiOverlay
       v-if="selectedAchi"
       v-model="showOverlay"

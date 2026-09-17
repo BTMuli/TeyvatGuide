@@ -81,11 +81,17 @@
           <dl class="tua-ao-record-list">
             <div>
               <dt>完成状态</dt>
-              <dd :class="{ 'is-completed': props.data.isCompleted }">
+              <dd
+                :class="{
+                  'is-completed': props.data.isCompleted,
+                  'is-unclaimed': props.data.status === UiafAchiStatEnum.Finished,
+                  'is-invalid': props.data.status === UiafAchiStatEnum.Invalid,
+                }"
+              >
                 <v-icon size="16">
-                  {{ props.data.isCompleted ? "mdi-check-circle" : "mdi-progress-clock" }}
+                  {{ getStatusIcon(props.data.status) }}
                 </v-icon>
-                {{ props.data.isCompleted ? "已完成" : "未完成" }}
+                {{ getStatusLabel(props.data.status) }}
               </dd>
             </div>
             <div>
@@ -112,7 +118,11 @@
             <button
               v-for="item in otherAchievementStages"
               :key="item.id"
-              :class="{ 'is-completed': item.isCompleted }"
+              :class="{
+                'is-completed': item.isCompleted,
+                'is-unclaimed': item.status === UiafAchiStatEnum.Finished,
+                'is-invalid': item.status === UiafAchiStatEnum.Invalid,
+              }"
               :title="'查看阶段 ' + getStageIndex(item.id) + '：' + item.name"
               class="tua-ao-stage-item"
               type="button"
@@ -128,9 +138,9 @@
               <span class="tua-ao-stage-item-footer">
                 <span class="tua-ao-stage-item-status">
                   <v-icon size="14">
-                    {{ item.isCompleted ? "mdi-check-circle" : "mdi-progress-clock" }}
+                    {{ getStatusIcon(item.status) }}
                   </v-icon>
-                  {{ item.isCompleted ? "已完成" : "未完成" }}
+                  {{ getStatusLabel(item.status) }}
                 </span>
                 <span class="tua-ao-stage-item-reward">
                   {{ item.reward }}
@@ -180,6 +190,7 @@
 import TOverlay from "@comp/app/t-overlay.vue";
 import showDialog from "@comp/func/dialog.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import { getStatusIcon, getStatusLabel, UiafAchiStatEnum } from "@enum/uiaf.js";
 import TSUserAchi from "@Sqlm/userAchi.js";
 import { event } from "@tauri-apps/api";
 import { getVersion } from "@tauri-apps/api/app";
@@ -222,6 +233,7 @@ async function toggleCompletion(): Promise<void> {
   await event.emit("updateAchi", props.data.categoryId);
   emits("updated");
 }
+
 const appVersion = ref<string>();
 const achievementStages = shallowRef<Array<TGApp.App.Achievement.RenderItem>>([props.data]);
 let stageLoadRequest = 0;
@@ -790,6 +802,14 @@ $achi-action-share-text-dark: #c678ddff;
   font-weight: 600;
 }
 
+.tua-ao-record-list dd.is-unclaimed {
+  color: var(--tgc-od-red);
+}
+
+.tua-ao-record-list dd.is-invalid {
+  color: var(--tgc-od-orange);
+}
+
 .tua-ao-stages {
   grid-area: stages;
 }
@@ -888,6 +908,14 @@ $achi-action-share-text-dark: #c678ddff;
 .tua-ao-stage-item.is-completed .tua-ao-stage-item-status {
   color: var(--tgc-yellow-3);
   font-weight: 600;
+}
+
+.tua-ao-stage-item.is-unclaimed .tua-ao-stage-item-status {
+  color: var(--tgc-od-red);
+}
+
+.tua-ao-stage-item.is-invalid .tua-ao-stage-item-status {
+  color: var(--tgc-od-orange);
 }
 
 .tua-ao-stage-item-reward {

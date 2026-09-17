@@ -14,8 +14,8 @@
     <div class="achi-version">v{{ props.data.version }}</div>
     <button
       v-if="props.expandable"
-      :aria-label="props.expanded ? '收起其他阶段' : '展开其他阶段'"
       :aria-expanded="props.expanded"
+      :aria-label="props.expanded ? '收起其他阶段' : '展开其他阶段'"
       :title="props.expanded ? '收起其他阶段' : '展开其他阶段'"
       class="achi-stage-toggle"
       type="button"
@@ -27,6 +27,7 @@
       <div class="achi-pre-icon">
         <button
           :aria-label="props.data.isCompleted ? '设为未完成' : '设置完成进度'"
+          :class="{ 'is-unfinished': !props.data.isCompleted }"
           :title="props.data.isCompleted ? '设为未完成' : '设置完成进度'"
           class="achi-state"
           type="button"
@@ -57,19 +58,22 @@
     <div class="achi-append">
       <span v-show="props.data.isCompleted">{{ props.data.completedTime }}</span>
       <div
-        class="achi-append-icon"
         :aria-label="props.data.isCompleted ? '设为未完成' : '设置完成进度'"
         :title="props.data.isCompleted ? '设为未完成' : '设置完成进度'"
+        class="achi-append-icon"
         @click.stop="setAchiStat(!props.data.isCompleted)"
       >
         <img alt="icon" src="/icon/material/201.webp" />
         <span>{{ props.data.reward }}</span>
         <img
+          v-if="props.data.status === UiafAchiStatEnum.RewardTaken"
           alt="fin"
           class="achi-append-fin"
-          v-if="props.data.isCompleted"
           src="/UI/app/finish.webp"
         />
+        <span v-else-if="props.data.status === UiafAchiStatEnum.Finished" class="achi-append-gift">
+          <v-icon color="var(--tgc-od-red)" icon="mdi-gift" size="20" title="已完成未领取" />
+        </span>
       </div>
     </div>
   </div>
@@ -348,6 +352,10 @@ async function notifyUpdated(): Promise<void> {
   background: transparent;
   cursor: pointer;
 
+  &.is-unfinished {
+    filter: grayscale(1);
+  }
+
   &:focus-visible {
     outline: 2px solid var(--tgc-yellow-2);
     outline-offset: 1px;
@@ -436,7 +444,7 @@ async function notifyUpdated(): Promise<void> {
     flex-shrink: 0;
   }
 
-  span {
+  span:not(.achi-append-gift) {
     position: absolute;
     z-index: 2;
     bottom: 0;
@@ -460,6 +468,20 @@ async function notifyUpdated(): Promise<void> {
   top: 0;
   left: 0;
   padding: 8px;
+  background: #00000060;
+}
+
+.achi-append-gift {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 4px;
   background: #00000060;
 }
 </style>
