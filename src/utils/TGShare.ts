@@ -2449,7 +2449,7 @@ async function captureSnapBlob(
   const bust = opts?.fontUrlBust;
   try {
     return await snapdom.toBlob(element, {
-      type: "png",
+      format: "png",
       backgroundColor: getShareImgBgColor(),
       scale,
       dpr: 1,
@@ -2469,7 +2469,6 @@ async function captureSnapBlob(
         }),
       ),
       reconcile: true,
-      compress: false,
       outerShadows: true,
       ...(opts?.cacheDisabled === true ? { cache: <const>"disabled" } : {}),
     });
