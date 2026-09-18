@@ -43,11 +43,15 @@ const emits = defineEmits<ToGameLoginEmits>();
 const codeGid = ref<number>(7);
 const codeUrl = ref<string>();
 const codeTicket = ref<string>("");
+let lastLoggedStatus: TGApp.BBS.GameLogin.GetLoginStatusData["status"] | null = null;
+let qrLoginActive = false;
 
 watch(
   () => model.value,
   async () => {
     if (model.value) {
+      qrLoginActive = true;
+      await TGLogger.Info("[用户登录][扫码] 开始扫码登录");
       await freshQr();
       if (cycleTimer) {
         clearInterval(cycleTimer);
@@ -57,6 +61,10 @@ watch(
     } else {
       if (cycleTimer) clearInterval(cycleTimer);
       cycleTimer = null;
+      if (qrLoginActive) {
+        await TGLogger.Info("[用户登录][扫码] 扫码登录已取消");
+        qrLoginActive = false;
+      }
     }
   },
 );
@@ -81,35 +89,40 @@ async function share(): Promise<void> {
 
 async function freshQr(): Promise<void> {
   let resp: TGApp.BBS.GameLogin.GetLoginQrResponse | undefined;
+  lastLoggedStatus = null;
+  await TGLogger.Info("[用户登录][扫码][freshQr] 开始获取二维码");
   try {
     resp = await passportReq.qrLogin.create();
     if (resp.retcode !== 0) {
       showSnackbar.error(`[${resp.retcode}] ${resp.message}`);
+      await TGLogger.Warn(`[用户登录][扫码][freshQr] 获取二维码失败，retcode=${resp.retcode}`);
       return;
     }
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`创建二维码失败：${errMsg}`);
-    await TGLogger.Error(`[TcoGameLogin][freshQr] 创建二维码异常`);
-    await TGLogger.Error(`[TcoGameLogin][freshQr] ${e}`);
+    await TGLogger.Error("[用户登录][扫码][freshQr] 创建二维码异常");
     return;
   }
   codeUrl.value = resp.data.url;
   codeTicket.value = resp.data.ticket;
+  await TGLogger.Info("[用户登录][扫码][freshQr] 获取二维码成功");
 }
 
 async function cycleGetDataGame(): Promise<void> {
   let res: TGApp.BBS.GameLogin.GetLoginStatusResponse | undefined;
   try {
     res = await passportReq.qrLogin.query(codeTicket.value);
-    console.log(res);
     if (res.retcode !== 0) {
       showSnackbar.error(`[${res.retcode}] ${res.message}`);
       if (res.retcode === -106) {
+        await TGLogger.Warn("[用户登录][扫码][query] 二维码已过期，重新获取");
         await freshQr();
       } else {
+        await TGLogger.Warn(`[用户登录][扫码][query] 获取登录状态失败，retcode=${res.retcode}`);
         if (cycleTimer) clearInterval(cycleTimer);
         cycleTimer = null;
+        qrLoginActive = false;
         model.value = false;
       }
       return;
@@ -117,23 +130,36 @@ async function cycleGetDataGame(): Promise<void> {
   } catch (e) {
     const errMsg = TGHttps.getErrMsg(e);
     showSnackbar.error(`获取登录状态失败：${errMsg}`);
-    await TGLogger.Error(`[TcoGameLogin][cycleGetDataGame] 获取登录状态异常`);
-    await TGLogger.Error(`[TcoGameLogin][cycleGetDataGame] ${e}`);
+    await TGLogger.Error("[用户登录][扫码][query] 获取登录状态异常");
     return;
+  }
+  if (res.data.status !== lastLoggedStatus) {
+    await TGLogger.Info(`[用户登录][扫码][query] 登录状态变更：${res.data.status}`);
+    lastLoggedStatus = res.data.status;
   }
   if (res.data.status === "Created" || res.data.status === "Scanned") return;
   if (res.data.status === "Confirmed") {
     if (cycleTimer) clearInterval(cycleTimer);
     cycleTimer = null;
+    const token = res.data.tokens?.[0]?.token;
+    const userInfo = res.data.user_info;
+    if (!token || !userInfo?.aid || !userInfo.mid) {
+      await TGLogger.Error("[用户登录][扫码][token] 登录凭证交换失败：响应数据不完整");
+      qrLoginActive = false;
+      model.value = false;
+      return;
+    }
     const ck: TGApp.App.Account.Cookie = {
-      account_id: res.data.user_info.aid,
-      ltuid: res.data.user_info.aid,
-      stuid: res.data.user_info.aid,
-      mid: res.data.user_info.mid,
+      account_id: userInfo.aid,
+      ltuid: userInfo.aid,
+      stuid: userInfo.aid,
+      mid: userInfo.mid,
       cookie_token: "",
-      stoken: res.data.tokens[0].token,
+      stoken: token,
       ltoken: "",
     };
+    await TGLogger.Info("[用户登录][扫码][token] 登录凭证交换成功");
+    qrLoginActive = false;
     emits("success", ck);
     model.value = false;
   }
