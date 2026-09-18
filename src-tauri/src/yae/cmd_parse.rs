@@ -15,6 +15,15 @@ use tauri::{AppHandle, Emitter};
 const REQUIRED_PLAYER_PROPERTIES: [u32; 10] =
   [10015, 10016, 10025, 10042, 10022, 10023, 10026, 10053, 10043, 10058];
 
+/// 从流中读取一个小端序 `u16`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `r`: 可读取的输入流。
+///
+/// # 返回
+/// 读取结果，成功返回小端解析后的数值。
 fn read_u16_le<R: Read>(r: &mut R) -> std::io::Result<u16> {
   let mut buf = [0u8; 2];
   match r.read_exact(&mut buf) {
@@ -23,6 +32,15 @@ fn read_u16_le<R: Read>(r: &mut R) -> std::io::Result<u16> {
   }
 }
 
+/// 从流中读取一个小端序 `u32`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `r`: 可读取的输入流。
+///
+/// # 返回
+/// 读取结果，成功返回小端解析后的数值。
 fn read_u32_le<R: Read>(r: &mut R) -> std::io::Result<u32> {
   let mut buf = [0u8; 4];
   match r.read_exact(&mut buf) {
@@ -31,6 +49,15 @@ fn read_u32_le<R: Read>(r: &mut R) -> std::io::Result<u32> {
   }
 }
 
+/// 从流中读取一个小端序 `f64`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `r`: 可读取的输入流。
+///
+/// # 返回
+/// 读取结果，成功返回小端解析后的数值。
 fn read_f64_le<R: Read>(r: &mut R) -> std::io::Result<f64> {
   let mut buf = [0u8; 8];
   match r.read_exact(&mut buf) {
@@ -39,6 +66,16 @@ fn read_f64_le<R: Read>(r: &mut R) -> std::io::Result<f64> {
   }
 }
 
+/// 从流中读取指定长度的字节。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `r`: 可读取的输入流。
+/// - `len`: 要读取的字节数。
+///
+/// # 返回
+/// 读取结果，成功返回字节向量。
 fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> std::io::Result<Vec<u8>> {
   let mut v = vec![0u8; len];
   match r.read_exact(&mut v) {
@@ -47,6 +84,17 @@ fn read_exact_vec<R: Read>(r: &mut R, len: usize) -> std::io::Result<Vec<u8>> {
   }
 }
 
+/// 处理成就通知，解析成就列表并向前端发送 `yae_read` 事件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+/// - `app_handle`: Tauri 应用句柄。
+/// - `uid`: 玩家 UID。
+///
+/// # 返回
+/// 是否成功解析并发送。
 pub fn handle_achievement_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -> bool {
   println!("AchievementNotify");
   match read_u32_le(file) {
@@ -75,6 +123,17 @@ pub fn handle_achievement_notify(file: &mut File, app_handle: &AppHandle, uid: &
   false
 }
 
+/// 处理背包通知，解析物品列表并向前端发送 `yae_read` 事件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+/// - `app_handle`: Tauri 应用句柄。
+/// - `uid`: 玩家 UID。
+///
+/// # 返回
+/// 是否成功解析并发送。
 pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -> bool {
   println!("PlayerStoreNotify");
   // 读取剩余数据
@@ -100,6 +159,17 @@ pub fn handle_store_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -
   false
 }
 
+/// 处理角色通知，解析角色列表并向前端发送 `yae_read` 事件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+/// - `app_handle`: Tauri 应用句柄。
+/// - `uid`: 玩家 UID。
+///
+/// # 返回
+/// 是否成功解析并发送。
 pub fn handle_avatar_notify(file: &mut File, app_handle: &AppHandle, uid: &str) -> bool {
   println!("AvatarDataNotify");
   match read_u32_le(file) {
@@ -124,6 +194,14 @@ pub fn handle_avatar_notify(file: &mut File, app_handle: &AppHandle, uid: &str) 
   false
 }
 
+/// 根据网络包命令 ID 分发到成就、背包或角色通知处理。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+/// - `app_handle`: Tauri 应用句柄。
+/// - `uid`: 玩家 UID。
 pub fn handle_packet_notify(file: &mut File, app_handle: &AppHandle, uid: &str) {
   let handled = match read_u16_le(file) {
     Ok(cmd_id) if cmd_id == read_conf("nativeConfig.achievementCmdId") as u16 => {
@@ -155,6 +233,13 @@ pub fn handle_packet_notify(file: &mut File, app_handle: &AppHandle, uid: &str) 
   let _ = file.write_all(&[u8::from(handled)]);
 }
 
+/// 处理玩家属性通知，将属性类型与数值写入属性映射。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+/// - `prop_map`: 待更新的属性映射。
 pub fn handle_prop_notify(file: &mut File, prop_map: &mut HashMap<u32, f64>) {
   println!("PlayerPropNotify");
   // 读取剩余数据
@@ -177,6 +262,15 @@ pub fn handle_prop_notify(file: &mut File, prop_map: &mut HashMap<u32, f64>) {
   let _ = file.write_all(&[u8::from(handled)]);
 }
 
+/// 向 DLL 写入需要回传的网络包命令 ID 列表。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+///
+/// # 返回
+/// I/O 写入结果。
 pub fn handle_packet_tasks_write(file: &mut File) -> std::io::Result<()> {
   for key in ["achievementCmdId", "storeCmdId", "avatarCmdId"] {
     let cmd_id = read_conf(&format!("nativeConfig.{}", key)) as u32;
@@ -188,6 +282,15 @@ pub fn handle_packet_tasks_write(file: &mut File) -> std::io::Result<()> {
   file.write_all(&u32::MAX.to_le_bytes())
 }
 
+/// 向 DLL 写入需要回传的玩家属性类型列表。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+///
+/// # 返回
+/// I/O 写入结果。
 pub fn handle_prop_tasks_write(file: &mut File) -> std::io::Result<()> {
   for prop_type in REQUIRED_PLAYER_PROPERTIES {
     file.write_all(&prop_type.to_le_bytes())?;
@@ -195,6 +298,12 @@ pub fn handle_prop_tasks_write(file: &mut File) -> std::io::Result<()> {
   file.write_all(&u32::MAX.to_le_bytes())
 }
 
+/// 向 DLL 写入配置的 RVA 偏移值。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
 pub fn handle_rva_write(file: &mut File) {
   let _ = file.write_all(&0x12345678_u32.to_le_bytes());
   for key in [
@@ -212,6 +321,15 @@ pub fn handle_rva_write(file: &mut File) {
   }
 }
 
+/// 汇总玩家属性为常用货币并向前端发送 `yae_read` 事件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `file`: 命名管道文件句柄。
+/// - `app_handle`: Tauri 应用句柄。
+/// - `uid`: 玩家 UID。
+/// - `prop_map`: 已收集的玩家属性映射。
 pub fn handle_prop_list(
   file: &mut File,
   app_handle: &AppHandle,

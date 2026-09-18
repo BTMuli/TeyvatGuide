@@ -4,6 +4,9 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+/// 启用 Windows 每显示器 DPI V2 感知。
+///
+/// @since Beta v0.11.3
 #[cfg(target_os = "windows")]
 fn enable_dpi_v2() {
   use windows_sys::Win32::UI::HiDpi::{
@@ -15,6 +18,9 @@ fn enable_dpi_v2() {
   }
 }
 
+/// 应用入口，初始化 Sentry、DPI 感知并启动 Tauri 运行时。
+///
+/// @since Beta v0.11.3
 fn main() {
   let _guard = sentry::init((
     "https://8d59057c08ff381e1fccf3c9e97c6a6c@o4510617609175040.ingest.de.sentry.io/4510617659506768",

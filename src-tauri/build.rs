@@ -1,6 +1,9 @@
 // 构建文件
 // @since Beta v0.9.1
 
+/// 构建脚本入口，执行 Tauri 构建并在 Windows 上编译本地 HDiffPatch。
+///
+/// @since Beta v0.9.1
 fn main() {
   tauri_build::build();
   if std::env::var("CARGO_CFG_TARGET_OS").ok().as_deref() == Some("windows") {
@@ -8,6 +11,9 @@ fn main() {
   }
 }
 
+/// 使用 cc 编译本地 HDiffPatch C++ 源文件。
+///
+/// @since Beta v0.9.1
 fn compile_hpatch() {
   println!("cargo:rerun-if-changed=native/hpatch/hpatch.cpp");
   println!("cargo:rerun-if-changed=native/hpatch/teyvat_hpatch.cpp");

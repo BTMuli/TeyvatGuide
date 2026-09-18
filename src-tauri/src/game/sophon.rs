@@ -1,5 +1,5 @@
 //! Sophon 游戏构建、补丁元数据与清单解码。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.3
 
 use super::{
   hoyoplay::{BranchDescriptor, network_error, read_limited_json},
@@ -265,6 +265,17 @@ pub async fn get_decoded_patch_build(
   Ok(DecodedPatchBuild { tag: build.tag, manifests })
 }
 
+/// 下载并解码、校验一个主构建 manifest。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `manifest`: 主构建 manifest 信息。
+///
+/// # 返回
+/// - `Ok(DecodedManifest)`: 解码并校验后的 manifest。
+/// - `Err(String)`: 下载、解码或校验失败的错误描述。
 async fn decode_build_manifest(
   client: &Client,
   manifest: BuildManifest,
@@ -290,6 +301,18 @@ async fn decode_build_manifest(
   })
 }
 
+/// 下载并解码、校验一个差分构建 manifest。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `manifest`: 差分构建 manifest 信息。
+/// - `source_tag`: 源版本标签。
+///
+/// # 返回
+/// - `Ok(DecodedPatchManifest)`: 解码并校验后的差分 manifest。
+/// - `Err(String)`: 下载、解码或校验失败的错误描述。
 async fn decode_patch_manifest(
   client: &Client,
   manifest: PatchBuildManifest,
@@ -318,6 +341,17 @@ async fn decode_patch_manifest(
   })
 }
 
+/// 请求指定分支的主构建元数据。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `branch`: 分支描述。
+///
+/// # 返回
+/// - `Ok(BuildResponse)`: 主构建元数据。
+/// - `Err(String)`: 请求或校验失败的错误描述。
 async fn get_build(client: &Client, branch: &BranchDescriptor) -> Result<BuildResponse, String> {
   let mut url = Url::parse(&format!("{API_ORIGIN}/downloader/sophon_chunk/api/getBuild"))
     .map_err(|error| format!("Sophon API 地址无效：{error}"))?;
@@ -338,6 +372,17 @@ async fn get_build(client: &Client, branch: &BranchDescriptor) -> Result<BuildRe
   validate_api_response(response, "Sophon build")
 }
 
+/// 请求指定分支的差分构建元数据。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `branch`: 分支描述。
+///
+/// # 返回
+/// - `Ok(PatchBuildResponse)`: 差分构建元数据。
+/// - `Err(String)`: 请求或校验失败的错误描述。
 async fn get_patch_build(
   client: &Client,
   branch: &BranchDescriptor,
@@ -354,6 +399,17 @@ async fn get_patch_build(
   validate_api_response(response, "Sophon patch build")
 }
 
+/// 校验 API 返回码并取出 `data`。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `response`: API 响应。
+/// - `context`: 错误上下文名称。
+///
+/// # 返回
+/// - `Ok(T)`: 响应数据。
+/// - `Err(String)`: 返回码非 0 或缺少 data 的错误描述。
 fn validate_api_response<T>(response: ApiResponse<T>, context: &str) -> Result<T, String> {
   if response.retcode != 0 {
     return Err(format!("{context}返回错误 {}：{}", response.retcode, response.message));
@@ -361,6 +417,18 @@ fn validate_api_response<T>(response: ApiResponse<T>, context: &str) -> Result<T
   response.data.ok_or_else(|| format!("{context}响应缺少 data"))
 }
 
+/// 下载 manifest 载荷并解压校验。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `identity`: manifest 身份与大小/校验值。
+/// - `download`: 下载地址信息。
+///
+/// # 返回
+/// - `Ok(Vec<u8>)`: 解压并校验后的 manifest 字节。
+/// - `Err(String)`: 下载、解压或校验失败的错误描述。
 async fn download_and_decode_manifest(
   client: &Client,
   identity: &ManifestIdentity,
@@ -391,12 +459,27 @@ async fn download_and_decode_manifest(
   .map_err(|error| format!("等待 Sophon manifest 解压失败：{error}"))?
 }
 
+/// 解压并校验 Sophon manifest 的压缩载荷。
+///
+/// 使用 Zstandard 解码 `compressed`，限制解压后大小不超过
+/// `MAX_UNCOMPRESSED_MANIFEST_BYTES`，再校验解压后长度与 MD5 是否与预期一致。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `compressed`: 经过 Zstandard 压缩的 manifest 原始字节。
+/// - `uncompressed_size`: 预期的解压后字节数。
+/// - `expected_checksum`: 预期的解压后内容 MD5 十六进制字符串。
+///
+/// # 返回
+/// - `Ok(Vec<u8>)`: 通过长度与 MD5 校验的解压后 manifest 字节。
+/// - `Err(String)`: 解码失败、长度不一致或 MD5 校验失败的错误描述。
 fn decode_manifest_payload(
   compressed: Vec<u8>,
   uncompressed_size: u64,
   expected_checksum: &str,
 ) -> Result<Vec<u8>, String> {
-  let mut decoder = zstd::stream::read::Decoder::new(compressed.as_slice())
+  let mut decoder = zstd::stream::read::Decoder::with_buffer(compressed.as_slice())
     .map_err(|error| format!("创建 Zstandard 解码器失败：{error}"))?;
   let mut decoded = Vec::with_capacity(uncompressed_size as usize);
   decoder
@@ -414,6 +497,18 @@ fn decode_manifest_payload(
   Ok(decoded)
 }
 
+/// 按声明大小读取响应字节，防止超限。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `response`: HTTP 响应。
+/// - `expected_size`: 预期字节数。
+/// - `context`: 错误上下文名称。
+///
+/// # 返回
+/// - `Ok(Vec<u8>)`: 读取到的字节。
+/// - `Err(String)`: 请求失败或超限的错误描述。
 async fn read_limited_bytes(
   response: Response,
   expected_size: usize,
@@ -438,6 +533,17 @@ async fn read_limited_bytes(
   Ok(bytes)
 }
 
+/// 使用 manifest 下载字段重建指定资源的下载 URL。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `download`: 下载地址信息。
+/// - `id`: 资源 ID。
+///
+/// # 返回
+/// - `Ok(Url)`: 重建后的 URL。
+/// - `Err(String)`: 地址字段无效的错误描述。
 fn download_url(download: &DownloadInfo, id: &str) -> Result<Url, String> {
   payload_url(&download.url_prefix, &download.url_suffix, id)
 }
@@ -470,6 +576,15 @@ pub(crate) fn payload_url(url_prefix: &str, url_suffix: &str, id: &str) -> Resul
   Ok(base)
 }
 
+/// 判断主机名是否属于受信任的官方下载域名。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `host`: 主机名。
+///
+/// # 返回
+/// 是否为官方域名。
 pub(crate) fn is_official_download_host(host: &str) -> bool {
   let host = host.to_ascii_lowercase();
   ["mihoyo.com", "hoyoverse.com", "hyoverse.com", "yuanshen.com"]
@@ -477,6 +592,16 @@ pub(crate) fn is_official_download_host(host: &str) -> bool {
     .any(|suffix| host == *suffix || host.ends_with(&format!(".{suffix}")))
 }
 
+/// 校验 manifest 下载字段使用的传输方式受支持。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `download`: 下载地址信息。
+///
+/// # 返回
+/// - `Ok(())`: 传输方式受支持。
+/// - `Err(String)`: 不支持的加密或压缩方式的错误描述。
 fn validate_manifest_download(download: &DownloadInfo) -> Result<(), String> {
   if download.encryption != 0 || download.compression != 1 || !download.password.is_empty() {
     return Err(format!(
@@ -490,6 +615,16 @@ fn validate_manifest_download(download: &DownloadInfo) -> Result<(), String> {
   Ok(())
 }
 
+/// 校验资源载荷下载字段使用的传输方式受支持。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `download`: 下载地址信息。
+///
+/// # 返回
+/// - `Ok(())`: 传输方式受支持。
+/// - `Err(String)`: 不支持的加密或压缩方式的错误描述。
 fn validate_payload_download(download: &DownloadInfo) -> Result<(), String> {
   if download.encryption != 0
     || !matches!(download.compression, 0 | 1)
@@ -501,6 +636,16 @@ fn validate_payload_download(download: &DownloadInfo) -> Result<(), String> {
   Ok(())
 }
 
+/// 校验主 manifest 的资源与 chunk 元数据合法性。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `manifest`: 待校验的主 manifest。
+///
+/// # 返回
+/// - `Ok(())`: manifest 合法。
+/// - `Err(String)`: 资源或 chunk 非法的错误描述。
 fn validate_manifest(manifest: &ManifestProto) -> Result<(), String> {
   if manifest.assets.is_empty() || manifest.assets.len() > MAX_ASSETS {
     return Err("Sophon manifest 资源条目数无效".to_string());
@@ -558,6 +703,18 @@ fn validate_manifest(manifest: &ManifestProto) -> Result<(), String> {
   Ok(())
 }
 
+/// 校验差分 manifest 的文件与差分范围元数据合法性。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `manifest`: 待校验的差分 manifest。
+/// - `source_tag`: 源版本标签。
+/// - `diff_download`: 差分下载地址信息。
+///
+/// # 返回
+/// - `Ok(())`: 差分 manifest 合法。
+/// - `Err(String)`: 文件或差分范围非法的错误描述。
 fn validate_patch_manifest(
   manifest: &PatchManifestProto,
   source_tag: &str,
@@ -623,10 +780,31 @@ fn validate_patch_manifest(
   Ok(())
 }
 
+/// 判断资源分类是否为 game 或已选语音包。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `matching_field`: 资源分类名。
+/// - `audio_languages`: 已选语音包。
+///
+/// # 返回
+/// 是否被选中。
 fn category_selected(matching_field: &str, audio_languages: &[String]) -> bool {
   matching_field == "game" || audio_languages.iter().any(|language| language == matching_field)
 }
 
+/// 校验构建返回中已包含 game 与全部已选语音分类。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `matching_fields`: 构建返回的资源分类集合。
+/// - `audio_languages`: 已选语音包。
+///
+/// # 返回
+/// - `Ok(())`: 分类齐全。
+/// - `Err(String)`: 缺少分类的错误描述。
 fn ensure_selected_categories(
   matching_fields: &[&str],
   audio_languages: &[String],
@@ -640,6 +818,16 @@ fn ensure_selected_categories(
   Ok(())
 }
 
+/// 判断字符串是否为指定长度的十六进制值。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `value`: 待判断的字符串。
+/// - `length`: 期望长度。
+///
+/// # 返回
+/// 是否为合法十六进制字符串。
 fn is_hex(value: &str, length: usize) -> bool {
   value.len() == length && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
@@ -654,6 +842,15 @@ pub fn chunk_xxhash64(value: &str) -> Option<u64> {
   u64::from_str_radix(hash, 16).ok()
 }
 
+/// 将 `u64` 从整数或字符串形式反序列化，兼容 API 返回的类型差异。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `deserializer`: serde 反序列化器。
+///
+/// # 返回
+/// serde 反序列化结果。
 fn deserialize_u64<'de, D>(deserializer: D) -> Result<u64, D::Error>
 where
   D: Deserializer<'de>,

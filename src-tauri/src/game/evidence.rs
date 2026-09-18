@@ -46,10 +46,30 @@ pub(crate) fn evidence_dir(task_root: &Path, plan_id: &str) -> PathBuf {
   task_root.join("tasks").join(plan_id).join("install-evidence")
 }
 
+/// 构造主资源证据文件的路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `dir`: 证据目录。
+/// - `index`: 资源游标。
+///
+/// # 返回
+/// 主资源证据文件路径。
 fn asset_evidence_path(dir: &Path, index: usize) -> PathBuf {
   dir.join(format!("a-{index:06}.json"))
 }
 
+/// 构造附加文件证据文件的路径（按路径 SHA-256 前缀命名）。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `dir`: 证据目录。
+/// - `path`: 附加文件的规范相对路径。
+///
+/// # 返回
+/// 附加文件证据文件路径。
 fn additional_evidence_path(dir: &Path, path: &str) -> PathBuf {
   let mut hasher = Sha256::new();
   hasher.update(path.as_bytes());
@@ -113,6 +133,22 @@ pub(crate) fn capture_and_persist_additional_evidence(
   Ok(evidence)
 }
 
+/// 采集单条文件的身份与元数据证据，不读取文件内容。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 当前资源计划。
+/// - `canonical_path`: 规范相对路径。
+/// - `expected_size`: 预期字节数。
+/// - `expected_md5`: 预期 MD5。
+/// - `staging_root`: staging 根目录。
+/// - `output`: 实际输出文件路径。
+/// - `metadata`: 文件元数据。
+///
+/// # 返回
+/// - `Ok(FileEvidence)`: 采集到的证据。
+/// - `Err(String)`: 读取身份或时间失败的错误描述。
 fn capture_evidence(
   plan: &PersistedPlan,
   canonical_path: &str,
@@ -163,6 +199,18 @@ fn persist_evidence(
   Ok(())
 }
 
+/// 持久化附加文件证据。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan`: 当前资源计划。
+/// - `evidence`: 待写入的证据。
+///
+/// # 返回
+/// - `Ok(())`: 证据已写入。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_additional_evidence(
   task_root: &Path,
   plan: &PersistedPlan,
@@ -174,6 +222,17 @@ fn persist_additional_evidence(
   Ok(())
 }
 
+/// 通过临时文件加原子重命名写入证据，并同步文件与目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目标证据文件路径。
+/// - `evidence`: 待写入的证据。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 创建、写入或重命名失败的错误描述。
 fn atomic_write_synced(path: &Path, evidence: &FileEvidence) -> Result<(), String> {
   let parent = path.parent().ok_or_else(|| "证据路径缺少父目录".to_string())?;
   fs::create_dir_all(parent).map_err(|error| format!("创建证据目录失败：{error}"))?;
@@ -205,6 +264,16 @@ fn atomic_write_synced(path: &Path, evidence: &FileEvidence) -> Result<(), Strin
   result
 }
 
+/// 同步证据目录；Windows 下无需额外操作。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `directory`: 待同步的目录。
+///
+/// # 返回
+/// - `Ok(())`: 同步成功。
+/// - `Err(String)`: 同步失败的错误描述（非 Windows）。
 fn sync_directory(directory: &Path) -> Result<(), String> {
   #[cfg(target_os = "windows")]
   {
@@ -348,6 +417,17 @@ fn asset_evidence_matches(
     && file_matches_evidence(staging_root, &evidence).unwrap_or(false)
 }
 
+/// 读取单条证据文件，不存在时返回 `None`。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 证据文件路径。
+///
+/// # 返回
+/// - `Ok(Some(FileEvidence))`: 证据有效。
+/// - `Ok(None)`: 文件不存在。
+/// - `Err(String)`: 文件结构或大小非法的错误描述。
 fn load_evidence_file(path: &Path) -> Result<Option<FileEvidence>, String> {
   if !path_occupied(path)? {
     return Ok(None);

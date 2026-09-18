@@ -527,6 +527,20 @@ where
   Ok(())
 }
 
+/// 准备修复提交事务。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `original`: 原计划。
+/// - `repair_plan`: 修复计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 准备完成。
+/// - `Err(String)`: 准备失败的错误描述。
 fn prepare_repair_transaction(
   original: &PersistedPlan,
   repair_plan: &PersistedPlan,
@@ -564,6 +578,21 @@ fn prepare_repair_transaction(
   Ok(())
 }
 
+/// 提交修复资源。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `repair_plan`: 修复计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 提交失败的错误描述。
 fn commit_repair_resources<F>(
   repair_plan: &PersistedPlan,
   game_root: &Path,
@@ -620,6 +649,23 @@ where
   Ok(())
 }
 
+/// 收尾失败的修复提交。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 原计划。
+/// - `repair_plan`: 修复计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `canceled`: 是否取消。
+/// - `error`: 错误信息。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 收尾完成。
+/// - `Err(String)`: 收尾失败的错误描述。
 fn finish_failed_repair<F>(
   plan: &PersistedPlan,
   repair_plan: &PersistedPlan,
@@ -656,6 +702,19 @@ where
   Err(if canceled { "应用更新已取消".to_string() } else { error })
 }
 
+/// 回滚未完成的修复提交。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `repair_plan`: 修复计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 回滚成功。
+/// - `Err(String)`: 回滚失败的错误描述。
 pub(crate) fn revert_incomplete_repair(
   repair_plan: &PersistedPlan,
   game_root: &Path,
@@ -682,6 +741,18 @@ pub(crate) fn revert_incomplete_repair(
   journal::persist(task_root, journal)
 }
 
+/// 回滚修复提交的资源。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `repair_plan`: 修复计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 回滚成功。
+/// - `Err(String)`: 回滚失败的错误描述。
 fn rollback_repair(
   repair_plan: &PersistedPlan,
   game_root: &Path,
@@ -744,6 +815,15 @@ fn rollback_repair(
   Ok(())
 }
 
+/// 生成修复计划的提交步骤。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 修复计划。
+///
+/// # 返回
+/// 提交步骤列表。
 fn repair_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
   plan
     .assets
@@ -759,6 +839,19 @@ fn repair_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
     .collect()
 }
 
+/// 准备文件提交事务。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 准备完成。
+/// - `Err(String)`: 准备失败的错误描述。
 fn prepare_transaction(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -777,6 +870,17 @@ fn prepare_transaction(
   prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal, true, false)
 }
 
+/// 返回应用的 incoming 暂存目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: incoming 目录。
+/// - `Err(String)`: 创建失败的错误描述。
 pub(crate) fn prepare_apply_assembly(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -795,6 +899,18 @@ pub(crate) fn evaluate_apply_space(
   evaluate_apply_space_with_preassembled(plan, game_root, incoming_preassembled)
 }
 
+/// 判断 incoming 目录是否已预组装。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `task_root`: 任务根目录。
+/// - `incoming_root`: incoming 目录。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否预组装。
+/// - `Err(String)`: 检查失败的错误描述。
 fn incoming_is_preassembled(
   plan: &PersistedPlan,
   task_root: &Path,
@@ -842,6 +958,18 @@ pub(crate) fn remaining_incoming_bytes(
   })
 }
 
+/// 结合预组装状态评估应用空间。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `incoming_preassembled`: 是否预组装。
+///
+/// # 返回
+/// - `Ok(PackageApplySpaceSummary)`: 空间摘要。
+/// - `Err(String)`: 评估失败的错误描述。
 fn evaluate_apply_space_with_preassembled(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -864,6 +992,23 @@ fn evaluate_apply_space_with_preassembled(
   })
 }
 
+/// 准备文件提交事务，生成 backup 与 incoming 布局。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `original`: 原始 config 字节。
+/// - `target`: 目标 config 字节。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `trust_preverified_incoming`: 是否信任预校验 incoming。
+/// - `verify_source`: 是否校验源文件。
+///
+/// # 返回
+/// - `Ok(())`: 准备完成。
+/// - `Err(String)`: 准备失败的错误描述。
 fn prepare_file_transaction(
   commit: &FileCommitPlan,
   original: &[u8],
@@ -914,6 +1059,18 @@ fn prepare_file_transaction(
   Ok(())
 }
 
+/// 预检提交目标状态。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `steps`: 提交步骤。
+/// - `game_root`: 游戏根目录。
+/// - `verify_source`: 是否校验源。
+///
+/// # 返回
+/// - `Ok(())`: 预检通过。
+/// - `Err(String)`: 预检失败的错误描述。
 fn preflight_targets(
   steps: &[CommitStep],
   game_root: &Path,
@@ -943,6 +1100,21 @@ fn preflight_targets(
   Ok(())
 }
 
+/// 提交资源计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 提交失败的错误描述。
 fn commit_resources<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -964,6 +1136,21 @@ where
   )
 }
 
+/// 提交文件资源。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 提交失败的错误描述。
 fn commit_file_resources<F>(
   commit: &FileCommitPlan,
   game_root: &Path,
@@ -1110,6 +1297,22 @@ where
   Ok(())
 }
 
+/// 预检语音源文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `cursor`: 当前游标。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 预检完成。
+/// - `Err(String)`: 预检失败的错误描述。
 fn preflight_audio_sources<F>(
   commit: &FileCommitPlan,
   cursor: usize,
@@ -1137,6 +1340,20 @@ where
   persist_and_emit(task_root, journal, emit)
 }
 
+/// 提交游戏版本号。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 提交失败的错误描述。
 fn commit_version<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1150,6 +1367,20 @@ where
   commit_config(&plan.plan_id, game_root, task_root, journal, emit)
 }
 
+/// 提交 config.ini。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 提交失败的错误描述。
 fn commit_config<F>(
   plan_id: &str,
   game_root: &Path,
@@ -1192,6 +1423,21 @@ where
   persist_and_emit(task_root, journal, emit)
 }
 
+/// 校验已变更文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 校验通过。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_changed_files<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1292,6 +1538,21 @@ where
   Ok(())
 }
 
+/// 校验单个语音资产。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `asset`: 语音资产。
+/// - `asset_index`: 资产游标。
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(u64)`: 资产字节数。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_audio_asset(
   asset: &PlanAsset,
   asset_index: usize,
@@ -1311,6 +1572,19 @@ fn verify_audio_asset(
   Ok(asset.size)
 }
 
+/// 检查库存并上报进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `canceled`: 取消标志。
+/// - `progress`: 进度回调。
+///
+/// # 返回
+/// - `Ok(Vec<InventoryIssue>)`: 库存问题列表。
+/// - `Err(String)`: 检查失败的错误描述。
 fn inspect_inventory_with_progress(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1360,6 +1634,15 @@ fn inspect_inventory_with_progress(
   Ok(issues)
 }
 
+/// 计算库存校验总数与总字节数。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// 总数与字节数。
 fn inventory_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
   (
     plan.inventory.len().saturating_add(plan.delete_files.len()),
@@ -1367,6 +1650,15 @@ fn inventory_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
   )
 }
 
+/// 计算变更校验总数与总字节数。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// 总数与字节数。
 fn changed_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
   (
     plan.assets.len().saturating_add(plan.delete_files.len()),
@@ -1374,6 +1666,21 @@ fn changed_verification_totals(plan: &PersistedPlan) -> (usize, u64) {
   )
 }
 
+/// 检查变更布局并写入日志进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 检查完成。
+/// - `Err(String)`: 检查失败的错误描述。
 fn inspect_changed_layout_with_journal_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1437,6 +1744,23 @@ where
   Ok(())
 }
 
+/// 检查库存并写入日志进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+/// - `completed_offset_count`: 已完成偏移数。
+/// - `completed_offset_bytes`: 已完成偏移字节数。
+///
+/// # 返回
+/// - `Ok(())`: 检查完成。
+/// - `Err(String)`: 检查失败的错误描述。
 fn inspect_inventory_with_journal_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1506,6 +1830,23 @@ where
   Ok(issues)
 }
 
+/// 校验库存并写入日志进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+/// - `completed_offset_count`: 已完成偏移数。
+/// - `completed_offset_bytes`: 已完成偏移字节数。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_inventory_with_journal_progress<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1536,6 +1877,22 @@ where
   issues.first().map_or(Ok(()), |issue| Err(issue.message.clone()))
 }
 
+/// 收尾失败的应用提交。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `canceled`: 是否取消。
+/// - `error`: 错误信息。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 收尾完成。
+/// - `Err(String)`: 收尾失败的错误描述。
 fn finish_failed_apply<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -1571,6 +1928,18 @@ where
   Err(if canceled { "应用更新已取消".to_string() } else { error })
 }
 
+/// 回滚文件事务。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 回滚成功。
+/// - `Err(String)`: 回滚失败的错误描述。
 fn rollback_file_transaction(
   commit: &FileCommitPlan,
   game_root: &Path,
@@ -1579,6 +1948,19 @@ fn rollback_file_transaction(
   rollback_file_transaction_with_progress(commit, game_root, journal, &mut |_, _, _| {})
 }
 
+/// 回滚文件事务并上报进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+/// - `report_progress`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 回滚成功。
+/// - `Err(String)`: 回滚失败的错误描述。
 fn rollback_file_transaction_with_progress(
   commit: &FileCommitPlan,
   game_root: &Path,
@@ -1748,6 +2130,17 @@ fn restore_prep_staged_deletions(
   Ok(())
 }
 
+/// 计算需要回滚的已触碰步骤。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `steps`: 提交步骤。
+/// - `apply`: 提交日志。
+///
+/// # 返回
+/// - `Ok(&[CommitStep])`: 已触碰步骤切片。
+/// - `Err(String)`: 游标溢出的错误描述。
 fn rollback_touched_steps<'a>(
   steps: &'a [CommitStep],
   apply: &ApplyJournal,
@@ -1768,6 +2161,18 @@ fn rollback_touched_steps<'a>(
   Ok(touched)
 }
 
+/// 回滚 config.ini。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 回滚成功。
+/// - `Err(String)`: 回滚失败的错误描述。
 fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   let config = resolve_existing_manifest_file(game_root, "config.ini")?;
   let current = fs::read(&config).map_err(|error| format!("读取 config.ini 失败：{error}"))?;
@@ -1795,6 +2200,15 @@ fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Re
   Ok(())
 }
 
+/// 生成资源计划的提交步骤。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// 提交步骤列表。
 fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
   let mut steps = plan
     .assets
@@ -1823,6 +2237,13 @@ fn commit_steps(plan: &PersistedPlan) -> Vec<CommitStep> {
   steps
 }
 
+/// 重置语音提交进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `journal`: 任务日志。
 fn reset_audio_commit_progress(plan: &PersistedPlan, journal: &mut TaskJournal) {
   if plan.target != PackagePlanTarget::Audio {
     return;
@@ -1836,6 +2257,12 @@ fn reset_audio_commit_progress(plan: &PersistedPlan, journal: &mut TaskJournal) 
     (journal.commit_total_count > 0).then_some("等待提交配音文件".to_string());
 }
 
+/// 将更新提交进度标记为完成。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
 fn mark_update_commit_complete(journal: &mut TaskJournal) {
   if !matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
     return;
@@ -1845,6 +2272,15 @@ fn mark_update_commit_complete(journal: &mut TaskJournal) {
   journal.current_file = journal.commit_current_step.clone();
 }
 
+/// 计算提交步骤摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `steps`: 提交步骤。
+///
+/// # 返回
+/// 摘要字符串。
 fn steps_digest(steps: &[CommitStep]) -> String {
   let mut hasher = Sha256::new();
   for step in steps {
@@ -1865,6 +2301,17 @@ fn steps_digest(steps: &[CommitStep]) -> String {
   hex::encode(hasher.finalize())
 }
 
+/// 校验源文件是否与步骤一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 源文件路径。
+/// - `step`: 提交步骤。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否一致。
+/// - `Err(String)`: 校验失败的错误描述。
 fn source_file_matches(path: &Path, step: &CommitStep) -> Result<bool, String> {
   let size = step.source_size.ok_or_else(|| format!("资源步骤缺少源大小：{}", step.name))?;
   let md5 =
@@ -1872,6 +2319,17 @@ fn source_file_matches(path: &Path, step: &CommitStep) -> Result<bool, String> {
   file_matches(path, size, md5)
 }
 
+/// 校验提交日志与步骤身份一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `steps`: 提交步骤。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不一致的错误描述。
 fn validate_apply_identity(journal: &TaskJournal, steps: &[CommitStep]) -> Result<(), String> {
   let apply = apply(journal)?;
   if apply.steps_digest != steps_digest(steps) || apply.step_count != steps.len() {
@@ -1880,6 +2338,17 @@ fn validate_apply_identity(journal: &TaskJournal, steps: &[CommitStep]) -> Resul
   Ok(())
 }
 
+/// 校验提交日志与计划摘要一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `digest`: 计划摘要。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不一致的错误描述。
 fn validate_plan_digest(journal: &TaskJournal, digest: &str) -> Result<(), String> {
   if apply(journal)?.plan_sha256 != digest {
     return Err("提交日志与完整资源计划不匹配".to_string());
@@ -1887,11 +2356,30 @@ fn validate_plan_digest(journal: &TaskJournal, digest: &str) -> Result<(), Strin
   Ok(())
 }
 
+/// 计算资源计划 SHA-256。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(String)`: 摘要。
+/// - `Err(String)`: 序列化失败的错误描述。
 fn plan_sha256(plan: &PersistedPlan) -> Result<String, String> {
   let bytes = serde_json::to_vec(plan).map_err(|error| format!("序列化资源计划失败：{error}"))?;
   Ok(sha256_bytes(&bytes))
 }
 
+/// 设置修复提交的当前步骤。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `index`: 步骤游标。
+/// - `step`: 提交步骤。
+/// - `phase`: 步骤阶段。
 fn set_repair_active_step(
   journal: &mut TaskJournal,
   index: usize,
@@ -1905,6 +2393,16 @@ fn set_repair_active_step(
   }
 }
 
+/// 返回修复提交日志。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(&ApplyJournal)`: 修复提交日志。
+/// - `Err(String)`: 缺少修复提交日志的错误描述。
 fn repair_apply(journal: &TaskJournal) -> Result<&ApplyJournal, String> {
   journal
     .repair
@@ -1913,6 +2411,16 @@ fn repair_apply(journal: &TaskJournal) -> Result<&ApplyJournal, String> {
     .ok_or_else(|| "资源任务缺少修复提交日志".to_string())
 }
 
+/// 返回可变的修复提交日志。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(&mut ApplyJournal)`: 修复提交日志。
+/// - `Err(String)`: 缺少修复提交日志的错误描述。
 fn repair_apply_mut(journal: &mut TaskJournal) -> Result<&mut ApplyJournal, String> {
   journal
     .repair
@@ -1921,6 +2429,15 @@ fn repair_apply_mut(journal: &mut TaskJournal) -> Result<&mut ApplyJournal, Stri
     .ok_or_else(|| "资源任务缺少修复提交日志".to_string())
 }
 
+/// 设置提交的当前步骤。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `index`: 步骤游标。
+/// - `step`: 提交步骤。
+/// - `phase`: 步骤阶段。
 fn set_active_step(
   journal: &mut TaskJournal,
   index: usize,
@@ -1934,14 +2451,46 @@ fn set_active_step(
   }
 }
 
+/// 返回提交日志。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(&ApplyJournal)`: 提交日志。
+/// - `Err(String)`: 缺少提交日志的错误描述。
 fn apply(journal: &TaskJournal) -> Result<&ApplyJournal, String> {
   journal.apply.as_ref().ok_or_else(|| "资源任务缺少提交日志".to_string())
 }
 
+/// 返回可变的提交日志。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(&mut ApplyJournal)`: 提交日志。
+/// - `Err(String)`: 缺少提交日志的错误描述。
 fn apply_mut(journal: &mut TaskJournal) -> Result<&mut ApplyJournal, String> {
   journal.apply.as_mut().ok_or_else(|| "资源任务缺少提交日志".to_string())
 }
 
+/// 持久化日志并发送进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 成功。
+/// - `Err(String)`: 持久化失败的错误描述。
 fn persist_and_emit<F>(task_root: &Path, journal: &mut TaskJournal, emit: &F) -> Result<(), String>
 where
   F: Fn(&TaskJournal),
@@ -1952,6 +2501,18 @@ where
   Ok(())
 }
 
+/// 创建事务子目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `task_id`: 任务 ID。
+/// - `child`: 子目录名。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 子目录路径。
+/// - `Err(String)`: 创建失败的错误描述。
 fn transaction_subdirectory(
   game_root: &Path,
   task_id: &str,
@@ -1971,6 +2532,19 @@ pub(crate) fn prepare_audio_backup_root(
   transaction_subdirectory(game_root, plan_id, "backup")
 }
 
+/// 复制文件并校验大小与 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+/// - `size`: 预期大小。
+/// - `md5`: 预期 MD5。
+///
+/// # 返回
+/// - `Ok(())`: 复制成功。
+/// - `Err(String)`: 校验或复制失败的错误描述。
 fn copy_verified(source: &Path, target: &Path, size: u64, md5: &str) -> Result<(), String> {
   let partial = sibling_with_suffix(target, ".part")?;
   remove_optional_file(&partial)?;
@@ -1983,6 +2557,17 @@ fn copy_verified(source: &Path, target: &Path, size: u64, md5: &str) -> Result<(
   fs::rename(&partial, target).map_err(|error| format!("提交同卷 incoming 资源失败：{error}"))
 }
 
+/// 普通复制文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 复制成功。
+/// - `Err(String)`: 复制失败的错误描述。
 fn copy_plain(source: &Path, target: &Path) -> Result<(), String> {
   remove_optional_file(target)?;
   let mut source = File::open(source).map_err(|error| format!("打开复制源文件失败：{error}"))?;
@@ -1996,6 +2581,17 @@ fn copy_plain(source: &Path, target: &Path) -> Result<(), String> {
   target_file.sync_all().map_err(|error| format!("同步资源文件失败：{error}"))
 }
 
+/// 写入并校验字节内容。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目标文件。
+/// - `content`: 待写入内容。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn write_verified_bytes(path: &Path, content: &[u8]) -> Result<(), String> {
   remove_optional_file(path)?;
   let mut file = OpenOptions::new()
@@ -2009,6 +2605,18 @@ fn write_verified_bytes(path: &Path, content: &[u8]) -> Result<(), String> {
     .map_err(|error| format!("写入提交配置文件失败：{error}"))
 }
 
+/// 校验文件大小与 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+/// - `size`: 预期大小。
+/// - `md5`: 预期 MD5。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否一致。
+/// - `Err(String)`: 读取失败的错误描述。
 fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
   let metadata = fs::metadata(path).map_err(|error| format!("读取资源文件状态失败：{error}"))?;
   if metadata.len() != size {
@@ -2027,6 +2635,16 @@ fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
   Ok(hex::encode(hasher.finalize()).eq_ignore_ascii_case(md5))
 }
 
+/// 从资源计划构造文件提交计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(FileCommitPlan)`: 文件提交计划。
+/// - `Err(String)`: 摘要计算失败的错误描述。
 fn file_commit_from_plan(plan: &PersistedPlan) -> Result<FileCommitPlan, String> {
   Ok(FileCommitPlan {
     plan_id: plan.plan_id.clone(),
@@ -2035,6 +2653,15 @@ fn file_commit_from_plan(plan: &PersistedPlan) -> Result<FileCommitPlan, String>
   })
 }
 
+/// 从换服请求构造文件提交计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `request`: 换服请求。
+///
+/// # 返回
+/// 文件提交计划。
 fn file_commit_from_switch(request: &SwitchApplyRequest) -> FileCommitPlan {
   FileCommitPlan {
     plan_id: request.plan_id.clone(),
@@ -2054,6 +2681,18 @@ fn file_commit_from_switch(request: &SwitchApplyRequest) -> FileCommitPlan {
   }
 }
 
+/// 校验换服文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `game_root`: 游戏根目录。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 校验通过。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_switch_files(
   commit: &FileCommitPlan,
   game_root: &Path,
@@ -2079,6 +2718,19 @@ fn verify_switch_files(
   Ok(())
 }
 
+/// 校验换服 config.ini。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `channel`: 渠道。
+/// - `sub_channel`: 子渠道。
+/// - `original`: 原始字节。
+///
+/// # 返回
+/// - `Ok(())`: 校验通过。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_switch_config(
   game_root: &Path,
   channel: u32,
@@ -2099,6 +2751,17 @@ fn verify_switch_config(
   Ok(())
 }
 
+/// 读取 config.ini 中 General 段的值。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `content`: config 字节。
+/// - `key`: 键名。
+///
+/// # 返回
+/// - `Ok(Option<String>)`: 值或 `None`。
+/// - `Err(String)`: 解析失败的错误描述。
 fn general_value(content: &[u8], key: &str) -> Result<Option<String>, String> {
   let body = content.strip_prefix(&[0xef, 0xbb, 0xbf]).unwrap_or(content);
   let text = std::str::from_utf8(body).map_err(|_| "config.ini 不是有效 UTF-8".to_string())?;
@@ -2129,6 +2792,22 @@ fn general_value(content: &[u8], key: &str) -> Result<Option<String>, String> {
   Ok(found)
 }
 
+/// 收尾失败的换服提交。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `canceled`: 是否取消。
+/// - `error`: 错误信息。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 收尾完成。
+/// - `Err(String)`: 收尾失败的错误描述。
 fn finish_failed_switch<F>(
   commit: &FileCommitPlan,
   game_root: &Path,
@@ -2166,16 +2845,50 @@ where
   Err(if canceled { "换服已取消".to_string() } else { error })
 }
 
+/// 修改 config 中的游戏版本号。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `original`: 原始字节。
+/// - `target_version`: 目标版本。
+///
+/// # 返回
+/// - `Ok(Vec<u8>)`: 修改后字节。
+/// - `Err(String)`: 解析失败的错误描述。
 fn patch_game_version(original: &[u8], target_version: &str) -> Result<Vec<u8>, String> {
   patch_general_keys(original, &[("game_version", target_version)])
 }
 
+/// 修改 config 中的渠道与子渠道。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `original`: 原始字节。
+/// - `channel`: 渠道。
+/// - `sub_channel`: 子渠道。
+///
+/// # 返回
+/// - `Ok(Vec<u8>)`: 修改后字节。
+/// - `Err(String)`: 解析失败的错误描述。
 fn patch_channel(original: &[u8], channel: u32, sub_channel: u32) -> Result<Vec<u8>, String> {
   let channel = channel.to_string();
   let sub_channel = sub_channel.to_string();
   patch_general_keys(original, &[("channel", &channel), ("sub_channel", &sub_channel)])
 }
 
+/// 修改 config General 段中的多个键。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `original`: 原始字节。
+/// - `updates`: 键值更新列表。
+///
+/// # 返回
+/// - `Ok(Vec<u8>)`: 修改后字节。
+/// - `Err(String)`: 解析失败的错误描述。
 fn patch_general_keys(original: &[u8], updates: &[(&str, &str)]) -> Result<Vec<u8>, String> {
   let (bom, body) = original
     .strip_prefix(&[0xef, 0xbb, 0xbf])
@@ -2233,12 +2946,32 @@ fn patch_general_keys(original: &[u8], updates: &[(&str, &str)]) -> Result<Vec<u
   Ok(output)
 }
 
+/// 计算字节内容 SHA-256。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `content`: 待哈希内容。
+///
+/// # 返回
+/// SHA-256 十六进制字符串。
 fn sha256_bytes(content: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(content);
   hex::encode(hasher.finalize())
 }
 
+/// 生成同目录带后缀的临时路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 原路径。
+/// - `suffix`: 后缀。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 临时路径。
+/// - `Err(String)`: 缺少文件名的错误描述。
 fn sibling_with_suffix(path: &Path, suffix: &str) -> Result<PathBuf, String> {
   let name = path.file_name().ok_or_else(|| "提交路径缺少文件名".to_string())?;
   let mut partial = name.to_os_string();
@@ -2246,6 +2979,16 @@ fn sibling_with_suffix(path: &Path, suffix: &str) -> Result<PathBuf, String> {
   Ok(path.with_file_name(partial))
 }
 
+/// 删除文件，不存在时静默成功。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok(())`: 删除成功或不存在。
+/// - `Err(String)`: 删除失败的错误描述。
 fn remove_optional_file(path: &Path) -> Result<(), String> {
   match fs::remove_file(path) {
     Ok(()) => Ok(()),
@@ -2254,6 +2997,12 @@ fn remove_optional_file(path: &Path) -> Result<(), String> {
   }
 }
 
+/// 递归删除空目录树。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 目录根。
 fn remove_empty_directory_tree(root: &Path) {
   // Windows 上 ReadDir 会锁住当前目录，必须先收集子项并释放句柄，否则空目录也删不掉。
   let children = match fs::read_dir(root) {
@@ -2271,12 +3020,28 @@ fn remove_empty_directory_tree(root: &Path) {
   let _ = fs::remove_dir(root);
 }
 
+/// 清理已知事务文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
 fn cleanup_known_transaction_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
   if let Ok(commit) = file_commit_from_plan(plan) {
     cleanup_file_transaction(&commit, game_root, task_root);
   }
 }
 
+/// 清理文件事务目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 文件提交计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
 fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root: &Path) {
   let Ok(incoming_root) = transaction_subdirectory(game_root, &commit.plan_id, "incoming") else {
     return;
@@ -2323,6 +3088,14 @@ fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root
   remove_empty_directory_tree(&staging_root);
 }
 
+/// 清理修复事务文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
 fn cleanup_repair_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path) {
   let Ok(incoming_root) = transaction_subdirectory(game_root, &plan.plan_id, "repair-incoming")
   else {
@@ -2351,14 +3124,41 @@ fn cleanup_repair_files(plan: &PersistedPlan, game_root: &Path, task_root: &Path
   }
 }
 
+/// 返回修复日志中的资源名列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `_task_root`: 任务根目录（未使用）。
+///
+/// # 返回
+/// 资源名列表。
 fn journal_repair_names(plan: &PersistedPlan, _task_root: &Path) -> Vec<String> {
   plan.inventory.iter().map(|file| file.name.clone()).collect()
 }
 
+/// 检查任务是否已取消。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 未取消。
+/// - `Err(String)`: 已取消。
 fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) { Err("应用更新已取消".to_string()) } else { Ok(()) }
 }
 
+/// 确保游戏进程已停止。
+///
+/// @since Beta v0.12.1
+///
+/// # 返回
+/// - `Ok(())`: 已停止。
+/// - `Err(String)`: 游戏运行中的错误描述。
 fn ensure_game_stopped() -> Result<(), String> {
   if super::package::is_game_running() {
     Err("检测到游戏进程，已停止资源提交并开始安全回滚".to_string())
@@ -2367,6 +3167,17 @@ fn ensure_game_stopped() -> Result<(), String> {
   }
 }
 
+/// Windows 下原子替换 config.ini。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(target_os = "windows")]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   use std::os::windows::ffi::OsStrExt;
@@ -2388,6 +3199,17 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 非 Windows 平台通过 rename 原子替换 config.ini。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子替换 config.ini 失败：{error}"))

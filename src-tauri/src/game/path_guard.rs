@@ -155,6 +155,17 @@ pub(crate) fn prepare_guarded_manifest_directory(
   Ok(current)
 }
 
+/// 创建目录并在已存在时校验其安全性。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待创建的目录。
+/// - `context`: 错误上下文。
+///
+/// # 返回
+/// - `Ok(())`: 目录已创建或已安全存在。
+/// - `Err(String)`: 创建或校验失败的错误描述。
 fn create_manifest_directory(path: &Path, context: &str) -> Result<(), String> {
   match fs::create_dir(path) {
     Ok(()) => Ok(()),
@@ -163,6 +174,16 @@ fn create_manifest_directory(path: &Path, context: &str) -> Result<(), String> {
   }
 }
 
+/// 校验目录路径不是链接或重解析点且确为目录。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待校验的目录路径。
+///
+/// # 返回
+/// - `Ok(())`: 校验通过。
+/// - `Err(String)`: 读取失败或路径不安全的错误描述。
 fn validate_directory(path: &Path) -> Result<(), String> {
   let metadata =
     fs::symlink_metadata(path).map_err(|error| format!("读取 manifest 根目录失败：{error}"))?;
@@ -173,6 +194,16 @@ fn validate_directory(path: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 拒绝符号链接与 Windows 重解析点，防止 manifest 路径逃逸。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `metadata`: 待检查的文件元数据。
+///
+/// # 返回
+/// - `Ok(())`: 路径安全。
+/// - `Err(String)`: 路径包含链接或重解析点的错误描述。
 fn reject_link_or_reparse(metadata: &fs::Metadata) -> Result<(), String> {
   if metadata.file_type().is_symlink() {
     return Err("manifest 路径不能包含符号链接".to_string());

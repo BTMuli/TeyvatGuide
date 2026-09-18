@@ -140,6 +140,9 @@ pub fn inject_dll(pi: &PROCESS_INFORMATION, dll_path: &str) {
 
 struct Snapshot(HANDLE);
 impl Drop for Snapshot {
+  /// 释放模块快照句柄。
+  ///
+  /// @since Beta v0.9.2
   fn drop(&mut self) {
     unsafe {
       if self.0 != INVALID_HANDLE_VALUE {
@@ -149,6 +152,15 @@ impl Drop for Snapshot {
   }
 }
 
+/// 为目标进程创建模块快照，`ERROR_BAD_LENGTH` 时自动重试。
+///
+/// @since Beta v0.9.2
+///
+/// # 参数
+/// - `pid`: 目标进程 ID。
+///
+/// # 返回
+/// 成功时返回快照，失败或无法创建时返回 `None`。
 fn create_snapshot(pid: u32) -> Option<Snapshot> {
   loop {
     unsafe {
@@ -171,6 +183,16 @@ fn create_snapshot(pid: u32) -> Option<Snapshot> {
   }
 }
 
+/// 在目标进程的已加载模块中查找指定 DLL 的基址。
+///
+/// @since Beta v0.9.2
+///
+/// # 参数
+/// - `pid`: 目标进程 ID。
+/// - `dll_name`: 目标 DLL 文件名。
+///
+/// # 返回
+/// 找到时返回模块基址，未找到返回 `None`。
 pub fn find_module_base(pid: u32, dll_name: &str) -> Option<usize> {
   unsafe {
     let snapshot = match create_snapshot(pid) {

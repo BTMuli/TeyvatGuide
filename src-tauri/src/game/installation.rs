@@ -19,6 +19,15 @@ pub(crate) const AUDIO_PACKAGES: [(&str, &str); 4] = [
   ("Audio_Korean_pkg_version", "ko-kr"),
 ];
 
+/// 根据语音包标识返回其在安装清单中使用的注册表标记名。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `language`: 语音包标识（如 `zh-cn`）。
+///
+/// # 返回
+/// 匹配到的标记名，未匹配时返回 `None`。
 pub(crate) fn audio_marker(language: &str) -> Option<&'static str> {
   AUDIO_PACKAGES
     .iter()

@@ -63,6 +63,15 @@ struct VerifySession {
 }
 
 impl VerifySession {
+  /// 生成当前校验会话的前端摘要。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `run_elapsed`: 本次运行已耗时。
+  ///
+  /// # 返回
+  /// 校验会话摘要。
   fn summary(&self, run_elapsed: Duration) -> PackageVerifySummary {
     let current_ms = u64::try_from(run_elapsed.as_millis()).unwrap_or(u64::MAX);
     let total_elapsed_ms = self.elapsed_ms.max(current_ms);
@@ -108,15 +117,41 @@ pub(crate) struct VerifyRuntime {
 }
 
 impl VerifyRuntime {
+  /// 创建空的校验运行时。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 新的校验运行时。
   pub(crate) fn new() -> Self {
     Self { active: Mutex::new(std::collections::HashMap::new()) }
   }
 
+  /// 判断指定安装是否正在校验。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `installation_id`: 安装 ID。
+  ///
+  /// # 返回
+  /// - `Ok(bool)`: 是否正在运行。
+  /// - `Err(String)`: 锁损坏的错误描述。
   pub(crate) fn is_running(&self, installation_id: &str) -> Result<bool, String> {
     let active = self.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
     Ok(active.contains_key(installation_id))
   }
 
+  /// 请求取消指定安装的校验。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `installation_id`: 安装 ID。
+  ///
+  /// # 返回
+  /// - `Ok(())`: 已请求取消。
+  /// - `Err(String)`: 无运行中任务或锁损坏的错误描述。
   pub(crate) fn cancel(&self, installation_id: &str) -> Result<(), String> {
     let active = self.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
     let task =
@@ -125,6 +160,17 @@ impl VerifyRuntime {
     Ok(())
   }
 
+  /// 清除指定安装的校验会话。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `task_root`: 任务根目录。
+  /// - `installation_id`: 安装 ID。
+  ///
+  /// # 返回
+  /// - `Ok(())`: 会话已删除。
+  /// - `Err(String)`: 删除失败的错误描述。
   pub(crate) fn clear(&self, task_root: &Path, installation_id: &str) -> Result<(), String> {
     let active_task = {
       let active = self.active.lock().map_err(|_| "完整性校验锁已损坏".to_string())?;
@@ -141,6 +187,17 @@ impl VerifyRuntime {
     delete_session(task_root, installation_id)
   }
 
+  /// 返回指定安装的校验会话摘要。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `task_root`: 任务根目录。
+  /// - `installation_id`: 安装 ID。
+  ///
+  /// # 返回
+  /// - `Ok(Option<PackageVerifySummary>)`: 会话摘要或 `None`。
+  /// - `Err(String)`: 读取失败的错误描述。
   pub(crate) fn status(
     &self,
     task_root: &Path,
@@ -157,6 +214,21 @@ impl VerifyRuntime {
   }
 }
 
+/// 启动或复用指定安装的完整性校验任务。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `runtime`: 校验运行时。
+/// - `app_handle`: 应用句柄。
+/// - `task_root`: 任务根目录。
+/// - `installation`: 游戏安装信息。
+/// - `branches`: 游戏分支信息。
+/// - `reservation`: 任务保留。
+///
+/// # 返回
+/// - `Ok(PackageVerifySummary)`: 校验摘要。
+/// - `Err(String)`: 启动失败的错误描述。
 pub(crate) fn start_verify(
   runtime: &Arc<VerifyRuntime>,
   app_handle: AppHandle,
@@ -213,6 +285,17 @@ pub(crate) fn start_verify(
   Ok(session.summary(Duration::ZERO))
 }
 
+/// 恢复已有会话或创建新的待扫描会话。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation`: 游戏安装信息。
+///
+/// # 返回
+/// - `Ok(VerifySession)`: 初始会话。
+/// - `Err(String)`: 读取或创建失败的错误描述。
 fn initial_session(
   task_root: &Path,
   installation: &GameInstallation,
@@ -236,6 +319,16 @@ fn initial_session(
   }
 }
 
+/// 创建全新的待扫描校验会话。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installation`: 游戏安装信息。
+///
+/// # 返回
+/// - `Ok(VerifySession)`: 新会话。
+/// - `Err(String)`: 版本未知的错误描述。
 fn new_pending_session(installation: &GameInstallation) -> Result<VerifySession, String> {
   let version = installation
     .version
@@ -267,6 +360,18 @@ fn new_pending_session(installation: &GameInstallation) -> Result<VerifySession,
   })
 }
 
+/// 执行校验主流程并处理失败收尾。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `task_root`: 任务根目录。
+/// - `installation`: 游戏安装信息。
+/// - `branches`: 游戏分支信息。
+/// - `shared`: 共享会话。
+/// - `canceled`: 取消标志。
+/// - `dropped`: 丢弃标志。
 async fn run_verify(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -310,6 +415,22 @@ async fn run_verify(
   }
 }
 
+/// 准备校验目标并执行扫描。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `task_root`: 任务根目录。
+/// - `installation`: 游戏安装信息。
+/// - `branches`: 游戏分支信息。
+/// - `shared`: 共享会话。
+/// - `canceled`: 取消标志。
+/// - `dropped`: 丢弃标志。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 准备或扫描失败的错误描述。
 async fn prepare_and_scan(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -430,6 +551,22 @@ async fn prepare_and_scan(
   finish_completed(shared, task_root, app_handle, mismatched, plan, dropped)
 }
 
+/// 扫描库存文件，按批次哈希并更新进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `task_root`: 任务根目录。
+/// - `game_root`: 游戏根目录。
+/// - `inventory`: 库存文件列表。
+/// - `shared`: 共享会话。
+/// - `canceled`: 取消标志。
+/// - `dropped`: 丢弃标志。
+///
+/// # 返回
+/// - `Ok(Vec<PlanFile>)`: 不匹配文件列表。
+/// - `Err(String)`: 扫描失败的错误描述。
 fn scan_inventory(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -532,6 +669,20 @@ fn scan_inventory(
   Ok(mismatched)
 }
 
+/// 并发哈希一批文件并返回不匹配文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `files`: 文件批次。
+/// - `hashed_bytes`: 已哈希字节计数。
+/// - `current_file`: 当前文件。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(Vec<PlanFile>)`: 不匹配文件列表。
+/// - `Err(String)`: 哈希失败的错误描述。
 fn hash_batch(
   game_root: &Path,
   files: &[PlanFile],
@@ -591,6 +742,19 @@ fn hash_batch(
   Ok(list)
 }
 
+/// 检查单个库存文件是否与清单一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `file`: 库存文件。
+/// - `hashed_bytes`: 已哈希字节计数。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否一致。
+/// - `Err(String)`: 路径解析失败的错误描述。
 fn inspect_file(
   game_root: &Path,
   file: &PlanFile,
@@ -606,6 +770,19 @@ fn inspect_file(
   }
 }
 
+/// 哈希已存在文件并校验大小与 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+/// - `file`: 库存文件。
+/// - `hashed_bytes`: 已哈希字节计数。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否一致。
+/// - `Err(String)`: 读取失败的错误描述。
 fn hash_existing(
   path: &Path,
   file: &PlanFile,
@@ -640,6 +817,16 @@ fn hash_existing(
   Ok(hex::encode(hasher.finalize()).eq_ignore_ascii_case(&file.md5))
 }
 
+/// 以顺序扫描提示打开文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok(File)`: 打开的文件。
+/// - `Err(String)`: 打开失败的错误描述。
 fn open_sequential(path: &Path) -> Result<File, String> {
   let mut options = OpenOptions::new();
   options.read(true);
@@ -651,6 +838,12 @@ fn open_sequential(path: &Path) -> Result<File, String> {
   options.open(path).map_err(|error| format!("打开资源文件失败：{error}"))
 }
 
+/// 计算校验哈希并发数。
+///
+/// @since Beta v0.12.1
+///
+/// # 返回
+/// 限制范围内的并发数。
 fn verify_concurrency() -> usize {
   std::thread::available_parallelism()
     .map(|value| value.get())
@@ -658,6 +851,23 @@ fn verify_concurrency() -> usize {
     .clamp(MIN_CONCURRENCY, MAX_CONCURRENCY)
 }
 
+/// 刷新会话进度与不匹配列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `shared`: 共享会话。
+/// - `cursor`: 当前游标。
+/// - `hashed_bytes`: 已哈希字节数。
+/// - `mismatched`: 不匹配文件列表。
+/// - `current_file`: 当前文件。
+/// - `hashed_at_start`: 起始已哈希字节数。
+/// - `baseline_elapsed`: 基线耗时。
+/// - `run_started`: 本次运行起始时间。
+///
+/// # 返回
+/// - `Ok(())`: 刷新成功。
+/// - `Err(String)`: 锁损坏的错误描述。
 fn refresh_session(
   shared: &Arc<Mutex<VerifySession>>,
   cursor: usize,
@@ -683,6 +893,21 @@ fn refresh_session(
   Ok(())
 }
 
+/// 更新会话进度统计。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `shared`: 共享会话。
+/// - `hashed_bytes`: 已哈希字节数。
+/// - `current_file`: 当前文件。
+/// - `hashed_at_start`: 起始已哈希字节数。
+/// - `baseline_elapsed`: 基线耗时。
+/// - `run_started`: 本次运行起始时间。
+///
+/// # 返回
+/// - `Ok(())`: 更新成功。
+/// - `Err(String)`: 锁损坏的错误描述。
 fn touch_progress(
   shared: &Arc<Mutex<VerifySession>>,
   hashed_bytes: u64,
@@ -703,6 +928,17 @@ fn touch_progress(
   Ok(())
 }
 
+/// 将本次运行进度写入会话。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `session`: 待更新会话。
+/// - `hashed_bytes`: 已哈希字节数。
+/// - `current_file`: 当前文件。
+/// - `hashed_at_start`: 起始已哈希字节数。
+/// - `baseline_elapsed`: 基线耗时。
+/// - `run_started`: 本次运行起始时间。
 fn apply_progress(
   session: &mut VerifySession,
   hashed_bytes: u64,
@@ -726,6 +962,18 @@ fn apply_progress(
   session.touch();
 }
 
+/// 持久化当前会话，已丢弃时删除会话。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `shared`: 共享会话。
+/// - `task_root`: 任务根目录。
+/// - `dropped`: 丢弃标志。
+///
+/// # 返回
+/// - `Ok(())`: 持久化或删除成功。
+/// - `Err(String)`: 失败的错误描述。
 fn persist_current(
   shared: &Arc<Mutex<VerifySession>>,
   task_root: &Path,
@@ -738,6 +986,19 @@ fn persist_current(
   persist_session(task_root, &session)
 }
 
+/// 向前端发送当前校验进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `shared`: 共享会话。
+/// - `run_started`: 本次运行起始时间。
+/// - `dropped`: 丢弃标志。
+///
+/// # 返回
+/// - `Ok(())`: 发送完成。
+/// - `Err(String)`: 锁损坏的错误描述。
 fn emit_current(
   app_handle: &AppHandle,
   shared: &Arc<Mutex<VerifySession>>,
@@ -752,6 +1013,19 @@ fn emit_current(
   Ok(())
 }
 
+/// 将会话标记为已取消并持久化、上报。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `shared`: 共享会话。
+/// - `task_root`: 任务根目录。
+/// - `app_handle`: 应用句柄。
+/// - `dropped`: 丢弃标志。
+///
+/// # 返回
+/// - `Ok(())`: 收尾完成。
+/// - `Err(String)`: 失败的错误描述。
 fn finish_canceled(
   shared: &Arc<Mutex<VerifySession>>,
   task_root: &Path,
@@ -773,6 +1047,21 @@ fn finish_canceled(
   Ok(())
 }
 
+/// 将会话标记为已完成并写入修复计划、持久化、上报。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `shared`: 共享会话。
+/// - `task_root`: 任务根目录。
+/// - `app_handle`: 应用句柄。
+/// - `mismatched`: 不匹配文件列表。
+/// - `plan`: 可选的修复计划摘要。
+/// - `dropped`: 丢弃标志。
+///
+/// # 返回
+/// - `Ok(())`: 收尾完成。
+/// - `Err(String)`: 失败的错误描述。
 fn finish_completed(
   shared: &Arc<Mutex<VerifySession>>,
   task_root: &Path,
@@ -802,19 +1091,53 @@ fn finish_completed(
 }
 
 impl VerifySession {
+  /// 更新时间戳为当前时间。
+  ///
+  /// @since Beta v0.12.1
   fn touch(&mut self) {
     self.updated_at = Utc::now().to_rfc3339();
   }
 }
 
+/// 返回校验会话目录路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 安装 ID。
+///
+/// # 返回
+/// 会话目录路径。
 fn session_dir(task_root: &Path, installation_id: &str) -> PathBuf {
   task_root.join("verify").join(installation_id)
 }
 
+/// 返回校验会话文件路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 安装 ID。
+///
+/// # 返回
+/// 会话文件路径。
 fn session_path(task_root: &Path, installation_id: &str) -> PathBuf {
   session_dir(task_root, installation_id).join("session.json")
 }
 
+/// 删除指定安装的校验会话。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 安装 ID。
+///
+/// # 返回
+/// - `Ok(())`: 删除成功。
+/// - `Err(String)`: 删除失败的错误描述。
 fn delete_session(task_root: &Path, installation_id: &str) -> Result<(), String> {
   let path = session_path(task_root, installation_id);
   match fs::remove_file(&path) {
@@ -826,6 +1149,17 @@ fn delete_session(task_root: &Path, installation_id: &str) -> Result<(), String>
   Ok(())
 }
 
+/// 读取校验会话，不存在时返回 `None`。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 安装 ID。
+///
+/// # 返回
+/// - `Ok(Option<VerifySession>)`: 会话或 `None`。
+/// - `Err(String)`: 会话无效或读取失败的错误描述。
 fn load_session(task_root: &Path, installation_id: &str) -> Result<Option<VerifySession>, String> {
   let path = session_path(task_root, installation_id);
   match fs::read(&path) {
@@ -847,6 +1181,17 @@ fn load_session(task_root: &Path, installation_id: &str) -> Result<Option<Verify
   }
 }
 
+/// 持久化校验会话。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `session`: 校验会话。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 序列化或写入失败的错误描述。
 fn persist_session(task_root: &Path, session: &VerifySession) -> Result<(), String> {
   let directory = session_dir(task_root, &session.installation_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建完整性校验会话目录失败：{error}"))?;
@@ -875,6 +1220,17 @@ fn persist_session(task_root: &Path, session: &VerifySession) -> Result<(), Stri
   atomic_replace(&temporary, &target)
 }
 
+/// Windows 下原子替换会话文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(target_os = "windows")]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   use std::os::windows::ffi::OsStrExt;
@@ -896,11 +1252,29 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 非 Windows 平台通过 rename 原子替换会话文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("提交完整性校验会话失败：{error}"))
 }
 
+/// 向前端发送完整性校验进度事件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `summary`: 校验摘要。
 fn emit_verify(app_handle: &AppHandle, summary: &PackageVerifySummary) {
   if let Err(error) = app_handle.emit("game-package://verify", summary) {
     log::warn!("[game-package] 发送完整性校验进度失败：{error}");

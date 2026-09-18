@@ -25,6 +25,17 @@ pub(crate) fn status(task_root: &Path) -> Result<PackageCacheSummary, String> {
   status_with_journals(task_root, &journals)
 }
 
+/// 基于任务日志计算缓存占用与可回收空间。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journals`: 任务日志列表。
+///
+/// # 返回
+/// - `Ok(PackageCacheSummary)`: 缓存统计摘要。
+/// - `Err(String)`: 统计失败的错误描述。
 fn status_with_journals(
   task_root: &Path,
   journals: &[journal::TaskJournal],
@@ -95,6 +106,16 @@ where
   status_with_journals(task_root, &journals)
 }
 
+/// 递归统计目录内普通文件数量。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待统计的目录。
+///
+/// # 返回
+/// - `Ok(usize)`: 文件数量。
+/// - `Err(String)`: 读取目录失败的错误描述。
 fn count_dir_files(path: &Path) -> Result<usize, String> {
   let mut count = 0_usize;
   if !path.exists() {
@@ -129,6 +150,18 @@ fn count_dir_files(path: &Path) -> Result<usize, String> {
   Ok(count)
 }
 
+/// 递归删除目录中未被保护引用的普通缓存文件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待清理的缓存目录。
+/// - `protected`: 受保护的缓存文件名集合。
+/// - `on_file`: 每处理一个文件时调用的回调，参数为文件名。
+///
+/// # 返回
+/// - `Ok(())`: 清理完成。
+/// - `Err(String)`: 读取或删除失败的错误描述。
 fn clear_dir(
   path: &Path,
   protected: &HashSet<String>,
@@ -179,6 +212,17 @@ struct CacheDirectorySummary {
   protected_count: usize,
 }
 
+/// 统计目录内普通文件的总数、总字节数与被保护文件的数量与字节数。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待统计的目录。
+/// - `protected`: 受保护的缓存文件名集合。
+///
+/// # 返回
+/// - `Ok(CacheDirectorySummary)`: 目录统计结果。
+/// - `Err(String)`: 读取目录失败的错误描述。
 fn summarize_dir(
   path: &Path,
   protected: &HashSet<String>,

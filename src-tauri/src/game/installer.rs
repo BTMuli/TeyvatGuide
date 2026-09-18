@@ -74,16 +74,34 @@ pub(crate) struct InstallValidationTiming {
 }
 
 impl InstallValidationTiming {
+  /// 记录一次 staging 树扫描。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `elapsed`: 耗时。
   fn record_staging_tree(&mut self, elapsed: Duration) {
     self.staging_tree_count = self.staging_tree_count.saturating_add(1);
     self.staging_tree_micros = self.staging_tree_micros.saturating_add(duration_micros(elapsed));
   }
 
+  /// 记录一次发布后校验。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `elapsed`: 耗时。
   fn record_post_publish(&mut self, elapsed: Duration) {
     self.post_publish_count = self.post_publish_count.saturating_add(1);
     self.post_publish_micros = self.post_publish_micros.saturating_add(duration_micros(elapsed));
   }
 
+  /// 记录一次日志持久化样本。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `sample`: 日志持久化计时。
   fn record_journal(&mut self, sample: &super::journal::JournalPersistTiming) {
     self.journal_attempt_count = self.journal_attempt_count.saturating_add(1);
     self.journal_write_count = self.journal_write_count.saturating_add(u64::from(sample.persisted));
@@ -106,10 +124,31 @@ impl InstallValidationTiming {
   }
 }
 
+/// 将时长转换为微秒并截断到 `u64` 上限。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `duration`: 时长。
+///
+/// # 返回
+/// 微秒数。
 fn duration_micros(duration: Duration) -> u64 {
   duration.as_micros().min(u128::from(u64::MAX)) as u64
 }
 
+/// 持久化安装日志并记录计时。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `timing`: 校验计时。
+///
+/// # 返回
+/// - `Ok(())`: 成功。
+/// - `Err(String)`: 失败的错误描述。
 fn persist_install_journal(
   task_root: &Path,
   journal: &TaskJournal,
@@ -121,6 +160,18 @@ fn persist_install_journal(
   result
 }
 
+/// 持久化安装进度并记录计时。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `timing`: 校验计时。
+///
+/// # 返回
+/// - `Ok(())`: 成功。
+/// - `Err(String)`: 失败的错误描述。
 fn persist_install_progress(
   task_root: &Path,
   journal: &TaskJournal,
@@ -239,6 +290,21 @@ struct InstallMarker {
   evidence_sha256: String,
 }
 
+/// 创建全新安装草稿。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `install_root_input`: 安装目录输入。
+/// - `scheme`: 渠道方案。
+/// - `audio_languages`: 语音包。
+/// - `machine_uid`: 设备标识。
+/// - `protected_roots`: 受保护根目录。
+///
+/// # 返回
+/// - `Ok(InstallDraftSummary)`: 草稿摘要。
+/// - `Err(String)`: 创建失败的错误描述。
 pub(crate) fn create_draft(
   task_root: &Path,
   install_root_input: &str,
@@ -361,6 +427,19 @@ pub(crate) fn referenced_plan_ids(task_root: &Path) -> Result<HashSet<String>, S
   Ok(plan_ids)
 }
 
+/// 检查安装位置。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `install_root_input`: 安装目录输入。
+/// - `machine_uid`: 设备标识。
+/// - `protected_roots`: 受保护根目录。
+/// - `registered_roots`: 已登记根目录。
+///
+/// # 返回
+/// - `Ok(InstallLocationSummary)`: 位置摘要。
+/// - `Err(String)`: 检查失败的错误描述。
 pub(crate) fn inspect_install_location(
   install_root_input: &str,
   machine_uid: &str,
@@ -403,6 +482,17 @@ pub(crate) fn inspect_install_location(
   Ok(InstallLocationSummary { kind: InstallLocationKind::Empty, installation: None, message: None })
 }
 
+/// 读取并校验安装草稿。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+///
+/// # 返回
+/// - `Ok(InstallDraft)`: 草稿。
+/// - `Err(String)`: 读取或校验失败的错误描述。
 pub(crate) fn load_draft(task_root: &Path, draft_id: &str) -> Result<InstallDraft, String> {
   if Uuid::parse_str(draft_id).is_err() {
     return Err("安装草稿 ID 无效".to_string());
@@ -423,12 +513,34 @@ pub(crate) fn load_draft(task_root: &Path, draft_id: &str) -> Result<InstallDraf
   Ok(draft)
 }
 
+/// 持久化安装草稿。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 pub(crate) fn persist_draft(task_root: &Path, draft: &InstallDraft) -> Result<(), String> {
   let lock = draft_mutation_lock(&draft_lock_key(task_root, &draft.draft_id))?;
   let _guard = lock.lock().map_err(|_| "安装草稿锁已损坏".to_string())?;
   persist_draft_unlocked(task_root, draft)
 }
 
+/// 无锁写入安装草稿。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_draft_unlocked(task_root: &Path, draft: &InstallDraft) -> Result<(), String> {
   validate_draft(draft, &draft.draft_id)?;
   let directory = task_root.join("install-drafts");
@@ -446,6 +558,18 @@ fn persist_draft_unlocked(task_root: &Path, draft: &InstallDraft) -> Result<(), 
   atomic_write(&draft_path(task_root, &draft.draft_id), &content)
 }
 
+/// 将计划关联到草稿。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(InstallDraft)`: 更新后的草稿。
+/// - `Err(String)`: 更新失败的错误描述。
 pub(crate) fn mark_draft_plan(
   task_root: &Path,
   draft_id: &str,
@@ -473,6 +597,18 @@ pub(crate) fn mark_draft_plan(
   Ok(draft)
 }
 
+/// 设置草稿状态。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+/// - `state`: 目标状态。
+///
+/// # 返回
+/// - `Ok(InstallDraft)`: 更新后的草稿。
+/// - `Err(String)`: 更新失败的错误描述。
 pub(crate) fn set_draft_state(
   task_root: &Path,
   draft_id: &str,
@@ -483,6 +619,18 @@ pub(crate) fn set_draft_state(
   set_draft_state_unlocked(task_root, draft_id, state)
 }
 
+/// 无锁设置草稿状态。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+/// - `state`: 目标状态。
+///
+/// # 返回
+/// - `Ok(InstallDraft)`: 更新后的草稿。
+/// - `Err(String)`: 更新失败的错误描述。
 fn set_draft_state_unlocked(
   task_root: &Path,
   draft_id: &str,
@@ -500,6 +648,16 @@ fn set_draft_state_unlocked(
   Ok(draft)
 }
 
+/// 根据草稿构造安装覆盖层。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `draft`: 安装草稿。
+/// - `target_tag`: 目标版本。
+///
+/// # 返回
+/// 安装覆盖层。
 pub(crate) fn overlay_for_draft(draft: &InstallDraft, target_tag: &str) -> InstallOverlay {
   let spool_root = Path::new(&draft.library_root).join(format!(
     ".teyvatguide-spool-{}-{}",
@@ -527,6 +685,16 @@ pub(crate) fn overlay_for_draft(draft: &InstallDraft, target_tag: &str) -> Insta
   }
 }
 
+/// 生成游戏 config.ini 内容。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `scheme`: 渠道方案。
+/// - `target_tag`: 目标版本。
+///
+/// # 返回
+/// config.ini 文本。
 pub(crate) fn build_config(scheme: SchemeId, target_tag: &str) -> String {
   let (channel, sub_channel) = canonical_channel(scheme);
   let cps = match scheme {
@@ -538,6 +706,22 @@ pub(crate) fn build_config(scheme: SchemeId, target_tag: &str) -> String {
   )
 }
 
+/// 执行全新安装。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `task_root`: 任务根目录。
+/// - `machine_uid`: 设备标识。
+/// - `journal`: 任务日志。
+/// - `canceled`: 取消标志。
+/// - `emit`: 进度回调。
+/// - `timing`: 校验计时。
+///
+/// # 返回
+/// - `Ok(GameInstallation)`: 安装结果。
+/// - `Err(String)`: 安装失败的错误描述。
 pub(crate) fn execute_install(
   plan: &PersistedPlan,
   task_root: &Path,
@@ -865,6 +1049,17 @@ pub(crate) fn execute_install(
   Ok(installation)
 }
 
+/// 返回安装 staging 目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `task_root`: 任务根目录。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: staging 目录。
+/// - `Err(String)`: 创建失败的错误描述。
 pub(crate) fn prepare_install_assembly(
   plan: &PersistedPlan,
   task_root: &Path,
@@ -885,6 +1080,17 @@ pub(crate) fn prepare_install_assembly(
   Ok(staging_root)
 }
 
+/// 注册安装到数据库。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `pool`: SQLite 连接池。
+/// - `installation`: 安装信息。
+///
+/// # 返回
+/// - `Ok(())`: 注册成功。
+/// - `Err(String)`: 注册失败的错误描述。
 pub(crate) async fn register_installation(
   pool: &SqlitePool,
   installation: &GameInstallation,
@@ -934,6 +1140,18 @@ pub(crate) async fn register_installation(
   Ok(())
 }
 
+/// 校验已发布安装。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan`: 资源计划。
+/// - `machine_uid`: 设备标识。
+///
+/// # 返回
+/// - `Ok(GameInstallation)`: 校验结果。
+/// - `Err(String)`: 校验失败的错误描述。
 pub(crate) fn verify_published_installation(
   task_root: &Path,
   plan: &PersistedPlan,
@@ -1266,6 +1484,12 @@ pub(crate) fn abandon_published_draft(
 }
 
 impl InstallDraft {
+  /// 生成草稿摘要。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 草稿摘要。
   fn summary(&self) -> InstallDraftSummary {
     InstallDraftSummary {
       draft_id: self.draft_id.clone(),
@@ -1280,6 +1504,17 @@ impl InstallDraft {
   }
 }
 
+/// 校验并规范化安装根目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `input`: 输入路径。
+/// - `protected_roots`: 受保护根目录。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 规范化路径。
+/// - `Err(String)`: 无效路径的错误描述。
 fn validate_install_root(input: &str, protected_roots: &[PathBuf]) -> Result<PathBuf, String> {
   if input.trim().is_empty() || input.contains('\0') {
     return Err("安装位置无效".to_string());
@@ -1324,6 +1559,16 @@ fn validate_install_root(input: &str, protected_roots: &[PathBuf]) -> Result<Pat
   Ok(library_root)
 }
 
+/// 判断目录是否为空。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目录路径。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否为空。
+/// - `Err(String)`: 读取失败的错误描述。
 fn is_directory_empty(path: &Path) -> Result<bool, String> {
   let mut entries = fs::read_dir(path).map_err(|error| format!("读取安装目录失败：{error}"))?;
   match entries.next() {
@@ -1333,6 +1578,17 @@ fn is_directory_empty(path: &Path) -> Result<bool, String> {
   }
 }
 
+/// 校验安装草稿字段。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `draft`: 安装草稿。
+/// - `draft_id`: 草稿 ID。
+///
+/// # 返回
+/// - `Ok(())`: 合法。
+/// - `Err(String)`: 非法的错误描述。
 fn validate_draft(draft: &InstallDraft, draft_id: &str) -> Result<(), String> {
   if draft.schema_version != DRAFT_SCHEMA_VERSION {
     return Err(format!(
@@ -1383,6 +1639,15 @@ fn validate_draft(draft: &InstallDraft, draft_id: &str) -> Result<(), String> {
   Ok(())
 }
 
+/// 判断库目录是否稳定且安全。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目录路径。
+///
+/// # 返回
+/// 是否稳定。
 fn is_stable_library_root(path: &Path) -> bool {
   let Ok(metadata) = fs::symlink_metadata(path) else {
     return false;
@@ -1406,6 +1671,18 @@ fn is_stable_library_root(path: &Path) -> bool {
   same_path(&canonical, path)
 }
 
+/// 校验计划与草稿一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不一致的错误描述。
 fn validate_plan_draft(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -1452,6 +1729,18 @@ fn validate_plan_draft(
   Ok(())
 }
 
+/// 准备安装 spool 目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+/// - `overlay`: 安装覆盖层。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: spool 目录。
+/// - `Err(String)`: 创建失败的错误描述。
 pub(crate) fn prepare_install_spool(
   task_root: &Path,
   draft_id: &str,
@@ -1478,6 +1767,18 @@ pub(crate) fn prepare_install_spool(
   Ok(expected)
 }
 
+/// 清理安装 spool 目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+/// - `overlay`: 安装覆盖层。
+///
+/// # 返回
+/// - `Ok(())`: 清理成功。
+/// - `Err(String)`: 清理失败的错误描述。
 pub(crate) fn cleanup_install_spool(
   task_root: &Path,
   draft_id: &str,
@@ -1500,6 +1801,17 @@ pub(crate) fn cleanup_install_spool(
   fs::remove_dir_all(path).map_err(|error| format!("清理安装任务 spool 失败：{error}"))
 }
 
+/// 创建独占 staging 目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目录路径。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 创建成功。
+/// - `Err(String)`: 创建失败的错误描述。
 fn create_exclusive_staging(path: &Path, draft: &InstallDraft) -> Result<(), String> {
   if path_occupied(path)? {
     let metadata =
@@ -1581,12 +1893,31 @@ fn write_config(
   result
 }
 
+/// 生成临时文件路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目标路径。
+///
+/// # 返回
+/// 临时路径。
 fn partial_for(path: &Path) -> PathBuf {
   let mut name = path.file_name().unwrap_or_default().to_os_string();
   name.push(".part");
   path.with_file_name(name)
 }
 
+/// 清理旧临时文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 临时文件路径。
+///
+/// # 返回
+/// - `Ok(())`: 清理成功。
+/// - `Err(String)`: 清理失败的错误描述。
 fn remove_stale_partial_file(path: &Path) -> Result<(), String> {
   match fs::remove_file(path) {
     Ok(()) => Ok(()),
@@ -1595,6 +1926,22 @@ fn remove_stale_partial_file(path: &Path) -> Result<(), String> {
   }
 }
 
+/// 解压并校验渠道 SDK。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `task_root`: 任务根目录。
+/// - `staging_root`: staging 根目录。
+/// - `spool_root`: spool 根目录。
+/// - `sdk`: SDK 信息。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(BTreeMap)`: SDK 文件映射。
+/// - `Err(String)`: 解压或校验失败的错误描述。
 fn extract_and_verify_sdk(
   plan: &PersistedPlan,
   task_root: &Path,
@@ -1750,6 +2097,18 @@ struct SdkVersionEntry {
   file_size: u64,
 }
 
+/// 收集已发布 SDK 文件并采集证据。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 游戏根目录。
+/// - `sdk`: SDK 信息。
+/// - `evidence`: 证据映射。
+///
+/// # 返回
+/// - `Ok(BTreeMap)`: SDK 文件映射。
+/// - `Err(String)`: 采集失败的错误描述。
 fn collect_published_sdk_files_with_evidence(
   root: &Path,
   sdk: &super::planner::InstallSdk,
@@ -1813,6 +2172,19 @@ fn collect_published_sdk_files_with_evidence(
   Ok(files)
 }
 
+/// 校验安装目录树。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+///
+/// # 返回
+/// - `Ok(BTreeMap)`: 校验结果。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -1822,6 +2194,20 @@ fn verify_install_tree(
   verify_install_tree_with_evidence(plan, overlay, root, sdk_files, &BTreeMap::new())
 }
 
+/// 结合证据校验安装目录树。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+/// - `evidence`: 证据映射。
+///
+/// # 返回
+/// - `Ok(BTreeMap)`: 校验结果。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree_with_evidence(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -1839,6 +2225,17 @@ fn verify_install_tree_with_evidence(
   )
 }
 
+/// 计算安装校验总字节数。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `sdk_files`: SDK 文件映射。
+///
+/// # 返回
+/// 总字节数。
 fn install_verification_total_bytes(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -1928,6 +2325,17 @@ fn verify_install_tree_with_evidence_and_progress(
   Ok(expected)
 }
 
+/// 校验安装目录树结构。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 根目录。
+/// - `expected`: 预期文件映射。
+///
+/// # 返回
+/// - `Ok(())`: 结构合法。
+/// - `Err(String)`: 结构非法的错误描述。
 fn validate_tree_structure(
   root: &Path,
   expected: &BTreeMap<String, (u64, String)>,
@@ -2006,12 +2414,37 @@ fn trusted_file_value(
   Ok(Some((entry.actual_size, entry.actual_md5.clone())))
 }
 
+/// 计算字节内容 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `bytes`: 待哈希内容。
+///
+/// # 返回
+/// MD5 十六进制字符串。
 fn md5_hex(bytes: &[u8]) -> String {
   let mut hasher = Md5::new();
   hasher.update(bytes);
   hex::encode(hasher.finalize())
 }
 
+/// 带计时校验安装目录树。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+/// - `timing`: 校验计时。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree_timed(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -2029,6 +2462,22 @@ fn verify_install_tree_timed(
   result
 }
 
+/// 校验安装目录树并写入日志进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+/// - `phase`: 阶段名。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree_with_journal_progress(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -2082,6 +2531,23 @@ fn verify_install_tree_parallel_timed(
   result
 }
 
+/// 并行校验安装目录树并写入日志进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+/// - `evidence`: 证据映射。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree_parallel_with_journal_progress(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -2145,6 +2611,21 @@ fn verify_install_tree_parallel_with_journal_progress(
   result
 }
 
+/// 并行校验安装目录树并上报进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+/// - `evidence`: 证据映射。
+/// - `task_root`: 任务根目录。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree_parallel_with_progress(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -2331,6 +2812,21 @@ fn verify_install_tree_parallel_with_progress(
   Ok(expected)
 }
 
+/// 并行校验单个库存文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `root`: 根目录。
+/// - `root_identity`: 目录身份。
+/// - `evidence`: 证据映射。
+/// - `task_root`: 任务根目录。
+/// - `heal_evidence`: 是否重建证据。
+/// - `asset_index_by_name`: 资源索引映射。
+///
+/// # 返回
+/// 校验结果。
 fn verify_one_inventory_file_parallel(
   plan: &PersistedPlan,
   root: &Path,
@@ -2365,6 +2861,22 @@ fn verify_one_inventory_file_parallel(
   Ok((file.name.clone(), actual))
 }
 
+/// 结合证据校验安装目录树并写入进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `root`: 根目录。
+/// - `sdk_files`: SDK 文件映射。
+/// - `evidence`: 证据映射。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 校验完成。
+/// - `Err(String)`: 校验失败的错误描述。
 fn verify_install_tree_with_evidence_with_journal_progress(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -2423,6 +2935,15 @@ fn verify_install_tree_with_evidence_with_journal_progress(
   result
 }
 
+/// 更新提交进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `completed_count`: 已完成数。
+/// - `current_step`: 当前步骤。
+/// - `emit`: 进度回调。
 fn update_commit_progress(
   journal: &mut TaskJournal,
   completed_count: usize,
@@ -2436,6 +2957,15 @@ fn update_commit_progress(
   emit(journal);
 }
 
+/// 计算文件树摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `files`: 文件映射。
+///
+/// # 返回
+/// 摘要字符串。
 fn tree_digest(files: &BTreeMap<String, (u64, String)>) -> String {
   let mut bytes = Vec::new();
   for (name, (size, md5)) in files {
@@ -2449,6 +2979,17 @@ fn tree_digest(files: &BTreeMap<String, (u64, String)>) -> String {
   sha256_bytes(&bytes)
 }
 
+/// 写入安装标记。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 根目录。
+/// - `marker`: 安装标记。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn write_marker(root: &Path, marker: &InstallMarker) -> Result<(), String> {
   let content =
     serde_json::to_vec_pretty(marker).map_err(|error| format!("序列化安装标记失败：{error}"))?;
@@ -2468,6 +3009,17 @@ fn write_marker(root: &Path, marker: &InstallMarker) -> Result<(), String> {
   file.sync_all().map_err(|error| format!("同步安装标记失败：{error}"))
 }
 
+/// 校验安装标记。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 根目录。
+/// - `expected`: 预期标记。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不一致的错误描述。
 fn verify_marker(root: &Path, expected: &InstallMarker) -> Result<(), String> {
   let actual = read_marker(root)?;
   if actual.schema_version != MARKER_SCHEMA_VERSION || &actual != expected {
@@ -2476,6 +3028,16 @@ fn verify_marker(root: &Path, expected: &InstallMarker) -> Result<(), String> {
   Ok(())
 }
 
+/// 读取安装标记。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 根目录。
+///
+/// # 返回
+/// - `Ok(InstallMarker)`: 安装标记。
+/// - `Err(String)`: 读取失败的错误描述。
 fn read_marker(root: &Path) -> Result<InstallMarker, String> {
   let path = root.join(MARKER_FILE_NAME);
   let metadata =
@@ -2490,6 +3052,20 @@ fn read_marker(root: &Path) -> Result<InstallMarker, String> {
     .map_err(|error| format!("解析安装标记失败：{error}"))
 }
 
+/// 校验安装标记身份。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `marker`: 安装标记。
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `draft`: 安装草稿。
+/// - `game_root`: 游戏根目录。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不一致的错误描述。
 fn validate_marker_identity(
   marker: &InstallMarker,
   plan: &PersistedPlan,
@@ -2513,6 +3089,17 @@ fn validate_marker_identity(
   Ok(())
 }
 
+/// 确保安装空间充足。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+///
+/// # 返回
+/// - `Ok(())`: 空间充足。
+/// - `Err(String)`: 空间不足的错误描述。
 fn ensure_install_space(plan: &PersistedPlan, game_root: &Path) -> Result<(), String> {
   let overlay = plan.install_overlay.as_ref().ok_or_else(|| "安装计划缺少覆盖层".to_string())?;
   let install_bytes = plan
@@ -2535,6 +3122,16 @@ fn ensure_install_space(plan: &PersistedPlan, game_root: &Path) -> Result<(), St
   Ok(())
 }
 
+/// 统计 spool 目录字节数。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: spool 根目录。
+///
+/// # 返回
+/// - `Ok(u64)`: 字节数。
+/// - `Err(String)`: 统计失败的错误描述。
 fn spool_bytes(root: &Path) -> Result<u64, String> {
   let mut total = 0_u64;
   let entries = match fs::read_dir(root) {
@@ -2553,6 +3150,20 @@ fn spool_bytes(root: &Path) -> Result<u64, String> {
   Ok(total)
 }
 
+/// 释放已消费的 spool chunk。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `completed_assets`: 已完成资源数。
+/// - `spool_root`: spool 根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `preserve_chunks`: 是否保留 chunk。
+///
+/// # 返回
+/// - `Ok(u64)`: 释放字节数。
+/// - `Err(String)`: 释放失败的错误描述。
 fn release_consumed_spool_chunks(
   plan: &PersistedPlan,
   completed_assets: usize,
@@ -2612,6 +3223,17 @@ fn release_consumed_spool_chunks(
   Ok(released)
 }
 
+/// 校验空安装目标。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 目标有效。
+/// - `Err(String)`: 目标变化的错误描述。
 fn validate_empty_install_target(game_root: &Path, draft: &InstallDraft) -> Result<(), String> {
   if directory_identity(game_root)? != (draft.target_volume_serial, draft.target_file_id) {
     return Err("安装目标目录身份发生变化，需要重新选择安装目录".to_string());
@@ -2622,6 +3244,17 @@ fn validate_empty_install_target(game_root: &Path, draft: &InstallDraft) -> Resu
   Ok(())
 }
 
+/// 准备发布目标目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 准备完成。
+/// - `Err(String)`: 准备失败的错误描述。
 fn prepare_publish_target(game_root: &Path, draft: &InstallDraft) -> Result<(), String> {
   if !path_occupied(game_root)? {
     return Ok(());
@@ -2634,6 +3267,21 @@ fn prepare_publish_target(game_root: &Path, draft: &InstallDraft) -> Result<(), 
   Ok(())
 }
 
+/// 确保发布事实一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `overlay`: 安装覆盖层。
+/// - `draft`: 安装草稿。
+/// - `staging_root`: staging 根目录。
+/// - `game_root`: 游戏根目录。
+/// - `marker`: 安装标记。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不一致的错误描述。
 fn ensure_publish_facts(
   plan: &PersistedPlan,
   overlay: &InstallOverlay,
@@ -2662,6 +3310,16 @@ fn ensure_publish_facts(
   Ok(())
 }
 
+/// 判断路径是否已占用。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 路径。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否占用。
+/// - `Err(String)`: 读取失败的错误描述。
 pub(crate) fn path_occupied(path: &Path) -> Result<bool, String> {
   match fs::symlink_metadata(path) {
     Ok(_) => Ok(true),
@@ -2670,10 +3328,29 @@ pub(crate) fn path_occupied(path: &Path) -> Result<bool, String> {
   }
 }
 
+/// 判断两个路径是否相同。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `left`: 第一个路径。
+/// - `right`: 第二个路径。
+///
+/// # 返回
+/// 是否相同。
 fn same_path(left: &Path, right: &Path) -> bool {
   normalized_path_key(left) == normalized_path_key(right)
 }
 
+/// 返回规范化路径键。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 路径。
+///
+/// # 返回
+/// 规范化键。
 fn normalized_path_key(path: &Path) -> String {
   let value = path.to_string_lossy().replace('/', "\\");
   #[cfg(target_os = "windows")]
@@ -2682,18 +3359,55 @@ fn normalized_path_key(path: &Path) -> String {
   value
 }
 
+/// 计算路径摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 路径。
+///
+/// # 返回
+/// 摘要字符串。
 fn path_digest(path: &Path) -> String {
   sha256_bytes(normalized_path_key(path).as_bytes())
 }
 
+/// 判断字符串是否为 SHA-256。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `value`: 字符串。
+///
+/// # 返回
+/// 是否合法。
 fn is_sha256(value: &str) -> bool {
   value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
+/// 判断字符串是否为 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `value`: 字符串。
+///
+/// # 返回
+/// 是否合法。
 fn is_md5_value(value: &str) -> bool {
   value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
+/// 返回目录身份（卷序列号与文件 ID）。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目录路径。
+///
+/// # 返回
+/// - `Ok((u64, u64))`: 目录身份。
+/// - `Err(String)`: 读取失败的错误描述。
 pub(crate) fn directory_identity(path: &Path) -> Result<(u64, u64), String> {
   #[cfg(target_os = "windows")]
   super::installation::validate_windows_path(path)?;
@@ -2756,6 +3470,15 @@ pub(crate) fn directory_identity(path: &Path) -> Result<(u64, u64), String> {
   }
 }
 
+/// 判断元数据是否为重解析点。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `metadata`: 文件元数据。
+///
+/// # 返回
+/// 是否为重解析点。
 pub(crate) fn is_reparse_point(metadata: &fs::Metadata) -> bool {
   #[cfg(target_os = "windows")]
   {
@@ -2769,6 +3492,16 @@ pub(crate) fn is_reparse_point(metadata: &fs::Metadata) -> bool {
   }
 }
 
+/// 校验目录树不包含链接或重解析点。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `root`: 根目录。
+///
+/// # 返回
+/// - `Ok(())`: 安全。
+/// - `Err(String)`: 不安全或扫描失败的错误描述。
 fn validate_no_links(root: &Path) -> Result<(), String> {
   for entry in WalkDir::new(root).follow_links(false) {
     let entry = entry.map_err(|error| format!("扫描安装暂存目录失败：{error}"))?;
@@ -2781,6 +3514,17 @@ fn validate_no_links(root: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 发布目录到目标。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源目录。
+/// - `target`: 目标目录。
+///
+/// # 返回
+/// - `Ok(())`: 发布成功。
+/// - `Err(String)`: 发布失败的错误描述。
 fn publish_directory(source: &Path, target: &Path) -> Result<(), String> {
   if path_occupied(target)? {
     return Err("安装目标目录已存在，拒绝覆盖".to_string());
@@ -2800,6 +3544,17 @@ fn publish_directory(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子发布游戏目录失败：{error}"))
 }
 
+/// 删除属于当前草稿的 staging 目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: staging 目录。
+/// - `draft`: 安装草稿。
+///
+/// # 返回
+/// - `Ok(())`: 删除成功。
+/// - `Err(String)`: 删除失败的错误描述。
 fn remove_owned_staging(path: &Path, draft: &InstallDraft) -> Result<(), String> {
   if !path_occupied(path)? {
     return Ok(());
@@ -2822,6 +3577,20 @@ fn remove_owned_staging(path: &Path, draft: &InstallDraft) -> Result<(), String>
   fs::remove_dir_all(path).map_err(|error| format!("清理安装暂存目录失败：{error}"))
 }
 
+/// 设置任务状态并持久化、上报。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `state`: 目标状态。
+/// - `emit`: 进度回调。
+/// - `timing`: 校验计时。
+///
+/// # 返回
+/// - `Ok(())`: 成功。
+/// - `Err(String)`: 失败的错误描述。
 fn set_task_state(
   task_root: &Path,
   journal: &mut TaskJournal,
@@ -2838,6 +3607,17 @@ fn set_task_state(
   Ok(())
 }
 
+/// 按安装 ID 查找草稿 ID。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `install_id`: 安装 ID。
+///
+/// # 返回
+/// - `Ok(String)`: 草稿 ID。
+/// - `Err(String)`: 未找到的错误描述。
 pub(crate) fn find_draft_id(task_root: &Path, install_id: &str) -> Result<String, String> {
   let directory = task_root.join("install-drafts");
   let entries = match fs::read_dir(directory) {
@@ -2865,6 +3645,17 @@ pub(crate) fn find_draft_id(task_root: &Path, install_id: &str) -> Result<String
   Err("找不到安装草稿".to_string())
 }
 
+/// 查找可恢复的草稿 ID。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `install_id`: 安装 ID。
+///
+/// # 返回
+/// - `Ok(String)`: 草稿 ID。
+/// - `Err(String)`: 未找到的错误描述。
 pub(crate) fn find_recovery_draft_id(task_root: &Path, install_id: &str) -> Result<String, String> {
   if let Ok(draft_id) = find_draft_id(task_root, install_id) {
     return Ok(draft_id);
@@ -2890,6 +3681,18 @@ pub(crate) fn find_recovery_draft_id(task_root: &Path, install_id: &str) -> Resu
   Err("找不到可恢复的安装草稿".to_string())
 }
 
+/// 判断是否存在活跃草稿。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `expected_executable`: 预期可执行文件。
+/// - `machine_uid`: 设备标识。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否存在。
+/// - `Err(String)`: 读取失败的错误描述。
 fn has_active_draft(
   task_root: &Path,
   expected_executable: &Path,
@@ -2920,10 +3723,31 @@ fn has_active_draft(
   Ok(false)
 }
 
+/// 检查任务是否已取消。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 未取消。
+/// - `Err(String)`: 已取消。
 fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) { Err("安装任务已取消".to_string()) } else { Ok(()) }
 }
 
+/// 校验草稿状态转换。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `current`: 当前状态。
+/// - `next`: 目标状态。
+///
+/// # 返回
+/// - `Ok(())`: 允许转换。
+/// - `Err(String)`: 不允许的错误描述。
 fn validate_draft_state_transition(
   current: InstallDraftState,
   next: InstallDraftState,
@@ -2936,6 +3760,13 @@ fn validate_draft_state_transition(
   Ok(())
 }
 
+/// 确保当前平台支持安装。
+///
+/// @since Beta v0.12.1
+///
+/// # 返回
+/// - `Ok(())`: 支持。
+/// - `Err(String)`: 不支持的平台错误描述。
 pub(crate) fn ensure_windows_install_platform() -> Result<(), String> {
   #[cfg(target_os = "windows")]
   {
@@ -2947,14 +3778,44 @@ pub(crate) fn ensure_windows_install_platform() -> Result<(), String> {
   }
 }
 
+/// 判断草稿状态是否为终态。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `state`: 草稿状态。
+///
+/// # 返回
+/// 是否终态。
 fn is_terminal_draft_state(state: InstallDraftState) -> bool {
   matches!(state, InstallDraftState::Canceled | InstallDraftState::Completed)
 }
 
+/// 返回草稿文件路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+///
+/// # 返回
+/// 草稿文件路径。
 fn draft_path(task_root: &Path, draft_id: &str) -> PathBuf {
   task_root.join("install-drafts").join(format!("{draft_id}.json"))
 }
 
+/// 删除草稿文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+///
+/// # 返回
+/// - `Ok(())`: 删除成功。
+/// - `Err(String)`: 删除失败的错误描述。
 fn remove_draft_file(task_root: &Path, draft_id: &str) -> Result<(), String> {
   let path = draft_path(task_root, draft_id);
   match fs::remove_file(&path) {
@@ -3001,6 +3862,16 @@ pub(crate) fn sweep_terminal_drafts(task_root: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 取得草稿变更互斥锁。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `key`: 锁键。
+///
+/// # 返回
+/// - `Ok(Arc<Mutex<()>>)`: 互斥锁。
+/// - `Err(String)`: 锁损坏的错误描述。
 fn draft_mutation_lock(key: &str) -> Result<Arc<Mutex<()>>, String> {
   let mut locks = DRAFT_MUTATION_LOCKS.lock().map_err(|_| "安装草稿锁注册表已损坏".to_string())?;
   if let Some(lock) = locks.get(key).and_then(Weak::upgrade) {
@@ -3011,18 +3882,52 @@ fn draft_mutation_lock(key: &str) -> Result<Arc<Mutex<()>>, String> {
   Ok(lock)
 }
 
+/// 返回任务根目录锁键。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+///
+/// # 返回
+/// 锁键。
 fn task_root_lock_key(task_root: &Path) -> String {
   format!("task\0{}", path_text(task_root))
 }
 
+/// 返回草稿锁键。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `draft_id`: 草稿 ID。
+///
+/// # 返回
+/// 锁键。
 fn draft_lock_key(task_root: &Path, draft_id: &str) -> String {
   format!("draft\0{}\0{draft_id}", path_text(task_root))
 }
 
+/// 返回路径文本。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 路径。
+///
+/// # 返回
+/// 路径字符串。
 fn path_text(path: &Path) -> String {
   path.to_string_lossy().into_owned()
 }
 
+/// 生成安装标记随机值。
+///
+/// @since Beta v0.12.1
+///
+/// # 返回
+/// 随机值字符串。
 fn marker_nonce() -> String {
   let first = Uuid::new_v4();
   let second = Uuid::new_v4();
@@ -3032,6 +3937,16 @@ fn marker_nonce() -> String {
   bytes.iter().map(|byte| format!("{byte:02x}")).collect()
 }
 
+/// 计算文件大小与 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok((u64, String))`: 大小与 MD5。
+/// - `Err(String)`: 读取失败的错误描述。
 fn file_size_md5(path: &Path) -> Result<(u64, String), String> {
   let metadata =
     fs::symlink_metadata(path).map_err(|error| format!("读取文件状态失败：{error}"))?;
@@ -3051,12 +3966,31 @@ fn file_size_md5(path: &Path) -> Result<(u64, String), String> {
   Ok((metadata.len(), hex::encode(hasher.finalize())))
 }
 
+/// 计算字节内容 SHA-256。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `bytes`: 待哈希内容。
+///
+/// # 返回
+/// SHA-256 十六进制字符串。
 fn sha256_bytes(bytes: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(bytes);
   hex::encode(hasher.finalize())
 }
 
+/// 判断两个路径是否相同或互为父子。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `left`: 第一个路径。
+/// - `right`: 第二个路径。
+///
+/// # 返回
+/// 是否相关。
 fn is_related(left: &Path, right: &Path) -> bool {
   let left = left.to_string_lossy().replace('/', "\\").to_ascii_lowercase();
   let right = right.to_string_lossy().replace('/', "\\").to_ascii_lowercase();
@@ -3065,6 +3999,17 @@ fn is_related(left: &Path, right: &Path) -> bool {
     || right.strip_prefix(&(left + "\\")).is_some()
 }
 
+/// 通过临时文件加原子重命名写入内容。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目标文件。
+/// - `content`: 待写入内容。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn atomic_write(path: &Path, content: &[u8]) -> Result<(), String> {
   let parent = path.parent().ok_or_else(|| "持久化路径缺少父目录".to_string())?;
   fs::create_dir_all(parent).map_err(|error| format!("创建持久化目录失败：{error}"))?;

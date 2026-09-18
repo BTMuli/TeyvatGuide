@@ -44,7 +44,13 @@ use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_ha
 // 子窗口 label 的数组
 pub const SUB_WINDOW_LABELS: [&str; 3] = ["Sub_window", "Dev_JSON", "mhy_client"];
 
-// 窗口事件处理
+/// 统一处理主窗口与子窗口的关闭请求。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `app`: 触发事件的窗口。
+/// - `event`: 窗口事件。
 fn window_event_handler(app: &Window, event: &WindowEvent) {
   match event {
     WindowEvent::CloseRequested { api, .. } => {
@@ -67,6 +73,9 @@ fn window_event_handler(app: &Window, event: &WindowEvent) {
   }
 }
 
+/// 配置并启动 Tauri 应用。
+///
+/// @since Beta v0.12.2
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   #[cfg(target_os = "windows")]

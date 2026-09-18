@@ -43,6 +43,20 @@ const DATABASE_URL: &str = "sqlite:TeyvatGuide.db";
 const MAX_AUDIO_VERSION_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_AUDIO_VERSION_FILES: usize = 500_000;
 
+/// 在恢复安装前重新拉取分支信息并水合、校验、持久化计划。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `install_id`: 安装 ID。
+/// - `scheme`: 渠道方案。
+/// - `audio_languages`: 已选语音包。
+/// - `plan`: 待恢复的持久化计划。
+///
+/// # 返回
+/// - `Ok(PersistedPlan)`: 水合并校验后的计划。
+/// - `Err(String)`: 拉取或校验失败的错误描述。
 async fn refill_install_plan_for_resume(
   task_root: &Path,
   install_id: &str,
@@ -58,6 +72,15 @@ async fn refill_install_plan_for_resume(
   Ok(plan)
 }
 
+/// 通过恢复进度通道发送一个阶段性进度。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `channel`: 恢复进度通道。
+/// - `task_id`: 任务 ID。
+/// - `step`: 当前步骤。
+/// - `message`: 进度说明。
 fn report_recovery_progress(
   channel: &Channel<PackageRecoveryProgress>,
   task_id: &str,
@@ -266,6 +289,16 @@ pub async fn game_installation_audio_usage(
     .map_err(|error| format!("语音包占用统计任务异常退出：{error}"))?
 }
 
+/// 统计各语音包实际占用的文件数与字节数。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `root`: 游戏安装根目录。
+///
+/// # 返回
+/// - `Ok(Vec<GameAudioPackageUsage>)`: 各语音包占用统计。
+/// - `Err(String)`: 读取或解析清单失败的错误描述。
 fn collect_audio_package_usage(root: &Path) -> Result<Vec<GameAudioPackageUsage>, String> {
   let mut result = Vec::new();
   for (marker_name, language) in AUDIO_PACKAGES {
@@ -419,12 +452,33 @@ fn uninstall_game_root(
   Ok(GameUninstallSummary { removed_files, removed_dirs })
 }
 
+/// 递归统计目录树中的条目数量。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `root`: 待统计的目录。
+///
+/// # 返回
+/// - `Ok(usize)`: 条目数量。
+/// - `Err(String)`: 读取失败或遇到不安全条目的错误描述。
 fn count_tree_entries(root: &Path) -> Result<usize, String> {
   let mut count = 0_usize;
   count_tree_entries_inner(root, &mut count)?;
   Ok(count)
 }
 
+/// `count_tree_entries` 的递归实现，逐级累加目录条目数。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `path`: 当前目录。
+/// - `count`: 累加计数器。
+///
+/// # 返回
+/// - `Ok(())`: 统计完成。
+/// - `Err(String)`: 读取失败或遇到符号链接/重解析点的错误描述。
 fn count_tree_entries_inner(path: &Path, count: &mut usize) -> Result<(), String> {
   for entry in fs::read_dir(path).map_err(|error| format!("读取卸载目录失败：{error}"))? {
     let entry = entry.map_err(|error| format!("读取卸载目录条目失败：{error}"))?;
@@ -442,6 +496,22 @@ fn count_tree_entries_inner(path: &Path, count: &mut usize) -> Result<(), String
   Ok(())
 }
 
+/// 递归删除目录树内容，保留根目录并节流上报卸载进度。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `path`: 当前目录。
+/// - `app_handle`: Tauri 应用句柄。
+/// - `total`: 条目总数。
+/// - `completed`: 已完成计数。
+/// - `last_emit`: 上次上报时间。
+/// - `removed_files`: 已删除文件计数。
+/// - `removed_dirs`: 已删除目录计数。
+///
+/// # 返回
+/// - `Ok(())`: 删除完成。
+/// - `Err(String)`: 读取或删除失败的错误描述。
 fn delete_tree_contents(
   path: &Path,
   app_handle: &AppHandle,
@@ -484,6 +554,15 @@ fn delete_tree_contents(
   Ok(())
 }
 
+/// 向前端发送卸载进度事件。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `app_handle`: Tauri 应用句柄。
+/// - `completed`: 已完成条目数。
+/// - `total`: 条目总数。
+/// - `current`: 当前处理文件。
 fn emit_uninstall_progress(
   app_handle: &AppHandle,
   completed: usize,
@@ -494,6 +573,16 @@ fn emit_uninstall_progress(
     .emit("game-uninstall://progress", GameUninstallProgress { completed, total, current });
 }
 
+/// 判断两个路径是否相同或互为父子目录。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `left`: 第一个路径。
+/// - `right`: 第二个路径。
+///
+/// # 返回
+/// 路径是否重叠。
 fn paths_overlap(left: &Path, right: &Path) -> bool {
   let left_key = path_key(left);
   let right_key = path_key(right);
@@ -502,6 +591,15 @@ fn paths_overlap(left: &Path, right: &Path) -> bool {
     || right_key.starts_with(&format!("{left_key}\\"))
 }
 
+/// 将路径转换为用于比较的小写反斜杠键。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `path`: 待转换的路径。
+///
+/// # 返回
+/// 规范化后的路径键。
 fn path_key(path: &Path) -> String {
   path.to_string_lossy().replace('/', "\\").to_ascii_lowercase()
 }
@@ -711,6 +809,18 @@ pub async fn game_install_defender_exclude_add(
   add_install_defender_exclusions(&task_root, &install_id, &plan_id).await
 }
 
+/// 解析并登记安装目录，随后提权加入 Windows Defender 排除列表。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `install_id`: 安装 ID。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// - `Ok(Vec<String>)`: 已加入排除的路径。
+/// - `Err(String)`: 登记或提权执行失败的错误描述。
 async fn add_install_defender_exclusions(
   task_root: &Path,
   install_id: &str,
@@ -985,6 +1095,21 @@ pub async fn game_install_pause(
   manager.pause_install(&app_handle, &task_root, &task_id, &install_id).await
 }
 
+/// 验证已发布安装并完成数据库登记与任务收尾。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `app_handle`: Tauri 应用句柄。
+/// - `db_instances`: 数据库实例。
+/// - `task_root`: 任务根目录。
+/// - `task_id`: 任务 ID。
+/// - `draft_id`: 草稿 ID。
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(PackageTaskSummary)`: 最终任务摘要。
+/// - `Err(String)`: 验证或登记失败的错误描述。
 async fn complete_install_registration(
   app_handle: &AppHandle,
   db_instances: &DbInstances,
@@ -1700,6 +1825,21 @@ async fn load_trusted_installation(
   Ok(installation)
 }
 
+/// 根据恢复动作恢复换服任务，支持回滚或续跑。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `app_handle`: Tauri 应用句柄。
+/// - `db_instances`: 数据库实例。
+/// - `manager`: 包管理器。
+/// - `task_root`: 任务根目录。
+/// - `journal_value`: 任务日志。
+/// - `action`: 恢复动作。
+///
+/// # 返回
+/// - `Ok(PackageTaskSummary)`: 恢复后的任务摘要。
+/// - `Err(String)`: 恢复失败的错误描述。
 async fn recover_switch_task(
   app_handle: AppHandle,
   db_instances: tauri::State<'_, DbInstances>,
@@ -1744,6 +1884,16 @@ async fn recover_switch_task(
   }
 }
 
+/// 返回游戏任务根目录。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `app_handle`: Tauri 应用句柄。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 应用数据目录下的 `game-tasks` 目录。
+/// - `Err(String)`: 读取应用数据目录失败的错误描述。
 fn game_task_root(app_handle: &AppHandle) -> Result<std::path::PathBuf, String> {
   app_handle
     .path()

@@ -23,13 +23,29 @@ use tauri::{AppHandle, Manager};
 use windows_sys::Win32::Foundation::CloseHandle;
 use windows_sys::Win32::System::Pipes::ConnectNamedPipe;
 
-// 读取配置值
+/// 读取 `nativeConfig.methodRva.chinese` 下指定键的 RVA 配置值。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `key`: 配置键。
+///
+/// # 返回
+/// 配置值，缺失时返回 0。
 fn read_rva(key: &str) -> i32 {
   let path = format!("nativeConfig.methodRva.chinese.{}", key);
   read_conf(&path)
 }
 
-// 读取配置文件
+/// 按点分路径从编译时嵌入的配置中读取整数值。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 点分隔的配置路径。
+///
+/// # 返回
+/// 配置值，缺失时返回 0。
 pub fn read_conf(path: &str) -> i32 {
   // 编译时嵌入 JSON 文件，值都是32位整数
   let data = include_str!("../../lib/conf.json");

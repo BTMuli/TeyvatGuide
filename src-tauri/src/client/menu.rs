@@ -7,6 +7,16 @@ use tauri::menu::{Menu, MenuBuilder, MenuEvent, MenuItemBuilder, Submenu, Submen
 use tauri::{AppHandle, LogicalSize, Manager, Size, Window, Wry};
 use url::Url;
 
+/// 根据功能名返回米游社客户端对应的 URL。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `func`: 功能名（如 `sign_in`）。
+///
+/// # 返回
+/// - `Ok(Url)`: 解析后的米游社 URL。
+/// - `Err(String)`: URL 无效的错误描述。
 pub fn get_mhy_client_url(func: &str) -> Result<Url, String> {
   let url = match func {
     "sign_in" => {
@@ -24,7 +34,16 @@ pub fn get_mhy_client_url(func: &str) -> Result<Url, String> {
   url.parse().map_err(|error| format!("米游社链接无效：{error}"))
 }
 
-// 创建子菜单-工具
+/// 创建米游社客户端的“工具”子菜单。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app`: Tauri 应用句柄。
+///
+/// # 返回
+/// - `Ok(Submenu<Wry>)`: 创建的子菜单。
+/// - `Err(String)`: 菜单项创建失败的错误描述。
 fn create_utils_menu(app: AppHandle) -> Result<Submenu<Wry>, String> {
   let retry_bridge_submenu =
     MenuItemBuilder::with_id("retry", "重试桥接").build(&app).map_err(|error| error.to_string())?;
@@ -51,7 +70,16 @@ fn create_utils_menu(app: AppHandle) -> Result<Submenu<Wry>, String> {
   Ok(utils_menu)
 }
 
-// 创建米游社客户端菜单
+/// 创建米游社客户端菜单。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app`: Tauri 应用句柄。
+///
+/// # 返回
+/// - `Ok(Menu<Wry>)`: 创建完成的菜单。
+/// - `Err(String)`: 菜单创建失败的错误描述。
 pub fn create_mhy_menu(app: AppHandle) -> Result<Menu<Wry>, String> {
   let top_menu =
     MenuItemBuilder::with_id("top", "置顶").build(&app).map_err(|error| error.to_string())?;
@@ -71,7 +99,13 @@ pub fn create_mhy_menu(app: AppHandle) -> Result<Menu<Wry>, String> {
     .map_err(|error| error.to_string())
 }
 
-// 菜单栏事件处理
+/// 按菜单事件 ID 分发到对应的处理函数。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `window`: 触发事件的窗口。
+/// - `event`: 菜单事件。
 pub fn handle_menu_event(window: &Window, event: MenuEvent) {
   match event.id.as_ref() {
     "top" => handle_menu_top(window),
@@ -86,7 +120,12 @@ pub fn handle_menu_event(window: &Window, event: MenuEvent) {
   }
 }
 
-// 处理置顶菜单
+/// 将米游社客户端窗口置顶。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_top(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   if window.is_some() {
@@ -94,7 +133,12 @@ fn handle_menu_top(app_handle: &Window) {
   }
 }
 
-// 处理取消置顶菜单
+/// 取消米游社客户端窗口置顶。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_cancel_top(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   if window.is_some() {
@@ -102,7 +146,12 @@ fn handle_menu_cancel_top(app_handle: &Window) {
   }
 }
 
-// 处理打开帖子菜单
+/// 在米游社客户端中打开当前帖子。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_open_post(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   let execute_js = r#"
@@ -142,7 +191,12 @@ fn handle_menu_open_post(app_handle: &Window) {
   }
 }
 
-// 处理重试桥接菜单
+/// 向米游社客户端发送重试桥接指令。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_retry(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   let execute_js = r#"
@@ -157,7 +211,12 @@ fn handle_menu_retry(app_handle: &Window) {
   }
 }
 
-// 处理模拟触摸菜单
+/// 向米游社客户端发送模拟触摸指令。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_mock_touch(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   let execute_js = r#"
@@ -172,7 +231,12 @@ fn handle_menu_mock_touch(app_handle: &Window) {
   }
 }
 
-// 处理移除遮罩菜单
+/// 向米游社客户端发送移除遮罩指令。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_remove_overlay(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   let execute_js = r#"
@@ -187,7 +251,12 @@ fn handle_menu_remove_overlay(app_handle: &Window) {
   }
 }
 
-// 处理旋转窗口菜单
+/// 在竖屏与横屏尺寸之间切换米游社客户端窗口。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_rotate_window(app_handle: &Window) {
   let Some(window) = app_handle.get_webview_window("mhy_client") else {
     return;
@@ -217,7 +286,12 @@ fn handle_menu_rotate_window(app_handle: &Window) {
   }
 }
 
-// 处理使用 WebView 打开菜单
+/// 向米游社客户端发送使用外部 WebView 打开当前页面的指令。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `app_handle`: 主窗口引用，用于定位米游社客户端窗口。
 fn handle_menu_open_with_webview(app_handle: &Window) {
   let window = app_handle.get_webview_window("mhy_client");
   let execute_js = r#"

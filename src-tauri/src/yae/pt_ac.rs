@@ -119,6 +119,16 @@ pub struct UiafAchiItem {
   pub status: u32,
 }
 
+/// 从 Yae 导出的成就字节流解析出成就列表。
+///
+/// @since Beta v0.8.9
+///
+/// # 参数
+/// - `bytes`: 成就信息的原始字节。
+///
+/// # 返回
+/// - `Ok(Vec<UiafAchiItem>)`: 过滤掉 `status` 为 0 后的成就条目。
+/// - `Err(DecodeError)`: Protobuf 解码失败。
 pub fn parse_achi_list(bytes: &[u8]) -> Result<Vec<UiafAchiItem>, DecodeError> {
   let mut cursor = Cursor::new(bytes);
   let mut dicts: Vec<HashMap<u32, u32>> = Vec::new();

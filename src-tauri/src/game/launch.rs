@@ -25,16 +25,45 @@ pub fn sync_voice_language(installed_languages: &[String]) -> Result<(), String>
   Ok(())
 }
 
+/// 将配音语言标识映射为游戏使用的数值 ID。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `language`: 配音语言标识（如 `zh-cn`）。
+///
+/// # 返回
+/// 匹配到的配音 ID，未匹配时返回 `None`。
 fn voice_language_id(language: &str) -> Option<u32> {
   VOICE_LANGUAGES.iter().find(|(value, _)| value.eq_ignore_ascii_case(language)).map(|(_, id)| *id)
 }
 
+/// 根据当前值与已安装配音选择需要写入游戏配置的配音 ID。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `current`: 游戏当前保存的配音 ID。
+/// - `installed`: 实际已安装的配音 ID 列表。
+///
+/// # 返回
+/// 当前值仍有效时返回 `None`，否则返回 `installed` 中的第一个可用配音 ID。
 fn voice_language_to_apply(current: Option<u32>, installed: &[u32]) -> Option<u32> {
   let fallback = installed.first().copied()?;
   (!current.is_some_and(|value| installed.contains(&value))).then_some(fallback)
 }
 
 #[cfg(target_os = "windows")]
+/// 将当前配音写入 Windows 注册表中的游戏通用配置。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installed`: 实际已安装的配音 ID 列表。
+///
+/// # 返回
+/// - `Ok(())`: 配音无需调整或已成功同步。
+/// - `Err(String)`: 读取或写入注册表失败的错误描述。
 fn sync_windows_voice_language(installed: &[u32]) -> Result<(), String> {
   use serde_json::{Map, Value};
   use std::io::ErrorKind;

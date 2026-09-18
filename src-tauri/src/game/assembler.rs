@@ -1,5 +1,5 @@
 //! 将已验证的 manifest-diff 计划流式组装到任务 staging 目录。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.3
 
 use super::{
   model::PackagePlanStrategy,
@@ -31,6 +31,15 @@ const MIN_ASSEMBLY_CONCURRENCY: usize = 4;
 pub(crate) const DOWNLOAD_CACHE_INTEGRITY_ERROR_PREFIX: &str = "下载缓存完整性复验失败：";
 pub(crate) const RESOURCE_CHUNK_INTEGRITY_ERROR_PREFIX: &str = "资源 chunk 完整性复验失败：";
 
+/// 从缓存完整性错误文本中提取 chunk ID。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `error`: 错误文本。
+///
+/// # 返回
+/// chunk ID，无法识别时返回 `None`。
 pub(crate) fn cache_integrity_chunk_id(error: &str) -> Option<&str> {
   error
     .strip_prefix(DOWNLOAD_CACHE_INTEGRITY_ERROR_PREFIX)
@@ -61,6 +70,12 @@ pub(crate) struct InstallAssetValidationFailure {
 }
 
 impl InstallAssetValidationFailure {
+  /// 判断该失败是否可通过自动修复恢复。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 返回
+  /// 是否可修复。
   pub(crate) fn repairable(&self) -> bool {
     matches!(
       self.kind,
@@ -91,24 +106,52 @@ pub(crate) struct AssemblyTiming {
 }
 
 impl AssemblyTiming {
+  /// 记录一次 zstd 解码读取。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `elapsed_micros`: 耗时微秒。
+  /// - `bytes`: 字节数。
   fn record_zstd_decode_read(&mut self, elapsed_micros: u64, bytes: u64) {
     self.zstd_decode_read_micros = self.zstd_decode_read_micros.saturating_add(elapsed_micros);
     self.zstd_decode_read_count = self.zstd_decode_read_count.saturating_add(1);
     self.zstd_decode_read_bytes = self.zstd_decode_read_bytes.saturating_add(bytes);
   }
 
+  /// 记录一次 chunk MD5 计算。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `elapsed_micros`: 耗时微秒。
+  /// - `bytes`: 字节数。
   fn record_chunk_md5(&mut self, elapsed_micros: u64, bytes: u64) {
     self.chunk_md5_micros = self.chunk_md5_micros.saturating_add(elapsed_micros);
     self.chunk_md5_count = self.chunk_md5_count.saturating_add(1);
     self.chunk_md5_bytes = self.chunk_md5_bytes.saturating_add(bytes);
   }
 
+  /// 记录一次资源 MD5 计算。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `elapsed_micros`: 耗时微秒。
+  /// - `bytes`: 字节数。
   fn record_asset_md5(&mut self, elapsed_micros: u64, bytes: u64) {
     self.asset_md5_micros = self.asset_md5_micros.saturating_add(elapsed_micros);
     self.asset_md5_count = self.asset_md5_count.saturating_add(1);
     self.asset_md5_bytes = self.asset_md5_bytes.saturating_add(bytes);
   }
 
+  /// 记录一次 staging 文件同步。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `elapsed_micros`: 耗时微秒。
+  /// - `bytes`: 字节数。
   fn record_staging_file_sync(&mut self, elapsed_micros: u64, bytes: u64) {
     self.staging_file_sync_micros = self.staging_file_sync_micros.saturating_add(elapsed_micros);
     self.staging_file_sync_count = self.staging_file_sync_count.saturating_add(1);
@@ -171,6 +214,9 @@ pub(crate) struct AssemblyTelemetrySnapshot {
 }
 
 impl Default for AssemblyTelemetry {
+  /// 创建空的组装遥测计数器。
+  ///
+  /// @since Beta v0.12.3
   fn default() -> Self {
     Self {
       started_at: Instant::now(),
@@ -214,10 +260,22 @@ struct AssemblyLiveStageGuard<'a> {
 }
 
 impl AssemblyTelemetry {
+  /// 创建共享组装遥测实例。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 返回
+  /// 遥测实例。
   pub(crate) fn new() -> Arc<Self> {
     Arc::new(Self::default())
   }
 
+  /// 生成当前遥测快照。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 返回
+  /// 遥测快照。
   pub(crate) fn snapshot(&self) -> AssemblyTelemetrySnapshot {
     let now_micros = duration_micros(self.started_at.elapsed());
     let last_heartbeat_micros = self.last_heartbeat_micros.load(Ordering::Acquire);
@@ -246,6 +304,15 @@ impl AssemblyTelemetry {
     }
   }
 
+  /// 开始一个组装阶段并返回守卫。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `stage`: 组装阶段。
+  ///
+  /// # 返回
+  /// 阶段守卫。
   fn begin(&self, stage: AssemblyLiveStage) -> AssemblyLiveStageGuard<'_> {
     match stage {
       AssemblyLiveStage::Read => self.active_reads.fetch_add(1, Ordering::AcqRel),
@@ -257,6 +324,9 @@ impl AssemblyTelemetry {
     AssemblyLiveStageGuard { telemetry: self, stage, started_at: Instant::now() }
   }
 
+  /// 更新心跳时间与计数。
+  ///
+  /// @since Beta v0.12.3
   fn heartbeat(&self) {
     self.last_heartbeat_micros.store(duration_micros(self.started_at.elapsed()), Ordering::Release);
     self.heartbeat_count.fetch_add(1, Ordering::AcqRel);
@@ -264,6 +334,12 @@ impl AssemblyTelemetry {
 }
 
 impl AssemblyLiveStageGuard<'_> {
+  /// 结束阶段并记录耗时与字节数。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `bytes`: 本阶段处理字节数。
   fn finish(self, bytes: u64) {
     let elapsed_micros = duration_micros(self.started_at.elapsed());
     match self.stage {
@@ -295,6 +371,9 @@ impl AssemblyLiveStageGuard<'_> {
 }
 
 impl Drop for AssemblyLiveStageGuard<'_> {
+  /// 释放阶段并回退活跃计数。
+  ///
+  /// @since Beta v0.12.3
   fn drop(&mut self) {
     match self.stage {
       AssemblyLiveStage::Read => self.telemetry.active_reads.fetch_sub(1, Ordering::AcqRel),
@@ -306,6 +385,15 @@ impl Drop for AssemblyLiveStageGuard<'_> {
   }
 }
 
+/// 将时长转换为微秒并截断到 `u64` 上限。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `duration`: 标准库时长。
+///
+/// # 返回
+/// 微秒数。
 fn duration_micros(duration: std::time::Duration) -> u64 {
   duration.as_micros().min(u128::from(u64::MAX)) as u64
 }
@@ -336,6 +424,16 @@ pub(crate) struct FullInstallDownloadIndex {
 }
 
 impl FullInstallDownloadIndex {
+  /// 从全新安装计划构建下载索引。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `plan`: 资源计划。
+  ///
+  /// # 返回
+  /// - `Ok(Self)`: 下载索引。
+  /// - `Err(String)`: 下载项重复的错误描述。
   pub(crate) fn from_plan(plan: &PersistedPlan) -> Result<Self, String> {
     let mut by_id = HashMap::with_capacity(plan.downloads.len());
     for (index, download) in plan.downloads.iter().enumerate() {
@@ -346,6 +444,16 @@ impl FullInstallDownloadIndex {
     Ok(Self { by_id })
   }
 
+  /// 按下载 ID 返回计划中的下载项。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `plan`: 资源计划。
+  /// - `id`: 下载 ID。
+  ///
+  /// # 返回
+  /// 下载项或 `None`。
   pub(crate) fn get<'a>(&self, plan: &'a PersistedPlan, id: &str) -> Option<&'a PlanDownload> {
     self.by_id.get(id).and_then(|index| plan.downloads.get(*index))
   }
@@ -357,21 +465,64 @@ struct FullInstallDownloadLookup<'a> {
 }
 
 trait DownloadLookup {
+  /// 按 ID 查找下载项。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `id`: 下载 ID。
+  ///
+  /// # 返回
+  /// 下载项或 `None`。
   fn get(&self, id: &str) -> Option<&PlanDownload>;
 }
 
 impl DownloadLookup for HashMap<&str, &PlanDownload> {
+  /// 从 HashMap 中查找下载项。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `id`: 下载 ID。
+  ///
+  /// # 返回
+  /// 下载项或 `None`。
   fn get(&self, id: &str) -> Option<&PlanDownload> {
     HashMap::get(self, id).copied()
   }
 }
 
 impl DownloadLookup for FullInstallDownloadLookup<'_> {
+  /// 通过索引查找下载项。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `id`: 下载 ID。
+  ///
+  /// # 返回
+  /// 下载项或 `None`。
   fn get(&self, id: &str) -> Option<&PlanDownload> {
     self.index.get(self.plan, id)
   }
 }
 
+/// 组装并校验单个全新安装资源。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `download_index`: 下载索引。
+/// - `asset_index`: 资源游标。
+/// - `staging_root`: staging 根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `spool_root`: spool 根目录。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 pub(crate) fn assemble_full_install_asset(
   plan: &PersistedPlan,
   download_index: &FullInstallDownloadIndex,
@@ -422,6 +573,24 @@ pub(crate) fn assemble_full_install_asset_with_timing_observer(
   )
 }
 
+/// 组装单个全新安装资源并写入遥测与计时。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `download_index`: 下载索引。
+/// - `asset_index`: 资源游标。
+/// - `staging_root`: staging 根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `spool_root`: spool 根目录。
+/// - `canceled`: 取消标志。
+/// - `timing`: 组装计时。
+/// - `telemetry`: 组装遥测。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 pub(crate) fn assemble_full_install_asset_with_observers(
   plan: &PersistedPlan,
   download_index: &FullInstallDownloadIndex,
@@ -446,6 +615,24 @@ pub(crate) fn assemble_full_install_asset_with_observers(
   )
 }
 
+/// 组装单个全新安装资源的内部实现。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `download_index`: 下载索引。
+/// - `asset_index`: 资源游标。
+/// - `staging_root`: staging 根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `spool_root`: spool 根目录。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_full_install_asset_inner(
   plan: &PersistedPlan,
   download_index: &FullInstallDownloadIndex,
@@ -550,6 +737,22 @@ pub(crate) fn validate_full_install_assets_for_repair(
   Ok(())
 }
 
+/// 校验单个已安装资源，必要时重建逐文件证据。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `task_root`: 任务根目录。
+/// - `staging_root`: staging 根目录。
+/// - `asset`: 资源。
+/// - `index`: 资源游标。
+/// - `root_identity`: staging 目录身份。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 资源可信。
+/// - `Err(InstallAssetValidationFailure)`: 结构化校验失败。
 fn validate_install_asset_with_evidence(
   plan: &PersistedPlan,
   task_root: &Path,
@@ -611,6 +814,21 @@ fn validate_install_asset_with_evidence(
   Ok(())
 }
 
+/// 组装 manifest-diff 计划并上报进度。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `canceled`: 取消标志。
+/// - `concurrency`: 并发数。
+/// - `progress`: 进度回调。
+///
+/// # 返回
+/// - `Ok(AssemblySummary)`: 组装摘要。
+/// - `Err(String)`: 组装失败的错误描述。
 pub(crate) fn assemble_manifest_plan_with_progress_concurrent<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -727,16 +945,47 @@ pub(crate) fn assemble_plan_asset_to_root(
   }
 }
 
+/// 返回默认组装并发数。
+///
+/// @since Beta v0.12.3
+///
+/// # 返回
+/// 并发数。
 pub(crate) fn default_assembly_concurrency() -> usize {
   assembly_concurrency_from_parallelism(
     std::thread::available_parallelism().ok().map(|value| value.get()),
   )
 }
 
+/// 由可用并行度计算组装并发数。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `parallelism`: 可用并行度。
+///
+/// # 返回
+/// 并发数。
 fn assembly_concurrency_from_parallelism(parallelism: Option<usize>) -> usize {
   parallelism.unwrap_or(MIN_ASSEMBLY_CONCURRENCY).max(MIN_ASSEMBLY_CONCURRENCY)
 }
 
+/// 将 manifest-diff 计划组装到指定输出目录并上报进度。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `output_root`: 输出目录。
+/// - `canceled`: 取消标志。
+/// - `concurrency`: 并发数。
+/// - `progress`: 进度回调。
+///
+/// # 返回
+/// - `Ok(AssemblySummary)`: 组装摘要。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_manifest_plan_to_root_with_progress_concurrent<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -774,6 +1023,22 @@ where
   )
 }
 
+/// 将 patch 计划组装到指定输出目录并上报进度。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `output_root`: 输出目录。
+/// - `canceled`: 取消标志。
+/// - `concurrency`: 并发数。
+/// - `progress`: 进度回调。
+///
+/// # 返回
+/// - `Ok(AssemblySummary)`: 组装摘要。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_patch_plan_to_root_with_progress_concurrent<F>(
   plan: &PersistedPlan,
   game_root: &Path,
@@ -831,6 +1096,22 @@ where
   )
 }
 
+/// 并发组装资源并汇总进度。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `assets`: 资源列表。
+/// - `concurrency`: 并发数。
+/// - `canceled`: 取消标志。
+/// - `assemble`: 单个资源组装函数。
+/// - `total_count`: 资源总数。
+/// - `total_bytes`: 总字节数。
+/// - `progress`: 进度回调。
+///
+/// # 返回
+/// - `Ok(AssemblySummary)`: 组装摘要。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_assets_parallel<F, P>(
   assets: &[PlanAsset],
   concurrency: usize,
@@ -913,6 +1194,16 @@ where
   Ok(summary)
 }
 
+/// 计算资源计划的总数与总字节数。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok((usize, u64))`: 资源数与字节数。
+/// - `Err(String)`: 大小溢出的错误描述。
 fn assembly_totals(plan: &PersistedPlan) -> Result<(usize, u64), String> {
   let total_bytes = plan.assets.iter().try_fold(0_u64, |total, asset| {
     total.checked_add(asset.size).ok_or_else(|| "组装资源总大小溢出".to_string())
@@ -920,6 +1211,17 @@ fn assembly_totals(plan: &PersistedPlan) -> Result<(usize, u64), String> {
   Ok((plan.assets.len(), total_bytes))
 }
 
+/// 向前端回调上报单个资源组装进度。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `progress`: 进度回调。
+/// - `completed_count`: 已完成数。
+/// - `total_count`: 总数。
+/// - `completed_bytes`: 已完成字节数。
+/// - `total_bytes`: 总字节数。
+/// - `current_file`: 当前文件。
 fn report_asset_progress(
   progress: &mut impl FnMut(&AssemblyProgress),
   completed_count: usize,
@@ -937,6 +1239,23 @@ fn report_asset_progress(
   });
 }
 
+/// 组装并校验单个 patch 资源。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `asset`: 资源。
+/// - `patch`: patch 元数据。
+/// - `download`: patch 下载项。
+/// - `game_root`: 游戏根目录。
+/// - `cache_root`: 缓存根目录。
+/// - `staging_root`: staging 根目录。
+/// - `canceled`: 取消标志。
+/// - `telemetry`: 组装遥测。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_patch_asset(
   asset: &PlanAsset,
   patch: &PlanPatch,
@@ -984,6 +1303,21 @@ fn assemble_patch_asset(
   result
 }
 
+/// 将差分容器中指定范围复制到临时文件。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `cache_root`: 缓存根目录。
+/// - `download`: patch 下载项。
+/// - `patch`: patch 元数据。
+/// - `output`: 输出文件。
+/// - `canceled`: 取消标志。
+/// - `telemetry`: 组装遥测。
+///
+/// # 返回
+/// - `Ok(())`: 复制成功。
+/// - `Err(String)`: 复制失败的错误描述。
 fn copy_container_range(
   cache_root: &Path,
   download: &super::planner::PlanDownload,
@@ -1027,6 +1361,23 @@ fn copy_container_range(
   target.sync_all().map_err(|error| format!("同步 patch 临时文件失败：{error}"))
 }
 
+/// 使用 HDiffPatch 将原文件与差分合成为目标文件。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `asset`: 资源。
+/// - `patch`: patch 元数据。
+/// - `download`: patch 下载项。
+/// - `game_root`: 游戏根目录。
+/// - `cache_root`: 缓存根目录。
+/// - `output`: 输出文件。
+/// - `canceled`: 取消标志。
+/// - `telemetry`: 组装遥测。
+///
+/// # 返回
+/// - `Ok(())`: 合成成功。
+/// - `Err(String)`: 合成失败的错误描述。
 fn apply_hdiff_patch(
   asset: &PlanAsset,
   patch: &PlanPatch,
@@ -1098,6 +1449,20 @@ fn apply_hdiff_patch(
   }
 }
 
+/// 校验临时文件长度与 MD5 后原子提交为 staging 资源。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `partial`: 临时文件。
+/// - `output`: 目标文件。
+/// - `asset`: 资源。
+/// - `canceled`: 取消标志。
+/// - `telemetry`: 组装遥测。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 校验或提交失败的错误描述。
 fn finalize_staging_file(
   partial: &Path,
   output: &Path,
@@ -1129,6 +1494,17 @@ fn finalize_staging_file(
   rename_result.map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
+/// 校验资源 chunk 布局与下载元数据一致性。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `asset`: 资源。
+/// - `downloads`: 下载查找表。
+///
+/// # 返回
+/// - `Ok(())`: 布局合法。
+/// - `Err(String)`: 布局非法的错误描述。
 fn validate_asset_layout<L: DownloadLookup>(
   asset: &PlanAsset,
   downloads: &L,
@@ -1170,6 +1546,21 @@ fn validate_asset_layout<L: DownloadLookup>(
   Ok(())
 }
 
+/// 组装单个资源。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `asset`: 资源。
+/// - `downloads`: 下载查找表。
+/// - `game_root`: 游戏根目录。
+/// - `cache_root`: 缓存根目录。
+/// - `staging_root`: staging 根目录。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_asset<L: DownloadLookup>(
   asset: &PlanAsset,
   downloads: &L,
@@ -1192,6 +1583,25 @@ fn assemble_asset<L: DownloadLookup>(
   )
 }
 
+/// 组装单个资源并记录计时。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `asset`: 资源。
+/// - `downloads`: 下载查找表。
+/// - `game_root`: 游戏根目录。
+/// - `cache_root`: 缓存根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `spool_root`: spool 根目录。
+/// - `staging_root`: staging 根目录。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_asset_with_timing<L: DownloadLookup>(
   asset: &PlanAsset,
   downloads: &L,
@@ -1300,6 +1710,25 @@ fn assemble_asset_with_timing<L: DownloadLookup>(
   result
 }
 
+/// 组装资源，主路径失败时回退到共享缓存或 spool。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `asset`: 资源。
+/// - `downloads`: 下载查找表。
+/// - `game_root`: 游戏根目录。
+/// - `cache_root`: 主缓存根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `spool_root`: spool 根目录。
+/// - `staging_root`: staging 根目录。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 组装成功。
+/// - `Err(String)`: 组装失败的错误描述。
 fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
   asset: &PlanAsset,
   downloads: &L,
@@ -1422,6 +1851,21 @@ fn assemble_asset_with_fallback_with_timing<L: DownloadLookup>(
   result
 }
 
+/// 校验并提交已打开的资源临时文件。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `file`: 已打开文件。
+/// - `output`: 目标文件。
+/// - `asset`: 资源。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功。
+/// - `Err(String)`: 校验或提交失败的错误描述。
 fn finalize_open_asset_with_timing(
   mut file: File,
   partial: &Path,
@@ -1450,6 +1894,20 @@ fn finalize_open_asset_with_timing(
   rename_result.map_err(|error| format!("提交 staging 资源失败：{}：{error}", asset.name))
 }
 
+/// 校验 staging 资源文件的大小与 MD5。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `path`: 资源文件路径。
+/// - `asset`: 资源。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(bool)`: 是否校验通过。
+/// - `Err(String)`: 读取失败的错误描述。
 fn verified_asset_file_with_timing(
   path: &Path,
   asset: &PlanAsset,
@@ -1483,6 +1941,13 @@ struct ZstdReadTiming {
 }
 
 impl ZstdReadTiming {
+  /// 记录一次 zstd 解码读取。
+  ///
+  /// @since Beta v0.12.3
+  ///
+  /// # 参数
+  /// - `elapsed_micros`: 耗时微秒。
+  /// - `bytes`: 字节数。
   fn record(&mut self, elapsed_micros: u64, bytes: u64) {
     self.attempted = true;
     self.micros = self.micros.saturating_add(elapsed_micros);
@@ -1490,6 +1955,28 @@ impl ZstdReadTiming {
   }
 }
 
+/// 将下载完成的 chunk 校验、解压并写入 staging 输出文件。
+///
+/// 先从主缓存、共享缓存与可选 spool 中定位可用的下载缓存；命中后按
+/// `download.encoding` 选择原始读取或 Zstandard 解压，写入 `output` 并累计
+/// 装配耗时与实时遥测。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `output`: 待写入的 staging 输出文件。
+/// - `chunk`: 当前待装配的 chunk 描述。
+/// - `cache_root`: 主下载缓存目录。
+/// - `shared_cache_root`: 共享下载缓存目录。
+/// - `spool_root`: 可选的 spool 缓存目录。
+/// - `download`: 该 chunk 对应的下载计划与编码信息。
+/// - `canceled`: 取消标志，用于在装配过程中响应取消。
+/// - `timing`: 可选的装配耗时统计，函数返回后仍可读取累计结果。
+/// - `telemetry`: 可选的实时阶段遥测。
+///
+/// # 返回
+/// - `Ok(())`: chunk 已成功写入并校验。
+/// - `Err(String)`: 缓存缺失、取消或读写校验失败的错误描述。
 fn write_downloaded_chunk_with_timing(
   output: &mut File,
   chunk: &PlanChunk,
@@ -1576,7 +2063,7 @@ fn write_downloaded_chunk_with_timing(
       )?;
     }
     PayloadEncoding::Zstd => {
-      let mut reader = zstd::stream::read::Decoder::new(BufReader::new(file))
+      let mut reader = zstd::stream::read::Decoder::with_buffer(BufReader::new(file))
         .map_err(|error| format!("打开 zstd 下载缓存失败：{}：{error}", chunk.id))?;
       let timing_enabled = timing.is_some();
       let mut zstd_timing = ZstdReadTiming::default();
@@ -1629,6 +2116,23 @@ fn write_downloaded_chunk_with_timing(
   Ok(())
 }
 
+/// 将已有游戏文件中的 chunk 区间写入 staging 输出。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `output`: 目标输出文件。
+/// - `chunk`: chunk 描述。
+/// - `game_root`: 游戏根目录。
+/// - `asset_name`: 资源名。
+/// - `source_offset`: 源文件偏移。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 读取或写入失败的错误描述。
 fn write_reused_chunk_with_timing(
   output: &mut File,
   chunk: &PlanChunk,
@@ -1661,6 +2165,22 @@ fn write_reused_chunk_with_timing(
   write_exact_chunk_with_timing(output, chunk, &mut reader, canceled, timing, None, telemetry)
 }
 
+/// 按计划大小精确读取并写入 chunk，同时校验 MD5。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `output`: 目标输出文件。
+/// - `chunk`: chunk 描述。
+/// - `reader`: 输入读取器。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+/// - `zstd_timing`: 可选 zstd 计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 读取或写入失败的错误描述。
 fn write_exact_chunk_with_timing<R: Read>(
   output: &mut File,
   chunk: &PlanChunk,
@@ -1740,10 +2260,35 @@ fn write_exact_chunk_with_timing<R: Read>(
   result
 }
 
+/// 计算文件前 `size` 字节的 MD5。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `file`: 文件。
+/// - `size`: 哈希字节数。
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(String)`: MD5 十六进制字符串。
+/// - `Err(String)`: 读取失败的错误描述。
 fn hash_exact_file(file: &mut File, size: u64, canceled: &AtomicBool) -> Result<String, String> {
   hash_exact_file_with_timing(file, size, canceled, None, None)
 }
 
+/// 计算文件 MD5 并记录计时。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `file`: 文件。
+/// - `size`: 哈希字节数。
+/// - `canceled`: 取消标志。
+/// - `timing`: 可选计时。
+///
+/// # 返回
+/// - `Ok(String)`: MD5 十六进制字符串。
+/// - `Err(String)`: 读取失败的错误描述。
 fn hash_exact_file_with_timing(
   file: &mut File,
   size: u64,
@@ -1783,6 +2328,19 @@ fn hash_exact_file_with_timing(
   result
 }
 
+/// 同步 staging 文件到稳定存储。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `file`: 文件。
+/// - `bytes`: 字节数。
+/// - `timing`: 可选计时。
+/// - `telemetry`: 可选遥测。
+///
+/// # 返回
+/// - `Ok(())`: 同步成功。
+/// - `Err(String)`: 同步失败的错误描述。
 fn sync_staging_file(
   file: &File,
   bytes: u64,
@@ -1801,6 +2359,16 @@ fn sync_staging_file(
   result
 }
 
+/// 构造 staging 临时文件路径。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `output`: 目标输出路径。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 临时文件路径。
+/// - `Err(String)`: 缺少文件名或父目录的错误描述。
 fn partial_path(output: &Path) -> Result<PathBuf, String> {
   let name = output.file_name().ok_or_else(|| "资源 staging 输出路径缺少文件名".to_string())?;
   let mut partial_name = name.to_os_string();
@@ -1808,6 +2376,16 @@ fn partial_path(output: &Path) -> Result<PathBuf, String> {
   Ok(output.with_file_name(partial_name))
 }
 
+/// 清理旧的 staging 临时文件。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `path`: 临时文件路径。
+///
+/// # 返回
+/// - `Ok(())`: 清理完成。
+/// - `Err(String)`: 清理失败的错误描述。
 fn remove_stale_partial(path: &Path) -> Result<(), String> {
   match fs::remove_file(path) {
     Ok(()) => Ok(()),
@@ -1825,6 +2403,16 @@ fn remove_stale_output(path: &Path) -> Result<(), String> {
   }
 }
 
+/// 检查任务是否已取消。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 未取消。
+/// - `Err(String)`: 已取消。
 fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) {
     Err("游戏资源组装已取消".to_string())

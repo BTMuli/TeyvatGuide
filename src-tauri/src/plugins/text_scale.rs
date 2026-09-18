@@ -10,6 +10,12 @@ use windows_sys::Win32::System::Registry::{
   RegNotifyChangeKeyValue, RegOpenKeyExW,
 };
 
+/// 启动后台线程监听 Windows 文本缩放注册表变化并向前端广播。
+///
+/// @since Beta v0.9.1
+///
+/// # 参数
+/// - `app`: Tauri 应用句柄，用于向窗口发送 `text_scale_change` 事件。
 pub fn init(app: AppHandle) {
   thread::spawn(move || unsafe {
     let subkey = U16CString::from_str("Software\\Microsoft\\Accessibility").unwrap();

@@ -32,6 +32,12 @@ pub(crate) struct InstallDefenderDirs {
 }
 
 impl InstallDefenderDirs {
+  /// 返回所有已配置目录的规范化 Windows 路径。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 返回
+  /// 去空并统一为反斜杠分隔的目录路径列表。
   pub(crate) fn paths(&self) -> Vec<String> {
     [
       self.target_root.as_str(),
@@ -77,18 +83,55 @@ pub(crate) fn resolve_install_dirs(
   })
 }
 
+/// 将路径转换为规范化 Windows 字符串。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待转换的路径。
+///
+/// # 返回
+/// 规范化后的字符串。
 fn path_text(path: &Path) -> String {
   normalize_windows_path(&path.to_string_lossy())
 }
 
+/// 将路径中的正斜杠替换为反斜杠。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待转换的路径。
+///
+/// # 返回
+/// 反斜杠分隔的路径。
 fn normalize_windows_path(path: &str) -> String {
   path.replace('/', "\\")
 }
 
+/// 生成用于比较排除路径的规范化小写键。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待规范化的路径。
+///
+/// # 返回
+/// 去除末尾分隔符并小写后的键。
 fn normalize_exclusion_key(path: &str) -> String {
   normalize_windows_path(path).trim_end_matches('\\').to_ascii_lowercase()
 }
 
+/// 过滤出未被其它登记保留的可移除排除路径。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `paths`: 待检查的路径列表。
+/// - `retained`: 仍需保留的路径键集合。
+///
+/// # 返回
+/// 可安全移除的路径列表。
 fn removable_exclusion_paths(paths: &[String], retained: &HashSet<String>) -> Vec<String> {
   paths.iter().filter(|path| !retained.contains(&normalize_exclusion_key(path))).cloned().collect()
 }
@@ -121,6 +164,17 @@ pub(crate) fn remove_exclusions(paths: &[String]) -> Result<(), String> {
   run_defender_elevated(paths, true)
 }
 
+/// 通过 PowerShell UAC 提权执行 Defender 排除的添加或移除。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `paths`: 待处理的目录路径。
+/// - `remove`: `true` 表示移除，`false` 表示添加。
+///
+/// # 返回
+/// - `Ok(())`: 操作成功。
+/// - `Err(String)`: 启动失败或 PowerShell 返回的错误描述。
 fn run_defender_elevated(paths: &[String], remove: bool) -> Result<(), String> {
   let paths = paths.iter().map(|path| normalize_windows_path(path)).collect::<Vec<String>>();
   for path in &paths {
@@ -181,6 +235,15 @@ fn sanitize_powershell_error(text: &str) -> String {
   capped
 }
 
+/// 读取 PowerShell 状态文件内容，空内容返回 `None`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 状态文件路径。
+///
+/// # 返回
+/// 去除首尾空白后的状态文本。
 fn read_status_file(path: &Path) -> Option<String> {
   let bytes = fs::read(path).ok()?;
   let text = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
@@ -192,6 +255,16 @@ fn read_status_file(path: &Path) -> Option<String> {
   if text.is_empty() { None } else { Some(text.to_string()) }
 }
 
+/// 校验排除路径为不含通配符的绝对非盘根路径。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待校验的路径。
+///
+/// # 返回
+/// - `Ok(())`: 路径合法。
+/// - `Err(String)`: 路径非法的错误描述。
 fn validate_exclusion_path(path: &str) -> Result<(), String> {
   let value = Path::new(path);
   if !value.is_absolute() {
@@ -206,10 +279,30 @@ fn validate_exclusion_path(path: &str) -> Result<(), String> {
   Ok(())
 }
 
+/// 将字符串转换为 PowerShell 单引号字符串。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `value`: 待引用的字符串。
+///
+/// # 返回
+/// PowerShell 单引号字符串。
 fn ps_quote(value: &str) -> String {
   format!("'{}'", value.replace('\'', "''"))
 }
 
+/// 构造执行 Defender 排除增删的内层 PowerShell 脚本。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `status_file`: 状态文件路径。
+/// - `paths`: 待处理的目录路径。
+/// - `remove`: 是否为移除操作。
+///
+/// # 返回
+/// 内层脚本文本。
 fn build_inner_script(status_file: &str, paths: &[String], remove: bool) -> String {
   let path_list = paths
     .iter()
@@ -263,6 +356,16 @@ fn build_inner_script(status_file: &str, paths: &[String], remove: bool) -> Stri
   )
 }
 
+/// 构造负责 UAC 提权启动内层脚本的外层 PowerShell 脚本。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `status_file`: 状态文件路径。
+/// - `encoded_command`: 已编码的内层命令。
+///
+/// # 返回
+/// 外层脚本文本。
 fn build_outer_script(status_file: &str, encoded_command: &str) -> String {
   format!(
     "$ErrorActionPreference = 'Stop'\n\
@@ -285,6 +388,15 @@ fn build_outer_script(status_file: &str, encoded_command: &str) -> String {
   )
 }
 
+/// 将文本编码为 UTF-16LE 字节。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `text`: 待编码的文本。
+///
+/// # 返回
+/// UTF-16LE 字节向量。
 fn utf16le_bytes(text: &str) -> Vec<u8> {
   let mut bytes = Vec::with_capacity(text.len() * 2);
   for unit in text.encode_utf16() {
@@ -293,6 +405,15 @@ fn utf16le_bytes(text: &str) -> Vec<u8> {
   bytes
 }
 
+/// 使用标准 Base64 编码字节数据。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `data`: 待编码的字节。
+///
+/// # 返回
+/// Base64 字符串。
 fn base64_encode(data: &[u8]) -> String {
   const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   let mut output = String::with_capacity(data.len().div_ceil(3) * 4);
@@ -313,10 +434,29 @@ fn base64_encode(data: &[u8]) -> String {
   output
 }
 
+/// 返回 Defender 排除登记目录路径。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+///
+/// # 返回
+/// 登记目录路径。
 fn registry_dir(task_root: &Path) -> PathBuf {
   task_root.join(EXCLUSION_REGISTRY_DIR)
 }
 
+/// 返回指定计划的 Defender 排除登记文件路径。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// 登记文件路径。
 fn registry_path(task_root: &Path, plan_id: &str) -> PathBuf {
   registry_dir(task_root).join(format!("{plan_id}.json"))
 }
@@ -389,6 +529,16 @@ pub(crate) fn cleanup_install_exclusions(task_root: &Path, plan_id: &str) -> Res
   Ok(())
 }
 
+/// 收集其它计划登记中仍需保留的排除路径键。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `except_plan_id`: 需要排除的计划 ID。
+///
+/// # 返回
+/// 其它计划保留的路径键集合。
 fn other_registry_path_keys(task_root: &Path, except_plan_id: &str) -> HashSet<String> {
   let entries = match fs::read_dir(registry_dir(task_root)) {
     Ok(entries) => entries,

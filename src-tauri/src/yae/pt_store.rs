@@ -8,6 +8,15 @@ use serde::{Deserialize, Serialize, Serializer};
 use std::collections::HashMap;
 use std::io::{Cursor, Error, ErrorKind, Read, Seek};
 
+/// 构造带 `InvalidData` 错误类型的 I/O 错误。
+///
+/// @since Beta v0.11.3
+///
+/// # 参数
+/// - `message`: 错误描述。
+///
+/// # 返回
+/// 对应的 `std::io::Error`。
 fn invalid_data(message: &'static str) -> Error {
   Error::new(ErrorKind::InvalidData, message)
 }
@@ -247,6 +256,15 @@ pub enum ItemInfo {
 /// 自定义序列化：将 enum 变体展开为一个扁平的 map（没有变体名包裹）
 /// 例如：ItemInfo::Material { count: 5 } -> { "count": 5 }
 impl Serialize for ItemInfo {
+  /// 将 `ItemInfo` 序列化为扁平 map。
+  ///
+  /// @since Beta v0.11.3
+  ///
+  /// # 参数
+  /// - `serializer`: serde 序列化器。
+  ///
+  /// # 返回
+  /// serde 序列化结果。
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where
     S: Serializer,

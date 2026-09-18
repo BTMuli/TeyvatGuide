@@ -11,6 +11,18 @@ use url::Url;
 
 static BBS_VERSION: &'static str = "2.115.0";
 
+/// 创建或复用米游社客户端 WebView 窗口。
+///
+/// @since Beta v0.12.2
+///
+/// # 参数
+/// - `handle`: Tauri 应用句柄。
+/// - `func`: 要打开的功能名。
+/// - `url`: 可选的自定义 URL。
+///
+/// # 返回
+/// - `Ok(())`: 窗口已创建或已复用。
+/// - `Err(String)`: 链接无效或窗口操作失败的错误描述。
 #[tauri::command]
 pub async fn create_mhy_client(handle: AppHandle, func: String, url: String) -> Result<(), String> {
   let mut win_width = 400.0;

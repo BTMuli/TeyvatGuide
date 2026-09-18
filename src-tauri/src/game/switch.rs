@@ -76,10 +76,22 @@ pub(crate) struct PersistedSwitchPlan {
 }
 
 impl PersistedSwitchPlan {
+  /// 返回计划 ID。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 计划 ID 字符串。
   pub(crate) fn plan_id(&self) -> &str {
     &self.plan_id
   }
 
+  /// 返回安装 ID。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 安装 ID 字符串。
   pub(crate) fn installation_id(&self) -> &str {
     &self.installation_id
   }
@@ -484,6 +496,19 @@ pub(crate) fn load_or_create_switch_journal(
   Ok(journal)
 }
 
+/// 收集换服时需要删除的废弃文件与已知 SDK 文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `deprecated`: 废弃文件路径列表。
+/// - `inventory_names`: 库存文件名集合。
+/// - `remove_known_sdk`: 是否删除已知 SDK 文件。
+///
+/// # 返回
+/// - `Ok(Vec<String>)`: 去重排序后的待删除文件路径。
+/// - `Err(String)`: 路径校验失败的错误描述。
 fn collect_delete_files(
   game_root: &Path,
   deprecated: &[String],
@@ -504,6 +529,20 @@ fn collect_delete_files(
   Ok(delete_files)
 }
 
+/// 将存在且不属于库存的文件路径加入删除列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `name`: 文件相对路径。
+/// - `inventory_names`: 库存文件名集合。
+/// - `seen`: 已处理集合。
+/// - `delete_files`: 待删除文件列表。
+///
+/// # 返回
+/// - `Ok(())`: 处理完成。
+/// - `Err(String)`: 路径解析失败的错误描述。
 fn push_existing_non_inventory(
   game_root: &Path,
   name: &str,
@@ -520,6 +559,15 @@ fn push_existing_non_inventory(
   Ok(())
 }
 
+/// 将渠道 SDK 包转换为可持久化结构。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `package`: 渠道 SDK 包。
+///
+/// # 返回
+/// 持久化 SDK 结构。
 fn persisted_sdk(package: &ChannelSdkPackage) -> PersistedSdk {
   PersistedSdk {
     version: package.version.clone(),
@@ -531,10 +579,30 @@ fn persisted_sdk(package: &ChannelSdkPackage) -> PersistedSdk {
   }
 }
 
+/// 返回渠道 SDK 缓存文件路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `md5`: SDK MD5。
+///
+/// # 返回
+/// 缓存文件路径。
 fn sdk_cache_path(task_root: &Path, md5: &str) -> PathBuf {
   task_root.join("cache/sdks").join(md5)
 }
 
+/// 检查渠道 SDK 缓存是否完整命中。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `package`: 渠道 SDK 包。
+///
+/// # 返回
+/// 命中时返回包大小，否则返回 0。
 fn sdk_cache_hit(task_root: &Path, package: &ChannelSdkPackage) -> u64 {
   let path = sdk_cache_path(task_root, &package.md5);
   let Ok(metadata) = fs::metadata(&path) else {
@@ -549,10 +617,30 @@ fn sdk_cache_hit(task_root: &Path, package: &ChannelSdkPackage) -> u64 {
   }
 }
 
+/// 计算文件 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok(String)`: MD5 十六进制字符串。
+/// - `Err(String)`: 读取失败的错误描述。
 fn file_md5(path: &Path) -> Result<String, String> {
   Ok(file_size_and_md5(path)?.1)
 }
 
+/// 同时计算文件大小与 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok((u64, String))`: 文件大小与 MD5。
+/// - `Err(String)`: 读取失败的错误描述。
 fn file_size_and_md5(path: &Path) -> Result<(u64, String), String> {
   let metadata = fs::metadata(path).map_err(|error| format!("读取文件状态失败：{error}"))?;
   let mut file = File::open(path).map_err(|error| format!("打开文件失败：{error}"))?;
@@ -568,6 +656,16 @@ fn file_size_and_md5(path: &Path) -> Result<(u64, String), String> {
   Ok((metadata.len(), hex::encode(hasher.finalize())))
 }
 
+/// 读取并校验换服计划文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 计划文件路径。
+///
+/// # 返回
+/// - `Ok(PersistedSwitchPlan)`: 有效计划。
+/// - `Err(String)`: 大小或字段无效的错误描述。
 fn load_plan_file(path: &Path) -> Result<PersistedSwitchPlan, String> {
   let metadata = fs::metadata(path).map_err(|error| format!("读取换服计划失败：{error}"))?;
   if metadata.len() == 0 || metadata.len() > MAX_PLAN_BYTES as u64 {
@@ -585,6 +683,17 @@ fn load_plan_file(path: &Path) -> Result<PersistedSwitchPlan, String> {
   Ok(plan)
 }
 
+/// 校验安装与换服计划是否匹配。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installation`: 游戏安装信息。
+/// - `plan`: 换服计划。
+///
+/// # 返回
+/// - `Ok(())`: 匹配。
+/// - `Err(String)`: 不匹配的错误描述。
 fn validate_switch_installation(
   installation: &GameInstallation,
   plan: &PersistedSwitchPlan,
@@ -606,10 +715,27 @@ fn validate_switch_installation(
   Ok(())
 }
 
+/// 返回换服计划中的目标 SDK 包列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 换服计划。
+///
+/// # 返回
+/// SDK 包列表。
 fn target_sdk_packages(plan: &PersistedSwitchPlan) -> Vec<PersistedSdk> {
   plan.sdk.iter().cloned().collect()
 }
 
+/// 将换服 SDK 缓存命中信息写入任务日志。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `task_root`: 任务根目录。
+/// - `packages`: SDK 包列表。
 fn record_switch_cache(journal: &mut TaskJournal, task_root: &Path, packages: &[PersistedSdk]) {
   let mut owned = Vec::new();
   let mut downloaded = 0_u64;
@@ -626,6 +752,15 @@ fn record_switch_cache(journal: &mut TaskJournal, task_root: &Path, packages: &[
   journal.downloaded_bytes = downloaded.min(journal.total_bytes);
 }
 
+/// 将持久化 SDK 结构转换回渠道 SDK 包。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `package`: 持久化 SDK 结构。
+///
+/// # 返回
+/// 渠道 SDK 包。
 fn channel_sdk_from_persisted(package: &PersistedSdk) -> ChannelSdkPackage {
   ChannelSdkPackage {
     version: package.version.clone(),
@@ -637,6 +772,21 @@ fn channel_sdk_from_persisted(package: &PersistedSdk) -> ChannelSdkPackage {
   }
 }
 
+/// 下载渠道 SDK 压缩包，校验 MD5 后提交到缓存。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `package`: SDK 包。
+/// - `task_root`: 任务根目录。
+/// - `task_id`: 任务 ID。
+/// - `canceled`: 取消标志。
+/// - `on_progress`: 下载进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 下载并校验成功。
+/// - `Err(String)`: 下载或校验失败的错误描述。
 async fn download_sdk_zip(
   client: &reqwest::Client,
   package: &PersistedSdk,
@@ -688,6 +838,20 @@ async fn download_sdk_zip(
   Err(format!("渠道 SDK 下载重试后仍失败：{last_error}"))
 }
 
+/// 执行单次 SDK 压缩包下载。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `package`: SDK 包。
+/// - `partial`: 临时文件路径。
+/// - `canceled`: 取消标志。
+/// - `on_progress`: 下载进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 下载完成。
+/// - `Err(String)`: 下载失败的错误描述。
 async fn download_sdk_once(
   client: &reqwest::Client,
   package: &PersistedSdk,
@@ -729,10 +893,31 @@ async fn download_sdk_once(
   Ok(())
 }
 
+/// 计算 SDK 解压大小预算。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `declared`: 声明的解压大小。
+///
+/// # 返回
+/// 受限后的预算字节数。
 fn sdk_decompress_budget(declared: u64) -> u64 {
   declared.saturating_mul(2).min(MAX_SDK_DECOMPRESSED_BYTES)
 }
 
+/// 安全解压渠道 SDK 压缩包到 staging 目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `zip_path`: 压缩包路径。
+/// - `staging_root`: staging 根目录。
+/// - `max_decompressed`: 解压大小上限。
+///
+/// # 返回
+/// - `Ok(())`: 解压完成。
+/// - `Err(String)`: 解压失败或超限的错误描述。
 fn extract_sdk_zip(
   zip_path: &Path,
   staging_root: &Path,
@@ -776,6 +961,17 @@ fn extract_sdk_zip(
   Ok(())
 }
 
+/// 校验 staging 中 SDK 文件与 sdk_pkg_version 清单一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `staging_root`: staging 根目录。
+/// - `package`: SDK 包。
+///
+/// # 返回
+/// - `Ok(HashMap)`: 校验通过的文件名到（大小, MD5）映射。
+/// - `Err(String)`: 清单或文件不一致的错误描述。
 fn verify_staged_sdk(
   staging_root: &Path,
   package: &PersistedSdk,
@@ -828,6 +1024,20 @@ fn verify_staged_sdk(
   Ok(staged)
 }
 
+/// 构造换服文件步骤描述。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `kind`: 步骤类型。
+/// - `name`: 文件相对路径。
+/// - `size`: 文件大小。
+/// - `md5`: 文件 MD5。
+/// - `source_size`: 源文件大小。
+/// - `source_md5`: 源文件 MD5。
+///
+/// # 返回
+/// 换服文件步骤。
 fn switch_file(
   kind: &str,
   name: &str,
@@ -846,12 +1056,32 @@ fn switch_file(
   }
 }
 
+/// 返回清空摘要后的提交负载，用于计算摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 原提交。
+///
+/// # 返回
+/// 清空摘要后的提交副本。
 fn digest_payload(commit: &PersistedSwitchCommit) -> PersistedSwitchCommit {
   let mut payload = commit.clone();
   payload.digest.clear();
   payload
 }
 
+/// 持久化换服提交计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `commit`: 换服提交。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 序列化或写入失败的错误描述。
 fn persist_commit(task_root: &Path, commit: &PersistedSwitchCommit) -> Result<(), String> {
   let directory = task_root.join("switch").join(&commit.installation_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建换服提交目录失败：{error}"))?;
@@ -880,10 +1110,30 @@ fn persist_commit(task_root: &Path, commit: &PersistedSwitchCommit) -> Result<()
   atomic_replace(&temporary, &target)
 }
 
+/// 返回换服提交计划文件路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 安装 ID。
+///
+/// # 返回
+/// 提交计划文件路径。
 fn commit_path(task_root: &Path, installation_id: &str) -> PathBuf {
   task_root.join("switch").join(installation_id).join("commit.json")
 }
 
+/// 将持久化换服提交转换为执行请求。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `commit`: 持久化换服提交。
+///
+/// # 返回
+/// - `Ok(SwitchApplyRequest)`: 执行请求。
+/// - `Err(String)`: 未知步骤类型的错误描述。
 fn switch_apply_request(commit: &PersistedSwitchCommit) -> Result<SwitchApplyRequest, String> {
   let mut files = Vec::with_capacity(commit.files.len());
   for file in &commit.files {
@@ -911,12 +1161,31 @@ fn switch_apply_request(commit: &PersistedSwitchCommit) -> Result<SwitchApplyReq
   })
 }
 
+/// 计算字节内容的 SHA-256。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `content`: 待哈希内容。
+///
+/// # 返回
+/// SHA-256 十六进制字符串。
 fn sha256_bytes(content: &[u8]) -> String {
   let mut hasher = <Sha256 as Sha2Digest>::new();
   hasher.update(content);
   hex::encode(hasher.finalize())
 }
 
+/// 检查任务是否已取消。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `canceled`: 取消标志。
+///
+/// # 返回
+/// - `Ok(())`: 未取消。
+/// - `Err(String)`: 已取消。
 fn check_canceled(canceled: &AtomicBool) -> Result<(), String> {
   if canceled.load(Ordering::Acquire) { Err("任务已取消".to_string()) } else { Ok(()) }
 }
@@ -944,6 +1213,18 @@ pub(crate) fn remove_finished_switch_dir(
   Ok(())
 }
 
+/// 删除与指定计划匹配的换服提交计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 安装 ID。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// - `Ok(())`: 删除成功或无需删除。
+/// - `Err(String)`: 读取或删除失败的错误描述。
 fn remove_matching_switch_commit(
   task_root: &Path,
   installation_id: &str,
@@ -966,6 +1247,17 @@ fn remove_matching_switch_commit(
   }
 }
 
+/// 持久化换服计划及元数据，失败时回滚相关目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan`: 换服计划。
+///
+/// # 返回
+/// - `Ok(())`: 持久化成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_plan(task_root: &Path, plan: &PersistedSwitchPlan) -> Result<(), String> {
   persist_plan_at(&task_root.join("switch").join(&plan.installation_id), plan)?;
   if let Err(error) = persist_task_switch_plan(task_root, plan).and_then(|()| {
@@ -984,10 +1276,32 @@ fn persist_plan(task_root: &Path, plan: &PersistedSwitchPlan) -> Result<(), Stri
   Ok(())
 }
 
+/// 在任务目录下持久化换服计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan`: 换服计划。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_task_switch_plan(task_root: &Path, plan: &PersistedSwitchPlan) -> Result<(), String> {
   persist_plan_at(&task_root.join("tasks").join(&plan.plan_id), plan)
 }
 
+/// 在指定目录写入换服计划文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `directory`: 目标目录。
+/// - `plan`: 换服计划。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 序列化或写入失败的错误描述。
 fn persist_plan_at(directory: &Path, plan: &PersistedSwitchPlan) -> Result<(), String> {
   fs::create_dir_all(directory).map_err(|error| format!("创建换服计划目录失败：{error}"))?;
   let content =
@@ -1015,6 +1329,17 @@ fn persist_plan_at(directory: &Path, plan: &PersistedSwitchPlan) -> Result<(), S
   atomic_replace(&temporary, &target)
 }
 
+/// Windows 下原子替换文件，处理占用与只读属性并短暂重试。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(target_os = "windows")]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   use std::os::windows::ffi::OsStrExt;
@@ -1055,6 +1380,15 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   Err(format!("提交换服计划失败：{message}"))
 }
 
+/// 清除文件的只读属性，文件不存在时静默成功。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// I/O 操作结果。
 #[cfg(target_os = "windows")]
 fn clear_readonly_attribute(path: &Path) -> std::io::Result<()> {
   use std::os::windows::ffi::OsStrExt;
@@ -1078,6 +1412,17 @@ fn clear_readonly_attribute(path: &Path) -> std::io::Result<()> {
   Ok(())
 }
 
+/// 非 Windows 平台通过 rename 原子替换文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("提交换服计划失败：{error}"))

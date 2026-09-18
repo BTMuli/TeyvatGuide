@@ -322,6 +322,16 @@ pub async fn get_deprecated_files(
   Ok(names)
 }
 
+/// 校验并规范化单个渠道 SDK 响应，返回可供下载的 SDK 包信息。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `item`: HoyoPlay 返回的渠道 SDK 响应。
+///
+/// # 返回
+/// - `Ok(ChannelSdkPackage)`: 校验通过并规范化后的 SDK 包。
+/// - `Err(String)`: 字段、校验值、大小或下载地址非法的错误描述。
 fn validate_channel_sdk(item: ChannelSdkResponse) -> Result<ChannelSdkPackage, String> {
   if item.version.is_empty()
     || item.version.len() > 128
@@ -362,10 +372,28 @@ fn validate_channel_sdk(item: ChannelSdkResponse) -> Result<ChannelSdkPackage, S
   })
 }
 
+/// 判断字符串是否为 32 位十六进制 MD5 校验值。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `value`: 待判断的字符串。
+///
+/// # 返回
+/// 是否为合法 MD5 十六进制字符串。
 fn is_hex_md5(value: &str) -> bool {
   value.len() == 32 && value.chars().all(|ch| ch.is_ascii_hexdigit())
 }
 
+/// 将 `u64` 从整数或字符串形式反序列化，兼容 API 返回的类型差异。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `deserializer`: serde 反序列化器。
+///
+/// # 返回
+/// serde 反序列化结果。
 fn deserialize_u64<'de, D>(deserializer: D) -> Result<u64, D::Error>
 where
   D: serde::Deserializer<'de>,
@@ -399,6 +427,17 @@ pub fn create_snapshot(
   }
 }
 
+/// 校验 HoyoPlay 分支描述字段与资源分类的合法性。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `branch`: 待校验的分支描述。
+/// - `pre_download`: 是否为预下载分支。
+///
+/// # 返回
+/// - `Ok(())`: 分支字段合法。
+/// - `Err(String)`: 字段或资源分类非法的错误描述。
 fn validate_branch(branch: &BranchDescriptor, pre_download: bool) -> Result<(), String> {
   for (name, value) in [
     ("package_id", branch.package_id.as_str()),

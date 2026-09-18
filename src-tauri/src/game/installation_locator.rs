@@ -321,6 +321,15 @@ fn source_rank(source: InstallationDiscoverySource) -> u8 {
 }
 
 #[cfg(target_os = "windows")]
+/// 计算一组发现来源的最低优先级排名，空集合返回 `u8::MAX`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `sources`: 安装发现来源集合。
+///
+/// # 返回
+/// 最低排名，空集合时返回 `u8::MAX`。
 fn source_rank_of(sources: &[InstallationDiscoverySource]) -> u8 {
   sources.iter().copied().map(source_rank).min().unwrap_or(u8::MAX)
 }

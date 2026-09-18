@@ -44,6 +44,14 @@ const PLAN_PROGRESS_TOTAL: u8 = 4;
 const MAX_CACHE_SCAN_WORKERS: usize = 8;
 const CACHE_SCAN_PROGRESS_BATCH_SIZE: usize = 128;
 
+/// 通过计划进度通道发送一个阶段性进度。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `channel`: 计划进度通道。
+/// - `step`: 当前步骤。
+/// - `message`: 进度说明。
 pub(crate) fn report_plan_progress(
   channel: &Channel<PackagePlanProgress>,
   step: u8,
@@ -440,6 +448,23 @@ pub(crate) async fn load_verify_target(
   Ok((target, inventory))
 }
 
+/// 将计划部件持久化并生成计划摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installation`: 安装信息。
+/// - `scheme`: 渠道方案。
+/// - `target`: 计划目标。
+/// - `source_tag`: 源版本标签。
+/// - `target_tag`: 目标版本标签。
+/// - `parts`: 计划部件。
+/// - `task_root`: 任务根目录。
+/// - `audio_selection`: 可选语音选择。
+///
+/// # 返回
+/// - `Ok(PackagePlanSummary)`: 计划摘要。
+/// - `Err(String)`: 持久化失败的错误描述。
 pub(crate) fn persist_plan_parts(
   installation: &GameInstallation,
   scheme: SchemeId,
@@ -713,6 +738,20 @@ fn persist_install_plan_from_decoded(
   Ok((summary, plan))
 }
 
+/// 重新请求远端清单并校验、水合全新安装计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installation_id`: 安装 ID。
+/// - `scheme`: 渠道方案。
+/// - `audio_languages`: 已选语音包。
+/// - `branches`: 游戏分支信息。
+/// - `plan`: 待校验计划。
+///
+/// # 返回
+/// - `Ok(PersistedPlan)`: 水合后的计划。
+/// - `Err(String)`: 不匹配或请求失败的错误描述。
 pub(crate) async fn hydrate_and_validate_install_plan(
   installation_id: &str,
   scheme: SchemeId,
@@ -770,6 +809,17 @@ pub(crate) async fn hydrate_and_validate_install_plan(
   Ok(plan)
 }
 
+/// 将 SDK 包追加到计划下载列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `parts`: 计划部件。
+/// - `sdk`: SDK 包。
+///
+/// # 返回
+/// - `Ok(())`: 追加成功。
+/// - `Err(String)`: 缓存键重复的错误描述。
 fn parts_download_push_sdk(parts: &mut PlanParts, sdk: &InstallSdk) -> Result<(), String> {
   let download = PlanDownload {
     id: sdk.cache_key.clone(),
@@ -792,6 +842,16 @@ fn parts_download_push_sdk(parts: &mut PlanParts, sdk: &InstallSdk) -> Result<()
   Ok(())
 }
 
+/// 从解码后的主构建生成全新安装计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `target`: 目标构建。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 缺少下载信息或元数据无效的错误描述。
 fn build_full_install_plan(target: DecodedBuild) -> Result<PlanParts, String> {
   let target_assets = collect_assets(&target)?;
   let inventory = collect_inventory(&target_assets)?;
@@ -828,6 +888,17 @@ fn build_full_install_plan(target: DecodedBuild) -> Result<PlanParts, String> {
   })
 }
 
+/// 计算带覆盖层的新安装 manifest 摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `manifest_digest`: 基础 manifest 摘要。
+/// - `overlay`: 安装覆盖层。
+///
+/// # 返回
+/// - `Ok(String)`: 摘要。
+/// - `Err(String)`: 序列化失败的错误描述。
 fn install_manifest_digest(
   manifest_digest: &str,
   overlay: &InstallOverlay,
@@ -837,6 +908,16 @@ fn install_manifest_digest(
   Ok(sha256_bytes(&bytes))
 }
 
+/// 判断两个路径是否位于同一卷。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `left`: 第一个路径。
+/// - `right`: 第二个路径。
+///
+/// # 返回
+/// 是否同卷；非 Windows 返回 `false`。
 pub(crate) fn same_volume(left: &Path, right: &Path) -> bool {
   #[cfg(target_os = "windows")]
   {
@@ -858,6 +939,19 @@ pub(crate) fn same_volume(left: &Path, right: &Path) -> bool {
   }
 }
 
+/// 计算更新计划的空间预算。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `missing_download_bytes`: 待下载字节数。
+/// - `install_bytes`: 安装字节数。
+/// - `cache_available_free_bytes`: 缓存卷可用空间。
+/// - `install_available_free_bytes`: 安装卷可用空间。
+/// - `same_volume`: 是否同卷。
+///
+/// # 返回
+/// 空间预算。
 fn calculate_update_space_budget(
   missing_download_bytes: u64,
   install_bytes: u64,
@@ -891,6 +985,19 @@ fn calculate_update_space_budget(
   }
 }
 
+/// 计算全新安装计划的空间预算。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `install_bytes`: 安装字节数。
+/// - `spool_window`: 峰值 spool 窗口。
+/// - `cache_available_free_bytes`: 缓存卷可用空间。
+/// - `install_available_free_bytes`: 安装卷可用空间。
+/// - `same_volume`: 是否同卷。
+///
+/// # 返回
+/// 空间预算。
 fn calculate_install_space_budget(
   install_bytes: u64,
   spool_window: u64,
@@ -930,12 +1037,32 @@ fn calculate_install_space_budget(
   }
 }
 
+/// 计算字节内容的 SHA-256。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `bytes`: 待哈希内容。
+///
+/// # 返回
+/// SHA-256 十六进制字符串。
 fn sha256_bytes(bytes: &[u8]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(bytes);
   hex::encode(hasher.finalize())
 }
 
+/// 解析预下载计划水合时应使用的分支。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `branches`: 游戏分支信息。
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(&BranchDescriptor)`: 分支描述。
+/// - `Err(String)`: 版本变化的错误描述。
 fn resolve_pre_download_hydrate_branch<'a>(
   branches: &'a GameBranches,
   plan: &PersistedPlan,
@@ -1092,6 +1219,18 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
   Ok(plan)
 }
 
+/// 重新请求远端清单并校验、水合语音包计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installation`: 安装信息。
+/// - `branches`: 游戏分支信息。
+/// - `plan`: 待校验计划。
+///
+/// # 返回
+/// - `Ok(PersistedPlan)`: 水合后的计划。
+/// - `Err(String)`: 不匹配或请求失败的错误描述。
 async fn hydrate_audio_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -1193,6 +1332,17 @@ pub(crate) async fn hydrate_and_validate_repair_plan(
   overlay_repair_parts(plan, build_repair_parts(target, files)?)
 }
 
+/// 将修复计划部件覆盖到已有计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 已有计划。
+/// - `parts`: 修复计划部件。
+///
+/// # 返回
+/// - `Ok(PersistedPlan)`: 覆盖后的计划。
+/// - `Err(String)`: 清单不一致的错误描述。
 fn overlay_repair_parts(
   mut plan: PersistedPlan,
   parts: PlanParts,
@@ -1214,6 +1364,18 @@ fn overlay_repair_parts(
   Ok(plan)
 }
 
+/// 重新请求清单生成完整性修复计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `installation`: 安装信息。
+/// - `branches`: 游戏分支信息。
+/// - `plan`: 已有计划。
+///
+/// # 返回
+/// - `Ok(PersistedPlan)`: 修复计划。
+/// - `Err(String)`: 生成失败的错误描述。
 async fn hydrate_integrity_repair_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -1234,6 +1396,15 @@ async fn hydrate_integrity_repair_plan(
   overlay_repair_parts(plan, build_repair_parts(target, &files)?)
 }
 
+/// 判断计划是否为完整性修复计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// 是否为修复计划。
 fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
   plan.source_tag.as_deref() == Some(plan.target_tag.as_str())
     && plan.target == PackagePlanTarget::Main
@@ -1243,6 +1414,16 @@ fn is_integrity_repair_plan(plan: &PersistedPlan) -> bool {
     && plan.assets.iter().all(|asset| asset.action == PlanAssetAction::Repair)
 }
 
+/// 判断两个下载列表是否一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `left`: 第一个列表。
+/// - `right`: 第二个列表。
+///
+/// # 返回
+/// 是否一致。
 fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
   left.len() == right.len()
     && left.iter().zip(right).all(|(left, right)| {
@@ -1258,6 +1439,16 @@ fn downloads_match(left: &[PlanDownload], right: &[PlanDownload]) -> bool {
     })
 }
 
+/// 判断两个资源列表是否一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `left`: 第一个列表。
+/// - `right`: 第二个列表。
+///
+/// # 返回
+/// 是否一致。
 fn assets_match(left: &[PlanAsset], right: &[PlanAsset]) -> bool {
   left.len() == right.len()
     && left.iter().zip(right).all(|(left, right)| {
@@ -1271,6 +1462,20 @@ fn assets_match(left: &[PlanAsset], right: &[PlanAsset]) -> bool {
     })
 }
 
+/// 构建可执行计划，优先使用 patch，失败时回退 manifest-diff。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `branches`: 游戏分支信息。
+/// - `target_branch`: 目标分支。
+/// - `source_tag`: 源版本标签。
+/// - `audio_languages`: 已选语音包。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 构建失败的错误描述。
 async fn build_executable_plan(
   client: &reqwest::Client,
   branches: &GameBranches,
@@ -1308,6 +1513,19 @@ async fn build_executable_plan(
     .await
 }
 
+/// 拉取源与目标清单并生成 manifest-diff 计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `source_branch`: 源分支。
+/// - `target_branch`: 目标分支。
+/// - `audio_languages`: 已选语音包。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 构建失败的错误描述。
 async fn build_manifest_plan(
   client: &reqwest::Client,
   source_branch: &super::hoyoplay::BranchDescriptor,
@@ -1321,6 +1539,18 @@ async fn build_manifest_plan(
   build_manifest_diff(source, target)
 }
 
+/// 生成语音包 manifest-diff 计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `branch`: 分支。
+/// - `selection`: 语音选择。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 构建失败的错误描述。
 async fn build_audio_manifest_plan(
   client: &reqwest::Client,
   branch: &super::hoyoplay::BranchDescriptor,
@@ -1336,6 +1566,17 @@ async fn build_audio_manifest_plan(
   Ok(parts)
 }
 
+/// 对比源与目标构建生成 manifest-diff 计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源构建。
+/// - `target`: 目标构建。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 元数据无效的错误描述。
 fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<PlanParts, String> {
   let source_assets = collect_assets(&source)?;
   let target_assets = collect_assets(&target)?;
@@ -1404,6 +1645,17 @@ fn build_manifest_diff(source: DecodedBuild, target: DecodedBuild) -> Result<Pla
   })
 }
 
+/// 从差分构建生成 patch 计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `build`: 差分构建。
+/// - `source_tag`: 源版本标签。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 元数据冲突或无效的错误描述。
 fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanParts, String> {
   let manifest_digest = patch_manifest_digest(&build);
   let inventory = collect_patch_inventory(&build)?;
@@ -1498,6 +1750,17 @@ fn build_patch_plan(build: DecodedPatchBuild, source_tag: &str) -> Result<PlanPa
   })
 }
 
+/// 生成仅含 Repair 资产的修复计划部件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `target`: 目标构建。
+/// - `files`: 待修复文件。
+///
+/// # 返回
+/// - `Ok(PlanParts)`: 计划部件。
+/// - `Err(String)`: 元数据不一致的错误描述。
 pub(crate) fn build_repair_parts(
   target: DecodedBuild,
   files: &[PlanFile],
@@ -1544,6 +1807,22 @@ pub(crate) fn build_repair_parts(
   })
 }
 
+/// 构造单个目标资源的计划资产与 chunk 下载。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `name`: 资源名。
+/// - `target_asset`: 目标资源。
+/// - `action`: 资产动作。
+/// - `source`: 源资源。
+/// - `download`: 下载信息。
+/// - `source_chunks`: 可复用 chunk。
+/// - `downloads`: 累计下载表。
+///
+/// # 返回
+/// - `Ok(PlanAsset)`: 计划资产。
+/// - `Err(String)`: 元数据无效的错误描述。
 fn plan_target_asset(
   name: String,
   target_asset: &Asset,
@@ -1605,6 +1884,16 @@ fn plan_target_asset(
   })
 }
 
+/// 收集并去重构建中的资源。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `build`: 解码构建。
+///
+/// # 返回
+/// - `Ok(HashMap)`: 资源映射。
+/// - `Err(String)`: 路径或冲突无效的错误描述。
 fn collect_assets(build: &DecodedBuild) -> Result<HashMap<String, &Asset>, String> {
   let mut assets = HashMap::<String, &Asset>::new();
   for manifest in &build.manifests {
@@ -1623,6 +1912,16 @@ fn collect_assets(build: &DecodedBuild) -> Result<HashMap<String, &Asset>, Strin
   Ok(assets)
 }
 
+/// 收集资源库存列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `assets`: 资源映射。
+///
+/// # 返回
+/// - `Ok(Vec<PlanFile>)`: 库存列表。
+/// - `Err(String)`: 大小无效的错误描述。
 fn collect_inventory(assets: &HashMap<String, &Asset>) -> Result<Vec<PlanFile>, String> {
   let mut inventory = assets
     .iter()
@@ -1639,6 +1938,16 @@ fn collect_inventory(assets: &HashMap<String, &Asset>) -> Result<Vec<PlanFile>, 
   Ok(inventory)
 }
 
+/// 收集差分构建的库存列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `build`: 差分构建。
+///
+/// # 返回
+/// - `Ok(Vec<PlanFile>)`: 库存列表。
+/// - `Err(String)`: 元数据冲突或无效的错误描述。
 fn collect_patch_inventory(build: &DecodedPatchBuild) -> Result<Vec<PlanFile>, String> {
   let mut files = HashMap::<String, PlanFile>::new();
   for manifest in &build.manifests {
@@ -1663,6 +1972,15 @@ fn collect_patch_inventory(build: &DecodedPatchBuild) -> Result<Vec<PlanFile>, S
   Ok(inventory)
 }
 
+/// 收集各资源的分类下载信息。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `build`: 解码构建。
+///
+/// # 返回
+/// - `Ok(HashMap)`: 资源名到下载信息的映射。
 fn collect_category_downloads(
   build: &DecodedBuild,
 ) -> Result<HashMap<String, &DownloadInfo>, String> {
@@ -1676,6 +1994,16 @@ fn collect_category_downloads(
   Ok(downloads)
 }
 
+/// 收集可在源资源间复用的 chunk。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `assets`: 源资源映射。
+///
+/// # 返回
+/// - `Ok(HashMap)`: 复用 chunk 映射。
+/// - `Err(String)`: 元数据无效的错误描述。
 fn collect_reusable_chunks(
   assets: &HashMap<String, &Asset>,
 ) -> Result<HashMap<(String, u64), PlanReuse>, String> {
@@ -1695,11 +2023,31 @@ fn collect_reusable_chunks(
   Ok(chunks)
 }
 
+/// 判断两个资源是否大小与 MD5 一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `left`: 第一个资源。
+/// - `right`: 第二个资源。
+///
+/// # 返回
+/// 是否一致。
 fn assets_equal(left: &Asset, right: &Asset) -> bool {
   left.asset_size == right.asset_size
     && left.asset_hash_md5.eq_ignore_ascii_case(&right.asset_hash_md5)
 }
 
+/// 构造 patch 计划描述。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `info`: patch 信息。
+///
+/// # 返回
+/// - `Ok(PlanPatch)`: patch 计划。
+/// - `Err(String)`: 元数据无效的错误描述。
 fn plan_patch(info: &PatchInfo) -> Result<PlanPatch, String> {
   Ok(PlanPatch {
     id: info.id.clone(),
@@ -1717,6 +2065,15 @@ fn plan_patch(info: &PatchInfo) -> Result<PlanPatch, String> {
   })
 }
 
+/// 生成 patch 容器缓存键。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `patch`: patch 计划。
+///
+/// # 返回
+/// 缓存键字符串。
 fn patch_container_cache_key(patch: &PlanPatch) -> String {
   let mut hasher = Sha256::new();
   hasher.update(patch.id.as_bytes());
@@ -1727,6 +2084,15 @@ fn patch_container_cache_key(patch: &PlanPatch) -> String {
   format!("{}.patch", hex::encode(hasher.finalize()))
 }
 
+/// 计算主构建 manifest 摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `build`: 解码构建。
+///
+/// # 返回
+/// 摘要字符串。
 pub(crate) fn manifest_digest(build: &DecodedBuild) -> String {
   let mut entries = build
     .manifests
@@ -1739,6 +2105,17 @@ pub(crate) fn manifest_digest(build: &DecodedBuild) -> String {
   digest_parts(&build.tag, &entries)
 }
 
+/// 计算语音包 manifest 摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源构建。
+/// - `target`: 目标构建。
+/// - `selection`: 语音选择。
+///
+/// # 返回
+/// 摘要字符串。
 fn audio_manifest_digest(
   source: &DecodedBuild,
   target: &DecodedBuild,
@@ -1767,6 +2144,15 @@ fn audio_manifest_digest(
   digest_parts(&target.tag, &entries)
 }
 
+/// 计算差分构建 manifest 摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `build`: 差分构建。
+///
+/// # 返回
+/// 摘要字符串。
 fn patch_manifest_digest(build: &DecodedPatchBuild) -> String {
   let mut entries = build
     .manifests
@@ -1779,6 +2165,16 @@ fn patch_manifest_digest(build: &DecodedPatchBuild) -> String {
   digest_parts(&build.tag, &entries)
 }
 
+/// 计算标签与条目列表的摘要。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `tag`: 标签。
+/// - `entries`: 条目列表。
+///
+/// # 返回
+/// 摘要字符串。
 fn digest_parts(tag: &str, entries: &[String]) -> String {
   let mut hasher = Sha256::new();
   hasher.update(tag.as_bytes());
@@ -1795,6 +2191,16 @@ pub(crate) struct CachedDownloadScan {
   pub(crate) missing_bytes: u64,
 }
 
+/// 扫描缓存目录统计缓存命中。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `downloads`: 下载列表。
+///
+/// # 返回
+/// 命中字节数。
 pub(crate) fn scan_cached_downloads(
   cache_root: &Path,
   downloads: &[PlanDownload],
@@ -1803,11 +2209,31 @@ pub(crate) fn scan_cached_downloads(
   scan_cached_downloads_inner(cache_root, downloads, true, on_progress)
 }
 
+/// 计算缓存命中字节数。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `downloads`: 下载列表。
+///
+/// # 返回
+/// 命中字节数。
 fn calculate_cache_hits(cache_root: &Path, downloads: &[PlanDownload]) -> u64 {
   scan_cached_downloads_inner(cache_root, downloads, false, |_, _, _| {})
     .map_or(0, |scan| scan.confirmed_bytes)
 }
 
+/// 内部实现：扫描缓存下载并收集命中记录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `downloads`: 下载列表。
+///
+/// # 返回
+/// 命中字节数。
 fn scan_cached_downloads_inner(
   cache_root: &Path,
   downloads: &[PlanDownload],
@@ -1890,6 +2316,16 @@ fn scan_cached_downloads_inner(
   })
 }
 
+/// 计算缓存扫描工作线程数。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `download_count`: 下载项数量。
+/// - `available`: 可用并行度。
+///
+/// # 返回
+/// 工作线程数。
 fn cache_hit_worker_count(download_count: usize, available: usize) -> usize {
   if download_count == 0 {
     return 0;
@@ -1897,6 +2333,16 @@ fn cache_hit_worker_count(download_count: usize, available: usize) -> usize {
   available.max(1).min(MAX_CACHE_SCAN_WORKERS).min(download_count)
 }
 
+/// 校验缓存 chunk 是否与下载计划一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// 是否命中。
 pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -> bool {
   if download.hash_kind == PlanDownloadHashKind::UnsupportedPatchRange {
     return false;
@@ -1934,6 +2380,16 @@ pub(crate) fn cached_chunk_matches(cache_root: &Path, download: &PlanDownload) -
   matches
 }
 
+/// 异步校验缓存 chunk 是否命中。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// 是否命中。
 pub(crate) async fn cached_chunk_matches_async(cache_root: &Path, download: &PlanDownload) -> bool {
   let cache_root = cache_root.to_path_buf();
   let download = download.clone();
@@ -1982,12 +2438,32 @@ pub(crate) fn cache_file_matches(path: &Path, download: &PlanDownload) -> bool {
   cache_file_metadata_matches(&metadata, download) && cache_file_hash_matches(path, download)
 }
 
+/// 异步校验缓存文件是否与下载计划一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 缓存文件路径。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// 是否命中。
 pub(crate) async fn cache_file_matches_async(path: PathBuf, download: PlanDownload) -> bool {
   tauri::async_runtime::spawn_blocking(move || cache_file_matches(&path, &download))
     .await
     .unwrap_or(false)
 }
 
+/// 校验缓存文件元数据是否匹配。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `metadata`: 文件元数据。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// 是否匹配。
 fn cache_file_metadata_matches(metadata: &fs::Metadata, download: &PlanDownload) -> bool {
   if metadata.file_type().is_symlink()
     || !metadata.is_file()
@@ -2006,6 +2482,16 @@ fn cache_file_metadata_matches(metadata: &fs::Metadata, download: &PlanDownload)
   true
 }
 
+/// 校验缓存文件哈希是否匹配。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 缓存文件路径。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// 是否匹配。
 fn cache_file_hash_matches(path: &Path, download: &PlanDownload) -> bool {
   let Ok(file) = File::open(path) else {
     return false;
@@ -2038,10 +2524,28 @@ fn cache_file_hash_matches(path: &Path, download: &PlanDownload) -> bool {
   }
 }
 
+/// 返回缓存校验索引文件路径。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+///
+/// # 返回
+/// 索引文件路径。
 fn cache_validation_index_path(cache_root: &Path) -> PathBuf {
   cache_root.parent().unwrap_or(cache_root).join(CACHE_VALIDATION_INDEX_FILE)
 }
 
+/// 读取缓存校验状态。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+///
+/// # 返回
+/// 校验状态。
 fn load_cache_validation_state(cache_root: &Path) -> CacheValidationState {
   let path = cache_validation_index_path(cache_root);
   let index = fs::metadata(&path)
@@ -2053,10 +2557,30 @@ fn load_cache_validation_state(cache_root: &Path) -> CacheValidationState {
   CacheValidationState { index, dirty: false }
 }
 
+/// 返回文件修改时间戳（秒）。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `metadata`: 文件元数据。
+///
+/// # 返回
+/// 修改时间戳或 `None`。
 fn cache_modified_at(metadata: &fs::Metadata) -> Option<u64> {
   metadata.modified().ok()?.duration_since(UNIX_EPOCH).ok()?.as_nanos().try_into().ok()
 }
 
+/// 判断缓存校验记录是否匹配。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `record`: 校验记录。
+/// - `metadata`: 文件元数据。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// 是否匹配。
 fn cache_validation_matches(
   cache_root: &Path,
   download: &PlanDownload,
@@ -2079,6 +2603,14 @@ fn cache_validation_matches(
   })
 }
 
+/// 记录缓存校验结果。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `download`: 下载计划。
+/// - `metadata`: 文件元数据。
 pub(crate) fn remember_cache_validation(
   cache_root: &Path,
   download: &PlanDownload,
@@ -2105,6 +2637,13 @@ pub(crate) fn remember_cache_validation(
   state.dirty = true;
 }
 
+/// 移除缓存校验记录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
+/// - `download`: 下载计划。
 fn forget_cache_validation(cache_root: &Path, download: &PlanDownload) {
   let Ok(mut states) = CACHE_VALIDATION_STATES.lock() else {
     return;
@@ -2117,6 +2656,12 @@ fn forget_cache_validation(cache_root: &Path, download: &PlanDownload) {
   }
 }
 
+/// 立即落盘缓存校验索引。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
 pub(crate) fn flush_cache_validation_index(cache_root: &Path) {
   let Ok(mut states) = CACHE_VALIDATION_STATES.lock() else {
     return;
@@ -2146,6 +2691,12 @@ pub(crate) fn flush_cache_validation_index(cache_root: &Path) {
   state.dirty = false;
 }
 
+/// 清空缓存校验索引。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_root`: 缓存目录。
 pub(crate) fn clear_cache_validation_index(cache_root: &Path) {
   if let Ok(mut states) = CACHE_VALIDATION_STATES.lock() {
     states.remove(cache_root);
@@ -2178,6 +2729,17 @@ pub(crate) fn load_persisted_plan(
   Ok(plan)
 }
 
+/// 校验持久化计划的整体合法性。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 持久化计划。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// - `Ok(())`: 计划合法。
+/// - `Err(String)`: 字段无效的错误描述。
 fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), String> {
   if plan.schema_version != PLAN_SCHEMA_VERSION || plan.plan_id != plan_id {
     return Err("游戏资源计划版本或身份不匹配".to_string());
@@ -2259,6 +2821,16 @@ fn validate_persisted_plan(plan: &PersistedPlan, plan_id: &str) -> Result<(), St
   Ok(())
 }
 
+/// 校验计划资产与 chunk 布局。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `plan`: 持久化计划。
+///
+/// # 返回
+/// - `Ok(())`: 合法。
+/// - `Err(String)`: 无效的错误描述。
 fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   if plan.assets.len() > 500_000
     || plan.delete_files.len() > 500_000
@@ -2383,6 +2955,16 @@ fn validate_plan_assets(plan: &PersistedPlan) -> Result<(), String> {
   Ok(())
 }
 
+/// 校验库存列表。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `inventory`: 库存列表。
+///
+/// # 返回
+/// - `Ok(())`: 合法。
+/// - `Err(String)`: 无效的错误描述。
 fn validate_inventory(inventory: &[PlanFile]) -> Result<(), String> {
   if inventory.iter().any(|file| !is_md5(&file.md5))
     || inventory.windows(2).any(|files| files[0].name >= files[1].name)
@@ -2392,6 +2974,16 @@ fn validate_inventory(inventory: &[PlanFile]) -> Result<(), String> {
   validate_managed_paths(inventory.iter().map(|file| file.name.as_str()))
 }
 
+/// 校验受管资源路径集合。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `paths`: 路径集合。
+///
+/// # 返回
+/// - `Ok(())`: 合法。
+/// - `Err(String)`: 无效的错误描述。
 fn validate_managed_paths<'a>(paths: impl IntoIterator<Item = &'a str>) -> Result<(), String> {
   let mut normalized_paths = Vec::new();
   for path in paths {
@@ -2418,10 +3010,31 @@ fn validate_managed_paths<'a>(paths: impl IntoIterator<Item = &'a str>) -> Resul
   Ok(())
 }
 
+/// 判断字符串是否为 32 位十六进制 MD5。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `value`: 字符串。
+///
+/// # 返回
+/// 是否合法。
 fn is_md5(value: &str) -> bool {
   value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
+/// 持久化计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan_id`: 计划 ID。
+/// - `plan`: 持久化计划。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result<(), String> {
   let directory = task_root.join("tasks").join(plan_id);
   fs::create_dir_all(&directory).map_err(|error| format!("创建游戏资源计划目录失败：{error}"))?;
@@ -2479,6 +3092,17 @@ fn persist_plan(task_root: &Path, plan_id: &str, plan: &PersistedPlan) -> Result
   Ok(())
 }
 
+/// 以新计划方式持久化，拒绝覆盖已有计划。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan`: 持久化计划。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 计划已存在或写入失败的错误描述。
 fn persist_new_plan(task_root: &Path, plan: &PersistedPlan) -> Result<(), String> {
   persist_plan(task_root, &plan.plan_id, plan)?;
   if let Err(error) = plan_lifecycle::persist_metadata(
@@ -2494,6 +3118,17 @@ fn persist_new_plan(task_root: &Path, plan: &PersistedPlan) -> Result<(), String
   Ok(())
 }
 
+/// Windows 下原子替换计划文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(target_os = "windows")]
 fn atomic_replace_plan(source: &Path, target: &Path) -> Result<(), String> {
   use std::os::windows::ffi::OsStrExt;
@@ -2515,11 +3150,32 @@ fn atomic_replace_plan(source: &Path, target: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 非 Windows 平台通过 rename 原子替换计划文件。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace_plan(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("提交游戏资源计划失败：{error}"))
 }
 
+/// 同步计划目录；Windows 下无需额外操作。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `directory`: 待同步目录。
+///
+/// # 返回
+/// - `Ok(())`: 同步成功。
+/// - `Err(String)`: 同步失败的错误描述（非 Windows）。
 fn sync_directory(directory: &Path) -> Result<(), String> {
   #[cfg(target_os = "windows")]
   {
@@ -2534,6 +3190,17 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
   }
 }
 
+/// 校验 i64 值可转换为正的 u64。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `value`: 值。
+/// - `field`: 字段名。
+///
+/// # 返回
+/// - `Ok(u64)`: 转换结果。
+/// - `Err(String)`: 非正数的错误描述。
 fn positive_u64(value: i64, field: &str) -> Result<u64, String> {
   if value <= 0 {
     return Err(format!("{field}不是正整数"));
@@ -2541,6 +3208,17 @@ fn positive_u64(value: i64, field: &str) -> Result<u64, String> {
   Ok(value as u64)
 }
 
+/// 校验 i64 值可转换为非负的 u64。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `value`: 值。
+/// - `field`: 字段名。
+///
+/// # 返回
+/// - `Ok(u64)`: 转换结果。
+/// - `Err(String)`: 负数的错误描述。
 fn nonnegative_u64(value: i64, field: &str) -> Result<u64, String> {
   if value < 0 {
     return Err(format!("{field}为负数"));
@@ -2548,6 +3226,16 @@ fn nonnegative_u64(value: i64, field: &str) -> Result<u64, String> {
   Ok(value as u64)
 }
 
+/// 将压缩码映射为载荷编码。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `compression`: 压缩码。
+///
+/// # 返回
+/// - `Ok(PayloadEncoding)`: 载荷编码。
+/// - `Err(String)`: 不支持的压缩码。
 fn payload_encoding(compression: u32) -> Result<PayloadEncoding, String> {
   match compression {
     0 => Ok(PayloadEncoding::Raw),

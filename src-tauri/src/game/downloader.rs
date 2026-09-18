@@ -35,6 +35,15 @@ const DOWNLOAD_IO_STALL_TIMEOUT: Duration = Duration::from_secs(45);
 const DOWNLOAD_CONTROL_POLL_INTERVAL: Duration = Duration::from_millis(100);
 const WRITE_BUFFER_BYTES: usize = 256 * 1024;
 
+/// 将时长转换为微秒并截断到 `u64` 上限。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `duration`: 标准库时长。
+///
+/// # 返回
+/// 微秒数。
 fn duration_micros(duration: Duration) -> u64 {
   duration.as_micros().min(u128::from(u64::MAX)) as u64
 }
@@ -121,6 +130,9 @@ pub(crate) struct DownloadTelemetrySnapshot {
 }
 
 impl Default for DownloadTelemetry {
+  /// 创建空的下载遥测计数器。
+  ///
+  /// @since Beta v0.12.1
   fn default() -> Self {
     Self {
       started_at: Instant::now(),
@@ -166,10 +178,22 @@ struct DownloadLiveStageGuard {
 }
 
 impl DownloadTelemetry {
+  /// 创建共享下载遥测实例。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 遥测实例。
   pub(crate) fn new() -> Arc<Self> {
     Arc::new(Self::default())
   }
 
+  /// 生成当前遥测快照。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 遥测快照。
   pub(crate) fn snapshot(&self) -> DownloadTelemetrySnapshot {
     let now_micros = duration_micros(self.started_at.elapsed());
     let last_heartbeat_micros = self.last_heartbeat_micros.load(Ordering::Acquire);
@@ -202,6 +226,12 @@ impl DownloadTelemetry {
     }
   }
 
+  /// 开始一次下载尝试并创建尝试级遥测。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 尝试级遥测。
   fn begin_attempt(self: &Arc<Self>) -> DownloadAttemptTelemetry {
     self.attempts.fetch_add(1, Ordering::Relaxed);
     DownloadAttemptTelemetry {
@@ -216,18 +246,36 @@ impl DownloadTelemetry {
     }
   }
 
+  /// 记录一次缓存命中。
+  ///
+  /// @since Beta v0.12.1
   pub(crate) fn record_cache_hit(&self) {
     self.cache_hits.fetch_add(1, Ordering::Relaxed);
   }
 
+  /// 记录一次重试。
+  ///
+  /// @since Beta v0.12.1
   fn record_retry(&self) {
     self.retries.fetch_add(1, Ordering::Relaxed);
   }
 
+  /// 记录一次发布失败。
+  ///
+  /// @since Beta v0.12.1
   fn record_publish_failure(&self) {
     self.publish_failures.fetch_add(1, Ordering::Relaxed);
   }
 
+  /// 开始一个下载阶段并返回守卫。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `stage`: 下载阶段。
+  ///
+  /// # 返回
+  /// 阶段守卫。
   fn begin_live_stage(self: &Arc<Self>, stage: DownloadLiveStage) -> DownloadLiveStageGuard {
     match stage {
       DownloadLiveStage::NetworkWait => {
@@ -244,6 +292,9 @@ impl DownloadTelemetry {
     DownloadLiveStageGuard { telemetry: Arc::clone(self), stage, started_at: Instant::now() }
   }
 
+  /// 更新心跳时间与计数。
+  ///
+  /// @since Beta v0.12.1
   fn heartbeat(&self) {
     self.last_heartbeat_micros.store(duration_micros(self.started_at.elapsed()), Ordering::Release);
     self.heartbeat_count.fetch_add(1, Ordering::AcqRel);
@@ -251,6 +302,12 @@ impl DownloadTelemetry {
 }
 
 impl DownloadLiveStageGuard {
+  /// 结束阶段并记录耗时与字节数。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `bytes`: 本阶段处理字节数。
   fn finish(self, bytes: u64) {
     let elapsed_micros = duration_micros(self.started_at.elapsed());
     match self.stage {
@@ -268,6 +325,9 @@ impl DownloadLiveStageGuard {
 }
 
 impl Drop for DownloadLiveStageGuard {
+  /// 释放阶段并回退活跃计数。
+  ///
+  /// @since Beta v0.12.1
   fn drop(&mut self) {
     match self.stage {
       DownloadLiveStage::NetworkWait => {
@@ -293,16 +353,34 @@ struct DownloadObjectTelemetry {
 }
 
 impl DownloadObjectTelemetry {
+  /// 创建对象级遥测。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `telemetry`: 共享遥测。
+  ///
+  /// # 返回
+  /// 对象级遥测。
   fn new(telemetry: Arc<DownloadTelemetry>) -> Self {
     Self { telemetry, outcome: None }
   }
 
+  /// 记录对象最终结果。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `outcome`: 对象结果。
   fn finish(&mut self, outcome: DownloadObjectOutcome) {
     self.outcome = Some(outcome);
   }
 }
 
 impl Drop for DownloadObjectTelemetry {
+  /// 按最终结果累加对象级计数器。
+  ///
+  /// @since Beta v0.12.1
   fn drop(&mut self) {
     match self.outcome {
       Some(DownloadObjectOutcome::Success) => {
@@ -330,33 +408,75 @@ struct DownloadAttemptTelemetry {
 }
 
 impl DownloadAttemptTelemetry {
+  /// 开始一次下载阶段。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `stage`: 下载阶段。
+  ///
+  /// # 返回
+  /// 阶段守卫。
   fn begin_live_stage(&self, stage: DownloadLiveStage) -> DownloadLiveStageGuard {
     self.telemetry.begin_live_stage(stage)
   }
 
+  /// 记录网络等待耗时。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `elapsed`: 耗时。
   fn record_network_wait(&mut self, elapsed: Duration) {
     self.network_wait_micros = self.network_wait_micros.saturating_add(duration_micros(elapsed));
   }
 
+  /// 记录写入耗时。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `elapsed`: 耗时。
   fn record_write(&mut self, elapsed: Duration) {
     self.write_micros = self.write_micros.saturating_add(duration_micros(elapsed));
   }
 
+  /// 记录哈希耗时。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `elapsed`: 耗时。
   fn record_hash(&mut self, elapsed: Duration) {
     self.hash_micros = self.hash_micros.saturating_add(duration_micros(elapsed));
   }
 
+  /// 记录文件同步耗时与次数。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `elapsed`: 耗时。
   fn record_file_sync(&mut self, elapsed: Duration) {
     self.file_sync_count = self.file_sync_count.saturating_add(1);
     self.file_sync_micros = self.file_sync_micros.saturating_add(duration_micros(elapsed));
   }
 
+  /// 记录已接收字节数并更新在途字节数。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `bytes`: 字节数。
   fn record_received_bytes(&mut self, bytes: u64) {
     self.received_bytes = self.received_bytes.saturating_add(bytes);
     self.telemetry.received_bytes.fetch_add(bytes, Ordering::Relaxed);
     self.telemetry.in_flight_bytes.fetch_add(bytes, Ordering::Relaxed);
   }
 
+  /// 释放本次尝试的在途字节数。
+  ///
+  /// @since Beta v0.12.1
   fn release_in_flight_bytes(&self) {
     if self.received_bytes == 0 {
       return;
@@ -376,10 +496,22 @@ impl DownloadAttemptTelemetry {
     }
   }
 
+  /// 结束本次尝试并提交遥测。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `success`: 是否成功。
   fn finish(mut self, success: bool) {
     self.commit(success);
   }
 
+  /// 将本次尝试耗时与结果提交到共享遥测。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `success`: 是否成功。
   fn commit(&mut self, success: bool) {
     if self.committed {
       return;
@@ -400,6 +532,9 @@ impl DownloadAttemptTelemetry {
 }
 
 impl Drop for DownloadAttemptTelemetry {
+  /// 未提交时按失败提交遥测。
+  ///
+  /// @since Beta v0.12.1
   fn drop(&mut self) {
     self.commit(false);
   }
@@ -430,6 +565,19 @@ pub(crate) struct DownloadControl<'a> {
 }
 
 impl<'a> DownloadControl<'a> {
+  /// 构造下载控制参数。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `task_id`: 任务 ID。
+  /// - `canceled`: 取消标志。
+  /// - `paused`: 暂停标志。
+  /// - `limiter`: 速率限制器。
+  /// - `durability`: 持久化级别。
+  ///
+  /// # 返回
+  /// 下载控制参数。
   pub(crate) fn new(
     task_id: &'a str,
     canceled: &'a AtomicBool,
@@ -448,11 +596,26 @@ impl<'a> DownloadControl<'a> {
     }
   }
 
+  /// 绑定下载遥测。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `telemetry`: 共享遥测。
+  ///
+  /// # 返回
+  /// 更新后的控制参数。
   pub(crate) fn with_telemetry(mut self, telemetry: Arc<DownloadTelemetry>) -> Self {
     self.telemetry = Some(telemetry);
     self
   }
 
+  /// 跳过初始缓存命中检查。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 更新后的控制参数。
   pub(crate) fn skip_initial_cache_check(mut self) -> Self {
     self.skip_initial_cache_check = true;
     self
@@ -460,12 +623,27 @@ impl<'a> DownloadControl<'a> {
 }
 
 impl DownloadDurability {
+  /// 判断是否需要在发布前强制落盘。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 返回
+  /// 是否需要文件同步。
   fn requires_file_sync(self) -> bool {
     matches!(self, Self::Strict)
   }
 }
 
 impl RateLimiter {
+  /// 创建速率限制器。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `bytes_per_second`: 每秒字节数上限。
+  ///
+  /// # 返回
+  /// 速率限制器。
   pub(crate) fn new(bytes_per_second: Option<u64>) -> Self {
     Self {
       bytes_per_second,
@@ -473,6 +651,12 @@ impl RateLimiter {
     }
   }
 
+  /// 按限速消费字节数，必要时等待。
+  ///
+  /// @since Beta v0.12.1
+  ///
+  /// # 参数
+  /// - `bytes`: 本次字节数。
   async fn consume(&self, bytes: u64) {
     let Some(limit) = self.bytes_per_second else {
       return;
@@ -493,6 +677,20 @@ impl RateLimiter {
   }
 }
 
+/// 等待下载 I/O 完成，并在暂停、取消或超时后返回错误。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `future`: 待等待的 I/O future。
+/// - `canceled`: 取消标志。
+/// - `paused`: 暂停标志。
+/// - `stall_timeout`: 停滞超时。
+/// - `timeout_error`: 超时错误信息。
+///
+/// # 返回
+/// - `Ok(F::Output)`: I/O 完成。
+/// - `Err(String)`: 暂停、取消或超时。
 async fn wait_for_download_io<F>(
   future: F,
   canceled: &AtomicBool,
@@ -533,6 +731,16 @@ where
   }
 }
 
+/// 创建并校验下载缓存根目录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 缓存目录路径。
+/// - `Err(String)`: 创建或校验失败的错误描述。
 pub(crate) fn prepare_cache_root(task_root: &Path) -> Result<PathBuf, String> {
   let cache_root = task_root.join("cache/chunks");
   fs::create_dir_all(&cache_root).map_err(|error| format!("创建游戏资源缓存目录失败：{error}"))?;
@@ -542,6 +750,19 @@ pub(crate) fn prepare_cache_root(task_root: &Path) -> Result<PathBuf, String> {
   Ok(cache_root)
 }
 
+/// 下载单个游戏资源对象到缓存并校验发布。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `cache_root`: 缓存根目录。
+/// - `download`: 下载计划。
+/// - `control`: 下载控制参数。
+///
+/// # 返回
+/// - `Ok(DownloadedObject)`: 已下载对象。
+/// - `Err(String)`: 下载或校验失败的错误描述。
 pub(crate) async fn download_object(
   client: &reqwest::Client,
   cache_root: &Path,
@@ -719,6 +940,24 @@ pub(crate) async fn download_object(
   Err(format!("游戏资源下载重试后仍失败：{last_error}"))
 }
 
+/// 执行一次资源下载，写入临时文件并校验哈希。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `client`: HTTP 客户端。
+/// - `download`: 下载计划。
+/// - `target`: 目标缓存文件。
+/// - `partial`: 临时文件路径。
+/// - `canceled`: 取消标志。
+/// - `paused`: 暂停标志。
+/// - `limiter`: 速率限制器。
+/// - `durability`: 持久化级别。
+/// - `telemetry`: 尝试级遥测。
+///
+/// # 返回
+/// - `Ok(())`: 下载并校验成功。
+/// - `Err(String)`: 下载失败的错误描述。
 async fn download_once(
   client: &reqwest::Client,
   download: &PlanDownload,
@@ -932,6 +1171,17 @@ async fn download_once(
   Ok(())
 }
 
+/// 校验 Range 响应头与下载计划一致。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `header`: `Content-Range` 头。
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// - `Ok(())`: 范围一致。
+/// - `Err(String)`: 范围不一致的错误描述。
 fn validate_content_range(
   header: Option<&reqwest::header::HeaderValue>,
   download: &PlanDownload,
@@ -954,6 +1204,16 @@ fn validate_content_range(
   Ok(())
 }
 
+/// 取得指定缓存键的下载互斥锁。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `cache_key`: 缓存键。
+///
+/// # 返回
+/// - `Ok(Arc<AsyncMutex<()>>)`: 互斥锁。
+/// - `Err(String)`: 锁损坏的错误描述。
 fn download_lock(cache_key: &str) -> Result<Arc<AsyncMutex<()>>, String> {
   let mut locks = DOWNLOAD_LOCKS.lock().map_err(|_| "游戏资源下载锁已损坏".to_string())?;
   if let Some(lock) = locks.get(cache_key).and_then(Weak::upgrade) {
@@ -965,6 +1225,16 @@ fn download_lock(cache_key: &str) -> Result<Arc<AsyncMutex<()>>, String> {
   Ok(lock)
 }
 
+/// 拒绝已存在路径为符号链接、目录或重解析点。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目标路径。
+///
+/// # 返回
+/// - `Ok(())`: 路径安全或不存在。
+/// - `Err(String)`: 路径不安全的错误描述。
 async fn reject_existing_link(path: &Path) -> Result<(), String> {
   match tokio::fs::symlink_metadata(path).await {
     Ok(metadata) if metadata.file_type().is_symlink() => {
@@ -987,6 +1257,16 @@ async fn reject_existing_link(path: &Path) -> Result<(), String> {
   }
 }
 
+/// 拒绝缓存目录为符号链接或重解析点。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 目录路径。
+///
+/// # 返回
+/// - `Ok(())`: 目录安全。
+/// - `Err(String)`: 目录不安全的错误描述。
 fn reject_reparse_point(path: &Path) -> Result<(), String> {
   let metadata =
     fs::symlink_metadata(path).map_err(|error| format!("读取游戏资源缓存目录状态失败：{error}"))?;
@@ -1004,6 +1284,12 @@ fn reject_reparse_point(path: &Path) -> Result<(), String> {
   Ok(())
 }
 
+/// 清理下载临时文件，不存在或清理失败仅记录。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `path`: 临时文件路径。
 async fn remove_partial(path: &Path) {
   if let Err(error) = tokio::fs::remove_file(path).await
     && error.kind() != std::io::ErrorKind::NotFound
@@ -1012,10 +1298,29 @@ async fn remove_partial(path: &Path) {
   }
 }
 
+/// 判断下载错误是否为无需重试的永久设置错误。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `error`: 错误文本。
+///
+/// # 返回
+/// 是否为永久错误。
 fn is_permanent_download_setup_error(error: &str) -> bool {
   error.contains("下载地址") || error.contains("主机不受信任") || error.contains("字段无效")
 }
 
+/// 水合并校验资源下载 URL。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `download`: 下载计划。
+///
+/// # 返回
+/// - `Ok(Url)`: 下载 URL。
+/// - `Err(String)`: 地址无效或主机不受信任的错误描述。
 fn download_url(download: &PlanDownload) -> Result<reqwest::Url, String> {
   if download.url_prefix.is_empty() {
     return Err("游戏资源下载地址未水合，请重新评估或恢复安装计划".to_string());

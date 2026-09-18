@@ -1,5 +1,5 @@
 //! 游戏资源任务写前日志与重启恢复投影。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.3
 
 use super::{
   model::{PackagePlanTarget, PackageTaskState, PackageTaskSummary, SchemeId},
@@ -54,6 +54,15 @@ pub(crate) struct JournalPersistTiming {
   pub(crate) directory_sync_count: u64,
 }
 
+/// 将时长转换为微秒并截断到 `u64` 上限。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `duration`: 标准库时长。
+///
+/// # 返回
+/// 微秒数。
 fn duration_micros(duration: StdDuration) -> u64 {
   duration.as_micros().min(u128::from(u64::MAX)) as u64
 }
@@ -239,6 +248,15 @@ pub(crate) struct TaskJournal {
 }
 
 impl TaskJournal {
+  /// 从资源计划构造初始任务日志。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `plan`: 持久化资源计划。
+  ///
+  /// # 返回
+  /// 初始任务日志。
   pub(crate) fn from_plan(plan: &PersistedPlan) -> Self {
     let now = Utc::now().to_rfc3339();
     Self {
@@ -332,6 +350,21 @@ impl TaskJournal {
     }
   }
 
+  /// 从换服参数构造初始任务日志。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `plan_id`: 计划 ID。
+  /// - `installation_id`: 安装 ID。
+  /// - `source_scheme`: 源渠道。
+  /// - `target_scheme`: 目标渠道。
+  /// - `manifest_digest`: manifest 摘要。
+  /// - `total_bytes`: 总字节数。
+  /// - `total_count`: 总步骤数。
+  ///
+  /// # 返回
+  /// 初始任务日志。
   pub(crate) fn from_switch(
     plan_id: String,
     installation_id: String,
@@ -406,6 +439,9 @@ impl TaskJournal {
     }
   }
 
+  /// 更新日志修订号与更新时间戳。
+  ///
+  /// @since Beta v0.12.0
   pub(crate) fn touch(&mut self) {
     self.revision = self.revision.saturating_add(1);
     self.updated_at = Utc::now().to_rfc3339();
@@ -427,6 +463,13 @@ impl TaskJournal {
     true
   }
 
+  /// 重置组装进度统计。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `total_count`: 总资源数。
+  /// - `total_bytes`: 总字节数。
   pub(crate) fn reset_assembly_progress(&mut self, total_count: usize, total_bytes: u64) {
     self.assembly_completed_count = 0;
     self.assembly_total_count = total_count;
@@ -435,6 +478,16 @@ impl TaskJournal {
     self.assembly_current_file = None;
   }
 
+  /// 更新组装进度统计。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `completed_count`: 已完成资源数。
+  /// - `total_count`: 总资源数。
+  /// - `completed_bytes`: 已完成字节数。
+  /// - `total_bytes`: 总字节数。
+  /// - `current_file`: 当前文件。
   pub(crate) fn update_assembly_progress(
     &mut self,
     completed_count: usize,
@@ -500,6 +553,12 @@ impl TaskJournal {
     self.commit_current_step = Some("等待提交资源文件".to_string());
   }
 
+  /// 生成任务日志的前端摘要。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 返回
+  /// 任务摘要。
   pub(crate) fn summary(&self) -> PackageTaskSummary {
     PackageTaskSummary {
       revision: self.revision,
@@ -556,6 +615,12 @@ impl TaskJournal {
     }
   }
 
+  /// 计算任务已耗时（毫秒）。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 返回
+  /// 已耗时毫秒数。
   fn elapsed_ms(&self) -> u64 {
     let Some(started_at) = self.active_started_at.as_deref() else {
       if self.accumulated_elapsed_ms > 0 {
@@ -569,6 +634,16 @@ impl TaskJournal {
   }
 }
 
+/// 计算两个 RFC 3339 时间戳之间的非负毫秒差。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `started_at`: 起始时间。
+/// - `ended_at`: 结束时间。
+///
+/// # 返回
+/// 毫秒差，解析失败时返回 0。
 fn elapsed_between(started_at: &str, ended_at: &str) -> u64 {
   let started = match DateTime::parse_from_rfc3339(started_at) {
     Ok(value) => value.with_timezone(&Utc),
@@ -594,14 +669,37 @@ struct JournalProgressRegistry {
 
 static JOURNAL_PROGRESS_REGISTRY: OnceLock<Mutex<JournalProgressRegistry>> = OnceLock::new();
 
+/// 返回全局日志进度节流注册表。
+///
+/// @since Beta v0.12.0
+///
+/// # 返回
+/// 全局注册表。
 fn progress_registry() -> &'static Mutex<JournalProgressRegistry> {
   JOURNAL_PROGRESS_REGISTRY.get_or_init(|| Mutex::new(JournalProgressRegistry::default()))
 }
 
+/// 返回任务日志进度键。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `task_id`: 任务 ID。
+///
+/// # 返回
+/// 进度键路径。
 fn progress_key(task_root: &Path, task_id: &str) -> PathBuf {
   journal_path(task_root, task_id)
 }
 
+/// 清理过期进度节流槽。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `registry`: 进度注册表。
+/// - `now`: 当前时间。
 fn prune_progress_slots(registry: &mut JournalProgressRegistry, now: Instant) {
   registry.slots.retain(|_, slot| {
     slot
@@ -610,10 +708,31 @@ fn prune_progress_slots(registry: &mut JournalProgressRegistry, now: Instant) {
   });
 }
 
+/// 返回任务日志文件路径。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `task_id`: 任务 ID。
+///
+/// # 返回
+/// 日志文件路径。
 pub(crate) fn journal_path(task_root: &Path, task_id: &str) -> PathBuf {
   task_root.join("tasks").join(task_id).join("journal.json")
 }
 
+/// 读取任务日志，不存在时从计划创建并持久化。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(TaskJournal)`: 任务日志。
+/// - `Err(String)`: 读取、校验或创建失败的错误描述。
 pub(crate) fn load_or_create(
   task_root: &Path,
   plan: &PersistedPlan,
@@ -629,6 +748,16 @@ pub(crate) fn load_or_create(
   Ok(journal)
 }
 
+/// 读取并校验任务日志文件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 日志文件路径。
+///
+/// # 返回
+/// - `Ok(TaskJournal)`: 有效日志。
+/// - `Err(String)`: 大小或字段无效的错误描述。
 pub(crate) fn load(path: &Path) -> Result<TaskJournal, String> {
   let metadata =
     fs::metadata(path).map_err(|error| format!("读取游戏资源任务日志失败：{error}"))?;
@@ -642,6 +771,17 @@ pub(crate) fn load(path: &Path) -> Result<TaskJournal, String> {
   Ok(journal)
 }
 
+/// 持久化任务日志。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 pub(crate) fn persist(task_root: &Path, journal: &TaskJournal) -> Result<(), String> {
   let mut timing = JournalPersistTiming::default();
   persist_timed(task_root, journal, &mut timing)
@@ -700,6 +840,19 @@ pub(crate) fn persist_progress_timed(
   persist_progress_at_timed(task_root, journal, Instant::now(), timing)
 }
 
+/// 在节流窗口允许时持久化展示进度。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `now`: 当前时间。
+/// - `timing`: 持久化计时。
+///
+/// # 返回
+/// - `Ok(())`: 已写入或按节流跳过。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_progress_at_timed(
   task_root: &Path,
   journal: &TaskJournal,
@@ -785,6 +938,18 @@ pub(crate) fn forget_progress(task_root: &Path, task_id: &str) -> Result<(), Str
   Ok(())
 }
 
+/// 通过临时文件加原子重命名写入任务日志，并记录各阶段耗时。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `timing`: 持久化计时。
+///
+/// # 返回
+/// - `Ok(())`: 写入成功。
+/// - `Err(String)`: 写入失败的错误描述。
 fn persist_file(
   task_root: &Path,
   journal: &TaskJournal,
@@ -851,6 +1016,17 @@ fn persist_file(
   Ok(())
 }
 
+/// 列出任务目录中的全部任务日志。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `installation_id`: 可选的安装 ID 过滤。
+///
+/// # 返回
+/// - `Ok(Vec<TaskJournal>)`: 任务日志列表。
+/// - `Err(String)`: 读取失败的错误描述。
 pub(crate) fn list(
   task_root: &Path,
   installation_id: Option<&str>,
@@ -1003,6 +1179,16 @@ pub(crate) fn scan_records(task_root: &Path) -> Result<Vec<TaskDirectoryRecord>,
   Ok(records)
 }
 
+/// 读取可选元数据，文件不存在时返回 `None`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok(Option<Metadata>)`: 元数据或 `None`。
+/// - `Err(String)`: 读取失败的错误描述。
 fn symlink_metadata_optional(path: &Path) -> Result<Option<fs::Metadata>, String> {
   match fs::symlink_metadata(path) {
     Ok(metadata) => Ok(Some(metadata)),
@@ -1011,10 +1197,28 @@ fn symlink_metadata_optional(path: &Path) -> Result<Option<fs::Metadata>, String
   }
 }
 
+/// 将文件修改时间转换为 RFC 3339 字符串。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `metadata`: 文件元数据。
+///
+/// # 返回
+/// 修改时间字符串。
 fn metadata_updated_at(metadata: &fs::Metadata) -> String {
   metadata.modified().map(DateTime::<Utc>::from).unwrap_or(DateTime::<Utc>::UNIX_EPOCH).to_rfc3339()
 }
 
+/// 返回目录记录的时间字段。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `record`: 任务目录记录。
+///
+/// # 返回
+/// 更新时间字符串。
 fn record_updated_at(record: &TaskDirectoryRecord) -> &str {
   match record {
     TaskDirectoryRecord::Journal(journal) => &journal.updated_at,
@@ -1031,6 +1235,15 @@ pub(crate) fn has_incomplete_tasks(
   Ok(list(task_root, installation_id)?.iter().any(|journal| !journal.state.is_history_terminal()))
 }
 
+/// 判断计划目标是否占用可恢复资源名额。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `target`: 计划目标。
+///
+/// # 返回
+/// 是否为唯一性目标。
 fn is_uniqueness_target(target: PackagePlanTarget) -> bool {
   matches!(
     target,
@@ -1092,6 +1305,19 @@ pub(crate) fn protected_cache_files_for_target(
   keys
 }
 
+/// 清理已结束且超过保留期的任务目录。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `active_ids`: 活跃任务 ID 集合。
+/// - `max_age`: 最大保留时长。
+/// - `journals`: 任务日志列表。
+///
+/// # 返回
+/// - `Ok((PackageTaskCleanupSummary, Vec<TaskJournal>))`: 清理摘要与保留日志。
+/// - `Err(String)`: 清理失败的错误描述。
 pub(crate) fn cleanup_terminal_tasks_from_journals(
   task_root: &Path,
   active_ids: &HashSet<String>,
@@ -1194,6 +1420,16 @@ pub(crate) fn cleanup_task_record(
   }
 }
 
+/// 递归统计目录内普通文件总字节数。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 目录路径。
+///
+/// # 返回
+/// - `Ok(u64)`: 字节数。
+/// - `Err(String)`: 读取失败的错误描述。
 fn directory_bytes(path: &Path) -> Result<u64, String> {
   let mut total = 0_u64;
   let mut pending = vec![path.to_path_buf()];
@@ -1217,6 +1453,17 @@ fn directory_bytes(path: &Path) -> Result<u64, String> {
   Ok(total)
 }
 
+/// 校验任务日志与不可变计划身份一致。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(())`: 一致。
+/// - `Err(String)`: 不匹配的错误描述。
 fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), String> {
   if journal.task_id != plan.plan_id
     || journal.plan_id != plan.plan_id
@@ -1244,6 +1491,16 @@ fn validate_identity(journal: &TaskJournal, plan: &PersistedPlan) -> Result<(), 
   Ok(())
 }
 
+/// 校验任务日志字段合法性。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 字段合法。
+/// - `Err(String)`: 字段无效的错误描述。
 fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
   if journal.schema_version != JOURNAL_SCHEMA_VERSION
     || Uuid::parse_str(&journal.task_id).is_err()
@@ -1326,6 +1583,16 @@ fn validate_journal(journal: &TaskJournal) -> Result<(), String> {
   Ok(())
 }
 
+/// 校验提交日志字段合法性。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `apply`: 提交日志。
+///
+/// # 返回
+/// - `Ok(())`: 字段合法。
+/// - `Err(String)`: 字段无效的错误描述。
 fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
   let hashes_valid = [
     &apply.plan_sha256,
@@ -1349,6 +1616,17 @@ fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
   Ok(())
 }
 
+/// Windows 下原子替换日志文件，处理占用与只读属性并短暂重试。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(target_os = "windows")]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   use std::os::windows::ffi::OsStrExt;
@@ -1389,6 +1667,15 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   Err(format!("原子提交任务日志失败：{message}"))
 }
 
+/// 清除文件的只读属性，文件不存在时静默成功。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// I/O 操作结果。
 #[cfg(target_os = "windows")]
 fn clear_readonly_attribute(path: &Path) -> std::io::Result<()> {
   use std::os::windows::ffi::OsStrExt;
@@ -1412,11 +1699,31 @@ fn clear_readonly_attribute(path: &Path) -> std::io::Result<()> {
   Ok(())
 }
 
+/// 非 Windows 平台通过 rename 原子替换日志文件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `source`: 源文件。
+/// - `target`: 目标文件。
+///
+/// # 返回
+/// - `Ok(())`: 替换成功。
+/// - `Err(String)`: 替换失败的错误描述。
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子提交任务日志失败：{error}"))
 }
 
+/// 返回计划目标对应的操作名。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `target`: 计划目标。
+///
+/// # 返回
+/// 操作名字符串。
 fn operation_for_target(target: PackagePlanTarget) -> &'static str {
   match target {
     PackagePlanTarget::Main => "update",
@@ -1427,6 +1734,16 @@ fn operation_for_target(target: PackagePlanTarget) -> &'static str {
   }
 }
 
+/// 同步任务目录；Windows 下无需额外操作。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `directory`: 待同步目录。
+///
+/// # 返回
+/// - `Ok(())`: 同步成功。
+/// - `Err(String)`: 同步失败的错误描述（非 Windows）。
 fn sync_directory(directory: &Path) -> Result<(), String> {
   #[cfg(target_os = "windows")]
   {
@@ -1438,67 +1755,5 @@ fn sync_directory(directory: &Path) -> Result<(), String> {
     std::fs::File::open(directory)
       .and_then(|file| file.sync_all())
       .map_err(|error| format!("刷新游戏资源任务目录失败：{error}"))
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  struct TestTaskRoot(PathBuf);
-
-  impl TestTaskRoot {
-    fn new() -> Self {
-      let path = std::env::temp_dir().join(format!("teyvatguide-task-scan-{}", Uuid::new_v4()));
-      fs::create_dir_all(path.join("tasks")).expect("create test task root");
-      Self(path)
-    }
-
-    fn task_directory(&self, task_id: &str) -> PathBuf {
-      self.0.join("tasks").join(task_id)
-    }
-  }
-
-  impl Drop for TestTaskRoot {
-    fn drop(&mut self) {
-      let _ = fs::remove_dir_all(&self.0);
-    }
-  }
-
-  #[test]
-  fn scans_every_directory_and_only_removes_strict_plan_only_records() {
-    let root = TestTaskRoot::new();
-    let removable_id = Uuid::new_v4().to_string();
-    let abnormal_id = Uuid::new_v4().to_string();
-    let removable_directory = root.task_directory(&removable_id);
-    let abnormal_directory = root.task_directory(&abnormal_id);
-    fs::create_dir_all(&removable_directory).expect("create removable task");
-    fs::write(removable_directory.join("plan.json"), b"{}").expect("write removable plan");
-    fs::create_dir_all(&abnormal_directory).expect("create abnormal task");
-    fs::write(abnormal_directory.join("plan.json"), b"{}").expect("write abnormal plan");
-    fs::write(abnormal_directory.join("unexpected.bin"), b"residue")
-      .expect("write abnormal residue");
-
-    let records = scan_records(&root.0).expect("scan task records");
-    assert_eq!(records.len(), 2);
-    assert!(records.iter().any(|record| {
-      matches!(
-        record,
-        TaskDirectoryRecord::PlanOnly { task_id, .. } if task_id == &removable_id
-      )
-    }));
-    assert!(records.iter().any(|record| {
-      matches!(
-        record,
-        TaskDirectoryRecord::Invalid { task_id, .. } if task_id == &abnormal_id
-      )
-    }));
-
-    let summary = cleanup_task_record(&root.0, &HashSet::new(), &removable_id)
-      .expect("remove strict plan-only task");
-    assert_eq!(summary.removed_task_ids, vec![removable_id]);
-    assert!(!removable_directory.exists());
-    assert!(cleanup_task_record(&root.0, &HashSet::new(), &abnormal_id).is_err());
-    assert!(abnormal_directory.exists());
   }
 }

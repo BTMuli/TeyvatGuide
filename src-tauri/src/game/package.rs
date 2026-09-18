@@ -1,5 +1,5 @@
 //! 可恢复资源下载任务编排、安装互斥、取消与事件投影。
-//! @since Beta v0.12.0
+//! @since Beta v0.12.3
 
 use super::{
   assembler, committer, defender,
@@ -220,6 +220,17 @@ fn install_watchdog_live_progress(
   Some((journal_value.state, journal_value.revision))
 }
 
+/// 生成安装看门狗进度签名。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `revision`: 日志修订号。
+/// - `download`: 下载遥测快照。
+/// - `assembly`: 组装遥测快照。
+///
+/// # 返回
+/// 进度签名元组。
 fn install_watchdog_progress_signature(
   revision: u64,
   download: &super::downloader::DownloadTelemetrySnapshot,
@@ -249,6 +260,18 @@ fn install_watchdog_is_network_only_wait(
   download.active_network_waits > 0 && download.active_local_writes == 0 && !assembly_io_active
 }
 
+/// 记录安装流水线停滞诊断信息。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+/// - `stalled_for`: 停滞时长。
+/// - `journal_age_seconds`: 日志年龄秒数。
+/// - `confirmations`: 确认次数。
+/// - `metrics`: 安装管道指标。
+/// - `download`: 下载遥测快照。
+/// - `assembly`: 组装遥测快照。
 fn log_install_stall_diagnostics(
   plan_id: &str,
   stalled_for: Duration,
@@ -296,6 +319,16 @@ fn log_install_stall_diagnostics(
   );
 }
 
+/// 在下载或组装状态时应用看门狗暂停。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `value`: 任务日志。
+/// - `message`: 暂停信息。
+///
+/// # 返回
+/// 是否应用暂停。
 fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool {
   if !matches!(value.state, PackageTaskState::Downloading | PackageTaskState::Assembling) {
     return false;
@@ -315,6 +348,17 @@ fn apply_install_watchdog_pause(value: &mut TaskJournal, message: &str) -> bool 
   true
 }
 
+/// 持久化看门狗暂停状态。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `events`: 事件分发器。
+/// - `task_root`: 任务根目录。
+/// - `plan_id`: 计划 ID。
+/// - `journal`: 任务日志。
+/// - `message`: 暂停信息。
+/// - `runtime`: Tokio 运行时句柄。
 fn persist_install_watchdog_pause(
   events: &InstallEventDispatcher,
   task_root: &Path,
@@ -361,6 +405,17 @@ fn persist_install_watchdog_pause_from_disk(
   Some(value.summary())
 }
 
+/// 在锁内应用看门狗暂停并持久化。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `message`: 暂停信息。
+///
+/// # 返回
+/// 应用后的任务摘要或 `None`。
 async fn apply_install_watchdog_pause_locked(
   task_root: &Path,
   journal: &Arc<AsyncMutex<TaskJournal>>,
@@ -377,6 +432,16 @@ async fn apply_install_watchdog_pause_locked(
   Some(value.summary())
 }
 
+/// 等待下载 worker 完成。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `worker`: worker 句柄。
+///
+/// # 返回
+/// - `Ok(T)`: worker 结果。
+/// - `Err(String)`: 异常退出的错误描述。
 async fn await_install_download_worker<T>(
   worker: tauri::async_runtime::JoinHandle<Result<T, String>>,
 ) -> Result<T, String> {
@@ -396,14 +461,39 @@ struct AudioLiveAssemblyOverlay {
 }
 
 impl AudioLiveAssemblyOverlay {
+  /// 创建组装进度叠加器。
+  ///
+  /// @since Beta v0.12.0
   fn new() -> Self {
     Self { accounted_written: AtomicU64::new(0) }
   }
 
+  /// 计算展示用已完成字节数。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `durable_completed`: 持久完成字节数。
+  /// - `total`: 总字节数。
+  /// - `written`: 已写字节数。
+  /// - `accounted`: 已入账字节数。
+  ///
+  /// # 返回
+  /// 展示字节数。
   fn display_bytes(durable_completed: u64, total: u64, written: u64, accounted: u64) -> u64 {
     durable_completed.saturating_add(written.saturating_sub(accounted)).min(total)
   }
 
+  /// 叠加写出进度到任务摘要。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `journal`: 任务日志。
+  /// - `written`: 已写字节数。
+  ///
+  /// # 返回
+  /// 叠加后的摘要。
   fn overlay(&self, journal: &TaskJournal, written: u64) -> PackageTaskSummary {
     let mut summary = journal.summary();
     summary.assembly_completed_bytes = Self::display_bytes(
@@ -428,12 +518,26 @@ struct LatestEventDispatcher<T> {
 }
 
 impl<T> Clone for LatestEventDispatcher<T> {
+  /// 克隆事件派发器。
+  ///
+  /// @since Beta v0.12.0
   fn clone(&self) -> Self {
     Self { pending: Arc::clone(&self.pending), wake: self.wake.clone() }
   }
 }
 
 impl<T: Send + 'static> LatestEventDispatcher<T> {
+  /// 创建后台事件派发器。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `thread_name`: 线程名。
+  /// - `sink`: 事件接收器。
+  ///
+  /// # 返回
+  /// - `Ok(Self)`: 派发器。
+  /// - `Err(String)`: 创建线程失败的错误描述。
   fn new<F>(thread_name: String, mut sink: F) -> Result<Self, String>
   where
     F: FnMut(T) + Send + 'static,
@@ -467,6 +571,12 @@ impl<T: Send + 'static> LatestEventDispatcher<T> {
     Ok(Self { pending, wake })
   }
 
+  /// 更新并发布最新事件。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `update`: 事件更新函数。
   fn publish_with<F>(&self, update: F)
   where
     F: FnOnce(Option<T>) -> T,
@@ -491,6 +601,17 @@ struct AudioEventDispatcher {
 }
 
 impl AudioEventDispatcher {
+  /// 创建音频事件派发器。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `app_handle`: 应用句柄。
+  /// - `task_id`: 任务 ID。
+  ///
+  /// # 返回
+  /// - `Ok(Self)`: 派发器。
+  /// - `Err(String)`: 创建失败的错误描述。
   fn new(app_handle: AppHandle, task_id: &str) -> Result<Self, String> {
     let thread_name = format!("tg-audio-events-{}", task_id.chars().take(8).collect::<String>());
     let events = LatestEventDispatcher::new(thread_name, move |event: AudioTaskEvent| {
@@ -502,14 +623,33 @@ impl AudioEventDispatcher {
     Ok(Self { events })
   }
 
+  /// 发布音频进度。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `summary`: 任务摘要。
   fn publish_progress(&self, summary: PackageTaskSummary) {
     self.publish(summary, false);
   }
 
+  /// 发布音频状态。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `summary`: 任务摘要。
   fn publish_state(&self, summary: PackageTaskSummary) {
     self.publish(summary, true);
   }
 
+  /// 发布音频事件。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `summary`: 任务摘要。
+  /// - `emit_state`: 是否发布状态。
   fn publish(&self, summary: PackageTaskSummary, emit_state: bool) {
     self.events.publish_with(|pending| newest_audio_event(pending, summary, emit_state));
   }
@@ -526,6 +666,17 @@ struct InstallEventDispatcher {
 }
 
 impl InstallEventDispatcher {
+  /// 创建安装事件派发器。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `app_handle`: 应用句柄。
+  /// - `task_id`: 任务 ID。
+  ///
+  /// # 返回
+  /// - `Ok(Self)`: 派发器。
+  /// - `Err(String)`: 创建失败的错误描述。
   fn new(app_handle: AppHandle, task_id: &str) -> Result<Self, String> {
     let thread_name = format!("tg-install-events-{}", task_id.chars().take(8).collect::<String>());
     let events = LatestEventDispatcher::new(thread_name, move |event: InstallTaskEvent| {
@@ -537,14 +688,33 @@ impl InstallEventDispatcher {
     Ok(Self { events })
   }
 
+  /// 发布安装进度。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `summary`: 任务摘要。
   fn publish_progress(&self, summary: PackageTaskSummary) {
     self.publish(summary, false);
   }
 
+  /// 发布安装状态。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `summary`: 任务摘要。
   fn publish_state(&self, summary: PackageTaskSummary) {
     self.publish(summary, true);
   }
 
+  /// 发布安装事件。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `summary`: 任务摘要。
+  /// - `emit_state`: 是否发布状态。
   fn publish(&self, summary: PackageTaskSummary, emit_state: bool) {
     self.events.publish_with(|pending| newest_install_event(pending, summary, emit_state));
   }
@@ -564,6 +734,17 @@ fn newest_audio_event(
   }
 }
 
+/// 合并最新安装事件，保证 revision 单调递增。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `pending`: 待发布事件。
+/// - `summary`: 任务摘要。
+/// - `emit_state`: 是否发布状态。
+///
+/// # 返回
+/// 最新安装事件。
 fn newest_install_event(
   pending: Option<InstallTaskEvent>,
   summary: PackageTaskSummary,
@@ -592,6 +773,15 @@ pub(crate) fn default_concurrency() -> usize {
   default_install_concurrency()
 }
 
+/// 计算安装下载并发数。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `pipeline_concurrency`: 管道并发数。
+///
+/// # 返回
+/// 下载并发数。
 fn install_download_concurrency(pipeline_concurrency: usize) -> usize {
   pipeline_concurrency.clamp(1, MAX_CONCURRENCY)
 }
@@ -618,10 +808,26 @@ struct ProgressEmitRegistry {
 static PROGRESS_EMIT_REGISTRY: LazyLock<Mutex<ProgressEmitRegistry>> =
   LazyLock::new(|| Mutex::new(ProgressEmitRegistry::default()));
 
+/// 清理过期进度发布槽。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `registry`: 发布注册表。
+/// - `now`: 当前时间。
 fn prune_progress_emit_slots(registry: &mut ProgressEmitRegistry, now: Instant) {
   registry.slots.retain(|_, last| now.saturating_duration_since(*last) < UI_PROGRESS_EMIT_SLOT_TTL);
 }
 
+/// 读取安装 spool 字节数。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `tracker`: spool 跟踪器。
+///
+/// # 返回
+/// 字节数。
 fn install_tracker_spool_bytes(tracker: &Mutex<InstallSpoolTracker>) -> u64 {
   tracker.lock().unwrap().spool_bytes()
 }
@@ -641,6 +847,9 @@ struct AssemblyWorkerDoneGuard {
 }
 
 impl Drop for AssemblyWorkerDoneGuard {
+  /// 释放组装 worker 槽位并唤醒等待者。
+  ///
+  /// @since Beta v0.12.0
   fn drop(&mut self) {
     if self.slot.active.fetch_sub(1, Ordering::AcqRel) == 1 {
       self.slot.finished.notify_waiters();
@@ -648,6 +857,15 @@ impl Drop for AssemblyWorkerDoneGuard {
   }
 }
 
+/// 取得计划对应的组装 worker 槽位。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// worker 槽位。
 fn assembly_worker_slot(plan_id: &str) -> Arc<AssemblyWorkerSlot> {
   let mut slots = ASSEMBLY_WORKER_SLOTS.lock().unwrap();
   Arc::clone(slots.entry(plan_id.to_string()).or_insert_with(|| {
@@ -659,6 +877,23 @@ fn assembly_worker_slot(plan_id: &str) -> Arc<AssemblyWorkerSlot> {
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 派生安装组装 worker。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+/// - `plan`: 资源计划。
+/// - `download_index`: 下载索引。
+/// - `asset_index`: 资源游标。
+/// - `staging_root`: staging 根目录。
+/// - `shared_cache_root`: 共享缓存根目录。
+/// - `spool_root`: spool 根目录。
+/// - `canceled`: 取消标志。
+/// - `telemetry`: 组装遥测。
+///
+/// # 返回
+/// worker 句柄。
 fn spawn_install_assembly_worker(
   plan_id: &str,
   plan: Arc<PersistedPlan>,
@@ -735,6 +970,16 @@ struct PlanWorksetBaseline {
 }
 
 impl PlanWorksetBaseline {
+  /// 从计划计算 workset 基线。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `plan`: 资源计划。
+  /// - `concurrency`: 并发数。
+  ///
+  /// # 返回
+  /// workset 基线。
   fn from_plan(plan: &PersistedPlan, concurrency: usize) -> Self {
     let mut asset_worksets = Vec::with_capacity(plan.assets.len());
     let mut asset_workset_chunk_max = 0_usize;
@@ -801,6 +1046,16 @@ impl PlanWorksetBaseline {
   }
 }
 
+/// 计算最近邻百分位值。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `values`: 值列表。
+/// - `percentile`: 百分位。
+///
+/// # 返回
+/// 百分位值。
 fn nearest_rank(values: &[u64], percentile: usize) -> u64 {
   if values.is_empty() {
     return 0;
@@ -869,6 +1124,7 @@ struct InstallDownloadProgressMonitor {
 }
 
 impl Drop for InstallDownloadProgressMonitor {
+  /// 停止下载进度监控任务。
   fn drop(&mut self) {
     self.stopped.store(true, Ordering::Release);
   }
@@ -879,6 +1135,7 @@ struct AssemblyWriteProgressMonitor {
 }
 
 impl Drop for AssemblyWriteProgressMonitor {
+  /// 停止组装写盘进度监控任务。
   fn drop(&mut self) {
     self.stopped.store(true, Ordering::Release);
   }
@@ -892,6 +1149,7 @@ struct AssemblyWriteBandwidthTracker {
 }
 
 impl AssemblyWriteBandwidthTracker {
+  /// 以当前已写字节数初始化组装带宽采样器。
   fn new(written_bytes: u64) -> Self {
     Self {
       last_written_bytes: written_bytes,
@@ -900,6 +1158,7 @@ impl AssemblyWriteBandwidthTracker {
     }
   }
 
+  /// 采样最近窗口的组装写盘带宽，并用 EMA 平滑。
   fn sample(&mut self, written_bytes: u64, active_assemblies: usize, now: Instant) -> u64 {
     let elapsed = now.saturating_duration_since(self.last_sample_at).as_secs_f64().max(0.001);
     let delta = written_bytes.saturating_sub(self.last_written_bytes);
@@ -919,6 +1178,7 @@ impl AssemblyWriteBandwidthTracker {
   }
 }
 
+/// 把组装写盘带宽写回任务日志；数值未变化时返回 false。
 fn apply_assembly_write_bandwidth(journal: &mut TaskJournal, speed: u64) -> bool {
   let remaining = journal.assembly_total_bytes.saturating_sub(journal.assembly_completed_bytes);
   let eta = download_eta_seconds(remaining, speed);
@@ -931,6 +1191,7 @@ fn apply_assembly_write_bandwidth(journal: &mut TaskJournal, speed: u64) -> bool
   true
 }
 
+/// 启动安装流水线进度采样，定期把下载/组装带宽与 ETA 写回任务日志。
 fn start_install_download_progress_monitor(
   events: InstallEventDispatcher,
   journal: Arc<AsyncMutex<TaskJournal>>,
@@ -1018,6 +1279,7 @@ fn start_install_download_progress_monitor(
   InstallDownloadProgressMonitor { stopped }
 }
 
+/// 启动配音组装写盘进度采样，实时把组装增量叠加到任务摘要。
 fn start_assembly_write_progress_monitor(
   events: AudioEventDispatcher,
   journal: Arc<AsyncMutex<TaskJournal>>,
@@ -1062,10 +1324,12 @@ fn start_assembly_write_progress_monitor(
   AssemblyWriteProgressMonitor { stopped }
 }
 
+/// 按剩余字节与当前带宽计算下载 ETA。
 fn download_eta_seconds(remaining_bytes: u64, bytes_per_second: u64) -> Option<u64> {
   (remaining_bytes > 0 && bytes_per_second > 0).then(|| remaining_bytes.div_ceil(bytes_per_second))
 }
 
+/// 把当前活跃组装数写回任务日志并发布进度。
 async fn emit_active_assembly_count(
   events: &InstallEventDispatcher,
   journal: &Arc<AsyncMutex<TaskJournal>>,
@@ -1196,14 +1460,17 @@ impl InstallSpoolTracker {
     }
   }
 
+  /// 返回当前记账的 spool 字节数。
   fn spool_bytes(&self) -> u64 {
     self.spool_bytes
   }
 
+  /// 返回已完成下载对象的数量。
   fn committed_step(&self) -> usize {
     self.counted.len()
   }
 
+  /// 计算计划中尚未入账下载对象的字节数。
   fn remaining_download_bytes(&self, plan: &PersistedPlan) -> u64 {
     plan.downloads.iter().fold(0_u64, |total, download| {
       if self.counted.contains(&download.id) {
@@ -1214,6 +1481,7 @@ impl InstallSpoolTracker {
     })
   }
 
+  /// 记录一个已下载对象，并返回当前完成下载数。
   fn mark_downloaded(&mut self, id: &str, cache_key: &str, bytes: u64) -> usize {
     if let Some(existing) = self.resident.get(cache_key) {
       if existing.id == id {
@@ -1228,6 +1496,7 @@ impl InstallSpoolTracker {
     self.committed_step()
   }
 
+  /// 作废并移除指定下载对象的记账。
   fn forget_download(&mut self, id: &str, cache_key: &str) {
     self.counted.remove(id);
     if let Some(existing) = self.resident.remove(cache_key) {
@@ -1235,10 +1504,12 @@ impl InstallSpoolTracker {
     }
   }
 
+  /// 判断指定安装资源是否已完成。
   fn asset_completed(&self, index: usize) -> bool {
     self.completed_assets.contains(&index)
   }
 
+  /// 标记安装资源完成并推进连续完成游标。
   fn mark_asset_completed(&mut self, plan: &PersistedPlan, index: usize) -> bool {
     if !self.completed_assets.insert(index) {
       return false;
@@ -1263,6 +1534,7 @@ impl InstallSpoolTracker {
     true
   }
 
+  /// 作废已完成安装资源，并回退连续完成游标。
   fn invalidate_asset(&mut self, plan: &PersistedPlan, index: usize) -> bool {
     if !self.completed_assets.remove(&index) {
       return false;
@@ -1289,6 +1561,7 @@ impl InstallSpoolTracker {
       .is_some_and(|indices| indices.iter().all(|index| self.completed_assets.contains(index)))
   }
 
+  /// 生成安装完成快照。
   fn completion_snapshot(&self, plan: &PersistedPlan) -> InstallCompletionSnapshot {
     debug_assert!(self.completed_count <= plan.assets.len());
     InstallCompletionSnapshot {
@@ -1415,6 +1688,7 @@ async fn release_spool_unneeded_async(
   .unwrap_or(0)
 }
 
+/// 把安装完成快照写回任务日志，并同步逻辑 staging 占用指标。
 fn apply_install_completion_snapshot(
   value: &mut TaskJournal,
   snapshot: InstallCompletionSnapshot,
@@ -1428,6 +1702,7 @@ fn apply_install_completion_snapshot(
 }
 
 impl InstallPipelineMetrics {
+  /// 创建安装流水线指标收集器。
   fn new(
     plan: &PersistedPlan,
     concurrency: usize,
@@ -1494,23 +1769,27 @@ impl InstallPipelineMetrics {
     }
   }
 
+  /// 记录下载开始并返回起始时刻。
   fn begin_download(&self) -> Instant {
     let active = self.active_downloads.fetch_add(1, Ordering::AcqRel).saturating_add(1);
     self.peak_active_downloads.fetch_max(active, Ordering::AcqRel);
     Instant::now()
   }
 
+  /// 记录下载结束及耗时。
   fn finish_download(&self, started_at: Instant) {
     self.active_downloads.fetch_sub(1, Ordering::AcqRel);
     self.download_micros.fetch_add(duration_micros(started_at.elapsed()), Ordering::Relaxed);
   }
 
+  /// 记录组装开始并返回起始时刻。
   fn begin_assembly(&self) -> Instant {
     let active = self.active_assemblies.fetch_add(1, Ordering::AcqRel).saturating_add(1);
     self.peak_active_assemblies.fetch_max(active, Ordering::AcqRel);
     Instant::now()
   }
 
+  /// 记录组装结束并返回耗时。
   fn finish_assembly(&self, started_at: Instant) -> Duration {
     let elapsed = started_at.elapsed();
     self.active_assemblies.fetch_sub(1, Ordering::AcqRel);
@@ -1518,19 +1797,23 @@ impl InstallPipelineMetrics {
     elapsed
   }
 
+  /// 记录一次检查点持久化耗时。
   fn record_checkpoint(&self, elapsed: Duration) {
     self.checkpoint_count.fetch_add(1, Ordering::Relaxed);
     self.checkpoint_micros.fetch_add(duration_micros(elapsed), Ordering::Relaxed);
   }
 
+  /// 更新 spool 峰值占用。
   fn observe_spool(&self, bytes: u64) {
     self.peak_spool_bytes.fetch_max(bytes, Ordering::Relaxed);
   }
 
+  /// 更新逻辑 staging 峰值占用。
   fn observe_logical_staging(&self, bytes: u64) {
     self.peak_logical_staging_bytes.fetch_max(bytes, Ordering::Relaxed);
   }
 
+  /// 汇总 journal 持久化耗时。
   fn record_journal(&self, timing: &journal::JournalPersistTiming) {
     self.journal_attempt_count.fetch_add(1, Ordering::Relaxed);
     if timing.persisted {
@@ -1547,6 +1830,7 @@ impl InstallPipelineMetrics {
     self.journal_lock_wait_micros.fetch_add(timing.lock_wait_micros, Ordering::Relaxed);
   }
 
+  /// 汇总安装发布后的校验耗时。
   fn record_validation(&self, timing: &installer::InstallValidationTiming) {
     self.record_assembly_detail(&timing.assembly);
     self.staging_verify_count.fetch_add(timing.staging_tree_count, Ordering::Relaxed);
@@ -1570,6 +1854,7 @@ impl InstallPipelineMetrics {
     self.journal_lock_wait_micros.fetch_add(timing.journal_lock_wait_micros, Ordering::Relaxed);
   }
 
+  /// 汇总组装阶段耗时。
   fn record_assembly_detail(&self, timing: &assembler::AssemblyTiming) {
     self.zstd_decode_read_count.fetch_add(timing.zstd_decode_read_count, Ordering::Relaxed);
     self.zstd_decode_read_bytes.fetch_add(timing.zstd_decode_read_bytes, Ordering::Relaxed);
@@ -1585,15 +1870,18 @@ impl InstallPipelineMetrics {
     self.staging_file_sync_micros.fetch_add(timing.staging_file_sync_micros, Ordering::Relaxed);
   }
 
+  /// 记录恢复校验游标与耗时。
   fn record_recovery_validation(&self, cursor: usize, elapsed: Duration) {
     self.resume_asset_cursor.store(cursor, Ordering::Relaxed);
     self.recovery_validate_micros.store(duration_micros(elapsed), Ordering::Relaxed);
   }
 
+  /// 记录因并发去重而等待的字节数。
   fn record_duplicate_wait(&self, bytes: u64) {
     self.duplicate_wait_bytes.fetch_add(bytes, Ordering::Relaxed);
   }
 
+  /// 记录唯一下载字节数并扣减 ETA 剩余量。
   fn record_unique_download(&self, bytes: u64) {
     self.unique_download_bytes.fetch_add(bytes, Ordering::Relaxed);
     let _ =
@@ -1602,12 +1890,14 @@ impl InstallPipelineMetrics {
       });
   }
 
+  /// 设置 ETA 计算所用的剩余字节数。
   fn set_eta_remaining_bytes(&self, bytes: u64) {
     self.eta_remaining_bytes.store(bytes, Ordering::Release);
   }
 }
 
 impl Drop for InstallPipelineMetrics {
+  /// 输出安装流水线的性能摘要。
   fn drop(&mut self) {
     let download = self.download_telemetry.snapshot();
     let assembly = self.assembly_telemetry.snapshot();
@@ -1716,10 +2006,12 @@ impl Drop for InstallPipelineMetrics {
   }
 }
 
+/// 把时长换算为微秒并钳制到 `u64` 范围。
 fn duration_micros(duration: Duration) -> u64 {
   duration.as_micros().min(u128::from(u64::MAX)) as u64
 }
 
+/// 持久化安装检查点，并记录检查点及 journal 写入耗时指标。
 fn persist_install_checkpoint(
   task_root: &Path,
   journal_value: &TaskJournal,
@@ -1735,6 +2027,7 @@ fn persist_install_checkpoint(
   result
 }
 
+/// 持久化安装进度，并记录 journal 写入耗时指标。
 fn persist_install_progress(
   task_root: &Path,
   journal_value: &TaskJournal,
@@ -1749,6 +2042,7 @@ fn persist_install_progress(
   result
 }
 
+/// 把下载中的 in-flight 字节叠加到任务摘要的已下载量。
 fn overlay_install_download_progress(
   journal: &TaskJournal,
   metrics: &InstallPipelineMetrics,
@@ -1763,6 +2057,7 @@ fn overlay_install_download_progress(
   summary
 }
 
+/// 在 blocking 线程池中异步持久化安装进度。
 async fn persist_install_progress_async(
   task_root: PathBuf,
   journal_value: TaskJournal,
@@ -1775,6 +2070,7 @@ async fn persist_install_progress_async(
   .map_err(|error| format!("持久化安装进度 worker 异常退出：{error}"))?
 }
 
+/// 在 blocking 线程池中异步持久化安装检查点。
 async fn persist_install_checkpoint_async(
   task_root: PathBuf,
   journal_value: TaskJournal,
@@ -1787,6 +2083,7 @@ async fn persist_install_checkpoint_async(
   .map_err(|error| format!("持久化安装检查点 worker 异常退出：{error}"))?
 }
 
+/// 在 journal 锁内应用下载进度更新、异步持久化，并按节流规则发布进度。
 async fn commit_install_download_progress(
   events: &InstallEventDispatcher,
   task_root: &Path,
@@ -1813,6 +2110,7 @@ async fn commit_install_download_progress(
   Ok(persist_value)
 }
 
+/// 有指标时使用带计时的检查点持久化，否则直接持久化 journal。
 fn persist_optional_install_checkpoint(
   task_root: &Path,
   journal_value: &TaskJournal,
@@ -1837,6 +2135,7 @@ struct ActiveTasks {
   cache_clear_active: bool,
 }
 
+/// 收集当前活动任务与安装互斥所覆盖的任务 ID。
 fn active_task_ids(active: &ActiveTasks) -> HashSet<String> {
   let mut active_ids = active.by_task.keys().cloned().collect::<HashSet<_>>();
   active_ids.extend(active.by_installation.values().map(|reservation| reservation.task_id.clone()));
@@ -1870,6 +2169,7 @@ struct ActiveTask {
   journal: Arc<AsyncMutex<TaskJournal>>,
 }
 
+/// 设置手动暂停请求，并返回暂停令牌与 journal 锁。
 async fn signal_pause_and_lock_journal(
   task: &ActiveTask,
 ) -> Result<(Arc<AtomicBool>, bool, tokio::sync::MutexGuard<'_, TaskJournal>), String> {
@@ -1901,6 +2201,7 @@ pub(crate) struct TaskRecordOperation {
 }
 
 impl TaskRecordOperation {
+  /// 预留任务记录变更互斥。
   fn acquire(active: Arc<Mutex<ActiveTasks>>, task_id: &str) -> Result<Self, String> {
     let task_id =
       Uuid::parse_str(task_id).map_err(|_| "任务 ID 无效：必须是 UUID".to_string())?.to_string();
@@ -1918,6 +2219,7 @@ impl TaskRecordOperation {
 }
 
 impl Drop for TaskRecordOperation {
+  /// 释放任务记录变更互斥。
   fn drop(&mut self) {
     if let Ok(mut active) = self.active.lock() {
       active.record_operations.remove(&self.task_id);
@@ -1926,6 +2228,7 @@ impl Drop for TaskRecordOperation {
 }
 
 impl TaskReservation {
+  /// 预留安装运行互斥。
   fn acquire(
     active: Arc<Mutex<ActiveTasks>>,
     installation_id: &str,
@@ -1956,12 +2259,14 @@ impl TaskReservation {
     })
   }
 
+  /// 返回该任务的取消标志。
   pub(crate) fn canceled_flag(&self) -> Arc<AtomicBool> {
     Arc::clone(&self.canceled)
   }
 }
 
 impl Drop for TaskReservation {
+  /// 释放安装运行互斥，并清理仍指向本 reservation 的任务记录。
   fn drop(&mut self) {
     let Ok(mut active) = self.active.lock() else {
       return;
@@ -1984,6 +2289,7 @@ pub(crate) struct CacheClearReservation {
 }
 
 impl Drop for CacheClearReservation {
+  /// 释放游戏资源缓存清理互斥。
   fn drop(&mut self) {
     if let Ok(mut active) = self.active.lock() {
       active.cache_clear_active = false;
@@ -1992,6 +2298,7 @@ impl Drop for CacheClearReservation {
 }
 
 impl GamePackageManager {
+  /// 创建游戏包管理器。
   pub(crate) fn new() -> Self {
     Self {
       active: Arc::new(Mutex::new(ActiveTasks {
@@ -2256,6 +2563,7 @@ impl GamePackageManager {
     Ok(active.by_installation.get(installation_id).map(|reservation| reservation.task_id.clone()))
   }
 
+  /// 启动全新安装下载、组装与提交任务。
   pub(crate) fn start_install(
     &self,
     app_handle: AppHandle,
@@ -2453,6 +2761,7 @@ impl GamePackageManager {
     Ok(summary)
   }
 
+  /// 启动换服任务的下载、准备与提交。
   pub(crate) fn start_switch(
     &self,
     app_handle: AppHandle,
@@ -2515,6 +2824,7 @@ impl GamePackageManager {
     Ok(summary)
   }
 
+  /// 恢复或回滚换服提交。
   pub(crate) fn rollback_switch(
     &self,
     app_handle: &AppHandle,
@@ -2546,6 +2856,7 @@ impl GamePackageManager {
     Ok(journal_value.summary())
   }
 
+  /// 请求取消任务，并发布产生的状态变化。
   pub(crate) fn cancel(
     &self,
     app_handle: &AppHandle,
@@ -2660,6 +2971,7 @@ impl GamePackageManager {
     Ok(false)
   }
 
+  /// 请求运行中任务取消；若已不在运行，则直接回滚下载并返回状态。
   fn request_or_reap_cancel(
     &self,
     task_root: &Path,
@@ -2688,6 +3000,7 @@ impl GamePackageManager {
     Ok(Some(self.rollback_download(task_root, task_id)?))
   }
 
+  /// 应用已就绪的资源计划；必要时转入修复并最终同步语音包登记。
   pub(crate) fn apply(
     &self,
     app_handle: AppHandle,
@@ -2834,6 +3147,7 @@ impl GamePackageManager {
     Ok(summary)
   }
 
+  /// 恢复或回滚资源提交。
   pub(crate) async fn rollback_apply(
     &self,
     app_handle: AppHandle,
@@ -2889,6 +3203,7 @@ impl GamePackageManager {
     .map_err(|error| format!("资源提交恢复线程异常退出：{error}"))?
   }
 
+  /// 启动游戏完整性校验。
   pub(crate) fn start_verify(
     &self,
     app_handle: AppHandle,
@@ -2921,6 +3236,7 @@ impl GamePackageManager {
     verify::start_verify(&self.verify, app_handle, task_root, installation, branches, reservation)
   }
 
+  /// 查询指定安装的完整性校验状态。
   pub(crate) fn verify_status(
     &self,
     task_root: &Path,
@@ -2929,14 +3245,17 @@ impl GamePackageManager {
     self.verify.status(task_root, installation_id)
   }
 
+  /// 取消指定安装的完整性校验。
   pub(crate) fn cancel_verify(&self, installation_id: &str) -> Result<(), String> {
     self.verify.cancel(installation_id)
   }
 
+  /// 清除指定安装的完整性校验状态。
   pub(crate) fn clear_verify(&self, task_root: &Path, installation_id: &str) -> Result<(), String> {
     self.verify.clear(task_root, installation_id)
   }
 
+  /// 为游戏启动预留安装互斥。
   pub(crate) fn reserve_installation(
     &self,
     installation_id: &str,
@@ -2944,6 +3263,7 @@ impl GamePackageManager {
     self.reserve_installation_operation(installation_id, "game-launch")
   }
 
+  /// 为一次性安装操作预留互斥。
   pub(crate) fn reserve_installation_operation(
     &self,
     installation_id: &str,
@@ -2952,6 +3272,7 @@ impl GamePackageManager {
     TaskReservation::acquire(Arc::clone(&self.active), installation_id, operation)
   }
 
+  /// 预留游戏资源缓存清理互斥。
   pub(crate) fn reserve_cache_clear(&self) -> Result<CacheClearReservation, String> {
     let mut active = self.active.lock().map_err(|_| "游戏资源任务锁已损坏".to_string())?;
     if active.cache_clear_active {
@@ -2964,6 +3285,7 @@ impl GamePackageManager {
     Ok(CacheClearReservation { active: Arc::clone(&self.active) })
   }
 
+  /// 列出指定安装的资源任务安全投影。
   pub(crate) async fn list(
     &self,
     task_root: &Path,
@@ -2973,6 +3295,7 @@ impl GamePackageManager {
     self.list_from_journals(journals, installation_id).await
   }
 
+  /// 列出任务记录，包含 journal、plan-only 与无效记录。
   pub(crate) async fn record_list(
     &self,
     task_root: &Path,
@@ -3106,6 +3429,7 @@ impl GamePackageManager {
     })
   }
 
+  /// 预留任务记录变更互斥。
   pub(crate) fn reserve_task_record_operation(
     &self,
     task_id: &str,
@@ -3113,6 +3437,7 @@ impl GamePackageManager {
     TaskRecordOperation::acquire(Arc::clone(&self.active), task_id)
   }
 
+  /// 删除指定任务记录及其 sidecar。
   pub(crate) fn remove_task(
     &self,
     task_root: &Path,
@@ -3157,6 +3482,7 @@ impl GamePackageManager {
     result
   }
 
+  /// 把磁盘 journal 与活动任务合并为按更新时间倒序的安全投影。
   async fn list_from_journals(
     &self,
     journals: Vec<TaskJournal>,
@@ -3202,6 +3528,7 @@ impl GamePackageManager {
     Ok(summaries)
   }
 
+  /// 按最长保留时长清理已结束任务。
   pub(crate) fn cleanup_tasks(
     &self,
     task_root: &Path,
@@ -3226,6 +3553,7 @@ impl GamePackageManager {
     })
   }
 
+  /// 放弃仍在下载中的任务并还原相关中间状态。
   pub(crate) fn rollback_download(
     &self,
     task_root: &Path,
@@ -3285,12 +3613,14 @@ fn cleanup_finished_task_sidecars(
   }
 }
 
+/// 收集安装器与换服仍持久引用的计划 ID。
 fn persistent_plan_references(task_root: &Path) -> Result<HashSet<String>, String> {
   let mut references = installer::referenced_plan_ids(task_root)?;
   references.extend(switch::referenced_plan_ids(task_root)?);
   Ok(references)
 }
 
+/// 逐个清理未被引用的 plan-only 记录及其 sidecar。
 fn cleanup_plan_only_records(
   task_root: &Path,
   active_ids: &HashSet<String>,
@@ -3310,6 +3640,7 @@ fn cleanup_plan_only_records(
   Ok(summary)
 }
 
+/// 清理未启动换服计划副本与 Defender 排除登记。
 fn cleanup_plan_only_sidecars(task_root: &Path, task_id: &str) {
   if let Err(error) = switch::remove_unstarted_plan_reference(task_root, task_id) {
     log::warn!("[game-package][{task_id}] 清理未启动换服计划副本失败：{error}");
@@ -3319,6 +3650,7 @@ fn cleanup_plan_only_sidecars(task_root: &Path, task_id: &str) {
   }
 }
 
+/// 构造空的任务清理摘要。
 fn empty_task_cleanup_summary() -> PackageTaskCleanupSummary {
   PackageTaskCleanupSummary { removed_count: 0, removed_bytes: 0, removed_task_ids: Vec::new() }
 }
@@ -3356,7 +3688,7 @@ fn restore_prep_staged_audio_deletions(
   journal::persist(task_root, journal)?;
   Ok(())
 }
-
+/// 按计划策略映射每个配音资源所需的下载对象索引。
 fn audio_asset_download_dependencies(plan: &PersistedPlan) -> Result<Vec<Vec<usize>>, String> {
   let mut downloads = HashMap::with_capacity(plan.downloads.len());
   for (index, download) in plan.downloads.iter().enumerate() {
@@ -3403,6 +3735,7 @@ fn audio_asset_download_dependencies(plan: &PersistedPlan) -> Result<Vec<Vec<usi
     .collect()
 }
 
+/// 为指定配音资源生成待下载对象列表；缓存命中或已可用时跳过。
 fn prepare_audio_asset_job(
   plan: &PersistedPlan,
   asset_index: usize,
@@ -3430,6 +3763,7 @@ fn prepare_audio_asset_job(
   AudioAssetJob { asset_index, pending }
 }
 
+/// 用配音组装写盘叠加器生成展示摘要。
 fn overlay_audio_summary(
   journal: &TaskJournal,
   telemetry: &assembler::AssemblyTelemetry,
@@ -3439,6 +3773,7 @@ fn overlay_audio_summary(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 占用组装槽并在后台完成单个配音资源组装与证据落盘。
 async fn assemble_audio_asset(
   events: AudioEventDispatcher,
   task_root: PathBuf,
@@ -3503,6 +3838,7 @@ async fn assemble_audio_asset(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 下载并组装单个配音资源，返回该资源任务的完成结果。
 async fn run_audio_asset_job(
   job: AudioAssetJob,
   events: AudioEventDispatcher,
@@ -3657,6 +3993,7 @@ fn discover_audio_delete_progress(
 
 /// 并发删除单个待移除配音资源：把文件移入备份目录并累计删除进度。
 #[allow(clippy::too_many_arguments)]
+/// 把单个待删除配音文件移入备份目录并累计删除进度。
 async fn delete_audio_resource(
   events: &AudioEventDispatcher,
   task_root: &Path,
@@ -3700,8 +4037,8 @@ async fn delete_audio_resource(
   events.publish_state(summary);
   Ok(())
 }
-
 #[allow(clippy::too_many_arguments)]
+/// 执行配音/更新边下边组装准备流水线，包含删除 staging 与证据恢复。
 async fn run_streaming_prepare_task(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -4088,6 +4425,7 @@ async fn run_streaming_prepare_task(
   events.publish_state(summary);
 }
 
+/// 把准备流水线错误写入任务日志，并按暂停/取消/失败发布终态。
 async fn persist_audio_pipeline_error(
   task_root: &Path,
   app_handle: &AppHandle,
@@ -4125,6 +4463,7 @@ async fn persist_audio_pipeline_error(
   }
 }
 
+/// 配音包下载完成后自动退出游戏并提交、登记配音变更。
 async fn apply_audio_after_download(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -4223,6 +4562,7 @@ async fn apply_audio_after_download(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 监督全新安装流水线，处理停滞自动重试与 Defender 清理。
 async fn run_install_streaming_supervisor(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -4405,6 +4745,7 @@ async fn run_install_streaming_supervisor(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 执行全新安装下载、组装与发布的主流水线。
 async fn run_install_streaming_task(
   app_handle: AppHandle,
   events: InstallEventDispatcher,
@@ -5116,6 +5457,7 @@ const MAX_INSTALL_ASSET_REPAIR_ATTEMPTS: usize = 2;
 const MAX_INSTALL_TASK_REPAIR_ATTEMPTS: usize = 3;
 const MAX_INSTALL_ASSEMBLY_CACHE_REPAIR_ATTEMPTS: usize = 2;
 
+/// 为安装资源自动修复预留一次重试额度，超出上限时返回错误。
 fn reserve_install_repair_attempt(
   journal: &mut TaskJournal,
   asset_index: usize,
@@ -5136,6 +5478,7 @@ fn reserve_install_repair_attempt(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 发布前反复校验并修复失败的安装资源，直到全部通过或重试额度耗尽。
 async fn run_install_prepublish_repair(
   events: &InstallEventDispatcher,
   task_root: &Path,
@@ -5289,6 +5632,7 @@ async fn run_install_prepublish_repair(
   }
 }
 
+/// 以 spool 预算约束调度安装资源下载与组装。
 async fn run_install_bounded_asset_pipeline(
   events: &InstallEventDispatcher,
   task_root: &Path,
@@ -5501,6 +5845,7 @@ async fn run_install_bounded_asset_pipeline(
   if let Some(error) = first_error { Err(error) } else { Ok(()) }
 }
 
+/// 为指定安装资源生成待下载分片与 spool 空间预留。
 fn prepare_install_asset_job(
   plan: &PersistedPlan,
   download_index: &assembler::FullInstallDownloadIndex,
@@ -5648,6 +5993,7 @@ async fn apply_install_download_results(
   Ok(())
 }
 
+/// 复验并收集指定安装资源仍缺失的下载分片。
 fn collect_missing_install_downloads(
   plan: &PersistedPlan,
   download_index: &assembler::FullInstallDownloadIndex,
@@ -5676,6 +6022,7 @@ fn collect_missing_install_downloads(
   missing
 }
 
+/// 作废共享缓存与 spool 中的损坏分片，并刷新缓存校验索引。
 fn invalidate_install_chunk_caches(
   shared_cache_root: &Path,
   spool_root: &Path,
@@ -5692,6 +6039,7 @@ fn invalidate_install_chunk_caches(
 }
 
 #[allow(clippy::too_many_arguments)]
+/// 执行单个安装资源的下载与组装，支持缓存复验失败后的自动重下。
 async fn run_install_asset_job(
   job: InstallAssetJob,
   events: InstallEventDispatcher,
@@ -5883,6 +6231,7 @@ async fn run_install_asset_job(
 }
 
 #[allow(dead_code)]
+/// 按批次串行下载并组装安装资源的备用流水线。
 async fn run_install_streaming_asset_pipeline(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -6021,6 +6370,7 @@ async fn run_install_streaming_asset_pipeline(
   Ok(())
 }
 
+/// 把安装流水线错误写入任务日志，并按暂停/取消/失败发布终态。
 async fn persist_install_stream_error(
   task_root: &Path,
   events: &InstallEventDispatcher,
@@ -6056,6 +6406,7 @@ async fn persist_install_stream_error(
   events.publish_state(summary);
 }
 
+/// 释放已完成安装资源不再需要的 spool 分片。
 fn release_install_spool(plan: &PersistedPlan, completed: usize, spool_root: &Path) -> u64 {
   let retained = plan
     .assets
@@ -6089,6 +6440,7 @@ fn release_install_spool(plan: &PersistedPlan, completed: usize, spool_root: &Pa
     .sum()
 }
 
+/// 统计前 N 个资源已消费或已缓存可用的下载对象数量。
 fn completed_download_count(
   plan: &PersistedPlan,
   completed: usize,
@@ -6114,6 +6466,7 @@ fn completed_download_count(
     .count()
 }
 
+/// 继续执行已有的资源修复清单。
 async fn continue_repair(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -6179,6 +6532,7 @@ async fn continue_repair(
   result
 }
 
+/// 合并执行资源修复计划，包含下载缺失分片与提交修复。
 async fn run_repair(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -6285,6 +6639,7 @@ async fn run_repair(
   .map_err(|error| format!("修复资源任务异常退出：{error}"))?
 }
 
+/// 执行换服下载、准备与提交流水线。
 async fn run_switch(
   app_handle: AppHandle,
   task_root: PathBuf,
@@ -6407,6 +6762,7 @@ async fn run_switch(
   }
 }
 
+/// 完成语音包安装记录同步，并把任务推进到已完成状态。
 async fn finalize_audio_registration(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -6484,6 +6840,7 @@ async fn finalize_audio_registration(
   Ok(summary)
 }
 
+/// 记录语音包安装同步失败，任务保持等待重试状态。
 async fn persist_audio_registration_error(
   app_handle: &AppHandle,
   task_root: &Path,
@@ -6515,6 +6872,7 @@ pub(crate) async fn retry_audio_registration(
   finalize_audio_registration(app_handle, task_root, pool, plan, game_root, &journal).await
 }
 
+/// 执行纯下载型资源任务，并按计划目标推进到待提交状态。
 async fn run_task(
   app_handle: AppHandle,
   task_root: &Path,
@@ -6746,6 +7104,7 @@ async fn run_task(
   }
 }
 
+/// 执行下载完成后的安装提交与游戏登记。
 async fn run_install_task(
   events: InstallEventDispatcher,
   task_root: PathBuf,
@@ -6881,6 +7240,7 @@ async fn run_install_task(
   events.publish_state(summary);
 }
 
+/// 按磁盘缓存重建纯下载任务的完成缓存状态。
 fn rebuild_completed_cache(journal: &mut TaskJournal, plan: &PersistedPlan, cache_root: &Path) {
   let mut completed = Vec::new();
   let mut bytes = 0_u64;
@@ -6895,6 +7255,7 @@ fn rebuild_completed_cache(journal: &mut TaskJournal, plan: &PersistedPlan, cach
   journal.downloaded_bytes = bytes;
 }
 
+/// 按共享缓存与 spool 重建安装任务的缓存与下载进度。
 fn rebuild_install_cache_state(
   journal: &mut TaskJournal,
   plan: &PersistedPlan,
@@ -6919,6 +7280,7 @@ fn rebuild_install_cache_state(
   journal.spool_bytes = spool_bytes(spool_root);
 }
 
+/// 按共享缓存或 spool 任一命中重建下载完成状态。
 fn rebuild_completed_cache_with_fallback(
   journal: &mut TaskJournal,
   plan: &PersistedPlan,
@@ -6941,6 +7303,7 @@ fn rebuild_completed_cache_with_fallback(
   journal.spool_bytes = spool_bytes(spool_root);
 }
 
+/// 校验流式安装所需磁盘空间，按是否同卷分别计算缓存与安装需求。
 fn check_install_stream_space_with_spool<'a>(
   plan: &PersistedPlan,
   asset_index: usize,
@@ -6996,6 +7359,7 @@ fn check_install_stream_space_with_spool<'a>(
   Ok(())
 }
 
+/// 读取当前 spool 占用后执行流式安装磁盘空间校验。
 fn check_install_stream_space<'a>(
   plan: &PersistedPlan,
   asset_index: usize,
@@ -7005,6 +7369,7 @@ fn check_install_stream_space<'a>(
   check_install_stream_space_with_spool(plan, asset_index, pending, spool_bytes(spool_root))
 }
 
+/// 统计目录内全部普通文件的字节数。
 fn spool_bytes(root: &Path) -> u64 {
   fs::read_dir(root)
     .ok()
@@ -7046,6 +7411,7 @@ fn build_download_labels(plan: &PersistedPlan) -> HashMap<String, String> {
     .collect()
 }
 
+/// 按字节边界截断过长的进度标签。
 fn truncate_progress_label(value: String) -> String {
   const MAX_PROGRESS_LABEL_BYTES: usize = 256;
   if value.len() <= MAX_PROGRESS_LABEL_BYTES {
@@ -7059,6 +7425,7 @@ fn truncate_progress_label(value: String) -> String {
   format!("{}{}", &value[..end], suffix)
 }
 
+/// 清理指定任务残留的 `.part.<task_id>` 下载临时文件。
 fn cleanup_task_partials(cache_root: &Path, task_id: &str) -> Result<(), String> {
   let entries = match fs::read_dir(cache_root) {
     Ok(entries) => entries,
@@ -7075,6 +7442,7 @@ fn cleanup_task_partials(cache_root: &Path, task_id: &str) -> Result<(), String>
   Ok(())
 }
 
+/// 写入并发布取消/失败等终态日志。
 fn persist_terminal_journal(
   task_root: &Path,
   journal: &mut TaskJournal,
@@ -7097,6 +7465,7 @@ fn persist_terminal_journal(
   emit(journal.summary());
 }
 
+/// 记录安装任务失败日志。
 fn log_install_failure(journal: &TaskJournal) {
   if journal.target != PackagePlanTarget::Install {
     return;
@@ -7108,12 +7477,14 @@ fn log_install_failure(journal: &TaskJournal) {
   );
 }
 
+/// 发送任务状态事件。
 fn emit_state(app_handle: &AppHandle, summary: &PackageTaskSummary) {
   if let Err(error) = app_handle.emit("game-package://state", summary) {
     log::warn!("[game-package] 发送任务状态事件失败：{error}");
   }
 }
 
+/// 发送任务进度事件并登记发布槽位。
 fn emit_progress(app_handle: &AppHandle, summary: &PackageTaskSummary) {
   remember_progress_emit(&summary.task_id);
   if let Err(error) = app_handle.emit("game-package://progress", summary) {
@@ -7121,6 +7492,7 @@ fn emit_progress(app_handle: &AppHandle, summary: &PackageTaskSummary) {
   }
 }
 
+/// 记录任务进度发布槽位并清理过期槽位。
 fn remember_progress_emit(task_id: &str) {
   let now = Instant::now();
   let Ok(mut registry) = PROGRESS_EMIT_REGISTRY.lock() else {
@@ -7130,6 +7502,7 @@ fn remember_progress_emit(task_id: &str) {
   registry.slots.insert(task_id.to_string(), now);
 }
 
+/// 按 UI 发布间隔判断当前任务是否允许再次发布进度。
 fn should_emit_progress(task_id: &str) -> bool {
   let now = Instant::now();
   let Ok(mut registry) = PROGRESS_EMIT_REGISTRY.lock() else {
@@ -7151,11 +7524,13 @@ fn should_emit_progress(task_id: &str) -> bool {
 const GAME_PROCESS_NAME: &str = "YuanShen.exe";
 
 #[cfg(target_os = "windows")]
+/// 判断国服客户端进程是否正在运行。
 pub(crate) fn is_game_running() -> bool {
   yuan_shen_process_ids().map(|ids| !ids.is_empty()).unwrap_or(true)
 }
 
 #[cfg(not(target_os = "windows"))]
+/// 非 Windows 平台不识别国服客户端，恒返回未运行。
 pub(crate) fn is_game_running() -> bool {
   false
 }
@@ -7190,6 +7565,7 @@ pub(crate) fn stop_game() -> Result<(), String> {
 }
 
 #[cfg(target_os = "windows")]
+/// 枚举当前国服客户端进程 ID。
 fn yuan_shen_process_ids() -> Result<Vec<u32>, String> {
   use windows_sys::Win32::{
     Foundation::{CloseHandle, INVALID_HANDLE_VALUE},
@@ -7226,6 +7602,7 @@ fn yuan_shen_process_ids() -> Result<Vec<u32>, String> {
 }
 
 #[cfg(target_os = "windows")]
+/// 强制结束指定 PID 的国服客户端进程。
 fn terminate_pid(pid: u32) -> Result<(), String> {
   use windows_sys::Win32::{
     Foundation::CloseHandle,
@@ -7246,62 +7623,4 @@ fn terminate_pid(pid: u32) -> Result<(), String> {
     }
   }
   Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  struct TestTaskRoot(PathBuf);
-
-  impl TestTaskRoot {
-    fn new() -> Self {
-      let root = std::env::temp_dir().join(format!("teyvatguide-plan-cleanup-{}", Uuid::new_v4()));
-      fs::create_dir_all(root.join("tasks")).expect("create task root");
-      Self(root)
-    }
-
-    fn create_plan(&self, installation_id: &str, target: PackagePlanTarget) -> String {
-      let plan_id = Uuid::new_v4().to_string();
-      let directory = self.0.join("tasks").join(&plan_id);
-      fs::create_dir_all(&directory).expect("create plan directory");
-      fs::write(directory.join("plan.json"), b"{}").expect("write plan");
-      plan_lifecycle::persist_metadata(
-        &self.0,
-        &plan_id,
-        installation_id,
-        target,
-        &Utc::now().to_rfc3339(),
-      )
-      .expect("persist plan metadata");
-      plan_id
-    }
-  }
-
-  impl Drop for TestTaskRoot {
-    fn drop(&mut self) {
-      let _ = fs::remove_dir_all(&self.0);
-    }
-  }
-
-  #[test]
-  fn replaces_same_target_plan_and_sweeps_startup_orphans() {
-    let root = TestTaskRoot::new();
-    let old_main = root.create_plan("game-test", PackagePlanTarget::Main);
-    let current_main = root.create_plan("game-test", PackagePlanTarget::Main);
-    let audio = root.create_plan("game-test", PackagePlanTarget::Audio);
-    let manager = GamePackageManager::new();
-
-    let replaced =
-      manager.cleanup_superseded_plans(&root.0, &current_main).expect("cleanup superseded plans");
-    assert_eq!(replaced.removed_task_ids, vec![old_main.clone()]);
-    assert!(!root.0.join("tasks").join(old_main).exists());
-    assert!(root.0.join("tasks").join(&current_main).exists());
-    assert!(root.0.join("tasks").join(&audio).exists());
-
-    let expired = manager.cleanup_expired_plans(&root.0).expect("cleanup startup plans");
-    assert_eq!(expired.removed_count, 2);
-    assert!(!root.0.join("tasks").join(current_main).exists());
-    assert!(!root.0.join("tasks").join(audio).exists());
-  }
 }

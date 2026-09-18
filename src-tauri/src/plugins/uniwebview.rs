@@ -25,6 +25,17 @@ pub fn init(app: &AppHandle) {
   }
 }
 
+/// 在 WebView2 上注册导航与外部 URI 协议拦截处理器。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `webview`: 平台 WebView 实例。
+/// - `app`: Tauri 应用句柄。
+///
+/// # 返回
+/// - `Ok(())`: 处理器注册成功。
+/// - `Err(String)`: 访问 WebView2 或注册失败的错误描述。
 fn attach_handlers(webview: PlatformWebview, app: AppHandle) -> Result<(), String> {
   unsafe {
     let core = webview.controller().CoreWebView2().map_err(|error| error.to_string())?;
@@ -51,6 +62,15 @@ fn attach_handlers(webview: PlatformWebview, app: AppHandle) -> Result<(), Strin
   Ok(())
 }
 
+/// 创建导航起始事件处理器，用于拦截 `uniwebview://` 链接。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app`: Tauri 应用句柄。
+///
+/// # 返回
+/// WebView2 导航事件处理器。
 fn navigation_handler(
   app: AppHandle,
 ) -> webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2NavigationStartingEventHandler {
@@ -72,6 +92,15 @@ fn navigation_handler(
   }))
 }
 
+/// 创建外部 URI 协议处理器，用于拦截 `uniwebview://` 外部协议。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app`: Tauri 应用句柄。
+///
+/// # 返回
+/// WebView2 外部协议事件处理器。
 fn external_scheme_handler(
   app: AppHandle,
 ) -> webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2LaunchingExternalUriSchemeEventHandler
@@ -94,6 +123,16 @@ fn external_scheme_handler(
   }))
 }
 
+/// 判断并处理 `uniwebview://` 协议，拦截后向前端发送事件。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app`: Tauri 应用句柄。
+/// - `uri`: 待处理的 URI。
+///
+/// # 返回
+/// 是否为 `uniwebview://` 协议。
 fn handle_uniwebview_uri(app: &AppHandle, uri: &str) -> bool {
   if !uri.to_ascii_lowercase().starts_with("uniwebview:") {
     return false;

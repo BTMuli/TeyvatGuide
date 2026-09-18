@@ -8,6 +8,16 @@ use serde::{Serialize, Serializer};
 use std::collections::{HashMap, HashSet};
 use std::io::{Cursor, Read};
 
+/// 将 `u64` 序列化为 JSON 字符串，避免 JavaScript 大整数精度丢失。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `value`: 待序列化的数值。
+/// - `serializer`: serde 序列化器。
+///
+/// # 返回
+/// serde 序列化结果。
 fn serialize_u64_as_string<S>(value: &u64, serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,
@@ -15,6 +25,16 @@ where
   serializer.serialize_str(&value.to_string())
 }
 
+/// 将 `u64` 切片序列化为 JSON 字符串数组，避免 JavaScript 大整数精度丢失。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `values`: 待序列化的数值切片。
+/// - `serializer`: serde 序列化器。
+///
+/// # 返回
+/// serde 序列化结果。
 fn serialize_u64s_as_strings<S>(values: &[u64], serializer: S) -> Result<S::Ok, S::Error>
 where
   S: Serializer,

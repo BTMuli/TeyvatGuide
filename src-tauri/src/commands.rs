@@ -23,6 +23,16 @@ static mut APP_INITIALIZED: bool = false;
 static WINDOW_LABEL_LOCKS: LazyLock<Mutex<HashMap<String, Weak<tauri::async_runtime::Mutex<()>>>>> =
   LazyLock::new(|| Mutex::new(HashMap::new()));
 
+/// 在指定窗口 label 的短生命周期互斥锁保护下执行操作。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `label`: 窗口 label。
+/// - `operation`: 受锁保护的操作。
+///
+/// # 返回
+/// 操作结果。
 pub async fn with_window_label_lock<T>(
   label: &str,
   operation: impl FnOnce() -> Result<T, String>,
@@ -32,6 +42,15 @@ pub async fn with_window_label_lock<T>(
   operation()
 }
 
+/// 取得指定窗口 label 的互斥锁，不存在时惰性创建。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `label`: 窗口 label。
+///
+/// # 返回
+/// 该 label 对应的互斥锁。
 fn get_window_label_lock(label: &str) -> Arc<tauri::async_runtime::Mutex<()>> {
   {
     let mut locks = WINDOW_LABEL_LOCKS.lock().unwrap_or_else(|error| error.into_inner());
@@ -47,6 +66,17 @@ fn get_window_label_lock(label: &str) -> Arc<tauri::async_runtime::Mutex<()>> {
   }
 }
 
+/// 按 label 销毁窗口并等待其实际移除。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `label`: 窗口 label。
+///
+/// # 返回
+/// - `Ok(())`: 窗口不存在或已销毁。
+/// - `Err(String)`: 销毁或等待超时的错误描述。
 pub async fn destroy_window_by_label<R: Runtime>(
   app_handle: &AppHandle<R>,
   label: &str,
@@ -75,6 +105,16 @@ pub async fn destroy_window_by_label<R: Runtime>(
   .map_err(|error| error.to_string())?
 }
 
+/// 并发销毁所有子窗口。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+///
+/// # 返回
+/// - `Ok(())`: 全部销毁成功。
+/// - `Err(String)`: 任一窗口销毁失败的错误描述。
 pub async fn destroy_sub_windows<R: Runtime>(app_handle: AppHandle<R>) -> Result<(), String> {
   let mut tasks = Vec::with_capacity(crate::SUB_WINDOW_LABELS.len());
   for label in crate::SUB_WINDOW_LABELS {
@@ -155,7 +195,12 @@ pub async fn execute_sql_transaction(
   transaction.commit().await.map_err(|error| error.to_string())
 }
 
-// 初始化应用
+/// 初始化应用，广播 `initApp` 并触发一次启动清理。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
 #[tauri::command]
 pub async fn init_app(app_handle: AppHandle) {
   unsafe {
@@ -195,7 +240,19 @@ pub async fn init_app(app_handle: AppHandle) {
   }
 }
 
-// 创建窗口
+/// 创建或复用指定 label 的窗口。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `label`: 窗口 label。
+/// - `url`: 窗口 URL。
+/// - `option`: 窗口配置。
+///
+/// # 返回
+/// - `Ok(())`: 窗口已创建或复用。
+/// - `Err(String)`: 窗口操作失败的错误描述。
 #[tauri::command]
 pub async fn create_window(
   app_handle: AppHandle,
@@ -236,12 +293,34 @@ pub async fn create_window(
   .await
 }
 
+/// 销毁指定 label 的窗口。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `label`: 窗口 label。
+///
+/// # 返回
+/// - `Ok(())`: 窗口已销毁。
+/// - `Err(String)`: 销毁失败的错误描述。
 #[tauri::command]
 pub async fn destroy_window(app_handle: AppHandle, label: String) -> Result<(), String> {
   destroy_window_by_label(&app_handle, &label).await
 }
 
-// 执行 js
+/// 在指定窗口中执行 JavaScript。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+/// - `label`: 窗口 label。
+/// - `js`: 要执行的脚本。
+///
+/// # 返回
+/// - `Ok(())`: 执行成功。
+/// - `Err(String)`: 未找到窗口或执行失败的错误描述。
 #[tauri::command]
 pub async fn execute_js(app_handle: AppHandle, label: String, js: String) -> Result<(), String> {
   with_window_label_lock(&label, || {
@@ -252,7 +331,16 @@ pub async fn execute_js(app_handle: AppHandle, label: String, js: String) -> Res
   .await
 }
 
-// 获取目录大小
+/// 计算目录中所有文件的总字节数。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 目录路径。
+///
+/// # 返回
+/// - `Ok(u64)`: 目录大小。
+/// - `Err(String)`: 读取失败或大小溢出的错误描述。
 #[tauri::command]
 pub async fn get_dir_size(path: String) -> Result<u64, String> {
   tauri::async_runtime::spawn_blocking(move || {
@@ -398,6 +486,18 @@ pub fn resolve_external_path(app_handle: AppHandle, path: String) -> Result<Stri
   Ok(source.to_string_lossy().into_owned())
 }
 
+/// 将 MSIX 重定向路径映射到本地缓存目录。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `source`: 源路径。
+/// - `local_data_dir`: 本地数据目录。
+/// - `roaming_data_dir`: 漫游数据目录。
+/// - `package_family_name`: 包族名。
+///
+/// # 返回
+/// 映射后的路径，无法映射时返回 `None`。
 #[cfg(target_os = "windows")]
 fn msix_redirected_path(
   source: &std::path::Path,
@@ -419,6 +519,16 @@ fn msix_redirected_path(
   None
 }
 
+/// 清理超过一周的按日切割日志。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+///
+/// # 返回
+/// - `Ok(ClearAppLogsResult)`: 已删除与删除失败的数量。
+/// - `Err(String)`: 读取日志目录失败的错误描述。
 #[tauri::command]
 pub fn clear_app_logs(app_handle: AppHandle) -> Result<ClearAppLogsResult, String> {
   let log_dir =
@@ -471,6 +581,16 @@ pub struct AppFsDirEntry {
   pub is_symlink: bool,
 }
 
+/// 校验并解析应用文件系统路径，禁止访问 WebView 数据目录。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `path`: 待解析的路径。
+///
+/// # 返回
+/// - `Ok(PathBuf)`: 解析后的路径。
+/// - `Err(String)`: 路径为空或访问受限的错误描述。
 fn prepare_app_fs_path(path: &str) -> Result<std::path::PathBuf, String> {
   let trimmed = path.trim();
   if trimmed.is_empty() {
@@ -540,6 +660,16 @@ pub fn app_fs_read_dir(path: String) -> Result<Vec<AppFsDirEntry>, String> {
   Ok(result)
 }
 
+/// 判断按日切割日志是否已超过 7 天。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `name`: 日志文件名。
+/// - `today`: 当前日期。
+///
+/// # 返回
+/// 是否过期。
 fn is_expired_daily_log(name: &str, today: chrono::NaiveDate) -> bool {
   let Some(stem) = name.strip_suffix(".log") else {
     return false;
@@ -556,7 +686,12 @@ fn clear_platform_cache(_app_handle: AppHandle) -> Result<(), String> {
   Err("当前平台不支持清除 WebView 缓存".to_string())
 }
 
-// 判断是否是管理员权限
+/// 判断当前进程是否以管理员权限运行。
+///
+/// @since Beta v0.12.0
+///
+/// # 返回
+/// 是否已提权；非 Windows 平台返回 `false`。
 #[tauri::command]
 pub fn is_in_admin() -> bool {
   #[cfg(not(target_os = "windows"))]
@@ -595,7 +730,16 @@ pub fn is_in_admin() -> bool {
   }
 }
 
-// 隐藏主窗口到托盘
+/// 关闭所有子窗口并隐藏主窗口到托盘。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+///
+/// # 返回
+/// - `Ok(())`: 已隐藏。
+/// - `Err(String)`: 隐藏失败的错误描述。
 #[tauri::command]
 pub async fn hide_main_window(app_handle: AppHandle) -> Result<(), String> {
   // 关闭所有子窗口
@@ -607,7 +751,16 @@ pub async fn hide_main_window(app_handle: AppHandle) -> Result<(), String> {
   Ok(())
 }
 
-// 退出应用
+/// 关闭所有子窗口并退出应用。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `app_handle`: 应用句柄。
+///
+/// # 返回
+/// - `Ok(())`: 已触发退出。
+/// - `Err(String)`: 关闭子窗口失败的错误描述。
 #[tauri::command]
 pub async fn quit_app(app_handle: AppHandle) -> Result<(), String> {
   // 关闭所有子窗口
@@ -624,6 +777,12 @@ pub fn read_text_scale() -> Result<f64, String> {
   utils::read_text_scale_factor()
 }
 
+/// 判断当前应用是否以 MSIX 包形式运行。
+///
+/// @since Beta v0.12.0
+///
+/// # 返回
+/// 是否为 MSIX 包；非 Windows 返回 `false`。
 #[tauri::command]
 pub fn is_msix() -> bool {
   #[cfg(not(windows))]
@@ -656,6 +815,15 @@ pub fn is_msix() -> bool {
   }
 }
 
+/// 判断指定名称的进程是否正在运行。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `process_name`: 进程名。
+///
+/// # 返回
+/// 是否存在匹配进程；非 Windows 返回 `false`。
 #[tauri::command]
 pub fn is_process_running(process_name: String) -> bool {
   #[cfg(not(target_os = "windows"))]

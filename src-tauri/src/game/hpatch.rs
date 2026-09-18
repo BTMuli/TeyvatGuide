@@ -4,6 +4,21 @@
 use std::{fs::File, os::windows::io::AsRawHandle};
 
 unsafe extern "C" {
+  /// 调用本地 HDiffPatch 实现，将旧文件与差分容器片段合成为目标文件。
+  ///
+  /// @since Beta v0.12.0
+  ///
+  /// # 参数
+  /// - `old_handle`: 旧文件句柄。
+  /// - `old_size`: 旧文件字节数。
+  /// - `patch_handle`: 差分容器文件句柄。
+  /// - `patch_offset`: 差分片段在容器中的偏移。
+  /// - `patch_length`: 差分片段长度。
+  /// - `out_handle`: 目标输出文件句柄。
+  /// - `expected_new_size`: 预期生成的目标字节数。
+  ///
+  /// # 返回
+  /// 0 表示成功，非 0 为 HDiffPatch 错误码。
   fn teyvat_hpatch_zstd(
     old_handle: *mut std::ffi::c_void,
     old_size: u64,

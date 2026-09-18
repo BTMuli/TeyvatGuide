@@ -25,6 +25,20 @@ pub(crate) struct PlanMetadata {
   pub(crate) created_at: String,
 }
 
+/// 将资源计划元数据以临时文件加原子重命名的方式写入任务目录。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 游戏资源任务根目录。
+/// - `plan_id`: 计划 ID。
+/// - `installation_id`: 安装 ID。
+/// - `target`: 计划目标。
+/// - `created_at`: 计划创建时间（RFC 3339）。
+///
+/// # 返回
+/// - `Ok(())`: 元数据已写入。
+/// - `Err(String)`: 校验、序列化或写入失败的错误描述。
 pub(crate) fn persist_metadata(
   task_root: &Path,
   plan_id: &str,
@@ -73,6 +87,18 @@ pub(crate) fn persist_metadata(
   }
 }
 
+/// 读取并校验指定计划的元数据，不存在时返回 `None`。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `task_root`: 游戏资源任务根目录。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// - `Ok(Some(PlanMetadata))`: 元数据存在且有效。
+/// - `Ok(None)`: 元数据文件不存在。
+/// - `Err(String)`: 元数据损坏或读取失败的错误描述。
 pub(crate) fn load_metadata(
   task_root: &Path,
   plan_id: &str,
@@ -96,6 +122,18 @@ pub(crate) fn load_metadata(
   Ok(Some(value))
 }
 
+/// 判断目录是否为只包含 `plan.json` 与可选元数据的安全计划目录。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `directory`: 待检查的目录。
+/// - `task_id`: 任务 ID，必须为合法 UUID。
+///
+/// # 返回
+/// - `Ok(true)`: 目录内容符合安全计划目录。
+/// - `Ok(false)`: 目录内容不符合。
+/// - `Err(String)`: 读取目录或元数据失败的错误描述。
 pub(crate) fn is_safe_plan_only_directory(directory: &Path, task_id: &str) -> Result<bool, String> {
   if Uuid::parse_str(task_id).is_err() {
     return Ok(false);
@@ -127,6 +165,17 @@ pub(crate) fn is_safe_plan_only_directory(directory: &Path, task_id: &str) -> Re
   Ok(true)
 }
 
+/// 从目录中读取并校验资源计划元数据。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `directory`: 包含元数据文件的目录。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// - `Ok(PlanMetadata)`: 读取到的有效元数据。
+/// - `Err(String)`: 元数据结构无效或读取失败的错误描述。
 fn load_metadata_from_directory(directory: &Path, plan_id: &str) -> Result<PlanMetadata, String> {
   let path = directory.join(PLAN_METADATA_FILE_NAME);
   let metadata =
@@ -145,6 +194,17 @@ fn load_metadata_from_directory(directory: &Path, plan_id: &str) -> Result<PlanM
   Ok(value)
 }
 
+/// 校验资源计划元数据的字段合法性。
+///
+/// @since Beta v0.12.0
+///
+/// # 参数
+/// - `metadata`: 待校验的元数据。
+/// - `plan_id`: 计划 ID。
+///
+/// # 返回
+/// - `Ok(())`: 字段合法。
+/// - `Err(String)`: 字段非法的错误描述。
 fn validate_metadata(metadata: &PlanMetadata, plan_id: &str) -> Result<(), String> {
   if metadata.schema_version != PLAN_METADATA_SCHEMA_VERSION
     || Uuid::parse_str(plan_id).is_err()
