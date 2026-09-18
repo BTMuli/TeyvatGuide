@@ -390,7 +390,7 @@ async function toWiki(): Promise<void> {
   }
 }
 
-.tww-level-nodes {
+.tww-level-nodes.v-btn-toggle {
   width: fit-content;
   height: 20px;
   flex-shrink: 0;
@@ -534,7 +534,7 @@ async function toWiki(): Promise<void> {
   }
 }
 
-.tww-refinement-toggle {
+.tww-refinement-toggle.v-btn-toggle {
   height: 20px;
   flex-shrink: 0;
   border: 1px solid var(--common-shadow-1);

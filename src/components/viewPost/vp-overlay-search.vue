@@ -274,7 +274,7 @@ async function toUserProfile(user: TGApp.BBS.Post.User, gid: number): Promise<vo
   column-gap: 8px;
 }
 
-.tops-toggle {
+.tops-toggle.v-btn-toggle {
   height: 40px;
 }
 

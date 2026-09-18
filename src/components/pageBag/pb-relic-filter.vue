@@ -352,7 +352,7 @@ function confirmSelect(): void {
 <style lang="scss" scoped>
 @use "@styles/github.styles.scss" as github-styles;
 
-.pbrf-tabs {
+.pbrf-tabs.v-btn-toggle {
   min-width: 0;
   height: 36px;
   flex-shrink: 1;

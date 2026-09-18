@@ -809,7 +809,7 @@ async function openPlan(): Promise<void> {
   gap: 4px;
 }
 
-.pwcc-level-nodes {
+.pwcc-level-nodes.v-btn-toggle {
   width: fit-content;
   height: 20px;
   flex-shrink: 0;

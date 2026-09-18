@@ -530,7 +530,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   }
 }
 
-.pc-view-toggle {
+.pc-view-toggle.v-btn-toggle {
   height: 40px;
 }
 </style>

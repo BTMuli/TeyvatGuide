@@ -629,7 +629,7 @@ function clearPageStateForUid(): void {
   max-width: 320px;
 }
 
-.pbr-view-toggle {
+.pbr-view-toggle.v-btn-toggle {
   display: inline-flex;
   overflow: hidden;
   height: 36px;

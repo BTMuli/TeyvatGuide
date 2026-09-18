@@ -201,7 +201,7 @@ function searchNameCard(): void {
   margin-right: 16px;
 }
 
-.wnc-type-toggle {
+.wnc-type-toggle.v-btn-toggle {
   height: 40px;
   flex-shrink: 0;
   border-radius: 4px;

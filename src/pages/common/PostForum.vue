@@ -14,6 +14,8 @@
         :items="sortGameList"
         :label="gidLabel"
         class="post-switch-item"
+        density="compact"
+        hide-details
         item-title="text"
         item-value="gid"
         variant="outlined"
@@ -43,6 +45,8 @@
         :items="curForums"
         :label="forumLabel"
         class="post-switch-item"
+        density="compact"
+        hide-details
         item-title="text"
         variant="outlined"
       >
@@ -70,6 +74,8 @@
         :items="sortOrderList"
         :label="sortLabel"
         class="post-switch-item"
+        density="compact"
+        hide-details
         item-title="text"
         item-value="value"
         variant="outlined"
@@ -81,6 +87,7 @@
         append-inner-icon="mdi-magnify"
         autocomplete="off"
         class="post-switch-item"
+        density="compact"
         label="请输入帖子 ID 或搜索词"
         variant="outlined"
         @click:append-inner="searchPost"
@@ -514,7 +521,6 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
 .post-switch-item {
   width: 250px;
-  height: 50px;
 }
 
 .post-forum-btn {
@@ -534,7 +540,7 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
   column-gap: 8px;
 }
 
-.posts-view-conf {
+.posts-view-conf.v-btn-toggle {
   height: 36px;
 }
 

@@ -132,8 +132,8 @@ function loadPosInfo(): void {
   font-size: 20px;
 }
 
-.pwd-rss-pos,
-.pwd-rss-star {
+.pwd-rss-pos.v-btn-toggle,
+.pwd-rss-star.v-btn-toggle {
   height: 32px;
 }
 
