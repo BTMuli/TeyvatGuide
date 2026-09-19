@@ -56,32 +56,6 @@
       />
     </template>
 
-    <section class="ucmd-section">
-      <header class="ucmd-section-title">
-        <v-icon color="var(--tgc-od-orange)" size="18"> mdi-clipboard-list-outline </v-icon>
-        <h3>需求信息</h3>
-      </header>
-      <div class="ucmd-stats">
-        <div class="ucmd-stat progress">
-          <span>
-            {{ material.craftable > 0 ? "当前量（可合成量）/需求总量" : "当前量/需求总量" }}
-          </span>
-          <UcMaterialCount
-            :complete="material.missing === 0"
-            :craftable="material.craftable"
-            :current="material.owned"
-            :required="material.required"
-          />
-        </div>
-      </div>
-      <v-progress-linear
-        :color="material.missing > 0 ? 'var(--tgc-od-red)' : 'var(--tgc-od-green)'"
-        :model-value="material.progress"
-        height="6"
-        rounded
-      />
-    </section>
-
     <section v-if="wiki.description.trim().length > 0" class="ucmd-section">
       <header class="ucmd-section-title">
         <v-icon size="18">mdi-text-box-outline</v-icon>
@@ -101,27 +75,7 @@
       </div>
     </section>
 
-    <section v-if="wiki.convert.length > 0" class="ucmd-section">
-      <header class="ucmd-section-title">
-        <v-icon color="var(--tgc-od-green)" size="18">mdi-all-inclusive</v-icon>
-        <h3>合成消耗</h3>
-        <span v-if="material.craftable > 0"> 可合成 {{ fmtUtil.num(material.craftable) }} 个 </span>
-      </header>
-      <div v-if="costMaterials.length > 0" class="ucmd-costs">
-        <TMaterialStarChip
-          v-for="cost in costMaterials"
-          :key="cost.id"
-          :id="cost.id"
-          mode="convert"
-          :name="cost.name"
-          :owned="cost.local"
-          :required="cost.count"
-          :star="cost.star"
-          :type="cost.type"
-        />
-      </div>
-      <span v-else class="ucmd-no-cost">当前计算未使用合成材料</span>
-    </section>
+    <UcMaterialCrafting :material :canCraft="wiki.convert.length > 0" />
 
     <template #right>
       <slot name="right" />
@@ -130,13 +84,11 @@
 </template>
 
 <script lang="ts" setup>
-import TMaterialStarChip from "@comp/app/t-material-star-chip.vue";
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
-import type { PboConvertSource } from "@comp/pageBag/pbo-convert.vue";
 import TwoSource from "@comp/pageWiki/two-source.vue";
-import UcMaterialCount from "@comp/userCalc/uc-material-count.vue";
+import UcMaterialCrafting from "@comp/userCalc/uc-material-crafting.vue";
 import fmtUtil from "@utils/fmtUtil.js";
 import TGLogger from "@utils/TGLogger.js";
 import { generateShareImg } from "@utils/TGShare.js";
@@ -162,16 +114,6 @@ const props = withDefaults(defineProps<UcMaterialDetailProps>(), {
 const visible = defineModel<boolean>({ required: true });
 const shareLoading = ref<boolean>(false);
 const overlayPanel = useTemplateRef<InstanceType<typeof TopOverlay>>("overlayPanel");
-const costMaterials = computed<Array<PboConvertSource>>(() =>
-  props.material.craftingCosts.map((cost) => ({
-    id: String(cost.id),
-    name: cost.name,
-    type: cost.type,
-    star: cost.star,
-    count: cost.count,
-    local: cost.owned,
-  })),
-);
 const shareCaption = computed<string>(() => {
   const parts: Array<string> = [
     props.footerContext ? `${props.footerContext} · 养成材料详情` : "养成材料详情",
@@ -328,34 +270,6 @@ defineSlots<{
   }
 }
 
-.ucmd-stats {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.ucmd-stat {
-  display: flex;
-  min-width: 0;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--common-shadow-t-1);
-  gap: 8px;
-
-  span {
-    color: var(--common-text-sub);
-  }
-
-  strong {
-    overflow: hidden;
-    font-family: var(--font-title);
-    font-weight: normal;
-    text-overflow: ellipsis;
-  }
-}
-
 .ucmd-desc {
   color: var(--box-text-2);
   font-size: 14px;
@@ -368,16 +282,6 @@ defineSlots<{
   display: grid;
   gap: 8px;
   grid-template-columns: repeat(2, minmax(0, 0.5fr));
-}
-
-.ucmd-costs {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 0.5fr));
-}
-
-.ucmd-no-cost {
-  color: var(--common-text-sub);
 }
 
 @media (width <= 720px) {

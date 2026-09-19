@@ -135,6 +135,8 @@
       </div>
     </section>
 
+    <UcCraftingSummary :materials="displayMaterials" />
+
     <template #right>
       <v-btn
         :disabled="!canSelectNext"
@@ -189,6 +191,7 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcItemIcon from "@comp/userCalc/uc-item-icon.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";

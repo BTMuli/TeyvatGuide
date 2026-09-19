@@ -29,6 +29,7 @@
       <PboConvert v-for="item in props.data.info.convert" :key="item.id" :data="item" :uid />
     </template>
     <template #after-content>
+      <slot name="before-record" />
       <section v-if="showRecord" class="pbom-record-panel">
         <header class="pbom-record-header">
           <v-icon size="18">mdi-clock-edit-outline</v-icon>
@@ -108,6 +109,7 @@ const showRecord = computed<boolean>(() => isTrackableBagMaterial(props.data.inf
 const dbInfo = shallowRef<TGApp.Sqlite.UserBag.MaterialTable>(props.data.tb);
 
 defineSlots<{
+  "before-record"?: () => unknown;
   footer?: () => unknown;
   left?: () => unknown;
   right?: () => unknown;

@@ -106,6 +106,7 @@
         <span>{{ emptyText }}</span>
       </div>
     </section>
+    <UcCraftingSummary :materials />
   </TopOverlay>
 
   <UcMaterialDetail
@@ -149,6 +150,7 @@
 import TopOverlay from "@comp/app/top-overlay.vue";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import UcCraftingSummary from "@comp/userCalc/uc-crafting-summary.vue";
 import UcMaterialDetail from "@comp/userCalc/uc-material-detail.vue";
 import UcMaterialReq from "@comp/userCalc/uc-material-req.vue";
 import TGLogger from "@utils/TGLogger.js";

@@ -49,6 +49,13 @@
     :uid
     topOffset="132px"
   >
+    <template #before-record>
+      <UcMaterialCrafting
+        v-if="currentMaterialResult"
+        :material="currentMaterialResult"
+        :canCraft="currentMaterial.info.convert.length > 0"
+      />
+    </template>
     <template #left>
       <v-btn
         :disabled="currentMaterialIndex === 0"
@@ -89,6 +96,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 
 import PboMaterial from "@comp/pageBag/pbo-material.vue";
+import UcMaterialCrafting from "@comp/userCalc/uc-material-crafting.vue";
 import UcPlanTargetCard from "@comp/userCalc/uc-plan-target-card.vue";
 import UcPlanTargetSummaryOverlay from "@comp/userCalc/uc-plan-target-summary-overlay.vue";
 import { getServerDay, isMaterialAvailableToday } from "@utils/cultivationPlan.js";
@@ -125,6 +133,7 @@ const swiperModules = [A11y, Navigation];
 const materialOverlayVisible = ref<boolean>(false);
 const summaryOverlayVisible = ref<boolean>(false);
 const currentMaterial = shallowRef<MaterialInfo>();
+const currentMaterialEntryId = ref<string>();
 const overlayMaterials = shallowRef<Array<MaterialInfo>>([]);
 const currentSummaryEntry = shallowRef<TGApp.Sqlite.Cultivation.EntryWithItems>();
 const currentMaterialIndex = ref<number>(0);
@@ -132,6 +141,12 @@ const currentMaterialIndex = ref<number>(0);
 const entryMaterialResults = computed<
   ReadonlyMap<string, Array<TGApp.App.UserCalc.ResultMaterial>>
 >(() => props.entryMaterials);
+const currentMaterialResult = computed<TGApp.App.UserCalc.ResultMaterial | undefined>(() => {
+  if (!currentMaterialEntryId.value || !currentMaterial.value) return undefined;
+  return entryMaterialResults.value
+    .get(currentMaterialEntryId.value)
+    ?.find((material) => material.id === currentMaterial.value?.info.id);
+});
 
 const sortedEntries = computed<Array<TGApp.Sqlite.Cultivation.EntryWithItems>>(() =>
   [...props.entries].sort(compareEntries),
@@ -291,6 +306,7 @@ async function openMaterial(
   const index = materials.findIndex((material) => material.info.id === materialId);
   if (index < 0) return;
   materialOverlayVisible.value = false;
+  currentMaterialEntryId.value = entry.id;
   overlayMaterials.value = materials;
   currentMaterialIndex.value = index;
   currentMaterial.value = materials[index];
