@@ -47,7 +47,12 @@
         >
           导入
         </v-btn>
-        <v-btn class="ua-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteAbyss()">
+        <v-btn
+          class="ua-btn danger-btn"
+          prepend-icon="mdi-delete"
+          variant="elevated"
+          @click="deleteAbyss()"
+        >
           删除
         </v-btn>
       </div>
@@ -730,5 +735,9 @@ async function refreshAvatars(
   font-family: var(--font-title);
   font-size: 1.5rem;
   row-gap: 12px;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

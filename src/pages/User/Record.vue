@@ -37,7 +37,7 @@
         </v-btn>
         <v-btn
           :disabled="recordData === undefined || isRefresh"
-          class="ur-top-btn"
+          class="ur-top-btn danger-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
           @click="deleteRecord()"
@@ -405,5 +405,9 @@ async function deleteRecord(): Promise<void> {
   align-items: center;
   justify-content: center;
   font-family: var(--font-title);
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

@@ -92,7 +92,7 @@
           />
           <v-btn
             :title="selectedMode ? '删除帖子分类' : '清空合集'"
-            class="pc-btn"
+            class="pc-btn danger-btn"
             icon="mdi-delete"
             size="small"
             variant="elevated"
@@ -100,7 +100,7 @@
           />
           <v-btn
             :title="selectedMode ? '删除帖子' : '删除合集'"
-            class="pc-btn"
+            class="pc-btn danger-btn"
             icon="mdi-delete-forever"
             size="small"
             variant="elevated"
@@ -532,5 +532,9 @@ function handleUserClick(user: TGApp.BBS.Post.User, gid: number): void {
 
 .pc-view-toggle.v-btn-toggle {
   height: 40px;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

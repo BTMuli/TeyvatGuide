@@ -46,7 +46,7 @@
         >
         <v-btn
           aria-label="删除存档"
-          class="pbr-ne-btn"
+          class="pbr-ne-btn danger-btn"
           prepend-icon="mdi-delete"
           title="删除存档"
           variant="elevated"
@@ -854,5 +854,9 @@ function clearPageStateForUid(): void {
   .pbr-group-grid {
     padding: 8px;
   }
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

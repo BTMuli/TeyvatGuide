@@ -52,7 +52,12 @@
         >
           导入
         </v-btn>
-        <v-btn class="uc-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteCombat()">
+        <v-btn
+          class="uc-btn danger-btn"
+          prepend-icon="mdi-delete"
+          variant="elevated"
+          @click="deleteCombat()"
+        >
           删除
         </v-btn>
       </div>
@@ -716,5 +721,9 @@ async function tryReadCombat(): Promise<void> {
   font-family: var(--font-title);
   font-size: 1.5rem;
   row-gap: 12px;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

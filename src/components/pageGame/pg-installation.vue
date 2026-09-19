@@ -16,6 +16,7 @@
           {{ installationSizeButtonLabel }}
         </v-btn>
         <v-btn
+          color="var(--tgc-od-red)"
           :disabled="installationActionPending"
           :loading="unregistering"
           prepend-icon="mdi-link-off"

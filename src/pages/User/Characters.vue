@@ -52,7 +52,7 @@
         <v-btn
           v-model:loading="loadDel"
           :disabled="uidCur === undefined"
-          class="uc-top-btn"
+          class="uc-top-btn danger-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
           @click="deleteUid()"
@@ -1373,5 +1373,9 @@ function handleSwitch(next: boolean): void {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

@@ -19,7 +19,12 @@
           <template #subtitle>{{ item.desc }}</template>
           <template #append>
             <v-list-item-action end>
-              <v-btn size="small" class="topc-btn" @click="deleteCollect(item)" icon="mdi-delete" />
+              <v-btn
+                size="small"
+                class="topc-btn danger-btn"
+                @click="deleteCollect(item)"
+                icon="mdi-delete"
+              />
             </v-list-item-action>
           </template>
         </v-list-item>
@@ -186,5 +191,9 @@ async function onSubmit(): Promise<void> {
 
 .dark .topc-btn {
   border: 1px solid var(--common-shadow-2);
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

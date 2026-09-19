@@ -26,7 +26,13 @@
       </v-item-group>
       <div class="ugo-hd-acts">
         <v-btn :rounded="true" class="ugo-hdi-btn" @click="visible = false">取消</v-btn>
-        <v-btn :rounded="true" class="ugo-hdi-btn" @click="handleSelected()">确定</v-btn>
+        <v-btn
+          :rounded="true"
+          :class="{ 'danger-btn': props.mode === 'delete' }"
+          class="ugo-hdi-btn"
+          @click="handleSelected()"
+          >确定</v-btn
+        >
       </div>
     </div>
   </TOverlay>
@@ -218,5 +224,9 @@ function handleSelected(): void {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

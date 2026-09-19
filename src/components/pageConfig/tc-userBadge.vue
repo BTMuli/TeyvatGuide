@@ -81,6 +81,7 @@
                 @click="loadAccount(ac.uid)"
               />
               <v-icon
+                color="var(--tgc-od-red)"
                 class="tcu-btn"
                 icon="mdi-delete"
                 size="small"

@@ -77,7 +77,7 @@
         />
         <v-btn
           aria-label="删除存档"
-          class="pbm-icon-btn"
+          class="pbm-icon-btn danger-btn"
           icon="mdi-delete"
           title="删除存档"
           variant="elevated"
@@ -683,5 +683,9 @@ function switchMaterial(isNext: boolean): void {
   border-radius: 8px;
   background: var(--box-bg-1);
   color: var(--box-text-2);
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

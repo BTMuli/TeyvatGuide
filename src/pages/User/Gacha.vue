@@ -147,7 +147,7 @@
           </v-btn>
           <v-btn
             :disabled="!isLoginHutao"
-            class="gacha-top-btn"
+            class="gacha-top-btn danger-btn"
             prepend-icon="mdi-delete"
             variant="elevated"
             @click="tryDeleteGacha()"
@@ -202,7 +202,7 @@
           导出(v4)
         </v-btn>
         <v-btn
-          class="gacha-top-btn"
+          class="gacha-top-btn danger-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
           @click="deleteGacha()"
@@ -1444,5 +1444,9 @@ async function checkData(): Promise<void> {
 
 .gacha-window-item {
   height: 100%;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

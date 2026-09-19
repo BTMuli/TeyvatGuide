@@ -60,7 +60,7 @@
           </v-btn>
           <v-btn
             :disabled="isRefresh"
-            class="ucp-btn"
+            class="ucp-btn danger-btn"
             prepend-icon="mdi-delete"
             variant="elevated"
             @click="deleteChallenge()"
@@ -636,5 +636,9 @@ async function tryReadChallenge(): Promise<void> {
   z-index: -1;
   font-size: 12px;
   opacity: 0.8;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

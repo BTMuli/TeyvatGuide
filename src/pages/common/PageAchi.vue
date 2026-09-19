@@ -52,7 +52,12 @@
         <v-btn class="top-btn" prepend-icon="mdi-plus" variant="elevated" @click="createUid()">
           新建存档
         </v-btn>
-        <v-btn class="top-btn" prepend-icon="mdi-delete" variant="elevated" @click="deleteUid()">
+        <v-btn
+          class="top-btn danger-btn"
+          prepend-icon="mdi-delete"
+          variant="elevated"
+          @click="deleteUid()"
+        >
           删除存档
         </v-btn>
         <div class="top-switch" @click="switchHideFin">
@@ -477,5 +482,9 @@ async function toYae(): Promise<void> {
 
 :deep(.v-virtual-scroll__item + .v-virtual-scroll__item) {
   margin-top: 8px;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>

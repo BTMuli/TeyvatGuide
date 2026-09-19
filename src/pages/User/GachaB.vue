@@ -62,7 +62,7 @@
           检测数据
         </v-btn>
         <v-btn
-          class="gb-top-btn"
+          class="gb-top-btn danger-btn"
           prepend-icon="mdi-delete"
           variant="elevated"
           @click="deleteGacha()"
@@ -564,5 +564,9 @@ async function checkData(): Promise<void> {
 
 .gb-window-item {
   height: 100%;
+}
+
+.danger-btn {
+  color: var(--tgc-od-red);
 }
 </style>
