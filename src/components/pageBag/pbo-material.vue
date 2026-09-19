@@ -45,6 +45,7 @@
               手动更新
             </v-btn>
             <v-btn
+              color="var(--tgc-od-red)"
               density="comfortable"
               prepend-icon="mdi-delete-outline"
               size="small"
