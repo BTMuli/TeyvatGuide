@@ -46,11 +46,14 @@
           <span class="ucps-overview-label">计划进度</span>
           <strong>{{ planStateLabel }}</strong>
         </div>
-        <span>{{ completedTargetCount }} / {{ totalTargetCount }} 项就绪</span>
+        <span>
+          {{ readyMaterialCount }} / {{ materials.length }} 种材料就绪 ·
+          {{ materialProgress.toFixed(0) }}%
+        </span>
       </div>
       <v-progress-linear
         :color="missingKinds > 0 ? 'var(--tgc-od-orange)' : 'var(--tgc-od-green)'"
-        :model-value="targetProgress"
+        :model-value="materialProgress"
         height="6"
         rounded
       />
@@ -184,12 +187,16 @@ const shareCaption = computed<string>(
 const totalTargetCount = computed<number>(
   () => props.targetCounts.active + props.targetCounts.fulfilled + props.targetCounts.completed,
 );
-const completedTargetCount = computed<number>(
-  () => props.targetCounts.fulfilled + props.targetCounts.completed,
+const readyMaterialCount = computed<number>(
+  () => props.materials.filter((material) => material.missing === 0).length,
 );
-const targetProgress = computed<number>(() =>
-  totalTargetCount.value === 0 ? 0 : (completedTargetCount.value / totalTargetCount.value) * 100,
-);
+const materialProgress = computed<number>(() => {
+  if (props.materials.length === 0) {
+    return totalTargetCount.value > 0 && props.targetCounts.active === 0 ? 100 : 0;
+  }
+  const total = props.materials.reduce((sum, material) => sum + material.progress, 0);
+  return Math.min(total / props.materials.length, 100);
+});
 const missingKinds = computed<number>(
   () => props.materials.filter((material) => material.missing > 0).length,
 );
