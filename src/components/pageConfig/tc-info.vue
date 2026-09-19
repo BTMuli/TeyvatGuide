@@ -1,86 +1,67 @@
 <template>
-  <v-list class="config-list">
-    <v-list-subheader :inset="true" class="config-header" title="相关信息" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item title="Tauri 版本" @click="openUrl('https://v2.tauri.app/')">
-      <template #prepend>
-        <v-img alt="Tauri" class="config-icon" src="/platforms/tauri.webp" />
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ versionTauri }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="成就版本">
-      <template #prepend>
-        <img alt="Achievements" class="config-icon" src="@/assets/icons/achievements.svg" />
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ latestAchiVersion }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="系统平台">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>{{ iconPlatform }}</v-icon>
-        </div>
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ osPlatform }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="系统版本">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-monitor-dashboard</v-icon>
-        </div>
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ osVersion }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="设备ID">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-chip</v-icon>
-        </div>
-      </template>
-      <template #append>
-        <v-list-item-subtitle>{{ machineId }}</v-list-item-subtitle>
-      </template>
-    </v-list-item>
-    <v-list-item title="数据库更新时间">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-database-sync</v-icon>
-        </div>
-      </template>
-      <template #append>
-        <v-list-item-subtitle>
-          {{ dbInfo.find((item) => item.key === "dataUpdated")?.value }}
-        </v-list-item-subtitle>
-      </template>
-      <v-list-item-subtitle>
-        <span>更新于</span>
-        <span>{{ dbInfo.find((item) => item.key === "dataUpdated")?.updated }}</span>
-      </v-list-item-subtitle>
-    </v-list-item>
-    <v-list-item title="数据库版本">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-database-search</v-icon>
-        </div>
-      </template>
-      <template #append>
-        <v-list-item-subtitle>
-          {{ dbInfo.find((item) => item.key === "appVersion")?.value }}
-        </v-list-item-subtitle>
-      </template>
-      <v-list-item-subtitle>
-        <span>更新于</span>
-        <span>{{ dbInfo.find((item) => item.key === "appVersion")?.updated }}</span>
-      </v-list-item-subtitle>
-    </v-list-item>
-  </v-list>
+  <div class="tc-info-box">
+    <div class="tc-info-title">
+      <v-icon size="16">mdi-information-outline</v-icon>
+      <span>相关信息</span>
+    </div>
+    <div class="tc-info-grid">
+      <TcInfoItem
+        :pad="true"
+        :title="versionTauri"
+        icon="/platforms/tauri.webp"
+        subtitle="Tauri 版本"
+      >
+        <template #subtitleAction>
+          <v-icon
+            :rounded="false"
+            aria-label="打开 Tauri 官网"
+            color="var(--tgc-od-orange)"
+            icon="mdi-open-in-new"
+            size="12"
+            title="打开 Tauri 官网"
+            variant="text"
+            @click="openUrl('https://v2.tauri.app/')"
+          />
+        </template>
+      </TcInfoItem>
+      <TcInfoItem :title="TGBbs.version" icon="/platforms/mhy/mys.webp" subtitle="米游社版本" />
+      <TcInfoItem
+        :icon="achievementsIcon"
+        :pad="true"
+        :title="latestAchiVersion"
+        subtitle="成就版本"
+      />
+      <TcInfoItem :title="machineId" icon="mdi-chip" subtitle="设备ID">
+        <template #subtitleAction>
+          <v-icon
+            :disabled="!machineId"
+            :rounded="false"
+            aria-label="复制设备ID"
+            color="var(--tgc-od-orange)"
+            icon="mdi-content-copy"
+            size="12"
+            title="复制设备ID"
+            variant="text"
+            @click="copyMachineId"
+          />
+        </template>
+      </TcInfoItem>
+      <TcInfoItem :icon="iconPlatform" :title="osPlatform" subtitle="系统平台" />
+      <TcInfoItem :title="osVersion" icon="mdi-monitor-dashboard" subtitle="系统版本" />
+      <TcInfoItem
+        :subtitle="`更新于${dbInfo.find((item) => item.key === 'appVersion')?.updated ?? ''}`"
+        :title="dbInfo.find((item) => item.key === 'appVersion')?.value ?? ''"
+        append="数据库版本"
+        icon="mdi-database-search"
+      />
+      <TcInfoItem
+        :subtitle="`更新于${dbInfo.find((item) => item.key === 'dataUpdated')?.updated ?? ''}`"
+        :title="dbInfo.find((item) => item.key === 'dataUpdated')?.value ?? ''"
+        append="数据库更新"
+        icon="mdi-database-sync"
+      />
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
 import showSnackbar from "@comp/func/snackbar.js";
@@ -90,8 +71,13 @@ import TSUserAchi from "@Sqlm/userAchi.js";
 import { app } from "@tauri-apps/api";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { platform, version } from "@tauri-apps/plugin-os";
+import TGBbs from "@utils/TGBbs.js";
 import TGLogger from "@utils/TGLogger.js";
 import { onMounted, ref, shallowRef } from "vue";
+
+import TcInfoItem from "./tc-info-item.vue";
+
+import achievementsIcon from "@/assets/icons/achievements.svg";
 
 const latestAchiVersion = TSUserAchi.getLatestAchiVersion();
 const osPlatform = platform();
@@ -102,6 +88,16 @@ const versionApp = ref<string>("");
 const versionTauri = ref<string>("");
 const iconPlatform = ref<string>("mdi-microsoft-windows");
 const dbInfo = shallowRef<Array<TGApp.Sqlite.AppData.Item>>([]);
+
+async function copyMachineId(): Promise<void> {
+  if (!machineId.value) return;
+  try {
+    await navigator.clipboard.writeText(machineId.value);
+    showSnackbar.success("设备ID已复制");
+  } catch {
+    showSnackbar.error("复制设备ID失败，请重试");
+  }
+}
 
 onMounted(async () => {
   versionApp.value = await app.getVersion();
@@ -140,25 +136,46 @@ onMounted(async () => {
   }
 });
 </script>
-<style lang="css" scoped>
-.config-header {
-  margin-top: 10px;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: large;
+<style lang="scss" scoped>
+@use "@styles/github.styles.scss" as github-styles;
+
+.tc-info-box {
+  @include github-styles.github-card;
+
+  position: relative;
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+  flex-direction: column;
+  flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 4px;
+  font-family: var(--font-text);
+  row-gap: 4px;
 }
 
-.config-icon {
+.dark .tc-info-box {
+  @include github-styles.github-card("dark");
+}
+
+.tc-info-title {
+  position: relative;
   display: flex;
-  width: 40px;
-  height: 40px;
   align-items: center;
-  justify-content: center;
-  padding: 5px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  margin-right: 15px;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
+  justify-content: flex-start;
+  color: var(--common-text-title);
+  column-gap: 4px;
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: normal;
+}
+
+.tc-info-grid {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 2fr);
 }
 </style>

@@ -1,49 +1,83 @@
 <template>
-  <v-list class="config-list">
-    <v-list-subheader :inset="true" class="config-header" title="路径" />
-    <v-divider :inset="true" class="border-opacity-75" />
-    <v-list-item :subtitle="externalUserDir" title="用户数据目录">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-folder-key</v-icon>
-        </div>
-      </template>
+  <TcConfigSection title="路径" icon="mdi-folder-multiple-outline" :columns="1">
+    <TcConfigItem :subtitle="externalUserDir" title="用户数据目录" icon="mdi-folder-key">
       <template #append>
-        <div class="config-opers">
-          <v-icon title="修改用户数据目录" @click="confirmCUD()"> mdi-pencil</v-icon>
-          <v-icon title="打开用户数据目录" @click="openDataPath('user')"> mdi-folder-open</v-icon>
-          <v-icon title="复制用户数据目录路径" @click="copyPath('user')"> mdi-content-copy</v-icon>
-        </div>
+        <v-btn
+          aria-label="修改用户数据目录"
+          icon="mdi-pencil"
+          size="28"
+          title="修改用户数据目录"
+          variant="text"
+          @click="confirmCUD()"
+        />
+        <v-btn
+          aria-label="打开用户数据目录"
+          icon="mdi-folder-open"
+          size="28"
+          title="打开用户数据目录"
+          variant="text"
+          @click="openDataPath('user')"
+        />
+        <v-btn
+          aria-label="复制用户数据目录路径"
+          icon="mdi-content-copy"
+          size="28"
+          title="复制用户数据目录路径"
+          variant="text"
+          @click="copyPath('user')"
+        />
       </template>
-    </v-list-item>
-    <v-list-item :subtitle="externalDbPath" title="应用数据库路径">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-folder-account</v-icon>
-        </div>
-      </template>
+    </TcConfigItem>
+    <TcConfigItem :subtitle="externalDbPath" title="应用数据库路径" icon="mdi-folder-account">
       <template #append>
-        <div class="config-opers">
-          <v-icon title="打开数据库目录" @click="openDataPath('db')"> mdi-folder-open</v-icon>
-          <v-icon title="复制数据库目录路径" @click="copyPath('db')"> mdi-content-copy</v-icon>
-        </div>
+        <v-btn
+          aria-label="打开数据库目录"
+          icon="mdi-folder-open"
+          size="28"
+          title="打开数据库目录"
+          variant="text"
+          @click="openDataPath('db')"
+        />
+        <v-btn
+          aria-label="复制数据库目录路径"
+          icon="mdi-content-copy"
+          size="28"
+          title="复制数据库目录路径"
+          variant="text"
+          @click="copyPath('db')"
+        />
       </template>
-    </v-list-item>
-    <v-list-item :subtitle="externalLogDir" title="日志目录">
-      <template #prepend>
-        <div class="config-icon">
-          <v-icon>mdi-folder-multiple</v-icon>
-        </div>
-      </template>
+    </TcConfigItem>
+    <TcConfigItem :subtitle="externalLogDir" title="日志目录" icon="mdi-folder-multiple">
       <template #append>
-        <div class="config-opers">
-          <v-icon title="清理日志文件" @click="confirmCLD()"> mdi-delete</v-icon>
-          <v-icon title="打开日志目录" @click="openDataPath('log')"> mdi-folder-open</v-icon>
-          <v-icon title="复制日志目录路径" @click="copyPath('log')"> mdi-content-copy</v-icon>
-        </div>
+        <v-btn
+          aria-label="清理日志文件"
+          icon="mdi-delete"
+          color="var(--tgc-od-red)"
+          size="28"
+          title="清理日志文件"
+          variant="text"
+          @click="confirmCLD()"
+        />
+        <v-btn
+          aria-label="打开日志目录"
+          icon="mdi-folder-open"
+          size="28"
+          title="打开日志目录"
+          variant="text"
+          @click="openDataPath('log')"
+        />
+        <v-btn
+          aria-label="复制日志目录路径"
+          icon="mdi-content-copy"
+          size="28"
+          title="复制日志目录路径"
+          variant="text"
+          @click="copyPath('log')"
+        />
       </template>
-    </v-list-item>
-  </v-list>
+    </TcConfigItem>
+  </TcConfigSection>
 </template>
 <script lang="ts" setup>
 import showDialog from "@comp/func/dialog.js";
@@ -59,6 +93,9 @@ import { backUpUserData } from "@utils/dataBS.js";
 import TGLogger from "@utils/TGLogger.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref } from "vue";
+
+import TcConfigItem from "./tc-config-item.vue";
+import TcConfigSection from "./tc-config-section.vue";
 
 const { dbPath, logDir, userDir } = storeToRefs(useAppStore());
 const externalUserDir = ref<string>(userDir.value);
@@ -225,32 +262,3 @@ async function resolveExternalPath(targetPath: string): Promise<string> {
   return await core.invoke<string>("resolve_external_path", { path: targetPath });
 }
 </script>
-<style lang="css" scoped>
-.config-header {
-  margin-top: 10px;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: large;
-}
-
-.config-icon {
-  display: flex;
-  width: 40px;
-  height: 40px;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  margin-right: 15px;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
-}
-
-.config-opers {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  column-gap: 10px;
-}
-</style>
