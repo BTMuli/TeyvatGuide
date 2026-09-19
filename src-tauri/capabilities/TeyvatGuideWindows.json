@@ -1,0 +1,13 @@
+{
+  "$schema": "./schemas/desktop-schema.json",
+  "identifier": "TeyvatGuideWindows",
+  "description": "Windows-only capability for Yae DLL resources",
+  "windows": ["TeyvatGuide"],
+  "permissions": [
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [{ "path": "$RESOURCE/resources/YaeAchievementLib.dll" }]
+    }
+  ],
+  "platforms": ["windows"]
+}

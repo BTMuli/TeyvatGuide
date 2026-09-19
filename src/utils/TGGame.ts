@@ -1,6 +1,6 @@
 /**
  * 游戏文件相关功能
- * @since Beta v0.12.0
+ * @since Beta v0.12.3
  */
 
 import showDialog from "@comp/func/dialog.js";
@@ -10,7 +10,15 @@ import passportReq from "@req/passportReq.js";
 import TSGameInstallation from "@Sqlm/gameInstallation.js";
 import { invoke } from "@tauri-apps/api/core";
 import { documentDir, resourceDir, sep } from "@tauri-apps/api/path";
-import { copyFile, exists, mkdir, readDir, readTextFile, stat } from "@tauri-apps/plugin-fs";
+import {
+  exists,
+  mkdir,
+  readDir,
+  readFile,
+  readTextFile,
+  stat,
+  writeFile,
+} from "@tauri-apps/plugin-fs";
 import { platform } from "@tauri-apps/plugin-os";
 import {
   inspectGameInstallation,
@@ -224,7 +232,7 @@ export async function isRunInAdmin(): Promise<boolean> {
 
 /**
  * 尝试移动dll
- * @since Beta v0.12.0
+ * @since Beta v0.12.3
  * @returns 是否存在 YaeAchievementLib.dll
  */
 export async function tryCopyYae(): Promise<boolean> {
@@ -237,7 +245,10 @@ export async function tryCopyYae(): Promise<boolean> {
   }
   await mkdir(targetDir, { recursive: true });
   const srcDllPath = `${await resourceDir()}${sep()}resources${sep()}YaeAchievementLib.dll`;
-  await copyFile(srcDllPath, targetPath);
+  // MSIX 资源可能带有加密属性，copyFile 会尝试保留该属性并触发 Windows 错误 6000。
+  // 只读取和写入 DLL 内容，避免将安装目录的加密属性复制到用户目录。
+  const dllContent = await readFile(srcDllPath);
+  await writeFile(targetPath, dllContent);
   const check2 = await exists(targetPath);
   if (!check2) {
     showSnackbar.warn("移动 dll 失败，请手动移动");
