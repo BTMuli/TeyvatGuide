@@ -1112,6 +1112,13 @@ function findCurrentTraveler(
   records: ReadonlyArray<TGApp.Game.Record.Avatar>,
   syncedAvatars: ReadonlyArray<TGApp.Game.Calculate.SyncAvatar>,
 ): TGApp.Game.Calculate.AvatarListItem | undefined {
+  // 同步数据决定当前元素，避免旧战绩缓存覆盖已拥有的旅行者。
+  const synced = syncedAvatars.find((avatar) => TRAVELER_IDS.has(avatar.id));
+  if (synced) {
+    return catalog.find(
+      (avatar) => avatar.id === synced.id && avatar.element_attr_id === synced.element_attr_id,
+    );
+  }
   const record = records.find((avatar) => TRAVELER_IDS.has(avatar.id));
   if (record) {
     const recordElement = getZhElement(record.element);
@@ -1123,11 +1130,7 @@ function findCurrentTraveler(
     );
     if (matched) return matched;
   }
-  const synced = syncedAvatars.find((avatar) => TRAVELER_IDS.has(avatar.id));
-  if (!synced) return undefined;
-  return catalog.find(
-    (avatar) => avatar.id === synced.id && avatar.element_attr_id === synced.element_attr_id,
-  );
+  return undefined;
 }
 
 function findSyncedAvatar(
@@ -1670,8 +1673,9 @@ function createEntryState(
   promoteLevel: number,
   ascended: boolean,
   talents: Array<TGApp.Sqlite.Cultivation.TalentState> = [],
+  element?: string,
 ): TGApp.Sqlite.Cultivation.EntryState {
-  return { level, promoteLevel, ascended, talents };
+  return { level, promoteLevel, ascended, talents, element };
 }
 
 function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | undefined {
@@ -1705,6 +1709,7 @@ function createAvatarPlanInput(): TGApp.Sqlite.Cultivation.SaveEntryInput | unde
       avatarCurrentPromoteLevel.value,
       avatarAscended.value,
       currentTalents,
+      character.element,
     ),
     targetState: createEntryState(
       avatarTargetLevel.value,
@@ -2566,6 +2571,7 @@ function createApiRefreshInputsFromResult(
         target.avatar.skill_list
           .filter((skill) => skill.max_level > 1)
           .map((skill) => ({ id: skill.id, name: skill.name, level: skill.level_current })),
+        getElementNameByAttrId(target.avatar.element_attr_id),
       ),
       status:
         target.avatarEntry.status === "completed" || requirements.length === 0

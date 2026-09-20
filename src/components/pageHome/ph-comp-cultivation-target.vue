@@ -89,7 +89,12 @@ const sortedMissingMaterials = computed<Array<TGApp.App.UserCalc.ResultMaterial>
 const entryBadge = computed<string | undefined>(() => {
   if (props.entry.type === "avatar") {
     const character = AppCharacterData.find((item) => item.id === props.entry.itemId);
-    return character ? `/icon/element/${character.element}元素.webp` : undefined;
+    const element =
+      props.entry.currentState.element ??
+      (props.entry.itemId === 10000005 || props.entry.itemId === 10000007
+        ? undefined
+        : character?.element);
+    return element ? `/icon/element/${element}元素.webp` : undefined;
   }
   const weapon = AppWeaponData.find((item) => item.id === props.entry.itemId);
   return weapon ? `/icon/weapon/${weapon.weapon}.webp` : undefined;

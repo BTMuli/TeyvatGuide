@@ -228,7 +228,14 @@ const weaponBadge = computed<string | undefined>(() =>
 const itemDescription = computed<string>(() => {
   const info = itemInfo.value;
   const details = [`${props.entry.star % 100}★`];
-  if (info && "element" in info && info.element) details.push(`${info.element}元素`);
+  const element =
+    props.entry.currentState.element ??
+    (props.entry.itemId === 10000005 || props.entry.itemId === 10000007
+      ? undefined
+      : info && "element" in info
+        ? info.element
+        : undefined);
+  if (element) details.push(`${element}元素`);
   if (info?.weapon) details.push(info.weapon);
   return details.join(" · ");
 });

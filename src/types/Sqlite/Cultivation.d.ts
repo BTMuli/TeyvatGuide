@@ -39,8 +39,13 @@ declare namespace TGApp.Sqlite.Cultivation {
     level: number;
   };
 
-  /** 养成目标的等级状态 */
+  /**
+   * 养成目标的等级状态
+   * @since Beta v0.12.3
+   */
   type EntryState = {
+    /** 角色元素，旧计划和武器目标可能未记录 */
+    element?: string;
     /** 等级 */
     level: number;
     /** 已完成突破次数 */
