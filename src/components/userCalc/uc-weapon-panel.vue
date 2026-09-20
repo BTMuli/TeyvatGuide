@@ -39,7 +39,7 @@
               class="ucw-select-trigger"
               icon
               v-bind="menuProps"
-              variant="tonal"
+              variant="text"
             >
               <UcItemIcon
                 v-if="selectedWeapon"
@@ -445,6 +445,10 @@ watch(showSelector, (visible) => {
   height: 40px;
   padding: 0;
   border-radius: 50%;
+
+  :deep(.v-btn__overlay) {
+    border-radius: inherit;
+  }
 }
 
 .ucw-select-hint {
