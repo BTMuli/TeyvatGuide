@@ -347,6 +347,7 @@ async function handleDebug(): Promise<void> {
   padding-right: 4px;
   background: var(--app-page-bg);
   row-gap: 8px;
+  scrollbar-gutter: stable;
 }
 
 .tpr-list-item {

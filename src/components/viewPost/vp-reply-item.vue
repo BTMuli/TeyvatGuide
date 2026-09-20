@@ -299,6 +299,7 @@ async function handleUser(): Promise<void> {
   width: 100%;
   box-sizing: border-box;
   flex-direction: column;
+  flex-shrink: 0;
   align-items: flex-start;
   justify-content: center;
   padding: 8px;
@@ -520,6 +521,7 @@ async function handleUser(): Promise<void> {
   background: var(--app-page-bg);
   overflow-y: auto;
   row-gap: 8px;
+  scrollbar-gutter: stable;
 
   &.v-list {
     box-shadow: -4px 0 8px var(--common-shadow-4);
