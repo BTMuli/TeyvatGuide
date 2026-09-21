@@ -102,6 +102,7 @@ const props = defineProps<TwoConvertProps>();
   opacity: 0.8;
 }
 
+.star0,
 .star1 {
   --twoc-extra-color: var(--tgc-od-white);
 
