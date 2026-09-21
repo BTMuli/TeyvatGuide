@@ -1157,10 +1157,11 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .version-body {
+  position: relative;
   display: flex;
+  width: 100%;
   box-sizing: border-box;
   flex-direction: column;
-  padding-bottom: 16px;
   color: var(--box-text-1);
   gap: 12px;
 }
@@ -1177,10 +1178,6 @@ onUnmounted(() => {
   gap: 8px;
 }
 
-.version-error {
-  margin-inline: 16px;
-}
-
 .version-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1188,7 +1185,6 @@ onUnmounted(() => {
   color: var(--box-text-2);
   font-size: 12px;
   gap: 8px;
-  padding-inline: 16px;
 }
 
 .plan-summary {
@@ -1199,11 +1195,6 @@ onUnmounted(() => {
   backdrop-filter: var(--game-page-cover-backdrop-filter, none);
   background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
   gap: 12px;
-  margin-inline: 16px;
-}
-
-:deep(.task-panel) {
-  margin-inline: 16px;
 }
 
 .plan-title {

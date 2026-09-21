@@ -3,45 +3,63 @@
   <section class="game-list">
     <div class="game-list-header">
       <div class="game-list-heading">
-        <span>{{ gameEnum.installation.schemeDesc(installation.schemeId) }}</span>
+        <span class="game-list-title">
+          {{ gameEnum.installation.schemeDesc(installation.schemeId) }}
+        </span>
+        <v-chip
+          :color="statusColor(installation.status)"
+          class="game-fact-tag"
+          size="x-small"
+          variant="tonal"
+        >
+          {{ statusDesc(installation.status) }}
+        </v-chip>
+        <v-chip
+          v-if="installation.isChosen"
+          class="game-fact-tag"
+          color="var(--tgc-od-orange)"
+          size="x-small"
+          variant="tonal"
+        >
+          主启动
+        </v-chip>
+      </div>
+      <div class="game-list-actions">
         <v-btn
+          v-if="!installation.isChosen"
+          aria-label="设为当前"
+          class="game-action-btn game-icon-action-btn"
+          color="var(--tgc-od-orange)"
+          icon="mdi-play-circle-outline"
+          size="small"
+          title="设为当前"
+          variant="tonal"
+          @click="handleChooseInstallation"
+        />
+        <v-btn
+          aria-label="更换路径"
+          class="game-action-btn game-icon-action-btn"
+          color="var(--tgc-od-orange)"
+          icon="mdi-folder-swap-outline"
+          size="small"
+          title="更换路径"
+          variant="tonal"
+          @click="openPathOverlay"
+        />
+        <v-btn
+          :aria-label="installationSizeButtonLabel"
           :disabled="installationSizeLoading"
           :loading="installationSizeLoading"
-          class="game-size-btn"
-          prepend-icon="mdi-harddisk"
+          :title="installationSizeButtonLabel"
+          class="game-action-btn game-icon-action-btn"
+          icon="mdi-harddisk"
           size="small"
           variant="tonal"
           @click="handleInstallationSizeClick"
-        >
-          {{ installationSizeButtonLabel }}
-        </v-btn>
-        <v-btn
-          color="var(--tgc-od-red)"
-          :disabled="installationActionPending"
-          :loading="unregistering"
-          prepend-icon="mdi-link-off"
-          size="small"
-          variant="tonal"
-          @click="handleUnregister"
-        >
-          移除登记
-        </v-btn>
-        <v-btn
-          :disabled="installationActionPending"
-          :loading="uninstalling"
-          class="game-uninstall-btn"
-          prepend-icon="mdi-delete-outline"
-          size="small"
-          variant="tonal"
-          @click="handleUninstall"
-        >
-          卸载
-        </v-btn>
-      </div>
-      <div class="game-list-chips">
+        />
         <v-btn
           v-if="installationCount > 1"
-          class="game-launch-card-btn"
+          class="game-action-btn game-launch-card-btn"
           color="var(--tgc-od-orange)"
           prepend-icon="mdi-play"
           size="small"
@@ -50,20 +68,32 @@
         >
           启动
         </v-btn>
-        <v-chip
-          v-if="installation.isChosen"
-          color="var(--tgc-od-orange)"
+        <v-btn
+          :disabled="installationActionPending"
+          :loading="unregistering"
+          aria-label="移除登记"
+          class="game-action-btn game-icon-action-btn"
+          color="var(--tgc-od-red)"
+          icon="mdi-link-off"
           size="small"
+          title="移除登记"
           variant="tonal"
-        >
-          主启动
-        </v-chip>
-        <v-chip :color="statusColor(installation.status)" size="small" variant="tonal">
-          {{ statusDesc(installation.status) }}
-        </v-chip>
+          @click="handleUnregister"
+        />
+        <v-btn
+          :disabled="installationActionPending"
+          :loading="uninstalling"
+          aria-label="卸载"
+          class="game-action-btn game-icon-action-btn game-uninstall-btn"
+          icon="mdi-delete-outline"
+          size="small"
+          title="卸载"
+          variant="tonal"
+          @click="handleUninstall"
+        />
       </div>
     </div>
-    <div class="game-path">
+    <div class="game-path-panel">
       <div class="game-icon">
         <TMiImg :ori="true" :size="40" :src="genshinIcon" alt="原神" />
       </div>
@@ -71,33 +101,12 @@
         <span>安装路径</span>
         <strong>{{ installation.executablePath }}</strong>
       </div>
-      <div class="game-path-actions">
-        <v-btn
-          v-if="!installation.isChosen"
-          class="game-path-act"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-play-circle-outline"
-          variant="tonal"
-          @click="handleChooseInstallation"
-        >
-          设为当前
-        </v-btn>
-        <v-btn
-          class="game-path-act"
-          color="var(--tgc-od-orange)"
-          prepend-icon="mdi-folder-swap-outline"
-          variant="tonal"
-          @click="openPathOverlay"
-        >
-          更换路径
-        </v-btn>
-      </div>
     </div>
     <PgVersion
       v-if="installation.status === gameEnum.installation.status.KNOWN"
       :installation="installation"
-      @pre-download-requested="emit('pre-download-requested')"
       @updated="refreshRegistered"
+      @pre-download-requested="emit('pre-download-requested')"
     >
       <template #facts="version">
         <PgScheme :installation="installation" @switched="refreshRegistered">
@@ -116,9 +125,9 @@
                   </v-icon>
                   <v-icon
                     v-else-if="version.snapshot !== null && !isLatestOfficial(version.snapshot)"
+                    :title="`正式 ${version.snapshot.main.tag}`"
                     color="var(--tgc-od-orange)"
                     size="16"
-                    :title="`正式 ${version.snapshot.main.tag}`"
                   >
                     mdi-arrow-up-circle-outline
                   </v-icon>
@@ -148,10 +157,10 @@
                     />
                     <v-progress-circular
                       v-if="version.verifyActive || version.verifyPending"
+                      :title="version.verifyActive ? '正在校验' : '正在开始校验'"
                       color="var(--tgc-od-orange)"
                       indeterminate
                       size="16"
-                      :title="version.verifyActive ? '正在校验' : '正在开始校验'"
                       width="2"
                     />
                     <v-btn
@@ -203,13 +212,13 @@
                   <div class="game-fact-acts">
                     <v-btn
                       :disabled="version.refreshDisabled || !isLatestOfficial(version.snapshot)"
+                      :title="
+                        isLatestOfficial(version.snapshot) ? '管理配音包' : '请先更新到当前正式版本'
+                      "
                       aria-label="管理配音包"
                       density="compact"
                       icon="mdi-tune-variant"
                       size="small"
-                      :title="
-                        isLatestOfficial(version.snapshot) ? '管理配音包' : '请先更新到当前正式版本'
-                      "
                       variant="text"
                       @click="audioOverlay = true"
                     />
@@ -219,15 +228,15 @@
                   <v-chip
                     v-for="item in installedAudioItems"
                     :key="item.language"
+                    :title="audioUsageTitle(item)"
                     class="game-fact-tag"
                     size="x-small"
-                    :title="audioUsageTitle(item)"
                     variant="tonal"
                   >
                     {{ item.label }}
                     <template v-if="item.bytes !== null">
-                      · {{ fmtUtil.size(item.bytes) }}</template
-                    >
+                      · {{ fmtUtil.size(item.bytes) }}
+                    </template>
                   </v-chip>
                 </div>
                 <strong v-else>未识别</strong>
@@ -276,9 +285,9 @@
             <v-chip
               v-for="item in installedAudioItems"
               :key="item.language"
+              :title="audioUsageTitle(item)"
               class="game-fact-tag"
               size="x-small"
-              :title="audioUsageTitle(item)"
               variant="tonal"
             >
               {{ item.label }}
@@ -351,8 +360,8 @@ import {
   chooseGameInstallation,
   getGameInstallationAudioUsage,
   getGameInstallationSize,
-  unregisterGameInstallation,
   uninstallGameInstallation,
+  unregisterGameInstallation,
 } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
 import { computed, defineAsyncComponent, ref, watch } from "vue";
@@ -500,7 +509,7 @@ function statusDesc(status: TGApp.Game.Installation.StatusEnum): string {
 function statusColor(status: TGApp.Game.Installation.StatusEnum): string {
   switch (status) {
     case gameEnum.installation.status.KNOWN:
-      return "success";
+      return "var(--tgc-od-green)";
     case gameEnum.installation.status.INCONSISTENT:
       return "warning";
     case gameEnum.installation.status.UNSUPPORTED:
@@ -687,16 +696,16 @@ async function handleUninstall(): Promise<void> {
   await showLoading.start("正在卸载游戏", "正在统计文件…");
   try {
     const summary = await uninstallGameInstallation(props.installation.id);
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.success(
       `卸载完成：删除 ${summary.removedFiles} 个文件、${summary.removedDirs} 个目录`,
     );
     emit("updated");
   } catch (error) {
-    showLoading.end();
+    await showLoading.end();
     showSnackbar.error(`卸载失败：${error}`);
   } finally {
-    await unlisten();
+    unlisten();
     uninstalling.value = false;
   }
 }
@@ -704,30 +713,29 @@ async function handleUninstall(): Promise<void> {
 
 <style lang="scss" scoped>
 .game-list {
+  position: relative;
+  display: flex;
   width: 100%;
+  flex-direction: column;
   flex-shrink: 0;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px;
   border: var(--game-page-cover-border, 0);
   border-radius: 8px;
-  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
-  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
   background: var(--game-page-cover-panel-bg, var(--box-bg-1));
-  color: var(--box-text-4);
+  color: var(--common-text-title);
   font-family: var(--font-text);
+  row-gap: 8px;
 }
 
 .game-list-header {
+  position: relative;
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 16px 8px;
   gap: 8px;
-
-  > span {
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: large;
-    font-weight: normal;
-  }
 }
 
 .game-list-heading {
@@ -735,42 +743,53 @@ async function handleUninstall(): Promise<void> {
   min-width: 0;
   align-items: center;
   gap: 8px;
-
-  > span {
-    overflow: hidden;
-    min-width: 0;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
-.game-size-btn {
+.game-list-title {
+  overflow: hidden;
+  min-width: 0;
+  font-family: var(--font-title);
+  font-size: large;
+  font-weight: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-action-btn {
+  height: 24px;
   flex-shrink: 0;
-  padding-inline: 4px;
+  border-radius: 4px;
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
 }
 
-.game-list-chips {
+.game-icon-action-btn {
+  width: 32px;
+  min-width: 32px;
+}
+
+.game-list-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 4px;
 }
 
-.game-path-act {
-  flex-shrink: 0;
-}
-
-.game-path-actions {
+.game-path-panel {
+  position: relative;
   display: flex;
-  flex-shrink: 0;
+  width: fit-content;
+  max-width: 100%;
   align-items: center;
-  gap: 8px;
-}
-
-.game-path {
-  display: flex;
-  align-items: center;
-  padding: 8px 16px;
+  padding: 8px;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 4px;
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
+  column-gap: 8px;
 }
 
 .game-uninstall-btn {
@@ -789,7 +808,6 @@ async function handleUninstall(): Promise<void> {
   min-width: 0;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
 
   span {
     color: var(--box-text-2);
@@ -808,8 +826,9 @@ async function handleUninstall(): Promise<void> {
 }
 
 .game-facts {
+  position: relative;
   display: grid;
-  padding: 8px 16px 12px;
+  width: 100%;
   gap: 8px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -820,7 +839,7 @@ async function handleUninstall(): Promise<void> {
   flex-direction: column;
   padding: 12px;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 8px;
+  border-radius: 4px;
   -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
   backdrop-filter: var(--game-page-cover-backdrop-filter, none);
   background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
@@ -862,6 +881,9 @@ async function handleUninstall(): Promise<void> {
 
 .game-fact-tag {
   flex-shrink: 0;
+  -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  backdrop-filter: var(--game-page-cover-backdrop-filter, none);
+  background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
 }
 
 .game-fact-tags {
@@ -878,8 +900,7 @@ async function handleUninstall(): Promise<void> {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--common-shadow-1);
-  border-radius: 5px;
-  margin-right: 15px;
+  border-radius: 4px;
   -webkit-backdrop-filter: var(--game-page-cover-backdrop-filter, none);
   backdrop-filter: var(--game-page-cover-backdrop-filter, none);
   background: var(--game-page-cover-subpanel-bg, var(--box-bg-2));
@@ -893,10 +914,18 @@ async function handleUninstall(): Promise<void> {
 }
 
 .game-alert {
-  margin: 8px 16px 16px;
+  margin: 0;
 }
 
 @media (width <= 900px) {
+  .game-list-header {
+    flex-wrap: wrap;
+  }
+
+  .game-list-actions {
+    margin-inline-start: auto;
+  }
+
   .game-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
