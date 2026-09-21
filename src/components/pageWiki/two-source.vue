@@ -3,7 +3,7 @@
     <div class="twos-icon">
       <v-icon size="20">mdi-map-marker-outline</v-icon>
     </div>
-    <div class="twos-content">
+    <div class="twos-content" :title="props.data.name">
       <span>{{ props.data.name }}</span>
       <span>{{ props.data.type }}</span>
     </div>
