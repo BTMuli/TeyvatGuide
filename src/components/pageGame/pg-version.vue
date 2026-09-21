@@ -4,9 +4,15 @@
     <slot
       name="facts"
       :loading
+      :preDownloadActionDisabled
+      :preDownloadActive
+      :preDownloadColor
+      :preDownloadIcon
+      :preDownloadStatusLabel
       :refreshDisabled
       :refreshSnapshot
       :snapshot
+      :triggerPreDownload="handlePreDownloadAction"
       :startVerify="verifyInstallation"
       :verifyActive
       :verifyBusy
@@ -72,10 +78,7 @@
       :text="errorMessage"
       tone="warning"
     />
-    <div
-      v-if="snapshot !== null && (snapshot.updateAvailable || snapshot.preDownloadAvailable)"
-      class="version-actions"
-    >
+    <div v-if="snapshot?.updateAvailable" class="version-actions">
       <v-btn
         v-if="snapshot.updateAvailable"
         :disabled="planningTarget !== null || taskActive || verifyActive || occupyingTask"
@@ -86,17 +89,6 @@
         @click="createPlan(gameEnum.package.planTarget.MAIN)"
       >
         评估正式更新
-      </v-btn>
-      <v-btn
-        v-if="snapshot.preDownloadAvailable"
-        :disabled="planningTarget !== null || taskActive || verifyActive || occupyingTask"
-        :loading="planningTarget === gameEnum.package.planTarget.PRE_DOWNLOAD"
-        prepend-icon="mdi-cloud-download-outline"
-        size="small"
-        variant="tonal"
-        @click="createPlan(gameEnum.package.planTarget.PRE_DOWNLOAD)"
-      >
-        评估预下载
       </v-btn>
     </div>
 
@@ -189,12 +181,13 @@
       </p>
     </div>
     <PgTask
+      v-if="taskPanelVisible"
       :actionPending="taskActionPending"
       :applySpace
       :plan="visiblePlan"
       :recoveryProgress="currentRecoveryProgress"
       :targetPublished
-      :task="currentTask"
+      :task="taskPanelTask"
       @apply-requested="handleApplyRequested"
       @cancel-requested="handleCancelRequested"
       @pause-requested="handlePauseRequested"
@@ -214,9 +207,10 @@ import {
   createGamePackagePlan,
   getGamePackageApplySpace,
   getGamePackageSnapshot,
+  getGamePreDownloadCacheStatus,
 } from "@utils/TGGameLauncher.js";
 import { storeToRefs } from "pinia";
-import { computed, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import PgNotice from "./pg-notice.vue";
 import PgProgress from "./pg-progress.vue";
@@ -228,10 +222,16 @@ type Props = {
 
 type VersionFactsSlot = {
   loading: boolean;
+  preDownloadActionDisabled: boolean;
+  preDownloadActive: boolean;
+  preDownloadColor: string | undefined;
+  preDownloadIcon: string;
+  preDownloadStatusLabel: string;
   refreshDisabled: boolean;
   refreshSnapshot: () => Promise<void>;
   snapshot: TGApp.Game.Package.Snapshot | null;
   startVerify: () => Promise<void>;
+  triggerPreDownload: () => Promise<void>;
   verifyActive: boolean;
   verifyBusy: boolean;
   verifyPending: boolean;
@@ -239,7 +239,10 @@ type VersionFactsSlot = {
 };
 
 const { installation } = defineProps<Props>();
-const emit = defineEmits<{ updated: [] }>();
+const emit = defineEmits<{
+  updated: [];
+  "pre-download-requested": [];
+}>();
 defineSlots<{ facts(props: VersionFactsSlot): unknown }>();
 const taskStore = useGameLauncherStore();
 const { pendingActions, recoveryProgressByTask, tasksByInstallation, verifyByInstallation } =
@@ -247,6 +250,10 @@ const { pendingActions, recoveryProgressByTask, tasksByInstallation, verifyByIns
 const snapshot = ref<TGApp.Game.Package.Snapshot | null>(null);
 const plan = ref<TGApp.Game.Package.PlanSummary | null>(null);
 const loading = ref<boolean>(false);
+const preDownloadCacheState = ref<"unknown" | "checking" | "ready" | "missing" | "error">(
+  "unknown",
+);
+const preDownloadCacheStatus = ref<{ targetTag: string; ready: boolean } | null>(null);
 const planningTarget = ref<TGApp.Game.Package.PlanTargetEnum | null>(null);
 const planProgress = ref<TGApp.Game.Package.PlanProgress | null>(null);
 const exitingGame = ref<boolean>(false);
@@ -259,6 +266,8 @@ let verifyStoppingInstallationId: string | null = null;
 let requestSequence = 0;
 let applySpaceSequence = 0;
 let snapshotRefreshTimer: number | null = null;
+let preDownloadCachePromise: Promise<{ targetTag: string; ready: boolean } | null> | null = null;
+let preDownloadCacheInstallationId: string | null = null;
 
 const currentTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
   const task = tasksByInstallation.value[installation.id];
@@ -272,9 +281,6 @@ const visiblePlan = computed<TGApp.Game.Package.PlanSummary | null>(() => {
 const planSpaceChip = computed<string>(() => {
   const summary = visiblePlan.value;
   if (summary === null) return "空间充足";
-  if (summary.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
-    return summary.cacheHasSufficientSpace ? "缓存空间充足" : "缓存空间不足";
-  }
   if (summary.hasSufficientSpace) return "空间充足";
   if (!summary.cacheHasSufficientSpace) return "缓存空间不足";
   if (!summary.installHasSufficientSpace) return "游戏空间不足";
@@ -283,9 +289,6 @@ const planSpaceChip = computed<string>(() => {
 const planSpaceChipColor = computed<string>(() => {
   const summary = visiblePlan.value;
   if (summary === null) return "success";
-  if (summary.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
-    return summary.cacheHasSufficientSpace ? "success" : "warning";
-  }
   return summary.hasSufficientSpace ? "success" : "warning";
 });
 const planDownloadNote = computed<string>(() => {
@@ -293,9 +296,6 @@ const planDownloadNote = computed<string>(() => {
   if (summary === null) return "";
   if (summary.sourceTag === summary.targetTag) {
     return "下载阶段会组装到事务目录；应用修复时不会改写版本号。";
-  }
-  if (summary.target === gameEnum.package.planTarget.PRE_DOWNLOAD) {
-    return "预下载只写入应用缓存；不会在此阶段修改游戏目录。";
   }
   return "下载阶段会边下边组装到事务目录；正式游戏文件仍等应用后才替换。";
 });
@@ -406,6 +406,136 @@ const targetPublished = computed<boolean>(() => {
       currentTask.value.sourceTag === currentTask.value.targetTag)
   );
 });
+const preDownloadTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
+  return currentTask.value?.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+    ? currentTask.value
+    : null;
+});
+const preDownloadReady = computed<boolean>(() => {
+  const status = preDownloadCacheStatus.value;
+  return status !== null && status.ready && isCurrentPreDownloadTarget(status.targetTag);
+});
+const preDownloadCacheTargetTag = computed<string | null>(() => {
+  const currentSnapshot = snapshot.value;
+  const cacheStatus = preDownloadCacheStatus.value;
+  if (
+    currentSnapshot !== null &&
+    cacheStatus !== null &&
+    currentSnapshot.localVersion !== cacheStatus.targetTag &&
+    (cacheStatus.targetTag === currentSnapshot.main.tag ||
+      cacheStatus.targetTag === currentSnapshot.preDownload?.tag)
+  ) {
+    return cacheStatus.targetTag;
+  }
+  return currentSnapshot?.preDownload?.tag ?? null;
+});
+const preDownloadPublished = computed<boolean>(() => {
+  return (
+    preDownloadReady.value && preDownloadCacheStatus.value?.targetTag === snapshot.value?.main.tag
+  );
+});
+const preDownloadPublishedTargetAvailable = computed<boolean>(() => {
+  const currentSnapshot = snapshot.value;
+  const status = preDownloadCacheStatus.value;
+  return (
+    currentSnapshot !== null &&
+    status !== null &&
+    status.targetTag === currentSnapshot.main.tag &&
+    currentSnapshot.localVersion !== currentSnapshot.main.tag
+  );
+});
+const preDownloadActive = computed<boolean>(() => {
+  return (
+    (preDownloadTask.value !== null && gameEnum.package.taskActive(preDownloadTask.value.state)) ||
+    preDownloadCacheState.value === "checking"
+  );
+});
+const preDownloadStatusLabel = computed<string>(() => {
+  const task = preDownloadTask.value;
+  if (task !== null && gameEnum.package.taskActive(task.state)) {
+    return `预下载 ${task.targetTag}：${gameEnum.package.taskStateDesc(task.state)}`;
+  }
+  const targetTag = preDownloadCacheTargetTag.value;
+  if (preDownloadCacheState.value === "checking" && targetTag !== null) {
+    return `正在核对预下载 ${targetTag} 的本地分片`;
+  }
+  if (preDownloadReady.value && targetTag !== null) {
+    return preDownloadPublished.value
+      ? `预下载 ${targetTag}：已发布，点击评估更新`
+      : `预下载 ${targetTag}：未发布，等待正式发布`;
+  }
+  if (preDownloadCacheState.value === "error" && targetTag !== null) {
+    return `预下载 ${targetTag}：状态读取失败，点击重试`;
+  }
+  if (preDownloadPublishedTargetAvailable.value && targetTag !== null) {
+    return `预下载 ${targetTag}：分片缺失，点击评估更新`;
+  }
+  return targetTag === null ? "未预下载：当前没有可预下载版本" : `未预下载 ${targetTag}：点击评估`;
+});
+const preDownloadIcon = computed<string>(() => {
+  if (preDownloadPublished.value) return "mdi-cloud-check-variant-outline";
+  if (preDownloadReady.value) return "mdi-cloud-clock-outline";
+  if (preDownloadCacheState.value === "missing" || preDownloadCacheState.value === "error") {
+    return "mdi-cloud-alert-outline";
+  }
+  return "mdi-cloud-download-outline";
+});
+const preDownloadColor = computed<string | undefined>(() => {
+  if (preDownloadPublished.value) return "var(--tgc-od-green)";
+  if (preDownloadReady.value) {
+    return "var(--tgc-od-orange)";
+  }
+  if (preDownloadCacheState.value === "missing" || preDownloadCacheState.value === "error") {
+    return "var(--tgc-od-red)";
+  }
+  if (snapshot.value?.preDownloadAvailable === true) return "var(--tgc-od-orange)";
+  return undefined;
+});
+const preDownloadActionDisabled = computed<boolean>(() => {
+  if (preDownloadActive.value || verifyBusy.value || planningTarget.value !== null) return true;
+  if (occupyingTask.value && !preDownloadTaskWaiting.value) return true;
+  if (
+    preDownloadReady.value ||
+    preDownloadTaskCurrent.value ||
+    preDownloadPublishedTargetAvailable.value
+  ) {
+    return false;
+  }
+  return snapshot.value?.preDownloadAvailable !== true || occupyingTask.value;
+});
+const preDownloadTaskCurrent = computed<boolean>(() => {
+  const task = preDownloadTask.value;
+  const currentSnapshot = snapshot.value;
+  return (
+    task?.state === gameEnum.package.taskState.READY_TO_APPLY &&
+    currentSnapshot !== null &&
+    currentSnapshot.localVersion !== task.targetTag &&
+    (task.targetTag === currentSnapshot.main.tag ||
+      task.targetTag === currentSnapshot.preDownload?.tag)
+  );
+});
+const preDownloadTaskWaiting = computed<boolean>(() => {
+  const task = currentTask.value;
+  if (task?.target !== gameEnum.package.planTarget.PRE_DOWNLOAD) return false;
+  return (
+    task.state === gameEnum.package.taskState.READY_TO_APPLY ||
+    task.state === gameEnum.package.taskState.COMPLETED ||
+    task.state === gameEnum.package.taskState.ABANDONED
+  );
+});
+const taskPanelTask = computed<TGApp.Game.Package.TaskSummary | null>(() => {
+  if (
+    preDownloadTaskWaiting.value &&
+    visiblePlan.value?.target === gameEnum.package.planTarget.MAIN
+  ) {
+    return null;
+  }
+  return currentTask.value;
+});
+const taskPanelVisible = computed<boolean>(() => {
+  if (!preDownloadTaskWaiting.value) return true;
+  return visiblePlan.value?.target === gameEnum.package.planTarget.MAIN;
+});
 const audioApplyPreparing = computed<boolean>(() => {
   return (
     currentTask.value?.target === gameEnum.package.planTarget.AUDIO &&
@@ -414,15 +544,15 @@ const audioApplyPreparing = computed<boolean>(() => {
   );
 });
 const occupyingTask = computed<boolean>(() => {
-  return currentTask.value !== null && gameEnum.package.taskOccupying(currentTask.value.state);
+  const task = currentTask.value;
+  if (task === null) return false;
+  if (task.target === gameEnum.package.planTarget.PRE_DOWNLOAD && preDownloadTaskWaiting.value) {
+    return false;
+  }
+  return gameEnum.package.taskOccupying(task.state);
 });
 const waitingPromotion = computed<boolean>(() => {
-  return (
-    currentTask.value !== null &&
-    currentTask.value.target === gameEnum.package.planTarget.PRE_DOWNLOAD &&
-    currentTask.value.state === gameEnum.package.taskState.READY_TO_APPLY &&
-    !targetPublished.value
-  );
+  return preDownloadReady.value && !preDownloadPublished.value;
 });
 const taskActive = computed<boolean>(() => {
   return (
@@ -513,6 +643,9 @@ async function loadSnapshot(notify: boolean): Promise<void> {
     const result = await getGamePackageSnapshot(installation.id);
     if (sequence !== requestSequence) return;
     snapshot.value = result;
+    if (preDownloadCacheStatus.value !== null) {
+      preDownloadCacheState.value = getPreDownloadCacheState(preDownloadCacheStatus.value);
+    }
     if (
       plan.value !== null &&
       plan.value.sourceTag !== plan.value.targetTag &&
@@ -542,6 +675,103 @@ async function loadSnapshot(notify: boolean): Promise<void> {
 
 async function refreshSnapshot(): Promise<void> {
   await loadSnapshot(true);
+  await refreshPreDownloadCache();
+}
+
+function refreshPreDownloadCache(): Promise<{ targetTag: string; ready: boolean } | null> {
+  if (preDownloadCachePromise !== null && preDownloadCacheInstallationId === installation.id) {
+    return preDownloadCachePromise;
+  }
+  preDownloadCacheInstallationId = installation.id;
+  preDownloadCacheState.value = "checking";
+  const pending = getGamePreDownloadCacheStatus(installation.id)
+    .then((status) => {
+      preDownloadCacheStatus.value = status;
+      preDownloadCacheState.value = getPreDownloadCacheState(status);
+      return status;
+    })
+    .catch(() => {
+      preDownloadCacheStatus.value = null;
+      preDownloadCacheState.value = "error";
+      return null;
+    })
+    .finally(() => {
+      if (preDownloadCachePromise === pending) {
+        preDownloadCachePromise = null;
+        preDownloadCacheInstallationId = null;
+      }
+    });
+  preDownloadCachePromise = pending;
+  return pending;
+}
+
+function isCurrentPreDownloadTarget(targetTag: string): boolean {
+  const currentSnapshot = snapshot.value;
+  if (currentSnapshot === null) return false;
+  return (
+    currentSnapshot.localVersion !== targetTag &&
+    (targetTag === currentSnapshot.main.tag || targetTag === currentSnapshot.preDownload?.tag)
+  );
+}
+
+function getPreDownloadCacheState(
+  status: { targetTag: string; ready: boolean } | null,
+): "unknown" | "ready" | "missing" {
+  if (status === null) return "unknown";
+  if (status.ready && isCurrentPreDownloadTarget(status.targetTag)) {
+    return "ready";
+  }
+  if (isCurrentPreDownloadTarget(status.targetTag)) return "missing";
+  return "unknown";
+}
+
+async function handlePreDownloadAction(): Promise<void> {
+  if (preDownloadActionDisabled.value) return;
+  const cacheStatus = await refreshPreDownloadCache();
+  if (preDownloadCacheState.value === "error") {
+    showSnackbar.warn("预下载缓存状态读取失败，请稍后重试");
+    return;
+  }
+  const cacheStatusCurrent =
+    cacheStatus !== null && isCurrentPreDownloadTarget(cacheStatus.targetTag);
+  if (cacheStatusCurrent && cacheStatus.ready) {
+    if (cacheStatus.targetTag === snapshot.value?.main.tag) {
+      await createPlan(gameEnum.package.planTarget.MAIN);
+    } else {
+      await refreshSnapshot();
+    }
+    return;
+  }
+  const task = preDownloadTask.value;
+  const currentSnapshot = snapshot.value;
+  const taskTargetTag = cacheStatus?.targetTag ?? task?.targetTag ?? null;
+  if (
+    taskTargetTag !== null &&
+    currentSnapshot !== null &&
+    taskTargetTag === currentSnapshot.main.tag &&
+    currentSnapshot.localVersion !== currentSnapshot.main.tag
+  ) {
+    await createPlan(gameEnum.package.planTarget.MAIN);
+    return;
+  }
+  if (task?.state === gameEnum.package.taskState.READY_TO_APPLY) {
+    const confirmed = await showDialog.checkF({
+      title: "重新评估预下载？",
+      text: "本地预下载分片已缺失。将放弃失效任务并重新评估；仍有效的共享缓存会保留。",
+      confirmLabel: "放弃并重新评估",
+    });
+    if (confirmed !== true) return;
+    const published = task.targetTag === snapshot.value?.main.tag;
+    try {
+      await taskStore.recoverTask(task.taskId, gameEnum.package.recoveryAction.ROLLBACK);
+      if (published) await createPlan(gameEnum.package.planTarget.MAIN);
+      else emit("pre-download-requested");
+    } catch (error) {
+      showSnackbar.error(`重新评估预下载失败：${error}`);
+    }
+    return;
+  }
+  emit("pre-download-requested");
 }
 
 async function loadApplySpace(): Promise<void> {
@@ -550,7 +780,8 @@ async function loadApplySpace(): Promise<void> {
     task === null ||
     (task.state !== gameEnum.package.taskState.READY_TO_APPLY &&
       task.state !== gameEnum.package.taskState.REPAIR_REQUIRED) ||
-    task.target === gameEnum.package.planTarget.AUDIO
+    task.target === gameEnum.package.planTarget.AUDIO ||
+    task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
   ) {
     applySpace.value = null;
     return;
@@ -687,7 +918,13 @@ async function handleStartRequested(): Promise<void> {
 
 async function handleApplyRequested(): Promise<void> {
   const task = currentTask.value;
-  if (task === null || task.target === gameEnum.package.planTarget.AUDIO) return;
+  if (
+    task === null ||
+    task.target === gameEnum.package.planTarget.AUDIO ||
+    task.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+  ) {
+    return;
+  }
   const repairing = task.state === gameEnum.package.taskState.REPAIR_REQUIRED;
   const integrity = task.sourceTag === task.targetTag;
   if (
@@ -843,7 +1080,9 @@ watch(
     clearVerifyHideTimer();
     verifyStopping.value = false;
     verifyStartError.value = null;
-    void loadSnapshot(false);
+    preDownloadCacheStatus.value = null;
+    preDownloadCacheState.value = "unknown";
+    void loadSnapshot(false).then(() => refreshPreDownloadCache());
     void taskStore.hydrateVerify(installation.id);
   },
   { immediate: true },
@@ -859,9 +1098,27 @@ watch(
     ) {
       emit("updated");
     }
+    if (
+      currentTask.value?.target === gameEnum.package.planTarget.PRE_DOWNLOAD &&
+      state !== undefined &&
+      !gameEnum.package.taskActive(state)
+    ) {
+      void refreshPreDownloadCache();
+    }
     void loadApplySpace();
   },
 );
+
+function handlePreDownloadVisibility(): void {
+  if (document.visibilityState !== "visible") return;
+  void refreshPreDownloadCache();
+  if (waitingPromotion.value && canRefreshSnapshotSilently()) void loadSnapshot(false);
+}
+
+onMounted(() => {
+  window.addEventListener("focus", handlePreDownloadVisibility);
+  document.addEventListener("visibilitychange", handlePreDownloadVisibility);
+});
 
 watch(waitingPromotion, (waiting) => {
   if (waiting) startPromotionWatch();
@@ -891,6 +1148,8 @@ watch(currentVerify, (next, previous) => {
 
 onUnmounted(() => {
   clearVerifyHideTimer();
+  window.removeEventListener("focus", handlePreDownloadVisibility);
+  document.removeEventListener("visibilitychange", handlePreDownloadVisibility);
   verifyStopping.value = false;
   stopPromotionWatch();
 });

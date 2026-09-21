@@ -334,7 +334,12 @@ const integrityRepair = computed<boolean>(() => {
   );
 });
 const canApply = computed<boolean>(() => {
-  if (task?.target === gameEnum.package.planTarget.AUDIO) return false;
+  if (
+    task?.target === gameEnum.package.planTarget.AUDIO ||
+    task?.target === gameEnum.package.planTarget.PRE_DOWNLOAD
+  ) {
+    return false;
+  }
   if (!((readyToApply.value && targetPublished) || repairRequired.value)) return false;
   return applySpace === null || applySpace.hasSufficientSpace;
 });

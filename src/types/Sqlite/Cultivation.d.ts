@@ -1,6 +1,6 @@
 /**
  * 养成计划数据库类型定义文件
- * @since Beta v0.11.2
+ * @since Beta v0.12.3
  */
 
 declare namespace TGApp.Sqlite.Cultivation {

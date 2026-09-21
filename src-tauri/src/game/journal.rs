@@ -1235,6 +1235,44 @@ pub(crate) fn has_incomplete_tasks(
   Ok(list(task_root, installation_id)?.iter().any(|journal| !journal.state.is_history_terminal()))
 }
 
+/// 将旧版本中“已下载但等待发布”的预下载任务迁移为缓存任务终态。
+///
+/// 预下载只负责把经过校验的分片写入共享缓存，不应因为等待正式版本发布而
+/// 占用安装的资源任务名额。迁移只修改 journal，不清理或移动任何缓存分片；
+/// 正式版本发布后会生成独立的 Main 计划并按实际缓存命中情况继续下载。
+///
+/// 调用方应先取得该安装的任务级互斥，避免与正在退出的旧 worker 并发写入日志。
+///
+/// @since Beta v0.12.0
+///
+pub(crate) fn migrate_legacy_predownload_tasks(
+  task_root: &Path,
+  installation_id: &str,
+) -> Result<usize, String> {
+  let journals = list(task_root, Some(installation_id))?;
+  let mut migrated = 0;
+  for mut journal in journals.into_iter().filter(|journal| {
+    journal.target == PackagePlanTarget::PreDownload
+      && journal.state == PackageTaskState::ReadyToApply
+  }) {
+    journal.freeze_elapsed_at_updated_at();
+    journal.state = PackageTaskState::Completed;
+    journal.error_message = None;
+    journal.current_file = None;
+    journal.download_current_file = None;
+    journal.assembly_current_file = None;
+    journal.bytes_per_second = 0;
+    journal.eta_seconds = None;
+    journal.assembly_bytes_per_second = 0;
+    journal.assembly_eta_seconds = None;
+    journal.touch();
+    persist(task_root, &journal)?;
+    let _ = forget_progress(task_root, &journal.task_id);
+    migrated += 1;
+  }
+  Ok(migrated)
+}
+
 /// 判断计划目标是否占用可恢复资源名额。
 ///
 /// @since Beta v0.12.0

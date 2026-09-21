@@ -1,6 +1,6 @@
 /**
  * 游戏资源长任务的非权威前端投影。
- * @since Beta v0.12.0
+ * @since Beta v0.12.3
  */
 
 import gameEnum from "@enum/game.js";
@@ -108,6 +108,13 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     );
   }
 
+  function shouldHideAbandonedPreDownload(task: TGApp.Game.Package.TaskSummary): boolean {
+    return (
+      task.target === gameEnum.package.planTarget.PRE_DOWNLOAD &&
+      task.state === gameEnum.package.taskState.ABANDONED
+    );
+  }
+
   function scheduleCompletedTaskRemoval(task: TGApp.Game.Package.TaskSummary): void {
     if (task.state !== gameEnum.package.taskState.COMPLETED) return;
     if (task.target === gameEnum.package.planTarget.AUDIO) {
@@ -156,6 +163,10 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
+    if (shouldHideAbandonedPreDownload(task)) {
+      removeTaskProjection(task);
+      return;
+    }
     scheduleCompletedTaskRemoval(task);
   }
 
@@ -342,6 +353,13 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       const pending = pendingProgressByInstallation.get(task.installationId);
       if (!shouldReplaceTask(pending ?? next[task.installationId], task)) continue;
       if (pending !== undefined) pendingProgressByInstallation.delete(task.installationId);
+      if (shouldHideAbandonedPreDownload(task)) {
+        if (next[task.installationId] !== undefined) {
+          delete next[task.installationId];
+          changed = true;
+        }
+        continue;
+      }
       if (shouldOmitCompletedInstall(task)) {
         if (next[task.installationId] !== undefined) {
           delete next[task.installationId];

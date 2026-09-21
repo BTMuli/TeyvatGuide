@@ -6872,7 +6872,7 @@ pub(crate) async fn retry_audio_registration(
   finalize_audio_registration(app_handle, task_root, pool, plan, game_root, &journal).await
 }
 
-/// 执行纯下载型资源任务，并按计划目标推进到待提交状态。
+/// 执行纯下载型资源任务；预下载在缓存完成后终止，其他目标推进到待提交状态。
 async fn run_task(
   app_handle: AppHandle,
   task_root: &Path,
@@ -7053,7 +7053,15 @@ async fn run_task(
         Some("取消时已进入安装提交边界，请通过恢复入口继续处理".to_string());
     }
   } else if journal_value.owned_cache_files.len() == plan.downloads.len() {
-    journal_value.state = PackageTaskState::ReadyToApply;
+    // Pre-download is an independent cache warm-up task.  Once every chunk has
+    // been validated it is complete; publication creates a separate Main plan
+    // which can reuse these chunks.  It must never wait in ReadyToApply (that
+    // state is reserved for tasks that still need to mutate the game tree).
+    journal_value.state = if plan.target == PackagePlanTarget::PreDownload {
+      PackageTaskState::Completed
+    } else {
+      PackageTaskState::ReadyToApply
+    };
     journal_value.error_message = None;
   } else {
     journal_value.state = PackageTaskState::Failed;

@@ -1,5 +1,5 @@
 //! 游戏资源差异、空间估算与不可变计划持久化。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.3
 
 use super::hoyoplay::get_channel_sdk;
 use super::{
@@ -1156,6 +1156,9 @@ pub(crate) async fn hydrate_and_validate_apply_plan(
   branches: &GameBranches,
   mut plan: PersistedPlan,
 ) -> Result<PersistedPlan, String> {
+  if plan.target == PackagePlanTarget::PreDownload {
+    return Err("预下载任务只负责准备共享缓存，请重新评估并应用正式更新计划".to_string());
+  }
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
   let source_tag =
     plan.source_tag.as_deref().ok_or_else(|| "全新安装计划不能用于已有游戏更新".to_string())?;

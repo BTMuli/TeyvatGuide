@@ -1,8 +1,9 @@
 //! 游戏安装检测、列表读取与可信启动命令。
-//! @since Beta v0.12.2
+//! @since Beta v0.12.3
 
 use super::{
   cache, defender,
+  downloader::prepare_cache_root,
   hoyoplay::{configure_system_proxy, create_http_client, create_snapshot, get_game_branches},
   installation::{AUDIO_PACKAGES, derive_installation_id, inspect_executable},
   installation_locator::discover_installations,
@@ -20,7 +21,7 @@ use super::{
     PersistedPlan, create_and_persist_audio_plan, create_and_persist_install_plan,
     create_and_persist_plan, hydrate_and_validate_apply_plan, hydrate_and_validate_install_plan,
     hydrate_and_validate_plan, hydrate_and_validate_repair_plan, load_persisted_plan,
-    persist_validated_plan, report_plan_progress,
+    persist_validated_plan, report_plan_progress, scan_cached_downloads,
   },
   switch::{self, create_and_persist_switch_plan},
 };
@@ -141,6 +142,13 @@ pub struct GameAudioPackageUsage {
   pub language: String,
   pub bytes: u64,
   pub file_count: usize,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GamePreDownloadCacheStatus {
+  pub target_tag: String,
+  pub ready: bool,
 }
 
 #[derive(Deserialize)]
@@ -1246,6 +1254,7 @@ pub async fn game_package_plan(
   let branches = get_game_branches(&client, scheme).await?;
   let app_data_dir =
     app_handle.path().app_data_dir().map_err(|error| format!("读取应用数据目录失败：{error}"))?;
+  journal::migrate_legacy_predownload_tasks(&app_data_dir.join("game-tasks"), &installation.id)?;
   journal::reject_occupying_resource_task(
     &app_data_dir.join("game-tasks"),
     &installation.id,
@@ -1351,6 +1360,43 @@ pub async fn game_package_cache_status(
   tauri::async_runtime::spawn_blocking(move || cache::status(&task_root))
     .await
     .map_err(|error| format!("缓存占用统计任务异常退出：{error}"))?
+}
+
+/// 从该安装最近完成的预下载计划核对共享分片，不依赖当前任务投影。
+#[tauri::command]
+pub async fn game_package_pre_download_cache_status(
+  app_handle: AppHandle,
+  installation_id: String,
+) -> Result<Option<GamePreDownloadCacheStatus>, String> {
+  let task_root = game_task_root(&app_handle)?;
+  tauri::async_runtime::spawn_blocking(move || {
+    let Some(journal_value) =
+      journal::list(&task_root, Some(&installation_id))?.into_iter().find(|journal_value| {
+        journal_value.target == PackagePlanTarget::PreDownload
+          && matches!(
+            journal_value.state,
+            PackageTaskState::Completed | PackageTaskState::ReadyToApply
+          )
+      })
+    else {
+      return Ok(None);
+    };
+    let plan = load_persisted_plan(&task_root, &journal_value.plan_id)?;
+    if plan.target != PackagePlanTarget::PreDownload
+      || plan.installation_id != journal_value.installation_id
+      || plan.target_tag != journal_value.target_tag
+    {
+      return Err("预下载任务与资源计划不匹配".to_string());
+    }
+    let cache_root = prepare_cache_root(&task_root)?;
+    let scan = scan_cached_downloads(&cache_root, &plan.downloads, |_, _, _| {})?;
+    Ok(Some(GamePreDownloadCacheStatus {
+      target_tag: journal_value.target_tag,
+      ready: scan.completed_cache_keys.len() == plan.downloads.len(),
+    }))
+  })
+  .await
+  .map_err(|error| format!("预下载缓存核对任务异常退出：{error}"))?
 }
 
 /// 清理资源分片与渠道 SDK 缓存；仍被未完成任务引用的文件会保留。
@@ -1484,7 +1530,7 @@ pub async fn game_package_apply_space(
   super::committer::evaluate_apply_space(&plan, Path::new(&installation.root_path), &task_root)
 }
 
-/// 消费 ReadyToApply 的正式更新或已转正预下载，完整校验后最后提交版本号。
+/// 消费 ReadyToApply 的正式更新，完整校验后最后提交版本号。
 #[tauri::command]
 pub async fn game_package_apply(
   app_handle: AppHandle,
@@ -1495,6 +1541,9 @@ pub async fn game_package_apply(
   let task_root = game_task_root(&app_handle)?;
   let _record_operation = manager.reserve_task_record_operation(&task_id)?;
   let plan = load_persisted_plan(&task_root, &task_id)?;
+  if plan.target == PackagePlanTarget::PreDownload {
+    return Err("预下载任务只负责准备缓存，请重新评估并启动独立的正式更新任务".to_string());
+  }
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, &plan.installation_id).await?;
   let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;

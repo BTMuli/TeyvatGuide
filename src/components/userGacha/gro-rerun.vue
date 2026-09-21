@@ -1,67 +1,188 @@
-<!-- UP角色复刻周期统计 -->
 <template>
-  <div class="gro-rerun-container">
-    <!-- 顶部筛选区 -->
-    <div class="gro-rerun-header">
-      <div class="gro-rerun-tabs">
+  <section class="rerun">
+    <header class="rerun-heading">
+      <div>
+        <h2>祈愿复刻周期</h2>
+        <p>查找最近 UP，回顾每一次相遇</p>
+      </div>
+      <span class="rerun-source">本地卡池收录至 {{ dataThrough }}</span>
+    </header>
+    <div class="rerun-toolbar">
+      <div class="rerun-tabs" aria-label="物品分类">
         <button
           v-for="tab in categoryTabs"
           :key="tab.value"
-          :class="['gro-rerun-tab', { active: category === tab.value }]"
+          :aria-pressed="category === tab.value"
           @click="category = tab.value"
         >
           {{ tab.label }}
         </button>
       </div>
-      <div class="gro-rerun-sort">
-        <select v-model="sortOrder" class="gro-rerun-sort-select">
-          <option value="0">首次UP排序</option>
-          <option value="1">UP次数升序</option>
-          <option value="2">UP次数降序</option>
-        </select>
+      <div class="rerun-search">
+        <i class="mdi mdi-magnify" aria-hidden="true"></i>
+        <input
+          v-model="search"
+          type="search"
+          placeholder="搜索角色 / 武器名称或 ID"
+          aria-label="搜索角色或武器"
+        />
+      </div>
+      <select v-model="sortOrder" aria-label="排序方式">
+        <option value="waiting">最久未 UP</option>
+        <option value="recent">最近 UP</option>
+        <option value="0">首次 UP 顺序</option>
+        <option value="1">UP 次数从少到多</option>
+        <option value="2">UP 次数从多到少</option>
+      </select>
+    </div>
+    <div class="rerun-meta">
+      <span aria-live="polite">{{ sortedRows.length }} 项 · 点击名称查看完整记录</span>
+      <label><input v-model="includeMix" type="checkbox" /> 含集录祈愿</label>
+      <div class="rerun-tabs rerun-view" aria-label="展示方式">
+        <button :aria-pressed="view === 'list'" @click="view = 'list'">复刻列表</button>
+        <button :aria-pressed="view === 'timeline'" @click="view = 'timeline'">版本时间轴</button>
       </div>
     </div>
-
-    <!-- 表格区域 -->
-    <div class="gro-rerun-table-wrap">
-      <table class="gro-rerun-table">
-        <thead>
-          <tr>
-            <th class="gro-rerun-th-fixed"></th>
-            <th v-for="vg in displayVersionGroups" :key="vg.version" class="gro-rerun-th-ver">
-              <span class="gro-rerun-ver-name">{{ vg.version }}</span>
-              <span class="gro-rerun-ver-time">{{ vg.timeRange }}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(row, ri) in sortedRows"
-            :key="row.id"
-            :class="['gro-rerun-row', { odd: ri % 2 === 0 }]"
-          >
-            <td class="gro-rerun-td-name">
-              <TItemBox :model-value="row.boxData" :title="row.name" />
-            </td>
-            <td
-              v-for="vg in displayVersionGroups"
-              :key="`${vg.version}-${row.id}`"
-              class="gro-rerun-td-cell"
-            >
-              <GroRerunCell :item-id="row.id" :version-group="vg" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-if="sortedRows.length === 0" class="rerun-empty">
+      <strong>没有找到匹配的角色或武器</strong><span>试试名称中的几个字，或切换分类</span>
+      <button @click="search = ''">清除搜索</button>
     </div>
-  </div>
+    <div v-else class="rerun-body" :class="{ 'has-detail': selectedRow }">
+      <div class="rerun-scroll">
+        <table v-if="view === 'list'" class="rerun-list">
+          <thead>
+            <tr>
+              <th scope="col">角色 / 武器</th>
+              <th scope="col">最近 UP</th>
+              <th scope="col">距今</th>
+              <th scope="col">UP 次数</th>
+              <th scope="col">最近三次版本</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in sortedRows"
+              :key="row.id"
+              :class="{ selected: selectedId === row.id }"
+            >
+              <th scope="row">
+                <button
+                  class="rerun-name"
+                  :aria-expanded="selectedId === row.id"
+                  @click="selectedId = selectedId === row.id ? null : row.id"
+                >
+                  <TItemBox :modelValue="row.boxData" /><span
+                    ><strong>{{ row.name }}</strong
+                    ><small
+                      >查看历次记录 <i class="mdi mdi-chevron-right" aria-hidden="true"></i></small
+                  ></span>
+                </button>
+              </th>
+              <td>
+                <template v-if="row.lastPool"
+                  ><strong
+                    >{{ row.lastPool.version }}
+                    <small>{{ periodLabel(row.lastPool) }}</small></strong
+                  ><small
+                    >{{ dateLabel(row.lastPool.from) }} — {{ dateLabel(row.lastPool.to) }}</small
+                  ></template
+                ><span v-else>尚未开始</span>
+              </td>
+              <td>
+                <span
+                  :class="{
+                    'rerun-current':
+                      row.lastPool && new Date(row.lastPool.to).getTime() >= Date.now(),
+                  }"
+                  >{{ waitingLabel(row) }}</span
+                >
+              </td>
+              <td>
+                <strong>{{ row.upCount }}</strong
+                ><small>期</small>
+              </td>
+              <td>
+                <div class="rerun-recent">
+                  <span
+                    v-for="pool in row.pools
+                      .filter((item) => new Date(item.from).getTime() <= Date.now())
+                      .slice(-3)
+                      .reverse()"
+                    :key="pool.from + pool.type"
+                    :title="dateLabel(pool.from) + ' · ' + periodLabel(pool)"
+                    >{{ pool.version }}</span
+                  >
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table v-else class="rerun-timeline">
+          <thead>
+            <tr>
+              <th class="rerun-fixed">最近版本 ←</th>
+              <th v-for="vg in displayVersionGroups" :key="vg.version">
+                <strong>{{ vg.version }}</strong
+                ><small>{{ vg.timeRange.split("~")[0] }}</small>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="row in sortedRows"
+              :key="row.id"
+              :class="{ selected: selectedId === row.id }"
+            >
+              <th scope="row" class="rerun-fixed">
+                <button
+                  class="rerun-name"
+                  :aria-expanded="selectedId === row.id"
+                  @click="selectedId = selectedId === row.id ? null : row.id"
+                >
+                  <TItemBox :modelValue="row.boxData" /><span>{{ row.name }}</span>
+                </button>
+              </th>
+              <td v-for="vg in displayVersionGroups" :key="vg.version">
+                <GroRerunCell :itemId="row.id" :versionGroup="vg" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <aside v-if="selectedRow" class="rerun-detail" aria-label="历次 UP 记录">
+        <div class="rerun-detail-heading">
+          <TItemBox :modelValue="selectedRow.boxData" />
+          <div>
+            <h3>{{ selectedRow.name }}</h3>
+            <small>{{ selectedRow.upCount }} 期 UP · 由近到远</small>
+          </div>
+          <button aria-label="关闭记录" @click="selectedId = null">
+            <i class="mdi mdi-close" aria-hidden="true"></i>
+          </button>
+        </div>
+        <ol class="rerun-history">
+          <li v-for="(pool, index) in history" :key="pool.from + pool.type">
+            <div>
+              <strong>{{ pool.version }} · {{ periodLabel(pool) }}</strong
+              ><span>{{ gapLabel(index) }}</span>
+            </div>
+            <p>{{ dateLabel(pool.from) }} — {{ dateLabel(pool.to) }}</p>
+            <small
+              >{{ pool.name
+              }}{{ new Date(pool.from).getTime() > Date.now() ? " · 尚未开始" : "" }}</small
+            >
+          </li>
+        </ol>
+      </aside>
+    </div>
+    <footer>同时间、同类型的双卡池合并为一期；间隔从上期结束计算，记录不代表未来复刻安排。</footer>
+  </section>
 </template>
-
 <script lang="ts" setup>
 import TItemBox, { type TItemBoxData } from "@comp/app/t-itemBox.vue";
 import gameEnum from "@enum/game.js";
 import { getWikiBrief } from "@utils/toolFunc.js";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 import GroRerunCell from "./gro-rerun-cell.vue";
 
@@ -112,7 +233,11 @@ type RerunRow = {
 };
 
 const category = ref<CategoryType>(Category.FiveChar);
-const sortOrder = ref<string>("0");
+const sortOrder = ref<string>("waiting");
+const search = ref<string>("");
+const view = ref<"list" | "timeline">("list");
+const selectedId = ref<number | null>(null);
+const includeMix = ref<boolean>(true);
 const allVersionGroups = ref<Array<VersionGroup>>([]);
 const allRows = ref<Array<RerunRow>>([]);
 
@@ -121,6 +246,8 @@ onMounted(() => buildData());
 /** 构建数据 */
 function buildData(): void {
   const allUpPools = AppGachaData.filter(
+    (pool) => includeMix.value || pool.type !== Number(gameEnum.gachaType.MixUp),
+  ).filter(
     (p) =>
       p.type === Number(gameEnum.gachaType.AvatarUp) ||
       p.type === Number(gameEnum.gachaType.AvatarUp2) ||
@@ -129,9 +256,7 @@ function buildData(): void {
   );
 
   const sortedPools = [...allUpPools].sort((a, b) => {
-    const verCmp = compareVersion(a.version, b.version);
-    if (verCmp !== 0) return verCmp;
-    return a.order - b.order;
+    return new Date(a.from).getTime() - new Date(b.from).getTime() || a.order - b.order;
   });
 
   const verMap = new Map<string, Array<TGApp.App.Gacha.PoolItem>>();
@@ -229,9 +354,21 @@ function addOrUpdateItem(
     });
   }
   const row = map.get(id)!;
+  if (
+    row.pools.some(
+      (item) =>
+        item.from === pool.from &&
+        item.to === pool.to &&
+        (item.type === Number(gameEnum.gachaType.MixUp)) ===
+          (pool.type === Number(gameEnum.gachaType.MixUp)),
+    )
+  )
+    return;
   row.pools.push(pool);
-  row.upCount++;
-  row.lastPool = pool;
+  if (new Date(pool.from).getTime() <= Date.now()) {
+    row.upCount++;
+    row.lastPool = pool;
+  }
 }
 
 function compareVersion(a: string, b: string): number {
@@ -249,11 +386,13 @@ function compareVersion(a: string, b: string): number {
 const displayVersionGroups = computed<Array<VersionGroup>>(() => {
   const rows = filteredRows.value;
   const rowIds = new Set(rows.map((r) => r.id));
-  return allVersionGroups.value.filter((vg) =>
-    vg.allPools.some(
-      (p) => p.up5List.some((id) => rowIds.has(id)) || p.up4List.some((id) => rowIds.has(id)),
-    ),
-  );
+  return [...allVersionGroups.value]
+    .reverse()
+    .filter((vg) =>
+      vg.allPools.some(
+        (p) => p.up5List.some((id) => rowIds.has(id)) || p.up4List.some((id) => rowIds.has(id)),
+      ),
+    );
 });
 
 /** 按分类过滤后的行 */
@@ -276,8 +415,15 @@ const filteredRows = computed<Array<RerunRow>>(() => {
 
 /** 排序后的行 */
 const sortedRows = computed<Array<RerunRow>>(() => {
-  const rows = [...filteredRows.value];
+  const query = search.value.trim().toLocaleLowerCase();
+  const rows = filteredRows.value.filter(
+    (row) => row.name.toLocaleLowerCase().includes(query) || String(row.id).includes(query),
+  );
   switch (sortOrder.value) {
+    case "waiting":
+      return rows.sort((a, b) => lastTime(a) - lastTime(b) || a.id - b.id);
+    case "recent":
+      return rows.sort((a, b) => lastTime(b) - lastTime(a) || a.id - b.id);
     case "1":
       return rows.sort((a, b) => a.upCount - b.upCount || a.id - b.id);
     case "2":
@@ -290,166 +436,458 @@ const sortedRows = computed<Array<RerunRow>>(() => {
       });
   }
 });
+
+watch(includeMix, buildData);
+watch([category, search, includeMix], () => {
+  selectedId.value = null;
+});
+
+const selectedRow = computed<RerunRow | undefined>(() =>
+  sortedRows.value.find((row) => row.id === selectedId.value),
+);
+const history = computed<Array<TGApp.App.Gacha.PoolItem>>(() =>
+  [...(selectedRow.value?.pools ?? [])].reverse(),
+);
+const dataThrough = AppGachaData.reduce(
+  (latest, pool) => (pool.to > latest ? pool.to : latest),
+  "",
+).slice(0, 10);
+
+function lastTime(row: RerunRow): number {
+  return row.lastPool ? new Date(row.lastPool.from).getTime() : Infinity;
+}
+
+function dateLabel(value: string): string {
+  return value.slice(0, 10);
+}
+
+function periodLabel(pool: TGApp.App.Gacha.PoolItem): string {
+  if (pool.type === Number(gameEnum.gachaType.MixUp)) return "集录祈愿";
+  return `第 ${pool.order} 期`;
+}
+
+function waitingLabel(row: RerunRow): string {
+  if (!row.lastPool) return "尚未开始";
+  if (new Date(row.lastPool.to).getTime() >= Date.now()) return "UP 进行中";
+  return `距结束 ${Math.floor((Date.now() - new Date(row.lastPool.to).getTime()) / 86400000)} 天`;
+}
+
+function gapLabel(index: number): string {
+  const pool = history.value[index];
+  const previous = history.value[index + 1];
+  if (!previous) return "首次收录";
+  const days = Math.max(
+    0,
+    Math.floor((new Date(pool.from).getTime() - new Date(previous.to).getTime()) / 86400000),
+  );
+  return `间隔 ${days} 天`;
+}
 </script>
 
 <style lang="scss" scoped>
-.gro-rerun-container {
+.rerun {
   display: flex;
   overflow: hidden;
-  width: 100%;
   height: 100%;
+  min-height: 0;
   flex-direction: column;
+  border: 1px solid var(--common-shadow-1);
+  border-radius: 8px;
+  background: var(--app-page-bg);
+  color: var(--app-page-content);
+  font-size: 14px;
+  line-height: 20px;
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button,
+  select {
+    cursor: pointer;
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--common-text-title);
+    outline-offset: -2px;
+  }
+
+  small {
+    display: block;
+    font-size: 12px;
+    font-weight: normal;
+  }
+
+  button {
+    color: inherit;
+  }
+
+  footer {
+    padding: 8px 16px;
+    border-top: 1px solid var(--common-shadow-1);
+    color: var(--box-text-4);
+    font-size: 12px;
+  }
 }
 
-.gro-rerun-header {
+.rerun-heading {
   display: flex;
-  flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 3px 8px 2px;
-}
+  padding: 12px 16px;
+  gap: 8px;
 
-.gro-rerun-tabs {
-  display: flex;
-  gap: 1px;
-}
-
-.gro-rerun-tab {
-  padding: 2px 10px;
-  border: 1px solid transparent;
-  border-radius: 4px 4px 0 0;
-  background: var(--box-bg-2);
-  color: var(--box-text-2);
-  cursor: pointer;
-  font-size: 11px;
-
-  &.active {
-    border-color: var(--common-shadow-1) var(--common-shadow-1) transparent;
-    border-bottom-color: var(--box-bg-1);
-    background: var(--box-bg-1);
+  h2 {
     color: var(--common-text-title);
-    font-weight: 600;
+    font-family: var(--font-title);
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 28px;
   }
 
-  &:hover:not(.active) {
+  p {
+    margin: 0;
+    color: var(--box-text-4);
+    font-size: 12px;
+  }
+}
+
+.rerun-source {
+  color: var(--box-text-4);
+  font-size: 12px;
+}
+
+.rerun-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 16px 12px;
+  gap: 8px;
+
+  select {
+    min-height: 36px;
+    padding: 4px 8px;
+    border: 1px solid var(--common-shadow-2);
+    border-radius: 4px;
     background: var(--box-bg-1);
+    color: var(--box-text-1);
   }
 }
 
-.gro-rerun-sort-select {
-  padding: 1px 6px;
-  border: 1px solid var(--common-shadow-1);
+.rerun-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 4px;
   border-radius: 4px;
-  background: var(--box-bg-1);
-  color: var(--box-text-2);
-  cursor: pointer;
-  font-size: 11px;
-  outline: none;
+  background: var(--box-bg-3);
+  gap: 4px;
 
-  &:focus {
-    border-color: var(--tgc-pink-1);
+  button {
+    padding: 4px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  button:hover {
+    background: var(--box-bg-4);
+  }
+
+  button[aria-pressed="true"] {
+    background: var(--app-page-bg);
+    box-shadow: 0 1px 3px var(--common-shadow-1);
+    color: var(--common-text-title);
   }
 }
 
-.gro-rerun-table-wrap {
+.rerun-search {
+  display: flex;
+  min-width: 200px;
+  flex: 1;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid var(--common-shadow-2);
+  border-radius: 4px;
+  gap: 8px;
+
+  input {
+    width: 100%;
+    min-width: 0;
+    color: inherit;
+  }
+}
+
+.rerun-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0 16px 8px;
+  font-size: 12px;
+  gap: 12px;
+
+  label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    gap: 4px;
+  }
+}
+
+.rerun-view {
+  padding: 0;
+  margin-left: auto;
+  background: transparent;
+}
+
+.rerun-body {
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1;
+  border-top: 1px solid var(--common-shadow-1);
+}
+
+.rerun-scroll {
   overflow: auto;
-  width: 100%;
+  min-width: 0;
   flex: 1;
 }
 
-.gro-rerun-table {
-  border-collapse: collapse;
-
-  .gro-rerun-row {
-    position: relative;
-
-    &.odd {
-      background: rgb(128 128 128 / 2%);
-    }
-
-    &:hover {
-      background: rgb(128 128 128 / 6%) !important;
-    }
-
-    &::after {
-      position: absolute;
-      z-index: 0;
-      top: 50%;
-      right: 0;
-      left: 62px;
-      height: 1px;
-      background: var(--common-shadow-1);
-      content: "";
-      opacity: 0.35;
-      transform: translateY(-50%);
-    }
-  }
+.rerun-list,
+.rerun-timeline {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 
   th,
   td {
-    padding: 1px 2px;
-    text-align: center;
-    vertical-align: middle;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--common-shadow-1);
+    text-align: left;
     white-space: nowrap;
   }
-}
 
-/* 固定列 */
+  thead th {
+    position: sticky;
+    z-index: 2;
+    top: 0;
+    background: var(--box-bg-3);
+    font-size: 12px;
+    font-weight: normal;
+  }
 
-.gro-rerun-th-fixed {
-  position: sticky;
-  z-index: 3;
-  left: 0;
-  width: 60px;
-  min-width: 60px;
-  background: var(--box-bg-1);
-}
+  tbody tr:hover,
+  tbody tr.selected {
+    background: var(--box-bg-1);
+  }
 
-/* 版本号表头 */
-
-.gro-rerun-th-ver {
-  position: sticky;
-  z-index: 2;
-  top: 0;
-  min-width: 120px;
-  border-bottom: 2px solid var(--common-shadow-1);
-  background: var(--box-bg-3);
-
-  .gro-rerun-ver-name {
+  td > strong {
     display: block;
-    color: var(--common-text-title);
-    font-family: var(--font-title);
-    font-size: 11px;
     font-weight: 600;
   }
 
-  .gro-rerun-ver-time {
-    display: block;
-    color: var(--box-text-2);
-    font-size: 8px;
-    opacity: 0.7;
+  td > strong > small {
+    display: inline;
+    margin-left: 4px;
+  }
+
+  td > small {
+    color: var(--box-text-4);
   }
 }
 
-/* 名称列 */
-
-.gro-rerun-td-name {
-  position: sticky;
-  z-index: 1;
-  left: 0;
+.rerun-name {
   display: flex;
+  width: 100%;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  text-align: left;
+
+  > span {
+    display: grid;
+    gap: 4px;
+  }
+
+  strong {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--box-text-4);
+  }
+}
+
+.rerun-current {
+  color: var(--common-text-title);
+  font-weight: 600;
+}
+
+.rerun-recent {
+  display: flex;
+  gap: 4px;
+
+  span {
+    min-width: 40px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: var(--box-bg-3);
+    text-align: center;
+  }
+}
+
+.rerun-timeline {
+  td {
+    min-width: 152px;
+  }
+
+  .rerun-fixed {
+    position: sticky;
+    z-index: 1;
+    left: 0;
+    min-width: 188px;
+    background: var(--box-bg-1);
+  }
+
+  thead .rerun-fixed {
+    z-index: 3;
+    background: var(--box-bg-3);
+  }
+}
+
+.rerun-detail {
+  overflow: auto;
+  width: 320px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--common-shadow-1);
   background: var(--box-bg-1);
 }
 
-/* 数据单元格 */
+.rerun-detail-heading {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: var(--box-bg-1);
+  gap: 12px;
 
-.gro-rerun-td-cell {
-  position: relative;
-  width: 120px;
-  min-width: 120px;
-  text-align: center;
-  vertical-align: middle;
+  h3 {
+    color: var(--common-text-title);
+    font-size: 16px;
+  }
+
+  button {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+
+  button:hover {
+    background: var(--box-bg-4);
+  }
+}
+
+.rerun-history {
+  padding: 0 16px 16px 28px;
+  list-style: none;
+
+  li {
+    position: relative;
+    padding: 12px 0 12px 16px;
+    border-left: 2px solid var(--common-shadow-2);
+  }
+
+  li::before {
+    position: absolute;
+    top: 20px;
+    left: -5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--common-text-title);
+    content: "";
+  }
+
+  li > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  span,
+  small {
+    color: var(--box-text-4);
+    font-size: 12px;
+  }
+
+  p {
+    margin: 4px 0;
+    font-size: 12px;
+  }
+}
+
+.rerun-empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 8px;
+}
+
+@media (width <= 900px) {
+  .rerun-detail {
+    width: 280px;
+  }
+
+  .has-detail .rerun-list th:last-child,
+  .has-detail .rerun-list td:last-child {
+    display: none;
+  }
+}
+
+@media (width <= 600px) {
+  .rerun-source,
+  .rerun-heading p {
+    display: none;
+  }
+
+  .rerun-heading {
+    padding: 8px 12px;
+  }
+
+  .rerun-toolbar {
+    padding: 0 12px 8px;
+  }
+
+  .rerun-tabs button {
+    padding: 4px 8px;
+  }
+
+  .rerun-meta {
+    padding: 0 12px 8px;
+    gap: 8px;
+  }
+
+  .rerun-body {
+    position: relative;
+  }
+
+  .rerun-detail {
+    position: absolute;
+    z-index: 4;
+    width: 100%;
+    border: 0;
+    inset: 0;
+  }
 }
 </style>

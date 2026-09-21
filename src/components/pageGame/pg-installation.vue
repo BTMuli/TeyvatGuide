@@ -96,6 +96,7 @@
     <PgVersion
       v-if="installation.status === gameEnum.installation.status.KNOWN"
       :installation="installation"
+      @pre-download-requested="emit('pre-download-requested')"
       @updated="refreshRegistered"
     >
       <template #facts="version">
@@ -121,14 +122,6 @@
                   >
                     mdi-arrow-up-circle-outline
                   </v-icon>
-                  <v-icon
-                    v-if="preDownloadTag(version.snapshot) !== null"
-                    color="var(--tgc-od-orange)"
-                    size="16"
-                    :title="`预下载 ${preDownloadTag(version.snapshot)}`"
-                  >
-                    mdi-cloud-download-outline
-                  </v-icon>
                   <div class="game-fact-acts">
                     <v-btn
                       :disabled="version.refreshDisabled"
@@ -140,6 +133,18 @@
                       title="刷新远端版本"
                       variant="text"
                       @click="handleVersionRefresh(version)"
+                    />
+                    <v-btn
+                      :aria-label="version.preDownloadStatusLabel"
+                      :color="version.preDownloadColor"
+                      :disabled="version.preDownloadActionDisabled"
+                      :icon="version.preDownloadIcon"
+                      :loading="version.preDownloadActive"
+                      :title="version.preDownloadStatusLabel"
+                      density="compact"
+                      size="small"
+                      variant="text"
+                      @click="version.triggerPreDownload()"
                     />
                     <v-progress-circular
                       v-if="version.verifyActive || version.verifyPending"
@@ -365,6 +370,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   updated: [];
   "change-path": [installation: TGApp.Game.Installation.Item];
+  "pre-download-requested": [];
 }>();
 
 type AccountChoice = {
@@ -555,10 +561,6 @@ function isLatestOfficial(snapshot: TGApp.Game.Package.Snapshot | null): boolean
   if (snapshot === null) return false;
   const local = snapshot.localVersion ?? props.installation.version;
   return local === snapshot.main.tag;
-}
-
-function preDownloadTag(snapshot: TGApp.Game.Package.Snapshot | null): string | null {
-  return snapshot?.preDownload?.tag ?? null;
 }
 
 function handleVersionRefresh(version: { refreshSnapshot: () => Promise<void> }): void {

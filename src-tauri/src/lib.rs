@@ -1,5 +1,5 @@
 //! 主模块，用于启动应用
-//! @since Beta v0.12.2
+//! @since Beta v0.12.3
 
 mod client;
 mod commands;
@@ -32,11 +32,12 @@ use crate::game::commands::{
   game_installation_locate, game_installation_uninstall, game_installation_unregister,
   game_is_running, game_launch, game_package_apply, game_package_apply_space,
   game_package_audio_plan, game_package_cache_clear, game_package_cache_status,
-  game_package_cancel, game_package_pause, game_package_plan, game_package_recover,
-  game_package_snapshot, game_package_start, game_package_switch, game_package_switch_plan,
-  game_package_task_cleanup, game_package_task_history_list, game_package_task_list,
-  game_package_task_remove, game_package_verify, game_package_verify_cancel,
-  game_package_verify_clear, game_package_verify_status, game_stop,
+  game_package_cancel, game_package_pause, game_package_plan,
+  game_package_pre_download_cache_status, game_package_recover, game_package_snapshot,
+  game_package_start, game_package_switch, game_package_switch_plan, game_package_task_cleanup,
+  game_package_task_history_list, game_package_task_list, game_package_task_remove,
+  game_package_verify, game_package_verify_cancel, game_package_verify_clear,
+  game_package_verify_status, game_stop,
 };
 use crate::game::package::GamePackageManager;
 use tauri::{Emitter, Manager, Window, WindowEvent, generate_context, generate_handler};
@@ -229,6 +230,8 @@ pub fn run() {
       game_package_apply,
       #[cfg(target_os = "windows")]
       game_package_apply_space,
+      #[cfg(target_os = "windows")]
+      game_package_pre_download_cache_status,
       #[cfg(target_os = "windows")]
       game_package_cancel,
       #[cfg(target_os = "windows")]

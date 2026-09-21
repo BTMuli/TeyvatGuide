@@ -540,6 +540,21 @@ export async function getGamePackageCacheStatus(): Promise<TGApp.Game.Package.Ca
   return await invoke<TGApp.Game.Package.CacheSummary>("game_package_cache_status");
 }
 
+/**
+ * 按持久化计划重新核对预下载分片，避免仅凭任务日志误判缓存仍完整。
+ * @since Beta v0.12.3
+ * @param installationId - 本地安装 ID
+ * @returns 最近一次已完成预下载的目标版本与缓存校验结果；没有记录时为 null
+ */
+export async function getGamePreDownloadCacheStatus(
+  installationId: string,
+): Promise<{ targetTag: string; ready: boolean } | null> {
+  return await invoke<{ targetTag: string; ready: boolean } | null>(
+    "game_package_pre_download_cache_status",
+    { installationId },
+  );
+}
+
 type CacheClearTarget = "chunks" | "sdk" | "all";
 
 /**
