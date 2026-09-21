@@ -544,6 +544,23 @@
     "source": { "index": 7, "area": "挪德卡莱", "name": "墟都" }
   },
   {
+    "id": 10000140,
+    "contentId": 509804,
+    "dropDays": [2, 5, 7],
+    "name": "沃雅妮莎",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "法器",
+    "element": "水",
+    "release": "2026-09-22 00:00:00",
+    "materials": [
+      { "id": 104368, "name": "「坚忍」的教导", "star": 2 },
+      { "id": 104369, "name": "「坚忍」的指引", "star": 3 },
+      { "id": 104370, "name": "「坚忍」的哲学", "star": 4 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "隐修" }
+  },
+  {
     "id": 10000016,
     "contentId": 75,
     "dropDays": [2, 5, 7],
@@ -1137,6 +1154,23 @@
       { "id": 104355, "name": "「纷争」的哲学", "star": 4 }
     ],
     "source": { "index": 6, "area": "纳塔", "name": "旋复" }
+  },
+  {
+    "id": 10000143,
+    "contentId": 509803,
+    "dropDays": [3, 6, 7],
+    "name": "薇斯纳",
+    "itemType": "character",
+    "star": 5,
+    "weapon": "单手剑",
+    "element": "风",
+    "release": "2026-09-22 00:00:00",
+    "materials": [
+      { "id": 104371, "name": "「荣光」的教导", "star": 2 },
+      { "id": 104372, "name": "「荣光」的指引", "star": 3 },
+      { "id": 104373, "name": "「荣光」的哲学", "star": 4 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "共观" }
   },
   {
     "id": 10000015,
@@ -2278,20 +2312,20 @@
     "source": { "index": 8, "area": "至冬", "name": "链轨" }
   },
   {
-    "id": 11521,
-    "contentId": 509223,
-    "dropDays": [3, 6, 7],
-    "name": "星锋剑",
+    "id": 11522,
+    "contentId": 509881,
+    "dropDays": [1, 4, 7],
+    "name": "蝶变",
     "itemType": "weapon",
     "star": 5,
     "weapon": "单手剑",
     "materials": [
-      { "id": 114093, "name": "凛雪帝皇的复生", "star": 2 },
-      { "id": 114094, "name": "凛雪帝皇的庆仪", "star": 3 },
-      { "id": 114095, "name": "凛雪帝皇的悲恤", "star": 4 },
-      { "id": 114096, "name": "凛雪帝皇的辞决", "star": 5 }
+      { "id": 114085, "name": "苍星军势的始动", "star": 2 },
+      { "id": 114086, "name": "苍星军势的集结", "star": 3 },
+      { "id": 114087, "name": "苍星军势的鸣令", "star": 4 },
+      { "id": 114088, "name": "苍星军势的征服", "star": 5 }
     ],
-    "source": { "index": 8, "area": "至冬", "name": "断钢" }
+    "source": { "index": 8, "area": "至冬", "name": "铸铁" }
   },
   {
     "id": 12501,
@@ -2966,6 +3000,22 @@
     "source": { "index": 7, "area": "挪德卡莱", "name": "明辉" }
   },
   {
+    "id": 14524,
+    "contentId": 509880,
+    "dropDays": [2, 5, 7],
+    "name": "漩流颂歌",
+    "itemType": "weapon",
+    "star": 5,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114089, "name": "藏窖灵浆的斟酌", "star": 2 },
+      { "id": 114090, "name": "藏窖灵浆的酩酊", "star": 3 },
+      { "id": 114091, "name": "藏窖灵浆的酣畅", "star": 4 },
+      { "id": 114092, "name": "藏窖灵浆的恣意", "star": 5 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "链轨" }
+  },
+  {
     "id": 13502,
     "contentId": 1077,
     "dropDays": [3, 6, 7],
@@ -3398,6 +3448,22 @@
     "source": { "index": 2, "area": "璃月", "name": "雷云祭坛" }
   },
   {
+    "id": 11438,
+    "contentId": 0,
+    "dropDays": [3, 6, 7],
+    "name": "银釭",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "单手剑",
+    "materials": [
+      { "id": 114021, "name": "漆黑陨铁的一粒", "star": 2 },
+      { "id": 114022, "name": "漆黑陨铁的一片", "star": 3 },
+      { "id": 114023, "name": "漆黑陨铁的一角", "star": 4 },
+      { "id": 114024, "name": "漆黑陨铁的一块", "star": 5 }
+    ],
+    "source": { "index": 2, "area": "璃月", "name": "古雷试炼场" }
+  },
+  {
     "id": 11414,
     "contentId": 2307,
     "dropDays": [1, 4, 7],
@@ -3652,6 +3718,22 @@
       { "id": 114088, "name": "苍星军势的征服", "star": 5 }
     ],
     "source": { "index": 8, "area": "至冬", "name": "铸铁" }
+  },
+  {
+    "id": 11437,
+    "contentId": 509879,
+    "dropDays": [2, 5, 7],
+    "name": "新枝",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "单手剑",
+    "materials": [
+      { "id": 114089, "name": "藏窖灵浆的斟酌", "star": 2 },
+      { "id": 114090, "name": "藏窖灵浆的酩酊", "star": 3 },
+      { "id": 114091, "name": "藏窖灵浆的酣畅", "star": 4 },
+      { "id": 114092, "name": "藏窖灵浆的恣意", "star": 5 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "链轨" }
   },
   {
     "id": 12401,
@@ -4566,6 +4648,22 @@
     "source": { "index": 8, "area": "至冬", "name": "铸铁" }
   },
   {
+    "id": 15437,
+    "contentId": 509877,
+    "dropDays": [3, 6, 7],
+    "name": "柔风游弦",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "弓",
+    "materials": [
+      { "id": 114093, "name": "凛雪帝皇的复生", "star": 2 },
+      { "id": 114094, "name": "凛雪帝皇的庆仪", "star": 3 },
+      { "id": 114095, "name": "凛雪帝皇的悲恤", "star": 4 },
+      { "id": 114096, "name": "凛雪帝皇的辞决", "star": 5 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "断钢" }
+  },
+  {
     "id": 14401,
     "contentId": 185,
     "dropDays": [1, 4, 7],
@@ -4996,6 +5094,22 @@
       { "id": 114088, "name": "苍星军势的征服", "star": 5 }
     ],
     "source": { "index": 8, "area": "至冬", "name": "铸铁" }
+  },
+  {
+    "id": 14437,
+    "contentId": 509878,
+    "dropDays": [3, 6, 7],
+    "name": "凝雪沉心",
+    "itemType": "weapon",
+    "star": 4,
+    "weapon": "法器",
+    "materials": [
+      { "id": 114093, "name": "凛雪帝皇的复生", "star": 2 },
+      { "id": 114094, "name": "凛雪帝皇的庆仪", "star": 3 },
+      { "id": 114095, "name": "凛雪帝皇的悲恤", "star": 4 },
+      { "id": 114096, "name": "凛雪帝皇的辞决", "star": 5 }
+    ],
+    "source": { "index": 8, "area": "至冬", "name": "断钢" }
   },
   {
     "id": 13405,

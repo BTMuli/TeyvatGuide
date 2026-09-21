@@ -9162,7 +9162,12 @@
       }
     ],
     "variants": {
-      "special": [],
+      "special": [
+        {
+          "characterId": 10000143,
+          "foodId": 132037
+        }
+      ],
       "strange": 108994,
       "normal": 108995,
       "delicious": 108996
@@ -9448,6 +9453,116 @@
     "variants": {
       "special": [],
       "normal": 132026
+    }
+  },
+  {
+    "id": 132028,
+    "input": [
+      {
+        "id": 100080,
+        "name": "土豆",
+        "icon": "UI_ItemIcon_100080",
+        "count": 4
+      },
+      {
+        "id": 100084,
+        "name": "鱼肉",
+        "icon": "UI_ItemIcon_100084",
+        "count": 4
+      },
+      {
+        "id": 101280,
+        "name": "雪球花",
+        "icon": "UI_ItemIcon_101280",
+        "count": 2
+      },
+      {
+        "id": 101281,
+        "name": "冰醋栗",
+        "icon": "UI_ItemIcon_101281",
+        "count": 3
+      }
+    ],
+    "variants": {
+      "special": [],
+      "strange": 132027,
+      "normal": 132028,
+      "delicious": 132029
+    }
+  },
+  {
+    "id": 132031,
+    "input": [
+      {
+        "id": 100030,
+        "name": "琉璃百合",
+        "icon": "UI_ItemIcon_100030",
+        "count": 2
+      },
+      {
+        "id": 101242,
+        "name": "沉玉仙茗",
+        "icon": "UI_ItemIcon_101242",
+        "count": 3
+      },
+      {
+        "id": 110001,
+        "name": "面粉",
+        "icon": "UI_ItemIcon_110001",
+        "count": 2
+      },
+      {
+        "id": 110004,
+        "name": "黄油",
+        "icon": "UI_ItemIcon_110004",
+        "count": 2
+      }
+    ],
+    "variants": {
+      "special": [],
+      "strange": 132030,
+      "normal": 132031,
+      "delicious": 132032
+    }
+  },
+  {
+    "id": 132034,
+    "input": [
+      {
+        "id": 101279,
+        "name": "冰星果",
+        "icon": "UI_ItemIcon_101279",
+        "count": 2
+      },
+      {
+        "id": 101281,
+        "name": "冰醋栗",
+        "icon": "UI_ItemIcon_101281",
+        "count": 3
+      },
+      {
+        "id": 110006,
+        "name": "糖",
+        "icon": "UI_ItemIcon_110006",
+        "count": 1
+      },
+      {
+        "id": 110017,
+        "name": "蜂蜜",
+        "icon": "UI_ItemIcon_110017",
+        "count": 1
+      }
+    ],
+    "variants": {
+      "special": [
+        {
+          "characterId": 10000140,
+          "foodId": 132036
+        }
+      ],
+      "strange": 132033,
+      "normal": 132034,
+      "delicious": 132035
     }
   }
 ]

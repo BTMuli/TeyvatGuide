@@ -3568,5 +3568,41 @@
     "postId": "77797178",
     "up5List": [13516, 13515],
     "up4List": [11402, 12401, 13407, 14409, 15402]
+  },
+  {
+    "name": "煦风欢舞时",
+    "version": "7.1",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/09/11/1ac93244f05eebd065627a7d7b06c028_4633734522165510386_transformed.jpg",
+    "from": "2026-09-23T06:00:00+08:00",
+    "to": "2026-10-13T17:59:00+08:00",
+    "type": 301,
+    "postId": "78299710",
+    "up5List": [10000143],
+    "up4List": [10000039, 10000076, 10000036]
+  },
+  {
+    "name": "涌浪叙歌",
+    "version": "7.1",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/09/11/ed5b6858865abee281e907f4bb311338_2361939764776998707_transformed.jpg",
+    "from": "2026-09-23T06:00:00+08:00",
+    "to": "2026-10-13T17:59:00+08:00",
+    "type": 400,
+    "postId": "78299709",
+    "up5List": [10000140],
+    "up4List": [10000039, 10000076, 10000036]
+  },
+  {
+    "name": "神铸赋形",
+    "version": "7.1",
+    "order": 1,
+    "banner": "https://sdk-webstatic.mihoyo.com/upload/ann/2026/09/11/b3be26ece1baf3366ea495d364a789d2_4898269335729252786_transformed.jpg",
+    "from": "2026-09-23T06:00:00+08:00",
+    "to": "2026-10-13T17:59:00+08:00",
+    "type": 302,
+    "postId": "78299708",
+    "up5List": [11522, 14524],
+    "up4List": [11437, 14437, 15437, 12401, 13401]
   }
 ]

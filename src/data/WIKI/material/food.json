@@ -7301,6 +7301,104 @@
     "kind": "normal"
   },
   {
+    "id": 132027,
+    "effect": [
+      "队伍中所有角色防御力提高215点，治疗效果提升6%，持续300秒。多人游戏时，仅对自己的角色生效。"
+    ],
+    "recipeId": 132028,
+    "kind": "strange"
+  },
+  {
+    "id": 132028,
+    "effect": [
+      "队伍中所有角色防御力提高261点，治疗效果提升8%，持续300秒。多人游戏时，仅对自己的角色生效。"
+    ],
+    "recipeId": 132028,
+    "kind": "normal"
+  },
+  {
+    "id": 132029,
+    "effect": [
+      "队伍中所有角色防御力提高<color=#3399CCFF>215-308</color>点，治疗效果提升<color=#3399CCFF>6%-10%</color>，持续300秒。",
+      "多人游戏时，仅对自己的角色生效。"
+    ],
+    "effectIcon": "UI_Buff_Item_Def_Add",
+    "recipeId": 132028,
+    "kind": "delicious"
+  },
+  {
+    "id": 132030,
+    "effect": [
+      "队伍中所有角色攻击力提高224点，暴击率提升6%，持续300秒。多人游戏时，仅对自己的角色生效。"
+    ],
+    "recipeId": 132031,
+    "kind": "strange"
+  },
+  {
+    "id": 132031,
+    "effect": [
+      "队伍中所有角色攻击力提高272点，暴击率提升8%，持续300秒。多人游戏时，仅对自己的角色生效。"
+    ],
+    "recipeId": 132031,
+    "kind": "normal"
+  },
+  {
+    "id": 132032,
+    "effect": [
+      "队伍中所有角色攻击力提高<color=#3399CCFF>224-320</color>点，暴击率提升<color=#3399CCFF>6%-10%</color>，持续300秒。",
+      "多人游戏时，仅对自己的角色生效。"
+    ],
+    "effectIcon": "UI_Buff_Item_Atk_Add",
+    "recipeId": 132031,
+    "kind": "delicious"
+  },
+  {
+    "id": 132033,
+    "effect": ["立即为选中的角色恢复生命值上限的26%，并在之后的30秒内，每5秒恢复450点生命值。"],
+    "recipeId": 132034,
+    "kind": "strange"
+  },
+  {
+    "id": 132034,
+    "effect": ["立即为选中的角色恢复生命值上限的28%，并在之后的30秒内，每5秒恢复620点生命值。"],
+    "recipeId": 132034,
+    "kind": "normal"
+  },
+  {
+    "id": 132035,
+    "effect": [
+      "为选中的角色恢复生命值上限的<color=#3399CCFF>26%-30%</color>。",
+      "并在之后的30秒内，每5秒恢复<color=#3399CCFF>450-790</color>点生命值。"
+    ],
+    "effectIcon": "UI_Buff_Item_Recovery_HpAddAll",
+    "recipeId": 132034,
+    "kind": "delicious"
+  },
+  {
+    "id": 132036,
+    "effect": ["立即为选中的角色恢复生命值上限的34%，并在之后的30秒内，每5秒恢复980点生命值。"],
+    "effectIcon": "UI_Buff_Item_Recovery_HpAddAll",
+    "recipeId": 132034,
+    "kind": "special"
+  },
+  {
+    "id": 132037,
+    "effect": ["队伍中所有角色防御力提高282点，持续300秒。多人游戏时，仅对自己的角色生效。"],
+    "effectIcon": "UI_Buff_Item_Def_Add",
+    "recipeId": 108995,
+    "kind": "special"
+  },
+  {
+    "id": 132038,
+    "effect": ["好看又好吃，但是几乎没什么用。"],
+    "effectIcon": "UI_Buff_Item_SpecialEffect"
+  },
+  {
+    "id": 132039,
+    "effect": ["好看又好吃，但是几乎没什么用。"],
+    "effectIcon": "UI_Buff_Item_SpecialEffect"
+  },
+  {
     "id": 111029,
     "effect": [
       "队伍中所有角色攻击力提高320点，暴击率提升10%，受到的伤害提升20%，持续30秒。多人游戏时，仅对自己的角色生效。"
