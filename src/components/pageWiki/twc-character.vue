@@ -139,7 +139,19 @@
             class="twc-text-window-item"
           >
             <div v-for="talk in item.list" :key="talk.title" class="twc-text-talk">
-              <div class="twc-text-talk-title">{{ talk.title }}</div>
+              <div class="twc-text-heading">
+                <span class="twc-text-title">{{ talk.title }}</span>
+                <span v-if="talk.unlock.length" class="twc-text-unlock">
+                  <span
+                    v-for="condition in talk.unlock"
+                    :key="condition"
+                    class="twc-text-unlock-tag"
+                  >
+                    <v-icon aria-hidden="true" icon="mdi-lock" size="12" />
+                    {{ condition }}
+                  </span>
+                </span>
+              </div>
               <div class="twc-text-talk-content">
                 <span v-html="parseHtmlText(talk.talk)" />
               </div>
@@ -164,6 +176,15 @@
             :value="index"
             class="twc-text-content"
           >
+            <div class="twc-text-heading twc-text-story-heading">
+              <span class="twc-text-title">{{ item.Title }}</span>
+              <span v-if="item.unlock.length" class="twc-text-unlock">
+                <span v-for="condition in item.unlock" :key="condition" class="twc-text-unlock-tag">
+                  <v-icon aria-hidden="true" icon="mdi-lock" size="8" />
+                  {{ condition }}
+                </span>
+              </span>
+            </div>
             <span>{{ item.Context }}</span>
           </v-window-item>
         </v-window>
@@ -495,9 +516,47 @@ async function toBirth(date: string): Promise<void> {
   row-gap: 4px;
 }
 
-.twc-text-talk-title {
+.twc-text-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  white-space: normal;
+}
+
+.twc-text-story-heading {
+  margin-bottom: 8px;
+}
+
+.twc-text-title {
   font-family: var(--font-title);
   font-size: 14px;
+  font-weight: normal;
+}
+
+.twc-text-unlock {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.twc-text-unlock-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
+  border-radius: 2px;
+  background: var(--box-bg-2);
+  color: var(--tgc-od-red);
+  column-gap: 2px;
+  font-size: 10px;
+  line-height: 16px;
+
+  i {
+    width: 8px !important;
+    height: 8px !important;
+    font-size: 10px !important;
+  }
 }
 
 .twc-text-talk-content {

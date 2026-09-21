@@ -1,6 +1,6 @@
 /**
  * 角色类型定义
- * @since Beta v0.11.2
+ * @since Beta v0.12.3
  */
 
 declare namespace TGApp.Plugins.Hutao.Character {
@@ -59,17 +59,5 @@ declare namespace TGApp.Plugins.Hutao.Character {
     SpecialDescription?: string;
     /** 天赋图标 */
     Icon: string;
-  };
-
-  /**
-   * 元数据 - 胡桃 - 好感信息 - 语音
-   * @since Beta v0.3.8
-   * @remarks RawHutaoItem.FetterInfo.Fetters
-   */
-  type RhiFetter = {
-    /** 语音标题 */
-    Title: string;
-    /** 语音内容 */
-    Context: string;
   };
 }
