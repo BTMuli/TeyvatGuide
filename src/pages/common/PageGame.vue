@@ -101,6 +101,7 @@
     />
     <PgCache />
   </div>
+  <PgCoverSwitcher />
   <PgoClientSource
     v-if="clientSourceMounted"
     v-model="clientSourceOverlay"
@@ -133,6 +134,7 @@
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
+import PgCoverSwitcher from "@comp/pageGame/pg-cover-switcher.vue";
 import gameEnum from "@enum/game.js";
 import { useHoYoPlayPageCover, usePageCover } from "@hooks/usePageCover.js";
 import useAppStore from "@store/app.js";
@@ -858,8 +860,6 @@ onUnmounted(() => {
   --game-page-cover-border: 1px solid var(--common-shadow-1);
   --game-page-cover-panel-bg: color-mix(in srgb, var(--box-bg-1) 30%, transparent);
   --game-page-cover-subpanel-bg: color-mix(in srgb, var(--box-bg-2) 20%, transparent);
-
-  padding-bottom: 144px;
 
   .game-empty,
   .game-list {

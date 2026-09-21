@@ -3,16 +3,18 @@
   <div v-if="pageCoverUrls.length > 1" class="cover-switcher">
     <Transition name="cover-panel">
       <div v-if="expanded" aria-label="启动器背景轮换" class="cover-panel" role="group">
-        <button
+        <PgCoverItem
           v-for="(url, index) in pageCoverUrls"
           :key="url"
-          :aria-current="index === pageCoverIndex ? 'true' : undefined"
-          :aria-label="`第 ${index + 1} 张背景，共 ${pageCoverUrls.length} 张`"
-          :class="{ current: index === pageCoverIndex }"
-          :style="coverItemStyle(url)"
-          class="cover-panel-item"
-          type="button"
-          @click="selectPageCover(index)"
+          :actionPending="actionPending !== null"
+          :count="pageCoverUrls.length"
+          :current="index === pageCoverIndex"
+          :index
+          :loadingAction="actionPending?.url === url ? actionPending.action : null"
+          :url
+          @select="selectPageCover(index)"
+          @copy="handleCopy(url)"
+          @download="handleDownload(url, index)"
         />
       </div>
     </Transition>
@@ -29,14 +31,63 @@
 </template>
 
 <script lang="ts" setup>
+import showSnackbar from "@comp/func/snackbar.js";
 import { selectPageCover, usePageCover } from "@hooks/usePageCover.js";
+import TGHttps from "@utils/TGHttps.js";
+import { copyToClipboard, saveBufferFile } from "@utils/TGShare.js";
 import { ref } from "vue";
+
+import PgCoverItem from "./pg-cover-item.vue";
 
 const { pageCoverIndex, pageCoverUrls } = usePageCover();
 const expanded = ref<boolean>(false);
+const actionPending = ref<{ url: string; action: "copy" | "download" } | null>(null);
 
-function coverItemStyle(url: string): { backgroundImage: string } {
-  return { backgroundImage: `url("${url}")` };
+async function loadCoverPng(url: string): Promise<ArrayBuffer> {
+  const source = await TGHttps.buffer(url);
+  const bitmap = await createImageBitmap(new Blob([new Uint8Array(source)]));
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext("2d");
+    if (context === null) throw new Error("无法处理背景图像");
+    context.drawImage(bitmap, 0, 0);
+    const png = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob === null) reject(new Error("无法转换背景图像"));
+        else resolve(blob);
+      }, "image/png");
+    });
+    return png.arrayBuffer();
+  } finally {
+    bitmap.close();
+  }
+}
+
+async function handleCopy(url: string): Promise<void> {
+  if (actionPending.value !== null) return;
+  actionPending.value = { url, action: "copy" };
+  try {
+    await copyToClipboard(await loadCoverPng(url));
+    showSnackbar.success("背景图像已复制到剪贴板");
+  } catch (error) {
+    showSnackbar.error(`复制背景图像失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    actionPending.value = null;
+  }
+}
+
+async function handleDownload(url: string, index: number): Promise<void> {
+  if (actionPending.value !== null) return;
+  actionPending.value = { url, action: "download" };
+  try {
+    await saveBufferFile(await loadCoverPng(url), `原神启动器背景-${index + 1}`);
+  } catch (error) {
+    showSnackbar.error(`下载背景图像失败：${TGHttps.getErrMsg(error)}`);
+  } finally {
+    actionPending.value = null;
+  }
 }
 </script>
 
@@ -44,8 +95,8 @@ function coverItemStyle(url: string): { backgroundImage: string } {
 .cover-switcher {
   position: absolute;
   z-index: 1;
-  right: 0;
-  bottom: 16px;
+  right: -16px;
+  bottom: 0;
   display: flex;
   height: 40px;
   align-items: flex-end;
@@ -62,29 +113,6 @@ function coverItemStyle(url: string): { backgroundImage: string } {
   background: color-mix(in srgb, var(--app-page-bg) 24%, transparent);
   box-shadow: 0 4px 16px var(--common-shadow-2);
   gap: 8px;
-}
-
-.cover-panel-item {
-  overflow: hidden;
-  width: 192px;
-  padding: 0;
-  border: unset;
-  border-radius: 8px;
-  aspect-ratio: 2560 / 1440;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  cursor: pointer;
-
-  &:hover,
-  &.current {
-    border: 1px solid var(--tgc-od-blue);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-od-blue);
-    outline-offset: 2px;
-  }
 }
 
 .cover-toggle {

@@ -22,7 +22,6 @@
             </div>
           </router-view>
         </div>
-        <TPageCoverSwitcher />
       </v-container>
     </v-main>
     <TBackTop />
@@ -30,7 +29,6 @@
 </template>
 <script lang="ts" setup>
 import TBackTop from "@comp/app/t-backTop.vue";
-import TPageCoverSwitcher from "@comp/app/t-page-cover-switcher.vue";
 import TSidebar from "@comp/app/t-sidebar.vue";
 import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
