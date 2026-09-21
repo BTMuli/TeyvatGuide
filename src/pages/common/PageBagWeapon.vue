@@ -15,6 +15,7 @@
           variant="outlined"
         />
         <v-switch
+          v-if="YAE_AVATAR_AVAILABLE"
           v-model="onlyEquipped"
           class="pbw-equipped-switch"
           color="var(--tgc-od-blue)"
@@ -185,7 +186,7 @@ import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagWeapon from "@Sqlm/userBagWeapon.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { tryCallYae } from "@utils/TGGame.js";
+import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
 import { getWeaponRefineLevel, groupWeapons } from "@utils/userBagGroup.js";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef, watch } from "vue";
@@ -240,7 +241,7 @@ const visibleGroups = computed<Array<TGApp.App.UserBag.WeaponGroup>>(() =>
 const isFilteringActive = computed<boolean>(() => {
   const filter = filterValue.value;
   return (
-    onlyEquipped.value ||
+    (YAE_AVATAR_AVAILABLE && onlyEquipped.value) ||
     searchQuery.value !== "" ||
     filter.star.length > 0 ||
     filter.weaponType.length > 0 ||
@@ -295,7 +296,8 @@ function applyWeaponFilters(
   data: Array<TGApp.App.UserBag.WeaponItem>,
 ): Array<TGApp.App.UserBag.WeaponItem> {
   let result = data;
-  if (onlyEquipped.value) result = result.filter((item) => equipAvatarMap.value.has(item.tb.guid));
+  if (YAE_AVATAR_AVAILABLE && onlyEquipped.value)
+    result = result.filter((item) => equipAvatarMap.value.has(item.tb.guid));
   const filter = filterValue.value;
   if (filter.star.length > 0)
     result = result.filter((item) => filter.star.includes(item.info.star));
@@ -346,7 +348,7 @@ async function loadWeaponList(uid: number): Promise<void> {
   await showLoading.start(`正在加载 ${uid} 的武器数据`);
   sourceItems.value = [];
   clearPageStateForUid();
-  equipAvatarMap.value = await TSUserBagAvatar.getEquipMap(uid);
+  equipAvatarMap.value = YAE_AVATAR_AVAILABLE ? await TSUserBagAvatar.getEquipMap(uid) : new Map();
   const records = await TSUserBagWeapon.getWeapon(uid);
   const items: Array<TGApp.App.UserBag.WeaponItem> = [];
   for (const weapon of records) {

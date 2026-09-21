@@ -15,6 +15,7 @@
           variant="outlined"
         />
         <v-switch
+          v-if="YAE_AVATAR_AVAILABLE"
           v-model="onlyEquipped"
           class="pbr-equipped-switch"
           color="var(--tgc-od-blue)"
@@ -198,7 +199,7 @@ import TSUserBagAvatar from "@Sqlm/userBagAvatar.js";
 import TSUserBagRelic from "@Sqlm/userBagRelic.js";
 import useAppStore from "@store/app.js";
 import useUserStore from "@store/user.js";
-import { tryCallYae } from "@utils/TGGame.js";
+import { tryCallYae, YAE_AVATAR_AVAILABLE } from "@utils/TGGame.js";
 import { groupRelics } from "@utils/userBagGroup.js";
 import wikiUtils from "@utils/wikiUtils.js";
 import { storeToRefs } from "pinia";
@@ -266,7 +267,7 @@ const visibleGroups = computed<Array<TGApp.App.UserBag.RelicGroup>>(() =>
 const isFilteringActive = computed<boolean>(() => {
   const filter = filterValue.value;
   return (
-    onlyEquipped.value ||
+    (YAE_AVATAR_AVAILABLE && onlyEquipped.value) ||
     searchQuery.value !== "" ||
     filter.slot.length > 0 ||
     filter.star.length > 0 ||
@@ -362,7 +363,8 @@ function applyRelicFilters(
 ): Array<TGApp.Sqlite.UserBag.RelicTable> {
   let result = data;
   const filter = filterValue.value;
-  if (onlyEquipped.value) result = result.filter((item) => equipAvatarMap.value.has(item.guid));
+  if (YAE_AVATAR_AVAILABLE && onlyEquipped.value)
+    result = result.filter((item) => equipAvatarMap.value.has(item.guid));
   if (filter.slot.length > 0)
     result = result.filter((item) => filter.slot.includes(item.brief.pos));
   if (filter.star.length > 0)
@@ -428,7 +430,7 @@ async function loadRelicList(uid: number): Promise<void> {
   await showLoading.start(`正在加载 ${uid} 的圣遗物数据`);
   sourceItems.value = [];
   clearPageStateForUid();
-  equipAvatarMap.value = await TSUserBagAvatar.getEquipMap(uid);
+  equipAvatarMap.value = YAE_AVATAR_AVAILABLE ? await TSUserBagAvatar.getEquipMap(uid) : new Map();
   sourceItems.value = sortRelics(await TSUserBagRelic.getRelic(uid));
   await showLoading.end();
 }

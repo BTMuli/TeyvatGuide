@@ -31,8 +31,17 @@ import TGHttps from "@utils/TGHttps.js";
 import TGLogger from "@utils/TGLogger.js";
 import { parse } from "ini";
 
+// 配置文件没有上传到Git，有需要的联系开发者获取
+import yaeConf from "../../src-tauri/lib/conf.json" with { type: "json" };
+
 // YAE支持的游戏版本
 export const YAE_GAME_VER: Readonly<string> = "7.0.0";
+/**
+ * 当前 Yae 配置是否支持读取角色及其装备。
+ * @since Beta v0.12.3
+ */
+export const YAE_AVATAR_AVAILABLE: Readonly<boolean> =
+  Number(Reflect.get(yaeConf.nativeConfig, "avatarCmdId")) > 0;
 // Yae.Lib 5.5.0 更新时间
 const YAE_DLL_UPDATE_TIME = Date.parse("2026-08-26");
 
