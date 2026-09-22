@@ -1,4 +1,4 @@
-<!-- 公告详情页面,TODO:联动消除红点 -->
+<!-- 公告详情页面  -->
 <template>
   <TSwitchTheme />
   <TPinWin />
@@ -100,10 +100,9 @@ async function createAnnoJson(): Promise<void> {
   align-items: end;
   justify-content: space-between;
   border-bottom: 1px dashed var(--common-shadow-2);
-  margin-bottom: 10px;
-  color: var(--box-text-4);
-  font-family: var(--font-title);
-  font-size: 14px;
+  color: var(--box-text-1);
+  font-size: 12px;
+  opacity: 0.3;
 }
 
 .anno-body {
@@ -125,6 +124,6 @@ async function createAnnoJson(): Promise<void> {
 }
 
 .anno-content {
-  line-height: 2;
+  line-height: 1.5;
 }
 </style>
