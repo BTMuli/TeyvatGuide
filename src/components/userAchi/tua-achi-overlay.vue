@@ -4,7 +4,6 @@
       <slot name="left"></slot>
       <div :class="{ 'has-stage-chain': achievementStageChain.length > 1 }" class="tua-ao-box">
         <img :src="achievementCard" alt="" aria-hidden="true" class="tua-ao-bg" />
-
         <header class="tua-ao-header">
           <button
             class="tua-ao-series"
@@ -27,84 +26,88 @@
             </span>
           </div>
         </header>
-
-        <section aria-labelledby="achi-condition-title" class="tua-ao-panel tua-ao-conditions">
-          <div class="tua-ao-section-heading">
-            <h3 id="achi-condition-title">达成条件</h3>
-            <span :title="props.data.trigger.type">{{ triggerTypeLabel }}</span>
-          </div>
-          <p class="tua-ao-condition-text">{{ props.data.description }}</p>
-          <div v-if="groupedTriggerTasks.length > 0" class="tua-ao-task-grid">
-            <button
-              v-for="item in groupedTriggerTasks"
-              :key="item.key"
-              :title="`查询任务：${item.name}`"
-              class="tua-ao-task"
-              type="button"
-              @click="searchDirect(item.name)"
-            >
-              <v-icon size="16">mdi-alert-decagram-outline</v-icon>
-              <span class="tua-ao-task-content">
-                <span class="tua-ao-task-name">{{ item.name }}</span>
-                <span :title="item.type" class="tua-ao-task-meta">
-                  {{ getTaskTypeLabel(item.type) }}<b v-if="item.count > 1"> ×{{ item.count }}</b>
+        <div class="tua-ao-info">
+          <section aria-labelledby="achi-condition-title" class="tua-ao-panel tua-ao-conditions">
+            <div class="tua-ao-section-heading">
+              <h3 id="achi-condition-title">达成条件</h3>
+              <span :title="props.data.trigger.type">{{ triggerTypeLabel }}</span>
+            </div>
+            <p class="tua-ao-condition-text">{{ props.data.description }}</p>
+            <div v-if="groupedTriggerTasks.length > 0" class="tua-ao-task-grid">
+              <button
+                v-for="item in groupedTriggerTasks"
+                :key="item.key"
+                :title="`查询任务：${item.name}`"
+                class="tua-ao-task"
+                type="button"
+                @click="searchDirect(item.name)"
+              >
+                <v-icon size="16">mdi-alert-decagram-outline</v-icon>
+                <span class="tua-ao-task-content">
+                  <span class="tua-ao-task-name">{{ item.name }}</span>
+                  <span :title="item.type" class="tua-ao-task-meta">
+                    {{ getTaskTypeLabel(item.type) }}<b v-if="item.count > 1"> ×{{ item.count }}</b>
+                  </span>
                 </span>
+              </button>
+            </div>
+            <div class="tua-ao-condition-reward">
+              <span>达成奖励</span>
+              <span class="tua-ao-condition-reward-value">
+                <span>{{ props.data.reward }}</span>
+                <img alt="原石" src="/icon/material/201.webp" />
               </span>
-            </button>
-          </div>
-          <div class="tua-ao-condition-reward">
-            <span>达成奖励</span>
-            <span class="tua-ao-condition-reward-value">
-              <span>{{ props.data.reward }}</span>
-              <img alt="原石" src="/icon/material/201.webp" />
-            </span>
-          </div>
-        </section>
-
-        <section aria-labelledby="achi-record-title" class="tua-ao-panel tua-ao-record">
-          <img :src="achievementStatusIcon" alt="" aria-hidden="true" class="tua-ao-record-ghost" />
-          <div class="tua-ao-section-heading">
-            <h3 id="achi-record-title">成就记录</h3>
-            <button
-              :aria-label="props.data.isCompleted ? '取消完成' : '标记完成'"
-              :title="props.data.isCompleted ? '取消完成' : '标记完成'"
-              class="tua-ao-completion-button"
-              data-html2canvas-ignore
-              type="button"
-              @click="toggleCompletion"
-            >
-              <v-icon size="16">
-                {{ props.data.isCompleted ? "mdi-undo" : "mdi-check-circle-outline" }}
-              </v-icon>
-            </button>
-          </div>
-          <dl class="tua-ao-record-list">
-            <div>
-              <dt>完成状态</dt>
-              <dd
-                :class="{
-                  'is-completed': props.data.isCompleted,
-                  'is-unclaimed': props.data.status === UiafAchiStatEnum.Finished,
-                  'is-invalid': props.data.status === UiafAchiStatEnum.Invalid,
-                }"
+            </div>
+          </section>
+          <section aria-labelledby="achi-record-title" class="tua-ao-panel tua-ao-record">
+            <img
+              :src="achievementStatusIcon"
+              alt="statIcon"
+              aria-hidden="true"
+              class="tua-ao-record-ghost"
+            />
+            <div class="tua-ao-section-heading">
+              <h3 id="achi-record-title">成就记录</h3>
+              <button
+                :aria-label="props.data.isCompleted ? '取消完成' : '标记完成'"
+                :title="props.data.isCompleted ? '取消完成' : '标记完成'"
+                class="tua-ao-completion-button"
+                data-html2canvas-ignore
+                type="button"
+                @click="toggleCompletion"
               >
                 <v-icon size="16">
-                  {{ getStatusIcon(props.data.status) }}
+                  {{ props.data.isCompleted ? "mdi-undo" : "mdi-check-circle-outline" }}
                 </v-icon>
-                {{ getStatusLabel(props.data.status) }}
-              </dd>
+              </button>
             </div>
-            <div>
-              <dt>完成时间</dt>
-              <dd>{{ props.data.isCompleted ? props.data.completedTime || "未记录" : "—" }}</dd>
-            </div>
-            <div>
-              <dt>当前进度</dt>
-              <dd>{{ props.data.progress }} / {{ props.data.target }}</dd>
-            </div>
-          </dl>
-        </section>
-
+            <dl class="tua-ao-record-list">
+              <div>
+                <dt>完成状态</dt>
+                <dd
+                  :class="{
+                    'is-completed': props.data.isCompleted,
+                    'is-unclaimed': props.data.status === UiafAchiStatEnum.Finished,
+                    'is-invalid': props.data.status === UiafAchiStatEnum.Invalid,
+                  }"
+                >
+                  <v-icon size="16">
+                    {{ getStatusIcon(props.data.status) }}
+                  </v-icon>
+                  {{ getStatusLabel(props.data.status) }}
+                </dd>
+              </div>
+              <div>
+                <dt>完成时间</dt>
+                <dd>{{ props.data.isCompleted ? props.data.completedTime || "未记录" : "—" }}</dd>
+              </div>
+              <div>
+                <dt>当前进度</dt>
+                <dd>{{ props.data.progress }} / {{ props.data.target }}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
         <section
           v-if="otherAchievementStages.length > 0"
           aria-labelledby="achi-stages-title"
@@ -150,7 +153,6 @@
             </button>
           </div>
         </section>
-
         <footer class="tua-ao-footer">
           <div class="tua-ao-metadata">
             <span>
@@ -367,31 +369,6 @@ function getTaskTypeLabel(taskType: string): string {
 }
 </script>
 <style lang="scss" scoped>
-$achi-action-query-bg: #115ea32e;
-$achi-action-query-bg-hover: #115ea342;
-$achi-action-query-border: #115ea34d;
-$achi-action-query-text: #115ea3ff;
-$achi-action-share-bg: #7a3e8e2e;
-$achi-action-share-bg-hover: #7a3e8e42;
-$achi-action-share-border: #7a3e8e4d;
-$achi-action-share-text: #7a3e8eff;
-$achi-action-query-bg-dark: #479ef52e;
-$achi-action-query-bg-hover-dark: #479ef542;
-$achi-action-query-border-dark: #479ef54d;
-$achi-action-query-text-dark: #479ef5ff;
-$achi-action-share-bg-dark: #c678dd2e;
-$achi-action-share-bg-hover-dark: #c678dd42;
-$achi-action-share-border-dark: #c678dd4d;
-$achi-action-share-text-dark: #c678ddff;
-
-@media (prefers-reduced-motion: reduce) {
-  .tua-ao-task,
-  .tua-ao-series,
-  .tua-ao-stage-item {
-    transition: none;
-  }
-}
-
 .tua-ao-container {
   display: flex;
   align-items: center;
@@ -401,53 +378,37 @@ $achi-action-share-text-dark: #c678ddff;
 
 .tua-ao-box {
   position: relative;
-  display: grid;
+  display: flex;
   overflow: hidden;
   width: 840px;
+  height: 400px;
   box-sizing: border-box;
-  padding: 20px;
-  border: 1px solid var(--common-shadow-2);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px;
   border-radius: 12px;
   aspect-ratio: 21 / 10;
   background: var(--app-page-bg);
-  box-shadow:
-    0 8px 24px var(--common-shadow-4),
-    0 2px 8px var(--common-shadow-2);
+  box-shadow: 0 0 4px var(--common-shadow-4);
   color: var(--box-text-1);
-  gap: 12px 16px;
-  grid-template:
-    "header header" 64px
-    "conditions record" minmax(0, 1fr)
-    "footer footer" 36px / minmax(0, 1fr) 248px;
   isolation: isolate;
-}
+  row-gap: 8px;
 
-.tua-ao-box.has-stage-chain {
-  width: 880px;
-  min-height: 460px;
-  aspect-ratio: auto;
-  grid-template:
-    "header header" 64px
-    "conditions record" minmax(0, 1fr)
-    "stages stages" auto
-    "footer footer" 36px / minmax(0, 1fr) 248px;
-}
+  &::after {
+    position: absolute;
+    z-index: 1;
+    border-radius: 12px;
+    background: var(--common-shadow-1);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+  }
 
-.tua-ao-box::after {
-  position: absolute;
-  z-index: 1;
-  border-radius: 12px;
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  background: var(--common-shadow-t-4);
-  content: "";
-  inset: 0;
-  pointer-events: none;
-}
-
-.tua-ao-box > :not(.tua-ao-bg) {
-  position: relative;
-  z-index: 2;
+  > :not(.tua-ao-bg) {
+    position: relative;
+    z-index: 2;
+  }
 }
 
 .tua-ao-bg {
@@ -462,16 +423,11 @@ $achi-action-share-text-dark: #c678ddff;
 }
 
 .tua-ao-header {
-  display: grid;
-  min-width: 0;
-  align-content: start;
-  align-items: center;
-  grid-area: header;
-  grid-template-areas:
-    "series"
-    "title";
-  grid-template-columns: minmax(0, 1fr);
-  row-gap: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  place-content: start center;
 }
 
 .tua-ao-series {
@@ -481,41 +437,35 @@ $achi-action-share-text-dark: #c678ddff;
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--box-text-2);
+  color: var(--tgc-od-orange);
   column-gap: 8px;
   cursor: pointer;
   font: inherit;
   font-size: 12px;
-  grid-area: series;
   justify-self: start;
   line-height: 16px;
-  text-shadow: 0 1px 4px var(--common-shadow-t-8);
+  text-shadow: 0 0 8px var(--common-shadow-t-8);
 }
 
 .tua-ao-series:hover {
-  color: var(--common-text-title);
   text-decoration: underline;
-}
-
-.tua-ao-series:focus-visible {
-  outline: 2px solid var(--tgc-yellow-1);
-  outline-offset: 2px;
 }
 
 .tua-ao-series img {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  border-radius: 50%;
   object-fit: contain;
 }
 
 .tua-ao-title-main {
+  position: relative;
   display: flex;
   overflow: hidden;
   min-width: 0;
   align-items: flex-start;
-  column-gap: 8px;
-  grid-area: title;
+  column-gap: 4px;
 }
 
 .tua-ao-title {
@@ -527,17 +477,21 @@ $achi-action-share-text-dark: #c678ddff;
   font-weight: normal;
   line-height: 32px;
   text-overflow: ellipsis;
-  text-shadow: 0 1px 4px var(--common-shadow-t-8);
+  text-shadow: 0 0 4px var(--common-shadow-t-8);
   white-space: nowrap;
 }
 
 .tua-ao-version {
+  display: inline-flex;
   height: 20px;
   flex-shrink: 0;
-  padding: 2px 6px;
+  align-items: center;
+  padding: 0 4px;
   border: 1px solid var(--tgc-od-orange);
   border-radius: 4px;
-  background: #d19a6630;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--tgc-od-orange) 20%, transparent);
   color: var(--tgc-od-orange);
   font-family: var(--font-title);
   font-size: 10px;
@@ -550,14 +504,19 @@ $achi-action-share-text-dark: #c678ddff;
   height: 20px;
   flex-shrink: 0;
   align-items: center;
-  padding: 2px 6px;
+  padding: 0 4px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 4px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: var(--common-shadow-t-2);
-  color: var(--box-text-2);
   column-gap: 4px;
   font-size: 10px;
   line-height: 14px;
+}
+
+.tua-ao-stage {
+  color: var(--tgc-od-blue);
 }
 
 .tua-ao-hidden {
@@ -565,10 +524,19 @@ $achi-action-share-text-dark: #c678ddff;
   color: var(--tgc-od-orange);
 }
 
+.tua-ao-info {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: 4px;
+}
+
 .tua-ao-condition-text {
   display: -webkit-box;
   overflow: hidden;
-  margin: 8px 0 0;
+  margin: 0;
   -webkit-box-orient: vertical;
   color: var(--box-text-1);
   font-size: 14px;
@@ -581,24 +549,34 @@ $achi-action-share-text-dark: #c678ddff;
   padding: 8px;
   border: 1px solid var(--common-shadow-2);
   border-radius: 8px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: var(--common-shadow-t-4);
 }
 
 .tua-ao-conditions {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
   align-self: start;
-  grid-area: conditions;
+  justify-content: flex-start;
+  row-gap: 4px;
 }
 
 .tua-ao-record {
-  overflow: hidden;
-  align-self: start;
-  grid-area: record;
-  isolation: isolate;
-}
-
-.tua-ao-record > :not(.tua-ao-record-ghost) {
   position: relative;
-  z-index: 1;
+  overflow: hidden;
+  width: 240px;
+  flex-shrink: 0;
+  align-self: start;
+  isolation: isolate;
+
+  > :not(.tua-ao-record-ghost) {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .tua-ao-record-ghost {
@@ -616,28 +594,28 @@ $achi-action-share-text-dark: #c678ddff;
 
 .tua-ao-section-heading {
   display: flex;
-  height: 22px;
-  align-items: center;
+  height: 20px;
+  align-items: flex-end;
   justify-content: flex-start;
-  column-gap: 8px;
-}
+  column-gap: 4px;
 
-.tua-ao-section-heading h3 {
-  margin: 0;
-  color: var(--common-text-title);
-  font-family: var(--font-title);
-  font-size: 16px;
-  font-weight: normal;
-  line-height: 22px;
-}
+  h3 {
+    margin: 0;
+    color: var(--common-text-title);
+    font-family: var(--font-title);
+    font-size: 16px;
+    font-weight: normal;
+    line-height: 20px;
+  }
 
-.tua-ao-section-heading > span {
-  overflow: hidden;
-  color: var(--box-text-4);
-  font-size: 12px;
-  line-height: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  > span {
+    overflow: hidden;
+    color: var(--box-text-4);
+    font-size: 12px;
+    line-height: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .tua-ao-completion-button {
@@ -659,16 +637,12 @@ $achi-action-share-text-dark: #c678ddff;
     background: var(--common-shadow-1);
     color: var(--tgc-yellow-2);
   }
-
-  &:focus-visible {
-    outline: 2px solid var(--tgc-yellow-2);
-    outline-offset: 1px;
-  }
 }
 
 .tua-ao-task-grid {
+  position: relative;
   display: grid;
-  margin-top: 8px;
+  width: 100%;
   gap: 4px 8px;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
 }
@@ -680,23 +654,20 @@ $achi-action-share-text-dark: #c678ddff;
   height: 40px;
   align-items: center;
   padding: 4px 8px;
-  border: 0;
+  border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  background: transparent;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  background: var(--common-shadow-t-1);
   color: var(--box-text-1);
   column-gap: 8px;
   cursor: pointer;
   font: inherit;
   text-align: left;
-}
 
-.tua-ao-task:hover {
-  background: var(--box-bg-4);
-}
-
-.tua-ao-task:focus-visible {
-  outline: 2px solid var(--tgc-yellow-1);
-  outline-offset: 2px;
+  &:hover {
+    background: var(--common-shadow-1);
+  }
 }
 
 .tua-ao-task > .v-icon {
@@ -735,14 +706,17 @@ $achi-action-share-text-dark: #c678ddff;
 }
 
 .tua-ao-condition-reward {
+  position: relative;
   display: flex;
+  width: 100%;
   height: 28px;
   align-items: center;
   justify-content: space-between;
   padding: 4px 8px;
   border: 1px solid var(--common-shadow-1);
   border-radius: 4px;
-  margin-top: 8px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   background: var(--common-shadow-t-2);
   color: var(--box-text-4);
   column-gap: 12px;
@@ -811,13 +785,18 @@ $achi-action-share-text-dark: #c678ddff;
 }
 
 .tua-ao-stages {
-  grid-area: stages;
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-self: flex-start;
+  justify-content: flex-start;
+  row-gap: 4px;
 }
 
 .tua-ao-stage-list {
   display: grid;
-  margin-top: 8px;
-  gap: 8px;
+  gap: 4px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
@@ -835,19 +814,11 @@ $achi-action-share-text-dark: #c678ddff;
   font: inherit;
   gap: 4px;
   text-align: left;
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease;
-}
 
-.tua-ao-stage-item:hover {
-  border-color: var(--common-shadow-3);
-  background: var(--box-bg-4);
-}
-
-.tua-ao-stage-item:focus-visible {
-  outline: 2px solid var(--tgc-yellow-1);
-  outline-offset: 2px;
+  &:hover {
+    border-color: var(--common-shadow-1);
+    background: var(--common-shadow-2);
+  }
 }
 
 .tua-ao-stage-item-head {
@@ -930,12 +901,14 @@ $achi-action-share-text-dark: #c678ddff;
 }
 
 .tua-ao-footer {
+  position: relative;
   display: flex;
+  width: 100%;
   min-width: 0;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+  margin-top: auto;
   column-gap: 16px;
-  grid-area: footer;
 }
 
 .tua-ao-metadata {
@@ -943,10 +916,11 @@ $achi-action-share-text-dark: #c678ddff;
   overflow: hidden;
   min-width: 0;
   align-items: center;
-  color: var(--box-text-2);
+  color: var(--tgc-white-1);
   column-gap: 12px;
   font-size: 12px;
   line-height: 16px;
+  text-shadow: 1px 1px 1px var(--tgc-dark-1);
 }
 
 .tua-ao-metadata > span {
@@ -965,45 +939,26 @@ $achi-action-share-text-dark: #c678ddff;
   padding: 0 12px;
   border: 1px solid;
   border-radius: 4px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  text-shadow: 0 0 4px var(--common-shadow-t-4);
 }
 
 .tua-ao-action-query {
-  border-color: $achi-action-query-border;
-  background: $achi-action-query-bg;
-  color: $achi-action-query-text;
+  background: var(--common-shadow-t-2);
+  color: var(--tgc-od-blue);
 
-  .dark & {
-    border-color: $achi-action-query-border-dark;
-    background: $achi-action-query-bg-dark;
-    color: $achi-action-query-text-dark;
-  }
-}
-
-.tua-ao-action-query:hover {
-  background: $achi-action-query-bg-hover;
-
-  .dark & {
-    background: $achi-action-query-bg-hover-dark;
+  &:hover {
+    background: var(--common-shadow-1);
   }
 }
 
 .tua-ao-action-share {
-  border-color: $achi-action-share-border;
-  background: $achi-action-share-bg;
-  color: $achi-action-share-text;
+  background: var(--common-shadow-t-2);
+  color: var(--tgc-od-purple);
 
-  .dark & {
-    border-color: $achi-action-share-border-dark;
-    background: $achi-action-share-bg-dark;
-    color: $achi-action-share-text-dark;
-  }
-}
-
-.tua-ao-action-share:hover {
-  background: $achi-action-share-bg-hover;
-
-  .dark & {
-    background: $achi-action-share-bg-hover-dark;
+  &:hover {
+    background: var(--common-shadow-1);
   }
 }
 </style>
