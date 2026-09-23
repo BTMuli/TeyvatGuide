@@ -7299,7 +7299,7 @@ async fn finalize_audio_registration(
       .map_err(|error| format!("读取主启动状态失败：{error}"))?
       .unwrap_or(false);
   if is_chosen {
-    if let Err(error) = super::launch::sync_voice_language(&actual) {
+    if let Err(error) = super::launch::sync_voice_language(game_root, &actual) {
       persist_audio_registration_error(app_handle, task_root, journal, &error).await;
       return Err(error);
     }

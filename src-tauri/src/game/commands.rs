@@ -245,14 +245,15 @@ pub async fn game_installation_choose(
   installation_id: String,
 ) -> Result<(), String> {
   let pool = sqlite_pool(&db_instances).await?;
-  let audio_languages_json = sqlx::query_scalar::<_, String>(
-    "SELECT audioLanguages FROM GameInstallation WHERE id = ? LIMIT 1",
-  )
-  .bind(&installation_id)
-  .fetch_optional(&pool)
-  .await
-  .map_err(|error| format!("读取主启动语音包失败：{error}"))?
-  .ok_or_else(|| "未找到已登记的游戏安装".to_string())?;
+  let installation_row =
+    sqlx::query("SELECT audioLanguages, rootPath FROM GameInstallation WHERE id = ? LIMIT 1")
+      .bind(&installation_id)
+      .fetch_optional(&pool)
+      .await
+      .map_err(|error| format!("读取主启动语音包失败：{error}"))?
+      .ok_or_else(|| "未找到已登记的游戏安装".to_string())?;
+  let audio_languages_json: String = installation_row.get("audioLanguages");
+  let root_path: String = installation_row.get("rootPath");
   let audio_languages: Vec<String> = serde_json::from_str(&audio_languages_json)
     .map_err(|error| format!("解析主启动语音包失败：{error}"))?;
   let mut transaction =
@@ -267,7 +268,7 @@ pub async fn game_installation_choose(
     .await
     .map_err(|error| format!("设置主启动失败：{error}"))?;
   transaction.commit().await.map_err(|error| format!("提交主启动切换事务失败：{error}"))?;
-  launch::sync_voice_language(&audio_languages)?;
+  launch::sync_voice_language(Path::new(&root_path), &audio_languages)?;
   Ok(())
 }
 
@@ -1195,7 +1196,7 @@ pub async fn game_launch(
   {
     return Err("当前安装不支持指定的启动渠道".to_string());
   }
-  launch::sync_voice_language(&installation.audio_languages)?;
+  launch::sync_voice_language(Path::new(&installation.root_path), &installation.audio_languages)?;
   launch::launch(Path::new(&installation.executable_path), scheme, ticket)?;
   sqlx::query("UPDATE GameInstallation SET lastSeen = ? WHERE id = ?")
     .bind(Utc::now().to_rfc3339())

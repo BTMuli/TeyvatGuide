@@ -1134,7 +1134,12 @@ pub(crate) async fn register_installation(
   .await
   .map_err(|error| format!("登记游戏安装失败：{error}"))?;
   transaction.commit().await.map_err(|error| format!("提交安装登记事务失败：{error}"))?;
-  if become_chosen && let Err(error) = launch::sync_voice_language(&installation.audio_languages) {
+  if become_chosen
+    && let Err(error) = launch::sync_voice_language(
+      std::path::Path::new(&installation.root_path),
+      &installation.audio_languages,
+    )
+  {
     log::warn!("[game-install][register] 同步主启动配音失败：{error}");
   }
   Ok(())

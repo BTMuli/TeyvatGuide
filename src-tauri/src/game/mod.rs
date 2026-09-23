@@ -2,6 +2,7 @@
 //! @since Beta v0.12.0
 
 mod assembler;
+mod audio_language;
 mod cache;
 pub mod commands;
 mod committer;

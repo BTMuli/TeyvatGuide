@@ -1,41 +1,35 @@
 //! 国服官服与哔哩哔哩服客户端启动实现。
 //! @since Beta v0.12.1
 
-use super::model::SchemeId;
+use super::{audio_language, model::SchemeId};
 use std::path::Path;
 
-const VOICE_LANGUAGES: [(&str, u32); 4] = [("zh-cn", 0), ("en-us", 1), ("ja-jp", 2), ("ko-kr", 3)];
-
-/// 启动游戏前让游戏自身保存的当前配音与所选安装实际存在的配音包保持一致。
-pub fn sync_voice_language(installed_languages: &[String]) -> Result<(), String> {
+/// 启动游戏前让游戏自身保存的当前配音与所选安装实际存在的配音包保持一致，
+/// 并同步客户端维护的配音语言清单。
+///
+/// @since Beta v0.12.1
+///
+/// # 参数
+/// - `game_root`: 游戏安装根目录。
+/// - `installed_languages`: 已选/已安装的语音标识列表。
+///
+/// # 返回
+/// - `Ok(())`: 游戏设置与清单均已同步或无需调整。
+/// - `Err(String)`: 读取或写入游戏设置、清单失败的错误描述。
+pub fn sync_voice_language(game_root: &Path, installed_languages: &[String]) -> Result<(), String> {
   let supported_languages = installed_languages
     .iter()
-    .filter_map(|language| voice_language_id(language))
+    .filter_map(|language| audio_language::registry_id(language))
     .collect::<Vec<_>>();
-  if supported_languages.is_empty() {
-    return Ok(());
-  }
 
   #[cfg(target_os = "windows")]
   sync_windows_voice_language(&supported_languages)?;
 
   #[cfg(not(target_os = "windows"))]
-  let _ = supported_languages;
+  let _ = &supported_languages;
 
+  audio_language::sync_list(game_root, installed_languages)?;
   Ok(())
-}
-
-/// 将配音语言标识映射为游戏使用的数值 ID。
-///
-/// @since Beta v0.12.1
-///
-/// # 参数
-/// - `language`: 配音语言标识（如 `zh-cn`）。
-///
-/// # 返回
-/// 匹配到的配音 ID，未匹配时返回 `None`。
-fn voice_language_id(language: &str) -> Option<u32> {
-  VOICE_LANGUAGES.iter().find(|(value, _)| value.eq_ignore_ascii_case(language)).map(|(_, id)| *id)
 }
 
 /// 根据当前值与已安装配音选择需要写入游戏配置的配音 ID。

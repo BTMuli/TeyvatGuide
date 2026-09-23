@@ -2214,6 +2214,18 @@ fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Re
   Ok(())
 }
 
+/// 需要同步的一项客户端状态文件。
+struct ClientStateTarget {
+  /// 进度展示用的简短名称。
+  label: &'static str,
+  /// 客户端状态文件相对游戏根的路径。
+  marker_path: String,
+  /// 标记值需要与部署后的文件内容核对时给出依据文件路径。
+  value_path: Option<String>,
+  /// 应写入的状态文件内容。
+  target: Vec<u8>,
+}
+
 /// 计算基础包替换后需要同步的客户端资源状态标记。
 ///
 /// 游戏本体启动时把 `Persistent/base_res_version_hash` 与基础包内
@@ -2221,41 +2233,85 @@ fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Re
 /// 自己的资源状态并强制重新下载。这里依据计划的目标清单推导出标记路径与目标值：
 /// 标记路径始终与基础包内的版本列表文件同级推导，目标值取该文件的目标 MD5。
 ///
+/// 配音包变更计划则同步客户端维护的配音语言清单（`Persistent/audio_lang_14`）：
+/// 清单里列出、但启动器并未安装的语言会让客户端自行下载整份语音资源。
+///
 /// @since Beta v0.12.3
 ///
 /// # 参数
 /// - `plan`: 资源计划。
 ///
 /// # 返回
-/// - `Ok(Some((marker_path, value_path, md5)))`: 需要同步的标记、依据文件与目标值。
+/// - `Ok(Some(target))`: 需要同步的状态文件。
 /// - `Ok(None)`: 计划不需要同步客户端状态。
 /// - `Err(String)`: 计划元数据无效的错误描述。
-fn client_state_target(plan: &PersistedPlan) -> Result<Option<(String, String, String)>, String> {
-  if !matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
-    return Ok(None);
+fn client_state_target(plan: &PersistedPlan) -> Result<Option<ClientStateTarget>, String> {
+  match plan.target {
+    PackagePlanTarget::Main | PackagePlanTarget::PreDownload => {
+      let Some(asset) = plan.inventory.iter().find(|file| {
+        file.name.ends_with(CLIENT_STATE_VALUE_SUFFIX)
+          && file.name.len() > CLIENT_STATE_VALUE_SUFFIX.len()
+      }) else {
+        return Ok(None);
+      };
+      let prefix = asset
+        .name
+        .strip_suffix(CLIENT_STATE_VALUE_SUFFIX)
+        .ok_or_else(|| "客户端资源版本文件路径无效".to_string())?;
+      // 标记文件位于同一个 `*_Data/Persistent` 目录下；路径形状不符合预期时不同步，
+      // 避免在未知客户端目录布局上写入错误的标记。
+      if !prefix.ends_with("_Data/") {
+        return Ok(None);
+      }
+      if !is_hex_md5(&asset.md5) {
+        return Err("客户端资源版本文件缺少有效校验值".to_string());
+      }
+      Ok(Some(ClientStateTarget {
+        label: "客户端资源状态",
+        marker_path: normalize_manifest_path(&format!(
+          "{prefix}Persistent/{CLIENT_STATE_MARKER_FILE}"
+        ))?,
+        value_path: Some(normalize_manifest_path(&asset.name)?),
+        target: asset.md5.to_ascii_lowercase().into_bytes(),
+      }))
+    }
+    PackagePlanTarget::Audio => {
+      let selection =
+        plan.audio_selection.as_ref().ok_or_else(|| "配音计划缺少语音包选择".to_string())?;
+      let Some(target) = super::audio_language::list_bytes(&selection.target_audio_languages)
+      else {
+        return Ok(None);
+      };
+      let Some(prefix) = plan.inventory.iter().find_map(|file| client_data_prefix(&file.name))
+      else {
+        return Ok(None);
+      };
+      Ok(Some(ClientStateTarget {
+        label: "配音语言清单",
+        marker_path: normalize_manifest_path(&format!(
+          "{prefix}Persistent/{}",
+          super::audio_language::AUDIO_LANGUAGE_LIST_FILE_NAME
+        ))?,
+        value_path: None,
+        target,
+      }))
+    }
+    _ => Ok(None),
   }
-  let Some(asset) = plan.inventory.iter().find(|file| {
-    file.name.ends_with(CLIENT_STATE_VALUE_SUFFIX)
-      && file.name.len() > CLIENT_STATE_VALUE_SUFFIX.len()
-  }) else {
-    return Ok(None);
-  };
-  let prefix = asset
-    .name
-    .strip_suffix(CLIENT_STATE_VALUE_SUFFIX)
-    .ok_or_else(|| "客户端资源版本文件路径无效".to_string())?;
-  // 标记文件位于同一个 `*_Data/Persistent` 目录下；路径形状不符合预期时不同步，
-  // 避免在未知客户端目录布局上写入错误的标记。
-  if !prefix.ends_with("_Data/") {
-    return Ok(None);
-  }
-  let value_path = normalize_manifest_path(&asset.name)?;
-  let marker_path =
-    normalize_manifest_path(&format!("{prefix}Persistent/{CLIENT_STATE_MARKER_FILE}"))?;
-  if !is_hex_md5(&asset.md5) {
-    return Err("客户端资源版本文件缺少有效校验值".to_string());
-  }
-  Ok(Some((marker_path, value_path, asset.md5.to_ascii_lowercase())))
+}
+
+/// 从资源相对路径中取出 `*_Data/` 前缀。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `name`: 资源相对路径。
+///
+/// # 返回
+/// `Some(prefix)` 表示首个路径段是 `*_Data` 目录。
+fn client_data_prefix(name: &str) -> Option<String> {
+  let (prefix, _) = name.split_once('/')?;
+  prefix.ends_with("_Data").then(|| format!("{prefix}/"))
 }
 
 /// 准备客户端资源状态同步事务。
@@ -2278,27 +2334,27 @@ fn prepare_client_state(
   game_root: &Path,
   journal: &mut TaskJournal,
 ) -> Result<(), String> {
-  let Some((marker_path, value_path, md5)) = client_state_target(plan)? else {
+  let Some(target) = client_state_target(plan)? else {
     return Ok(());
   };
-  let original = match resolve_optional_manifest_file(game_root, &marker_path)? {
+  let original = match resolve_optional_manifest_file(game_root, &target.marker_path)? {
     Some(path) => {
       Some(fs::read(&path).map_err(|error| format!("读取客户端资源状态失败：{error}"))?)
     }
     None => None,
   };
-  let target = md5.into_bytes();
   let state_root = transaction_subdirectory(game_root, &plan.plan_id, CLIENT_STATE_DIRECTORY)?;
-  write_verified_bytes(&state_root.join("target"), &target)?;
+  write_verified_bytes(&state_root.join("target"), &target.target)?;
   match original.as_deref() {
     Some(bytes) => write_verified_bytes(&state_root.join("original"), bytes)?,
     None => remove_optional_file(&state_root.join("original"))?,
   }
   apply_mut(journal)?.client_state = Some(ClientStateJournal {
-    marker_path,
-    value_path,
+    label: target.label.to_string(),
+    marker_path: target.marker_path,
+    value_path: target.value_path,
     original_sha256: original.as_deref().map(sha256_bytes),
-    target_sha256: sha256_bytes(&target),
+    target_sha256: sha256_bytes(&target.target),
     phase: ConfigCommitPhase::Prepared,
   });
   Ok(())
@@ -2344,21 +2400,23 @@ where
   let expected = std::str::from_utf8(&target_bytes)
     .map_err(|_| "客户端资源状态目标不是有效文本".to_string())?
     .to_string();
-  let value = resolve_existing_manifest_file(game_root, &state.value_path)?;
-  let actual = md5_file(&value)?;
-  if !actual.eq_ignore_ascii_case(&expected) {
-    return Err(format!("客户端资源版本文件与计划不一致：{}", state.value_path));
+  if let Some(value_path) = state.value_path.as_deref() {
+    let value = resolve_existing_manifest_file(game_root, value_path)?;
+    let actual = md5_file(&value)?;
+    if !actual.eq_ignore_ascii_case(&expected) {
+      return Err(format!("客户端资源版本文件与计划不一致：{value_path}"));
+    }
   }
   let current = read_optional_sha256(game_root, &state.marker_path)?;
   if current.as_deref() == Some(state.target_sha256.as_str()) {
     set_client_state_phase(journal, ConfigCommitPhase::Replaced);
-    mark_client_state_progress(journal, "客户端资源状态已一致");
+    mark_client_state_progress(journal, &format!("{}已一致", state.label));
     return persist_and_emit(task_root, journal, emit);
   }
   if current != state.original_sha256 {
     return Err("客户端资源状态在提交期间发生变化，拒绝覆盖".to_string());
   }
-  mark_client_state_progress(journal, "同步客户端资源状态");
+  mark_client_state_progress(journal, &format!("同步{}", state.label));
   set_client_state_phase(journal, ConfigCommitPhase::ReplacePending);
   persist_and_emit(task_root, journal, emit)?;
   ensure_game_stopped()?;
@@ -2369,7 +2427,7 @@ where
     return Err("客户端资源状态提交后完整性校验失败".to_string());
   }
   set_client_state_phase(journal, ConfigCommitPhase::Replaced);
-  mark_client_state_progress(journal, "客户端资源状态已同步");
+  mark_client_state_progress(journal, &format!("{}已同步", state.label));
   persist_and_emit(task_root, journal, emit)
 }
 
@@ -3540,10 +3598,11 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 mod tests {
   use super::*;
   use crate::game::model::SchemeId;
-  use crate::game::planner::PlanFile;
+  use crate::game::planner::{PlanAudioSelection, PlanFile};
 
   const VALUE_PATH: &str = "YuanShen_Data/StreamingAssets/res_versions_streaming";
   const MARKER_PATH: &str = "YuanShen_Data/Persistent/base_res_version_hash";
+  const AUDIO_LIST_PATH: &str = "YuanShen_Data/Persistent/audio_lang_14";
   const VALUE_MD5: &str = "201b945f3e9dd1cfcb3d9b7a3a1dac5e";
 
   fn plan_with(target: PackagePlanTarget, inventory: Vec<PlanFile>) -> PersistedPlan {
@@ -3576,15 +3635,30 @@ mod tests {
   fn client_state_target_uses_sibling_persistent_marker() {
     let plan = plan_with(PackagePlanTarget::Main, vec![value_file()]);
     let target = client_state_target(&plan).expect("derivation failed").expect("no target");
-    assert_eq!(target.0, MARKER_PATH);
-    assert_eq!(target.1, VALUE_PATH);
-    assert_eq!(target.2, VALUE_MD5);
+    assert_eq!(target.marker_path, MARKER_PATH);
+    assert_eq!(target.value_path.as_deref(), Some(VALUE_PATH));
+    assert_eq!(target.target, VALUE_MD5.as_bytes());
+    assert_eq!(target.label, "客户端资源状态");
   }
 
   #[test]
-  fn client_state_target_skips_audio_plans() {
+  fn client_state_target_syncs_audio_language_list_for_audio_plans() {
+    let mut plan = plan_with(PackagePlanTarget::Audio, vec![value_file()]);
+    plan.audio_selection = Some(PlanAudioSelection {
+      source_audio_languages: vec!["ja-jp".to_string()],
+      target_audio_languages: vec!["ja-jp".to_string(), "zh-cn".to_string()],
+    });
+    let target = client_state_target(&plan).expect("derivation failed").expect("no target");
+    assert_eq!(target.marker_path, AUDIO_LIST_PATH);
+    assert_eq!(target.value_path, None);
+    assert_eq!(target.target, b"Japanese\nChinese".to_vec());
+    assert_eq!(target.label, "配音语言清单");
+  }
+
+  #[test]
+  fn client_state_target_rejects_audio_plan_without_selection() {
     let plan = plan_with(PackagePlanTarget::Audio, vec![value_file()]);
-    assert!(client_state_target(&plan).expect("derivation failed").is_none());
+    assert!(client_state_target(&plan).is_err());
   }
 
   #[test]

@@ -110,10 +110,13 @@ pub(crate) struct ActiveCommitStep {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ClientStateJournal {
+  /// 进度展示用的简短名称，例如「客户端资源状态」。
+  pub(crate) label: String,
   /// 客户端状态标记文件，例如 `YuanShen_Data/Persistent/base_res_version_hash`。
   pub(crate) marker_path: String,
-  /// 计算标记值时依据的基础包文件，例如 `YuanShen_Data/StreamingAssets/res_versions_streaming`。
-  pub(crate) value_path: String,
+  /// 标记值需要与部署后的文件内容核对时给出依据文件路径，例如
+  /// `YuanShen_Data/StreamingAssets/res_versions_streaming`；标记值由计划声明直接给出时为 `None`。
+  pub(crate) value_path: Option<String>,
   /// 提交前标记文件的 SHA-256；提交前不存在时为 `None`。
   pub(crate) original_sha256: Option<String>,
   /// 提交后应写入的标记文件 SHA-256。
@@ -1672,10 +1675,16 @@ fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
     return Err("游戏资源任务日志包含无效提交状态".to_string());
   }
   if let Some(state) = &apply.client_state {
-    let paths_valid = [&state.marker_path, &state.value_path]
-      .into_iter()
-      .all(|value| normalize_manifest_path(value).is_ok_and(|normalized| normalized == *value));
-    if !paths_valid
+    let marker_valid =
+      normalize_manifest_path(&state.marker_path).is_ok_and(|value| value == state.marker_path);
+    let value_valid = state.value_path.as_ref().is_none_or(|value| {
+      normalize_manifest_path(value).is_ok_and(|normalized| normalized == *value)
+    });
+    if !marker_valid
+      || !value_valid
+      || state.label.is_empty()
+      || state.label.len() > 32
+      || state.label.chars().any(char::is_control)
       || !is_sha256(&state.target_sha256)
       || state.original_sha256.as_deref().is_some_and(|value| !is_sha256(value))
     {
