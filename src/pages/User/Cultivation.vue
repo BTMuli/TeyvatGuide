@@ -1844,7 +1844,7 @@ function collectPlanSaveInputs(
       const syncedSelf = createPairedEntrySyncInput(editing);
       if (syncedSelf) inputs.push(syncedSelf);
     }
-    if (weaponInput && findExistingWeaponEntry(weaponInput)) {
+    if (weaponInput) {
       inputs.push(weaponInput);
       return inputs;
     }
@@ -1858,7 +1858,7 @@ function collectPlanSaveInputs(
     const syncedSelf = createPairedEntrySyncInput(editing);
     if (syncedSelf) inputs.push(syncedSelf);
   }
-  if (avatarInput && findExistingAvatarEntry(avatarInput.itemId)) {
+  if (avatarInput) {
     inputs.push(avatarInput);
     return inputs;
   }
@@ -1866,18 +1866,6 @@ function collectPlanSaveInputs(
   const synced = createPairedEntrySyncInput(paired);
   if (synced) inputs.push(synced);
   return inputs;
-}
-
-function findExistingAvatarEntry(
-  itemId: number,
-): TGApp.Sqlite.Cultivation.EntryWithItems | undefined {
-  return planEntries.value.find((item) => item.type === "avatar" && item.itemId === itemId);
-}
-
-function findExistingWeaponEntry(
-  input: TGApp.Sqlite.Cultivation.SaveEntryInput,
-): TGApp.Sqlite.Cultivation.EntryWithItems | undefined {
-  return planEntries.value.find((item) => isSameWeaponEntry(input, item));
 }
 
 function inputMatchesEntry(
