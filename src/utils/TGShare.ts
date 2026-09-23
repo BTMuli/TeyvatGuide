@@ -1,6 +1,6 @@
 /**
  * 生成分享截图并保存到本地
- * @since Beta v0.12.0
+ * @since Beta v0.12.4
  */
 
 import showSnackbar from "@comp/func/snackbar.js";
@@ -34,21 +34,24 @@ import fontGenshinUrl from "@/assets/fonts/zh-cn.ttf?url";
 
 /**
  * 保存图片-canvas
- * @since Beta v0.10.0
+ * @since Beta v0.12.4
  * @param buffer - 图片数据
  * @param filename - 文件名
  * @param format - 文件格式
+ * @param filterName - 保存对话框的筛选器名称
  * @returns 无返回值
  */
 export async function saveBufferFile(
   buffer: ArrayBuffer,
   filename: string,
   format?: string,
+  filterName?: string,
 ): Promise<void> {
   if (format === undefined) format = "png";
+  const name = filterName ?? "图片";
   const res = await save({
-    title: "保存图片",
-    filters: [{ name: "图片", extensions: [format] }],
+    title: `保存${name}`,
+    filters: [{ name, extensions: [format] }],
     defaultPath: `${await path.downloadDir()}${path.sep()}${filename}.${format}`,
   });
   if (res === null) {

@@ -1,9 +1,9 @@
 <template>
   <v-app-bar
-    :class="{ 'game-app-bar-frost': pageCoverUrl !== null }"
-    :color="pageCoverUrl !== null ? 'transparent' : undefined"
-    :elevation="pageCoverUrl !== null ? 0 : undefined"
-    :flat="pageCoverUrl !== null"
+    :class="{ 'game-app-bar-frost': pageCoverCurrent !== null }"
+    :color="pageCoverCurrent !== null ? 'transparent' : undefined"
+    :elevation="pageCoverCurrent !== null ? 0 : undefined"
+    :flat="pageCoverCurrent !== null"
   >
     <template #prepend>
       <div class="game-title">
@@ -49,7 +49,30 @@
     </template>
   </v-app-bar>
 
-  <div :class="{ 'game-page-cover': pageCoverUrl !== null }" class="game-page">
+  <div v-if="pageCoverCurrent !== null" aria-hidden="true" class="game-page-backdrop-layer">
+    <Transition name="game-page-backdrop">
+      <div :key="pageCoverCurrent.id" :style="pageCoverStyle" class="game-page-backdrop">
+        <video
+          v-if="pageCoverVideo !== null"
+          :poster="pageCoverCurrent.imageUrl"
+          :src="pageCoverVideo"
+          autoplay
+          class="game-page-backdrop-video"
+          loop
+          muted
+          playsinline
+          @playing="pageCoverVideoPlaying = true"
+        />
+        <div
+          v-if="pageCoverCurrent.themeUrl !== null && pageCoverVideoPlaying"
+          :style="pageCoverThemeStyle"
+          class="game-page-backdrop-theme"
+        />
+      </div>
+    </Transition>
+  </div>
+
+  <div :class="{ 'game-page-cover': pageCoverCurrent !== null }" class="game-page">
     <div v-if="installationsLoading && installations.length === 0" class="game-empty" role="status">
       <v-progress-circular indeterminate />
       <span class="game-empty-title">正在读取本地安装…</span>
@@ -144,7 +167,7 @@ import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import PgCoverSwitcher from "@comp/pageGame/pg-cover-switcher.vue";
 import gameEnum from "@enum/game.js";
-import { useHoYoPlayPageCover, usePageCover } from "@hooks/usePageCover.js";
+import { usePageCover } from "@hooks/usePageCover.js";
 import useAppStore from "@store/app.js";
 import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
@@ -210,8 +233,29 @@ let pageDataRefreshRequested = false;
 const chosen = computed<TGApp.Game.Installation.Item | null>(() => {
   return installations.value.find((installation) => installation.isChosen) ?? null;
 });
-useHoYoPlayPageCover();
-const { pageCoverUrl } = usePageCover();
+const { pageCoverCurrent } = usePageCover();
+const pageCoverStyle = computed<{ backgroundImage: string } | undefined>(() => {
+  const imageUrl = pageCoverCurrent.value?.imageUrl;
+  if (imageUrl === undefined) return undefined;
+  return { backgroundImage: `url("${imageUrl}")` };
+});
+const pageCoverThemeStyle = computed<{ backgroundImage: string } | undefined>(() => {
+  const themeUrl = pageCoverCurrent.value?.themeUrl;
+  if (themeUrl === null || themeUrl === undefined) return undefined;
+  return { backgroundImage: `url("${themeUrl}")` };
+});
+const pageCoverVideo = computed<string | null>(() => {
+  const cover = pageCoverCurrent.value;
+  if (cover === null || cover.videoPaused) return null;
+  return cover.videoUrl;
+});
+// 视频封面已包含版本文案，动态背景播出画面后才叠加主题文案，避免与静态封面重复
+const pageCoverVideoPlaying = ref<boolean>(false);
+
+watch(pageCoverVideo, () => {
+  pageCoverVideoPlaying.value = false;
+});
+
 const installTasks = computed<Array<TGApp.Game.Package.TaskSummary>>(() => {
   return Object.values(taskStore.tasksByInstallation).filter(
     (task) =>
@@ -951,6 +995,55 @@ onUnmounted(() => {
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     background: var(--game-page-cover-subpanel-bg);
+  }
+}
+
+.game-page-backdrop-layer {
+  position: fixed;
+  z-index: -1;
+  overflow: hidden;
+  inset: 0;
+  pointer-events: none;
+}
+
+.game-page-backdrop {
+  position: absolute;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  inset: 0;
+}
+
+.game-page-backdrop-video {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+}
+
+.game-page-backdrop-theme {
+  position: absolute;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  inset: 0;
+}
+
+.game-page-backdrop-enter-active,
+.game-page-backdrop-leave-active {
+  transition: opacity 0.8s ease;
+}
+
+.game-page-backdrop-enter-from,
+.game-page-backdrop-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page-backdrop-enter-active,
+  .game-page-backdrop-leave-active {
+    transition: none;
   }
 }
 </style>

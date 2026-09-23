@@ -3,16 +3,7 @@
   <v-app v-model:theme="vuetifyTheme">
     <TSidebar v-if="isMain" />
     <v-main class="app-main">
-      <div v-if="pageCoverUrl !== null" aria-hidden="true" class="app-page-cover-layer">
-        <Transition name="app-page-cover">
-          <div :key="pageCoverUrl" :style="pageCoverStyle" class="app-page-cover" />
-        </Transition>
-      </div>
-      <v-container
-        :class="{ 'app-container-cover': pageCoverUrl !== null }"
-        :fluid="true"
-        class="app-container"
-      >
+      <v-container :fluid="true" class="app-container">
         <div class="app-page-content">
           <router-view v-slot="{ Component }">
             <component :is="Component" v-if="Component" />
@@ -34,7 +25,6 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
-import { usePageCover } from "@hooks/usePageCover.js";
 import OtherApi from "@req/otherReq.js";
 import type { FeedbackInternalOptions, Integration } from "@sentry/core";
 import * as Sentry from "@sentry/vue";
@@ -81,12 +71,7 @@ const userStore = useUserStore();
 const { uid, briefInfo, account, cookie } = storeToRefs(userStore);
 
 const isMain = ref<boolean>(false);
-const { pageCoverUrl } = usePageCover();
 const vuetifyTheme = computed<string>(() => (theme.value === "dark" ? "dark" : "light"));
-const pageCoverStyle = computed<{ backgroundImage: string } | undefined>(() => {
-  if (pageCoverUrl.value === null) return undefined;
-  return { backgroundImage: `url("${pageCoverUrl.value}")` };
-});
 
 let themeListener: UnlistenFn | null = null;
 let dpListener: UnlistenFn | null = null;
@@ -668,46 +653,9 @@ async function handleCommands(cmds: CliMatches): Promise<void> {
   color: var(--app-page-content);
 }
 
-.app-container-cover {
-  background: transparent;
-}
-
-.app-page-cover-layer {
-  position: absolute;
-  z-index: 0;
-  overflow: hidden;
-  inset: 0;
-  pointer-events: none;
-}
-
-.app-page-cover {
-  position: absolute;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  inset: 0;
-}
-
-.app-page-cover-enter-active,
-.app-page-cover-leave-active {
-  transition: opacity 0.8s ease;
-}
-
-.app-page-cover-enter-from,
-.app-page-cover-leave-to {
-  opacity: 0;
-}
-
 .app-page-content {
   position: relative;
   height: 100%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .app-page-cover-enter-active,
-  .app-page-cover-leave-active {
-    transition: none;
-  }
 }
 
 .app-route-loading {
