@@ -76,6 +76,7 @@
         :key="installation.id"
         :installation="installation"
         :installation-count="installations.length"
+        @launch-requested="handleInstallationLaunch(installation)"
         @pre-download-requested="openPreDownloadOverlay(installation)"
         @update-requested="openUpdateOverlay(installation)"
         @updated="refreshPageData"
@@ -149,7 +150,7 @@ import useGameLauncherStore from "@store/gameLauncher.js";
 import useUserStore from "@store/user.js";
 import { listen } from "@tauri-apps/api/event";
 import type { UnlistenFn } from "@tauri-apps/api/event";
-import { confirmStopRunningGame, tryLaunchGame } from "@utils/TGGame.js";
+import { confirmStopRunningGame, launchInstallation, tryLaunchGame } from "@utils/TGGame.js";
 import {
   createGamePackageSwitchPlan,
   ensureGameInstallDefenderExclusions,
@@ -282,27 +283,47 @@ function taskBlocksLaunch(state: TGApp.Game.Package.TaskStateEnum): boolean {
   );
 }
 
-const launchBlockReason = computed<string | null>(() => {
-  if (installationsLoading.value) return "正在读取本地安装…";
-  if (chosen.value === null) return "请先选择游戏路径";
-  if (chosen.value.status !== gameEnum.installation.status.KNOWN) {
-    return chosen.value.statusMessage;
+/**
+ * 计算指定安装的启动阻断原因；页面级与卡片级启动共用。
+ * @since Beta v0.12.3
+ * @param installation - 游戏安装
+ * @returns 阻断原因，可启动时为 null
+ */
+function installationLaunchBlockReason(installation: TGApp.Game.Installation.Item): string | null {
+  if (installation.status !== gameEnum.installation.status.KNOWN) {
+    return installation.statusMessage;
   }
-  if (chosen.value.schemeId === gameEnum.installation.scheme.CN_OFFICIAL && !isLogin.value) {
+  if (installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL && !isLogin.value) {
     return "启动国服官服前请先登录米游社";
   }
-  const task = taskStore.tasksByInstallation[chosen.value.id];
+  const task = taskStore.tasksByInstallation[installation.id];
   if (task !== undefined && taskBlocksLaunch(task.state)) {
     return "存在进行中或等待恢复的资源提交，暂时不能启动";
   }
   return null;
-});
-const launchNeedsSchemeSwitch = computed<boolean>(() => {
+}
+
+/**
+ * 判断启动指定安装前是否需要先把客户端转为国服 B 服。
+ * @since Beta v0.12.3
+ * @param installation - 游戏安装
+ * @returns 是否需要先换服
+ */
+function installationNeedsSchemeSwitch(installation: TGApp.Game.Installation.Item): boolean {
   return (
-    chosen.value?.schemeId === gameEnum.installation.scheme.CN_OFFICIAL &&
+    installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL &&
     isLogin.value &&
     account.value.isOfficial !== 1
   );
+}
+
+const launchBlockReason = computed<string | null>(() => {
+  if (installationsLoading.value) return "正在读取本地安装…";
+  if (chosen.value === null) return "请先选择游戏路径";
+  return installationLaunchBlockReason(chosen.value);
+});
+const launchNeedsSchemeSwitch = computed<boolean>(() => {
+  return chosen.value !== null && installationNeedsSchemeSwitch(chosen.value);
 });
 const launchTitle = computed<string>(() => {
   if (launchBlockReason.value !== null) return launchBlockReason.value;
@@ -420,6 +441,43 @@ async function handleLaunchGame(): Promise<void> {
   try {
     if (isLogin.value) await tryLaunchGame(account.value, cookie.value);
     else await tryLaunchGame();
+  } finally {
+    launching.value = false;
+  }
+}
+
+/**
+ * 启动指定安装：沿用应用当前选中的米游社游戏账号，不再让用户逐个挑选。
+ *
+ * 账号来自米游社游戏列表保存的当前选择（导航栏可切换）；官服安装遇到 B 服账号时与页面级
+ * 启动一致地先换服。
+ *
+ * @since Beta v0.12.3
+ *
+ * # 参数
+ * - `installation`: 目标游戏安装
+ *
+ * # 返回
+ * 无返回值
+ */
+async function handleInstallationLaunch(installation: TGApp.Game.Installation.Item): Promise<void> {
+  const reason = installationLaunchBlockReason(installation);
+  if (reason !== null) {
+    await showDialog.checkF({
+      title: "暂时无法启动",
+      text: reason,
+      confirmLabel: "知道了",
+    });
+    return;
+  }
+  if (installationNeedsSchemeSwitch(installation)) {
+    await handleLaunchSchemeSwitch(installation);
+    return;
+  }
+  launching.value = true;
+  try {
+    if (isLogin.value) await launchInstallation(installation, account.value, cookie.value);
+    else await launchInstallation(installation);
   } finally {
     launching.value = false;
   }

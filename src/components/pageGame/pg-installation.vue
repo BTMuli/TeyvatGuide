@@ -326,28 +326,6 @@
     :installation="installation"
     @task-started="audioOverlay = false"
   />
-
-  <v-dialog v-model="accountDialog" max-width="420">
-    <v-card>
-      <v-card-title>选择官服启动账号</v-card-title>
-      <v-card-text>
-        <v-list v-if="officialAccounts.length > 0">
-          <v-list-item
-            v-for="entry in officialAccounts"
-            :key="entry.uid"
-            @click="launchWithAccount(entry)"
-          >
-            <v-list-item-title>{{ entry.nickname }}</v-list-item-title>
-            <v-list-item-subtitle>{{ entry.uid }}</v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
-        <p v-else class="game-account-empty">未找到已登录的官服账号，请先在米游社登录</p>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn variant="text" @click="accountDialog = false">取消</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -356,11 +334,9 @@ import showDialog from "@comp/func/dialog.js";
 import showLoading from "@comp/func/loading.js";
 import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
-import TSUserAccount from "@Sqlm/userAccount.js";
 import useBBSStore from "@store/bbs.js";
 import { listen } from "@tauri-apps/api/event";
 import fmtUtil from "@utils/fmtUtil.js";
-import { launchInstallation } from "@utils/TGGame.js";
 import {
   chooseGameInstallation,
   getGameInstallationAudioUsage,
@@ -384,16 +360,10 @@ const props = defineProps<{
 const emit = defineEmits<{
   updated: [];
   "change-path": [installation: TGApp.Game.Installation.Item];
+  "launch-requested": [];
   "pre-download-requested": [];
   "update-requested": [];
 }>();
-
-type AccountChoice = {
-  nickname: string;
-  uid: string;
-  game: TGApp.Sqlite.Account.Game;
-  cookie: TGApp.App.Account.Cookie;
-};
 
 type InstalledAudioItem = {
   language: string;
@@ -401,8 +371,6 @@ type InstalledAudioItem = {
   bytes: number | null;
 };
 
-const accountDialog = ref<boolean>(false);
-const officialAccounts = ref<Array<AccountChoice>>([]);
 const unregistering = ref<boolean>(false);
 const uninstalling = ref<boolean>(false);
 const audioOverlay = ref<boolean>(false);
@@ -640,29 +608,7 @@ async function handleChooseInstallation(): Promise<void> {
 }
 
 function handleLaunch(): void {
-  if (props.installation.schemeId === gameEnum.installation.scheme.CN_OFFICIAL) {
-    accountDialog.value = true;
-    void loadOfficialAccounts();
-    return;
-  }
-  void launchInstallation(props.installation);
-}
-
-async function loadOfficialAccounts(): Promise<void> {
-  const users = await TSUserAccount.account.getAllAccount();
-  const entries: Array<AccountChoice> = [];
-  for (const user of users) {
-    const game = await TSUserAccount.game.getCurAccount(user.uid);
-    if (game !== false && game.isOfficial === 1 && game.gameBiz === "hk4e_cn") {
-      entries.push({ nickname: user.brief.nickname, uid: user.uid, game, cookie: user.cookie });
-    }
-  }
-  officialAccounts.value = entries;
-}
-
-function launchWithAccount(entry: AccountChoice): void {
-  accountDialog.value = false;
-  void launchInstallation(props.installation, entry.game, entry.cookie);
+  emit("launch-requested");
 }
 
 async function handleUnregister(): Promise<void> {
@@ -800,13 +746,6 @@ async function handleUninstall(): Promise<void> {
 
 .game-uninstall-btn {
   color: var(--tgc-od-red);
-}
-
-.game-account-empty {
-  margin: 0;
-  color: var(--box-text-2);
-  font-size: 13px;
-  line-height: 20px;
 }
 
 .game-path-copy {
