@@ -3,7 +3,7 @@
 //! 评估阶段只写 `switch/<installation-id>/plan.json`。目标渠道存在 SDK 时，执行阶段先把
 //! SDK zip 写入 `cache/sdks/<md5>`，安全解压到任务 staging 并按 `sdk_pkg_version` 校验，
 //! 再复用写前 journal 提交文件，最后才改 `channel/sub_channel`。
-//! @since Beta v0.12.1
+//! @since Beta v0.12.4
 
 use super::{
   committer::{SwitchApplyRequest, SwitchFileStep},
@@ -140,6 +140,7 @@ struct PersistedSdk {
 }
 
 /// 生成并持久化渠道转换计划；评估不会修改游戏目录。
+/// @since 0.12.4
 pub(crate) async fn create_and_persist_switch_plan(
   installation: &GameInstallation,
   branches: &GameBranches,
@@ -147,6 +148,14 @@ pub(crate) async fn create_and_persist_switch_plan(
 ) -> Result<PackageSwitchSummary, String> {
   if installation.status != InstallationStatus::Known {
     return Err("只有渠道状态一致的安装才能评估换服".to_string());
+  }
+  let version = installation
+    .version
+    .as_deref()
+    .filter(|value| !value.trim().is_empty())
+    .ok_or_else(|| "本地游戏版本未知，无法评估换服".to_string())?;
+  if version != branches.main.tag {
+    return Err("请先将游戏更新到当前正式版本，再进行换服".to_string());
   }
   let source_scheme = installation.scheme_id.ok_or_else(|| "无法识别当前游戏渠道".to_string())?;
   let source_channel = installation.channel.ok_or_else(|| "config.ini 缺少 channel".to_string())?;

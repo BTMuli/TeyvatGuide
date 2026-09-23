@@ -1,5 +1,5 @@
 //! 游戏安装检测、列表读取与可信启动命令。
-//! @since Beta v0.12.3
+//! @since Beta v0.12.4
 
 use super::{
   cache, defender,
@@ -1349,6 +1349,7 @@ pub async fn game_package_switch(
   let plan = switch::load_persisted_switch_plan(&task_root, &plan_id)?;
   let pool = sqlite_pool(&db_instances).await?;
   let installation = load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
+  require_latest_official_version(&installation, "进行换服").await?;
   manager.start_switch(app_handle, task_root, installation, plan, false)
 }
 
@@ -1925,6 +1926,25 @@ async fn load_trusted_installation(
   Ok(installation)
 }
 
+/// 确保安装版本仍是远端当前正式版本。
+async fn require_latest_official_version(
+  installation: &GameInstallation,
+  operation: &str,
+) -> Result<(), String> {
+  let version = installation
+    .version
+    .as_deref()
+    .filter(|value| !value.trim().is_empty())
+    .ok_or_else(|| format!("本地游戏版本未知，无法{operation}"))?;
+  let scheme = installation.scheme_id.ok_or_else(|| "无法识别游戏渠道".to_string())?;
+  let client = create_http_client()?;
+  let branches = get_game_branches(&client, scheme).await?;
+  if version != branches.main.tag {
+    return Err(format!("请先将游戏更新到当前正式版本，再{operation}"));
+  }
+  Ok(())
+}
+
 /// 根据恢复动作恢复换服任务，支持回滚或续跑。
 ///
 /// @since Beta v0.12.2
@@ -1967,6 +1987,7 @@ async fn recover_switch_task(
     let plan = switch::load_persisted_switch_plan(&task_root, &journal_value.plan_id)?;
     let installation =
       load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
+    require_latest_official_version(&installation, "进行换服").await?;
     return manager.start_switch(app_handle, task_root, installation, plan, true);
   }
   match action {
@@ -1975,6 +1996,7 @@ async fn recover_switch_task(
       let pool = sqlite_pool(&db_instances).await?;
       let installation =
         load_trusted_installation(&app_handle, &pool, plan.installation_id()).await?;
+      require_latest_official_version(&installation, "进行换服").await?;
       manager.start_switch(app_handle, task_root, installation, plan, true)
     }
     PackageRecoveryAction::Rollback => {

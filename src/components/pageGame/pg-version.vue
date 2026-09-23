@@ -18,6 +18,7 @@
       :updateStatusLabel
       :startVerify="verifyInstallation"
       :verifyActive
+      :verifyActionDisabled
       :verifyBusy
       :verifyPending
       :verifyResumeLabel
@@ -215,6 +216,7 @@ type VersionFactsSlot = {
   updateActionDisabled: boolean;
   updateStatusLabel: string;
   verifyActive: boolean;
+  verifyActionDisabled: boolean;
   verifyBusy: boolean;
   verifyPending: boolean;
   verifyResumeLabel: string;
@@ -289,6 +291,10 @@ const currentRecoveryProgress = computed<TGApp.Game.Package.RecoveryProgress | n
 const currentVerify = computed<TGApp.Game.Package.VerifySummary | null>(() => {
   return verifyByInstallation.value[installation.id] ?? null;
 });
+const latestOfficial = computed<boolean>(() => {
+  if (snapshot.value === null) return false;
+  return (snapshot.value.localVersion ?? installation.version) === snapshot.value.main.tag;
+});
 const verifyActive = computed<boolean>(() => {
   return (
     !verifyStopping.value &&
@@ -305,8 +311,11 @@ const verifyClearing = computed<boolean>(() => {
 const verifyBusy = computed<boolean>(() => {
   return verifyStopping.value || verifyActive.value || verifyPending.value || verifyClearing.value;
 });
+const verifyActionDisabled = computed<boolean>(() => {
+  return verifyBusy.value || !latestOfficial.value;
+});
 const verifyCanResume = computed<boolean>(() => {
-  if (verifyBusy.value) return false;
+  if (verifyActionDisabled.value) return false;
   const state = currentVerify.value?.state;
   return (
     state === gameEnum.package.verifyState.CANCELED || state === gameEnum.package.verifyState.FAILED
@@ -324,6 +333,8 @@ const verifyPanelVisible = computed<boolean>(() => {
   );
 });
 const verifyResumeLabel = computed<string>(() => {
+  if (snapshot.value === null) return "正在读取正式版本";
+  if (!latestOfficial.value) return "请先更新到当前正式版本";
   const state = currentVerify.value?.state;
   if (
     state === gameEnum.package.verifyState.CANCELED ||
@@ -822,6 +833,10 @@ function handleUpdateAction(): void {
 
 async function verifyInstallation(): Promise<void> {
   if (verifyBusy.value || taskActive.value) return;
+  if (!latestOfficial.value) {
+    verifyStartError.value = "请先将游戏更新到当前正式版本，再校验资源完整性";
+    return;
+  }
   const paused = currentVerify.value?.state === gameEnum.package.verifyState.CANCELED;
   if (!paused) {
     const failed = currentVerify.value?.state === gameEnum.package.verifyState.FAILED;

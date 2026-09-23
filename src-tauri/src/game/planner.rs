@@ -1,5 +1,5 @@
 //! 游戏资源差异、空间估算与不可变计划持久化。
-//! @since Beta v0.12.3
+//! @since Beta v0.12.4
 
 use super::hoyoplay::get_channel_sdk;
 use super::{
@@ -440,6 +440,9 @@ pub(crate) async fn load_verify_target(
     .as_deref()
     .filter(|value| !value.trim().is_empty())
     .ok_or_else(|| "本地游戏版本未知，无法校验资源完整性".to_string())?;
+  if version != branches.main.tag {
+    return Err("请先将游戏更新到当前正式版本，再校验资源完整性".to_string());
+  }
   let client = create_http_client()?;
   let target =
     get_decoded_build(&client, &branches.main.with_tag(version), &installation.audio_languages)
@@ -1369,7 +1372,7 @@ fn overlay_repair_parts(
 
 /// 重新请求清单生成完整性修复计划。
 ///
-/// @since Beta v0.12.1
+/// @since Beta v0.12.4
 ///
 /// # 参数
 /// - `installation`: 安装信息。
@@ -1384,6 +1387,11 @@ async fn hydrate_integrity_repair_plan(
   branches: &GameBranches,
   plan: PersistedPlan,
 ) -> Result<PersistedPlan, String> {
+  if installation.version.as_deref() != Some(branches.main.tag.as_str())
+    || plan.target_tag != branches.main.tag
+  {
+    return Err("请先将游戏更新到当前正式版本，再修复资源完整性".to_string());
+  }
   let client = create_http_client()?;
   let target = get_decoded_build(
     &client,

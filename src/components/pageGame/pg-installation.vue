@@ -138,7 +138,11 @@
       @update-requested="emit('update-requested')"
     >
       <template #facts="version">
-        <PgScheme :installation="installation" @switched="refreshRegistered">
+        <PgScheme
+          :installation="installation"
+          :latestOfficial="isLatestOfficial(version.snapshot)"
+          @switched="refreshRegistered"
+        >
           <template #channel="scheme">
             <div class="game-facts">
               <div class="game-fact">
@@ -199,7 +203,7 @@
                     <v-btn
                       v-else
                       :aria-label="version.verifyResumeLabel"
-                      :disabled="version.verifyBusy"
+                      :disabled="version.verifyActionDisabled"
                       :title="version.verifyResumeLabel"
                       density="compact"
                       icon="mdi-shield-check-outline"
@@ -219,9 +223,16 @@
                   </v-chip>
                   <div class="game-fact-acts">
                     <v-btn
-                      :aria-label="schemeActionLabel(scheme, version.verifyBusy)"
+                      :aria-label="
+                        schemeActionLabel(
+                          scheme,
+                          version.verifyBusy,
+                          isLatestOfficial(version.snapshot),
+                        )
+                      "
                       :disabled="
                         version.verifyBusy ||
+                        (!isLatestOfficial(version.snapshot) && !scheme.taskActive) ||
                         (scheme.converting && !scheme.taskActive) ||
                         (!scheme.canConvert && !scheme.taskActive)
                       "
@@ -229,7 +240,13 @@
                         scheme.taskActive ? 'mdi-stop-circle-outline' : 'mdi-swap-horizontal-bold'
                       "
                       :loading="scheme.converting && !scheme.taskActive"
-                      :title="schemeActionTitle(scheme, version.verifyBusy)"
+                      :title="
+                        schemeActionTitle(
+                          scheme,
+                          version.verifyBusy,
+                          isLatestOfficial(version.snapshot),
+                        )
+                      "
                       density="compact"
                       size="small"
                       variant="text"
@@ -600,18 +617,27 @@ type SchemeAction = {
   taskActive: boolean;
 };
 
-function schemeActionLabel(scheme: SchemeAction, verifyBusy: boolean): string {
+function schemeActionLabel(
+  scheme: SchemeAction,
+  verifyBusy: boolean,
+  latestOfficial: boolean,
+): string {
   if (verifyBusy) return "校验进行中，暂时不能换服";
   if (scheme.taskActive) return "取消换服";
+  if (!latestOfficial) return "请先更新到当前正式版本";
   if (!scheme.canConvert) {
     return scheme.blockingTask ? "安装任务进行中，暂时不能换服" : "换服任务未完成，暂时不能换服";
   }
   return scheme.convertLabel;
 }
 
-function schemeActionTitle(scheme: SchemeAction, verifyBusy: boolean): string {
+function schemeActionTitle(
+  scheme: SchemeAction,
+  verifyBusy: boolean,
+  latestOfficial: boolean,
+): string {
   if (verifyBusy || scheme.taskActive || !scheme.canConvert) {
-    return schemeActionLabel(scheme, verifyBusy);
+    return schemeActionLabel(scheme, verifyBusy, latestOfficial);
   }
   return `可转为${gameEnum.installation.schemeDesc(scheme.targetScheme)}`;
 }

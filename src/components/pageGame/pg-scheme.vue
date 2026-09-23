@@ -68,9 +68,10 @@ import PgProgress from "./pg-progress.vue";
 
 type Props = {
   installation: TGApp.Game.Installation.Item;
+  latestOfficial: boolean;
 };
 
-const { installation } = defineProps<Props>();
+const { installation, latestOfficial } = defineProps<Props>();
 const emit = defineEmits<{ switched: [] }>();
 defineSlots<{
   channel(props: {
@@ -149,7 +150,7 @@ const blockingTask = computed<boolean>(() => {
   );
 });
 const canConvert = computed<boolean>(() => {
-  if (blockingTask.value || taskActive.value) return false;
+  if (!latestOfficial || blockingTask.value || taskActive.value) return false;
   const task = switchTask.value;
   if (task === null) return true;
   return (
@@ -301,7 +302,7 @@ function formatDuration(seconds: number): string {
 }
 
 async function convertScheme(): Promise<void> {
-  if (converting.value || !canConvert.value || verifyBusy.value) return;
+  if (!latestOfficial || converting.value || !canConvert.value || verifyBusy.value) return;
   const confirmed = await showDialog.checkF({
     title: "确认转换服务器?",
     text: switchConfirmText.value,
