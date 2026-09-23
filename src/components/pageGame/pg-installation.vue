@@ -47,9 +47,9 @@
           @click="openPathOverlay"
         />
         <v-btn
+          v-if="!installationSizeVisible"
           :aria-label="installationSizeButtonLabel"
           :disabled="installationSizeLoading"
-          :loading="installationSizeLoading"
           :title="installationSizeButtonLabel"
           class="game-action-btn game-icon-action-btn"
           icon="mdi-harddisk"
@@ -57,6 +57,20 @@
           variant="tonal"
           @click="handleInstallationSizeClick"
         />
+        <v-btn
+          v-else
+          :aria-label="installationSizeButtonLabel"
+          :color="installationSizeError ? 'var(--tgc-od-red)' : undefined"
+          :disabled="installationSizeLoading"
+          :title="installationSizeButtonLabel"
+          class="game-action-btn"
+          prepend-icon="mdi-harddisk"
+          size="small"
+          variant="tonal"
+          @click="handleInstallationSizeClick"
+        >
+          {{ installationSizeLabel }}
+        </v-btn>
         <v-btn
           v-if="installationCount > 1"
           class="game-action-btn game-launch-card-btn"
@@ -98,7 +112,21 @@
         <TMiImg :ori="true" :size="40" :src="genshinIcon" alt="原神" />
       </div>
       <div class="game-path-copy">
-        <span>安装路径</span>
+        <div class="game-path-label">
+          <span>安装路径</span>
+          <v-icon
+            aria-label="打开安装目录"
+            class="game-path-open"
+            icon="mdi-folder-open-outline"
+            role="button"
+            size="16"
+            tabindex="0"
+            title="打开安装目录"
+            @click="handleOpenPath"
+            @keydown.enter="handleOpenPath"
+            @keydown.space.prevent="handleOpenPath"
+          />
+        </div>
         <strong>{{ installation.executablePath }}</strong>
       </div>
     </div>
@@ -336,6 +364,7 @@ import showSnackbar from "@comp/func/snackbar.js";
 import gameEnum from "@enum/game.js";
 import useBBSStore from "@store/bbs.js";
 import { listen } from "@tauri-apps/api/event";
+import { openPath } from "@tauri-apps/plugin-opener";
 import fmtUtil from "@utils/fmtUtil.js";
 import {
   chooseGameInstallation,
@@ -413,6 +442,13 @@ const installationSizeButtonLabel = computed<string>(() => {
   if (installationSizeError.value) return "重试占用空间";
   if (installationSize.value === null) return "读取占用空间";
   return `占用空间 ${installationSizeLabel.value}`;
+});
+// 点击读取后把占用空间文案并入按钮（读取中显示"读取中…"，避免依赖会被隐藏的 loading 覆盖层），
+// 未读取时保持图标按钮。
+const installationSizeVisible = computed<boolean>(() => {
+  return (
+    installationSizeLoading.value || installationSizeError.value || installationSize.value !== null
+  );
 });
 
 function handleInstallationSizeClick(): void {
@@ -596,6 +632,14 @@ function openPathOverlay(): void {
   emit("change-path", props.installation);
 }
 
+async function handleOpenPath(): Promise<void> {
+  try {
+    await openPath(props.installation.rootPath);
+  } catch (error) {
+    showSnackbar.error(`打开安装目录失败：${error}`);
+  }
+}
+
 async function handleChooseInstallation(): Promise<void> {
   if (props.installation.isChosen) return;
   try {
@@ -760,6 +804,12 @@ async function handleUninstall(): Promise<void> {
     line-height: 16px;
   }
 
+  .game-path-label {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
   strong {
     color: var(--common-text-title);
     font-family: var(--font-title);
@@ -767,6 +817,17 @@ async function handleUninstall(): Promise<void> {
     font-weight: normal;
     line-height: 20px;
     overflow-wrap: anywhere;
+  }
+}
+
+.game-path-open {
+  flex-shrink: 0;
+  color: var(--box-text-2);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--tgc-od-orange);
   }
 }
 
