@@ -8,12 +8,12 @@ use super::{
   },
   evidence,
   journal::{
-    self, ActiveCommitStep, ApplyJournal, CommitStepKind, CommitStepPhase, ConfigCommitPhase,
-    TaskJournal,
+    self, ActiveCommitStep, ApplyJournal, ClientStateJournal, CommitStepKind, CommitStepPhase,
+    ConfigCommitPhase, TaskJournal,
   },
   model::{PackageApplySpaceSummary, PackagePlanStrategy, PackagePlanTarget, PackageTaskState},
   path_guard::{
-    prepare_guarded_manifest_directory, prepare_manifest_output_file,
+    normalize_manifest_path, prepare_guarded_manifest_directory, prepare_manifest_output_file,
     resolve_existing_manifest_file, resolve_optional_manifest_file,
   },
   planner::{PersistedPlan, PlanAsset, PlanAssetAction},
@@ -31,6 +31,12 @@ use std::{
 const COPY_BUFFER_SIZE: usize = 128 * 1024;
 const ASSEMBLY_PROGRESS_EMIT_INTERVAL: Duration = Duration::from_millis(250);
 const TRANSACTION_DIRECTORY: &str = ".teyvatguide-update";
+/// 客户端资源状态标记的暂存子目录。
+const CLIENT_STATE_DIRECTORY: &str = "client-state";
+/// 游戏本体用于比对基础包是否变化的标记文件名。
+const CLIENT_STATE_MARKER_FILE: &str = "base_res_version_hash";
+/// 标记值取自基础包内的客户端资源版本列表。
+const CLIENT_STATE_VALUE_SUFFIX: &str = "StreamingAssets/res_versions_streaming";
 const SAFETY_MARGIN_BYTES: u64 = 1024 * 1024 * 1024;
 
 /// 提交结果：正常完成，或兼容旧路径返回的「仍需修复未变化文件」。
@@ -202,6 +208,7 @@ where
         plan, game_root, journal, task_root, canceled, &emit,
       )?;
     }
+    commit_client_state(&plan.plan_id, game_root, task_root, journal, &emit)?;
     commit_version(plan, game_root, task_root, journal, &emit)?;
     journal.state = if plan.target == super::model::PackagePlanTarget::Audio {
       PackageTaskState::RegistrationPending
@@ -574,6 +581,7 @@ fn prepare_repair_transaction(
     config_original_sha256: original_apply.config_original_sha256,
     config_target_sha256: original_apply.config_target_sha256,
     config_phase: ConfigCommitPhase::Prepared,
+    client_state: None,
   });
   Ok(())
 }
@@ -867,7 +875,10 @@ fn prepare_transaction(
   } else {
     patch_game_version(&original, &plan.target_tag)?
   };
-  prepare_file_transaction(&commit, &original, &target, game_root, task_root, journal, true, false)
+  prepare_file_transaction(
+    &commit, &original, &target, game_root, task_root, journal, true, false,
+  )?;
+  prepare_client_state(plan, game_root, journal)
 }
 
 /// 返回应用的 incoming 暂存目录。
@@ -1055,6 +1066,7 @@ fn prepare_file_transaction(
     config_original_sha256: sha256_bytes(original),
     config_target_sha256: sha256_bytes(target),
     config_phase: ConfigCommitPhase::Prepared,
+    client_state: None,
   });
   Ok(())
 }
@@ -1970,10 +1982,12 @@ fn rollback_file_transaction_with_progress(
   validate_plan_digest(journal, &commit.digest)?;
   validate_apply_identity(journal, &commit.steps)?;
   let touched_steps = rollback_touched_steps(&commit.steps, apply(journal)?)?;
-  let total = touched_steps.len().saturating_add(1);
+  let total = touched_steps.len().saturating_add(2);
   report_progress(0, total, "config.ini");
   rollback_config(&commit.plan_id, game_root, journal)?;
   report_progress(1, total, "config.ini");
+  rollback_client_state(&commit.plan_id, game_root, journal)?;
+  report_progress(2, total, "客户端资源状态");
   let incoming_root = transaction_subdirectory(game_root, &commit.plan_id, "incoming")?;
   let backup_root = transaction_subdirectory(game_root, &commit.plan_id, "backup")?;
   for (index, step) in touched_steps.iter().rev().enumerate() {
@@ -2098,7 +2112,7 @@ fn rollback_file_transaction_with_progress(
         },
       },
     }
-    report_progress(index.saturating_add(2), total, &step.name);
+    report_progress(index.saturating_add(3), total, &step.name);
   }
   restore_prep_staged_deletions(commit, game_root, &backup_root, journal)?;
   Ok(())
@@ -2198,6 +2212,315 @@ fn rollback_config(plan_id: &str, game_root: &Path, journal: &TaskJournal) -> Re
     return Err("恢复后的 config.ini 完整性校验失败".to_string());
   }
   Ok(())
+}
+
+/// 计算基础包替换后需要同步的客户端资源状态标记。
+///
+/// 游戏本体启动时把 `Persistent/base_res_version_hash` 与基础包内
+/// `StreamingAssets/res_versions_streaming` 的实际 MD5 比较，不一致时会清空
+/// 自己的资源状态并强制重新下载。这里依据计划的目标清单推导出标记路径与目标值：
+/// 标记路径始终与基础包内的版本列表文件同级推导，目标值取该文件的目标 MD5。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+///
+/// # 返回
+/// - `Ok(Some((marker_path, value_path, md5)))`: 需要同步的标记、依据文件与目标值。
+/// - `Ok(None)`: 计划不需要同步客户端状态。
+/// - `Err(String)`: 计划元数据无效的错误描述。
+fn client_state_target(plan: &PersistedPlan) -> Result<Option<(String, String, String)>, String> {
+  if !matches!(plan.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+    return Ok(None);
+  }
+  let Some(asset) = plan.inventory.iter().find(|file| {
+    file.name.ends_with(CLIENT_STATE_VALUE_SUFFIX)
+      && file.name.len() > CLIENT_STATE_VALUE_SUFFIX.len()
+  }) else {
+    return Ok(None);
+  };
+  let prefix = asset
+    .name
+    .strip_suffix(CLIENT_STATE_VALUE_SUFFIX)
+    .ok_or_else(|| "客户端资源版本文件路径无效".to_string())?;
+  // 标记文件位于同一个 `*_Data/Persistent` 目录下；路径形状不符合预期时不同步，
+  // 避免在未知客户端目录布局上写入错误的标记。
+  if !prefix.ends_with("_Data/") {
+    return Ok(None);
+  }
+  let value_path = normalize_manifest_path(&asset.name)?;
+  let marker_path =
+    normalize_manifest_path(&format!("{prefix}Persistent/{CLIENT_STATE_MARKER_FILE}"))?;
+  if !is_hex_md5(&asset.md5) {
+    return Err("客户端资源版本文件缺少有效校验值".to_string());
+  }
+  Ok(Some((marker_path, value_path, asset.md5.to_ascii_lowercase())))
+}
+
+/// 准备客户端资源状态同步事务。
+///
+/// 暂存提交前后的标记内容，供提交与回滚复用；标记目标值由基础包内版本列表文件的
+/// 目标 MD5 直接推导，不依赖任何远端请求。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan`: 资源计划。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 准备完成或无需同步。
+/// - `Err(String)`: 读取或暂存失败的错误描述。
+fn prepare_client_state(
+  plan: &PersistedPlan,
+  game_root: &Path,
+  journal: &mut TaskJournal,
+) -> Result<(), String> {
+  let Some((marker_path, value_path, md5)) = client_state_target(plan)? else {
+    return Ok(());
+  };
+  let original = match resolve_optional_manifest_file(game_root, &marker_path)? {
+    Some(path) => {
+      Some(fs::read(&path).map_err(|error| format!("读取客户端资源状态失败：{error}"))?)
+    }
+    None => None,
+  };
+  let target = md5.into_bytes();
+  let state_root = transaction_subdirectory(game_root, &plan.plan_id, CLIENT_STATE_DIRECTORY)?;
+  write_verified_bytes(&state_root.join("target"), &target)?;
+  match original.as_deref() {
+    Some(bytes) => write_verified_bytes(&state_root.join("original"), bytes)?,
+    None => remove_optional_file(&state_root.join("original"))?,
+  }
+  apply_mut(journal)?.client_state = Some(ClientStateJournal {
+    marker_path,
+    value_path,
+    original_sha256: original.as_deref().map(sha256_bytes),
+    target_sha256: sha256_bytes(&target),
+    phase: ConfigCommitPhase::Prepared,
+  });
+  Ok(())
+}
+
+/// 提交客户端资源状态标记。
+///
+/// 写入前复验基础包内版本列表文件的实际 MD5 与计划一致，保证标记不会与磁盘内容脱节；
+/// 标记与目标一致时直接记为已完成，标记与提交前状态不一致时拒绝覆盖。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+/// - `game_root`: 游戏根目录。
+/// - `task_root`: 任务根目录。
+/// - `journal`: 任务日志。
+/// - `emit`: 进度回调。
+///
+/// # 返回
+/// - `Ok(())`: 提交成功或无需同步。
+/// - `Err(String)`: 校验、备份或写入失败的错误描述。
+fn commit_client_state<F>(
+  plan_id: &str,
+  game_root: &Path,
+  task_root: &Path,
+  journal: &mut TaskJournal,
+  emit: &F,
+) -> Result<(), String>
+where
+  F: Fn(&TaskJournal),
+{
+  let Some(state) = apply(journal)?.client_state.clone() else {
+    return Ok(());
+  };
+  let state_root = transaction_subdirectory(game_root, plan_id, CLIENT_STATE_DIRECTORY)?;
+  let target = resolve_existing_manifest_file(&state_root, "target")?;
+  let target_bytes =
+    fs::read(&target).map_err(|error| format!("读取客户端资源状态目标失败：{error}"))?;
+  if sha256_bytes(&target_bytes) != state.target_sha256 {
+    return Err("客户端资源状态目标完整性校验失败".to_string());
+  }
+  let expected = std::str::from_utf8(&target_bytes)
+    .map_err(|_| "客户端资源状态目标不是有效文本".to_string())?
+    .to_string();
+  let value = resolve_existing_manifest_file(game_root, &state.value_path)?;
+  let actual = md5_file(&value)?;
+  if !actual.eq_ignore_ascii_case(&expected) {
+    return Err(format!("客户端资源版本文件与计划不一致：{}", state.value_path));
+  }
+  let current = read_optional_sha256(game_root, &state.marker_path)?;
+  if current.as_deref() == Some(state.target_sha256.as_str()) {
+    set_client_state_phase(journal, ConfigCommitPhase::Replaced);
+    mark_client_state_progress(journal, "客户端资源状态已一致");
+    return persist_and_emit(task_root, journal, emit);
+  }
+  if current != state.original_sha256 {
+    return Err("客户端资源状态在提交期间发生变化，拒绝覆盖".to_string());
+  }
+  mark_client_state_progress(journal, "同步客户端资源状态");
+  set_client_state_phase(journal, ConfigCommitPhase::ReplacePending);
+  persist_and_emit(task_root, journal, emit)?;
+  ensure_game_stopped()?;
+  let output = prepare_manifest_output_file(game_root, &state.marker_path)?;
+  atomic_replace(&target, &output)?;
+  let written = fs::read(&output).map_err(|error| format!("复验客户端资源状态失败：{error}"))?;
+  if sha256_bytes(&written) != state.target_sha256 {
+    return Err("客户端资源状态提交后完整性校验失败".to_string());
+  }
+  set_client_state_phase(journal, ConfigCommitPhase::Replaced);
+  mark_client_state_progress(journal, "客户端资源状态已同步");
+  persist_and_emit(task_root, journal, emit)
+}
+
+/// 回滚客户端资源状态标记。
+///
+/// 仅在标记仍等于本次提交写入的目标值时恢复：提交前存在则还原备份内容，提交前
+/// 不存在则删除该文件，避免把“基础包已被换回”这一事实继续隐瞒给游戏本体。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `plan_id`: 计划 ID。
+/// - `game_root`: 游戏根目录。
+/// - `journal`: 任务日志。
+///
+/// # 返回
+/// - `Ok(())`: 回滚成功或无需回滚。
+/// - `Err(String)`: 状态未知或恢复失败的错误描述。
+fn rollback_client_state(
+  plan_id: &str,
+  game_root: &Path,
+  journal: &TaskJournal,
+) -> Result<(), String> {
+  let Some(state) = apply(journal)?.client_state.as_ref() else {
+    return Ok(());
+  };
+  let current = read_optional_sha256(game_root, &state.marker_path)?;
+  if current == state.original_sha256 {
+    return Ok(());
+  }
+  if current.as_deref() != Some(state.target_sha256.as_str()) {
+    return Err("客户端资源状态既不匹配源状态也不匹配目标状态".to_string());
+  }
+  ensure_game_stopped()?;
+  match state.original_sha256.as_deref() {
+    Some(expected) => {
+      let state_root = transaction_subdirectory(game_root, plan_id, CLIENT_STATE_DIRECTORY)?;
+      let original = resolve_existing_manifest_file(&state_root, "original")?;
+      let bytes =
+        fs::read(&original).map_err(|error| format!("读取客户端资源状态备份失败：{error}"))?;
+      if sha256_bytes(&bytes) != expected {
+        return Err("客户端资源状态备份完整性校验失败".to_string());
+      }
+      let output = prepare_manifest_output_file(game_root, &state.marker_path)?;
+      atomic_replace(&original, &output)?;
+      let restored =
+        fs::read(&output).map_err(|error| format!("复验客户端资源状态失败：{error}"))?;
+      if sha256_bytes(&restored) != expected {
+        return Err("恢复后的客户端资源状态完整性校验失败".to_string());
+      }
+    }
+    None => {
+      if let Some(path) = resolve_optional_manifest_file(game_root, &state.marker_path)? {
+        remove_optional_file(&path)?;
+      }
+    }
+  }
+  Ok(())
+}
+
+/// 更新客户端状态同步阶段并返回状态是否变化。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `phase`: 目标阶段。
+///
+/// # 返回
+/// 阶段是否发生变化。
+fn set_client_state_phase(journal: &mut TaskJournal, phase: ConfigCommitPhase) -> bool {
+  match journal.apply.as_mut().and_then(|apply| apply.client_state.as_mut()) {
+    Some(state) => {
+      let changed = state.phase != phase;
+      state.phase = phase;
+      changed
+    }
+    None => false,
+  }
+}
+
+/// 写入客户端状态同步的进度文案。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `journal`: 任务日志。
+/// - `text`: 进度文案。
+fn mark_client_state_progress(journal: &mut TaskJournal, text: &str) {
+  journal.current_file = Some(text.to_string());
+  if matches!(journal.target, PackagePlanTarget::Main | PackagePlanTarget::PreDownload) {
+    journal.commit_current_step = Some(text.to_string());
+  }
+}
+
+/// 读取相对路径文件的 SHA-256，文件缺失时返回 `None`。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `game_root`: 游戏根目录。
+/// - `relative_path`: 相对路径。
+///
+/// # 返回
+/// - `Ok(Option<String>)`: 文件内容的 SHA-256。
+/// - `Err(String)`: 读取失败的错误描述。
+fn read_optional_sha256(game_root: &Path, relative_path: &str) -> Result<Option<String>, String> {
+  match resolve_optional_manifest_file(game_root, relative_path)? {
+    Some(path) => {
+      let bytes = fs::read(&path).map_err(|error| format!("读取客户端资源状态失败：{error}"))?;
+      Ok(Some(sha256_bytes(&bytes)))
+    }
+    None => Ok(None),
+  }
+}
+
+/// 计算文件内容的 MD5。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `path`: 文件路径。
+///
+/// # 返回
+/// - `Ok(String)`: 小写十六进制 MD5。
+/// - `Err(String)`: 读取失败的错误描述。
+fn md5_file(path: &Path) -> Result<String, String> {
+  let mut file = File::open(path).map_err(|error| format!("打开资源文件失败：{error}"))?;
+  let mut hasher = Md5::new();
+  let mut buffer = [0_u8; COPY_BUFFER_SIZE];
+  loop {
+    let read = file.read(&mut buffer).map_err(|error| format!("读取资源文件失败：{error}"))?;
+    if read == 0 {
+      break;
+    }
+    hasher.update(&buffer[..read]);
+  }
+  Ok(hex::encode(hasher.finalize()))
+}
+
+/// 判断字符串是否为 32 位十六进制 MD5。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `value`: 待判断的字符串。
+///
+/// # 返回
+/// 是否为合法 MD5 十六进制字符串。
+fn is_hex_md5(value: &str) -> bool {
+  value.len() == 32 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
 /// 生成资源计划的提交步骤。
@@ -2622,17 +2945,7 @@ fn file_matches(path: &Path, size: u64, md5: &str) -> Result<bool, String> {
   if metadata.len() != size {
     return Ok(false);
   }
-  let mut file = File::open(path).map_err(|error| format!("打开资源文件失败：{error}"))?;
-  let mut hasher = Md5::new();
-  let mut buffer = [0_u8; COPY_BUFFER_SIZE];
-  loop {
-    let read = file.read(&mut buffer).map_err(|error| format!("读取资源文件失败：{error}"))?;
-    if read == 0 {
-      break;
-    }
-    hasher.update(&buffer[..read]);
-  }
-  Ok(hex::encode(hasher.finalize()).eq_ignore_ascii_case(md5))
+  Ok(md5_file(path)?.eq_ignore_ascii_case(md5))
 }
 
 /// 从资源计划构造文件提交计划。
@@ -3065,6 +3378,14 @@ fn cleanup_file_transaction(commit: &FileCommitPlan, game_root: &Path, task_root
     }
     remove_empty_directory_tree(&config_root);
   }
+  if let Ok(client_state_root) =
+    transaction_subdirectory(game_root, &commit.plan_id, CLIENT_STATE_DIRECTORY)
+  {
+    for name in ["original", "target"] {
+      let _ = remove_optional_file(&client_state_root.join(name));
+    }
+    remove_empty_directory_tree(&client_state_root);
+  }
   remove_empty_directory_tree(&incoming_root);
   remove_empty_directory_tree(&backup_root);
   if let Some(transaction_root) = incoming_root.parent() {
@@ -3213,4 +3534,83 @@ fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
 #[cfg(not(target_os = "windows"))]
 fn atomic_replace(source: &Path, target: &Path) -> Result<(), String> {
   fs::rename(source, target).map_err(|error| format!("原子替换 config.ini 失败：{error}"))
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::game::model::SchemeId;
+  use crate::game::planner::PlanFile;
+
+  const VALUE_PATH: &str = "YuanShen_Data/StreamingAssets/res_versions_streaming";
+  const MARKER_PATH: &str = "YuanShen_Data/Persistent/base_res_version_hash";
+  const VALUE_MD5: &str = "201b945f3e9dd1cfcb3d9b7a3a1dac5e";
+
+  fn plan_with(target: PackagePlanTarget, inventory: Vec<PlanFile>) -> PersistedPlan {
+    PersistedPlan {
+      schema_version: 1,
+      plan_id: "00000000-0000-4000-8000-000000000000".to_string(),
+      installation_id: "game-test".to_string(),
+      source_scheme: SchemeId::CnOfficial,
+      target_scheme: SchemeId::CnOfficial,
+      target,
+      source_tag: Some("7.0.0".to_string()),
+      target_tag: "7.1.0".to_string(),
+      manifest_digest: "0".repeat(64),
+      strategy: PackagePlanStrategy::ManifestDiff,
+      downloads: Vec::new(),
+      assets: Vec::new(),
+      delete_files: Vec::new(),
+      inventory,
+      install_overlay: None,
+      audio_selection: None,
+      created_at: "2026-01-01T00:00:00Z".to_string(),
+    }
+  }
+
+  fn value_file() -> PlanFile {
+    PlanFile { name: VALUE_PATH.to_string(), size: 367_816, md5: VALUE_MD5.to_ascii_uppercase() }
+  }
+
+  #[test]
+  fn client_state_target_uses_sibling_persistent_marker() {
+    let plan = plan_with(PackagePlanTarget::Main, vec![value_file()]);
+    let target = client_state_target(&plan).expect("derivation failed").expect("no target");
+    assert_eq!(target.0, MARKER_PATH);
+    assert_eq!(target.1, VALUE_PATH);
+    assert_eq!(target.2, VALUE_MD5);
+  }
+
+  #[test]
+  fn client_state_target_skips_audio_plans() {
+    let plan = plan_with(PackagePlanTarget::Audio, vec![value_file()]);
+    assert!(client_state_target(&plan).expect("derivation failed").is_none());
+  }
+
+  #[test]
+  fn client_state_target_requires_value_file_in_inventory() {
+    let plan = plan_with(PackagePlanTarget::Main, Vec::new());
+    assert!(client_state_target(&plan).expect("derivation failed").is_none());
+  }
+
+  #[test]
+  fn client_state_target_skips_unexpected_layout() {
+    let plan = plan_with(
+      PackagePlanTarget::Main,
+      vec![PlanFile {
+        name: "StreamingAssets/res_versions_streaming".to_string(),
+        size: 1,
+        md5: VALUE_MD5.to_string(),
+      }],
+    );
+    assert!(client_state_target(&plan).expect("derivation failed").is_none());
+  }
+
+  #[test]
+  fn client_state_target_rejects_invalid_hash() {
+    let mut file = value_file();
+    file.md5 = "not-a-hash".to_string();
+    let plan = plan_with(PackagePlanTarget::PreDownload, vec![file]);
+    assert!(client_state_target(&plan).is_err());
+  }
 }

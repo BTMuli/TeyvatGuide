@@ -102,6 +102,26 @@ pub(crate) struct ActiveCommitStep {
   pub(crate) relative_path: String,
 }
 
+/// 基础包替换后需要回写的客户端资源状态标记。
+///
+/// 游戏本体启动时会把 `Persistent/base_res_version_hash` 与基础包内
+/// `StreamingAssets/res_versions_streaming` 的实际 MD5 比较；两者不一致时
+/// 会清空自己的资源状态并强制重新下载。启动器替换基础包后必须同步该标记。
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ClientStateJournal {
+  /// 客户端状态标记文件，例如 `YuanShen_Data/Persistent/base_res_version_hash`。
+  pub(crate) marker_path: String,
+  /// 计算标记值时依据的基础包文件，例如 `YuanShen_Data/StreamingAssets/res_versions_streaming`。
+  pub(crate) value_path: String,
+  /// 提交前标记文件的 SHA-256；提交前不存在时为 `None`。
+  pub(crate) original_sha256: Option<String>,
+  /// 提交后应写入的标记文件 SHA-256。
+  pub(crate) target_sha256: String,
+  /// 与 config 提交阶段同构的写入阶段。
+  pub(crate) phase: ConfigCommitPhase,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ApplyJournal {
@@ -113,6 +133,9 @@ pub(crate) struct ApplyJournal {
   pub(crate) config_original_sha256: String,
   pub(crate) config_target_sha256: String,
   pub(crate) config_phase: ConfigCommitPhase,
+  /// 客户端资源状态同步；计划不需要同步时为 `None`。
+  #[serde(default)]
+  pub(crate) client_state: Option<ClientStateJournal>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -1648,10 +1671,41 @@ fn validate_apply_journal(apply: &ApplyJournal) -> Result<(), String> {
   if !hashes_valid || apply.cursor > apply.step_count || !active_valid {
     return Err("游戏资源任务日志包含无效提交状态".to_string());
   }
-  if apply.step_count == 0 && apply.config_original_sha256 == apply.config_target_sha256 {
+  if let Some(state) = &apply.client_state {
+    let paths_valid = [&state.marker_path, &state.value_path]
+      .into_iter()
+      .all(|value| normalize_manifest_path(value).is_ok_and(|normalized| normalized == *value));
+    if !paths_valid
+      || !is_sha256(&state.target_sha256)
+      || state.original_sha256.as_deref().is_some_and(|value| !is_sha256(value))
+    {
+      return Err("游戏资源任务日志包含无效客户端状态同步".to_string());
+    }
+  }
+  let client_state_changes = apply
+    .client_state
+    .as_ref()
+    .is_some_and(|state| state.original_sha256.as_deref() != Some(state.target_sha256.as_str()));
+  if apply.step_count == 0
+    && apply.config_original_sha256 == apply.config_target_sha256
+    && !client_state_changes
+  {
     return Err("游戏资源任务日志包含无效提交状态".to_string());
   }
   Ok(())
+}
+
+/// 判断字符串是否为 64 位十六进制 SHA-256。
+///
+/// @since Beta v0.12.3
+///
+/// # 参数
+/// - `value`: 待判断的字符串。
+///
+/// # 返回
+/// 是否为合法 SHA-256 十六进制字符串。
+fn is_sha256(value: &str) -> bool {
+  value.len() == 64 && value.bytes().all(|byte| byte.is_ascii_hexdigit())
 }
 
 /// Windows 下原子替换日志文件，处理占用与只读属性并短暂重试。
