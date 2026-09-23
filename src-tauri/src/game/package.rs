@@ -86,6 +86,15 @@ const MAIN_UPDATE_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍检测到下载写入或资源组装持续停滞，请检查磁盘状态后手动继续。";
 const MAIN_UPDATE_NETWORK_STALL_NOTIFICATION_BODY: &str =
   "自动重试后仍未收到下载数据，请检查网络后手动继续。";
+const AUDIO_STALL_PAUSE_MESSAGE: &str =
+  "检测到配音包下载或资源组装持续停滞，任务已自动暂停；可从任务记录继续。详情见运行日志。";
+const AUDIO_NETWORK_STALL_PAUSE_MESSAGE: &str =
+  "检测到配音包下载长时间没有数据，任务已自动暂停；请检查网络后从任务记录继续。";
+const AUDIO_STALL_NOTIFICATION_TITLE: &str = "配音包任务已暂停";
+const AUDIO_STALL_NOTIFICATION_BODY: &str =
+  "检测到配音包下载或资源组装持续停滞，请确认磁盘与网络状态后手动继续。";
+const AUDIO_NETWORK_STALL_NOTIFICATION_BODY: &str =
+  "检测到配音包下载长时间没有数据，请检查网络后手动继续。";
 /// 配音包同时让 4 个资源占用下载槽；真正下多少仍由这个焦点信号量卡住。
 const AUDIO_DOWNLOAD_FOCUS: usize = 4;
 /// 4 路下载之外再预取 1 个资源，焦点空出后立刻接上下一包。
@@ -474,27 +483,67 @@ pub(crate) struct AudioApplyContext {
   pub registration_pool: sqlx::SqlitePool,
 }
 
-/// 正式更新准备流水线的停滞监测上下文。
-struct MainUpdateWatchdogContext {
+/// 准备流水线停滞看门狗的文案与日志范围。
+struct StallWatchdogLabels {
+  log_scope: &'static str,
+  pause_message: &'static str,
+  retry_exhausted_message: &'static str,
+  network_pause_message: &'static str,
+  network_retry_exhausted_message: &'static str,
+  notification_title: &'static str,
+  notification_body: &'static str,
+  network_notification_body: &'static str,
+}
+
+impl StallWatchdogLabels {
+  /// 正式更新：磁盘停滞先自动重试一次，重试用尽后才提醒。
+  const MAIN_UPDATE: Self = Self {
+    log_scope: "game-main-update",
+    pause_message: MAIN_UPDATE_STALL_PAUSE_MESSAGE,
+    retry_exhausted_message: MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE,
+    network_pause_message: MAIN_UPDATE_NETWORK_STALL_PAUSE_MESSAGE,
+    network_retry_exhausted_message: MAIN_UPDATE_NETWORK_STALL_RETRY_EXHAUSTED_MESSAGE,
+    notification_title: MAIN_UPDATE_STALL_NOTIFICATION_TITLE,
+    notification_body: MAIN_UPDATE_STALL_NOTIFICATION_BODY,
+    network_notification_body: MAIN_UPDATE_NETWORK_STALL_NOTIFICATION_BODY,
+  };
+  /// 配音包：没有自动重试流程，停滞即暂停并提醒。
+  const AUDIO: Self = Self {
+    log_scope: "game-audio-update",
+    pause_message: AUDIO_STALL_PAUSE_MESSAGE,
+    retry_exhausted_message: AUDIO_STALL_PAUSE_MESSAGE,
+    network_pause_message: AUDIO_NETWORK_STALL_PAUSE_MESSAGE,
+    network_retry_exhausted_message: AUDIO_NETWORK_STALL_PAUSE_MESSAGE,
+    notification_title: AUDIO_STALL_NOTIFICATION_TITLE,
+    notification_body: AUDIO_STALL_NOTIFICATION_BODY,
+    network_notification_body: AUDIO_NETWORK_STALL_NOTIFICATION_BODY,
+  };
+}
+
+/// 准备流水线的停滞监测上下文，正式更新与配音包变更共用。
+struct PreparePipelineWatchdogContext {
   download_telemetry: Arc<DownloadTelemetry>,
   assembly_telemetry: Arc<assembler::AssemblyTelemetry>,
   stall_pause_requested: Arc<AtomicBool>,
   retry_budget_exhausted: bool,
+  notify_on_stall: bool,
+  labels: StallWatchdogLabels,
   abort_handle: AbortHandle,
 }
 
-/// 正式更新准备流水线停滞看门狗。
+/// 准备流水线停滞看门狗：写盘/组装停滞或长时间无下载数据时暂停任务并提示用户。
 #[allow(clippy::too_many_arguments)]
-fn spawn_main_update_stall_watchdog(
+fn spawn_prepare_stall_watchdog(
   app_handle: AppHandle,
   task_root: PathBuf,
   plan_id: String,
   journal: Arc<AsyncMutex<TaskJournal>>,
   paused: Arc<AtomicBool>,
   canceled: Arc<AtomicBool>,
-  context: MainUpdateWatchdogContext,
+  context: PreparePipelineWatchdogContext,
 ) {
   let runtime = tokio::runtime::Handle::current();
+  let log_scope = context.labels.log_scope;
   std::thread::spawn(move || {
     let journal_path = journal::journal_path(&task_root, &plan_id);
     let mut last_signature = None;
@@ -528,7 +577,7 @@ fn spawn_main_update_stall_watchdog(
         if stalled_for >= INSTALL_STALL_THRESHOLD {
           network_stall_cycles = network_stall_cycles.saturating_add(1);
           log::info!(
-            "[game-main-update][{plan_id}] 仅网络等待持续 {}s（{}/{}），本轮未收到任何下载数据",
+            "[{log_scope}][{plan_id}] 仅网络等待持续 {}s（{}/{}），本轮未收到任何下载数据",
             stalled_for.as_secs(),
             network_stall_cycles,
             INSTALL_NETWORK_STALL_CYCLES
@@ -547,7 +596,7 @@ fn spawn_main_update_stall_watchdog(
         }
         confirmations = confirmations.saturating_add(1);
         log::warn!(
-          "[game-main-update][{plan_id}] 正式更新准备停滞样本：stalled={}s confirmation={}/{} downloadHeartbeatAge={}ms downloadWriteActive={} downloadWrittenBytes={} assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyWrittenBytes={} assemblyHashedBytes={}",
+          "[{log_scope}][{plan_id}] 准备流水线停滞样本：stalled={}s confirmation={}/{} downloadHeartbeatAge={}ms downloadWriteActive={} downloadWrittenBytes={} assemblyHeartbeatAge={}ms assemblyReadActive={} assemblyWriteActive={} assemblyHashActive={} assemblySyncActive={} assemblyWrittenBytes={} assemblyHashedBytes={}",
           stalled_for.as_secs(),
           confirmations,
           INSTALL_STALL_CONFIRMATIONS,
@@ -570,33 +619,27 @@ fn spawn_main_update_stall_watchdog(
         continue;
       }
       paused.store(true, Ordering::Release);
+      let labels = &context.labels;
       let message = match (network_only, context.retry_budget_exhausted) {
-        (false, false) => MAIN_UPDATE_STALL_PAUSE_MESSAGE,
-        (false, true) => MAIN_UPDATE_STALL_RETRY_EXHAUSTED_MESSAGE,
-        (true, false) => MAIN_UPDATE_NETWORK_STALL_PAUSE_MESSAGE,
-        (true, true) => MAIN_UPDATE_NETWORK_STALL_RETRY_EXHAUSTED_MESSAGE,
+        (false, false) => labels.pause_message,
+        (false, true) => labels.retry_exhausted_message,
+        (true, false) => labels.network_pause_message,
+        (true, true) => labels.network_retry_exhausted_message,
       };
       log::error!(
-        "[game-main-update][{plan_id}] 已确认停滞（networkOnly={network_only}，retryExhausted={}），自动转为可恢复暂停状态",
+        "[{log_scope}][{plan_id}] 已确认停滞（networkOnly={network_only}，retryExhausted={}），自动转为可恢复暂停状态",
         context.retry_budget_exhausted
       );
-      if context.retry_budget_exhausted {
-        let body = if network_only {
-          MAIN_UPDATE_NETWORK_STALL_NOTIFICATION_BODY
-        } else {
-          MAIN_UPDATE_STALL_NOTIFICATION_BODY
-        };
-        if let Err(error) = app_handle
-          .notification()
-          .builder()
-          .title(MAIN_UPDATE_STALL_NOTIFICATION_TITLE)
-          .body(body)
-          .show()
+      if context.notify_on_stall {
+        let body =
+          if network_only { labels.network_notification_body } else { labels.notification_body };
+        if let Err(error) =
+          app_handle.notification().builder().title(labels.notification_title).body(body).show()
         {
-          log::error!("[game-main-update][{plan_id}] 发送正式更新停滞通知失败：{error}");
+          log::error!("[{log_scope}][{plan_id}] 发送停滞系统通知失败：{error}");
         }
       }
-      persist_main_update_watchdog_pause(
+      persist_prepare_watchdog_pause(
         &app_handle,
         &task_root,
         &plan_id,
@@ -610,8 +653,8 @@ fn spawn_main_update_stall_watchdog(
   });
 }
 
-/// 持久化正式更新看门狗暂停状态并同步给前端。
-fn persist_main_update_watchdog_pause(
+/// 持久化看门狗暂停状态并同步给前端。
+fn persist_prepare_watchdog_pause(
   app_handle: &AppHandle,
   task_root: &Path,
   plan_id: &str,
@@ -2711,22 +2754,46 @@ impl GamePackageManager {
           )
           .await;
         } else {
-          run_streaming_prepare_task(
-            app_handle.clone(),
-            task_root.clone(),
-            cache_root,
-            game_root.clone(),
-            plan.clone(),
-            download_client,
-            Arc::clone(&shared_journal),
-            Arc::clone(&canceled),
-            Arc::clone(&paused),
-            concurrency,
-            options.max_bytes_per_second,
-            audio_apply.is_some(),
-            None,
-          )
-          .await;
+          // 配音包没有自动重试流程：停滞看门狗确认后直接暂停并系统通知，因此按"重试预算已
+          // 用尽"呈现提示文案。
+          let stall_pause_requested = Arc::new(AtomicBool::new(false));
+          let (abort_handle, abort_registration) = futures_util::future::AbortHandle::new_pair();
+          let watchdog_context = PreparePipelineWatchdogContext {
+            download_telemetry: DownloadTelemetry::new(),
+            assembly_telemetry: assembler::AssemblyTelemetry::new(),
+            stall_pause_requested: Arc::clone(&stall_pause_requested),
+            retry_budget_exhausted: true,
+            notify_on_stall: true,
+            labels: StallWatchdogLabels::AUDIO,
+            abort_handle,
+          };
+          let pipeline = futures_util::future::Abortable::new(
+            run_streaming_prepare_task(
+              app_handle.clone(),
+              task_root.clone(),
+              cache_root,
+              game_root.clone(),
+              plan.clone(),
+              download_client,
+              Arc::clone(&shared_journal),
+              Arc::clone(&canceled),
+              Arc::clone(&paused),
+              concurrency,
+              options.max_bytes_per_second,
+              audio_apply.is_some(),
+              Some(watchdog_context),
+            ),
+            abort_registration,
+          );
+          let _ = pipeline.await;
+          if stall_pause_requested.load(Ordering::Acquire)
+            && !drain_assembly_workers(&plan.plan_id, INSTALL_ABORT_DRAIN_TIMEOUT).await
+          {
+            log::error!(
+              "[game-audio-update][{}] 停滞中止后的组装 worker 未在超时内结束",
+              plan.plan_id
+            );
+          }
         }
         if let Some(installation) = main_apply {
           let ready_to_apply = shared_journal.lock().await.state == PackageTaskState::ReadyToApply;
@@ -4427,11 +4494,13 @@ async fn run_main_streaming_prepare_supervisor(
 
     let stall_pause_requested = Arc::new(AtomicBool::new(false));
     let (abort_handle, abort_registration) = futures_util::future::AbortHandle::new_pair();
-    let watchdog_context = MainUpdateWatchdogContext {
+    let watchdog_context = PreparePipelineWatchdogContext {
       download_telemetry: DownloadTelemetry::new(),
       assembly_telemetry: assembler::AssemblyTelemetry::new(),
       stall_pause_requested: Arc::clone(&stall_pause_requested),
       retry_budget_exhausted,
+      notify_on_stall: retry_budget_exhausted,
+      labels: StallWatchdogLabels::MAIN_UPDATE,
       abort_handle,
     };
     let pipeline = futures_util::future::Abortable::new(
@@ -4602,7 +4671,7 @@ async fn run_streaming_prepare_task(
   concurrency: usize,
   max_bytes_per_second: Option<u64>,
   stage_audio_deletes: bool,
-  watchdog_context: Option<MainUpdateWatchdogContext>,
+  watchdog_context: Option<PreparePipelineWatchdogContext>,
 ) {
   let download_telemetry =
     watchdog_context.as_ref().map(|context| Arc::clone(&context.download_telemetry));
@@ -4789,7 +4858,7 @@ async fn run_streaming_prepare_task(
     Arc::clone(&paused),
   );
   if let Some(context) = watchdog_context {
-    spawn_main_update_stall_watchdog(
+    spawn_prepare_stall_watchdog(
       app_handle.clone(),
       task_root.clone(),
       plan.plan_id.clone(),
