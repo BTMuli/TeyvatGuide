@@ -1,6 +1,6 @@
 /**
  * 游戏资源长任务的非权威前端投影。
- * @since Beta v0.12.3
+ * @since Beta v0.12.4
  */
 
 import gameEnum from "@enum/game.js";
@@ -108,11 +108,8 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     );
   }
 
-  function shouldHideAbandonedPreDownload(task: TGApp.Game.Package.TaskSummary): boolean {
-    return (
-      task.target === gameEnum.package.planTarget.PRE_DOWNLOAD &&
-      task.state === gameEnum.package.taskState.ABANDONED
-    );
+  function shouldHideAbandonedTask(task: TGApp.Game.Package.TaskSummary): boolean {
+    return task.state === gameEnum.package.taskState.ABANDONED;
   }
 
   function scheduleCompletedTaskRemoval(task: TGApp.Game.Package.TaskSummary): void {
@@ -163,7 +160,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       ...tasksByInstallation.value,
       [task.installationId]: task,
     };
-    if (shouldHideAbandonedPreDownload(task)) {
+    if (shouldHideAbandonedTask(task)) {
       removeTaskProjection(task);
       return;
     }
@@ -353,7 +350,7 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
       // 自动隐藏的终态任务不占位：若最新任务已完成或已放弃，同一安装下更旧的暂停、
       // 失败或待恢复任务仍必须展示，否则刷新页面后会出现「任务存在但面板不显示」，
       // 只能靠重启应用恢复。
-      if (shouldHideAbandonedPreDownload(task) || shouldOmitCompletedInstall(task)) continue;
+      if (shouldHideAbandonedTask(task) || shouldOmitCompletedInstall(task)) continue;
       selectedInstallationIds.add(task.installationId);
       const pending = pendingProgressByInstallation.get(task.installationId);
       if (!shouldReplaceTask(pending ?? next[task.installationId], task)) continue;
