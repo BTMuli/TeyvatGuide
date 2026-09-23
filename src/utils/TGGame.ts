@@ -35,7 +35,7 @@ import { parse } from "ini";
 import yaeConf from "../../src-tauri/lib/conf.json" with { type: "json" };
 
 // YAE支持的游戏版本
-export const YAE_GAME_VER: Readonly<string> = "7.0.0";
+export const YAE_GAME_VER: Readonly<string> = "7.1.0";
 /**
  * 当前 Yae 配置是否支持读取角色及其装备。
  * @since Beta v0.12.3
