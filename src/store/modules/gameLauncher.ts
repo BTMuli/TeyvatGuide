@@ -345,28 +345,19 @@ const useGameLauncherStore = defineStore("gameLauncher", () => {
     const tasks = await listGamePackageTasks(installationId);
     const next = { ...tasksByInstallation.value };
     const completedTasks: Array<TGApp.Game.Package.TaskSummary> = [];
-    const hydratedInstallationIds = new Set<string>();
+    // 后端按更新时间倒序返回：每个安装只投影最新的「需要展示」任务。
+    const selectedInstallationIds = new Set<string>();
     let changed = false;
     for (const task of tasks) {
-      if (hydratedInstallationIds.has(task.installationId)) continue;
-      hydratedInstallationIds.add(task.installationId);
+      if (selectedInstallationIds.has(task.installationId)) continue;
+      // 自动隐藏的终态任务不占位：若最新任务已完成或已放弃，同一安装下更旧的暂停、
+      // 失败或待恢复任务仍必须展示，否则刷新页面后会出现「任务存在但面板不显示」，
+      // 只能靠重启应用恢复。
+      if (shouldHideAbandonedPreDownload(task) || shouldOmitCompletedInstall(task)) continue;
+      selectedInstallationIds.add(task.installationId);
       const pending = pendingProgressByInstallation.get(task.installationId);
       if (!shouldReplaceTask(pending ?? next[task.installationId], task)) continue;
       if (pending !== undefined) pendingProgressByInstallation.delete(task.installationId);
-      if (shouldHideAbandonedPreDownload(task)) {
-        if (next[task.installationId] !== undefined) {
-          delete next[task.installationId];
-          changed = true;
-        }
-        continue;
-      }
-      if (shouldOmitCompletedInstall(task)) {
-        if (next[task.installationId] !== undefined) {
-          delete next[task.installationId];
-          changed = true;
-        }
-        continue;
-      }
       next[task.installationId] = task;
       changed = true;
       if (task.state === gameEnum.package.taskState.COMPLETED) completedTasks.push(task);
